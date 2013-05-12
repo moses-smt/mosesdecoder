@@ -31,11 +31,9 @@ private:
  **/
 class PhraseBoundaryFeature : public StatefulFeatureFunction {
 public:
-  PhraseBoundaryFeature(const FactorList& sourceFactors, const FactorList& targetFactors);
+  PhraseBoundaryFeature(const std::string &line);
 
   size_t GetNumScoreComponents() const;
-  std::string GetScoreProducerWeightShortName(unsigned) const;
-  size_t GetNumInputScores() const;
 
   virtual const FFState* EmptyHypothesisState(const InputType &) const;
 
@@ -48,7 +46,10 @@ public:
                                   {
                                     abort();
                                   }
-  
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
   

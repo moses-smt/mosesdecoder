@@ -33,7 +33,7 @@ namespace Moses
 {
 extern bool g_debug;
 
-ChartParserUnknown::ChartParserUnknown(const TranslationSystem &system) : m_system(system) {}
+ChartParserUnknown::ChartParserUnknown() {}
 
 ChartParserUnknown::~ChartParserUnknown() {
   RemoveAllInColl(m_unksrcs);
@@ -43,13 +43,14 @@ ChartParserUnknown::~ChartParserUnknown() {
 void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to) {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system.GetUnknownWordPenaltyProducer();
-  vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
+  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+  vector<float> wordPenaltyScore(1, -1);
   
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
     const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-    isDigit = f->GetString().find_first_of("0123456789");
+    const StringPiece s = f->GetString();
+    isDigit = s.find_first_of("0123456789");
     if (isDigit == string::npos)
       isDigit = 0;
     else
@@ -87,7 +88,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       
       //targetPhrase->SetScore();
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->SetScore(m_system.GetWordPenaltyProducer(), wordPenaltyScore);
+      targetPhrase->SetScore(staticData.GetWordPenaltyProducer(), wordPenaltyScore);
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
@@ -121,17 +122,17 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   }
 }
 
-ChartParser::ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollectionBase &cells) : 
-  m_unknown(system),
-  m_decodeGraphList(system.GetDecodeGraphs()),
+ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells) :
+  m_decodeGraphList(StaticData::Instance().GetDecodeGraphs()),
   m_source(source) {
-  system.InitializeBeforeSentenceProcessing(source);
-  const std::vector<PhraseDictionaryFeature*> &dictionaries = system.GetPhraseDictionaries();
+  const StaticData &staticData = StaticData::Instance();
+
+  staticData.InitializeForInput(source);
+  const std::vector<PhraseDictionary*> &dictionaries = staticData.GetPhraseDictionaries();
   m_ruleLookupManagers.reserve(dictionaries.size());
-  for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();
+  for (std::vector<PhraseDictionary*>::const_iterator p = dictionaries.begin();
        p != dictionaries.end(); ++p) {
-    PhraseDictionaryFeature *pdf = *p;
-    const PhraseDictionary *dict = pdf->GetDictionary();
+    const PhraseDictionary *dict = *p;
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
     m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, cells));
   }
@@ -139,6 +140,7 @@ ChartParser::ChartParser(InputType const &source, const TranslationSystem &syste
 
 ChartParser::~ChartParser() {
   RemoveAllInColl(m_ruleLookupManagers);
+  StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
 }
 
 void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to) {

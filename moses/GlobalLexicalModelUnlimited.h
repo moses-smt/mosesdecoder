@@ -8,15 +8,11 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "ScoreProducer.h"
 #include "FeatureFunction.h"
 #include "FactorTypeSet.h"
 #include "Sentence.h"
-#include "FFState.h"
 
-#include "util/string_piece.hh"
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
+#include "FFState.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
@@ -38,8 +34,8 @@ class InputType;
 
 class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
 {
-  // TODO(ehasler): This should be an array of size 256.
 	typedef std::map< char, short > CharHash;
+	typedef std::map< std::string, short > StringHash;
 
   struct ThreadLocalStorage
   {
@@ -67,54 +63,11 @@ private:
   float m_sparseProducerWeight;
   bool m_ignorePunctuation;
 
-  boost::unordered_set<std::string> m_vocabSource;
-  boost::unordered_set<std::string> m_vocabTarget;
+  std::set<std::string> m_vocabSource;
+  std::set<std::string> m_vocabTarget;
 
 public:
-  GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors, const std::vector< FactorType >& outFactors,
-  		bool biasFeature, bool ignorePunctuation, size_t context):
-    StatelessFeatureFunction("glm",ScoreProducer::unlimited),
-  	m_inputFactors(inFactors),
-    m_outputFactors(outFactors),
-    m_unrestricted(true),
-    m_sourceContext(false),
-    m_biphrase(false),
-    m_bitrigger(false),
-    m_biasFeature(biasFeature),
-    m_sparseProducerWeight(1),
-    m_ignorePunctuation(ignorePunctuation)
-  {
-  	std::cerr << "Creating global lexical model unlimited.. ";
-
-
-		switch(context) {
-			case 1:
-				m_sourceContext = true;
-				std::cerr << "using source context.. ";
-				break;
-			case 2:
-				m_biphrase = true;
-				std::cerr << "using biphrases.. ";
-				break;
-			case 3:
-				std::cerr << "using bitriggers.. ";
-				m_bitrigger = true;
-				break;
-		}
-
-  	// compile a list of punctuation characters
-  	if (m_ignorePunctuation) {
-  		std::cerr << "ignoring punctuation.. ";
-  		char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
-  		for (size_t i=0; i < sizeof(punctuation)-1; ++i)
-  			m_punctuationHash[punctuation[i]] = 1;
-  	}
-  	std::cerr << "done." << std::endl;
-  }
-
-  std::string GetScoreProducerWeightShortName(unsigned) const {
-    return "glm";
-  };
+  GlobalLexicalModelUnlimited(const std::string &line);
 
   bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
@@ -136,6 +89,9 @@ public:
     assert(0);
   }
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
@@ -143,6 +99,10 @@ public:
 	void AddFeature(ScoreComponentCollection* accumulator,
 			StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
 			StringPiece targetWord) const;
+
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return DependsOnSource; }
+
 };
 
 }

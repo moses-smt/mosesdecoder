@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollectionText.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "WordsRange.h"
 
@@ -31,8 +30,8 @@ using namespace std;
 namespace Moses
 {
 /** constructor; just initialize the base class */
-TranslationOptionCollectionText::TranslationOptionCollectionText(const TranslationSystem* system, Sentence const &inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(system, inputSentence, maxNoTransOptPerCoverage, translationOptionThreshold) {}
+TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const &inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(inputSentence, maxNoTransOptPerCoverage, translationOptionThreshold) {}
 
 /* forcibly create translation option for a particular source word.
 	* For text, this function is easy, just call the base class' ProcessOneUnknownWord()
@@ -65,7 +64,6 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosit
 
   //get vector of TranslationOptions from Sentence
   for(size_t i=0; i<xmlOptions.size(); i++) {
-    xmlOptions[i]->CalcScore(m_system);
     Add(xmlOptions[i]);
   }
 

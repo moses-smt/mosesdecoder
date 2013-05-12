@@ -33,10 +33,35 @@ using namespace std;
 
 namespace Moses
 {
-  GenerationDictionary::GenerationDictionary(size_t numFeatures,
-                                             const std::vector<FactorType> &input,
-                                             const std::vector<FactorType> &output)
-  : Dictionary(numFeatures), DecodeFeature("Generation",numFeatures,input,output) {}
+
+GenerationDictionary::GenerationDictionary(const std::string &line)
+: DecodeFeature("Generation", line)
+{
+  string filePath;
+
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
+
+    if (args[0] == "input-factor") {
+      m_input =Tokenize<FactorType>(args[1]);
+      m_inputFactors = FactorMask(m_input);
+    }
+    else if (args[0] == "output-factor") {
+      m_output =Tokenize<FactorType>(args[1]);
+      m_outputFactors = FactorMask(m_output);
+    }
+    else if (args[0] == "path") {
+      filePath = args[1];
+    }
+    else {
+      UserMessage::Add("Unknown argument " + args[0]);
+      abort();
+    }
+  }
+
+  Load(filePath, Output);
+
+}
 
 bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
 {
@@ -128,12 +153,6 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
   }
   return ret;
 }
-
-bool GenerationDictionary::ComputeValueInTranslationOption() const
-{
-  return true;
-}
-
 
 }
 

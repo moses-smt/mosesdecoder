@@ -9,7 +9,6 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "ScoreProducer.h"
 #include "FeatureFunction.h"
 #include "FactorTypeSet.h"
 #include "Sentence.h"
@@ -63,14 +62,8 @@ private:
   float GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const;
 
 public:
-	GlobalLexicalModel(const std::string &filePath,
-	                   const std::vector< FactorType >& inFactors,
-	                   const std::vector< FactorType >& outFactors);
+  GlobalLexicalModel(const std::string &line);
 	virtual ~GlobalLexicalModel();
-
-  virtual std::string GetScoreProducerWeightShortName(unsigned) const {
-    return "lex";
-  };
 
   void InitializeForInput( Sentence const& in );
 
@@ -85,6 +78,15 @@ public:
   	std::cerr << "EvaluateChart not implemented." << std::endl;
   	exit(1);
   }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
+
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return DependsOnSource; }
+
 };
 
 }

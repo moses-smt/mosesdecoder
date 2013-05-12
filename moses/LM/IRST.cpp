@@ -39,10 +39,31 @@ using namespace std;
 
 namespace Moses
 {
-
-LanguageModelIRST::LanguageModelIRST(int dub)
-  :m_lmtb(0),m_lmtb_dub(dub)
+LanguageModelIRST::LanguageModelIRST(const std::string &line)
+:LanguageModelSingleFactor("IRSTLM", line)
 {
+  FactorType factorType;
+  size_t nGramOrder;
+  string filePath;
+
+  for (size_t i = 0; i < m_args.size(); ++i) {
+	const vector<string> &args = m_args[i];
+
+    if (args[0] == "factor") {
+      factorType = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "order") {
+      nGramOrder = Scan<size_t>(args[1]);
+    }
+    else if (args[0] == "path") {
+      filePath = args[1];
+    }
+    else {
+      throw "Unknown argument " + args[0];
+    }
+  }
+
+  Load(filePath, factorType, nGramOrder);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -125,13 +146,13 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
   factorId = m_sentenceStart->GetId();
   m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
-  m_sentenceStartArray[m_factorType] = m_sentenceStart;
+  m_sentenceStartWord[m_factorType] = m_sentenceStart;
 
   m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
   factorId = m_sentenceEnd->GetId();
   m_lmtb_sentenceEnd=lmIdMap[factorId] = GetLmID(EOS_);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
-  m_sentenceEndArray[m_factorType] = m_sentenceEnd;
+  m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
   // add to lookup vector in object
   m_lmIdLookup.resize(maxFactorId+1);
@@ -154,8 +175,7 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
     if (d->incflag()==1) {
-      const StringPiece &f = factor->GetString();
-      std::string s(f.data(), f.size());
+      std::string s = factor->GetString().as_string();
       int code = d->encode(s.c_str());
 
       //////////
@@ -251,6 +271,13 @@ bool LMCacheCleanup(size_t sentences_done, size_t m_lmcache_cleanup_threshold)
   return false;
 }
 
+void LanguageModelIRST::InitializeForInput(InputType const& source)
+{
+  //nothing to do
+#ifdef TRACE_CACHE
+  m_lmtb->sentence_id++;
+#endif
+}
 
 void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
 {
@@ -264,14 +291,6 @@ void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
     TRACE_ERR( "reset caches\n");
     m_lmtb->reset_caches();
   }
-}
-
-void LanguageModelIRST::InitializeBeforeSentenceProcessing()
-{
-  //nothing to do
-#ifdef TRACE_CACHE
-  m_lmtb->sentence_id++;
-#endif
 }
 
 }

@@ -7,11 +7,107 @@
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
 #include "TranslationOption.h"
+#include "UserMessage.h"
 #include "util/string_piece_hash.hh"
 
 namespace Moses {
 
 using namespace std;
+
+WordTranslationFeature::WordTranslationFeature(const std::string &line)
+:StatelessFeatureFunction("WordTranslationFeature", 0, line)
+,m_unrestricted(true)
+,m_sparseProducerWeight(1)
+,m_simple(true)
+,m_sourceContext(false)
+,m_targetContext(false)
+,m_ignorePunctuation(false)
+,m_domainTrigger(false)
+{
+  std::cerr << "Initializing word translation feature.. " << endl;
+
+  string texttype;
+  string filenameSource;
+  string filenameTarget;
+
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
+
+    if (args[0] == "input-factor") {
+      m_factorTypeSource = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "output-factor") {
+      m_factorTypeTarget = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "simple") {
+      m_simple = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "source-context") {
+      m_sourceContext = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "target-context") {
+      m_targetContext = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "ignore-punctuation") {
+      m_ignorePunctuation = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "domain-trigger") {
+      m_domainTrigger = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "texttype") {
+      texttype = args[1];
+    }
+    else if (args[0] == "source-path") {
+      filenameSource = args[1];
+    }
+    else if (args[0] == "target-path") {
+      filenameTarget = args[1];
+    }
+    else {
+      throw "Unknown argument " + args[0];
+    }
+  }
+
+  if (m_simple == 1) std::cerr << "using simple word translations.. ";
+  if (m_sourceContext == 1) std::cerr << "using source context.. ";
+  if (m_targetContext == 1) std::cerr << "using target context.. ";
+  if (m_domainTrigger == 1) std::cerr << "using domain triggers.. ";
+
+  // compile a list of punctuation characters
+  if (m_ignorePunctuation) {
+    std::cerr << "ignoring punctuation for triggers.. ";
+    char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
+    for (size_t i=0; i < sizeof(punctuation)-1; ++i) {
+      m_punctuationHash[punctuation[i]] = 1;
+    }
+  }
+
+  std::cerr << "done." << std::endl;
+
+  // load word list for restricted feature set
+  if (filenameSource != "") {
+    cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
+    if (!Load(filenameSource, filenameTarget)) {
+      UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+      //return false;
+    }
+  } //else if (tokens.size() == 8) {
+
+  // TODO not sure about this
+  /*
+  if (weight[0] != 1) {
+    AddSparseProducer(wordTranslationFeature);
+    cerr << "wt sparse producer weight: " << weight[0] << endl;
+    if (m_mira)
+      m_metaFeatureProducer = new MetaFeatureProducer("wt");
+  }
+
+  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+    wordTranslationFeature->SetSparseFeatureReporting();
+  }
+  */
+
+}
 
 bool WordTranslationFeature::Load(const std::string &filePathSource, const std::string &filePathTarget) 
 {
@@ -25,11 +121,11 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
     
     std::string line;
     while (getline(inFileSource, line)) {
-      m_vocabDomain.resize(m_vocabDomain.size() + 1);
-      vector<string> termVector;
-      boost::split(termVector, line, boost::is_any_of("\t "));
-      for (size_t i=0; i < termVector.size(); ++i) 
-	m_vocabDomain.back().insert(termVector[i]);  
+	  m_vocabDomain.resize(m_vocabDomain.size() + 1);
+  	  vector<string> termVector;
+	  boost::split(termVector, line, boost::is_any_of("\t "));
+	  for (size_t i=0; i < termVector.size(); ++i)
+	    m_vocabDomain.back().insert(termVector[i]);
     }
     
     inFileSource.close();
@@ -90,11 +186,11 @@ void WordTranslationFeature::Evaluate
     StringPiece targetWord = wt.GetFactor(m_factorTypeTarget)->GetString();
     if (m_ignorePunctuation) {
       // check if source or target are punctuation
-      char firstChar = sourceWord.data()[0];
+      char firstChar = sourceWord[0];
       CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
       if(charIterator != m_punctuationHash.end())
       	continue;
-      firstChar = targetWord.data()[0];
+      firstChar = targetWord[0];
       charIterator = m_punctuationHash.find( firstChar );
       if(charIterator != m_punctuationHash.end())
         continue;
@@ -164,7 +260,7 @@ void WordTranslationFeature::Evaluate
       else {
 	// range over domain trigger words (keywords)
 	const long docid = input.GetDocumentId();
-	for (boost::unordered_set<string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
+	for (boost::unordered_set<std::string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
 	  string sourceTrigger = *p;
 	  stringstream feature;
 	  feature << "wt_";
@@ -196,7 +292,7 @@ void WordTranslationFeature::Evaluate
 	StringPiece sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
 	if (m_ignorePunctuation) {
 	  // check if trigger is punctuation
-	  char firstChar = sourceTrigger.data()[0];
+	  char firstChar = sourceTrigger[0];
 	  CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
 	  if(charIterator != m_punctuationHash.end())
 	    continue;
@@ -205,9 +301,9 @@ void WordTranslationFeature::Evaluate
 	const long docid = input.GetDocumentId();
 	bool sourceTriggerExists = false;
 	if (m_domainTrigger)
-	  sourceTriggerExists = FindStringPiece(m_vocabDomain[docid], sourceTrigger) != m_vocabDomain[docid].end();
+	  sourceTriggerExists = FindStringPiece(m_vocabDomain[docid], sourceTrigger ) != m_vocabDomain[docid].end();
 	else if (!m_unrestricted)
-	  sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger) != m_vocabSource.end();
+	  sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger ) != m_vocabSource.end();
 	
 	if (m_domainTrigger) {
 	  if (sourceTriggerExists) {
@@ -429,6 +525,13 @@ void WordTranslationFeature::EvaluateChart(
     	}
     }*/
   }
+
+}
+
+void WordTranslationFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
 
 }
 

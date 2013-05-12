@@ -14,7 +14,6 @@ namespace Moses
 class FactorCollection;
 class TranslationOptionCollection;
 class Sentence;
-class TranslationSystem;
 
 /** An input to the decoder where each position can be 1 of a number of words, 
  *  each with an associated probability. Compared with a sentence, where each position is a word
@@ -69,7 +68,7 @@ public:
   std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined
   const Word& GetWord(size_t pos) const;
 
-  TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const;
+  TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
     CHECK(false);

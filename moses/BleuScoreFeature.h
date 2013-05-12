@@ -62,33 +62,7 @@ public:
   typedef boost::unordered_map<size_t, RefValue > RefCounts;
   typedef boost::unordered_map<size_t, NGrams> Matches;
 
-	BleuScoreFeature():
-	                                 StatefulFeatureFunction("BleuScore",1),
-	                                 m_enabled(true),
-	                                 m_sentence_bleu(true),
-					 m_simple_history_bleu(false),
-	                                 m_count_history(BleuScoreState::bleu_order),
-	                                 m_match_history(BleuScoreState::bleu_order),
-	                                 m_source_length_history(0),
-	                                 m_target_length_history(0),
-	                                 m_ref_length_history(0),
-	                                 m_scale_by_input_length(true),
-	                                 m_scale_by_avg_input_length(false),
-	                                 m_scale_by_inverse_length(false),
-	                                 m_scale_by_avg_inverse_length(false),
-	                                 m_scale_by_x(1),
-	                                 m_historySmoothing(0.9),
-					 m_smoothing_scheme(PLUS_POINT_ONE) {}
-
-    std::string GetScoreProducerDescription() const
-    {
-    	return "BleuScoreFeature";
-    }
-
-    std::string GetScoreProducerWeightShortName(unsigned) const
-    {
-        return "bl";
-    }
+  BleuScoreFeature(const std::string &line);
 
     void PrintHistory(std::ostream& out) const;
     void LoadReferences(const std::vector< std::vector< std::string > > &);
@@ -143,6 +117,10 @@ public:
     float GetSourceLengthHistory() { return m_source_length_history; }
     float GetTargetLengthHistory() { return m_target_length_history; }
     float GetAverageInputLength() { return m_avg_input_length; }
+
+    virtual void Evaluate(const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const;
 
 private:
     bool m_enabled;

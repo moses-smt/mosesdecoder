@@ -23,11 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/ScoreComponentCollection.h"
 #include "moses/Word.h"
-#include "moses/ScoreProducer.h"
+#include "moses/FeatureFunction.h"
 #include "Decoder.h"
 
-typedef std::map<const Moses::ScoreProducer*, std::vector< float > > ProducerWeightMap;
-typedef std::pair<const Moses::ScoreProducer*, std::vector< float > > ProducerWeightPair;
+typedef std::map<const Moses::FeatureFunction*, std::vector< float > > ProducerWeightMap;
+typedef std::pair<const Moses::FeatureFunction*, std::vector< float > > ProducerWeightPair;
 
 template <class T> bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
 {
@@ -52,7 +52,7 @@ void deleteTranslations(std::vector<std::vector<const Moses::Word*> > &translati
 void decodeHopeOrFear(size_t rank, size_t size, size_t decode, std::string decode_filename, std::vector<std::string> &inputSentences, Mira::MosesDecoder* decoder, size_t n, float bleuWeight);
 void applyLearningRates(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, float core_r0, float sparse_r0); 
 void applyPerFeatureLearningRates(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, Moses::ScoreComponentCollection featureLearningRates, float sparse_r0);
-void scaleFeatureScore(Moses::ScoreProducer *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
-void scaleFeatureScores(Moses::ScoreProducer *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
+void scaleFeatureScore(Moses::FeatureFunction *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
+void scaleFeatureScores(Moses::FeatureFunction *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
 
 #endif /* MAIN_H_ */

@@ -17,9 +17,7 @@ namespace Moses
  */
 class PhraseLengthFeature : public StatelessFeatureFunction {
 public:
-	PhraseLengthFeature():
-     StatelessFeatureFunction("pl", ScoreProducer::unlimited)
-  {}
+  PhraseLengthFeature(const std::string &line);
       
   void Evaluate(const PhraseBasedFeatureContext& context,
                 ScoreComponentCollection* accumulator) const;
@@ -29,9 +27,10 @@ public:
     throw std::logic_error("PhraseLengthFeature not valid in chart decoder");
 	}
 
-  // basic properties
-	std::string GetScoreProducerWeightShortName(unsigned) const { return "pl"; }
-	size_t GetNumInputScores() const { return 0; }
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
 };
 
 }

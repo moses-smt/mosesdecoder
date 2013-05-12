@@ -43,6 +43,8 @@ namespace Moses
  */
 class PartialTranslOptColl
 {
+  friend std::ostream& operator<<(std::ostream& out, const PartialTranslOptColl& possibleTranslation);
+
 protected:
   std::vector<TranslationOption*> m_list;
   float m_bestScore; /**< score of the best translation option */
@@ -58,8 +60,8 @@ public:
     RemoveAllInColl( m_list );
   }
 
-  void AddNoPrune(const TranslationSystem* system, TranslationOption *partialTranslOpt);
-  void Add(const TranslationSystem* system, TranslationOption *partialTranslOpt);
+  void AddNoPrune(TranslationOption *partialTranslOpt);
+  void Add(TranslationOption *partialTranslOpt);
   void Prune();
 
   /** returns list of translation options */

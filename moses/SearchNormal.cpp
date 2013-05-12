@@ -1,7 +1,6 @@
 #include "Manager.h"
 #include "Timer.h"
 #include "SearchNormal.h"
-#include "Phrase.h"
 
 using namespace std;
 
@@ -339,8 +338,6 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
       stats.AddTimeBuildHyp( clock()-t );
     }
 
-    // compute expected score (all but correct LM)
-    expectedScore = newHypo->CalcExpectedScore( m_transOptColl.GetFutureScore() );
     // ... and check if that is below the limit
     if (expectedScore < allowedScore) {
       IFVERBOSE(2) {
@@ -349,9 +346,6 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
       FREEHYPO( newHypo );
       return;
     }
-
-    // ok, all is good, compute remaining scores
-    newHypo->CalcRemainingScore();
 
   }
 

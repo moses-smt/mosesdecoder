@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "StaticData.h"  // GetMaxNumFactors
 
-#include "util/exception.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
 
@@ -153,48 +152,48 @@ void Phrase::PrependWord(const Word &newWord)
   m_words[0] = newWord;
 }
 
-void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter)
-{
-  FactorCollection &factorCollection = FactorCollection::Instance();
-
-  for (util::TokenIter<util::AnyCharacter, true> word_it(phraseString, util::AnyCharacter(" \t")); word_it; ++word_it) {
-    Word &word = AddWord();
-    size_t index = 0;
-    for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter)); 
-        factor_it && (index < factorOrder.size()); 
-        ++factor_it, ++index) {
-      word[factorOrder[index]] = factorCollection.AddFactor(*factor_it);
-    }
-    if (index != factorOrder.size()) {
-      TRACE_ERR( "[ERROR] Malformed input: '" << *word_it << "'" <<  std::endl
-                 << "In '" << phraseString << "'" << endl
-                 << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
-                 << "  but instead received input with " << index << " factor(s).\n");
-      abort();
-    }
-  }
-}
-
-class NonTerminalParseException : public util::Exception {};
-
-void Phrase::CreateFromStringNewFormat(FactorDirection direction
-                                       , const std::vector<FactorType> &factorOrder
-                                       , const StringPiece &phraseString
-                                       , const std::string & /*factorDelimiter */
-                                       , Word &lhs)
+void Phrase::CreateFromString(FactorDirection direction
+                            ,const std::vector<FactorType> &factorOrder
+                            ,const StringPiece &phraseString
+                            ,const StringPiece &factorDelimiter
+                            ,Word *lhs)
 {
   // parse
   vector<StringPiece> annotatedWordVector;
   for (util::TokenIter<util::AnyCharacter, true> it(phraseString, "\t "); it; ++it) {
     annotatedWordVector.push_back(*it);
   }
+
+  if (annotatedWordVector.size() == 0)
+    return;
+
   // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
-  //		to
+  //    to
   // "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
 
-  m_words.reserve(annotatedWordVector.size()-1);
+  size_t numWords;
+  const StringPiece &annotatedWord = annotatedWordVector.back();
+  if (annotatedWord.size() >= 2
+      && *annotatedWord.data() == '['
+      && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
+    // hiero/syntax rule
+    numWords = annotatedWordVector.size()-1;
 
-  for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -  1 ; phrasePos++) {
+    // lhs
+    CHECK(lhs);
+    lhs->CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
+    assert(lhs->IsNonTerminal());
+  }
+  else {
+    //CHECK(lhs == NULL);
+
+    numWords = annotatedWordVector.size();
+  }
+
+  // parse each word
+  m_words.reserve(numWords);
+
+  for (size_t phrasePos = 0 ; phrasePos < numWords; phrasePos++) {
     StringPiece &annotatedWord = annotatedWordVector[phrasePos];
     bool isNonTerminal;
     if (annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
@@ -202,7 +201,6 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
       isNonTerminal = true;
 
       size_t nextPos = annotatedWord.find('[', 1);
-      UTIL_THROW_IF(nextPos == string::npos, NonTerminalParseException, "The string " << annotatedWord << " was parsed as a non-terminal but does not take the form [source][target].");
       CHECK(nextPos != string::npos);
 
       if (direction == Input)
@@ -217,12 +215,6 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
     word.CreateFromString(direction, factorOrder, annotatedWord, isNonTerminal);
 
   }
-
-  // lhs
-  const StringPiece &annotatedWord = annotatedWordVector.back();
-  UTIL_THROW_IF(annotatedWord.size() < 2 || *annotatedWord.data() != '[' || annotatedWord.data()[annotatedWord.size() - 1] != ']', NonTerminalParseException, "The last entry should be a single non-terminal but was given as " << annotatedWord);
-  lhs.CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
-  assert(lhs.IsNonTerminal());
 }
 
 int Phrase::Compare(const Phrase &other) const
@@ -266,7 +258,8 @@ bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
       for (size_t currSubPos = 0 ; currSubPos < subSize ; currSubPos++) {
         size_t currThisPos = currSubPos + currStartPos;
         const string &subStr	= subPhraseVector[currSubPos][currFactorIndex];
-        if (subStr != GetFactor(currThisPos, factorType)->GetString()) {
+        StringPiece thisStr	= GetFactor(currThisPos, factorType)->GetString();
+        if (subStr != thisStr) {
           match = false;
           break;
         }
@@ -347,6 +340,17 @@ void Phrase::InitializeMemPool()
 
 void Phrase::FinalizeMemPool()
 {
+}
+
+void Phrase::OnlyTheseFactors(const FactorMask &factors)
+{
+  for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
+    if (!factors[currFactor]) {
+      for (size_t pos = 0; pos < GetSize(); ++pos) {
+        SetFactor(pos, currFactor, NULL);
+      }
+    }
+  }
 }
 
 TO_STRING_BODY(Phrase);

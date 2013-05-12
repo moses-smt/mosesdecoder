@@ -32,29 +32,31 @@ BOOST_AUTO_TEST_SUITE(scc)
 
 class MockStatelessFeatureFunction : public StatelessFeatureFunction {
   public:
-    MockStatelessFeatureFunction(const string& desc, size_t n) :
-      StatelessFeatureFunction(desc,n) {}
+    MockStatelessFeatureFunction(const string& desc, size_t n, const string &line) :
+      StatelessFeatureFunction(desc,n, line) {}
     virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
     virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
+    virtual void Evaluate(const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+    { }
 };
 
 class MockSingleFeature : public MockStatelessFeatureFunction {
   public:
-    MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1) {}
-    std::string GetScoreProducerWeightShortName(unsigned) const {return "sf";}
+    MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1, "MockSingle") {}
 };
 
 class MockMultiFeature : public MockStatelessFeatureFunction {
   public:
-    MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5) {}
-    std::string GetScoreProducerWeightShortName(unsigned) const {return "mf";}
+    MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5, "MockMulti") {}
 };
 
 class MockSparseFeature : public MockStatelessFeatureFunction {
   public:
-    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", ScoreProducer::unlimited) {}
-    std::string GetScoreProducerWeightShortName(unsigned) const {return "sf";}
+    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", 0, "MockSparse") {}
 };
+
 
 
 struct MockProducers {
@@ -106,7 +108,7 @@ BOOST_FIXTURE_TEST_CASE(sparse_feature, MockProducers)
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"third"), 0.0f);
   scc.Assign(&sparse, "first", -1.9f);
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -1.9f);
-  scc.PlusEquals(&sparse, "first", -1.9f);
+  scc.PlusEquals(&sparse, StringPiece("first"), -1.9f);
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -3.8f);
 }
 

@@ -282,7 +282,7 @@ namespace Moses {
     }
   }
 
-  const FValue& FVector::getBackoff(const FName& name, float backoff) const {
+  FValue FVector::getBackoff(const FName& name, float backoff) const {
     const_iterator fi = m_features.find(name);
     if (fi == m_features.end()) {
       return backoff;

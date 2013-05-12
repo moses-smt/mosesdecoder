@@ -24,20 +24,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/check.hh"
 #include "TypeDef.h"
-#include "Dictionary.h"
+#include "FactorTypeSet.h"
 
 namespace Moses
 {
 
 class DecodeFeature;
-class PhraseDictionaryFeature;
+class PhraseDictionary;
 class GenerationDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
 class PartialTranslOptColl;
 class FactorCollection;
 class InputType;
-class TranslationSystem;
 
 /** Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
@@ -89,22 +88,18 @@ public:
   }
 
   /*! returns phrase table feature for translation step */
-  const PhraseDictionaryFeature* GetPhraseDictionaryFeature() const;
+  const PhraseDictionary* GetPhraseDictionaryFeature() const;
 
   /*! returns generation table feature for generation step */
   const GenerationDictionary* GetGenerationDictionaryFeature() const;
 
 
   /*! Given an input TranslationOption, extend it in some way (put results in outputPartialTranslOptColl) */
-  virtual void Process(const TranslationSystem* system,
-                       const TranslationOption &inputPartialTranslOpt
+  virtual void Process(const TranslationOption &inputPartialTranslOpt
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
                        , bool adhereTableLimit) const = 0;
-
-  /** Do any sentence specific initialisation */
-  virtual void InitializeBeforeSentenceProcessing(InputType const&) const {}
 
 };
 

@@ -35,20 +35,6 @@ DecodeStepGeneration::DecodeStepGeneration(const GenerationDictionary* dict, con
 {
 }
 
-
-TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
-    , const ScoreComponentCollection& generationScore) const
-{
-  if (IsFilteringStep()) {
-    if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors))
-      return NULL;
-  }
-
-  TranslationOption *newTransOpt = new TranslationOption(oldTO);
-  newTransOpt->MergeNewFeatures(mergePhrase, generationScore, m_newOutputFactors);
-  return newTransOpt;
-}
-
 // helpers
 typedef pair<Word, ScoreComponentCollection> WordPair;
 typedef list< WordPair > WordList;
@@ -73,8 +59,7 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
   }
 }
 
-void DecodeStepGeneration::Process(const TranslationSystem* system
-                                   , const TranslationOption &inputPartialTranslOpt
+void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
                                    , const DecodeStep &decodeStep
                                    , PartialTranslOptColl &outputPartialTranslOptColl
                                    , TranslationOptionCollection * /* toc */
@@ -84,14 +69,13 @@ void DecodeStepGeneration::Process(const TranslationSystem* system
     // word deletion
 
     TranslationOption *newTransOpt = new TranslationOption(inputPartialTranslOpt);
-    outputPartialTranslOptColl.Add(system, newTransOpt);
+    outputPartialTranslOptColl.Add(newTransOpt);
 
     return;
   }
 
   // normal generation step
   const GenerationDictionary* generationDictionary  = decodeStep.GetGenerationDictionaryFeature();
-//  const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
 
   const Phrase &targetPhrase  = inputPartialTranslOpt.GetTargetPhrase();
   size_t targetLength         = targetPhrase.GetSize();
@@ -150,10 +134,23 @@ void DecodeStepGeneration::Process(const TranslationSystem* system
 
     // merge with existing trans opt
     Phrase genPhrase( mergeWords);
-    TranslationOption *newTransOpt = MergeGeneration(inputPartialTranslOpt, genPhrase, generationScore);
-    if (newTransOpt != NULL) {
-      outputPartialTranslOptColl.Add(system, newTransOpt);
+
+    if (IsFilteringStep()) {
+      if (!inputPartialTranslOpt.IsCompatible(genPhrase, m_conflictFactors))
+        continue;
     }
+
+    const TargetPhrase &inPhrase = inputPartialTranslOpt.GetTargetPhrase();
+    TargetPhrase outPhrase(inPhrase);
+    outPhrase.SetScore(generationScore);
+
+    outPhrase.MergeFactors(genPhrase, m_newOutputFactors);
+    const WordsRange &sourceWordsRange = inputPartialTranslOpt.GetSourceWordsRange();
+
+    TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
+    assert(newTransOpt);
+
+    outputPartialTranslOptColl.Add(newTransOpt);
 
     // increment iterators
     IncrementIterators(wordListIterVector, wordListVector);

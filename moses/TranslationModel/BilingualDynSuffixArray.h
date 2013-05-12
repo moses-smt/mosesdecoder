@@ -98,7 +98,6 @@ public:
             std::string source, std::string target, std::string alignments, 
             const std::vector<float> &weight);
 	void GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> >& target) const;
-	void CleanUp(const InputType& source);
   void addSntPair(string& source, string& target, string& alignment);
 private:
 	DynSuffixArray* m_srcSA;
@@ -120,7 +119,7 @@ private:
   mutable std::set<wordID_t> m_freqWordsCached;
 	const size_t m_maxPhraseLength, m_maxSampleSize;
 
-	int LoadCorpus(InputFileStream&, const std::vector<FactorType>& factors, 
+	int LoadCorpus(FactorDirection direction, InputFileStream&, const std::vector<FactorType>& factors,
 		std::vector<wordID_t>&, std::vector<wordID_t>&,
     Vocab*);
 	int LoadAlignments(InputFileStream& aligs);

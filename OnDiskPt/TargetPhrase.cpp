@@ -244,7 +244,8 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   }
 
   // scores
-  ret->SetScoreChart(phraseDict.GetFeature(), m_scores, weightT, lmList, wpProducer);
+  ret->SetScore(&phraseDict, m_scores);
+  ret->Evaluate();
 
   // alignments
   int index = 0;

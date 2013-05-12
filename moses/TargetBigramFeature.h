@@ -4,8 +4,6 @@
 #include <string>
 #include <map>
 
-#include <boost/unordered_set.hpp>
-
 #include "FactorCollection.h"
 #include "FeatureFunction.h"
 #include "FFState.h"
@@ -28,21 +26,9 @@ class TargetBigramState : public FFState {
  */
 class TargetBigramFeature : public StatefulFeatureFunction {
 public:
-	TargetBigramFeature(FactorType factorType = 0):
-     StatefulFeatureFunction("dlmb", ScoreProducer::unlimited),
-     m_factorType(factorType)
-  {
-    FactorCollection& factorCollection = FactorCollection::Instance();
-    const Factor* bosFactor =
-       factorCollection.AddFactor(Output,m_factorType,BOS_);
-    m_bos.SetFactor(m_factorType,bosFactor);
-  }
-      
+	TargetBigramFeature(const std::string &line);
 
 	bool Load(const std::string &filePath);
-
-	std::string GetScoreProducerWeightShortName(unsigned) const;
-  size_t GetNumInputScores() const;
 
 	virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
@@ -55,10 +41,15 @@ public:
                                   {
                                     abort();
                                   }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
 private:
   FactorType m_factorType;
   Word m_bos;
-  boost::unordered_set<std::string> m_vocab;
+	std::set<std::string> m_vocab;
 };
 
 }

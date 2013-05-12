@@ -11,14 +11,38 @@ using namespace std;
 
 namespace Moses {
 
-string PhrasePairFeature::GetScoreProducerWeightShortName(unsigned) const
+PhrasePairFeature::PhrasePairFeature(const std::string &line)
+:StatelessFeatureFunction("PhrasePairFeature", 0, line)
 {
-  return "pp";
-}
+  std::cerr << "Initializing PhrasePairFeature.." << std::endl;
 
-size_t PhrasePairFeature::GetNumInputScores() const 
-{
-  return 0;
+  vector<string> tokens = Tokenize(line);
+  //CHECK(tokens[0] == m_description);
+
+  // set factor
+  m_sourceFactorId = Scan<FactorType>(tokens[1]);
+  m_targetFactorId = Scan<FactorType>(tokens[2]);
+  m_unrestricted = Scan<bool>(tokens[3]);
+  m_simple = Scan<bool>(tokens[4]);
+  m_sourceContext = Scan<bool>(tokens[5]);
+  m_domainTrigger = Scan<bool>(tokens[6]);
+  m_sparseProducerWeight = 1;
+  m_ignorePunctuation = Scan<bool>(tokens[6]);
+
+  if (m_simple == 1) std::cerr << "using simple phrase pairs.. ";
+  if (m_sourceContext == 1) std::cerr << "using source context.. ";
+  if (m_domainTrigger == 1) std::cerr << "using domain triggers.. ";
+
+  // compile a list of punctuation characters
+  if (m_ignorePunctuation) {
+    std::cerr << "ignoring punctuation for triggers.. ";
+    char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
+    for (size_t i=0; i < sizeof(punctuation)-1; ++i)
+      m_punctuationHash[punctuation[i]] = 1;
+  }
+
+  const string &filePathSource = tokens[7];
+  Load(filePathSource);
 }
 
 bool PhrasePairFeature::Load(const std::string &filePathSource/*, const std::string &filePathTarget*/) 
@@ -38,7 +62,7 @@ bool PhrasePairFeature::Load(const std::string &filePathSource/*, const std::str
       vector<string> termVector;
       boost::split(termVector, line, boost::is_any_of("\t "));
       for (size_t i=0; i < termVector.size(); ++i) 
-	terms.insert(termVector[i]);	
+        terms.insert(termVector[i]);
       
       // add term set for current document
       m_vocabDomain.push_back(terms);
@@ -185,7 +209,7 @@ void PhrasePairFeature::Evaluate(
       StringPiece sourceTrigger = input.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
       if (m_ignorePunctuation) {
 	// check if trigger is punctuation
-	char firstChar = sourceTrigger.data()[0];
+	char firstChar = sourceTrigger[0];
 	CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
 	if(charIterator != m_punctuationHash.end())
 	  continue;
@@ -193,7 +217,7 @@ void PhrasePairFeature::Evaluate(
       
       bool sourceTriggerExists = false;
       if (!m_unrestricted)
-	sourceTriggerExists = (FindStringPiece(m_vocabSource, sourceTrigger) != m_vocabSource.end());
+	sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger ) != m_vocabSource.end();
       
       if (m_unrestricted || sourceTriggerExists) {
 	ostringstream namestr;
@@ -220,7 +244,11 @@ void PhrasePairFeature::Evaluate(
   }
 }
 
-bool PhrasePairFeature::ComputeValueInTranslationOption() const {
-  return true;
-} 
+void PhrasePairFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 }

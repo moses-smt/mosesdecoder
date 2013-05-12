@@ -37,7 +37,7 @@ bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
   }
   
   // file path is the directory of the rules for eacg, NOT the file of all the rules
-  SetFilePath(filePath);
+  //SetFilePath(filePath);
   m_tableLimit = tableLimit;
 
   m_input = &input;
@@ -61,7 +61,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
   
   std::auto_ptr<RuleTableLoader> loader =
   RuleTableLoaderFactory::Create(grammarFile);
-  std::vector<float> weightT = StaticData::Instance().GetWeights(GetFeature());
+  std::vector<float> weightT = StaticData::Instance().GetWeights(this);
   bool ret = loader->Load(*m_input, *m_output, grammarFile, weightT, m_tableLimit,
                           *m_languageModels, m_wpProducer, *this);
   

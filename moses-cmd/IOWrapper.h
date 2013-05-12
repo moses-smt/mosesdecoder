@@ -53,6 +53,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/WordLattice.h"
 #include "LatticeMBR.h"
 
+namespace Moses
+{
+class ScoreComponentCollection;
+}
+
 namespace MosesCmd
 {
 
@@ -80,6 +85,7 @@ protected:
                       , const Moses::FactorMask							&inputFactorUsed
                       , size_t												nBestSize
                       , const std::string							&nBestFilePath);
+
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -126,10 +132,6 @@ public:
 IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, bool reportSegmentation, bool reportAllFactors);
-void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&,
-                 const Moses::TranslationSystem* system, long translationId, bool reportSegmentation);
-void OutputAllFeatureScores(std::ostream& out, const Moses::TranslationSystem* system, const Moses::TrellisPath &path);
-void OutputFeatureScores(std::ostream& out, const Moses::TrellisPath &path, const Moses::FeatureFunction *ff, std::string &lastName);
 void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
                     bool reportSegmentation, bool reportAllFactors, std::ostream& out);
@@ -138,6 +140,18 @@ void OutputInput(std::ostream& os, const Moses::Hypothesis* hypo);
 void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo, const Moses::Hypothesis *hypo);
 void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
 void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo);
+
+void OutputNBest(std::ostream& out
+                  , const Moses::TrellisPathList &nBestList
+                  , const std::vector<Moses::FactorType>& outputFactorOrder
+                  , long translationId
+                  , bool reportSegmentation);
+void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
+                              , std::ostream &out);
+void OutputFeatureScores( std::ostream& out
+                          , const Moses::ScoreComponentCollection &features
+                          , const Moses::FeatureFunction *ff
+                          , std::string &lastName );
 
 }
 

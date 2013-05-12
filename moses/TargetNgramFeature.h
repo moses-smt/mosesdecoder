@@ -13,8 +13,6 @@
 #include "ChartHypothesis.h"
 #include "ChartManager.h"
 
-#include <boost/unordered_set.hpp>
-
 namespace Moses
 {
 
@@ -182,24 +180,9 @@ public:
  */
 class TargetNgramFeature : public StatefulFeatureFunction {
 public:
-	TargetNgramFeature(FactorType factorType = 0, size_t n = 3, bool lower_ngrams = true):
-     StatefulFeatureFunction("dlm", ScoreProducer::unlimited),
-     m_factorType(factorType),
-     m_n(n),
-     m_lower_ngrams(lower_ngrams),
-     m_sparseProducerWeight(1)
-  {
-    FactorCollection& factorCollection = FactorCollection::Instance();
-    const Factor* bosFactor = factorCollection.AddFactor(Output,m_factorType,BOS_);
-    m_bos.SetFactor(m_factorType,bosFactor);
-    m_baseName = GetScoreProducerDescription();
-    m_baseName.append("_");
-  }
+  TargetNgramFeature(const std::string &line);
 
 	bool Load(const std::string &filePath);
-
-	std::string GetScoreProducerWeightShortName(unsigned) const;
-	size_t GetNumInputScores() const;
 
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
@@ -212,10 +195,14 @@ public:
   virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
                                   ScoreComponentCollection* accumulator) const;
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
 private:
   FactorType m_factorType;
   Word m_bos;
-  boost::unordered_set<std::string> m_vocab;
+	std::set<std::string> m_vocab;
 	size_t m_n;
 	bool m_lower_ngrams;
 

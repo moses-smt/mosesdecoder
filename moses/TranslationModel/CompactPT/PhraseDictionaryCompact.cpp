@@ -35,28 +35,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
 #include "moses/ThreadPool.h"
+#include "moses/LMList.h"
+#include "moses/DummyScoreProducers.h"
 
 using namespace std;
 
 namespace Moses
 {
   
-bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
-                                  , const std::vector<FactorType> &output
-                                  , const string &filePath
-                                  , const vector<float> &weight
-                                  , size_t tableLimit
-                                  , const LMList &languageModels
-                                  , float weightWP)
+bool PhraseDictionaryCompact::InitDictionary()
 {
-  m_input = &input;
-  m_output = &output;
-  m_weight = new std::vector<float>(weight);
-  m_tableLimit = tableLimit;
-  m_languageModels = &languageModels; 
-  m_weightWP = weightWP;
+  const StaticData &staticData = StaticData::Instance();
+
+  m_weight = staticData.GetWeights(this);
+  m_weightWP = staticData.GetWeight(staticData.GetWordPenaltyProducer());
+  m_languageModels = &staticData.GetLMList();
  
-  std::string tFilePath = filePath;
+  std::string tFilePath = m_filePath;
   
   std::string suffix = ".minphr";
   if(tFilePath.substr(tFilePath.length() - suffix.length(), suffix.length()) == suffix)
@@ -80,8 +75,8 @@ bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
     }
   }
 
-  m_phraseDecoder = new PhraseDecoder(*this, m_input, m_output, m_feature,
-                                  m_numScoreComponent, m_weight, m_weightWP,
+  m_phraseDecoder = new PhraseDecoder(*this, &m_input, &m_output,
+                                  m_numScoreComponents, &m_weight, m_weightWP,
                                   m_languageModels);
 
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
@@ -134,8 +129,11 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
       (m_tableLimit == 0 || tpv->size() < m_tableLimit) ?
       tpv->end() : tpv->begin() + m_tableLimit;
     std::nth_element(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
-    for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++)
-      phraseColl->Add(new TargetPhrase(*it));
+    for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++) {
+      TargetPhrase *tp = new TargetPhrase(*it);
+      cerr << *tp << endl;
+      phraseColl->Add(tp);
+    }
     
     // Cache phrase pair for for clean-up or retrieval with PREnc
     const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
@@ -161,8 +159,6 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase
 PhraseDictionaryCompact::~PhraseDictionaryCompact() {
   if(m_phraseDecoder)
     delete m_phraseDecoder;
-  if(m_weight)
-    delete m_weight;
 }
 
 //TO_STRING_BODY(PhraseDictionaryCompact)
@@ -177,12 +173,10 @@ void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection* tpc) {
   ref.push_back(tpc);
 }
 
-void PhraseDictionaryCompact::InitializeForInput(const Moses::InputType&) {}
-
 void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
                                              const TargetPhrase &targetPhrase) { }
 
-void PhraseDictionaryCompact::CleanUp(const InputType &source) {
+void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &source) {
   if(!m_inMemory)
     m_hash.KeepNLastRanges(0.01, 0.2);
     

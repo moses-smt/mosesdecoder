@@ -16,7 +16,7 @@ class LMList
 {
 protected:
 	typedef std::list < LanguageModel* > CollType;
-	CollType m_coll; 
+	CollType m_coll;
 	
 public:
 	typedef CollType::iterator iterator;
@@ -34,28 +34,11 @@ public:
 
 	LMList()
 	{}
-    void CleanUp();
-	~LMList();
-	
-	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, float &retOOVScore, ScoreComponentCollection* breakdown) const;
-  void InitializeBeforeSentenceProcessing() {
-    std::list<LanguageModel*>::iterator lm_iter;
-    for (lm_iter = m_coll.begin();
-         lm_iter != m_coll.end();
-         ++lm_iter) {
-        (*lm_iter)->InitializeBeforeSentenceProcessing();
-    }
-  }
-  void CleanUpAfterSentenceProcessing(const InputType& source) {
-    std::list<LanguageModel*>::iterator lm_iter;
-    for (lm_iter = m_coll.begin();
-         lm_iter != m_coll.end();
-         ++lm_iter) {
-        (*lm_iter)->CleanUpAfterSentenceProcessing(source);
-    }
-  }
 
-	void Add(LanguageModel *lm);
+	void Add(LanguageModel *lm)	{
+		m_coll.push_back(lm);
+	}
+
 
 
 };

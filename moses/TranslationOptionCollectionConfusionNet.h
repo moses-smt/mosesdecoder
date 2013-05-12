@@ -8,7 +8,6 @@ namespace Moses
 {
 
 class ConfusionNet;
-class TranslationSystem;
 
 /** Holds all translation options, for all spans, of a particular confusion network input
  * Inherited from TranslationOptionCollection.
@@ -16,7 +15,7 @@ class TranslationSystem;
 class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection
 {
 public:
-  TranslationOptionCollectionConfusionNet(const TranslationSystem* system, const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+  TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   void ProcessUnknownWord(size_t sourcePos);
 

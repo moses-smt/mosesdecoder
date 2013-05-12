@@ -1,9 +1,6 @@
-// $Id$
-// vim:tabstop=2
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
-Copyright (C) 2006 University of Edinburgh
+Copyright (C) 2013- University of Edinburgh
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -20,58 +17,61 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_PhraseDictionaryMemory_h
-#define moses_PhraseDictionaryMemory_h
+
+#ifndef moses_PhraseDictionaryInterpolated_h
+#define moses_PhraseDictionaryInterpolated_h
+
+#include <boost/shared_ptr.hpp>
 
 #include "moses/TranslationModel/PhraseDictionary.h"
-#include "moses/TranslationModel/PhraseDictionaryNode.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 
 namespace Moses
 {
 
-/*** Implementation of a phrase table in a trie.  Looking up a phrase of
- * length n words requires n look-ups to find the TargetPhraseCollection.
- */
-class PhraseDictionaryMemory : public PhraseDictionary
+/**
+  * An interpolation of 1 or more PhraseDictionaryTree translation tables.
+  **/
+class PhraseDictionaryInterpolated : public PhraseDictionary
 {
-  typedef PhraseDictionary MyBase;
-  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
+  public:
 
-protected:
-  PhraseDictionaryNode m_collection;
+  PhraseDictionaryInterpolated
+    (size_t numScoreComponent,size_t numInputScores,const PhraseDictionaryFeature* feature);
 
-  TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
+  virtual ~PhraseDictionaryInterpolated() {delete m_targetPhrases;}
 
-public:
-  PhraseDictionaryMemory(size_t numScoreComponent, PhraseDictionaryFeature* feature)
-    : PhraseDictionary(numScoreComponent,feature) {}
-  virtual ~PhraseDictionaryMemory();
-
+  // initialize ...
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
-            , const std::string &filePath
+            , const std::vector<std::string>& config
             , const std::vector<float> &weight
             , size_t tableLimit
             , const LMList &languageModels
             , float weightWP);
 
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
-
-  // for mert
-  virtual void InitializeForInput(InputType const&) {
-    /* Don't do anything source specific here as this object is shared between threads.*/
-  }
-
+  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
+  virtual void InitializeForInput(InputType const& source);
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollectionBase &) {
-    CHECK(false);
-    return 0;
+    throw std::logic_error("PhraseDictionaryInterpolated.CreateRuleLookupManager() Not implemented");
   }
 
-  TO_STRING();
+  private:
+
+  typedef boost::shared_ptr<PhraseDictionaryTreeAdaptor> DictionaryHandle;
+  std::vector<DictionaryHandle> m_dictionaries;
+  std::vector<std::vector<float> > m_weights; //feature x table
+  mutable TargetPhraseCollection* m_targetPhrases;
+  std::vector<float> m_weightT;
+  size_t m_tableLimit;
+  const LMList* m_languageModels;
+  float m_weightWP;
 
 };
 
+
 }
+
 #endif

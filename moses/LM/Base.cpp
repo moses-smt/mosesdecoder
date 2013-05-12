@@ -33,8 +33,9 @@ using namespace std;
 
 namespace Moses {
 
-LanguageModel::LanguageModel() : 
-  StatefulFeatureFunction("LM", StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1 ) {
+LanguageModel::LanguageModel(const std::string& description, const std::string &line) :
+  StatefulFeatureFunction(description, StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1, line )
+{
   m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
 }
 
@@ -57,6 +58,35 @@ float LanguageModel::GetOOVWeight() const {
 
 void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const {
   UTIL_THROW(util::Exception, "Incremental search is only supported by KenLM.");
+}
+
+void LanguageModel::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+   if (Useable(targetPhrase)) {
+     // contains factors used by this LM
+     float fullScore, nGramScore;
+     size_t oovCount;
+
+     CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
+     float estimateScore = fullScore - nGramScore;
+
+     if (StaticData::Instance().GetLMEnableOOVFeature()) {
+       vector<float> scores(2), estimateScores(2);
+       scores[0] = nGramScore;
+       scores[1] = oovCount;
+       scoreBreakdown.Assign(this, scores);
+
+       estimateScores[0] = estimateScore;
+       estimateScores[1] = 0;
+       estimatedFutureScore.Assign(this, estimateScores);
+     } else {
+       scoreBreakdown.Assign(this, nGramScore);
+       estimatedFutureScore.Assign(this, estimateScore);
+     }
+
+   }
 }
 
 } // namespace Moses

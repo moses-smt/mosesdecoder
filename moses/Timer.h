@@ -22,11 +22,7 @@ private:
   bool running;
   // note: this only has the resolution of seconds, we'd often like better resolution
   // we make our best effort to do this on a system-by-system basis
-#ifdef CLOCK_MONOTONIC
-  struct timespec start_time;
-#else
   time_t start_time;
-#endif
 
   // in seconds
   double elapsed_time();
@@ -37,12 +33,7 @@ public:
    * using 'start' or 'restart'
    */
   Timer() : running(false) {
-#ifdef CLOCK_MONOTONIC
-  start_time.tv_sec = 0;
-  start_time.tv_nsec = 0;
-#else
   start_time = 0;
-#endif
   }
 
   void start(const char* msg = 0);

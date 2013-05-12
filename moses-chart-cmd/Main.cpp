@@ -67,6 +67,13 @@ using namespace std;
 using namespace Moses;
 using namespace MosesChartCmd;
 
+/** Enforce rounding */
+void fix(std::ostream& stream, size_t size)
+{
+  stream.setf(std::ios::fixed);
+  stream.precision(size);
+}
+
 /**
   * Translates a sentence.
  **/
@@ -84,13 +91,12 @@ public:
 
   void Run() {
     const StaticData &staticData = StaticData::Instance();
-    const TranslationSystem &system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
     const size_t translationId = m_source->GetTranslationId();
 
     VERBOSE(2,"\nTRANSLATING(" << translationId << "): " << *m_source);
 
     if (staticData.GetSearchAlgorithm() == ChartIncremental) {
-      Incremental::Manager manager(*m_source, system);
+      Incremental::Manager manager(*m_source);
       const std::vector<search::Applied> &nbest = manager.ProcessSentence();
       if (!nbest.empty()) {
         m_ioWrapper.OutputBestHypo(nbest[0], translationId);
@@ -98,11 +104,11 @@ public:
         m_ioWrapper.OutputBestNone(translationId);
       }
       if (staticData.GetNBestSize() > 0)
-        m_ioWrapper.OutputNBestList(nbest, system, translationId);
+        m_ioWrapper.OutputNBestList(nbest, translationId);
       return;
     }
 
-    ChartManager manager(*m_source, &system);
+    ChartManager manager(*m_source);
     manager.ProcessSentence();
 
     CHECK(!staticData.UseMBR());
@@ -129,7 +135,7 @@ public:
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
       ChartTrellisPathList nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-      m_ioWrapper.OutputNBestList(nBestList, &system, translationId);
+      m_ioWrapper.OutputNBestList(nBestList, translationId);
       IFVERBOSE(2) {
         PrintUserTime("N-Best Hypotheses Generation Time:");
       }
@@ -182,69 +188,41 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != ScoreProducer::unlimited) {
+  if (numScoreComps != 0) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
-    for (size_t i = 0; i < numScoreComps; ++i) 
-      cout << ff->GetScoreProducerDescription() <<  " "
-           << ff->GetScoreProducerWeightShortName() << " "
-           << values[i] << endl;
+    cout << ff->GetScoreProducerDescription() << "=";
+    for (size_t i = 0; i < numScoreComps; ++i) {
+    	cout << " " << values[i];
+    }
+    cout << endl;
   }
   else {
   	if (ff->GetSparseProducerWeight() == 1)
-  		cout << ff->GetScoreProducerDescription() << " " <<
-  		ff->GetScoreProducerWeightShortName() << " sparse" << endl;
+  		cout << ff->GetScoreProducerDescription() << "= sparse" <<  endl;
   	else
-  		cout << ff->GetScoreProducerDescription() << " " <<
-  		ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
+  		cout << ff->GetScoreProducerDescription() << "= " << ff->GetSparseProducerWeight() << endl;
   }
 }
 
 static void ShowWeights()
 {
-  cout.precision(6);
+  fix(cout,6);
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  //This has to match the order in the nbest list
+  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 
-  //LMs
-  const LMList& lml = system.GetLanguageModels();
-  LMList::const_iterator lmi = lml.begin();
-  for (; lmi != lml.end(); ++lmi) {
-    PrintFeatureWeight(*lmi);
-  }
-
-  //sparse stateful ffs
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  for( size_t i=0; i<sff.size(); i++ ) {
-    if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
-      PrintFeatureWeight(sff[i]);
+  for (size_t i = 0; i < sff.size(); ++i) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(ff);
     }
   }
-
-  // translation components - phrase dicts
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  for( size_t i=0; i<pds.size(); i++ ) {
-    PrintFeatureWeight(pds[i]);
-  }
-
-  //word penalty
-  PrintFeatureWeight(system.GetWordPenaltyProducer());
-
-  //generation dicts
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
-  for( size_t i=0; i<gds.size(); i++ ) {
-    PrintFeatureWeight(gds[i]);
-  }
-
-  //sparse stateless ffs
-  const vector<const StatelessFeatureFunction*>& slf = system.GetStatelessFeatureFunctions();
-  for( size_t i=0; i<slf.size(); i++ ) {
-    if (slf[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
-      PrintFeatureWeight(slf[i]);
+  for (size_t i = 0; i < slf.size(); ++i) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(ff);
     }
   }
-
-
 }
 
 

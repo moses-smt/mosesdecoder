@@ -44,21 +44,18 @@ extern bool g_debug;
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.
  */
-ChartManager::ChartManager(InputType const& source, const TranslationSystem* system)
+ChartManager::ChartManager(InputType const& source)
   :m_source(source)
   ,m_hypoStackColl(source, *this)
-  ,m_system(system)
   ,m_start(clock())
   ,m_hypothesisId(0)
-  ,m_parser(source, *system, m_hypoStackColl)
+  ,m_parser(source, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
 {
 }
 
 ChartManager::~ChartManager()
 {
-  m_system->CleanUpAfterSentenceProcessing(m_source);
-
   clock_t end = clock();
   float et = (end - m_start);
   et /= (float)CLOCKS_PER_SEC;
@@ -128,6 +125,7 @@ void ChartManager::ProcessSentence()
  *  @todo check walls & zones. Check that the implementation doesn't leak, xml options sometimes does if you're not careful
  */
 void ChartManager::AddXmlChartOptions() {
+  const StaticData &staticData = StaticData::Instance();
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) { cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl; }
   if (xmlChartOptionsList.size() == 0) return;
@@ -136,8 +134,8 @@ void ChartManager::AddXmlChartOptions() {
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    Moses::Scores wordPenaltyScore(1, -0.434294482); // TODO what is this number?
-    opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((ScoreProducer*)m_system->GetWordPenaltyProducer(), wordPenaltyScore);
+    Moses::Scores wordPenaltyScore(1, -1);
+    opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((FeatureFunction*)staticData.GetWordPenaltyProducer(), wordPenaltyScore);
 
     const WordsRange &range = opt->GetSourceWordsRange();
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
@@ -353,10 +351,10 @@ void ChartManager::PreCalculateScores()
       if (m_precalculatedScores.find(*targetPhrase) == m_precalculatedScores.end()) {
         ChartBasedFeatureContext context(*targetPhrase,m_source);
         const vector<const StatelessFeatureFunction*>& sfs =
-          m_system->GetStatelessFeatureFunctions();
+            StatelessFeatureFunction::GetStatelessFeatureFunctions();
         ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
         for (size_t k = 0; k < sfs.size(); ++k) {
-          if (!sfs[k]->ComputeValueInTranslationTable()) {
+          if (sfs[k]->GetStatelessFeatureType() == DependsOnSource) {
             sfs[k]->EvaluateChart(context,&breakdown);
           }
         }

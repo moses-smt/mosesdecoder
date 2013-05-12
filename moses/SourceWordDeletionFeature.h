@@ -2,7 +2,7 @@
 #define moses_SourceWordDeletionFeature_h
 
 #include <string>
-#include <boost/unordered_set.hpp>
+#include <map>
 
 #include "FeatureFunction.h"
 #include "FactorCollection.h"
@@ -15,18 +15,12 @@ namespace Moses
  */
 class SourceWordDeletionFeature : public StatelessFeatureFunction {
 private:
-  boost::unordered_set<std::string> m_vocab;
+  std::set<std::string> m_vocab;
   FactorType m_factorType;
   bool m_unrestricted;
 
 public:
-	SourceWordDeletionFeature(FactorType factorType = 0):
-     StatelessFeatureFunction("swd", ScoreProducer::unlimited),
-     m_factorType(factorType),
-     m_unrestricted(true)
-  {
-		std::cerr << "Initializing source word deletion feature.." << std::endl;
-  }
+  SourceWordDeletionFeature(const std::string &line);
       
   bool Load(const std::string &filePath);
   void Evaluate(const PhraseBasedFeatureContext& context, 
@@ -35,13 +29,16 @@ public:
   void EvaluateChart(const ChartBasedFeatureContext& context,
   		               ScoreComponentCollection* accumulator) const;
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
   void ComputeFeatures(const TargetPhrase& targetPhrase, 
 		  	           ScoreComponentCollection* accumulator, 
 		  	           const AlignmentInfo &alignmentInfo) const;
 
-  // basic properties
-	std::string GetScoreProducerWeightShortName(unsigned) const { return "swd"; }
-	size_t GetNumInputScores() const { return 0; }
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return NotCacheable; }
 };
 
 }

@@ -37,7 +37,7 @@ public:
   void SetAdditionalScoreComponents(size_t number);
   size_t GetNumberOfTypes() const;
 
-  ScoreProducer *GetScoreProducer() const {
+  LexicalReordering *GetScoreProducer() const {
     return m_scoreProducer;
   }
 
@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  void SetScoreProducer(ScoreProducer* scoreProducer) {
+  void SetScoreProducer(LexicalReordering* scoreProducer) {
     m_scoreProducer = scoreProducer;
   }
 
@@ -72,7 +72,7 @@ private:
   }
 
   std::string m_modelString;
-  ScoreProducer *m_scoreProducer;
+  LexicalReordering *m_scoreProducer;
   ModelType m_modelType;
   bool m_phraseBased;
   bool m_collapseScores;
@@ -103,7 +103,7 @@ protected:
 
   inline LexicalReorderingState(const LexicalReorderingState *prev, const TranslationOption &topt) :
     m_configuration(prev->m_configuration), m_direction(prev->m_direction), m_offset(prev->m_offset),
-    m_prevScore(topt.GetCachedScores(m_configuration.GetScoreProducer())) {}
+    m_prevScore(topt.GetLexReorderingScores(m_configuration.GetScoreProducer())) {}
 
   inline LexicalReorderingState(const LexicalReorderingConfiguration &config, LexicalReorderingConfiguration::Direction dir, size_t offset)
     : m_configuration(config), m_direction(dir), m_offset(offset), m_prevScore(NULL) {}

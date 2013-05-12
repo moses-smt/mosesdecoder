@@ -8,7 +8,6 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "ScoreProducer.h"
 #include "FeatureFunction.h"
 
 #include "LexicalReorderingState.h"
@@ -26,30 +25,21 @@ class InputType;
  */
 class LexicalReordering : public StatefulFeatureFunction {
 public:   
-    LexicalReordering(std::vector<FactorType>& f_factors, 
-                      std::vector<FactorType>& e_factors,
-                      const LexicalReorderingConfiguration& configuration,
-                      const std::string &filePath, 
-                      const std::vector<float>& weights);
-    virtual ~LexicalReordering();
-    
-    virtual FFState* Evaluate(const Hypothesis& cur_hypo,
-                              const FFState* prev_state,
-                              ScoreComponentCollection* accumulator) const;
-    
-    virtual const FFState* EmptyHypothesisState(const InputType &input) const;
-    
-    
-    std::string GetScoreProducerWeightShortName(unsigned) const {
-        return "d";
-    };
-    
-    void InitializeForInput(const InputType& i){
-        m_table->InitializeForInput(i);
-    }
-    
-    Scores GetProb(const Phrase& f, const Phrase& e) const;
-    
+  LexicalReordering(const std::string &line);
+  virtual ~LexicalReordering();
+
+  virtual const FFState* EmptyHypothesisState(const InputType &input) const;
+
+  void InitializeForInput(const InputType& i){
+      m_table->InitializeForInput(i);
+  }
+
+  Scores GetProb(const Phrase& f, const Phrase& e) const;
+
+  virtual FFState* Evaluate(const Hypothesis& cur_hypo,
+                            const FFState* prev_state,
+                            ScoreComponentCollection* accumulator) const;
+
   virtual FFState* EvaluateChart(const ChartHypothesis&,
                                  int /* featureID */,
 																 ScoreComponentCollection*) const {
@@ -57,12 +47,16 @@ public:
 		return NULL;
 	}
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
 private:
     bool DecodeCondition(std::string s);
     bool DecodeDirection(std::string s);
     bool DecodeNumFeatureFunctions(std::string s);
 
-    LexicalReorderingConfiguration m_configuration;
+    LexicalReorderingConfiguration *m_configuration;
     std::string m_modelTypeString;
     std::vector<std::string> m_modelType;
     LexicalReorderingTable* m_table;

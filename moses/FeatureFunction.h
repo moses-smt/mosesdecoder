@@ -2,8 +2,9 @@
 #define moses_FeatureFunction_h
 
 #include <vector>
-
-#include "ScoreProducer.h"
+#include <set>
+#include <string>
+#include "TypeDef.h"
 
 namespace Moses
 {
@@ -72,18 +73,68 @@ public:
 
 /** base class for all feature functions.
  * @todo is this for pb & hiero too?
- * @todo what's the diff between FeatureFunction and ScoreProducer?
  */
-class FeatureFunction: public ScoreProducer
+class FeatureFunction
 {
+protected:
+  /**< all the score producers in this run */
+  static std::vector<FeatureFunction*> m_producers;
+
+  std::string m_description, m_argLine;
+  std::vector<std::vector<std::string> > m_args;
+  bool m_reportSparseFeatures;
+  bool m_tuneable;
+  size_t m_numScoreComponents;
+  //In case there's multiple producers with the same description
+  static std::multiset<std::string> description_counts;
+
+  void ParseLine(const std::string& description, const std::string &line);
 
 public:
-  FeatureFunction(const std::string& description, size_t numScoreComponents) :
-    ScoreProducer(description, numScoreComponents) {}
+  static const std::vector<FeatureFunction*>& GetFeatureFunctions() { return m_producers; }
+
+  FeatureFunction(const std::string& description, const std::string &line);
+  FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
   
-  float GetSparseProducerWeight() const { return 1; }	
+  static void ResetDescriptionCounts() {
+    description_counts.clear();
+  }
+
+  //! returns the number of scores that a subclass produces.
+  //! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
+  size_t GetNumScoreComponents() const {return m_numScoreComponents;}
+
+  //! returns a string description of this producer
+  const std::string& GetScoreProducerDescription() const
+  { return m_description; }
+
+  void SetSparseFeatureReporting() { m_reportSparseFeatures = true; }
+  bool GetSparseFeatureReporting() const { return m_reportSparseFeatures; }
+
+  virtual float GetSparseProducerWeight() const { return 1; }
+
+  virtual bool IsTuneable() const { return m_tuneable; }
+
+  //!
+  virtual void InitializeForInput(InputType const& source)
+  {}
+
+  // clean up temporary memory, called after processing each sentence
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
+  {}
+
+  const std::string &GetArgLine() const
+  { return m_argLine; }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const = 0;
+
+  virtual bool IsDecodeFeature() const
+  { return false; }
+
 };
 
 /** base class for all stateless feature functions.
@@ -91,10 +142,14 @@ public:
  */
 class StatelessFeatureFunction: public FeatureFunction
 {
+  //All stateless FFs, except those that cache scores in T-Option
+  static std::vector<const StatelessFeatureFunction*> m_statelessFFs;
 
 public:
-  StatelessFeatureFunction(const std::string& description, size_t numScoreComponents) :
-    FeatureFunction(description, numScoreComponents) {}
+  static const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() {return m_statelessFFs;}
+
+  StatelessFeatureFunction(const std::string& description, const std::string &line);
+  StatelessFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
   /**
     * This should be implemented for features that apply to phrase-based models.
     **/
@@ -107,15 +162,12 @@ public:
   virtual void EvaluateChart(const ChartBasedFeatureContext& context,
                              ScoreComponentCollection* accumulator) const  = 0;
 
-  //If true, then the feature is evaluated before search begins, and stored in
-  //the TranslationOptionCollection.
-  virtual bool ComputeValueInTranslationOption() const;
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return CacheableInPhraseTable; }
 
-  //!If true, the feature is stored in the ttable, so gets copied into the 
-  //TargetPhrase and does not need cached in the TranslationOption
-  virtual bool ComputeValueInTranslationTable() const {return false;}
+  bool IsStateless() const
+  { return true; }
 
-  bool IsStateless() const;
 };
 
 /** base class for all stateful feature functions.
@@ -123,10 +175,14 @@ public:
  */
 class StatefulFeatureFunction: public FeatureFunction
 {
+  //All statefull FFs
+  static std::vector<const StatefulFeatureFunction*> m_statefulFFs;
 
 public:
-  StatefulFeatureFunction(const std::string& description, size_t numScoreComponents) :
-    FeatureFunction(description,numScoreComponents) {}
+  static const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() {return m_statefulFFs;}
+
+  StatefulFeatureFunction(const std::string& description, const std::string &line);
+  StatefulFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
 
   /**
    * \brief This interface should be implemented.

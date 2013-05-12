@@ -255,7 +255,7 @@ namespace Moses {
     
     /** Internal get and set. */
     const FValue& get(const FName& name) const;
-    const FValue& getBackoff(const FName& name, float backoff) const;
+    FValue getBackoff(const FName& name, float backoff) const;
     void set(const FName& name, const FValue& value);
 	       
     FNVmap m_features;

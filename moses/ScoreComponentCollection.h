@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 
 #include "LMList.h"
-#include "ScoreProducer.h"
+#include "FeatureFunction.h"
 #include "FeatureVector.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -67,17 +67,17 @@ class ScoreComponentCollection
 private:
 	FVector m_scores;
   typedef std::pair<size_t,size_t> IndexPair;
-  typedef std::map<const ScoreProducer*,IndexPair> ScoreIndexMap;
+  typedef std::map<const FeatureFunction*,IndexPair> ScoreIndexMap;
   static  ScoreIndexMap s_scoreIndexes;
   static size_t s_denseVectorSize;
-  static IndexPair GetIndexes(const ScoreProducer* sp) 
+  static IndexPair GetIndexes(const FeatureFunction* sp)
   {
     ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
     if (indexIter == s_scoreIndexes.end()) {
-      std::cerr << "ERROR: ScoreProducer: " << sp->GetScoreProducerDescription() <<
+      std::cerr << "ERROR: FeatureFunction: " << sp->GetScoreProducerDescription() <<
         " not registered with ScoreIndexMap" << std::endl;
       std::cerr << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
-        " for every ScoreProducer" << std::endl;
+        " for every FeatureFunction" << std::endl;
       abort();
     }
     return indexIter->second;
@@ -105,8 +105,7 @@ public:
     * Register a ScoreProducer with a fixed number of scores, so that it can 
     * be allocated space in the dense part of the feature vector.
     **/
-  static void RegisterScoreProducer(const ScoreProducer* scoreProducer);
-  static void UnregisterScoreProducer(const ScoreProducer* scoreProducer);
+  static void RegisterScoreProducer(const FeatureFunction* scoreProducer);
 
   /** Load from file */
   bool Load(const std::string& filename) 
@@ -159,9 +158,9 @@ public:
 	void MultiplyEquals(const ScoreComponentCollection& rhs);	
 	void MultiplyEqualsBackoff(const ScoreComponentCollection& rhs, float backoff);
 	void MultiplyEquals(float core_r0, float sparse_r0);
-	void MultiplyEquals(const ScoreProducer* sp, float scalar);
+	void MultiplyEquals(const FeatureFunction* sp, float scalar);
 
-	size_t GetNumberWeights(const ScoreProducer* sp);
+	size_t GetNumberWeights(const FeatureFunction* sp);
 
 	void CoreAssign(const ScoreComponentCollection& rhs)
         {
@@ -192,15 +191,14 @@ public:
 	}
 
   //For features which have an unbounded number of components
-  void MinusEquals(const ScoreProducer*sp, const std::string& name, float score)
+  void MinusEquals(const FeatureFunction*sp, const std::string& name, float score)
   {
-    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] -= score;
   }
 
   //For features which have an unbounded number of components
-  void SparseMinusEquals(const StringPiece &full_name, float score)
+  void SparseMinusEquals(const std::string& full_name, float score)
   {
     FName fname(full_name);
     m_scores[fname] -= score;
@@ -209,7 +207,7 @@ public:
 	//! Add scores from a single ScoreProducer only
 	//! The length of scores must be equal to the number of score components
 	//! produced by sp
-	void PlusEquals(const ScoreProducer* sp, const ScoreComponentCollection& scores)
+	void PlusEquals(const FeatureFunction* sp, const ScoreComponentCollection& scores)
 	{
     IndexPair indexes = GetIndexes(sp);
     for (size_t i = indexes.first; i < indexes.second; ++i) {
@@ -217,10 +215,10 @@ public:
     }
 	}
 
-	//! Add scores from a single ScoreProducer only
+	//! Add scores from a single FeatureFunction only
 	//! The length of scores must be equal to the number of score components
 	//! produced by sp
-  void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores)
+  void PlusEquals(const FeatureFunction* sp, const std::vector<float>& scores)
   {
     IndexPair indexes = GetIndexes(sp);
     CHECK(scores.size() == indexes.second - indexes.first);
@@ -232,7 +230,7 @@ public:
 	//! Special version PlusEquals(ScoreProducer, vector<float>)
 	//! to add the score from a single ScoreProducer that produces
 	//! a single value
-	void PlusEquals(const ScoreProducer* sp, float score)
+	void PlusEquals(const FeatureFunction* sp, float score)
 	{
     IndexPair indexes = GetIndexes(sp);
     CHECK(1 == indexes.second - indexes.first);
@@ -240,21 +238,27 @@ public:
 	}
 
   //For features which have an unbounded number of components
-  void PlusEquals(const ScoreProducer*sp, const StringPiece &name, float score)
+  void PlusEquals(const FeatureFunction*sp, const std::string& name, float score)
   {
-    CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] += score;
   }
 
   //For features which have an unbounded number of components
-  void SparsePlusEquals(const StringPiece &full_name, float score)
+  void PlusEquals(const FeatureFunction*sp, const StringPiece& name, float score)
+  {
+    FName fname(sp->GetScoreProducerDescription(),name);
+    m_scores[fname] += score;
+  }
+
+  //For features which have an unbounded number of components
+  void SparsePlusEquals(const std::string& full_name, float score)
   {
   	FName fname(full_name);
     m_scores[fname] += score;
   }
 
-  void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
+  void Assign(const FeatureFunction* sp, const std::vector<float>& scores)
   {
     IndexPair indexes = GetIndexes(sp);
     CHECK(scores.size() == indexes.second - indexes.first);
@@ -266,7 +270,7 @@ public:
   //! Special version Assign(ScoreProducer, vector<float>)
   //! to add the score from a single ScoreProducer that produces
   //! a single value
-  void Assign(const ScoreProducer* sp, float score)
+  void Assign(const FeatureFunction* sp, float score)
   {
     IndexPair indexes = GetIndexes(sp);
     CHECK(1 == indexes.second - indexes.first);
@@ -279,16 +283,15 @@ public:
   }
 
   //For features which have an unbounded number of components
-  void Assign(const ScoreProducer*sp, const std::string name, float score)
+  void Assign(const FeatureFunction*sp, const std::string name, float score)
   {
-    CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] = score;
   }
 
 
   //Read sparse features from string
-  void Assign(const ScoreProducer* sp, const std::string line);
+  void Assign(const FeatureFunction* sp, const std::string line);
 
   // shortcut: setting the value directly using the feature name
   void Assign(const std::string name, float score)
@@ -302,18 +305,19 @@ public:
 		return m_scores.inner_product(rhs.m_scores);
 	}
 	
-	float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const
+	float PartialInnerProduct(const FeatureFunction* sp, const std::vector<float>& rhs) const
 	{
 		std::vector<float> lhs = GetScoresForProducer(sp);
 		CHECK(lhs.size() == rhs.size());
 		return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f);
 	}
 
-	//! return a vector of all the scores associated with a certain ScoreProducer
-	std::vector<float> GetScoresForProducer(const ScoreProducer* sp) const
+	//! return a vector of all the scores associated with a certain FeatureFunction
+	std::vector<float> GetScoresForProducer(const FeatureFunction* sp) const
 	{
     size_t components = sp->GetNumScoreComponents();
-    if (components == ScoreProducer::unlimited) return std::vector<float>();
+    assert(components > 0);
+
     std::vector<float> res(components);
     IndexPair indexes = GetIndexes(sp);
     for (size_t i = 0; i < res.size(); ++i) {
@@ -323,7 +327,7 @@ public:
 	}
 
   //! get subset of scores that belong to a certain sparse ScoreProducer
-  FVector GetVectorForProducer(const ScoreProducer* sp) const
+  FVector GetVectorForProducer(const FeatureFunction* sp) const
   {
     FVector fv(s_denseVectorSize);
     std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
@@ -365,9 +369,9 @@ public:
 		m_scores.capMin(minValue);
 	}
 
-	//! if a ScoreProducer produces a single score (for example, a language model score)
+	//! if a FeatureFunction produces a single score (for example, a language model score)
 	//! this will return it.  If not, this method will throw
-	float GetScoreForProducer(const ScoreProducer* sp) const
+	float GetScoreForProducer(const FeatureFunction* sp) const
 	{
     IndexPair indexes = GetIndexes(sp);
     CHECK(indexes.second - indexes.first == 1);
@@ -376,9 +380,8 @@ public:
 
   //For features which have an unbounded number of components
   float GetScoreForProducer
-    (const ScoreProducer* sp, const std::string& name) const
+    (const FeatureFunction* sp, const std::string& name) const
   {
-    CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     return m_scores[fname];
   }

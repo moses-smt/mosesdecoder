@@ -9,8 +9,8 @@
 #include "UniqueObject.h"
 #include "InputFileStream.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "SparsePhraseDictionaryFeature.h"
 #include "Util.h"
+#include "DummyScoreProducers.h"
 #include "util/tokenize_piece.hh"
 
 namespace Moses
@@ -141,9 +141,8 @@ protected:
     }
 
     //TODO: Multiple models broken here
-    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    std::vector<float> weights = StaticData::Instance().GetWeights(m_obj->GetFeature());
-    float weightWP = system.GetWeightWordPenalty();
+    std::vector<float> weights = StaticData::Instance().GetWeights(m_obj);
+    float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
     std::vector<TargetPhrase> tCands;
     tCands.reserve(cands.size());
@@ -165,12 +164,6 @@ protected:
       //sparse features.
       //These are already in log-space
       ScoreComponentCollection sparseFeatures;
-      if (m_obj->GetFeature()->GetSparsePhraseDictionaryFeature()) {
-        for (size_t j = 0; j < cands[i].fnames.size(); ++j) {
-          sparseFeatures.Assign(m_obj->GetFeature()->GetSparsePhraseDictionaryFeature(),
-            *(cands[i].fnames[j]), cands[i].fvalues[j]);
-        } 
-      }
       CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, sparseFeatures, wacands[i], weights, weightWP, &src);
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);
@@ -199,7 +192,7 @@ protected:
              ) {
 
     // set my members
-    m_dict=new PhraseDictionaryTree(weight.size()-m_numInputScores);
+    m_dict=new PhraseDictionaryTree();
     m_input=input;
     m_output=output;
     m_languageModels=&languageModels;
@@ -274,15 +267,15 @@ protected:
     targetPhrase.SetAlignmentInfo(alignmentString);
   }
 
-
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
                           Scores const& scoreVector,
                           const ScoreComponentCollection& sparseFeatures,
-			  std::vector<float> &weights,
-			  float weightWP,
-                          Phrase const* srcPtr=0) const {
-    FactorCollection &factorCollection = FactorCollection::Instance();
+  		  std::vector<float> &weights,
+  		  float weightWP,
+                          Phrase const* srcPtr) const {
+  const StaticData &staticData = StaticData::Instance();
+  FactorCollection &factorCollection = FactorCollection::Instance();
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
       util::TokenIter<util::MultiCharacter, false> word(*factorStrings[k], StaticData::Instance().GetFactorDelimiter());
@@ -292,12 +285,11 @@ protected:
       }
     }
 
-    targetPhrase.SetScore(m_obj->GetFeature(), scoreVector, sparseFeatures, weights, weightWP, *m_languageModels);
     targetPhrase.SetSourcePhrase(*srcPtr);
+
+    targetPhrase.SetScore(m_obj, scoreVector);
+    targetPhrase.Evaluate();
   }
-
-
-
 
   TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,
       std::vector<std::pair<float,size_t> >& costs) const {
@@ -374,9 +366,8 @@ protected:
     for(Position i=0 ; i < srcSize ; ++i)
       stack.push_back(State(i, i, m_dict->GetRoot(), std::vector<float>(m_numInputScores,0.0)));
 
-    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj->GetFeature());
-    float weightWP = system.GetWeightWordPenalty();
+    std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj);
+    float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
     while(!stack.empty()) {
       State curr(stack.back());

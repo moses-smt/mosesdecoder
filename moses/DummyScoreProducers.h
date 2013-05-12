@@ -4,6 +4,7 @@
 #define moses_DummyScoreProducers_h
 
 #include "FeatureFunction.h"
+#include "util/check.hh"
 
 namespace Moses
 {
@@ -15,12 +16,13 @@ class WordsRange;
 class DistortionScoreProducer : public StatefulFeatureFunction
 {
 public:
-	DistortionScoreProducer() : StatefulFeatureFunction("Distortion", 1) {}
+	DistortionScoreProducer(const std::string &line)
+	: StatefulFeatureFunction("Distortion", 1, line)
+	{}
 
-  float CalculateDistortionScore(const Hypothesis& hypo,
-                                 const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
+  static float CalculateDistortionScore(const Hypothesis& hypo,
+                                 const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
 
-	std::string GetScoreProducerWeightShortName(unsigned) const;
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
   virtual FFState* Evaluate(
@@ -35,6 +37,11 @@ public:
 		CHECK(0); // feature function not valid in chart decoder
 		return NULL;
 	}
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
 };
 
 /** Doesn't do anything but provide a key into the global
@@ -43,9 +50,7 @@ public:
 class WordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-	WordPenaltyProducer() : StatelessFeatureFunction("WordPenalty",1) {}
-
-	std::string GetScoreProducerWeightShortName(unsigned) const;
+	WordPenaltyProducer(const std::string &line) : StatelessFeatureFunction("WordPenalty",1, line) {}
 
   virtual void Evaluate(
     const PhraseBasedFeatureContext& context,
@@ -58,7 +63,9 @@ public:
       //required but does nothing.
     }
 
-
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 };
 
@@ -66,11 +73,12 @@ public:
 class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-	UnknownWordPenaltyProducer() : StatelessFeatureFunction("!UnknownWordPenalty",1) {}
+	UnknownWordPenaltyProducer(const std::string &line)
+  : StatelessFeatureFunction("UnknownWordPenalty",1, line)
+  {
+	  m_tuneable = false;
+  }
 
-	std::string GetScoreProducerWeightShortName(unsigned) const;
-
-  virtual bool ComputeValueInTranslationOption() const;
   void Evaluate(  const PhraseBasedFeatureContext& context,
   								ScoreComponentCollection* accumulator) const 
   {
@@ -84,19 +92,23 @@ public:
     //do nothing - not a real feature
   }
 
-  bool ComputeValueInTranslationTable() const {return true;}
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
+  bool IsDecodeFeature() const
+  { return true; }
+
 
 };
 
 class MetaFeatureProducer : public StatelessFeatureFunction
 {
  public:
- MetaFeatureProducer(std::string shortName) : StatelessFeatureFunction("MetaFeature_"+shortName,1), m_shortName(shortName) {}
+ MetaFeatureProducer(std::string shortName, const std::string &line) : StatelessFeatureFunction("MetaFeature_"+shortName,1, line), m_shortName(shortName) {}
 
   std::string m_shortName;
   
-  std::string GetScoreProducerWeightShortName(unsigned) const;
-
   void Evaluate(const PhraseBasedFeatureContext& context,
 		ScoreComponentCollection* accumulator) const {
     //do nothing - not a real feature
@@ -106,6 +118,10 @@ class MetaFeatureProducer : public StatelessFeatureFunction
 		     ScoreComponentCollection*) const {
     //do nothing - not a real feature
   }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 };
 
 }

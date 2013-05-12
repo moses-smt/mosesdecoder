@@ -14,22 +14,24 @@ int PhraseBoundaryState::Compare(const FFState& other) const
   return Word::Compare(*m_sourceWord,*(rhs.m_sourceWord));
 }
 
-
-PhraseBoundaryFeature::PhraseBoundaryFeature
-  (const FactorList& sourceFactors, const FactorList& targetFactors) :
-    StatefulFeatureFunction("pb", ScoreProducer::unlimited), m_sourceFactors(sourceFactors),
-    m_targetFactors(targetFactors), m_sparseProducerWeight(1)
+PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
+: StatefulFeatureFunction("PhraseBoundaryFeature", 0, line)
 {
-}
+  std::cerr << "Initializing source word deletion feature.." << std::endl;
 
-string PhraseBoundaryFeature::GetScoreProducerWeightShortName(unsigned) const 
-{
-  return "pb";
-}
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
-size_t PhraseBoundaryFeature::GetNumInputScores() const 
-{
-  return 0;
+    if (args[0] == "source") {
+      m_sourceFactors = Tokenize<FactorType>(args[1], ",");
+    }
+    else if (args[0] == "target") {
+      m_targetFactors = Tokenize<FactorType>(args[1], ",");
+    }
+    else {
+      throw "Unknown argument " + args[0];
+    }
+  }
 }
 
 const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &) const 
@@ -90,6 +92,13 @@ FFState* PhraseBoundaryFeature::Evaluate
   }
 
   return new PhraseBoundaryState(endSourceWord,endTargetWord);
+}
+
+void PhraseBoundaryFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+  CHECK(false);
 }
 
 

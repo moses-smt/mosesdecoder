@@ -40,7 +40,7 @@ class Phrase;
 /** Implementation of single factor LM using IRST's code.
  * This is available from the same sourceforge repository
  */
-class LanguageModelIRST : public LanguageModelPointerState
+class LanguageModelIRST : public LanguageModelSingleFactor
 {
 protected:
   mutable std::vector<int> m_lmIdLookup;
@@ -62,7 +62,8 @@ protected:
   dictionary* d;
 
 public:
-  LanguageModelIRST(int dub);
+  LanguageModelIRST(const std::string &line);
+
   ~LanguageModelIRST();
   bool Load(const std::string &filePath
             , FactorType factorType
@@ -70,8 +71,8 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
 
+  void InitializeForInput(InputType const& source);
   void CleanUpAfterSentenceProcessing(const InputType& source);
-  void InitializeBeforeSentenceProcessing();
 
   void set_dictionary_upperbound(int dub) {
     m_lmtb_size=dub ;

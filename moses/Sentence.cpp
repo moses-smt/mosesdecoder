@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdexcept>
 
 #include "Sentence.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
 #include "Util.h"
@@ -113,12 +112,6 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     }
   }
 
-  // if sentence contains passthrough info "<passthrough tag1=""/>"
-  if (1 || staticData.IsPassthroughEnabled() || staticData.IsPassthroughInNBestEnabled()) {
-    std::string passthrough = PassthroughSGML(line,"passthrough");
-    this->SetPassthroughInformation(passthrough);
-  }
-
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
   std::vector<XmlOption*> xmlOptionsList(0);
@@ -130,7 +123,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       throw runtime_error(msg);
     }
   }
-  Phrase::CreateFromString(factorOrder, line, factorDelimiter);
+  Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter);
 
   if (staticData.IsChart()) {
     InitStartEndWord();
@@ -152,7 +145,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
       const XmlOption *xmlOption = *iterXmlOpts;
 
-      TranslationOption *transOpt = new TranslationOption(xmlOption->range, xmlOption->targetPhrase, *this);
+      TranslationOption *transOpt = new TranslationOption(xmlOption->range, xmlOption->targetPhrase);
       m_xmlOptionsList.push_back(transOpt);
 
       for(size_t j=transOpt->GetSourceWordsRange().GetStartPos(); j<=transOpt->GetSourceWordsRange().GetEndPos(); j++) {
@@ -196,11 +189,11 @@ void Sentence::InitStartEndWord()
 }
 
 TranslationOptionCollection*
-Sentence::CreateTranslationOptionCollection(const TranslationSystem* system) const
+Sentence::CreateTranslationOptionCollection() const
 {
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-  TranslationOptionCollection *rv= new TranslationOptionCollectionText(system, *this, maxNoTransOptPerCoverage, transOptThreshold);
+  TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
   CHECK(rv);
   return rv;
 }
@@ -236,7 +229,7 @@ void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder
                                 , const std::string &phraseString
                                 , const std::string &factorDelimiter)
 {
-  Phrase::CreateFromString(factorOrder, phraseString, factorDelimiter);
+  Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter);
 }
 
 

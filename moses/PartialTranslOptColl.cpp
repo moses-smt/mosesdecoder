@@ -21,6 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PartialTranslOptColl.h"
 #include <algorithm>
+#include <iostream>
+
+using namespace std;
 
 namespace Moses
 {
@@ -35,9 +38,8 @@ PartialTranslOptColl::PartialTranslOptColl()
 
 
 /** add a partial translation option to the collection (without pruning) */
-void PartialTranslOptColl::AddNoPrune(const TranslationSystem* system, TranslationOption *partialTranslOpt)
+void PartialTranslOptColl::AddNoPrune(TranslationOption *partialTranslOpt)
 {
-  partialTranslOpt->CalcScore(system);
   if (partialTranslOpt->GetFutureScore() >= m_worstScore) {
     m_list.push_back(partialTranslOpt);
     if (partialTranslOpt->GetFutureScore() > m_bestScore)
@@ -51,10 +53,10 @@ void PartialTranslOptColl::AddNoPrune(const TranslationSystem* system, Translati
 /** add a partial translation option to the collection, prune if necessary.
  * This is done similar to the Prune() in TranslationOptionCollection */
 
-void PartialTranslOptColl::Add(const TranslationSystem* system, TranslationOption *partialTranslOpt)
+void PartialTranslOptColl::Add(TranslationOption *partialTranslOpt)
 {
   // add
-  AddNoPrune(system,partialTranslOpt );
+  AddNoPrune(partialTranslOpt );
 
   // done if not too large (lazy pruning, only if twice as large as max)
   if ( m_list.size() > 2 * m_maxSize ) {
@@ -93,6 +95,16 @@ void PartialTranslOptColl::Prune()
   }
   m_list.resize(m_maxSize);
   //	TRACE_ERR( "pruned to size " << m_list.size() << ", total pruned: " << m_totalPruned << std::endl);
+}
+
+// friend
+ostream& operator<<(ostream& out, const PartialTranslOptColl& possibleTranslation)
+{
+  for (size_t i = 0; i < possibleTranslation.m_list.size(); ++i) {
+    const TranslationOption &transOpt = *possibleTranslation.m_list[i];
+    out << transOpt << endl;
+  }
+  return out;
 }
 
 }

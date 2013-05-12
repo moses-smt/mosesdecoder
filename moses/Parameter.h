@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_Parameter_h
 
 #include <string>
+#include <set>
 #include <map>
 #include <vector>
 #include "TypeDef.h"
@@ -48,6 +49,8 @@ protected:
 	PARAM_STRING m_description;
 	PARAM_STRING m_fullname;
 
+  std::map<std::string, std::vector<float> >  m_weights;
+
   std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
   void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
   bool ReadConfigFile(const std::string &filePath );
@@ -59,6 +62,21 @@ protected:
   void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
 
   void PrintCredit();
+
+  void SetWeight(const std::string &name, size_t ind, float weight);
+  void SetWeight(const std::string &name, size_t ind, const std::vector<float> &weights);
+  void AddWeight(const std::string &name, size_t ind, const std::vector<float> &weights);
+  void ConvertWeightArgs();
+  void ConvertWeightArgsSingleWeight(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsPhraseModel(const std::string &oldWeightName);
+  void ConvertWeightArgsLM();
+  void ConvertWeightArgsDistortion();
+  void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsWordPenalty();
+  void CreateWeightsMap();
+  void WeightOverwrite();
+  void AddFeature(const std::string &line);
+
 
 public:
   Parameter();
@@ -75,11 +93,6 @@ public:
   bool isParamSpecified(const std::string &paramName) {
     return  m_setting.find( paramName ) != m_setting.end();
   }
-
-	bool isParamShortNameSpecified(const std::string &paramName)
-	{
-		return  m_setting.find( GetFullName(paramName) ) != m_setting.end();
-	}
 		
 	const std::string GetFullName(std::string abbr)
 	{
@@ -101,6 +114,12 @@ public:
 		OverwriteParam(GetFullName(paramShortName),values);
 	}
 	
+  std::vector<float> &GetWeights(const std::string &name);
+  std::set<std::string> GetWeightNames() const;
+
+  const PARAM_MAP &GetParams() const
+  { return m_setting; }
+
 };
 
 }

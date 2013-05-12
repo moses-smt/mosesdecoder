@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisStackCubePruning.h"
 #include "DummyScoreProducers.h"
 #include "TranslationOptionList.h"
-#include "TranslationSystem.h"
 
 namespace Moses
 {
@@ -52,32 +51,45 @@ public:
 class HypothesisScoreOrdererWithDistortion
 {
 public:
-  HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange, const TranslationSystem* system) :
-    m_transOptRange(transOptRange), m_system(system) {}
+  HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange) :
+    m_transOptRange(transOptRange) {}
 
   const WordsRange* m_transOptRange;
-  const TranslationSystem* m_system;
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
     CHECK(m_transOptRange != NULL);
 
-    const float weightDistortion = m_system->GetWeightDistortion();
-    const DistortionScoreProducer *dsp = m_system->GetDistortionProducer();
-    const float distortionScoreA = dsp->CalculateDistortionScore(
+    const StaticData &staticData = StaticData::Instance();
+
+    const float distortionScoreA = DistortionScoreProducer::CalculateDistortionScore(
                                      *hypoA,
                                      hypoA->GetCurrSourceWordsRange(),
                                      *m_transOptRange,
                                      hypoA->GetWordsBitmap().GetFirstGapPos()
                                    );
-    const float distortionScoreB = dsp->CalculateDistortionScore(
+    const float distortionScoreB = DistortionScoreProducer::CalculateDistortionScore(
                                      *hypoB,
                                      hypoB->GetCurrSourceWordsRange(),
                                      *m_transOptRange,
                                      hypoB->GetWordsBitmap().GetFirstGapPos()
                                    );
 
-    const float scoreA = hypoA->GetScore() + distortionScoreA * weightDistortion;
-    const float scoreB = hypoB->GetScore() + distortionScoreB * weightDistortion;
+
+    float totalWeightDistortion = 0;
+    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+    std::vector<FeatureFunction*>::const_iterator iter;
+    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+      const FeatureFunction *ff = *iter;
+
+      const DistortionScoreProducer *model = dynamic_cast<const DistortionScoreProducer*>(ff);
+      if (model) {
+        float weight =staticData.GetAllWeights().GetScoreForProducer(model);
+        totalWeightDistortion += weight;
+      }
+    }
+    const float scoreA = hypoA->GetScore() + distortionScoreA * totalWeightDistortion;
+    const float scoreB = hypoB->GetScore() + distortionScoreB * totalWeightDistortion;
+
 
     if (scoreA > scoreB) {
       return true;
@@ -98,8 +110,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
                              , BitmapContainer &parent
                              , const TranslationOptionList &translations
                              , const SquareMatrix &futureScore,
-                             const InputType& itype,
-                             const TranslationSystem* system)
+                             const InputType& itype)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
@@ -156,7 +167,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
     CHECK(m_hypotheses[0]->GetTotalScore() >= m_hypotheses[1]->GetTotalScore());
   }
 
-  HypothesisScoreOrdererWithDistortion orderer (&transOptRange, system);
+  HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
   std::sort(m_hypotheses.begin(), m_hypotheses.end(), orderer);
 
   // std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererNoDistortion());

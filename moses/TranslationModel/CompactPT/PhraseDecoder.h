@@ -88,7 +88,6 @@ class PhraseDecoder
     
     const std::vector<FactorType>* m_input;
     const std::vector<FactorType>* m_output;
-    const PhraseDictionaryFeature* m_feature;
     const std::vector<float>* m_weight;
     float m_weightWP;
     const LMList* m_languageModels;
@@ -123,9 +122,8 @@ class PhraseDecoder
     
     PhraseDecoder(
       PhraseDictionaryCompact &phraseDictionary,
-      const std::vector<FactorType>* &input,
-      const std::vector<FactorType>* &output,
-      const PhraseDictionaryFeature* feature,
+      const std::vector<FactorType>* input,
+      const std::vector<FactorType>* output,
       size_t numScoreComponent,
       const std::vector<float>* weight,
       float weightWP,

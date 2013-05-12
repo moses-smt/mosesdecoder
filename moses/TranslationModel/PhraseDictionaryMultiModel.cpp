@@ -25,10 +25,30 @@ using namespace std;
 namespace Moses
 
 {
-PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(size_t numScoreComponent,
-    PhraseDictionaryFeature* feature): PhraseDictionary(numScoreComponent, feature)
+PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
+:PhraseDictionary("PhraseDictionaryMultiModel", line)
 {
-    m_feature_load = feature;
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
+    if (args[0] == "mode") {
+      m_mode =args[1];
+      if (m_mode != "interpolate") {
+        ostringstream msg;
+        msg << "combination mode unknown: " << m_mode;
+        throw runtime_error(msg.str());
+      }
+    }
+    else if (args[0] == "components") {
+      m_pdStr = Tokenize(args[1], ",");
+      m_numModels = m_pdStr.size();
+    }
+    else if (args[0] == "lambda") {
+      m_multimodelweights = Tokenize<float>(args[1], ",");
+    }
+  } // for
+
+
+  CHECK(m_pdStr.size() == m_multimodelweights.size());
 }
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
@@ -36,81 +56,30 @@ PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
     RemoveAllInColl(m_pd);
 }
 
-bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
-                                  , const std::vector<FactorType> &output
-                                  , const std::vector<std::string> &config
-                                  , const vector<float> &weight
-                                  , size_t tableLimit
-                                  , size_t numInputScores
-                                  , bool isThreadSafe
-                                  , const LMList &languageModels
-                                  , float weightWP)
+bool PhraseDictionaryMultiModel::InitDictionary()
 {
-  m_languageModels = &languageModels;
-  m_weight = weight;
-  m_weightWP = weightWP;
-  m_input = input;
-  m_output = output;
-  m_tableLimit = tableLimit;
-
-  m_mode = config[4];
-  std::vector<std::string> files(config.begin()+5,config.end());
-
-  m_numModels = files.size();
+  const StaticData &staticData = StaticData::Instance();
 
   // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
   // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
-  m_componentTableLimit = tableLimit;
 
-  //how many actual scores there are in the phrase tables
-  //so far, equal to number of log-linear scores, but it is allowed to be smaller (for other combination types)
-  size_t numPtScores = m_numScoreComponent;
-
-  if (m_mode != "interpolate") {
-    ostringstream msg;
-    msg << "combination mode unknown: " << m_mode;
-    throw runtime_error(msg.str());
-  }
+  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
 
   for(size_t i = 0; i < m_numModels; ++i){
+    const string &ptName = m_pdStr[i];
 
-      std::string impl, file, main_table;
-
-      std::string delim = ":";
-      size_t delim_pos = files[i].find(delim);
-      UTIL_THROW_IF(delim_pos >= files[i].size(), util::Exception, "Phrase table must be specified in this format: Implementation:Path");
-
-      impl = files[i].substr(0,delim_pos);
-      file = files[i].substr(delim_pos+1,files[i].size());
-
-      PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(impl);
-
-      if (implementation == Memory) {
-
-            if (!FileExists(file) && FileExists(file + ".gz")) file += ".gz";
-
-            PhraseDictionaryMemory* pdm = new PhraseDictionaryMemory(m_numScoreComponent, m_feature_load);
-            pdm->SetNumScoreComponentMultiModel(numPtScores); //instead of complaining about inequal number of scores, silently fill up the score vector with zeroes
-            pdm->Load( input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
-            m_pd.push_back(pdm);
-      } else if (implementation == Binary) {
-            UTIL_THROW_IF(isThreadSafe, util::Exception, "Binarised phrase table is not thread-safe - use phrase table type " << MultiModelThreadUnsafe << " for a thread-unsafe multimodel table"); 
-            PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, numInputScores , m_feature_load);
-            pdta->Load(input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
-            m_pd.push_back(pdta);
-      } else if (implementation == Compact) {
-#ifndef WIN32
-            PhraseDictionaryCompact* pdc = new PhraseDictionaryCompact(m_numScoreComponent, implementation, m_feature_load);
-            pdc->SetNumScoreComponentMultiModel(m_numScoreComponent); //for compact models, we need to pass number of log-linear components to correctly resize the score vector
-            pdc->Load( input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
-            m_pd.push_back(pdc);
-#else
-            UTIL_THROW(util::Exception, "Compact phrase table not supported in windows");
-#endif
+    PhraseDictionary *pt = NULL;
+    std::vector<PhraseDictionary*>::const_iterator iter;
+    for (iter = pts.begin(); iter != pts.end(); ++iter) {
+      PhraseDictionary *currPt = *iter;
+      if (currPt->GetScoreProducerDescription() == ptName) {
+        pt = currPt;
+        break;
       }
-      else {
-        UTIL_THROW(util::Exception,"PhraseDictionaryMultiModel does not support phrase table type " << implementation);
-      }
+    }
+
+    CHECK(pt);
+    m_pd.push_back(pt);
   }
 
   return true;
@@ -124,7 +93,7 @@ const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollect
 
   if (m_mode == "interpolate") {
     //interpolation of phrase penalty is skipped, and fixed-value (2.718) is used instead. results will be screwed up if phrase penalty is not last feature
-    size_t numWeights = m_numScoreComponent-1;
+    size_t numWeights = m_numScoreComponents-1;
     multimodelweights = getWeights(numWeights, true);
   }
 
@@ -154,8 +123,8 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
     if (ret_raw != NULL) {
 
       TargetPhraseCollection::iterator iterTargetPhrase, iterLast;
-      if (m_componentTableLimit != 0 && ret_raw->GetSize() > m_componentTableLimit) {
-          iterLast = ret_raw->begin() + m_componentTableLimit;
+      if (m_tableLimit != 0 && ret_raw->GetSize() > m_tableLimit) {
+          iterLast = ret_raw->begin() + m_tableLimit;
       }
       else {
           iterLast = ret_raw->end();
@@ -163,7 +132,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
 
       for (iterTargetPhrase = ret_raw->begin(); iterTargetPhrase != iterLast;  ++iterTargetPhrase) {
         TargetPhrase * targetPhrase = *iterTargetPhrase;
-        std::vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(m_feature);
+        std::vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(this);
 
         std::string targetString = targetPhrase->GetStringRep(m_output);
         if (allStats->find(targetString) == allStats->end()) {
@@ -171,21 +140,21 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           multiModelStatistics * statistics = new multiModelStatistics;
           statistics->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
 
-          Scores scoreVector(m_numScoreComponent);
-          statistics->p.resize(m_numScoreComponent);
-          for(size_t j = 0; j < m_numScoreComponent; ++j){
+          Scores scoreVector(m_numScoreComponents);
+          statistics->p.resize(m_numScoreComponents);
+          for(size_t j = 0; j < m_numScoreComponents; ++j){
               statistics->p[j].resize(m_numModels);
               scoreVector[j] = -raw_scores[j];
           }
 
-          statistics->targetPhrase->SetScore(m_feature, scoreVector, ScoreComponentCollection(), m_weight, m_weightWP, *m_languageModels); // set scores to 0
+          statistics->targetPhrase->SetScore(this, scoreVector); // set scores to 0
 
           (*allStats)[targetString] = statistics;
 
         }
         multiModelStatistics * statistics = (*allStats)[targetString];
 
-        for(size_t j = 0; j < m_numScoreComponent; ++j){
+        for(size_t j = 0; j < m_numScoreComponents; ++j){
             statistics->p[j][i] = UntransformScore(raw_scores[j]);
         }
 
@@ -203,16 +172,16 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
 
         multiModelStatistics * statistics = iter->second;
 
-        Scores scoreVector(m_numScoreComponent);
+        Scores scoreVector(m_numScoreComponents);
 
-        for(size_t i = 0; i < m_numScoreComponent-1; ++i){
+        for(size_t i = 0; i < m_numScoreComponents-1; ++i){
             scoreVector[i] = TransformScore(std::inner_product(statistics->p[i].begin(), statistics->p[i].end(), multimodelweights[i].begin(), 0.0));
         }
 
         //assuming that last value is phrase penalty
-        scoreVector[m_numScoreComponent-1] = 1.0;
+        scoreVector[m_numScoreComponents-1] = 1.0;
 
-        statistics->targetPhrase->SetScore(m_feature, scoreVector, ScoreComponentCollection(), m_weight, m_weightWP, *m_languageModels);
+        statistics->targetPhrase->SetScore(this, scoreVector);
         ret->Add(new TargetPhrase(*statistics->targetPhrase));
     }
     return ret;
@@ -228,16 +197,17 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
 
   weights_ptr = staticData.GetTemporaryMultiModelWeightsVector();
 
+  // HIEU - uninitialised variable.
   //checking weights passed to mosesserver; only valid for this sentence; *don't* raise exception if client weights are malformed
   if (weights_ptr == NULL || weights_ptr->size() == 0) {
-    weights_ptr = staticData.GetMultiModelWeightsVector(); //fall back to weights defined in config
+    weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   }
   else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
     //TODO: can we pass error message to client if weights are malformed?
     std::stringstream strme;
     strme << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ". Reverting to weights in config";
     UserMessage::Add(strme.str());
-    weights_ptr = staticData.GetMultiModelWeightsVector(); //fall back to weights defined in config
+    weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   }
 
   //checking weights defined in config; only valid for this sentence; raise exception if config weights are malformed
@@ -305,7 +275,7 @@ void PhraseDictionaryMultiModel::CacheForCleanup(TargetPhraseCollection* tpc) {
 }
 
 
-void PhraseDictionaryMultiModel::CleanUp(const InputType &source) {
+void PhraseDictionaryMultiModel::CleanUpAfterSentenceProcessing(const InputType &source) {
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_sentenceMutex);
   PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
@@ -329,7 +299,7 @@ void PhraseDictionaryMultiModel::CleanUp(const InputType &source) {
 
 void  PhraseDictionaryMultiModel::CleanUpComponentModels(const InputType &source) {
   for(size_t i = 0; i < m_numModels; ++i){
-    m_pd[i]->CleanUp(source);
+    m_pd[i]->CleanUpAfterSentenceProcessing(source);
   }
 }
 
@@ -382,10 +352,10 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
     Sentence sentence;
     CleanUp(sentence); // free memory used by compact phrase tables
 
-    size_t numWeights = m_numScoreComponent;
+    size_t numWeights = m_numScoreComponents;
     if (m_mode == "interpolate") {
         //interpolation of phrase penalty is skipped, and fixed-value (2.718) is used instead. results will be screwed up if phrase penalty is not last feature
-        numWeights = m_numScoreComponent-1;
+        numWeights = m_numScoreComponents-1;
     }
 
     vector<float> ret (m_numModels*numWeights);

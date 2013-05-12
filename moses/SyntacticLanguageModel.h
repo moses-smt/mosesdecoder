@@ -17,17 +17,11 @@ namespace Moses
   class SyntacticLanguageModel : public StatefulFeatureFunction {
 
   public:
-
-    SyntacticLanguageModel(const std::vector<std::string>& filePaths,
-			   const std::vector<float>& weights,
-			   const FactorType factorType,
-			   const size_t beamWidth);
+    SyntacticLanguageModel(const std::string &line);
 
     ~SyntacticLanguageModel();
 
     size_t GetNumScoreComponents() const;
-    std::string GetScoreProducerDescription(unsigned) const;
-    std::string GetScoreProducerWeightShortName(unsigned) const;
 
     const FFState* EmptyHypothesisState(const InputType &input) const;
 

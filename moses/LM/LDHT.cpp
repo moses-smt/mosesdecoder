@@ -68,19 +68,13 @@ public:
                       FactorType factorType);
     LanguageModelLDHT(ScoreIndexManager& manager,
                       LanguageModelLDHT& copyFrom);
-    std::string GetScoreProducerDescription(unsigned) const {
-      std::ostringstream oss;
-      oss << "DLM_" << LDHT::NewNgram::k_max_order << "gram";
-      return oss.str();
-    }
+
     LDHT::Client* getClientUnsafe() const;
     LDHT::Client* getClientSafe();
     LDHT::Client* initTSSClient();
     virtual ~LanguageModelLDHT();
-    virtual LanguageModel* Duplicate(
-            ScoreIndexManager& scoreIndexManager) const;
-    virtual void InitializeBeforeSentenceProcessing();
-    virtual void CleanUpAfterSentenceProcessing();
+    virtual void InitializeForInput(InputType const& source);
+    virtual void CleanUpAfterSentenceProcessing(const InputType &source);
     virtual const FFState* EmptyHypothesisState(const InputType& input) const;
     virtual bool Useable(const Phrase& phrase) const;
     virtual void CalcScore(const Phrase& phrase,
@@ -146,11 +140,6 @@ LanguageModelLDHT::~LanguageModelLDHT() {
     //delete getClientSafe();
 }
 
-LanguageModel* LanguageModelLDHT::Duplicate(
-            ScoreIndexManager& scoreIndexManager) const {
-    return NULL;
-}
-
 // Check that there is a TSS Client instance, and instantiate one if
 // there isn't.
 LDHT::Client* LanguageModelLDHT::getClientSafe() {
@@ -183,12 +172,12 @@ LDHT::Client* LanguageModelLDHT::initTSSClient() {
     return client;
 }
 
-void LanguageModelLDHT::InitializeBeforeSentenceProcessing() {
+void LanguageModelLDHT::InitializeForInput(InputType const& source) {
     getClientSafe()->clearCache();
     m_start_tick = LDHT::Util::rdtsc();
 }
 
-void LanguageModelLDHT::CleanUpAfterSentenceProcessing() {
+void LanguageModelLDHT::CleanUpAfterSentenceProcessing(const InputType &source) {
     LDHT::Client* client = getClientSafe();
 
     std::cerr << "LDHT sentence stats:" << std::endl;

@@ -8,6 +8,12 @@ namespace Moses {
 
 using namespace std;
 
+PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
+:StatelessFeatureFunction("pl", 0, line)
+{
+
+}
+
 void PhraseLengthFeature::Evaluate(
               const PhraseBasedFeatureContext& context,
               ScoreComponentCollection* accumulator) const
@@ -32,6 +38,13 @@ void PhraseLengthFeature::Evaluate(
   accumulator->PlusEquals(this,nameBoth.str(),1);
 
   //cerr << nameSource.str() << " " << nameTarget.str() << " " << nameBoth.str() << endl;
+}
+
+void PhraseLengthFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+  CHECK(false);
 }
 
 }

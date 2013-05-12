@@ -41,7 +41,7 @@ int main(int argc, char **argv)
   if(ttable == "")
     usage();
 
-  Moses::PhraseDictionaryTree ptree(nscores);
+  Moses::PhraseDictionaryTree ptree;
   ptree.NeedAlignmentInfo(needAlignments);
   ptree.Read(ttable);
 

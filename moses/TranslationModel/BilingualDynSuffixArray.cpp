@@ -46,9 +46,9 @@ bool BilingualDynSuffixArray::Load(
 	InputFileStream sourceStrme(source);
 	InputFileStream targetStrme(target);
 	cerr << "Loading source corpus...\n";	
-	LoadCorpus(sourceStrme, m_inputFactors, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
+	LoadCorpus(Input, sourceStrme, m_inputFactors, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
 	cerr << "Loading target corpus...\n";	
-	LoadCorpus(targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
+	LoadCorpus(Output, targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
 	CHECK(m_srcSntBreaks.size() == m_trgSntBreaks.size());
 
 	// build suffix arrays and auxilliary arrays
@@ -83,10 +83,10 @@ bool BilingualDynSuffixArray::LoadTM(
   InputFileStream targetStrme(target);
 
   cerr << "Loading target corpus...\n";	
-  LoadCorpus(targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
+  LoadCorpus(Output, targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
   
   cerr << "Loading source corpus...\n";	
-  LoadCorpus(sourceStrme, m_inputFactors, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
+  LoadCorpus(Input, sourceStrme, m_inputFactors, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
   
   CHECK(m_srcSntBreaks.size() == m_trgSntBreaks.size());
   
@@ -214,12 +214,7 @@ bool BilingualDynSuffixArray::ExtractPhrases(const int& sntIndex, const int& wor
 	return curSnt.Extract(m_maxPhraseLength, phrasePairs, leftIdx, rightIdx); // extract all phrase Alignments in sentence
 }
 
-void BilingualDynSuffixArray::CleanUp(const InputType& source) 
-{
-	//m_wordPairCache.clear();
-}
-
-int BilingualDynSuffixArray::LoadCorpus(InputFileStream& corpus, const FactorList& factors,
+int BilingualDynSuffixArray::LoadCorpus(FactorDirection direction, InputFileStream& corpus, const FactorList& factors,
 	std::vector<wordID_t>& cArray, std::vector<wordID_t>& sntArray,
   Vocab* vocab) 
 {
@@ -231,7 +226,7 @@ int BilingualDynSuffixArray::LoadCorpus(InputFileStream& corpus, const FactorLis
 		sntArray.push_back(sntIdx);
 		Phrase phrase(ARRAY_SIZE_INCR);
 		// parse phrase
-		phrase.CreateFromString( factors, line, factorDelimiter);
+		phrase.CreateFromString(direction, factors, line, factorDelimiter);
 		// store words in vocabulary and corpus
 		for( size_t i = 0; i < phrase.GetSize(); ++i) {
 			cArray.push_back( vocab->GetWordID(phrase.GetWord(i)) );
@@ -456,9 +451,9 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 		itrLexW = lexicalWeights.find(iterPhrases->first);
 		CHECK(itrLexW != lexicalWeights.end());
 		Scores scoreVector(3);
-		scoreVector[0] = std::log(trg2SrcMLE); 
-		scoreVector[1] = std::log(itrLexW->second.first);
-		scoreVector[2] = 1; //log(2.718); 
+		scoreVector[0] = trg2SrcMLE; 
+		scoreVector[1] = itrLexW->second.first;
+		scoreVector[2] = 2.718; // exp(1); 
 		phraseScores.insert(make_pair(scoreVector, &iterPhrases->first));
 	}
 	// return top scoring phrases
@@ -504,7 +499,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   const unsigned oldSrcCrpSize = m_srcCorpus->size(), oldTrgCrpSize = m_trgCorpus->size();
   cerr << "old source corpus size = " << oldSrcCrpSize << "\told target size = " << oldTrgCrpSize << endl;
   Phrase sphrase(ARRAY_SIZE_INCR);
-  sphrase.CreateFromString(m_inputFactors, source, factorDelimiter);
+  sphrase.CreateFromString(Input, m_inputFactors, source, factorDelimiter);
   m_srcVocab->MakeOpen();
   std::vector<wordID_t> sIDs(sphrase.GetSize());
   // store words in vocabulary and corpus
@@ -519,7 +514,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   m_srcSntBreaks.push_back(oldSrcCrpSize); // former end of corpus is index of new sentence 
   m_srcVocab->MakeClosed();
   Phrase tphrase(ARRAY_SIZE_INCR);
-  tphrase.CreateFromString(m_outputFactors, target, factorDelimiter);
+  tphrase.CreateFromString(Output, m_outputFactors, target, factorDelimiter);
   m_trgVocab->MakeOpen();
   std::vector<wordID_t> tIDs(tphrase.GetSize());
   for(int i = tphrase.GetSize()-1; i >= 0; --i) {

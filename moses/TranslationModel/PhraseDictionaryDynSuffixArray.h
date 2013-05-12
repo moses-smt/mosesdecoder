@@ -15,7 +15,7 @@ namespace Moses
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary
 {
 public:
-  PhraseDictionaryDynSuffixArray(size_t m_numScoreComponent, PhraseDictionaryFeature* feature);
+  PhraseDictionaryDynSuffixArray(const std::string &line);
   ~PhraseDictionaryDynSuffixArray();
   bool Load( const std::vector<FactorType>& m_input
              , const std::vector<FactorType>& m_output
@@ -28,8 +28,6 @@ public:
              , float weightWP);
   // functions below required by base class
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
-  void InitializeForInput(const InputType& i);
-  void CleanUp(const InputType &source);
   void insertSnt(string&, string&, string&);
   void deleteSnt(unsigned, unsigned);
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);

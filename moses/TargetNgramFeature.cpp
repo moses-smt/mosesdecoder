@@ -37,6 +37,22 @@ int TargetNgramState::Compare(const FFState& other) const {
   }
 }
 
+TargetNgramFeature::TargetNgramFeature(const std::string &line)
+:StatefulFeatureFunction("TargetNgramFeature", 0, line)
+,m_sparseProducerWeight(1)
+{
+  std::cerr << "Initializing target ngram feature.." << std::endl;
+
+  vector<string> tokens = Tokenize(line);
+  //CHECK(tokens[0] == m_description);
+
+  CHECK(tokens.size() == 4);
+  m_factorType = Scan<FactorType>(tokens[1]);
+  m_n = Scan<size_t>(tokens[2]);
+  m_lower_ngrams = Scan<bool>(tokens[3]);
+
+}
+
 bool TargetNgramFeature::Load(const std::string &filePath)
 {
   if (filePath == "*") return true; //allow all
@@ -55,16 +71,6 @@ bool TargetNgramFeature::Load(const std::string &filePath)
 
   inFile.close();
   return true;
-}
-
-string TargetNgramFeature::GetScoreProducerWeightShortName(unsigned) const
-{
-	return "dlm";
-}
-
-size_t TargetNgramFeature::GetNumInputScores() const
-{
-	return 0;
 }
 
 const FFState* TargetNgramFeature::EmptyHypothesisState(const InputType &/*input*/) const
@@ -386,6 +392,13 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
 
 //  cerr << endl;
   return new TargetNgramChartState(cur_hypo, featureId, m_n);
+}
+
+void TargetNgramFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+  CHECK(false);
 }
 
 void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfStartPos, size_t offset) const {

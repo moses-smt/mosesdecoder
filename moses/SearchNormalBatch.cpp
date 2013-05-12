@@ -1,6 +1,7 @@
 #include "SearchNormalBatch.h"
 #include "LM/Base.h"
 #include "Manager.h"
+#include "Hypothesis.h"
 
 //#include <google/profiler.h>
 
@@ -17,9 +18,9 @@ SearchNormalBatch::SearchNormalBatch(Manager& manager, const InputType &source, 
   // Split the feature functions into sets of stateless, stateful
   // distributed lm, and stateful non-distributed.
   const vector<const StatefulFeatureFunction*>& ffs =
-         m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
+      StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
-      if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") {
+      if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") { // TODO WFT
           m_dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
           m_dlm_ffs[i]->SetFFStateIdx(i);
       }
@@ -27,7 +28,7 @@ SearchNormalBatch::SearchNormalBatch(Manager& manager, const InputType &source, 
           m_stateful_ffs[i] = const_cast<StatefulFeatureFunction*>(ffs[i]);
       }
   }
-  m_stateless_ffs = const_cast< vector<const StatelessFeatureFunction*>& >(m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions());
+  m_stateless_ffs = StatelessFeatureFunction::GetStatelessFeatureFunctions();
  
 }
 
@@ -155,25 +156,21 @@ void SearchNormalBatch::EvalAndMergePartialHypos() {
          ++partial_hypo_iter) {
         Hypothesis* hypo = *partial_hypo_iter;
 
-        // Incorporate the translation option scores.
-        hypo->IncorporateTransOptScores();
-
         // Evaluate with other ffs.
         std::map<int, StatefulFeatureFunction*>::iterator sfff_iter;
         for (sfff_iter = m_stateful_ffs.begin();
              sfff_iter != m_stateful_ffs.end();
              ++sfff_iter) {
-            hypo->EvaluateWith((*sfff_iter).second, (*sfff_iter).first);
+          const StatefulFeatureFunction &ff = *(sfff_iter->second);
+          int state_idx = sfff_iter->first;
+          hypo->EvaluateWith(ff, state_idx);
         }
         std::vector<const StatelessFeatureFunction*>::iterator slff_iter;
         for (slff_iter = m_stateless_ffs.begin();
              slff_iter != m_stateless_ffs.end();
              ++slff_iter) {
-            hypo->EvaluateWith(*slff_iter);
+            hypo->EvaluateWith(**slff_iter);
         }
-
-        // Calculate future score.
-        hypo->CalculateFutureScore(m_transOptColl.GetFutureScore());
     }
 
     // Wait for all requests from the distributed LM to come back.
@@ -196,11 +193,9 @@ void SearchNormalBatch::EvalAndMergePartialHypos() {
         for (dlm_iter = m_dlm_ffs.begin();
              dlm_iter != m_dlm_ffs.end();
              ++dlm_iter) {
-            hypo->EvaluateWith((*dlm_iter).second, (*dlm_iter).first);
+          LanguageModel &lm = *(dlm_iter->second);
+          hypo->EvaluateWith(lm, (*dlm_iter).first);
         }
-
-        // Calculate the final score.
-        hypo->CalculateFinalScore();
 
         // Put completed hypothesis onto its stack.
         size_t wordsTranslated = hypo->GetWordsBitmap().GetNumWordsCovered();

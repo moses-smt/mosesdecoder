@@ -190,14 +190,15 @@ bool RuleTableLoaderStandard::Load(FormatType format
     StringPiece sourcePhraseString(*pipes);
     StringPiece targetPhraseString(*++pipes);
     StringPiece scoreString(*++pipes);
-    StringPiece alignString(*++pipes);
     
-    // Allow but ignore rule count.  
-    if (++pipes && ++pipes) {
-      stringstream strme;
-      strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
-      UserMessage::Add(strme.str());
-      abort();
+    StringPiece alignString;
+    if (++pipes) {
+      StringPiece temp(*pipes);
+      alignString = temp;
+    }
+
+    if (++pipes) {
+      StringPiece str(*pipes); //counts
     }
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
@@ -213,7 +214,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
       UTIL_THROW_IF(isnan(score), util::Exception, "Bad score " << *s << " on line " << count);
       scoreVector.push_back(FloorScore(TransformScore(score)));
     }
-    const size_t numScoreComponents = ruleTable.GetFeature()->GetNumScoreComponents();
+    const size_t numScoreComponents = ruleTable.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       stringstream strme;
       strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
@@ -229,10 +230,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, targetLHS);
+    targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
 
     // source
-    targetPhrase->MutableSourcePhrase().CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
+    targetPhrase->MutableSourcePhrase().CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
@@ -240,7 +241,13 @@ bool RuleTableLoaderStandard::Load(FormatType format
     
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
     
-    targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weight, languageModels,wpProducer);
+    if (++pipes) {
+      StringPiece sparseString(*pipes);
+      targetPhrase->SetSparseScore(&ruleTable, sparseString);
+    }
+
+    targetPhrase->SetScore(&ruleTable, scoreVector);
+    targetPhrase->Evaluate();
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

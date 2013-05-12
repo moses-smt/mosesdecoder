@@ -5,13 +5,34 @@
 #include "ScoreComponentCollection.h"
 #include "util/string_piece_hash.hh"
 
-namespace Moses {
-
 using namespace std;
+
+namespace Moses {
 
 int TargetBigramState::Compare(const FFState& other) const {
   const TargetBigramState& rhs = dynamic_cast<const TargetBigramState&>(other);
   return Word::Compare(m_word,rhs.m_word);
+}
+
+TargetBigramFeature::TargetBigramFeature(const std::string &line)
+:StatefulFeatureFunction("TargetBigramFeature", 0, line)
+{
+  std::cerr << "Initializing target bigram feature.." << std::endl;
+
+  vector<string> tokens = Tokenize(line);
+  //CHECK(tokens[0] == m_description);
+
+  // set factor
+  m_factorType = Scan<FactorType>(tokens[1]);
+
+  FactorCollection& factorCollection = FactorCollection::Instance();
+  const Factor* bosFactor =
+     factorCollection.AddFactor(Output,m_factorType,BOS_);
+  m_bos.SetFactor(m_factorType,bosFactor);
+
+  const string &filePath = tokens[2];
+  Load(filePath);
+
 }
 
 bool TargetBigramFeature::Load(const std::string &filePath) 
@@ -32,16 +53,6 @@ bool TargetBigramFeature::Load(const std::string &filePath)
 
   inFile.close();
   return true;
-}
-
-string TargetBigramFeature::GetScoreProducerWeightShortName(unsigned) const
-{
-	return "dlmb";
-}
-
-size_t TargetBigramFeature::GetNumInputScores() const
-{
-	return 0;
 }
 
 
@@ -72,25 +83,27 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
       f1 = targetPhrase.GetWord(i-1).GetFactor(m_factorType);
     }
     const Factor* f2 = targetPhrase.GetWord(i).GetFactor(m_factorType);
-    StringPiece w1(f1->GetString()), w2(f2->GetString());
+    const StringPiece w1 = f1->GetString();
+    const StringPiece w2 = f2->GetString();
 
     // skip bigrams if they don't belong to a given restricted vocabulary
-    if (m_vocab.size() &&
+    if (m_vocab.size() && 
         (FindStringPiece(m_vocab, w1) == m_vocab.end() || FindStringPiece(m_vocab, w2) == m_vocab.end())) {
       continue;
     }
+
     string name(w1.data(), w1.size());
-    name += ':';
+    name += ":";
     name.append(w2.data(), w2.size());
     accumulator->PlusEquals(this,name,1);
   }
 
   if (cur_hypo.GetWordsBitmap().IsComplete()) {
-    StringPiece w1(targetPhrase.GetWord(targetPhrase.GetSize()-1).GetFactor(m_factorType)->GetString());
+    const StringPiece w1 = targetPhrase.GetWord(targetPhrase.GetSize()-1).GetFactor(m_factorType)->GetString();
     const string& w2 = EOS_;
     if (m_vocab.empty() || (FindStringPiece(m_vocab, w1) != m_vocab.end())) {
       string name(w1.data(), w1.size());
-      name += ':';
+      name += ":";
       name += w2;
       accumulator->PlusEquals(this,name,1);
     }
@@ -98,5 +111,13 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
   }
   return new TargetBigramState(targetPhrase.GetWord(targetPhrase.GetSize()-1));
 }
+
+void TargetBigramFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 }
 

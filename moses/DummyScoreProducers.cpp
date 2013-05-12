@@ -38,14 +38,8 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
            NOT_FOUND);
 }
 
-
-std::string DistortionScoreProducer::GetScoreProducerWeightShortName(unsigned) const
-{
-  return "d";
-}
-
 float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
-    const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
+    const WordsRange &prev, const WordsRange &curr, const int FirstGap)
 {
   if(!StaticData::Instance().UseEarlyDistortionCost()) {
     return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
@@ -107,34 +101,37 @@ FFState* DistortionScoreProducer::Evaluate(
   return res;
 }
 
-
-std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
+void DistortionScoreProducer::Evaluate(const TargetPhrase &targetPhrase
+                    , ScoreComponentCollection &scoreBreakdown
+                    , ScoreComponentCollection &estimatedFutureScore) const
 {
-  return "w";
+  // no score
 }
 
 void WordPenaltyProducer::Evaluate(
     const PhraseBasedFeatureContext& context,
     ScoreComponentCollection* out) const
 {
-	const TargetPhrase& tp = context.GetTargetPhrase();
-  out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
+	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
+  float score = - targetPhrase.GetNumTerminals();
+
+  out->PlusEquals(this, score);
 }
 
-std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
+void WordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
+                    , ScoreComponentCollection &scoreBreakdown
+                    , ScoreComponentCollection &estimatedFutureScore) const
 {
-  return "u";
+  float score = - targetPhrase.GetNumTerminals();
+  scoreBreakdown.Assign(this, score);
 }
 
-
-bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
+void UnknownWordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
 {
-  return true;
-}
-
-std::string MetaFeatureProducer::GetScoreProducerWeightShortName(unsigned) const
-{
-  return "m"+m_shortName;
+  // shouldn't be called
+  CHECK(false);
 }
 
 }

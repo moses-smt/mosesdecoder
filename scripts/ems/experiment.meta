@@ -844,7 +844,7 @@ apply-filter
 	default-name: tuning/moses.filtered.ini
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
-	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
+	template: cp IN1/moses.ini OUT
 apply-filter-devtest
 	in: TRAINING:config filtered-dir-devtest
 	out: filtered-config-devtest
@@ -865,7 +865,7 @@ apply-weights
 	out: config-with-reused-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.tuned.ini
-	template: $moses-script-dir/ems/support/reuse-weights.perl IN1 < IN > OUT
+	template: $moses-script-dir/ems/support/substitute-weights.perl IN < IN1 > OUT
 	error: cannot open
 hiero-tune
 	in: TRAINING:hiero-config input reference
@@ -955,7 +955,7 @@ apply-filter
 	default-name: evaluation/filtered.ini
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
-	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
+	template: $moses-script-dir/ems/support/substitute-weights.perl IN1/moses.ini < IN > OUT
 decode
 	in: filtered-config input
 	out: system-output

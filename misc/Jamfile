@@ -19,4 +19,4 @@ else {
     alias programsMin ;
 }
 
-alias programs : processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin ;
+alias programs : processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin create-ini//create-ini ;

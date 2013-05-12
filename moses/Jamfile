@@ -3,14 +3,7 @@ path-constant FACTOR-LOG : bin/factor.log ;
 update-if-changed $(FACTOR-LOG) $(max-factors) ;
 max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
 
-with-dlib = [ option.get "with-dlib" ] ;
-if $(with-dlib) {
-  dlib = <define>WITH_DLIB <include>$(with-dlib) ;
-} else {
-  dlib = ;
-}
-
-alias headers : ../util//kenutil : : : $(max-factors) $(dlib) ;
+alias headers : ../util//kenutil : : : $(max-factors) ;
 
 alias ThreadPool : ThreadPool.cpp ;
 
@@ -52,5 +45,5 @@ alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+#unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
 

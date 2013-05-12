@@ -118,13 +118,11 @@ public:
     const StaticData &staticData = StaticData::Instance();
     // input sentence
     Sentence sentence();
-    // set translation system
-    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
     // execute the translation
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
-    Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm(), &system);
+    Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm());
     manager.ProcessSentence();
 
     // output word graph
@@ -381,7 +379,7 @@ public:
       TrellisPathList nBestList;
       ostringstream out;
       manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-      OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber,
+      OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_lineNumber,
 		  staticData.GetReportSegmentation());
       m_nbestCollector->Write(m_lineNumber, out.str());
     }
@@ -391,7 +389,7 @@ public:
       TrellisPathList latticeSamples;
       ostringstream out;
       manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber,
+      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_lineNumber,
 		  staticData.GetReportSegmentation());
       m_latticeSamplesCollector->Write(m_lineNumber, out.str());
     }
@@ -400,7 +398,7 @@ public:
     if (m_detailedTranslationCollector) {
       ostringstream out;
       fix(out,PRECISION);
-      TranslationAnalysis::PrintTranslationAnalysis(manager.GetTranslationSystem(), out, manager.GetBestHypothesis());
+      TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
       m_detailedTranslationCollector->Write(m_lineNumber,out.str());
     }
 
@@ -449,20 +447,19 @@ private:
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != ScoreProducer::unlimited) {
+  if (numScoreComps != 0) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
-    for (size_t i = 0; i < numScoreComps; ++i) 
-      cout << ff->GetScoreProducerDescription() <<  " "
-           << ff->GetScoreProducerWeightShortName(i) << " "
-           << values[i] << endl;
+    cout << ff->GetScoreProducerDescription() << "=";
+    for (size_t i = 0; i < numScoreComps; ++i) {
+    	cout << " " << values[i];
+    }
+    cout << endl;
   }
   else {
   	if (ff->GetSparseProducerWeight() == 1)
-  		cout << ff->GetScoreProducerDescription() << " " <<
-  		ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
+  		cout << ff->GetScoreProducerDescription() << "= sparse" <<  endl;
   	else
-  		cout << ff->GetScoreProducerDescription() << " " <<
-  		ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
+  		cout << ff->GetScoreProducerDescription() << "= " << ff->GetSparseProducerWeight() << endl;
   }
 }
 
@@ -471,45 +468,36 @@ static void ShowWeights()
   //TODO: Find a way of ensuring this order is synced with the nbest
   fix(cout,6);
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+
   for (size_t i = 0; i < sff.size(); ++i) {
-    PrintFeatureWeight(sff[i]);
-  }
-  for (size_t i = 0; i < slf.size(); ++i) {
-    if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
-          slf[i]->GetScoreProducerWeightShortName() != "tm" &&
-          slf[i]->GetScoreProducerWeightShortName() != "I" &&
-          slf[i]->GetScoreProducerWeightShortName() != "g")
-    {
-  	  PrintFeatureWeight(slf[i]);
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(ff);
     }
   }
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  for( size_t i=0; i<pds.size(); i++ ) {
-    PrintFeatureWeight(pds[i]);
+  for (size_t i = 0; i < slf.size(); ++i) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(ff);
+    }
   }
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
-  for( size_t i=0; i<gds.size(); i++ ) {
-    PrintFeatureWeight(gds[i]);
-  }
-
 }
 
 size_t OutputFeatureWeightsForHypergraph(size_t index, const FeatureFunction* ff, std::ostream &outputSearchGraphStream)
 {
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != ScoreProducer::unlimited) {
+  if (numScoreComps != 0) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     if (numScoreComps > 1) {
       for (size_t i = 0; i < numScoreComps; ++i) {
-	outputSearchGraphStream << ff->GetScoreProducerWeightShortName()
+	outputSearchGraphStream << ff->GetScoreProducerDescription()
 				<< i
 				<< "=" << values[i] << endl;
       }
     } else {
-	outputSearchGraphStream << ff->GetScoreProducerWeightShortName()
+	outputSearchGraphStream << ff->GetScoreProducerDescription()
 				<< "=" << values[0] << endl;
     }
     return index+numScoreComps;
@@ -526,27 +514,28 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
   outputSearchGraphStream.precision(6);
 
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
   for (size_t i = 0; i < sff.size(); ++i) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, sff[i], outputSearchGraphStream);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
+    /*
     if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
           slf[i]->GetScoreProducerWeightShortName() != "tm" &&
           slf[i]->GetScoreProducerWeightShortName() != "I" &&
           slf[i]->GetScoreProducerWeightShortName() != "g")
+    */
     {
       featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, gds[i], outputSearchGraphStream);
   }
@@ -708,7 +697,7 @@ int main(int argc, char** argv)
       detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
     }
   
-    // initialize stream for word alignment between input and output
+    // initialize stram for word alignment between input and output
     auto_ptr<OutputCollector> alignmentInfoCollector;
     if (!staticData.GetAlignmentOutputFile().empty()) {
       alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));

@@ -1614,7 +1614,8 @@ sub define_tuning_tune {
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
     
     # the last 3 variables are only used for mira tuning 
-    my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest) = &get_output_and_input($step_id); 
+    my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest, $filtered_config) = &get_output_and_input($step_id); 
+    $config = $filtered_config if $filtered_config;
 
     my $cmd = "";
     if ($use_mira) {
@@ -2105,10 +2106,41 @@ sub define_training_create_config {
     my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM)
 			= &get_output_and_input($step_id);
 
-    my $cmd = &get_training_setting(9);
+    my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+    my $cmd = "$moses_src_dir/bin/create-ini ";
 
-		# get model, and whether suffix array is used. Determines the pt implementation.
+    my %IN;
+    my %OUT;
+    if (&backoff_and_get("TRAINING:input-factors")) {
+      %IN = &get_factor_id("input");
+    }
+    else {
+      $IN{"word"} = 0;
+    }
+
+    if (&backoff_and_get("TRAINING:output-factors")) {
+      %OUT = &get_factor_id("output");
+    }
+    else {
+      $OUT{"word"} = 0;
+    }
+
+    $cmd .= "-input-factor-max ".((scalar keys %IN)-1)." ";
+
+    $cmd .= "-translation-factors ".
+	          &encode_factor_definition("translation-factors",\%IN,\%OUT)." "
+	          if &get("TRAINING:translation-factors");
+    $cmd .= "-reordering-factors ".
+	          &encode_factor_definition("reordering-factors",\%IN,\%OUT)." "
+	          if &get("TRAINING:reordering-factors");
+    $cmd .= "-generation-factors ".
+      	    &encode_factor_definition("generation-factors",\%OUT,\%OUT)." "
+      	    if &get("TRAINING:generation-factors");
+
+    # get model, and whether suffix array is used. Determines the pt implementation.
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+    $cmd .= "-hierarchical " if $hierarchical;
+
     my $sa_exec_dir = &get("TRAINING:suffix-array");
 		
 		my ($ptImpl, $numFF);
@@ -2576,31 +2608,8 @@ sub define_tuningevaluation_filter {
     else {
       $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
       $delete_config = 1;
-      $cmd = &get_training_setting(9);
-      $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
-    
-      my $ptCmd = $phrase_translation_table;
-      $ptCmd .= ":$ptImpl" if $ptImpl>0;
-      $ptCmd .= ":$numFF" if defined($numFF);
-      $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
-      $cmd .= &get_table_name_settings("reordering-factors","reordering-table", $reordering_table)
-	  if $reordering_table;
-      # additional settings for hierarchical models
-      if (&get("TRAINING:hierarchical-rule-set")) {
-        my $extract_version = $VERSION;
-        $extract_version = $RE_USE[$STEP_LOOKUP{"TRAINING:extract-phrases"}] 
-          if defined($STEP_LOOKUP{"TRAINING:extract-phrases"});
-        my $glue_grammar_file = &get("TRAINING:glue-grammar");
-        $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
-          unless $glue_grammar_file;
-        $cmd .= "-glue-grammar-file $glue_grammar_file ";
-      }
-      if (&get("TRAINING:score-settings") && 
-          &get("TRAINING:score-settings") =~ /SparseCountBinFeature/) {
-        $cmd .= "-sparse-translation-table ";
-      }
-      $cmd .= "-lm 0:3:$dir "; # dummy
-      $cmd .= "-config $config\n";
+      
+      $cmd = "cp $dir/model/moses.ini.$VERSION $config \n";
     }
 
     # filter command
@@ -2630,7 +2639,8 @@ sub define_evaluation_decode {
     my $dir = &check_and_get("GENERAL:working-dir");
     
     my ($system_output,
-	$config,$input) = &get_output_and_input($step_id);
+	$config,$input,$filtered_config) = &get_output_and_input($step_id);
+    $config = $filtered_config if $filtered_config;
 
     my $jobs = &backoff_and_get("EVALUATION:$set:jobs");
     my $decoder = &check_backoff_and_get("EVALUATION:$set:decoder");

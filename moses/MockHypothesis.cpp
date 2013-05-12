@@ -37,8 +37,10 @@ MockHypothesisGuard::MockHypothesisGuard(
     const vector<string>& targetSegments) 
 : m_emptyTarget(),
   m_sentence(),
-  m_system("mock",&m_wp,&m_uwp,&m_dist),
-  m_manager(0,m_sentence,Normal,&m_system)
+  m_wp("WordPenalty"),
+  m_uwp("UnknownWordPenalty"),
+  m_dist("Distortion"),
+  m_manager(0,m_sentence,Normal)
 {
   BOOST_CHECK_EQUAL(alignments.size(), targetSegments.size());
 
@@ -61,9 +63,9 @@ MockHypothesisGuard::MockHypothesisGuard(
     Hypothesis* prevHypo = m_hypothesis;
     WordsRange wordsRange(ai->first,ai->second);
     m_targetPhrases.push_back(TargetPhrase());
-    m_targetPhrases.back().CreateFromString(factors,*ti,"|");
+    m_targetPhrases.back().CreateFromString(Input, factors, *ti, "|");
     m_toptions.push_back(new TranslationOption
-      (wordsRange,m_targetPhrases.back(),m_sentence));
+      (wordsRange,m_targetPhrases.back()));
     m_hypothesis =  Hypothesis::Create(*prevHypo,*m_toptions.back(),NULL); 
   }
 

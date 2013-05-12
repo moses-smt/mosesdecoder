@@ -49,6 +49,29 @@ TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(
   return currNode.GetOrCreateTargetPhraseCollection();
 }
 
+const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(const Phrase& source) const
+{
+  // exactly like CreateTargetPhraseCollection, but don't create
+  const size_t size = source.GetSize();
+
+  const PhraseDictionaryNodeSCFG *currNode = &m_collection;
+  for (size_t pos = 0 ; pos < size ; ++pos) {
+    const Word& word = source.GetWord(pos);
+    currNode = currNode->GetChild(word);
+    if (currNode == NULL)
+      return NULL;
+  }
+
+  const TargetPhraseCollection *coll = currNode->GetTargetPhraseCollection();
+  /*
+  if (coll) {
+    cerr << "source=" << source << endl
+        << *coll << endl;
+  }
+  */
+  return coll;
+}
+
 PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source
                                                                 , const TargetPhrase &target
                                                                 , const Word &sourceLHS)

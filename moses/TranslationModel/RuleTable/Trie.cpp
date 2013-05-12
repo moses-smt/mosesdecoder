@@ -17,50 +17,41 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <vector>
 #include "moses/InputFileStream.h"
 #include "moses/Util.h"
+#include "moses/StaticData.h"
 #include "Trie.h"
 #include "Loader.h"
 #include "LoaderFactory.h"
+
+using namespace std;
 
 namespace Moses
 {
 
 RuleTableTrie::~RuleTableTrie()
 {
-  CleanUp();
 }
 
-bool RuleTableTrie::Load(const std::vector<FactorType> &input,
-                         const std::vector<FactorType> &output,
-                         const std::string &filePath,
-                         const std::vector<float> &weight,
-                         size_t tableLimit,
-                         const LMList &languageModels,
-                         const WordPenaltyProducer* wpProducer)
+bool RuleTableTrie::InitDictionary()
 {
-  m_filePath = filePath;
-  m_tableLimit = tableLimit;
 
   std::auto_ptr<Moses::RuleTableLoader> loader =
-      Moses::RuleTableLoaderFactory::Create(filePath);
-  if (!loader.get())
-  {
+      Moses::RuleTableLoaderFactory::Create(m_filePath);
+  if (!loader.get()) {
     return false;
   }
-  bool ret = loader->Load(input, output, filePath, weight, tableLimit,
+
+  const StaticData &staticData = StaticData::Instance();
+
+  vector<float> weight = staticData.GetWeights(this);
+  const WordPenaltyProducer *wpProducer = staticData.GetWordPenaltyProducer();
+  const LMList &languageModels = staticData.GetLMList();
+
+  bool ret = loader->Load(m_input, m_output, m_filePath, weight, m_tableLimit,
                           languageModels, wpProducer, *this);
   return ret;
-}
-
-void RuleTableTrie::InitializeForInput(const InputType& /* input */)
-{
-  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
-}
-
-void RuleTableTrie::CleanUp()
-{
-  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }
 
 }  // namespace Moses

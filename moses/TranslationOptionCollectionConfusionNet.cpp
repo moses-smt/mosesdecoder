@@ -3,17 +3,16 @@
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "ConfusionNet.h"
 #include "DecodeStep.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 
 namespace Moses
 {
 
 /** constructor; just initialize the base class */
-TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet(const TranslationSystem* system,
+TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet(
     const ConfusionNet &input
     , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(system, input, maxNoTransOptPerCoverage, translationOptionThreshold) {}
+  : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold) {}
 
 /* forcibly create translation option for a particular source word.
 	* call the base class' ProcessOneUnknownWord() for each possible word in the confusion network

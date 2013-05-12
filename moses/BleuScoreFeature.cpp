@@ -1,6 +1,7 @@
 #include "BleuScoreFeature.h"
 
 #include "StaticData.h"
+#include "UserMessage.h"
 
 using namespace std;
 
@@ -68,6 +69,66 @@ void BleuScoreState::AddNgramCountAndMatches(std::vector< size_t >& counts,
 		m_ngram_counts[order] += counts[order];
 		m_ngram_matches[order] += matches[order];
 	}
+}
+
+
+BleuScoreFeature::BleuScoreFeature(const std::string &line)
+:StatefulFeatureFunction("BleuScoreFeature",1, line),
+m_enabled(true),
+m_sentence_bleu(true),
+m_simple_history_bleu(false),
+m_count_history(BleuScoreState::bleu_order),
+m_match_history(BleuScoreState::bleu_order),
+m_source_length_history(0),
+m_target_length_history(0),
+m_ref_length_history(0),
+m_scale_by_input_length(true),
+m_scale_by_avg_input_length(false),
+m_scale_by_inverse_length(false),
+m_scale_by_avg_inverse_length(false),
+m_scale_by_x(1),
+m_historySmoothing(0.9),
+m_smoothing_scheme(PLUS_POINT_ONE)
+{
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
+
+    if (args[0] == "references") {
+      vector<string> referenceFiles = Tokenize(args[1]);
+      CHECK(referenceFiles.size());
+      vector<vector<string> > references(referenceFiles.size());
+
+      for (size_t i =0; i < referenceFiles.size(); ++i) {
+        ifstream in(referenceFiles[i].c_str());
+        if (!in) {
+          stringstream strme;
+          strme << "Unable to load references from " << referenceFiles[i];
+          UserMessage::Add(strme.str());
+          abort();
+        }
+        string line;
+        while (getline(in,line)) {
+          /*  if (GetSearchAlgorithm() == ChartDecoding) {
+          stringstream tmp;
+          tmp << "<s> " << line << " </s>";
+          line = tmp.str();
+          }
+          */
+          references[i].push_back(line);
+        }
+        if (i > 0) {
+          if (references[i].size() != references[i-1].size()) {
+            UserMessage::Add("Reference files are of different lengths");
+            abort();
+          }
+        }
+        in.close();
+      } // for (size_t i =0; i < referenceFiles.size(); ++i) {
+
+      //Set the references in the bleu feature
+      LoadReferences(references);
+    } // if (args[0] == "references") {
+  } // for (size_t i = 0; i < toks.size(); ++i) {
 }
 
 void BleuScoreFeature::PrintHistory(std::ostream& out) const {
@@ -795,6 +856,13 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const
 {
     return new BleuScoreState();
+}
+
+void BleuScoreFeature::Evaluate(const TargetPhrase &targetPhrase
+                    , ScoreComponentCollection &scoreBreakdown
+                    , ScoreComponentCollection &estimatedFutureScore) const
+{
+  CHECK(false);
 }
 
 } // namespace.

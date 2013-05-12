@@ -39,7 +39,7 @@ class Phrase;
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public StatefulFeatureFunction {
 protected:
-  LanguageModel();
+  LanguageModel(const std::string& description, const std::string &line);
 
   // This can't be in the constructor for virual function dispatch reasons
 
@@ -48,9 +48,6 @@ protected:
 public:
   virtual ~LanguageModel();
 
-  // Make another feature without copying the underlying model data.  
-  virtual LanguageModel *Duplicate() const = 0;
-
   bool OOVFeatureEnabled() const {
     return m_enableOOVFeature;
   }
@@ -58,13 +55,6 @@ public:
   float GetWeight() const;
   float GetOOVWeight() const;
 
-  std::string GetScoreProducerWeightShortName(unsigned) const {
-    return "lm";
-  }
-
-  virtual void InitializeBeforeSentenceProcessing() {}
-
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {}
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
@@ -95,6 +85,11 @@ public:
 
   // KenLM only (others throw an exception): call incremental search with the model and mapping.
   virtual void IncrementalCallback(Incremental::Manager &manager) const;
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
 };
 
 }

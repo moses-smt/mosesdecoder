@@ -58,29 +58,6 @@ my $SCRIPTS_ROOTDIR = $RealBin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-## We preserve this bit of comments to keep the traditional weight ranges.
-#     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
-#     "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
-#     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
-#     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
-# 	      [ 1.0, 0.0, 2.0 ] ],
-#     "tm" => [ [ 0.3, 0.0, 0.5 ],    # translation model
-# 	      [ 0.2, 0.0, 0.5 ],
-# 	      [ 0.3, 0.0, 0.5 ],
-# 	      [ 0.2, 0.0, 0.5 ],
-# 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
-#     "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
-#     "I"  => [ [ 0.0,-1.0, 1.0 ] ],  # input lattice scores
-
-
-
-# moses.ini file uses FULL names for lambdas, while this training script
-# internally (and on the command line) uses ABBR names.
-my @ABBR_FULL_MAP = qw(d=weight-d lm=weight-l tm=weight-t w=weight-w
-  g=weight-generation lex=weight-lex I=weight-i dlm=weight-dlm pp=weight-pp wt=weight-wt pb=weight-pb lex=weight-lex glm=weight-glm);
-my %ABBR2FULL = map { split /=/, $_, 2 } @ABBR_FULL_MAP;
-my %FULL2ABBR = map { my ($a, $b) = split /=/, $_, 2; ($b, $a); } @ABBR_FULL_MAP;
-
 my $minimum_required_change_in_weights = 0.00001;
     # stop if no lambda changes more than this
 
@@ -727,7 +704,7 @@ while (1) {
     
     # Create an ini file for the interpolated phrase table
     $interpolated_config ="moses.interpolated.ini"; 
-    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "97");
+    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "99");
 
     # Append the multimodel weights
     open(ITABLE,">>$interpolated_config") || die "Failed to append weights to $interpolated_config";
@@ -1201,11 +1178,11 @@ sub run_decoder {
     my %model_weights;
     for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
       my $name = $featlist->{"names"}->[$i];
-      $model_weights{$name} = "-$name" if !defined $model_weights{$name};
+      $model_weights{$name} = "$name=" if !defined $model_weights{$name};
       $model_weights{$name} .= sprintf " %.6f", $vals[$i];
     }
     my $decoder_config = "";
-    $decoder_config = join(" ", values %model_weights) unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
+    $decoder_config = "-weight-overwrite '" . join(" ", values %model_weights) ."'" unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
     $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
     $decoder_config .= " -report-segmentation" if $__PROMIX_TRAINING;
     print STDERR "DECODER_CFG = $decoder_config\n";
@@ -1245,8 +1222,6 @@ sub insert_ranges_to_featlist {
       if ($namedpair =~ /^(.*?):/) {
         $name = $1;
         $namedpair =~ s/^.*?://;
-        die "Unrecognized name '$name' in --range=$range"
-          if !defined $ABBR2FULL{$name};
       }
       my ($min, $max) = split /\.\./, $namedpair;
       die "Bad min '$min' in --range=$range" if $min !~ /^-?[0-9.]+$/;
@@ -1309,15 +1284,17 @@ sub get_featlist_from_file {
   while (<$fh>) {
     $nr++;
     chomp;
-    /^(.+) (\S+) (\S+)$/ || die "invalid feature: $_";
-    my ($longname, $feature, $value) = ($1, $2, $3);
-    next if $value eq "sparse";
-    push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
-      if $value !~ /^[+-]?[0-9.\-e]+$/;
-    push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
-      if !defined $ABBR2FULL{$feature};
-    push @names, $feature;
-    push @startvalues, $value;
+    /^(\S+)= (.+)$/ || die "invalid feature: $_";
+    my ($longname, $valuesStr) = ($1, $2);
+    next if $valuesStr eq "sparse";
+    
+    my @values = split(/ /, $valuesStr);
+		foreach my $value (@values) {
+			push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
+				if $value !~ /^[+-]?[0-9.\-e]+$/;
+			push @names, $longname;
+			push @startvalues, $value;
+    }
   }
   close $fh;
 
@@ -1348,7 +1325,7 @@ sub get_order_of_scores_from_nbestlist {
   foreach my $tok (split /\s+/, $scores) {
     if ($tok =~ /.+_.+:/) {
       $sparse = 1;
-    } elsif ($tok =~ /^([a-z][0-9a-z]*):/i) {
+    } elsif ($tok =~ /^([a-z][0-9a-z]*)=/i) {
       $label = $1;
     } elsif ($tok =~ /^-?[-0-9.\-e]+$/) {
       if (!$sparse) {
@@ -1375,6 +1352,13 @@ sub create_config {
   my $bleu_achieved       = shift; # just for verbosity
   my $sparse_weights_file = shift; # only defined when optimizing sparse features
 
+  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    my $val = $featlist->{"values"}->[$i];
+    # ensure long name
+		print STDERR "featlist: $name=$val \n";
+  }
+
   my %P; # the hash of all parameters we wish to override
 
   # first convert the command line parameters to the hash
@@ -1387,30 +1371,13 @@ sub create_config {
     foreach (split(/ /, $___DECODER_FLAGS)) {
       if (/^\-([^\d].*)$/) {
         $parameter = $1;
-        $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
       } else {
-        die "Found value with no -paramname before it: $_"
+				my $value = $_;
+        die "Found value with no -paramname before it: $value"
             if !defined $parameter;
-        push @{$P{$parameter}}, $_;
+        push @{$P{$parameter}}, $value;
       }
     }
-  }
-
-  # First delete all weights params from the input, we're overwriting them.
-  # Delete both short and long-named version.
-  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
-    my $name = $featlist->{"names"}->[$i];
-    delete($P{$name});
-    delete($P{$ABBR2FULL{$name}});
-  }
-
-  # Convert weights to elements in P
-  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
-    my $name = $featlist->{"names"}->[$i];
-    my $val = $featlist->{"values"}->[$i];
-    $name = defined $ABBR2FULL{$name} ? $ABBR2FULL{$name} : $name;
-    # ensure long name
-    push @{$P{$name}}, $val;
   }
 
   if (defined($sparse_weights_file)) {
@@ -1442,31 +1409,28 @@ sub create_config {
 
     # parameter name
     my $parameter = $1;
-    $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
-    print $out "[$parameter]\n";
 
-    # change parameter, if new values
-    if (defined($P{$parameter})) {
-      # write new values
-      foreach (@{$P{$parameter}}) {
-        print $out $_ . "\n";
-      }
-      delete($P{$parameter});
-      # skip until new parameter, only write comments
-      while ($line = <$ini_fh>) {
-        print $out $line if $line =~ /^\#/ || $line =~ /^\s+$/;
-        last if $line =~ /^\[/;
-        last unless $line;
-      }
-      next;
-    }
-
-    # unchanged parameter, write old
-    while ($line = <$ini_fh>) {
-      last if $line =~ /^\[/;
-      print $out $line;
-    }
-  }
+		if ($parameter eq "weight") {
+			# leave weights 'til last. We're changing it
+			while ($line = <$ini_fh>) {
+			  last if $line =~ /^\[/;
+			}
+		}
+	  elsif (defined($P{$parameter})) {
+			# found a param (thread, verbose etc) that we're overriding. Leave to the end
+			while ($line = <$ini_fh>) {
+			  last if $line =~ /^\[/;
+			}
+	  }
+		else {
+			# unchanged parameter, write old
+			print $out "[$parameter]\n";
+			while ($line = <$ini_fh>) {
+				last if $line =~ /^\[/;
+				print $out $line;
+			}
+		}
+	}
 
   # write all additional parameters
   foreach my $parameter (keys %P) {
@@ -1475,6 +1439,26 @@ sub create_config {
       print $out $_."\n";
     }
   }
+
+  # write all weights
+  print $out "[weight]\n";
+  
+  my $prevName = "";
+  my $outStr = "";
+  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    my $val = $featlist->{"values"}->[$i];
+    
+    if ($prevName eq $name) {
+      $outStr .= " $val";
+    }
+    else {
+  		print $out "$outStr\n";
+  		$outStr = "$name= $val";
+  		$prevName = $name;
+    }
+  }
+	print $out "$outStr\n";
 
   close $ini_fh;
   close $out;

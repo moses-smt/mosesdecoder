@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_TargetPhraseCollection_h
 
 #include <vector>
+#include <iostream>
 #include "TargetPhrase.h"
 #include "Util.h"
 
@@ -33,6 +34,8 @@ namespace Moses
 class TargetPhraseCollection
 {
 protected:
+  friend std::ostream& operator<<(std::ostream &, const TargetPhraseCollection &);
+
   std::vector<TargetPhrase*> m_collection;
 
 public:

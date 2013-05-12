@@ -6,11 +6,45 @@
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
 #include "TranslationOption.h"
+#include "UserMessage.h"
 #include "util/string_piece_hash.hh"
 
 namespace Moses {
 
 using namespace std;
+
+TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
+:StatelessFeatureFunction("TargetWordInsertionFeature", 0, line),
+m_unrestricted(true)
+{
+  std::cerr << "Initializing target word insertion feature.." << std::endl;
+
+  string filename;
+
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
+
+    if (args[0] == "factor") {
+      m_factorType = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "path") {
+      filename = args[1];
+    }
+    else {
+      throw "Unknown argument " + args[0];
+    }
+  }
+
+  // load word list for restricted feature set
+  if (filename != "") {
+    cerr << "loading target word insertion word list from " << filename << endl;
+    if (!Load(filename)) {
+      UserMessage::Add("Unable to load word list for target word insertion feature from file " + filename);
+      //return false;
+    }
+  }
+
+}
 
 bool TargetWordInsertionFeature::Load(const std::string &filePath) 
 {
@@ -50,6 +84,13 @@ void TargetWordInsertionFeature::EvaluateChart(
 	ComputeFeatures(targetPhrase, accumulator, alignmentInfo);
 }
 
+void TargetWordInsertionFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+
+}
+
 void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
     											 ScoreComponentCollection* accumulator,
     											 const AlignmentInfo &alignmentInfo) const
@@ -74,10 +115,10 @@ void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhras
     if (!aligned[i]) {
       Word w = targetPhrase.GetWord(i);
       if (!w.IsNonTerminal()) {
-    	const StringPiece &word = w.GetFactor(m_factorType)->GetString();
+    	const StringPiece word = w.GetFactor(m_factorType)->GetString();
     	if (word != "<s>" && word != "</s>") {
-      	  if (!m_unrestricted && FindStringPiece(m_vocab, word) == m_vocab.end()) {
-      		accumulator->PlusEquals(this,"OTHER",1);
+      	  if (!m_unrestricted && FindStringPiece(m_vocab, word ) == m_vocab.end()) {
+      		accumulator->PlusEquals(this,StringPiece("OTHER"),1);
       	  }
       	  else {
       		accumulator->PlusEquals(this,word,1);

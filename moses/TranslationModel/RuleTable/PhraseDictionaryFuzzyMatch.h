@@ -40,8 +40,7 @@ namespace Moses
     friend class RuleTableLoader;
     
   public:
-    PhraseDictionaryFuzzyMatch(size_t numScoreComponents,
-                              PhraseDictionaryFeature* feature);
+    PhraseDictionaryFuzzyMatch(const std::string &line);
     bool Load(const std::vector<FactorType> &input
               , const std::vector<FactorType> &output
               , const std::string &initStr
@@ -56,16 +55,12 @@ namespace Moses
                                                     const InputType &,
                                                     const ChartCellCollectionBase &);
     void InitializeForInput(InputType const& inputSentence);
-    void CleanUp(const InputType& source);
+    void CleanUpAfterSentenceProcessing(const InputType& source);
     
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const
     {
       assert(false);
       return NULL;
-    }
-    virtual DecodeType GetDecodeType() const
-    {
-      assert(false);
     }
     
     TO_STRING();

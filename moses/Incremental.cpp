@@ -4,7 +4,6 @@
 #include "moses/ChartParserCallback.h"
 #include "moses/FeatureVector.h"
 #include "moses/StaticData.h"
-#include "moses/TranslationSystem.h"
 #include "moses/Util.h"
 
 #include "lm/model.hh"
@@ -172,19 +171,18 @@ struct ChartCellBaseFactory {
 
 } // namespace
 
-Manager::Manager(const InputType &source, const TranslationSystem &system) :
+Manager::Manager(const InputType &source) :
   source_(source),
-  system_(system),
   cells_(source, ChartCellBaseFactory()),
-  parser_(source, system, cells_),
+  parser_(source, cells_),
   n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
 
 Manager::~Manager() {
-  system_.CleanUpAfterSentenceProcessing(source_);
 }
 
 template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out) {
-  const LanguageModel &abstract = **system_.GetLanguageModels().begin();
+  const LMList &lmList = StaticData::Instance().GetLMList();
+  const LanguageModel &abstract = **lmList.begin();
   const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
   search::Config config(abstract.GetWeight(), data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
@@ -238,9 +236,10 @@ template void Manager::LMCallback<lm::ngram::ArrayTrieModel>(const lm::ngram::Ar
 template void Manager::LMCallback<lm::ngram::QuantArrayTrieModel>(const lm::ngram::QuantArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 
 const std::vector<search::Applied> &Manager::ProcessSentence() {
-  const LMList &lms = system_.GetLanguageModels();
-  UTIL_THROW_IF(lms.size() != 1, util::Exception, "Incremental search only supports one language model.");
-  (*lms.begin())->IncrementalCallback(*this);
+  const LMList &lmList = StaticData::Instance().GetLMList();
+
+  UTIL_THROW_IF(lmList.size() != 1, util::Exception, "Incremental search only supports one language model.");
+  (*lmList.begin())->IncrementalCallback(*this);
   return *completed_nbest_;
 }
 
@@ -278,7 +277,7 @@ void ToPhrase(const search::Applied final, Phrase &out) {
   AppendToPhrase(final, out, NoOp());
 }
 
-void PhraseAndFeatures(const TranslationSystem &system, const search::Applied final, Phrase &phrase, ScoreComponentCollection &features) {
+void PhraseAndFeatures(const search::Applied final, Phrase &phrase, ScoreComponentCollection &features) {
   phrase.Clear();
   features.ZeroAll();
   AppendToPhrase(final, phrase, AccumScore(features));
@@ -286,10 +285,12 @@ void PhraseAndFeatures(const TranslationSystem &system, const search::Applied fi
   // If we made it this far, there is only one language model.  
   float full, ignored_ngram;
   std::size_t ignored_oov;
-  const LanguageModel &model = **system.GetLanguageModels().begin();
+
+  const LMList &lmList = StaticData::Instance().GetLMList();
+  const LanguageModel &model = **lmList.begin();
   model.CalcScore(phrase, full, ignored_ngram, ignored_oov);
   // CalcScore transforms, but EvaluateChart doesn't.  
-  features.Assign(&model, UntransformLMScore(full));
+  features.Assign(&model, full);
 }
 
 } // namespace Incremental

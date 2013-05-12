@@ -17,11 +17,13 @@ class Phrase;
 
 /** @todo ask ollie
  */
-class LanguageModelORLM : public LanguageModelPointerState {
+class LanguageModelORLM : public LanguageModelSingleFactor {
 public:
   typedef count_t T;  // type for ORLM filter
-  LanguageModelORLM()
-    : m_lm(0) {}
+  LanguageModelORLM(const std::string &line)
+    :LanguageModelSingleFactor("ORLM", line)
+    ,m_lm(0)
+  {}
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
   ~LanguageModelORLM() {
@@ -33,10 +35,7 @@ public:
     delete m_lm;
   }
   void CleanUpAfterSentenceProcessing() {m_lm->clearCache();} // clear caches
-  void InitializeBeforeSentenceProcessing() { // nothing to do
-    //m_lm->initThreadSpecificData(); // Creates thread specific data iff
-                                    // compiled with multithreading.
-  }
+
   bool UpdateORLM(const std::vector<string>& ngram, const int value);
  protected:
   OnlineRLM<T>* m_lm;

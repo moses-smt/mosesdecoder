@@ -10,21 +10,67 @@
 
 namespace Moses
 {
-  //  asnteousntaoheisnthaoesntih
-  SyntacticLanguageModel::SyntacticLanguageModel(const std::vector<std::string>& filePath,
-						 const std::vector<float>& weights,
-						 const FactorType factorType,
-						 size_t beamWidth) 
-    // Initialize member variables  
+  SyntacticLanguageModel::SyntacticLanguageModel(const std::string &line)
+  // Initialize member variables
+  /*
   : m_NumScoreComponents(weights.size())
   , m_files(new SyntacticLanguageModelFiles<YModel,XModel>(filePath))
   , m_factorType(factorType)
   , m_beamWidth(beamWidth) {
+  */
+  {
+    /* taken from StaticData::LoadSyntacticLanguageModel()
+          cerr << "Loading syntactic language models..." << std::endl;
 
-    // Inform Moses score manager of this feature and its weight(s)
-    const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-    const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
-    VERBOSE(3,"Constructed SyntacticLanguageModel" << endl);
+    const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
+    const vector<string> files = m_parameter->GetParam("slmodel-file");
+
+    const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
+      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
+      : 0;
+
+    const size_t beamWidth = (m_parameter->GetParam("slmodel-beam").size() > 0) ?
+      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-beam")[0]))
+      : 500;
+
+    if (files.size() < 1) {
+      cerr << "No syntactic language model files specified!" << std::endl;
+      return false;
+    }
+
+    // check if feature is used
+    if (weights.size() >= 1) {
+
+      //cout.setf(ios::scientific,ios::floatfield);
+      //cerr.setf(ios::scientific,ios::floatfield);
+
+      // create the feature
+      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth);
+
+
+      /////////////////////////////////////////
+      // BEGIN LANE's UNSTABLE EXPERIMENT :)
+      //
+
+      //double ppl = m_syntacticLanguageModel->perplexity();
+      //cerr << "Probability is " << ppl << endl;
+
+
+      //
+      // END LANE's UNSTABLE EXPERIMENT
+      /////////////////////////////////////////
+
+
+
+      if (m_syntacticLanguageModel==NULL) {
+        return false;
+      }
+
+    }
+
+    return true;
+
+     */
   }
 
   SyntacticLanguageModel::~SyntacticLanguageModel() {
@@ -36,12 +82,8 @@ namespace Moses
     return m_NumScoreComponents;
   }
 
-  std::string SyntacticLanguageModel::GetScoreProducerDescription(unsigned) const {
-    return "Syntactic Language Model";
-  }
-
-  std::string SyntacticLanguageModel::GetScoreProducerWeightShortName(unsigned) const {
-    return "slm";
+  std::string SyntacticLanguageModel::GetScoreProducerDescription() const {
+    return "SyntacticLM";
   }
 
   const FFState* SyntacticLanguageModel::EmptyHypothesisState(const InputType &input) const {
