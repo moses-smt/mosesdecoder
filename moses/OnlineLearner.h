@@ -69,7 +69,7 @@ private:
 public:
 	SparseVec sparsevector;
 	OnlineLearner(float f_learningrate, float w_learningrate);
-	OnlineLearner(float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
+	OnlineLearner(int setAlgo, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
 			float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam);
 	bool SetPostEditedSentence(std::string s);
 	void RunOnlineLearning(Manager& manager);
