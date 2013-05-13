@@ -163,7 +163,7 @@ public:
                              ScoreComponentCollection* accumulator) const  = 0;
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return CacheableInPhraseTable; }
+  { return RequiresTargetPhrase; }
 
   bool IsStateless() const
   { return true; }

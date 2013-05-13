@@ -85,7 +85,7 @@ public:
 
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return DependsOnSource; }
+  { return RequiresSource; }
 
 };
 

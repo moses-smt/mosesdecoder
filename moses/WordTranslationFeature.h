@@ -58,7 +58,7 @@ public:
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 
   StatelessFeatureType GetStatelessFeatureType() const
-  { return NotCacheable; }
+  { return RequiresSegmentation; }
 };
 
 }
