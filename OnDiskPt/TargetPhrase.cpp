@@ -244,7 +244,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   }
 
   // scores
-  ret->SetScore(&phraseDict, m_scores);
+  ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);
   ret->Evaluate();
 
   // alignments

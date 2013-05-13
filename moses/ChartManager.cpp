@@ -134,8 +134,8 @@ void ChartManager::AddXmlChartOptions() {
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    Moses::Scores wordPenaltyScore(1, -1);
-    opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((FeatureFunction*)staticData.GetWordPenaltyProducer(), wordPenaltyScore);
+    TargetPhrase &targetPhrase = *opt->GetTargetPhraseCollection().GetCollection()[0];
+    targetPhrase.GetScoreBreakdown().Assign(staticData.GetWordPenaltyProducer(), -1);
 
     const WordsRange &range = opt->GetSourceWordsRange();
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );

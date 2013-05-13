@@ -52,7 +52,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     //std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 
-    targetPhrase->SetScore(this, scoreVector);
+    targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
     targetPhrase->Evaluate();
 
     //cout << *targetPhrase << "\t" << std::setprecision(8) << scoreVector[2] << endl;

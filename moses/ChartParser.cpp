@@ -44,7 +44,6 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
-  vector<float> wordPenaltyScore(1, -1);
   
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
@@ -84,11 +83,11 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetWord.CreateUnknownWord(sourceWord);
       
       // scores
-      vector<float> unknownScore(1, FloorScore(TransformScore(prob)));
-      
-      //targetPhrase->SetScore();
-      targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->SetScore(staticData.GetWordPenaltyProducer(), wordPenaltyScore);
+      float unknownScore = FloorScore(TransformScore(prob));
+
+      targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
+      targetPhrase->Evaluate();
+
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
@@ -98,7 +97,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
     } // for (iterLHS
   } else {
     // drop source word. create blank trans opt
-    vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
+    float unknownScore = FloorScore(-numeric_limits<float>::infinity());
     
     TargetPhrase *targetPhrase = new TargetPhrase();
     // loop
@@ -112,8 +111,10 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
       CHECK(targetLHS.GetFactor(0) != NULL);
       
+      targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
+      targetPhrase->Evaluate();
+
       targetPhrase->SetSourcePhrase(*unksrc);
-      targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
 
       // chart rule

@@ -65,7 +65,6 @@ public:
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
   // used to set translation or gen score
-  void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
   void SetXMLScore(float score);
   void SetInputScore(const Scores &scoreVector);
 

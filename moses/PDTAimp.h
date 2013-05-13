@@ -287,7 +287,7 @@ protected:
 
     targetPhrase.SetSourcePhrase(*srcPtr);
 
-    targetPhrase.SetScore(m_obj, scoreVector);
+    targetPhrase.GetScoreBreakdown().Assign(m_obj, scoreVector);
     targetPhrase.Evaluate();
   }
 
