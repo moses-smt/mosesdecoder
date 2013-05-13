@@ -630,13 +630,13 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-#ifdef LM_IRST
+//#ifdef LM_IRST
     else if (feature == "IRSTLM") {
       LanguageModelIRST *model = new LanguageModelIRST(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-#endif
+//#endif
     else if (feature == "Generation") {
       GenerationDictionary *model = new GenerationDictionary(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());

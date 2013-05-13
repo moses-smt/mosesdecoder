@@ -127,7 +127,6 @@ FeatureFunction::~FeatureFunction() {}
 
 void FeatureFunction::ParseLine(const std::string& description, const std::string &line)
 {
-  cerr << "line=" << line << endl;
   vector<string> toks = Tokenize(line);
 
   CHECK(toks.size());
