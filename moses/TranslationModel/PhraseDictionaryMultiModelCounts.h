@@ -81,7 +81,7 @@ typedef std::vector< std::set<size_t> > AlignVector;
 public:
   PhraseDictionaryMultiModelCounts(const std::string &line);
   ~PhraseDictionaryMultiModelCounts();
-  bool Load(const std::vector<FactorType> &input
+  bool InitDictionary(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
             , const std::vector<std::string> &files
             , const std::vector<float> &weight

@@ -55,15 +55,7 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &descri
 {
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
-    if (args[0] == "mode") {
-      m_mode =args[1];
-      if (m_mode != "interpolate") {
-        ostringstream msg;
-        msg << "combination mode unknown: " << m_mode;
-        throw runtime_error(msg.str());
-      }
-    }
-    else if (args[0] == "components") {
+    if (args[0] == "components") {
       m_pdStr = Tokenize(args[1], ",");
       m_numModels = m_pdStr.size();
     }

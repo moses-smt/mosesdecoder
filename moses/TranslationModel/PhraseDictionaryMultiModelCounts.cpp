@@ -58,6 +58,24 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
     m_combineFunction = InstanceWeighting;
     //m_mode = "interpolate";
     //m_combineFunction = LinearInterpolationFromCounts;
+
+    for (size_t i = 0; i < m_args.size(); ++i) {
+      const vector<string> &args = m_args[i];
+      if (args[0] == "mode") {
+        m_mode =args[1];
+        if (m_mode == "instance_weighting")
+          m_combineFunction = InstanceWeighting;
+        else if (m_mode == "interpolate")
+          m_combineFunction = LinearInterpolationFromCounts;
+        else {
+          ostringstream msg;
+          msg << "combination mode unknown: " << m_mode;
+          throw runtime_error(msg.str());
+        }
+
+      }
+    } // for
+
 }
 
 PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
@@ -68,7 +86,7 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
     RemoveAllInColl(m_inverse_pd);
 }
 
-bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
+bool PhraseDictionaryMultiModelCounts::InitDictionary(const vector<FactorType> &input
                                   , const vector<FactorType> &output
                                   , const vector<string> &config
                                   , const vector<float> &weight
@@ -77,25 +95,6 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
                                   , const LMList &languageModels
                                   , float weightWP)
 {
-  m_input = input;
-  m_output = output;
-  m_tableLimit = tableLimit;
-
-  m_mode = config[4];
-  std::vector<std::string> files(config.begin()+5,config.end());
-
-  m_numModels = files.size();
-
-  if (m_mode == "instance_weighting")
-    m_combineFunction = InstanceWeighting;
-  else if (m_mode == "interpolate")
-    m_combineFunction = LinearInterpolationFromCounts;
-  else {
-    ostringstream msg;
-    msg << "combination mode unknown: " << m_mode;
-    throw runtime_error(msg.str());
-  }
-
   for(size_t i = 0; i < m_numModels; ++i){
 
       string impl, file, main_table, target_table, lex_e2f, lex_f2e;
