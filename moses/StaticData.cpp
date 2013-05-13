@@ -55,9 +55,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "LM/Ken.h"
 
-#ifdef LM_IRST
+//#ifdef LM_IRST
 #include "LM/IRST.h"
-#endif
+//#endif
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
