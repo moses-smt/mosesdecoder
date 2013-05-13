@@ -40,6 +40,7 @@ lib moses :
   TranslationModel/RuleTable/*.cpp
   TranslationModel/Scope3Parser/*.cpp
   TranslationModel/CYKPlusParser/*.cpp
+  OnlineLearning/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
