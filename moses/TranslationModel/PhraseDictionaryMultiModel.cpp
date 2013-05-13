@@ -140,6 +140,9 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           multiModelStatistics * statistics = new multiModelStatistics;
           statistics->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
 
+          // zero out scores from original phrase table
+          statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
+
           Scores scoreVector(m_numScoreComponents);
           statistics->p.resize(m_numScoreComponents);
           for(size_t j = 0; j < m_numScoreComponents; ++j){

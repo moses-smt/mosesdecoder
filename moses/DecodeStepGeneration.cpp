@@ -142,7 +142,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
 
     const TargetPhrase &inPhrase = inputPartialTranslOpt.GetTargetPhrase();
     TargetPhrase outPhrase(inPhrase);
-    outPhrase.SetScore(generationScore);
+    outPhrase.GetScoreBreakdown().PlusEquals(generationScore);
 
     outPhrase.MergeFactors(genPhrase, m_newOutputFactors);
     const WordsRange &sourceWordsRange = inputPartialTranslOpt.GetSourceWordsRange();
