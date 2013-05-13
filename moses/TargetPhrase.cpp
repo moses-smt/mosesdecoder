@@ -86,7 +86,19 @@ void TargetPhrase::Evaluate()
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    if (!ff.IsDecodeFeature()) {
+    bool evaluate = false;
+
+    if (!ff.IsStateless()) {
+      evaluate = true;
+    }
+    else {
+      const StatelessFeatureFunction &sff = static_cast<const StatelessFeatureFunction&>(ff);
+      if (sff.GetStatelessFeatureType() != SetByOriginator) {
+        evaluate = true;
+      }
+    }
+
+    if (evaluate) {
       ff.Evaluate(*this, m_scoreBreakdown, futureScoreBreakdown);
     }
   }

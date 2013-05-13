@@ -132,9 +132,6 @@ public:
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const = 0;
 
-  virtual bool IsDecodeFeature() const
-  { return false; }
-
 };
 
 /** base class for all stateless feature functions.

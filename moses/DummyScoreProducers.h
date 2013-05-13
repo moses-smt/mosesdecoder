@@ -96,10 +96,8 @@ public:
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const;
 
-  bool IsDecodeFeature() const
-  { return true; }
-
-
+  StatelessFeatureType GetStatelessFeatureType() const
+  { return SetByOriginator; }
 };
 
 class MetaFeatureProducer : public StatelessFeatureFunction
