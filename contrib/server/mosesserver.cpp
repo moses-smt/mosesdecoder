@@ -203,7 +203,7 @@ public:
           insertTranslationOptions(manager,retData);
         }
         if (nbest_size>0) {
-          outputNBest(manager, system, retData, nbest_size, nbest_distinct, reportAllFactors);
+          outputNBest(manager, retData, nbest_size, nbest_distinct, reportAllFactors);
         }
     }
     pair<string, xmlrpc_c::value>
@@ -290,7 +290,6 @@ public:
   }
 
   void outputNBest(const Manager& manager,
-                   const TranslationSystem& system,
                    map<string, xmlrpc_c::value>& retData,
                    const int n=100,
                    const bool distinct=false,
