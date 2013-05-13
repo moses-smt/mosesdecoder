@@ -39,7 +39,6 @@ namespace Moses
 
 class LMList;
 class FeatureFunction;
-class TranslationSystem;
 class WordPenaltyProducer;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)

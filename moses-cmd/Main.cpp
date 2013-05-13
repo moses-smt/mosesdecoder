@@ -118,13 +118,11 @@ public:
     const StaticData &staticData = StaticData::Instance();
     // input sentence
     Sentence sentence();
-    // set translation system
-    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
     // execute the translation
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
-    Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm(), &system);
+    Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm());
     manager.ProcessSentence();
 
     // output word graph
@@ -381,7 +379,7 @@ public:
       TrellisPathList nBestList;
       ostringstream out;
       manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-      OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), *manager.GetTranslationSystem(), m_lineNumber,
+      OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_lineNumber,
 		  staticData.GetReportSegmentation());
       m_nbestCollector->Write(m_lineNumber, out.str());
     }
@@ -391,7 +389,7 @@ public:
       TrellisPathList latticeSamples;
       ostringstream out;
       manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), *manager.GetTranslationSystem(), m_lineNumber,
+      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_lineNumber,
 		  staticData.GetReportSegmentation());
       m_latticeSamplesCollector->Write(m_lineNumber, out.str());
     }
@@ -400,7 +398,7 @@ public:
     if (m_detailedTranslationCollector) {
       ostringstream out;
       fix(out,PRECISION);
-      TranslationAnalysis::PrintTranslationAnalysis(manager.GetTranslationSystem(), out, manager.GetBestHypothesis());
+      TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
       m_detailedTranslationCollector->Write(m_lineNumber,out.str());
     }
 
@@ -470,7 +468,6 @@ static void ShowWeights()
   //TODO: Find a way of ensuring this order is synced with the nbest
   fix(cout,6);
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 
@@ -517,7 +514,6 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
   outputSearchGraphStream.precision(6);
 
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;

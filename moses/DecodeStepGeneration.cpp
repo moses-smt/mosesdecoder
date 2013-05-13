@@ -59,8 +59,7 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
   }
 }
 
-void DecodeStepGeneration::Process(const TranslationSystem* system
-                                   , const TranslationOption &inputPartialTranslOpt
+void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
                                    , const DecodeStep &decodeStep
                                    , PartialTranslOptColl &outputPartialTranslOptColl
                                    , TranslationOptionCollection * /* toc */
@@ -70,7 +69,7 @@ void DecodeStepGeneration::Process(const TranslationSystem* system
     // word deletion
 
     TranslationOption *newTransOpt = new TranslationOption(inputPartialTranslOpt);
-    outputPartialTranslOptColl.Add(system, newTransOpt);
+    outputPartialTranslOptColl.Add(newTransOpt);
 
     return;
   }
@@ -151,7 +150,7 @@ void DecodeStepGeneration::Process(const TranslationSystem* system
     TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
     assert(newTransOpt);
 
-    outputPartialTranslOptColl.Add(system, newTransOpt);
+    outputPartialTranslOptColl.Add(newTransOpt);
 
     // increment iterators
     IncrementIterators(wordListIterVector, wordListVector);

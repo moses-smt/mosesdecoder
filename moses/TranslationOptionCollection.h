@@ -62,7 +62,6 @@ class TranslationOptionCollection
   friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
   TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
 protected:
-  const TranslationSystem* m_system;
   std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
   InputType const			&m_source; /*< reference to the input */
   SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
@@ -70,7 +69,7 @@ protected:
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<Phrase*> m_unksrcs;
 
-  TranslationOptionCollection(const TranslationSystem* system, InputType const& src, size_t maxNoTransOptPerCoverage,
+  TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
 
   void CalcFutureScore();

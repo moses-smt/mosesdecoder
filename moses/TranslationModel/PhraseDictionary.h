@@ -46,7 +46,6 @@ class StaticData;
 class InputType;
 class WordsRange;
 class ChartCellCollectionBase;
-class TranslationSystem;
 class ChartRuleLookupManager;
 
 /**

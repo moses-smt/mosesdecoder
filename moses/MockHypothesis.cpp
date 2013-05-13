@@ -40,7 +40,7 @@ MockHypothesisGuard::MockHypothesisGuard(
   m_wp("WordPenalty"),
   m_uwp("UnknownWordPenalty"),
   m_dist("Distortion"),
-  m_manager(0,m_sentence,Normal,&m_system)
+  m_manager(0,m_sentence,Normal)
 {
   BOOST_CHECK_EQUAL(alignments.size(), targetSegments.size());
 

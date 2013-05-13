@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DummyScoreProducers.h"
 #include "Hypothesis.h"
 #include "Manager.h"
-#include "TranslationSystem.h"
 
 namespace MosesTest {
 
@@ -57,7 +56,6 @@ class MockHypothesisGuard {
     Moses::WordPenaltyProducer m_wp;
     Moses::UnknownWordPenaltyProducer m_uwp;
     Moses::DistortionScoreProducer m_dist;
-    Moses::TranslationSystem m_system;
     Moses::Manager m_manager;
     Moses::Hypothesis* m_hypothesis;
     std::vector<Moses::TargetPhrase> m_targetPhrases;

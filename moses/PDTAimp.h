@@ -141,7 +141,6 @@ protected:
     }
 
     //TODO: Multiple models broken here
-    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
     std::vector<float> weights = StaticData::Instance().GetWeights(m_obj);
     float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
@@ -367,7 +366,6 @@ protected:
     for(Position i=0 ; i < srcSize ; ++i)
       stack.push_back(State(i, i, m_dict->GetRoot(), std::vector<float>(m_numInputScores,0.0)));
 
-    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
     std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj);
     float weightWP = StaticData::Instance().GetWeightWordPenalty();
 

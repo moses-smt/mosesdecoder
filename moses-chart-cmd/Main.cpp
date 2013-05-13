@@ -91,13 +91,12 @@ public:
 
   void Run() {
     const StaticData &staticData = StaticData::Instance();
-    const TranslationSystem &system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
     const size_t translationId = m_source->GetTranslationId();
 
     VERBOSE(2,"\nTRANSLATING(" << translationId << "): " << *m_source);
 
     if (staticData.GetSearchAlgorithm() == ChartIncremental) {
-      Incremental::Manager manager(*m_source, system);
+      Incremental::Manager manager(*m_source);
       const std::vector<search::Applied> &nbest = manager.ProcessSentence();
       if (!nbest.empty()) {
         m_ioWrapper.OutputBestHypo(nbest[0], translationId);
@@ -105,11 +104,11 @@ public:
         m_ioWrapper.OutputBestNone(translationId);
       }
       if (staticData.GetNBestSize() > 0)
-        m_ioWrapper.OutputNBestList(nbest, system, translationId);
+        m_ioWrapper.OutputNBestList(nbest, translationId);
       return;
     }
 
-    ChartManager manager(*m_source, &system);
+    ChartManager manager(*m_source);
     manager.ProcessSentence();
 
     CHECK(!staticData.UseMBR());
@@ -136,7 +135,7 @@ public:
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
       ChartTrellisPathList nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-      m_ioWrapper.OutputNBestList(nBestList, &system, translationId);
+      m_ioWrapper.OutputNBestList(nBestList, translationId);
       IFVERBOSE(2) {
         PrintUserTime("N-Best Hypotheses Generation Time:");
       }
@@ -209,7 +208,6 @@ static void ShowWeights()
 {
   fix(cout,6);
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 

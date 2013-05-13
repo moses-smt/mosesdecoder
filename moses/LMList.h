@@ -16,7 +16,7 @@ class LMList
 {
 protected:
 	typedef std::list < LanguageModel* > CollType;
-	CollType m_coll; 
+	CollType m_coll;
 	
 public:
 	typedef CollType::iterator iterator;
@@ -34,9 +34,11 @@ public:
 
 	LMList()
 	{}
-	
-	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, float &retOOVScore, ScoreComponentCollection* breakdown) const;
-	void Add(LanguageModel *lm);
+
+	void Add(LanguageModel *lm)	{
+		m_coll.push_back(lm);
+	}
+
 
 
 };

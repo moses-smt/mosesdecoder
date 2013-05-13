@@ -399,7 +399,7 @@ void IOWrapper::OutputBestNone(long translationId) {
   }
 }
 
-void IOWrapper::OutputAllFeatureScores(const TranslationSystem &system, const ScoreComponentCollection &features, std::ostream &out)
+void IOWrapper::OutputAllFeatureScores(const ScoreComponentCollection &features, std::ostream &out)
 {
   std::string lastName = "";
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
@@ -461,7 +461,7 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   }
 }
 
-void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const TranslationSystem* system, long translationId) {
+void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long translationId) {
   std::ostringstream out;
 
   // Check if we're writing to std::cout.
@@ -497,7 +497,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Tra
     // before each model type, the corresponding command-line-like name must be emitted
     // MERT script relies on this
 
-    OutputAllFeatureScores(*system, path.GetScoreBreakdown(), out);
+    OutputAllFeatureScores(path.GetScoreBreakdown(), out);
 
     // total
     out << " ||| " << path.GetTotalScore();
@@ -546,7 +546,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Tra
   m_nBestOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, const TranslationSystem &system, long translationId) {
+void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId) {
   std::ostringstream out;
   // wtf? copied from the original OutputNBestList
   if (m_nBestOutputCollector->OutputIsCout()) {
@@ -555,7 +555,7 @@ void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, const
   Phrase outputPhrase;
   ScoreComponentCollection features;
   for (std::vector<search::Applied>::const_iterator i = nbest.begin(); i != nbest.end(); ++i) {
-    Incremental::PhraseAndFeatures(system, *i, outputPhrase, features);
+    Incremental::PhraseAndFeatures(*i, outputPhrase, features);
     // <s> and </s>
     CHECK(outputPhrase.GetSize() >= 2);
     outputPhrase.RemoveWord(0);
@@ -563,7 +563,7 @@ void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, const
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
     out << " ||| ";
-    OutputAllFeatureScores(system, features, out);
+    OutputAllFeatureScores(features, out);
     out << " ||| " << i->GetScore() << '\n';
   }
   out << std::flush;

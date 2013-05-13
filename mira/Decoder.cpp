@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/ChartManager.h"
 #include "moses/Sentence.h"
 #include "moses/InputType.h"
-#include "moses/TranslationSystem.h"
 #include "moses/Phrase.h"
 #include "moses/TrellisPathList.h"
 #include "moses/ChartTrellisPathList.h"
@@ -74,7 +73,6 @@ namespace Mira {
 	  }
 	  delete[] mosesargv;
 
-	  const StaticData &staticData = StaticData::Instance();
 	  //m_bleuScoreFeature = staticData.GetBleuScoreFeature(); TODO
 	  assert(false);
   }
@@ -106,19 +104,17 @@ namespace Mira {
   	StaticData &staticData = StaticData::InstanceNonConst();
   	bool chartDecoding = (staticData.GetSearchAlgorithm() == ChartDecoding);
   	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength, chartDecoding);
-    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
     // run the decoder
     if (chartDecoding) {
     	return runChartDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
-    			featureValues, bleuScores, modelScores, numReturnedTranslations, realBleu, distinct, rank, epoch,
-    			system);
+    			featureValues, bleuScores, modelScores, numReturnedTranslations, realBleu, distinct, rank, epoch);
     }
     else {
     	SearchAlgorithm search = staticData.GetSearchAlgorithm();
     	return runDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
     			featureValues, bleuScores, modelScores, numReturnedTranslations, realBleu, distinct, rank, epoch,
-    			search, system, filename);
+    			search, filename);
     }
   }
 
@@ -136,10 +132,9 @@ namespace Mira {
   														size_t rank,
   														size_t epoch,
   														SearchAlgorithm& search,
-  														const TranslationSystem& system,
   														string filename) {
   	// run the decoder
-    m_manager = new Moses::Manager(0,*m_sentence, search, &system);
+    m_manager = new Moses::Manager(0,*m_sentence, search);
     m_manager->ProcessSentence();
     TrellisPathList nBestList;
     m_manager->CalcNBest(nBestSize, nBestList, distinct);
@@ -153,7 +148,7 @@ namespace Mira {
     		throw runtime_error(msg.str());
     	}
     	// TODO: handle sentence id (for now always 0)
-    	//OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
+    	//OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(), 0, false);
     	out.close();
     }
 
@@ -213,10 +208,9 @@ namespace Mira {
                               bool realBleu,
                               bool distinct,
                               size_t rank,
-                              size_t epoch,
-                              const TranslationSystem& system) {
+                              size_t epoch) {
   	// run the decoder
-    m_chartManager = new ChartManager(*m_sentence, &system);
+    m_chartManager = new ChartManager(*m_sentence);
     m_chartManager->ProcessSentence();
     ChartTrellisPathList nBestList;
     m_chartManager->CalcNBest(nBestSize, nBestList, distinct);
@@ -271,10 +265,9 @@ namespace Mira {
   	StaticData &staticData = StaticData::InstanceNonConst();
   	bool chartDecoding = (staticData.GetSearchAlgorithm() == ChartDecoding);
   	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength, chartDecoding);
-    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
     if (chartDecoding) {
-      m_chartManager = new ChartManager(*m_sentence, &system);
+      m_chartManager = new ChartManager(*m_sentence);
       m_chartManager->ProcessSentence();
       ChartTrellisPathList nBestList;
       m_chartManager->CalcNBest(nBestSize, nBestList, distinctNbest);
@@ -300,7 +293,7 @@ namespace Mira {
     }
     else {
     	// run the decoder
-      m_manager = new Moses::Manager(0,*m_sentence, staticData.GetSearchAlgorithm(), &system);
+      m_manager = new Moses::Manager(0,*m_sentence, staticData.GetSearchAlgorithm());
       m_manager->ProcessSentence();
       TrellisPathList nBestList;
       m_manager->CalcNBest(nBestSize, nBestList, distinctNbest);

@@ -380,7 +380,6 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 void OutputNBest(std::ostream& out
                   , const Moses::TrellisPathList &nBestList
                   , const std::vector<Moses::FactorType>& outputFactorOrder
-                  , const TranslationSystem &system
                   , long translationId
                   , bool reportSegmentation)
 {
@@ -404,7 +403,7 @@ void OutputNBest(std::ostream& out
     out << " |||";
 
     // print scores with feature names
-    OutputAllFeatureScores( system, path.GetScoreBreakdown(), out );
+    OutputAllFeatureScores(path.GetScoreBreakdown(), out );
 
     // total
     out << " ||| " << path.GetTotalScore();
@@ -453,9 +452,8 @@ void OutputNBest(std::ostream& out
   out << std::flush;
 }
 
-void OutputAllFeatureScores(const Moses::TranslationSystem &system
-                                          , const Moses::ScoreComponentCollection &features
-                                          , std::ostream &out)
+void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
+                            , std::ostream &out)
 {
   std::string lastName = "";
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();

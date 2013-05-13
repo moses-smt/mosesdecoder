@@ -181,8 +181,7 @@ public:
                 , BitmapContainer &parent
                 , const TranslationOptionList &translations
                 , const SquareMatrix &futureScore,
-                const InputType& source,
-                const TranslationSystem* system);
+                const InputType& source);
   ~BackwardsEdge();
 
   bool GetInitialized();

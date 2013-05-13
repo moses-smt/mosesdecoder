@@ -12,7 +12,7 @@ using namespace Moses;
 namespace TranslationAnalysis
 {
 
-void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os, const Hypothesis* hypo)
+void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 {
   os << std::endl << "TRANSLATION HYPOTHESIS DETAILS:" << std::endl;
   std::vector<const Hypothesis*> translationPath;

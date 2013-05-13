@@ -44,13 +44,12 @@ extern bool g_debug;
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.
  */
-ChartManager::ChartManager(InputType const& source, const TranslationSystem* system)
+ChartManager::ChartManager(InputType const& source)
   :m_source(source)
   ,m_hypoStackColl(source, *this)
-  ,m_system(system)
   ,m_start(clock())
   ,m_hypothesisId(0)
-  ,m_parser(source, *system, m_hypoStackColl)
+  ,m_parser(source, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
 {
 }

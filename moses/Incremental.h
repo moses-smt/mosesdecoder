@@ -13,12 +13,11 @@
 namespace Moses {
 class ScoreComponentCollection;
 class InputType;
-class TranslationSystem;
 namespace Incremental {
 
 class Manager {
   public:
-    Manager(const InputType &source, const TranslationSystem &system);
+    Manager(const InputType &source);
 
     ~Manager();
 
@@ -35,7 +34,6 @@ class Manager {
     template <class Model, class Best> search::History PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out);
 
     const InputType &source_;
-    const TranslationSystem &system_;
     ChartCellCollectionBase cells_;
     ChartParser parser_;
 
@@ -53,7 +51,7 @@ class Manager {
 // Just get the phrase.
 void ToPhrase(const search::Applied final, Phrase &out);
 // Get the phrase and the features.  
-void PhraseAndFeatures(const TranslationSystem &system, const search::Applied final, Phrase &phrase, ScoreComponentCollection &features);
+void PhraseAndFeatures(const search::Applied final, Phrase &phrase, ScoreComponentCollection &features);
 
 } // namespace Incremental
 } // namespace Moses
