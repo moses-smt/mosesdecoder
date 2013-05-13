@@ -244,7 +244,7 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 		if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 		{
 			m_featureIdx[sp][tp]=sparsevector.GetSize();
-			sparsevector.AddFeat(0.0);
+			sparsevector.AddFeat(0.0001);
 			m_PPindex++;
 			return;
 		}
@@ -252,7 +252,7 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 	else if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 	{
 		m_featureIdx[sp][tp]=sparsevector.GetSize();
-		sparsevector.AddFeat(0.0);
+		sparsevector.AddFeat(0.0001);
 		m_PPindex++;
 		return;
 	}
@@ -406,11 +406,13 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	std::vector<std::vector<float> > losses, BleuScores, BleuScoresHope, BleuScoresFear, lossesHope, lossesFear, modelScores;
 	std::vector<ScoreComponentCollection> featureValue,featureValueHope, featureValueFear, oraclefeatureScore;
 	std::vector<std::vector<ScoreComponentCollection> > featureValues, featureValuesHope, featureValuesFear;
-	vector<pp_list> OracleList;
+	std::map<int, map<string, map<string, int> > > OracleList;
 	TrellisPathList::const_iterator iter;
 	pp_list BestOracle,ShootemUp, ShootemDown;
 	float maxBleu=0.0, maxScore=0.0,oracleScore=0.0;
+	int whichoracle=-1;
 	for (iter = nBestList.begin(); iter != nBestList.end(); ++iter) {
+		whichoracle++;
 		const TrellisPath &path = **iter;
 		PP_ORACLE.clear();
 		const std::vector<const Hypothesis *> &edges = path.GetEdges();
@@ -429,14 +431,13 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			if(!has_only_spaces(sourceP) && !has_only_spaces(targetP) )
 			{
 				PP_ORACLE[sourceP][targetP]=1;
+				OracleList[whichoracle][sourceP][targetP]=1;
 				Insert(sourceP, targetP);
 			}
 		}
 		oracleScore=path.GetTotalScore();
-		OracleList.push_back(PP_ORACLE);
 		float oraclebleu = GetBleu(oracle.str(), m_postedited);
 		if(m_mira || update_weights){
-			cerr<<"Mira is activated and update weights is activated\n";
 			HypothesisList.push_back(oracle.str());
 			BleuScore.push_back(oraclebleu);
 			featureValue.push_back(path.GetScoreBreakdown());
@@ -484,7 +485,6 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 
 //	Update the features
 	if(update_features && m_perceptron){
-		cerr<<"update_features is activated and m_perceptron is activated\n";
 		pp_list::const_iterator it1;
 		for(it1=ShootemUp.begin(); it1!=ShootemUp.end(); it1++)
 		{
@@ -509,29 +509,35 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 
 	if(update_features && m_mira)
 	{
-		cerr<<"update_features is activated and m_mira is activated\n";
 		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
 		{
 			float bleuscore = BleuScore[i];
 			loss.push_back(maxBleu-bleuscore);
 		}
 		vector<vector<int> > FeatureIdxVec, oracleFeatureIdxVec;
-		pp_list::const_iterator it1;
+		pp_list::iterator it, it1;
 		for(int i=0;i<OracleList.size();i++){
-			for(it1=OracleList[i].begin(); it1!=OracleList[i].end(); it1++)
+			vector<int> FeatureVec;
+			for(it=OracleList[i].begin();it!=OracleList[i].end(); it++)
 			{
-				cerr<<"Phrase : "<<it1->first<<" : ";
-				std::map<std::string, int>::const_iterator itr1;
-				for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+				if(!(it->first.empty()))
 				{
-					int idx=RetrieveIdx(it1->first, itr1->first);
-					if(idx!=m_featureIdx.size()){
-						FeatureIdxVec[i].push_back(idx);
+					map<string, int>::iterator itr;
+					for(itr=it->second.begin();itr!=it->second.end(); itr++)
+					{
+						if(!(itr->first.empty()))
+						{
+							int idx=RetrieveIdx(it->first, itr->first);
+							if(idx!=m_featureIdx.size()){
+								FeatureVec.push_back(idx);
+							}
+						}
 					}
-					cerr<<it1->first<<" : ";
 				}
 			}
+			FeatureIdxVec.push_back(FeatureVec);
 		}
+		vector<int> oracleFeatureVec;
 		for(it1=BestOracle.begin(); it1!=BestOracle.end(); it1++)
 		{
 			std::map<std::string, int>::const_iterator itr1;
@@ -539,11 +545,11 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			{
 				int idx=RetrieveIdx(it1->first, itr1->first);
 				if(idx!=m_featureIdx.size()){
-					oracleFeatureIdxVec[0].push_back(idx);
+					oracleFeatureVec.push_back(idx);
 				}
 			}
 		}
-		cerr<<"constructed the index vectors for the sparsevector\n";
+		oracleFeatureIdxVec.push_back(oracleFeatureVec);
 		size_t update_status=optimiser->updateFeatures(sparsevector, FeatureIdxVec, loss, BleuScore,
 				modelScore, oracleFeatureIdxVec, oracleBleuScores[0], maxScore, flr);
 	}
@@ -551,7 +557,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 //	---------------------------------------------------------------------------------- //
 
 //	Update the weights
-	if(update_weights)
+	if(update_weights && m_mira)
 	{
 		cerr<<"update_weights is activated\n";
 		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores

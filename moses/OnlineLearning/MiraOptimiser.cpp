@@ -137,7 +137,7 @@ size_t MiraOptimiser::updateFeatures(
     const float oracleBleuScores,
     const float oracleModelScores,
     float learning_rate) {
-
+	cerr<<"Updating Features using MIRA\n";
 	vector<SparseVec> featureValueDiffs;
 	vector<float> lossMinusModelScoreDiffs;
 	vector<float> all_losses;
@@ -149,24 +149,32 @@ size_t MiraOptimiser::updateFeatures(
 	// loop iterating over all oracles.
 	for(int j=0;j<FeatureValues.size();j++){
 
-		for(int i=0;i<oracleFeatureValues[0].size();i++)
+		for(int i=0;i<oracleFeatureValues[0].size();i++){
 			featureValueDiff.Assign(oracleFeatureValues[0][i],UpdateVector.getElement(oracleFeatureValues[0][i]));
-
-		for(int i=0;i<FeatureValues[j].size();i++)
-			featureValueDiff.MinusEqualsFeat(FeatureValues[j][i],UpdateVector.getElement(FeatureValues[j][i]));
-
-		if (featureValueDiff.GetL1Norm() == 0) { // over sparse features values only
-			continue;
+//			cerr<<"Inserting from Oracle at : "<<oracleFeatureValues[0][i]<<" value : "<<UpdateVector.getElement(oracleFeatureValues[0][i])<<endl;
 		}
 
+		for(int i=0;i<FeatureValues[j].size();i++){
+			featureValueDiff.MinusEqualsFeat(FeatureValues[j][i],UpdateVector.getElement(FeatureValues[j][i]));
+//			cerr<<"Subtracting from features at : "<<oracleFeatureValues[0][i]<<" value : "<<UpdateVector.getElement(oracleFeatureValues[0][i])<<endl;
+		}
+
+//		if (featureValueDiff.GetL1Norm() == 0) { // over sparse features values only
+//			continue;
+//		}
+
 		float loss=losses[j];
+//		cerr<<"Loss : "<<loss<<endl;
 		bool violated = false;
 		float modelScoreDiff = oracleModelScores - modelScores[j];
 		float diff = 0;
 		if (loss > modelScoreDiff)
 			diff = loss - modelScoreDiff;
-		if (diff > epsilon)
+//		cerr<<"Diff : "<<diff<<endl;
+		if (diff > epsilon){
 			violated = true;
+//			cerr<<"Constraint violated!!!\n";
+		}
 
 		if (m_normaliseMargin) {
 			modelScoreDiff = (2*m_sigmoidParam/(1 + exp(-modelScoreDiff))) - m_sigmoidParam;
@@ -187,10 +195,11 @@ size_t MiraOptimiser::updateFeatures(
 		}
 	}
 	vector<float> alphas;
-	SparseVec summedUpdate;
+	SparseVec summedUpdate(UpdateVector.GetSize());
 	if (violatedConstraintsBefore > 0) {
 		if (m_slack != 0) {
 			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs, m_slack);
+			cerr<<"Alphas : ";for(int i=0;i<alphas.size();i++) cerr<<alphas[i]<<" ";cerr<<endl;
 		} else {
 			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs);
 		}
