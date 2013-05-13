@@ -95,6 +95,8 @@ bool PhraseDictionaryMultiModelCounts::InitDictionary(const vector<FactorType> &
                                   , const LMList &languageModels
                                   , float weightWP)
 {
+  /*
+
   for(size_t i = 0; i < m_numModels; ++i){
 
       string impl, file, main_table, target_table, lex_e2f, lex_f2e;
@@ -116,7 +118,6 @@ bool PhraseDictionaryMultiModelCounts::InitDictionary(const vector<FactorType> &
       //how many actual scores there are in the phrase tables
       size_t numScoresCounts = 3;
       size_t numScoresTargetCounts = 1;
-/*
       if (implementation == Memory) {
 
             if (!FileExists(main_table) && FileExists(main_table + ".gz")) main_table += ".gz";
@@ -168,8 +169,10 @@ bool PhraseDictionaryMultiModelCounts::InitDictionary(const vector<FactorType> &
       m_lexTable_e2f.push_back(e2f);
       m_lexTable_f2e.push_back(f2e);
 
-*/
   }
+
+*/
+
   return true;
 }
 
