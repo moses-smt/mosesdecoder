@@ -575,7 +575,7 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-    else if (feature == "glm") {
+    else if (feature == "GlobalLexicalModelUnlimited") {
       GlobalLexicalModelUnlimited *model = NULL; //new GlobalLexicalModelUnlimited(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
@@ -595,7 +595,7 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
-    else if (feature == "pl") {
+    else if (feature == "PhraseLengthFeature") {
       PhraseLengthFeature *model = new PhraseLengthFeature(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);

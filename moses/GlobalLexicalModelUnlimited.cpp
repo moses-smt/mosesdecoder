@@ -10,7 +10,7 @@ using namespace std;
 namespace Moses
 {
 GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line)
-:StatelessFeatureFunction("glm", 0, line)
+:StatelessFeatureFunction("GlobalLexicalModelUnlimited", 0, line)
 {
   const vector<string> modelSpec = Tokenize(line);
 
