@@ -52,7 +52,7 @@ namespace Moses
 {
 
 PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::string &line)
-:PhraseDictionaryMultiModel("PhraseDictionaryMultiModel", line)
+:PhraseDictionaryMultiModel("PhraseDictionaryMultiModelCounts", line)
 {
     m_mode = "instance_weighting"; //TODO: set this in config; use m_mode to switch between interpolation and instance weighting
     m_combineFunction = InstanceWeighting;
@@ -95,6 +95,26 @@ bool PhraseDictionaryMultiModelCounts::InitDictionary(const vector<FactorType> &
                                   , const LMList &languageModels
                                   , float weightWP)
 {
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
+
+  for(size_t i = 0; i < m_numModels; ++i){
+    const string &ptName = m_pdStr[i];
+
+    PhraseDictionary *pt = NULL;
+    std::vector<PhraseDictionary*>::const_iterator iter;
+    for (iter = pts.begin(); iter != pts.end(); ++iter) {
+      PhraseDictionary *currPt = *iter;
+      if (currPt->GetScoreProducerDescription() == ptName) {
+        pt = currPt;
+        break;
+      }
+    }
+
+    CHECK(pt);
+    m_pd.push_back(pt);
+  }
+
   /*
 
   for(size_t i = 0; i < m_numModels; ++i){
