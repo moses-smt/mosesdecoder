@@ -95,6 +95,8 @@ protected:
 #endif
   SentenceCache m_sentenceCache;
 
+  PhraseDictionary *FindPhraseDictionary(const std::string &ptName) const;
+
 };
 
 #ifdef WITH_DLIB

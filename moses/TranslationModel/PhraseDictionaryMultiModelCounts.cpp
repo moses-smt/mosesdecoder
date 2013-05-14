@@ -74,6 +74,22 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
         }
 
       }
+      else if (args[0] == "lex-e2f") {
+        m_lexE2FStr = Tokenize(args[1], ",");
+        CHECK(m_lexE2FStr.size() == m_pdStr.size());
+      }
+      else if (args[0] == "lex-f2e") {
+        m_lexF2EStr = Tokenize(args[1], ",");
+        CHECK(m_lexF2EStr.size() == m_pdStr.size());
+      }
+
+      else if (args[0] == "target-table") {
+        m_targetTable = Tokenize(args[1], ",");
+        CHECK(m_targetTable.size() == m_pdStr.size());
+      }
+
+
+
     } // for
 
 }
@@ -86,33 +102,36 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
     RemoveAllInColl(m_inverse_pd);
 }
 
-bool PhraseDictionaryMultiModelCounts::InitDictionary(const vector<FactorType> &input
-                                  , const vector<FactorType> &output
-                                  , const vector<string> &config
-                                  , const vector<float> &weight
-                                  , size_t tableLimit
-                                  , size_t numInputScores
-                                  , const LMList &languageModels
-                                  , float weightWP)
-{
-  const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
 
+bool PhraseDictionaryMultiModelCounts::InitDictionary()
+{
   for(size_t i = 0; i < m_numModels; ++i){
+
+    // phrase table
     const string &ptName = m_pdStr[i];
 
-    PhraseDictionary *pt = NULL;
-    std::vector<PhraseDictionary*>::const_iterator iter;
-    for (iter = pts.begin(); iter != pts.end(); ++iter) {
-      PhraseDictionary *currPt = *iter;
-      if (currPt->GetScoreProducerDescription() == ptName) {
-        pt = currPt;
-        break;
-      }
-    }
-
+    PhraseDictionary *pt;
+    pt = FindPhraseDictionary(ptName);
     CHECK(pt);
     m_pd.push_back(pt);
+
+    // reverse
+    const string &target_table = m_targetTable[i];
+    pt = FindPhraseDictionary(target_table);
+    CHECK(pt);
+    m_inverse_pd.push_back(pt);
+
+    // lex
+    string lex_e2f = m_lexE2FStr[i];
+    string lex_f2e = m_lexF2EStr[i];
+    lexicalTable* e2f = new lexicalTable;
+    LoadLexicalTable(lex_e2f, e2f);
+    lexicalTable* f2e = new lexicalTable;
+    LoadLexicalTable(lex_f2e, f2e);
+
+    m_lexTable_e2f.push_back(e2f);
+    m_lexTable_f2e.push_back(f2e);
+
   }
 
   /*

@@ -81,14 +81,7 @@ typedef std::vector< std::set<size_t> > AlignVector;
 public:
   PhraseDictionaryMultiModelCounts(const std::string &line);
   ~PhraseDictionaryMultiModelCounts();
-  bool InitDictionary(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::vector<std::string> &files
-            , const std::vector<float> &weight
-            , size_t tableLimit
-            , size_t numInputScores
-            , const LMList &languageModels
-            , float weightWP);
+  bool InitDictionary();
   TargetPhraseCollection* CreateTargetPhraseCollectionCounts(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
   void CollectSufficientStatistics(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats) const;
   float GetTargetCount(const Phrase& target, size_t modelIndex) const;
@@ -113,6 +106,9 @@ private:
   std::vector<PhraseDictionary*> m_inverse_pd;
   std::vector<lexicalTable*> m_lexTable_e2f, m_lexTable_f2e;
   double (*m_combineFunction) (std::vector<float> &joint_counts, std::vector<float> &marginals, std::vector<float> &multimodelweights);
+
+  std::vector<std::string> m_lexE2FStr, m_lexF2EStr, m_targetTable;
+
 };
 
 #ifdef WITH_DLIB
