@@ -410,7 +410,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       numInputScores.push_back("1");
     }
 
-    SetWeight("PhraseDictionaryTreeAdaptor", 0, inputWeights);
+    SetWeight("PhraseDictionaryBinary", 0, inputWeights);
   }
 
   // convert actually pt feature
@@ -469,7 +469,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
         ptType = "PhraseDictionaryMemory";
         break;
       case Binary:
-        ptType = "PhraseDictionaryTreeAdaptor";
+        ptType = "PhraseDictionaryBinary";
         break;
       case OnDisk:
         ptType = "PhraseDictionaryOnDisk";

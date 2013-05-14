@@ -666,7 +666,7 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
       m_unknownWordPenaltyProducer = model;
     }
-    else if (feature == "PhraseDictionaryTreeAdaptor") {
+    else if (feature == "PhraseDictionaryBinary") {
       PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
