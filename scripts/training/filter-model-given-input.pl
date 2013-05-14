@@ -36,6 +36,7 @@ my $ZCAT = "gzip -cd";
 # get optional parameters
 my $opt_hierarchical = 0;
 my $binarizer = undef;
+my $min_score = undef;
 my $opt_min_non_initial_rule_count = undef;
 my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
 
@@ -43,6 +44,7 @@ GetOptions(
     "gzip!" => \$opt_gzip,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
+    "MinScore=s" => \$min_score,
     "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count
 ) or exit(1);
 
@@ -52,11 +54,20 @@ my $config = shift;
 my $input = shift;
 
 if (!defined $dir || !defined $config || !defined $input) {
-  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text [-Binarizer binarizer] [-Hierarchical]\n";
+  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text [-Binarizer binarizer] [-Hierarchical] [-MinScore id:threshold[,id:threshold]*]\n";
   exit 1;
 }
 $dir = ensure_full_path($dir);
 
+# decode min-score definitions
+my %MIN_SCORE;
+if ($min_score) {
+  foreach (split(/ *, */,$min_score)) {
+    my ($id,$score) = split(/ *: */);
+    $MIN_SCORE{$id} = $score;
+    print STDERR "score $id must be at least $score\n";
+  }
+}
 # buggy directory in place?
 if (-d $dir && ! -e "$dir/info") {
     print STDERR "The directory $dir already exists. Please delete $dir and rerun!\n";
@@ -303,6 +314,18 @@ for(my $i=0;$i<=$#TABLE;$i++) {
             my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
             $foreign =~ s/ $//;
             if (defined($PHRASE_USED{$factors}{$foreign})) {
+                # handle min_score thresholds
+                if ($min_score) {
+                   my @ITEM = split(/ *\|\|\| */,$rest);
+                   if(scalar (@ITEM)>2) { # do not filter reordering table
+                     my @SCORE = split(/ /,$ITEM[1]);
+                     my $okay = 1;
+                     foreach my $id (keys %MIN_SCORE) {
+                       $okay = 0 if $SCORE[$id] < $MIN_SCORE{$id};
+                     }
+                     next unless $okay;
+                   }
+                }
                 print FILE_OUT $entry;
                 $used++;
             }

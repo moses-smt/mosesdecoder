@@ -400,6 +400,27 @@ mml-filter-before-wa
 	rerun-on-change: mml-filter-corpora mml-before-wa
 	default-name: training/corpus-mml
 	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -score IN1 -domain IN2 -input-extension $input-extension -output-extension $output-extension $mml-before-wa
+prepare-data-fast-align
+	in: corpus-mml-prefilter=OR=corpus
+	out: prepared-data-fast-align
+	default-name: prepared
+fast-align
+	in: prepared-data-fast-align
+	out: fast-alignment
+	rerun-on-change: fast-align-settings
+	template: $external-bin-dir/fast_align -i IN $fast-align-settings > OUT
+	default-name: fast-align
+fast-align-inverse
+	in: prepared-data-fast-align
+	out: fast-alignment-inverse
+	template: $external-bin-dir/fast_align -i IN -r $fast-align-settings > OUT
+	default-name: fast-align-inverse
+symmetrize-fast-align
+	in: fast-alignment fast-alignment-inverse corpus-mml-prefilter=OR=corpus
+	out: word-alignment
+	ignore-unless: fast-align-settings
+	template: $moses-script-dir/ems/support/symmetrize-fast-align.perl IN IN1 IN2.$input-extension IN2.$output-extension OUT $alignment-symmetrization-method $moses-src-dir/bin/symal
+        default-name: model/aligned
 prepare-data
 	in: corpus-mml-prefilter=OR=corpus
 	out: prepared-data
@@ -441,7 +462,7 @@ process-berkeley
 symmetrize-giza
 	in: giza-alignment giza-alignment-inverse
 	out: word-alignment
-	ignore-if: use-berkeley
+	ignore-if: use-berkeley fast-align-settings
 	rerun-on-change: alignment-symmetrization-method training-options script
 	default-name: model/aligned
 	error: skip=<[1-9]

@@ -940,6 +940,9 @@ sub define_step {
         elsif ($DO_STEP[$i] eq 'TRAINING:prepare-data') {
             &define_training_prepare_data($i);
         }
+        elsif ($DO_STEP[$i] eq 'TRAINING:prepare-data-fast-align') {
+            &define_training_prepare_data_fast_align($i);
+        }
         elsif ($DO_STEP[$i] eq 'TRAINING:run-giza') {
             &define_training_run_giza($i);
         }
@@ -1843,6 +1846,25 @@ sub write_selectBestMiraWeights {
     system("chmod u+x $script_filename");
 }
 
+sub define_training_prepare_data_fast_align {
+    my ($step_id) = @_;
+
+    my ($prepared, $corpus) = &get_output_and_input($step_id);
+    my $scripts = &check_and_get("GENERAL:moses-script-dir");
+    my $input_extension  = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+
+    my $alignment_factors = "";
+    if (&backoff_and_get("TRAINING:input-factors")) {
+      my %IN = &get_factor_id("input");
+      my %OUT = &get_factor_id("output");
+      $alignment_factors = &encode_factor_definition("alignment-factors",\%IN,\%OUT);
+    }
+    my $cmd = "$scripts/ems/support/prepare-fast-align.perl $corpus.$input_extension $corpus.$output_extension $alignment_factors > $prepared";
+
+    &create_step($step_id,$cmd);
+}
+
 sub define_training_prepare_data {
     my ($step_id) = @_;
 
@@ -2000,13 +2022,14 @@ sub define_training_build_ttable {
 sub define_domain_feature_score_option {
     my ($domains) = @_;
     my $spec = &backoff_and_get("TRAINING:domain-features");
-    my $method;
+    my ($method,$restricted_to_table) = ("","");
     $method = "Indicator" if $spec =~ /indicator/;
     $method = "Ratio" if $spec =~ /ratio/;
     $method = "Subset" if $spec =~ /subset/;
+    $restricted_to_table = $1 if $spec =~ /( table \S+)/;
     die("ERROR: faulty TRAINING:domain-features spec (no method): $spec\n") unless defined($method);
     if ($spec =~ /sparse/) {
-      return "-sparse-translation-table -score-options '--SparseDomain$method $domains' -additional-ini '<br>[report-sparse-features]<br>stm<br><br>' ";
+      return "-sparse-translation-table -score-options '--SparseDomain$method $domains$restricted_to_table' -additional-ini '<br>[report-sparse-features]<br>stm<br><br>' ";
     }
     else {
       return "-score-options '--Domain$method $domains' ";
