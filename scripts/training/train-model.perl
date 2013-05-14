@@ -446,7 +446,7 @@ if ($STEPS[9]) {
     die "ERROR: Filename is not absolute: $filename"
       unless file_name_is_absolute $filename;
     die "ERROR: Language model file not found or empty: $filename"
-      if ! -s $filename;
+      if ! -e $filename;
     push @___LM, [ $f, $order, $filename, $type ];
   }
 }
