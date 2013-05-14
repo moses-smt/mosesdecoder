@@ -393,7 +393,7 @@ psd-extract-examples
   ignore-unless: use-psd
   default-name: model/psd
 psd-build-model
-  in: psd-output
+  in: psd-output GENERAL:psd-config
   out: psd-model
   ignore-unless: use-psd
   default-name: model/psd

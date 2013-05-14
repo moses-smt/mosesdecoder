@@ -131,6 +131,9 @@ void ExtractorConfig::Load(const string &configFile)
   m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
   m_scoreBins = Scan<float>(Tokenize(pTree.get<string>("features.score-bins", ""), ","));
 
+  m_vwOptsTrain = pTree.get<string>("vw-options.train", "");
+  m_vwOptsPredict = pTree.get<string>("vw-options.predict", "");
+
   m_isLoaded = true;
 }
 

@@ -36,6 +36,8 @@ class ExtractorConfig
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
     inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
     inline const std::vector<float> &GetScoreBins() const { return m_scoreBins; }
+    inline const std::string &GetVWOptionsTrain() const { return m_vwOptsTrain; }
+    inline const std::string &GetVWOptionsPredict() const { return m_vwOptsPredict; }
 
     inline bool IsLoaded() const { return m_isLoaded; }
 
@@ -44,9 +46,8 @@ class ExtractorConfig
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal, m_mostFrequent,
          m_binnedScores, m_sourceIndicator, m_targetIndicator, 
-         m_sourceTargetIndicator, m_STSE,
-         m_sourceTopic,
-         m_phraseFactor;
+         m_sourceTargetIndicator, m_STSE, m_sourceTopic, m_phraseFactor;
+    std::string m_vwOptsPredict, m_vwOptsTrain;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
     std::vector<float> m_scoreBins;

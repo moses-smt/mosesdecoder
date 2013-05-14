@@ -32,11 +32,11 @@ PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float w
 
 bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &configFile)
 {
-  m_consumerFactory = new VWLibraryPredictConsumerFactory(modelFile, 255);
+  m_extractorConfig.Load(configFile);
+
+  m_consumerFactory = new VWLibraryPredictConsumerFactory(modelFile, m_extractorConfig.GetVWOptionsPredict(), 255);
   if (! LoadPhraseIndex(indexFile))
     return false;
-
-  m_extractorConfig.Load(configFile);
 
   m_extractor = new FeatureExtractor(m_phraseIndex, m_extractorConfig, false);
   return true;

@@ -369,6 +369,28 @@ sub read_config {
     die if $error;
 }
 
+# tiny INI file reader
+
+sub read_ini_file {
+  my $file = shift;
+  my %config;
+  my $section = "";
+  open(my $inihdl, $file) or die "Failed to read .ini file: $file";
+  while (<$inihdl>) {
+    chomp(my $line = $_);
+    if ($line =~ m/^\[(.*)\]/) {
+      $section = $1;    
+    } elsif ($line =~ m/=/) {
+      my ($key, $value) = split / *= */;
+      $value =~ s/^"//;
+      $value =~ s/"\s*$//;
+      $config{"$section.$key"} = $value;
+    }
+  }  
+  close $inihdl;
+  return \%config;
+}
+
 # log parameter settings into a file
 
 sub log_config {
@@ -1776,14 +1798,16 @@ sub define_training_psd_extract {
 
 sub define_training_psd_model {
   my $step_id = shift;
-  my ($out, $psd_output) = &get_output_and_input($step_id);
+  my ($out, $psd_output, $psd_config) = &get_output_and_input($step_id);
   my $trainfile = "$psd_output.train.gz";
   my $cores = &get("GENERAL:cores");
   my $vwparallel = &get("GENERAL:moses-script-dir") . "/generic/vw-parallel.perl";
   my $vwpath = &get("GENERAL:vw-path");
-#  my $vw_opts = "-q st --hash all --noconstant -k --passes 40 --power_t 0.5 -b 22 --csoaa_ldf m ";
-  my $vw_opts = "--hash all --noconstant -b 26 --csoaa_ldf mc --loss_function=logistic --initial_t 1 --passes 10 -q st";
-  my $cmd = "$vwparallel $cores $trainfile vwcache $out.model $vwpath $vw_opts";
+  my $psd_parsed_config = read_ini_file($psd_config);
+  if (! defined $psd_parsed_config->{'vw-options.train'}) {
+    die "PSD configuration file does not contain the key 'train' in section [vw-options]";
+  }
+  my $cmd = "$vwparallel $cores $trainfile vwcache $out.model $vwpath $psd_parsed_config->{'vw-options.train'}";
 
   &create_step($step_id, $cmd);
 }

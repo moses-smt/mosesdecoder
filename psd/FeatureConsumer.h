@@ -88,7 +88,7 @@ private:
   class VWLibraryTrainConsumer : public VWLibraryConsumer
   {
   public:
-    VWLibraryTrainConsumer(const std::string &modelFile);
+    VWLibraryTrainConsumer(const std::string &modelFile, const std::string &vwOptions);
     virtual void Train(const std::string &label, float loss);
     virtual float Predict(const std::string &label);
     virtual void FinishExample();
@@ -98,7 +98,7 @@ private:
   class VWLibraryPredictConsumer : public VWLibraryConsumer
   {
   public:
-    VWLibraryPredictConsumer(const std::string &modelFile);
+    VWLibraryPredictConsumer(const std::string &modelFile, const std::string &vwOptions);
     virtual void Train(const std::string &label, float loss);
     virtual float Predict(const std::string &label);
 
@@ -112,7 +112,7 @@ private:
   class VWLibraryPredictConsumerFactory : private boost::noncopyable
   {
   public:
-    VWLibraryPredictConsumerFactory(const std::string &modelFile, const int poolSize);
+    VWLibraryPredictConsumerFactory(const std::string &modelFile, const std::string &vwOptions, const int poolSize);
 
     VWLibraryPredictConsumer * Acquire();
     void Release(VWLibraryPredictConsumer * fc);

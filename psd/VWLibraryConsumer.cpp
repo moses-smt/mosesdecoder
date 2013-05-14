@@ -11,10 +11,6 @@ using namespace std;
 namespace PSD
 {
 
-//const char * VW_INIT_OPTIONS = " -q st --hash all --noconstant --csoaa_ldf s -b 22 ";
-// taken from Hal's email April 20th 2013, with --passes 10 removed
-const char * VW_INIT_OPTIONS = " --hash all --noconstant -b 26 --csoaa_ldf s -q st";
-
 //
 // VWLibraryPredictConsumerFactory
 //
@@ -23,10 +19,11 @@ const int EMPTY_LIST = -1;
 const int BAD_LIST_POINTER = -2;
 
 VWLibraryPredictConsumerFactory::VWLibraryPredictConsumerFactory(
-    const string & modelFile,
+    const string &modelFile,
+    const string &vwOptions,
     const int poolSize)
 {
-  m_VWInstance = VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile));
+  m_VWInstance = VW::initialize(vwOptions + "-i " + modelFile);
 
   if (poolSize < 1)
     throw runtime_error("VWLibraryPredictConsumerFactory pool size must be greater than zero!");
@@ -150,11 +147,10 @@ VWLibraryConsumer::~VWLibraryConsumer()
 // VWLibraryTrainConsumer
 //
 
-VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile)
+VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile, const string &vwOptions)
 {
   m_shared = true;
-	// THIS IS NOT GOING TO WORK!!!!! THE VW_INIT_OPTIONS ARE SET UP FOR "s" = single line prediction, but that is not how we aare going to get training data!!!!!!!!!
-  m_VWInstance = VW::initialize(VW_INIT_OPTIONS + (" -f " + modelFile));
+  m_VWInstance = VW::initialize(vwOptions + " -f " + modelFile);
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
 }
@@ -179,10 +175,10 @@ float VWLibraryTrainConsumer::Predict(const string &label)
 // VWLibraryPredictConsumer
 //
 
-VWLibraryPredictConsumer::VWLibraryPredictConsumer(const string &modelFile)
+VWLibraryPredictConsumer::VWLibraryPredictConsumer(const string &modelFile, const string &vwOptions)
 {
   m_shared = true;
-  m_VWInstance = VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile));
+  m_VWInstance = VW::initialize(vwOptions + " -i " + modelFile);
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
 }
