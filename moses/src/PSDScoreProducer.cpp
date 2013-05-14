@@ -104,7 +104,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
         options[0]->GetEndPos(), psdOptions, losses);
     m_consumerFactory->Release(p_consumer);
 
-    Normalize0(losses);
+    Normalize1(losses);
 
     vector<float>::const_iterator lossIt;
     for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
@@ -156,6 +156,9 @@ bool PSDScoreProducer::LoadPhraseIndex(const string &indexFile)
 
 void PSDScoreProducer::Normalize0(vector<float> &losses)
 {
+
+	// This is (?) a good choice for sqrt loss (default loss function in VW)
+
   float sum = 0;
 
 	// clip to [0,1] and take 1-Z as non-normalized prob
@@ -163,7 +166,7 @@ void PSDScoreProducer::Normalize0(vector<float> &losses)
   for (it = losses.begin(); it != losses.end(); it++) {
 		if (*it <= 0.0) *it = 1.0;
 		else if (*it >= 1.0) *it = 0.0;
-		else *it = 1 - *it;
+		else *it = 1.0 - *it;
 		sum += *it;
   }
 
@@ -180,6 +183,9 @@ void PSDScoreProducer::Normalize0(vector<float> &losses)
 
 void PSDScoreProducer::Normalize1(vector<float> &losses)
 {
+
+	// Use this with logistic loss (we switched to this in April/May 2013)
+
   float sum = 0;
   vector<float>::iterator it;
   for (it = losses.begin(); it != losses.end(); it++) {
