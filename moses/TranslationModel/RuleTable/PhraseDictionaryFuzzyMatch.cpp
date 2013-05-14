@@ -242,7 +242,7 @@ namespace Moses
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
       
-      targetPhrase->SetScore(this, scoreVector);
+      targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
       targetPhrase->Evaluate();
       
       TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);

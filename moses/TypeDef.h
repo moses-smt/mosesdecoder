@@ -177,9 +177,11 @@ enum FormatType
 
 enum StatelessFeatureType
 {
-  CacheableInPhraseTable // simplest. eg. phrase table scores. word penalty, phrase penalty.
-  ,DependsOnSource // can't be pre-computed during training, but can be computed before search.eg. source bag-of-word features
-  ,NotCacheable // can't be pre-computed. Depends on segmentation during search. eg. span-length feature
+  SetByOriginator // The scores are set by the phrase table, generatio table, or unknown word handler
+                  // They shouldn't be subsequently evaluated.
+  ,RequiresTargetPhrase // Default. simplest, but not in phrase-table. eg. word penalty
+  ,RequiresSource // can't be pre-computed during training, but can be computed before search.eg. source bag-of-word features
+  ,RequiresSegmentation // can't be pre-computed. Depends on segmentation during search. eg. span-length feature
 };
 
 // typedef

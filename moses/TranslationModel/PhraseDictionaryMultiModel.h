@@ -58,6 +58,7 @@ friend class CrossEntropy;
 
 public:
   PhraseDictionaryMultiModel(const std::string &line);
+  PhraseDictionaryMultiModel(const std::string &description, const std::string &line);
   ~PhraseDictionaryMultiModel();
   bool InitDictionary();
   virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;

@@ -200,8 +200,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 {
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
-  vector<float> wordPenaltyScore(1, -1);
-  vector<float> unknownScore(1, FloorScore(TransformScore(0)));
+  float unknownScore = FloorScore(TransformScore(0));
 
 	// unknown word, add as trans opt
 	FactorCollection &factorCollection = FactorCollection::Instance();
@@ -260,7 +259,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 	}
 
-  targetPhrase.SetScore(unknownWordPenaltyProducer, unknownScore);
+  targetPhrase.GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
 
 	if (inputScores != NULL) {
 		targetPhrase.SetInputScore(*inputScores);

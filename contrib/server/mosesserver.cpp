@@ -154,6 +154,10 @@ public:
     bool addTopts = (si != params.end());
     si = params.find("report-all-factors");
     bool reportAllFactors = (si != params.end());
+    si = params.find("nbest");
+    int nbest_size = (si == params.end()) ? 0 : int(xmlrpc_c::value_int(si->second));
+    si = params.find("nbest-distinct");
+    bool nbest_distinct = (si != params.end());
 
     const StaticData &staticData = StaticData::Instance();
 
@@ -197,6 +201,9 @@ public:
         }
         if (addTopts) {
           insertTranslationOptions(manager,retData);
+        }
+        if (nbest_size>0) {
+          outputNBest(manager, retData, nbest_size, nbest_distinct, reportAllFactors);
         }
     }
     pair<string, xmlrpc_c::value>
@@ -248,7 +255,6 @@ public:
 
   }
 
-
   bool compareSearchGraphNode(const SearchGraphNode& a, const SearchGraphNode b) {
     return a.hypo->GetId() < b.hypo->GetId();
   }
@@ -281,6 +287,45 @@ public:
       searchGraphXml.push_back(xmlrpc_c::value_struct(searchGraphXmlNode));
     }
     retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_array(searchGraphXml)));
+  }
+
+  void outputNBest(const Manager& manager,
+                   map<string, xmlrpc_c::value>& retData,
+                   const int n=100,
+                   const bool distinct=false,
+                   const bool reportAllFactors=false)
+  {
+    TrellisPathList nBestList;
+    manager.CalcNBest(n, nBestList, distinct);
+
+    vector<xmlrpc_c::value> nBestXml;
+    TrellisPathList::const_iterator iter;
+    for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
+      const TrellisPath &path = **iter;
+      const std::vector<const Hypothesis *> &edges = path.GetEdges();
+      map<string, xmlrpc_c::value> nBestXMLItem;
+
+      // output surface
+      ostringstream out;
+      for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+        const Hypothesis &edge = *edges[currEdge];
+        const Phrase& phrase = edge.GetCurrTargetPhrase();
+        if(reportAllFactors) {
+          out << phrase << " ";
+        } else {
+          for (size_t pos = 0 ; pos < phrase.GetSize() ; pos++) {
+            const Factor *factor = phrase.GetFactor(pos, 0);
+            out << *factor << " ";
+          }
+        }
+      }
+      nBestXMLItem["hyp"] = xmlrpc_c::value_string(out.str());
+
+      // weighted score
+      nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetTotalScore());
+      nBestXml.push_back(xmlrpc_c::value_struct(nBestXMLItem));
+    }
+    retData.insert(pair<string, xmlrpc_c::value>("nbest", xmlrpc_c::value_array(nBestXml)));
   }
 
   void insertTranslationOptions(Manager& manager, map<string, xmlrpc_c::value>& retData) {

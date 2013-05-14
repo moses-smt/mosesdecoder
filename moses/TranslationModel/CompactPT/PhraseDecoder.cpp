@@ -439,7 +439,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       
       if(scores.size() == m_numScoreComponent)
       {
-        targetPhrase->SetScore(&m_phraseDictionary, scores);
+        targetPhrase->GetScoreBreakdown().Assign(&m_phraseDictionary, scores);
         targetPhrase->Evaluate();
 
         if(m_containsAlignmentInfo)

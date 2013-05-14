@@ -65,14 +65,8 @@ public:
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
   // used to set translation or gen score
-  void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
   void SetXMLScore(float score);
   void SetInputScore(const Scores &scoreVector);
-
-  void SetScore(const ScoreComponentCollection &scores)
-  {
-    m_scoreBreakdown.PlusEquals(scores);
-  }
 
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
   // used for translation step
@@ -92,9 +86,9 @@ public:
   }
 
 	inline const ScoreComponentCollection &GetScoreBreakdown() const
-	{
-		return m_scoreBreakdown;
-	}
+	{ return m_scoreBreakdown;	}
+  inline ScoreComponentCollection &GetScoreBreakdown()
+  { return m_scoreBreakdown;  }
 
   //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
 	void SetSourcePhrase(const Phrase&  p) 

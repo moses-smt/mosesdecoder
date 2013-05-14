@@ -49,16 +49,33 @@ vector<string> tokenize( const char* input )
 }
 
 namespace Moses
+{
 
+PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::string &line)
+:PhraseDictionaryMultiModel("PhraseDictionaryMultiModel", line)
 {
-PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(size_t numScoreComponent,
-    PhraseDictionaryFeature* feature): PhraseDictionaryMultiModel(numScoreComponent, feature)
-{
-    m_feature_load = feature;
     m_mode = "instance_weighting"; //TODO: set this in config; use m_mode to switch between interpolation and instance weighting
     m_combineFunction = InstanceWeighting;
     //m_mode = "interpolate";
     //m_combineFunction = LinearInterpolationFromCounts;
+
+    for (size_t i = 0; i < m_args.size(); ++i) {
+      const vector<string> &args = m_args[i];
+      if (args[0] == "mode") {
+        m_mode =args[1];
+        if (m_mode == "instance_weighting")
+          m_combineFunction = InstanceWeighting;
+        else if (m_mode == "interpolate")
+          m_combineFunction = LinearInterpolationFromCounts;
+        else {
+          ostringstream msg;
+          msg << "combination mode unknown: " << m_mode;
+          throw runtime_error(msg.str());
+        }
+
+      }
+    } // for
+
 }
 
 PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
@@ -69,7 +86,7 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
     RemoveAllInColl(m_inverse_pd);
 }
 
-bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
+bool PhraseDictionaryMultiModelCounts::InitDictionary(const vector<FactorType> &input
                                   , const vector<FactorType> &output
                                   , const vector<string> &config
                                   , const vector<float> &weight
@@ -78,27 +95,7 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
                                   , const LMList &languageModels
                                   , float weightWP)
 {
-  m_languageModels = &languageModels;
-  m_weight = weight;
-  m_weightWP = weightWP;
-  m_input = input;
-  m_output = output;
-  m_tableLimit = tableLimit;
-
-  m_mode = config[4];
-  std::vector<std::string> files(config.begin()+5,config.end());
-
-  m_numModels = files.size();
-
-  if (m_mode == "instance_weighting")
-    m_combineFunction = InstanceWeighting;
-  else if (m_mode == "interpolate")
-    m_combineFunction = LinearInterpolationFromCounts;
-  else {
-    ostringstream msg;
-    msg << "combination mode unknown: " << m_mode;
-    throw runtime_error(msg.str());
-  }
+  /*
 
   for(size_t i = 0; i < m_numModels; ++i){
 
@@ -121,7 +118,6 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
       //how many actual scores there are in the phrase tables
       size_t numScoresCounts = 3;
       size_t numScoresTargetCounts = 1;
-
       if (implementation == Memory) {
 
             if (!FileExists(main_table) && FileExists(main_table + ".gz")) main_table += ".gz";
@@ -175,6 +171,8 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
 
   }
 
+*/
+
   return true;
 }
 
@@ -214,7 +212,7 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
       for (iterTargetPhrase = ret_raw->begin(); iterTargetPhrase != ret_raw->end();  ++iterTargetPhrase) {
 
         TargetPhrase * targetPhrase = *iterTargetPhrase;
-        vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(m_feature);
+        vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(this);
 
         string targetString = targetPhrase->GetStringRep(m_output);
         if (allStats->find(targetString) == allStats->end()) {
@@ -228,7 +226,7 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
           scoreVector[0] = -raw_scores[0];
           scoreVector[1] = -raw_scores[1];
           scoreVector[2] = -raw_scores[2];
-          statistics->targetPhrase->SetScore(m_feature, scoreVector, ScoreComponentCollection(), m_weight, m_weightWP, *m_languageModels); // set scores to 0
+          statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
 
           (*allStats)[targetString] = statistics;
 
@@ -281,7 +279,7 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
         scoreVector[3] = FloorScore(TransformScore(lexts));
         scoreVector[4] = FloorScore(TransformScore(2.718));
 
-        statistics->targetPhrase->SetScore(m_feature, scoreVector, ScoreComponentCollection(), m_weight, m_weightWP, *m_languageModels);
+        statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
     }
     catch (AlignmentException& e) {
         continue;
@@ -303,7 +301,7 @@ float PhraseDictionaryMultiModelCounts::GetTargetCount(const Phrase &target, siz
     // in inverse mode, we want the first score of the first phrase pair (note: if we were to work with truly symmetric models, it would be the third score)
     if (ret_raw != NULL) {
         TargetPhrase * targetPhrase = *(ret_raw->begin());
-        return UntransformScore(targetPhrase->GetScoreBreakdown().GetScoresForProducer(m_feature)[0]);
+        return UntransformScore(targetPhrase->GetScoreBreakdown().GetScoresForProducer(this)[0]);
     }
 
     // target phrase unknown
@@ -494,14 +492,6 @@ void PhraseDictionaryMultiModelCounts::LoadLexicalTable( string &fileName, lexic
   }
   cerr << endl;
 
-}
-
-
-void  PhraseDictionaryMultiModelCounts::CleanUpComponentModels(const InputType &source)  {
-  for(size_t i = 0; i < m_numModels; ++i){
-    m_pd[i]->CleanUp(source);
-    m_inverse_pd[i]->CleanUp(source);
-  }
 }
 
 

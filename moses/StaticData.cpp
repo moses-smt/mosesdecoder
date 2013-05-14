@@ -55,9 +55,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "LM/Ken.h"
 
-#ifdef LM_IRST
+//#ifdef LM_IRST
 #include "LM/IRST.h"
-#endif
+//#endif
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -630,13 +630,13 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-#ifdef LM_IRST
+//#ifdef LM_IRST
     else if (feature == "IRSTLM") {
       LanguageModelIRST *model = new LanguageModelIRST(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-#endif
+//#endif
     else if (feature == "Generation") {
       GenerationDictionary *model = new GenerationDictionary(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());

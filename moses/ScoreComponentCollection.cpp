@@ -186,6 +186,14 @@ void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string li
   }
 }
 
+void ScoreComponentCollection::ZeroDenseFeatures(const FeatureFunction* sp)
+{
+  size_t numScores = sp->GetNumScoreComponents();
+  Scores vec(numScores, 0);
+
+  Assign(sp, vec);
+}
+
 }
 
 

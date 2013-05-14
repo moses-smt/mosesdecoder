@@ -388,6 +388,7 @@ public:
 
 	float GetWeightedScore() const;
 
+  void ZeroDenseFeatures(const FeatureFunction* sp);
   void ZeroAllLM(const LMList& lmList);
   void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
   void L1Normalise();

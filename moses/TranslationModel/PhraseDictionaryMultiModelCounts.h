@@ -21,11 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_PhraseDictionaryMultiModelCounts_h
 
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h" 
-#ifndef WIN32
-#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
-#endif
 
 
 #include <boost/unordered_map.hpp>
@@ -84,9 +79,9 @@ typedef std::vector< std::set<size_t> > AlignVector;
 
 
 public:
-  PhraseDictionaryMultiModelCounts(size_t m_numScoreComponent, PhraseDictionaryFeature* feature);
+  PhraseDictionaryMultiModelCounts(const std::string &line);
   ~PhraseDictionaryMultiModelCounts();
-  bool Load(const std::vector<FactorType> &input
+  bool InitDictionary(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
             , const std::vector<std::string> &files
             , const std::vector<float> &weight
@@ -106,7 +101,6 @@ public:
   void FillLexicalCountsMarginal(std::string &wordS, std::vector<float> &count, const std::vector<lexicalTable*> &tables) const;
   void LoadLexicalTable( std::string &fileName, lexicalTable* ltable);
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
-  void CleanUpComponentModels(const InputType &source);
 #ifdef WITH_DLIB
   std::vector<float> MinimizePerplexity(std::vector<std::pair<std::string, std::string> > &phrase_pair_vector);
 #endif

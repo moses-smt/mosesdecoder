@@ -132,9 +132,6 @@ public:
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const = 0;
 
-  virtual bool IsDecodeFeature() const
-  { return false; }
-
 };
 
 /** base class for all stateless feature functions.
@@ -163,7 +160,7 @@ public:
                              ScoreComponentCollection* accumulator) const  = 0;
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return CacheableInPhraseTable; }
+  { return RequiresTargetPhrase; }
 
   bool IsStateless() const
   { return true; }

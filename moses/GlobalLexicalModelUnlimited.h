@@ -101,7 +101,7 @@ public:
 			StringPiece targetWord) const;
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return DependsOnSource; }
+  { return RequiresSource; }
 
 };
 

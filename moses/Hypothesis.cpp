@@ -286,7 +286,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
       StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
 	const StatelessFeatureFunction &ff = *sfs[i];
-    if (ff.GetStatelessFeatureType() == NotCacheable) {
+    if (ff.GetStatelessFeatureType() == RequiresSegmentation) {
       EvaluateWith(ff);
     }
   }

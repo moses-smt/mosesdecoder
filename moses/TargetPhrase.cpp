@@ -86,7 +86,19 @@ void TargetPhrase::Evaluate()
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    if (!ff.IsDecodeFeature()) {
+    bool evaluate = false;
+
+    if (!ff.IsStateless()) {
+      evaluate = true;
+    }
+    else {
+      const StatelessFeatureFunction &sff = static_cast<const StatelessFeatureFunction&>(ff);
+      if (sff.GetStatelessFeatureType() != SetByOriginator) {
+        evaluate = true;
+      }
+    }
+
+    if (evaluate) {
       ff.Evaluate(*this, m_scoreBreakdown, futureScoreBreakdown);
     }
   }
@@ -103,11 +115,14 @@ void TargetPhrase::SetXMLScore(float score)
   const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
   size_t numScores = prod->GetNumScoreComponents();
   vector <float> scoreVector(numScores,score/numScores);
-  SetScore(prod, scoreVector);
+
+  m_scoreBreakdown.Assign(prod, scoreVector);
 }
 
 void TargetPhrase::SetInputScore(const Scores &scoreVector)
 {
+  cerr << scoreVector.size() << endl;
+
   //we use an existing score producer to figure out information for score setting (number of scores and weights)
   const StaticData &staticData = StaticData::Instance();
   const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
@@ -117,15 +132,7 @@ void TargetPhrase::SetInputScore(const Scores &scoreVector)
   Scores sizedScoreVector = scoreVector;
   sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-  SetScore(prod, sizedScoreVector);
-}
-
-// used to set translation or gen score
-void TargetPhrase::SetScore(const FeatureFunction* producer, const Scores &scoreVector)
-{
-  // used when creating translations of unknown words (chart decoding)
-  m_scoreBreakdown.Assign(producer, scoreVector);
-  m_fullScore = m_scoreBreakdown.GetWeightedScore();
+  m_scoreBreakdown.Assign(prod, sizedScoreVector);
 }
 
 TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
