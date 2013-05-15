@@ -3,11 +3,15 @@ Extra Implementations in "moses_onlinelearning" branch.
 
 For computer assisted translation, we have implemented a online learning feature that learns from the corrections by the translator
 
-1. This feature stores the phrase pairs which occurs in Oracle translation (the closest translation to a post edited sentence).
-2. These phrase pairs get rewarded if they are seen to be translated again in the future.
-3. These updates are similar to perceptron update where the margin is the difference between the scores of the oracle translation and the best translation (as decided by the decoder).
-4. In this system we have additional two parameters, a weight for the online feature, and a learning rate for online algorithm. 
-5. These parameters can be passed as
+This feature stores the phrase pairs which occurs in Oracle translation (the closest translation to a post edited sentence).
+
+These phrase pairs get rewarded if they are seen to be translated again in the future.
+
+These updates are similar to perceptron update where the margin is the difference between the scores of the oracle translation and the best translation (as decided by the decoder).
+
+In this system we have additional two parameters, a weight for the online feature, and a learning rate for online algorithm. 
+
+These parameters can be passed as
 
 	1. "weight-ol" : is the initial weight of the online feature function
 	
