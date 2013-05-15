@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 template<typename T>
-void outVec(const vector<T> &vec)
+void OutputVec(const vector<T> &vec)
 {
   for (size_t i = 0; i < vec.size(); ++i) {
     cerr << vec[i] << " " << flush;
@@ -280,11 +280,7 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
           scoreVector[1] = -raw_scores[1];
           scoreVector[2] = -raw_scores[2];
           statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
-
-          cerr << *targetPhrase << endl;
-          for (size_t i = 0; i < scoreVector.size(); ++i)
-            cerr << scoreVector[i] << " ";
-          cerr << endl;
+          statistics->targetPhrase->Evaluate();
 
           (*allStats)[targetString] = statistics;
 
@@ -295,8 +291,6 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
         statistics->ft[i] = UntransformScore(raw_scores[1]);
         fs[i] = UntransformScore(raw_scores[2]);
         (*allStats)[targetString] = statistics;
-
-        outVec(statistics->ft);
       }
     }
   }
@@ -310,7 +304,6 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
             statistics->ft[i] = GetTargetCount(static_cast<const Phrase&>(*statistics->targetPhrase), i);
         }
     }
-    outVec(statistics->ft);
   }
 }
 
@@ -339,21 +332,8 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
         scoreVector[3] = FloorScore(TransformScore(lexts));
         scoreVector[4] = FloorScore(TransformScore(2.718));
 
-        cerr << *statistics->targetPhrase << endl;
-        for (size_t i = 0; i < scoreVector.size(); ++i)
-          cerr << scoreVector[i] << " ";
-        cerr << endl;
-
-        vector<float> a = statistics->fst;
-        vector<float> b = statistics->ft;
-        vector<float> c = multimodelweights[0];
-        float d = m_combineFunction(statistics->fst, statistics->ft, multimodelweights[0]);
-        outVec(a);
-        outVec(b);
-        outVec(c);
-        cerr << d << endl;
-
         statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
+        statistics->targetPhrase->Evaluate();
     }
     catch (AlignmentException& e) {
         continue;
