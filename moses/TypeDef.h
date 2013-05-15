@@ -183,6 +183,13 @@ enum SourceLabelOverlap {
   ,SourceLabelOverlapDiscard = 2
 };
 
+enum OnlineAlgorithm {
+	MIRA = 0
+	, Perceptron = 1
+	, FPercepWMira = 3
+	, FMiraWMira = 4
+};
+
 enum WordAlignmentSort {
   NoSort = 0
   ,TargetOrder = 1

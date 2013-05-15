@@ -1448,8 +1448,9 @@ bool StaticData::LoadOnlineLearningModel()
 {
 	const std::string f_algorithm = (m_parameter->GetParam("f_algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("f_algorithm")[0]) : "perceptron";
 	const std::string w_algorithm = (m_parameter->GetParam("w_algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("w_algorithm")[0]) : "NULL";
-	int setAlgo = 1; // 1 for perceptron, 2 for mira
-	if(f_algorithm.compare("perceptron")==0)
+	const bool sparse_feature = (m_parameter->GetParam("use_sparse_features").size()>0) ? true : false;
+	int setAlgo = 1; // 1 for perceptron for feature update, 2 for mira, 3 for mira with sparse features
+	if(f_algorithm.compare("perceptron")==0 && !sparse_feature)	// sparse feature only works with mira
 	{
 		cerr<<"Using perceptron as online learning algorithm\n";
 		const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
@@ -1485,6 +1486,11 @@ bool StaticData::LoadOnlineLearningModel()
 			PrintUserTime("Online Learning : Perceptron\tWeights : MIRA");
 		}
 	}
+	else if(f_algorithm.compare("perceptron")==0 && !sparse_feature)
+	{
+		VERBOSE(1,"Perceptron cannot work on sparse features yet!\n");
+		CHECK(false);
+	}
 	else if(f_algorithm.compare("mira")==0)
 	{
 		setAlgo=2;
@@ -1497,6 +1503,7 @@ bool StaticData::LoadOnlineLearningModel()
 		}
 		else if(weights.size()==1)
 		{
+			if(sparse_feature) setAlgo=3;
 			float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 0;
 			if(w_algorithm.compare("NULL")==0) w_learningrate=0;
 			const float f_learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("f_learningrate")[0]) : 0;

@@ -138,6 +138,7 @@ OnlineLearner::OnlineLearner(float f_learningrate, float w_learningrate):Statele
 	wlr = w_learningrate;
 	m_learn=false;
 	m_PPindex=0;
+	sparse_weights_on=false;
 	if(w_learningrate>0)
 		update_weights=true;
 	else
@@ -152,10 +153,11 @@ OnlineLearner::OnlineLearner(float f_learningrate, float w_learningrate):Statele
 	cerr<<"Initialization Online Learning Model\n";
 }
 
-OnlineLearner::OnlineLearner(int setAlgo, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
+OnlineLearner::OnlineLearner(OnlineAlgorithm implementation, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
 		float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
 	flr = f_learningrate;
 	wlr = w_learningrate;
+	sparse_weights_on=false;
 	if(w_learningrate>0)
 		update_weights=true;
 	else
@@ -168,9 +170,13 @@ OnlineLearner::OnlineLearner(int setAlgo, float w_learningrate, float f_learning
 	m_learn=false;
 	m_mira=false;
 	m_perceptron=false;
-	if(setAlgo==1)
+	if(implementation==Perceptron)
 		m_perceptron=true;
-	if(setAlgo==2)
+	else if(implementation==MIRA)
+		m_mira=true;
+	else if(implementation==FPercepWMira)
+		m_mira = true;
+	else if(implementation==FMiraWMira)
 		m_mira=true;
 	optimiser = new Optimizer::MiraOptimiser(slack, scale_margin, scale_margin_precision, scale_update,
 			scale_update_precision, boost, normaliseMargin, sigmoidParam);
@@ -285,6 +291,12 @@ OnlineLearner::~OnlineLearner() {
 
 void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
 {
+	const TranslationSystem &trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+	const StaticData& staticData = StaticData::Instance();
+	const std::vector<Moses::FactorType>& outputFactorOrder=staticData.GetOutputFactorOrder();
+	ScoreComponentCollection weightUpdate = staticData.GetAllWeights();
+	std::vector<const ScoreProducer*> sps = trans_sys.GetFeatureFunctions();
+	ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
 	for(int i=0;i<sps.size();i++)
 	{
 		if(sps[i]->GetScoreProducerDescription().compare("OnlineLearner")==0)
@@ -325,6 +337,8 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 			if(it2!=it->second.end())
 			{
 				score=sparsevector.getElement(it2->second);
+//				score*=actual_weight;
+				score/=weight;
 			}
 		}
 	}
@@ -577,6 +591,24 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 
 //	Update the weights
 	if(update_weights)
+	{
+		cerr<<"update_weights is activated\n";
+		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
+		{
+			float bleuscore = BleuScore[i];
+			loss.push_back(maxBleu-bleuscore);
+		}
+		modelScores.push_back(modelScore);
+		featureValues.push_back(featureValue);
+		BleuScores.push_back(BleuScore);
+		losses.push_back(loss);
+		oracleModelScores.push_back(maxScore);
+		size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
+				BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,wlr);
+		cerr<<"\nWeight : "<<weightUpdate.GetScoreForProducer(sp)<<"\n";
+		StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
+	}
+	if(update_weights && sparse_weights_on)
 	{
 		cerr<<"update_weights is activated\n";
 		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
