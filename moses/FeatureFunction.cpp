@@ -79,8 +79,7 @@ std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statele
 std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 
 FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
-: m_reportSparseFeatures(false)
-, m_tuneable(true)
+: m_tuneable(true)
 {
   ParseLine(description, line);
 
@@ -101,8 +100,7 @@ FeatureFunction::FeatureFunction(const std::string& description, const std::stri
 }
 
 FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
-: m_reportSparseFeatures(false)
-, m_numScoreComponents(numScoreComponents)
+: m_numScoreComponents(numScoreComponents)
 , m_tuneable(true)
 {
   ParseLine(description, line);

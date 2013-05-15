@@ -327,18 +327,7 @@ public:
 	}
 
   //! get subset of scores that belong to a certain sparse ScoreProducer
-  FVector GetVectorForProducer(const FeatureFunction* sp) const
-  {
-    FVector fv(s_denseVectorSize);
-    std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
-    for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
-      std::stringstream name;
-      name << i->first;
-      if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
-        fv[i->first] = i->second;
-    }
-    return fv;
-  }
+  FVector GetVectorForProducer(const FeatureFunction* sp) const;
 
   float GetSparseWeight(const FName& featureName) const
   {

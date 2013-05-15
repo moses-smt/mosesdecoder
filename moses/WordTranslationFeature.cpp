@@ -206,7 +206,7 @@ void WordTranslationFeature::Evaluate
     if (m_simple) {
       // construct feature name
       stringstream featureName;
-      featureName << "wt_";
+      featureName << m_description << "_";
       featureName << sourceWord;
       featureName << "~";
       featureName << targetWord;
@@ -220,7 +220,7 @@ void WordTranslationFeature::Evaluate
 	  // use topicid as trigger
 	  const long topicid = input.GetTopicId();
 	  stringstream feature;
-	  feature << "wt_";
+	  feature << m_description << "_";
 	  if (topicid == -1) 
 	    feature << "unk";
 	  else 
@@ -237,7 +237,7 @@ void WordTranslationFeature::Evaluate
 	  const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
 	  if (atol(topicid_prob[0].c_str()) == -1) {
 	    stringstream feature;
-	    feature << "wt_unk_";
+	    feature << m_description << "_unk_";
 	    feature << sourceWord;
 	    feature << "~";
 	    feature << targetWord;
@@ -246,7 +246,7 @@ void WordTranslationFeature::Evaluate
 	  else {
 	    for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
 	      stringstream feature;
-	      feature << "wt_";
+	      feature << m_description << "_";
 	      feature << topicid_prob[i];
 	      feature << "_";
 	      feature << sourceWord;
@@ -263,7 +263,7 @@ void WordTranslationFeature::Evaluate
 	for (boost::unordered_set<std::string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
 	  string sourceTrigger = *p;
 	  stringstream feature;
-	  feature << "wt_";
+	  feature << m_description << "_";
 	  feature << sourceTrigger;
 	  feature << "_";
 	  feature << sourceWord;
@@ -278,7 +278,7 @@ void WordTranslationFeature::Evaluate
       if (!m_domainTrigger && globalSourceIndex == 0) {
 	// add <s> trigger feature for source
 	stringstream feature;
-	feature << "wt_";
+	feature << m_description << "_";
 	feature << "<s>,";
 	feature << sourceWord;
 	feature << "~";
@@ -308,7 +308,7 @@ void WordTranslationFeature::Evaluate
 	if (m_domainTrigger) {
 	  if (sourceTriggerExists) {
 	    stringstream feature;
-	    feature << "wt_";
+	    feature << m_description << "_";
 	    feature << sourceTrigger;
 	    feature << "_";
 	    feature << sourceWord;
@@ -319,7 +319,7 @@ void WordTranslationFeature::Evaluate
 	}
 	else if (m_unrestricted || sourceTriggerExists) {
 	  stringstream feature;
-	  feature << "wt_";
+	  feature << m_description << "_";
 	  if (contextIndex < globalSourceIndex) {
 	    feature << sourceTrigger;
 	    feature << ",";
@@ -421,7 +421,7 @@ void WordTranslationFeature::EvaluateChart(
     if (m_simple) {
     	// construct feature name
     	stringstream featureName;
-    	featureName << "wt_";
+    	featureName << m_description << "_";
     	//featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
     	featureName << sourceWord;
     	featureName << "~";

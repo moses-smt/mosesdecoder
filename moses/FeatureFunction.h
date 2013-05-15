@@ -82,7 +82,6 @@ protected:
 
   std::string m_description, m_argLine;
   std::vector<std::vector<std::string> > m_args;
-  bool m_reportSparseFeatures;
   bool m_tuneable;
   size_t m_numScoreComponents;
   //In case there's multiple producers with the same description
@@ -109,9 +108,6 @@ public:
   //! returns a string description of this producer
   const std::string& GetScoreProducerDescription() const
   { return m_description; }
-
-  void SetSparseFeatureReporting() { m_reportSparseFeatures = true; }
-  bool GetSparseFeatureReporting() const { return m_reportSparseFeatures; }
 
   virtual float GetSparseProducerWeight() const { return 1; }
 

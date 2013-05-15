@@ -439,25 +439,8 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   // sparse features
   else {
     const FVector scores = features.GetVectorForProducer( ff );
-
-    // report weighted aggregate
-    if (! ff->GetSparseFeatureReporting()) {
-      const FVector &weights = staticData.GetAllWeights().GetScoresVector();
-      if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), "="))
-        out << " " << ff->GetScoreProducerDescription() << "=";
-      out << " " << scores.inner_product(weights);
-    }
-
-    // report each feature
-    else {
-      for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++)
-        out << " " << i->first << ": " << i->second;
-      /*        if (i->second != 0) { // do not report zero-valued features
-    float weight = staticData.GetSparseWeight(i->first);
-          if (weight != 0)
-    out << " " << i->first << "=" << weight;
-    }*/
-    }
+    for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++)
+      out << " " << i->first << ": " << i->second;
   }
 }
 
