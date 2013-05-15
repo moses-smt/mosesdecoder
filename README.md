@@ -25,6 +25,7 @@ There are different online learning algorithms implemented to update the feature
 6. Additionally, we have implemented MIRA algorithm, which updates the "weight-ol" after translating each sentence. 
 
 Input can be of two types.
+
 	1. A source sentence one wants to translate. 
 		source_segment
 
