@@ -6,23 +6,20 @@ For computer assisted translation, we have implemented a online learning feature
 1. This feature stores the phrase pairs which occurs in Oracle translation (the closest translation to a post edited sentence).
 2. These phrase pairs get rewarded if they are seen to be translated again in the future.
 3. These updates are similar to perceptron update where the margin is the difference between the scores of the oracle translation and the best translation (as decided by the decoder).
-4. In this system we have additional two parameters, a weight for the online feature, and a learning rate
-for online algorithm. 
+4. In this system we have additional two parameters, a weight for the online feature, and a learning rate for online algorithm. 
 5. These parameters can be passed as
 
-	a. "weight-ol" : is the weight of the online feature function
+	1. "weight-ol" : is the initial weight of the online feature function
 	
-	b. "f_learningrate" : is the learning rate of the perceptron algorithm
+	2. "f_learningrate" : is the learning rate of the perceptron algorithm
 
-	c. "w_learningrate" : is the learning rate for the weights of online feature
+	3. "w_learningrate" : is the learning rate for the weight of online feature
 
-There are different online learning algorithms implemented to update the features and the feature weights
+6. There are different online learning algorithms implemented to update the features and the feature weights
 
 	1. features : MIRA, Perceptron 
 
 	2. weights : MIRA
-
-6. Additionally, we have implemented MIRA algorithm, which updates the "weight-ol" after translating each sentence. 
 
 Input can be of two types.
 
