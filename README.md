@@ -25,14 +25,11 @@ There are different online learning algorithms implemented to update the feature
 6. Additionally, we have implemented MIRA algorithm, which updates the "weight-ol" after translating each sentence. 
 
 Input can be of two types.
+	1. A source sentence one wants to translate. 
+		source_segment
 
-1. A source sentence one wants to translate. 
-
-	source_segment
-
-2. If you want moses to learn from the post edited sentence, you have the option of passing the source and post edited sentence like this
-
-	source_segment_#_postedited_segment
+	2. If you want moses to learn from the post edited sentence, you have the option of passing the source and post edited sentence like this
+		source_segment_#_postedited_segment
 
 The decoder detects the delimiter "_#_" and automatically splits it based on the delimiter, and updates the models and weights.
 
