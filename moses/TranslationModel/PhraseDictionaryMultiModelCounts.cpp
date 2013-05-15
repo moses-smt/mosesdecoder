@@ -52,7 +52,7 @@ namespace Moses
 {
 
 PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::string &line)
-:PhraseDictionaryMultiModel("PhraseDictionaryMultiModel", line)
+:PhraseDictionaryMultiModel("PhraseDictionaryMultiModelCounts", line)
 {
     m_mode = "instance_weighting"; //TODO: set this in config; use m_mode to switch between interpolation and instance weighting
     m_combineFunction = InstanceWeighting;
@@ -74,6 +74,22 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
         }
 
       }
+      else if (args[0] == "lex-e2f") {
+        m_lexE2FStr = Tokenize(args[1], ",");
+        CHECK(m_lexE2FStr.size() == m_pdStr.size());
+      }
+      else if (args[0] == "lex-f2e") {
+        m_lexF2EStr = Tokenize(args[1], ",");
+        CHECK(m_lexF2EStr.size() == m_pdStr.size());
+      }
+
+      else if (args[0] == "target-table") {
+        m_targetTable = Tokenize(args[1], ",");
+        CHECK(m_targetTable.size() == m_pdStr.size());
+      }
+
+
+
     } // for
 
 }
@@ -86,15 +102,38 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
     RemoveAllInColl(m_inverse_pd);
 }
 
-bool PhraseDictionaryMultiModelCounts::InitDictionary(const vector<FactorType> &input
-                                  , const vector<FactorType> &output
-                                  , const vector<string> &config
-                                  , const vector<float> &weight
-                                  , size_t tableLimit
-                                  , size_t numInputScores
-                                  , const LMList &languageModels
-                                  , float weightWP)
+
+bool PhraseDictionaryMultiModelCounts::InitDictionary()
 {
+  for(size_t i = 0; i < m_numModels; ++i){
+
+    // phrase table
+    const string &ptName = m_pdStr[i];
+
+    PhraseDictionary *pt;
+    pt = FindPhraseDictionary(ptName);
+    CHECK(pt);
+    m_pd.push_back(pt);
+
+    // reverse
+    const string &target_table = m_targetTable[i];
+    pt = FindPhraseDictionary(target_table);
+    CHECK(pt);
+    m_inverse_pd.push_back(pt);
+
+    // lex
+    string lex_e2f = m_lexE2FStr[i];
+    string lex_f2e = m_lexF2EStr[i];
+    lexicalTable* e2f = new lexicalTable;
+    LoadLexicalTable(lex_e2f, e2f);
+    lexicalTable* f2e = new lexicalTable;
+    LoadLexicalTable(lex_f2e, f2e);
+
+    m_lexTable_e2f.push_back(e2f);
+    m_lexTable_f2e.push_back(f2e);
+
+  }
+
   /*
 
   for(size_t i = 0; i < m_numModels; ++i){
@@ -204,21 +243,25 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
 //fill fs and allStats with statistics from models
 {
   for(size_t i = 0; i < m_numModels; ++i){
+    const PhraseDictionary &pd = *m_pd[i];
 
-    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  m_pd[i]->GetTargetPhraseCollection( src);
+    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  pd.GetTargetPhraseCollection( src);
     if (ret_raw != NULL) {
 
       TargetPhraseCollection::iterator iterTargetPhrase;
       for (iterTargetPhrase = ret_raw->begin(); iterTargetPhrase != ret_raw->end();  ++iterTargetPhrase) {
 
         TargetPhrase * targetPhrase = *iterTargetPhrase;
-        vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(this);
+        vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
         string targetString = targetPhrase->GetStringRep(m_output);
         if (allStats->find(targetString) == allStats->end()) {
 
           multiModelCountsStatistics * statistics = new multiModelCountsStatistics;
           statistics->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
+
+          // zero out scores from original phrase table
+          statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
 
           statistics->fst.resize(m_numModels);
           statistics->ft.resize(m_numModels);
@@ -227,6 +270,11 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
           scoreVector[1] = -raw_scores[1];
           scoreVector[2] = -raw_scores[2];
           statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
+
+          cerr << *targetPhrase << endl;
+          for (size_t i = 0; i < scoreVector.size(); ++i)
+            cerr << scoreVector[i] << " ";
+          cerr << endl;
 
           (*allStats)[targetString] = statistics;
 
@@ -278,6 +326,11 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
         scoreVector[2] = FloorScore(TransformScore(m_combineFunction(statistics->fst, fs, multimodelweights[2])));
         scoreVector[3] = FloorScore(TransformScore(lexts));
         scoreVector[4] = FloorScore(TransformScore(2.718));
+
+        cerr << *statistics->targetPhrase << endl;
+        for (size_t i = 0; i < scoreVector.size(); ++i)
+          cerr << scoreVector[i] << " ";
+        cerr << endl;
 
         statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
     }

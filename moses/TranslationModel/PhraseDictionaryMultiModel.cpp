@@ -74,31 +74,37 @@ PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
 
 bool PhraseDictionaryMultiModel::InitDictionary()
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
   // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
 
-  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
 
   for(size_t i = 0; i < m_numModels; ++i){
     const string &ptName = m_pdStr[i];
 
-    PhraseDictionary *pt = NULL;
-    std::vector<PhraseDictionary*>::const_iterator iter;
-    for (iter = pts.begin(); iter != pts.end(); ++iter) {
-      PhraseDictionary *currPt = *iter;
-      if (currPt->GetScoreProducerDescription() == ptName) {
-        pt = currPt;
-        break;
-      }
-    }
-
+    PhraseDictionary *pt = FindPhraseDictionary(ptName);
     CHECK(pt);
     m_pd.push_back(pt);
   }
 
   return true;
+}
+
+PhraseDictionary *PhraseDictionaryMultiModel::FindPhraseDictionary(const string &ptName) const
+{
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
+
+  PhraseDictionary *pt = NULL;
+  std::vector<PhraseDictionary*>::const_iterator iter;
+  for (iter = pts.begin(); iter != pts.end(); ++iter) {
+    PhraseDictionary *currPt = *iter;
+    if (currPt->GetScoreProducerDescription() == ptName) {
+      pt = currPt;
+      break;
+    }
+  }
+
+  return pt;
 }
 
 
@@ -168,6 +174,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           }
 
           statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
+          statistics->targetPhrase->Evaluate();
 
           (*allStats)[targetString] = statistics;
 
@@ -205,6 +212,8 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
         cerr << endl;
 
         statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
+        statistics->targetPhrase->Evaluate();
+
         ret->Add(new TargetPhrase(*statistics->targetPhrase));
     }
     return ret;
