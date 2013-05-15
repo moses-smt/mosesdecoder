@@ -25,6 +25,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+template<typename T>
+void outVec(const vector<T> &vec)
+{
+  for (size_t i = 0; i < vec.size(); ++i) {
+    cerr << vec[i] << " " << flush;
+  }
+  cerr << endl;
+}
+
 // from phrase-extract/tables-core.cpp
 vector<string> tokenize( const char* input )
 {
@@ -62,11 +71,12 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
     for (size_t i = 0; i < m_args.size(); ++i) {
       const vector<string> &args = m_args[i];
       if (args[0] == "mode") {
-        m_mode =args[1];
+        m_mode = args[1];
         if (m_mode == "instance_weighting")
           m_combineFunction = InstanceWeighting;
-        else if (m_mode == "interpolate")
+        else if (m_mode == "interpolate") {
           m_combineFunction = LinearInterpolationFromCounts;
+        }
         else {
           ostringstream msg;
           msg << "combination mode unknown: " << m_mode;
@@ -285,6 +295,8 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
         statistics->ft[i] = UntransformScore(raw_scores[1]);
         fs[i] = UntransformScore(raw_scores[2]);
         (*allStats)[targetString] = statistics;
+
+        outVec(statistics->ft);
       }
     }
   }
@@ -298,9 +310,9 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
             statistics->ft[i] = GetTargetCount(static_cast<const Phrase&>(*statistics->targetPhrase), i);
         }
     }
+    outVec(statistics->ft);
   }
 }
-
 
 TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseCollectionCounts(const Phrase &src, vector<float> &fs, map<string,multiModelCountsStatistics*>* allStats, vector<vector<float> > &multimodelweights) const
 {
@@ -332,6 +344,15 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
           cerr << scoreVector[i] << " ";
         cerr << endl;
 
+        vector<float> a = statistics->fst;
+        vector<float> b = statistics->ft;
+        vector<float> c = multimodelweights[0];
+        float d = m_combineFunction(statistics->fst, statistics->ft, multimodelweights[0]);
+        outVec(a);
+        outVec(b);
+        outVec(c);
+        cerr << d << endl;
+
         statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
     }
     catch (AlignmentException& e) {
@@ -349,12 +370,13 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
 
 float PhraseDictionaryMultiModelCounts::GetTargetCount(const Phrase &target, size_t modelIndex) const {
 
-    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  m_inverse_pd[modelIndex]->GetTargetPhraseCollection(target);
+    const PhraseDictionary &pd = *m_inverse_pd[modelIndex];
+    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  pd.GetTargetPhraseCollection(target);
 
     // in inverse mode, we want the first score of the first phrase pair (note: if we were to work with truly symmetric models, it would be the third score)
     if (ret_raw != NULL) {
         TargetPhrase * targetPhrase = *(ret_raw->begin());
-        return UntransformScore(targetPhrase->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+        return UntransformScore(targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd)[0]);
     }
 
     // target phrase unknown
