@@ -574,7 +574,7 @@ vector<float> PhraseDictionaryMultiModelCounts::MinimizePerplexity(vector<pair<s
         map<string,multiModelCountsStatistics*>* allStats = new(map<string,multiModelCountsStatistics*>);
 
         Phrase sourcePhrase(0);
-        sourcePhrase.CreateFromString(m_input, source_string, factorDelimiter);
+        sourcePhrase.CreateFromString(Input, m_input, source_string, factorDelimiter);
 
         CollectSufficientStatistics(sourcePhrase, fs, allStats); //optimization potential: only call this once per source phrase
 
@@ -606,7 +606,7 @@ vector<float> PhraseDictionaryMultiModelCounts::MinimizePerplexity(vector<pair<s
     }
 
     Sentence sentence;
-    CleanUp(sentence); // free memory used by compact phrase tables
+    CleanUpAfterSentenceProcessing(sentence); // free memory used by compact phrase tables
 
     vector<float> ret (m_numModels*4);
     for (size_t iFeature=0; iFeature < 4; iFeature++) {

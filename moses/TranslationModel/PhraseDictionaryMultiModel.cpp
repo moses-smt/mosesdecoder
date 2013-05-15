@@ -360,7 +360,7 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
         map<string,multiModelStatistics*>* allStats = new(map<string,multiModelStatistics*>);
 
         Phrase sourcePhrase(0);
-        sourcePhrase.CreateFromString(m_input, source_string, factorDelimiter);
+        sourcePhrase.CreateFromString(Input, m_input, source_string, factorDelimiter);
 
         CollectSufficientStatistics(sourcePhrase, allStats); //optimization potential: only call this once per source phrase
 
@@ -382,7 +382,7 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
         }
 
     Sentence sentence;
-    CleanUp(sentence); // free memory used by compact phrase tables
+    CleanUpAfterSentenceProcessing(sentence); // free memory used by compact phrase tables
 
     size_t numWeights = m_numScoreComponents;
     if (m_mode == "interpolate") {
