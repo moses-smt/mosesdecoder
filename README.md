@@ -16,9 +16,9 @@ These parameters can be passed as
 
 There are different online learning algorithms implemented to update the features and the feature weights. 
 
-	1. features : MIRA("-f_learningalgorithm mira"), Perceptron ("-f_learningalgorithm perceptron")
+	1. features : MIRA("-f_algorithm mira"), Perceptron ("-f_algorithm perceptron")
 
-	2. weights : MIRA("-w_learningalgorithm mira")
+	2. weights : MIRA("-w_algorithm mira")
 
 Input can be of two types.
 
