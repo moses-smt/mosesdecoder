@@ -103,7 +103,7 @@ while(my $line = <INI>) {
   chomp($line);
   my @toks = split(/ /, $line);
   if ($line =~ /PhraseDictionaryMemory /
-     || $line =~ /PhraseDictionaryTreeAdaptor /
+     || $line =~ /PhraseDictionaryBinary /
      || $line =~ /PhraseDictionaryOnDisk /
      || $line =~ /PhraseDictionarySCFG /
      ) {
@@ -161,7 +161,7 @@ while(my $line = <INI>) {
 		  @toks = set_value(\@toks, "path", "$new_name.bin$table_flag");
 			}
 			else {
-  		  $phrase_table_impl = "PhraseDictionaryTreeAdaptor";
+  		  $phrase_table_impl = "PhraseDictionaryBinary";
 			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
 			}
 		}
