@@ -12,7 +12,15 @@ for online algorithm.
 
 	a. "weight-ol" : is the weight of the online feature function
 	
-	b. "learningrate" : is the learning rate of the perceptron algorithm
+	b. "f_learningrate" : is the learning rate of the perceptron algorithm
+
+	c. "w_learningrate" : is the learning rate for the weights of online feature
+
+There are different online learning algorithms implemented to update the features and the feature weights
+
+	1. features : MIRA, Perceptron 
+
+	2. weights : MIRA
 
 6. Additionally, we have implemented MIRA algorithm, which updates the "weight-ol" after translating each sentence. 
 
