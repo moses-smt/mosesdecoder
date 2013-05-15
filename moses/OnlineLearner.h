@@ -43,6 +43,7 @@ class Search;
 class OnlineLearner : public StatelessFeatureFunction {
 
 private:
+	OnlineAlgorithm implementation;
 	pp_feature m_feature;
 	pp_list m_featureIdx;
 	pp_list PP_ORACLE, PP_BEST;

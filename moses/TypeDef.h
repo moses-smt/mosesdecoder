@@ -184,10 +184,11 @@ enum SourceLabelOverlap {
 };
 
 enum OnlineAlgorithm {
-	MIRA = 0
-	, Perceptron = 1
+	FOnlyMIRA = 0
+	, FOnlyPerceptron = 1
 	, FPercepWMira = 3
 	, FMiraWMira = 4
+	, FSparseMiraWSparseMira = 5
 };
 
 enum WordAlignmentSort {

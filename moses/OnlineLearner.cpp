@@ -153,7 +153,7 @@ OnlineLearner::OnlineLearner(float f_learningrate, float w_learningrate):Statele
 	cerr<<"Initialization Online Learning Model\n";
 }
 
-OnlineLearner::OnlineLearner(OnlineAlgorithm implementation, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
+OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
 		float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
 	flr = f_learningrate;
 	wlr = w_learningrate;
@@ -170,14 +170,7 @@ OnlineLearner::OnlineLearner(OnlineAlgorithm implementation, float w_learningrat
 	m_learn=false;
 	m_mira=false;
 	m_perceptron=false;
-	if(implementation==Perceptron)
-		m_perceptron=true;
-	else if(implementation==MIRA)
-		m_mira=true;
-	else if(implementation==FPercepWMira)
-		m_mira = true;
-	else if(implementation==FMiraWMira)
-		m_mira=true;
+	implementation=algorithm;
 	optimiser = new Optimizer::MiraOptimiser(slack, scale_margin, scale_margin_precision, scale_update,
 			scale_update_precision, boost, normaliseMargin, sigmoidParam);
 	cerr<<"Initialization Online Learning Model\n";
