@@ -8,11 +8,11 @@ The feature also stores the phrase pairs in non-oracles and penalize them if the
 This system has additional parameters, a weight for the online feature, and a learning rate for online algorithm. 
 These parameters can be passed as
 
-	1. "weight-ol" : is the initial weight of the online feature function
+	1. "weight-ol <weight>" : is the initial weight of the online feature function
 	
-	2. "f_learningrate" : is the learning rate for online algorithm to update the feature
+	2. "f_learningrate <rate>" : is the learning rate for online algorithm to update the feature 
 
-	3. "w_learningrate" : is the learning rate for online algorithm to update the weight of online feature
+	3. "w_learningrate <rate>" : is the learning rate for online algorithm to update the weight of online feature
 
 There are different online learning algorithms implemented to update the features and the feature weights. 
 
