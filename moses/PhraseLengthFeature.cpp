@@ -44,7 +44,7 @@ void PhraseLengthFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {
-  CHECK(false);
+  //CHECK(false);
 }
 
 }

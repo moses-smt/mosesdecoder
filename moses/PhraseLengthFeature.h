@@ -18,7 +18,10 @@ namespace Moses
 class PhraseLengthFeature : public StatelessFeatureFunction {
 public:
   PhraseLengthFeature(const std::string &line);
-      
+
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return RequiresSegmentation; }
+
   void Evaluate(const PhraseBasedFeatureContext& context,
                 ScoreComponentCollection* accumulator) const;
 
