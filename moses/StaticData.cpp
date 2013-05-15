@@ -1446,9 +1446,10 @@ int StaticData::GetNumIterationsOnlineLearning() const
 
 bool StaticData::LoadOnlineLearningModel()
 {
-	const std::string algorithm = (m_parameter->GetParam("algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("algorithm")[0]) : "perceptron";
+	const std::string f_algorithm = (m_parameter->GetParam("f_algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("f_algorithm")[0]) : "perceptron";
+	const std::string w_algorithm = (m_parameter->GetParam("w_algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("w_algorithm")[0]) : "NULL";
 	int setAlgo = 1; // 1 for perceptron, 2 for mira
-	if(algorithm.compare("perceptron")==0)
+	if(f_algorithm.compare("perceptron")==0)
 	{
 		cerr<<"Using perceptron as online learning algorithm\n";
 		const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
@@ -1460,14 +1461,14 @@ bool StaticData::LoadOnlineLearningModel()
 			UserMessage::Add("Can only specify one weight for the online learning feature");
 			return false;
 		}
-		else if(weights.size()==1 && w_learningrate==0)
+		else if(weights.size()==1 && w_algorithm.compare("NULL")==0)
 		{
 			m_onlinelearner = new OnlineLearner(f_learningrate, w_learningrate);
 			SetWeight(m_onlinelearner, weights[0]);
 			IFVERBOSE(1)
 			PrintUserTime("Online Learning : Perceptron");
 		}
-		else if(weights.size()==1 && w_learningrate!=0)
+		else if(weights.size()==1 && w_algorithm.compare("mira")==0)
 		{
 			const float slack = (m_parameter->GetParam("slack").size() > 0) ? Scan<float>(m_parameter->GetParam("slack")[0]) : 0.01;
 			const float scale_margin = (m_parameter->GetParam("scale_margin").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_margin")[0]) : 0.0;
@@ -1484,10 +1485,10 @@ bool StaticData::LoadOnlineLearningModel()
 			PrintUserTime("Online Learning : Perceptron\tWeights : MIRA");
 		}
 	}
-	else if(algorithm.compare("mira")==0)
+	else if(f_algorithm.compare("mira")==0)
 	{
 		setAlgo=2;
-		cerr<<"Using MIRA as online learning algorithm\n";
+		cerr<<"Using MIRA as online learning algorithm for feature update\n";
 		const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
 		if(weights.size()>1)
 		{
@@ -1496,7 +1497,8 @@ bool StaticData::LoadOnlineLearningModel()
 		}
 		else if(weights.size()==1)
 		{
-			const float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 0;
+			float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 0;
+			if(w_algorithm.compare("NULL")==0) w_learningrate=0;
 			const float f_learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("f_learningrate")[0]) : 0;
 			if(w_learningrate==0 && f_learningrate==0)
 				cerr<<"both learning rates are zero ... You sure about that?\n";

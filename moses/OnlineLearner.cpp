@@ -285,6 +285,15 @@ OnlineLearner::~OnlineLearner() {
 
 void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
 {
+	for(int i=0;i<sps.size();i++)
+	{
+		if(sps[i]->GetScoreProducerDescription().compare("OnlineLearner")==0)
+		{
+			sp=const_cast<ScoreProducer*>(sps[i]);
+			break;
+		}
+	}
+	float weight=weightUpdate.GetScoreForProducer(sp);
 	float score=0.0;
 	std::string s="",t="";
 	size_t endpos = tp.GetSize();
@@ -300,6 +309,12 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 
 	if(update_features && m_mira)
 	{
+		const TranslationSystem &trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+		const StaticData& staticData = StaticData::Instance();
+		ScoreComponentCollection weightUpdate = staticData.GetAllWeights();
+		std::vector<const ScoreProducer*> sps = trans_sys.GetFeatureFunctions();
+		ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
+
 		size_t idx;
 		pp_list::const_iterator it;
 		it=m_featureIdx.find(s);

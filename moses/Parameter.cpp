@@ -195,7 +195,8 @@ Parameter::Parameter()
   AddParam("print-translation-option", "pto", "print translation option (without setting verbosity)");
   AddParam("print-id", "prefix translations with id. Default if false");
 
-  AddParam("algorithm","algorithm to be used for online learning : mira or perceptron");
+  AddParam("f_algorithm","algorithm to be used for online learning of features : mira or perceptron");
+  AddParam("w_algorithm","algorithm to be used for online learning of weights : mira (only option so far :( )");
   AddParam("w_learningrate", "online learning rate for weights");
   AddParam("f_learningrate", "online learning rate for features");
   AddParam("weight-ol", "ol", "initial weight for online learning feature");
