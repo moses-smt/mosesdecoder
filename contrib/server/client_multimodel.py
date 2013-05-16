@@ -32,7 +32,8 @@ def optimize(phrase_pairs, server):
     params = {}
     params['phrase_pairs'] = phrase_pairs
     weights = server.optimize(params)
-    sys.stderr.write(str(weights + '\n'))
+    sys.stderr.write('weight vector (set lambda in moses.ini to this value to set as default): ')
+    sys.stderr.write(','.join(map(str,weights)) + '\n')
     return weights
 
 
