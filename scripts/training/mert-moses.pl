@@ -1284,9 +1284,9 @@ sub get_featlist_from_file {
   while (<$fh>) {
     $nr++;
     chomp;
-    /^(\S+)= (.+)$/ || die "invalid feature: $_";
+    /^(\S+)= (.+)$/;
     my ($longname, $valuesStr) = ($1, $2);
-    next if $valuesStr eq "sparse";
+    next if (!defined($valuesStr));
     
     my @values = split(/ /, $valuesStr);
 		foreach my $value (@values) {
