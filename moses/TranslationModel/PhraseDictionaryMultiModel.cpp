@@ -47,7 +47,11 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
     }
   } // for
 
-  CHECK(m_pdStr.size() == m_multimodelweights.size());
+  size_t numWeights = m_numScoreComponents;
+  if (m_mode == "interpolate") {
+    numWeights--;
+  }
+  CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*numWeights == m_multimodelweights.size());
 }
 
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &description, const std::string &line)
@@ -64,7 +68,9 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &descri
     }
   } // for
 
-  CHECK(m_pdStr.size() == m_multimodelweights.size());
+  if (description == "PhraseDictionaryMultiModelCounts") {
+    CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*4 == m_multimodelweights.size());
+  }
 }
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
