@@ -662,15 +662,6 @@ public:
     return m_nBestIncludesSegmentation;
   }
 
-  const std::vector<const FeatureFunction*>& GetSparseProducers() const {return m_sparseProducers;}
-
-  void AddSparseProducer(const FeatureFunction* ff) {
-    m_sparseProducers.push_back(ff);
-  }
-
-  //All sparse producers that have an activated global weight
-	std::vector<const FeatureFunction*> m_sparseProducers;
-
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
 

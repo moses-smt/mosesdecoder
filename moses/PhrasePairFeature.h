@@ -26,7 +26,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
     bool m_simple;
     bool m_sourceContext;
     bool m_domainTrigger;
-    float m_sparseProducerWeight;
     bool m_ignorePunctuation;
     CharHash m_punctuationHash;
     
@@ -47,8 +46,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 
     bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
 
-    void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
-    float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 };
 
 }

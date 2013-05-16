@@ -17,7 +17,6 @@ using namespace std;
 WordTranslationFeature::WordTranslationFeature(const std::string &line)
 :StatelessFeatureFunction("WordTranslationFeature", 0, line)
 ,m_unrestricted(true)
-,m_sparseProducerWeight(1)
 ,m_simple(true)
 ,m_sourceContext(false)
 ,m_targetContext(false)

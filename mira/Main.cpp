@@ -524,19 +524,7 @@ int main(int argc, char** argv) {
   // get reference to feature functions
   const vector<FeatureFunction*> &featureFunctions = FeatureFunction::GetFeatureFunctions();
   ScoreComponentCollection initialWeights = decoder->getWeights();
-  
-  bool tuneMetaFeature = false;
-  const vector<const FeatureFunction*>& sparseProducers = staticData.GetSparseProducers();
-  for (unsigned i = 0; i < sparseProducers.size(); ++i) {
-    float spWeight = sparseProducers[i]->GetSparseProducerWeight();
-    if (spWeight != 1.0) {
-      tuneMetaFeature = true;
-      cerr << "Rank " << rank << ", sparse Producer " <<
-	sparseProducers[i]->GetScoreProducerDescription()
-	   << " weight: " << spWeight << endl;
-    }
-  }
-  
+    
   if (add2lm != 0) {
     const LMList& lmList_new = staticData.GetLMList();
     for (LMList::const_iterator i = lmList_new.begin(); i != lmList_new.end(); ++i) {
@@ -691,22 +679,6 @@ int main(int argc, char** argv) {
       
       if (historyBleu || simpleHistoryBleu) {
 	decoder->printBleuFeatureHistory(cerr);
-      }
-      
-      if (tuneMetaFeature) {
-	// initialise meta feature
-	MetaFeatureProducer *m = staticData.GetMetaFeatureProducer();
-	FeatureFunction* ff = const_cast<FeatureFunction*>(sparseProducers[0]);
-	if (sparseProducers[0]->GetScoreProducerDescription().compare("wt") == 0) {
-	  WordTranslationFeature* wt =
-	    static_cast<WordTranslationFeature*>(ff);
-	  mosesWeights.Assign(m, wt->GetSparseProducerWeight());
-	}
-	else if (sparseProducers[0]->GetScoreProducerDescription().compare("pp") == 0) {
-	  PhrasePairFeature* pp =
-	    static_cast<PhrasePairFeature*>(ff);
-	  mosesWeights.Assign(m, pp->GetSparseProducerWeight());
-	}
       }
       
       // BATCHING: produce nbest lists for all input sentences in batch
@@ -1260,62 +1232,6 @@ int main(int argc, char** argv) {
 	  }
 	}
 	
-	if (kbest) {
-	  // If we are tuning a global weight for a sparse producer,
-	  // we must collapse the sparse features first (report weighted aggregate)
-	  if (tuneMetaFeature) {
-	    for (unsigned i = 0; i < sparseProducers.size(); ++i) {
-	      float spWeight = sparseProducers[i]->GetSparseProducerWeight();
-	      if (spWeight != 1.0) {
-		MetaFeatureProducer *m = staticData.GetMetaFeatureProducer();
-		for (size_t i=0; i < featureValuesHope.size(); ++i) {
-		  for (size_t j=0; j < featureValuesHope[i].size(); ++j) {
-		    // multiply sparse feature values with weights
-		    const FVector scores =
-		      featureValuesHope[i][j].GetVectorForProducer(sparseProducers[i]);
-		    const FVector &weights = staticData.GetAllWeights().GetScoresVector();
-		    float aggregate = scores.inner_product(weights);
-		    //cerr << "Rank " << rank << ", epoch " << epoch << ", sparse Producer " <<
-		    //sparseProducers[i]->GetScoreProducerDescription()
-		    //<< " aggregate: " << aggregate << endl;
-		    aggregate *= spWeight;
-		    //cerr << "Rank " << rank << ", epoch " << epoch << ", sparse Producer " <<
-		    //sparseProducers[i]->GetScoreProducerDescription()
-		    //<< " weighted aggregate: " << aggregate << endl;
-		    
-		    // copy core features to a new collection, then assign aggregated sparse feature
-		    ScoreComponentCollection scoresAggregate;
-		    scoresAggregate.CoreAssign(featureValuesHope[i][j]);
-		    scoresAggregate.Assign(m, aggregate);
-		    featureValuesHope[i][j] = scoresAggregate;
-		  }
-		}
-		for (size_t i=0; i < featureValuesFear.size(); ++i) {
-		  for (size_t j=0; j < featureValuesFear[i].size(); ++j) {
-		    // multiply sparse feature values with weights
-		    const FVector scores =
-		      featureValuesFear[i][j].GetVectorForProducer(sparseProducers[i]);
-		    const FVector &weights = staticData.GetAllWeights().GetScoresVector();
-		    float aggregate = scores.inner_product(weights);
-		    aggregate *= spWeight;
-		    
-		    // copy core features to a new collection, then assign aggregated sparse feature
-		    ScoreComponentCollection scoresAggregate;
-		    scoresAggregate.CoreAssign(featureValuesFear[i][j]);
-		    scoresAggregate.Assign(m, aggregate);
-		    featureValuesFear[i][j] = scoresAggregate;
-		  }
-		}
-		
-		cerr << "Rank " << rank << ", epoch " << epoch << ", new hope feature vector: " <<
-		  featureValuesHope[0][0] << endl;
-		cerr << "Rank " << rank << ", epoch " << epoch << ", new fear feature vector: " <<
-		  featureValuesFear[0][0] << endl;
-	      }
-	    }
-	  }
-	}
-
 	// Run optimiser on batch:
 	VERBOSE(1, "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl);
 	size_t update_status = 1;
@@ -1381,34 +1297,6 @@ int main(int argc, char** argv) {
 	  if (debug)
 	    cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
 	  
-	  if (tuneMetaFeature) {
-	    MetaFeatureProducer *m = staticData.GetMetaFeatureProducer();
-	    // update sparse producer weight
-	    // (NOTE: this currently doesn't work for more than one sparse producer)
-	    float metaWeightUpdate = weightUpdate.GetScoreForProducer(m);
-	    
-	    const vector<const FeatureFunction*> sparseProducers = staticData.GetSparseProducers();
-	    FeatureFunction* ff = const_cast<FeatureFunction*>(sparseProducers[0]);
-	    if (sparseProducers[0]->GetScoreProducerDescription().compare("wt") == 0) {
-	      WordTranslationFeature* wt =
-		static_cast<WordTranslationFeature*>(ff);
-	      float newWeight = wt->GetSparseProducerWeight();
-	      cerr << "Rank " << rank << ", epoch " << epoch << ", old meta weight: " << newWeight << endl;
-	      newWeight += metaWeightUpdate;
-	      wt->SetSparseProducerWeight(newWeight);
-	      cerr << "Rank " << rank << ", epoch " << epoch << ", new meta weight: " << newWeight << endl;
-	    }
-	    else if (sparseProducers[0]->GetScoreProducerDescription().compare("pp") == 0) {
-	      PhrasePairFeature* pp =
-		static_cast<PhrasePairFeature*>(ff);
-	      float newWeight = pp->GetSparseProducerWeight();
-	      cerr << "Rank " << rank << ", epoch " << epoch << ", old meta weight: " << newWeight << endl;
-	      newWeight += metaWeightUpdate;
-	      pp->SetSparseProducerWeight(newWeight);
-	      cerr << "Rank " << rank << ", epoch " << epoch << ", new meta weight: " << newWeight << endl;
-	    }
-	  }
-	  
 	  if (feature_confidence) {
 	    // update confidence counts based on weight update
 	    confidenceCounts.UpdateConfidenceCounts(weightUpdate, signed_counts);
@@ -1420,7 +1308,7 @@ int main(int argc, char** argv) {
 	  // apply weight update to Moses weights
 	  mosesWeights.PlusEquals(weightUpdate);
 	  
-	  if (normaliseWeights && !tuneMetaFeature)
+	  if (normaliseWeights)
 	    mosesWeights.L1Normalise();
 	  
 	  cumulativeWeights.PlusEquals(mosesWeights);
@@ -1432,7 +1320,7 @@ int main(int argc, char** argv) {
 	  
 	  ++numberOfUpdates;
 	  ++numberOfUpdatesThisEpoch;
-	  if (averageWeights && !tuneMetaFeature) {
+	  if (averageWeights) {
 	    ScoreComponentCollection averageWeights(cumulativeWeights);
 	    if (accumulateWeights) {
 	      averageWeights.DivideEquals(numberOfUpdates);

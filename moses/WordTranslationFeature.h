@@ -31,7 +31,6 @@ private:
   bool m_sourceContext;
   bool m_targetContext;
   bool m_domainTrigger;
-  float m_sparseProducerWeight;
   bool m_ignorePunctuation;
   CharHash m_punctuationHash;
   
@@ -53,9 +52,6 @@ public:
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const;
-
-  void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
-  float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 
   StatelessFeatureType GetStatelessFeatureType() const
   { return RequiresSegmentation; }

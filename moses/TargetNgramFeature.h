@@ -184,9 +184,6 @@ public:
 
 	bool Load(const std::string &filePath);
 
-  void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
-  float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
-
 	virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
 	virtual FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
@@ -205,9 +202,6 @@ private:
 	std::set<std::string> m_vocab;
 	size_t m_n;
 	bool m_lower_ngrams;
-
-	// additional weight that all sparse weights are scaled with
-	float m_sparseProducerWeight;
 
 	std::string m_baseName;
 

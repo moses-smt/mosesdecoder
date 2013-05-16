@@ -60,7 +60,6 @@ private:
   bool m_bitrigger;
 
   bool m_biasFeature;
-  float m_sparseProducerWeight;
   bool m_ignorePunctuation;
 
   std::set<std::string> m_vocabSource;
@@ -92,9 +91,6 @@ public:
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const;
-
-  void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
-  float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 
 	void AddFeature(ScoreComponentCollection* accumulator,
 			StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,

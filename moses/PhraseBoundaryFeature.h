@@ -49,9 +49,6 @@ public:
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const;
-
-  void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
-  float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
   
 private:
   void AddFeatures(
@@ -59,7 +56,6 @@ private:
     const std::string& side, ScoreComponentCollection* scores) const ;
   FactorList m_sourceFactors;
   FactorList m_targetFactors;
-  float m_sparseProducerWeight;
 };
 
 }

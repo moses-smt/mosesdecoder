@@ -187,21 +187,14 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 }
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
+  cout << ff->GetScoreProducerDescription() << "=";
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != 0) {
-    vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
-    cout << ff->GetScoreProducerDescription() << "=";
-    for (size_t i = 0; i < numScoreComps; ++i) {
-    	cout << " " << values[i];
-    }
-    cout << endl;
+  vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+  for (size_t i = 0; i < numScoreComps; ++i) {
+  	cout << " " << values[i];
   }
-  else {
-  	if (ff->GetSparseProducerWeight() == 1)
-  		cout << ff->GetScoreProducerDescription() << "= sparse" <<  endl;
-  	else
-  		cout << ff->GetScoreProducerDescription() << "= " << ff->GetSparseProducerWeight() << endl;
-  }
+  cout << endl;
+
 }
 
 static void ShowWeights()

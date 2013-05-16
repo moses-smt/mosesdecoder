@@ -109,8 +109,6 @@ public:
   const std::string& GetScoreProducerDescription() const
   { return m_description; }
 
-  virtual float GetSparseProducerWeight() const { return 1; }
-
   virtual bool IsTuneable() const { return m_tuneable; }
 
   //!

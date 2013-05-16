@@ -39,7 +39,6 @@ int TargetNgramState::Compare(const FFState& other) const {
 
 TargetNgramFeature::TargetNgramFeature(const std::string &line)
 :StatefulFeatureFunction("TargetNgramFeature", 0, line)
-,m_sparseProducerWeight(1)
 {
   std::cerr << "Initializing target ngram feature.." << std::endl;
 

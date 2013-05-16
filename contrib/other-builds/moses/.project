@@ -592,11 +592,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingTable.h</locationURI>
 		</link>
 		<link>
-			<name>Makefile.am</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Makefile.am</locationURI>
-		</link>
-		<link>
 			<name>Manager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Manager.cpp</locationURI>

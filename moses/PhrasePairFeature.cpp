@@ -26,7 +26,6 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
   m_simple = Scan<bool>(tokens[4]);
   m_sourceContext = Scan<bool>(tokens[5]);
   m_domainTrigger = Scan<bool>(tokens[6]);
-  m_sparseProducerWeight = 1;
   m_ignorePunctuation = Scan<bool>(tokens[6]);
 
   if (m_simple == 1) std::cerr << "using simple phrase pairs.. ";
