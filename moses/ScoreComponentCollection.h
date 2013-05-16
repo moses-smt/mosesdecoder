@@ -316,7 +316,6 @@ public:
 	std::vector<float> GetScoresForProducer(const FeatureFunction* sp) const
 	{
     size_t components = sp->GetNumScoreComponents();
-    assert(components > 0);
 
     std::vector<float> res(components);
     IndexPair indexes = GetIndexes(sp);
