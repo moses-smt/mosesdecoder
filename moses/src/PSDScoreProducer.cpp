@@ -39,6 +39,17 @@ bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFi
     return false;
 
   m_extractor = new FeatureExtractor(m_phraseIndex, m_extractorConfig, false);
+
+  // set normalization function
+  const string &normFunc = m_extractorConfig.GetNormalization();
+  if (normFunc == "squared_loss") {
+    m_normalizer = &NormalizeSquaredLoss;
+  } else if (normFunc == "logistic_loss_basic") {
+    m_normalizer = &NormalizeLogisticLossBasic;
+  } else {
+    throw runtime_error("Unknown normalization function: " + normFunc);
+  }
+
   return true;
 }
 
@@ -104,7 +115,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
         options[0]->GetEndPos(), psdOptions, losses);
     m_consumerFactory->Release(p_consumer);
 
-    Normalize1(losses);
+    m_normalizer(losses); // normalize using the function specified in config file
 
     vector<float>::const_iterator lossIt;
     for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
@@ -154,7 +165,7 @@ bool PSDScoreProducer::LoadPhraseIndex(const string &indexFile)
   return true;
 }
 
-void PSDScoreProducer::Normalize0(vector<float> &losses)
+void PSDScoreProducer::NormalizeSquaredLoss(vector<float> &losses)
 {
 
 	// This is (?) a good choice for sqrt loss (default loss function in VW)
@@ -181,7 +192,7 @@ void PSDScoreProducer::Normalize0(vector<float> &losses)
   }
 }
 
-void PSDScoreProducer::Normalize1(vector<float> &losses)
+void PSDScoreProducer::NormalizeLogisticLossBasic(vector<float> &losses)
 {
 
 	// Use this with logistic loss (we switched to this in April/May 2013)

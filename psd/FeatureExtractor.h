@@ -38,6 +38,7 @@ class ExtractorConfig
     inline const std::vector<float> &GetScoreBins() const { return m_scoreBins; }
     inline const std::string &GetVWOptionsTrain() const { return m_vwOptsTrain; }
     inline const std::string &GetVWOptionsPredict() const { return m_vwOptsPredict; }
+    inline const std::string &GetNormalization() const { return m_normalization; }
 
     inline bool IsLoaded() const { return m_isLoaded; }
 
@@ -47,7 +48,7 @@ class ExtractorConfig
          m_sourceInternal, m_targetInternal, m_mostFrequent,
          m_binnedScores, m_sourceIndicator, m_targetIndicator, 
          m_sourceTargetIndicator, m_STSE, m_sourceTopic, m_phraseFactor;
-    std::string m_vwOptsPredict, m_vwOptsTrain;
+    std::string m_vwOptsPredict, m_vwOptsTrain, m_normalization;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
     std::vector<float> m_scoreBins;

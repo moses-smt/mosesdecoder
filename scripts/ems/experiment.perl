@@ -378,7 +378,9 @@ sub read_ini_file {
   open(my $inihdl, $file) or die "Failed to read .ini file: $file";
   while (<$inihdl>) {
     chomp(my $line = $_);
-    if ($line =~ m/^\[(.*)\]/) {
+    if ($line =~ m/^\s*;/) {
+      # skip commented lines
+    } elsif ($line =~ m/^\[(.*)\]/) {
       $section = $1;    
     } elsif ($line =~ m/=/) {
       my ($key, $value) = split / *= */;

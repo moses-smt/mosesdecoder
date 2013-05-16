@@ -57,10 +57,10 @@ private:
   // Build PSD::Translation object from Moses structures
   PSD::Translation GetPSDTranslation(const TranslationOption *option);
 
-  void Normalize0(std::vector<float> &losses);
-  void Normalize1(std::vector<float> &losses);
-  void Normalize2(std::vector<float> &losses);
-  void Normalize3(std::vector<float> &losses);
+  static void NormalizeSquaredLoss(std::vector<float> &losses);
+  static void NormalizeLogisticLossBasic(std::vector<float> &losses);
+  static void Normalize2(std::vector<float> &losses);
+  static void Normalize3(std::vector<float> &losses);
 
   std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
   PSD::IndexType m_phraseIndex;
@@ -68,6 +68,7 @@ private:
   PSD::FeatureExtractor *m_extractor;
   PSD::ExtractorConfig m_extractorConfig;
   std::ifstream m_contextFile;
+  void (*m_normalizer)(std::vector<float> &); // normalization function
 };
 
 }

@@ -134,6 +134,8 @@ void ExtractorConfig::Load(const string &configFile)
   m_vwOptsTrain = pTree.get<string>("vw-options.train", "");
   m_vwOptsPredict = pTree.get<string>("vw-options.predict", "");
 
+  m_normalization = pTree.get<string>("decoder.normalization", "");
+
   m_isLoaded = true;
 }
 
