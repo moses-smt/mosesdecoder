@@ -17,10 +17,13 @@ using namespace std;
 
 string iniPath;
 vector<FF*> ffVec;
+vector<string> additionalIni;
 bool isHierarchical = false;
 int inputFactorMax = 0;
 
 void OutputIni();
+void OutputAdditionalIni(ofstream &out);
+void OutputAdditionalIni(ofstream &out, const string &path);
 void ParseFactors(const string &line, vector< pair<Factors, Factors> > &ret);
 
 int main(int argc, char **argv)
@@ -80,6 +83,21 @@ int main(int argc, char **argv)
     else if (key == "-input-factor-max") {
       ++i;
       inputFactorMax = Scan<int>(argv[i]);
+    }
+    else if (key == "-additional-ini-file") {
+      ++i;
+      additionalIni.push_back(argv[i]);
+    }
+    else if (key == "-sparse-translation-table") {
+      // ignore. TODO check that all pt can handle sparse features
+    }
+    else if (key == "-score-options") {
+      // ignore. TODO 
+      ++i;
+    }
+    else if (key == "-additional-ini") {
+      // ignore. TODO 
+      ++i;
     }
 
     else {
@@ -177,9 +195,32 @@ void OutputIni()
   }
 
   strme << weightStrme.str();
+  strme << endl;
+
+  OutputAdditionalIni(strme);
 
   strme << endl << endl << endl;
   strme.close();
+}
+
+
+void OutputAdditionalIni(ofstream &out)
+{
+  for (size_t i = 0; i < additionalIni.size(); ++i) {
+    string &path = additionalIni[i];
+    OutputAdditionalIni(out, path);
+  }
+}
+
+void OutputAdditionalIni(ofstream &out, const string &path)
+{
+  ifstream in(path.c_str());
+
+  string line;
+  while (getline(in, line)) {
+    out << line << endl;
+  }
+  in.close();
 }
 
 
