@@ -2107,7 +2107,8 @@ sub define_training_create_config {
 			= &get_output_and_input($step_id);
 
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
-    my $cmd = "$moses_src_dir/bin/create-ini ";
+    #my $cmd = "$moses_src_dir/bin/create-ini ";
+    my $cmd = &backoff_and_get("TRAINING:create-ini");
 
     my %IN;
     my %OUT;
@@ -2125,7 +2126,7 @@ sub define_training_create_config {
       $OUT{"word"} = 0;
     }
 
-    $cmd .= "-input-factor-max ".((scalar keys %IN)-1)." ";
+    $cmd .= " -input-factor-max ".((scalar keys %IN)-1)." ";
 
     $cmd .= "-translation-factors ".
 	          &encode_factor_definition("translation-factors",\%IN,\%OUT)." "

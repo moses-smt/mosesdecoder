@@ -36,10 +36,12 @@ m_unrestricted(true)
   }
 
   // load word list for restricted feature set
-  cerr << "loading source word deletion word list from " << filename << endl;
-  if (!Load(filename)) {
-    UserMessage::Add("Unable to load word list for source word deletion feature from file " + filename);
-    //return false;
+  if (filename != "") {
+    cerr << "loading source word deletion word list from " << filename << endl;
+    if (!Load(filename)) {
+  	UserMessage::Add("Unable to load word list for source word deletion feature from file " + filename);
+	  //return false;
+    }
   }
 }
 

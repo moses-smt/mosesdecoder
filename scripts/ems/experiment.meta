@@ -581,7 +581,7 @@ create-config
 	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse-lexical corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini create-ini
 	default-name: model/moses.ini
 	error: Unknown option
 binarize-config
