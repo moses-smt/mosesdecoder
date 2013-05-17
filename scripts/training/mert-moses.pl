@@ -741,7 +741,7 @@ while (1) {
     my @names = @{$featlist->{"names"}};
     open my $denseout, '>', $densefile or die "Can't write $densefile (WD now $___WORKING_DIR)";
     for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
-        print $denseout "$names[$i] $names[$i] $vals[$i]\n";
+        print $denseout "$names[$i]= $vals[$i]\n";
     }
     close $denseout;
   }
