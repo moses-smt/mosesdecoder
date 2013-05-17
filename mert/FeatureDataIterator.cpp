@@ -89,7 +89,7 @@ void FeatureDataIterator::readNext() {
       StringPiece line = m_in->ReadLine();
       m_next.push_back(FeatureDataItem());
       for (TokenIter<AnyCharacter, true> token(line, AnyCharacter(" \t")); token; ++token) {
-        TokenIter<AnyCharacterLast,false> value(*token,AnyCharacterLast(":"));
+        TokenIter<AnyCharacterLast,false> value(*token,AnyCharacterLast("="));
         if (!value) throw FileFormatException(m_in->FileName(), line.as_string());
         StringPiece first = *value;
         ++value;

@@ -2100,15 +2100,12 @@ sub define_training_sigtest_filter {
     &create_step($step_id,$cmd);
 }
 
-sub define_training_create_config {
-    my ($step_id) = @_;
-
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM)
-			= &get_output_and_input($step_id);
+sub get_config_tables {
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$domains) = @_;
 
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
-    #my $cmd = "$moses_src_dir/bin/create-ini ";
     my $cmd = &backoff_and_get("TRAINING:create-ini");
+    $cmd = "$moses_src_dir/bin/create-ini" unless defined($cmd);
 
     my %IN;
     my %OUT;
@@ -2188,8 +2185,29 @@ sub define_training_create_config {
 	my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version);
 	$cmd .= "-unknown-word-label $unknown_word_label ";
     }
+    my $additional_ini = &get("TRAINING:additional-ini");
+    if (&get("TRAINING:score-settings") && 
+        &get("TRAINING:score-settings") =~ /SparseCountBinFeature/) {
+      $additional_ini .= "<br>[report-sparse-features]<br>stm<br><br>";
+      $cmd .= "-sparse-translation-table ";
+    }
+    $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
+    $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
 
-    # find out which language model files have been built
+    return $cmd;
+}
+
+sub define_training_create_config {
+    my ($step_id) = @_;
+
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM)
+			= &get_output_and_input($step_id);
+
+    my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
+
+    # sparse lexical features provide additional content for config file
+    $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
+
     my @LM_SETS = &get_sets("LM");
     my %INTERPOLATED_AWAY;
     my %OUTPUT_FACTORS;
@@ -2256,18 +2274,6 @@ sub define_training_create_config {
 
 	    $cmd .= "-lm $factor:$order:$lm_file:$type ";
     }
-
-    my $additional_ini = &get("TRAINING:additional-ini");
-    if (&get("TRAINING:score-settings") && 
-        &get("TRAINING:score-settings") =~ /SparseCountBinFeature/) {
-      $additional_ini .= "<br>[report-sparse-features]<br>stm<br><br>";
-      $cmd .= "-sparse-translation-table ";
-    }
-    $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
-
-    # sparse lexical features provide additional content for config file
-    $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
-    $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
 
     &create_step($step_id,$cmd);
 }
@@ -2608,9 +2614,12 @@ sub define_tuningevaluation_filter {
     # create pseudo-config file
     else {
       $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
+      $cmd = "touch $config\n";
       $delete_config = 1;
       
-      $cmd = "cp $dir/model/moses.ini.$VERSION $config \n";
+      $cmd .= &get_config_tables($config,$reordering_table,$phrase_translation_table,undef,$domains);
+
+      $cmd .= "-lm 0:3:$config:8\n"; # dummy kenlm 3-gram model on factor 0
     }
 
     # filter command

@@ -10,30 +10,39 @@ if (scalar @ARGV < 1 || ! -e $ARGV[0]) {
 # read config sections about filtered tables
 my @arr;
 open(FILTERED, $ARGV[0]) or die "Cannot open: $!";
+my $feature_section = 0;
 while(my $line = <FILTERED>) {
   chomp($line);
-  if ($line =~ /PhraseModel /) {
-   print STDERR "pt:$line \n";
-   push(@arr, $line);
+  if ($line =~ /^\[(.+)\]/) {
+    $feature_section = ($1 eq "feature");
   }
-  elsif ($line =~ /LexicalReordering /) {
-   print STDERR "ro:$line \n";
-   push(@arr, $line);
-  }  
+  next unless $feature_section;
+  if ($line =~ /PhraseDictionary/) {
+    print STDERR "pt:$line \n";
+    push(@arr, $line);
+  }
+  elsif ($line =~ /LexicalReordering/) {
+    print STDERR "ro:$line \n";
+    push(@arr, $line);
+  }
 }
 close(FILTERED);
 
 # pass through master config file and replace table sections
 my $ind = 0;
+$feature_section = 0;
 while(my $line = <STDIN>) {
   chomp($line);
-  if ($line =~ /PhraseModel /) {
-   print $arr[$ind]."\n";
-   ++$ind;
+  if ($line =~ /^\[(.+)\]/) {
+    $feature_section = ($1 eq "feature");
   }
-  elsif ($line =~ /LexicalReordering /) {
-   print $arr[$ind]."\n";
-   ++$ind;
+  if ($feature_section && $line =~ /PhraseDictionary/) {
+    print $arr[$ind]."\n";
+    ++$ind;
+  }
+  elsif ($feature_section && $line =~ /LexicalReordering/) {
+    print $arr[$ind]."\n";
+    ++$ind;
   }  
   else {
     print "$line\n";

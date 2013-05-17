@@ -1284,16 +1284,17 @@ sub get_featlist_from_file {
   while (<$fh>) {
     $nr++;
     chomp;
-    /^(\S+)= (.+)$/;
-    my ($longname, $valuesStr) = ($1, $2);
-    next if (!defined($valuesStr));
+    if (/^(\S+)= (.+)$/) { # only for feature functions with dense features
+      my ($longname, $valuesStr) = ($1, $2);
+      next if (!defined($valuesStr));
     
-    my @values = split(/ /, $valuesStr);
-		foreach my $value (@values) {
-			push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
-				if $value !~ /^[+-]?[0-9.\-e]+$/;
-			push @names, $longname;
-			push @startvalues, $value;
+      my @values = split(/ /, $valuesStr);
+		  foreach my $value (@values) {
+			  push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
+				  if $value !~ /^[+-]?[0-9.\-e]+$/;
+			  push @names, $longname;
+			  push @startvalues, $value;
+      }
     }
   }
   close $fh;
@@ -1323,7 +1324,7 @@ sub get_order_of_scores_from_nbestlist {
   my $label = undef;
   my $sparse = 0; # we ignore sparse features here
   foreach my $tok (split /\s+/, $scores) {
-    if ($tok =~ /.+_.+:/) {
+    if ($tok =~ /.+_.+=/) {
       $sparse = 1;
     } elsif ($tok =~ /^([a-z][0-9a-z]*)=/i) {
       $label = $1;

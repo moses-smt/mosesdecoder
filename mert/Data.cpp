@@ -212,7 +212,7 @@ void Data::InitFeatureMap(const string& str) {
   while (!buf.empty()) {
     getNextPound(buf, substr);
 
-    // string ending with ":" are skipped, because they are the names of the features
+    // string ending with "=" are skipped, because they are the names of the features
     if (!EndsWith(substr, "=")) {
       stringstream ss;
       ss << tmp_name << "_" << tmp_index << " ";

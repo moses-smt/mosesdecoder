@@ -220,12 +220,12 @@ void FeatureStats::set(string &theString, const SparseVector& sparseWeights )
   while (!theString.empty()) {
     getNextPound(theString, substring);
     // regular feature
-    if (substring.find(":") == string::npos) {
+    if (substring.find("=") == string::npos) {
       add(ConvertStringToFeatureStatsType(substring));
     }
     // sparse feature
     else {
-      size_t separator = substring.find_last_of(":");
+      size_t separator = substring.find_last_of("=");
       addSparse(substring.substr(0,separator), atof(substring.substr(separator+1).c_str()) );
     }
   }
