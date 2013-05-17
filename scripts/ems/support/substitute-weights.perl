@@ -14,10 +14,10 @@ open(BASEINI, $ARGV[0]) or die "Cannot open: $!";
 while(my $line = <BASEINI>) {
   chomp($line);
   if ($line =~ /\[weight\]/) {
-   $inWeightSection = 1;
+    $inWeightSection = 1;
   }
   elsif ($line =~ /\[[a-zA-Z0-0]*\]/) {
-   $inWeightSection = 0;
+    $inWeightSection = 0;
   }  
 
   if (!$inWeightSection) {
@@ -32,6 +32,9 @@ my $ind = 0;
 while(my $line = <STDIN>) {
   chomp($line);
   if ($line =~ /\[weight\]/) {
+   $inWeightSection = 1;
+  }
+  elsif ($line =~ /\[weight-file\]/) {
    $inWeightSection = 1;
   }
   elsif ($line =~ /\[[a-zA-Z0-0]*\]/) {
