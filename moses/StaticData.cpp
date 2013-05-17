@@ -1446,83 +1446,44 @@ int StaticData::GetNumIterationsOnlineLearning() const
 
 bool StaticData::LoadOnlineLearningModel()
 {
-	const std::string f_algorithm = (m_parameter->GetParam("f_algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("f_algorithm")[0]) : "perceptron";
 	const std::string w_algorithm = (m_parameter->GetParam("w_algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("w_algorithm")[0]) : "NULL";
 	const bool sparse_feature = (m_parameter->GetParam("use_sparse_features").size()>0) ? true : false;
-	int setAlgo = 1; // 1 for perceptron for feature update, 2 for mira, 3 for mira with sparse features
-	if(f_algorithm.compare("perceptron")==0 && !sparse_feature)	// sparse feature only works with mira
+	OnlineAlgorithm setAlgo = FOnlyPerceptron;
+
+	const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
+	const float f_learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ?
+			Scan<float>(m_parameter->GetParam("f_learningrate")[0]) : 0.8;
+	const float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 0;
+	if(weights.size()>1)
 	{
-		cerr<<"Using perceptron as online learning algorithm\n";
-		const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
-		const float f_learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ?
-				Scan<float>(m_parameter->GetParam("f_learningrate")[0]) : 0.8;
-		const float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 0;
-		if(weights.size()>1)
-		{
-			UserMessage::Add("Can only specify one weight for the online learning feature");
-			return false;
-		}
-		else if(weights.size()==1 && w_algorithm.compare("NULL")==0)
-		{
-			m_onlinelearner = new OnlineLearner(f_learningrate, w_learningrate);
-			SetWeight(m_onlinelearner, weights[0]);
-			IFVERBOSE(1)
-			PrintUserTime("Online Learning : Perceptron");
-		}
-		else if(weights.size()==1 && w_algorithm.compare("mira")==0)
-		{
-			const float slack = (m_parameter->GetParam("slack").size() > 0) ? Scan<float>(m_parameter->GetParam("slack")[0]) : 0.01;
-			const float scale_margin = (m_parameter->GetParam("scale_margin").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_margin")[0]) : 0.0;
-			const float scale_margin_precision = (m_parameter->GetParam("scale_margin_precision").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_margin_precision")[0]) : 0.0;
-			const float scale_update = (m_parameter->GetParam("scale_update").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_update")[0]) : 0.0;
-			const float scale_update_precision = (m_parameter->GetParam("scale_update_precision").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_update_precision")[0]) : 0.0;
-			const bool boost = (m_parameter->GetParam("boost").size() > 0) ? true : false;
-			const bool normaliseMargin = (m_parameter->GetParam("normaliseMargin").size() > 0) ? true : false;
-			const int sigmoidparam = (m_parameter->GetParam("sigmoidParam").size() > 0) ? Scan<int>(m_parameter->GetParam("sigmoidParam")[0]) : 1;
-			m_onlinelearner = new OnlineLearner(setAlgo,w_learningrate, f_learningrate, slack, scale_margin,
-					scale_margin_precision, scale_update, scale_update_precision, boost, normaliseMargin, sigmoidparam);
-			SetWeight(m_onlinelearner, weights[0]);
-			IFVERBOSE(1)
-			PrintUserTime("Online Learning : Perceptron\tWeights : MIRA");
-		}
+		UserMessage::Add("Can only specify one weight for the online learning feature");
+		return false;
 	}
-	else if(f_algorithm.compare("perceptron")==0 && !sparse_feature)
+	else if(weights.size()==1 && w_algorithm.compare("NULL")==0)
 	{
-		VERBOSE(1,"Perceptron cannot work on sparse features yet!\n");
-		CHECK(false);
+		m_onlinelearner = new OnlineLearner(FOnlyPerceptron, w_learningrate, f_learningrate);
+		SetWeight(m_onlinelearner, weights[0]);
+		IFVERBOSE(1)
+		PrintUserTime("Online Learning : Perceptron");
 	}
-	else if(f_algorithm.compare("mira")==0)
+	else if(weights.size()==1 && w_algorithm.compare("mira")==0)
 	{
-		setAlgo=2;
-		cerr<<"Using MIRA as online learning algorithm for feature update\n";
-		const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
-		if(weights.size()>1)
-		{
-			UserMessage::Add("Can only specify one weight for the online learning feature");
-			return false;
-		}
-		else if(weights.size()==1)
-		{
-			if(sparse_feature) setAlgo=3;
-			float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 0;
-			if(w_algorithm.compare("NULL")==0) w_learningrate=0;
-			const float f_learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("f_learningrate")[0]) : 0;
-			if(w_learningrate==0 && f_learningrate==0)
-				cerr<<"both learning rates are zero ... You sure about that?\n";
-			const float slack = (m_parameter->GetParam("slack").size() > 0) ? Scan<float>(m_parameter->GetParam("slack")[0]) : 0.01;
-			const float scale_margin = (m_parameter->GetParam("scale_margin").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_margin")[0]) : 0.0;
-			const float scale_margin_precision = (m_parameter->GetParam("scale_margin_precision").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_margin_precision")[0]) : 0.0;
-			const float scale_update = (m_parameter->GetParam("scale_update").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_update")[0]) : 0.0;
-			const float scale_update_precision = (m_parameter->GetParam("scale_update_precision").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_update_precision")[0]) : 0.0;
-			const bool boost = (m_parameter->GetParam("boost").size() > 0) ? true : false;
-			const bool normaliseMargin = (m_parameter->GetParam("normaliseMargin").size() > 0) ? true : false;
-			const int sigmoidparam = (m_parameter->GetParam("sigmoidParam").size() > 0) ? Scan<int>(m_parameter->GetParam("sigmoidParam")[0]) : 1;
-			m_onlinelearner = new OnlineLearner(setAlgo,w_learningrate, f_learningrate, slack, scale_margin,
-					scale_margin_precision, scale_update, scale_update_precision, boost, normaliseMargin, sigmoidparam);
-			SetWeight(m_onlinelearner, weights[0]);
-			PrintUserTime("Online Learning : MIRA\tWeights : MIRA");
-		}
+		setAlgo=FPercepWMira;
+		const float slack = (m_parameter->GetParam("slack").size() > 0) ? Scan<float>(m_parameter->GetParam("slack")[0]) : 0.01;
+		const float scale_margin = (m_parameter->GetParam("scale_margin").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_margin")[0]) : 0.0;
+		const float scale_margin_precision = (m_parameter->GetParam("scale_margin_precision").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_margin_precision")[0]) : 0.0;
+		const float scale_update = (m_parameter->GetParam("scale_update").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_update")[0]) : 0.0;
+		const float scale_update_precision = (m_parameter->GetParam("scale_update_precision").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_update_precision")[0]) : 0.0;
+		const bool boost = (m_parameter->GetParam("boost").size() > 0) ? true : false;
+		const bool normaliseMargin = (m_parameter->GetParam("normaliseMargin").size() > 0) ? true : false;
+		const int sigmoidparam = (m_parameter->GetParam("sigmoidParam").size() > 0) ? Scan<int>(m_parameter->GetParam("sigmoidParam")[0]) : 1;
+		m_onlinelearner = new OnlineLearner(setAlgo,w_learningrate, f_learningrate, slack, scale_margin,
+				scale_margin_precision, scale_update, scale_update_precision, boost, normaliseMargin, sigmoidparam);
+		SetWeight(m_onlinelearner, weights[0]);
+		IFVERBOSE(1)
+		PrintUserTime("Online Learning : Perceptron\tWeights : MIRA");
 	}
+
 	return true;
 }
 bool StaticData::LoadCacheBasedLanguageModel()

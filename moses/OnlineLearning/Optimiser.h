@@ -56,7 +56,7 @@ namespace Optimizer {
 	   const std::vector<float> oracleModelScores,
 	   float learning_rate);
 
-      size_t updateFeatures(
+      size_t updateSparseWeights(
     		  Moses::SparseVec& UpdateVector,
     		  const std::vector<std::vector<int> >& FeatureValues,	// index to hypothesis feature values in UpdateVector
     		  const std::vector<float>& losses,

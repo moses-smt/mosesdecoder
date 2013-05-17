@@ -133,22 +133,12 @@ bool OnlineLearner::SetPostEditedSentence(std::string s)
 	}
 }
 
-OnlineLearner::OnlineLearner(float f_learningrate, float w_learningrate):StatelessFeatureFunction("OnlineLearner",1){
+OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate):StatelessFeatureFunction("OnlineLearner",1){
 	flr = f_learningrate;
 	wlr = w_learningrate;
 	m_learn=false;
 	m_PPindex=0;
-	sparse_weights_on=false;
-	if(w_learningrate>0)
-		update_weights=true;
-	else
-		update_weights=false;
-	if(f_learningrate>0)
-		update_features=true;
-	else
-		update_features=false;
-	m_perceptron=true;
-	m_mira=false;
+	implementation=algorithm;
 	ReadFunctionWords();
 	cerr<<"Initialization Online Learning Model\n";
 }
@@ -157,19 +147,8 @@ OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, fl
 		float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
 	flr = f_learningrate;
 	wlr = w_learningrate;
-	sparse_weights_on=false;
-	if(w_learningrate>0)
-		update_weights=true;
-	else
-		update_weights=false;
-	if(f_learningrate>0)
-		update_features=true;
-	else
-		update_features=false;
 	m_PPindex=0;
 	m_learn=false;
-	m_mira=false;
-	m_perceptron=false;
 	implementation=algorithm;
 	optimiser = new Optimizer::MiraOptimiser(slack, scale_margin, scale_margin_precision, scale_update,
 			scale_update_precision, boost, normaliseMargin, sigmoidParam);
@@ -180,7 +159,7 @@ OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, fl
 void OnlineLearner::ShootUp(std::string sp, std::string tp, float margin)
 {
 	if (binary_search(function_words_italian.begin(),function_words_italian.end(), sp) ||
-	    binary_search(function_words_english.begin(),function_words_english.end(), tp)) {
+			binary_search(function_words_english.begin(),function_words_english.end(), tp)) {
 		return;
 	}
 	if(m_feature.find(sp)!=m_feature.end())
@@ -205,7 +184,7 @@ void OnlineLearner::ShootUp(std::string sp, std::string tp, float margin)
 void OnlineLearner::ShootDown(std::string sp, std::string tp, float margin)
 {
 	if (binary_search(function_words_italian.begin(),function_words_italian.end(), sp) ||
-		binary_search(function_words_english.begin(),function_words_english.end(), tp)) {
+			binary_search(function_words_english.begin(),function_words_english.end(), tp)) {
 		return;
 	}
 	if(m_feature.find(sp)!=m_feature.end())
@@ -246,16 +225,18 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 	{
 		if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 		{
-			m_featureIdx[sp][tp]=sparsevector.GetSize();
-			sparsevector.AddFeat(0.0001);
+			m_featureIdx[sp][tp]=sparsefeaturevector.GetSize();
+			sparsefeaturevector.AddFeat(0.0001);
+			sparseweightvector.AddFeat(0.0001);
 			m_PPindex++;
 			return;
 		}
 	}
 	else if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 	{
-		m_featureIdx[sp][tp]=sparsevector.GetSize();
-		sparsevector.AddFeat(0.0001);
+		m_featureIdx[sp][tp]=sparsefeaturevector.GetSize();
+		sparsefeaturevector.AddFeat(0.0001);
+		sparseweightvector.AddFeat(0.0001);
 		m_PPindex++;
 		return;
 	}
@@ -298,7 +279,8 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 			break;
 		}
 	}
-	float weight=weightUpdate.GetScoreForProducer(sp);
+	float weight=weightUpdate.GetScoreForProducer(sp);	// permanent weight stored in decoder
+
 	float score=0.0;
 	std::string s="",t="";
 	size_t endpos = tp.GetSize();
@@ -312,15 +294,18 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 		s += tp.GetSourcePhrase().GetWord(pos).GetFactor(0)->GetString();
 	}
 
-	if(update_features && m_mira)
+	pp_feature::const_iterator it;
+	it=m_feature.find(s);
+	if(it!=m_feature.end())
 	{
-		const TranslationSystem &trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-		const StaticData& staticData = StaticData::Instance();
-		ScoreComponentCollection weightUpdate = staticData.GetAllWeights();
-		std::vector<const ScoreProducer*> sps = trans_sys.GetFeatureFunctions();
-		ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
-
-		size_t idx;
+		std::map<std::string, float>::const_iterator it2;
+		it2=it->second.find(t);
+		if(it2!=it->second.end())
+		{
+			score=it2->second;
+		}
+	}
+	if(implementation == FSparsePercepWSparseMira){
 		pp_list::const_iterator it;
 		it=m_featureIdx.find(s);
 		if(it!=m_featureIdx.end())
@@ -329,23 +314,9 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 			it2=it->second.find(t);
 			if(it2!=it->second.end())
 			{
-				score=sparsevector.getElement(it2->second);
-//				score*=actual_weight;
+				score=sparseweightvector.getElement(it2->second);
+				//				score*=actual_weight;
 				score/=weight;
-			}
-		}
-	}
-	else if(update_features && m_perceptron)
-	{
-		pp_feature::const_iterator it;
-		it=m_feature.find(s);
-		if(it!=m_feature.end())
-		{
-			std::map<std::string, float>::const_iterator it2;
-			it2=it->second.find(t);
-			if(it2!=it->second.end())
-			{
-				score=it2->second;
 			}
 		}
 	}
@@ -414,7 +385,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 		}
 	}
 	const Hypothesis* hypo = manager.GetBestHypothesis();
-//	Decay(manager.m_lineNumber);
+	//	Decay(manager.m_lineNumber);
 	stringstream bestHypothesis;
 	PP_BEST.clear();
 	PrintHypo(hypo, bestHypothesis);
@@ -463,7 +434,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 		}
 		oracleScore=path.GetTotalScore();
 		float oraclebleu = GetBleu(oracle.str(), m_postedited);
-		if(m_mira || update_weights){
+		if(implementation != FOnlyPerceptron){
 			HypothesisList.push_back(oracle.str());
 			BleuScore.push_back(oraclebleu);
 			featureValue.push_back(path.GetScoreBreakdown());
@@ -509,8 +480,9 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	}
 	cerr<<"Read all the oracles in the list!\n";
 
-//	Update the features
-	if(update_features && m_perceptron){
+	//	Update the features
+	if(implementation==FOnlyPerceptron || implementation==FPercepWMira)
+	{
 		pp_list::const_iterator it1;
 		for(it1=ShootemUp.begin(); it1!=ShootemUp.end(); it1++)
 		{
@@ -518,7 +490,6 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
 			{
 				ShootUp(it1->first, itr1->first, abs(maxScore-bestScore));
-				cerr<<"SHOOTING UP : "<<it1->first<<" ||| "<<itr1->first<<" ||| "<<maxScore-bestScore<<"\n";
 			}
 		}
 		for(it1=ShootemDown.begin(); it1!=ShootemDown.end(); it1++)
@@ -527,23 +498,42 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
 			{
 				ShootDown(it1->first, itr1->first, abs(maxScore-bestScore));
-				cerr<<"SHOOTING DOWN : "<<it1->first<<" ||| "<<itr1->first<<" ||| "<<maxScore-bestScore<<"\n";
 			}
 		}
 	}
-//	---------------------------------------------------------------------------------- //
+	//	---------------------------------------------------------------------------------- //
 
-	if(update_features && m_mira)
+	//	Update the weights
+	if(implementation == FPercepWMira)
 	{
 		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
 		{
 			float bleuscore = BleuScore[i];
 			loss.push_back(maxBleu-bleuscore);
 		}
-		vector<vector<int> > FeatureIdxVec, oracleFeatureIdxVec;
+		modelScores.push_back(modelScore);
+		featureValues.push_back(featureValue);
+		BleuScores.push_back(BleuScore);
+		losses.push_back(loss);
+		oracleModelScores.push_back(maxScore);
+		cerr<<"Updating the Weights\n";
+		size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
+				BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,wlr);
+		cerr<<"\nWeight : "<<weightUpdate.GetScoreForProducer(sp)<<"\n";
+		StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
+	}
+	if(implementation == FSparsePercepWSparseMira)
+	{
+		cerr<<"sparse weights is activated\n";
+		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
+		{
+			float bleuscore = BleuScore[i];
+			loss.push_back(maxBleu-bleuscore);
+		}
+		vector<vector<int> > WeightIdxVec, oracleWeightIdxVec;
 		pp_list::iterator it, it1;
 		for(int i=0;i<OracleList.size();i++){
-			vector<int> FeatureVec;
+			vector<int> WeightVec;
 			for(it=OracleList[i].begin();it!=OracleList[i].end(); it++)
 			{
 				if(!(it->first.empty()))
@@ -555,15 +545,15 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 						{
 							int idx=RetrieveIdx(it->first, itr->first);
 							if(idx!=m_featureIdx.size()){
-								FeatureVec.push_back(idx);
+								WeightVec.push_back(idx);
 							}
 						}
 					}
 				}
 			}
-			FeatureIdxVec.push_back(FeatureVec);
+			WeightIdxVec.push_back(WeightVec);
 		}
-		vector<int> oracleFeatureVec;
+		vector<int> oracleWeightVec;
 		for(it1=BestOracle.begin(); it1!=BestOracle.end(); it1++)
 		{
 			std::map<std::string, int>::const_iterator itr1;
@@ -571,53 +561,13 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			{
 				int idx=RetrieveIdx(it1->first, itr1->first);
 				if(idx!=m_featureIdx.size()){
-					oracleFeatureVec.push_back(idx);
+					oracleWeightVec.push_back(idx);
 				}
 			}
 		}
-		oracleFeatureIdxVec.push_back(oracleFeatureVec);
-		size_t update_status=optimiser->updateFeatures(sparsevector, FeatureIdxVec, loss, BleuScore,
-				modelScore, oracleFeatureIdxVec, oracleBleuScores[0], maxScore, flr);
-	}
-
-//	---------------------------------------------------------------------------------- //
-
-//	Update the weights
-	if(update_weights)
-	{
-		cerr<<"update_weights is activated\n";
-		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
-		{
-			float bleuscore = BleuScore[i];
-			loss.push_back(maxBleu-bleuscore);
-		}
-		modelScores.push_back(modelScore);
-		featureValues.push_back(featureValue);
-		BleuScores.push_back(BleuScore);
-		losses.push_back(loss);
-		oracleModelScores.push_back(maxScore);
-		size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
-				BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,wlr);
-		cerr<<"\nWeight : "<<weightUpdate.GetScoreForProducer(sp)<<"\n";
-		StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
-	}
-	if(update_weights && sparse_weights_on)
-	{
-		cerr<<"update_weights is activated\n";
-		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
-		{
-			float bleuscore = BleuScore[i];
-			loss.push_back(maxBleu-bleuscore);
-		}
-		modelScores.push_back(modelScore);
-		featureValues.push_back(featureValue);
-		BleuScores.push_back(BleuScore);
-		losses.push_back(loss);
-		oracleModelScores.push_back(maxScore);
-		size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
-				BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,wlr);
-		cerr<<"\nWeight : "<<weightUpdate.GetScoreForProducer(sp)<<"\n";
-		StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
+		oracleWeightIdxVec.push_back(oracleWeightVec);
+		size_t update_status=optimiser->updateSparseWeights(sparseweightvector, WeightIdxVec, loss, BleuScore,
+				modelScore, oracleWeightIdxVec, oracleBleuScores[0], maxScore, wlr);
 	}
 	return;
 }

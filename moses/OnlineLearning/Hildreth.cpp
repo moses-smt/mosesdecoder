@@ -110,7 +110,6 @@ vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, con
 }
 
 vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<float>& b, float C) {
-
 	size_t i;
 	int max_iter = 10000;
 	float eps = 0.00000001;
@@ -153,7 +152,6 @@ vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, con
 
 	while ( max_kkt >= eps && iter < max_iter )
 	{
-
 		diff_alpha = A[max_kkt_i][max_kkt_i] <= zero ? 0.0 : F[max_kkt_i]/A[max_kkt_i][max_kkt_i];
 		try_alpha = alpha[max_kkt_i] + diff_alpha;
 		add_alpha = 0.0;
@@ -166,6 +164,7 @@ vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, con
 			add_alpha = diff_alpha;
 
 		alpha[max_kkt_i] = alpha[max_kkt_i] + add_alpha;
+		if(alpha[max_kkt_i] <= 0) alpha[max_kkt_i]=0;
 
 		if ( !is_computed[max_kkt_i] )
 		{

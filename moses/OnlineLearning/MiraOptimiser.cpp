@@ -122,12 +122,12 @@ size_t MiraOptimiser::updateWeights(
 			summedUpdate.MultiplyEquals(oracleBleuScores[0]);
 		}
 	}
-	weightUpdate.PlusEquals(sp,summedUpdate);
+	weightUpdate.PlusEquals(summedUpdate);
 
 	return 0;
 }
 
-size_t MiraOptimiser::updateFeatures(
+size_t MiraOptimiser::updateSparseWeights(
 	SparseVec& UpdateVector,			// sparse vector
 	const vector<vector<int> >& FeatureValues,	// index to hypothesis feature values in UpdateVector
     const vector<float>& losses,
@@ -137,7 +137,7 @@ size_t MiraOptimiser::updateFeatures(
     const float oracleBleuScores,
     const float oracleModelScores,
     float learning_rate) {
-	cerr<<"Updating Features using MIRA\n";
+
 	vector<SparseVec> featureValueDiffs;
 	vector<float> lossMinusModelScoreDiffs;
 	vector<float> all_losses;
@@ -159,9 +159,9 @@ size_t MiraOptimiser::updateFeatures(
 //			cerr<<"Subtracting from features at : "<<oracleFeatureValues[0][i]<<" value : "<<UpdateVector.getElement(oracleFeatureValues[0][i])<<endl;
 		}
 
-//		if (featureValueDiff.GetL1Norm() == 0) { // over sparse features values only
-//			continue;
-//		}
+		if (featureValueDiff.GetL1Norm() == 0) { // over sparse features values only
+			continue;
+		}
 
 		float loss=losses[j];
 //		cerr<<"Loss : "<<loss<<endl;
