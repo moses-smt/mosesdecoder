@@ -48,6 +48,7 @@ private:
 	pp_list m_featureIdx;
 	pp_list PP_ORACLE, PP_BEST;
 	learningrate flr, wlr;
+	float m_weight;
 	int m_PPindex;
 	std::string m_postedited;
 	bool m_learn;

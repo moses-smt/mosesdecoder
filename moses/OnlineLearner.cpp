@@ -227,7 +227,7 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 		if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 		{
 			m_featureIdx[sp][tp]=sparseweightvector.GetSize();
-			sparseweightvector.AddFeat(0.0001);
+			sparseweightvector.AddFeat(m_weight);
 			m_PPindex++;
 			return;
 		}
@@ -235,7 +235,7 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 	else if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 	{
 		m_featureIdx[sp][tp]=sparseweightvector.GetSize();
-		sparseweightvector.AddFeat(0.0001);
+		sparseweightvector.AddFeat(m_weight);
 		m_PPindex++;
 		return;
 	}
@@ -264,21 +264,6 @@ OnlineLearner::~OnlineLearner() {
 
 void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
 {
-	const TranslationSystem &trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-	const StaticData& staticData = StaticData::Instance();
-	const std::vector<Moses::FactorType>& outputFactorOrder=staticData.GetOutputFactorOrder();
-	ScoreComponentCollection weightUpdate = staticData.GetAllWeights();
-	std::vector<const ScoreProducer*> sps = trans_sys.GetFeatureFunctions();
-	ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
-	for(int i=0;i<sps.size();i++)
-	{
-		if(sps[i]->GetScoreProducerDescription().compare("OnlineLearner")==0)
-		{
-			sp=const_cast<ScoreProducer*>(sps[i]);
-			break;
-		}
-	}
-	float m_weight=weightUpdate.GetScoreForProducer(sp);	// permanent weight stored in decoder
 	float score=0.0;
 	std::string s="",t="";
 	size_t endpos = tp.GetSize();
@@ -382,6 +367,8 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			break;
 		}
 	}
+	m_weight=weightUpdate.GetScoreForProducer(sp);	// permanent weight stored in decoder
+
 	const Hypothesis* hypo = manager.GetBestHypothesis();
 	//	Decay(manager.m_lineNumber);
 	stringstream bestHypothesis;
