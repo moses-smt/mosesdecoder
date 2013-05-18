@@ -14,11 +14,11 @@ These parameters can be passed as
 
 	3. "w_learningrate <rate>" : is the learning rate for online algorithm to update the weight of online feature
 
-There are different online learning algorithms implemented to update the features and the feature weights. 
+There are different online learning algorithms implemented to update the feature weights. 
 
-	1. features : MIRA("-f_algorithm mira"), Perceptron ("-f_algorithm perceptron")
+	1. features : Perceptron 
 
-	2. weights : MIRA("-w_algorithm mira")
+	2. weights : MIRA("-w_algorithm mira"), SparseMira ("-w_algorithm mira -use_sparse_features")
 
 Input can be of two types.
 
