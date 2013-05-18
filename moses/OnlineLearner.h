@@ -43,6 +43,7 @@ class Search;
 class OnlineLearner : public StatelessFeatureFunction {
 
 private:
+	float m_weight;
 	OnlineAlgorithm implementation;
 	pp_feature m_feature;
 	pp_list m_featureIdx;
