@@ -145,21 +145,7 @@ OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, fl
 
 OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
 		float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
-	const TranslationSystem &trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-	const StaticData& staticData = StaticData::Instance();
-	const std::vector<Moses::FactorType>& outputFactorOrder=staticData.GetOutputFactorOrder();
-	ScoreComponentCollection weightUpdate = staticData.GetAllWeights();
-	std::vector<const ScoreProducer*> sps = trans_sys.GetFeatureFunctions();
-	ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
-	for(int i=0;i<sps.size();i++)
-	{
-		if(sps[i]->GetScoreProducerDescription().compare("OnlineLearner")==0)
-		{
-			sp=const_cast<ScoreProducer*>(sps[i]);
-			break;
-		}
-	}
-	m_weight=weightUpdate.GetScoreForProducer(sp);	// permanent weight stored in decoder
+
 	flr = f_learningrate;
 	wlr = w_learningrate;
 	m_PPindex=0;
@@ -278,7 +264,21 @@ OnlineLearner::~OnlineLearner() {
 
 void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
 {
-
+	const TranslationSystem &trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+	const StaticData& staticData = StaticData::Instance();
+	const std::vector<Moses::FactorType>& outputFactorOrder=staticData.GetOutputFactorOrder();
+	ScoreComponentCollection weightUpdate = staticData.GetAllWeights();
+	std::vector<const ScoreProducer*> sps = trans_sys.GetFeatureFunctions();
+	ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
+	for(int i=0;i<sps.size();i++)
+	{
+		if(sps[i]->GetScoreProducerDescription().compare("OnlineLearner")==0)
+		{
+			sp=const_cast<ScoreProducer*>(sps[i]);
+			break;
+		}
+	}
+	m_weight=weightUpdate.GetScoreForProducer(sp);	// permanent weight stored in decoder
 	float score=0.0;
 	std::string s="",t="";
 	size_t endpos = tp.GetSize();
