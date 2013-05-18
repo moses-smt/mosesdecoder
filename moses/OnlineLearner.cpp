@@ -278,7 +278,7 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 			break;
 		}
 	}
-	m_weight=weightUpdate.GetScoreForProducer(sp);	// permanent weight stored in decoder
+	float m_weight=weightUpdate.GetScoreForProducer(sp);	// permanent weight stored in decoder
 	float score=0.0;
 	std::string s="",t="";
 	size_t endpos = tp.GetSize();
