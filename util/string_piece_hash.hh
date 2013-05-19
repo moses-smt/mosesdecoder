@@ -29,9 +29,7 @@ template <class T> typename T::const_iterator FindStringPiece(const T &t, const 
   std::string temp(key.data(), key.size());
   return t.find(temp);
 #else
-  std::string temp(key.data(), key.size());
-  return t.find(temp);
-  //return t.find(key, StringPieceCompatibleHash(), StringPieceCompatibleEquals());
+  return t.find(key, StringPieceCompatibleHash(), StringPieceCompatibleEquals());
 #endif
 }
 
