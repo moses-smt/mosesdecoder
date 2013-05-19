@@ -26,7 +26,7 @@ $cmd = "$RealBin/substitute-filtered-tables.perl $filteredPath < $origPath > $te
 print STDERR "cmd=$cmd \n";
 system($cmd);
 
-$cmd = "$RealBin/substitute-weights.perl $tempPath < $tunedPath > $outPath ";
+$cmd = "$RealBin/substitute-weights.perl $tempPath $tunedPath $outPath ";
 print STDERR "cmd=$cmd \n";
 system($cmd);
 

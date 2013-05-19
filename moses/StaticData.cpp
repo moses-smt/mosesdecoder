@@ -745,7 +745,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_allWeights.PlusEquals(extraWeights);
   }
 
-  cerr << endl << "m_allWeights=" << m_allWeights << endl;
+  //cerr << endl << "m_allWeights=" << m_allWeights << endl;
 
   return true;
 }
