@@ -3,6 +3,8 @@
 
 #include "util/string_piece.hh"
 
+#include <set>
+
 #include <boost/functional/hash.hpp>
 #include <boost/version.hpp>
 
@@ -40,6 +42,16 @@ template <class T> typename T::iterator FindStringPiece(T &t, const StringPiece 
 #else
   return t.find(key, StringPieceCompatibleHash(), StringPieceCompatibleEquals());
 #endif
+}
+
+// Horribly inefficient versions because Hieu undid my changes.
+template <class Entry, class Compare, class Alloc> typename std::set<Entry, Compare, Alloc>::const_iterator FindStringPiece(const std::set<Entry, Compare, Alloc> &t, const StringPiece &key) {
+  std::string temp(key.data(), key.size());
+  return t.find(temp);
+}
+template <class Entry, class Compare, class Alloc> typename std::set<Entry, Compare, Alloc>::iterator FindStringPiece(std::set<Entry, Compare, Alloc> &t, const StringPiece &key) {
+  std::string temp(key.data(), key.size());
+  return t.find(temp);
 }
 
 #endif // UTIL_STRING_PIECE_HASH__
