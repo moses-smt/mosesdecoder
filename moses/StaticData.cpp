@@ -1452,7 +1452,7 @@ bool StaticData::LoadOnlineLearningModel()
 	const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
 	const float f_learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ?
 			Scan<float>(m_parameter->GetParam("f_learningrate")[0]) : 0.8;
-	const float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 0;
+	const float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 1;
 	OnlineAlgorithm setAlgo = FOnlyPerceptron;
 	if(!sparse_feature && w_learningrate>0)	setAlgo=FPercepWMira;
 	if(sparse_feature) setAlgo=FSparsePercepWSparseMira;

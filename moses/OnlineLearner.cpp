@@ -227,7 +227,7 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 		if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 		{
 			m_featureIdx[sp][tp]=sparseweightvector.GetSize();
-			sparseweightvector.AddFeat(m_weight);
+			sparseweightvector.AddFeat(1);
 			m_PPindex++;
 			return;
 		}
@@ -235,7 +235,7 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 	else if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 	{
 		m_featureIdx[sp][tp]=sparseweightvector.GetSize();
-		sparseweightvector.AddFeat(m_weight);
+		sparseweightvector.AddFeat(1);
 		m_PPindex++;
 		return;
 	}
