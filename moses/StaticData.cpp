@@ -60,6 +60,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LM/IRST.h"
 #endif
 
+#ifdef LM_SRI
+#include "LM/SRI.h"
+#endif
+
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
 #endif
@@ -634,6 +638,13 @@ bool StaticData::LoadData(Parameter *parameter)
 #ifdef LM_IRST
     else if (feature == "IRSTLM") {
       LanguageModelIRST *model = new LanguageModelIRST(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+    }
+#endif
+#ifdef LM_SRI
+    else if (feature == "SRILM") {
+      LanguageModelSRI *model = new LanguageModelSRI(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
