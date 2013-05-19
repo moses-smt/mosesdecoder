@@ -36,7 +36,9 @@ const char *SkipSpaces(const char *at) {
 class RecordStart {
   public:
     RecordStart() {
+#ifdef CLOCK_MONOTONIC
       clock_gettime(CLOCK_MONOTONIC, &started_);
+#endif
     }
 
     const struct timespec &Started() const {
@@ -77,7 +79,9 @@ void PrintUsage(std::ostream &out) {
   out << "CPU:" << (FloatSec(usage.ru_utime) + FloatSec(usage.ru_stime));
 
   struct timespec current;
+#ifdef CLOCK_MONOTONIC
   clock_gettime(CLOCK_MONOTONIC, &current);
+#endif
   out << "\treal:" << (FloatSec(current) - FloatSec(kRecordStart.Started())) << '\n';
 #endif
 }
