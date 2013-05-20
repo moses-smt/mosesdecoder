@@ -112,7 +112,7 @@ void WordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
                     , ScoreComponentCollection &scoreBreakdown
                     , ScoreComponentCollection &estimatedFutureScore) const
 {
-  float score = - targetPhrase.GetNumTerminals();
+  float score = - (float) targetPhrase.GetNumTerminals();
   scoreBreakdown.Assign(this, score);
 }
 
