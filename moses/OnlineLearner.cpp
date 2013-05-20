@@ -145,7 +145,6 @@ OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, fl
 
 OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
 		float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
-
 	flr = f_learningrate;
 	wlr = w_learningrate;
 	m_PPindex=0;
