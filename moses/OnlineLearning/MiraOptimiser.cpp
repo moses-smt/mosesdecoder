@@ -86,14 +86,10 @@ size_t MiraOptimiser::updateWeights(
 //		cerr<<"Features values diff size : "<<featureValueDiffs.size() << " (of which violated: " << violatedConstraintsBefore << ")" << endl;
 	  if (m_slack != 0) {
 	    alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs, m_slack);
-	    cerr<<"Alphas : ";
-	    for (int i=0;i<alphas.size();i++)
-	    {
-	    	cerr<<alphas[i]<<" ";
-	    }
-	    cerr<<"\n";
+	    cerr<<"Alphas : ";for (int i=0;i<alphas.size();i++) cerr<<alphas[i]<<" ";cerr<<"\n";
 	  } else {
 	    alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs);
+	    cerr<<"Alphas : ";for (int i=0;i<alphas.size();i++) cerr<<alphas[i]<<" ";cerr<<"\n";
 	  }
 
 	  // Update the weight vector according to the alphas and the feature value differences
