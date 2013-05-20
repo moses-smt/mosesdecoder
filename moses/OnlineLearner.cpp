@@ -226,7 +226,7 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 		if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 		{
 			m_featureIdx[sp][tp]=sparseweightvector.GetSize();
-			sparseweightvector.AddFeat(1);
+			sparseweightvector.AddFeat(m_weight);
 			m_PPindex++;
 			return;
 		}
@@ -234,7 +234,7 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 	else if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 	{
 		m_featureIdx[sp][tp]=sparseweightvector.GetSize();
-		sparseweightvector.AddFeat(1);
+		sparseweightvector.AddFeat(m_weight);
 		m_PPindex++;
 		return;
 	}
@@ -275,7 +275,6 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 		if (pos > 0){ s += " "; }
 		s += tp.GetSourcePhrase().GetWord(pos).GetFactor(0)->GetString();
 	}
-
 	pp_feature::const_iterator it;
 	it=m_feature.find(s);
 	if(it!=m_feature.end())
@@ -297,7 +296,8 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 			if(it2!=it->second.end())
 			{
 				float actual_weight=sparseweightvector.getElement(it2->second);
-				score*=actual_weight;
+//				cerr<<"Score : "<<score<<"\tWeight : "<<m_weight<<"\tActual Weight"<<actual_weight<<endl;
+				score*=(2*actual_weight);
 				score/=m_weight;
 			}
 		}
@@ -389,7 +389,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	std::vector<std::vector<ScoreComponentCollection> > featureValues, featureValuesHope, featureValuesFear;
 	std::map<int, map<string, map<string, int> > > OracleList;
 	TrellisPathList::const_iterator iter;
-	pp_list BestOracle,ShootemUp, ShootemDown;
+	pp_list BestOracle,ShootemUp, ShootemDown,Visited;
 	float maxBleu=0.0, maxScore=0.0,oracleScore=0.0;
 	int whichoracle=-1;
 	for (iter = nBestList.begin(); iter != nBestList.end(); ++iter) {
@@ -424,6 +424,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			featureValue.push_back(path.GetScoreBreakdown());
 			modelScore.push_back(oracleScore);
 		}
+
 
 		if(oraclebleu > maxBleu)
 		{
@@ -461,11 +462,72 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			oracleBleuScores.push_back(oraclebleu);
 			oraclefeatureScore.push_back(path.GetScoreBreakdown());
 		}
+// ------------------------trial--------------------------------//
+		if(implementation==FSparsePercepWSparseMira)
+		{
+			if(oraclebleu > bestbleu)
+			{
+				pp_list::const_iterator it1;
+				for(it1=PP_ORACLE.begin(); it1!=PP_ORACLE.end(); it1++)
+				{
+					std::map<std::string, int>::const_iterator itr1;
+					for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+					{
+						if(PP_BEST[it1->first][itr1->first]!=1 && Visited[it1->first][itr1->first]!=1)
+						{
+							ShootUp(it1->first, itr1->first, abs(oracleScore-bestScore));
+							Visited[it1->first][itr1->first]=1;
+						}
+					}
+				}
+				for(it1=PP_BEST.begin(); it1!=PP_BEST.end(); it1++)
+				{
+					std::map<std::string, int>::const_iterator itr1;
+					for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+					{
+						if(PP_ORACLE[it1->first][itr1->first]!=1 && Visited[it1->first][itr1->first]!=1)
+						{
+							ShootDown(it1->first, itr1->first, abs(oracleScore-bestScore));
+							Visited[it1->first][itr1->first]=1;
+						}
+					}
+				}
+			}
+			if(oraclebleu < bestbleu)
+			{
+				pp_list::const_iterator it1;
+				for(it1=PP_ORACLE.begin(); it1!=PP_ORACLE.end(); it1++)
+				{
+					std::map<std::string, int>::const_iterator itr1;
+					for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+					{
+						if(PP_BEST[it1->first][itr1->first]!=1 && Visited[it1->first][itr1->first]!=1)
+						{
+							ShootDown(it1->first, itr1->first, abs(oracleScore-bestScore));
+							Visited[it1->first][itr1->first]=1;
+						}
+					}
+				}
+				for(it1=PP_BEST.begin(); it1!=PP_BEST.end(); it1++)
+				{
+					std::map<std::string, int>::const_iterator itr1;
+					for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+					{
+						if(PP_ORACLE[it1->first][itr1->first]!=1 && Visited[it1->first][itr1->first]!=1)
+						{
+							ShootUp(it1->first, itr1->first, abs(oracleScore-bestScore));
+							Visited[it1->first][itr1->first]=1;
+						}
+					}
+				}
+			}
+		}
+// ------------------------trial--------------------------------//
 	}
 	cerr<<"Read all the oracles in the list!\n";
 
 	//	Update the features
-	if(implementation==FOnlyPerceptron || implementation==FPercepWMira)
+	if(implementation!=FSparsePercepWSparseMira)
 	{
 		pp_list::const_iterator it1;
 		for(it1=ShootemUp.begin(); it1!=ShootemUp.end(); it1++)

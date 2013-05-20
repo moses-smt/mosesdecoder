@@ -202,6 +202,7 @@ Parameter::Parameter()
   AddParam("weight-ol", "ol", "initial weight for online learning feature");
   AddParam("numIterations", "number of iterations for online learning feature");
   AddParam("scale-margin", "Scale the margin by the Bleu score of the oracle translation");
+  AddParam("normaliseMargin", "Normalise the margin: squash between 0 and 1");
   AddParam("scale-margin-precision", "Scale margin by precision of oracle");
   AddParam("scale-update", "Scale update by Bleu score of oracle");
   AddParam("scale-update-precision", "Scale update by precision of oracle");

@@ -118,7 +118,7 @@ size_t MiraOptimiser::updateWeights(
 			summedUpdate.MultiplyEquals(oracleBleuScores[0]);
 		}
 	}
-	weightUpdate.PlusEquals(summedUpdate);
+	weightUpdate.PlusEquals(sp,summedUpdate);
 
 	return 0;
 }
@@ -169,7 +169,7 @@ size_t MiraOptimiser::updateSparseWeights(
 		VERBOSE(3,"Diff : "<<diff<<endl);
 		if (diff > epsilon){
 			violated = true;
-			cerr<<"Constraint violated!!!\n";
+			VERBOSE(3,"Constraint violated!!!\n");
 		}
 
 		if (m_normaliseMargin) {
