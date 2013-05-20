@@ -151,12 +151,12 @@ size_t MiraOptimiser::updateSparseWeights(
 
 		for(int i=0;i<oracleFeatureValues[0].size();i++){
 			featureValueDiff.Assign(oracleFeatureValues[0][i],UpdateVector.getElement(oracleFeatureValues[0][i]));
-//			cerr<<"Inserting from Oracle at : "<<oracleFeatureValues[0][i]<<" value : "<<UpdateVector.getElement(oracleFeatureValues[0][i])<<endl;
+			VERBOSE(3,"Inserting from Oracle at : "<<oracleFeatureValues[0][i]<<" value : "<<UpdateVector.getElement(oracleFeatureValues[0][i])<<endl);
 		}
 
 		for(int i=0;i<FeatureValues[j].size();i++){
 			featureValueDiff.MinusEqualsFeat(FeatureValues[j][i],UpdateVector.getElement(FeatureValues[j][i]));
-//			cerr<<"Subtracting from features at : "<<oracleFeatureValues[0][i]<<" value : "<<UpdateVector.getElement(oracleFeatureValues[0][i])<<endl;
+			VERBOSE(3, "Subtracting from features at : "<<oracleFeatureValues[0][i]<<" value : "<<UpdateVector.getElement(oracleFeatureValues[0][i])<<endl);
 		}
 
 		if (featureValueDiff.GetL1Norm() == 0) { // over sparse features values only
@@ -164,16 +164,16 @@ size_t MiraOptimiser::updateSparseWeights(
 		}
 
 		float loss=losses[j];
-//		cerr<<"Loss : "<<loss<<endl;
+		VERBOSE(3,"Loss : "<<loss<<endl);
 		bool violated = false;
 		float modelScoreDiff = oracleModelScores - modelScores[j];
 		float diff = 0;
 		if (loss > modelScoreDiff)
 			diff = loss - modelScoreDiff;
-//		cerr<<"Diff : "<<diff<<endl;
+		VERBOSE(3,"Diff : "<<diff<<endl);
 		if (diff > epsilon){
 			violated = true;
-//			cerr<<"Constraint violated!!!\n";
+			cerr<<"Constraint violated!!!\n";
 		}
 
 		if (m_normaliseMargin) {
@@ -202,6 +202,7 @@ size_t MiraOptimiser::updateSparseWeights(
 			cerr<<"Alphas : ";for(int i=0;i<alphas.size();i++) cerr<<alphas[i]<<" ";cerr<<endl;
 		} else {
 			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs);
+			cerr<<"Alphas : ";for(int i=0;i<alphas.size();i++) cerr<<alphas[i]<<" ";cerr<<endl;
 		}
 		for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 			float alpha = alphas[k];
