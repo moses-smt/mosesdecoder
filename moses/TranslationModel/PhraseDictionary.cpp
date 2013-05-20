@@ -38,15 +38,7 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
-    if (args[0] == "input-factor") {
-      m_input =Tokenize<FactorType>(args[1], ",");
-      m_inputFactors = FactorMask(m_input);
-    }
-    else if (args[0] == "output-factor") {
-      m_output =Tokenize<FactorType>(args[1], ",");
-      m_outputFactors = FactorMask(m_output);
-    }
-    else if (args[0] == "num-input-features") {
+    if (args[0] == "num-input-features") {
       m_numInputScores = Scan<unsigned>(args[1]);
     }
     else if (args[0] == "path") {

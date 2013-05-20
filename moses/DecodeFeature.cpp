@@ -33,7 +33,20 @@ DecodeFeature::DecodeFeature(  const std::string& description
                 , const std::string &line)
 : StatelessFeatureFunction(description, line)
 {
-  VERBOSE(2,"DecodeFeature: no factors yet" << std::endl);
+  VERBOSE(2,"DecodeFeature:" << std::endl);
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
+
+    if (args[0] == "input-factor") {
+      m_input =Tokenize<FactorType>(args[1], ",");
+      m_inputFactors = FactorMask(m_input);
+    }
+    else if (args[0] == "output-factor") {
+      m_output =Tokenize<FactorType>(args[1], ",");
+      m_outputFactors = FactorMask(m_output);
+    }
+  }
+
 }
 
 DecodeFeature::DecodeFeature(  const std::string& description

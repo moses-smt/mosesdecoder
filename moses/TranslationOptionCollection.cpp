@@ -488,8 +488,10 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
       // do rest of decode steps
       int indexStep = 0;
+
       for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
-        const DecodeStep &decodeStep = **iterStep;
+
+    	const DecodeStep &decodeStep = **iterStep;
         PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
         // go thru each intermediate trans opt just created
@@ -505,11 +507,11 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                              , adhereTableLimit);
         }
 
-
         // last but 1 partial trans not required anymore
         totalEarlyPruned += newPtoc->GetPrunedCount();
         delete oldPtoc;
         oldPtoc = newPtoc;
+
         indexStep++;
       } // for (++iterStep
 
