@@ -54,11 +54,12 @@ public:
 
   virtual void Evaluate(
     const PhraseBasedFeatureContext& context,
-  	ScoreComponentCollection* accumulator) const;
+  	ScoreComponentCollection* accumulator) const
+  {}
 
   virtual void EvaluateChart(
     const ChartBasedFeatureContext& context,
-    ScoreComponentCollection* accumulator) const 
+    ScoreComponentCollection* accumulator) const
     {
       //required but does nothing.
     }

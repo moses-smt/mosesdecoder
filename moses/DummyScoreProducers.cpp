@@ -108,16 +108,6 @@ void DistortionScoreProducer::Evaluate(const TargetPhrase &targetPhrase
   // no score
 }
 
-void WordPenaltyProducer::Evaluate(
-    const PhraseBasedFeatureContext& context,
-    ScoreComponentCollection* out) const
-{
-	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
-  float score = - targetPhrase.GetNumTerminals();
-
-  out->PlusEquals(this, score);
-}
-
 void WordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
                     , ScoreComponentCollection &scoreBreakdown
                     , ScoreComponentCollection &estimatedFutureScore) const
