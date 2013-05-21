@@ -36,11 +36,10 @@ class PDTAimp
 
 protected:
   PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis)
-    : m_languageModels(0),m_dict(0),
+    : m_dict(0),
       m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
 
  public:
-  LMList const* m_languageModels;
   std::vector<FactorType> m_input,m_output;
   PhraseDictionaryTree *m_dict;
   typedef std::vector<TargetPhraseCollection const*> vTPC;
@@ -195,7 +194,6 @@ protected:
     m_dict=new PhraseDictionaryTree();
     m_input=input;
     m_output=output;
-    m_languageModels=&languageModels;
 
     const StaticData &staticData = StaticData::Instance();
     m_dict->NeedAlignmentInfo(staticData.NeedAlignmentInfo());

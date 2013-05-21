@@ -122,7 +122,6 @@ public:
     return m_targetPhrase;
   }
 
-// void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
 
   /** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
   inline const WordsRange &GetCurrSourceWordsRange() const {

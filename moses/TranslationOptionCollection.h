@@ -39,7 +39,6 @@ class LanguageModel;
 class FactorCollection;
 class GenerationDictionary;
 class InputType;
-class LMList;
 class FactorMask;
 class Word;
 class DecodeGraph;

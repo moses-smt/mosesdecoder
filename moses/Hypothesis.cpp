@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
-#include "LMList.h"
 #include "Manager.h"
 
 using namespace std;
