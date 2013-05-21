@@ -76,8 +76,7 @@ bool PhraseDictionaryCompact::InitDictionary()
   }
 
   m_phraseDecoder = new PhraseDecoder(*this, &m_input, &m_output,
-                                  m_numScoreComponents, &m_weight, m_weightWP,
-                                  m_languageModels);
+                                  m_numScoreComponents, &m_weight, m_weightWP);
 
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
   

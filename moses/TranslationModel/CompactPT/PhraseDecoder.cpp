@@ -36,8 +36,7 @@ PhraseDecoder::PhraseDecoder(
   const std::vector<FactorType>* output,
   size_t numScoreComponent,
   const std::vector<float>* weight,
-  float weightWP,
-  const LMList* languageModels
+  float weightWP
 )
   : m_coding(None), m_numScoreComponent(numScoreComponent),
   m_containsAlignmentInfo(true), m_maxRank(0),
@@ -45,7 +44,7 @@ PhraseDecoder::PhraseDecoder(
   m_scoreTrees(1), m_alignTree(0),
   m_phraseDictionary(phraseDictionary), m_input(input), m_output(output),
   m_weight(weight),
-  m_weightWP(weightWP), m_languageModels(languageModels),
+  m_weightWP(weightWP),
   m_separator(" ||| ")
 { }
 

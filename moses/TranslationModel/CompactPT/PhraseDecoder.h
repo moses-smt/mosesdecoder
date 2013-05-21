@@ -90,7 +90,6 @@ class PhraseDecoder
     const std::vector<FactorType>* m_output;
     const std::vector<float>* m_weight;
     float m_weightWP;
-    const LMList* m_languageModels;
     
     std::string m_separator;
   
@@ -126,8 +125,7 @@ class PhraseDecoder
       const std::vector<FactorType>* output,
       size_t numScoreComponent,
       const std::vector<float>* weight,
-      float weightWP,
-      const LMList* languageModels
+      float weightWP
     );
     
     ~PhraseDecoder();
