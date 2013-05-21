@@ -89,7 +89,6 @@ class PhraseDecoder
     const std::vector<FactorType>* m_input;
     const std::vector<FactorType>* m_output;
     const std::vector<float>* m_weight;
-    float m_weightWP;
     
     std::string m_separator;
   

@@ -43,7 +43,6 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   : ChartRuleLookupManagerCYKPlus(sentence, cellColl)
   , m_dictionary(dictionary)
   , m_dbWrapper(dbWrapper)
-  , m_wpProducer(wpProducer)
   , m_inputFactorsVec(inputFactorsVec)
   , m_outputFactorsVec(outputFactorsVec)
   , m_filePath(filePath)

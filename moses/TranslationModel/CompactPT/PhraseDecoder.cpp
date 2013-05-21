@@ -44,7 +44,6 @@ PhraseDecoder::PhraseDecoder(
   m_scoreTrees(1), m_alignTree(0),
   m_phraseDictionary(phraseDictionary), m_input(input), m_output(output),
   m_weight(weight),
-  m_weightWP(weightWP),
   m_separator(" ||| ")
 { }
 
