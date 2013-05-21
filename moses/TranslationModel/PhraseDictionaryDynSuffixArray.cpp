@@ -24,12 +24,10 @@ bool PhraseDictionaryDynSuffixArray::Load(const std::vector<FactorType>& input,
     string source, string target, string alignments,
     const std::vector<float> &weight,
     size_t tableLimit,
-    const LMList &languageModels,
     float weightWP)
 {
 
   m_tableLimit = tableLimit;
-  m_languageModels = &languageModels;
   m_weight = weight;
   m_weightWP = weightWP;
 

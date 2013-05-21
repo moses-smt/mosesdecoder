@@ -24,7 +24,6 @@ public:
              , std::string m_alignments
              , const std::vector<float> &m_weight
              , size_t m_tableLimit
-             , const LMList &languageModels
              , float weightWP);
   // functions below required by base class
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
@@ -35,7 +34,6 @@ private:
   BilingualDynSuffixArray *m_biSA;
   std::vector<float> m_weight;
   size_t m_tableLimit;
-  const LMList *m_languageModels;
   float m_weightWP;
 
 

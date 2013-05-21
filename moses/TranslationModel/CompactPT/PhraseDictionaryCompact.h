@@ -67,7 +67,6 @@ protected:
   StringVector<unsigned char, size_t, std::allocator> m_targetPhrasesMemory;
 
   std::vector<float> m_weight;
-  const LMList* m_languageModels;
   float m_weightWP;
 
 public:

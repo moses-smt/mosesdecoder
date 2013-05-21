@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
 #include "moses/ThreadPool.h"
-#include "moses/LMList.h"
 #include "moses/DummyScoreProducers.h"
 
 using namespace std;
@@ -49,7 +48,6 @@ bool PhraseDictionaryCompact::InitDictionary()
 
   m_weight = staticData.GetWeights(this);
   m_weightWP = staticData.GetWeight(staticData.GetWordPenaltyProducer());
-  m_languageModels = &staticData.GetLMList();
  
   std::string tFilePath = m_filePath;
   

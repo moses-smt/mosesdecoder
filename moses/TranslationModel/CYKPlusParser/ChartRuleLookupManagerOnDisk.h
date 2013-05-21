@@ -40,7 +40,6 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
                                const ChartCellCollectionBase &cellColl,
                                const PhraseDictionaryOnDisk &dictionary,
                                OnDiskPt::OnDiskWrapper &dbWrapper,
-                               const LMList *languageModels,
                                const WordPenaltyProducer *wpProducer,
                                const std::vector<FactorType> &inputFactorsVec,
                                const std::vector<FactorType> &outputFactorsVec,
@@ -54,7 +53,6 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
  private:
   const PhraseDictionaryOnDisk &m_dictionary;
   OnDiskPt::OnDiskWrapper &m_dbWrapper;
-  const LMList *m_languageModels;
   const WordPenaltyProducer *m_wpProducer;
   const std::vector<FactorType> &m_inputFactorsVec;
   const std::vector<FactorType> &m_outputFactorsVec;

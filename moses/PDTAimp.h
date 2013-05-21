@@ -187,7 +187,6 @@ protected:
               , const std::vector<FactorType> &output
               , const std::string &filePath
 	      , const std::vector<float> &weight
-              , const LMList &languageModels
              ) {
 
     // set my members

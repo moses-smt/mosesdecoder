@@ -45,8 +45,6 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 
   PDTAimp *obj = new PDTAimp(this,m_numInputScores);
 
-  const LMList &languageModels = staticData.GetLMList();
-
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
     std::stringstream strme;
@@ -56,7 +54,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
     abort();
   }
 
-  obj->Create(m_input, m_output, m_filePath, weight, languageModels);
+  obj->Create(m_input, m_output, m_filePath, weight);
 
   obj->CleanUp();
   // caching only required for confusion net

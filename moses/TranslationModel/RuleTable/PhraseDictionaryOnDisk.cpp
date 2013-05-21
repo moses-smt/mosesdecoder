@@ -57,7 +57,7 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const ChartCellCollectionBase &cellCollection)
 {
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
-                                          GetImplementation(), m_languageModels,
+                                          GetImplementation(),
                                           m_wpProducer, m_input,
                                           m_output, m_filePath);
 }

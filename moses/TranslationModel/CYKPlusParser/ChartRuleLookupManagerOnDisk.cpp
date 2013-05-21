@@ -37,7 +37,6 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
-  const LMList *languageModels,
   const WordPenaltyProducer *wpProducer,
   const std::vector<FactorType> &inputFactorsVec,
   const std::vector<FactorType> &outputFactorsVec,
@@ -45,7 +44,6 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   : ChartRuleLookupManagerCYKPlus(sentence, cellColl)
   , m_dictionary(dictionary)
   , m_dbWrapper(dbWrapper)
-  , m_languageModels(languageModels)
   , m_wpProducer(wpProducer)
   , m_inputFactorsVec(inputFactorsVec)
   , m_outputFactorsVec(outputFactorsVec)
