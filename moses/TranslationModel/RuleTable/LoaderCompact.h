@@ -39,7 +39,6 @@ class RuleTableLoaderCompact : public RuleTableLoader
   bool Load(const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
-            const std::vector<float> &weight,
             size_t tableLimit,
             RuleTableTrie &);
 
@@ -75,7 +74,6 @@ class RuleTableLoaderCompact : public RuleTableLoader
                        const std::vector<Phrase> &,
                        const std::vector<size_t> &,
                        const std::vector<const AlignmentInfo *> &,
-                       const std::vector<float> &weights,
                        RuleTableTrie &ruleTable);
 
   // Like Tokenize() but records starting positions of tokens (instead of

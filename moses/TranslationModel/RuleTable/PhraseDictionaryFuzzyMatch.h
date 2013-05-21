@@ -44,7 +44,6 @@ namespace Moses
     bool Load(const std::vector<FactorType> &input
               , const std::vector<FactorType> &output
               , const std::string &initStr
-              , const std::vector<float> &weight
               , size_t tableLimit);
     
     const PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source) const;

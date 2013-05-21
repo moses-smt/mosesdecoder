@@ -24,7 +24,6 @@ namespace Moses
 bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
                                  , const std::vector<FactorType> &output
                                  , const std::string &filePath
-                                 , const std::vector<float> &weight
                                  , size_t tableLimit)
 {
   const StaticData &staticData = StaticData::Instance();
@@ -40,7 +39,6 @@ bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
 
   m_input = &input;
   m_output = &output;
-  m_weight = &weight;
   
   return true;
 }
@@ -57,8 +55,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
   
   std::auto_ptr<RuleTableLoader> loader =
   RuleTableLoaderFactory::Create(grammarFile);
-  std::vector<float> weightT = StaticData::Instance().GetWeights(this);
-  bool ret = loader->Load(*m_input, *m_output, grammarFile, weightT, m_tableLimit,
+  bool ret = loader->Load(*m_input, *m_output, grammarFile, m_tableLimit,
                           *this);
   
   CHECK(ret);

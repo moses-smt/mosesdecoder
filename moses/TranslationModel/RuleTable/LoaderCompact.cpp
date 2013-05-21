@@ -36,7 +36,6 @@ namespace Moses
 bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
                                   const std::vector<FactorType> &output,
                                   const std::string &inFile,
-                                  const std::vector<float> &weight,
                                   size_t /* tableLimit */,
                                   RuleTableTrie &ruleTable)
 {
@@ -75,7 +74,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
   // Load rules.
   if (!LoadRuleSection(reader, vocab, sourcePhrases, targetPhrases,
                        targetLhsIds, alignmentSets,
-                       weight, ruleTable)) {
+                       ruleTable)) {
     return false;
   }
 
@@ -178,7 +177,6 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     const std::vector<Phrase> &targetPhrases,
     const std::vector<size_t> &targetLhsIds,
     const std::vector<const AlignmentInfo *> &alignmentSets,
-    const std::vector<float> &weights,
     RuleTableTrie &ruleTable)
 {
   // Read rule count.

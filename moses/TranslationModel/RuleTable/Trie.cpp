@@ -43,11 +43,7 @@ bool RuleTableTrie::InitDictionary()
     return false;
   }
 
-  const StaticData &staticData = StaticData::Instance();
-
-  vector<float> weight = staticData.GetWeights(this);
-
-  bool ret = loader->Load(m_input, m_output, m_filePath, weight, m_tableLimit,
+  bool ret = loader->Load(m_input, m_output, m_filePath, m_tableLimit,
                           *this);
   return ret;
 }

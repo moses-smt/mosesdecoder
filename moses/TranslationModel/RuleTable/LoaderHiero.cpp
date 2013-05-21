@@ -16,13 +16,12 @@ namespace Moses {
 bool RuleTableLoaderHiero::Load(const std::vector<FactorType> &input,
           const std::vector<FactorType> &output,
           const std::string &inFile,
-          const std::vector<float> &weight,
           size_t tableLimit,
           RuleTableTrie &ruleTable)
 {
   bool ret = RuleTableLoaderStandard::Load(HieroFormat
               ,input, output
-              ,inFile, weight
+              ,inFile
               ,tableLimit
               ,ruleTable);
   return ret;

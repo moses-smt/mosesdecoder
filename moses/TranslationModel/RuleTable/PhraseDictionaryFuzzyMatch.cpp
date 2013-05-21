@@ -56,14 +56,12 @@ namespace Moses
   bool PhraseDictionaryFuzzyMatch::Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
             , const std::string &initStr
-            , const std::vector<float> &weight
             , size_t tableLimit)
   {
     m_tableLimit = tableLimit;
     m_input		= &input;
     m_output	= &output;
     
-    m_weight = new vector<float>(weight);
    
     cerr << "initStr=" << initStr << endl;
     m_config = Tokenize(initStr, ";");
