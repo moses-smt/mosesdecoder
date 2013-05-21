@@ -22,7 +22,6 @@
 #include "moses/AlignmentInfoCollection.h"
 #include "moses/DummyScoreProducers.h"
 #include "moses/InputFileStream.h"
-#include "moses/LMList.h"
 #include "moses/UserMessage.h"
 #include "moses/Util.h"
 #include "moses/Word.h"
@@ -39,7 +38,6 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
                                   const std::string &inFile,
                                   const std::vector<float> &weight,
                                   size_t /* tableLimit */,
-                                  const LMList &languageModels,
                                   const WordPenaltyProducer* wpProducer,
                                   RuleTableTrie &ruleTable)
 {
@@ -77,7 +75,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
 
   // Load rules.
   if (!LoadRuleSection(reader, vocab, sourcePhrases, targetPhrases,
-                       targetLhsIds, alignmentSets, languageModels,
+                       targetLhsIds, alignmentSets,
                        wpProducer, weight, ruleTable)) {
     return false;
   }
@@ -181,7 +179,6 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     const std::vector<Phrase> &targetPhrases,
     const std::vector<size_t> &targetLhsIds,
     const std::vector<const AlignmentInfo *> &alignmentSets,
-    const LMList &languageModels,
     const WordPenaltyProducer *wpProducer,
     const std::vector<float> &weights,
     RuleTableTrie &ruleTable)

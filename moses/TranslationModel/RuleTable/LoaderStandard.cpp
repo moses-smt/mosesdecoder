@@ -50,14 +50,13 @@ bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
                                    , const std::string &inFile
                                    , const std::vector<float> &weight
                                    , size_t tableLimit
-                                   , const LMList &languageModels
                                    , const WordPenaltyProducer* wpProducer
                                    , RuleTableTrie &ruleTable)
 {
   bool ret = Load(MosesFormat
                   ,input, output
                   ,inFile, weight
-                  ,tableLimit, languageModels
+                  ,tableLimit
                   ,wpProducer, ruleTable);
   return ret;
 
@@ -152,7 +151,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
                                 , const std::string &inFile
                                 , const std::vector<float> &weight
                                 , size_t /* tableLimit */
-                                , const LMList &languageModels
                                 , const WordPenaltyProducer* wpProducer
                                 , RuleTableTrie &ruleTable)
 {

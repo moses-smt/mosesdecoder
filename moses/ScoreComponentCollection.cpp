@@ -32,20 +32,6 @@ float ScoreComponentCollection::GetWeightedScore() const
 	return m_scores.inner_product(StaticData::Instance().GetAllWeights().m_scores);
 }
 
-void ScoreComponentCollection::ZeroAllLM(const LMList& lmList)
-{
-  for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i) {
-    Assign(*i, 0);
-  }
-}
-
-void ScoreComponentCollection::PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs)
-{
-  for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i) {
-    PlusEquals(*i,rhs);
-  }
-}
-
 void ScoreComponentCollection::MultiplyEquals(float scalar)
 {
 	m_scores *= scalar;

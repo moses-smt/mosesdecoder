@@ -26,7 +26,6 @@ bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
                                  , const std::string &filePath
                                  , const std::vector<float> &weight
                                  , size_t tableLimit
-                                 , const LMList &languageModels
                                  , const WordPenaltyProducer* wpProducer)
 {
   const StaticData &staticData = StaticData::Instance();
@@ -42,7 +41,6 @@ bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
 
   m_input = &input;
   m_output = &output;
-  m_languageModels = &languageModels;
   m_wpProducer = wpProducer;
   m_weight = &weight;
   
@@ -63,7 +61,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
   RuleTableLoaderFactory::Create(grammarFile);
   std::vector<float> weightT = StaticData::Instance().GetWeights(this);
   bool ret = loader->Load(*m_input, *m_output, grammarFile, weightT, m_tableLimit,
-                          *m_languageModels, m_wpProducer, *this);
+                          m_wpProducer, *this);
   
   CHECK(ret);
 }

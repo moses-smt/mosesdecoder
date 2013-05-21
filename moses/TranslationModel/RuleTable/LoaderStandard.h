@@ -35,7 +35,6 @@ protected:
             const std::string &inFile,
             const std::vector<float> &weight,
             size_t tableLimit,
-            const LMList &languageModels,
             const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
  public:
@@ -44,7 +43,6 @@ protected:
             const std::string &inFile,
             const std::vector<float> &weight,
             size_t tableLimit,
-            const LMList &languageModels,
             const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
 };

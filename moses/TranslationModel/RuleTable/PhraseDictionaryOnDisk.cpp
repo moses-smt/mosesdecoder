@@ -37,7 +37,6 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 bool PhraseDictionaryOnDisk::InitDictionary()
 {
   const StaticData &staticData = StaticData::Instance();
-  m_languageModels = &staticData.GetLMList();
   m_wpProducer = staticData.GetWordPenaltyProducer();
 
   return true;

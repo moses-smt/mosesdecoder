@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/check.hh"
 
-#include "LMList.h"
 #include "FeatureFunction.h"
 #include "FeatureVector.h"
 #include "TypeDef.h"
@@ -377,8 +376,6 @@ public:
 	float GetWeightedScore() const;
 
   void ZeroDenseFeatures(const FeatureFunction* sp);
-  void ZeroAllLM(const LMList& lmList);
-  void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
   void L1Normalise();
   float GetL1Norm() const;
   float GetL2Norm() const;

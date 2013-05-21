@@ -47,10 +47,9 @@ bool RuleTableTrie::InitDictionary()
 
   vector<float> weight = staticData.GetWeights(this);
   const WordPenaltyProducer *wpProducer = staticData.GetWordPenaltyProducer();
-  const LMList &languageModels = staticData.GetLMList();
 
   bool ret = loader->Load(m_input, m_output, m_filePath, weight, m_tableLimit,
-                          languageModels, wpProducer, *this);
+                          wpProducer, *this);
   return ret;
 }
 

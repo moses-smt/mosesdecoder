@@ -30,8 +30,6 @@
 
 namespace Moses
 {
-
-class LMList;
 class RuleTableTrie;
 class WordPenaltyProducer;
 
@@ -44,7 +42,6 @@ class RuleTableLoaderCompact : public RuleTableLoader
             const std::string &inFile,
             const std::vector<float> &weight,
             size_t tableLimit,
-            const LMList &languageModels,
             const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
 
@@ -80,7 +77,6 @@ class RuleTableLoaderCompact : public RuleTableLoader
                        const std::vector<Phrase> &,
                        const std::vector<size_t> &,
                        const std::vector<const AlignmentInfo *> &,
-                       const LMList &languageModels,
                        const WordPenaltyProducer *wpProducer,
                        const std::vector<float> &weights,
                        RuleTableTrie &ruleTable);

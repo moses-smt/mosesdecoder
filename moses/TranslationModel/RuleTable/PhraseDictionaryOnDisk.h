@@ -45,7 +45,6 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
 protected:
   boost::thread_specific_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
 
-  const LMList* m_languageModels;
   const WordPenaltyProducer* m_wpProducer;
 
   OnDiskPt::OnDiskWrapper &GetImplementation();
@@ -54,7 +53,6 @@ protected:
 public:
   PhraseDictionaryOnDisk(const std::string &line)
     : MyBase("PhraseDictionaryOnDisk", line)
-    , m_languageModels(NULL)
   {}
 
   virtual ~PhraseDictionaryOnDisk();

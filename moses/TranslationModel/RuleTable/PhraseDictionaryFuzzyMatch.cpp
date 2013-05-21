@@ -57,11 +57,9 @@ namespace Moses
             , const std::vector<FactorType> &output
             , const std::string &initStr
             , const std::vector<float> &weight
-            , size_t tableLimit,
-            const LMList& languageModels,
-            const WordPenaltyProducer* wpProducer)
+            , size_t tableLimit
+            , const WordPenaltyProducer* wpProducer)
   {
-    m_languageModels = &(languageModels);
     m_wpProducer = wpProducer;
     m_tableLimit = tableLimit;
     m_input		= &input;

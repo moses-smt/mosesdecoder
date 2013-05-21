@@ -28,7 +28,6 @@
 namespace Moses
 {
 
-class LMList;
 class Phrase;
 class TargetPhrase;
 class TargetPhraseCollection;
