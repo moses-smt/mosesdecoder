@@ -38,7 +38,6 @@ namespace Moses
 {
 
 class FeatureFunction;
-class WordPenaltyProducer;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */

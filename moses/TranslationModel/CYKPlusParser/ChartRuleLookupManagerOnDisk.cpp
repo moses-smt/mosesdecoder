@@ -240,7 +240,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
                                                ,m_outputFactorsVec
                                                ,m_dictionary
                                                ,weightT
-                                               ,m_wpProducer
                                                ,m_filePath
                                                , m_dbWrapper.GetVocab());
 

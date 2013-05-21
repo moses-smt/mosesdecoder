@@ -228,8 +228,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
     , const std::vector<Moses::FactorType> &outputFactors
     , const Vocab &vocab
     , const Moses::PhraseDictionary &phraseDict
-    , const std::vector<float> &weightT
-    , const Moses::WordPenaltyProducer* wpProducer) const
+    , const std::vector<float> &weightT) const
 {
   Moses::TargetPhrase *ret = new Moses::TargetPhrase();
 
