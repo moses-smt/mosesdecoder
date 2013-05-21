@@ -47,7 +47,6 @@ bool PhraseDictionaryCompact::InitDictionary()
   const StaticData &staticData = StaticData::Instance();
 
   m_weight = staticData.GetWeights(this);
-  m_weightWP = staticData.GetWeight(staticData.GetWordPenaltyProducer());
  
   std::string tFilePath = m_filePath;
   
@@ -74,7 +73,7 @@ bool PhraseDictionaryCompact::InitDictionary()
   }
 
   m_phraseDecoder = new PhraseDecoder(*this, &m_input, &m_output,
-                                  m_numScoreComponents, &m_weight, m_weightWP);
+                                  m_numScoreComponents, &m_weight);
 
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
   

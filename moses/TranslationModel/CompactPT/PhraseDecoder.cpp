@@ -35,8 +35,7 @@ PhraseDecoder::PhraseDecoder(
   const std::vector<FactorType>* input,
   const std::vector<FactorType>* output,
   size_t numScoreComponent,
-  const std::vector<float>* weight,
-  float weightWP
+  const std::vector<float>* weight
 )
   : m_coding(None), m_numScoreComponent(numScoreComponent),
   m_containsAlignmentInfo(true), m_maxRank(0),

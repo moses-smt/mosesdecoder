@@ -67,8 +67,6 @@ protected:
   StringVector<unsigned char, size_t, std::allocator> m_targetPhrasesMemory;
 
   std::vector<float> m_weight;
-  float m_weightWP;
-
 public:
   PhraseDictionaryCompact(const std::string &line)
   :PhraseDictionary("PhraseDictionaryCompact", line)

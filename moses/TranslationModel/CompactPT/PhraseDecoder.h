@@ -123,8 +123,7 @@ class PhraseDecoder
       const std::vector<FactorType>* input,
       const std::vector<FactorType>* output,
       size_t numScoreComponent,
-      const std::vector<float>* weight,
-      float weightWP
+      const std::vector<float>* weight
     );
     
     ~PhraseDecoder();
