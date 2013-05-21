@@ -295,10 +295,11 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 			it2=it->second.find(t);
 			if(it2!=it->second.end())
 			{
-				float actual_weight=sparseweightvector.getElement(it2->second);
+//				float actual_weight=sparseweightvector.getElement(it2->second);
 //				cerr<<"Score : "<<score<<"\tWeight : "<<m_weight<<"\tActual Weight"<<actual_weight<<endl;
-				score*=(2*actual_weight);
-				score/=m_weight;
+//				score*=actual_weight;
+//				score/=m_weight;
+				score=sparseweightvector.getElement(it2->second);
 			}
 		}
 	}
