@@ -22,7 +22,6 @@ public:
             const std::string &inFile,
             const std::vector<float> &weight,
             size_t tableLimit,
-            const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
 
 };

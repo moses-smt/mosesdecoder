@@ -29,14 +29,12 @@ public:
             , const std::vector<FactorType> &output
             , const std::string &filePath
             , const std::vector<float> &weight
-            , size_t tableLimit
-            , const WordPenaltyProducer* wpProducer);
+            , size_t tableLimit);
 
   void InitializeForInput(InputType const& source);
 
 protected:
   const std::vector<FactorType> *m_input, *m_output;
-  const WordPenaltyProducer *m_wpProducer;
   const std::vector<float> *m_weight;
   
 };

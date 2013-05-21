@@ -28,8 +28,6 @@
 namespace Moses
 {
 
-class WordPenaltyProducer;
-
 /** Abstract base class defining RuleTableLoader interface.  Friend of RuleTableTrie.
  */
 class RuleTableLoader
@@ -42,7 +40,6 @@ class RuleTableLoader
                     const std::string &inFile,
                     const std::vector<float> &weight,
                     size_t tableLimit,
-                    const WordPenaltyProducer* wpProducer,
                     RuleTableTrie &) = 0;
 
  protected:

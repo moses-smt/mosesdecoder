@@ -38,7 +38,6 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
                                   const std::string &inFile,
                                   const std::vector<float> &weight,
                                   size_t /* tableLimit */,
-                                  const WordPenaltyProducer* wpProducer,
                                   RuleTableTrie &ruleTable)
 {
   PrintUserTime("Start loading compact rule table");
@@ -76,7 +75,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
   // Load rules.
   if (!LoadRuleSection(reader, vocab, sourcePhrases, targetPhrases,
                        targetLhsIds, alignmentSets,
-                       wpProducer, weight, ruleTable)) {
+                       weight, ruleTable)) {
     return false;
   }
 
@@ -179,7 +178,6 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     const std::vector<Phrase> &targetPhrases,
     const std::vector<size_t> &targetLhsIds,
     const std::vector<const AlignmentInfo *> &alignmentSets,
-    const WordPenaltyProducer *wpProducer,
     const std::vector<float> &weights,
     RuleTableTrie &ruleTable)
 {

@@ -55,6 +55,7 @@ class InputType;
 class PhraseDictionary;
 class GenerationDictionary;
 class DecodeStep;
+class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;

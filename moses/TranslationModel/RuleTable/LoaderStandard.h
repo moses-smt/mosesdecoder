@@ -35,7 +35,6 @@ protected:
             const std::string &inFile,
             const std::vector<float> &weight,
             size_t tableLimit,
-            const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
  public:
   bool Load(const std::vector<FactorType> &input,
@@ -43,7 +42,6 @@ protected:
             const std::string &inFile,
             const std::vector<float> &weight,
             size_t tableLimit,
-            const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
 };
 

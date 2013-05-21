@@ -50,14 +50,13 @@ bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
                                    , const std::string &inFile
                                    , const std::vector<float> &weight
                                    , size_t tableLimit
-                                   , const WordPenaltyProducer* wpProducer
                                    , RuleTableTrie &ruleTable)
 {
   bool ret = Load(MosesFormat
                   ,input, output
                   ,inFile, weight
                   ,tableLimit
-                  ,wpProducer, ruleTable);
+                  ,ruleTable);
   return ret;
 
 }
@@ -151,7 +150,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
                                 , const std::string &inFile
                                 , const std::vector<float> &weight
                                 , size_t /* tableLimit */
-                                , const WordPenaltyProducer* wpProducer
                                 , RuleTableTrie &ruleTable)
 {
   PrintUserTime(string("Start loading text SCFG phrase table. ") + (format==MosesFormat?"Moses ":"Hiero ") + " format");

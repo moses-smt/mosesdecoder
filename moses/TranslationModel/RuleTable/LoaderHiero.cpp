@@ -18,14 +18,13 @@ bool RuleTableLoaderHiero::Load(const std::vector<FactorType> &input,
           const std::string &inFile,
           const std::vector<float> &weight,
           size_t tableLimit,
-          const WordPenaltyProducer* wpProducer,
           RuleTableTrie &ruleTable)
 {
   bool ret = RuleTableLoaderStandard::Load(HieroFormat
               ,input, output
               ,inFile, weight
               ,tableLimit
-              ,wpProducer, ruleTable);
+              ,ruleTable);
   return ret;
 }
 

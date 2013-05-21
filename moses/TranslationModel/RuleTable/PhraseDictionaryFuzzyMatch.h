@@ -45,8 +45,7 @@ namespace Moses
               , const std::vector<FactorType> &output
               , const std::string &initStr
               , const std::vector<float> &weight
-              , size_t tableLimit
-              , const WordPenaltyProducer* wpProducer);
+              , size_t tableLimit);
     
     const PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source) const;
     
@@ -82,7 +81,6 @@ namespace Moses
     std::vector<std::string> m_config;
     
     const std::vector<FactorType> *m_input, *m_output;
-    const WordPenaltyProducer *m_wpProducer;
     const std::vector<float> *m_weight;
     
     tmmt::FuzzyMatchWrapper *m_FuzzyMatchWrapper;

@@ -37,7 +37,6 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
-  const WordPenaltyProducer *wpProducer,
   const std::vector<FactorType> &inputFactorsVec,
   const std::vector<FactorType> &outputFactorsVec,
   const std::string &filePath)

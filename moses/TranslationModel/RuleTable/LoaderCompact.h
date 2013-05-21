@@ -31,7 +31,6 @@
 namespace Moses
 {
 class RuleTableTrie;
-class WordPenaltyProducer;
 
 //! @todo ask phil williams
 class RuleTableLoaderCompact : public RuleTableLoader
@@ -42,7 +41,6 @@ class RuleTableLoaderCompact : public RuleTableLoader
             const std::string &inFile,
             const std::vector<float> &weight,
             size_t tableLimit,
-            const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
 
  private:
@@ -77,7 +75,6 @@ class RuleTableLoaderCompact : public RuleTableLoader
                        const std::vector<Phrase> &,
                        const std::vector<size_t> &,
                        const std::vector<const AlignmentInfo *> &,
-                       const WordPenaltyProducer *wpProducer,
                        const std::vector<float> &weights,
                        RuleTableTrie &ruleTable);
 

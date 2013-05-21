@@ -33,7 +33,6 @@ namespace Moses
 {
 class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
-class WordPenaltyProducer;
 
 /** Implementation of on-disk phrase table for hierarchical/syntax model.
  */   
@@ -44,8 +43,6 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
 
 protected:
   boost::thread_specific_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
-
-  const WordPenaltyProducer* m_wpProducer;
 
   OnDiskPt::OnDiskWrapper &GetImplementation();
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
