@@ -101,28 +101,6 @@ public:
   { return SetByOriginator; }
 };
 
-class MetaFeatureProducer : public StatelessFeatureFunction
-{
- public:
- MetaFeatureProducer(std::string shortName, const std::string &line) : StatelessFeatureFunction("MetaFeature_"+shortName,1, line), m_shortName(shortName) {}
-
-  std::string m_shortName;
-  
-  void Evaluate(const PhraseBasedFeatureContext& context,
-		ScoreComponentCollection* accumulator) const {
-    //do nothing - not a real feature
-  }
-
-  void EvaluateChart(const ChartBasedFeatureContext& context,
-		     ScoreComponentCollection*) const {
-    //do nothing - not a real feature
-  }
-
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
-};
-
 }
 
 #endif
