@@ -43,7 +43,7 @@ namespace Moses
 TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(
                                                                                 const Phrase &source
                                                                                 , const TargetPhrase &target
-                                                                                , const Word &sourceLHS)
+                                                                                , const Word *sourceLHS)
 {
   PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection();
@@ -74,7 +74,7 @@ const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(co
 
 PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source
                                                                 , const TargetPhrase &target
-                                                                , const Word &sourceLHS)
+                                                                , const Word *sourceLHS)
 {
   const size_t size = source.GetSize();
 

@@ -66,7 +66,7 @@ int main(int argc, char **argv)
   std::string line;
   while(getline(std::cin, line)) {
     Phrase sourcePhrase;
-    sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||");
+    sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||", NULL);
     
     TargetPhraseVectorPtr decodedPhraseColl
       = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);

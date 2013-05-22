@@ -123,7 +123,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       throw runtime_error(msg);
     }
   }
-  Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter);
+  Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter, NULL);
 
   if (staticData.IsChart()) {
     InitStartEndWord();
@@ -229,7 +229,7 @@ void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder
                                 , const std::string &phraseString
                                 , const std::string &factorDelimiter)
 {
-  Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter);
+  Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter, NULL);
 }
 
 

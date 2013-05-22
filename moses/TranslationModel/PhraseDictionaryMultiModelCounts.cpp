@@ -574,7 +574,7 @@ vector<float> PhraseDictionaryMultiModelCounts::MinimizePerplexity(vector<pair<s
         map<string,multiModelCountsStatistics*>* allStats = new(map<string,multiModelCountsStatistics*>);
 
         Phrase sourcePhrase(0);
-        sourcePhrase.CreateFromString(Input, m_input, source_string, factorDelimiter);
+        sourcePhrase.CreateFromString(Input, m_input, source_string, factorDelimiter, NULL);
 
         CollectSufficientStatistics(sourcePhrase, fs, allStats); //optimization potential: only call this once per source phrase
 

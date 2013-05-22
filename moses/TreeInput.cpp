@@ -169,7 +169,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
             TargetPhrase targetPhrase;
-            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter);
+            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
 
             // set constituent label
 	    string targetLHSstr;
@@ -181,9 +181,9 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
               UnknownLHSList::const_iterator iterLHS = lhsList.begin();
               targetLHSstr = iterLHS->first;
             }
-            Word targetLHS(true);
-            targetLHS.CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
-            CHECK(targetLHS.GetFactor(0) != NULL);
+            Word *targetLHS = new Word(true);
+            targetLHS->CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
+            CHECK(targetLHS->GetFactor(0) != NULL);
             targetPhrase.SetTargetLHS(targetLHS);
 
             // get probability

@@ -217,7 +217,8 @@ namespace Moses
       // parse source & find pt node
       
       // constituent labels
-      Word sourceLHS, targetLHS;
+      Word *sourceLHS;
+      Word *targetLHS;
       
       // source
       Phrase sourcePhrase( 0);
@@ -262,7 +263,7 @@ namespace Moses
   TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
                                                                                   , const Phrase &source
                                                                                   , const TargetPhrase &target
-                                                                                  , const Word &sourceLHS)
+                                                                                  , const Word *sourceLHS)
   {
     PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
     return currNode.GetOrCreateTargetPhraseCollection();
@@ -271,7 +272,7 @@ namespace Moses
   PhraseDictionaryNodeSCFG &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
                                                                   , const Phrase &source
                                                                   , const TargetPhrase &target
-                                                                  , const Word &sourceLHS)
+                                                                  , const Word *sourceLHS)
   {
     cerr << source << endl << target << endl;
     const size_t size = source.GetSize();

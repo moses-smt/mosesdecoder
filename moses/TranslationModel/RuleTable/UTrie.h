@@ -57,10 +57,10 @@ class RuleTableUTrie : public RuleTableTrie
   const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const;
 
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      const Phrase &source, const TargetPhrase &target, const Word &sourceLHS);
+      const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
 
   UTrieNode &GetOrCreateNode(const Phrase &source, const TargetPhrase &target,
-                             const Word &sourceLHS);
+                             const Word *sourceLHS);
 
   void SortAndPrune();
 

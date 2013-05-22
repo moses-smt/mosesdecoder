@@ -66,12 +66,12 @@ namespace Moses
     TargetPhraseCollection &GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
                                                               , const Phrase &source
                                                               , const TargetPhrase &target
-                                                              , const Word &sourceLHS);
+                                                              , const Word *sourceLHS);
     
     PhraseDictionaryNodeSCFG &GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
                                               , const Phrase &source
                                               , const TargetPhrase &target
-                                              , const Word &sourceLHS);
+                                              , const Word *sourceLHS);
     
     void SortAndPrune(PhraseDictionaryNodeSCFG &rootNode);
     PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source);
