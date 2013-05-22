@@ -141,14 +141,14 @@ StaticData::~StaticData()
 	TranslationOptionList *transOptList = valuePair.first;
 	delete transOptList;
   }
+
   /*
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
-    ScoreProducer *ff = producers[i];
-    cerr << endl << "Destroying" << ff << endl;
+	FeatureFunction *ff = producers[i];
     delete ff;
   }
-  */
+	*/
 
   // memory pools
   Phrase::FinalizeMemPool();

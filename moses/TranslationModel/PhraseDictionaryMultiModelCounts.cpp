@@ -108,8 +108,6 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
 {
     RemoveAllInColl(m_lexTable_e2f);
     RemoveAllInColl(m_lexTable_f2e);
-    RemoveAllInColl(m_pd);
-    RemoveAllInColl(m_inverse_pd);
 }
 
 

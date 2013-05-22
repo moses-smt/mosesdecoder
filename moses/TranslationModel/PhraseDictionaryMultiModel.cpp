@@ -75,7 +75,6 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &descri
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
 {
-    RemoveAllInColl(m_pd);
 }
 
 bool PhraseDictionaryMultiModel::InitDictionary()

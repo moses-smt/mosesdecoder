@@ -89,6 +89,8 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
 
 TargetPhrase::~TargetPhrase()
 {
+  //cerr << "m_lhsTarget=" << m_lhsTarget << endl;
+
   delete m_lhsTarget;
 }
 
