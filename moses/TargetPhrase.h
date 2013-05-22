@@ -51,13 +51,14 @@ protected:
 	// in case of confusion net, ptr to source phrase
 	Phrase m_sourcePhrase; 
 	const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
-	Word m_lhsTarget;
+	Word *m_lhsTarget;
 
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(std::string out_string);
   explicit TargetPhrase(const Phrase &targetPhrase);
+  ~TargetPhrase();
 
   void Evaluate();
 
@@ -104,9 +105,9 @@ public:
 	}
 	
 	void SetTargetLHS(const Word &lhs)
-	{ 	m_lhsTarget = lhs; }
+	{ 	m_lhsTarget = new Word(lhs); }
 	const Word &GetTargetLHS() const
-	{ return m_lhsTarget; }
+	{ return *m_lhsTarget; }
 	
   void SetAlignmentInfo(const StringPiece &alignString);
   void SetAlignTerm(const AlignmentInfo *alignTerm) {
