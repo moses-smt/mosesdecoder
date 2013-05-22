@@ -3,20 +3,31 @@ import shutil
 import subprocess
 import tempfile
 
-from pypeline.helpers.helpers import cons_function_component
+
+def get_name():
+    return 'irstlm_build'
+
+def get_inputs():
+    return ['input_filename']
+
+def get_outputs():
+    return ['add_start_end_filename', 'lm_filename', 'compiled_lm_filename']
+
+def get_configuration():
+    return ['irstlm_installation_dir', 'irstlm_smoothing_method', 'language_model_directory']
 
 def configure(args):
     config = dict()
     config['irstlm_install_directory'] = args['irstlm_installation_dir']
     config['smoothing_method'] = args['irstlm_smoothing_method']
     config['lm_directory'] = args['language_model_directory']
-    return config
+    return config    
 
 def initialise(config):
     def process(a, s):
         # Create the LM directory if we need to
-        if os.path.exists(s['lm_directory']) is False:
-            os.makedirs(s['lm_directory'])
+        if os.path.exists(config['lm_directory']) is False:
+            os.makedirs(config['lm_directory'])
 
         # The filename of the file to chew through
         start_end_input_filename = a['input_filename']
@@ -26,18 +37,18 @@ def initialise(config):
         # Derive the output file name for the add start-end marker processor
         filename_bits = os.path.basename(start_end_input_filename).split(".")
         filename_bits[2] = "sb";
-        start_end_output_filename = os.path.join(s['lm_directory'], ".".join(filename_bits))
+        start_end_output_filename = os.path.join(config['lm_directory'], ".".join(filename_bits))
 
         # Derive the output file name of the LM build
         filename_bits[2] = "lm"
-        lm_filename = os.path.join(s['lm_directory'], ".".join(filename_bits))
+        lm_filename = os.path.join(config['lm_directory'], ".".join(filename_bits))
 
         # Derive the compiled LM file name
         filename_bits[2] = "arpa"
-        compiled_lm_filename = os.path.join(s['lm_directory'], ".".join(filename_bits))
+        compiled_lm_filename = os.path.join(config['lm_directory'], ".".join(filename_bits))
 
         # First thing to do is add start and end markers
-        start_end_cmdline = [os.path.join(s['irstlm_install_directory'], "bin", "add-start-end.sh")]
+        start_end_cmdline = [os.path.join(config['irstlm_install_directory'], "bin", "add-start-end.sh")]
         infile = open(start_end_input_filename, 'r')
         outfile = open(start_end_output_filename, 'w')
         print "IRSTLM Build: Invoking [%s]..." % " ".join(start_end_cmdline)
@@ -49,11 +60,11 @@ def initialise(config):
         # Next build the language model
         tmp_dir = tempfile.mkdtemp(dir = "/tmp")
         try:
-            build_lm_cmdline = [os.path.join(s['irstlm_install_directory'], "bin", "build-lm.sh"),
+            build_lm_cmdline = [os.path.join(config['irstlm_install_directory'], "bin", "build-lm.sh"),
                                 "-i", start_end_output_filename,
                                 "-t", tmp_dir,
                                 "-p",
-                                "-s", s['smoothing_method'],
+                                "-s", config['smoothing_method'],
                                 "-o", lm_filename]
             print "IRSTLM Build: Invoking [%s]..." % " ".join(build_lm_cmdline)
             return_code = subprocess.check_call(build_lm_cmdline)
@@ -65,7 +76,7 @@ def initialise(config):
 
         # Compile the LM
         lm_filename = lm_filename + ".gz"
-        compile_lm_cmdline = [os.path.join(s['irstlm_install_directory'], "bin", "compile-lm"),
+        compile_lm_cmdline = [os.path.join(config['irstlm_install_directory'], "bin", "compile-lm"),
                               "--text", "yes",
                               lm_filename,
                               compiled_lm_filename]
@@ -86,7 +97,7 @@ def initialise(config):
 
 
 if __name__ == '__main__':
-    from pypeline.helpers.helpers import eval_pipeline
+    from pypeline.helpers.helpers import eval_pipeline, cons_function_component
 
     lm_dir = os.environ["PWD"]
     configuration = {'irstlm_root': os.environ["IRSTLM"],
@@ -95,7 +106,7 @@ if __name__ == '__main__':
     component_config = configure(configuration)
     component = initialise(component_config)
 
-    value = eval_pipeline(component,
+    value = eval_pipeline(cons_function_component(component),
                           {'input_filename': '/Users/ianjohnson/Dropbox/Documents/MTM2012/tokenised_files/news-commentary-v7.fr-en.tok.en'},
                           component_config)
     target = {'add_start_end_filename': os.path.join(lm_dir, 'news-commentary-v7.fr-en.sb.en'),

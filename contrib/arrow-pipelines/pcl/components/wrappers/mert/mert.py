@@ -1,25 +1,38 @@
-#!/usr/bin/env python
+import os
+import shutil
+import subprocess
 
-import os, shutil, subprocess
+def get_name():
+    return 'mert'
 
-from pypeline.helpers.helpers import cons_function_component
+def get_inputs():
+    return ['evaluation_data_filename', 'trg_language_model_filename',
+            'trg_language_model_order', 'trg_language_model_type',
+            'moses_ini_filename']
+
+def get_outputs():
+    return ['moses_ini_filename']
+
+def get_configuration():
+    return ['source_language', 'target_language',
+            'moses_installation_dir', 'mert_working_directory']
 
 def configure(args):
     result = {}
-    result['src_lang'] = args['src_lang']
-    result['trg_lang'] = args['trg_lang']
+    result['src_lang'] = args['source_language']
+    result['trg_lang'] = args['target_language']
     result['moses_installation_dir'] = args['moses_installation_dir']
     result['mert_working_dir'] = args['mert_working_directory']
     return result
 
 def initialise(config):
-
     def process(a, s):
-        infilename = os.path.abspath(a['development_data_filename'])
+        infilename = os.path.abspath(a['evaluation_data_filename'])
+        infilename = ".".join(infilename.split(".")[:-1])
         lm_file = os.path.abspath(a['trg_language_model_filename'])
         lm_order = int(a['trg_language_model_order'])
         lm_type = int(a['trg_language_model_type'])
-        orig_moses_ini = os.path.abspath(a['moses_ini_file'])
+        orig_moses_ini = os.path.abspath(a['moses_ini_filename'])
         
         if not os.path.exists(orig_moses_ini):
             raise Exception, "Error: Input moses.ini does not exist"
@@ -57,12 +70,12 @@ def initialise(config):
         if not os.path.exists(new_mosesini):
             raise Exception, 'Failed MERT'
         
-        return {'moses_ini_file':new_mosesini}
+        return {'moses_ini_filename' : new_mosesini}
 
     return process
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     def __test():
         configuration = {'src_lang':'en',
                          'trg_lang':'lt',
@@ -80,4 +93,3 @@ if __name__ == '__main__':
 
     #do some test
     __test()
-
