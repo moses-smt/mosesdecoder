@@ -55,6 +55,7 @@ protected:
 
 public:
   TargetPhrase();
+  TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(std::string out_string);
   explicit TargetPhrase(const Phrase &targetPhrase);
 

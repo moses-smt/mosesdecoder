@@ -49,7 +49,6 @@ TargetPhrase::TargetPhrase( std::string out_string)
   CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
 }
 
-
 TargetPhrase::TargetPhrase()
   :Phrase()
   , m_fullScore(0.0)
@@ -59,14 +58,26 @@ TargetPhrase::TargetPhrase()
 {
 }
 
+TargetPhrase::TargetPhrase(const TargetPhrase &copy)
+: Phrase(copy)
+, m_fullScore(copy.m_fullScore)
+, m_sourcePhrase(copy.m_sourcePhrase)
+, m_alignTerm(copy.m_alignTerm)
+, m_alignNonTerm(copy.m_alignNonTerm)
+, m_scoreBreakdown(copy.m_scoreBreakdown)
+{
+
+}
+
 TargetPhrase::TargetPhrase(const Phrase &phrase)
-  : Phrase(phrase)
-  , m_fullScore(0.0)
-  , m_sourcePhrase()
-	, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-	, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+: Phrase(phrase)
+, m_fullScore(0.0)
+, m_sourcePhrase()
+, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
+
 
 #ifdef HAVE_PROTOBUF
 void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
