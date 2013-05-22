@@ -47,6 +47,7 @@ class CellContextScoreProducer : public StatelessFeatureFunction
     virtual bool ComputeValueInTranslationOption() const { return true; }
     void Normalize(std::vector<float> &losses);
     void Normalize0(std::vector<float> &losses);
+    void Normalize1(std::vector<float> &losses);
     double LogAddition(double logA, double logB, double logAddPrecision);
     void Interpolate(std::vector<float> &losses, std::vector<float> &pEgivenF, float interpolParam);
 

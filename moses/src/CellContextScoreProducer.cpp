@@ -216,7 +216,8 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
 
         m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses,pEgivenF);
         m_consumerFactory->Release(p_consumer);
-        Normalize0(losses);
+        //Normalize0(losses);
+        Normalize1(losses);
         VERBOSE(5, "VW losses BEFORE interpolation : " << std::endl);
         vector<float>::iterator lossIt;
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
@@ -288,6 +289,20 @@ void CellContextScoreProducer::Normalize0(vector<float> &losses)
       //VERBOSE(3, "Created uniform proba : " << *it << " ");
     }
     VERBOSE(3, std::endl;);
+}
+
+
+void CellContextScoreProducer::Normalize1(vector<float> &losses)
+{
+  float sum = 0;
+  vector<float>::iterator it;
+  for (it = losses.begin(); it != losses.end(); it++) {
+    *it = exp(-*it);
+    sum += *it;
+  }
+  for (it = losses.begin(); it != losses.end(); it++) {
+    *it /= sum;
+  }
 }
 
 
