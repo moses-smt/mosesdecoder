@@ -107,10 +107,6 @@ public:
 	const Word &GetTargetLHS() const
 	{ return m_lhsTarget; }
 	
-  Word &MutableTargetLHS() {
-    return m_lhsTarget;
-  }
-
   void SetAlignmentInfo(const StringPiece &alignString);
   void SetAlignTerm(const AlignmentInfo *alignTerm) {
     m_alignTerm = alignTerm;
