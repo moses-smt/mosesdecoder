@@ -220,8 +220,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // parse source & find pt node
 
     // constituent labels
-    Word *sourceLHS = new Word(true);
-    Word *targetLHS = new Word(true);
+    Word *sourceLHS;
+    Word *targetLHS;
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();

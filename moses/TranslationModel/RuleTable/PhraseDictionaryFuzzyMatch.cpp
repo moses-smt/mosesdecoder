@@ -217,8 +217,8 @@ namespace Moses
       // parse source & find pt node
       
       // constituent labels
-      Word *sourceLHS = new Word(true);
-      Word *targetLHS = new Word(true);
+      Word *sourceLHS;
+      Word *targetLHS;
       
       // source
       Phrase sourcePhrase( 0);
