@@ -217,7 +217,8 @@ namespace Moses
       // parse source & find pt node
       
       // constituent labels
-      Word sourceLHS, targetLHS;
+      Word sourceLHS;
+      Word *targetLHS = new Word(true);
       
       // source
       Phrase sourcePhrase( 0);
@@ -225,7 +226,7 @@ namespace Moses
       
       // create target phrase obj
       TargetPhrase *targetPhrase = new TargetPhrase();
-      targetPhrase->CreateFromString(Output, *m_output, targetPhraseString, factorDelimiter, &targetLHS);
+      targetPhrase->CreateFromString(Output, *m_output, targetPhraseString, factorDelimiter, targetLHS);
       
       // rest of target phrase
       targetPhrase->SetAlignmentInfo(alignString);

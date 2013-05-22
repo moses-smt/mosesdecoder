@@ -72,10 +72,10 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       
       // lhs
       //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
-      Word targetLHS(true);
+      Word *targetLHS = new Word(true);
       
-      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS.GetFactor(0) != NULL);
+      targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
+      CHECK(targetLHS->GetFactor(0) != NULL);
       
       // add to dictionary
       TargetPhrase *targetPhrase = new TargetPhrase();
@@ -107,9 +107,9 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       const string &targetLHSStr = iterLHS->first;
       //float prob = iterLHS->second;
       
-      Word targetLHS(true);
-      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS.GetFactor(0) != NULL);
+      Word *targetLHS = new Word(true);
+      targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
+      CHECK(targetLHS->GetFactor(0) != NULL);
       
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate();

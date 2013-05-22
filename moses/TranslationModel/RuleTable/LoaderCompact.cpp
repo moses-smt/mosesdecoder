@@ -203,7 +203,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
     const Phrase &sourcePhrase = sourcePhrases[sourcePhraseId];
     const Phrase &targetPhrasePhrase = targetPhrases[targetPhraseId];
-    const Word &targetLhs = vocab[targetLhsIds[targetPhraseId]];
+    const Word *targetLhs = new Word(vocab[targetLhsIds[targetPhraseId]]);
     Word sourceLHS("X"); // TODO not implemented for compact
     const AlignmentInfo *alignNonTerm = alignmentSets[alignmentSetId];
 

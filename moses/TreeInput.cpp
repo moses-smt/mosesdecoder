@@ -181,9 +181,9 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
               UnknownLHSList::const_iterator iterLHS = lhsList.begin();
               targetLHSstr = iterLHS->first;
             }
-            Word targetLHS(true);
-            targetLHS.CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
-            CHECK(targetLHS.GetFactor(0) != NULL);
+            Word *targetLHS = new Word(true);
+            targetLHS->CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
+            CHECK(targetLHS->GetFactor(0) != NULL);
             targetPhrase.SetTargetLHS(targetLHS);
 
             // get probability

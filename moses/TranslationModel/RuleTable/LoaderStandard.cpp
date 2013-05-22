@@ -220,11 +220,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // parse source & find pt node
 
     // constituent labels
-    Word sourceLHS, targetLHS;
+    Word sourceLHS;
+    Word *targetLHS = new Word(true);
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
+    targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, targetLHS);
 
     // source
     targetPhrase->MutableSourcePhrase().CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);

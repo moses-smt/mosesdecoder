@@ -51,7 +51,7 @@ protected:
 	// in case of confusion net, ptr to source phrase
 	Phrase m_sourcePhrase; 
 	const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
-	Word *m_lhsTarget;
+	const Word *m_lhsTarget;
 
 public:
   TargetPhrase();
@@ -104,8 +104,8 @@ public:
 		return m_sourcePhrase;
 	}
 	
-	void SetTargetLHS(const Word &lhs)
-	{ 	m_lhsTarget = new Word(lhs); }
+	void SetTargetLHS(const Word *lhs)
+	{ 	m_lhsTarget = lhs; }
 	const Word &GetTargetLHS() const
 	{ return *m_lhsTarget; }
 	
