@@ -130,6 +130,30 @@ StaticData::StaticData()
   Phrase::InitializeMemPool();
 }
 
+StaticData::~StaticData()
+{
+  RemoveAllInColl(m_decodeGraphs);
+
+  typedef std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > Coll;
+  Coll::iterator iter;
+  for (iter = m_transOptCache.begin(); iter != m_transOptCache.end(); ++iter) {
+	std::pair<TranslationOptionList*,clock_t> &valuePair =iter->second;
+	TranslationOptionList *transOptList = valuePair.first;
+	delete transOptList;
+  }
+  /*
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
+  for(size_t i=0;i<producers.size();++i) {
+    ScoreProducer *ff = producers[i];
+    cerr << endl << "Destroying" << ff << endl;
+    delete ff;
+  }
+  */
+
+  // memory pools
+  Phrase::FinalizeMemPool();
+}
+
 bool StaticData::LoadDataStatic(Parameter *parameter, const std::string &execPath) {
   s_instance.SetExecPath(execPath);
   return s_instance.LoadData(parameter);
@@ -790,21 +814,6 @@ void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>&
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weights);
-}
-
-StaticData::~StaticData()
-{
-  /*
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
-  for(size_t i=0;i<producers.size();++i) {
-    ScoreProducer *ff = producers[i];
-    cerr << endl << "Destroying" << ff << endl;
-    delete ff;
-  }
-  */
-
-  // memory pools
-  Phrase::FinalizeMemPool();
 }
 
 void StaticData::LoadNonTerminals()
