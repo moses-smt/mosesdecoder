@@ -156,7 +156,7 @@ void Phrase::CreateFromString(FactorDirection direction
                             ,const std::vector<FactorType> &factorOrder
                             ,const StringPiece &phraseString
                             ,const StringPiece &factorDelimiter
-                            ,Word *lhs)
+                            ,Word **lhs)
 {
   // parse
   vector<StringPiece> annotatedWordVector;
@@ -181,8 +181,8 @@ void Phrase::CreateFromString(FactorDirection direction
 
     // lhs
     CHECK(lhs);
-    lhs->CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
-    assert(lhs->IsNonTerminal());
+    (*lhs)->CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
+    assert((*lhs)->IsNonTerminal());
   }
   else {
     //CHECK(lhs == NULL);

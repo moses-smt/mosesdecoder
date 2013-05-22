@@ -220,12 +220,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // parse source & find pt node
 
     // constituent labels
-    Word sourceLHS;
+    Word *sourceLHS = new Word(true);
     Word *targetLHS = new Word(true);
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, targetLHS);
+    targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
 
     // source
     targetPhrase->MutableSourcePhrase().CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
@@ -244,7 +244,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
     targetPhrase->Evaluate();
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);
+    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, *sourceLHS);
     phraseColl.Add(targetPhrase);
 
     count++;

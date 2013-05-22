@@ -75,7 +75,7 @@ public:
                         , const std::vector<FactorType> &factorOrder
   											, const StringPiece &phraseString
   											, const StringPiece &factorDelimiter
-  											, Word *lhs);
+  											, Word **lhs);
 
   /**	copy factors from the other phrase to this phrase.
   	IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten

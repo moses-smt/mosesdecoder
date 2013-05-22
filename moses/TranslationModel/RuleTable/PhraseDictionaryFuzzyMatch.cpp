@@ -217,7 +217,7 @@ namespace Moses
       // parse source & find pt node
       
       // constituent labels
-      Word sourceLHS;
+      Word *sourceLHS = new Word(true);
       Word *targetLHS = new Word(true);
       
       // source
@@ -226,7 +226,7 @@ namespace Moses
       
       // create target phrase obj
       TargetPhrase *targetPhrase = new TargetPhrase();
-      targetPhrase->CreateFromString(Output, *m_output, targetPhraseString, factorDelimiter, targetLHS);
+      targetPhrase->CreateFromString(Output, *m_output, targetPhraseString, factorDelimiter, &targetLHS);
       
       // rest of target phrase
       targetPhrase->SetAlignmentInfo(alignString);
@@ -240,7 +240,7 @@ namespace Moses
       targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
       targetPhrase->Evaluate();
       
-      TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
+      TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, *sourceLHS);
       phraseColl.Add(targetPhrase);
       
       count++;
