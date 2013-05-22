@@ -60,7 +60,7 @@ class RuleTableTrie : public PhraseDictionary
 
   virtual TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
       const Phrase &source, const TargetPhrase &target,
-      const Word &sourceLHS) = 0;
+      const Word *sourceLHS) = 0;
 
   virtual void SortAndPrune() = 0;
 

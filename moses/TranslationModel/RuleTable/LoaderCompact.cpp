@@ -233,7 +233,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
-        ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
+        ruleTable, sourcePhrase, *targetPhrase, &sourceLHS);
     coll.Add(targetPhrase);
   }
 

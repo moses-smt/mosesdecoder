@@ -240,7 +240,7 @@ namespace Moses
       targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
       targetPhrase->Evaluate();
       
-      TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, *sourceLHS);
+      TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
       phraseColl.Add(targetPhrase);
       
       count++;
@@ -263,7 +263,7 @@ namespace Moses
   TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
                                                                                   , const Phrase &source
                                                                                   , const TargetPhrase &target
-                                                                                  , const Word &sourceLHS)
+                                                                                  , const Word *sourceLHS)
   {
     PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
     return currNode.GetOrCreateTargetPhraseCollection();
@@ -272,7 +272,7 @@ namespace Moses
   PhraseDictionaryNodeSCFG &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
                                                                   , const Phrase &source
                                                                   , const TargetPhrase &target
-                                                                  , const Word &sourceLHS)
+                                                                  , const Word *sourceLHS)
   {
     cerr << source << endl << target << endl;
     const size_t size = source.GetSize();

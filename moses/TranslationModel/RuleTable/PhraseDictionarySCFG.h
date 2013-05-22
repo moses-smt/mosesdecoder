@@ -56,12 +56,12 @@ public:
 
  protected:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      const Phrase &source, const TargetPhrase &target, const Word &sourceLHS);
+      const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
   const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& source) const;
 
   PhraseDictionaryNodeSCFG &GetOrCreateNode(const Phrase &source
                                             , const TargetPhrase &target
-                                            , const Word &sourceLHS);
+                                            , const Word *sourceLHS);
 
   void SortAndPrune();
 

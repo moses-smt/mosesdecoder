@@ -53,7 +53,7 @@ class RuleTableLoader
       RuleTableTrie &ruleTable
       , const Phrase &source
       , const TargetPhrase &target
-      , const Word &sourceLHS) {
+      , const Word *sourceLHS) {
     return ruleTable.GetOrCreateTargetPhraseCollection(source, target, sourceLHS);
   }
 };
