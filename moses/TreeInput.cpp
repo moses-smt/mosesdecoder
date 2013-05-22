@@ -169,7 +169,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
             TargetPhrase targetPhrase;
-            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter);
+            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
 
             // set constituent label
 	    string targetLHSstr;

@@ -47,7 +47,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
+  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter(), NULL);
 }
 
 TargetPhrase::TargetPhrase()
