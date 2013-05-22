@@ -1,32 +1,57 @@
 Arrow Based Moses Training Pipeline
 ===================================
 
+This demonstration implements a training pipeline that is shown in the Dia diagram in documentation/training-pipeline/moses-pypeline.dia.
+
+
+Setup
+-----
+
 To use the demonstration you must first initialise the git submodules for this clone. Return to the top level directory and issue the following command:
 
-$ git submodule init
+$ git submodule update --init --recursive
 
-This will clone the Pypeline submodule that is available on GitHub (https://github.com/ianj-als/pypeline). To install Pypeline:
+This will clone PCL, available at Github (git://github.com/ianj-als/pcl.git), and Pypeline submodules, available at GitHub (git://github.com/ianj-als/pypeline.git).
 
-$ cd libs/pypeline
-$ python setup.py install
+Return to the arrow-pipelines contrib directory:
 
-Alternatively, you can set an appropriate PYTHONPATH enviornment variable to the Pypeline library.
+$ cd contrib/arrow-pipelines
 
-This demonstration implements a training pipeline that is shown in the Dia diagram in ../documentation/training-pipeline/moses-pypeline.dia.
+To use the PCL compiler and run-time set the following environment variables (assuming Bash shell):
 
-Three environment variables need to be set before the manager.py script can be run, they are:
+$ export PATH=$PATH:`pwd`/python/pcl/src/pclc:`pwd`/python/pcl/src/pcl-run
+$ export PYTHONPATH=$PYTHONPATH:`pwd`/python/pcl/libs/pypeline/src
+
+Three environment variables need to be set before the pipeline can be run, they are:
 
  - MOSES_HOME : The directory where Moses has been cloned, or installed,
  - IRSTLM : The installation directory of your IRSTLM, and
  - GIZA_HOME : The installation directory of GIZA++.
 
-The manager.py script takes four positional command-line arguments:
 
- - The source language code,
- - The target language code,
- - The source corpus file. This file *must* be cleaned prior to use, and
- - The target corpus file. This file *must* be cleaned prior to use.
+Building the example training pipeline
+--------------------------------------
 
-For example, run the manager.py script with:
+$ cd pcl
+$ make
 
-$ python manager.py en lt cleantrain.en cleantrain.lt
+
+Running the example training pipeline
+-------------------------------------
+
+Ensure that the training_pipeline.cfg file meets you site specific installations. You only need to review and change, if necassary, the following settings in the Configuration section:
+
+ - moses_installation_directory (default: /opt/moses), this should be the value of MOSES_HOME,
+ - giza_installation_directory (default: /opt/moses/giza++-v1.0.7), this should be the value of GIZA_HOME,
+ - irstlm_installation_directory (default: /opt/moses/irstlm-5.70.04), this should be the value of IRSTLM.
+
+To execute the training pipeline run the following command:
+
+$ pcl-run.py training_pipeline
+
+Once complete the output of the pipeline can be found in the directories:
+
+ - test_data/tokenisation
+ - test_data/model
+ - test_data/lm
+ - test_data/mert
