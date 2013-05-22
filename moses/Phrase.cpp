@@ -180,14 +180,17 @@ void Phrase::CreateFromString(FactorDirection direction
     numWords = annotatedWordVector.size()-1;
 
     // lhs
-    CHECK(lhs);
+    assert(lhs);
+    (*lhs) = new Word(true);
     (*lhs)->CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
     assert((*lhs)->IsNonTerminal());
   }
   else {
-    //CHECK(lhs == NULL);
-
     numWords = annotatedWordVector.size();
+    //CHECK(lhs == NULL);
+    if (lhs) {
+      (*lhs) = NULL;
+    }
   }
 
   // parse each word
