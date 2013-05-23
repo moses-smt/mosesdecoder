@@ -70,25 +70,20 @@ void TargetWordInsertionFeature::Evaluate(
                       const PhraseBasedFeatureContext& context,
                       ScoreComponentCollection* accumulator) const
 {
-	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
-	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
-	ComputeFeatures(targetPhrase, accumulator, alignmentInfo);
 }
 
 void TargetWordInsertionFeature::EvaluateChart(
             const ChartBasedFeatureContext& context,
 						ScoreComponentCollection* accumulator) const
 {
-	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
-	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignTerm();
-	ComputeFeatures(targetPhrase, accumulator, alignmentInfo);
 }
 
 void TargetWordInsertionFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {
-
+  const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
+  ComputeFeatures(targetPhrase, &scoreBreakdown, alignmentInfo);
 }
 
 void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,

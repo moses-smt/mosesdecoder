@@ -281,8 +281,7 @@ public:
     m_scores[index] = score;
   }
 
-  //For features which have an unbounded number of components
-  void Assign(const FeatureFunction*sp, const std::string name, float score)
+  void Assign(const FeatureFunction*sp, const StringPiece &name, float score)
   {
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] = score;
