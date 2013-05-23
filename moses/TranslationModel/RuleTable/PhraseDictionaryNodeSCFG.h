@@ -97,17 +97,17 @@ public:
 
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_map<Word,
-          PhraseDictionaryNodeSCFG,
+          PhraseDictionaryNodeSCFG*,
           TerminalHasher,
           TerminalEqualityPred> TerminalMap;
 
   typedef boost::unordered_map<NonTerminalMapKey,
-          PhraseDictionaryNodeSCFG,
+          PhraseDictionaryNodeSCFG*,
           NonTerminalMapKeyHasher,
           NonTerminalMapKeyEqualityPred> NonTerminalMap;
 #else
-  typedef std::map<Word, PhraseDictionaryNodeSCFG> TerminalMap;
-  typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeSCFG> NonTerminalMap;
+  typedef std::map<Word, PhraseDictionaryNodeSCFG*> TerminalMap;
+  typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeSCFG*> NonTerminalMap;
 #endif
 
 private:
@@ -145,11 +145,7 @@ public:
   const TargetPhraseCollection *GetTargetPhraseCollection() const {
     return m_targetPhraseCollection;
   }
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection() {
-    if (m_targetPhraseCollection == NULL)
-      m_targetPhraseCollection = new TargetPhraseCollection();
-    return *m_targetPhraseCollection;
-  }
+  TargetPhraseCollection &GetOrCreateTargetPhraseCollection();
 
   const NonTerminalMap & GetNonTerminalMap() const {
     return m_nonTermMap;

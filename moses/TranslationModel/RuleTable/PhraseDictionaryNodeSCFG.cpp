@@ -30,17 +30,31 @@ namespace Moses
 
 PhraseDictionaryNodeSCFG::~PhraseDictionaryNodeSCFG()
 {
+  for (TerminalMap::iterator iter = m_sourceTermMap.begin(); iter != m_sourceTermMap.end(); ++iter) {
+	const PhraseDictionaryNodeSCFG *node = iter->second;
+	delete node;
+  }
+  for (NonTerminalMap::iterator iter = m_nonTermMap.begin(); iter != m_nonTermMap.end(); ++iter) {
+    const PhraseDictionaryNodeSCFG *node = iter->second;
+    delete node;
+  }
   delete m_targetPhraseCollection;
+}
+
+TargetPhraseCollection &PhraseDictionaryNodeSCFG::GetOrCreateTargetPhraseCollection() {
+  if (m_targetPhraseCollection == NULL)
+    m_targetPhraseCollection = new TargetPhraseCollection();
+  return *m_targetPhraseCollection;
 }
 
 void PhraseDictionaryNodeSCFG::Prune(size_t tableLimit)
 {
   // recusively prune
   for (TerminalMap::iterator p = m_sourceTermMap.begin(); p != m_sourceTermMap.end(); ++p) {
-    p->second.Prune(tableLimit);
+    p->second->Prune(tableLimit);
   }
   for (NonTerminalMap::iterator p = m_nonTermMap.begin(); p != m_nonTermMap.end(); ++p) {
-    p->second.Prune(tableLimit);
+    p->second->Prune(tableLimit);
   }
 
   // prune TargetPhraseCollection in this node
@@ -52,10 +66,10 @@ void PhraseDictionaryNodeSCFG::Sort(size_t tableLimit)
 {
   // recusively sort
   for (TerminalMap::iterator p = m_sourceTermMap.begin(); p != m_sourceTermMap.end(); ++p) {
-    p->second.Sort(tableLimit);
+    p->second->Sort(tableLimit);
   }
   for (NonTerminalMap::iterator p = m_nonTermMap.begin(); p != m_nonTermMap.end(); ++p) {
-    p->second.Sort(tableLimit);
+    p->second->Sort(tableLimit);
   }
 
   // prune TargetPhraseCollection in this node
@@ -69,9 +83,9 @@ PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word 
   //CHECK(!sourceTerm.IsNonTerminal());
 
   std::pair <TerminalMap::iterator,bool> insResult;
-  insResult = m_sourceTermMap.insert( std::make_pair(sourceTerm, PhraseDictionaryNodeSCFG()) );
+  insResult = m_sourceTermMap.insert( std::make_pair(sourceTerm, new PhraseDictionaryNodeSCFG()) );
   const TerminalMap::iterator &iter = insResult.first;
-  PhraseDictionaryNodeSCFG &ret = iter->second;
+  PhraseDictionaryNodeSCFG &ret = *iter->second;
   return &ret;
 }
 
@@ -82,9 +96,9 @@ PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word 
 
   NonTerminalMapKey key(sourceNonTerm, targetNonTerm);
   std::pair <NonTerminalMap::iterator,bool> insResult;
-  insResult = m_nonTermMap.insert( std::make_pair(key, PhraseDictionaryNodeSCFG()) );
+  insResult = m_nonTermMap.insert( std::make_pair(key, new PhraseDictionaryNodeSCFG()) );
   const NonTerminalMap::iterator &iter = insResult.first;
-  PhraseDictionaryNodeSCFG &ret = iter->second;
+  PhraseDictionaryNodeSCFG &ret = *iter->second;
   return &ret;
 }
 
@@ -93,7 +107,7 @@ const PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetChild(const Word &s
   CHECK(!sourceTerm.IsNonTerminal());
 
   TerminalMap::const_iterator p = m_sourceTermMap.find(sourceTerm);
-  return (p == m_sourceTermMap.end()) ? NULL : &p->second;
+  return (p == m_sourceTermMap.end()) ? NULL : p->second;
 }
 
 const PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const
@@ -103,7 +117,7 @@ const PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetChild(const Word &s
 
   NonTerminalMapKey key(sourceNonTerm, targetNonTerm);
   NonTerminalMap::const_iterator p = m_nonTermMap.find(key);
-  return (p == m_nonTermMap.end()) ? NULL : &p->second;
+  return (p == m_nonTermMap.end()) ? NULL : p->second;
 }
 
 void PhraseDictionaryNodeSCFG::Clear()
