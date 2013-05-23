@@ -149,6 +149,12 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   }
 }
 
+void FeatureFunction::Evaluate(const InputType &source
+                    , ScoreComponentCollection &scoreBreakdown) const
+{
+
+}
+
 StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, const std::string &line)
 :FeatureFunction(description, line)
 {

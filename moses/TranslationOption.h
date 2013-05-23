@@ -65,9 +65,9 @@ class TranslationOption
 
 protected:
 
-  TargetPhrase 							m_targetPhrase; /*< output phrase when using this translation option */
-  const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
-  float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
+  TargetPhrase 		m_targetPhrase; /*< output phrase when using this translation option */
+  const WordsRange	m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
+  float             m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
   typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
   _ScoreCacheMap m_lexReorderingScores;
@@ -131,6 +131,8 @@ public:
   inline const ScoreComponentCollection &GetScoreBreakdown() const {
     return m_targetPhrase.GetScoreBreakdown();
   }
+
+  void Evaluate(const InputType &source);
 
   /** returns cached scores */
   inline const Scores *GetLexReorderingScores(const LexicalReordering *scoreProducer) const {

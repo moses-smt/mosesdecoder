@@ -126,6 +126,8 @@ public:
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const = 0;
 
+  virtual void Evaluate(const InputType &source
+                      , ScoreComponentCollection &scoreBreakdown) const;
 };
 
 /** base class for all stateless feature functions.

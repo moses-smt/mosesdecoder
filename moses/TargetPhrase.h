@@ -61,6 +61,7 @@ public:
   ~TargetPhrase();
 
   void Evaluate();
+  void Evaluate(const InputType &source);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
