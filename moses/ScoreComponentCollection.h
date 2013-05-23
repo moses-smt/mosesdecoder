@@ -237,13 +237,6 @@ public:
 	}
 
   //For features which have an unbounded number of components
-  void PlusEquals(const FeatureFunction*sp, const std::string& name, float score)
-  {
-    FName fname(sp->GetScoreProducerDescription(),name);
-    m_scores[fname] += score;
-  }
-
-  //For features which have an unbounded number of components
   void PlusEquals(const FeatureFunction*sp, const StringPiece& name, float score)
   {
     FName fname(sp->GetScoreProducerDescription(),name);
