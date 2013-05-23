@@ -83,7 +83,13 @@ PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word 
   //CHECK(!sourceTerm.IsNonTerminal());
 
   std::pair <TerminalMap::iterator,bool> insResult;
-  insResult = m_sourceTermMap.insert( std::make_pair(sourceTerm, new PhraseDictionaryNodeSCFG()) );
+  PhraseDictionaryNodeSCFG *node = new PhraseDictionaryNodeSCFG();
+  insResult = m_sourceTermMap.insert( std::make_pair(sourceTerm, node) );
+
+  if (!insResult.second) {
+    delete node;
+  }
+
   const TerminalMap::iterator &iter = insResult.first;
   PhraseDictionaryNodeSCFG &ret = *iter->second;
   return &ret;
@@ -96,7 +102,14 @@ PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word 
 
   NonTerminalMapKey key(sourceNonTerm, targetNonTerm);
   std::pair <NonTerminalMap::iterator,bool> insResult;
-  insResult = m_nonTermMap.insert( std::make_pair(key, new PhraseDictionaryNodeSCFG()) );
+  PhraseDictionaryNodeSCFG *node = new PhraseDictionaryNodeSCFG();
+
+  insResult = m_nonTermMap.insert( std::make_pair(key, node) );
+
+  if (!insResult.second) {
+    delete node;
+  }
+
   const NonTerminalMap::iterator &iter = insResult.first;
   PhraseDictionaryNodeSCFG &ret = *iter->second;
   return &ret;
