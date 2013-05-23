@@ -164,8 +164,12 @@ void Phrase::CreateFromString(FactorDirection direction
     annotatedWordVector.push_back(*it);
   }
 
-  if (annotatedWordVector.size() == 0)
+  if (annotatedWordVector.size() == 0) {
+	if (lhs) {
+	  (*lhs) = NULL;
+	}
     return;
+  }
 
   // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
   //    to

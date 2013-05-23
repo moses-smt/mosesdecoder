@@ -142,7 +142,6 @@ StaticData::~StaticData()
 	delete transOptList;
   }
 
-
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
 	FeatureFunction *ff = producers[i];
