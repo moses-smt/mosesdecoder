@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "FeatureFunction.h"
+#include "StatelessFeatureFunction.h"
 #include "moses/Factor.h"
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"

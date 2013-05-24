@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include "FeatureFunction.h"
+#include "StatelessFeatureFunction.h"
 #include "moses/Factor.h"
 #include "moses/Sentence.h"
 

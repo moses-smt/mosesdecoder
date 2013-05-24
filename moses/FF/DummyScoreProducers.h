@@ -3,7 +3,8 @@
 #ifndef moses_DummyScoreProducers_h
 #define moses_DummyScoreProducers_h
 
-#include "FeatureFunction.h"
+#include "StatelessFeatureFunction.h"
+#include "StatefulFeatureFunction.h"
 #include "util/check.hh"
 
 namespace Moses

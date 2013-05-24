@@ -11,7 +11,7 @@
 
 #include "LexicalReorderingState.h"
 #include "LexicalReorderingTable.h"
-#include "moses/FF/FeatureFunction.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 
 
 namespace Moses

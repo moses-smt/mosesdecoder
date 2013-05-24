@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include "FeatureFunction.h"
+#include "StatelessFeatureFunction.h"
 #include "moses/FactorCollection.h"
 #include "moses/AlignmentInfo.h"
 

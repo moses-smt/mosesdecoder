@@ -7,7 +7,7 @@
 
 #include <boost/unordered_map.hpp>
 
-#include "FeatureFunction.h"
+#include "StatefulFeatureFunction.h"
 
 #include "moses/FF/FFState.h"
 #include "moses/Phrase.h"

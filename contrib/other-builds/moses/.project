@@ -1057,6 +1057,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/BleuScoreFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ChartBasedFeatureContext.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ChartBasedFeatureContext.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.h</locationURI>
+		</link>
+		<link>
 			<name>FF/DummyScoreProducers.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DummyScoreProducers.cpp</locationURI>
@@ -1107,6 +1117,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/GlobalLexicalModelUnlimited.h</locationURI>
 		</link>
 		<link>
+			<name>FF/PhraseBasedFeatureContext.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseBasedFeatureContext.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.h</locationURI>
+		</link>
+		<link>
 			<name>FF/PhraseBoundaryFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBoundaryFeature.cpp</locationURI>
@@ -1150,6 +1170,26 @@
 			<name>FF/SourceWordDeletionFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/StatefulFeatureFunction.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatefulFeatureFunction.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/StatefulFeatureFunction.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatefulFeatureFunction.h</locationURI>
+		</link>
+		<link>
+			<name>FF/StatelessFeatureFunction.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/StatelessFeatureFunction.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.h</locationURI>
 		</link>
 		<link>
 			<name>FF/TargetBigramFeature.cpp</name>
@@ -1367,11 +1407,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
 		</link>
 		<link>
-			<name>LM/bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/BilingualDynSuffixArray.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.cpp</locationURI>
@@ -1518,21 +1553,6 @@
 		</link>
 		<link>
 			<name>bin/lm.log</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
 		</link>
@@ -2067,16 +2087,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2097,16 +2107,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2122,16 +2122,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2143,16 +2133,6 @@
 		</link>
 		<link>
 			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2782,36 +2762,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/moses_test.passed</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Factory.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Factory.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/IRST.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/IRST.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/ORLM.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/ORLM.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/ParallelBackoff.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/ParallelBackoff.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/SRI.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/SRI.o</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2960,76 +2910,6 @@
 			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/fuzzy-match</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Backward.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Backward.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardLMState.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardLMState.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.output</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.output</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.run</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.run</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.test</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.test</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Base.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Base.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Implementation.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Implementation.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Joint.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Joint.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Ken.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Ken.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/MultiFactor.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/MultiFactor.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Remote.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Remote.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/SingleFactor.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/SingleFactor.o</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BlockHashIndex.o</name>

@@ -45,6 +45,8 @@ class TranslationOption;
 class WordsRange;
 class Hypothesis;
 class FFState;
+class StatelessFeatureFunction;
+class StatefulFeatureFunction;
 class Manager;
 class LexicalReordering;
 

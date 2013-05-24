@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-#include "FeatureFunction.h"
+#include "StatelessFeatureFunction.h"
 #include "moses/FF/FFState.h"
 #include "moses/Word.h"
 #include "moses/FactorCollection.h"

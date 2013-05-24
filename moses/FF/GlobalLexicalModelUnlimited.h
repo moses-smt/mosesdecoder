@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "FeatureFunction.h"
+#include "StatelessFeatureFunction.h"
 #include "moses/Factor.h"
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"

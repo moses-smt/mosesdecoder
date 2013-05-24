@@ -4,10 +4,10 @@
 #include <string>
 #include <boost/unordered_set.hpp>
 
-#include "moses/FF/FFState.h"
-#include "FeatureFunction.h"
 #include "moses/FactorCollection.h"
 #include "moses/Sentence.h"
+#include "FFState.h"
+#include "StatelessFeatureFunction.h"
 
 namespace Moses
 {
