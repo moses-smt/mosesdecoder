@@ -1067,6 +1067,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.h</locationURI>
 		</link>
 		<link>
+			<name>FF/DistortionScoreProducer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/DistortionScoreProducer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.h</locationURI>
+		</link>
+		<link>
 			<name>FF/DummyScoreProducers.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DummyScoreProducers.cpp</locationURI>
@@ -1220,6 +1230,26 @@
 			<name>FF/TargetWordInsertionFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetWordInsertionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/UnknownWordPenaltyProducer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/UnknownWordPenaltyProducer.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/UnknownWordPenaltyProducer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/UnknownWordPenaltyProducer.h</locationURI>
+		</link>
+		<link>
+			<name>FF/WordPenaltyProducer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/WordPenaltyProducer.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/WordPenaltyProducer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/WordPenaltyProducer.h</locationURI>
 		</link>
 		<link>
 			<name>FF/WordTranslationFeature.cpp</name>

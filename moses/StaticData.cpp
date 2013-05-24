@@ -48,7 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/SourceWordDeletionFeature.h"
 #include "moses/FF/GlobalLexicalModel.h"
 #include "moses/FF/GlobalLexicalModelUnlimited.h"
-#include "moses/FF/DummyScoreProducers.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/WordTranslationFeature.h"
 #include "moses/FF/TargetBigramFeature.h"
 #include "moses/FF/TargetNgramFeature.h"

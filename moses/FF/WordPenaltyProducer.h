@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include "StatelessFeatureFunction.h"
+
 namespace Moses
 {
 class TargetPhrase;

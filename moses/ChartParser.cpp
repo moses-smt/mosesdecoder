@@ -24,7 +24,7 @@
 #include "ChartRuleLookupManager.h"
 #include "StaticData.h"
 #include "TreeInput.h"
-#include "moses/FF/DummyScoreProducers.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
 
 using namespace std;
 using namespace Moses;

@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
-#include "moses/FF/DummyScoreProducers.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
 
 using namespace std;
 
