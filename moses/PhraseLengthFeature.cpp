@@ -18,9 +18,15 @@ void PhraseLengthFeature::Evaluate(
               const PhraseBasedFeatureContext& context,
               ScoreComponentCollection* accumulator) const
 {
+}
+
+void PhraseLengthFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
   // get length of source and target phrase
-  size_t targetLength = context.GetTargetPhrase().GetSize();
-  size_t sourceLength = context.GetTranslationOption().GetSourceWordsRange().GetNumWordsCovered();
+  size_t targetLength = targetPhrase.GetSize();
+  size_t sourceLength = targetPhrase.GetSourcePhrase().GetSize();
 
   // create feature names
   stringstream nameSource;
@@ -33,18 +39,11 @@ void PhraseLengthFeature::Evaluate(
   nameBoth << sourceLength << "," << targetLength;
 
   // increase feature counts
-  accumulator->PlusEquals(this,nameSource.str(),1);
-  accumulator->PlusEquals(this,nameTarget.str(),1);
-  accumulator->PlusEquals(this,nameBoth.str(),1);
+  scoreBreakdown.PlusEquals(this,nameSource.str(),1);
+  scoreBreakdown.PlusEquals(this,nameTarget.str(),1);
+  scoreBreakdown.PlusEquals(this,nameBoth.str(),1);
 
   //cerr << nameSource.str() << " " << nameTarget.str() << " " << nameBoth.str() << endl;
-}
-
-void PhraseLengthFeature::Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
-{
-  //CHECK(false);
 }
 
 }

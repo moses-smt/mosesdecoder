@@ -20,7 +20,7 @@ public:
   PhraseLengthFeature(const std::string &line);
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return RequiresSegmentation; }
+  { return RequiresTargetPhrase; }
 
   void Evaluate(const PhraseBasedFeatureContext& context,
                 ScoreComponentCollection* accumulator) const;
