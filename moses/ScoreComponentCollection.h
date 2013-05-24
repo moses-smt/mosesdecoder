@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/check.hh"
 
-#include "FeatureFunction.h"
+#include "moses/FF/FeatureFunction.h"
 #include "FeatureVector.h"
 #include "TypeDef.h"
 #include "Util.h"

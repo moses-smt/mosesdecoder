@@ -8,7 +8,7 @@
 #include "nl-hmm.h"
 
 #include "SyntacticLanguageModelFiles.h"
-#include "FFState.h"
+#include "moses/FF/FFState.h"
 #include <string>
 
 namespace Moses

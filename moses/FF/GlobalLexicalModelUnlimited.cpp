@@ -1,8 +1,8 @@
 #include "GlobalLexicalModelUnlimited.h"
 #include <fstream>
-#include "StaticData.h"
-#include "InputFileStream.h"
-#include "UserMessage.h"
+#include "moses/StaticData.h"
+#include "moses/InputFileStream.h"
+#include "moses/UserMessage.h"
 #include "util/string_piece_hash.hh"
 
 using namespace std;

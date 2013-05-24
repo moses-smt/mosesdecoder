@@ -1,9 +1,9 @@
 #include <fstream>
 #include "GlobalLexicalModel.h"
-#include "StaticData.h"
-#include "InputFileStream.h"
-#include "TranslationOption.h"
-#include "UserMessage.h"
+#include "moses/StaticData.h"
+#include "moses/InputFileStream.h"
+#include "moses/TranslationOption.h"
+#include "moses/UserMessage.h"
 
 using namespace std;
 

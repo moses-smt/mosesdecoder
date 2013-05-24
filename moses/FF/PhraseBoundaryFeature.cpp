@@ -1,6 +1,6 @@
 #include "PhraseBoundaryFeature.h"
 
-#include "Hypothesis.h"
+#include "moses/Hypothesis.h"
 
 using namespace std;
 

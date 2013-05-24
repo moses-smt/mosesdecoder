@@ -18,11 +18,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include <boost/test/unit_test.hpp>
 
-#include "FactorCollection.h"
-#include "PhraseLengthFeature.h"
-#include "Sentence.h"
-#include "TargetPhrase.h"
-#include "TranslationOption.h"
+#include "moses/FF/PhraseLengthFeature.h"
+#include "moses/FactorCollection.h"
+#include "moses/Sentence.h"
+#include "moses/TargetPhrase.h"
+#include "moses/TranslationOption.h"
 
 using namespace Moses;
 using namespace std;

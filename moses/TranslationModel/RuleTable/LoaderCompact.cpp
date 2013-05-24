@@ -20,7 +20,7 @@
 #include "LoaderCompact.h"
 
 #include "moses/AlignmentInfoCollection.h"
-#include "moses/DummyScoreProducers.h"
+#include "moses/FF/DummyScoreProducers.h"
 #include "moses/InputFileStream.h"
 #include "moses/UserMessage.h"
 #include "moses/Util.h"

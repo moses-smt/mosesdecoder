@@ -4,13 +4,13 @@
 #include <vector>
 #include <string>
 
-#include "FFState.h"
 #include "Hypothesis.h"
 #include "LexicalReordering.h"
 #include "WordsRange.h"
 #include "WordsBitmap.h"
 #include "ReorderingStack.h"
 #include "TranslationOption.h"
+#include "moses/FF/FFState.h"
 
 
 namespace Moses

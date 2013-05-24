@@ -21,8 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/test/unit_test.hpp>
 
-#include "DummyScoreProducers.h"
-#include "FeatureFunction.h"
+#include "moses/FF/DummyScoreProducers.h"
+#include "moses/FF/FeatureFunction.h"
 #include "ScoreComponentCollection.h"
 
 using namespace Moses;

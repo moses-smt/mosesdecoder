@@ -1,10 +1,10 @@
 #include <boost/algorithm/string.hpp>
 
-#include "AlignmentInfo.h"
 #include "PhrasePairFeature.h"
-#include "TargetPhrase.h"
-#include "Hypothesis.h"
-#include "TranslationOption.h"
+#include "moses/AlignmentInfo.h"
+#include "moses/TargetPhrase.h"
+#include "moses/Hypothesis.h"
+#include "moses/TranslationOption.h"
 #include "util/string_piece_hash.hh"
 
 using namespace std;

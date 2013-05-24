@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 
 
-#include "DummyScoreProducers.h"
+#include "moses/FF/DummyScoreProducers.h"
 #include "Hypothesis.h"
 #include "Manager.h"
 

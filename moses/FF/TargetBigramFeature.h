@@ -4,10 +4,10 @@
 #include <string>
 #include <map>
 
-#include "FactorCollection.h"
+#include "moses/FF/FFState.h"
 #include "FeatureFunction.h"
-#include "FFState.h"
-#include "Word.h"
+#include "moses/FactorCollection.h"
+#include "moses/Word.h"
 
 namespace Moses
 {

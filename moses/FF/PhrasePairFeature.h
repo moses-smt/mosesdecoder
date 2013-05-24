@@ -3,9 +3,9 @@
 
 #include <stdexcept>
 
-#include "Factor.h"
 #include "FeatureFunction.h"
-#include "Sentence.h"
+#include "moses/Factor.h"
+#include "moses/Sentence.h"
 
 namespace Moses {
 

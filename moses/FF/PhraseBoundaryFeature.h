@@ -6,8 +6,8 @@
 #include <string>
 
 #include "FeatureFunction.h"
-#include "FFState.h"
-#include "Word.h"
+#include "moses/FF/FFState.h"
+#include "moses/Word.h"
 
 namespace Moses
 {

@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 
 #include "FactorTypeSet.h"
-#include "FeatureFunction.h"
+#include "moses/FF/FeatureFunction.h"
 #include "TypeDef.h"
 
 namespace Moses

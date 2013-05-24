@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "ScoreComponentCollection.h"
 #include "Util.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/DummyScoreProducers.h"
 #include "AlignmentInfoCollection.h"
 
 using namespace std;

@@ -4,14 +4,13 @@
 #include <string>
 #include <map>
 
-#include "FactorCollection.h"
 #include "FeatureFunction.h"
-#include "FFState.h"
-#include "Word.h"
-
-#include "LM/SingleFactor.h"
-#include "ChartHypothesis.h"
-#include "ChartManager.h"
+#include "moses/FF/FFState.h"
+#include "moses/Word.h"
+#include "moses/FactorCollection.h"
+#include "moses/LM/SingleFactor.h"
+#include "moses/ChartHypothesis.h"
+#include "moses/ChartManager.h"
 
 namespace Moses
 {

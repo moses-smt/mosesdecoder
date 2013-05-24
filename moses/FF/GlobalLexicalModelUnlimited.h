@@ -4,16 +4,16 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "Factor.h"
-#include "Phrase.h"
-#include "TypeDef.h"
-#include "Util.h"
-#include "WordsRange.h"
 #include "FeatureFunction.h"
-#include "FactorTypeSet.h"
-#include "Sentence.h"
+#include "moses/Factor.h"
+#include "moses/Phrase.h"
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
+#include "moses/WordsRange.h"
+#include "moses/FactorTypeSet.h"
+#include "moses/Sentence.h"
 
-#include "FFState.h"
+#include "moses/FF/FFState.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>

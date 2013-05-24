@@ -28,7 +28,7 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "TargetPhrase.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/DummyScoreProducers.h"
 
 namespace Moses
 {

@@ -40,7 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
-#include "DummyScoreProducers.h"
 #include "Timer.h"
 
 #ifdef HAVE_PROTOBUF
@@ -49,6 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "util/exception.hh"
+#include "moses/FF/DummyScoreProducers.h"
 
 using namespace std;
 

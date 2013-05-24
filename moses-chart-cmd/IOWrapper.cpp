@@ -38,7 +38,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/Util.h"
 #include "moses/WordsRange.h"
 #include "moses/StaticData.h"
-#include "moses/DummyScoreProducers.h"
 #include "moses/InputFileStream.h"
 #include "moses/Incremental.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
@@ -48,6 +47,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
+#include "moses/FF/DummyScoreProducers.h"
 
 #include <boost/algorithm/string.hpp>
 

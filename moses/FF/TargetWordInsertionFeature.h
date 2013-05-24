@@ -5,8 +5,8 @@
 #include <map>
 
 #include "FeatureFunction.h"
-#include "FactorCollection.h"
-#include "AlignmentInfo.h"
+#include "moses/FactorCollection.h"
+#include "moses/AlignmentInfo.h"
 
 namespace Moses
 {

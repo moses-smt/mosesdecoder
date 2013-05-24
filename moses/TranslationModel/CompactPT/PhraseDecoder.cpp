@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PhraseDecoder.h"
 #include "moses/StaticData.h"
-#include "moses/DummyScoreProducers.h"
+#include "moses/FF/DummyScoreProducers.h"
 
 using namespace std;
 

@@ -1,13 +1,14 @@
 #include <sstream>
 #include "SourceWordDeletionFeature.h"
-#include "Phrase.h"
-#include "TargetPhrase.h"
-#include "Hypothesis.h"
-#include "ChartHypothesis.h"
-#include "ScoreComponentCollection.h"
-#include "TranslationOption.h"
-#include "UserMessage.h"
-#include "Util.h"
+#include "moses/Phrase.h"
+#include "moses/TargetPhrase.h"
+#include "moses/Hypothesis.h"
+#include "moses/ChartHypothesis.h"
+#include "moses/ScoreComponentCollection.h"
+#include "moses/TranslationOption.h"
+#include "moses/UserMessage.h"
+#include "moses/Util.h"
+
 #include "util/string_piece_hash.hh"
 
 namespace Moses {

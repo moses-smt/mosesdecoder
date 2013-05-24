@@ -31,7 +31,7 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "TreeInput.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/DummyScoreProducers.h"
 
 using namespace std;
 using namespace Moses;

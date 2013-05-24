@@ -1,11 +1,11 @@
 // $Id$
 
 #include "util/check.hh"
-#include "FFState.h"
-#include "StaticData.h"
-#include "DummyScoreProducers.h"
-#include "WordsRange.h"
-#include "TranslationOption.h"
+#include "moses/FF/FFState.h"
+#include "moses/FF/DummyScoreProducers.h"
+#include "moses/StaticData.h"
+#include "moses/WordsRange.h"
+#include "moses/TranslationOption.h"
 
 namespace Moses
 {

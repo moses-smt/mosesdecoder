@@ -1,6 +1,6 @@
 #include <sstream>
 
-#include "FFState.h"
+#include "moses/FF/FFState.h"
 #include "LexicalReordering.h"
 #include "LexicalReorderingState.h"
 #include "StaticData.h"

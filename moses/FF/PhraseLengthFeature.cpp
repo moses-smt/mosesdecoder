@@ -1,8 +1,8 @@
 #include <sstream>
 #include "PhraseLengthFeature.h"
-#include "Hypothesis.h"
-#include "ScoreComponentCollection.h"
-#include "TranslationOption.h"
+#include "moses/Hypothesis.h"
+#include "moses/ScoreComponentCollection.h"
+#include "moses/TranslationOption.h"
 
 namespace Moses {
 

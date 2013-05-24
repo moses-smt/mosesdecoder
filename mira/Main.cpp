@@ -36,17 +36,18 @@ namespace mpi = boost::mpi;
 #include "Optimiser.h"
 #include "Hildreth.h"
 #include "HypothesisQueue.h"
-#include "moses/FeatureVector.h"
 #include "moses/StaticData.h"
 #include "moses/ChartTrellisPathList.h"
 #include "moses/ChartTrellisPath.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/ThreadPool.h"
-#include "moses/DummyScoreProducers.h"
 #include "moses/LexicalReordering.h"
-#include "moses/WordTranslationFeature.h"
-#include "moses/PhrasePairFeature.h"
 #include "mert/BleuScorer.h"
+#include "moses/FeatureVector.h"
+
+#include "moses/FF/WordTranslationFeature.h"
+#include "moses/FF/PhrasePairFeature.h"
+#include "moses/FF/DummyScoreProducers.h"
 
 using namespace Mira;
 using namespace std;

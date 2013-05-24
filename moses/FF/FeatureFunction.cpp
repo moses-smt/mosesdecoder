@@ -2,12 +2,12 @@
 
 #include "util/check.hh"
 
-#include "ChartHypothesis.h"
-#include "ChartManager.h"
 #include "FeatureFunction.h"
-#include "Hypothesis.h"
-#include "Manager.h"
-#include "TranslationOption.h"
+#include "moses/ChartHypothesis.h"
+#include "moses/ChartManager.h"
+#include "moses/Hypothesis.h"
+#include "moses/Manager.h"
+#include "moses/TranslationOption.h"
 
 using namespace std;
 

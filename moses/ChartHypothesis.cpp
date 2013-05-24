@@ -27,9 +27,9 @@
 #include "TargetPhrase.h"
 #include "Phrase.h"
 #include "StaticData.h"
-#include "DummyScoreProducers.h"
 #include "ChartTranslationOptions.h"
-#include "FFState.h"
+#include "moses/FF/DummyScoreProducers.h"
+#include "moses/FF/FFState.h"
 
 using namespace std;
 

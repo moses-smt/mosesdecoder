@@ -1,4 +1,4 @@
-#include "FFState.h"
+#include "moses/FF/FFState.h"
 
 namespace Moses
 {

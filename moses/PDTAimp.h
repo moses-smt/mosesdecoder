@@ -10,7 +10,7 @@
 #include "InputFileStream.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "Util.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/DummyScoreProducers.h"
 #include "util/tokenize_piece.hh"
 
 namespace Moses

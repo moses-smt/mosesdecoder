@@ -22,9 +22,9 @@
 #include "ChartParser.h"
 #include "ChartParserCallback.h"
 #include "ChartRuleLookupManager.h"
-#include "DummyScoreProducers.h"
 #include "StaticData.h"
 #include "TreeInput.h"
+#include "moses/FF/DummyScoreProducers.h"
 
 using namespace std;
 using namespace Moses;

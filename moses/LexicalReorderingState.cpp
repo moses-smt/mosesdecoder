@@ -3,7 +3,7 @@
 #include <string>
 #include "util/check.hh"
 
-#include "FFState.h"
+#include "moses/FF/FFState.h"
 #include "Hypothesis.h"
 #include "WordsRange.h"
 #include "ReorderingStack.h"

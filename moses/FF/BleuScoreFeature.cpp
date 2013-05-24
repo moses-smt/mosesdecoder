@@ -1,7 +1,7 @@
 #include "BleuScoreFeature.h"
 
-#include "StaticData.h"
-#include "UserMessage.h"
+#include "moses/StaticData.h"
+#include "moses/UserMessage.h"
 
 using namespace std;
 

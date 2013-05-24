@@ -9,9 +9,9 @@
 
 #include "FeatureFunction.h"
 
-#include "FFState.h"
-#include "Phrase.h"
-#include "ChartHypothesis.h"
+#include "moses/FF/FFState.h"
+#include "moses/Phrase.h"
+#include "moses/ChartHypothesis.h"
 
 namespace Moses {
 

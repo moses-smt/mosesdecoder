@@ -1,9 +1,9 @@
 #include "TargetNgramFeature.h"
-#include "Phrase.h"
-#include "TargetPhrase.h"
-#include "Hypothesis.h"
-#include "ScoreComponentCollection.h"
-#include "ChartHypothesis.h"
+#include "moses/Phrase.h"
+#include "moses/TargetPhrase.h"
+#include "moses/Hypothesis.h"
+#include "moses/ScoreComponentCollection.h"
+#include "moses/ChartHypothesis.h"
 
 #include "util/string_piece_hash.hh"
 

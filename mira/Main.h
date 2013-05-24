@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/ScoreComponentCollection.h"
 #include "moses/Word.h"
-#include "moses/FeatureFunction.h"
+#include "moses/FF/FeatureFunction.h"
 #include "Decoder.h"
 
 typedef std::map<const Moses::FeatureFunction*, std::vector< float > > ProducerWeightMap;

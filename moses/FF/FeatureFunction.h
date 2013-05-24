@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 #include <string>
-#include "TypeDef.h"
+#include "moses/TypeDef.h"
 
 namespace Moses
 {

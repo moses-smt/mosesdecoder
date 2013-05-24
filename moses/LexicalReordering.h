@@ -8,10 +8,11 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "FeatureFunction.h"
 
 #include "LexicalReorderingState.h"
 #include "LexicalReorderingTable.h"
+#include "moses/FF/FeatureFunction.h"
+
 
 namespace Moses
 {

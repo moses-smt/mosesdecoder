@@ -25,10 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <algorithm>
 
-#include "FFState.h"
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
-#include "DummyScoreProducers.h"
 #include "Hypothesis.h"
 #include "Util.h"
 #include "SquareMatrix.h"
@@ -36,6 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 #include "Manager.h"
+#include "moses/FF/FFState.h"
+#include "moses/FF/DummyScoreProducers.h"
 
 using namespace std;
 

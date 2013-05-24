@@ -44,7 +44,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "mbr.h"
 #include "IOWrapper.h"
 
-#include "moses/DummyScoreProducers.h"
 #include "moses/FactorCollection.h"
 #include "moses/Manager.h"
 #include "moses/Phrase.h"
@@ -60,6 +59,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTrellisPath.h"
 #include "moses/ChartTrellisPathList.h"
 #include "moses/Incremental.h"
+
+#include "moses/FF/DummyScoreProducers.h"
 
 #include "util/usage.hh"
 
