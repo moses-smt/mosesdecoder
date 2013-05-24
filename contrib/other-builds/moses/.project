@@ -1422,6 +1422,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryMemory.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemory.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryMemory.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemory.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryMultiModel.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMultiModel.cpp</locationURI>
@@ -1440,6 +1450,16 @@
 			<name>TranslationModel/PhraseDictionaryMultiModelCounts.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMultiModelCounts.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryNodeMemory.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNodeMemory.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryNodeMemory.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNodeMemory.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/PhraseDictionaryTree.cpp</name>
@@ -1862,16 +1882,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/RuleTable/PhraseDictionaryOnDisk.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.cpp</locationURI>
@@ -1880,16 +1890,6 @@
 			<name>TranslationModel/RuleTable/PhraseDictionaryOnDisk.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/RuleTable/PhraseDictionarySCFG.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionarySCFG.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/RuleTable/PhraseDictionarySCFG.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/RuleTable/Trie.cpp</name>

@@ -20,7 +20,7 @@
 #pragma once
 
 #include "DotChart.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
 
 #include "util/check.hh"
 #include <vector>

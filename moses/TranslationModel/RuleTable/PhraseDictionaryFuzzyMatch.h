@@ -19,13 +19,13 @@
 
 #pragma once
 
+#include "Trie.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
-#include "Trie.h"
-#include "PhraseDictionaryNodeSCFG.h"
-#include "PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
 namespace Moses
 {

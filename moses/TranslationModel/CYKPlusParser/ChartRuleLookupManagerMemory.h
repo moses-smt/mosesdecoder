@@ -30,8 +30,8 @@
 #include "ChartRuleLookupManagerCYKPlus.h"
 #include "DotChartInMemory.h"
 #include "moses/NonTerminal.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
 #include "moses/StackVec.h"
 
 namespace Moses

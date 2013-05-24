@@ -23,9 +23,7 @@
 #include <string>
 #include <iterator>
 #include <algorithm>
-#include "Loader.h"
-#include "LoaderFactory.h"
-#include "PhraseDictionarySCFG.h"
+#include "PhraseDictionaryMemory.h"
 #include "moses/FactorCollection.h"
 #include "moses/Word.h"
 #include "moses/Util.h"
@@ -33,6 +31,8 @@
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
+#include "moses/TranslationModel/RuleTable/LoaderFactory.h"
+#include "moses/TranslationModel/RuleTable/Loader.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.h"
 
 using namespace std;

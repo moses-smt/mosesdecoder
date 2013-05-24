@@ -9,7 +9,7 @@
 #ifndef moses_PhraseDictionaryALSuffixArray_h
 #define moses_PhraseDictionaryALSuffixArray_h
 
-#include "PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
 namespace Moses {
   

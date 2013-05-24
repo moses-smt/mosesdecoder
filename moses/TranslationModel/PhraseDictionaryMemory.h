@@ -22,8 +22,8 @@
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
-#include "PhraseDictionaryNodeSCFG.h"
-#include "Trie.h"
+#include "PhraseDictionaryNodeMemory.h"
+#include "moses/TranslationModel/RuleTable/Trie.h"
 
 namespace Moses
 {
