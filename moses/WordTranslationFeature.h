@@ -49,10 +49,6 @@ public:
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection* accumulator) const;
   
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
-
   StatelessFeatureType GetStatelessFeatureType() const
   { return RequiresSegmentation; }
 };

@@ -186,11 +186,4 @@ void GlobalLexicalModel::Evaluate
       GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
 }
 
-void GlobalLexicalModel::Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
-{
-  CHECK(false);
-}
-
 }

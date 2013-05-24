@@ -1,6 +1,7 @@
 #ifndef GLOBALLEXICALMODELUNLIMITED_H_
 #define GLOBALLEXICALMODELUNLIMITED_H_
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include "Factor.h"
@@ -84,13 +85,8 @@ public:
   void EvaluateChart(const ChartHypothesis& /* cur_hypo */,
   									 int /* featureID */,
   									 ScoreComponentCollection* ) const {
-  	/* Not implemented */
-    assert(0);
+    throw std::logic_error("GlobalLexicalModelUnlimited not supported in chart decoder, yet");
   }
-
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 	void AddFeature(ScoreComponentCollection* accumulator,
 			StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,

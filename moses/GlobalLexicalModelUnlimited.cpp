@@ -334,11 +334,4 @@ void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulat
 
 }
 
-void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
-{
-  CHECK(false);
-}
-
 }

@@ -40,10 +40,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
       throw std::logic_error("PhrasePairFeature not valid in chart decoder");
     }
 
-    virtual void Evaluate(const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const;
-
     bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
 
     virtual StatelessFeatureType GetStatelessFeatureType() const

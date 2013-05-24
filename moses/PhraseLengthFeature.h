@@ -22,13 +22,10 @@ public:
   virtual StatelessFeatureType GetStatelessFeatureType() const
   { return RequiresTargetPhrase; }
 
-  void Evaluate(const PhraseBasedFeatureContext& context,
-                ScoreComponentCollection* accumulator) const;
-
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection*) const {
     throw std::logic_error("PhraseLengthFeature not valid in chart decoder");
-	}
+  }
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown

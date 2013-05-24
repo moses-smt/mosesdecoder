@@ -112,12 +112,5 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
   return new TargetBigramState(targetPhrase.GetWord(targetPhrase.GetSize()-1));
 }
 
-void TargetBigramFeature::Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
-{
-  CHECK(false);
-}
-
 }
 

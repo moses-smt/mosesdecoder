@@ -1,6 +1,7 @@
 #ifndef moses_GlobalLexicalModel_h
 #define moses_GlobalLexicalModel_h
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <memory>
@@ -75,14 +76,8 @@ public:
     const ChartBasedFeatureContext& context,
     ScoreComponentCollection* accumulator) const
   {
-  	std::cerr << "EvaluateChart not implemented." << std::endl;
-  	exit(1);
+    throw std::logic_error("GlobalLexicalModel not supported in chart decoder, yet");
   }
-
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
-
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
   { return RequiresSource; }

@@ -393,13 +393,6 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
   return new TargetNgramChartState(cur_hypo, featureId, m_n);
 }
 
-void TargetNgramFeature::Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
-{
-  CHECK(false);
-}
-
 void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfStartPos, size_t offset) const {
 	stringstream ngram;
 	size_t size = contextFactor.size();

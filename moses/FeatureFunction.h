@@ -124,7 +124,8 @@ public:
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const = 0;
+                      , ScoreComponentCollection &estimatedFutureScore) const
+  {}
 
   virtual void Evaluate(const InputType &source
                       , ScoreComponentCollection &scoreBreakdown) const;
@@ -147,18 +148,20 @@ public:
     * This should be implemented for features that apply to phrase-based models.
     **/
   virtual void Evaluate(const PhraseBasedFeatureContext& context,
-  											ScoreComponentCollection* accumulator) const = 0;
+  											ScoreComponentCollection* accumulator) const
+  {}
 
   /**
     * Same for chart-based features.
     **/
   virtual void EvaluateChart(const ChartBasedFeatureContext& context,
-                             ScoreComponentCollection* accumulator) const  = 0;
+                             ScoreComponentCollection* accumulator) const
+  {}
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
   { return RequiresTargetPhrase; }
 
-  bool IsStateless() const
+  virtual bool IsStateless() const
   { return true; }
 
 };

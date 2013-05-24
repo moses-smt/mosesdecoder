@@ -66,18 +66,6 @@ bool TargetWordInsertionFeature::Load(const std::string &filePath)
   return true;
 }
 
-void TargetWordInsertionFeature::Evaluate(
-                      const PhraseBasedFeatureContext& context,
-                      ScoreComponentCollection* accumulator) const
-{
-}
-
-void TargetWordInsertionFeature::EvaluateChart(
-            const ChartBasedFeatureContext& context,
-						ScoreComponentCollection* accumulator) const
-{
-}
-
 void TargetWordInsertionFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const

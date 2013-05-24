@@ -14,12 +14,6 @@ PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
 
 }
 
-void PhraseLengthFeature::Evaluate(
-              const PhraseBasedFeatureContext& context,
-              ScoreComponentCollection* accumulator) const
-{
-}
-
 void PhraseLengthFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const

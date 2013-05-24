@@ -243,11 +243,4 @@ void PhrasePairFeature::Evaluate(
   }
 }
 
-void PhrasePairFeature::Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
-{
-
-}
-
 }

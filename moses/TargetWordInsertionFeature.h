@@ -23,11 +23,6 @@ public:
   TargetWordInsertionFeature(const std::string &line);
       
   bool Load(const std::string &filePath);
-  void Evaluate(  const PhraseBasedFeatureContext& context,
-  								ScoreComponentCollection* accumulator) const;
-
-  void EvaluateChart( const ChartBasedFeatureContext& context, 
-                      ScoreComponentCollection* accumulator) const;
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown

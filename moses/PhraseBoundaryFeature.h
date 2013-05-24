@@ -1,6 +1,7 @@
 #ifndef moses_PhraseBoundaryFeature_h
 #define moses_PhraseBoundaryFeature_h
 
+#include <stdexcept>
 #include <sstream>
 #include <string>
 
@@ -42,14 +43,10 @@ public:
 
   virtual FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */,
                                   int /* featureID */,
-                                  ScoreComponentCollection* ) const
-                                  {
-                                    abort();
-                                  }
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
-  
+                                  ScoreComponentCollection* ) const {
+    throw std::logic_error("PhraseBoundaryState not supported in chart decoder, yet");
+  }
+
 private:
   void AddFeatures(
     const Word* leftWord, const Word* rightWord, const FactorList& factors, 
