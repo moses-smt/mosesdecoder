@@ -46,6 +46,9 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 
     bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
 
+    virtual StatelessFeatureType GetStatelessFeatureType() const
+    { return RequiresSource; }
+
 };
 
 }

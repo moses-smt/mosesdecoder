@@ -247,7 +247,7 @@ void PhrasePairFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {
-  CHECK(false);
+
 }
 
 }

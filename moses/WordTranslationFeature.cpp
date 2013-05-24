@@ -211,19 +211,19 @@ void WordTranslationFeature::Evaluate
       featureName << targetWord;
       accumulator->SparsePlusEquals(featureName.str(), 1);
     }
-    if (m_domainTrigger && !m_sourceContext) {  
+    if (m_domainTrigger && !m_sourceContext) {
       const bool use_topicid = input.GetUseTopicId();
-      const bool use_topicid_prob = input.GetUseTopicIdAndProb();        
+      const bool use_topicid_prob = input.GetUseTopicIdAndProb();
       if (use_topicid || use_topicid_prob) {
 	if(use_topicid) {
 	  // use topicid as trigger
 	  const long topicid = input.GetTopicId();
 	  stringstream feature;
 	  feature << m_description << "_";
-	  if (topicid == -1) 
+	  if (topicid == -1)
 	    feature << "unk";
-	  else 
-	    feature << topicid;	  
+	  else
+	    feature << topicid;
 
 	  feature << "_";
 	  feature << sourceWord;
@@ -268,7 +268,7 @@ void WordTranslationFeature::Evaluate
 	  feature << sourceWord;
 	  feature << "~";
 	  feature << targetWord;
-	  accumulator->SparsePlusEquals(feature.str(), 1);    
+	  accumulator->SparsePlusEquals(feature.str(), 1);
 	}
       }
     }
@@ -284,7 +284,7 @@ void WordTranslationFeature::Evaluate
 	feature << targetWord;
 	accumulator->SparsePlusEquals(feature.str(), 1);
       }
-      
+
       // range over source words to get context
       for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
 	if (contextIndex == globalSourceIndex) continue;
@@ -296,14 +296,14 @@ void WordTranslationFeature::Evaluate
 	  if(charIterator != m_punctuationHash.end())
 	    continue;
 	}
-	
+
 	const long docid = input.GetDocumentId();
 	bool sourceTriggerExists = false;
 	if (m_domainTrigger)
 	  sourceTriggerExists = FindStringPiece(m_vocabDomain[docid], sourceTrigger ) != m_vocabDomain[docid].end();
 	else if (!m_unrestricted)
 	  sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger ) != m_vocabSource.end();
-	
+
 	if (m_domainTrigger) {
 	  if (sourceTriggerExists) {
 	    stringstream feature;
