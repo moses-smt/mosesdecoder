@@ -9,6 +9,7 @@
 #define SPARSEVEC_H_
 
 #include<vector>
+#include<valarray>
 #include "../Util.h"
 namespace Moses {
 
@@ -16,6 +17,7 @@ class SparseVec {
 
 private:
 	std::vector<float> m_SparseVector;
+	std::vector<float> m_coreVector;
 
 public:
 	const std::vector<float> GetSparseVector() const;
@@ -35,6 +37,7 @@ public:
 	void MinusEquals(std::vector<int>& IdxVec, std::vector<float>& Val);
 	const size_t GetSize() const;
 	const float getElement(const int idx) const;
+	void coreAssign(std::valarray<float>& x);
 	float GetL1Norm();
 	SparseVec& operator*= (const float& rhs);
 

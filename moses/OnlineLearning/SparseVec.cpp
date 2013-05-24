@@ -6,8 +6,7 @@
  */
 
 #include "SparseVec.h"
-#include <functional>
-#include <numeric>
+
 
 namespace Moses {
 
@@ -23,10 +22,21 @@ SparseVec::SparseVec(int size)
 {
 	m_SparseVector.resize(size);
 }
+void SparseVec::coreAssign(std::valarray<float>& x)
+{
+	m_coreVector.resize(x.size());
+	for(int i=0;i<x.size();i++)
+	{
+		m_coreVector[i]=x[i];
+	}
+	return;
+}
 
 float SparseVec::GetL1Norm()
 {
 	float sum=0;
+//	for (size_t i=0;i<m_coreVector.size(); i++)
+//		sum+=m_coreVector[i];
 	for (size_t i=0;i<m_SparseVector.size(); i++)
 		sum+=m_SparseVector[i];
 	return sum;
@@ -38,7 +48,9 @@ const std::vector<float> SparseVec::GetSparseVector() const
 }
 void SparseVec::Assign(int idx, float val)
 {
+	CHECK(idx<=m_SparseVector.size());
 	m_SparseVector[idx]=val;
+	return;
 }
 const size_t SparseVec::GetSize() const
 {
@@ -46,6 +58,7 @@ const size_t SparseVec::GetSize() const
 }
 const float SparseVec::getElement(const int idx) const
 {
+	if(idx>=m_SparseVector.size()) return 0.0;
 	return m_SparseVector[idx];
 }
 void SparseVec::MultiplyEquals(std::vector<int>& IdxVec, std::vector<float>& Val)
@@ -86,22 +99,26 @@ void SparseVec::MinusEquals(std::vector<int>& IdxVec, std::vector<float>& Val)
 }
 void SparseVec::PlusEqualsFeat(int idx, float val)
 {
+	CHECK(idx<m_SparseVector.size());
 	m_SparseVector[idx] += val;
 	return;
 }
 void SparseVec::MinusEqualsFeat(int idx, float val)
 {
+	CHECK(idx<m_SparseVector.size());
 	m_SparseVector[idx] -= val;
 	return;
 }
 void SparseVec::MultiplyEqualsFeat(int idx, float scale)
 {
+	CHECK(idx<m_SparseVector.size());
 	m_SparseVector[idx] *= scale;
 	return;
 }
 
 void SparseVec::AddFeat(int idx, float val)
 {
+	CHECK(idx<=m_SparseVector.size());
 	m_SparseVector[idx]=val;
 	return;
 }
@@ -113,6 +130,7 @@ int SparseVec::AddFeat(float val)
 }
 SparseVec& SparseVec::operator*= (const float& rhs) {
 	//NB Could do this with boost::bind ?
+	if(rhs==0) return *this;
 	for(size_t i=0;i<m_SparseVector.size();i++)
 	{
 		m_SparseVector[i] *= rhs;

@@ -1448,7 +1448,7 @@ bool StaticData::LoadOnlineLearningModel()
 {
 	const std::string w_algorithm = (m_parameter->GetParam("w_algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("w_algorithm")[0]) : "NULL";
 	bool sparse_feature = (m_parameter->isParamSpecified("use_sparse_features")) ? true : false;
-
+	bool normaliseScore = (m_parameter->isParamSpecified("normaliseScore")) ? true : false;
 	const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
 	const float f_learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ?
 			Scan<float>(m_parameter->GetParam("f_learningrate")[0]) : 0.8;
@@ -1463,7 +1463,7 @@ bool StaticData::LoadOnlineLearningModel()
 	}
 	else if(weights.size()==1 && w_algorithm.compare("NULL")==0)
 	{
-		m_onlinelearner = new OnlineLearner(FOnlyPerceptron, w_learningrate, f_learningrate);
+		m_onlinelearner = new OnlineLearner(FOnlyPerceptron, w_learningrate, f_learningrate, normaliseScore);
 		SetWeight(m_onlinelearner, weights[0]);
 		IFVERBOSE(1)
 		PrintUserTime("Online Learning : Perceptron");
@@ -1481,7 +1481,7 @@ bool StaticData::LoadOnlineLearningModel()
 		const bool normaliseMargin = (m_parameter->isParamSpecified("normaliseMargin")) ? true : false;
 		const int sigmoidparam = (m_parameter->GetParam("sigmoidParam").size() > 0) ? Scan<int>(m_parameter->GetParam("sigmoidParam")[0]) : 1;
 		m_onlinelearner = new OnlineLearner(setAlgo,w_learningrate, f_learningrate, slack, scale_margin,
-				scale_margin_precision, scale_update, scale_update_precision, boost, normaliseMargin, sigmoidparam);
+				scale_margin_precision, scale_update, scale_update_precision, boost, normaliseMargin, normaliseScore, sigmoidparam);
 		SetWeight(m_onlinelearner, weights[0]);
 		IFVERBOSE(1)
 		PrintUserTime("Online Learning : Perceptron\tWeights : MIRA");

@@ -51,7 +51,7 @@ private:
 	float m_weight;
 	int m_PPindex;
 	std::string m_postedited;
-	bool m_learn;
+	bool m_learn, m_normaliseScore;
 	MiraOptimiser* optimiser;
 	std::vector<std::string> function_words_english;
 	std::vector<std::string> function_words_italian;
@@ -71,9 +71,9 @@ private:
 	void Insert(std::string sp, std::string tp);
 public:
 	SparseVec sparsefeaturevector, sparseweightvector;
-	OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate);
+	OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, bool normaliseScore);
 	OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
-			float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam);
+			float scale_update_precision, bool boost, bool normaliseMargin, bool normaliseScore, int sigmoidParam);
 	bool SetPostEditedSentence(std::string s);
 	void RunOnlineLearning(Manager& manager);
 	void RemoveJunk();

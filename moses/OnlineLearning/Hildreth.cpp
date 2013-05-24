@@ -213,12 +213,11 @@ vector<float> Hildreth::optimise (const vector<Moses::SparseVec>& a, const vecto
 	vector<float> kkt ( b.size() );
 
 	float max_kkt = -1e100;
-
 	size_t K = b.size();
 
 	float A[K][K];
 	bool is_computed[K];
-	for ( i = 0; i < K; i++ )
+	for ( i = 0; i < a.size(); i++ )
 	{
 		A[i][i] = inner_product(a[i], a[i]);
 		is_computed[i] = false;

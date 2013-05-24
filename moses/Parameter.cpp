@@ -199,6 +199,7 @@ Parameter::Parameter()
   AddParam("w_algorithm","algorithm to be used for online learning of weights : mira");
   AddParam("w_learningrate", "online learning rate for weights");
   AddParam("f_learningrate", "online learning rate for features");
+  AddParam("normaliseScore", "Normalise the online feature score: squash between 0 and 1");
   AddParam("weight-ol", "ol", "initial weight for online learning feature");
   AddParam("numIterations", "number of iterations for online learning feature");
   AddParam("scale-margin", "Scale the margin by the Bleu score of the oracle translation");

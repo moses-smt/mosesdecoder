@@ -133,22 +133,24 @@ bool OnlineLearner::SetPostEditedSentence(std::string s)
 	}
 }
 
-OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate):StatelessFeatureFunction("OnlineLearner",1){
+OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, bool normaliseScore):StatelessFeatureFunction("OnlineLearner",1){
 	flr = f_learningrate;
 	wlr = w_learningrate;
 	m_learn=false;
 	m_PPindex=0;
+	m_normaliseScore=normaliseScore;
 	implementation=algorithm;
 	ReadFunctionWords();
 	cerr<<"Initialization Online Learning Model\n";
 }
 
 OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
-		float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
+		float scale_update_precision, bool boost, bool normaliseMargin, bool normaliseScore,  int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
 	flr = f_learningrate;
 	wlr = w_learningrate;
 	m_PPindex=0;
 	m_learn=false;
+	m_normaliseScore=normaliseScore;
 	implementation=algorithm;
 	optimiser = new Optimizer::MiraOptimiser(slack, scale_margin, scale_margin_precision, scale_update,
 			scale_update_precision, boost, normaliseMargin, sigmoidParam);
@@ -226,16 +228,19 @@ void OnlineLearner::Insert(std::string sp, std::string tp)
 		if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
 		{
 			m_featureIdx[sp][tp]=sparseweightvector.GetSize();
-			sparseweightvector.AddFeat(m_weight);
+			sparseweightvector.AddFeat(0.001);
 			m_PPindex++;
 			return;
 		}
 	}
-	else if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
+	else if(m_featureIdx.find(sp)!=m_featureIdx.end())
 	{
-		m_featureIdx[sp][tp]=sparseweightvector.GetSize();
-		sparseweightvector.AddFeat(m_weight);
-		m_PPindex++;
+		if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
+		{
+			m_featureIdx[sp][tp]=sparseweightvector.GetSize();
+			sparseweightvector.AddFeat(0.001);
+			m_PPindex++;
+		}
 		return;
 	}
 	return;
@@ -301,8 +306,15 @@ void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* o
 //				score/=m_weight;
 				score=sparseweightvector.getElement(it2->second);
 			}
+			else
+			{
+				score = 0;
+			}
 		}
+		else{ score = 0; }
 	}
+	if(m_normaliseScore)
+		score = (2/(1+exp(-score))) - 1;	// normalising score!
 	//cerr<<"Source : "<<s<<"\tTarget : "<<t<<"\tScore : "<<score<<endl;
 	out->PlusEquals(this, score);
 }
@@ -412,9 +424,9 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			std::string targetP = edge.GetTargetPhraseStringRep();  // Target Phrase
 			if(!has_only_spaces(sourceP) && !has_only_spaces(targetP) )
 			{
-				PP_ORACLE[sourceP][targetP]=1;
-				OracleList[whichoracle][sourceP][targetP]=1;
-				Insert(sourceP, targetP);
+				PP_ORACLE[sourceP][targetP]=1;	// phrase pairs in the current nbest_i
+				OracleList[whichoracle][sourceP][targetP]=1;	// list of all phrase pairs given the nbest_i
+				Insert(sourceP, targetP);	// I insert all the phrase pairs that I see in NBEST list
 			}
 		}
 		oracleScore=path.GetTotalScore();
@@ -425,8 +437,6 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			featureValue.push_back(path.GetScoreBreakdown());
 			modelScore.push_back(oracleScore);
 		}
-
-
 		if(oraclebleu > maxBleu)
 		{
 			cerr<<"NBEST : "<<oracle.str()<<"\t|||\tBLEU : "<<oraclebleu<<endl;
@@ -464,7 +474,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			oraclefeatureScore.push_back(path.GetScoreBreakdown());
 		}
 // ------------------------trial--------------------------------//
-		if(implementation==FSparsePercepWSparseMira)
+		if(implementation==FSparsePercepWSparseMira || implementation==FPercepWMira)
 		{
 			if(oraclebleu > bestbleu)
 			{
@@ -566,8 +576,8 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 		cerr<<"Updating the Weights\n";
 		size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
 				BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,wlr);
-		cerr<<"\nWeight : "<<weightUpdate.GetScoreForProducer(sp)<<"\n";
 		StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
+		cerr<<"\nWeight : "<<weightUpdate.GetScoreForProducer(sp)<<"\n";
 	}
 	if(implementation == FSparsePercepWSparseMira)
 	{
@@ -579,7 +589,8 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 		}
 		vector<vector<int> > WeightIdxVec, oracleWeightIdxVec;
 		pp_list::iterator it, it1;
-		for(int i=0;i<OracleList.size();i++){
+		for(int i=0;i<OracleList.size();i++)
+		{
 			vector<int> WeightVec;
 			for(it=OracleList[i].begin();it!=OracleList[i].end(); it++)
 			{
@@ -591,7 +602,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 						if(!(itr->first.empty()))
 						{
 							int idx=RetrieveIdx(it->first, itr->first);
-							if(idx!=m_featureIdx.size()){
+							if(idx!=m_PPindex){
 								WeightVec.push_back(idx);
 							}
 						}
@@ -607,12 +618,16 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
 			{
 				int idx=RetrieveIdx(it1->first, itr1->first);
-				if(idx!=m_featureIdx.size()){
+				if(idx!=m_PPindex){
 					oracleWeightVec.push_back(idx);
 				}
 			}
 		}
 		oracleWeightIdxVec.push_back(oracleWeightVec);
+//		std::valarray<float> coreFeatures = weightUpdate.getCoreFeatures();
+//		sparseweightvector.coreAssign(coreFeatures);
+//		std::cerr<<"Everything is alright till here\n";
+
 		size_t update_status=optimiser->updateSparseWeights(sparseweightvector, WeightIdxVec, loss, BleuScore,
 				modelScore, oracleWeightIdxVec, oracleBleuScores[0], maxScore, wlr);
 	}
