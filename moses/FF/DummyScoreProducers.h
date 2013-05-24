@@ -4,8 +4,6 @@
 #define moses_DummyScoreProducers_h
 
 #include "StatelessFeatureFunction.h"
-#include "StatefulFeatureFunction.h"
-#include "util/check.hh"
 
 namespace Moses
 {
