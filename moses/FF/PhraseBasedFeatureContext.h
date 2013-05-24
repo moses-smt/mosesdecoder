@@ -28,8 +28,10 @@ public:
   PhraseBasedFeatureContext(const TranslationOption& translationOption,
                             const InputType& source);
 
-  const TranslationOption& GetTranslationOption() const;
-  const InputType& GetSource() const;
+  const TranslationOption& GetTranslationOption() const
+  { return m_translationOption; }
+  const InputType& GetSource() const
+  { return m_source; }
   const TargetPhrase& GetTargetPhrase() const; //convenience method
   const WordsBitmap& GetWordsBitmap() const;
 

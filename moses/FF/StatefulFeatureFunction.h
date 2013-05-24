@@ -39,7 +39,9 @@ public:
   //! return the state associated with the empty hypothesis for a given sentence
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
-  bool IsStateless() const;
+  bool IsStateless() const
+  { return false; }
+
 };
 
 

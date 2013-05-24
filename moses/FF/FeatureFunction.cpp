@@ -3,8 +3,6 @@
 #include "util/check.hh"
 
 #include "FeatureFunction.h"
-#include "moses/ChartHypothesis.h"
-#include "moses/ChartManager.h"
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
@@ -13,64 +11,6 @@ using namespace std;
 
 namespace Moses
 {
-
-PhraseBasedFeatureContext::PhraseBasedFeatureContext(const Hypothesis* hypothesis) :
-  m_hypothesis(hypothesis),
-  m_translationOption(m_hypothesis->GetTranslationOption()),
-  m_source(m_hypothesis->GetManager().GetSource()) {}
-
-PhraseBasedFeatureContext::PhraseBasedFeatureContext
-      (const TranslationOption& translationOption, const InputType& source) :
-  m_hypothesis(NULL),
-  m_translationOption(translationOption),
-  m_source(source) {}
-
-const TranslationOption& PhraseBasedFeatureContext::GetTranslationOption() const
-{
-  return m_translationOption;
-}
-
-const InputType& PhraseBasedFeatureContext::GetSource() const
-{
-  return m_source;
-}
-
-const TargetPhrase& PhraseBasedFeatureContext::GetTargetPhrase() const
-{
-  return m_translationOption.GetTargetPhrase();
-}
-
-const WordsBitmap& PhraseBasedFeatureContext::GetWordsBitmap() const
-{
-  if (!m_hypothesis) {
-    throw std::logic_error("Coverage vector not available during pre-calculation");
-  }
-  return m_hypothesis->GetWordsBitmap();
-}
-
-
-ChartBasedFeatureContext::ChartBasedFeatureContext
-                        (const ChartHypothesis* hypothesis):
-  m_hypothesis(hypothesis),
-  m_targetPhrase(hypothesis->GetCurrTargetPhrase()),
-  m_source(hypothesis->GetManager().GetSource()) {}
-
-ChartBasedFeatureContext::ChartBasedFeatureContext(
-                         const TargetPhrase& targetPhrase,
-                         const InputType& source):
-  m_hypothesis(NULL),
-  m_targetPhrase(targetPhrase),
-  m_source(source) {}
-
-const InputType& ChartBasedFeatureContext::GetSource() const
-{
-  return m_source;
-}
-
-const TargetPhrase& ChartBasedFeatureContext::GetTargetPhrase() const
-{
-  return m_targetPhrase;
-}
 
 multiset<string> FeatureFunction::description_counts;
 
@@ -120,7 +60,6 @@ FeatureFunction::FeatureFunction(const std::string& description, size_t numScore
   m_producers.push_back(this);
 }
 
-
 FeatureFunction::~FeatureFunction() {}
 
 void FeatureFunction::ParseLine(const std::string& description, const std::string &line)
@@ -147,41 +86,6 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
       m_args.push_back(args);
     }
   }
-}
-
-void FeatureFunction::Evaluate(const InputType &source
-                    , ScoreComponentCollection &scoreBreakdown) const
-{
-
-}
-
-StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, const std::string &line)
-:FeatureFunction(description, line)
-{
-  m_statelessFFs.push_back(this);
-}
-
-StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
-:FeatureFunction(description, numScoreComponents, line)
-{
-  m_statelessFFs.push_back(this);
-}
-
-StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, const std::string &line)
-: FeatureFunction(description, line)
-{
-  m_statefulFFs.push_back(this);
-}
-
-StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
-: FeatureFunction(description,numScoreComponents, line)
-{
-  m_statefulFFs.push_back(this);
-}
-
-bool StatefulFeatureFunction::IsStateless() const
-{
-  return false;
 }
 
 }

@@ -24,8 +24,11 @@ public:
   ChartBasedFeatureContext(const TargetPhrase& targetPhrase,
                            const InputType& source);
 
-  const InputType& GetSource() const;
-  const TargetPhrase& GetTargetPhrase() const;
+  const InputType& GetSource() const
+  { return m_source; }
+
+  const TargetPhrase& GetTargetPhrase() const
+  { return m_targetPhrase; }
 
 };
 

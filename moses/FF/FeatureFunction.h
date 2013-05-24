@@ -24,7 +24,6 @@ class WordsRange;
 
 
 /** base class for all feature functions.
- * @todo is this for pb & hiero too?
  */
 class FeatureFunction
 {
@@ -80,7 +79,8 @@ public:
   {}
 
   virtual void Evaluate(const InputType &source
-                      , ScoreComponentCollection &scoreBreakdown) const;
+                      , ScoreComponentCollection &scoreBreakdown) const
+  {}
 };
 
 }
