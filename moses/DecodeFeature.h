@@ -59,11 +59,6 @@ class DecodeFeature : public StatelessFeatureFunction {
     const std::vector<FactorType>& GetInput() const;
     const std::vector<FactorType>& GetOutput() const;
 
-    virtual void Evaluate(const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-    {}
-    
     bool IsDecodeFeature() const
     { return true; }
 

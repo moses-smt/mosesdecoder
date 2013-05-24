@@ -36,9 +36,6 @@ public:
   void ComputeFeatures(const TargetPhrase& targetPhrase, 
 		  	           ScoreComponentCollection* accumulator, 
 		  	           const AlignmentInfo &alignmentInfo) const;
-
-  virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return RequiresTargetPhrase; }
 };
 
 }

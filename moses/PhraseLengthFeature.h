@@ -19,9 +19,6 @@ class PhraseLengthFeature : public StatelessFeatureFunction {
 public:
   PhraseLengthFeature(const std::string &line);
 
-  virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return RequiresTargetPhrase; }
-
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection*) const {
     throw std::logic_error("PhraseLengthFeature not valid in chart decoder");

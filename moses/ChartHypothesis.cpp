@@ -166,9 +166,9 @@ void ChartHypothesis::CalcScore()
   // cached in the translation option-- there is no principled distinction
   const std::vector<const StatelessFeatureFunction*>& sfs =
       StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  for (unsigned i = 0; i < sfs.size(); ++i)
-  	if (sfs[i]->GetStatelessFeatureType() == RequiresSegmentation)
-  		sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
+  for (unsigned i = 0; i < sfs.size(); ++i) {
+    sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
+  }
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
       StatefulFeatureFunction::GetStatefulFeatureFunctions();

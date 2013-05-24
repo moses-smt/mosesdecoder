@@ -111,21 +111,7 @@ void TargetPhrase::Evaluate()
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    bool evaluate = false;
-
-    if (!ff.IsStateless()) {
-      evaluate = true;
-    }
-    else {
-      const StatelessFeatureFunction &sff = static_cast<const StatelessFeatureFunction&>(ff);
-      if (sff.GetStatelessFeatureType() != SetByOriginator) {
-        evaluate = true;
-      }
-    }
-
-    if (evaluate) {
-      ff.Evaluate(*this, m_scoreBreakdown, futureScoreBreakdown);
-    }
+    ff.Evaluate(*this, m_scoreBreakdown, futureScoreBreakdown);
   }
 
   float weightedScore = m_scoreBreakdown.GetWeightedScore();

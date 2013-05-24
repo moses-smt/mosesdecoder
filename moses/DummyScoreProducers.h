@@ -37,11 +37,6 @@ public:
 		CHECK(0); // feature function not valid in chart decoder
 		return NULL;
 	}
-
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
-
 };
 
 /** Doesn't do anything but provide a key into the global
@@ -80,25 +75,6 @@ public:
 	  m_tuneable = false;
   }
 
-  void Evaluate(  const PhraseBasedFeatureContext& context,
-  								ScoreComponentCollection* accumulator) const 
-  {
-    //do nothing - not a real feature
-  }
-
-  void EvaluateChart(
-    const ChartBasedFeatureContext& context,
-    ScoreComponentCollection* accumulator) const
-  {
-    //do nothing - not a real feature
-  }
-
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
-
-  StatelessFeatureType GetStatelessFeatureType() const
-  { return SetByOriginator; }
 };
 
 }

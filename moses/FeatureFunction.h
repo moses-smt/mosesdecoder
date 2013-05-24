@@ -158,9 +158,6 @@ public:
                              ScoreComponentCollection* accumulator) const
   {}
 
-  virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return RequiresTargetPhrase; }
-
   virtual bool IsStateless() const
   { return true; }
 

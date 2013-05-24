@@ -48,9 +48,6 @@ public:
 
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection* accumulator) const;
-  
-  StatelessFeatureType GetStatelessFeatureType() const
-  { return RequiresSegmentation; }
 };
 
 }
