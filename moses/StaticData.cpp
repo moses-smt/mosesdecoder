@@ -715,7 +715,7 @@ bool StaticData::LoadData(Parameter *parameter)
       m_phraseDictionary.push_back(model);
     }
     else if (feature == "PhraseDictionaryMemory") {
-      PhraseDictionarySCFG* model = new PhraseDictionarySCFG(line);
+      PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);

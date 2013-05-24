@@ -41,7 +41,7 @@ ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence
   size_t sourceSize = src.GetSize();
   m_dottedRuleColls.resize(sourceSize);
 
-  const PhraseDictionaryNodeSCFG &rootNode = m_ruleTable.GetRootNode(src);
+  const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode(src);
 
   for (size_t ind = 0; ind < m_dottedRuleColls.size(); ++ind) {
 #ifdef USE_BOOST_POOL
@@ -95,7 +95,7 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
       // with the source word in the last position
       const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
       const Word &sourceWord = sourceWordLabel.GetLabel();
-      const PhraseDictionaryNodeSCFG *node = prevDottedRule.GetLastNode().GetChild(sourceWord);
+      const PhraseDictionaryNodeMemory *node = prevDottedRule.GetLastNode().GetChild(sourceWord);
 
       // if we found a new rule -> create it and add it to the list
       if (node != NULL) {
@@ -152,7 +152,7 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
   DottedRuleList::const_iterator iterRule;
   for (iterRule = rules.begin(); iterRule != rules.end(); ++iterRule) {
     const DottedRuleInMemory &dottedRule = **iterRule;
-    const PhraseDictionaryNodeSCFG &node = dottedRule.GetLastNode();
+    const PhraseDictionaryNodeMemory &node = dottedRule.GetLastNode();
 
     // look up target sides
     const TargetPhraseCollection *tpc = node.GetTargetPhraseCollection();
@@ -185,9 +185,9 @@ void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
   const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
 
   // note where it was found in the prefix tree of the rule dictionary
-  const PhraseDictionaryNodeSCFG &node = prevDottedRule.GetLastNode();
+  const PhraseDictionaryNodeMemory &node = prevDottedRule.GetLastNode();
 
-  const PhraseDictionaryNodeSCFG::NonTerminalMap & nonTermMap =
+  const PhraseDictionaryNodeMemory::NonTerminalMap & nonTermMap =
     node.GetNonTerminalMap();
 
   const size_t numChildren = nonTermMap.size();
@@ -220,7 +220,7 @@ void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
         const ChartCellLabel &cellLabel = q->second;
 
         // try to match both source and target non-terminal
-        const PhraseDictionaryNodeSCFG * child =
+        const PhraseDictionaryNodeMemory * child =
           node.GetChild(sourceNonTerm, cellLabel.GetLabel());
 
         // nothing found? then we are done
@@ -243,12 +243,12 @@ void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
   else 
   {
     // loop over possible expansions of the rule
-    PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator p;
-    PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator end =
+    PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator p;
+    PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator end =
       nonTermMap.end();
     for (p = nonTermMap.begin(); p != end; ++p) {
       // does it match possible source and target non-terminals?
-      const PhraseDictionaryNodeSCFG::NonTerminalMapKey &key = p->first;
+      const PhraseDictionaryNodeMemory::NonTerminalMapKey &key = p->first;
       const Word &sourceNonTerm = key.first;
       if (sourceNonTerms.find(sourceNonTerm) == sourceNonTerms.end()) {
         continue;
@@ -260,7 +260,7 @@ void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
       }
 
       // create new rule
-      const PhraseDictionaryNodeSCFG &child = *p->second;
+      const PhraseDictionaryNodeMemory &child = *p->second;
 #ifdef USE_BOOST_POOL
       DottedRuleInMemory *rule = m_dottedRulePool.malloc();
       new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);

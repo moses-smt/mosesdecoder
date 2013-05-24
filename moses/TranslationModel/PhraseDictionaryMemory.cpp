@@ -40,21 +40,21 @@ using namespace std;
 namespace Moses
 {
 
-TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(
+TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollection(
                                                                                 const Phrase &source
                                                                                 , const TargetPhrase &target
                                                                                 , const Word *sourceLHS)
 {
-  PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target, sourceLHS);
+  PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection();
 }
 
-const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(const Phrase& source) const
+const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& source) const
 {
   // exactly like CreateTargetPhraseCollection, but don't create
   const size_t size = source.GetSize();
 
-  const PhraseDictionaryNodeSCFG *currNode = &m_collection;
+  const PhraseDictionaryNodeMemory *currNode = &m_collection;
   for (size_t pos = 0 ; pos < size ; ++pos) {
     const Word& word = source.GetWord(pos);
     currNode = currNode->GetChild(word);
@@ -72,7 +72,7 @@ const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(co
   return coll;
 }
 
-PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source
+PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase &source
                                                                 , const TargetPhrase &target
                                                                 , const Word *sourceLHS)
 {
@@ -81,7 +81,7 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
   const AlignmentInfo &alignmentInfo = target.GetAlignNonTerm();
   AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
 
-  PhraseDictionaryNodeSCFG *currNode = &m_collection;
+  PhraseDictionaryNodeMemory *currNode = &m_collection;
   for (size_t pos = 0 ; pos < size ; ++pos) {
     const Word& word = source.GetWord(pos);
 
@@ -111,14 +111,14 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
   return *currNode;
 }
 
-ChartRuleLookupManager *PhraseDictionarySCFG::CreateRuleLookupManager(
+ChartRuleLookupManager *PhraseDictionaryMemory::CreateRuleLookupManager(
   const InputType &sentence,
   const ChartCellCollectionBase &cellCollection)
 {
   return new ChartRuleLookupManagerMemory(sentence, cellCollection, *this);
 }
 
-void PhraseDictionarySCFG::SortAndPrune()
+void PhraseDictionaryMemory::SortAndPrune()
 {
   if (GetTableLimit())
   {
@@ -126,15 +126,15 @@ void PhraseDictionarySCFG::SortAndPrune()
   }
 }
 
-TO_STRING_BODY(PhraseDictionarySCFG);
+TO_STRING_BODY(PhraseDictionaryMemory);
 
 // friend
-ostream& operator<<(ostream& out, const PhraseDictionarySCFG& phraseDict)
+ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 {
-  typedef PhraseDictionaryNodeSCFG::TerminalMap TermMap;
-  typedef PhraseDictionaryNodeSCFG::NonTerminalMap NonTermMap;
+  typedef PhraseDictionaryNodeMemory::TerminalMap TermMap;
+  typedef PhraseDictionaryNodeMemory::NonTerminalMap NonTermMap;
 
-  const PhraseDictionaryNodeSCFG &coll = phraseDict.m_collection;
+  const PhraseDictionaryNodeMemory &coll = phraseDict.m_collection;
   for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p) {
     const Word &sourceNonTerm = p->first.first;
     out << sourceNonTerm;

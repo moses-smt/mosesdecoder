@@ -3147,9 +3147,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.o</locationURI>
 		</link>
 		<link>
-			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.o</name>
+			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryNodeMemory.o</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryNodeMemory.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryOnDisk.o</name>
@@ -3157,9 +3157,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryOnDisk.o</locationURI>
 		</link>
 		<link>
-			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionarySCFG.o</name>
+			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryMemory.o</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionarySCFG.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryMemory.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/Trie.o</name>

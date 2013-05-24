@@ -18,11 +18,11 @@ namespace Moses {
  *  1. Loads grammar for a sentence to be decoded only when the sentence is being decoded. Unload afterwards
     2. Format of the pt file follows Hiero, rather than Moses
  */   
-class PhraseDictionaryALSuffixArray : public PhraseDictionarySCFG
+class PhraseDictionaryALSuffixArray : public PhraseDictionaryMemory
 {
 public:
   PhraseDictionaryALSuffixArray(const std::string &line)
-  : PhraseDictionarySCFG("PhraseDictionaryALSuffixArray", line)
+  : PhraseDictionaryMemory("PhraseDictionaryALSuffixArray", line)
   {}
 
   bool Load(const std::vector<FactorType> &input

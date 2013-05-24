@@ -31,22 +31,22 @@ namespace Moses
 /** Implementation of a SCFG rule table in a trie.  Looking up a rule of
  * length n symbols requires n look-ups to find the TargetPhraseCollection.
  */
-class PhraseDictionarySCFG : public RuleTableTrie
+class PhraseDictionaryMemory : public RuleTableTrie
 {
-  friend std::ostream& operator<<(std::ostream&, const PhraseDictionarySCFG&);
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
   friend class RuleTableLoader;
 
 protected:
-  PhraseDictionarySCFG(const std::string &description, const std::string &line)
+  PhraseDictionaryMemory(const std::string &description, const std::string &line)
       : RuleTableTrie(description, line)
   {}
 
 public:
-  PhraseDictionarySCFG(const std::string &line)
+  PhraseDictionaryMemory(const std::string &line)
       : RuleTableTrie("PhraseDictionaryMemory", line)
   {}
 
-  const PhraseDictionaryNodeSCFG &GetRootNode() const { return m_collection; }
+  const PhraseDictionaryNodeMemory &GetRootNode() const { return m_collection; }
 
   ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
@@ -59,13 +59,13 @@ public:
       const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
   const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& source) const;
 
-  PhraseDictionaryNodeSCFG &GetOrCreateNode(const Phrase &source
+  PhraseDictionaryNodeMemory &GetOrCreateNode(const Phrase &source
                                             , const TargetPhrase &target
                                             , const Word *sourceLHS);
 
   void SortAndPrune();
 
-  PhraseDictionaryNodeSCFG m_collection;
+  PhraseDictionaryNodeMemory m_collection;
 };
 
 }  // namespace Moses

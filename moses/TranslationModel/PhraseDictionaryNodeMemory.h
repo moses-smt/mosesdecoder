@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class PhraseDictionarySCFG;
+class PhraseDictionaryMemory;
 class PhraseDictionaryFuzzyMatch;
   
   //! @todo why?
@@ -88,48 +88,48 @@ public:
   }
 };
 
-/** One node of the PhraseDictionarySCFG structure
+/** One node of the PhraseDictionaryMemory structure
 */
-class PhraseDictionaryNodeSCFG
+class PhraseDictionaryNodeMemory
 {
 public:
   typedef std::pair<Word, Word> NonTerminalMapKey;
 
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_map<Word,
-          PhraseDictionaryNodeSCFG*,
+          PhraseDictionaryNodeMemory*,
           TerminalHasher,
           TerminalEqualityPred> TerminalMap;
 
   typedef boost::unordered_map<NonTerminalMapKey,
-          PhraseDictionaryNodeSCFG*,
+          PhraseDictionaryNodeMemory*,
           NonTerminalMapKeyHasher,
           NonTerminalMapKeyEqualityPred> NonTerminalMap;
 #else
-  typedef std::map<Word, PhraseDictionaryNodeSCFG*> TerminalMap;
-  typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeSCFG*> NonTerminalMap;
+  typedef std::map<Word, PhraseDictionaryNodeMemory*> TerminalMap;
+  typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeMemory*> NonTerminalMap;
 #endif
 
 private:
-  friend std::ostream& operator<<(std::ostream&, const PhraseDictionarySCFG&);
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryFuzzyMatch&);
 
   // only these classes are allowed to instantiate this class
-  friend class PhraseDictionarySCFG;
+  friend class PhraseDictionaryMemory;
   friend class PhraseDictionaryFuzzyMatch;
-  friend class std::map<Word, PhraseDictionaryNodeSCFG>;
-  friend class std::map<long, PhraseDictionaryNodeSCFG>;
+  friend class std::map<Word, PhraseDictionaryNodeMemory>;
+  friend class std::map<long, PhraseDictionaryNodeMemory>;
 
 protected:
   TerminalMap m_sourceTermMap;
   NonTerminalMap m_nonTermMap;
   TargetPhraseCollection *m_targetPhraseCollection;
 
-  PhraseDictionaryNodeSCFG()
+  PhraseDictionaryNodeMemory()
     :m_targetPhraseCollection(NULL)
   {}
 public:
-  virtual ~PhraseDictionaryNodeSCFG();
+  virtual ~PhraseDictionaryNodeMemory();
 
   bool IsLeaf() const {
     return m_sourceTermMap.empty() && m_nonTermMap.empty();
@@ -137,10 +137,10 @@ public:
 
   void Prune(size_t tableLimit);
   void Sort(size_t tableLimit);
-  PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &sourceTerm);
-  PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm);
-  const PhraseDictionaryNodeSCFG *GetChild(const Word &sourceTerm) const;
-  const PhraseDictionaryNodeSCFG *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
+  PhraseDictionaryNodeMemory *GetOrCreateChild(const Word &sourceTerm);
+  PhraseDictionaryNodeMemory *GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm);
+  const PhraseDictionaryNodeMemory *GetChild(const Word &sourceTerm) const;
+  const PhraseDictionaryNodeMemory *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
 
   const TargetPhraseCollection *GetTargetPhraseCollection() const {
     return m_targetPhraseCollection;
@@ -156,6 +156,6 @@ public:
   TO_STRING();
 };
 
-std::ostream& operator<<(std::ostream&, const PhraseDictionaryNodeSCFG&);
+std::ostream& operator<<(std::ostream&, const PhraseDictionaryNodeMemory&);
 
 }

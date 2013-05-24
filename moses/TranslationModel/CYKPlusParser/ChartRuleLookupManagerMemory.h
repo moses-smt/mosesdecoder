@@ -47,7 +47,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
  public:
   ChartRuleLookupManagerMemory(const InputType &sentence,
                                const ChartCellCollectionBase &cellColl,
-                               const PhraseDictionarySCFG &ruleTable);
+                               const PhraseDictionaryMemory &ruleTable);
 
   ~ChartRuleLookupManagerMemory();
 
@@ -64,7 +64,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
     DottedRuleColl &dottedRuleColl);
 
   std::vector<DottedRuleColl*> m_dottedRuleColls;
-  const PhraseDictionarySCFG &m_ruleTable;
+  const PhraseDictionaryMemory &m_ruleTable;
 #ifdef USE_BOOST_POOL
   // Use an object pool to allocate the dotted rules for this sentence.  We
   // allocate a lot of them and this has been seen to significantly improve
