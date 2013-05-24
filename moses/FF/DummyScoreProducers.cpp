@@ -1,11 +1,14 @@
 // $Id$
 
+#include "moses/TranslationOption.h"
 #include "util/check.hh"
 #include "moses/FF/FFState.h"
 #include "moses/FF/DummyScoreProducers.h"
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
 #include "moses/TranslationOption.h"
+#include "DistortionScoreProducer.h"
+#include "WordPenaltyProducer.h""
 
 namespace Moses
 {

@@ -48,6 +48,7 @@ namespace mpi = boost::mpi;
 #include "moses/FF/WordTranslationFeature.h"
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/DummyScoreProducers.h"
+#include "moses/FF/WordPenaltyProducer.h"
 
 using namespace Mira;
 using namespace std;

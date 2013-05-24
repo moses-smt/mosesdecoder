@@ -55,6 +55,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/PhraseBoundaryFeature.h"
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/PhraseLengthFeature.h"
+#include "moses/FF/DistortionScoreProducer.h""
+#include "moses/FF/WordPenaltyProducer.h""
 
 #include "LM/Ken.h"
 #ifdef LM_IRST
