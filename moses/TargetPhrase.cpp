@@ -132,6 +132,7 @@ void TargetPhrase::Evaluate()
   float futureScore = futureScoreBreakdown.GetWeightedScore();
 
   m_fullScore = weightedScore + futureScore;
+
 }
 
 void TargetPhrase::Evaluate(const InputType &source)

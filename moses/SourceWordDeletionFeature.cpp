@@ -69,24 +69,20 @@ void SourceWordDeletionFeature::Evaluate(
             const PhraseBasedFeatureContext& context,
             ScoreComponentCollection* accumulator) const
 {
-	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
-	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
-	ComputeFeatures(targetPhrase, accumulator, alignmentInfo);
 }
 
 void SourceWordDeletionFeature::EvaluateChart(
             const ChartBasedFeatureContext& context,
 		 	 	 	 	ScoreComponentCollection* accumulator) const
 {
-	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignTerm();
-	ComputeFeatures(context.GetTargetPhrase(), accumulator, alignmentInfo);
 }
 
 void SourceWordDeletionFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {
-
+  const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
+  ComputeFeatures(targetPhrase, &scoreBreakdown, alignmentInfo);
 }
 
 void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
@@ -117,7 +113,7 @@ void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase
     				accumulator->PlusEquals(this, StringPiece("OTHER"),1);
     			}
     			else {
-    				accumulator->PlusEquals(this,word,1);
+    			  accumulator->PlusEquals(this,word,1);
     			}
     		}
     	}

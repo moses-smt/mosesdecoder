@@ -38,7 +38,7 @@ public:
 		  	           const AlignmentInfo &alignmentInfo) const;
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
-  { return RequiresSegmentation; }
+  { return RequiresTargetPhrase; }
 };
 
 }
