@@ -47,7 +47,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
-#include "moses/FF/DummyScoreProducers.h"
 
 #include <boost/algorithm/string.hpp>
 

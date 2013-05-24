@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "Manager.h"
 #include "moses/FF/FFState.h"
-#include "moses/FF/DummyScoreProducers.h"
 
 using namespace std;
 

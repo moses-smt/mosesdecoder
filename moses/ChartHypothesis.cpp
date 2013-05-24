@@ -28,7 +28,6 @@
 #include "Phrase.h"
 #include "StaticData.h"
 #include "ChartTranslationOptions.h"
-#include "moses/FF/DummyScoreProducers.h"
 #include "moses/FF/FFState.h"
 
 using namespace std;

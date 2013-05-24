@@ -46,8 +46,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/InputFileStream.h"
 #include "IOWrapper.h"
 
-#include "moses/FF/DummyScoreProducers.h"
-
 using namespace std;
 using namespace Moses;
 

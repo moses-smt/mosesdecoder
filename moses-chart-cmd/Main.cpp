@@ -60,8 +60,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTrellisPathList.h"
 #include "moses/Incremental.h"
 
-#include "moses/FF/DummyScoreProducers.h"
-
 #include "util/usage.hh"
 
 using namespace std;
