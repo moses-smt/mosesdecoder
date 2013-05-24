@@ -4,6 +4,8 @@
 #include <vector>
 #include <set>
 #include <string>
+#include "PhraseBasedFeatureContext.h"
+#include "ChartBasedFeatureContext.h"
 #include "moses/TypeDef.h"
 
 namespace Moses
@@ -19,56 +21,6 @@ class ScoreComponentCollection;
 class WordsBitmap;
 class WordsRange;
 
-
-/**
-  * Contains all that a feature function can access without affecting recombination.
-  * For stateless features, this is all that it can access. Currently this is not
-  * used for stateful features, as it would need to be retro-fitted to the LM feature.
-  * TODO: Expose source segmentation,lattice path.
-  * XXX Don't add anything to the context that would break recombination XXX
- **/
-class PhraseBasedFeatureContext
-{
-  // The context either has a hypothesis (during search), or a TranslationOption and 
-  // source sentence (during pre-calculation).
-  const Hypothesis* m_hypothesis;
-  const TranslationOption& m_translationOption;
-  const InputType& m_source;
-
-public:
-  PhraseBasedFeatureContext(const Hypothesis* hypothesis);
-  PhraseBasedFeatureContext(const TranslationOption& translationOption,
-                            const InputType& source);
-
-  const TranslationOption& GetTranslationOption() const;
-  const InputType& GetSource() const;
-  const TargetPhrase& GetTargetPhrase() const; //convenience method
-  const WordsBitmap& GetWordsBitmap() const;
-
-};
-
-/**
- * Same as PhraseBasedFeatureContext, but for chart-based Moses.
- **/
-class ChartBasedFeatureContext
-{
-  //The context either has a hypothesis (during search) or a 
-  //TargetPhrase and source sentence (during pre-calculation)
-  //TODO: should the context also include some info on where the TargetPhrase
-  //is anchored (assuming it's lexicalised), which is available at pre-calc?
-  const ChartHypothesis* m_hypothesis;
-  const TargetPhrase& m_targetPhrase;
-  const InputType& m_source;
-
-public:
-  ChartBasedFeatureContext(const ChartHypothesis* hypothesis);
-  ChartBasedFeatureContext(const TargetPhrase& targetPhrase,
-                           const InputType& source);
-
-  const InputType& GetSource() const;
-  const TargetPhrase& GetTargetPhrase() const;
-
-};
 
 
 /** base class for all feature functions.

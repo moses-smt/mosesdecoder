@@ -30,7 +30,7 @@ const TranslationOption& PhraseBasedFeatureContext::GetTranslationOption() const
   return m_translationOption;
 }
 
-const InputType& PhraseBasedFeatureContext::GetSource() const 
+const InputType& PhraseBasedFeatureContext::GetSource() const
 {
   return m_source;
 }
@@ -44,7 +44,7 @@ const WordsBitmap& PhraseBasedFeatureContext::GetWordsBitmap() const
 {
   if (!m_hypothesis) {
     throw std::logic_error("Coverage vector not available during pre-calculation");
-  } 
+  }
   return m_hypothesis->GetWordsBitmap();
 }
 
