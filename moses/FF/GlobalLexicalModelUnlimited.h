@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
+
 #include "StatelessFeatureFunction.h"
 #include "moses/Factor.h"
 #include "moses/Phrase.h"
@@ -63,8 +66,8 @@ private:
   bool m_biasFeature;
   bool m_ignorePunctuation;
 
-  std::set<std::string> m_vocabSource;
-  std::set<std::string> m_vocabTarget;
+  boost::unordered_set<std::string> m_vocabSource;
+  boost::unordered_set<std::string> m_vocabTarget;
 
 public:
   GlobalLexicalModelUnlimited(const std::string &line);

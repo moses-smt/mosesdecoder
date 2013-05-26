@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <boost/unordered_set.hpp>
 
 #include "moses/FF/FFState.h"
 #include "StatefulFeatureFunction.h"
@@ -45,7 +46,7 @@ public:
 private:
   FactorType m_factorType;
   Word m_bos;
-	std::set<std::string> m_vocab;
+  boost::unordered_set<std::string> m_vocab;
 };
 
 }
