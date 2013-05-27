@@ -102,7 +102,7 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
-void TargetPhrase::Evaluate()
+void TargetPhrase::Evaluate(const Phrase &source)
 {
   ScoreComponentCollection futureScoreBreakdown;
 
@@ -120,7 +120,7 @@ void TargetPhrase::Evaluate()
 
 }
 
-void TargetPhrase::Evaluate(const InputType &source)
+void TargetPhrase::Evaluate(const InputType &input)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 

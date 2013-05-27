@@ -60,8 +60,8 @@ public:
   explicit TargetPhrase(const Phrase &targetPhrase);
   ~TargetPhrase();
 
-  void Evaluate();
-  void Evaluate(const InputType &source);
+  void Evaluate(const Phrase &source);
+  void Evaluate(const InputType &input);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 

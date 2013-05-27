@@ -228,7 +228,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     targetPhrase->SetTargetLHS(targetLhs);
     targetPhrase->SetSourcePhrase(sourcePhrase);
 
-    targetPhrase->Evaluate();
+    targetPhrase->Evaluate(sourcePhrase);
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
