@@ -38,7 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TrellisPathCollection.h"
 #include "TranslationOption.h"
 #include "LexicalReordering.h"
-#include "LMList.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
 #include "moses/FF/DistortionScoreProducer.h"

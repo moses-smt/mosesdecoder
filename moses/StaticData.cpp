@@ -1173,13 +1173,6 @@ void StaticData::CollectFeatureFunctions()
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     const FeatureFunction *ff = *iter;
 
-    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
-    if (lm) {
-      LanguageModel *lmNonConst = const_cast<LanguageModel*>(lm);
-      m_languageModel.Add(lmNonConst);
-      continue;
-    }
-
     const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
     if (generation) {
       m_generationDictionary.push_back(generation);
