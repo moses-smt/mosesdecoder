@@ -66,7 +66,6 @@ VWLibraryPredictConsumerFactory::~VWLibraryPredictConsumerFactory()
   }
   m_consumers.clear();
   VW::finish(*m_VWInstance);
-  delete m_VWInstance;
 }
 
 VWLibraryPredictConsumer * VWLibraryPredictConsumerFactory::Acquire()

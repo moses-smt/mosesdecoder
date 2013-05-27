@@ -30,14 +30,27 @@ my $TMPDIR="tmp.$$";
 mkdir $TMPDIR;
 
 my $fileCount = 0;
+
+# AMF changed this to run VW single-threaded without a span_server if cores=1 and then exit
 if ($numParallel <= 1)
-{ # don't do parallel. Just link the train file into place
-  my $cmd = "ln -s $trainFile $TMPDIR/train.0.gz";
-  print STDERR "$cmd \n";
+{ 
+		### AMF - outdated
+    ## don't do parallel. Just link the train file into place
+		#my $cmd = "ln -s $trainFile $TMPDIR/train.0.gz";
+		#$fileCount = 1;
+
+	my $cmd = "zcat $trainFile | $vwCmd --cache_file $TMPDIR/$cacheFile -f $modelFile --save_per_pass";
+  print STDERR "$cmd\n";
   systemCheck($cmd);
   
-  $fileCount = 1;
+  $cmd = "rm -rf $TMPDIR";
+	print STDERR "WARNING, SKIPPING: $cmd\n";
+  #systemCheck($cmd);
+
+	print STDERR "Finished ".localtime() ."\n";
+	exit(0);
 }
+### else not necessary, but whatever...
 else
 {
   # count the number of lines first
@@ -100,9 +113,18 @@ for (my $i = 0; $i < $numParallel; ++$i)
   my $numStr = NumStr($i);
 
   my $fh = $runFiles[$i];
-  my $cmd = "zcat $TMPDIR/train.$i.gz ";
-  $cmd .= "| $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile --node $i --total $numParallel --span_server localhost --unique_id $$ --save_per_pass";
-  print $fh $cmd;
+  my $cmd;
+	if ($i == 0) {
+			$cmd = "zcat $TMPDIR/train.$i.gz | $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile --node $i --total $numParallel --span_server localhost --unique_id $$ --save_per_pass";
+			# pass through the output from the first piece
+			$cmd .= " |& tee > $TMPDIR/run.$i.sh.log";
+	}
+	else {
+			$cmd = "zcat $TMPDIR/train.$i.gz | $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile.$numStr --node $i --total $numParallel --span_server localhost --unique_id $$ --save_per_pass";
+			# save the output of the other pieces
+			$cmd .= " >& $TMPDIR/run.$i.sh.log";
+	}
+  print $fh $cmd, "\n";
 }
 
 # close run script files
@@ -132,9 +154,10 @@ foreach (@children) {
 
 kill 1, $masterPid;
 
- my $cmd = "rm -rf $TMPDIR $modelFile.*\n";
- print STDERR $cmd;
- systemCheck($cmd);
+#my $cmd = "rm -rf $TMPDIR $modelFile.*";
+my $cmd = "rm -rf $TMPDIR";
+print STDERR "WARNING, SKIPPING: $cmd\n";
+#systemCheck($cmd);
 
 print STDERR "Finished ".localtime() ."\n";
 
@@ -149,7 +172,7 @@ sub RunFork($)
   
   if ($pid == 0)
   { # child
-    print STDERR $cmd;
+    print STDERR $cmd, "\n";
     systemCheck($cmd);
     exit();
   }
