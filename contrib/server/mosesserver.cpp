@@ -12,7 +12,6 @@
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TreeInput.h"
-#include "moses/LMList.h"
 #include "moses/LM/ORLM.h"
 
 #ifdef WITH_THREADS
@@ -48,7 +47,7 @@ public:
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
     if(add2ORLM_) {
-      updateORLM();
+      //updateORLM();
     }
     cerr << "Done inserting\n";
     //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy);
@@ -60,6 +59,7 @@ public:
   }
   string source_, target_, alignment_;
   bool bounded_, add2ORLM_;
+  /*
   void updateORLM() {
     // TODO(level101): this belongs in the language model, not in moseserver.cpp
     vector<string> vl;
@@ -101,6 +101,8 @@ public:
       }
     }
   }
+  */
+  
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");
     if(si == params.end())
