@@ -48,6 +48,12 @@ public:
                                   {
                                     abort();
                                   }
+
+  //Fabienne Braune : language model for l-MBOT (discontiguous units). Had to be added in order to compile the decoder
+  FFState *EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const
+  {
+	  abort();
+  }
   
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }

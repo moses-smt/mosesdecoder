@@ -77,67 +77,32 @@ TargetPhraseMBOT::~TargetPhraseMBOT()
 	delete m_sourcePhrase;
 }
 
-//Create sequence of target phrase from string in l-MBOT rule table
+//Fabienne Braune : Create sequence of target phrase from string in l-MBOT rule table
 //Tokenize at || and create a sequence of phrases out of it
 void TargetPhraseMBOT::CreateFromStringForSequence(FactorDirection direction
                                        , const std::vector<FactorType> &factorOrder
-                                       , const std::string &phraseString
+                                       , const StringPiece &phraseString
                                        , const std::string & /*factorDelimiter */
-                                       , std::vector<Word> &lhs)
+                                       , WordSequence &lhs)
 {
-  //Fabienne Braune :
-  vector<string> targetPhraseFields;
-  vector<string>::iterator itr_tagetPhraseFields;
-  TokenizeMultiCharSeparator(targetPhraseFields, phraseString, "||");
 
-  for(itr_tagetPhraseFields = targetPhraseFields.begin(); itr_tagetPhraseFields != targetPhraseFields.end(); itr_tagetPhraseFields++)
+  util::TokenIter<util::MultiCharacter> targetUnits(phraseString, "||");
+
+  while(bool(targetUnits))
   {
-
-        string field = *itr_tagetPhraseFields;
-        vector<string> annotatedWordVector;
-        Tokenize(annotatedWordVector, field);
-
-        Phrase myPhrase = Phrase(annotatedWordVector.size() -1);
-
-        for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -1; phrasePos++) {
-        string &annotatedWord = annotatedWordVector[phrasePos];
-
-        bool isNonTerminal;
-        if (annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]") {
-
-          isNonTerminal = true;
-          size_t nextPos = annotatedWord.find("[", 1);
-
-          if ( nextPos != string::npos) {
-            if (direction == Input)
-            {
-                annotatedWord = annotatedWord.substr(1, nextPos - 2);
-            }
-            else
-            {
-                annotatedWord = annotatedWord.substr(nextPos + 1, annotatedWord.size() - nextPos - 2);
-          }
+        //std::cerr << "Looking at field : " << field << std::endl;
+        vector<StringPiece> annotatedWordVector;
+        for (util::TokenIter<util::AnyCharacter, true> it(*targetUnits, "\t "); it; ++it) {
+        		  //std::cerr << "Adding word : " << *it << std::endl;
+                  annotatedWordVector.push_back(*it);
         }
-      }
-      else {
-          isNonTerminal = false;
-    }
-        Word &myWord = myPhrase.AddWord();
-        myWord.CreateFromString(direction, factorOrder, annotatedWord, isNonTerminal);
-    }
-    m_targetPhrases.Add(&myPhrase);
-
-    //create sequence of target lhs
-    string &annotatedWord = annotatedWordVector.back();
-    CHECK(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size() -1 , 1) == "]");
-    annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
-
-    Word myLhs;
-    myLhs.CreateFromString(direction, factorOrder, annotatedWord, true);
-    CHECK(myLhs.IsNonTerminal());
-    m_targetLhs.Add(&myLhs);
-
-    }
+        //Create sequence of target phrases
+        m_targetPhrases.CreatePhraseFromString(annotatedWordVector, direction, factorOrder);
+        //Create sequence of target lhs
+        m_targetLhs.CreateWordFromString(annotatedWordVector.back(),direction, factorOrder);
+        //this->SetTargetLHSMBOT(*(myWordSequence));
+        targetUnits++;
+  }
 }
 
 //new : FB override phrase and display error message because of not implemented
@@ -185,7 +150,7 @@ void TargetPhraseMBOT::CreateFromString(const std::vector<FactorType> &factorOrd
 //2. if sizes are the same : compare each phrase return first case where phrases are different
 int TargetPhraseMBOT::Compare(const TargetPhraseMBOT &other) const
 {
-    size_t thisSize = GetMBOTPhrases().GetSize();
+    size_t thisSize = m_targetPhrases.GetSize();
     size_t compareSize = other.GetMBOTPhrases().GetSize();
 
     if (thisSize != compareSize) {
@@ -407,36 +372,20 @@ void TargetPhraseMBOT::SetScoreChart(const ScoreProducer* translationScoreProduc
   }
 
   // word penalty
-  //check if word penalty is enabled otherwise take log(1)
-  if(StaticData::Instance().IsWordPenaltyOn())
-  {
-	  size_t wordCount = GetNumTerminals();
-	  m_scoreBreakdown.Assign(wpProducer, - (float) wordCount * 0.434294482); // TODO log -> ln ??
-  }
-  else
-  {
-	  m_scoreBreakdown.Assign(wpProducer, log(1));
-  }
+  size_t wordCount = GetNumTerminals();
+  m_scoreBreakdown.Assign(wpProducer, - (float) wordCount * 0.434294482); // TODO log -> ln ??
 
-  //gap penalty
-  //check if gap penalty is enabled otherwise take log(1)
 
+  //Fabienne Braune : The gap penalty of each target phrase is computed here
   const GapPenaltyProducer *gpp = StaticData::Instance().GetGapPenaltyProducer();
 
-  if(StaticData::Instance().IsGapPenaltyOn())
+  if(gpp != NULL)
   {
-
-  	  if(gpp != NULL)
-  	  {
-  		  int nbrMBOT = GetMBOTPhrases().size();
-  		  //Discount mbot gap
-  		  float gapPenalty = 1/(pow(100,nbrMBOT-1));
-  		  m_scoreBreakdown.Assign(gpp, log(gapPenalty)); // TODO log -> ln ??
-  	  }
+	  int nbrMBOT = m_targetPhrases.GetSize();
+	  //Discount mbot gap
+	  float gapPenalty = 1/(pow(100,nbrMBOT-1));
+  	  m_scoreBreakdown.Assign(gpp, log(gapPenalty)); // TODO log -> ln ??
   }
-  else
-  {m_scoreBreakdown.Assign(gpp,log(1));}
-
 
   m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore + totalOOVScore;
 
@@ -463,16 +412,15 @@ ostream& operator<<(ostream& out, const TargetPhraseMBOT& targetPhrase)
   out << "THIS : IS AN MBOT TARGET PRHASE " << std::endl;
   out << "-------------------------------------" << std::endl;
 
-  const std::vector<Phrase> myPhrases = targetPhrase.GetMBOTPhrases();
-  std::vector<Phrase> :: const_iterator itr_vector_phrases;
+  const PhraseSequence myPhrases = targetPhrase.GetMBOTPhrases();
+  PhraseSequence :: const_iterator itr_vector_phrases;
 
   out << "Target Phrases : ";
   int phraseCounter = 1;
 
   for(itr_vector_phrases = myPhrases.begin(); itr_vector_phrases != myPhrases.end(); itr_vector_phrases++)
     {
-        Phrase currentPhrase = *itr_vector_phrases;
-        out << currentPhrase << "(" << phraseCounter++ << ") ";
+        out << **itr_vector_phrases << "(" << phraseCounter++ << ") ";
     }
     out << "\t" << std::endl;
 
@@ -498,14 +446,13 @@ ostream& operator<<(ostream& out, const TargetPhraseMBOT& targetPhrase)
     }
     out << std::endl;
 
-  out << "Translation Score " << targetPhrase.GetTranslationScore() << endl;
   out << "Full Score " << targetPhrase.GetFutureScore() << endl;
   out << "Feature Vector " << targetPhrase.GetScoreBreakdown() << endl;
   //out << "Source Phrase " << *(targetPhrase.GetSourcePhrase()) << endl;
   out << "Source Left-hand-side : " << targetPhrase.GetSourceLHS() << endl;
   out << "Target Left-hand-side : ";
 
-  std::vector<Word> :: const_iterator itr_words;
+  WordSequence :: const_iterator itr_words;
 
   int counter = 1;
   for(itr_words = targetPhrase.GetTargetLHSMBOT().begin(); itr_words != targetPhrase.GetTargetLHSMBOT().end(); itr_words++)

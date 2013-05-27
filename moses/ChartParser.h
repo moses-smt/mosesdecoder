@@ -61,6 +61,9 @@ class ChartParser {
 
     void Create(const WordsRange &range, ChartParserCallback &to);
 
+    //Fabienne Braune : Create Rule Lookup Manager for l-MBOT rules
+    void CreateMBOT(const WordsRange &range, ChartParserCallback &to);
+
   private:
     ChartParserUnknown m_unknown;
     std::vector <DecodeGraph*> m_decodeGraphList;

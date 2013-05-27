@@ -135,6 +135,16 @@ public:
     FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
     										int featureID,
     										ScoreComponentCollection* accumulator) const;
+
+    //Fabienne Braune : language model for l-MBOT (discontiguous units). Had to be added in order to compile the decoder
+    //not yet implemented for this feature
+    FFState *EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const
+    {
+    	std::cerr << "l-MBOT language model not yet implemented for BLEU SCORE FEATURE" << std::endl;
+    	abort();
+    }
+
+
     bool Enabled() const { return m_enabled; }
     float CalculateBleu(BleuScoreState*) const;
     float CalculateBleu(Phrase translation) const;

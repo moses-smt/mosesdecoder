@@ -43,7 +43,7 @@ class PhraseDictionarySCFG : public RuleTableTrie
 
   const PhraseDictionaryNodeSCFG &GetRootNode() const { return m_collection; }
 
-  ChartRuleLookupManager *CreateRuleLookupManager(
+  virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollectionBase &);
 

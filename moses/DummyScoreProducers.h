@@ -35,6 +35,12 @@ public:
 		CHECK(0); // feature function not valid in chart decoder
 		return NULL;
 	}
+    //Fabienne Braune : language model for l-MBOT (discontiguous units). Had to be added in order to compile the decoder
+  virtual  FFState *EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const{
+	  CHECK(0); // feature function not valid in chart decoder
+	  return NULL;
+  }
+
 };
 
 /** Doesn't do anything but provide a key into the global

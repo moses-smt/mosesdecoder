@@ -168,11 +168,15 @@ protected:
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 
+  //Fabienne Braune : Are we using l-MBOT rules ?
+  bool m_lmbot;
+
   //Fabienne Braune : Feature giving a penalty to l-MBOT rules with discontiguous rules
   GapPenaltyProducer *m_gapPenaltyProducer;
 
   //Fabienne Braune : allows to pass a list of source side labels to avoid matching the input parse tree
   std::vector<std::string> m_sourceSideLabels;
+
 
   MetaFeatureProducer *m_metaFeatureProducer;
   BleuScoreFeature* m_bleuScoreFeature;
@@ -759,6 +763,10 @@ public:
   bool NBestIncludesSegmentation() const {
     return m_nBestIncludesSegmentation;
   }
+
+  //Fabienne Braune : are we using l-MBOT rules
+  bool IsMBOT() const
+   { return m_lmbot;}
 
   //Fabienne Braune :
   GapPenaltyProducer *GetGapPenaltyProducer() const

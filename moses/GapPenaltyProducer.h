@@ -25,8 +25,19 @@ class GapPenaltyProducer : public StatelessFeatureFunction
     size_t GetNumScoreComponents() const;
     size_t GetNumInputScores() const;
 
-    //Feature function scores rules in hypothesis
-    void Evaluate(const TargetPhrase tp, ScoreComponentCollection* out) const;
+    //Fabienne Braune : none of these features should be used for the GapPenaltyProducer
+    virtual void Evaluate(const PhraseBasedFeatureContext& context,
+    											ScoreComponentCollection* accumulator) const
+    {
+    	//do nothing
+    }
+
+    virtual void EvaluateChart(const ChartBasedFeatureContext& context,
+                               ScoreComponentCollection* accumulator) const
+    {
+    	//do nothing
+    }
+
     bool ComputeValueInTranslationOption() const { return false; };
 
   };

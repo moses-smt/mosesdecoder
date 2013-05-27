@@ -61,15 +61,9 @@ std::auto_ptr<RuleTableLoader> RuleTableLoaderFactory::Create(
           RuleTableLoaderHiero());
       
     }
-    
-    else if (tokens[0] == "[MBOT]" && tokens[1] == "|||") {
-
-        //std::cout << "RULE TABLE FACTORY : Loading MBOT table" << std::endl;
-
-      return std::auto_ptr<RuleTableLoader>(new
-      RuleTableLoaderMBOT());
+    else if (tokens[0] == "[MBOT]") {
+      return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderMBOT());
     }
-
     return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderStandard());
   }
   else

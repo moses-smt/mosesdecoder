@@ -39,7 +39,14 @@ extern bool g_debug;
 
 ChartCellBase::ChartCellBase(size_t startPos, size_t endPos) :
   m_coverage(startPos, endPos),
-  m_targetLabelSet(m_coverage) {}
+  m_targetLabelSet(m_coverage),
+  m_mbotCoverage(vector<WordsRange>()),
+  m_mbotTargetLabelSet(m_mbotCoverage.front()),
+  m_mbotSourceWordLabel(NULL),
+{
+	m_mbotCoverage.push_back(WordsRange(startPos,endPos));
+}
+
 
 ChartCellBase::~ChartCellBase() {}
 
@@ -53,7 +60,7 @@ ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
   m_nBestIsEnabled = staticData.IsNBestEnabled();
 }
 
-virtual ChartCell::~ChartCell() {}
+ChartCell::~ChartCell() {}
 
 /** Add the given hypothesis to the cell. 
  *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
@@ -81,7 +88,7 @@ void ChartCell::PruneToSize()
  * \param transOptList list of applicable rules to create hypotheses for the cell
  * \param allChartCells entire chart - needed to look up underlying hypotheses
  */
-virtual void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
+void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
                                 , const ChartCellCollection &allChartCells)
 {
   const StaticData &staticData = StaticData::Instance();

@@ -68,6 +68,7 @@ class TargetPhraseMBOT : public TargetPhrase
     //friend ChartHypothesisMBOT;
 
 protected:
+    //Fabienne Braune : This should either be const or a pointer. To fix.
     PhraseSequence m_targetPhrases;
     const std::vector<const AlignmentInfoMBOT*> *m_alignments;
     WordSequence m_targetLhs;
@@ -75,6 +76,8 @@ protected:
     //Fabienne Braune : source phrase corresponding to target
     bool m_matchesSource;
     Phrase* m_sourcePhrase;
+    //Fabienne Braune : source left-hand side (parent nodes on source side)
+    Word m_sourceLhs;
 
 public:
 
@@ -105,6 +108,14 @@ public:
     std::cout << "Get target lhs with single Word NOT IMPLEMENTED for target phrase mbot" << std::endl;
   }
 
+  void SetSourceLHS(const Word &lhs) {
+     m_sourceLhs = lhs;
+   }
+
+   const Word &GetSourceLHS() const {
+     return m_sourceLhs;
+   }
+
   void SetTargetLHSMBOT(const WordSequence &lhs) {
     m_targetLhs = lhs;
   }
@@ -114,13 +125,14 @@ public:
   }
 
  const PhraseSequence GetMBOTPhrases() const {
+	std::cerr << "Trying to get : " << m_targetPhrases << std::endl;
     return m_targetPhrases;
-  }
+ }
 
-  void SetMBOTPhrases(PhraseSequence p)
-  {
-    m_targetPhrases = p;
-  }
+ // void SetMBOTPhrases(PhraseSequence p)
+ // {
+ //   m_targetPhrases = p;
+ // }
 
  size_t GetSize() const;
 
@@ -138,9 +150,9 @@ public:
 
   void CreateFromStringForSequence(FactorDirection direction
                                  , const std::vector<FactorType> &factorOrder
-                                 , const std::string &phraseString
+                                 , const StringPiece &phraseString
                                  , const std::string &factorDelimiter
-                                 , std::vector<Word> &lhs);
+                                 , WordSequence &lhs);
 
 
  void MergeFactors(const Phrase &copy);
@@ -163,32 +175,53 @@ public:
   //}
 
   //given a set of indices, fills the vector passed as arguments with words at those positions
-  inline size_t &GetWordVector(std::vector<std::vector<size_t> > pos, std::vector<Word> &wordVector) const {
+  inline size_t &GetWordVector(std::vector<std::vector<size_t> > pos, WordSequence &wordVector) const {
 
         //std::cout << "MAKING MBOT PHRRASES "<< std::endl;
 
-        CHECK(pos.size() == GetMBOTPhrases().GetSize());
+        CHECK(pos.size() == m_targetPhrases.GetSize());
 
-        PhraseSequence myPhrases = GetMBOTPhrases();
         PhraseSequence :: const_iterator itr_phrase;
         std::vector<std::vector<size_t> > :: const_iterator itr_pos;
         int counter = 0;
         for(itr_pos = pos.begin(); itr_pos != pos.end(); itr_pos++)
         {
-            Phrase * myPhrase = myPhrases.GetPhrase(counter);
-
             std::vector<size_t> myPhPos = *itr_pos;
             std::vector<size_t> :: iterator itr_phpos;
             for(itr_phpos = myPhPos.begin();itr_phpos != myPhPos.end();itr_phpos++)
             {
                 size_t currentPos = *itr_phpos;
-                wordVector.push_back(myPhrase->GetWord(currentPos));
+                wordVector.Add(m_targetPhrases.GetPhrase(counter)->GetWord(currentPos));
             }
             counter++;
         }
-        size_t vecSize = wordVector.size();
+        size_t vecSize = wordVector.GetSize();
         return vecSize;
 
+  }
+
+  inline std::vector<Word> &GetWordVector (std::vector<size_t> pos){
+
+        //new : check that there are as many phrases as positions
+        CHECK(m_targetPhrases.GetSize() == pos.size());
+
+        //new : get word in target phrase vector
+        //std::cout << "1. Getting word at position : "<< pos << std::endl;
+        std::vector<Word> wordVector;
+        Word myWord;
+
+        PhraseSequence :: const_iterator itr_phrase;
+        std::vector<size_t> :: const_iterator itr_pos;
+        for(itr_phrase = m_targetPhrases.begin(), itr_pos = pos.begin(); itr_phrase != m_targetPhrases.end(), itr_pos != pos.end(); itr_phrase++,itr_pos++)
+        {
+            Phrase * myPhrase = *itr_phrase;
+            size_t myPos = *itr_pos;
+            //std::cout << "Current Phrase "<< myPhrase.GetSize() << std::endl;
+            myWord = myPhrase->GetWord(myPos);
+        }
+        wordVector.push_back(myWord);
+       //should return a vector of words
+       return wordVector;
   }
 
   //just in case GetWord is called somewhere

@@ -1,5 +1,6 @@
 //Fabienne Braune
-//RuleCube conaining l-MBOT RuleCubeItems
+//RuleCube conaining l-MBOT RuleCubeItems : Would be cool to inherit from RuleCube but then how can I cast ChartCellCollectionMBOT
+//to ChartCellCollection when instantiating base class RuleCube in constructor.
 
 #include "ChartCellMBOT.h"
 #include "ChartCellCollection.h"
@@ -15,10 +16,10 @@ namespace Moses
 {
 
 // initialise the RuleCube by creating the top-left corner item
-RuleCubeMBOT::RuleCubeMBOT(const ChartTranslationOptionMBOT &transOpt,
-                   const ChartCellCollection &allChartCells,
+RuleCubeMBOT::RuleCubeMBOT(const ChartTranslationOptions &transOpt,
+                   const ChartCellCollection* allChartCells,
                    ChartManager &manager)
-                   : RuleCube(transOpt,allChartCells,manager)
+   : RuleCube(transOpt,*allChartCells,manager)
   , m_mbotTransOpt(transOpt)
 {
   RuleCubeItemMBOT *item = new RuleCubeItemMBOT(transOpt, allChartCells);
@@ -62,17 +63,17 @@ RuleCubeItemMBOT *RuleCubeMBOT::PopMBOT(ChartManager &manager)
   //std::cout << "FOUND TOP"<< std::endl;
   m_mbotQueue.pop();
   //std::cout << "POPPED QUEUE"<< std::endl;
-  CreateNeighborsMBOT(*item, manager);
+  CreateNeighborsMBOT(item, manager);
   //std::cout << "Neighnord done"<< std::endl;
   return item;
 }
 
 // create new RuleCube for neighboring principle rules
-void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT &item, ChartManager &manager)
+void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT* item, ChartManager &manager)
 {
   // create neighbor along translation dimension
   const TranslationDimension &translationDimension =
-    item.GetTranslationDimensionMBOT();
+    item->GetTranslationDimensionMBOT();
 
   //Fabienne Braune : check matching option
   if(StaticData::Instance().IsMatchingSourceAtRuleApplication() == 1)
@@ -84,8 +85,8 @@ void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT &item, ChartManage
 		  CreateNeighborMBOT(item, -1, manager);
 
 	  	// create neighbors along all hypothesis dimensions
-	  		for (size_t i = 0; i < item.GetHypothesisDimensionsMBOT().size(); ++i) {
-	  			const HypothesisDimension &dimension = item.GetHypothesisDimensionsMBOT()[i];
+	  		for (size_t i = 0; i < item->GetHypothesisDimensionsMBOT().size(); ++i) {
+	  			const HypothesisDimension &dimension = item->GetHypothesisDimensionsMBOT()[i];
 	  			if (dimension.HasMoreHypo()) {
 	  				CreateNeighborMBOT(item, i, manager);
 	  			}
@@ -99,8 +100,8 @@ void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT &item, ChartManage
 		  CreateNeighborMBOT(item, -1, manager);}
 
 	  // create neighbors along all hypothesis dimensions
-	  for (size_t i = 0; i < item.GetHypothesisDimensionsMBOT().size(); ++i) {
-		  const HypothesisDimension &dimension = item.GetHypothesisDimensions()[i];
+	  for (size_t i = 0; i < item->GetHypothesisDimensionsMBOT().size(); ++i) {
+		  const HypothesisDimension &dimension = item->GetHypothesisDimensions()[i];
 		  if (dimension.HasMoreHypo()) {
 			  CreateNeighborMBOT(item, i, manager);
 		  }
@@ -108,7 +109,7 @@ void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT &item, ChartManage
   }
 }
 
-void RuleCubeMBOT::CreateNeighborMBOT(const RuleCubeItemMBOT &item, int dimensionIndex,
+void RuleCubeMBOT::CreateNeighborMBOT(const RuleCubeItemMBOT* item, int dimensionIndex,
                               ChartManager &manager)
 {
   RuleCubeItemMBOT *newItem = new RuleCubeItemMBOT(item, dimensionIndex);

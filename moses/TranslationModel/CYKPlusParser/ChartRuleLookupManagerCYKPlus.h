@@ -48,12 +48,6 @@ class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
     const WordsRange &range,
     ChartParserCallback &outColl);
 
-//Fabienne Braune : Needed to work with l-MBOT dotted rules
-  void AddCompletedRuleMBOT(
-      const DottedRuleMBOT &dottedRule,
-      const TargetPhraseCollection &tpc,
-      const WordsRange &range,
-      ChartParserCallback &outColl);
 
   StackVec m_stackVec;
 };

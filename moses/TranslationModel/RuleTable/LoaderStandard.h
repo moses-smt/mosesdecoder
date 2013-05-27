@@ -29,7 +29,7 @@ class RuleTableLoaderStandard : public RuleTableLoader
 {
 protected:
 
-  bool Load(FormatType format,
+ bool Load(FormatType format,
             const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
@@ -39,7 +39,7 @@ protected:
             const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
  public:
-  bool Load(const std::vector<FactorType> &input,
+ bool Load(const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
             const std::vector<float> &weight,

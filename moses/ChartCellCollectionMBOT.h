@@ -9,7 +9,8 @@
 #pragma once
 
 #include "InputType.h"
-#include "ChartCell.h"
+#include "ChartCellMBOT.h"
+#include "ChartCellCollection.h"
 #include "WordsRange.h"
 
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -19,57 +20,70 @@ namespace Moses
 class InputType;
 class ChartManager;
 
-class ChartCellCollectionBaseMBOT {
+class ChartCellCollectionBaseMBOT : public ChartCellCollectionBase {
   public:
-    template <class Factory> ChartCellCollectionBaseMBOT(const InputType &input, const Factory &factory) :
-      m_cells(input.GetSize()) {
+    template <class Factory> ChartCellCollectionBaseMBOT(const InputType &input, const Factory &factory)
+     : ChartCellCollectionBase(input,factory)
+     , m_cells(input.GetSize()) {
+
+      std::cerr << "BUILDING CHART CELL COLLECTION BASE MBOT" << std::endl;
       size_t size = input.GetSize();
       for (size_t startPos = 0; startPos < size; ++startPos) {
-        std::vector<ChartCellBase*> &inner = m_cells[startPos];
+        std::vector<ChartCellBaseMBOT*> &inner = m_cells[startPos];
         inner.reserve(size - startPos);
         for (size_t endPos = startPos; endPos < size; ++endPos) {
           inner.push_back(factory(startPos, endPos));
         }
         //Fabienne Braune : Would be cool to defer the instantiation outside of the constructor
-        m_source.push_back(new ChartCellLabel(inner[0]->GetCoverage(), input.GetWord(startPos)));
+        WordSequence firstWord;
+        firstWord.Add(*(const_cast<Word*> (&(input.GetWord(startPos)))));
+        m_source.push_back(new ChartCellLabelMBOT(inner[0]->GetCoverage(),firstWord));
       }
     }
 
     virtual ~ChartCellCollectionBaseMBOT();
 
+    const ChartCellBaseMBOT &GetBaseMBOT(const WordsRange &coverage) const {
+      return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
+    }
+
+    //Fabienne Braune : just in case GetBase gets somehow called
     const ChartCellBase &GetBase(const WordsRange &coverage) const {
+    	std::cerr << "GetBase not implmented in ChartCellCollectionMBOT "<< std::endl;
+       }
+
+    ChartCellBaseMBOT &MutableBaseMBOT(const WordsRange &coverage) {
       return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
     }
 
-    ChartCellBase &MutableBase(const WordsRange &coverage) {
-      return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
+    //Fabienne Braune : just in case MutableBase gets somehow called
+     const ChartCellBase &MutableBase(const WordsRange &coverage) const {
+       	std::cerr << "Mutable Base not implmented in ChartCellCollectionMBOT "<< std::endl;
     }
 
-
-    const ChartCellLabel &GetSourceWordLabel(size_t at) const {
+    const ChartCellLabelMBOT &GetSourceWordLabel(size_t at) const {
       return m_source[at];
     }
 
   private:
-    std::vector<std::vector<ChartCellBase*> > m_cells;
-
-    boost::ptr_vector<ChartCellLabel> m_source;
+    std::vector<std::vector<ChartCellBaseMBOT*> > m_cells;
+    boost::ptr_vector<ChartCellLabelMBOT> m_source;
 };
 
 /** Hold all the chart cells for 1 input sentence. A variable of this type is held by the ChartManager
  */
-class ChartCellCollection : public ChartCellCollectionBase {
+class ChartCellCollectionMBOT : public ChartCellCollectionBaseMBOT, public ChartCellCollection {
   public:
-    ChartCellCollection(const InputType &input, ChartManager &manager);
+    ChartCellCollectionMBOT(const InputType &input, ChartManager &manager);
 
   //! get a chart cell for a particular range
-  ChartCell &Get(const WordsRange &coverage) {
-    return static_cast<ChartCell&>(MutableBase(coverage));
+  ChartCellMBOT &Get(const WordsRange &coverage) {
+    return static_cast<ChartCellMBOT&>(MutableBaseMBOT(coverage));
   }
 
   //! get a chart cell for a particular range
-  const ChartCell &Get(const WordsRange &coverage) const {
-    return static_cast<const ChartCell&>(GetBase(coverage));
+  const ChartCellMBOT &Get(const WordsRange &coverage) const {
+    return static_cast<const ChartCellMBOT&>(GetBaseMBOT(coverage));
   }
 };
 

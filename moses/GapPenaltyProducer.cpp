@@ -13,12 +13,6 @@ using namespace std;
 namespace Moses
 {
 
-//Fabienne Braune : Just in case Gap penalty is evaluated in the wrong place
-void GapPenaltyProducer::Evaluate(const TargetPhrase tp, ScoreComponentCollection* out) const
-{
-	 std::cout << "Evaluate should not be called here !" << std::endl;
-}
-
 size_t GapPenaltyProducer::GetNumScoreComponents() const
 {
   return 1;

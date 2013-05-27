@@ -123,6 +123,64 @@ void ChartManager::ProcessSentence()
   }
 }
 
+
+//! decode the sentence. This contains the main laps. Basically, the CKY++ algorithm
+void ChartManager::ProcessSentenceWithMBOT()
+{
+  VERBOSE(1,"Translating: " << m_source << endl);
+
+  ResetSentenceStats(m_source);
+
+  VERBOSE(2,"Decoding: " << endl);
+  //ChartHypothesis::ResetHypoCount();
+
+  AddXmlChartOptions();
+
+  // MAIN LOOP
+  size_t size = m_source.GetSize();
+  for (size_t width = 1; width <= size; ++width) {
+    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+      size_t endPos = startPos + width - 1;
+      WordsRange range(startPos, endPos);
+
+      // create trans opt
+      m_translationOptionList.Clear();
+      m_parser.CreateMBOT(range, m_translationOptionList);
+      m_translationOptionList.ApplyThreshold();
+      PreCalculateScores();
+
+      // decode
+      ChartCell &cell = m_hypoStackColl.Get(range);
+
+      cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+      m_translationOptionList.Clear();
+      cell.PruneToSize();
+      cell.CleanupArcList();
+      cell.SortHypotheses();
+    }
+  }
+
+  IFVERBOSE(1) {
+
+    for (size_t startPos = 0; startPos < size; ++startPos) {
+      cerr.width(3);
+      cerr << startPos << " ";
+    }
+    cerr << endl;
+    for (size_t width = 1; width <= size; width++) {
+      for( size_t space = 0; space < width-1; space++ ) {
+        cerr << "  ";
+      }
+      for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+        WordsRange range(startPos, startPos+width-1);
+        cerr.width(3);
+        cerr << m_hypoStackColl.Get(range).GetSize() << " ";
+      }
+      cerr << endl;
+    }
+  }
+}
+
 /** add specific translation options and hypotheses according to the XML override translation scheme.
  *  Doesn't seem to do anything about walls and zones.
  *  @todo check walls & zones. Check that the implementation doesn't leak, xml options sometimes does if you're not careful

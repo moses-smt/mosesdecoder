@@ -32,8 +32,8 @@ namespace Moses
 {
 
 RuleCubeItemMBOT::RuleCubeItemMBOT( const ChartTranslationOptions &transOpt,
-                                    const ChartCellCollection &allChartCells)
-                                    : RuleCubeItem(transOpt, allChartCells)
+                                    const ChartCellCollection* allChartCells)
+									: RuleCubeItem(transOpt,*allChartCells)
                                     , m_mbotTranslationDimension(0,transOpt.GetTargetPhraseCollection().GetCollection())
                                     , m_mbotHypothesis(0)
 {
@@ -41,10 +41,10 @@ RuleCubeItemMBOT::RuleCubeItemMBOT( const ChartTranslationOptions &transOpt,
 }
 
 //new : create the RuleCubeMBOT from an existing one, differing only in one dimension
-RuleCubeItemMBOT::RuleCubeItemMBOT(const RuleCubeItemMBOT &copy, int hypoDimensionIncr)
-  : RuleCubeItem(copy,hypoDimensionIncr)
-  , m_mbotTranslationDimension(copy.m_mbotTranslationDimension)
-  , m_hypothesisDimensions(copy.m_hypothesisDimensions)
+RuleCubeItemMBOT::RuleCubeItemMBOT(const RuleCubeItemMBOT* copyCube, int hypoDimensionIncr)
+   : RuleCubeItem(*(static_cast<const RuleCubeItem*> (copyCube)),hypoDimensionIncr)
+  , m_mbotTranslationDimension(copyCube->m_mbotTranslationDimension)
+  , m_hypothesisDimensions(copyCube->m_hypothesisDimensions)
   , m_mbotHypothesis(0)
 {
     //std::cout << "Create Rule Cube from existing Dimension"<< std::endl;

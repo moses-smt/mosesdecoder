@@ -77,14 +77,10 @@ class RuleCubeItemEqualityPredMBOT
 class RuleCubeMBOT : public RuleCube
 {
  public:
-  RuleCubeMBOT(const ChartTranslationOptionMBOT &, const ChartCellCollection &,
+  RuleCubeMBOT(const ChartTranslationOptions &, const ChartCellCollection* chartCells,
            ChartManager &);
 
   ~RuleCubeMBOT();
-
-  float GetTopScore() const {
-      std::cout << "Get top score NOT IMPLEMENTED for non-mbot queue in RuleCubeMBOT" << std::endl;
-  }
 
    float GetTopScoreMBOT() const {
     CHECK(!m_mbotQueue.empty());
@@ -92,25 +88,13 @@ class RuleCubeMBOT : public RuleCube
     return item->GetScoreMBOT();
   }
 
-  RuleCubeItem *Pop(ChartManager &)
-  {
-        std::cout << "Pop NOT IMPLEMENTED for non-mbot queue in RuleCubeMBOT" << std::endl;
-  }
-
   RuleCubeItemMBOT *PopMBOT(ChartManager &);
-
-  bool IsEmpty() const {
-        std::cout << "Emptiness test NOT IMPLEMENTED for non-mbot queue in RuleCubeMBOT" << std::endl;
-      }
 
 
   bool IsEmptyMBOT() const { return m_mbotQueue.empty(); }
 
-  const ChartTranslationOptions &GetTranslationOption() const {
-       std::cout << "Get translation option NOT IMPLEMENTED for non-mbot queue in RuleCubeMBOT" << std::endl;
-  }
 
-  const ChartTranslationOptionMBOT &GetTranslationOptionMBOT() const {
+  const ChartTranslationOptions &GetTranslationOptionMBOT() const {
     return m_mbotTransOpt;
   }
 
@@ -128,10 +112,10 @@ class RuleCubeMBOT : public RuleCube
   RuleCubeMBOT(const RuleCubeMBOT &);  // Not implemented
   RuleCubeMBOT &operator=(const RuleCubeMBOT &);  // Not implemented
 
-  void CreateNeighborsMBOT(const RuleCubeItemMBOT &, ChartManager &);
-  void CreateNeighborMBOT(const RuleCubeItemMBOT &, int, ChartManager &);
+  void CreateNeighborsMBOT(const RuleCubeItemMBOT * item, ChartManager &);
+  void CreateNeighborMBOT(const RuleCubeItemMBOT * item, int, ChartManager &);
 
-  const ChartTranslationOptionMBOT &m_mbotTransOpt;
+  const ChartTranslationOptions &m_mbotTransOpt;
   ItemSetMBOT m_mbotCovered;
   QueueMBOT m_mbotQueue;
 };

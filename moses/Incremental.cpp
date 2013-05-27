@@ -1,6 +1,7 @@
 #include "moses/Incremental.h"
 
 #include "moses/ChartCell.h"
+#include "moses/ChartCellMBOT.h"
 #include "moses/ChartParserCallback.h"
 #include "moses/FeatureVector.h"
 #include "moses/StaticData.h"
@@ -164,9 +165,17 @@ template <class Model> lm::WordIndex Fill<Model>::Convert(const Word &word) cons
   return (factor >= vocab_mapping_.size() ? 0 : vocab_mapping_[factor]);
 }
 
+//Fabienne Braune : create l-MBOT chart cells if using the l-MBOT based system
 struct ChartCellBaseFactory {
   ChartCellBase *operator()(size_t startPos, size_t endPos) const {
-    return new ChartCellBase(startPos, endPos);
+	if(StaticData::Instance().IsMBOT())
+	{
+		return static_cast<ChartCellBase*>(new ChartCellBaseMBOT(startPos, endPos));
+	}
+	else
+	{
+		return new ChartCellBase(startPos, endPos);
+	}
   }
 };
 

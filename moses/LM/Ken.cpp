@@ -84,9 +84,15 @@ template <class Model> class LanguageModelKen : public LanguageModel {
 
     void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
+    //Fabienne Braune : language model for l-MBOT (discontiguous units). Had to be added in order to compile the decoder
+    void CalcScoreMBOT(const TargetPhraseMBOT &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const;
+
     FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
     FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+
+    //Fabienne Braune : language model for l-MBOT (discontiguous units). Had to be added in order to compile the decoder
+    FFState *EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
 
     void IncrementalCallback(Incremental::Manager &manager) const {
       manager.LMCallback(*m_ngram, m_lmIdLookup);
@@ -222,6 +228,11 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
   fullScore = TransformLMScore(fullScore);
 }
 
+template <class Model> void LanguageModelKen<Model>::CalcScoreMBOT(const TargetPhraseMBOT &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const{
+//BEWARE : not implemented for Kenlm
+std::cout << "NOT IMPLEMENTED IN KENLM" << std::endl;
+}
+
 template <class Model> FFState *LanguageModelKen<Model>::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const {
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
 
@@ -333,6 +344,12 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 
   accumulator->Assign(this, ruleScore.Finish());
   return newState;
+}
+
+//Evaluate kenlm for mbot
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateMBOT(const ChartHypothesisMBOT& hypo, int featureID, ScoreComponentCollection *accumulator) const {
+ std:cout << "KEN LM NOT YET IMPLEMENTED FOR MBOT" << std::endl;
+ abort();
 }
 
 } // namespace

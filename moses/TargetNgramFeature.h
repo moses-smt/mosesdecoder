@@ -210,6 +210,13 @@ public:
   virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
                                   ScoreComponentCollection* accumulator) const;
 
+  //Fabienne Braune : language model for l-MBOT (discontiguous units). Had to be added in order to compile the decoder
+  FFState *EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const
+  {
+	  std::cerr << "MBOT language model not yet implemented for TargetNgramFeature" << std::endl;
+	  abort();
+  }
+
 private:
   FactorType m_factorType;
   Word m_bos;

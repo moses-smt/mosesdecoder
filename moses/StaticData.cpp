@@ -52,6 +52,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "BleuScoreFeature.h"
 #include "ScoreComponentCollection.h"
+#include "GapPenaltyProducer.h"
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -136,6 +137,17 @@ bool StaticData::LoadData(Parameter *parameter)
   // to cube or not to cube
   m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
                       (SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
+
+  // Fabienne Braune : use l-mbot or not
+    if(m_parameter->isParamSpecified("l-mbot")) {
+      const vector<string> &args = m_parameter->GetParam("l-mbot");
+      if (args.size() == 1) {
+      	m_lmbot= Scan<bool>( m_parameter->GetParam("l-mbot")[0] );
+      } else {
+        UserMessage::Add(string("set the l-mbot option to 0 or 1"));
+        return false;
+      }
+    }
 
   if (IsChart())
     LoadChartDecodingParameters();
@@ -355,8 +367,8 @@ bool StaticData::LoadData(Parameter *parameter)
   //Fabienne Braune : instantiate gap penalty producer (class GapPenaltyProducer)
   float weightGap				= (m_parameter->GetParam("weight-gap").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-gap")[0]) : 1;
     //make new Gap Penalty Producer
-  	m_gapPenaltyProducer = new GapPenaltyProducer(m_scoreIndexManager);
-    m_allWeights.push_back(weightGap);
+  	m_gapPenaltyProducer = new GapPenaltyProducer();
+  	SetWeight(m_gapPenaltyProducer, weightUnknownWord);
 
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
@@ -799,9 +811,10 @@ bool StaticData::LoadData(Parameter *parameter)
 	  cerr << "pb sparse producer weight: " << weight << endl;
     	}
     }
-    
+
     m_allWeights.PlusEquals(extraWeights);
   }
+
 
   return true;
 }
@@ -1448,6 +1461,18 @@ void StaticData::LoadNonTerminals()
 
   }
 
+  //Fabienne Braune : non-terminals used for no match semantics (no match of the input parse tree)
+  //TODO : waht happens when the option is not on ?
+  if(m_parameter->GetParam("source-side-labels").size() > 0){
+      const string &filePath = m_parameter->GetParam("source-side-labels")[0];
+      InputFileStream inStream(filePath);
+      string line;
+      while(getline(inStream, line)) {
+        vector<string> tokens = Tokenize(line);
+        CHECK(tokens.size() == 1);
+        m_sourceSideLabels.push_back(tokens[0]);
+      }
+    }
 }
 
 void StaticData::LoadChartDecodingParameters()

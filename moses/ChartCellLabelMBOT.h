@@ -10,6 +10,7 @@
 #include "HypoList.h"
 #include "Word.h"
 #include "WordsRange.h"
+#include "WordSequence.h"
 #include "ChartCellLabel.h"
 
 namespace search { class Vertex; }
@@ -34,19 +35,22 @@ public:
  friend std::ostream& operator<<(std::ostream &, const ChartCellLabelMBOT &);
 
   public:
-  ChartCellLabelMBOT(const WordsRange &coverage, const Word &label,
+  ChartCellLabelMBOT(const std::vector<WordsRange> &coverage, const WordSequence &label,
                  const Stack stack=Stack())
-                 : ChartCellLabel(coverage,label, stack)
+                 : ChartCellLabel(coverage.front(),*(label.GetWord(0)), stack)
                  , m_mbotStack(stack)
   {
-      m_mbotCoverage.push_back(coverage);
-      m_mbotLabel.push_back(label);
+	  for(int i=0;i<coverage.size();i++)
+      {
+		  m_mbotCoverage.push_back(coverage[i]);
+		  m_mbotLabel.Add(*(label.GetWord(i)));
+      }
   }
 
   ~ChartCellLabelMBOT(){
     m_mbotCoverage.clear();
     m_mbotCoverage.clear();
-    m_mbotLabel.clear();
+    m_mbotLabel.Clear();
   }
 
 
@@ -57,7 +61,7 @@ public:
 
   void AddLabel(Word label)
   {
-      m_mbotLabel.push_back(label);
+      m_mbotLabel.Add(label);
   }
 
   const WordsRange &GetCoverage() const
@@ -73,7 +77,7 @@ public:
     std::cout << "Get label of non mbot Chart Cell Label NOT IMPLEMENTED in Chart Cell Label MBOT" << std::endl;
   }
 
-  const std::vector<Word> &GetLabelMBOT() const {
+  const WordSequence &GetLabelMBOT() const {
       return m_mbotLabel;
       }
 
@@ -86,24 +90,21 @@ public:
       std::cout << "Get Chart Hypothesis Collection NOT implemented in chart cell mbot" << std::endl;
       }
 
-  bool CompareLabels(std::vector<Word> other) const
+  bool CompareLabels(WordSequence other) const
   {
-        if(m_mbotLabel.size() != other.size())
+        if(m_mbotLabel.GetSize() != other.GetSize())
         {
-        	return m_mbotLabel.size() < other.size();
+        	return m_mbotLabel.GetSize() < other.GetSize();
         }
 
-        std::vector<Word> :: const_iterator itr_label;
-        std::vector<Word> :: const_iterator itr_labelOther;
+        WordSequence :: const_iterator itr_label;
+        WordSequence :: const_iterator itr_labelOther;
         for(itr_label = m_mbotLabel.begin(), itr_labelOther = other.begin();
             itr_label != m_mbotLabel.end(), itr_labelOther != other.end(); itr_label++, itr_labelOther++)
         {
-             Word current = *itr_label;
-             Word other = *itr_labelOther;
-
-            if(current != other)
+	     if(*itr_label != *itr_labelOther)
             {
-                return current < other;
+                return *itr_label < *itr_labelOther;
             }
          }
 
@@ -148,7 +149,7 @@ public:
 
  private:
     std::vector<WordsRange> m_mbotCoverage;
-    std::vector<Word> m_mbotLabel;
+    WordSequence m_mbotLabel;
     Stack m_mbotStack;
 
 };

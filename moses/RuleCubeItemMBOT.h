@@ -1,7 +1,7 @@
 //Fabienne Braune : Rule Cube Item dealing with l-MBOT hypotheses
 
 //Comment on implementation : could use RuleCubeItem and implement a method creating an l-MBOT hpyothesis (ChartHypothesisMBOT)
-//Found it more modular to write a derived class but this can be easily modified
+//Found it more modular to write a separate class but this can be easily modified
 
 #pragma once
 
@@ -71,8 +71,8 @@ private:
 class RuleCubeItemMBOT : public RuleCubeItem
 {
  public:
-  RuleCubeItemMBOT(const ChartTranslationOptions &, const ChartCellCollection &);
-  RuleCubeItemMBOT(const RuleCubeItemMBOT &, int);
+  RuleCubeItemMBOT(const ChartTranslationOptions &, const ChartCellCollection * cellCollection);
+  RuleCubeItemMBOT(const RuleCubeItemMBOT* copyCube, int);
   ~RuleCubeItemMBOT();
 
     const TranslationDimension &GetTranslationDimension() const {

@@ -22,6 +22,7 @@
 #include "ChartParser.h"
 #include "ChartParserCallback.h"
 #include "ChartRuleLookupManager.h"
+#include "ChartRuleLookupManagerMBOT.h"
 #include "DummyScoreProducers.h"
 #include "StaticData.h"
 #include "TreeInput.h"
@@ -165,6 +166,35 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to) 
       m_unknown.Process(sourceWord, wordsRange, to);
     }
   }  
+}
+
+//Fabienne Braune : Create Rule Lookup Manager for l-MBOT rules
+void ChartParser::CreateMBOT(const WordsRange &wordsRange, ChartParserCallback &to) {
+  assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
+
+  std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
+  std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
+  for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
+    const DecodeGraph &decodeGraph = **iterDecodeGraph;
+    assert(decodeGraph.GetSize() == 1);
+    ChartRuleLookupManagerMBOT * mbotRuleLookupManager = static_cast<ChartRuleLookupManagerMBOT *> (*iterRuleLookupManagers);
+
+    //Fabienne Braune : cast to l-MBOT and then use l-MBOT specific methods
+    //ChartRuleLookupManagerMBOT * mbotRuleLookupManager = static_cast<ChartRuleLookupManagerMBOT *> (ruleLookupManager);
+    size_t maxSpan = decodeGraph.GetMaxChartSpan();
+    if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
+    	mbotRuleLookupManager->GetMBOTRuleCollection(wordsRange, to);
+    }
+  }
+
+  if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
+    bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+    if (to.Empty() || alwaysCreateDirectTranslationOption) {
+      // create unknown words for 1 word coverage where we don't have any trans options
+      const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
+      m_unknown.Process(sourceWord, wordsRange, to);
+    }
+  }
 }
  
 } // namespace Moses

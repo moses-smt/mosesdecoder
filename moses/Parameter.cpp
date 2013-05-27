@@ -188,7 +188,18 @@ Parameter::Parameter()
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
   AddParam("print-id", "prefix translations with id. Default if false");
 
+  //Fabienne Braune : are we using l-MBOT rules
+  AddParam("l-mbot", "MBOT", "use l-MBOT rules");
 
+  //Fabienne Braune : gap penalty for l-MBOT rules
+  AddParam("weight-gap", "gpp", "weight for gap penalty");
+
+  //Fabienne Braune : option to match syntactic labels during rule application (parsing) and not only rule selection
+  AddParam("source-label-matching-at-rule-application", "SMARA", "match source syntactic labels during rule application");
+
+  //Fabienne Braune : allows to pass a list of source side labels that are always matched. This allows to match all labels
+  //and not only the ones in the input parse tree.
+  AddParam("source-side-labels", "SSL", "source side labels");
 }
 
 Parameter::~Parameter()

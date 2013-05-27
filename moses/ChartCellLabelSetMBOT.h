@@ -9,6 +9,7 @@
 
 #include "ChartCellLabelMBOT.h"
 #include "ChartCellLabelSet.h"
+#include "WordSequence.h"
 
 #include <set>
 
@@ -23,7 +24,7 @@ class ChartCellLabelSetMBOT
  //Fabienne Braune : I use an stl map for now
  //todo : switch to boost unordered_map but then define a non-terminal map as a map between a VECTOR of words and a chart cell label
  private:
-  typedef std::map<std::vector<Word>, ChartCellLabelMBOT> MapTypeMBOT;
+  typedef std::map<WordSequence, ChartCellLabelMBOT> MapTypeMBOT;
 
  public:
   typedef MapTypeMBOT::const_iterator const_iterator;
@@ -42,38 +43,21 @@ class ChartCellLabelSetMBOT
       m_mbotCoverage.push_back(coverage);
   }
 
-  //Fabienne Braune : Make label with first word and then add the other ones
-  void AddWord(const std::vector<Word> &w)
+  void AddWord(const WordSequence w)
   {
-    ChartCellLabelMBOT cellLabel(m_mbotCoverage.front(), w.front());
+    ChartCellLabelMBOT cellLabel(m_mbotCoverage, w);
     std::vector<Word>::const_iterator itr_word;
     int counter = 1;
-    for(itr_word = w.begin()+1; itr_word!=w.end();itr_word++)
-    {
-        cellLabel.AddLabel(*itr_word);
-        if(counter < m_mbotCoverage.size())
-        {cellLabel.AddCoverage(m_mbotCoverage[counter++]);}
-    }
     m_mbotMap.insert(std::make_pair(w,cellLabel));
   }
 
-  void AddConstituent(const std::vector<Word> &w, const HypoList *stack)
+  void AddConstituent(const WordSequence &w, const HypoList *stack)
   {
-    std::vector<Word>::const_iterator itr_word;
 
     ChartCellLabelMBOT::Stack s;
     s.cube = stack;
 
-    ChartCellLabelMBOT cellLabel = ChartCellLabelMBOT(m_mbotCoverage.front(), w.front(), s);
-    int counter = 1;
-    for(itr_word = w.begin()+1; itr_word!=w.end();itr_word++)
-    {
-        cellLabel.AddLabel(*itr_word);
-        if(counter < m_mbotCoverage.size())
-        {
-            cellLabel.AddCoverage(m_mbotCoverage[counter++]);
-        }
-    }
+    ChartCellLabelMBOT cellLabel = ChartCellLabelMBOT(m_mbotCoverage, w, s);
     m_mbotMap.insert(std::make_pair(w,cellLabel));
   }
 
@@ -82,26 +66,17 @@ class ChartCellLabelSetMBOT
 
   size_t GetSize() const { return m_mbotMap.size(); }
 
-  const ChartCellLabelMBOT *Find(const std::vector<Word> &w) const
+  const ChartCellLabelMBOT *Find(const WordSequence &w) const
   {
-	 //Fabienne Braune : Construct with first elements and add the other ones later
-	 ChartCellLabelMBOT CellToFind = ChartCellLabelMBOT(m_mbotCoverage.front(), w.front());
-     std::vector<Word>::const_iterator itr_word;
-
-     int counter = 1;
-     for(itr_word = w.begin()+1; itr_word!=w.end();itr_word++)
-     {
-        CellToFind.AddLabel(*itr_word);
-        if(counter < m_mbotCoverage.size())
-        {CellToFind.AddCoverage(m_mbotCoverage[counter++]);}
-    }
+	 ChartCellLabelMBOT CellToFind = ChartCellLabelMBOT(m_mbotCoverage, w);
+     WordSequence::const_iterator itr_word;
 
     MapTypeMBOT::const_iterator p = m_mbotMap.find(w);
     return p == m_mbotMap.end() ? 0 : &(p->second);
   }
 
-  ChartCellLabelMBOT::Stack &FindOrInsert(const std::vector<Word> &w) {
-    return m_mbotMap.insert(std::make_pair(w,ChartCellLabelMBOT(m_mbotCoverage.front(), w.front()))).first->second.MutableStack();
+  ChartCellLabelMBOT::Stack &FindOrInsert(const WordSequence &w) {
+    return m_mbotMap.insert(std::make_pair(w,ChartCellLabelMBOT(m_mbotCoverage, w))).first->second.MutableStack();
   }
 
  private:

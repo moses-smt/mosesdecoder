@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryMBOT.h"
 
 #ifndef WIN32
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
@@ -177,7 +178,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     m_filePath += ".gz";
     VERBOSE(2,"Using gzipped file" << std::endl);
     }
-    PhraseDictionaryMBOT* pdmbot  = new PhraseDictionaryMBOT(m_numScoreComponent,this);
+    PhraseDictionaryMBOT* pdmbot  = new PhraseDictionaryMBOT(GetNumScoreComponents(),this);
     bool ret = pdmbot->Load(GetInput()
                              , GetOutput()
                              , m_filePath

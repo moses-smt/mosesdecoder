@@ -57,6 +57,13 @@ public:
 		return NULL;
 	}
 
+  //Fabienne Braune : language model for l-MBOT (discontiguous units). Had to be added in order to compile the decoder
+    FFState *EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const
+    {
+    	std::cerr << "MBOT language model not implemented for lexical reordering "<< std::endl;
+    	abort();
+    }
+
 private:
     bool DecodeCondition(std::string s);
     bool DecodeDirection(std::string s);

@@ -384,7 +384,7 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesisMBOT& hypo)
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter) {
 
-    const ChartHypothesisMBOT * prevHypo = *(iter);
+    const ChartHypothesisMBOT * prevHypo = static_cast<const ChartHypothesisMBOT*> (*iter);
     out << prevHypo->GetId();
   }
 

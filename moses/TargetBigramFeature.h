@@ -53,6 +53,13 @@ public:
                                   {
                                     abort();
                                   }
+  //Fabienne Braune : language model for l-MBOT (discontiguous units). Had to be added in order to compile the decoder
+   virtual FFState *EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const
+   {
+	   std::cerr << "MBOT langauge model not implemented for TargetBigramFeature" << std::endl;
+	   abort();
+   }
+
 private:
   FactorType m_factorType;
   Word m_bos;

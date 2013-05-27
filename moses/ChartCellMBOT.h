@@ -21,43 +21,18 @@ class ChartTranslationOptionList;
 class ChartCellCollectionMBOT;
 class ChartManager;
 
-//Fabienne Braune : nothing to inherit here
-class ChartCellBaseMBOT
-{
 
-public:
-   ChartCellBaseMBOT(size_t startPos, size_t endPos);
-
-   virtual ~ChartCellBaseMBOT();
-
-   const ChartCellLabelSetMBOT &GetTargetLabelSet() const { return m_mbotTargetLabelSet; }
-
-   const ChartCellLabelMBOT &GetSourceWordLabel() const {
-        CHECK(m_mbotCoverage.size()!=0);
-        CHECK(m_mbotCoverage.front().GetNumWordsCovered() == 1);
-        return *m_mbotSourceWordLabel;
-      }
-
-   ChartCellLabelSetMBOT &MutableTargetLabelSet() { return m_mbotTargetLabelSet; }
-
-   const std::vector<WordsRange> &GetCoverage() const { return m_mbotCoverage; }
-
- protected:
-   std::vector<WordsRange> m_mbotCoverage;
-   ChartCellLabelSetMBOT m_mbotTargetLabelSet;
-   ChartCellLabelMBOT *m_mbotSourceWordLabel;
-};
-
-
-class ChartCellMBOT : public ChartCell, public ChartCellBaseMBOT
+class ChartCellMBOT : public ChartCellBase, public ChartCell
 {
   friend std::ostream& operator<<(std::ostream&, const ChartCellMBOT&);
 
   //Fabienne Braune : TODO : implement Boost unordered map instead of stl map
-  typedef std::map<std::vector<Word>, ChartHypothesisCollection> MapTypeMBOT;
+  typedef std::map<WordSequence, ChartHypothesisCollection> MapTypeMBOT;
 
 protected:
   MapTypeMBOT m_mbotHypoColl;
+
+  bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
   //Fabienne Braune : See if we need an MBOT Chart Manager here...
   ChartManager &m_manager;
@@ -67,10 +42,10 @@ public:
   ~ChartCellMBOT();
 
   void ProcessSentence(const ChartTranslationOptionList &transOptList
-                       ,const ChartCellCollectionMBOT &allChartCells);
+                       ,const ChartCellCollection* allChartCells);
 
   void ProcessSentenceWithSourceLabels(const ChartTranslationOptionList &transOptList
-                          ,const ChartCellCollectionMBOT &allChartCells, const InputType &source, size_t startPos, size_t endPos);
+                          ,const ChartCellCollection* allChartCells, const InputType &source, size_t startPos, size_t endPos);
 
   // Get out target phrases that do not match source label
   void MarkPhrasesWithSourceLabels(std::vector<Word> sourceLabel);

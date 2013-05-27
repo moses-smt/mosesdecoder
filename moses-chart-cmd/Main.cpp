@@ -103,7 +103,17 @@ public:
     }
 
     ChartManager manager(*m_source, &system);
-    manager.ProcessSentence();
+
+
+    //Fabienne Braune : If we are using the MBOT decoder then tell it to th ChartManager
+    if(staticData.IsMBOT())
+    {
+    	manager.ProcessSentenceWithMBOT();
+    }
+    else
+    {
+    	manager.ProcessSentence();
+    }
 
     CHECK(!staticData.UseMBR());
 

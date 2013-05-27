@@ -35,6 +35,7 @@ class ChartCellCollectionBase {
   public:
     template <class Factory> ChartCellCollectionBase(const InputType &input, const Factory &factory) :
       m_cells(input.GetSize()) {
+     std::cerr << "BUILDING CHART CELL COLLECTION BASE" << std::endl;
       size_t size = input.GetSize();
       for (size_t startPos = 0; startPos < size; ++startPos) {
         std::vector<ChartCellBase*> &inner = m_cells[startPos];
