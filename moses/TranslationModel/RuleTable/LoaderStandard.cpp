@@ -101,8 +101,10 @@ void ReformateHieroScore(string &scoreString)
   for (size_t i = 0; i < toks.size(); ++i)
   {
     string &tok = toks[i];
+    vector<string> nameValue = Tokenize(tok, "=");
+    CHECK(nameValue.size() == 2);
 
-    float score = Scan<float>(tok);
+    float score = Scan<float>(nameValue[1]);
     score = exp(-score);
     tok = SPrint(score);
   }
