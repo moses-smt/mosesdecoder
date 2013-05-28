@@ -284,7 +284,7 @@ protected:
     targetPhrase.SetSourcePhrase(*srcPtr);
 
     targetPhrase.GetScoreBreakdown().Assign(m_obj, scoreVector);
-    targetPhrase.Evaluate();
+    targetPhrase.Evaluate(*srcPtr);
   }
 
   TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,

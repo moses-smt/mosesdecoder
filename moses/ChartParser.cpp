@@ -86,7 +86,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       float unknownScore = FloorScore(TransformScore(prob));
 
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->Evaluate();
+      targetPhrase->Evaluate(*unksrc);
 
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
@@ -112,7 +112,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       CHECK(targetLHS->GetFactor(0) != NULL);
       
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->Evaluate();
+      targetPhrase->Evaluate(*unksrc);
 
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);

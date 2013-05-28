@@ -43,7 +43,8 @@ public:
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
-                       , bool adhereTableLimit) const;
+                       , bool adhereTableLimit
+                       , const Phrase &src) const;
 
 
   /*! initialize list of partial translation options by applying the first translation step

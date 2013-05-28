@@ -240,10 +240,6 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
     GetWord(pos).ConvertToMoses(outputFactors, vocab, ret->AddWord());
   }
 
-  // scores
-  ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);
-  ret->Evaluate();
-
   // alignments
   int index = 0;
   Moses::AlignmentInfo::CollType alignTerm, alignNonTerm;
@@ -269,14 +265,18 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   Moses::Word *lhsTarget = new Moses::Word(true);
   GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
   ret->SetTargetLHS(lhsTarget);
-  
+
   // set source phrase
   Moses::Phrase mosesSP(Moses::Input);
   for (size_t pos = 0; pos < sp->GetSize(); ++pos) {
     sp->GetWord(pos).ConvertToMoses(inputFactors, vocab, mosesSP.AddWord());
   }
   ret->SetSourcePhrase(mosesSP);
-  
+
+  // scores
+  ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);
+  ret->Evaluate(mosesSP);
+
   return ret;
 }
 
