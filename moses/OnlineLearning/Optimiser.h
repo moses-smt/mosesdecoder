@@ -33,7 +33,7 @@ namespace Optimizer {
 
   MiraOptimiser(
 	float slack, bool scale_margin, bool scale_margin_precision,
-	bool scale_update, bool scale_update_precision, bool boost, bool normaliseMargin, float sigmoidParam) :
+	bool scale_update, bool scale_update_precision, bool boost, bool normaliseMargin, float sigmoidParam, bool onlyOnlineScoreProducerUpdate) :
       m_slack(slack),
       m_scale_margin(scale_margin),
       m_scale_margin_precision(scale_margin_precision),
@@ -42,7 +42,8 @@ namespace Optimizer {
       m_precision(1),
       m_boost(boost),
       m_normaliseMargin(normaliseMargin),
-      m_sigmoidParam(sigmoidParam) { }
+      m_sigmoidParam(sigmoidParam),
+      m_onlyOnlineScoreProducerUpdate(onlyOnlineScoreProducerUpdate) { }
 
       size_t updateWeights(
 	   Moses::ScoreComponentCollection& weightUpdate,
@@ -85,6 +86,9 @@ namespace Optimizer {
      // scale update with oracle BLEU score or precision
      bool m_scale_update, m_scale_update_precision;
      
+     // update only online score producer
+     bool m_onlyOnlineScoreProducerUpdate;
+
      float m_precision;
      
      // boosting of updates on misranked candidates

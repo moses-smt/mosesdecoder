@@ -1477,11 +1477,12 @@ bool StaticData::LoadOnlineLearningModel()
 		const float scale_margin_precision = (m_parameter->GetParam("scale_margin_precision").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_margin_precision")[0]) : 0.0;
 		const float scale_update = (m_parameter->GetParam("scale_update").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_update")[0]) : 0.0;
 		const float scale_update_precision = (m_parameter->GetParam("scale_update_precision").size() > 0) ? Scan<float>(m_parameter->GetParam("scale_update_precision")[0]) : 0.0;
-		const bool boost = (m_parameter->isParamSpecified("boost")) ? true : false;
+		const bool onlyOnlineScoreProducerUpdate = (m_parameter->isParamSpecified("boost")) ? true : false;
+		const bool boost = (m_parameter->isParamSpecified("onlyOnlineScoreProducerUpdate")) ? true : false;
 		const bool normaliseMargin = (m_parameter->isParamSpecified("normaliseMargin")) ? true : false;
 		const int sigmoidparam = (m_parameter->GetParam("sigmoidParam").size() > 0) ? Scan<int>(m_parameter->GetParam("sigmoidParam")[0]) : 1;
 		m_onlinelearner = new OnlineLearner(setAlgo,w_learningrate, f_learningrate, slack, scale_margin,
-				scale_margin_precision, scale_update, scale_update_precision, boost, normaliseMargin, normaliseScore, sigmoidparam);
+				scale_margin_precision, scale_update, scale_update_precision, boost, normaliseMargin, normaliseScore, sigmoidparam, onlyOnlineScoreProducerUpdate);
 		SetWeight(m_onlinelearner, weights[0]);
 		IFVERBOSE(1)
 		PrintUserTime("Online Learning : Perceptron\tWeights : MIRA");

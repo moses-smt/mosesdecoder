@@ -73,7 +73,7 @@ public:
 	SparseVec sparsefeaturevector, sparseweightvector;
 	OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, bool normaliseScore);
 	OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
-			float scale_update_precision, bool boost, bool normaliseMargin, bool normaliseScore, int sigmoidParam);
+			float scale_update_precision, bool boost, bool normaliseMargin, bool normaliseScore, int sigmoidParam, bool onlyOnlineScoreProducerUpdate);
 	bool SetPostEditedSentence(std::string s);
 	void RunOnlineLearning(Manager& manager);
 	void RemoveJunk();

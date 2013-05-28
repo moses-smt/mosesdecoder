@@ -24,9 +24,6 @@ size_t MiraOptimiser::updateWeights(
 	vector<float> lossMinusModelScoreDiffs;
 	vector<float> all_losses;
 
-	// most violated constraint in batch
-	ScoreComponentCollection max_batch_featureValueDiff;
-
 	// Make constraints for new hypothesis translations
 	float epsilon = 0.0001;
 	int violatedConstraintsBefore = 0;
@@ -118,7 +115,10 @@ size_t MiraOptimiser::updateWeights(
 			summedUpdate.MultiplyEquals(oracleBleuScores[0]);
 		}
 	}
-	weightUpdate.PlusEquals(sp,summedUpdate);
+	if(m_onlyOnlineScoreProducerUpdate)
+		weightUpdate.PlusEquals(sp,summedUpdate);
+	else
+		weightUpdate.PlusEquals(summedUpdate);
 
 	return 0;
 }

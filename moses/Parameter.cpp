@@ -205,6 +205,7 @@ Parameter::Parameter()
   AddParam("scale-margin", "Scale the margin by the Bleu score of the oracle translation");
   AddParam("normaliseMargin", "Normalise the margin: squash between 0 and 1");
   AddParam("scale-margin-precision", "Scale margin by precision of oracle");
+  AddParam("onlyOnlineScoreProducerUpdate", "Only update the online feature score producer");
   AddParam("scale-update", "Scale update by Bleu score of oracle");
   AddParam("scale-update-precision", "Scale update by precision of oracle");
   AddParam("slack", "Use slack in optimiser");

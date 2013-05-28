@@ -145,7 +145,7 @@ OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, fl
 }
 
 OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
-		float scale_update_precision, bool boost, bool normaliseMargin, bool normaliseScore,  int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
+		float scale_update_precision, bool boost, bool normaliseMargin, bool normaliseScore,  int sigmoidParam, bool onlyOnlineScoreProducerUpdate):StatelessFeatureFunction("OnlineLearner",1){
 	flr = f_learningrate;
 	wlr = w_learningrate;
 	m_PPindex=0;
@@ -153,7 +153,7 @@ OnlineLearner::OnlineLearner(OnlineAlgorithm algorithm, float w_learningrate, fl
 	m_normaliseScore=normaliseScore;
 	implementation=algorithm;
 	optimiser = new Optimizer::MiraOptimiser(slack, scale_margin, scale_margin_precision, scale_update,
-			scale_update_precision, boost, normaliseMargin, sigmoidParam);
+			scale_update_precision, boost, normaliseMargin, sigmoidParam, onlyOnlineScoreProducerUpdate);
 	cerr<<"Initialization Online Learning Model\n";
 }
 
