@@ -96,11 +96,7 @@ public:
 	{
 		m_sourcePhrase=p;
 	}
-  // ... but if we must store a copy, at least initialize it in-place
-  Phrase &MutableSourcePhrase() {
-    return m_sourcePhrase;
-  }
-	const Phrase& GetSourcePhrase() const 
+	const Phrase& GetSourcePhrase() const
 	{
 		return m_sourcePhrase;
 	}
