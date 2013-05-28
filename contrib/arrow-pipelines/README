@@ -3,6 +3,12 @@ Arrow Based Moses Training Pipeline
 
 This demonstration implements a training pipeline that is shown in the Dia diagram in documentation/training-pipeline/moses-pypeline.dia.
 
+The demo has been tested with:
+
+ - Moses v1.0
+ - Giza++ v1.0.7
+ - IRSTLM v5.70.04
+
 
 Setup
 -----
@@ -38,12 +44,6 @@ $ make
 
 Running the example training pipeline
 -------------------------------------
-
-Ensure that the training_pipeline.cfg file meets you site specific installations. You only need to review and change, if necassary, the following settings in the Configuration section:
-
- - moses_installation_directory (default: /opt/moses), this should be the value of MOSES_HOME,
- - giza_installation_directory (default: /opt/moses/giza++-v1.0.7), this should be the value of GIZA_HOME,
- - irstlm_installation_directory (default: /opt/moses/irstlm-5.70.04), this should be the value of IRSTLM.
 
 To execute the training pipeline run the following command:
 
