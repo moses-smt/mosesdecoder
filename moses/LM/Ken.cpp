@@ -337,7 +337,6 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 LanguageModel *ConstructKenLM(const std::string &description, const std::string &line)
 {
   FactorType factorType;
-  size_t nGramOrder;
   string filePath;
   bool lazy;
 
@@ -350,7 +349,7 @@ LanguageModel *ConstructKenLM(const std::string &description, const std::string 
       factorType = Scan<FactorType>(args[1]);
     }
     else if (args[0] == "order") {
-      nGramOrder = Scan<size_t>(args[1]);
+      //nGramOrder = Scan<size_t>(args[1]);
     }
     else if (args[0] == "path") {
       filePath = args[1];

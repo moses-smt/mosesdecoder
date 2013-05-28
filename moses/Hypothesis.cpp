@@ -270,7 +270,6 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff) {
  */
 void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 {
-  const StaticData &staticData = StaticData::Instance();
   clock_t t=0; // used to track time
 
   // some stateless score producers cache their values in the translation

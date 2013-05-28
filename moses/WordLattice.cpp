@@ -37,7 +37,6 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
 
   size_t numInputScores = StaticData::Instance().GetNumInputScores();
   size_t numRealWordCount = StaticData::Instance().GetNumRealWordsInInput();
-  size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);
 
   //when we have one more weight than params, we add a word count feature

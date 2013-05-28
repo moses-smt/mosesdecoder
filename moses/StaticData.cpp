@@ -55,8 +55,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/PhraseBoundaryFeature.h"
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/PhraseLengthFeature.h"
-#include "moses/FF/DistortionScoreProducer.h""
-#include "moses/FF/WordPenaltyProducer.h""
+#include "moses/FF/DistortionScoreProducer.h"
+#include "moses/FF/WordPenaltyProducer.h"
 
 #include "LM/Ken.h"
 #ifdef LM_IRST
@@ -79,38 +79,6 @@ using namespace std;
 
 namespace Moses
 {
-static size_t CalcMax(size_t x, const vector<size_t>& y)
-{
-  size_t max = x;
-  for (vector<size_t>::const_iterator i=y.begin(); i != y.end(); ++i)
-    if (*i > max) max = *i;
-  return max;
-}
-
-static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z)
-{
-  size_t max = x;
-  for (vector<size_t>::const_iterator i=y.begin(); i != y.end(); ++i)
-    if (*i > max) max = *i;
-  for (vector<size_t>::const_iterator i=z.begin(); i != z.end(); ++i)
-    if (*i > max) max = *i;
-  return max;
-}
-
-int GetFeatureIndex(std::map<string, int> &map, const string &featureName)
-{
-  std::map<string, int>::iterator iter;
-  iter = map.find(featureName);
-  if (iter == map.end()) {
-    map[featureName] = 0;
-    return 0;
-  }
-  else {
-    int &index = iter->second;
-    ++index;
-    return index;
-  }
-}
 
 StaticData StaticData::s_instance;
 
@@ -600,7 +568,6 @@ bool StaticData::LoadData(Parameter *parameter)
     vector<string> toks = Tokenize(line);
 
     const string &feature = toks[0];
-    int featureIndex = GetFeatureIndex(featureIndexMap, feature);
 
     if (feature == "GlobalLexicalModel") {
       GlobalLexicalModel *model = new GlobalLexicalModel(line);

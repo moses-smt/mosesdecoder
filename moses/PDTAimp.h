@@ -270,7 +270,6 @@ protected:
   		  std::vector<float> &weights,
   		  float weightWP,
                           Phrase const* srcPtr) const {
-  const StaticData &staticData = StaticData::Instance();
   FactorCollection &factorCollection = FactorCollection::Instance();
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
