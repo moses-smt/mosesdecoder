@@ -55,7 +55,6 @@ void ToPhrase(const search::Applied final, Phrase &out);
 // Get the phrase and the features.  
 void PhraseAndFeatures(const search::Applied final, Phrase &phrase, ScoreComponentCollection &features);
 
-const LanguageModel &GetFirstLM();
 
 } // namespace Incremental
 } // namespace Moses

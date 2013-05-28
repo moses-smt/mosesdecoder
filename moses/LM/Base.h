@@ -46,6 +46,8 @@ protected:
   bool m_enableOOVFeature;
   
 public:
+  static const LanguageModel &GetFirstLM();
+
   virtual ~LanguageModel();
 
   bool OOVFeatureEnabled() const {

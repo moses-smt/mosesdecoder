@@ -90,4 +90,27 @@ void LanguageModel::Evaluate(const Phrase &source
    }
 }
 
+const LanguageModel &LanguageModel::GetFirstLM()
+{
+  static const LanguageModel *lmStatic = NULL;
+
+  if (lmStatic) {
+    return *lmStatic;
+  }
+
+  // 1st time looking up lm
+  const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for (size_t i = 0; i < statefulFFs.size(); ++i) {
+    const StatefulFeatureFunction *ff = statefulFFs[i];
+    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
+    if (lm) {
+      lmStatic = lm;
+      return *lmStatic;
+    }
+  }
+
+  throw std::logic_error("Incremental search only supports one language model.");
+}
+
 } // namespace Moses
