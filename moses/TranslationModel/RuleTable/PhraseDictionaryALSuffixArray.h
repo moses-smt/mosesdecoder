@@ -22,11 +22,12 @@ class PhraseDictionaryALSuffixArray : public PhraseDictionaryMemory
 {
 public:
   PhraseDictionaryALSuffixArray(const std::string &line);
-
+  bool InitDictionary()
+  { return true; }
   void InitializeForInput(InputType const& source);
+  void CleanUpAfterSentenceProcessing(const InputType& source);
 
 protected:
-  const std::vector<FactorType> *m_input, *m_output;
   
 };
   
