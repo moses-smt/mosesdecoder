@@ -63,7 +63,8 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
                                    , const DecodeStep &decodeStep
                                    , PartialTranslOptColl &outputPartialTranslOptColl
                                    , TranslationOptionCollection * /* toc */
-                                   , bool /*adhereTableLimit*/) const
+                                   , bool /*adhereTableLimit*/
+                                   , const Phrase &src) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion

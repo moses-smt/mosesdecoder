@@ -126,7 +126,7 @@ void TargetPhrase::Evaluate(const InputType &input)
 
   for (size_t i = 0; i < ffs.size(); ++i) {
 	const FeatureFunction &ff = *ffs[i];
-	ff.Evaluate(source, m_scoreBreakdown);
+	ff.Evaluate(input, m_scoreBreakdown);
   }
 }
 

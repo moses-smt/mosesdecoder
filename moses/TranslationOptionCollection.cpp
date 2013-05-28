@@ -265,7 +265,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 		targetPhrase.SetInputScore(*inputScores);
 	}
 
-	targetPhrase.Evaluate();
+	targetPhrase.Evaluate(*m_unksrc);
 
 	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase);
 	Add(transOpt);
@@ -527,7 +527,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                              , decodeStep
                              , *newPtoc
                              , this
-                             , adhereTableLimit);
+                             , adhereTableLimit
+                             , *sourcePhrase);
         }
 
         // last but 1 partial trans not required anymore
