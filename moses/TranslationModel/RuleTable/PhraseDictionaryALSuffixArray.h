@@ -21,14 +21,7 @@ namespace Moses {
 class PhraseDictionaryALSuffixArray : public PhraseDictionaryMemory
 {
 public:
-  PhraseDictionaryALSuffixArray(const std::string &line)
-  : PhraseDictionaryMemory("PhraseDictionaryALSuffixArray", line)
-  {}
-
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , size_t tableLimit);
+  PhraseDictionaryALSuffixArray(const std::string &line);
 
   void InitializeForInput(InputType const& source);
 
