@@ -48,10 +48,6 @@ public:
 		return NULL;
 	}
 
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
-
 private:
     bool DecodeCondition(std::string s);
     bool DecodeDirection(std::string s);

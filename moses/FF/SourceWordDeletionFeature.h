@@ -23,17 +23,14 @@ public:
   SourceWordDeletionFeature(const std::string &line);
       
   bool Load(const std::string &filePath);
-  void Evaluate(const PhraseBasedFeatureContext& context, 
-              ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartBasedFeatureContext& context,
-  		               ScoreComponentCollection* accumulator) const;
-
-  virtual void Evaluate(const TargetPhrase &targetPhrase
+  virtual void Evaluate(const Phrase &source
+	  	  	  	  	  , const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const;
 
-  void ComputeFeatures(const TargetPhrase& targetPhrase, 
+  void ComputeFeatures(const Phrase &source,
+	  	  	  	  	   const TargetPhrase& targetPhrase,
 		  	           ScoreComponentCollection* accumulator, 
 		  	           const AlignmentInfo &alignmentInfo) const;
 };

@@ -110,7 +110,7 @@ void TargetPhrase::Evaluate(const Phrase &source)
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    ff.Evaluate(*this, m_scoreBreakdown, futureScoreBreakdown);
+    ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
   }
 
   float weightedScore = m_scoreBreakdown.GetWeightedScore();

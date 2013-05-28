@@ -95,12 +95,5 @@ const FFState* LexicalReordering::EmptyHypothesisState(const InputType &input) c
   return m_configuration->CreateLexicalReorderingState(input);
 }
 
-void LexicalReordering::Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
-{
-
-}
-
 }
 

@@ -66,27 +66,17 @@ bool SourceWordDeletionFeature::Load(const std::string &filePath)
   return true;
 }
 
-void SourceWordDeletionFeature::Evaluate(
-            const PhraseBasedFeatureContext& context,
-            ScoreComponentCollection* accumulator) const
-{
-}
-
-void SourceWordDeletionFeature::EvaluateChart(
-            const ChartBasedFeatureContext& context,
-		 	 	 	 	ScoreComponentCollection* accumulator) const
-{
-}
-
-void SourceWordDeletionFeature::Evaluate(const TargetPhrase &targetPhrase
+void SourceWordDeletionFeature::Evaluate(const Phrase &source
+  	  	  	  	  	  , const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
-  ComputeFeatures(targetPhrase, &scoreBreakdown, alignmentInfo);
+  ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);
 }
 
-void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
+void SourceWordDeletionFeature::ComputeFeatures(const Phrase &source,
+  	  	  	  	  	  	  	  	  	  	  	  	const TargetPhrase& targetPhrase,
 		                   	 	 	 	 	 	ScoreComponentCollection* accumulator,
 		                   	 	 	 	 	 	const AlignmentInfo &alignmentInfo) const
 {

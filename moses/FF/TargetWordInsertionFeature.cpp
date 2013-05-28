@@ -66,15 +66,17 @@ bool TargetWordInsertionFeature::Load(const std::string &filePath)
   return true;
 }
 
-void TargetWordInsertionFeature::Evaluate(const TargetPhrase &targetPhrase
+void TargetWordInsertionFeature::Evaluate(const Phrase &source
+  	  	  	  	  	  , const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
-  ComputeFeatures(targetPhrase, &scoreBreakdown, alignmentInfo);
+  ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);
 }
 
-void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
+void TargetWordInsertionFeature::ComputeFeatures(const Phrase &source,
+												 const TargetPhrase& targetPhrase,
     											 ScoreComponentCollection* accumulator,
     											 const AlignmentInfo &alignmentInfo) const
 {

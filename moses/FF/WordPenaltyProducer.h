@@ -16,7 +16,8 @@ class WordPenaltyProducer : public StatelessFeatureFunction
 public:
 	WordPenaltyProducer(const std::string &line) : StatelessFeatureFunction("WordPenalty",1, line) {}
 
-  virtual void Evaluate(const TargetPhrase &targetPhrase
+  virtual void Evaluate(const Phrase &source
+	  	  	  	  	  , const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const;
 

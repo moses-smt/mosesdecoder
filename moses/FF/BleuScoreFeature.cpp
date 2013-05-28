@@ -858,12 +858,5 @@ const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) co
     return new BleuScoreState();
 }
 
-void BleuScoreFeature::Evaluate(const TargetPhrase &targetPhrase
-                    , ScoreComponentCollection &scoreBreakdown
-                    , ScoreComponentCollection &estimatedFutureScore) const
-{
-  CHECK(false);
-}
-
 } // namespace.
 

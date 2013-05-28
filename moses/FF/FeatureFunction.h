@@ -11,6 +11,7 @@
 namespace Moses
 {
 
+class Phrase;
 class TargetPhrase;
 class TranslationOption;
 class Hypothesis;
@@ -73,7 +74,8 @@ public:
   const std::string &GetArgLine() const
   { return m_argLine; }
 
-  virtual void Evaluate(const TargetPhrase &targetPhrase
+  virtual void Evaluate(const Phrase &source
+		  	  	  	  , const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
   {}
