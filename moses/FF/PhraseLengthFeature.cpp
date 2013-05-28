@@ -21,7 +21,7 @@ void PhraseLengthFeature::Evaluate(const Phrase &source
 {
   // get length of source and target phrase
   size_t targetLength = targetPhrase.GetSize();
-  size_t sourceLength = targetPhrase.GetSourcePhrase().GetSize();
+  size_t sourceLength = source.GetSize();
 
   // create feature names
   stringstream nameSource;

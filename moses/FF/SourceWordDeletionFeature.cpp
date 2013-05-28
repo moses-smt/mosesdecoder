@@ -82,7 +82,7 @@ void SourceWordDeletionFeature::ComputeFeatures(const Phrase &source,
 {
   // handle special case: unknown words (they have no word alignment)
 	size_t targetLength = targetPhrase.GetSize();
-	size_t sourceLength = targetPhrase.GetSourcePhrase().GetSize();
+	size_t sourceLength = source.GetSize();
 	if (targetLength == 1 && sourceLength == 1 && !alignmentInfo.GetSize()) return;
 
   // flag aligned words
@@ -96,7 +96,7 @@ void SourceWordDeletionFeature::ComputeFeatures(const Phrase &source,
   // process unaligned source words
   for(size_t i=0; i<sourceLength; i++) {
     if (!aligned[i]) {
-    	Word w = targetPhrase.GetSourcePhrase().GetWord(i);
+    	const Word &w = source.GetWord(i);
     	if (!w.IsNonTerminal()) {
     		const StringPiece word = w.GetFactor(m_factorType)->GetString();
     		if (word != "<s>" && word != "</s>") {

@@ -246,7 +246,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
     targetPhrase->Evaluate(sourcePhrase);
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);
+    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);
 
     count++;
