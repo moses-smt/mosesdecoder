@@ -1,6 +1,6 @@
 #pragma once
 
-#include "moses/FFState.h"
+#include "moses/FF/FFState.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
 

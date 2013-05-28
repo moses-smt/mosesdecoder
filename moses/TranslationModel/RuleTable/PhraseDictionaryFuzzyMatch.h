@@ -19,17 +19,17 @@
 
 #pragma once
 
+#include "Trie.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
-#include "Trie.h"
-#include "PhraseDictionaryNodeSCFG.h"
-#include "PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
 namespace Moses
 {
-  class PhraseDictionaryNodeSCFG;
+  class PhraseDictionaryNodeMemory;
   
   /** Implementation of a SCFG rule table in a trie.  Looking up a rule of
    * length n symbols requires n look-ups to find the TargetPhraseCollection.
@@ -46,7 +46,7 @@ namespace Moses
               , const std::string &initStr
               , size_t tableLimit);
     
-    const PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source) const;
+    const PhraseDictionaryNodeMemory &GetRootNode(const InputType &source) const;
     
     ChartRuleLookupManager *CreateRuleLookupManager(
                                                     const InputType &,
@@ -63,20 +63,20 @@ namespace Moses
     TO_STRING();
     
   protected:
-    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
+    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
                                                               , const Phrase &source
                                                               , const TargetPhrase &target
                                                               , const Word *sourceLHS);
     
-    PhraseDictionaryNodeSCFG &GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
+    PhraseDictionaryNodeMemory &GetOrCreateNode(PhraseDictionaryNodeMemory &rootNode
                                               , const Phrase &source
                                               , const TargetPhrase &target
                                               , const Word *sourceLHS);
     
-    void SortAndPrune(PhraseDictionaryNodeSCFG &rootNode);
-    PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source);
+    void SortAndPrune(PhraseDictionaryNodeMemory &rootNode);
+    PhraseDictionaryNodeMemory &GetRootNode(const InputType &source);
 
-    std::map<long, PhraseDictionaryNodeSCFG> m_collection;
+    std::map<long, PhraseDictionaryNodeMemory> m_collection;
     std::vector<std::string> m_config;
     
     const std::vector<FactorType> *m_input, *m_output;

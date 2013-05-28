@@ -175,15 +175,6 @@ enum FormatType
   ,HieroFormat
 };
 
-enum StatelessFeatureType
-{
-  SetByOriginator // The scores are set by the phrase table, generatio table, or unknown word handler
-                  // They shouldn't be subsequently evaluated.
-  ,RequiresTargetPhrase // Default. simplest, but not in phrase-table. eg. word penalty
-  ,RequiresSource // can't be pre-computed during training, but can be computed before search.eg. source bag-of-word features
-  ,RequiresSegmentation // can't be pre-computed. Depends on segmentation during search. eg. span-length feature
-};
-
 // typedef
 typedef size_t FactorType;
 

@@ -28,7 +28,6 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "TargetPhrase.h"
-#include "DummyScoreProducers.h"
 
 namespace Moses
 {
@@ -333,6 +332,8 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
           if (StaticData::Instance().GetXmlInputType() != XmlIgnore) {
             // only store options if we aren't ignoring them
             for (size_t i=0; i<altTexts.size(); ++i) {
+              Phrase sourcePhrase; // TODO don't know what the source phrase is
+
               // set default probability
               float probValue = 1;
               if (altProbs.size() > 0) probValue = Scan<float>(altProbs[i]);
@@ -344,7 +345,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
 
               targetPhrase.SetXMLScore(scoreValue);
-              targetPhrase.Evaluate();
+              targetPhrase.Evaluate(sourcePhrase);
 
               XmlOption *option = new XmlOption(range,targetPhrase);
               CHECK(option);

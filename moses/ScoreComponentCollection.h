@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/check.hh"
 
-#include "FeatureFunction.h"
+#include "moses/FF/FeatureFunction.h"
 #include "FeatureVector.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -237,13 +237,6 @@ public:
 	}
 
   //For features which have an unbounded number of components
-  void PlusEquals(const FeatureFunction*sp, const std::string& name, float score)
-  {
-    FName fname(sp->GetScoreProducerDescription(),name);
-    m_scores[fname] += score;
-  }
-
-  //For features which have an unbounded number of components
   void PlusEquals(const FeatureFunction*sp, const StringPiece& name, float score)
   {
     FName fname(sp->GetScoreProducerDescription(),name);
@@ -281,8 +274,7 @@ public:
     m_scores[index] = score;
   }
 
-  //For features which have an unbounded number of components
-  void Assign(const FeatureFunction*sp, const std::string name, float score)
+  void Assign(const FeatureFunction*sp, const StringPiece &name, float score)
   {
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] = score;

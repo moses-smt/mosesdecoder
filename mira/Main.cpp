@@ -36,17 +36,18 @@ namespace mpi = boost::mpi;
 #include "Optimiser.h"
 #include "Hildreth.h"
 #include "HypothesisQueue.h"
-#include "moses/FeatureVector.h"
 #include "moses/StaticData.h"
 #include "moses/ChartTrellisPathList.h"
 #include "moses/ChartTrellisPath.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/ThreadPool.h"
-#include "moses/DummyScoreProducers.h"
 #include "moses/LexicalReordering.h"
-#include "moses/WordTranslationFeature.h"
-#include "moses/PhrasePairFeature.h"
 #include "mert/BleuScorer.h"
+#include "moses/FeatureVector.h"
+
+#include "moses/FF/WordTranslationFeature.h"
+#include "moses/FF/PhrasePairFeature.h"
+#include "moses/FF/WordPenaltyProducer.h"
 
 using namespace Mira;
 using namespace std;
@@ -526,12 +527,17 @@ int main(int argc, char** argv) {
   ScoreComponentCollection initialWeights = decoder->getWeights();
     
   if (add2lm != 0) {
-    const LMList& lmList_new = staticData.GetLMList();
-    for (LMList::const_iterator i = lmList_new.begin(); i != lmList_new.end(); ++i) {
-      float lmWeight = initialWeights.GetScoreForProducer(*i) + add2lm;
-      initialWeights.Assign(*i, lmWeight);
-      cerr << "Rank " << rank << ", add " << add2lm << " to lm weight." << endl;
-    }
+		const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+		for (size_t i = 0; i < statefulFFs.size(); ++i) {
+		  const StatefulFeatureFunction *ff = statefulFFs[i];
+		  const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
+		  if (lm) {
+		    float lmWeight = initialWeights.GetScoreForProducer(lm) + add2lm;
+		    initialWeights.Assign(lm, lmWeight);
+		    cerr << "Rank " << rank << ", add " << add2lm << " to lm weight." << endl;
+		  }
+		}
   }
   
   if (normaliseWeights) {
@@ -542,11 +548,18 @@ int main(int argc, char** argv) {
   decoder->setWeights(initialWeights);
   
   // set bleu weight to twice the size of the language model weight(s)
-  const LMList& lmList = staticData.GetLMList();
   if (bleu_weight_lm) {
     float lmSum = 0;
-    for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i)
-      lmSum += abs(initialWeights.GetScoreForProducer(*i));
+		const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+		for (size_t i = 0; i < statefulFFs.size(); ++i) {
+		  const StatefulFeatureFunction *ff = statefulFFs[i];
+		  const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
+		  if (lm) {
+        lmSum += abs(initialWeights.GetScoreForProducer(lm));
+			}
+		}
+
     bleuWeight = lmSum * bleu_weight_lm_factor;
     cerr << "Set bleu weight to lm weight * " << bleu_weight_lm_factor << endl;
   }
@@ -765,15 +778,20 @@ int main(int argc, char** argv) {
 	}
 	
 	// check LM weight
-	const LMList& lmList_new = staticData.GetLMList();
-	for (LMList::const_iterator i = lmList_new.begin(); i != lmList_new.end(); ++i) {
-	  float lmWeight = mosesWeights.GetScoreForProducer(*i);
-	  cerr << "Rank " << rank << ", epoch " << epoch << ", lm weight: " << lmWeight << endl;
-	  if (lmWeight <= 0) {
-	    cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: language model weight should never be <= 0." << endl;
-	    mosesWeights.Assign(*i, 0.1);
-	    cerr << "Rank " << rank << ", epoch " << epoch << ", assign lm weights of 0.1" << endl;
-	  }
+  const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for (size_t i = 0; i < statefulFFs.size(); ++i) {
+    const StatefulFeatureFunction *ff = statefulFFs[i];
+    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
+    if (lm) {
+			float lmWeight = mosesWeights.GetScoreForProducer(lm);
+			cerr << "Rank " << rank << ", epoch " << epoch << ", lm weight: " << lmWeight << endl;
+			if (lmWeight <= 0) {
+			  cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: language model weight should never be <= 0." << endl;
+			  mosesWeights.Assign(lm, 0.1);
+			  cerr << "Rank " << rank << ", epoch " << epoch << ", assign lm weights of 0.1" << endl;
+			}
+		}
 	}
 	
 	// select inference scheme
@@ -1167,17 +1185,22 @@ int main(int argc, char** argv) {
 	// scale LM feature (to avoid rapid changes)
 	if (scale_lm) {
 	  cerr << "scale lm" << endl;
-	  const LMList& lmList_new = staticData.GetLMList();
-	  for (LMList::const_iterator iter = lmList_new.begin(); iter != lmList_new.end(); ++iter) {
-	    // scale down score
-	    if (model_hope_fear) {
-	      scaleFeatureScore(*iter, scale_lm_factor, featureValues, rank, epoch);
-	    }
-	    else {
-	      scaleFeatureScore(*iter, scale_lm_factor, featureValuesHope, rank, epoch);
-	      scaleFeatureScore(*iter, scale_lm_factor, featureValuesFear, rank, epoch);
-	    }
-	  }
+		const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+		for (size_t i = 0; i < statefulFFs.size(); ++i) {
+		  const StatefulFeatureFunction *ff = statefulFFs[i];
+		  const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
+		  if (lm) {
+			  // scale down score
+			  if (model_hope_fear) {
+			    scaleFeatureScore(lm, scale_lm_factor, featureValues, rank, epoch);
+			  }
+			  else {
+			    scaleFeatureScore(lm, scale_lm_factor, featureValuesHope, rank, epoch);
+			    scaleFeatureScore(lm, scale_lm_factor, featureValuesFear, rank, epoch);
+			  }
+			}
+		}
 	}
 	
 	// scale WP
@@ -1848,7 +1871,7 @@ void applyPerFeatureLearningRates(vector<vector<ScoreComponentCollection> > &fea
       featureValues[i][j].MultiplyEqualsBackoff(featureLearningRates, sparse_r0);
 }
 
-void scaleFeatureScore(FeatureFunction *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
+void scaleFeatureScore(const FeatureFunction *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
   string name = sp->GetScoreProducerDescription();
 
   // scale down score
@@ -1862,7 +1885,7 @@ void scaleFeatureScore(FeatureFunction *sp, float scaling_factor, vector<vector<
   }
 }
 
-void scaleFeatureScores(FeatureFunction *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
+void scaleFeatureScores(const FeatureFunction *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
   string name = sp->GetScoreProducerDescription();
 
   // scale down score

@@ -20,27 +20,13 @@ using namespace std;
 
 namespace Moses 
 {
-  
-bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
-                                 , const std::vector<FactorType> &output
-                                 , const std::string &filePath
-                                 , size_t tableLimit)
+PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &line)
+: PhraseDictionaryMemory("PhraseDictionaryALSuffixArray", line)
 {
   const StaticData &staticData = StaticData::Instance();
-  if (staticData.ThreadCount() > 1)
-  {
-    UserMessage::Add("Suffix array implementation is not threadsafe");
-    return false;
+  if (staticData.ThreadCount() > 1) {
+	throw runtime_error("Suffix array implementation is not threadsafe");
   }
-  
-  // file path is the directory of the rules for eacg, NOT the file of all the rules
-  //SetFilePath(filePath);
-  m_tableLimit = tableLimit;
-
-  m_input = &input;
-  m_output = &output;
-  
-  return true;
 }
 
 void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)

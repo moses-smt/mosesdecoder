@@ -60,7 +60,8 @@ void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const {
   UTIL_THROW(util::Exception, "Incremental search is only supported by KenLM.");
 }
 
-void LanguageModel::Evaluate(const TargetPhrase &targetPhrase
+void LanguageModel::Evaluate(const Phrase &source
+					  , const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {

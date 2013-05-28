@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 #include "TypeDef.h"
 #include "FactorTypeSet.h"
+#include "Phrase.h"
 
 namespace Moses
 {
@@ -99,7 +100,8 @@ public:
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
-                       , bool adhereTableLimit) const = 0;
+                       , bool adhereTableLimit
+                       , const Phrase &src) const = 0;
 
 };
 

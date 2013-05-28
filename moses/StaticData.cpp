@@ -24,38 +24,42 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
-#include "DummyScoreProducers.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
 #include "LexicalReordering.h"
-#include "GlobalLexicalModel.h"
-#include "GlobalLexicalModelUnlimited.h"
 #include "SentenceStats.h"
-#include "PhraseBoundaryFeature.h"
-#include "PhrasePairFeature.h"
-#include "PhraseLengthFeature.h"
-#include "TargetWordInsertionFeature.h"
-#include "SourceWordDeletionFeature.h"
-#include "WordTranslationFeature.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
-#include "TargetBigramFeature.h"
-#include "TargetNgramFeature.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
-#include "BleuScoreFeature.h"
 #include "ScoreComponentCollection.h"
-#include "LM/Ken.h"
 
+#include "moses/FF/BleuScoreFeature.h"
+#include "moses/FF/TargetWordInsertionFeature.h"
+#include "moses/FF/SourceWordDeletionFeature.h"
+#include "moses/FF/GlobalLexicalModel.h"
+#include "moses/FF/GlobalLexicalModelUnlimited.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
+#include "moses/FF/WordTranslationFeature.h"
+#include "moses/FF/TargetBigramFeature.h"
+#include "moses/FF/TargetNgramFeature.h"
+#include "moses/FF/PhraseBoundaryFeature.h"
+#include "moses/FF/PhrasePairFeature.h"
+#include "moses/FF/PhraseLengthFeature.h"
+#include "moses/FF/DistortionScoreProducer.h"
+#include "moses/FF/WordPenaltyProducer.h"
+
+#include "LM/Ken.h"
 #ifdef LM_IRST
 #include "LM/IRST.h"
 #endif
@@ -76,38 +80,6 @@ using namespace std;
 
 namespace Moses
 {
-static size_t CalcMax(size_t x, const vector<size_t>& y)
-{
-  size_t max = x;
-  for (vector<size_t>::const_iterator i=y.begin(); i != y.end(); ++i)
-    if (*i > max) max = *i;
-  return max;
-}
-
-static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z)
-{
-  size_t max = x;
-  for (vector<size_t>::const_iterator i=y.begin(); i != y.end(); ++i)
-    if (*i > max) max = *i;
-  for (vector<size_t>::const_iterator i=z.begin(); i != z.end(); ++i)
-    if (*i > max) max = *i;
-  return max;
-}
-
-int GetFeatureIndex(std::map<string, int> &map, const string &featureName)
-{
-  std::map<string, int>::iterator iter;
-  iter = map.find(featureName);
-  if (iter == map.end()) {
-    map[featureName] = 0;
-    return 0;
-  }
-  else {
-    int &index = iter->second;
-    ++index;
-    return index;
-  }
-}
 
 StaticData StaticData::s_instance;
 
@@ -128,6 +100,30 @@ StaticData::StaticData()
 
   // memory pools
   Phrase::InitializeMemPool();
+}
+
+StaticData::~StaticData()
+{
+  RemoveAllInColl(m_decodeGraphs);
+
+  typedef std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > Coll;
+  Coll::iterator iter;
+  for (iter = m_transOptCache.begin(); iter != m_transOptCache.end(); ++iter) {
+	std::pair<TranslationOptionList*,clock_t> &valuePair =iter->second;
+	TranslationOptionList *transOptList = valuePair.first;
+	delete transOptList;
+  }
+
+  /*
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
+  for(size_t i=0;i<producers.size();++i) {
+	FeatureFunction *ff = producers[i];
+    delete ff;
+  }
+  */
+
+  // memory pools
+  Phrase::FinalizeMemPool();
 }
 
 bool StaticData::LoadDataStatic(Parameter *parameter, const std::string &execPath) {
@@ -573,7 +569,6 @@ bool StaticData::LoadData(Parameter *parameter)
     vector<string> toks = Tokenize(line);
 
     const string &feature = toks[0];
-    int featureIndex = GetFeatureIndex(featureIndexMap, feature);
 
     if (feature == "GlobalLexicalModel") {
       GlobalLexicalModel *model = new GlobalLexicalModel(line);
@@ -691,7 +686,7 @@ bool StaticData::LoadData(Parameter *parameter)
       m_phraseDictionary.push_back(model);
     }
     else if (feature == "PhraseDictionaryMemory") {
-      PhraseDictionarySCFG* model = new PhraseDictionarySCFG(line);
+      PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
@@ -710,6 +705,12 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     else if (feature == "PhraseDictionaryMultiModelCounts") {
       PhraseDictionaryMultiModelCounts* model = new PhraseDictionaryMultiModelCounts(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    else if (feature == "PhraseDictionaryALSuffixArray") {
+    	PhraseDictionaryALSuffixArray* model = new PhraseDictionaryALSuffixArray(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
@@ -790,21 +791,6 @@ void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>&
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weights);
-}
-
-StaticData::~StaticData()
-{
-  /*
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
-  for(size_t i=0;i<producers.size();++i) {
-    ScoreProducer *ff = producers[i];
-    cerr << endl << "Destroying" << ff << endl;
-    delete ff;
-  }
-  */
-
-  // memory pools
-  Phrase::FinalizeMemPool();
 }
 
 void StaticData::LoadNonTerminals()
@@ -1160,13 +1146,6 @@ void StaticData::CollectFeatureFunctions()
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     const FeatureFunction *ff = *iter;
-
-    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
-    if (lm) {
-      LanguageModel *lmNonConst = const_cast<LanguageModel*>(lm);
-      m_languageModel.Add(lmNonConst);
-      continue;
-    }
 
     const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
     if (generation) {

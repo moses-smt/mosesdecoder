@@ -228,7 +228,9 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
 
     // source
-    targetPhrase->MutableSourcePhrase().CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    Phrase sourcePhrase;
+    sourcePhrase.CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    targetPhrase->SetSourcePhrase(sourcePhrase);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
@@ -242,9 +244,9 @@ bool RuleTableLoaderStandard::Load(FormatType format
     }
 
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
-    targetPhrase->Evaluate();
+    targetPhrase->Evaluate(sourcePhrase);
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);
+    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);
 
     count++;

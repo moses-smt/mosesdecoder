@@ -41,7 +41,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LM/Base.h"
-#include "LMList.h"
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
@@ -76,7 +75,6 @@ protected:
   std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
-  LMList									m_languageModel;
   ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
@@ -423,8 +421,6 @@ public:
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
   }
-  const LMList &GetLMList() const
-  { return m_languageModel;  }
   const WordPenaltyProducer *GetWordPenaltyProducer() const
   { return m_wpProducer; }
   WordPenaltyProducer *GetWordPenaltyProducer() // for mira

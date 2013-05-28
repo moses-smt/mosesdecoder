@@ -20,12 +20,12 @@
 #include "ChartRuleLookupManagerCYKPlus.h"
 #include "DotChartInMemory.h"
 
-#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
 #include "moses/InputType.h"
 #include "moses/StaticData.h"
 #include "moses/NonTerminal.h"
 #include "moses/ChartCellCollection.h"
 #include "moses/ChartParserCallback.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
 namespace Moses
 {

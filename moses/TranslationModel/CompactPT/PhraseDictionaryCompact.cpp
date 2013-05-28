@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
 #include "moses/ThreadPool.h"
-#include "moses/DummyScoreProducers.h"
 
 using namespace std;
 

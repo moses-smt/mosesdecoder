@@ -10,7 +10,6 @@
 #include "InputFileStream.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "Util.h"
-#include "DummyScoreProducers.h"
 #include "util/tokenize_piece.hh"
 
 namespace Moses
@@ -271,7 +270,6 @@ protected:
   		  std::vector<float> &weights,
   		  float weightWP,
                           Phrase const* srcPtr) const {
-  const StaticData &staticData = StaticData::Instance();
   FactorCollection &factorCollection = FactorCollection::Instance();
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
@@ -285,7 +283,7 @@ protected:
     targetPhrase.SetSourcePhrase(*srcPtr);
 
     targetPhrase.GetScoreBreakdown().Assign(m_obj, scoreVector);
-    targetPhrase.Evaluate();
+    targetPhrase.Evaluate(*srcPtr);
   }
 
   TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,

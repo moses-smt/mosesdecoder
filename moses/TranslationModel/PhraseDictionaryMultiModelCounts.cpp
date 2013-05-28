@@ -108,8 +108,6 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
 {
     RemoveAllInColl(m_lexTable_e2f);
     RemoveAllInColl(m_lexTable_f2e);
-    RemoveAllInColl(m_pd);
-    RemoveAllInColl(m_inverse_pd);
 }
 
 
@@ -280,7 +278,7 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
           scoreVector[1] = -raw_scores[1];
           scoreVector[2] = -raw_scores[2];
           statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
-          statistics->targetPhrase->Evaluate();
+          statistics->targetPhrase->Evaluate(src);
 
           (*allStats)[targetString] = statistics;
 
@@ -333,7 +331,7 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
         scoreVector[4] = FloorScore(TransformScore(2.718));
 
         statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-        statistics->targetPhrase->Evaluate();
+        statistics->targetPhrase->Evaluate(src);
     }
     catch (AlignmentException& e) {
         continue;

@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <cstddef>
 
-#include "moses/FeatureFunction.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 
 namespace Moses
 {
@@ -86,7 +86,8 @@ public:
   // KenLM only (others throw an exception): call incremental search with the model and mapping.
   virtual void IncrementalCallback(Incremental::Manager &manager) const;
 
-  virtual void Evaluate(const TargetPhrase &targetPhrase
+  virtual void Evaluate(const Phrase &source
+	  	  	  	  	  , const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const;
 

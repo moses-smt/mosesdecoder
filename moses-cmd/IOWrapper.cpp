@@ -42,7 +42,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/WordsRange.h"
 #include "moses/TrellisPathList.h"
 #include "moses/StaticData.h"
-#include "moses/DummyScoreProducers.h"
 #include "moses/FeatureVector.h"
 #include "moses/InputFileStream.h"
 #include "IOWrapper.h"

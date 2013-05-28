@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
-#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -68,6 +67,16 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
   return bitmap.Overlap(GetSourceWordsRange());
 }
 
+void TranslationOption::CacheLexReorderingScores(const LexicalReordering &producer, const Scores &score)
+{
+  m_lexReorderingScores[&producer] = score;
+}
+
+void TranslationOption::Evaluate(const InputType &source)
+{
+  m_targetPhrase.Evaluate(source);
+}
+
 TO_STRING_BODY(TranslationOption);
 
 // friend
@@ -80,10 +89,6 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
   return out;
 }
 
-void TranslationOption::CacheLexReorderingScores(const LexicalReordering &producer, const Scores &score)
-{
-  m_lexReorderingScores[&producer] = score;
-}
 
 }
 

@@ -20,7 +20,7 @@
 #pragma once
 
 #include "DotChart.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
 
 #include "util/check.hh"
 #include <vector>
@@ -34,20 +34,20 @@ class DottedRuleInMemory : public DottedRule
 {
  public:
   // used only to init dot stack.
-  explicit DottedRuleInMemory(const PhraseDictionaryNodeSCFG &node)
+  explicit DottedRuleInMemory(const PhraseDictionaryNodeMemory &node)
       : DottedRule()
       , m_node(node) {}
 
-  DottedRuleInMemory(const PhraseDictionaryNodeSCFG &node,
+  DottedRuleInMemory(const PhraseDictionaryNodeMemory &node,
                      const ChartCellLabel &cellLabel,
                      const DottedRuleInMemory &prev)
       : DottedRule(cellLabel, prev)
       , m_node(node) {}
              
-  const PhraseDictionaryNodeSCFG &GetLastNode() const { return m_node; }
+  const PhraseDictionaryNodeMemory &GetLastNode() const { return m_node; }
 
  private:
-  const PhraseDictionaryNodeSCFG &m_node;
+  const PhraseDictionaryNodeMemory &m_node;
 };
 
 typedef std::vector<const DottedRuleInMemory*> DottedRuleList;
@@ -55,7 +55,7 @@ typedef std::vector<const DottedRuleInMemory*> DottedRuleList;
 // Collection of all in-memory DottedRules that share a common start point,
 // grouped by end point.  Additionally, maintains a list of all
 // DottedRules that could be expanded further, i.e. for which the
-// corresponding PhraseDictionaryNodeSCFG is not a leaf.
+// corresponding PhraseDictionaryNodeMemory is not a leaf.
 class DottedRuleColl
 {
 protected:

@@ -186,6 +186,9 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             CHECK(targetLHS->GetFactor(0) != NULL);
             targetPhrase.SetTargetLHS(targetLHS);
 
+            // not tested
+            Phrase sourcePhrase = this->GetSubString(WordsRange(startPos,endPos-1));
+
             // get probability
             float probValue = 1;
             if (altProbs.size() > i && altProbs[i].size() > 0) {
@@ -194,7 +197,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             // convert from prob to log-prob
             float scoreValue = FloorScore(TransformScore(probValue));
             targetPhrase.SetXMLScore(scoreValue);
-            targetPhrase.Evaluate();
+            targetPhrase.Evaluate(sourcePhrase);
 
             // set span and create XmlOption
             WordsRange range(startPos+1,endPos);

@@ -23,8 +23,8 @@
 #include "moses/Util.h"
 #include "moses/Word.h"
 #include "UTrieNode.h"
-#include "PhraseDictionaryNodeSCFG.h"  // For TerminalHasher and TerminalEqualityPred
 #include "Trie.h"
+#include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"  // For TerminalHasher and TerminalEqualityPred
 
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>

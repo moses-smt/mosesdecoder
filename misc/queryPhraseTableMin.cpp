@@ -47,9 +47,7 @@ int main(int argc, char **argv)
   std::vector<FactorType> input(1, 0);
   std::vector<FactorType> output(1, 0);
   std::vector<float> weight(nscores, 0);
-  
-  LMList lmList;
-  
+    
   Parameter *parameter = new Parameter();
   const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
   const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");

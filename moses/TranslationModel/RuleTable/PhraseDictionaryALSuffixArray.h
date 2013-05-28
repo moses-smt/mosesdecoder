@@ -9,7 +9,7 @@
 #ifndef moses_PhraseDictionaryALSuffixArray_h
 #define moses_PhraseDictionaryALSuffixArray_h
 
-#include "PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
 namespace Moses {
   
@@ -18,17 +18,10 @@ namespace Moses {
  *  1. Loads grammar for a sentence to be decoded only when the sentence is being decoded. Unload afterwards
     2. Format of the pt file follows Hiero, rather than Moses
  */   
-class PhraseDictionaryALSuffixArray : public PhraseDictionarySCFG
+class PhraseDictionaryALSuffixArray : public PhraseDictionaryMemory
 {
 public:
-  PhraseDictionaryALSuffixArray(const std::string &line)
-  : PhraseDictionarySCFG("PhraseDictionaryALSuffixArray", line)
-  {}
-
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , size_t tableLimit);
+  PhraseDictionaryALSuffixArray(const std::string &line);
 
   void InitializeForInput(InputType const& source);
 

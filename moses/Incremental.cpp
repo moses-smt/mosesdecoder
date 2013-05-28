@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "moses/Incremental.h"
 
 #include "moses/ChartCell.h"
@@ -5,6 +7,7 @@
 #include "moses/FeatureVector.h"
 #include "moses/StaticData.h"
 #include "moses/Util.h"
+#include "moses/LM/Base.h"
 
 #include "lm/model.hh"
 #include "search/applied.hh"
@@ -181,8 +184,7 @@ Manager::~Manager() {
 }
 
 template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out) {
-  const LMList &lmList = StaticData::Instance().GetLMList();
-  const LanguageModel &abstract = **lmList.begin();
+  const LanguageModel &abstract = GetFirstLM();
   const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
   search::Config config(abstract.GetWeight(), data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
@@ -236,10 +238,7 @@ template void Manager::LMCallback<lm::ngram::ArrayTrieModel>(const lm::ngram::Ar
 template void Manager::LMCallback<lm::ngram::QuantArrayTrieModel>(const lm::ngram::QuantArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 
 const std::vector<search::Applied> &Manager::ProcessSentence() {
-  const LMList &lmList = StaticData::Instance().GetLMList();
-
-  UTIL_THROW_IF(lmList.size() != 1, util::Exception, "Incremental search only supports one language model.");
-  (*lmList.begin())->IncrementalCallback(*this);
+  GetFirstLM().IncrementalCallback(*this);
   return *completed_nbest_;
 }
 
@@ -286,11 +285,33 @@ void PhraseAndFeatures(const search::Applied final, Phrase &phrase, ScoreCompone
   float full, ignored_ngram;
   std::size_t ignored_oov;
 
-  const LMList &lmList = StaticData::Instance().GetLMList();
-  const LanguageModel &model = **lmList.begin();
+  const LanguageModel &model = GetFirstLM();
   model.CalcScore(phrase, full, ignored_ngram, ignored_oov);
   // CalcScore transforms, but EvaluateChart doesn't.  
   features.Assign(&model, full);
+}
+
+const LanguageModel &GetFirstLM()
+{
+  static const LanguageModel *lmStatic = NULL;
+
+  if (lmStatic) {
+    return *lmStatic;
+  }
+
+  // 1st time looking up lm
+  const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for (size_t i = 0; i < statefulFFs.size(); ++i) {
+    const StatefulFeatureFunction *ff = statefulFFs[i];
+    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
+    if (lm) {
+      lmStatic = lm;
+      return *lmStatic;
+    }
+  }
+
+  throw std::logic_error("Incremental search only supports one language model.");
 }
 
 } // namespace Incremental

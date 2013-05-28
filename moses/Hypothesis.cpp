@@ -25,10 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <algorithm>
 
-#include "FFState.h"
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
-#include "DummyScoreProducers.h"
 #include "Hypothesis.h"
 #include "Util.h"
 #include "SquareMatrix.h"
@@ -36,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 #include "Manager.h"
+#include "moses/FF/FFState.h"
 
 using namespace std;
 
@@ -271,7 +270,6 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff) {
  */
 void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 {
-  const StaticData &staticData = StaticData::Instance();
   clock_t t=0; // used to track time
 
   // some stateless score producers cache their values in the translation
@@ -285,9 +283,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
       StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
 	const StatelessFeatureFunction &ff = *sfs[i];
-    if (ff.GetStatelessFeatureType() == RequiresSegmentation) {
-      EvaluateWith(ff);
-    }
+    EvaluateWith(ff);
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =

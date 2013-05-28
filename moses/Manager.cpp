@@ -38,10 +38,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TrellisPathCollection.h"
 #include "TranslationOption.h"
 #include "LexicalReordering.h"
-#include "LMList.h"
 #include "TranslationOptionCollection.h"
-#include "DummyScoreProducers.h"
 #include "Timer.h"
+#include "moses/FF/DistortionScoreProducer.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -466,11 +465,12 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 
   // language model scores
   outputWordGraphStream << "\tl=";
-  const LMList &lmList = StaticData::Instance().GetLMList();
 
-  LMList::const_iterator iterLM;
-  for (iterLM = lmList.begin() ; iterLM != lmList.end() ; ++iterLM) {
-    LanguageModel *lm = *iterLM;
+  const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for (size_t i = 0; i < statefulFFs.size(); ++i) {
+    const StatefulFeatureFunction *ff = statefulFFs[i];
+    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
     vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(lm);
 
     outputWordGraphStream << scores[0];

@@ -70,19 +70,6 @@ public:
 	*/
 	const OutputWordCollection *FindWord(const Word &word) const;
 
-  //Usual feature function methods are not implemented
-  virtual void Evaluate(const PhraseBasedFeatureContext& context,
-  											ScoreComponentCollection* accumulator) const 
-  {
-    throw std::logic_error("GenerationDictionary::Evaluate() Not implemented");
-  }
-
-  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
-                             ScoreComponentCollection* accumulator) const 
-  {
-    throw std::logic_error("GenerationDictionary.Evaluate() Not implemented");
-  }
-
 };
 
 

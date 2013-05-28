@@ -31,7 +31,7 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "TreeInput.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/WordPenaltyProducer.h"
 
 using namespace std;
 using namespace Moses;
@@ -354,9 +354,7 @@ void ChartManager::PreCalculateScores()
             StatelessFeatureFunction::GetStatelessFeatureFunctions();
         ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
         for (size_t k = 0; k < sfs.size(); ++k) {
-          if (sfs[k]->GetStatelessFeatureType() == RequiresSource) {
-            sfs[k]->EvaluateChart(context,&breakdown);
-          }
+          sfs[k]->EvaluateChart(context,&breakdown);
         }
       }
     }

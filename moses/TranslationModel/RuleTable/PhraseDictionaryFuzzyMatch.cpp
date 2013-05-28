@@ -153,7 +153,7 @@ namespace Moses
     string ptFileName = m_FuzzyMatchWrapper->Extract(translationId, dirNameStr);
 
     // populate with rules for this sentence
-    PhraseDictionaryNodeSCFG &rootNode = m_collection[translationId];
+    PhraseDictionaryNodeMemory &rootNode = m_collection[translationId];
     FormatType format = MosesFormat;
         
     // data from file
@@ -238,7 +238,7 @@ namespace Moses
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
       
       targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-      targetPhrase->Evaluate();
+      targetPhrase->Evaluate(sourcePhrase);
       
       TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
       phraseColl.Add(targetPhrase);
@@ -260,16 +260,16 @@ namespace Moses
     //removedirectoryrecursively(dirName);
   }
   
-  TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
+  TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
                                                                                   , const Phrase &source
                                                                                   , const TargetPhrase &target
                                                                                   , const Word *sourceLHS)
   {
-    PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
+    PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
     return currNode.GetOrCreateTargetPhraseCollection();
   }
 
-  PhraseDictionaryNodeSCFG &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
+  PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDictionaryNodeMemory &rootNode
                                                                   , const Phrase &source
                                                                   , const TargetPhrase &target
                                                                   , const Word *sourceLHS)
@@ -280,7 +280,7 @@ namespace Moses
     const AlignmentInfo &alignmentInfo = target.GetAlignNonTerm();
     AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
     
-    PhraseDictionaryNodeSCFG *currNode = &rootNode;
+    PhraseDictionaryNodeMemory *currNode = &rootNode;
     for (size_t pos = 0 ; pos < size ; ++pos) {
       const Word& word = source.GetWord(pos);
       
@@ -310,7 +310,7 @@ namespace Moses
     return *currNode;
   }
 
-  void PhraseDictionaryFuzzyMatch::SortAndPrune(PhraseDictionaryNodeSCFG &rootNode)
+  void PhraseDictionaryFuzzyMatch::SortAndPrune(PhraseDictionaryNodeMemory &rootNode)
   {
     if (GetTableLimit())
     {
@@ -323,17 +323,17 @@ namespace Moses
     m_collection.erase(source.GetTranslationId());
   }
 
-  const PhraseDictionaryNodeSCFG &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source) const 
+  const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source) const 
   {
     long transId = source.GetTranslationId();
-    std::map<long, PhraseDictionaryNodeSCFG>::const_iterator iter = m_collection.find(transId);
+    std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(transId);
     CHECK(iter != m_collection.end());
     return iter->second; 
   }
-  PhraseDictionaryNodeSCFG &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source) 
+  PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source) 
   {
     long transId = source.GetTranslationId();
-    std::map<long, PhraseDictionaryNodeSCFG>::iterator iter = m_collection.find(transId);
+    std::map<long, PhraseDictionaryNodeMemory>::iterator iter = m_collection.find(transId);
     CHECK(iter != m_collection.end());
     return iter->second; 
   }
@@ -343,11 +343,11 @@ namespace Moses
   // friend
   ostream& operator<<(ostream& out, const PhraseDictionaryFuzzyMatch& phraseDict)
   {
-    typedef PhraseDictionaryNodeSCFG::TerminalMap TermMap;
-    typedef PhraseDictionaryNodeSCFG::NonTerminalMap NonTermMap;
+    typedef PhraseDictionaryNodeMemory::TerminalMap TermMap;
+    typedef PhraseDictionaryNodeMemory::NonTerminalMap NonTermMap;
     
     /*
-    const PhraseDictionaryNodeSCFG &coll = phraseDict.m_collection;
+    const PhraseDictionaryNodeMemory &coll = phraseDict.m_collection;
     for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p) {
       const Word &sourceNonTerm = p->first.first;
       out << sourceNonTerm;

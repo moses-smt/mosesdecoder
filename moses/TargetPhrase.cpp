@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "ScoreComponentCollection.h"
 #include "Util.h"
-#include "DummyScoreProducers.h"
 #include "AlignmentInfoCollection.h"
 
 using namespace std;
@@ -89,6 +88,8 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
 
 TargetPhrase::~TargetPhrase()
 {
+  //cerr << "m_lhsTarget=" << m_lhsTarget << endl;
+
   delete m_lhsTarget;
 }
 
@@ -101,7 +102,7 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
-void TargetPhrase::Evaluate()
+void TargetPhrase::Evaluate(const Phrase &source)
 {
   ScoreComponentCollection futureScoreBreakdown;
 
@@ -109,27 +110,24 @@ void TargetPhrase::Evaluate()
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    bool evaluate = false;
-
-    if (!ff.IsStateless()) {
-      evaluate = true;
-    }
-    else {
-      const StatelessFeatureFunction &sff = static_cast<const StatelessFeatureFunction&>(ff);
-      if (sff.GetStatelessFeatureType() != SetByOriginator) {
-        evaluate = true;
-      }
-    }
-
-    if (evaluate) {
-      ff.Evaluate(*this, m_scoreBreakdown, futureScoreBreakdown);
-    }
+    ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
   }
 
   float weightedScore = m_scoreBreakdown.GetWeightedScore();
   float futureScore = futureScoreBreakdown.GetWeightedScore();
 
   m_fullScore = weightedScore + futureScore;
+
+}
+
+void TargetPhrase::Evaluate(const InputType &input)
+{
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+
+  for (size_t i = 0; i < ffs.size(); ++i) {
+	const FeatureFunction &ff = *ffs[i];
+	ff.Evaluate(input, m_scoreBreakdown);
+  }
 }
 
 void TargetPhrase::SetXMLScore(float score)

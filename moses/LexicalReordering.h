@@ -8,10 +8,11 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "FeatureFunction.h"
 
 #include "LexicalReorderingState.h"
 #include "LexicalReorderingTable.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+
 
 namespace Moses
 {
@@ -46,10 +47,6 @@ public:
 		CHECK(0); // not valid for chart decoder
 		return NULL;
 	}
-
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 private:
     bool DecodeCondition(std::string s);

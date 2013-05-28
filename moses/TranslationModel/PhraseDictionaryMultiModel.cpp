@@ -75,7 +75,6 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &descri
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
 {
-    RemoveAllInColl(m_pd);
 }
 
 bool PhraseDictionaryMultiModel::InitDictionary()
@@ -131,7 +130,7 @@ const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollect
 
   TargetPhraseCollection *ret = NULL;
   if (m_mode == "interpolate") {
-    ret = CreateTargetPhraseCollectionLinearInterpolation(allStats, multimodelweights);
+    ret = CreateTargetPhraseCollectionLinearInterpolation(src, allStats, multimodelweights);
   }
 
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
@@ -180,7 +179,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           }
 
           statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
-          statistics->targetPhrase->Evaluate();
+          statistics->targetPhrase->Evaluate(src);
 
           (*allStats)[targetString] = statistics;
 
@@ -198,7 +197,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
 }
 
 
-TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollectionLinearInterpolation(std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const
+TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollectionLinearInterpolation(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const
 {
     TargetPhraseCollection *ret = new TargetPhraseCollection();
     for ( std::map< std::string, multiModelStatistics*>::const_iterator iter = allStats->begin(); iter != allStats->end(); ++iter ) {
@@ -214,11 +213,8 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
         //assuming that last value is phrase penalty
         scoreVector[m_numScoreComponents-1] = 1.0;
 
-        for (size_t i = 0; i < scoreVector.size(); ++i) cerr << scoreVector[i] << " ";
-        cerr << endl;
-
         statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-        statistics->targetPhrase->Evaluate();
+        statistics->targetPhrase->Evaluate(src);
 
         ret->Add(new TargetPhrase(*statistics->targetPhrase));
     }

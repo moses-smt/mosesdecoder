@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
 
 using namespace std;
 
@@ -265,7 +265,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 		targetPhrase.SetInputScore(*inputScores);
 	}
 
-	targetPhrase.Evaluate();
+	targetPhrase.Evaluate(*m_unksrc);
 
 	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase);
 	Add(transOpt);
@@ -408,6 +408,8 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   ProcessUnknownWord();
 
+  EvaluateWithSource();
+
   // Prune
   Prune();
 
@@ -418,6 +420,27 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
+}
+
+void TranslationOptionCollection::EvaluateWithSource()
+{
+  const size_t size = m_source.GetSize();
+  for (size_t startPos = 0 ; startPos < size ; ++startPos) {
+	size_t maxSize = m_source.GetSize() - startPos;
+	size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+	maxSize = std::min(maxSize, maxSizePhrase);
+
+	for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos) {
+	  TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
+
+	  TranslationOptionList::const_iterator iterTransOpt;
+	  for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) {
+		TranslationOption &transOpt = **iterTransOpt;
+		transOpt.Evaluate(m_source);
+	  }
+	}
+  }
+
 }
 
 void TranslationOptionCollection::Sort()
@@ -504,7 +527,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                              , decodeStep
                              , *newPtoc
                              , this
-                             , adhereTableLimit);
+                             , adhereTableLimit
+                             , *sourcePhrase);
         }
 
         // last but 1 partial trans not required anymore

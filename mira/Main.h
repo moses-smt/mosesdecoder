@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/ScoreComponentCollection.h"
 #include "moses/Word.h"
-#include "moses/FeatureFunction.h"
+#include "moses/FF/FeatureFunction.h"
 #include "Decoder.h"
 
 typedef std::map<const Moses::FeatureFunction*, std::vector< float > > ProducerWeightMap;
@@ -52,7 +52,7 @@ void deleteTranslations(std::vector<std::vector<const Moses::Word*> > &translati
 void decodeHopeOrFear(size_t rank, size_t size, size_t decode, std::string decode_filename, std::vector<std::string> &inputSentences, Mira::MosesDecoder* decoder, size_t n, float bleuWeight);
 void applyLearningRates(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, float core_r0, float sparse_r0); 
 void applyPerFeatureLearningRates(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, Moses::ScoreComponentCollection featureLearningRates, float sparse_r0);
-void scaleFeatureScore(Moses::FeatureFunction *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
-void scaleFeatureScores(Moses::FeatureFunction *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
+void scaleFeatureScore(const Moses::FeatureFunction *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
+void scaleFeatureScores(const Moses::FeatureFunction *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
 
 #endif /* MAIN_H_ */

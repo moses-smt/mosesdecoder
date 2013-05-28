@@ -60,7 +60,8 @@ public:
   explicit TargetPhrase(const Phrase &targetPhrase);
   ~TargetPhrase();
 
-  void Evaluate();
+  void Evaluate(const Phrase &source);
+  void Evaluate(const InputType &input);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
@@ -95,11 +96,7 @@ public:
 	{
 		m_sourcePhrase=p;
 	}
-  // ... but if we must store a copy, at least initialize it in-place
-  Phrase &MutableSourcePhrase() {
-    return m_sourcePhrase;
-  }
-	const Phrase& GetSourcePhrase() const 
+	const Phrase& GetSourcePhrase() const
 	{
 		return m_sourcePhrase;
 	}

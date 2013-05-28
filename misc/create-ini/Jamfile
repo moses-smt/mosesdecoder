@@ -1,3 +1,0 @@
-exe create-ini : FF.cpp LM.cpp PT.cpp RO.cpp WP.cpp Distortion.cpp UnknownWP.cpp Main.cpp ; 
-
-

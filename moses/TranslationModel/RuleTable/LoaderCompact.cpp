@@ -20,7 +20,6 @@
 #include "LoaderCompact.h"
 
 #include "moses/AlignmentInfoCollection.h"
-#include "moses/DummyScoreProducers.h"
 #include "moses/InputFileStream.h"
 #include "moses/UserMessage.h"
 #include "moses/Util.h"
@@ -229,7 +228,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     targetPhrase->SetTargetLHS(targetLhs);
     targetPhrase->SetSourcePhrase(sourcePhrase);
 
-    targetPhrase->Evaluate();
+    targetPhrase->Evaluate(sourcePhrase);
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(

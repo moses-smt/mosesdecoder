@@ -38,13 +38,12 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
                                     , const DecodeStep &decodeStep
                                     , PartialTranslOptColl &outputPartialTranslOptColl
                                     , TranslationOptionCollection *toc
-                                    , bool adhereTableLimit) const
+                                    , bool adhereTableLimit
+                                    , const Phrase &src) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion
-
     outputPartialTranslOptColl.Add(new TranslationOption(inputPartialTranslOpt));
-
     return;
   }
 
@@ -77,7 +76,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
       }
 
       outPhrase.GetScoreBreakdown().PlusEquals(transScores);
-      outPhrase.Evaluate(); // need to do this as all non-transcores would be screwed up
+      outPhrase.Evaluate(src); // need to do this as all non-transcores would be screwed up
 
       outPhrase.MergeFactors(targetPhrase, m_newOutputFactors);
 

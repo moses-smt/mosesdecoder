@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "BitmapContainer.h"
 #include "HypothesisStackCubePruning.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/DistortionScoreProducer.h"
 #include "TranslationOptionList.h"
 
 namespace Moses
