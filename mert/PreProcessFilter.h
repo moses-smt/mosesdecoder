@@ -5,7 +5,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 class ofdstream;
 class ifdstream;
@@ -22,8 +22,8 @@ public:
   ~PreProcessFilter();
 
 private:
-    ofdstream* m_toFilter;
-    ifdstream* m_fromFilter;
+  ofdstream* m_toFilter;
+  ifdstream* m_fromFilter;
 };
 
 }

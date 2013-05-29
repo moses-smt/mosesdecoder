@@ -11,7 +11,8 @@
 
 using namespace std;
 
-namespace {
+namespace
+{
 
 MosesTuning::Timer g_timer;
 int g_verbose = 0;
@@ -56,7 +57,8 @@ size_t getNextPound(std::string &str, std::string &substr,
   return pos;
 }
 
-void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+void split(const std::string &s, char delim, std::vector<std::string> &elems)
+{
   std::stringstream ss(s);
   std::string item;
   while(std::getline(ss, item, delim)) {
@@ -65,7 +67,8 @@ void split(const std::string &s, char delim, std::vector<std::string> &elems) {
 }
 
 void Tokenize(const char *str, const char delim,
-              std::vector<std::string> *res) {
+              std::vector<std::string> *res)
+{
   while (1) {
     const char *begin = str;
     while (*str != delim && *str) str++;

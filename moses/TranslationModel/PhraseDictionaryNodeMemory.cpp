@@ -31,8 +31,8 @@ namespace Moses
 PhraseDictionaryNodeMemory::~PhraseDictionaryNodeMemory()
 {
   for (TerminalMap::iterator iter = m_sourceTermMap.begin(); iter != m_sourceTermMap.end(); ++iter) {
-	const PhraseDictionaryNodeMemory *node = iter->second;
-	delete node;
+    const PhraseDictionaryNodeMemory *node = iter->second;
+    delete node;
   }
   for (NonTerminalMap::iterator iter = m_nonTermMap.begin(); iter != m_nonTermMap.end(); ++iter) {
     const PhraseDictionaryNodeMemory *node = iter->second;
@@ -41,7 +41,8 @@ PhraseDictionaryNodeMemory::~PhraseDictionaryNodeMemory()
   delete m_targetPhraseCollection;
 }
 
-TargetPhraseCollection &PhraseDictionaryNodeMemory::GetOrCreateTargetPhraseCollection() {
+TargetPhraseCollection &PhraseDictionaryNodeMemory::GetOrCreateTargetPhraseCollection()
+{
   if (m_targetPhraseCollection == NULL)
     m_targetPhraseCollection = new TargetPhraseCollection();
   return *m_targetPhraseCollection;
@@ -138,9 +139,9 @@ void PhraseDictionaryNodeMemory::Clear()
   m_sourceTermMap.clear();
   m_nonTermMap.clear();
   delete m_targetPhraseCollection;
-  
+
 }
-  
+
 std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeMemory &node)
 {
   out << node.GetTargetPhraseCollection();

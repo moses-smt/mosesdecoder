@@ -50,14 +50,14 @@ int main (int argc, char * const argv[])
   }
 
   int numSourceFactors	= Moses::Scan<int>(argv[1])
-     , numTargetFactors	= Moses::Scan<int>(argv[2])
-     , numScores				= Moses::Scan<int>(argv[3])
-     , tableLimit				= Moses::Scan<int>(argv[4]);
+                          , numTargetFactors	= Moses::Scan<int>(argv[2])
+                              , numScores				= Moses::Scan<int>(argv[3])
+                                  , tableLimit				= Moses::Scan<int>(argv[4]);
   TargetPhraseCollection::s_sortScoreInd			= Moses::Scan<int>(argv[5]);
   assert(TargetPhraseCollection::s_sortScoreInd < numScores);
-  
+
   const string filePath 	= argv[6]
-               ,destPath	= argv[7];
+                            ,destPath	= argv[7];
 
   Moses::InputFileStream inStream(filePath);
 
@@ -128,10 +128,10 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
     } else {
       switch (stage) {
       case 0: {
-    	WordPtr w = Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
-    	if (w != NULL)
-    	  out->AddWord(w);
-    	
+        WordPtr w = Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
+        if (w != NULL)
+          out->AddWord(w);
+
         break;
       }
       case 1: {
@@ -146,19 +146,19 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
       }
       case 3: {
         //targetPhrase.Create1AlignFromString(tok);
-    	targetPhrase.CreateAlignFromString(tok);	
+        targetPhrase.CreateAlignFromString(tok);
         break;
       }
       case 4:
         ++stage;
         break;
-	/*      case 5: {
-        // count info. Only store the 2nd one
-        float val = Moses::Scan<float>(tok);
-        misc[0] = val;
-        ++stage;
-        break;
-	}*/
+        /*      case 5: {
+              // count info. Only store the 2nd one
+              float val = Moses::Scan<float>(tok);
+              misc[0] = val;
+              ++stage;
+              break;
+        }*/
       case 5: {
         // count info. Only store the 2nd one
         //float val = Moses::Scan<float>(tok);
@@ -167,12 +167,12 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
         break;
       }
       case 6: {
-	// store only the 3rd one (rule count)
+        // store only the 3rd one (rule count)
         float val = Moses::Scan<float>(tok);
         misc[0] = val;
         ++stage;
         break;
-	}
+      }
       default:
         cerr << "ERROR in line " << line << endl;
         assert(false);
@@ -189,8 +189,8 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
 } // Tokenize()
 
 OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
-              , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
-              , OnDiskPt::OnDiskWrapper &onDiskWrapper)
+                           , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
+                           , OnDiskPt::OnDiskWrapper &onDiskWrapper)
 {
 
   bool nonTerm = false;
@@ -218,7 +218,7 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
       if (addSourceNonTerm) {
         WordPtr word(new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
-        phrase.AddWord(word);        
+        phrase.AddWord(word);
       }
 
       wordStr = token.substr(splitPos, tokSize - splitPos);
@@ -237,7 +237,7 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
     phrase.AddWord(word);
     out = word;
   }
-  
+
   return out;
 }
 

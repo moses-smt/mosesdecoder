@@ -15,7 +15,7 @@ class FactorCollection;
 class TranslationOptionCollection;
 class Sentence;
 
-/** An input to the decoder where each position can be 1 of a number of words, 
+/** An input to the decoder where each position can be 1 of a number of words,
  *  each with an associated probability. Compared with a sentence, where each position is a word
  */
 class ConfusionNet : public InputType

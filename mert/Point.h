@@ -8,7 +8,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 class FeatureStats;
 class Optimizer;
@@ -53,11 +53,19 @@ private:
   statscore_t m_score;
 
 public:
-  static unsigned int getdim() { return m_dim; }
-  static void setdim(std::size_t d) { m_dim = d; }
+  static unsigned int getdim() {
+    return m_dim;
+  }
+  static void setdim(std::size_t d) {
+    m_dim = d;
+  }
 
-  static unsigned int getpdim() { return m_pdim; }
-  static void setpdim(std::size_t pd) { m_pdim = pd; }
+  static unsigned int getpdim() {
+    return m_pdim;
+  }
+  static void setpdim(std::size_t pd) {
+    m_pdim = pd;
+  }
 
   static void set_optindices(const std::vector<unsigned int>& indices) {
     m_opt_indices = indices;
@@ -90,7 +98,9 @@ public:
    */
   friend std::ostream& operator<<(std::ostream& o,const Point& P);
 
-  void Normalize() { NormalizeL2(); }
+  void Normalize() {
+    NormalizeL2();
+  }
   void NormalizeL2();
   void NormalizeL1();
 
@@ -100,8 +110,12 @@ public:
    */
   void GetAllWeights(std::vector<parameter_t>& w) const;
 
-  statscore_t GetScore() const { return m_score; }
-  void SetScore(statscore_t score) { m_score = score; }
+  statscore_t GetScore() const {
+    return m_score;
+  }
+  void SetScore(statscore_t score) {
+    m_score = score;
+  }
 };
 
 }

@@ -124,10 +124,13 @@ void ChartManager::ProcessSentence()
  *  Doesn't seem to do anything about walls and zones.
  *  @todo check walls & zones. Check that the implementation doesn't leak, xml options sometimes does if you're not careful
  */
-void ChartManager::AddXmlChartOptions() {
+void ChartManager::AddXmlChartOptions()
+{
   const StaticData &staticData = StaticData::Instance();
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
-  IFVERBOSE(2) { cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl; }
+  IFVERBOSE(2) {
+    cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl;
+  }
   if (xmlChartOptionsList.size() == 0) return;
 
   for(std::vector<ChartTranslationOptions*>::const_iterator i = xmlChartOptionsList.begin();
@@ -160,12 +163,12 @@ const ChartHypothesis *ChartManager::GetBestHypothesis() const
   }
 }
 
-  /** Calculate the n-best paths through the output hypergraph.
-   * Return the list of paths with the variable ret
-   * \param count how may paths to return
-   * \param ret return argument
-   * \param onlyDistinct whether to check for distinct output sentence or not (default - don't check, just return top n-paths)
-   */
+/** Calculate the n-best paths through the output hypergraph.
+ * Return the list of paths with the variable ret
+ * \param count how may paths to return
+ * \param ret return argument
+ * \param onlyDistinct whether to check for distinct output sentence or not (default - don't check, just return top n-paths)
+ */
 void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct) const
 {
   size_t size = m_source.GetSize();
@@ -184,7 +187,7 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
 
   // Add it to the n-best list.
   if (count == 1) {
-	ret.Add(basePath);
+    ret.Add(basePath);
     return;
   }
 
@@ -210,21 +213,21 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
 
   // Get all complete translations
   const HypoList *topHypos = lastCell.GetAllSortedHypotheses();
-  
+
   // Create a ChartTrellisDetour for each complete translation and add it to the queue
   HypoList::const_iterator iter;
   for (iter = topHypos->begin(); iter != topHypos->end(); ++iter) {
-	  const ChartHypothesis &hypo = **iter;
-	  boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(hypo));
-	  ChartTrellisDetour *detour = new ChartTrellisDetour(basePath, basePath->GetFinalNode(), hypo);
-	  contenders.Push(detour);
+    const ChartHypothesis &hypo = **iter;
+    boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(hypo));
+    ChartTrellisDetour *detour = new ChartTrellisDetour(basePath, basePath->GetFinalNode(), hypo);
+    contenders.Push(detour);
   }
- 	
+
   delete topHypos;
 
   // Record the output phrase if distinct translations are required.
   set<Phrase> distinctHyps;
-  
+
   // MAIN loop
   for (size_t i = 0; ret.GetSize() < count && !contenders.Empty() && i < popLimit; ++i) {
     // Get the best detour from the queue.
@@ -234,7 +237,7 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
     // Create a full base path from the chosen detour.
     //basePath.reset(new ChartTrellisPath(*detour));
     boost::shared_ptr<ChartTrellisPath> path(new ChartTrellisPath(*detour));
-    
+
     // Generate new detours from this base path and add them to the queue of
     // contenders.  The new detours deviate from the base path by a single
     // replacement along the previous detour sub-path.
@@ -259,17 +262,17 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
 {
   size_t size = m_source.GetSize();
 
-	// which hypotheses are reachable?
-	std::map<unsigned,bool> reachable;
-	WordsRange fullRange(0, size-1);
-	const ChartCell &lastCell = m_hypoStackColl.Get(fullRange);
+  // which hypotheses are reachable?
+  std::map<unsigned,bool> reachable;
+  WordsRange fullRange(0, size-1);
+  const ChartCell &lastCell = m_hypoStackColl.Get(fullRange);
   const ChartHypothesis *hypo = lastCell.GetBestHypothesis();
 
   if (hypo == NULL) {
     // no hypothesis
     return;
   }
-	FindReachableHypotheses( hypo, reachable);
+  FindReachableHypotheses( hypo, reachable);
 
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
@@ -285,42 +288,40 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
 
 void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const
 {
-	// do not recurse, if already visited
-	if (reachable.find(hypo->GetId()) != reachable.end())
-	{
-		return;
-	}
+  // do not recurse, if already visited
+  if (reachable.find(hypo->GetId()) != reachable.end()) {
+    return;
+  }
 
-	// recurse
-	reachable[ hypo->GetId() ] = true;
-	const std::vector<const ChartHypothesis*> &previous = hypo->GetPrevHypos();
-	for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i)
-	{
-		FindReachableHypotheses( *i, reachable );
-	}	
+  // recurse
+  reachable[ hypo->GetId() ] = true;
+  const std::vector<const ChartHypothesis*> &previous = hypo->GetPrevHypos();
+  for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i) {
+    FindReachableHypotheses( *i, reachable );
+  }
 
-	// also loop over recombined hypotheses (arcs)
-	const ChartArcList *arcList = hypo->GetArcList();
-	if (arcList) {
-		ChartArcList::const_iterator iterArc;
-		for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
-			const ChartHypothesis &arc = **iterArc;
-			FindReachableHypotheses( &arc, reachable );
-		}
-	}
+  // also loop over recombined hypotheses (arcs)
+  const ChartArcList *arcList = hypo->GetArcList();
+  if (arcList) {
+    ChartArcList::const_iterator iterArc;
+    for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
+      const ChartHypothesis &arc = **iterArc;
+      FindReachableHypotheses( &arc, reachable );
+    }
+  }
 }
 
 void ChartManager::CreateDeviantPaths(
-    boost::shared_ptr<const ChartTrellisPath> basePath,
-    ChartTrellisDetourQueue &q)
+  boost::shared_ptr<const ChartTrellisPath> basePath,
+  ChartTrellisDetourQueue &q)
 {
   CreateDeviantPaths(basePath, basePath->GetFinalNode(), q);
 }
 
 void ChartManager::CreateDeviantPaths(
-    boost::shared_ptr<const ChartTrellisPath> basePath,
-    const ChartTrellisNode &substitutedNode,
-    ChartTrellisDetourQueue &queue)
+  boost::shared_ptr<const ChartTrellisPath> basePath,
+  const ChartTrellisNode &substitutedNode,
+  ChartTrellisDetourQueue &queue)
 {
   const ChartArcList *arcList = substitutedNode.GetHypothesis().GetArcList();
   if (arcList) {
@@ -340,18 +341,18 @@ void ChartManager::CreateDeviantPaths(
   }
 }
 
-  
-void ChartManager::PreCalculateScores() 
+
+void ChartManager::PreCalculateScores()
 {
   for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
     const ChartTranslationOptions& cto = m_translationOptionList.Get(i);
     for (TargetPhraseCollection::const_iterator j  = cto.GetTargetPhraseCollection().begin();
-     j != cto.GetTargetPhraseCollection().end(); ++j) {
+         j != cto.GetTargetPhraseCollection().end(); ++j) {
       const TargetPhrase* targetPhrase = *j;
       if (m_precalculatedScores.find(*targetPhrase) == m_precalculatedScores.end()) {
         ChartBasedFeatureContext context(*targetPhrase,m_source);
         const vector<const StatelessFeatureFunction*>& sfs =
-            StatelessFeatureFunction::GetStatelessFeatureFunctions();
+          StatelessFeatureFunction::GetStatelessFeatureFunctions();
         ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
         for (size_t k = 0; k < sfs.size(); ++k) {
           sfs[k]->EvaluateChart(context,&breakdown);
@@ -362,18 +363,18 @@ void ChartManager::PreCalculateScores()
 }
 
 void ChartManager::InsertPreCalculatedScores(
-    const TargetPhrase& targetPhrase, ScoreComponentCollection* scoreBreakdown) const 
+  const TargetPhrase& targetPhrase, ScoreComponentCollection* scoreBreakdown) const
 {
-  boost::unordered_map<TargetPhrase,ScoreComponentCollection>::const_iterator scoreIter = 
+  boost::unordered_map<TargetPhrase,ScoreComponentCollection>::const_iterator scoreIter =
     m_precalculatedScores.find(targetPhrase);
   if (scoreIter != m_precalculatedScores.end()) {
     scoreBreakdown->PlusEquals(scoreIter->second);
   } else {
     TRACE_ERR("ERROR: " << targetPhrase << " missing from precalculation cache" << endl);
-    assert(0);  
+    assert(0);
   }
 
 }
 
-  
+
 } // namespace Moses

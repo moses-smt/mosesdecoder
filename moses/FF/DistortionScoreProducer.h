@@ -17,12 +17,12 @@ class WordsRange;
 class DistortionScoreProducer : public StatefulFeatureFunction
 {
 public:
-	DistortionScoreProducer(const std::string &line)
-	: StatefulFeatureFunction("Distortion", 1, line)
-	{}
+  DistortionScoreProducer(const std::string &line)
+    : StatefulFeatureFunction("Distortion", 1, line)
+  {}
 
   static float CalculateDistortionScore(const Hypothesis& hypo,
-                                 const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
+                                        const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
@@ -35,8 +35,8 @@ public:
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection*) const {
-		throw std::logic_error("DistortionScoreProducer not supported in chart decoder, yet");
-	}
+    throw std::logic_error("DistortionScoreProducer not supported in chart decoder, yet");
+  }
 };
 }
 

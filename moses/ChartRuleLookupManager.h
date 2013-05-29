@@ -50,7 +50,7 @@ public:
   const InputType &GetSentence() const {
     return m_sentence;
   }
-  
+
   const ChartCellLabelSet &GetTargetLabelSet(size_t begin, size_t end) const {
     return m_cellCollection.GetBase(WordsRange(begin, end)).GetTargetLabelSet();
   }

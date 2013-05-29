@@ -41,9 +41,9 @@ namespace Moses
 {
 
 TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollection(
-                                                                                const Phrase &source
-                                                                                , const TargetPhrase &target
-                                                                                , const Word *sourceLHS)
+  const Phrase &source
+  , const TargetPhrase &target
+  , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection();
@@ -73,8 +73,8 @@ const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(
 }
 
 PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase &source
-                                                                , const TargetPhrase &target
-                                                                , const Word *sourceLHS)
+    , const TargetPhrase &target
+    , const Word *sourceLHS)
 {
   const size_t size = source.GetSize();
 
@@ -102,12 +102,12 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
 
     CHECK(currNode != NULL);
   }
-  
+
   // finally, the source LHS
   //currNode = currNode->GetOrCreateChild(sourceLHS);
   //CHECK(currNode != NULL);
 
-  
+
   return *currNode;
 }
 
@@ -120,8 +120,7 @@ ChartRuleLookupManager *PhraseDictionaryMemory::CreateRuleLookupManager(
 
 void PhraseDictionaryMemory::SortAndPrune()
 {
-  if (GetTableLimit())
-  {
+  if (GetTableLimit()) {
     m_collection.Sort(GetTableLimit());
   }
 }

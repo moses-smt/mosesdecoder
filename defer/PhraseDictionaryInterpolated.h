@@ -34,12 +34,14 @@ namespace Moses
   **/
 class PhraseDictionaryInterpolated : public PhraseDictionary
 {
-  public:
+public:
 
   PhraseDictionaryInterpolated
-    (size_t numScoreComponent,size_t numInputScores,const PhraseDictionaryFeature* feature);
+  (size_t numScoreComponent,size_t numInputScores,const PhraseDictionaryFeature* feature);
 
-  virtual ~PhraseDictionaryInterpolated() {delete m_targetPhrases;}
+  virtual ~PhraseDictionaryInterpolated() {
+    delete m_targetPhrases;
+  }
 
   // initialize ...
   bool Load(const std::vector<FactorType> &input
@@ -58,7 +60,7 @@ class PhraseDictionaryInterpolated : public PhraseDictionary
     throw std::logic_error("PhraseDictionaryInterpolated.CreateRuleLookupManager() Not implemented");
   }
 
-  private:
+private:
 
   typedef boost::shared_ptr<PhraseDictionaryTreeAdaptor> DictionaryHandle;
   std::vector<DictionaryHandle> m_dictionaries;

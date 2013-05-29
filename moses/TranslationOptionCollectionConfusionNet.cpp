@@ -10,8 +10,8 @@ namespace Moses
 
 /** constructor; just initialize the base class */
 TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet(
-    const ConfusionNet &input
-    , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  const ConfusionNet &input
+  , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
   : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold) {}
 
 /* forcibly create translation option for a particular source word.

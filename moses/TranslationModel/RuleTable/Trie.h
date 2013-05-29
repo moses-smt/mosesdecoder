@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2012 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -39,28 +39,27 @@ class Word;
  */
 class RuleTableTrie : public PhraseDictionary
 {
- public:
+public:
   RuleTableTrie(const std::string &description, const std::string &line)
-      : PhraseDictionary(description, line)
- {}
+    : PhraseDictionary(description, line)
+  {}
 
   virtual ~RuleTableTrie();
 
   bool InitDictionary();
 
   // Required by PhraseDictionary.
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const
-  {
+  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const {
     CHECK(false);
     return NULL;
   }
 
- private:
+private:
   friend class RuleTableLoader;
 
   virtual TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      const Phrase &source, const TargetPhrase &target,
-      const Word *sourceLHS) = 0;
+    const Phrase &source, const TargetPhrase &target,
+    const Word *sourceLHS) = 0;
 
   virtual void SortAndPrune() = 0;
 

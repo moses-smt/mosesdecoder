@@ -182,8 +182,7 @@ std::string PassthroughSGML(std::string &line, const std::string tagName, const 
 
   size_t close = lline.find(rbrack, open);
   //check whether the tag is closed with '/>'; if not return the empty string
-  if (close == std::string::npos)
-  {
+  if (close == std::string::npos) {
     TRACE_ERR("PassthroughSGML error: the <passthrough info/> tag does not end properly\n");
     return meta;
   }
@@ -198,8 +197,7 @@ std::string PassthroughSGML(std::string &line, const std::string tagName, const 
 
   lline = ToLower(line);
   open = lline.find(lbrack+tagName);
-  if (open != std::string::npos)
-  {
+  if (open != std::string::npos) {
     TRACE_ERR("PassthroughSGML error: there are two <passthrough> tags\n");
   }
   return meta;

@@ -30,17 +30,31 @@
 
 #include "diy-fp.h"
 
-namespace double_conversion {
+namespace double_conversion
+{
 
 // We assume that doubles and uint64_t have the same endianness.
-static uint64_t double_to_uint64(double d) { return BitCast<uint64_t>(d); }
-static double uint64_to_double(uint64_t d64) { return BitCast<double>(d64); }
-static uint32_t float_to_uint32(float f) { return BitCast<uint32_t>(f); }
-static float uint32_to_float(uint32_t d32) { return BitCast<float>(d32); }
+static uint64_t double_to_uint64(double d)
+{
+  return BitCast<uint64_t>(d);
+}
+static double uint64_to_double(uint64_t d64)
+{
+  return BitCast<double>(d64);
+}
+static uint32_t float_to_uint32(float f)
+{
+  return BitCast<uint32_t>(f);
+}
+static float uint32_to_float(uint32_t d32)
+{
+  return BitCast<float>(d32);
+}
 
 // Helper functions for doubles.
-class Double {
- public:
+class Double
+{
+public:
   static const uint64_t kSignMask = UINT64_2PART_C(0x80000000, 00000000);
   static const uint64_t kExponentMask = UINT64_2PART_C(0x7FF00000, 00000000);
   static const uint64_t kSignificandMask = UINT64_2PART_C(0x000FFFFF, FFFFFFFF);
@@ -113,7 +127,7 @@ class Double {
 
     uint64_t d64 = AsUint64();
     int biased_e =
-        static_cast<int>((d64 & kExponentMask) >> kPhysicalSignificandSize);
+      static_cast<int>((d64 & kExponentMask) >> kPhysicalSignificandSize);
     return biased_e - kExponentBias;
   }
 
@@ -143,13 +157,13 @@ class Double {
   bool IsNan() const {
     uint64_t d64 = AsUint64();
     return ((d64 & kExponentMask) == kExponentMask) &&
-        ((d64 & kSignificandMask) != 0);
+           ((d64 & kSignificandMask) != 0);
   }
 
   bool IsInfinite() const {
     uint64_t d64 = AsUint64();
     return ((d64 & kExponentMask) == kExponentMask) &&
-        ((d64 & kSignificandMask) == 0);
+           ((d64 & kSignificandMask) == 0);
   }
 
   int Sign() const {
@@ -197,7 +211,9 @@ class Double {
     return physical_significand_is_zero && (Exponent() != kDenormalExponent);
   }
 
-  double value() const { return uint64_to_double(d64_); }
+  double value() const {
+    return uint64_to_double(d64_);
+  }
 
   // Returns the significand size for a given order of magnitude.
   // If v = f*2^e with 2^p-1 <= f <= 2^p then p+e is v's order of magnitude.
@@ -221,7 +237,7 @@ class Double {
     return Double(kNaN).value();
   }
 
- private:
+private:
   static const int kExponentBias = 0x3FF + kPhysicalSignificandSize;
   static const int kDenormalExponent = -kExponentBias + 1;
   static const int kMaxExponent = 0x7FF - kExponentBias;
@@ -254,12 +270,13 @@ class Double {
       biased_exponent = static_cast<uint64_t>(exponent + kExponentBias);
     }
     return (significand & kSignificandMask) |
-        (biased_exponent << kPhysicalSignificandSize);
+           (biased_exponent << kPhysicalSignificandSize);
   }
 };
 
-class Single {
- public:
+class Single
+{
+public:
   static const uint32_t kSignMask = 0x80000000;
   static const uint32_t kExponentMask = 0x7F800000;
   static const uint32_t kSignificandMask = 0x007FFFFF;
@@ -289,7 +306,7 @@ class Single {
 
     uint32_t d32 = AsUint32();
     int biased_e =
-        static_cast<int>((d32 & kExponentMask) >> kPhysicalSignificandSize);
+      static_cast<int>((d32 & kExponentMask) >> kPhysicalSignificandSize);
     return biased_e - kExponentBias;
   }
 
@@ -319,13 +336,13 @@ class Single {
   bool IsNan() const {
     uint32_t d32 = AsUint32();
     return ((d32 & kExponentMask) == kExponentMask) &&
-        ((d32 & kSignificandMask) != 0);
+           ((d32 & kSignificandMask) != 0);
   }
 
   bool IsInfinite() const {
     uint32_t d32 = AsUint32();
     return ((d32 & kExponentMask) == kExponentMask) &&
-        ((d32 & kSignificandMask) == 0);
+           ((d32 & kSignificandMask) == 0);
   }
 
   int Sign() const {
@@ -373,7 +390,9 @@ class Single {
     return physical_significand_is_zero && (Exponent() != kDenormalExponent);
   }
 
-  float value() const { return uint32_to_float(d32_); }
+  float value() const {
+    return uint32_to_float(d32_);
+  }
 
   static float Infinity() {
     return Single(kInfinity).value();
@@ -383,7 +402,7 @@ class Single {
     return Single(kNaN).value();
   }
 
- private:
+private:
   static const int kExponentBias = 0x7F + kPhysicalSignificandSize;
   static const int kDenormalExponent = -kExponentBias + 1;
   static const int kMaxExponent = 0xFF - kExponentBias;

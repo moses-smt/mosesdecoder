@@ -48,10 +48,10 @@ protected:
   float m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
 
-	// in case of confusion net, ptr to source phrase
-	Phrase m_sourcePhrase; 
-	const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
-	const Word *m_lhsTarget;
+  // in case of confusion net, ptr to source phrase
+  Phrase m_sourcePhrase;
+  const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
+  const Word *m_lhsTarget;
 
 public:
   TargetPhrase();
@@ -86,26 +86,28 @@ public:
     return m_fullScore;
   }
 
-	inline const ScoreComponentCollection &GetScoreBreakdown() const
-	{ return m_scoreBreakdown;	}
-  inline ScoreComponentCollection &GetScoreBreakdown()
-  { return m_scoreBreakdown;  }
+  inline const ScoreComponentCollection &GetScoreBreakdown() const {
+    return m_scoreBreakdown;
+  }
+  inline ScoreComponentCollection &GetScoreBreakdown() {
+    return m_scoreBreakdown;
+  }
 
   //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
-	void SetSourcePhrase(const Phrase&  p) 
-	{
-		m_sourcePhrase=p;
-	}
-	const Phrase& GetSourcePhrase() const
-	{
-		return m_sourcePhrase;
-	}
-	
-	void SetTargetLHS(const Word *lhs)
-	{ 	m_lhsTarget = lhs; }
-	const Word &GetTargetLHS() const
-	{ return *m_lhsTarget; }
-	
+  void SetSourcePhrase(const Phrase&  p) {
+    m_sourcePhrase=p;
+  }
+  const Phrase& GetSourcePhrase() const {
+    return m_sourcePhrase;
+  }
+
+  void SetTargetLHS(const Word *lhs) {
+    m_lhsTarget = lhs;
+  }
+  const Word &GetTargetLHS() const {
+    return *m_lhsTarget;
+  }
+
   void SetAlignmentInfo(const StringPiece &alignString);
   void SetAlignTerm(const AlignmentInfo *alignTerm) {
     m_alignTerm = alignTerm;
@@ -117,11 +119,13 @@ public:
   void SetAlignTerm(const AlignmentInfo::CollType &coll);
   void SetAlignNonTerm(const AlignmentInfo::CollType &coll);
 
-  const AlignmentInfo &GetAlignTerm() const
-	{ return *m_alignTerm; }
-  const AlignmentInfo &GetAlignNonTerm() const
-	{ return *m_alignNonTerm; }
-	
+  const AlignmentInfo &GetAlignTerm() const {
+    return *m_alignTerm;
+  }
+  const AlignmentInfo &GetAlignNonTerm() const {
+    return *m_alignNonTerm;
+  }
+
 
   TO_STRING();
 };
@@ -131,10 +135,8 @@ std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 /**
  * Hasher that looks at source and target phrase.
  **/
-struct TargetPhraseHasher 
-{
-  inline size_t operator()(const TargetPhrase& targetPhrase) const
-  {
+struct TargetPhraseHasher {
+  inline size_t operator()(const TargetPhrase& targetPhrase) const {
     size_t seed = 0;
     boost::hash_combine(seed, targetPhrase);
     boost::hash_combine(seed, targetPhrase.GetSourcePhrase());
@@ -145,14 +147,12 @@ struct TargetPhraseHasher
   }
 };
 
-struct TargetPhraseComparator
-{
-  inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const
-  {
+struct TargetPhraseComparator {
+  inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const {
     return lhs.Compare(rhs) == 0 &&
-      lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0 &&
-      lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
-      lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
+           lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0 &&
+           lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
+           lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
   }
 
 };

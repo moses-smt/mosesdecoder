@@ -18,21 +18,21 @@ SearchNormalBatch::SearchNormalBatch(Manager& manager, const InputType &source, 
   // Split the feature functions into sets of stateless, stateful
   // distributed lm, and stateful non-distributed.
   const vector<const StatefulFeatureFunction*>& ffs =
-      StatefulFeatureFunction::GetStatefulFeatureFunctions();
+    StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
-      if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") { // TODO WFT
-          m_dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
-          m_dlm_ffs[i]->SetFFStateIdx(i);
-      }
-      else {
-          m_stateful_ffs[i] = const_cast<StatefulFeatureFunction*>(ffs[i]);
-      }
+    if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") { // TODO WFT
+      m_dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
+      m_dlm_ffs[i]->SetFFStateIdx(i);
+    } else {
+      m_stateful_ffs[i] = const_cast<StatefulFeatureFunction*>(ffs[i]);
+    }
   }
   m_stateless_ffs = StatelessFeatureFunction::GetStatelessFeatureFunctions();
- 
+
 }
 
-SearchNormalBatch::~SearchNormalBatch() {
+SearchNormalBatch::~SearchNormalBatch()
+{
 }
 
 /**
@@ -138,79 +138,79 @@ void SearchNormalBatch::ExpandHypothesis(const Hypothesis &hypothesis, const Tra
     for (dlm_iter = m_dlm_ffs.begin();
          dlm_iter != m_dlm_ffs.end();
          ++dlm_iter) {
-        const FFState* input_state = newHypo->GetPrevHypo() ? newHypo->GetPrevHypo()->GetFFState((*dlm_iter).first) : NULL;
-        (*dlm_iter).second->IssueRequestsFor(*newHypo, input_state);
+      const FFState* input_state = newHypo->GetPrevHypo() ? newHypo->GetPrevHypo()->GetFFState((*dlm_iter).first) : NULL;
+      (*dlm_iter).second->IssueRequestsFor(*newHypo, input_state);
     }
     m_partial_hypos.push_back(newHypo);
-  }
-  else {
+  } else {
     std::cerr << "can't use early discarding with batch decoding!" << std::endl;
     abort();
   }
 }
 
-void SearchNormalBatch::EvalAndMergePartialHypos() {
-    std::vector<Hypothesis*>::iterator partial_hypo_iter;
-    for (partial_hypo_iter = m_partial_hypos.begin();
-         partial_hypo_iter != m_partial_hypos.end();
-         ++partial_hypo_iter) {
-        Hypothesis* hypo = *partial_hypo_iter;
+void SearchNormalBatch::EvalAndMergePartialHypos()
+{
+  std::vector<Hypothesis*>::iterator partial_hypo_iter;
+  for (partial_hypo_iter = m_partial_hypos.begin();
+       partial_hypo_iter != m_partial_hypos.end();
+       ++partial_hypo_iter) {
+    Hypothesis* hypo = *partial_hypo_iter;
 
-        // Evaluate with other ffs.
-        std::map<int, StatefulFeatureFunction*>::iterator sfff_iter;
-        for (sfff_iter = m_stateful_ffs.begin();
-             sfff_iter != m_stateful_ffs.end();
-             ++sfff_iter) {
-          const StatefulFeatureFunction &ff = *(sfff_iter->second);
-          int state_idx = sfff_iter->first;
-          hypo->EvaluateWith(ff, state_idx);
-        }
-        std::vector<const StatelessFeatureFunction*>::iterator slff_iter;
-        for (slff_iter = m_stateless_ffs.begin();
-             slff_iter != m_stateless_ffs.end();
-             ++slff_iter) {
-            hypo->EvaluateWith(**slff_iter);
-        }
+    // Evaluate with other ffs.
+    std::map<int, StatefulFeatureFunction*>::iterator sfff_iter;
+    for (sfff_iter = m_stateful_ffs.begin();
+         sfff_iter != m_stateful_ffs.end();
+         ++sfff_iter) {
+      const StatefulFeatureFunction &ff = *(sfff_iter->second);
+      int state_idx = sfff_iter->first;
+      hypo->EvaluateWith(ff, state_idx);
     }
+    std::vector<const StatelessFeatureFunction*>::iterator slff_iter;
+    for (slff_iter = m_stateless_ffs.begin();
+         slff_iter != m_stateless_ffs.end();
+         ++slff_iter) {
+      hypo->EvaluateWith(**slff_iter);
+    }
+  }
 
-    // Wait for all requests from the distributed LM to come back.
+  // Wait for all requests from the distributed LM to come back.
+  std::map<int, LanguageModel*>::iterator dlm_iter;
+  for (dlm_iter = m_dlm_ffs.begin();
+       dlm_iter != m_dlm_ffs.end();
+       ++dlm_iter) {
+    (*dlm_iter).second->sync();
+  }
+
+  // Incorporate the DLM scores into all hypotheses and put into their
+  // stacks.
+  for (partial_hypo_iter = m_partial_hypos.begin();
+       partial_hypo_iter != m_partial_hypos.end();
+       ++partial_hypo_iter) {
+    Hypothesis* hypo = *partial_hypo_iter;
+
+    // Calculate DLM scores.
     std::map<int, LanguageModel*>::iterator dlm_iter;
     for (dlm_iter = m_dlm_ffs.begin();
          dlm_iter != m_dlm_ffs.end();
          ++dlm_iter) {
-        (*dlm_iter).second->sync();
+      LanguageModel &lm = *(dlm_iter->second);
+      hypo->EvaluateWith(lm, (*dlm_iter).first);
     }
 
-    // Incorporate the DLM scores into all hypotheses and put into their
-    // stacks.
-    for (partial_hypo_iter = m_partial_hypos.begin();
-         partial_hypo_iter != m_partial_hypos.end();
-         ++partial_hypo_iter) {
-        Hypothesis* hypo = *partial_hypo_iter;
+    // Put completed hypothesis onto its stack.
+    size_t wordsTranslated = hypo->GetWordsBitmap().GetNumWordsCovered();
+    m_hypoStackColl[wordsTranslated]->AddPrune(hypo);
+  }
+  m_partial_hypos.clear();
 
-        // Calculate DLM scores.
-        std::map<int, LanguageModel*>::iterator dlm_iter;
-        for (dlm_iter = m_dlm_ffs.begin();
-             dlm_iter != m_dlm_ffs.end();
-             ++dlm_iter) {
-          LanguageModel &lm = *(dlm_iter->second);
-          hypo->EvaluateWith(lm, (*dlm_iter).first);
-        }
-
-        // Put completed hypothesis onto its stack.
-        size_t wordsTranslated = hypo->GetWordsBitmap().GetNumWordsCovered();
-        m_hypoStackColl[wordsTranslated]->AddPrune(hypo);
-    }
-    m_partial_hypos.clear();
-
-    std::vector < HypothesisStack* >::iterator stack_iter;
-    HypothesisStackNormal* stack;
-    for (stack_iter = m_hypoStackColl.begin();
-         stack_iter != m_hypoStackColl.end();
-         ++stack_iter) {
-        stack = static_cast<HypothesisStackNormal*>(*stack_iter);
-        stack->PruneToSize(m_max_stack_size);
-    }
+  std::vector < HypothesisStack* >::iterator stack_iter;
+  HypothesisStackNormal* stack;
+  for (stack_iter = m_hypoStackColl.begin();
+       stack_iter != m_hypoStackColl.end();
+       ++stack_iter) {
+    stack = static_cast<HypothesisStackNormal*>(*stack_iter);
+    stack->PruneToSize(m_max_stack_size);
+  }
 }
 
 }

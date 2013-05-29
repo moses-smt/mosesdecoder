@@ -44,7 +44,7 @@ class WordsRange;
 //! Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
 {
- public:
+public:
   ChartRuleLookupManagerMemory(const InputType &sentence,
                                const ChartCellCollectionBase &cellColl,
                                const PhraseDictionaryMemory &ruleTable);
@@ -55,7 +55,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
     const WordsRange &range,
     ChartParserCallback &outColl);
 
- private:
+private:
   void ExtendPartialRuleApplication(
     const DottedRuleInMemory &prevDottedRule,
     size_t startPos,

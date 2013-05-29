@@ -52,7 +52,7 @@ protected:
   const TargetPhrase &m_targetPhrase;
 
   WordsRange					m_currSourceWordsRange;
-	std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
+  std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
   ,m_lmNGram
   ,m_lmPrefix;
@@ -68,8 +68,8 @@ protected:
   unsigned m_id; /* pkoehn wants to log the order in which hypotheses were generated */
 
   //! not implemented
-  ChartHypothesis(); 
-  
+  ChartHypothesis();
+
   //! not implemented
   ChartHypothesis(const ChartHypothesis &copy);
 
@@ -96,35 +96,39 @@ public:
 
   ~ChartHypothesis();
 
-  unsigned GetId() const { return m_id; }
+  unsigned GetId() const {
+    return m_id;
+  }
 
   //! Get the rule that created this hypothesis
   const TargetPhrase &GetCurrTargetPhrase()const {
     return m_targetPhrase;
   }
-  
+
   //! the source range that this hypothesis spans
   const WordsRange &GetCurrSourceRange()const {
     return m_currSourceWordsRange;
   }
-  
+
   //! the arc list when creating n-best lists
   inline const ChartArcList* GetArcList() const {
     return m_arcList;
   }
-  
+
   //! the feature function states for a particular feature \param featureID
-	inline const FFState* GetFFState( size_t featureID ) const {
-		return m_ffStates[ featureID ];
-	}
-  
+  inline const FFState* GetFFState( size_t featureID ) const {
+    return m_ffStates[ featureID ];
+  }
+
   //! reference back to the manager
-	inline const ChartManager& GetManager() const { return m_manager; }
+  inline const ChartManager& GetManager() const {
+    return m_manager;
+  }
 
   void CreateOutputPhrase(Phrase &outPhrase) const;
   Phrase GetOutputPhrase() const;
 
-	int RecombineCompare(const ChartHypothesis &compare) const;
+  int RecombineCompare(const ChartHypothesis &compare) const;
 
   void CalcScore();
 
@@ -133,30 +137,34 @@ public:
   void SetWinningHypo(const ChartHypothesis *hypo);
 
   //! get the unweighted score for each feature function
-  const ScoreComponentCollection &GetScoreBreakdown() const 
-  { return m_scoreBreakdown; }
-  
-  //! Get the weighted total score
-  float GetTotalScore() const 
-  { return m_totalScore; }
+  const ScoreComponentCollection &GetScoreBreakdown() const {
+    return m_scoreBreakdown;
+  }
 
-  //! vector of previous hypotheses this hypo is built on 
-  const std::vector<const ChartHypothesis*> &GetPrevHypos() const
-  { return m_prevHypos; }
+  //! Get the weighted total score
+  float GetTotalScore() const {
+    return m_totalScore;
+  }
+
+  //! vector of previous hypotheses this hypo is built on
+  const std::vector<const ChartHypothesis*> &GetPrevHypos() const {
+    return m_prevHypos;
+  }
 
   //! get a particular previous hypos
-	const ChartHypothesis* GetPrevHypo(size_t pos) const {
-		return m_prevHypos[pos];
-	}
-  
+  const ChartHypothesis* GetPrevHypo(size_t pos) const {
+    return m_prevHypos[pos];
+  }
+
   //! get the constituency label that covers this hypo
   const Word &GetTargetLHS() const {
     return GetCurrTargetPhrase().GetTargetLHS();
   }
 
   //! get the best hypo in the arc list when doing n-best list creation. It's either this hypothesis, or the best hypo is this hypo is in the arc list
-	const ChartHypothesis* GetWinningHypothesis() const 
-  {	return m_winningHypo;	}
+  const ChartHypothesis* GetWinningHypothesis() const {
+    return m_winningHypo;
+  }
 
   TO_STRING();
 

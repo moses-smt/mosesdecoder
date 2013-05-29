@@ -29,53 +29,55 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "lm/state.hh"
 
-namespace Moses {
+namespace Moses
+{
 
 //! This will also load. Returns a templated backward LM.
 LanguageModel *ConstructBackwardLM(const std::string &file, FactorType factorType, bool lazy);
 
- class FFState;
- // template<typename M> class BackwardLanguageModelTest;
- class BackwardLanguageModelTest;
+class FFState;
+// template<typename M> class BackwardLanguageModelTest;
+class BackwardLanguageModelTest;
 
 /*
  * An implementation of single factor backward LM using Kenneth's code.
  */
-template <class Model> class BackwardLanguageModel : public LanguageModelKen<Model> {
-  public:
-    BackwardLanguageModel(const std::string &file, FactorType factorType, bool lazy);
+template <class Model> class BackwardLanguageModel : public LanguageModelKen<Model>
+{
+public:
+  BackwardLanguageModel(const std::string &file, FactorType factorType, bool lazy);
 
-    virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
+  virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
-    virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
-    virtual FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+  virtual FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
-    FFState *Evaluate(const Phrase &phrase, const FFState *ps, float &returnedScore) const;
+  FFState *Evaluate(const Phrase &phrase, const FFState *ps, float &returnedScore) const;
 
-  private:
+private:
 
-    // These lines are required to make the parent class's protected members visible to this class
-    using LanguageModelKen<Model>::m_ngram;
-    using LanguageModelKen<Model>::m_beginSentenceFactor;
-    using LanguageModelKen<Model>::m_factorType;
-    using LanguageModelKen<Model>::TranslateID;
+  // These lines are required to make the parent class's protected members visible to this class
+  using LanguageModelKen<Model>::m_ngram;
+  using LanguageModelKen<Model>::m_beginSentenceFactor;
+  using LanguageModelKen<Model>::m_factorType;
+  using LanguageModelKen<Model>::TranslateID;
 
-    //    friend class Moses::BackwardLanguageModelTest<Model>;
-    friend class Moses::BackwardLanguageModelTest;
-    /*
-    lm::ngram::ChartState* GetState(FFState *ffState) {
-      return NULL;
-    }
-    */
-    /*
-    double Score(FFState *ffState) {
-    BackwardLMState *lmState = static_cast< BackwardLMState* >(ffState);
-    lm::ngram::ChartState &state = lmState->state;
-    lm::ngram::RuleScore<Model> ruleScore(*m_ngram, lmState);
-    return ruleScore.Finish();
+  //    friend class Moses::BackwardLanguageModelTest<Model>;
+  friend class Moses::BackwardLanguageModelTest;
+  /*
+  lm::ngram::ChartState* GetState(FFState *ffState) {
+    return NULL;
   }
-    */
+  */
+  /*
+  double Score(FFState *ffState) {
+  BackwardLMState *lmState = static_cast< BackwardLMState* >(ffState);
+  lm::ngram::ChartState &state = lmState->state;
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, lmState);
+  return ruleScore.Finish();
+  }
+  */
 };
 
 } // namespace Moses
@@ -83,7 +85,7 @@ template <class Model> class BackwardLanguageModel : public LanguageModelKen<Mod
 #endif
 
 // To create a sample backward language model using SRILM:
-// 
+//
 // (ngram-count and reverse-text are SRILM programs)
 //
 // head -n 49 ./contrib/synlm/hhmm/LICENSE | tail -n 45 | tr '\n' ' ' | ./scripts/ems/support/split-sentences.perl | ./scripts/tokenizer/lowercase.perl | ./scripts/tokenizer/tokenizer.perl | reverse-text | ngram-count -order 3 -text - -lm - > lm/backward.arpa

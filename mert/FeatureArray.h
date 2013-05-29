@@ -36,16 +36,28 @@ public:
   FeatureArray();
   ~FeatureArray();
 
-  void clear() { m_array.clear(); }
+  void clear() {
+    m_array.clear();
+  }
 
 
-  int getIndex() const { return m_index; }
-  void setIndex(const int value) { m_index = value; }
+  int getIndex() const {
+    return m_index;
+  }
+  void setIndex(const int value) {
+    m_index = value;
+  }
 
-  FeatureStats& get(std::size_t i) { return m_array.at(i); }
-  const FeatureStats& get(std::size_t i) const { return m_array.at(i); }
+  FeatureStats& get(std::size_t i) {
+    return m_array.at(i);
+  }
+  const FeatureStats& get(std::size_t i) const {
+    return m_array.at(i);
+  }
 
-  void add(FeatureStats& e) { m_array.push_back(e); }
+  void add(FeatureStats& e) {
+    m_array.push_back(e);
+  }
 
   //ADDED BY TS
   void swap(std::size_t i, std::size_t j) {
@@ -59,13 +71,23 @@ public:
 
   void merge(FeatureArray& e);
 
-  std::size_t size() const { return m_array.size(); }
+  std::size_t size() const {
+    return m_array.size();
+  }
 
-  std::size_t NumberOfFeatures() const { return m_num_features; }
-  void NumberOfFeatures(std::size_t v) { m_num_features = v; }
+  std::size_t NumberOfFeatures() const {
+    return m_num_features;
+  }
+  void NumberOfFeatures(std::size_t v) {
+    m_num_features = v;
+  }
 
-  std::string Features() const { return m_features; }
-  void Features(const std::string& f) { m_features = f; }
+  std::string Features() const {
+    return m_features;
+  }
+  void Features(const std::string& f) {
+    m_features = f;
+  }
 
   void savetxt(std::ostream* os);
   void savebin(std::ostream* os);

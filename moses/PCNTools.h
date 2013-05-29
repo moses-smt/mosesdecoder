@@ -36,7 +36,7 @@ namespace PCN
 typedef std::pair<std::pair<std::string, std::vector<float> >, size_t> CNAlt;
 typedef std::vector<CNAlt> CNCol;
 typedef std::vector<CNCol> CN;
-  
+
 /** Given a string ((('foo',0.1,1),('bar',0.9,2)),...) representation of a
  * word lattice in PCN format, return a CN object representing the lattice
  */

@@ -30,15 +30,17 @@
 
 #include "utils.h"
 
-namespace double_conversion {
+namespace double_conversion
+{
 
 // This "Do It Yourself Floating Point" class implements a floating-point number
 // with a uint64 significand and an int exponent. Normalized DiyFp numbers will
 // have the most significant bit of the significand set.
 // Multiplication and Subtraction do not normalize their results.
 // DiyFp are not designed to contain special doubles (NaN and Infinity).
-class DiyFp {
- public:
+class DiyFp
+{
+public:
   static const int kSignificandSize = 64;
 
   DiyFp() : f_(0), e_(0) {}
@@ -100,13 +102,21 @@ class DiyFp {
     return result;
   }
 
-  uint64_t f() const { return f_; }
-  int e() const { return e_; }
+  uint64_t f() const {
+    return f_;
+  }
+  int e() const {
+    return e_;
+  }
 
-  void set_f(uint64_t new_value) { f_ = new_value; }
-  void set_e(int new_value) { e_ = new_value; }
+  void set_f(uint64_t new_value) {
+    f_ = new_value;
+  }
+  void set_e(int new_value) {
+    e_ = new_value;
+  }
 
- private:
+private:
   static const uint64_t kUint64MSB = UINT64_2PART_C(0x80000000, 00000000);
 
   uint64_t f_;

@@ -18,7 +18,7 @@ int main(int argc, char **argv)
   // TODO all of these are empty for now
   string config;
   string factors;
-  string filter; 
+  string filter;
 
   BleuScorer scorer(config);
   scorer.setFactors(factors);

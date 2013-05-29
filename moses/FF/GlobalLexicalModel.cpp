@@ -10,7 +10,7 @@ using namespace std;
 namespace Moses
 {
 GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
-: StatelessFeatureFunction("GlobalLexicalModel",1, line)
+  : StatelessFeatureFunction("GlobalLexicalModel",1, line)
 {
   std::cerr << "Creating global lexical model...\n";
 
@@ -23,14 +23,11 @@ GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
     if (args[0] == "file") {
       CHECK(args.size() == 2);
       filePath = args[1];
-    }
-    else if (args[0] == "inputFactors") {
+    } else if (args[0] == "inputFactors") {
       inputFactors = Tokenize<FactorType>(args[1],",");
-    }
-    else if (args[0] == "outputFactors") {
+    } else if (args[0] == "outputFactors") {
       outputFactors = Tokenize<FactorType>(args[1],",");
-    }
-    else {
+    } else {
       throw "Unknown argument " + args[0];
     }
   }
@@ -179,11 +176,11 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
 }
 
 void GlobalLexicalModel::Evaluate
-               (const PhraseBasedFeatureContext& context,
-  							ScoreComponentCollection* accumulator) const
+(const PhraseBasedFeatureContext& context,
+ ScoreComponentCollection* accumulator) const
 {
-  accumulator->PlusEquals( this,  
-      GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
+  accumulator->PlusEquals( this,
+                           GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
 }
 
 }

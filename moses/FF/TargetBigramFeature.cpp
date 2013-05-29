@@ -7,15 +7,17 @@
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
-int TargetBigramState::Compare(const FFState& other) const {
+int TargetBigramState::Compare(const FFState& other) const
+{
   const TargetBigramState& rhs = dynamic_cast<const TargetBigramState&>(other);
   return Word::Compare(m_word,rhs.m_word);
 }
 
 TargetBigramFeature::TargetBigramFeature(const std::string &line)
-:StatefulFeatureFunction("TargetBigramFeature", 0, line)
+  :StatefulFeatureFunction("TargetBigramFeature", 0, line)
 {
   std::cerr << "Initializing target bigram feature.." << std::endl;
 
@@ -27,7 +29,7 @@ TargetBigramFeature::TargetBigramFeature(const std::string &line)
 
   FactorCollection& factorCollection = FactorCollection::Instance();
   const Factor* bosFactor =
-     factorCollection.AddFactor(Output,m_factorType,BOS_);
+    factorCollection.AddFactor(Output,m_factorType,BOS_);
   m_bos.SetFactor(m_factorType,bosFactor);
 
   const string &filePath = tokens[2];
@@ -35,13 +37,12 @@ TargetBigramFeature::TargetBigramFeature(const std::string &line)
 
 }
 
-bool TargetBigramFeature::Load(const std::string &filePath) 
+bool TargetBigramFeature::Load(const std::string &filePath)
 {
   if (filePath == "*") return true; //allow all
   ifstream inFile(filePath.c_str());
-  if (!inFile)
-  {
-      return false;
+  if (!inFile) {
+    return false;
   }
 
   std::string line;
@@ -87,7 +88,7 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
     const StringPiece w2 = f2->GetString();
 
     // skip bigrams if they don't belong to a given restricted vocabulary
-    if (m_vocab.size() && 
+    if (m_vocab.size() &&
         (FindStringPiece(m_vocab, w1) == m_vocab.end() || FindStringPiece(m_vocab, w2) == m_vocab.end())) {
       continue;
     }

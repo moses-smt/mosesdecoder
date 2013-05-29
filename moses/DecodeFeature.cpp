@@ -30,8 +30,8 @@ using namespace std;
 namespace Moses
 {
 DecodeFeature::DecodeFeature(  const std::string& description
-                , const std::string &line)
-: StatelessFeatureFunction(description, line)
+                               , const std::string &line)
+  : StatelessFeatureFunction(description, line)
 {
   VERBOSE(2,"DecodeFeature:" << std::endl);
   for (size_t i = 0; i < m_args.size(); ++i) {
@@ -40,8 +40,7 @@ DecodeFeature::DecodeFeature(  const std::string& description
     if (args[0] == "input-factor") {
       m_input =Tokenize<FactorType>(args[1], ",");
       m_inputFactors = FactorMask(m_input);
-    }
-    else if (args[0] == "output-factor") {
+    } else if (args[0] == "output-factor") {
       m_output =Tokenize<FactorType>(args[1], ",");
       m_outputFactors = FactorMask(m_output);
     }
@@ -50,20 +49,20 @@ DecodeFeature::DecodeFeature(  const std::string& description
 }
 
 DecodeFeature::DecodeFeature(  const std::string& description
-                            , size_t numScoreComponents
-                            , const std::string &line)
-: StatelessFeatureFunction(description,numScoreComponents, line)
+                               , size_t numScoreComponents
+                               , const std::string &line)
+  : StatelessFeatureFunction(description,numScoreComponents, line)
 {
   VERBOSE(2,"DecodeFeature: no factors yet" << std::endl);
 }
 
 DecodeFeature::DecodeFeature(const std::string& description
-                            , size_t numScoreComponents
-                            , const std::vector<FactorType> &input
-                            , const std::vector<FactorType> &output
-                            , const std::string &line)
-: StatelessFeatureFunction(description,numScoreComponents, line)
-, m_input(input), m_output(output)
+                             , size_t numScoreComponents
+                             , const std::vector<FactorType> &input
+                             , const std::vector<FactorType> &output
+                             , const std::string &line)
+  : StatelessFeatureFunction(description,numScoreComponents, line)
+  , m_input(input), m_output(output)
 {
   m_inputFactors = FactorMask(input);
   m_outputFactors = FactorMask(output);

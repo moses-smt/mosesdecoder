@@ -146,18 +146,18 @@ public:
   void CacheLexReorderingScores(const LexicalReordering &scoreProducer, const Scores &score);
 
   TO_STRING();
-	
-	bool operator== (const TranslationOption &rhs) const
-	{
+
+  bool operator== (const TranslationOption &rhs) const {
     return m_sourceWordsRange == rhs.m_sourceWordsRange &&
-      m_targetPhrase == rhs.m_targetPhrase;
-	}
+           m_targetPhrase == rhs.m_targetPhrase;
+  }
 
 };
 
 
 //XXX: This doesn't look at the alignment. Is this correct?
-inline size_t hash_value(const TranslationOption& translationOption) {
+inline size_t hash_value(const TranslationOption& translationOption)
+{
   size_t  seed = 0;
   boost::hash_combine(seed, translationOption.GetTargetPhrase());
   boost::hash_combine(seed, translationOption.GetStartPos());

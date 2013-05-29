@@ -64,7 +64,7 @@ int HoleCollection::Scope(const Hole &proposedHole) const
   const int holeEnd = proposedHole.GetEnd(0);
   int scope = m_scope.back();
   if (holeStart == m_sourcePhraseStart.back() ||
-     find(m_sourceHoleEndPoints.begin(), m_sourceHoleEndPoints.end(), holeStart-1) != m_sourceHoleEndPoints.end()) {
+      find(m_sourceHoleEndPoints.begin(), m_sourceHoleEndPoints.end(), holeStart-1) != m_sourceHoleEndPoints.end()) {
     ++scope; // Adding hole would introduce choice point at start of hole.
   }
   if (holeEnd == m_sourcePhraseEnd.back() ||

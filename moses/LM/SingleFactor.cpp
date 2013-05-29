@@ -38,7 +38,7 @@ namespace Moses
 {
 
 LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string& description, const std::string &line)
-:LanguageModelImplementation(description, line)
+  :LanguageModelImplementation(description, line)
 {
   m_nullContextState = new PointerState(NULL);
   m_beginSentenceState = new PointerState(NULL);

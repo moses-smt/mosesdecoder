@@ -19,7 +19,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 class Permutation
 {

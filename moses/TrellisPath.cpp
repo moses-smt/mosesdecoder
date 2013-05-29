@@ -41,7 +41,8 @@ TrellisPath::TrellisPath(const Hypothesis *hypo)
   }
 }
 
-void TrellisPath::InitScore() {
+void TrellisPath::InitScore()
+{
   m_totalScore		= m_path[0]->GetWinningHypo()->GetTotalScore();
   m_scoreBreakdown= m_path[0]->GetWinningHypo()->GetScoreBreakdown();
 
@@ -82,8 +83,8 @@ TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypoth
   InitScore();
 }
 
-TrellisPath::TrellisPath(const vector<const Hypothesis*> edges) 
-:m_prevEdgeChanged(NOT_FOUND)
+TrellisPath::TrellisPath(const vector<const Hypothesis*> edges)
+  :m_prevEdgeChanged(NOT_FOUND)
 {
   m_path.resize(edges.size());
   copy(edges.rbegin(),edges.rend(),m_path.begin());

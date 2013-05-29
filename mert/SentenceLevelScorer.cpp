@@ -17,48 +17,50 @@ namespace MosesTuning
 {
 
 SentenceLevelScorer::SentenceLevelScorer(const string& name, const string& config)
-    : Scorer(name, config),
-      m_regularisationStrategy(REG_NONE),
-      m_regularisationWindow(0) {
+  : Scorer(name, config),
+    m_regularisationStrategy(REG_NONE),
+    m_regularisationWindow(0)
+{
   Init();
 }
 
 SentenceLevelScorer::~SentenceLevelScorer() {}
 
-void SentenceLevelScorer::Init() {
-    // Configure regularisation.
-    static string KEY_TYPE = "regtype";
-    static string KEY_WINDOW = "regwin";
-    static string KEY_CASE = "case";
-    static string TYPE_NONE = "none";
-    static string TYPE_AVERAGE = "average";
-    static string TYPE_MINIMUM = "min";
-    static string TRUE = "true";
-    static string FALSE = "false";
+void SentenceLevelScorer::Init()
+{
+  // Configure regularisation.
+  static string KEY_TYPE = "regtype";
+  static string KEY_WINDOW = "regwin";
+  static string KEY_CASE = "case";
+  static string TYPE_NONE = "none";
+  static string TYPE_AVERAGE = "average";
+  static string TYPE_MINIMUM = "min";
+  static string TRUE = "true";
+  static string FALSE = "false";
 
-    const string type = getConfig(KEY_TYPE, TYPE_NONE);
-    if (type == TYPE_NONE) {
-      m_regularisationStrategy = REG_NONE;
-    } else if (type == TYPE_AVERAGE) {
-      m_regularisationStrategy = REG_AVERAGE;
-    } else if (type == TYPE_MINIMUM) {
-      m_regularisationStrategy = REG_MINIMUM;
-    } else {
-      throw boost::lexer::runtime_error("Unknown scorer regularisation strategy: " + type);
-    }
-    cerr << "Using scorer regularisation strategy: " << type << endl;
+  const string type = getConfig(KEY_TYPE, TYPE_NONE);
+  if (type == TYPE_NONE) {
+    m_regularisationStrategy = REG_NONE;
+  } else if (type == TYPE_AVERAGE) {
+    m_regularisationStrategy = REG_AVERAGE;
+  } else if (type == TYPE_MINIMUM) {
+    m_regularisationStrategy = REG_MINIMUM;
+  } else {
+    throw boost::lexer::runtime_error("Unknown scorer regularisation strategy: " + type);
+  }
+  cerr << "Using scorer regularisation strategy: " << type << endl;
 
-    const string window = getConfig(KEY_WINDOW, "0");
-    m_regularisationWindow = atoi(window.c_str());
-    cerr << "Using scorer regularisation window: " << m_regularisationWindow << endl;
+  const string window = getConfig(KEY_WINDOW, "0");
+  m_regularisationWindow = atoi(window.c_str());
+  cerr << "Using scorer regularisation window: " << m_regularisationWindow << endl;
 
-    const string preservecase = getConfig(KEY_CASE, TRUE);
-    if (preservecase == TRUE) {
-      m_enable_preserve_case = true;
-    } else if (preservecase == FALSE) {
-      m_enable_preserve_case = false;
-    }
-    cerr << "Using case preservation: " << m_enable_preserve_case << endl;
+  const string preservecase = getConfig(KEY_CASE, TRUE);
+  if (preservecase == TRUE) {
+    m_enable_preserve_case = true;
+  } else if (preservecase == FALSE) {
+    m_enable_preserve_case = false;
+  }
+  cerr << "Using case preservation: " << m_enable_preserve_case << endl;
 }
 
 void  SentenceLevelScorer::score(const candidates_t& candidates, const diffs_t& diffs,
@@ -83,8 +85,8 @@ void  SentenceLevelScorer::score(const candidates_t& candidates, const diffs_t& 
     if (stats.size() != totals.size()) {
       stringstream msg;
       msg << "Statistics for (" << "," << candidates[i] << ") have incorrect "
-      << "number of fields. Found: " << stats.size() << " Expected: "
-      << totals.size();
+          << "number of fields. Found: " << stats.size() << " Expected: "
+          << totals.size();
       throw runtime_error(msg.str());
     }
     //Add up scores for all sentences, would normally be just one score

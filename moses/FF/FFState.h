@@ -15,11 +15,12 @@ public:
   virtual int Compare(const FFState& other) const = 0;
 };
 
-class DummyState : public FFState {
+class DummyState : public FFState
+{
 public:
   DummyState()  {}
   int Compare(const FFState& other) const {
-  	return 0;
+    return 0;
   }
 };
 

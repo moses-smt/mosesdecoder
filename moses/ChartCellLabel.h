@@ -23,7 +23,10 @@
 #include "Word.h"
 #include "WordsRange.h"
 
-namespace search { class Vertex; }
+namespace search
+{
+class Vertex;
+}
 
 namespace Moses
 {
@@ -31,17 +34,17 @@ namespace Moses
 class Word;
 
 /** Contains a range, word (non-terms?) and a vector of hypotheses.
- * @todo This is probably incompatible with lattice decoding when the word that spans 
+ * @todo This is probably incompatible with lattice decoding when the word that spans
  *   a position (or positions) can vary.
  * @todo is this to hold sorted hypotheses that are in the queue for creating the next hypos?
  */
 class ChartCellLabel
 {
- public:
+public:
   union Stack {
     const HypoList *cube; // cube pruning
-    search::Vertex *incr; // incremental search after filling.  
-    void *incr_generator; // incremental search during filling.  
+    search::Vertex *incr; // incremental search after filling.
+    void *incr_generator; // incremental search during filling.
   };
 
 
@@ -52,13 +55,20 @@ class ChartCellLabel
     , m_stack(stack)
   {}
 
-  const WordsRange &GetCoverage() const { return m_coverage; }
-  const Word &GetLabel() const { return m_label; }
-  Stack GetStack() const { return m_stack; }
-  Stack &MutableStack() { return m_stack; }
+  const WordsRange &GetCoverage() const {
+    return m_coverage;
+  }
+  const Word &GetLabel() const {
+    return m_label;
+  }
+  Stack GetStack() const {
+    return m_stack;
+  }
+  Stack &MutableStack() {
+    return m_stack;
+  }
 
-  bool operator<(const ChartCellLabel &other) const
-  {
+  bool operator<(const ChartCellLabel &other) const {
     // m_coverage and m_label uniquely identify a ChartCellLabel, so don't
     // need to compare m_stack.
     if (m_coverage == other.m_coverage) {
@@ -67,7 +77,7 @@ class ChartCellLabel
     return m_coverage < other.m_coverage;
   }
 
- private:
+private:
   const WordsRange &m_coverage;
   const Word &m_label;
   Stack m_stack;

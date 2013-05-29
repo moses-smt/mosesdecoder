@@ -11,7 +11,7 @@ PhraseBasedFeatureContext::PhraseBasedFeatureContext(const Hypothesis* hypothesi
   m_source(m_hypothesis->GetManager().GetSource()) {}
 
 PhraseBasedFeatureContext::PhraseBasedFeatureContext
-      (const TranslationOption& translationOption, const InputType& source) :
+(const TranslationOption& translationOption, const InputType& source) :
   m_hypothesis(NULL),
   m_translationOption(translationOption),
   m_source(source)

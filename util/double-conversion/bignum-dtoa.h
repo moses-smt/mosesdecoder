@@ -30,7 +30,8 @@
 
 #include "utils.h"
 
-namespace double_conversion {
+namespace double_conversion
+{
 
 enum BignumDtoaMode {
   // Return the shortest correct representation.

@@ -38,16 +38,16 @@ typedef std::map<std::string, std::string > PARAM_STRING;
 
 /** Handles parameter values set in config file or on command line.
  * Process raw parameter data (names and values as strings) for StaticData
- * to parse; to get useful values, see StaticData. 
+ * to parse; to get useful values, see StaticData.
  */
 class Parameter
 {
 protected:
-	PARAM_MAP m_setting;
-	PARAM_BOOL m_valid;
-	PARAM_STRING m_abbreviation;
-	PARAM_STRING m_description;
-	PARAM_STRING m_fullname;
+  PARAM_MAP m_setting;
+  PARAM_BOOL m_valid;
+  PARAM_STRING m_abbreviation;
+  PARAM_STRING m_description;
+  PARAM_STRING m_fullname;
 
   std::map<std::string, std::vector<float> >  m_weights;
 
@@ -93,32 +93,30 @@ public:
   bool isParamSpecified(const std::string &paramName) {
     return  m_setting.find( paramName ) != m_setting.end();
   }
-		
-	const std::string GetFullName(std::string abbr)
-	{
-		return m_fullname[abbr];
-	}
-	
-	const std::string GetAbbreviation(std::string full)
-	{
-		return m_abbreviation[full];
-	}
-	const PARAM_VEC &GetParamShortName(const std::string &paramName)
-	{
-		return GetParam(GetFullName(paramName));
-	}
-	
-	void OverwriteParam(const std::string &paramName, PARAM_VEC values);
 
-	void OverwriteParamShortName(const std::string &paramShortName, PARAM_VEC values){
-		OverwriteParam(GetFullName(paramShortName),values);
-	}
-	
+  const std::string GetFullName(std::string abbr) {
+    return m_fullname[abbr];
+  }
+
+  const std::string GetAbbreviation(std::string full) {
+    return m_abbreviation[full];
+  }
+  const PARAM_VEC &GetParamShortName(const std::string &paramName) {
+    return GetParam(GetFullName(paramName));
+  }
+
+  void OverwriteParam(const std::string &paramName, PARAM_VEC values);
+
+  void OverwriteParamShortName(const std::string &paramShortName, PARAM_VEC values) {
+    OverwriteParam(GetFullName(paramShortName),values);
+  }
+
   std::vector<float> &GetWeights(const std::string &name);
   std::set<std::string> GetWeightNames() const;
 
-  const PARAM_MAP &GetParams() const
-  { return m_setting; }
+  const PARAM_MAP &GetParams() const {
+    return m_setting;
+  }
 
 };
 

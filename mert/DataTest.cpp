@@ -10,7 +10,8 @@
 using namespace MosesTuning;
 
 //very basic test of sharding
-BOOST_AUTO_TEST_CASE(shard_basic) {
+BOOST_AUTO_TEST_CASE(shard_basic)
+{
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));
   Data data(scorer.get());
   FeatureArray fa1, fa2, fa3, fa4;
@@ -39,7 +40,8 @@ BOOST_AUTO_TEST_CASE(shard_basic) {
   BOOST_CHECK_EQUAL(shards[1].getFeatureData()->size(),(std::size_t)2);
 }
 
-BOOST_AUTO_TEST_CASE(init_feature_map_test) {
+BOOST_AUTO_TEST_CASE(init_feature_map_test)
+{
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));
   Data data(scorer.get());
 
@@ -49,7 +51,8 @@ BOOST_AUTO_TEST_CASE(init_feature_map_test) {
   BOOST_CHECK_EQUAL(expected, data.Features());
 }
 
-BOOST_AUTO_TEST_CASE(add_features_test) {
+BOOST_AUTO_TEST_CASE(add_features_test)
+{
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));
   Data data(scorer.get());
 

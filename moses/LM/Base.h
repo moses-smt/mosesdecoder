@@ -30,21 +30,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-namespace Incremental { class Manager; }
+namespace Incremental
+{
+class Manager;
+}
 
 class FactorCollection;
 class Factor;
 class Phrase;
 
 //! Abstract base class which represent a language model on a contiguous phrase
-class LanguageModel : public StatefulFeatureFunction {
+class LanguageModel : public StatefulFeatureFunction
+{
 protected:
   LanguageModel(const std::string& description, const std::string &line);
 
   // This can't be in the constructor for virual function dispatch reasons
 
   bool m_enableOOVFeature;
-  
+
 public:
   static const LanguageModel &GetFirstLM();
 
@@ -89,9 +93,9 @@ public:
   virtual void IncrementalCallback(Incremental::Manager &manager) const;
 
   virtual void Evaluate(const Phrase &source
-	  	  	  	  	  , const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const;
 
 };
 

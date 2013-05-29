@@ -39,7 +39,7 @@ namespace Moses
  *  The expansion process itself may be still explode, so efficient handling
  *  of partial translation options during expansion is required.
  *  This class assists in this tasks by implementing pruning.
- *  This implementation is similar to the one in HypothesisStack. 
+ *  This implementation is similar to the one in HypothesisStack.
  */
 class PartialTranslOptColl
 {

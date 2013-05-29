@@ -31,106 +31,106 @@ public:
 
 class DomainFeature : public ScoreFeature
 {
-  public:
+public:
 
-    DomainFeature(const std::string& domainFile);
-    bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const;
-    void add(const ScoreFeatureContext& context, 
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const;
+  DomainFeature(const std::string& domainFile);
+  bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const;
+  void add(const ScoreFeatureContext& context,
+           std::vector<float>& denseValues,
+           std::map<std::string,float>& sparseValues) const;
 
-  protected:
-    /** Overriden in subclass */
-    virtual void add(const std::map<std::string,float>& domainCounts, float count,
-             const MaybeLog& maybeLog,
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const = 0;
-      
+protected:
+  /** Overriden in subclass */
+  virtual void add(const std::map<std::string,float>& domainCounts, float count,
+                   const MaybeLog& maybeLog,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const = 0;
 
-    Domain m_domain;
+
+  Domain m_domain;
 
 };
 
 class SubsetDomainFeature : public DomainFeature
 {
-  public:
-    SubsetDomainFeature(const std::string& domainFile) :
-      DomainFeature(domainFile) {}
+public:
+  SubsetDomainFeature(const std::string& domainFile) :
+    DomainFeature(domainFile) {}
 
-  protected:
-    virtual void add(const std::map<std::string,float>& domainCounts, float count,
-             const MaybeLog& maybeLog,
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const;
+protected:
+  virtual void add(const std::map<std::string,float>& domainCounts, float count,
+                   const MaybeLog& maybeLog,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const;
 };
 
 class SparseSubsetDomainFeature : public DomainFeature
 {
- public:
-    SparseSubsetDomainFeature(const std::string& domainFile) :
-      DomainFeature(domainFile) {}
+public:
+  SparseSubsetDomainFeature(const std::string& domainFile) :
+    DomainFeature(domainFile) {}
 
-  protected:
-    virtual void add(const std::map<std::string,float>& domainCounts, float count,
-             const MaybeLog& maybeLog,
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const;
+protected:
+  virtual void add(const std::map<std::string,float>& domainCounts, float count,
+                   const MaybeLog& maybeLog,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const;
 
 };
 
 class IndicatorDomainFeature : public DomainFeature
 {
-  public:
-    IndicatorDomainFeature(const std::string& domainFile) :
-      DomainFeature(domainFile) {}
+public:
+  IndicatorDomainFeature(const std::string& domainFile) :
+    DomainFeature(domainFile) {}
 
-  protected:
-    virtual void add(const std::map<std::string,float>& domainCounts, float count,
-             const MaybeLog& maybeLog,
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const;
+protected:
+  virtual void add(const std::map<std::string,float>& domainCounts, float count,
+                   const MaybeLog& maybeLog,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const;
 };
 
 
 class SparseIndicatorDomainFeature : public DomainFeature
 {
-  public:
-    SparseIndicatorDomainFeature(const std::string& domainFile) :
-      DomainFeature(domainFile) {}
+public:
+  SparseIndicatorDomainFeature(const std::string& domainFile) :
+    DomainFeature(domainFile) {}
 
-  protected:
-    virtual void add(const std::map<std::string,float>& domainCounts, float count,
-             const MaybeLog& maybeLog,
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const;
+protected:
+  virtual void add(const std::map<std::string,float>& domainCounts, float count,
+                   const MaybeLog& maybeLog,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const;
 };
 
 
 class RatioDomainFeature : public DomainFeature
 {
-  public:
-    RatioDomainFeature(const std::string& domainFile) :
-      DomainFeature(domainFile) {}
+public:
+  RatioDomainFeature(const std::string& domainFile) :
+    DomainFeature(domainFile) {}
 
-  protected:
-    virtual void add(const std::map<std::string,float>& domainCounts, float count,
-             const MaybeLog& maybeLog,
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const;
+protected:
+  virtual void add(const std::map<std::string,float>& domainCounts, float count,
+                   const MaybeLog& maybeLog,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const;
 };
 
 
 class SparseRatioDomainFeature : public DomainFeature
 {
-  public:
-    SparseRatioDomainFeature(const std::string& domainFile) :
-      DomainFeature(domainFile) {}
+public:
+  SparseRatioDomainFeature(const std::string& domainFile) :
+    DomainFeature(domainFile) {}
 
-  protected:
-    virtual void add(const std::map<std::string,float>& domainCounts, float count,
-             const MaybeLog& maybeLog,
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const;
+protected:
+  virtual void add(const std::map<std::string,float>& domainCounts, float count,
+                   const MaybeLog& maybeLog,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const;
 };
 
 

@@ -13,7 +13,7 @@ class TranslationOptionCollection;
 /** Implements the phrase-based stack decoding algorithm (no cube pruning) with a twist...
  *  Language model requests are batched together, duplicate requests are removed, and requests are sent together.
  *  Useful for distributed LM where network latency is an issue.
- */  
+ */
 class SearchNormalBatch: public SearchNormal
 {
 protected:
@@ -21,7 +21,7 @@ protected:
   // Added for asynclm decoding.
   std::vector<const StatelessFeatureFunction*> m_stateless_ffs;
   std::map<int, LanguageModel*> m_dlm_ffs;
-  std::map<int, StatefulFeatureFunction*> m_stateful_ffs;  
+  std::map<int, StatefulFeatureFunction*> m_stateful_ffs;
   std::vector<Hypothesis*> m_partial_hypos;
   int m_batch_size;
   int m_max_stack_size;

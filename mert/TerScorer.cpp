@@ -14,10 +14,10 @@ using namespace TERCpp;
 
 namespace MosesTuning
 {
-  
+
 
 TerScorer::TerScorer(const string& config)
-    : StatisticsBasedScorer("TER",config), kLENGTH(2) {}
+  : StatisticsBasedScorer("TER",config), kLENGTH(2) {}
 
 TerScorer::~TerScorer() {}
 

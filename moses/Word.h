@@ -152,8 +152,9 @@ struct WordComparer {
 };
 
 
-inline size_t hash_value(const Word& word) {
-  return word.hash();    
+inline size_t hash_value(const Word& word)
+{
+  return word.hash();
 }
 
 }

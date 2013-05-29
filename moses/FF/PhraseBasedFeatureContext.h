@@ -17,7 +17,7 @@ class WordsBitmap;
  **/
 class PhraseBasedFeatureContext
 {
-  // The context either has a hypothesis (during search), or a TranslationOption and 
+  // The context either has a hypothesis (during search), or a TranslationOption and
   // source sentence (during pre-calculation).
   const Hypothesis* m_hypothesis;
   const TranslationOption& m_translationOption;
@@ -28,10 +28,12 @@ public:
   PhraseBasedFeatureContext(const TranslationOption& translationOption,
                             const InputType& source);
 
-  const TranslationOption& GetTranslationOption() const
-  { return m_translationOption; }
-  const InputType& GetSource() const
-  { return m_source; }
+  const TranslationOption& GetTranslationOption() const {
+    return m_translationOption;
+  }
+  const InputType& GetSource() const {
+    return m_source;
+  }
   const TargetPhrase& GetTargetPhrase() const; //convenience method
   const WordsBitmap& GetWordsBitmap() const;
 

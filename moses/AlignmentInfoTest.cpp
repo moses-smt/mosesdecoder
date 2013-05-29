@@ -35,8 +35,7 @@ struct AlignmentInfoFixture {
   const AlignmentInfo* ai2;
   const AlignmentInfo* ai3;
 
-  AlignmentInfoFixture()
-  {
+  AlignmentInfoFixture() {
     AlignmentInfoCollection& collection = AlignmentInfoCollection::Instance();
     IndexSet aligns1,aligns2,aligns3;
     aligns1.insert(IndexPair(1,1));

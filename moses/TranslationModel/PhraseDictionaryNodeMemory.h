@@ -39,8 +39,8 @@ namespace Moses
 
 class PhraseDictionaryMemory;
 class PhraseDictionaryFuzzyMatch;
-  
-  //! @todo why?
+
+//! @todo why?
 class NonTerminalMapKeyHasher
 {
 public:
@@ -152,7 +152,7 @@ public:
   }
 
   void Clear();
-  
+
   TO_STRING();
 };
 

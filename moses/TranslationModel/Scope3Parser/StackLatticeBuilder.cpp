@@ -28,14 +28,14 @@ namespace Moses
 {
 
 void StackLatticeBuilder::Build(
-    int start,
-    int end,
-    const UTrieNode &ruleNode,
-    const VarSpanNode &varSpanNode,
-    const std::vector<VarSpanNode::NonTermRange> &ranges,
-    const ChartRuleLookupManager &manager,
-    StackLattice &lattice,
-    std::vector<std::vector<bool> > &checkTable)
+  int start,
+  int end,
+  const UTrieNode &ruleNode,
+  const VarSpanNode &varSpanNode,
+  const std::vector<VarSpanNode::NonTermRange> &ranges,
+  const ChartRuleLookupManager &manager,
+  StackLattice &lattice,
+  std::vector<std::vector<bool> > &checkTable)
 {
   // Extend the lattice if necessary.  Do not shrink it.
   const size_t span = end - start + 1;

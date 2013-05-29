@@ -59,7 +59,7 @@ private:
   ScoreList  m_ScoreList;
 };
 
-  
+
 /** @todo How is this used in the pb binary phrase table?
  */
 struct PPimp {

@@ -59,8 +59,8 @@ void TargetPhraseCollection::Sort(bool adhereTableLimit, size_t tableLimit)
 {
   std::vector<TargetPhrase*>::iterator iterMiddle;
   iterMiddle = (tableLimit == 0 || m_collection.size() < tableLimit)
-             ? m_collection.end()
-             : m_collection.begin()+tableLimit;
+               ? m_collection.end()
+               : m_collection.begin()+tableLimit;
 
   std::partial_sort(m_collection.begin(), iterMiddle, m_collection.end(),
                     CompareTargetPhrase());

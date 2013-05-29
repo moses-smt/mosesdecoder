@@ -9,13 +9,14 @@
 #include "moses/UserMessage.h"
 #include "util/string_piece_hash.hh"
 
-namespace Moses {
+namespace Moses
+{
 
 using namespace std;
 
 TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
-:StatelessFeatureFunction("TargetWordInsertionFeature", 0, line),
-m_unrestricted(true)
+  :StatelessFeatureFunction("TargetWordInsertionFeature", 0, line),
+   m_unrestricted(true)
 {
   std::cerr << "Initializing target word insertion feature.." << std::endl;
 
@@ -26,11 +27,9 @@ m_unrestricted(true)
 
     if (args[0] == "factor") {
       m_factorType = Scan<FactorType>(args[1]);
-    }
-    else if (args[0] == "path") {
+    } else if (args[0] == "path") {
       filename = args[1];
-    }
-    else {
+    } else {
       throw "Unknown argument " + args[0];
     }
   }
@@ -46,13 +45,12 @@ m_unrestricted(true)
 
 }
 
-bool TargetWordInsertionFeature::Load(const std::string &filePath) 
+bool TargetWordInsertionFeature::Load(const std::string &filePath)
 {
   ifstream inFile(filePath.c_str());
-  if (!inFile)
-  {
-      cerr << "could not open file " << filePath << endl;
-      return false;
+  if (!inFile) {
+    cerr << "could not open file " << filePath << endl;
+    return false;
   }
 
   std::string line;
@@ -67,18 +65,18 @@ bool TargetWordInsertionFeature::Load(const std::string &filePath)
 }
 
 void TargetWordInsertionFeature::Evaluate(const Phrase &source
-  	  	  	  	  	  , const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedFutureScore) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);
 }
 
 void TargetWordInsertionFeature::ComputeFeatures(const Phrase &source,
-												 const TargetPhrase& targetPhrase,
-    											 ScoreComponentCollection* accumulator,
-    											 const AlignmentInfo &alignmentInfo) const
+    const TargetPhrase& targetPhrase,
+    ScoreComponentCollection* accumulator,
+    const AlignmentInfo &alignmentInfo) const
 {
   // handle special case: unknown words (they have no word alignment)
   size_t targetLength = targetPhrase.GetSize();
@@ -100,15 +98,14 @@ void TargetWordInsertionFeature::ComputeFeatures(const Phrase &source,
     if (!aligned[i]) {
       Word w = targetPhrase.GetWord(i);
       if (!w.IsNonTerminal()) {
-    	const StringPiece word = w.GetFactor(m_factorType)->GetString();
-    	if (word != "<s>" && word != "</s>") {
-      	  if (!m_unrestricted && FindStringPiece(m_vocab, word ) == m_vocab.end()) {
-      		accumulator->PlusEquals(this,StringPiece("OTHER"),1);
-      	  }
-      	  else {
-      		accumulator->PlusEquals(this,word,1);
-      	  }
-    	}
+        const StringPiece word = w.GetFactor(m_factorType)->GetString();
+        if (word != "<s>" && word != "</s>") {
+          if (!m_unrestricted && FindStringPiece(m_vocab, word ) == m_vocab.end()) {
+            accumulator->PlusEquals(this,StringPiece("OTHER"),1);
+          } else {
+            accumulator->PlusEquals(this,word,1);
+          }
+        }
       }
     }
   }

@@ -35,7 +35,7 @@ namespace Moses
  */
 class ChartTranslationOptions
 {
- public:
+public:
   /** Constructor
       \param targetPhraseColl @todo dunno
       \param stackVec @todo dunno
@@ -43,13 +43,13 @@ class ChartTranslationOptions
       \param score @todo dunno
    */
   ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
-                         const StackVec &stackVec,
-                         const WordsRange &wordsRange,
-                         float score)
-      : m_stackVec(stackVec)
-      , m_targetPhraseCollection(&targetPhraseColl)
-      , m_wordsRange(&wordsRange)
-      , m_estimateOfBestScore(score) 
+                          const StackVec &stackVec,
+                          const WordsRange &wordsRange,
+                          float score)
+    : m_stackVec(stackVec)
+    , m_targetPhraseCollection(&targetPhraseColl)
+    , m_wordsRange(&wordsRange)
+    , m_estimateOfBestScore(score)
   {}
 
   ~ChartTranslationOptions() {}
@@ -58,10 +58,12 @@ class ChartTranslationOptions
                                        const StackVec &);
 
   //! @todo dunno
-  const StackVec &GetStackVec() const { return m_stackVec; }
+  const StackVec &GetStackVec() const {
+    return m_stackVec;
+  }
 
   //! @todo isn't the translation suppose to just contain 1 target phrase, not a whole collection of them?
-  const TargetPhraseCollection &GetTargetPhraseCollection() const { 
+  const TargetPhraseCollection &GetTargetPhraseCollection() const {
     return *m_targetPhraseCollection;
   }
 
@@ -74,9 +76,11 @@ class ChartTranslationOptions
     * the estimate is the sum of the top target phrase's estimated score plus the
     * scores of the best child hypotheses.
     */
-  inline float GetEstimateOfBestScore() const { return m_estimateOfBestScore; }
+  inline float GetEstimateOfBestScore() const {
+    return m_estimateOfBestScore;
+  }
 
- private:
+private:
 
   StackVec m_stackVec; //! vector of hypothesis list!
   const TargetPhraseCollection *m_targetPhraseCollection;

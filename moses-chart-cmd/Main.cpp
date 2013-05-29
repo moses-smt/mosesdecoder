@@ -190,7 +190,7 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
   size_t numScoreComps = ff->GetNumScoreComponents();
   vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
   for (size_t i = 0; i < numScoreComps; ++i) {
-  	cout << " " << values[i];
+    cout << " " << values[i];
   }
   cout << endl;
 
@@ -244,12 +244,12 @@ int main(int argc, char* argv[])
       ShowWeights();
       exit(0);
     }
-  
+
     CHECK(staticData.IsChart());
-  
+
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);
-  
+
     // check on weights
     const ScoreComponentCollection& weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
-  
+
     // read each sentence & decode
     InputType *source=0;
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
@@ -279,16 +279,16 @@ int main(int argc, char* argv[])
       delete task;
 #endif
     }
-  
+
 #ifdef WITH_THREADS
     pool.Stop(true);  // flush remaining jobs
 #endif
-  
+
     delete ioWrapper;
-  
+
     IFVERBOSE(1)
     PrintUserTime("End.");
-  
+
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;

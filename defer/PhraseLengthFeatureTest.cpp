@@ -31,7 +31,8 @@ BOOST_AUTO_TEST_SUITE(phrase_length_feature)
 
 //TODO: Factor out setup code so that it can be reused
 
-static Word MakeWord(string text) {
+static Word MakeWord(string text)
+{
   FactorCollection &factorCollection = FactorCollection::Instance();
   const Factor* f = factorCollection.AddFactor(Input,0,text);
   Word w;
@@ -40,7 +41,8 @@ static Word MakeWord(string text) {
 }
 
 
-BOOST_AUTO_TEST_CASE(evaluate) {
+BOOST_AUTO_TEST_CASE(evaluate)
+{
   Word w1 = MakeWord("w1");
   Word w2 = MakeWord("y2");
   Word w3 = MakeWord("x3");
@@ -78,7 +80,7 @@ BOOST_AUTO_TEST_CASE(evaluate) {
   PhraseBasedFeatureContext context1(topt1,sentence);
   PhraseBasedFeatureContext context2(topt2,sentence);
   PhraseBasedFeatureContext context3(topt3,sentence);
-     
+
   PhraseLengthFeature plf;
 
   ScoreComponentCollection acc1,acc2,acc3;

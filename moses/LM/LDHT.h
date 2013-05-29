@@ -7,7 +7,8 @@
 
 #include "moses/TypeDef.h"
 
-namespace Moses {
+namespace Moses
+{
 
 class ScoreIndexManager;
 class LanguageModel;

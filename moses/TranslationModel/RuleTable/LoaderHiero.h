@@ -11,7 +11,8 @@
 
 #include "LoaderStandard.h"
 
-namespace Moses {
+namespace Moses
+{
 
 //! specific implementation of SCFG loader to load rule tables formatted in Hiero-style format
 class RuleTableLoaderHiero : public RuleTableLoaderStandard

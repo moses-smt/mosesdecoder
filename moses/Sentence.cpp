@@ -104,8 +104,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       this->SetTopicId(atol(topic_params[0].c_str()));
       this->SetUseTopicId(true);
       this->SetUseTopicIdAndProb(false);
-    }
-    else {
+    } else {
       this->SetTopicIdAndProb(topic_params);
       this->SetUseTopicId(false);
       this->SetUseTopicIdAndProb(true);

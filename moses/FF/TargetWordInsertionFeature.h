@@ -13,7 +13,8 @@ namespace Moses
 
 /** Sets the features for length of source phrase, target phrase, both.
  */
-class TargetWordInsertionFeature : public StatelessFeatureFunction {
+class TargetWordInsertionFeature : public StatelessFeatureFunction
+{
 private:
   boost::unordered_set<std::string> m_vocab;
   FactorType m_factorType;
@@ -21,18 +22,18 @@ private:
 
 public:
   TargetWordInsertionFeature(const std::string &line);
-      
+
   bool Load(const std::string &filePath);
 
   virtual void Evaluate(const Phrase &source
-	  	  	  	  	  , const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const;
 
   void ComputeFeatures(const Phrase &source,
-	  	  	  	  	   const TargetPhrase& targetPhrase,
-		           	   ScoreComponentCollection* accumulator,
-		           	   const AlignmentInfo &alignmentInfo) const;
+                       const TargetPhrase& targetPhrase,
+                       ScoreComponentCollection* accumulator,
+                       const AlignmentInfo &alignmentInfo) const;
 
 };
 

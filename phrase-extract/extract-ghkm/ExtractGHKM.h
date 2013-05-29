@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -27,22 +27,26 @@
 #include <string>
 #include <vector>
 
-namespace Moses {
+namespace Moses
+{
 
 class OutputFileStream;
 
-namespace GHKM {
+namespace GHKM
+{
 
 struct Options;
 class ParseTree;
 
 class ExtractGHKM
 {
- public:
+public:
   ExtractGHKM() : m_name("extract-ghkm") {}
-  const std::string &GetName() const { return m_name; }
+  const std::string &GetName() const {
+    return m_name;
+  }
   int Main(int argc, char *argv[]);
- private:
+private:
   void Error(const std::string &) const;
   void OpenInputFileOrDie(const std::string &, std::ifstream &);
   void OpenOutputFileOrDie(const std::string &, std::ofstream &);
@@ -60,7 +64,7 @@ class ExtractGHKM
                         const std::map<std::string, int> &,
                         std::ostream &);
   std::vector<std::string> ReadTokens(const std::string &);
-  
+
   void ProcessOptions(int, char *[], Options &) const;
 
   std::string m_name;

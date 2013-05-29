@@ -40,25 +40,22 @@ using namespace std;
 namespace Moses
 {
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
-:LanguageModelSingleFactor("IRSTLM", line)
+  :LanguageModelSingleFactor("IRSTLM", line)
 {
   FactorType factorType;
   size_t nGramOrder;
   string filePath;
 
   for (size_t i = 0; i < m_args.size(); ++i) {
-	const vector<string> &args = m_args[i];
+    const vector<string> &args = m_args[i];
 
     if (args[0] == "factor") {
       factorType = Scan<FactorType>(args[1]);
-    }
-    else if (args[0] == "order") {
+    } else if (args[0] == "order") {
       nGramOrder = Scan<size_t>(args[1]);
-    }
-    else if (args[0] == "path") {
+    } else if (args[0] == "path") {
       filePath = args[1];
-    }
-    else {
+    } else {
       throw "Unknown argument " + args[0];
     }
   }
@@ -86,8 +83,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
-  if (threadCount != 1)
-  {
+  if (threadCount != 1) {
     UserMessage::Add(threadCount + " number of threads specified but IRST LM is not threadsafe.");
     return false;
   }
@@ -99,7 +95,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_filePath = filePath;
 
 
-  m_lmtb = m_lmtb->CreateLanguageModel(m_filePath); 
+  m_lmtb = m_lmtb->CreateLanguageModel(m_filePath);
   m_lmtb->setMaxLoadedLevel(1000);
   m_lmtb->load(m_filePath);
   d=m_lmtb->getDict();
@@ -170,7 +166,7 @@ int LanguageModelIRST::GetLmID( const std::string &str ) const
 }
 
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
-{  
+{
   size_t factorId = factor->GetId();
 
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
@@ -180,12 +176,12 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 
       //////////
       ///poiche' non c'e' distinzione tra i factorIDs delle parole sorgenti
-      ///e delle parole target in Moses, puo' accadere che una parola target 
+      ///e delle parole target in Moses, puo' accadere che una parola target
       ///di cui non sia stato ancora calcolato il suo codice target abbia
       ///comunque un factorID noto (e quindi minore di m_lmIdLookup.size())
       ///E' necessario dunque identificare questi casi di indeterminatezza
       ///del codice target. Attualamente, questo controllo e' stato implementato
-      ///impostando a    m_empty     tutti i termini che non hanno ancora 
+      ///impostando a    m_empty     tutti i termini che non hanno ancora
       //ricevuto un codice target effettivo
       ///////////
 
@@ -197,7 +193,7 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 /// IN POSIZIONE (factorID-1) invece che in posizione factrID dove dopo andiamo a leggerlo (vedi caso C
 /// Cosi' funziona ....
 /// ho un dubbio su cosa c'e' nelle prime posizioni di m_lmIdLookup
-/// quindi 
+/// quindi
 /// e scopro che rimane vuota una entry ogni due
 /// perche' factorID cresce di due in due (perche' codifica sia source che target) "vuota" la posizione (factorID-1)
 /// non da problemi di correttezza, ma solo di "spreco" di memoria
@@ -207,10 +203,10 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 ////////////////
 
 
-      if (factorId >= m_lmIdLookup.size()){
-	//resize and fill with m_empty  
-	//increment the array more than needed to avoid too many resizing operation.
-	m_lmIdLookup.resize(factorId+10, m_empty); 
+      if (factorId >= m_lmIdLookup.size()) {
+        //resize and fill with m_empty
+        //increment the array more than needed to avoid too many resizing operation.
+        m_lmIdLookup.resize(factorId+10, m_empty);
       }
 
       //insert new code

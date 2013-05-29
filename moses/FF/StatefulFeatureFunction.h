@@ -6,7 +6,7 @@ namespace Moses
 {
 
 /** base class for all stateful feature functions.
- * eg. LM, distortion penalty 
+ * eg. LM, distortion penalty
  */
 class StatefulFeatureFunction: public FeatureFunction
 {
@@ -14,7 +14,9 @@ class StatefulFeatureFunction: public FeatureFunction
   static std::vector<const StatefulFeatureFunction*> m_statefulFFs;
 
 public:
-  static const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() {return m_statefulFFs;}
+  static const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() {
+    return m_statefulFFs;
+  }
 
   StatefulFeatureFunction(const std::string& description, const std::string &line);
   StatefulFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
@@ -39,8 +41,9 @@ public:
   //! return the state associated with the empty hypothesis for a given sentence
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
-  bool IsStateless() const
-  { return false; }
+  bool IsStateless() const {
+    return false;
+  }
 
 };
 

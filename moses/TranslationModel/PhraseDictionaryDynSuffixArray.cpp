@@ -9,7 +9,7 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(const std::string &line)
-:PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
+  :PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
 {
   m_biSA = new BilingualDynSuffixArray();
 }
@@ -63,7 +63,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 void PhraseDictionaryDynSuffixArray::insertSnt(string& source, string& target, string& alignment)
 {
   m_biSA->addSntPair(source, target, alignment); // insert sentence pair into suffix arrays
-  //StaticData::Instance().ClearTransOptionCache(); // clear translation option cache 
+  //StaticData::Instance().ClearTransOptionCache(); // clear translation option cache
 }
 void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned /* idx */, unsigned /* num2Del */)
 {

@@ -87,7 +87,8 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
   return strme.str();
 }
 
-StringPiece Word::GetString(FactorType factorType) const {
+StringPiece Word::GetString(FactorType factorType) const
+{
   return m_factorArray[factorType]->GetString();
 }
 

@@ -57,7 +57,7 @@ void ModelScore::reset_f()
 }
 
 void ModelScore::add_example
-  (const StringPiece& previous, const StringPiece& next, float weight)
+(const StringPiece& previous, const StringPiece& next, float weight)
 {
   count_fe_prev[getType(previous)]+=weight;
   count_f_prev[getType(previous)]+=weight;

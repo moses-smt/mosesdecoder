@@ -29,18 +29,20 @@ using namespace util;
 
 namespace MosesTuning
 {
-  
+
 
 ScoreDataIterator::ScoreDataIterator() {}
 
-ScoreDataIterator::ScoreDataIterator(const string& filename) {
+ScoreDataIterator::ScoreDataIterator(const string& filename)
+{
   m_in.reset(new FilePiece(filename.c_str()));
   readNext();
 }
 
 ScoreDataIterator::~ScoreDataIterator() {}
 
-void ScoreDataIterator::readNext() {
+void ScoreDataIterator::readNext()
+{
   m_next.clear();
   try {
     StringPiece marker = m_in->ReadDelimited();
@@ -71,12 +73,14 @@ void ScoreDataIterator::readNext() {
   }
 }
 
-void ScoreDataIterator::increment() {
+void ScoreDataIterator::increment()
+{
   readNext();
 }
 
 
-bool ScoreDataIterator::equal(const ScoreDataIterator& rhs) const {
+bool ScoreDataIterator::equal(const ScoreDataIterator& rhs) const
+{
   if (!m_in && !rhs.m_in) {
     return true;
   } else if (!m_in) {
@@ -84,13 +88,14 @@ bool ScoreDataIterator::equal(const ScoreDataIterator& rhs) const {
   } else if (!rhs.m_in) {
     return false;
   } else {
-    return m_in->FileName() == rhs.m_in->FileName() && 
-      m_in->Offset() == rhs.m_in->Offset();
+    return m_in->FileName() == rhs.m_in->FileName() &&
+           m_in->Offset() == rhs.m_in->Offset();
   }
 }
 
 
-const vector<ScoreDataItem>& ScoreDataIterator::dereference() const {
+const vector<ScoreDataItem>& ScoreDataIterator::dereference() const
+{
   return m_next;
 }
 

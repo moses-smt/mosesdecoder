@@ -88,7 +88,9 @@ public:
   const PhraseDictionary* GetDictionary() const;
   PhraseDictionary* GetDictionary();
 
-  const std::string &GetFilePath() const { return m_filePath; }
+  const std::string &GetFilePath() const {
+    return m_filePath;
+  }
 
 protected:
   size_t m_tableLimit;

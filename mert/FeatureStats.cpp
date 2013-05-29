@@ -18,31 +18,35 @@
 
 using namespace std;
 
-namespace {
+namespace
+{
 const int kAvailableSize = 8;
 } // namespace
 
 namespace MosesTuning
 {
-  
+
 
 SparseVector::name2id_t SparseVector::m_name_to_id;
 SparseVector::id2name_t SparseVector::m_id_to_name;
 
-FeatureStatsType SparseVector::get(const string& name) const {
+FeatureStatsType SparseVector::get(const string& name) const
+{
   name2id_t::const_iterator name2id_iter = m_name_to_id.find(name);
   if (name2id_iter == m_name_to_id.end()) return 0;
   size_t id = name2id_iter->second;
   return get(id);
 }
 
-FeatureStatsType SparseVector::get(size_t id) const {
+FeatureStatsType SparseVector::get(size_t id) const
+{
   fvector_t::const_iterator fvector_iter = m_fvector.find(id);
   if (fvector_iter == m_fvector.end()) return 0;
   return fvector_iter->second;
 }
 
-void SparseVector::set(const string& name, FeatureStatsType value) {
+void SparseVector::set(const string& name, FeatureStatsType value)
+{
   name2id_t::const_iterator name2id_iter = m_name_to_id.find(name);
   size_t id = 0;
   if (name2id_iter == m_name_to_id.end()) {
@@ -55,7 +59,8 @@ void SparseVector::set(const string& name, FeatureStatsType value) {
   m_fvector[id] = value;
 }
 
-void SparseVector::write(ostream& out, const string& sep) const {
+void SparseVector::write(ostream& out, const string& sep) const
+{
   for (fvector_t::const_iterator i = m_fvector.begin(); i != m_fvector.end(); ++i) {
     if (abs(i->second) < 0.00001) continue;
     string name = m_id_to_name[i->first];
@@ -63,11 +68,13 @@ void SparseVector::write(ostream& out, const string& sep) const {
   }
 }
 
-void SparseVector::clear() {
+void SparseVector::clear()
+{
   m_fvector.clear();
 }
 
-void SparseVector::load(const string& file) {
+void SparseVector::load(const string& file)
+{
   ifstream in(file.c_str());
   if (!in) {
     throw runtime_error("Failed to open sparse weights file: " + file);
@@ -84,39 +91,44 @@ void SparseVector::load(const string& file) {
   }
 }
 
-SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
+SparseVector& SparseVector::operator-=(const SparseVector& rhs)
+{
 
   for (fvector_t::const_iterator i = rhs.m_fvector.begin();
-      i != rhs.m_fvector.end(); ++i) {
+       i != rhs.m_fvector.end(); ++i) {
     m_fvector[i->first] =  get(i->first) - (i->second);
   }
   return *this;
 }
 
-FeatureStatsType SparseVector::inner_product(const SparseVector& rhs) const {
+FeatureStatsType SparseVector::inner_product(const SparseVector& rhs) const
+{
   FeatureStatsType product = 0.0;
   for (fvector_t::const_iterator i = m_fvector.begin();
-    i != m_fvector.end(); ++i) {
+       i != m_fvector.end(); ++i) {
     product += ((i->second) * (rhs.get(i->first)));
   }
   return product;
 }
 
-SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs) {
+SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs)
+{
   SparseVector res(lhs);
   res -= rhs;
   return res;
 }
 
-FeatureStatsType inner_product(const SparseVector& lhs, const SparseVector& rhs) {
-    if (lhs.size() >= rhs.size()) {
-      return rhs.inner_product(lhs);
-    } else {
-      return lhs.inner_product(rhs);
-    }
+FeatureStatsType inner_product(const SparseVector& lhs, const SparseVector& rhs)
+{
+  if (lhs.size() >= rhs.size()) {
+    return rhs.inner_product(lhs);
+  } else {
+    return lhs.inner_product(rhs);
+  }
 }
 
-std::vector<std::size_t> SparseVector::feats() const {
+std::vector<std::size_t> SparseVector::feats() const
+{
   std::vector<std::size_t> toRet;
   for(fvector_t::const_iterator iter = m_fvector.begin();
       iter!=m_fvector.end();
@@ -126,7 +138,8 @@ std::vector<std::size_t> SparseVector::feats() const {
   return toRet;
 }
 
-std::size_t SparseVector::encode(const std::string& name) {
+std::size_t SparseVector::encode(const std::string& name)
+{
   name2id_t::const_iterator name2id_iter = m_name_to_id.find(name);
   size_t id = 0;
   if (name2id_iter == m_name_to_id.end()) {
@@ -139,26 +152,29 @@ std::size_t SparseVector::encode(const std::string& name) {
   return id;
 }
 
-std::string SparseVector::decode(std::size_t id) {
+std::string SparseVector::decode(std::size_t id)
+{
   return m_id_to_name[id];
 }
 
-bool operator==(SparseVector const& item1, SparseVector const& item2) {
+bool operator==(SparseVector const& item1, SparseVector const& item2)
+{
   return item1.m_fvector==item2.m_fvector;
 }
 
-std::size_t hash_value(SparseVector const& item) {
+std::size_t hash_value(SparseVector const& item)
+{
   boost::hash<SparseVector::fvector_t> hasher;
   return hasher(item.m_fvector);
 }
 
 FeatureStats::FeatureStats()
-    : m_available_size(kAvailableSize), m_entries(0),
-      m_array(new FeatureStatsType[m_available_size]) {}
+  : m_available_size(kAvailableSize), m_entries(0),
+    m_array(new FeatureStatsType[m_available_size]) {}
 
 FeatureStats::FeatureStats(const size_t size)
-    : m_available_size(size), m_entries(size),
-      m_array(new FeatureStatsType[m_available_size])
+  : m_available_size(size), m_entries(size),
+    m_array(new FeatureStatsType[m_available_size])
 {
   memset(m_array, 0, GetArraySizeWithBytes());
 }
@@ -276,7 +292,8 @@ void FeatureStats::savetxt(ostream* os)
   *os << *this;
 }
 
-void FeatureStats::savetxt() {
+void FeatureStats::savetxt()
+{
   savetxt(&cout);
 }
 
@@ -298,7 +315,8 @@ ostream& operator<<(ostream& o, const FeatureStats& e)
   return o;
 }
 
-bool operator==(const FeatureStats& f1, const FeatureStats& f2) {
+bool operator==(const FeatureStats& f1, const FeatureStats& f2)
+{
   size_t size = f1.size();
 
   if (size != f2.size())

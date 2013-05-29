@@ -33,7 +33,7 @@ namespace Moses
 
 class Phrase;
 
-/* Abstract class for for multi factor LM. Only inherited by the JointLM at the moment. 
+/* Abstract class for for multi factor LM. Only inherited by the JointLM at the moment.
  * Could use this when factored LM are implemented
  */
 class LanguageModelMultiFactor : public LanguageModelImplementation
@@ -41,16 +41,16 @@ class LanguageModelMultiFactor : public LanguageModelImplementation
 protected:
   FactorMask m_factorTypes;
 
-	LanguageModelMultiFactor(const std::string& description, const std::string &line)
-  :LanguageModelImplementation(description, line)
+  LanguageModelMultiFactor(const std::string& description, const std::string &line)
+    :LanguageModelImplementation(description, line)
   {}
-	
+
 public:
   virtual bool Load(const std::string &filePath
                     , const std::vector<FactorType> &factorTypes
                     , size_t nGramOrder) = 0;
 
-	bool Useable(const Phrase &phrase) const;	
+  bool Useable(const Phrase &phrase) const;
 };
 
 }

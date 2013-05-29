@@ -38,10 +38,10 @@ using namespace std;
 namespace Moses
 {
 TargetPhrase::TargetPhrase( std::string out_string)
-:Phrase(0), m_fullScore(0.0), m_sourcePhrase(0)
-, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-, m_lhsTarget(NULL)
+  :Phrase(0), m_fullScore(0.0), m_sourcePhrase(0)
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
 {
 
   //ACAT
@@ -50,37 +50,36 @@ TargetPhrase::TargetPhrase( std::string out_string)
 }
 
 TargetPhrase::TargetPhrase()
-:Phrase()
-, m_fullScore(0.0)
-,m_sourcePhrase()
-, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-, m_lhsTarget(NULL)
+  :Phrase()
+  , m_fullScore(0.0)
+  ,m_sourcePhrase()
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
 {
 }
 
 TargetPhrase::TargetPhrase(const Phrase &phrase)
-: Phrase(phrase)
-, m_fullScore(0.0)
-, m_sourcePhrase()
-, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-, m_lhsTarget(NULL)
+  : Phrase(phrase)
+  , m_fullScore(0.0)
+  , m_sourcePhrase()
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
 {
 }
 
 TargetPhrase::TargetPhrase(const TargetPhrase &copy)
-: Phrase(copy)
-, m_fullScore(copy.m_fullScore)
-, m_sourcePhrase(copy.m_sourcePhrase)
-, m_alignTerm(copy.m_alignTerm)
-, m_alignNonTerm(copy.m_alignNonTerm)
-, m_scoreBreakdown(copy.m_scoreBreakdown)
+  : Phrase(copy)
+  , m_fullScore(copy.m_fullScore)
+  , m_sourcePhrase(copy.m_sourcePhrase)
+  , m_alignTerm(copy.m_alignTerm)
+  , m_alignNonTerm(copy.m_alignNonTerm)
+  , m_scoreBreakdown(copy.m_scoreBreakdown)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(copy.m_lhsTarget);
-  }
-  else {
+  } else {
     m_lhsTarget = NULL;
   }
 
@@ -125,8 +124,8 @@ void TargetPhrase::Evaluate(const InputType &input)
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
-	const FeatureFunction &ff = *ffs[i];
-	ff.Evaluate(input, m_scoreBreakdown);
+    const FeatureFunction &ff = *ffs[i];
+    ff.Evaluate(input, m_scoreBreakdown);
   }
 }
 
@@ -180,7 +179,7 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
-	AlignmentInfo::CollType alignTerm, alignNonTerm;
+  AlignmentInfo::CollType alignTerm, alignNonTerm;
   for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
     util::TokenIter<util::SingleCharacter, false> dash(*token, util::SingleCharacter('-'));
 
@@ -194,11 +193,10 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 
 
     if (GetWord(targetPos).IsNonTerminal()) {
-    	alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    } else {
+      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
     }
-  	else {
-  		alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-  	}
   }
   SetAlignTerm(alignTerm);
   SetAlignNonTerm(alignNonTerm);
@@ -207,15 +205,15 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 
 void TargetPhrase::SetAlignTerm(const AlignmentInfo::CollType &coll)
 {
-	const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
-	m_alignTerm = alignmentInfo;
+  const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
+  m_alignTerm = alignmentInfo;
 
 }
 
 void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)
 {
-	const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
-	m_alignNonTerm = alignmentInfo;
+  const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
+  m_alignNonTerm = alignmentInfo;
 }
 
 void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString)

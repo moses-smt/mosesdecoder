@@ -31,63 +31,67 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
 LanguageModel::LanguageModel(const std::string& description, const std::string &line) :
   StatefulFeatureFunction(description, StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1, line )
 {
-  m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
+  m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature();
 }
 
 
 LanguageModel::~LanguageModel() {}
 
-float LanguageModel::GetWeight() const {
+float LanguageModel::GetWeight() const
+{
   //return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[0];
   return StaticData::Instance().GetWeights(this)[0];
 }
 
-float LanguageModel::GetOOVWeight() const {
+float LanguageModel::GetOOVWeight() const
+{
   if (m_enableOOVFeature) {
     //return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[1];
-	return StaticData::Instance().GetWeights(this)[1];
+    return StaticData::Instance().GetWeights(this)[1];
   } else {
     return 0;
   }
 }
 
-void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const {
+void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const
+{
   UTIL_THROW(util::Exception, "Incremental search is only supported by KenLM.");
 }
 
 void LanguageModel::Evaluate(const Phrase &source
-					  , const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
+                             , const TargetPhrase &targetPhrase
+                             , ScoreComponentCollection &scoreBreakdown
+                             , ScoreComponentCollection &estimatedFutureScore) const
 {
-   if (Useable(targetPhrase)) {
-     // contains factors used by this LM
-     float fullScore, nGramScore;
-     size_t oovCount;
+  if (Useable(targetPhrase)) {
+    // contains factors used by this LM
+    float fullScore, nGramScore;
+    size_t oovCount;
 
-     CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
-     float estimateScore = fullScore - nGramScore;
+    CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
+    float estimateScore = fullScore - nGramScore;
 
-     if (StaticData::Instance().GetLMEnableOOVFeature()) {
-       vector<float> scores(2), estimateScores(2);
-       scores[0] = nGramScore;
-       scores[1] = oovCount;
-       scoreBreakdown.Assign(this, scores);
+    if (StaticData::Instance().GetLMEnableOOVFeature()) {
+      vector<float> scores(2), estimateScores(2);
+      scores[0] = nGramScore;
+      scores[1] = oovCount;
+      scoreBreakdown.Assign(this, scores);
 
-       estimateScores[0] = estimateScore;
-       estimateScores[1] = 0;
-       estimatedFutureScore.Assign(this, estimateScores);
-     } else {
-       scoreBreakdown.Assign(this, nGramScore);
-       estimatedFutureScore.Assign(this, estimateScore);
-     }
+      estimateScores[0] = estimateScore;
+      estimateScores[1] = 0;
+      estimatedFutureScore.Assign(this, estimateScores);
+    } else {
+      scoreBreakdown.Assign(this, nGramScore);
+      estimatedFutureScore.Assign(this, estimateScore);
+    }
 
-   }
+  }
 }
 
 const LanguageModel &LanguageModel::GetFirstLM()

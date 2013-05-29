@@ -38,11 +38,10 @@ class InputType;
 
 class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
 {
-	typedef std::map< char, short > CharHash;
-	typedef std::map< std::string, short > StringHash;
+  typedef std::map< char, short > CharHash;
+  typedef std::map< std::string, short > StringHash;
 
-  struct ThreadLocalStorage
-  {
+  struct ThreadLocalStorage {
     const Sentence *input;
   };
 
@@ -77,23 +76,23 @@ public:
   void InitializeForInput( Sentence const& in );
 
   const FFState* EmptyHypothesisState(const InputType &) const {
-  	return new DummyState();
+    return new DummyState();
   }
 
   //TODO: This implements the old interface, but cannot be updated because
   //it appears to be stateful
   void Evaluate(const Hypothesis& cur_hypo,
-  							ScoreComponentCollection* accumulator) const;
+                ScoreComponentCollection* accumulator) const;
 
   void EvaluateChart(const ChartHypothesis& /* cur_hypo */,
-  									 int /* featureID */,
-  									 ScoreComponentCollection* ) const {
+                     int /* featureID */,
+                     ScoreComponentCollection* ) const {
     throw std::logic_error("GlobalLexicalModelUnlimited not supported in chart decoder, yet");
   }
 
-	void AddFeature(ScoreComponentCollection* accumulator,
-			StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
-			StringPiece targetWord) const;
+  void AddFeature(ScoreComponentCollection* accumulator,
+                  StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
+                  StringPiece targetWord) const;
 
 };
 

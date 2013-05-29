@@ -411,7 +411,7 @@ int main(int argc, char** argv)
                 "o", CMDSTRINGTYPE, &output,
                 "v", CMDENUMTYPE,  &verbose, BoolEnum,
                 "verbose", CMDENUMTYPE,  &verbose, BoolEnum,
-                
+
                 (char*)NULL);
 
   GetParams(&argc, &argv, (char*)NULL);

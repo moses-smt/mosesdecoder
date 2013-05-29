@@ -29,7 +29,7 @@ Point::Point() : vector<parameter_t>(m_dim), m_score(0.0) {}
 Point::Point(const vector<parameter_t>& init,
              const vector<parameter_t>& min,
              const vector<parameter_t>& max)
-    : vector<parameter_t>(Point::m_dim), m_score(0.0)
+  : vector<parameter_t>(Point::m_dim), m_score(0.0)
 {
   m_min.resize(Point::m_dim);
   m_max.resize(Point::m_dim);

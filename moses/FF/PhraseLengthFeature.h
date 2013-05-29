@@ -15,7 +15,8 @@ namespace Moses
 
 /** Sets the features for length of source phrase, target phrase, both.
  */
-class PhraseLengthFeature : public StatelessFeatureFunction {
+class PhraseLengthFeature : public StatelessFeatureFunction
+{
 public:
   PhraseLengthFeature(const std::string &line);
 
@@ -25,9 +26,9 @@ public:
   }
 
   virtual void Evaluate(const Phrase &source
-	  	  	  	  	  , const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const;
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const;
 
 };
 

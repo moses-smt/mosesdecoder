@@ -38,9 +38,9 @@ class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
 class ChartTranslationOptions;
-  
+
 /** base class for all types of inputs to the decoder,
- *  eg. sentences, confusion networks, lattices and tree 
+ *  eg. sentences, confusion networks, lattices and tree
  */
 class InputType
 {
@@ -81,7 +81,7 @@ public:
   }
   void SetDocumentId(long documentId) {
     m_documentId = documentId;
-  }  
+  }
   long GetTopicId() const {
     return m_topicId;
   }
@@ -111,7 +111,7 @@ public:
   }
   void SetTextType(std::string type) {
     m_textType = type;
-  }  
+  }
   std::string GetPassthroughInformation() const {
     return m_passthrough;
   }

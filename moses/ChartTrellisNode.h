@@ -34,7 +34,7 @@ class ChartTrellisDetour;
  */
 class ChartTrellisNode
 {
- public:
+public:
   typedef std::vector<ChartTrellisNode*> NodeChildren;
 
   ChartTrellisNode(const ChartHypothesis &hypo);
@@ -42,15 +42,21 @@ class ChartTrellisNode
 
   ~ChartTrellisNode();
 
-  const ChartHypothesis &GetHypothesis() const { return m_hypo; }
+  const ChartHypothesis &GetHypothesis() const {
+    return m_hypo;
+  }
 
-  const NodeChildren &GetChildren() const { return m_children; }
+  const NodeChildren &GetChildren() const {
+    return m_children;
+  }
 
-  const ChartTrellisNode &GetChild(size_t i) const { return *m_children[i]; }
+  const ChartTrellisNode &GetChild(size_t i) const {
+    return *m_children[i];
+  }
 
   Phrase GetOutputPhrase() const;
 
- private:
+private:
   ChartTrellisNode(const ChartTrellisNode &);  // Not implemented
   ChartTrellisNode& operator=(const ChartTrellisNode &);  // Not implemented
 

@@ -64,9 +64,9 @@ public:
   size_t GetSize() const {
     return m_coll.size();
   }
-  
+
   const TargetPhrase &GetTargetPhrase(size_t ind) const;
-  
+
   UINT64 GetFilePos() const;
 
   Moses::TargetPhraseCollection *ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors

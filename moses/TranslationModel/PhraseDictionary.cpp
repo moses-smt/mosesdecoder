@@ -31,7 +31,7 @@ namespace Moses
 {
 
 PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
-:DecodeFeature(description, line)
+  :DecodeFeature(description, line)
 {
   m_tableLimit= 20; // TODO default?
 
@@ -40,20 +40,15 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
 
     if (args[0] == "num-input-features") {
       m_numInputScores = Scan<unsigned>(args[1]);
-    }
-    else if (args[0] == "path") {
+    } else if (args[0] == "path") {
       m_filePath = args[1];
-    }
-    else if (args[0] == "table-limit") {
+    } else if (args[0] == "table-limit") {
       m_tableLimit = Scan<size_t>(args[1]);
-    }
-    else if (args[0] == "target-path") {
+    } else if (args[0] == "target-path") {
       m_targetFile = args[1];
-    }
-    else if (args[0] == "alignment-path") {
+    } else if (args[0] == "alignment-path") {
       m_alignmentsFile = args[1];
-    }
-    else {
+    } else {
       //throw "Unknown argument " + args[0];
     }
   } // for (size_t i = 0; i < toks.size(); ++i) {

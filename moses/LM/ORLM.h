@@ -17,7 +17,8 @@ class Phrase;
 
 /** @todo ask ollie
  */
-class LanguageModelORLM : public LanguageModelSingleFactor {
+class LanguageModelORLM : public LanguageModelSingleFactor
+{
 public:
   typedef count_t T;  // type for ORLM filter
   LanguageModelORLM(const std::string &line)
@@ -34,10 +35,12 @@ public:
     fout.close();
     delete m_lm;
   }
-  void CleanUpAfterSentenceProcessing() {m_lm->clearCache();} // clear caches
+  void CleanUpAfterSentenceProcessing() {
+    m_lm->clearCache(); // clear caches
+  }
 
   bool UpdateORLM(const std::vector<string>& ngram, const int value);
- protected:
+protected:
   OnlineRLM<T>* m_lm;
   //MultiOnlineRLM<T>* m_lm;
   wordID_t m_oov_id;

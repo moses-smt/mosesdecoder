@@ -19,7 +19,7 @@ std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statele
 std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 
 FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
-: m_tuneable(true)
+  : m_tuneable(true)
 {
   ParseLine(description, line);
 
@@ -35,13 +35,13 @@ FeatureFunction::FeatureFunction(const std::string& description, const std::stri
     m_description = dstream.str();
   }
 
-	ScoreComponentCollection::RegisterScoreProducer(this);
+  ScoreComponentCollection::RegisterScoreProducer(this);
   m_producers.push_back(this);
 }
 
 FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
-: m_numScoreComponents(numScoreComponents)
-, m_tuneable(true)
+  : m_numScoreComponents(numScoreComponents)
+  , m_tuneable(true)
 {
   ParseLine(description, line);
 
@@ -75,14 +75,11 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
 
     if (args[0] == "num-features") {
       m_numScoreComponents = Scan<size_t>(args[1]);
-    }
-    else if (args[0] == "name") {
+    } else if (args[0] == "name") {
       m_description = args[1];
-    }
-    else if (args[0] == "tuneable") {
+    } else if (args[0] == "tuneable") {
       m_tuneable = Scan<bool>(args[1]);
-    }
-    else {
+    } else {
       m_args.push_back(args);
     }
   }

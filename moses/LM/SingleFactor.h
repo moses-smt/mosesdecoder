@@ -43,31 +43,27 @@ protected:
   FFState *m_nullContextState;
   FFState *m_beginSentenceState;
 
-	LanguageModelSingleFactor(const std::string& description, const std::string &line);
+  LanguageModelSingleFactor(const std::string& description, const std::string &line);
 
 public:
-	virtual ~LanguageModelSingleFactor();
-	virtual bool Load(const std::string &filePath
-					, FactorType factorType
-					, size_t nGramOrder) = 0;
+  virtual ~LanguageModelSingleFactor();
+  virtual bool Load(const std::string &filePath
+                    , FactorType factorType
+                    , size_t nGramOrder) = 0;
 
-	bool Useable(const Phrase &phrase) const
-	{
-		return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);		
-	}
-	
-	const Factor *GetSentenceStart() const
-	{
-		return m_sentenceStart;
-	}
-	const Factor *GetSentenceEnd() const
-	{
-		return m_sentenceEnd;
-	}
-	FactorType GetFactorType() const
-	{
-		return m_factorType;
-	}
+  bool Useable(const Phrase &phrase) const {
+    return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
+  }
+
+  const Factor *GetSentenceStart() const {
+    return m_sentenceStart;
+  }
+  const Factor *GetSentenceEnd() const {
+    return m_sentenceEnd;
+  }
+  FactorType GetFactorType() const {
+    return m_factorType;
+  }
 
   virtual const FFState *GetNullContextState() const;
   virtual const FFState *GetBeginSentenceState() const;

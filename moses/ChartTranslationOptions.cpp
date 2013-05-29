@@ -27,8 +27,8 @@ namespace Moses
 {
 
 float ChartTranslationOptions::CalcEstimateOfBestScore(
-    const TargetPhraseCollection &tpc,
-    const StackVec &stackVec)
+  const TargetPhraseCollection &tpc,
+  const StackVec &stackVec)
 {
   const TargetPhrase &targetPhrase = **(tpc.begin());
   float estimateOfBestScore = targetPhrase.GetFutureScore();

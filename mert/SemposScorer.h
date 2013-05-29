@@ -19,7 +19,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 /**
  * This class represents sempos based metrics.
@@ -32,12 +32,16 @@ public:
 
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   virtual void prepareStats(std::size_t sindex, const std::string& text, ScoreStats& entry);
-  virtual std::size_t NumberOfScores() const { return m_ovr->NumberOfScores(); }
+  virtual std::size_t NumberOfScores() const {
+    return m_ovr->NumberOfScores();
+  }
   virtual float calculateScore(const std::vector<int>& comps) const {
     return m_ovr->calculateScore(comps);
   }
 
-  bool EnableDebug() const { return m_enable_debug; }
+  bool EnableDebug() const {
+    return m_enable_debug;
+  }
 
   float weight(int item) const;
 

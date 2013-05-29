@@ -60,8 +60,8 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
   , m_arcList(NULL)
   , m_transOpt(NULL)
   , m_manager(manager)
-,	m_totalScore(0.0f)
-,	m_futureScore(0.0f)
+  ,	m_totalScore(0.0f)
+  ,	m_futureScore(0.0f)
 
   , m_id(m_manager.GetNextHypoId())
 {
@@ -248,20 +248,22 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
     }
     if (comp != 0) return comp;
   }
-  
+
   return 0;
 }
 
 void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
-                              int state_idx) {
+                              int state_idx)
+{
   m_ffStates[state_idx] = sfff.Evaluate(
-      *this,
-      m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-      &m_scoreBreakdown);
-            
+                            *this,
+                            m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+                            &m_scoreBreakdown);
+
 }
 
-void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff) {
+void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
+{
   slff.Evaluate(PhraseBasedFeatureContext(this), &m_scoreBreakdown);
 }
 
@@ -280,14 +282,14 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // compute values of stateless feature functions that were not
   // cached in the translation option
   const vector<const StatelessFeatureFunction*>& sfs =
-      StatelessFeatureFunction::GetStatelessFeatureFunctions();
+    StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
-	const StatelessFeatureFunction &ff = *sfs[i];
+    const StatelessFeatureFunction &ff = *sfs[i];
     EvaluateWith(ff);
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =
-      StatefulFeatureFunction::GetStatefulFeatureFunctions();
+    StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     const StatefulFeatureFunction &ff = *ffs[i];
     m_ffStates[i] = ff.Evaluate(

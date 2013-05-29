@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <cstring>
 
-namespace {
+namespace
+{
 
 const int LINE_MAX_LENGTH = 10000;
 
@@ -84,10 +85,10 @@ void Alignment::Create(const string& fileName)
 }
 
 Alignment::Alignment()
-    : m_array(NULL),
-      m_sentenceEnd(NULL),
-      m_size(0),
-      m_sentenceCount(0) {}
+  : m_array(NULL),
+    m_sentenceEnd(NULL),
+    m_size(0),
+    m_sentenceCount(0) {}
 
 Alignment::~Alignment()
 {

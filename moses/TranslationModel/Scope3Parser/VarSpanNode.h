@@ -33,9 +33,8 @@ namespace Moses
 
 /** @todo what is this?
  */
-struct VarSpanNode
-{
- public:
+struct VarSpanNode {
+public:
   struct NonTermRange {
     size_t s1;
     size_t s2;
@@ -48,8 +47,7 @@ struct VarSpanNode
 
   VarSpanNode() : m_parent(0), m_label(0), m_rank(0) {}
 
-  VarSpanNode &Insert(const NodeVec &vec)
-  {
+  VarSpanNode &Insert(const NodeVec &vec) {
     if (vec.empty()) {
       return *this;
     }
@@ -59,8 +57,7 @@ struct VarSpanNode
   // Given a span, determine the ranges of possible start and end offsets
   // for each non-terminal.
   void CalculateRanges(int start, int end,
-                       std::vector<NonTermRange> &ranges) const
-  {
+                       std::vector<NonTermRange> &ranges) const {
     ranges.resize(m_rank);
     const VarSpanNode *n = this;
     size_t firstIndex = m_rank;
@@ -103,10 +100,9 @@ struct VarSpanNode
   size_t m_rank;
   MapType m_children;
 
- private:
+private:
   VarSpanNode &Insert(NodeVec::const_iterator first,
-                      NodeVec::const_iterator last)
-  {
+                      NodeVec::const_iterator last) {
     assert(first != last);
 
     KeyType key;
@@ -117,7 +113,7 @@ struct VarSpanNode
     key[4] = first->m_numSplitPoints;
 
     std::pair<MapType::iterator, bool> result = m_children.insert(
-        std::make_pair(key, VarSpanNode()));
+          std::make_pair(key, VarSpanNode()));
     VarSpanNode &child = result.first->second;
     if (result.second) {
       child.m_parent = this;

@@ -19,16 +19,15 @@ private:
 
   const ChartHypothesis &m_hypo;
 
-  /** Construct the prefix string of up to specified size 
+  /** Construct the prefix string of up to specified size
    * \param ret prefix string
    * \param size maximum size (typically max lm context window)
    */
-  size_t CalcPrefix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
-  {
+  size_t CalcPrefix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const {
     const TargetPhrase &target = hypo.GetCurrTargetPhrase();
     const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-          target.GetAlignNonTerm().GetNonTermIndexMap();
-    
+      target.GetAlignNonTerm().GetNonTermIndexMap();
+
     // loop over the rule that is being applied
     for (size_t pos = 0; pos < target.GetSize(); ++pos) {
       const Word &word = target.GetWord(pos);
@@ -53,13 +52,12 @@ private:
     return size;
   }
 
-  /** Construct the suffix phrase of up to specified size 
+  /** Construct the suffix phrase of up to specified size
    * will always be called after the construction of prefix phrase
    * \param ret suffix phrase
    * \param size maximum size of suffix
    */
-  size_t CalcSuffix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
-  {
+  size_t CalcSuffix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const {
     CHECK(m_contextPrefix.GetSize() <= m_numTargetTerminals);
 
     // special handling for small hypotheses
@@ -81,7 +79,7 @@ private:
     else {
       const TargetPhrase& target = hypo.GetCurrTargetPhrase();
       const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-            target.GetAlignNonTerm().GetNonTermIndexMap();
+        target.GetAlignNonTerm().GetNonTermIndexMap();
       for (int pos = (int) target.GetSize() - 1; pos >= 0 ; --pos) {
         const Word &word = target.GetWord(pos);
 
@@ -89,8 +87,7 @@ private:
           size_t nonTermInd = nonTermIndexMap[pos];
           const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermInd);
           size = static_cast<const LanguageModelChartState*>(prevHypo->GetFFState(featureID))->CalcSuffix(*prevHypo, featureID, ret, size);
-        }
-        else {
+        } else {
           ret.PrependWord(hypo.GetCurrTargetPhrase().GetWord(pos));
           size--;
         }
@@ -106,11 +103,10 @@ private:
 
 public:
   LanguageModelChartState(const ChartHypothesis &hypo, int featureID, size_t order)
-      :m_lmRightContext(NULL)
-      ,m_contextPrefix(order - 1)
-      ,m_contextSuffix( order - 1)
-      ,m_hypo(hypo)
-  {
+    :m_lmRightContext(NULL)
+    ,m_contextPrefix(order - 1)
+    ,m_contextSuffix( order - 1)
+    ,m_hypo(hypo) {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();
 
     for (std::vector<const ChartHypothesis*>::const_iterator i = hypo.GetPrevHypos().begin(); i != hypo.GetPrevHypos().end(); ++i) {
@@ -131,8 +127,12 @@ public:
     m_lmRightContext = rightState;
   }
 
-  float GetPrefixScore() const { return m_prefixScore; }
-  FFState* GetRightContext() const { return m_lmRightContext; }
+  float GetPrefixScore() const {
+    return m_prefixScore;
+  }
+  FFState* GetRightContext() const {
+    return m_lmRightContext;
+  }
 
   size_t GetNumTargetTerminals() const {
     return m_numTargetTerminals;
@@ -150,8 +150,7 @@ public:
       dynamic_cast<const LanguageModelChartState &>( o );
 
     // prefix
-    if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) // not for "<s> ..."
-    {
+    if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) { // not for "<s> ..."
       int ret = GetPrefix().Compare(other.GetPrefix());
       if (ret != 0)
         return ret;
@@ -159,8 +158,7 @@ public:
 
     // suffix
     size_t inputSize = m_hypo.GetManager().GetSource().GetSize();
-    if (m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1)// not for "... </s>"
-    {
+    if (m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1) { // not for "... </s>"
       int ret = other.GetRightContext()->Compare(*m_lmRightContext);
       if (ret != 0)
         return ret;

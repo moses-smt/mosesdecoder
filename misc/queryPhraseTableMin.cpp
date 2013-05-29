@@ -36,8 +36,7 @@ int main(int argc, char **argv)
       useAlignments = true;
     } else if (!strcmp(argv[i], "-c")) {
       reportCounts = true;
-    }
-    else
+    } else
       usage();
   }
 
@@ -47,28 +46,28 @@ int main(int argc, char **argv)
   std::vector<FactorType> input(1, 0);
   std::vector<FactorType> output(1, 0);
   std::vector<float> weight(nscores, 0);
-    
+
   Parameter *parameter = new Parameter();
   const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
   const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");
   const_cast<std::vector<std::string>&>(parameter->GetParam("verbose")).resize(1, "0");
   const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
   const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
-  
+
   StaticData::InstanceNonConst().LoadData(parameter);
 
   PhraseDictionaryCompact pdc("input-factor=0 output-factor=0 num-features=5 path=" + ttable);
-  bool ret = pdc.InitDictionary(); 
+  bool ret = pdc.InitDictionary();
   assert(ret);
-  
+
   std::string line;
   while(getline(std::cin, line)) {
     Phrase sourcePhrase;
     sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||", NULL);
-    
+
     TargetPhraseVectorPtr decodedPhraseColl
-      = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
-    
+    = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
+
     if(decodedPhraseColl != NULL) {
       if(reportCounts)
         std::cout << sourcePhrase << decodedPhraseColl->size() << std::endl;
@@ -77,19 +76,18 @@ int main(int argc, char **argv)
           TargetPhrase &tp = *it;
           std::cout << sourcePhrase << "||| ";
           std::cout << static_cast<const Phrase&>(tp) << "|||";
-          
+
           if(useAlignments)
-            std::cout << " " << tp.GetAlignTerm() << "|||"; 
-          
+            std::cout << " " << tp.GetAlignTerm() << "|||";
+
           std::vector<float> scores = tp.GetScoreBreakdown().GetScoresForProducer(&pdc);
           for(size_t i = 0; i < scores.size(); i++)
             std::cout << " " << exp(scores[i]);
           std::cout << std::endl;
         }
-    }
-    else if(reportCounts)
+    } else if(reportCounts)
       std::cout << sourcePhrase << 0 << std::endl;
-    
+
     std::cout.flush();
   }
 }

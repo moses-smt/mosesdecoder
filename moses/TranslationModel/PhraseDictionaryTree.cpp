@@ -157,7 +157,8 @@ PhraseDictionaryTree::PrefixPtr::operator bool() const
 typedef LVoc<std::string> WordVoc;
 
 
-class PDTimp {
+class PDTimp
+{
 public:
   typedef PrefixTreeF<LabelId,OFF_T> PTF;
   typedef FilePtr<PTF> CPT;
@@ -481,7 +482,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   std::vector<OFF_T> vo;
   size_t lnc=0;
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
-  size_t missingAlignmentCount = 0; 
+  size_t missingAlignmentCount = 0;
 
   while(getline(inFile, line)) {
     ++lnc;
@@ -553,9 +554,9 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (!sparseFeatureString.empty()) {
       std::vector<std::string> sparseTokens = Tokenize(sparseFeatureString);
       if (sparseTokens.size() % 2 != 0) {
-        TRACE_ERR("ERROR: incorrectly formatted sparse feature string: " << 
-          sparseFeatureString << std::endl);
-        abort();  
+        TRACE_ERR("ERROR: incorrectly formatted sparse feature string: " <<
+                  sparseFeatureString << std::endl);
+        abort();
       }
       for (size_t i = 0; i < sparseTokens.size(); i+=2) {
         fnames.push_back(imp->tv.add(sparseTokens[i]));
@@ -624,7 +625,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
   if ( PrintWordAlignment()) {
     TRACE_ERR("Count of lines with missing alignments: " <<
-      missingAlignmentCount << "/" << lnc << "\n");
+              missingAlignmentCount << "/" << lnc << "\n");
   }
 
   fClose(os);

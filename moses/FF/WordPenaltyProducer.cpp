@@ -5,9 +5,9 @@
 namespace Moses
 {
 void WordPenaltyProducer::Evaluate(const Phrase &source
-  	  	  	  	  	  , const TargetPhrase &targetPhrase
-  	  	  	  	  	  , ScoreComponentCollection &scoreBreakdown
-  	  	  	  	  	  , ScoreComponentCollection &estimatedFutureScore) const
+                                   , const TargetPhrase &targetPhrase
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection &estimatedFutureScore) const
 {
   float score = - (float) targetPhrase.GetNumTerminals();
   scoreBreakdown.Assign(this, score);

@@ -103,10 +103,11 @@ bool Vocab::Load(const std::string & vocab_path, const FactorDirection& directio
   std::cerr << "Loading vocab from " << vocab_path << std::endl;
   return Load(&vcbin, direction, factors, closed);
 }
-bool Vocab::Load(FileHandler* vcbin) {
+bool Vocab::Load(FileHandler* vcbin)
+{
   FactorList factors;
   factors.push_back(0);
-  return Load(vcbin, Input, factors);  
+  return Load(vcbin, Input, factors);
 }
 bool Vocab::Load(FileHandler* vcbin, const FactorDirection& direction,
                  const FactorList& factors, bool closed)

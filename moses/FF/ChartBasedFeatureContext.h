@@ -11,7 +11,7 @@ class TargetPhrase;
  **/
 class ChartBasedFeatureContext
 {
-  //The context either has a hypothesis (during search) or a 
+  //The context either has a hypothesis (during search) or a
   //TargetPhrase and source sentence (during pre-calculation)
   //TODO: should the context also include some info on where the TargetPhrase
   //is anchored (assuming it's lexicalised), which is available at pre-calc?
@@ -24,11 +24,13 @@ public:
   ChartBasedFeatureContext(const TargetPhrase& targetPhrase,
                            const InputType& source);
 
-  const InputType& GetSource() const
-  { return m_source; }
+  const InputType& GetSource() const {
+    return m_source;
+  }
 
-  const TargetPhrase& GetTargetPhrase() const
-  { return m_targetPhrase; }
+  const TargetPhrase& GetTargetPhrase() const {
+    return m_targetPhrase;
+  }
 
 };
 

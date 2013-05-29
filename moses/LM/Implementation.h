@@ -44,7 +44,7 @@ class Phrase;
 struct LMResult {
   // log probability
   float score;
-  // Is the word unknown?  
+  // Is the word unknown?
   bool unknown;
 };
 
@@ -62,7 +62,7 @@ protected:
   //! Usually <s> and </s>
 
   LanguageModelImplementation(const std::string& description, const std::string &line)
-  :LanguageModel(description, line)
+    :LanguageModel(description, line)
   {}
 public:
 
@@ -108,8 +108,7 @@ public:
     return m_sentenceEndWord;
   }
 
-  const FFState* EmptyHypothesisState(const InputType &/*input*/) const
-  {
+  const FFState* EmptyHypothesisState(const InputType &/*input*/) const {
     return NewState(GetBeginSentenceState());
   }
 

@@ -37,8 +37,7 @@ class GlobalLexicalModel : public StatelessFeatureFunction
   typedef std::map< const Word*, float, WordComparer > SingleHash;
   typedef std::map< const TargetPhrase*, float > LexiconCache;
 
-  struct ThreadLocalStorage
-  {
+  struct ThreadLocalStorage {
     LexiconCache cache;
     const Sentence *input;
   };
@@ -64,18 +63,17 @@ private:
 
 public:
   GlobalLexicalModel(const std::string &line);
-	virtual ~GlobalLexicalModel();
+  virtual ~GlobalLexicalModel();
 
   void InitializeForInput( Sentence const& in );
 
   void Evaluate(const PhraseBasedFeatureContext& context,
-  							ScoreComponentCollection* accumulator) const;
+                ScoreComponentCollection* accumulator) const;
 
 
   void EvaluateChart(
     const ChartBasedFeatureContext& context,
-    ScoreComponentCollection* accumulator) const
-  {
+    ScoreComponentCollection* accumulator) const {
     throw std::logic_error("GlobalLexicalModel not supported in chart decoder, yet");
   }
 

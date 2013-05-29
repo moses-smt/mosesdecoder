@@ -64,13 +64,13 @@ void TargetPhrase::Create1AlignFromString(const std::string &align1Str)
 
 void TargetPhrase::CreateAlignFromString(const std::string &alignStr)
 {
-	vector<std::string> alignPairs;
-	boost::split(alignPairs, alignStr, boost::is_any_of("\t "));
-	for (size_t i = 0; i < alignPairs.size(); ++i) {
-		vector<size_t> alignPoints;
-		Moses::Tokenize<size_t>(alignPoints, alignPairs[i], "-");
-		m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
-	}
+  vector<std::string> alignPairs;
+  boost::split(alignPairs, alignStr, boost::is_any_of("\t "));
+  for (size_t i = 0; i < alignPairs.size(); ++i) {
+    vector<size_t> alignPoints;
+    Moses::Tokenize<size_t>(alignPoints, alignPairs[i], "-");
+    m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
+  }
 }
 
 
@@ -97,16 +97,16 @@ char *TargetPhrase::WriteToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed)
 {
   size_t phraseSize = GetSize();
   size_t targetWordSize = onDiskWrapper.GetTargetWordSize();
-  
+
   const PhrasePtr sp = GetSourcePhrase();
   size_t spSize = sp->GetSize();
   size_t sourceWordSize = onDiskWrapper.GetSourceWordSize();
-  
+
   size_t memNeeded = sizeof(UINT64)						// num of words
                      + targetWordSize * phraseSize	// actual words. lhs as last words
-                     + sizeof(UINT64)					// num source words         
-  	  	  	  	  	 + sourceWordSize * spSize;   // actual source words              
- 
+                     + sizeof(UINT64)					// num source words
+                     + sourceWordSize * spSize;   // actual source words
+
   memUsed = 0;
   UINT64 *mem = (UINT64*) malloc(memNeeded);
 
@@ -125,13 +125,13 @@ char *TargetPhrase::WriteToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed)
   char *currPtr = (char*)mem + memUsed;
   UINT64 *memTmp = (UINT64*) currPtr;
   memTmp[0] = spSize;
-  memUsed += sizeof(UINT64);                                  
+  memUsed += sizeof(UINT64);
   for (size_t pos = 0; pos < spSize; ++pos) {
     const Word &word = sp->GetWord(pos);
     char *currPtr = (char*)mem + memUsed;
     memUsed += word.WriteToMemory((char*) currPtr);
   }
-  
+
   CHECK(memUsed == memNeeded);
   return (char *) mem;
 }
@@ -174,7 +174,7 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
   // phrase id
   memcpy(mem, &m_filePos, sizeof(UINT64));
   memUsed += sizeof(UINT64);
-  
+
   // align
   size_t tmp = WriteAlignToMemory(mem + memUsed);
   memUsed += tmp;
@@ -223,7 +223,7 @@ size_t TargetPhrase::WriteScoresToMemory(char *mem) const
 }
 
 
-Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> & inputFactors 
+Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> & inputFactors
     , const std::vector<Moses::FactorType> &outputFactors
     , const Vocab &vocab
     , const Moses::PhraseDictionary &phraseDict
@@ -244,7 +244,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   int index = 0;
   Moses::AlignmentInfo::CollType alignTerm, alignNonTerm;
   std::set<std::pair<size_t, size_t> > alignmentInfo;
-  const PhrasePtr sp = GetSourcePhrase(); 
+  const PhrasePtr sp = GetSourcePhrase();
   for (size_t ind = 0; ind < m_align.size(); ++ind) {
     const std::pair<size_t, size_t> &entry = m_align[ind];
     alignmentInfo.insert(entry);
@@ -252,11 +252,10 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
     size_t targetPos = entry.second;
 
     if (GetWord(targetPos).IsNonTerminal()) {
-    	alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    } else {
+      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
     }
-  	else {
-  		alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-  	}
 
   }
   ret->SetAlignTerm(alignTerm);
@@ -313,7 +312,7 @@ UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP)
     bytesRead += word->ReadFromFile(fileTP);
     AddWord(word);
   }
-  
+
   // read source words
   UINT64 numSourceWords;
   fileTP.read((char*) &numSourceWords, sizeof(UINT64));
@@ -371,7 +370,7 @@ UINT64 TargetPhrase::ReadScoresFromFile(std::fstream &fileTPColl)
 void TargetPhrase::DebugPrint(ostream &out, const Vocab &vocab) const
 {
   Phrase::DebugPrint(out, vocab);
-  
+
   for (size_t ind = 0; ind < m_align.size(); ++ind) {
     const AlignPair &alignPair = m_align[ind];
     out << alignPair.first << "-" << alignPair.second << " ";

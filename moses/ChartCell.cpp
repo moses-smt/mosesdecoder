@@ -45,17 +45,18 @@ ChartCellBase::~ChartCellBase() {}
 
 /** Constructor
  * \param startPos endPos range of this cell
- * \param manager pointer back to the manager 
+ * \param manager pointer back to the manager
  */
 ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
-  ChartCellBase(startPos, endPos), m_manager(manager) {
+  ChartCellBase(startPos, endPos), m_manager(manager)
+{
   const StaticData &staticData = StaticData::Instance();
   m_nBestIsEnabled = staticData.IsNBestEnabled();
 }
 
 ChartCell::~ChartCell() {}
 
-/** Add the given hypothesis to the cell. 
+/** Add the given hypothesis to the cell.
  *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
  *  This function just calls the correspondind AddHypothesis() in ChartHypothesisCollection
  *  \param hypo Hypothesis to be added
@@ -98,8 +99,7 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 
   // pluck things out of queue and add to hypo collection
   const size_t popLimit = staticData.GetCubePruningPopLimit();
-  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) 
-  {
+  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) {
     ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);
   }
@@ -179,15 +179,15 @@ size_t ChartCell::GetSize() const
 
 const HypoList *ChartCell::GetAllSortedHypotheses() const
 {
-	HypoList *ret = new HypoList();
+  HypoList *ret = new HypoList();
 
-	MapType::const_iterator iter;
-	for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
-	  const ChartHypothesisCollection &coll = iter->second;
-	  const HypoList &list = coll.GetSortedHypotheses();
+  MapType::const_iterator iter;
+  for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
+    const ChartHypothesisCollection &coll = iter->second;
+    const HypoList &list = coll.GetSortedHypotheses();
     std::copy(list.begin(), list.end(), std::inserter(*ret, ret->end()));
-	}
-	return ret;
+  }
+  return ret;
 }
 
 //! call GetSearchGraph() for each hypo collection

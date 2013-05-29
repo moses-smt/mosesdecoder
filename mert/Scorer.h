@@ -10,7 +10,8 @@
 #include "Types.h"
 #include "ScoreData.h"
 
-namespace mert {
+namespace mert
+{
 
 class Vocabulary;
 
@@ -32,7 +33,7 @@ enum ScorerRegularisationStrategy {REG_NONE, REG_AVERAGE, REG_MINIMUM};
  */
 class Scorer
 {
- public:
+public:
   Scorer(const std::string& name, const std::string& config);
   virtual ~Scorer();
 
@@ -117,14 +118,16 @@ class Scorer
    */
   virtual void setFactors(const std::string& factors);
 
-  mert::Vocabulary* GetVocab() const { return m_vocab; }
+  mert::Vocabulary* GetVocab() const {
+    return m_vocab;
+  }
 
   /**
    * Set unix filter, which will be used to preprocess the sentences
    */
   virtual void setFilter(const std::string& filterCommand);
 
- private:
+private:
   void InitConfig(const std::string& config);
 
   /**
@@ -143,7 +146,7 @@ class Scorer
   std::vector<int> m_factors;
   PreProcessFilter* m_filter;
 
- protected:
+protected:
   ScoreData* m_score_data;
   bool m_enable_preserve_case;
 
@@ -173,40 +176,40 @@ class Scorer
   /**
    * Every inherited scorer should call this function for each sentence
    */
-  std::string preprocessSentence(const std::string& sentence) const
-  {
+  std::string preprocessSentence(const std::string& sentence) const {
     return applyFactors(applyFilter(sentence));
   }
 
 };
 
-namespace {
+namespace
+{
 
-  //regularisation strategies
-  inline float score_min(const statscores_t& scores, size_t start, size_t end)
-  {
-    float min = std::numeric_limits<float>::max();
-    for (size_t i = start; i < end; ++i) {
-      if (scores[i] < min) {
-        min = scores[i];
-      }
+//regularisation strategies
+inline float score_min(const statscores_t& scores, size_t start, size_t end)
+{
+  float min = std::numeric_limits<float>::max();
+  for (size_t i = start; i < end; ++i) {
+    if (scores[i] < min) {
+      min = scores[i];
     }
-    return min;
+  }
+  return min;
+}
+
+inline float score_average(const statscores_t& scores, size_t start, size_t end)
+{
+  if ((end - start) < 1) {
+    // this shouldn't happen
+    return 0;
+  }
+  float total = 0;
+  for (size_t j = start; j < end; ++j) {
+    total += scores[j];
   }
 
-  inline float score_average(const statscores_t& scores, size_t start, size_t end)
-  {
-    if ((end - start) < 1) {
-      // this shouldn't happen
-      return 0;
-    }
-    float total = 0;
-    for (size_t j = start; j < end; ++j) {
-      total += scores[j];
-    }
-
-    return total / (end - start);
-  }
+  return total / (end - start);
+}
 
 } // namespace
 

@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-namespace 
+namespace
 {
 using namespace std;
 
@@ -45,8 +45,8 @@ class LanguageModelRandLM : public LanguageModelSingleFactor
 {
 public:
   LanguageModelRandLM(const std::string &line)
-  :LanguageModelSingleFactor("RandLM", line)
-  , m_lm(0)
+    :LanguageModelSingleFactor("RandLM", line)
+    , m_lm(0)
   {}
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
@@ -133,7 +133,7 @@ randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const
 }
 
 LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
-                                    State* finalState) const
+                                       State* finalState) const
 {
   FactorType factorType = GetFactorType();
   // set up context

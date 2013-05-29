@@ -35,7 +35,7 @@ namespace Moses
 {
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
-: DecodeFeature("Generation", line)
+  : DecodeFeature("Generation", line)
 {
   string filePath;
 
@@ -44,8 +44,7 @@ GenerationDictionary::GenerationDictionary(const std::string &line)
 
     if (args[0] == "path") {
       filePath = args[1];
-    }
-    else {
+    } else {
       //UserMessage::Add("Unknown argument " + args[0]);
       //abort();
     }
