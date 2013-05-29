@@ -17,9 +17,9 @@ namespace Moses
 
 // initialise the RuleCube by creating the top-left corner item
 RuleCubeMBOT::RuleCubeMBOT(const ChartTranslationOptions &transOpt,
-                   const ChartCellCollection* allChartCells,
+                   const ChartCellCollection& allChartCells,
                    ChartManager &manager)
-   : RuleCube(transOpt,*allChartCells,manager)
+   : RuleCube(transOpt,allChartCells,manager)
   , m_mbotTransOpt(transOpt)
 {
   RuleCubeItemMBOT *item = new RuleCubeItemMBOT(transOpt, allChartCells);
@@ -62,7 +62,7 @@ RuleCubeItemMBOT *RuleCubeMBOT::PopMBOT(ChartManager &manager)
   RuleCubeItemMBOT *item = m_mbotQueue.top();
   //std::cout << "FOUND TOP"<< std::endl;
   m_mbotQueue.pop();
-  //std::cout << "POPPED QUEUE"<< std::endl;
+  std::cerr << "POPPED QUEUE, CREATE NEIGHBORS..."<< std::endl;
   CreateNeighborsMBOT(item, manager);
   //std::cout << "Neighnord done"<< std::endl;
   return item;
@@ -95,14 +95,19 @@ void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT* item, ChartManage
   }
   else //Fabienne Braune : if matching option is off create neighbors for all target phrases
   {
+	  std::cerr << "HERE WE DO NOT MATCH..." << std::endl;
+
 	  // create neighbor along translation dimension
 	  if (translationDimension.HasMoreTranslations()) {
-		  CreateNeighborMBOT(item, -1, manager);}
+		  std::cerr << "Creating Translation neighbor (target phrase)..." << std::endl;
+		  CreateNeighborMBOT(item, -1, manager);
+	  }
 
 	  // create neighbors along all hypothesis dimensions
 	  for (size_t i = 0; i < item->GetHypothesisDimensionsMBOT().size(); ++i) {
 		  const HypothesisDimension &dimension = item->GetHypothesisDimensions()[i];
 		  if (dimension.HasMoreHypo()) {
+			  std::cerr << "Creating Hypothesis neighbor (non terminal)..." << std::endl;
 			  CreateNeighborMBOT(item, i, manager);
 		  }
 	  }
@@ -126,7 +131,6 @@ void RuleCubeMBOT::CreateNeighborMBOT(const RuleCubeItemMBOT* item, int dimensio
       		{
       			newItem->IncrementTranslationDimension();
       		}
-      		newItem->CreateHypothesis(m_mbotTransOpt, manager);
       	}
     }
     m_mbotQueue.push(newItem);

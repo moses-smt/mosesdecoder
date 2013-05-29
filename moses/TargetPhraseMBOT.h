@@ -112,7 +112,7 @@ public:
      m_sourceLhs = lhs;
    }
 
-   const Word &GetSourceLHS() const {
+   const Word GetSourceLHS() const {
      return m_sourceLhs;
    }
 
@@ -120,7 +120,7 @@ public:
     m_targetLhs = lhs;
   }
 
-  const WordSequence &GetTargetLHSMBOT() const {
+  const WordSequence GetTargetLHSMBOT() const {
     return m_targetLhs;
   }
 
@@ -175,7 +175,7 @@ public:
   //}
 
   //given a set of indices, fills the vector passed as arguments with words at those positions
-  inline size_t &GetWordVector(std::vector<std::vector<size_t> > pos, WordSequence &wordVector) const {
+  inline size_t GetWordVector(std::vector<std::vector<size_t> > pos, WordSequence &wordVector) const {
 
         //std::cout << "MAKING MBOT PHRRASES "<< std::endl;
 
@@ -200,7 +200,7 @@ public:
 
   }
 
-  inline std::vector<Word> &GetWordVector (std::vector<size_t> pos){
+  inline std::vector<Word> GetWordVector (std::vector<size_t> pos){
 
         //new : check that there are as many phrases as positions
         CHECK(m_targetPhrases.GetSize() == pos.size());
@@ -214,10 +214,13 @@ public:
         std::vector<size_t> :: const_iterator itr_pos;
         for(itr_phrase = m_targetPhrases.begin(), itr_pos = pos.begin(); itr_phrase != m_targetPhrases.end(), itr_pos != pos.end(); itr_phrase++,itr_pos++)
         {
-            Phrase * myPhrase = *itr_phrase;
+
+        	 size_t myPos = *itr_pos;
+        	 myWord = itr_phrase->GetWord(myPos);
+        	/*Phrase * myPhrase = *itr_phrase;
             size_t myPos = *itr_pos;
             //std::cout << "Current Phrase "<< myPhrase.GetSize() << std::endl;
-            myWord = myPhrase->GetWord(myPos);
+            myWord = myPhrase->GetWord(myPos);*/
         }
         wordVector.push_back(myWord);
        //should return a vector of words

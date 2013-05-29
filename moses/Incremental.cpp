@@ -168,14 +168,7 @@ template <class Model> lm::WordIndex Fill<Model>::Convert(const Word &word) cons
 //Fabienne Braune : create l-MBOT chart cells if using the l-MBOT based system
 struct ChartCellBaseFactory {
   ChartCellBase *operator()(size_t startPos, size_t endPos) const {
-	if(StaticData::Instance().IsMBOT())
-	{
-		return static_cast<ChartCellBase*>(new ChartCellBaseMBOT(startPos, endPos));
-	}
-	else
-	{
 		return new ChartCellBase(startPos, endPos);
-	}
   }
 };
 

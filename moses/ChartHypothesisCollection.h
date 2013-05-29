@@ -23,7 +23,7 @@
 #include <set>
 #include "ChartHypothesis.h"
 #include "RuleCube.h"
-
+#include "ChartHypothesisMBOT.h"
 
 namespace Moses
 {
@@ -78,6 +78,7 @@ protected:
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
   std::pair<HCType::iterator, bool> Add(ChartHypothesis *hypo, ChartManager &manager);
+  std::pair<HCType::iterator, bool> AddMBOT(ChartHypothesisMBOT *hypo, ChartManager &manager);
 
 public:
   typedef HCType::iterator iterator;

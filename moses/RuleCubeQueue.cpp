@@ -21,7 +21,9 @@
 
 #include "RuleCubeQueue.h"
 
+#include "RuleCubeMBOT.h"
 #include "RuleCubeItem.h"
+#include "RuleCubeItemMBOT.h"
 #include "StaticData.h"
 
 namespace Moses
@@ -57,6 +59,32 @@ ChartHypothesis *RuleCubeQueue::Pop()
 
   // if the cube contains more items then push it back onto the queue
   if (!cube->IsEmpty()) {
+    m_queue.push(cube);
+  } else {
+    delete cube;
+  }
+
+  return hypo;
+}
+
+ChartHypothesisMBOT *RuleCubeQueue::PopMBOT()
+{
+  // pop the most promising rule cube
+  RuleCubeMBOT *cube = static_cast<RuleCubeMBOT*>(m_queue.top());
+  m_queue.pop();
+
+  // pop the most promising item from the cube and get the corresponding
+  // hypothesis
+  RuleCubeItemMBOT *item = static_cast<RuleCubeItemMBOT*>(cube->PopMBOT(m_manager));
+  if (StaticData::Instance().GetCubePruningLazyScoring()) {
+    item->CreateHypothesis(cube->GetTranslationOption(), m_manager);
+  }
+
+  ChartHypothesisMBOT * hypo = item->ReleaseHypothesisMBOT();
+  std::cerr << "Hypo to return : " << hypo->GetTargetLHSMBOT() << std::endl;
+
+  // if the cube contains more items then push it back onto the queue
+  if (!cube->IsEmptyMBOT()) {
     m_queue.push(cube);
   } else {
     delete cube;

@@ -74,6 +74,7 @@ m_alignments(&AlignmentInfoCollectionMBOT::Instance().GetEmptyAlignmentInfoVecto
 
 TargetPhraseMBOT::~TargetPhraseMBOT()
 {
+	std::cerr << "KILLING TARGET PHRASE MBOT..." << std::endl;
 	delete m_sourcePhrase;
 }
 
@@ -100,6 +101,7 @@ void TargetPhraseMBOT::CreateFromStringForSequence(FactorDirection direction
         m_targetPhrases.CreatePhraseFromString(annotatedWordVector, direction, factorOrder);
         //Create sequence of target lhs
         m_targetLhs.CreateWordFromString(annotatedWordVector.back(),direction, factorOrder);
+        //std::cerr << "Constructed target LHS : " << m_targetLhs << std::endl;
         //this->SetTargetLHSMBOT(*(myWordSequence));
         targetUnits++;
   }
@@ -218,7 +220,7 @@ size_t TargetPhraseMBOT::GetSize() const {
     size_t sumOfsizes = 0;
     for(itr_targetPhrases = m_targetPhrases.begin();itr_targetPhrases != m_targetPhrases.end();itr_targetPhrases++)
     {
-        sumOfsizes += (*itr_targetPhrases)->GetSize();
+        sumOfsizes += (*itr_targetPhrases).GetSize();
     }
     return sumOfsizes;
   }
@@ -232,7 +234,7 @@ size_t TargetPhraseMBOT::GetNumTerminals() const
     size_t sumOfterms = 0;
     for(itr_targetPhrases = m_targetPhrases.begin();itr_targetPhrases != m_targetPhrases.end();itr_targetPhrases++)
     {
-        sumOfterms += (*itr_targetPhrases)->GetNumTerminals();
+        sumOfterms += (*itr_targetPhrases).GetNumTerminals();
     }
 
   return sumOfterms;
@@ -420,7 +422,7 @@ ostream& operator<<(ostream& out, const TargetPhraseMBOT& targetPhrase)
 
   for(itr_vector_phrases = myPhrases.begin(); itr_vector_phrases != myPhrases.end(); itr_vector_phrases++)
     {
-        out << **itr_vector_phrases << "(" << phraseCounter++ << ") ";
+        out << *itr_vector_phrases << "(" << phraseCounter++ << ") ";
     }
     out << "\t" << std::endl;
 

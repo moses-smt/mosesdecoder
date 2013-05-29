@@ -536,8 +536,8 @@ private:
 
         //1. Get MBOT phrases
         //2. Get MBOT alignments
-        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize();
-        const std::vector<const AlignmentInfoMBOT*> *alignedTargets = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTAlignments();
+        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize();
+        const std::vector<const AlignmentInfoMBOT*> *alignedTargets = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTAlignments();
 
 	  //FB : Here :iterate over vector and print out alignments
 	/*std::cout<< "Alignments : " << std::endl;
@@ -551,9 +551,10 @@ private:
         int currentlyProcessed = processedNT->GetStatus(currentHypo->GetId()) -1;
         //std::cout << "NUMTERMS :CURRENTLY PROCESSED : " << processedNT->GetStatus(currentHypo->GetId()) << std::endl;
 
-        CHECK(currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize() > currentlyProcessed);
-        Phrase * currentPhrase = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetPhrase(currentlyProcessed);
-        //sstd::cout << "NUMTERMS :Current Phrase : " << currentPhrase << " : " << currentPhrase.GetSize() << std::endl;
+        CHECK(currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize() > currentlyProcessed);
+        Phrase * currentPhrase = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetPhrase(currentlyProcessed);
+
+        //std::cerr << "NUMTERMS :Current Phrase : " << currentPhrase << " : " << std::endl;
 
         //std::vector<Word> targetLHS = currentHypo->GetCurrTargetPhraseMBOT().GetTargetLHSMBOT();
         //get size of mbot phrase in case we have several target terminals on single source
@@ -658,16 +659,16 @@ private:
 
         //1. Get MBOT phrases
         //2. Get MBOT alignments
-        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize();
+        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize();
 
-        const std::vector<const AlignmentInfoMBOT*> *alignedTargets = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTAlignments();
+        const std::vector<const AlignmentInfoMBOT*> *alignedTargets = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTAlignments();
 
         //std::cout << "PREFIX :CURRENTLY PROCESSED : " << processedNT->GetStatus(currentHypo->GetId()) << std::endl;
         int currentlyProcessed = processedNT->GetStatus(currentHypo->GetId()) - 1;
         //std::cout << "PREFIX :CURRENTLY PROCESSED : " << currentlyProcessed << std::endl;
 
-        CHECK(currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize() > currentlyProcessed);
-        Phrase * currentPhrase = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetPhrase(currentlyProcessed);
+        CHECK(currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize() > currentlyProcessed);
+        Phrase * currentPhrase = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetPhrase(currentlyProcessed);
         //std::cout << "PREFIX :Current Phrase : " << currentPhrase << std::endl;
 
         //std::vector<Word> targetLHS = currentHypo->GetCurrTargetPhraseMBOT().GetTargetLHSMBOT();
@@ -760,7 +761,8 @@ public:
         m_processedNonTerms = new ProcessedNonTerminals();
 
         //can get num terms directly...
-        size_t sizeOfMbot = hypo.GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize();
+        size_t sizeOfMbot = hypo.GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize();
+        std::cerr << "CONSTRUCTING LM STATE... " << hypo.GetCurrTargetPhraseMBOT()->GetMBOTPhrases() << std::endl;
 
         //store multiple phrases
         m_contextFactor = new ContextFactor(order,sizeOfMbot);
@@ -1038,8 +1040,9 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 //Fabienne Braune : we only use prefix information and rescore the whole window each time, this is simpler to understand
 FFState* LanguageModelImplementation::EvaluateMBOT(const ChartHypothesisMBOT& hypo, int featureID, ScoreComponentCollection* out, const LanguageModel *scorer) const {
 
-  //std::cerr << "Computing Language model for " << hypo << std::endl;
+	//std::cerr << "Computing Language model for " << hypo.GetCurrTargetPhraseMBOT()->GetMBOTPhrases() << std::endl;
     LanguageModelMBOTState *ret = new LanguageModelMBOTState(hypo, featureID, GetNGramOrder());
+
     //std::cout << "CONSTRUCTING MBOT LM STATE : " << std::endl;
     //std::cout << "HYPO : " << hypo << std::endl;
     //std::cout << "MBOT PREFIX : " << ret->GetPrefixesMBOT().front() << std::endl;
@@ -1074,23 +1077,24 @@ FFState* LanguageModelImplementation::EvaluateMBOT(const ChartHypothesisMBOT& hy
     size_t currentlyProcessed = 0;
 
     //Get size here because hypo is modified inside the loops (?)
-    size_t sizeOfMbot = hypo.GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize();
+    size_t sizeOfMbot = hypo.GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize();
     //std::cerr << "SIZE OF MBOT : " << sizeOfMbot << std::endl;
 
     while(currentlyProcessed < sizeOfMbot)
     {
-      //std::cerr << "PROCESSING NEXT MBOT PHRASE" << std::endl;
+      std::cerr << "PROCESSING NEXT MBOT PHRASE" << std::endl;
+      std::cerr << "CURENTLY PROCESSED : " << hypo.GetTargetLHSMBOT() << " : " << currentlyProcessed << std::endl;
 
         //in case we have already found the same non terminal in another mbot
         map<Word,unsigned> :: iterator itr_lhs_map_curr = lhsCurrMap.find(*(hypo.GetTargetLHSMBOT().GetWord(currentlyProcessed)));
 
-        const std::vector<const AlignmentInfoMBOT*> *alignedTargets = hypo.GetCurrTargetPhraseMBOT().GetMBOTAlignments();
+        const std::vector<const AlignmentInfoMBOT*> *alignedTargets = hypo.GetCurrTargetPhraseMBOT()->GetMBOTAlignments();
         //std::vector<Word> targetLHS = hypo.GetCurrTargetPhraseMBOT().GetTargetLHSMBOT()
 
         //Get size here because hypo is modified inside the loops (?)
-        size_t sizeOfPhrase = hypo.GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetPhrase(currentlyProcessed)->GetSize();
+        size_t sizeOfPhrase = hypo.GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetPhrase(currentlyProcessed)->GetSize();
 
-        ret->GetContextFactor()->AddPhrase(hypo.GetCurrTargetPhraseMBOT().GetMBOTPhrase(currentlyProcessed));
+        ret->GetContextFactor()->AddPhrase(hypo.GetCurrTargetPhraseMBOT()->GetMBOTPhrase(currentlyProcessed));
         //std::cerr << "----------------------------"<< std::endl;
         //std::cerr << "AT BEGINNIN : NEW MBOT..."<< std::endl;
         //std::cerr << "----------------------------"<< std::endl;
@@ -1176,7 +1180,7 @@ FFState* LanguageModelImplementation::EvaluateMBOT(const ChartHypothesisMBOT& hy
 
 			const LanguageModelMBOTState* prevState =
 			static_cast<const LanguageModelMBOTState*>(prevHypo->GetFFState(featureID));
-			size_t sizeOfPreviousMbot = prevHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize();
+			size_t sizeOfPreviousMbot = prevHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize();
 			bool previousFound = false;
 
 				//std::cout << "Subphrase Length for all : " << subPhraseLength << " : " << previousProcessed << std::endl;

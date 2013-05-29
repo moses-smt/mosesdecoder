@@ -32,8 +32,8 @@ namespace Moses
 {
 
 RuleCubeItemMBOT::RuleCubeItemMBOT( const ChartTranslationOptions &transOpt,
-                                    const ChartCellCollection* allChartCells)
-									: RuleCubeItem(transOpt,*allChartCells)
+                                    const ChartCellCollection &allChartCells)
+									: RuleCubeItem(transOpt,allChartCells)
                                     , m_mbotTranslationDimension(0,transOpt.GetTargetPhraseCollection().GetCollection())
                                     , m_mbotHypothesis(0)
 {
@@ -74,7 +74,9 @@ void RuleCubeItemMBOT::EstimateScoreMBOT()
 
 ChartHypothesisMBOT *RuleCubeItemMBOT::ReleaseHypothesisMBOT()
 {
+  std::cerr << "RELEASING MBOT HYPO..." << m_mbotHypothesis->GetCurrTargetPhraseMBOT() << std::endl;
   ChartHypothesisMBOT *hypo = m_mbotHypothesis;
+  std::cerr << "Hypo to release : " << hypo->GetCurrTargetPhraseMBOT() << std::endl;
   m_mbotHypothesis = 0;
   return hypo;
 }
@@ -84,7 +86,9 @@ void RuleCubeItemMBOT::CreateHypothesis(const ChartTranslationOptions &transOpt,
 {
 
   m_mbotHypothesis = new ChartHypothesisMBOT(transOpt, *this, manager);
+  std::cerr << "RCI : Create Hypo" << m_mbotHypothesis->GetCurrTargetPhraseMBOT()->GetTargetLHSMBOT() << std::endl;
   m_mbotHypothesis->CalcScoreMBOT();
+  std::cerr << "AFTER SCORING... " << m_mbotHypothesis->GetCurrTargetPhraseMBOT()->GetTargetLHSMBOT() << std::endl;
   m_mbotScore = m_mbotHypothesis->GetTotalScore();
   //Fabienne Braune : usefull for using debugging GUI
   /*std::cerr << "-----------------------" << std::endl;

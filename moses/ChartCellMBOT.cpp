@@ -20,24 +20,14 @@ namespace Moses
 extern bool g_debug;
 
 
-
-ChartCellBaseMBOT::~ChartCellBaseMBOT()
-{
-	 delete m_mbotSourceWordLabel;
-}
-
 ChartCellMBOT::ChartCellMBOT(size_t startPos, size_t endPos, ChartManager &manager):
-ChartCellBaseMBOT(startPos, endPos)
-, m_manager(manager)
-{
-	const StaticData &staticData = StaticData::Instance();
-	m_nBestIsEnabled = staticData.IsNBestEnabled();
-}
+ChartCell(startPos, endPos, manager)
+{}
 
 /** Add the given hypothesis to the cell */
 bool ChartCellMBOT::AddHypothesis(ChartHypothesisMBOT *hypo)
 {
-  const WordSequence &targetLHS = hypo->GetTargetLHSMBOT();
+  const WordSequence targetLHS = hypo->GetTargetLHSMBOT();
   CHECK(targetLHS.GetSize() != 0);
 
   bool ret = m_mbotHypoColl[targetLHS].AddHypothesis(hypo, m_manager);
@@ -60,8 +50,8 @@ void ChartCellMBOT::PruneToSize()
  * \param transOptList list of applicable rules to create hypotheses for the cell
  * \param allChartCells entire chart - needed to look up underlying hypotheses
  */
-void ChartCellMBOT::ProcessSentence(const ChartTranslationOptionList &transOptList
-                                , const ChartCellCollection* allChartCells)
+void ChartCellMBOT::ProcessSentenceWithMBOT(const ChartTranslationOptionList &transOptList
+                                , const ChartCellCollection &allChartCells)
 {
 
   const StaticData &staticData = StaticData::Instance();
@@ -78,14 +68,18 @@ void ChartCellMBOT::ProcessSentence(const ChartTranslationOptionList &transOptLi
   const size_t popLimit = staticData.GetCubePruningPopLimit();
   for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops)
   {
-    ChartHypothesisMBOT *hypo = static_cast<ChartHypothesisMBOT*> (queue.Pop());
+	std::cerr << "IN FOR LOOP..." << std::endl;
+    ChartHypothesisMBOT *hypo = queue.PopMBOT();
+    std::cerr << "CURRENT TARGET MBOT AFTER POP: " << hypo->GetCurrTargetPhraseMBOT()->GetTargetLHSMBOT() << std::endl;
     AddHypothesis(hypo);
+    std::cerr << "HYPOHTESIS ADDED..." << std::endl;
   }
+  std::cerr << "EXITING METHOD..." << std::endl;
 }
 
 
 void ChartCellMBOT::ProcessSentenceWithSourceLabels(const ChartTranslationOptionList &transOptList
-                        ,const ChartCellCollection* allChartCells, const InputType &source, size_t startPos, size_t endPos)
+                        ,const ChartCellCollection &allChartCells, const InputType &source, size_t startPos, size_t endPos)
 {
 
   const StaticData &staticData = StaticData::Instance();
@@ -228,7 +222,7 @@ void ChartCellMBOT::SortHypotheses()
 }
 
 /** Return the highest scoring hypothesis in the cell */
-const ChartHypothesisMBOT *ChartCellMBOT::GetBestHypothesis() const
+const ChartHypothesisMBOT *ChartCellMBOT::GetBestHypothesisMBOT() const
 {
 
   const ChartHypothesisMBOT *ret = NULL;

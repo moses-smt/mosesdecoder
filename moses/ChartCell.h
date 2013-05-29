@@ -32,6 +32,9 @@
 #include "ChartHypothesisCollection.h"
 #include "RuleCube.h"
 #include "ChartCellLabelSet.h"
+#include "ChartCellLabelSetMBOT.h"
+#include "ChartCellLabelMBOT.h"
+#include "StaticData.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/functional/hash.hpp>
@@ -44,15 +47,15 @@ class ChartTranslationOptionList;
 class ChartCellCollection;
 class ChartManager;
 
-//Fabienne Braune : Basically, wanted to create derived class ChartCellBaseMBOT but this led to inheritance diamond in class ChartCellMBOT
-//Put all stuff related to l-MBOT cells into this base.
+//Fabienne Braune : Wanted to create derived class ChartCellBaseMBOT but this led to inheritance diamond in class ChartCellMBOT
+//so I put l-MBOT components into ChartCellBase
 class ChartCellBase {
   public:
     ChartCellBase(size_t startPos, size_t endPos);
 
-    virtual ~ChartCellBase();
+    ~ChartCellBase();
 
-    const ChartCellLabelSet &GetTargetLabelSet() const { return m_targetLabelSet; }
+    const ChartCellLabelSet &GetTargetLabelSet() const { return m_targetLabelSet;}
 
     const ChartCellLabelSetMBOT &GetTargetLabelSetForMBOT() const { return m_mbotTargetLabelSet;}
 
@@ -60,27 +63,14 @@ class ChartCellBase {
 
     const WordsRange &GetCoverage() const { return m_coverage; }
 
-
-
-    class ChartCellBaseMBOT : public ChartCellBase
-    {
-
-    public:
-       ChartCellBaseMBOT(size_t startPos, size_t endPos);
-
-       virtual ~ChartCellBaseMBOT();
-
-
-
-       const ChartCellLabelMBOT &GetSourceWordLabel() const {
+    const ChartCellLabelMBOT &GetSourceWordLabel() const {
             CHECK(m_mbotCoverage.size()!=0);
             CHECK(m_mbotCoverage.front().GetNumWordsCovered() == 1);
-            return *m_mbotSourceWordLabel;
-          }
+            return *m_mbotSourceWordLabel;}
 
-       ChartCellLabelSetMBOT &MutableTargetLabelSet() { return m_mbotTargetLabelSet; }
+    ChartCellLabelSetMBOT &MutableTargetLabelSetForMBOT() { return m_mbotTargetLabelSet; }
 
-       const std::vector<WordsRange> &GetCoverage() const { return m_mbotCoverage; }
+    const std::vector<WordsRange> &GetCoverageForMBOT() const { return m_mbotCoverage; }
 
 
   protected:
@@ -97,6 +87,7 @@ class ChartCellBase {
  */
 
 class ChartCell : public ChartCellBase {
+
   friend std::ostream& operator<<(std::ostream&, const ChartCell&);
 public:
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
@@ -111,13 +102,12 @@ public:
 
 protected:
   MapType m_hypoColl;
-
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
   ChartManager &m_manager;
 
 public:
   ChartCell(size_t startPos, size_t endPos, ChartManager &manager);
-  virtual ~ChartCell();
+  ~ChartCell();
 
   virtual void ProcessSentence(const ChartTranslationOptionList &transOptList
                        ,const ChartCellCollection &allChartCells);
@@ -132,7 +122,7 @@ public:
   //! for n-best list
   virtual const HypoList *GetAllSortedHypotheses() const;
 
-  bool AddHypothesis(ChartHypothesis *hypo);
+  virtual bool AddHypothesis(ChartHypothesis *hypo);
 
   virtual void SortHypotheses();
   virtual void PruneToSize();
@@ -142,14 +132,16 @@ public:
   virtual void CleanupArcList();
 
   virtual void OutputSizes(std::ostream &out) const;
-  size_t GetSize() const;
+  virtual size_t GetSize() const;
 
-  //! transitive comparison used for adding objects into set
-  virtual inline bool operator<(const ChartCell &compare) const {
-    return m_coverage < compare.m_coverage;
+  //Fabienne Braune : TODO : somehow get comparison of m_mbotCoverage into derived class ChartCellMBOT
+  inline bool operator<(const ChartCell &compare) const {
+	  if(StaticData::Instance().IsMBOT())
+	  {return m_coverage < compare.m_coverage;}
+	  else{return m_mbotCoverage < compare.m_mbotCoverage;}
   }
 
-  virtual void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned,bool> &reachable) const;
+  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned,bool> &reachable) const;
 
 };
 

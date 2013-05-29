@@ -16,9 +16,10 @@ namespace Moses
 		m_wordSequence = vector<Word>();
 	};
 
-	WordSequence::~WordSequence()
+	WordSequence::WordSequence(const Word &firstWord)
 	{
-	  Clear();
+		m_wordSequence = vector<Word>();
+		m_wordSequence.push_back(firstWord);
 	};
 
 	void WordSequence::Add(Word Word)
@@ -39,16 +40,17 @@ namespace Moses
 
 	vector<Word> *WordSequence::GetSequence()
 	{
-		return &m_wordSequence;
+		vector<Word> * ret;
+		ret = &m_wordSequence;
+		return ret;
 	};
 
 
 	Word *WordSequence::GetWord(size_t position) const
 	{
 		CHECK(position < GetSize());
-		return const_cast<Word*>(&(m_wordSequence.at(position)));
+		return const_cast<Word*> (&(m_wordSequence.at(position)));
 	};
-
 
 	size_t WordSequence::GetSize() const
 	{
@@ -72,5 +74,17 @@ namespace Moses
 	{
 		m_wordSequence.clear();
 	}
+
+	ostream& operator<<(ostream& out, const WordSequence& ws)
+		{
+		  int counter = 1;
+		  WordSequence::const_iterator itr;
+		  for(itr = ws.begin(); itr != ws.end(); itr++)
+		  {
+			  out << *itr << "(" << counter << ")";
+			  counter++;
+		  }
+		  out << std::endl;
+		}
 
 }

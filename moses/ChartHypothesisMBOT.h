@@ -47,11 +47,11 @@ TargetPhraseMBOT *m_mbotTargetPhrase;
     return ptr;
   }
 
-  static void DeleteMBOT(ChartHypothesisMBOT *hypo) {
+  static void Delete(ChartHypothesisMBOT *hypo) {
     s_objectPool.freeObject(hypo);
   }
 #else
-  static void DeleteMBOT(ChartHypothesisMBOT *hypo) {
+  static void Delete(ChartHypothesisMBOT *hypo) {
     delete hypo;
   }
 #endif
@@ -61,8 +61,8 @@ TargetPhraseMBOT *m_mbotTargetPhrase;
 
   ~ChartHypothesisMBOT();
 
-  const TargetPhraseMBOT &GetCurrTargetPhraseMBOT()const {
-    return *m_mbotTargetPhrase;
+  const TargetPhraseMBOT * GetCurrTargetPhraseMBOT()const {
+    return m_mbotTargetPhrase;
   }
 
   //just in case we try to call target phrase
@@ -84,8 +84,8 @@ TargetPhraseMBOT *m_mbotTargetPhrase;
     std::cout << "Get non mbot target LHS NOT IMPLRMENTED in chart hypothesis MBOT" << std::endl;
   }
 
-  const WordSequence &GetTargetLHSMBOT() const {
-    return GetCurrTargetPhraseMBOT().GetTargetLHSMBOT();
+  const WordSequence GetTargetLHSMBOT() const {
+    return GetCurrTargetPhraseMBOT()->GetTargetLHSMBOT();
   }
 
   void CreateOutputPhrase(Phrase &outPhrase, ProcessedNonTerminals &processedNonTerms) const;
@@ -98,8 +98,6 @@ TargetPhraseMBOT *m_mbotTargetPhrase;
   void CalcScoreMBOT();
 
   void AddArc(ChartHypothesisMBOT *loserHypo);
-
-  void CleanupArcList();
 
   void SetWinningHypo(const ChartHypothesisMBOT *hypo);
 

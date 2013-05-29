@@ -94,7 +94,7 @@ class RuleCube
   RuleCube(const ChartTranslationOptions &, const ChartCellCollection &,
            ChartManager &);
 
-  ~RuleCube();
+  virtual ~RuleCube();
 
   float GetTopScore() const {
     CHECK(!m_queue.empty());

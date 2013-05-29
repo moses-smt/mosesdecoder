@@ -15,6 +15,8 @@ namespace Moses
 
 class WordSequence
 {
+	friend std::ostream& operator<<(ostream& out, const WordSequence& ws);
+
 	protected:
 	vector<Word> m_wordSequence;
 
@@ -22,7 +24,10 @@ class WordSequence
 	typedef vector<Word>::const_iterator const_iterator;
 	//TODO : Add constructor
 	 WordSequence();
-	~WordSequence();
+	 WordSequence(const Word &word);
+	~WordSequence(){
+		std::cerr << "KILLING WORD SEQUENCE" << std::endl;
+	};
 
 	//! iterators
 	const_iterator begin() const {
@@ -53,8 +58,6 @@ class WordSequence
 	size_t GetSize() const;
 	bool AreNonTerms() const;
 	void Clear();
-
-
 
 };
 

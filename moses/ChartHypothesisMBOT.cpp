@@ -93,7 +93,7 @@ void ChartHypothesisMBOT::CreateOutputPhrase(Phrase &outPhrase, ProcessedNonTerm
    //if there are several mbot phrases : split hypotheses
 
    //std::vector<Phrase> targetPhrases = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases();
-   const std::vector<const AlignmentInfoMBOT*> *alignedTargets = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTAlignments();
+   const std::vector<const AlignmentInfoMBOT*> *alignedTargets = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTAlignments();
    //std::vector<Word> targetLHS = currentHypo->GetCurrTargetPhraseMBOT().GetTargetLHSMBOT();
 
    //while(GetProcessingPhrase()->GetStatus() < targetPhrases.size())
@@ -104,12 +104,12 @@ void ChartHypothesisMBOT::CreateOutputPhrase(Phrase &outPhrase, ProcessedNonTerm
         //GetProcessingPhrase()->IncrementStatus();
         //std::cout << "CURENT STATUS : " << GetProcessingPhrase()->GetStatus() << std::endl;
 
-        CHECK(currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize() > currentlyProcessed);
-        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().GetSize();
+        CHECK(currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize() > currentlyProcessed);
+        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize();
         //std::cout << "Getting current Phrase : " << GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() << std::endl;
 
         //if several mbot phrases, look at status
-         const Phrase * currentPhrase = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrase(currentlyProcessed);
+         const Phrase * currentPhrase = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrase(currentlyProcessed);
          //std::cout << "Current MBOT Phrase : " << currentPhrase << std::endl;
         //std::vector<Phrase>::iterator itr_mbot_phrases;
 
@@ -229,7 +229,7 @@ void ChartHypothesisMBOT::CalcScoreMBOT()
   }
 
   // translation models & word penalty
-  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhraseMBOT().GetScoreBreakdown();
+  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhraseMBOT()->GetScoreBreakdown();
 
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
@@ -247,7 +247,6 @@ void ChartHypothesisMBOT::CalcScoreMBOT()
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
 
   //std::cerr << "Computing score for hypothesis : " << *this << std::endl;
-  //std::cerr << "Current Target Phrase : " << this->GetCurrTargetPhraseMBOT() << std::endl;
   for (unsigned i = 0; i < ffs.size(); ++i) {
         //std::cout << "Evaluating MBOT" << std::endl;
 		m_ffStates[i] = ffs[i]->EvaluateMBOT(*this,i,&m_scoreBreakdown);

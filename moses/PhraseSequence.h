@@ -15,10 +15,10 @@ class PhraseSequence
 	friend std::ostream& operator<<(ostream& out, const PhraseSequence& ps);
 
 	protected:
-	vector<Phrase*> m_phraseSequence;
+	vector<Phrase> m_phraseSequence;
 
 	public:
-	typedef vector<Phrase*>::const_iterator const_iterator;
+	typedef vector<Phrase>::const_iterator const_iterator;
 	//TODO : Add constructor
 	//TODO : Add comparator
 	PhraseSequence();
@@ -34,7 +34,7 @@ class PhraseSequence
 
 	void Add(Phrase *phrase);
 	void CreatePhraseFromString(vector<StringPiece> PhraseString, const FactorDirection &direction, const vector<FactorType> &factorOrder);
-	vector<Phrase*> *GetSequence() const;
+	vector<Phrase> *GetSequence();
 	Phrase *GetPhrase(size_t position) const;
 	size_t GetSize() const;
 };

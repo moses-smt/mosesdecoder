@@ -20,22 +20,33 @@
  ***********************************************************************/
 
 #include "ChartCellCollection.h"
+#include "ChartCellMBOT.h"
 #include "InputType.h"
 #include "WordsRange.h"
 
 namespace Moses {
 
 ChartCellCollectionBase::~ChartCellCollectionBase() {
+ std::cerr << "KILLING COLLECTION BASE " << std::endl;
   m_source.clear();
   for (std::vector<std::vector<ChartCellBase*> >::iterator i = m_cells.begin(); i != m_cells.end(); ++i) 
     RemoveAllInColl(*i);
+
+  //Fabienne Braune : clean up
+  RemoveAllInColl(m_mbotSource);
 }
 
 class CubeCellFactory {
   public:
     explicit CubeCellFactory(ChartManager &manager) : m_manager(manager) {}
-
     ChartCell *operator()(size_t start, size_t end) const {
+    //Fabienne Braune : check if we are in MBOT system. If yes create ChartCellLabelMBOT
+    //Would it make sense to have an own MBOT factory but how to initialize it? ChartCellCollectionBase
+    //is not a direct base of ChartCellMBOT
+    	if(StaticData::Instance().IsMBOT())
+    	{
+    		return static_cast<ChartCell*> (new ChartCellMBOT(start, end, m_manager));
+    	 }
       return new ChartCell(start, end, m_manager);
     }
 

@@ -77,7 +77,7 @@ class RuleCubeItemEqualityPredMBOT
 class RuleCubeMBOT : public RuleCube
 {
  public:
-  RuleCubeMBOT(const ChartTranslationOptions &, const ChartCellCollection* chartCells,
+  RuleCubeMBOT(const ChartTranslationOptions &, const ChartCellCollection &chartCells,
            ChartManager &);
 
   ~RuleCubeMBOT();

@@ -71,7 +71,7 @@ private:
 class RuleCubeItemMBOT : public RuleCubeItem
 {
  public:
-  RuleCubeItemMBOT(const ChartTranslationOptions &, const ChartCellCollection * cellCollection);
+  RuleCubeItemMBOT(const ChartTranslationOptions &, const ChartCellCollection &cellCollection);
   RuleCubeItemMBOT(const RuleCubeItemMBOT* copyCube, int);
   ~RuleCubeItemMBOT();
 
@@ -116,7 +116,7 @@ class RuleCubeItemMBOT : public RuleCubeItem
 
  bool operator<(const RuleCubeItemMBOT &) const;
 
- //Fabiennne Braune : Renamed private methods with ...MBOT. Would maybe be good to make these methods public in the base class?
+ //Fabiennne Braune : Do not copy
  private:
   RuleCubeItemMBOT(const RuleCubeItemMBOT &);  // Not implemented
   RuleCubeItemMBOT &operator=(const RuleCubeItemMBOT &);  // Not implemented

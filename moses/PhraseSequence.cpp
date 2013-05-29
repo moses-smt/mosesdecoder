@@ -12,17 +12,18 @@ namespace Moses
 {
 	PhraseSequence::PhraseSequence()
 	{
-		m_phraseSequence = vector<Phrase*>();
+		m_phraseSequence = vector<Phrase>();
 	}
 
 	PhraseSequence::~PhraseSequence()
 	{
-		RemoveAllInColl(m_phraseSequence);
+		std::cerr << "KILLING PHRASE SEQUENCE ..."<< std::endl;
+		//RemoveAllInColl(m_phraseSequence);
 	};
 
 	void PhraseSequence::Add(Phrase * phrase)
 	{
-		m_phraseSequence.push_back(phrase);
+		m_phraseSequence.push_back(*phrase);
 	};
 
 	void PhraseSequence::CreatePhraseFromString(vector<StringPiece> annotatedWordVector, const FactorDirection &direction, const vector<FactorType> &factorOrder)
@@ -54,15 +55,19 @@ namespace Moses
 		  Add(myPhrase);
 	};
 
-	vector<Phrase*> *PhraseSequence::GetSequence() const
+	vector<Phrase> *PhraseSequence::GetSequence()
 	{
-		return const_cast<vector<Phrase*> *>(&m_phraseSequence);
+		vector<Phrase> * ret;
+		ret = &m_phraseSequence;
+		return ret;
+
+		//return const_cast<vector<Phrase> *>(&m_phraseSequence);
 	};
 
 	Phrase *PhraseSequence::GetPhrase(size_t position) const
 	{
 		CHECK(position < GetSize());
-		return m_phraseSequence.at(position);
+		return const_cast<Phrase*> (&(m_phraseSequence.at(position)));
 	};
 
 	size_t PhraseSequence::GetSize() const
@@ -76,7 +81,7 @@ namespace Moses
 	  PhraseSequence::const_iterator itr;
 	  for(itr = ps.begin(); itr != ps.end(); itr++)
 	  {
-		  out << **itr << "(" << counter << ")";
+		  out << *itr << "(" << counter << ")";
 		  counter++;
 	  }
 	  out << std::endl;

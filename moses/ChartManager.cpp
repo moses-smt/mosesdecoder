@@ -32,6 +32,7 @@
 #include "DecodeStep.h"
 #include "TreeInput.h"
 #include "DummyScoreProducers.h"
+#include "ChartCellMBOT.h"
 
 using namespace std;
 using namespace Moses;
@@ -150,13 +151,15 @@ void ChartManager::ProcessSentenceWithMBOT()
       PreCalculateScores();
 
       // decode
-      ChartCell &cell = m_hypoStackColl.Get(range);
+      ChartCellMBOT * cell = static_cast<ChartCellMBOT*> (&m_hypoStackColl.Get(range));
 
-      cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+      //Fabienne Braune : Why does ProcessSentence not work although it is virtual in ChartCell (?)
+      cell->ProcessSentenceWithMBOT(m_translationOptionList, m_hypoStackColl);
+      std::cerr << "CELL PROCESSED..." << std::endl;
       m_translationOptionList.Clear();
-      cell.PruneToSize();
-      cell.CleanupArcList();
-      cell.SortHypotheses();
+      cell->PruneToSize();
+      cell->CleanupArcList();
+      cell->SortHypotheses();
     }
   }
 

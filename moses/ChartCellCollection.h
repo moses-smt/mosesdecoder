@@ -23,6 +23,7 @@
 #include "InputType.h"
 #include "ChartCell.h"
 #include "WordsRange.h"
+#include "StaticData.h"
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -30,7 +31,7 @@ namespace Moses
 {
 class InputType;
 class ChartManager;
-
+//Fabienne Braune : Same as in ChartCellBase, l-MBOT components are put into ChartCellCollectionBase
 class ChartCellCollectionBase {
   public:
     template <class Factory> ChartCellCollectionBase(const InputType &input, const Factory &factory) :
@@ -41,14 +42,23 @@ class ChartCellCollectionBase {
         std::vector<ChartCellBase*> &inner = m_cells[startPos];
         inner.reserve(size - startPos);
         for (size_t endPos = startPos; endPos < size; ++endPos) {
-          inner.push_back(factory(startPos, endPos));
-        }
+          inner.push_back(factory(startPos, endPos));}
         /* Hack: ChartCellLabel shouldn't need to know its span, but the parser
          * gets it from there :-(.  The span is actually stored as a reference,
          * which needs to point somewhere, so I have it refer to the ChartCell.
          */
-        m_source.push_back(new ChartCellLabel(inner[0]->GetCoverage(), input.GetWord(startPos)));
+          //Fabienne Braune : check if we are in MBOT system. If yes create ChartCellLabelMBOT
+          if(StaticData::Instance().IsMBOT())
+          {
+        	  //std::cerr << "ADDING WORD " << *(const_cast<Word*> (&(input.GetWord(startPos)))) << std::endl;
+        		//Fabienne Braune : Hack : first push WordSequence and then Add label. Should put label
+        	  //directly in sequence...
+        	  m_mbotSource.push_back(new ChartCellLabelMBOT(inner[0]->GetCoverageForMBOT(), WordSequence(input.GetWord(startPos))));
+        	  std::cerr << "Inserted Word Sequence : " << m_mbotSource.size() << std::endl;
+          }
+        	m_source.push_back(new ChartCellLabel(inner[0]->GetCoverage(), input.GetWord(startPos)));
       }
+      std::cerr << "Total Inserted Word Sequence : " << m_mbotSource.size() << std::endl;
     }
 
     virtual ~ChartCellCollectionBase();
@@ -61,16 +71,21 @@ class ChartCellCollectionBase {
       return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
     }
 
-
-    const ChartCellLabel &GetSourceWordLabel(size_t at) const {
+    const ChartCellLabel GetSourceWordLabel(size_t at) const {
       return m_source[at];
     }
 
+    const ChartCellLabelMBOT * GetSourceWordLabelMBOT(size_t at) const {
+          return m_mbotSource[at];
+        }
+
   private:
     std::vector<std::vector<ChartCellBase*> > m_cells;
-
     boost::ptr_vector<ChartCellLabel> m_source;
-};
+    //Fabienne Braune : Field Holdign MBOT Chart Cells.
+    vector<ChartCellLabelMBOT*> m_mbotSource;
+
+    };
 
 /** Hold all the chart cells for 1 input sentence. A variable of this type is held by the ChartManager
  */

@@ -22,6 +22,9 @@
 #pragma once
 
 #include "RuleCube.h"
+#include "RuleCubeMBOT.h"
+#include "RuleCubeItemMBOT.h"
+#include "ChartHypothesisMBOT.h"
 
 #include <queue>
 #include <vector>
@@ -51,6 +54,8 @@ class RuleCubeQueue
 
   void Add(RuleCube *);
   ChartHypothesis *Pop();
+  //Fabienne Braune : Pop l-MBOT hypotheses.
+  ChartHypothesisMBOT *PopMBOT();
   bool IsEmpty() const { return m_queue.empty(); }
 
  private:
