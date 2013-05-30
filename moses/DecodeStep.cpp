@@ -26,9 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 DecodeStep::DecodeStep(const DecodeFeature *decodeFeature,
-						const DecodeStep* prev,
-						const std::vector<FeatureFunction*> &features)
-: m_decodeFeature(decodeFeature)
+                       const DecodeStep* prev,
+                       const std::vector<FeatureFunction*> &features)
+  : m_decodeFeature(decodeFeature)
 {
   FactorMask prevOutputFactors;
   if (prev) prevOutputFactors = prev->m_outputFactors;
@@ -49,13 +49,12 @@ DecodeStep::DecodeStep(const DecodeFeature *decodeFeature,
 
   // find out which feature function can be applied in this decode step
   for (size_t i = 0; i < features.size(); ++i) {
-	FeatureFunction *feature = features[i];
-	if (feature->IsUseable(m_outputFactors)) {
-		m_featuresToApply.push_back(feature);
-	}
-	else {
-		m_featuresRemaining.push_back(feature);
-	}
+    FeatureFunction *feature = features[i];
+    if (feature->IsUseable(m_outputFactors)) {
+      m_featuresToApply.push_back(feature);
+    } else {
+      m_featuresRemaining.push_back(feature);
+    }
 
   }
 }

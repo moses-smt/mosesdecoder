@@ -61,6 +61,8 @@ public:
   ~TargetPhrase();
 
   void Evaluate(const Phrase &source);
+  void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
+
   void Evaluate(const InputType &input);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);

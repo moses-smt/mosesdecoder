@@ -113,8 +113,8 @@ void TargetWordInsertionFeature::ComputeFeatures(const Phrase &source,
 
 bool TargetWordInsertionFeature::IsUseable(const FactorMask &mask) const
 {
-	bool ret = mask[m_factorType];
-	return ret;
+  bool ret = mask[m_factorType];
+  return ret;
 }
 
 }

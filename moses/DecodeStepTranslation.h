@@ -37,8 +37,8 @@ class DecodeStepTranslation : public DecodeStep
 public:
   DecodeStepTranslation(); //! not implemented
   DecodeStepTranslation(const PhraseDictionary* phraseFeature,
-		  	  	  	  	  const DecodeStep* prev,
-		  	  	  	  	  const std::vector<FeatureFunction*> &features);
+                        const DecodeStep* prev,
+                        const std::vector<FeatureFunction*> &features);
 
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt

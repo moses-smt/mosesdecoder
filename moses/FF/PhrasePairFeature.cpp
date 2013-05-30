@@ -240,8 +240,8 @@ void PhrasePairFeature::Evaluate(
 
 bool PhrasePairFeature::IsUseable(const FactorMask &mask) const
 {
-	bool ret = mask[m_targetFactorId];
-	return ret;
+  bool ret = mask[m_targetFactorId];
+  return ret;
 }
 
 }

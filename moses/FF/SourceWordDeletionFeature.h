@@ -25,8 +25,9 @@ public:
 
   bool Load(const std::string &filePath);
 
-  bool IsUseable(const FactorMask &mask) const
-  { return true; }
+  bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase

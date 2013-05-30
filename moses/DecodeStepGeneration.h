@@ -36,8 +36,8 @@ class DecodeStepGeneration : public DecodeStep
 {
 public:
   DecodeStepGeneration(const GenerationDictionary* dict,
-		  	  	  		const DecodeStep* prev,
-		  	  	  		const std::vector<FeatureFunction*> &features);
+                       const DecodeStep* prev,
+                       const std::vector<FeatureFunction*> &features);
 
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt

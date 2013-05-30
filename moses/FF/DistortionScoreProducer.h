@@ -21,8 +21,9 @@ public:
     : StatefulFeatureFunction("Distortion", 1, line)
   {}
 
-  bool IsUseable(const FactorMask &mask) const
-  { return true; }
+  bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 
   static float CalculateDistortionScore(const Hypothesis& hypo,
                                         const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);

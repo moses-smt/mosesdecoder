@@ -115,8 +115,8 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
 
 bool TargetBigramFeature::IsUseable(const FactorMask &mask) const
 {
-	bool ret = mask[m_factorType];
-	return ret;
+  bool ret = mask[m_factorType];
+  return ret;
 }
 
 }

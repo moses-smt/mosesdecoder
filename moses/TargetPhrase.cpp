@@ -103,10 +103,13 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 
 void TargetPhrase::Evaluate(const Phrase &source)
 {
-  ScoreComponentCollection futureScoreBreakdown;
-
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  Evaluate(source, ffs);
+}
 
+void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
+{
+  ScoreComponentCollection futureScoreBreakdown;
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
@@ -116,7 +119,6 @@ void TargetPhrase::Evaluate(const Phrase &source)
   float futureScore = futureScoreBreakdown.GetWeightedScore();
 
   m_fullScore = weightedScore + futureScore;
-
 }
 
 void TargetPhrase::Evaluate(const InputType &input)

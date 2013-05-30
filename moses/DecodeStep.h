@@ -58,8 +58,8 @@ protected:
 public:
   DecodeStep(); //! not implemented
   DecodeStep(const DecodeFeature *featurePtr,
-		  	  const DecodeStep* prevDecodeStep,
-		  	  const std::vector<FeatureFunction*> &features);
+             const DecodeStep* prevDecodeStep,
+             const std::vector<FeatureFunction*> &features);
   virtual ~DecodeStep();
 
   //! mask of factors that are present after this decode step
@@ -77,8 +77,9 @@ public:
     return !m_newOutputFactors.empty();
   }
 
-  const std::vector<FeatureFunction*> &GetFeaturesRemaining() const
-  { return m_featuresRemaining; }
+  const std::vector<FeatureFunction*> &GetFeaturesRemaining() const {
+    return m_featuresRemaining;
+  }
 
   /*! returns a list (possibly empty) of the (target side) factors that
    * are produced in this decoding step.  For example, if a previous step

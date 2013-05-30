@@ -96,13 +96,13 @@ FFState* PhraseBoundaryFeature::Evaluate
 
 bool PhraseBoundaryFeature::IsUseable(const FactorMask &mask) const
 {
-	for (size_t i = 0; i < m_targetFactors.size(); ++i) {
-		const FactorType &factor = m_targetFactors[i];
-		if (!mask[factor]) {
-			return false;
-		}
-	}
-	return true;
+  for (size_t i = 0; i < m_targetFactors.size(); ++i) {
+    const FactorType &factor = m_targetFactors[i];
+    if (!mask[factor]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }

@@ -31,9 +31,9 @@ namespace Moses
 using namespace std;
 
 DecodeStepGeneration::DecodeStepGeneration(const GenerationDictionary* dict,
-											const DecodeStep* prev,
-											const std::vector<FeatureFunction*> &features)
-: DecodeStep(dict, prev, features)
+    const DecodeStep* prev,
+    const std::vector<FeatureFunction*> &features)
+  : DecodeStep(dict, prev, features)
 {
 }
 

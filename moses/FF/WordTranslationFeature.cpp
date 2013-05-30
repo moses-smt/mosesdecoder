@@ -512,8 +512,8 @@ void WordTranslationFeature::EvaluateChart(
 
 bool WordTranslationFeature::IsUseable(const FactorMask &mask) const
 {
-	bool ret = mask[m_factorTypeTarget];
-	return ret;
+  bool ret = mask[m_factorTypeTarget];
+  return ret;
 }
 
 }

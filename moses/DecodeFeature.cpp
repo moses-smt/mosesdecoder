@@ -93,13 +93,13 @@ const std::vector<FactorType>& DecodeFeature::GetOutput() const
 
 bool DecodeFeature::IsUseable(const FactorMask &mask) const
 {
-	for (size_t i = 0; i < m_output.size(); ++i) {
-		const FactorType &factor = m_output[i];
-		if (!mask[factor]) {
-			return false;
-		}
-	}
-	return true;
+  for (size_t i = 0; i < m_output.size(); ++i) {
+    const FactorType &factor = m_output[i];
+    if (!mask[factor]) {
+      return false;
+    }
+  }
+  return true;
 
 }
 
