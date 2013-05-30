@@ -167,28 +167,6 @@ void TargetPhrase::SetInputScore(const Scores &scoreVector)
   m_scoreBreakdown.Assign(prod, sizedScoreVector);
 }
 
-TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
-{
-  if (! IsCompatible(inputPhrase)) {
-    return NULL;
-  }
-
-  // ok, merge
-  TargetPhrase *clone				= new TargetPhrase(*this);
-  clone->m_sourcePhrase = m_sourcePhrase;
-  int currWord = 0;
-  const size_t len = GetSize();
-  for (size_t currPos = 0 ; currPos < len ; currPos++) {
-    const Word &inputWord	= inputPhrase.GetWord(currPos);
-    Word &cloneWord = clone->GetWord(currPos);
-    cloneWord.Merge(inputWord);
-
-    currWord++;
-  }
-
-  return clone;
-}
-
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
   AlignmentInfo::CollType alignTerm, alignNonTerm;
@@ -231,6 +209,12 @@ void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)
 void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString)
 {
   m_scoreBreakdown.Assign(translationScoreProducer, sparseString.as_string());
+}
+
+void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec)
+{
+  Phrase::MergeFactors(copy, factorVec);
+  m_scoreBreakdown.Merge(copy.GetScoreBreakdown());
 }
 
 TO_STRING_BODY(TargetPhrase);

@@ -71,9 +71,6 @@ public:
   void SetXMLScore(float score);
   void SetInputScore(const Scores &scoreVector);
 
-  TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
-  // used for translation step
-
 #ifdef HAVE_PROTOBUF
   void WriteToRulePB(hgmert::Rule* pb) const;
 #endif
@@ -128,6 +125,7 @@ public:
     return *m_alignNonTerm;
   }
 
+  void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 
   TO_STRING();
 };

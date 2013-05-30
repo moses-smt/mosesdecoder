@@ -903,7 +903,6 @@ bool StaticData::LoadDecodeGraphs()
 
       m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
 
-      featuresRemaining = &FeatureFunction::GetFeatureFunctions();
     }
 
     m_decodeGraphs[decodeGraphInd]->Add(decodeStep);
