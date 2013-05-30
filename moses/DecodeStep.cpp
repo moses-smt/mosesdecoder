@@ -73,6 +73,16 @@ const GenerationDictionary* DecodeStep::GetGenerationDictionaryFeature() const
   return dynamic_cast<const GenerationDictionary*>(m_decodeFeature);
 }
 
+void DecodeStep::RemoveFeature(const FeatureFunction *ff)
+{
+  for (size_t i = 0; i < m_featuresToApply.size(); ++i) {
+    if (ff == m_featuresToApply[i]) {
+      m_featuresToApply.erase(m_featuresToApply.begin() + i);
+      return;
+    }
+  }
+}
+
 }
 
 

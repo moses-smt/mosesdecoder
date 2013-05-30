@@ -111,6 +111,8 @@ public:
                        , bool adhereTableLimit
                        , const Phrase &src) const = 0;
 
+  void RemoveFeature(const FeatureFunction *ff);
+
 };
 
 }

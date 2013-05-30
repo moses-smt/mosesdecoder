@@ -34,6 +34,13 @@ DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf,
     const std::vector<FeatureFunction*> &features)
   : DecodeStep(pdf, prev, features)
 {
+  // don't apply feature functions that are from current phrase table.It should already have been
+  // dont by the phrase table.
+  const std::vector<FeatureFunction*> &pdfFeatures = pdf->GetFeaturesToApply();
+  for (size_t i = 0; i < pdfFeatures.size(); ++i) {
+    FeatureFunction *ff = pdfFeatures[i];
+    RemoveFeature(ff);
+  }
 }
 
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
