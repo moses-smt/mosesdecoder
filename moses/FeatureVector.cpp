@@ -807,8 +807,8 @@ void FVector::merge(const FVector &other)
 {
   // dense
   for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
-    FValue thisVal = m_coreFeatures[i];
-    FValue otherVal = other.m_coreFeatures[i];
+    FValue &thisVal = m_coreFeatures[i];
+    const FValue otherVal = other.m_coreFeatures[i];
 
     if (otherVal) {
       CHECK(thisVal == 0 || thisVal == otherVal);
