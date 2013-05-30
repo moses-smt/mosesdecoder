@@ -84,10 +84,9 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
           continue;
       }
 
-      outPhrase.GetScoreBreakdown().PlusEquals(transScores);
-      outPhrase.Evaluate(src); // need to do this as all non-transcores would be screwed up
+      outPhrase.Merge(targetPhrase, m_newOutputFactors);
+      outPhrase.Evaluate(src, m_featuresToApply); // need to do this as all non-transcores would be screwed up
 
-      outPhrase.MergeFactors(targetPhrase, m_newOutputFactors);
 
       TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
       assert(newTransOpt != NULL);

@@ -123,10 +123,8 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
     }
 
     float weightedScore = m_scoreBreakdown.GetWeightedScore();
-    //m_futureScore += futureScoreBreakdown.GetWeightedScore();
-    //m_fullScore = weightedScore + m_futureScore;
-    float futureScore = futureScoreBreakdown.GetWeightedScore();
-    m_fullScore = weightedScore + futureScore;
+    m_futureScore += futureScoreBreakdown.GetWeightedScore();
+    m_fullScore = weightedScore + m_futureScore;
 
   }
 }
@@ -153,8 +151,6 @@ void TargetPhrase::SetXMLScore(float score)
 
 void TargetPhrase::SetInputScore(const Scores &scoreVector)
 {
-  cerr << scoreVector.size() << endl;
-
   //we use an existing score producer to figure out information for score setting (number of scores and weights)
   const StaticData &staticData = StaticData::Instance();
   const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
@@ -215,6 +211,8 @@ void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>
 {
   Phrase::MergeFactors(copy, factorVec);
   m_scoreBreakdown.Merge(copy.GetScoreBreakdown());
+  m_futureScore += copy.m_futureScore;
+  m_fullScore += copy.m_fullScore;
 }
 
 TO_STRING_BODY(TargetPhrase);
