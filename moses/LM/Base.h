@@ -64,15 +64,9 @@ public:
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
-  /* whether this LM can be used on a particular phrase.
-   * Should return false if phrase size = 0 or factor types required don't exists
-   */
-  virtual bool Useable(const Phrase &phrase) const = 0;
-
   /* calc total unweighted LM score of this phrase and return score via arguments.
    * Return scores should always be in natural log, regardless of representation with LM implementation.
    * Uses GetValue() of inherited class.
-   * Useable() should be called beforehand on the phrase
    * \param fullScore scores of all unigram, bigram... of contiguous n-gram of the phrase
    * \param ngramScore score of only n-gram of order m_nGramOrder
    * \param oovCount number of LM OOVs

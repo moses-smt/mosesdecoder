@@ -68,10 +68,6 @@ template <class Model> class LanguageModelKen : public LanguageModel
 public:
   LanguageModelKen(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
-  bool Useable(const Phrase &phrase) const {
-    return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
-  }
-
   const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
     KenLMState *ret = new KenLMState();
     ret->state = m_ngram->BeginSentenceState();

@@ -69,28 +69,25 @@ void LanguageModel::Evaluate(const Phrase &source
                              , ScoreComponentCollection &scoreBreakdown
                              , ScoreComponentCollection &estimatedFutureScore) const
 {
-  if (Useable(targetPhrase)) {
-    // contains factors used by this LM
-    float fullScore, nGramScore;
-    size_t oovCount;
+  // contains factors used by this LM
+  float fullScore, nGramScore;
+  size_t oovCount;
 
-    CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
-    float estimateScore = fullScore - nGramScore;
+  CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
+  float estimateScore = fullScore - nGramScore;
 
-    if (StaticData::Instance().GetLMEnableOOVFeature()) {
-      vector<float> scores(2), estimateScores(2);
-      scores[0] = nGramScore;
-      scores[1] = oovCount;
-      scoreBreakdown.Assign(this, scores);
+  if (StaticData::Instance().GetLMEnableOOVFeature()) {
+    vector<float> scores(2), estimateScores(2);
+    scores[0] = nGramScore;
+    scores[1] = oovCount;
+    scoreBreakdown.Assign(this, scores);
 
-      estimateScores[0] = estimateScore;
-      estimateScores[1] = 0;
-      estimatedFutureScore.Assign(this, estimateScores);
-    } else {
-      scoreBreakdown.Assign(this, nGramScore);
-      estimatedFutureScore.Assign(this, estimateScore);
-    }
-
+    estimateScores[0] = estimateScore;
+    estimateScores[1] = 0;
+    estimatedFutureScore.Assign(this, estimateScores);
+  } else {
+    scoreBreakdown.Assign(this, nGramScore);
+    estimatedFutureScore.Assign(this, estimateScore);
   }
 }
 

@@ -50,7 +50,6 @@ public:
                     , const std::vector<FactorType> &factorTypes
                     , size_t nGramOrder) = 0;
 
-  bool Useable(const Phrase &phrase) const;
 };
 
 }

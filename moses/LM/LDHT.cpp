@@ -78,7 +78,6 @@ public:
   virtual void InitializeForInput(InputType const& source);
   virtual void CleanUpAfterSentenceProcessing(const InputType &source);
   virtual const FFState* EmptyHypothesisState(const InputType& input) const;
-  virtual bool Useable(const Phrase& phrase) const;
   virtual void CalcScore(const Phrase& phrase,
                          float& fullScore,
                          float& ngramScore,
@@ -212,11 +211,6 @@ const FFState* LanguageModelLDHT::EmptyHypothesisState(
   const InputType& input) const
 {
   return NULL;
-}
-
-bool LanguageModelLDHT::Useable(const Phrase& phrase) const
-{
-  return (phrase.GetSize() > 0 && phrase.GetFactor(0, m_factorType) != NULL);
 }
 
 void LanguageModelLDHT::CalcScore(const Phrase& phrase,
