@@ -819,9 +819,9 @@ void FVector::merge(const FVector &other)
   // sparse
   FNVmap::const_iterator iter;
   for (iter = other.m_features.begin(); iter != other.m_features.end(); ++iter) {
-	  const FName  &otherKey = iter->first;
-	  const FValue otherVal = iter->second;
-	  m_features[otherKey] = otherVal;
+    const FName  &otherKey = iter->first;
+    const FValue otherVal = iter->second;
+    m_features[otherKey] = otherVal;
   }
 }
 

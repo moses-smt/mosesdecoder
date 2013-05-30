@@ -92,8 +92,9 @@ public:
     return m_filePath;
   }
 
-  const std::vector<FeatureFunction*> &GetFeaturesToApply() const
-  { return m_featuresToApply; }
+  const std::vector<FeatureFunction*> &GetFeaturesToApply() const {
+    return m_featuresToApply;
+  }
 
 protected:
   size_t m_tableLimit;
