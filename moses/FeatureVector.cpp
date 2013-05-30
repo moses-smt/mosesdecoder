@@ -803,6 +803,28 @@ FValue FVector::inner_product(const FVector& rhs) const
   return product;
 }
 
+void FVector::merge(const FVector &other)
+{
+  // dense
+  for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+    FValue thisVal = m_coreFeatures[i];
+    FValue otherVal = other.m_coreFeatures[i];
+
+    if (otherVal) {
+      CHECK(thisVal == 0 || thisVal == otherVal);
+      thisVal = otherVal;
+    }
+  }
+
+  // sparse
+  FNVmap::const_iterator iter;
+  for (iter = other.m_features.begin(); iter != other.m_features.end(); ++iter) {
+	  const FName  &otherKey = iter->first;
+	  const FValue otherVal = iter->second;
+	  m_features[otherKey] = otherVal;
+  }
+}
+
 const FVector operator+(const FVector& lhs, const FVector& rhs)
 {
   return FVector(lhs) += rhs;

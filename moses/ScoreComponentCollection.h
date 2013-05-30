@@ -376,6 +376,9 @@ public:
   void UpdateLearningRates(float decay_core, float decay_sparse, ScoreComponentCollection &confidenceCounts, float core_r0, float sparse_r0) {
     m_scores.updateLearningRates(decay_core, decay_sparse, confidenceCounts.m_scores, core_r0, sparse_r0);
   }
+  void Merge(const ScoreComponentCollection &other) {
+    m_scores.merge(other.m_scores);
+  }
 
 #ifdef MPI_ENABLE
 public:

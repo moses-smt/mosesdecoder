@@ -257,6 +257,8 @@ public:
   // divide each element by the number given in the rhs vector
   FVector& divideEquals(const FVector& rhs);
 
+  void merge(const FVector &other);
+
 #ifdef MPI_ENABLE
   friend class boost::serialization::access;
 #endif
