@@ -182,6 +182,8 @@ public:
 
   bool Load(const std::string &filePath);
 
+  bool IsUseable(const FactorMask &mask) const;
+
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
   virtual FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,

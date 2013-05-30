@@ -88,6 +88,7 @@ public:
     manager.LMCallback(*m_ngram, m_lmIdLookup);
   }
 
+  bool IsUseable(const FactorMask &mask) const;
 private:
   LanguageModelKen(const LanguageModelKen<Model> &copy_from);
 
@@ -343,6 +344,13 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
   score = TransformLMScore(score);
   accumulator->Assign(this, score);
   return newState;
+}
+
+template <class Model>
+bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[m_factorType];
+  return ret;
 }
 
 } // namespace

@@ -865,5 +865,11 @@ const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) co
   return new BleuScoreState();
 }
 
+bool BleuScoreFeature::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[0];
+  return 0;
+}
+
 } // namespace.
 

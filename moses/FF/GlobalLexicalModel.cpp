@@ -183,4 +183,17 @@ void GlobalLexicalModel::Evaluate
                            GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
 }
 
+bool GlobalLexicalModel::IsUseable(const FactorMask &mask) const
+{
+  for (size_t i = 0; i < m_outputFactors.size(); ++i) {
+    if (m_outputFactors[i]) {
+    	if (!mask[i]) {
+    		return false;
+    	}
+    }
+  }
+
+  return true;
+}
+
 }

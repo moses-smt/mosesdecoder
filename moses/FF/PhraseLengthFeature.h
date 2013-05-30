@@ -20,6 +20,9 @@ class PhraseLengthFeature : public StatelessFeatureFunction
 public:
   PhraseLengthFeature(const std::string &line);
 
+  bool IsUseable(const FactorMask &mask) const
+  { return true; }
+
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection*) const {
     throw std::logic_error("PhraseLengthFeature not valid in chart decoder");

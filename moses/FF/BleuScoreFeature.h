@@ -117,6 +117,9 @@ public:
   bool Enabled() const {
     return m_enabled;
   }
+
+  bool IsUseable(const FactorMask &mask) const;
+
   float CalculateBleu(BleuScoreState*) const;
   float CalculateBleu(Phrase translation) const;
   const FFState* EmptyHypothesisState(const InputType&) const;

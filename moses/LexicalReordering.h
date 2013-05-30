@@ -30,6 +30,8 @@ public:
   LexicalReordering(const std::string &line);
   virtual ~LexicalReordering();
 
+  virtual bool IsUseable(const FactorMask &mask) const;
+
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
   void InitializeForInput(const InputType& i) {

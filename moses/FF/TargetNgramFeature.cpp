@@ -429,5 +429,11 @@ void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFacto
   }
 }
 
+bool TargetNgramFeature::IsUseable(const FactorMask &mask) const
+{
+	bool ret = mask[m_factorType];
+	return ret;
+}
+
 }
 

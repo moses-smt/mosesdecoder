@@ -66,6 +66,12 @@ LMResult LanguageModelSingleFactor::GetValueForgotState(const std::vector<const 
   return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate);
 }
 
+bool LanguageModelSingleFactor::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[m_factorType];
+  return ret;
+}
+
 }
 
 

@@ -91,5 +91,16 @@ const FFState* LexicalReordering::EmptyHypothesisState(const InputType &input) c
   return m_configuration->CreateLexicalReorderingState(input);
 }
 
+bool LexicalReordering::IsUseable(const FactorMask &mask) const
+{
+	for (size_t i = 0; i < m_factorsE.size(); ++i) {
+		const FactorType &factor = m_factorsE[i];
+		if (!mask[factor]) {
+			return false;
+		}
+	}
+	return true;
+
+}
 }
 

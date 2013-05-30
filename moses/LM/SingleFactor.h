@@ -51,6 +51,8 @@ public:
                     , FactorType factorType
                     , size_t nGramOrder) = 0;
 
+  bool IsUseable(const FactorMask &mask) const;
+
   bool Useable(const Phrase &phrase) const {
     return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
   }

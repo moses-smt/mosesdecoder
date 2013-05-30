@@ -46,18 +46,27 @@ class MockSingleFeature : public MockStatelessFeatureFunction
 {
 public:
   MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1, "MockSingle") {}
+
+  bool IsUseable(const FactorMask &mask) const
+  { return true; }
 };
 
 class MockMultiFeature : public MockStatelessFeatureFunction
 {
 public:
   MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5, "MockMulti") {}
+
+  bool IsUseable(const FactorMask &mask) const
+  { return true; }
 };
 
 class MockSparseFeature : public MockStatelessFeatureFunction
 {
 public:
   MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", 0, "MockSparse") {}
+
+  bool IsUseable(const FactorMask &mask) const
+  { return true; }
 };
 
 

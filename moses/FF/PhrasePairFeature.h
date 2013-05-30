@@ -34,6 +34,8 @@ class PhrasePairFeature: public StatelessFeatureFunction
 public:
   PhrasePairFeature(const std::string &line);
 
+  bool IsUseable(const FactorMask &mask) const;
+
   void Evaluate(const PhraseBasedFeatureContext& context,
                 ScoreComponentCollection* accumulator) const;
 

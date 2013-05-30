@@ -37,6 +37,8 @@ private:
 public:
   WordTranslationFeature(const std::string &line);
 
+  bool IsUseable(const FactorMask &mask) const;
+
   bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
   const FFState* EmptyHypothesisState(const InputType &) const {

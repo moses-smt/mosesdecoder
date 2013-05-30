@@ -8,13 +8,13 @@ namespace Moses
 class TargetPhrase;
 class ScoreComponentCollection;
 
-/** Doesn't do anything but provide a key into the global
- *  score array to store the word penalty in.
- */
 class WordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
   WordPenaltyProducer(const std::string &line) : StatelessFeatureFunction("WordPenalty",1, line) {}
+
+  bool IsUseable(const FactorMask &mask) const
+  { return true; }
 
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase

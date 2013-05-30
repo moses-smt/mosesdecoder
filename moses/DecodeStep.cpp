@@ -49,7 +49,13 @@ DecodeStep::DecodeStep(const DecodeFeature *decodeFeature,
 
   // find out which feature function can be applied in this decode step
   for (size_t i = 0; i < features.size(); ++i) {
-	const FeatureFunction *feature = features[i];
+	FeatureFunction *feature = features[i];
+	if (feature->IsUseable(m_outputFactors)) {
+		m_featuresToApply.push_back(feature);
+	}
+	else {
+		m_featuresRemaining.push_back(feature);
+	}
 
   }
 }

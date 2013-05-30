@@ -60,9 +60,7 @@ public:
   const std::vector<FactorType>& GetInput() const;
   const std::vector<FactorType>& GetOutput() const;
 
-  bool IsDecodeFeature() const {
-    return true;
-  }
+  bool IsUseable(const FactorMask &mask) const;
 
 protected:
   std::vector<FactorType> m_input;

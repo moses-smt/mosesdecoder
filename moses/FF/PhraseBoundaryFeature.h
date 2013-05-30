@@ -40,7 +40,7 @@ class PhraseBoundaryFeature : public StatefulFeatureFunction
 public:
   PhraseBoundaryFeature(const std::string &line);
 
-  size_t GetNumScoreComponents() const;
+  bool IsUseable(const FactorMask &mask) const;
 
   virtual const FFState* EmptyHypothesisState(const InputType &) const;
 

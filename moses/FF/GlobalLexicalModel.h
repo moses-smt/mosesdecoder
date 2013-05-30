@@ -67,6 +67,8 @@ public:
 
   void InitializeForInput( Sentence const& in );
 
+  bool IsUseable(const FactorMask &mask) const;
+
   void Evaluate(const PhraseBasedFeatureContext& context,
                 ScoreComponentCollection* accumulator) const;
 

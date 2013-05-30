@@ -23,6 +23,8 @@ private:
 public:
   TargetWordInsertionFeature(const std::string &line);
 
+  bool IsUseable(const FactorMask &mask) const;
+
   bool Load(const std::string &filePath);
 
   virtual void Evaluate(const Phrase &source

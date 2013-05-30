@@ -21,6 +21,7 @@ class InputType;
 class ScoreComponentCollection;
 class WordsBitmap;
 class WordsRange;
+class FactorMask;
 
 
 
@@ -82,7 +83,7 @@ public:
     return m_argLine;
   }
 
-  //virtual bool IsUseable() const = 0;
+  virtual bool IsUseable(const FactorMask &mask) const = 0;
 
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase

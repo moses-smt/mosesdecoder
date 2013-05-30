@@ -19,6 +19,9 @@ public:
     m_tuneable = false;
   }
 
+  bool IsUseable(const FactorMask &mask) const
+  { return true; }
+
 };
 
 }

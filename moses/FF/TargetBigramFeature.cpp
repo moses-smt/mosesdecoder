@@ -113,5 +113,11 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
   return new TargetBigramState(targetPhrase.GetWord(targetPhrase.GetSize()-1));
 }
 
+bool TargetBigramFeature::IsUseable(const FactorMask &mask) const
+{
+	bool ret = mask[m_factorType];
+	return ret;
+}
+
 }
 
