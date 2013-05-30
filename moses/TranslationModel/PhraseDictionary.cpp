@@ -53,6 +53,14 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
     }
   } // for (size_t i = 0; i < toks.size(); ++i) {
 
+  // find out which feature function can be applied in this decode step
+  const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < allFeatures.size(); ++i) {
+    FeatureFunction *feature = allFeatures[i];
+    if (feature->IsUseable(m_outputFactors)) {
+      m_featuresToApply.push_back(feature);
+    }
+  }
 }
 
 

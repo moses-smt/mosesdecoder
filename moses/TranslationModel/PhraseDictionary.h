@@ -92,15 +92,19 @@ public:
     return m_filePath;
   }
 
+  const std::vector<FeatureFunction*> &GetFeaturesToApply() const
+  { return m_featuresToApply; }
+
 protected:
   size_t m_tableLimit;
-
 
   unsigned m_numInputScores;
   std::string m_filePath;
 
   std::string m_targetFile;
   std::string m_alignmentsFile;
+
+  std::vector<FeatureFunction*> m_featuresToApply;
 };
 
 }

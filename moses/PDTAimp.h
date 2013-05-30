@@ -276,7 +276,7 @@ public:
     targetPhrase.SetSourcePhrase(*srcPtr);
 
     targetPhrase.GetScoreBreakdown().Assign(m_obj, scoreVector);
-    targetPhrase.Evaluate(*srcPtr);
+    targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
   }
 
   TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,

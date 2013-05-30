@@ -275,7 +275,7 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
           scoreVector[1] = -raw_scores[1];
           scoreVector[2] = -raw_scores[2];
           statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
-          statistics->targetPhrase->Evaluate(src);
+          statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
 
           (*allStats)[targetString] = statistics;
 
@@ -328,7 +328,7 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
       scoreVector[4] = FloorScore(TransformScore(2.718));
 
       statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-      statistics->targetPhrase->Evaluate(src);
+      statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
     } catch (AlignmentException& e) {
       continue;
     }

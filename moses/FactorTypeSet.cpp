@@ -33,6 +33,19 @@ FactorMask::FactorMask(const vector<FactorType> &factors)
   }
 }
 
+bool FactorMask::IsUseable(const FactorMask &other) const
+{
+  for (size_t i = 0; i < other.size(); ++i) {
+	if (other[i]) {
+	  if (!this->operator[](i) ) {
+		return false;
+	  }
+	}
+  }
+
+  return true;
+}
+
 TO_STRING_BODY(FactorMask);
 
 // friend

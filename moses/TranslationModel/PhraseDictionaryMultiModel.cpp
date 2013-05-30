@@ -175,7 +175,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           }
 
           statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
-          statistics->targetPhrase->Evaluate(src);
+          statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
 
           (*allStats)[targetString] = statistics;
 
@@ -210,7 +210,7 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
     scoreVector[m_numScoreComponents-1] = 1.0;
 
     statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-    statistics->targetPhrase->Evaluate(src);
+    statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
 
     ret->Add(new TargetPhrase(*statistics->targetPhrase));
   }
