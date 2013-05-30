@@ -82,6 +82,8 @@ public:
     return m_argLine;
   }
 
+  //virtual bool IsUseable() const = 0;
+
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown

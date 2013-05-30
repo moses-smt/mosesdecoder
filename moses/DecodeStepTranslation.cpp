@@ -29,8 +29,10 @@ using namespace std;
 
 namespace Moses
 {
-DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf, const DecodeStep* prev)
-  : DecodeStep(pdf, prev)
+DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf,
+											const DecodeStep* prev,
+											const std::vector<FeatureFunction*> &features)
+: DecodeStep(pdf, prev, features)
 {
 }
 

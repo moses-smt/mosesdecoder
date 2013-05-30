@@ -833,8 +833,10 @@ bool StaticData::LoadDecodeGraphs()
   const vector<string> &mappingVector = m_parameter->GetParam("mapping");
   const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
 
+  const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
   size_t prevDecodeGraphInd = 0;
+
   for(size_t i=0; i<mappingVector.size(); i++) {
     vector<string>	token		= Tokenize(mappingVector[i]);
     size_t decodeGraphInd;
@@ -869,7 +871,7 @@ bool StaticData::LoadDecodeGraphs()
         UserMessage::Add(strme.str());
         CHECK(false);
       }
-      decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
+      decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev, *featuresRemaining);
       break;
     case Generate:
       if(index>=m_generationDictionary.size()) {
@@ -879,12 +881,14 @@ bool StaticData::LoadDecodeGraphs()
         UserMessage::Add(strme.str());
         CHECK(false);
       }
-      decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev);
+      decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev, *featuresRemaining);
       break;
     case InsertNullFertilityWord:
       CHECK(!"Please implement NullFertilityInsertion.");
       break;
     }
+
+    featuresRemaining = &decodeStep->GetFeaturesRemaining();
 
     CHECK(decodeStep);
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
@@ -898,6 +902,8 @@ bool StaticData::LoadDecodeGraphs()
       }
 
       m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
+
+      featuresRemaining = &FeatureFunction::GetFeatureFunctions();
     }
 
     m_decodeGraphs[decodeGraphInd]->Add(decodeStep);

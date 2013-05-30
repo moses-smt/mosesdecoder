@@ -25,8 +25,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-DecodeStep::DecodeStep(const DecodeFeature *decodeFeature, const DecodeStep* prev) :
-  m_decodeFeature(decodeFeature)
+DecodeStep::DecodeStep(const DecodeFeature *decodeFeature,
+						const DecodeStep* prev,
+						const std::vector<FeatureFunction*> &features)
+: m_decodeFeature(decodeFeature)
 {
   FactorMask prevOutputFactors;
   if (prev) prevOutputFactors = prev->m_outputFactors;
@@ -44,6 +46,12 @@ DecodeStep::DecodeStep(const DecodeFeature *decodeFeature, const DecodeStep* pre
   VERBOSE(2,"DecodeStep():\n\toutputFactors=" << m_outputFactors
           << "\n\tconflictFactors=" << conflictMask
           << "\n\tnewOutputFactors=" << newOutputFactorMask << std::endl);
+
+  // find out which feature function can be applied in this decode step
+  for (size_t i = 0; i < features.size(); ++i) {
+	const FeatureFunction *feature = features[i];
+
+  }
 }
 
 DecodeStep::~DecodeStep() {}
