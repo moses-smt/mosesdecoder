@@ -854,6 +854,11 @@ bool StaticData::LoadDecodeGraphs()
       if (decodeGraphInd > prevDecodeGraphInd) {
         prev = NULL;
       }
+
+      if (prevDecodeGraphInd < decodeGraphInd) {
+        featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+      }
+
       decodeType = token[1] == "T" ? Translate : Generate;
       index = Scan<size_t>(token[2]);
     } else {
@@ -902,7 +907,6 @@ bool StaticData::LoadDecodeGraphs()
       }
 
       m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
-
     }
 
     m_decodeGraphs[decodeGraphInd]->Add(decodeStep);
