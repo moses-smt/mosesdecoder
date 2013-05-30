@@ -45,7 +45,7 @@ class TargetPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
-  float m_fullScore;
+  float m_fullScore, m_futureScore;
   ScoreComponentCollection m_scoreBreakdown;
 
   // in case of confusion net, ptr to source phrase

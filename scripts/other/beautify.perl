@@ -35,8 +35,8 @@ sub Beautify($)
 		    (my $nameOnly, my $pathOnly,my $suffix) = fileparse($name,qr"\..[^.]*$");
 		    if ($suffix eq ".cpp" || $suffix eq ".h") {
 		      my $cmd = "astyle --style='k&r' -s2 -v $name";
-		      print STDERR "Executing: $cmd \n";
-		      system($cmd);
+		      #print STDERR "Executing: $cmd \n";
+		      `$cmd`;
 		    }
 		 }
 	}

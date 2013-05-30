@@ -38,7 +38,10 @@ using namespace std;
 namespace Moses
 {
 TargetPhrase::TargetPhrase( std::string out_string)
-  :Phrase(0), m_fullScore(0.0), m_sourcePhrase(0)
+  :Phrase(0)
+  , m_fullScore(0.0)
+  , m_futureScore(0.0)
+  , m_sourcePhrase(0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
@@ -52,6 +55,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
 TargetPhrase::TargetPhrase()
   :Phrase()
   , m_fullScore(0.0)
+  , m_futureScore(0.0)
   ,m_sourcePhrase()
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -62,6 +66,7 @@ TargetPhrase::TargetPhrase()
 TargetPhrase::TargetPhrase(const Phrase &phrase)
   : Phrase(phrase)
   , m_fullScore(0.0)
+  , m_futureScore(0.0)
   , m_sourcePhrase()
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -72,6 +77,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
 TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   : Phrase(copy)
   , m_fullScore(copy.m_fullScore)
+  , m_futureScore(copy.m_futureScore)
   , m_sourcePhrase(copy.m_sourcePhrase)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
@@ -109,16 +115,20 @@ void TargetPhrase::Evaluate(const Phrase &source)
 
 void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
 {
-  ScoreComponentCollection futureScoreBreakdown;
-  for (size_t i = 0; i < ffs.size(); ++i) {
-    const FeatureFunction &ff = *ffs[i];
-    ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
+  if (ffs.size()) {
+    ScoreComponentCollection futureScoreBreakdown;
+    for (size_t i = 0; i < ffs.size(); ++i) {
+      const FeatureFunction &ff = *ffs[i];
+      ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
+    }
+
+    float weightedScore = m_scoreBreakdown.GetWeightedScore();
+    //m_futureScore += futureScoreBreakdown.GetWeightedScore();
+    //m_fullScore = weightedScore + m_futureScore;
+    float futureScore = futureScoreBreakdown.GetWeightedScore();
+    m_fullScore = weightedScore + futureScore;
+
   }
-
-  float weightedScore = m_scoreBreakdown.GetWeightedScore();
-  float futureScore = futureScoreBreakdown.GetWeightedScore();
-
-  m_fullScore = weightedScore + futureScore;
 }
 
 void TargetPhrase::Evaluate(const InputType &input)
