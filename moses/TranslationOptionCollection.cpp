@@ -385,10 +385,12 @@ void TranslationOptionCollection::CreateTranslationOptions()
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
         if (graphInd > 0 && // only skip subsequent graphs
-            decodeGraphBackoff[graphInd] != 0 && // use of backoff specified
-            (endPos-startPos+1 >= decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
-             m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
-          VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
+            decodeGraphBackoff[graphInd] != 0 && // limited use of backoff specified
+            (endPos-startPos+1 > decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
+             m_collection[startPos][endPos-startPos].size() > 0)) { // already covered
+          VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]");
+	  VERBOSE(3,", length limit: " << decodeGraphBackoff[graphInd]);
+	  VERBOSE(3,", found so far: " << m_collection[startPos][endPos-startPos].size() << endl);
           // do not create more options
           continue;
         }
@@ -505,11 +507,10 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
        , startPos, endPos, adhereTableLimit );
 
       // do rest of decode steps
-      int indexStep = 0;
+      int indexStep = 1;
 
-      for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
-
-        const DecodeStep &decodeStep = **iterStep;
+      for (++iterStep; iterStep != decodeGraph.end() ; ++iterStep, ++indexStep) {
+    	const DecodeStep &decodeStep = **iterStep;
         PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
         // go thru each intermediate trans opt just created
@@ -531,7 +532,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         delete oldPtoc;
         oldPtoc = newPtoc;
 
-        indexStep++;
       } // for (++iterStep
 
       // add to fully formed translation option list

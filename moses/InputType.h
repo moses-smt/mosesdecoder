@@ -48,10 +48,12 @@ protected:
   long m_translationId; 	//< contiguous Id
   long m_documentId;
   long m_topicId;
+  std::string m_weightSetting;
   std::vector<std::string> m_topicIdAndProb;
   bool m_useTopicId;
   bool m_useTopicIdAndProb;
   bool m_hasMetaData;
+  bool m_specifiesWeightSetting;
   long m_segId;
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   std::string m_textType;
@@ -108,6 +110,18 @@ public:
   }
   std::string GetTextType() const {
     return m_textType;
+  }
+  void SetSpecifiesWeightSetting(bool specifiesWeightSetting) {
+    m_specifiesWeightSetting = specifiesWeightSetting;
+  }
+  bool GetSpecifiesWeightSetting() const {
+    return m_specifiesWeightSetting;
+  }
+  void SetWeightSetting(std::string settingName) {
+    m_weightSetting = settingName;
+  }
+  std::string GetWeightSetting() const {
+    return m_weightSetting;
   }
   void SetTextType(std::string type) {
     m_textType = type;
