@@ -36,14 +36,12 @@ PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray()
   delete m_biSA;
 }
 
-bool PhraseDictionaryDynSuffixArray::InitDictionary()
+void PhraseDictionaryDynSuffixArray::Load()
 {
   const StaticData &staticData = StaticData::Instance();
   vector<float> weight = staticData.GetWeights(this);
 
   m_biSA->Load( m_input, m_output, m_source, m_target, m_alignments, weight);
-
-  return true;
 }
 
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const

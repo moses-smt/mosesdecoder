@@ -79,7 +79,7 @@ public:
 
   ~PhraseDictionaryCompact();
 
-  bool InitDictionary();
+  void Load();
 
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;

@@ -74,7 +74,7 @@ PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
 {
 }
 
-bool PhraseDictionaryMultiModel::InitDictionary()
+void PhraseDictionaryMultiModel::Load()
 {
   // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
   // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
@@ -87,8 +87,6 @@ bool PhraseDictionaryMultiModel::InitDictionary()
     CHECK(pt);
     m_pd.push_back(pt);
   }
-
-  return true;
 }
 
 PhraseDictionary *PhraseDictionaryMultiModel::FindPhraseDictionary(const string &ptName) const

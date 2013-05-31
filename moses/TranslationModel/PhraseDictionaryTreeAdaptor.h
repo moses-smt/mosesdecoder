@@ -47,9 +47,6 @@ public:
   void EnableCache();
   void DisableCache();
 
-  // initialize ...
-  bool InitDictionary();
-
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
   TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;

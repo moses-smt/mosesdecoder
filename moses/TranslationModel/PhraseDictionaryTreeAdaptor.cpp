@@ -34,11 +34,6 @@ PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
 }
 
-bool PhraseDictionaryTreeAdaptor::InitDictionary()
-{
-  return true;
-}
-
 void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();

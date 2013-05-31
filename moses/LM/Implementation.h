@@ -56,7 +56,7 @@ class LanguageModelImplementation : public LanguageModel
   void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 
 protected:
-  std::string	m_filePath; //! for debugging purposes
+  std::string	m_filePath;
   size_t			m_nGramOrder; //! max n-gram length contained in this LM
   Word m_sentenceStartWord, m_sentenceEndWord; //! Contains factors which represents the beging and end words for this LM.
   //! Usually <s> and </s>

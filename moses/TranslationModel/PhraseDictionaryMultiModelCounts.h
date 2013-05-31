@@ -82,7 +82,7 @@ class PhraseDictionaryMultiModelCounts: public PhraseDictionaryMultiModel
 public:
   PhraseDictionaryMultiModelCounts(const std::string &line);
   ~PhraseDictionaryMultiModelCounts();
-  bool InitDictionary();
+  void Load();
   TargetPhraseCollection* CreateTargetPhraseCollectionCounts(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
   void CollectSufficientStatistics(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats) const;
   float GetTargetCount(const Phrase& target, size_t modelIndex) const;

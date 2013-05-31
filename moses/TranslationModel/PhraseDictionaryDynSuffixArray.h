@@ -18,7 +18,7 @@ public:
   PhraseDictionaryDynSuffixArray(const std::string &line);
   ~PhraseDictionaryDynSuffixArray();
 
-  bool InitDictionary();
+  void Load();
 
   // functions below required by base class
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;

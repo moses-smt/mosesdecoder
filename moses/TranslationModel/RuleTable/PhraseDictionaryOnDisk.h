@@ -58,8 +58,6 @@ public:
     return OnDisk;
   }
 
-  bool InitDictionary();
-
   // PhraseDictionary impl
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;

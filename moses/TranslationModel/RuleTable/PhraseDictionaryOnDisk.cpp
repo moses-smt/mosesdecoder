@@ -34,11 +34,6 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
 }
 
-bool PhraseDictionaryOnDisk::InitDictionary()
-{
-  return true;
-}
-
 // PhraseDictionary impl
 
 //! find list of translations that can translates src. Only for phrase input

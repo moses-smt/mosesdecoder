@@ -52,6 +52,9 @@ public:
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
 
+  virtual void Load()
+  {}
+
   static void ResetDescriptionCounts() {
     description_counts.clear();
   }

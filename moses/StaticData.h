@@ -707,7 +707,7 @@ public:
   void InitializeForInput(const InputType& source) const;
   void CleanUpAfterSentenceProcessing(const InputType& source) const;
 
-  void CollectFeatureFunctions();
+  void LoadFeatureFunctions();
   bool CheckWeights() const;
   void ProcessAlternateWeightSettings();
 

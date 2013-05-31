@@ -81,9 +81,6 @@ public:
     const InputType &,
     const ChartCellCollectionBase &) = 0;
 
-  //Initialises the dictionary (may involve loading from file)
-  virtual bool InitDictionary() = 0;
-
   //Get the dictionary. Be sure to initialise it first.
   const PhraseDictionary* GetDictionary() const;
   PhraseDictionary* GetDictionary();

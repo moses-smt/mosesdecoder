@@ -41,7 +41,7 @@ using namespace std;
 namespace Moses
 {
 
-bool PhraseDictionaryCompact::InitDictionary()
+void PhraseDictionaryCompact::Load()
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -52,15 +52,14 @@ bool PhraseDictionaryCompact::InitDictionary()
   std::string suffix = ".minphr";
   if(tFilePath.substr(tFilePath.length() - suffix.length(), suffix.length()) == suffix) {
     if(!FileExists(tFilePath)) {
-      std::cerr << "Error: File " << tFilePath << " does not exit." << std::endl;
+    	throw runtime_error("Error: File " + tFilePath + " does not exit.");
       exit(1);
     }
   } else {
     if(FileExists(tFilePath + suffix)) {
       tFilePath += suffix;
     } else {
-      std::cerr << "Error: File " << tFilePath << ".minphr does not exit." << std::endl;
-      exit(1);
+      throw runtime_error("Error: File " + tFilePath + ".minphr does not exit.");
     }
   }
 
@@ -87,7 +86,7 @@ bool PhraseDictionaryCompact::InitDictionary()
     // Keep target phrase collections on disk
     phraseSize = m_targetPhrasesMapped.load(pFile, true);
 
-  return indexSize && coderSize && phraseSize;
+  CHECK(indexSize && coderSize && phraseSize);
 }
 
 struct CompareTargetPhrase {

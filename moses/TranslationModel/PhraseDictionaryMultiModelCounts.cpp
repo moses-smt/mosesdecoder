@@ -108,7 +108,7 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
 }
 
 
-bool PhraseDictionaryMultiModelCounts::InitDictionary()
+void PhraseDictionaryMultiModelCounts::Load()
 {
   for(size_t i = 0; i < m_numModels; ++i) {
 
@@ -217,7 +217,6 @@ bool PhraseDictionaryMultiModelCounts::InitDictionary()
 
   */
 
-  return true;
 }
 
 

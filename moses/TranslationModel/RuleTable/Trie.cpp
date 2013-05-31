@@ -34,18 +34,20 @@ RuleTableTrie::~RuleTableTrie()
 {
 }
 
-bool RuleTableTrie::InitDictionary()
+void RuleTableTrie::Load()
 {
 
   std::auto_ptr<Moses::RuleTableLoader> loader =
     Moses::RuleTableLoaderFactory::Create(m_filePath);
   if (!loader.get()) {
-    return false;
+    throw runtime_error("Error: Loading " + m_filePath);
   }
 
   bool ret = loader->Load(m_input, m_output, m_filePath, m_tableLimit,
                           *this);
-  return ret;
+  if (!ret) {
+	throw runtime_error("Error: Loading " + m_filePath);
+  }
 }
 
 }  // namespace Moses

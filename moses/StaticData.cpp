@@ -665,42 +665,34 @@ bool StaticData::LoadData(Parameter *parameter)
       PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
     } else if (feature == "PhraseDictionaryOnDisk") {
       PhraseDictionaryOnDisk* model = new PhraseDictionaryOnDisk(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
     } else if (feature == "PhraseDictionaryMemory") {
       PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
     } else if (feature == "PhraseDictionaryCompact") {
       PhraseDictionaryCompact* model = new PhraseDictionaryCompact(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
     } else if (feature == "PhraseDictionaryMultiModel") {
       PhraseDictionaryMultiModel* model = new PhraseDictionaryMultiModel(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
     } else if (feature == "PhraseDictionaryMultiModelCounts") {
       PhraseDictionaryMultiModelCounts* model = new PhraseDictionaryMultiModelCounts(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
     } else if (feature == "PhraseDictionaryALSuffixArray") {
       PhraseDictionaryALSuffixArray* model = new PhraseDictionaryALSuffixArray(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
     } else if (feature == "PhraseDictionaryDynSuffixArray") {
       PhraseDictionaryDynSuffixArray* model = new PhraseDictionaryDynSuffixArray(line);
 	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
 	  SetWeights(model, weights);
-	  m_phraseDictionary.push_back(model);
 	}
 
 #ifdef HAVE_SYNLM
@@ -716,7 +708,7 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-  CollectFeatureFunctions();
+  LoadFeatureFunctions();
 
   if (!LoadDecodeGraphs()) return false;
 
@@ -1143,24 +1135,34 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
   }
 }
 
-void StaticData::CollectFeatureFunctions()
+void StaticData::LoadFeatureFunctions()
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-    const FeatureFunction *ff = *iter;
+    FeatureFunction *ff = *iter;
 
     const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
     if (generation) {
       m_generationDictionary.push_back(generation);
-      continue;
+    }
+
+    PhraseDictionary *pt = dynamic_cast<PhraseDictionary*>(ff);
+    if (pt) {
+      m_phraseDictionary.push_back(pt);
+    }
+    else {
+      // load phrase table last. They can depend on other features
+      ff->Load();
     }
   }
 
+  // load phrase table
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-    PhraseDictionary *pt = m_phraseDictionary[i];
-    pt->InitDictionary();
+	PhraseDictionary *pt = m_phraseDictionary[i];
+	pt->Load();
   }
+
 }
 
 bool StaticData::CheckWeights() const

@@ -46,7 +46,7 @@ public:
 
   virtual ~RuleTableTrie();
 
-  bool InitDictionary();
+  void Load();
 
   // Required by PhraseDictionary.
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const {

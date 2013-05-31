@@ -42,25 +42,21 @@ namespace Moses
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor("IRSTLM", line)
 {
-  FactorType factorType;
-  size_t nGramOrder;
-  string filePath;
-
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
     if (args[0] == "factor") {
-      factorType = Scan<FactorType>(args[1]);
+    	m_factorType = Scan<FactorType>(args[1]);
     } else if (args[0] == "order") {
-      nGramOrder = Scan<size_t>(args[1]);
+    	m_nGramOrder = Scan<size_t>(args[1]);
     } else if (args[0] == "path") {
-      filePath = args[1];
+    	m_filePath = args[1];
     } else {
       throw "Unknown argument " + args[0];
     }
   }
 
-  Load(filePath, factorType, nGramOrder);
+  Load(m_filePath, m_factorType, m_nGramOrder);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -89,11 +85,6 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   }
 
   FactorCollection &factorCollection = FactorCollection::Instance();
-
-  m_factorType 	 = factorType;
-  m_nGramOrder	 = nGramOrder;
-  m_filePath = filePath;
-
 
   m_lmtb = m_lmtb->CreateLanguageModel(m_filePath);
   m_lmtb->setMaxLoadedLevel(1000);

@@ -62,7 +62,7 @@ public:
   PhraseDictionaryMultiModel(const std::string &line);
   PhraseDictionaryMultiModel(const std::string &description, const std::string &line);
   ~PhraseDictionaryMultiModel();
-  bool InitDictionary();
+  void Load();
   virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;
   virtual TargetPhraseCollection* CreateTargetPhraseCollectionLinearInterpolation(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
   std::vector<std::vector<float> > getWeights(size_t numWeights, bool normalize) const;
