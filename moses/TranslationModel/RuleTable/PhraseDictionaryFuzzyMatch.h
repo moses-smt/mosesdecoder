@@ -41,10 +41,8 @@ class PhraseDictionaryFuzzyMatch : public PhraseDictionary
 
 public:
   PhraseDictionaryFuzzyMatch(const std::string &line);
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &initStr
-            , size_t tableLimit);
+  ~PhraseDictionaryFuzzyMatch();
+  void Load();
 
   const PhraseDictionaryNodeMemory &GetRootNode(const InputType &source) const;
 
@@ -77,9 +75,6 @@ protected:
 
   std::map<long, PhraseDictionaryNodeMemory> m_collection;
   std::vector<std::string> m_config;
-
-  const std::vector<FactorType> *m_input, *m_output;
-  const std::vector<float> *m_weight;
 
   tmmt::FuzzyMatchWrapper *m_FuzzyMatchWrapper;
 

@@ -43,6 +43,8 @@
 #include "moses/UserMessage.h"
 #include "util/file.hh"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
+#include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
+#include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
 
 using namespace std;
 
@@ -50,26 +52,19 @@ namespace Moses
 {
 
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
-  : PhraseDictionary("PhraseDictionaryFuzzyMatch", line)
+:PhraseDictionary("PhraseDictionaryFuzzyMatch", line)
+,m_FuzzyMatchWrapper(NULL)
 {}
 
-bool PhraseDictionaryFuzzyMatch::Load(const std::vector<FactorType> &input
-                                      , const std::vector<FactorType> &output
-                                      , const std::string &initStr
-                                      , size_t tableLimit)
+PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
 {
-  m_tableLimit = tableLimit;
-  m_input		= &input;
-  m_output	= &output;
+  delete m_FuzzyMatchWrapper;
+}
 
-
-  cerr << "initStr=" << initStr << endl;
-  m_config = Tokenize(initStr, ";");
+void PhraseDictionaryFuzzyMatch::Load()
+{
   assert(m_config.size() == 3);
-
   m_FuzzyMatchWrapper = new tmmt::FuzzyMatchWrapper(m_config[0], m_config[1], m_config[2]);
-
-  return true;
 }
 
 ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
@@ -220,11 +215,11 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
 
     // source
     Phrase sourcePhrase( 0);
-    sourcePhrase.CreateFromString(Input, *m_input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, factorDelimiter, &sourceLHS);
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromString(Output, *m_output, targetPhraseString, factorDelimiter, &targetLHS);
+    targetPhrase->CreateFromString(Output, m_output, targetPhraseString, factorDelimiter, &targetLHS);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
