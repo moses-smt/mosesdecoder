@@ -14,9 +14,6 @@ LexicalReordering::LexicalReordering(const std::string &line)
 {
   std::cerr << "Initializing LexicalReordering.." << std::endl;
 
-  vector<FactorType> f_factors, e_factors;
-  string filePath;
-
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
@@ -25,11 +22,11 @@ LexicalReordering::LexicalReordering(const std::string &line)
       m_configuration->SetScoreProducer(this);
       m_modelTypeString = m_configuration->GetModelString();
     } else if (args[0] == "input-factor") {
-      f_factors =Tokenize<FactorType>(args[1]);
+      m_factorsF =Tokenize<FactorType>(args[1]);
     } else if (args[0] == "output-factor") {
-      e_factors =Tokenize<FactorType>(args[1]);
+      m_factorsE =Tokenize<FactorType>(args[1]);
     } else if (args[0] == "path") {
-      filePath = args[1];
+      m_filePath = args[1];
     } else {
       throw "Unknown argument " + args[0];
     }
@@ -38,27 +35,19 @@ LexicalReordering::LexicalReordering(const std::string &line)
   switch(m_configuration->GetCondition()) {
   case LexicalReorderingConfiguration::FE:
   case LexicalReorderingConfiguration::E:
-    m_factorsE = e_factors;
     if(m_factorsE.empty()) {
-      UserMessage::Add("TL factor mask for lexical reordering is unexpectedly empty");
-      exit(1);
+      throw "TL factor mask for lexical reordering is unexpectedly empty";
     }
     if(m_configuration->GetCondition() == LexicalReorderingConfiguration::E)
       break; // else fall through
   case LexicalReorderingConfiguration::F:
-    m_factorsF = f_factors;
     if(m_factorsF.empty()) {
-      UserMessage::Add("SL factor mask for lexical reordering is unexpectedly empty");
-      exit(1);
+      throw "SL factor mask for lexical reordering is unexpectedly empty";
     }
     break;
   default:
-    UserMessage::Add("Unknown conditioning option!");
-    exit(1);
+    throw "Unknown conditioning option!";
   }
-
-  m_table = LexicalReorderingTable::LoadAvailable(filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
-
 }
 
 LexicalReordering::~LexicalReordering()
@@ -66,6 +55,11 @@ LexicalReordering::~LexicalReordering()
   if(m_table)
     delete m_table;
   delete m_configuration;
+}
+
+void LexicalReordering::Load()
+{
+  m_table = LexicalReorderingTable::LoadAvailable(m_filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
 }
 
 Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const

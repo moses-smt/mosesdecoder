@@ -29,6 +29,7 @@ class LexicalReordering : public StatefulFeatureFunction
 public:
   LexicalReordering(const std::string &line);
   virtual ~LexicalReordering();
+  void Load();
 
   virtual bool IsUseable(const FactorMask &mask) const;
 
@@ -65,6 +66,7 @@ private:
   //std::vector<size_t> m_scoreOffset;
   //bool m_oneScorePerDirection;
   std::vector<FactorType> m_factorsE, m_factorsF;
+  std::string m_filePath;
 };
 
 }
