@@ -75,7 +75,7 @@ protected:
   std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
-  ScoreComponentCollection m_allWeights;
+  mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
   std::vector<size_t> m_decodeGraphBackoff;
@@ -206,6 +206,9 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
+  
+  // alternate weight settings
+  std::map< std::string, ScoreComponentCollection* > m_weightSetting;
 
   StaticData();
 
@@ -658,6 +661,24 @@ public:
     return m_nBestIncludesSegmentation;
   }
 
+  bool GetHasAlternateWeightSettings() const {
+    return m_weightSetting.size() > 0;
+  }
+
+  void SetWeightSetting(const std::string &settingName) const {
+    std::cerr << "SetWeightSetting( " << settingName << ")\n";
+    CHECK(GetHasAlternateWeightSettings());
+    std::map< std::string, ScoreComponentCollection* >::const_iterator i =
+      m_weightSetting.find( settingName );
+    // if not found, resort to default
+    std::cerr << "using weight setting " << settingName << std::endl;
+    if (i == m_weightSetting.end()) {
+      i = m_weightSetting.find( "default" );
+      std::cerr << "not found, using default weight setting instead\n";
+    }
+    m_allWeights = *(i->second);
+  }
+
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
 
@@ -688,6 +709,7 @@ public:
 
   void CollectFeatureFunctions();
   bool CheckWeights() const;
+  void ProcessAlternateWeightSettings();
 
 
   void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {

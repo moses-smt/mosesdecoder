@@ -110,6 +110,13 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       this->SetUseTopicIdAndProb(true);
     }
   }
+  if (meta.find("weight-setting") != meta.end()) {
+    this->SetWeightSetting(meta["weight-setting"]);
+    this->SetSpecifiesWeightSetting(true);
+  }
+  else {
+    this->SetSpecifiesWeightSetting(false);
+  }
 
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
@@ -156,6 +163,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   }
 
+  // reordering walls and zones
   m_reorderingConstraint.InitializeWalls( GetSize() );
 
   // set reordering walls, if "-monotone-at-punction" is set

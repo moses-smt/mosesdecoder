@@ -570,6 +570,7 @@ bool StaticData::LoadData(Parameter *parameter)
     vector<string> toks = Tokenize(line);
 
     const string &feature = toks[0];
+    //int featureIndex = GetFeatureIndex(featureIndexMap, feature);
 
     if (feature == "GlobalLexicalModel") {
       GlobalLexicalModel *model = new GlobalLexicalModel(line);
@@ -706,7 +707,6 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add("Unknown feature function:" + feature);
       return false;
     }
-
   }
 
   CollectFeatureFunctions();
@@ -738,6 +738,10 @@ bool StaticData::LoadData(Parameter *parameter)
 
   //cerr << endl << "m_allWeights=" << m_allWeights << endl;
 
+  // alternate weight settings
+  if (m_parameter->GetParam("alternate-weight-setting").size() > 0) {
+    ProcessAlternateWeightSettings();
+  }
   return true;
 }
 
@@ -1181,6 +1185,70 @@ bool StaticData::CheckWeights() const
   return true;
 }
 
-} // namespace
+void StaticData::ProcessAlternateWeightSettings() {
+  const vector<string> &weightSpecification = m_parameter->GetParam("alternate-weight-setting");
+  
+  // get mapping from feature names to feature functions
+  map<string,FeatureFunction*> nameToFF;
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    nameToFF[ ffs[i]->GetScoreProducerDescription() ] = ffs[i];
+  }
 
+  // copy main weight setting as default
+  m_weightSetting["default"] = new ScoreComponentCollection( m_allWeights );
+
+  // go through specification in config file
+  string currentId = "";
+  bool hasErrors = false;
+  for (size_t i=0; i<weightSpecification.size(); ++i) {
+
+    // identifier line (with optional additional specifications)
+    if (weightSpecification[i].find("id=") == 0) {
+      vector<string> tokens = Tokenize(weightSpecification[i]);
+      vector<string> args = Tokenize(tokens[0], "=");
+      currentId = args[1];
+      cerr << "alternate weight setting " << currentId << endl;
+      CHECK(m_weightSetting.find(currentId) == m_weightSetting.end());
+      m_weightSetting[ currentId ] = new ScoreComponentCollection;
+
+      // other specifications
+      for(size_t j=1; j<tokens.size(); j++) {
+        vector<string> args = Tokenize(tokens[j], "=");
+        if (args[0] == "weight-file") {
+          // TODO: support for sparse weights
+        }
+      }
+    }
+ 
+   // weight lines
+    else {
+      CHECK(currentId != "");
+      vector<string> tokens = Tokenize(weightSpecification[i]);
+      CHECK(tokens.size() >= 2);
+
+      // get name and weight values
+      string name = tokens[0];
+      name = name.substr(0, name.size() - 1); // remove trailing "="
+      vector<float> weights(tokens.size() - 1);
+      for (size_t i = 1; i < tokens.size(); ++i) {
+        float weight = Scan<float>(tokens[i]);
+        weights[i - 1] = weight;
+      }
+
+      // check if a valid nane
+      map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(name);
+      if (ffLookUp == nameToFF.end()) {
+	cerr << "ERROR: alternate weight setting " << currentId << " specifies weight(s) for " << name << " but there is no such feature function" << endl;
+	hasErrors = true;
+      }
+      else {
+	m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);
+      }
+    }
+  }
+  CHECK(!hasErrors);
+}
+
+} // namespace
 

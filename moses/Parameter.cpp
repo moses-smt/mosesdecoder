@@ -194,7 +194,7 @@ Parameter::Parameter()
   AddParam("feature", "");
   AddParam("print-id", "prefix translations with id. Default if false");
 
-
+  AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
 }
 
 Parameter::~Parameter()
