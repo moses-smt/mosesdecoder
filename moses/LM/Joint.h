@@ -77,7 +77,7 @@ public:
       m_sentenceEndWord[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
     }
 
-    return m_lmImpl->Load(filePath, m_implFactor, nGramOrder);
+    m_lmImpl->Load();
   }
 
   LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {

@@ -54,9 +54,7 @@ protected:
 public:
   LanguageModelSRI(const std::string &line);
   ~LanguageModelSRI();
-  bool Load(const std::string &filePath
-            , FactorType factorType
-            , size_t nGramOrder);
+  void Load();
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
 };

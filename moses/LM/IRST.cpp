@@ -42,6 +42,12 @@ namespace Moses
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor("IRSTLM", line)
 {
+  const StaticData &staticData = StaticData::Instance();
+  int threadCount = staticData.ThreadCount();
+  if (threadCount != 1) {
+	throw runtime_error("Error: " + SPrint(threadCount) + " number of threads specified but IRST LM is not threadsafe.");
+  }
+
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
@@ -55,8 +61,6 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
       throw "Unknown argument " + args[0];
     }
   }
-
-  Load(m_filePath, m_factorType, m_nGramOrder);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -71,18 +75,9 @@ LanguageModelIRST::~LanguageModelIRST()
 }
 
 
-bool LanguageModelIRST::Load(const std::string &filePath,
-                             FactorType factorType,
-                             size_t nGramOrder)
+void LanguageModelIRST::Load()
 {
-  cerr << "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n";
-
-  const StaticData &staticData = StaticData::Instance();
-  int threadCount = staticData.ThreadCount();
-  if (threadCount != 1) {
-    UserMessage::Add(threadCount + " number of threads specified but IRST LM is not threadsafe.");
-    return false;
-  }
+  cerr << "In LanguageModelIRST::Load: nGramOrder = " << m_nGramOrder << "\n";
 
   FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -107,8 +102,6 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_lmtb->init_caches(m_lmtb_size>2?m_lmtb_size-1:2);
 
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
-
-  return true;
 }
 
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)

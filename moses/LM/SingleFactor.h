@@ -47,10 +47,6 @@ protected:
 
 public:
   virtual ~LanguageModelSingleFactor();
-  virtual bool Load(const std::string &filePath
-                    , FactorType factorType
-                    , size_t nGramOrder) = 0;
-
   bool IsUseable(const FactorMask &mask) const;
 
   const Factor *GetSentenceStart() const {

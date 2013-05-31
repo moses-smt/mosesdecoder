@@ -57,7 +57,6 @@ LanguageModelSRI::LanguageModelSRI(const std::string &line)
     }
   }
 
-  Load(m_filePath, m_factorType, m_nGramOrder);
 }
 
 LanguageModelSRI::~LanguageModelSRI()
@@ -66,23 +65,19 @@ LanguageModelSRI::~LanguageModelSRI()
   delete m_srilmVocab;
 }
 
-bool LanguageModelSRI::Load(const std::string &filePath
-                            , FactorType factorType
-                            , size_t nGramOrder)
+void LanguageModelSRI::Load()
 {
   m_srilmVocab  = new ::Vocab();
-  m_srilmModel	= new Ngram(*m_srilmVocab, nGramOrder);
+  m_srilmModel	= new Ngram(*m_srilmVocab, m_nGramOrder);
 
   m_srilmModel->skipOOVs() = false;
 
-  File file( filePath.c_str(), "r" );
+  File file( m_filePath.c_str(), "r" );
   m_srilmModel->read(file);
 
   // LM can be ok, just outputs warnings
   CreateFactors();
   m_unknownId = m_srilmVocab->unkIndex();
-
-  return true;
 }
 
 void LanguageModelSRI::CreateFactors()
