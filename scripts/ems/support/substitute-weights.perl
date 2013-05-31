@@ -14,7 +14,7 @@ while(my $line = <BASEINI>) {
   if ($line =~ /\[weight\]/ || $line =~ /\[weight-file\]/) {
     $inWeightSection = 1;
   }
-  elsif ($line =~ /\[[a-zA-Z0-0]*\]/) {
+  elsif ($line =~ /\[[a-zA-Z0-9\-]*\]/) {
     $inWeightSection = 0;
   }  
 
@@ -43,7 +43,7 @@ while(my $line = <WEIGHTINI>) {
     print OUT "$ARGV[2].sparse\n\n";
     $inWeightSection = 0;
   }
-  elsif ($line =~ /\[[a-zA-Z0-0]*\]/) {
+  elsif ($line =~ /\[[a-zA-Z0-9\-]*\]/) {
    print OUT "\n" if $inWeightSection;
    $inWeightSection = 0;
   }  

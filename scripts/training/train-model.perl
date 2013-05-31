@@ -2021,28 +2021,6 @@ sub create_ini {
     print INI "\n# language model OOV feature enabled\n[lmodel-oov-feature]\n1\n\n";
   }
 
-  
-  # feature functions and weights
-  print INI "\n# feature functions\n";
-  print INI "[feature]\n";
-  print INI "UnknownWordPenalty\n";
-  print INI "WordPenalty\n";
-  print INI $feature_spec;
-
-  print INI "\n# dense weights for feature functions\n";
-  print INI "[weight]\n";
-  print INI "UnknownWordPenalty0= 1\n";
-  print INI "WordPenalty0= -1\n";
-  print INI $weight_spec;
-
-  if ($_NUM_LATTICE_FEATURES) {
-    print INI "\n\n#lattice or confusion net weights\n[weight-i]\n";
-    for (1..$_NUM_LATTICE_FEATURES) {
-      print INI "0.1\n";
-    }
-    print "\n";
-  }
-
   # hierarchical model settings
   print INI "\n";
   if ($_HIERARCHICAL) {
@@ -2055,6 +2033,7 @@ sub create_ini {
     foreach (split(/\+/,$___TRANSLATION_FACTORS)) { print INI "20\n"; }
     print INI "1000\n";
   }
+  # phrase-based model settings
   else {
     print INI "[distortion-limit]\n6\n";
   }
@@ -2062,6 +2041,15 @@ sub create_ini {
   # only set the factor delimiter if it is non-standard
   unless ($___FACTOR_DELIMITER eq '|') {
     print INI "\n# delimiter between factors in input\n[factor-delimiter]\n$___FACTOR_DELIMITER\n\n"
+  }
+
+  # lattice feature
+  if ($_NUM_LATTICE_FEATURES) {
+    print INI "\n\n#lattice or confusion net weights\n[weight-i]\n";
+    for (1..$_NUM_LATTICE_FEATURES) {
+      print INI "0.1\n";
+    }
+    print "\n";
   }
 
   # get addititional content for config file from switch or file
@@ -2074,6 +2062,18 @@ sub create_ini {
     print INI `cat $_ADDITIONAL_INI_FILE`;
   }
 
+  # feature functions and weights
+  print INI "\n# feature functions\n";
+  print INI "[feature]\n";
+  print INI "UnknownWordPenalty\n";
+  print INI "WordPenalty\n";
+  print INI $feature_spec;
+
+  print INI "\n# dense weights for feature functions\n";
+  print INI "[weight]\n";
+  print INI "UnknownWordPenalty0= 1\n";
+  print INI "WordPenalty0= -1\n";
+  print INI $weight_spec;
   close(INI);
 }
 
