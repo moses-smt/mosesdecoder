@@ -71,13 +71,6 @@ class SizedProxy {
         static_cast<char*>(second.inner_.Data()));
     }
 
-    friend void swap(SizedProxy &first, SizedProxy &second) {
-      std::swap_ranges(
-          static_cast<char*>(first.inner_.Data()), 
-          static_cast<char*>(first.inner_.Data()) + first.inner_.EntrySize(),
-          static_cast<char*>(second.inner_.Data()));
-    }
-
   private:
     friend class util::ProxyIterator<SizedProxy>;
 
