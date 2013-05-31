@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
+#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -693,7 +695,12 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
-    }
+    } else if (feature == "PhraseDictionaryDynSuffixArray") {
+      PhraseDictionaryDynSuffixArray* model = new PhraseDictionaryDynSuffixArray(line);
+	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+	  SetWeights(model, weights);
+	  m_phraseDictionary.push_back(model);
+	}
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {

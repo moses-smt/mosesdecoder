@@ -9,9 +9,26 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(const std::string &line)
-  :PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
+:PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
+,m_biSA(new BilingualDynSuffixArray())
 {
-  m_biSA = new BilingualDynSuffixArray();
+
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
+    if (args[0] == "source") {
+      m_source = args[1];
+    }
+    else if (args[0] == "target") {
+      m_target = args[1];
+    }
+    else if (args[0] == "alignment") {
+      m_alignments = args[1];
+    }
+    else {
+      //throw "Unknown argument " + args[0];
+    }
+  }
+
 }
 
 PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray()
@@ -19,19 +36,12 @@ PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray()
   delete m_biSA;
 }
 
-bool PhraseDictionaryDynSuffixArray::Load(const std::vector<FactorType>& input,
-    const std::vector<FactorType>& output,
-    string source, string target, string alignments,
-    const std::vector<float> &weight,
-    size_t tableLimit,
-    float weightWP)
+bool PhraseDictionaryDynSuffixArray::InitDictionary()
 {
+  const StaticData &staticData = StaticData::Instance();
+  vector<float> weight = staticData.GetWeights(this);
 
-  m_tableLimit = tableLimit;
-  m_weight = weight;
-  m_weightWP = weightWP;
-
-  m_biSA->Load( input, output, source, target, alignments, weight);
+  m_biSA->Load( m_input, m_output, m_source, m_target, m_alignments, weight);
 
   return true;
 }
@@ -72,8 +82,7 @@ void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned /* idx */, unsigned /* n
 
 ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
 {
-  CHECK(false);
-  return 0;
+  throw "Chart decoding not supported by PhraseDictionaryDynSuffixArray";
 }
 
 }// end namepsace
