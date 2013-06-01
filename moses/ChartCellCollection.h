@@ -76,6 +76,7 @@ class ChartCellCollectionBase {
     }
 
     const ChartCellLabelMBOT * GetSourceWordLabelMBOT(size_t at) const {
+    	  std::cerr << "GETTING SOURCE LABEL..." << std::endl;
           return m_mbotSource[at];
         }
 

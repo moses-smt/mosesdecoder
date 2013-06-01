@@ -113,6 +113,7 @@ class RuleCubeMBOT : public RuleCube
   RuleCubeMBOT &operator=(const RuleCubeMBOT &);  // Not implemented
 
   void CreateNeighborsMBOT(const RuleCubeItemMBOT * item, ChartManager &);
+  void CreateMatchingNeighborMBOT(const RuleCubeItemMBOT * item, int, ChartManager &);
   void CreateNeighborMBOT(const RuleCubeItemMBOT * item, int, ChartManager &);
 
   const ChartTranslationOptions &m_mbotTransOpt;

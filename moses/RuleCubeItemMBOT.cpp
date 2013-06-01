@@ -86,9 +86,9 @@ void RuleCubeItemMBOT::CreateHypothesis(const ChartTranslationOptions &transOpt,
 {
 
   m_mbotHypothesis = new ChartHypothesisMBOT(transOpt, *this, manager);
-  std::cerr << "RCI : Create Hypo" << m_mbotHypothesis->GetCurrTargetPhraseMBOT()->GetTargetLHSMBOT() << std::endl;
+  //std::cerr << "RCI : Create Hypo" << m_mbotHypothesis->GetCurrTargetPhraseMBOT()->GetTargetLHSMBOT() << std::endl;
   m_mbotHypothesis->CalcScoreMBOT();
-  std::cerr << "AFTER SCORING... " << m_mbotHypothesis->GetCurrTargetPhraseMBOT()->GetTargetLHSMBOT() << std::endl;
+  //std::cerr << "AFTER SCORING... " << m_mbotHypothesis->GetCurrTargetPhraseMBOT()->GetTargetLHSMBOT() << std::endl;
   m_mbotScore = m_mbotHypothesis->GetTotalScore();
   //Fabienne Braune : usefull for using debugging GUI
   /*std::cerr << "-----------------------" << std::endl;

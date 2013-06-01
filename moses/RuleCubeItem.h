@@ -69,6 +69,7 @@ class TranslationDimension
       	TargetPhrase * tp = const_cast<TargetPhrase*>(tpConst);
       	TargetPhraseMBOT * tpmbot = static_cast<TargetPhraseMBOT*>(tp);
       	const TargetPhraseMBOT * targetPhrase = const_cast<TargetPhraseMBOT*>(tpmbot);
+      	std::cerr << "GETTING MBOT TARGET : " << *(targetPhrase->GetMBOTPhrases()) << std::endl;
       	return targetPhrase;
   }
 

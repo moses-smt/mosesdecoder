@@ -213,8 +213,6 @@ void ChartCellMBOT::SortHypotheses()
     //}
     //std::cout << "SIZE OF VECTOR " << (iter->first).size() << std::endl;
 
-    coll.SortHypotheses();
-
     m_mbotTargetLabelSet.AddConstituent(iter->first, &(coll.GetSortedHypotheses()));
     //std::cout << "SORTING HYPOTHESES : " << coll << std::endl;
     coll.SortHypotheses();

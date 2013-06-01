@@ -124,9 +124,18 @@ public:
     return m_targetLhs;
   }
 
- const PhraseSequence GetMBOTPhrases() const {
-	std::cerr << "Trying to get : " << m_targetPhrases << std::endl;
-    return m_targetPhrases;
+ const PhraseSequence * GetMBOTPhrases() const {
+	//std::cerr << "Trying to get : " << m_targetPhrases << std::endl;
+    return &m_targetPhrases;
+ }
+
+ const Phrase * GetPhraseFormSequence(size_t pos) const {
+	 return m_targetPhrases.GetPhrase(pos);
+ }
+
+ size_t GetSizeOfSquence() const
+ {
+	 return m_targetPhrases.GetSize();
  }
 
  // void SetMBOTPhrases(PhraseSequence p)

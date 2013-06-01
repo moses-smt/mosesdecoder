@@ -35,23 +35,26 @@ public:
  friend std::ostream& operator<<(std::ostream &, const ChartCellLabelMBOT &);
 
   public:
-  ChartCellLabelMBOT(const std::vector<WordsRange> &coverage, const WordSequence &label,
+  ChartCellLabelMBOT(const std::vector<WordsRange> &coverage, const WordSequence label,
                  const Stack stack=Stack())
                  : ChartCellLabel(coverage.front(),*(label.GetWord(0)), stack)
                  , m_mbotStack(stack)
+  	  	  	  	 , m_mbotLabel(label)
   {
 	  for(int i=0;i<coverage.size();i++)
       {
 		  m_mbotCoverage.push_back(coverage[i]);
-		  m_mbotLabel = new WordSequence(label);
+		  //m_mbotLabel = *(new WordSequence(label));
 		  //m_mbotLabel->Add(*(label.GetWord(i)));
       }
+
+
   }
 
   ~ChartCellLabelMBOT(){
 	std::cerr << "KILLING CHART CELL MBOT" << std::endl;
     m_mbotCoverage.clear();
-    delete m_mbotLabel;
+    //delete m_mbotLabel;
   }
 
 
@@ -62,7 +65,7 @@ public:
 
   void AddLabel(Word label)
   {
-      m_mbotLabel->Add(label);
+      m_mbotLabel.Add(label);
   }
 
   const WordsRange &GetCoverage() const
@@ -70,7 +73,7 @@ public:
     std::cout << "Get coverage of non mbot Chart Cell Label NOT IMPLEMENTED in Chart Cell Label MBOT" << std::endl;
   }
 
-  const std::vector<WordsRange> &GetCoverageMBOT() const { return m_mbotCoverage; }
+  const std::vector<WordsRange> GetCoverageMBOT() const { return m_mbotCoverage; }
 
 
   const Word &GetLabel() const
@@ -78,7 +81,8 @@ public:
     std::cout << "Get label of non mbot Chart Cell Label NOT IMPLEMENTED in Chart Cell Label MBOT" << std::endl;
   }
 
-  const WordSequence * GetLabelMBOT() const {
+  const WordSequence GetLabelMBOT() const {
+	  std::cerr << "GETTING MBOT LABEL" << std::endl;
 	  return m_mbotLabel;
       }
 
@@ -91,24 +95,25 @@ public:
       std::cout << "Get Chart Hypothesis Collection NOT implemented in chart cell mbot" << std::endl;
       }
 
-  bool CompareLabels(const WordSequence * other) const
+  bool CompareLabels(const WordSequence other) const
   {
-        if(m_mbotLabel->GetSize() != other->GetSize())
+	  std::cerr << "COMPARING LABELS..."<< std::endl;
+
+        if(m_mbotLabel.GetSize() != other.GetSize())
         {
-        	return m_mbotLabel->GetSize() < other->GetSize();
+        	return m_mbotLabel.GetSize() < other.GetSize();
         }
 
         WordSequence :: const_iterator itr_label;
         WordSequence :: const_iterator itr_labelOther;
-        for(itr_label = m_mbotLabel->begin(), itr_labelOther = other->begin();
-            itr_label != m_mbotLabel->end(), itr_labelOther != other->end(); itr_label++, itr_labelOther++)
+        for(itr_label = m_mbotLabel.begin(), itr_labelOther = other.begin();
+            itr_label != m_mbotLabel.end(), itr_labelOther != other.end(); itr_label++, itr_labelOther++)
         {
 	     if(*itr_label != *itr_labelOther)
             {
                 return *itr_label < *itr_labelOther;
             }
          }
-
          return false;
 }
 
@@ -150,7 +155,7 @@ public:
 
  private:
     std::vector<WordsRange> m_mbotCoverage;
-    WordSequence * m_mbotLabel;
+    WordSequence m_mbotLabel;
     Stack m_mbotStack;
 
 };

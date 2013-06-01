@@ -45,20 +45,16 @@ class ChartCellLabelSetMBOT
 
   void AddWord(const WordSequence w)
   {
-    ChartCellLabelMBOT cellLabel(m_mbotCoverage, w);
-    std::vector<Word>::const_iterator itr_word;
     int counter = 1;
-    m_mbotMap.insert(std::make_pair(w,cellLabel));
+    m_mbotMap.insert(std::make_pair(w,ChartCellLabelMBOT(m_mbotCoverage, w)));
   }
 
-  void AddConstituent(const WordSequence &w, const HypoList *stack)
+  void AddConstituent(const WordSequence w, const HypoList *stack)
   {
 
     ChartCellLabelMBOT::Stack s;
     s.cube = stack;
-
-    ChartCellLabelMBOT cellLabel = ChartCellLabelMBOT(m_mbotCoverage, w, s);
-    m_mbotMap.insert(std::make_pair(w,cellLabel));
+    m_mbotMap.insert(std::make_pair(w,ChartCellLabelMBOT(m_mbotCoverage, w, s)));
   }
 
 

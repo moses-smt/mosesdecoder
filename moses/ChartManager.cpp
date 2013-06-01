@@ -157,9 +157,13 @@ void ChartManager::ProcessSentenceWithMBOT()
       cell->ProcessSentenceWithMBOT(m_translationOptionList, m_hypoStackColl);
       std::cerr << "CELL PROCESSED..." << std::endl;
       m_translationOptionList.Clear();
+      std::cerr << "TO CLEAR" << std::endl;
       cell->PruneToSize();
+      std::cerr << "PRUNING DONE" << std::endl;
       cell->CleanupArcList();
+      std::cerr << "ARCLIST CLEAN" << std::endl;
       cell->SortHypotheses();
+      std::cerr << "HYPOS SORTED" << std::endl;
     }
   }
 

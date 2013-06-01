@@ -69,6 +69,8 @@ RuleCubeItemMBOT *RuleCubeMBOT::PopMBOT(ChartManager &manager)
 }
 
 // create new RuleCube for neighboring principle rules
+//Fabienne Braune : Two ways to create neighbors : standard and with check if the source phrase matches the input parse tree.
+//TODO : The check could be moved out of here in method PopMBOT
 void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT* item, ChartManager &manager)
 {
   // create neighbor along translation dimension
@@ -78,17 +80,17 @@ void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT* item, ChartManage
   //Fabienne Braune : check matching option
   if(StaticData::Instance().IsMatchingSourceAtRuleApplication() == 1)
   {
-	  //Fabienne Braune : if matching option is on, only create  neighbor on tranlsation dimension if we have more matching target phrases
+	  //Fabienne Braune : if matching option is on, only create neighbor on translation dimension if we have more matching target phrases
 	  if (translationDimension.HasMoreMatchingTargetPhrase()) {
 
 		  //std::cerr << "CREATING NEIGHBOR FOR TRANSLATION AND HYPOTHESIS DIMENSIONS... " << std::endl;
-		  CreateNeighborMBOT(item, -1, manager);
+		  CreateMatchingNeighborMBOT(item, -1, manager);
 
 	  	// create neighbors along all hypothesis dimensions
 	  		for (size_t i = 0; i < item->GetHypothesisDimensionsMBOT().size(); ++i) {
 	  			const HypothesisDimension &dimension = item->GetHypothesisDimensionsMBOT()[i];
 	  			if (dimension.HasMoreHypo()) {
-	  				CreateNeighborMBOT(item, i, manager);
+	  				CreateMatchingNeighborMBOT(item, i, manager);
 	  			}
 	  		}
 	  }
@@ -125,12 +127,35 @@ void RuleCubeMBOT::CreateNeighborMBOT(const RuleCubeItemMBOT* item, int dimensio
     if (StaticData::Instance().GetCubePruningLazyScoring()) {
       newItem->EstimateScore();
     } else {
+      newItem->CreateHypothesis(m_mbotTransOpt, manager);
+    }
+    m_mbotQueue.push(newItem);
+  }
+}
+
+//Fabienne : Create neighbors with target phrases with source sides that match the input parse Tree
+//This is very hacky : we iterate over the translation dimension until we find a target phrase having a source phrase that matches
+//the parse tree.
+void RuleCubeMBOT::CreateMatchingNeighborMBOT(const RuleCubeItemMBOT* item, int dimensionIndex,
+                              ChartManager &manager)
+{
+  RuleCubeItemMBOT *newItem = new RuleCubeItemMBOT(item, dimensionIndex);
+  std::pair<ItemSetMBOT::iterator, bool> result = m_mbotCovered.insert(newItem);
+  if (!result.second) {
+    delete newItem;  // already seen it
+  } else {
+	//Fabienne Braune : TODO : this has to be adapted for lazy scoring
+    if (StaticData::Instance().GetCubePruningLazyScoring()) {
+      newItem->EstimateScore();
+    } else {
       	if(newItem->GetTranslationDimensionMBOT().HasMoreMatchingTargetPhrase())
       	{
       		while(newItem->GetTranslationDimensionMBOT().GetPosition() != newItem->GetTranslationDimensionMBOT().GetPositionOfMatchingTargetPhrase())
       		{
       			newItem->IncrementTranslationDimension();
       		}
+      		//std::cerr << "WE HAVE A MATCHING TARGET PHRASE AT POSITION : " << newItem->GetTranslationDimensionMBOT().GetPosition() << std::endl;
+      	    newItem->CreateHypothesis(m_mbotTransOpt, manager);
       	}
     }
     m_mbotQueue.push(newItem);

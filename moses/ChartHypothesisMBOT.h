@@ -65,6 +65,14 @@ TargetPhraseMBOT *m_mbotTargetPhrase;
     return m_mbotTargetPhrase;
   }
 
+  const PhraseSequence * GetCurrentTargetSequence() const {
+	return  m_mbotTargetPhrase->GetMBOTPhrases();
+  }
+
+  size_t GetSizeOfTargetSequence() const {
+	  return  m_mbotTargetPhrase->GetMBOTPhrases()->GetSize();
+  }
+
   //just in case we try to call target phrase
   const TargetPhrase &GetCurrTargetPhrase()const {
     std::cout << "Get current Target Phrase NOT implemented in chart hypothesis MBOT" << std::endl;

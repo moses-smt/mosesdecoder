@@ -16,7 +16,7 @@ namespace Moses
 		m_wordSequence = vector<Word>();
 	};
 
-	WordSequence::WordSequence(const Word &firstWord)
+	WordSequence::WordSequence(const Word firstWord)
 	{
 		m_wordSequence = vector<Word>();
 		m_wordSequence.push_back(firstWord);
@@ -46,10 +46,12 @@ namespace Moses
 	};
 
 
-	Word *WordSequence::GetWord(size_t position) const
+	Word * WordSequence::GetWord(size_t position) const
 	{
+		std::cerr << "TRYING TO GET WORD..." << std::endl;
 		CHECK(position < GetSize());
-		return const_cast<Word*> (&(m_wordSequence.at(position)));
+		//std::cerr << "RETURNING WORD..." <<  << std::endl;
+		return const_cast<Word*>(&(m_wordSequence.at(position)));
 	};
 
 	size_t WordSequence::GetSize() const

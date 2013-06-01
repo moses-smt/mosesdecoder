@@ -24,7 +24,7 @@ class WordSequence
 	typedef vector<Word>::const_iterator const_iterator;
 	//TODO : Add constructor
 	 WordSequence();
-	 WordSequence(const Word &word);
+	 WordSequence(const Word word);
 	~WordSequence(){
 		std::cerr << "KILLING WORD SEQUENCE" << std::endl;
 	};

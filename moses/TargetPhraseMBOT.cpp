@@ -153,7 +153,7 @@ void TargetPhraseMBOT::CreateFromString(const std::vector<FactorType> &factorOrd
 int TargetPhraseMBOT::Compare(const TargetPhraseMBOT &other) const
 {
     size_t thisSize = m_targetPhrases.GetSize();
-    size_t compareSize = other.GetMBOTPhrases().GetSize();
+    size_t compareSize = other.GetMBOTPhrases()->GetSize();
 
     if (thisSize != compareSize) {
     return (thisSize < compareSize) ? -1 : 1;
@@ -414,13 +414,12 @@ ostream& operator<<(ostream& out, const TargetPhraseMBOT& targetPhrase)
   out << "THIS : IS AN MBOT TARGET PRHASE " << std::endl;
   out << "-------------------------------------" << std::endl;
 
-  const PhraseSequence myPhrases = targetPhrase.GetMBOTPhrases();
   PhraseSequence :: const_iterator itr_vector_phrases;
 
   out << "Target Phrases : ";
   int phraseCounter = 1;
 
-  for(itr_vector_phrases = myPhrases.begin(); itr_vector_phrases != myPhrases.end(); itr_vector_phrases++)
+  for(itr_vector_phrases = targetPhrase.GetMBOTPhrases()->begin(); itr_vector_phrases != targetPhrase.GetMBOTPhrases()->end(); itr_vector_phrases++)
     {
         out << *itr_vector_phrases << "(" << phraseCounter++ << ") ";
     }

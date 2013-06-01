@@ -104,8 +104,8 @@ void ChartHypothesisMBOT::CreateOutputPhrase(Phrase &outPhrase, ProcessedNonTerm
         //GetProcessingPhrase()->IncrementStatus();
         //std::cout << "CURENT STATUS : " << GetProcessingPhrase()->GetStatus() << std::endl;
 
-        CHECK(currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize() > currentlyProcessed);
-        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases().GetSize();
+        CHECK(currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases()->GetSize() > currentlyProcessed);
+        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT()->GetMBOTPhrases()->GetSize();
         //std::cout << "Getting current Phrase : " << GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() << std::endl;
 
         //if several mbot phrases, look at status
@@ -246,7 +246,7 @@ void ChartHypothesisMBOT::CalcScoreMBOT()
   const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
 
-  //std::cerr << "Computing score for hypothesis : " << *this << std::endl;
+  std::cerr << "COMPUTING SCORE FOR HYPOTHESIS : " << *this << std::endl;
   for (unsigned i = 0; i < ffs.size(); ++i) {
         //std::cout << "Evaluating MBOT" << std::endl;
 		m_ffStates[i] = ffs[i]->EvaluateMBOT(*this,i,&m_scoreBreakdown);
