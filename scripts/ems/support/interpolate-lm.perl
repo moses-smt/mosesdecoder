@@ -135,7 +135,7 @@ sub interpolate {
   die "Failed to mix models: $mixerr" if $mixexitcode != 0;
   my $mix = $mixout;
   `rm $tmp/iplm.$$.*`;
-  $mix =~ /best lambda \(([\d\. ]+)\)/ || die("ERROR: computing lambdas failed: $mix");
+  $mix =~ /best lambda \(([\d\. e-]+)\)/ || die("ERROR: computing lambdas failed: $mix");
   my @LAMBDA = split(/ /,$1);
 
   # create new language model
