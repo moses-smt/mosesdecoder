@@ -9,22 +9,19 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(const std::string &line)
-:PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
-,m_biSA(new BilingualDynSuffixArray())
+  :PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
+  ,m_biSA(new BilingualDynSuffixArray())
 {
 
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
     if (args[0] == "source") {
       m_source = args[1];
-    }
-    else if (args[0] == "target") {
+    } else if (args[0] == "target") {
       m_target = args[1];
-    }
-    else if (args[0] == "alignment") {
+    } else if (args[0] == "alignment") {
       m_alignments = args[1];
-    }
-    else {
+    } else {
       //throw "Unknown argument " + args[0];
     }
   }

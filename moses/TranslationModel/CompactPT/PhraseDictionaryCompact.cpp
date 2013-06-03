@@ -52,7 +52,7 @@ void PhraseDictionaryCompact::Load()
   std::string suffix = ".minphr";
   if(tFilePath.substr(tFilePath.length() - suffix.length(), suffix.length()) == suffix) {
     if(!FileExists(tFilePath)) {
-    	throw runtime_error("Error: File " + tFilePath + " does not exit.");
+      throw runtime_error("Error: File " + tFilePath + " does not exit.");
       exit(1);
     }
   } else {

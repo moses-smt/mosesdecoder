@@ -691,9 +691,9 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
     } else if (feature == "PhraseDictionaryDynSuffixArray") {
       PhraseDictionaryDynSuffixArray* model = new PhraseDictionaryDynSuffixArray(line);
-	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-	  SetWeights(model, weights);
-	}
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+    }
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
@@ -1150,8 +1150,7 @@ void StaticData::LoadFeatureFunctions()
     PhraseDictionary *pt = dynamic_cast<PhraseDictionary*>(ff);
     if (pt) {
       m_phraseDictionary.push_back(pt);
-    }
-    else {
+    } else {
       // load phrase table last. They can depend on other features
       ff->Load();
     }
@@ -1159,8 +1158,8 @@ void StaticData::LoadFeatureFunctions()
 
   // load phrase table
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-	PhraseDictionary *pt = m_phraseDictionary[i];
-	pt->Load();
+    PhraseDictionary *pt = m_phraseDictionary[i];
+    pt->Load();
   }
 
 }
@@ -1194,9 +1193,10 @@ bool StaticData::CheckWeights() const
   return true;
 }
 
-void StaticData::ProcessAlternateWeightSettings() {
+void StaticData::ProcessAlternateWeightSettings()
+{
   const vector<string> &weightSpecification = m_parameter->GetParam("alternate-weight-setting");
-  
+
   // get mapping from feature names to feature functions
   map<string,FeatureFunction*> nameToFF;
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
@@ -1229,8 +1229,8 @@ void StaticData::ProcessAlternateWeightSettings() {
         }
       }
     }
- 
-   // weight lines
+
+    // weight lines
     else {
       CHECK(currentId != "");
       vector<string> tokens = Tokenize(weightSpecification[i]);
@@ -1248,11 +1248,10 @@ void StaticData::ProcessAlternateWeightSettings() {
       // check if a valid nane
       map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(name);
       if (ffLookUp == nameToFF.end()) {
-	cerr << "ERROR: alternate weight setting " << currentId << " specifies weight(s) for " << name << " but there is no such feature function" << endl;
-	hasErrors = true;
-      }
-      else {
-	m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);
+        cerr << "ERROR: alternate weight setting " << currentId << " specifies weight(s) for " << name << " but there is no such feature function" << endl;
+        hasErrors = true;
+      } else {
+        m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);
       }
     }
   }

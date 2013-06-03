@@ -206,7 +206,7 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
-  
+
   // alternate weight settings
   std::map< std::string, ScoreComponentCollection* > m_weightSetting;
 

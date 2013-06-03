@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 
   PhraseDictionaryCompact pdc("input-factor=0 output-factor=0 num-features=5 path=" + ttable);
   pdc.Load();
-  
+
   std::string line;
   while(getline(std::cin, line)) {
     Phrase sourcePhrase;

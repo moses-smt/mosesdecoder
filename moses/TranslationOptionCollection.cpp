@@ -389,8 +389,8 @@ void TranslationOptionCollection::CreateTranslationOptions()
             (endPos-startPos+1 > decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // already covered
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]");
-	  VERBOSE(3,", length limit: " << decodeGraphBackoff[graphInd]);
-	  VERBOSE(3,", found so far: " << m_collection[startPos][endPos-startPos].size() << endl);
+          VERBOSE(3,", length limit: " << decodeGraphBackoff[graphInd]);
+          VERBOSE(3,", found so far: " << m_collection[startPos][endPos-startPos].size() << endl);
           // do not create more options
           continue;
         }
@@ -510,7 +510,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       int indexStep = 1;
 
       for (++iterStep; iterStep != decodeGraph.end() ; ++iterStep, ++indexStep) {
-    	const DecodeStep &decodeStep = **iterStep;
+        const DecodeStep &decodeStep = **iterStep;
         PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
         // go thru each intermediate trans opt just created

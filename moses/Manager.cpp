@@ -80,7 +80,7 @@ void Manager::ProcessSentence()
 {
   // reset statistics
   ResetSentenceStats(m_source);
-  
+
   // check if alternate weight setting is used
   // this is not thread safe! it changes StaticData
   if (StaticData::Instance().GetHasAlternateWeightSettings()) {
@@ -89,8 +89,7 @@ void Manager::ProcessSentence()
       std::cerr << "sentence specifies weight setting\n";
       std::cerr << "calling SetWeightSetting( " << m_source.GetWeightSetting() << ")\n";
       StaticData::Instance().SetWeightSetting(m_source.GetWeightSetting());
-    }
-    else {
+    } else {
       StaticData::Instance().SetWeightSetting("default");
     }
   }
