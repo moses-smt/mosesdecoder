@@ -53,22 +53,21 @@ protected:
 
 public:
   GenerationDictionary(const std::string &line);
-	virtual ~GenerationDictionary();
-	
-	//! load data file
-	bool Load(const std::string &filePath, FactorDirection direction);
+  virtual ~GenerationDictionary();
 
-	/** number of unique input entries in the generation table. 
-	* NOT the number of lines in the generation table
-	*/
-	size_t GetSize() const
-	{
-		return m_collection.size();
-	}
-	/** returns a bag of output words, OutputWordCollection, for a particular input word. 
-	*	Or NULL if the input word isn't found. The search function used is the WordComparer functor
-	*/
-	const OutputWordCollection *FindWord(const Word &word) const;
+  //! load data file
+  bool Load(const std::string &filePath, FactorDirection direction);
+
+  /** number of unique input entries in the generation table.
+  * NOT the number of lines in the generation table
+  */
+  size_t GetSize() const {
+    return m_collection.size();
+  }
+  /** returns a bag of output words, OutputWordCollection, for a particular input word.
+  *	Or NULL if the input word isn't found. The search function used is the WordComparer functor
+  */
+  const OutputWordCollection *FindWord(const Word &word) const;
 
 };
 

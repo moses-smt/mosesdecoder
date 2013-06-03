@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -28,8 +28,10 @@
 #include <string>
 #include <vector>
 
-namespace Moses {
-namespace GHKM {
+namespace Moses
+{
+namespace GHKM
+{
 
 class Subgraph;
 
@@ -37,34 +39,68 @@ enum NodeType { SOURCE, TARGET, TREE };
 
 class Node
 {
- public:
+public:
   Node(const std::string &label, NodeType type)
-      : m_label(label)
-      , m_type(type)
-      , m_pcfgScore(0.0f) {}
+    : m_label(label)
+    , m_type(type)
+    , m_pcfgScore(0.0f) {}
 
   ~Node();
 
-  const std::string &GetLabel() const { return m_label; }
-  NodeType GetType() const { return m_type; }
-  const std::vector<Node*> &GetChildren() const { return m_children; }
-  const std::vector<Node*> &GetParents() const { return m_parents; }
-  float GetPcfgScore() const { return m_pcfgScore; }
-  const Span &GetSpan() const { return m_span; }
-  const Span &GetComplementSpan() const { return m_complementSpan; }
-  const std::vector<const Subgraph*> &GetRules() const { return m_rules; }
+  const std::string &GetLabel() const {
+    return m_label;
+  }
+  NodeType GetType() const {
+    return m_type;
+  }
+  const std::vector<Node*> &GetChildren() const {
+    return m_children;
+  }
+  const std::vector<Node*> &GetParents() const {
+    return m_parents;
+  }
+  float GetPcfgScore() const {
+    return m_pcfgScore;
+  }
+  const Span &GetSpan() const {
+    return m_span;
+  }
+  const Span &GetComplementSpan() const {
+    return m_complementSpan;
+  }
+  const std::vector<const Subgraph*> &GetRules() const {
+    return m_rules;
+  }
 
-  void SetChildren(const std::vector<Node*> &c) { m_children = c; }
-  void SetParents(const std::vector<Node*> &p) { m_parents = p; }
-  void SetPcfgScore(float s) { m_pcfgScore = s; }
-  void SetSpan(const Span &s) { m_span = s; }
-  void SetComplementSpan(const Span &cs) { m_complementSpan = cs; }
+  void SetChildren(const std::vector<Node*> &c) {
+    m_children = c;
+  }
+  void SetParents(const std::vector<Node*> &p) {
+    m_parents = p;
+  }
+  void SetPcfgScore(float s) {
+    m_pcfgScore = s;
+  }
+  void SetSpan(const Span &s) {
+    m_span = s;
+  }
+  void SetComplementSpan(const Span &cs) {
+    m_complementSpan = cs;
+  }
 
-  void AddChild(Node *c) { m_children.push_back(c); }
-  void AddParent(Node *p) { m_parents.push_back(p); }
-  void AddRule(const Subgraph *s) { m_rules.push_back(s); }
+  void AddChild(Node *c) {
+    m_children.push_back(c);
+  }
+  void AddParent(Node *p) {
+    m_parents.push_back(p);
+  }
+  void AddRule(const Subgraph *s) {
+    m_rules.push_back(s);
+  }
 
-  bool IsSink() const { return m_children.empty(); }
+  bool IsSink() const {
+    return m_children.empty();
+  }
   bool IsPreterminal() const;
 
   void PropagateIndex(int);
@@ -82,7 +118,7 @@ class Node
   template<typename InputIterator>
   static Node *LowestCommonAncestor(InputIterator first, InputIterator last);
 
- private:
+private:
   // Disallow copying
   Node(const Node &);
   Node &operator=(const Node &);

@@ -56,9 +56,9 @@ struct SearchGraphNode {
     hypo(theHypo), recombinationHypo(theRecombinationHypo),
     forward(theForward), fscore(theFscore) {}
 
-    bool operator<(const SearchGraphNode& sgn) const {
-        return this->hypo->GetId() < sgn.hypo->GetId();
-    }
+  bool operator<(const SearchGraphNode& sgn) const {
+    return this->hypo->GetId() < sgn.hypo->GetId();
+  }
 
 };
 

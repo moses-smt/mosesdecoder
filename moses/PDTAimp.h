@@ -38,7 +38,7 @@ protected:
     : m_dict(0),
       m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
 
- public:
+public:
   std::vector<FactorType> m_input,m_output;
   PhraseDictionaryTree *m_dict;
   typedef std::vector<TargetPhraseCollection const*> vTPC;
@@ -161,8 +161,7 @@ protected:
                      FloorScore);
       //sparse features.
       //These are already in log-space
-      ScoreComponentCollection sparseFeatures;
-      CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, sparseFeatures, wacands[i], weights, weightWP, &src);
+      CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, wacands[i], &src);
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);
     }
@@ -185,7 +184,7 @@ protected:
   void Create(const std::vector<FactorType> &input
               , const std::vector<FactorType> &output
               , const std::string &filePath
-	      , const std::vector<float> &weight
+              , const std::vector<float> &weight
              ) {
 
     // set my members
@@ -254,23 +253,17 @@ protected:
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
                           Scores const& scoreVector,
-                          const ScoreComponentCollection& sparseFeatures,
                           const std::string& alignmentString,
-                          std::vector<float> &weights,
-                          float weightWP,
                           Phrase const* srcPtr=0) const {
-    CreateTargetPhrase(targetPhrase, factorStrings, scoreVector, sparseFeatures, weights, weightWP, srcPtr);
+    CreateTargetPhrase(targetPhrase, factorStrings, scoreVector, srcPtr);
     targetPhrase.SetAlignmentInfo(alignmentString);
   }
 
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
                           Scores const& scoreVector,
-                          const ScoreComponentCollection& sparseFeatures,
-  		  std::vector<float> &weights,
-  		  float weightWP,
                           Phrase const* srcPtr) const {
-  FactorCollection &factorCollection = FactorCollection::Instance();
+    FactorCollection &factorCollection = FactorCollection::Instance();
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
       util::TokenIter<util::MultiCharacter, false> word(*factorStrings[k], StaticData::Instance().GetFactorDelimiter());
@@ -283,7 +276,7 @@ protected:
     targetPhrase.SetSourcePhrase(*srcPtr);
 
     targetPhrase.GetScoreBreakdown().Assign(m_obj, scoreVector);
-    targetPhrase.Evaluate(*srcPtr);
+    targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
   }
 
   TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,
@@ -438,8 +431,8 @@ protected:
 
               //put in phrase table scores, logging as we insert
               std::transform(tcands[i].scores.begin(),tcands[i].scores.end(),nscores.begin() + m_numInputScores,TransformScore);
-              
-	      CHECK(nscores.size()==weightT.size());
+
+              CHECK(nscores.size()==weightT.size());
 
               //tally up
               float score=std::inner_product(nscores.begin(), nscores.end(), weightT.begin(), 0.0f);
@@ -493,7 +486,7 @@ protected:
       for(E2Costs::const_iterator j=i->second.begin(); j!=i->second.end(); ++j) {
         TScores const & scores=j->second;
         TargetPhrase targetPhrase;
-        CreateTargetPhrase(targetPhrase,j->first,scores.trans,ScoreComponentCollection(),weightT,weightWP,scores.src);
+        CreateTargetPhrase(targetPhrase,j->first,scores.trans,scores.src);
         costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
         tCands.push_back(targetPhrase);
         //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;

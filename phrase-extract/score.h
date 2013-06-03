@@ -32,6 +32,6 @@ inline bool isNonTerminal( const std::string &word )
   return (word.length()>=3 && word[0] == '[' && word[word.length()-1] == ']');
 }
 
-  
+
 }
 

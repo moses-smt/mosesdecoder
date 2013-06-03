@@ -42,7 +42,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /**
   * Classes to implement a ThreadPool.
 **/
-namespace Moses {
+namespace Moses
+{
 
 /** A task to be executed by the ThreadPool
  */
@@ -50,7 +51,9 @@ class Task
 {
 public:
   virtual void Run() = 0;
-  virtual bool DeleteAfterExecution() { return true; }
+  virtual bool DeleteAfterExecution() {
+    return true;
+  }
   virtual ~Task() {}
 };
 
@@ -58,7 +61,7 @@ public:
 
 class ThreadPool
 {
- public:
+public:
   /**
    * Construct a thread pool of a fixed size.
    **/
@@ -82,7 +85,9 @@ class ThreadPool
   /**
    * Set maximum number of queued threads (otherwise Submit blocks)
    **/
-  void SetQueueLimit( size_t limit ) { m_queueLimit = limit; }
+  void SetQueueLimit( size_t limit ) {
+    m_queueLimit = limit;
+  }
 
 private:
   /**
@@ -109,7 +114,7 @@ public:
 #ifdef BOOST_HAS_PTHREADS
     pthread_t tid = pthread_self();
 #else
-	typedef void * pthread_t;
+    typedef void * pthread_t;
     pthread_t tid = 0;
 #endif
     std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;

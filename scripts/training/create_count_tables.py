@@ -71,7 +71,7 @@ def create_count_lines(fobj, countobj, countobj_target, prune=0):
 
     i = 0
     original_pos = 0
-    source = ""
+    source = b""
     store_lines = set()
     for line in fobj:
 

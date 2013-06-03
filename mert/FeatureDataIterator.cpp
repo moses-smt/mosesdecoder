@@ -32,9 +32,10 @@ using namespace util;
 
 namespace MosesTuning
 {
-  
 
-int ParseInt(const StringPiece& str ) {
+
+int ParseInt(const StringPiece& str )
+{
   char* errIndex;
   //could wrap?
   int value = static_cast<int>(strtol(str.data(), &errIndex,10));
@@ -44,7 +45,8 @@ int ParseInt(const StringPiece& str ) {
   return value;
 }
 
-float ParseFloat(const StringPiece& str) {
+float ParseFloat(const StringPiece& str)
+{
   char* errIndex;
   float value = static_cast<float>(strtod(str.data(), &errIndex));
   if (errIndex == str.data()) {
@@ -53,11 +55,13 @@ float ParseFloat(const StringPiece& str) {
   return value;
 }
 
-bool operator==(FeatureDataItem const& item1, FeatureDataItem const& item2) {
+bool operator==(FeatureDataItem const& item1, FeatureDataItem const& item2)
+{
   return item1.dense==item1.dense && item1.sparse==item1.sparse;
 }
 
-size_t hash_value(FeatureDataItem const& item) {
+size_t hash_value(FeatureDataItem const& item)
+{
   size_t seed = 0;
   boost::hash_combine(seed,item.dense);
   boost::hash_combine(seed,item.sparse);
@@ -67,14 +71,16 @@ size_t hash_value(FeatureDataItem const& item) {
 
 FeatureDataIterator::FeatureDataIterator() {}
 
-FeatureDataIterator::FeatureDataIterator(const string& filename) {
+FeatureDataIterator::FeatureDataIterator(const string& filename)
+{
   m_in.reset(new FilePiece(filename.c_str()));
   readNext();
 }
 
 FeatureDataIterator::~FeatureDataIterator() {}
 
-void FeatureDataIterator::readNext() {
+void FeatureDataIterator::readNext()
+{
   m_next.clear();
   try {
     StringPiece marker = m_in->ReadDelimited();
@@ -101,7 +107,7 @@ void FeatureDataIterator::readNext() {
           //sparse feature
           StringPiece second = *value;
           float floatValue = ParseFloat(second);
-          m_next.back().sparse.set(first.as_string(),floatValue); 
+          m_next.back().sparse.set(first.as_string(),floatValue);
         }
       }
       if (length != m_next.back().dense.size()) {
@@ -117,11 +123,13 @@ void FeatureDataIterator::readNext() {
   }
 }
 
-void FeatureDataIterator::increment() {
+void FeatureDataIterator::increment()
+{
   readNext();
 }
 
-bool FeatureDataIterator::equal(const FeatureDataIterator& rhs) const {
+bool FeatureDataIterator::equal(const FeatureDataIterator& rhs) const
+{
   if (!m_in && !rhs.m_in) {
     return true;
   } else if (!m_in) {
@@ -129,12 +137,13 @@ bool FeatureDataIterator::equal(const FeatureDataIterator& rhs) const {
   } else if (!rhs.m_in) {
     return false;
   } else {
-    return m_in->FileName() == rhs.m_in->FileName() && 
-      m_in->Offset() == rhs.m_in->Offset();
+    return m_in->FileName() == rhs.m_in->FileName() &&
+           m_in->Offset() == rhs.m_in->Offset();
   }
 }
 
-const vector<FeatureDataItem>& FeatureDataIterator::dereference() const {
+const vector<FeatureDataItem>& FeatureDataIterator::dereference() const
+{
   return m_next;
 }
 

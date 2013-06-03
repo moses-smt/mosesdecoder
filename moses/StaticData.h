@@ -75,7 +75,7 @@ protected:
   std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
-  ScoreComponentCollection m_allWeights;
+  mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
   std::vector<size_t> m_decodeGraphBackoff;
@@ -87,7 +87,7 @@ protected:
   m_translationOptionThreshold,
   m_wordDeletionWeight;
 
-  
+
   // PhraseTrans, Generation & LanguageModelScore has multiple weights.
   int				m_maxDistortion;
   // do it differently from old pharaoh
@@ -207,6 +207,9 @@ protected:
   int m_threadCount;
   long m_startTranslationId;
   
+  // alternate weight settings
+  std::map< std::string, ScoreComponentCollection* > m_weightSetting;
+
   StaticData();
 
 
@@ -223,7 +226,7 @@ protected:
   bool m_continuePartialTranslation;
 
   std::string m_binPath;
-  
+
 public:
 
   bool IsAlwaysCreateDirectTranslationOption() const {
@@ -363,15 +366,15 @@ public:
   bool IsLabeledNBestList() const {
     return m_labeledNBestList;
   }
-  
+
   bool UseMinphrInMemory() const {
-     return m_minphrMemory;
+    return m_minphrMemory;
   }
 
   bool UseMinlexrInMemory() const {
-     return m_minlexrMemory;
+    return m_minlexrMemory;
   }
-  
+
   size_t GetNumRealWordsInInput() const {
     return m_numRealWordsInInput;
   }
@@ -421,13 +424,16 @@ public:
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
   }
-  const WordPenaltyProducer *GetWordPenaltyProducer() const
-  { return m_wpProducer; }
-  WordPenaltyProducer *GetWordPenaltyProducer() // for mira
-  { return m_wpProducer; }
+  const WordPenaltyProducer *GetWordPenaltyProducer() const {
+    return m_wpProducer;
+  }
+  WordPenaltyProducer *GetWordPenaltyProducer() { // for mira
+    return m_wpProducer;
+  }
 
-  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const
-  { return m_unknownWordPenaltyProducer; }
+  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const {
+    return m_unknownWordPenaltyProducer;
+  }
 
   size_t GetNumInputScores() const {
     return m_numInputScores;
@@ -458,7 +464,7 @@ public:
   float GetSparseWeight(const FName& featureName) const {
     return m_allWeights.GetSparseWeight(featureName);
   }
-  
+
   //Weights for feature with fixed number of values
   void SetWeights(const FeatureFunction* sp, const std::vector<float>& weights);
 
@@ -627,15 +633,17 @@ public:
   int ThreadCount() const {
     return m_threadCount;
   }
-  
-  long GetStartTranslationId() const
-  { return m_startTranslationId; }
-  
+
+  long GetStartTranslationId() const {
+    return m_startTranslationId;
+  }
+
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;
 
   bool NeedAlignmentInfo() const {
-    return m_needAlignmentInfo; }
+    return m_needAlignmentInfo;
+  }
   const std::string &GetAlignmentOutputFile() const {
     return m_alignmentOutputFile;
   }
@@ -653,29 +661,55 @@ public:
     return m_nBestIncludesSegmentation;
   }
 
+  bool GetHasAlternateWeightSettings() const {
+    return m_weightSetting.size() > 0;
+  }
+
+  void SetWeightSetting(const std::string &settingName) const {
+    std::cerr << "SetWeightSetting( " << settingName << ")\n";
+    CHECK(GetHasAlternateWeightSettings());
+    std::map< std::string, ScoreComponentCollection* >::const_iterator i =
+      m_weightSetting.find( settingName );
+    // if not found, resort to default
+    std::cerr << "using weight setting " << settingName << std::endl;
+    if (i == m_weightSetting.end()) {
+      i = m_weightSetting.find( "default" );
+      std::cerr << "not found, using default weight setting instead\n";
+    }
+    m_allWeights = *(i->second);
+  }
+
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
 
-  const std::vector<PhraseDictionary*>& GetPhraseDictionaries() const
-  { return m_phraseDictionary;}
-  const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const
-  { return m_generationDictionary;}
-  const PhraseDictionary*GetTranslationScoreProducer(size_t index) const
-  { return GetPhraseDictionaries().at(index); }
+  const std::vector<PhraseDictionary*>& GetPhraseDictionaries() const {
+    return m_phraseDictionary;
+  }
+  const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const {
+    return m_generationDictionary;
+  }
+  const PhraseDictionary*GetTranslationScoreProducer(size_t index) const {
+    return GetPhraseDictionaries().at(index);
+  }
   std::vector<float> GetTranslationWeights(size_t index) const {
     std::vector<float> weights = GetWeights(GetTranslationScoreProducer(index));
     return weights;
   }
 
-  const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
-  const std::vector<size_t>& GetDecodeGraphBackoff() const {return m_decodeGraphBackoff;}
+  const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
+    return m_decodeGraphs;
+  }
+  const std::vector<size_t>& GetDecodeGraphBackoff() const {
+    return m_decodeGraphBackoff;
+  }
 
   //sentence (and thread) specific initialisationn and cleanup
   void InitializeForInput(const InputType& source) const;
   void CleanUpAfterSentenceProcessing(const InputType& source) const;
 
-  void CollectFeatureFunctions();
+  void LoadFeatureFunctions();
   bool CheckWeights() const;
+  void ProcessAlternateWeightSettings();
 
 
   void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {
@@ -697,8 +731,7 @@ public:
 #ifdef WITH_THREADS
     if (m_multimodelweights_tmp.find(boost::this_thread::get_id()) != m_multimodelweights_tmp.end()) {
       return &m_multimodelweights_tmp.find(boost::this_thread::get_id())->second;
-    }
-    else {
+    } else {
       return NULL;
     }
 #else

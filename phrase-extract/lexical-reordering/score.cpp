@@ -29,11 +29,11 @@ void get_orientations(const StringPiece& pair, StringPiece& previous, StringPiec
 
 class FileFormatException : public util::Exception
 {
-  public:
-    FileFormatException() throw() {
-     *this << "Invalid extract file format: ";
-    }
-    ~FileFormatException() throw() {}
+public:
+  FileFormatException() throw() {
+    *this << "Invalid extract file format: ";
+  }
+  ~FileFormatException() throw() {}
 };
 
 int main(int argc, char* argv[])
@@ -214,9 +214,10 @@ int main(int argc, char* argv[])
 }
 
 template <class It> StringPiece
-GrabOrDie(It &it, const StringPiece& line) {
-    UTIL_THROW_IF(!it, FileFormatException, line.as_string());
-    return *it++;
+GrabOrDie(It &it, const StringPiece& line)
+{
+  UTIL_THROW_IF(!it, FileFormatException, line.as_string());
+  return *it++;
 }
 
 
@@ -236,12 +237,12 @@ void split_line(
        | phrase | hier
        | phrase | hier ||| weight
   */
-  
+
   util::TokenIter<util::MultiCharacter> pipes(line, util::MultiCharacter(" ||| "));
   foreign = GrabOrDie(pipes,line);
   english = GrabOrDie(pipes,line);
   StringPiece next = GrabOrDie(pipes,line);
-  
+
   util::TokenIter<util::MultiCharacter> singlePipe(next, util::MultiCharacter(" | "));
   wbe = GrabOrDie(singlePipe,line);
   if (singlePipe) {

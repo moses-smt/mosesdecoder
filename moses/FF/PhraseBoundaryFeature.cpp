@@ -4,9 +4,10 @@
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
-int PhraseBoundaryState::Compare(const FFState& other) const 
+int PhraseBoundaryState::Compare(const FFState& other) const
 {
   const PhraseBoundaryState& rhs = dynamic_cast<const PhraseBoundaryState&>(other);
   int tgt = Word::Compare(*m_targetWord,*(rhs.m_targetWord));
@@ -15,7 +16,7 @@ int PhraseBoundaryState::Compare(const FFState& other) const
 }
 
 PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
-: StatefulFeatureFunction("PhraseBoundaryFeature", 0, line)
+  : StatefulFeatureFunction("PhraseBoundaryFeature", 0, line)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
 
@@ -24,17 +25,15 @@ PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
 
     if (args[0] == "source") {
       m_sourceFactors = Tokenize<FactorType>(args[1], ",");
-    }
-    else if (args[0] == "target") {
+    } else if (args[0] == "target") {
       m_targetFactors = Tokenize<FactorType>(args[1], ",");
-    }
-    else {
+    } else {
       throw "Unknown argument " + args[0];
     }
   }
 }
 
-const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &) const 
+const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &) const
 {
   return new PhraseBoundaryState(NULL,NULL);
 }
@@ -42,31 +41,32 @@ const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &) co
 
 void PhraseBoundaryFeature::AddFeatures(
   const Word* leftWord, const Word* rightWord, const FactorList& factors, const string& side,
-  ScoreComponentCollection* scores) const {
-   for (size_t i = 0; i < factors.size(); ++i) {
-      ostringstream name;
-      name << side << ":";
-      name << factors[i];
-      name << ":";
-      if (leftWord) {
-        name << leftWord->GetFactor(factors[i])->GetString();
-      } else {
-        name << BOS_;
-      }
-      name << ":";
-      if (rightWord) {
-        name << rightWord->GetFactor(factors[i])->GetString();
-      } else {
-        name << EOS_;
-      }
-      scores->PlusEquals(this,name.str(),1);
+  ScoreComponentCollection* scores) const
+{
+  for (size_t i = 0; i < factors.size(); ++i) {
+    ostringstream name;
+    name << side << ":";
+    name << factors[i];
+    name << ":";
+    if (leftWord) {
+      name << leftWord->GetFactor(factors[i])->GetString();
+    } else {
+      name << BOS_;
     }
+    name << ":";
+    if (rightWord) {
+      name << rightWord->GetFactor(factors[i])->GetString();
+    } else {
+      name << EOS_;
+    }
+    scores->PlusEquals(this,name.str(),1);
+  }
 
 }
 
 FFState* PhraseBoundaryFeature::Evaluate
-  (const Hypothesis& cur_hypo, const FFState* prev_state,
-      ScoreComponentCollection* scores) const
+(const Hypothesis& cur_hypo, const FFState* prev_state,
+ ScoreComponentCollection* scores) const
 {
   const PhraseBoundaryState* pbState = dynamic_cast<const PhraseBoundaryState*>(prev_state);
   const Phrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
@@ -94,5 +94,15 @@ FFState* PhraseBoundaryFeature::Evaluate
   return new PhraseBoundaryState(endSourceWord,endTargetWord);
 }
 
+bool PhraseBoundaryFeature::IsUseable(const FactorMask &mask) const
+{
+  for (size_t i = 0; i < m_targetFactors.size(); ++i) {
+    const FactorType &factor = m_targetFactors[i];
+    if (!mask[factor]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 }

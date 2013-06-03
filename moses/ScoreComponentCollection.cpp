@@ -17,7 +17,7 @@ ScoreComponentCollection::ScoreComponentCollection() : m_scores(s_denseVectorSiz
 
 
 void ScoreComponentCollection::RegisterScoreProducer
-  (const FeatureFunction* scoreProducer)
+(const FeatureFunction* scoreProducer)
 {
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
@@ -29,56 +29,58 @@ void ScoreComponentCollection::RegisterScoreProducer
 
 float ScoreComponentCollection::GetWeightedScore() const
 {
-	return m_scores.inner_product(StaticData::Instance().GetAllWeights().m_scores);
+  return m_scores.inner_product(StaticData::Instance().GetAllWeights().m_scores);
 }
 
 void ScoreComponentCollection::MultiplyEquals(float scalar)
 {
-	m_scores *= scalar;
+  m_scores *= scalar;
 }
 
 // Multiply all weights of this sparse producer by a given scalar
-void ScoreComponentCollection::MultiplyEquals(const FeatureFunction* sp, float scalar) {
+void ScoreComponentCollection::MultiplyEquals(const FeatureFunction* sp, float scalar)
+{
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
     std::stringstream name;
     name << i->first;
     if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
-    	m_scores[i->first] = i->second * scalar;
+      m_scores[i->first] = i->second * scalar;
   }
 }
 
 // Count weights belonging to this sparse producer
-size_t ScoreComponentCollection::GetNumberWeights(const FeatureFunction* sp) {
+size_t ScoreComponentCollection::GetNumberWeights(const FeatureFunction* sp)
+{
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   size_t weights = 0;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
     std::stringstream name;
     name << i->first;
     if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
-    	weights++;
+      weights++;
   }
   return weights;
 }
 
 void ScoreComponentCollection::DivideEquals(float scalar)
 {
-	m_scores /= scalar;
+  m_scores /= scalar;
 }
 
 void ScoreComponentCollection::CoreDivideEquals(float scalar)
 {
-	m_scores.coreDivideEquals(scalar);
+  m_scores.coreDivideEquals(scalar);
 }
 
 void ScoreComponentCollection::DivideEquals(const ScoreComponentCollection& rhs)
 {
-	m_scores.divideEquals(rhs.m_scores);
+  m_scores.divideEquals(rhs.m_scores);
 }
 
 void ScoreComponentCollection::MultiplyEquals(const ScoreComponentCollection& rhs)
 {
-	m_scores *= rhs.m_scores;
+  m_scores *= rhs.m_scores;
 }
 
 void ScoreComponentCollection::MultiplyEqualsBackoff(const ScoreComponentCollection& rhs, float backoff)
@@ -93,42 +95,51 @@ void ScoreComponentCollection::MultiplyEquals(float core_r0, float sparse_r0)
 
 std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 {
-	os << rhs.m_scores;
-	return os;
+  os << rhs.m_scores;
+  return os;
 }
-void ScoreComponentCollection::L1Normalise() {
+void ScoreComponentCollection::L1Normalise()
+{
   m_scores /= m_scores.l1norm_coreFeatures();
 }
 
-float ScoreComponentCollection::GetL1Norm() const {
+float ScoreComponentCollection::GetL1Norm() const
+{
   return m_scores.l1norm();
 }
 
-float ScoreComponentCollection::GetL2Norm() const {
+float ScoreComponentCollection::GetL2Norm() const
+{
   return m_scores.l2norm();
 }
 
-float ScoreComponentCollection::GetLInfNorm() const {
+float ScoreComponentCollection::GetLInfNorm() const
+{
   return m_scores.linfnorm();
 }
 
-size_t ScoreComponentCollection::L1Regularize(float lambda) {
+size_t ScoreComponentCollection::L1Regularize(float lambda)
+{
   return m_scores.l1regularize(lambda);
 }
 
-void ScoreComponentCollection::L2Regularize(float lambda) {
+void ScoreComponentCollection::L2Regularize(float lambda)
+{
   m_scores.l2regularize(lambda);
 }
 
-size_t ScoreComponentCollection::SparseL1Regularize(float lambda) {
+size_t ScoreComponentCollection::SparseL1Regularize(float lambda)
+{
   return m_scores.sparseL1regularize(lambda);
 }
 
-void ScoreComponentCollection::SparseL2Regularize(float lambda) {
+void ScoreComponentCollection::SparseL2Regularize(float lambda)
+{
   m_scores.sparseL2regularize(lambda);
 }
 
-void ScoreComponentCollection::Save(ostream& out) const {
+void ScoreComponentCollection::Save(ostream& out) const
+{
   ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
   for (; iter != s_scoreIndexes.end(); ++iter ) {
     string name = iter->first->GetScoreProducerDescription();
@@ -148,7 +159,8 @@ void ScoreComponentCollection::Save(ostream& out) const {
   m_scores.write(out);
 }
 
-void ScoreComponentCollection::Save(const string& filename) const {
+void ScoreComponentCollection::Save(const string& filename) const
+{
   ofstream out(filename.c_str());
   if (!out) {
     ostringstream msg;
@@ -159,7 +171,8 @@ void ScoreComponentCollection::Save(const string& filename) const {
   out.close();
 }
 
-void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string line) {
+void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string line)
+{
   istringstream istr(line);
   while(istr) {
     string namestring;

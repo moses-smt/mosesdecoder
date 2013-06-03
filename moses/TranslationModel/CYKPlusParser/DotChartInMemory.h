@@ -32,21 +32,23 @@ namespace Moses
  */
 class DottedRuleInMemory : public DottedRule
 {
- public:
+public:
   // used only to init dot stack.
   explicit DottedRuleInMemory(const PhraseDictionaryNodeMemory &node)
-      : DottedRule()
-      , m_node(node) {}
+    : DottedRule()
+    , m_node(node) {}
 
   DottedRuleInMemory(const PhraseDictionaryNodeMemory &node,
                      const ChartCellLabel &cellLabel,
                      const DottedRuleInMemory &prev)
-      : DottedRule(cellLabel, prev)
-      , m_node(node) {}
-             
-  const PhraseDictionaryNodeMemory &GetLastNode() const { return m_node; }
+    : DottedRule(cellLabel, prev)
+    , m_node(node) {}
 
- private:
+  const PhraseDictionaryNodeMemory &GetLastNode() const {
+    return m_node;
+  }
+
+private:
   const PhraseDictionaryNodeMemory &m_node;
 };
 

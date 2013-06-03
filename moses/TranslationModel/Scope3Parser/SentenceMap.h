@@ -29,7 +29,7 @@
 namespace Moses
 {
 typedef boost::unordered_map<Word,
-                             std::vector<size_t>,
-                             TerminalHasher,
-                             TerminalEqualityPred> SentenceMap;
+        std::vector<size_t>,
+        TerminalHasher,
+        TerminalEqualityPred> SentenceMap;
 }

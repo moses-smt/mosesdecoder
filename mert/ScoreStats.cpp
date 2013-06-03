@@ -13,21 +13,22 @@
 
 using namespace std;
 
-namespace {
+namespace
+{
 const int kAvailableSize = 8;
 } // namespace
 
 namespace MosesTuning
 {
-  
+
 
 ScoreStats::ScoreStats()
-    : m_available_size(kAvailableSize), m_entries(0),
-      m_array(new ScoreStatsType[m_available_size]) {}
+  : m_available_size(kAvailableSize), m_entries(0),
+    m_array(new ScoreStatsType[m_available_size]) {}
 
 ScoreStats::ScoreStats(const size_t size)
-    : m_available_size(size), m_entries(size),
-      m_array(new ScoreStatsType[m_available_size])
+  : m_available_size(size), m_entries(size),
+    m_array(new ScoreStatsType[m_available_size])
 {
   memset(m_array, 0, GetArraySizeWithBytes());
 }
@@ -123,7 +124,8 @@ void ScoreStats::savetxt(ostream* os)
   *os << *this;
 }
 
-void ScoreStats::savetxt() {
+void ScoreStats::savetxt()
+{
   savetxt(&cout);
 }
 
@@ -140,7 +142,8 @@ ostream& operator<<(ostream& o, const ScoreStats& e)
   return o;
 }
 
-bool operator==(const ScoreStats& s1, const ScoreStats& s2) {
+bool operator==(const ScoreStats& s1, const ScoreStats& s2)
+{
   size_t size = s1.size();
 
   if (size != s2.size())

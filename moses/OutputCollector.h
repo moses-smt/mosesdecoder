@@ -45,27 +45,23 @@ public:
   OutputCollector(std::ostream* outStream= &std::cout, std::ostream* debugStream=&std::cerr) :
     m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream),
     m_isHoldingOutputStream(false), m_isHoldingDebugStream(false) {}
-  
-  ~OutputCollector()
-  {
+
+  ~OutputCollector() {
     if (m_isHoldingOutputStream)
       delete m_outStream;
     if (m_isHoldingDebugStream)
       delete m_debugStream;
   }
-  
-  void HoldOutputStream()
-  {
+
+  void HoldOutputStream() {
     m_isHoldingOutputStream = true;
   }
-  
-  void HoldDebugStream()
-  {
+
+  void HoldDebugStream() {
     m_isHoldingDebugStream = true;
   }
-  
-  bool OutputIsCout() const
-  {
+
+  bool OutputIsCout() const {
     return (m_outStream == std::cout);
   }
 
@@ -87,7 +83,7 @@ public:
         *m_outStream << iter->second << std::flush;
         ++m_nextOutput;
         std::map<int,std::string>::iterator debugIter = m_debugs.find(iter->first);
-		m_outputs.erase(iter);
+        m_outputs.erase(iter);
         if (debugIter != m_debugs.end()) {
           *m_debugStream << debugIter->second << std::flush;
           m_debugs.erase(debugIter);

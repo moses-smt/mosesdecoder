@@ -81,24 +81,28 @@ public:
     const InputType &,
     const ChartCellCollectionBase &) = 0;
 
-  //Initialises the dictionary (may involve loading from file)
-  virtual bool InitDictionary() = 0;
-
   //Get the dictionary. Be sure to initialise it first.
   const PhraseDictionary* GetDictionary() const;
   PhraseDictionary* GetDictionary();
 
-  const std::string &GetFilePath() const { return m_filePath; }
+  const std::string &GetFilePath() const {
+    return m_filePath;
+  }
+
+  const std::vector<FeatureFunction*> &GetFeaturesToApply() const {
+    return m_featuresToApply;
+  }
 
 protected:
   size_t m_tableLimit;
-
 
   unsigned m_numInputScores;
   std::string m_filePath;
 
   std::string m_targetFile;
   std::string m_alignmentsFile;
+
+  std::vector<FeatureFunction*> m_featuresToApply;
 };
 
 }

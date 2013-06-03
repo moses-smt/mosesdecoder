@@ -11,7 +11,7 @@ namespace Moses
 
 class Manager;
 
-/** abstract unique set of hypotheses that cover a certain number of words, 
+/** abstract unique set of hypotheses that cover a certain number of words,
  *  ie. a stack in phrase-based decoding
  */
 class HypothesisStack

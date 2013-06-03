@@ -129,7 +129,7 @@ enum InputTypeEnum {
   ,WordLatticeInput				= 2
   ,TreeInputType					= 3
   ,WordLatticeInput2			= 4
-  
+
 };
 
 enum XmlInputType {
@@ -169,8 +169,7 @@ enum WordAlignmentSort {
   ,TargetOrder = 1
 };
 
-enum FormatType
-{
+enum FormatType {
   MosesFormat
   ,HieroFormat
 };

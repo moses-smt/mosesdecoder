@@ -20,11 +20,12 @@
 
 namespace MosesTuning
 {
-  
+
 
 // Start with these abstract classes
 
-class HypPackEnumerator {
+class HypPackEnumerator
+{
 public:
   virtual ~HypPackEnumerator() {}
 
@@ -41,7 +42,8 @@ public:
 
 // Instantiation that streams from disk
 // Low-memory, low-speed, sequential access
-class StreamingHypPackEnumerator : public HypPackEnumerator {
+class StreamingHypPackEnumerator : public HypPackEnumerator
+{
 public:
   StreamingHypPackEnumerator(std::vector<std::string> const& featureFiles,
                              std::vector<std::string> const& scoreFiles);
@@ -75,7 +77,8 @@ private:
 // Instantiation that reads into memory
 // High-memory, high-speed, random access
 // (Actually randomizes with each call to reset)
-class RandomAccessHypPackEnumerator : public HypPackEnumerator {
+class RandomAccessHypPackEnumerator : public HypPackEnumerator
+{
 public:
   RandomAccessHypPackEnumerator(std::vector<std::string> const& featureFiles,
                                 std::vector<std::string> const& scoreFiles,

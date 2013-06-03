@@ -49,7 +49,7 @@ class TargetPhrase: public Phrase
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
   AlignType m_align;
-  PhrasePtr m_sourcePhrase; 
+  PhrasePtr m_sourcePhrase;
 
   std::vector<float> m_scores;
   UINT64 m_filePos;
@@ -73,10 +73,10 @@ public:
   const PhrasePtr GetSourcePhrase() const {
     return m_sourcePhrase;
   }
-  const std::vector<float> &GetScores() const{
+  const std::vector<float> &GetScores() const {
     return m_scores;
   }
-  
+
   void SetLHS(WordPtr lhs);
 
   void Create1AlignFromString(const std::string &align1Str);
@@ -107,7 +107,7 @@ public:
   UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
   UINT64 ReadFromFile(std::fstream &fileTP);
 
-	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
 };
 

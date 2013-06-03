@@ -97,13 +97,14 @@ size_t Word::ReadFromFile(std::fstream &file)
 }
 
 void Word::ConvertToMoses(
-    const std::vector<Moses::FactorType> &outputFactorsVec, 
-    const Vocab &vocab,
-    Moses::Word &overwrite) const {
+  const std::vector<Moses::FactorType> &outputFactorsVec,
+  const Vocab &vocab,
+  Moses::Word &overwrite) const
+{
   Moses::FactorCollection &factorColl = Moses::FactorCollection::Instance();
   overwrite = Moses::Word(m_isNonTerminal);
 
-  // TODO: this conversion should have been done at load time.  
+  // TODO: this conversion should have been done at load time.
   util::TokenIter<util::SingleCharacter> tok(vocab.GetString(m_vocabId), '|');
 
   for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
@@ -144,14 +145,14 @@ bool Word::operator==(const Word &compare) const
 
 void Word::DebugPrint(ostream &out, const Vocab &vocab) const
 {
- 	const string &str = vocab.GetString(m_vocabId);
+  const string &str = vocab.GetString(m_vocabId);
   out << str;
 }
 
 std::ostream& operator<<(std::ostream &out, const Word &word)
 {
   out << "(";
- 	out << word.m_vocabId;
+  out << word.m_vocabId;
 
   out << (word.m_isNonTerminal ? "n" : "t");
   out << ")";

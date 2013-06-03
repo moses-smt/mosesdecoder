@@ -19,14 +19,14 @@ namespace MosesTuning
 
 
 FeatureArray::FeatureArray()
-    : m_index(0), m_num_features(0){}
+  : m_index(0), m_num_features(0) {}
 
 FeatureArray::~FeatureArray() {}
 
 void FeatureArray::savetxt(ostream* os)
 {
   *os << FEATURES_TXT_BEGIN << " " << m_index << " " << m_array.size()
-          << " " << m_num_features << " " << m_features << endl;
+      << " " << m_num_features << " " << m_features << endl;
   for (featarray_t::iterator i = m_array.begin(); i != m_array.end(); ++i) {
     i->savetxt(os);
     *os << endl;
@@ -37,7 +37,7 @@ void FeatureArray::savetxt(ostream* os)
 void FeatureArray::savebin(ostream* os)
 {
   *os << FEATURES_BIN_BEGIN << " " << m_index << " " << m_array.size()
-          << " " << m_num_features << " " << m_features << endl;
+      << " " << m_num_features << " " << m_features << endl;
   for (featarray_t::iterator i = m_array.begin(); i != m_array.end(); ++i)
     i->savebin(os);
 

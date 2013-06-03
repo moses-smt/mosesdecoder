@@ -39,8 +39,7 @@ float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
 {
   if(!StaticData::Instance().UseEarlyDistortionCost()) {
     return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
-  }
-  else {
+  } else {
     /* Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
        Definitions:
        S   : current source range
@@ -50,23 +49,23 @@ float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
 
     int prefixEndPos = (int)FirstGap-1;
     if((int)FirstGap==-1)
-    prefixEndPos = -1;
+      prefixEndPos = -1;
 
     // case1: S is adjacent to S'' => return 0
     if ((int) curr.GetStartPos() == prefixEndPos+1) {
-    IFVERBOSE(4) std::cerr<< "MQ07disto:case1" << std::endl;
+      IFVERBOSE(4) std::cerr<< "MQ07disto:case1" << std::endl;
       return 0;
     }
 
     // case2: S is to the left of S' => return 2(length(S))
     if ((int) curr.GetEndPos() < (int) prev.GetEndPos()) {
-    IFVERBOSE(4) std::cerr<< "MQ07disto:case2" << std::endl;
+      IFVERBOSE(4) std::cerr<< "MQ07disto:case2" << std::endl;
       return (float) -2*(int)curr.GetNumWordsCovered();
     }
 
     // case3: S' is a subsequence of S'' => return 2(nbWordBetween(S,S'')+length(S))
     if ((int) prev.GetEndPos() <= prefixEndPos) {
-    IFVERBOSE(4) std::cerr<< "MQ07disto:case3" << std::endl;
+      IFVERBOSE(4) std::cerr<< "MQ07disto:case3" << std::endl;
       int z = (int)curr.GetStartPos()-prefixEndPos - 1;
       return (float) -2*(z + (int)curr.GetNumWordsCovered());
     }

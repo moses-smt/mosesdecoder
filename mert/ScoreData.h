@@ -40,7 +40,9 @@ public:
   ScoreData(Scorer* scorer);
   ~ScoreData() {}
 
-  void clear() { m_array.clear(); }
+  void clear() {
+    m_array.clear();
+  }
 
   inline ScoreArray& get(std::size_t idx) {
     return m_array.at(idx);
@@ -66,7 +68,9 @@ public:
     return m_array.at(i).get(j);
   }
 
-  std::string name() const { return m_score_type; }
+  std::string name() const {
+    return m_score_type;
+  }
 
   std::string name(const std::string &score_type) {
     return m_score_type = score_type;
@@ -75,8 +79,12 @@ public:
   void add(ScoreArray& e);
   void add(const ScoreStats& e, int sent_idx);
 
-  std::size_t NumberOfScores() const { return m_num_scores; }
-  std::size_t size() const { return m_array.size(); }
+  std::size_t NumberOfScores() const {
+    return m_num_scores;
+  }
+  std::size_t size() const {
+    return m_array.size();
+  }
 
   void save(const std::string &file, bool bin=false);
   void save(std::ostream* os, bool bin=false);

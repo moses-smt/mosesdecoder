@@ -10,7 +10,8 @@ namespace tmmt
 {
 
 // as in beamdecoder/tables.cpp
-vector<WORD_ID> Vocabulary::Tokenize( const char input[] ) {
+vector<WORD_ID> Vocabulary::Tokenize( const char input[] )
+{
   vector< WORD_ID > token;
   bool betweenWords = true;
   int start=0;
@@ -21,8 +22,7 @@ vector<WORD_ID> Vocabulary::Tokenize( const char input[] ) {
     if (!isSpace && betweenWords) {
       start = i;
       betweenWords = false;
-    }
-    else if (isSpace && !betweenWords) {
+    } else if (isSpace && !betweenWords) {
       token.push_back( StoreIfNew ( string( input+start, i-start ) ) );
       betweenWords = true;
     }
@@ -32,9 +32,11 @@ vector<WORD_ID> Vocabulary::Tokenize( const char input[] ) {
   return token;
 }
 
-WORD_ID Vocabulary::StoreIfNew( const WORD& word ) {
+WORD_ID Vocabulary::StoreIfNew( const WORD& word )
+{
 
-  { // read=lock scope
+  {
+    // read=lock scope
 #ifdef WITH_THREADS
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
 #endif
@@ -43,17 +45,18 @@ WORD_ID Vocabulary::StoreIfNew( const WORD& word ) {
     if( i != lookup.end() )
       return i->second;
   }
-  
+
 #ifdef WITH_THREADS
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
   WORD_ID id = vocab.size();
   vocab.push_back( word );
   lookup[ word ] = id;
-  return id;  
+  return id;
 }
 
-WORD_ID Vocabulary::GetWordID( const WORD &word ) {
+WORD_ID Vocabulary::GetWordID( const WORD &word )
+{
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
 #endif

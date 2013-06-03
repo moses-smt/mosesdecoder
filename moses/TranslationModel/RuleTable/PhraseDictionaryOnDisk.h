@@ -35,7 +35,7 @@ class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
 
 /** Implementation of on-disk phrase table for hierarchical/syntax model.
- */   
+ */
 class PhraseDictionaryOnDisk : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;
@@ -57,8 +57,6 @@ public:
   PhraseTableImplementation GetPhraseTableImplementation() const {
     return OnDisk;
   }
-
-  bool InitDictionary();
 
   // PhraseDictionary impl
   //! find list of translations that can translates src. Only for phrase input

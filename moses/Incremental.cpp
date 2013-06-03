@@ -19,90 +19,98 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace Moses {
-namespace Incremental {
-namespace {
+namespace Moses
+{
+namespace Incremental
+{
+namespace
+{
 
 // This is called by EdgeGenerator.  Route hypotheses to separate vertices for
-// each left hand side label, populating ChartCellLabelSet out.  
-template <class Best> class HypothesisCallback {
-  private:
-    typedef search::VertexGenerator<Best> Gen;
-  public:
-    HypothesisCallback(search::ContextBase &context, Best &best, ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool)
-      : context_(context), best_(best), out_(out), vertex_pool_(vertex_pool) {}
+// each left hand side label, populating ChartCellLabelSet out.
+template <class Best> class HypothesisCallback
+{
+private:
+  typedef search::VertexGenerator<Best> Gen;
+public:
+  HypothesisCallback(search::ContextBase &context, Best &best, ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool)
+    : context_(context), best_(best), out_(out), vertex_pool_(vertex_pool) {}
 
-    void NewHypothesis(search::PartialEdge partial) {
-      // Get the LHS, look it up in the output ChartCellLabel, and upcast it.  
-      // It's not part of the union because it would have been ugly to expose template types in ChartCellLabel.
-      ChartCellLabel::Stack &stack = out_.FindOrInsert(static_cast<const TargetPhrase *>(partial.GetNote().vp)->GetTargetLHS());
-      Gen *entry = static_cast<Gen*>(stack.incr_generator);
-      if (!entry) {
-        entry = generator_pool_.construct(context_, *vertex_pool_.construct(), best_);
-        stack.incr_generator = entry;
-      }
-      entry->NewHypothesis(partial);
+  void NewHypothesis(search::PartialEdge partial) {
+    // Get the LHS, look it up in the output ChartCellLabel, and upcast it.
+    // It's not part of the union because it would have been ugly to expose template types in ChartCellLabel.
+    ChartCellLabel::Stack &stack = out_.FindOrInsert(static_cast<const TargetPhrase *>(partial.GetNote().vp)->GetTargetLHS());
+    Gen *entry = static_cast<Gen*>(stack.incr_generator);
+    if (!entry) {
+      entry = generator_pool_.construct(context_, *vertex_pool_.construct(), best_);
+      stack.incr_generator = entry;
     }
+    entry->NewHypothesis(partial);
+  }
 
-    void FinishedSearch() {
-      for (ChartCellLabelSet::iterator i(out_.mutable_begin()); i != out_.mutable_end(); ++i) {
-        ChartCellLabel::Stack &stack = i->second.MutableStack();
-        Gen *gen = static_cast<Gen*>(stack.incr_generator);
-        gen->FinishedSearch();
-        stack.incr = &gen->Generating();
-      }
+  void FinishedSearch() {
+    for (ChartCellLabelSet::iterator i(out_.mutable_begin()); i != out_.mutable_end(); ++i) {
+      ChartCellLabel::Stack &stack = i->second.MutableStack();
+      Gen *gen = static_cast<Gen*>(stack.incr_generator);
+      gen->FinishedSearch();
+      stack.incr = &gen->Generating();
     }
+  }
 
-  private:
-    search::ContextBase &context_;
+private:
+  search::ContextBase &context_;
 
-    Best &best_;
+  Best &best_;
 
-    ChartCellLabelSet &out_;
+  ChartCellLabelSet &out_;
 
-    boost::object_pool<search::Vertex> &vertex_pool_;
-    boost::object_pool<Gen> generator_pool_;
+  boost::object_pool<search::Vertex> &vertex_pool_;
+  boost::object_pool<Gen> generator_pool_;
 };
 
 // This is called by the moses parser to collect hypotheses.  It converts to my
-// edges (search::PartialEdge).  
-template <class Model> class Fill : public ChartParserCallback {
-  public:
-    Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, search::Score oov_weight)
-      : context_(context), vocab_mapping_(vocab_mapping), oov_weight_(oov_weight) {}
+// edges (search::PartialEdge).
+template <class Model> class Fill : public ChartParserCallback
+{
+public:
+  Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, search::Score oov_weight)
+    : context_(context), vocab_mapping_(vocab_mapping), oov_weight_(oov_weight) {}
 
-    void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
+  void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
 
-    void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
+  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
 
-    bool Empty() const { return edges_.Empty(); }
+  bool Empty() const {
+    return edges_.Empty();
+  }
 
-    template <class Best> void Search(Best &best, ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool) {
-      HypothesisCallback<Best> callback(context_, best, out, vertex_pool);
-      edges_.Search(context_, callback);
-    }
+  template <class Best> void Search(Best &best, ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool) {
+    HypothesisCallback<Best> callback(context_, best, out, vertex_pool);
+    edges_.Search(context_, callback);
+  }
 
-    // Root: everything into one vertex.  
-    template <class Best> search::History RootSearch(Best &best) {
-      search::Vertex vertex;
-      search::RootVertexGenerator<Best> gen(vertex, best);
-      edges_.Search(context_, gen);
-      return vertex.BestChild();
-    }
+  // Root: everything into one vertex.
+  template <class Best> search::History RootSearch(Best &best) {
+    search::Vertex vertex;
+    search::RootVertexGenerator<Best> gen(vertex, best);
+    edges_.Search(context_, gen);
+    return vertex.BestChild();
+  }
 
-  private:
-    lm::WordIndex Convert(const Word &word) const;
+private:
+  lm::WordIndex Convert(const Word &word) const;
 
-    search::Context<Model> &context_;
+  search::Context<Model> &context_;
 
-    const std::vector<lm::WordIndex> &vocab_mapping_;
+  const std::vector<lm::WordIndex> &vocab_mapping_;
 
-    search::EdgeGenerator edges_;
+  search::EdgeGenerator edges_;
 
-    const search::Score oov_weight_;
+  const search::Score oov_weight_;
 };
 
-template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &) {
+template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &)
+{
   std::vector<search::PartialVertex> vertices;
   vertices.reserve(nts.size());
   float below_score = 0.0;
@@ -131,7 +139,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     }
 
     edge.SetScore(phrase.GetFutureScore() + below_score);
-    // prob and oov were already accounted for.  
+    // prob and oov were already accounted for.
     search::ScoreRule(context_.LanguageModel(), words, edge.Between());
 
     search::Note note;
@@ -142,14 +150,15 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   }
 }
 
-template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &) {
+template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &)
+{
   std::vector<lm::WordIndex> words;
   CHECK(phrase.GetSize() <= 1);
   if (phrase.GetSize())
     words.push_back(Convert(phrase.GetWord(0)));
 
   search::PartialEdge edge(edges_.AllocateEdge(0));
-  // Appears to be a bug that FutureScore does not already include language model. 
+  // Appears to be a bug that FutureScore does not already include language model.
   search::ScoreRuleRet scored(search::ScoreRule(context_.LanguageModel(), words, edge.Between()));
   edge.SetScore(phrase.GetFutureScore() + scored.prob * context_.LMWeight() + static_cast<search::Score>(scored.oov) * oov_weight_);
 
@@ -160,8 +169,9 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   edges_.AddEdge(edge);
 }
 
-// TODO: factors (but chart doesn't seem to support factors anyway). 
-template <class Model> lm::WordIndex Fill<Model>::Convert(const Word &word) const {
+// TODO: factors (but chart doesn't seem to support factors anyway).
+template <class Model> lm::WordIndex Fill<Model>::Convert(const Word &word) const
+{
   std::size_t factor = word.GetFactor(0)->GetId();
   return (factor >= vocab_mapping_.size() ? 0 : vocab_mapping_[factor]);
 }
@@ -180,11 +190,13 @@ Manager::Manager(const InputType &source) :
   parser_(source, cells_),
   n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
 
-Manager::~Manager() {
+Manager::~Manager()
+{
 }
 
-template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out) {
-  const LanguageModel &abstract = GetFirstLM();
+template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
+{
+  const LanguageModel &abstract = LanguageModel::GetFirstLM();
   const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
   search::Config config(abstract.GetWeight(), data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
@@ -192,7 +204,7 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
 
   size_t size = source_.GetSize();
   boost::object_pool<search::Vertex> vertex_pool(std::max<size_t>(size * size / 2, 32));
-  
+
   for (size_t width = 1; width < size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       WordsRange range(startPos, startPos + width - 1);
@@ -208,7 +220,8 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
   return filler.RootSearch(out);
 }
 
-template <class Model> void Manager::LMCallback(const Model &model, const std::vector<lm::WordIndex> &words) {
+template <class Model> void Manager::LMCallback(const Model &model, const std::vector<lm::WordIndex> &words)
+{
   std::size_t nbest = StaticData::Instance().GetNBestSize();
   if (nbest <= 1) {
     search::History ret = PopulateBest(model, words, single_best_);
@@ -237,12 +250,14 @@ template void Manager::LMCallback<lm::ngram::QuantTrieModel>(const lm::ngram::Qu
 template void Manager::LMCallback<lm::ngram::ArrayTrieModel>(const lm::ngram::ArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 template void Manager::LMCallback<lm::ngram::QuantArrayTrieModel>(const lm::ngram::QuantArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 
-const std::vector<search::Applied> &Manager::ProcessSentence() {
-  GetFirstLM().IncrementalCallback(*this);
+const std::vector<search::Applied> &Manager::ProcessSentence()
+{
+  LanguageModel::GetFirstLM().IncrementalCallback(*this);
   return *completed_nbest_;
 }
 
-namespace {
+namespace
+{
 
 struct NoOp {
   void operator()(const TargetPhrase &) const {}
@@ -254,7 +269,8 @@ struct AccumScore {
   }
   ScoreComponentCollection *out_;
 };
-template <class Action> void AppendToPhrase(const search::Applied final, Phrase &out, Action action) {
+template <class Action> void AppendToPhrase(const search::Applied final, Phrase &out, Action action)
+{
   assert(final.Valid());
   const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(final.GetNote().vp);
   action(phrase);
@@ -271,47 +287,26 @@ template <class Action> void AppendToPhrase(const search::Applied final, Phrase 
 
 } // namespace
 
-void ToPhrase(const search::Applied final, Phrase &out) {
+void ToPhrase(const search::Applied final, Phrase &out)
+{
   out.Clear();
   AppendToPhrase(final, out, NoOp());
 }
 
-void PhraseAndFeatures(const search::Applied final, Phrase &phrase, ScoreComponentCollection &features) {
+void PhraseAndFeatures(const search::Applied final, Phrase &phrase, ScoreComponentCollection &features)
+{
   phrase.Clear();
   features.ZeroAll();
   AppendToPhrase(final, phrase, AccumScore(features));
 
-  // If we made it this far, there is only one language model.  
+  // If we made it this far, there is only one language model.
   float full, ignored_ngram;
   std::size_t ignored_oov;
 
-  const LanguageModel &model = GetFirstLM();
+  const LanguageModel &model = LanguageModel::GetFirstLM();
   model.CalcScore(phrase, full, ignored_ngram, ignored_oov);
-  // CalcScore transforms, but EvaluateChart doesn't.  
+  // CalcScore transforms, but EvaluateChart doesn't.
   features.Assign(&model, full);
-}
-
-const LanguageModel &GetFirstLM()
-{
-  static const LanguageModel *lmStatic = NULL;
-
-  if (lmStatic) {
-    return *lmStatic;
-  }
-
-  // 1st time looking up lm
-  const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  for (size_t i = 0; i < statefulFFs.size(); ++i) {
-    const StatefulFeatureFunction *ff = statefulFFs[i];
-    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
-
-    if (lm) {
-      lmStatic = lm;
-      return *lmStatic;
-    }
-  }
-
-  throw std::logic_error("Incremental search only supports one language model.");
 }
 
 } // namespace Incremental

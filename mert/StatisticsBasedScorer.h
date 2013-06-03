@@ -13,7 +13,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 /**
  * Abstract base class for Scorers that work by adding statistics across all
@@ -26,20 +26,20 @@ public:
   virtual ~StatisticsBasedScorer() {}
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                      statscores_t& scores) const;
-  
+
 protected:
-  
+
   enum RegularisationType {
     NONE,
     AVERAGE,
     MINIMUM
   };
-  
+
   /**
    * Calculate the actual score.
    */
   virtual statscore_t calculateScore(const std::vector<int>& totals) const = 0;
-  
+
   // regularisation
   RegularisationType m_regularization_type;
   std::size_t  m_regularization_window;

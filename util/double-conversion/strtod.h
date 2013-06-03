@@ -30,7 +30,8 @@
 
 #include "utils.h"
 
-namespace double_conversion {
+namespace double_conversion
+{
 
 // The buffer must only contain digits in the range [0-9]. It must not
 // contain a dot or a sign. It must not start with '0', and must not be empty.

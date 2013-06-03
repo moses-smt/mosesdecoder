@@ -69,13 +69,13 @@ public:
   /** Fills phrase with words from format string, typically from phrase table or sentence input
   	* \param factorOrder factor types of each element in 2D string vector
   	* \param phraseString formatted input string to parse
-  	*	\param factorDelimiter delimiter between factors.  
+  	*	\param factorDelimiter delimiter between factors.
   */
   void CreateFromString(FactorDirection direction
                         , const std::vector<FactorType> &factorOrder
-  											, const StringPiece &phraseString
-  											, const StringPiece &factorDelimiter
-  											, Word **lhs);
+                        , const StringPiece &phraseString
+                        , const StringPiece &factorDelimiter
+                        , Word **lhs);
 
   /**	copy factors from the other phrase to this phrase.
   	IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
@@ -127,52 +127,49 @@ public:
   void AddWord(const Word &newWord) {
     AddWord() = newWord;
   }
-	
-	/** appends a phrase at the end of current phrase **/
-	void Append(const Phrase &endPhrase);
-	void PrependWord(const Word &newWord);
-	
-	void Clear()
-	{
-		m_words.clear();
-	}
-	
-	void RemoveWord(size_t pos)
-	{
-		CHECK(pos < m_words.size());
-		m_words.erase(m_words.begin() + pos);
-	}
-	
-	//! create new phrase class that is a substring of this phrase
-	Phrase GetSubString(const WordsRange &wordsRange) const;
+
+  /** appends a phrase at the end of current phrase **/
+  void Append(const Phrase &endPhrase);
+  void PrependWord(const Word &newWord);
+
+  void Clear() {
+    m_words.clear();
+  }
+
+  void RemoveWord(size_t pos) {
+    CHECK(pos < m_words.size());
+    m_words.erase(m_words.begin() + pos);
+  }
+
+  //! create new phrase class that is a substring of this phrase
+  Phrase GetSubString(const WordsRange &wordsRange) const;
   Phrase GetSubString(const WordsRange &wordsRange, FactorType factorType) const;
-	
-	//! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
-	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
-  
-	TO_STRING();
 
-	
-	int Compare(const Phrase &other) const;
-	
-	/** transitive comparison between 2 phrases
-	 *		used to insert & find phrase in dictionary
-	 */
-	bool operator< (const Phrase &compare) const
-	{
-		return Compare(compare) < 0;
-	}
-	
-	bool operator== (const Phrase &compare) const
-	{
-		return Compare(compare) == 0;
-	}
+  //! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
+  std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const;
 
-	void OnlyTheseFactors(const FactorMask &factors);
+  TO_STRING();
+
+
+  int Compare(const Phrase &other) const;
+
+  /** transitive comparison between 2 phrases
+   *		used to insert & find phrase in dictionary
+   */
+  bool operator< (const Phrase &compare) const {
+    return Compare(compare) < 0;
+  }
+
+  bool operator== (const Phrase &compare) const {
+    return Compare(compare) == 0;
+  }
+
+  void OnlyTheseFactors(const FactorMask &factors);
 
 };
 
-inline size_t hash_value(const Phrase& phrase) {
+inline size_t hash_value(const Phrase& phrase)
+{
   size_t  seed = 0;
   for (size_t i = 0; i < phrase.GetSize(); ++i) {
     boost::hash_combine(seed, phrase.GetWord(i));

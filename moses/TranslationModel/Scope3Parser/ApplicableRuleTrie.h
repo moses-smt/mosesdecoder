@@ -33,14 +33,13 @@ struct VarSpanNode;
 
 /** @todo what is this?
  */
-struct ApplicableRuleTrie
-{
- public:
+struct ApplicableRuleTrie {
+public:
   ApplicableRuleTrie(int start, int end, const UTrieNode &node)
-      : m_start(start)
-      , m_end(end)
-      , m_node(&node)
-      , m_vstNode(NULL) {}
+    : m_start(start)
+    , m_end(end)
+    , m_node(&node)
+    , m_vstNode(NULL) {}
 
   ~ApplicableRuleTrie() {
     RemoveAllInColl(m_children);

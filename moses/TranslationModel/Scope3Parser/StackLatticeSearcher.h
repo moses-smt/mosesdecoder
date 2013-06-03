@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2012 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -33,22 +33,20 @@ class ChartHypothesisCollection;
 template<typename MatchCallBackType>
 class StackLatticeSearcher
 {
- public:
+public:
   StackLatticeSearcher(const StackLattice &lattice,
                        const std::vector<VarSpanNode::NonTermRange> &ranges)
-      : m_lattice(lattice)
-      , m_ranges(ranges) {}
+    : m_lattice(lattice)
+    , m_ranges(ranges) {}
 
-  void Search(const std::vector<int> &labels, MatchCallBackType &callback)
-  {
+  void Search(const std::vector<int> &labels, MatchCallBackType &callback) {
     m_labels = &labels;
     m_matchCB = &callback;
     SearchInner(0, 0);
   }
 
- private:
-  void SearchInner(int start, size_t index)
-  {
+private:
+  void SearchInner(int start, size_t index) {
     assert(m_stackVec.size() == index);
 
     const VarSpanNode::NonTermRange &range = m_ranges[index];

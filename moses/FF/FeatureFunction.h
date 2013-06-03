@@ -21,6 +21,7 @@ class InputType;
 class ScoreComponentCollection;
 class WordsBitmap;
 class WordsRange;
+class FactorMask;
 
 
 
@@ -42,26 +43,36 @@ protected:
   void ParseLine(const std::string& description, const std::string &line);
 
 public:
-  static const std::vector<FeatureFunction*>& GetFeatureFunctions() { return m_producers; }
+  static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
+    return m_producers;
+  }
 
   FeatureFunction(const std::string& description, const std::string &line);
   FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
-  virtual bool IsStateless() const = 0;	
+  virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
-  
+
+  virtual void Load()
+  {}
+
   static void ResetDescriptionCounts() {
     description_counts.clear();
   }
 
   //! returns the number of scores that a subclass produces.
   //! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
-  size_t GetNumScoreComponents() const {return m_numScoreComponents;}
+  size_t GetNumScoreComponents() const {
+    return m_numScoreComponents;
+  }
 
   //! returns a string description of this producer
-  const std::string& GetScoreProducerDescription() const
-  { return m_description; }
+  const std::string& GetScoreProducerDescription() const {
+    return m_description;
+  }
 
-  virtual bool IsTuneable() const { return m_tuneable; }
+  virtual bool IsTuneable() const {
+    return m_tuneable;
+  }
 
   //!
   virtual void InitializeForInput(InputType const& source)
@@ -71,17 +82,20 @@ public:
   virtual void CleanUpAfterSentenceProcessing(const InputType& source)
   {}
 
-  const std::string &GetArgLine() const
-  { return m_argLine; }
+  const std::string &GetArgLine() const {
+    return m_argLine;
+  }
+
+  virtual bool IsUseable(const FactorMask &mask) const = 0;
 
   virtual void Evaluate(const Phrase &source
-		  	  	  	  , const TargetPhrase &targetPhrase
-                      , ScoreComponentCollection &scoreBreakdown
-                      , ScoreComponentCollection &estimatedFutureScore) const
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
   virtual void Evaluate(const InputType &source
-                      , ScoreComponentCollection &scoreBreakdown) const
+                        , ScoreComponentCollection &scoreBreakdown) const
   {}
 };
 

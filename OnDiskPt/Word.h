@@ -50,8 +50,8 @@ public:
   {}
 
   explicit Word(bool isNonTerminal)
-  :m_isNonTerminal(isNonTerminal)
-  ,m_vocabId(0)
+    :m_isNonTerminal(isNonTerminal)
+    ,m_vocabId(0)
   {}
 
   Word(const Word &copy);
@@ -77,8 +77,7 @@ public:
     Moses::Word &overwrite) const;
 
   void DebugPrint(std::ostream &out, const Vocab &vocab) const;
-  inline const std::string &GetString(const Vocab &vocab) const
-  {
+  inline const std::string &GetString(const Vocab &vocab) const {
     return vocab.GetString(m_vocabId);
   }
 

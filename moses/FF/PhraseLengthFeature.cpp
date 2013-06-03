@@ -4,20 +4,21 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
 
-namespace Moses {
+namespace Moses
+{
 
 using namespace std;
 
 PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
-:StatelessFeatureFunction("PhraseLengthFeature", 0, line)
+  :StatelessFeatureFunction("PhraseLengthFeature", 0, line)
 {
 
 }
 
 void PhraseLengthFeature::Evaluate(const Phrase &source
-								  , const TargetPhrase &targetPhrase
-								  , ScoreComponentCollection &scoreBreakdown
-								  , ScoreComponentCollection &estimatedFutureScore) const
+                                   , const TargetPhrase &targetPhrase
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection &estimatedFutureScore) const
 {
   // get length of source and target phrase
   size_t targetLength = targetPhrase.GetSize();

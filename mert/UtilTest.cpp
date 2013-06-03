@@ -5,7 +5,8 @@
 
 using namespace MosesTuning;
 
-BOOST_AUTO_TEST_CASE(util_get_next_pound_test) {
+BOOST_AUTO_TEST_CASE(util_get_next_pound_test)
+{
   {
     std::string str("9 9 7 ");
     std::string substr;
@@ -38,7 +39,8 @@ BOOST_AUTO_TEST_CASE(util_get_next_pound_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(util_tokenize_test) {
+BOOST_AUTO_TEST_CASE(util_tokenize_test)
+{
   {
     std::vector<std::string> res;
     Tokenize("9 9 7", ' ', &res);
@@ -66,7 +68,8 @@ BOOST_AUTO_TEST_CASE(util_tokenize_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(util_ends_with_test) {
+BOOST_AUTO_TEST_CASE(util_ends_with_test)
+{
   BOOST_CHECK(EndsWith("abc:", ":"));
   BOOST_CHECK(EndsWith("a b c:", ":"));
   BOOST_CHECK(!EndsWith("a", ":"));

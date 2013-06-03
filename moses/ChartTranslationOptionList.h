@@ -32,27 +32,34 @@ class TargetPhraseCollection;
 class WordsRange;
 
 //! a vector of translations options for a specific range, in a specific sentence
-class ChartTranslationOptionList : public ChartParserCallback {
- public:
+class ChartTranslationOptionList : public ChartParserCallback
+{
+public:
   ChartTranslationOptionList(size_t);
   ~ChartTranslationOptionList();
 
-  const ChartTranslationOptions &Get(size_t i) const { return *m_collection[i]; }
+  const ChartTranslationOptions &Get(size_t i) const {
+    return *m_collection[i];
+  }
 
   //! number of translation options
-  size_t GetSize() const { return m_size; }
+  size_t GetSize() const {
+    return m_size;
+  }
 
   void Add(const TargetPhraseCollection &, const StackVec &,
            const WordsRange &);
 
   void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
 
-  bool Empty() const { return m_size == 0; }
+  bool Empty() const {
+    return m_size == 0;
+  }
 
   void Clear();
   void ApplyThreshold();
 
- private:
+private:
   typedef std::vector<ChartTranslationOptions*> CollType;
 
   struct ScoreThresholdPred {

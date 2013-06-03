@@ -20,18 +20,18 @@
 #include "Match.h"
 #include "moses/InputType.h"
 
-namespace tmmt 
+namespace tmmt
 {
 class Match;
 class SentenceAlignment;
-  
+
 class FuzzyMatchWrapper
 {
 public:
   FuzzyMatchWrapper(const std::string &source, const std::string &target, const std::string &alignment);
 
   std::string Extract(long translationId, const std::string &dirNameStr);
-  
+
 protected:
   // tm-mt
   std::vector< std::vector< tmmt::SentenceAlignment > > targetAndAlignment;
@@ -58,13 +58,13 @@ protected:
   void load_corpus( const std::string &fileName, std::vector< std::vector< tmmt::WORD_ID > > &corpus );
   void load_target( const std::string &fileName, std::vector< std::vector< tmmt::SentenceAlignment > > &corpus);
   void load_alignment( const std::string &fileName, std::vector< std::vector< tmmt::SentenceAlignment > > &corpus );
-  
+
   /** brute force method: compare input to all corpus sentences */
-  int basic_fuzzy_match( std::vector< std::vector< tmmt::WORD_ID > > source, 
-                        std::vector< std::vector< tmmt::WORD_ID > > input ) ;
-  
-  /** utlility function: compute length of sentence in characters 
-   (spaces do not count) */    
+  int basic_fuzzy_match( std::vector< std::vector< tmmt::WORD_ID > > source,
+                         std::vector< std::vector< tmmt::WORD_ID > > input ) ;
+
+  /** utlility function: compute length of sentence in characters
+   (spaces do not count) */
   unsigned int compute_length( const std::vector< tmmt::WORD_ID > &sentence );
   unsigned int letter_sed( WORD_ID aIdx, WORD_ID bIdx );
   unsigned int sed( const std::vector< WORD_ID > &a, const std::vector< WORD_ID > &b, std::string &best_path, bool use_letter_sed );
@@ -77,8 +77,9 @@ protected:
   void create_extract(int sentenceInd, int cost, const std::vector< WORD_ID > &sourceSentence, const std::vector<SentenceAlignment> &targets, const std::string &inputStr, const std::string  &path, std::ofstream &outputFile);
 
   std::string ExtractTM(WordIndex &wordIndex, long translationId, const std::string &inputPath);
-  Vocabulary &GetVocabulary()
-  { return suffixArray->GetVocabulary(); }
+  Vocabulary &GetVocabulary() {
+    return suffixArray->GetVocabulary();
+  }
 
   bool GetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, unsigned int &value) const;
   void SetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, const unsigned int &value);

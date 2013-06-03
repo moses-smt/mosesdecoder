@@ -69,30 +69,30 @@ Parameter::Parameter()
   AddParam("report-all-factors", "report all factors in output, not just first");
   AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
 #ifdef HAVE_SYNLM
-	AddParam("slmodel-file", "location of the syntactic language model file(s)");
-	AddParam("slmodel-factor", "factor to use with syntactic language model");
-	AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
+  AddParam("slmodel-file", "location of the syntactic language model file(s)");
+  AddParam("slmodel-factor", "factor to use with syntactic language model");
+  AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
 #endif
   AddParam("stack", "s", "maximum stack size for histogram pruning");
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
-	AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
-	AddParam("ttable-file", "location and properties of the translation tables");
-	AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
-	AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
-	AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
-	AddParam("verbose", "v", "verbosity level of the logging");
+  AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
+  AddParam("ttable-file", "location and properties of the translation tables");
+  AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
+  AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
+  AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
+  AddParam("verbose", "v", "verbosity level of the logging");
   AddParam("references", "Reference file(s) - used for bleu score feature");
-	AddParam("output-factors", "list if factors in the output");
-	AddParam("cache-path", "?");
-	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");	
-	AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
-	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
- 	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
- 	AddParam("early-distortion-cost", "edc", "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
-	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
+  AddParam("output-factors", "list if factors in the output");
+  AddParam("cache-path", "?");
+  AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
+  AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
+  AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
+  AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+  AddParam("early-distortion-cost", "edc", "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
+  AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
   AddParam("xml-brackets", "xb", "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode" );
- 	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
+  AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
   AddParam("lminimum-bayes-risk", "lmbr", "use lattice miminum Bayes risk to determine best translation");
   AddParam("mira", "do mira training");
   AddParam("consensus-decoding", "con", "use consensus decoding (De Nero et. al. 2009)");
@@ -119,17 +119,17 @@ Parameter::Parameter()
 #ifdef HAVE_PROTOBUF
   AddParam("output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
 #endif
-	AddParam("cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
-	AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
-	AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
-	AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
-	AddParam("description", "Source language, target language, description");
-	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
-	AddParam("non-terminals", "list of non-term symbols, space separated");
-	AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
-	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
-	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
-	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
+  AddParam("cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
+  AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
+  AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
+  AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
+  AddParam("description", "Source language, target language, description");
+  AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
+  AddParam("non-terminals", "list of non-term symbols, space separated");
+  AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
+  AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
+  AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
+  AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
   AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
   AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
@@ -153,9 +153,9 @@ Parameter::Parameter()
   AddParam("show-weights", "print feature weights and exit");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
-  
-  // Compact phrase table and reordering table.                                                                                  
-  AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
+
+  // Compact phrase table and reordering table.
+  AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
 
   AddParam("print-alignment-info", "Output word-to-word alignment to standard out, separated from translation by |||. Word-to-word alignments are takne from the phrase table if any. Default is false");
@@ -194,7 +194,7 @@ Parameter::Parameter()
   AddParam("feature", "");
   AddParam("print-id", "prefix translations with id. Default if false");
 
-
+  AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
 }
 
 Parameter::~Parameter()
@@ -214,7 +214,7 @@ void Parameter::AddParam(const string &paramName, const string &abbrevName, cons
   m_valid[paramName] = true;
   m_valid[abbrevName] = true;
   m_abbreviation[paramName] = abbrevName;
-	m_fullname[abbrevName] = paramName;
+  m_fullname[abbrevName] = paramName;
   m_description[paramName] = description;
 }
 
@@ -263,7 +263,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
     PrintCredit();
     Explain();
 
-    cerr << endl;    
+    cerr << endl;
     UserMessage::Add("No configuration file was specified.  Use -config or -f");
     cerr << endl;
     return false;
@@ -381,11 +381,9 @@ void Parameter::ConvertWeightArgsSingleWeight(const string &oldWeightName, const
   PARAM_MAP::iterator iterMap;
 
   iterMap = m_setting.find(oldWeightName);
-  if (iterMap != m_setting.end())
-  {
+  if (iterMap != m_setting.end()) {
     const PARAM_VEC &weights = iterMap->second;
-    for (size_t i = 0; i < weights.size(); ++i)
-    {
+    for (size_t i = 0; i < weights.size(); ++i) {
       SetWeight(newWeightName, ind, Scan<float>(weights[i]));
     }
 
@@ -403,8 +401,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       CHECK(numInputScores.size() == 0);
       numInputScores.push_back("1");
       numInputScores.push_back("0");
-    }
-    else if (inputWeights.size() == 2) {
+    } else if (inputWeights.size() == 2) {
       CHECK(numInputScores.size() == 0);
       numInputScores.push_back("1");
       numInputScores.push_back("1");
@@ -463,8 +460,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
 
       string ptType;
-      switch (implementation)
-      {
+      switch (implementation) {
       case Memory:
         ptType = "PhraseDictionaryMemory";
         break;
@@ -488,8 +484,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       if (ptIndices.find(ptType) == ptIndices.end()) {
         ptIndices[ptType] = 0;
         ptInd = 0;
-      }
-      else {
+      } else {
         ptInd = ++ptIndices[ptType];
       }
 
@@ -516,7 +511,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       //characteristics of the phrase table
 
       vector<FactorType>  input   = Tokenize<FactorType>(token[1], ",")
-                         ,output  = Tokenize<FactorType>(token[2], ",");
+                                    ,output  = Tokenize<FactorType>(token[2], ",");
       size_t numScoreComponent = Scan<size_t>(token[3]);
       string filePath= token[4];
 
@@ -561,14 +556,13 @@ void Parameter::ConvertWeightArgsDistortion()
   // distortion / lex distortion
   const PARAM_VEC &oldWeights = GetParam(oldWeightName);
 
-  if (oldWeights.size() > 0)
-  {
+  if (oldWeights.size() > 0) {
     if (!isParamSpecified("search-algorithm") ||
-         (GetParam("search-algorithm").size() > 0
-           && (Trim(GetParam("search-algorithm")[0]) == "0"
+        (GetParam("search-algorithm").size() > 0
+         && (Trim(GetParam("search-algorithm")[0]) == "0"
              ||Trim(GetParam("search-algorithm")[0]) == "1"
-              )
-         )
+            )
+        )
        ) {
       // phrase-based. Add distance distortion to list of features
       AddFeature("Distortion");
@@ -587,8 +581,7 @@ void Parameter::ConvertWeightArgsDistortion()
       size_t numFF = Scan<size_t>(toks[2]);
 
       vector<float> weights(numFF);
-      for (size_t currFF = 0; currFF < numFF; ++currFF)
-      {
+      for (size_t currFF = 0; currFF < numFF; ++currFF) {
         CHECK(currOldInd < oldWeights.size());
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
@@ -625,12 +618,12 @@ void Parameter::ConvertWeightArgsLM()
 
   bool isChartDecoding = true;
   if (!isParamSpecified("search-algorithm") ||
-	 (GetParam("search-algorithm").size() > 0
-	   && (Trim(GetParam("search-algorithm")[0]) == "0"
-		 ||Trim(GetParam("search-algorithm")[0]) == "1"
-		  )
-	 )
-   ) {
+      (GetParam("search-algorithm").size() > 0
+       && (Trim(GetParam("search-algorithm")[0]) == "0"
+           ||Trim(GetParam("search-algorithm")[0]) == "1"
+          )
+      )
+     ) {
     isChartDecoding = false;
   }
 
@@ -643,8 +636,7 @@ void Parameter::ConvertWeightArgsLM()
   PARAM_MAP::iterator iterMap;
 
   iterMap = m_setting.find(oldWeightName);
-  if (iterMap != m_setting.end())
-  {
+  if (iterMap != m_setting.end()) {
 
     size_t currOldInd = 0;
     const PARAM_VEC &weights = iterMap->second;
@@ -656,8 +648,7 @@ void Parameter::ConvertWeightArgsLM()
       int lmType = Scan<int>(modelToks[0]);
 
       string newFeatureName;
-      switch (lmType)
-      {
+      switch (lmType) {
       case 0:
         newFeatureName = "SRILM";
         break;
@@ -677,12 +668,11 @@ void Parameter::ConvertWeightArgsLM()
         numFF += oovWeights[lmIndex];
 
       vector<float> weightsLM(numFF);
-      for (size_t currFF = 0; currFF < numFF; ++currFF)
-      {
+      for (size_t currFF = 0; currFF < numFF; ++currFF) {
         CHECK(currOldInd < weights.size());
         weightsLM[currFF] = Scan<float>(weights[currOldInd]);
         if (isChartDecoding) {
-        	weightsLM[currFF] = UntransformLMScore(weightsLM[currFF]);
+          weightsLM[currFF] = UntransformLMScore(weightsLM[currFF]);
         }
 
         ++currOldInd;
@@ -691,12 +681,11 @@ void Parameter::ConvertWeightArgsLM()
       SetWeight(newFeatureName, ind, weightsLM);
 
       string featureLine = newFeatureName + " "
-                        + "factor=" + modelToks[1] + " "  // factor
-                        + "order="  + modelToks[2] + " "; // order
+                           + "factor=" + modelToks[1] + " "  // factor
+                           + "order="  + modelToks[2] + " "; // order
       if (lmType == 9) {
         featureLine += "lazyken=1 ";
-      }
-      else if (lmType == 8) {
+      } else if (lmType == 8) {
         featureLine += "lazyken=0 ";
       }
 
@@ -718,8 +707,7 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
   // distortion / lex distortion
   PARAM_VEC &oldWeights = m_setting[oldWeightName];
 
-  if (oldWeights.size() > 0)
-  {
+  if (oldWeights.size() > 0) {
     size_t currOldInd = 0;
     PARAM_VEC &models = m_setting[oldFeatureName];
 
@@ -730,8 +718,7 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
       size_t numFF = Scan<size_t>(modelToks[2]);
 
       vector<float> weights(numFF);
-      for (size_t currFF = 0; currFF < numFF; ++currFF)
-      {
+      for (size_t currFF = 0; currFF < numFF; ++currFF) {
         CHECK(currOldInd < oldWeights.size());
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
@@ -742,10 +729,10 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
 
       stringstream strme;
       strme << "Generation "
-                  << "input-factor=" << modelToks[0] << " "
-                  << "output-factor=" << modelToks[1] << " "
-                  << "num-features=" << modelToks[2] << " "
-                  << "path=" << modelToks[3];
+            << "input-factor=" << modelToks[0] << " "
+            << "output-factor=" << modelToks[1] << " "
+            << "num-features=" << modelToks[2] << " "
+            << "path=" << modelToks[3];
       AddFeature(strme.str());
     }
   }
@@ -761,23 +748,21 @@ void Parameter::ConvertWeightArgsWordPenalty()
 
   bool isChartDecoding = true;
   if (!isParamSpecified("search-algorithm") ||
-	 (GetParam("search-algorithm").size() > 0
-	   && (Trim(GetParam("search-algorithm")[0]) == "0"
-		 ||Trim(GetParam("search-algorithm")[0]) == "1"
-		  )
-	 )
-   ) {
+      (GetParam("search-algorithm").size() > 0
+       && (Trim(GetParam("search-algorithm")[0]) == "0"
+           ||Trim(GetParam("search-algorithm")[0]) == "1"
+          )
+      )
+     ) {
     isChartDecoding = false;
   }
 
   PARAM_MAP::iterator iterMap;
 
   iterMap = m_setting.find(oldWeightName);
-  if (iterMap != m_setting.end())
-  {
+  if (iterMap != m_setting.end()) {
     const PARAM_VEC &weights = iterMap->second;
-    for (size_t i = 0; i < weights.size(); ++i)
-    {
+    for (size_t i = 0; i < weights.size(); ++i) {
       float weight = Scan<float>(weights[i]);
       if (isChartDecoding) {
         weight *= 0.434294482;
@@ -800,8 +785,7 @@ void Parameter::ConvertWeightArgs()
       (m_setting.count("weight-i") || m_setting.count("weight-t") || m_setting.count("weight-w") ||
        m_setting.count("weight-l") || m_setting.count("weight-u") || m_setting.count("weight-lex") ||
        m_setting.count("weight-generation") || m_setting.count("weight-lr") || m_setting.count("weight-d")
-       ))
-  {
+      )) {
     cerr << "Do not mix old and new format for specify weights";
   }
 
@@ -833,8 +817,7 @@ void Parameter::ConvertWeightArgs()
 void Parameter::CreateWeightsMap()
 {
   PARAM_VEC &vec = m_setting["weight"];
-  for (size_t i = 0; i < vec.size(); ++i)
-  {
+  for (size_t i = 0; i < vec.size(); ++i) {
     const string &line = vec[i];
     vector<string> toks = Tokenize(line);
     CHECK(toks.size() >= 2);
@@ -865,8 +848,7 @@ void Parameter::WeightOverwrite()
   string name("");
   vector<float> weights;
   vector<string> toks = Tokenize(vec[0]);
-  for (size_t i = 0; i < toks.size(); ++i)
-  {
+  for (size_t i = 0; i < toks.size(); ++i) {
     const string &tok = toks[i];
 
     if (tok.substr(tok.size() - 1, 1) == "=") {
@@ -879,8 +861,7 @@ void Parameter::WeightOverwrite()
       }
 
       name = tok.substr(0, tok.size() - 1);
-    }
-    else {
+    } else {
       // a weight for curr ff
       float weight = Scan<float>(toks[i]);
       weights.push_back(weight);
@@ -899,14 +880,13 @@ bool Parameter::Validate()
   PARAM_MAP::const_iterator iterParams;
   for (iterParams = m_setting.begin(); iterParams != m_setting.end(); ++iterParams) {
     const std::string &key = iterParams->first;
-    
-    if (m_valid.find(key) == m_valid.end())
-    {
+
+    if (m_valid.find(key) == m_valid.end()) {
       UserMessage::Add("Unknown parameter " + key);
       noErrorFlag = false;
     }
   }
-  
+
   if (m_setting["lmodel-dub"].size() > 0) {
     if (m_setting["lmodel-file"].size() != m_setting["lmodel-dub"].size()) {
       stringstream errorMsg("");
@@ -1082,8 +1062,7 @@ bool Parameter::ReadConfigFile(const string &filePath )
 
     if (line.size() == 0) {
       // blank line. do nothing.
-    }
-    else if (line[0]=='[') {
+    } else if (line[0]=='[') {
       // new parameter
       for (size_t currPos = 0 ; currPos < line.size() ; currPos++) {
         if (line[currPos] == ']') {
@@ -1227,23 +1206,23 @@ void Parameter::PrintCredit()
  * \param values inew values for paramName */
 void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
 {
-	VERBOSE(2,"Overwriting parameter " << paramName);
-	
-	m_setting[paramName]; // defines the parameter, important for boolean switches
-	if (m_setting[paramName].size() > 1){
-		VERBOSE(2," (the parameter had " << m_setting[paramName].size() << " previous values)");
-		CHECK(m_setting[paramName].size() == values.size());
-	}else{
-		VERBOSE(2," (the parameter does not have previous values)");
-		m_setting[paramName].resize(values.size());
-	}
-	VERBOSE(2," with the following values:");
-	int i=0;
-	for (PARAM_VEC::iterator iter = values.begin(); iter != values.end() ; iter++, i++){
-		m_setting[paramName][i] = *iter;
-		VERBOSE(2, " " << *iter);
-	}
-	VERBOSE(2, std::endl);
+  VERBOSE(2,"Overwriting parameter " << paramName);
+
+  m_setting[paramName]; // defines the parameter, important for boolean switches
+  if (m_setting[paramName].size() > 1) {
+    VERBOSE(2," (the parameter had " << m_setting[paramName].size() << " previous values)");
+    CHECK(m_setting[paramName].size() == values.size());
+  } else {
+    VERBOSE(2," (the parameter does not have previous values)");
+    m_setting[paramName].resize(values.size());
+  }
+  VERBOSE(2," with the following values:");
+  int i=0;
+  for (PARAM_VEC::iterator iter = values.begin(); iter != values.end() ; iter++, i++) {
+    m_setting[paramName][i] = *iter;
+    VERBOSE(2, " " << *iter);
+  }
+  VERBOSE(2, std::endl);
 }
 
 std::set<std::string> Parameter::GetWeightNames() const
@@ -1256,7 +1235,7 @@ std::set<std::string> Parameter::GetWeightNames() const
   }
   return ret;
 }
-	
+
 }
 
 

@@ -26,12 +26,12 @@ typedef std::pair<size_t, size_t>  AlignPair;
 typedef std::vector<AlignPair> AlignType;
 
 OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
-              , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
-              , OnDiskPt::OnDiskWrapper &onDiskWrapper);
+                           , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
+                           , OnDiskPt::OnDiskWrapper &onDiskWrapper);
 OnDiskPt::PhrasePtr Tokenize(OnDiskPt::SourcePhrase &sourcePhrase, OnDiskPt::TargetPhrase &targetPhrase
-              , char *line, OnDiskPt::OnDiskWrapper &onDiskWrapper
-              , int numScores
-              , std::vector<float> &misc);
+                             , char *line, OnDiskPt::OnDiskWrapper &onDiskWrapper
+                             , int numScores
+                             , std::vector<float> &misc);
 
 void InsertTargetNonTerminals(std::vector<std::string> &sourceToks, const std::vector<std::string> &targetToks, const AlignType &alignments);
 void SortAlign(AlignType &alignments);

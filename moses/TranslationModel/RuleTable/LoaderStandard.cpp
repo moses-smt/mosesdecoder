@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -59,38 +59,34 @@ bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
   return ret;
 
 }
-  
+
 void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t, size_t> > &ntAlign)
 {
   vector<string> toks;
   Tokenize(toks, phrase, " ");
 
-  for (size_t i = 0; i < toks.size(); ++i)
-  {
+  for (size_t i = 0; i < toks.size(); ++i) {
     string &tok = toks[i];
     size_t tokLen = tok.size();
-    if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]")
-    { // no-term
+    if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]") {
+      // no-term
       vector<string> split = Tokenize(tok, ",");
       CHECK(split.size() == 2);
-      
+
       tok = "[X]" + split[0] + "]";
       size_t coIndex = Scan<size_t>(split[1]);
-      
+
       pair<size_t, size_t> &alignPoint = ntAlign[coIndex];
-      if (sourceTarget == 0)
-      {
+      if (sourceTarget == 0) {
         alignPoint.first = i;
-      }
-      else
-      {
+      } else {
         alignPoint.second = i;
       }
     }
   }
-  
+
   phrase = Join(" ", toks) + " [X]";
-  
+
 }
 
 void ReformateHieroScore(string &scoreString)
@@ -98,57 +94,57 @@ void ReformateHieroScore(string &scoreString)
   vector<string> toks;
   Tokenize(toks, scoreString, " ");
 
-  for (size_t i = 0; i < toks.size(); ++i)
-  {
+  for (size_t i = 0; i < toks.size(); ++i) {
     string &tok = toks[i];
+    vector<string> nameValue = Tokenize(tok, "=");
+    CHECK(nameValue.size() == 2);
 
-    float score = Scan<float>(tok);
+    float score = Scan<float>(nameValue[1]);
     score = exp(-score);
     tok = SPrint(score);
   }
-  
+
   scoreString = Join(" ", toks);
 }
-  
+
 void ReformatHieroRule(const string &lineOrig, string &out)
-{  
+{
   vector<string> tokens;
   vector<float> scoreVector;
-  
+
   TokenizeMultiCharSeparator(tokens, lineOrig, "|||" );
 
   string &sourcePhraseString = tokens[1]
-              , &targetPhraseString = tokens[2]
-              , &scoreString        = tokens[3];
+                               , &targetPhraseString = tokens[2]
+                                   , &scoreString        = tokens[3];
 
   map<size_t, pair<size_t, size_t> > ntAlign;
   ReformatHieroRule(0, sourcePhraseString, ntAlign);
   ReformatHieroRule(1, targetPhraseString, ntAlign);
   ReformateHieroScore(scoreString);
-  
+
   stringstream align;
   map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
-  for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign)
-  {
+  for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign) {
     const pair<size_t, size_t> &alignPoint = iterAlign->second;
     align << alignPoint.first << "-" << alignPoint.second << " ";
   }
-  
+
   stringstream ret;
   ret << sourcePhraseString << " ||| "
-      << targetPhraseString << " ||| " 
+      << targetPhraseString << " ||| "
       << scoreString << " ||| "
       << align.str();
-  
+
   out = ret.str();
 }
-  
+
 bool RuleTableLoaderStandard::Load(FormatType format
-                                , const std::vector<FactorType> &input
-                                , const std::vector<FactorType> &output
-                                , const std::string &inFile
-                                , size_t /* tableLimit */
-                                , RuleTableTrie &ruleTable)
+                                   , const std::vector<FactorType> &input
+                                   , const std::vector<FactorType> &output
+                                   , const std::string &inFile
+                                   , size_t /* tableLimit */
+                                   , RuleTableTrie &ruleTable)
 {
   PrintUserTime(string("Start loading text SCFG phrase table. ") + (format==MosesFormat?"Moses ":"Hiero ") + " format");
 
@@ -172,7 +168,9 @@ bool RuleTableLoaderStandard::Load(FormatType format
   while(true) {
     try {
       line = in.ReadLine();
-    } catch (const util::EndOfFileException &e) { break; }
+    } catch (const util::EndOfFileException &e) {
+      break;
+    }
 
     if (format == HieroFormat) { // inefficiently reformat line
       hiero_before.assign(line.data(), line.size());
@@ -184,7 +182,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     StringPiece sourcePhraseString(*pipes);
     StringPiece targetPhraseString(*++pipes);
     StringPiece scoreString(*++pipes);
-    
+
     StringPiece alignString;
     if (++pipes) {
       StringPiece temp(*pipes);
@@ -235,16 +233,16 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
     targetPhrase->SetTargetLHS(targetLHS);
-    
+
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
-    
+
     if (++pipes) {
       StringPiece sparseString(*pipes);
       targetPhrase->SetSparseScore(&ruleTable, sparseString);
     }
 
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
-    targetPhrase->Evaluate(sourcePhrase);
+    targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

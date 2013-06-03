@@ -51,7 +51,8 @@ namespace po = boost::program_options;
 namespace MosesTuning
 {
 
-class SampledPair {
+class SampledPair
+{
 private:
   pair<size_t,size_t> m_translation1;
   pair<size_t,size_t> m_translation2;
@@ -70,12 +71,19 @@ public:
     }
   }
 
-  float getDiff() const { return m_score_diff; }
-  const pair<size_t,size_t>& getTranslation1() const { return m_translation1; }
-  const pair<size_t,size_t>& getTranslation2() const { return m_translation2; }
+  float getDiff() const {
+    return m_score_diff;
+  }
+  const pair<size_t,size_t>& getTranslation1() const {
+    return m_translation1;
+  }
+  const pair<size_t,size_t>& getTranslation2() const {
+    return m_translation2;
+  }
 };
 
-static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureDataItem& f2) {
+static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureDataItem& f2)
+{
   // difference in score in regular features
   for(unsigned int j=0; j<f1.dense.size(); j++)
     if (abs(f1.dense[j]-f2.dense[j]) > 0.00001)
@@ -110,13 +118,13 @@ int main(int argc, char** argv)
 
   po::options_description desc("Allowed options");
   desc.add_options()
-      ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-      ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
-      ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
-      ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
-      ("output-file,o", po::value<string>(&outputFile), "Output file")
-      ("smooth-brevity-penalty,b", po::value(&smoothBP)->zero_tokens()->default_value(false), "Smooth the brevity penalty, as in Nakov et al. (Coling 2012)")
-      ;
+  ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
+  ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
+  ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
+  ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
+  ("output-file,o", po::value<string>(&outputFile), "Output file")
+  ("smooth-brevity-penalty,b", po::value(&smoothBP)->zero_tokens()->default_value(false), "Smooth the brevity penalty, as in Nakov et al. (Coling 2012)")
+  ;
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -125,9 +133,9 @@ int main(int argc, char** argv)
             options(cmdline_options).run(), vm);
   po::notify(vm);
   if (help) {
-      cout << "Usage: " + string(argv[0]) +  " [options]" << endl;
-      cout << desc << endl;
-      exit(0);
+    cout << "Usage: " + string(argv[0]) +  " [options]" << endl;
+    cout << desc << endl;
+    exit(0);
   }
 
   if (vm.count("random-seed")) {
@@ -145,7 +153,7 @@ int main(int argc, char** argv)
 
   if (featureFiles.size() != scoreFiles.size()) {
     cerr << "Error: Number of feature files (" << featureFiles.size() <<
-      ") does not match number of score files (" << scoreFiles.size() << ")" << endl;
+         ") does not match number of score files (" << scoreFiles.size() << ")" << endl;
     exit(1);
   }
 
@@ -238,11 +246,11 @@ int main(int argc, char** argv)
       size_t hypo_id2 = samples[i].getTranslation2().second;
       *out << "1";
       outputSample(*out, featureDataIters[file_id1]->operator[](hypo_id1),
-                        featureDataIters[file_id2]->operator[](hypo_id2));
+                   featureDataIters[file_id2]->operator[](hypo_id2));
       *out << endl;
       *out << "0";
       outputSample(*out, featureDataIters[file_id2]->operator[](hypo_id2),
-                        featureDataIters[file_id1]->operator[](hypo_id1));
+                   featureDataIters[file_id1]->operator[](hypo_id1));
       *out << endl;
     }
     //advance all iterators

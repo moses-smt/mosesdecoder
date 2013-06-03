@@ -34,13 +34,12 @@ struct VarSpanNode;
  */
 class VarSpanTrieBuilder
 {
- public:
+public:
   std::auto_ptr<VarSpanNode> Build(ApplicableRuleTrie &);
 
- private:
+private:
   typedef std::vector<IntermediateVarSpanNode> NodeVec;
-  struct NodeVecState
-  {
+  struct NodeVecState {
     std::size_t m_size;
     IntermediateVarSpanNode m_lastNode;
   };

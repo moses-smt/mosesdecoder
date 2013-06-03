@@ -23,24 +23,27 @@
 #include "InputType.h"
 #include "WordsRange.h"
 
-namespace Moses {
+namespace Moses
+{
 
-ChartCellCollectionBase::~ChartCellCollectionBase() {
+ChartCellCollectionBase::~ChartCellCollectionBase()
+{
   m_source.clear();
-  for (std::vector<std::vector<ChartCellBase*> >::iterator i = m_cells.begin(); i != m_cells.end(); ++i) 
+  for (std::vector<std::vector<ChartCellBase*> >::iterator i = m_cells.begin(); i != m_cells.end(); ++i)
     RemoveAllInColl(*i);
 }
 
-class CubeCellFactory {
-  public:
-    explicit CubeCellFactory(ChartManager &manager) : m_manager(manager) {}
+class CubeCellFactory
+{
+public:
+  explicit CubeCellFactory(ChartManager &manager) : m_manager(manager) {}
 
-    ChartCell *operator()(size_t start, size_t end) const {
-      return new ChartCell(start, end, m_manager);
-    }
+  ChartCell *operator()(size_t start, size_t end) const {
+    return new ChartCell(start, end, m_manager);
+  }
 
-  private:
-    ChartManager &m_manager;
+private:
+  ChartManager &m_manager;
 };
 
 /** Costructor

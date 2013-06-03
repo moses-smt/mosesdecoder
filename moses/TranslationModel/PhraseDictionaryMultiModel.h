@@ -36,15 +36,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-  struct multiModelStatistics {
-    TargetPhrase *targetPhrase;
-    std::vector<std::vector<float> > p;
-    ~multiModelStatistics() {delete targetPhrase;};
+struct multiModelStatistics {
+  TargetPhrase *targetPhrase;
+  std::vector<std::vector<float> > p;
+  ~multiModelStatistics() {
+    delete targetPhrase;
   };
+};
 
-  struct multiModelStatisticsOptimization: multiModelStatistics {
-    size_t f;
-  };
+struct multiModelStatisticsOptimization: multiModelStatistics {
+  size_t f;
+};
 
 class OptimizationObjective;
 
@@ -53,14 +55,14 @@ class OptimizationObjective;
 class PhraseDictionaryMultiModel: public PhraseDictionary
 {
 #ifdef WITH_DLIB
-friend class CrossEntropy;
+  friend class CrossEntropy;
 #endif
 
 public:
   PhraseDictionaryMultiModel(const std::string &line);
   PhraseDictionaryMultiModel(const std::string &description, const std::string &line);
   ~PhraseDictionaryMultiModel();
-  bool InitDictionary();
+  void Load();
   virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;
   virtual TargetPhraseCollection* CreateTargetPhraseCollectionLinearInterpolation(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
   std::vector<std::vector<float> > getWeights(size_t numWeights, bool normalize) const;
@@ -100,34 +102,33 @@ protected:
 };
 
 #ifdef WITH_DLIB
-class OptimizationObjective 
+class OptimizationObjective
 {
 public:
 
-    virtual double operator() ( const dlib::matrix<double,0,1>& arg) const = 0;
+  virtual double operator() ( const dlib::matrix<double,0,1>& arg) const = 0;
 };
 
 class CrossEntropy: public OptimizationObjective
 {
 public:
 
-    CrossEntropy (
-        std::vector<multiModelStatisticsOptimization*> &optimizerStats,
-        PhraseDictionaryMultiModel * model,
-        size_t iFeature
-    )
-    {
-        m_optimizerStats = optimizerStats;
-        m_model = model;
-        m_iFeature = iFeature;
-    }
+  CrossEntropy (
+    std::vector<multiModelStatisticsOptimization*> &optimizerStats,
+    PhraseDictionaryMultiModel * model,
+    size_t iFeature
+  ) {
+    m_optimizerStats = optimizerStats;
+    m_model = model;
+    m_iFeature = iFeature;
+  }
 
-    double operator() ( const dlib::matrix<double,0,1>& arg) const;
+  double operator() ( const dlib::matrix<double,0,1>& arg) const;
 
 protected:
-    std::vector<multiModelStatisticsOptimization*> m_optimizerStats;
-    PhraseDictionaryMultiModel * m_model;
-    size_t m_iFeature;
+  std::vector<multiModelStatisticsOptimization*> m_optimizerStats;
+  PhraseDictionaryMultiModel * m_model;
+  size_t m_iFeature;
 };
 #endif
 

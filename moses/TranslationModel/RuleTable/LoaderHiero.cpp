@@ -11,19 +11,20 @@
 
 using namespace std;
 
-namespace Moses {
-  
+namespace Moses
+{
+
 bool RuleTableLoaderHiero::Load(const std::vector<FactorType> &input,
-          const std::vector<FactorType> &output,
-          const std::string &inFile,
-          size_t tableLimit,
-          RuleTableTrie &ruleTable)
+                                const std::vector<FactorType> &output,
+                                const std::string &inFile,
+                                size_t tableLimit,
+                                RuleTableTrie &ruleTable)
 {
   bool ret = RuleTableLoaderStandard::Load(HieroFormat
-              ,input, output
-              ,inFile
-              ,tableLimit
-              ,ruleTable);
+             ,input, output
+             ,inFile
+             ,tableLimit
+             ,ruleTable);
   return ret;
 }
 

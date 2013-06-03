@@ -18,33 +18,35 @@
 
 using namespace std;
 
-namespace Moses 
+namespace Moses
 {
 PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &line)
-: PhraseDictionaryMemory("PhraseDictionaryALSuffixArray", line)
+  : PhraseDictionaryMemory("PhraseDictionaryALSuffixArray", line)
 {
   const StaticData &staticData = StaticData::Instance();
   if (staticData.ThreadCount() > 1) {
-	throw runtime_error("Suffix array implementation is not threadsafe");
+    throw runtime_error("Suffix array implementation is not threadsafe");
   }
 }
 
 void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
 {
-  // clear out rules for previous sentence
-  m_collection.Clear();
-  
   // populate with rules for this sentence
   long translationId = source.GetTranslationId();
-  
-  string grammarFile = GetFilePath() + "/grammar.out." + SPrint(translationId) + ".gz";
-  
+
+  string grammarFile = GetFilePath() + "/grammar." + SPrint(translationId) + ".gz";
+
   std::auto_ptr<RuleTableLoader> loader =
-  RuleTableLoaderFactory::Create(grammarFile);
-  bool ret = loader->Load(*m_input, *m_output, grammarFile, m_tableLimit,
+    RuleTableLoaderFactory::Create(grammarFile);
+  bool ret = loader->Load(m_input, m_output, grammarFile, m_tableLimit,
                           *this);
-  
+
   CHECK(ret);
+}
+
+void PhraseDictionaryALSuffixArray::CleanUpAfterSentenceProcessing(const InputType &source)
+{
+  m_collection.Clear();
 }
 
 }

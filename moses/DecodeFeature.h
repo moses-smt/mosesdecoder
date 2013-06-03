@@ -34,9 +34,10 @@ namespace Moses
 /**
   * Baseclass for phrase-table or generation table feature function
  **/
-class DecodeFeature : public StatelessFeatureFunction {
+class DecodeFeature : public StatelessFeatureFunction
+{
 
-  public:
+public:
   DecodeFeature(  const std::string& description
                   , const std::string &line);
 
@@ -45,28 +46,27 @@ class DecodeFeature : public StatelessFeatureFunction {
                   , const std::string &line);
 
   DecodeFeature(  const std::string& description
-                    , size_t numScoreComponents
-                    , const std::vector<FactorType> &input
-                    , const std::vector<FactorType> &output
-                    , const std::string &line);
-    
-    //! returns output factor types as specified by the ini file
-    const FactorMask& GetOutputFactorMask() const;
-    
-    //! returns input factor types as specified by the ini file
-    const FactorMask& GetInputFactorMask() const;
-    
-    const std::vector<FactorType>& GetInput() const;
-    const std::vector<FactorType>& GetOutput() const;
+                  , size_t numScoreComponents
+                  , const std::vector<FactorType> &input
+                  , const std::vector<FactorType> &output
+                  , const std::string &line);
 
-    bool IsDecodeFeature() const
-    { return true; }
+  //! returns output factor types as specified by the ini file
+  const FactorMask& GetOutputFactorMask() const;
 
-  protected:
-    std::vector<FactorType> m_input;
-    std::vector<FactorType> m_output;
-    FactorMask m_inputFactors;
-    FactorMask m_outputFactors;
+  //! returns input factor types as specified by the ini file
+  const FactorMask& GetInputFactorMask() const;
+
+  const std::vector<FactorType>& GetInput() const;
+  const std::vector<FactorType>& GetOutput() const;
+
+  bool IsUseable(const FactorMask &mask) const;
+
+protected:
+  std::vector<FactorType> m_input;
+  std::vector<FactorType> m_output;
+  FactorMask m_inputFactors;
+  FactorMask m_outputFactors;
 };
 
 }

@@ -20,7 +20,7 @@
 /**
  * This contains extra features that can be added to the scorer. To add a new feature:
  * 1. Implement a subclass of ScoreFeature
- * 2. Updated ScoreFeatureManager.configure() to configure your feature, and usage() to 
+ * 2. Updated ScoreFeatureManager.configure() to configure your feature, and usage() to
  *    display usage info.
  * 3. Write unit tests (see ScoreFeatureTest.cpp) and regression tests
 **/
@@ -37,35 +37,37 @@
 
 #include "PhraseAlignment.h"
 
-namespace MosesTraining 
+namespace MosesTraining
 {
 
-struct MaybeLog{
+struct MaybeLog {
   MaybeLog(bool useLog, float negativeLog):
     m_useLog(useLog), m_negativeLog(negativeLog) {}
-    
-  inline float operator() (float a) const    
-   { return m_useLog ? m_negativeLog*log(a) : a; }
+
+  inline float operator() (float a) const {
+    return m_useLog ? m_negativeLog*log(a) : a;
+  }
 
   float m_useLog;
   float m_negativeLog;
 };
 
-class ScoreFeatureArgumentException : public util::Exception 
+class ScoreFeatureArgumentException : public util::Exception
 {
-  public:
-    ScoreFeatureArgumentException() throw() {*this << "Unable to configure features: ";}
-    ~ScoreFeatureArgumentException() throw() {}
+public:
+  ScoreFeatureArgumentException() throw() {
+    *this << "Unable to configure features: ";
+  }
+  ~ScoreFeatureArgumentException() throw() {}
 };
 
 /** Passed to each feature to be used to calculate its values */
-struct ScoreFeatureContext
-{
+struct ScoreFeatureContext {
   ScoreFeatureContext(
     const PhraseAlignmentCollection &thePhrasePair,
     float theCount, /* Total counts of all phrase pairs*/
     const MaybeLog& theMaybeLog
-    ) :
+  ) :
     phrasePair(thePhrasePair),
     count(theCount),
     maybeLog(theMaybeLog)
@@ -82,53 +84,57 @@ struct ScoreFeatureContext
   **/
 class ScoreFeature
 {
-  public:
-    /** Add the values for this feature function. */
-    virtual void add(const ScoreFeatureContext& context, 
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const = 0;
+public:
+  /** Add the values for this feature function. */
+  virtual void add(const ScoreFeatureContext& context,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const = 0;
 
-    /** Return true if the two phrase pairs are equal from the point of this feature. Assume
-        that they already compare true according to PhraseAlignment.equals()
-     **/
-    virtual bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const = 0;
+  /** Return true if the two phrase pairs are equal from the point of this feature. Assume
+      that they already compare true according to PhraseAlignment.equals()
+   **/
+  virtual bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const = 0;
 
-    virtual ~ScoreFeature() {}
+  virtual ~ScoreFeature() {}
 
 };
 
 typedef boost::shared_ptr<ScoreFeature> ScoreFeaturePtr;
 class ScoreFeatureManager
 {
-  public:
-    ScoreFeatureManager():
-      m_includeSentenceId(false) {}
+public:
+  ScoreFeatureManager():
+    m_includeSentenceId(false) {}
 
-   /** To be appended to the score usage message */
-   const std::string& usage() const;
-   
-   /** Pass the unused command-line arguments to configure the extra features */
-   void configure(const std::vector<std::string> args);
+  /** To be appended to the score usage message */
+  const std::string& usage() const;
 
-   /** Add all the features */
-   void addFeatures(const ScoreFeatureContext& context,
-             std::vector<float>& denseValues,
-             std::map<std::string,float>& sparseValues) const;
+  /** Pass the unused command-line arguments to configure the extra features */
+  void configure(const std::vector<std::string> args);
 
-    /** 
-      * Used to tell if the PhraseAlignment should be considered the same by all
-      * extended features. 
-     **/
-    bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const;
+  /** Add all the features */
+  void addFeatures(const ScoreFeatureContext& context,
+                   std::vector<float>& denseValues,
+                   std::map<std::string,float>& sparseValues) const;
 
-   const std::vector<ScoreFeaturePtr>& getFeatures() const {return m_features;}
+  /**
+    * Used to tell if the PhraseAlignment should be considered the same by all
+    * extended features.
+   **/
+  bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const;
 
-   /** Do we need to include sentence ids in phrase pairs? */
-   bool includeSentenceId() const {return m_includeSentenceId;}
+  const std::vector<ScoreFeaturePtr>& getFeatures() const {
+    return m_features;
+  }
 
-  private:
-    std::vector<ScoreFeaturePtr> m_features;
-    bool m_includeSentenceId;
+  /** Do we need to include sentence ids in phrase pairs? */
+  bool includeSentenceId() const {
+    return m_includeSentenceId;
+  }
+
+private:
+  std::vector<ScoreFeaturePtr> m_features;
+  bool m_includeSentenceId;
 };
 
 }

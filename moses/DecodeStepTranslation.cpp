@@ -29,9 +29,18 @@ using namespace std;
 
 namespace Moses
 {
-DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf, const DecodeStep* prev)
-  : DecodeStep(pdf, prev)
+DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf,
+    const DecodeStep* prev,
+    const std::vector<FeatureFunction*> &features)
+  : DecodeStep(pdf, prev, features)
 {
+  // don't apply feature functions that are from current phrase table.It should already have been
+  // dont by the phrase table.
+  const std::vector<FeatureFunction*> &pdfFeatures = pdf->GetFeaturesToApply();
+  for (size_t i = 0; i < pdfFeatures.size(); ++i) {
+    FeatureFunction *ff = pdfFeatures[i];
+    RemoveFeature(ff);
+  }
 }
 
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
@@ -75,10 +84,9 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
           continue;
       }
 
-      outPhrase.GetScoreBreakdown().PlusEquals(transScores);
-      outPhrase.Evaluate(src); // need to do this as all non-transcores would be screwed up
+      outPhrase.Merge(targetPhrase, m_newOutputFactors);
+      outPhrase.Evaluate(src, m_featuresToApply); // need to do this as all non-transcores would be screwed up
 
-      outPhrase.MergeFactors(targetPhrase, m_newOutputFactors);
 
       TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
       assert(newTransOpt != NULL);
@@ -94,9 +102,9 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 
 
 void DecodeStepTranslation::ProcessInitialTranslation(
-    const InputType &source
-    ,PartialTranslOptColl &outputPartialTranslOptColl
-    , size_t startPos, size_t endPos, bool adhereTableLimit) const
+  const InputType &source
+  ,PartialTranslOptColl &outputPartialTranslOptColl
+  , size_t startPos, size_t endPos, bool adhereTableLimit) const
 {
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();

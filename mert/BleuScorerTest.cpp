@@ -10,16 +10,19 @@
 
 using namespace MosesTuning;
 
-namespace {
+namespace
+{
 
 NgramCounts* g_counts = NULL;
 
-NgramCounts* GetNgramCounts() {
+NgramCounts* GetNgramCounts()
+{
   assert(g_counts);
   return g_counts;
 }
 
-void SetNgramCounts(NgramCounts* counts) {
+void SetNgramCounts(NgramCounts* counts)
+{
   g_counts = counts;
 }
 
@@ -58,33 +61,38 @@ struct Fourgram {
   NgramCounts::Key instance;
 };
 
-bool CheckUnigram(const std::string& str) {
+bool CheckUnigram(const std::string& str)
+{
   Unigram unigram(str);
   NgramCounts::Value v;
   return GetNgramCounts()->Lookup(unigram.instance, &v);
 }
 
-bool CheckBigram(const std::string& a, const std::string& b) {
+bool CheckBigram(const std::string& a, const std::string& b)
+{
   Bigram bigram(a, b);
   NgramCounts::Value v;
   return GetNgramCounts()->Lookup(bigram.instance, &v);
 }
 
 bool CheckTrigram(const std::string& a, const std::string& b,
-                  const std::string& c) {
+                  const std::string& c)
+{
   Trigram trigram(a, b, c);
   NgramCounts::Value v;
   return GetNgramCounts()->Lookup(trigram.instance, &v);
 }
 
 bool CheckFourgram(const std::string& a, const std::string& b,
-                   const std::string& c, const std::string& d) {
+                   const std::string& c, const std::string& d)
+{
   Fourgram fourgram(a, b, c, d);
   NgramCounts::Value v;
   return GetNgramCounts()->Lookup(fourgram.instance, &v);
 }
 
-void SetUpReferences(BleuScorer& scorer) {
+void SetUpReferences(BleuScorer& scorer)
+{
   // The following examples are taken from Koehn, "Statistical Machine Translation",
   // Cambridge University Press, 2010.
   {
@@ -115,7 +123,8 @@ void SetUpReferences(BleuScorer& scorer) {
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(bleu_reference_type) {
+BOOST_AUTO_TEST_CASE(bleu_reference_type)
+{
   BleuScorer scorer;
   // BleuScorer will use "closest" by default.
   BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::CLOSEST);
@@ -127,7 +136,8 @@ BOOST_AUTO_TEST_CASE(bleu_reference_type) {
   BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::SHORTEST);
 }
 
-BOOST_AUTO_TEST_CASE(bleu_reference_type_with_config) {
+BOOST_AUTO_TEST_CASE(bleu_reference_type_with_config)
+{
   {
     BleuScorer scorer("reflen:average");
     BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::AVERAGE);
@@ -139,7 +149,8 @@ BOOST_AUTO_TEST_CASE(bleu_reference_type_with_config) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(bleu_count_ngrams) {
+BOOST_AUTO_TEST_CASE(bleu_count_ngrams)
+{
   BleuScorer scorer;
 
   std::string line = "I saw a girl with a telescope .";
@@ -198,7 +209,8 @@ BOOST_AUTO_TEST_CASE(bleu_count_ngrams) {
   BOOST_CHECK(CheckFourgram("with", "a", "telescope", "."));
 }
 
-BOOST_AUTO_TEST_CASE(bleu_clipped_counts) {
+BOOST_AUTO_TEST_CASE(bleu_clipped_counts)
+{
   BleuScorer scorer;
   SetUpReferences(scorer);
   std::string line("israeli officials responsibility of airport safety");
@@ -220,7 +232,8 @@ BOOST_AUTO_TEST_CASE(bleu_clipped_counts) {
   BOOST_CHECK_EQUAL(entry.get(7), 3);  // fourgram
 }
 
-BOOST_AUTO_TEST_CASE(calculate_actual_score) {
+BOOST_AUTO_TEST_CASE(calculate_actual_score)
+{
   BOOST_REQUIRE(4 == kBleuNgramOrder);
   std::vector<int> stats(2 * kBleuNgramOrder + 1);
   BleuScorer scorer;
@@ -247,7 +260,8 @@ BOOST_AUTO_TEST_CASE(calculate_actual_score) {
   BOOST_CHECK_CLOSE(0.5115f, scorer.calculateScore(stats), 0.01);
 }
 
-BOOST_AUTO_TEST_CASE(sentence_level_bleu) {
+BOOST_AUTO_TEST_CASE(sentence_level_bleu)
+{
   BOOST_REQUIRE(4 == kBleuNgramOrder);
   std::vector<float> stats(2 * kBleuNgramOrder + 1);
 

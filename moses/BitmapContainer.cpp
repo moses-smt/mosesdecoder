@@ -275,11 +275,11 @@ BitmapContainer::~BitmapContainer()
   // As we have created the square position objects we clean up now.
 
   while (!m_queue.empty()) {
-	HypothesisQueueItem *item = m_queue.top();
-	m_queue.pop();
+    HypothesisQueueItem *item = m_queue.top();
+    m_queue.pop();
 
-	FREEHYPO( item->GetHypothesis() );
-	delete item;
+    FREEHYPO( item->GetHypothesis() );
+    delete item;
   }
 
   // Delete all edges.

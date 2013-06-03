@@ -33,40 +33,43 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FeatureDataIterator.h"
 
-namespace util { class FilePiece; }
+namespace util
+{
+class FilePiece;
+}
 
 namespace MosesTuning
 {
-  
+
 
 typedef std::vector<float> ScoreDataItem;
 
 class ScoreDataIterator :
   public boost::iterator_facade<ScoreDataIterator,
-                                const std::vector<ScoreDataItem>,
-                                boost::forward_traversal_tag>
+  const std::vector<ScoreDataItem>,
+  boost::forward_traversal_tag>
 {
-  public:
-    ScoreDataIterator();
-    explicit ScoreDataIterator(const std::string& filename);
+public:
+  ScoreDataIterator();
+  explicit ScoreDataIterator(const std::string& filename);
 
-    ~ScoreDataIterator();
+  ~ScoreDataIterator();
 
-    static ScoreDataIterator end() {
-      return ScoreDataIterator();
-    }
+  static ScoreDataIterator end() {
+    return ScoreDataIterator();
+  }
 
-  private:
-    friend class boost::iterator_core_access;
+private:
+  friend class boost::iterator_core_access;
 
-    void increment();
-    bool equal(const ScoreDataIterator& rhs) const;
-    const std::vector<ScoreDataItem>& dereference() const;
+  void increment();
+  bool equal(const ScoreDataIterator& rhs) const;
+  const std::vector<ScoreDataItem>& dereference() const;
 
-    void readNext();
+  void readNext();
 
-    boost::shared_ptr<util::FilePiece> m_in;
-    std::vector<ScoreDataItem> m_next;
+  boost::shared_ptr<util::FilePiece> m_in;
+  std::vector<ScoreDataItem> m_next;
 };
 
 }

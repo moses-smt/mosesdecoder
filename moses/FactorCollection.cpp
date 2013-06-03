@@ -38,11 +38,12 @@ FactorCollection FactorCollection::s_instance;
 const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
 {
   FactorFriend to_ins;
-  to_ins.in.m_string = factorString; 
+  to_ins.in.m_string = factorString;
   to_ins.in.m_id = m_factorId;
   // If we're threaded, hope a read-only lock is sufficient.
 #ifdef WITH_THREADS
-  { // read=lock scope
+  {
+    // read=lock scope
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
     Set::const_iterator i = m_set.find(to_ins);
     if (i != m_set.end()) return &i->in;
@@ -52,8 +53,8 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
   std::pair<Set::iterator, bool> ret(m_set.insert(to_ins));
   if (ret.second) {
     ret.first->in.m_string.set(
-        memcpy(m_string_backing.Allocate(factorString.size()), factorString.data(), factorString.size()),
-        factorString.size());
+      memcpy(m_string_backing.Allocate(factorString.size()), factorString.data(), factorString.size()),
+      factorString.size());
     m_factorId++;
   }
   return &ret.first->in;

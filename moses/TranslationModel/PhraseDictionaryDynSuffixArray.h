@@ -17,14 +17,9 @@ class PhraseDictionaryDynSuffixArray: public PhraseDictionary
 public:
   PhraseDictionaryDynSuffixArray(const std::string &line);
   ~PhraseDictionaryDynSuffixArray();
-  bool Load( const std::vector<FactorType>& m_input
-             , const std::vector<FactorType>& m_output
-             , std::string m_source
-             , std::string m_target
-             , std::string m_alignments
-             , const std::vector<float> &m_weight
-             , size_t m_tableLimit
-             , float weightWP);
+
+  void Load();
+
   // functions below required by base class
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
   void insertSnt(string&, string&, string&);
@@ -32,10 +27,7 @@ public:
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
 private:
   BilingualDynSuffixArray *m_biSA;
-  std::vector<float> m_weight;
-  size_t m_tableLimit;
-  float m_weightWP;
-
+  std::string m_source, m_target, m_alignments;
 
 };
 

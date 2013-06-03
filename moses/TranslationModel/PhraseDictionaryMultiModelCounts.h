@@ -35,32 +35,33 @@ extern std::vector<std::string> tokenize( const char*);
 namespace Moses
 {
 
-  typedef boost::unordered_map<std::string, double > lexicalMap;
-  typedef boost::unordered_map<std::string, lexicalMap > lexicalMapJoint;
-  typedef std::pair<std::vector<float>, std::vector<float> > lexicalPair;
-  typedef std::vector<std::vector<lexicalPair> > lexicalCache;
+typedef boost::unordered_map<std::string, double > lexicalMap;
+typedef boost::unordered_map<std::string, lexicalMap > lexicalMapJoint;
+typedef std::pair<std::vector<float>, std::vector<float> > lexicalPair;
+typedef std::vector<std::vector<lexicalPair> > lexicalCache;
 
-  struct multiModelCountsStatistics : multiModelStatistics {
-    std::vector<float> fst, ft;
-  };
+struct multiModelCountsStatistics : multiModelStatistics {
+  std::vector<float> fst, ft;
+};
 
-  struct multiModelCountsStatisticsOptimization: multiModelCountsStatistics {
-    std::vector<float> fs;
-    lexicalCache lexCachee2f, lexCachef2e;
-    size_t f;
-  };
+struct multiModelCountsStatisticsOptimization: multiModelCountsStatistics {
+  std::vector<float> fs;
+  lexicalCache lexCachee2f, lexCachef2e;
+  size_t f;
+};
 
-  struct lexicalTable {
-    lexicalMapJoint joint;
-    lexicalMap marginal;
-  };
+struct lexicalTable {
+  lexicalMapJoint joint;
+  lexicalMap marginal;
+};
 
-  double InstanceWeighting(std::vector<float> &joint_counts, std::vector<float> &marginals, std::vector<float> &multimodelweights);
-  double LinearInterpolationFromCounts(std::vector<float> &joint_counts, std::vector<float> &marginals, std::vector<float> &multimodelweights);
+double InstanceWeighting(std::vector<float> &joint_counts, std::vector<float> &marginals, std::vector<float> &multimodelweights);
+double LinearInterpolationFromCounts(std::vector<float> &joint_counts, std::vector<float> &marginals, std::vector<float> &multimodelweights);
 
 
 //thrown if alignment information does not match phrase pair (out-of-bound alignment points)
-class AlignmentException : public std::runtime_error {
+class AlignmentException : public std::runtime_error
+{
 public:
   AlignmentException() : std::runtime_error("AlignmentException") { }
 };
@@ -72,16 +73,16 @@ class PhraseDictionaryMultiModelCounts: public PhraseDictionaryMultiModel
 {
 
 #ifdef WITH_DLIB
-friend class CrossEntropyCounts;
+  friend class CrossEntropyCounts;
 #endif
 
-typedef std::vector< std::set<size_t> > AlignVector;
+  typedef std::vector< std::set<size_t> > AlignVector;
 
 
 public:
   PhraseDictionaryMultiModelCounts(const std::string &line);
   ~PhraseDictionaryMultiModelCounts();
-  bool InitDictionary();
+  void Load();
   TargetPhraseCollection* CreateTargetPhraseCollectionCounts(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
   void CollectSufficientStatistics(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats) const;
   float GetTargetCount(const Phrase& target, size_t modelIndex) const;
@@ -116,23 +117,22 @@ class CrossEntropyCounts: public OptimizationObjective
 {
 public:
 
-    CrossEntropyCounts (
-        std::vector<multiModelCountsStatisticsOptimization*> &optimizerStats,
-        PhraseDictionaryMultiModelCounts * model,
-        size_t iFeature
-    )
-    {
-        m_optimizerStats = optimizerStats;
-        m_model = model;
-        m_iFeature = iFeature;
-    }
+  CrossEntropyCounts (
+    std::vector<multiModelCountsStatisticsOptimization*> &optimizerStats,
+    PhraseDictionaryMultiModelCounts * model,
+    size_t iFeature
+  ) {
+    m_optimizerStats = optimizerStats;
+    m_model = model;
+    m_iFeature = iFeature;
+  }
 
-    double operator() ( const dlib::matrix<double,0,1>& arg) const;
+  double operator() ( const dlib::matrix<double,0,1>& arg) const;
 
 private:
-    std::vector<multiModelCountsStatisticsOptimization*> m_optimizerStats;
-    PhraseDictionaryMultiModelCounts * m_model;
-    size_t m_iFeature;
+  std::vector<multiModelCountsStatisticsOptimization*> m_optimizerStats;
+  PhraseDictionaryMultiModelCounts * m_model;
+  size_t m_iFeature;
 };
 #endif
 

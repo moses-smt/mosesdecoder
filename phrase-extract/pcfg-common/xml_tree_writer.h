@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2012 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -32,12 +32,15 @@
 #include <vector>
 #include <string>
 
-namespace Moses {
-namespace PCFG {
+namespace Moses
+{
+namespace PCFG
+{
 
 template<typename InputTree>
-class XmlOutputHandler {
- public:
+class XmlOutputHandler
+{
+public:
   typedef std::map<std::string, std::string> AttributeMap;
 
   void GetLabel(const InputTree &, std::string &) const;
@@ -45,17 +48,19 @@ class XmlOutputHandler {
 };
 
 template<typename InputTree>
-class XmlTreeWriter : public XmlOutputHandler<InputTree> {
- public:
+class XmlTreeWriter : public XmlOutputHandler<InputTree>
+{
+public:
   typedef XmlOutputHandler<InputTree> Base;
   void Write(const InputTree &, std::ostream &) const;
- private:
+private:
   std::string Escape(const std::string &) const;
 };
 
 template<typename InputTree>
 void XmlTreeWriter<InputTree>::Write(const InputTree &tree,
-                                     std::ostream &out) const {
+                                     std::ostream &out) const
+{
   assert(!tree.IsLeaf());
 
   // Opening tag
@@ -99,7 +104,8 @@ void XmlTreeWriter<InputTree>::Write(const InputTree &tree,
 
 // Escapes XML special characters.
 template<typename InputTree>
-std::string XmlTreeWriter<InputTree>::Escape(const std::string &s) const {
+std::string XmlTreeWriter<InputTree>::Escape(const std::string &s) const
+{
   std::string t;
   std::size_t len = s.size();
   t.reserve(len);

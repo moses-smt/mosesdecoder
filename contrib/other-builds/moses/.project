@@ -1112,6 +1112,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/GlobalLexicalModelUnlimited.h</locationURI>
 		</link>
 		<link>
+			<name>FF/InputFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/InputFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/PhraseBasedFeatureContext.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.cpp</locationURI>

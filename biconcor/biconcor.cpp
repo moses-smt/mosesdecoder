@@ -150,22 +150,19 @@ int main(int argc, char* argv[])
       cout << "TOTAL: " << total << endl;
       if (htmlFlag) {
         ppCollection.PrintHTML();
-      }
-      else {
-	ppCollection.Print(prettyFlag);
+      } else {
+        ppCollection.Print(prettyFlag);
       }
       cout << "-|||- BICONCOR END -|||-" << endl << flush;
     }
-  }
-  else if (queryFlag) {
+  } else if (queryFlag) {
     cerr << "query is " << query << endl;
     vector< string > queryString = alignment.Tokenize( query.c_str() );
     PhrasePairCollection ppCollection( &suffixArray, &targetCorpus, &alignment, max_translation, max_example );
     ppCollection.GetCollection( queryString );
     if (htmlFlag) {
       ppCollection.PrintHTML();
-    }
-    else {
+    } else {
       ppCollection.Print(prettyFlag);
     }
   }

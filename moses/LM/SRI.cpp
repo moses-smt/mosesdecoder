@@ -39,32 +39,24 @@ using namespace std;
 namespace Moses
 {
 LanguageModelSRI::LanguageModelSRI(const std::string &line)
-:LanguageModelSingleFactor("SRILM", line)
-,m_srilmVocab(0)
-,m_srilmModel(0)
+  :LanguageModelSingleFactor("SRILM", line)
+  ,m_srilmVocab(0)
+  ,m_srilmModel(0)
 {
-  FactorType factorType;
-  size_t nGramOrder;
-  string filePath;
-
   for (size_t i = 0; i < m_args.size(); ++i) {
-	const vector<string> &args = m_args[i];
+    const vector<string> &args = m_args[i];
 
-	if (args[0] == "factor") {
-	  factorType = Scan<FactorType>(args[1]);
-	}
-	else if (args[0] == "order") {
-	  nGramOrder = Scan<size_t>(args[1]);
-	}
-	else if (args[0] == "path") {
-	  filePath = args[1];
-	}
-	else {
-	  throw "Unknown argument " + args[0];
-	}
+    if (args[0] == "factor") {
+      m_factorType = Scan<FactorType>(args[1]);
+    } else if (args[0] == "order") {
+      m_nGramOrder = Scan<size_t>(args[1]);
+    } else if (args[0] == "path") {
+      m_filePath = args[1];
+    } else {
+      throw "Unknown argument " + args[0];
+    }
   }
 
-  Load(filePath, factorType, nGramOrder);
 }
 
 LanguageModelSRI::~LanguageModelSRI()
@@ -73,26 +65,19 @@ LanguageModelSRI::~LanguageModelSRI()
   delete m_srilmVocab;
 }
 
-bool LanguageModelSRI::Load(const std::string &filePath
-                            , FactorType factorType
-                            , size_t nGramOrder)
+void LanguageModelSRI::Load()
 {
   m_srilmVocab  = new ::Vocab();
-  m_srilmModel	= new Ngram(*m_srilmVocab, nGramOrder);
-  m_factorType 	= factorType;
-  m_nGramOrder	= nGramOrder;
-  m_filePath		= filePath;
+  m_srilmModel	= new Ngram(*m_srilmVocab, m_nGramOrder);
 
   m_srilmModel->skipOOVs() = false;
 
-  File file( filePath.c_str(), "r" );
+  File file( m_filePath.c_str(), "r" );
   m_srilmModel->read(file);
 
   // LM can be ok, just outputs warnings
   CreateFactors();
   m_unknownId = m_srilmVocab->unkIndex();
-
-  return true;
 }
 
 void LanguageModelSRI::CreateFactors()

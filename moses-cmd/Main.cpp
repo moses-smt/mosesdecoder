@@ -92,7 +92,7 @@ public:
                   OutputCollector* alignmentInfoCollector,
                   OutputCollector* unknownsCollector,
                   bool outputSearchGraphSLF,
-		  bool outputSearchGraphHypergraph) :
+                  bool outputSearchGraphHypergraph) :
     m_source(source), m_lineNumber(lineNumber),
     m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
     m_latticeSamplesCollector(latticeSamplesCollector),
@@ -103,7 +103,7 @@ public:
     m_outputSearchGraphSLF(outputSearchGraphSLF),
     m_outputSearchGraphHypergraph(outputSearchGraphHypergraph) {}
 
-	/** Translate one sentence
+  /** Translate one sentence
    * gets called by main function implemented at end of this source file */
   void Run() {
 
@@ -150,7 +150,7 @@ public:
         manager.SerializeSearchGraphPB(m_lineNumber, output);
       }
 #endif
-    }		
+    }
 
     // Output search graph in HTK standard lattice format (SLF)
     if (m_outputSearchGraphSLF) {
@@ -159,13 +159,13 @@ public:
       std::ofstream *file = new std::ofstream;
       file->open(fileName.str().c_str());
       if (file->is_open() && file->good()) {
-	ostringstream out;
-	fix(out,PRECISION);
-	manager.OutputSearchGraphAsSLF(m_lineNumber, out);
-	*file << out.str();
-	file -> flush();
+        ostringstream out;
+        fix(out,PRECISION);
+        manager.OutputSearchGraphAsSLF(m_lineNumber, out);
+        *file << out.str();
+        file -> flush();
       } else {
-	TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
+        TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
       }
     }
 
@@ -176,91 +176,91 @@ public:
 
       bool appendSuffix;
       if (hypergraphParameters.size() > 0 && hypergraphParameters[0] == "true") {
-	appendSuffix = true;
+        appendSuffix = true;
       } else {
-	appendSuffix = false;
+        appendSuffix = false;
       }
 
       string compression;
       if (hypergraphParameters.size() > 1) {
-	compression = hypergraphParameters[1];
+        compression = hypergraphParameters[1];
       } else {
-	compression = "txt";
+        compression = "txt";
       }
 
       string hypergraphDir;
       if ( hypergraphParameters.size() > 2 ) {
         hypergraphDir = hypergraphParameters[2];
       } else {
-	string nbestFile = staticData.GetNBestFilePath();
-	if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
-	  boost::filesystem::path nbestPath(nbestFile);
+        string nbestFile = staticData.GetNBestFilePath();
+        if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
+          boost::filesystem::path nbestPath(nbestFile);
 
-	  // In the Boost filesystem API version 2, 
-	  //   which was the default prior to Boost 1.46,
-	  //   the filename() method returned a string.
-	  //
-	  // In the Boost filesystem API version 3,
-	  //   which is the default starting with Boost 1.46,
-	  //   the filename() method returns a path object.
-	  //
-	  // To get a string from the path object, 
-	  //   the native() method must be called.
-	  //	  hypergraphDir = nbestPath.parent_path().filename()
-	  //#if BOOST_VERSION >= 104600
-	  //	    .native()
-	  //#endif
-	  //;
+          // In the Boost filesystem API version 2,
+          //   which was the default prior to Boost 1.46,
+          //   the filename() method returned a string.
+          //
+          // In the Boost filesystem API version 3,
+          //   which is the default starting with Boost 1.46,
+          //   the filename() method returns a path object.
+          //
+          // To get a string from the path object,
+          //   the native() method must be called.
+          //	  hypergraphDir = nbestPath.parent_path().filename()
+          //#if BOOST_VERSION >= 104600
+          //	    .native()
+          //#endif
+          //;
 
-	  // Hopefully the following compiles under all versions of Boost.
-	  //
-	  // If this line gives you compile errors,
-	  //   contact Lane Schwartz on the Moses mailing list
-	  hypergraphDir = nbestPath.parent_path().string();
+          // Hopefully the following compiles under all versions of Boost.
+          //
+          // If this line gives you compile errors,
+          //   contact Lane Schwartz on the Moses mailing list
+          hypergraphDir = nbestPath.parent_path().string();
 
-	} else {
-	  stringstream hypergraphDirName;
-	  hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
-	  hypergraphDir = hypergraphDirName.str();
-	}
+        } else {
+          stringstream hypergraphDirName;
+          hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
+          hypergraphDir = hypergraphDirName.str();
+        }
       }
 
       if ( ! boost::filesystem::exists(hypergraphDir) ) {
-	boost::filesystem::create_directory(hypergraphDir);
-      } 
+        boost::filesystem::create_directory(hypergraphDir);
+      }
 
       if ( ! boost::filesystem::exists(hypergraphDir) ) {
-	TRACE_ERR("Cannot output hypergraphs to " << hypergraphDir << " because the directory does not exist" << std::endl);
+        TRACE_ERR("Cannot output hypergraphs to " << hypergraphDir << " because the directory does not exist" << std::endl);
       } else if ( ! boost::filesystem::is_directory(hypergraphDir) ) {
-	TRACE_ERR("Cannot output hypergraphs to " << hypergraphDir << " because that path exists, but is not a directory" << std::endl);
+        TRACE_ERR("Cannot output hypergraphs to " << hypergraphDir << " because that path exists, but is not a directory" << std::endl);
       } else {
-	stringstream fileName;
-	fileName << hypergraphDir << "/" << m_lineNumber;
-	if ( appendSuffix ) {
-	  fileName << "." << compression;
-	}
-	boost::iostreams::filtering_ostream *file = new boost::iostreams::filtering_ostream;
+        stringstream fileName;
+        fileName << hypergraphDir << "/" << m_lineNumber;
+        if ( appendSuffix ) {
+          fileName << "." << compression;
+        }
+        boost::iostreams::filtering_ostream *file = new boost::iostreams::filtering_ostream;
 
-	if ( compression == "gz" ) {
-	  file->push( boost::iostreams::gzip_compressor() );
-	} else if ( compression == "bz2" ) {
-	  file->push( boost::iostreams::bzip2_compressor() );
-	} else if ( compression != "txt" ) {
-	  TRACE_ERR("Unrecognized hypergraph compression format (" << compression << ") - using uncompressed plain txt" << std::endl);
-	  compression = "txt";
-	}
+        if ( compression == "gz" ) {
+          file->push( boost::iostreams::gzip_compressor() );
+        } else if ( compression == "bz2" ) {
+          file->push( boost::iostreams::bzip2_compressor() );
+        } else if ( compression != "txt" ) {
+          TRACE_ERR("Unrecognized hypergraph compression format (" << compression << ") - using uncompressed plain txt" << std::endl);
+          compression = "txt";
+        }
 
-	file->push( boost::iostreams::file_sink(fileName.str(), ios_base::out) );
+        file->push( boost::iostreams::file_sink(fileName.str(), ios_base::out) );
 
-	if (file->is_complete() && file->good()) {
-	  fix(*file,PRECISION);
-	  manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
-	  file -> flush();
-	} else {
-	  TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file " << fileName.str() << " is not open or not ready for writing" << std::endl);
-	}
-	file -> pop();
-	delete file;
+        if (file->is_complete() && file->good()) {
+          fix(*file,PRECISION);
+          manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
+          file -> flush();
+        } else {
+          TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file " << fileName.str() << " is not open or not ready for writing" << std::endl);
+        }
+        file -> pop();
+        delete file;
       }
     }
 
@@ -277,8 +277,7 @@ public:
 
       // MAP decoding: best hypothesis
       const Hypothesis* bestHypo = NULL;
-      if (!staticData.UseMBR()) 
-	  {
+      if (!staticData.UseMBR()) {
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
           if (staticData.IsPathRecoveryEnabled()) {
@@ -296,7 +295,7 @@ public:
             staticData.GetReportSegmentation(),
             staticData.GetReportAllFactors());
           if (staticData.PrintAlignmentInfo()) {
-        	out << "||| ";
+            out << "||| ";
             OutputAlignment(out, bestHypo);
           }
 
@@ -306,11 +305,10 @@ public:
           }
         }
         out << endl;
-	  }
+      }
 
       // MBR decoding (n-best MBR, lattice MBR, consensus)
-      else 
-			{
+      else {
         // we first need the n-best translations
         size_t nBestSize = staticData.GetMBRSize();
         if (nBestSize <= 0) {
@@ -346,7 +344,7 @@ public:
         }
 
         // consensus decoding
-				else if (staticData.UseConsensusDecoding()) {
+        else if (staticData.UseConsensusDecoding()) {
           const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
           OutputBestHypo(conBestHypo, m_lineNumber,
                          staticData.GetReportSegmentation(),
@@ -355,8 +353,8 @@ public:
           IFVERBOSE(2) {
             PrintUserTime("finished Consensus decoding");
           }
-				}
-				
+        }
+
         // n-best MBR decoding
         else {
           const Moses::TrellisPath &mbrBestHypo = doMBR(nBestList);
@@ -380,7 +378,7 @@ public:
       ostringstream out;
       manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
       OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_lineNumber,
-		  staticData.GetReportSegmentation());
+                  staticData.GetReportSegmentation());
       m_nbestCollector->Write(m_lineNumber, out.str());
     }
 
@@ -390,7 +388,7 @@ public:
       ostringstream out;
       manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
       OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_lineNumber,
-		  staticData.GetReportSegmentation());
+                  staticData.GetReportSegmentation());
       m_latticeSamplesCollector->Write(m_lineNumber, out.str());
     }
 
@@ -450,7 +448,7 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
   size_t numScoreComps = ff->GetNumScoreComponents();
   vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
   for (size_t i = 0; i < numScoreComps; ++i) {
-	cout << " " << values[i];
+    cout << " " << values[i];
   }
   cout << endl;
 }
@@ -484,13 +482,13 @@ size_t OutputFeatureWeightsForHypergraph(size_t index, const FeatureFunction* ff
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     if (numScoreComps > 1) {
       for (size_t i = 0; i < numScoreComps; ++i) {
-	outputSearchGraphStream << ff->GetScoreProducerDescription()
-				<< i
-				<< "=" << values[i] << endl;
+        outputSearchGraphStream << ff->GetScoreProducerDescription()
+                                << i
+                                << "=" << values[i] << endl;
       }
     } else {
-	outputSearchGraphStream << ff->GetScoreProducerDescription()
-				<< "=" << values[0] << endl;
+      outputSearchGraphStream << ff->GetScoreProducerDescription()
+                              << "=" << values[0] << endl;
     }
     return index+numScoreComps;
   } else {
@@ -541,7 +539,7 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
 int main(int argc, char** argv)
 {
   try {
-  
+
 #ifdef HAVE_PROTOBUF
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
@@ -601,20 +599,20 @@ int main(int argc, char** argv)
     if (staticData.GetOutputSearchGraphHypergraph()) {
       ofstream* weightsOut = new std::ofstream;
       stringstream weightsFilename;
-      if (staticData.GetParam("output-search-graph-hypergraph").size() > 3) { 
-	weightsFilename << staticData.GetParam("output-search-graph-hypergraph")[3];
+      if (staticData.GetParam("output-search-graph-hypergraph").size() > 3) {
+        weightsFilename << staticData.GetParam("output-search-graph-hypergraph")[3];
       } else {
-	string nbestFile = staticData.GetNBestFilePath();
-	if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
-	  boost::filesystem::path nbestPath(nbestFile);
-	  weightsFilename << nbestPath.parent_path().filename() << "/weights";
-	} else {
-	  weightsFilename << boost::filesystem::current_path() << "/hypergraph/weights";
-	}
+        string nbestFile = staticData.GetNBestFilePath();
+        if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
+          boost::filesystem::path nbestPath(nbestFile);
+          weightsFilename << nbestPath.parent_path().filename() << "/weights";
+        } else {
+          weightsFilename << boost::filesystem::current_path() << "/hypergraph/weights";
+        }
       }
       boost::filesystem::path weightsFilePath(weightsFilename.str());
       if ( ! boost::filesystem::exists(weightsFilePath.parent_path()) ) {
-	boost::filesystem::create_directory(weightsFilePath.parent_path());
+        boost::filesystem::create_directory(weightsFilePath.parent_path());
       }
       TRACE_ERR("The weights file is " << weightsFilename.str() << "\n");
       weightsOut->open(weightsFilename.str().c_str());
@@ -669,26 +667,26 @@ int main(int argc, char** argv)
     if (output1best) {
       outputCollector.reset(new OutputCollector());
     }
-  
+
     // initialize stream for word graph (aka: output lattice)
     auto_ptr<OutputCollector> wordGraphCollector;
     if (staticData.GetOutputWordGraph()) {
       wordGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputWordGraphStream())));
     }
-  
+
     // initialize stream for search graph
     // note: this is essentially the same as above, but in a different format
     auto_ptr<OutputCollector> searchGraphCollector;
     if (staticData.GetOutputSearchGraph()) {
       searchGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputSearchGraphStream())));
     }
-  
+
     // initialize stram for details about the decoder run
     auto_ptr<OutputCollector> detailedTranslationCollector;
     if (staticData.IsDetailedTranslationReportingEnabled()) {
       detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
     }
-  
+
     // initialize stram for word alignment between input and output
     auto_ptr<OutputCollector> alignmentInfoCollector;
     if (!staticData.GetAlignmentOutputFile().empty()) {
@@ -706,11 +704,11 @@ int main(int argc, char** argv)
       }
       unknownsCollector.reset(new OutputCollector(unknownsStream.get()));
     }
-  
+
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
-  
+
     // main loop over set of input sentences
     InputType* source = NULL;
     size_t lineCount = staticData.GetStartTranslationId();
@@ -728,21 +726,21 @@ int main(int argc, char** argv)
                             detailedTranslationCollector.get(),
                             alignmentInfoCollector.get(),
                             unknownsCollector.get(),
-			    staticData.GetOutputSearchGraphSLF(),
-			    staticData.GetOutputSearchGraphHypergraph());
+                            staticData.GetOutputSearchGraphSLF(),
+                            staticData.GetOutputSearchGraphHypergraph());
       // execute task
 #ifdef WITH_THREADS
-    pool.Submit(task);
+      pool.Submit(task);
 #else
       task->Run();
       delete task;
 #endif
-  
+
       source = NULL; //make sure it doesn't get deleted
       ++lineCount;
     }
-  
-  // we are done, finishing up
+
+    // we are done, finishing up
 #ifdef WITH_THREADS
     pool.Stop(true); //flush remaining jobs
 #endif

@@ -229,13 +229,12 @@ string reverseAlignment(const string &alignments)
 
   vector<string> alignToks = tokenize(alignments.c_str());
 
-  for (size_t i = 0; i < alignToks.size(); ++i)
-  {
+  for (size_t i = 0; i < alignToks.size(); ++i) {
     string &alignPair = alignToks[i];
     vector<string> alignPoints;
     Tokenize(alignPoints, alignPair, "-");
     assert(alignPoints.size() == 2);
-    
+
     ret << alignPoints[1] << "-" << alignPoints[0] << " ";
   }
 

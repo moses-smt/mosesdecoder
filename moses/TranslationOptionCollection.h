@@ -42,7 +42,7 @@ class InputType;
 class FactorMask;
 class Word;
 class DecodeGraph;
-  
+
 /** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
  * conditions (trelliss, factored input, normal text, xml markup)

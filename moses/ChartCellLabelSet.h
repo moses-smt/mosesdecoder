@@ -35,46 +35,55 @@ class ChartHypothesisCollection;
  */
 class ChartCellLabelSet
 {
- private:
+private:
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_map<Word, ChartCellLabel,
-                               NonTerminalHasher, NonTerminalEqualityPred
-                              > MapType;
+          NonTerminalHasher, NonTerminalEqualityPred
+          > MapType;
 #else
   typedef std::map<Word, ChartCellLabel> MapType;
 #endif
 
- public:
+public:
   typedef MapType::const_iterator const_iterator;
   typedef MapType::iterator iterator;
 
   ChartCellLabelSet(const WordsRange &coverage) : m_coverage(coverage) {}
 
-  const_iterator begin() const { return m_map.begin(); }
-  const_iterator end() const { return m_map.end(); }
-  
-  iterator mutable_begin() { return m_map.begin(); }
-  iterator mutable_end() { return m_map.end(); }
+  const_iterator begin() const {
+    return m_map.begin();
+  }
+  const_iterator end() const {
+    return m_map.end();
+  }
 
-  void AddWord(const Word &w)
-  {
+  iterator mutable_begin() {
+    return m_map.begin();
+  }
+  iterator mutable_end() {
+    return m_map.end();
+  }
+
+  void AddWord(const Word &w) {
     m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w)));
   }
 
-  // Stack is a HypoList or whatever the search algorithm uses.  
-  void AddConstituent(const Word &w, const HypoList *stack)
-  {
+  // Stack is a HypoList or whatever the search algorithm uses.
+  void AddConstituent(const Word &w, const HypoList *stack) {
     ChartCellLabel::Stack s;
     s.cube = stack;
     m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w, s)));
   }
 
-  bool Empty() const { return m_map.empty(); }
+  bool Empty() const {
+    return m_map.empty();
+  }
 
-  size_t GetSize() const { return m_map.size(); }
+  size_t GetSize() const {
+    return m_map.size();
+  }
 
-  const ChartCellLabel *Find(const Word &w) const
-  {
+  const ChartCellLabel *Find(const Word &w) const {
     MapType::const_iterator p = m_map.find(w);
     return p == m_map.end() ? 0 : &(p->second);
   }
@@ -83,7 +92,7 @@ class ChartCellLabelSet
     return m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w))).first->second.MutableStack();
   }
 
- private:
+private:
   const WordsRange &m_coverage;
   MapType m_map;
 };

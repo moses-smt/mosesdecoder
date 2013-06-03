@@ -34,12 +34,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace Moses;
 
-namespace MosesTest 
+namespace MosesTest
 {
 
 BOOST_AUTO_TEST_SUITE(target_bigram)
 
-static Word MakeWord(string text) {
+static Word MakeWord(string text)
+{
   FactorCollection &factorCollection = FactorCollection::Instance();
   const Factor* f = factorCollection.AddFactor(Input,0,text);
   Word w;
@@ -47,34 +48,32 @@ static Word MakeWord(string text) {
   return w;
 }
 
-class VocabFileFixture {
-  public:
-    template<class I>
-    VocabFileFixture(I begin, I end) 
-    {
-      char name[] = "TargetBigramXXXXXX";
-      int fd = mkstemp(name);
-      BOOST_CHECK(fd != -1);
-      BOOST_CHECK(!close(fd));
-      filename = name;
-      ofstream out(name);
-      for (I i = begin; i != end; ++i) 
-      {
-        out << *i << endl;
-      }
-      out.close();
+class VocabFileFixture
+{
+public:
+  template<class I>
+  VocabFileFixture(I begin, I end) {
+    char name[] = "TargetBigramXXXXXX";
+    int fd = mkstemp(name);
+    BOOST_CHECK(fd != -1);
+    BOOST_CHECK(!close(fd));
+    filename = name;
+    ofstream out(name);
+    for (I i = begin; i != end; ++i) {
+      out << *i << endl;
     }
+    out.close();
+  }
 
-    ~VocabFileFixture() 
-    {
-      BOOST_CHECK(!remove(filename.c_str()));
-    }
+  ~VocabFileFixture() {
+    BOOST_CHECK(!remove(filename.c_str()));
+  }
 
-    string filename;
+  string filename;
 };
 
 /*
-BOOST_AUTO_TEST_CASE(Test2) 
+BOOST_AUTO_TEST_CASE(Test2)
 {
   HypothesisFixture hypos;
   cerr << hypos.empty() << ", " << *hypos.empty() << endl;
@@ -113,7 +112,7 @@ BOOST_AUTO_TEST_CASE(score_components)
     ScoreProducer::unlimited);
 }
 
-BOOST_AUTO_TEST_CASE(empty_hypo) 
+BOOST_AUTO_TEST_CASE(empty_hypo)
 {
   Sentence s;
   TargetBigramFeature tbf;
@@ -124,7 +123,7 @@ BOOST_AUTO_TEST_CASE(empty_hypo)
 }
 
 //Test of evaluate() where a vocab is specified
-BOOST_AUTO_TEST_CASE(evaluate_vocab) 
+BOOST_AUTO_TEST_CASE(evaluate_vocab)
 {
   string vocab[] = {"i", "do"};
   VocabFileFixture vocabFile(vocab,vocab+2);
@@ -156,7 +155,7 @@ BOOST_AUTO_TEST_CASE(evaluate_all)
   BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&tbf, "do:not"),1);
   BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&tbf, "not:</s>"),0);
   BOOST_CHECK(! currState->Compare(TargetBigramState(MakeWord("not"))));
-  
+
 }
 
 BOOST_AUTO_TEST_CASE(evaluate_empty)
@@ -171,7 +170,7 @@ BOOST_AUTO_TEST_CASE(evaluate_empty)
   BOOST_CHECK(! currState->Compare(*prevState));
 }
 
-BOOST_AUTO_TEST_CASE(evaluate_eos) 
+BOOST_AUTO_TEST_CASE(evaluate_eos)
 {
   HypothesisFixture hypos;
   TargetBigramFeature tbf;

@@ -26,9 +26,8 @@ namespace Moses
 
 /** @todo what is this?
  */
-struct IntermediateVarSpanNode
-{
- public:
+struct IntermediateVarSpanNode {
+public:
   typedef std::pair<int, int> Range;
 
   IntermediateVarSpanNode()
@@ -41,8 +40,12 @@ struct IntermediateVarSpanNode
     , m_end(end)
     , m_numSplitPoints(0) {}
 
-  bool isOpen() { return m_end.second == -1; }
-  bool isClosed() { return !isOpen(); }
+  bool isOpen() {
+    return m_end.second == -1;
+  }
+  bool isClosed() {
+    return !isOpen();
+  }
 
   Range m_start;
   Range m_end;

@@ -3,10 +3,10 @@
 namespace OnDiskPt
 {
 
-void OnDiskQuery::Tokenize(Phrase &phrase, 
-    const std::string &token,
-    bool addSourceNonTerm,
-    bool addTargetNonTerm)
+void OnDiskQuery::Tokenize(Phrase &phrase,
+                           const std::string &token,
+                           bool addSourceNonTerm,
+                           bool addTargetNonTerm)
 {
   bool nonTerm = false;
   size_t tokSize = token.size();
@@ -50,13 +50,13 @@ void OnDiskQuery::Tokenize(Phrase &phrase,
     phrase.AddWord(word);
   }
 }
-  
+
 SourcePhrase OnDiskQuery::Tokenize(const std::vector<std::string>& tokens)
 {
   SourcePhrase sourcePhrase;
-  if (tokens.size() > 0){
+  if (tokens.size() > 0) {
     std::vector<std::string>::const_iterator token = tokens.begin();
-    for (; token + 1 != tokens.end(); ++token){
+    for (; token + 1 != tokens.end(); ++token) {
       Tokenize(sourcePhrase, *token, true, true);
     }
     // last position. LHS non-term
@@ -64,22 +64,20 @@ SourcePhrase OnDiskQuery::Tokenize(const std::vector<std::string>& tokens)
   }
   return sourcePhrase;
 }
-  
+
 const PhraseNode* OnDiskQuery::Query(const SourcePhrase& sourcePhrase)
 {
-    const PhraseNode *node = &m_wrapper.GetRootSourceNode();
-    assert(node);
-    
-    for (size_t pos = 0; pos < sourcePhrase.GetSize(); ++pos)
-    {
-      const Word &word = sourcePhrase.GetWord(pos);
-      node = node->GetChild(word, m_wrapper);
-      if (node == NULL)
-      {
-        break;
-      }
+  const PhraseNode *node = &m_wrapper.GetRootSourceNode();
+  assert(node);
+
+  for (size_t pos = 0; pos < sourcePhrase.GetSize(); ++pos) {
+    const Word &word = sourcePhrase.GetWord(pos);
+    node = node->GetChild(word, m_wrapper);
+    if (node == NULL) {
+      break;
     }
-    return node;
+  }
+  return node;
 }
 
 }

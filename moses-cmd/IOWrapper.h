@@ -142,12 +142,12 @@ void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Mo
 void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo);
 
 void OutputNBest(std::ostream& out
-                  , const Moses::TrellisPathList &nBestList
-                  , const std::vector<Moses::FactorType>& outputFactorOrder
-                  , long translationId
-                  , bool reportSegmentation);
+                 , const Moses::TrellisPathList &nBestList
+                 , const std::vector<Moses::FactorType>& outputFactorOrder
+                 , long translationId
+                 , bool reportSegmentation);
 void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
-                              , std::ostream &out);
+                            , std::ostream &out);
 void OutputFeatureScores( std::ostream& out
                           , const Moses::ScoreComponentCollection &features
                           , const Moses::FeatureFunction *ff

@@ -22,11 +22,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/LM/BackwardLMState.h"
 #include "lm/state.hh"
 
-namespace Moses {
+namespace Moses
+{
 
-  int BackwardLMState::Compare(const FFState &o) const {
-    const BackwardLMState &other = static_cast<const BackwardLMState &>(o);
-    return state.left.Compare(other.state.left);
-  }
+int BackwardLMState::Compare(const FFState &o) const
+{
+  const BackwardLMState &other = static_cast<const BackwardLMState &>(o);
+  return state.left.Compare(other.state.left);
+}
 
 }

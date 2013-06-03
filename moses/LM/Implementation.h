@@ -44,7 +44,7 @@ class Phrase;
 struct LMResult {
   // log probability
   float score;
-  // Is the word unknown?  
+  // Is the word unknown?
   bool unknown;
 };
 
@@ -56,13 +56,13 @@ class LanguageModelImplementation : public LanguageModel
   void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 
 protected:
-  std::string	m_filePath; //! for debugging purposes
+  std::string	m_filePath;
   size_t			m_nGramOrder; //! max n-gram length contained in this LM
   Word m_sentenceStartWord, m_sentenceEndWord; //! Contains factors which represents the beging and end words for this LM.
   //! Usually <s> and </s>
 
   LanguageModelImplementation(const std::string& description, const std::string &line)
-  :LanguageModel(description, line)
+    :LanguageModel(description, line)
   {}
 public:
 
@@ -108,8 +108,7 @@ public:
     return m_sentenceEndWord;
   }
 
-  const FFState* EmptyHypothesisState(const InputType &/*input*/) const
-  {
+  const FFState* EmptyHypothesisState(const InputType &/*input*/) const {
     return NewState(GetBeginSentenceState());
   }
 

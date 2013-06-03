@@ -126,25 +126,29 @@ typedef unsigned __int64 uint64_t;
   DISALLOW_COPY_AND_ASSIGN(TypeName)
 #endif
 
-namespace double_conversion {
+namespace double_conversion
+{
 
 static const int kCharSize = sizeof(char);
 
 // Returns the maximum of the two parameters.
 template <typename T>
-static T Max(T a, T b) {
+static T Max(T a, T b)
+{
   return a < b ? b : a;
 }
 
 
 // Returns the minimum of the two parameters.
 template <typename T>
-static T Min(T a, T b) {
+static T Min(T a, T b)
+{
   return a < b ? a : b;
 }
 
 
-inline int StrLength(const char* string) {
+inline int StrLength(const char* string)
+{
   size_t length = strlen(string);
   ASSERT(length == static_cast<size_t>(static_cast<int>(length)));
   return static_cast<int>(length);
@@ -152,8 +156,9 @@ inline int StrLength(const char* string) {
 
 // This is a simplified version of V8's Vector class.
 template <typename T>
-class Vector {
- public:
+class Vector
+{
+public:
   Vector() : start_(NULL), length_(0) {}
   Vector(T* data, int length) : start_(data), length_(length) {
     ASSERT(length == 0 || (length > 0 && data != NULL));
@@ -169,13 +174,19 @@ class Vector {
   }
 
   // Returns the length of the vector.
-  int length() const { return length_; }
+  int length() const {
+    return length_;
+  }
 
   // Returns whether or not the vector is empty.
-  bool is_empty() const { return length_ == 0; }
+  bool is_empty() const {
+    return length_ == 0;
+  }
 
   // Returns the pointer to the start of the data in the vector.
-  T* start() const { return start_; }
+  T* start() const {
+    return start_;
+  }
 
   // Access individual vector elements - checks bounds in debug mode.
   T& operator[](int index) const {
@@ -183,11 +194,15 @@ class Vector {
     return start_[index];
   }
 
-  T& first() { return start_[0]; }
+  T& first() {
+    return start_[0];
+  }
 
-  T& last() { return start_[length_ - 1]; }
+  T& last() {
+    return start_[length_ - 1];
+  }
 
- private:
+private:
   T* start_;
   int length_;
 };
@@ -196,14 +211,19 @@ class Vector {
 // Helper class for building result strings in a character buffer. The
 // purpose of the class is to use safe operations that checks the
 // buffer bounds on all operations in debug mode.
-class StringBuilder {
- public:
+class StringBuilder
+{
+public:
   StringBuilder(char* buffer, int size)
-      : buffer_(buffer, size), position_(0) { }
+    : buffer_(buffer, size), position_(0) { }
 
-  ~StringBuilder() { if (!is_finalized()) Finalize(); }
+  ~StringBuilder() {
+    if (!is_finalized()) Finalize();
+  }
 
-  int size() const { return buffer_.length(); }
+  int size() const {
+    return buffer_.length();
+  }
 
   // Get the current position in the builder.
   int position() const {
@@ -212,7 +232,9 @@ class StringBuilder {
   }
 
   // Reset the position.
-  void Reset() { position_ = 0; }
+  void Reset() {
+    position_ = 0;
+  }
 
   // Add a single character to the builder. It is not allowed to add
   // 0-characters; use the Finalize() method to terminate the string
@@ -262,11 +284,13 @@ class StringBuilder {
     return buffer_.start();
   }
 
- private:
+private:
   Vector<char> buffer_;
   int position_;
 
-  bool is_finalized() const { return position_ < 0; }
+  bool is_finalized() const {
+    return position_ < 0;
+  }
 
   DISALLOW_IMPLICIT_CONSTRUCTORS(StringBuilder);
 };
@@ -296,7 +320,8 @@ class StringBuilder {
 // enough that it can no longer see that you have cast one pointer type to
 // another thus avoiding the warning.
 template <class Dest, class Source>
-inline Dest BitCast(const Source& source) {
+inline Dest BitCast(const Source& source)
+{
   // Compile time assertion: sizeof(Dest) == sizeof(Source)
   // A compile error here means your Dest and Source have different sizes.
   typedef char VerifySizesAreEqual[sizeof(Dest) == sizeof(Source) ? 1 : -1];
@@ -307,7 +332,8 @@ inline Dest BitCast(const Source& source) {
 }
 
 template <class Dest, class Source>
-inline Dest BitCast(Source* source) {
+inline Dest BitCast(Source* source)
+{
   return BitCast<Dest>(reinterpret_cast<uintptr_t>(source));
 }
 

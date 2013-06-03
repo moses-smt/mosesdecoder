@@ -11,7 +11,7 @@
 
 namespace Moses
 {
-  
+
 //! Vocab maps between strings and uint32 ids.
 class Vocab
 {

@@ -13,10 +13,11 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& config)
-: Scorer(name,config) {
+  : Scorer(name,config)
+{
   //configure regularisation
   static string KEY_TYPE = "regtype";
   static string KEY_WINDOW = "regwin";
@@ -26,7 +27,7 @@ StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& c
   static string TYPE_MINIMUM = "min";
   static string TRUE = "true";
   static string FALSE = "false";
-  
+
   string type = getConfig(KEY_TYPE,TYPE_NONE);
   if (type == TYPE_NONE) {
     m_regularization_type = NONE;
@@ -38,11 +39,11 @@ StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& c
     throw runtime_error("Unknown scorer regularisation strategy: " + type);
   }
   //    cerr << "Using scorer regularisation strategy: " << type << endl;
-  
+
   const string& window = getConfig(KEY_WINDOW, "0");
   m_regularization_window = atoi(window.c_str());
   //    cerr << "Using scorer regularisation window: " << m_regularization_window << endl;
-  
+
   const string& preserve_case = getConfig(KEY_CASE,TRUE);
   if (preserve_case == TRUE) {
     m_enable_preserve_case = true;
@@ -72,8 +73,8 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
     if (stats.size() != totals.size()) {
       stringstream msg;
       msg << "Statistics for (" << "," << candidates[i] << ") have incorrect "
-      << "number of fields. Found: " << stats.size() << " Expected: "
-      << totals.size();
+          << "number of fields. Found: " << stats.size() << " Expected: "
+          << totals.size();
       throw runtime_error(msg.str());
     }
     for (size_t k = 0; k < totals.size(); ++k) {
@@ -81,7 +82,7 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
     }
   }
   scores.push_back(calculateScore(totals));
-  
+
   candidates_t last_candidates(candidates);
   // apply each of the diffs, and get new scores
   for (size_t i = 0; i < diffs.size(); ++i) {
@@ -91,21 +92,21 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
       size_t last_nid = last_candidates[sid];
       for (size_t k  = 0; k < totals.size(); ++k) {
         int diff = m_score_data->get(sid,nid).get(k)
-        - m_score_data->get(sid,last_nid).get(k);
+                   - m_score_data->get(sid,last_nid).get(k);
         totals[k] += diff;
       }
       last_candidates[sid] = nid;
     }
     scores.push_back(calculateScore(totals));
   }
-  
+
   // Regularisation. This can either be none, or the min or average as described in
   // Cer, Jurafsky and Manning at WMT08.
   if (m_regularization_type == NONE || m_regularization_window <= 0) {
     // no regularisation
     return;
   }
-  
+
   // window size specifies the +/- in each direction
   statscores_t raw_scores(scores);      // copy scores
   for (size_t i = 0; i < scores.size(); ++i) {

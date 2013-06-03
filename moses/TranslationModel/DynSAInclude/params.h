@@ -10,21 +10,23 @@
 #include "utils.h"
 #include "types.h"
 
-#define NumOfParams(paramArray) (sizeof(paramArray)/sizeof((paramArray)[0])) 
+#define NumOfParams(paramArray) (sizeof(paramArray)/sizeof((paramArray)[0]))
 
-namespace Moses {
+namespace Moses
+{
 typedef struct ParamDefs {
   std::string name;
-  std::string value; 
+  std::string value;
   std::string abbrev;
   int type;
   std::string description;
 } ParamDefs;
 
-  //! @todo ask abby2
-class Parameters {
+//! @todo ask abby2
+class Parameters
+{
 public:
-  static const std::string kNotSetValue; 
+  static const std::string kNotSetValue;
   static const int kBoolValue;
   static const int kIntValue;
   static const int kFloatValue;
@@ -32,15 +34,15 @@ public:
   static const int kUndefinedValue;
   static const std::string kFalseValue;
   static const std::string kTrueValue;
-  
+
   Parameters(const ParamDefs * paramdefs, const count_t paramNum);
   Parameters(int argc, char** argv, const ParamDefs * paramdefs, const count_t paramNum);
   ~Parameters() {}
   bool loadParams(int argc, char ** argv);
   bool loadParams(const std::string& param_file, std::set<std::string>&);
   int getValueType(const std::string & name);
-  bool setParamValue(const std::string& name, const std::string& value); 
-  bool verifyValueType(const std::string& name, const std::string& value); 
+  bool setParamValue(const std::string& name, const std::string& value);
+  bool verifyValueType(const std::string& name, const std::string& value);
   bool isValidParamName(const std::string & name);
   std::string getParamValue(const std::string& name);
   //void* getParam(const std::string& name);

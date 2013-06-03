@@ -44,18 +44,28 @@ public:
     m_feature_data->clear();
   }
 
-  ScoreDataHandle getScoreData() { return m_score_data; }
+  ScoreDataHandle getScoreData() {
+    return m_score_data;
+  }
 
-  FeatureDataHandle getFeatureData() { return m_feature_data; }
+  FeatureDataHandle getFeatureData() {
+    return m_feature_data;
+  }
 
-  Scorer* getScorer() { return m_scorer; }
+  Scorer* getScorer() {
+    return m_scorer;
+  }
 
   std::size_t NumberOfFeatures() const {
     return m_feature_data->NumberOfFeatures();
   }
 
-  std::string Features() const { return m_feature_data->Features(); }
-  void Features(const std::string &f) { m_feature_data->Features(f); }
+  std::string Features() const {
+    return m_feature_data->Features();
+  }
+  void Features(const std::string &f) {
+    m_feature_data->Features(f);
+  }
 
   void loadNBest(const std::string &file);
 

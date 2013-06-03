@@ -25,8 +25,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-DecodeStep::DecodeStep(const DecodeFeature *decodeFeature, const DecodeStep* prev) :
-  m_decodeFeature(decodeFeature)
+DecodeStep::DecodeStep(const DecodeFeature *decodeFeature,
+                       const DecodeStep* prev,
+                       const std::vector<FeatureFunction*> &features)
+  : m_decodeFeature(decodeFeature)
 {
   FactorMask prevOutputFactors;
   if (prev) prevOutputFactors = prev->m_outputFactors;
@@ -44,6 +46,17 @@ DecodeStep::DecodeStep(const DecodeFeature *decodeFeature, const DecodeStep* pre
   VERBOSE(2,"DecodeStep():\n\toutputFactors=" << m_outputFactors
           << "\n\tconflictFactors=" << conflictMask
           << "\n\tnewOutputFactors=" << newOutputFactorMask << std::endl);
+
+  // find out which feature function can be applied in this decode step
+  for (size_t i = 0; i < features.size(); ++i) {
+    FeatureFunction *feature = features[i];
+    if (feature->IsUseable(m_outputFactors)) {
+      m_featuresToApply.push_back(feature);
+    } else {
+      m_featuresRemaining.push_back(feature);
+    }
+
+  }
 }
 
 DecodeStep::~DecodeStep() {}
@@ -58,6 +71,16 @@ const PhraseDictionary* DecodeStep::GetPhraseDictionaryFeature() const
 const GenerationDictionary* DecodeStep::GetGenerationDictionaryFeature() const
 {
   return dynamic_cast<const GenerationDictionary*>(m_decodeFeature);
+}
+
+void DecodeStep::RemoveFeature(const FeatureFunction *ff)
+{
+  for (size_t i = 0; i < m_featuresToApply.size(); ++i) {
+    if (ff == m_featuresToApply[i]) {
+      m_featuresToApply.erase(m_featuresToApply.begin() + i);
+      return;
+    }
+  }
 }
 
 }

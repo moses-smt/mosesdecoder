@@ -1,4 +1,4 @@
-  // vim:tabstop=2
+// vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
@@ -32,11 +32,6 @@ namespace Moses
 {
 PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
-}
-
-bool PhraseDictionaryOnDisk::InitDictionary()
-{
-  return true;
 }
 
 // PhraseDictionary impl

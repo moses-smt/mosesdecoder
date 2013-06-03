@@ -36,14 +36,16 @@ namespace lm {
 
 //#include "lm/state.hh"
 
-namespace Moses {
+namespace Moses
+{
 
-  //template<typename M> 
+//template<typename M>
 class BackwardLanguageModelTest;
 
-class BackwardLMState : public FFState {
+class BackwardLMState : public FFState
+{
 
-  public:
+public:
 
   /*
     int Compare(const FFState &o) const {
@@ -53,14 +55,14 @@ class BackwardLMState : public FFState {
   */
   int Compare(const FFState &o) const;
 
-    // Allow BackwardLanguageModel to access the private members of this class
-    template <class Model> friend class BackwardLanguageModel;
+  // Allow BackwardLanguageModel to access the private members of this class
+  template <class Model> friend class BackwardLanguageModel;
 
   //    template <class Model> friend class Moses::BackwardLanguageModelTest;
-    friend class Moses::BackwardLanguageModelTest;
+  friend class Moses::BackwardLanguageModelTest;
 
-  private:
-    lm::ngram::ChartState state;
+private:
+  lm::ngram::ChartState state;
 
 };
 

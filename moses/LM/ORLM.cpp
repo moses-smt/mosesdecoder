@@ -9,10 +9,11 @@
 #include "ORLM.h"
 
 using std::map;
-namespace Moses 
+namespace Moses
 {
-bool LanguageModelORLM::Load(const std::string &filePath, FactorType factorType, 
-			       size_t nGramOrder) {
+bool LanguageModelORLM::Load(const std::string &filePath, FactorType factorType,
+                             size_t nGramOrder)
+{
   cerr << "Loading LanguageModelORLM..." << endl;
   m_filePath = filePath;
   m_factorType = factorType;
@@ -26,13 +27,14 @@ bool LanguageModelORLM::Load(const std::string &filePath, FactorType factorType,
   CreateFactors();
   return true;
 }
-void LanguageModelORLM::CreateFactors() {
+void LanguageModelORLM::CreateFactors()
+{
   FactorCollection &factorCollection = FactorCollection::Instance();
   size_t maxFactorId = 0; // to create lookup vector later on
   std::map<size_t, wordID_t> m_lmids_map; // map from factor id -> word id
 
   for(std::map<Word, wordID_t>::const_iterator vIter = m_lm->vocab_->VocabStart();
-      vIter != m_lm->vocab_->VocabEnd(); vIter++){
+      vIter != m_lm->vocab_->VocabEnd(); vIter++) {
     // get word from ORLM vocab and associate with (new) factor id
     size_t factorId = factorCollection.AddFactor(Output,m_factorType,vIter->first.ToString())->GetId();
     m_lmids_map[factorId] = vIter->second;
@@ -50,7 +52,7 @@ void LanguageModelORLM::CreateFactors() {
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
   // add to lookup vector in object
- lm_ids_vec_.resize(maxFactorId+1);
+  lm_ids_vec_.resize(maxFactorId+1);
   // fill with OOV code
   fill(lm_ids_vec_.begin(), lm_ids_vec_.end(), m_oov_id);
 
@@ -58,15 +60,18 @@ void LanguageModelORLM::CreateFactors() {
        iter != m_lmids_map.end() ; ++iter)
     lm_ids_vec_[iter->first] = iter->second;
 }
-wordID_t LanguageModelORLM::GetLmID(const std::string& str) const {
+wordID_t LanguageModelORLM::GetLmID(const std::string& str) const
+{
   return m_lm->vocab_->GetWordID(str);
 }
-wordID_t LanguageModelORLM::GetLmID(const Factor* factor) const {
+wordID_t LanguageModelORLM::GetLmID(const Factor* factor) const
+{
   size_t factorId = factor->GetId();
   return (factorId >= lm_ids_vec_.size()) ? m_oov_id : lm_ids_vec_[factorId];
 }
-LMResult LanguageModelORLM::GetValue(const std::vector<const Word*> &contextFactor, 
-    State* finalState) const {
+LMResult LanguageModelORLM::GetValue(const std::vector<const Word*> &contextFactor,
+                                     State* finalState) const
+{
   FactorType factorType = GetFactorType();
   // set up context
   //std::vector<long unsigned int> factor(1,0);
@@ -88,13 +93,14 @@ LMResult LanguageModelORLM::GetValue(const std::vector<const Word*> &contextFact
   */
   return ret;
 }
-bool LanguageModelORLM::UpdateORLM(const std::vector<string>& ngram, const int value) {
+bool LanguageModelORLM::UpdateORLM(const std::vector<string>& ngram, const int value)
+{
   /*cerr << "Inserting into ORLM: \"";
   iterate(ngram, nit)
     cerr << *nit << " ";
   cerr << "\"\t" << value << endl; */
   m_lm->vocab_->MakeOpen();
-  bool res = m_lm->update(ngram, value); 
+  bool res = m_lm->update(ngram, value);
   m_lm->vocab_->MakeClosed();
   return res;
 }
