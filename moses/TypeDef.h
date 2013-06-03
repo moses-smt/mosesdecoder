@@ -121,6 +121,7 @@ enum PhraseTableImplementation {
   ,FuzzyMatch    = 11
   ,Compact      = 12
   ,Interpolated = 13
+  ,DSuffixArray = 14
 };
 
 enum InputTypeEnum {
