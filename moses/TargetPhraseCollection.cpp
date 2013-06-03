@@ -35,11 +35,11 @@ struct CompareTargetPhrase {
 
 void TargetPhraseCollection::NthElement(size_t tableLimit)
 {
-  vector<TargetPhrase*>::iterator
-  iterMiddle = (tableLimit == 0 || m_collection.size() < tableLimit) ?m_collection.end() : m_collection.begin() + tableLimit;
-
-  //std::sort(m_collection.begin(), m_collection.end(), CompareTargetPhrase());
-  std::nth_element(m_collection.begin(), iterMiddle, m_collection.end(), CompareTargetPhrase());
+  vector<TargetPhrase*>::iterator nth;
+  nth = (tableLimit && tableLimit <= m_collection.size()
+	 ? m_collection.begin() + tableLimit 
+	 : m_collection.end());
+  std::nth_element(m_collection.begin(), nth, m_collection.end(), CompareTargetPhrase());
 }
 
 void TargetPhraseCollection::Prune(bool adhereTableLimit, size_t tableLimit)
