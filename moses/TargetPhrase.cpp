@@ -104,8 +104,8 @@ void TargetPhrase::Evaluate()
   }
 
   float weightedScore = m_scoreBreakdown.GetWeightedScore();
-  float futureScore = futureScoreBreakdown.GetWeightedScore();
-
+  float futureScore   = futureScoreBreakdown.GetWeightedScore();
+  
   m_fullScore = weightedScore + futureScore;
 }
 
