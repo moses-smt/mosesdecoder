@@ -187,6 +187,7 @@ enum OnlineAlgorithm {
 	FOnlyPerceptron = 0
 	, FPercepWMira = 1
 	, FSparsePercepWSparseMira = 2
+	, Mira = 4
 };
 
 enum WordAlignmentSort {

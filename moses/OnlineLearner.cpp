@@ -538,7 +538,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	cerr<<"Read all the oracles in the list!\n";
 
 	//	Update the features
-	if(implementation!=FSparsePercepWSparseMira)
+	if(implementation==FSparsePercepWSparseMira)
 	{
 		pp_list::const_iterator it1;
 		for(it1=ShootemUp.begin(); it1!=ShootemUp.end(); it1++)
@@ -561,7 +561,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	//	---------------------------------------------------------------------------------- //
 
 	//	Update the weights
-	if(implementation == FPercepWMira)
+	if(implementation == FPercepWMira || implementation == Mira)
 	{
 		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
 		{
