@@ -321,7 +321,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
     }
   }
 
-  //Save("/tmp/new.ini");
+  Save("/tmp/moses.ini.new");
 
   // check if parameters make sense
   return Validate() && noErrorFlag;

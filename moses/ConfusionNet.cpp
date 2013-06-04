@@ -10,6 +10,7 @@
 #include "StaticData.h"
 #include "Sentence.h"
 #include "UserMessage.h"
+#include "moses/FF/InputFeature.h"
 
 namespace Moses
 {
@@ -118,8 +119,14 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
                                const std::vector<FactorType>& factorOrder)
 {
   Clear();
-  size_t numInputScores = StaticData::Instance().GetNumInputScores();
-  size_t numRealWordCount = StaticData::Instance().GetNumRealWordsInInput();
+
+  const StaticData &staticData = StaticData::Instance();
+  const InputFeature *inputFeature = staticData.GetInputFeature();
+  size_t numInputScores = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+  //size_t numInputScores = staticData.GetNumInputScores();
+  //size_t numRealWordCount = staticData.GetNumRealWordsInInput();
+
   size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);
 
