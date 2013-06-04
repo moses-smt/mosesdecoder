@@ -118,6 +118,7 @@ public:
     return m_setting;
   }
 
+  void Save(const std::string path);
 };
 
 }

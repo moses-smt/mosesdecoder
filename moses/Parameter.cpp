@@ -321,6 +321,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
     }
   }
 
+  //Save("/tmp/new.ini");
+
   // check if parameters make sense
   return Validate() && noErrorFlag;
 }
@@ -1234,6 +1236,31 @@ std::set<std::string> Parameter::GetWeightNames() const
     ret.insert(key);
   }
   return ret;
+}
+
+void Parameter::Save(const std::string path)
+{
+  ofstream file;
+  file.open(path.c_str());
+
+  PARAM_MAP::const_iterator iterOuter;
+  for (iterOuter = m_setting.begin(); iterOuter != m_setting.end(); ++iterOuter) {
+	const std::string &sectionName = iterOuter->first;
+	file << "[" << sectionName << "]" << endl;
+
+	const PARAM_VEC &values = iterOuter->second;
+
+	PARAM_VEC::const_iterator iterInner;
+	for (iterInner = values.begin(); iterInner != values.end(); ++iterInner) {
+      const std::string &value = *iterInner;
+      file << value << endl;
+	}
+
+	file << endl;
+  }
+
+
+  file.close();
 }
 
 }
