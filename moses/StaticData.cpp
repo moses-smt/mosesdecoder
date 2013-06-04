@@ -60,6 +60,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
+#include "moses/FF/InputFeature.h"
 
 #include "LM/Ken.h"
 #ifdef LM_IRST
@@ -96,6 +97,9 @@ StaticData::StaticData()
   ,m_needAlignmentInfo(false)
   ,m_numInputScores(0)
   ,m_numRealWordsInInput(0)
+  ,m_inputFeature(NULL)
+  ,m_wpProducer(NULL)
+  ,m_unknownWordPenaltyProducer(NULL)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -653,14 +657,17 @@ bool StaticData::LoadData(Parameter *parameter)
       WordPenaltyProducer *model = new WordPenaltyProducer(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_wpProducer = model;
     } else if (feature == "UnknownWordPenalty") {
       UnknownWordPenaltyProducer *model = new UnknownWordPenaltyProducer(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       if (weights.size() == 0)
         weights.push_back(1.0f);
       SetWeights(model, weights);
-      m_unknownWordPenaltyProducer = model;
+    } else if (feature == "InputFeature") {
+      InputFeature *model = new InputFeature(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+
     } else if (feature == "PhraseDictionaryBinary") {
       PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
@@ -1145,6 +1152,24 @@ void StaticData::LoadFeatureFunctions()
     const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
     if (generation) {
       m_generationDictionary.push_back(generation);
+    }
+
+    WordPenaltyProducer *wpProducer = dynamic_cast<WordPenaltyProducer*>(ff);
+    if (wpProducer) {
+      CHECK(m_wpProducer == NULL); // max 1 feature;
+      m_wpProducer = wpProducer;
+    }
+
+    UnknownWordPenaltyProducer *unknownWordPenaltyProducer = dynamic_cast<UnknownWordPenaltyProducer*>(ff);
+    if (unknownWordPenaltyProducer) {
+      CHECK(m_unknownWordPenaltyProducer == NULL); // max 1 feature;
+      m_unknownWordPenaltyProducer = unknownWordPenaltyProducer;
+    }
+
+    const InputFeature *inputFeature = dynamic_cast<const InputFeature*>(ff);
+    if (inputFeature) {
+      CHECK(m_inputFeature == NULL); // max 1 input feature;
+      m_inputFeature = inputFeature;
     }
 
     PhraseDictionary *pt = dynamic_cast<PhraseDictionary*>(ff);

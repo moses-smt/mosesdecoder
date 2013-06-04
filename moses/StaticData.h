@@ -56,6 +56,7 @@ class GenerationDictionary;
 class DecodeStep;
 class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
+class InputFeature;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -129,6 +130,7 @@ protected:
   mutable size_t m_verboseLevel;
   WordPenaltyProducer* m_wpProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  const InputFeature *m_inputFeature;
 
   bool m_reportSegmentation;
   bool m_reportAllFactors;
@@ -433,6 +435,10 @@ public:
 
   const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const {
     return m_unknownWordPenaltyProducer;
+  }
+
+  const InputFeature *GetInputFeature() const {
+    return m_inputFeature;
   }
 
   size_t GetNumInputScores() const {
