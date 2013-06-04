@@ -35,15 +35,17 @@ public:
   std::vector<int> alignedCountS;
   std::vector<std::vector<int> > alignedToT;
   int sentenceID;
+  std::string weightString;
 
   virtual ~SentenceAlignment();
 
-  virtual bool processTargetSentence(const char *, int);
+  virtual bool processTargetSentence(const char *, int, bool boundaryRules);
 
-  virtual bool processSourceSentence(const char *, int);
+  virtual bool processSourceSentence(const char *, int, bool boundaryRules);
 
   bool create(char targetString[], char sourceString[],
-              char alignmentString[], int sentenceID);
+              char alignmentString[], char weightString[], int sentenceID, bool boundaryRules);
+
 };
 
 }

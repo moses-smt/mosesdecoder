@@ -17,14 +17,15 @@
 #include <unistd.h>
 #endif
 
-typedef std::set<TextLenType> SentIdSet;
-typedef std::map<std::string, SentIdSet> PhraseSetMap;
+typedef std::vector<TextLenType> SentIdSet;
+typedef std::pair<SentIdSet, clock_t> ClockedSentIdSet;
+typedef std::map<std::string, ClockedSentIdSet> PhraseSetMap;
 
 #undef min
 
 // constants
-const size_t MINIMUM_SIZE_TO_KEEP = 10000;     // reduce this to improve memory usage,
-// increase for speed
+const size_t MINIMUM_SIZE_TO_KEEP = 10000;     // increase this to improve memory usage,
+// reduce for speed
 const std::string SEPARATOR       = " ||| ";
 
 const double ALPHA_PLUS_EPS  = -1000.0;        // dummy value
@@ -38,6 +39,7 @@ double sig_filter_limit = 0;            // keep phrase pairs with -log(sig) > si
 //    higher = filter-more
 bool pef_filter_only = false;           // only filter based on pef
 bool hierarchical = false;
+int max_cache = 0;
 
 // globals
 PhraseSetMap esets;
@@ -62,7 +64,8 @@ void usage()
             << "   [-n num      ] 0, 1...: 0=no filtering, >0 sort by P(e|f) and keep the top num elements\n"
             << "   [-c          ] add the cooccurence counts to the phrase table\n"
             << "   [-p          ] add -log(significance) to the phrasetable\n"
-            << "   [-h          ] filter hierarchical rule table\n";
+            << "   [-h          ] filter hierarchical rule table\n"
+            << "   [-m num      ] limit cache to num most recent phrases\n";
   exit(1);
 }
 
@@ -199,20 +202,10 @@ double fisher_exact(int cfe, int ce, int cf)
 }
 
 template <class setType>
-setType unordered_set_intersect(setType & set_1, setType & set_2)
+setType ordered_set_intersect(setType & set_1, setType & set_2)
 {
     setType set_out;
-
-    if (set_1.size() < set_2.size()) {
-        for (SentIdSet::iterator i=set_1.begin(); i != set_1.end(); ++i) {
-            if (set_2.find(*i) != set_2.end()) set_out.insert(*i);
-    }
-    }
-    else {
-        for (SentIdSet::iterator i=set_2.begin(); i != set_2.end(); ++i) {
-            if (set_1.find(*i) != set_1.end()) set_out.insert(*i);
-        }
-    }
+    std::set_intersection(set_1.begin(), set_1.end(), set_2.begin(), set_2.end(), inserter(set_out,set_out.begin()) );
     return set_out;
 }
 
@@ -227,8 +220,13 @@ SentIdSet lookup_phrase(const std::string & phrase, C_SuffixArraySearchApplicati
         cerr<<"No occurrences found!!\n";
     }
     for (vector<S_SimplePhraseLocationElement>::iterator i=locations.begin(); i != locations.end(); ++i) {
-        occur_set.insert(i->sentIdInCorpus);
+        occur_set.push_back(i->sentIdInCorpus);
     }
+    
+    std::sort(occur_set.begin(), occur_set.end());
+    SentIdSet::iterator it = std::unique(occur_set.begin(), occur_set.end());
+    occur_set.resize(it - occur_set.begin());
+    
     return occur_set;
 }
 
@@ -243,22 +241,28 @@ SentIdSet lookup_multiple_phrases(vector<std::string> & phrases, C_SuffixArraySe
 
     else {
         SentIdSet main_set;
-        SentIdSet & first_set = cache[phrases.front()];
+        ClockedSentIdSet & clocked_first_set = cache[phrases.front()];
+        SentIdSet & first_set = clocked_first_set.first;
+        clocked_first_set.second = clock();
+        
         bool first = true;
         if (first_set.empty()) {
             first_set = lookup_phrase(phrases.front(), my_sa);
         }
         for (vector<std::string>::iterator phrase=phrases.begin()+1; phrase != phrases.end(); ++phrase) {
-            SentIdSet & temp_set = cache[*phrase];
+            ClockedSentIdSet & clocked_temp_set = cache[*phrase];
+            SentIdSet & temp_set = clocked_temp_set.first;
+            clocked_temp_set.second = clock();
+            
             if (temp_set.empty()) {
                 temp_set = lookup_phrase(*phrase, my_sa);
             }
             if (first) {
-                main_set = unordered_set_intersect(first_set,temp_set);
+                main_set = ordered_set_intersect(first_set,temp_set);
                 first = false;
             }
             else {
-                main_set = unordered_set_intersect(main_set,temp_set);
+                main_set = ordered_set_intersect(main_set,temp_set);
             }
             if (temp_set.size() < MINIMUM_SIZE_TO_KEEP) {
                 cache.erase(*phrase);
@@ -283,24 +287,24 @@ SentIdSet find_occurrences(const std::string& rule, C_SuffixArraySearchApplicati
     if (hierarchical) {
         //   std::cerr << "splitting up phrase: " << phrase << "\n";
         int pos = 0;
-        int endPos = 0;
+        int NTStartPos, NTEndPos;
         vector<std::string> phrases;
-
-        while (rule.find("[X][X] ", pos) < rule.size()) {
-            endPos = rule.find("[X][X] ",pos) - 1; // -1 to cut space before NT
-            if (endPos < pos) { // no space: NT at start of rule (or two consecutive NTs)
-                pos += 7; 
+        while (rule.find("] ", pos) < rule.size()) {
+            NTStartPos = rule.find("[",pos) - 1; // -1 to cut space before NT
+            NTEndPos = rule.find("] ",pos);
+            if (NTStartPos < pos) { // no space: NT at start of rule (or two consecutive NTs)
+                pos = NTEndPos + 2;
                 continue;
             }
-            phrases.push_back(rule.substr(pos,endPos-pos));
-            pos = endPos + 8;
+            phrases.push_back(rule.substr(pos,NTStartPos-pos));
+            pos = NTEndPos + 2;
         }
 
-        // cut LHS of rule
-        endPos = rule.size()-4;
-        if (endPos > pos) {
-            phrases.push_back(rule.substr(pos,endPos-pos));
+        NTStartPos = rule.find("[",pos) - 1; // LHS of rule
+        if (NTStartPos > pos) {
+            phrases.push_back(rule.substr(pos,NTStartPos-pos));
         }
+
         sa_set = lookup_multiple_phrases(phrases, my_sa, rule, cache);
     }
     else {
@@ -328,7 +332,9 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
   for (std::vector<PTEntry*>::iterator i=options.begin(); i != options.end(); ++i) {
     const std::string& e_phrase = (*i)->e_phrase;
     size_t cef=0;
-    SentIdSet& eset = esets[e_phrase];
+    ClockedSentIdSet& clocked_eset = esets[e_phrase];
+    SentIdSet & eset = clocked_eset.first;
+    clocked_eset.second = clock();
     if (eset.empty()) {
         eset = find_occurrences(e_phrase, e_sa, esets);
         //std::cerr << "Looking up e-phrase: " << e_phrase << "\n";
@@ -336,11 +342,11 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
     size_t ce=eset.size();
     if (ce < cf) {
       for (SentIdSet::iterator i=eset.begin(); i != eset.end(); ++i) {
-        if (fset.find(*i) != fset.end()) cef++;
+        if (std::binary_search(fset.begin(), fset.end(), *i)) cef++;
       }
     } else {
       for (SentIdSet::iterator i=fset.begin(); i != fset.end(); ++i) {
-        if (eset.find(*i) != eset.end()) cef++;
+        if (std::binary_search(eset.begin(), eset.end(), *i)) cef++;
       }
     }
     double nlp = -log(fisher_exact(cef, cf, ce));
@@ -356,13 +362,28 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
   options.erase(new_end,options.end());
 }
 
+void prune_cache(PhraseSetMap & psm) {
+  if(max_cache && psm.size() > max_cache) {
+    std::vector<clock_t> clocks;
+    for(PhraseSetMap::iterator it = psm.begin(); it != psm.end(); it++) 
+      clocks.push_back(it->second.second);
+    
+    std::sort(clocks.begin(), clocks.end());
+    clock_t out = clocks[psm.size()-max_cache];
+    
+    for(PhraseSetMap::iterator it = psm.begin(); it != psm.end(); it++)
+      if(it->second.second < out)
+        psm.erase(it);
+  }
+}
+
 int main(int argc, char * argv[])
 {
   int c;
   const char* efile=0;
   const char* ffile=0;
   int pfe_index = 2;
-  while ((c = getopt(argc, argv, "cpf:e:i:n:l:h")) != -1) {
+  while ((c = getopt(argc, argv, "cpf:e:i:n:l:m:h")) != -1) {
     switch (c) {
     case 'e':
       efile = optarg;
@@ -385,6 +406,9 @@ int main(int argc, char * argv[])
       break;
     case 'h':
       hierarchical = true;
+      break;
+    case 'm':
+      max_cache = atoi(optarg);
       break;
     case 'l':
       std::cerr << "-l = " << optarg << "\n";
@@ -442,9 +466,14 @@ int main(int argc, char * argv[])
   size_t pt_lines = 0;
   while(!cin.eof()) {
     cin.getline(tmpString,10000,'\n');
-    if(++pt_lines%10000==0) {
+    if(++pt_lines%10000==0) { 
       std::cerr << ".";
-      if(pt_lines%500000==0) std::cerr << "[n:"<<pt_lines<<"]\n";
+      
+      prune_cache(esets);
+      prune_cache(fsets);
+      
+      if(pt_lines%500000==0) 
+        std::cerr << "[n:"<<pt_lines<<"]\n";
     }
 
     if(strlen(tmpString)>0) {

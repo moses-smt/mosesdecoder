@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <cstring>
 
-namespace {
+namespace
+{
 
 const int LINE_MAX_LENGTH = 10000;
 
@@ -14,15 +15,15 @@ const int LINE_MAX_LENGTH = 10000;
 using namespace std;
 
 SuffixArray::SuffixArray()
-    : m_array(NULL),
-      m_index(NULL),
-      m_buffer(NULL),
-      m_wordInSentence(NULL),
-      m_sentence(NULL),
-      m_sentenceLength(NULL),
-      m_vcb(),
-      m_size(0),
-      m_sentenceCount(0) { }
+  : m_array(NULL),
+    m_index(NULL),
+    m_buffer(NULL),
+    m_wordInSentence(NULL),
+    m_sentence(NULL),
+    m_sentenceLength(NULL),
+    m_vcb(),
+    m_size(0),
+    m_sentenceCount(0) { }
 
 SuffixArray::~SuffixArray()
 {

@@ -19,7 +19,7 @@
  ***********************************************************************/
 #include <iostream>
 #include "util/check.hh"
-#include "../moses/src/Util.h"
+#include "moses/Util.h"
 #include "Phrase.h"
 
 using namespace std;
@@ -27,27 +27,13 @@ using namespace std;
 namespace OnDiskPt
 {
 
-Phrase::Phrase(const Phrase &copy)
-  :m_words(copy.GetSize())
-{
-  for (size_t pos = 0; pos < copy.GetSize(); ++pos) {
-    const Word &oldWord = copy.GetWord(pos);
-    Word *newWord = new Word(oldWord);
-    m_words[pos] = newWord;
-  }
-}
 
-Phrase::~Phrase()
-{
-  Moses::RemoveAllInColl(m_words);
-}
-
-void Phrase::AddWord(Word *word)
+void Phrase::AddWord(WordPtr word)
 {
   m_words.push_back(word);
 }
 
-void Phrase::AddWord(Word *word, size_t pos)
+void Phrase::AddWord(WordPtr word, size_t pos)
 {
   CHECK(pos < m_words.size());
   m_words.insert(m_words.begin() + pos + 1, word);

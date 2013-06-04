@@ -41,11 +41,12 @@ template <class Quant, class Bhiksha> class TrieSearch {
     static void UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &counts, Config &config) {
       Quant::UpdateConfigFromBinary(fd, counts, config);
       util::AdvanceOrThrow(fd, Quant::Size(counts.size(), config) + Unigram::Size(counts[0]));
-      Bhiksha::UpdateConfigFromBinary(fd, config);
+      // Currently the unigram pointers are not compresssed, so there will only be a header for order > 2.
+      if (counts.size() > 2) Bhiksha::UpdateConfigFromBinary(fd, config);
     }
 
-    static std::size_t Size(const std::vector<uint64_t> &counts, const Config &config) {
-      std::size_t ret = Quant::Size(counts.size(), config) + Unigram::Size(counts[0]);
+    static uint64_t Size(const std::vector<uint64_t> &counts, const Config &config) {
+      uint64_t ret = Quant::Size(counts.size(), config) + Unigram::Size(counts[0]);
       for (unsigned char i = 1; i < counts.size() - 1; ++i) {
         ret += Middle::Size(Quant::MiddleBits(config), counts[i], counts[0], counts[i+1], config);
       }

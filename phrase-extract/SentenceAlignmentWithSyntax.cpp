@@ -32,17 +32,18 @@ using namespace std;
 namespace MosesTraining
 {
 
-bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID)
+bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID, bool boundaryRules)
 {
   if (!m_options.targetSyntax) {
-    return SentenceAlignment::processTargetSentence(targetString, sentenceID);
+    return SentenceAlignment::processTargetSentence(targetString, sentenceID, boundaryRules);
   }
 
   string targetStringCPP(targetString);
   try {
     ProcessAndStripXMLTags(targetStringCPP, targetTree,
                            m_targetLabelCollection,
-                           m_targetTopLabelCollection);
+                           m_targetTopLabelCollection,
+                           false);
   } catch (const XmlException & e) {
     std::cerr << "WARNING: failed to process target sentence at line "
               << sentenceID << ": " << e.getMsg() << std::endl;
@@ -52,17 +53,18 @@ bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetStrin
   return true;
 }
 
-bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceString, int sentenceID)
+bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceString, int sentenceID, bool boundaryRules)
 {
   if (!m_options.sourceSyntax) {
-    return SentenceAlignment::processSourceSentence(sourceString, sentenceID);
+    return SentenceAlignment::processSourceSentence(sourceString, sentenceID, boundaryRules);
   }
 
   string sourceStringCPP(sourceString);
   try {
     ProcessAndStripXMLTags(sourceStringCPP, sourceTree,
                            m_sourceLabelCollection ,
-                           m_sourceTopLabelCollection);
+                           m_sourceTopLabelCollection,
+                           false);
   } catch (const XmlException & e) {
     std::cerr << "WARNING: failed to process source sentence at line "
               << sentenceID << ": " << e.getMsg() << std::endl;

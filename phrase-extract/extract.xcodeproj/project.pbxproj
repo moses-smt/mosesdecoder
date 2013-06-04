@@ -37,6 +37,17 @@
 		1CFE962911762A3A006FF13B /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962311762A20006FF13B /* consolidate-direct.cpp */; };
 		1E2C902D141FDED400EA06A6 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 		1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
+		1E5B9DC8164DC1F100838CD0 /* ScoreFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5B9DC6164DC1F100838CD0 /* ScoreFeature.cpp */; };
+		1E5B9DC9164DC21200838CD0 /* ScoreFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5B9DC6164DC1F100838CD0 /* ScoreFeature.cpp */; };
+		1E5B9DCA164DC21200838CD0 /* ScoreFeature.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E5B9DC7164DC1F100838CD0 /* ScoreFeature.h */; };
+		1E5B9DCD164DC22800838CD0 /* domain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5B9DCB164DC22800838CD0 /* domain.cpp */; };
+		1E5B9DD2164DC23F00838CD0 /* relax-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5B9DCF164DC23F00838CD0 /* relax-parse.cpp */; };
+		1E5B9DD3164DC24C00838CD0 /* domain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5B9DCB164DC22800838CD0 /* domain.cpp */; };
+		1E5B9DD4164DC24C00838CD0 /* domain.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E5B9DCC164DC22800838CD0 /* domain.h */; };
+		1E5B9DD5164DC4F400838CD0 /* SyntaxTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C05B9EA1174CC24003585B2 /* SyntaxTree.cpp */; };
+		1E5B9DD6164DC4F400838CD0 /* SyntaxTree.h in Sources */ = {isa = PBXBuildFile; fileRef = 1C05B9EB1174CC24003585B2 /* SyntaxTree.h */; };
+		1E5B9DDA164DC55900838CD0 /* XmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C05BA1F1174CEE8003585B2 /* XmlTree.cpp */; };
+		1E5B9DDB164DC55900838CD0 /* XmlTree.h in Sources */ = {isa = PBXBuildFile; fileRef = 1C05BA201174CEE8003585B2 /* XmlTree.h */; };
 		1E66AB3D155D8068009ABD7C /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
 		1E66AB3E155D8068009ABD7C /* OutputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7F155C22C500119DD9 /* OutputFileStream.h */; };
 		1E66AB40155D8233009ABD7C /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
@@ -100,6 +111,14 @@
 		1CFE962411762A20006FF13B /* consolidate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consolidate.cpp; sourceTree = "<group>"; };
 		1E3EF29E13DBEAF300C1D54A /* extract-lex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "extract-lex.cpp"; sourceTree = "<group>"; };
 		1E3EF29F13DBEAF300C1D54A /* extract-lex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "extract-lex.h"; sourceTree = "<group>"; };
+		1E5B9DC6164DC1F100838CD0 /* ScoreFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScoreFeature.cpp; sourceTree = "<group>"; };
+		1E5B9DC7164DC1F100838CD0 /* ScoreFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScoreFeature.h; sourceTree = "<group>"; };
+		1E5B9DCB164DC22800838CD0 /* domain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = domain.cpp; sourceTree = "<group>"; };
+		1E5B9DCC164DC22800838CD0 /* domain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = domain.h; sourceTree = "<group>"; };
+		1E5B9DCE164DC23F00838CD0 /* PhraseExtractionOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhraseExtractionOptions.h; sourceTree = "<group>"; };
+		1E5B9DCF164DC23F00838CD0 /* relax-parse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "relax-parse.cpp"; sourceTree = "<group>"; };
+		1E5B9DD0164DC23F00838CD0 /* relax-parse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "relax-parse.h"; sourceTree = "<group>"; };
+		1E5B9DD1164DC23F00838CD0 /* SafeGetline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SafeGetline.h; sourceTree = "<group>"; };
 		1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputFileStream.cpp; sourceTree = "<group>"; };
 		1E671A7F155C22C500119DD9 /* OutputFileStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputFileStream.h; sourceTree = "<group>"; };
 		1E7C2CF611F1146200213451 /* extract */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = extract; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -178,6 +197,14 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E5B9DCE164DC23F00838CD0 /* PhraseExtractionOptions.h */,
+				1E5B9DCF164DC23F00838CD0 /* relax-parse.cpp */,
+				1E5B9DD0164DC23F00838CD0 /* relax-parse.h */,
+				1E5B9DD1164DC23F00838CD0 /* SafeGetline.h */,
+				1E5B9DCB164DC22800838CD0 /* domain.cpp */,
+				1E5B9DCC164DC22800838CD0 /* domain.h */,
+				1E5B9DC6164DC1F100838CD0 /* ScoreFeature.cpp */,
+				1E5B9DC7164DC1F100838CD0 /* ScoreFeature.h */,
 				1E9B03A4159E70A100E91032 /* consolidate-reverse.cpp */,
 				1E9B03A5159E70A100E91032 /* XmlException.h */,
 				1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */,
@@ -418,6 +445,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E5B9DD3164DC24C00838CD0 /* domain.cpp in Sources */,
+				1E5B9DD4164DC24C00838CD0 /* domain.h in Sources */,
+				1E5B9DC9164DC21200838CD0 /* ScoreFeature.cpp in Sources */,
+				1E5B9DCA164DC21200838CD0 /* ScoreFeature.h in Sources */,
 				1E671A82155C234500119DD9 /* OutputFileStream.cpp in Sources */,
 				1E671A83155C234500119DD9 /* OutputFileStream.h in Sources */,
 				1EB8A29A129C06B300041956 /* gzfilebuf.h in Sources */,
@@ -459,11 +490,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E5B9DDA164DC55900838CD0 /* XmlTree.cpp in Sources */,
+				1E5B9DDB164DC55900838CD0 /* XmlTree.h in Sources */,
+				1E5B9DD5164DC4F400838CD0 /* SyntaxTree.cpp in Sources */,
+				1E5B9DD6164DC4F400838CD0 /* SyntaxTree.h in Sources */,
 				1CE8CE2E0FC6EA0200924FEA /* extract.cpp in Sources */,
 				1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */,
 				1C05B9EC1174CC24003585B2 /* SentenceAlignment.cpp in Sources */,
 				1EB8A212129C024C00041956 /* InputFileStream.cpp in Sources */,
 				1E671A80155C22C500119DD9 /* OutputFileStream.cpp in Sources */,
+				1E5B9DC8164DC1F100838CD0 /* ScoreFeature.cpp in Sources */,
+				1E5B9DCD164DC22800838CD0 /* domain.cpp in Sources */,
+				1E5B9DD2164DC23F00838CD0 /* relax-parse.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -474,7 +512,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -482,10 +520,10 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = "extract-rules";
-				SDKROOT = macosx;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -493,7 +531,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
@@ -501,10 +539,10 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = "extract-rules";
-				SDKROOT = macosx;
+				SDKROOT = "";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -513,7 +551,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -521,7 +559,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = statistics;
-				SDKROOT = macosx;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -529,7 +567,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
@@ -537,7 +575,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = statistics;
-				SDKROOT = macosx;
+				SDKROOT = "";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -546,7 +584,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -555,10 +593,10 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = score;
-				SDKROOT = macosx;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -566,7 +604,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
@@ -574,10 +612,10 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = score;
-				SDKROOT = macosx;
+				SDKROOT = "";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -586,7 +624,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -594,10 +632,10 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = consolidate;
-				SDKROOT = macosx;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -605,7 +643,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
@@ -613,10 +651,10 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = consolidate;
-				SDKROOT = macosx;
+				SDKROOT = "";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -625,7 +663,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -633,10 +671,10 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = "consolidate-direct";
-				SDKROOT = macosx;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -644,7 +682,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
@@ -652,10 +690,10 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = "consolidate-direct";
-				SDKROOT = macosx;
+				SDKROOT = "";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -664,7 +702,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -676,10 +714,10 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = extract;
-				SDKROOT = macosx;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -687,17 +725,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lboost_iostreams",
+					"-lboost_iostreams-mt",
 				);
 				PRODUCT_NAME = extract;
-				SDKROOT = macosx;
+				SDKROOT = "";
 			};
 			name = Release;
 		};
@@ -709,7 +747,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = /opt/local/include;
+				HEADER_SEARCH_PATHS = (
+					/opt/local/include,
+					../,
+				);
 				LIBRARY_SEARCH_PATHS = /opt/local/lib;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -723,7 +764,10 @@
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = /opt/local/include;
+				HEADER_SEARCH_PATHS = (
+					/opt/local/include,
+					../,
+				);
 				LIBRARY_SEARCH_PATHS = /opt/local/lib;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;

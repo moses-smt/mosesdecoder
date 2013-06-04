@@ -4,7 +4,7 @@
 
 #include "../native.h"
 #include "../timestamp.h"
-#include "../newstr.h"
+#include "../object.h"
 #include "../strings.h"
 #include "../regexp.h"
 #include "../compile.h"
@@ -25,7 +25,7 @@ rule transform ( list * : pattern : indices * )
     return $(result) ;
 }
 */
-LIST *regex_transform( PARSE *parse, FRAME *frame )
+LIST *regex_transform( FRAME *frame, int flags )
 {
     LIST* l = lol_get( frame->args, 0 );    
     LIST* pattern = lol_get( frame->args, 1 );    
@@ -33,18 +33,19 @@ LIST *regex_transform( PARSE *parse, FRAME *frame )
     int* indices = 0;
     int size;
     int* p;
-    LIST* result = 0;
+    LIST* result = L0;
 
     string buf[1];
     string_new(buf);
 
-    if (indices_list)
+    if (!list_empty(indices_list))
     {
+        LISTITER iter = list_begin(indices_list), end = list_end(indices_list);
         size = list_length(indices_list);
         indices = (int*)BJAM_MALLOC(size*sizeof(int));
-        for(p = indices; indices_list; indices_list = indices_list->next)
+        for(p = indices; iter != end; iter = list_next(iter))
         {
-            *p++ = atoi(indices_list->string);
+            *p++ = atoi(object_str(list_item(iter)));
         }        
     }
     else 
@@ -56,11 +57,12 @@ LIST *regex_transform( PARSE *parse, FRAME *frame )
 
     {
         /* Result is cached and intentionally never freed */
-        regexp *re = regex_compile( pattern->string );
+        regexp *re = regex_compile( list_front( pattern ) );
 
-        for(; l; l = l->next)
+        LISTITER iter = list_begin( l ), end = list_end( l );
+        for( ; iter != end; iter = list_next( iter ) )
         {
-            if( regexec( re, l->string ) )
+            if( regexec( re, object_str( list_item( iter ) ) ) )
             {
                 int i = 0;
                 for(; i < size; ++i)
@@ -73,7 +75,7 @@ LIST *regex_transform( PARSE *parse, FRAME *frame )
                     if (re->startp[index] != re->endp[index])
                     {
                         string_append_range( buf, re->startp[index], re->endp[index] );
-                        result = list_new( result, newstr( buf->value ) ); 
+                        result = list_push_back( result, object_new( buf->value ) ); 
                         string_truncate( buf, 0 );
                     }
                 }
@@ -90,7 +92,7 @@ LIST *regex_transform( PARSE *parse, FRAME *frame )
 void init_regex()
 {
     {
-        char* args[] = { "list", "*", ":", "pattern", ":", "indices", "*", 0 };
+        const char* args[] = { "list", "*", ":", "pattern", ":", "indices", "*", 0 };
         declare_native_rule("regex", "transform", args, regex_transform, 2);
     }
 }

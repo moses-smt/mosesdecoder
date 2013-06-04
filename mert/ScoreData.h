@@ -18,7 +18,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 class Scorer;
 
@@ -40,10 +40,8 @@ public:
   ScoreData(Scorer* scorer);
   ~ScoreData() {}
 
-  void clear() { m_array.clear(); }
-
-  inline ScoreArray get(const std::string& idx) {
-    return m_array.at(getIndex(idx));
+  void clear() {
+    m_array.clear();
   }
 
   inline ScoreArray& get(std::size_t idx) {
@@ -54,11 +52,11 @@ public:
     return m_array.at(idx);
   }
 
-  inline bool exists(const std::string& sent_idx) const {
-    return exists(getIndex(sent_idx));
+  inline bool exists(int sent_idx) const {
+    return existsInternal(getIndex(sent_idx));
   }
 
-  inline bool exists(int sent_idx) const {
+  inline bool existsInternal(int sent_idx) const {
     return (sent_idx > -1 && sent_idx < static_cast<int>(m_array.size())) ? true : false;
   }
 
@@ -70,17 +68,23 @@ public:
     return m_array.at(i).get(j);
   }
 
-  std::string name() const { return m_score_type; }
+  std::string name() const {
+    return m_score_type;
+  }
 
   std::string name(const std::string &score_type) {
     return m_score_type = score_type;
   }
 
   void add(ScoreArray& e);
-  void add(const ScoreStats& e, const std::string& sent_idx);
+  void add(const ScoreStats& e, int sent_idx);
 
-  std::size_t NumberOfScores() const { return m_num_scores; }
-  std::size_t size() const { return m_array.size(); }
+  std::size_t NumberOfScores() const {
+    return m_num_scores;
+  }
+  std::size_t size() const {
+    return m_array.size();
+  }
 
   void save(const std::string &file, bool bin=false);
   void save(std::ostream* os, bool bin=false);
@@ -93,7 +97,7 @@ public:
 
   void setIndex();
 
-  inline int getIndex(const std::string& idx) const {
+  inline int getIndex(const int idx) const {
     name2idx::const_iterator i = m_array_name_to_index.find(idx);
     if (i != m_array_name_to_index.end())
       return i->second;
@@ -101,7 +105,7 @@ public:
       return -1;
   }
 
-  inline std::string getIndex(std::size_t idx) const {
+  inline int getName(std::size_t idx) const {
     idx2name::const_iterator i = m_index_to_array_name.find(idx);
     if (i != m_index_to_array_name.end())
       throw std::runtime_error("there is no entry at index " + idx);

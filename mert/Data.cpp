@@ -11,41 +11,45 @@
 #include <fstream>
 
 #include "Data.h"
-#include "FileStream.h"
 #include "Scorer.h"
 #include "ScorerFactory.h"
 #include "Util.h"
 #include "util/check.hh"
 
+#include "util/file_piece.hh"
+#include "util/tokenize_piece.hh"
+#include "util/string_piece.hh"
+#include "FeatureDataIterator.h"
+
 using namespace std;
 
 namespace MosesTuning
 {
-  
 
-Data::Data()
-  : m_scorer(NULL),
+Data::Data(Scorer* scorer, const string& sparse_weights_file)
+  : m_scorer(scorer),
+    m_score_type(m_scorer->getName()),
     m_num_scores(0),
-    m_sparse_flag(false),
-    m_score_data(),
-    m_feature_data() {}
-
-Data::Data(Scorer* scorer)
-    : m_scorer(scorer),
-      m_score_type(m_scorer->getName()),
-      m_num_scores(0),
-      m_sparse_flag(false),
-      m_score_data(new ScoreData(m_scorer)),
-      m_feature_data(new FeatureData)
+    m_score_data(new ScoreData(m_scorer)),
+    m_feature_data(new FeatureData)
 {
   TRACE_ERR("Data::m_score_type " << m_score_type << endl);
   TRACE_ERR("Data::Scorer type from Scorer: " << m_scorer->getName() << endl);
+  if (sparse_weights_file.size()) {
+    m_sparse_weights.load(sparse_weights_file);
+    ostringstream msg;
+    msg << "Data::sparse_weights {";
+    m_sparse_weights.write(msg,"=");
+    msg << "}";
+    TRACE_ERR(msg.str() << std::endl);
+  }
 }
 
 //ADDED BY TS
 // TODO: This is too long; consider creating additional functions to
 // reduce the lines of this function.
-void Data::removeDuplicates() {
+void Data::removeDuplicates()
+{
   size_t nSentences = m_feature_data->size();
   assert(m_score_data->size() == nSentences);
 
@@ -125,59 +129,73 @@ void Data::removeDuplicates() {
 }
 //END_ADDED
 
-void Data::load(const std::string &featfile, const std::string &scorefile) {
-  m_feature_data->load(featfile);
+void Data::load(const std::string &featfile, const std::string &scorefile)
+{
+  m_feature_data->load(featfile, m_sparse_weights);
   m_score_data->load(scorefile);
-  if (m_feature_data->hasSparseFeatures())
-    m_sparse_flag = true;
 }
 
 void Data::loadNBest(const string &file)
 {
   TRACE_ERR("loading nbest from " << file << endl);
-  inputfilestream inp(file); // matches a stream with a file. Opens the file
-  if (!inp.good())
-    throw runtime_error("Unable to open: " + file);
+  util::FilePiece in(file.c_str());
 
   ScoreStats scoreentry;
-  string line, sentence_index, sentence, feature_str, alignment;
+  string sentence, feature_str, alignment;
+  int sentence_index;
 
-  while (getline(inp, line, '\n')) {
-    if (line.empty()) continue;
-    // adding statistics for error measures
-    scoreentry.clear();
+  while (true) {
+    try {
+      StringPiece line = in.ReadLine();
+      if (line.empty()) continue;
+      // adding statistics for error measures
+      scoreentry.clear();
 
-    getNextPound(line, sentence_index, "|||"); // first field
-    getNextPound(line, sentence, "|||");       // second field
-    getNextPound(line, feature_str, "|||");    // third field
+      util::TokenIter<util::MultiCharacter> it(line, util::MultiCharacter("|||"));
 
-    if (line.length() > 0) {
-      string temp;
-      getNextPound(line, temp, "|||"); //fourth field sentence score
-      if (line.length() > 0) {
-        getNextPound(line, alignment, "|||"); //fourth field only there if alignment scorer
+      sentence_index = ParseInt(*it);
+      ++it;
+      sentence = it->as_string();
+      ++it;
+      feature_str = it->as_string();
+      ++it;
+
+      if (it) {
+        ++it;                             // skip model score.
+
+        if (it) {
+          ++it;
+          alignment = it->as_string(); //fifth field (if present) is either phrase or word alignment
+          if (it) {
+            ++it;
+            alignment = it->as_string(); //sixth field (if present) is word alignment
+          }
+        }
       }
-    }
-    //TODO check alignment exists if scorers need it
+      //TODO check alignment exists if scorers need it
 
-    if (m_scorer->useAlignment()) {
-      sentence += "|||";
-      sentence += alignment;
-    }
-    m_scorer->prepareStats(sentence_index, sentence, scoreentry);
-    
-    m_score_data->add(scoreentry, sentence_index);
+      if (m_scorer->useAlignment()) {
+        sentence += "|||";
+        sentence += alignment;
+      }
+      m_scorer->prepareStats(sentence_index, sentence, scoreentry);
 
-    // examine first line for name of features
-    if (!existsFeatureNames()) {
-      InitFeatureMap(feature_str);
+      m_score_data->add(scoreentry, sentence_index);
+
+      // examine first line for name of features
+      if (!existsFeatureNames()) {
+        InitFeatureMap(feature_str);
+      }
+      AddFeatures(feature_str, sentence_index);
+    } catch (util::EndOfFileException &e) {
+      PrintUserTime("Loaded N-best lists");
+      break;
     }
-    AddFeatures(feature_str, sentence_index);
   }
-  inp.close();
 }
 
-void Data::save(const std::string &featfile, const std::string &scorefile, bool bin) {
+void Data::save(const std::string &featfile, const std::string &scorefile, bool bin)
+{
   if (bin)
     cerr << "Binary write mode is selected" << endl;
   else
@@ -187,7 +205,8 @@ void Data::save(const std::string &featfile, const std::string &scorefile, bool 
   m_score_data->save(scorefile, bin);
 }
 
-void Data::InitFeatureMap(const string& str) {
+void Data::InitFeatureMap(const string& str)
+{
   string buf = str;
   string substr;
   string features = "";
@@ -197,8 +216,8 @@ void Data::InitFeatureMap(const string& str) {
   while (!buf.empty()) {
     getNextPound(buf, substr);
 
-    // string ending with ":" are skipped, because they are the names of the features
-    if (!EndsWith(substr, ":")) {
+    // string ending with "=" are skipped, because they are the names of the features
+    if (!EndsWith(substr, "=")) {
       stringstream ss;
       ss << tmp_name << "_" << tmp_index << " ";
       features.append(ss.str());
@@ -216,7 +235,8 @@ void Data::InitFeatureMap(const string& str) {
 }
 
 void Data::AddFeatures(const string& str,
-                       const string& sentence_index) {
+                       int sentence_index)
+{
   string buf = str;
   string substr;
   FeatureStats feature_entry;
@@ -226,23 +246,16 @@ void Data::AddFeatures(const string& str,
     getNextPound(buf, substr);
 
     // no ':' -> feature value that needs to be stored
-    if (!EndsWith(substr, ":")) {
+    if (!EndsWith(substr, "=")) {
       feature_entry.add(ConvertStringToFeatureStatsType(substr));
     } else if (substr.find("_") != string::npos) {
       // sparse feature name? store as well
       string name = substr;
       getNextPound(buf, substr);
       feature_entry.addSparse(name, atof(substr.c_str()));
-      m_sparse_flag = true;
     }
   }
   m_feature_data->add(feature_entry, sentence_index);
-}
-
-// TODO
-void Data::mergeSparseFeatures() {
-  cerr << "ERROR: sparse features can only be trained with pairwise ranked optimizer (PRO), not traditional MERT\n";
-  exit(1);
 }
 
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
@@ -279,7 +292,6 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     shards.push_back(Data(scorer));
     shards.back().m_score_type = m_score_type;
     shards.back().m_num_scores = m_num_scores;
-    shards.back().m_sparse_flag = m_sparse_flag;
     for (size_t i = 0; i < shard_contents.size(); ++i) {
       shards.back().m_feature_data->add(m_feature_data->get(shard_contents[i]));
       shards.back().m_score_data->add(m_score_data->get(shard_contents[i]));
@@ -289,4 +301,3 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
 }
 
 }
-

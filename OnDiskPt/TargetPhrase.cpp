@@ -20,12 +20,13 @@
 
 #include <algorithm>
 #include <iostream>
-#include "../moses/src/Util.h"
-#include "../moses/src/TargetPhrase.h"
-#include "../moses/src/PhraseDictionary.h"
-#include "../moses/src/DummyScoreProducers.h"
+#include "moses/Util.h"
+#include "moses/TargetPhrase.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "TargetPhrase.h"
 #include "OnDiskWrapper.h"
+
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -48,7 +49,7 @@ TargetPhrase::~TargetPhrase()
 {
 }
 
-void TargetPhrase::SetLHS(Word *lhs)
+void TargetPhrase::SetLHS(WordPtr lhs)
 {
   AddWord(lhs);
 }
@@ -60,6 +61,18 @@ void TargetPhrase::Create1AlignFromString(const std::string &align1Str)
   CHECK(alignPoints.size() == 2);
   m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
 }
+
+void TargetPhrase::CreateAlignFromString(const std::string &alignStr)
+{
+  vector<std::string> alignPairs;
+  boost::split(alignPairs, alignStr, boost::is_any_of("\t "));
+  for (size_t i = 0; i < alignPairs.size(); ++i) {
+    vector<size_t> alignPoints;
+    Moses::Tokenize<size_t>(alignPoints, alignPairs[i], "-");
+    m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
+  }
+}
+
 
 void TargetPhrase::SetScore(float score, size_t ind)
 {
@@ -85,8 +98,15 @@ char *TargetPhrase::WriteToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed)
   size_t phraseSize = GetSize();
   size_t targetWordSize = onDiskWrapper.GetTargetWordSize();
 
+  const PhrasePtr sp = GetSourcePhrase();
+  size_t spSize = sp->GetSize();
+  size_t sourceWordSize = onDiskWrapper.GetSourceWordSize();
+
   size_t memNeeded = sizeof(UINT64)						// num of words
-                     + targetWordSize * phraseSize;	// actual words. lhs as last words
+                     + targetWordSize * phraseSize	// actual words. lhs as last words
+                     + sizeof(UINT64)					// num source words
+                     + sourceWordSize * spSize;   // actual source words
+
   memUsed = 0;
   UINT64 *mem = (UINT64*) malloc(memNeeded);
 
@@ -97,6 +117,17 @@ char *TargetPhrase::WriteToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed)
   // write each word
   for (size_t pos = 0; pos < phraseSize; ++pos) {
     const Word &word = GetWord(pos);
+    char *currPtr = (char*)mem + memUsed;
+    memUsed += word.WriteToMemory((char*) currPtr);
+  }
+
+  // write size of source phrase and all source words
+  char *currPtr = (char*)mem + memUsed;
+  UINT64 *memTmp = (UINT64*) currPtr;
+  memTmp[0] = spSize;
+  memUsed += sizeof(UINT64);
+  for (size_t pos = 0; pos < spSize; ++pos) {
+    const Word &word = sp->GetWord(pos);
     char *currPtr = (char*)mem + memUsed;
     memUsed += word.WriteToMemory((char*) currPtr);
   }
@@ -145,7 +176,8 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
   memUsed += sizeof(UINT64);
 
   // align
-  memUsed += WriteAlignToMemory(mem + memUsed);
+  size_t tmp = WriteAlignToMemory(mem + memUsed);
+  memUsed += tmp;
 
   // scores
   memUsed += WriteScoresToMemory(mem + memUsed);
@@ -191,15 +223,13 @@ size_t TargetPhrase::WriteScoresToMemory(char *mem) const
 }
 
 
-Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> & /*inputFactors */
+Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> & inputFactors
     , const std::vector<Moses::FactorType> &outputFactors
     , const Vocab &vocab
     , const Moses::PhraseDictionary &phraseDict
-    , const std::vector<float> &weightT
-    , const Moses::WordPenaltyProducer* wpProducer
-    , const Moses::LMList &lmList) const
+    , const std::vector<float> &weightT) const
 {
-  Moses::TargetPhrase *ret = new Moses::TargetPhrase(Moses::Output);
+  Moses::TargetPhrase *ret = new Moses::TargetPhrase();
 
   // words
   size_t phraseSize = GetSize();
@@ -207,25 +237,44 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   --phraseSize;
 
   for (size_t pos = 0; pos < phraseSize; ++pos) {
-    Moses::Word *mosesWord = GetWord(pos).ConvertToMoses(Moses::Output, outputFactors, vocab);
-    ret->AddWord(*mosesWord);
-    delete mosesWord;
+    GetWord(pos).ConvertToMoses(outputFactors, vocab, ret->AddWord());
   }
 
-  // scores
-  ret->SetScoreChart(phraseDict.GetFeature(), m_scores, weightT, lmList, wpProducer);
-
   // alignments
+  int index = 0;
+  Moses::AlignmentInfo::CollType alignTerm, alignNonTerm;
   std::set<std::pair<size_t, size_t> > alignmentInfo;
+  const PhrasePtr sp = GetSourcePhrase();
   for (size_t ind = 0; ind < m_align.size(); ++ind) {
     const std::pair<size_t, size_t> &entry = m_align[ind];
     alignmentInfo.insert(entry);
-  }
-  ret->SetAlignmentInfo(alignmentInfo);
+    size_t sourcePos = entry.first;
+    size_t targetPos = entry.second;
 
-  Moses::Word *lhs = GetWord(GetSize() - 1).ConvertToMoses(Moses::Output, outputFactors, vocab);
-  ret->SetTargetLHS(*lhs);
-  delete lhs;
+    if (GetWord(targetPos).IsNonTerminal()) {
+      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    } else {
+      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    }
+
+  }
+  ret->SetAlignTerm(alignTerm);
+  ret->SetAlignNonTerm(alignNonTerm);
+
+  Moses::Word *lhsTarget = new Moses::Word(true);
+  GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
+  ret->SetTargetLHS(lhsTarget);
+
+  // set source phrase
+  Moses::Phrase mosesSP(Moses::Input);
+  for (size_t pos = 0; pos < sp->GetSize(); ++pos) {
+    sp->GetWord(pos).ConvertToMoses(inputFactors, vocab, mosesSP.AddWord());
+  }
+  ret->SetSourcePhrase(mosesSP);
+
+  // scores
+  ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);
+  ret->Evaluate(mosesSP);
 
   return ret;
 }
@@ -259,10 +308,23 @@ UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP)
   bytesRead += sizeof(UINT64);
 
   for (size_t ind = 0; ind < numWords; ++ind) {
-    Word *word = new Word();
+    WordPtr word(new Word());
     bytesRead += word->ReadFromFile(fileTP);
     AddWord(word);
   }
+
+  // read source words
+  UINT64 numSourceWords;
+  fileTP.read((char*) &numSourceWords, sizeof(UINT64));
+  bytesRead += sizeof(UINT64);
+
+  PhrasePtr sp(new SourcePhrase());
+  for (size_t ind = 0; ind < numSourceWords; ++ind) {
+    WordPtr word( new Word());
+    bytesRead += word->ReadFromFile(fileTP);
+    sp->AddWord(word);
+  }
+  SetSourcePhrase(sp);
 
   return bytesRead;
 }
@@ -308,7 +370,7 @@ UINT64 TargetPhrase::ReadScoresFromFile(std::fstream &fileTPColl)
 void TargetPhrase::DebugPrint(ostream &out, const Vocab &vocab) const
 {
   Phrase::DebugPrint(out, vocab);
-  
+
   for (size_t ind = 0; ind < m_align.size(); ++ind) {
     const AlignPair &alignPair = m_align[ind];
     out << alignPair.first << "-" << alignPair.second << " ";

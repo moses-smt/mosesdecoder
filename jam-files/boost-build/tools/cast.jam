@@ -11,7 +11,7 @@
 #
 #    exe main : main.cpp [ cast _ moccable-cpp : widget.cpp ] ;
 #
-# Boost.Build will assing target type CPP to both main.cpp and widget.cpp. Then,
+# Boost.Build will assign target type CPP to both main.cpp and widget.cpp. Then,
 # the cast rule will change target type of widget.cpp to MOCCABLE-CPP, and Qt
 # support will run the MOC tool as part of the build process.
 #

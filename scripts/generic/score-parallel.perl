@@ -15,7 +15,7 @@ sub NumStr($);
 #my $EXTRACT_SPLIT_LINES = 5000000;
 my $EXTRACT_SPLIT_LINES = 50000000;
 
-print "Started ".localtime() ."\n";
+print STDERR "Started ".localtime() ."\n";
 
 my $numParallel	= $ARGV[0];
 $numParallel = 1 if $numParallel < 1;
@@ -163,7 +163,7 @@ else
     $cmd .= "| LC_ALL=C $sortCmd -T $TMPDIR ";
   }
 
-  $cmd .= " | gzip -c > $ptHalf";
+  $cmd .= " | gzip -c > $ptHalf  2>> /dev/stderr ";
 }
 print STDERR $cmd;
 systemCheck($cmd);

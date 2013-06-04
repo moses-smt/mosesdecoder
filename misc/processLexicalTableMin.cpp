@@ -5,7 +5,9 @@
 #include <boost/thread/thread.hpp>
 #endif
 
-#include "CompactPT/LexicalReorderingTableCreator.h"
+#include "moses/TranslationModel/CompactPT/LexicalReorderingTableCreator.h"
+
+#include "util/file.hh"
 
 using namespace Moses;
 
@@ -15,9 +17,10 @@ void printHelp(char **argv)
             "  options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
+            "\t-T string         -- path to temporary directory (uses /tmp by default)\n"
 #ifdef WITH_THREADS
             "\t-threads int|all  -- number of threads used for conversion\n"
-#endif 
+#endif
             "\n  advanced:\n"
             "\t-landmark int     -- use landmark phrase every 2^n phrases\n"
             "\t-fingerprint int  -- number of bits used for phrase fingerprints\n"
@@ -41,11 +44,11 @@ void printHelp(char **argv)
 
 int main(int argc, char** argv)
 {
-  
+
   std::string inFilePath;
   std::string outFilePath("out");
-  
-  size_t numScoreComponent = 6;
+  std::string tempfilePath;
+
   size_t orderBits = 10;
   size_t fingerPrintBits = 16;
   bool multipleScoreTrees = true;
@@ -53,47 +56,36 @@ int main(int argc, char** argv)
 
 #ifdef WITH_THREADS
   size_t threads = 1;
-#endif   
+#endif
 
-  if(1 >= argc)
-  {
+  if(1 >= argc) {
     printHelp(argv);
     return 1;
   }
-  for(int i = 1; i < argc; ++i)
-  {
+  for(int i = 1; i < argc; ++i) {
     std::string arg(argv[i]);
-    if("-in" == arg && i+1 < argc)
-    {
+    if("-in" == arg && i+1 < argc) {
       ++i;
       inFilePath = argv[i];
-    }
-    else if("-out" == arg && i+1 < argc)
-    {
+    } else if("-out" == arg && i+1 < argc) {
       ++i;
       outFilePath = argv[i];
-    }
-    else if("-landmark" == arg && i+1 < argc)
-    {
+    } else if("-T" == arg && i+1 < argc) {
+      ++i;
+      tempfilePath = argv[i];
+      util::NormalizeTempPrefix(tempfilePath);
+    } else if("-landmark" == arg && i+1 < argc) {
       ++i;
       orderBits = atoi(argv[i]);
-    }
-    else if("-fingerprint" == arg && i+1 < argc)
-    {
+    } else if("-fingerprint" == arg && i+1 < argc) {
       ++i;
       fingerPrintBits = atoi(argv[i]);
-    }
-    else if("-join-scores" == arg)
-    {
+    } else if("-join-scores" == arg) {
       multipleScoreTrees = false;
-    }
-    else if("-quantize" == arg && i+1 < argc)
-    {
+    } else if("-quantize" == arg && i+1 < argc) {
       ++i;
       quantize = atoi(argv[i]);
-    }
-    else if("-threads" == arg && i+1 < argc)
-    {
+    } else if("-threads" == arg && i+1 < argc) {
 #ifdef WITH_THREADS
       ++i;
       if(std::string(argv[i]) == "all") {
@@ -101,32 +93,29 @@ int main(int argc, char** argv)
         if(!threads) {
           std::cerr << "Could not determine number of hardware threads, setting to 1" << std::endl;
           threads = 1;
-        }  
-      }
-      else
+        }
+      } else
         threads = atoi(argv[i]);
 #else
       std::cerr << "Thread support not compiled in" << std::endl;
       exit(1);
 #endif
-    }
-    else
-    {
+    } else {
       //somethings wrong... print help
       printHelp(argv);
       return 1;
     }
   }
-  
+
   if(outFilePath.rfind(".minlexr") != outFilePath.size() - 8)
     outFilePath += ".minlexr";
 
   LexicalReorderingTableCreator(
-    inFilePath, outFilePath, numScoreComponent,
+    inFilePath, outFilePath, tempfilePath,
     orderBits, fingerPrintBits,
     multipleScoreTrees, quantize
 #ifdef WITH_THREADS
     , threads
-#endif   
+#endif
   );
 }

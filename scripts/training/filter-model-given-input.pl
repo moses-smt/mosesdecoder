@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 
 # $Id$
 # Given a moses.ini file and an input text prepare minimized translation
@@ -36,6 +36,7 @@ my $ZCAT = "gzip -cd";
 # get optional parameters
 my $opt_hierarchical = 0;
 my $binarizer = undef;
+my $min_score = undef;
 my $opt_min_non_initial_rule_count = undef;
 my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
 
@@ -43,6 +44,7 @@ GetOptions(
     "gzip!" => \$opt_gzip,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
+    "MinScore=s" => \$min_score,
     "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count
 ) or exit(1);
 
@@ -52,11 +54,20 @@ my $config = shift;
 my $input = shift;
 
 if (!defined $dir || !defined $config || !defined $input) {
-  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text [-Binarizer binarizer] [-Hierarchical]\n";
+  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text [-Binarizer binarizer] [-Hierarchical] [-MinScore id:threshold[,id:threshold]*]\n";
   exit 1;
 }
 $dir = ensure_full_path($dir);
 
+# decode min-score definitions
+my %MIN_SCORE;
+if ($min_score) {
+  foreach (split(/ *, */,$min_score)) {
+    my ($id,$score) = split(/ *: */);
+    $MIN_SCORE{$id} = $score;
+    print STDERR "score $id must be at least $score\n";
+  }
+}
 # buggy directory in place?
 if (-d $dir && ! -e "$dir/info") {
     print STDERR "The directory $dir already exists. Please delete $dir and rerun!\n";
@@ -84,99 +95,161 @@ safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
 # get tables to be filtered (and modify config file)
 my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%KNOWN_TTABLE,@TABLE_WEIGHTS,%TABLE_NUMBER);
+
 my %new_name_used = ();
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
-while(<INI>) {
-    print INI_OUT $_;
-    if (/ttable-file\]/) {
-      while(1) {	       
-    	my $table_spec = <INI>;
-    	if ($table_spec !~ /^(\d+) ([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)$/) {
-    	    print INI_OUT $table_spec;
-    	    last;
-    	}
-    	my ($phrase_table_impl,$source_factor,$t,$w,$file) = ($1,$2,$3,$4,$5);
+while(my $line = <INI>) {
+  chomp($line);
+  my @toks = split(/ /, $line);
+  if ($line =~ /PhraseDictionaryMemory /
+     || $line =~ /PhraseDictionaryBinary /
+     || $line =~ /PhraseDictionaryOnDisk /
+     || $line =~ /PhraseDictionarySCFG /
+     ) {
+    print STDERR "pt:$line\n";
 
-        if (($phrase_table_impl ne "0" && $phrase_table_impl ne "6") || $file =~ /glue-grammar/) {
-            # Only Memory ("0") and NewFormat ("6") can be filtered.
-            print INI_OUT $table_spec;
-            next;
-        }
+		my ($phrase_table_impl,$source_factor,$t,$w,$file,$table_flag); # = ($1,$2,$3,$4,$5,$6);
+    $table_flag = "";
+    $phrase_table_impl = $toks[0];
+    
+    for (my $i = 1; $i < scalar(@toks); ++$i) {
+      my @args = split(/=/, $toks[$i]);
+      chomp($args[0]);
+      chomp($args[1]);
 
-    	chomp($file);
-    	push @TABLE, $file;
-	push @TABLE_WEIGHTS,$w;
-	$KNOWN_TTABLE{$#TABLE}++;
+      if ($args[0] eq "num-features") {
+			  $w = $args[1];
+			}
+			elsif ($args[0] eq "input-factor") {
+			  $source_factor = $args[1];
+			}
+			elsif ($args[0] eq "output-factor") {
+			  $t = $args[1];
+			}
+			elsif ($args[0] eq "path") {
+			  $file = $args[1];
+			}
+    } #for (my $i = 1; $i < scalar(@toks); ++$i) {
+    
+		if (($phrase_table_impl ne "PhraseDictionaryMemory" && $phrase_table_impl ne "PhraseDictionarySCFG") || $file =~ /glue-grammar/) {
+				# Only Memory ("0") and NewFormat ("6") can be filtered.
+				print INI_OUT "$line\n";
+				next;
+		}
 
-    	my $new_name = "$dir/phrase-table.$source_factor-$t.".(++$TABLE_NUMBER{"$source_factor-$t"});
-        my $cnt = 1;
-        $cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
-        $new_name .= ".$cnt";
-        $new_name_used{$new_name} = 1;
-	if ($binarizer && $phrase_table_impl == 6) {
-    	  print INI_OUT "2 $source_factor $t $w $new_name.bin\n";
-        }
-        elsif ($binarizer && $phrase_table_impl == 0) {
-    	  print INI_OUT "1 $source_factor $t $w $new_name\n";
-        } else {
-          $new_name .= ".gz" if $opt_gzip;
-    	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
-        }
-    	push @TABLE_NEW_NAME,$new_name;
+		push @TABLE, $file;
+		push @TABLE_WEIGHTS,$w;
+		$KNOWN_TTABLE{$#TABLE}++;
 
-    	$CONSIDER_FACTORS{$source_factor} = 1;
-        print STDERR "Considering factor $source_factor\n";
-    	push @TABLE_FACTORS, $source_factor;
-      }
-    }
-    elsif (/distortion-file/) {
-        while(1) {
-    	  my $table_spec = <INI>;
-    	  if ($table_spec !~ /^([\d\,\-]+) (\S+) (\d+) (\S+)$/) {
-    	      print INI_OUT $table_spec;
-    	      last;
-    	}
-    	my ($factors,$t,$w,$file) = ($1,$2,$3,$4);
-	my $source_factor = $factors;
-	$source_factor =~ s/\-[\d,]+$//;
+  	my $new_name = "$dir/phrase-table.$source_factor-$t.".(++$TABLE_NUMBER{"$source_factor-$t"});
+		my $cnt = 1;
+		$cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
+		$new_name .= ".$cnt";
+		$new_name_used{$new_name} = 1;
+		if ($binarizer && $phrase_table_impl eq "PhraseDictionarySCFG") {
+		  $phrase_table_impl = "PhraseDictionaryOnDisk";
+		  @toks = set_value(\@toks, "path", "$new_name.bin$table_flag");
+		}
+		elsif ($binarizer && $phrase_table_impl eq "PhraseDictionaryMemory") {
+			if ($binarizer =~ /processPhraseTableMin/) {
+  		  $phrase_table_impl = "PhraseDictionaryCompact";
+  		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+			}
+			elsif ($binarizer =~ /CreateOnDiskPt/) {
+  		  $phrase_table_impl = "PhraseDictionaryOnDisk";
+		  @toks = set_value(\@toks, "path", "$new_name.bin$table_flag");
+			}
+			else {
+  		  $phrase_table_impl = "PhraseDictionaryBinary";
+			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+			}
+		}
+		else {
+			$new_name .= ".gz" if $opt_gzip;
+		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+		}
 
-    	chomp($file);
-    	push @TABLE,$file;
+    $toks[0] = $phrase_table_impl;
 
-    	$file =~ s/^.*\/+([^\/]+)/$1/g;
-    	my $new_name = "$dir/$file";
-	$new_name =~ s/\.gz//;
-    	print INI_OUT "$factors $t $w $new_name\n";
-    	push @TABLE_NEW_NAME,$new_name;
+    print INI_OUT join_array(\@toks)."\n";
 
-    	$CONSIDER_FACTORS{$source_factor} = 1;
-        print STDERR "Considering factor $source_factor\n";
-    	push @TABLE_FACTORS,$source_factor;
-        }
-    }
-}
+		push @TABLE_NEW_NAME,$new_name;
+
+		$CONSIDER_FACTORS{$source_factor} = 1;
+			print STDERR "Considering factor $source_factor\n";
+		push @TABLE_FACTORS, $source_factor;
+		
+  } #if (/PhraseModel /) {
+  elsif ($line =~ /LexicalReordering /) {
+    print STDERR "ro:$line\n";
+		my ($source_factor, $t, $w, $file); # = ($1,$2,$3,$4);
+
+    for (my $i = 1; $i < scalar(@toks); ++$i) {
+      my @args = split(/=/, $toks[$i]);
+      chomp($args[0]);
+      chomp($args[1]);
+      
+			if ($args[0] eq "num-features") {
+			  $w = $args[1];
+			}
+			elsif ($args[0] eq "input-factor") {
+			  $source_factor = chomp($args[1]);
+			}
+			elsif ($args[0] eq "output-factor") {
+			  #$t = chomp($args[1]);
+			}
+			elsif ($args[0] eq "type") {
+			  $t = $args[1];
+			}
+			elsif ($args[0] eq "path") {
+			  $file = $args[1];
+			}
+
+		} # for (my $i = 1; $i < scalar(@toks); ++$i) {
+		
+  	push @TABLE, $file;
+		
+		$file =~ s/^.*\/+([^\/]+)/$1/g;
+		my $new_name = "$dir/$file";
+		$new_name =~ s/\.gz//;
+		
+		#print INI_OUT "$source_factor $t $w $new_name\n";
+	  @toks = set_value(\@toks, "path", "$new_name");
+	  print INI_OUT join_array(\@toks)."\n";
+
+		push @TABLE_NEW_NAME,$new_name;
+
+		$CONSIDER_FACTORS{$source_factor} = 1;
+			print STDERR "Considering factor $source_factor\n";
+		push @TABLE_FACTORS,$source_factor;
+
+		
+  } #elsif (/LexicalReordering /) {
+  else {
+    print INI_OUT "$line\n";  
+  }
+} # while(<INI>) {
 close(INI);
 close(INI_OUT);
 
 my %TMP_INPUT_FILENAME;
 
-if ($opt_hierarchical)
-{
-    # Write a separate, temporary input file for each combination of source
-    # factors
-    foreach my $key (keys %CONSIDER_FACTORS) {
-        my $filename = "$dir/input-$key";
-        open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
-        $TMP_INPUT_FILENAME{$key} = $filename;
-        my @FACTOR = split(/,/, $key);
-        open(PIPE,"$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |");
-        while (my $line = <PIPE>) {
-            print FILEHANDLE $line
-        }
-        close(FILEHANDLE);
-    }
-}
+if ($opt_hierarchical) {
+	# Write a separate, temporary input file for each combination of source
+	# factors
+	foreach my $key (keys %CONSIDER_FACTORS) {
+		my $filename = "$dir/input-$key";
+		open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
+		$TMP_INPUT_FILENAME{$key} = $filename;
+		my @FACTOR = split(/,/, $key);
+		open(PIPE,"$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |");
+		while (my $line = <PIPE>) {
+			print FILEHANDLE $line
+		}
+		close(FILEHANDLE);
+	} # foreach my $key (keys %CONSIDER_FACTORS) {
+} #if ($opt_hierarchical) {
 
 my %PHRASE_USED;
 if (!$opt_hierarchical) {
@@ -206,22 +279,6 @@ if (!$opt_hierarchical) {
     }
     close(INPUT);
 }
-
-sub mk_open_string {
-  my $file = shift;
-  my $openstring;
-  if ($file !~ /\.gz$/ && -e "$file.gz") {
-    $openstring = "$ZCAT $file.gz |";
-  } elsif ($file =~ /\.gz$/) {
-    $openstring = "$ZCAT $file |";
-  } elsif ($opt_hierarchical) {
-    $openstring = "cat $file |";
-  } else {
-    $openstring = "< $file";
-  }
-  return $openstring;
-}
-
 
 # filter files
 for(my $i=0;$i<=$#TABLE;$i++) {
@@ -257,6 +314,18 @@ for(my $i=0;$i<=$#TABLE;$i++) {
             my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
             $foreign =~ s/ $//;
             if (defined($PHRASE_USED{$factors}{$foreign})) {
+                # handle min_score thresholds
+                if ($min_score) {
+                   my @ITEM = split(/ *\|\|\| */,$rest);
+                   if(scalar (@ITEM)>2) { # do not filter reordering table
+                     my @SCORE = split(/ /,$ITEM[1]);
+                     my $okay = 1;
+                     foreach my $id (keys %MIN_SCORE) {
+                       $okay = 0 if $SCORE[$id] < $MIN_SCORE{$id};
+                     }
+                     next unless $okay;
+                   }
+                }
                 print FILE_OUT $entry;
                 $used++;
             }
@@ -274,11 +343,16 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         # ... hierarchical translation model
         if ($opt_hierarchical) {
           my $cmd = "$binarizer $new_file $new_file.bin";
-	  print STDERR $cmd."\n";
-	  print STDERR `$cmd`;
+          print STDERR $cmd."\n";
+          print STDERR `$cmd`;
         }
         # ... phrase translation model
-        else { 
+        elsif ($binarizer =~ /processPhraseTableMin/) {
+          #compact phrase table
+          my $cmd = "LC_ALL=C sort -T $dir $new_file > $new_file.sorted; $binarizer -in $new_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $new_file.sorted";
+          print STDERR $cmd."\n";
+          print STDERR `$cmd`;
+        } else { 
           my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
@@ -288,8 +362,13 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       else {
         my $lexbin = $binarizer; 
         $lexbin =~ s/PhraseTable/LexicalTable/;
-        $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
-        my $cmd = "$lexbin -in $new_file -out $new_file";
+        my $cmd;
+        if ($lexbin =~ /processLexicalTableMin/) {
+          $cmd = "LC_ALL=C sort -T $dir $new_file > $new_file.sorted;  $lexbin -in $new_file.sorted -out $new_file; rm $new_file.sorted";
+        } else {
+          $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
+          $cmd = "$lexbin -in $new_file -out $new_file";
+        }
         print STDERR $cmd."\n";
         print STDERR `$cmd`;
       }
@@ -312,6 +391,23 @@ close(INFO);
 print "To run the decoder, please call:
   moses -f $dir/moses.ini -i $input\n";
 
+# functions
+sub mk_open_string {
+  my $file = shift;
+  my $openstring;
+  if ($file !~ /\.gz$/ && -e "$file.gz") {
+    $openstring = "$ZCAT $file.gz |";
+  } elsif ($file =~ /\.gz$/) {
+    $openstring = "$ZCAT $file |";
+  } elsif ($opt_hierarchical) {
+    $openstring = "cat $file |";
+  } else {
+    $openstring = "< $file";
+  }
+  return $openstring;
+}
+
+
 sub safesystem {
   print STDERR "Executing: @_\n";
   system(@_);
@@ -330,6 +426,7 @@ sub safesystem {
     return ! $exitcode;
   }
 }
+
 sub ensure_full_path {
     my $PATH = shift;
     return $PATH if $PATH =~ /^\//;
@@ -349,4 +446,34 @@ sub ensure_full_path {
     $PATH =~ s/\/+$//;
     return $PATH;
 }
+
+sub join_array {
+  my @outside = @{$_[0]};
+   
+  my $ret = "";
+  for (my $i = 0; $i < scalar(@outside); ++$i) {
+    my $tok = $outside[$i];    
+    $ret .= "$tok ";
+  }
+  
+  return $ret;
+}
+
+sub set_value {
+  my @arr = @{$_[0]};
+  my $keySought = $_[1];
+  my $newValue = $_[2];
+
+  for (my $i = 1; $i < scalar(@arr); ++$i) {
+    my @inside = split(/=/, $arr[$i]);
+
+		my $key = $inside[0];
+		if ($key eq $keySought) {
+		  $arr[$i] = "$key=$newValue";
+		  return @arr;
+		}
+  }
+  return @arr;
+}
+
 

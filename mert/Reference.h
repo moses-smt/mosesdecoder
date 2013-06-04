@@ -9,38 +9,57 @@
 
 namespace MosesTuning
 {
-  
+
 
 /**
  * Reference class represents reference translations for an output
  * translation used in calculating BLEU score.
  */
-class Reference {
- public:
+class Reference
+{
+public:
   // for m_length
   typedef std::vector<std::size_t>::iterator iterator;
   typedef std::vector<std::size_t>::const_iterator const_iterator;
 
   Reference() : m_counts(new NgramCounts) { }
-  ~Reference() { delete m_counts; }
+  ~Reference() {
+    delete m_counts;
+  }
 
-  NgramCounts* get_counts() { return m_counts; }
-  const NgramCounts* get_counts() const { return m_counts; }
+  NgramCounts* get_counts() {
+    return m_counts;
+  }
+  const NgramCounts* get_counts() const {
+    return m_counts;
+  }
 
-  iterator begin() { return m_length.begin(); }
-  const_iterator begin() const { return m_length.begin(); }
-  iterator end() { return m_length.end(); }
-  const_iterator end() const { return m_length.end(); }
+  iterator begin() {
+    return m_length.begin();
+  }
+  const_iterator begin() const {
+    return m_length.begin();
+  }
+  iterator end() {
+    return m_length.end();
+  }
+  const_iterator end() const {
+    return m_length.end();
+  }
 
-  void push_back(std::size_t len) { m_length.push_back(len); }
+  void push_back(std::size_t len) {
+    m_length.push_back(len);
+  }
 
-  std::size_t num_references() const { return m_length.size(); }
+  std::size_t num_references() const {
+    return m_length.size();
+  }
 
   int CalcAverage() const;
   int CalcClosest(std::size_t length) const;
   int CalcShortest() const;
 
- private:
+private:
   NgramCounts* m_counts;
 
   // multiple reference lengths
@@ -49,16 +68,18 @@ class Reference {
 
 // TODO(tetsuok): fix this function and related stuff.
 // "average" reference length should not be calculated at sentence-level unlike "closest".
-inline int Reference::CalcAverage() const {
+inline int Reference::CalcAverage() const
+{
   int total = 0;
   for (std::size_t i = 0; i < m_length.size(); ++i) {
     total += m_length[i];
   }
   return static_cast<int>(
-      static_cast<float>(total) / m_length.size());
+           static_cast<float>(total) / m_length.size());
 }
 
-inline int Reference::CalcClosest(std::size_t length) const {
+inline int Reference::CalcClosest(std::size_t length) const
+{
   int min_diff = INT_MAX;
   int closest_ref_id = 0; // an index of the closest reference translation
   for (std::size_t i = 0; i < m_length.size(); ++i) {
@@ -79,7 +100,8 @@ inline int Reference::CalcClosest(std::size_t length) const {
   return static_cast<int>(m_length[closest_ref_id]);
 }
 
-inline int Reference::CalcShortest() const {
+inline int Reference::CalcShortest() const
+{
   return *std::min_element(m_length.begin(), m_length.end());
 }
 

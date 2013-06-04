@@ -12,7 +12,7 @@ if (scalar(@ARGV) < 4) {
 
     my ($SOURCE,$TARGET,$ALIGNMENT,$OUT) = @ARGV;
     
-    &get_lexical($SOURCE,$TARGET,$ALIGNMENT,$OUT);
+    &get_lexical($SOURCE,$TARGET,$ALIGNMENT,$OUT,0);
 
 }
 

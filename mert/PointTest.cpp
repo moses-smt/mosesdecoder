@@ -9,7 +9,8 @@
 using namespace std;
 using namespace MosesTuning;
 
-BOOST_AUTO_TEST_CASE(point_operators) {
+BOOST_AUTO_TEST_CASE(point_operators)
+{
   const unsigned int dim = 5;
   vector<float> init(dim);
   init[0] = 1.0f;

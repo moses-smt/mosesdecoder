@@ -15,7 +15,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 const char FEATURES_TXT_BEGIN[] = "FEATURES_TXT_BEGIN_0";
 const char FEATURES_TXT_END[] = "FEATURES_TXT_END_0";
@@ -27,27 +27,37 @@ class FeatureArray
 private:
   // idx to identify the utterance. It can differ from
   // the index inside the vector.
-  std::string m_index;
+  int m_index;
   featarray_t m_array;
   std::size_t m_num_features;
   std::string m_features;
-  bool m_sparse_flag;
 
 public:
   FeatureArray();
   ~FeatureArray();
 
-  void clear() { m_array.clear(); }
+  void clear() {
+    m_array.clear();
+  }
 
-  bool hasSparseFeatures() const { return m_sparse_flag; }
 
-  std::string getIndex() const { return m_index; }
-  void setIndex(const std::string& value) { m_index = value; }
+  int getIndex() const {
+    return m_index;
+  }
+  void setIndex(const int value) {
+    m_index = value;
+  }
 
-  FeatureStats& get(std::size_t i) { return m_array.at(i); }
-  const FeatureStats& get(std::size_t i) const { return m_array.at(i); }
+  FeatureStats& get(std::size_t i) {
+    return m_array.at(i);
+  }
+  const FeatureStats& get(std::size_t i) const {
+    return m_array.at(i);
+  }
 
-  void add(FeatureStats& e) { m_array.push_back(e); }
+  void add(FeatureStats& e) {
+    m_array.push_back(e);
+  }
 
   //ADDED BY TS
   void swap(std::size_t i, std::size_t j) {
@@ -61,13 +71,23 @@ public:
 
   void merge(FeatureArray& e);
 
-  std::size_t size() const { return m_array.size(); }
+  std::size_t size() const {
+    return m_array.size();
+  }
 
-  std::size_t NumberOfFeatures() const { return m_num_features; }
-  void NumberOfFeatures(std::size_t v) { m_num_features = v; }
+  std::size_t NumberOfFeatures() const {
+    return m_num_features;
+  }
+  void NumberOfFeatures(std::size_t v) {
+    m_num_features = v;
+  }
 
-  std::string Features() const { return m_features; }
-  void Features(const std::string& f) { m_features = f; }
+  std::string Features() const {
+    return m_features;
+  }
+  void Features(const std::string& f) {
+    m_features = f;
+  }
 
   void savetxt(std::ostream* os);
   void savebin(std::ostream* os);
@@ -75,10 +95,9 @@ public:
   void save(const std::string &file, bool bin=false);
   void save(bool bin=false);
 
-  void loadtxt(std::istream* is, std::size_t n);
+  void loadtxt(std::istream* is, const SparseVector& sparseWeights, std::size_t n);
   void loadbin(std::istream* is, std::size_t n);
-  void load(std::istream* is);
-  void load(const std::string &file);
+  void load(std::istream* is, const SparseVector& sparseWeights);
 
   bool check_consistency() const;
 };

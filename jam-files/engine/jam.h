@@ -46,40 +46,6 @@
 #define HAVE_POPEN 1
 
 /*
- * VMS, OPENVMS
- */
-
-#ifdef VMS
-
-#include <types.h>
-#include <file.h>
-#include <stat.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-#include <unixlib.h>
-
-#define OSMINOR "OS=VMS"
-#define OSMAJOR "VMS=true"
-#define OS_VMS
-#define MAXLINE 1024 /* longest 'together' actions */
-#define SPLITPATH ','
-#define EXITOK 1
-#define EXITBAD 0
-#define DOWNSHIFT_PATHS
-
-/* This may be inaccurate. */
-#ifndef __DECC
-#define OSPLAT "OSPLAT=VAX"
-#endif
-
-#endif
-
-/*
  * Windows NT
  */
 
@@ -153,55 +119,6 @@
 #define USE_PATHUNIX
 #define PATH_DELIM '\\'
 #define DOWNSHIFT_PATHS
-
-#endif
-
-/*
- * OS2
- */
-
-#ifdef __OS2__
-
-#include <fcntl.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <malloc.h>
-#include <signal.h>
-#include <string.h>
-#include <time.h>
-
-#define OSMAJOR "OS2=true"
-#define OSMINOR "OS=OS2"
-#define OS_OS2
-#define SPLITPATH ';'
-#define MAXLINE 996    /* longest 'together' actions */
-#define USE_EXECUNIX
-#define USE_PATHUNIX
-#define PATH_DELIM '\\'
-#define DOWNSHIFT_PATHS
-
-#ifdef __EMX__
-    #define USE_FILEUNIX
-#endif
-
-#endif
-
-/*
- * Macintosh MPW
- */
-
-#ifdef macintosh
-
-#include <time.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-#define OSMAJOR "MAC=true"
-#define OSMINOR "OS=MAC"
-#define OS_MAC
-#define SPLITPATH ','
 
 #endif
 

@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,13 +29,15 @@
 
 using namespace MosesTraining;
 
-namespace Moses {
-namespace GHKM {
+namespace Moses
+{
+namespace GHKM
+{
 
 XmlTreeParser::XmlTreeParser(std::set<std::string> &labelSet,
                              std::map<std::string, int> &topLabelSet)
-    : m_labelSet(labelSet)
-    , m_topLabelSet(topLabelSet)
+  : m_labelSet(labelSet)
+  , m_topLabelSet(topLabelSet)
 {
 }
 
@@ -44,7 +46,8 @@ std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
   m_line = line;
   m_tree.Clear();
   try {
-    if (!ProcessAndStripXMLTags(m_line, m_tree, m_labelSet, m_topLabelSet)) {
+    if (!ProcessAndStripXMLTags(m_line, m_tree, m_labelSet, m_topLabelSet,
+                                false)) {
       throw Exception("");
     }
   } catch (const XmlException &e) {
@@ -59,8 +62,8 @@ std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
 
 // Converts a SyntaxNode tree to a Moses::GHKM::ParseTree.
 std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
-    const SyntaxNode &tree,
-    const std::vector<std::string> &words)
+  const SyntaxNode &tree,
+  const std::vector<std::string> &words)
 {
   std::auto_ptr<ParseTree> root(new ParseTree(tree.GetLabel()));
   root->SetPcfgScore(tree.GetPcfgScore());

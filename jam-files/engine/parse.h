@@ -21,36 +21,55 @@
  * parse.h - make and destroy parse trees as driven by the parser.
  */
 
+#define PARSE_APPEND    0
+#define PARSE_FOREACH   1
+#define PARSE_IF        2
+#define PARSE_EVAL      3
+#define PARSE_INCLUDE   4
+#define PARSE_LIST      5
+#define PARSE_LOCAL     6
+#define PARSE_MODULE    7
+#define PARSE_CLASS     8
+#define PARSE_NULL      9
+#define PARSE_ON        10
+#define PARSE_RULE      11
+#define PARSE_RULES     12
+#define PARSE_SET       13
+#define PARSE_SETCOMP   14
+#define PARSE_SETEXEC   15
+#define PARSE_SETTINGS  16
+#define PARSE_SWITCH    17
+#define PARSE_WHILE     18
+
 /*
  * Parse tree node.
  */
 
 struct _PARSE {
-    LIST   * (* func)( PARSE *, FRAME * );
+    int      type;
     PARSE  * left;
     PARSE  * right;
     PARSE  * third;
-    char   * string;
-    char   * string1;
+    OBJECT * string;
+    OBJECT * string1;
     int      num;
     int      refs;
-/*  module * module; */
-    char   * rulename;
-    char   * file;
+    OBJECT * rulename;
+    OBJECT * file;
     int      line;
 };
 
-void    parse_file( char *, FRAME * );
+void    parse_file( OBJECT *, FRAME * );
 void    parse_save( PARSE * );
 
 PARSE * parse_make(
-    LIST  * (* func)( PARSE *, FRAME * ),
-    PARSE * left,
-    PARSE * right,
-    PARSE * third,
-    char  * string,
-    char  * string1,
-    int     num );
+    int type,
+    PARSE  * left,
+    PARSE  * right,
+    PARSE  * third,
+    OBJECT * string,
+    OBJECT * string1,
+    int      num );
 
 void   parse_refer   ( PARSE * );
 void   parse_free    ( PARSE * );

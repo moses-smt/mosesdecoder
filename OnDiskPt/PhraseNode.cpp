@@ -22,7 +22,7 @@
 #include "OnDiskWrapper.h"
 #include "TargetPhraseCollection.h"
 #include "SourcePhrase.h"
-#include "../moses/src/Util.h"
+#include "moses/Util.h"
 
 using namespace std;
 
@@ -38,7 +38,7 @@ size_t PhraseNode::GetNodeSize(size_t numChildren, size_t wordSize, size_t count
 }
 
 PhraseNode::PhraseNode()
-  : m_value(0) 
+  : m_value(0)
   ,m_currChild(NULL)
   ,m_saved(false)
   ,m_memLoad(NULL)
@@ -160,14 +160,14 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
 
 void PhraseNode::AddTargetPhrase(const SourcePhrase &sourcePhrase, TargetPhrase *targetPhrase
                                  , OnDiskWrapper &onDiskWrapper, size_t tableLimit
-                                 , const std::vector<float> &counts)
+                                 , const std::vector<float> &counts, OnDiskPt::PhrasePtr spShort)
 {
-  AddTargetPhrase(0, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts);
+  AddTargetPhrase(0, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts, spShort);
 }
 
 void PhraseNode::AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
                                  , TargetPhrase *targetPhrase, OnDiskWrapper &onDiskWrapper
-                                 , size_t tableLimit, const std::vector<float> &counts)
+                                 , size_t tableLimit, const std::vector<float> &counts, OnDiskPt::PhrasePtr spShort)
 {
   size_t phraseSize = sourcePhrase.GetSize();
   if (pos < phraseSize) {
@@ -185,10 +185,12 @@ void PhraseNode::AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
       m_currChild = &node;
     }
 
-    node.AddTargetPhrase(pos + 1, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts);
+    // keep searching for target phrase node..
+    node.AddTargetPhrase(pos + 1, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts, spShort);
   } else {
     // drilled down to the right node
     m_counts = counts;
+    targetPhrase->SetSourcePhrase(spShort);
     m_targetPhraseColl.AddTargetPhrase(targetPhrase);
   }
 }

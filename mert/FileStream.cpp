@@ -5,15 +5,17 @@
 
 using namespace std;
 
-namespace {
-bool IsGzipFile(const std::string &filename) {
+namespace
+{
+bool IsGzipFile(const std::string &filename)
+{
   return filename.size() > 3 &&
-      filename.substr(filename.size() - 3, 3) == ".gz";
+         filename.substr(filename.size() - 3, 3) == ".gz";
 }
 } // namespace
 
 inputfilestream::inputfilestream(const std::string &filePath)
-    : std::istream(0), m_streambuf(0), m_is_good(false)
+  : std::istream(0), m_streambuf(0), m_is_good(false)
 {
   // check if file is readable
   std::filebuf* fb = new std::filebuf();
@@ -40,7 +42,7 @@ void inputfilestream::close()
 }
 
 outputfilestream::outputfilestream(const std::string &filePath)
-    : std::ostream(0), m_streambuf(0), m_is_good(false)
+  : std::ostream(0), m_streambuf(0), m_is_good(false)
 {
   // check if file is readable
   std::filebuf* fb = new std::filebuf();

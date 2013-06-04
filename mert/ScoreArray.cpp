@@ -14,15 +14,15 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 ScoreArray::ScoreArray()
-    : m_num_scores(0), m_index("") {}
+  : m_num_scores(0), m_index(0) {}
 
 void ScoreArray::savetxt(ostream* os, const string& sctype)
 {
   *os << SCORES_TXT_BEGIN << " " << m_index << " " << m_array.size()
-          << " " << m_num_scores << " " << sctype << endl;
+      << " " << m_num_scores << " " << sctype << endl;
   for (scorearray_t::iterator i = m_array.begin(); i !=m_array.end(); i++) {
     i->savetxt(os);
     *os << endl;
@@ -33,7 +33,7 @@ void ScoreArray::savetxt(ostream* os, const string& sctype)
 void ScoreArray::savebin(ostream* os, const string& score_type)
 {
   *os << SCORES_BIN_BEGIN << " " << m_index << " " << m_array.size()
-          << " " << m_num_scores << " " << score_type << endl;
+      << " " << m_num_scores << " " << score_type << endl;
   for (scorearray_t::iterator i = m_array.begin();
        i != m_array.end(); i++) {
     i->savebin(os);
@@ -63,7 +63,8 @@ void ScoreArray::save(const string &file, const string& score_type, bool bin)
   ofs.close();
 }
 
-void ScoreArray::save(const string& score_type, bool bin) {
+void ScoreArray::save(const string& score_type, bool bin)
+{
   save(&cout, score_type, bin);
 }
 
@@ -109,7 +110,7 @@ void ScoreArray::load(istream* is)
     }
     getNextPound(stringBuf, substring);
     getNextPound(stringBuf, substring);
-    m_index = substring;
+    m_index = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
     number_of_entries = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
@@ -166,4 +167,3 @@ bool ScoreArray::check_consistency() const
 }
 
 }
-

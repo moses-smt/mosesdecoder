@@ -20,7 +20,7 @@
  ***********************************************************************/
 #include <string>
 #include <map>
-#include "../moses/src/TypeDef.h"
+#include "moses/TypeDef.h"
 
 
 namespace OnDiskPt

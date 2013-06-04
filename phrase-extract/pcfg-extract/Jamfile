@@ -1,1 +1,1 @@
-exe pcfg-extract : [ glob *.cc ] ..//pcfg-common ../..//boost_program_options ;
+exe pcfg-extract : [ glob *.cc ] ..//pcfg-common ../..//boost_program_options : <include>.. ;

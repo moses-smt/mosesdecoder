@@ -1,6 +1,7 @@
 #ifndef LM_STATE__
 #define LM_STATE__
 
+#include "lm/max_order.hh"
 #include "lm/word_index.hh"
 #include "util/murmur_hash.hh"
 
@@ -46,6 +47,8 @@ class State {
     unsigned char length;
 };
 
+typedef State Right;
+
 inline uint64_t hash_value(const State &state, uint64_t seed = 0) {
   return util::MurmurHashNative(state.words, sizeof(WordIndex) * state.length, seed);
 }
@@ -53,14 +56,14 @@ inline uint64_t hash_value(const State &state, uint64_t seed = 0) {
 struct Left {
   bool operator==(const Left &other) const {
     return 
-      (length == other.length) && 
-      pointers[length - 1] == other.pointers[length - 1] &&
-      full == other.full;
+      length == other.length &&
+      (!length || (pointers[length - 1] == other.pointers[length - 1] && full == other.full));
   }
 
   int Compare(const Left &other) const {
     if (length < other.length) return -1;
     if (length > other.length) return 1;
+    if (length == 0) return 0; // Must be full.
     if (pointers[length - 1] > other.pointers[length - 1]) return 1;
     if (pointers[length - 1] < other.pointers[length - 1]) return -1;
     return (int)full - (int)other.full;

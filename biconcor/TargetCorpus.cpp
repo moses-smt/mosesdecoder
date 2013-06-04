@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <cstring>
 
-namespace {
+namespace
+{
 
 const int LINE_MAX_LENGTH = 10000;
 
@@ -14,11 +15,11 @@ const int LINE_MAX_LENGTH = 10000;
 using namespace std;
 
 TargetCorpus::TargetCorpus()
-    : m_array(NULL),
-      m_sentenceEnd(NULL),
-      m_vcb(),
-      m_size(0),
-      m_sentenceCount(0) {}
+  : m_array(NULL),
+    m_sentenceEnd(NULL),
+    m_vcb(),
+    m_size(0),
+    m_sentenceCount(0) {}
 
 TargetCorpus::~TargetCorpus()
 {

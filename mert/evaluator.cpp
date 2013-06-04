@@ -14,7 +14,8 @@
 using namespace std;
 using namespace MosesTuning;
 
-namespace {
+namespace
+{
 
 Scorer* g_scorer = NULL;
 bool g_has_more_files = false;
@@ -22,13 +23,14 @@ bool g_has_more_scorers = false;
 const float g_alpha = 0.05;
 
 
-class EvaluatorUtil {
- public:
+class EvaluatorUtil
+{
+public:
   static void evaluate(const string& candFile, int bootstrap);
   static float average(const vector<float>& list);
   static string int2string(int n);
 
- private:
+private:
   EvaluatorUtil() {}
   ~EvaluatorUtil() {}
 };
@@ -43,25 +45,20 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
   // Loading sentences and preparing statistics
   ScoreStats scoreentry;
   string line;
-  while (getline(cand, line))
-  {
+  while (getline(cand, line)) {
     g_scorer->prepareStats(entries.size(), line, scoreentry);
     entries.push_back(scoreentry);
   }
 
   int n = entries.size();
-  if (bootstrap)
-  {
+  if (bootstrap) {
     vector<float> scores;
-    for (int i = 0; i < bootstrap; ++i)
-    {
+    for (int i = 0; i < bootstrap; ++i) {
       // TODO: Use smart pointer for exceptional-safety.
       ScoreData* scoredata = new ScoreData(g_scorer);
-      for (int j = 0; j < n; ++j)
-      {
+      for (int j = 0; j < n; ++j) {
         int randomIndex = random() % n;
-        string str_j = int2string(j);
-        scoredata->add(entries[randomIndex], str_j);
+        scoredata->add(entries[randomIndex], j);
       }
       g_scorer->setScoreData(scoredata);
       candidates_t candidates(n, 0);
@@ -86,15 +83,11 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
     cout.setf(ios::fixed, ios::floatfield);
     cout.precision(4);
     cout << avg << "\t[" << lb << "," << rb << "]" << endl;
-  }
-  else
-  {
+  } else {
     // TODO: Use smart pointer for exceptional-safety.
     ScoreData* scoredata = new ScoreData(g_scorer);
-    for (int sid = 0; sid < n; ++sid)
-    {
-      string str_sid = int2string(sid);
-      scoredata->add(entries[sid], str_sid);
+    for (int sid = 0; sid < n; ++sid) {
+      scoredata->add(entries[sid], sid);
     }
     g_scorer->setScoreData(scoredata);
     candidates_t candidates(n, 0);
@@ -186,56 +179,56 @@ struct ProgramOption {
   bool has_seed;
 
   ProgramOption()
-      : reference(""),
-        candidate(""),
-        bootstrap(0),
-        seed(0),
-        has_seed(false) { }
+    : reference(""),
+      candidate(""),
+      bootstrap(0),
+      seed(0),
+      has_seed(false) { }
 };
 
-void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
+void ParseCommandOptions(int argc, char** argv, ProgramOption* opt)
+{
   int c;
   int option_index;
   int last_scorer_index = -1;
   while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:f:l:h", long_options, &option_index)) != -1) {
     switch(c) {
-      case 's':
-        opt->scorer_types.push_back(string(optarg));
-        opt->scorer_configs.push_back(string(""));
-        opt->scorer_factors.push_back(string(""));
-        opt->scorer_filter.push_back(string(""));
-        last_scorer_index++;
-        break;
-      case 'c':
-        opt->scorer_configs[last_scorer_index] = string(optarg);
-        break;
-      case 'R':
-        opt->reference = string(optarg);
-        break;
-      case 'C':
-        opt->candidate = string(optarg);
-        break;
-      case 'b':
-        opt->bootstrap = atoi(optarg);
-        break;
-      case 'r':
-        opt->seed = strtol(optarg, NULL, 10);
-        opt->has_seed = true;
-        break;
-      case 'f':
-        opt->scorer_factors[last_scorer_index] = string(optarg);
-        break;
-      case 'l':
-        opt->scorer_filter[last_scorer_index] = string(optarg);
-        break;
-      default:
-        usage();
+    case 's':
+      opt->scorer_types.push_back(string(optarg));
+      opt->scorer_configs.push_back(string(""));
+      opt->scorer_factors.push_back(string(""));
+      opt->scorer_filter.push_back(string(""));
+      last_scorer_index++;
+      break;
+    case 'c':
+      opt->scorer_configs[last_scorer_index] = string(optarg);
+      break;
+    case 'R':
+      opt->reference = string(optarg);
+      break;
+    case 'C':
+      opt->candidate = string(optarg);
+      break;
+    case 'b':
+      opt->bootstrap = atoi(optarg);
+      break;
+    case 'r':
+      opt->seed = strtol(optarg, NULL, 10);
+      opt->has_seed = true;
+      break;
+    case 'f':
+      opt->scorer_factors[last_scorer_index] = string(optarg);
+      break;
+    case 'l':
+      opt->scorer_filter[last_scorer_index] = string(optarg);
+      break;
+    default:
+      usage();
     }
   }
 
   // Add default scorer if no scorer provided
-  if (opt->scorer_types.size() == 0)
-  {
+  if (opt->scorer_types.size() == 0) {
     opt->scorer_types.push_back(string("BLEU"));
     opt->scorer_configs.push_back(string(""));
     opt->scorer_factors.push_back(string(""));
@@ -243,7 +236,8 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   }
 }
 
-void InitSeed(const ProgramOption *opt) {
+void InitSeed(const ProgramOption *opt)
+{
   if (opt->has_seed) {
     cerr << "Seeding random numbers with " << opt->seed << endl;
     srandom(opt->seed);
@@ -262,8 +256,7 @@ int main(int argc, char** argv)
   ProgramOption option;
   ParseCommandOptions(argc, argv, &option);
 
-  if (option.bootstrap)
-  {
+  if (option.bootstrap) {
     InitSeed(&option);
   }
 
@@ -280,17 +273,15 @@ int main(int argc, char** argv)
     if (candFiles.size() > 1) g_has_more_files = true;
     if (option.scorer_types.size() > 1) g_has_more_scorers = true;
 
-    for (vector<string>::const_iterator fileIt = candFiles.begin(); fileIt != candFiles.end(); ++fileIt)
-    {
-        for (size_t i = 0; i < option.scorer_types.size(); i++)
-        {
-            g_scorer = ScorerFactory::getScorer(option.scorer_types[i], option.scorer_configs[i]);
-            g_scorer->setFactors(option.scorer_factors[i]);
-            g_scorer->setFilter(option.scorer_filter[i]);
-            g_scorer->setReferenceFiles(refFiles);
-            EvaluatorUtil::evaluate(*fileIt, option.bootstrap);
-            delete g_scorer;
-        }
+    for (vector<string>::const_iterator fileIt = candFiles.begin(); fileIt != candFiles.end(); ++fileIt) {
+      for (size_t i = 0; i < option.scorer_types.size(); i++) {
+        g_scorer = ScorerFactory::getScorer(option.scorer_types[i], option.scorer_configs[i]);
+        g_scorer->setFactors(option.scorer_factors[i]);
+        g_scorer->setFilter(option.scorer_filter[i]);
+        g_scorer->setReferenceFiles(refFiles);
+        EvaluatorUtil::evaluate(*fileIt, option.bootstrap);
+        delete g_scorer;
+      }
     }
     return EXIT_SUCCESS;
   } catch (const exception& e) {

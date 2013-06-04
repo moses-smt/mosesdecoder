@@ -12,11 +12,14 @@
 #include "Ngram.h"
 #include "Reference.h"
 #include "Util.h"
+#include "ScoreDataIterator.h"
+#include "FeatureDataIterator.h"
 #include "Vocabulary.h"
 
 using namespace std;
 
-namespace {
+namespace
+{
 
 // configure regularisation
 const char KEY_REFLEN[] = "reflen";
@@ -28,11 +31,12 @@ const char REFLEN_CLOSEST[] = "closest";
 
 namespace MosesTuning
 {
-  
+
 
 BleuScorer::BleuScorer(const string& config)
-    : StatisticsBasedScorer("BLEU", config),
-      m_ref_length_type(CLOSEST) {
+  : StatisticsBasedScorer("BLEU", config),
+    m_ref_length_type(CLOSEST)
+{
   const string reflen = getConfig(KEY_REFLEN, REFLEN_CLOSEST);
   if (reflen == REFLEN_AVERAGE) {
     m_ref_length_type = AVERAGE;
@@ -48,25 +52,39 @@ BleuScorer::BleuScorer(const string& config)
 BleuScorer::~BleuScorer() {}
 
 size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
-                               unsigned int n)
+                               unsigned int n, bool is_testing)
 {
   assert(n > 0);
   vector<int> encoded_tokens;
-  TokenizeAndEncode(line, encoded_tokens);
+
+  // When performing tokenization of a hypothesis translation, we don't have
+  // to update the Scorer's word vocabulary. However, the tokenization of
+  // reference translations requires modifying the vocabulary, which means
+  // this procedure might be slower than the tokenization the hypothesis
+  // translation.
+  if (is_testing) {
+    TokenizeAndEncodeTesting(line, encoded_tokens);
+  } else {
+    TokenizeAndEncode(line, encoded_tokens);
+  }
+  const size_t len = encoded_tokens.size();
+  vector<int> ngram;
+
   for (size_t k = 1; k <= n; ++k) {
     //ngram order longer than sentence - no point
-    if (k > encoded_tokens.size()) {
+    if (k > len) {
       continue;
     }
-    for (size_t i = 0; i < encoded_tokens.size()-k+1; ++i) {
-      vector<int> ngram;
-      for (size_t j = i; j < i+k && j < encoded_tokens.size(); ++j) {
+    for (size_t i = 0; i < len - k + 1; ++i) {
+      ngram.clear();
+      ngram.reserve(len);
+      for (size_t j = i; j < i+k && j < len; ++j) {
         ngram.push_back(encoded_tokens[j]);
       }
       counts.Add(ngram);
     }
   }
-  return encoded_tokens.size();
+  return len;
 }
 
 void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
@@ -85,7 +103,8 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
   }
 }
 
-bool BleuScorer::OpenReference(const char* filename, size_t file_id) {
+bool BleuScorer::OpenReference(const char* filename, size_t file_id)
+{
   ifstream ifs(filename);
   if (!ifs) {
     cerr << "Cannot open " << filename << endl;
@@ -94,7 +113,8 @@ bool BleuScorer::OpenReference(const char* filename, size_t file_id) {
   return OpenReferenceStream(&ifs, file_id);
 }
 
-bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id) {
+bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id)
+{
   if (is == NULL) return false;
 
   string line;
@@ -144,7 +164,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   // stats for this line
   vector<ScoreStatsType> stats(kBleuNgramOrder * 2);
   string sentence = preprocessSentence(text);
-  const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder);
+  const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder, true);
 
   const int reference_len = CalcReferenceLength(sid, length);
   stats.push_back(reference_len);
@@ -187,25 +207,27 @@ statscore_t BleuScorer::calculateScore(const vector<int>& comps) const
   return exp(logbleu);
 }
 
-int BleuScorer::CalcReferenceLength(size_t sentence_id, size_t length) {
+int BleuScorer::CalcReferenceLength(size_t sentence_id, size_t length)
+{
   switch (m_ref_length_type) {
-    case AVERAGE:
-      return m_references[sentence_id]->CalcAverage();
-      break;
-    case CLOSEST:
-      return m_references[sentence_id]->CalcClosest(length);
-      break;
-    case SHORTEST:
-      return m_references[sentence_id]->CalcShortest();
-      break;
-    default:
-      cerr << "unknown reference types." << endl;
-      exit(1);
+  case AVERAGE:
+    return m_references[sentence_id]->CalcAverage();
+    break;
+  case CLOSEST:
+    return m_references[sentence_id]->CalcClosest(length);
+    break;
+  case SHORTEST:
+    return m_references[sentence_id]->CalcShortest();
+    break;
+  default:
+    cerr << "unknown reference types." << endl;
+    exit(1);
   }
 }
 
 void BleuScorer::DumpCounts(ostream* os,
-                            const NgramCounts& counts) const {
+                            const NgramCounts& counts) const
+{
   for (NgramCounts::const_iterator it = counts.begin();
        it != counts.end(); ++it) {
     *os << "(";
@@ -221,15 +243,20 @@ void BleuScorer::DumpCounts(ostream* os,
   *os << endl;
 }
 
-float sentenceLevelBleuPlusOne(const vector<float>& stats) {
+float smoothedSentenceBleu
+(const std::vector<float>& stats, float smoothing, bool smoothBP)
+{
+
   CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
 
   float logbleu = 0.0;
   for (int j = 0; j < kBleuNgramOrder; j++) {
-    logbleu += log(stats[2 * j] + 1.0) - log(stats[2 * j + 1] + 1.0);
+    logbleu += log(stats[2 * j] + smoothing) - log(stats[2 * j + 1] + smoothing);
   }
   logbleu /= kBleuNgramOrder;
-  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
+  const float reflength = stats[(kBleuNgramOrder * 2)]  +
+                          (smoothBP ? smoothing : 0.0f);
+  const float brevity = 1.0 - reflength / stats[1];
 
   if (brevity < 0.0) {
     logbleu += brevity;
@@ -243,7 +270,7 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
   std::vector<float> stats;
   CHECK(sent.size()==bg.size());
   CHECK(sent.size()==kBleuNgramOrder*2+1);
-  for(size_t i=0;i<sent.size();i++) 
+  for(size_t i=0; i<sent.size(); i++)
     stats.push_back(sent[i]+bg[i]);
 
   // Calculate BLEU
@@ -253,7 +280,7 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
   }
   logbleu /= kBleuNgramOrder;
   const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
-  
+
   if (brevity < 0.0) {
     logbleu += brevity;
   }
@@ -262,7 +289,8 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
   return exp(logbleu) * stats[kBleuNgramOrder*2];
 }
 
-float unsmoothedBleu(const std::vector<float>& stats) {
+float unsmoothedBleu(const std::vector<float>& stats)
+{
   CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
 
   float logbleu = 0.0;
@@ -278,5 +306,53 @@ float unsmoothedBleu(const std::vector<float>& stats) {
   return exp(logbleu);
 }
 
+vector<float> BleuScorer::ScoreNbestList(const string& scoreFile, const string& featureFile)
+{
+  vector<string> scoreFiles;
+  vector<string> featureFiles;
+  scoreFiles.push_back(scoreFile);
+  featureFiles.push_back(featureFile);
+
+  vector<FeatureDataIterator> featureDataIters;
+  vector<ScoreDataIterator> scoreDataIters;
+  for (size_t i = 0; i < featureFiles.size(); ++i) {
+    featureDataIters.push_back(FeatureDataIterator(featureFiles[i]));
+    scoreDataIters.push_back(ScoreDataIterator(scoreFiles[i]));
+  }
+
+  vector<pair<size_t,size_t> > hypotheses;
+  if (featureDataIters[0] == FeatureDataIterator::end()) {
+    cerr << "Error: at the end of feature data iterator" << endl;
+    exit(1);
+  }
+  for (size_t i = 0; i < featureFiles.size(); ++i) {
+    if (featureDataIters[i] == FeatureDataIterator::end()) {
+      cerr << "Error: Feature file " << i << " ended prematurely" << endl;
+      exit(1);
+    }
+    if (scoreDataIters[i] == ScoreDataIterator::end()) {
+      cerr << "Error: Score file " << i << " ended prematurely" << endl;
+      exit(1);
+    }
+    if (featureDataIters[i]->size() != scoreDataIters[i]->size()) {
+      cerr << "Error: features and scores have different size" << endl;
+      exit(1);
+    }
+    for (size_t j = 0; j < featureDataIters[i]->size(); ++j) {
+      hypotheses.push_back(pair<size_t,size_t>(i,j));
+    }
+  }
+
+  // score the nbest list
+  vector<float> bleuScores;
+  for (size_t i=0; i < hypotheses.size(); ++i) {
+    pair<size_t,size_t> translation = hypotheses[i];
+    float bleu = smoothedSentenceBleu(scoreDataIters[translation.first]->operator[](translation.second));
+    bleuScores.push_back(bleu);
+  }
+  return bleuScores;
 }
 
+
+
+}

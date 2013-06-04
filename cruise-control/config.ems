@@ -33,10 +33,10 @@ toy-data = $moses-script-dir/ems/example/data
 ### basic tools
 #
 # moses decoder
-decoder = $moses-src-dir/dist/bin/moses
+decoder = $moses-src-dir/bin/moses
 
 # conversion of phrase table into binary on-disk format
-ttable-binarizer = $moses-src-dir/dist/bin/processPhraseTable
+ttable-binarizer = $moses-src-dir/bin/processPhraseTable
 
 # conversion of rule table into binary on-disk format
 #ttable-binarizer = "$moses-src-dir/CreateOnDisk/src/CreateOnDiskPt 1 1 5 100 2"
@@ -139,7 +139,7 @@ order = 5
 
 # kenlm, also set type to 8
 #lm-binarizer = $moses-src-dir/kenlm/build_binary
-#type = 8
+type = 8
 
 ### script to create quantized language model format (irstlm)
 # (default: no quantization)
@@ -158,6 +158,8 @@ order = 5
 ### command to run to get raw corpus files
 #
 #get-corpus-script = ""
+
+type = 8
 
 ### raw corpus (untokenized)
 #

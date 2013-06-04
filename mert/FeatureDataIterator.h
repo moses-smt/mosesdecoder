@@ -32,21 +32,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "util/file_piece.hh"
+#include "util/exception.hh"
 #include "util/string_piece.hh"
 
 #include "FeatureStats.h"
 
+namespace util
+{
+class FilePiece;
+}
+
 namespace MosesTuning
 {
-  
 
-class FileFormatException : public util::Exception 
+
+class FileFormatException : public util::Exception
 {
-  public:
-    explicit FileFormatException(const std::string& filename, const std::string& line) {
-      *this << "Error in line \"" << line << "\" of " << filename;
-    }
+public:
+  explicit FileFormatException(const std::string& filename, const std::string& line) {
+    *this << "Error in line \"" << line << "\" of " << filename;
+  }
 };
 
 
@@ -54,44 +59,45 @@ class FileFormatException : public util::Exception
 int ParseInt(const StringPiece& str );
 
 /** Assumes a delimiter, so only apply to tokens */
-float ParseFloat(const StringPiece& str); 
+float ParseFloat(const StringPiece& str);
 
 
-class FeatureDataItem 
+class FeatureDataItem
 {
-  public:
-    std::vector<float> dense;
-    SparseVector sparse;
+public:
+  std::vector<float> dense;
+  SparseVector sparse;
 };
 
 bool operator==(FeatureDataItem const& item1, FeatureDataItem const& item2);
 std::size_t hash_value(FeatureDataItem const& item);
 
-class FeatureDataIterator : 
+class FeatureDataIterator :
   public boost::iterator_facade<FeatureDataIterator,
-                                const std::vector<FeatureDataItem>,
-                                boost::forward_traversal_tag> 
+  const std::vector<FeatureDataItem>,
+  boost::forward_traversal_tag>
 {
-  public:
-    FeatureDataIterator();
-    explicit FeatureDataIterator(const std::string& filename);
+public:
+  FeatureDataIterator();
+  explicit FeatureDataIterator(const std::string& filename);
+  ~FeatureDataIterator();
 
-    static FeatureDataIterator end() {
-      return FeatureDataIterator();
-    }
+  static FeatureDataIterator end() {
+    return FeatureDataIterator();
+  }
 
 
-  private:
-    friend class boost::iterator_core_access;
+private:
+  friend class boost::iterator_core_access;
 
-    void increment();
-    bool equal(const FeatureDataIterator& rhs) const;
-    const std::vector<FeatureDataItem>& dereference() const;
+  void increment();
+  bool equal(const FeatureDataIterator& rhs) const;
+  const std::vector<FeatureDataItem>& dereference() const;
 
-    void readNext();
+  void readNext();
 
-    boost::shared_ptr<util::FilePiece> m_in;
-    std::vector<FeatureDataItem> m_next;
+  boost::shared_ptr<util::FilePiece> m_in;
+  std::vector<FeatureDataItem> m_next;
 };
 
 }

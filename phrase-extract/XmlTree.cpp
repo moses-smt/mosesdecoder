@@ -228,7 +228,7 @@ vector<string> TokenizeXml(const string& str)
 	parse because we don't have the completed source parsed until after this function
 	removes all the markup from it (CreateFromString in Sentence::Read).
 */
-bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &labelCollection, map< string, int > &topLabelCollection )
+bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &labelCollection, map< string, int > &topLabelCollection, bool unescapeSpecialChars )
 {
   //parse XML markup in translation line
 
@@ -260,7 +260,12 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
           xmlTokens[xmlTokenPos][0] != ' ') {
         cleanLine += " ";
       }
-      cleanLine += unescape(xmlTokens[xmlTokenPos]); // add to output
+      // add words to output
+      if (unescapeSpecialChars) {
+        cleanLine += unescape(xmlTokens[xmlTokenPos]);
+      } else {
+        cleanLine += xmlTokens[xmlTokenPos];
+      }
       wordPos = Tokenize(cleanLine).size(); // count all the words
     }
 
@@ -359,7 +364,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
 
         string pcfgString = ParseXmlTagAttribute(tagContent,"pcfg");
         float pcfgScore = pcfgString == "" ? 0.0f
-                                           : std::atof(pcfgString.c_str());
+                          : std::atof(pcfgString.c_str());
 
         // report what we have processed so far
         if (0) {

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 # $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
@@ -58,29 +58,6 @@ my $SCRIPTS_ROOTDIR = $RealBin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-## We preserve this bit of comments to keep the traditional weight ranges.
-#     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
-#     "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
-#     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
-#     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
-# 	      [ 1.0, 0.0, 2.0 ] ],
-#     "tm" => [ [ 0.3, 0.0, 0.5 ],    # translation model
-# 	      [ 0.2, 0.0, 0.5 ],
-# 	      [ 0.3, 0.0, 0.5 ],
-# 	      [ 0.2, 0.0, 0.5 ],
-# 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
-#     "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
-#     "I"  => [ [ 0.0,-1.0, 1.0 ] ],  # input lattice scores
-
-
-
-# moses.ini file uses FULL names for lambdas, while this training script
-# internally (and on the command line) uses ABBR names.
-my @ABBR_FULL_MAP = qw(d=weight-d lm=weight-l tm=weight-t w=weight-w
-  g=weight-generation lex=weight-lex I=weight-i);
-my %ABBR2FULL = map { split /=/, $_, 2 } @ABBR_FULL_MAP;
-my %FULL2ABBR = map { my ($a, $b) = split /=/, $_, 2; ($b, $a); } @ABBR_FULL_MAP;
-
 my $minimum_required_change_in_weights = 0.00001;
     # stop if no lambda changes more than this
 
@@ -121,6 +98,13 @@ my $megam_default_options = "-fvals -maxi 30 -nobias binary";
 # Flags related to Batch MIRA (Cherry & Foster, 2012)
 my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 
+# Train phrase model mixture weights with PRO (Haddow, NAACL 2012)
+my $__PROMIX_TRAINING = undef; # Location of main script (contrib/promix/main.py)
+# The phrase tables. These should be gzip text format.
+my @__PROMIX_TABLES;
+# used to filter output
+my $__REMOVE_SEGMENTATION = "$SCRIPTS_ROOTDIR/ems/support/remove-segmentation-markup.perl";
+
 my $__THREADS = 0;
 
 # Parameter for effective reference length when computing BLEU score
@@ -148,6 +132,7 @@ my $mertdir = undef; # path to new mert directory
 my $mertargs = undef; # args to pass through to mert & extractor
 my $mertmertargs = undef; # args to pass through to mert only
 my $extractorargs = undef; # args to pass through to extractor only
+my $proargs = undef; # args to pass through to pro only
 
 # Args to pass through to batch mira only.  This flags is useful to
 # change MIRA's hyperparameters such as regularization parameter C,
@@ -164,6 +149,7 @@ my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
 my $___RANGES = undef;
+my $___USE_CONFIG_WEIGHTS_FIRST = 0; # use weights in configuration file for first iteration
 my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loading data (default =-1)
                                   # -1 means all previous, i.e. from iteration 1
                                   # 0 means no previous data, i.e. from actual iteration
@@ -196,6 +182,7 @@ GetOptions(
   "mertdir=s" => \$mertdir,
   "mertargs=s" => \$mertargs,
   "extractorargs=s" => \$extractorargs,
+  "proargs=s" => \$proargs,
   "mertmertargs=s" => \$mertmertargs,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
@@ -212,6 +199,7 @@ GetOptions(
   "return-best-dev" => \$___RETURN_BEST_DEV, # return the best weights according to dev, not the last
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "range=s@" => \$___RANGES,
+  "use-config-weights-for-first-run" => \$___USE_CONFIG_WEIGHTS_FIRST, # use the weights in the configuration file when running the decoder for the first time
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
   "maximum-iterations=i" => \$maximum_iterations,
   "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER,
@@ -219,6 +207,8 @@ GetOptions(
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
   "batch-mira" => \$___BATCH_MIRA,
   "batch-mira-args=s" => \$batch_mira_args,
+  "promix-training=s" => \$__PROMIX_TRAINING,
+  "promix-table=s" => \@__PROMIX_TABLES,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -308,6 +298,8 @@ Options:
   --batch-mira-args=STRING  ... args to pass through to batch MIRA. This flag is useful to
                                 change MIRA's hyperparameters such as regularization parameter C,
                                 BLEU decay factor, and the number of iterations of MIRA.
+  --promix-training=STRING  ... PRO-based mixture model training (Haddow, NAACL 2013)
+  --promix-tables=STRING    ... Phrase tables for PRO-based mixture model training.
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
@@ -356,15 +348,26 @@ my $pro_optimizer = File::Spec->catfile($mertdir, "megam_i686.opt");  # or set t
 
 if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optimizer) {
   print "Could not find $pro_optimizer, installing it in $mertdir\n";
-  my $megam_url = "http://www.cs.utah.edu/~hal/megam/";
+  my $megam_url = "http://hal3.name/megam";
   if (&is_mac_osx()) {
     die "Error: Sorry for Mac OS X users! Please get the source code of megam and compile by hand. Please see $megam_url for details.";
   }
 
-  `cd $mertdir; wget http://www.cs.utah.edu/~hal/megam/megam_i686.opt.gz;`;
+  `cd $mertdir; wget $megam_url/megam_i686.opt.gz;`;
   `gunzip $pro_optimizer.gz`;
   `chmod +x $pro_optimizer`;
   die("ERROR: Installation of megam_i686.opt failed! Install by hand from $megam_url") unless -x $pro_optimizer;
+}
+
+if ($__PROMIX_TRAINING) {
+  die "Not executable $__PROMIX_TRAINING" unless -x $__PROMIX_TRAINING;
+  die "For promix training, specify the tables using --promix-table arguments" unless @__PROMIX_TABLES;
+  die "For mixture model, need at least 2 tables" unless scalar(@__PROMIX_TABLES) > 1;
+  
+  for my $TABLE (@__PROMIX_TABLES) {
+    die "Phrase table $TABLE not found" unless -r $TABLE;
+  }
+  die "To use promix training, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
 }
 
 $mertargs = "" if !defined $mertargs;
@@ -395,6 +398,8 @@ $extractorargs = "" unless $extractorargs;
 $mert_extract_args .= " $extractorargs";
 
 $mertmertargs = "" if !defined $mertmertargs;
+
+$proargs = "" unless $proargs;
 
 my $mert_mert_args = "$mertargs $mertmertargs";
 $mert_mert_args =~ s/\-+(binary|b)\b//;
@@ -486,7 +491,28 @@ my $sparse_weights_file = undef;
 my $prev_feature_file = undef;
 my $prev_score_file = undef;
 my $prev_init_file = undef;
+my @allnbests;
 
+# If we're doing promix training, need to make sure the appropriate
+# tables are in place
+my @_PROMIX_TABLES_BIN;
+if ($__PROMIX_TRAINING) {
+  print STDERR "Training mixture model using promix\n";
+  for (my $i = 0; $i < scalar(@__PROMIX_TABLES); ++$i) {
+    # Create filtered, binarised tables
+    my $filtered_config = "moses_$i.ini";
+    substitute_ttable($___CONFIG, $filtered_config, $__PROMIX_TABLES[$i]); 
+    #TODO: Remove reordering table from config, as we don't need to filter
+    # and binarise it.
+    my $filtered_path = "filtered_$i";
+    my $___FILTER_F  = $___DEV_F;
+    $___FILTER_F = $filterfile if (defined $filterfile);
+    my $cmd = "$filtercmd ./$filtered_path $filtered_config $___FILTER_F";
+    &submit_or_exec($cmd, "filterphrases_$i.out", "filterphrases_$i.err");
+    push (@_PROMIX_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
+  }
+}
+ 
 if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
   if (-e "$outdir/moses.ini") {
@@ -641,6 +667,11 @@ my $allsorted       = undef;
 my $nbest_file      = undef;
 my $lsamp_file      = undef; # Lattice samples
 my $orig_nbest_file = undef; # replaced if lattice sampling
+# For mixture modelling
+my @promix_weights;
+my $num_mixed_phrase_features;
+my $interpolated_config;
+my $uninterpolated_config; # backup of config without interpolated ttable
 
 while (1) {
   $run++;
@@ -648,10 +679,57 @@ while (1) {
     print "Maximum number of iterations exceeded - stopping\n";
     last;
   }
+  print "run $run start at ".`date`;
+
+  if ($__PROMIX_TRAINING) {
+    # Need to create an ini file for the interpolated phrase table
+    if (!@promix_weights) {
+      # Create initial weights, distributing evenly between tables
+      # total number of weights is 1 less than number of phrase features, multiplied
+      # by the number of tables
+      $num_mixed_phrase_features = (grep { $_ eq 'tm' } @{$featlist->{"names"}}) - 1;
+  
+      @promix_weights = (1.0/scalar(@__PROMIX_TABLES)) x 
+        ($num_mixed_phrase_features * scalar(@__PROMIX_TABLES));
+    }
+    
+    # backup orig config, so we always add the table into it
+    $uninterpolated_config= $___CONFIG unless $uninterpolated_config; 
+
+    # Interpolation
+    my $interpolated_phrase_table = "interpolate";
+    for my $itable (@_PROMIX_TABLES_BIN) {
+      $interpolated_phrase_table .= " 1:$itable";
+    }
+    
+    # Create an ini file for the interpolated phrase table
+    $interpolated_config ="moses.interpolated.ini"; 
+    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "99");
+
+    # Append the multimodel weights
+    open(ITABLE,">>$interpolated_config") || die "Failed to append weights to $interpolated_config";
+    print ITABLE "\n";
+    print ITABLE "[weight-t-multimodel]\n";
+    #for my $feature (0..($num_mixed_phrase_features-1)) {
+    #  for my $table (0..(scalar(@__PROMIX_TABLES)-1)) {
+    #    print ITABLE $promix_weights[$table * $num_mixed_phrase_features + $feature];
+    #    print ITABLE "\n";
+    #  }
+    #}
+    for my $iweight (@promix_weights) {
+      print ITABLE $iweight . "\n";
+    }
+
+    close ITABLE;
+
+    # the decoder should now use the interpolated model
+    $___CONFIG = "$interpolated_config";
+
+  }
+
   # run beamdecoder with option to output nbestlists
   # the end result should be (1) @NBEST_LIST, a list of lists; (2) @SCORE, a list of lists of lists
 
-  print "run $run start at ".`date`;
 
   # In case something dies later, we might wish to have a copy
   create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined $devbleu ? $devbleu : "--not-estimated--"), $sparse_weights_file);
@@ -663,7 +741,7 @@ while (1) {
     my @names = @{$featlist->{"names"}};
     open my $denseout, '>', $densefile or die "Can't write $densefile (WD now $___WORKING_DIR)";
     for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
-        print $denseout "$names[$i] $names[$i] $vals[$i]\n";
+        print $denseout "$names[$i]= $vals[$i]\n";
     }
     close $denseout;
   }
@@ -703,6 +781,9 @@ while (1) {
   my $score_file        = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r " . join(",", @references) . " -n $nbest_file";
+  $cmd .= " -d" if $__PROMIX_TRAINING; # Allow duplicates
+  # remove segmentation
+  $cmd .= " -l $__REMOVE_SEGMENTATION" if  $__PROMIX_TRAINING;
   $cmd = &create_extractor_script($cmd, $___WORKING_DIR);
   &submit_or_exec($cmd, "extract.out","extract.err");
 
@@ -775,6 +856,11 @@ while (1) {
   my $pro_file_settings = "--ffile " . join(" --ffile ", split(/,/, $ffiles)) .
                           " --scfile " .  join(" --scfile ", split(/,/, $scfiles));
 
+  push @allnbests, $nbest_file;
+  my $promix_file_settings = 
+                          "--scfile " .  join(" --scfile ", split(/,/, $scfiles)) .
+                          " --nbest " . join(" --nbest ", @allnbests);
+
   if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
     $file_settings .= " --ifile $prev_init_file,run$run.$weights_in_file";
   } else {
@@ -783,22 +869,39 @@ while (1) {
 
   $cmd .= $file_settings;
 
-
+  my %sparse_weights; # sparse features
   my $pro_optimizer_cmd = "$pro_optimizer $megam_default_options run$run.pro.data";
   if ($___PAIRWISE_RANKED_OPTIMIZER) {  # pro optimization
-    $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer_cmd";
+    $cmd = "$mert_pro_cmd $proargs $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer_cmd";
     &submit_or_exec($cmd, $mert_outfile, $mert_logfile);
   } elsif ($___PRO_STARTING_POINT) {  # First, run pro, then mert
     # run pro...
-    my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
+    my $pro_cmd = "$mert_pro_cmd $proargs $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
     &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err");
     # ... get results ...
-    my %dummy;
-    ($bestpoint, $devbleu) = &get_weights_from_mert("run$run.pro.out", "run$run.pro.err", scalar @{$featlist->{"names"}}, \%dummy);
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights, \@promix_weights);
+    # Get the pro outputs ready for mert. Add the weight ranges,
+    # and a weight and range for the single sparse feature
+    $cmd =~ s/--ifile (\S+)/--ifile run$run.init.pro/;
+    open(MERT_START,$1);
+    open(PRO_START,">run$run.init.pro");
+    print PRO_START $bestpoint." 1\n";
+    my $mert_line = <MERT_START>;
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 0\n";
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 1\n";
+    close(PRO_START);
 
-    open my $pro_fh, '>', "run$run.init.pro" or die "run$run.init.pro: $!";
-    print $pro_fh $bestpoint . "\n";
-    close $pro_fh;
+    # Write the sparse weights to file so mert can use them
+    open(SPARSE_WEIGHTS,">run$run.merge-weights");
+    foreach my $fname (keys %sparse_weights) {
+      print SPARSE_WEIGHTS "$fname $sparse_weights{$fname}\n";
+    }
+    close(SPARSE_WEIGHTS);
+    $cmd = $cmd." --sparse-weights run$run.merge-weights";
 
     # ... and run mert
     $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
@@ -807,9 +910,19 @@ while (1) {
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
+  } elsif ($__PROMIX_TRAINING) {
+    # PRO trained  mixture model
+    safesystem("echo 'not used' > $weights_out_file") or die;
+    $cmd = "$__PROMIX_TRAINING $promix_file_settings";
+    $cmd .= " -t mix ";
+    $cmd .= join(" ", map {"-p $_"} @_PROMIX_TABLES_BIN);
+    $cmd .= " -i $___DEV_F";
+    print "Starting promix optimisation at " . `date`;
+    &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
+    print "Finished promix optimisation at " . `date`;
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
-  }
+  } 
 
   die "Optimization failed, file $weights_out_file does not exist or is empty"
     if ! -s $weights_out_file;
@@ -821,11 +934,15 @@ while (1) {
   safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem("touch $mert_logfile run$run.$mert_logfile") or die;
   safesystem("\\cp -f $weights_out_file run$run.$weights_out_file") or die; # this one is needed for restarts, too
+  if ($__PROMIX_TRAINING) {
+    safesystem("\\cp -f $interpolated_config run$run.$interpolated_config") or die;
+  }
 
   print "run $run end at ".`date`;
 
-  my %sparse_weights; # sparse features
-  ($bestpoint, $devbleu) = &get_weights_from_mert("run$run.$mert_outfile", "run$run.$mert_logfile", scalar @{$featlist->{"names"}}, \%sparse_weights);
+  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights,\@promix_weights);
+  my $merge_weight = 0;
+  print "New mixture weights: " . join(" ", @promix_weights) . "\n";
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -834,6 +951,10 @@ while (1) {
 
   # update my cache of lambda values
   my @newweights = split /\s+/, $bestpoint;
+
+  if ($___PRO_STARTING_POINT) {
+    $merge_weight = pop @newweights;
+  }
 
   # interpolate with prior's interation weight, if historic-interpolation is specified
   if ($___HISTORIC_INTERPOLATION>0 && $run>3) {
@@ -874,7 +995,11 @@ while (1) {
     $sparse_weights_file = "run" . ($run + 1) . ".sparse-weights";
     open my $sparse_fh, '>', $sparse_weights_file or die "$sparse_weights_file: $!";
     foreach my $feature (keys %sparse_weights) {
-      print $sparse_fh "$feature $sparse_weights{$feature}\n";
+      my $sparse_weight = $sparse_weights{$feature};
+      if ($___PRO_STARTING_POINT) {
+        $sparse_weight *= $merge_weight;
+      }
+      print $sparse_fh "$feature $sparse_weight\n";
     }
     close $sparse_fh;
   }
@@ -945,7 +1070,9 @@ if($___RETURN_BEST_DEV) {
   my $bestbleu=0;
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
-    safesystem("$mert_eval_cmd --reference " . join(",", @references) . " --candidate run$i.out 2> /dev/null 1> $evalout");
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " -s BLEU --candidate run$i.out";
+    $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
+    safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
     my $bleu = <$fh>;
     chomp $bleu;
@@ -976,25 +1103,28 @@ print "Training finished at " . `date`;
 } # end of local scope
 
 sub get_weights_from_mert {
-  my ($outfile, $logfile, $weight_count, $sparse_weights) = @_;
+  my ($outfile, $logfile, $weight_count, $sparse_weights, $mix_weights) = @_;
   my ($bestpoint, $devbleu);
   if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)
-          || $___BATCH_MIRA) {
+          || $___BATCH_MIRA || $__PROMIX_TRAINING) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
     my @WEIGHT;
+    @$mix_weights = ();
     for (my $i = 0; $i < $weight_count; $i++) { push @WEIGHT, 0; }
     my $sum = 0.0;
     while (<$fh>) {
       if (/^F(\d+) ([\-\.\de]+)/) {     # regular features
         $WEIGHT[$1] = $2;
         $sum += abs($2);
+      } elsif (/^M(\d+_\d+) ([\-\.\de]+)/) {     # mix weights
+        push @$mix_weights,$2;
       } elsif (/^(.+_.+) ([\-\.\de]+)/) { # sparse features
         $$sparse_weights{$1} = $2;
       }
     }
     close $fh;
     die "It seems feature values are invalid or unable to read $outfile." if $sum < 1e-09;
-
+  
     $devbleu = "unknown";
     foreach (@WEIGHT) { $_ /= $sum; }
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
@@ -1048,11 +1178,13 @@ sub run_decoder {
     my %model_weights;
     for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
       my $name = $featlist->{"names"}->[$i];
-      $model_weights{$name} = "-$name" if !defined $model_weights{$name};
+      $model_weights{$name} = "$name=" if !defined $model_weights{$name};
       $model_weights{$name} .= sprintf " %.6f", $vals[$i];
     }
-    my $decoder_config = join(" ", values %model_weights);
+    my $decoder_config = "";
+    $decoder_config = "-weight-overwrite '" . join(" ", values %model_weights) ."'" unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
     $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
+    $decoder_config .= " -report-segmentation" if $__PROMIX_TRAINING;
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
 
@@ -1090,8 +1222,6 @@ sub insert_ranges_to_featlist {
       if ($namedpair =~ /^(.*?):/) {
         $name = $1;
         $namedpair =~ s/^.*?://;
-        die "Unrecognized name '$name' in --range=$range"
-          if !defined $ABBR2FULL{$name};
       }
       my ($min, $max) = split /\.\./, $namedpair;
       die "Bad min '$min' in --range=$range" if $min !~ /^-?[0-9.]+$/;
@@ -1154,15 +1284,18 @@ sub get_featlist_from_file {
   while (<$fh>) {
     $nr++;
     chomp;
-    /^(.+) (\S+) (\S+)$/ || die "invalid feature: $_";
-    my ($longname, $feature, $value) = ($1, $2, $3);
-    next if $value eq "sparse";
-    push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
-      if $value !~ /^[+-]?[0-9.e-]+$/;
-    push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
-      if !defined $ABBR2FULL{$feature};
-    push @names, $feature;
-    push @startvalues, $value;
+    if (/^(\S+)= (.+)$/) { # only for feature functions with dense features
+      my ($longname, $valuesStr) = ($1, $2);
+      next if (!defined($valuesStr));
+    
+      my @values = split(/ /, $valuesStr);
+		  foreach my $value (@values) {
+			  push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
+				  if $value !~ /^[+-]?[0-9.\-e]+$/;
+			  push @names, $longname;
+			  push @startvalues, $value;
+      }
+    }
   }
   close $fh;
 
@@ -1191,11 +1324,11 @@ sub get_order_of_scores_from_nbestlist {
   my $label = undef;
   my $sparse = 0; # we ignore sparse features here
   foreach my $tok (split /\s+/, $scores) {
-    if ($tok =~ /.+_.+:/) {
+    if ($tok =~ /.+_.+=/) {
       $sparse = 1;
-    } elsif ($tok =~ /^([a-z][0-9a-z]*):/i) {
+    } elsif ($tok =~ /^([a-z][0-9a-z]*)=/i) {
       $label = $1;
-    } elsif ($tok =~ /^-?[-0-9.e]+$/) {
+    } elsif ($tok =~ /^-?[-0-9.\-e]+$/) {
       if (!$sparse) {
         # a score found, remember it
         die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"
@@ -1220,6 +1353,13 @@ sub create_config {
   my $bleu_achieved       = shift; # just for verbosity
   my $sparse_weights_file = shift; # only defined when optimizing sparse features
 
+  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    my $val = $featlist->{"values"}->[$i];
+    # ensure long name
+		print STDERR "featlist: $name=$val \n";
+  }
+
   my %P; # the hash of all parameters we wish to override
 
   # first convert the command line parameters to the hash
@@ -1232,30 +1372,13 @@ sub create_config {
     foreach (split(/ /, $___DECODER_FLAGS)) {
       if (/^\-([^\d].*)$/) {
         $parameter = $1;
-        $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
       } else {
-        die "Found value with no -paramname before it: $_"
+				my $value = $_;
+        die "Found value with no -paramname before it: $value"
             if !defined $parameter;
-        push @{$P{$parameter}}, $_;
+        push @{$P{$parameter}}, $value;
       }
     }
-  }
-
-  # First delete all weights params from the input, we're overwriting them.
-  # Delete both short and long-named version.
-  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
-    my $name = $featlist->{"names"}->[$i];
-    delete($P{$name});
-    delete($P{$ABBR2FULL{$name}});
-  }
-
-  # Convert weights to elements in P
-  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
-    my $name = $featlist->{"names"}->[$i];
-    my $val = $featlist->{"values"}->[$i];
-    $name = defined $ABBR2FULL{$name} ? $ABBR2FULL{$name} : $name;
-    # ensure long name
-    push @{$P{$name}}, $val;
   }
 
   if (defined($sparse_weights_file)) {
@@ -1287,31 +1410,28 @@ sub create_config {
 
     # parameter name
     my $parameter = $1;
-    $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
-    print $out "[$parameter]\n";
 
-    # change parameter, if new values
-    if (defined($P{$parameter})) {
-      # write new values
-      foreach (@{$P{$parameter}}) {
-        print $out $_ . "\n";
-      }
-      delete($P{$parameter});
-      # skip until new parameter, only write comments
-      while ($line = <$ini_fh>) {
-        print $out $line if $line =~ /^\#/ || $line =~ /^\s+$/;
-        last if $line =~ /^\[/;
-        last unless $line;
-      }
-      next;
-    }
-
-    # unchanged parameter, write old
-    while ($line = <$ini_fh>) {
-      last if $line =~ /^\[/;
-      print $out $line;
-    }
-  }
+		if ($parameter eq "weight") {
+			# leave weights 'til last. We're changing it
+			while ($line = <$ini_fh>) {
+			  last if $line =~ /^\[/;
+			}
+		}
+	  elsif (defined($P{$parameter})) {
+			# found a param (thread, verbose etc) that we're overriding. Leave to the end
+			while ($line = <$ini_fh>) {
+			  last if $line =~ /^\[/;
+			}
+	  }
+		else {
+			# unchanged parameter, write old
+			print $out "[$parameter]\n";
+			while ($line = <$ini_fh>) {
+				last if $line =~ /^\[/;
+				print $out $line;
+			}
+		}
+	}
 
   # write all additional parameters
   foreach my $parameter (keys %P) {
@@ -1321,10 +1441,55 @@ sub create_config {
     }
   }
 
+  # write all weights
+  print $out "[weight]\n";
+  
+  my $prevName = "";
+  my $outStr = "";
+  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    my $val = $featlist->{"values"}->[$i];
+    
+    if ($prevName eq $name) {
+      $outStr .= " $val";
+    }
+    else {
+  		print $out "$outStr\n";
+  		$outStr = "$name= $val";
+  		$prevName = $name;
+    }
+  }
+	print $out "$outStr\n";
+
   close $ini_fh;
   close $out;
   print STDERR "Saved: $outfn\n";
 }
+
+# Create a new ini file, with the first ttable replaced by the given one
+# and its type set to text
+sub substitute_ttable {
+  my ($old_ini, $new_ini, $new_ttable, $ttable_type) = @_;
+  $ttable_type = "0" unless defined($ttable_type);
+  open(NEW_INI,">$new_ini") || die "Failed to create $new_ini";
+  open(INI,$old_ini) || die "Failed to open $old_ini";
+  while(<INI>) {
+    if (/\[ttable-file\]/) {
+      print NEW_INI "[ttable-file]\n";
+      my $ttable_config = <INI>;
+      chomp $ttable_config;
+      my @ttable_fields = split /\s+/, $ttable_config;
+      $ttable_fields[0] = $ttable_type;
+      $ttable_fields[4] = $new_ttable;
+      print NEW_INI join(" ", @ttable_fields) . "\n";
+    } else {
+      print NEW_INI;
+    }
+  }
+  close NEW_INI;
+  close INI;
+}
+
 
 sub safesystem {
   print STDERR "Executing: @_\n";

@@ -7,6 +7,7 @@
 #ifndef BJAM_OUTPUT_H
 #define BJAM_OUTPUT_H
 
+#include "object.h"
 #include <time.h>
 
 #define EXIT_OK 0
@@ -22,8 +23,8 @@ void out_action(
     int exit_reason
     );
 
-char * outf_int( int value );
-char * outf_double( double value );
-char * outf_time( time_t value );
+OBJECT * outf_int( int value );
+OBJECT * outf_double( double value );
+OBJECT * outf_time( time_t value );
 
 #endif

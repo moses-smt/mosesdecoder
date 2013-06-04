@@ -65,7 +65,13 @@ function load_experiment_info() {
   }
   
   krsort($experiment);
-  ksort($evalset);
+  uksort($evalset,"evalsetsort");
+}
+
+function evalsetsort($a,$b) {
+  if ($a == "avg") { return -1; }
+  if ($b == "avg") { return 1; }
+  return strcmp($a,$b);
 }
 
 function load_parameter($run) {
@@ -187,7 +193,7 @@ function get_analysis_version($dir,$set,$id) {
   if (file_exists("$dir/steps/$id/REPORTING_report.$id")) {
    $report = file("$dir/steps/$id/REPORTING_report.$id.INFO");
    foreach ($report as $line) {
-    if (preg_match("/\# reuse run (\d+) for EVALUATION:(.+):analysis/",$line,$match) &&
+    if (preg_match("/\# reuse run (\d+) for EVALUATION:(.+):analysis$/",$line,$match) &&
         $match[2] == $set) {
       if (file_exists("$prefix.$match[1]/summary")) {
         $analysis_version[$id][$set]["basic"] = $match[1];

@@ -6,7 +6,8 @@
 
 using namespace std;
 
-namespace {
+namespace
+{
 
 MosesTuning::SemposOverlapping* g_overlapping = NULL;
 
@@ -14,9 +15,10 @@ MosesTuning::SemposOverlapping* g_overlapping = NULL;
 
 namespace MosesTuning
 {
-  
 
-SemposOverlapping* SemposOverlappingFactory::GetOverlapping(const string& str, const SemposScorer* sempos) {
+
+SemposOverlapping* SemposOverlappingFactory::GetOverlapping(const string& str, const SemposScorer* sempos)
+{
   if (str == "cap-micro") {
     return new CapMicroOverlapping(sempos);
   } else if (str == "cap-macro") {
@@ -26,7 +28,8 @@ SemposOverlapping* SemposOverlappingFactory::GetOverlapping(const string& str, c
   }
 }
 
-void SemposOverlappingFactory::SetOverlapping(SemposOverlapping* ovr) {
+void SemposOverlappingFactory::SetOverlapping(SemposOverlapping* ovr)
+{
   g_overlapping = ovr;
 }
 
@@ -41,15 +44,13 @@ vector<int> CapMicroOverlapping::prepareStats(const sentence_t& cand, const sent
   int multCoeff = 1000;
 
   float interSum = 0;
-  for (sentence_t::iterator it = intersection.begin(); it != intersection.end(); it++)
-  {
+  for (sentence_t::iterator it = intersection.begin(); it != intersection.end(); it++) {
     interSum += semposScorer->weight(it->first);
   }
 
   float refSum = 0;
-  for (sentence_t::iterator it = ref.begin(); it != ref.end(); it++)
-  {
-    refSum += semposScorer->weight(it->first);    
+  for (sentence_t::iterator it = ref.begin(); it != ref.end(); it++) {
+    refSum += semposScorer->weight(it->first);
   }
 
   stats[0] = (int)(multCoeff * interSum);

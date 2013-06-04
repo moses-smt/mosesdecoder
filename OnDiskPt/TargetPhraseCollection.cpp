@@ -20,9 +20,9 @@
 
 #include <algorithm>
 #include <iostream>
-#include "../moses/src/Util.h"
-#include "../moses/src/TargetPhraseCollection.h"
-#include "../moses/src/PhraseDictionary.h"
+#include "moses/Util.h"
+#include "moses/TargetPhraseCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "TargetPhraseCollection.h"
 #include "Vocab.h"
 #include "OnDiskWrapper.h"
@@ -117,8 +117,6 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
     , const std::vector<Moses::FactorType> &outputFactors
     , const Moses::PhraseDictionary &phraseDict
     , const std::vector<float> &weightT
-    , const Moses::WordPenaltyProducer* wpProducer
-    , const Moses::LMList &lmList
     , const std::string & /* filePath */
     , Vocab &vocab) const
 {
@@ -130,9 +128,7 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
     Moses::TargetPhrase *mosesPhrase = tp.ConvertToMoses(inputFactors, outputFactors
                                        , vocab
                                        , phraseDict
-                                       , weightT
-                                       , wpProducer
-                                       , lmList);
+                                       , weightT);
 
     /*
     // debugging output
@@ -156,6 +152,7 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
   fstream &fileTP = onDiskWrapper.GetFileTargetInd();
 
   size_t numScores = onDiskWrapper.GetNumScores();
+
 
   UINT64 numPhrases;
 
@@ -200,7 +197,7 @@ const TargetPhrase &TargetPhraseCollection::GetTargetPhrase(size_t ind) const
   assert(ind < GetSize());
   return *m_coll[ind];
 }
-  
+
 }
 
 

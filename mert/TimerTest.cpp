@@ -8,7 +8,8 @@
 
 using namespace MosesTuning;
 
-BOOST_AUTO_TEST_CASE(timer_basic_test) {
+BOOST_AUTO_TEST_CASE(timer_basic_test)
+{
   Timer timer;
   const int sleep_time_microsec = 40; // ad-hoc microseconds to pass unit tests.
 

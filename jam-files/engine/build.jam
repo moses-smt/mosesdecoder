@@ -18,12 +18,9 @@ for local v in ARGV CC CFLAGS LIBS
 
 # Platform related specifics.
 if $(OS) = NT { rule .path { return "$(<:J=\\)" ; } ./ = "/" ; }
-else if $(OS) = OS2 { rule .path { return "$(<:J=\\)" ; } ./ = "/" ; }
-else if $(OS) = VMS { rule .path { return "[.$(<:J=/)]" ; } }
-else if $(OS) = MAC { rule .path { return ":$(<:J=\:)" ; } }
 else { rule .path { return "$(<:J=/)" ; } }
-if $(OS) = VMS { . = "_" ; }
-else { . = "." ; }
+
+. = "." ;
 ./ ?= "" ;
 
 # Info about what we are building.
@@ -71,7 +68,7 @@ if $(with-python)
     {
         --python-include = [ .path $(python-location) include ] ;
         --python-lib = ;
-        for local v in 26 25 24 23 22
+        for local v in 27 26 25 24 23 22
         {
             --python-lib ?=
                 [ GLOB [ .path $(python-location) libs ] : "python$(v).lib" ]
@@ -94,7 +91,7 @@ if $(with-python)
     {
         --python-include = ;
         --python-lib = ;
-        for local v in 2.6 2.5 2.4 2.3 2.2
+        for local v in 2.7 2.6 2.5 2.4 2.3 2.2
         {
             local inc = [ GLOB [ .path $(python-location) include ] : python$(v) ] ;
             local lib = [ GLOB [ .path $(python-location) lib ] : libpython$(v)* ] ;
@@ -214,6 +211,7 @@ toolset gcc gcc : "-o " : -D
     : -pedantic -fno-strict-aliasing
     [ opt --release : [ opt --symbols : -g : -s ] -O3 ]
     [ opt --debug : -g -O0 -fno-inline ]
+    [ opt --profile : -O3 -g -pg ]
     -I$(--python-include) -I$(--extra-include) -Wno-long-long
     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
 ## GCC 2.x, 3.x on CYGWIN but without cygwin1.dll
@@ -319,14 +317,14 @@ toolset pgi pgcc : "-o " : -D
 ## Sun Workshop 6 C++
 toolset sun cc : "-o " : -D
     :
-    [ opt --release : -s -fast -xO4 ]
+    [ opt --release : -s -xO3 ]
     [ opt --debug : -g ]
     -I$(--python-include) -I$(--extra-include)
     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
 ## Sun Workshop 6 C++ (old alias)
 toolset sunpro cc : "-o " : -D
     :
-    [ opt --release : -s -fast -xO4 ]
+    [ opt --release : -s -xO3 ]
     [ opt --debug : -g ]
     -I$(--python-include) -I$(--extra-include)
     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
@@ -372,18 +370,13 @@ toolset vc10 cl : /Fe /Fe /Fd /Fo : -D
     [ opt --debug : /MTd /DEBUG /Z7 /Od /Ob0 /wd4996 ]
     -I$(--python-include) -I$(--extra-include)
     : kernel32.lib advapi32.lib user32.lib $(--python-lib[1]) ;
-## VMS/OpenVMS DEC C
-toolset vmsdecc cc : /OBJECT= : "/DEFINES=(" "," ")"
-    : /STANDARD=VAXC /PREFIX_LIBRARY_ENTRIES=ALL_ENTRIES
-    [ opt --release : /OPTIMIZE /NODEBUG ]
-    [ opt --debug : /NOOPTIMIZE /DEBUG ]
-    ;
-toolset vmsdecc link .link : /EXECUTABLE= :
-    : /NOMAP
-    [ opt --release : /NODEBUG ]
-    [ opt --debug : /DEBUG ]
-    ;
-
+toolset vc11 cl : /Fe /Fe /Fd /Fo : -D
+    : /nologo
+    [ opt --release : /MT /O2 /Ob2 /Gy /GF /GA /wd4996 ]
+    [ opt --debug : /MTd /DEBUG /Z7 /Od /Ob0 /wd4996 ]
+    -I$(--python-include) -I$(--extra-include)
+    : kernel32.lib advapi32.lib user32.lib $(--python-lib[1]) ;
+    
 # First set the build commands and options according to the
 # preset toolset.
 toolset = [ MATCH --toolset=(.*) : $(ARGV) ] ;
@@ -454,17 +447,7 @@ if $(tool.$(toolset).link.cc)
 
 # Put executables in platform-specific subdirectory.
 locate-target = $(LOCATE_TARGET) ;
-if $(OS) = VMS
-{
-    locate-target ?= bin$(.)vms ;
-    platform = vms ;
-}
-else if $(OS) = MAC
-{
-    locate-target ?= bin$(.)$(OS:L)$(OSPLAT:L) ;
-    platform = $(OS:L)$(OSPLAT:L) ;
-}
-else if $(OSPLAT)
+if $(OSPLAT)
 {
     locate-target ?= bin$(.)$(OS:L)$(OSPLAT:L) ;
     platform = $(OS:L)$(OSPLAT:L) ;
@@ -492,12 +475,12 @@ if --show-locate-target in $(ARGV)
   ECHO $(locate-target) ;
 }
 
-# We have some different files for UNIX, VMS, and NT.
+# We have some different files for UNIX, and NT.
 jam.source =
-    command.c compile.c debug.c expand.c glob.c
+    command.c compile.c constants.c debug.c function.c glob.c
     hash.c hcache.c headers.c hdrmacro.c
     jam.c jambase.c jamgram.c
-    lists.c make.c make1.c mem.c newstr.c
+    lists.c make.c make1.c mem.c object.c
     option.c output.c parse.c regexp.c rules.c
     scan.c search.c subst.c w32_getreg.c
     timestamp.c variable.c modules.c strings.c filesys.c
@@ -508,18 +491,6 @@ jam.source =
 if $(OS) = NT
 {
     jam.source += execnt.c filent.c pathunix.c ;
-}
-else if $(OS) = OS2
-{
-    jam.source += execunix.c fileos2.c pathunix.c ;
-}
-else if $(OS) = VMS
-{
-    jam.source += execvms.c filevms.c pathvms.c ;
-}
-else if $(OS) = MAC
-{
-    jam.source += execmac.c filemac.c pathmac.c ;
 }
 else
 {
@@ -565,10 +536,6 @@ if ( $(OS) = NT ) && ! NT in $(--defs)
 {
     --defs += NT ;
 }
-if $(OS) = VMS
-{
-    --defs += VMS ;
-}
 --defs += YYSTACKSIZE=5000 ;
 
 if $(with-python)
@@ -597,17 +564,11 @@ if $(OS) = NT { actions piecemeal together existing [DELETE] {
 if $(UNIX) = true { actions piecemeal together existing [DELETE] {
     rm -f "$(>)"
 } }
-if $(OS) = VMS { actions piecemeal together existing [DELETE] {
-    DELETE $(>[--2]:J=";*, ") $(>[-1]);*
-} }
 if $(OS) = NT {
     --chmod+w = "attrib -r " ;
 }
 if $(UNIX) = true {
     --chmod+w = "chmod +w " ;
-}
-if $(OS) = VMS {
-    --chmod+w = "SET FILE/PROT=(S:RWED) " ;
 }
 
 rule .mkdir
@@ -622,14 +583,11 @@ if $(OS) = NT { actions [MKDIR] {
 if $(UNIX) = true { actions [MKDIR] {
     mkdir "$(<)"
 } }
-if $(OS) = VMS { actions [MKDIR] {
-    CREATE/DIR $(<J=", ")
-} }
 
 rule .exe
 {
     local exe = $(<) ;
-    if $(OS) = NT || ( $(UNIX) = true && $(OS) = CYGWIN ) || $(OS) = VMS { exe = $(exe:S=.exe) ; }
+    if $(OS) = NT || ( $(UNIX) = true && $(OS) = CYGWIN ) { exe = $(exe:S=.exe) ; }
     LOCATE on $(exe) = $(locate-target) ;
     DEPENDS all : $(exe) ;
     .mkdir $(locate-target) ;
@@ -665,17 +623,15 @@ rule .exe
     return $(exe) ;
 }
 if ! $(--def[2]) { actions [COMPILE] {
-    "$(--cc)" "$(--bin)$(<:D=)" "$(--dir)$(<:D)$(./)" $(--out)$(<) "$(--def)$(--defs)" "$(--flags)" "$(--libs)" "$(>)"
+    "$(--cc)" "$(--bin)$(<:D=)" "$(--dir)$(<:D)$(./)" $(--out)$(<) "$(--def)$(--defs)" "$(--flags)" "$(>)" "$(--libs)"
 } }
 else { actions [COMPILE] {
-    "$(--cc)" "$(--bin)$(<:D=)" "$(--dir)$(<:D)$(./)" $(--out)$(<) "$(--def[1])$(--defs:J=$(--def[2]))$(--def[3])" "$(--flags)" "$(--libs)" "$(>)"
+    "$(--cc)" "$(--bin)$(<:D=)" "$(--dir)$(<:D)$(./)" $(--out)$(<) "$(--def[1])$(--defs:J=$(--def[2]))$(--def[3])" "$(--flags)"  "$(>)" "$(--libs)"
 } }
-if $(OS) = VMS { actions [COMPILE.LINK] {
-    "$(--link)" $(--link-bin)$(<:D=) $(--link-dir)$(<:D)$(./) $(--link-out)$(<) $(--link-def)$(--link-defs) $(--link-flags) "$(--link-libs)" $(>J=", ")
-} }
-else { actions [COMPILE.LINK] {
-    "$(--link)" "$(--link-bin)$(<:D=)" "$(--link-dir)$(<:D)$(./)" "$(--link-out)$(<)" "$(--link-def)$(--link-defs)" "$(--link-flags)" "$(--link-libs)" "$(>)"
-} }
+
+actions [COMPILE.LINK] {
+    "$(--link)" "$(--link-bin)$(<:D=)" "$(--link-dir)$(<:D)$(./)" "$(--link-out)$(<)" "$(--link-def)$(--link-defs)" "$(--link-flags)"  "$(>)" "$(--link-libs)"
+}
 
 rule .link
 {
@@ -689,9 +645,6 @@ if $(OS) = NT { actions [LINK] {
 } }
 if $(UNIX) = true { actions [LINK] {
     ln -fs "$(>)" "$(<)"
-} }
-if $(OS) = VMS { actions [LINK] {
-    COPY/REPLACE $(>) $(<)
 } }
 
 rule .copy
@@ -719,9 +672,6 @@ if $(OS) = NT { actions [MOVE] {
 } }
 if $(UNIX) = true { actions [MOVE] {
     mv -f "$(>)" "$(<)"
-} }
-if $(OS) = VMS { actions [MOVE] {
-    RENAME "$(>)" "$(<)"
 } }
 
 # Generate the grammar tokens table, and the real yacc grammar.
@@ -795,13 +745,6 @@ if $(UNIX) = true { actions [YACC] {
     else
         exit 1
     fi
-} }
-if $(OS) = VMS { actions [YACC] {
-    IF "$(yacc)" $(>)
-    THEN
-        RENAME y_tab$(<[1]:S) $(<[1])
-        RENAME y_tab$(<[2]:S) $(<[2])
-    ENDIF
 } }
 if $(grammar) && ! $(yacc)
 {
@@ -888,7 +831,7 @@ dist.source =
 dist.source = $(dist.source:D=)
     $(dist.license[1])
     $(dist.docs)
-    build.jam build.bat build.sh build_vms.com
+    build.jam build.bat build.sh
     Jambase
     jamgram.y jamgram.yy
     [ .path modules set.c ]

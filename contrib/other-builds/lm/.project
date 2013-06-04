@@ -23,7 +23,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildArguments</key>
-					<value></value>
+					<value>-j3</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>
@@ -142,11 +142,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/lm/build_binary</locationURI>
 		</link>
 		<link>
-			<name>build_binary.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/build_binary.cc</locationURI>
-		</link>
-		<link>
 			<name>clean.sh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/clean.sh</locationURI>
@@ -232,14 +227,19 @@
 			<locationURI>PARENT-3-PROJECT_LOC/lm/model_type.hh</locationURI>
 		</link>
 		<link>
-			<name>ngram_query.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/ngram_query.cc</locationURI>
-		</link>
-		<link>
 			<name>ngram_query.hh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/ngram_query.hh</locationURI>
+		</link>
+		<link>
+			<name>partial.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/partial.hh</locationURI>
+		</link>
+		<link>
+			<name>partial_test.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/partial_test.cc</locationURI>
 		</link>
 		<link>
 			<name>quantize.cc</name>
@@ -292,6 +292,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/lm/search_trie.hh</locationURI>
 		</link>
 		<link>
+			<name>state.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/state.hh</locationURI>
+		</link>
+		<link>
 			<name>test.arpa</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/test.arpa</locationURI>
@@ -325,6 +330,21 @@
 			<name>trie_sort.hh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/trie_sort.hh</locationURI>
+		</link>
+		<link>
+			<name>value.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/value.hh</locationURI>
+		</link>
+		<link>
+			<name>value_build.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/value_build.cc</locationURI>
+		</link>
+		<link>
+			<name>value_build.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/value_build.hh</locationURI>
 		</link>
 		<link>
 			<name>virtual_interface.cc</name>

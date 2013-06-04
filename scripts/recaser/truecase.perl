@@ -8,9 +8,11 @@ binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
 # apply switches
-my $MODEL;
-die("truecase.perl --model truecaser < in > out")
-    unless &GetOptions('model=s' => \$MODEL);
+my ($MODEL, $UNBUFFERED);
+die("truecase.perl --model MODEL [-b] < in > out")
+    unless &GetOptions('model=s' => \$MODEL,'b|unbuffered' => \$UNBUFFERED)
+    && defined($MODEL);
+if (defined($UNBUFFERED) && $UNBUFFERED) { $|=1; }
 
 my (%BEST,%KNOWN);
 open(MODEL,$MODEL) || die("ERROR: could not open '$MODEL'");
@@ -26,7 +28,7 @@ while(<MODEL>) {
 close(MODEL);
 
 my %SENTENCE_END = ("."=>1,":"=>1,"?"=>1,"!"=>1);
-my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1);
+my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1,"&apos;"=>1,"&quot;"=>1,"&#91;"=>1,"&#93;"=>1);
 
 while(<STDIN>) {
   chop;

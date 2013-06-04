@@ -2,7 +2,7 @@
 // vim:tabstop=2
 /***********************************************************************
 K-best Batch MIRA for Moses
-Copyright (C) 2012, National Research Council Canada / Conseil national 
+Copyright (C) 2012, National Research Council Canada / Conseil national
 de recherches du Canada
 ***********************************************************************/
 
@@ -49,13 +49,14 @@ using namespace MosesTuning;
 
 namespace po = boost::program_options;
 
-ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv) {
+ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv)
+{
   vector<ValType> stats(kBleuNgramOrder*2+1,0);
   for(train->reset(); !train->finished(); train->next()) {
     // Find max model
     size_t max_index=0;
     ValType max_score=0;
-    for(size_t i=0;i<train->cur_size();i++) {
+    for(size_t i=0; i<train->cur_size(); i++) {
       MiraFeatureVector vec(train->featuresAt(i));
       ValType score = wv.score(vec);
       if(i==0 || score > max_score) {
@@ -64,8 +65,8 @@ ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv) {
       }
     }
     // Update stats
-    const vector<float>& sent = train->scoresAt(max_index);    
-    for(size_t i=0;i<sent.size();i++) {
+    const vector<float>& sent = train->scoresAt(max_index);
+    for(size_t i=0; i<sent.size(); i++) {
       stats[i]+=sent[i];
     }
   }
@@ -74,6 +75,7 @@ ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv) {
 
 int main(int argc, char** argv)
 {
+  const ValType BLEU_RATIO = 5;
   bool help;
   string denseInitFile;
   string sparseInitFile;
@@ -88,25 +90,27 @@ int main(int argc, char** argv)
   bool no_shuffle = false; // Don't shuffle, even for in memory version
   bool model_bg = false; // Use model for background corpus
   bool verbose = false; // Verbose updates
-  
+  bool safe_hope = false; // Model score cannot have more than BLEU_RATIO times more influence than BLEU
+
   // Command-line processing follows pro.cpp
   po::options_description desc("Allowed options");
   desc.add_options()
-      ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-      ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
-      ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
-      ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
-      ("output-file,o", po::value<string>(&outputFile), "Output file")
-      ("cparam,C", po::value<float>(&c), "MIRA C-parameter, lower for more regularization (default 0.01)")
-      ("decay,D", po::value<float>(&decay), "BLEU background corpus decay rate (default 0.999)")
-      ("iters,J", po::value<int>(&n_iters), "Number of MIRA iterations to run (default 60)")
-      ("dense-init,d", po::value<string>(&denseInitFile), "Weight file for dense features")
-      ("sparse-init,s", po::value<string>(&sparseInitFile), "Weight file for sparse features")
-      ("streaming", po::value(&streaming)->zero_tokens()->default_value(false), "Stream n-best lists to save memory, implies --no-shuffle")
-      ("no-shuffle", po::value(&no_shuffle)->zero_tokens()->default_value(false), "Don't shuffle hypotheses before each epoch")
-      ("model-bg", po::value(&model_bg)->zero_tokens()->default_value(false), "Use model instead of hope for BLEU background")
-      ("verbose", po::value(&verbose)->zero_tokens()->default_value(false), "Verbose updates")
-      ;
+  ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
+  ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
+  ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
+  ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
+  ("output-file,o", po::value<string>(&outputFile), "Output file")
+  ("cparam,C", po::value<float>(&c), "MIRA C-parameter, lower for more regularization (default 0.01)")
+  ("decay,D", po::value<float>(&decay), "BLEU background corpus decay rate (default 0.999)")
+  ("iters,J", po::value<int>(&n_iters), "Number of MIRA iterations to run (default 60)")
+  ("dense-init,d", po::value<string>(&denseInitFile), "Weight file for dense features")
+  ("sparse-init,s", po::value<string>(&sparseInitFile), "Weight file for sparse features")
+  ("streaming", po::value(&streaming)->zero_tokens()->default_value(false), "Stream n-best lists to save memory, implies --no-shuffle")
+  ("no-shuffle", po::value(&no_shuffle)->zero_tokens()->default_value(false), "Don't shuffle hypotheses before each epoch")
+  ("model-bg", po::value(&model_bg)->zero_tokens()->default_value(false), "Use model instead of hope for BLEU background")
+  ("verbose", po::value(&verbose)->zero_tokens()->default_value(false), "Verbose updates")
+  ("safe-hope", po::value(&safe_hope)->zero_tokens()->default_value(false), "Mode score's influence on hope decoding is limited")
+  ;
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -115,9 +119,9 @@ int main(int argc, char** argv)
             options(cmdline_options).run(), vm);
   po::notify(vm);
   if (help) {
-      cout << "Usage: " + string(argv[0]) +  " [options]" << endl;
-      cout << desc << endl;
-      exit(0);
+    cout << "Usage: " + string(argv[0]) +  " [options]" << endl;
+    cout << desc << endl;
+    exit(0);
   }
 
   cerr << "kbmira with c=" << c << " decay=" << decay << " no_shuffle=" << no_shuffle << endl;
@@ -162,7 +166,8 @@ int main(int argc, char** argv)
       exit(3);
     }
     int sparseCount=0;
-    parameter_t val; std::string name;
+    parameter_t val;
+    std::string name;
     while(opt >> name >> val) {
       size_t id = SparseVector::encode(name) + initDenseSize;
       while(initParams.size()<=id) initParams.push_back(0.0);
@@ -172,17 +177,17 @@ int main(int argc, char** argv)
     cerr << "Found " << sparseCount << " initial sparse features" << endl;
     opt.close();
   }
-  
+
   MiraWeightVector wv(initParams);
 
   // Initialize background corpus
   vector<ValType> bg;
-  for(int j=0;j<kBleuNgramOrder;j++){
+  for(int j=0; j<kBleuNgramOrder; j++) {
     bg.push_back(kBleuNgramOrder-j);
     bg.push_back(kBleuNgramOrder-j);
   }
   bg.push_back(kBleuNgramOrder);
-  
+
   // Training loop
   boost::scoped_ptr<HypPackEnumerator> train;
   if(streaming)
@@ -191,38 +196,50 @@ int main(int argc, char** argv)
     train.reset(new RandomAccessHypPackEnumerator(featureFiles, scoreFiles, no_shuffle));
   cerr << "Initial BLEU = " << evaluate(train.get(), wv.avg()) << endl;
   ValType bestBleu = 0;
-  for(int j=0;j<n_iters;j++)
-  {
+  for(int j=0; j<n_iters; j++) {
     // MIRA train for one epoch
     int iNumHyps = 0;
     int iNumExamples = 0;
     int iNumUpdates = 0;
     ValType totalLoss = 0.0;
     for(train->reset(); !train->finished(); train->next()) {
-      
       // Hope / fear decode
+      ValType hope_scale = 1.0;
       size_t hope_index=0, fear_index=0, model_index=0;
       ValType hope_score=0, fear_score=0, model_score=0;
-      for(size_t i=0; i< train->cur_size(); i++) {
-        const MiraFeatureVector& vec=train->featuresAt(i);
-        ValType score = wv.score(vec);
-        ValType bleu = sentenceLevelBackgroundBleu(train->scoresAt(i),bg);
-        // Hope
-        if(i==0 || (score + bleu) > hope_score) {
-          hope_score = score + bleu;
-          hope_index = i;
+      int iNumHypsBackup = iNumHyps;
+      for(size_t safe_loop=0; safe_loop<2; safe_loop++) {
+        iNumHyps = iNumHypsBackup;
+        ValType hope_bleu, hope_model;
+        for(size_t i=0; i< train->cur_size(); i++) {
+          const MiraFeatureVector& vec=train->featuresAt(i);
+          ValType score = wv.score(vec);
+          ValType bleu = sentenceLevelBackgroundBleu(train->scoresAt(i),bg);
+          // Hope
+          if(i==0 || (hope_scale*score + bleu) > hope_score) {
+            hope_score = hope_scale*score + bleu;
+            hope_index = i;
+            hope_bleu = bleu;
+            hope_model = score;
+          }
+          // Fear
+          if(i==0 || (score - bleu) > fear_score) {
+            fear_score = score - bleu;
+            fear_index = i;
+          }
+          // Model
+          if(i==0 || score > model_score) {
+            model_score = score;
+            model_index = i;
+          }
+          iNumHyps++;
         }
-        // Fear
-        if(i==0 || (score - bleu) > fear_score) {
-          fear_score = score - bleu;
-          fear_index = i;
-        }
-        // Model
-        if(i==0 || score > model_score) {
-          model_score = score;
-          model_index = i;
-        }
-        iNumHyps++;
+        // Outer loop rescales the contribution of model score to 'hope' in antagonistic cases
+        // where model score is having far more influence than BLEU
+        hope_bleu *= BLEU_RATIO; // We only care about cases where model has MUCH more influence than BLEU
+        if(safe_hope && safe_loop==0 && abs(hope_model)>1e-8 && abs(hope_bleu)/abs(hope_model)<hope_scale)
+          hope_scale = abs(hope_bleu) / abs(hope_model);
+        else break;
       }
       // Update weights
       if(hope_index!=fear_index) {
@@ -240,14 +257,15 @@ int main(int argc, char** argv)
         // Loss and update
         ValType diff_score = wv.score(diff);
         ValType loss = delta - diff_score;
-	if(verbose) {
-	  cerr << "Updating sent " << train->cur_id() << endl;
-	  cerr << "Wght: " << wv << endl;
-	  cerr << "Hope: " << hope << " => " << hopeBleu << " <> " << wv.score(hope) << endl;
-	  cerr << "Fear: " << fear << " => " << fearBleu << " <> " << wv.score(fear) << endl;
-	  cerr << "Diff: " << diff << " => " << delta << " <> " << diff_score << endl;
-	  cerr << endl;
-	}
+        if(verbose) {
+          cerr << "Updating sent " << train->cur_id() << endl;
+          cerr << "Wght: " << wv << endl;
+          cerr << "Hope: " << hope << " BLEU:" << hopeBleu << " Score:" << wv.score(hope) << endl;
+          cerr << "Fear: " << fear << " BLEU:" << fearBleu << " Score:" << wv.score(fear) << endl;
+          cerr << "Diff: " << diff << " BLEU:" << delta << " Score:" << diff_score << endl;
+          cerr << "Loss: " << loss << " Scale: " << hope_scale << endl;
+          cerr << endl;
+        }
         if(loss > 0) {
           ValType eta = min(c, loss / diff.sqrNorm());
           wv.update(diff,eta);
@@ -256,7 +274,7 @@ int main(int argc, char** argv)
         }
         // Update BLEU statistics
         const vector<float>& model_stats = train->scoresAt(model_index);
-        for(size_t k=0;k<bg.size();k++) {
+        for(size_t k=0; k<bg.size(); k++) {
           bg[k]*=decay;
           if(model_bg)
             bg[k]+=model_stats[k];
@@ -269,7 +287,7 @@ int main(int argc, char** argv)
     // Training Epoch summary
     cerr << iNumUpdates << "/" << iNumExamples << " updates"
          << ", avg loss = " << (totalLoss / iNumExamples);
-         
+
 
     // Evaluate current average weights
     AvgWeightVector avg = wv.avg();
@@ -295,11 +313,11 @@ int main(int argc, char** argv)
       } else {
         out = &cout;
       }
-      for(size_t i=0;i<avg.size();i++) {
+      for(size_t i=0; i<avg.size(); i++) {
         if(i<num_dense)
           *out << "F" << i << " " << avg.weight(i) << endl;
         else {
-          if(abs(avg.weight(i))>1e-8) 
+          if(abs(avg.weight(i))>1e-8)
             *out << SparseVector::decode(i-num_dense) << " " << avg.weight(i) << endl;
         }
       }

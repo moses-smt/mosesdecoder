@@ -40,7 +40,8 @@ int setverboselevel(int v);
 const float kEPS = 0.0001f;
 
 template <typename T>
-bool IsAlmostEqual(T expected, T actual, float round=kEPS) {
+bool IsAlmostEqual(T expected, T actual, float round=kEPS)
+{
   if (std::abs(expected - actual) < round) {
     return true;
   } else {
@@ -86,7 +87,8 @@ inline T Scan(const std::string &input)
  * Returns true iff "str" ends with "suffix".
  * e.g., Given str = "abc:" and suffix = ":", this function returns true.
  */
-inline bool EndsWith(const std::string& str, const char* suffix) {
+inline bool EndsWith(const std::string& str, const char* suffix)
+{
   return str.find_last_of(suffix) == str.size() - 1;
 }
 

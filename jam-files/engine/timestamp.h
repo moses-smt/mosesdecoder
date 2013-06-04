@@ -8,5 +8,13 @@
  * timestamp.h - get the timestamp of a file or archive member
  */
 
-void timestamp( char * target, time_t * time );
+#ifndef TIMESTAMP_H_SW_2011_11_18
+#define TIMESTAMP_H_SW_2011_11_18
+
+#include "object.h"
+#include "time.h"
+
+void timestamp( OBJECT * target, time_t * time );
 void stamps_done();
+
+#endif

@@ -14,10 +14,10 @@ namespace MosesTraining
 template<typename T>
 inline T Scan(const std::string &input)
 {
-	std::stringstream stream(input);
-	T ret;
-	stream >> ret;
-	return ret;
+  std::stringstream stream(input);
+  T ret;
+  stream >> ret;
+  return ret;
 }
 
 
@@ -25,13 +25,12 @@ inline T Scan(const std::string &input)
 template<typename T>
 inline void Scan(std::vector<T> &output, const std::vector< std::string > &input)
 {
-	output.resize(input.size());
-	for (size_t i = 0 ; i < input.size() ; i++)
-	{
-		output[i] = Scan<T>( input[i] );
-	}
+  output.resize(input.size());
+  for (size_t i = 0 ; i < input.size() ; i++) {
+    output[i] = Scan<T>( input[i] );
+  }
 }
-	
+
 
 inline void Tokenize(std::vector<std::string> &output
                      , const std::string& str
@@ -55,17 +54,17 @@ inline void Tokenize(std::vector<std::string> &output
 // speeded up version of above
 template<typename T>
 inline void Tokenize( std::vector<T> &output
-										 , const std::string &input
-										 , const std::string& delimiters = " \t")
+                      , const std::string &input
+                      , const std::string& delimiters = " \t")
 {
-	std::vector<std::string> stringVector;
-	Tokenize(stringVector, input, delimiters);
-	return Scan<T>(output, stringVector );
+  std::vector<std::string> stringVector;
+  Tokenize(stringVector, input, delimiters);
+  return Scan<T>(output, stringVector );
 }
 
 class WordCount
 {
-	friend std::ostream& operator<<(std::ostream&, const WordCount&);
+  friend std::ostream& operator<<(std::ostream&, const WordCount&);
 public:
   float m_count;
 
@@ -83,13 +82,16 @@ public:
 
   void AddCount(float incr);
 
-  std::map<const std::string*, WordCount> &GetColl()
-  { return m_coll; }
-  const std::map<const std::string*, WordCount> &GetColl() const
-  { return m_coll; }
+  std::map<const std::string*, WordCount> &GetColl() {
+    return m_coll;
+  }
+  const std::map<const std::string*, WordCount> &GetColl() const {
+    return m_coll;
+  }
 
-  const float GetCount() const
-  { return m_count; }
+  const float GetCount() const {
+    return m_count;
+  }
 
 };
 
