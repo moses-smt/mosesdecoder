@@ -683,8 +683,9 @@ void Parameter::ConvertWeightArgsLM()
       SetWeight(newFeatureName, ind, weightsLM);
 
       string featureLine = newFeatureName + " "
-                           + "factor=" + modelToks[1] + " "  // factor
-                           + "order="  + modelToks[2] + " "; // order
+                          + "factor=" + modelToks[1] + " "  // factor
+                          + "order="  + modelToks[2] + " " // order
+      	  	  	  	  	  + "num-features=" + SPrint(numFF) + " ";
       if (lmType == 9) {
         featureLine += "lazyken=1 ";
       } else if (lmType == 8) {

@@ -372,8 +372,6 @@ LanguageModel *ConstructKenLM(const std::string &description, const std::string 
       lazy = Scan<bool>(args[1]);
     } else if (args[0] == "name") {
       // that's ok. do nothing, passes onto LM constructor
-    } else {
-      throw "Unknown argument " + args[0];
     }
   }
 
