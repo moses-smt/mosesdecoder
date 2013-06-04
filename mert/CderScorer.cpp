@@ -68,8 +68,16 @@ void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>&
     const sent_t& ref = m_ref_sentences[rid][sid];
     tmp.clear();
     computeCD(cand, ref, tmp);
-    if (calculateScore(tmp) > max) {
+    int score = calculateScore(tmp);
+    if (rid == 0)
+    {
       stats = tmp;
+      max = score;
+    }
+    else if (score > max) 
+    {
+      stats = tmp;
+      max = score;
     }
   }
 }
@@ -94,8 +102,12 @@ void CderScorer::computeCD(const sent_t& cand, const sent_t& ref,
   vector<int>* row = new vector<int>(I);
 
   // Initialization of first row
-  (*row)[0] = 0;
-  for (int i = 1; i < I; ++i) (*row)[i] = 1;
+  for (int i = 0; i < I; ++i) (*row)[i] = i;
+  
+  // For CDER metric, the initialization is different
+  if (m_allowed_long_jumps) {
+    for (int i = 1; i < I; ++i) (*row)[i] = 1;
+  }
 
   // Calculating costs for next row using costs from the previous row.
   while (++l < L) {
