@@ -211,9 +211,9 @@ protected:
   // alternate weight settings
   mutable std::string m_currentWeightSetting;
   std::map< std::string, ScoreComponentCollection* > m_weightSetting;
+  std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF;
 
   StaticData();
-
 
   void LoadChartDecodingParameters();
   void LoadNonTerminals();
@@ -664,13 +664,26 @@ public:
     return m_weightSetting.size() > 0;
   }
 
+  bool IsFeatureFunctionIgnored( const FeatureFunction &ff ) const {
+    if (!GetHasAlternateWeightSettings()) {
+      return false;
+    }
+    std::map< std::string, std::set< std::string > >::const_iterator lookupIgnoreFF 
+      =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
+    if (lookupIgnoreFF == m_weightSettingIgnoreFF.end()) {
+      return false;
+    }
+    const std::string &ffName = ff.GetScoreProducerDescription();
+    const std::set< std::string > &ignoreFF = lookupIgnoreFF->second;
+    return ignoreFF.count( ffName );
+  }
+
   /** process alternate weight settings 
     * (specified with [alternate-weight-setting] in config file) */
   void SetWeightSetting(const std::string &settingName) const {
 
     // if no change in weight setting, do nothing
     if (m_currentWeightSetting == settingName) {
-      UserMessage::Add("no change in weight setting");
       return;
     }
 

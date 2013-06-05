@@ -142,6 +142,7 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
  */
 void ChartHypothesis::CalcScore()
 {
+  const StaticData &staticData = StaticData::Instance();
   // total scores from prev hypos
   std::vector<const ChartHypothesis*>::iterator iter;
   for (iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
@@ -163,14 +164,18 @@ void ChartHypothesis::CalcScore()
   const std::vector<const StatelessFeatureFunction*>& sfs =
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
-    sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
+    if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) {
+      sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
+    }
   }
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  for (unsigned i = 0; i < ffs.size(); ++i)
-    m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
-
+  for (unsigned i = 0; i < ffs.size(); ++i) {
+    if (! staticData.IsFeatureFunctionIgnored( *ffs[i] )) {
+      m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+    }
+  }
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }
 

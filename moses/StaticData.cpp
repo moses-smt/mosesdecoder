@@ -1248,9 +1248,27 @@ bool StaticData::LoadAlternateWeightSettings()
       // other specifications
       for(size_t j=1; j<tokens.size(); j++) {
         vector<string> args = Tokenize(tokens[j], "=");
-        if (args[0] == "weight-file") {
-          // TODO: support for sparse weights
+	// TODO: support for sparse weights
+	if (args[0] == "weight-file") {
+	  cerr << "ERROR: sparse weight files currently not supported";
         }
+	// ignore feature functions
+	else if (args[0] == "ignore-ff") {
+	  set< string > *ffNameSet = new set< string >;
+	  m_weightSettingIgnoreFF[ currentId ] = *ffNameSet;
+	  vector<string> featureFunctionName = Tokenize(args[1], " ");
+	  for(size_t k=0; k<featureFunctionName.size(); k++) {
+	    // check if a valid nane
+	    map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(featureFunctionName[k]);
+	    if (ffLookUp == nameToFF.end()) {
+	      cerr << "ERROR: alternate weight setting " << currentId << " specifies to ignore feature function " << featureFunctionName[k] << " but there is no such feature function" << endl;
+	      hasErrors = true;
+	    } 
+	    else {
+	      m_weightSettingIgnoreFF[ currentId ].insert( featureFunctionName[k] );
+	    }
+	  }
+	}
       }
     }
 

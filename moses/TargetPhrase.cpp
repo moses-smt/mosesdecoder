@@ -78,10 +78,10 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   : Phrase(copy)
   , m_fullScore(copy.m_fullScore)
   , m_futureScore(copy.m_futureScore)
+  , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_sourcePhrase(copy.m_sourcePhrase)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
-  , m_scoreBreakdown(copy.m_scoreBreakdown)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(copy.m_lhsTarget);
@@ -116,10 +116,13 @@ void TargetPhrase::Evaluate(const Phrase &source)
 void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
 {
   if (ffs.size()) {
+    const StaticData &staticData = StaticData::Instance();
     ScoreComponentCollection futureScoreBreakdown;
     for (size_t i = 0; i < ffs.size(); ++i) {
       const FeatureFunction &ff = *ffs[i];
-      ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
+      if (! staticData.IsFeatureFunctionIgnored( ff )) {
+	ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
+      }
     }
 
     float weightedScore = m_scoreBreakdown.GetWeightedScore();

@@ -56,13 +56,12 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
     m_sourceCompleted.GetFirstGapPos()>0 ? m_sourceCompleted.GetFirstGapPos()-1 : NOT_FOUND)
   , m_currTargetWordsRange(0, emptyTarget.GetSize()-1)
   , m_wordDeleted(false)
+  , m_totalScore(0.0f)
+  , m_futureScore(0.0f)
   , m_ffStates(StatefulFeatureFunction::GetStatefulFeatureFunctions().size())
   , m_arcList(NULL)
   , m_transOpt(NULL)
   , m_manager(manager)
-  ,	m_totalScore(0.0f)
-  ,	m_futureScore(0.0f)
-
   , m_id(m_manager.GetNextHypoId())
 {
   // used for initial seeding of trans process
@@ -88,14 +87,14 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   , m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
                               ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
   , m_wordDeleted(false)
-  ,	m_totalScore(0.0f)
-  ,	m_futureScore(0.0f)
+  , m_totalScore(0.0f)
+  , m_futureScore(0.0f)
+  , m_scoreBreakdown(prevHypo.GetScoreBreakdown())
   , m_ffStates(prevHypo.m_ffStates.size())
   , m_arcList(NULL)
   , m_transOpt(&transOpt)
   , m_manager(prevHypo.GetManager())
   , m_id(m_manager.GetNextHypoId())
-  , m_scoreBreakdown(prevHypo.GetScoreBreakdown())
 {
   m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
 
@@ -255,16 +254,21 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
 void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
                               int state_idx)
 {
-  m_ffStates[state_idx] = sfff.Evaluate(
+  const StaticData &staticData = StaticData::Instance();
+  if (! staticData.IsFeatureFunctionIgnored( sfff )) {
+    m_ffStates[state_idx] = sfff.Evaluate(
                             *this,
                             m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
                             &m_scoreBreakdown);
-
+  }
 }
 
 void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
 {
-  slff.Evaluate(PhraseBasedFeatureContext(this), &m_scoreBreakdown);
+  const StaticData &staticData = StaticData::Instance();
+  if (! staticData.IsFeatureFunctionIgnored( slff )) {
+    slff.Evaluate(PhraseBasedFeatureContext(this), &m_scoreBreakdown);
+  }
 }
 
 /***
@@ -292,10 +296,12 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     const StatefulFeatureFunction &ff = *ffs[i];
-    m_ffStates[i] = ff.Evaluate(
-                      *this,
-                      m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                      &m_scoreBreakdown);
+    const StaticData &staticData = StaticData::Instance();
+    if (! staticData.IsFeatureFunctionIgnored(ff)) {
+      m_ffStates[i] = ff.Evaluate(*this,
+				  m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
+				  &m_scoreBreakdown);
+    }
   }
 
   IFVERBOSE(2) {
