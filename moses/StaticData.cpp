@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "DecodeStepTranslation.h"
@@ -56,9 +57,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "LM/Ken.h"
 
-//#ifdef LM_IRST
+#ifdef LM_IRST
 #include "LM/IRST.h"
-//#endif
+#endif
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -108,16 +109,16 @@ int GetFeatureIndex(std::map<string, int> &map, const string &featureName)
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  :m_sourceStartPosMattersForRecombination(false)
+  :m_numRealWordsInInput(0)
+  ,m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
+  ,m_numInputScores(0)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
+  ,m_needAlignmentInfo(false)
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
-  ,m_needAlignmentInfo(false)
-  ,m_numInputScores(0)
-  ,m_numRealWordsInInput(0)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -534,11 +535,16 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   // use of xml in input
-  if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
-  else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
-  else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
-  else if (m_parameter->GetParam("xml-input")[0]=="ignore") m_xmlInputType = XmlIgnore;
-  else if (m_parameter->GetParam("xml-input")[0]=="pass-through") m_xmlInputType = XmlPassThrough;
+  if (m_parameter->GetParam("xml-input").size() == 0) 
+    m_xmlInputType = XmlPassThrough;
+  else if (m_parameter->GetParam("xml-input")[0]=="exclusive") 
+    m_xmlInputType = XmlExclusive;
+  else if (m_parameter->GetParam("xml-input")[0]=="inclusive") 
+    m_xmlInputType = XmlInclusive;
+  else if (m_parameter->GetParam("xml-input")[0]=="ignore") 
+    m_xmlInputType = XmlIgnore;
+  else if (m_parameter->GetParam("xml-input")[0]=="pass-through") 
+    m_xmlInputType = XmlPassThrough;
   else {
     UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
     return false;
@@ -569,7 +575,8 @@ bool StaticData::LoadData(Parameter *parameter)
     vector<string> toks = Tokenize(line);
 
     const string &feature = toks[0];
-    int featureIndex = GetFeatureIndex(featureIndexMap, feature);
+    // not used:
+    // int featureIndex = GetFeatureIndex(featureIndexMap, feature);
 
     if (feature == "GlobalLexicalModel") {
       GlobalLexicalModel *model = new GlobalLexicalModel(line);
@@ -631,13 +638,13 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-//#ifdef LM_IRST
+#ifdef LM_IRST
     else if (feature == "IRSTLM") {
       LanguageModelIRST *model = new LanguageModelIRST(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-//#endif
+#endif
     else if (feature == "Generation") {
       GenerationDictionary *model = new GenerationDictionary(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
@@ -700,10 +707,22 @@ bool StaticData::LoadData(Parameter *parameter)
     else if (feature == "PhraseDictionaryMultiModelCounts") {
       PhraseDictionaryMultiModelCounts* model = new PhraseDictionaryMultiModelCounts(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
-
+    else if (feature == "PhraseDictionaryDynSuffixArray") {
+      PhraseDictionaryDynSuffixArray* model;
+      model = new PhraseDictionaryDynSuffixArray(line);
+      string const& mdesc = model->GetScoreProducerDescription();
+      vector<float> weights = m_parameter->GetWeights(mdesc);
+      cerr << "PhraseDictionaryDynSuffixArray with " 
+	   << weights.size() << " weights. (" 
+	   << model->GetScoreProducerDescription() << ")"
+	   << endl;
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }      
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
       SyntacticLanguageModel *model = new SyntacticLanguageModel(line);

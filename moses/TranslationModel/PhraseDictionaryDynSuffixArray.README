@@ -1,0 +1,4 @@
+Specifying Dynamic Suffix Array-based Phrase Tables in moses.ini
+
+[ttable-file]
+14 0 0 5 <source language text file> <target language text file> <file with alignment info in symal format>

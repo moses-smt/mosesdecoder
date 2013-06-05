@@ -17,15 +17,18 @@ class PhraseDictionaryDynSuffixArray: public PhraseDictionary
 public:
   PhraseDictionaryDynSuffixArray(const std::string &line);
   ~PhraseDictionaryDynSuffixArray();
-  bool Load( const std::vector<FactorType>& m_input
-             , const std::vector<FactorType>& m_output
-             , std::string m_source
-             , std::string m_target
-             , std::string m_alignments
-             , const std::vector<float> &m_weight
-             , size_t m_tableLimit
-             , const LMList &languageModels
-             , float weightWP);
+  bool InitDictionary();
+  bool Load(
+	    // const std::vector<FactorType>& m_input
+            //  , const std::vector<FactorType>& m_output
+            //  , std::string m_source
+            //  , std::string m_target
+            //  , std::string m_alignments
+            //  , const std::vector<float> &m_weight
+            //  , size_t m_tableLimit
+            //  , const LMList &languageModels
+            //  , float weightWP
+	    );
   // functions below required by base class
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
   void insertSnt(string&, string&, string&);
