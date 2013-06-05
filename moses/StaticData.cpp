@@ -89,15 +89,16 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
+  ,m_wpProducer(NULL)
+  ,m_unknownWordPenaltyProducer(NULL)
+  ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
+  ,m_needAlignmentInfo(false)
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
-  ,m_needAlignmentInfo(false)
-  ,m_inputFeature(NULL)
-  ,m_wpProducer(NULL)
-  ,m_unknownWordPenaltyProducer(NULL)
+  ,m_currentWeightSetting("default")
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -110,7 +111,7 @@ StaticData::~StaticData()
 {
   RemoveAllInColl(m_decodeGraphs);
 
-  typedef std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > Coll;
+  typedef std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> > Coll;
   Coll::iterator iter;
   for (iter = m_transOptCache.begin(); iter != m_transOptCache.end(); ++iter) {
     std::pair<TranslationOptionList*,clock_t> &valuePair =iter->second;
@@ -431,6 +432,7 @@ bool StaticData::LoadData(Parameter *parameter)
   //mira training
   SetBooleanParameter( &m_mira, "mira", false );
 
+  // lattice MBR
   if (m_useLatticeMBR) m_mbr = true;
 
   m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
@@ -715,7 +717,6 @@ bool StaticData::LoadData(Parameter *parameter)
   //Add any other features here.
 
   //Load extra feature weights
-  //NB: These are common to all translation systems (at the moment!)
   vector<string> extraWeightConfig = m_parameter->GetParam("weight-file");
   if (extraWeightConfig.size()) {
     if (extraWeightConfig.size() != 1) {
@@ -731,11 +732,11 @@ bool StaticData::LoadData(Parameter *parameter)
     m_allWeights.PlusEquals(extraWeights);
   }
 
-  //cerr << endl << "m_allWeights=" << m_allWeights << endl;
-
   // alternate weight settings
   if (m_parameter->GetParam("alternate-weight-setting").size() > 0) {
-    ProcessAlternateWeightSettings();
+    if (!LoadAlternateWeightSettings()) {
+      return false;
+    }
   }
   return true;
 }
@@ -929,11 +930,12 @@ bool StaticData::LoadDecodeGraphs()
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {
-  std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
+  std::pair<size_t, std::string> cacheKey(decodeGraph.GetPosition(), m_currentWeightSetting);
+  std::pair<std::pair<size_t, std::string>, Phrase> key(cacheKey, sourcePhrase);
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
 #endif
-  std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
+  std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
   = m_transOptCache.find(key);
   if (iter == m_transOptCache.end())
     return NULL;
@@ -948,7 +950,8 @@ void StaticData::ReduceTransOptCache() const
 
   // find cutoff for last used time
   priority_queue< clock_t > lastUsedTimes;
-  std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
+
+  std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
   iter = m_transOptCache.begin();
   while( iter != m_transOptCache.end() ) {
     lastUsedTimes.push( iter->second.second );
@@ -962,7 +965,7 @@ void StaticData::ReduceTransOptCache() const
   iter = m_transOptCache.begin();
   while( iter != m_transOptCache.end() ) {
     if (iter->second.second < cutoffLastUsedTime) {
-      std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
+      std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
       delete iterRemove->second.first;
       m_transOptCache.erase(iterRemove);
     } else iter++;
@@ -973,7 +976,8 @@ void StaticData::ReduceTransOptCache() const
 void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
 {
   if (m_transOptCacheMaxSize == 0) return;
-  std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
+  std::pair<size_t, std::string> cacheKey(decodeGraph.GetPosition(), m_currentWeightSetting);
+  std::pair<std::pair<size_t, std::string>, Phrase> key(cacheKey, sourcePhrase);
   TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
@@ -983,7 +987,7 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
 }
 void StaticData::ClearTransOptionCache() const
 {
-  map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
+  map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
   for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
     TranslationOptionList *transOptList = iterCache->second.first;
     delete transOptList;
@@ -1207,8 +1211,14 @@ bool StaticData::CheckWeights() const
   return true;
 }
 
-void StaticData::ProcessAlternateWeightSettings()
+/**! Read in settings for alternative weights */
+bool StaticData::LoadAlternateWeightSettings()
 {
+  if (m_threadCount > 1) {
+    cerr << "ERROR: alternative weight settings currently not supported with multi-threading.";
+    return false;
+  }
+
   const vector<string> &weightSpecification = m_parameter->GetParam("alternate-weight-setting");
 
   // get mapping from feature names to feature functions
@@ -1270,6 +1280,7 @@ void StaticData::ProcessAlternateWeightSettings()
     }
   }
   CHECK(!hasErrors);
+  return true;
 }
 
 } // namespace

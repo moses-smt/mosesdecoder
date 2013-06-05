@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <utility>
 #include <fstream>
 #include <string>
+#include "UserMessage.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -166,7 +167,7 @@ protected:
   size_t m_timeout_threshold; //! seconds after which time out is activated
 
   bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
-  mutable std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
+  mutable std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
   size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
   //FIXME: Single lock for cache not most efficient. However using a
   //reader-writer for LRU cache is tricky - how to record last used time?
@@ -208,6 +209,7 @@ protected:
   long m_startTranslationId;
 
   // alternate weight settings
+  mutable std::string m_currentWeightSetting;
   std::map< std::string, ScoreComponentCollection* > m_weightSetting;
 
   StaticData();
@@ -662,17 +664,38 @@ public:
     return m_weightSetting.size() > 0;
   }
 
+  /** process alternate weight settings 
+    * (specified with [alternate-weight-setting] in config file) */
   void SetWeightSetting(const std::string &settingName) const {
-    std::cerr << "SetWeightSetting( " << settingName << ")\n";
-    CHECK(GetHasAlternateWeightSettings());
+
+    // if no change in weight setting, do nothing
+    if (m_currentWeightSetting == settingName) {
+      UserMessage::Add("no change in weight setting");
+      return;
+    }
+
+    // model must support alternate weight settings
+    if (!GetHasAlternateWeightSettings()) {
+      UserMessage::Add("Warning: Input specifies weight setting, but model does not support alternate weight settings.");
+      return;
+    }
+
+    // find the setting
+    m_currentWeightSetting = settingName;
     std::map< std::string, ScoreComponentCollection* >::const_iterator i =
       m_weightSetting.find( settingName );
+
     // if not found, resort to default
-    std::cerr << "using weight setting " << settingName << std::endl;
     if (i == m_weightSetting.end()) {
+      std::stringstream strme;
+      strme << "Warning: Specified weight setting " << settingName 
+	    << " does not exist in model, using default weight setting instead";
+      UserMessage::Add(strme.str());
       i = m_weightSetting.find( "default" );
-      std::cerr << "not found, using default weight setting instead\n";
+      m_currentWeightSetting = "default";
     }
+
+    // set weights
     m_allWeights = *(i->second);
   }
 
@@ -706,8 +729,8 @@ public:
 
   void LoadFeatureFunctions();
   bool CheckWeights() const;
-  void ProcessAlternateWeightSettings();
-
+  bool LoadWeightSettings();
+  bool LoadAlternateWeightSettings();
 
   void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {
 #ifdef WITH_THREADS
