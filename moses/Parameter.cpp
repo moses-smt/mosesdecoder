@@ -184,12 +184,12 @@ Parameter::Parameter()
   AddParam("weight-u", "u", "DEPRECATED. DO NOT USE. weight for unknown word penalty");
   AddParam("weight-e", "e", "DEPRECATED. DO NOT USE. weight for word deletion");
   AddParam("text-type", "DEPRECATED. DO NOT USE. should be one of dev/devtest/test, used for domain adaptation features");
+  AddParam("input-scores", "DEPRECATED. DO NOT USE. 2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
 
   AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
 
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
-  AddParam("input-scores", "2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
 
   AddParam("feature", "");
   AddParam("print-id", "prefix translations with id. Default if false");
@@ -321,7 +321,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
     }
   }
 
-  Save("/tmp/moses.ini.new");
+  //Save("/tmp/moses.ini.new");
 
   // check if parameters make sense
   return Validate() && noErrorFlag;

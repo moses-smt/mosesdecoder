@@ -124,8 +124,6 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
   const InputFeature *inputFeature = staticData.GetInputFeature();
   size_t numInputScores = inputFeature->GetNumInputScores();
   size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
-  //size_t numInputScores = staticData.GetNumInputScores();
-  //size_t numRealWordCount = staticData.GetNumRealWordsInInput();
 
   size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);

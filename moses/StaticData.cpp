@@ -95,8 +95,6 @@ StaticData::StaticData()
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_needAlignmentInfo(false)
-  ,m_numInputScores(0)
-  ,m_numRealWordsInInput(0)
   ,m_inputFeature(NULL)
   ,m_wpProducer(NULL)
   ,m_unknownWordPenaltyProducer(NULL)
@@ -529,15 +527,6 @@ bool StaticData::LoadData(Parameter *parameter)
         CHECK(false);
       }
     }
-  }
-
-  // input scores for lattices & confusion network input. TODO - get rid of this
-  if (m_parameter->GetParam("input-scores").size() > 0) {
-    m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
-  }
-
-  if (m_parameter->GetParam("input-scores").size() > 1) {
-    m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
   }
 
   // use of xml in input

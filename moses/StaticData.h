@@ -104,8 +104,7 @@ protected:
   , m_nBestFactor
   , m_maxNoTransOptPerCoverage
   , m_maxNoPartTransOpt
-  , m_maxPhraseLength
-  , m_numRealWordsInInput;
+  , m_maxPhraseLength;
 
   std::string
   m_constraintFileName;
@@ -125,7 +124,6 @@ protected:
   ParsingAlgorithm m_parsingAlgorithm;
   SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
-  size_t m_numInputScores;
 
   mutable size_t m_verboseLevel;
   WordPenaltyProducer* m_wpProducer;
@@ -377,9 +375,6 @@ public:
     return m_minlexrMemory;
   }
 
-  size_t GetNumRealWordsInInput() const {
-    return m_numRealWordsInInput;
-  }
   const std::vector<std::string> &GetDescription() const {
     return m_parameter->GetParam("description");
   }
@@ -439,10 +434,6 @@ public:
 
   const InputFeature *GetInputFeature() const {
     return m_inputFeature;
-  }
-
-  size_t GetNumInputScores() const {
-    return m_numInputScores;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
