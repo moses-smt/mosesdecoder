@@ -683,9 +683,9 @@ void Parameter::ConvertWeightArgsLM()
       SetWeight(newFeatureName, ind, weightsLM);
 
       string featureLine = newFeatureName + " "
-                          + "factor=" + modelToks[1] + " "  // factor
-                          + "order="  + modelToks[2] + " " // order
-      	  	  	  	  	  + "num-features=" + SPrint(numFF) + " ";
+                           + "factor=" + modelToks[1] + " "  // factor
+                           + "order="  + modelToks[2] + " " // order
+                           + "num-features=" + SPrint(numFF) + " ";
       if (lmType == 9) {
         featureLine += "lazyken=1 ";
       } else if (lmType == 8) {
@@ -1246,18 +1246,18 @@ void Parameter::Save(const std::string path)
 
   PARAM_MAP::const_iterator iterOuter;
   for (iterOuter = m_setting.begin(); iterOuter != m_setting.end(); ++iterOuter) {
-	const std::string &sectionName = iterOuter->first;
-	file << "[" << sectionName << "]" << endl;
+    const std::string &sectionName = iterOuter->first;
+    file << "[" << sectionName << "]" << endl;
 
-	const PARAM_VEC &values = iterOuter->second;
+    const PARAM_VEC &values = iterOuter->second;
 
-	PARAM_VEC::const_iterator iterInner;
-	for (iterInner = values.begin(); iterInner != values.end(); ++iterInner) {
+    PARAM_VEC::const_iterator iterInner;
+    for (iterInner = values.begin(); iterInner != values.end(); ++iterInner) {
       const std::string &value = *iterInner;
       file << value << endl;
-	}
+    }
 
-	file << endl;
+    file << endl;
   }
 
 

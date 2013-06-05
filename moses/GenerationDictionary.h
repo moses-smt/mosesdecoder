@@ -56,7 +56,7 @@ public:
   virtual ~GenerationDictionary();
 
   //! load data file
-  bool Load(const std::string &filePath, FactorDirection direction);
+  void Load();
 
   /** number of unique input entries in the generation table.
   * NOT the number of lines in the generation table

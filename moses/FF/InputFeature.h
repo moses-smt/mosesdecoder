@@ -16,13 +16,16 @@ protected:
 public:
   InputFeature(const std::string &line);
 
-  bool IsUseable(const FactorMask &mask) const
-  { return true; }
+  bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 
-  size_t GetNumInputScores() const
-  { return m_numInputScores; }
-  size_t GetNumRealWordsInInput() const
-  { return m_numRealWordCount; }
+  size_t GetNumInputScores() const {
+    return m_numInputScores;
+  }
+  size_t GetNumRealWordsInInput() const {
+    return m_numRealWordCount;
+  }
 
 
 };
