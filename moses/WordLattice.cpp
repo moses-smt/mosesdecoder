@@ -36,10 +36,10 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
 {
   const StaticData &staticData = StaticData::Instance();
   const InputFeature *inputFeature = staticData.GetInputFeature();
-  //size_t numInputScores = inputFeature->GetNumInputScores();
-  //size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
-  size_t numInputScores = StaticData::Instance().GetNumInputScores();
-  size_t numRealWordCount = StaticData::Instance().GetNumRealWordsInInput();
+  size_t numInputScores = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+  //size_t numInputScores = StaticData::Instance().GetNumInputScores();
+  //size_t numRealWordCount = StaticData::Instance().GetNumRealWordsInInput();
 
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 
