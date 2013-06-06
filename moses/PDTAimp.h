@@ -35,9 +35,24 @@ class PDTAimp
   friend class PhraseDictionaryTreeAdaptor;
 
 protected:
-  PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis)
+  PDTAimp(PhraseDictionaryTreeAdaptor *p)
     : m_dict(0),
-      m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
+      m_obj(p),
+      useCache(1),
+      totalE(0),
+      distinctE(0)
+  {
+    m_numInputScores = 0;
+	const StaticData &staticData = StaticData::Instance();
+	const InputFeature *inputFeature = staticData.GetInputFeature();
+
+	if (inputFeature) {
+	  const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
+	  if (firstPt == m_obj) {
+		  m_numInputScores = inputFeature->GetNumScoreComponents();
+	  }
+	}
+  }
 
 public:
   std::vector<FactorType> m_input,m_output;
@@ -278,16 +293,12 @@ public:
     const StaticData &staticData = StaticData::Instance();
     const InputFeature *inputFeature = staticData.GetInputFeature();
 
-    if (inputFeature) {
-      const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
-      if (firstPt == m_obj) {
-		  size_t numInputScores = inputFeature->GetNumScoreComponents();
-		  std::vector<float> inputScores(numInputScores);
-		  std::copy(scoreVector.begin()
-				, scoreVector.begin() + numInputScores
-				, inputScores.begin());
-		  targetPhrase.GetScoreBreakdown().Assign(inputFeature, inputScores);
-      }
+    if (m_numInputScores) {
+	  std::vector<float> inputScores(m_numInputScores);
+	  std::copy(scoreVector.begin()
+			, scoreVector.begin() + m_numInputScores
+			, inputScores.begin());
+	  targetPhrase.GetScoreBreakdown().Assign(inputFeature, inputScores);
     }
 
     size_t numPtScores = m_obj->GetNumScoreComponents();

@@ -38,7 +38,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
 
-  PDTAimp *obj = new PDTAimp(this,m_numInputScores);
+  PDTAimp *obj = new PDTAimp(this);
 
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {

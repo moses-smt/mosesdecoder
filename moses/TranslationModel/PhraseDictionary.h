@@ -96,7 +96,6 @@ public:
 protected:
   size_t m_tableLimit;
 
-  unsigned m_numInputScores;
   std::string m_filePath;
 
   std::string m_targetFile;
