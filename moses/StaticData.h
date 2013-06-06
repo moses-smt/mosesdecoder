@@ -210,8 +210,9 @@ protected:
 
   // alternate weight settings
   mutable std::string m_currentWeightSetting;
-  std::map< std::string, ScoreComponentCollection* > m_weightSetting;
-  std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF;
+  std::map< std::string, ScoreComponentCollection* > m_weightSetting; // core weights
+  std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
+  std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
   StaticData();
 
@@ -664,6 +665,9 @@ public:
     return m_weightSetting.size() > 0;
   }
 
+  /** Alternate weight settings allow the wholesale ignoring of 
+      feature functions. This function checks if a feature function
+      should be evaluated given the current weight setting */
   bool IsFeatureFunctionIgnored( const FeatureFunction &ff ) const {
     if (!GetHasAlternateWeightSettings()) {
       return false;
@@ -676,6 +680,25 @@ public:
     const std::string &ffName = ff.GetScoreProducerDescription();
     const std::set< std::string > &ignoreFF = lookupIgnoreFF->second;
     return ignoreFF.count( ffName );
+  }
+
+  /** Alternate weight settings allow the wholesale ignoring of 
+      decoding graphs (typically a translation table). This function 
+      checks if a feature function should be evaluated given the 
+      current weight setting */
+  bool IsDecodingGraphIgnored( const size_t id ) const {
+    std::cerr << "IsFeatureFunctionIgnored( " << id << " )" << std::endl;
+    if (!GetHasAlternateWeightSettings()) {
+      return false;
+    }
+    std::map< std::string, std::set< size_t > >::const_iterator lookupIgnoreDP 
+      =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
+    if (lookupIgnoreDP == m_weightSettingIgnoreDP.end()) {
+      return false;
+    }
+    const std::set< size_t > &ignoreDP = lookupIgnoreDP->second;
+    std::cerr << "IsFeatureFunctionIgnored( " << id << " ) = " << ignoreDP.count( id ) << std::endl;
+    return ignoreDP.count( id );
   }
 
   /** process alternate weight settings 

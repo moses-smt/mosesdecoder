@@ -362,6 +362,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
   // in the phraseDictionary (which is the- possibly filtered-- phrase
   // table loaded on initialization), generate TranslationOption objects
   // for all phrases
+  const StaticData &staticData = StaticData::Instance();
 
   // there may be multiple decoding graphs (factorizations of decoding)
   const vector <DecodeGraph*> &decodeGraphList = StaticData::Instance().GetDecodeGraphs();
@@ -372,10 +373,13 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // loop over all decoding graphs, each generates translation options
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
+    if (staticData.IsDecodingGraphIgnored( graphInd )) {
+      std::cerr << "ignoring decoding path " << graphInd << std::endl;
+      continue;
+    }
     if (decodeGraphList.size() > 1) {
       VERBOSE(3,"Creating translation options from decoding graph " << graphInd << endl);
     }
-
     const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
     // generate phrases that start at startPos ...
     for (size_t startPos = 0 ; startPos < size; startPos++) {

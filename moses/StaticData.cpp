@@ -1241,7 +1241,7 @@ bool StaticData::LoadAlternateWeightSettings()
       vector<string> tokens = Tokenize(weightSpecification[i]);
       vector<string> args = Tokenize(tokens[0], "=");
       currentId = args[1];
-      cerr << "alternate weight setting " << currentId << endl;
+      VERBOSE(1,"alternate weight setting " << currentId << endl);
       CHECK(m_weightSetting.find(currentId) == m_weightSetting.end());
       m_weightSetting[ currentId ] = new ScoreComponentCollection;
 
@@ -1251,12 +1251,13 @@ bool StaticData::LoadAlternateWeightSettings()
 	// TODO: support for sparse weights
 	if (args[0] == "weight-file") {
 	  cerr << "ERROR: sparse weight files currently not supported";
+	  hasErrors = true;
         }
 	// ignore feature functions
 	else if (args[0] == "ignore-ff") {
 	  set< string > *ffNameSet = new set< string >;
 	  m_weightSettingIgnoreFF[ currentId ] = *ffNameSet;
-	  vector<string> featureFunctionName = Tokenize(args[1], " ");
+	  vector<string> featureFunctionName = Tokenize(args[1], ",");
 	  for(size_t k=0; k<featureFunctionName.size(); k++) {
 	    // check if a valid nane
 	    map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(featureFunctionName[k]);
@@ -1268,6 +1269,26 @@ bool StaticData::LoadAlternateWeightSettings()
 	      m_weightSettingIgnoreFF[ currentId ].insert( featureFunctionName[k] );
 	    }
 	  }
+	}
+	// ignore decoding path
+	else if (args[0] == "ignore-decoding-path") {
+	  set< size_t > *decodingPathSet = new set< size_t >;
+	  m_weightSettingIgnoreDP[ currentId ] = *decodingPathSet;
+	  vector<string> decodingPathId = Tokenize(args[1], " ");
+	  for(size_t k=0; k<decodingPathId.size(); k++) {
+	    size_t id = Scan<size_t>(decodingPathId[k]);
+	    if (id >= m_decodeGraphs.size()) {
+	      cerr << "ERROR: alternate weight setting " << currentId << " specifies to ignore decoding path " << id << " but there is no such decoding path" << endl;
+	      hasErrors = true;
+	    }
+	    else {
+	      m_weightSettingIgnoreDP[ currentId ].insert( id );
+	    }
+	  }
+	}
+	else {
+	  cerr << "ERROR: unknown parameter in alternative weight setting: " << args[0] << endl;
+	  hasErrors = true;
 	}
       }
     }
