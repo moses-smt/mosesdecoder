@@ -442,7 +442,7 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   else {
     const FVector scores = features.GetVectorForProducer( ff );
     for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++)
-      out << " " << i->first << ": " << i->second;
+      out << " " << i->first << "= " << i->second;
   }
 }
 
