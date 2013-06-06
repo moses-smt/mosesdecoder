@@ -447,18 +447,18 @@ public:
             Phrase const* srcPtr=uniqSrcPhr(newSrc);
             for(size_t i=0; i<tcands.size(); ++i) {
               //put input scores in first - already logged, just drop in directly
-              std::vector<float> nscores(newInputScores);
-
-              //resize to include phrase table scores
-              nscores.resize(m_numInputScores+tcands[i].scores.size(),0.0f);
+              std::vector<float> transcores(m_obj->GetNumScoreComponents());
+              CHECK(transcores.size()==weightTrans.size());
 
               //put in phrase table scores, logging as we insert
-              std::transform(tcands[i].scores.begin(),tcands[i].scores.end(),nscores.begin() + m_numInputScores,TransformScore);
+              std::transform(tcands[i].scores.begin()
+            		  	  ,tcands[i].scores.end()
+            		  	  ,transcores.begin()
+            		  	  ,TransformScore);
 
-              CHECK(nscores.size()==weightTrans.size());
 
               //tally up
-              float score=std::inner_product(nscores.begin(), nscores.end(), weightTrans.begin(), 0.0f);
+              float score=std::inner_product(transcores.begin(), transcores.end(), weightTrans.begin(), 0.0f);
 
               // input feature
               score +=std::inner_product(newInputScores.begin(), newInputScores.end(), weightInput.begin(), 0.0f);
@@ -473,7 +473,7 @@ public:
               TScores & scores=p.first->second;
               if(p.second || scores.total<score) {
                 scores.total=score;
-                scores.transScore=nscores;
+                scores.transScore=transcores;
                 scores.inputScores=newInputScores;
                 scores.src=srcPtr;
               }
