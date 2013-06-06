@@ -177,7 +177,7 @@ public:
                      FloorScore);
       //sparse features.
       //These are already in log-space
-      CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, wacands[i], &src);
+      CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), wacands[i], &src);
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);
     }
@@ -268,16 +268,18 @@ public:
 
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
-                          Scores const& scoreVector,
+                          Scores const& transVector,
+                          Scores const& inputVector,
                           const std::string& alignmentString,
                           Phrase const* srcPtr=0) const {
-    CreateTargetPhrase(targetPhrase, factorStrings, scoreVector, srcPtr);
+    CreateTargetPhrase(targetPhrase, factorStrings, transVector, inputVector, srcPtr);
     targetPhrase.SetAlignmentInfo(alignmentString);
   }
 
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
-                          Scores const& scoreVector,
+                          Scores const& transVector,
+                          Scores const& inputVector,
                           Phrase const* srcPtr) const {
     FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -291,23 +293,11 @@ public:
 
     targetPhrase.SetSourcePhrase(*srcPtr);
 
-    const StaticData &staticData = StaticData::Instance();
-    const InputFeature *inputFeature = staticData.GetInputFeature();
-
     if (m_numInputScores) {
-	  std::vector<float> inputScores(m_numInputScores);
-	  std::copy(scoreVector.begin()
-			, scoreVector.begin() + m_numInputScores
-			, inputScores.begin());
-	  targetPhrase.GetScoreBreakdown().Assign(inputFeature, inputScores);
+	  targetPhrase.GetScoreBreakdown().Assign(m_inputFeature, inputVector);
     }
 
-    size_t numPtScores = m_obj->GetNumScoreComponents();
-    std::vector<float> ptScores(numPtScores);
-    std::copy(scoreVector.begin()
-    		, scoreVector.begin() + numPtScores
-    		, ptScores.begin());
-    targetPhrase.GetScoreBreakdown().Assign(m_obj, ptScores);
+    targetPhrase.GetScoreBreakdown().Assign(m_obj, transVector);
     targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
   }
 
@@ -336,7 +326,7 @@ public:
   // POD for target phrase scores
   struct TScores {
     float total;
-    Scores trans;
+    Scores transScore, inputScores;
     Phrase const* src;
 
     TScores() : total(0.0),src(0) {}
@@ -470,6 +460,9 @@ public:
               //tally up
               float score=std::inner_product(nscores.begin(), nscores.end(), weightTrans.begin(), 0.0f);
 
+              // input feature
+              score +=std::inner_product(newInputScores.begin(), newInputScores.end(), weightInput.begin(), 0.0f);
+
               //count word penalty
               score-=tcands[i].tokens.size() * weightWP;
 
@@ -480,7 +473,8 @@ public:
               TScores & scores=p.first->second;
               if(p.second || scores.total<score) {
                 scores.total=score;
-                scores.trans=nscores;
+                scores.transScore=nscores;
+                scores.inputScores=newInputScores;
                 scores.src=srcPtr;
               }
             }
@@ -519,7 +513,11 @@ public:
       for(E2Costs::const_iterator j=i->second.begin(); j!=i->second.end(); ++j) {
         TScores const & scores=j->second;
         TargetPhrase targetPhrase;
-        CreateTargetPhrase(targetPhrase,j->first,scores.trans,scores.src);
+        CreateTargetPhrase(targetPhrase
+        				, j ->first
+        				, scores.transScore
+        				, scores.inputScores
+        				, scores.src);
         costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
         tCands.push_back(targetPhrase);
         //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;
