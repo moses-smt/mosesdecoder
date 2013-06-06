@@ -11,6 +11,7 @@
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "Util.h"
 #include "util/tokenize_piece.hh"
+#include "moses/FF/InputFeature.h"
 
 namespace Moses
 {
@@ -140,7 +141,6 @@ public:
 
     //TODO: Multiple models broken here
     std::vector<float> weights = StaticData::Instance().GetWeights(m_obj);
-    float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
     std::vector<TargetPhrase> tCands;
     tCands.reserve(cands.size());
@@ -275,7 +275,27 @@ public:
 
     targetPhrase.SetSourcePhrase(*srcPtr);
 
-    targetPhrase.GetScoreBreakdown().Assign(m_obj, scoreVector);
+    const StaticData &staticData = StaticData::Instance();
+    const InputFeature *inputFeature = staticData.GetInputFeature();
+
+    if (inputFeature) {
+      const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
+      if (firstPt == m_obj) {
+		  size_t numInputScores = inputFeature->GetNumScoreComponents();
+		  std::vector<float> inputScores(numInputScores);
+		  std::copy(scoreVector.begin()
+				, scoreVector.begin() + numInputScores
+				, inputScores.begin());
+		  targetPhrase.GetScoreBreakdown().Assign(inputFeature, inputScores);
+      }
+    }
+
+    size_t numPtScores = m_obj->GetNumScoreComponents();
+    std::vector<float> ptScores(numPtScores);
+    std::copy(scoreVector.begin()
+    		, scoreVector.begin() + numPtScores
+    		, ptScores.begin());
+    targetPhrase.GetScoreBreakdown().Assign(m_obj, ptScores);
     targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
   }
 
