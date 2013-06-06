@@ -665,15 +665,15 @@ public:
     return m_weightSetting.size() > 0;
   }
 
-  /** Alternate weight settings allow the wholesale ignoring of 
+  /** Alternate weight settings allow the wholesale ignoring of
       feature functions. This function checks if a feature function
       should be evaluated given the current weight setting */
   bool IsFeatureFunctionIgnored( const FeatureFunction &ff ) const {
     if (!GetHasAlternateWeightSettings()) {
       return false;
     }
-    std::map< std::string, std::set< std::string > >::const_iterator lookupIgnoreFF 
-      =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
+    std::map< std::string, std::set< std::string > >::const_iterator lookupIgnoreFF
+    =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
     if (lookupIgnoreFF == m_weightSettingIgnoreFF.end()) {
       return false;
     }
@@ -682,17 +682,17 @@ public:
     return ignoreFF.count( ffName );
   }
 
-  /** Alternate weight settings allow the wholesale ignoring of 
-      decoding graphs (typically a translation table). This function 
-      checks if a feature function should be evaluated given the 
+  /** Alternate weight settings allow the wholesale ignoring of
+      decoding graphs (typically a translation table). This function
+      checks if a feature function should be evaluated given the
       current weight setting */
   bool IsDecodingGraphIgnored( const size_t id ) const {
     std::cerr << "IsFeatureFunctionIgnored( " << id << " )" << std::endl;
     if (!GetHasAlternateWeightSettings()) {
       return false;
     }
-    std::map< std::string, std::set< size_t > >::const_iterator lookupIgnoreDP 
-      =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
+    std::map< std::string, std::set< size_t > >::const_iterator lookupIgnoreDP
+    =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
     if (lookupIgnoreDP == m_weightSettingIgnoreDP.end()) {
       return false;
     }
@@ -701,7 +701,7 @@ public:
     return ignoreDP.count( id );
   }
 
-  /** process alternate weight settings 
+  /** process alternate weight settings
     * (specified with [alternate-weight-setting] in config file) */
   void SetWeightSetting(const std::string &settingName) const {
 
@@ -724,8 +724,8 @@ public:
     // if not found, resort to default
     if (i == m_weightSetting.end()) {
       std::stringstream strme;
-      strme << "Warning: Specified weight setting " << settingName 
-	    << " does not exist in model, using default weight setting instead";
+      strme << "Warning: Specified weight setting " << settingName
+            << " does not exist in model, using default weight setting instead";
       UserMessage::Add(strme.str());
       i = m_weightSetting.find( "default" );
       m_currentWeightSetting = "default";

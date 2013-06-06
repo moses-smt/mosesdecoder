@@ -121,7 +121,7 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
     for (size_t i = 0; i < ffs.size(); ++i) {
       const FeatureFunction &ff = *ffs[i];
       if (! staticData.IsFeatureFunctionIgnored( ff )) {
-	ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
+        ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
       }
     }
 

@@ -257,9 +257,9 @@ void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( sfff )) {
     m_ffStates[state_idx] = sfff.Evaluate(
-                            *this,
-                            m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-                            &m_scoreBreakdown);
+                              *this,
+                              m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+                              &m_scoreBreakdown);
   }
 }
 
@@ -299,8 +299,8 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
     const StaticData &staticData = StaticData::Instance();
     if (! staticData.IsFeatureFunctionIgnored(ff)) {
       m_ffStates[i] = ff.Evaluate(*this,
-				  m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-				  &m_scoreBreakdown);
+                                  m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
+                                  &m_scoreBreakdown);
     }
   }
 
