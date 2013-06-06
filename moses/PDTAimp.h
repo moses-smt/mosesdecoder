@@ -386,7 +386,8 @@ public:
     for(Position i=0 ; i < srcSize ; ++i)
       stack.push_back(State(i, i, m_dict->GetRoot(), std::vector<float>(m_numInputScores,0.0)));
 
-    std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj);
+    std::vector<float> weightTrans = StaticData::Instance().GetWeights(m_obj);
+    std::vector<float> weightInput = StaticData::Instance().GetWeights(m_inputFeature);
     float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
     while(!stack.empty()) {
@@ -464,10 +465,10 @@ public:
               //put in phrase table scores, logging as we insert
               std::transform(tcands[i].scores.begin(),tcands[i].scores.end(),nscores.begin() + m_numInputScores,TransformScore);
 
-              CHECK(nscores.size()==weightT.size());
+              CHECK(nscores.size()==weightTrans.size());
 
               //tally up
-              float score=std::inner_product(nscores.begin(), nscores.end(), weightT.begin(), 0.0f);
+              float score=std::inner_product(nscores.begin(), nscores.end(), weightTrans.begin(), 0.0f);
 
               //count word penalty
               score-=tcands[i].tokens.size() * weightWP;
