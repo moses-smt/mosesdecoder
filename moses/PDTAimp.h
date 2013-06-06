@@ -44,12 +44,12 @@ protected:
   {
     m_numInputScores = 0;
 	const StaticData &staticData = StaticData::Instance();
-	const InputFeature *inputFeature = staticData.GetInputFeature();
+	m_inputFeature = staticData.GetInputFeature();
 
-	if (inputFeature) {
+	if (m_inputFeature) {
 	  const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
 	  if (firstPt == m_obj) {
-		  m_numInputScores = inputFeature->GetNumScoreComponents();
+		  m_numInputScores = m_inputFeature->GetNumScoreComponents();
 	  }
 	}
   }
@@ -57,6 +57,7 @@ protected:
 public:
   std::vector<FactorType> m_input,m_output;
   PhraseDictionaryTree *m_dict;
+  const InputFeature *m_inputFeature;
   typedef std::vector<TargetPhraseCollection const*> vTPC;
   mutable vTPC m_tgtColls;
 
