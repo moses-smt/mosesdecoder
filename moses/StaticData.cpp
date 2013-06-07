@@ -1302,7 +1302,7 @@ void StaticData::OverrideFeatures()
 
 	FeatureFunction &ff = FeatureFunction::FindFeatureFunction(toks[0]);
 
-	for (size_t j = 1; j < params.size(); ++j) {
+	for (size_t j = 1; j < toks.size(); ++j) {
 		const string &keyValStr = toks[j];
 		vector<string> keyVal = Tokenize(keyValStr, "=");
 		CHECK(keyVal.size() == 2);
