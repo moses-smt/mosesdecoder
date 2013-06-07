@@ -58,7 +58,7 @@ void TargetPhraseCollection::Sort(size_t tableLimit)
 {
   std::sort(m_coll.begin(), m_coll.end(), TargetPhraseOrderByScore());
 
-  if (m_coll.size() > tableLimit) {
+  if (tableLimit && m_coll.size() > tableLimit) {
     CollType::iterator iter;
     for (iter = m_coll.begin() + tableLimit ; iter != m_coll.end(); ++iter) {
       delete *iter;
@@ -161,7 +161,9 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
   fileTPColl.read((char*) &numPhrases, sizeof(UINT64));
 
   // table limit
-  numPhrases = std::min(numPhrases, (UINT64) tableLimit);
+  if (tableLimit) {
+    numPhrases = std::min(numPhrases, (UINT64) tableLimit);
+  }
 
   currFilePos += sizeof(UINT64);
 
