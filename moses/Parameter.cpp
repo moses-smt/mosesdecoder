@@ -635,7 +635,6 @@ void Parameter::ConvertWeightArgsLM()
     oovWeights = Scan<int>(m_setting["lmodel-oov-feature"]);
   }
 
-  size_t ind = 0;
   PARAM_MAP::iterator iterMap;
 
   iterMap = m_setting.find(oldWeightName);
@@ -681,7 +680,7 @@ void Parameter::ConvertWeightArgsLM()
         ++currOldInd;
       }
 
-      SetWeight(newFeatureName, ind, weightsLM);
+      SetWeight(newFeatureName, lmIndex, weightsLM);
 
       string featureLine = newFeatureName + " "
                            + "factor=" + modelToks[1] + " "  // factor
