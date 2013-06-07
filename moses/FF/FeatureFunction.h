@@ -46,6 +46,7 @@ public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
     return m_producers;
   }
+  static FeatureFunction &FindFeatureFunction(const std::string& name);
 
   FeatureFunction(const std::string& description, const std::string &line);
   FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
@@ -97,6 +98,8 @@ public:
   virtual void Evaluate(const InputType &source
                         , ScoreComponentCollection &scoreBreakdown) const
   {}
+
+  virtual void OverrideParameter(const std::string& key, const std::string& value);
 };
 
 }

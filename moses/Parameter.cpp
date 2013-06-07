@@ -190,6 +190,7 @@ Parameter::Parameter()
 
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
+  AddParam("feature-overwrite", "Override arguments in a particular featureu function with a particular key");
 
   AddParam("feature", "");
   AddParam("print-id", "prefix translations with id. Default if false");

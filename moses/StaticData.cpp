@@ -706,6 +706,8 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  OverrideFeatures();
+
   LoadFeatureFunctions();
 
   if (!LoadDecodeGraphs()) return false;
@@ -1288,6 +1290,27 @@ bool StaticData::LoadAlternateWeightSettings()
   }
   CHECK(!hasErrors);
   return true;
+}
+
+void StaticData::OverrideFeatures()
+{
+  const PARAM_VEC &params = m_parameter->GetParam("feature-overwrite");
+  for (size_t i = 0; i < params.size(); ++i) {
+	const string &str = params[i];
+	vector<string> toks = Tokenize(str);
+	CHECK(toks.size() > 1);
+
+	FeatureFunction &ff = FeatureFunction::FindFeatureFunction(toks[0]);
+
+	for (size_t j = 1; j < params.size(); ++j) {
+		const string &keyValStr = toks[j];
+		vector<string> keyVal = Tokenize(keyValStr, "=");
+		CHECK(keyVal.size() == 2);
+		ff.OverrideParameter(keyVal[0], keyVal[1]);
+
+	}
+  }
+
 }
 
 } // namespace

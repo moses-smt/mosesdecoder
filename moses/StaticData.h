@@ -768,6 +768,8 @@ public:
   bool LoadWeightSettings();
   bool LoadAlternateWeightSettings();
 
+  void OverrideFeatures();
+
   void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {
 #ifdef WITH_THREADS
     m_multimodelweights_tmp[boost::this_thread::get_id()] = weights;

@@ -18,6 +18,18 @@ std::vector<FeatureFunction*> FeatureFunction::m_producers;
 std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
 std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 
+FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
+{
+  for (size_t i = 0; i < m_producers.size(); ++i) {
+	  FeatureFunction &ff = *m_producers[i];
+	  if (ff.GetScoreProducerDescription() == name) {
+		  return ff;
+	  }
+  }
+
+  throw "Unknown feature " + name;
+}
+
 FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
   : m_tuneable(true)
 {
@@ -83,6 +95,11 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
       m_args.push_back(args);
     }
   }
+}
+
+void FeatureFunction::OverrideParameter(const std::string& key, const std::string& value)
+{
+  throw "unknown key" + key;
 }
 
 }

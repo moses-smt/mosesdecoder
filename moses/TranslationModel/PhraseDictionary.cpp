@@ -70,5 +70,17 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
   return GetTargetPhraseCollection(phrase);
 }
 
+void PhraseDictionary::OverrideParameter(const std::string& key, const std::string& value)
+{
+  if (key == "table-limit") {
+	  m_tableLimit = Scan<size_t>(value);
+  }
+
+  else {
+	  // call parent function, all the way to the top if necessary
+	  DecodeFeature::OverrideParameter(key, value);
+  }
+}
+
 }
 
