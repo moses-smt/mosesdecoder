@@ -576,7 +576,7 @@ build-sparse
         out: sparse
         ignore-unless: sparse-features
 	rerun-on-change: sparse-features
-        default-name: model/most-frequent-words
+        default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
 	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains INTERPOLATED-LM:binlm LM:binlm 
