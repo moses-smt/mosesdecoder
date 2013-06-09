@@ -1177,16 +1177,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.h</locationURI>
 		</link>
 		<link>
-			<name>FF/SparsePhraseDictionaryFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparsePhraseDictionaryFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SparsePhraseDictionaryFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparsePhraseDictionaryFeature.h</locationURI>
-		</link>
-		<link>
 			<name>FF/StatefulFeatureFunction.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatefulFeatureFunction.cpp</locationURI>

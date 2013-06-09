@@ -8,6 +8,7 @@
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
 #include "util/string_piece_hash.hh"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -20,38 +21,27 @@ TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
 {
   std::cerr << "Initializing target word insertion feature.." << std::endl;
 
-  string filename;
-
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
     if (args[0] == "factor") {
       m_factorType = Scan<FactorType>(args[1]);
     } else if (args[0] == "path") {
-      filename = args[1];
+    	m_filename = args[1];
     } else {
       throw "Unknown argument " + args[0];
     }
   }
-
-  // load word list for restricted feature set
-  if (filename != "") {
-    cerr << "loading target word insertion word list from " << filename << endl;
-    if (!Load(filename)) {
-      UserMessage::Add("Unable to load word list for target word insertion feature from file " + filename);
-      //return false;
-    }
-  }
-
 }
 
-bool TargetWordInsertionFeature::Load(const std::string &filePath)
+void TargetWordInsertionFeature::Load()
 {
-  ifstream inFile(filePath.c_str());
-  if (!inFile) {
-    cerr << "could not open file " << filePath << endl;
-    return false;
-  }
+  if (m_filename.empty())
+    return;
+
+  cerr << "loading target word insertion word list from " << m_filename << endl;
+  ifstream inFile(m_filename.c_str());
+  UTIL_THROW_IF(!inFile, util::Exception, "could not open file " << m_filename);
 
   std::string line;
   while (getline(inFile, line)) {
@@ -61,7 +51,6 @@ bool TargetWordInsertionFeature::Load(const std::string &filePath)
   inFile.close();
 
   m_unrestricted = false;
-  return true;
 }
 
 void TargetWordInsertionFeature::Evaluate(const Phrase &source
