@@ -13,6 +13,7 @@ my %LM_IMPLEMENTATION = ( 0 => "SRILM",
 
 my (%FEATURE,%WEIGHT);
 my $i=0;
+my ($has_sparse_ttable_features,$sparse_weight_file) = (0);
 
 for(; $i<scalar(@INI); $i++) {
     my $line = $INI[$i];
@@ -28,6 +29,19 @@ for(; $i<scalar(@INI); $i++) {
 	    $section eq "word-translation-feature" ||
 	    $section eq "phrase-length-feature") {
 	    $FEATURE{$section} = &get_data();
+	}
+	elsif ($section eq "weight-file") {
+	  print $header.$line;
+	  my $WEIGHT_FILE = &get_data();
+	  $sparse_weight_file = $$WEIGHT_FILE[0];
+	  $has_sparse_ttable_features = `cat $sparse_weight_file | grep ^stm | wc -l`;
+	  if ($has_sparse_ttable_features) {
+	    print STDERR "sparse weight feature file has translaton model features\n -> creating new sparse weight file '$sparse_weight_file.new'\n";
+	    print "$sparse_weight_file.new\n";
+	  }
+	  else {
+	    print "$sparse_weight_file\n";
+	  }
 	}
 	elsif ($section =~ /weight-(.+)/ && $section ne "weight-file") {
 	    $WEIGHT{$1} = &get_data();
@@ -48,6 +62,24 @@ for(; $i<scalar(@INI); $i++) {
     }
 }
 print $header;
+
+if ($has_sparse_ttable_features) {
+  open(SPARSE,$sparse_weight_file);
+  open(NEW,">$sparse_weight_file.new");
+  while(<SPARSE>) {
+    if (!/^stm/) {
+      print NEW $_;
+    }
+    else {
+      s/^stm//;
+      for (my $i=0;$i<scalar@{$FEATURE{"ttable-file"}};$i++) {
+	print NEW "TranslationModel$i$_";
+      }
+    }
+  }
+  close(NEW);
+  close(SPARSE);
+}
 
 my ($feature,$weight) = ("","");
 $feature .= "UnknownWordPenalty\n";
