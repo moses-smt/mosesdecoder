@@ -493,11 +493,9 @@ void OutputFeatureScores( std::ostream& out
   }
 
   // sparse features
-  else {
-    const FVector scores = features.GetVectorForProducer( ff );
-    for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
-      out << " " << i->first << "= " << i->second;
-    }
+  const FVector scores = features.GetVectorForProducer( ff );
+  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+    out << " " << i->first << "= " << i->second;
   }
 }
 

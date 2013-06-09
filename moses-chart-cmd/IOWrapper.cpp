@@ -439,10 +439,9 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   }
 
   // sparse features
-  else {
-    const FVector scores = features.GetVectorForProducer( ff );
-    for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++)
-      out << " " << i->first << "= " << i->second;
+  const FVector scores = features.GetVectorForProducer( ff );
+  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+    out << " " << i->first << "= " << i->second;
   }
 }
 

@@ -53,6 +53,7 @@ public:
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
 
+  //! override to load model files
   virtual void Load()
   {}
 
@@ -71,11 +72,13 @@ public:
     return m_description;
   }
 
+  //! if false, then this feature is not displayed in the n-best list.
+  // use with care
   virtual bool IsTuneable() const {
     return m_tuneable;
   }
 
-  //!
+  //! Called before search and collecting of translation options
   virtual void InitializeForInput(InputType const& source)
   {}
 
@@ -91,6 +94,7 @@ public:
   // return true if the feature function can be evaluated
   virtual bool IsUseable(const FactorMask &mask) const = 0;
 
+  // used by stateless ff. And stateful ff to make initial score estimate during loading of phrase table
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
