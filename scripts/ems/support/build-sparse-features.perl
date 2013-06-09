@@ -46,20 +46,20 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
     $ini .= "\n";
   }
   elsif ($SPEC[0] eq 'word-translation') {
-    $ini .= "WordTranslationFeature input-factor=0 output-factor=0 simple=1 source-context=0 target-context=0";
-
+    my $extra_ini = "";
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/ && $SPEC[3] =~ /^\d+$/) {
       my $file_in  = &create_top_words($input_extension,  $SPEC[2]);
       my $file_out = &create_top_words($output_extension, $SPEC[3]);
-      $ini .= " source-path=$file_in target-path=$file_out"
+      $extra_ini .= " source-path=$file_in target-path=$file_out"
     }
     elsif ($SPEC[1] eq 'all') {
-
+      # nothing to specify
     }
     else {
-      die("ERROR: Unknown parameter specification in '$feature_spec'\n");
+      die("ERROR: Unknown parameter specification in '$SPEC[1]'\n");
     }
-    $ini .= "\n";
+    my ($input_factor,$output_factor) = split(/\-/,$factor);
+    $ini .= "WordTranslationFeature input-factor=$input_factor output-factor=$output_factor simple=1 source-context=0 target-context=0$extra_ini\n";
   }
   elsif ($SPEC[0] eq 'phrase-length') {
     $ini .= "PhraseLengthFeature\n";

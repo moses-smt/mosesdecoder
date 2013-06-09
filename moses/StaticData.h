@@ -687,7 +687,6 @@ public:
       checks if a feature function should be evaluated given the
       current weight setting */
   bool IsDecodingGraphIgnored( const size_t id ) const {
-    std::cerr << "IsFeatureFunctionIgnored( " << id << " )" << std::endl;
     if (!GetHasAlternateWeightSettings()) {
       return false;
     }
@@ -697,7 +696,6 @@ public:
       return false;
     }
     const std::set< size_t > &ignoreDP = lookupIgnoreDP->second;
-    std::cerr << "IsFeatureFunctionIgnored( " << id << " ) = " << ignoreDP.count( id ) << std::endl;
     return ignoreDP.count( id );
   }
 
