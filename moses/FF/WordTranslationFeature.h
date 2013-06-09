@@ -33,13 +33,15 @@ private:
   bool m_domainTrigger;
   bool m_ignorePunctuation;
   CharHash m_punctuationHash;
+  std::string m_filePathSource;
+  std::string m_filePathTarget;
 
 public:
   WordTranslationFeature(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const;
 
-  bool Load(const std::string &filePathSource, const std::string &filePathTarget);
+  void Load();
 
   const FFState* EmptyHypothesisState(const InputType &) const {
     return new DummyState();

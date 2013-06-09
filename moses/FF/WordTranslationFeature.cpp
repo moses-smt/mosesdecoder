@@ -9,11 +9,12 @@
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
 #include "util/string_piece_hash.hh"
+#include "util/exception.hh"
+
+using namespace std;
 
 namespace Moses
 {
-
-using namespace std;
 
 WordTranslationFeature::WordTranslationFeature(const std::string &line)
   :StatelessFeatureFunction("WordTranslationFeature", 0, line)
@@ -27,8 +28,6 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
   std::cerr << "Initializing word translation feature.. " << endl;
 
   string texttype;
-  string filenameSource;
-  string filenameTarget;
 
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
@@ -50,9 +49,9 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
     } else if (args[0] == "texttype") {
       texttype = args[1];
     } else if (args[0] == "source-path") {
-      filenameSource = args[1];
+      m_filePathSource = args[1];
     } else if (args[0] == "target-path") {
-      filenameTarget = args[1];
+      m_filePathTarget = args[1];
     } else {
       throw "Unknown argument " + args[0];
     }
@@ -74,15 +73,6 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
 
   std::cerr << "done." << std::endl;
 
-  // load word list for restricted feature set
-  if (filenameSource != "") {
-    cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
-    if (!Load(filenameSource, filenameTarget)) {
-      UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
-      //return false;
-    }
-  } //else if (tokens.size() == 8) {
-
   // TODO not sure about this
   /*
   if (weight[0] != 1) {
@@ -99,15 +89,18 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
 
 }
 
-bool WordTranslationFeature::Load(const std::string &filePathSource, const std::string &filePathTarget)
+void WordTranslationFeature::Load()
 {
+  // load word list for restricted feature set
+  if (m_filePathSource.empty()) {
+    return;
+  } //else if (tokens.size() == 8) {
+
+  cerr << "loading word translation word lists from " << m_filePathSource << " and " << m_filePathTarget << endl;
   if (m_domainTrigger) {
     // domain trigger terms for each input document
-    ifstream inFileSource(filePathSource.c_str());
-    if (!inFileSource) {
-      cerr << "could not open file " << filePathSource << endl;
-      return false;
-    }
+    ifstream inFileSource(m_filePathSource.c_str());
+    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -121,11 +114,8 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
     inFileSource.close();
   } else {
     // restricted source word vocabulary
-    ifstream inFileSource(filePathSource.c_str());
-    if (!inFileSource) {
-      cerr << "could not open file " << filePathSource << endl;
-      return false;
-    }
+    ifstream inFileSource(m_filePathSource.c_str());
+    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -135,11 +125,8 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
     inFileSource.close();
 
     // restricted target word vocabulary
-    ifstream inFileTarget(filePathTarget.c_str());
-    if (!inFileTarget) {
-      cerr << "could not open file " << filePathTarget << endl;
-      return false;
-    }
+    ifstream inFileTarget(m_filePathTarget.c_str());
+    UTIL_THROW_IF(!inFileTarget, util::Exception, "could not open file " << m_filePathTarget);
 
     while (getline(inFileTarget, line)) {
       m_vocabTarget.insert(line);
@@ -149,7 +136,6 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
 
     m_unrestricted = false;
   }
-  return true;
 }
 
 void WordTranslationFeature::Evaluate
