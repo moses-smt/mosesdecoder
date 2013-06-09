@@ -87,6 +87,8 @@ public:
     return m_argLine;
   }
 
+  // given a target phrase containing only factors specified in mask
+  // return true if the feature function can be evaluated
   virtual bool IsUseable(const FactorMask &mask) const = 0;
 
   virtual void Evaluate(const Phrase &source
