@@ -175,8 +175,13 @@ public:
                      TransformScore);
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
                      FloorScore);
+
       //sparse features.
       //These are already in log-space
+      for (size_t j = 0; j < cands[i].fnames.size(); ++j) {
+    	targetPhrase.GetScoreBreakdown().Assign(m_obj, *cands[i].fnames[j], cands[i].fvalues[j]);
+      }
+
       CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), wacands[i], &src);
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);
