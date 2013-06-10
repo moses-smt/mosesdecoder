@@ -6,6 +6,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/TranslationOption.h"
 #include "util/string_piece_hash.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -17,17 +18,16 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
 {
   std::cerr << "Initializing PhrasePairFeature.." << std::endl;
 
-  vector<string> tokens = Tokenize(line);
-  //CHECK(tokens[0] == m_description);
-
-  // set factor
-  m_sourceFactorId = Scan<FactorType>(tokens[1]);
-  m_targetFactorId = Scan<FactorType>(tokens[2]);
-  m_unrestricted = Scan<bool>(tokens[3]);
-  m_simple = Scan<bool>(tokens[4]);
-  m_sourceContext = Scan<bool>(tokens[5]);
-  m_domainTrigger = Scan<bool>(tokens[6]);
-  m_ignorePunctuation = Scan<bool>(tokens[6]);
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = OverrideParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
+    } else {
+      ++ind;
+    }
+  }
 
   if (m_simple == 1) std::cerr << "using simple phrase pairs.. ";
   if (m_sourceContext == 1) std::cerr << "using source context.. ";
@@ -40,25 +40,39 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
     for (size_t i=0; i < sizeof(punctuation)-1; ++i)
       m_punctuationHash[punctuation[i]] = 1;
   }
-
-  const string &filePathSource = tokens[7];
-  Load(filePathSource);
 }
 
 bool PhrasePairFeature::OverrideParameter(const std::string& key, const std::string& value)
 {
+	  if (key == "input-factor") {
+		  m_sourceFactorId = Scan<FactorType>(value);
+	  } else if (key == "output-factor") {
+		  m_targetFactorId = Scan<FactorType>(value);
+	  } else if (key == "unrestricted") {
+		  m_unrestricted = Scan<bool>(value);
+	  } else if (key == "simple") {
+		  m_simple = Scan<bool>(value);
+	  } else if (key == "source-context") {
+		  m_sourceContext = Scan<bool>(value);
+	  } else if (key == "domain-trigger") {
+		  m_domainTrigger = Scan<bool>(value);
+	  } else if (key == "ignore-punctuation") {
+		  m_ignorePunctuation = Scan<bool>(value);
+	  } else if (key == "ignore-punctuation") {
+		  m_filePathSource = value;
+	  } else {
+	    return false;
+	  }
+	  return true;
 
 }
 
-bool PhrasePairFeature::Load(const std::string &filePathSource/*, const std::string &filePathTarget*/)
+void PhrasePairFeature::Load()
 {
   if (m_domainTrigger) {
     // domain trigger terms for each input document
-    ifstream inFileSource(filePathSource.c_str());
-    if (!inFileSource) {
-      cerr << "could not open file " << filePathSource << endl;
-      return false;
-    }
+    ifstream inFileSource(m_filePathSource.c_str());
+    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -75,11 +89,8 @@ bool PhrasePairFeature::Load(const std::string &filePathSource/*, const std::str
     inFileSource.close();
   } else {
     // restricted source word vocabulary
-    ifstream inFileSource(filePathSource.c_str());
-    if (!inFileSource) {
-      cerr << "could not open file " << filePathSource << endl;
-      return false;
-    }
+    ifstream inFileSource(m_filePathSource.c_str());
+    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -104,7 +115,6 @@ bool PhrasePairFeature::Load(const std::string &filePathSource/*, const std::str
 
     m_unrestricted = false;
   }
-  return true;
 }
 
 void PhrasePairFeature::Evaluate(

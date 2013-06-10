@@ -30,6 +30,7 @@ class PhrasePairFeature: public StatelessFeatureFunction
   bool m_domainTrigger;
   bool m_ignorePunctuation;
   CharHash m_punctuationHash;
+  std::string m_filePathSource;
 
 public:
   PhrasePairFeature(const std::string &line);
@@ -44,7 +45,7 @@ public:
     throw std::logic_error("PhrasePairFeature not valid in chart decoder");
   }
 
-  bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
+  void Load();
   bool OverrideParameter(const std::string& key, const std::string& value);
 
 };
