@@ -63,9 +63,9 @@ bool TargetNgramFeature::OverrideParameter(const std::string& key, const std::st
   } else if (key == "lower-ngrams") {
     m_lower_ngrams = Scan<bool>(value);
   } else {
-    StatefulFeatureFunction::OverrideParameter(key, value);
+    return false;
   }
-
+  return true;
 }
 
 bool TargetNgramFeature::Load(const std::string &filePath)

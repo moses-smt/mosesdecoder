@@ -40,8 +40,9 @@ bool TargetWordInsertionFeature::OverrideParameter(const std::string& key, const
   } else if (key == "path") {
     m_filename = value;
   } else {
-    StatelessFeatureFunction::OverrideParameter(key, value);
+    return false;
   }
+  return true;
 }
 
 void TargetWordInsertionFeature::Load()

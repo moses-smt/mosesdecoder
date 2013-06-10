@@ -75,11 +75,9 @@ bool PhraseDictionary::OverrideParameter(const std::string& key, const std::stri
   } else if (key == "alignment-path") {
     m_alignmentsFile = value;
   } else {
-    return DecodeFeature::OverrideParameter(key, value);
+    return false;
   }
-
   return true;
-
 }
 
 }

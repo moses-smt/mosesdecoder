@@ -76,7 +76,7 @@ bool DecodeFeature::OverrideParameter(const std::string& key, const std::string&
     m_output =Tokenize<FactorType>(value, ",");
     m_outputFactors = FactorMask(m_output);
   } else {
-    return StatelessFeatureFunction::OverrideParameter(key, value);
+    return false;
   }
 
   return true;

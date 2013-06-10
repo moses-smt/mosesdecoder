@@ -39,6 +39,12 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
     }
   }
 
+  if (m_mode != "interpolate") {
+    ostringstream msg;
+    msg << "combination mode unknown: " << m_mode;
+    throw runtime_error(msg.str());
+  }
+
   size_t numWeights = m_numScoreComponents;
   if (m_mode == "interpolate") {
     numWeights--;
@@ -65,6 +71,21 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &descri
   }
 }
 
+bool PhraseDictionaryMultiModel::OverrideParameter(const std::string& key, const std::string& value)
+{
+  if (key == "mode") {
+    m_mode = value;
+  } else if (key == "components") {
+    m_pdStr = Tokenize(value, ",");
+    m_numModels = m_pdStr.size();
+  } else if (key == "lambda") {
+    m_multimodelweights = Tokenize<float>(value, ",");
+  } else {
+    return false;
+  }
+  return true;
+}
+
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
 {
 }
@@ -86,6 +107,7 @@ void PhraseDictionaryMultiModel::Load()
 
 PhraseDictionary *PhraseDictionaryMultiModel::FindPhraseDictionary(const string &ptName) const
 {
+  cerr << ptName << endl;
   const StaticData &staticData = StaticData::Instance();
   const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
 
@@ -93,6 +115,7 @@ PhraseDictionary *PhraseDictionaryMultiModel::FindPhraseDictionary(const string 
   std::vector<PhraseDictionary*>::const_iterator iter;
   for (iter = pts.begin(); iter != pts.end(); ++iter) {
     PhraseDictionary *currPt = *iter;
+    cerr << currPt->GetScoreProducerDescription() << endl;
     if (currPt->GetScoreProducerDescription() == ptName) {
       pt = currPt;
       break;
@@ -321,25 +344,6 @@ void  PhraseDictionaryMultiModel::CleanUpComponentModels(const InputType &source
 {
   for(size_t i = 0; i < m_numModels; ++i) {
     m_pd[i]->CleanUpAfterSentenceProcessing(source);
-  }
-}
-
-bool PhraseDictionaryMultiModel::OverrideParameter(const std::string& key, const std::string& value)
-{
-  if (key == "mode") {
-    m_mode = value;
-    if (m_mode != "interpolate") {
-      ostringstream msg;
-      msg << "combination mode unknown: " << m_mode;
-      throw runtime_error(msg.str());
-    }
-  } else if (key == "components") {
-    m_pdStr = Tokenize(value, ",");
-    m_numModels = m_pdStr.size();
-  } else if (key == "lambda") {
-    m_multimodelweights = Tokenize<float>(value, ",");
-  } else {
-    PhraseDictionary::OverrideParameter(key, value);
   }
 }
 

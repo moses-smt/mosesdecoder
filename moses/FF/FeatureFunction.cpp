@@ -99,7 +99,6 @@ bool FeatureFunction::OverrideParameter(const std::string& key, const std::strin
   } else if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
   } else {
-    //UTIL_THROW(util::Exception, "unknown key" << key);
     return false;
   }
 

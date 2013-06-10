@@ -86,8 +86,9 @@ bool PhraseDictionaryDynSuffixArray::OverrideParameter(const std::string& key, c
   } else if (key == "alignment") {
     m_alignments = value;
   } else {
-    PhraseDictionary::OverrideParameter(key, value);
+    return false;
   }
+  return true;
 }
 
 }// end namepsace

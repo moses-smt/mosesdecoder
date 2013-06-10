@@ -93,8 +93,9 @@ bool WordTranslationFeature::OverrideParameter(const std::string& key, const std
   } else if (key == "target-path") {
     m_filePathTarget = value;
   } else {
-    StatelessFeatureFunction::OverrideParameter(key, value);
+    return false;
   }
+  return true;
 }
 
 void WordTranslationFeature::Load()

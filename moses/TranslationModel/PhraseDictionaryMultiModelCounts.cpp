@@ -67,7 +67,7 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
   m_combineFunction = InstanceWeighting;
   //m_mode = "interpolate";
   //m_combineFunction = LinearInterpolationFromCounts;
-
+  cerr << "m_args=" << m_args.size() << endl;
   size_t ind = 0;
   while (ind < m_args.size()) {
     vector<string> &args = m_args[ind];
@@ -78,6 +78,38 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
       ++ind;
     }
   }
+
+  CHECK(m_targetTable.size() == m_pdStr.size());
+
+  if (m_mode == "instance_weighting")
+    m_combineFunction = InstanceWeighting;
+  else if (m_mode == "interpolate") {
+    m_combineFunction = LinearInterpolationFromCounts;
+  } else {
+    ostringstream msg;
+    msg << "combination mode unknown: " << m_mode;
+    throw runtime_error(msg.str());
+  }
+
+}
+
+bool PhraseDictionaryMultiModelCounts::OverrideParameter(const std::string& key, const std::string& value)
+{
+  if (key == "mode") {
+    m_mode = value;
+  } else if (key == "lex-e2f") {
+    m_lexE2FStr = Tokenize(value, ",");
+    CHECK(m_lexE2FStr.size() == m_pdStr.size());
+  } else if (key == "lex-f2e") {
+    m_lexF2EStr = Tokenize(value, ",");
+    CHECK(m_lexF2EStr.size() == m_pdStr.size());
+  } else if (key == "target-table") {
+    m_targetTable = Tokenize(value, ",");
+  } else {
+    return false;
+  }
+
+  return true;
 }
 
 PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
@@ -687,38 +719,6 @@ double LinearInterpolationFromCounts(vector<float> &joint_counts, vector<float> 
   double p_weighted = inner_product(p.begin(), p.end(), multimodelweights.begin(), 0.0);
 
   return p_weighted;
-}
-
-bool PhraseDictionaryMultiModelCounts::OverrideParameter(const std::string& key, const std::string& value)
-{
-  if (key == "mode") {
-    m_mode = value;
-    if (m_mode == "instance_weighting")
-      m_combineFunction = InstanceWeighting;
-    else if (m_mode == "interpolate") {
-      m_combineFunction = LinearInterpolationFromCounts;
-    } else {
-      ostringstream msg;
-      msg << "combination mode unknown: " << m_mode;
-      throw runtime_error(msg.str());
-    }
-
-  } else if (key == "lex-e2f") {
-    m_lexE2FStr = Tokenize(value, ",");
-    CHECK(m_lexE2FStr.size() == m_pdStr.size());
-  } else if (key == "lex-f2e") {
-    m_lexF2EStr = Tokenize(value, ",");
-    CHECK(m_lexF2EStr.size() == m_pdStr.size());
-  }
-
-  else if (key == "target-table") {
-    m_targetTable = Tokenize(value, ",");
-    CHECK(m_targetTable.size() == m_pdStr.size());
-  }
-
-  else {
-    PhraseDictionaryMultiModel::OverrideParameter(key, value);
-  }
 }
 
 } //namespace
