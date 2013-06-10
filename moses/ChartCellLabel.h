@@ -52,8 +52,8 @@ public:
                  Stack stack=Stack())
     : m_coverage(coverage)
     , m_label(label)
-    , m_stack(stack)
-  {}
+    , m_stack(stack) {
+  }
 
   const WordsRange &GetCoverage() const {
     return m_coverage;

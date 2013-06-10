@@ -27,33 +27,14 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
 {
   std::cerr << "Initializing word translation feature.. " << endl;
 
-  string texttype;
-
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "input-factor") {
-      m_factorTypeSource = Scan<FactorType>(args[1]);
-    } else if (args[0] == "output-factor") {
-      m_factorTypeTarget = Scan<FactorType>(args[1]);
-    } else if (args[0] == "simple") {
-      m_simple = Scan<bool>(args[1]);
-    } else if (args[0] == "source-context") {
-      m_sourceContext = Scan<bool>(args[1]);
-    } else if (args[0] == "target-context") {
-      m_targetContext = Scan<bool>(args[1]);
-    } else if (args[0] == "ignore-punctuation") {
-      m_ignorePunctuation = Scan<bool>(args[1]);
-    } else if (args[0] == "domain-trigger") {
-      m_domainTrigger = Scan<bool>(args[1]);
-    } else if (args[0] == "texttype") {
-      texttype = args[1];
-    } else if (args[0] == "source-path") {
-      m_filePathSource = args[1];
-    } else if (args[0] == "target-path") {
-      m_filePathTarget = args[1];
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = OverrideParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
     } else {
-      throw "Unknown argument " + args[0];
+      ++ind;
     }
   }
 
@@ -87,6 +68,33 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
   }
   */
 
+}
+
+bool WordTranslationFeature::OverrideParameter(const std::string& key, const std::string& value)
+{
+  if (key == "input-factor") {
+    m_factorTypeSource = Scan<FactorType>(value);
+  } else if (key == "output-factor") {
+    m_factorTypeTarget = Scan<FactorType>(value);
+  } else if (key == "simple") {
+    m_simple = Scan<bool>(value);
+  } else if (key == "source-context") {
+    m_sourceContext = Scan<bool>(value);
+  } else if (key == "target-context") {
+    m_targetContext = Scan<bool>(value);
+  } else if (key == "ignore-punctuation") {
+    m_ignorePunctuation = Scan<bool>(value);
+  } else if (key == "domain-trigger") {
+    m_domainTrigger = Scan<bool>(value);
+  } else if (key == "texttype") {
+    //texttype = value; TODO not used
+  } else if (key == "source-path") {
+    m_filePathSource = value;
+  } else if (key == "target-path") {
+    m_filePathTarget = value;
+  } else {
+    StatelessFeatureFunction::OverrideParameter(key, value);
+  }
 }
 
 void WordTranslationFeature::Load()

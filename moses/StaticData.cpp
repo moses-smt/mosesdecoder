@@ -938,7 +938,7 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGra
   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
 #endif
   std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
-  = m_transOptCache.find(key);
+    = m_transOptCache.find(key);
   if (iter == m_transOptCache.end())
     return NULL;
   iter->second.second = clock(); // update last used time
@@ -1296,19 +1296,19 @@ void StaticData::OverrideFeatures()
 {
   const PARAM_VEC &params = m_parameter->GetParam("feature-overwrite");
   for (size_t i = 0; i < params.size(); ++i) {
-	const string &str = params[i];
-	vector<string> toks = Tokenize(str);
-	CHECK(toks.size() > 1);
+    const string &str = params[i];
+    vector<string> toks = Tokenize(str);
+    CHECK(toks.size() > 1);
 
-	FeatureFunction &ff = FeatureFunction::FindFeatureFunction(toks[0]);
+    FeatureFunction &ff = FeatureFunction::FindFeatureFunction(toks[0]);
 
-	for (size_t j = 1; j < toks.size(); ++j) {
-		const string &keyValStr = toks[j];
-		vector<string> keyVal = Tokenize(keyValStr, "=");
-		CHECK(keyVal.size() == 2);
-		ff.OverrideParameter(keyVal[0], keyVal[1]);
+    for (size_t j = 1; j < toks.size(); ++j) {
+      const string &keyValStr = toks[j];
+      vector<string> keyVal = Tokenize(keyValStr, "=");
+      CHECK(keyVal.size() == 2);
+      ff.OverrideParameter(keyVal[0], keyVal[1]);
 
-	}
+    }
   }
 
 }

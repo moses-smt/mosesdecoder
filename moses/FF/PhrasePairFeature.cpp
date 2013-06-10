@@ -45,6 +45,11 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
   Load(filePathSource);
 }
 
+bool PhrasePairFeature::OverrideParameter(const std::string& key, const std::string& value)
+{
+
+}
+
 bool PhrasePairFeature::Load(const std::string &filePathSource/*, const std::string &filePathTarget*/)
 {
   if (m_domainTrigger) {

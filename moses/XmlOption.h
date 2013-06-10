@@ -20,8 +20,8 @@ struct XmlOption {
   TargetPhrase targetPhrase;
 
   XmlOption(const WordsRange &r, const TargetPhrase &tp)
-    : range(r), targetPhrase(tp)
-  {}
+    : range(r), targetPhrase(tp) {
+  }
 
 };
 

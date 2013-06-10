@@ -86,8 +86,8 @@ public:
     , gzOutput(false)
     , unpairedExtractFormat(false)
     , conditionOnTargetLhs(false)
-    , boundaryRules(false)
-  {}
+    , boundaryRules(false) {
+  }
 };
 
 }

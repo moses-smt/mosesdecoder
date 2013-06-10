@@ -20,17 +20,27 @@ TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
    m_unrestricted(true)
 {
   std::cerr << "Initializing target word insertion feature.." << std::endl;
-
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "factor") {
-      m_factorType = Scan<FactorType>(args[1]);
-    } else if (args[0] == "path") {
-    	m_filename = args[1];
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = OverrideParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
     } else {
-      throw "Unknown argument " + args[0];
+      ++ind;
     }
+  }
+
+}
+
+bool TargetWordInsertionFeature::OverrideParameter(const std::string& key, const std::string& value)
+{
+  if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
+  } else if (key == "path") {
+    m_filename = value;
+  } else {
+    StatelessFeatureFunction::OverrideParameter(key, value);
   }
 }
 

@@ -42,13 +42,29 @@ TargetNgramFeature::TargetNgramFeature(const std::string &line)
 {
   std::cerr << "Initializing target ngram feature.." << std::endl;
 
-  vector<string> tokens = Tokenize(line);
-  //CHECK(tokens[0] == m_description);
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = OverrideParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
+    } else {
+      ++ind;
+    }
+  }
+}
 
-  CHECK(tokens.size() == 4);
-  m_factorType = Scan<FactorType>(tokens[1]);
-  m_n = Scan<size_t>(tokens[2]);
-  m_lower_ngrams = Scan<bool>(tokens[3]);
+bool TargetNgramFeature::OverrideParameter(const std::string& key, const std::string& value)
+{
+  if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
+  } else if (key == "n") {
+    m_n = Scan<size_t>(value);
+  } else if (key == "lower-ngrams") {
+    m_lower_ngrams = Scan<bool>(value);
+  } else {
+    StatefulFeatureFunction::OverrideParameter(key, value);
+  }
 
 }
 

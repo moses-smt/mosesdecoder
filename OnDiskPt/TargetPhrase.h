@@ -61,8 +61,8 @@ protected:
   UINT64 ReadScoresFromFile(std::fstream &fileTPColl);
 
 public:
-  TargetPhrase()
-  {}
+  TargetPhrase() {
+  }
   TargetPhrase(size_t numScores);
   TargetPhrase(const TargetPhrase &copy);
   virtual ~TargetPhrase();

@@ -32,24 +32,18 @@ namespace Moses
 
 PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
   :DecodeFeature(description, line)
+  ,m_tableLimit(20) // default
 {
-  m_tableLimit= 20; // TODO default?
-
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "path") {
-      m_filePath = args[1];
-    } else if (args[0] == "table-limit") {
-      m_tableLimit = Scan<size_t>(args[1]);
-    } else if (args[0] == "target-path") {
-      m_targetFile = args[1];
-    } else if (args[0] == "alignment-path") {
-      m_alignmentsFile = args[1];
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = OverrideParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
     } else {
-      //throw "Unknown argument " + args[0];
+      ++ind;
     }
-  } // for (size_t i = 0; i < toks.size(); ++i) {
+  }
 
   // find out which feature function can be applied in this decode step
   const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
@@ -72,11 +66,16 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 
 bool PhraseDictionary::OverrideParameter(const std::string& key, const std::string& value)
 {
-  if (key == "table-limit") {
-	  m_tableLimit = Scan<size_t>(value);
-  }
-  else {
-  	return DecodeFeature::OverrideParameter(key, value);
+  if (key == "path") {
+    m_filePath = value;
+  } else if (key == "table-limit") {
+    m_tableLimit = Scan<size_t>(value);
+  } else if (key == "target-path") {
+    m_targetFile = value;
+  } else if (key == "alignment-path") {
+    m_alignmentsFile = value;
+  } else {
+    return DecodeFeature::OverrideParameter(key, value);
   }
 
   return true;

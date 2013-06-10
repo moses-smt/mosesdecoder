@@ -40,18 +40,17 @@ protected:
       m_obj(p),
       useCache(1),
       totalE(0),
-      distinctE(0)
-  {
+      distinctE(0) {
     m_numInputScores = 0;
-	const StaticData &staticData = StaticData::Instance();
-	m_inputFeature = staticData.GetInputFeature();
+    const StaticData &staticData = StaticData::Instance();
+    m_inputFeature = staticData.GetInputFeature();
 
-	if (m_inputFeature) {
-	  const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
-	  if (firstPt == m_obj) {
-		  m_numInputScores = m_inputFeature->GetNumScoreComponents();
-	  }
-	}
+    if (m_inputFeature) {
+      const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
+      if (firstPt == m_obj) {
+        m_numInputScores = m_inputFeature->GetNumScoreComponents();
+      }
+    }
   }
 
 public:
@@ -179,7 +178,7 @@ public:
       //sparse features.
       //These are already in log-space
       for (size_t j = 0; j < cands[i].fnames.size(); ++j) {
-    	targetPhrase.GetScoreBreakdown().Assign(m_obj, *cands[i].fnames[j], cands[i].fvalues[j]);
+        targetPhrase.GetScoreBreakdown().Assign(m_obj, *cands[i].fnames[j], cands[i].fvalues[j]);
       }
 
       CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), &wacands[i], &src);
@@ -294,7 +293,7 @@ public:
     }
 
     if (m_numInputScores) {
-	  targetPhrase.GetScoreBreakdown().Assign(m_inputFeature, inputVector);
+      targetPhrase.GetScoreBreakdown().Assign(m_inputFeature, inputVector);
     }
 
     targetPhrase.GetScoreBreakdown().Assign(m_obj, transVector);
@@ -452,9 +451,9 @@ public:
 
               //put in phrase table scores, logging as we insert
               std::transform(tcands[i].scores.begin()
-            		  	  ,tcands[i].scores.end()
-            		  	  ,transcores.begin()
-            		  	  ,TransformScore);
+                             ,tcands[i].scores.end()
+                             ,transcores.begin()
+                             ,TransformScore);
 
 
               //tally up
@@ -514,11 +513,11 @@ public:
         TScores const & scores=j->second;
         TargetPhrase targetPhrase;
         CreateTargetPhrase(targetPhrase
-        				, j ->first
-        				, scores.transScore
-        				, scores.inputScores
-        				, NULL
-        				, scores.src);
+                           , j ->first
+                           , scores.transScore
+                           , scores.inputScores
+                           , NULL
+                           , scores.src);
         costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
         tCands.push_back(targetPhrase);
         //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;

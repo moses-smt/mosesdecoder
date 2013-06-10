@@ -36,13 +36,12 @@ DecodeFeature::DecodeFeature(  const std::string& description
   VERBOSE(2,"DecodeFeature:" << std::endl);
   size_t ind = 0;
   while (ind < m_args.size()) {
-	vector<string> &args = m_args[ind];
+    vector<string> &args = m_args[ind];
     bool consumed = OverrideParameter(args[0], args[1]);
     if (consumed) {
-    	m_args.erase(m_args.begin() + ind);
-    }
-    else {
-    	++ind;
+      m_args.erase(m_args.begin() + ind);
+    } else {
+      ++ind;
     }
   }
 }
@@ -70,19 +69,17 @@ DecodeFeature::DecodeFeature(const std::string& description
 
 bool DecodeFeature::OverrideParameter(const std::string& key, const std::string& value)
 {
-    if (key == "input-factor") {
-      m_input =Tokenize<FactorType>(value, ",");
-      m_inputFactors = FactorMask(m_input);
-    }
-    else if (key == "output-factor") {
-      m_output =Tokenize<FactorType>(value, ",");
-      m_outputFactors = FactorMask(m_output);
-    }
-    else {
-    	return StatelessFeatureFunction::OverrideParameter(key, value);
-    }
+  if (key == "input-factor") {
+    m_input =Tokenize<FactorType>(value, ",");
+    m_inputFactors = FactorMask(m_input);
+  } else if (key == "output-factor") {
+    m_output =Tokenize<FactorType>(value, ",");
+    m_outputFactors = FactorMask(m_output);
+  } else {
+    return StatelessFeatureFunction::OverrideParameter(key, value);
+  }
 
-    return true;
+  return true;
 }
 
 

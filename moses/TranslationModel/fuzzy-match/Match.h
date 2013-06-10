@@ -25,8 +25,8 @@ public:
   int max_cost;
   int internal_cost;
   Match( int is, int ie, int ts, int te, int min, int max, int i )
-    :input_start(is), input_end(ie), tm_start(ts), tm_end(te), min_cost(min), max_cost(max), internal_cost(i)
-  {}
+    :input_start(is), input_end(ie), tm_start(ts), tm_end(te), min_cost(min), max_cost(max), internal_cost(i) {
+  }
 };
 
 }

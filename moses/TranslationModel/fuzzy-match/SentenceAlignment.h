@@ -21,8 +21,8 @@ struct SentenceAlignment {
   std::vector< WORD_ID > target;
   std::vector< std::pair<int,int> > alignment;
 
-  SentenceAlignment()
-  {}
+  SentenceAlignment() {
+  }
 
   std::string getTargetString(const Vocabulary &vocab) const;
 

@@ -12,17 +12,14 @@ PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(const std::string
   :PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
   ,m_biSA(new BilingualDynSuffixArray())
 {
-
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-    if (args[0] == "source") {
-      m_source = args[1];
-    } else if (args[0] == "target") {
-      m_target = args[1];
-    } else if (args[0] == "alignment") {
-      m_alignments = args[1];
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = OverrideParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
     } else {
-      //throw "Unknown argument " + args[0];
+      ++ind;
     }
   }
 
@@ -78,6 +75,19 @@ void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned /* idx */, unsigned /* n
 ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
 {
   throw "Chart decoding not supported by PhraseDictionaryDynSuffixArray";
+}
+
+bool PhraseDictionaryDynSuffixArray::OverrideParameter(const std::string& key, const std::string& value)
+{
+  if (key == "source") {
+    m_source = value;
+  } else if (key == "target") {
+    m_target = value;
+  } else if (key == "alignment") {
+    m_alignments = value;
+  } else {
+    PhraseDictionary::OverrideParameter(key, value);
+  }
 }
 
 }// end namepsace

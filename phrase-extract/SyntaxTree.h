@@ -44,8 +44,8 @@ public:
     ,m_end(endPos)
     ,m_label(label)
     ,m_parent(0)
-    ,m_pcfgScore(0.0f)
-  {}
+    ,m_pcfgScore(0.0f) {
+  }
   int GetStart() const {
     return m_start;
   }

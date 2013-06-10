@@ -38,8 +38,8 @@ public:
   virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
   virtual void Evaluate(const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-  { }
+                        , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 };
 
 class MockSingleFeature : public MockStatelessFeatureFunction

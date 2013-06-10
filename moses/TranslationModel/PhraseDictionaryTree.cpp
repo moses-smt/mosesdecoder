@@ -41,8 +41,8 @@ public:
   TgtCand(const IPhrase& a, const Scores& b , const std::string& alignment)
     : e(a)
     , sc(b)
-    , m_alignment(alignment)
-  {}
+    , m_alignment(alignment) {
+  }
 
   TgtCand(const IPhrase& a,const Scores& b) : e(a),sc(b) {}
 

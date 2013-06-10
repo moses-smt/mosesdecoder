@@ -91,8 +91,8 @@ public:
 
   //! Clone a score collection
   ScoreComponentCollection(const ScoreComponentCollection& rhs)
-    : m_scores(rhs.m_scores)
-  {}
+    : m_scores(rhs.m_scores) {
+  }
 
   ScoreComponentCollection& operator=( const ScoreComponentCollection& rhs ) {
     m_scores = rhs.m_scores;

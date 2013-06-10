@@ -56,8 +56,8 @@ class PhraseDictionary :  public DecodeFeature
 public:
   PhraseDictionary(const std::string &description, const std::string &line);
 
-  virtual ~PhraseDictionary()
-  {}
+  virtual ~PhraseDictionary() {
+  }
 
   //! table limit number.
   size_t GetTableLimit() const {
@@ -70,11 +70,11 @@ public:
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
 
   //! Create entry for translation of source to targetPhrase
-  virtual void InitializeForInput(InputType const& source)
-  {}
+  virtual void InitializeForInput(InputType const& source) {
+  }
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
-  {}
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {
+  }
 
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(

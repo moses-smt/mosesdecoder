@@ -53,8 +53,8 @@ public:
     , m_sourceLabelCollection(srcLabelColl)
     , m_targetTopLabelCollection(tgtTopLabelColl)
     , m_sourceTopLabelCollection(srcTopLabelColl)
-    , m_options(options)
-  {}
+    , m_options(options) {
+  }
 
   virtual ~SentenceAlignmentWithSyntax() {}
 

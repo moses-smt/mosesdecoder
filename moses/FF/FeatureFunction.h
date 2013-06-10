@@ -55,8 +55,8 @@ public:
   virtual ~FeatureFunction();
 
   //! override to load model files
-  virtual void Load()
-  {}
+  virtual void Load() {
+  }
 
   static void ResetDescriptionCounts() {
     description_counts.clear();
@@ -80,12 +80,12 @@ public:
   }
 
   //! Called before search and collecting of translation options
-  virtual void InitializeForInput(InputType const& source)
-  {}
+  virtual void InitializeForInput(InputType const& source) {
+  }
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
-  {}
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {
+  }
 
   const std::string &GetArgLine() const {
     return m_argLine;
@@ -99,12 +99,12 @@ public:
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                        , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 
   virtual void Evaluate(const InputType &source
-                        , ScoreComponentCollection &scoreBreakdown) const
-  {}
+                        , ScoreComponentCollection &scoreBreakdown) const {
+  }
 
   virtual bool OverrideParameter(const std::string& key, const std::string& value);
 };

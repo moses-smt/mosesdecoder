@@ -80,6 +80,7 @@ public:
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
+  bool OverrideParameter(const std::string& key, const std::string& value);
 
 protected:
   std::string m_mode;

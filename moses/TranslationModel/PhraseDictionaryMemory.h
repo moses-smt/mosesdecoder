@@ -38,13 +38,13 @@ class PhraseDictionaryMemory : public RuleTableTrie
 
 protected:
   PhraseDictionaryMemory(const std::string &description, const std::string &line)
-    : RuleTableTrie(description, line)
-  {}
+    : RuleTableTrie(description, line) {
+  }
 
 public:
   PhraseDictionaryMemory(const std::string &line)
-    : RuleTableTrie("PhraseDictionaryMemory", line)
-  {}
+    : RuleTableTrie("PhraseDictionaryMemory", line) {
+  }
 
   const PhraseDictionaryNodeMemory &GetRootNode() const {
     return m_collection;

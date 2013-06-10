@@ -37,6 +37,7 @@ public:
                        const TargetPhrase& targetPhrase,
                        ScoreComponentCollection* accumulator,
                        const AlignmentInfo &alignmentInfo) const;
+  bool OverrideParameter(const std::string& key, const std::string& value);
 
 };
 

@@ -22,10 +22,10 @@ std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_stateful
 FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 {
   for (size_t i = 0; i < m_producers.size(); ++i) {
-	  FeatureFunction &ff = *m_producers[i];
-	  if (ff.GetScoreProducerDescription() == name) {
-		  return ff;
-	  }
+    FeatureFunction &ff = *m_producers[i];
+    if (ff.GetScoreProducerDescription() == name) {
+      return ff;
+    }
   }
 
   throw "Unknown feature " + name;
@@ -50,25 +50,24 @@ void FeatureFunction::Initialize(const std::string& description, const std::stri
 
   size_t ind = 0;
   while (ind < m_args.size()) {
-	vector<string> &args = m_args[ind];
+    vector<string> &args = m_args[ind];
     bool consumed = OverrideParameter(args[0], args[1]);
     if (consumed) {
-    	m_args.erase(m_args.begin() + ind);
-    }
-    else {
-    	++ind;
+      m_args.erase(m_args.begin() + ind);
+    } else {
+      ++ind;
     }
   }
 
   if (m_description == "") {
-	size_t index = description_counts.count(description);
+    size_t index = description_counts.count(description);
 
-	ostringstream dstream;
-	dstream << description;
-	dstream << index;
+    ostringstream dstream;
+    dstream << description;
+    dstream << index;
 
-	description_counts.insert(description);
-	m_description = dstream.str();
+    description_counts.insert(description);
+    m_description = dstream.str();
   }
 
   ScoreComponentCollection::RegisterScoreProducer(this);
@@ -93,18 +92,18 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
 
 bool FeatureFunction::OverrideParameter(const std::string& key, const std::string& value)
 {
-	if (key == "num-features") {
-	  m_numScoreComponents = Scan<size_t>(value);
-	} else if (key == "name") {
-	  m_description = value;
-	} else if (key == "tuneable") {
-	  m_tuneable = Scan<bool>(value);
-	} else {
-	  //UTIL_THROW(util::Exception, "unknown key" << key);
-	  return false;
-	}
+  if (key == "num-features") {
+    m_numScoreComponents = Scan<size_t>(value);
+  } else if (key == "name") {
+    m_description = value;
+  } else if (key == "tuneable") {
+    m_tuneable = Scan<bool>(value);
+  } else {
+    //UTIL_THROW(util::Exception, "unknown key" << key);
+    return false;
+  }
 
-	return true;
+  return true;
 }
 
 }

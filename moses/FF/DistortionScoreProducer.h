@@ -18,8 +18,8 @@ class DistortionScoreProducer : public StatefulFeatureFunction
 {
 public:
   DistortionScoreProducer(const std::string &line)
-    : StatefulFeatureFunction("Distortion", 1, line)
-  {}
+    : StatefulFeatureFunction("Distortion", 1, line) {
+  }
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

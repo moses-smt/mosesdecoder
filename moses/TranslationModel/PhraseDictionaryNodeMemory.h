@@ -126,8 +126,8 @@ protected:
   TargetPhraseCollection *m_targetPhraseCollection;
 
   PhraseDictionaryNodeMemory()
-    :m_targetPhraseCollection(NULL)
-  {}
+    :m_targetPhraseCollection(NULL) {
+  }
 public:
   virtual ~PhraseDictionaryNodeMemory();
 

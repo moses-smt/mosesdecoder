@@ -49,8 +49,8 @@ protected:
 
 public:
   PhraseDictionaryOnDisk(const std::string &line)
-    : MyBase("PhraseDictionaryOnDisk", line)
-  {}
+    : MyBase("PhraseDictionaryOnDisk", line) {
+  }
 
   virtual ~PhraseDictionaryOnDisk();
 
@@ -67,7 +67,6 @@ public:
     const ChartCellCollectionBase &);
 
   virtual void InitializeForInput(InputType const& source);
-  virtual void CleanUpAfterSentenceProcessing(InputType const& source);
 
 };
 

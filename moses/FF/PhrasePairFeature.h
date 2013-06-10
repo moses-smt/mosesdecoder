@@ -45,6 +45,7 @@ public:
   }
 
   bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
+  bool OverrideParameter(const std::string& key, const std::string& value);
 
 };
 

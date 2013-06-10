@@ -10,6 +10,7 @@
 #include "moses/Util.h"
 
 #include "util/string_piece_hash.hh"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -22,36 +23,41 @@ SourceWordDeletionFeature::SourceWordDeletionFeature(const std::string &line)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
 
-  string filename;
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "factor") {
-      m_factorType = Scan<FactorType>(args[1]);
-    } else if (args[0] == "path") {
-      filename = args[1];
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = OverrideParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
     } else {
-      throw "Unknown argument " + args[0];
+      ++ind;
     }
   }
 
-  // load word list for restricted feature set
-  if (filename != "") {
-    cerr << "loading source word deletion word list from " << filename << endl;
-    if (!Load(filename)) {
-      UserMessage::Add("Unable to load word list for source word deletion feature from file " + filename);
-      //return false;
-    }
-  }
 }
 
-bool SourceWordDeletionFeature::Load(const std::string &filePath)
+bool SourceWordDeletionFeature::OverrideParameter(const std::string& key, const std::string& value)
 {
-  ifstream inFile(filePath.c_str());
-  if (!inFile) {
-    cerr << "could not open file " << filePath << endl;
-    return false;
+  if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
+  } else if (key == "path") {
+    m_filename = value;
+  } else {
+    StatelessFeatureFunction::OverrideParameter(key, value);
   }
+
+}
+
+void SourceWordDeletionFeature::Load()
+{
+  if (m_filename == "") {
+    return;
+  }
+
+  cerr << "loading source word deletion word list from " << m_filename << endl;
+
+  ifstream inFile(m_filename.c_str());
+  UTIL_THROW_IF(!inFile, util::Exception, "Can't open file " << m_filename);
 
   std::string line;
   while (getline(inFile, line)) {
@@ -61,7 +67,6 @@ bool SourceWordDeletionFeature::Load(const std::string &filePath)
   inFile.close();
 
   m_unrestricted = false;
-  return true;
 }
 
 void SourceWordDeletionFeature::Evaluate(const Phrase &source
