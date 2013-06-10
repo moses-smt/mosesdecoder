@@ -61,7 +61,7 @@ public:
   const std::vector<FactorType>& GetOutput() const;
 
   bool IsUseable(const FactorMask &mask) const;
-  virtual bool OverrideParameter(const std::string& key, const std::string& value);
+  virtual bool SetParameter(const std::string& key, const std::string& value);
 
 protected:
   std::vector<FactorType> m_input;

@@ -46,7 +46,7 @@ public:
   }
 
   void Load();
-  bool OverrideParameter(const std::string& key, const std::string& value);
+  bool SetParameter(const std::string& key, const std::string& value);
 
 };
 

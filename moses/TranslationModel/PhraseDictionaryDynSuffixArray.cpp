@@ -15,7 +15,7 @@ PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(const std::string
   size_t ind = 0;
   while (ind < m_args.size()) {
     vector<string> &args = m_args[ind];
-    bool consumed = OverrideParameter(args[0], args[1]);
+    bool consumed = SetParameter(args[0], args[1]);
     if (consumed) {
       m_args.erase(m_args.begin() + ind);
     } else {
@@ -77,7 +77,7 @@ ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(
   throw "Chart decoding not supported by PhraseDictionaryDynSuffixArray";
 }
 
-bool PhraseDictionaryDynSuffixArray::OverrideParameter(const std::string& key, const std::string& value)
+bool PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source") {
     m_source = value;

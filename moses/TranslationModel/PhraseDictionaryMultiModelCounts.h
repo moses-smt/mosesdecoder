@@ -103,7 +103,7 @@ public:
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
 
-  bool OverrideParameter(const std::string& key, const std::string& value);
+  bool SetParameter(const std::string& key, const std::string& value);
 
 private:
   std::vector<PhraseDictionary*> m_inverse_pd;

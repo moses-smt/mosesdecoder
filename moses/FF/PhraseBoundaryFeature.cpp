@@ -23,7 +23,7 @@ PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
   size_t ind = 0;
   while (ind < m_args.size()) {
     vector<string> &args = m_args[ind];
-    bool consumed = OverrideParameter(args[0], args[1]);
+    bool consumed = SetParameter(args[0], args[1]);
     if (consumed) {
       m_args.erase(m_args.begin() + ind);
     } else {
@@ -32,7 +32,7 @@ PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
   }
 }
 
-bool PhraseBoundaryFeature::OverrideParameter(const std::string& key, const std::string& value)
+bool PhraseBoundaryFeature::SetParameter(const std::string& key, const std::string& value)
 {
 	if (key == "source") {
 	  m_sourceFactors = Tokenize<FactorType>(value, ",");

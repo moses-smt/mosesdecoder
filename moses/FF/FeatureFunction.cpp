@@ -51,7 +51,7 @@ void FeatureFunction::Initialize(const std::string& description, const std::stri
   size_t ind = 0;
   while (ind < m_args.size()) {
     vector<string> &args = m_args[ind];
-    bool consumed = OverrideParameter(args[0], args[1]);
+    bool consumed = SetParameter(args[0], args[1]);
     if (consumed) {
       m_args.erase(m_args.begin() + ind);
     } else {
@@ -90,7 +90,7 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   }
 }
 
-bool FeatureFunction::OverrideParameter(const std::string& key, const std::string& value)
+bool FeatureFunction::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "num-features") {
     m_numScoreComponents = Scan<size_t>(value);

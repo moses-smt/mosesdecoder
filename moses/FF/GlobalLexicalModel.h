@@ -77,7 +77,7 @@ public:
     ScoreComponentCollection* accumulator) const {
     throw std::logic_error("GlobalLexicalModel not supported in chart decoder, yet");
   }
-  bool OverrideParameter(const std::string& key, const std::string& value);
+  bool SetParameter(const std::string& key, const std::string& value);
 
 };
 

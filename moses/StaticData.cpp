@@ -1306,7 +1306,7 @@ void StaticData::OverrideFeatures()
       const string &keyValStr = toks[j];
       vector<string> keyVal = Tokenize(keyValStr, "=");
       CHECK(keyVal.size() == 2);
-      ff.OverrideParameter(keyVal[0], keyVal[1]);
+      ff.SetParameter(keyVal[0], keyVal[1]);
 
     }
   }

@@ -66,7 +66,7 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
   }
 }
 
-bool GlobalLexicalModelUnlimited::OverrideParameter(const std::string& key, const std::string& value)
+bool GlobalLexicalModelUnlimited::SetParameter(const std::string& key, const std::string& value)
 {
 }
 

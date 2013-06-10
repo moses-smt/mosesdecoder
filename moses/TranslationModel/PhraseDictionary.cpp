@@ -37,7 +37,7 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
   size_t ind = 0;
   while (ind < m_args.size()) {
     vector<string> &args = m_args[ind];
-    bool consumed = OverrideParameter(args[0], args[1]);
+    bool consumed = SetParameter(args[0], args[1]);
     if (consumed) {
       m_args.erase(m_args.begin() + ind);
     } else {
@@ -64,7 +64,7 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
   return GetTargetPhraseCollection(phrase);
 }
 
-bool PhraseDictionary::OverrideParameter(const std::string& key, const std::string& value)
+bool PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "path") {
     m_filePath = value;

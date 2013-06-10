@@ -106,7 +106,7 @@ public:
                         , ScoreComponentCollection &scoreBreakdown) const {
   }
 
-  virtual bool OverrideParameter(const std::string& key, const std::string& value);
+  virtual bool SetParameter(const std::string& key, const std::string& value);
 };
 
 }

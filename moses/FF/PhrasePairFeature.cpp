@@ -21,7 +21,7 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
   size_t ind = 0;
   while (ind < m_args.size()) {
     vector<string> &args = m_args[ind];
-    bool consumed = OverrideParameter(args[0], args[1]);
+    bool consumed = SetParameter(args[0], args[1]);
     if (consumed) {
       m_args.erase(m_args.begin() + ind);
     } else {
@@ -42,7 +42,7 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
   }
 }
 
-bool PhrasePairFeature::OverrideParameter(const std::string& key, const std::string& value)
+bool PhrasePairFeature::SetParameter(const std::string& key, const std::string& value)
 {
 	  if (key == "input-factor") {
 		  m_sourceFactorId = Scan<FactorType>(value);

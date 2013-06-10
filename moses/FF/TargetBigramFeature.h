@@ -47,7 +47,7 @@ public:
                                   ScoreComponentCollection* ) const {
     abort();
   }
-  bool OverrideParameter(const std::string& key, const std::string& value);
+  bool SetParameter(const std::string& key, const std::string& value);
 
 private:
   FactorType m_factorType;

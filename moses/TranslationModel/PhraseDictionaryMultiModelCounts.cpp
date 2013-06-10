@@ -71,7 +71,7 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
   size_t ind = 0;
   while (ind < m_args.size()) {
     vector<string> &args = m_args[ind];
-    bool consumed = OverrideParameter(args[0], args[1]);
+    bool consumed = SetParameter(args[0], args[1]);
     if (consumed) {
       m_args.erase(m_args.begin() + ind);
     } else {
@@ -93,7 +93,7 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
 
 }
 
-bool PhraseDictionaryMultiModelCounts::OverrideParameter(const std::string& key, const std::string& value)
+bool PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "mode") {
     m_mode = value;
