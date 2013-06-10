@@ -1,6 +1,7 @@
 #include <stdexcept>
 
 #include "util/check.hh"
+#include "util/exception.hh"
 
 #include "FeatureFunction.h"
 #include "moses/Hypothesis.h"
@@ -33,39 +34,41 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
   : m_tuneable(true)
 {
-  ParseLine(description, line);
-
-  if (m_description == "") {
-    // not been given a name. Make a unique name
-    size_t index = description_counts.count(description);
-
-    ostringstream dstream;
-    dstream << description;
-    dstream << index;
-
-    description_counts.insert(description);
-    m_description = dstream.str();
-  }
-
-  ScoreComponentCollection::RegisterScoreProducer(this);
-  m_producers.push_back(this);
+  Initialize(description, line);
 }
 
 FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
   : m_numScoreComponents(numScoreComponents)
   , m_tuneable(true)
 {
+  Initialize(description, line);
+}
+
+void FeatureFunction::Initialize(const std::string& description, const std::string &line)
+{
   ParseLine(description, line);
 
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+	vector<string> &args = m_args[ind];
+    bool consumed = OverrideParameter(args[0], args[1]);
+    if (consumed) {
+    	m_args.erase(m_args.begin() + ind);
+    }
+    else {
+    	++ind;
+    }
+  }
+
   if (m_description == "") {
-    size_t index = description_counts.count(description);
+	size_t index = description_counts.count(description);
 
-    ostringstream dstream;
-    dstream << description;
-    dstream << index;
+	ostringstream dstream;
+	dstream << description;
+	dstream << index;
 
-    description_counts.insert(description);
-    m_description = dstream.str();
+	description_counts.insert(description);
+	m_description = dstream.str();
   }
 
   ScoreComponentCollection::RegisterScoreProducer(this);
@@ -84,22 +87,24 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
     CHECK(args.size() == 2);
-
-    if (args[0] == "num-features") {
-      m_numScoreComponents = Scan<size_t>(args[1]);
-    } else if (args[0] == "name") {
-      m_description = args[1];
-    } else if (args[0] == "tuneable") {
-      m_tuneable = Scan<bool>(args[1]);
-    } else {
-      m_args.push_back(args);
-    }
+    m_args.push_back(args);
   }
 }
 
-void FeatureFunction::OverrideParameter(const std::string& key, const std::string& value)
+bool FeatureFunction::OverrideParameter(const std::string& key, const std::string& value)
 {
-  throw "unknown key" + key;
+	if (key == "num-features") {
+	  m_numScoreComponents = Scan<size_t>(value);
+	} else if (key == "name") {
+	  m_description = value;
+	} else if (key == "tuneable") {
+	  m_tuneable = Scan<bool>(value);
+	} else {
+	  //UTIL_THROW(util::Exception, "unknown key" << key);
+	  return false;
+	}
+
+	return true;
 }
 
 }

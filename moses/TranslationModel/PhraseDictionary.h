@@ -93,7 +93,7 @@ public:
     return m_featuresToApply;
   }
 
-  void OverrideParameter(const std::string& key, const std::string& value);
+  bool OverrideParameter(const std::string& key, const std::string& value);
 
 protected:
   size_t m_tableLimit;

@@ -103,6 +103,8 @@ public:
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
 
+  bool OverrideParameter(const std::string& key, const std::string& value);
+
 private:
   std::vector<PhraseDictionary*> m_inverse_pd;
   std::vector<lexicalTable*> m_lexTable_e2f, m_lexTable_f2e;

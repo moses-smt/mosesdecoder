@@ -101,6 +101,38 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
 
 }
 
+bool PhraseDictionaryMultiModelCounts::OverrideParameter(const std::string& key, const std::string& value)
+{
+    if (key == "mode") {
+      m_mode = value;
+      if (m_mode == "instance_weighting")
+        m_combineFunction = InstanceWeighting;
+      else if (m_mode == "interpolate") {
+        m_combineFunction = LinearInterpolationFromCounts;
+      } else {
+        ostringstream msg;
+        msg << "combination mode unknown: " << m_mode;
+        throw runtime_error(msg.str());
+      }
+
+    } else if (key == "lex-e2f") {
+      m_lexE2FStr = Tokenize(value, ",");
+      CHECK(m_lexE2FStr.size() == m_pdStr.size());
+    } else if (key == "lex-f2e") {
+      m_lexF2EStr = Tokenize(value, ",");
+      CHECK(m_lexF2EStr.size() == m_pdStr.size());
+    }
+
+    else if (key == "target-table") {
+      m_targetTable = Tokenize(value, ",");
+      CHECK(m_targetTable.size() == m_pdStr.size());
+    }
+
+    else {
+    	PhraseDictionaryMultiModel::OverrideParameter(key, value);
+    }
+}
+
 PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
 {
   RemoveAllInColl(m_lexTable_e2f);
