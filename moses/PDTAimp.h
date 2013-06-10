@@ -182,7 +182,7 @@ public:
     	targetPhrase.GetScoreBreakdown().Assign(m_obj, *cands[i].fnames[j], cands[i].fvalues[j]);
       }
 
-      CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), wacands[i], &src);
+      CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), &wacands[i], &src);
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);
     }
@@ -275,17 +275,8 @@ public:
                           StringTgtCand::Tokens const& factorStrings,
                           Scores const& transVector,
                           Scores const& inputVector,
-                          const std::string& alignmentString,
+                          const std::string *alignmentString,
                           Phrase const* srcPtr=0) const {
-    CreateTargetPhrase(targetPhrase, factorStrings, transVector, inputVector, srcPtr);
-    targetPhrase.SetAlignmentInfo(alignmentString);
-  }
-
-  void CreateTargetPhrase(TargetPhrase& targetPhrase,
-                          StringTgtCand::Tokens const& factorStrings,
-                          Scores const& transVector,
-                          Scores const& inputVector,
-                          Phrase const* srcPtr) const {
     FactorCollection &factorCollection = FactorCollection::Instance();
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
@@ -297,6 +288,10 @@ public:
     }
 
     targetPhrase.SetSourcePhrase(*srcPtr);
+
+    if (alignmentString) {
+      targetPhrase.SetAlignmentInfo(*alignmentString);
+    }
 
     if (m_numInputScores) {
 	  targetPhrase.GetScoreBreakdown().Assign(m_inputFeature, inputVector);
@@ -522,6 +517,7 @@ public:
         				, j ->first
         				, scores.transScore
         				, scores.inputScores
+        				, NULL
         				, scores.src);
         costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
         tCands.push_back(targetPhrase);
