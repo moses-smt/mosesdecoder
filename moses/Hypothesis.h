@@ -143,7 +143,7 @@ public:
     return m_currTargetWordsRange.GetNumWordsCovered();
   }
 
-  void CalcScore(const SquareMatrix &futureScore);
+  void Evaluate(const SquareMatrix &futureScore);
 
   int GetId()const {
     return m_id;

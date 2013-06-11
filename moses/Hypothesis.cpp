@@ -274,7 +274,7 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const SquareMatrix &futureScore)
+void Hypothesis::Evaluate(const SquareMatrix &futureScore)
 {
   clock_t t=0; // used to track time
 

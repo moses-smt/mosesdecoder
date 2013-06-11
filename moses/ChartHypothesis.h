@@ -130,7 +130,7 @@ public:
 
   int RecombineCompare(const ChartHypothesis &compare) const;
 
-  void CalcScore();
+  void Evaluate();
 
   void AddArc(ChartHypothesis *loserHypo);
   void CleanupArcList();

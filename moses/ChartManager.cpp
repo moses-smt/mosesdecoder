@@ -86,7 +86,6 @@ void ChartManager::ProcessSentence()
       m_translationOptionList.Clear();
       m_parser.Create(range, m_translationOptionList);
       m_translationOptionList.ApplyThreshold();
-      PreCalculateScores();
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
@@ -143,7 +142,7 @@ void ChartManager::AddXmlChartOptions()
     const WordsRange &range = opt->GetSourceWordsRange();
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
-    hypo->CalcScore();
+    hypo->Evaluate();
     ChartCell &cell = m_hypoStackColl.Get(range);
     cell.AddHypothesis(hypo);
   }
@@ -339,44 +338,6 @@ void ChartManager::CreateDeviantPaths(
     const ChartTrellisNode &child = **iter;
     CreateDeviantPaths(basePath, child, queue);
   }
-}
-
-
-void ChartManager::PreCalculateScores()
-{
-  const StaticData &staticData = StaticData::Instance();
-  for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
-    const ChartTranslationOptions& cto = m_translationOptionList.Get(i);
-    for (TargetPhraseCollection::const_iterator j  = cto.GetTargetPhraseCollection().begin();
-         j != cto.GetTargetPhraseCollection().end(); ++j) {
-      const TargetPhrase* targetPhrase = *j;
-      if (m_precalculatedScores.find(*targetPhrase) == m_precalculatedScores.end()) {
-        ChartBasedFeatureContext context(*targetPhrase,m_source);
-        const vector<const StatelessFeatureFunction*>& sfs =
-          StatelessFeatureFunction::GetStatelessFeatureFunctions();
-        ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
-        for (size_t k = 0; k < sfs.size(); ++k) {
-          if (! staticData.IsFeatureFunctionIgnored( *sfs[k] )) {
-            sfs[k]->EvaluateChart(context,&breakdown);
-          }
-        }
-      }
-    }
-  }
-}
-
-void ChartManager::InsertPreCalculatedScores(
-  const TargetPhrase& targetPhrase, ScoreComponentCollection* scoreBreakdown) const
-{
-  boost::unordered_map<TargetPhrase,ScoreComponentCollection>::const_iterator scoreIter =
-    m_precalculatedScores.find(targetPhrase);
-  if (scoreIter != m_precalculatedScores.end()) {
-    scoreBreakdown->PlusEquals(scoreIter->second);
-  } else {
-    TRACE_ERR("ERROR: " << targetPhrase << " missing from precalculation cache" << endl);
-    assert(0);
-  }
-
 }
 
 

@@ -198,7 +198,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 {
   // create hypothesis and calculate all its scores
   Hypothesis *newHypo = hypothesis.CreateNext(transOpt, NULL); // TODO FIXME This is absolutely broken - don't pass null here
-  newHypo->CalcScore(m_futurescore);
+  newHypo->Evaluate(m_futurescore);
 
   return newHypo;
 }

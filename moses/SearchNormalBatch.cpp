@@ -130,7 +130,7 @@ void SearchNormalBatch::ExpandHypothesis(const Hypothesis &hypothesis, const Tra
       stats.AddTimeBuildHyp( clock()-t );
     }
     if (newHypo==NULL) return;
-    //newHypo->CalcScore(m_transOptColl.GetFutureScore());
+    //newHypo->Evaluate(m_transOptColl.GetFutureScore());
 
     // Issue DLM requests for new hypothesis and put into the list of
     // partial hypotheses.
