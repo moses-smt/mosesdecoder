@@ -37,6 +37,7 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
       ++ind;
     }
   }
+  CHECK(m_args.size() == 0);
 
   if (m_simple == 1) std::cerr << "using simple word translations.. ";
   if (m_sourceContext == 1) std::cerr << "using source context.. ";

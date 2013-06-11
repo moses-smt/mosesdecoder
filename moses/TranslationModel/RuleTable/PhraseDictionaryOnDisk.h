@@ -28,6 +28,7 @@
 #include "OnDiskPt/OnDiskWrapper.h"
 #include "OnDiskPt/Word.h"
 #include "OnDiskPt/PhraseNode.h"
+#include "util/check.hh"
 
 namespace Moses
 {
@@ -50,6 +51,7 @@ protected:
 public:
   PhraseDictionaryOnDisk(const std::string &line)
     : MyBase("PhraseDictionaryOnDisk", line) {
+    CHECK(m_args.size() == 0);
   }
 
   virtual ~PhraseDictionaryOnDisk();

@@ -526,7 +526,6 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       }
 
       ptLine << "num-features=" << numScoreComponent << " ";
-      ptLine << "num-input-features=" << (currDict==0 ? numInputScores + numRealWordsInInput : 0) << " ";
       ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
 
       if (implementation == SuffixArray) {

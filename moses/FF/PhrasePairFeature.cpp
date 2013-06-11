@@ -28,6 +28,7 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
       ++ind;
     }
   }
+  CHECK(m_args.size() == 0);
 
   if (m_simple == 1) std::cerr << "using simple phrase pairs.. ";
   if (m_sourceContext == 1) std::cerr << "using source context.. ";
@@ -44,26 +45,26 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
 
 bool PhrasePairFeature::SetParameter(const std::string& key, const std::string& value)
 {
-	  if (key == "input-factor") {
-		  m_sourceFactorId = Scan<FactorType>(value);
-	  } else if (key == "output-factor") {
-		  m_targetFactorId = Scan<FactorType>(value);
-	  } else if (key == "unrestricted") {
-		  m_unrestricted = Scan<bool>(value);
-	  } else if (key == "simple") {
-		  m_simple = Scan<bool>(value);
-	  } else if (key == "source-context") {
-		  m_sourceContext = Scan<bool>(value);
-	  } else if (key == "domain-trigger") {
-		  m_domainTrigger = Scan<bool>(value);
-	  } else if (key == "ignore-punctuation") {
-		  m_ignorePunctuation = Scan<bool>(value);
-	  } else if (key == "ignore-punctuation") {
-		  m_filePathSource = value;
-	  } else {
-	    return false;
-	  }
-	  return true;
+  if (key == "input-factor") {
+    m_sourceFactorId = Scan<FactorType>(value);
+  } else if (key == "output-factor") {
+    m_targetFactorId = Scan<FactorType>(value);
+  } else if (key == "unrestricted") {
+    m_unrestricted = Scan<bool>(value);
+  } else if (key == "simple") {
+    m_simple = Scan<bool>(value);
+  } else if (key == "source-context") {
+    m_sourceContext = Scan<bool>(value);
+  } else if (key == "domain-trigger") {
+    m_domainTrigger = Scan<bool>(value);
+  } else if (key == "ignore-punctuation") {
+    m_ignorePunctuation = Scan<bool>(value);
+  } else if (key == "ignore-punctuation") {
+    m_filePathSource = value;
+  } else {
+    return false;
+  }
+  return true;
 
 }
 

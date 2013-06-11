@@ -78,6 +78,7 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
       ++ind;
     }
   }
+  CHECK(m_args.size() == 0);
 
   CHECK(m_targetTable.size() == m_pdStr.size());
 

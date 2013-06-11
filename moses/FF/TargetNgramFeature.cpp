@@ -52,6 +52,8 @@ TargetNgramFeature::TargetNgramFeature(const std::string &line)
       ++ind;
     }
   }
+  CHECK(m_args.size() == 0);
+
 }
 
 bool TargetNgramFeature::SetParameter(const std::string& key, const std::string& value)

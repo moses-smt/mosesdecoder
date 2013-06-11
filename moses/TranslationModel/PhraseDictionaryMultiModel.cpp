@@ -38,6 +38,7 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
       ++ind;
     }
   }
+  CHECK(m_args.size() == 0);
 
   if (m_mode != "interpolate") {
     ostringstream msg;

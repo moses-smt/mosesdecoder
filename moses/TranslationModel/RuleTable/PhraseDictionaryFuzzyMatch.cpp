@@ -45,6 +45,7 @@
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
+#include "util/check.hh"
 
 using namespace std;
 
@@ -54,7 +55,9 @@ namespace Moses
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
   :PhraseDictionary("PhraseDictionaryFuzzyMatch", line)
   ,m_FuzzyMatchWrapper(NULL)
-{}
+{
+  CHECK(m_args.size() == 0);
+}
 
 PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
 {

@@ -24,6 +24,7 @@ GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
       ++ind;
     }
   }
+  CHECK(m_args.size() == 0);
 
   // define bias word
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -35,17 +36,16 @@ GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
 
 bool GlobalLexicalModel::SetParameter(const std::string& key, const std::string& value)
 {
-    if (key == "file") {
-      m_filePath = value;
-    } else if (key == "inputFactors") {
-    	m_inputFactorsVec = Tokenize<FactorType>(value,",");
-    } else if (key == "outputFactors") {
-    	m_outputFactorsVec = Tokenize<FactorType>(value,",");
-    }
-	else {
-		return false;
-	}
-	return true;
+  if (key == "file") {
+    m_filePath = value;
+  } else if (key == "inputFactors") {
+    m_inputFactorsVec = Tokenize<FactorType>(value,",");
+  } else if (key == "outputFactors") {
+    m_outputFactorsVec = Tokenize<FactorType>(value,",");
+  } else {
+    return false;
+  }
+  return true;
 }
 
 GlobalLexicalModel::~GlobalLexicalModel()

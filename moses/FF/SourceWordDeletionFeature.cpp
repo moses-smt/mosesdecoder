@@ -33,7 +33,7 @@ SourceWordDeletionFeature::SourceWordDeletionFeature(const std::string &line)
       ++ind;
     }
   }
-
+  CHECK(m_args.size() == 0);
 }
 
 bool SourceWordDeletionFeature::SetParameter(const std::string& key, const std::string& value)

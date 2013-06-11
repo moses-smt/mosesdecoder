@@ -22,6 +22,7 @@ PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(const std::string
       ++ind;
     }
   }
+  CHECK(m_args.size() == 0);
 
 }
 

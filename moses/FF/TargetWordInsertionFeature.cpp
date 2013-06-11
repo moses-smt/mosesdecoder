@@ -30,6 +30,7 @@ TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
       ++ind;
     }
   }
+  CHECK(m_args.size() == 0);
 
 }
 
