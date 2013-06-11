@@ -79,10 +79,9 @@ FeatureFunction::~FeatureFunction() {}
 void FeatureFunction::ParseLine(const std::string& description, const std::string &line)
 {
   vector<string> toks = Tokenize(line);
-  set<string> keys;
-
   CHECK(toks.size());
-  //CHECK(toks[0] == description);
+
+  set<string> keys;
 
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
