@@ -70,10 +70,6 @@ bool PhraseDictionary::SetParameter(const std::string& key, const std::string& v
     m_filePath = value;
   } else if (key == "table-limit") {
     m_tableLimit = Scan<size_t>(value);
-  } else if (key == "target-path") {
-    m_targetFile = value;
-  } else if (key == "alignment-path") {
-    m_alignmentsFile = value;
   } else {
     return false;
   }

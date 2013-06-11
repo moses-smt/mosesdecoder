@@ -97,11 +97,7 @@ public:
 
 protected:
   size_t m_tableLimit;
-
   std::string m_filePath;
-
-  std::string m_targetFile;
-  std::string m_alignmentsFile;
 
   std::vector<FeatureFunction*> m_featuresToApply;
 };

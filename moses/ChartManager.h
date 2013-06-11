@@ -101,10 +101,6 @@ public:
     return m_hypothesisId++;
   }
 
-  //! Access the pre-calculated values
-  void InsertPreCalculatedScores(const TargetPhrase& targetPhrase,
-                                 ScoreComponentCollection* scoreBreakdown) const;
-
 };
 
 }
