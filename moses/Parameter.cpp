@@ -78,7 +78,6 @@ Parameter::Parameter()
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
   AddParam("ttable-file", "location and properties of the translation tables");
-  AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
   AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
   AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
   AddParam("verbose", "v", "verbosity level of the logging");

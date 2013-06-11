@@ -79,6 +79,7 @@ FeatureFunction::~FeatureFunction() {}
 void FeatureFunction::ParseLine(const std::string& description, const std::string &line)
 {
   vector<string> toks = Tokenize(line);
+  set<string> keys;
 
   CHECK(toks.size());
   //CHECK(toks[0] == description);
@@ -86,6 +87,10 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
     CHECK(args.size() == 2);
+
+    pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
+    UTIL_THROW_IF(!ret.second, util::Exception, "Duplicate key in line " << line);
+
     m_args.push_back(args);
   }
 }
@@ -103,6 +108,12 @@ bool FeatureFunction::SetParameter(const std::string& key, const std::string& va
   }
 
   return true;
+}
+
+void FeatureFunction::OverrideParameter(const std::string& key, const std::string& value)
+{
+  bool ret = SetParameter(key, value);
+  UTIL_THROW_IF(!ret, util::Exception, "Unknown argument" << key);
 }
 
 }
