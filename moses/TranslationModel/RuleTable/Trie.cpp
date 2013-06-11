@@ -46,7 +46,7 @@ void RuleTableTrie::Load()
   bool ret = loader->Load(m_input, m_output, m_filePath, m_tableLimit,
                           *this);
   if (!ret) {
-	throw runtime_error("Error: Loading " + m_filePath);
+    throw runtime_error("Error: Loading " + m_filePath);
   }
 }
 

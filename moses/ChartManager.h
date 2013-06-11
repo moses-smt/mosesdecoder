@@ -95,8 +95,8 @@ public:
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
    * currently an empty function
    */
-  void CalcDecoderStatistics() const
-  { }
+  void CalcDecoderStatistics() const {
+  }
 
   void ResetSentenceStats(const InputType& source) {
     m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));

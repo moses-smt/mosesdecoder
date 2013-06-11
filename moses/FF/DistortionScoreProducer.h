@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 #include "StatefulFeatureFunction.h"
+#include "util/check.hh"
 
 namespace Moses
 {
@@ -18,8 +19,9 @@ class DistortionScoreProducer : public StatefulFeatureFunction
 {
 public:
   DistortionScoreProducer(const std::string &line)
-    : StatefulFeatureFunction("Distortion", 1, line)
-  {}
+    : StatefulFeatureFunction("Distortion", 1, line) {
+    CHECK(m_args.size() == 0);
+  }
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

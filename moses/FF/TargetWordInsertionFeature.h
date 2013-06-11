@@ -19,13 +19,14 @@ private:
   boost::unordered_set<std::string> m_vocab;
   FactorType m_factorType;
   bool m_unrestricted;
+  std::string m_filename;
 
 public:
   TargetWordInsertionFeature(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const;
 
-  bool Load(const std::string &filePath);
+  void Load();
 
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
@@ -36,6 +37,7 @@ public:
                        const TargetPhrase& targetPhrase,
                        ScoreComponentCollection* accumulator,
                        const AlignmentInfo &alignmentInfo) const;
+  bool SetParameter(const std::string& key, const std::string& value);
 
 };
 

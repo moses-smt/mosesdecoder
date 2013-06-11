@@ -28,22 +28,23 @@ namespace Moses
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
   :PhraseDictionary("PhraseDictionaryMultiModel", line)
 {
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-    if (args[0] == "mode") {
-      m_mode =args[1];
-      if (m_mode != "interpolate") {
-        ostringstream msg;
-        msg << "combination mode unknown: " << m_mode;
-        throw runtime_error(msg.str());
-      }
-    } else if (args[0] == "components") {
-      m_pdStr = Tokenize(args[1], ",");
-      m_numModels = m_pdStr.size();
-    } else if (args[0] == "lambda") {
-      m_multimodelweights = Tokenize<float>(args[1], ",");
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = SetParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
+    } else {
+      ++ind;
     }
-  } // for
+  }
+  CHECK(m_args.size() == 0);
+
+  if (m_mode != "interpolate") {
+    ostringstream msg;
+    msg << "combination mode unknown: " << m_mode;
+    throw runtime_error(msg.str());
+  }
 
   size_t numWeights = m_numScoreComponents;
   if (m_mode == "interpolate") {
@@ -55,19 +56,35 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &description, const std::string &line)
   :PhraseDictionary(description, line)
 {
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-    if (args[0] == "components") {
-      m_pdStr = Tokenize(args[1], ",");
-      m_numModels = m_pdStr.size();
-    } else if (args[0] == "lambda") {
-      m_multimodelweights = Tokenize<float>(args[1], ",");
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = SetParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
+    } else {
+      ++ind;
     }
-  } // for
+  }
 
   if (description == "PhraseDictionaryMultiModelCounts") {
     CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*4 == m_multimodelweights.size());
   }
+}
+
+bool PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "mode") {
+    m_mode = value;
+  } else if (key == "components") {
+    m_pdStr = Tokenize(value, ",");
+    m_numModels = m_pdStr.size();
+  } else if (key == "lambda") {
+    m_multimodelweights = Tokenize<float>(value, ",");
+  } else {
+    return false;
+  }
+  return true;
 }
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
@@ -91,6 +108,7 @@ void PhraseDictionaryMultiModel::Load()
 
 PhraseDictionary *PhraseDictionaryMultiModel::FindPhraseDictionary(const string &ptName) const
 {
+  cerr << ptName << endl;
   const StaticData &staticData = StaticData::Instance();
   const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
 
@@ -98,6 +116,7 @@ PhraseDictionary *PhraseDictionaryMultiModel::FindPhraseDictionary(const string 
   std::vector<PhraseDictionary*>::const_iterator iter;
   for (iter = pts.begin(); iter != pts.end(); ++iter) {
     PhraseDictionary *currPt = *iter;
+    cerr << currPt->GetScoreProducerDescription() << endl;
     if (currPt->GetScoreProducerDescription() == ptName) {
       pt = currPt;
       break;
@@ -328,7 +347,6 @@ void  PhraseDictionaryMultiModel::CleanUpComponentModels(const InputType &source
     m_pd[i]->CleanUpAfterSentenceProcessing(source);
   }
 }
-
 
 #ifdef WITH_DLIB
 vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string, string> > &phrase_pair_vector)

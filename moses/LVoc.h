@@ -38,7 +38,7 @@ public:
   }
   LabelId add(const Key& k) {
     std::pair<typename M::iterator,bool> p
-    =m.insert(std::make_pair(k,data.size()));
+      =m.insert(std::make_pair(k,data.size()));
     if(p.second) data.push_back(k);
     CHECK(static_cast<size_t>(p.first->second)<data.size());
     return p.first->second;

@@ -81,8 +81,8 @@ class TranslationTask : public Task
 public:
   TranslationTask(InputType *source, IOWrapper &ioWrapper)
     : m_source(source)
-    , m_ioWrapper(ioWrapper)
-  {}
+    , m_ioWrapper(ioWrapper) {
+  }
 
   ~TranslationTask() {
     delete m_source;

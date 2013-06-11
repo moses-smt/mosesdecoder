@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <algorithm>
+#include <typeinfo>
 #include "TranslationOptionCollection.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
@@ -361,6 +362,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
   // in the phraseDictionary (which is the- possibly filtered-- phrase
   // table loaded on initialization), generate TranslationOption objects
   // for all phrases
+  const StaticData &staticData = StaticData::Instance();
 
   // there may be multiple decoding graphs (factorizations of decoding)
   const vector <DecodeGraph*> &decodeGraphList = StaticData::Instance().GetDecodeGraphs();
@@ -371,10 +373,13 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // loop over all decoding graphs, each generates translation options
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
+    if (staticData.IsDecodingGraphIgnored( graphInd )) {
+      std::cerr << "ignoring decoding path " << graphInd << std::endl;
+      continue;
+    }
     if (decodeGraphList.size() > 1) {
       VERBOSE(3,"Creating translation options from decoding graph " << graphInd << endl);
     }
-
     const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
     // generate phrases that start at startPos ...
     for (size_t startPos = 0 ; startPos < size; startPos++) {
@@ -389,8 +394,8 @@ void TranslationOptionCollection::CreateTranslationOptions()
             (endPos-startPos+1 > decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // already covered
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]");
-	  VERBOSE(3,", length limit: " << decodeGraphBackoff[graphInd]);
-	  VERBOSE(3,", found so far: " << m_collection[startPos][endPos-startPos].size() << endl);
+          VERBOSE(3,", length limit: " << decodeGraphBackoff[graphInd]);
+          VERBOSE(3,", found so far: " << m_collection[startPos][endPos-startPos].size() << endl);
           // do not create more options
           continue;
         }
@@ -510,7 +515,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       int indexStep = 1;
 
       for (++iterStep; iterStep != decodeGraph.end() ; ++iterStep, ++indexStep) {
-    	const DecodeStep &decodeStep = **iterStep;
+        const DecodeStep &decodeStep = **iterStep;
         PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
         // go thru each intermediate trans opt just created

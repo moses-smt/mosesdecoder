@@ -87,10 +87,5 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   return;
 }
 
-void PhraseDictionaryOnDisk::CleanUpAfterSentenceProcessing(InputType const& source)
-{
-
-}
-
 }
 

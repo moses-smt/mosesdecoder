@@ -20,8 +20,8 @@ public:
   std::vector<wordID_t> words;
 
   SAPhrase(size_t phraseSize)
-    :words(phraseSize)
-  {}
+    :words(phraseSize) {
+  }
 
   void SetId(size_t pos, wordID_t id) {
     CHECK(pos < words.size());
@@ -43,8 +43,8 @@ public:
     , m_endTarget(endTarget)
     , m_startSource(startSource)
     , m_endSource(endSource)
-    , m_sntIndex(sntIndex)
-  {}
+    , m_sntIndex(sntIndex) {
+  }
 
   size_t GetTargetSize() const {
     return m_endTarget - m_startTarget + 1;

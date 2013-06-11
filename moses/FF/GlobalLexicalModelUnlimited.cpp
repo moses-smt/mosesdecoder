@@ -12,6 +12,8 @@ namespace Moses
 GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line)
   :StatelessFeatureFunction("GlobalLexicalModelUnlimited", 0, line)
 {
+  CHECK(false); // TODO need to update arguments to key=value
+
   const vector<string> modelSpec = Tokenize(line);
 
   for (size_t i = 0; i < modelSpec.size(); i++ ) {
@@ -62,6 +64,10 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
       }
     }
   }
+}
+
+bool GlobalLexicalModelUnlimited::SetParameter(const std::string& key, const std::string& value)
+{
 }
 
 bool GlobalLexicalModelUnlimited::Load(const std::string &filePathSource,

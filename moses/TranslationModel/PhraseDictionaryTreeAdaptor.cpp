@@ -1,8 +1,8 @@
 // $Id$
 
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include <sys/stat.h>
 #include <algorithm>
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include "moses/Phrase.h"
 #include "moses/FactorCollection.h"
@@ -14,6 +14,7 @@
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
 #include "moses/UserMessage.h"
+#include "util/check.hh"
 
 using namespace std;
 
@@ -28,6 +29,7 @@ PhraseDictionaryTreeAdaptor::
 PhraseDictionaryTreeAdaptor(const std::string &line)
   : PhraseDictionary("PhraseDictionaryBinary", line)
 {
+  CHECK(m_args.size() == 0);
 }
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
@@ -38,7 +40,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
 
-  PDTAimp *obj = new PDTAimp(this,m_numInputScores);
+  PDTAimp *obj = new PDTAimp(this);
 
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {

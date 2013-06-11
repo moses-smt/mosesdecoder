@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <utility>
 #include <fstream>
 #include <string>
+#include "UserMessage.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -56,6 +57,7 @@ class GenerationDictionary;
 class DecodeStep;
 class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
+class InputFeature;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -103,8 +105,7 @@ protected:
   , m_nBestFactor
   , m_maxNoTransOptPerCoverage
   , m_maxNoPartTransOpt
-  , m_maxPhraseLength
-  , m_numRealWordsInInput;
+  , m_maxPhraseLength;
 
   std::string
   m_constraintFileName;
@@ -124,11 +125,11 @@ protected:
   ParsingAlgorithm m_parsingAlgorithm;
   SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
-  size_t m_numInputScores;
 
   mutable size_t m_verboseLevel;
   WordPenaltyProducer* m_wpProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  const InputFeature *m_inputFeature;
 
   bool m_reportSegmentation;
   bool m_reportAllFactors;
@@ -166,7 +167,7 @@ protected:
   size_t m_timeout_threshold; //! seconds after which time out is activated
 
   bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
-  mutable std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
+  mutable std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
   size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
   //FIXME: Single lock for cache not most efficient. However using a
   //reader-writer for LRU cache is tricky - how to record last used time?
@@ -206,12 +207,14 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
-  
+
   // alternate weight settings
-  std::map< std::string, ScoreComponentCollection* > m_weightSetting;
+  mutable std::string m_currentWeightSetting;
+  std::map< std::string, ScoreComponentCollection* > m_weightSetting; // core weights
+  std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
+  std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
   StaticData();
-
 
   void LoadChartDecodingParameters();
   void LoadNonTerminals();
@@ -375,9 +378,6 @@ public:
     return m_minlexrMemory;
   }
 
-  size_t GetNumRealWordsInInput() const {
-    return m_numRealWordsInInput;
-  }
   const std::vector<std::string> &GetDescription() const {
     return m_parameter->GetParam("description");
   }
@@ -435,8 +435,8 @@ public:
     return m_unknownWordPenaltyProducer;
   }
 
-  size_t GetNumInputScores() const {
-    return m_numInputScores;
+  const InputFeature *GetInputFeature() const {
+    return m_inputFeature;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
@@ -665,17 +665,71 @@ public:
     return m_weightSetting.size() > 0;
   }
 
+  /** Alternate weight settings allow the wholesale ignoring of
+      feature functions. This function checks if a feature function
+      should be evaluated given the current weight setting */
+  bool IsFeatureFunctionIgnored( const FeatureFunction &ff ) const {
+    if (!GetHasAlternateWeightSettings()) {
+      return false;
+    }
+    std::map< std::string, std::set< std::string > >::const_iterator lookupIgnoreFF
+      =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
+    if (lookupIgnoreFF == m_weightSettingIgnoreFF.end()) {
+      return false;
+    }
+    const std::string &ffName = ff.GetScoreProducerDescription();
+    const std::set< std::string > &ignoreFF = lookupIgnoreFF->second;
+    return ignoreFF.count( ffName );
+  }
+
+  /** Alternate weight settings allow the wholesale ignoring of
+      decoding graphs (typically a translation table). This function
+      checks if a feature function should be evaluated given the
+      current weight setting */
+  bool IsDecodingGraphIgnored( const size_t id ) const {
+    if (!GetHasAlternateWeightSettings()) {
+      return false;
+    }
+    std::map< std::string, std::set< size_t > >::const_iterator lookupIgnoreDP
+      =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
+    if (lookupIgnoreDP == m_weightSettingIgnoreDP.end()) {
+      return false;
+    }
+    const std::set< size_t > &ignoreDP = lookupIgnoreDP->second;
+    return ignoreDP.count( id );
+  }
+
+  /** process alternate weight settings
+    * (specified with [alternate-weight-setting] in config file) */
   void SetWeightSetting(const std::string &settingName) const {
-    std::cerr << "SetWeightSetting( " << settingName << ")\n";
-    CHECK(GetHasAlternateWeightSettings());
+
+    // if no change in weight setting, do nothing
+    if (m_currentWeightSetting == settingName) {
+      return;
+    }
+
+    // model must support alternate weight settings
+    if (!GetHasAlternateWeightSettings()) {
+      UserMessage::Add("Warning: Input specifies weight setting, but model does not support alternate weight settings.");
+      return;
+    }
+
+    // find the setting
+    m_currentWeightSetting = settingName;
     std::map< std::string, ScoreComponentCollection* >::const_iterator i =
       m_weightSetting.find( settingName );
+
     // if not found, resort to default
-    std::cerr << "using weight setting " << settingName << std::endl;
     if (i == m_weightSetting.end()) {
+      std::stringstream strme;
+      strme << "Warning: Specified weight setting " << settingName
+            << " does not exist in model, using default weight setting instead";
+      UserMessage::Add(strme.str());
       i = m_weightSetting.find( "default" );
-      std::cerr << "not found, using default weight setting instead\n";
+      m_currentWeightSetting = "default";
     }
+
+    // set weights
     m_allWeights = *(i->second);
   }
 
@@ -709,8 +763,10 @@ public:
 
   void LoadFeatureFunctions();
   bool CheckWeights() const;
-  void ProcessAlternateWeightSettings();
+  bool LoadWeightSettings();
+  bool LoadAlternateWeightSettings();
 
+  void OverrideFeatures();
 
   void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {
 #ifdef WITH_THREADS

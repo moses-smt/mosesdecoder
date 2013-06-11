@@ -19,11 +19,12 @@ private:
   boost::unordered_set<std::string> m_vocab;
   FactorType m_factorType;
   bool m_unrestricted;
+  std::string m_filename;
 
 public:
   SourceWordDeletionFeature(const std::string &line);
 
-  bool Load(const std::string &filePath);
+  void Load();
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -38,6 +39,8 @@ public:
                        const TargetPhrase& targetPhrase,
                        ScoreComponentCollection* accumulator,
                        const AlignmentInfo &alignmentInfo) const;
+  bool SetParameter(const std::string& key, const std::string& value);
+
 };
 
 }

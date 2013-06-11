@@ -83,8 +83,8 @@ public:
   }
 
   DottedRuleColl(size_t size)
-    : m_coll(size)
-  {}
+    : m_coll(size) {
+  }
 
   ~DottedRuleColl();
 

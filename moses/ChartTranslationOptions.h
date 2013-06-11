@@ -49,8 +49,8 @@ public:
     : m_stackVec(stackVec)
     , m_targetPhraseCollection(&targetPhraseColl)
     , m_wordsRange(&wordsRange)
-    , m_estimateOfBestScore(score)
-  {}
+    , m_estimateOfBestScore(score) {
+  }
 
   ~ChartTranslationOptions() {}
 

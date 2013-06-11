@@ -344,6 +344,7 @@ void ChartManager::CreateDeviantPaths(
 
 void ChartManager::PreCalculateScores()
 {
+  const StaticData &staticData = StaticData::Instance();
   for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
     const ChartTranslationOptions& cto = m_translationOptionList.Get(i);
     for (TargetPhraseCollection::const_iterator j  = cto.GetTargetPhraseCollection().begin();
@@ -355,7 +356,9 @@ void ChartManager::PreCalculateScores()
           StatelessFeatureFunction::GetStatelessFeatureFunctions();
         ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
         for (size_t k = 0; k < sfs.size(); ++k) {
-          sfs[k]->EvaluateChart(context,&breakdown);
+          if (! staticData.IsFeatureFunctionIgnored( *sfs[k] )) {
+            sfs[k]->EvaluateChart(context,&breakdown);
+          }
         }
       }
     }

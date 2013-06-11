@@ -43,8 +43,8 @@ public:
   TranslationDimension(std::size_t pos,
                        const std::vector<TargetPhrase*> &orderedTargetPhrases)
     : m_pos(pos)
-    , m_orderedTargetPhrases(&orderedTargetPhrases)
-  {}
+    , m_orderedTargetPhrases(&orderedTargetPhrases) {
+  }
 
   std::size_t IncrementPos() {
     return m_pos++;
@@ -80,8 +80,8 @@ class HypothesisDimension
 public:
   HypothesisDimension(std::size_t pos, const HypoList &orderedHypos)
     : m_pos(pos)
-    , m_orderedHypos(&orderedHypos)
-  {}
+    , m_orderedHypos(&orderedHypos) {
+  }
 
   std::size_t IncrementPos() {
     return m_pos++;

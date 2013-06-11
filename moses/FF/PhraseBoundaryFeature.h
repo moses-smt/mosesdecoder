@@ -52,6 +52,7 @@ public:
                                   ScoreComponentCollection* ) const {
     throw std::logic_error("PhraseBoundaryState not supported in chart decoder, yet");
   }
+  bool SetParameter(const std::string& key, const std::string& value);
 
 private:
   void AddFeatures(

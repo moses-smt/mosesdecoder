@@ -62,8 +62,8 @@ public:
     , startS(sS)
     , endS(eS)
     , count(0)
-    , pcfgScore(0.0)
-  {}
+    , pcfgScore(0.0) {
+  }
 
   void SetSpanLength(size_t sourcePos, size_t sourceLength, size_t targetLength) {
     m_ntLengths[sourcePos] = std::pair<size_t, size_t>(sourceLength, targetLength);

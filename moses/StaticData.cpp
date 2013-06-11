@@ -60,6 +60,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
+#include "moses/FF/InputFeature.h"
 
 #include "LM/Ken.h"
 #ifdef LM_IRST
@@ -88,14 +89,16 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
+  ,m_wpProducer(NULL)
+  ,m_unknownWordPenaltyProducer(NULL)
+  ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
+  ,m_needAlignmentInfo(false)
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
-  ,m_needAlignmentInfo(false)
-  ,m_numInputScores(0)
-  ,m_numRealWordsInInput(0)
+  ,m_currentWeightSetting("default")
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -108,7 +111,7 @@ StaticData::~StaticData()
 {
   RemoveAllInColl(m_decodeGraphs);
 
-  typedef std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > Coll;
+  typedef std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> > Coll;
   Coll::iterator iter;
   for (iter = m_transOptCache.begin(); iter != m_transOptCache.end(); ++iter) {
     std::pair<TranslationOptionList*,clock_t> &valuePair =iter->second;
@@ -429,6 +432,7 @@ bool StaticData::LoadData(Parameter *parameter)
   //mira training
   SetBooleanParameter( &m_mira, "mira", false );
 
+  // lattice MBR
   if (m_useLatticeMBR) m_mbr = true;
 
   m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
@@ -525,15 +529,6 @@ bool StaticData::LoadData(Parameter *parameter)
         CHECK(false);
       }
     }
-  }
-
-  // input scores for lattices & confusion network input. TODO - get rid of this
-  if (m_parameter->GetParam("input-scores").size() > 0) {
-    m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
-  }
-
-  if (m_parameter->GetParam("input-scores").size() > 1) {
-    m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
   }
 
   // use of xml in input
@@ -653,14 +648,17 @@ bool StaticData::LoadData(Parameter *parameter)
       WordPenaltyProducer *model = new WordPenaltyProducer(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_wpProducer = model;
     } else if (feature == "UnknownWordPenalty") {
       UnknownWordPenaltyProducer *model = new UnknownWordPenaltyProducer(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       if (weights.size() == 0)
         weights.push_back(1.0f);
       SetWeights(model, weights);
-      m_unknownWordPenaltyProducer = model;
+    } else if (feature == "InputFeature") {
+      InputFeature *model = new InputFeature(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+
     } else if (feature == "PhraseDictionaryBinary") {
       PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
@@ -691,9 +689,9 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
     } else if (feature == "PhraseDictionaryDynSuffixArray") {
       PhraseDictionaryDynSuffixArray* model = new PhraseDictionaryDynSuffixArray(line);
-	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-	  SetWeights(model, weights);
-	}
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+    }
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
@@ -708,6 +706,8 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  OverrideFeatures();
+
   LoadFeatureFunctions();
 
   if (!LoadDecodeGraphs()) return false;
@@ -719,7 +719,6 @@ bool StaticData::LoadData(Parameter *parameter)
   //Add any other features here.
 
   //Load extra feature weights
-  //NB: These are common to all translation systems (at the moment!)
   vector<string> extraWeightConfig = m_parameter->GetParam("weight-file");
   if (extraWeightConfig.size()) {
     if (extraWeightConfig.size() != 1) {
@@ -735,11 +734,11 @@ bool StaticData::LoadData(Parameter *parameter)
     m_allWeights.PlusEquals(extraWeights);
   }
 
-  //cerr << endl << "m_allWeights=" << m_allWeights << endl;
-
   // alternate weight settings
   if (m_parameter->GetParam("alternate-weight-setting").size() > 0) {
-    ProcessAlternateWeightSettings();
+    if (!LoadAlternateWeightSettings()) {
+      return false;
+    }
   }
   return true;
 }
@@ -933,12 +932,13 @@ bool StaticData::LoadDecodeGraphs()
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {
-  std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
+  std::pair<size_t, std::string> cacheKey(decodeGraph.GetPosition(), m_currentWeightSetting);
+  std::pair<std::pair<size_t, std::string>, Phrase> key(cacheKey, sourcePhrase);
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
 #endif
-  std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
-  = m_transOptCache.find(key);
+  std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
+    = m_transOptCache.find(key);
   if (iter == m_transOptCache.end())
     return NULL;
   iter->second.second = clock(); // update last used time
@@ -952,7 +952,8 @@ void StaticData::ReduceTransOptCache() const
 
   // find cutoff for last used time
   priority_queue< clock_t > lastUsedTimes;
-  std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
+
+  std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
   iter = m_transOptCache.begin();
   while( iter != m_transOptCache.end() ) {
     lastUsedTimes.push( iter->second.second );
@@ -966,7 +967,7 @@ void StaticData::ReduceTransOptCache() const
   iter = m_transOptCache.begin();
   while( iter != m_transOptCache.end() ) {
     if (iter->second.second < cutoffLastUsedTime) {
-      std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
+      std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
       delete iterRemove->second.first;
       m_transOptCache.erase(iterRemove);
     } else iter++;
@@ -977,7 +978,8 @@ void StaticData::ReduceTransOptCache() const
 void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
 {
   if (m_transOptCacheMaxSize == 0) return;
-  std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
+  std::pair<size_t, std::string> cacheKey(decodeGraph.GetPosition(), m_currentWeightSetting);
+  std::pair<std::pair<size_t, std::string>, Phrase> key(cacheKey, sourcePhrase);
   TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
@@ -987,7 +989,7 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
 }
 void StaticData::ClearTransOptionCache() const
 {
-  map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
+  map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
   for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
     TranslationOptionList *transOptList = iterCache->second.first;
     delete transOptList;
@@ -1141,26 +1143,33 @@ void StaticData::LoadFeatureFunctions()
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     FeatureFunction *ff = *iter;
+    bool doLoad = true;
 
-    const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
-    if (generation) {
-      m_generationDictionary.push_back(generation);
+    if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+      m_phraseDictionary.push_back(ffCast);
+      doLoad = false;
+    } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
+      m_generationDictionary.push_back(ffCast);
+    } else if (WordPenaltyProducer *ffCast = dynamic_cast<WordPenaltyProducer*>(ff)) {
+      CHECK(m_wpProducer == NULL); // max 1 feature;
+      m_wpProducer = ffCast;
+    } else if (UnknownWordPenaltyProducer *ffCast = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
+      CHECK(m_unknownWordPenaltyProducer == NULL); // max 1 feature;
+      m_unknownWordPenaltyProducer = ffCast;
+    } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
+      CHECK(m_inputFeature == NULL); // max 1 input feature;
+      m_inputFeature = ffCast;
     }
 
-    PhraseDictionary *pt = dynamic_cast<PhraseDictionary*>(ff);
-    if (pt) {
-      m_phraseDictionary.push_back(pt);
-    }
-    else {
-      // load phrase table last. They can depend on other features
+    if (doLoad) {
       ff->Load();
     }
   }
 
   // load phrase table
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-	PhraseDictionary *pt = m_phraseDictionary[i];
-	pt->Load();
+    PhraseDictionary *pt = m_phraseDictionary[i];
+    pt->Load();
   }
 
 }
@@ -1194,9 +1203,16 @@ bool StaticData::CheckWeights() const
   return true;
 }
 
-void StaticData::ProcessAlternateWeightSettings() {
+/**! Read in settings for alternative weights */
+bool StaticData::LoadAlternateWeightSettings()
+{
+  if (m_threadCount > 1) {
+    cerr << "ERROR: alternative weight settings currently not supported with multi-threading.";
+    return false;
+  }
+
   const vector<string> &weightSpecification = m_parameter->GetParam("alternate-weight-setting");
-  
+
   // get mapping from feature names to feature functions
   map<string,FeatureFunction*> nameToFF;
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
@@ -1224,13 +1240,30 @@ void StaticData::ProcessAlternateWeightSettings() {
       // other specifications
       for(size_t j=1; j<tokens.size(); j++) {
         vector<string> args = Tokenize(tokens[j], "=");
+        // TODO: support for sparse weights
         if (args[0] == "weight-file") {
-          // TODO: support for sparse weights
+          cerr << "ERROR: sparse weight files currently not supported";
+        }
+        // ignore feature functions
+        else if (args[0] == "ignore-ff") {
+          set< string > *ffNameSet = new set< string >;
+          m_weightSettingIgnoreFF[ currentId ] = *ffNameSet;
+          vector<string> featureFunctionName = Tokenize(args[1], " ");
+          for(size_t k=0; k<featureFunctionName.size(); k++) {
+            // check if a valid nane
+            map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(featureFunctionName[k]);
+            if (ffLookUp == nameToFF.end()) {
+              cerr << "ERROR: alternate weight setting " << currentId << " specifies to ignore feature function " << featureFunctionName[k] << " but there is no such feature function" << endl;
+              hasErrors = true;
+            } else {
+              m_weightSettingIgnoreFF[ currentId ].insert( featureFunctionName[k] );
+            }
+          }
         }
       }
     }
- 
-   // weight lines
+
+    // weight lines
     else {
       CHECK(currentId != "");
       vector<string> tokens = Tokenize(weightSpecification[i]);
@@ -1248,15 +1281,36 @@ void StaticData::ProcessAlternateWeightSettings() {
       // check if a valid nane
       map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(name);
       if (ffLookUp == nameToFF.end()) {
-	cerr << "ERROR: alternate weight setting " << currentId << " specifies weight(s) for " << name << " but there is no such feature function" << endl;
-	hasErrors = true;
-      }
-      else {
-	m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);
+        cerr << "ERROR: alternate weight setting " << currentId << " specifies weight(s) for " << name << " but there is no such feature function" << endl;
+        hasErrors = true;
+      } else {
+        m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);
       }
     }
   }
   CHECK(!hasErrors);
+  return true;
+}
+
+void StaticData::OverrideFeatures()
+{
+  const PARAM_VEC &params = m_parameter->GetParam("feature-overwrite");
+  for (size_t i = 0; i < params.size(); ++i) {
+    const string &str = params[i];
+    vector<string> toks = Tokenize(str);
+    CHECK(toks.size() > 1);
+
+    FeatureFunction &ff = FeatureFunction::FindFeatureFunction(toks[0]);
+
+    for (size_t j = 1; j < toks.size(); ++j) {
+      const string &keyValStr = toks[j];
+      vector<string> keyVal = Tokenize(keyValStr, "=");
+      CHECK(keyVal.size() == 2);
+      ff.SetParameter(keyVal[0], keyVal[1]);
+
+    }
+  }
+
 }
 
 } // namespace

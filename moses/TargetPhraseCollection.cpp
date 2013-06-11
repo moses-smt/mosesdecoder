@@ -65,7 +65,7 @@ void TargetPhraseCollection::Sort(bool adhereTableLimit, size_t tableLimit)
   std::partial_sort(m_collection.begin(), iterMiddle, m_collection.end(),
                     CompareTargetPhrase());
 
-  if (adhereTableLimit && m_collection.size() > tableLimit) {
+  if (adhereTableLimit && tableLimit && m_collection.size() > tableLimit) {
     for (size_t i = tableLimit; i < m_collection.size(); ++i) {
       TargetPhrase *targetPhrase = m_collection[i];
       delete targetPhrase;

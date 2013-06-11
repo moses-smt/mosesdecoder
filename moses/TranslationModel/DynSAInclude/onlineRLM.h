@@ -338,7 +338,7 @@ template<typename T>
 const void* OnlineRLM<T>::getContext(const wordID_t* ngram, int len)
 {
   int dummy(0);
-  float* *addresses = new float*[len];  // only interested in addresses of cache
+  float**addresses = new float*[len];  // only interested in addresses of cache
   CHECK(cache_->getCache2(ngram, len, &addresses[0], &dummy) == len);
   // return address of cache node
 

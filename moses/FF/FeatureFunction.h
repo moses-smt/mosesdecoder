@@ -40,20 +40,23 @@ protected:
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
+  void Initialize(const std::string& description, const std::string &line);
   void ParseLine(const std::string& description, const std::string &line);
 
 public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
     return m_producers;
   }
+  static FeatureFunction &FindFeatureFunction(const std::string& name);
 
   FeatureFunction(const std::string& description, const std::string &line);
   FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
 
-  virtual void Load()
-  {}
+  //! override to load model files
+  virtual void Load() {
+  }
 
   static void ResetDescriptionCounts() {
     description_counts.clear();
@@ -70,33 +73,41 @@ public:
     return m_description;
   }
 
+  //! if false, then this feature is not displayed in the n-best list.
+  // use with care
   virtual bool IsTuneable() const {
     return m_tuneable;
   }
 
-  //!
-  virtual void InitializeForInput(InputType const& source)
-  {}
+  //! Called before search and collecting of translation options
+  virtual void InitializeForInput(InputType const& source) {
+  }
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
-  {}
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {
+  }
 
   const std::string &GetArgLine() const {
     return m_argLine;
   }
 
+  // given a target phrase containing only factors specified in mask
+  // return true if the feature function can be evaluated
   virtual bool IsUseable(const FactorMask &mask) const = 0;
 
+  // used by stateless ff. And stateful ff to make initial score estimate during loading of phrase table
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                        , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 
   virtual void Evaluate(const InputType &source
-                        , ScoreComponentCollection &scoreBreakdown) const
-  {}
+                        , ScoreComponentCollection &scoreBreakdown) const {
+  }
+
+  virtual bool SetParameter(const std::string& key, const std::string& value);
+  virtual void OverrideParameter(const std::string& key, const std::string& value);
 };
 
 }

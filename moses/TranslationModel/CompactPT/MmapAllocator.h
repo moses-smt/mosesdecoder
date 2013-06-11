@@ -57,26 +57,26 @@ public:
   MmapAllocator() throw()
     : m_file_ptr(std::tmpfile()), m_file_desc(fileno(m_file_ptr)),
       m_page_size(sysconf(_SC_PAGE_SIZE)), m_map_size(0), m_data_ptr(0),
-      m_data_offset(0), m_fixed(false), m_count(new size_t(0))
-  { }
+      m_data_offset(0), m_fixed(false), m_count(new size_t(0)) {
+  }
 
   MmapAllocator(std::FILE* f_ptr) throw()
     : m_file_ptr(f_ptr), m_file_desc(fileno(m_file_ptr)),
       m_page_size(sysconf(_SC_PAGE_SIZE)), m_map_size(0), m_data_ptr(0),
-      m_data_offset(0), m_fixed(false), m_count(new size_t(0))
-  { }
+      m_data_offset(0), m_fixed(false), m_count(new size_t(0)) {
+  }
 
   MmapAllocator(std::FILE* f_ptr, size_t data_offset) throw()
     : m_file_ptr(f_ptr), m_file_desc(fileno(m_file_ptr)),
       m_page_size(sysconf(_SC_PAGE_SIZE)), m_map_size(0), m_data_ptr(0),
-      m_data_offset(data_offset), m_fixed(true), m_count(new size_t(0))
-  { }
+      m_data_offset(data_offset), m_fixed(true), m_count(new size_t(0)) {
+  }
 
   MmapAllocator(std::string fileName) throw()
     : m_file_ptr(std::fopen(fileName.c_str(), "wb+")), m_file_desc(fileno(m_file_ptr)),
       m_page_size(sysconf(_SC_PAGE_SIZE)), m_map_size(0), m_data_ptr(0),
-      m_data_offset(0), m_fixed(false), m_count(new size_t(0))
-  { }
+      m_data_offset(0), m_fixed(false), m_count(new size_t(0)) {
+  }
 
   MmapAllocator(const MmapAllocator& c) throw()
     : m_file_ptr(c.m_file_ptr), m_file_desc(c.m_file_desc),

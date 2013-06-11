@@ -62,8 +62,8 @@ protected:
   //! Usually <s> and </s>
 
   LanguageModelImplementation(const std::string& description, const std::string &line)
-    :LanguageModel(description, line)
-  {}
+    :LanguageModel(description, line) {
+  }
 public:
 
   virtual ~LanguageModelImplementation() {}

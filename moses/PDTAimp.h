@@ -11,6 +11,7 @@
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "Util.h"
 #include "util/tokenize_piece.hh"
+#include "moses/FF/InputFeature.h"
 
 namespace Moses
 {
@@ -34,13 +35,28 @@ class PDTAimp
   friend class PhraseDictionaryTreeAdaptor;
 
 protected:
-  PDTAimp(PhraseDictionaryTreeAdaptor *p,unsigned nis)
+  PDTAimp(PhraseDictionaryTreeAdaptor *p)
     : m_dict(0),
-      m_obj(p),useCache(1),m_numInputScores(nis),totalE(0),distinctE(0) {}
+      m_obj(p),
+      useCache(1),
+      totalE(0),
+      distinctE(0) {
+    m_numInputScores = 0;
+    const StaticData &staticData = StaticData::Instance();
+    m_inputFeature = staticData.GetInputFeature();
+
+    if (m_inputFeature) {
+      const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
+      if (firstPt == m_obj) {
+        m_numInputScores = m_inputFeature->GetNumScoreComponents();
+      }
+    }
+  }
 
 public:
   std::vector<FactorType> m_input,m_output;
   PhraseDictionaryTree *m_dict;
+  const InputFeature *m_inputFeature;
   typedef std::vector<TargetPhraseCollection const*> vTPC;
   mutable vTPC m_tgtColls;
 
@@ -140,7 +156,6 @@ public:
 
     //TODO: Multiple models broken here
     std::vector<float> weights = StaticData::Instance().GetWeights(m_obj);
-    float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
     std::vector<TargetPhrase> tCands;
     tCands.reserve(cands.size());
@@ -159,9 +174,14 @@ public:
                      TransformScore);
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
                      FloorScore);
+
       //sparse features.
       //These are already in log-space
-      CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, wacands[i], &src);
+      for (size_t j = 0; j < cands[i].fnames.size(); ++j) {
+        targetPhrase.GetScoreBreakdown().Assign(m_obj, *cands[i].fnames[j], cands[i].fvalues[j]);
+      }
+
+      CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), &wacands[i], &src);
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);
     }
@@ -252,17 +272,10 @@ public:
 
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
-                          Scores const& scoreVector,
-                          const std::string& alignmentString,
+                          Scores const& transVector,
+                          Scores const& inputVector,
+                          const std::string *alignmentString,
                           Phrase const* srcPtr=0) const {
-    CreateTargetPhrase(targetPhrase, factorStrings, scoreVector, srcPtr);
-    targetPhrase.SetAlignmentInfo(alignmentString);
-  }
-
-  void CreateTargetPhrase(TargetPhrase& targetPhrase,
-                          StringTgtCand::Tokens const& factorStrings,
-                          Scores const& scoreVector,
-                          Phrase const* srcPtr) const {
     FactorCollection &factorCollection = FactorCollection::Instance();
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
@@ -275,7 +288,15 @@ public:
 
     targetPhrase.SetSourcePhrase(*srcPtr);
 
-    targetPhrase.GetScoreBreakdown().Assign(m_obj, scoreVector);
+    if (alignmentString) {
+      targetPhrase.SetAlignmentInfo(*alignmentString);
+    }
+
+    if (m_numInputScores) {
+      targetPhrase.GetScoreBreakdown().Assign(m_inputFeature, inputVector);
+    }
+
+    targetPhrase.GetScoreBreakdown().Assign(m_obj, transVector);
     targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
   }
 
@@ -304,7 +325,7 @@ public:
   // POD for target phrase scores
   struct TScores {
     float total;
-    Scores trans;
+    Scores transScore, inputScores;
     Phrase const* src;
 
     TScores() : total(0.0),src(0) {}
@@ -354,7 +375,8 @@ public:
     for(Position i=0 ; i < srcSize ; ++i)
       stack.push_back(State(i, i, m_dict->GetRoot(), std::vector<float>(m_numInputScores,0.0)));
 
-    std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj);
+    std::vector<float> weightTrans = StaticData::Instance().GetWeights(m_obj);
+    std::vector<float> weightInput = StaticData::Instance().GetWeights(m_inputFeature);
     float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
     while(!stack.empty()) {
@@ -424,18 +446,21 @@ public:
             Phrase const* srcPtr=uniqSrcPhr(newSrc);
             for(size_t i=0; i<tcands.size(); ++i) {
               //put input scores in first - already logged, just drop in directly
-              std::vector<float> nscores(newInputScores);
-
-              //resize to include phrase table scores
-              nscores.resize(m_numInputScores+tcands[i].scores.size(),0.0f);
+              std::vector<float> transcores(m_obj->GetNumScoreComponents());
+              CHECK(transcores.size()==weightTrans.size());
 
               //put in phrase table scores, logging as we insert
-              std::transform(tcands[i].scores.begin(),tcands[i].scores.end(),nscores.begin() + m_numInputScores,TransformScore);
+              std::transform(tcands[i].scores.begin()
+                             ,tcands[i].scores.end()
+                             ,transcores.begin()
+                             ,TransformScore);
 
-              CHECK(nscores.size()==weightT.size());
 
               //tally up
-              float score=std::inner_product(nscores.begin(), nscores.end(), weightT.begin(), 0.0f);
+              float score=std::inner_product(transcores.begin(), transcores.end(), weightTrans.begin(), 0.0f);
+
+              // input feature
+              score +=std::inner_product(newInputScores.begin(), newInputScores.end(), weightInput.begin(), 0.0f);
 
               //count word penalty
               score-=tcands[i].tokens.size() * weightWP;
@@ -447,7 +472,8 @@ public:
               TScores & scores=p.first->second;
               if(p.second || scores.total<score) {
                 scores.total=score;
-                scores.trans=nscores;
+                scores.transScore=transcores;
+                scores.inputScores=newInputScores;
                 scores.src=srcPtr;
               }
             }
@@ -486,7 +512,12 @@ public:
       for(E2Costs::const_iterator j=i->second.begin(); j!=i->second.end(); ++j) {
         TScores const & scores=j->second;
         TargetPhrase targetPhrase;
-        CreateTargetPhrase(targetPhrase,j->first,scores.trans,scores.src);
+        CreateTargetPhrase(targetPhrase
+                           , j ->first
+                           , scores.transScore
+                           , scores.inputScores
+                           , NULL
+                           , scores.src);
         costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
         tCands.push_back(targetPhrase);
         //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;

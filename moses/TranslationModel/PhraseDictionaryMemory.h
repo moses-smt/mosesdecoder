@@ -19,11 +19,12 @@
 
 #pragma once
 
+#include "PhraseDictionaryNodeMemory.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
-#include "PhraseDictionaryNodeMemory.h"
 #include "moses/TranslationModel/RuleTable/Trie.h"
+#include "util/check.hh"
 
 namespace Moses
 {
@@ -38,13 +39,14 @@ class PhraseDictionaryMemory : public RuleTableTrie
 
 protected:
   PhraseDictionaryMemory(const std::string &description, const std::string &line)
-    : RuleTableTrie(description, line)
-  {}
+    : RuleTableTrie(description, line) {
+  }
 
 public:
   PhraseDictionaryMemory(const std::string &line)
-    : RuleTableTrie("PhraseDictionaryMemory", line)
-  {}
+    : RuleTableTrie("PhraseDictionaryMemory", line) {
+    CHECK(m_args.size() == 0);
+  }
 
   const PhraseDictionaryNodeMemory &GetRootNode() const {
     return m_collection;

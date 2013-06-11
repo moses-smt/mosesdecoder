@@ -34,18 +34,16 @@ DecodeFeature::DecodeFeature(  const std::string& description
   : StatelessFeatureFunction(description, line)
 {
   VERBOSE(2,"DecodeFeature:" << std::endl);
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "input-factor") {
-      m_input =Tokenize<FactorType>(args[1], ",");
-      m_inputFactors = FactorMask(m_input);
-    } else if (args[0] == "output-factor") {
-      m_output =Tokenize<FactorType>(args[1], ",");
-      m_outputFactors = FactorMask(m_output);
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = SetParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
+    } else {
+      ++ind;
     }
   }
-
 }
 
 DecodeFeature::DecodeFeature(  const std::string& description
@@ -67,6 +65,21 @@ DecodeFeature::DecodeFeature(const std::string& description
   m_inputFactors = FactorMask(input);
   m_outputFactors = FactorMask(output);
   VERBOSE(2,"DecodeFeature: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
+}
+
+bool DecodeFeature::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "input-factor") {
+    m_input =Tokenize<FactorType>(value, ",");
+    m_inputFactors = FactorMask(m_input);
+  } else if (key == "output-factor") {
+    m_output =Tokenize<FactorType>(value, ",");
+    m_outputFactors = FactorMask(m_output);
+  } else {
+    return false;
+  }
+
+  return true;
 }
 
 

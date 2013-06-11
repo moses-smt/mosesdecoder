@@ -20,8 +20,8 @@ class _fdstream
 {
 protected:
   _fdstream() :
-    _file_descriptor(-1), _filebuf(NULL)
-  { }
+    _file_descriptor(-1), _filebuf(NULL) {
+  }
 
   _fdstream(int file_descriptor, std::ios_base::openmode openmode) :
     _file_descriptor(file_descriptor), _openmode(openmode) {
@@ -59,8 +59,8 @@ class ifdstream : public _fdstream
 {
 public:
   ifdstream() :
-    _fdstream(), _stream(NULL)
-  { }
+    _fdstream(), _stream(NULL) {
+  }
 
   ifdstream(int file_descriptor) :
     _fdstream(file_descriptor, std::ios_base::in) {
@@ -116,8 +116,8 @@ class ofdstream : public _fdstream
 {
 public:
   ofdstream() :
-    _fdstream(), _stream(NULL)
-  { }
+    _fdstream(), _stream(NULL) {
+  }
 
   ofdstream(int file_descriptor) :
     _fdstream(file_descriptor, std::ios_base::out) {

@@ -45,8 +45,8 @@ class RuleTableUTrie : public RuleTableTrie
 {
 public:
   RuleTableUTrie(const std::string &line)
-    : RuleTableTrie("RuleTableUTrie", line)
-  {}
+    : RuleTableTrie("RuleTableUTrie", line) {
+  }
 
   const UTrieNode &GetRootNode() const {
     return m_root;

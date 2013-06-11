@@ -52,7 +52,7 @@ void PhraseDictionaryCompact::Load()
   std::string suffix = ".minphr";
   if(tFilePath.substr(tFilePath.length() - suffix.length(), suffix.length()) == suffix) {
     if(!FileExists(tFilePath)) {
-    	throw runtime_error("Error: File " + tFilePath + " does not exit.");
+      throw runtime_error("Error: File " + tFilePath + " does not exit.");
       exit(1);
     }
   } else {
@@ -106,7 +106,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
 
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
-  = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true);
+    = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true);
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));

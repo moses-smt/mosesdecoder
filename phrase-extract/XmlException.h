@@ -29,8 +29,8 @@ class XmlException
 {
 public:
   XmlException(const std::string & msg)
-    : m_msg(msg)
-  {}
+    : m_msg(msg) {
+  }
 
   const std::string &
   getMsg() const {

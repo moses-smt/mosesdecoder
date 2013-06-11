@@ -78,7 +78,6 @@ Parameter::Parameter()
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
   AddParam("ttable-file", "location and properties of the translation tables");
-  AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
   AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
   AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
   AddParam("verbose", "v", "verbosity level of the logging");
@@ -184,12 +183,13 @@ Parameter::Parameter()
   AddParam("weight-u", "u", "DEPRECATED. DO NOT USE. weight for unknown word penalty");
   AddParam("weight-e", "e", "DEPRECATED. DO NOT USE. weight for word deletion");
   AddParam("text-type", "DEPRECATED. DO NOT USE. should be one of dev/devtest/test, used for domain adaptation features");
+  AddParam("input-scores", "DEPRECATED. DO NOT USE. 2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
 
   AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
 
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
-  AddParam("input-scores", "2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
+  AddParam("feature-overwrite", "Override arguments in a particular featureu function with a particular key");
 
   AddParam("feature", "");
   AddParam("print-id", "prefix translations with id. Default if false");
@@ -320,6 +320,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
       }
     }
   }
+
+  //Save("/tmp/moses.ini.new");
 
   // check if parameters make sense
   return Validate() && noErrorFlag;
@@ -523,7 +525,6 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       }
 
       ptLine << "num-features=" << numScoreComponent << " ";
-      ptLine << "num-input-features=" << (currDict==0 ? numInputScores + numRealWordsInInput : 0) << " ";
       ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
 
       if (implementation == SuffixArray) {
@@ -632,7 +633,6 @@ void Parameter::ConvertWeightArgsLM()
     oovWeights = Scan<int>(m_setting["lmodel-oov-feature"]);
   }
 
-  size_t ind = 0;
   PARAM_MAP::iterator iterMap;
 
   iterMap = m_setting.find(oldWeightName);
@@ -678,11 +678,12 @@ void Parameter::ConvertWeightArgsLM()
         ++currOldInd;
       }
 
-      SetWeight(newFeatureName, ind, weightsLM);
+      SetWeight(newFeatureName, lmIndex, weightsLM);
 
       string featureLine = newFeatureName + " "
                            + "factor=" + modelToks[1] + " "  // factor
-                           + "order="  + modelToks[2] + " "; // order
+                           + "order="  + modelToks[2] + " " // order
+                           + "num-features=" + SPrint(numFF) + " ";
       if (lmType == 9) {
         featureLine += "lazyken=1 ";
       } else if (lmType == 8) {
@@ -1234,6 +1235,31 @@ std::set<std::string> Parameter::GetWeightNames() const
     ret.insert(key);
   }
   return ret;
+}
+
+void Parameter::Save(const std::string path)
+{
+  ofstream file;
+  file.open(path.c_str());
+
+  PARAM_MAP::const_iterator iterOuter;
+  for (iterOuter = m_setting.begin(); iterOuter != m_setting.end(); ++iterOuter) {
+    const std::string &sectionName = iterOuter->first;
+    file << "[" << sectionName << "]" << endl;
+
+    const PARAM_VEC &values = iterOuter->second;
+
+    PARAM_VEC::const_iterator iterInner;
+    for (iterInner = values.begin(); iterInner != values.end(); ++iterInner) {
+      const std::string &value = *iterInner;
+      file << value << endl;
+    }
+
+    file << endl;
+  }
+
+
+  file.close();
 }
 
 }
