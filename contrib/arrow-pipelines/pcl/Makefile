@@ -1,4 +1,5 @@
 CC = pclc.py
+CFLAGS=-i
 SOURCES = training_pipeline.pcl
 OBJS = $(SOURCES:.pcl=.py)
 SUBDIRS = components
@@ -8,7 +9,7 @@ all: subdirs build
 build: $(OBJS)
 
 %.py: %.pcl
-	$(CC) $<
+	$(CC) $(CFLAGS) $<
 
 clean:
 	for dir in $(SUBDIRS); do \

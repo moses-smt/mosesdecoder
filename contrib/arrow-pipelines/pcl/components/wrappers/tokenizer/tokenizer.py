@@ -29,6 +29,8 @@ class BatchTokenizer(object):
 
         return outfilename
 
+def get_name():
+    return 'tokeniser'
 
 def get_inputs():
     return ['filename']

@@ -63,6 +63,8 @@ component translation_model_training
            devel_trg_filename -> trg_filename,
            evaluation_data_filename -> _ >>>
       model_training) &&&
-     wire evaluation_data_filename -> evaluation_data_filename) >>>
+     wire evaluation_data_filename -> evaluation_data_filename,
+          devel_src_filename -> _,
+          devel_trg_filename -> _) >>>
     merge top[moses_ini_filename] -> moses_ini_filename,
           bottom[evaluation_data_filename] -> evaluation_data_filename
