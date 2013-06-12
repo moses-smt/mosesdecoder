@@ -307,24 +307,14 @@ ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(cons
 //copied from PhraseDictionaryCompact; free memory allocated to TargetPhraseCollection (and each TargetPhrase) at end of sentence
 void PhraseDictionaryMultiModel::CacheForCleanup(TargetPhraseCollection* tpc)
 {
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
-#else
-  PhraseCache &ref = m_sentenceCache;
-#endif
+  PhraseCache &ref = GetPhraseCache();
   ref.push_back(tpc);
 }
 
 
 void PhraseDictionaryMultiModel::CleanUpAfterSentenceProcessing(const InputType &source)
 {
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
-#else
-  PhraseCache &ref = m_sentenceCache;
-#endif
+  PhraseCache &ref = GetPhraseCache();
   for(PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) {
     delete *it;
   }
