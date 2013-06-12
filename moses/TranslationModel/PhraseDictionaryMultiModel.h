@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #include <boost/unordered_map.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Util.h"
@@ -82,6 +83,9 @@ public:
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
   bool SetParameter(const std::string& key, const std::string& value);
 
+  const std::vector<float>* GetTemporaryMultiModelWeightsVector() const;
+  void SetTemporaryMultiModelWeightsVector(std::vector<float> weights);
+
 protected:
   std::string m_mode;
   std::vector<std::string> m_pdStr;
@@ -100,6 +104,14 @@ protected:
 
   PhraseDictionary *FindPhraseDictionary(const std::string &ptName) const;
 
+
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_lock_weights;
+  std::map<boost::thread::id, std::vector<float> > m_multimodelweights_tmp;
+#else
+  std::vector<float> m_multimodelweights_tmp;
+#endif
 };
 
 #ifdef WITH_DLIB
