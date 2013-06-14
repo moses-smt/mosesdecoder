@@ -58,6 +58,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
     } // for (iter = col.begin(); iter != col.end(); ++iter) {
   } // for (size_t startPos = 0; startPos < size; ++startPos) {
 
+  // create subphrases by appending words to previous subphrases
   for (size_t startPos = 0; startPos < size; ++startPos) {
     for (size_t endPos = startPos + 1; endPos < size; ++endPos) {
     	std::vector<SourcePath> &newSubphrases = GetPhrases(startPos, endPos);
