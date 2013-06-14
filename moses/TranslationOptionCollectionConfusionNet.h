@@ -27,9 +27,9 @@ protected:
   std::vector<std::vector<std::vector<SourcePath> > > m_collection;
 
   void CreateSubPhrases(std::vector<SourcePath> &newSubphrases
-		  	  	  	  , const std::vector<SourcePath> &prevSubphrases
-		  	  	  	  , const ConfusionNet::Column &col
-		  	  	  	  , const InputFeature &inputFeature);
+                        , const std::vector<SourcePath> &prevSubphrases
+                        , const ConfusionNet::Column &col
+                        , const InputFeature &inputFeature);
 };
 
 }

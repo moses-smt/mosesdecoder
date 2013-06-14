@@ -60,11 +60,16 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 
   // create subphrases by appending words to previous subphrases
   for (size_t startPos = 0; startPos < size; ++startPos) {
-    for (size_t endPos = startPos + 1; endPos < size; ++endPos) {
-    	std::vector<SourcePath> &newSubphrases = GetPhrases(startPos, endPos);
-    	const std::vector<SourcePath> &prevSubphrases = GetPhrases(startPos, endPos - 1);
-    	const ConfusionNet::Column &col = input.GetColumn(endPos);
-        CreateSubPhrases(newSubphrases, prevSubphrases, col, *inputFeature);
+	size_t maxSize = size - startPos;
+	size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+	maxSize = std::min(maxSize, maxSizePhrase);
+	size_t end = startPos + maxSize - 1;
+
+    for (size_t endPos = startPos + 1; endPos < end; ++endPos) {
+      std::vector<SourcePath> &newSubphrases = GetPhrases(startPos, endPos);
+      const std::vector<SourcePath> &prevSubphrases = GetPhrases(startPos, endPos - 1);
+      const ConfusionNet::Column &col = input.GetColumn(endPos);
+      CreateSubPhrases(newSubphrases, prevSubphrases, col, *inputFeature);
     }
   }
 
@@ -85,29 +90,29 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 }
 
 void TranslationOptionCollectionConfusionNet::CreateSubPhrases(std::vector<SourcePath> &newSubphrases
-															, const std::vector<SourcePath> &prevSubphrases
-															, const ConfusionNet::Column &col
-															, const InputFeature &inputFeature)
+    , const std::vector<SourcePath> &prevSubphrases
+    , const ConfusionNet::Column &col
+    , const InputFeature &inputFeature)
 {
-	std::vector<SourcePath>::const_iterator iterSourcePath;
-	for (iterSourcePath = prevSubphrases.begin(); iterSourcePath != prevSubphrases.end(); ++iterSourcePath) {
-		const SourcePath &sourcePath = *iterSourcePath;
-		const Phrase &prevSubPhrase = sourcePath.first;
-		const ScoreComponentCollection &prevScore = sourcePath.second;
+  std::vector<SourcePath>::const_iterator iterSourcePath;
+  for (iterSourcePath = prevSubphrases.begin(); iterSourcePath != prevSubphrases.end(); ++iterSourcePath) {
+    const SourcePath &sourcePath = *iterSourcePath;
+    const Phrase &prevSubPhrase = sourcePath.first;
+    const ScoreComponentCollection &prevScore = sourcePath.second;
 
-		ConfusionNet::Column::const_iterator iterCol;
-		for (iterCol = col.begin(); iterCol != col.end(); ++iterCol) {
-			const std::pair<Word,std::vector<float> > &node = *iterCol;
-			Phrase subphrase(prevSubPhrase);
-			subphrase.AddWord(node.first);
+    ConfusionNet::Column::const_iterator iterCol;
+    for (iterCol = col.begin(); iterCol != col.end(); ++iterCol) {
+      const std::pair<Word,std::vector<float> > &node = *iterCol;
+      Phrase subphrase(prevSubPhrase);
+      subphrase.AddWord(node.first);
 
-			ScoreComponentCollection score(prevScore);
-			score.PlusEquals(&inputFeature, node.second);
+      ScoreComponentCollection score(prevScore);
+      score.PlusEquals(&inputFeature, node.second);
 
-			SourcePath newSourcePath(subphrase, score);
-			newSubphrases.push_back(newSourcePath);
-		}
-	}
+      SourcePath newSourcePath(subphrase, score);
+      newSubphrases.push_back(newSourcePath);
+    }
+  }
 }
 
 /* forcibly create translation option for a particular source word.
@@ -128,24 +133,16 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
 
 const std::vector<TranslationOptionCollectionConfusionNet::SourcePath> &TranslationOptionCollectionConfusionNet::GetPhrases(size_t startPos, size_t endPos) const
 {
-  size_t maxSize = endPos - startPos;
-  //size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-  //maxSize = std::min(maxSize, maxSizePhrase);
-
-  CHECK(maxSize < m_collection[startPos].size());
-  return m_collection[startPos][maxSize];
-
+  size_t offset = endPos - startPos;
+  CHECK(offset < m_collection[startPos].size());
+  return m_collection[startPos][offset];
 }
 
 std::vector<TranslationOptionCollectionConfusionNet::SourcePath> &TranslationOptionCollectionConfusionNet::GetPhrases(size_t startPos, size_t endPos)
 {
-  size_t maxSize = endPos - startPos;
-  //size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-  //maxSize = std::min(maxSize, maxSizePhrase);
-
-  CHECK(maxSize < m_collection[startPos].size());
-  return m_collection[startPos][maxSize];
-
+  size_t offset = endPos - startPos;
+  CHECK(offset < m_collection[startPos].size());
+  return m_collection[startPos][offset];
 }
 
 } // namespace

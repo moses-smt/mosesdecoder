@@ -30,8 +30,28 @@ using namespace std;
 namespace Moses
 {
 /** constructor; just initialize the base class */
-TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const &inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(inputSentence, maxNoTransOptPerCoverage, translationOptionThreshold) {}
+TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const &input
+    , size_t maxNoTransOptPerCoverage
+    , float translationOptionThreshold)
+  : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
+{
+  size_t size = input.GetSize();
+  m_collection.resize(size);
+  for (size_t startPos = 0; startPos < size; ++startPos) {
+    std::vector<Phrase> &vec = m_collection[startPos];
+    for (size_t endPos = startPos; endPos < size; ++endPos) {
+      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+      vec.push_back(subphrase);
+    }
+  }
+  /*
+  for (size_t startPos = 0; startPos < size; ++startPos) {
+    for (size_t endPos = startPos; endPos < size; ++endPos) {
+      cerr << startPos << "-" << endPos << "=" << GetPhrase(startPos, endPos) << endl;
+    }
+  }
+  */
+}
 
 /* forcibly create translation option for a particular source word.
 	* For text, this function is easy, just call the base class' ProcessOneUnknownWord()
@@ -66,10 +86,16 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosit
   for(size_t i=0; i<xmlOptions.size(); i++) {
     Add(xmlOptions[i]);
   }
-
-};
-
 }
+
+const Phrase &TranslationOptionCollectionText::GetPhrase(size_t startPos, size_t endPos) const
+{
+  size_t offset = endPos - startPos;
+  CHECK(offset < m_collection[startPos].size());
+  return m_collection[startPos][offset];
+}
+
+} // namespace
 
 
 
