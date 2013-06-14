@@ -33,6 +33,7 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 
 FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
   : m_tuneable(true)
+  , m_numScoreComponents(1)
 {
   Initialize(description, line);
 }
