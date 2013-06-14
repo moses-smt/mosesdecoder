@@ -3,11 +3,11 @@
 #define moses_TranslationOptionCollectionConfusionNet_h
 
 #include "TranslationOptionCollection.h"
+#include "ConfusionNet.h"
 
 namespace Moses
 {
-
-class ConfusionNet;
+class InputFeature;
 
 /** Holds all translation options, for all spans, of a particular confusion network input
  * Inherited from TranslationOptionCollection.
@@ -25,6 +25,11 @@ public:
   std::vector<SourcePath> &GetPhrases(size_t startPos, size_t endPos);
 protected:
   std::vector<std::vector<std::vector<SourcePath> > > m_collection;
+
+  void CreateSubPhrases(std::vector<SourcePath> &newSubphrases
+		  	  	  	  , const std::vector<SourcePath> &prevSubphrases
+		  	  	  	  , const ConfusionNet::Column &col
+		  	  	  	  , const InputFeature &inputFeature);
 };
 
 }

@@ -3,7 +3,6 @@
 #include <cassert>
 #include <iostream>
 #include "TranslationOptionCollectionConfusionNet.h"
-#include "ConfusionNet.h"
 #include "DecodeStep.h"
 #include "FactorCollection.h"
 #include "moses/FF/InputFeature.h"
@@ -24,8 +23,9 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   CHECK(inputFeature);
 
   size_t size = input.GetSize();
+
+  // create matrix
   for (size_t startPos = 0; startPos < size; ++startPos) {
-    // create matrix
     std::vector<std::vector<SourcePath> > vec;
     m_collection.push_back( vec );
     size_t maxSize = size - startPos;
@@ -55,16 +55,58 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       sourcePath.first.AddWord(inputNode.first);
       sourcePath.second.PlusEquals(inputFeature, inputNode.second);
 
+    } // for (iter = col.begin(); iter != col.end(); ++iter) {
+  } // for (size_t startPos = 0; startPos < size; ++startPos) {
+
+  for (size_t startPos = 0; startPos < size; ++startPos) {
+    for (size_t endPos = startPos + 1; endPos < size; ++endPos) {
+    	std::vector<SourcePath> &newSubphrases = GetPhrases(startPos, endPos);
+    	const std::vector<SourcePath> &prevSubphrases = GetPhrases(startPos, endPos - 1);
+    	const ConfusionNet::Column &col = input.GetColumn(endPos);
+        CreateSubPhrases(newSubphrases, prevSubphrases, col, *inputFeature);
     }
   }
 
-  for (size_t startPos = 0; startPos < input.GetSize(); ++startPos) {
-    for (size_t endPos = startPos; endPos < input.GetSize(); ++endPos) {
+  /*
+  for (size_t startPos = 0; startPos < size; ++startPos) {
+    for (size_t endPos = startPos; endPos < size; ++endPos) {
+    	cerr << "RANGE=" << startPos << "-" << endPos << endl;
 
+    	const std::vector<SourcePath> &subphrases = GetPhrases(startPos, endPos);
+    	std::vector<SourcePath>::const_iterator iterSourcePath;
+    	for (iterSourcePath = subphrases.begin(); iterSourcePath != subphrases.end(); ++iterSourcePath) {
+    		const SourcePath &sourcePath = *iterSourcePath;
+    		cerr << sourcePath.first << " " <<sourcePath.second << endl;
+    	}
     }
   }
+  */
+}
 
+void TranslationOptionCollectionConfusionNet::CreateSubPhrases(std::vector<SourcePath> &newSubphrases
+															, const std::vector<SourcePath> &prevSubphrases
+															, const ConfusionNet::Column &col
+															, const InputFeature &inputFeature)
+{
+	std::vector<SourcePath>::const_iterator iterSourcePath;
+	for (iterSourcePath = prevSubphrases.begin(); iterSourcePath != prevSubphrases.end(); ++iterSourcePath) {
+		const SourcePath &sourcePath = *iterSourcePath;
+		const Phrase &prevSubPhrase = sourcePath.first;
+		const ScoreComponentCollection &prevScore = sourcePath.second;
 
+		ConfusionNet::Column::const_iterator iterCol;
+		for (iterCol = col.begin(); iterCol != col.end(); ++iterCol) {
+			const std::pair<Word,std::vector<float> > &node = *iterCol;
+			Phrase subphrase(prevSubPhrase);
+			subphrase.AddWord(node.first);
+
+			ScoreComponentCollection score(prevScore);
+			score.PlusEquals(&inputFeature, node.second);
+
+			SourcePath newSourcePath(subphrase, score);
+			newSubphrases.push_back(newSourcePath);
+		}
+	}
 }
 
 /* forcibly create translation option for a particular source word.
