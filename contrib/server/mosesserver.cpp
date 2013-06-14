@@ -143,7 +143,7 @@ public:
 #ifdef WITH_DLIB
     const StaticData &staticData = StaticData::Instance();
     const params_t params = paramList.getStruct(0);
-    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0];
+    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
 
     params_t::const_iterator si = params.find("phrase_pairs");
     if (si == params.end()) {
@@ -238,7 +238,8 @@ public:
     }
 
     if (multiModelWeights.size() > 0) {
-      staticData.SetTemporaryMultiModelWeightsVector(multiModelWeights);
+      PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
+      pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
       if (staticData.GetUseTransOptCache()) {
           cerr << "Warning: -use-persistent-cache is set to true; sentence-specific weights may be ignored. Disable cache for true results.\n";
       }
