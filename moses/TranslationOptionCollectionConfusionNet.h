@@ -15,10 +15,16 @@ class ConfusionNet;
 class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection
 {
 public:
+  typedef std::pair<Phrase, ScoreComponentCollection> SourcePath;
+
   TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   void ProcessUnknownWord(size_t sourcePos);
 
+  const std::vector<SourcePath> &GetPhrases(size_t startPos, size_t endPos) const;
+  std::vector<SourcePath> &GetPhrases(size_t startPos, size_t endPos);
+protected:
+  std::vector<std::vector<std::vector<SourcePath> > > m_collection;
 };
 
 }
