@@ -122,6 +122,7 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
 
 void PhraseDictionaryMultiModelCounts::Load()
 {
+  SetFeaturesToApply();
   for(size_t i = 0; i < m_numModels; ++i) {
 
     // phrase table

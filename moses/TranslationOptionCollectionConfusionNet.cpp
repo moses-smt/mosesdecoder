@@ -40,29 +40,29 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 
     // cut up confusion network into substrings
     // start with 1-word phrases
-	  std::vector<SourcePath> &subphrases = GetPhrases(startPos, startPos);
-	  assert(subphrases.size() == 0);
+    std::vector<SourcePath> &subphrases = GetPhrases(startPos, startPos);
+    assert(subphrases.size() == 0);
 
-	  const ConfusionNet::Column &col = input.GetColumn(startPos);
-	  ConfusionNet::Column::const_iterator iter;
-	  for (iter = col.begin(); iter != col.end(); ++iter) {
-		  subphrases.push_back(SourcePath());
-		  SourcePath &sourcePath = subphrases.back();
+    const ConfusionNet::Column &col = input.GetColumn(startPos);
+    ConfusionNet::Column::const_iterator iter;
+    for (iter = col.begin(); iter != col.end(); ++iter) {
+      subphrases.push_back(SourcePath());
+      SourcePath &sourcePath = subphrases.back();
 
-		  const std::pair<Word,std::vector<float> > &inputNode = *iter;
+      const std::pair<Word,std::vector<float> > &inputNode = *iter;
 
-		  //cerr << "word=" << inputNode.first << " scores=" << inputNode.second.size() << endl;
-		  sourcePath.first.AddWord(inputNode.first);
-		  sourcePath.second.PlusEquals(inputFeature, inputNode.second);
+      //cerr << "word=" << inputNode.first << " scores=" << inputNode.second.size() << endl;
+      sourcePath.first.AddWord(inputNode.first);
+      sourcePath.second.PlusEquals(inputFeature, inputNode.second);
 
-	  }
+    }
   }
 
-	for (size_t startPos = 0; startPos < input.GetSize(); ++startPos) {
-		for (size_t endPos = startPos; endPos < input.GetSize(); ++endPos) {
+  for (size_t startPos = 0; startPos < input.GetSize(); ++startPos) {
+    for (size_t endPos = startPos; endPos < input.GetSize(); ++endPos) {
 
-		}
-	}
+    }
+  }
 
 
 }

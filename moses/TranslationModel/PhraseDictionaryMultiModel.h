@@ -104,15 +104,16 @@ protected:
 
   PhraseCache& GetPhraseCache() {
 #ifdef WITH_THREADS
-  { // first try read-only lock
-  boost::shared_lock<boost::shared_mutex> read_lock(m_lock_cache);
-  SentenceCache::iterator i = m_sentenceCache.find(boost::this_thread::get_id());
-  if (i != m_sentenceCache.end()) return i->second;
-  }
-  boost::unique_lock<boost::shared_mutex> lock(m_lock_cache);
-  return m_sentenceCache[boost::this_thread::get_id()];
+    {
+      // first try read-only lock
+      boost::shared_lock<boost::shared_mutex> read_lock(m_lock_cache);
+      SentenceCache::iterator i = m_sentenceCache.find(boost::this_thread::get_id());
+      if (i != m_sentenceCache.end()) return i->second;
+    }
+    boost::unique_lock<boost::shared_mutex> lock(m_lock_cache);
+    return m_sentenceCache[boost::this_thread::get_id()];
 #else
-  return m_sentenceCache;
+    return m_sentenceCache;
 #endif
   }
 

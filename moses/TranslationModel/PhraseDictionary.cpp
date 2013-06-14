@@ -44,15 +44,6 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
       ++ind;
     }
   }
-
-  // find out which feature function can be applied in this decode step
-  const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
-  for (size_t i = 0; i < allFeatures.size(); ++i) {
-    FeatureFunction *feature = allFeatures[i];
-    if (feature->IsUseable(m_outputFactors)) {
-      m_featuresToApply.push_back(feature);
-    }
-  }
 }
 
 
@@ -74,6 +65,18 @@ bool PhraseDictionary::SetParameter(const std::string& key, const std::string& v
     return false;
   }
   return true;
+}
+
+void PhraseDictionary::SetFeaturesToApply()
+{
+  // find out which feature function can be applied in this decode step
+  const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < allFeatures.size(); ++i) {
+    FeatureFunction *feature = allFeatures[i];
+    if (feature->IsUseable(m_outputFactors)) {
+      m_featuresToApply.push_back(feature);
+    }
+  }
 }
 
 }

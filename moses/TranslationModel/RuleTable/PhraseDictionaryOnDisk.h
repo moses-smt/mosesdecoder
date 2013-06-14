@@ -53,8 +53,8 @@ public:
     : MyBase("PhraseDictionaryOnDisk", line) {
     CHECK(m_args.size() == 0);
   }
-
-  virtual ~PhraseDictionaryOnDisk();
+  ~PhraseDictionaryOnDisk();
+  void Load();
 
   PhraseTableImplementation GetPhraseTableImplementation() const {
     return OnDisk;

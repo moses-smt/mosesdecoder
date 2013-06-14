@@ -59,6 +59,8 @@ public:
   virtual ~PhraseDictionary() {
   }
 
+  virtual void Load() = 0;
+
   //! table limit number.
   size_t GetTableLimit() const {
     return m_tableLimit;
@@ -99,7 +101,12 @@ protected:
   size_t m_tableLimit;
   std::string m_filePath;
 
+  // features to apply evaluate target phrase when loading.
+  // NOT when creating translation options. Those are in DecodeStep
   std::vector<FeatureFunction*> m_featuresToApply;
+
+  // MUST be called at the start of Load()
+  void SetFeaturesToApply();
 };
 
 }

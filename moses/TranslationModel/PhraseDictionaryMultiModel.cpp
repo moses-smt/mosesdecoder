@@ -93,6 +93,8 @@ PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
 
 void PhraseDictionaryMultiModel::Load()
 {
+  SetFeaturesToApply();
+
   // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
   // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
 
@@ -336,25 +338,27 @@ void  PhraseDictionaryMultiModel::CleanUpComponentModels(const InputType &source
   }
 }
 
-const std::vector<float>* PhraseDictionaryMultiModel::GetTemporaryMultiModelWeightsVector() const {
+const std::vector<float>* PhraseDictionaryMultiModel::GetTemporaryMultiModelWeightsVector() const
+{
 #ifdef WITH_THREADS
-    boost::shared_lock<boost::shared_mutex> read_lock(m_lock_weights);
-    if (m_multimodelweights_tmp.find(boost::this_thread::get_id()) != m_multimodelweights_tmp.end()) {
-      return &m_multimodelweights_tmp.find(boost::this_thread::get_id())->second;
-    } else {
-      return NULL;
-    }
+  boost::shared_lock<boost::shared_mutex> read_lock(m_lock_weights);
+  if (m_multimodelweights_tmp.find(boost::this_thread::get_id()) != m_multimodelweights_tmp.end()) {
+    return &m_multimodelweights_tmp.find(boost::this_thread::get_id())->second;
+  } else {
+    return NULL;
+  }
 #else
-    return &m_multimodelweights_tmp;
+  return &m_multimodelweights_tmp;
 #endif
 }
 
-void PhraseDictionaryMultiModel::SetTemporaryMultiModelWeightsVector(std::vector<float> weights) {
+void PhraseDictionaryMultiModel::SetTemporaryMultiModelWeightsVector(std::vector<float> weights)
+{
 #ifdef WITH_THREADS
-    boost::unique_lock<boost::shared_mutex> lock(m_lock_weights);
-    m_multimodelweights_tmp[boost::this_thread::get_id()] = weights;
+  boost::unique_lock<boost::shared_mutex> lock(m_lock_weights);
+  m_multimodelweights_tmp[boost::this_thread::get_id()] = weights;
 #else
-    m_multimodelweights_tmp = weights;
+  m_multimodelweights_tmp = weights;
 #endif
 }
 

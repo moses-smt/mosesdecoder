@@ -33,6 +33,8 @@ PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray()
 
 void PhraseDictionaryDynSuffixArray::Load()
 {
+  SetFeaturesToApply();
+
   const StaticData &staticData = StaticData::Instance();
   vector<float> weight = staticData.GetWeights(this);
 

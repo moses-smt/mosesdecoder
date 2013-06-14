@@ -35,6 +35,10 @@ PhraseDictionaryTreeAdaptor(const std::string &line)
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
 }
+void PhraseDictionaryTreeAdaptor::Load()
+{
+  SetFeaturesToApply();
+}
 
 void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {

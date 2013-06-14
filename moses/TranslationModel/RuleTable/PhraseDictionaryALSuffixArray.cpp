@@ -30,6 +30,11 @@ PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &
   CHECK(m_args.size() == 0);
 }
 
+void PhraseDictionaryALSuffixArray::Load()
+{
+  SetFeaturesToApply();
+}
+
 void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
 {
   // populate with rules for this sentence
