@@ -69,6 +69,12 @@ void SourceWordDeletionFeature::Load()
   m_unrestricted = false;
 }
 
+bool SourceWordDeletionFeature::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[m_factorType];
+  return ret;
+}
+
 void SourceWordDeletionFeature::Evaluate(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
