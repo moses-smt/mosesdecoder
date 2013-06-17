@@ -30,6 +30,12 @@ protected:
                         , const std::vector<SourcePath> &prevSubphrases
                         , const ConfusionNet::Column &col
                         , const InputFeature &inputFeature);
+
+  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
+        , size_t startPosition
+        , size_t endPosition
+        , bool adhereTableLimit
+        , size_t graphInd);
 };
 
 }

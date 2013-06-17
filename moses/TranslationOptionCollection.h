@@ -133,12 +133,21 @@ public:
 
   //! Create all possible translations from the phrase tables
   virtual void CreateTranslationOptions();
+
   //! Create translation options that exactly cover a specific input span.
+  /** create translation options that exactly cover a specific input span.
+   * Called by CreateTranslationOptions() and ProcessUnknownWord()
+   * \param decodeGraph list of decoding steps
+   * \param factorCollection input sentence with all factors
+   * \param startPos first position in input sentence
+   * \param lastPos last position in input sentence
+   * \param adhereTableLimit whether phrase & generation table limits are adhered to
+   */
   virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
       , size_t startPosition
       , size_t endPosition
       , bool adhereTableLimit
-      , size_t graphInd);
+      , size_t graphInd) = 0;
 
   //!Check if this range has XML options
   virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
