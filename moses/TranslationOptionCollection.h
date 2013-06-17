@@ -43,6 +43,25 @@ class FactorMask;
 class Word;
 class DecodeGraph;
 
+/** Each node contains
+	1. substring used to searching the phrase table
+	2. the source range it covers
+	3. a list of InputLatticeNode that it is a prefix of
+  This is for both sentence input, and confusion network/lattices
+  */
+class InputLatticeNode
+{
+protected:
+  Phrase m_phrase;
+  WordsRange m_range;
+  std::vector<const InputLatticeNode*> m_next;
+
+public:
+  InputLatticeNode(const Phrase &phrase, const WordsRange &range);
+  void AddNext(const InputLatticeNode &next);
+
+};
+
 /** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
  * conditions (trelliss, factored input, normal text, xml markup)

@@ -42,10 +42,10 @@ public:
   void ProcessUnknownWord(size_t sourcePos);
   bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
   void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
-  const Phrase &GetPhrase(size_t startPos, size_t endPos) const;
+  const InputLatticeNode &GetPhrase(size_t startPos, size_t endPos) const;
 
 protected:
-  std::vector<std::vector<Phrase> > m_collection;
+  std::vector<std::vector<InputLatticeNode> > m_collection;
 
 };
 

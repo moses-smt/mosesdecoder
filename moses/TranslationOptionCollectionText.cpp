@@ -38,10 +38,18 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
   size_t size = input.GetSize();
   m_collection.resize(size);
   for (size_t startPos = 0; startPos < size; ++startPos) {
-    std::vector<Phrase> &vec = m_collection[startPos];
+    std::vector<InputLatticeNode> &vec = m_collection[startPos];
     for (size_t endPos = startPos; endPos < size; ++endPos) {
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
-      vec.push_back(subphrase);
+      WordsRange range(startPos, endPos);
+      InputLatticeNode node(subphrase, range);
+
+      if (range.GetNumWordsCovered() > 1) {
+    	  InputLatticeNode prevNode = GetPhrase(startPos, endPos - 1);
+    	  node.AddNext(prevNode);
+      }
+
+      vec.push_back(node);
     }
   }
   /*
@@ -88,7 +96,7 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosit
   }
 }
 
-const Phrase &TranslationOptionCollectionText::GetPhrase(size_t startPos, size_t endPos) const
+const InputLatticeNode &TranslationOptionCollectionText::GetPhrase(size_t startPos, size_t endPos) const
 {
   size_t offset = endPos - startPos;
   CHECK(offset < m_collection[startPos].size());
