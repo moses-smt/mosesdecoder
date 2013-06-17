@@ -49,8 +49,11 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
   return currNode.GetOrCreateTargetPhraseCollection();
 }
 
-const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& source) const
+const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& sourceOrig) const
 {
+  Phrase source(sourceOrig);
+  source.OnlyTheseFactors(m_inputFactors);
+
   // exactly like CreateTargetPhraseCollection, but don't create
   const size_t size = source.GetSize();
 

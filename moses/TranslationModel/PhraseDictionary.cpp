@@ -51,7 +51,6 @@ const TargetPhraseCollection *PhraseDictionary::
 GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 {
   Phrase phrase = src.GetSubString(range);
-  phrase.OnlyTheseFactors(m_inputFactors);
   return GetTargetPhraseCollection(phrase);
 }
 
