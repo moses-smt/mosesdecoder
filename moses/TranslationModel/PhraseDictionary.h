@@ -83,10 +83,6 @@ public:
     const InputType &,
     const ChartCellCollectionBase &) = 0;
 
-  //Get the dictionary. Be sure to initialise it first.
-  const PhraseDictionary* GetDictionary() const;
-  PhraseDictionary* GetDictionary();
-
   const std::string &GetFilePath() const {
     return m_filePath;
   }
