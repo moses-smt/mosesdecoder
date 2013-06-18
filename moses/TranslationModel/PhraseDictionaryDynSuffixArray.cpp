@@ -89,7 +89,7 @@ bool PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const 
   } else if (key == "alignment") {
     m_alignments = value;
   } else {
-    return false;
+    return PhraseDictionary::SetParameter(key, value);
   }
   return true;
 }

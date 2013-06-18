@@ -66,10 +66,6 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line
   }
 }
 
-bool GlobalLexicalModelUnlimited::SetParameter(const std::string& key, const std::string& value)
-{
-}
-
 bool GlobalLexicalModelUnlimited::Load(const std::string &filePathSource,
                                        const std::string &filePathTarget)
 {

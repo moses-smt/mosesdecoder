@@ -43,7 +43,7 @@ bool GlobalLexicalModel::SetParameter(const std::string& key, const std::string&
   } else if (key == "outputFactors") {
     m_outputFactorsVec = Tokenize<FactorType>(value,",");
   } else {
-    return false;
+    return StatelessFeatureFunction::SetParameter(key, value);
   }
   return true;
 }

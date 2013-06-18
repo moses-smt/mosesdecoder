@@ -76,9 +76,8 @@ bool DecodeFeature::SetParameter(const std::string& key, const std::string& valu
     m_output =Tokenize<FactorType>(value, ",");
     m_outputFactors = FactorMask(m_output);
   } else {
-    return false;
+    return StatelessFeatureFunction::SetParameter(key, value);
   }
-
   return true;
 }
 

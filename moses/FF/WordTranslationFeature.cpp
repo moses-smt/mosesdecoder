@@ -94,7 +94,7 @@ bool WordTranslationFeature::SetParameter(const std::string& key, const std::str
   } else if (key == "target-path") {
     m_filePathTarget = value;
   } else {
-    return false;
+    return StatelessFeatureFunction::SetParameter(key, value);
   }
   return true;
 }

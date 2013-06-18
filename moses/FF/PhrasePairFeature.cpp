@@ -62,7 +62,7 @@ bool PhrasePairFeature::SetParameter(const std::string& key, const std::string& 
   } else if (key == "ignore-punctuation") {
     m_filePathSource = value;
   } else {
-    return false;
+    return StatelessFeatureFunction::SetParameter(key, value);
   }
   return true;
 

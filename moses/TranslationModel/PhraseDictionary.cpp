@@ -61,7 +61,7 @@ bool PhraseDictionary::SetParameter(const std::string& key, const std::string& v
   } else if (key == "table-limit") {
     m_tableLimit = Scan<size_t>(value);
   } else {
-    return false;
+    return DecodeFeature::SetParameter(key, value);
   }
   return true;
 }

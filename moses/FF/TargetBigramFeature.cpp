@@ -50,7 +50,7 @@ bool TargetBigramFeature::SetParameter(const std::string& key, const std::string
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
-
+  return true;
 }
 
 void TargetBigramFeature::Load()

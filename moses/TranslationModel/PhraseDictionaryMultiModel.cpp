@@ -82,7 +82,7 @@ bool PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std:
   } else if (key == "lambda") {
     m_multimodelweights = Tokenize<float>(value, ",");
   } else {
-    return false;
+    return PhraseDictionary::SetParameter(key, value);
   }
   return true;
 }

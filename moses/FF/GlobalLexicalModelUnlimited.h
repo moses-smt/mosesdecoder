@@ -93,8 +93,6 @@ public:
   void AddFeature(ScoreComponentCollection* accumulator,
                   StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
                   StringPiece targetWord) const;
-  bool SetParameter(const std::string& key, const std::string& value);
-
 };
 
 }
