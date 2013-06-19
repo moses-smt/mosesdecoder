@@ -59,6 +59,8 @@ public:
   virtual ~PhraseDictionary() {
   }
 
+  virtual void Load() = 0;
+
   //! table limit number.
   size_t GetTableLimit() const {
     return m_tableLimit;
@@ -81,10 +83,6 @@ public:
     const InputType &,
     const ChartCellCollectionBase &) = 0;
 
-  //Get the dictionary. Be sure to initialise it first.
-  const PhraseDictionary* GetDictionary() const;
-  PhraseDictionary* GetDictionary();
-
   const std::string &GetFilePath() const {
     return m_filePath;
   }
@@ -97,13 +95,14 @@ public:
 
 protected:
   size_t m_tableLimit;
-
   std::string m_filePath;
 
-  std::string m_targetFile;
-  std::string m_alignmentsFile;
-
+  // features to apply evaluate target phrase when loading.
+  // NOT when creating translation options. Those are in DecodeStep
   std::vector<FeatureFunction*> m_featuresToApply;
+
+  // MUST be called at the start of Load()
+  void SetFeaturesToApply();
 };
 
 }

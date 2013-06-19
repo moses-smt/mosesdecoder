@@ -41,7 +41,7 @@ bool PhraseBoundaryFeature::SetParameter(const std::string& key, const std::stri
   } else if (key == "target") {
     m_targetFactors = Tokenize<FactorType>(value, ",");
   } else {
-    return false;
+    return StatefulFeatureFunction::SetParameter(key, value);
   }
   return true;
 }

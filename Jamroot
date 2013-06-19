@@ -78,6 +78,8 @@ external-lib z ;
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
   external-lib tcmalloc_minimal ;
   requirements += <threading>multi:<library>tcmalloc_minimal ;
+} else {
+  echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
 }
 
 if [ option.get "enable-mpi" : : "yes" ] {

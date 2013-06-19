@@ -36,6 +36,7 @@ RuleTableTrie::~RuleTableTrie()
 
 void RuleTableTrie::Load()
 {
+  SetFeaturesToApply();
 
   std::auto_ptr<Moses::RuleTableLoader> loader =
     Moses::RuleTableLoaderFactory::Create(m_filePath);

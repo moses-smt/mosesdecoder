@@ -41,7 +41,7 @@ bool TargetWordInsertionFeature::SetParameter(const std::string& key, const std:
   } else if (key == "path") {
     m_filename = value;
   } else {
-    return false;
+    return StatelessFeatureFunction::SetParameter(key, value);
   }
   return true;
 }

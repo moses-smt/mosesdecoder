@@ -107,7 +107,7 @@ bool PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, cons
   } else if (key == "target-table") {
     m_targetTable = Tokenize(value, ",");
   } else {
-    return false;
+	return PhraseDictionaryMultiModel::SetParameter(key, value);
   }
 
   return true;
@@ -122,6 +122,7 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
 
 void PhraseDictionaryMultiModelCounts::Load()
 {
+  SetFeaturesToApply();
   for(size_t i = 0; i < m_numModels; ++i) {
 
     // phrase table

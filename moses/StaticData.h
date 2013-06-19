@@ -768,33 +768,6 @@ public:
 
   void OverrideFeatures();
 
-  void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {
-#ifdef WITH_THREADS
-    m_multimodelweights_tmp[boost::this_thread::get_id()] = weights;
-#else
-    m_multimodelweights_tmp = weights;
-#endif
-  }
-
-  // multimodel
-#ifdef WITH_THREADS
-  mutable std::map<boost::thread::id, std::vector<float> > m_multimodelweights_tmp;
-#else
-  mutable std::vector<float> m_multimodelweights_tmp;
-#endif
-
-  const std::vector<float>* GetTemporaryMultiModelWeightsVector() const {
-#ifdef WITH_THREADS
-    if (m_multimodelweights_tmp.find(boost::this_thread::get_id()) != m_multimodelweights_tmp.end()) {
-      return &m_multimodelweights_tmp.find(boost::this_thread::get_id())->second;
-    } else {
-      return NULL;
-    }
-#else
-    return &m_multimodelweights_tmp;
-#endif
-  }
-
 };
 
 }

@@ -34,7 +34,10 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
 }
 
-// PhraseDictionary impl
+void PhraseDictionaryOnDisk::Load()
+{
+  SetFeaturesToApply();
+}
 
 //! find list of translations that can translates src. Only for phrase input
 const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const Phrase& /* src */) const

@@ -22,7 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_TranslationOptionCollectionText_h
 #define moses_TranslationOptionCollectionText_h
 
+#include <vector>
 #include "TranslationOptionCollection.h"
+#include "Phrase.h"
 
 namespace Moses
 {
@@ -35,15 +37,21 @@ class Sentence;
 class TranslationOptionCollectionText : public TranslationOptionCollection
 {
 public:
+  TranslationOptionCollectionText(Sentence const& input, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+
   void ProcessUnknownWord(size_t sourcePos);
-
-  TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
-
   bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
-
   void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
+  const InputLatticeNode &GetPhrase(size_t startPos, size_t endPos) const;
 
+protected:
+  std::vector<std::vector<InputLatticeNode> > m_collection;
 
+  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
+        , size_t startPosition
+        , size_t endPosition
+        , bool adhereTableLimit
+        , size_t graphInd);
 };
 
 }

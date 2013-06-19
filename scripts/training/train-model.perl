@@ -1920,8 +1920,13 @@ sub create_ini {
      $phrase_table_impl_name = "PhraseDictionaryOnDisk" if $phrase_table_impl==2;
      $phrase_table_impl_name = "PhraseDictionaryMemory" if $phrase_table_impl==6;
 
+     #table limit
+     my $table_limit = 0;
+     if ($i == 0) {
+       $table_limit = 20;
+     }
      # sum up...
-     $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor\n";
+     $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i table-limit=$table_limit num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor\n";
      $weight_spec .= "TranslationModel$i=";
      for(my $j=0;$j<$basic_weight_count;$j++) { $weight_spec .= " 0.2"; }
      $weight_spec .= "\n";
@@ -1939,12 +1944,6 @@ sub create_ini {
      &full_path(\$___GLUE_GRAMMAR_FILE);
      $feature_spec .= "PhraseDictionaryMemory name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
      $weight_spec .= "TranslationModel$i= 1.0\n";
-   }
-
-   # ttable limit
-   print INI "\n\# limit on how many phrase translations e for each phrase f are loaded\n# 0 = all elements loaded\n[ttable-limit]\n20\n";
-   foreach(1 .. ($i-1)) {
-     print INI (defined($FIRST_TTABLE{$_})?"20":"0")."\n";
    }
 
    # generation model

@@ -82,7 +82,7 @@ bool PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std:
   } else if (key == "lambda") {
     m_multimodelweights = Tokenize<float>(value, ",");
   } else {
-    return false;
+    return PhraseDictionary::SetParameter(key, value);
   }
   return true;
 }
@@ -93,6 +93,8 @@ PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
 
 void PhraseDictionaryMultiModel::Load()
 {
+  SetFeaturesToApply();
+
   // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
   // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
 
@@ -240,9 +242,8 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
 {
   const std::vector<float>* weights_ptr;
   std::vector<float> raw_weights;
-  const StaticData &staticData = StaticData::Instance();
 
-  weights_ptr = staticData.GetTemporaryMultiModelWeightsVector();
+  weights_ptr = GetTemporaryMultiModelWeightsVector();
 
   // HIEU - uninitialised variable.
   //checking weights passed to mosesserver; only valid for this sentence; *don't* raise exception if client weights are malformed
@@ -308,24 +309,14 @@ ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(cons
 //copied from PhraseDictionaryCompact; free memory allocated to TargetPhraseCollection (and each TargetPhrase) at end of sentence
 void PhraseDictionaryMultiModel::CacheForCleanup(TargetPhraseCollection* tpc)
 {
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
-#else
-  PhraseCache &ref = m_sentenceCache;
-#endif
+  PhraseCache &ref = GetPhraseCache();
   ref.push_back(tpc);
 }
 
 
 void PhraseDictionaryMultiModel::CleanUpAfterSentenceProcessing(const InputType &source)
 {
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()];
-#else
-  PhraseCache &ref = m_sentenceCache;
-#endif
+  PhraseCache &ref = GetPhraseCache();
   for(PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) {
     delete *it;
   }
@@ -335,9 +326,8 @@ void PhraseDictionaryMultiModel::CleanUpAfterSentenceProcessing(const InputType 
 
   CleanUpComponentModels(source);
 
-  const StaticData &staticData = StaticData::Instance();
   std::vector<float> empty_vector;
-  (const_cast<StaticData&>(staticData)).SetTemporaryMultiModelWeightsVector(empty_vector);
+  SetTemporaryMultiModelWeightsVector(empty_vector);
 }
 
 
@@ -346,6 +336,30 @@ void  PhraseDictionaryMultiModel::CleanUpComponentModels(const InputType &source
   for(size_t i = 0; i < m_numModels; ++i) {
     m_pd[i]->CleanUpAfterSentenceProcessing(source);
   }
+}
+
+const std::vector<float>* PhraseDictionaryMultiModel::GetTemporaryMultiModelWeightsVector() const
+{
+#ifdef WITH_THREADS
+  boost::shared_lock<boost::shared_mutex> read_lock(m_lock_weights);
+  if (m_multimodelweights_tmp.find(boost::this_thread::get_id()) != m_multimodelweights_tmp.end()) {
+    return &m_multimodelweights_tmp.find(boost::this_thread::get_id())->second;
+  } else {
+    return NULL;
+  }
+#else
+  return &m_multimodelweights_tmp;
+#endif
+}
+
+void PhraseDictionaryMultiModel::SetTemporaryMultiModelWeightsVector(std::vector<float> weights)
+{
+#ifdef WITH_THREADS
+  boost::unique_lock<boost::shared_mutex> lock(m_lock_weights);
+  m_multimodelweights_tmp[boost::this_thread::get_id()] = weights;
+#else
+  m_multimodelweights_tmp = weights;
+#endif
 }
 
 #ifdef WITH_DLIB

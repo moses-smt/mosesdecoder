@@ -68,15 +68,36 @@ export CPATH=$PREFIX/include${CPATH:+:$CPATH}
 Add all the above code to your .bashrc or .bash_login as appropriate.  Then
 you're ready to install packages in non-standard paths:
 
-#For autotools packages e.g. xmlrpc-c
+#For autotools packages e.g. xmlrpc-c and zlib
 ./configure --prefix=$PREFIX --libdir=$LIBDIR [other options here]
 
-#For tcmalloc (we only need the minimal version)
+#tcmalloc is a malloc implementation with threaded performance.  To see how it
+#improves Moses performance, read
+# http://www.mail-archive.com/moses-support@mit.edu/msg07303.html
+#It is part of gperftools which can be downloaded from from
+# https://code.google.com/p/gperftools/downloads/list
+#configure with this:
 ./configure --prefix=$PREFIX --libdir=$LIBDIR --enable-shared --enable-static --enable-minimal
+
+#For bzip2:
+wget http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
+tar xzvf bzip2-1.0.6.tar.gz
+cd bzip2-1.0.6/
+#Compile and install libbz2.a (static library)
+make
+make install PREFIX=$PREFIX
+mkdir -p $LIBDIR
+#Note this may be the same file; you can ignore the error
+mv $PREFIX/lib/libbz2.a $LIBDIR 2>/dev/null
+#Compile and install libbz2.so (dynamic library)
+make clean
+make -f Makefile-libbz2_so
+cp libbz2.so.* $LIBDIR
+ln -sf libbz2.so.1.0 $LIBDIR/libbz2.so
 
 #For Boost:
 ./bootstrap.sh
-./b2 --prefix=$PREFIX --libdir=$LIBDIR --layout=tagged link=static,shared threading=multi,single install
+./b2 --prefix=$PREFIX --libdir=$LIBDIR --layout=tagged link=static,shared threading=multi,single install || echo FAILURE
 
 --------------------------------------------------------------------------
 

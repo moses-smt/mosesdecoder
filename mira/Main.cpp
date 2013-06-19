@@ -416,8 +416,7 @@ int main(int argc, char** argv)
   decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
                              scaleByInverseLength, scaleByAvgInverseLength,
                              scaleByX, historySmoothing, bleu_smoothing_scheme, simpleHistoryBleu);
-  SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
-  bool chartDecoding = (searchAlgorithm == ChartDecoding);
+  bool chartDecoding = staticData.IsChart();
 
   // Optionally shuffle the sentences
   vector<size_t> order;
@@ -1800,7 +1799,7 @@ void decodeHopeOrFear(size_t rank, size_t size, size_t decode, string filename, 
     vector< vector<const Word*> > nbestOutput = decoder->getNBest(input, sid, n, factor, bleuWeight, dummyFeatureValues[0],
         dummyBleuScores[0], dummyModelScores[0], n, realBleu, true, false, rank, 0, "");
     cerr << endl;
-    decoder->cleanup(StaticData::Instance().GetSearchAlgorithm() == ChartDecoding);
+    decoder->cleanup(StaticData::Instance().IsChart());
 
     for (size_t i = 0; i < nbestOutput.size(); ++i) {
       vector<const Word*> output = nbestOutput[i];

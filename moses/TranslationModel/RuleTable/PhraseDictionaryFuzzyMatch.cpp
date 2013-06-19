@@ -66,6 +66,8 @@ PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
 
 void PhraseDictionaryFuzzyMatch::Load()
 {
+  SetFeaturesToApply();
+
   assert(m_config.size() == 3);
   m_FuzzyMatchWrapper = new tmmt::FuzzyMatchWrapper(m_config[0], m_config[1], m_config[2]);
 }

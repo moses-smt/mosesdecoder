@@ -33,6 +33,8 @@ PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray()
 
 void PhraseDictionaryDynSuffixArray::Load()
 {
+  SetFeaturesToApply();
+
   const StaticData &staticData = StaticData::Instance();
   vector<float> weight = staticData.GetWeights(this);
 
@@ -87,7 +89,7 @@ bool PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const 
   } else if (key == "alignment") {
     m_alignments = value;
   } else {
-    return false;
+    return PhraseDictionary::SetParameter(key, value);
   }
   return true;
 }

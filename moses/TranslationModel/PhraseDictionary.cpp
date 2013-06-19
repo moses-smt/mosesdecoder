@@ -44,15 +44,6 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
       ++ind;
     }
   }
-
-  // find out which feature function can be applied in this decode step
-  const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
-  for (size_t i = 0; i < allFeatures.size(); ++i) {
-    FeatureFunction *feature = allFeatures[i];
-    if (feature->IsUseable(m_outputFactors)) {
-      m_featuresToApply.push_back(feature);
-    }
-  }
 }
 
 
@@ -60,7 +51,6 @@ const TargetPhraseCollection *PhraseDictionary::
 GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 {
   Phrase phrase = src.GetSubString(range);
-  phrase.OnlyTheseFactors(m_inputFactors);
   return GetTargetPhraseCollection(phrase);
 }
 
@@ -70,14 +60,22 @@ bool PhraseDictionary::SetParameter(const std::string& key, const std::string& v
     m_filePath = value;
   } else if (key == "table-limit") {
     m_tableLimit = Scan<size_t>(value);
-  } else if (key == "target-path") {
-    m_targetFile = value;
-  } else if (key == "alignment-path") {
-    m_alignmentsFile = value;
   } else {
-    return false;
+    return DecodeFeature::SetParameter(key, value);
   }
   return true;
+}
+
+void PhraseDictionary::SetFeaturesToApply()
+{
+  // find out which feature function can be applied in this decode step
+  const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < allFeatures.size(); ++i) {
+    FeatureFunction *feature = allFeatures[i];
+    if (feature->IsUseable(m_outputFactors)) {
+      m_featuresToApply.push_back(feature);
+    }
+  }
 }
 
 }

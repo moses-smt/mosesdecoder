@@ -140,7 +140,7 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 /** calculate total score
   * @todo this should be in ScoreBreakdown
  */
-void ChartHypothesis::CalcScore()
+void ChartHypothesis::Evaluate()
 {
   const StaticData &staticData = StaticData::Instance();
   // total scores from prev hypos
@@ -152,12 +152,9 @@ void ChartHypothesis::CalcScore()
     m_scoreBreakdown.PlusEquals(scoreBreakdown);
   }
 
-  // translation models & word penalty
+  // scores from current translation rule. eg. translation models & word penalty
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
-
-  //Add pre-computed features
-  m_manager.InsertPreCalculatedScores(GetCurrTargetPhrase(), &m_scoreBreakdown);
 
   // compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
@@ -176,6 +173,7 @@ void ChartHypothesis::CalcScore()
       m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
     }
   }
+
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }
 

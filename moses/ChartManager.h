@@ -64,12 +64,6 @@ private:
 
   ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
 
-  //! Some features should be calculated prior to search
-  boost::unordered_map<TargetPhrase,ScoreComponentCollection, TargetPhraseHasher, TargetPhraseComparator> m_precalculatedScores;
-
-  //! Pre-calculate most stateless feature values
-  void PreCalculateScores();
-
 public:
   ChartManager(InputType const& source);
   ~ChartManager();
@@ -106,10 +100,6 @@ public:
   unsigned GetNextHypoId() {
     return m_hypothesisId++;
   }
-
-  //! Access the pre-calculated values
-  void InsertPreCalculatedScores(const TargetPhrase& targetPhrase,
-                                 ScoreComponentCollection* scoreBreakdown) const;
 
 };
 

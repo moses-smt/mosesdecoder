@@ -65,7 +65,7 @@ bool TargetNgramFeature::SetParameter(const std::string& key, const std::string&
   } else if (key == "lower-ngrams") {
     m_lower_ngrams = Scan<bool>(value);
   } else {
-    return false;
+    return StatefulFeatureFunction::SetParameter(key, value);
   }
   return true;
 }

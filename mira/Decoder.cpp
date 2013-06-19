@@ -106,7 +106,7 @@ vector< vector<const Word*> > MosesDecoder::getNBest(const std::string& source,
     string filename)
 {
   StaticData &staticData = StaticData::InstanceNonConst();
-  bool chartDecoding = (staticData.GetSearchAlgorithm() == ChartDecoding);
+  bool chartDecoding = staticData.IsChart();
   initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength, chartDecoding);
 
   // run the decoder
@@ -269,7 +269,7 @@ void MosesDecoder::outputNBestList(const std::string& source, size_t sentenceid,
                                    bool distinctNbest, bool avgRefLength, string filename, ofstream& streamOut)
 {
   StaticData &staticData = StaticData::InstanceNonConst();
-  bool chartDecoding = (staticData.GetSearchAlgorithm() == ChartDecoding);
+  bool chartDecoding = staticData.IsChart();
   initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength, chartDecoding);
 
   if (chartDecoding) {

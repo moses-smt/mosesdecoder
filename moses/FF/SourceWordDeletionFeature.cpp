@@ -43,7 +43,7 @@ bool SourceWordDeletionFeature::SetParameter(const std::string& key, const std::
   } else if (key == "path") {
     m_filename = value;
   } else {
-    return false;
+    return StatelessFeatureFunction::SetParameter(key, value);
   }
   return true;
 }
@@ -67,6 +67,12 @@ void SourceWordDeletionFeature::Load()
   inFile.close();
 
   m_unrestricted = false;
+}
+
+bool SourceWordDeletionFeature::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[m_factorType];
+  return ret;
 }
 
 void SourceWordDeletionFeature::Evaluate(const Phrase &source
