@@ -12,18 +12,7 @@ PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(const std::string
   :PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
   ,m_biSA(new BilingualDynSuffixArray())
 {
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
-
+  ReadParameters();
 }
 
 PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray()

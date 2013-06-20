@@ -38,16 +38,7 @@ namespace Moses
 GenerationDictionary::GenerationDictionary(const std::string &line)
   : DecodeFeature("Generation", line)
 {
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-	vector<string> &args = m_args[ind];
-	bool consumed = SetParameter(args[0], args[1]);
-	if (consumed) {
-	  m_args.erase(m_args.begin() + ind);
-	} else {
-	  ++ind;
-	}
-  }
+  ReadParameters();
 }
 
 void GenerationDictionary::Load()

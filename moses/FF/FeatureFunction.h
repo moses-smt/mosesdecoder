@@ -108,6 +108,7 @@ public:
 
   virtual bool SetParameter(const std::string& key, const std::string& value);
   virtual void OverrideParameter(const std::string& key, const std::string& value);
+  virtual void ReadParameters();
 };
 
 }
