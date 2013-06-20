@@ -91,17 +91,20 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
     UTIL_THROW_IF(!ret.second, util::Exception, "Duplicate key in line " << line);
 
-    m_args.push_back(args);
+    if (args[0] == "num-features") {
+      m_numScoreComponents = Scan<size_t>(args[1]);
+    } else if (args[0] == "name") {
+      m_description = args[1];
+    }
+    else {
+    	m_args.push_back(args);
+    }
   }
 }
 
 bool FeatureFunction::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "num-features") {
-    m_numScoreComponents = Scan<size_t>(value);
-  } else if (key == "name") {
-    m_description = value;
-  } else if (key == "tuneable") {
+  if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
   } else {
     return false;
