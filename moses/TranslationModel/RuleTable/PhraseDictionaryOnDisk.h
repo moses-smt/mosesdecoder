@@ -49,10 +49,7 @@ protected:
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
 public:
-  PhraseDictionaryOnDisk(const std::string &line)
-    : MyBase("PhraseDictionaryOnDisk", line) {
-    CHECK(m_args.size() == 0);
-  }
+  PhraseDictionaryOnDisk(const std::string &line);
   ~PhraseDictionaryOnDisk();
   void Load();
 

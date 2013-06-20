@@ -32,10 +32,10 @@ protected:
                         , const InputFeature &inputFeature);
 
   void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-        , size_t startPosition
-        , size_t endPosition
-        , bool adhereTableLimit
-        , size_t graphInd);
+                                        , size_t startPosition
+                                        , size_t endPosition
+                                        , bool adhereTableLimit
+                                        , size_t graphInd);
 };
 
 }

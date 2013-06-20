@@ -47,8 +47,8 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
       InputLatticeNode node(subphrase, range);
 
       if (range.GetNumWordsCovered() > 1) {
-    	  InputLatticeNode prevNode = GetPhrase(startPos, endPos - 1);
-    	  node.AddNext(prevNode);
+        InputLatticeNode prevNode = GetPhrase(startPos, endPos - 1);
+        node.AddNext(prevNode);
       }
 
       vec.push_back(node);

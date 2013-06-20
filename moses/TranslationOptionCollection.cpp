@@ -40,8 +40,8 @@ using namespace std;
 namespace Moses
 {
 InputLatticeNode::InputLatticeNode(const Phrase &phrase, const WordsRange &range)
-:m_phrase(phrase)
-,m_range(range)
+  :m_phrase(phrase)
+  ,m_range(range)
 {
 }
 

@@ -62,10 +62,10 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 
   // create subphrases by appending words to previous subphrases
   for (size_t startPos = 0; startPos < size; ++startPos) {
-	size_t maxSize = size - startPos;
-	size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-	maxSize = std::min(maxSize, maxSizePhrase);
-	size_t end = startPos + maxSize - 1;
+    size_t maxSize = size - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+    size_t end = startPos + maxSize - 1;
 
     for (size_t endPos = startPos + 1; endPos < end; ++endPos) {
       std::vector<SourcePath> &newSubphrases = GetPhrases(startPos, endPos);

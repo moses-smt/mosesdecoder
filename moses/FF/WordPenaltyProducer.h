@@ -12,10 +12,7 @@ class ScoreComponentCollection;
 class WordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-  WordPenaltyProducer(const std::string &line)
-    : StatelessFeatureFunction("WordPenalty",1, line) {
-    CHECK(m_args.size() == 0);
-  }
+  WordPenaltyProducer(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

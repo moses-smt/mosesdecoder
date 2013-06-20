@@ -68,6 +68,7 @@ public:
   *	Or NULL if the input word isn't found. The search function used is the WordComparer functor
   */
   const OutputWordCollection *FindWord(const Word &word) const;
+  bool SetParameter(const std::string& key, const std::string& value);
 
 };
 

@@ -39,6 +39,20 @@ using namespace std;
 
 namespace Moses
 {
+PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
+  : RuleTableTrie("PhraseDictionaryMemory", line)
+{
+  size_t ind = 0;
+  while (ind < m_args.size()) {
+    vector<string> &args = m_args[ind];
+    bool consumed = SetParameter(args[0], args[1]);
+    if (consumed) {
+      m_args.erase(m_args.begin() + ind);
+    } else {
+      ++ind;
+    }
+  }
+}
 
 TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollection(
   const Phrase &source

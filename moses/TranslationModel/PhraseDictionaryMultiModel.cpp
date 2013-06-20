@@ -56,17 +56,6 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &description, const std::string &line)
   :PhraseDictionary(description, line)
 {
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-
   if (description == "PhraseDictionaryMultiModelCounts") {
     CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*4 == m_multimodelweights.size());
   }
