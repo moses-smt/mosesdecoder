@@ -101,23 +101,14 @@ bool FeatureFunction::SetParameter(const std::string& key, const std::string& va
   return true;
 }
 
-void FeatureFunction::OverrideParameter(const std::string& key, const std::string& value)
-{
-  bool ret = SetParameter(key, value);
-  UTIL_THROW_IF(!ret, util::Exception, "Unknown argument" << key);
-}
-
 void FeatureFunction::ReadParameters()
 {
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-	vector<string> &args = m_args[ind];
+  while (!m_args.empty()) {
+	const vector<string> &args = m_args[0];
 	bool consumed = SetParameter(args[0], args[1]);
-	if (consumed) {
-	  m_args.erase(m_args.begin() + ind);
-	} else {
-	  ++ind;
-	}
+	CHECK(consumed);
+
+    m_args.erase(m_args.begin());
   }
 }
 
