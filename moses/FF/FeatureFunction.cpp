@@ -90,23 +90,20 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   }
 }
 
-bool FeatureFunction::SetParameter(const std::string& key, const std::string& value)
+void FeatureFunction::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
   } else {
     UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
   }
-
-  return true;
 }
 
 void FeatureFunction::ReadParameters()
 {
   while (!m_args.empty()) {
 	const vector<string> &args = m_args[0];
-	bool consumed = SetParameter(args[0], args[1]);
-	CHECK(consumed);
+	SetParameter(args[0], args[1]);
 
     m_args.erase(m_args.begin());
   }

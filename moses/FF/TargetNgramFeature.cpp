@@ -44,7 +44,7 @@ TargetNgramFeature::TargetNgramFeature(const std::string &line)
   ReadParameters();
 }
 
-bool TargetNgramFeature::SetParameter(const std::string& key, const std::string& value)
+void TargetNgramFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
@@ -53,9 +53,8 @@ bool TargetNgramFeature::SetParameter(const std::string& key, const std::string&
   } else if (key == "lower-ngrams") {
     m_lower_ngrams = Scan<bool>(value);
   } else {
-    return StatefulFeatureFunction::SetParameter(key, value);
+    StatefulFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 bool TargetNgramFeature::Load(const std::string &filePath)

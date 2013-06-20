@@ -60,7 +60,7 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
 
 }
 
-bool WordTranslationFeature::SetParameter(const std::string& key, const std::string& value)
+void WordTranslationFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "input-factor") {
     m_factorTypeSource = Scan<FactorType>(value);
@@ -83,9 +83,8 @@ bool WordTranslationFeature::SetParameter(const std::string& key, const std::str
   } else if (key == "target-path") {
     m_filePathTarget = value;
   } else {
-    return StatelessFeatureFunction::SetParameter(key, value);
+    StatelessFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 void WordTranslationFeature::Load()

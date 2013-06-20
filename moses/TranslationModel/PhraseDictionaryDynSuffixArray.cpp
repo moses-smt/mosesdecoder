@@ -69,7 +69,7 @@ ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(
   throw "Chart decoding not supported by PhraseDictionaryDynSuffixArray";
 }
 
-bool PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const std::string& value)
+void PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source") {
     m_source = value;
@@ -78,9 +78,8 @@ bool PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const 
   } else if (key == "alignment") {
     m_alignments = value;
   } else {
-    return PhraseDictionary::SetParameter(key, value);
+    PhraseDictionary::SetParameter(key, value);
   }
-  return true;
 }
 
 }// end namepsace

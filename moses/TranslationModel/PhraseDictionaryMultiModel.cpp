@@ -51,7 +51,7 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &descri
   }
 }
 
-bool PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std::string& value)
+void PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "mode") {
     m_mode = value;
@@ -61,9 +61,8 @@ bool PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std:
   } else if (key == "lambda") {
     m_multimodelweights = Tokenize<float>(value, ",");
   } else {
-    return PhraseDictionary::SetParameter(key, value);
+    PhraseDictionary::SetParameter(key, value);
   }
-  return true;
 }
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()

@@ -91,7 +91,7 @@ public:
     return m_featuresToApply;
   }
 
-  bool SetParameter(const std::string& key, const std::string& value);
+  void SetParameter(const std::string& key, const std::string& value);
 
 protected:
   size_t m_tableLimit;

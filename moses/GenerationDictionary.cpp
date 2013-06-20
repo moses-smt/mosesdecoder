@@ -126,14 +126,13 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
   return ret;
 }
 
-bool GenerationDictionary::SetParameter(const std::string& key, const std::string& value)
+void GenerationDictionary::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "path") {
     m_filePath = value;
   } else {
-    return DecodeFeature::SetParameter(key, value);
+    DecodeFeature::SetParameter(key, value);
   }
-  return true;
 }
 
 }

@@ -23,7 +23,7 @@ GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
 
 }
 
-bool GlobalLexicalModel::SetParameter(const std::string& key, const std::string& value)
+void GlobalLexicalModel::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "file") {
     m_filePath = value;
@@ -32,9 +32,8 @@ bool GlobalLexicalModel::SetParameter(const std::string& key, const std::string&
   } else if (key == "outputFactors") {
     m_outputFactorsVec = Tokenize<FactorType>(value,",");
   } else {
-    return StatelessFeatureFunction::SetParameter(key, value);
+    StatelessFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 GlobalLexicalModel::~GlobalLexicalModel()

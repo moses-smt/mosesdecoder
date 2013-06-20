@@ -23,16 +23,15 @@ TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
   ReadParameters();
 }
 
-bool TargetWordInsertionFeature::SetParameter(const std::string& key, const std::string& value)
+void TargetWordInsertionFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
   } else if (key == "path") {
     m_filename = value;
   } else {
-    return StatelessFeatureFunction::SetParameter(key, value);
+    StatelessFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 void TargetWordInsertionFeature::Load()

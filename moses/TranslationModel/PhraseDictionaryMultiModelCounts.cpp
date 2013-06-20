@@ -84,7 +84,7 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
 
 }
 
-bool PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, const std::string& value)
+void PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "mode") {
     m_mode = value;
@@ -97,10 +97,8 @@ bool PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, cons
   } else if (key == "target-table") {
     m_targetTable = Tokenize(value, ",");
   } else {
-    return PhraseDictionaryMultiModel::SetParameter(key, value);
+    PhraseDictionaryMultiModel::SetParameter(key, value);
   }
-
-  return true;
 }
 
 PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()

@@ -57,7 +57,7 @@ DecodeFeature::DecodeFeature(const std::string& description
   VERBOSE(2,"DecodeFeature: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 }
 
-bool DecodeFeature::SetParameter(const std::string& key, const std::string& value)
+void DecodeFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "input-factor") {
     m_input =Tokenize<FactorType>(value, ",");
@@ -66,9 +66,8 @@ bool DecodeFeature::SetParameter(const std::string& key, const std::string& valu
     m_output =Tokenize<FactorType>(value, ",");
     m_outputFactors = FactorMask(m_output);
   } else {
-    return StatelessFeatureFunction::SetParameter(key, value);
+    StatelessFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 

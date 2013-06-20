@@ -44,16 +44,15 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
   return GetTargetPhraseCollection(phrase);
 }
 
-bool PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
+void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "path") {
     m_filePath = value;
   } else if (key == "table-limit") {
     m_tableLimit = Scan<size_t>(value);
   } else {
-    return DecodeFeature::SetParameter(key, value);
+    DecodeFeature::SetParameter(key, value);
   }
-  return true;
 }
 
 void PhraseDictionary::SetFeaturesToApply()

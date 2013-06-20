@@ -32,7 +32,7 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
   }
 }
 
-bool PhrasePairFeature::SetParameter(const std::string& key, const std::string& value)
+void PhrasePairFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "input-factor") {
     m_sourceFactorId = Scan<FactorType>(value);
@@ -51,10 +51,8 @@ bool PhrasePairFeature::SetParameter(const std::string& key, const std::string& 
   } else if (key == "ignore-punctuation") {
     m_filePathSource = value;
   } else {
-    return StatelessFeatureFunction::SetParameter(key, value);
+    StatelessFeatureFunction::SetParameter(key, value);
   }
-  return true;
-
 }
 
 void PhrasePairFeature::Load()

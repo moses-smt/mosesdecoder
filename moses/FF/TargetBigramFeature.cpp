@@ -30,7 +30,7 @@ TargetBigramFeature::TargetBigramFeature(const std::string &line)
 
 }
 
-bool TargetBigramFeature::SetParameter(const std::string& key, const std::string& value)
+void TargetBigramFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
@@ -39,7 +39,6 @@ bool TargetBigramFeature::SetParameter(const std::string& key, const std::string
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 void TargetBigramFeature::Load()

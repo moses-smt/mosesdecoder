@@ -47,7 +47,7 @@ public:
                                   ScoreComponentCollection* ) const {
     abort();
   }
-  bool SetParameter(const std::string& key, const std::string& value);
+  void SetParameter(const std::string& key, const std::string& value);
 
 private:
   FactorType m_factorType;

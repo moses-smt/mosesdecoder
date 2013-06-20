@@ -22,16 +22,15 @@ PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
   ReadParameters();
 }
 
-bool PhraseBoundaryFeature::SetParameter(const std::string& key, const std::string& value)
+void PhraseBoundaryFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source") {
     m_sourceFactors = Tokenize<FactorType>(value, ",");
   } else if (key == "target") {
     m_targetFactors = Tokenize<FactorType>(value, ",");
   } else {
-    return StatefulFeatureFunction::SetParameter(key, value);
+    StatefulFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &) const
