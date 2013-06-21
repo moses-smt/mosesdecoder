@@ -30,6 +30,10 @@
 #include "OnDiskPt/PhraseNode.h"
 #include "util/check.hh"
 
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#endif
+
 namespace Moses
 {
 class TargetPhraseCollection;
