@@ -3,11 +3,13 @@
 #ifndef moses_PhraseDictionaryTreeAdaptor_h
 #define moses_PhraseDictionaryTreeAdaptor_h
 
-#include <vector>
-#include "util/check.hh"
 #include "moses/TypeDef.h"
 #include "moses/TargetPhraseCollection.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "util/check.hh"
+
+#include <boost/thread/tss.hpp>
+#include <vector>
 
 namespace Moses
 {
