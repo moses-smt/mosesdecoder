@@ -46,7 +46,9 @@ for(; $i<scalar(@INI); $i++) {
 	elsif ($section =~ /weight-(.+)/ && $section ne "weight-file") {
 	    $WEIGHT{$1} = &get_data();
 	}
-	elsif ($section eq "report-sparse-features") {}
+	elsif ($section eq "report-sparse-features") {
+    &get_data(); # ignore
+  } 
 	else {
 	    print STDERR "include section [$section] verbatim.\n";
 	    print $header.$line;
@@ -101,9 +103,9 @@ foreach my $section (keys %FEATURE) {
 	$feature .= " path=$file" if defined($file);
 	$feature .= "\n";
     }
-    elsif ($section eq "source-word-insertion-feature") {
+    elsif ($section eq "source-word-deletion-feature") {
 	my ($factor,$file) = split(/ /,$FEATURE{$section}[0]);
-	$feature .= "SourceWordDeletionFeature name=swd factor=$file";
+	$feature .= "SourceWordDeletionFeature name=swd factor=$factor";
  	$feature .= " path=$file" if defined($file);
 	$feature .= "\n";
    }
@@ -126,7 +128,7 @@ foreach my $section (keys %FEATURE) {
 		$implementation = "UNKNOWN";
 	    }
 	    $feature .= "$implementation name=TranslationModel$i num-features=$weight_count path=$file input-factor=$input_factor output-factor=$output_factor";
-	    $feature .= " ttable-limit=".$TTABLE_LIMIT[$i] if $#TTABLE_LIMIT >= $i;
+	    $feature .= " table-limit=".$TTABLE_LIMIT[$i] if $#TTABLE_LIMIT >= $i;
 	    $feature .= "\n";
 	    $weight .= "TranslationModel$i=".&get_weights(\@W,$weight_count)."\n";
 	    $i++;
@@ -194,7 +196,6 @@ sub get_weights {
     my $list = "";
     for(my $w=0;$w<$count;$w++) {
 	my $value = shift @{$W};
-	chop($value);
 	$list .= " $value";
     }
     return $list;
