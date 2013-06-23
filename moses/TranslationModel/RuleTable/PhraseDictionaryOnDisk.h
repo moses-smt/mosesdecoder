@@ -30,6 +30,10 @@
 #include "OnDiskPt/PhraseNode.h"
 #include "util/check.hh"
 
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#endif
+
 namespace Moses
 {
 class TargetPhraseCollection;
@@ -49,10 +53,7 @@ protected:
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
 public:
-  PhraseDictionaryOnDisk(const std::string &line)
-    : MyBase("PhraseDictionaryOnDisk", line) {
-    CHECK(m_args.size() == 0);
-  }
+  PhraseDictionaryOnDisk(const std::string &line);
   ~PhraseDictionaryOnDisk();
   void Load();
 

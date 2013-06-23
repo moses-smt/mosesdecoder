@@ -2,8 +2,15 @@
 #include "moses/TargetPhrase.h"
 #include "moses/ScoreComponentCollection.h"
 
+using namespace std;
+
 namespace Moses
 {
+WordPenaltyProducer::WordPenaltyProducer(const std::string &line)
+  : StatelessFeatureFunction("WordPenalty",1, line) {
+  ReadParameters();
+}
+
 void WordPenaltyProducer::Evaluate(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown

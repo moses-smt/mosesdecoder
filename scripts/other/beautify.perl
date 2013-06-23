@@ -5,7 +5,7 @@ use File::Basename;
 
 sub Beautify($);
 
-Beautify("/Users/hieuhoang/unison/workspace/github/mosesdecoder");
+Beautify("/home/hieu/workspace/github/mosesdecoder");
 
 sub Beautify($)
 {

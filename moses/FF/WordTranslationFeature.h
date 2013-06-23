@@ -52,7 +52,7 @@ public:
 
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection* accumulator) const;
-  bool SetParameter(const std::string& key, const std::string& value);
+  void SetParameter(const std::string& key, const std::string& value);
 };
 
 }

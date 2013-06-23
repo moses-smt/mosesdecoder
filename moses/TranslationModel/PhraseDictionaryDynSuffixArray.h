@@ -26,7 +26,7 @@ public:
   void deleteSnt(unsigned, unsigned);
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
 
-  bool SetParameter(const std::string& key, const std::string& value);
+  void SetParameter(const std::string& key, const std::string& value);
 
 private:
   BilingualDynSuffixArray *m_biSA;

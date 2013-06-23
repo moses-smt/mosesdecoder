@@ -68,17 +68,7 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
   //m_mode = "interpolate";
   //m_combineFunction = LinearInterpolationFromCounts;
   cerr << "m_args=" << m_args.size() << endl;
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 
   CHECK(m_targetTable.size() == m_pdStr.size());
 
@@ -94,7 +84,7 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
 
 }
 
-bool PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, const std::string& value)
+void PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "mode") {
     m_mode = value;
@@ -107,10 +97,8 @@ bool PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, cons
   } else if (key == "target-table") {
     m_targetTable = Tokenize(value, ",");
   } else {
-    return false;
+    PhraseDictionaryMultiModel::SetParameter(key, value);
   }
-
-  return true;
 }
 
 PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()

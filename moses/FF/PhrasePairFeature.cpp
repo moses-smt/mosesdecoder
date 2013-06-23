@@ -17,18 +17,7 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
   :StatelessFeatureFunction("PhrasePairFeature", 0, line)
 {
   std::cerr << "Initializing PhrasePairFeature.." << std::endl;
-
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 
   if (m_simple == 1) std::cerr << "using simple phrase pairs.. ";
   if (m_sourceContext == 1) std::cerr << "using source context.. ";
@@ -43,7 +32,7 @@ PhrasePairFeature::PhrasePairFeature(const std::string &line)
   }
 }
 
-bool PhrasePairFeature::SetParameter(const std::string& key, const std::string& value)
+void PhrasePairFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "input-factor") {
     m_sourceFactorId = Scan<FactorType>(value);
@@ -62,10 +51,8 @@ bool PhrasePairFeature::SetParameter(const std::string& key, const std::string& 
   } else if (key == "ignore-punctuation") {
     m_filePathSource = value;
   } else {
-    return false;
+    StatelessFeatureFunction::SetParameter(key, value);
   }
-  return true;
-
 }
 
 void PhrasePairFeature::Load()

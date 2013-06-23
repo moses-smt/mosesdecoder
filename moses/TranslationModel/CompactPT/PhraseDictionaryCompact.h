@@ -68,14 +68,7 @@ protected:
 
   std::vector<float> m_weight;
 public:
-  PhraseDictionaryCompact(const std::string &line)
-    :PhraseDictionary("PhraseDictionaryCompact", line)
-    ,m_inMemory(true)
-    ,m_useAlignmentInfo(true)
-    ,m_hash(10, 16)
-    ,m_phraseDecoder(0)
-    ,m_weight(0) {
-  }
+  PhraseDictionaryCompact(const std::string &line);
 
   ~PhraseDictionaryCompact();
 

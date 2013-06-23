@@ -22,30 +22,18 @@ SourceWordDeletionFeature::SourceWordDeletionFeature(const std::string &line)
    m_unrestricted(true)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
-
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 }
 
-bool SourceWordDeletionFeature::SetParameter(const std::string& key, const std::string& value)
+void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
   } else if (key == "path") {
     m_filename = value;
   } else {
-    return false;
+    StatelessFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 void SourceWordDeletionFeature::Load()

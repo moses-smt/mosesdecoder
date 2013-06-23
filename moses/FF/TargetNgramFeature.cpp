@@ -41,22 +41,10 @@ TargetNgramFeature::TargetNgramFeature(const std::string &line)
   :StatefulFeatureFunction("TargetNgramFeature", 0, line)
 {
   std::cerr << "Initializing target ngram feature.." << std::endl;
-
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
-
+  ReadParameters();
 }
 
-bool TargetNgramFeature::SetParameter(const std::string& key, const std::string& value)
+void TargetNgramFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
@@ -65,9 +53,8 @@ bool TargetNgramFeature::SetParameter(const std::string& key, const std::string&
   } else if (key == "lower-ngrams") {
     m_lower_ngrams = Scan<bool>(value);
   } else {
-    return false;
+    StatefulFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 bool TargetNgramFeature::Load(const std::string &filePath)

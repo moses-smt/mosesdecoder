@@ -38,14 +38,7 @@ namespace Moses
 GenerationDictionary::GenerationDictionary(const std::string &line)
   : DecodeFeature("Generation", line)
 {
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "path") {
-      m_filePath = args[1];
-    }
-  }
-
+  ReadParameters();
 }
 
 void GenerationDictionary::Load()
@@ -131,6 +124,15 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
     ret = &iter->second;
   }
   return ret;
+}
+
+void GenerationDictionary::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "path") {
+    m_filePath = value;
+  } else {
+    DecodeFeature::SetParameter(key, value);
+  }
 }
 
 }

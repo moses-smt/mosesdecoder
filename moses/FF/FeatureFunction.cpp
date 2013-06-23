@@ -49,17 +49,6 @@ void FeatureFunction::Initialize(const std::string& description, const std::stri
 {
   ParseLine(description, line);
 
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-
   if (m_description == "") {
     size_t index = description_counts.count(description);
 
@@ -91,29 +80,33 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
     UTIL_THROW_IF(!ret.second, util::Exception, "Duplicate key in line " << line);
 
-    m_args.push_back(args);
+    if (args[0] == "num-features") {
+      m_numScoreComponents = Scan<size_t>(args[1]);
+    } else if (args[0] == "name") {
+      m_description = args[1];
+    } else {
+      m_args.push_back(args);
+    }
   }
 }
 
-bool FeatureFunction::SetParameter(const std::string& key, const std::string& value)
+void FeatureFunction::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "num-features") {
-    m_numScoreComponents = Scan<size_t>(value);
-  } else if (key == "name") {
-    m_description = value;
-  } else if (key == "tuneable") {
+  if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
   } else {
-    return false;
+    UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
   }
-
-  return true;
 }
 
-void FeatureFunction::OverrideParameter(const std::string& key, const std::string& value)
+void FeatureFunction::ReadParameters()
 {
-  bool ret = SetParameter(key, value);
-  UTIL_THROW_IF(!ret, util::Exception, "Unknown argument" << key);
+  while (!m_args.empty()) {
+	const vector<string> &args = m_args[0];
+	SetParameter(args[0], args[1]);
+
+    m_args.erase(m_args.begin());
+  }
 }
 
 }

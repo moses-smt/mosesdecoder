@@ -43,10 +43,7 @@ protected:
   }
 
 public:
-  PhraseDictionaryMemory(const std::string &line)
-    : RuleTableTrie("PhraseDictionaryMemory", line) {
-    CHECK(m_args.size() == 0);
-  }
+  PhraseDictionaryMemory(const std::string &line);
 
   const PhraseDictionaryNodeMemory &GetRootNode() const {
     return m_collection;
