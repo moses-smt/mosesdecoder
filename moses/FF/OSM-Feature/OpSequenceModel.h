@@ -42,6 +42,9 @@ public:
   std::vector<float> GetFutureScores(const Phrase &source, const Phrase &target) const;
   void SetParameter(const std::string& key, const std::string& value);
 
+  bool IsUseable(const FactorMask &mask) const
+  { return true; }
+
 protected:
 	typedef std::pair<Phrase, Phrase> ParallelPhrase;
 	typedef std::vector<float> Scores;
