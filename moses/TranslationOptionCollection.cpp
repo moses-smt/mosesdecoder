@@ -233,6 +233,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
     // add to dictionary
 
     Word &targetWord = targetPhrase.AddWord();
+    targetWord.SetIsOOV(true);
 
     for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
       FactorType factorType = static_cast<FactorType>(currFactor);

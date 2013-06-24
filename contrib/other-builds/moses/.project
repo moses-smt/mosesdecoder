@@ -1122,6 +1122,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/OSM-Feature</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>FF/PhraseBasedFeatureContext.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.cpp</locationURI>
@@ -1580,6 +1585,36 @@
 			<name>bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/OpSequenceModel.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/OpSequenceModel.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/OpSequenceModel.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/OpSequenceModel.h</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/SRILM-API.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/SRILM-API.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/SRILM-API.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/SRILM-API.h</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/osmHyp.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/osmHyp.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>

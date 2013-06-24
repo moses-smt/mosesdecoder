@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Ngram.h"
+#include "srilm/include/Ngram.h"
 #include <vector>
 
 using namespace std;

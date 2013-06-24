@@ -3,7 +3,6 @@
 #include "osmHyp.h"
 #include "util/check.hh"
 #include "moses/Util.h"
-#include "moses/OSM-Feature/osmHyp.h"
 
 
 
@@ -12,12 +11,9 @@ using namespace std;
 namespace Moses
 {
 
-OpSequenceModel::OpSequenceModel()
-:StatefulFeatureFunction("OpSequenceModel", 5 )
+OpSequenceModel::OpSequenceModel(const std::string &line)
+:StatefulFeatureFunction("OpSequenceModel", 5, line )
 {
-
-
-
 	//LanguageModel = NULL;
 }
 
@@ -75,8 +71,8 @@ void OpSequenceModel::Load(const std::string &osmFeatureFile, const std::string 
     CHECK(tokens.size() == 3);
 
     Phrase source, target;
-    source.CreateFromString(factorOrder, tokens[0], "|");
-    target.CreateFromString(factorOrder, tokens[1], "|");
+    source.CreateFromString(Input, factorOrder, tokens[0], "|", NULL);
+    target.CreateFromString(Output, factorOrder, tokens[1], "|", NULL);
 
     ParallelPhrase pp(source, target);
     Scores scores = Tokenize<float>(tokens[2], " ");
@@ -149,7 +145,7 @@ FFState* OpSequenceModel::Evaluate(
   for (int i = startIndex; i <= endIndex; i++)
   {
 	  myBitmap.SetValue(i,0); // resetting coverage of this phrase ...
-	 mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString());
+	 mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString().as_string());
 	 // cerr<<mySourcePhrase[i]<<endl;
   }
 
@@ -159,7 +155,7 @@ FFState* OpSequenceModel::Evaluate(
 	  if (target.GetWord(i).IsOOV())
 		  myTargetPhrase.push_back("_TRANS_SLF_");
 	  else
-		  myTargetPhrase.push_back(target.GetWord(i).GetFactor(0)->GetString());
+		  myTargetPhrase.push_back(target.GetWord(i).GetFactor(0)->GetString().as_string());
 
   }
 

@@ -3,11 +3,10 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "moses/FeatureFunction.h"
-#include "Ngram.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/Manager.h"
-#include "moses/OSM-Feature/osmHyp.h"
-#include "moses/OSM-Feature/SRILM-API.h"
+#include "moses/FF/OSM-Feature/osmHyp.h"
+#include "moses/FF/OSM-Feature/SRILM-API.h"
 
 namespace Moses
 {
@@ -21,7 +20,7 @@ public:
 	int lmOrder;
 	float unkOpProb;
 
-	OpSequenceModel();
+	OpSequenceModel(const std::string &line);
 
 	void readLanguageModel(const char *);
 	void Load(const std::string &osmFeatureFile, const std::string &operationLM , int orderVal);

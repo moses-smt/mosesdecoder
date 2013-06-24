@@ -1,7 +1,7 @@
 #pragma once
 
 # include "SRILM-API.h"
-# include "moses/FFState.h"
+# include "moses/FF/FFState.h"
 # include "moses/Manager.h"
 # include <set>
 # include <map>

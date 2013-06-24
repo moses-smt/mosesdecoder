@@ -12,6 +12,11 @@ if $(with-dlib) {
 
 alias headers : ../util//kenutil : : : $(max-factors) $(dlib) ; 
 
+local with-srilm = [ option.get "with-srilm" ] ;
+if $(with-srilm) {
+  headers += <include>$(with-srilm)/include
+}
+
 alias ThreadPool : ThreadPool.cpp ;
 
 if [ option.get "with-synlm" : no : yes ] = yes
@@ -41,6 +46,7 @@ lib moses :
   TranslationModel/Scope3Parser/*.cpp
   TranslationModel/CYKPlusParser/*.cpp
   FF/*.cpp
+  FF/OSM-Feature/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
