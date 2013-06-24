@@ -243,7 +243,7 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
 		  m_featurePath = value;
 	  } else if (key == "lm-path") {
 		  m_lmPath = value;
-	  } else if (key == "lm-path") {
+	  } else if (key == "order") {
 		  lmOrder = Scan<int>(value);
 	  } else {
 		  StatefulFeatureFunction::SetParameter(key, value);
