@@ -23,7 +23,7 @@ public:
 	OpSequenceModel(const std::string &line);
 
 	void readLanguageModel(const char *);
-	void Load(const std::string &osmFeatureFile, const std::string &operationLM , int orderVal);
+	void Load();
 
 	FFState* Evaluate(
 	    const Hypothesis& cur_hypo,
@@ -40,6 +40,7 @@ public:
   virtual std::string GetScoreProducerWeightShortName(unsigned idx=0) const;
 
   std::vector<float> GetFutureScores(const Phrase &source, const Phrase &target) const;
+  void SetParameter(const std::string& key, const std::string& value);
 
 protected:
 	typedef std::pair<Phrase, Phrase> ParallelPhrase;
@@ -48,6 +49,7 @@ protected:
 
 	std::vector < std::pair < std::set <int> , std::set <int> > > ceptsInPhrase;
 	std::set <int> targetNullWords;
+	std::string m_featurePath, m_lmPath;
 
 
 

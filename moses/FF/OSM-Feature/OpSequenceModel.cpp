@@ -50,12 +50,12 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 }
 
 
-void OpSequenceModel::Load(const std::string &osmFeatureFile, const std::string &operationLM , int orderVal)
+void OpSequenceModel::Load()
 {
   // load future cost
-  lmOrder= orderVal;
+
   //vector <string> input;
-  ifstream sr (osmFeatureFile.c_str());
+  ifstream sr (m_featurePath.c_str());
   char* tmp;
 
   CHECK(sr.is_open());
@@ -80,7 +80,7 @@ void OpSequenceModel::Load(const std::string &osmFeatureFile, const std::string 
    // m_coll[pp] = scores;
   }
 
-  readLanguageModel(operationLM.c_str());
+  readLanguageModel(m_lmPath.c_str());
 
 }
 
@@ -235,6 +235,19 @@ std::vector<float> OpSequenceModel::GetFutureScores(const Phrase &source, const 
     const vector<float> &scores = iter->second;
 	return scores;
   }
+}
+
+void OpSequenceModel::SetParameter(const std::string& key, const std::string& value)
+{
+	  if (key == "feature-path") {
+		  m_featurePath = value;
+	  } else if (key == "lm-path") {
+		  m_lmPath = value;
+	  } else if (key == "lm-path") {
+		  lmOrder = Scan<int>(value);
+	  } else {
+		  StatefulFeatureFunction::SetParameter(key, value);
+	  }
 }
 
 } // namespace
