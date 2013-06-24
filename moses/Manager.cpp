@@ -68,6 +68,7 @@ Manager::~Manager()
 {
   delete m_transOptColl;
   delete m_search;
+  // this is a comment ...
 
   StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
 }
