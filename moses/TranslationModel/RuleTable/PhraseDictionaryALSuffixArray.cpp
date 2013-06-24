@@ -27,7 +27,8 @@ PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &
   if (staticData.ThreadCount() > 1) {
     throw runtime_error("Suffix array implementation is not threadsafe");
   }
-  CHECK(m_args.size() == 0);
+
+  ReadParameters();
 }
 
 void PhraseDictionaryALSuffixArray::Load()
