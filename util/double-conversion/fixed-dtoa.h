@@ -30,8 +30,7 @@
 
 #include "utils.h"
 
-namespace double_conversion
-{
+namespace double_conversion {
 
 // Produces digits necessary to print a given number with
 // 'fractional_count' digits after the decimal point.

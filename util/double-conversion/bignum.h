@@ -30,12 +30,10 @@
 
 #include "utils.h"
 
-namespace double_conversion
-{
+namespace double_conversion {
 
-class Bignum
-{
-public:
+class Bignum {
+ public:
   // 3584 = 128 * 28. We can represent 2^3584 > 10^1000 accurately.
   // This bignum can encode much bigger numbers, since it contains an
   // exponent.
@@ -62,9 +60,7 @@ public:
   void MultiplyByUInt32(uint32_t factor);
   void MultiplyByUInt64(uint64_t factor);
   void MultiplyByPowerOfTen(int exponent);
-  void Times10() {
-    return MultiplyByUInt32(10);
-  }
+  void Times10() { return MultiplyByUInt32(10); }
   // Pseudocode:
   //  int result = this / other;
   //  this = this % other;
@@ -101,7 +97,7 @@ public:
   static bool PlusLess(const Bignum& a, const Bignum& b, const Bignum& c) {
     return PlusCompare(a, b, c) < 0;
   }
-private:
+ private:
   typedef uint32_t Chunk;
   typedef uint64_t DoubleChunk;
 
@@ -129,9 +125,7 @@ private:
   // shift_amount must be < kBigitSize.
   void BigitsShiftLeft(int shift_amount);
   // BigitLength includes the "hidden" digits encoded in the exponent.
-  int BigitLength() const {
-    return used_digits_ + exponent_;
-  }
+  int BigitLength() const { return used_digits_ + exponent_; }
   Chunk BigitAt(int index) const;
   void SubtractTimes(const Bignum& other, int factor);
 
