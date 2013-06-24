@@ -1,5 +1,5 @@
 #include "SRILM-API.h"
-#include "srilm/include/Ngram.h"
+#include <Ngram.h>
 
 
 Api :: Api()

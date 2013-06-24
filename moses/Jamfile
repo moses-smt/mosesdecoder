@@ -14,7 +14,10 @@ alias headers : ../util//kenutil : : : $(max-factors) $(dlib) ;
 
 local with-srilm = [ option.get "with-srilm" ] ;
 if $(with-srilm) {
-  headers += <include>$(with-srilm)/include
+  obj SRILM-API.o : FF/OSM-Feature/SRILM-API.cpp : <include>$(with-srilm)/include ;
+  osm-deps = SRILM-API.o FF/OSM-Feature/OpSequenceModel.cpp FF/OSM-Feature/osmHyp.cpp ;
+} else {
+  osm-deps = ;
 }
 
 alias ThreadPool : ThreadPool.cpp ;
@@ -46,13 +49,12 @@ lib moses :
   TranslationModel/Scope3Parser/*.cpp
   TranslationModel/CYKPlusParser/*.cpp
   FF/*.cpp
-  FF/OSM-Feature/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp
 ]
-headers LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
+headers $(osm-deps) LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
