@@ -1,9 +1,10 @@
 #pragma once
 
-#include "srilm/include/Ngram.h"
 #include <vector>
 
 using namespace std;
+
+class LM;
 
 class Api
 {
@@ -13,8 +14,8 @@ class Api
 	Api();
 	~Api();
 	void read_lm(const char *,int);
-	float lm_logprobContext( const VocabString word, const VocabString *context );
-	float lm_logprobSent( const VocabString *sentence );
+	float lm_logprobContext( const char *word, const char *const *context );
+	float lm_logprobSent( const char *const *sentence );
 	double contextProb(char *, int & );
 	double contextProbN (std::vector <int> , int &);
 	unsigned backOffLength (std::vector <int>);
