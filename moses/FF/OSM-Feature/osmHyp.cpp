@@ -2,6 +2,7 @@
 #include <sstream>
 
 using namespace std;
+using namespace lm::ngram;
 
 namespace Moses
 {

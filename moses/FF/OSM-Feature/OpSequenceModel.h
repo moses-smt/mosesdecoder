@@ -13,15 +13,13 @@
 namespace Moses
 {
 
-using namespace lm::ngram;
-
 class OpSequenceModel : public StatefulFeatureFunction
 {
 public:
 
 	//LM *LanguageModel;
 
-	Model * OSM;
+	lm::ngram::Model * OSM;
 	
 	Api * ptrOp;
 	int lmOrder;

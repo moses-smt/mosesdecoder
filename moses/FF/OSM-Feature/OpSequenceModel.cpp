@@ -4,9 +4,8 @@
 #include "util/check.hh"
 #include "moses/Util.h"
 
-
-
 using namespace std;
+using namespace lm::ngram;
 
 namespace Moses
 {
