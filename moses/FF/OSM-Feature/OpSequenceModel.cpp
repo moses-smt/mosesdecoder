@@ -164,7 +164,8 @@ FFState* OpSequenceModel::Evaluate(
   obj.setState(prev_state);
   obj.constructCepts(alignments,startIndex,endIndex,target.GetSize());
   obj.setPhrases(mySourcePhrase , myTargetPhrase);
-  obj.computeOSMFeature(startIndex,myBitmap,*ptrOp,lmOrder);
+  obj.computeOSMFeature(startIndex,myBitmap);
+  obj.calculateOSMProb(*ptrOp, lmOrder);	
   obj.calculateOSMProb(*OSM);
   obj.populateScores(scores);
 

@@ -80,7 +80,7 @@ class osmHypothesis
 	void generateDeleteOperations(std::string english, int currTargetIndex, std::set <int> doneTargetIndexes);
 	void calculateOSMProb(Api & opPtr , int order);
 	void calculateOSMProb(Model & ptrOp);
-	void computeOSMFeature(int startIndex , WordsBitmap & coverageVector , Api & ptrOp, int order);
+	void computeOSMFeature(int startIndex , WordsBitmap & coverageVector);
 
 	void constructCepts(vector <int> & align , int startIndex , int endIndex, int targetPhraseLength);
 	void setPhrases(vector <string> & val1 , vector <string> & val2){currF = val1; currE = val2;}

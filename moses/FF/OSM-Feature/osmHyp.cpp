@@ -143,9 +143,9 @@ void osmHypothesis :: removeReorderingOperations()
 void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 {
 	
-	cout<<"SRILM "<<opProb<<endl;
+	//cout<<"SRILM "<<opProb<<endl;
 
-	opProb = 0;
+	double opProb = 0;
 	State currState = lmState;
 	State temp;	
 
@@ -157,7 +157,7 @@ void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 
 	lmState = currState;
 
-	cout<<"Ken LM "<<opProb<<endl;
+	//cout<<"Ken LM "<<opProb<<endl;
 
 	
 }
@@ -456,7 +456,7 @@ void osmHypothesis :: generateDeleteOperations(std::string english, int currTarg
 
 }
 
-void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageVector , Api & ptrOp, int order)
+void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageVector)
 {
 
 	set <int> doneTargetIndexes;
@@ -554,7 +554,7 @@ void osmHypothesis :: computeOSMFeature(int startIndex , WordsBitmap & coverageV
 	}
 
 	//removeReorderingOperations();
-	calculateOSMProb(ptrOp, order);
+	
 	//print();
 
 }
