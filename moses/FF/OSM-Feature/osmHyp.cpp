@@ -3,11 +3,13 @@
 
 namespace Moses
 {
-osmState::osmState()
+osmState::osmState(const State & val)
 :j(0)
 ,E(0)
 {
   history.push_back("<s>");
+  lmState = val;
+  
 }
 
 void osmState::saveState(int jVal, int eVal, vector <string> & histVal , map <int , string> & gapVal)
@@ -31,6 +33,10 @@ int osmState::Compare(const FFState& otherBase) const
     return (gap < other.gap) ? -1 : +1;
   if (history != other.history)
     return (history < other.history) ? -1 : +1;
+
+  if (lmState.length < other.lmState.length) return -1;
+  
+  if (lmState.length > other.lmState.length) return 1;
 
   return 0;
 }
@@ -74,19 +80,18 @@ void osmHypothesis :: setState(const FFState* prev_state)
 	if(prev_state != NULL)
 	{
 
-
 		j = static_cast <const osmState *> (prev_state)->getJ();
 		E =  static_cast <const osmState *> (prev_state)->getE();
 		history = static_cast <const osmState *> (prev_state)->getHistory();
 		gap = static_cast <const osmState *> (prev_state)->getGap();
-
+		lmState = static_cast <const osmState *> (prev_state)->getLMState();
 	}
 }
 
 osmState * osmHypothesis :: saveState()
 {
 
-	osmState * statePtr = new osmState;
+	osmState * statePtr = new osmState(lmState);
 	statePtr->saveState(j,E,history,gap);
 	statePtr->saveDelHistory(operations);
 	return statePtr;
@@ -133,6 +138,28 @@ void osmHypothesis :: removeReorderingOperations()
 
 	operations.clear();
 	operations = tupleSequence;
+}
+
+void osmHypothesis :: calculateOSMProb(Model & ptrOp)
+{
+	
+	cout<<"SRILM "<<opProb<<endl;
+
+	opProb = 0;
+	State currState = lmState;
+	State temp;	
+
+	for (int i = 0; i<operations.size(); i++)
+	{
+		temp = currState;
+		opProb += ptrOp.Score(temp,ptrOp.GetVocabulary().Index(operations[i]),currState);
+	}
+
+	lmState = currState;
+
+	cout<<"Ken LM "<<opProb<<endl;
+
+	
 }
 
 void osmHypothesis :: calculateOSMProb(Api & ptrOp , int order)

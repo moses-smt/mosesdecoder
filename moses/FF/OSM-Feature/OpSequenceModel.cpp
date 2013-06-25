@@ -14,7 +14,7 @@ namespace Moses
 OpSequenceModel::OpSequenceModel(const std::string &line)
 :StatefulFeatureFunction("OpSequenceModel", 5, line )
 {
-  myLine = line; 
+  //myLine = line; 
   ReadParameters();
 }
 
@@ -31,6 +31,9 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 
 	// Code to load KenLM
 
+	OSM = new Model(m_lmPath.c_str());
+
+	/*
 	vector<string> toks = Tokenize(myLine);	
 	myLine = "factor=0";
 
@@ -41,7 +44,7 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 	}
 
 	cout<<myLine<<endl;
-	OSM = ConstructKenLM("KENLM", myLine);
+	*/
 
 }
 
@@ -162,6 +165,7 @@ FFState* OpSequenceModel::Evaluate(
   obj.constructCepts(alignments,startIndex,endIndex,target.GetSize());
   obj.setPhrases(mySourcePhrase , myTargetPhrase);
   obj.computeOSMFeature(startIndex,myBitmap,*ptrOp,lmOrder);
+  obj.calculateOSMProb(*OSM);
   obj.populateScores(scores);
 
 /*
@@ -208,7 +212,10 @@ FFState* OpSequenceModel::EvaluateChart(
 const FFState* OpSequenceModel::EmptyHypothesisState(const InputType &input) const
 {
   cerr << "OpSequenceModel::EmptyHypothesisState()" << endl;
-  return new osmState();
+
+  State startState = OSM->BeginSentenceState();
+
+  return new osmState(startState);
 }
 
 std::string OpSequenceModel::GetScoreProducerWeightShortName(unsigned idx) const
