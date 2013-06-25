@@ -1172,6 +1172,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePairFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/PhrasePenalty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhrasePenalty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.cpp</locationURI>

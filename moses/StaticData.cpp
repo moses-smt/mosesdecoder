@@ -61,6 +61,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
+#include "moses/FF/PhrasePenalty.h"
 
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 
@@ -696,6 +697,10 @@ bool StaticData::LoadData(Parameter *parameter)
     } else if (feature == "OpSequenceModel") {
 	  OpSequenceModel* model = new OpSequenceModel(line);
 	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+	  SetWeights(model, weights);
+    } else if (feature == "PhrasePenalty") {
+      PhrasePenalty* model = new PhrasePenalty(line);
+  	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
 	  SetWeights(model, weights);
     }
 
