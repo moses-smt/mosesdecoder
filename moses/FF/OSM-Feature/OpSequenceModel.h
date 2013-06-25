@@ -7,6 +7,7 @@
 #include "moses/Manager.h"
 #include "moses/FF/OSM-Feature/osmHyp.h"
 #include "moses/FF/OSM-Feature/SRILM-API.h"
+#include "moses/LM/Ken.h"
 
 namespace Moses
 {
@@ -16,9 +17,12 @@ class OpSequenceModel : public StatefulFeatureFunction
 public:
 
 	//LM *LanguageModel;
+
+	LanguageModel * OSM;
 	Api * ptrOp;
 	int lmOrder;
 	float unkOpProb;
+	std::string myLine;
 
 	OpSequenceModel(const std::string &line);
 

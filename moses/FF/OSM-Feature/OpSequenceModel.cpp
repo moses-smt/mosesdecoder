@@ -14,6 +14,7 @@ namespace Moses
 OpSequenceModel::OpSequenceModel(const std::string &line)
 :StatefulFeatureFunction("OpSequenceModel", 5, line )
 {
+  myLine = line; 
   ReadParameters();
 }
 
@@ -28,25 +29,20 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 	numbers.push_back(ptrOp->getLMID(const_cast <char *> (unkOp.c_str())));
 	unkOpProb = ptrOp->contextProbN(numbers,nonWordFlag);
 
-/*
-  setlocale(LC_CTYPE, "");
-  setlocale(LC_COLLATE, "");
+	// Code to load KenLM
 
-  Vocab *vocab = new Vocab;
-   vocab->unkIsWord() = true; // vocabulary contains unknown word tag
+	vector<string> toks = Tokenize(myLine);	
+	myLine = "factor=0";
 
-  LanguageModel = new Ngram( *vocab,order );
-  assert(LanguageModel != 0);
-  // LanguageModel->debugme(0);
+	for (size_t i = 3; i < toks.size(); ++i) 
+	{
+		myLine += " ";
+		myLine += toks[i];
+	}
 
-  File file( lmFile, "r" );
-  if (!LanguageModel->read( file )) {
-    cerr << "format error in lm file\n";
-    exit(1);
-  }
+	cout<<myLine<<endl;
+	OSM = ConstructKenLM("KENLM", myLine);
 
-  file.close();
-  */
 }
 
 
@@ -241,7 +237,7 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
 {
 	  if (key == "feature-path") {
 		  m_featurePath = value;
-	  } else if (key == "lm-path") {
+	  } else if (key == "path") {
 		  m_lmPath = value;
 	  } else if (key == "order") {
 		  lmOrder = Scan<int>(value);
