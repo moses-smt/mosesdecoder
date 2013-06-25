@@ -145,21 +145,21 @@ void osmHypothesis :: removeReorderingOperations()
 void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 {
 	
-	//cout<<"SRILM "<<opProb<<endl;
+	cout<<"SRILM "<<opProb<<endl;
 
-	double opProb = 0;
+	double nadir = 0;
 	State currState = lmState;
 	State temp;	
 
 	for (int i = 0; i<operations.size(); i++)
 	{
 		temp = currState;
-		opProb += ptrOp.Score(temp,ptrOp.GetVocabulary().Index(operations[i]),currState);
+		nadir += ptrOp.Score(temp,ptrOp.GetVocabulary().Index(operations[i]),currState);
 	}
 
 	lmState = currState;
 
-	//cout<<"Ken LM "<<opProb<<endl;
+	cout<<"Ken LM "<<nadir<<endl;
 
 	
 }
