@@ -2,6 +2,8 @@
 #include <Ngram.h>
 
 
+using namespace std;
+
 Api :: Api()
 {
 	LanguageModel = NULL;

@@ -2,8 +2,6 @@
 
 #include <vector>
 
-using namespace std;
-
 class LM;
 
 class Api
