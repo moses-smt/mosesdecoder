@@ -9,8 +9,6 @@
 # include <string>
 # include <vector>
 
-using namespace std;
-
 namespace Moses
 {
 
@@ -21,15 +19,17 @@ class osmState : public FFState
 public:
   osmState(const State & val);
   int Compare(const FFState& other) const;
-  void saveState(int jVal, int eVal, vector <string> & hist , map <int , string> & gapVal);
+  void saveState(int jVal, int eVal, std::vector <std::string> & hist , std::map <int , std::string> & gapVal);
   int getJ()const {return j;}
   int getE()const {return E;}
+  std::map <int , std::string> getGap() const { return gap;}
+  std::vector <std::string> getHistory()const {return history;}
+
   State getLMState() const {return lmState;}	
-  map <int , string> getGap() const { return gap;}
-  vector <string> getHistory()const {return history;}
+
   void print() const;
   std::string getName() const;
-  void saveDelHistory(vector <string> & histVal){delHistory = histVal;}
+  void saveDelHistory(std::vector <std::string> & histVal){delHistory = histVal;}
 
 protected:
   int j, E;
@@ -57,11 +57,11 @@ class osmHypothesis
 	int gapWidth;	
 	double opProb;
 
-	vector <string> currE;
-	vector <string> currF;
-	vector < pair < set <int> , set <int> > > ceptsInPhrase;
-	set <int> targetNullWords;
-	set <int> sourceNullWords;
+	std::vector <std::string> currE;
+	std::vector <std::string> currF;
+	std::vector < std::pair < std::set <int> , std::set <int> > > ceptsInPhrase;
+	std::set <int> targetNullWords;
+	std::set <int> sourceNullWords;
 
 	int closestGap(std::map <int,std::string> gap,int j1, int & gp);
 	int firstOpenGap(std::vector <int> & coverageVector);
@@ -70,7 +70,7 @@ class osmHypothesis
 	int isTranslationOperation(int j);
 	void removeReorderingOperations();
 
-	void getMeCepts ( set <int> & eSide , set <int> & fSide , map <int , vector <int> > & tS , map <int , vector <int> > & sT);
+	void getMeCepts ( std::set <int> & eSide , std::set <int> & fSide , std::map <int , std::vector <int> > & tS , std::map <int , std::vector <int> > & sT);
 
 	public:
 
@@ -81,13 +81,12 @@ class osmHypothesis
 	void calculateOSMProb(Api & opPtr , int order);
 	void calculateOSMProb(Model & ptrOp);
 	void computeOSMFeature(int startIndex , WordsBitmap & coverageVector);
-
-	void constructCepts(vector <int> & align , int startIndex , int endIndex, int targetPhraseLength);
-	void setPhrases(vector <string> & val1 , vector <string> & val2){currF = val1; currE = val2;}
+	void constructCepts(std::vector <int> & align , int startIndex , int endIndex, int targetPhraseLength);
+	void setPhrases(std::vector <std::string> & val1 , std::vector <std::string> & val2){currF = val1; currE = val2;}
 	void setState(const FFState* prev_state);
 	osmState * saveState();
 	void print();
-	void populateScores(vector <float> & scores);
+	void populateScores(std::vector <float> & scores);
 
 };
 

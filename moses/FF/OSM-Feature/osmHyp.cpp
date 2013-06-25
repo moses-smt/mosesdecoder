@@ -1,6 +1,8 @@
 #include "osmHyp.h"
 #include <sstream>
 
+using namespace std;
+
 namespace Moses
 {
 osmState::osmState(const State & val)
