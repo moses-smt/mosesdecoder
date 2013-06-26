@@ -18,30 +18,18 @@ public:
   PhraseDictionaryDynSuffixArray(const std::string &line);
   ~PhraseDictionaryDynSuffixArray();
   bool InitDictionary();
-  bool Load(
-	    // const std::vector<FactorType>& m_input
-            //  , const std::vector<FactorType>& m_output
-            //  , std::string m_source
-            //  , std::string m_target
-            //  , std::string m_alignments
-            //  , const std::vector<float> &m_weight
-            //  , size_t m_tableLimit
-            //  , const LMList &languageModels
-            //  , float weightWP
-	    );
+  void Load();
   // functions below required by base class
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
   void insertSnt(string&, string&, string&);
   void deleteSnt(unsigned, unsigned);
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
+  void SetParameter(const std::string& key, const std::string& value);
 private:
   BilingualDynSuffixArray *m_biSA;
+  std::string m_source, m_target, m_alignments;
+
   std::vector<float> m_weight;
-  size_t m_tableLimit;
-  const LMList *m_languageModels;
-  float m_weightWP;
-
-
 };
 
 } // end namespace

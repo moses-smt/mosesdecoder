@@ -56,8 +56,10 @@ class PhraseDictionary :  public DecodeFeature
 public:
   PhraseDictionary(const std::string &description, const std::string &line);
 
-  virtual ~PhraseDictionary()
-  {}
+  virtual ~PhraseDictionary() {
+  }
+
+  virtual void Load() = 0;
 
   //! table limit number.
   size_t GetTableLimit() const {
@@ -70,48 +72,37 @@ public:
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
 
   //! Create entry for translation of source to targetPhrase
-  virtual void InitializeForInput(InputType const& source)
-  {}
+  virtual void InitializeForInput(InputType const& source) {
+  }
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
-  {}
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {
+  }
 
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollectionBase &) = 0;
 
-  //Initialises the dictionary (may involve loading from file)
-  virtual bool InitDictionary() = 0;
-
-  //Get the dictionary. Be sure to initialise it first.
-  const PhraseDictionary* GetDictionary() const;
-  PhraseDictionary* GetDictionary();
-
-  //Usual feature function methods are not implemented
-  virtual void Evaluate(const PhraseBasedFeatureContext& context,
-                        ScoreComponentCollection* accumulator) const
-  {
-    throw std::logic_error("PhraseDictionary.Evaluate() Not implemented");
+  const std::string &GetFilePath() const {
+    return m_filePath;
   }
 
-  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
-                             ScoreComponentCollection* accumulator) const 
-  {
-    throw std::logic_error("PhraseDictionary.EvaluateChart() Not implemented");
+  const std::vector<FeatureFunction*> &GetFeaturesToApply() const {
+    return m_featuresToApply;
   }
 
-  const std::string &GetFilePath() const { return m_filePath; }
+  void SetParameter(const std::string& key, const std::string& value);
 
 protected:
   size_t m_tableLimit;
-
-
-  unsigned m_numInputScores;
   std::string m_filePath;
 
-  std::string m_targetFile;
-  std::string m_alignmentsFile;
+  // features to apply evaluate target phrase when loading.
+  // NOT when creating translation options. Those are in DecodeStep
+  std::vector<FeatureFunction*> m_featuresToApply;
+
+  // MUST be called at the start of Load()
+  void SetFeaturesToApply();
 };
 
 }

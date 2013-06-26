@@ -11,28 +11,37 @@ namespace Moses
 PhraseDictionaryDynSuffixArray::
 PhraseDictionaryDynSuffixArray(const std::string &line)
 : PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
+,m_biSA(new BilingualDynSuffixArray())
 {
-  m_biSA = new BilingualDynSuffixArray();
+	ReadParameters();
 }
 
 
-bool
-PhraseDictionaryDynSuffixArray::
-InitDictionary()
+void PhraseDictionaryDynSuffixArray::Load()
 {
-  m_weightWP = StaticData::Instance().GetWeightWordPenalty(); 
-  vector<float> weight = StaticData::Instance().GetWeights(this);
-  
-  m_biSA->Load(m_input, m_output, m_filePath, m_targetFile, 
-	       m_alignmentsFile, weight);
+  SetFeaturesToApply();
 
-  return true;
+  vector<float> weight = StaticData::Instance().GetWeights(this);
+  m_biSA->Load(m_input, m_output, m_source, m_target, m_alignments, weight);
 }
 
 PhraseDictionaryDynSuffixArray::
 ~PhraseDictionaryDynSuffixArray()
 {
   delete m_biSA;
+}
+
+void PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "source") {
+    m_source = value;
+  } else if (key == "target") {
+    m_target = value;
+  } else if (key == "alignment") {
+    m_alignments = value;
+  } else {
+    PhraseDictionary::SetParameter(key, value);
+  }
 }
 
 const TargetPhraseCollection*

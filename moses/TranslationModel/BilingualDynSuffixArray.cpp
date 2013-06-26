@@ -246,7 +246,7 @@ namespace Moses {
       sntArray.push_back(sntIdx);
       Phrase phrase(ARRAY_SIZE_INCR);
       // parse phrase
-      phrase.CreateFromString( direction, factors, line, factorDelimiter);
+      phrase.CreateFromString( direction, factors, line, factorDelimiter, NULL);
       // store words in vocabulary and corpus
       for( size_t i = 0; i < phrase.GetSize(); ++i) {
 	cArray.push_back( vocab->GetWordID(phrase.GetWord(i)) );
@@ -684,7 +684,7 @@ namespace Moses {
     const unsigned oldSrcCrpSize = m_srcCorpus->size(), oldTrgCrpSize = m_trgCorpus->size();
     cerr << "old source corpus size = " << oldSrcCrpSize << "\told target size = " << oldTrgCrpSize << endl;
     Phrase sphrase(ARRAY_SIZE_INCR);
-    sphrase.CreateFromString(Input, m_inputFactors, source, factorDelimiter);
+    sphrase.CreateFromString(Input, m_inputFactors, source, factorDelimiter, NULL);
     m_srcVocab->MakeOpen();
     vector<wordID_t> sIDs(sphrase.GetSize());
     // store words in vocabulary and corpus
@@ -699,7 +699,7 @@ namespace Moses {
     m_srcSntBreaks.push_back(oldSrcCrpSize); // former end of corpus is index of new sentence 
     m_srcVocab->MakeClosed();
     Phrase tphrase(ARRAY_SIZE_INCR);
-    tphrase.CreateFromString(Output, m_outputFactors, target, factorDelimiter);
+    tphrase.CreateFromString(Output, m_outputFactors, target, factorDelimiter, NULL);
     m_trgVocab->MakeOpen();
     vector<wordID_t> tIDs(tphrase.GetSize());
     for(int i = tphrase.GetSize()-1; i >= 0; --i) {

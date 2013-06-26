@@ -1567,6 +1567,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/WordCoocTable.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/WordCoocTable.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/WordCoocTable.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/WordCoocTable.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/fuzzy-match</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
