@@ -30,8 +30,7 @@
 
 #include "utils.h"
 
-namespace double_conversion
-{
+namespace double_conversion {
 
 enum FastDtoaMode {
   // Computes the shortest representation of the given input. The returned

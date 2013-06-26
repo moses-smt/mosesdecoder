@@ -209,6 +209,7 @@ while(my $line = <INI>) {
 		} # for (my $i = 1; $i < scalar(@toks); ++$i) {
 		
   	push @TABLE, $file;
+	push @TABLE_WEIGHTS,$w;
 		
 		$file =~ s/^.*\/+([^\/]+)/$1/g;
 		my $new_name = "$dir/$file";

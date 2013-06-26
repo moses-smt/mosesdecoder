@@ -61,6 +61,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
+#include "moses/FF/PhrasePenalty.h"
 
 #include "LM/Ken.h"
 #ifdef LM_IRST
@@ -691,6 +692,10 @@ bool StaticData::LoadData(Parameter *parameter)
       PhraseDictionaryDynSuffixArray* model = new PhraseDictionaryDynSuffixArray(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
+    } else if (feature == "PhrasePenalty") {
+      PhrasePenalty* model = new PhrasePenalty(line);
+  	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+	  SetWeights(model, weights);
     }
 
 #ifdef HAVE_SYNLM
