@@ -38,7 +38,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/Util.h"
 #include "moses/WordsRange.h"
 #include "moses/StaticData.h"
-#include "moses/DummyScoreProducers.h"
 #include "moses/InputFileStream.h"
 #include "moses/Incremental.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
@@ -139,7 +138,8 @@ IOWrapper::~IOWrapper()
   delete m_alignmentInfoCollector;
 }
 
-void IOWrapper::ResetTranslationId() {
+void IOWrapper::ResetTranslationId()
+{
   m_translationId = StaticData::Instance().GetStartTranslationId();
 }
 
@@ -175,7 +175,7 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-	CHECK(factor);
+        CHECK(factor);
 
         out << "|" << *factor;
       }
@@ -246,8 +246,8 @@ void OutputInput(std::ostream& os, const ChartHypothesis* hypo)
 // Given a hypothesis and sentence, reconstructs the 'application context' --
 // the source RHS symbols of the SCFG rule that was applied, plus their spans.
 void IOWrapper::ReconstructApplicationContext(const ChartHypothesis &hypo,
-                                   const Sentence &sentence,
-                                   ApplicationContext &context)
+    const Sentence &sentence,
+    ApplicationContext &context)
 {
   context.clear();
   const std::vector<const ChartHypothesis*> &prevHypos = hypo.GetPrevHypos();
@@ -277,7 +277,7 @@ void IOWrapper::ReconstructApplicationContext(const ChartHypothesis &hypo,
 // but there are scripts and tools that expect the output of -T to look like
 // that.
 void IOWrapper::WriteApplicationContext(std::ostream &out,
-                             const ApplicationContext &context)
+                                        const ApplicationContext &context)
 {
   assert(!context.empty());
   ApplicationContext::const_reverse_iterator p = context.rbegin();
@@ -328,7 +328,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
 }
-  
+
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {
@@ -345,18 +345,18 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
     if (StaticData::Instance().GetOutputHypoScore()) {
       out << hypo->GetTotalScore() << " ";
     }
-    
+
     if (StaticData::Instance().IsPathRecoveryEnabled()) {
       out << "||| ";
     }
     Phrase outPhrase(ARRAY_SIZE_INCR);
     hypo->CreateOutputPhrase(outPhrase);
-    
+
     // delete 1st & last
     CHECK(outPhrase.GetSize() >= 2);
     outPhrase.RemoveWord(0);
     outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-    
+
     const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
     string output = outPhrase.GetStringRep(outputFactorOrder);
     out << output << endl;
@@ -372,7 +372,8 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
   m_singleBestOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputBestHypo(search::Applied applied, long translationId) {
+void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
+{
   if (!m_singleBestOutputCollector) return;
   std::ostringstream out;
   IOWrapper::FixPrecision(out);
@@ -390,7 +391,8 @@ void IOWrapper::OutputBestHypo(search::Applied applied, long translationId) {
   m_singleBestOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputBestNone(long translationId) {
+void IOWrapper::OutputBestNone(long translationId)
+{
   if (!m_singleBestOutputCollector) return;
   if (StaticData::Instance().GetOutputHypoScore()) {
     m_singleBestOutputCollector->Write(translationId, "0 \n");
@@ -437,14 +439,14 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   }
 
   // sparse features
-  else {
-    const FVector scores = features.GetVectorForProducer( ff );
-    for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++)
-      out << " " << i->first << ": " << i->second;
+  const FVector scores = features.GetVectorForProducer( ff );
+  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+    out << " " << i->first << "= " << i->second;
   }
 }
 
-void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long translationId) {
+void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long translationId)
+{
   std::ostringstream out;
 
   // Check if we're writing to std::cout.
@@ -453,7 +455,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long tran
     // preserve existing behaviour, but should probably be done either way.
     IOWrapper::FixPrecision(out);
 
-    // Used to check StaticData's GetOutputHypoScore(), but it makes no sense with nbest output.  
+    // Used to check StaticData's GetOutputHypoScore(), but it makes no sense with nbest output.
   }
 
   //bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
@@ -529,7 +531,8 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long tran
   m_nBestOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId) {
+void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId)
+{
   std::ostringstream out;
   // wtf? copied from the original OutputNBestList
   if (m_nBestOutputCollector->OutputIsCout()) {
@@ -566,12 +569,11 @@ void ShiftOffsets(vector<T> &offsets, T shift)
   T currPos = shift;
   for (size_t i = 0; i < offsets.size(); ++i) {
     if (offsets[i] == 0) {
-	  offsets[i] = currPos;
-	  ++currPos;
-	}
-	else {
-	  currPos += offsets[i];
-	}
+      offsets[i] = currPos;
+      ++currPos;
+    } else {
+      currPos += offsets[i];
+    }
   }
 }
 
@@ -631,8 +633,7 @@ size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartT
 
       totalTargetSize += targetSize;
       ++targetInd;
-    }
-    else {
+    } else {
       ++totalTargetSize;
     }
   }
@@ -667,15 +668,15 @@ void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothe
   ostringstream out;
 
   if (hypo) {
-	Alignments retAlign;
-	OutputAlignment(retAlign, hypo, 0);
+    Alignments retAlign;
+    OutputAlignment(retAlign, hypo, 0);
 
-	// output alignments
-	Alignments::const_iterator iter;
-	for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
-	  const pair<size_t, size_t> &alignPoint = *iter;
-	  out << alignPoint.first << "-" << alignPoint.second << " ";
-	}
+    // output alignments
+    Alignments::const_iterator iter;
+    for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
+      const pair<size_t, size_t> &alignPoint = *iter;
+      out << alignPoint.first << "-" << alignPoint.second << " ";
+    }
   }
   out << endl;
 
@@ -725,8 +726,7 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
 
       totalTargetSize += targetSize;
       ++targetInd;
-    }
-    else {
+    } else {
       ++totalTargetSize;
     }
   }

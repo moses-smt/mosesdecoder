@@ -35,13 +35,11 @@ namespace Moses
 //! Implementation of ChartRuleLookupManager for on-disk rule tables.
 class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
 {
- public:
+public:
   ChartRuleLookupManagerOnDisk(const InputType &sentence,
                                const ChartCellCollectionBase &cellColl,
                                const PhraseDictionaryOnDisk &dictionary,
                                OnDiskPt::OnDiskWrapper &dbWrapper,
-                               const LMList *languageModels,
-                               const WordPenaltyProducer *wpProducer,
                                const std::vector<FactorType> &inputFactorsVec,
                                const std::vector<FactorType> &outputFactorsVec,
                                const std::string &filePath);
@@ -51,11 +49,9 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
   virtual void GetChartRuleCollection(const WordsRange &range,
                                       ChartParserCallback &outColl);
 
- private:
+private:
   const PhraseDictionaryOnDisk &m_dictionary;
   OnDiskPt::OnDiskWrapper &m_dbWrapper;
-  const LMList *m_languageModels;
-  const WordPenaltyProducer *m_wpProducer;
   const std::vector<FactorType> &m_inputFactorsVec;
   const std::vector<FactorType> &m_outputFactorsVec;
   const std::string &m_filePath;

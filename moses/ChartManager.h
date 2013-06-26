@@ -64,12 +64,6 @@ private:
 
   ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
 
-  //! Some features should be calculated prior to search
-  boost::unordered_map<TargetPhrase,ScoreComponentCollection, TargetPhraseHasher, TargetPhraseComparator> m_precalculatedScores;
-
-  //! Pre-calculate most stateless feature values
-  void PreCalculateScores();
-
 public:
   ChartManager(InputType const& source);
   ~ChartManager();
@@ -79,35 +73,33 @@ public:
   void CalcNBest(size_t count, ChartTrellisPathList &ret, bool onlyDistinct=0) const;
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
-	void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
+  void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
 
   //! the input sentence being decoded
   const InputType& GetSource() const {
     return m_source;
   }
-  
+
   //! debug data collected when decoding sentence
   SentenceStats& GetSentenceStats() const {
     return *m_sentenceStats;
   }
-  
+
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
    * currently an empty function
    */
-  void CalcDecoderStatistics() const
-  { }
-  
+  void CalcDecoderStatistics() const {
+  }
+
   void ResetSentenceStats(const InputType& source) {
     m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
   }
 
   //! contigious hypo id for each input sentence. For debugging purposes
-  unsigned GetNextHypoId() { return m_hypothesisId++; }
-
-  //! Access the pre-calculated values
-  void InsertPreCalculatedScores(const TargetPhrase& targetPhrase,
-      ScoreComponentCollection* scoreBreakdown) const;
+  unsigned GetNextHypoId() {
+    return m_hypothesisId++;
+  }
 
 };
 

@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 #include "TypeDef.h"
 #include "FactorTypeSet.h"
+#include "Phrase.h"
 
 namespace Moses
 {
@@ -37,6 +38,7 @@ class TranslationOptionCollection;
 class PartialTranslOptColl;
 class FactorCollection;
 class InputType;
+class FeatureFunction;
 
 /** Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
@@ -52,9 +54,12 @@ protected:
   std::vector<FactorType> m_newOutputFactors; //! list of the factors that are new in this step, may be empty
   const DecodeFeature* m_decodeFeature;
 
+  std::vector<FeatureFunction*> m_featuresToApply, m_featuresRemaining;
 public:
   DecodeStep(); //! not implemented
-  DecodeStep(const DecodeFeature *featurePtr, const DecodeStep* prevDecodeStep);
+  DecodeStep(const DecodeFeature *featurePtr,
+             const DecodeStep* prevDecodeStep,
+             const std::vector<FeatureFunction*> &features);
   virtual ~DecodeStep();
 
   //! mask of factors that are present after this decode step
@@ -70,6 +75,10 @@ public:
   //! returns true if this decode step produces one or more new factors
   bool IsFactorProducingStep() const {
     return !m_newOutputFactors.empty();
+  }
+
+  const std::vector<FeatureFunction*> &GetFeaturesRemaining() const {
+    return m_featuresRemaining;
   }
 
   /*! returns a list (possibly empty) of the (target side) factors that
@@ -99,7 +108,10 @@ public:
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
-                       , bool adhereTableLimit) const = 0;
+                       , bool adhereTableLimit
+                       , const Phrase &src) const = 0;
+
+  void RemoveFeature(const FeatureFunction *ff);
 
 };
 

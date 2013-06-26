@@ -1,8 +1,8 @@
 // $Id$
 
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include <sys/stat.h>
 #include <algorithm>
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include "moses/Phrase.h"
 #include "moses/FactorCollection.h"
@@ -14,6 +14,7 @@
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
 #include "moses/UserMessage.h"
+#include "util/check.hh"
 
 using namespace std;
 
@@ -28,24 +29,22 @@ PhraseDictionaryTreeAdaptor::
 PhraseDictionaryTreeAdaptor(const std::string &line)
   : PhraseDictionary("PhraseDictionaryBinary", line)
 {
+  ReadParameters();
 }
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
 }
-
-bool PhraseDictionaryTreeAdaptor::InitDictionary()
+void PhraseDictionaryTreeAdaptor::Load()
 {
-  return true;
+  SetFeaturesToApply();
 }
 
 void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
 
-  PDTAimp *obj = new PDTAimp(this,m_numInputScores);
-
-  const LMList &languageModels = staticData.GetLMList();
+  PDTAimp *obj = new PDTAimp(this);
 
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
@@ -56,7 +55,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
     abort();
   }
 
-  obj->Create(m_input, m_output, m_filePath, weight, languageModels);
+  obj->Create(m_input, m_output, m_filePath, weight);
 
   obj->CleanUp();
   // caching only required for confusion net

@@ -34,16 +34,20 @@ namespace tmmt
 typedef std::string WORD;
 typedef unsigned int WORD_ID;
 
-class Vocabulary {
- public:
+class Vocabulary
+{
+public:
   std::map<WORD, WORD_ID> lookup;
   std::vector< WORD > vocab;
   WORD_ID StoreIfNew( const WORD& );
   WORD_ID GetWordID( const WORD& );
   std::vector<WORD_ID> Tokenize( const char[] );
-  inline WORD &GetWord( WORD_ID id ) const { WORD &i = (WORD&) vocab[ id ]; return i; }
+  inline WORD &GetWord( WORD_ID id ) const {
+    WORD &i = (WORD&) vocab[ id ];
+    return i;
+  }
 
- protected:
+protected:
 #ifdef WITH_THREADS
   //reader-writer lock
   mutable boost::shared_mutex m_accessLock;

@@ -33,8 +33,9 @@ vector<string> tokenize( const char* input )
 namespace MosesTraining
 {
 
-bool isNonTerminal( const WORD &symbol ) {
-   return symbol.substr(0, 1) == "[" && symbol.substr(symbol.size()-1, 1) == "]";
+bool isNonTerminal( const WORD &symbol )
+{
+  return symbol.substr(0, 1) == "[" && symbol.substr(symbol.size()-1, 1) == "]";
 }
 
 WORD_ID Vocabulary::storeIfNew( const WORD& word )
@@ -105,7 +106,7 @@ void DTable::load( const string& fileName )
       std::cerr << "Error reading from " << fileName << std::endl;
       abort();
     }
-    
+
     vector<string> token = tokenize(line.c_str());
     if (token.size() < 2) {
       cerr << "line " << i << " in " << fileName << " too short, skipping\n";

@@ -14,7 +14,8 @@ static const float kFloatErr = 0.00001f;
 #endif
 
 //! @todo ask abby2
-class LogQtizer {
+class LogQtizer
+{
 public:
   LogQtizer(float i): base_(pow(2, 1 / i)) {
     CHECK(base_ > 1);
@@ -22,8 +23,8 @@ public:
     float value = 1; // code = 1 -> value = 1 for any base
     std::vector<float> code_to_value_vec;
     while (log2(value) < 30) { // assume 2^30 is largest count
-      code_to_value_vec.push_back(value);  
-      value = pow(base_, ++max_code_);      
+      code_to_value_vec.push_back(value);
+      value = pow(base_, ++max_code_);
     }
     code_to_value_vec.push_back(value);  // store max_code_ so in total [0, max_code_]
     // get valid range
@@ -46,22 +47,22 @@ public:
   int code(float value) {
     // should just be: return log_b(value)
     CHECK(!(value < min_value_ || value > max_value_));
-    // but binary search removes errors due to floor operator above 
-    int code =  static_cast<int>(std::lower_bound(code_to_value_, code_to_value_+ max_code_, 
-						  value) - code_to_value_);
-    // make sure not overestimating 
+    // but binary search removes errors due to floor operator above
+    int code =  static_cast<int>(std::lower_bound(code_to_value_, code_to_value_+ max_code_,
+                                 value) - code_to_value_);
+    // make sure not overestimating
     code = code_to_value_[code] > value ? code - 1 : code;
     return code;
   }
   inline float value(int code) {
-    // table look up for values 
+    // table look up for values
     return code_to_value_[code];
   }
   inline int maxcode() {
     return max_code_;
   }
   inline float logValue(int code) {
-    // table look up for log of values 
+    // table look up for log of values
     return code_to_log_value_[code];
   }
   ~LogQtizer() {
@@ -75,15 +76,15 @@ public:
     fout->write((char*)&min_value_, sizeof(min_value_));
     for (int j = 0; j <= max_code_; ++j)
       fout->write((char*)&code_to_value_[j], sizeof(code_to_value_[j]));
-    for (int j = 0; j <= max_code_; ++j) 
+    for (int j = 0; j <= max_code_; ++j)
       fout->write((char*)&code_to_log_value_[j], sizeof(code_to_log_value_[j]));
     std::cerr << "Saved log codebook with " << max_code_ + 1 << " codes." <<std::endl;
   }
 private:
   float base_;
-  float* code_to_value_; 
+  float* code_to_value_;
   float* code_to_log_value_;
-  int max_code_; 
+  int max_code_;
   float max_value_;
   float min_value_;
   void load(FileHandler* fin) {

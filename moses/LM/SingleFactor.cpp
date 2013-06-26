@@ -25,10 +25,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "SingleFactor.h"
 #include "PointerState.h"
+#include "moses/FF/FFState.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/FactorCollection.h"
-#include "moses/FFState.h"
 #include "moses/Phrase.h"
 #include "moses/StaticData.h"
 
@@ -38,7 +38,7 @@ namespace Moses
 {
 
 LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string& description, const std::string &line)
-:LanguageModelImplementation(description, line)
+  :LanguageModelImplementation(description, line)
 {
   m_nullContextState = new PointerState(NULL);
   m_beginSentenceState = new PointerState(NULL);
@@ -64,6 +64,12 @@ FFState *LanguageModelSingleFactor::NewState(const FFState *from) const
 LMResult LanguageModelSingleFactor::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const
 {
   return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate);
+}
+
+bool LanguageModelSingleFactor::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[m_factorType];
+  return ret;
 }
 
 }

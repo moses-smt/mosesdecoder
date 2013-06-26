@@ -2,7 +2,8 @@
 #include "Vocabulary.h"
 #include <fstream>
 
-namespace {
+namespace
+{
 
 const int MAX_LENGTH = 10000;
 

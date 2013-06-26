@@ -44,35 +44,43 @@ class ChartTranslationOptionList;
 class ChartCellCollection;
 class ChartManager;
 
-class ChartCellBase {
-  public:
-    ChartCellBase(size_t startPos, size_t endPos);
+class ChartCellBase
+{
+public:
+  ChartCellBase(size_t startPos, size_t endPos);
 
-    virtual ~ChartCellBase();
+  virtual ~ChartCellBase();
 
-    const ChartCellLabelSet &GetTargetLabelSet() const { return m_targetLabelSet; }
+  const ChartCellLabelSet &GetTargetLabelSet() const {
+    return m_targetLabelSet;
+  }
 
-    ChartCellLabelSet &MutableTargetLabelSet() { return m_targetLabelSet; }
+  ChartCellLabelSet &MutableTargetLabelSet() {
+    return m_targetLabelSet;
+  }
 
-    const WordsRange &GetCoverage() const { return m_coverage; }
+  const WordsRange &GetCoverage() const {
+    return m_coverage;
+  }
 
-  protected:
-    const WordsRange m_coverage;
-    ChartCellLabelSet m_targetLabelSet;
+protected:
+  const WordsRange m_coverage;
+  ChartCellLabelSet m_targetLabelSet;
 };
 
 /** 1 cell in chart decoder.
  *  Doesn't directly hold hypotheses. Each cell contain a map of ChartHypothesisCollection that have different constituent labels
  */
-class ChartCell : public ChartCellBase {
+class ChartCell : public ChartCellBase
+{
   friend std::ostream& operator<<(std::ostream&, const ChartCell&);
 public:
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_map<Word,
-                               ChartHypothesisCollection,
-                               NonTerminalHasher,
-                               NonTerminalEqualityPred
-                              > MapType;
+          ChartHypothesisCollection,
+          NonTerminalHasher,
+          NonTerminalEqualityPred
+          > MapType;
 #else
   typedef std::map<Word, ChartHypothesisCollection> MapType;
 #endif
@@ -91,8 +99,7 @@ public:
                        ,const ChartCellCollection &allChartCells);
 
   //! Get all hypotheses in the cell that have the specified constituent label
-  const HypoList *GetSortedHypotheses(const Word &constituentLabel) const
-  {
+  const HypoList *GetSortedHypotheses(const Word &constituentLabel) const {
     MapType::const_iterator p = m_hypoColl.find(constituentLabel);
     return (p == m_hypoColl.end()) ? NULL : &(p->second.GetSortedHypotheses());
   }

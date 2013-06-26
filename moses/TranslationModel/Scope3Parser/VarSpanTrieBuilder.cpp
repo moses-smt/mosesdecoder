@@ -30,7 +30,7 @@ namespace Moses
 {
 
 std::auto_ptr<VarSpanNode> VarSpanTrieBuilder::Build(
-    ApplicableRuleTrie &root)
+  ApplicableRuleTrie &root)
 {
   std::auto_ptr<VarSpanNode> vstRoot(new VarSpanNode());
   NodeVec vec;

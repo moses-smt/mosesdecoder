@@ -5,7 +5,7 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 const int PermutationScorer::SCORE_PRECISION = 5;
 const int PermutationScorer::SCORE_MULTFACT = 100000; // 100000=10^SCORE_PRECISION
@@ -147,7 +147,7 @@ int PermutationScorer::getNumberWords (const string& text) const
 void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
   //bool debug= (verboselevel()>3); // TODO: fix verboselevel()
-  bool debug=false; 
+  bool debug=false;
   if (debug) {
     cout << "*******prepareStats" ;
     cout << text << endl;

@@ -31,8 +31,7 @@ class PDTimp;
 typedef PrefixTreeF<LabelId,OFF_T> PTF;
 
 //typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
-struct StringTgtCand
-{
+struct StringTgtCand {
   typedef std::vector<std::string const*> Tokens;
   Tokens tokens;
   Scores scores;
@@ -86,7 +85,7 @@ public:
   // get the target candidates for a given phrase
   void GetTargetCandidates(const std::vector<std::string>& src,
                            std::vector<StringTgtCand>& rv) const;
-                           
+
 
   // get the target candidates for a given phrase
   void GetTargetCandidates(const std::vector<std::string>& src,

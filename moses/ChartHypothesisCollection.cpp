@@ -51,7 +51,7 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
   //RemoveAllInColl(m_hypos);
 }
 
-/** public function to add hypothesis to this collection. 
+/** public function to add hypothesis to this collection.
  * Returns false if equiv hypo exists in collection, otherwise returns true.
  * Takes care of update arc list for n-best list creation.
  * Will delete hypo is it exist - once this function is call don't delete hypothesis.
@@ -108,8 +108,7 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
     VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
-    } 
-    else {
+    } else {
       ChartHypothesis::Delete(hypo);
     }
     return false;
@@ -146,7 +145,7 @@ pair<ChartHypothesisCollection::HCType::iterator, bool> ChartHypothesisCollectio
   return ret;
 }
 
-/** Remove hypothesis pointed to by iterator but DOES NOT delete the object. 
+/** Remove hypothesis pointed to by iterator but DOES NOT delete the object.
  * \param iter iterator to delete
  */
 void ChartHypothesisCollection::Detach(const HCType::iterator &iter)

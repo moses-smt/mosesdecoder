@@ -1,4 +1,4 @@
-  // vim:tabstop=2
+// vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
@@ -30,20 +30,19 @@ using namespace std;
 
 namespace Moses
 {
+PhraseDictionaryOnDisk::PhraseDictionaryOnDisk(const std::string &line)
+  : MyBase("PhraseDictionaryOnDisk", line) {
+  ReadParameters();
+}
+
 PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
 }
 
-bool PhraseDictionaryOnDisk::InitDictionary()
+void PhraseDictionaryOnDisk::Load()
 {
-  const StaticData &staticData = StaticData::Instance();
-  m_languageModels = &staticData.GetLMList();
-  m_wpProducer = staticData.GetWordPenaltyProducer();
-
-  return true;
+  SetFeaturesToApply();
 }
-
-// PhraseDictionary impl
 
 //! find list of translations that can translates src. Only for phrase input
 const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const Phrase& /* src */) const
@@ -57,8 +56,8 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const ChartCellCollectionBase &cellCollection)
 {
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
-                                          GetImplementation(), m_languageModels,
-                                          m_wpProducer, m_input,
+                                          GetImplementation(),
+                                          m_input,
                                           m_output, m_filePath);
 }
 
@@ -94,11 +93,6 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   m_implementation.reset(obj);
 
   return;
-}
-
-void PhraseDictionaryOnDisk::CleanUpAfterSentenceProcessing(InputType const& source)
-{
-
 }
 
 }

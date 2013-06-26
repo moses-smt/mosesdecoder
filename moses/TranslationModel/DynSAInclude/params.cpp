@@ -1,10 +1,11 @@
 #include "params.h"
 
-namespace Moses {
+namespace Moses
+{
 // parameter constants
 const std::string Parameters::kNotSetValue = "__NOT_SET__";
 
-const int Parameters::kBoolValue = 0; 
+const int Parameters::kBoolValue = 0;
 const int Parameters::kIntValue = 1;
 const int Parameters::kFloatValue = 2;
 const int Parameters::kStringValue = 3;
@@ -13,26 +14,30 @@ const int Parameters::kUndefinedValue = -1;
 const std::string Parameters::kTrueValue = "1";
 const std::string Parameters::kFalseValue = "0";
 
-Parameters::Parameters(const ParamDefs * paramdefs, const count_t paramNum) {
+Parameters::Parameters(const ParamDefs * paramdefs, const count_t paramNum)
+{
   initialize(paramdefs, paramNum);
 }
 
-Parameters::Parameters(int argc, char ** argv, const ParamDefs * paramdefs, 
-    const count_t paramNum) {
+Parameters::Parameters(int argc, char ** argv, const ParamDefs * paramdefs,
+                       const count_t paramNum)
+{
   initialize(paramdefs, paramNum);
   loadParams(argc, argv);
 }
 
-void Parameters::initialize(const ParamDefs * paramdefs, const count_t paramNum) {
+void Parameters::initialize(const ParamDefs * paramdefs, const count_t paramNum)
+{
   for( count_t i = 0; i < paramNum; i++ ) {
     params_[paramdefs[i].name] = paramdefs[i]; // assign name
   }
   cerr << "Default parameter values:\n";
-  iterate(params_, itr) 
-    cerr << "\t" << itr->first << " --> " << itr->second.value << endl;
+  iterate(params_, itr)
+  cerr << "\t" << itr->first << " --> " << itr->second.value << endl;
 }
 
-bool Parameters::loadParams(int argc, char ** argv) {
+bool Parameters::loadParams(int argc, char ** argv)
+{
   // load params from commandline args
   //if( argc < 3 ) {
   //  fprintf(stderr, "ERROR: No parameters. Use \"-config\" or \"-f\" to specify configuration file.\n");
@@ -66,7 +71,7 @@ bool Parameters::loadParams(int argc, char ** argv) {
       std::string val = argv[i+1];
       Utils::trim(val);
       if( param == "config" )
-        load_from_file = true;      
+        load_from_file = true;
       if(!setParamValue(param, val)) {
         std::cerr << "Invalid Param name->value " << param << "->" << val << std::endl;
         return false;
@@ -80,35 +85,40 @@ bool Parameters::loadParams(int argc, char ** argv) {
   return success;
 }
 
-std::string Parameters::normaliseParamName(const std::string & name) {
+std::string Parameters::normaliseParamName(const std::string & name)
+{
   // Map valid abbreviations to long names. Retain other names.
   if( params_.find(name) == params_.end() )
-    iterate(params_, i) 
-      if( i->second.abbrev == name ) 
-        return i->first;
+    iterate(params_, i)
+    if( i->second.abbrev == name )
+      return i->first;
   return name;
 }
 
-int Parameters::getValueType(const std::string& name) {
+int Parameters::getValueType(const std::string& name)
+{
   if(params_.find(name) != params_.end())
     return params_[name].type;
   return Parameters::kUndefinedValue;
 }
 
-bool Parameters::isValidParamName(const std::string & name) {
-  return params_.find(name) != params_.end(); 
+bool Parameters::isValidParamName(const std::string & name)
+{
+  return params_.find(name) != params_.end();
 }
 
-bool Parameters::setParamValue(const std::string& name, const std::string& val) {
-  // TODO: Add basic type checking w verifyValueType() 
-  bool set = isValidParamName(name); 
-  if(set) { 
-    params_[name].value = val;  
+bool Parameters::setParamValue(const std::string& name, const std::string& val)
+{
+  // TODO: Add basic type checking w verifyValueType()
+  bool set = isValidParamName(name);
+  if(set) {
+    params_[name].value = val;
     std::cerr << "PARAM SET: "<< name << "=" << val << std::endl;
   }
   return( set );
 }
-std::string Parameters::getParamValue(const std::string& name) {
+std::string Parameters::getParamValue(const std::string& name)
+{
   std::string value = Parameters::kNotSetValue;
   if(isValidParamName(name))
     if(params_.find(name) != params_.end())
@@ -117,43 +127,46 @@ std::string Parameters::getParamValue(const std::string& name) {
       value = kFalseValue;
   return value;
 }
-std::string Parameters::getParam(const std::string& name) {
+std::string Parameters::getParam(const std::string& name)
+{
   return getParamValue(name);
-/*void* Parameters::getParam(const std::string& name) {
-  void* paramVal = 0;
-  int type = getValueType(name);
-  const char* sval = getParamValue(name).c_str();
-  switch(type) {
-    case kIntValue: {
-      int ival = atoi(sval);
-      paramVal = (void*)&ival;
-      break;
+  /*void* Parameters::getParam(const std::string& name) {
+    void* paramVal = 0;
+    int type = getValueType(name);
+    const char* sval = getParamValue(name).c_str();
+    switch(type) {
+      case kIntValue: {
+        int ival = atoi(sval);
+        paramVal = (void*)&ival;
+        break;
+      }
+      case kFloatValue: {
+        float fval = atof(sval);
+        paramVal = (void*)&fval;
+        break;
+      }
+      case kStringValue: {
+        paramVal = (void*)sval;
+        break;
+      }
+      case kBoolValue: {
+        bool bval = sval == Parameters::kTrueValue ? true : false;
+        paramVal = (void*)&bval;
+        break;
+      }
+      default: // --> Parameters::kUndefinedValue
+        paramVal = (void*)sval; // will set to Parameters::kNotSetValue
     }
-    case kFloatValue: {
-      float fval = atof(sval);
-      paramVal = (void*)&fval;
-      break;
-    }
-    case kStringValue: {
-      paramVal = (void*)sval;
-      break;
-    }
-    case kBoolValue: {
-      bool bval = sval == Parameters::kTrueValue ? true : false;
-      paramVal = (void*)&bval;
-      break;
-    }
-    default: // --> Parameters::kUndefinedValue 
-      paramVal = (void*)sval; // will set to Parameters::kNotSetValue
-  }
-  return paramVal;*/
+    return paramVal;*/
 }
-bool Parameters::verifyValueType(const std::string& name, const std::string& val) {
+bool Parameters::verifyValueType(const std::string& name, const std::string& val)
+{
   // Implement basic type checking
   return true;
 }
 
-int Parameters::getParamCount() const {
+int Parameters::getParamCount() const
+{
   return params_.size();
 }
 
@@ -161,7 +174,8 @@ int Parameters::getParamCount() const {
  * HAVE TO CHANGE loadParams() from file to not overwrite command lines but
  * override default if different*/
 bool Parameters::loadParams(const std::string & file_path,
-    std::set<std::string>& setParams) {
+                            std::set<std::string>& setParams)
+{
   // parameters loaded from file don't override cmd line paramters
   /*std::set<std::string>::iterator end = setParams.end();
   FileHandler file(file_path.c_str(), std::ios::in);

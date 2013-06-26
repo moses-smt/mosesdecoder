@@ -32,7 +32,7 @@ class ChartCellCollection;
  */
 class StackLatticeBuilder
 {
- public:
+public:
   StackLatticeBuilder() {}
 
   void Build(int, int, const UTrieNode &, const VarSpanNode &,

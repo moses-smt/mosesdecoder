@@ -91,11 +91,11 @@ protected:
                                const ApplicationContext &context);
 
   void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
-                                , std::ostream &out);
+                              , std::ostream &out);
   void OutputFeatureScores( std::ostream& out
-                                , const Moses::ScoreComponentCollection &features
-                                , const Moses::FeatureFunction *ff
-                                , std::string &lastName );
+                            , const Moses::ScoreComponentCollection &features
+                            , const Moses::FeatureFunction *ff
+                            , std::string &lastName );
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder

@@ -30,9 +30,7 @@ namespace Moses
 {
 class PhraseDictionary;
 class TargetPhrase;
-class LMList;
 class Phrase;
-class WordPenaltyProducer;
 }
 
 namespace OnDiskPt
@@ -51,7 +49,7 @@ class TargetPhrase: public Phrase
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
   AlignType m_align;
-  PhrasePtr m_sourcePhrase; 
+  PhrasePtr m_sourcePhrase;
 
   std::vector<float> m_scores;
   UINT64 m_filePos;
@@ -63,8 +61,8 @@ protected:
   UINT64 ReadScoresFromFile(std::fstream &fileTPColl);
 
 public:
-  TargetPhrase()
-  {}
+  TargetPhrase() {
+  }
   TargetPhrase(size_t numScores);
   TargetPhrase(const TargetPhrase &copy);
   virtual ~TargetPhrase();
@@ -75,10 +73,10 @@ public:
   const PhrasePtr GetSourcePhrase() const {
     return m_sourcePhrase;
   }
-  const std::vector<float> &GetScores() const{
+  const std::vector<float> &GetScores() const {
     return m_scores;
   }
-  
+
   void SetLHS(WordPtr lhs);
 
   void Create1AlignFromString(const std::string &align1Str);
@@ -105,13 +103,11 @@ public:
                                       , const std::vector<Moses::FactorType> &outputFactors
                                       , const Vocab &vocab
                                       , const Moses::PhraseDictionary &phraseDict
-                                      , const std::vector<float> &weightT
-                                      , const Moses::WordPenaltyProducer* wpProducer
-                                      , const Moses::LMList &lmList) const;
+                                      , const std::vector<float> &weightT) const;
   UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
   UINT64 ReadFromFile(std::fstream &fileTP);
 
-	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
 };
 

@@ -19,11 +19,12 @@
 
 namespace MosesTuning
 {
-  
+
 
 typedef FeatureStatsType ValType;
 
-class MiraFeatureVector {
+class MiraFeatureVector
+{
 public:
   MiraFeatureVector(const FeatureDataItem& vec);
   MiraFeatureVector(const MiraFeatureVector& other);

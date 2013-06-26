@@ -17,7 +17,8 @@ using namespace std;
 static const float MIN_FLOAT = -1.0 * numeric_limits<float>::max();
 static const float MAX_FLOAT = numeric_limits<float>::max();
 
-namespace {
+namespace
+{
 
 /**
  * Compute the intersection of 2 lines.
@@ -35,7 +36,7 @@ inline float intersect(float m1, float b1, float m2, float b2)
 
 namespace MosesTuning
 {
-  
+
 
 Optimizer::Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<bool>& pos, const vector<parameter_t>& start, unsigned int nrandom)
   : m_scorer(NULL), m_feature_data(), m_num_random_directions(nrandom), m_positive(pos)
@@ -198,7 +199,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
             thresholdmap.erase(previnserted); // erase old previnsert
             previnserted = thresholdmap.find(leftmostx); // point previnsert to the new threshold
             previnserted->second.back()=newd; // We update the diff for sentence S
-          // Threshold already exists but is not the previous one.
+            // Threshold already exists but is not the previous one.
           } else {
             // We append the diffs in previnsert to tit before destroying previnsert.
             tit->second.insert(tit->second.end(),previnserted->second.begin(),previnserted->second.end());
@@ -405,8 +406,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P) const
         for (unsigned int i = 0; i < Point::getdim(); i++)
           direction[i]=0.0;
         direction[d]=1.0;
-      }
-      else { // random direction update
+      } else { // random direction update
         direction.Randomize();
       }
       statscore_t curscore = LineOptimize(P, direction, linebest);//find the minimum on the line
@@ -443,8 +443,7 @@ statscore_t RandomDirectionOptimizer::TrueRun(Point& P) const
   // do specified number of random direction optimizations
   unsigned int nrun = 0;
   unsigned int nrun_no_change = 0;
-  for (; nrun_no_change < m_num_random_directions; nrun++, nrun_no_change++)
-  {
+  for (; nrun_no_change < m_num_random_directions; nrun++, nrun_no_change++) {
     // choose a random direction in which to optimize
     Point direction;
     direction.Randomize();

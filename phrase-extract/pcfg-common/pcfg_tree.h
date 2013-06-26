@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2012 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -26,34 +26,43 @@
 
 #include <string>
 
-namespace Moses {
-namespace PCFG {
+namespace Moses
+{
+namespace PCFG
+{
 
 template<typename DerivedType>
-class PcfgTreeBase : public SyntaxTreeBase<std::string, DerivedType> {
- public:
+class PcfgTreeBase : public SyntaxTreeBase<std::string, DerivedType>
+{
+public:
   typedef std::string LabelType;
   typedef SyntaxTreeBase<LabelType, DerivedType> BaseType;
 
   PcfgTreeBase(const LabelType &label) : BaseType(label), score_(0.0) {}
 
-  double score() const { return score_; }
-  void set_score(double s) { score_ = s; }
+  double score() const {
+    return score_;
+  }
+  void set_score(double s) {
+    score_ = s;
+  }
 
- private:
+private:
   double score_;
 };
 
-class PcfgTree : public PcfgTreeBase<PcfgTree> {
- public:
+class PcfgTree : public PcfgTreeBase<PcfgTree>
+{
+public:
   typedef PcfgTreeBase<PcfgTree> BaseType;
   PcfgTree(const BaseType::LabelType &label) : BaseType(label) {}
 };
 
 // Specialise XmlOutputHandler for PcfgTree.
 template<>
-class XmlOutputHandler<PcfgTree> {
- public:
+class XmlOutputHandler<PcfgTree>
+{
+public:
   typedef std::map<std::string, std::string> AttributeMap;
 
   void GetLabel(const PcfgTree &tree, std::string &label) const {

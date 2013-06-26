@@ -39,14 +39,16 @@ typedef std::vector<const ChartHypothesis*> HypoList;
  */
 class TranslationDimension
 {
- public:
+public:
   TranslationDimension(std::size_t pos,
                        const std::vector<TargetPhrase*> &orderedTargetPhrases)
     : m_pos(pos)
-    , m_orderedTargetPhrases(&orderedTargetPhrases)
-  {}
+    , m_orderedTargetPhrases(&orderedTargetPhrases) {
+  }
 
-  std::size_t IncrementPos() { return m_pos++; }
+  std::size_t IncrementPos() {
+    return m_pos++;
+  }
 
   bool HasMoreTranslations() const {
     return m_pos+1 < m_orderedTargetPhrases->size();
@@ -64,7 +66,7 @@ class TranslationDimension
     return GetTargetPhrase() == compare.GetTargetPhrase();
   }
 
- private:
+private:
   std::size_t m_pos;
   const std::vector<TargetPhrase*> *m_orderedTargetPhrases;
 };
@@ -78,10 +80,12 @@ class HypothesisDimension
 public:
   HypothesisDimension(std::size_t pos, const HypoList &orderedHypos)
     : m_pos(pos)
-    , m_orderedHypos(&orderedHypos)
-  {}
+    , m_orderedHypos(&orderedHypos) {
+  }
 
-  std::size_t IncrementPos() { return m_pos++; }
+  std::size_t IncrementPos() {
+    return m_pos++;
+  }
 
   bool HasMoreHypo() const {
     return m_pos+1 < m_orderedHypos->size();
@@ -109,7 +113,7 @@ std::size_t hash_value(const HypothesisDimension &);
 /** @todo How is this used. Split out into separate source file */
 class RuleCubeItem
 {
- public:
+public:
   RuleCubeItem(const ChartTranslationOptions &, const ChartCellCollection &);
   RuleCubeItem(const RuleCubeItem &, int);
   ~RuleCubeItem();
@@ -122,7 +126,9 @@ class RuleCubeItem
     return m_hypothesisDimensions;
   }
 
-  float GetScore() const { return m_score; }
+  float GetScore() const {
+    return m_score;
+  }
 
   void EstimateScore();
 
@@ -132,7 +138,7 @@ class RuleCubeItem
 
   bool operator<(const RuleCubeItem &) const;
 
- private:
+private:
   RuleCubeItem(const RuleCubeItem &);  // Not implemented
   RuleCubeItem &operator=(const RuleCubeItem &);  // Not implemented
 

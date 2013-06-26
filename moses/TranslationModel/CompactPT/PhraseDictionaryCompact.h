@@ -1,23 +1,23 @@
-// $Id$                                                                                                                               
-// vim:tabstop=2                                                                                                                      
-/***********************************************************************                                                              
-Moses - factored phrase-based language decoder                                                                                        
-Copyright (C) 2006 University of Edinburgh                                                                                            
-                                                                                                                                      
-This library is free software; you can redistribute it and/or                                                                         
-modify it under the terms of the GNU Lesser General Public                                                                            
-License as published by the Free Software Foundation; either                                                                          
-version 2.1 of the License, or (at your option) any later version.                                                                    
-                                                                                                                                      
-This library is distributed in the hope that it will be useful,                                                                       
-but WITHOUT ANY WARRANTY; without even the implied warranty of                                                                        
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU                                                                     
-Lesser General Public License for more details.                                                                                       
-                                                                                                                                      
-You should have received a copy of the GNU Lesser General Public                                                                      
-License along with this library; if not, write to the Free Software                                                                   
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA                                                        
-***********************************************************************/  
+// $Id$
+// vim:tabstop=2
+/***********************************************************************
+Moses - factored phrase-based language decoder
+Copyright (C) 2006 University of Edinburgh
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+***********************************************************************/
 
 #ifndef moses_PhraseDictionaryCompact_h
 #define moses_PhraseDictionaryCompact_h
@@ -50,7 +50,7 @@ protected:
 
   bool m_inMemory;
   bool m_useAlignmentInfo;
-  
+
   typedef std::vector<TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS
   boost::mutex m_sentenceMutex;
@@ -59,44 +59,32 @@ protected:
   typedef PhraseCache SentenceCache;
 #endif
   SentenceCache m_sentenceCache;
-  
+
   BlockHashIndex m_hash;
   PhraseDecoder* m_phraseDecoder;
-  
+
   StringVector<unsigned char, size_t, MmapAllocator>  m_targetPhrasesMapped;
   StringVector<unsigned char, size_t, std::allocator> m_targetPhrasesMemory;
 
   std::vector<float> m_weight;
-  const LMList* m_languageModels;
-  float m_weightWP;
-
 public:
-  PhraseDictionaryCompact(const std::string &line)
-  :PhraseDictionary("PhraseDictionaryCompact", line)
-  ,m_inMemory(true)
-  ,m_useAlignmentInfo(true)
-  ,m_hash(10, 16)
-  ,m_phraseDecoder(0)
-  ,m_weight(0)
-  {
-  }
+  PhraseDictionaryCompact(const std::string &line);
 
   ~PhraseDictionaryCompact();
 
-  bool InitDictionary();
+  void Load();
 
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
-  
+
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
-  
+
   void CacheForCleanup(TargetPhraseCollection* tpc);
   void CleanUpAfterSentenceProcessing(const InputType &source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const ChartCellCollectionBase &)
-  {
+    const ChartCellCollectionBase &) {
     assert(false);
     return 0;
   }

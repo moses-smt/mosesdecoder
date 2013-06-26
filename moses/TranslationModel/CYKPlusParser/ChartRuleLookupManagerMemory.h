@@ -30,8 +30,8 @@
 #include "ChartRuleLookupManagerCYKPlus.h"
 #include "DotChartInMemory.h"
 #include "moses/NonTerminal.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
 #include "moses/StackVec.h"
 
 namespace Moses
@@ -44,10 +44,10 @@ class WordsRange;
 //! Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
 {
- public:
+public:
   ChartRuleLookupManagerMemory(const InputType &sentence,
                                const ChartCellCollectionBase &cellColl,
-                               const PhraseDictionarySCFG &ruleTable);
+                               const PhraseDictionaryMemory &ruleTable);
 
   ~ChartRuleLookupManagerMemory();
 
@@ -55,7 +55,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
     const WordsRange &range,
     ChartParserCallback &outColl);
 
- private:
+private:
   void ExtendPartialRuleApplication(
     const DottedRuleInMemory &prevDottedRule,
     size_t startPos,
@@ -64,7 +64,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
     DottedRuleColl &dottedRuleColl);
 
   std::vector<DottedRuleColl*> m_dottedRuleColls;
-  const PhraseDictionarySCFG &m_ruleTable;
+  const PhraseDictionaryMemory &m_ruleTable;
 #ifdef USE_BOOST_POOL
   // Use an object pool to allocate the dotted rules for this sentence.  We
   // allocate a lot of them and this has been seen to significantly improve

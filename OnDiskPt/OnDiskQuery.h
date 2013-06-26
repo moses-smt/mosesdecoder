@@ -18,22 +18,21 @@ private:
 
 public:
 
-  OnDiskQuery(OnDiskWrapper &wrapper):m_wrapper(wrapper){}
+  OnDiskQuery(OnDiskWrapper &wrapper):m_wrapper(wrapper) {}
 
-  void Tokenize(Phrase &phrase, 
-      const std::string &token,
-      bool addSourceNonTerm, 
-      bool addTargetNonTerm);
-  
+  void Tokenize(Phrase &phrase,
+                const std::string &token,
+                bool addSourceNonTerm,
+                bool addTargetNonTerm);
+
   SourcePhrase Tokenize(const std::vector<std::string>& tokens);
 
   const PhraseNode *Query(const SourcePhrase& sourcePhrase);
 
-  inline const PhraseNode *Query(const std::vector<std::string>& tokens)
-  {
+  inline const PhraseNode *Query(const std::vector<std::string>& tokens) {
     return Query(Tokenize(tokens));
   }
-  
+
 };
 
 

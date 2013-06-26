@@ -50,7 +50,8 @@ void ScoreData::save(const string &file, bool bin)
   ofs.close();
 }
 
-void ScoreData::save(bool bin) {
+void ScoreData::save(bool bin)
+{
   save(&cout, bin);
 }
 

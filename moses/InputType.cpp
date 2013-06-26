@@ -67,7 +67,7 @@ std::vector <ChartTranslationOptions*> InputType::GetXmlChartTranslationOptions(
   std::vector <ChartTranslationOptions*> ret;
   return ret;
 }
-  
+
 }
 
 

@@ -16,7 +16,7 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 Permutation::Permutation(const string &alignment, const int sourceLength, const int targetLength )
 {
@@ -86,7 +86,7 @@ void Permutation::set(const string & alignment,const int sourceLength)
     //cout << "SP:" << sourcePos << " TP:" << targetPos << endl;
     if (sourcePos > sourceLength) {
       cerr << "Source sentence length:" << sourceLength << " is smaller than alignment source position:" << sourcePos << endl;
-      cerr << "******** Permutation::set :" << alignment << ": len : " << sourceLength <<endl; 
+      cerr << "******** Permutation::set :" << alignment << ": len : " << sourceLength <<endl;
       exit(1);
     }
     //If have multiple target pos aligned to one source,
@@ -187,7 +187,7 @@ float Permutation::distance(const Permutation &permCompare, const distanceMetric
   float score=0;
 
   //bool debug= (verboselevel()>3); // TODO: fix verboselevel()
-  bool debug=false; 
+  bool debug=false;
   if (debug) {
     cout << "*****Permutation::distance" <<endl;
     cout << "Hypo:" << endl;

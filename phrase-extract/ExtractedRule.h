@@ -49,7 +49,7 @@ public:
   double pcfgScore;
 
   std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
-  
+
   ExtractedRule(int sT, int eT, int sS, int eS)
     : source()
     , target()
@@ -62,14 +62,13 @@ public:
     , startS(sS)
     , endS(eS)
     , count(0)
-    , pcfgScore(0.0)
-  {}
-  
-  void SetSpanLength(size_t sourcePos, size_t sourceLength, size_t targetLength)
-  {
+    , pcfgScore(0.0) {
+  }
+
+  void SetSpanLength(size_t sourcePos, size_t sourceLength, size_t targetLength) {
     m_ntLengths[sourcePos] = std::pair<size_t, size_t>(sourceLength, targetLength);
   }
-  
+
   void OutputNTLengths(std::ostream &out) const;
   void OutputNTLengths(std::ostringstream &out) const;
 };

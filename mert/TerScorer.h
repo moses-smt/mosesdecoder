@@ -10,7 +10,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 class ScoreStats;
 

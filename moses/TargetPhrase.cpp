@@ -29,10 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "LM/Base.h"
 #include "StaticData.h"
-#include "LMList.h"
 #include "ScoreComponentCollection.h"
 #include "Util.h"
-#include "DummyScoreProducers.h"
 #include "AlignmentInfoCollection.h"
 
 using namespace std;
@@ -40,33 +38,64 @@ using namespace std;
 namespace Moses
 {
 TargetPhrase::TargetPhrase( std::string out_string)
-  :Phrase(0), m_fullScore(0.0), m_sourcePhrase(0)
+  :Phrase(0)
+  , m_fullScore(0.0)
+  , m_futureScore(0.0)
+  , m_sourcePhrase(0)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
 {
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
+  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter(), NULL);
 }
-
 
 TargetPhrase::TargetPhrase()
   :Phrase()
   , m_fullScore(0.0)
+  , m_futureScore(0.0)
   ,m_sourcePhrase()
-	, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-	, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
 {
 }
 
 TargetPhrase::TargetPhrase(const Phrase &phrase)
   : Phrase(phrase)
   , m_fullScore(0.0)
+  , m_futureScore(0.0)
   , m_sourcePhrase()
-	, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-	, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_lhsTarget(NULL)
 {
+}
+
+TargetPhrase::TargetPhrase(const TargetPhrase &copy)
+  : Phrase(copy)
+  , m_fullScore(copy.m_fullScore)
+  , m_futureScore(copy.m_futureScore)
+  , m_scoreBreakdown(copy.m_scoreBreakdown)
+  , m_sourcePhrase(copy.m_sourcePhrase)
+  , m_alignTerm(copy.m_alignTerm)
+  , m_alignNonTerm(copy.m_alignNonTerm)
+{
+  if (copy.m_lhsTarget) {
+    m_lhsTarget = new Word(copy.m_lhsTarget);
+  } else {
+    m_lhsTarget = NULL;
+  }
+
+}
+
+TargetPhrase::~TargetPhrase()
+{
+  //cerr << "m_lhsTarget=" << m_lhsTarget << endl;
+
+  delete m_lhsTarget;
 }
 
 #ifdef HAVE_PROTOBUF
@@ -78,35 +107,39 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
-void TargetPhrase::Evaluate()
+void TargetPhrase::Evaluate(const Phrase &source)
 {
-  ScoreComponentCollection futureScoreBreakdown;
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  Evaluate(source, ffs);
+}
 
+void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
+{
+  if (ffs.size()) {
+    const StaticData &staticData = StaticData::Instance();
+    ScoreComponentCollection futureScoreBreakdown;
+    for (size_t i = 0; i < ffs.size(); ++i) {
+      const FeatureFunction &ff = *ffs[i];
+      if (! staticData.IsFeatureFunctionIgnored( ff )) {
+        ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
+      }
+    }
+
+    float weightedScore = m_scoreBreakdown.GetWeightedScore();
+    m_futureScore += futureScoreBreakdown.GetWeightedScore();
+    m_fullScore = weightedScore + m_futureScore;
+
+  }
+}
+
+void TargetPhrase::Evaluate(const InputType &input)
+{
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    bool evaluate = false;
-
-    if (!ff.IsStateless()) {
-      evaluate = true;
-    }
-    else {
-      const StatelessFeatureFunction &sff = static_cast<const StatelessFeatureFunction&>(ff);
-      if (sff.GetStatelessFeatureType() != SetByOriginator) {
-        evaluate = true;
-      }
-    }
-
-    if (evaluate) {
-      ff.Evaluate(*this, m_scoreBreakdown, futureScoreBreakdown);
-    }
+    ff.Evaluate(input, m_scoreBreakdown);
   }
-
-  float weightedScore = m_scoreBreakdown.GetWeightedScore();
-  float futureScore   = futureScoreBreakdown.GetWeightedScore();
-  
-  m_fullScore = weightedScore + futureScore;
 }
 
 void TargetPhrase::SetXMLScore(float score)
@@ -121,8 +154,6 @@ void TargetPhrase::SetXMLScore(float score)
 
 void TargetPhrase::SetInputScore(const Scores &scoreVector)
 {
-  cerr << scoreVector.size() << endl;
-
   //we use an existing score producer to figure out information for score setting (number of scores and weights)
   const StaticData &staticData = StaticData::Instance();
   const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
@@ -135,31 +166,9 @@ void TargetPhrase::SetInputScore(const Scores &scoreVector)
   m_scoreBreakdown.Assign(prod, sizedScoreVector);
 }
 
-TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
-{
-  if (! IsCompatible(inputPhrase)) {
-    return NULL;
-  }
-
-  // ok, merge
-  TargetPhrase *clone				= new TargetPhrase(*this);
-  clone->m_sourcePhrase = m_sourcePhrase;
-  int currWord = 0;
-  const size_t len = GetSize();
-  for (size_t currPos = 0 ; currPos < len ; currPos++) {
-    const Word &inputWord	= inputPhrase.GetWord(currPos);
-    Word &cloneWord = clone->GetWord(currPos);
-    cloneWord.Merge(inputWord);
-
-    currWord++;
-  }
-
-  return clone;
-}
-
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
-	AlignmentInfo::CollType alignTerm, alignNonTerm;
+  AlignmentInfo::CollType alignTerm, alignNonTerm;
   for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
     util::TokenIter<util::SingleCharacter, false> dash(*token, util::SingleCharacter('-'));
 
@@ -173,11 +182,10 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 
 
     if (GetWord(targetPos).IsNonTerminal()) {
-    	alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    } else {
+      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
     }
-  	else {
-  		alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-  	}
   }
   SetAlignTerm(alignTerm);
   SetAlignNonTerm(alignNonTerm);
@@ -186,20 +194,28 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 
 void TargetPhrase::SetAlignTerm(const AlignmentInfo::CollType &coll)
 {
-	const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
-	m_alignTerm = alignmentInfo;
+  const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
+  m_alignTerm = alignmentInfo;
 
 }
 
 void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)
 {
-	const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
-	m_alignNonTerm = alignmentInfo;
+  const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
+  m_alignNonTerm = alignmentInfo;
 }
 
 void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString)
 {
   m_scoreBreakdown.Assign(translationScoreProducer, sparseString.as_string());
+}
+
+void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec)
+{
+  Phrase::MergeFactors(copy, factorVec);
+  m_scoreBreakdown.Merge(copy.GetScoreBreakdown());
+  m_futureScore += copy.m_futureScore;
+  m_fullScore += copy.m_fullScore;
 }
 
 TO_STRING_BODY(TargetPhrase);

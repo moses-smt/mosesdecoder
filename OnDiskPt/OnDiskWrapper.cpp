@@ -204,16 +204,16 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
   Word *newWord = new Word(isNonTerminal);
   stringstream strme;
 
-  size_t factorType = factorsVec[0];  
+  size_t factorType = factorsVec[0];
   const Moses::Factor *factor = origWord.GetFactor(factorType);
-  CHECK(factor);  
+  CHECK(factor);
   strme << factor->GetString();
 
   for (size_t ind = 1 ; ind < factorsVec.size() ; ++ind) {
     size_t factorType = factorsVec[ind];
     const Moses::Factor *factor = origWord.GetFactor(factorType);
-    if (factor == NULL)
-    { // can have less factors than factorType.size()
+    if (factor == NULL) {
+      // can have less factors than factorType.size()
       break;
     }
     CHECK(factor);

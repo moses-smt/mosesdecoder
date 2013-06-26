@@ -74,11 +74,11 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   if (m_size == m_collection.size()) {
     // m_collection has reached capacity: create a new object.
     m_collection.push_back(new ChartTranslationOptions(tpc, stackVec,
-                                                      range, score));
+                           range, score));
   } else {
     // Overwrite an unused object.
     *(m_collection[m_size]) = ChartTranslationOptions(tpc, stackVec,
-                                                     range, score);
+                              range, score);
   }
   ++m_size;
 
@@ -98,7 +98,8 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   }
 }
 
-void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range) {
+void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range)
+{
   TargetPhraseCollection *tpc = new TargetPhraseCollection();
   tpc->Add(&phrase);
   waste_memory.push_back(tpc);
@@ -106,7 +107,8 @@ void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<Ta
   Add(*tpc, empty, range);
 }
 
-void ChartTranslationOptionList::ApplyThreshold() {
+void ChartTranslationOptionList::ApplyThreshold()
+{
   if (m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2
     // without being pruned.
@@ -134,8 +136,8 @@ void ChartTranslationOptionList::ApplyThreshold() {
   scoreThreshold += StaticData::Instance().GetTranslationOptionThreshold();
 
   CollType::iterator bound = std::partition(m_collection.begin(),
-                                            m_collection.begin()+m_size,
-                                            ScoreThresholdPred(scoreThreshold));
+                             m_collection.begin()+m_size,
+                             ScoreThresholdPred(scoreThreshold));
 
   m_size = std::distance(m_collection.begin(), bound);
 }

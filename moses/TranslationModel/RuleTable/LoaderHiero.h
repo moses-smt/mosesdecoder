@@ -11,7 +11,8 @@
 
 #include "LoaderStandard.h"
 
-namespace Moses {
+namespace Moses
+{
 
 //! specific implementation of SCFG loader to load rule tables formatted in Hiero-style format
 class RuleTableLoaderHiero : public RuleTableLoaderStandard
@@ -20,10 +21,7 @@ public:
   bool Load(const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
-            const std::vector<float> &weight,
             size_t tableLimit,
-            const LMList &languageModels,
-            const WordPenaltyProducer* wpProducer,
             RuleTableTrie &);
 
 };

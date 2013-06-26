@@ -364,7 +364,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
 
         string pcfgString = ParseXmlTagAttribute(tagContent,"pcfg");
         float pcfgScore = pcfgString == "" ? 0.0f
-                                           : std::atof(pcfgString.c_str());
+                          : std::atof(pcfgString.c_str());
 
         // report what we have processed so far
         if (0) {

@@ -21,8 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/test/unit_test.hpp>
 
-#include "DummyScoreProducers.h"
-#include "FeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 #include "ScoreComponentCollection.h"
 
 using namespace Moses;
@@ -30,31 +29,47 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE(scc)
 
-class MockStatelessFeatureFunction : public StatelessFeatureFunction {
-  public:
-    MockStatelessFeatureFunction(const string& desc, size_t n, const string &line) :
-      StatelessFeatureFunction(desc,n, line) {}
-    virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
-    virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
-    virtual void Evaluate(const TargetPhrase &targetPhrase
+class MockStatelessFeatureFunction : public StatelessFeatureFunction
+{
+public:
+  MockStatelessFeatureFunction(const string& desc, size_t n, const string &line) :
+    StatelessFeatureFunction(desc,n, line) {}
+  virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
+  virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
+  virtual void Evaluate(const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-    { }
+                        , ScoreComponentCollection &estimatedFutureScore) const {
+  }
 };
 
-class MockSingleFeature : public MockStatelessFeatureFunction {
-  public:
-    MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1, "MockSingle") {}
+class MockSingleFeature : public MockStatelessFeatureFunction
+{
+public:
+  MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1, "MockSingle") {}
+
+  bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 };
 
-class MockMultiFeature : public MockStatelessFeatureFunction {
-  public:
-    MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5, "MockMulti") {}
+class MockMultiFeature : public MockStatelessFeatureFunction
+{
+public:
+  MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5, "MockMulti") {}
+
+  bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 };
 
-class MockSparseFeature : public MockStatelessFeatureFunction {
-  public:
-    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", 0, "MockSparse") {}
+class MockSparseFeature : public MockStatelessFeatureFunction
+{
+public:
+  MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", 0, "MockSparse") {}
+
+  bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 };
 
 
@@ -67,7 +82,7 @@ struct MockProducers {
   MockSparseFeature sparse;
 };
 
-BOOST_FIXTURE_TEST_CASE(ctor, MockProducers) 
+BOOST_FIXTURE_TEST_CASE(ctor, MockProducers)
 {
   ScoreComponentCollection scc;
   BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&single),0);
@@ -89,11 +104,11 @@ BOOST_FIXTURE_TEST_CASE(plusequals, MockProducers)
   scc.PlusEquals(&multi,vec1);
   std::vector<float> actual = scc.GetScoresForProducer(&multi);
   BOOST_CHECK_EQUAL_COLLECTIONS(vec1.begin(),vec1.end()
-        ,actual.begin(), actual.end());
+                                ,actual.begin(), actual.end());
   scc.PlusEquals(&multi,vec1);
   actual = scc.GetScoresForProducer(&multi);
   BOOST_CHECK_EQUAL_COLLECTIONS(vec2.begin(),vec2.end(),
-         actual.begin(), actual.end());
+                                actual.begin(), actual.end());
 
   BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&single), 3.4f);
 }

@@ -5,7 +5,8 @@
 #include <cstdio>
 #include <iostream>
 
-GzFileBuf::GzFileBuf(const char* filename) {
+GzFileBuf::GzFileBuf(const char* filename)
+{
   m_gz_file = gzopen(filename, "rb");
   if (m_gz_file == NULL) {
     std::cerr << "ERROR: Failed to open " << filename << std::endl;
@@ -16,16 +17,19 @@ GzFileBuf::GzFileBuf(const char* filename) {
        m_buf + sizeof(int));    // end position
 }
 
-GzFileBuf::~GzFileBuf() {
+GzFileBuf::~GzFileBuf()
+{
   gzclose(m_gz_file);
 }
 
-int GzFileBuf::overflow(int_type c) {
+int GzFileBuf::overflow(int_type c)
+{
   throw;
 }
 
 // read one character
-int GzFileBuf::underflow() {
+int GzFileBuf::underflow()
+{
   // is read position before end of m_buf?
   if (gptr() < egptr()) {
     return traits_type::to_int_type(*gptr());
@@ -64,17 +68,20 @@ int GzFileBuf::underflow() {
 }
 
 std::streampos GzFileBuf::seekpos(
-    std::streampos sp,
-    std::ios_base::openmode which) {
+  std::streampos sp,
+  std::ios_base::openmode which)
+{
   throw;
 }
 
 std::streamsize GzFileBuf::xsgetn(char* s,
-                                  std::streamsize num) {
+                                  std::streamsize num)
+{
   return static_cast<std::streamsize>(gzread(m_gz_file,s,num));
 }
 
 std::streamsize GzFileBuf::xsputn(const char* s,
-                                  std::streamsize num) {
+                                  std::streamsize num)
+{
   throw;
 }

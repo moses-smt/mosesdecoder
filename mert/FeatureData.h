@@ -33,7 +33,9 @@ public:
   FeatureData();
   ~FeatureData() {}
 
-  void clear() { m_array.clear(); }
+  void clear() {
+    m_array.clear();
+  }
 
   FeatureArray& get(size_t idx) {
     return m_array.at(idx);
@@ -61,13 +63,23 @@ public:
   void add(FeatureArray& e);
   void add(FeatureStats& e, int sent_idx);
 
-  std::size_t size() const { return m_array.size(); }
+  std::size_t size() const {
+    return m_array.size();
+  }
 
-  std::size_t NumberOfFeatures() const { return m_num_features; }
-  void NumberOfFeatures(std::size_t v) { m_num_features = v; }
+  std::size_t NumberOfFeatures() const {
+    return m_num_features;
+  }
+  void NumberOfFeatures(std::size_t v) {
+    m_num_features = v;
+  }
 
-  std::string Features() const { return m_features; }
-  void Features(const std::string& f) { m_features = f; }
+  std::string Features() const {
+    return m_features;
+  }
+  void Features(const std::string& f) {
+    m_features = f;
+  }
 
   void save(const std::string &file, bool bin=false);
   void save(std::ostream* os, bool bin=false);

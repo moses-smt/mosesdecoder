@@ -3,11 +3,13 @@
 #ifndef moses_PhraseDictionaryTreeAdaptor_h
 #define moses_PhraseDictionaryTreeAdaptor_h
 
-#include <vector>
-#include "util/check.hh"
 #include "moses/TypeDef.h"
 #include "moses/TargetPhraseCollection.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "util/check.hh"
+
+#include <boost/thread/tss.hpp>
+#include <vector>
 
 namespace Moses
 {
@@ -37,6 +39,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 public:
   PhraseDictionaryTreeAdaptor(const std::string &line);
   virtual ~PhraseDictionaryTreeAdaptor();
+  void Load();
 
   // enable/disable caching
   // you enable caching if you request the target candidates for a source phrase multiple times
@@ -46,9 +49,6 @@ public:
 
   void EnableCache();
   void DisableCache();
-
-  // initialize ...
-  bool InitDictionary();
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found

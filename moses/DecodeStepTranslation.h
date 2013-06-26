@@ -36,14 +36,17 @@ class DecodeStepTranslation : public DecodeStep
 {
 public:
   DecodeStepTranslation(); //! not implemented
-  DecodeStepTranslation(const PhraseDictionary* phraseFeature, const DecodeStep* prev);
+  DecodeStepTranslation(const PhraseDictionary* phraseFeature,
+                        const DecodeStep* prev,
+                        const std::vector<FeatureFunction*> &features);
 
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
-                       , bool adhereTableLimit) const;
+                       , bool adhereTableLimit
+                       , const Phrase &src) const;
 
 
   /*! initialize list of partial translation options by applying the first translation step

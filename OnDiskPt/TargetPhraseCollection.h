@@ -26,8 +26,6 @@ namespace Moses
 {
 class TargetPhraseCollection;
 class PhraseDictionary;
-class LMList;
-class WordPenaltyProducer;
 }
 
 namespace OnDiskPt
@@ -66,17 +64,15 @@ public:
   size_t GetSize() const {
     return m_coll.size();
   }
-  
+
   const TargetPhrase &GetTargetPhrase(size_t ind) const;
-  
+
   UINT64 GetFilePos() const;
 
   Moses::TargetPhraseCollection *ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
       , const std::vector<Moses::FactorType> &outputFactors
       , const Moses::PhraseDictionary &phraseDict
       , const std::vector<float> &weightT
-      , const Moses::WordPenaltyProducer* wpProducer
-      , const Moses::LMList &lmList
       , const std::string &filePath
       , Vocab &vocab) const;
   void ReadFromFile(size_t tableLimit, UINT64 filePos, OnDiskWrapper &onDiskWrapper);

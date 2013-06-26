@@ -41,18 +41,24 @@ class ChartTrellisNode;
  */
 class ChartTrellisPath
 {
- public:
+public:
   ChartTrellisPath(const ChartHypothesis &hypo);
   ChartTrellisPath(const ChartTrellisDetour &detour);
 
   ~ChartTrellisPath();
 
-  const ChartTrellisNode &GetFinalNode() const { return *m_finalNode; }
+  const ChartTrellisNode &GetFinalNode() const {
+    return *m_finalNode;
+  }
 
-  const ChartTrellisNode *GetDeviationPoint() const { return m_deviationPoint; }
+  const ChartTrellisNode *GetDeviationPoint() const {
+    return m_deviationPoint;
+  }
 
   //! get score for this path throught trellis
-  float GetTotalScore() const { return m_totalScore; }
+  float GetTotalScore() const {
+    return m_totalScore;
+  }
 
   Phrase GetOutputPhrase() const;
 
@@ -61,7 +67,7 @@ class ChartTrellisPath
     return m_scoreBreakdown;
   }
 
- private:
+private:
   ChartTrellisPath(const ChartTrellisPath &);  // Not implemented
   ChartTrellisPath &operator=(const ChartTrellisPath &);  // Not implemented
 

@@ -45,7 +45,7 @@ public:
 
   bool create(char targetString[], char sourceString[],
               char alignmentString[], char weightString[], int sentenceID, bool boundaryRules);
-  
+
 };
 
 }

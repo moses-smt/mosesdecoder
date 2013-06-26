@@ -15,20 +15,18 @@
 
 namespace tmmt
 {
-  
-struct SentenceAlignment
-{
+
+struct SentenceAlignment {
   int count;
   std::vector< WORD_ID > target;
   std::vector< std::pair<int,int> > alignment;
-  
-  SentenceAlignment()
-  {}
-  
+
+  SentenceAlignment() {
+  }
+
   std::string getTargetString(const Vocabulary &vocab) const;
-  
-  std::string getAlignmentString() const
-  {
+
+  std::string getAlignmentString() const {
     std::stringstream strme;
     for (size_t i = 0; i < alignment.size(); ++i) {
       const std::pair<int,int> &alignPair = alignment[i];
@@ -36,7 +34,7 @@ struct SentenceAlignment
     }
     return strme.str();
   }
-  
+
 };
 
 }

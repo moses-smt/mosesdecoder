@@ -22,9 +22,9 @@
 #include "ChartParser.h"
 #include "ChartParserCallback.h"
 #include "ChartRuleLookupManager.h"
-#include "DummyScoreProducers.h"
 #include "StaticData.h"
 #include "TreeInput.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
 
 using namespace std;
 using namespace Moses;
@@ -35,16 +35,18 @@ extern bool g_debug;
 
 ChartParserUnknown::ChartParserUnknown() {}
 
-ChartParserUnknown::~ChartParserUnknown() {
+ChartParserUnknown::~ChartParserUnknown()
+{
   RemoveAllInColl(m_unksrcs);
   RemoveAllInColl(m_cacheTargetPhraseCollection);
 }
 
-void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to) {
+void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to)
+{
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
-  
+
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
     const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
@@ -56,11 +58,11 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       isDigit = 1;
     // modify the starting bitmap
   }
-  
+
   Phrase* unksrc = new Phrase(1);
   unksrc->AddWord() = sourceWord;
   m_unksrcs.push_back(unksrc);
-  
+
   //TranslationOption *transOpt;
   if (! staticData.GetDropUnknown() || isDigit) {
     // loop
@@ -69,24 +71,24 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
     for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
       const string &targetLHSStr = iterLHS->first;
       float prob = iterLHS->second;
-      
+
       // lhs
       //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
-      Word targetLHS(true);
-      
-      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS.GetFactor(0) != NULL);
-      
+      Word *targetLHS = new Word(true);
+
+      targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
+      CHECK(targetLHS->GetFactor(0) != NULL);
+
       // add to dictionary
       TargetPhrase *targetPhrase = new TargetPhrase();
       Word &targetWord = targetPhrase->AddWord();
       targetWord.CreateUnknownWord(sourceWord);
-      
+
       // scores
       float unknownScore = FloorScore(TransformScore(prob));
 
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->Evaluate();
+      targetPhrase->Evaluate(*unksrc);
 
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
@@ -98,7 +100,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   } else {
     // drop source word. create blank trans opt
     float unknownScore = FloorScore(-numeric_limits<float>::infinity());
-    
+
     TargetPhrase *targetPhrase = new TargetPhrase();
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
@@ -106,13 +108,13 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
     for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
       const string &targetLHSStr = iterLHS->first;
       //float prob = iterLHS->second;
-      
-      Word targetLHS(true);
-      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS.GetFactor(0) != NULL);
-      
+
+      Word *targetLHS = new Word(true);
+      targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
+      CHECK(targetLHS->GetFactor(0) != NULL);
+
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->Evaluate();
+      targetPhrase->Evaluate(*unksrc);
 
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
@@ -125,7 +127,8 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 
 ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells) :
   m_decodeGraphList(StaticData::Instance().GetDecodeGraphs()),
-  m_source(source) {
+  m_source(source)
+{
   const StaticData &staticData = StaticData::Instance();
 
   staticData.InitializeForInput(source);
@@ -139,14 +142,16 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
   }
 }
 
-ChartParser::~ChartParser() {
+ChartParser::~ChartParser()
+{
   RemoveAllInColl(m_ruleLookupManagers);
   StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
 }
 
-void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to) {
+void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
+{
   assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
-   
+
   std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
   std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
   for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
@@ -158,7 +163,7 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to) 
       ruleLookupManager.GetChartRuleCollection(wordsRange, to);
     }
   }
-  
+
   if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
     bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
     if (to.Empty() || alwaysCreateDirectTranslationOption) {
@@ -166,7 +171,7 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to) 
       const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
       m_unknown.Process(sourceWord, wordsRange, to);
     }
-  }  
+  }
 }
- 
+
 } // namespace Moses

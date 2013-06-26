@@ -18,54 +18,42 @@
 
 using namespace std;
 
-namespace Moses 
+namespace Moses
 {
-  
-bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
-                                 , const std::vector<FactorType> &output
-                                 , const std::string &filePath
-                                 , const std::vector<float> &weight
-                                 , size_t tableLimit
-                                 , const LMList &languageModels
-                                 , const WordPenaltyProducer* wpProducer)
+PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &line)
+  : PhraseDictionaryMemory("PhraseDictionaryALSuffixArray", line)
 {
   const StaticData &staticData = StaticData::Instance();
-  if (staticData.ThreadCount() > 1)
-  {
-    UserMessage::Add("Suffix array implementation is not threadsafe");
-    return false;
+  if (staticData.ThreadCount() > 1) {
+    throw runtime_error("Suffix array implementation is not threadsafe");
   }
-  
-  // file path is the directory of the rules for eacg, NOT the file of all the rules
-  //SetFilePath(filePath);
-  m_tableLimit = tableLimit;
 
-  m_input = &input;
-  m_output = &output;
-  m_languageModels = &languageModels;
-  m_wpProducer = wpProducer;
-  m_weight = &weight;
-  
-  return true;
+  ReadParameters();
+}
+
+void PhraseDictionaryALSuffixArray::Load()
+{
+  SetFeaturesToApply();
 }
 
 void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
 {
-  // clear out rules for previous sentence
-  m_collection.Clear();
-  
   // populate with rules for this sentence
   long translationId = source.GetTranslationId();
-  
-  string grammarFile = GetFilePath() + "/grammar.out." + SPrint(translationId) + ".gz";
-  
+
+  string grammarFile = GetFilePath() + "/grammar." + SPrint(translationId) + ".gz";
+
   std::auto_ptr<RuleTableLoader> loader =
-  RuleTableLoaderFactory::Create(grammarFile);
-  std::vector<float> weightT = StaticData::Instance().GetWeights(this);
-  bool ret = loader->Load(*m_input, *m_output, grammarFile, weightT, m_tableLimit,
-                          *m_languageModels, m_wpProducer, *this);
-  
+    RuleTableLoaderFactory::Create(grammarFile);
+  bool ret = loader->Load(m_input, m_output, grammarFile, m_tableLimit,
+                          *this);
+
   CHECK(ret);
+}
+
+void PhraseDictionaryALSuffixArray::CleanUpAfterSentenceProcessing(const InputType &source)
+{
+  m_collection.Clear();
 }
 
 }

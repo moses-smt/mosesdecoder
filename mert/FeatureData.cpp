@@ -20,7 +20,7 @@ namespace MosesTuning
 
 
 FeatureData::FeatureData()
-    : m_num_features(0) {}
+  : m_num_features(0) {}
 
 void FeatureData::save(ostream* os, bool bin)
 {
@@ -38,7 +38,8 @@ void FeatureData::save(const string &file, bool bin)
   ofs.close();
 }
 
-void FeatureData::save(bool bin) {
+void FeatureData::save(bool bin)
+{
   save(&cout, bin);
 }
 
@@ -145,7 +146,8 @@ void FeatureData::setFeatureMap(const string& feat)
   }
 }
 
-string FeatureData::ToString() const {
+string FeatureData::ToString() const
+{
   string res;
 
   {

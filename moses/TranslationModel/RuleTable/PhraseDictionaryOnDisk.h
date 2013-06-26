@@ -28,15 +28,19 @@
 #include "OnDiskPt/OnDiskWrapper.h"
 #include "OnDiskPt/Word.h"
 #include "OnDiskPt/PhraseNode.h"
+#include "util/check.hh"
+
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#endif
 
 namespace Moses
 {
 class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
-class WordPenaltyProducer;
 
 /** Implementation of on-disk phrase table for hierarchical/syntax model.
- */   
+ */
 class PhraseDictionaryOnDisk : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;
@@ -45,25 +49,17 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
 protected:
   boost::thread_specific_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
 
-  const LMList* m_languageModels;
-  const WordPenaltyProducer* m_wpProducer;
-
   OnDiskPt::OnDiskWrapper &GetImplementation();
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
 public:
-  PhraseDictionaryOnDisk(const std::string &line)
-    : MyBase("PhraseDictionaryOnDisk", line)
-    , m_languageModels(NULL)
-  {}
-
-  virtual ~PhraseDictionaryOnDisk();
+  PhraseDictionaryOnDisk(const std::string &line);
+  ~PhraseDictionaryOnDisk();
+  void Load();
 
   PhraseTableImplementation GetPhraseTableImplementation() const {
     return OnDisk;
   }
-
-  bool InitDictionary();
 
   // PhraseDictionary impl
   //! find list of translations that can translates src. Only for phrase input
@@ -74,7 +70,6 @@ public:
     const ChartCellCollectionBase &);
 
   virtual void InitializeForInput(InputType const& source);
-  virtual void CleanUpAfterSentenceProcessing(InputType const& source);
 
 };
 

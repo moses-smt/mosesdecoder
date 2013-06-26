@@ -57,7 +57,7 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
         }
       }
     }
-    
+
     bool epsilon = false;
     if (target == "") {
       target="<EPSILON>";
@@ -102,12 +102,19 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
   os << std::endl << std::endl;
   if (doLMStats && lmCalls > 0) {
     std::vector<unsigned int>::iterator acc = lmAcc.begin();
-    const LMList &lmList = StaticData::Instance().GetLMList();
-    LMList::const_iterator i = lmList.begin();
-    for (; acc != lmAcc.end(); ++acc, ++i) {
-      char buf[256];
-      sprintf(buf, "%.4f", (float)(*acc)/(float)lmCalls);
-      os << (*i)->GetScoreProducerDescription() <<", AVG N-GRAM LENGTH: " << buf << std::endl;
+
+    const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+    for (size_t i = 0; i < statefulFFs.size(); ++i) {
+      const StatefulFeatureFunction *ff = statefulFFs[i];
+      const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
+      if (lm) {
+        char buf[256];
+        sprintf(buf, "%.4f", (float)(*acc)/(float)lmCalls);
+        os << lm->GetScoreProducerDescription() <<", AVG N-GRAM LENGTH: " << buf << std::endl;
+
+        ++acc;
+      }
     }
   }
 
@@ -118,10 +125,10 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
       os << "\tdropped=" << *dwi << std::endl;
     }
   }
-	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED): ";
+  os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED): ";
   os << translationPath.back()->GetScoreBreakdown();
   os << " weighted(TODO)";
-	os << std::endl;
+  os << std::endl;
 }
 
 }

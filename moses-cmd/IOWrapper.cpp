@@ -42,7 +42,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/WordsRange.h"
 #include "moses/TrellisPathList.h"
 #include "moses/StaticData.h"
-#include "moses/DummyScoreProducers.h"
 #include "moses/FeatureVector.h"
 #include "moses/InputFileStream.h"
 #include "IOWrapper.h"
@@ -54,47 +53,47 @@ namespace MosesCmd
 {
 
 IOWrapper::IOWrapper(
-    const vector<FactorType>				&inputFactorOrder
-    , const vector<FactorType>			&outputFactorOrder
-    , const FactorMask							&inputFactorUsed
-    , size_t												nBestSize
-    , const string									&nBestFilePath)
-:m_inputFactorOrder(inputFactorOrder)
-,m_outputFactorOrder(outputFactorOrder)
-,m_inputFactorUsed(inputFactorUsed)
-,m_inputFile(NULL)
-,m_inputStream(&std::cin)
-,m_nBestStream(NULL)
-,m_outputWordGraphStream(NULL)
-,m_outputSearchGraphStream(NULL)
-,m_detailedTranslationReportingStream(NULL)
-,m_alignmentOutputStream(NULL)
+  const vector<FactorType>				&inputFactorOrder
+  , const vector<FactorType>			&outputFactorOrder
+  , const FactorMask							&inputFactorUsed
+  , size_t												nBestSize
+  , const string									&nBestFilePath)
+  :m_inputFactorOrder(inputFactorOrder)
+  ,m_outputFactorOrder(outputFactorOrder)
+  ,m_inputFactorUsed(inputFactorUsed)
+  ,m_inputFile(NULL)
+  ,m_inputStream(&std::cin)
+  ,m_nBestStream(NULL)
+  ,m_outputWordGraphStream(NULL)
+  ,m_outputSearchGraphStream(NULL)
+  ,m_detailedTranslationReportingStream(NULL)
+  ,m_alignmentOutputStream(NULL)
 {
   Initialization(inputFactorOrder, outputFactorOrder
-      , inputFactorUsed
-      , nBestSize, nBestFilePath);
+                 , inputFactorUsed
+                 , nBestSize, nBestFilePath);
 }
 
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
-    , const std::vector<FactorType>	&outputFactorOrder
-    , const FactorMask							&inputFactorUsed
-    , size_t												nBestSize
-    , const std::string							&nBestFilePath
-    , const std::string							&inputFilePath)
-:m_inputFactorOrder(inputFactorOrder)
-,m_outputFactorOrder(outputFactorOrder)
-,m_inputFactorUsed(inputFactorUsed)
-,m_inputFilePath(inputFilePath)
-,m_inputFile(new InputFileStream(inputFilePath))
-,m_nBestStream(NULL)
-,m_outputWordGraphStream(NULL)
-,m_outputSearchGraphStream(NULL)
-,m_detailedTranslationReportingStream(NULL)
-,m_alignmentOutputStream(NULL)
+                     , const std::vector<FactorType>	&outputFactorOrder
+                     , const FactorMask							&inputFactorUsed
+                     , size_t												nBestSize
+                     , const std::string							&nBestFilePath
+                     , const std::string							&inputFilePath)
+  :m_inputFactorOrder(inputFactorOrder)
+  ,m_outputFactorOrder(outputFactorOrder)
+  ,m_inputFactorUsed(inputFactorUsed)
+  ,m_inputFilePath(inputFilePath)
+  ,m_inputFile(new InputFileStream(inputFilePath))
+  ,m_nBestStream(NULL)
+  ,m_outputWordGraphStream(NULL)
+  ,m_outputSearchGraphStream(NULL)
+  ,m_detailedTranslationReportingStream(NULL)
+  ,m_alignmentOutputStream(NULL)
 {
   Initialization(inputFactorOrder, outputFactorOrder
-      , inputFactorUsed
-      , nBestSize, nBestFilePath);
+                 , inputFactorUsed
+                 , nBestSize, nBestFilePath);
 
   m_inputStream = m_inputFile;
 }
@@ -118,10 +117,10 @@ IOWrapper::~IOWrapper()
 }
 
 void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
-    , const std::vector<FactorType>			&/*outputFactorOrder*/
-    , const FactorMask							&/*inputFactorUsed*/
-    , size_t												nBestSize
-    , const std::string							&nBestFilePath)
+                               , const std::vector<FactorType>			&/*outputFactorOrder*/
+                               , const FactorMask							&/*inputFactorUsed*/
+                               , size_t												nBestSize
+                               , const std::string							&nBestFilePath)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -193,7 +192,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
  * print surface factor only for the given phrase
  */
 void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-    bool reportSegmentation, bool reportAllFactors)
+                   bool reportSegmentation, bool reportAllFactors)
 {
   CHECK(outputFactorOrder.size() > 0);
   const Phrase& phrase = edge.GetCurrTargetPhrase();
@@ -219,12 +218,12 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
   // trace option "-t"
   if (reportSegmentation == true && phrase.GetSize() > 0) {
     out << "|" << edge.GetCurrSourceWordsRange().GetStartPos()
-	    << "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
+        << "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
   }
 }
 
 void OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
-    bool reportSegmentation, bool reportAllFactors)
+                       bool reportSegmentation, bool reportAllFactors)
 {
   if (hypo != NULL) {
     // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
@@ -378,10 +377,10 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 }
 
 void OutputNBest(std::ostream& out
-                  , const Moses::TrellisPathList &nBestList
-                  , const std::vector<Moses::FactorType>& outputFactorOrder
-                  , long translationId
-                  , bool reportSegmentation)
+                 , const Moses::TrellisPathList &nBestList
+                 , const std::vector<Moses::FactorType>& outputFactorOrder
+                 , long translationId
+                 , bool reportSegmentation)
 {
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();
@@ -474,9 +473,9 @@ void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
 }
 
 void OutputFeatureScores( std::ostream& out
-                                      , const ScoreComponentCollection &features
-                                      , const FeatureFunction *ff
-                                      , std::string &lastName )
+                          , const ScoreComponentCollection &features
+                          , const FeatureFunction *ff
+                          , std::string &lastName )
 {
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();
@@ -494,11 +493,9 @@ void OutputFeatureScores( std::ostream& out
   }
 
   // sparse features
-  else {
-    const FVector scores = features.GetVectorForProducer( ff );
-    for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
-      out << " " << i->first << "= " << i->second;
-    }
+  const FVector scores = features.GetVectorForProducer( ff );
+  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+    out << " " << i->first << "= " << i->second;
   }
 }
 
@@ -557,7 +554,7 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
 {
   IOWrapper *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
-          ,&outputFactorOrder = staticData.GetOutputFactorOrder();
+      ,&outputFactorOrder = staticData.GetOutputFactorOrder();
   FactorMask inputFactorUsed(inputFactorOrder);
 
   // io
@@ -566,14 +563,14 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
     string filePath = staticData.GetParam("input-file")[0];
 
     ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-        , staticData.GetNBestSize()
-        , staticData.GetNBestFilePath()
-        , filePath);
+                              , staticData.GetNBestSize()
+                              , staticData.GetNBestFilePath()
+                              , filePath);
   } else {
     VERBOSE(1,"IO from STDOUT/STDIN" << endl);
     ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-        , staticData.GetNBestSize()
-        , staticData.GetNBestFilePath());
+                              , staticData.GetNBestSize()
+                              , staticData.GetNBestFilePath());
   }
   ioWrapper->ResetTranslationId();
 

@@ -117,16 +117,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.h</locationURI>
 		</link>
 		<link>
-			<name>BleuScoreFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/BleuScoreFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>BleuScoreFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/BleuScoreFeature.h</locationURI>
-		</link>
-		<link>
 			<name>ChartCell.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartCell.cpp</locationURI>
@@ -332,24 +322,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/DecodeStepTranslation.h</locationURI>
 		</link>
 		<link>
-			<name>DummyScoreProducers.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DummyScoreProducers.cpp</locationURI>
-		</link>
-		<link>
-			<name>DummyScoreProducers.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DummyScoreProducers.h</locationURI>
-		</link>
-		<link>
-			<name>FFState.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FFState.cpp</locationURI>
-		</link>
-		<link>
-			<name>FFState.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FFState.h</locationURI>
+			<name>FF</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>Factor.cpp</name>
@@ -380,16 +355,6 @@
 			<name>FactorTypeSet.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FactorTypeSet.h</locationURI>
-		</link>
-		<link>
-			<name>FeatureFunction.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FeatureFunction.cpp</locationURI>
-		</link>
-		<link>
-			<name>FeatureFunction.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FeatureFunction.h</locationURI>
 		</link>
 		<link>
 			<name>FeatureVector.cpp</name>
@@ -440,26 +405,6 @@
 			<name>GenerationDictionary.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/GenerationDictionary.h</locationURI>
-		</link>
-		<link>
-			<name>GlobalLexicalModel.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/GlobalLexicalModel.cpp</locationURI>
-		</link>
-		<link>
-			<name>GlobalLexicalModel.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/GlobalLexicalModel.h</locationURI>
-		</link>
-		<link>
-			<name>GlobalLexicalModelUnlimited.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/GlobalLexicalModelUnlimited.cpp</locationURI>
-		</link>
-		<link>
-			<name>GlobalLexicalModelUnlimited.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/GlobalLexicalModelUnlimited.h</locationURI>
 		</link>
 		<link>
 			<name>HypoList.h</name>
@@ -545,11 +490,6 @@
 			<name>LM</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LMList.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LMList.h</locationURI>
 		</link>
 		<link>
 			<name>LVoc.cpp</name>
@@ -680,41 +620,6 @@
 			<name>Phrase.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Phrase.h</locationURI>
-		</link>
-		<link>
-			<name>PhraseBoundaryFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseBoundaryFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseBoundaryFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseBoundaryFeature.h</locationURI>
-		</link>
-		<link>
-			<name>PhraseLengthFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseLengthFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseLengthFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseLengthFeature.h</locationURI>
-		</link>
-		<link>
-			<name>PhraseLengthFeatureTest.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseLengthFeatureTest.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhrasePairFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhrasePairFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhrasePairFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhrasePairFeature.h</locationURI>
 		</link>
 		<link>
 			<name>PrefixTree.h</name>
@@ -857,16 +762,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SentenceStats.h</locationURI>
 		</link>
 		<link>
-			<name>SourceWordDeletionFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SourceWordDeletionFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>SourceWordDeletionFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SourceWordDeletionFeature.h</locationURI>
-		</link>
-		<link>
 			<name>SquareMatrix.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SquareMatrix.cpp</locationURI>
@@ -912,26 +807,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntacticLanguageModelState.h</locationURI>
 		</link>
 		<link>
-			<name>TargetBigramFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetBigramFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>TargetBigramFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetBigramFeature.h</locationURI>
-		</link>
-		<link>
-			<name>TargetNgramFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetNgramFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>TargetNgramFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetNgramFeature.h</locationURI>
-		</link>
-		<link>
 			<name>TargetPhrase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetPhrase.cpp</locationURI>
@@ -950,16 +825,6 @@
 			<name>TargetPhraseCollection.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetPhraseCollection.h</locationURI>
-		</link>
-		<link>
-			<name>TargetWordInsertionFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetWordInsertionFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>TargetWordInsertionFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetWordInsertionFeature.h</locationURI>
 		</link>
 		<link>
 			<name>Terminal.h</name>
@@ -1127,16 +992,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/WordLattice.h</locationURI>
 		</link>
 		<link>
-			<name>WordTranslationFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/WordTranslationFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>WordTranslationFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/WordTranslationFeature.h</locationURI>
-		</link>
-		<link>
 			<name>WordsBitmap.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/WordsBitmap.cpp</locationURI>
@@ -1185,6 +1040,231 @@
 			<name>rule.proto</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/rule.proto</locationURI>
+		</link>
+		<link>
+			<name>FF/BleuScoreFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/BleuScoreFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/BleuScoreFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/BleuScoreFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/ChartBasedFeatureContext.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ChartBasedFeatureContext.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.h</locationURI>
+		</link>
+		<link>
+			<name>FF/DistortionScoreProducer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/DistortionScoreProducer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.h</locationURI>
+		</link>
+		<link>
+			<name>FF/FFState.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FFState.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/FFState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FFState.h</locationURI>
+		</link>
+		<link>
+			<name>FF/FeatureFunction.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FeatureFunction.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/FeatureFunction.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FeatureFunction.h</locationURI>
+		</link>
+		<link>
+			<name>FF/GlobalLexicalModel.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/GlobalLexicalModel.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/GlobalLexicalModel.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/GlobalLexicalModel.h</locationURI>
+		</link>
+		<link>
+			<name>FF/GlobalLexicalModelUnlimited.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/GlobalLexicalModelUnlimited.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/GlobalLexicalModelUnlimited.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/GlobalLexicalModelUnlimited.h</locationURI>
+		</link>
+		<link>
+			<name>FF/InputFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/InputFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseBasedFeatureContext.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseBasedFeatureContext.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.h</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseBoundaryFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBoundaryFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseBoundaryFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBoundaryFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseLengthFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseLengthFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseLengthFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseLengthFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseLengthFeatureTest.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseLengthFeatureTest.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhrasePairFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePairFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhrasePairFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePairFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/PhrasePenalty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhrasePenalty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SourceWordDeletionFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SourceWordDeletionFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/StatefulFeatureFunction.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatefulFeatureFunction.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/StatefulFeatureFunction.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatefulFeatureFunction.h</locationURI>
+		</link>
+		<link>
+			<name>FF/StatelessFeatureFunction.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/StatelessFeatureFunction.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.h</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetBigramFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetBigramFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetBigramFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetBigramFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetNgramFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetNgramFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetNgramFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetNgramFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetWordInsertionFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetWordInsertionFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetWordInsertionFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetWordInsertionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/UnknownWordPenaltyProducer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/UnknownWordPenaltyProducer.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/UnknownWordPenaltyProducer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/UnknownWordPenaltyProducer.h</locationURI>
+		</link>
+		<link>
+			<name>FF/WordPenaltyProducer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/WordPenaltyProducer.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/WordPenaltyProducer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/WordPenaltyProducer.h</locationURI>
+		</link>
+		<link>
+			<name>FF/WordTranslationFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/WordTranslationFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/WordTranslationFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/WordTranslationFeature.h</locationURI>
 		</link>
 		<link>
 			<name>LM/Backward.cpp</name>
@@ -1362,11 +1442,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
 		</link>
 		<link>
-			<name>LM/bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/BilingualDynSuffixArray.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.cpp</locationURI>
@@ -1422,6 +1497,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryMemory.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemory.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryMemory.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemory.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryMultiModel.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMultiModel.cpp</locationURI>
@@ -1440,6 +1525,16 @@
 			<name>TranslationModel/PhraseDictionaryMultiModelCounts.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMultiModelCounts.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryNodeMemory.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNodeMemory.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryNodeMemory.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNodeMemory.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/PhraseDictionaryTree.cpp</name>
@@ -1493,21 +1588,6 @@
 		</link>
 		<link>
 			<name>bin/lm.log</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
 		</link>
@@ -1862,16 +1942,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/RuleTable/PhraseDictionaryOnDisk.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.cpp</locationURI>
@@ -1880,16 +1950,6 @@
 			<name>TranslationModel/RuleTable/PhraseDictionaryOnDisk.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/RuleTable/PhraseDictionarySCFG.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionarySCFG.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/RuleTable/PhraseDictionarySCFG.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/RuleTable/Trie.cpp</name>
@@ -2062,16 +2122,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2092,16 +2142,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2117,16 +2157,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2138,16 +2168,6 @@
 		</link>
 		<link>
 			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2777,36 +2797,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/moses_test.passed</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Factory.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Factory.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/IRST.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/IRST.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/ORLM.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/ORLM.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/ParallelBackoff.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/ParallelBackoff.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/SRI.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/SRI.o</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2957,76 +2947,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Backward.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Backward.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardLMState.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardLMState.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.output</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.output</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.run</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.run</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.test</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BackwardTest.test</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Base.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Base.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Implementation.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Implementation.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Joint.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Joint.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Ken.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Ken.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/MultiFactor.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/MultiFactor.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Remote.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/Remote.o</locationURI>
-		</link>
-		<link>
-			<name>LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/SingleFactor.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/BackwardTest.test/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/SingleFactor.o</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BlockHashIndex.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CompactPT/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/BlockHashIndex.o</locationURI>
@@ -3147,19 +3067,19 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.o</locationURI>
 		</link>
 		<link>
-			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.o</name>
+			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryMemory.o</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryNodeSCFG.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryMemory.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryNodeMemory.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryNodeMemory.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryOnDisk.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionaryOnDisk.o</locationURI>
-		</link>
-		<link>
-			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionarySCFG.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/PhraseDictionarySCFG.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.7/release/debug-symbols-on/link-static/threading-multi/TranslationModel/RuleTable/Trie.o</name>

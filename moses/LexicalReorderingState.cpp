@@ -3,7 +3,7 @@
 #include <string>
 #include "util/check.hh"
 
-#include "FFState.h"
+#include "moses/FF/FFState.h"
 #include "Hypothesis.h"
 #include "WordsRange.h"
 #include "ReorderingStack.h"
@@ -212,7 +212,7 @@ LexicalReorderingState* PhraseBasedReorderingState::Expand(const TranslationOpti
   if (m_direction == LexicalReorderingConfiguration::Forward && m_first) {
     ClearScores(scores);
   } else {
-    if (!m_first || m_useFirstBackwardScore){
+    if (!m_first || m_useFirstBackwardScore) {
       if (modelType == LexicalReorderingConfiguration::MSD) {
         reoType = GetOrientationTypeMSD(currWordsRange);
       } else if (modelType == LexicalReorderingConfiguration::MSLR) {

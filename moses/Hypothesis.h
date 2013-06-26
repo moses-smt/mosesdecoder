@@ -45,6 +45,8 @@ class TranslationOption;
 class WordsRange;
 class Hypothesis;
 class FFState;
+class StatelessFeatureFunction;
+class StatefulFeatureFunction;
 class Manager;
 class LexicalReordering;
 
@@ -122,7 +124,6 @@ public:
     return m_targetPhrase;
   }
 
-// void PrintLMScores(const LMList &lmListInitial, const LMList	&lmListEnd) const;
 
   /** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
   inline const WordsRange &GetCurrSourceWordsRange() const {
@@ -142,7 +143,7 @@ public:
     return m_currTargetWordsRange.GetNumWordsCovered();
   }
 
-  void CalcScore(const SquareMatrix &futureScore);
+  void Evaluate(const SquareMatrix &futureScore);
 
   int GetId()const {
     return m_id;

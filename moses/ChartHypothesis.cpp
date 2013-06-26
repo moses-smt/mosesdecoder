@@ -27,10 +27,8 @@
 #include "TargetPhrase.h"
 #include "Phrase.h"
 #include "StaticData.h"
-#include "DummyScoreProducers.h"
-#include "LMList.h"
 #include "ChartTranslationOptions.h"
-#include "FFState.h"
+#include "moses/FF/FFState.h"
 
 using namespace std;
 
@@ -41,7 +39,7 @@ namespace Moses
 ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
 #endif
 
-/** Create a hypothesis from a rule 
+/** Create a hypothesis from a rule
  * \param transOpt wrapper around the rule
  * \param item @todo dunno
  * \param manager reference back to manager
@@ -61,15 +59,14 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
   const std::vector<HypothesisDimension> &childEntries = item.GetHypothesisDimensions();
   m_prevHypos.reserve(childEntries.size());
   std::vector<HypothesisDimension>::const_iterator iter;
-  for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) 
-  {
+  for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) {
     m_prevHypos.push_back(iter->GetHypothesis());
   }
 }
 
 ChartHypothesis::~ChartHypothesis()
 {
-	// delete feature function states
+  // delete feature function states
   for (unsigned i = 0; i < m_ffStates.size(); ++i) {
     delete m_ffStates[i];
   }
@@ -100,8 +97,7 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
       size_t nonTermInd = GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
-    } 
-    else {
+    } else {
       outPhrase.AddWord(word);
     }
   }
@@ -126,17 +122,16 @@ Phrase ChartHypothesis::GetOutputPhrase() const
 */
 int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 {
-	int comp = 0;
+  int comp = 0;
 
-  for (unsigned i = 0; i < m_ffStates.size(); ++i) 
-	{
-    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) 
+  for (unsigned i = 0; i < m_ffStates.size(); ++i) {
+    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL)
       comp = m_ffStates[i] - compare.m_ffStates[i];
-		else 
+    else
       comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
 
-		if (comp != 0) 
-			return comp;
+    if (comp != 0)
+      return comp;
   }
 
   return 0;
@@ -145,8 +140,9 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 /** calculate total score
   * @todo this should be in ScoreBreakdown
  */
-void ChartHypothesis::CalcScore()
+void ChartHypothesis::Evaluate()
 {
+  const StaticData &staticData = StaticData::Instance();
   // total scores from prev hypos
   std::vector<const ChartHypothesis*>::iterator iter;
   for (iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
@@ -156,25 +152,27 @@ void ChartHypothesis::CalcScore()
     m_scoreBreakdown.PlusEquals(scoreBreakdown);
   }
 
-  // translation models & word penalty
+  // scores from current translation rule. eg. translation models & word penalty
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
-  //Add pre-computed features
-  m_manager.InsertPreCalculatedScores(GetCurrTargetPhrase(), &m_scoreBreakdown);
-
-	// compute values of stateless feature functions that were not
+  // compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
   const std::vector<const StatelessFeatureFunction*>& sfs =
-      StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  for (unsigned i = 0; i < sfs.size(); ++i)
-  	if (sfs[i]->GetStatelessFeatureType() == RequiresSegmentation)
-  		sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
+    StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  for (unsigned i = 0; i < sfs.size(); ++i) {
+    if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) {
+      sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
+    }
+  }
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
-      StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  for (unsigned i = 0; i < ffs.size(); ++i)
-    m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+    StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for (unsigned i = 0; i < ffs.size(); ++i) {
+    if (! staticData.IsFeatureFunctionIgnored( *ffs[i] )) {
+      m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+    }
+  }
 
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }
@@ -264,13 +262,12 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 {
 
   out << hypo.GetId();
-	
-	// recombination
-	if (hypo.GetWinningHypothesis() != NULL &&
-			hypo.GetWinningHypothesis() != &hypo)
-	{
-		out << "->" << hypo.GetWinningHypothesis()->GetId();
-	}
+
+  // recombination
+  if (hypo.GetWinningHypothesis() != NULL &&
+      hypo.GetWinningHypothesis() != &hypo) {
+    out << "->" << hypo.GetWinningHypothesis()->GetId();
+  }
 
   if (StaticData::Instance().GetIncludeLHSInSearchGraph()) {
     out << " " << hypo.GetTargetLHS() << "=>";

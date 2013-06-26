@@ -14,9 +14,10 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
 
-vector<string> ScorerFactory::getTypes() {
+
+vector<string> ScorerFactory::getTypes()
+{
   vector<string> types;
   types.push_back(string("BLEU"));
   types.push_back(string("PER"));
@@ -29,7 +30,8 @@ vector<string> ScorerFactory::getTypes() {
   return types;
 }
 
-Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
+Scorer* ScorerFactory::getScorer(const string& type, const string& config)
+{
   if (type == "BLEU") {
     return new BleuScorer(config);
   } else if (type == "PER") {
@@ -48,8 +50,7 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);
-    }
-    else {
+    } else {
       throw runtime_error("Unknown scorer type: " + type);
     }
   }

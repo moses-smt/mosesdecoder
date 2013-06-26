@@ -1,0 +1,70 @@
+#
+# Import all of the components to be composed
+#
+import wrappers.cleanup.cleanup as cleanup
+import wrappers.data_split.data_split as data_split
+import wrappers.model_training.model_training as model_training
+
+#
+# Component definition
+#
+#        {cleaned_src_filename, {src_filename, {[devel|eval|train]_src_filename, {src_filename,    {moses_ini_file,
+#         cleaned_trg_filename}  trg_filename}  [devel|eval|train]_trg_filename}  trg_filename}     evaluation_data_filename}
+#                             |  |              |                                 | +-------+                              |
+#                   +-------+ |  | +-------+    |         +-------+               V | Model | {moses_ini_file} +-------+   V
+#                   | Clean | V  V | Data  |    V         |       +---------------->+ Train +----------------->+ Merge +----->
+# {src_filename, -->+       +----->+       +------------->+ Split |                 +-------+                  +---+---+
+#  trg_filename}    |  Up   |      | Split |              |       +---\  Config: {[src|trg]_language::String,      ^
+#                   +-------+      +-------+              +-------+   |           alignment_method::String,        |
+# Config: {segment_length::Int} Config: {development_size::Int,       |           reordering_method::String,       |
+#                                        evaluation_size::Int}        |           giza_installation_dir::String,   |
+#                                                                     |           model_directory::String}         |
+#                                                                     \--------------------------------------------/
+#
+component translation_model_training
+  inputs src_filename, trg_filename
+  outputs evaluation_data_filename, moses_ini_filename
+  configuration model_training.max_segment_length,
+                model_training.corpus.development_size,
+                model_training.corpus.evaluation_size,
+                model_training.src.language,
+                model_training.trg.language,
+                model_training.method.alignment,
+                model_training.method.reordering,
+                model_training.moses.installation,
+                model_training.giza.installation,
+                model_training.translation_model.dir
+  declare
+    cleanup := new cleanup with
+      model_training.max_segment_length -> segment_length_limit
+    data_split := new data_split with
+      model_training.corpus.development_size -> development_data_size,
+      model_training.corpus.evaluation_size -> evaluation_data_size
+    model_training := new model_training with
+      model_training.src.language -> source_language,
+      model_training.trg.language -> target_language,
+      model_training.method.alignment -> alignment_method,
+      model_training.method.reordering -> reordering_method,
+      model_training.moses.installation -> moses_installation_dir,
+      model_training.giza.installation -> giza_installation_dir,
+      model_training.translation_model.dir -> translation_model_directory
+  as
+    cleanup >>>
+    wire cleaned_src_filename -> src_filename,
+         cleaned_trg_filename -> trg_filename >>>
+    data_split >>>
+    wire devel_src_filename -> devel_src_filename,
+         eval_src_filename -> evaluation_data_filename,
+         train_trg_filename -> _,
+         train_src_filename -> _,
+         eval_trg_filename -> _,
+         devel_trg_filename -> devel_trg_filename >>>
+    ((wire devel_src_filename -> src_filename,
+           devel_trg_filename -> trg_filename,
+           evaluation_data_filename -> _ >>>
+      model_training) &&&
+     wire evaluation_data_filename -> evaluation_data_filename,
+          devel_src_filename -> _,
+          devel_trg_filename -> _) >>>
+    merge top[moses_ini_filename] -> moses_ini_filename,
+          bottom[evaluation_data_filename] -> evaluation_data_filename

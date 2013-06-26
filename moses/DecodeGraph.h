@@ -47,14 +47,14 @@ public:
     **/
   DecodeGraph(size_t position)
     : m_position(position)
-    , m_maxChartSpan(NOT_FOUND)
-  {}
+    , m_maxChartSpan(NOT_FOUND) {
+  }
 
   // for chart decoding
   DecodeGraph(size_t position, size_t maxChartSpan)
     : m_position(position)
-    , m_maxChartSpan(maxChartSpan)
-  {}
+    , m_maxChartSpan(maxChartSpan) {
+  }
 
   //! iterators
   typedef std::list<const DecodeStep*>::iterator iterator;

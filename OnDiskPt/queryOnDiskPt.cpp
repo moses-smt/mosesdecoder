@@ -33,8 +33,7 @@ int main(int argc, char **argv)
       if(i + 1 == argc)
         usage();
       ttable = argv[++i];
-    }
-    else
+    } else
       usage();
   }
 
@@ -55,30 +54,27 @@ int main(int argc, char **argv)
 
     cerr << "line: " << line << endl;
     const PhraseNode* node = onDiskQuery.Query(tokens);
-    
-    if (node)
-    { // source phrase points to a bunch of rules
+
+    if (node) {
+      // source phrase points to a bunch of rules
       const TargetPhraseCollection *coll = node->GetTargetPhraseCollection(tableLimit, onDiskWrapper);
       string str = coll->GetDebugStr();
       cout << "Found " << coll->GetSize() << endl;
-      
-      for (size_t ind = 0; ind < coll->GetSize(); ++ind)
-      {
+
+      for (size_t ind = 0; ind < coll->GetSize(); ++ind) {
         const TargetPhrase &targetPhrase = coll->GetTargetPhrase(ind);
         cerr << "  ";
         targetPhrase.DebugPrint(cerr, onDiskWrapper.GetVocab());
         cerr << endl;
       }
-    }
-    else
-    {
+    } else {
       cout << "Not found" << endl;
     }
-    
+
     std::cout << '\n';
     std::cout.flush();
   }
-  
+
   cerr << "Finished." << endl;
 }
 

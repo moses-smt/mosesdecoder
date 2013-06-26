@@ -30,31 +30,44 @@ using namespace std;
 namespace Moses
 {
 DecodeFeature::DecodeFeature(  const std::string& description
-                , const std::string &line)
-: StatelessFeatureFunction(description, line)
+                               , const std::string &line)
+  : StatelessFeatureFunction(description, line)
 {
-  VERBOSE(2,"DecodeFeature: no factors yet" << std::endl);
+  VERBOSE(2,"DecodeFeature:" << std::endl);
 }
 
 DecodeFeature::DecodeFeature(  const std::string& description
-                            , size_t numScoreComponents
-                            , const std::string &line)
-: StatelessFeatureFunction(description,numScoreComponents, line)
+                               , size_t numScoreComponents
+                               , const std::string &line)
+  : StatelessFeatureFunction(description,numScoreComponents, line)
 {
   VERBOSE(2,"DecodeFeature: no factors yet" << std::endl);
 }
 
 DecodeFeature::DecodeFeature(const std::string& description
-                            , size_t numScoreComponents
-                            , const std::vector<FactorType> &input
-                            , const std::vector<FactorType> &output
-                            , const std::string &line)
-: StatelessFeatureFunction(description,numScoreComponents, line)
-, m_input(input), m_output(output)
+                             , size_t numScoreComponents
+                             , const std::vector<FactorType> &input
+                             , const std::vector<FactorType> &output
+                             , const std::string &line)
+  : StatelessFeatureFunction(description,numScoreComponents, line)
+  , m_input(input), m_output(output)
 {
   m_inputFactors = FactorMask(input);
   m_outputFactors = FactorMask(output);
   VERBOSE(2,"DecodeFeature: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
+}
+
+void DecodeFeature::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "input-factor") {
+    m_input =Tokenize<FactorType>(value, ",");
+    m_inputFactors = FactorMask(m_input);
+  } else if (key == "output-factor") {
+    m_output =Tokenize<FactorType>(value, ",");
+    m_outputFactors = FactorMask(m_output);
+  } else {
+    StatelessFeatureFunction::SetParameter(key, value);
+  }
 }
 
 
@@ -77,6 +90,18 @@ const std::vector<FactorType>& DecodeFeature::GetInput() const
 const std::vector<FactorType>& DecodeFeature::GetOutput() const
 {
   return m_output;
+}
+
+bool DecodeFeature::IsUseable(const FactorMask &mask) const
+{
+  for (size_t i = 0; i < m_output.size(); ++i) {
+    const FactorType &factor = m_output[i];
+    if (!mask[factor]) {
+      return false;
+    }
+  }
+  return true;
+
 }
 
 }

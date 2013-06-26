@@ -17,8 +17,8 @@ public:
 
   XMLParseOutput(const std::string &label, const WordsRange &range)
     : m_label(label)
-    , m_range(range)
-  {}
+    , m_range(range) {
+  }
 };
 
 /** An input to the decoder that represent a parse tree.
@@ -45,8 +45,8 @@ protected:
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
 
 public:
-  TreeInput()
-  {}
+  TreeInput() {
+  }
 
   InputTypeEnum GetType() const {
     return TreeInputType;

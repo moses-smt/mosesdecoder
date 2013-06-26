@@ -41,8 +41,8 @@ public:
   TgtCand(const IPhrase& a, const Scores& b , const std::string& alignment)
     : e(a)
     , sc(b)
-    , m_alignment(alignment)
-  {}
+    , m_alignment(alignment) {
+  }
 
   TgtCand(const IPhrase& a,const Scores& b) : e(a),sc(b) {}
 
@@ -157,7 +157,8 @@ PhraseDictionaryTree::PrefixPtr::operator bool() const
 typedef LVoc<std::string> WordVoc;
 
 
-class PDTimp {
+class PDTimp
+{
 public:
   typedef PrefixTreeF<LabelId,OFF_T> PTF;
   typedef FilePtr<PTF> CPT;
@@ -245,23 +246,27 @@ public:
   void PrintTgtCand(const TgtCands& tcands,std::ostream& out) const;
 
   // convert target candidates from internal data structure to the external one
-  void ConvertTgtCand(const TgtCands& tcands,std::vector<StringTgtCand>& rv,
+  void ConvertTgtCand(const TgtCands& tcands,std::vector<StringTgtCand>& extTgtCands,
                       std::vector<std::string>* wa) const {
-    for(TgtCands::const_iterator i=tcands.begin(); i!=tcands.end(); ++i) {
-      rv.push_back(StringTgtCand());
-      const IPhrase& iphrase=i->GetPhrase();
+    for(TgtCands::const_iterator iter=tcands.begin(); iter!=tcands.end(); ++iter) {
+      const TgtCand &intTgtCand = *iter;
 
-      rv.back().tokens.reserve(iphrase.size());
+      extTgtCands.push_back(StringTgtCand());
+      StringTgtCand &extTgtCand = extTgtCands.back();
+
+      const IPhrase& iphrase = intTgtCand.GetPhrase();
+
+      extTgtCand.tokens.reserve(iphrase.size());
       for(size_t j=0; j<iphrase.size(); ++j) {
-        rv.back().tokens.push_back(&tv.symbol(iphrase[j]));
+        extTgtCand.tokens.push_back(&tv.symbol(iphrase[j]));
       }
-      rv.back().scores = i->GetScores();
-      const IPhrase& fnames = i->GetFeatureNames();
+      extTgtCand.scores = intTgtCand.GetScores();
+      const IPhrase& fnames = intTgtCand.GetFeatureNames();
       for (size_t j = 0; j < fnames.size(); ++j) {
-        rv.back().fnames.push_back(&tv.symbol(fnames[j]));
+        extTgtCand.fnames.push_back(&tv.symbol(fnames[j]));
       }
-      rv.back().fvalues = i->GetFeatureValues();
-      if (wa) wa->push_back(i->GetAlignment());
+      extTgtCand.fvalues = intTgtCand.GetFeatureValues();
+      if (wa) wa->push_back(intTgtCand.GetAlignment());
     }
   }
 
@@ -481,7 +486,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   std::vector<OFF_T> vo;
   size_t lnc=0;
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
-  size_t missingAlignmentCount = 0; 
+  size_t missingAlignmentCount = 0;
 
   while(getline(inFile, line)) {
     ++lnc;
@@ -553,9 +558,9 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (!sparseFeatureString.empty()) {
       std::vector<std::string> sparseTokens = Tokenize(sparseFeatureString);
       if (sparseTokens.size() % 2 != 0) {
-        TRACE_ERR("ERROR: incorrectly formatted sparse feature string: " << 
-          sparseFeatureString << std::endl);
-        abort();  
+        TRACE_ERR("ERROR: incorrectly formatted sparse feature string: " <<
+                  sparseFeatureString << std::endl);
+        abort();
       }
       for (size_t i = 0; i < sparseTokens.size(); i+=2) {
         fnames.push_back(imp->tv.add(sparseTokens[i]));
@@ -624,7 +629,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
   if ( PrintWordAlignment()) {
     TRACE_ERR("Count of lines with missing alignments: " <<
-      missingAlignmentCount << "/" << lnc << "\n");
+              missingAlignmentCount << "/" << lnc << "\n");
   }
 
   fClose(os);

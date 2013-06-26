@@ -37,16 +37,12 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
-  const LMList *languageModels,
-  const WordPenaltyProducer *wpProducer,
   const std::vector<FactorType> &inputFactorsVec,
   const std::vector<FactorType> &outputFactorsVec,
   const std::string &filePath)
   : ChartRuleLookupManagerCYKPlus(sentence, cellColl)
   , m_dictionary(dictionary)
   , m_dbWrapper(dbWrapper)
-  , m_languageModels(languageModels)
-  , m_wpProducer(wpProducer)
   , m_inputFactorsVec(inputFactorsVec)
   , m_outputFactorsVec(outputFactorsVec)
   , m_filePath(filePath)
@@ -242,8 +238,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
                                                ,m_outputFactorsVec
                                                ,m_dictionary
                                                ,weightT
-                                               ,m_wpProducer
-                                               ,*m_languageModels
                                                ,m_filePath
                                                , m_dbWrapper.GetVocab());
 

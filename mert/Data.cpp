@@ -27,11 +27,11 @@ namespace MosesTuning
 {
 
 Data::Data(Scorer* scorer, const string& sparse_weights_file)
-    : m_scorer(scorer),
-      m_score_type(m_scorer->getName()),
-      m_num_scores(0),
-      m_score_data(new ScoreData(m_scorer)),
-      m_feature_data(new FeatureData)
+  : m_scorer(scorer),
+    m_score_type(m_scorer->getName()),
+    m_num_scores(0),
+    m_score_data(new ScoreData(m_scorer)),
+    m_feature_data(new FeatureData)
 {
   TRACE_ERR("Data::m_score_type " << m_score_type << endl);
   TRACE_ERR("Data::Scorer type from Scorer: " << m_scorer->getName() << endl);
@@ -48,7 +48,8 @@ Data::Data(Scorer* scorer, const string& sparse_weights_file)
 //ADDED BY TS
 // TODO: This is too long; consider creating additional functions to
 // reduce the lines of this function.
-void Data::removeDuplicates() {
+void Data::removeDuplicates()
+{
   size_t nSentences = m_feature_data->size();
   assert(m_score_data->size() == nSentences);
 
@@ -128,7 +129,8 @@ void Data::removeDuplicates() {
 }
 //END_ADDED
 
-void Data::load(const std::string &featfile, const std::string &scorefile) {
+void Data::load(const std::string &featfile, const std::string &scorefile)
+{
   m_feature_data->load(featfile, m_sparse_weights);
   m_score_data->load(scorefile);
 }
@@ -192,7 +194,8 @@ void Data::loadNBest(const string &file)
   }
 }
 
-void Data::save(const std::string &featfile, const std::string &scorefile, bool bin) {
+void Data::save(const std::string &featfile, const std::string &scorefile, bool bin)
+{
   if (bin)
     cerr << "Binary write mode is selected" << endl;
   else
@@ -202,7 +205,8 @@ void Data::save(const std::string &featfile, const std::string &scorefile, bool 
   m_score_data->save(scorefile, bin);
 }
 
-void Data::InitFeatureMap(const string& str) {
+void Data::InitFeatureMap(const string& str)
+{
   string buf = str;
   string substr;
   string features = "";
@@ -231,7 +235,8 @@ void Data::InitFeatureMap(const string& str) {
 }
 
 void Data::AddFeatures(const string& str,
-                       int sentence_index) {
+                       int sentence_index)
+{
   string buf = str;
   string substr;
   FeatureStats feature_entry;

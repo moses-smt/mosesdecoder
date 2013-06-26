@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "BitmapContainer.h"
 #include "HypothesisStackCubePruning.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/DistortionScoreProducer.h"
 #include "TranslationOptionList.h"
 
 namespace Moses
@@ -198,7 +198,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 {
   // create hypothesis and calculate all its scores
   Hypothesis *newHypo = hypothesis.CreateNext(transOpt, NULL); // TODO FIXME This is absolutely broken - don't pass null here
-  newHypo->CalcScore(m_futurescore);
+  newHypo->Evaluate(m_futurescore);
 
   return newHypo;
 }
@@ -275,11 +275,11 @@ BitmapContainer::~BitmapContainer()
   // As we have created the square position objects we clean up now.
 
   while (!m_queue.empty()) {
-	HypothesisQueueItem *item = m_queue.top();
-	m_queue.pop();
+    HypothesisQueueItem *item = m_queue.top();
+    m_queue.pop();
 
-	FREEHYPO( item->GetHypothesis() );
-	delete item;
+    FREEHYPO( item->GetHypothesis() );
+    delete item;
   }
 
   // Delete all edges.

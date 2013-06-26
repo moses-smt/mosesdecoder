@@ -31,41 +31,9 @@ namespace Moses
 {
 
 PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
-:DecodeFeature(description, line)
+  :DecodeFeature(description, line)
+  ,m_tableLimit(20) // default
 {
-  m_tableLimit= 20; // TODO default?
-
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "input-factor") {
-      m_input =Tokenize<FactorType>(args[1], ",");
-      m_inputFactors = FactorMask(m_input);
-    }
-    else if (args[0] == "output-factor") {
-      m_output =Tokenize<FactorType>(args[1], ",");
-      m_outputFactors = FactorMask(m_output);
-    }
-    else if (args[0] == "num-input-features") {
-      m_numInputScores = Scan<unsigned>(args[1]);
-    }
-    else if (args[0] == "path") {
-      m_filePath = args[1];
-    }
-    else if (args[0] == "table-limit") {
-      m_tableLimit = Scan<size_t>(args[1]);
-    }
-    else if (args[0] == "target-path") {
-      m_targetFile = args[1];
-    }
-    else if (args[0] == "alignment-path") {
-      m_alignmentsFile = args[1];
-    }
-    else {
-      //throw "Unknown argument " + args[0];
-    }
-  } // for (size_t i = 0; i < toks.size(); ++i) {
-
 }
 
 
@@ -73,8 +41,30 @@ const TargetPhraseCollection *PhraseDictionary::
 GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 {
   Phrase phrase = src.GetSubString(range);
-  phrase.OnlyTheseFactors(m_inputFactors);
   return GetTargetPhraseCollection(phrase);
+}
+
+void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "path") {
+    m_filePath = value;
+  } else if (key == "table-limit") {
+    m_tableLimit = Scan<size_t>(value);
+  } else {
+    DecodeFeature::SetParameter(key, value);
+  }
+}
+
+void PhraseDictionary::SetFeaturesToApply()
+{
+  // find out which feature function can be applied in this decode step
+  const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < allFeatures.size(); ++i) {
+    FeatureFunction *feature = allFeatures[i];
+    if (feature->IsUseable(m_outputFactors)) {
+      m_featuresToApply.push_back(feature);
+    }
+  }
 }
 
 }

@@ -2029,7 +2029,7 @@ sub define_domain_feature_score_option {
     $restricted_to_table = $1 if $spec =~ /( table \S+)/;
     die("ERROR: faulty TRAINING:domain-features spec (no method): $spec\n") unless defined($method);
     if ($spec =~ /sparse/) {
-      return "-sparse-translation-table -score-options '--SparseDomain$method $domains$restricted_to_table' -additional-ini '<br>[report-sparse-features]<br>stm<br><br>' ";
+      return "-score-options '--SparseDomain$method $domains$restricted_to_table' ";
     }
     else {
       return "-score-options '--Domain$method $domains' ";
@@ -2104,57 +2104,24 @@ sub get_config_tables {
     my ($config,$reordering_table,$phrase_translation_table,$generation_table,$domains) = @_;
 
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
-    my $cmd = &backoff_and_get("TRAINING:create-ini");
-    $cmd = "$moses_src_dir/bin/create-ini" unless defined($cmd);
-
-    my %IN;
-    my %OUT;
-    if (&backoff_and_get("TRAINING:input-factors")) {
-      %IN = &get_factor_id("input");
-    }
-    else {
-      $IN{"word"} = 0;
-    }
-
-    if (&backoff_and_get("TRAINING:output-factors")) {
-      %OUT = &get_factor_id("output");
-    }
-    else {
-      $OUT{"word"} = 0;
-    }
-
-    $cmd .= " -input-factor-max ".((scalar keys %IN)-1)." ";
-
-    $cmd .= "-translation-factors ".
-	          &encode_factor_definition("translation-factors",\%IN,\%OUT)." "
-	          if &get("TRAINING:translation-factors");
-    $cmd .= "-reordering-factors ".
-	          &encode_factor_definition("reordering-factors",\%IN,\%OUT)." "
-	          if &get("TRAINING:reordering-factors");
-    $cmd .= "-generation-factors ".
-      	    &encode_factor_definition("generation-factors",\%OUT,\%OUT)." "
-      	    if &get("TRAINING:generation-factors");
+    my $cmd = &get_training_setting(9);
 
     # get model, and whether suffix array is used. Determines the pt implementation.
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     $cmd .= "-hierarchical " if $hierarchical;
 
     my $sa_exec_dir = &get("TRAINING:suffix-array");
-		
-		my ($ptImpl, $numFF);
-		if ($hierarchical) {
-		  if ($sa_exec_dir) {
-				$ptImpl = 10;  # suffix array
-				$numFF = 7;
-			}
-			else {
-				$ptImpl = 6; # in-mem SCFG
-			}
-		}
-		else {
-			$ptImpl = 0; # phrase-based
-		}
-		
+    my ($ptImpl, $numFF) = (0);
+    if ($hierarchical) {
+      if ($sa_exec_dir) {
+        $ptImpl = 10;  # suffix array
+        $numFF = 7;
+      }
+      else {
+        $ptImpl = 6; # in-mem SCFG
+      }
+    }
+
     # additional settings for factored models
     my $ptCmd = $phrase_translation_table;
     $ptCmd .= ":$ptImpl" if $ptImpl>0;
@@ -2185,14 +2152,11 @@ sub get_config_tables {
 	my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version);
 	$cmd .= "-unknown-word-label $unknown_word_label ";
     }
-    my $additional_ini = &get("TRAINING:additional-ini");
-    if (&get("TRAINING:score-settings") && 
-        &get("TRAINING:score-settings") =~ /SparseCountBinFeature/) {
-      $additional_ini .= "<br>[report-sparse-features]<br>stm<br><br>";
-      $cmd .= "-sparse-translation-table ";
-    }
-    $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
+    # configuration due to domain features
     $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
+    # additional specified items from config
+    my $additional_ini = &get("TRAINING:additional-ini");
+    $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
 
     return $cmd;
 }
@@ -2588,6 +2552,8 @@ sub define_tuningevaluation_filter {
 
     # get model, and whether suffix array is used. Determines the pt implementation.
     my $sa_exec_dir = &get("TRAINING:suffix-array");
+    my $sa_extractors = &get("GENERAL:sa_extractors");
+    $sa_extractors = 1 unless $sa_extractors;
 
     my ($ptImpl, $numFF);
     if ($hierarchical) {
@@ -2600,7 +2566,7 @@ sub define_tuningevaluation_filter {
 	}
     }
     else {
-	$ptImpl = 0; # phrase-based
+    	$ptImpl = 0; # phrase-based
     }
 
     # config file specified?
@@ -2625,11 +2591,14 @@ sub define_tuningevaluation_filter {
     # filter command
     if ($sa_exec_dir) {
 	# suffix array
-	$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
+	$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir $sa_extractors \n";
 	
 	my $escaped_filter_dir = $filter_dir;
 	$escaped_filter_dir =~ s/\//\\\\\//g;
 	$cmd .= "cat $config | sed s/10\\ 0\\ 0\\ 7.*/10\\ 0\\ 0\\ 7\\ $escaped_filter_dir/g > $filter_dir/moses.ini \n";
+    # kind of a hack -- the correct thing would be to make the generation of the config file ($filter_dir/moses.ini) 
+    # set the PhraseDictionaryALSuffixArray's path to the filtered directory rather than to the suffix array itself 
+    $cmd .= "sed -i 's%path=$phrase_translation_table%path=$filter_dir%' $filter_dir/moses.ini\n";
     }
     else {
 	# normal phrase table

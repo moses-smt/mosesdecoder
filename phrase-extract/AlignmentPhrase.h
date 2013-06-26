@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace MosesTraining
 {
-  
+
 class WordsRange;
 
 class AlignmentElement
@@ -42,8 +42,8 @@ public:
     return m_elements.end();
   }
 
-  AlignmentElement()
-  {}
+  AlignmentElement() {
+  }
 
   size_t GetSize() const {
     return m_elements.size();
@@ -58,8 +58,8 @@ protected:
   std::vector<AlignmentElement> m_elements;
 public:
   AlignmentPhrase(size_t size)
-    :m_elements(size)
-  {}
+    :m_elements(size) {
+  }
   void Merge(const AlignmentPhrase &newAlignment, const WordsRange &newAlignmentRange);
   void Merge(const std::vector< std::vector<size_t> > &source);
   size_t GetSize() const {

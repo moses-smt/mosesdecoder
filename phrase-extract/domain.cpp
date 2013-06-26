@@ -13,7 +13,8 @@ namespace MosesTraining
 {
 
 // handling of domain names: load database with sentence-id / domain name info
-void Domain::load( const std::string &domainFileName ) {
+void Domain::load( const std::string &domainFileName )
+{
   Moses::InputFileStream fileS( domainFileName );
   istream *fileP = &fileS;
   while(true) {
@@ -39,7 +40,8 @@ void Domain::load( const std::string &domainFileName ) {
 }
 
 // get domain name based on sentence number
-string Domain::getDomainOfSentence( int sentenceId ) const {
+string Domain::getDomainOfSentence( int sentenceId ) const
+{
   for(size_t i=0; i<spec.size(); i++) {
     if (sentenceId <= spec[i].first) {
       return spec[i].second;
@@ -54,9 +56,9 @@ DomainFeature::DomainFeature(const string& domainFile)
   m_domain.load(domainFile);
 }
 
-void DomainFeature::add(const ScoreFeatureContext& context, 
-         std::vector<float>& denseValues,
-         std::map<std::string,float>& sparseValues)  const
+void DomainFeature::add(const ScoreFeatureContext& context,
+                        std::vector<float>& denseValues,
+                        std::map<std::string,float>& sparseValues)  const
 {
   map< string, float > domainCount;
   for(size_t i=0; i<context.phrasePair.size(); i++) {
@@ -71,13 +73,13 @@ void DomainFeature::add(const ScoreFeatureContext& context,
 }
 
 void SubsetDomainFeature::add(const map<string,float>& domainCount,float count,
-         const MaybeLog& maybeLog,
-         std::vector<float>& denseValues,
-         std::map<std::string,float>& sparseValues)  const
+                              const MaybeLog& maybeLog,
+                              std::vector<float>& denseValues,
+                              std::map<std::string,float>& sparseValues)  const
 {
- if (m_domain.list.size() > 6) {
+  if (m_domain.list.size() > 6) {
     UTIL_THROW_IF(m_domain.list.size() > 6, ScoreFeatureArgumentException,
-      "too many domains for core domain subset features");
+                  "too many domains for core domain subset features");
   }
   size_t bitmap = 0;
   for(size_t bit = 0; bit < m_domain.list.size(); bit++) {
@@ -87,13 +89,13 @@ void SubsetDomainFeature::add(const map<string,float>& domainCount,float count,
   }
   for(size_t i = 1; i < (1 << m_domain.list.size()); i++) {
     denseValues.push_back(maybeLog( (bitmap == i) ? 2.718 : 1 ));
-  } 
+  }
 }
 
 void SparseSubsetDomainFeature::add(const map<string,float>& domainCount,float count,
-         const MaybeLog& maybeLog,
-         std::vector<float>& denseValues,
-         std::map<std::string,float>& sparseValues)  const
+                                    const MaybeLog& maybeLog,
+                                    std::vector<float>& denseValues,
+                                    std::map<std::string,float>& sparseValues)  const
 {
   typedef vector<string>::const_iterator I;
   ostringstream key;
@@ -108,9 +110,9 @@ void SparseSubsetDomainFeature::add(const map<string,float>& domainCount,float c
 
 
 void RatioDomainFeature::add(const map<string,float>& domainCount,float count,
-         const MaybeLog& maybeLog,
-         std::vector<float>& denseValues,
-         std::map<std::string,float>& sparseValues)  const
+                             const MaybeLog& maybeLog,
+                             std::vector<float>& denseValues,
+                             std::map<std::string,float>& sparseValues)  const
 {
   typedef vector< string >::const_iterator I;
   for (I i = m_domain.list.begin(); i != m_domain.list.end(); i++ ) {
@@ -125,9 +127,9 @@ void RatioDomainFeature::add(const map<string,float>& domainCount,float count,
 
 
 void SparseRatioDomainFeature::add(const map<string,float>& domainCount,float count,
-         const MaybeLog& maybeLog,
-         std::vector<float>& denseValues,
-         std::map<std::string,float>& sparseValues)  const
+                                   const MaybeLog& maybeLog,
+                                   std::vector<float>& denseValues,
+                                   std::map<std::string,float>& sparseValues)  const
 {
   typedef map< string, float >::const_iterator I;
   for (I i=domainCount.begin(); i != domainCount.end(); i++) {
@@ -137,9 +139,9 @@ void SparseRatioDomainFeature::add(const map<string,float>& domainCount,float co
 
 
 void IndicatorDomainFeature::add(const map<string,float>& domainCount,float count,
-         const MaybeLog& maybeLog,
-         std::vector<float>& denseValues,
-         std::map<std::string,float>& sparseValues)  const
+                                 const MaybeLog& maybeLog,
+                                 std::vector<float>& denseValues,
+                                 std::map<std::string,float>& sparseValues)  const
 {
   typedef vector< string >::const_iterator I;
   for (I i = m_domain.list.begin(); i != m_domain.list.end(); i++ ) {
@@ -154,20 +156,20 @@ void IndicatorDomainFeature::add(const map<string,float>& domainCount,float coun
 }
 
 void SparseIndicatorDomainFeature::add(const map<string,float>& domainCount,float count,
-         const MaybeLog& maybeLog,
-         std::vector<float>& denseValues,
-         std::map<std::string,float>& sparseValues)  const
+                                       const MaybeLog& maybeLog,
+                                       std::vector<float>& denseValues,
+                                       std::map<std::string,float>& sparseValues)  const
 {
   typedef map< string, float >::const_iterator I;
   for (I i=domainCount.begin(); i != domainCount.end(); i++) {
-      sparseValues["dom_" + i->first] = 1;
+    sparseValues["dom_" + i->first] = 1;
   }
 }
 
-bool DomainFeature::equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const 
+bool DomainFeature::equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const
 {
   return m_domain.getDomainOfSentence(lhs.sentenceId) ==
-    m_domain.getDomainOfSentence( rhs.sentenceId);
+         m_domain.getDomainOfSentence( rhs.sentenceId);
 }
 
 

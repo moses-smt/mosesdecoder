@@ -6,9 +6,11 @@
 
 using namespace std;
 
-namespace {
+namespace
+{
 
-inline int CalcDistance(int word1, int word2) {
+inline int CalcDistance(int word1, int word2)
+{
   return word1 == word2 ? 0 : 1;
 }
 
@@ -16,11 +18,11 @@ inline int CalcDistance(int word1, int word2) {
 
 namespace MosesTuning
 {
-  
+
 
 CderScorer::CderScorer(const string& config, bool allowed_long_jumps)
-    : StatisticsBasedScorer(allowed_long_jumps ? "CDER" : "WER", config),
-      m_allowed_long_jumps(allowed_long_jumps) {}
+  : StatisticsBasedScorer(allowed_long_jumps ? "CDER" : "WER", config),
+    m_allowed_long_jumps(allowed_long_jumps) {}
 
 CderScorer::~CderScorer() {}
 
@@ -66,8 +68,13 @@ void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>&
     const sent_t& ref = m_ref_sentences[rid][sid];
     tmp.clear();
     computeCD(cand, ref, tmp);
-    if (calculateScore(tmp) > max) {
+    int score = calculateScore(tmp);
+    if (rid == 0) {
       stats = tmp;
+      max = score;
+    } else if (score > max) {
+      stats = tmp;
+      max = score;
     }
   }
 }
@@ -82,7 +89,8 @@ float CderScorer::calculateScore(const vector<int>& comps) const
 }
 
 void CderScorer::computeCD(const sent_t& cand, const sent_t& ref,
-                           vector<int>& stats) const {
+                           vector<int>& stats) const
+{
   int I = cand.size() + 1; // Number of inter-words positions in candidate sentence
   int L = ref.size() + 1; // Number of inter-words positions in reference sentence
 
@@ -91,15 +99,17 @@ void CderScorer::computeCD(const sent_t& cand, const sent_t& ref,
   vector<int>* row = new vector<int>(I);
 
   // Initialization of first row
-  (*row)[0] = 0;
-  for (int i = 1; i < I; ++i) (*row)[i] = 1;
+  for (int i = 0; i < I; ++i) (*row)[i] = i;
+
+  // For CDER metric, the initialization is different
+  if (m_allowed_long_jumps) {
+    for (int i = 1; i < I; ++i) (*row)[i] = 1;
+  }
 
   // Calculating costs for next row using costs from the previous row.
-  while (++l < L)
-  {
+  while (++l < L) {
     vector<int>* nextRow = new vector<int>(I);
-    for (int i = 0; i < I; ++i)
-    {
+    for (int i = 0; i < I; ++i) {
       vector<int> possibleCosts;
       if (i > 0) {
         possibleCosts.push_back((*nextRow)[i-1] + 1); // Deletion

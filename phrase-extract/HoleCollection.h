@@ -44,8 +44,8 @@ public:
   HoleCollection(int sourcePhraseStart, int sourcePhraseEnd)
     : m_scope(1, 0)
     , m_sourcePhraseStart(1, sourcePhraseStart)
-    , m_sourcePhraseEnd(1, sourcePhraseEnd)
-  {}
+    , m_sourcePhraseEnd(1, sourcePhraseEnd) {
+  }
 
   const HoleList &GetHoles() const {
     return m_holes;

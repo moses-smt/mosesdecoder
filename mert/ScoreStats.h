@@ -18,7 +18,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 class ScoreStats
 {
@@ -41,7 +41,9 @@ public:
 
   void Copy(const ScoreStats &stats);
 
-  bool isfull() const { return (m_entries < m_available_size) ? 0 : 1; }
+  bool isfull() const {
+    return (m_entries < m_available_size) ? 0 : 1;
+  }
 
   void expand();
   void add(ScoreStatsType v);
@@ -55,9 +57,15 @@ public:
     clear();
   }
 
-  ScoreStatsType get(std::size_t i) { return m_array[i]; }
-  ScoreStatsType get(std::size_t i) const { return m_array[i]; }
-  scorestats_t getArray() const { return m_array; }
+  ScoreStatsType get(std::size_t i) {
+    return m_array[i];
+  }
+  ScoreStatsType get(std::size_t i) const {
+    return m_array[i];
+  }
+  scorestats_t getArray() const {
+    return m_array;
+  }
 
   void set(const std::string& str);
 
@@ -69,15 +77,21 @@ public:
     }
   }
 
-  std::size_t bytes() const { return GetArraySizeWithBytes(); }
+  std::size_t bytes() const {
+    return GetArraySizeWithBytes();
+  }
 
   std::size_t GetArraySizeWithBytes() const {
     return m_entries * sizeof(ScoreStatsType);
   }
 
-  std::size_t size() const { return m_entries; }
+  std::size_t size() const {
+    return m_entries;
+  }
 
-  std::size_t available() const { return m_available_size; }
+  std::size_t available() const {
+    return m_available_size;
+  }
 
   void savetxt(const std::string &file);
   void savetxt(std::ostream* os);

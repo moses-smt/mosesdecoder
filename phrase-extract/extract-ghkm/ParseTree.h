@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -24,27 +24,39 @@
 #include <string>
 #include <vector>
 
-namespace Moses {
-namespace GHKM {
+namespace Moses
+{
+namespace GHKM
+{
 
 class ParseTree
 {
- public:
+public:
   ParseTree(const std::string &label)
-      : m_label(label)
-      , m_parent(0)
-      , m_pcfgScore(0.0) {}
+    : m_label(label)
+    , m_parent(0)
+    , m_pcfgScore(0.0) {}
 
   ~ParseTree();
 
-  const std::string &GetLabel() const { return m_label; }
-  const std::vector<ParseTree*> &GetChildren() const { return m_children; }
-  const ParseTree *GetParent() const { return m_parent; }
-  float GetPcfgScore() const { return m_pcfgScore; }
+  const std::string &GetLabel() const {
+    return m_label;
+  }
+  const std::vector<ParseTree*> &GetChildren() const {
+    return m_children;
+  }
+  const ParseTree *GetParent() const {
+    return m_parent;
+  }
+  float GetPcfgScore() const {
+    return m_pcfgScore;
+  }
 
   void SetParent(ParseTree *);
   void SetChildren(const std::vector<ParseTree*> &);
-  void SetPcfgScore(float score) { m_pcfgScore = score; }
+  void SetPcfgScore(float score) {
+    m_pcfgScore = score;
+  }
 
   void AddChild(ParseTree *);
 
@@ -53,7 +65,7 @@ class ParseTree
   template<typename OutputIterator>
   void GetLeaves(OutputIterator);
 
- private:
+private:
   // Disallow copying
   ParseTree(const ParseTree &);
   ParseTree &operator=(const ParseTree &);

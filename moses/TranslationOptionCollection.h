@@ -39,11 +39,10 @@ class LanguageModel;
 class FactorCollection;
 class GenerationDictionary;
 class InputType;
-class LMList;
 class FactorMask;
 class Word;
 class DecodeGraph;
-  
+
 /** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
  * conditions (trelliss, factored input, normal text, xml markup)
@@ -93,7 +92,7 @@ protected:
   //! implemented by inherited class, called by this class
   virtual void ProcessUnknownWord(size_t sourcePos)=0;
 
-    
+  void EvaluateWithSource();
 
   void CacheLexReordering();
 

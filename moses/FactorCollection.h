@@ -44,7 +44,7 @@ namespace Moses
  * private and friended to FactorFriend.  The STL containers can delegate
  * copying, so friending the container isn't sufficient.  STL containers see
  * FactorFriend's public copy constructor and everybody else sees Factor's
- * private copy constructor.  
+ * private copy constructor.
  */
 struct FactorFriend {
   Factor in;
@@ -87,8 +87,8 @@ class FactorCollection
 
   //! constructor. only the 1 static variable can be created
   FactorCollection()
-    :m_factorId(0)
-  {}
+    :m_factorId(0) {
+  }
 
 public:
   static FactorCollection& Instance() {

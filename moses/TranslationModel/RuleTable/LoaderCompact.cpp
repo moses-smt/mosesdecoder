@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -20,9 +20,7 @@
 #include "LoaderCompact.h"
 
 #include "moses/AlignmentInfoCollection.h"
-#include "moses/DummyScoreProducers.h"
 #include "moses/InputFileStream.h"
-#include "moses/LMList.h"
 #include "moses/UserMessage.h"
 #include "moses/Util.h"
 #include "moses/Word.h"
@@ -37,10 +35,7 @@ namespace Moses
 bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
                                   const std::vector<FactorType> &output,
                                   const std::string &inFile,
-                                  const std::vector<float> &weight,
                                   size_t /* tableLimit */,
-                                  const LMList &languageModels,
-                                  const WordPenaltyProducer* wpProducer,
                                   RuleTableTrie &ruleTable)
 {
   PrintUserTime("Start loading compact rule table");
@@ -77,8 +72,8 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
 
   // Load rules.
   if (!LoadRuleSection(reader, vocab, sourcePhrases, targetPhrases,
-                       targetLhsIds, alignmentSets, languageModels,
-                       wpProducer, weight, ruleTable)) {
+                       targetLhsIds, alignmentSets,
+                       ruleTable)) {
     return false;
   }
 
@@ -89,9 +84,9 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
 }
 
 void RuleTableLoaderCompact::LoadVocabularySection(
-    LineReader &reader,
-    const std::vector<FactorType> &factorTypes,
-    std::vector<Word> &vocabulary)
+  LineReader &reader,
+  const std::vector<FactorType> &factorTypes,
+  std::vector<Word> &vocabulary)
 {
   // Read symbol count.
   reader.ReadLine();
@@ -111,10 +106,10 @@ void RuleTableLoaderCompact::LoadVocabularySection(
 }
 
 void RuleTableLoaderCompact::LoadPhraseSection(
-    LineReader &reader,
-    const std::vector<Word> &vocab,
-    std::vector<Phrase> &rhsPhrases,
-    std::vector<size_t> &lhsIds)
+  LineReader &reader,
+  const std::vector<Word> &vocab,
+  std::vector<Phrase> &rhsPhrases,
+  std::vector<size_t> &lhsIds)
 {
   // Read phrase count.
   reader.ReadLine();
@@ -137,7 +132,7 @@ void RuleTableLoaderCompact::LoadPhraseSection(
 }
 
 void RuleTableLoaderCompact::LoadAlignmentSection(
-    LineReader &reader, std::vector<const AlignmentInfo *> &alignmentSets, std::vector<Phrase> &sourcePhrases)
+  LineReader &reader, std::vector<const AlignmentInfo *> &alignmentSets, std::vector<Phrase> &sourcePhrases)
 {
   // Read alignment set count.
   reader.ReadLine();
@@ -149,8 +144,8 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
   std::vector<size_t> points;
   for (size_t i = 0; i < alignmentSetCount; ++i) {
     // Read alignment set, lookup in collection, and store pointer.
-  	alignTerm.clear();
-  	alignNonTerm.clear();
+    alignTerm.clear();
+    alignNonTerm.clear();
     tokens.clear();
 
     reader.ReadLine();
@@ -162,11 +157,10 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
       std::pair<size_t, size_t> alignmentPair(points[0], points[1]);
 
       if (sourcePhrases[i].GetWord(alignmentPair.first).IsNonTerminal()) {
-      	alignNonTerm.insert(alignmentPair);
+        alignNonTerm.insert(alignmentPair);
+      } else {
+        alignTerm.insert(alignmentPair);
       }
-    	else {
-    		alignTerm.insert(alignmentPair);
-    	}
 
     }
     alignmentSets[i*2] = AlignmentInfoCollection::Instance().Add(alignNonTerm);
@@ -175,16 +169,13 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
 }
 
 bool RuleTableLoaderCompact::LoadRuleSection(
-    LineReader &reader,
-    const std::vector<Word> &vocab,
-    const std::vector<Phrase> &sourcePhrases,
-    const std::vector<Phrase> &targetPhrases,
-    const std::vector<size_t> &targetLhsIds,
-    const std::vector<const AlignmentInfo *> &alignmentSets,
-    const LMList &languageModels,
-    const WordPenaltyProducer *wpProducer,
-    const std::vector<float> &weights,
-    RuleTableTrie &ruleTable)
+  LineReader &reader,
+  const std::vector<Word> &vocab,
+  const std::vector<Phrase> &sourcePhrases,
+  const std::vector<Phrase> &targetPhrases,
+  const std::vector<size_t> &targetLhsIds,
+  const std::vector<const AlignmentInfo *> &alignmentSets,
+  RuleTableTrie &ruleTable)
 {
   // Read rule count.
   reader.ReadLine();
@@ -210,7 +201,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
     const Phrase &sourcePhrase = sourcePhrases[sourcePhraseId];
     const Phrase &targetPhrasePhrase = targetPhrases[targetPhraseId];
-    const Word &targetLhs = vocab[targetLhsIds[targetPhraseId]];
+    const Word *targetLhs = new Word(vocab[targetLhsIds[targetPhraseId]]);
     Word sourceLHS("X"); // TODO not implemented for compact
     const AlignmentInfo *alignNonTerm = alignmentSets[alignmentSetId];
 
@@ -236,11 +227,11 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     targetPhrase->SetTargetLHS(targetLhs);
     targetPhrase->SetSourcePhrase(sourcePhrase);
 
-    targetPhrase->Evaluate();
+    targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
-        ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
+                                     ruleTable, sourcePhrase, *targetPhrase, &sourceLHS);
     coll.Add(targetPhrase);
   }
 

@@ -38,8 +38,8 @@ public:
     ,m_start_null(start_null)
     ,m_end_null(end_null)
     ,m_pre_null(pre_null)
-    ,m_post_null(post_null)
-  {}
+    ,m_post_null(post_null) {
+  }
   ~PhrasePair () {}
 
   void PrintTarget( std::ostream* out ) const;

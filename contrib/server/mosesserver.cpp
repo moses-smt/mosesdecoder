@@ -12,7 +12,6 @@
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TreeInput.h"
-#include "moses/LMList.h"
 #include "moses/LM/ORLM.h"
 
 #ifdef WITH_THREADS
@@ -48,7 +47,7 @@ public:
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
     if(add2ORLM_) {
-      updateORLM();
+      //updateORLM();
     }
     cerr << "Done inserting\n";
     //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy);
@@ -60,6 +59,7 @@ public:
   }
   string source_, target_, alignment_;
   bool bounded_, add2ORLM_;
+  /*
   void updateORLM() {
     // TODO(level101): this belongs in the language model, not in moseserver.cpp
     vector<string> vl;
@@ -101,6 +101,8 @@ public:
       }
     }
   }
+  */
+  
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");
     if(si == params.end())
@@ -141,7 +143,7 @@ public:
 #ifdef WITH_DLIB
     const StaticData &staticData = StaticData::Instance();
     const params_t params = paramList.getStruct(0);
-    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0];
+    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
 
     params_t::const_iterator si = params.find("phrase_pairs");
     if (si == params.end()) {
@@ -236,7 +238,8 @@ public:
     }
 
     if (multiModelWeights.size() > 0) {
-      staticData.SetTemporaryMultiModelWeightsVector(multiModelWeights);
+      PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
+      pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
       if (staticData.GetUseTransOptCache()) {
           cerr << "Warning: -use-persistent-cache is set to true; sentence-specific weights may be ignored. Disable cache for true results.\n";
       }

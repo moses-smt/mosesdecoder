@@ -42,12 +42,10 @@ void create_xml(const string &inPath)
   string inLine;
 
   int step = 0;
-  while (!inStrme.eof())
-  {
+  while (!inStrme.eof()) {
     getline(inStrme, inLine);
     //cout << inLine << endl;
-    switch (step)
-    {
+    switch (step) {
     case 0:
       setenceId = Scan<int>(inLine);
       ++step;
@@ -63,8 +61,7 @@ void create_xml(const string &inPath)
     case 3:
       if (input == NULL) {
         input = new string(inLine);
-      }
-      else {
+      } else {
         assert(inLine == *input);
       }
       ++step;
@@ -87,9 +84,9 @@ void create_xml(const string &inPath)
 
       //print STDOUT $frame."\n";
       rule << ret.ruleS << " [X] ||| " << ret.ruleT << " [X] ||| " << ret.ruleAlignment
-          << " ||| " << count << endl;
+           << " ||| " << count << endl;
       ruleInv << ret.ruleT << " [X] ||| " << ret.ruleS << " [X] ||| " << ret.ruleAlignmentInv
-          << " ||| " << count << endl;
+              << " ||| " << count << endl;
 
       //print STDOUT "$sentenceInd ||| $score ||| $count\n";
       ++ruleCount;
@@ -112,8 +109,8 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
 {
   CreateXMLRetValues ret;
   vector<string> sourceToks   = Tokenize(source, " ")
-                		    ,inputToks    = Tokenize(input, " ")
-                		    ,targetsToks  = Tokenize(target, " ");
+                                ,inputToks    = Tokenize(input, " ")
+                                    ,targetsToks  = Tokenize(target, " ");
   Alignments alignments(align, sourceToks.size(), targetsToks.size());
   map<int, string> frameInput;
   map<int, int> alignI2S;
@@ -241,8 +238,7 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
 
     if (action == "M") {
       inputBitmap.push_back(1);
-    }
-    else if (action == "I" || action == "S") {
+    } else if (action == "I" || action == "S") {
       inputBitmap.push_back(0);
     }
 
@@ -358,9 +354,8 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
     }
     // end of tm target inclusion (not included word or inserted input)
     else if (currently_included
-        && ( targetBitmap[t] || frameInput.find(t) != frameInput.end() )
-    )
-    {
+             && ( targetBitmap[t] || frameInput.find(t) != frameInput.end() )
+            ) {
       // add xml (unless change is at the beginning of the sentence
       if ( start_t >= 0 ) {
         string target = "";

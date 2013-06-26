@@ -17,11 +17,12 @@
 
 namespace MosesTuning
 {
-  
+
 
 class AvgWeightVector;
 
-class MiraWeightVector {
+class MiraWeightVector
+{
 public:
   /**
    * Constructor, initializes to the zero vector
@@ -91,7 +92,8 @@ private:
 /**
  * Averaged view of a weight vector
  */
-class AvgWeightVector {
+class AvgWeightVector
+{
 public:
   AvgWeightVector(const MiraWeightVector& wv);
   ValType score(const MiraFeatureVector& fv) const;

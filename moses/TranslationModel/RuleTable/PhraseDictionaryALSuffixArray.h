@@ -9,40 +9,28 @@
 #ifndef moses_PhraseDictionaryALSuffixArray_h
 #define moses_PhraseDictionaryALSuffixArray_h
 
-#include "PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
-namespace Moses {
-  
+namespace Moses
+{
+
 /** Implementation of in-memory phrase table for use with Adam Lopez's suffix array.
  * Does 2 things that the normal in-memory pt doesn't do:
  *  1. Loads grammar for a sentence to be decoded only when the sentence is being decoded. Unload afterwards
     2. Format of the pt file follows Hiero, rather than Moses
- */   
-class PhraseDictionaryALSuffixArray : public PhraseDictionarySCFG
+ */
+class PhraseDictionaryALSuffixArray : public PhraseDictionaryMemory
 {
 public:
-  PhraseDictionaryALSuffixArray(const std::string &line)
-  : PhraseDictionarySCFG("PhraseDictionaryALSuffixArray", line)
-  {}
-
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , const std::vector<float> &weight
-            , size_t tableLimit
-            , const LMList &languageModels
-            , const WordPenaltyProducer* wpProducer);
-
+  PhraseDictionaryALSuffixArray(const std::string &line);
+  void Load();
   void InitializeForInput(InputType const& source);
+  void CleanUpAfterSentenceProcessing(const InputType& source);
 
 protected:
-  const std::vector<FactorType> *m_input, *m_output;
-  const LMList *m_languageModels;
-  const WordPenaltyProducer *m_wpProducer;
-  const std::vector<float> *m_weight;
-  
+
 };
-  
+
 
 }
 

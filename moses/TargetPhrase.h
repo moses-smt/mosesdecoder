@@ -37,9 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class LMList;
 class FeatureFunction;
-class WordPenaltyProducer;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
@@ -47,29 +45,31 @@ class TargetPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
-  float m_fullScore;
+  float m_fullScore, m_futureScore;
   ScoreComponentCollection m_scoreBreakdown;
 
-	// in case of confusion net, ptr to source phrase
-	Phrase m_sourcePhrase; 
-	const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
-	Word m_lhsTarget;
+  // in case of confusion net, ptr to source phrase
+  Phrase m_sourcePhrase;
+  const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
+  const Word *m_lhsTarget;
 
 public:
   TargetPhrase();
+  TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(std::string out_string);
   explicit TargetPhrase(const Phrase &targetPhrase);
+  ~TargetPhrase();
 
-  void Evaluate();
+  void Evaluate(const Phrase &source);
+  void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
+
+  void Evaluate(const InputType &input);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
   // used to set translation or gen score
   void SetXMLScore(float score);
   void SetInputScore(const Scores &scoreVector);
-
-  TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
-  // used for translation step
 
 #ifdef HAVE_PROTOBUF
   void WriteToRulePB(hgmert::Rule* pb) const;
@@ -85,32 +85,26 @@ public:
     return m_fullScore;
   }
 
-	inline const ScoreComponentCollection &GetScoreBreakdown() const
-	{ return m_scoreBreakdown;	}
-  inline ScoreComponentCollection &GetScoreBreakdown()
-  { return m_scoreBreakdown;  }
+  inline const ScoreComponentCollection &GetScoreBreakdown() const {
+    return m_scoreBreakdown;
+  }
+  inline ScoreComponentCollection &GetScoreBreakdown() {
+    return m_scoreBreakdown;
+  }
 
   //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
-	void SetSourcePhrase(const Phrase&  p) 
-	{
-		m_sourcePhrase=p;
-	}
-  // ... but if we must store a copy, at least initialize it in-place
-  Phrase &MutableSourcePhrase() {
+  void SetSourcePhrase(const Phrase&  p) {
+    m_sourcePhrase=p;
+  }
+  const Phrase& GetSourcePhrase() const {
     return m_sourcePhrase;
   }
-	const Phrase& GetSourcePhrase() const 
-	{
-		return m_sourcePhrase;
-	}
-	
-	void SetTargetLHS(const Word &lhs)
-	{ 	m_lhsTarget = lhs; }
-	const Word &GetTargetLHS() const
-	{ return m_lhsTarget; }
-	
-  Word &MutableTargetLHS() {
-    return m_lhsTarget;
+
+  void SetTargetLHS(const Word *lhs) {
+    m_lhsTarget = lhs;
+  }
+  const Word &GetTargetLHS() const {
+    return *m_lhsTarget;
   }
 
   void SetAlignmentInfo(const StringPiece &alignString);
@@ -124,11 +118,14 @@ public:
   void SetAlignTerm(const AlignmentInfo::CollType &coll);
   void SetAlignNonTerm(const AlignmentInfo::CollType &coll);
 
-  const AlignmentInfo &GetAlignTerm() const
-	{ return *m_alignTerm; }
-  const AlignmentInfo &GetAlignNonTerm() const
-	{ return *m_alignNonTerm; }
-	
+  const AlignmentInfo &GetAlignTerm() const {
+    return *m_alignTerm;
+  }
+  const AlignmentInfo &GetAlignNonTerm() const {
+    return *m_alignNonTerm;
+  }
+
+  void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 
   TO_STRING();
 };
@@ -138,10 +135,8 @@ std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 /**
  * Hasher that looks at source and target phrase.
  **/
-struct TargetPhraseHasher 
-{
-  inline size_t operator()(const TargetPhrase& targetPhrase) const
-  {
+struct TargetPhraseHasher {
+  inline size_t operator()(const TargetPhrase& targetPhrase) const {
     size_t seed = 0;
     boost::hash_combine(seed, targetPhrase);
     boost::hash_combine(seed, targetPhrase.GetSourcePhrase());
@@ -152,14 +147,12 @@ struct TargetPhraseHasher
   }
 };
 
-struct TargetPhraseComparator
-{
-  inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const
-  {
+struct TargetPhraseComparator {
+  inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const {
     return lhs.Compare(rhs) == 0 &&
-      lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0 &&
-      lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
-      lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
+           lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0 &&
+           lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
+           lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
   }
 
 };

@@ -363,27 +363,27 @@ std::string PassthroughSGML(std::string &line, const std::string tagName,const s
  */
 inline std::string GetFirstString(const std::string& str, int& first_pos,  const std::string& delimiters = " \t")
 {
-	
-	std::string first_str;
-	// Skip delimiters at beginning.
-	std::string::size_type lastPos = str.find_first_not_of(delimiters, first_pos);
-	
-	// Find first "non-delimiter".
-	std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
-	
-	if (std::string::npos != pos || std::string::npos != lastPos){
-		
-		first_str = str.substr(lastPos, pos - lastPos);
-		
-		// Skip delimiters.  Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
-		
-	}
-	
-	first_pos = lastPos;
-	return first_str;
+
+  std::string first_str;
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, first_pos);
+
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+  if (std::string::npos != pos || std::string::npos != lastPos) {
+
+    first_str = str.substr(lastPos, pos - lastPos);
+
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+
+  }
+
+  first_pos = lastPos;
+  return first_str;
 }
-	
+
 template<class T>
 T log_sum (T log_a, T log_b)
 {

@@ -36,26 +36,32 @@ namespace Moses
  */
 class DottedRuleOnDisk : public DottedRule
 {
- public:
+public:
   // used only to init dot stack.
   explicit DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode)
-      : DottedRule()
-      , m_lastNode(lastNode)
-      , m_done(false) {}
+    : DottedRule()
+    , m_lastNode(lastNode)
+    , m_done(false) {}
 
   DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode,
                    const ChartCellLabel &cellLabel,
                    const DottedRuleOnDisk &prev)
-      : DottedRule(cellLabel, prev)
-      , m_lastNode(lastNode)
-      , m_done(false) {}
+    : DottedRule(cellLabel, prev)
+    , m_lastNode(lastNode)
+    , m_done(false) {}
 
-  const OnDiskPt::PhraseNode &GetLastNode() const { return m_lastNode; }
+  const OnDiskPt::PhraseNode &GetLastNode() const {
+    return m_lastNode;
+  }
 
-  bool Done() const { return m_done; }
-  void Done(bool value) const { m_done = value; }
+  bool Done() const {
+    return m_done;
+  }
+  void Done(bool value) const {
+    m_done = value;
+  }
 
- private:
+private:
   const OnDiskPt::PhraseNode &m_lastNode;
   mutable bool m_done;
 };

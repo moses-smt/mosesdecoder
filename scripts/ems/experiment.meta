@@ -413,6 +413,7 @@ fast-align
 fast-align-inverse
 	in: prepared-data-fast-align
 	out: fast-alignment-inverse
+	rerun-on-change: fast-align-settings
 	template: $external-bin-dir/fast_align -i IN -r $fast-align-settings > OUT
 	default-name: fast-align-inverse
 symmetrize-fast-align
@@ -570,18 +571,18 @@ build-generation-custom
 	rerun-on-change: generation-factors generation-type training-options script generation-corpus
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
-build-sparse-lexical
+build-sparse
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
-        out: sparse-lexical
-        ignore-unless: sparse-lexical-features
-	rerun-on-change: sparse-lexical-features
-        default-name: model/most-frequent-words
-	template: $moses-script-dir/ems/support/build-sparse-lexical-features.perl IN $input-extension $output-extension OUT "$sparse-lexical-features"
+        out: sparse
+        ignore-unless: sparse-features
+	rerun-on-change: sparse-features
+        default-name: model/sparse-features
+	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse-lexical corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini create-ini
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
 	default-name: model/moses.ini
 	error: Unknown option
 binarize-config
@@ -865,7 +866,7 @@ apply-weights
 	out: config-with-reused-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.tuned.ini
-	template: $moses-script-dir/ems/support/substitute-weights.perl IN < IN1 > OUT
+	template: $moses-script-dir/ems/support/substitute-weights.perl IN IN1 OUT
 	error: cannot open
 hiero-tune
 	in: TRAINING:hiero-config input reference

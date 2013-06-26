@@ -103,16 +103,15 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 
 Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType) const
 {
-	Phrase retPhrase(wordsRange.GetNumWordsCovered());
+  Phrase retPhrase(wordsRange.GetNumWordsCovered());
 
-	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
-	{
-		const Factor* f = GetFactor(currPos, factorType);
-		Word &word = retPhrase.AddWord();
-		word.SetFactor(factorType, f);
-	}
+  for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++) {
+    const Factor* f = GetFactor(currPos, factorType);
+    Word &word = retPhrase.AddWord();
+    word.SetFactor(factorType, f);
+  }
 
-	return retPhrase;
+  return retPhrase;
 }
 
 std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
@@ -153,10 +152,10 @@ void Phrase::PrependWord(const Word &newWord)
 }
 
 void Phrase::CreateFromString(FactorDirection direction
-                            ,const std::vector<FactorType> &factorOrder
-                            ,const StringPiece &phraseString
-                            ,const StringPiece &factorDelimiter
-                            ,Word *lhs)
+                              ,const std::vector<FactorType> &factorOrder
+                              ,const StringPiece &phraseString
+                              ,const StringPiece &factorDelimiter
+                              ,Word **lhs)
 {
   // parse
   vector<StringPiece> annotatedWordVector;
@@ -164,8 +163,12 @@ void Phrase::CreateFromString(FactorDirection direction
     annotatedWordVector.push_back(*it);
   }
 
-  if (annotatedWordVector.size() == 0)
+  if (annotatedWordVector.size() == 0) {
+    if (lhs) {
+      (*lhs) = NULL;
+    }
     return;
+  }
 
   // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
   //    to
@@ -180,14 +183,16 @@ void Phrase::CreateFromString(FactorDirection direction
     numWords = annotatedWordVector.size()-1;
 
     // lhs
-    CHECK(lhs);
-    lhs->CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
-    assert(lhs->IsNonTerminal());
-  }
-  else {
-    //CHECK(lhs == NULL);
-
+    assert(lhs);
+    (*lhs) = new Word(true);
+    (*lhs)->CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
+    assert((*lhs)->IsNonTerminal());
+  } else {
     numWords = annotatedWordVector.size();
+    //CHECK(lhs == NULL);
+    if (lhs) {
+      (*lhs) = NULL;
+    }
   }
 
   // parse each word

@@ -28,7 +28,7 @@ namespace OnDiskPt
 {
 const float DEFAULT_COUNT = 66666;
 
-/** Global class with misc information need to create and use the on-disk rule table. 
+/** Global class with misc information need to create and use the on-disk rule table.
  * 1 object of this class should be instantiated per rule table.
  * Currently only hierarchical/syntax models use this, but can & should be used with pb models too
  */

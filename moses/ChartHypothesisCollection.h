@@ -46,7 +46,7 @@ public:
   bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
     // assert in same cell
     const WordsRange &rangeA	= hypoA->GetCurrSourceRange()
-                                      , &rangeB	= hypoB->GetCurrSourceRange();
+                                , &rangeB	= hypoB->GetCurrSourceRange();
     CHECK(rangeA == rangeB);
 
     // shouldn't be mixing hypos with different lhs
@@ -115,7 +115,9 @@ public:
   }
 
   //! return the best total score of all hypos in this collection
-  float GetBestScore() const { return m_bestScore; }
+  float GetBestScore() const {
+    return m_bestScore;
+  }
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned,bool> &reachable) const;
 

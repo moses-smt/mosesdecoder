@@ -149,7 +149,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           return false;
         }
 
-	// may be either a input span label ("label"), or a specified output translation "translation"
+        // may be either a input span label ("label"), or a specified output translation "translation"
         string label = ParseXmlTagAttribute(tagContent,"label");
         string translation = ParseXmlTagAttribute(tagContent,"translation");
 
@@ -165,26 +165,28 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           vector<string> altTexts = TokenizeMultiCharSeparator(translation, "||");
           vector<string> altLabel = TokenizeMultiCharSeparator(label, "||");
           vector<string> altProbs = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"prob"), "||");
-	  //TRACE_ERR("number of translations: " << altTexts.size() << endl);
+          //TRACE_ERR("number of translations: " << altTexts.size() << endl);
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
             TargetPhrase targetPhrase;
-            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter);
+            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
 
             // set constituent label
-	    string targetLHSstr;
+            string targetLHSstr;
             if (altLabel.size() > i && altLabel[i].size() > 0) {
               targetLHSstr = altLabel[i];
-            }
-            else {
+            } else {
               const UnknownLHSList &lhsList = StaticData::Instance().GetUnknownLHS();
               UnknownLHSList::const_iterator iterLHS = lhsList.begin();
               targetLHSstr = iterLHS->first;
             }
-            Word targetLHS(true);
-            targetLHS.CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
-            CHECK(targetLHS.GetFactor(0) != NULL);
+            Word *targetLHS = new Word(true);
+            targetLHS->CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
+            CHECK(targetLHS->GetFactor(0) != NULL);
             targetPhrase.SetTargetLHS(targetLHS);
+
+            // not tested
+            Phrase sourcePhrase = this->GetSubString(WordsRange(startPos,endPos-1));
 
             // get probability
             float probValue = 1;
@@ -194,7 +196,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             // convert from prob to log-prob
             float scoreValue = FloorScore(TransformScore(probValue));
             targetPhrase.SetXMLScore(scoreValue);
-            targetPhrase.Evaluate();
+            targetPhrase.Evaluate(sourcePhrase);
 
             // set span and create XmlOption
             WordsRange range(startPos+1,endPos);

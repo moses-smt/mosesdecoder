@@ -28,26 +28,38 @@ namespace Moses
  */
 class DottedRule
 {
- public:
+public:
   // used only to init dot stack.
   DottedRule()
-      : m_cellLabel(NULL)
-      , m_prev(NULL) {}
+    : m_cellLabel(NULL)
+    , m_prev(NULL) {}
 
   DottedRule(const ChartCellLabel &ccl, const DottedRule &prev)
-      : m_cellLabel(&ccl)
-      , m_prev(&prev) {}
+    : m_cellLabel(&ccl)
+    , m_prev(&prev) {}
 
-  const WordsRange &GetWordsRange() const { return m_cellLabel->GetCoverage(); }
-  const Word &GetSourceWord() const { return m_cellLabel->GetLabel(); }
-  bool IsNonTerminal() const { return m_cellLabel->GetLabel().IsNonTerminal(); }
-  const DottedRule *GetPrev() const { return m_prev; }
-  bool IsRoot() const { return m_prev == NULL; }
-  const ChartCellLabel &GetChartCellLabel() const { return *m_cellLabel; }
+  const WordsRange &GetWordsRange() const {
+    return m_cellLabel->GetCoverage();
+  }
+  const Word &GetSourceWord() const {
+    return m_cellLabel->GetLabel();
+  }
+  bool IsNonTerminal() const {
+    return m_cellLabel->GetLabel().IsNonTerminal();
+  }
+  const DottedRule *GetPrev() const {
+    return m_prev;
+  }
+  bool IsRoot() const {
+    return m_prev == NULL;
+  }
+  const ChartCellLabel &GetChartCellLabel() const {
+    return *m_cellLabel;
+  }
 
- private:
+private:
   const ChartCellLabel *m_cellLabel; // usually contains something, unless
-                                     // it's the init processed rule
+  // it's the init processed rule
   const DottedRule *m_prev;
 };
 

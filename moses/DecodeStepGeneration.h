@@ -35,14 +35,17 @@ class ScoreComponentCollection;
 class DecodeStepGeneration : public DecodeStep
 {
 public:
-  DecodeStepGeneration(const GenerationDictionary* dict, const DecodeStep* prev);
+  DecodeStepGeneration(const GenerationDictionary* dict,
+                       const DecodeStep* prev,
+                       const std::vector<FeatureFunction*> &features);
 
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
-                       , bool adhereTableLimit) const;
+                       , bool adhereTableLimit
+                       , const Phrase &src) const;
 
 private:
 };

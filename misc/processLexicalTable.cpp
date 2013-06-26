@@ -43,13 +43,16 @@ int main(int argc, char** argv)
     }
   }
 
+  bool success = false;
+
   if(inFilePath.empty()) {
     std::cerr << "processing stdin to " << outFilePath << ".*\n";
-    return LexicalReorderingTableTree::Create(std::cin, outFilePath);
+    success = LexicalReorderingTableTree::Create(std::cin, outFilePath);
   } else {
     std::cerr << "processing " << inFilePath<< " to " << outFilePath << ".*\n";
     InputFileStream file(inFilePath);
-    bool success = LexicalReorderingTableTree::Create(file, outFilePath);
-    return (success ? 0 : 1);
+    success = LexicalReorderingTableTree::Create(file, outFilePath);
   }
+
+  return (success ? 0 : 1);
 }

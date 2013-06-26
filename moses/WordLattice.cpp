@@ -3,6 +3,7 @@
 #include "PCNTools.h"
 #include "Util.h"
 #include "FloydWarshall.h"
+#include "moses/FF/InputFeature.h"
 
 namespace Moses
 {
@@ -33,11 +34,13 @@ void WordLattice::Print(std::ostream& out) const
 
 int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line)
 {
+  const StaticData &staticData = StaticData::Instance();
+  const InputFeature *inputFeature = staticData.GetInputFeature();
+  size_t numInputScores = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 
-  size_t numInputScores = StaticData::Instance().GetNumInputScores();
-  size_t numRealWordCount = StaticData::Instance().GetNumRealWordsInInput();
-  size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);
 
   //when we have one more weight than params, we add a word count feature

@@ -65,9 +65,7 @@ public:
   LanguageModelIRST(const std::string &line);
 
   ~LanguageModelIRST();
-  bool Load(const std::string &filePath
-            , FactorType factorType
-            , size_t nGramOrder);
+  void Load();
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
 

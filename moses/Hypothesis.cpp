@@ -25,18 +25,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <algorithm>
 
-#include "FFState.h"
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
-#include "DummyScoreProducers.h"
 #include "Hypothesis.h"
 #include "Util.h"
 #include "SquareMatrix.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
-#include "LMList.h"
 #include "Manager.h"
+#include "moses/FF/FFState.h"
 
 using namespace std;
 
@@ -54,11 +52,8 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
   , m_sourceCompleted(source.GetSize(), manager.m_source.m_sourceCompleted)
   , m_sourceInput(source)
   , m_currSourceWordsRange(
-    m_sourceCompleted.GetFirstGapPos() > 0 
-    ? 0 : NOT_FOUND,
-    m_sourceCompleted.GetFirstGapPos() > 0 
-    ? m_sourceCompleted.GetFirstGapPos()-1 
-    : NOT_FOUND)
+    m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
+    m_sourceCompleted.GetFirstGapPos()>0 ? m_sourceCompleted.GetFirstGapPos()-1 : NOT_FOUND)
   , m_currTargetWordsRange(0, emptyTarget.GetSize()-1)
   , m_wordDeleted(false)
   , m_totalScore(0.0f)
@@ -66,7 +61,7 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
   , m_ffStates(StatefulFeatureFunction::GetStatefulFeatureFunctions().size())
   , m_arcList(NULL)
   , m_transOpt(NULL)
-  , m_manager(manager)  
+  , m_manager(manager)
   , m_id(m_manager.GetNextHypoId())
 {
   // used for initial seeding of trans process
@@ -92,14 +87,14 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   , m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
                               ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
   , m_wordDeleted(false)
-  ,	m_totalScore(0.0f)
-  ,	m_futureScore(0.0f)
+  , m_totalScore(0.0f)
+  , m_futureScore(0.0f)
+  , m_scoreBreakdown(prevHypo.GetScoreBreakdown())
   , m_ffStates(prevHypo.m_ffStates.size())
   , m_arcList(NULL)
   , m_transOpt(&transOpt)
   , m_manager(prevHypo.GetManager())
   , m_id(m_manager.GetNextHypoId())
-  , m_scoreBreakdown(prevHypo.GetScoreBreakdown())
 {
   m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
 
@@ -252,29 +247,35 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
     }
     if (comp != 0) return comp;
   }
-  
+
   return 0;
 }
 
 void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
-                              int state_idx) {
-  m_ffStates[state_idx] = sfff.Evaluate(
-      *this,
-      m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-      &m_scoreBreakdown);
-            
+                              int state_idx)
+{
+  const StaticData &staticData = StaticData::Instance();
+  if (! staticData.IsFeatureFunctionIgnored( sfff )) {
+    m_ffStates[state_idx] = sfff.Evaluate(
+                              *this,
+                              m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+                              &m_scoreBreakdown);
+  }
 }
 
-void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff) {
-  slff.Evaluate(PhraseBasedFeatureContext(this), &m_scoreBreakdown);
+void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
+{
+  const StaticData &staticData = StaticData::Instance();
+  if (! staticData.IsFeatureFunctionIgnored( slff )) {
+    slff.Evaluate(PhraseBasedFeatureContext(this), &m_scoreBreakdown);
+  }
 }
 
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const SquareMatrix &futureScore)
+void Hypothesis::Evaluate(const SquareMatrix &futureScore)
 {
-  const StaticData &staticData = StaticData::Instance();
   clock_t t=0; // used to track time
 
   // some stateless score producers cache their values in the translation
@@ -285,22 +286,22 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // compute values of stateless feature functions that were not
   // cached in the translation option
   const vector<const StatelessFeatureFunction*>& sfs =
-      StatelessFeatureFunction::GetStatelessFeatureFunctions();
+    StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
-	const StatelessFeatureFunction &ff = *sfs[i];
-    if (ff.GetStatelessFeatureType() == RequiresSegmentation) {
-      EvaluateWith(ff);
-    }
+    const StatelessFeatureFunction &ff = *sfs[i];
+    EvaluateWith(ff);
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =
-      StatefulFeatureFunction::GetStatefulFeatureFunctions();
+    StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     const StatefulFeatureFunction &ff = *ffs[i];
-    m_ffStates[i] = ff.Evaluate(
-                      *this,
-                      m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                      &m_scoreBreakdown);
+    const StaticData &staticData = StaticData::Instance();
+    if (! staticData.IsFeatureFunctionIgnored(ff)) {
+      m_ffStates[i] = ff.Evaluate(*this,
+                                  m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
+                                  &m_scoreBreakdown);
+    }
   }
 
   IFVERBOSE(2) {

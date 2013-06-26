@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
-#include "DummyScoreProducers.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
 
 using namespace std;
 
@@ -48,11 +48,11 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 	* This fn should be called by inherited classes
 */
 TranslationOptionCollection::TranslationOptionCollection(
-    InputType const& src, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  InputType const& src, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
   : m_source(src)
-    ,m_futureScore(src.GetSize())
-    ,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
-    ,m_translationOptionThreshold(translationOptionThreshold)
+  ,m_futureScore(src.GetSize())
+  ,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
+  ,m_translationOptionThreshold(translationOptionThreshold)
 {
   // create 2-d vector
   size_t size = src.GetSize();
@@ -202,73 +202,68 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
   float unknownScore = FloorScore(TransformScore(0));
 
-	// unknown word, add as trans opt
-	FactorCollection &factorCollection = FactorCollection::Instance();
+  // unknown word, add as trans opt
+  FactorCollection &factorCollection = FactorCollection::Instance();
 
-	size_t isDigit = 0;
-	
-	const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-	const StringPiece s = f->GetString();
-	bool isEpsilon = (s=="" || s==EPSILON);
-	if (StaticData::Instance().GetDropUnknown())
-	{
+  size_t isDigit = 0;
+
+  const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+  const StringPiece s = f->GetString();
+  bool isEpsilon = (s=="" || s==EPSILON);
+  if (StaticData::Instance().GetDropUnknown()) {
 
 
-		isDigit = s.find_first_of("0123456789");
-		if (isDigit == 1) 
-			isDigit = 1;
-		else 
-			isDigit = 0;
-		// modify the starting bitmap
-	}
-	
-	Phrase* m_unksrc = new Phrase(1);
+    isDigit = s.find_first_of("0123456789");
+    if (isDigit == 1)
+      isDigit = 1;
+    else
+      isDigit = 0;
+    // modify the starting bitmap
+  }
+
+  Phrase* m_unksrc = new Phrase(1);
   m_unksrc->AddWord() = sourceWord;
-	m_unksrcs.push_back(m_unksrc);
+  m_unksrcs.push_back(m_unksrc);
 
-	TranslationOption *transOpt;
-	TargetPhrase targetPhrase;
-	targetPhrase.SetSourcePhrase(*m_unksrc);
-	
-	if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit)
-	{
-		// add to dictionary
+  TranslationOption *transOpt;
+  TargetPhrase targetPhrase;
+  targetPhrase.SetSourcePhrase(*m_unksrc);
 
-		Word &targetWord = targetPhrase.AddWord();
-					
-		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
-		{
-			FactorType factorType = static_cast<FactorType>(currFactor);
-			
-			const Factor *sourceFactor = sourceWord[currFactor];
-			if (sourceFactor == NULL)
-				targetWord[factorType] = factorCollection.AddFactor(UNKNOWN_FACTOR);
-			else
-				targetWord[factorType] = factorCollection.AddFactor(sourceFactor->GetString());
-		}
-		//create a one-to-one alignment between UNKNOWN_FACTOR and its verbatim translation	
-        
-		targetPhrase.SetAlignmentInfo("0-0");
-		
-	}
-	else 
-	{ 
-		// drop source word. create blank trans opt
+  if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
+    // add to dictionary
 
-		//targetPhrase.SetAlignment();
+    Word &targetWord = targetPhrase.AddWord();
 
-	}
+    for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
+      FactorType factorType = static_cast<FactorType>(currFactor);
+
+      const Factor *sourceFactor = sourceWord[currFactor];
+      if (sourceFactor == NULL)
+        targetWord[factorType] = factorCollection.AddFactor(UNKNOWN_FACTOR);
+      else
+        targetWord[factorType] = factorCollection.AddFactor(sourceFactor->GetString());
+    }
+    //create a one-to-one alignment between UNKNOWN_FACTOR and its verbatim translation
+
+    targetPhrase.SetAlignmentInfo("0-0");
+
+  } else {
+    // drop source word. create blank trans opt
+
+    //targetPhrase.SetAlignment();
+
+  }
 
   targetPhrase.GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
 
-	if (inputScores != NULL) {
-		targetPhrase.SetInputScore(*inputScores);
-	}
+  if (inputScores != NULL) {
+    targetPhrase.SetInputScore(*inputScores);
+  }
 
-	targetPhrase.Evaluate();
+  targetPhrase.Evaluate(*m_unksrc);
 
-	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase);
-	Add(transOpt);
+  transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase);
+  Add(transOpt);
 
 
 }
@@ -408,6 +403,8 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   ProcessUnknownWord();
 
+  EvaluateWithSource();
+
   // Prune
   Prune();
 
@@ -418,6 +415,27 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
+}
+
+void TranslationOptionCollection::EvaluateWithSource()
+{
+  const size_t size = m_source.GetSize();
+  for (size_t startPos = 0 ; startPos < size ; ++startPos) {
+    size_t maxSize = m_source.GetSize() - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+    for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos) {
+      TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
+
+      TranslationOptionList::const_iterator iterTransOpt;
+      for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) {
+        TranslationOption &transOpt = **iterTransOpt;
+        transOpt.Evaluate(m_source);
+      }
+    }
+  }
+
 }
 
 void TranslationOptionCollection::Sort()
@@ -488,7 +506,9 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
       // do rest of decode steps
       int indexStep = 0;
+
       for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
+
         const DecodeStep &decodeStep = **iterStep;
         PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
@@ -502,14 +522,15 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                              , decodeStep
                              , *newPtoc
                              , this
-                             , adhereTableLimit);
+                             , adhereTableLimit
+                             , *sourcePhrase);
         }
-
 
         // last but 1 partial trans not required anymore
         totalEarlyPruned += newPtoc->GetPrunedCount();
         delete oldPtoc;
         oldPtoc = newPtoc;
+
         indexStep++;
       } // for (++iterStep
 
@@ -608,7 +629,7 @@ std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& c
   return out;
 }
 
-const std::vector<Phrase*>& TranslationOptionCollection::GetUnknownSources() const 
+const std::vector<Phrase*>& TranslationOptionCollection::GetUnknownSources() const
 {
   return m_unksrcs;
 }
