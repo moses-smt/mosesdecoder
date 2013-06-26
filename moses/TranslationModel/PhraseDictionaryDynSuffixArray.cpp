@@ -10,10 +10,10 @@ namespace Moses
 {
 PhraseDictionaryDynSuffixArray::
 PhraseDictionaryDynSuffixArray(const std::string &line)
-: PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
-,m_biSA(new BilingualDynSuffixArray())
+  : PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
+  ,m_biSA(new BilingualDynSuffixArray())
 {
-	ReadParameters();
+  ReadParameters();
 }
 
 
@@ -48,17 +48,16 @@ const TargetPhraseCollection*
 PhraseDictionaryDynSuffixArray::
 GetTargetPhraseCollection(const Phrase& src) const
 {
-  typedef map<SAPhrase, vector<float> >::value_type pstat_entry; 
+  typedef map<SAPhrase, vector<float> >::value_type pstat_entry;
   map<SAPhrase, vector<float> > pstats; // phrase (pair) statistics
   m_biSA->GatherCands(src,pstats);
 
   TargetPhraseCollection *ret = new TargetPhraseCollection();
-  BOOST_FOREACH(pstat_entry & e, pstats)
-    {
-      TargetPhrase* tp = m_biSA->GetMosesFactorIDs(e.first, src);
-      tp->GetScoreBreakdown().Assign(this,e.second); 
-      ret->Add(tp);
-    }
+  BOOST_FOREACH(pstat_entry & e, pstats) {
+    TargetPhrase* tp = m_biSA->GetMosesFactorIDs(e.first, src);
+    tp->GetScoreBreakdown().Assign(this,e.second);
+    ret->Add(tp);
+  }
   // return ret;
   // TargetPhraseCollection *ret = new TargetPhraseCollection();
   // std::vector< std::pair< Scores, TargetPhrase*> > trg;
@@ -80,15 +79,15 @@ GetTargetPhraseCollection(const Phrase& src) const
   return ret;
 }
 
-void 
+void
 PhraseDictionaryDynSuffixArray::
 insertSnt(string& source, string& target, string& alignment)
 {
   m_biSA->addSntPair(source, target, alignment); // insert sentence pair into suffix arrays
-  //StaticData::Instance().ClearTransOptionCache(); // clear translation option cache 
+  //StaticData::Instance().ClearTransOptionCache(); // clear translation option cache
 }
 
-void 
+void
 PhraseDictionaryDynSuffixArray::
 deleteSnt(unsigned /* idx */, unsigned /* num2Del */)
 {

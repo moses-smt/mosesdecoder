@@ -216,37 +216,37 @@ void DynSuffixArray::Substitute(vuint_t* /* newSents */, unsigned /* newIndex */
   return;
 }
 
-  ComparePosition::
-  ComparePosition(vuint_t const& crp, vuint_t const& sfa)
-    : m_crp(crp), m_sfa(sfa) { }
+ComparePosition::
+ComparePosition(vuint_t const& crp, vuint_t const& sfa)
+  : m_crp(crp), m_sfa(sfa) { }
 
-  bool
-  ComparePosition::
-  operator()(unsigned const& i, vector<wordID_t> const& phrase) const
-  {
-    unsigned const* x = &m_crp.at(i);
-    unsigned const* e = &m_crp.back();
-    size_t k = 0;
-    for (;k < phrase.size() && x < e; ++k, ++x) 
-      if (*x != phrase[k]) return *x < phrase[k];
-    return (x == e && k < phrase.size());
-  }
+bool
+ComparePosition::
+operator()(unsigned const& i, vector<wordID_t> const& phrase) const
+{
+  unsigned const* x = &m_crp.at(i);
+  unsigned const* e = &m_crp.back();
+  size_t k = 0;
+  for (; k < phrase.size() && x < e; ++k, ++x)
+    if (*x != phrase[k]) return *x < phrase[k];
+  return (x == e && k < phrase.size());
+}
 
-  bool
-  ComparePosition::
-  operator()(vector<wordID_t> const& phrase, unsigned const& i) const
-  {
-    unsigned const* x = &m_crp.at(i);
-    unsigned const* e = &m_crp.back();
-    size_t k = 0;
-    for (;k < phrase.size() && x < e; ++k, ++x) 
-      if (*x != phrase[k]) return phrase[k] < *x;
-    return false; // (k == phrase.size() && x < e);
-  }
+bool
+ComparePosition::
+operator()(vector<wordID_t> const& phrase, unsigned const& i) const
+{
+  unsigned const* x = &m_crp.at(i);
+  unsigned const* e = &m_crp.back();
+  size_t k = 0;
+  for (; k < phrase.size() && x < e; ++k, ++x)
+    if (*x != phrase[k]) return phrase[k] < *x;
+  return false; // (k == phrase.size() && x < e);
+}
 
 bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices)
 {
-    // DOES THIS EVEN WORK WHEN A DynSuffixArray has been saved and reloaded????
+  // DOES THIS EVEN WORK WHEN A DynSuffixArray has been saved and reloaded????
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   indices->clear();
   size_t phrasesize = phrase->size();
@@ -281,15 +281,15 @@ bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices)
   return (indices->size() > 0);
 }
 
-  size_t 
-  DynSuffixArray::
-  GetCount(vuint_t const& phrase) const
-  {
-    ComparePosition cmp(*m_corpus, *m_SA);
-    vuint_t::const_iterator lb = lower_bound(m_SA->begin(), m_SA->end(), phrase, cmp);
-    vuint_t::const_iterator ub = upper_bound(m_SA->begin(), m_SA->end(), phrase, cmp);
-    return ub-lb;
-  }
+size_t
+DynSuffixArray::
+GetCount(vuint_t const& phrase) const
+{
+  ComparePosition cmp(*m_corpus, *m_SA);
+  vuint_t::const_iterator lb = lower_bound(m_SA->begin(), m_SA->end(), phrase, cmp);
+  vuint_t::const_iterator ub = upper_bound(m_SA->begin(), m_SA->end(), phrase, cmp);
+  return ub-lb;
+}
 
 void DynSuffixArray::Save(FILE* fout)
 {

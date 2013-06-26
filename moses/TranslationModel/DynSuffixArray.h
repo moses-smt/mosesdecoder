@@ -11,28 +11,28 @@
 
 namespace Moses
 {
-  using namespace std;
-  typedef std::vector<unsigned> vuint_t;
+using namespace std;
+typedef std::vector<unsigned> vuint_t;
 
 
-  /// compare position /i/ in the suffix array /m_sfa/ into corpus /m_crp/
-  /// against reference phrase /phrase/
-  // added by Ulrich Germann
-  class ComparePosition
-  { 
-    vuint_t const& m_crp;
-    vuint_t const& m_sfa;
+/// compare position /i/ in the suffix array /m_sfa/ into corpus /m_crp/
+/// against reference phrase /phrase/
+// added by Ulrich Germann
+class ComparePosition
+{
+  vuint_t const& m_crp;
+  vuint_t const& m_sfa;
 
-  public:
-    ComparePosition(vuint_t const& crp, vuint_t const& sfa);
-    bool operator()(unsigned const& i, vector<wordID_t> const& phrase) const;
-    bool operator()(vector<wordID_t> const& phrase, unsigned const& i) const;
-  };
-  
+public:
+  ComparePosition(vuint_t const& crp, vuint_t const& sfa);
+  bool operator()(unsigned const& i, vector<wordID_t> const& phrase) const;
+  bool operator()(vector<wordID_t> const& phrase, unsigned const& i) const;
+};
+
 
 /** @todo ask Abbey Levenberg
  */
-class DynSuffixArray 
+class DynSuffixArray
 {
 
 public:
@@ -64,8 +64,8 @@ private:
   void PrintAuxArrays() {
     std::cerr << "SA\tISA\tF\tL\n";
     for(size_t i=0; i < m_SA->size(); ++i)
-      std::cerr << m_SA->at(i) << "\t" << m_ISA->at(i) << "\t" 
-  		<< m_F->at(i) << "\t" << m_L->at(i) << std::endl;
+      std::cerr << m_SA->at(i) << "\t" << m_ISA->at(i) << "\t"
+                << m_F->at(i) << "\t" << m_L->at(i) << std::endl;
   }
 };
 } //end namespace

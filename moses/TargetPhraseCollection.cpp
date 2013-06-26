@@ -37,8 +37,8 @@ void TargetPhraseCollection::NthElement(size_t tableLimit)
 {
   vector<TargetPhrase*>::iterator nth;
   nth = (tableLimit && tableLimit <= m_collection.size()
-	 ? m_collection.begin() + tableLimit 
-	 : m_collection.end());
+         ? m_collection.begin() + tableLimit
+         : m_collection.end());
   std::nth_element(m_collection.begin(), nth, m_collection.end(), CompareTargetPhrase());
 }
 

@@ -275,14 +275,14 @@ bool Parameter::LoadParam(int argc, char* argv[])
   }
 
   // overwrite parameters with values from switches
-  for(PARAM_STRING::const_iterator iterParam = m_description.begin(); 
+  for(PARAM_STRING::const_iterator iterParam = m_description.begin();
       iterParam != m_description.end(); iterParam++) {
     const string paramName = iterParam->first;
     OverwriteParam("-" + paramName, paramName, argc, argv);
   }
 
   // ... also shortcuts
-  for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin(); 
+  for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin();
       iterParam != m_abbreviation.end(); iterParam++) {
     const string paramName = iterParam->first;
     const string paramShortName = iterParam->second;
@@ -296,8 +296,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
     verbose = Scan<int>(m_setting["verbose"][0]);
   if (verbose >= 1) { // only if verbose
     TRACE_ERR( "Defined parameters (per moses.ini or switch):" << endl);
-    for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; 
-	iterParam != m_setting.end(); iterParam++) {
+    for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ;
+        iterParam != m_setting.end(); iterParam++) {
       TRACE_ERR( "\t" << iterParam->first << ": ");
       for ( size_t i = 0; i < iterParam->second.size(); i++ )
         TRACE_ERR( iterParam->second[i] << " ");
@@ -307,7 +307,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 
   // convert old weights args to new format
   // WHAT IS GOING ON HERE??? - UG
- if (!isParamSpecified("feature")) // UG
+  if (!isParamSpecified("feature")) // UG
     ConvertWeightArgs();
   CreateWeightsMap();
   WeightOverwrite();
@@ -361,10 +361,10 @@ void Parameter::SetWeight(const std::string &name, size_t ind, const vector<floa
   newWeights.push_back(line);
 }
 
-void 
+void
 Parameter::
-AddWeight(const std::string &name, size_t ind, 
-	  const std::vector<float> &weights)
+AddWeight(const std::string &name, size_t ind,
+          const std::vector<float> &weights)
 {
   PARAM_VEC &newWeights = m_setting["weight"];
 
@@ -516,7 +516,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
         ++currOldInd;
       }
 
-      // cerr << weights.size() << " PHRASE TABLE WEIGHTS " 
+      // cerr << weights.size() << " PHRASE TABLE WEIGHTS "
       // << __FILE__ << ":" << __LINE__ << endl;
       AddWeight(ptType, ptInd, weights);
 
