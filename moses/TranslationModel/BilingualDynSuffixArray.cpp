@@ -531,9 +531,11 @@ GatherCands(Phrase const& src, map<SAPhrase, vector<float> >& pstats) const
     // 3: lex 2
     // 4: phrase penalty
     float x  = m_trgSA->GetCount(e.first.words)-feats[0] * sampleRate;
-    feats[2] = feats[0] / totalPhrases;
-    feats[0] = feats[0] / (feats[0] + x);
-    feats[4] = 2.718;
+    feats[4] = 1;
+    feats[3] = log(feats[3]);
+    feats[2] = log(feats[0]) - log(totalPhrases);
+    feats[1] = log(feats[1]);
+    feats[0] = log(feats[0]) - log(feats[0] + x);
   }
   return ret;
 }
