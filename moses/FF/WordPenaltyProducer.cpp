@@ -7,7 +7,8 @@ using namespace std;
 namespace Moses
 {
 WordPenaltyProducer::WordPenaltyProducer(const std::string &line)
-  : StatelessFeatureFunction("WordPenalty",1, line) {
+  : StatelessFeatureFunction("WordPenalty",1, line)
+{
   ReadParameters();
 }
 

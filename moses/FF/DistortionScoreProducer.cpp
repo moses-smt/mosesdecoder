@@ -22,7 +22,8 @@ struct DistortionState_traditional : public FFState {
 };
 
 DistortionScoreProducer::DistortionScoreProducer(const std::string &line)
-  : StatefulFeatureFunction("Distortion", 1, line) {
+  : StatefulFeatureFunction("Distortion", 1, line)
+{
   ReadParameters();
 }
 

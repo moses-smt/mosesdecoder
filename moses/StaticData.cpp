@@ -700,8 +700,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	  SetWeights(model, weights);
     } else if (feature == "PhrasePenalty") {
       PhrasePenalty* model = new PhrasePenalty(line);
-  	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-	  SetWeights(model, weights);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
     }
 
 #ifdef HAVE_SYNLM
@@ -1177,7 +1177,6 @@ void StaticData::LoadFeatureFunctions()
     }
   }
 
-  // load phrase table
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
     PhraseDictionary *pt = m_phraseDictionary[i];
     pt->Load();
