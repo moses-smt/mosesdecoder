@@ -122,6 +122,8 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
   , bool adhereTableLimit
   , size_t graphInd)
 {
+  InputLatticeNode &inputLatticeNode = GetInputLatticeNode(startPos, endPos);
+
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
@@ -153,9 +155,13 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
       list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
       const DecodeStep &decodeStep = **iterStep;
 
+      const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
+      const TargetPhraseCollection *targetPhrases = inputLatticeNode.GetTargetPhrases(phraseDictionary);
+
       static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
       (m_source, *oldPtoc
-       , startPos, endPos, adhereTableLimit );
+       , startPos, endPos, adhereTableLimit
+       , targetPhrases);
 
       // do rest of decode steps
       int indexStep = 0;

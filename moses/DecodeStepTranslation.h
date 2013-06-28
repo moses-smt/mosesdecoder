@@ -56,6 +56,11 @@ public:
                                  , PartialTranslOptColl &outputPartialTranslOptColl
                                  , size_t startPos, size_t endPos, bool adhereTableLimit) const;
 
+  void ProcessInitialTranslation(const InputType &source
+                                 , PartialTranslOptColl &outputPartialTranslOptColl
+                                 , size_t startPos, size_t endPos, bool adhereTableLimit
+                                 , const TargetPhraseCollection *phraseColl) const;
+
 private:
 
 };
