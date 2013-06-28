@@ -53,6 +53,11 @@ public:
 
   void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
 
+  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
+      , size_t startPosition
+      , size_t endPosition
+      , bool adhereTableLimit
+      , size_t graphInd);
 
 };
 

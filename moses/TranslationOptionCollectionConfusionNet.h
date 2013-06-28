@@ -18,7 +18,11 @@ public:
   TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   void ProcessUnknownWord(size_t sourcePos);
-
+  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
+        , size_t startPosition
+        , size_t endPosition
+        , bool adhereTableLimit
+        , size_t graphInd);
 };
 
 }

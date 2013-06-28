@@ -158,7 +158,7 @@ public:
       , size_t startPosition
       , size_t endPosition
       , bool adhereTableLimit
-      , size_t graphInd);
+      , size_t graphInd) = 0;
 
   //!Check if this range has XML options
   virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
