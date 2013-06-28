@@ -56,7 +56,6 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
 	  m_phraseDictionaryQueue.push_back(&node);
 	}
   }
-
 }
 
 /* forcibly create translation option for a particular source word.
@@ -100,6 +99,12 @@ InputLatticeNode &TranslationOptionCollectionText::GetInputLatticeNode(size_t st
   size_t offset = endPos - startPos;
   CHECK(offset < m_targetPhrasesfromPt[startPos].size());
   return m_targetPhrasesfromPt[startPos][offset];
+}
+
+void TranslationOptionCollectionText::CreateTranslationOptions()
+{
+  SetTargetPhraseFromPtMatrix();
+  TranslationOptionCollection::CreateTranslationOptions();
 }
 
 /** create translation options that exactly cover a specific input span.

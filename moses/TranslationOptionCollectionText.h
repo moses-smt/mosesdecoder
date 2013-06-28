@@ -53,6 +53,8 @@ public:
 
   void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
 
+  void CreateTranslationOptions();
+
   void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
       , size_t startPosition
       , size_t endPosition

@@ -73,10 +73,10 @@ public:
     return m_range;
   }
 
-  void SetTargetPhrases(const PhraseDictionary *phraseDictionary, const TargetPhraseCollection *targetPhrases) {
-    m_targetPhrases[phraseDictionary] = targetPhrases;
+  void SetTargetPhrases(const PhraseDictionary &phraseDictionary, const TargetPhraseCollection *targetPhrases) {
+    m_targetPhrases[&phraseDictionary] = targetPhrases;
   }
-  const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary *phraseDictionary) const;
+  const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
 
 };
 
@@ -135,6 +135,8 @@ protected:
 
   void CacheLexReordering();
 
+  void SetTargetPhraseFromPtMatrix();
+  void SetTargetPhraseFromPtMatrix(const PhraseDictionary &phraseDictionary);
 public:
   virtual ~TranslationOptionCollection();
 

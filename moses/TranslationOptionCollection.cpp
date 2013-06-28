@@ -39,9 +39,9 @@ using namespace std;
 namespace Moses
 {
 
-const TargetPhraseCollection *InputLatticeNode::GetTargetPhrases(const PhraseDictionary *phraseDictionary) const {
+const TargetPhraseCollection *InputLatticeNode::GetTargetPhrases(const PhraseDictionary &phraseDictionary) const {
 	std::map<const PhraseDictionary*, const TargetPhraseCollection *>::const_iterator iter;
-	iter = m_targetPhrases.find(phraseDictionary);
+	iter = m_targetPhrases.find(&phraseDictionary);
 	CHECK(iter != m_targetPhrases.end());
   return iter->second;
 }
@@ -582,6 +582,40 @@ const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionLi
 
   CHECK(maxSize < m_collection[startPos].size());
   return m_collection[startPos][maxSize];
+}
+
+void TranslationOptionCollection::SetTargetPhraseFromPtMatrix()
+{
+  const vector <DecodeGraph*> &decodeGraphList = StaticData::Instance().GetDecodeGraphs();
+  for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
+    const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
+
+    list <const DecodeStep* >::const_iterator iterStep;
+    for (iterStep = decodeGraph.begin(); iterStep != decodeGraph.end() ; ++iterStep) {
+      const DecodeStep &decodeStep = **iterStep;
+      const DecodeStepTranslation *transStep = dynamic_cast<const DecodeStepTranslation *>(&decodeStep);
+      if (transStep) {
+        const PhraseDictionary &phraseDictionary = *transStep->GetPhraseDictionaryFeature();
+        SetTargetPhraseFromPtMatrix(phraseDictionary);
+      }
+    }
+  }
+}
+
+void TranslationOptionCollection::SetTargetPhraseFromPtMatrix(const PhraseDictionary &phraseDictionary)
+{
+  for (size_t i = 0; i < m_phraseDictionaryQueue.size(); ++i) {
+    InputLatticeNode &node = *m_phraseDictionaryQueue[i];
+
+    bool doIt = true;
+
+    doIt = true; // TODO HACK
+    if (doIt) {
+      const Phrase &phrase = node.GetPhrase();
+      const TargetPhraseCollection *targetPhrases = phraseDictionary.GetTargetPhraseCollection(phrase);
+      node.SetTargetPhrases(phraseDictionary, targetPhrases);
+    }
+  }
 }
 
 }
