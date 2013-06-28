@@ -38,23 +38,23 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
   size_t size = input.GetSize();
   m_targetPhrasesfromPt.resize(size);
   for (size_t startPos = 0; startPos < size; ++startPos) {
-	std::vector<InputLatticeNode> &vec = m_targetPhrasesfromPt[startPos];
-	for (size_t endPos = startPos; endPos < size; ++endPos) {
-	  Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
-	  WordsRange range(startPos, endPos);
-	  InputLatticeNode node(subphrase, range);
+    std::vector<InputLatticeNode> &vec = m_targetPhrasesfromPt[startPos];
+    for (size_t endPos = startPos; endPos < size; ++endPos) {
+      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+      WordsRange range(startPos, endPos);
+      InputLatticeNode node(subphrase, range);
 
-	  vec.push_back(node);
-	}
+      vec.push_back(node);
+    }
   }
 
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
-	for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
-	  size_t endPos = startPos + phaseSize -1;
-	  //cerr << startPos << "-" << endPos << "=" << GetPhrase(startPos, endPos) << endl;
-	  InputLatticeNode &node = GetInputLatticeNode(startPos, endPos);
-	  m_phraseDictionaryQueue.push_back(&node);
-	}
+    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
+      size_t endPos = startPos + phaseSize -1;
+      //cerr << startPos << "-" << endPos << "=" << GetPhrase(startPos, endPos) << endl;
+      InputLatticeNode &node = GetInputLatticeNode(startPos, endPos);
+      m_phraseDictionaryQueue.push_back(&node);
+    }
   }
 }
 

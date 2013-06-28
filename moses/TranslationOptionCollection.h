@@ -59,7 +59,7 @@ protected:
 
 public:
   InputLatticeNode()
-:m_range(NOT_FOUND, NOT_FOUND)
+    :m_range(NOT_FOUND, NOT_FOUND)
   {}
   InputLatticeNode(const Phrase &phrase, const WordsRange &range)
     :m_phrase(phrase)
