@@ -47,6 +47,13 @@ public:
                        , TranslationOptionCollection *toc
                        , bool adhereTableLimit
                        , const Phrase &src) const;
+  virtual void Process(const TranslationOption &inputPartialTranslOpt
+                       , const DecodeStep &decodeStep
+                       , PartialTranslOptColl &outputPartialTranslOptColl
+                       , TranslationOptionCollection *toc
+                       , bool adhereTableLimit
+                       , const Phrase &src
+                       , const TargetPhraseCollection *phraseColl) const;
 
 
   /*! initialize list of partial translation options by applying the first translation step

@@ -168,7 +168,7 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
 
       for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
 
-        const DecodeStep &decodeStep = **iterStep;
+        const DecodeStep *decodeStep = *iterStep;
         PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
         // go thru each intermediate trans opt just created
@@ -177,8 +177,8 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
         for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
           TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 
-          decodeStep.Process(inputPartialTranslOpt
-                             , decodeStep
+          decodeStep->Process(inputPartialTranslOpt
+                             , *decodeStep
                              , *newPtoc
                              , this
                              , adhereTableLimit
