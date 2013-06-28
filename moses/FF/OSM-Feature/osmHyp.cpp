@@ -34,8 +34,8 @@ int osmState::Compare(const FFState& otherBase) const
     return (E < other.E) ? -1 : +1;
   if (gap != other.gap)
     return (gap < other.gap) ? -1 : +1;
-  if (history != other.history)
-    return (history < other.history) ? -1 : +1;
+  //if (history != other.history)
+  //  return (history < other.history) ? -1 : +1;
 
   if (lmState.length < other.lmState.length) return -1;
   
@@ -96,7 +96,7 @@ osmState * osmHypothesis :: saveState()
 
 	osmState * statePtr = new osmState(lmState);
 	statePtr->saveState(j,E,history,gap);
-	statePtr->saveDelHistory(operations);
+	// statePtr->saveDelHistory(operations);
 	return statePtr;
 }
 
@@ -146,22 +146,21 @@ void osmHypothesis :: removeReorderingOperations()
 void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 {
 	
-	cout<<"SRILM "<<opProb<<endl;
+	//cout<<"SRILM "<<opProb<<endl;
 
-	double nadir = 0;
+	opProb = 0;
 	State currState = lmState;
 	State temp;	
 
 	for (int i = 0; i<operations.size(); i++)
 	{
 		temp = currState;
-		nadir += ptrOp.Score(temp,ptrOp.GetVocabulary().Index(operations[i]),currState);
+		opProb += ptrOp.Score(temp,ptrOp.GetVocabulary().Index(operations[i]),currState);
 	}
 
 	lmState = currState;
 
-	cout<<"Ken LM "<<nadir<<endl;
-
+	//cout<<"Ken LM "<<opProb<<endl;
 	
 }
 

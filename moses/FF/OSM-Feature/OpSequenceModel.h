@@ -24,7 +24,6 @@ public:
 	Api * ptrOp;
 	int lmOrder;
 	float unkOpProb;
-	std::string myLine;
 
 	OpSequenceModel(const std::string &line);
 

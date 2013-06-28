@@ -13,37 +13,41 @@ namespace Moses
 OpSequenceModel::OpSequenceModel(const std::string &line)
 :StatefulFeatureFunction("OpSequenceModel", 5, line )
 {
-  //myLine = line; 
+
   ReadParameters();
 }
 
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
 
-    vector <int> numbers;
-    int nonWordFlag = 0;
     string unkOp = "_TRANS_SLF_";
+
+	
+	//* 
+
+	// Code for SRILM	
+
+	vector <int> numbers;
+        int nonWordFlag = 0;
+  
 	ptrOp = new Api;
 	ptrOp -> read_lm(lmFile,lmOrder);
 	numbers.push_back(ptrOp->getLMID(const_cast <char *> (unkOp.c_str())));
 	unkOpProb = ptrOp->contextProbN(numbers,nonWordFlag);
+	
+	//*/
 
 	// Code to load KenLM
 
 	OSM = new Model(m_lmPath.c_str());
-
+	
 	/*
-	vector<string> toks = Tokenize(myLine);	
-	myLine = "factor=0";
-
-	for (size_t i = 3; i < toks.size(); ++i) 
-	{
-		myLine += " ";
-		myLine += toks[i];
-	}
-
-	cout<<myLine<<endl;
+	State startState = OSM->EmptyContextState();
+	State endState;
+	unkOpProb = OSM->Score(startState,OSM->GetVocabulary().Index(unkOp),endState);
 	*/
+
+	
 
 }
 
@@ -164,7 +168,7 @@ FFState* OpSequenceModel::Evaluate(
   obj.constructCepts(alignments,startIndex,endIndex,target.GetSize());
   obj.setPhrases(mySourcePhrase , myTargetPhrase);
   obj.computeOSMFeature(startIndex,myBitmap);
-  obj.calculateOSMProb(*ptrOp, lmOrder);	
+  //obj.calculateOSMProb(*ptrOp, lmOrder);	
   obj.calculateOSMProb(*OSM);
   obj.populateScores(scores);
 
