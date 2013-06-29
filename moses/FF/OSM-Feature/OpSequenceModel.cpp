@@ -13,7 +13,6 @@ namespace Moses
 OpSequenceModel::OpSequenceModel(const std::string &line)
 :StatefulFeatureFunction("OpSequenceModel", 5, line )
 {
-
   ReadParameters();
 }
 

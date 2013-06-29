@@ -177,12 +177,25 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
         for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
           TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 
-          decodeStep->Process(inputPartialTranslOpt
+          if (const DecodeStepTranslation *translateStep = dynamic_cast<const DecodeStepTranslation*>(decodeStep) ) {
+            const PhraseDictionary &phraseDictionary = *translateStep->GetPhraseDictionaryFeature();
+            const TargetPhraseCollection *targetPhrases = inputLatticeNode.GetTargetPhrases(phraseDictionary);
+            translateStep->Process(inputPartialTranslOpt
+                             , *decodeStep
+                             , *newPtoc
+                             , this
+                             , adhereTableLimit
+                             , *sourcePhrase
+                             , targetPhrases);
+          }
+          else {
+            decodeStep->Process(inputPartialTranslOpt
                              , *decodeStep
                              , *newPtoc
                              , this
                              , adhereTableLimit
                              , *sourcePhrase);
+          }
         }
 
         // last but 1 partial trans not required anymore
