@@ -63,7 +63,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/PhrasePenalty.h"
 
+#ifdef LM_SRI
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
+#endif
 
 #include "LM/Ken.h"
 #ifdef LM_IRST
@@ -695,9 +697,13 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     } else if (feature == "OpSequenceModel") {
+#ifdef HAVE_SRI
 	  OpSequenceModel* model = new OpSequenceModel(line);
 	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
 	  SetWeights(model, weights);
+#else
+      UTIL_THROW(util::Exception, "TODO(nadir): Fix OSM to work without SRILM");
+#endif
     } else if (feature == "PhrasePenalty") {
       PhrasePenalty* model = new PhrasePenalty(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
