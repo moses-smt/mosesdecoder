@@ -34,8 +34,8 @@ int osmState::Compare(const FFState& otherBase) const
     return (E < other.E) ? -1 : +1;
   if (gap != other.gap)
     return (gap < other.gap) ? -1 : +1;
-  if (history != other.history)
-    return (history < other.history) ? -1 : +1;
+  //if (history != other.history)
+  //  return (history < other.history) ? -1 : +1;
 
   if (lmState.length < other.lmState.length) return -1;
   
@@ -96,7 +96,7 @@ osmState * osmHypothesis :: saveState()
 
 	osmState * statePtr = new osmState(lmState);
 	statePtr->saveState(j,E,history,gap);
-	statePtr->saveDelHistory(operations);
+	// statePtr->saveDelHistory(operations);
 	return statePtr;
 }
 
@@ -148,7 +148,7 @@ void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 	
 	//cout<<"SRILM "<<opProb<<endl;
 
-	double opProb = 0;
+	opProb = 0;
 	State currState = lmState;
 	State temp;	
 
@@ -161,7 +161,6 @@ void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 	lmState = currState;
 
 	//cout<<"Ken LM "<<opProb<<endl;
-
 	
 }
 
