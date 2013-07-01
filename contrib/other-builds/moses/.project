@@ -472,6 +472,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/InputFileStream.h</locationURI>
 		</link>
 		<link>
+			<name>InputLatticeNode.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/InputLatticeNode.cpp</locationURI>
+		</link>
+		<link>
+			<name>InputLatticeNode.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/InputLatticeNode.h</locationURI>
+		</link>
+		<link>
 			<name>InputType.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/InputType.cpp</locationURI>
