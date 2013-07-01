@@ -17,8 +17,7 @@ class OpSequenceModel : public StatefulFeatureFunction
 {
 public:
 
-	//LM *LanguageModel;
-
+	
 	lm::ngram::Model * OSM;
 	
 	Api * ptrOp;
