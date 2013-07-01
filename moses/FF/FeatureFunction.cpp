@@ -102,8 +102,8 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
 void FeatureFunction::ReadParameters()
 {
   while (!m_args.empty()) {
-	const vector<string> &args = m_args[0];
-	SetParameter(args[0], args[1]);
+    const vector<string> &args = m_args[0];
+    SetParameter(args[0], args[1]);
 
     m_args.erase(m_args.begin());
   }

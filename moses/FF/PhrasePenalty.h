@@ -11,13 +11,13 @@ public:
   PhrasePenalty(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
-	return true;
+    return true;
   }
 
   virtual void Evaluate(const Phrase &source
-						, const TargetPhrase &targetPhrase
-						, ScoreComponentCollection &scoreBreakdown
-						, ScoreComponentCollection &estimatedFutureScore) const;
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const;
 };
 
 } //namespace
