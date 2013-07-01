@@ -6,7 +6,6 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/Manager.h"
 #include "moses/FF/OSM-Feature/osmHyp.h"
-#include "moses/FF/OSM-Feature/SRILM-API.h"
 #include "lm/model.hh"
 
 
@@ -20,7 +19,6 @@ public:
 	
 	lm::ngram::Model * OSM;
 	
-	Api * ptrOp;
 	int lmOrder;
 	float unkOpProb;
 
