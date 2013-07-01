@@ -62,7 +62,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/PhrasePenalty.h"
-
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 
 #include "LM/Ken.h"

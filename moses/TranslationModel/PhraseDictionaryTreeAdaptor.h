@@ -7,9 +7,13 @@
 #include "moses/TargetPhraseCollection.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "util/check.hh"
-
-#include <boost/thread/tss.hpp>
 #include <vector>
+
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#else
+#include <boost/scoped_ptr.hpp>
+#endif
 
 namespace Moses
 {
@@ -26,7 +30,11 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;
 
+#ifdef WITH_THREADS
   boost::thread_specific_ptr<PDTAimp> m_implementation;
+#else
+  boost::scoped_ptr<PDTAimp> m_implementation;
+#endif
 
   friend class PDTAimp;
   PhraseDictionaryTreeAdaptor();

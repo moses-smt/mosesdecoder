@@ -1,9 +1,8 @@
 #pragma once
 
-# include "SRILM-API.h"
-#include "lm/model.hh"
 # include "moses/FF/FFState.h"
 # include "moses/Manager.h"
+#include "lm/model.hh"
 # include <set>
 # include <map>
 # include <string>
@@ -17,23 +16,19 @@ class osmState : public FFState
 public:
   osmState(const lm::ngram::State & val);
   int Compare(const FFState& other) const;
-  void saveState(int jVal, int eVal, std::vector <std::string> & hist , std::map <int , std::string> & gapVal);
+  void saveState(int jVal, int eVal, std::map <int , std::string> & gapVal);
   int getJ()const {return j;}
   int getE()const {return E;}
   std::map <int , std::string> getGap() const { return gap;}
-  std::vector <std::string> getHistory()const {return history;}
 
   lm::ngram::State getLMState() const {return lmState;}
 
   void print() const;
   std::string getName() const;
-  void saveDelHistory(std::vector <std::string> & histVal){delHistory = histVal;}
-
+  
 protected:
   int j, E;
   std::map <int,std::string> gap;
-  std::vector <std::string> history;
-  std::vector <std::string> delHistory;
   lm::ngram::State lmState;
 };
 
@@ -42,7 +37,7 @@ class osmHypothesis
 
 	private:
 	
-	std::vector <std::string> history;
+	
 	std::vector <std::string> operations;	// List of operations required to generated this hyp ...
 	std::map <int,std::string> gap;	// Maintains gap history ...
 	int j;	// Position after the last source word generated ...
@@ -76,7 +71,6 @@ class osmHypothesis
 	~osmHypothesis(){};
 	void generateOperations(int & startIndex, int j1 , int contFlag , WordsBitmap & coverageVector , std::string english , std::string german , std::set <int> & targetNullWords , std::vector <std::string> & currF);
 	void generateDeleteOperations(std::string english, int currTargetIndex, std::set <int> doneTargetIndexes);
-	void calculateOSMProb(Api & opPtr , int order);
 	void calculateOSMProb(lm::ngram::Model & ptrOp);
 	void computeOSMFeature(int startIndex , WordsBitmap & coverageVector);
 	void constructCepts(std::vector <int> & align , int startIndex , int endIndex, int targetPhraseLength);

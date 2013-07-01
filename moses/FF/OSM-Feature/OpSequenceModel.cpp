@@ -22,7 +22,7 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
     string unkOp = "_TRANS_SLF_";
 
 	
-	//* 
+	/* 
 
 	// Code for SRILM	
 
@@ -34,20 +34,14 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 	numbers.push_back(ptrOp->getLMID(const_cast <char *> (unkOp.c_str())));
 	unkOpProb = ptrOp->contextProbN(numbers,nonWordFlag);
 	
-	//*/
+	*/
 
 	// Code to load KenLM
 
 	OSM = new Model(m_lmPath.c_str());
-	
-	/*
-	State startState = OSM->EmptyContextState();
+	State startState = OSM->BeginSentenceState();
 	State endState;
 	unkOpProb = OSM->Score(startState,OSM->GetVocabulary().Index(unkOp),endState);
-	*/
-
-	
-
 }
 
 
@@ -166,8 +160,7 @@ FFState* OpSequenceModel::Evaluate(
   obj.setState(prev_state);
   obj.constructCepts(alignments,startIndex,endIndex,target.GetSize());
   obj.setPhrases(mySourcePhrase , myTargetPhrase);
-  obj.computeOSMFeature(startIndex,myBitmap);
-  //obj.calculateOSMProb(*ptrOp, lmOrder);	
+  obj.computeOSMFeature(startIndex,myBitmap);	
   obj.calculateOSMProb(*OSM);
   obj.populateScores(scores);
 

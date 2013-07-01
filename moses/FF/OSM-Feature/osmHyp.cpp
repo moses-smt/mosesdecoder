@@ -1,4 +1,4 @@
-#include "osmHyp.h"
+ #include "osmHyp.h"
 #include <sstream>
 
 using namespace std;
@@ -10,17 +10,14 @@ osmState::osmState(const State & val)
 :j(0)
 ,E(0)
 {
-  history.push_back("<s>");
   lmState = val;
   
 }
 
-void osmState::saveState(int jVal, int eVal, vector <string> & histVal , map <int , string> & gapVal)
+void osmState::saveState(int jVal, int eVal, map <int , string> & gapVal)
 {
-	history.clear();
 	gap.clear();
 	gap = gapVal;
-	history = histVal;
 	j = jVal;
 	E = eVal;
 }
@@ -34,8 +31,6 @@ int osmState::Compare(const FFState& otherBase) const
     return (E < other.E) ? -1 : +1;
   if (gap != other.gap)
     return (gap < other.gap) ? -1 : +1;
-  //if (history != other.history)
-  //  return (history < other.history) ? -1 : +1;
 
   if (lmState.length < other.lmState.length) return -1;
   
@@ -44,20 +39,10 @@ int osmState::Compare(const FFState& otherBase) const
   return 0;
 }
 
-void osmState :: print() const
-{
-
-	for (int i = 0; i< delHistory.size(); i++)
-		{
-			cerr<<delHistory[i]<<" ";
-		}
-
-}
 
 std::string osmState :: getName() const
 {
 
-		print();
 		return "done";
 }
 
@@ -73,7 +58,6 @@ osmHypothesis :: osmHypothesis()
 	gapCount = 0;
 	j = 0;
 	E = 0;
-	history.clear();
 	gap.clear();
 }
 
@@ -85,7 +69,6 @@ void osmHypothesis :: setState(const FFState* prev_state)
 
 		j = static_cast <const osmState *> (prev_state)->getJ();
 		E =  static_cast <const osmState *> (prev_state)->getE();
-		history = static_cast <const osmState *> (prev_state)->getHistory();
 		gap = static_cast <const osmState *> (prev_state)->getGap();
 		lmState = static_cast <const osmState *> (prev_state)->getLMState();
 	}
@@ -95,8 +78,7 @@ osmState * osmHypothesis :: saveState()
 {
 
 	osmState * statePtr = new osmState(lmState);
-	statePtr->saveState(j,E,history,gap);
-	// statePtr->saveDelHistory(operations);
+	statePtr->saveState(j,E,gap);
 	return statePtr;
 }
 
@@ -146,8 +128,7 @@ void osmHypothesis :: removeReorderingOperations()
 void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 {
 	
-	//cout<<"SRILM "<<opProb<<endl;
-
+	
 	opProb = 0;
 	State currState = lmState;
 	State temp;	
@@ -160,55 +141,7 @@ void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 
 	lmState = currState;
 
-	//cout<<"Ken LM "<<opProb<<endl;
 	
-}
-
-void osmHypothesis :: calculateOSMProb(Api & ptrOp , int order)
-{
-	
-	opProb = 0;
-	vector <int> numbers;
-	vector <int> context;
-	int nonWordFlag  = 0;
-	double temp;
-
-	for (int i=0; i< operations.size(); i++)
-		numbers.push_back(ptrOp.getLMID(const_cast <char *> (operations[i].c_str())));
-
-	// cerr<<"History Of Operations "<<history.size()<<endl;
-
-	for (int i=0; i< history.size(); i++)
-	{
-		context.push_back(ptrOp.getLMID(const_cast <char *> (history[i].c_str())));
-		//cerr<<history[i]<<" ";
-	}
-	//cerr<<endl;
-
-	for (int i = 0; i<operations.size(); i++)
-	{
-		//cerr<<operations[i]<<endl;
-		context.push_back(numbers[i]);
-		history.push_back(operations[i]);
-		//cout<<"Context Size "<<context.size()<<endl;
-		if (context.size() > order)
-		{
-			context.erase(context.begin());
-			history.erase(history.begin());
-		}
-		
-		temp = ptrOp.contextProbN(context,nonWordFlag);		   
-		opProb = opProb + temp;
-		
-		 //cout<<temp<<" "<<opProb<<endl;
-	
-	}
-
-	if (history.size() > order-1)
-	{
-	      history.erase(history.begin());
-	}
-
 }
 
 

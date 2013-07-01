@@ -1617,16 +1617,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/OpSequenceModel.h</locationURI>
 		</link>
 		<link>
-			<name>FF/OSM-Feature/SRILM-API.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/SRILM-API.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/OSM-Feature/SRILM-API.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/SRILM-API.h</locationURI>
-		</link>
-		<link>
 			<name>FF/OSM-Feature/osmHyp.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.cpp</locationURI>
