@@ -108,6 +108,10 @@ project : default-build
   <link>static
   ;
 
+#Apparently OS X likes to link against iconv for fgetsUTF8.
+lib iconv ;
+requirements += <os>DARWIN:<library>iconv ;
+
 project : requirements 
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
