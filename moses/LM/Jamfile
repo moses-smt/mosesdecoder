@@ -51,12 +51,13 @@ if $(with-srilm) {
     sri-arch ?= [ _shell $(with-srilm)/sbin/machine-type ] ;
     sri-lib = <search>$(with-srilm)/lib/$(sri-arch) <search>$(with-srilm)/lib <search>$(with-srilm)/lib64 <search>$(with-srilm)/flm/obj/$(sri-arch) ;
 
-    lib flm : : $(sri-lib) ;
-    lib misc : flm : $(sri-lib) ;
-    lib dstruct : misc flm : $(sri-lib) ;
-    lib oolm : dstruct misc flm : $(sri-lib) ;
+    lib iconv : : $(sri-lib) ;
+    lib flm : iconv : $(sri-lib) ;
+    lib misc : flm iconv : $(sri-lib) ;
+    lib dstruct : misc flm iconv : $(sri-lib) ;
+    lib oolm : dstruct misc flm iconv : $(sri-lib) ;
 
-    alias sri-libs : oolm dstruct misc flm ;
+    alias sri-libs : oolm dstruct misc flm iconv ;
   }
 
   obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
