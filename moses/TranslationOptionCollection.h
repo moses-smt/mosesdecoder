@@ -53,16 +53,19 @@ This is for both sentence input, and confusion network/lattices
 class InputLatticeNode
 {
 protected:
+  const InputLatticeNode *m_prevNode;
   Phrase m_phrase;
   WordsRange m_range;
-  std::map<const PhraseDictionary*, const TargetPhraseCollection *> m_targetPhrases;
+  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, void*> > m_targetPhrases;
 
 public:
   InputLatticeNode()
-    :m_range(NOT_FOUND, NOT_FOUND)
+    : m_prevNode(NULL)
+    , m_range(NOT_FOUND, NOT_FOUND)
   {}
-  InputLatticeNode(const Phrase &phrase, const WordsRange &range)
-    :m_phrase(phrase)
+  InputLatticeNode(const Phrase &phrase, const WordsRange &range, const InputLatticeNode *prevNode)
+    :m_prevNode(prevNode)
+    ,m_phrase(phrase)
     ,m_range(range) {
   }
 
@@ -73,8 +76,11 @@ public:
     return m_range;
   }
 
-  void SetTargetPhrases(const PhraseDictionary &phraseDictionary, const TargetPhraseCollection *targetPhrases) {
-    m_targetPhrases[&phraseDictionary] = targetPhrases;
+  void SetTargetPhrases(const PhraseDictionary &phraseDictionary
+		  	  	  	  , const TargetPhraseCollection *targetPhrases
+		  	  	  	  , void *ptNode) {
+	  std::pair<const TargetPhraseCollection*, void*> value(targetPhrases, ptNode);
+    m_targetPhrases[&phraseDictionary] = value;
   }
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
 

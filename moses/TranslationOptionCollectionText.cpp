@@ -42,9 +42,16 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
     for (size_t endPos = startPos; endPos < size; ++endPos) {
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
       WordsRange range(startPos, endPos);
-      InputLatticeNode node(subphrase, range);
 
-      vec.push_back(node);
+      if (range.GetNumWordsCovered() == 1) {
+        InputLatticeNode node(subphrase, range, NULL);
+        vec.push_back(node);
+      }
+      else {
+    	  const InputLatticeNode prevNode = GetInputLatticeNode(startPos, endPos - 1);
+          InputLatticeNode node(subphrase, range, &prevNode);
+          vec.push_back(node);
+      }
     }
   }
 

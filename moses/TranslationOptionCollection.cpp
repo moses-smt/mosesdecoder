@@ -41,10 +41,10 @@ namespace Moses
 
 const TargetPhraseCollection *InputLatticeNode::GetTargetPhrases(const PhraseDictionary &phraseDictionary) const
 {
-  std::map<const PhraseDictionary*, const TargetPhraseCollection *>::const_iterator iter;
+  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, void*> >::const_iterator iter;
   iter = m_targetPhrases.find(&phraseDictionary);
   CHECK(iter != m_targetPhrases.end());
-  return iter->second;
+  return iter->second.first;
 }
 
 /** helper for pruning */
@@ -615,7 +615,7 @@ void TranslationOptionCollection::SetTargetPhraseFromPtMatrix(const PhraseDictio
     if (doIt) {
       const Phrase &phrase = node.GetPhrase();
       const TargetPhraseCollection *targetPhrases = phraseDictionary.GetTargetPhraseCollection(phrase);
-      node.SetTargetPhrases(phraseDictionary, targetPhrases);
+      node.SetTargetPhrases(phraseDictionary, targetPhrases, NULL);
     }
   }
 }
