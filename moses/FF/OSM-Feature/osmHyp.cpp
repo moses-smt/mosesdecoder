@@ -128,7 +128,6 @@ void osmHypothesis :: removeReorderingOperations()
 void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 {
 	
-	
 	opProb = 0;
 	State currState = lmState;
 	State temp;	
@@ -141,7 +140,7 @@ void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 
 	lmState = currState;
 
-	
+	//print();
 }
 
 
@@ -284,7 +283,6 @@ void osmHypothesis :: generateOperations(int & startIndex , int j1 , int contFla
 		generateOperations(startIndex, j1, 2 , coverageVector , english , german , targetNullWords , currF);
 	}
 
-	//print();
 }
 
 void osmHypothesis :: print()
