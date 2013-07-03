@@ -28,17 +28,7 @@ namespace Moses
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
   :PhraseDictionary("PhraseDictionaryMultiModel", line)
 {
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 
   if (m_mode != "interpolate") {
     ostringstream msg;
@@ -56,23 +46,12 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &description, const std::string &line)
   :PhraseDictionary(description, line)
 {
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-
   if (description == "PhraseDictionaryMultiModelCounts") {
     CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*4 == m_multimodelweights.size());
   }
 }
 
-bool PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std::string& value)
+void PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "mode") {
     m_mode = value;
@@ -82,9 +61,8 @@ bool PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std:
   } else if (key == "lambda") {
     m_multimodelweights = Tokenize<float>(value, ",");
   } else {
-    return PhraseDictionary::SetParameter(key, value);
+    PhraseDictionary::SetParameter(key, value);
   }
-  return true;
 }
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()

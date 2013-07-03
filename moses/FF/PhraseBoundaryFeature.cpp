@@ -19,31 +19,18 @@ PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
   : StatefulFeatureFunction("PhraseBoundaryFeature", 0, line)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
-
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
-
+  ReadParameters();
 }
 
-bool PhraseBoundaryFeature::SetParameter(const std::string& key, const std::string& value)
+void PhraseBoundaryFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source") {
     m_sourceFactors = Tokenize<FactorType>(value, ",");
   } else if (key == "target") {
     m_targetFactors = Tokenize<FactorType>(value, ",");
   } else {
-    return StatefulFeatureFunction::SetParameter(key, value);
+    StatefulFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &) const

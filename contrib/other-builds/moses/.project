@@ -1122,6 +1122,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/OSM-Feature</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>FF/PhraseBasedFeatureContext.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.cpp</locationURI>
@@ -1165,6 +1170,16 @@
 			<name>FF/PhrasePairFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePairFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/PhrasePenalty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhrasePenalty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
@@ -1557,6 +1572,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/WordCoocTable.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/WordCoocTable.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/WordCoocTable.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/WordCoocTable.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/fuzzy-match</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1580,6 +1605,26 @@
 			<name>bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/OpSequenceModel.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/OpSequenceModel.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/OpSequenceModel.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/OpSequenceModel.h</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/osmHyp.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/OSM-Feature/osmHyp.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>

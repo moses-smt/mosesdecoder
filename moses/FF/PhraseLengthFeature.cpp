@@ -12,7 +12,7 @@ using namespace std;
 PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
   :StatelessFeatureFunction("PhraseLengthFeature", 0, line)
 {
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 }
 
 void PhraseLengthFeature::Evaluate(const Phrase &source

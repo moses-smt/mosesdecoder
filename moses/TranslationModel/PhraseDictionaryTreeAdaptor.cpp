@@ -29,7 +29,7 @@ PhraseDictionaryTreeAdaptor::
 PhraseDictionaryTreeAdaptor(const std::string &line)
   : PhraseDictionary("PhraseDictionaryBinary", line)
 {
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 }
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()

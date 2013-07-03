@@ -3,8 +3,6 @@
 
 #include "util/string_piece.hh"
 
-#include <set>
-
 #include <boost/functional/hash.hpp>
 #include <boost/version.hpp>
 

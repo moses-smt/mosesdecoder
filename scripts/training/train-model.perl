@@ -1919,6 +1919,7 @@ sub create_ini {
      $phrase_table_impl_name = "PhraseDictionaryBinary" if $phrase_table_impl==1;
      $phrase_table_impl_name = "PhraseDictionaryOnDisk" if $phrase_table_impl==2;
      $phrase_table_impl_name = "PhraseDictionaryMemory" if $phrase_table_impl==6;
+     $phrase_table_impl_name = "PhraseDictionaryALSuffixArray" if $phrase_table_impl==10;
 
      #table limit
      my $table_limit = 0;

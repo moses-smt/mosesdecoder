@@ -39,17 +39,6 @@ using namespace std;
 
 namespace Moses
 {
-InputLatticeNode::InputLatticeNode(const Phrase &phrase, const WordsRange &range)
-:m_phrase(phrase)
-,m_range(range)
-{
-}
-
-void InputLatticeNode::AddNext(const InputLatticeNode &next)
-{
-  m_next.push_back(&next);
-}
-
 /** helper for pruning */
 bool CompareTranslationOption(const TranslationOption *a, const TranslationOption *b)
 {
@@ -245,6 +234,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
     // add to dictionary
 
     Word &targetWord = targetPhrase.AddWord();
+    targetWord.SetIsOOV(true);
 
     for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
       FactorType factorType = static_cast<FactorType>(currFactor);
@@ -373,7 +363,6 @@ void TranslationOptionCollection::CreateTranslationOptions()
   // in the phraseDictionary (which is the- possibly filtered-- phrase
   // table loaded on initialization), generate TranslationOption objects
   // for all phrases
-  const StaticData &staticData = StaticData::Instance();
 
   // there may be multiple decoding graphs (factorizations of decoding)
   const vector <DecodeGraph*> &decodeGraphList = StaticData::Instance().GetDecodeGraphs();
@@ -384,13 +373,10 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // loop over all decoding graphs, each generates translation options
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
-    if (staticData.IsDecodingGraphIgnored( graphInd )) {
-      std::cerr << "ignoring decoding path " << graphInd << std::endl;
-      continue;
-    }
     if (decodeGraphList.size() > 1) {
       VERBOSE(3,"Creating translation options from decoding graph " << graphInd << endl);
     }
+
     const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
     // generate phrases that start at startPos ...
     for (size_t startPos = 0 ; startPos < size; startPos++) {
@@ -401,12 +387,10 @@ void TranslationOptionCollection::CreateTranslationOptions()
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
         if (graphInd > 0 && // only skip subsequent graphs
-            decodeGraphBackoff[graphInd] != 0 && // limited use of backoff specified
-            (endPos-startPos+1 > decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
-             m_collection[startPos][endPos-startPos].size() > 0)) { // already covered
-          VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]");
-          VERBOSE(3,", length limit: " << decodeGraphBackoff[graphInd]);
-          VERBOSE(3,", found so far: " << m_collection[startPos][endPos-startPos].size() << endl);
+            decodeGraphBackoff[graphInd] != 0 && // use of backoff specified
+            (endPos-startPos+1 >= decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
+             m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
+          VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options
           continue;
         }
@@ -472,6 +456,117 @@ void TranslationOptionCollection::Sort()
 }
 
 
+/** create translation options that exactly cover a specific input span.
+ * Called by CreateTranslationOptions() and ProcessUnknownWord()
+ * \param decodeGraph list of decoding steps
+ * \param factorCollection input sentence with all factors
+ * \param startPos first position in input sentence
+ * \param lastPos last position in input sentence
+ * \param adhereTableLimit whether phrase & generation table limits are adhered to
+ */
+void TranslationOptionCollection::CreateTranslationOptionsForRange(
+  const DecodeGraph &decodeGraph
+  , size_t startPos
+  , size_t endPos
+  , bool adhereTableLimit
+  , size_t graphInd)
+{
+  if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
+    Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
+
+    // consult persistent (cross-sentence) cache for stored translation options
+    bool skipTransOptCreation = false
+                                , useCache = StaticData::Instance().GetUseTransOptCache();
+    if (useCache) {
+      const WordsRange wordsRange(startPos, endPos);
+      sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
+
+      const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeGraph, *sourcePhrase);
+      // is phrase in cache?
+      if (transOptList != NULL) {
+        skipTransOptCreation = true;
+        TranslationOptionList::const_iterator iterTransOpt;
+        for (iterTransOpt = transOptList->begin() ; iterTransOpt != transOptList->end() ; ++iterTransOpt) {
+          TranslationOption *transOpt = new TranslationOption(**iterTransOpt, wordsRange);
+          Add(transOpt);
+        }
+      }
+    } // useCache
+
+    if (!skipTransOptCreation) {
+      // partial trans opt stored in here
+      PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+      size_t totalEarlyPruned = 0;
+
+      // initial translation step
+      list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
+      const DecodeStep &decodeStep = **iterStep;
+
+      static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
+      (m_source, *oldPtoc
+       , startPos, endPos, adhereTableLimit );
+
+      // do rest of decode steps
+      int indexStep = 0;
+
+      for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
+
+        const DecodeStep &decodeStep = **iterStep;
+        PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
+
+        // go thru each intermediate trans opt just created
+        const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
+        vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
+        for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
+          TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
+
+          decodeStep.Process(inputPartialTranslOpt
+                             , decodeStep
+                             , *newPtoc
+                             , this
+                             , adhereTableLimit
+                             , *sourcePhrase);
+        }
+
+        // last but 1 partial trans not required anymore
+        totalEarlyPruned += newPtoc->GetPrunedCount();
+        delete oldPtoc;
+        oldPtoc = newPtoc;
+
+        indexStep++;
+      } // for (++iterStep
+
+      // add to fully formed translation option list
+      PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
+      const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
+      vector<TranslationOption*>::const_iterator iterColl;
+      for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
+        TranslationOption *transOpt = *iterColl;
+        Add(transOpt);
+      }
+
+      // storing translation options in persistent cache (kept across sentences)
+      if (useCache) {
+        if (partTransOptList.size() > 0) {
+          TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
+          StaticData::Instance().AddTransOptListToCache(decodeGraph, *sourcePhrase, transOptList);
+        }
+      }
+
+      lastPartialTranslOptColl.DetachAll();
+      totalEarlyPruned += oldPtoc->GetPrunedCount();
+      delete oldPtoc;
+      // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
+    } // if (!skipTransOptCreation)
+
+    if (useCache)
+      delete sourcePhrase;
+  } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
+
+  if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
+    CreateXmlOptionsForRange(startPos, endPos);
+  }
+}
 
 /** Check if this range overlaps with any XML options. This doesn't need to be an exact match, only an overlap.
  * by default, we don't support XML options. subclasses need to override this function.

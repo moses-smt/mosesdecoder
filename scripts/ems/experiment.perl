@@ -2552,6 +2552,8 @@ sub define_tuningevaluation_filter {
 
     # get model, and whether suffix array is used. Determines the pt implementation.
     my $sa_exec_dir = &get("TRAINING:suffix-array");
+    my $sa_extractors = &get("GENERAL:sa_extractors");
+    $sa_extractors = 1 unless $sa_extractors;
 
     my ($ptImpl, $numFF);
     if ($hierarchical) {
@@ -2564,7 +2566,7 @@ sub define_tuningevaluation_filter {
 	}
     }
     else {
-	$ptImpl = 0; # phrase-based
+    	$ptImpl = 0; # phrase-based
     }
 
     # config file specified?
@@ -2589,11 +2591,14 @@ sub define_tuningevaluation_filter {
     # filter command
     if ($sa_exec_dir) {
 	# suffix array
-	$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
+	$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir $sa_extractors \n";
 	
 	my $escaped_filter_dir = $filter_dir;
 	$escaped_filter_dir =~ s/\//\\\\\//g;
 	$cmd .= "cat $config | sed s/10\\ 0\\ 0\\ 7.*/10\\ 0\\ 0\\ 7\\ $escaped_filter_dir/g > $filter_dir/moses.ini \n";
+    # kind of a hack -- the correct thing would be to make the generation of the config file ($filter_dir/moses.ini) 
+    # set the PhraseDictionaryALSuffixArray's path to the filtered directory rather than to the suffix array itself 
+    $cmd .= "sed -i 's%path=$phrase_translation_table%path=$filter_dir%' $filter_dir/moses.ini\n";
     }
     else {
 	# normal phrase table

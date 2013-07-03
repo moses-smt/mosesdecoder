@@ -21,18 +21,7 @@ TargetBigramFeature::TargetBigramFeature(const std::string &line)
   :StatefulFeatureFunction("TargetBigramFeature", 0, line)
 {
   std::cerr << "Initializing target bigram feature.." << std::endl;
-
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 
   FactorCollection& factorCollection = FactorCollection::Instance();
   const Factor* bosFactor =
@@ -41,7 +30,7 @@ TargetBigramFeature::TargetBigramFeature(const std::string &line)
 
 }
 
-bool TargetBigramFeature::SetParameter(const std::string& key, const std::string& value)
+void TargetBigramFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
@@ -50,7 +39,6 @@ bool TargetBigramFeature::SetParameter(const std::string& key, const std::string
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 void TargetBigramFeature::Load()

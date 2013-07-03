@@ -81,7 +81,7 @@ public:
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
-  bool SetParameter(const std::string& key, const std::string& value);
+  void SetParameter(const std::string& key, const std::string& value);
 
   const std::vector<float>* GetTemporaryMultiModelWeightsVector() const;
   void SetTemporaryMultiModelWeightsVector(std::vector<float> weights);

@@ -15,11 +15,7 @@ class WordsRange;
 class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-  UnknownWordPenaltyProducer(const std::string &line)
-    : StatelessFeatureFunction("UnknownWordPenalty",1, line) {
-    m_tuneable = false;
-    CHECK(m_args.size() == 0);
-  }
+  UnknownWordPenaltyProducer(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

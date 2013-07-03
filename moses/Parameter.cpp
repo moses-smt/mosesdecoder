@@ -275,13 +275,15 @@ bool Parameter::LoadParam(int argc, char* argv[])
   }
 
   // overwrite parameters with values from switches
-  for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) {
+  for(PARAM_STRING::const_iterator iterParam = m_description.begin();
+      iterParam != m_description.end(); iterParam++) {
     const string paramName = iterParam->first;
     OverwriteParam("-" + paramName, paramName, argc, argv);
   }
 
   // ... also shortcuts
-  for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin(); iterParam != m_abbreviation.end(); iterParam++) {
+  for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin();
+      iterParam != m_abbreviation.end(); iterParam++) {
     const string paramName = iterParam->first;
     const string paramShortName = iterParam->second;
     OverwriteParam("-" + paramShortName, paramName, argc, argv);
@@ -294,7 +296,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
     verbose = Scan<int>(m_setting["verbose"][0]);
   if (verbose >= 1) { // only if verbose
     TRACE_ERR( "Defined parameters (per moses.ini or switch):" << endl);
-    for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; iterParam != m_setting.end(); iterParam++) {
+    for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ;
+        iterParam != m_setting.end(); iterParam++) {
       TRACE_ERR( "\t" << iterParam->first << ": ");
       for ( size_t i = 0; i < iterParam->second.size(); i++ )
         TRACE_ERR( iterParam->second[i] << " ");
@@ -303,7 +306,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
   }
 
   // convert old weights args to new format
-  if (!isParamSpecified("feature"))
+  // WHAT IS GOING ON HERE??? - UG
+  if (!isParamSpecified("feature")) // UG
     ConvertWeightArgs();
   CreateWeightsMap();
   WeightOverwrite();
@@ -331,11 +335,11 @@ std::vector<float> &Parameter::GetWeights(const std::string &name)
 {
   std::vector<float> &ret = m_weights[name];
 
-  cerr << "WEIGHT " << name << "=";
-  for (size_t i = 0; i < ret.size(); ++i) {
-    cerr << ret[i] << ",";
-  }
-  cerr << endl;
+  // cerr << "WEIGHT " << name << "=";
+  // for (size_t i = 0; i < ret.size(); ++i) {
+  //   cerr << ret[i] << ",";
+  // }
+  // cerr << endl;
   return ret;
 }
 
@@ -357,7 +361,10 @@ void Parameter::SetWeight(const std::string &name, size_t ind, const vector<floa
   newWeights.push_back(line);
 }
 
-void Parameter::AddWeight(const std::string &name, size_t ind, const std::vector<float> &weights)
+void
+Parameter::
+AddWeight(const std::string &name, size_t ind,
+          const std::vector<float> &weights)
 {
   PARAM_VEC &newWeights = m_setting["weight"];
 
@@ -478,6 +485,12 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       case Compact:
         ptType = "PhraseDictionaryCompact";
         break;
+      case SuffixArray:
+        ptType = "PhraseDictionarySuffixArray";
+        break;
+      case DSuffixArray:
+        ptType = "PhraseDictionaryDynSuffixArray";
+        break;
       default:
         break;
       }
@@ -502,6 +515,9 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
         ++currOldInd;
       }
+
+      // cerr << weights.size() << " PHRASE TABLE WEIGHTS "
+      // << __FILE__ << ":" << __LINE__ << endl;
       AddWeight(ptType, ptInd, weights);
 
       // actual pt
@@ -527,7 +543,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       ptLine << "num-features=" << numScoreComponent << " ";
       ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
 
-      if (implementation == SuffixArray) {
+      if (implementation == SuffixArray || implementation == DSuffixArray) {
         ptLine << "target-path=" << token[5] << " ";
         ptLine << "alignment-path=" << token[6] << " ";
       }

@@ -61,6 +61,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
+#include "moses/FF/PhrasePenalty.h"
+#include "moses/FF/OSM-Feature/OpSequenceModel.h"
 
 #include "LM/Ken.h"
 #ifdef LM_IRST
@@ -691,6 +693,14 @@ bool StaticData::LoadData(Parameter *parameter)
       PhraseDictionaryDynSuffixArray* model = new PhraseDictionaryDynSuffixArray(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
+    } else if (feature == "OpSequenceModel") {
+	  OpSequenceModel* model = new OpSequenceModel(line);
+	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+	  SetWeights(model, weights);
+    } else if (feature == "PhrasePenalty") {
+      PhrasePenalty* model = new PhrasePenalty(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
     }
 
 #ifdef HAVE_SYNLM
@@ -938,7 +948,7 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGra
   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
 #endif
   std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
-    = m_transOptCache.find(key);
+  = m_transOptCache.find(key);
   if (iter == m_transOptCache.end())
     return NULL;
   iter->second.second = clock(); // update last used time
@@ -1166,7 +1176,6 @@ void StaticData::LoadFeatureFunctions()
     }
   }
 
-  // load phrase table
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
     PhraseDictionary *pt = m_phraseDictionary[i];
     pt->Load();

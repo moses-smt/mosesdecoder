@@ -30,6 +30,12 @@ using namespace std;
 
 namespace Moses
 {
+PhraseDictionaryOnDisk::PhraseDictionaryOnDisk(const std::string &line)
+  : MyBase("PhraseDictionaryOnDisk", line)
+{
+  ReadParameters();
+}
+
 PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
 }

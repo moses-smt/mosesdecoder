@@ -26,18 +26,7 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
   ,m_domainTrigger(false)
 {
   std::cerr << "Initializing word translation feature.. " << endl;
-
-  size_t ind = 0;
-  while (ind < m_args.size()) {
-    vector<string> &args = m_args[ind];
-    bool consumed = SetParameter(args[0], args[1]);
-    if (consumed) {
-      m_args.erase(m_args.begin() + ind);
-    } else {
-      ++ind;
-    }
-  }
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 
   if (m_simple == 1) std::cerr << "using simple word translations.. ";
   if (m_sourceContext == 1) std::cerr << "using source context.. ";
@@ -71,7 +60,7 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
 
 }
 
-bool WordTranslationFeature::SetParameter(const std::string& key, const std::string& value)
+void WordTranslationFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "input-factor") {
     m_factorTypeSource = Scan<FactorType>(value);
@@ -94,9 +83,8 @@ bool WordTranslationFeature::SetParameter(const std::string& key, const std::str
   } else if (key == "target-path") {
     m_filePathTarget = value;
   } else {
-    return StatelessFeatureFunction::SetParameter(key, value);
+    StatelessFeatureFunction::SetParameter(key, value);
   }
-  return true;
 }
 
 void WordTranslationFeature::Load()

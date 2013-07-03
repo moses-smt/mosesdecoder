@@ -67,7 +67,7 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
     FullScoreReturn FullScoreForgotState(const WordIndex *context_rbegin, const WordIndex *context_rend, const WordIndex new_word, State &out_state) const;
 
     /* Get the state for a context.  Don't use this if you can avoid it.  Use
-     * BeginSentenceState or EmptyContextState and extend from those.  If
+     * BeginSentenceState or NullContextState and extend from those.  If
      * you're only going to use this state to call FullScore once, use
      * FullScoreForgotState. 
      * To use this function, make an array of WordIndex containing the context
@@ -152,6 +152,11 @@ LM_NAME_MODEL(QuantArrayTrieModel, detail::GenericModel<trie::TrieSearch<Separat
 // Default implementation.  No real reason for it to be the default.  
 typedef ::lm::ngram::ProbingVocabulary Vocabulary;
 typedef ProbingModel Model;
+
+/* Autorecognize the file type, load, and return the virtual base class.  Don't
+ * use the virtual base class if you can avoid it.  Instead, use the above
+ * classes as template arguments to your own virtual feature function.*/
+base::Model *LoadVirtual(const char *file_name, const Config &config = Config(), ModelType if_arpa = PROBING);
 
 } // namespace ngram
 } // namespace lm
