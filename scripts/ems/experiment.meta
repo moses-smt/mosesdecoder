@@ -511,6 +511,13 @@ pcfg-score
 	default-name: model/scored-corpus
 	pass-unless: use-pcfg-feature
 	template: ln -s IN.$input-extension OUT.$input-extension ; $moses-bin-dir/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
+build-osm
+	in: corpus word-alignment
+	out: osm-model
+	ignore-unless: operation-sequence-model
+	rerun-on-change: operation-sequence-model training-options script giza-settings 
+	template: $moses-script-dir/OSM/OSM-Train IN0.$output-extension IN0.$input-extension IN1.$alignment-symmetrization-method $operation-sequence-model-order OUT $moses-src-dir
+	default-name: model/OSM/
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
@@ -579,7 +586,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains INTERPOLATED-LM:binlm LM:binlm osm-model
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini

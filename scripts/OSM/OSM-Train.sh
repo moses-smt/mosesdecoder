@@ -26,7 +26,9 @@ echo 'Learning Operation Sequence Translation Model'
 
 ngram-count -kndiscount -order $4 -unk -text $5/opCorpus -lm $5/operationLM$4
 
-../../bin/build_binary -i $5/operationLM$4 $5/operationLM$4.bin
+echo 'Binarizing'
+
+../../bin/build_binary $5/operationLM$4 $5/operationLM$4.bin
 
 echo 'Training OSM - End'
 date
