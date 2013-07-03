@@ -39,7 +39,7 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 	// Code to load KenLM
 
 	OSM = new Model(m_lmPath.c_str());
-	State startState = OSM->BeginSentenceState();
+	State startState = OSM->NullContextState();
 	State endState;
 	unkOpProb = OSM->Score(startState,OSM->GetVocabulary().Index(unkOp),endState);
 }
@@ -47,6 +47,8 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 
 void OpSequenceModel::Load()
 {
+
+  /*
   // load future cost
 
   //vector <string> input;
@@ -75,10 +77,60 @@ void OpSequenceModel::Load()
    // m_coll[pp] = scores;
   }
 
+  */
   readLanguageModel(m_lmPath.c_str());
 
 }
 
+
+
+void OpSequenceModel:: Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const 
+{
+
+	osmHypothesis obj;
+	obj.setState(OSM->NullContextState());
+	WordsBitmap myBitmap(source.GetSize());
+	vector <string> mySourcePhrase;
+  	vector <string> myTargetPhrase;
+  	vector<float> scores(5);
+	vector <int> alignments;
+	int startIndex = 0;
+	int endIndex = source.GetSize();
+
+	const AlignmentInfo &align = targetPhrase.GetAlignTerm();
+	AlignmentInfo::const_iterator iter;
+
+
+      	for (iter = align.begin(); iter != align.end(); ++iter) 
+      	{
+      	 alignments.push_back(iter->first);
+    	 alignments.push_back(iter->second);
+      	}
+
+	for (int i = 0; i < targetPhrase.GetSize(); i++)
+  	{
+	  	if (targetPhrase.GetWord(i).IsOOV())
+		 myTargetPhrase.push_back("_TRANS_SLF_");
+	 	else
+		  myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(0)->GetString().as_string());
+   	 }
+
+	 for (int i = 0; i < source.GetSize(); i++)
+  	 {
+		  mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString().as_string());
+   	 }
+	
+	 obj.setPhrases(mySourcePhrase , myTargetPhrase);
+	 obj.constructCepts(alignments,startIndex,endIndex-1,targetPhrase.GetSize());
+	 obj.computeOSMFeature(startIndex,myBitmap);	
+	 obj.calculateOSMProb(*OSM);
+         obj.populateScores(scores);
+         estimatedFutureScore.PlusEquals(this, scores);
+
+}
 
 
 FFState* OpSequenceModel::Evaluate(

@@ -79,6 +79,7 @@ class osmHypothesis
 	osmState * saveState();
 	void print();
 	void populateScores(std::vector <float> & scores);
+	void setState(const lm::ngram::State & val){lmState = val;}
 
 };
 

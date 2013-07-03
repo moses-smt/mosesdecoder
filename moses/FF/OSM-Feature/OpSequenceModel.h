@@ -32,6 +32,11 @@ public:
 	    const FFState* prev_state,
 	    ScoreComponentCollection* accumulator) const;
 
+	void  Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const;
+
   virtual FFState* EvaluateChart(
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
