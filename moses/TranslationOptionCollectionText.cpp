@@ -37,9 +37,11 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
 {
   size_t size = input.GetSize();
   m_targetPhrasesfromPt.resize(size);
-  for (size_t startPos = 0; startPos < size; ++startPos) {
-    std::vector<InputLatticeNode> &vec = m_targetPhrasesfromPt[startPos];
-    for (size_t endPos = startPos; endPos < size; ++endPos) {
+  for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
+    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
+      size_t endPos = startPos + phaseSize -1;
+      std::vector<InputLatticeNode> &vec = m_targetPhrasesfromPt[startPos];
+
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
       WordsRange range(startPos, endPos);
 
@@ -48,10 +50,11 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
         vec.push_back(node);
       }
       else {
-    	  const InputLatticeNode prevNode = GetInputLatticeNode(startPos, endPos - 1);
+    	  const InputLatticeNode &prevNode = GetInputLatticeNode(startPos, endPos - 1);
           InputLatticeNode node(subphrase, range, &prevNode);
           vec.push_back(node);
       }
+      cerr << vec.back() << endl;
     }
   }
 

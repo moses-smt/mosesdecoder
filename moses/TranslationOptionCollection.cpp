@@ -598,22 +598,5 @@ void TranslationOptionCollection::SetTargetPhraseFromPtMatrix()
   }
 }
 
-/*
-void TranslationOptionCollection::SetTargetPhraseFromPtMatrix(const PhraseDictionary &phraseDictionary)
-{
-  for (size_t i = 0; i < m_phraseDictionaryQueue.size(); ++i) {
-    InputLatticeNode &node = *m_phraseDictionaryQueue[i];
-
-    bool doIt = true;
-
-    doIt = true; // TODO HACK
-    if (doIt) {
-      const Phrase &phrase = node.GetPhrase();
-      const TargetPhraseCollection *targetPhrases = phraseDictionary.GetTargetPhraseCollection(phrase);
-      node.SetTargetPhrases(phraseDictionary, targetPhrases, NULL);
-    }
-  }
-}
-*/
-}
+} // namespace
 

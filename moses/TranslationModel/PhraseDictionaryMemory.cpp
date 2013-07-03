@@ -34,6 +34,7 @@
 #include "moses/TranslationModel/RuleTable/LoaderFactory.h"
 #include "moses/TranslationModel/RuleTable/Loader.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.h"
+#include "moses/InputLatticeNode.h"
 
 using namespace std;
 
@@ -132,7 +133,46 @@ void PhraseDictionaryMemory::SortAndPrune()
     m_collection.Sort(GetTableLimit());
   }
 }
+/*
+void PhraseDictionaryMemory::SetTargetPhraseFromPtMatrix(const std::vector<InputLatticeNode*> &phraseDictionaryQueue) const
+{
+//  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
+  for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
+	bool doIt = true;
+	InputLatticeNode &node = *phraseDictionaryQueue[i];
+    const Phrase &phrase = node.GetPhrase();
+	const InputLatticeNode *prevNode = node.GetPrevNode();
+cerr << node << endl;
 
+	const PhraseDictionaryNodeMemory *prevPtNode;
+
+	if (prevNode) {
+	  prevPtNode = static_cast<const PhraseDictionaryNodeMemory*>(prevNode->GetPtNode(*this));
+
+	  if (prevPtNode == NULL) {
+		  doIt = false;
+	  }
+	}
+	else {
+		// Starting subphrase.
+		assert(phrase.GetSize() == 1);
+		prevPtNode = &GetRootNode();
+	}
+
+	if (doIt) {
+	  const Word &lastWord = phrase.GetWord(phrase.GetSize() - 1);
+	  const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
+	  if (ptNode) {
+		  const TargetPhraseCollection *targetPhrases = ptNode->GetTargetPhraseCollection();
+		  node.SetTargetPhrases(*this, targetPhrases, ptNode);
+	  }
+	  else {
+		  node.SetTargetPhrases(*this, NULL, NULL);
+	  }
+	}
+  }
+}
+*/
 TO_STRING_BODY(PhraseDictionaryMemory);
 
 // friend

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <iostream>
 #include "Phrase.h"
 #include "WordsRange.h"
 
@@ -18,14 +19,16 @@ This is for both sentence input, and confusion network/lattices
 */
 class InputLatticeNode
 {
+  friend std::ostream& operator<<(std::ostream& out, const InputLatticeNode &pbj);
+
 protected:
   const InputLatticeNode *m_prevNode;
   Phrase m_phrase;
   WordsRange m_range;
-  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, void*> > m_targetPhrases;
+  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
 
 public:
-  InputLatticeNode()
+  explicit InputLatticeNode()
     : m_prevNode(NULL)
     , m_range(NOT_FOUND, NOT_FOUND)
   {}
@@ -41,14 +44,18 @@ public:
   const WordsRange &GetWordsRange() const {
     return m_range;
   }
+  const InputLatticeNode *GetPrevNode() const {
+    return m_prevNode;
+  }
 
   void SetTargetPhrases(const PhraseDictionary &phraseDictionary
 		  	  	  	  , const TargetPhraseCollection *targetPhrases
-		  	  	  	  , void *ptNode) {
-	  std::pair<const TargetPhraseCollection*, void*> value(targetPhrases, ptNode);
+		  	  	  	  , const void *ptNode) {
+	  std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
     m_targetPhrases[&phraseDictionary] = value;
   }
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
+  const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;
 
 };
 
