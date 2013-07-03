@@ -32,6 +32,8 @@
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
+#else
+#include <boost/scoped_ptr.hpp>
 #endif
 
 namespace Moses
@@ -47,7 +49,11 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryOnDisk&);
 
 protected:
+#ifdef WITH_THREADS
   boost::thread_specific_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
+#else
+  boost::scoped_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
+#endif
 
   OnDiskPt::OnDiskWrapper &GetImplementation();
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
