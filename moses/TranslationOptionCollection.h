@@ -100,7 +100,6 @@ protected:
   void CacheLexReordering();
 
   void SetTargetPhraseFromPtMatrix();
-  void SetTargetPhraseFromPtMatrix(const PhraseDictionary &phraseDictionary);
 public:
   virtual ~TranslationOptionCollection();
 

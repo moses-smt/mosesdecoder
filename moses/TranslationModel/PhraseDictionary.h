@@ -47,6 +47,7 @@ class InputType;
 class WordsRange;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
+class InputLatticeNode;
 
 /**
   * Abstract base class for phrase dictionaries (tables).
@@ -92,6 +93,8 @@ public:
   }
 
   void SetParameter(const std::string& key, const std::string& value);
+
+  virtual void SetTargetPhraseFromPtMatrix(const std::vector<InputLatticeNode*> &phraseDictionaryQueue) const;
 
 protected:
   size_t m_tableLimit;

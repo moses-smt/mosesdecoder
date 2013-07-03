@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/InputLatticeNode.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -64,6 +66,23 @@ void PhraseDictionary::SetFeaturesToApply()
     if (feature->IsUseable(m_outputFactors)) {
       m_featuresToApply.push_back(feature);
     }
+  }
+}
+
+void PhraseDictionary::SetTargetPhraseFromPtMatrix(const std::vector<InputLatticeNode*> &phraseDictionaryQueue) const
+{
+//	  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
+  for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
+	InputLatticeNode &node = *phraseDictionaryQueue[i];
+
+	bool doIt = true;
+
+	doIt = true; // TODO HACK
+	if (doIt) {
+	  const Phrase &phrase = node.GetPhrase();
+	  const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollection(phrase);
+	  node.SetTargetPhrases(*this, targetPhrases, NULL);
+	}
   }
 }
 
