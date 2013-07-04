@@ -101,57 +101,57 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 }
 
 void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
-                     , const DecodeStep &decodeStep
-                     , PartialTranslOptColl &outputPartialTranslOptColl
-                     , TranslationOptionCollection *toc
-                     , bool adhereTableLimit
-                     , const Phrase &src
-                     , const TargetPhraseCollection *phraseColl) const
+                                    , const DecodeStep &decodeStep
+                                    , PartialTranslOptColl &outputPartialTranslOptColl
+                                    , TranslationOptionCollection *toc
+                                    , bool adhereTableLimit
+                                    , const Phrase &src
+                                    , const TargetPhraseCollection *phraseColl) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
-	// word deletion
-	outputPartialTranslOptColl.Add(new TranslationOption(inputPartialTranslOpt));
-	return;
+    // word deletion
+    outputPartialTranslOptColl.Add(new TranslationOption(inputPartialTranslOpt));
+    return;
   }
 
   // normal trans step
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
   const PhraseDictionary* phraseDictionary  =
-	decodeStep.GetPhraseDictionaryFeature();
+    decodeStep.GetPhraseDictionaryFeature();
   const TargetPhrase &inPhrase = inputPartialTranslOpt.GetTargetPhrase();
   const size_t currSize = inPhrase.GetSize();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   if (phraseColl != NULL) {
-	TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
-	iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
+    TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
+    iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
 
-	for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase) {
-	  const TargetPhrase& targetPhrase = **iterTargetPhrase;
-	  const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
-	  // skip if the
-	  if (targetPhrase.GetSize() != currSize) continue;
+    for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase) {
+      const TargetPhrase& targetPhrase = **iterTargetPhrase;
+      const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
+      // skip if the
+      if (targetPhrase.GetSize() != currSize) continue;
 
-	  TargetPhrase outPhrase(inPhrase);
+      TargetPhrase outPhrase(inPhrase);
 
-	  if (IsFilteringStep()) {
-		if (!inputPartialTranslOpt.IsCompatible(targetPhrase, m_conflictFactors))
-		  continue;
-	  }
+      if (IsFilteringStep()) {
+        if (!inputPartialTranslOpt.IsCompatible(targetPhrase, m_conflictFactors))
+          continue;
+      }
 
-	  outPhrase.Merge(targetPhrase, m_newOutputFactors);
-	  outPhrase.Evaluate(src, m_featuresToApply); // need to do this as all non-transcores would be screwed up
+      outPhrase.Merge(targetPhrase, m_newOutputFactors);
+      outPhrase.Evaluate(src, m_featuresToApply); // need to do this as all non-transcores would be screwed up
 
 
-	  TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
-	  assert(newTransOpt != NULL);
+      TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
+      assert(newTransOpt != NULL);
 
-	  outputPartialTranslOptColl.Add(newTransOpt );
+      outputPartialTranslOptColl.Add(newTransOpt );
 
-	}
+    }
   } else if (sourceWordsRange.GetNumWordsCovered() == 1) {
-	// unknown handler
-	//toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
+    // unknown handler
+    //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
   }
 }
 

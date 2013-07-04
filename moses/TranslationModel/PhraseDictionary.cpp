@@ -73,11 +73,11 @@ void PhraseDictionary::SetTargetPhraseFromPtMatrix(const std::vector<InputLattic
 {
 //  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
   for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
-	InputLatticeNode &node = *phraseDictionaryQueue[i];
+    InputLatticeNode &node = *phraseDictionaryQueue[i];
 
     const Phrase &phrase = node.GetPhrase();
-	const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollection(phrase);
-	node.SetTargetPhrases(*this, targetPhrases, NULL);
+    const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollection(phrase);
+    node.SetTargetPhrases(*this, targetPhrases, NULL);
   }
 }
 

@@ -24,12 +24,12 @@ public:
 
   COMP const& Compare;
   VectorIndexSorter(vector<VAL> const& v, COMP const& comp)
-    : m_vecref(v), Compare(comp)
-  { }
+    : m_vecref(v), Compare(comp) {
+  }
 
   VectorIndexSorter(vector<VAL> const& v)
-    : m_vecref(v), m_comp(new COMP()), Compare(*m_comp)
-  { }
+    : m_vecref(v), m_comp(new COMP()), Compare(*m_comp) {
+  }
 
   bool operator()(IDX_T const & a, IDX_T const & b) const {
     bool fwd = Compare(m_vecref.at(a) ,m_vecref.at(b));

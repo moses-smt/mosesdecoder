@@ -48,11 +48,10 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
       if (range.GetNumWordsCovered() == 1) {
         InputLatticeNode *node = new InputLatticeNode(subphrase, range, NULL);
         vec.push_back(node);
-      }
-      else {
-    	  const InputLatticeNode &prevNode = GetInputLatticeNode(startPos, endPos - 1);
-          InputLatticeNode *node = new InputLatticeNode(subphrase, range, &prevNode);
-          vec.push_back(node);
+      } else {
+        const InputLatticeNode &prevNode = GetInputLatticeNode(startPos, endPos - 1);
+        InputLatticeNode *node = new InputLatticeNode(subphrase, range, &prevNode);
+        vec.push_back(node);
       }
     }
   }
@@ -190,20 +189,19 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
             const PhraseDictionary &phraseDictionary = *translateStep->GetPhraseDictionaryFeature();
             const TargetPhraseCollection *targetPhrases = inputLatticeNode.GetTargetPhrases(phraseDictionary);
             translateStep->Process(inputPartialTranslOpt
-                             , *decodeStep
-                             , *newPtoc
-                             , this
-                             , adhereTableLimit
-                             , *sourcePhrase
-                             , targetPhrases);
-          }
-          else {
+                                   , *decodeStep
+                                   , *newPtoc
+                                   , this
+                                   , adhereTableLimit
+                                   , *sourcePhrase
+                                   , targetPhrases);
+          } else {
             decodeStep->Process(inputPartialTranslOpt
-                             , *decodeStep
-                             , *newPtoc
-                             , this
-                             , adhereTableLimit
-                             , *sourcePhrase);
+                                , *decodeStep
+                                , *newPtoc
+                                , this
+                                , adhereTableLimit
+                                , *sourcePhrase);
           }
         }
 

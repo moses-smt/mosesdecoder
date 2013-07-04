@@ -30,8 +30,8 @@ protected:
 public:
   explicit InputLatticeNode()
     : m_prevNode(NULL)
-    , m_range(NOT_FOUND, NOT_FOUND)
-  {}
+    , m_range(NOT_FOUND, NOT_FOUND) {
+  }
 
   InputLatticeNode(const Phrase &phrase, const WordsRange &range, const InputLatticeNode *prevNode)
     :m_prevNode(prevNode)
@@ -50,9 +50,9 @@ public:
   }
 
   void SetTargetPhrases(const PhraseDictionary &phraseDictionary
-		  	  	  	  , const TargetPhraseCollection *targetPhrases
-		  	  	  	  , const void *ptNode) {
-	  std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
+                        , const TargetPhraseCollection *targetPhrases
+                        , const void *ptNode) {
+    std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
     m_targetPhrases[&phraseDictionary] = value;
   }
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;

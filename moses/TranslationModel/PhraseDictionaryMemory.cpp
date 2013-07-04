@@ -138,34 +138,32 @@ void PhraseDictionaryMemory::SetTargetPhraseFromPtMatrix(const std::vector<Input
 {
 //  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
   for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
-	InputLatticeNode &node = *phraseDictionaryQueue[i];
+    InputLatticeNode &node = *phraseDictionaryQueue[i];
     const Phrase &phrase = node.GetPhrase();
-	const InputLatticeNode *prevNode = node.GetPrevNode();
+    const InputLatticeNode *prevNode = node.GetPrevNode();
 
-	const PhraseDictionaryNodeMemory *prevPtNode = NULL;
+    const PhraseDictionaryNodeMemory *prevPtNode = NULL;
 
-	if (prevNode) {
-	  prevPtNode = static_cast<const PhraseDictionaryNodeMemory*>(prevNode->GetPtNode(*this));
-	}
-	else {
-		// Starting subphrase.
-		assert(phrase.GetSize() == 1);
-		prevPtNode = &GetRootNode();
-	}
+    if (prevNode) {
+      prevPtNode = static_cast<const PhraseDictionaryNodeMemory*>(prevNode->GetPtNode(*this));
+    } else {
+      // Starting subphrase.
+      assert(phrase.GetSize() == 1);
+      prevPtNode = &GetRootNode();
+    }
 
-	if (prevPtNode) {
-	  Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
-	  lastWord.OnlyTheseFactors(m_inputFactors);
+    if (prevPtNode) {
+      Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
+      lastWord.OnlyTheseFactors(m_inputFactors);
 
-	  const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
-	  if (ptNode) {
-		  const TargetPhraseCollection *targetPhrases = ptNode->GetTargetPhraseCollection();
-		  node.SetTargetPhrases(*this, targetPhrases, ptNode);
-	  }
-	  else {
-		  node.SetTargetPhrases(*this, NULL, NULL);
-	  }
-	}
+      const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
+      if (ptNode) {
+        const TargetPhraseCollection *targetPhrases = ptNode->GetTargetPhraseCollection();
+        node.SetTargetPhrases(*this, targetPhrases, ptNode);
+      } else {
+        node.SetTargetPhrases(*this, NULL, NULL);
+      }
+    }
   }
 }
 

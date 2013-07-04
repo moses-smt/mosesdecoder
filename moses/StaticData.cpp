@@ -948,7 +948,7 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGra
   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
 #endif
   std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
-  = m_transOptCache.find(key);
+    = m_transOptCache.find(key);
   if (iter == m_transOptCache.end())
     return NULL;
   iter->second.second = clock(); // update last used time
