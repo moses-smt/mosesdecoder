@@ -60,8 +60,7 @@ protected:
 
   std::vector < std::pair < std::set <int> , std::set <int> > > ceptsInPhrase;
   std::set <int> targetNullWords;
-  std::string m_featurePath, m_lmPath;
-
+  std::string m_lmPath;
 
 
 };
