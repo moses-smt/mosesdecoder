@@ -516,8 +516,8 @@ build-osm
 	out: osm-model
 	ignore-unless: operation-sequence-model
 	rerun-on-change: operation-sequence-model training-options script giza-settings 
-	template: $moses-script-dir/OSM/OSM-Train IN0.$output-extension IN0.$input-extension IN1.$alignment-symmetrization-method $operation-sequence-model-order OUT $moses-src-dir
-	default-name: model/OSM/
+	template: $moses-script-dir/OSM/OSM-Train.sh IN0.$output-extension IN0.$input-extension IN1.$alignment-symmetrization-method $operation-sequence-model-order OUT $moses-src-dir
+	default-name: model/OSM
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
@@ -586,7 +586,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains INTERPOLATED-LM:binlm LM:binlm osm-model
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
