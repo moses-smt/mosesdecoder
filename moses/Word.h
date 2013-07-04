@@ -38,6 +38,7 @@ namespace Moses
 {
 
 class Phrase;
+class FactorMask;
 
 /** Represent a word (terminal or non-term)
  * Wrapper around hold a set of factors for a single word
@@ -149,6 +150,8 @@ public:
                         , bool isNonTerminal);
 
   void CreateUnknownWord(const Word &sourceWord);
+
+  void OnlyTheseFactors(const FactorMask &factors);
 
   inline size_t hash() const {
     return util::MurmurHashNative(m_factorArray, MAX_NUM_FACTORS*sizeof(Factor*), m_isNonTerminal);
