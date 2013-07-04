@@ -29,7 +29,7 @@ public:
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
   virtual statscore_t calculateScore(const std::vector<int>& comps) const;
 
-  int CalcReferenceLength(std::size_t doc_id, std::size_t sentence_id, std::size_t length); 
+  int CalcReferenceLength(std::size_t doc_id, std::size_t sentence_id, std::size_t length);
 
   // NOTE: this function is used for unit testing.
   virtual bool OpenReferenceStream(std::istream* is, std::size_t file_id);
