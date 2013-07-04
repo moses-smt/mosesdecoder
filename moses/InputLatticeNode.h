@@ -19,7 +19,7 @@ This is for both sentence input, and confusion network/lattices
 */
 class InputLatticeNode
 {
-  friend std::ostream& operator<<(std::ostream& out, const InputLatticeNode &pbj);
+  friend std::ostream& operator<<(std::ostream& out, const InputLatticeNode &obj);
 
 protected:
   const InputLatticeNode *m_prevNode;
@@ -32,6 +32,7 @@ public:
     : m_prevNode(NULL)
     , m_range(NOT_FOUND, NOT_FOUND)
   {}
+
   InputLatticeNode(const Phrase &phrase, const WordsRange &range, const InputLatticeNode *prevNode)
     :m_prevNode(prevNode)
     ,m_phrase(phrase)

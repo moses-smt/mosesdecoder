@@ -38,7 +38,7 @@ class Sentence;
 class TranslationOptionCollectionText : public TranslationOptionCollection
 {
 public:
-  typedef std::vector< std::vector<InputLatticeNode> > TargetPhraseMatrix;
+  typedef std::vector< std::vector<InputLatticeNode*> > TargetPhraseMatrix;
 
 protected:
   TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */

@@ -40,21 +40,20 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
-      std::vector<InputLatticeNode> &vec = m_targetPhrasesfromPt[startPos];
+      std::vector<InputLatticeNode*> &vec = m_targetPhrasesfromPt[startPos];
 
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
       WordsRange range(startPos, endPos);
 
       if (range.GetNumWordsCovered() == 1) {
-        InputLatticeNode node(subphrase, range, NULL);
+        InputLatticeNode *node = new InputLatticeNode(subphrase, range, NULL);
         vec.push_back(node);
       }
       else {
     	  const InputLatticeNode &prevNode = GetInputLatticeNode(startPos, endPos - 1);
-          InputLatticeNode node(subphrase, range, &prevNode);
+          InputLatticeNode *node = new InputLatticeNode(subphrase, range, &prevNode);
           vec.push_back(node);
       }
-      cerr << vec.back() << endl;
     }
   }
 
@@ -108,7 +107,7 @@ InputLatticeNode &TranslationOptionCollectionText::GetInputLatticeNode(size_t st
 {
   size_t offset = endPos - startPos;
   CHECK(offset < m_targetPhrasesfromPt[startPos].size());
-  return m_targetPhrasesfromPt[startPos][offset];
+  return *m_targetPhrasesfromPt[startPos][offset];
 }
 
 void TranslationOptionCollectionText::CreateTranslationOptions()
