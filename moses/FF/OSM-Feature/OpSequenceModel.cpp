@@ -20,25 +20,7 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
 
-    string unkOp = "_TRANS_SLF_";
-
-	
-	/* 
-
-	// Code for SRILM	
-
-	vector <int> numbers;
-        int nonWordFlag = 0;
-  
-	ptrOp = new Api;
-	ptrOp -> read_lm(lmFile,lmOrder);
-	numbers.push_back(ptrOp->getLMID(const_cast <char *> (unkOp.c_str())));
-	unkOpProb = ptrOp->contextProbN(numbers,nonWordFlag);
-	
-	*/
-
-	// Code to load KenLM
-
+        string unkOp = "_TRANS_SLF_";
 	OSM = new Model(m_lmPath.c_str());
 	State startState = OSM->NullContextState();
 	State endState;
@@ -49,36 +31,6 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 void OpSequenceModel::Load()
 {
 
-  /*
-  // load future cost
-
-  //vector <string> input;
-  ifstream sr (m_featurePath.c_str());
-  char* tmp;
-
-  CHECK(sr.is_open());
-
-  vector<FactorType> factorOrder;
-  factorOrder.push_back(0);
-
-  string line;
-  while (std::getline(sr, line))
-  {
-    std::vector<std::string> tokens;
-    tokens = TokenizeMultiCharSeparator(line, "|||");
-    CHECK(tokens.size() == 3);
-
-    Phrase source, target;
-    source.CreateFromString(Input, factorOrder, tokens[0], "|", NULL);
-    target.CreateFromString(Output, factorOrder, tokens[1], "|", NULL);
-
-    ParallelPhrase pp(source, target);
-    Scores scores = Tokenize<float>(tokens[2], " ");
-    m_futureCost[pp] = scores;
-   // m_coll[pp] = scores;
-  }
-
-  */
   readLanguageModel(m_lmPath.c_str());
 
 }
@@ -291,9 +243,8 @@ std::vector<float> OpSequenceModel::GetFutureScores(const Phrase &source, const 
 
 void OpSequenceModel::SetParameter(const std::string& key, const std::string& value)
 {
-	  if (key == "feature-path") {
-		  m_featurePath = value;
-	  } else if (key == "path") {
+
+	  if (key == "path") {
 		  m_lmPath = value;
 	  } else if (key == "order") {
 		  lmOrder = Scan<int>(value);
