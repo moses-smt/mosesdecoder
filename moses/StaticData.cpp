@@ -694,9 +694,9 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     } else if (feature == "OpSequenceModel") {
-	  OpSequenceModel* model = new OpSequenceModel(line);
-	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-	  SetWeights(model, weights);
+      OpSequenceModel* model = new OpSequenceModel(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
     } else if (feature == "PhrasePenalty") {
       PhrasePenalty* model = new PhrasePenalty(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
