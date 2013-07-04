@@ -76,6 +76,7 @@ TranslationOptionCollection::TranslationOptionCollection(
 TranslationOptionCollection::~TranslationOptionCollection()
 {
   RemoveAllInColl(m_unksrcs);
+  RemoveAllInColl(m_phraseDictionaryQueue);
 }
 
 void TranslationOptionCollection::Prune()
