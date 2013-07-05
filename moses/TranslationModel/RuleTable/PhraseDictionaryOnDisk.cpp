@@ -120,7 +120,7 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<Input
     if (prevPtNode) {
       Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
       lastWord.OnlyTheseFactors(m_inputFactors);
-      OnDiskPt::Word *lastWordOnDisk = wrapper.ConvertFromMoses(Output, m_input, lastWord);
+      OnDiskPt::Word *lastWordOnDisk = wrapper.ConvertFromMoses(m_input, lastWord);
 
       const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
       if (ptNode) {
@@ -129,7 +129,7 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<Input
 
         const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
         const TargetPhraseCollection *targetPhrases
-        		= targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, "", vocab);
+        		= targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab);
 
         node.SetTargetPhrases(*this, targetPhrases, ptNode);
       } else {

@@ -117,7 +117,6 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
     , const std::vector<Moses::FactorType> &outputFactors
     , const Moses::PhraseDictionary &phraseDict
     , const std::vector<float> &weightT
-    , const std::string & /* filePath */
     , Vocab &vocab) const
 {
   Moses::TargetPhraseCollection *ret = new Moses::TargetPhraseCollection();

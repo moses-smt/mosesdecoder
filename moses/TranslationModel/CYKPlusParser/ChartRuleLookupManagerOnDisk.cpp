@@ -101,7 +101,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
     // search for terminal symbol
     if (startPos == absEndPos) {
-      OnDiskPt::Word *sourceWordBerkeleyDb = m_dbWrapper.ConvertFromMoses(Input, m_inputFactorsVec, sourceWordLabel.GetLabel());
+      OnDiskPt::Word *sourceWordBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceWordLabel.GetLabel());
 
       if (sourceWordBerkeleyDb != NULL) {
         const OnDiskPt::PhraseNode *node = prevNode.GetChild(*sourceWordBerkeleyDb, m_dbWrapper);
@@ -149,7 +149,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
     for (iterSourceLHS = sourceLHSSet.begin(); iterSourceLHS != sourceLHSSet.end(); ++iterSourceLHS) {
       const Word &sourceLHS = *iterSourceLHS;
 
-      OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(Input, m_inputFactorsVec, sourceLHS);
+      OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceLHS);
 
       if (sourceLHSBerkeleyDb == NULL) {
         delete sourceLHSBerkeleyDb;
@@ -175,7 +175,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
         if (doSearch) {
 
-          OnDiskPt::Word *chartNonTermBerkeleyDb = m_dbWrapper.ConvertFromMoses(Output, m_outputFactorsVec, cellLabel.GetLabel());
+          OnDiskPt::Word *chartNonTermBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_outputFactorsVec, cellLabel.GetLabel());
 
           if (chartNonTermBerkeleyDb == NULL)
             continue;
@@ -219,7 +219,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       for (iterLabelSet = lhsSet.begin(); iterLabelSet != lhsSet.end(); ++iterLabelSet) {
         const Word &sourceLHS = *iterLabelSet;
 
-        OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(Input, m_inputFactorsVec, sourceLHS);
+        OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceLHS);
         if (sourceLHSBerkeleyDb == NULL)
           continue;
 
@@ -238,8 +238,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
                                                  ,m_outputFactorsVec
                                                  ,m_dictionary
                                                  ,weightT
-                                                 ,m_filePath
-                                                 , m_dbWrapper.GetVocab());
+                                                 ,m_dbWrapper.GetVocab());
 
             delete tpcollBerkeleyDb;
             m_cache[tpCollFilePos] = targetPhraseCollection;

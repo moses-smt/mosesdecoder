@@ -102,8 +102,7 @@ public:
 
   UINT64 GetMisc(const std::string &key) const;
 
-  Word *ConvertFromMoses(Moses::FactorDirection direction
-                         , const std::vector<Moses::FactorType> &factorsVec
+  Word *ConvertFromMoses(const std::vector<Moses::FactorType> &factorsVec
                          , const Moses::Word &origWord) const;
 
 };
