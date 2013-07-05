@@ -94,7 +94,7 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 
   m_implementation.reset(obj);
 }
-
+/*
 void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<InputLatticeNode*> &phraseDictionaryQueue) const
 {
 //  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
@@ -103,14 +103,14 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<Input
     const Phrase &phrase = node.GetPhrase();
     const InputLatticeNode *prevNode = node.GetPrevNode();
 
-    const PhraseDictionaryNodeMemory *prevPtNode = NULL;
+    const OnDiskPt::PhraseNode *prevPtNode = NULL;
 
     if (prevNode) {
-      prevPtNode = static_cast<const PhraseDictionaryNodeMemory*>(prevNode->GetPtNode(*this));
+      prevPtNode = static_cast<const OnDiskPt::PhraseNode*>(prevNode->GetPtNode(*this));
     } else {
       // Starting subphrase.
       assert(phrase.GetSize() == 1);
-      prevPtNode = &GetRootNode();
+      prevPtNode = &GetImplementation().GetRootSourceNode();
     }
 
     if (prevPtNode) {
@@ -127,6 +127,6 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<Input
     }
   }
 }
-
+*/
 }
 
