@@ -95,7 +95,10 @@ public:
     return 1;
   }
 
-  PhraseNode &GetRootSourceNode();
+  PhraseNode &GetRootSourceNode()
+  { return *m_rootSourceNode;  }
+  const PhraseNode &GetRootSourceNode() const
+  { return *m_rootSourceNode;  }
 
   UINT64 GetMisc(const std::string &key) const;
 

@@ -26,6 +26,9 @@
 #include "moses/TranslationModel/CYKPlusParser/DotChartOnDisk.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h"
 
+#include "OnDiskPt/OnDiskWrapper.h"
+#include "OnDiskPt/Word.h"
+
 using namespace std;
 
 
@@ -94,10 +97,11 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 
   m_implementation.reset(obj);
 }
-/*
+
 void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<InputLatticeNode*> &phraseDictionaryQueue) const
 {
-//  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
+  OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+
   for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
     InputLatticeNode &node = *phraseDictionaryQueue[i];
     const Phrase &phrase = node.GetPhrase();
@@ -110,23 +114,26 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<Input
     } else {
       // Starting subphrase.
       assert(phrase.GetSize() == 1);
-      prevPtNode = &GetImplementation().GetRootSourceNode();
+      prevPtNode = &wrapper.GetRootSourceNode();
     }
 
     if (prevPtNode) {
       Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
       lastWord.OnlyTheseFactors(m_inputFactors);
+      OnDiskPt::Word *lastWordOnDisk = wrapper.ConvertFromMoses(Output, m_input, lastWord);
 
-      const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
+      const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
       if (ptNode) {
-        const TargetPhraseCollection *targetPhrases = ptNode->GetTargetPhraseCollection();
-        node.SetTargetPhrases(*this, targetPhrases, ptNode);
+        const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
+        //const TargetPhraseCollection *targetPhrases = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this)
+
+        //node.SetTargetPhrases(*this, targetPhrases, ptNode);
       } else {
         node.SetTargetPhrases(*this, NULL, NULL);
       }
     }
   }
 }
-*/
+
 }
 
