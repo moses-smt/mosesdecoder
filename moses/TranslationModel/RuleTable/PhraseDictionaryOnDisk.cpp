@@ -132,9 +132,15 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<Input
         		= targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab);
 
         node.SetTargetPhrases(*this, targetPhrases, ptNode);
+
+        delete targetPhrasesOnDisk;
+
       } else {
         node.SetTargetPhrases(*this, NULL, NULL);
       }
+
+      delete lastWordOnDisk;
+
     }
   }
 }
