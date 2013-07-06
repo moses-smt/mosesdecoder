@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 
   StaticData::InstanceNonConst().LoadData(parameter);
 
-  PhraseDictionaryCompact pdc("input-factor=0 output-factor=0 num-features=5 path=" + ttable);
+  PhraseDictionaryCompact pdc("PhraseDictionaryCompact input-factor=0 output-factor=0 num-features=5 path=" + ttable);
   pdc.Load();
 
   std::string line;
