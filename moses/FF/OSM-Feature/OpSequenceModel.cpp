@@ -11,7 +11,7 @@ namespace Moses
 {
 
 OpSequenceModel::OpSequenceModel(const std::string &line)
-:StatefulFeatureFunction("OpSequenceModel", 5, line )
+  :StatefulFeatureFunction("OpSequenceModel", 5, line )
 {
 
   ReadParameters();
@@ -20,29 +20,29 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
 
-    string unkOp = "_TRANS_SLF_";
+  string unkOp = "_TRANS_SLF_";
 
-	
-	/* 
 
-	// Code for SRILM	
+  /*
 
-	vector <int> numbers;
+  // Code for SRILM
+
+  vector <int> numbers;
         int nonWordFlag = 0;
-  
-	ptrOp = new Api;
-	ptrOp -> read_lm(lmFile,lmOrder);
-	numbers.push_back(ptrOp->getLMID(const_cast <char *> (unkOp.c_str())));
-	unkOpProb = ptrOp->contextProbN(numbers,nonWordFlag);
-	
-	*/
 
-	// Code to load KenLM
+  ptrOp = new Api;
+  ptrOp -> read_lm(lmFile,lmOrder);
+  numbers.push_back(ptrOp->getLMID(const_cast <char *> (unkOp.c_str())));
+  unkOpProb = ptrOp->contextProbN(numbers,nonWordFlag);
 
-	OSM = new Model(m_lmPath.c_str());
-	State startState = OSM->NullContextState();
-	State endState;
-	unkOpProb = OSM->Score(startState,OSM->GetVocabulary().Index(unkOp),endState);
+  */
+
+  // Code to load KenLM
+
+  OSM = new Model(m_lmPath.c_str());
+  State startState = OSM->NullContextState();
+  State endState;
+  unkOpProb = OSM->Score(startState,OSM->GetVocabulary().Index(unkOp),endState);
 }
 
 
@@ -86,58 +86,55 @@ void OpSequenceModel::Load()
 
 
 void OpSequenceModel:: Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const 
+                                , const TargetPhrase &targetPhrase
+                                , ScoreComponentCollection &scoreBreakdown
+                                , ScoreComponentCollection &estimatedFutureScore) const
 {
 
-	osmHypothesis obj;
-	obj.setState(OSM->NullContextState());
-	WordsBitmap myBitmap(source.GetSize());
-	vector <string> mySourcePhrase;
-  	vector <string> myTargetPhrase;
-  	vector<float> scores(5);
-	vector <int> alignments;
-	int startIndex = 0;
-	int endIndex = source.GetSize();
+  osmHypothesis obj;
+  obj.setState(OSM->NullContextState());
+  WordsBitmap myBitmap(source.GetSize());
+  vector <string> mySourcePhrase;
+  vector <string> myTargetPhrase;
+  vector<float> scores(5);
+  vector <int> alignments;
+  int startIndex = 0;
+  int endIndex = source.GetSize();
 
-	const AlignmentInfo &align = targetPhrase.GetAlignTerm();
-	AlignmentInfo::const_iterator iter;
+  const AlignmentInfo &align = targetPhrase.GetAlignTerm();
+  AlignmentInfo::const_iterator iter;
 
 
-      	for (iter = align.begin(); iter != align.end(); ++iter) 
-      	{
-      	 alignments.push_back(iter->first);
-    	 alignments.push_back(iter->second);
-      	}
+  for (iter = align.begin(); iter != align.end(); ++iter) {
+    alignments.push_back(iter->first);
+    alignments.push_back(iter->second);
+  }
 
-	for (int i = 0; i < targetPhrase.GetSize(); i++)
-  	{
-	  	if (targetPhrase.GetWord(i).IsOOV())
-		 myTargetPhrase.push_back("_TRANS_SLF_");
-	 	else
-		  myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(0)->GetString().as_string());
-   	 }
+  for (int i = 0; i < targetPhrase.GetSize(); i++) {
+    if (targetPhrase.GetWord(i).IsOOV())
+      myTargetPhrase.push_back("_TRANS_SLF_");
+    else
+      myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(0)->GetString().as_string());
+  }
 
-	 for (int i = 0; i < source.GetSize(); i++)
-  	 {
-		  mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString().as_string());
-   	 }
-	
-	 obj.setPhrases(mySourcePhrase , myTargetPhrase);
-	 obj.constructCepts(alignments,startIndex,endIndex-1,targetPhrase.GetSize());
-	 obj.computeOSMFeature(startIndex,myBitmap);	
-	 obj.calculateOSMProb(*OSM);
-         obj.populateScores(scores);
-         estimatedFutureScore.PlusEquals(this, scores);
+  for (int i = 0; i < source.GetSize(); i++) {
+    mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString().as_string());
+  }
+
+  obj.setPhrases(mySourcePhrase , myTargetPhrase);
+  obj.constructCepts(alignments,startIndex,endIndex-1,targetPhrase.GetSize());
+  obj.computeOSMFeature(startIndex,myBitmap);
+  obj.calculateOSMProb(*OSM);
+  obj.populateScores(scores);
+  estimatedFutureScore.PlusEquals(this, scores);
 
 }
 
 
 FFState* OpSequenceModel::Evaluate(
-    const Hypothesis& cur_hypo,
-    const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const
+  const Hypothesis& cur_hypo,
+  const FFState* prev_state,
+  ScoreComponentCollection* accumulator) const
 {
   const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
   const WordsBitmap &bitmap = cur_hypo.GetWordsBitmap();
@@ -160,83 +157,81 @@ FFState* OpSequenceModel::Evaluate(
 
   //cerr << source <<endl;
 
- // int a = sourceRange.GetStartPos();
- // cerr << source.GetWord(a);
+// int a = sourceRange.GetStartPos();
+// cerr << source.GetWord(a);
   //cerr <<a<<endl;
 
   //const Sentence &sentence = static_cast<const Sentence&>(curr_hypo.GetManager().GetSource());
 
 
-   const WordsRange & sourceRange = cur_hypo.GetCurrSourceWordsRange();
-   int startIndex  = sourceRange.GetStartPos();
-   int endIndex = sourceRange.GetEndPos();
-   const AlignmentInfo &align = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();
-   osmState * statePtr;
+  const WordsRange & sourceRange = cur_hypo.GetCurrSourceWordsRange();
+  int startIndex  = sourceRange.GetStartPos();
+  int endIndex = sourceRange.GetEndPos();
+  const AlignmentInfo &align = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();
+  osmState * statePtr;
 
-   vector <int> alignments;
-
-
-
-   AlignmentInfo::const_iterator iter;
-
-      for (iter = align.begin(); iter != align.end(); ++iter) {
-        //cerr << iter->first << "----" << iter->second << " ";
-    	 alignments.push_back(iter->first);
-    	 alignments.push_back(iter->second);
-      }
+  vector <int> alignments;
 
 
-   //cerr<<bitmap<<endl;
-   //cerr<<startIndex<<" "<<endIndex<<endl;
 
+  AlignmentInfo::const_iterator iter;
 
-  for (int i = startIndex; i <= endIndex; i++)
-  {
-	  myBitmap.SetValue(i,0); // resetting coverage of this phrase ...
-	 mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString().as_string());
-	 // cerr<<mySourcePhrase[i]<<endl;
+  for (iter = align.begin(); iter != align.end(); ++iter) {
+    //cerr << iter->first << "----" << iter->second << " ";
+    alignments.push_back(iter->first);
+    alignments.push_back(iter->second);
   }
 
-  for (int i = 0; i < target.GetSize(); i++)
-  {
 
-	  if (target.GetWord(i).IsOOV())
-		  myTargetPhrase.push_back("_TRANS_SLF_");
-	  else
-		  myTargetPhrase.push_back(target.GetWord(i).GetFactor(0)->GetString().as_string());
+  //cerr<<bitmap<<endl;
+  //cerr<<startIndex<<" "<<endIndex<<endl;
+
+
+  for (int i = startIndex; i <= endIndex; i++) {
+    myBitmap.SetValue(i,0); // resetting coverage of this phrase ...
+    mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString().as_string());
+    // cerr<<mySourcePhrase[i]<<endl;
+  }
+
+  for (int i = 0; i < target.GetSize(); i++) {
+
+    if (target.GetWord(i).IsOOV())
+      myTargetPhrase.push_back("_TRANS_SLF_");
+    else
+      myTargetPhrase.push_back(target.GetWord(i).GetFactor(0)->GetString().as_string());
 
   }
 
- 
+
   //cerr<<myBitmap<<endl;
 
   obj.setState(prev_state);
   obj.constructCepts(alignments,startIndex,endIndex,target.GetSize());
   obj.setPhrases(mySourcePhrase , myTargetPhrase);
-  obj.computeOSMFeature(startIndex,myBitmap);	
+  obj.computeOSMFeature(startIndex,myBitmap);
   obj.calculateOSMProb(*OSM);
   obj.populateScores(scores);
 
-/*
-  if (bitmap.GetFirstGapPos() == NOT_FOUND)
-  {
+  /*
+    if (bitmap.GetFirstGapPos() == NOT_FOUND)
+    {
 
-    int xx;
-	 cerr<<bitmap<<endl;
-	 int a = bitmap.GetFirstGapPos();
-	 obj.print();
-    cin>>xx;
-  }
-  */
+      int xx;
+  	 cerr<<bitmap<<endl;
+  	 int a = bitmap.GetFirstGapPos();
+  	 obj.print();
+      cin>>xx;
+    }
+    */
 
-/*
-  vector<float> scores(5);
-  scores[0] = 0.343423f;
-  scores[1] = 1.343423f;
-  scores[2] = 2.343423f;
-  scores[3] = 3.343423f;
-  scores[4] = 4.343423f;
-  */
+  /*
+    vector<float> scores(5);
+    scores[0] = 0.343423f;
+    scores[1] = 1.343423f;
+    scores[2] = 2.343423f;
+    scores[3] = 3.343423f;
+    scores[4] = 4.343423f;
+    */
 
   accumulator->PlusEquals(this, scores);
 
@@ -246,7 +241,7 @@ FFState* OpSequenceModel::Evaluate(
 
 
   //return statePtr;
- // return NULL;
+// return NULL;
 }
 
 FFState* OpSequenceModel::EvaluateChart(
@@ -277,29 +272,28 @@ std::vector<float> OpSequenceModel::GetFutureScores(const Phrase &source, const 
   ParallelPhrase pp(source, target);
   std::map<ParallelPhrase, Scores>::const_iterator iter;
   iter = m_futureCost.find(pp);
- //iter = m_coll.find(pp);
+//iter = m_coll.find(pp);
   if (iter == m_futureCost.end()) {
     vector<float> scores(5, 0);
     scores[0] = unkOpProb;
     return scores;
-  }
-  else {
+  } else {
     const vector<float> &scores = iter->second;
-	return scores;
+    return scores;
   }
 }
 
 void OpSequenceModel::SetParameter(const std::string& key, const std::string& value)
 {
-	  if (key == "feature-path") {
-		  m_featurePath = value;
-	  } else if (key == "path") {
-		  m_lmPath = value;
-	  } else if (key == "order") {
-		  lmOrder = Scan<int>(value);
-	  } else {
-		  StatefulFeatureFunction::SetParameter(key, value);
-	  }
+  if (key == "feature-path") {
+    m_featurePath = value;
+  } else if (key == "path") {
+    m_lmPath = value;
+  } else if (key == "order") {
+    lmOrder = Scan<int>(value);
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
 }
 
 } // namespace

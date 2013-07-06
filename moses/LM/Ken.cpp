@@ -383,7 +383,7 @@ LanguageModel *ConstructKenLM(const std::string &description, const std::string 
   try {
     lm::ngram::ModelType model_type;
     if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
-	  
+
       switch(model_type) {
       case lm::ngram::PROBING:
         return new LanguageModelKen<lm::ngram::ProbingModel>(description, line, file, factorType, lazy);

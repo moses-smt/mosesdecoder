@@ -130,7 +130,6 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
     std::nth_element(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
     for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++) {
       TargetPhrase *tp = new TargetPhrase(*it);
-      cerr << *tp << endl;
       phraseColl->Add(tp);
     }
 

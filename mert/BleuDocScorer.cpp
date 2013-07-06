@@ -31,11 +31,11 @@ const char REFLEN_CLOSEST[] = "closest";
 
 namespace MosesTuning
 {
-  
+
 
 BleuDocScorer::BleuDocScorer(const string& config)
-    : BleuScorer("BLEUDOC", config),
-      m_ref_length_type(CLOSEST)
+  : BleuScorer("BLEUDOC", config),
+    m_ref_length_type(CLOSEST)
 {
   const string reflen = getConfig(KEY_REFLEN, REFLEN_CLOSEST);
   if (reflen == REFLEN_AVERAGE) {
@@ -63,41 +63,40 @@ bool BleuDocScorer::OpenReferenceStream(istream* is, size_t file_id)
 
     if (line.find("<doc docid") != std::string::npos) {  // new document
       doc_id++;
-      m_references.push_back(new ScopedVector<Reference>()); 
+      m_references.push_back(new ScopedVector<Reference>());
       sid = 0;
-    }
-    else if (line.find("<seg") != std::string::npos) {  //new sentence
+    } else if (line.find("<seg") != std::string::npos) { //new sentence
       int start = line.find_first_of('>') + 1;
       std::string trans = line.substr(start, line.find_last_of('<')-start);
       trans = preprocessSentence(trans);
 
       if (file_id == 0) {
-		  Reference* ref = new Reference;
-		  m_references[doc_id]->push_back(ref);    // Take ownership of the Reference object.
+        Reference* ref = new Reference;
+        m_references[doc_id]->push_back(ref);    // Take ownership of the Reference object.
       }
 
       if (m_references[doc_id]->size() <= sid) {
-      	return false;
+        return false;
       }
       NgramCounts counts;
       size_t length = CountNgrams(trans, counts, kBleuNgramOrder);
-      
+
       //for any counts larger than those already there, merge them in
       for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
-		  const NgramCounts::Key& ngram = ci->first;
-		  const NgramCounts::Value newcount = ci->second;
-	
-		  NgramCounts::Value oldcount = 0;
-		  m_references[doc_id]->get().at(sid)->get_counts()->Lookup(ngram, &oldcount);
-		  if (newcount > oldcount) {
-			  m_references[doc_id]->get().at(sid)->get_counts()->operator[](ngram) = newcount;
-		  }
+        const NgramCounts::Key& ngram = ci->first;
+        const NgramCounts::Value newcount = ci->second;
+
+        NgramCounts::Value oldcount = 0;
+        m_references[doc_id]->get().at(sid)->get_counts()->Lookup(ngram, &oldcount);
+        if (newcount > oldcount) {
+          m_references[doc_id]->get().at(sid)->get_counts()->operator[](ngram) = newcount;
+        }
       }
       //add in the length
 
-	  m_references[doc_id]->get().at(sid)->push_back(length);
+      m_references[doc_id]->get().at(sid)->push_back(length);
       if (sid > 0 && sid % 100 == 0) {
-		  TRACE_ERR(".");
+        TRACE_ERR(".");
       }
       ++sid;
     }
@@ -127,14 +126,14 @@ void BleuDocScorer::prepareStats(size_t sid, const string& text, ScoreStats& ent
 
     //precision on each ngram type
     for (NgramCounts::const_iterator testcounts_it = testcounts.begin();
-	 testcounts_it != testcounts.end(); ++testcounts_it) {
+         testcounts_it != testcounts.end(); ++testcounts_it) {
       const NgramCounts::Value guess = testcounts_it->second;
       const size_t len = testcounts_it->first.size();
       NgramCounts::Value correct = 0;
-    
+
       NgramCounts::Value v = 0;
       if (m_references[sid]->get().at(i)->get_counts()->Lookup(testcounts_it->first, &v)) {
-	correct = min(v, guess);
+        correct = min(v, guess);
       }
       stats[len * 2 - 2] += correct;
       stats[len * 2 - 1] += guess;
@@ -143,13 +142,13 @@ void BleuDocScorer::prepareStats(size_t sid, const string& text, ScoreStats& ent
     const int reference_len = CalcReferenceLength(sid, i, length);
     stats.push_back(reference_len);
 
-    //ADD stats to totStats 
-    std::transform(stats.begin(), stats.end(), totStats.begin(), 
-		   totStats.begin(), std::plus<int>());
+    //ADD stats to totStats
+    std::transform(stats.begin(), stats.end(), totStats.begin(),
+                   totStats.begin(), std::plus<int>());
   }
-  entry.set(totStats); 
+  entry.set(totStats);
 }
-  
+
 std::vector<std::string> BleuDocScorer::splitDoc(const std::string& text)
 {
   std::vector<std::string> res;
@@ -188,18 +187,18 @@ statscore_t BleuDocScorer::calculateScore(const vector<int>& comps) const
 int BleuDocScorer::CalcReferenceLength(size_t doc_id, size_t sentence_id, size_t length)
 {
   switch (m_ref_length_type) {
-    case AVERAGE:
-      return m_references[doc_id]->get().at(sentence_id)->CalcAverage();
-      break;
-    case CLOSEST:
-      return m_references[doc_id]->get().at(sentence_id)->CalcClosest(length);
-      break;
-    case SHORTEST:
-      return m_references[doc_id]->get().at(sentence_id)->CalcShortest();
-      break;
-    default:
-      cerr << "unknown reference types." << endl;
-      exit(1);
+  case AVERAGE:
+    return m_references[doc_id]->get().at(sentence_id)->CalcAverage();
+    break;
+  case CLOSEST:
+    return m_references[doc_id]->get().at(sentence_id)->CalcClosest(length);
+    break;
+  case SHORTEST:
+    return m_references[doc_id]->get().at(sentence_id)->CalcShortest();
+    break;
+  default:
+    cerr << "unknown reference types." << endl;
+    exit(1);
   }
 }
 
