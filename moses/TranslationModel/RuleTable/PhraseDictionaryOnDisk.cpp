@@ -22,7 +22,7 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/TargetPhraseCollection.h"
-#include "moses/InputLatticeNode.h"
+#include "moses/InputPath.h"
 #include "moses/TranslationModel/CYKPlusParser/DotChartOnDisk.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h"
 

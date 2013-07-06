@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
-#include "moses/InputLatticeNode.h"
+#include "moses/InputPath.h"
 #include "util/exception.hh"
 
 using namespace std;

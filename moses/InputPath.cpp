@@ -1,4 +1,4 @@
-#include "InputLatticeNode.h"
+#include "InputPath.h"
 
 namespace Moses
 {

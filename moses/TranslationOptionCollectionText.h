@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_TranslationOptionCollectionText_h
 
 #include "TranslationOptionCollection.h"
-#include "InputLatticeNode.h"
+#include "InputPath.h"
 #include <map>
 #include <vector>
 

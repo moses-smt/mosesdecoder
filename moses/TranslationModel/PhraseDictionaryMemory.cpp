@@ -34,7 +34,7 @@
 #include "moses/TranslationModel/RuleTable/LoaderFactory.h"
 #include "moses/TranslationModel/RuleTable/Loader.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.h"
-#include "moses/InputLatticeNode.h"
+#include "moses/InputPath.h"
 
 using namespace std;
 
