@@ -516,7 +516,7 @@ build-osm
 	out: osm-model
 	ignore-unless: operation-sequence-model
 	rerun-on-change: operation-sequence-model training-options script giza-settings 
-	template: $moses-script-dir/OSM/OSM-Train.sh IN0.$output-extension IN0.$input-extension IN1.$alignment-symmetrization-method $operation-sequence-model-order OUT $moses-src-dir
+	template: $moses-script-dir/OSM/OSM-Train.sh IN0.$output-extension IN0.$input-extension IN1.$alignment-symmetrization-method $operation-sequence-model-order OUT $moses-src-dir $srilm-dir
 	default-name: model/OSM
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus

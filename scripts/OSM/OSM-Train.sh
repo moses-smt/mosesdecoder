@@ -19,11 +19,11 @@ $6/scripts/OSM/generateSequences $5/e $5/f $5/align $5/Singletons > $5/opCorpus	
 
 echo 'Learning Operation Sequence Translation Model'
 
-ngram-count -kndiscount -order $4 -unk -text $5/opCorpus -lm $5/operationLM
+$7/ngram-count -kndiscount -order $4 -unk -text $5/opCorpus -lm $5/operationLM
 
 echo 'Binarizing'
 
-$6/bin/build_binary $5/operationLM$4 $5/operationLM.bin
+$6/bin/build_binary $5/operationLM $5/operationLM.bin
 
 \rm $5/e
 \rm $5/f
