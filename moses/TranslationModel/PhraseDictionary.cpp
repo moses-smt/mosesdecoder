@@ -69,11 +69,11 @@ void PhraseDictionary::SetFeaturesToApply()
   }
 }
 
-void PhraseDictionary::SetTargetPhraseFromPtMatrix(const std::vector<InputLatticeNode*> &phraseDictionaryQueue) const
+void PhraseDictionary::SetTargetPhraseFromPtMatrix(const std::vector<InputPath*> &phraseDictionaryQueue) const
 {
 //  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
   for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
-    InputLatticeNode &node = *phraseDictionaryQueue[i];
+    InputPath &node = *phraseDictionaryQueue[i];
 
     const Phrase &phrase = node.GetPhrase();
     const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollection(phrase);

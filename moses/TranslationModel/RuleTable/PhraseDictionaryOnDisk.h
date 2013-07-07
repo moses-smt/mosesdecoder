@@ -40,7 +40,7 @@ namespace Moses
 {
 class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
-class InputLatticeNode;
+class InputPath;
 
 /** Implementation of on-disk phrase table for hierarchical/syntax model.
  */
@@ -77,7 +77,7 @@ public:
     const ChartCellCollectionBase &);
 
   virtual void InitializeForInput(InputType const& source);
-  void SetTargetPhraseFromPtMatrix(const std::vector<InputLatticeNode*> &phraseDictionaryQueue) const;
+  void SetTargetPhraseFromPtMatrix(const std::vector<InputPath*> &phraseDictionaryQueue) const;
 
 };
 

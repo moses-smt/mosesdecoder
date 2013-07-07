@@ -38,12 +38,12 @@ class Sentence;
 class TranslationOptionCollectionText : public TranslationOptionCollection
 {
 public:
-  typedef std::vector< std::vector<InputLatticeNode*> > TargetPhraseMatrix;
+  typedef std::vector< std::vector<InputPath*> > TargetPhraseMatrix;
 
 protected:
   TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
 
-  InputLatticeNode &GetInputLatticeNode(size_t startPos, size_t endPos);
+  InputPath &GetInputPath(size_t startPos, size_t endPos);
 
 public:
   void ProcessUnknownWord(size_t sourcePos);

@@ -134,13 +134,13 @@ void PhraseDictionaryMemory::SortAndPrune()
   }
 }
 
-void PhraseDictionaryMemory::SetTargetPhraseFromPtMatrix(const std::vector<InputLatticeNode*> &phraseDictionaryQueue) const
+void PhraseDictionaryMemory::SetTargetPhraseFromPtMatrix(const std::vector<InputPath*> &phraseDictionaryQueue) const
 {
 //  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
   for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
-    InputLatticeNode &node = *phraseDictionaryQueue[i];
+    InputPath &node = *phraseDictionaryQueue[i];
     const Phrase &phrase = node.GetPhrase();
-    const InputLatticeNode *prevNode = node.GetPrevNode();
+    const InputPath *prevNode = node.GetPrevNode();
 
     const PhraseDictionaryNodeMemory *prevPtNode = NULL;
 

@@ -14,26 +14,26 @@ class TargetPhraseCollection;
 /** Each node contains
 1. substring used to searching the phrase table
 2. the source range it covers
-3. a list of InputLatticeNode that it is a prefix of
+3. a list of InputPath that it is a prefix of
 This is for both sentence input, and confusion network/lattices
 */
-class InputLatticeNode
+class InputPath
 {
-  friend std::ostream& operator<<(std::ostream& out, const InputLatticeNode &obj);
+  friend std::ostream& operator<<(std::ostream& out, const InputPath &obj);
 
 protected:
-  const InputLatticeNode *m_prevNode;
+  const InputPath *m_prevNode;
   Phrase m_phrase;
   WordsRange m_range;
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
 
 public:
-  explicit InputLatticeNode()
+  explicit InputPath()
     : m_prevNode(NULL)
     , m_range(NOT_FOUND, NOT_FOUND) {
   }
 
-  InputLatticeNode(const Phrase &phrase, const WordsRange &range, const InputLatticeNode *prevNode)
+  InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode)
     :m_prevNode(prevNode)
     ,m_phrase(phrase)
     ,m_range(range) {
@@ -45,7 +45,7 @@ public:
   const WordsRange &GetWordsRange() const {
     return m_range;
   }
-  const InputLatticeNode *GetPrevNode() const {
+  const InputPath *GetPrevNode() const {
     return m_prevNode;
   }
 

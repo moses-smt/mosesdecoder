@@ -2,7 +2,7 @@
 
 namespace Moses
 {
-const TargetPhraseCollection *InputLatticeNode::GetTargetPhrases(const PhraseDictionary &phraseDictionary) const
+const TargetPhraseCollection *InputPath::GetTargetPhrases(const PhraseDictionary &phraseDictionary) const
 {
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
   iter = m_targetPhrases.find(&phraseDictionary);
@@ -12,7 +12,7 @@ const TargetPhraseCollection *InputLatticeNode::GetTargetPhrases(const PhraseDic
   return iter->second.first;
 }
 
-const void *InputLatticeNode::GetPtNode(const PhraseDictionary &phraseDictionary) const
+const void *InputPath::GetPtNode(const PhraseDictionary &phraseDictionary) const
 {
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
   iter = m_targetPhrases.find(&phraseDictionary);
@@ -22,7 +22,7 @@ const void *InputLatticeNode::GetPtNode(const PhraseDictionary &phraseDictionary
   return iter->second.second;
 }
 
-std::ostream& operator<<(std::ostream& out, const InputLatticeNode& obj)
+std::ostream& operator<<(std::ostream& out, const InputPath& obj)
 {
   out << &obj << " " << obj.GetWordsRange() << " " << obj.GetPrevNode() << " " << obj.GetPhrase();
 
