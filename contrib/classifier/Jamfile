@@ -1,4 +1,4 @@
-alias headers : : : : <include>. <include>../moses/src <include>.. ;
+alias headers : : : : <include>. <include>..//..//moses// <include>.. ;
 
 boost 103600 ;
 

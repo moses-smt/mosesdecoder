@@ -54,8 +54,7 @@ public:
     size_t spanStart,
     size_t spanEnd,
     const std::vector<Translation> &translations,
-    std::vector<float> &losses,
-    std::string extraFeature = "");
+    std::vector<float> &losses);
 
 private:
   const ExtractorConfig &m_config;      // Configuration of features.
