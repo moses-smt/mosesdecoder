@@ -11,6 +11,4 @@ if $(with-vw) {
   alias vw_objects : VWLibraryConsumer.o vw allreduce : : : <library>boost_program_options ;
   lib classifier : [ glob *.cpp : VWLibraryConsumer.cpp ] vw_objects headers ;
   echo "Linking with Vowpal Wabbit" ;
-} else {
-  lib classifier : headers ;
 }

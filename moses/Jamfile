@@ -10,7 +10,12 @@ if $(with-dlib) {
   dlib = ;
 }
 
-alias headers : ../util//kenutil ..//contrib//classifier//classifier : : : $(max-factors) $(dlib) ; 
+local classifier = ;
+if [ option.get "with-vw" ] {
+  classifier += ..//contrib//classifier//classifier ;
+}
+
+alias headers : ../util//kenutil $(classifier) : : : $(max-factors) $(dlib) ; 
 alias ThreadPool : ThreadPool.cpp ;
 
 if [ option.get "with-synlm" : no : yes ] = yes
