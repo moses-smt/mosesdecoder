@@ -2,10 +2,13 @@
 
 use strict;
 use File::Basename;
+use FindBin qw($RealBin);
 
 sub Beautify($);
 
-Beautify("/home/hieu/workspace/github/mosesdecoder");
+print STDERR "RealBin=$RealBin \n\n";
+
+Beautify("$RealBin/../..");
 
 sub Beautify($)
 {
