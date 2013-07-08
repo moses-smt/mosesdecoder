@@ -51,8 +51,8 @@ int main(int argc, char **argv)
   const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
   const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");
   const_cast<std::vector<std::string>&>(parameter->GetParam("verbose")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
+  //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
+  //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
 
   StaticData::InstanceNonConst().LoadData(parameter);
 
