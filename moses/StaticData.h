@@ -58,6 +58,9 @@ class DecodeStep;
 class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
 class InputFeature;
+#ifdef HAVE_VW
+class ClassifierFeature;
+#endif
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -129,6 +132,9 @@ protected:
   mutable size_t m_verboseLevel;
   WordPenaltyProducer* m_wpProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+#ifdef HAVE_VW
+  ClassifierFeature *m_classifierFeature;
+#endif
   const InputFeature *m_inputFeature;
 
   bool m_reportSegmentation;

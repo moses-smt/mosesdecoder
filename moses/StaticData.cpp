@@ -63,6 +63,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/PhrasePenalty.h"
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
+#ifdef HAVE_VW
+#include "moses/FF/ClassifierFeature.h"
+#endif
 
 #include "LM/Ken.h"
 #ifdef LM_IRST
@@ -208,6 +211,26 @@ bool StaticData::LoadData(Parameter *parameter)
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
     m_needAlignmentInfo = true;
   }
+
+#ifdef HAVE_VW
+  if (m_parameter->GetParam("classifier-model").size() > 0) {
+    if (m_parameter->GetParam("classifier-config").size() <= 0) {
+      UserMessage::Add(string("classifier-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-classifier").size() <= 0) {
+      UserMessage::Add(string("weight-classifier not specified"));
+      return false;
+    }
+    float classifierWeight = Scan<float>(m_parameter->GetParam("weight-classifier")[0]);
+    m_classifierFeature = new ClassifierFeature(m_scoreIndexManager, classifierWeight);
+    if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("classifier-model")[0],
+      m_parameter->GetParam("classifier-config")[0])) {
+      UserMessage::Add(string("Failed to initialize classifier feature"));
+      return false;  
+    }
+  }
+#endif // HAVE_VW
 
   // n-best
   if (m_parameter->GetParam("n-best-list").size() >= 2) {

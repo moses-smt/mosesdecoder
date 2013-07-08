@@ -195,6 +195,11 @@ Parameter::Parameter()
   AddParam("print-id", "prefix translations with id. Default if false");
 
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
+#ifdef HAVE_VW
+  AddParam("weight-classifier", "clfr", "weight of the discriminative classifier");
+  AddParam("classifier-model", "clfrm", "classifier model"); 
+  AddParam("classifier-config", "clfrf", "classifier configuration file for feature extraction"); 
+#endif
 }
 
 Parameter::~Parameter()
