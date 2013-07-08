@@ -33,14 +33,14 @@ extern "C" {
 #endif
 
 #if defined(__STDC__)
-  int DeclareParams(char *, ...);
+int DeclareParams(char *, ...);
 #else
-  int DeclareParams();
+int DeclareParams();
 #endif
 
-  int	GetParams(int *n, char ***a,char *CmdFileName),
-      SPrintParams(),
-      PrintParams();
+int	GetParams(int *n, char ***a,char *CmdFileName),
+    SPrintParams(),
+    PrintParams();
 
 #ifdef  __cplusplus
 }
