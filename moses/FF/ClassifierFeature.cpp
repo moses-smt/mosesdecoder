@@ -92,6 +92,10 @@ vector<ScoreComponentCollection> ClassifierFeature::EvaluateOptions(const vector
 
   if (options.size() != 0 && ! options[0]->IsOOV()) {
     vector<float> losses(options.size());
+    ContextType srcContext;
+    for (size_t i = 0; i < src.GetSize(); i++) {
+      srcContext.push_back(GetFactors(src.GetWord(i), StaticData::Instance().GetInputFactorOrder()));
+    }
     vector<Translation> classifierOptions;
 
     vector<TranslationOption *>::const_iterator optIt;
@@ -99,8 +103,8 @@ vector<ScoreComponentCollection> ClassifierFeature::EvaluateOptions(const vector
       CheckIndex((*optIt)->GetTargetPhrase());
       classifierOptions.push_back(GetClassifierTranslation(*optIt));
     }
-    VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
-    m_extractor->GenerateFeatures(p_consumer, src.m_classifierContext, options[0]->GetStartPos(),
+    VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
+    m_extractor->GenerateFeatures(p_consumer, srcContext, options[0]->GetStartPos(),
         options[0]->GetEndPos(), classifierOptions, losses);
     m_consumerFactory->Release(p_consumer);
 

@@ -58,6 +58,15 @@ private:
   static void Normalize2(std::vector<float> &losses) const;
   static void Normalize3(std::vector<float> &losses) const;
 
+  std::vector<std::string> GetFactors(const Word &word, const std::vector<FactorType> &factors) {
+    std::vector<std::string> out;
+    std::vector<FactorType>::const_iterator it = factors.begin();
+    while (it != factors.end()) {
+      out.push_back(word.GetFactor(*it).as_string());
+    }
+    return out;
+  }
+
   std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
   mutable Classifier::VWLibraryPredictConsumerFactory	*m_consumerFactory; // XXX mutable
   mutable Classifier::FeatureExtractor *m_extractor; // XXX mutable
