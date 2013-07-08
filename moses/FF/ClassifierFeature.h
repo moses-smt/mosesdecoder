@@ -6,12 +6,12 @@
 #ifdef HAVE_VW
 
 #include "FeatureFunction.h"
-#include "TypeDef.h"
-#include "TranslationOption.h"
-#include "ScoreComponentCollection.h"
-#include "InputType.h"
-#include "FeatureExtractor.h"
-#include "FeatureConsumer.h"
+#include "moses/TypeDef.h"
+#include "moses/TranslationOption.h"
+#include "moses/ScoreComponentCollection.h"
+#include "moses/InputType.h"
+#include "contrib/classifier/FeatureExtractor.h"
+#include "contrib/classifier/FeatureConsumer.h"
 
 #include <map>
 #include <string>
@@ -25,21 +25,21 @@ namespace Moses
 class ClassifierFeature : public StatelessFeatureFunction
 {
 public:
-  ClassifierFeature(ScoreIndexManager &scoreIndexManager, float weight);
-
-  // read required data files
-  bool Initialize(const std::string &modelFile, const std::string &configFile);
+  ClassifierFeature(const std::string &line);
 
   // score a list of translation options
   // this is required to contain all possible translations
   // of a given source span
   std::vector<ScoreComponentCollection> EvaluateOptions(const std::vector<TranslationOption *> &options, const InputType &src) const;
 
-  // mandatory methods for Moses feature functions
+  // methods for Moses feature functions
+  void Load();
+  void SetParameter(const std::string& key, const std::string& value);
   size_t GetNumScoreComponents() const;
   std::string GetScoreProducerDescription(unsigned) const;
   std::string GetScoreProducerWeightShortName(unsigned) const;
   size_t GetNumInputScores() const;
+  bool IsUseable(const FactorMask &mask) const { return true; }
 
   // calculate scores when collecting translation options, not during decoding
   virtual bool ComputedInTranslationOption() const
@@ -53,10 +53,10 @@ private:
   // Build Classifier::Translation object from Moses structures
   Classifier::Translation GetClassifierTranslation(const TranslationOption *option) const;
 
-  static void NormalizeSquaredLoss(std::vector<float> &losses) const;
-  static void NormalizeLogisticLossBasic(std::vector<float> &losses) const;
-  static void Normalize2(std::vector<float> &losses) const;
-  static void Normalize3(std::vector<float> &losses) const;
+  static void NormalizeSquaredLoss(std::vector<float> &losses);
+  static void NormalizeLogisticLossBasic(std::vector<float> &losses);
+  static void Normalize2(std::vector<float> &losses);
+  static void Normalize3(std::vector<float> &losses);
 
   std::vector<std::string> GetFactors(const Word &word, const std::vector<FactorType> &factors) {
     std::vector<std::string> out;
@@ -71,7 +71,8 @@ private:
   mutable Classifier::VWLibraryPredictConsumerFactory	*m_consumerFactory; // XXX mutable
   mutable Classifier::FeatureExtractor *m_extractor; // XXX mutable
   Classifier::ExtractorConfig m_extractorConfig;
-  void (*m_normalizer)(std::vector<float> & const); // normalization function
+  void (*m_normalizer)(std::vector<float> &); // normalization function
+  std::string m_configFile, m_modelFile;
 };
 
 }

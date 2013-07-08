@@ -322,30 +322,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_useTransOptCache = false;
   }
 
-#ifdef HAVE_VW
-  if (m_parameter->GetParam("classifier-model").size() > 0) {
-    if (m_parameter->GetParam("classifier-config").size() <= 0) {
-      UserMessage::Add(string("classifier-config not specified"));
-      return false;
-    }
-    if (m_parameter->GetParam("weight-classifier").size() <= 0) {
-      UserMessage::Add(string("weight-classifier not specified"));
-      return false;
-    }
-    if (m_useTransOptCache) {
-      UserMessage::Add("Warning: disabling translation option cache.");
-      m_useTransOptCache = false;
-    }
-    float classifierWeight = Scan<float>(m_parameter->GetParam("weight-classifier")[0]);
-    m_classifierFeature = new ClassifierFeature(m_scoreIndexManager, classifierWeight);
-    if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("classifier-model")[0],
-      m_parameter->GetParam("classifier-config")[0])) {
-      UserMessage::Add(string("Failed to initialize classifier feature"));
-      return false;  
-    }
-  }
-#endif // HAVE_VW
-
   //input factors
   const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
   for(size_t i=0; i<inputFactorVector.size(); i++) {
@@ -729,6 +705,18 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
+#ifdef HAVE_VW
+    else if (feature == "ClassifierFeature") {
+      ClassifierFeature *model = new ClassifierFeature(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      if (m_useTransOptCache) {
+        UserMessage::Add("Warning: disabling translation option cache (XXX this might not work, check!).");
+        m_useTransOptCache = false;
+      }
+      SetWeights(model, weights);
+    }
+#endif // HAVE_VW
+
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {

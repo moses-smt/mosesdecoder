@@ -2,12 +2,11 @@
 
 #ifdef HAVE_VW
 
-#include "util/check.hh"
-#include "FFState.h"
-#include "StaticData.h"
 #include "ClassifierFeature.h"
-#include "WordsRange.h"
-#include "Util.h"
+#include "util/check.hh"
+#include "moses/StaticData.h"
+#include "moses/WordsRange.h"
+#include "moses/Util.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -16,27 +15,28 @@
 #include <exception>
 
 using namespace std;
-using namespace boost::bimaps;
 using namespace Classifier;
 
 namespace Moses
 {
 
-ClassifierFeature::ClassifierFeature(ScoreIndexManager &scoreIndexManager, float weight)
+ClassifierFeature::ClassifierFeature(const std::string &line)
+  : StatelessFeatureFunction("ClassifierFeature", line)
 {
-  scoreIndexManager.AddScoreProducer(this);
-  vector<float> weights;
-  weights.push_back(weight);
-
   m_tgtFactors.push_back(0);
-  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
+  ReadParameters();
 }
 
-bool ClassifierFeature::Initialize(const string &modelFile, const string &configFile)
+void ClassifierFeature::Load()
 {
-  m_extractorConfig.Load(configFile);
-
-  m_consumerFactory = new VWLibraryPredictConsumerFactory(modelFile, m_extractorConfig.GetVWOptionsPredict(), 255);
+  if (m_configFile.empty())
+    throw runtime_error("No config file specified for ClassifierFeature");
+  if (m_modelFile.empty())
+    throw runtime_error("No model file specified for ClassifierFeature");
+  m_extractorConfig.Load(m_configFile);
+  if (! m_extractorConfig.IsLoaded())
+    throw runtime_error("Failed to load configuration for ClassifierFeature");
+  m_consumerFactory = new VWLibraryPredictConsumerFactory(m_modelFile, m_extractorConfig.GetVWOptionsPredict(), 255);
 
   m_extractor = new FeatureExtractor(m_extractorConfig, false);
 
@@ -49,8 +49,17 @@ bool ClassifierFeature::Initialize(const string &modelFile, const string &config
   } else {
     throw runtime_error("Unknown normalization function: " + normFunc);
   }
+}
 
-  return true;
+void ClassifierFeature::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "config") {
+    m_configFile = value;
+  } else if (key == "model") {
+    m_modelFile = value;
+  } else {
+    StatelessFeatureFunction::SetParameter(key, value);
+  }
 }
 
 ScoreComponentCollection ClassifierFeature::ScoreFactory(float score) const
@@ -143,7 +152,7 @@ size_t ClassifierFeature::GetNumInputScores() const
   return 0;
 }
 
-void ClassifierFeature::NormalizeSquaredLoss(vector<float> &losses) const
+void ClassifierFeature::NormalizeSquaredLoss(vector<float> &losses)
 {
 
 	// This is (?) a good choice for sqrt loss (default loss function in VW)
@@ -170,7 +179,7 @@ void ClassifierFeature::NormalizeSquaredLoss(vector<float> &losses) const
   }
 }
 
-void ClassifierFeature::NormalizeLogisticLossBasic(vector<float> &losses) const
+void ClassifierFeature::NormalizeLogisticLossBasic(vector<float> &losses)
 {
 
 	// Use this with logistic loss (we switched to this in April/May 2013)
@@ -186,7 +195,7 @@ void ClassifierFeature::NormalizeLogisticLossBasic(vector<float> &losses) const
   }
 }
 
-void ClassifierFeature::Normalize2(vector<float> &losses) const
+void ClassifierFeature::Normalize2(vector<float> &losses)
 {
   float sum = 0;
   float minLoss;
@@ -213,7 +222,7 @@ void ClassifierFeature::Normalize2(vector<float> &losses) const
   }
 }
 
-void ClassifierFeature::Normalize3(vector<float> &losses) const
+void ClassifierFeature::Normalize3(vector<float> &losses)
 {
   float sum = 0;
   vector<float>::iterator it;

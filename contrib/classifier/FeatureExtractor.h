@@ -33,7 +33,7 @@ struct TTableEntry
 // One translation (phrase target side). 
 struct Translation
 {
-  vector<string> translation;              // words (surface forms) of translation
+  std::vector<std::string> translation;    // words (surface forms) of translation
   AlignmentType m_alignment;               // phrase-internal word alignment
   std::vector<TTableEntry> m_ttableScores; // phrase scores in each phrase table
 };
