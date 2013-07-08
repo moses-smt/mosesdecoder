@@ -10,6 +10,7 @@ namespace Moses
 
 class PhraseDictionary;
 class TargetPhraseCollection;
+class ScoreComponentCollection;
 
 /** Each node contains
 1. substring used to searching the phrase table
@@ -25,19 +26,19 @@ protected:
   const InputPath *m_prevNode;
   Phrase m_phrase;
   WordsRange m_range;
+  const ScoreComponentCollection *m_inputScore;
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
 
 public:
   explicit InputPath()
     : m_prevNode(NULL)
-    , m_range(NOT_FOUND, NOT_FOUND) {
+    , m_range(NOT_FOUND, NOT_FOUND)
+    , m_inputScore(NULL) {
   }
 
-  InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode)
-    :m_prevNode(prevNode)
-    ,m_phrase(phrase)
-    ,m_range(range) {
-  }
+  InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode
+		  ,const ScoreComponentCollection *inputScore);
+  ~InputPath();
 
   const Phrase &GetPhrase() const {
     return m_phrase;
@@ -57,6 +58,8 @@ public:
   }
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;
+  const ScoreComponentCollection *GetInputScore() const
+  { return m_inputScore; }
 
 };
 

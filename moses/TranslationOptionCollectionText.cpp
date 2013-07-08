@@ -46,11 +46,11 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
       WordsRange range(startPos, endPos);
 
       if (range.GetNumWordsCovered() == 1) {
-        InputPath *node = new InputPath(subphrase, range, NULL);
+        InputPath *node = new InputPath(subphrase, range, NULL, NULL);
         vec.push_back(node);
       } else {
         const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-        InputPath *node = new InputPath(subphrase, range, &prevNode);
+        InputPath *node = new InputPath(subphrase, range, &prevNode, NULL);
         vec.push_back(node);
       }
     }
