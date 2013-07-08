@@ -76,7 +76,7 @@ void TranslationOption::CacheLexReorderingScores(const LexicalReordering &produc
 
 void TranslationOption::AddStatelessScore(const ScoreComponentCollection &score)
 {
-  m_scoreBreakdown.PlusEquals(score);
+  m_targetPhrase.GetScoreBreakdown().PlusEquals(score);
 }
 
 void TranslationOption::Evaluate(const InputType &source)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FeatureFunction.h"
+#include "moses/ScoreComponentCollection.h"
 
 namespace Moses
 {
