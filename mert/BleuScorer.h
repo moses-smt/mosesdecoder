@@ -67,7 +67,7 @@ public:
   // NOTE: this function is used for unit testing.
   virtual bool OpenReferenceStream(std::istream* is, std::size_t file_id);
 
-	//private:
+  //private:
 protected:
   ReferenceLengthType m_ref_length_type;
 
@@ -76,7 +76,7 @@ protected:
 
   // constructor used by subclasses
   BleuScorer(const std::string& name, const std::string& config): StatisticsBasedScorer(name,config) {}
-	
+
   // no copying allowed
   BleuScorer(const BleuScorer&);
   BleuScorer& operator=(const BleuScorer&);

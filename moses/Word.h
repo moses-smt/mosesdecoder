@@ -59,8 +59,7 @@ public:
   /** deep copy */
   Word(const Word &copy)
     :m_isNonTerminal(copy.m_isNonTerminal)
-	,m_isOOV(copy.m_isOOV)
-  {
+    ,m_isOOV(copy.m_isOOV) {
     std::memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
   }
 
