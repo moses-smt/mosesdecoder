@@ -537,18 +537,23 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       } // for (++iterStep
 
       // add scores of stateless features that can be pre-computed here
-      PartialTranslOptColl &lastPartialTranslOptColl = *oldPtoc;
-      const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
-      const std::vector<const StatelessFeatureFunction*> &ffs =
-        StatelessFeatureFunction::GetStatelessFeatureFunctions();
+      const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
+      const std::vector<const StatelessFeatureFunction*> &ffs = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+
       std::vector<const StatelessFeatureFunction*>::const_iterator ffIt;
       vector<TranslationOption*>::const_iterator iterColl;
+
+      // over all feature functions
       for (ffIt = ffs.begin(); ffIt != ffs.end(); ++ffIt) {
-        if (! (*ffIt)->ComputedInTranslationOption()) continue;
+        if (! (*ffIt)->ComputedInTranslationOption()) // not computed before decoding
+          continue;
+
+        // evaluate all translation options
         vector<ScoreComponentCollection> scores = (*ffIt)->EvaluateOptions(partTransOptList, m_source);
+
+        // update scores
         vector<ScoreComponentCollection>::const_iterator scoreIt = scores.begin();
         for (iterColl = partTransOptList.begin(); iterColl != partTransOptList.end(); ++iterColl) {
-          assert(scoreIt != scores.end());
           (*iterColl)->AddStatelessScore(*scoreIt++);
         }
       }
@@ -567,6 +572,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         }
       }
 
+      PartialTranslOptColl &lastPartialTranslOptColl = *oldPtoc;
       lastPartialTranslOptColl.DetachAll();
       totalEarlyPruned += oldPtoc->GetPrunedCount();
       delete oldPtoc;
