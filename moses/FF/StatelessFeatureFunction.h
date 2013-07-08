@@ -34,8 +34,23 @@ public:
                              ScoreComponentCollection* accumulator) const {
   }
 
+  /**
+   * Implement this if your feature can be computed before decoding
+   * (when translation options are collected). You will get access to all phrase
+   * translations at once as a reward. Override ComputedInTranslationOption()
+   * and return true.
+   */
+  virtual std::vector<ScoreComponentCollection> EvaluateOptions(
+      const std::vector<TranslationOption *> &options, const InputType &src) const {
+    return std::vector<ScoreComponentCollection>(); // empty 
+  }
+
   virtual bool IsStateless() const {
     return true;
+  }
+
+  virtual bool ComputedInTranslationOption() const {
+    return false;
   }
 
 };

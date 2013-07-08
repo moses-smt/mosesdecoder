@@ -100,6 +100,10 @@ if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
 }
 
+if [ option.get "with-vw" ] ;
+  requirements += <define>HAVE_VW ;
+}
+
 project : default-build
   <threading>multi
   <warnings>on
