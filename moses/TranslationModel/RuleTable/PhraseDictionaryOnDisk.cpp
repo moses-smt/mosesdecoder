@@ -124,27 +124,26 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<Input
 
       if (lastWordOnDisk == NULL) {
         // OOV according to this phrase table. Not possible to extend
-    	node.SetTargetPhrases(*this, NULL, NULL);
-      }
-      else {
-		  const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
-		  if (ptNode) {
-			vector<float> weightT = StaticData::Instance().GetWeights(this);
-			OnDiskPt::Vocab &vocab = wrapper.GetVocab();
+        node.SetTargetPhrases(*this, NULL, NULL);
+      } else {
+        const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
+        if (ptNode) {
+          vector<float> weightT = StaticData::Instance().GetWeights(this);
+          OnDiskPt::Vocab &vocab = wrapper.GetVocab();
 
-			const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
-			TargetPhraseCollection *targetPhrases
-					= targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+          const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
+          TargetPhraseCollection *targetPhrases
+            = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
 
-			node.SetTargetPhrases(*this, targetPhrases, ptNode);
+          node.SetTargetPhrases(*this, targetPhrases, ptNode);
 
-			delete targetPhrasesOnDisk;
+          delete targetPhrasesOnDisk;
 
-		  } else {
-			node.SetTargetPhrases(*this, NULL, NULL);
-		  }
+        } else {
+          node.SetTargetPhrases(*this, NULL, NULL);
+        }
 
-		  delete lastWordOnDisk;
+        delete lastWordOnDisk;
       }
     }
   }

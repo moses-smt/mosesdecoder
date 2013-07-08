@@ -265,9 +265,9 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   ret->SetAlignNonTerm(alignNonTerm);
 
   if (isSyntax) {
-	  Moses::Word *lhsTarget = new Moses::Word(true);
-	  GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
-	  ret->SetTargetLHS(lhsTarget);
+    Moses::Word *lhsTarget = new Moses::Word(true);
+    GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
+    ret->SetTargetLHS(lhsTarget);
   }
 
   // set source phrase
