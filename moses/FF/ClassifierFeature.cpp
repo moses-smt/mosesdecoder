@@ -74,14 +74,13 @@ Translation ClassifierFeature::GetClassifierTranslation(const TranslationOption 
   Translation classifierOpt;
 
   // alignment
-  const AlignmentInfo &alignInfo = option->GetTargetPhrase().GetAlignmentInfo();
+  const AlignmentInfo &alignInfo = option->GetTargetPhrase().GetAlignTerm();
   AlignmentInfo::const_iterator it;
   for (it = alignInfo.begin(); it != alignInfo.end(); it++)
     classifierOpt.m_alignment.insert(*it);
 
   // scores
-  const TranslationSystem& system = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<PhraseDictionaryFeature*>& ttables = system.GetPhraseDictionaries();
+  const vector<PhraseDictionaryFeature*> &ttables = StaticData::Instance().GetPhraseDictionaries();
   const ScoreComponentCollection &scoreCollection = option->GetTargetPhrase().GetScoreBreakdown();
   TTableEntry tableEntry;
   tableEntry.m_id = ""; // no domain adaptation so far

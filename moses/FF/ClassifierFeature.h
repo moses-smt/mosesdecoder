@@ -58,7 +58,7 @@ private:
     std::vector<std::string> out;
     std::vector<FactorType>::const_iterator it = factors.begin();
     while (it != factors.end()) {
-      out.push_back(word.GetFactor(*it)->GetString());
+      out.push_back(word.GetFactor(*it)->GetString().as_string());
     }
     return out;
   }
