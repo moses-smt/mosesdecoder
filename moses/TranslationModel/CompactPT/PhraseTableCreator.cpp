@@ -38,7 +38,7 @@ bool operator<(const PackedItem &pi1, const PackedItem &pi2)
 }
 
 std::string PhraseTableCreator::m_phraseStopSymbol = "__SPECIAL_STOP_SYMBOL__";
-std::string PhraseTableCreator::m_separator = " ||| ";
+std::string PhraseTableCreator::m_separator = "|||";
 
 PhraseTableCreator::PhraseTableCreator(std::string inPath,
                                        std::string outPath,
@@ -332,12 +332,12 @@ void PhraseTableCreator::CreateRankHash()
 
 inline std::string PhraseTableCreator::MakeSourceKey(std::string &source)
 {
-  return source + m_separator;
+  return source + " " + m_separator + " ";
 }
 
 inline std::string PhraseTableCreator::MakeSourceTargetKey(std::string &source, std::string &target)
 {
-  return source + m_separator + target + m_separator;
+  return source + " " + m_separator + " " + target + " " + m_separator + " ";
 }
 
 void PhraseTableCreator::EncodeTargetPhrases()
@@ -1034,17 +1034,24 @@ void RankingTask::operator()()
     for(size_t i = 0; i < lines.size(); i++) {
       std::vector<std::string> tokens;
       Moses::TokenizeMultiCharSeparator(tokens, lines[i], m_creator.m_separator);
-
-      if(tokens.size() < 3) {
+      
+      for(std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++)
+        *it = Moses::Trim(*it);
+      
+      if(tokens.size() < 4) {
         std::cerr << "Error: It seems the following line has a wrong format:" << std::endl;
         std::cerr << "Line " << i << ": " << lines[i] << std::endl;
         abort();
       }
-      if(tokens.size() == 3 && m_creator.m_warnMe) {
-        std::cerr << "Warning: It seems the following line contains no alignment information, " << std::endl;
-        std::cerr << "but you are using PREnc encoding which makes use of alignment data. " << std::endl;
-        std::cerr << "Better use  -encoding None  or disable this warning with  -no-warnings ." << std::endl;
+      
+      if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
+        std::cerr << "Error: It seems the following line contains no alignment information, " << std::endl;
+        std::cerr << "but you are using ";
+        std::cerr << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+        std::cerr << " encoding which makes use of alignment data. " << std::endl;
+        std::cerr << "Use -encoding None" << std::endl;
         std::cerr << "Line " << i << ": " << lines[i] << std::endl;
+        abort();
       }
 
       std::vector<float> scores = Tokenize<float>(tokens[2]);
@@ -1125,18 +1132,23 @@ void EncodingTask::operator()()
       std::vector<std::string> tokens;
       Moses::TokenizeMultiCharSeparator(tokens, lines[i], m_creator.m_separator);
 
+      for(std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++)
+        *it = Moses::Trim(*it);
+      
       if(tokens.size() < 3) {
         std::cerr << "Error: It seems the following line has a wrong format:" << std::endl;
         std::cerr << "Line " << i << ": " << lines[i] << std::endl;
         abort();
       }
-      if(tokens.size() == 3 && m_creator.m_coding != PhraseTableCreator::None && m_creator.m_warnMe) {
-        std::cerr << "Warning: It seems the following line contains no alignment information, " << std::endl;
+      
+      if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
+        std::cerr << "Error: It seems the following line contains no alignment information, " << std::endl;
         std::cerr << "but you are using ";
         std::cerr << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
         std::cerr << " encoding which makes use of alignment data. " << std::endl;
-        std::cerr << "Better use -encoding None or disable this warning with -no-warnings." << std::endl;
+        std::cerr << "Use -encoding None" << std::endl;
         std::cerr << "Line " << i << ": " << lines[i] << std::endl;
+        abort();
       }
 
       size_t ownRank = 0;
