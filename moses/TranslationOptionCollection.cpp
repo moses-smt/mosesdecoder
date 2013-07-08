@@ -542,8 +542,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       std::vector<const StatelessFeatureFunction*>::const_iterator ffIt;
       vector<TranslationOption*>::const_iterator iterColl;
       for (ffIt = ffs.begin(); ffIt != ffs.end(); ++ffIt) {
-        if (! ffIt->ComputedInTranslationOption()) continue;
-        vector<ScoreComponentCollection> scores = ffIt->EvaluateOptions(partTransOptList, m_source);
+        if (! (*ffIt)->ComputedInTranslationOption()) continue;
+        vector<ScoreComponentCollection> scores = (*ffIt)->EvaluateOptions(partTransOptList, m_source);
         vector<ScoreComponentCollection>::const_iterator scoreIt = scores.begin();
         for (iterColl = partTransOptList.begin(); iterColl != partTransOptList.end(); ++iterColl) {
           assert(scoreIt != scores.end());

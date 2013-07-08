@@ -38,6 +38,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
   : m_targetPhrase(targetPhrase)
   , m_sourceWordsRange(wordsRange)
   , m_futureScore(targetPhrase.GetFutureScore())
+  , m_isOOV(false)
 {
 }
 
@@ -47,6 +48,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
   , m_sourceWordsRange(sourceWordsRange)
   , m_futureScore(copy.m_futureScore)
   , m_lexReorderingScores(copy.m_lexReorderingScores)
+  , m_isOOV(true)
 {}
 
 bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const
@@ -70,6 +72,11 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 void TranslationOption::CacheLexReorderingScores(const LexicalReordering &producer, const Scores &score)
 {
   m_lexReorderingScores[&producer] = score;
+}
+
+void TranslationOption::AddStatelessScore(const ScoreComponentCollection &score)
+{
+  m_scoreBreakdown.PlusEquals(score);
 }
 
 void TranslationOption::Evaluate(const InputType &source)

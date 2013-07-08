@@ -71,6 +71,7 @@ protected:
 
   typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
   _ScoreCacheMap m_lexReorderingScores;
+  bool                m_isOOV;
 
 public:
   /** constructor. Used by initial translation step */
@@ -131,6 +132,14 @@ public:
   inline const ScoreComponentCollection &GetScoreBreakdown() const {
     return m_targetPhrase.GetScoreBreakdown();
   }
+
+  /** is this an OOV option */
+  inline bool IsOOV() const {
+    return m_isOOV;
+  }
+
+  /** Adds score produced by a stateless feature before decoding */
+  void AddStatelessScore(const ScoreComponentCollection &score);
 
   void Evaluate(const InputType &source);
 
