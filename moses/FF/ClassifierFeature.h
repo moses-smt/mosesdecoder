@@ -35,10 +35,6 @@ public:
   // methods for Moses feature functions
   void Load();
   void SetParameter(const std::string& key, const std::string& value);
-  size_t GetNumScoreComponents() const;
-  std::string GetScoreProducerDescription(unsigned) const;
-  std::string GetScoreProducerWeightShortName(unsigned) const;
-  size_t GetNumInputScores() const;
   bool IsUseable(const FactorMask &mask) const { return true; }
 
   // calculate scores when collecting translation options, not during decoding
@@ -62,7 +58,7 @@ private:
     std::vector<std::string> out;
     std::vector<FactorType>::const_iterator it = factors.begin();
     while (it != factors.end()) {
-      out.push_back(word.GetFactor(*it).as_string());
+      out.push_back(word.GetFactor(*it)->GetString());
     }
     return out;
   }

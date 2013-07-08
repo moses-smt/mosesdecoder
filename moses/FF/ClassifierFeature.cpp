@@ -21,7 +21,7 @@ namespace Moses
 {
 
 ClassifierFeature::ClassifierFeature(const std::string &line)
-  : StatelessFeatureFunction("ClassifierFeature", line)
+  : StatelessFeatureFunction("ClassifierFeature", 1, line)
 {
   m_tgtFactors.push_back(0);
   ReadParameters();
@@ -135,16 +135,6 @@ vector<ScoreComponentCollection> ClassifierFeature::EvaluateOptions(const vector
 size_t ClassifierFeature::GetNumScoreComponents() const
 {
   return 1;
-}
-
-std::string ClassifierFeature::GetScoreProducerDescription(unsigned) const
-{
-  return "Classifier";
-}
-
-std::string ClassifierFeature::GetScoreProducerWeightShortName(unsigned) const
-{
-  return "clfr";
 }
 
 size_t ClassifierFeature::GetNumInputScores() const
