@@ -212,26 +212,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
-#ifdef HAVE_VW
-  if (m_parameter->GetParam("classifier-model").size() > 0) {
-    if (m_parameter->GetParam("classifier-config").size() <= 0) {
-      UserMessage::Add(string("classifier-config not specified"));
-      return false;
-    }
-    if (m_parameter->GetParam("weight-classifier").size() <= 0) {
-      UserMessage::Add(string("weight-classifier not specified"));
-      return false;
-    }
-    float classifierWeight = Scan<float>(m_parameter->GetParam("weight-classifier")[0]);
-    m_classifierFeature = new ClassifierFeature(m_scoreIndexManager, classifierWeight);
-    if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("classifier-model")[0],
-      m_parameter->GetParam("classifier-config")[0])) {
-      UserMessage::Add(string("Failed to initialize classifier feature"));
-      return false;  
-    }
-  }
-#endif // HAVE_VW
-
   // n-best
   if (m_parameter->GetParam("n-best-list").size() >= 2) {
     m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
@@ -341,6 +321,30 @@ bool StaticData::LoadData(Parameter *parameter)
   } else {
     m_useTransOptCache = false;
   }
+
+#ifdef HAVE_VW
+  if (m_parameter->GetParam("classifier-model").size() > 0) {
+    if (m_parameter->GetParam("classifier-config").size() <= 0) {
+      UserMessage::Add(string("classifier-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-classifier").size() <= 0) {
+      UserMessage::Add(string("weight-classifier not specified"));
+      return false;
+    }
+    if (m_useTransOptCache) {
+      UserMessage::Add("Warning: disabling translation option cache.");
+      m_useTransOptCache = false;
+    }
+    float classifierWeight = Scan<float>(m_parameter->GetParam("weight-classifier")[0]);
+    m_classifierFeature = new ClassifierFeature(m_scoreIndexManager, classifierWeight);
+    if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("classifier-model")[0],
+      m_parameter->GetParam("classifier-config")[0])) {
+      UserMessage::Add(string("Failed to initialize classifier feature"));
+      return false;  
+    }
+  }
+#endif // HAVE_VW
 
   //input factors
   const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
