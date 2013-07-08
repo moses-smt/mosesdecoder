@@ -36,14 +36,12 @@ public:
   }
 
   /**
-   * Implement this if your feature can be computed before decoding
-   * (when translation options are collected). You will get access to all phrase
-   * translations at once as a reward. Override ComputedInTranslationOption()
-   * and return true.
+   * For features which can be computed before decoding. Has access to all translation opts
+   * for span. Features that implement this must also return true in ComputedInTranslationOption().
    */
-  virtual std::vector<ScoreComponentCollection> EvaluateOptions(
-      const std::vector<TranslationOption *> &options, const InputType &src) const {
-    return std::vector<ScoreComponentCollection>(); // empty 
+  virtual std::vector<ScoreComponentCollection> EvaluateOptions(const std::vector<TranslationOption *> &options,
+                                                                const InputType &src) const {
+    return std::vector<ScoreComponentCollection>(); // empty
   }
 
   virtual bool IsStateless() const {

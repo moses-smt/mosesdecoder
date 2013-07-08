@@ -540,10 +540,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
       const std::vector<const StatelessFeatureFunction*> &ffs = StatelessFeatureFunction::GetStatelessFeatureFunctions();
 
-      std::vector<const StatelessFeatureFunction*>::const_iterator ffIt;
-      vector<TranslationOption*>::const_iterator iterColl;
-
       // over all feature functions
+      std::vector<const StatelessFeatureFunction*>::const_iterator ffIt;
       for (ffIt = ffs.begin(); ffIt != ffs.end(); ++ffIt) {
         if (! (*ffIt)->ComputedInTranslationOption()) // not computed before decoding
           continue;
@@ -553,12 +551,14 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
         // update scores
         vector<ScoreComponentCollection>::const_iterator scoreIt = scores.begin();
-        for (iterColl = partTransOptList.begin(); iterColl != partTransOptList.end(); ++iterColl) {
-          (*iterColl)->AddStatelessScore(*scoreIt++);
+        vector<TranslationOption*>::const_iterator iterColl = partTransOptList.begin();
+        while (iterColl != partTransOptList.end())
+          (*iterColl++)->AddStatelessScore(*scoreIt++);
         }
       }
 
       // add to fully formed translation option list
+      vector<TranslationOption*>::const_iterator iterColl;
       for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
         TranslationOption *transOpt = *iterColl;
         Add(transOpt);
