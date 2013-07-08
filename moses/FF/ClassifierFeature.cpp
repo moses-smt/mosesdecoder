@@ -80,7 +80,7 @@ Translation ClassifierFeature::GetClassifierTranslation(const TranslationOption 
     classifierOpt.m_alignment.insert(*it);
 
   // scores
-  const vector<PhraseDictionaryFeature*> &ttables = StaticData::Instance().GetPhraseDictionaries();
+  const vector<PhraseDictionary*> &ttables = StaticData::Instance().GetPhraseDictionaries();
   const ScoreComponentCollection &scoreCollection = option->GetTargetPhrase().GetScoreBreakdown();
   TTableEntry tableEntry;
   tableEntry.m_id = ""; // no domain adaptation so far
@@ -108,7 +108,6 @@ vector<ScoreComponentCollection> ClassifierFeature::EvaluateOptions(const vector
 
     vector<TranslationOption *>::const_iterator optIt;
     for (optIt = options.begin(); optIt != options.end(); optIt++) {
-      CheckIndex((*optIt)->GetTargetPhrase());
       classifierOptions.push_back(GetClassifierTranslation(*optIt));
     }
     VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
@@ -129,16 +128,6 @@ vector<ScoreComponentCollection> ClassifierFeature::EvaluateOptions(const vector
   }
 
   return scores;
-}
-
-size_t ClassifierFeature::GetNumScoreComponents() const
-{
-  return 1;
-}
-
-size_t ClassifierFeature::GetNumInputScores() const
-{
-  return 0;
 }
 
 void ClassifierFeature::NormalizeSquaredLoss(vector<float> &losses)

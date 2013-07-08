@@ -54,7 +54,7 @@ private:
   static void Normalize2(std::vector<float> &losses);
   static void Normalize3(std::vector<float> &losses);
 
-  std::vector<std::string> GetFactors(const Word &word, const std::vector<FactorType> &factors) {
+  std::vector<std::string> GetFactors(const Word &word, const std::vector<FactorType> &factors) const {
     std::vector<std::string> out;
     std::vector<FactorType>::const_iterator it = factors.begin();
     while (it != factors.end()) {
