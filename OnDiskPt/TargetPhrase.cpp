@@ -227,14 +227,17 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
     , const std::vector<Moses::FactorType> &outputFactors
     , const Vocab &vocab
     , const Moses::PhraseDictionary &phraseDict
-    , const std::vector<float> &weightT) const
+    , const std::vector<float> &weightT
+    , bool isSyntax) const
 {
   Moses::TargetPhrase *ret = new Moses::TargetPhrase();
 
   // words
   size_t phraseSize = GetSize();
   CHECK(phraseSize > 0); // last word is lhs
-  --phraseSize;
+  if (isSyntax) {
+    --phraseSize;
+  }
 
   for (size_t pos = 0; pos < phraseSize; ++pos) {
     GetWord(pos).ConvertToMoses(outputFactors, vocab, ret->AddWord());
@@ -261,9 +264,11 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   ret->SetAlignTerm(alignTerm);
   ret->SetAlignNonTerm(alignNonTerm);
 
-  Moses::Word *lhsTarget = new Moses::Word(true);
-  GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
-  ret->SetTargetLHS(lhsTarget);
+  if (isSyntax) {
+	  Moses::Word *lhsTarget = new Moses::Word(true);
+	  GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
+	  ret->SetTargetLHS(lhsTarget);
+  }
 
   // set source phrase
   Moses::Phrase mosesSP(Moses::Input);

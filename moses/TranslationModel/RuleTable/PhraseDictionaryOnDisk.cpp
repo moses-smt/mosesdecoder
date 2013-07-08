@@ -133,8 +133,8 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<Input
 			OnDiskPt::Vocab &vocab = wrapper.GetVocab();
 
 			const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
-			const TargetPhraseCollection *targetPhrases
-					= targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab);
+			TargetPhraseCollection *targetPhrases
+					= targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
 
 			node.SetTargetPhrases(*this, targetPhrases, ptNode);
 

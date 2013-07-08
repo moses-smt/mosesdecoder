@@ -238,7 +238,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
                                                  ,m_outputFactorsVec
                                                  ,m_dictionary
                                                  ,weightT
-                                                 ,m_dbWrapper.GetVocab());
+                                                 ,m_dbWrapper.GetVocab()
+                                                 ,true);
 
             delete tpcollBerkeleyDb;
             m_cache[tpCollFilePos] = targetPhraseCollection;
