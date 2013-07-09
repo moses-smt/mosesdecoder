@@ -554,7 +554,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         vector<TranslationOption*>::const_iterator iterColl = partTransOptList.begin();
         while (iterColl != partTransOptList.end())
           (*iterColl++)->AddStatelessScore(*scoreIt++);
-        }
       }
 
       // add to fully formed translation option list
