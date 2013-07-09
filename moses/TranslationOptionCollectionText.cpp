@@ -45,23 +45,17 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
       WordsRange range(startPos, endPos);
 
+      InputPath *node;
       if (range.GetNumWordsCovered() == 1) {
-        InputPath *node = new InputPath(subphrase, range, NULL, NULL);
+        node = new InputPath(subphrase, range, NULL, NULL);
         vec.push_back(node);
       } else {
         const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-        InputPath *node = new InputPath(subphrase, range, &prevNode, NULL);
+        node = new InputPath(subphrase, range, &prevNode, NULL);
         vec.push_back(node);
       }
-    }
-  }
 
-  for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
-    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
-      size_t endPos = startPos + phaseSize -1;
-      //cerr << startPos << "-" << endPos << "=" << GetPhrase(startPos, endPos) << endl;
-      InputPath &node = GetInputPath(startPos, endPos);
-      m_phraseDictionaryQueue.push_back(&node);
+      m_phraseDictionaryQueue.push_back(node);
     }
   }
 }
