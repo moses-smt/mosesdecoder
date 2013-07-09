@@ -1,5 +1,6 @@
 #include "InputPath.h"
 #include "ScoreComponentCollection.h"
+
 namespace Moses
 {
 InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode
@@ -7,13 +8,8 @@ InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputP
   :m_prevNode(prevNode)
   ,m_phrase(phrase)
   ,m_range(range)
+  ,m_inputScore(inputScore)
 {
-  if (inputScore) {
-    m_inputScore = new ScoreComponentCollection(*inputScore);
-  }
-  else {
-    m_inputScore = NULL;
-  }
 }
 
 InputPath::~InputPath()

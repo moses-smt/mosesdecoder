@@ -1,11 +1,12 @@
 // $Id$
 
+#include <list>
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "ConfusionNet.h"
 #include "DecodeStep.h"
 #include "DecodeStepTranslation.h"
 #include "FactorCollection.h"
-#include <list>
+#include "FF/InputFeature.h"
 
 using namespace std;
 
@@ -16,7 +17,63 @@ namespace Moses
 TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet(
   const ConfusionNet &input
   , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold) {}
+  : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
+{
+  const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
+  CHECK(inputFeature);
+
+  size_t size = input.GetSize();
+  m_targetPhrasesfromPt.resize(size);
+
+  // 1-word phrases
+  for (size_t startPos = 0; startPos < size; ++startPos) {
+    vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
+	vec.push_back(InputPathList());
+	InputPathList &list = vec.back();
+
+	WordsRange range(startPos, startPos);
+
+	const ConfusionNet::Column &col = input.GetColumn(startPos);
+	for (size_t i = 0; i < col.size(); ++i) {
+	  const Word &word = col[i].first;
+	  Phrase subphrase;
+	  subphrase.AddWord(word);
+
+	  const std::vector<float> &scores = col[i].second;
+	  ScoreComponentCollection *inputScore = new ScoreComponentCollection();
+	  inputScore->Assign(inputFeature, scores);
+
+	  InputPath *node = new InputPath(subphrase, range, NULL, inputScore);
+	  list.push_back(node);
+
+	}
+  }
+
+  /*
+  for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
+	for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
+	  size_t endPos = startPos + phaseSize -1;
+	  vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
+
+	  Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+	  WordsRange range(startPos, endPos);
+
+	  InputPath *node;
+	  if (range.GetNumWordsCovered() == 1) {
+		node = new InputPath(subphrase, range, NULL, NULL);
+		vec.push_back(node);
+	  } else {
+		const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
+		node = new InputPath(subphrase, range, &prevNode, NULL);
+		vec.push_back(node);
+	  }
+
+	  m_phraseDictionaryQueue.push_back(node);
+	}
+  }
+  */
+
+}
 
 /* forcibly create translation option for a particular source word.
 	* call the base class' ProcessOneUnknownWord() for each possible word in the confusion network

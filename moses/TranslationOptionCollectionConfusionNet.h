@@ -15,8 +15,11 @@ class ConfusionNet;
  */
 class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection
 {
+public:
+  typedef std::vector< std::vector<InputPathList> > TargetPhraseMatrix;
+
 protected:
-	typedef std::vector< std::vector<InputPathList> > TargetPhraseMatrix;
+  TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
 
 public:
   TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
