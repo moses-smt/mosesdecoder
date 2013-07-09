@@ -28,51 +28,76 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   // 1-word phrases
   for (size_t startPos = 0; startPos < size; ++startPos) {
     vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
-	vec.push_back(InputPathList());
-	InputPathList &list = vec.back();
+    vec.push_back(InputPathList());
+    InputPathList &list = vec.back();
 
-	WordsRange range(startPos, startPos);
+    WordsRange range(startPos, startPos);
 
-	const ConfusionNet::Column &col = input.GetColumn(startPos);
-	for (size_t i = 0; i < col.size(); ++i) {
-	  const Word &word = col[i].first;
-	  Phrase subphrase;
-	  subphrase.AddWord(word);
+    const ConfusionNet::Column &col = input.GetColumn(startPos);
+    for (size_t i = 0; i < col.size(); ++i) {
+      const Word &word = col[i].first;
+      Phrase subphrase;
+      subphrase.AddWord(word);
 
-	  const std::vector<float> &scores = col[i].second;
-	  ScoreComponentCollection *inputScore = new ScoreComponentCollection();
-	  inputScore->Assign(inputFeature, scores);
+      const std::vector<float> &scores = col[i].second;
+      ScoreComponentCollection *inputScore = new ScoreComponentCollection();
+      inputScore->Assign(inputFeature, scores);
 
-	  InputPath *node = new InputPath(subphrase, range, NULL, inputScore);
-	  list.push_back(node);
+      InputPath *node = new InputPath(subphrase, range, NULL, inputScore);
+      list.push_back(node);
 
-	}
+      m_phraseDictionaryQueue.push_back(node);
+    }
   }
 
-  /*
-  for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
-	for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
-	  size_t endPos = startPos + phaseSize -1;
-	  vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
+  // subphrases of 2+ words
+  for (size_t phaseSize = 2; phaseSize <= size; ++phaseSize) {
+    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
+      size_t endPos = startPos + phaseSize -1;
+      WordsRange range(startPos, endPos);
 
-	  Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
-	  WordsRange range(startPos, endPos);
+      vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
+      InputPathList &list = vec.back();
 
-	  InputPath *node;
-	  if (range.GetNumWordsCovered() == 1) {
-		node = new InputPath(subphrase, range, NULL, NULL);
-		vec.push_back(node);
-	  } else {
-		const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-		node = new InputPath(subphrase, range, &prevNode, NULL);
-		vec.push_back(node);
-	  }
 
-	  m_phraseDictionaryQueue.push_back(node);
-	}
+      // loop thru every previous path
+      const InputPathList &prevNodes = GetInputPathList(startPos, endPos - 1);
+      InputPathList::const_iterator iter;
+      for (iter = prevNodes.begin(); iter != prevNodes.end(); ++iter) {
+        const InputPath &prevNode = **iter;
+        const Phrase &prevPhrase = prevNode.GetPhrase();
+        const ScoreComponentCollection *prevInputScore = prevNode.GetInputScore();
+        CHECK(prevInputScore);
+
+        // loop thru every word at this position
+        const ConfusionNet::Column &col = input.GetColumn(startPos);
+        for (size_t i = 0; i < col.size(); ++i) {
+          const Word &word = col[i].first;
+          Phrase subphrase(prevPhrase);
+          subphrase.AddWord(word);
+
+          const std::vector<float> &scores = col[i].second;
+          ScoreComponentCollection *inputScore = new ScoreComponentCollection(*prevInputScore);
+          inputScore->PlusEquals(inputFeature, scores);
+
+          InputPath *node = new InputPath(subphrase, range, NULL, inputScore);
+          list.push_back(node);
+
+          m_phraseDictionaryQueue.push_back(node);
+        }
+
+      }
+    }
   }
-  */
 
+
+}
+
+InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t startPos, size_t endPos)
+{
+  size_t offset = endPos - startPos;
+  CHECK(offset < m_targetPhrasesfromPt[startPos].size());
+  return m_targetPhrasesfromPt[startPos][offset];
 }
 
 /* forcibly create translation option for a particular source word.

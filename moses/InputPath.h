@@ -41,7 +41,7 @@ public:
   }
 
   InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode
-		  ,const ScoreComponentCollection *inputScore);
+            ,const ScoreComponentCollection *inputScore);
   ~InputPath();
 
   const Phrase &GetPhrase() const {
@@ -62,8 +62,9 @@ public:
   }
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;
-  const ScoreComponentCollection *GetInputScore() const
-  { return m_inputScore; }
+  const ScoreComponentCollection *GetInputScore() const {
+    return m_inputScore;
+  }
 
 };
 

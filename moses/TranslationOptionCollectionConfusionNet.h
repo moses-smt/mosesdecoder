@@ -21,6 +21,7 @@ public:
 protected:
   TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
 
+  InputPathList &GetInputPathList(size_t startPos, size_t endPos);
 public:
   TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 

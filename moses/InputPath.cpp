@@ -4,7 +4,7 @@
 namespace Moses
 {
 InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode
-		,const ScoreComponentCollection *inputScore)
+                     ,const ScoreComponentCollection *inputScore)
   :m_prevNode(prevNode)
   ,m_phrase(phrase)
   ,m_range(range)

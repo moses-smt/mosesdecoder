@@ -134,7 +134,7 @@ void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const InputPathList &ph
 
           const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
           TargetPhraseCollection *targetPhrases
-            = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+          = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
 
           node.SetTargetPhrases(*this, targetPhrases, ptNode);
 
