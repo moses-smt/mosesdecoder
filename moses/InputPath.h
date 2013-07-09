@@ -10,34 +10,35 @@ namespace Moses
 
 class PhraseDictionary;
 class TargetPhraseCollection;
+class ScoreComponentCollection;
 
 /** Each node contains
 1. substring used to searching the phrase table
 2. the source range it covers
-3. a list of InputLatticeNode that it is a prefix of
+3. a list of InputPath that it is a prefix of
 This is for both sentence input, and confusion network/lattices
 */
-class InputLatticeNode
+class InputPath
 {
-  friend std::ostream& operator<<(std::ostream& out, const InputLatticeNode &obj);
+  friend std::ostream& operator<<(std::ostream& out, const InputPath &obj);
 
 protected:
-  const InputLatticeNode *m_prevNode;
+  const InputPath *m_prevNode;
   Phrase m_phrase;
   WordsRange m_range;
+  const ScoreComponentCollection *m_inputScore;
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
 
 public:
-  explicit InputLatticeNode()
+  explicit InputPath()
     : m_prevNode(NULL)
     , m_range(NOT_FOUND, NOT_FOUND)
-  {}
-
-  InputLatticeNode(const Phrase &phrase, const WordsRange &range, const InputLatticeNode *prevNode)
-    :m_prevNode(prevNode)
-    ,m_phrase(phrase)
-    ,m_range(range) {
+    , m_inputScore(NULL) {
   }
+
+  InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode
+		  ,const ScoreComponentCollection *inputScore);
+  ~InputPath();
 
   const Phrase &GetPhrase() const {
     return m_phrase;
@@ -45,18 +46,20 @@ public:
   const WordsRange &GetWordsRange() const {
     return m_range;
   }
-  const InputLatticeNode *GetPrevNode() const {
+  const InputPath *GetPrevNode() const {
     return m_prevNode;
   }
 
   void SetTargetPhrases(const PhraseDictionary &phraseDictionary
-		  	  	  	  , const TargetPhraseCollection *targetPhrases
-		  	  	  	  , const void *ptNode) {
-	  std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
+                        , const TargetPhraseCollection *targetPhrases
+                        , const void *ptNode) {
+    std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
     m_targetPhrases[&phraseDictionary] = value;
   }
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;
+  const ScoreComponentCollection *GetInputScore() const
+  { return m_inputScore; }
 
 };
 

@@ -103,7 +103,8 @@ public:
                                       , const std::vector<Moses::FactorType> &outputFactors
                                       , const Vocab &vocab
                                       , const Moses::PhraseDictionary &phraseDict
-                                      , const std::vector<float> &weightT) const;
+                                      , const std::vector<float> &weightT
+                                      , bool isSyntax) const;
   UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
   UINT64 ReadFromFile(std::fstream &fileTP);
 

@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_TranslationOptionCollectionText_h
 
 #include "TranslationOptionCollection.h"
-#include "InputLatticeNode.h"
+#include "InputPath.h"
 #include <map>
 #include <vector>
 
@@ -38,12 +38,12 @@ class Sentence;
 class TranslationOptionCollectionText : public TranslationOptionCollection
 {
 public:
-  typedef std::vector< std::vector<InputLatticeNode*> > TargetPhraseMatrix;
+  typedef std::vector< std::vector<InputPath*> > TargetPhraseMatrix;
 
 protected:
   TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
 
-  InputLatticeNode &GetInputLatticeNode(size_t startPos, size_t endPos);
+  InputPath &GetInputPath(size_t startPos, size_t endPos);
 
 public:
   void ProcessUnknownWord(size_t sourcePos);

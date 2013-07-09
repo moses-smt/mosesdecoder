@@ -40,19 +40,18 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
-      std::vector<InputLatticeNode*> &vec = m_targetPhrasesfromPt[startPos];
+      std::vector<InputPath*> &vec = m_targetPhrasesfromPt[startPos];
 
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
       WordsRange range(startPos, endPos);
 
       if (range.GetNumWordsCovered() == 1) {
-        InputLatticeNode *node = new InputLatticeNode(subphrase, range, NULL);
+        InputPath *node = new InputPath(subphrase, range, NULL, NULL);
         vec.push_back(node);
-      }
-      else {
-    	  const InputLatticeNode &prevNode = GetInputLatticeNode(startPos, endPos - 1);
-          InputLatticeNode *node = new InputLatticeNode(subphrase, range, &prevNode);
-          vec.push_back(node);
+      } else {
+        const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
+        InputPath *node = new InputPath(subphrase, range, &prevNode, NULL);
+        vec.push_back(node);
       }
     }
   }
@@ -61,7 +60,7 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
       //cerr << startPos << "-" << endPos << "=" << GetPhrase(startPos, endPos) << endl;
-      InputLatticeNode &node = GetInputLatticeNode(startPos, endPos);
+      InputPath &node = GetInputPath(startPos, endPos);
       m_phraseDictionaryQueue.push_back(&node);
     }
   }
@@ -103,7 +102,7 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosit
 
 };
 
-InputLatticeNode &TranslationOptionCollectionText::GetInputLatticeNode(size_t startPos, size_t endPos)
+InputPath &TranslationOptionCollectionText::GetInputPath(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
   CHECK(offset < m_targetPhrasesfromPt[startPos].size());
@@ -131,7 +130,7 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
   , bool adhereTableLimit
   , size_t graphInd)
 {
-  InputLatticeNode &inputLatticeNode = GetInputLatticeNode(startPos, endPos);
+  InputPath &InputPath = GetInputPath(startPos, endPos);
 
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
@@ -165,7 +164,7 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
       const DecodeStep &decodeStep = **iterStep;
 
       const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
-      const TargetPhraseCollection *targetPhrases = inputLatticeNode.GetTargetPhrases(phraseDictionary);
+      const TargetPhraseCollection *targetPhrases = InputPath.GetTargetPhrases(phraseDictionary);
 
       static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
       (m_source, *oldPtoc
@@ -188,22 +187,21 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
 
           if (const DecodeStepTranslation *translateStep = dynamic_cast<const DecodeStepTranslation*>(decodeStep) ) {
             const PhraseDictionary &phraseDictionary = *translateStep->GetPhraseDictionaryFeature();
-            const TargetPhraseCollection *targetPhrases = inputLatticeNode.GetTargetPhrases(phraseDictionary);
+            const TargetPhraseCollection *targetPhrases = InputPath.GetTargetPhrases(phraseDictionary);
             translateStep->Process(inputPartialTranslOpt
-                             , *decodeStep
-                             , *newPtoc
-                             , this
-                             , adhereTableLimit
-                             , *sourcePhrase
-                             , targetPhrases);
-          }
-          else {
+                                   , *decodeStep
+                                   , *newPtoc
+                                   , this
+                                   , adhereTableLimit
+                                   , *sourcePhrase
+                                   , targetPhrases);
+          } else {
             decodeStep->Process(inputPartialTranslOpt
-                             , *decodeStep
-                             , *newPtoc
-                             , this
-                             , adhereTableLimit
-                             , *sourcePhrase);
+                                , *decodeStep
+                                , *newPtoc
+                                , this
+                                , adhereTableLimit
+                                , *sourcePhrase);
           }
         }
 

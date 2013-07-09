@@ -22,8 +22,12 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/TargetPhraseCollection.h"
+#include "moses/InputPath.h"
 #include "moses/TranslationModel/CYKPlusParser/DotChartOnDisk.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h"
+
+#include "OnDiskPt/OnDiskWrapper.h"
+#include "OnDiskPt/Word.h"
 
 using namespace std;
 
@@ -92,8 +96,57 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   CHECK(obj->GetMisc("NumScores") == m_numScoreComponents);
 
   m_implementation.reset(obj);
+}
 
-  return;
+void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<InputPath*> &phraseDictionaryQueue) const
+{
+  OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+
+  for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
+    InputPath &node = *phraseDictionaryQueue[i];
+    const Phrase &phrase = node.GetPhrase();
+    const InputPath *prevNode = node.GetPrevNode();
+
+    const OnDiskPt::PhraseNode *prevPtNode = NULL;
+
+    if (prevNode) {
+      prevPtNode = static_cast<const OnDiskPt::PhraseNode*>(prevNode->GetPtNode(*this));
+    } else {
+      // Starting subphrase.
+      assert(phrase.GetSize() == 1);
+      prevPtNode = &wrapper.GetRootSourceNode();
+    }
+
+    if (prevPtNode) {
+      Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
+      lastWord.OnlyTheseFactors(m_inputFactors);
+      OnDiskPt::Word *lastWordOnDisk = wrapper.ConvertFromMoses(m_input, lastWord);
+
+      if (lastWordOnDisk == NULL) {
+        // OOV according to this phrase table. Not possible to extend
+        node.SetTargetPhrases(*this, NULL, NULL);
+      } else {
+        const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
+        if (ptNode) {
+          vector<float> weightT = StaticData::Instance().GetWeights(this);
+          OnDiskPt::Vocab &vocab = wrapper.GetVocab();
+
+          const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
+          TargetPhraseCollection *targetPhrases
+            = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+
+          node.SetTargetPhrases(*this, targetPhrases, ptNode);
+
+          delete targetPhrasesOnDisk;
+
+        } else {
+          node.SetTargetPhrases(*this, NULL, NULL);
+        }
+
+        delete lastWordOnDisk;
+      }
+    }
+  }
 }
 
 }

@@ -191,13 +191,7 @@ UINT64 OnDiskWrapper::GetMisc(const std::string &key) const
   return iter->second;
 }
 
-PhraseNode &OnDiskWrapper::GetRootSourceNode()
-{
-  return *m_rootSourceNode;
-}
-
-Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
-                                      , const std::vector<Moses::FactorType> &factorsVec
+Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &factorsVec
                                       , const Moses::Word &origWord) const
 {
   bool isNonTerminal = origWord.IsNonTerminal();
