@@ -69,11 +69,11 @@ void PhraseDictionary::SetFeaturesToApply()
   }
 }
 
-void PhraseDictionary::SetTargetPhraseFromPtMatrix(const std::vector<InputPath*> &phraseDictionaryQueue) const
+void PhraseDictionary::SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const
 {
-//  UTIL_THROW(util::Exception, "SetTargetPhraseFromPtMatrix() not implemented");
-  for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
-    InputPath &node = *phraseDictionaryQueue[i];
+  InputPathList::const_iterator iter;
+  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+    InputPath &node = **iter;
 
     const Phrase &phrase = node.GetPhrase();
     const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollection(phrase);

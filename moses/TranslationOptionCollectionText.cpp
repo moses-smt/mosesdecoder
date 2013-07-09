@@ -40,7 +40,7 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
-      std::vector<InputPath*> &vec = m_targetPhrasesfromPt[startPos];
+      vector<InputPath*> &vec = m_targetPhrasesfromPt[startPos];
 
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
       WordsRange range(startPos, endPos);

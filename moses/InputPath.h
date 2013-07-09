@@ -2,6 +2,7 @@
 
 #include <map>
 #include <iostream>
+#include <list>
 #include "Phrase.h"
 #include "WordsRange.h"
 
@@ -11,6 +12,9 @@ namespace Moses
 class PhraseDictionary;
 class TargetPhraseCollection;
 class ScoreComponentCollection;
+
+class InputPath;
+typedef std::list<InputPath*> InputPathList;
 
 /** Each node contains
 1. substring used to searching the phrase table

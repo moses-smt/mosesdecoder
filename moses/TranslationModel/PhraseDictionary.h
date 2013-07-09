@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
 #include "moses/DecodeFeature.h"
+#include "moses/InputPath.h"
 
 namespace Moses
 {
@@ -47,7 +48,6 @@ class InputType;
 class WordsRange;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
-class InputPath;
 
 /**
   * Abstract base class for phrase dictionaries (tables).
@@ -94,7 +94,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  virtual void SetTargetPhraseFromPtMatrix(const std::vector<InputPath*> &phraseDictionaryQueue) const;
+  virtual void SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const;
 
 protected:
   size_t m_tableLimit;

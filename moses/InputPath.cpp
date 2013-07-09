@@ -11,6 +11,9 @@ InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputP
   if (inputScore) {
     m_inputScore = new ScoreComponentCollection(*inputScore);
   }
+  else {
+    m_inputScore = NULL;
+  }
 }
 
 InputPath::~InputPath()

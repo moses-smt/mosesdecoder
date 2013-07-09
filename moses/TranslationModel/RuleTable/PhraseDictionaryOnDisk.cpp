@@ -98,12 +98,13 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   m_implementation.reset(obj);
 }
 
-void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const std::vector<InputPath*> &phraseDictionaryQueue) const
+void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const
 {
   OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
 
-  for (size_t i = 0; i < phraseDictionaryQueue.size(); ++i) {
-    InputPath &node = *phraseDictionaryQueue[i];
+  InputPathList::const_iterator iter;
+  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+    InputPath &node = **iter;
     const Phrase &phrase = node.GetPhrase();
     const InputPath *prevNode = node.GetPrevNode();
 

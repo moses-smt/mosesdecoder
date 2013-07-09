@@ -53,7 +53,7 @@ public:
     const InputType &,
     const ChartCellCollectionBase &);
 
-  void SetTargetPhraseFromPtMatrix(const std::vector<InputPath*> &phraseDictionaryQueue) const;
+  void SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const;
 
   TO_STRING();
 

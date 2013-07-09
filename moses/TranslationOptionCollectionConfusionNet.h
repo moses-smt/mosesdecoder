@@ -3,6 +3,7 @@
 #define moses_TranslationOptionCollectionConfusionNet_h
 
 #include "TranslationOptionCollection.h"
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -14,6 +15,9 @@ class ConfusionNet;
  */
 class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection
 {
+protected:
+	typedef std::vector< std::vector<InputPathList> > TargetPhraseMatrix;
+
 public:
   TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
@@ -23,6 +27,9 @@ public:
                                         , size_t endPosition
                                         , bool adhereTableLimit
                                         , size_t graphInd);
+
+protected:
+
 };
 
 }

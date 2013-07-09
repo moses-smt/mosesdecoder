@@ -69,7 +69,7 @@ protected:
   const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<Phrase*> m_unksrcs;
-  std::vector<InputPath*> m_phraseDictionaryQueue;
+  InputPathList m_phraseDictionaryQueue;
 
   TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
