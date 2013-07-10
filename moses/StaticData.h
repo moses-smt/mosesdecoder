@@ -166,14 +166,6 @@ protected:
   bool m_timeout; //! use timeout
   size_t m_timeout_threshold; //! seconds after which time out is activated
 
-  bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
-  mutable std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
-  size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
-  //FIXME: Single lock for cache not most efficient. However using a
-  //reader-writer for LRU cache is tricky - how to record last used time?
-#ifdef WITH_THREADS
-  mutable boost::mutex m_transOptCacheMutex;
-#endif
   bool m_isAlwaysCreateDirectTranslationOption;
   //! constructor. only the 1 static variable can be created
 
@@ -578,17 +570,6 @@ public:
   std::pair<std::string,std::string> GetXmlBrackets() const {
     return m_xmlBrackets;
   }
-
-  bool GetUseTransOptCache() const {
-    return m_useTransOptCache;
-  }
-
-  void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
-
-  void ClearTransOptionCache() const;
-
-
-  const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
 
   bool PrintAllDerivations() const {
     return m_printAllDerivations;

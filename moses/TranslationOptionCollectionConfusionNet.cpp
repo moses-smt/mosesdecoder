@@ -140,26 +140,6 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRange(
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
-    // consult persistent (cross-sentence) cache for stored translation options
-    bool skipTransOptCreation = false
-                                , useCache = StaticData::Instance().GetUseTransOptCache();
-    if (useCache) {
-      const WordsRange wordsRange(startPos, endPos);
-      sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
-
-      const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeGraph, *sourcePhrase);
-      // is phrase in cache?
-      if (transOptList != NULL) {
-        skipTransOptCreation = true;
-        TranslationOptionList::const_iterator iterTransOpt;
-        for (iterTransOpt = transOptList->begin() ; iterTransOpt != transOptList->end() ; ++iterTransOpt) {
-          TranslationOption *transOpt = new TranslationOption(**iterTransOpt, wordsRange);
-          Add(transOpt);
-        }
-      }
-    } // useCache
-
-    if (!skipTransOptCreation) {
       // partial trans opt stored in here
       PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
       size_t totalEarlyPruned = 0;
@@ -211,22 +191,11 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRange(
         Add(transOpt);
       }
 
-      // storing translation options in persistent cache (kept across sentences)
-      if (useCache) {
-        if (partTransOptList.size() > 0) {
-          TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
-          StaticData::Instance().AddTransOptListToCache(decodeGraph, *sourcePhrase, transOptList);
-        }
-      }
-
       lastPartialTranslOptColl.DetachAll();
       totalEarlyPruned += oldPtoc->GetPrunedCount();
       delete oldPtoc;
       // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
-    } // if (!skipTransOptCreation)
 
-    if (useCache)
-      delete sourcePhrase;
   } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 
   if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
