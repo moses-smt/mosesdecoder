@@ -57,20 +57,27 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       WordsRange range(startPos, endPos);
 
       vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
+      vec.push_back(InputPathList());
       InputPathList &list = vec.back();
 
 
       // loop thru every previous path
       const InputPathList &prevNodes = GetInputPathList(startPos, endPos - 1);
-      InputPathList::const_iterator iter;
-      for (iter = prevNodes.begin(); iter != prevNodes.end(); ++iter) {
-        const InputPath &prevNode = **iter;
+
+      int prevNodesInd = 0;
+      InputPathList::const_iterator iterPath;
+      for (iterPath = prevNodes.begin(); iterPath != prevNodes.end(); ++iterPath) {
+      //for (size_t pathInd = 0; pathInd < prevNodes.size(); ++pathInd) {
+        const InputPath &prevNode = **iterPath;
+    	//const InputPath &prevNode = *prevNodes[pathInd];
+
         const Phrase &prevPhrase = prevNode.GetPhrase();
         const ScoreComponentCollection *prevInputScore = prevNode.GetInputScore();
         CHECK(prevInputScore);
 
         // loop thru every word at this position
-        const ConfusionNet::Column &col = input.GetColumn(startPos);
+        const ConfusionNet::Column &col = input.GetColumn(endPos);
+
         for (size_t i = 0; i < col.size(); ++i) {
           const Word &word = col[i].first;
           Phrase subphrase(prevPhrase);
@@ -80,17 +87,16 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
           ScoreComponentCollection *inputScore = new ScoreComponentCollection(*prevInputScore);
           inputScore->PlusEquals(inputFeature, scores);
 
-          InputPath *node = new InputPath(subphrase, range, NULL, inputScore);
+          InputPath *node = new InputPath(subphrase, range, &prevNode, inputScore);
           list.push_back(node);
 
           m_phraseDictionaryQueue.push_back(node);
-        }
+        } // for (size_t i = 0; i < col.size(); ++i) {
 
-      }
+        ++prevNodesInd;
+      } // for (iterPath = prevNodes.begin(); iterPath != prevNodes.end(); ++iterPath) {
     }
   }
-
-
 }
 
 InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t startPos, size_t endPos)
