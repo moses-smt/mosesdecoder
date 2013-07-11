@@ -39,7 +39,9 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE,
+   $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $_CLASSIFIER_MODEL, $_CLASSIFIER_CONFIG,
+   $_EXTRACT_CONTEXT_INFO, $IGNORE);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
 
@@ -136,6 +138,9 @@ $_HELP = 1
 		       'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE,
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
+		       'classifier-model=s' => \$_CLASSIFIER_MODEL,
+		       'classifier-config=s' => \$_CLASSIFIER_CONFIG,
+		       'extract-context' => \$_EXTRACT_CONTEXT_INFO,
                );
 
 if ($_HELP) {
@@ -1430,6 +1435,10 @@ sub extract_phrase {
       }
       $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
+
+    if ($_EXTRACT_CONTEXT_INFO) {
+      $cmd .= " --OutputContextInfo ";
+    }
     
     $cmd .= " --GZOutput ";
     $cmd .= " --InstanceWeights $_INSTANCE_WEIGHTS_FILE " if defined $_INSTANCE_WEIGHTS_FILE;
@@ -2050,6 +2059,14 @@ sub create_ini {
       print INI "0.1\n";
     }
     print "\n";
+  }
+
+  # classifier feature
+  if (defined $_CLASSIFIER_MODEL && defined $_CLASSIFIER_CONFIG) {
+    $feature_spec .= "ClassifierFeature model=$_CLASSIFIER_MODEL config=$_CLASSIFIER_CONFIG\n";
+    $weight_spec .= "ClassifierFeature0=0.1\n";
+  } elsif (defined $_CLASSIFIER_MODEL || defined $_CLASSIFIER_CONFIG) {
+    die "ERROR: specify both --classifier-model and --classifier-config";
   }
 
   # get addititional content for config file from switch or file
