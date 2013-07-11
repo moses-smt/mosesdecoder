@@ -21,7 +21,7 @@ void ScoreComponentCollection::RegisterScoreProducer
 {
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
-  VERBOSE(1, "FeatureFunction: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl);
+  VERBOSE(1, "FeatureFunction: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << (end-1) << endl);
   s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
   s_denseVectorSize = end;
 }
