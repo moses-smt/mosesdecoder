@@ -101,7 +101,7 @@ protected:
 
   void SetTargetPhraseFromPtMatrix();
 
-  virtual void CreateTranslationOptionsForRange(
+  void CreateTranslationOptionsForRange(
     const DecodeGraph &decodeGraph
     , size_t startPos
     , size_t endPos

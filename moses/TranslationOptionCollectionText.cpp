@@ -126,7 +126,7 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
 {
   InputPath &inputPath = GetInputPath(startPos, endPos);
 
-  CreateTranslationOptionsForRange(decodeGraph
+  TranslationOptionCollection::CreateTranslationOptionsForRange(decodeGraph
 		  , startPos
 		  , endPos
 		  , adhereTableLimit
