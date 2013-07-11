@@ -449,6 +449,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	       , startPos, endPos, adhereTableLimit
 	       , targetPhrases);
 
+	      AddInputScore(inputPath, *oldPtoc);
+
 	      // do rest of decode steps
 	      int indexStep = 0;
 
@@ -509,6 +511,22 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	  if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
 	    CreateXmlOptionsForRange(startPos, endPos);
 	  }
+}
+
+void TranslationOptionCollection::AddInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
+{
+	const ScoreComponentCollection *inputScore = inputPath.GetInputScore();
+
+	if (inputScore == NULL) {
+		return;
+	}
+
+	const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
+	for (size_t i = 0; i < transOpts.size(); ++i) {
+		TranslationOption &transOpt = *transOpts[i];
+		ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
+		scores.PlusEquals(*inputScore);
+	}
 }
 
 void TranslationOptionCollection::EvaluateWithSource()

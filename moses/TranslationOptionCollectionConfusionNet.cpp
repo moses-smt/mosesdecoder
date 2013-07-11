@@ -127,6 +127,15 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
 
 }
 
+void TranslationOptionCollectionConfusionNet::CreateTranslationOptions()
+{
+  if (!m_useLegacy) {
+    SetTargetPhraseFromPtMatrix();
+  }
+  TranslationOptionCollection::CreateTranslationOptions();
+}
+
+
 /** create translation options that exactly cover a specific input span.
  * Called by CreateTranslationOptions() and ProcessUnknownWord()
  * \param decodeGraph list of decoding steps

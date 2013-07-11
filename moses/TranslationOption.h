@@ -132,6 +132,10 @@ public:
     return m_targetPhrase.GetScoreBreakdown();
   }
 
+  inline ScoreComponentCollection &GetScoreBreakdown() {
+    return m_targetPhrase.GetScoreBreakdown();
+  }
+
   void Evaluate(const InputType &source);
 
   /** returns cached scores */
