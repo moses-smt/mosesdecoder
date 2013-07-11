@@ -126,85 +126,12 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
 {
   InputPath &inputPath = GetInputPath(startPos, endPos);
 
-  if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
-    Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
-
-      // partial trans opt stored in here
-      PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
-      size_t totalEarlyPruned = 0;
-
-      // initial translation step
-      list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
-      const DecodeStep &decodeStep = **iterStep;
-
-      const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
-      const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
-
-      static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
-      (m_source, *oldPtoc
-       , startPos, endPos, adhereTableLimit
-       , targetPhrases);
-
-      // do rest of decode steps
-      int indexStep = 0;
-
-      for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
-
-        const DecodeStep *decodeStep = *iterStep;
-        PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
-
-        // go thru each intermediate trans opt just created
-        const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
-        vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-        for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
-          TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-
-          if (const DecodeStepTranslation *translateStep = dynamic_cast<const DecodeStepTranslation*>(decodeStep) ) {
-            const PhraseDictionary &phraseDictionary = *translateStep->GetPhraseDictionaryFeature();
-            const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
-            translateStep->Process(inputPartialTranslOpt
-                                   , *decodeStep
-                                   , *newPtoc
-                                   , this
-                                   , adhereTableLimit
-                                   , *sourcePhrase
-                                   , targetPhrases);
-          } else {
-            decodeStep->Process(inputPartialTranslOpt
-                                , *decodeStep
-                                , *newPtoc
-                                , this
-                                , adhereTableLimit
-                                , *sourcePhrase);
-          }
-        }
-
-        // last but 1 partial trans not required anymore
-        totalEarlyPruned += newPtoc->GetPrunedCount();
-        delete oldPtoc;
-        oldPtoc = newPtoc;
-
-        indexStep++;
-      } // for (++iterStep
-
-      // add to fully formed translation option list
-      PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
-      const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
-      vector<TranslationOption*>::const_iterator iterColl;
-      for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
-        TranslationOption *transOpt = *iterColl;
-        Add(transOpt);
-      }
-
-      lastPartialTranslOptColl.DetachAll();
-      totalEarlyPruned += oldPtoc->GetPrunedCount();
-      delete oldPtoc;
-      // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
-  } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
-
-  if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
-    CreateXmlOptionsForRange(startPos, endPos);
-  }
+  CreateTranslationOptionsForRange(decodeGraph
+		  , startPos
+		  , endPos
+		  , adhereTableLimit
+		  , graphInd
+		  , inputPath);
 }
 
 
