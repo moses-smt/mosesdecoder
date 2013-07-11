@@ -430,103 +430,103 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   , size_t graphInd
   , InputPath &inputPath)
 {
-	  if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
-	    Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
+  if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
+    Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
-	      // partial trans opt stored in here
-	      PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
-	      size_t totalEarlyPruned = 0;
+    // partial trans opt stored in here
+    PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+    size_t totalEarlyPruned = 0;
 
-	      // initial translation step
-	      list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
-	      const DecodeStep &decodeStep = **iterStep;
+    // initial translation step
+    list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
+    const DecodeStep &decodeStep = **iterStep;
 
-	      const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
-	      const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
+    const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
+    const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
 
-	      static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
-	      (m_source, *oldPtoc
-	       , startPos, endPos, adhereTableLimit
-	       , targetPhrases);
+    static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
+    (m_source, *oldPtoc
+     , startPos, endPos, adhereTableLimit
+     , targetPhrases);
 
-	      AddInputScore(inputPath, *oldPtoc);
+    AddInputScore(inputPath, *oldPtoc);
 
-	      // do rest of decode steps
-	      int indexStep = 0;
+    // do rest of decode steps
+    int indexStep = 0;
 
-	      for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
+    for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
 
-	        const DecodeStep *decodeStep = *iterStep;
-	        PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
+      const DecodeStep *decodeStep = *iterStep;
+      PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
-	        // go thru each intermediate trans opt just created
-	        const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
-	        vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-	        for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
-	          TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
+      // go thru each intermediate trans opt just created
+      const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
+      vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
+      for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
+        TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 
-	          if (const DecodeStepTranslation *translateStep = dynamic_cast<const DecodeStepTranslation*>(decodeStep) ) {
-	            const PhraseDictionary &phraseDictionary = *translateStep->GetPhraseDictionaryFeature();
-	            const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
-	            translateStep->Process(inputPartialTranslOpt
-	                                   , *decodeStep
-	                                   , *newPtoc
-	                                   , this
-	                                   , adhereTableLimit
-	                                   , *sourcePhrase
-	                                   , targetPhrases);
-	          } else {
-	            decodeStep->Process(inputPartialTranslOpt
-	                                , *decodeStep
-	                                , *newPtoc
-	                                , this
-	                                , adhereTableLimit
-	                                , *sourcePhrase);
-	          }
-	        }
+        if (const DecodeStepTranslation *translateStep = dynamic_cast<const DecodeStepTranslation*>(decodeStep) ) {
+          const PhraseDictionary &phraseDictionary = *translateStep->GetPhraseDictionaryFeature();
+          const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
+          translateStep->Process(inputPartialTranslOpt
+                                 , *decodeStep
+                                 , *newPtoc
+                                 , this
+                                 , adhereTableLimit
+                                 , *sourcePhrase
+                                 , targetPhrases);
+        } else {
+          decodeStep->Process(inputPartialTranslOpt
+                              , *decodeStep
+                              , *newPtoc
+                              , this
+                              , adhereTableLimit
+                              , *sourcePhrase);
+        }
+      }
 
-	        // last but 1 partial trans not required anymore
-	        totalEarlyPruned += newPtoc->GetPrunedCount();
-	        delete oldPtoc;
-	        oldPtoc = newPtoc;
+      // last but 1 partial trans not required anymore
+      totalEarlyPruned += newPtoc->GetPrunedCount();
+      delete oldPtoc;
+      oldPtoc = newPtoc;
 
-	        indexStep++;
-	      } // for (++iterStep
+      indexStep++;
+    } // for (++iterStep
 
-	      // add to fully formed translation option list
-	      PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
-	      const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
-	      vector<TranslationOption*>::const_iterator iterColl;
-	      for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
-	        TranslationOption *transOpt = *iterColl;
-	        Add(transOpt);
-	      }
+    // add to fully formed translation option list
+    PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
+    const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
+    vector<TranslationOption*>::const_iterator iterColl;
+    for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
+      TranslationOption *transOpt = *iterColl;
+      Add(transOpt);
+    }
 
-	      lastPartialTranslOptColl.DetachAll();
-	      totalEarlyPruned += oldPtoc->GetPrunedCount();
-	      delete oldPtoc;
-	      // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
-	  } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
+    lastPartialTranslOptColl.DetachAll();
+    totalEarlyPruned += oldPtoc->GetPrunedCount();
+    delete oldPtoc;
+    // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
+  } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 
-	  if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
-	    CreateXmlOptionsForRange(startPos, endPos);
-	  }
+  if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
+    CreateXmlOptionsForRange(startPos, endPos);
+  }
 }
 
 void TranslationOptionCollection::AddInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
 {
-	const ScoreComponentCollection *inputScore = inputPath.GetInputScore();
+  const ScoreComponentCollection *inputScore = inputPath.GetInputScore();
 
-	if (inputScore == NULL) {
-		return;
-	}
+  if (inputScore == NULL) {
+    return;
+  }
 
-	const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
-	for (size_t i = 0; i < transOpts.size(); ++i) {
-		TranslationOption &transOpt = *transOpts[i];
-		ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-		scores.PlusEquals(*inputScore);
-	}
+  const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
+  for (size_t i = 0; i < transOpts.size(); ++i) {
+    TranslationOption &transOpt = *transOpts[i];
+    ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
+    scores.PlusEquals(*inputScore);
+  }
 }
 
 void TranslationOptionCollection::EvaluateWithSource()

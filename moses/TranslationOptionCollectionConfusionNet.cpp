@@ -68,9 +68,9 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       int prevNodesInd = 0;
       InputPathList::const_iterator iterPath;
       for (iterPath = prevNodes.begin(); iterPath != prevNodes.end(); ++iterPath) {
-      //for (size_t pathInd = 0; pathInd < prevNodes.size(); ++pathInd) {
+        //for (size_t pathInd = 0; pathInd < prevNodes.size(); ++pathInd) {
         const InputPath &prevNode = **iterPath;
-    	//const InputPath &prevNode = *prevNodes[pathInd];
+        //const InputPath &prevNode = *prevNodes[pathInd];
 
         const Phrase &prevPhrase = prevNode.GetPhrase();
         const ScoreComponentCollection *prevInputScore = prevNode.GetInputScore();
@@ -152,10 +152,9 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRange(
   , size_t graphInd)
 {
   if (m_useLegacy) {
-	  CreateTranslationOptionsForRangeLegacy(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
-  }
-  else {
-	  CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
+    CreateTranslationOptionsForRangeLegacy(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
+  } else {
+    CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
   }
 }
 
@@ -169,13 +168,13 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeNe
   InputPathList &inputPathList = GetInputPathList(startPos, endPos);
   InputPathList::iterator iter;
   for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
-	InputPath &inputPath = **iter;
-	TranslationOptionCollection::CreateTranslationOptionsForRange(decodeGraph
-		  , startPos
-		  , endPos
-		  , adhereTableLimit
-		  , graphInd
-		  , inputPath);
+    InputPath &inputPath = **iter;
+    TranslationOptionCollection::CreateTranslationOptionsForRange(decodeGraph
+        , startPos
+        , endPos
+        , adhereTableLimit
+        , graphInd
+        , inputPath);
 
   }
 }
@@ -190,61 +189,61 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
-      // partial trans opt stored in here
-      PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
-      size_t totalEarlyPruned = 0;
+    // partial trans opt stored in here
+    PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+    size_t totalEarlyPruned = 0;
 
-      // initial translation step
-      list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
+    // initial translation step
+    list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
+    const DecodeStep &decodeStep = **iterStep;
+
+    static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
+    (m_source, *oldPtoc
+     , startPos, endPos, adhereTableLimit );
+
+    // do rest of decode steps
+    int indexStep = 0;
+
+    for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
+
       const DecodeStep &decodeStep = **iterStep;
+      PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
-      static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
-      (m_source, *oldPtoc
-       , startPos, endPos, adhereTableLimit );
+      // go thru each intermediate trans opt just created
+      const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
+      vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
+      for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
+        TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 
-      // do rest of decode steps
-      int indexStep = 0;
-
-      for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
-
-        const DecodeStep &decodeStep = **iterStep;
-        PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
-
-        // go thru each intermediate trans opt just created
-        const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
-        vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
-        for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
-          TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-
-          decodeStep.Process(inputPartialTranslOpt
-                             , decodeStep
-                             , *newPtoc
-                             , this
-                             , adhereTableLimit
-                             , *sourcePhrase);
-        }
-
-        // last but 1 partial trans not required anymore
-        totalEarlyPruned += newPtoc->GetPrunedCount();
-        delete oldPtoc;
-        oldPtoc = newPtoc;
-
-        indexStep++;
-      } // for (++iterStep
-
-      // add to fully formed translation option list
-      PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
-      const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
-      vector<TranslationOption*>::const_iterator iterColl;
-      for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
-        TranslationOption *transOpt = *iterColl;
-        Add(transOpt);
+        decodeStep.Process(inputPartialTranslOpt
+                           , decodeStep
+                           , *newPtoc
+                           , this
+                           , adhereTableLimit
+                           , *sourcePhrase);
       }
 
-      lastPartialTranslOptColl.DetachAll();
-      totalEarlyPruned += oldPtoc->GetPrunedCount();
+      // last but 1 partial trans not required anymore
+      totalEarlyPruned += newPtoc->GetPrunedCount();
       delete oldPtoc;
-      // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
+      oldPtoc = newPtoc;
+
+      indexStep++;
+    } // for (++iterStep
+
+    // add to fully formed translation option list
+    PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
+    const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
+    vector<TranslationOption*>::const_iterator iterColl;
+    for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
+      TranslationOption *transOpt = *iterColl;
+      Add(transOpt);
+    }
+
+    lastPartialTranslOptColl.DetachAll();
+    totalEarlyPruned += oldPtoc->GetPrunedCount();
+    delete oldPtoc;
+    // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
 
   } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 
@@ -255,16 +254,16 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
 
 void TranslationOptionCollectionConfusionNet::CheckLegacy()
 {
-	const std::vector<PhraseDictionary*> &pts = StaticData::Instance().GetPhraseDictionaries();
-	for (size_t i = 0; i < pts.size(); ++i) {
-	  const PhraseDictionary *phraseDictionary = pts[i];
-	  if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
-		  m_useLegacy = true;
-		  return;
-	  }
-	}
+  const std::vector<PhraseDictionary*> &pts = StaticData::Instance().GetPhraseDictionaries();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    const PhraseDictionary *phraseDictionary = pts[i];
+    if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
+      m_useLegacy = true;
+      return;
+    }
+  }
 
-	m_useLegacy = false;
+  m_useLegacy = false;
 }
 
 }

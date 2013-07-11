@@ -26,15 +26,15 @@ protected:
   InputPathList &GetInputPathList(size_t startPos, size_t endPos);
   void CheckLegacy();
   void CreateTranslationOptionsForRangeLegacy(const DecodeGraph &decodeStepList
-                                        , size_t startPosition
-                                        , size_t endPosition
-                                        , bool adhereTableLimit
-                                        , size_t graphInd);
+      , size_t startPosition
+      , size_t endPosition
+      , bool adhereTableLimit
+      , size_t graphInd);
   void CreateTranslationOptionsForRangeNew(const DecodeGraph &decodeStepList
-                                        , size_t startPosition
-                                        , size_t endPosition
-                                        , bool adhereTableLimit
-                                        , size_t graphInd);
+      , size_t startPosition
+      , size_t endPosition
+      , bool adhereTableLimit
+      , size_t graphInd);
 public:
   TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 

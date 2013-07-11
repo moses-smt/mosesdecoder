@@ -127,11 +127,11 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
   InputPath &inputPath = GetInputPath(startPos, endPos);
 
   TranslationOptionCollection::CreateTranslationOptionsForRange(decodeGraph
-		  , startPos
-		  , endPos
-		  , adhereTableLimit
-		  , graphInd
-		  , inputPath);
+      , startPos
+      , endPos
+      , adhereTableLimit
+      , graphInd
+      , inputPath);
 }
 
 
