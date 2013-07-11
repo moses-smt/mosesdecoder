@@ -91,7 +91,7 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   m_implementation.reset(obj);
 }
 
-void PhraseDictionaryOnDisk::SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const
+void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
 {
   OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
 

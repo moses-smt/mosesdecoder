@@ -134,7 +134,7 @@ cerr << "source=" << source << endl
   return coll;
 }
 
-void PhraseDictionaryMemory::SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const
+void PhraseDictionaryMemory::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
 {
   InputPathList::const_iterator iter;
   for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {

@@ -75,7 +75,7 @@ void PhraseDictionary::SetFeaturesToApply()
   }
 }
 
-void PhraseDictionary::SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const
+void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
 {
   InputPathList::const_iterator iter;
   for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {

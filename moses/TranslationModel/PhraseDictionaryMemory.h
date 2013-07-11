@@ -55,7 +55,7 @@ public:
 
   // only used by multi-model phrase table, and other meta-features
   const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
-  void SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const;
+  void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
   TO_STRING();
 

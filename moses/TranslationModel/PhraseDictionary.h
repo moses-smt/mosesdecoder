@@ -67,14 +67,14 @@ public:
     return m_tableLimit;
   }
 
-  // LEGACY - The preferred method is to override SetTargetPhraseFromPtMatrix().
+  // LEGACY - The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
 
-  virtual void SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const;
+  virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
   //! Create entry for translation of source to targetPhrase
   virtual void InitializeForInput(InputType const& source) {

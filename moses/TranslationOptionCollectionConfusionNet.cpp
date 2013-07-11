@@ -130,7 +130,7 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
 void TranslationOptionCollectionConfusionNet::CreateTranslationOptions()
 {
   if (!m_useLegacy) {
-    SetTargetPhraseFromPtMatrix();
+    GetTargetPhraseCollectionBatch();
   }
   TranslationOptionCollection::CreateTranslationOptions();
 }

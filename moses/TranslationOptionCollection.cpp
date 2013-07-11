@@ -688,7 +688,7 @@ const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionLi
   return m_collection[startPos][maxSize];
 }
 
-void TranslationOptionCollection::SetTargetPhraseFromPtMatrix()
+void TranslationOptionCollection::GetTargetPhraseCollectionBatch()
 {
   const vector <DecodeGraph*> &decodeGraphList = StaticData::Instance().GetDecodeGraphs();
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
@@ -700,7 +700,7 @@ void TranslationOptionCollection::SetTargetPhraseFromPtMatrix()
       const DecodeStepTranslation *transStep = dynamic_cast<const DecodeStepTranslation *>(&decodeStep);
       if (transStep) {
         const PhraseDictionary &phraseDictionary = *transStep->GetPhraseDictionaryFeature();
-        phraseDictionary.SetTargetPhraseFromPtMatrix(m_phraseDictionaryQueue);
+        phraseDictionary.GetTargetPhraseCollectionBatch(m_phraseDictionaryQueue);
       }
     }
   }

@@ -99,7 +99,7 @@ protected:
 
   void CacheLexReordering();
 
-  void SetTargetPhraseFromPtMatrix();
+  void GetTargetPhraseCollectionBatch();
 
   void CreateTranslationOptionsForRange(
     const DecodeGraph &decodeGraph

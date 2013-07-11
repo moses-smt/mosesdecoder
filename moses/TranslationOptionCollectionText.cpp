@@ -105,7 +105,7 @@ InputPath &TranslationOptionCollectionText::GetInputPath(size_t startPos, size_t
 
 void TranslationOptionCollectionText::CreateTranslationOptions()
 {
-  SetTargetPhraseFromPtMatrix();
+  GetTargetPhraseCollectionBatch();
   TranslationOptionCollection::CreateTranslationOptions();
 }
 

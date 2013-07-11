@@ -74,7 +74,7 @@ public:
     const ChartCellCollectionBase &);
 
   virtual void InitializeForInput(InputType const& source);
-  void SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const;
+  void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
 };
 
