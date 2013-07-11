@@ -42,8 +42,9 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
 const TargetPhraseCollection *PhraseDictionary::
 GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 {
-  Phrase phrase = src.GetSubString(range);
-  return GetTargetPhraseCollection(phrase);
+  UTIL_THROW(util::Exception, "Legacy method not implemented");
+  //Phrase phrase = src.GetSubString(range);
+  //return GetTargetPhraseCollection(phrase);
 }
 
 void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
