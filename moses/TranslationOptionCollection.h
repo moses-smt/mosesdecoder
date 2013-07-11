@@ -100,6 +100,15 @@ protected:
   void CacheLexReordering();
 
   void SetTargetPhraseFromPtMatrix();
+
+  void CreateTranslationOptionsForRange(
+    const DecodeGraph &decodeGraph
+    , size_t startPos
+    , size_t endPos
+    , bool adhereTableLimit
+    , size_t graphInd
+    , InputPath &inputPath);
+
 public:
   virtual ~TranslationOptionCollection();
 

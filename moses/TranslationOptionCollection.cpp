@@ -422,6 +422,17 @@ void TranslationOptionCollection::CreateTranslationOptions()
   CacheLexReordering();
 }
 
+void TranslationOptionCollection::CreateTranslationOptionsForRange(
+  const DecodeGraph &decodeGraph
+  , size_t startPos
+  , size_t endPos
+  , bool adhereTableLimit
+  , size_t graphInd
+  , InputPath &inputPath)
+{
+
+}
+
 void TranslationOptionCollection::EvaluateWithSource()
 {
   const size_t size = m_source.GetSize();

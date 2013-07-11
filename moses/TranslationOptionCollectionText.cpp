@@ -124,7 +124,7 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
   , bool adhereTableLimit
   , size_t graphInd)
 {
-  InputPath &InputPath = GetInputPath(startPos, endPos);
+  InputPath &inputPath = GetInputPath(startPos, endPos);
 
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
@@ -138,7 +138,7 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
       const DecodeStep &decodeStep = **iterStep;
 
       const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
-      const TargetPhraseCollection *targetPhrases = InputPath.GetTargetPhrases(phraseDictionary);
+      const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
 
       static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
       (m_source, *oldPtoc
@@ -161,7 +161,7 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
 
           if (const DecodeStepTranslation *translateStep = dynamic_cast<const DecodeStepTranslation*>(decodeStep) ) {
             const PhraseDictionary &phraseDictionary = *translateStep->GetPhraseDictionaryFeature();
-            const TargetPhraseCollection *targetPhrases = InputPath.GetTargetPhrases(phraseDictionary);
+            const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
             translateStep->Process(inputPartialTranslOpt
                                    , *decodeStep
                                    , *newPtoc
