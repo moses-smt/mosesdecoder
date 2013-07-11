@@ -142,6 +142,42 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRange(
   , bool adhereTableLimit
   , size_t graphInd)
 {
+  if (m_useLegacy) {
+	  CreateTranslationOptionsForRangeLegacy(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
+  }
+  else {
+	  CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
+  }
+}
+
+void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeNew(
+  const DecodeGraph &decodeGraph
+  , size_t startPos
+  , size_t endPos
+  , bool adhereTableLimit
+  , size_t graphInd)
+{
+  InputPathList &inputPathList = GetInputPathList(startPos, endPos);
+  InputPathList::iterator iter;
+  for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
+	InputPath &inputPath = **iter;
+	TranslationOptionCollection::CreateTranslationOptionsForRange(decodeGraph
+		  , startPos
+		  , endPos
+		  , adhereTableLimit
+		  , graphInd
+		  , inputPath);
+
+  }
+}
+
+void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLegacy(
+  const DecodeGraph &decodeGraph
+  , size_t startPos
+  , size_t endPos
+  , bool adhereTableLimit
+  , size_t graphInd)
+{
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
