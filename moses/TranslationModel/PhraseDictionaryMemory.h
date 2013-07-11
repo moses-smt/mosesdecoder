@@ -53,6 +53,8 @@ public:
     const InputType &,
     const ChartCellCollectionBase &);
 
+  // only used by multi-model phrase table, and other meta-features
+  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
   void SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const;
 
   TO_STRING();
@@ -60,7 +62,6 @@ public:
 protected:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
     const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& source) const;
 
   PhraseDictionaryNodeMemory &GetOrCreateNode(const Phrase &source
       , const TargetPhrase &target

@@ -69,9 +69,6 @@ public:
   }
 
   // PhraseDictionary impl
-  //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
-
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollectionBase &);

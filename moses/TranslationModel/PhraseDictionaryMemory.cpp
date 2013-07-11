@@ -55,32 +55,6 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
   return currNode.GetOrCreateTargetPhraseCollection();
 }
 
-const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& sourceOrig) const
-{
-  Phrase source(sourceOrig);
-  source.OnlyTheseFactors(m_inputFactors);
-
-  // exactly like CreateTargetPhraseCollection, but don't create
-  const size_t size = source.GetSize();
-
-  const PhraseDictionaryNodeMemory *currNode = &m_collection;
-  for (size_t pos = 0 ; pos < size ; ++pos) {
-    const Word& word = source.GetWord(pos);
-    currNode = currNode->GetChild(word);
-    if (currNode == NULL)
-      return NULL;
-  }
-
-  const TargetPhraseCollection *coll = currNode->GetTargetPhraseCollection();
-  /*
-  if (coll) {
-    cerr << "source=" << source << endl
-        << *coll << endl;
-  }
-  */
-  return coll;
-}
-
 PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase &source
     , const TargetPhrase &target
     , const Word *sourceLHS)
@@ -132,6 +106,32 @@ void PhraseDictionaryMemory::SortAndPrune()
   if (GetTableLimit()) {
     m_collection.Sort(GetTableLimit());
   }
+}
+
+const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& sourceOrig) const
+{
+  Phrase source(sourceOrig);
+  source.OnlyTheseFactors(m_inputFactors);
+
+  // exactly like CreateTargetPhraseCollection, but don't create
+  const size_t size = source.GetSize();
+
+  const PhraseDictionaryNodeMemory *currNode = &m_collection;
+  for (size_t pos = 0 ; pos < size ; ++pos) {
+    const Word& word = source.GetWord(pos);
+    currNode = currNode->GetChild(word);
+    if (currNode == NULL)
+      return NULL;
+  }
+
+  const TargetPhraseCollection *coll = currNode->GetTargetPhraseCollection();
+  /*
+if (coll) {
+cerr << "source=" << source << endl
+<< *coll << endl;
+}
+*/
+  return coll;
 }
 
 void PhraseDictionaryMemory::SetTargetPhraseFromPtMatrix(const InputPathList &phraseDictionaryQueue) const

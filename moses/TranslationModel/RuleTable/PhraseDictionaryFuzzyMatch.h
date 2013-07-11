@@ -52,11 +52,6 @@ public:
   void InitializeForInput(InputType const& inputSentence);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const {
-    assert(false);
-    return NULL;
-  }
-
   TO_STRING();
 
 protected:
