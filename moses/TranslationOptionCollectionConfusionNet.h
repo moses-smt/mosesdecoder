@@ -19,9 +19,12 @@ public:
   typedef std::vector< std::vector<InputPathList> > TargetPhraseMatrix;
 
 protected:
+  bool m_useLegacy;
+
   TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
 
   InputPathList &GetInputPathList(size_t startPos, size_t endPos);
+  void CheckLegacy();
 public:
   TranslationOptionCollectionConfusionNet(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 

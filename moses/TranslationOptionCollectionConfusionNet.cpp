@@ -7,6 +7,7 @@
 #include "DecodeStepTranslation.h"
 #include "FactorCollection.h"
 #include "FF/InputFeature.h"
+#include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
 
 using namespace std;
 
@@ -97,6 +98,10 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       } // for (iterPath = prevNodes.begin(); iterPath != prevNodes.end(); ++iterPath) {
     }
   }
+
+  // check whether we should be using the old code to supportbinary phrase-table.
+  // eventually, we'll stop support the binary phrase-table and delete this legacy code
+  CheckLegacy();
 }
 
 InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t startPos, size_t endPos)
@@ -201,6 +206,20 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRange(
   if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
     CreateXmlOptionsForRange(startPos, endPos);
   }
+}
+
+void TranslationOptionCollectionConfusionNet::CheckLegacy()
+{
+	const std::vector<PhraseDictionary*> &pts = StaticData::Instance().GetPhraseDictionaries();
+	for (size_t i = 0; i < pts.size(); ++i) {
+	  const PhraseDictionary *phraseDictionary = pts[i];
+	  if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
+		  m_useLegacy = true;
+		  return;
+	  }
+	}
+
+	m_useLegacy = false;
 }
 
 }
