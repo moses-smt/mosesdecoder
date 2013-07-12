@@ -120,14 +120,12 @@ private:
   friend class std::map<Word, PhraseDictionaryNodeMemory>;
   friend class std::map<long, PhraseDictionaryNodeMemory>;
 
-protected:
   TerminalMap m_sourceTermMap;
   NonTerminalMap m_nonTermMap;
-  TargetPhraseCollection *m_targetPhraseCollection;
+  TargetPhraseCollection m_targetPhraseCollection;
 
-  PhraseDictionaryNodeMemory()
-    :m_targetPhraseCollection(NULL) {
-  }
+  PhraseDictionaryNodeMemory() {}
+
 public:
   ~PhraseDictionaryNodeMemory();
 
@@ -143,9 +141,11 @@ public:
   const PhraseDictionaryNodeMemory *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
 
   const TargetPhraseCollection *GetTargetPhraseCollection() const {
+    return &m_targetPhraseCollection;
+  }
+  TargetPhraseCollection &GetOrCreateTargetPhraseCollection() {
     return m_targetPhraseCollection;
   }
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection();
 
   const NonTerminalMap & GetNonTerminalMap() const {
     return m_nonTermMap;

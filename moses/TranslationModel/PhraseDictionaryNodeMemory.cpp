@@ -38,14 +38,6 @@ PhraseDictionaryNodeMemory::~PhraseDictionaryNodeMemory()
     const PhraseDictionaryNodeMemory *node = iter->second;
     delete node;
   }
-  delete m_targetPhraseCollection;
-}
-
-TargetPhraseCollection &PhraseDictionaryNodeMemory::GetOrCreateTargetPhraseCollection()
-{
-  if (m_targetPhraseCollection == NULL)
-    m_targetPhraseCollection = new TargetPhraseCollection();
-  return *m_targetPhraseCollection;
 }
 
 void PhraseDictionaryNodeMemory::Prune(size_t tableLimit)
@@ -59,8 +51,7 @@ void PhraseDictionaryNodeMemory::Prune(size_t tableLimit)
   }
 
   // prune TargetPhraseCollection in this node
-  if (m_targetPhraseCollection != NULL)
-    m_targetPhraseCollection->Prune(true, tableLimit);
+  m_targetPhraseCollection.Prune(true, tableLimit);
 }
 
 void PhraseDictionaryNodeMemory::Sort(size_t tableLimit)
@@ -74,9 +65,7 @@ void PhraseDictionaryNodeMemory::Sort(size_t tableLimit)
   }
 
   // prune TargetPhraseCollection in this node
-  if (m_targetPhraseCollection != NULL) {
-    m_targetPhraseCollection->Sort(true, tableLimit);
-  }
+  m_targetPhraseCollection.Sort(true, tableLimit);
 }
 
 PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const Word &sourceTerm)
@@ -138,8 +127,7 @@ void PhraseDictionaryNodeMemory::Clear()
 {
   m_sourceTermMap.clear();
   m_nonTermMap.clear();
-  delete m_targetPhraseCollection;
-
+  m_targetPhraseCollection.Clear();
 }
 
 std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeMemory &node)
