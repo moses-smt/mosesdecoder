@@ -129,7 +129,7 @@ protected:
     :m_targetPhraseCollection(NULL) {
   }
 public:
-  virtual ~PhraseDictionaryNodeMemory();
+  ~PhraseDictionaryNodeMemory();
 
   bool IsLeaf() const {
     return m_sourceTermMap.empty() && m_nonTermMap.empty();
