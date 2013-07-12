@@ -257,7 +257,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       }
 
       // create new rule
-      const PhraseDictionaryNodeMemory &child = *p->second;
+      const PhraseDictionaryNodeMemory &child = p->second;
 #ifdef USE_BOOST_POOL
       DottedRuleInMemory *rule = m_dottedRulePool.malloc();
       new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);

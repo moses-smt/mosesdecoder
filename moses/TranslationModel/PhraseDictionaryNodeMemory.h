@@ -97,37 +97,30 @@ public:
 
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_map<Word,
-          PhraseDictionaryNodeMemory*,
+          PhraseDictionaryNodeMemory,
           TerminalHasher,
           TerminalEqualityPred> TerminalMap;
 
   typedef boost::unordered_map<NonTerminalMapKey,
-          PhraseDictionaryNodeMemory*,
+          PhraseDictionaryNodeMemory,
           NonTerminalMapKeyHasher,
           NonTerminalMapKeyEqualityPred> NonTerminalMap;
 #else
-  typedef std::map<Word, PhraseDictionaryNodeMemory*> TerminalMap;
-  typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeMemory*> NonTerminalMap;
+  typedef std::map<Word, PhraseDictionaryNodeMemory> TerminalMap;
+  typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeMemory> NonTerminalMap;
 #endif
 
 private:
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryFuzzyMatch&);
 
-  // only these classes are allowed to instantiate this class
-  friend class PhraseDictionaryMemory;
-  friend class PhraseDictionaryFuzzyMatch;
-  friend class std::map<Word, PhraseDictionaryNodeMemory>;
-  friend class std::map<long, PhraseDictionaryNodeMemory>;
-
   TerminalMap m_sourceTermMap;
   NonTerminalMap m_nonTermMap;
   TargetPhraseCollection m_targetPhraseCollection;
 
-  PhraseDictionaryNodeMemory() {}
 
 public:
-  ~PhraseDictionaryNodeMemory();
+  PhraseDictionaryNodeMemory() {}
 
   bool IsLeaf() const {
     return m_sourceTermMap.empty() && m_nonTermMap.empty();
