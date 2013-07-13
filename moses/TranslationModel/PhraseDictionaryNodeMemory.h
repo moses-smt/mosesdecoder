@@ -97,39 +97,30 @@ public:
 
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_map<Word,
-          PhraseDictionaryNodeMemory*,
+          PhraseDictionaryNodeMemory,
           TerminalHasher,
           TerminalEqualityPred> TerminalMap;
 
   typedef boost::unordered_map<NonTerminalMapKey,
-          PhraseDictionaryNodeMemory*,
+          PhraseDictionaryNodeMemory,
           NonTerminalMapKeyHasher,
           NonTerminalMapKeyEqualityPred> NonTerminalMap;
 #else
-  typedef std::map<Word, PhraseDictionaryNodeMemory*> TerminalMap;
-  typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeMemory*> NonTerminalMap;
+  typedef std::map<Word, PhraseDictionaryNodeMemory> TerminalMap;
+  typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeMemory> NonTerminalMap;
 #endif
 
 private:
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryFuzzyMatch&);
 
-  // only these classes are allowed to instantiate this class
-  friend class PhraseDictionaryMemory;
-  friend class PhraseDictionaryFuzzyMatch;
-  friend class std::map<Word, PhraseDictionaryNodeMemory>;
-  friend class std::map<long, PhraseDictionaryNodeMemory>;
-
-protected:
   TerminalMap m_sourceTermMap;
   NonTerminalMap m_nonTermMap;
-  TargetPhraseCollection *m_targetPhraseCollection;
+  TargetPhraseCollection m_targetPhraseCollection;
 
-  PhraseDictionaryNodeMemory()
-    :m_targetPhraseCollection(NULL) {
-  }
+
 public:
-  ~PhraseDictionaryNodeMemory();
+  PhraseDictionaryNodeMemory() {}
 
   bool IsLeaf() const {
     return m_sourceTermMap.empty() && m_nonTermMap.empty();
@@ -143,9 +134,11 @@ public:
   const PhraseDictionaryNodeMemory *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
 
   const TargetPhraseCollection *GetTargetPhraseCollection() const {
+    return &m_targetPhraseCollection;
+  }
+  TargetPhraseCollection &GetOrCreateTargetPhraseCollection() {
     return m_targetPhraseCollection;
   }
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection();
 
   const NonTerminalMap & GetNonTerminalMap() const {
     return m_nonTermMap;
