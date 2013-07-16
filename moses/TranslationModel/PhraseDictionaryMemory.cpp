@@ -151,8 +151,8 @@ void PhraseDictionaryMemory::GetTargetPhraseCollectionBatch(const InputPathList 
 
       const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
       if (ptNode) {
-        const TargetPhraseCollection *targetPhrases = ptNode->GetTargetPhraseCollection();
-        node.SetTargetPhrases(*this, targetPhrases, ptNode);
+        const TargetPhraseCollection &targetPhrases = ptNode->GetTargetPhraseCollection();
+        node.SetTargetPhrases(*this, &targetPhrases, ptNode);
       } else {
         node.SetTargetPhrases(*this, NULL, NULL);
       }
