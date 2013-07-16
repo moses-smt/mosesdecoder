@@ -1,0 +1,6 @@
+alias header_paths : : : : <include>. <include>.. <include>../../moses/ <include>../.. <include>../../contrib/classifier ;
+
+obj TranslationTable.o : TranslationTable.cpp header_paths ;
+obj TTableCollection.o : TTableCollection.cpp TranslationTable.o header_paths ;
+
+exe extract-classifier-features : extract_features.cpp TranslationTable.o TTableCollection.o ..//..//contrib//classifier//classifier header_paths ..//deps ;
