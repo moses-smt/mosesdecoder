@@ -52,7 +52,7 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
   , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(source, target, sourceLHS);
-  return currNode.GetOrCreateTargetPhraseCollection();
+  return currNode.GetTargetPhraseCollection();
 }
 
 const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& sourceOrig) const
@@ -71,7 +71,7 @@ const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(
       return NULL;
   }
 
-  return currNode->GetTargetPhraseCollection();
+  return &currNode->GetTargetPhraseCollection();
 }
 
 PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase &source
