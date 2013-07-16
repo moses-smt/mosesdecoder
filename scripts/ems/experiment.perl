@@ -390,6 +390,30 @@ sub read_config {
     die if $error;
 }
 
+# tiny INI file reader
+
+sub read_ini_file {
+  my $file = shift;
+  my %config;
+  my $section = "";
+  open(my $inihdl, $file) or die "Failed to read .ini file: $file";
+  while (<$inihdl>) {
+    chomp(my $line = $_);
+    if ($line =~ m/^\s*;/) {
+      # skip commented lines
+    } elsif ($line =~ m/^\[(.*)\]/) {
+      $section = $1;    
+    } elsif ($line =~ m/=/) {
+      my ($key, $value) = split / *= */;
+      $value =~ s/^"//;
+      $value =~ s/"\s*$//;
+      $config{"$section.$key"} = $value;
+    }
+  }  
+  close $inihdl;
+  return \%config;
+}
+
 # log parameter settings into a file
 
 sub log_config {
@@ -970,6 +994,12 @@ sub define_step {
         }
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-ttable') {
 	    &define_training_build_ttable($i);
+        }
+  elsif ($DO_STEP[$i] eq 'TRAINING:classifier-extract-examples') {
+      &define_training_classifier_extract($i);
+        }
+  elsif ($DO_STEP[$i] eq 'TRAINING:classifier-build-model') {
+      &define_training_classifier_model($i);
         }
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-generation') {
             &define_training_build_generation($i);
@@ -1993,6 +2023,7 @@ sub define_training_extract_phrases {
     my $extract_settings = &get("TRAINING:extract-settings");
     $extract_settings .= " --IncludeSentenceId " if &get("TRAINING:domain-features");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
+    $cmd .= " -extract-context " if &get("TRAINING:use-classifier");
 
     my $baseline_extract = &get("TRAINING:baseline-extract");
     $cmd .= "-baseline-extract $baseline_extract" if defined($baseline_extract);
@@ -2017,6 +2048,36 @@ sub define_training_build_ttable {
     $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
     
     &create_step($step_id,$cmd);
+}
+
+sub define_training_classifier_extract {
+  my $step_id = shift;
+  my ($out, $phrase_table, $extract, $src_corpus, $classifier_config) = &get_output_and_input($step_id);
+
+  die "error: no classifier_config" unless defined($classifier_config);
+
+  my $extractor = &get("GENERAL:moses-script-dir") . "/generic/classifier-feature-extract-parallel.perl";
+  my $cores = &get("GENERAL:cores");
+  my $extractor_bin = &get("GENERAL:moses-src-dir") . "/bin/extract-classifier";
+  my $cmd = "$extractor $cores $extractor_bin $extract.classifier.gz $src_corpus $phrase_table.gz $classifier_config $out";
+
+  &create_step($step_id, $cmd);
+}
+
+sub define_training_classifier_model {
+  my $step_id = shift;
+  my ($out, $classifier_output, $classifier_config) = &get_output_and_input($step_id);
+  my $trainfile = "$classifier_output.train.gz";
+  my $cores = &get("GENERAL:cores");
+  my $vwparallel = &get("GENERAL:moses-script-dir") . "/generic/vw-parallel.perl";
+  my $vwpath = &get("GENERAL:vw-path");
+  my $classifier_parsed_config = read_ini_file($classifier_config);
+  if (! defined $classifier_parsed_config->{'vw-options.train'}) {
+    die "Classifier configuration file does not contain the key 'train' in section [vw-options]";
+  }
+  my $cmd = "$vwparallel $cores $trainfile vwcache $out.model $vwpath $classifier_parsed_config->{'vw-options.train'}";
+
+  &create_step($step_id, $cmd);
 }
 
 sub define_domain_feature_score_option {
@@ -2164,13 +2225,20 @@ sub get_config_tables {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,$classifier_model,$classifier_config,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
 
     # sparse lexical features provide additional content for config file
     $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
+
+    if (&get("TRAINING:use-classifier")) {
+      die "ERROR: no classifier_config" unless defined($classifier_config);
+      die "ERROR: no classifier_model" unless defined($classifier_model);
+      my $classifier_modelfile = "$classifier_model.model";
+      $cmd .= " -classifier-model $classifier_modelfile -classifier-config $classifier_config ";
+    }
 
     my @LM_SETS = &get_sets("LM");
     my %INTERPOLATED_AWAY;
@@ -2527,7 +2595,7 @@ sub define_tuningevaluation_filter {
     my $tuning_flag = !defined($set);
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains, $classifier_model, $classifier_config) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $report_precision_by_coverage = !$tuning_flag && &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
@@ -2584,6 +2652,13 @@ sub define_tuningevaluation_filter {
       $delete_config = 1;
       
       $cmd .= &get_config_tables($config,$reordering_table,$phrase_translation_table,undef,$domains);
+
+      if (&get("TRAINING:use-classifier")) {
+        die "ERROR: no classifier_config" unless defined($classifier_config);
+        die "ERROR: no classifier_model" unless defined($classifier_model);
+        my $classifier_modelfile = "$classifier_model.model";
+        $cmd .= " -classifier-model $classifier_modelfile -classifier-config $classifier_config ";
+      }
 
       $cmd .= "-lm 0:3:$config:8\n"; # dummy kenlm 3-gram model on factor 0
     }

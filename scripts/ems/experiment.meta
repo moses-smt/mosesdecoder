@@ -551,6 +551,16 @@ sigtest-filter-ttable
 	default-name: model/phrase-table-sigtest-filter
 	pass-unless: sigtest-filter
   ignore-if: TRAINING:config
+classifier-extract-examples
+  in: sigtest-filter-phrase-translation-table extracted-phrases classifier-corpus GENERAL:classifier-config
+  out: classifier-output
+  ignore-unless: use-classifier
+  default-name: model/classifier
+classifier-build-model
+  in: classifier-output GENERAL:classfier-config
+  out: classifier-model
+  ignore-unless: use-classifier
+  default-name: model/classifier
 sigtest-filter-reordering
 	in: reordering-table sigtest-filter-suffix-array
 	out: sigtest-filter-reordering-table
