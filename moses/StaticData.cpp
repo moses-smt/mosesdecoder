@@ -539,6 +539,13 @@ bool StaticData::LoadData(Parameter *parameter)
     cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
   }
 
+  if (m_parameter->GetParam("placeholder-factor").size() > 0) {
+    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
+  } else {
+    m_placeHolderFactor = NOT_FOUND;
+  }
+
+
   // all features
   map<string, int> featureIndexMap;
 
@@ -1234,7 +1241,7 @@ void StaticData::OverrideFeatures()
       CHECK(keyVal.size() == 2);
 
       VERBOSE(1, "Override " << ff.GetScoreProducerDescription() << " "
-    		     << keyVal[0] << "=" << keyVal[1] << endl);
+              << keyVal[0] << "=" << keyVal[1] << endl);
 
       ff.SetParameter(keyVal[0], keyVal[1]);
 

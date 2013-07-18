@@ -246,9 +246,8 @@ inline std::vector<std::string> TokenizeFirstOnly(const std::string& str,
     // Found a token, add it to the vector.
     tokens.push_back(str.substr(0, pos));
     tokens.push_back(str.substr(pos + 1, str.size() - pos  - 1));
-  }
-  else {
-	  tokens.push_back(str);
+  } else {
+    tokens.push_back(str);
   }
 
   return tokens;
