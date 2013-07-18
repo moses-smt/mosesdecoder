@@ -74,7 +74,8 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   set<string> keys;
 
   for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
+    vector<string> args = TokenizeFirstOnly(toks[i], "=");
+    cerr << args[0] << " " << args[1] << endl;
     CHECK(args.size() == 2);
 
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
