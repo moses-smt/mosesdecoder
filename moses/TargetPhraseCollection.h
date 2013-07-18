@@ -58,7 +58,7 @@ public:
   }
 
   ~TargetPhraseCollection() {
-    Clear();
+	  Remove();
   }
 
   const std::vector<TargetPhrase*> &GetCollection() const {
@@ -84,8 +84,11 @@ public:
   void Prune(bool adhereTableLimit, size_t tableLimit);
   void Sort(bool adhereTableLimit, size_t tableLimit);
 
-  void Clear() {
+  void Remove() {
     RemoveAllInColl(m_collection);
+  }
+  void Detach() {
+    m_collection.clear();
   }
 
 };

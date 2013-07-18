@@ -88,11 +88,11 @@ const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Wor
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
-void PhraseDictionaryNodeMemory::Clear()
+void PhraseDictionaryNodeMemory::Remove()
 {
   m_sourceTermMap.clear();
   m_nonTermMap.clear();
-  m_targetPhraseCollection.Clear();
+  m_targetPhraseCollection.Remove();
 }
 
 std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeMemory &node)

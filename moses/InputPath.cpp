@@ -37,6 +37,13 @@ const void *InputPath::GetPtNode(const PhraseDictionary &phraseDictionary) const
   return iter->second.second;
 }
 
+void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
+                      , const TargetPhraseCollection *targetPhrases
+                      , const void *ptNode) {
+  std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
+  m_targetPhrases[&phraseDictionary] = value;
+}
+
 std::ostream& operator<<(std::ostream& out, const InputPath& obj)
 {
   out << &obj << " " << obj.GetWordsRange() << " " << obj.GetPrevNode() << " " << obj.GetPhrase();

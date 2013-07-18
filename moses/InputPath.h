@@ -33,6 +33,11 @@ protected:
   const ScoreComponentCollection *m_inputScore;
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
 
+  // make a copy of the target phrase collection, rather than using the 1 given by the phrase dictionary
+  // must clean up yourself.
+  // used when pruning during placeholder processing
+  std::vector<const TargetPhraseCollection*> m_copiedSet;
+
 public:
   explicit InputPath()
     : m_prevNode(NULL)
@@ -56,11 +61,10 @@ public:
 
   void SetTargetPhrases(const PhraseDictionary &phraseDictionary
                         , const TargetPhraseCollection *targetPhrases
-                        , const void *ptNode) {
-    std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
-    m_targetPhrases[&phraseDictionary] = value;
-  }
+                        , const void *ptNode);
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
+
+  // pointer to internal node in phrase-table. Since this is implementation dependent, this is a void*
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;
   const ScoreComponentCollection *GetInputScore() const {
     return m_inputScore;
