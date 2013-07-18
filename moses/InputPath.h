@@ -36,7 +36,7 @@ protected:
   // make a copy of the target phrase collection, rather than using the 1 given by the phrase dictionary
   // must clean up yourself.
   // used when pruning during placeholder processing
-  std::vector<const TargetPhraseCollection*> m_copiedSet;
+  std::vector<TargetPhraseCollection> m_copiedSet;
 
 public:
   explicit InputPath()

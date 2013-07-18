@@ -74,6 +74,11 @@ void TargetPhraseCollection::Sort(bool adhereTableLimit, size_t tableLimit)
   }
 }
 
+void TargetPhraseCollection::Add(const TargetPhraseCollection &copy)
+{
+	std::copy(copy.begin(), copy.end(), std::inserter(m_collection, m_collection.end()));
+}
+
 std::ostream& operator<<(std::ostream &out, const TargetPhraseCollection &obj)
 {
   TargetPhraseCollection::const_iterator iter;

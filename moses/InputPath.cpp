@@ -1,5 +1,6 @@
 #include "InputPath.h"
 #include "ScoreComponentCollection.h"
+#include "TargetPhraseCollection.h"
 
 namespace Moses
 {
@@ -15,6 +16,14 @@ InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputP
 InputPath::~InputPath()
 {
   delete m_inputScore;
+
+  // detach target phrase before delete objects from m_copiedSet
+  // the phrase dictionary owns the target phrases so they should be doing the deleting
+  std::vector<TargetPhraseCollection>::iterator iter;
+  for (iter = m_copiedSet.begin(); iter != m_copiedSet.end(); ++iter) {
+	  TargetPhraseCollection &coll = *iter;
+	  coll.Detach();
+  }
 }
 
 const TargetPhraseCollection *InputPath::GetTargetPhrases(const PhraseDictionary &phraseDictionary) const
