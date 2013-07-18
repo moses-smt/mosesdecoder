@@ -770,8 +770,9 @@ public:
 
   void OverrideFeatures();
 
-  FactorType GetPlaceholderFactor() const
-  { return m_placeHolderFactor; }
+  FactorType GetPlaceholderFactor() const {
+    return m_placeHolderFactor;
+  }
 };
 
 }

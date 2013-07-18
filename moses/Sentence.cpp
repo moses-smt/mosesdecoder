@@ -125,7 +125,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   if (staticData.GetXmlInputType() != XmlPassThrough) {
     if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls, placeholders,
-    		staticData.GetXmlBrackets().first, staticData.GetXmlBrackets().second)) {
+                                staticData.GetXmlBrackets().first, staticData.GetXmlBrackets().second)) {
       const string msg("Unable to parse XML in line: " + line);
       TRACE_ERR(msg << endl);
       throw runtime_error(msg);
@@ -205,15 +205,15 @@ void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::str
 {
   FactorType factorType = StaticData::Instance().GetPlaceholderFactor();
   if (factorType == NOT_FOUND) {
-	  return;
+    return;
   }
 
   for (size_t i = 0; i < placeholders.size(); ++i) {
-	  size_t pos = placeholders[i].first;
-	  const string &str = placeholders[i].second;
-	  const Factor *factor = FactorCollection::Instance().AddFactor(str);
-	  Word &word = Phrase::GetWord(pos);
-	  word[factorType] = factor;
+    size_t pos = placeholders[i].first;
+    const string &str = placeholders[i].second;
+    const Factor *factor = FactorCollection::Instance().AddFactor(str);
+    Word &word = Phrase::GetWord(pos);
+    word[factorType] = factor;
   }
 }
 

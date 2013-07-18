@@ -557,10 +557,9 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   if (m_parameter->GetParam("placeholder-factor").size() > 0) {
-	  m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
-  }
-  else {
-	  m_placeHolderFactor = NOT_FOUND;
+    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
+  } else {
+    m_placeHolderFactor = NOT_FOUND;
   }
 
 
@@ -1325,7 +1324,7 @@ void StaticData::OverrideFeatures()
       CHECK(keyVal.size() == 2);
 
       VERBOSE(1, "Override " << ff.GetScoreProducerDescription() << " "
-    		     << keyVal[0] << "=" << keyVal[1] << endl);
+              << keyVal[0] << "=" << keyVal[1] << endl);
 
       ff.SetParameter(keyVal[0], keyVal[1]);
 

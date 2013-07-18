@@ -150,7 +150,7 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
  * \param rbrackStr xml tag's right bracket string, typically ">"
  */
 bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls,
-							std::vector< std::pair<size_t, std::string> > &placeholders,
+                            std::vector< std::pair<size_t, std::string> > &placeholders,
                             const std::string& lbrackStr, const std::string& rbrackStr)
 {
   //parse XML markup in translation line
@@ -295,12 +295,12 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 
         // name-entity placeholder
         else if (tagName == "ne") {
-        	if (startPos != (endPos - 1)) {
-        	            TRACE_ERR("ERROR: Placeholder must only span 1 word: " << line << endl);
-        	            return false;
-        	}
-        	string entity = ParseXmlTagAttribute(tagContent,"entity");
-        	placeholders.push_back(std::pair<size_t, std::string>(startPos, entity));
+          if (startPos != (endPos - 1)) {
+            TRACE_ERR("ERROR: Placeholder must only span 1 word: " << line << endl);
+            return false;
+          }
+          string entity = ParseXmlTagAttribute(tagContent,"entity");
+          placeholders.push_back(std::pair<size_t, std::string>(startPos, entity));
         }
 
         // default: opening tag that specifies translation options
