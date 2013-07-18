@@ -195,6 +195,8 @@ Parameter::Parameter()
   AddParam("print-id", "prefix translations with id. Default if false");
 
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
+
+  AddParam("placeholder-factor", "Which factor to use to store the original text for placeholders");
 }
 
 Parameter::~Parameter()

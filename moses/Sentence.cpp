@@ -121,14 +121,21 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   //const StaticData &staticData = StaticData::Instance();
   std::vector<XmlOption*> xmlOptionsList(0);
   std::vector< size_t > xmlWalls;
+  std::vector< std::pair<size_t, std::string> > placeholders;
+
   if (staticData.GetXmlInputType() != XmlPassThrough) {
-    if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls, staticData.GetXmlBrackets().first, staticData.GetXmlBrackets().second)) {
+    if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls, placeholders,
+    		staticData.GetXmlBrackets().first, staticData.GetXmlBrackets().second)) {
       const string msg("Unable to parse XML in line: " + line);
       TRACE_ERR(msg << endl);
       throw runtime_error(msg);
     }
   }
+
   Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter, NULL);
+
+  // placeholders
+  ProcessPlaceholders(placeholders);
 
   if (staticData.IsChart()) {
     InitStartEndWord();
@@ -192,6 +199,22 @@ void Sentence::InitStartEndWord()
   factor = factorCollection.AddFactor(Input, 0, EOS_); // TODO - non-factored
   endWord.SetFactor(0, factor);
   AddWord(endWord);
+}
+
+void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
+{
+  FactorType factorType = StaticData::Instance().GetPlaceholderFactor();
+  if (factorType == NOT_FOUND) {
+	  return;
+  }
+
+  for (size_t i = 0; i < placeholders.size(); ++i) {
+	  size_t pos = placeholders[i].first;
+	  const string &str = placeholders[i].second;
+	  const Factor *factor = FactorCollection::Instance().AddFactor(str);
+	  Word &word = Phrase::GetWord(pos);
+	  word[factorType] = factor;
+  }
 }
 
 TranslationOptionCollection*
