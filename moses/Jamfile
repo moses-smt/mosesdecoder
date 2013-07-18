@@ -30,6 +30,8 @@ if $(have-clock[2]) = 0 {
   alias rt ;
 }
 
+obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm : <dependency>$(LM-LOG) ;
+
 lib moses :
 [ glob 
   *.cpp
@@ -45,8 +47,9 @@ lib moses :
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp
+  LM/Factory.cpp
 ]
-headers LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
+headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;

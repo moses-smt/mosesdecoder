@@ -22,14 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include "util/check.hh"
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
-#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
-#include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
-#include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
-#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+
+#include "moses/FF/Factory.h"
+#include "moses/FF/WordPenaltyProducer.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
+#include "moses/FF/InputFeature.h"
 
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -45,37 +42,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "ScoreComponentCollection.h"
-
-#include "moses/FF/BleuScoreFeature.h"
-#include "moses/FF/TargetWordInsertionFeature.h"
-#include "moses/FF/SourceWordDeletionFeature.h"
-#include "moses/FF/GlobalLexicalModel.h"
-#include "moses/FF/GlobalLexicalModelUnlimited.h"
-#include "moses/FF/UnknownWordPenaltyProducer.h"
-#include "moses/FF/WordTranslationFeature.h"
-#include "moses/FF/TargetBigramFeature.h"
-#include "moses/FF/TargetNgramFeature.h"
-#include "moses/FF/PhraseBoundaryFeature.h"
-#include "moses/FF/PhrasePairFeature.h"
-#include "moses/FF/PhraseLengthFeature.h"
-#include "moses/FF/DistortionScoreProducer.h"
-#include "moses/FF/WordPenaltyProducer.h"
-#include "moses/FF/InputFeature.h"
-#include "moses/FF/PhrasePenalty.h"
-#include "moses/FF/OSM-Feature/OpSequenceModel.h"
-
-#include "LM/Ken.h"
-#ifdef LM_IRST
-#include "LM/IRST.h"
-#endif
-
-#ifdef LM_SRI
-#include "LM/SRI.h"
-#endif
-
-#ifdef HAVE_SYNLM
-#include "SyntacticLanguageModel.h"
-#endif
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -550,6 +516,7 @@ bool StaticData::LoadData(Parameter *parameter)
   map<string, int> featureIndexMap;
 
   const vector<string> &features = m_parameter->GetParam("feature");
+  FeatureRegistry registry;
   for (size_t i = 0; i < features.size(); ++i) {
     const string &line = Trim(features[i]);
     cerr << "line=" << line << endl;
@@ -559,151 +526,8 @@ bool StaticData::LoadData(Parameter *parameter)
     vector<string> toks = Tokenize(line);
 
     const string &feature = toks[0];
-    //int featureIndex = GetFeatureIndex(featureIndexMap, feature);
 
-    if (feature == "GlobalLexicalModel") {
-      GlobalLexicalModel *model = new GlobalLexicalModel(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "GlobalLexicalModelUnlimited") {
-      GlobalLexicalModelUnlimited *model = NULL; //new GlobalLexicalModelUnlimited(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "SourceWordDeletionFeature") {
-      SourceWordDeletionFeature *model = new SourceWordDeletionFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "TargetWordInsertionFeature") {
-      TargetWordInsertionFeature *model = new TargetWordInsertionFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "PhraseBoundaryFeature") {
-      PhraseBoundaryFeature *model = new PhraseBoundaryFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "PhraseLengthFeature") {
-      PhraseLengthFeature *model = new PhraseLengthFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "WordTranslationFeature") {
-      WordTranslationFeature *model = new WordTranslationFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "TargetBigramFeature") {
-      TargetBigramFeature *model = new TargetBigramFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "TargetNgramFeature") {
-      TargetNgramFeature *model = new TargetNgramFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "PhrasePairFeature") {
-      PhrasePairFeature *model = new PhrasePairFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "LexicalReordering") {
-      LexicalReordering *model = new LexicalReordering(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "KENLM") {
-      LanguageModel *model = ConstructKenLM(feature, line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-#ifdef LM_IRST
-    else if (feature == "IRSTLM") {
-      LanguageModelIRST *model = new LanguageModelIRST(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-#endif
-#ifdef LM_SRI
-    else if (feature == "SRILM") {
-      LanguageModelSRI *model = new LanguageModelSRI(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-#endif
-    else if (feature == "Generation") {
-      GenerationDictionary *model = new GenerationDictionary(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "BleuScoreFeature") {
-      BleuScoreFeature *model = new BleuScoreFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "Distortion") {
-      DistortionScoreProducer *model = new DistortionScoreProducer(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "WordPenalty") {
-      WordPenaltyProducer *model = new WordPenaltyProducer(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "UnknownWordPenalty") {
-      UnknownWordPenaltyProducer *model = new UnknownWordPenaltyProducer(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      if (weights.size() == 0)
-        weights.push_back(1.0f);
-      SetWeights(model, weights);
-    } else if (feature == "InputFeature") {
-      InputFeature *model = new InputFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-
-    } else if (feature == "PhraseDictionaryBinary") {
-      PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryOnDisk") {
-      PhraseDictionaryOnDisk* model = new PhraseDictionaryOnDisk(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryMemory") {
-      PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryCompact") {
-      PhraseDictionaryCompact* model = new PhraseDictionaryCompact(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryMultiModel") {
-      PhraseDictionaryMultiModel* model = new PhraseDictionaryMultiModel(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryMultiModelCounts") {
-      PhraseDictionaryMultiModelCounts* model = new PhraseDictionaryMultiModelCounts(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryALSuffixArray") {
-      PhraseDictionaryALSuffixArray* model = new PhraseDictionaryALSuffixArray(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryDynSuffixArray") {
-      PhraseDictionaryDynSuffixArray* model = new PhraseDictionaryDynSuffixArray(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "OpSequenceModel") {
-      OpSequenceModel* model = new OpSequenceModel(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhrasePenalty") {
-      PhrasePenalty* model = new PhrasePenalty(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-
-#ifdef HAVE_SYNLM
-    else if (feature == "SyntacticLanguageModel") {
-      SyntacticLanguageModel *model = new SyntacticLanguageModel(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-#endif
-    else {
-      UserMessage::Add("Unknown feature function:" + feature);
-      return false;
-    }
+    registry.Construct(feature, line);
   }
 
   OverrideFeatures();
