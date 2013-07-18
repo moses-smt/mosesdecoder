@@ -37,6 +37,7 @@ protected:
   // must clean up yourself.
   // used when pruning during placeholder processing
   std::vector<TargetPhraseCollection> m_copiedSet;
+  std::vector<size_t> m_placeholders;
 
 public:
   explicit InputPath()

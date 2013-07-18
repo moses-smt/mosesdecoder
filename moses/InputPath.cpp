@@ -1,6 +1,8 @@
 #include "InputPath.h"
 #include "ScoreComponentCollection.h"
 #include "TargetPhraseCollection.h"
+#include "StaticData.h"
+#include "TypeDef.h"
 
 namespace Moses
 {
@@ -11,6 +13,14 @@ InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputP
   ,m_range(range)
   ,m_inputScore(inputScore)
 {
+	FactorType factorType = StaticData::Instance().GetPlaceholderFactor();
+	if (factorType != NOT_FOUND) {
+		for (size_t pos = 0; pos < m_phrase.size(); ++pos) {
+			if (m_phrase.GetFactor(pos, factorType)) {
+				m_placeholders.push_back(pos);
+			}
+		}
+	}
 }
 
 InputPath::~InputPath()
