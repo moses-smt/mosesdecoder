@@ -206,7 +206,7 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  FactorType m_placeHolderFactor;
+  std::pair<FactorType, FactorType> m_placeHolderFactor;
 
   StaticData();
 
@@ -751,7 +751,7 @@ public:
 
   void OverrideFeatures();
 
-  FactorType GetPlaceholderFactor() const {
+  const std::pair<FactorType, FactorType> &GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
 };

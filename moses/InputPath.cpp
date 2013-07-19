@@ -16,10 +16,10 @@ InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputP
   ,m_range(range)
   ,m_inputScore(inputScore)
 {
-  FactorType factorType = StaticData::Instance().GetPlaceholderFactor();
-  if (factorType != NOT_FOUND) {
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
+  if (placeholderFactor != NOT_FOUND) {
     for (size_t pos = 0; pos < m_phrase.GetSize(); ++pos) {
-      if (m_phrase.GetFactor(pos, factorType)) {
+      if (m_phrase.GetFactor(pos, placeholderFactor)) {
         m_placeholders.push_back(pos);
       }
     }
@@ -55,7 +55,7 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
                                  , const TargetPhraseCollection *targetPhrases
                                  , const void *ptNode)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
   if (targetPhrases == NULL || placeholderFactor == NOT_FOUND || m_placeholders.size() == 0) {
     // use all of the target phrase given
     std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
@@ -83,7 +83,8 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
 
 bool InputPath::SetPlaceholders(TargetPhrase *targetPhrase) const
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType sourcePlaceholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
+  FactorType targetPlaceholderFactor = StaticData::Instance().GetPlaceholderFactor().second;
 
   const AlignmentInfo &alignments = targetPhrase->GetAlignTerm();
   for (size_t i = 0; i < m_placeholders.size(); ++i) {
@@ -92,8 +93,7 @@ bool InputPath::SetPlaceholders(TargetPhrase *targetPhrase) const
     if (targetPos.size() == 1) {
       const Word &sourceWord = m_phrase.GetWord(sourcePos);
       Word &targetWord = targetPhrase->GetWord(*targetPos.begin());
-      targetWord[placeholderFactor] = sourceWord[placeholderFactor];
-      //targetPhrase->SetFactor(*targetPos.begin(), placeholderFactor, sourceWord[placeholderFactor]);
+      targetWord[targetPlaceholderFactor] = sourceWord[sourcePlaceholderFactor];
     } else {
       return false;
     }

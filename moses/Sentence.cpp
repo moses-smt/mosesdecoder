@@ -203,8 +203,8 @@ void Sentence::InitStartEndWord()
 
 void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorType factorType = StaticData::Instance().GetPlaceholderFactor();
-  if (factorType == NOT_FOUND) {
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
+  if (placeholderFactor == NOT_FOUND) {
     return;
   }
 
@@ -213,7 +213,7 @@ void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::str
     const string &str = placeholders[i].second;
     const Factor *factor = FactorCollection::Instance().AddFactor(str);
     Word &word = Phrase::GetWord(pos);
-    word[factorType] = factor;
+    word[placeholderFactor] = factor;
   }
 }
 
