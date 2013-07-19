@@ -68,23 +68,22 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
     // use all of the target phrase given
     std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
     m_targetPhrases[&phraseDictionary] = value;
-  }
-  else {
+  } else {
     // filter out target phrases with alignments that are not 1-to-1 with placeholder
-	m_copiedSet.push_back(TargetPhraseCollection());
-	TargetPhraseCollection &newTargetPhrases = m_copiedSet.back();
+    m_copiedSet.push_back(TargetPhraseCollection());
+    TargetPhraseCollection &newTargetPhrases = m_copiedSet.back();
     std::pair<const TargetPhraseCollection*, const void*> value(&newTargetPhrases, ptNode);
     m_targetPhrases[&phraseDictionary] = value;
 
     TargetPhraseCollection::const_iterator iter;
     for (iter = targetPhrases->begin(); iter != targetPhrases->end(); ++iter) {
-    	TargetPhrase *targetPhrase = *iter;
-    	const AlignmentInfo &alignments = targetPhrase->GetAlignTerm();
-    	bool ok = IsCompatibleWithPlaceholders(alignments);
+      TargetPhrase *targetPhrase = *iter;
+      const AlignmentInfo &alignments = targetPhrase->GetAlignTerm();
+      bool ok = IsCompatibleWithPlaceholders(alignments);
 
-    	if (ok) {
-    		newTargetPhrases.Add(targetPhrase);
-    	}
+      if (ok) {
+        newTargetPhrases.Add(targetPhrase);
+      }
     }
   }
 }
@@ -92,11 +91,11 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
 bool InputPath::IsCompatibleWithPlaceholders(const AlignmentInfo &alignments) const
 {
   for (size_t i = 0; i < m_placeholders.size(); ++i) {
-	  size_t sourcePos = m_placeholders[i];
-	  set<size_t> targetPos = alignments.GetAlignmentsForSource(sourcePos);
-	  if (targetPos.size() != 1) {
-		  return false;
-	  }
+    size_t sourcePos = m_placeholders[i];
+    set<size_t> targetPos = alignments.GetAlignmentsForSource(sourcePos);
+    if (targetPos.size() != 1) {
+      return false;
+    }
   }
   return true;
 }

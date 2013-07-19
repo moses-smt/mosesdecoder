@@ -57,15 +57,15 @@ void AlignmentInfo::BuildNonTermIndexMap()
 
 std::set<size_t> AlignmentInfo::GetAlignmentsForSource(size_t sourcePos) const
 {
-	std::set<size_t> ret;
-	CollType::const_iterator iter;
-	for (iter = begin(); iter != end(); ++iter) {
-		const std::pair<size_t,size_t> &align = *iter;
-		if (iter->first == sourcePos) {
-			ret.insert(iter->second);
-		}
-	}
-	return ret;
+  std::set<size_t> ret;
+  CollType::const_iterator iter;
+  for (iter = begin(); iter != end(); ++iter) {
+    const std::pair<size_t,size_t> &align = *iter;
+    if (iter->first == sourcePos) {
+      ret.insert(iter->second);
+    }
+  }
+  return ret;
 }
 
 
