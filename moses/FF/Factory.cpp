@@ -106,7 +106,8 @@ class RandFactory : public FeatureFactory
 {
 public:
   void Create(const std::string &line) {
-    DefaultSetup(NewRandLM());
+    //DefaultSetup(NewRandLM());
+	UTIL_THROW(util::Exception, "RandLM is currently broken.");
   }
 };
 #endif
