@@ -58,7 +58,7 @@ public:
   }
 
   ~TargetPhraseCollection() {
-	  Remove();
+    Remove();
   }
 
   const std::vector<TargetPhrase*> &GetCollection() const {
@@ -80,8 +80,6 @@ public:
   void Add(TargetPhrase *targetPhrase) {
     m_collection.push_back(targetPhrase);
   }
-  //! Shallow copy
-  void Add(const TargetPhraseCollection &copy);
 
   void Prune(bool adhereTableLimit, size_t tableLimit);
   void Sort(bool adhereTableLimit, size_t tableLimit);

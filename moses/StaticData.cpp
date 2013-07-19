@@ -506,9 +506,13 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   if (m_parameter->GetParam("placeholder-factor").size() > 0) {
-    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
+	CHECK(m_parameter->GetParam("placeholder-factor").size() == 2);
+    m_placeHolderFactor = std::pair<FactorType, FactorType>(
+    						Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]),
+    						Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[1])
+    						);
   } else {
-    m_placeHolderFactor = NOT_FOUND;
+    m_placeHolderFactor = std::pair<FactorType, FactorType>(NOT_FOUND, NOT_FOUND);
   }
 
 
