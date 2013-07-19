@@ -5,24 +5,26 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
-namespace Moses {
+namespace Moses
+{
 
 class FeatureFactory;
 
-class FeatureRegistry {
-  public:
-    FeatureRegistry();
+class FeatureRegistry
+{
+public:
+  FeatureRegistry();
 
-    ~FeatureRegistry();
+  ~FeatureRegistry();
 
-    void Construct(const std::string &name, const std::string &line);
+  void Construct(const std::string &name, const std::string &line);
 
-  private:
-    void Add(const std::string &name, FeatureFactory *factory);
+private:
+  void Add(const std::string &name, FeatureFactory *factory);
 
-    typedef boost::unordered_map<std::string, boost::shared_ptr<FeatureFactory> > Map;
+  typedef boost::unordered_map<std::string, boost::shared_ptr<FeatureFactory> > Map;
 
-    Map registry_;
+  Map registry_;
 };
 
 } // namespace Moses
