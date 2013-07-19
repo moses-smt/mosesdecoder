@@ -67,7 +67,17 @@ class FeatureFactory {
 
 template <class F> void FeatureFactory::DefaultSetup(F *feature) {
   StaticData &static_data = StaticData::InstanceNonConst();
-  static_data.SetWeights(feature, static_data.GetParameter()->GetWeights(feature->GetScoreProducerDescription()));
+  std::vector<float> &weights = static_data.GetParameter()->GetWeights(feature->GetScoreProducerDescription());
+
+  if (feature->IsTuneable() || weights.size()) {
+	// if it's tuneable, ini file MUST have weights
+	// even it it's not tuneable, people can still set the weights in the ini file
+    static_data.SetWeights(feature, weights);
+  }
+  else {
+    std::vector<float> defaultWeights = feature->DefaultWeights();
+    static_data.SetWeights(feature, defaultWeights);
+  }
 }
 
 namespace {
