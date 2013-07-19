@@ -58,7 +58,7 @@ public:
   }
 
   ~TargetPhraseCollection() {
-	  Remove();
+    Remove();
   }
 
   const std::vector<TargetPhrase*> &GetCollection() const {

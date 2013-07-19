@@ -13,14 +13,14 @@ InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputP
   ,m_range(range)
   ,m_inputScore(inputScore)
 {
-	FactorType factorType = StaticData::Instance().GetPlaceholderFactor();
-	if (factorType != NOT_FOUND) {
-		for (size_t pos = 0; pos < m_phrase.GetSize(); ++pos) {
-			if (m_phrase.GetFactor(pos, factorType)) {
-				m_placeholders.push_back(pos);
-			}
-		}
-	}
+  FactorType factorType = StaticData::Instance().GetPlaceholderFactor();
+  if (factorType != NOT_FOUND) {
+    for (size_t pos = 0; pos < m_phrase.GetSize(); ++pos) {
+      if (m_phrase.GetFactor(pos, factorType)) {
+        m_placeholders.push_back(pos);
+      }
+    }
+  }
 }
 
 InputPath::~InputPath()
@@ -31,8 +31,8 @@ InputPath::~InputPath()
   // the phrase dictionary owns the target phrases so they should be doing the deleting
   std::vector<TargetPhraseCollection>::iterator iter;
   for (iter = m_copiedSet.begin(); iter != m_copiedSet.end(); ++iter) {
-	  TargetPhraseCollection &coll = *iter;
-	  coll.Detach();
+    TargetPhraseCollection &coll = *iter;
+    coll.Detach();
   }
 }
 
@@ -57,8 +57,9 @@ const void *InputPath::GetPtNode(const PhraseDictionary &phraseDictionary) const
 }
 
 void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
-                      , const TargetPhraseCollection *targetPhrases
-                      , const void *ptNode) {
+                                 , const TargetPhraseCollection *targetPhrases
+                                 , const void *ptNode)
+{
   std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
   m_targetPhrases[&phraseDictionary] = value;
 }
