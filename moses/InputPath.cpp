@@ -29,14 +29,6 @@ InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputP
 InputPath::~InputPath()
 {
   delete m_inputScore;
-
-  // detach target phrase before delete objects from m_copiedSet
-  // the phrase dictionary owns the target phrases so they should be doing the deleting
-  std::vector<TargetPhraseCollection>::iterator iter;
-  for (iter = m_copiedSet.begin(); iter != m_copiedSet.end(); ++iter) {
-    TargetPhraseCollection &coll = *iter;
-    coll.Detach();
-  }
 }
 
 const TargetPhraseCollection *InputPath::GetTargetPhrases(const PhraseDictionary &phraseDictionary) const
@@ -77,23 +69,32 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
 
     TargetPhraseCollection::const_iterator iter;
     for (iter = targetPhrases->begin(); iter != targetPhrases->end(); ++iter) {
-      TargetPhrase *targetPhrase = *iter;
-      const AlignmentInfo &alignments = targetPhrase->GetAlignTerm();
-      bool ok = IsCompatibleWithPlaceholders(alignments);
+      TargetPhrase *targetPhrase = new TargetPhrase(**iter);
+      bool ok = SetPlaceholders(targetPhrase);
 
       if (ok) {
         newTargetPhrases.Add(targetPhrase);
+      } else {
+        delete targetPhrase;
       }
     }
   }
 }
 
-bool InputPath::IsCompatibleWithPlaceholders(const AlignmentInfo &alignments) const
+bool InputPath::SetPlaceholders(TargetPhrase *targetPhrase) const
 {
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+
+  const AlignmentInfo &alignments = targetPhrase->GetAlignTerm();
   for (size_t i = 0; i < m_placeholders.size(); ++i) {
     size_t sourcePos = m_placeholders[i];
     set<size_t> targetPos = alignments.GetAlignmentsForSource(sourcePos);
-    if (targetPos.size() != 1) {
+    if (targetPos.size() == 1) {
+      const Word &sourceWord = m_phrase.GetWord(sourcePos);
+      Word &targetWord = targetPhrase->GetWord(*targetPos.begin());
+      targetWord[placeholderFactor] = sourceWord[placeholderFactor];
+      //targetPhrase->SetFactor(*targetPos.begin(), placeholderFactor, sourceWord[placeholderFactor]);
+    } else {
       return false;
     }
   }
