@@ -51,66 +51,70 @@
 
 #include <vector>
 
-namespace Moses {
+namespace Moses
+{
 
-class FeatureFactory {
-  public:
-    virtual ~FeatureFactory() {}
+class FeatureFactory
+{
+public:
+  virtual ~FeatureFactory() {}
 
-    virtual void Create(const std::string &line) = 0;
+  virtual void Create(const std::string &line) = 0;
 
-  protected:
-    template <class F> static void DefaultSetup(F *feature);
+protected:
+  template <class F> static void DefaultSetup(F *feature);
 
-    FeatureFactory() {}
+  FeatureFactory() {}
 };
 
-template <class F> void FeatureFactory::DefaultSetup(F *feature) {
+template <class F> void FeatureFactory::DefaultSetup(F *feature)
+{
   StaticData &static_data = StaticData::InstanceNonConst();
-  static_data.SetWeights(feature, static_data.GetParameter()->GetWeights(feature->GetScoreProducerDescription()));
+  std::vector<float> &weights = static_data.GetParameter()->GetWeights(feature->GetScoreProducerDescription());
+
+  if (feature->IsTuneable() || weights.size()) {
+    // if it's tuneable, ini file MUST have weights
+    // even it it's not tuneable, people can still set the weights in the ini file
+    static_data.SetWeights(feature, weights);
+  } else {
+    std::vector<float> defaultWeights = feature->DefaultWeights();
+    static_data.SetWeights(feature, defaultWeights);
+  }
 }
 
-namespace {
+namespace
+{
 
-template <class F> class DefaultFeatureFactory : public FeatureFactory {
-  public:
-    void Create(const std::string &line) {
-      DefaultSetup(new F(line));
-    }
+template <class F> class DefaultFeatureFactory : public FeatureFactory
+{
+public:
+  void Create(const std::string &line) {
+    DefaultSetup(new F(line));
+  }
 };
 
-class KenFactory : public FeatureFactory {
-  public:
-    void Create(const std::string &line) {
-      DefaultSetup(ConstructKenLM(line));
-    }
-};
-
-//WTF(hieu): unknown word should be a normal feature
-class UnknownFactory : public FeatureFactory {
-  public:
-    void Create(const std::string &line) {
-      StaticData &static_data = StaticData::InstanceNonConst();
-      UnknownWordPenaltyProducer *f = new UnknownWordPenaltyProducer(line);
-      std::vector<float> weights = static_data.GetParameter()->GetWeights(f->GetScoreProducerDescription());
-      if (weights.empty())
-        weights.push_back(1.0f);
-      static_data.SetWeights(f, weights);
-    }
+class KenFactory : public FeatureFactory
+{
+public:
+  void Create(const std::string &line) {
+    DefaultSetup(ConstructKenLM(line));
+  }
 };
 
 #ifdef LM_RAND
-class RandFactory : public FeatureFactory {
-  public:
-    void Create(const std::string &line) {
-      DefaultSetup(NewRandLM());
-    }
+class RandFactory : public FeatureFactory
+{
+public:
+  void Create(const std::string &line) {
+    DefaultSetup(NewRandLM());
+  }
 };
 #endif
 
 } // namespace
 
-FeatureRegistry::FeatureRegistry() {
+FeatureRegistry::FeatureRegistry()
+{
 // Feature with same name as class
 #define MOSES_FNAME(name) Add(#name, new DefaultFeatureFactory< name >());
 // Feature with different name than class.
@@ -141,6 +145,8 @@ FeatureRegistry::FeatureRegistry() {
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
+  MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
+
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
 #endif
@@ -154,21 +160,23 @@ FeatureRegistry::FeatureRegistry() {
   Add("RANDLM", new RandFactory());
 #endif
   Add("KENLM", new KenFactory());
-  Add("UnknownWordPenalty", new UnknownFactory());
 }
 
 FeatureRegistry::~FeatureRegistry() {}
 
-void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory) {
+void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
+{
   std::pair<std::string, boost::shared_ptr<FeatureFactory> > to_ins(name, boost::shared_ptr<FeatureFactory>(factory));
   UTIL_THROW_IF(!registry_.insert(to_ins).second, util::Exception, "Duplicate feature name " << name);
 }
 
-namespace {
+namespace
+{
 class UnknownFeatureException : public util::Exception {};
 }
 
-void FeatureRegistry::Construct(const std::string &name, const std::string &line) {
+void FeatureRegistry::Construct(const std::string &name, const std::string &line)
+{
   Map::iterator i = registry_.find(name);
   UTIL_THROW_IF(i == registry_.end(), UnknownFeatureException, "Feature name " << name << " is not registered.");
   i->second->Create(line);

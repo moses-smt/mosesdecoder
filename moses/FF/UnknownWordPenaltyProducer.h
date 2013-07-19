@@ -20,6 +20,7 @@ public:
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
+  std::vector<float> DefaultWeights() const;
 
 };
 
