@@ -67,7 +67,17 @@ class FeatureFactory {
 
 template <class F> void FeatureFactory::DefaultSetup(F *feature) {
   StaticData &static_data = StaticData::InstanceNonConst();
-  static_data.SetWeights(feature, static_data.GetParameter()->GetWeights(feature->GetScoreProducerDescription()));
+  std::vector<float> &weights = static_data.GetParameter()->GetWeights(feature->GetScoreProducerDescription());
+
+  if (feature->IsTuneable() || weights.size()) {
+	// if it's tuneable, ini file MUST have weights
+	// even it it's not tuneable, people can still set the weights in the ini file
+    static_data.SetWeights(feature, weights);
+  }
+  else {
+    std::vector<float> defaultWeights = feature->DefaultWeights();
+    static_data.SetWeights(feature, defaultWeights);
+  }
 }
 
 namespace {
@@ -83,19 +93,6 @@ class KenFactory : public FeatureFactory {
   public:
     void Create(const std::string &line) {
       DefaultSetup(ConstructKenLM(line));
-    }
-};
-
-//WTF(hieu): unknown word should be a normal feature
-class UnknownFactory : public FeatureFactory {
-  public:
-    void Create(const std::string &line) {
-      StaticData &static_data = StaticData::InstanceNonConst();
-      UnknownWordPenaltyProducer *f = new UnknownWordPenaltyProducer(line);
-      std::vector<float> weights = static_data.GetParameter()->GetWeights(f->GetScoreProducerDescription());
-      if (weights.empty())
-        weights.push_back(1.0f);
-      static_data.SetWeights(f, weights);
     }
 };
 
@@ -141,6 +138,8 @@ FeatureRegistry::FeatureRegistry() {
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
+  MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
+
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
 #endif
@@ -154,7 +153,6 @@ FeatureRegistry::FeatureRegistry() {
   Add("RANDLM", new RandFactory());
 #endif
   Add("KENLM", new KenFactory());
-  Add("UnknownWordPenalty", new UnknownFactory());
 }
 
 FeatureRegistry::~FeatureRegistry() {}

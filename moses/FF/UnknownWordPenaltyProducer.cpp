@@ -13,5 +13,11 @@ UnknownWordPenaltyProducer::UnknownWordPenaltyProducer(const std::string &line)
   ReadParameters();
 }
 
+std::vector<float> UnknownWordPenaltyProducer::DefaultWeights() const
+{
+  std::vector<float> ret(1, 1.0f);
+  return ret;
+}
+
 }
 
