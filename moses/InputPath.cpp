@@ -15,7 +15,7 @@ InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputP
 {
 	FactorType factorType = StaticData::Instance().GetPlaceholderFactor();
 	if (factorType != NOT_FOUND) {
-		for (size_t pos = 0; pos < m_phrase.size(); ++pos) {
+		for (size_t pos = 0; pos < m_phrase.GetSize(); ++pos) {
 			if (m_phrase.GetFactor(pos, factorType)) {
 				m_placeholders.push_back(pos);
 			}
