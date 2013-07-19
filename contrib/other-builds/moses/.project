@@ -1082,6 +1082,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FFState.h</locationURI>
 		</link>
 		<link>
+			<name>FF/Factory.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Factory.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/Factory.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Factory.h</locationURI>
+		</link>
+		<link>
 			<name>FF/FeatureFunction.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FeatureFunction.cpp</locationURI>
