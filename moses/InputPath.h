@@ -12,6 +12,7 @@ namespace Moses
 class PhraseDictionary;
 class TargetPhraseCollection;
 class ScoreComponentCollection;
+class AlignmentInfo;
 
 class InputPath;
 typedef std::list<InputPath*> InputPathList;
@@ -39,6 +40,7 @@ protected:
   std::vector<TargetPhraseCollection> m_copiedSet;
   std::vector<size_t> m_placeholders;
 
+  bool IsCompatibleWithPlaceholders(const AlignmentInfo &alignments) const;
 public:
   explicit InputPath()
     : m_prevNode(NULL)
