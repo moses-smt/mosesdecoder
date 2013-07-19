@@ -20,11 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <vector>
 
-#include "SingleFactor.h"
-#include "RandLM.h"
 #include "Rand.h"
 #include "moses/Factor.h"
 #include "moses/Util.h"
@@ -34,61 +30,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "util/check.hh"
 
+using namespace std;
 
 namespace Moses
 {
-namespace
+
+LanguageModelRandLM::LanguageModelRandLM(const std::string &line)
+  :LanguageModelSingleFactor("RandLM", line)
+  , m_lm(0)
 {
-using namespace std;
+}
 
-class LanguageModelRandLM : public LanguageModelSingleFactor
-{
-public:
-  LanguageModelRandLM(const std::string &line)
-    :LanguageModelSingleFactor("RandLM", line)
-    , m_lm(0) {
-  }
-  bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
-  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
-  ~LanguageModelRandLM() {
-    delete m_lm;
-  }
-  void InitializeForInput(InputType const& source) {
-    m_lm->initThreadSpecificData(); // Creates thread specific data iff                                    // compiled with multithreading.
-  }
-  void CleanUpAfterSentenceProcessing(const InputType& source) {
-    m_lm->clearCaches(); // clear caches
-  }
-protected:
-  std::vector<randlm::WordID> m_randlm_ids_vec;
-  randlm::RandLM* m_lm;
-  randlm::WordID m_oov_id;
-  void CreateFactors(FactorCollection &factorCollection);
-  randlm::WordID GetLmID( const std::string &str ) const;
-  randlm::WordID GetLmID( const Factor *factor ) const {
-    size_t factorId = factor->GetId();
-    return ( factorId >= m_randlm_ids_vec.size()) ? m_oov_id : m_randlm_ids_vec[factorId];
-  };
+LanguageModelRandLM::~LanguageModelRandLM() {
+  delete m_lm;
+}
 
-};
-
-
-bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType,
-                               size_t nGramOrder)
+void LanguageModelRandLM::Load()
 {
   cerr << "Loading LanguageModelRandLM..." << endl;
   FactorCollection &factorCollection = FactorCollection::Instance();
-  m_filePath = filePath;
-  m_factorType = factorType;
-  m_nGramOrder = nGramOrder;
   int cache_MB = 50; // increase cache size
-  m_lm = randlm::RandLM::initRandLM(filePath, nGramOrder, cache_MB);
+  m_lm = randlm::RandLM::initRandLM(m_filePath, m_nGramOrder, cache_MB);
   CHECK(m_lm != NULL);
   // get special word ids
   m_oov_id = m_lm->getWordID(m_lm->getOOV());
   CreateFactors(factorCollection);
   m_lm->initThreadSpecificData();
-  return true;
 }
 
 void LanguageModelRandLM::CreateFactors(FactorCollection &factorCollection)   // add factors which have randlm id
@@ -132,6 +99,11 @@ randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const
   return m_lm->getWordID(str);
 }
 
+randlm::WordID LanguageModelRandLM::GetLmID( const Factor *factor ) const {
+  size_t factorId = factor->GetId();
+  return ( factorId >= m_randlm_ids_vec.size()) ? m_oov_id : m_randlm_ids_vec[factorId];
+}
+
 LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
                                        State* finalState) const
 {
@@ -154,6 +126,11 @@ LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
   return ret;
 }
 
+void LanguageModelRandLM::InitializeForInput(InputType const& source) {
+  m_lm->initThreadSpecificData(); // Creates thread specific data iff                                    // compiled with multithreading.
+}
+void LanguageModelRandLM::CleanUpAfterSentenceProcessing(const InputType& source) {
+  m_lm->clearCaches(); // clear caches
 }
 
 }

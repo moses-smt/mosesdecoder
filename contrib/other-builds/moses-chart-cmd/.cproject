@@ -55,6 +55,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../irstlm/lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../randlm/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../srilm/lib/macosx&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../srilm/lib/i686-m64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../srilm/lib/i686&quot;"/>
@@ -66,6 +67,7 @@
 									<listOptionValue builtIn="false" value="/opt/local/lib"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1177721357" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="RandLM"/>
 									<listOptionValue builtIn="false" value="dstruct"/>
 									<listOptionValue builtIn="false" value="flm"/>
 									<listOptionValue builtIn="false" value="oolm"/>
