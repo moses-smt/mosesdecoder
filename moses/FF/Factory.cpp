@@ -96,19 +96,6 @@ class KenFactory : public FeatureFactory {
     }
 };
 
-//WTF(hieu): unknown word should be a normal feature
-class UnknownFactory : public FeatureFactory {
-  public:
-    void Create(const std::string &line) {
-      StaticData &static_data = StaticData::InstanceNonConst();
-      UnknownWordPenaltyProducer *f = new UnknownWordPenaltyProducer(line);
-      std::vector<float> weights = static_data.GetParameter()->GetWeights(f->GetScoreProducerDescription());
-      if (weights.empty())
-        weights.push_back(1.0f);
-      static_data.SetWeights(f, weights);
-    }
-};
-
 #ifdef LM_RAND
 class RandFactory : public FeatureFactory {
   public:
@@ -151,6 +138,8 @@ FeatureRegistry::FeatureRegistry() {
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
+  MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
+
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
 #endif
@@ -164,7 +153,6 @@ FeatureRegistry::FeatureRegistry() {
   Add("RANDLM", new RandFactory());
 #endif
   Add("KENLM", new KenFactory());
-  Add("UnknownWordPenalty", new UnknownFactory());
 }
 
 FeatureRegistry::~FeatureRegistry() {}
