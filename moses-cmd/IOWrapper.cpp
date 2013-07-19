@@ -199,9 +199,18 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
   if (reportAllFactors == true) {
     out << phrase;
   } else {
+    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+
     size_t size = phrase.GetSize();
     for (size_t pos = 0 ; pos < size ; pos++) {
-      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+      const Factor *factor;
+
+      if (placeholderFactor == NOT_FOUND) {
+    	  factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+      }
+      else {
+    	  factor = phrase.GetFactor(pos, placeholderFactor);
+      }
       out << *factor;
       CHECK(factor);
 
