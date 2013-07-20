@@ -91,6 +91,7 @@ Parameter::Parameter()
   AddParam("lmbr-r", "ngram precision decay value for lattice mbr");
   AddParam("lmbr-map-weight", "weight given to map solution when doing lattice MBR (default 0)");
   AddParam("lattice-hypo-set", "to use lattice as hypo set during lattice MBR");
+  AddParam("lmodel-oov-feature", "add language model oov feature, one per model");
   AddParam("clean-lm-cache", "clean language model caches after N translations (default N=1)");
   AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
   AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");
@@ -172,7 +173,6 @@ Parameter::Parameter()
   AddParam("glm-feature", "DEPRECATED. DO NOT USE. discriminatively trained global lexical translation feature, sparse producer");
   AddParam("lmodel-file", "DEPRECATED. DO NOT USE. location and properties of the language models");
   AddParam("lmodel-dub", "DEPRECATED. DO NOT USE. dictionary upper bounds of language models");
-  AddParam("lmodel-oov-feature", "DEPRECATED. DO NOT USE. add language model oov feature, one per model");
 
   #ifdef HAVE_SYNLM
   AddParam("slmodel-file", "DEPRECATED. DO NOT USE. location of the syntactic language model file(s)");
@@ -320,7 +320,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 		isParamSpecified("weight-u") || isParamSpecified("weight-e") ||
 		isParamSpecified("dlm-mode") || isParamSpecified("generation-file") || isParamSpecified("global-lexical-file") ||
 		isParamSpecified("glm-feature") || isParamSpecified("lmodel-file") || isParamSpecified("lmodel-dub") ||
-		isParamSpecified("lmodel-oov-feature") || isParamSpecified("slmodel-file") || isParamSpecified("slmodel-factor") ||
+		isParamSpecified("slmodel-file") || isParamSpecified("slmodel-factor") ||
 		isParamSpecified("slmodel-beam") || isParamSpecified("ttable-file") || isParamSpecified("phrase-pair-feature") ||
 		isParamSpecified("phrase-boundary-source-feature") || isParamSpecified("phrase-boundary-target-feature") || isParamSpecified("phrase-length-feature") ||
 		isParamSpecified("target-word-insertion-feature") || isParamSpecified("source-word-deletion-feature") || isParamSpecified("word-translation-feature")
