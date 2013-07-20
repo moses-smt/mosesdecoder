@@ -101,17 +101,6 @@ public:
   }
 };
 
-#ifdef LM_RAND
-class RandFactory : public FeatureFactory
-{
-public:
-  void Create(const std::string &line) {
-    //DefaultSetup(NewRandLM());
-	UTIL_THROW(util::Exception, "RandLM is currently broken.");
-  }
-};
-#endif
-
 } // namespace
 
 FeatureRegistry::FeatureRegistry()
@@ -158,7 +147,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("SRILM", LanguageModelSRI);
 #endif
 #ifdef LM_RAND
-  Add("RANDLM", new RandFactory());
+  MOSES_FNAME2("RANDLM", LanguageModelRandLM);
 #endif
   Add("KENLM", new KenFactory());
 }
