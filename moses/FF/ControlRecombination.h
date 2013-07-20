@@ -11,8 +11,14 @@ class ControlRecombinationState;
 // force hypotheses NOT to recombine. For forced decoding
 class ControlRecombination : public StatefulFeatureFunction
 {
-
 public:
+	enum Type
+	{
+	  None,
+	  Output,
+	  Segmentation
+	};
+
   ControlRecombination(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
@@ -32,6 +38,9 @@ public:
   //! return the state associated with the empty hypothesis for a given sentence
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
+  void SetParameter(const std::string& key, const std::string& value);
+protected:
+  Type m_type;
 };
 
 class ControlRecombinationState : public FFState
