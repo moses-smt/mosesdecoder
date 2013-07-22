@@ -598,7 +598,7 @@ binarize-config
 	pass-unless: binarize-all
 	rerun-on-change: config
 	default-name: model/moses.bin.ini
-	template: $binarize-all $ttable-binarizer $rtable-binarizer OUT IN
+	template: $binarize-all IN OUT -Binarizer $ttable-binarizer 
 hiero-compile-source-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: hiero-source-suffix-array
@@ -835,33 +835,31 @@ filter
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings
-	pass-if: TRAINING:binarize-all
-	ignore-if: use-hiero
+	ignore-if: TRAINING:binarize-all
 	error: already exists. Please delete
 filter-devtest
 	in: input-devtest TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table
 	out: filtered-dir-devtest
 	default-name: tuning/filtered.devtest
  	rerun-on-change: filter-settings
-	pass-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all
 	ignore-unless: use-mira	
 	error: already exists. Please delete
 apply-filter
-	in: TRAINING:config filtered-dir
+	in: TRAINING:bin-config filtered-dir
 	out: filtered-config
 	default-name: tuning/moses.filtered.ini
-	pass-if: TRAINING:binarize-all
-	ignore-if: use-hiero
+	ignore-if: TRAINING:binarize-all
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 apply-filter-devtest
-	in: TRAINING:config filtered-dir-devtest
+	in: TRAINING:bin-config filtered-dir-devtest
 	out: filtered-config-devtest
 	default-name: tuning/moses.filtered.devtest.ini
 	pass-if: TRAINING:binarize-all
 	ignore-unless: use-mira
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 tune
-	in: filtered-config input reference filtered-config-devtest input-devtest reference-devtest
+	in: TRAINING:bin-config input reference filtered-config-devtest input-devtest reference-devtest filtered-config 
 	out: weight-config
 	ignore-if: use-hiero
 	qsub-script: yes
@@ -869,7 +867,7 @@ tune
 	rerun-on-change: decoder-settings tuning-settings nbest lambda async
 	not-error: trans: No such file or directory
 apply-weights
-	in: TRAINING:config weight-config
+	in: TRAINING:bin-config weight-config
 	out: config-with-reused-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.tuned.ini
