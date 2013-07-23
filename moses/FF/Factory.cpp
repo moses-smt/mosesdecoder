@@ -29,6 +29,7 @@
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/PhrasePenalty.h"
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
+#include "moses/FF/ControlRecombination.h"
 
 #include "moses/LM/Ken.h"
 #ifdef LM_IRST
@@ -136,6 +137,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
+  MOSES_FNAME(ControlRecombination);
 
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
