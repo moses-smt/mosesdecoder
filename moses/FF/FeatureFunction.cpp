@@ -109,5 +109,10 @@ void FeatureFunction::ReadParameters()
   }
 }
 
+std::vector<float> FeatureFunction::DefaultWeights() const
+{
+  UTIL_THROW(util::Exception, "No default weights");
+}
+
 }
 
