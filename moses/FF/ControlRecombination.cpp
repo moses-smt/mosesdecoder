@@ -58,7 +58,7 @@ int ControlRecombinationState::Compare(const FFState& other) const
   const ControlRecombinationState &other2 = static_cast<const ControlRecombinationState&>(other);
   const Hypothesis *otherHypo = other2.m_hypo;
 
-  const Phrase thisOutputPhrase, otherOutputPhrase;
+  Phrase thisOutputPhrase, otherOutputPhrase;
   m_hypo->GetOutputPhrase(thisOutputPhrase);
   otherHypo->GetOutputPhrase(otherOutputPhrase);
 
