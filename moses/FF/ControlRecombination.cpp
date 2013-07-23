@@ -8,7 +8,17 @@ namespace Moses {
 
 ControlRecombination::ControlRecombination(const std::string &line)
 :StatefulFeatureFunction("ControlRecombination", 0, line)
+,m_type(Output)
 {
+}
+
+void ControlRecombination::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "type") {
+    m_type = (Type) Scan<size_t>(value);
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
 }
 
 FFState* ControlRecombination::Evaluate(
@@ -48,20 +58,12 @@ int ControlRecombinationState::Compare(const FFState& other) const
   const ControlRecombinationState &other2 = static_cast<const ControlRecombinationState&>(other);
   const Hypothesis *otherHypo = other2.m_hypo;
 
-  const TargetPhrase &thisTargetPhrase = m_hypo->GetCurrTargetPhrase();
-  const TargetPhrase *otherTargetPhrase = &otherHypo->GetCurrTargetPhrase();
+  Phrase thisOutputPhrase, otherOutputPhrase;
+  m_hypo->GetOutputPhrase(thisOutputPhrase);
+  otherHypo->GetOutputPhrase(otherOutputPhrase);
 
-  int thisSize = thisTargetPhrase.GetSize();
-  int otherPos = otherTargetPhrase->GetSize() - 1;
-  for (int thisPos = thisSize - 1; thisPos >= 0; --thisPos) {
-    const Word &thisWord = thisTargetPhrase.GetWord(thisPos);
-
-
-    --otherPos;
-
-  }
-
-  return 0;
+  int ret = thisOutputPhrase.Compare(otherOutputPhrase);
+  return ret;
 }
 
 }
