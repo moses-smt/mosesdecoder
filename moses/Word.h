@@ -135,6 +135,11 @@ public:
     return Compare(*this, compare) != 0;
   }
 
+  int Compare(const Word &other) const {
+    return Compare(*this, other);
+  }
+
+
   /* static functions */
 
   /** transitive comparison of 2 word objects. Used by operator<.

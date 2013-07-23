@@ -401,6 +401,14 @@ void Hypothesis::CleanupArcList()
   }
 }
 
+void Hypothesis::GetOutputPhrase(Phrase &out) const
+{
+  if (m_prevHypo != NULL) {
+    m_prevHypo->GetOutputPhrase(out);
+  }
+  out.Append(GetCurrTargetPhrase());
+}
+
 TO_STRING_BODY(Hypothesis)
 
 // friend
