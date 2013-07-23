@@ -58,30 +58,12 @@ int ControlRecombinationState::Compare(const FFState& other) const
   const ControlRecombinationState &other2 = static_cast<const ControlRecombinationState&>(other);
   const Hypothesis *otherHypo = other2.m_hypo;
 
-  const TargetPhrase *thisTargetPhrase = &m_hypo->GetCurrTargetPhrase();
-  const TargetPhrase *otherTargetPhrase = &otherHypo->GetCurrTargetPhrase();
+  const Phrase thisOutputPhrase, otherOutputPhrase;
+  m_hypo->GetOutputPhrase(thisOutputPhrase);
+  otherHypo->GetOutputPhrase(otherOutputPhrase);
 
-  int thisSize = thisTargetPhrase->GetSize();
-  int otherPos = otherTargetPhrase->GetSize() - 1;
-  for (int thisPos = thisSize - 1; thisPos >= 0; --thisPos && --otherPos) {
-	if (otherPos < 0) {
-	  otherHypo = otherHypo->GetPrevHypo();
-	  if (otherHypo == NULL) {
-	    return -1;
-	  }
-	  otherTargetPhrase = &otherHypo->GetCurrTargetPhrase();
-	  otherPos = otherTargetPhrase->GetSize() - 1;
-	}
-
-    const Word &thisWord = thisTargetPhrase->GetWord(thisPos);
-    const Word &otherWord = otherTargetPhrase->GetWord(otherPos);
-    int compare = thisWord.Compare(otherWord);
-    if (compare) {
-      return compare;
-    }
-  }
-
-  return 0;
+  int ret = thisOutputPhrase.Compare(otherOutputPhrase);
+  return ret;
 }
 
 }
