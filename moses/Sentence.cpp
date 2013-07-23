@@ -43,6 +43,11 @@ Sentence::Sentence()
   }
 }
 
+Sentence::~Sentence()
+{
+	RemoveAllInColl(m_xmlOptions);
+}
+
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
@@ -119,12 +124,11 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
-  std::vector<XmlOption*> xmlOptionsList(0);
   std::vector< size_t > xmlWalls;
   std::vector< std::pair<size_t, std::string> > placeholders;
 
   if (staticData.GetXmlInputType() != XmlPassThrough) {
-    if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls, placeholders,
+    if (!ProcessAndStripXMLTags(line, m_xmlOptions, m_reorderingConstraint, xmlWalls, placeholders,
                                 staticData.GetXmlBrackets().first, staticData.GetXmlBrackets().second)) {
       const string msg("Unable to parse XML in line: " + line);
       TRACE_ERR(msg << endl);
@@ -152,19 +156,15 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
     //iterXMLOpts will be empty for XmlIgnore
     //look at each column
-    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = xmlOptionsList.begin();
-        iterXmlOpts != xmlOptionsList.end(); iterXmlOpts++) {
+    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = m_xmlOptions.begin();
+        iterXmlOpts != m_xmlOptions.end(); iterXmlOpts++) {
 
       const XmlOption *xmlOption = *iterXmlOpts;
+      const WordsRange &range = xmlOption->range;
 
-      TranslationOption *transOpt = new TranslationOption(xmlOption->range, xmlOption->targetPhrase);
-      m_xmlOptionsList.push_back(transOpt);
-
-      for(size_t j=transOpt->GetSourceWordsRange().GetStartPos(); j<=transOpt->GetSourceWordsRange().GetEndPos(); j++) {
+      for(size_t j=range.GetStartPos(); j<=range.GetEndPos(); j++) {
         m_xmlCoverageMap[j]=true;
       }
-
-      delete xmlOption;
     }
 
   }
@@ -246,10 +246,17 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
 {
   //iterate over XmlOptions list, find exact source/target matches
 
-  for (std::vector<TranslationOption*>::const_iterator iterXMLOpts = m_xmlOptionsList.begin();
-       iterXMLOpts != m_xmlOptionsList.end(); iterXMLOpts++) {
-    if (startPos == (**iterXMLOpts).GetSourceWordsRange().GetStartPos() && endPos == (**iterXMLOpts).GetSourceWordsRange().GetEndPos()) {
-      list.push_back(*iterXMLOpts);
+  for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
+       iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
+	const XmlOption &xmlOption = **iterXMLOpts;
+    const WordsRange &range = xmlOption.range;
+
+    if (startPos == range.GetStartPos()
+    		&& endPos == range.GetEndPos()) {
+      const TargetPhrase &targetPhrase = xmlOption.targetPhrase;
+
+      TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
+      list.push_back(transOpt);
     }
   }
 }
