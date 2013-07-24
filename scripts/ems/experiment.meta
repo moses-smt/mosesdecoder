@@ -956,14 +956,13 @@ filter
 	ignore-if: use-hiero
 	error: already exists. Please delete
 apply-filter
-	in: filtered-dir TRAINING:config TUNING:config-with-reused-weights
+	in: TUNING:config-with-reused-weights filtered-dir
 	out: filtered-config
 	default-name: evaluation/filtered.ini
-	pass-if: TRAINING:binarize-all
-	ignore-if: use-hiero
+	ignore-if: TRAINING:binarize-all
 	template: $moses-script-dir/ems/support/substitute-filtered-tables-and-weights.perl IN/moses.ini IN1 IN2 OUT
 decode
-	in: filtered-config input
+	in: TUNING:config-with-reused-weights input filtered-config
 	out: system-output
 	default-name: evaluation/output
 	qsub-script: yes
