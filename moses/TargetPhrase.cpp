@@ -84,7 +84,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_alignNonTerm(copy.m_alignNonTerm)
 {
   if (copy.m_lhsTarget) {
-    m_lhsTarget = new Word(copy.m_lhsTarget);
+    m_lhsTarget = new Word(*copy.m_lhsTarget);
   } else {
     m_lhsTarget = NULL;
   }
@@ -222,6 +222,9 @@ TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
+  if (tp.m_lhsTarget) {
+    os << *tp.m_lhsTarget<< " -> ";
+  }
   os << static_cast<const Phrase&>(tp) << ":" << flush;
   os << tp.GetAlignNonTerm() << flush;
   os << ": c=" << tp.m_fullScore << flush;

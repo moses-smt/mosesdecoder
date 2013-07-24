@@ -138,11 +138,14 @@ void ChartManager::AddXmlChartOptions()
 
     TargetPhrase &targetPhrase = *opt->GetTargetPhraseCollection().GetCollection()[0];
     targetPhrase.GetScoreBreakdown().Assign(staticData.GetWordPenaltyProducer(), -1);
-
     const WordsRange &range = opt->GetSourceWordsRange();
+
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
     hypo->Evaluate();
+
+    const Word &targetLHS = hypo->GetTargetLHS();
+
     ChartCell &cell = m_hypoStackColl.Get(range);
     cell.AddHypothesis(hypo);
   }
