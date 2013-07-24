@@ -151,6 +151,7 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
  */
 bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls,
                             std::vector< std::pair<size_t, std::string> > &placeholders,
+                            int offset,
                             const std::string& lbrackStr, const std::string& rbrackStr)
 {
   //parse XML markup in translation line
@@ -353,7 +354,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               // convert from prob to log-prob
               float scoreValue = FloorScore(TransformScore(probValue));
 
-              WordsRange range(startPos,endPos-1); // span covered by phrase
+              WordsRange range(startPos + offset,endPos-1 + offset); // span covered by phrase
               TargetPhrase targetPhrase;
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
 

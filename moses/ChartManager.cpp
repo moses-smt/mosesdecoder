@@ -137,7 +137,6 @@ void ChartManager::AddXmlChartOptions()
     ChartTranslationOptions* opt = *i;
 
     TargetPhrase &targetPhrase = *opt->GetTargetPhraseCollection().GetCollection()[0];
-    targetPhrase.GetScoreBreakdown().Assign(staticData.GetWordPenaltyProducer(), -1);
     const WordsRange &range = opt->GetSourceWordsRange();
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );

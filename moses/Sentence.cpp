@@ -129,8 +129,15 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   std::vector< std::pair<size_t, std::string> > placeholders;
 
   if (staticData.GetXmlInputType() != XmlPassThrough) {
+	int offset = 0;
+    if (staticData.IsChart()) {
+      offset = 1;
+	}
+
     if (!ProcessAndStripXMLTags(line, m_xmlOptions, m_reorderingConstraint, xmlWalls, placeholders,
-                                staticData.GetXmlBrackets().first, staticData.GetXmlBrackets().second)) {
+                                offset,
+    							staticData.GetXmlBrackets().first,
+                                staticData.GetXmlBrackets().second)) {
       const string msg("Unable to parse XML in line: " + line);
       TRACE_ERR(msg << endl);
       throw runtime_error(msg);
