@@ -388,6 +388,12 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("UnpairedExtractFormat")) {
     options.unpairedExtractFormat = true;
   }
+
+  // Workaround for extract-parallel issue.
+  if (options.sentenceOffset > 0) {
+    options.glueGrammarFile.clear();
+    options.unknownWordFile.clear();
+  }
 }
 
 void ExtractGHKM::Error(const std::string &msg) const

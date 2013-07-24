@@ -64,7 +64,7 @@ lib moses :
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp
-  LM/Factory.cpp
+  FF/Factory.cpp
 ]
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt ;
