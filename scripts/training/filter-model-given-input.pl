@@ -39,9 +39,11 @@ my $binarizer = undef;
 my $min_score = undef;
 my $opt_min_non_initial_rule_count = undef;
 my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
+my $opt_filter = 1; # enables skipping of filtering - useful for conf net or lattice
 
 GetOptions(
     "gzip!" => \$opt_gzip,
+    "filter!" => \$opt_filter,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
     "MinScore=s" => \$min_score,
@@ -253,32 +255,34 @@ if ($opt_hierarchical) {
 } #if ($opt_hierarchical) {
 
 my %PHRASE_USED;
-if (!$opt_hierarchical) {
-    # get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
-    open(INPUT,mk_open_string($input)) or die "Can't read $input";
-    while(my $line = <INPUT>) {
-        chomp($line);
-        my @WORD = split(/ +/,$line);
-        for(my $i=0;$i<=$#WORD;$i++) {
-            for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
-                foreach (keys %CONSIDER_FACTORS) {
-                    my @FACTOR = split(/,/);
-                    my $phrase = "";
-                    for(my $k=$i;$k<=$i+$j;$k++) {
-                        my @WORD_FACTOR = split(/\|/,$WORD[$k]);
-                        for(my $f=0;$f<=$#FACTOR;$f++) {
-                            $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
-                        }
-                        chop($phrase);
-                        $phrase .= " ";
-                    }
-                    chop($phrase);
-                    $PHRASE_USED{$_}{$phrase}++;
-                }
-            }
-        }
-    }
-    close(INPUT);
+if ($opt_filter) {
+  if (!$opt_hierarchical) {
+      # get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
+      open(INPUT,mk_open_string($input)) or die "Can't read $input";
+      while(my $line = <INPUT>) {
+          chomp($line);
+          my @WORD = split(/ +/,$line);
+          for(my $i=0;$i<=$#WORD;$i++) {
+              for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
+                  foreach (keys %CONSIDER_FACTORS) {
+                      my @FACTOR = split(/,/);
+                      my $phrase = "";
+                      for(my $k=$i;$k<=$i+$j;$k++) {
+                          my @WORD_FACTOR = split(/\|/,$WORD[$k]);
+                          for(my $f=0;$f<=$#FACTOR;$f++) {
+                              $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
+                          }
+                          chop($phrase);
+                          $phrase .= " ";
+                      }
+                      chop($phrase);
+                      $PHRASE_USED{$_}{$phrase}++;
+                  }
+              }
+          }
+      }
+      close(INPUT);
+  }
 }
 
 # filter files
@@ -288,79 +292,89 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     my $factors = $TABLE_FACTORS[$i];
     my $new_file = $TABLE_NEW_NAME[$i];
     print STDERR "filtering $file -> $new_file...\n";
-
-    my $openstring = mk_open_string($file);
-
-    my $new_openstring;
-    if ($new_file =~ /\.gz$/) {
-      $new_openstring = "| gzip -c > $new_file";
+    my $mid_file = $new_file; # used when both filtering and binarizing
+    if (!$opt_filter) {
+      # check if original file was gzipped
+      if ($file !~ /\.gz$/ && -e "$file.gz") {
+        $file .= ".gz";
+      }
+      $mid_file .= ".gz" if $file =~ /\.gz$/;
+      safesystem("ln -s $file $mid_file");
     } else {
-      $new_openstring = ">$new_file";
-    }
 
-    open(FILE_OUT,$new_openstring) or die "Can't write to $new_openstring";
+      $mid_file .= ".gz"
+        if $mid_file !~ /\.gz/
+           && $binarizer && $binarizer =~ /processPhraseTable/;
 
-    if ($opt_hierarchical) {
-        my $tmp_input = $TMP_INPUT_FILENAME{$factors};
-        my $options = "";
-        $options .= "--min-non-initial-rule-count=$opt_min_non_initial_rule_count" if defined($opt_min_non_initial_rule_count);
-        open(PIPE,"$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $options $tmp_input |");
-        while (my $line = <PIPE>) {
-            print FILE_OUT $line
-        }
-        close(FILEHANDLE);
-    } else {
-        open(FILE,$openstring) or die "Can't open '$openstring'";
-        while(my $entry = <FILE>) {
-            my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
-            $foreign =~ s/ $//;
-            if (defined($PHRASE_USED{$factors}{$foreign})) {
-                # handle min_score thresholds
-                if ($min_score) {
-                   my @ITEM = split(/ *\|\|\| */,$rest);
-                   if(scalar (@ITEM)>2) { # do not filter reordering table
-                     my @SCORE = split(/ /,$ITEM[1]);
-                     my $okay = 1;
-                     foreach my $id (keys %MIN_SCORE) {
-                       $okay = 0 if $SCORE[$id] < $MIN_SCORE{$id};
+      my $openstring = mk_open_string($file);
+
+      my $mid_openstring;
+      if ($mid_file =~ /\.gz$/) {
+        $mid_openstring = "| gzip -c > $mid_file";
+      } else {
+        $mid_openstring = ">$mid_file";
+      }
+
+
+      open(FILE_OUT,$mid_openstring) or die "Can't write to $mid_openstring";
+
+      if ($opt_hierarchical) {
+          my $tmp_input = $TMP_INPUT_FILENAME{$factors};
+          my $options = "";
+          $options .= "--min-non-initial-rule-count=$opt_min_non_initial_rule_count" if defined($opt_min_non_initial_rule_count);
+          open(PIPE,"$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $options $tmp_input |");
+          while (my $line = <PIPE>) {
+              print FILE_OUT $line
+          }
+          close(FILEHANDLE);
+      } else {
+          open(FILE,$openstring) or die "Can't open '$openstring'";
+          while(my $entry = <FILE>) {
+              my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
+              $foreign =~ s/ $//;
+              if (defined($PHRASE_USED{$factors}{$foreign})) {
+                  # handle min_score thresholds
+                  if ($min_score) {
+                     my @ITEM = split(/ *\|\|\| */,$rest);
+                     if(scalar (@ITEM)>2) { # do not filter reordering table
+                       my @SCORE = split(/ /,$ITEM[1]);
+                       my $okay = 1;
+                       foreach my $id (keys %MIN_SCORE) {
+                         $okay = 0 if $SCORE[$id] < $MIN_SCORE{$id};
+                       }
+                       next unless $okay;
                      }
-                     next unless $okay;
-                   }
-                }
-                print FILE_OUT $entry;
-                $used++;
-            }
-            $total++;
-        }
-        close(FILE);
-        die "No phrases found in $file!" if $total == 0;
-        printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
+                  }
+                  print FILE_OUT $entry;
+                  $used++;
+              }
+              $total++;
+          }
+          close(FILE);
+          die "No phrases found in $file!" if $total == 0;
+          printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
+      }
     }
 
+    my $catcmd = ($mid_file =~ /\.gz$/ ? "$ZCAT" : "cat");
     if(defined($binarizer)) {
       print STDERR "binarizing...";
       # translation model
       if ($KNOWN_TTABLE{$i}) {
         # ... hierarchical translation model
         if ($opt_hierarchical) {
-          my $cmd = "$binarizer $new_file $new_file.bin";
+          my $cmd = "$binarizer $mid_file $new_file.bin";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
         }
         # ... phrase translation model
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
-          my $cmd = "LC_ALL=C sort -T $dir $new_file > $new_file.sorted; $binarizer -in $new_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $new_file.sorted";
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir > $mid_file.sorted; $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $mid_file.sorted";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
-        }
-        elsif ($binarizer =~ /CreateOnDiskPt/) {
-          my $cmd = "$binarizer $new_file $new_file.bin";
-          print STDERR $cmd."\n";
-          print STDERR `$cmd`;
-        }
-        else { 
-          my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+        } else { 
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
         }
@@ -371,10 +385,10 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
-          $cmd = "LC_ALL=C sort -T $dir $new_file > $new_file.sorted;  $lexbin -in $new_file.sorted -out $new_file; rm $new_file.sorted";
+          $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir > $mid_file.sorted;  $lexbin -in $mid_file.sorted -out $new_file; rm $mid_file.sorted";
         } else {
           $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
-          $cmd = "$lexbin -in $new_file -out $new_file";
+          $cmd = "$lexbin -in $mid_file -out $new_file";
         }
         print STDERR $cmd."\n";
         print STDERR `$cmd`;
