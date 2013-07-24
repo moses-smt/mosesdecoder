@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "util/check.hh"
+#include "RandLM.h"
 
 using namespace std;
 

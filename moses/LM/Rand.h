@@ -20,10 +20,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include <vector>
 #include <string>
+#include <stdint.h>
 #include "SingleFactor.h"
 #include "moses/TypeDef.h"
 #include "moses/Word.h"
-#include "RandLM.h"
+//#include "RandLM.h"
+
+namespace randlm
+{
+ class RandLM;
+}
 
 namespace Moses
 {
@@ -39,12 +45,14 @@ public:
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
 protected:
-  std::vector<randlm::WordID> m_randlm_ids_vec;
+  //std::vector<randlm::WordID> m_randlm_ids_vec;
+  std::vector<uint32_t> m_randlm_ids_vec; // Ken made me do this
+
   randlm::RandLM* m_lm;
-  randlm::WordID m_oov_id;
+  uint32_t m_oov_id;
   void CreateFactors(FactorCollection &factorCollection);
-  randlm::WordID GetLmID( const std::string &str ) const;
-  randlm::WordID GetLmID( const Factor *factor ) const;
+  uint32_t GetLmID( const std::string &str ) const;
+  uint32_t GetLmID( const Factor *factor ) const;
 
 };
 
