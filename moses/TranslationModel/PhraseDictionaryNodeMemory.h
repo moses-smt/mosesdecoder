@@ -133,10 +133,10 @@ public:
   const PhraseDictionaryNodeMemory *GetChild(const Word &sourceTerm) const;
   const PhraseDictionaryNodeMemory *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
 
-  const TargetPhraseCollection *GetTargetPhraseCollection() const {
-    return &m_targetPhraseCollection;
+  const TargetPhraseCollection &GetTargetPhraseCollection() const {
+    return m_targetPhraseCollection;
   }
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection() {
+  TargetPhraseCollection &GetTargetPhraseCollection() {
     return m_targetPhraseCollection;
   }
 

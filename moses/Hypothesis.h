@@ -200,11 +200,12 @@ public:
 
   int RecombineCompare(const Hypothesis &compare) const;
 
+  void GetOutputPhrase(Phrase &out) const;
+
   void ToStream(std::ostream& out) const {
-    if (m_prevHypo != NULL) {
-      m_prevHypo->ToStream(out);
-    }
-    out << (Phrase) GetCurrTargetPhrase();
+    Phrase ret;
+    GetOutputPhrase(ret);
+    out << ret;
   }
 
   void ToStringStream(std::stringstream& out) const {

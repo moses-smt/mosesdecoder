@@ -85,7 +85,7 @@ public:
   void Sort(bool adhereTableLimit, size_t tableLimit);
 
   void Clear() {
-    RemoveAllInColl(m_collection); 
+    RemoveAllInColl(m_collection);
   }
 
 };

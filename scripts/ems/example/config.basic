@@ -371,6 +371,23 @@ alignment-symmetrization-method = grow-diag-final-and
 #
 #biconcor = $moses-script-dir/ems/biconcor/biconcor
 
+############################################################
+
+### use of Operation Sequence Model 
+### Durrani, Schmid and Fraser. (2011): "A Joint Sequence Translation Model with Integrated Reordering"
+
+#operation-sequence-model = "yes"
+#operation-sequence-model-order = 5
+### compile Moses with --max-kenlm-order=9 if higher order is required
+
+### if OSM training should be skipped,
+# point to OSM Model 
+#
+# osm-model =
+
+############################################################
+
+
 ### lexicalized reordering: specify orientation type
 # (default: only distance-based reordering model)
 #
