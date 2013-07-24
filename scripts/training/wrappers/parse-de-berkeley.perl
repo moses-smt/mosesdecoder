@@ -33,6 +33,9 @@ while(<STDIN>) {
   s/\(/*LRB*/g;
   s/\)/*RRB*/g;
 
+  # handle @ (the parser does something weird with these)
+  s/\@/\\\@/g;
+
   print TMP $_;
 }
 close(TMP);
@@ -42,6 +45,7 @@ print STDERR $cmd."\n";
 
 open(PARSE,"$cmd|");
 while(<PARSE>) {
+  s/\\\@/\@/g;
   print $_;
 }
 close(PARSE);

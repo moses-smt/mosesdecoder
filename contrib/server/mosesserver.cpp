@@ -240,9 +240,6 @@ public:
     if (multiModelWeights.size() > 0) {
       PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
       pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
-      if (staticData.GetUseTransOptCache()) {
-          cerr << "Warning: -use-persistent-cache is set to true; sentence-specific weights may be ignored. Disable cache for true results.\n";
-      }
     }
 
     stringstream out, graphInfo, transCollOpts;

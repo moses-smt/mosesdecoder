@@ -52,7 +52,26 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
   , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(source, target, sourceLHS);
-  return currNode.GetOrCreateTargetPhraseCollection();
+  return currNode.GetTargetPhraseCollection();
+}
+
+const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& sourceOrig) const
+{
+  Phrase source(sourceOrig);
+  source.OnlyTheseFactors(m_inputFactors);
+
+  // exactly like CreateTargetPhraseCollection, but don't create
+  const size_t size = source.GetSize();
+
+  const PhraseDictionaryNodeMemory *currNode = &m_collection;
+  for (size_t pos = 0 ; pos < size ; ++pos) {
+    const Word& word = source.GetWord(pos);
+    currNode = currNode->GetChild(word);
+    if (currNode == NULL)
+      return NULL;
+  }
+
+  return &currNode->GetTargetPhraseCollection();
 }
 
 PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase &source
@@ -108,32 +127,6 @@ void PhraseDictionaryMemory::SortAndPrune()
   }
 }
 
-const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& sourceOrig) const
-{
-  Phrase source(sourceOrig);
-  source.OnlyTheseFactors(m_inputFactors);
-
-  // exactly like CreateTargetPhraseCollection, but don't create
-  const size_t size = source.GetSize();
-
-  const PhraseDictionaryNodeMemory *currNode = &m_collection;
-  for (size_t pos = 0 ; pos < size ; ++pos) {
-    const Word& word = source.GetWord(pos);
-    currNode = currNode->GetChild(word);
-    if (currNode == NULL)
-      return NULL;
-  }
-
-  const TargetPhraseCollection *coll = currNode->GetTargetPhraseCollection();
-  /*
-if (coll) {
-cerr << "source=" << source << endl
-<< *coll << endl;
-}
-*/
-  return coll;
-}
-
 void PhraseDictionaryMemory::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
 {
   InputPathList::const_iterator iter;
@@ -158,8 +151,8 @@ void PhraseDictionaryMemory::GetTargetPhraseCollectionBatch(const InputPathList 
 
       const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
       if (ptNode) {
-        const TargetPhraseCollection *targetPhrases = ptNode->GetTargetPhraseCollection();
-        node.SetTargetPhrases(*this, targetPhrases, ptNode);
+        const TargetPhraseCollection &targetPhrases = ptNode->GetTargetPhraseCollection();
+        node.SetTargetPhrases(*this, &targetPhrases, ptNode);
       } else {
         node.SetTargetPhrases(*this, NULL, NULL);
       }

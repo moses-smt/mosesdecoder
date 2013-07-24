@@ -36,6 +36,7 @@ class WordsRange;
 class PhraseDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
+class XmlOption;
 
 
 /**
@@ -51,16 +52,18 @@ private:
    * Utility method that takes in a string representing an XML tag and the name of the attribute,
    * and returns the value of that tag if present, empty string otherwise
    */
-  std::vector <TranslationOption*> m_xmlOptionsList;
-  std::vector <bool> m_xmlCoverageMap;
+	std::vector<XmlOption*> m_xmlOptions;
+	std::vector <bool> m_xmlCoverageMap;
 
   NonTerminalSet m_defaultLabelSet;
 
   void InitStartEndWord();
+  void ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders);
 
 
 public:
   Sentence();
+  ~Sentence();
 
   InputTypeEnum GetType() const {
     return SentenceInput;

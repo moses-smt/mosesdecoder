@@ -74,7 +74,7 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   set<string> keys;
 
   for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
+    vector<string> args = TokenizeFirstOnly(toks[i], "=");
     CHECK(args.size() == 2);
 
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
@@ -107,6 +107,11 @@ void FeatureFunction::ReadParameters()
 
     m_args.erase(m_args.begin());
   }
+}
+
+std::vector<float> FeatureFunction::DefaultWeights() const
+{
+  UTIL_THROW(util::Exception, "No default weights");
 }
 
 }
