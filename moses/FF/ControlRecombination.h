@@ -4,7 +4,8 @@
 #include "StatefulFeatureFunction.h"
 #include "moses/FF/FFState.h"
 
-namespace Moses {
+namespace Moses
+{
 
 class ControlRecombinationState;
 
@@ -12,17 +13,16 @@ class ControlRecombinationState;
 class ControlRecombination : public StatefulFeatureFunction
 {
 public:
-	enum Type
-	{
-	  None,
-	  Output,
-	  Segmentation
-	};
+  enum Type {
+    None,
+    Output,
+    Segmentation
+  };
 
   ControlRecombination(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
-	  return true;
+    return true;
   }
 
   virtual FFState* Evaluate(

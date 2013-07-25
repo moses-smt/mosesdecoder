@@ -28,6 +28,9 @@ sub Beautify($)
 		 next if ($name eq "util");
 		 next if ($name eq "lm");
 		 next if ($name eq "search");
+		 next if ($name eq "randlm");
+		 next if ($name eq "srilm");
+		 next if ($name eq "irstlm");
 
 		 $name = $path ."/" .$name;
 		 if (-d $name) {
