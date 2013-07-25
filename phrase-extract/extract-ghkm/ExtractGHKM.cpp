@@ -391,7 +391,6 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
 
   // Workaround for extract-parallel issue.
   if (options.sentenceOffset > 0) {
-    options.glueGrammarFile.clear();
     options.unknownWordFile.clear();
   }
 }
