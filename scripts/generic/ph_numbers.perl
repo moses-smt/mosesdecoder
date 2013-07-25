@@ -46,7 +46,7 @@ sub mark_numbers {
 	}
 	my $number = substr($input,$numstart,$numend-$numstart);
 	if($corpusMode) {
-	    $output .= $number;
+      $output .= $numberSymbol;
 	}
 	else {
 	    if($legacyMode) {
