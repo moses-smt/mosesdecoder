@@ -33,7 +33,7 @@ while (my $line = <STDIN>) {
   my $alignS = $toks[6];
   my $align = ConvertAlignment($alignS);
 
-  print "$lineNum = $source|||$target|||$scores ||| $align\n";
+  print "$source|||$target|||$scores ||| $align\n";
 
 }
 
