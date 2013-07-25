@@ -56,7 +56,7 @@ public:
       const ChartCellCollectionBase &);
 
 private:
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const;
+//  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const;
 
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
     const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
