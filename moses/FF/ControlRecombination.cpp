@@ -4,11 +4,12 @@
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
 ControlRecombination::ControlRecombination(const std::string &line)
-:StatefulFeatureFunction("ControlRecombination", 0, line)
-,m_type(Output)
+  :StatefulFeatureFunction("ControlRecombination", 0, line)
+  ,m_type(Output)
 {
 }
 
@@ -44,12 +45,12 @@ const FFState* ControlRecombination::EmptyHypothesisState(const InputType &input
 }
 
 ControlRecombinationState::ControlRecombinationState()
-:m_hypo(NULL)
+  :m_hypo(NULL)
 {
 }
 
 ControlRecombinationState::ControlRecombinationState(const Hypothesis *hypo)
-:m_hypo(hypo)
+  :m_hypo(hypo)
 {
 }
 

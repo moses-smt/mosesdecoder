@@ -42,7 +42,8 @@ LanguageModelRandLM::LanguageModelRandLM(const std::string &line)
 {
 }
 
-LanguageModelRandLM::~LanguageModelRandLM() {
+LanguageModelRandLM::~LanguageModelRandLM()
+{
   delete m_lm;
 }
 
@@ -100,7 +101,8 @@ randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const
   return m_lm->getWordID(str);
 }
 
-randlm::WordID LanguageModelRandLM::GetLmID( const Factor *factor ) const {
+randlm::WordID LanguageModelRandLM::GetLmID( const Factor *factor ) const
+{
   size_t factorId = factor->GetId();
   return ( factorId >= m_randlm_ids_vec.size()) ? m_oov_id : m_randlm_ids_vec[factorId];
 }
@@ -127,10 +129,12 @@ LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
   return ret;
 }
 
-void LanguageModelRandLM::InitializeForInput(InputType const& source) {
+void LanguageModelRandLM::InitializeForInput(InputType const& source)
+{
   m_lm->initThreadSpecificData(); // Creates thread specific data iff                                    // compiled with multithreading.
 }
-void LanguageModelRandLM::CleanUpAfterSentenceProcessing(const InputType& source) {
+void LanguageModelRandLM::CleanUpAfterSentenceProcessing(const InputType& source)
+{
   m_lm->clearCaches(); // clear caches
 }
 
