@@ -21,7 +21,7 @@ sub run {
     }
     my $sourceLocale = $opts{s} || "";
     my $targetLocale = $opts{t} || "";
-    my $numberSymbol = $opts{m} || '@NUM@';
+    my $numberSymbol = $opts{m} || '@num@';
     while(<>) {
 	chomp;
 	print mark_numbers($_,$opts{c},$opts{l},$numberSymbol,$_),"\n";
@@ -32,7 +32,7 @@ sub mark_numbers {
     my $input = shift;
     my $corpusMode = shift;
     my $legacyMode = shift;
-    my $numberSymbol = shift || '@NUM@';
+    my $numberSymbol = shift || '@num@';
 
     my $numref = recognize($input);
     my $input_length = length($input);
