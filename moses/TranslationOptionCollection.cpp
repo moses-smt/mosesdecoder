@@ -218,10 +218,10 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 
     isDigit = s.find_first_of("0123456789");
-    if (isDigit == 1)
-      isDigit = 1;
-    else
+    if (isDigit == string::npos)
       isDigit = 0;
+    else
+      isDigit = 1;
     // modify the starting bitmap
   }
 
