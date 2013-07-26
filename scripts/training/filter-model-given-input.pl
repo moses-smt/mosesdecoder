@@ -373,6 +373,10 @@ for(my $i=0;$i<=$#TABLE;$i++) {
           my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir > $mid_file.sorted; $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $mid_file.sorted";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
+        elsif ($binarizer =~ /CreateOnDiskPt/) {
+	  my $cmd = "$binarizer $mid_file $new_file.bin";
+          print STDERR $cmd."\n";
+          print STDERR `$cmd`;
         } else { 
           my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
           print STDERR $cmd."\n";
