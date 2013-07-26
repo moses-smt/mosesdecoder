@@ -55,30 +55,8 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
                                  , const TargetPhraseCollection *targetPhrases
                                  , const void *ptNode)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
-  if (targetPhrases == NULL || placeholderFactor == NOT_FOUND || m_placeholders.size() == 0) {
-    // use all of the target phrase given
-    std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
-    m_targetPhrases[&phraseDictionary] = value;
-  } else {
-    // filter out target phrases with alignments that are not 1-to-1 with placeholder
-    m_copiedSet.push_back(TargetPhraseCollection());
-    TargetPhraseCollection &newTargetPhrases = m_copiedSet.back();
-    std::pair<const TargetPhraseCollection*, const void*> value(&newTargetPhrases, ptNode);
-    m_targetPhrases[&phraseDictionary] = value;
-
-    TargetPhraseCollection::const_iterator iter;
-    for (iter = targetPhrases->begin(); iter != targetPhrases->end(); ++iter) {
-      TargetPhrase *targetPhrase = new TargetPhrase(**iter);
-      bool ok = SetPlaceholders(targetPhrase);
-
-      if (ok) {
-        newTargetPhrases.Add(targetPhrase);
-      } else {
-        delete targetPhrase;
-      }
-    }
-  }
+  std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
+  m_targetPhrases[&phraseDictionary] = value;
 }
 
 bool InputPath::SetPlaceholders(TargetPhrase *targetPhrase) const

@@ -34,10 +34,6 @@ protected:
   const ScoreComponentCollection *m_inputScore;
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
 
-  // make a copy of the target phrase collection, rather than using the 1 given by the phrase dictionary
-  // must clean up yourself.
-  // used when pruning during placeholder processing
-  std::vector<TargetPhraseCollection> m_copiedSet;
   std::vector<size_t> m_placeholders;
 
   bool SetPlaceholders(TargetPhrase *targetPhrase) const;
