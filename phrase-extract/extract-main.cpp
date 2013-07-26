@@ -74,7 +74,12 @@ bool le(int, int);
 bool lt(int, int);
 
 bool isAligned (SentenceAlignment &, int, int);
+bool isGoodPlaceholderRule (SentenceAlignment &, int, int);
+
 int sentenceOffset = 0;
+
+std::vector<std::string> Tokenize(const std::string& str,
+    const std::string& delimiters = " \t");
 
 }
 
@@ -205,7 +210,10 @@ int main(int argc, char* argv[])
       }
 
       options.initAllModelsOutputFlag(true);
-
+    } else if (strcmp(argv[i], "--Placeholders") == 0) {
+      ++i;
+      string str = argv[i];
+      options.placeholders = Tokenize(str.c_str(), ",");
     } else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
@@ -798,4 +806,33 @@ void ExtractTask::extractBase( SentenceAlignment &sentence )
 
 }
 
+/** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument.
+		The separator can only be 1 character long. The default delimiters are space or tab
+*/
+std::vector<std::string> Tokenize(const std::string& str,
+    const std::string& delimiters)
+{
+  std::vector<std::string> tokens;
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+  while (std::string::npos != pos || std::string::npos != lastPos) {
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
+
+  return tokens;
+}
+
+bool isGoodPlaceholderRule (SentenceAlignment &, int, int)
+{
+
+  return true;
+}
 }

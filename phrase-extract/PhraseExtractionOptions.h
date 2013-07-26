@@ -1,3 +1,4 @@
+#pragma once
 /***********************************************************************
   Moses - factored phrase-based language decoder
   Copyright (C) 2010 University of Edinburgh
@@ -19,9 +20,8 @@
 
 /* Created by Rohit Gupta, CDAC, Mumbai, India on 18 July, 2012*/
 
-#pragma once
-#ifndef PHRASEEXTRACTIONOPTIONS_H_INCLUDED_
-#define PHRASEEXTRACTIONOPTIONS_H_INCLUDED_
+#include <string>
+#include <vector>
 
 namespace MosesTraining
 {
@@ -50,6 +50,8 @@ private:
   std::string instanceWeightsFile; //weights for each sentence
 
 public:
+  std::vector<std::string> placeholders;
+
   PhraseExtractionOptions(const int initmaxPhraseLength):
     maxPhraseLength(initmaxPhraseLength),
     allModelsOutputFlag(false),
@@ -150,4 +152,3 @@ public:
 
 }
 
-#endif
