@@ -104,7 +104,7 @@ private:
   void extract(SentenceAlignment &);
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
   void writePhrasesToFile();
-  bool isGoodPlaceholderRule (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF);
+  bool checkPlaceholders (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF);
   bool isPlaceholder(const string &word);
 
   SentenceAlignment &m_sentence;
@@ -686,7 +686,7 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
     return;
   }
 
-  if (!isGoodPlaceholderRule(sentence, startE, endE, startF, endF)) {
+  if (!checkPlaceholders(sentence, startE, endE, startF, endF)) {
 	  return;
   }
 
@@ -811,7 +811,7 @@ void ExtractTask::extractBase( SentenceAlignment &sentence )
 
 }
 
-bool ExtractTask::isGoodPlaceholderRule (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF)
+bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF)
 {
   for (size_t pos = startF; pos <= endF; ++pos) {
     const string &word = sentence.source[pos];
