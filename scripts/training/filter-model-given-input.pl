@@ -377,7 +377,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
         } elsif ($binarizer =~ /CreateOnDiskPt/) {
-	  my $cmd = "$binarizer $mid_file $new_file.bin";
+      	  my $cmd = "$binarizer $mid_file $new_file.bin";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
         } else { 
