@@ -174,12 +174,12 @@ Parameter::Parameter()
   AddParam("lmodel-file", "DEPRECATED. DO NOT USE. location and properties of the language models");
   AddParam("lmodel-dub", "DEPRECATED. DO NOT USE. dictionary upper bounds of language models");
 
-  #ifdef HAVE_SYNLM
+#ifdef HAVE_SYNLM
   AddParam("slmodel-file", "DEPRECATED. DO NOT USE. location of the syntactic language model file(s)");
   AddParam("slmodel-factor", "DEPRECATED. DO NOT USE. factor to use with syntactic language model");
   AddParam("slmodel-beam", "DEPRECATED. DO NOT USE. beam width to use with syntactic language model's parser");
 #endif
-AddParam("ttable-file", "DEPRECATED. DO NOT USE. location and properties of the translation tables");
+  AddParam("ttable-file", "DEPRECATED. DO NOT USE. location and properties of the translation tables");
   AddParam("phrase-pair-feature", "DEPRECATED. DO NOT USE. Source and target factors for phrase pair feature");
   AddParam("phrase-boundary-source-feature", "DEPRECATED. DO NOT USE. Source factors for phrase boundary feature");
   AddParam("phrase-boundary-target-feature", "DEPRECATED. DO NOT USE. Target factors for phrase boundary feature");
@@ -312,21 +312,21 @@ bool Parameter::LoadParam(int argc, char* argv[])
 
   // don't mix old and new format
   if ((isParamSpecified("feature") || isParamSpecified("weight"))
-	&& (isParamSpecified("weight-slm") || isParamSpecified("weight-bl") || isParamSpecified("weight-d") ||
-		isParamSpecified("weight-dlm") || isParamSpecified("weight-lrl") || isParamSpecified("weight-generation") ||
-		isParamSpecified("weight-i") || isParamSpecified("weight-l") || isParamSpecified("weight-lex") ||
-		isParamSpecified("weight-glm") || isParamSpecified("weight-wt") || isParamSpecified("weight-pp") ||
-		isParamSpecified("weight-pb") || isParamSpecified("weight-t") || isParamSpecified("weight-w") ||
-		isParamSpecified("weight-u") || isParamSpecified("weight-e") ||
-		isParamSpecified("dlm-mode") || isParamSpecified("generation-file") || isParamSpecified("global-lexical-file") ||
-		isParamSpecified("glm-feature") || isParamSpecified("lmodel-file") || isParamSpecified("lmodel-dub") ||
-		isParamSpecified("slmodel-file") || isParamSpecified("slmodel-factor") ||
-		isParamSpecified("slmodel-beam") || isParamSpecified("ttable-file") || isParamSpecified("phrase-pair-feature") ||
-		isParamSpecified("phrase-boundary-source-feature") || isParamSpecified("phrase-boundary-target-feature") || isParamSpecified("phrase-length-feature") ||
-		isParamSpecified("target-word-insertion-feature") || isParamSpecified("source-word-deletion-feature") || isParamSpecified("word-translation-feature")
-		)
-	 ) {
-	  UTIL_THROW(util::Exception, "Don't mix old and new ini file format");
+      && (isParamSpecified("weight-slm") || isParamSpecified("weight-bl") || isParamSpecified("weight-d") ||
+          isParamSpecified("weight-dlm") || isParamSpecified("weight-lrl") || isParamSpecified("weight-generation") ||
+          isParamSpecified("weight-i") || isParamSpecified("weight-l") || isParamSpecified("weight-lex") ||
+          isParamSpecified("weight-glm") || isParamSpecified("weight-wt") || isParamSpecified("weight-pp") ||
+          isParamSpecified("weight-pb") || isParamSpecified("weight-t") || isParamSpecified("weight-w") ||
+          isParamSpecified("weight-u") || isParamSpecified("weight-e") ||
+          isParamSpecified("dlm-mode") || isParamSpecified("generation-file") || isParamSpecified("global-lexical-file") ||
+          isParamSpecified("glm-feature") || isParamSpecified("lmodel-file") || isParamSpecified("lmodel-dub") ||
+          isParamSpecified("slmodel-file") || isParamSpecified("slmodel-factor") ||
+          isParamSpecified("slmodel-beam") || isParamSpecified("ttable-file") || isParamSpecified("phrase-pair-feature") ||
+          isParamSpecified("phrase-boundary-source-feature") || isParamSpecified("phrase-boundary-target-feature") || isParamSpecified("phrase-length-feature") ||
+          isParamSpecified("target-word-insertion-feature") || isParamSpecified("source-word-deletion-feature") || isParamSpecified("word-translation-feature")
+         )
+     ) {
+    UTIL_THROW(util::Exception, "Don't mix old and new ini file format");
   }
 
   // convert old weights args to new format
