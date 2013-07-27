@@ -354,6 +354,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
           die "No phrases found in $file!" if $total == 0;
           printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
       }
+
+      close(FILE_OUT);
+
     }
 
     my $catcmd = ($mid_file =~ /\.gz$/ ? "$ZCAT" : "cat");
@@ -398,8 +401,6 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         print STDERR `$cmd`;
       }
     }
-
-    close(FILE_OUT);
 }
 
 if ($opt_hierarchical)
