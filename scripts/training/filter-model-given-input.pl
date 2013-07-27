@@ -354,6 +354,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
           die "No phrases found in $file!" if $total == 0;
           printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
       }
+
+      close(FILE_OUT);
+
     }
 
     my $catcmd = ($mid_file =~ /\.gz$/ ? "$ZCAT" : "cat");
@@ -371,6 +374,10 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
           my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $dir > $mid_file.sorted; $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $mid_file.sorted";
+          print STDERR $cmd."\n";
+          print STDERR `$cmd`;
+        } elsif ($binarizer =~ /CreateOnDiskPt/) {
+      	  my $cmd = "$binarizer $mid_file $new_file.bin";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
         } else { 
@@ -394,8 +401,6 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         print STDERR `$cmd`;
       }
     }
-
-    close(FILE_OUT);
 }
 
 if ($opt_hierarchical)
