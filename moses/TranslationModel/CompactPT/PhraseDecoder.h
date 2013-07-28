@@ -131,12 +131,13 @@ public:
   size_t Load(std::FILE* in);
 
   TargetPhraseVectorPtr CreateTargetPhraseCollection(const Phrase &sourcePhrase,
-      bool topLevel = false);
+      bool topLevel = false, bool eval = true);
 
   TargetPhraseVectorPtr DecodeCollection(TargetPhraseVectorPtr tpv,
                                          BitWrapper<> &encodedBitStream,
                                          const Phrase &sourcePhrase,
-                                         bool topLevel);
+                                         bool topLevel,
+                                         bool eval);
 
   void PruneCache();
 };

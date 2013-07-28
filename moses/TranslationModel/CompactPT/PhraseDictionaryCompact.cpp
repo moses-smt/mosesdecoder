@@ -117,7 +117,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
 
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
-  = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true);
+  = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, true);
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));
@@ -130,7 +130,6 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
     std::nth_element(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
     for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++) {
       TargetPhrase *tp = new TargetPhrase(*it);
-      cerr << *tp << endl;
       phraseColl->Add(tp);
     }
 
@@ -152,7 +151,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase
     return TargetPhraseVectorPtr();
 
   // Retrieve target phrase collection from phrase table
-  return m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true);
+  return m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, false);
 }
 
 PhraseDictionaryCompact::~PhraseDictionaryCompact()

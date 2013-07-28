@@ -52,11 +52,13 @@ protected:
 
   FactorArray m_factorArray; /**< set of factors */
   bool m_isNonTerminal;
+  bool m_isOOV;
 
 public:
   /** deep copy */
   Word(const Word &copy)
-    :m_isNonTerminal(copy.m_isNonTerminal) {
+    :m_isNonTerminal(copy.m_isNonTerminal)
+    ,m_isOOV(copy.m_isOOV) {
     std::memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
   }
 
@@ -64,6 +66,7 @@ public:
   explicit Word(bool isNonTerminal = false) {
     std::memset(m_factorArray, 0, sizeof(FactorArray));
     m_isNonTerminal = isNonTerminal;
+    m_isOOV = false;
   }
 
   ~Word() {}
@@ -90,6 +93,13 @@ public:
   }
   inline void SetIsNonTerminal(bool val) {
     m_isNonTerminal = val;
+  }
+
+  inline bool IsOOV() const {
+    return m_isOOV;
+  }
+  inline void SetIsOOV(bool val) {
+    m_isOOV = val;
   }
 
   /** add the factors from sourceWord into this representation,
@@ -123,6 +133,11 @@ public:
   inline bool operator!= (const Word &compare) const {
     return Compare(*this, compare) != 0;
   }
+
+  int Compare(const Word &other) const {
+    return Compare(*this, other);
+  }
+
 
   /* static functions */
 

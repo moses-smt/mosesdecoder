@@ -61,6 +61,9 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 
   Phrase* unksrc = new Phrase(1);
   unksrc->AddWord() = sourceWord;
+  Word &newWord = unksrc->GetWord(0);
+  newWord.SetIsOOV(true);
+
   m_unksrcs.push_back(unksrc);
 
   //TranslationOption *transOpt;

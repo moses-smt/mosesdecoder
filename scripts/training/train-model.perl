@@ -31,7 +31,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
@@ -119,6 +119,7 @@ $_HELP = 1
 		       'xml' => \$_XML,
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
+		       'osm-model=s' => \$_OSM,	
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
@@ -1992,6 +1993,15 @@ sub create_ini {
       }
   }
 
+  # operation sequence model
+
+  if($_OSM)
+  {
+
+      $feature_spec .= "OpSequenceModel num-features=5 path=". $_OSM . " \n";
+      $weight_spec  .= "OpSequenceModel0= 0.08 -0.02 0.02 -0.001 0.03\n";
+  }	
+
   # distance-based reordering
   if (!$_HIERARCHICAL) {
     $feature_spec .= "Distortion\n";
@@ -2045,11 +2055,12 @@ sub create_ini {
 
   # lattice feature
   if ($_NUM_LATTICE_FEATURES) {
-    print INI "\n\n#lattice or confusion net weights\n[weight-i]\n";
+    $feature_spec .= "InputFeature num-input-features=$_NUM_LATTICE_FEATURES\n";
+    $weight_spec .= "InputFeature0=";
     for (1..$_NUM_LATTICE_FEATURES) {
-      print INI "0.1\n";
+      $weight_spec .= " 0.1";
     }
-    print "\n";
+    $weight_spec .= "\n";
   }
 
   # get addititional content for config file from switch or file

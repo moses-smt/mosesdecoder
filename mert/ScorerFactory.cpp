@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include "Scorer.h"
 #include "BleuScorer.h"
+#include "BleuDocScorer.h"
 #include "PerScorer.h"
 #include "TerScorer.h"
 #include "CderScorer.h"
@@ -20,6 +21,7 @@ vector<string> ScorerFactory::getTypes()
 {
   vector<string> types;
   types.push_back(string("BLEU"));
+  types.push_back(string("BLEUDOC"));
   types.push_back(string("PER"));
   types.push_back(string("TER"));
   types.push_back(string("CDER"));
@@ -34,6 +36,8 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config)
 {
   if (type == "BLEU") {
     return new BleuScorer(config);
+  } else if (type == "BLEUDOC") {
+    return new BleuDocScorer(config);
   } else if (type == "PER") {
     return new PerScorer(config);
   } else if (type == "TER") {

@@ -263,7 +263,7 @@ TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseColle
     , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
-  return currNode.GetOrCreateTargetPhraseCollection();
+  return currNode.GetTargetPhraseCollection();
 }
 
 PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDictionaryNodeMemory &rootNode

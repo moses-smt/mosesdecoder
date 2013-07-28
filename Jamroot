@@ -108,9 +108,14 @@ project : default-build
   <link>static
   ;
 
+#Apparently OS X likes to link against iconv for fgetsUTF8.
+lib iconv ;
+requirements += <os>MACOSX:<library>iconv ;
+
 project : requirements 
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
+  <library>boost_system
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(requirements)
   <include>.

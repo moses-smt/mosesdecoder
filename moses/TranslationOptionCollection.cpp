@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <typeinfo>
 #include <algorithm>
+#include <typeinfo>
 #include "TranslationOptionCollection.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
@@ -215,10 +216,10 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 
     isDigit = s.find_first_of("0123456789");
-    if (isDigit == 1)
-      isDigit = 1;
-    else
+    if (isDigit == string::npos)
       isDigit = 0;
+    else
+      isDigit = 1;
     // modify the starting bitmap
   }
 
@@ -234,6 +235,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
     // add to dictionary
 
     Word &targetWord = targetPhrase.AddWord();
+    targetWord.SetIsOOV(true);
 
     for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
       FactorType factorType = static_cast<FactorType>(currFactor);
