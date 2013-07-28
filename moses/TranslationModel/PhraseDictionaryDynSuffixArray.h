@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include "moses/TypeDef.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationModel/BilingualDynSuffixArray.h"
 
