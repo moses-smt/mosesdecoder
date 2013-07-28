@@ -388,7 +388,12 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       }
       # reordering model
       else {
-        my $lexbin = $binarizer; 
+        my $lexbin;
+        $lexbin = $binarizer;
+        if ($binarizer =~ /CreateOnDiskPt/) {
+          $lexbin =~ s/CreateOnDiskPt/processLexicalTable/;
+        }
+
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
