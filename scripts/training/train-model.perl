@@ -2078,12 +2078,14 @@ sub create_ini {
   print INI "[feature]\n";
   print INI "UnknownWordPenalty\n";
   print INI "WordPenalty\n";
+  print INI "PhrasePenalty\n";
   print INI $feature_spec;
 
   print INI "\n# dense weights for feature functions\n";
   print INI "[weight]\n";
   print INI "UnknownWordPenalty0= 1\n";
   print INI "WordPenalty0= -1\n";
+  print INI "PhrasePenalty0= 1\n";
   print INI $weight_spec;
   close(INI);
 }
