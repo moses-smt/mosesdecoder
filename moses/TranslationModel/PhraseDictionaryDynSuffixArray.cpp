@@ -56,6 +56,7 @@ GetTargetPhraseCollection(const Phrase& src) const
   BOOST_FOREACH(pstat_entry & e, pstats) {
     TargetPhrase* tp = m_biSA->GetMosesFactorIDs(e.first, src);
     tp->GetScoreBreakdown().Assign(this,e.second);
+    tp->Evaluate(src);
     ret->Add(tp);
   }
   // return ret;
