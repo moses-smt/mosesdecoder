@@ -22,7 +22,7 @@ def translate(input_object, server, weights=None):
         params = {}
         params['text'] = line
         if weights:
-            params['weight-t-multimodel'] = weights
+            params['lambda'] = weights
 
         print server.translate(params)
 
@@ -65,7 +65,7 @@ def translate_single_line(args):
     params = {}
     params['text'] = line
     if weights:
-        params['weight-t-multimodel'] = weights
+        params['lambda'] = weights
 
     return server.translate(params)['text']
 

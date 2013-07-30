@@ -228,7 +228,7 @@ public:
     bool nbest_distinct = (si != params.end());
 
     vector<float> multiModelWeights;
-    si = params.find("weight-t-multimodel");
+    si = params.find("lambda");
     if (si != params.end()) {
         xmlrpc_c::value_array multiModelArray = xmlrpc_c::value_array(si->second);
         vector<xmlrpc_c::value> multiModelValueVector(multiModelArray.vectorValueValue());
