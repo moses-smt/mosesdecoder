@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "WordsRange.h"
-#include "StackVec.h"
-
 #include <list>
 #include <vector>
+#include "WordsRange.h"
+#include "StackVec.h"
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -50,7 +50,6 @@ public:
 private:
   std::vector<Phrase*> m_unksrcs;
   std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
-  StackVec m_emptyStackVec;
 };
 
 class ChartParser
@@ -66,6 +65,15 @@ private:
   std::vector <DecodeGraph*> m_decodeGraphList;
   std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
   InputType const& m_source; /**< source sentence to be translated */
+
+  InputPathList m_phraseDictionaryQueue;
+
+  typedef std::vector< std::vector<InputPath*> > TargetPhraseMatrix;
+  TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
+
+  void CreateInputPaths(const InputType &input);
+  InputPath &GetInputPath(size_t startPos, size_t endPos);
+
 };
 
 }
