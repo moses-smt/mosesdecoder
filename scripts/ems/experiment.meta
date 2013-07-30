@@ -956,7 +956,7 @@ filter
 	ignore-if: use-hiero
 	error: already exists. Please delete
 apply-filter
-	in: TUNING:config-with-reused-weights filtered-dir
+	in: filtered-dir TRAINING:config TUNING:config-with-reused-weights
 	out: filtered-config
 	default-name: evaluation/filtered.ini
 	ignore-if: TRAINING:binarize-all
