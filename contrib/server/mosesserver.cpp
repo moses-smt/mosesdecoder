@@ -141,11 +141,17 @@ public:
   execute(xmlrpc_c::paramList const& paramList,
           xmlrpc_c::value *   const  retvalP) {
 #ifdef WITH_DLIB
-    const StaticData &staticData = StaticData::Instance();
     const params_t params = paramList.getStruct(0);
-    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
+    params_t::const_iterator si = params.find("model_name");
+    if (si == params.end()) {
+      throw xmlrpc_c::fault(
+        "Missing name of model to be optimized (e.g. PhraseDictionaryMultiModelCounts0)",
+        xmlrpc_c::fault::CODE_PARSE);
+    }
+    const string model_name = xmlrpc_c::value_string(si->second);
+    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
 
-    params_t::const_iterator si = params.find("phrase_pairs");
+    si = params.find("phrase_pairs");
     if (si == params.end()) {
       throw xmlrpc_c::fault(
         "Missing list of phrase pairs",

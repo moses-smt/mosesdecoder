@@ -73,10 +73,6 @@ void PhraseDictionaryMultiModel::Load()
 {
   SetFeaturesToApply();
 
-  // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
-  // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
-
-
   for(size_t i = 0; i < m_numModels; ++i) {
     const string &ptName = m_pdStr[i];
 
@@ -84,26 +80,6 @@ void PhraseDictionaryMultiModel::Load()
     CHECK(pt);
     m_pd.push_back(pt);
   }
-}
-
-PhraseDictionary *PhraseDictionaryMultiModel::FindPhraseDictionary(const string &ptName) const
-{
-  cerr << ptName << endl;
-  const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
-
-  PhraseDictionary *pt = NULL;
-  std::vector<PhraseDictionary*>::const_iterator iter;
-  for (iter = pts.begin(); iter != pts.end(); ++iter) {
-    PhraseDictionary *currPt = *iter;
-    cerr << currPt->GetScoreProducerDescription() << endl;
-    if (currPt->GetScoreProducerDescription() == ptName) {
-      pt = currPt;
-      break;
-    }
-  }
-
-  return pt;
 }
 
 
@@ -479,5 +455,23 @@ double CrossEntropy::operator() ( const dlib::matrix<double,0,1>& arg) const
 }
 
 #endif
+
+PhraseDictionary *FindPhraseDictionary(const string &ptName)
+{
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
+
+  PhraseDictionary *pt = NULL;
+  std::vector<PhraseDictionary*>::const_iterator iter;
+  for (iter = pts.begin(); iter != pts.end(); ++iter) {
+    PhraseDictionary *currPt = *iter;
+    if (currPt->GetScoreProducerDescription() == ptName) {
+      pt = currPt;
+      break;
+    }
+  }
+
+  return pt;
+}
 
 } //namespace
