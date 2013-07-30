@@ -4,6 +4,7 @@
 #include "StaticData.h"
 #include "TypeDef.h"
 #include "AlignmentInfo.h"
+#include "util/check.hh"
 
 using namespace std;
 
@@ -77,6 +78,14 @@ bool InputPath::SetPlaceholders(TargetPhrase *targetPhrase) const
     }
   }
   return true;
+}
+
+const Word &InputPath::GetLastWord() const
+{
+  size_t len = m_phrase.GetSize();
+  CHECK(len);
+  const Word &ret = m_phrase.GetWord(len - 1);
+  return ret;
 }
 
 std::ostream& operator<<(std::ostream& out, const InputPath& obj)

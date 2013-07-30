@@ -54,6 +54,8 @@ public:
   const WordsRange &GetWordsRange() const {
     return m_range;
   }
+  const Word &GetLastWord() const;
+
   const InputPath *GetPrevNode() const {
     return m_prevNode;
   }
