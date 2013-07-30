@@ -53,8 +53,8 @@ protected:
    * Utility method that takes in a string representing an XML tag and the name of the attribute,
    * and returns the value of that tag if present, empty string otherwise
    */
-	std::vector<XmlOption*> m_xmlOptions;
-	std::vector <bool> m_xmlCoverageMap;
+  std::vector<XmlOption*> m_xmlOptions;
+  std::vector <bool> m_xmlCoverageMap;
 
   NonTerminalSet m_defaultLabelSet;
 

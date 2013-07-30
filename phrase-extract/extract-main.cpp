@@ -78,7 +78,7 @@ bool isAligned (SentenceAlignment &, int, int);
 int sentenceOffset = 0;
 
 std::vector<std::string> Tokenize(const std::string& str,
-    const std::string& delimiters = " \t");
+                                  const std::string& delimiters = " \t");
 
 }
 
@@ -687,7 +687,7 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   }
 
   if (!checkPlaceholders(sentence, startE, endE, startF, endF)) {
-	  return;
+    return;
   }
 
   for(int fi=startF; fi<=endF; fi++) {
@@ -816,19 +816,19 @@ bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int star
   for (size_t pos = startF; pos <= endF; ++pos) {
     const string &word = sentence.source[pos];
     if (isPlaceholder(word)) {
-    	if (sentence.alignedCountS[pos] != 1) {
-    		return false;
-    	}
+      if (sentence.alignedCountS[pos] != 1) {
+        return false;
+      }
     }
   }
 
   for (size_t pos = startE; pos <= endE; ++pos) {
-      const string &word = sentence.target[pos];
-      if (isPlaceholder(word)) {
-      	if (sentence.alignedToT[pos].size() != 1) {
-      		return false;
-      	}
+    const string &word = sentence.target[pos];
+    if (isPlaceholder(word)) {
+      if (sentence.alignedToT[pos].size() != 1) {
+        return false;
       }
+    }
   }
 
   return true;
@@ -837,10 +837,10 @@ bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int star
 bool ExtractTask::isPlaceholder(const string &word)
 {
   for (size_t i = 0; i < m_options.placeholders.size(); ++i) {
-	const string &placeholder = m_options.placeholders[i];
-	if (word == placeholder) {
-		return true;
-	}
+    const string &placeholder = m_options.placeholders[i];
+    if (word == placeholder) {
+      return true;
+    }
   }
   return false;
 }
@@ -848,7 +848,7 @@ bool ExtractTask::isPlaceholder(const string &word)
 		The separator can only be 1 character long. The default delimiters are space or tab
 */
 std::vector<std::string> Tokenize(const std::string& str,
-    const std::string& delimiters)
+                                  const std::string& delimiters)
 {
   std::vector<std::string> tokens;
   // Skip delimiters at beginning.

@@ -181,29 +181,29 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
 
 void ChartParser::CreateInputPaths(const InputType &input)
 {
-	  size_t size = input.GetSize();
-	  m_targetPhrasesfromPt.resize(size);
-	  for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
-	    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
-	      size_t endPos = startPos + phaseSize -1;
-	      vector<InputPath*> &vec = m_targetPhrasesfromPt[startPos];
+  size_t size = input.GetSize();
+  m_targetPhrasesfromPt.resize(size);
+  for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
+    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
+      size_t endPos = startPos + phaseSize -1;
+      vector<InputPath*> &vec = m_targetPhrasesfromPt[startPos];
 
-	      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
-	      WordsRange range(startPos, endPos);
+      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+      WordsRange range(startPos, endPos);
 
-	      InputPath *node;
-	      if (range.GetNumWordsCovered() == 1) {
-	        node = new InputPath(subphrase, range, NULL, NULL);
-	        vec.push_back(node);
-	      } else {
-	        const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-	        node = new InputPath(subphrase, range, &prevNode, NULL);
-	        vec.push_back(node);
-	      }
+      InputPath *node;
+      if (range.GetNumWordsCovered() == 1) {
+        node = new InputPath(subphrase, range, NULL, NULL);
+        vec.push_back(node);
+      } else {
+        const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
+        node = new InputPath(subphrase, range, &prevNode, NULL);
+        vec.push_back(node);
+      }
 
-	      m_phraseDictionaryQueue.push_back(node);
-	    }
-	  }
+      m_phraseDictionaryQueue.push_back(node);
+    }
+  }
 }
 
 InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
