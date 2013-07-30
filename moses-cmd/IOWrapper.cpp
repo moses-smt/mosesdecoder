@@ -206,10 +206,9 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
       const Factor *factor;
 
       if (placeholderFactor == NOT_FOUND) {
-    	  factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-      }
-      else {
-    	  factor = phrase.GetFactor(pos, placeholderFactor);
+        factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+      } else {
+        factor = phrase.GetFactor(pos, placeholderFactor);
       }
       out << *factor;
       CHECK(factor);
