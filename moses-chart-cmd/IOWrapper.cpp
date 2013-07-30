@@ -389,6 +389,8 @@ void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
   out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
   out << '\n';
   m_singleBestOutputCollector->Write(translationId, out.str());
+
+  VERBOSE(1,"BEST TRANSLATION: " << outPhrase << "[total=" << applied.GetScore() << "]" << endl);
 }
 
 void IOWrapper::OutputBestNone(long translationId)
