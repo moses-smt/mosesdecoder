@@ -2085,7 +2085,7 @@ sub create_ini {
   print INI "[weight]\n";
   print INI "UnknownWordPenalty0= 1\n";
   print INI "WordPenalty0= -1\n";
-  print INI "PhrasePenalty0= 1\n";
+  print INI "PhrasePenalty0= 0.2\n";
   print INI $weight_spec;
   close(INI);
 }
