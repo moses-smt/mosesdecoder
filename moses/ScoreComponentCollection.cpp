@@ -185,6 +185,19 @@ void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string li
   }
 }
 
+void ScoreComponentCollection::InvertDenseFeatures(const FeatureFunction* sp)
+{
+
+  Scores old_scores = GetScoresForProducer(sp);
+  Scores new_scores(old_scores.size());
+
+  for (size_t i = 0; i != old_scores.size(); ++i) {
+    new_scores[i] = -old_scores[i];
+  }
+
+  Assign(sp, new_scores);
+}
+
 void ScoreComponentCollection::ZeroDenseFeatures(const FeatureFunction* sp)
 {
   size_t numScores = sp->GetNumScoreComponents();

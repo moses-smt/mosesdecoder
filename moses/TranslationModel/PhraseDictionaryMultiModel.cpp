@@ -136,19 +136,19 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
 
           multiModelStatistics * statistics = new multiModelStatistics;
           statistics->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
-
-          // zero out scores from original phrase table
-          statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
-
-          Scores scoreVector(m_numScoreComponents);
           statistics->p.resize(m_numScoreComponents);
           for(size_t j = 0; j < m_numScoreComponents; ++j) {
             statistics->p[j].resize(m_numModels);
-            scoreVector[j] = -raw_scores[j];
           }
 
-          statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
-          statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
+          //correct future cost estimates and total score
+          statistics->targetPhrase->GetScoreBreakdown().InvertDenseFeatures(&pd);
+          vector<FeatureFunction*> pd_feature;
+          pd_feature.push_back(m_pd[i]);
+          const vector<FeatureFunction*> pd_feature_const(pd_feature);
+          statistics->targetPhrase->Evaluate(src, pd_feature_const);
+          // zero out scores from original phrase table
+          statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
 
           (*allStats)[targetString] = statistics;
 
@@ -183,7 +183,12 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
     scoreVector[m_numScoreComponents-1] = 1.0;
 
     statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-    statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
+
+    //correct future cost estimates and total score
+    vector<FeatureFunction*> pd_feature;
+    pd_feature.push_back(const_cast<PhraseDictionaryMultiModel*>(this));
+    const vector<FeatureFunction*> pd_feature_const(pd_feature);
+    statistics->targetPhrase->Evaluate(src, pd_feature_const);
 
     ret->Add(new TargetPhrase(*statistics->targetPhrase));
   }

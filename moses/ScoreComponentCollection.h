@@ -335,6 +335,7 @@ public:
   float GetWeightedScore() const;
 
   void ZeroDenseFeatures(const FeatureFunction* sp);
+  void InvertDenseFeatures(const FeatureFunction* sp);
   void L1Normalise();
   float GetL1Norm() const;
   float GetL2Norm() const;

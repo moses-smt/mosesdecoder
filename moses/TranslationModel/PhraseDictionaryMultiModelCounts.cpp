@@ -183,17 +183,17 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
           multiModelCountsStatistics * statistics = new multiModelCountsStatistics;
           statistics->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
 
+          //correct future cost estimates and total score
+          statistics->targetPhrase->GetScoreBreakdown().InvertDenseFeatures(&pd);
+          vector<FeatureFunction*> pd_feature;
+          pd_feature.push_back(m_pd[i]);
+          const vector<FeatureFunction*> pd_feature_const(pd_feature);
+          statistics->targetPhrase->Evaluate(src, pd_feature_const);
           // zero out scores from original phrase table
           statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
 
           statistics->fst.resize(m_numModels);
           statistics->ft.resize(m_numModels);
-          Scores scoreVector(5);
-          scoreVector[0] = -raw_scores[0];
-          scoreVector[1] = -raw_scores[1];
-          scoreVector[2] = -raw_scores[2];
-          statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
-          statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
 
           (*allStats)[targetString] = statistics;
 
@@ -246,7 +246,12 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
       scoreVector[4] = FloorScore(TransformScore(2.718));
 
       statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-      statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
+
+      //correct future cost estimates and total score
+      vector<FeatureFunction*> pd_feature;
+      pd_feature.push_back(const_cast<PhraseDictionaryMultiModelCounts*>(this));
+      const vector<FeatureFunction*> pd_feature_const(pd_feature);
+      statistics->targetPhrase->Evaluate(src, pd_feature_const);
     } catch (AlignmentException& e) {
       continue;
     }
