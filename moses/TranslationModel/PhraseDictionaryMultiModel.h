@@ -117,8 +117,6 @@ protected:
 #endif
   }
 
-  PhraseDictionary *FindPhraseDictionary(const std::string &ptName) const;
-
 #ifdef WITH_THREADS
   //reader-writer lock
   mutable boost::shared_mutex m_lock_weights;
@@ -158,6 +156,8 @@ protected:
   size_t m_iFeature;
 };
 #endif
+
+PhraseDictionary *FindPhraseDictionary(const std::string &ptName);
 
 } // end namespace
 

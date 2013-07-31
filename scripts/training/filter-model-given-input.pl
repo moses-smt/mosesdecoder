@@ -116,9 +116,10 @@ while(my $line = <INI>) {
      ) {
     print STDERR "pt:$line\n";
 
-		my ($phrase_table_impl,$source_factor,$t,$w,$file,$table_flag); # = ($1,$2,$3,$4,$5,$6);
+		my ($phrase_table_impl,$source_factor,$t,$w,$file,$table_flag,$skip); # = ($1,$2,$3,$4,$5,$6,$7);
     $table_flag = "";
     $phrase_table_impl = $toks[0];
+    $skip = 0;
     
     for (my $i = 1; $i < scalar(@toks); ++$i) {
       my @args = split(/=/, $toks[$i]);
@@ -137,9 +138,12 @@ while(my $line = <INI>) {
 			elsif ($args[0] eq "path") {
 			  $file = $args[1];
 			}
+			elsif ($args[0] eq "filterable" && $args[1] eq "false") {
+			  $skip = 1;
+			}
     } #for (my $i = 1; $i < scalar(@toks); ++$i) {
     
-		if (($phrase_table_impl ne "PhraseDictionaryMemory" && $phrase_table_impl ne "PhraseDictionarySCFG") || $file =~ /glue-grammar/) {
+		if (($phrase_table_impl ne "PhraseDictionaryMemory" && $phrase_table_impl ne "PhraseDictionarySCFG") || $file =~ /glue-grammar/ || $skip) {
 				# Only Memory ("0") and NewFormat ("6") can be filtered.
 				print INI_OUT "$line\n";
 				next;
