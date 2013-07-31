@@ -26,18 +26,21 @@
 #include "moses/StaticData.h"
 #include "moses/NonTerminal.h"
 #include "moses/ChartCellCollection.h"
+#include "moses/ChartParser.h"
 
 namespace Moses
 {
 
 ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence(
-  const InputType &src,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryFuzzyMatch &ruleTable)
-  : ChartRuleLookupManagerCYKPlus(src, cellColl)
+  : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_ruleTable(ruleTable)
 {
   CHECK(m_dottedRuleColls.size() == 0);
+
+  const Sentence &src = parser.GetSentence();
   size_t sourceSize = src.GetSize();
   m_dottedRuleColls.resize(sourceSize);
 

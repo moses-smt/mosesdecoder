@@ -67,7 +67,7 @@ public:
   void CleanUpAfterSentenceProcessing(InputType const& source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &,
     const ChartCellCollectionBase &) {
     CHECK(false);
     return 0;

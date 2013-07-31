@@ -41,6 +41,7 @@ namespace Moses
 class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
 class InputPath;
+class ChartParser;
 
 /** Implementation of on-disk phrase table for hierarchical/syntax model.
  */
@@ -70,7 +71,7 @@ public:
 
   // PhraseDictionary impl
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &parser,
     const ChartCellCollectionBase &);
 
   virtual void InitializeForInput(InputType const& source);

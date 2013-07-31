@@ -80,7 +80,7 @@ public:
   virtual void InitializeForInput(InputType const&) {
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
-  ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
+  ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&);
   void SetParameter(const std::string& key, const std::string& value);
 
   const std::vector<float>* GetTemporaryMultiModelWeightsVector() const;

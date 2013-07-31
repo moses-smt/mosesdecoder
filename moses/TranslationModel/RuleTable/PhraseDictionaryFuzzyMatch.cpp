@@ -73,10 +73,10 @@ void PhraseDictionaryFuzzyMatch::Load()
 }
 
 ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
-  const InputType &sentence,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellCollection)
 {
-  return new ChartRuleLookupManagerMemoryPerSentence(sentence, cellCollection, *this);
+  return new ChartRuleLookupManagerMemoryPerSentence(parser, cellCollection, *this);
 }
 
 

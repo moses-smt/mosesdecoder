@@ -192,6 +192,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartParserCallback.h</locationURI>
 		</link>
 		<link>
+			<name>ChartRuleLookupManager.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartRuleLookupManager.cpp</locationURI>
+		</link>
+		<link>
 			<name>ChartRuleLookupManager.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartRuleLookupManager.h</locationURI>

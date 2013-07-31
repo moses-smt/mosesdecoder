@@ -21,6 +21,7 @@
 
 #include <algorithm>
 
+#include "moses/ChartParser.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/StaticData.h"
 #include "moses/ChartParserCallback.h"
@@ -33,14 +34,14 @@ namespace Moses
 {
 
 ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
-  const InputType &sentence,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
   const std::vector<FactorType> &inputFactorsVec,
   const std::vector<FactorType> &outputFactorsVec,
   const std::string &filePath)
-  : ChartRuleLookupManagerCYKPlus(sentence, cellColl)
+  : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_dictionary(dictionary)
   , m_dbWrapper(dbWrapper)
   , m_inputFactorsVec(inputFactorsVec)
@@ -48,6 +49,8 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_filePath(filePath)
 {
   CHECK(m_expandableDottedRuleListVec.size() == 0);
+
+  const Sentence &sentence = parser.GetSentence();
   size_t sourceSize = sentence.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
 

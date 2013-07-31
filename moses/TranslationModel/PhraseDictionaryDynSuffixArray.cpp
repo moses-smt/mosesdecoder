@@ -97,7 +97,7 @@ deleteSnt(unsigned /* idx */, unsigned /* num2Del */)
 
 ChartRuleLookupManager*
 PhraseDictionaryDynSuffixArray::
-CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
+CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
 {
   CHECK(false);
   return 0;

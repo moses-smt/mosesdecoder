@@ -20,6 +20,7 @@
 #include "ChartRuleLookupManagerMemory.h"
 #include "DotChartInMemory.h"
 
+#include "moses/ChartParser.h"
 #include "moses/InputType.h"
 #include "moses/ChartParserCallback.h"
 #include "moses/StaticData.h"
@@ -31,13 +32,15 @@ namespace Moses
 {
 
 ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
-  const InputType &src,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryMemory &ruleTable)
-  : ChartRuleLookupManagerCYKPlus(src, cellColl)
+  : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_ruleTable(ruleTable)
 {
   CHECK(m_dottedRuleColls.size() == 0);
+
+  const Sentence &src = parser.GetSentence();
   size_t sourceSize = src.GetSize();
   m_dottedRuleColls.resize(sourceSize);
 

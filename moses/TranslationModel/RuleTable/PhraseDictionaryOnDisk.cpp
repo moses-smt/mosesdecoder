@@ -50,10 +50,10 @@ void PhraseDictionaryOnDisk::Load()
 }
 
 ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
-  const InputType &sentence,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellCollection)
 {
-  return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
+  return new ChartRuleLookupManagerOnDisk(parser, cellCollection, *this,
                                           GetImplementation(),
                                           m_input,
                                           m_output, m_filePath);

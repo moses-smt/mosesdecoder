@@ -114,10 +114,10 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
 }
 
 ChartRuleLookupManager *PhraseDictionaryMemory::CreateRuleLookupManager(
-  const InputType &sentence,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellCollection)
 {
-  return new ChartRuleLookupManagerMemory(sentence, cellCollection, *this);
+  return new ChartRuleLookupManagerMemory(parser, cellCollection, *this);
 }
 
 void PhraseDictionaryMemory::SortAndPrune()

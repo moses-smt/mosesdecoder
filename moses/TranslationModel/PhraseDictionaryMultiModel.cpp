@@ -278,7 +278,7 @@ std::vector<float> PhraseDictionaryMultiModel::normalizeWeights(std::vector<floa
 }
 
 
-ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
+ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }

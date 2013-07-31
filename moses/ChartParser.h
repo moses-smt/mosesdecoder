@@ -33,6 +33,7 @@ namespace Moses
 class ChartParserCallback;
 class ChartRuleLookupManager;
 class InputType;
+class Sentence;
 class ChartCellCollectionBase;
 class Word;
 class Phrase;
@@ -59,6 +60,9 @@ public:
   ~ChartParser();
 
   void Create(const WordsRange &range, ChartParserCallback &to);
+
+  //! the sentence being decoded
+  const Sentence &GetSentence() const;
 
 private:
   ChartParserUnknown m_unknown;

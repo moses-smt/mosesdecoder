@@ -30,6 +30,7 @@
 namespace Moses
 {
 class PhraseDictionaryNodeMemory;
+class ChartParser;
 
 /** Implementation of a SCFG rule table in a trie.  Looking up a rule of
  * length n symbols requires n look-ups to find the TargetPhraseCollection.
@@ -47,7 +48,7 @@ public:
   const PhraseDictionaryNodeMemory &GetRootNode(const InputType &source) const;
 
   ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &parser,
     const ChartCellCollectionBase &);
   void InitializeForInput(InputType const& inputSentence);
   void CleanUpAfterSentenceProcessing(const InputType& source);

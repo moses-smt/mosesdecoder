@@ -48,6 +48,7 @@ class InputType;
 class WordsRange;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
+class ChartParser;
 
 /**
   * Abstract base class for phrase dictionaries (tables).
@@ -85,7 +86,7 @@ public:
 
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &,
     const ChartCellCollectionBase &) = 0;
 
   const std::string &GetFilePath() const {

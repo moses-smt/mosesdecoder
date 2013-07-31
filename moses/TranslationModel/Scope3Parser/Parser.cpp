@@ -19,6 +19,7 @@
 
 #include "Parser.h"
 
+#include "moses/ChartParser.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
@@ -90,7 +91,7 @@ void Scope3Parser::Init()
 {
   InitRuleApplicationVector();
 
-  const Sentence &sentence = dynamic_cast<const Sentence &>(GetSentence());
+  const Sentence &sentence = GetSentence();
 
   // Build a map from Words to index-sets.
   SentenceMap sentMap;

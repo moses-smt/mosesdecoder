@@ -24,6 +24,7 @@
 #include "ChartRuleLookupManager.h"
 #include "StaticData.h"
 #include "TreeInput.h"
+#include "Sentence.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 
 using namespace std;
@@ -141,7 +142,7 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
        p != dictionaries.end(); ++p) {
     const PhraseDictionary *dict = *p;
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
-    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, cells));
+    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(*this, cells));
   }
 
   CreateInputPaths(m_source);
@@ -211,6 +212,11 @@ InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
   size_t offset = endPos - startPos;
   CHECK(offset < m_targetPhrasesfromPt[startPos].size());
   return *m_targetPhrasesfromPt[startPos][offset];
+}
+
+const Sentence &ChartParser::GetSentence() const {
+  const Sentence &sentence = static_cast<const Sentence&>(m_source);
+  return sentence;
 }
 
 } // namespace Moses
