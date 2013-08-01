@@ -35,7 +35,7 @@ TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
 
         //new : cast rule table to phrase dictionary MBOT
         PhraseDictionaryMBOT* ruleTableMBOT;
-        ruleTableMBOT = static_cast<PhraseDictionaryMBOT*>(&ruleTable);
+        ruleTableMBOT = dynamic_cast<PhraseDictionaryMBOT*>(&ruleTable);
         return ruleTableMBOT->GetOrCreateTargetPhraseCollection(source,target,sourceLHS);
     }
 

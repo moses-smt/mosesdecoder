@@ -45,7 +45,7 @@ TargetPhraseCollection &PhraseDictionaryMBOT::GetOrCreateTargetPhraseCollection(
                                                                                 , const TargetPhraseMBOT &target
                                                                                 , const Word &sourceLHS)
 {
-      PhraseDictionaryNodeMBOT currNode = GetOrCreateNode(source, target, sourceLHS);
+      PhraseDictionaryNodeMBOT &currNode = GetOrCreateNode(source, target, sourceLHS);
       return currNode.GetOrCreateTargetPhraseCollectionMBOT(sourceLHS);
 }
 

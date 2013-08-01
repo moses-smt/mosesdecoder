@@ -23,6 +23,7 @@
 #include "TargetPhraseMBOT.h"
 
 #include <vector>
+#include <cassert>
 
 namespace Moses
 {
@@ -66,10 +67,22 @@ class TranslationDimension
 
   const TargetPhraseMBOT *GetTargetPhraseMBOT() const {
       	const TargetPhrase * tpConst = (*m_orderedTargetPhrases)[m_pos];
+      	assert(tpConst);
+      	std::cerr << *tpConst << std::endl;
+
       	TargetPhrase * tp = const_cast<TargetPhrase*>(tpConst);
-      	TargetPhraseMBOT * tpmbot = static_cast<TargetPhraseMBOT*>(tp);
+      	assert(tp);
+
+      	TargetPhraseMBOT * tpmbot = dynamic_cast<TargetPhraseMBOT*>(tp);
+      	assert(tpmbot);
+
       	const TargetPhraseMBOT * targetPhrase = const_cast<TargetPhraseMBOT*>(tpmbot);
-      	std::cerr << "GETTING MBOT TARGET : " << *(targetPhrase->GetMBOTPhrases()) << std::endl;
+      	assert(targetPhrase);
+
+      	const PhraseSequence *sequence = targetPhrase->GetMBOTPhrases();
+      	assert(sequence);
+
+      	std::cerr << "GETTING MBOT TARGET : " << *sequence << std::endl;
       	return targetPhrase;
   }
 

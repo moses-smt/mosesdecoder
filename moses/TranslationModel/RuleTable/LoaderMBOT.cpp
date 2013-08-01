@@ -127,7 +127,7 @@ bool RuleTableLoaderMBOT::Load(const std::vector<FactorType> &input,
     //SetScoreChart computes special scores for discontiguous units
     targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weight, languageModels, wpProducer);
 
-    TargetPhraseCollection phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
+    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
 
     phraseColl.Add(targetPhrase);
 

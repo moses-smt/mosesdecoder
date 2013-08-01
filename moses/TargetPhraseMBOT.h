@@ -80,6 +80,7 @@ protected:
     Word m_sourceLhs;
 
 public:
+  TargetPhraseMBOT(const TargetPhraseMBOT &copy);
 
   TargetPhraseMBOT(Phrase sourcePhrase);
   TargetPhraseMBOT(std::string out_string,Phrase sourcePhrase);

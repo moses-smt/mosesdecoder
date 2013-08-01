@@ -77,11 +77,13 @@ namespace Moses
 
 	ostream& operator<<(ostream& out, const PhraseSequence& ps)
 	{
+	  out << "Num ps = " << ps.GetSize() << std::endl;
 	  int counter = 1;
 	  PhraseSequence::const_iterator itr;
 	  for(itr = ps.begin(); itr != ps.end(); itr++)
 	  {
-		  out << *itr << "(" << counter << ")";
+		  const Phrase &phrase = *itr;
+		  out << phrase << "(" << counter << ")";
 		  counter++;
 	  }
 	  out << std::endl;
