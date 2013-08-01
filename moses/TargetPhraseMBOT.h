@@ -81,6 +81,8 @@ protected:
 
 public:
   TargetPhraseMBOT(const TargetPhraseMBOT &copy);
+  // not implemented.
+  // Designed to failed if accidently make a copy of this obj
 
   TargetPhraseMBOT(Phrase sourcePhrase);
   TargetPhraseMBOT(std::string out_string,Phrase sourcePhrase);
