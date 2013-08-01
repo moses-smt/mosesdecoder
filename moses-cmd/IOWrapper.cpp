@@ -203,15 +203,16 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
 
     size_t size = phrase.GetSize();
     for (size_t pos = 0 ; pos < size ; pos++) {
-      const Factor *factor;
+      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
 
-      if (placeholderFactor == NOT_FOUND) {
-        factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-      } else {
-        factor = phrase.GetFactor(pos, placeholderFactor);
+      if (placeholderFactor != NOT_FOUND) {
+    	  const Factor *origFactor = phrase.GetFactor(pos, placeholderFactor);
+    	  if (origFactor) {
+    		  factor = origFactor;
+    	  }
       }
-      out << *factor;
       CHECK(factor);
+      out << *factor;
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
