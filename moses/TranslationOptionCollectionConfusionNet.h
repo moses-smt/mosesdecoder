@@ -16,12 +16,12 @@ class ConfusionNet;
 class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection
 {
 public:
-  typedef std::vector< std::vector<InputPathList> > TargetPhraseMatrix;
+  typedef std::vector< std::vector<InputPathList> > InputPathMatrix;
 
 protected:
   bool m_useLegacy;
 
-  TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
+  InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
 
   InputPathList &GetInputPathList(size_t startPos, size_t endPos);
   void CheckLegacy();

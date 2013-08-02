@@ -24,11 +24,11 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   CHECK(inputFeature);
 
   size_t size = input.GetSize();
-  m_targetPhrasesfromPt.resize(size);
+  m_inputPathMatrix.resize(size);
 
   // 1-word phrases
   for (size_t startPos = 0; startPos < size; ++startPos) {
-    vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
+    vector<InputPathList> &vec = m_inputPathMatrix[startPos];
     vec.push_back(InputPathList());
     InputPathList &list = vec.back();
 
@@ -60,7 +60,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       WordsRange range(startPos, endPos);
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
-      vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
+      vector<InputPathList> &vec = m_inputPathMatrix[startPos];
       vec.push_back(InputPathList());
       InputPathList &list = vec.back();
 
@@ -109,8 +109,8 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_targetPhrasesfromPt[startPos].size());
-  return m_targetPhrasesfromPt[startPos][offset];
+  CHECK(offset < m_inputPathMatrix[startPos].size());
+  return m_inputPathMatrix[startPos][offset];
 }
 
 /* forcibly create translation option for a particular source word.

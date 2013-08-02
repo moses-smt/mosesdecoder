@@ -73,10 +73,8 @@ private:
   std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
   InputType const& m_source; /**< source sentence to be translated */
 
-  InputPathList m_phraseDictionaryQueue;
-
-  typedef std::vector< std::vector<InputPath*> > TargetPhraseMatrix;
-  TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
+  typedef std::vector< std::vector<InputPath*> > InputPathMatrix;
+  InputPathMatrix	m_inputPathMatrix;
 
   void CreateInputPaths(const InputType &input);
   InputPath &GetInputPath(size_t startPos, size_t endPos);

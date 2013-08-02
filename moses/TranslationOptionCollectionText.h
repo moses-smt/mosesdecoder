@@ -38,10 +38,10 @@ class Sentence;
 class TranslationOptionCollectionText : public TranslationOptionCollection
 {
 public:
-  typedef std::vector< std::vector<InputPath*> > TargetPhraseMatrix;
+  typedef std::vector< std::vector<InputPath*> > InputPathMatrix;
 
 protected:
-  TargetPhraseMatrix	m_targetPhrasesfromPt; /*< contains translation options */
+  InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
 
   InputPath &GetInputPath(size_t startPos, size_t endPos);
 

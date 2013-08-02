@@ -183,11 +183,11 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
 void ChartParser::CreateInputPaths(const InputType &input)
 {
   size_t size = input.GetSize();
-  m_targetPhrasesfromPt.resize(size);
+  m_inputPathMatrix.resize(size);
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
-      vector<InputPath*> &vec = m_targetPhrasesfromPt[startPos];
+      vector<InputPath*> &vec = m_inputPathMatrix[startPos];
 
       WordsRange range(startPos, endPos);
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
@@ -203,7 +203,7 @@ void ChartParser::CreateInputPaths(const InputType &input)
         vec.push_back(node);
       }
 
-      m_phraseDictionaryQueue.push_back(node);
+      //m_phraseDictionaryQueue.push_back(node);
     }
   }
 }
@@ -211,15 +211,15 @@ void ChartParser::CreateInputPaths(const InputType &input)
 const InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos) const
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_targetPhrasesfromPt[startPos].size());
-  return *m_targetPhrasesfromPt[startPos][offset];
+  CHECK(offset < m_inputPathMatrix[startPos].size());
+  return *m_inputPathMatrix[startPos][offset];
 }
 
 InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_targetPhrasesfromPt[startPos].size());
-  return *m_targetPhrasesfromPt[startPos][offset];
+  CHECK(offset < m_inputPathMatrix[startPos].size());
+  return *m_inputPathMatrix[startPos][offset];
 }
 /*
 const Sentence &ChartParser::GetSentence() const {
