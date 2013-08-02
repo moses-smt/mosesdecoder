@@ -33,6 +33,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
     InputPathList &list = vec.back();
 
     WordsRange range(startPos, startPos);
+    const NonTerminalSet &labels = input.GetLabelSet(startPos, startPos);
 
     const ConfusionNet::Column &col = input.GetColumn(startPos);
     for (size_t i = 0; i < col.size(); ++i) {
@@ -44,7 +45,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       ScoreComponentCollection *inputScore = new ScoreComponentCollection();
       inputScore->Assign(inputFeature, scores);
 
-      InputPath *node = new InputPath(subphrase, range, NULL, inputScore);
+      InputPath *node = new InputPath(subphrase, labels, range, NULL, inputScore);
       list.push_back(node);
 
       m_phraseDictionaryQueue.push_back(node);
@@ -55,12 +56,13 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   for (size_t phaseSize = 2; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
+
       WordsRange range(startPos, endPos);
+      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       vector<InputPathList> &vec = m_targetPhrasesfromPt[startPos];
       vec.push_back(InputPathList());
       InputPathList &list = vec.back();
-
 
       // loop thru every previous path
       const InputPathList &prevNodes = GetInputPathList(startPos, endPos - 1);
@@ -88,7 +90,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
           ScoreComponentCollection *inputScore = new ScoreComponentCollection(*prevInputScore);
           inputScore->PlusEquals(inputFeature, scores);
 
-          InputPath *node = new InputPath(subphrase, range, &prevNode, inputScore);
+          InputPath *node = new InputPath(subphrase, labels, range, &prevNode, inputScore);
           list.push_back(node);
 
           m_phraseDictionaryQueue.push_back(node);

@@ -5,6 +5,7 @@
 #include <list>
 #include "Phrase.h"
 #include "WordsRange.h"
+#include "NonTerminal.h"
 
 namespace Moses
 {
@@ -33,6 +34,7 @@ protected:
   WordsRange m_range;
   const ScoreComponentCollection *m_inputScore;
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
+  const NonTerminalSet m_sourceNonTerms;
 
   std::vector<size_t> m_placeholders;
 
@@ -44,12 +46,15 @@ public:
     , m_inputScore(NULL) {
   }
 
-  InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode
+  InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
             ,const ScoreComponentCollection *inputScore);
   ~InputPath();
 
   const Phrase &GetPhrase() const {
     return m_phrase;
+  }
+  const NonTerminalSet &GetNonTerminalSet() const {
+    return m_sourceNonTerms;
   }
   const WordsRange &GetWordsRange() const {
     return m_range;

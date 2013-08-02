@@ -63,6 +63,8 @@ public:
 
   //! the sentence being decoded
   const Sentence &GetSentence() const;
+  size_t GetSize() const;
+  const InputPath &GetInputPath(size_t startPos, size_t endPos) const;
 
 private:
   ChartParserUnknown m_unknown;

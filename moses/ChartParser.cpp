@@ -189,22 +189,30 @@ void ChartParser::CreateInputPaths(const InputType &input)
       size_t endPos = startPos + phaseSize -1;
       vector<InputPath*> &vec = m_targetPhrasesfromPt[startPos];
 
-      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
       WordsRange range(startPos, endPos);
+      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       InputPath *node;
       if (range.GetNumWordsCovered() == 1) {
-        node = new InputPath(subphrase, range, NULL, NULL);
+        node = new InputPath(subphrase, labels, range, NULL, NULL);
         vec.push_back(node);
       } else {
         const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-        node = new InputPath(subphrase, range, &prevNode, NULL);
+        node = new InputPath(subphrase, labels, range, &prevNode, NULL);
         vec.push_back(node);
       }
 
       m_phraseDictionaryQueue.push_back(node);
     }
   }
+}
+
+const InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos) const
+{
+  size_t offset = endPos - startPos;
+  CHECK(offset < m_targetPhrasesfromPt[startPos].size());
+  return *m_targetPhrasesfromPt[startPos][offset];
 }
 
 InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
@@ -218,5 +226,11 @@ const Sentence &ChartParser::GetSentence() const {
   const Sentence &sentence = static_cast<const Sentence&>(m_source);
   return sentence;
 }
+
+size_t ChartParser::GetSize() const
+{
+  return m_source.GetSize();
+}
+
 
 } // namespace Moses

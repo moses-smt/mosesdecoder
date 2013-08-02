@@ -10,10 +10,11 @@ using namespace std;
 
 namespace Moses
 {
-InputPath::InputPath(const Phrase &phrase, const WordsRange &range, const InputPath *prevNode
+InputPath::InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
                      ,const ScoreComponentCollection *inputScore)
   :m_prevNode(prevNode)
   ,m_phrase(phrase)
+  ,m_sourceNonTerms(sourceNonTerms)
   ,m_range(range)
   ,m_inputScore(inputScore)
 {
