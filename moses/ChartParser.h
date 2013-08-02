@@ -62,7 +62,8 @@ public:
   void Create(const WordsRange &range, ChartParserCallback &to);
 
   //! the sentence being decoded
-  const Sentence &GetSentence() const;
+  //const Sentence &GetSentence() const;
+  long GetTranslationId() const;
   size_t GetSize() const;
   const InputPath &GetInputPath(size_t startPos, size_t endPos) const;
 

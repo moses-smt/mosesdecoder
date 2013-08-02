@@ -80,7 +80,7 @@ private:
 
   void Init();
   void InitRuleApplicationVector();
-  void FillSentenceMap(const Sentence &, SentenceMap &);
+  void FillSentenceMap(SentenceMap &);
   void AddRulesToCells(const ApplicableRuleTrie &, std::pair<int, int>, int,
                        int);
 

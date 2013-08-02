@@ -40,11 +40,10 @@ ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence
 {
   CHECK(m_dottedRuleColls.size() == 0);
 
-  const Sentence &src = parser.GetSentence();
-  size_t sourceSize = src.GetSize();
+  size_t sourceSize = parser.GetSize();
   m_dottedRuleColls.resize(sourceSize);
 
-  const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode(src);
+  const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode(parser.GetTranslationId());
 
   for (size_t ind = 0; ind < m_dottedRuleColls.size(); ++ind) {
 #ifdef USE_BOOST_POOL
@@ -177,8 +176,7 @@ void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
   DottedRuleColl & dottedRuleColl)
 {
   // source non-terminal labels for the remainder
-  const NonTerminalSet &sourceNonTerms =
-    GetSentence().GetLabelSet(startPos, endPos);
+  const NonTerminalSet &sourceNonTerms = GetParser().GetInputPath(startPos, endPos).GetNonTerminalSet();
 
   // target non-terminal labels for the remainder
   const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);

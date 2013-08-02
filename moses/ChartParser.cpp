@@ -221,16 +221,19 @@ InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
   CHECK(offset < m_targetPhrasesfromPt[startPos].size());
   return *m_targetPhrasesfromPt[startPos][offset];
 }
-
+/*
 const Sentence &ChartParser::GetSentence() const {
   const Sentence &sentence = static_cast<const Sentence&>(m_source);
   return sentence;
 }
-
+*/
 size_t ChartParser::GetSize() const
 {
   return m_source.GetSize();
 }
 
-
+long ChartParser::GetTranslationId() const
+{
+	return m_source.GetTranslationId();
+}
 } // namespace Moses

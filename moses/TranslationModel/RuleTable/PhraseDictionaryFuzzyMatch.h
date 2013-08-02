@@ -45,7 +45,7 @@ public:
   ~PhraseDictionaryFuzzyMatch();
   void Load();
 
-  const PhraseDictionaryNodeMemory &GetRootNode(const InputType &source) const;
+  const PhraseDictionaryNodeMemory &GetRootNode(long translationId) const;
 
   ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &parser,

@@ -91,11 +91,9 @@ void Scope3Parser::Init()
 {
   InitRuleApplicationVector();
 
-  const Sentence &sentence = GetSentence();
-
   // Build a map from Words to index-sets.
   SentenceMap sentMap;
-  FillSentenceMap(sentence, sentMap);
+  FillSentenceMap(sentMap);
 
   // Build a trie containing 'elastic' application contexts
   const UTrieNode &rootNode = m_ruleTable.GetRootNode();
@@ -109,12 +107,12 @@ void Scope3Parser::Init()
   m_varSpanTrie = vstBuilder.Build(*art);
 
   // Fill each cell with a list of pointers to relevant ART nodes.
-  AddRulesToCells(*art, std::make_pair<int, int>(-1, -1), sentence.GetSize()-1, 0);
+  AddRulesToCells(*art, std::make_pair<int, int>(-1, -1), GetParser().GetSize()-1, 0);
 }
 
 void Scope3Parser::InitRuleApplicationVector()
 {
-  const size_t sourceSize = GetSentence().GetSize();
+  const size_t sourceSize = GetParser().GetSize();
   m_ruleApplications.resize(sourceSize);
   for (size_t start = 0; start < sourceSize; ++start) {
     size_t maxSpan = sourceSize-start+1;
@@ -122,11 +120,11 @@ void Scope3Parser::InitRuleApplicationVector()
   }
 }
 
-void Scope3Parser::FillSentenceMap(
-  const Sentence &sent, SentenceMap &sentMap)
+void Scope3Parser::FillSentenceMap(SentenceMap &sentMap)
 {
-  for (size_t i = 0; i < sent.GetSize(); ++i) {
-    sentMap[sent.GetWord(i)].push_back(i);
+  for (size_t i = 0; i < GetParser().GetSize(); ++i) {
+    const Word &word = GetParser().GetInputPath(i, i).GetLastWord();
+    sentMap[word].push_back(i);
   }
 }
 

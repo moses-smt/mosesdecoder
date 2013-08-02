@@ -53,7 +53,7 @@ public:
 
   const ChartParser &GetParser() const
   { return m_parser; }
-  const Sentence &GetSentence() const;
+  //const Sentence &GetSentence() const;
 
   const ChartCellLabel &GetSourceAt(size_t at) const {
     return m_cellCollection.GetSourceWordLabel(at);

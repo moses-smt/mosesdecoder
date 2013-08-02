@@ -50,8 +50,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
 {
   CHECK(m_expandableDottedRuleListVec.size() == 0);
 
-  const Sentence &sentence = parser.GetSentence();
-  size_t sourceSize = sentence.GetSize();
+  size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
 
   for (size_t ind = 0; ind < m_expandableDottedRuleListVec.size(); ++ind) {
@@ -146,7 +145,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
     //                                   ,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
 
     // go through each SOURCE lhs
-    const NonTerminalSet &sourceLHSSet = GetSentence().GetLabelSet(startPos, endPos);
+    const NonTerminalSet &sourceLHSSet = GetParser().GetInputPath(startPos, endPos).GetNonTerminalSet();
 
     NonTerminalSet::const_iterator iterSourceLHS;
     for (iterSourceLHS = sourceLHSSet.begin(); iterSourceLHS != sourceLHSSet.end(); ++iterSourceLHS) {
@@ -217,7 +216,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       const OnDiskPt::PhraseNode &prevNode = prevDottedRule.GetLastNode();
 
       //get node for each source LHS
-      const NonTerminalSet &lhsSet = GetSentence().GetLabelSet(range.GetStartPos(), range.GetEndPos());
+      const NonTerminalSet &lhsSet = GetParser().GetInputPath(range.GetStartPos(), range.GetEndPos()).GetNonTerminalSet();
       NonTerminalSet::const_iterator iterLabelSet;
       for (iterLabelSet = lhsSet.begin(); iterLabelSet != lhsSet.end(); ++iterLabelSet) {
         const Word &sourceLHS = *iterLabelSet;
