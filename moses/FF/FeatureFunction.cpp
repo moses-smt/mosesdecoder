@@ -94,8 +94,7 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
 {
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
-  }
-  else if (key == "filterable") { //ignore
+  } else if (key == "filterable") { //ignore
   } else {
     UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
   }

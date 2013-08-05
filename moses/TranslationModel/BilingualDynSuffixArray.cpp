@@ -301,13 +301,13 @@ GetLexicalWeight(const PhrasePair& pp) const
     ++sc[sx];
     ++tc[tx];
 #if 0
-    cout << m_srcVocab->GetWord(sw[s])   << " -> " 
-	 << m_trgVocab->GetWord(tw[t])   << " "
-	 << m_wrd_cooc.pfwd(sw[s],tw[t]) << " "
-	 << m_wrd_cooc.pbwd(sw[s],tw[t]) << " " 
-	 << sp[sx] << " (" << sc[sx] << ") "
-	 << tp[tx] << " (" << tc[tx] << ") " 
-	 << endl;
+    cout << m_srcVocab->GetWord(sw[s])   << " -> "
+         << m_trgVocab->GetWord(tw[t])   << " "
+         << m_wrd_cooc.pfwd(sw[s],tw[t]) << " "
+         << m_wrd_cooc.pbwd(sw[s],tw[t]) << " "
+         << sp[sx] << " (" << sc[sx] << ") "
+         << tp[tx] << " (" << tc[tx] << ") "
+         << endl;
 #endif
   }
   pair<float,float> ret(1,1);
