@@ -48,7 +48,6 @@ ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget)
   : m_prevHypo(NULL)
   , m_targetPhrase(emptyTarget)
-  , m_sourcePhrase(0)
   , m_sourceCompleted(source.GetSize(), manager.m_source.m_sourceCompleted)
   , m_sourceInput(source)
   , m_currSourceWordsRange(
@@ -80,7 +79,6 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   : m_prevHypo(&prevHypo)
   , m_targetPhrase(transOpt.GetTargetPhrase())
-  , m_sourcePhrase(&transOpt.GetSourcePhrase())
   , m_sourceCompleted				(prevHypo.m_sourceCompleted )
   , m_sourceInput						(prevHypo.m_sourceInput)
   , m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
@@ -348,8 +346,12 @@ void Hypothesis::PrintHypothesis() const
   }
   TRACE_ERR( ")"<<endl);
   TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
-  TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "
-             << *m_sourcePhrase <<endl);
+  TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": ");
+
+  if (m_transOpt) {
+    TRACE_ERR(m_transOpt->GetSourcePhrase());
+  }
+  TRACE_ERR(endl);
   TRACE_ERR( "\ttranslated as: "<<(Phrase&) m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
 
   if (m_wordDeleted) TRACE_ERR( "\tword deleted"<<endl);
@@ -440,14 +442,12 @@ std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factor
   if (!m_prevHypo) {
     return "";
   }
-  return m_sourcePhrase->GetStringRep(factorsToPrint);
-#if 0
-  if(m_sourcePhrase) {
-    return m_sourcePhrase->GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
-  } else {
-    return m_sourceInput.GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
+  if (m_transOpt) {
+    return m_transOpt->GetSourcePhrase().GetStringRep(factorsToPrint);
   }
-#endif
+  else {
+    return "";
+  }
 }
 std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const
 {

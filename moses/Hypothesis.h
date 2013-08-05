@@ -70,7 +70,6 @@ protected:
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
 //	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
   const TargetPhrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
-  Phrase const*     m_sourcePhrase; /*! input sentence */
   WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
   //TODO: how to integrate this into confusion network framework; what if
   //it's a confusion network in the end???
@@ -154,10 +153,6 @@ public:
   /** length of the partial translation (from the start of the sentence) */
   inline size_t GetSize() const {
     return m_currTargetWordsRange.GetEndPos() + 1;
-  }
-
-  inline const Phrase* GetSourcePhrase() const {
-    return m_sourcePhrase;
   }
 
   std::string GetSourcePhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
