@@ -655,13 +655,11 @@ void TranslationOptionCollection::CacheLexReordering()
           for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) {
             TranslationOption &transOpt = **iterTransOpt;
             //Phrase sourcePhrase =  m_source.GetSubString(WordsRange(startPos,endPos));
-            const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
-            if (sourcePhrase) {
-              Scores score = lexreordering.GetProb(*sourcePhrase
-                                                   , transOpt.GetTargetPhrase());
-              if (!score.empty())
-                transOpt.CacheLexReorderingScores(lexreordering, score);
-            } // if (sourcePhrase) {
+            const Phrase &sourcePhrase = transOpt.GetSourcePhrase();
+            Scores score = lexreordering.GetProb(sourcePhrase
+                                               , transOpt.GetTargetPhrase());
+            if (!score.empty())
+              transOpt.CacheLexReorderingScores(lexreordering, score);
           } // for(iterTransOpt
         } // for (size_t endPos = startPos ; endPos < startPos + maxSize; endPos++) {
       } // for (size_t startPos = 0 ; startPos < size ; startPos++) {

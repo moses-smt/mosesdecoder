@@ -80,7 +80,7 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   : m_prevHypo(&prevHypo)
   , m_targetPhrase(transOpt.GetTargetPhrase())
-  , m_sourcePhrase(transOpt.GetSourcePhrase())
+  , m_sourcePhrase(&transOpt.GetSourcePhrase())
   , m_sourceCompleted				(prevHypo.m_sourceCompleted )
   , m_sourceInput						(prevHypo.m_sourceInput)
   , m_currSourceWordsRange	(transOpt.GetSourceWordsRange())

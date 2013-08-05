@@ -95,8 +95,8 @@ public:
   }
 
   /** returns source phrase */
-  const Phrase *GetSourcePhrase() const {
-    return &(m_targetPhrase.GetSourcePhrase());
+  const Phrase &GetSourcePhrase() const {
+    return m_targetPhrase.GetSourcePhrase();
   }
 
   /** whether source span overlaps with those of a hypothesis */

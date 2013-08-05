@@ -110,7 +110,7 @@ void PhrasePairFeature::Evaluate(
   ScoreComponentCollection* accumulator) const
 {
   const TargetPhrase& target = context.GetTargetPhrase();
-  const Phrase& source = *(context.GetTranslationOption().GetSourcePhrase());
+  const Phrase& source = context.GetTranslationOption().GetSourcePhrase();
   if (m_simple) {
     ostringstream namestr;
     namestr << "pp_";
