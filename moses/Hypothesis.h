@@ -69,7 +69,6 @@ protected:
 
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
 //	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
-  const TargetPhrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
   WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
   //TODO: how to integrate this into confusion network framework; what if
   //it's a confusion network in the end???
@@ -83,13 +82,13 @@ protected:
   std::vector<const FFState*> m_ffStates;
   const Hypothesis 	*m_winningHypo;
   ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
-  const TranslationOption *m_transOpt;
+  const TranslationOption &m_transOpt;
   Manager& m_manager;
 
   int m_id; /*! numeric ID of this hypothesis, used for logging */
 
   /*! used by initial seeding of the translation process */
-  Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
+  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
   /*! used when creating a new hypothesis using a translation option (phrase translation) */
   Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
@@ -106,7 +105,7 @@ public:
   static Hypothesis* Create(Manager& manager, const WordsBitmap &initialCoverage);
 
   /** return the subclass of Hypothesis most appropriate to the given target phrase */
-  static Hypothesis* Create(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
+  static Hypothesis* Create(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
   Hypothesis* CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const;
@@ -119,10 +118,7 @@ public:
 
   /** return target phrase used to create this hypothesis */
 //	const Phrase &GetCurrTargetPhrase() const
-  const TargetPhrase &GetCurrTargetPhrase() const {
-    return m_targetPhrase;
-  }
-
+  const TargetPhrase &GetCurrTargetPhrase() const;
 
   /** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
   inline const WordsRange &GetCurrSourceWordsRange() const {
@@ -164,10 +160,10 @@ public:
    * (ie, start of sentence would be some negative number, which is
    * not allowed- USE WITH CAUTION) */
   inline const Word &GetCurrWord(size_t pos) const {
-    return m_targetPhrase.GetWord(pos);
+    return GetCurrTargetPhrase().GetWord(pos);
   }
   inline const Factor *GetCurrFactor(size_t pos, FactorType factorType) const {
-    return m_targetPhrase.GetFactor(pos, factorType);
+    return GetCurrTargetPhrase().GetFactor(pos, factorType);
   }
   /** recursive - pos is relative from start of sentence */
   inline const Word &GetWord(size_t pos) const {
@@ -260,7 +256,7 @@ public:
   }
 
   const TranslationOption &GetTranslationOption() const {
-    return *m_transOpt;
+    return m_transOpt;
   }
 };
 

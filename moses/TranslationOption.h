@@ -73,6 +73,8 @@ protected:
   _ScoreCacheMap m_lexReorderingScores;
 
 public:
+  explicit TranslationOption(); // For initial hypo that does translate anything
+
   /** constructor. Used by initial translation step */
   TranslationOption(const WordsRange &wordsRange
                     , const TargetPhrase &targetPhrase);

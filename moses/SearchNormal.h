@@ -6,6 +6,7 @@
 #include "HypothesisStackNormal.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
+#include "TranslationOption.h"
 
 namespace Moses
 {
@@ -23,7 +24,7 @@ protected:
   const InputType &m_source;
   std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */
   // no of elements = no of words in source + 1
-  TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
+  TranslationOption m_initialTransOpt; /**< used to seed 1st hypo */
   clock_t m_start; /**< starting time, used for logging */
   size_t interrupted_flag; /**< flag indicating that decoder ran out of time (see switch -time-out) */
   HypothesisStackNormal* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/

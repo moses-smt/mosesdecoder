@@ -42,7 +42,7 @@ Parameter::Parameter()
   AddParam("mapping", "description of decoding steps");
   AddParam("beam-threshold", "b", "threshold for threshold pruning");
   AddParam("config", "f", "location of the configuration file");
-  AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
+  //AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam("decoding-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");

@@ -32,6 +32,12 @@ using namespace std;
 namespace Moses
 {
 
+TranslationOption::TranslationOption()
+:m_targetPhrase()
+,m_sourceWordsRange(NOT_FOUND, NOT_FOUND)
+{
+}
+
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange
                                      , const TargetPhrase &targetPhrase)
