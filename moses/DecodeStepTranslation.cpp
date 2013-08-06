@@ -159,7 +159,8 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 void DecodeStepTranslation::ProcessInitialTranslationLegacy(
   const InputType &source
   ,PartialTranslOptColl &outputPartialTranslOptColl
-  , size_t startPos, size_t endPos, bool adhereTableLimit) const
+  , size_t startPos, size_t endPos, bool adhereTableLimit
+  , const InputPathList &inputPathList) const
 {
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();

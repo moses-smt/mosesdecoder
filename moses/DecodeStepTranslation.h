@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "DecodeStep.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -61,7 +62,8 @@ public:
   */
   void ProcessInitialTranslationLegacy(const InputType &source
                                  , PartialTranslOptColl &outputPartialTranslOptColl
-                                 , size_t startPos, size_t endPos, bool adhereTableLimit) const;
+                                 , size_t startPos, size_t endPos, bool adhereTableLimit
+                                 , const InputPathList &inputPathList) const;
 
   void ProcessInitialTranslation(const InputType &source
                                  , PartialTranslOptColl &outputPartialTranslOptColl

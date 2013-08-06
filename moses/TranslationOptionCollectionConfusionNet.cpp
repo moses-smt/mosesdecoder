@@ -191,6 +191,8 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
+	InputPathList &inputPathList = GetInputPathList(startPos, endPos);
+
     // partial trans opt stored in here
     PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
     size_t totalEarlyPruned = 0;
@@ -201,7 +203,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
 
     static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslationLegacy
     (m_source, *oldPtoc
-     , startPos, endPos, adhereTableLimit );
+     , startPos, endPos, adhereTableLimit, inputPathList );
 
     // do rest of decode steps
     int indexStep = 0;
