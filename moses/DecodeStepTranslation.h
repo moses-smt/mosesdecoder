@@ -60,15 +60,15 @@ public:
   /*! initialize list of partial translation options by applying the first translation step
   * Ideally, this function should be in DecodeStepTranslation class
   */
-  void ProcessInitialTranslationLegacy(const InputType &source
-                                 , PartialTranslOptColl &outputPartialTranslOptColl
-                                 , size_t startPos, size_t endPos, bool adhereTableLimit
-                                 , const InputPathList &inputPathList) const;
-
   void ProcessInitialTranslation(const InputType &source
                                  , PartialTranslOptColl &outputPartialTranslOptColl
                                  , size_t startPos, size_t endPos, bool adhereTableLimit
                                  , const TargetPhraseCollection *phraseColl) const;
+
+  void ProcessInitialTranslationLegacy(const InputType &source
+                                 , PartialTranslOptColl &outputPartialTranslOptColl
+                                 , size_t startPos, size_t endPos, bool adhereTableLimit
+                                 , const InputPathList &inputPathList) const;
 
 private:
 
