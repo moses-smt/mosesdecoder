@@ -159,8 +159,13 @@ public:
 
     std::vector<TargetPhrase> tCands;
     tCands.reserve(cands.size());
+
     std::vector<std::pair<float,size_t> > costs;
     costs.reserve(cands.size());
+
+    std::vector<Phrase> sourcePhrases;
+    sourcePhrases.reserve(cands.size());
+
 
     // convert into TargetPhrases
     for(size_t i=0; i<cands.size(); ++i) {
@@ -182,12 +187,15 @@ public:
       }
 
       CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), &wacands[i], &src);
+
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);
+
+      sourcePhrases.push_back(src);
     }
 
     TargetPhraseCollection *rv;
-    rv=PruneTargetCandidates(tCands,costs);
+    rv=PruneTargetCandidates(tCands,costs, sourcePhrases);
     if(rv->IsEmpty()) {
       delete rv;
       return 0;
@@ -300,10 +308,13 @@ public:
     targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
   }
 
-  TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,
-      std::vector<std::pair<float,size_t> >& costs) const {
+  TargetPhraseCollection* PruneTargetCandidates
+     (const std::vector<TargetPhrase> & tCands,
+      std::vector<std::pair<float,size_t> >& costs,
+      const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
     TargetPhraseCollection *rv=new TargetPhraseCollection;
+
 
     // set limit to tableLimit or actual size, whatever is smaller
     std::vector<std::pair<float,size_t> >::iterator nth =
@@ -316,8 +327,10 @@ public:
 
     // add n top phrases to the return list
     for(std::vector<std::pair<float,size_t> >::iterator
-        it = costs.begin(); it != nth; ++it)
+        it = costs.begin(); it != nth; ++it) {
       rv->Add(new TargetPhrase(tCands[it->second]));
+
+    }
 
     return rv;
   }
@@ -506,8 +519,12 @@ public:
 
       std::vector<TargetPhrase> tCands;
       tCands.reserve(i->second.size());
+
       std::vector<std::pair<float,size_t> > costs;
       costs.reserve(i->second.size());
+
+      std::vector<Phrase> sourcePhrases;
+      sourcePhrases.reserve(i->second.size());
 
       for(E2Costs::const_iterator j=i->second.begin(); j!=i->second.end(); ++j) {
         TScores const & scores=j->second;
@@ -520,10 +537,13 @@ public:
                            , scores.src);
         costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
         tCands.push_back(targetPhrase);
+
+        sourcePhrases.push_back(*scores.src);
+
         //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;
       }
 
-      TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);
+      TargetPhraseCollection *rv=PruneTargetCandidates(tCands, costs, sourcePhrases);
 
       if(rv->IsEmpty())
         delete rv;
