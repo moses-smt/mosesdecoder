@@ -199,7 +199,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
     list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
     const DecodeStep &decodeStep = **iterStep;
 
-    static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
+    static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslationLegacy
     (m_source, *oldPtoc
      , startPos, endPos, adhereTableLimit );
 

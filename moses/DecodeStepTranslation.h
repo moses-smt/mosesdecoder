@@ -59,7 +59,7 @@ public:
   /*! initialize list of partial translation options by applying the first translation step
   * Ideally, this function should be in DecodeStepTranslation class
   */
-  void ProcessInitialTranslation(const InputType &source
+  void ProcessInitialTranslationLegacy(const InputType &source
                                  , PartialTranslOptColl &outputPartialTranslOptColl
                                  , size_t startPos, size_t endPos, bool adhereTableLimit) const;
 
