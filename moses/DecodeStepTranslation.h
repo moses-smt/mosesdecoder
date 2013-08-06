@@ -71,6 +71,11 @@ public:
                                  , const InputPathList &inputPathList) const;
 
 private:
+  // I'm not sure whether this actually works or not for binary phrase table.
+  // The source phrase only appears to contain the 1st word, therefore, this function
+  // only compares the 1st word
+  const InputPath &GetInputPathLegacy(const TargetPhrase targetPhrase,
+		  	  	  	  	  	  	  	  const InputPathList &inputPathList) const;
 
 };
 

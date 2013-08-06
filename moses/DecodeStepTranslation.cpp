@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -214,7 +215,11 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
 
     for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
+
+      const InputPath &inputPath = GetInputPathLegacy(targetPhrase, inputPathList);
+
       TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
+      transOpt->SetSourcePhrase(inputPath.GetPhrase());
 
       outputPartialTranslOptColl.Add (transOpt);
 
@@ -224,6 +229,27 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
   }
 }
 
+const InputPath &DecodeStepTranslation::GetInputPathLegacy(const TargetPhrase targetPhrase,
+														const InputPathList &inputPathList) const
+{
+	const Phrase &phraseFromTP = targetPhrase.GetSourcePhrase();
+	const Word &wordTP =  phraseFromTP.GetWord(0);
+
+	InputPathList::const_iterator iter;
+	for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
+		const InputPath &inputPath = **iter;
+		const Phrase &phraseFromIP = inputPath.GetPhrase();
+		const Word &wordIP =  phraseFromIP.GetWord(0);
+
+		const WordsRange &range = inputPath.GetWordsRange();
+
+		if (wordTP == wordIP) {
+			return inputPath;
+		}
+	}
+
+	UTIL_THROW(util::Exception, "Input path not found");
+}
 
 }
 

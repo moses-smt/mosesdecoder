@@ -101,6 +101,11 @@ public:
     return m_targetPhrase.GetSourcePhrase();
   }
 
+  void SetSourcePhrase(const Phrase &sourcePhrase)
+  {
+	  // TODO
+  }
+
   /** whether source span overlaps with those of a hypothesis */
   bool Overlap(const Hypothesis &hypothesis) const;
 
