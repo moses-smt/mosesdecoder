@@ -5,6 +5,7 @@
 #include "ConfusionNet.h"
 #include "DecodeStep.h"
 #include "DecodeStepTranslation.h"
+#include "DecodeStepGeneration.h"
 #include "FactorCollection.h"
 #include "FF/InputFeature.h"
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
@@ -210,7 +211,10 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
 
     for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
 
-      const DecodeStep &decodeStep = **iterStep;
+      const DecodeStep *decodeStep = *iterStep;
+      const DecodeStepTranslation *transStep =dynamic_cast<const DecodeStepTranslation*>(decodeStep);
+      const DecodeStepGeneration *genStep =dynamic_cast<const DecodeStepGeneration*>(decodeStep);
+
       PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
 
       // go thru each intermediate trans opt just created
@@ -219,12 +223,23 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
       for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
         TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 
-        decodeStep.Process(inputPartialTranslOpt
-                           , decodeStep
+        if (transStep) {
+          transStep->ProcessLegacy(inputPartialTranslOpt
+                           , *decodeStep
                            , *newPtoc
                            , this
                            , adhereTableLimit
                            , *sourcePhrase);
+        }
+        else {
+        	CHECK(genStep);
+        	genStep->Process(inputPartialTranslOpt
+        	                           , *decodeStep
+        	                           , *newPtoc
+        	                           , this
+        	                           , adhereTableLimit
+        	                           , *sourcePhrase);
+        }
       }
 
       // last but 1 partial trans not required anymore

@@ -44,7 +44,7 @@ DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf,
   }
 }
 
-void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
+void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialTranslOpt
                                     , const DecodeStep &decodeStep
                                     , PartialTranslOptColl &outputPartialTranslOptColl
                                     , TranslationOptionCollection *toc

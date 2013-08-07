@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
+#include "DecodeStepGeneration.h"
 #include "DecodeGraph.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "InputPath.h"
@@ -479,7 +480,9 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                                  , *sourcePhrase
                                  , targetPhrases);
         } else {
-          decodeStep->Process(inputPartialTranslOpt
+          const DecodeStepGeneration *genStep = dynamic_cast<const DecodeStepGeneration*>(decodeStep);
+          assert(genStep);
+		  genStep->Process(inputPartialTranslOpt
                               , *decodeStep
                               , *newPtoc
                               , this

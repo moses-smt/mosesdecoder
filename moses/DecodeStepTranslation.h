@@ -42,7 +42,7 @@ public:
                         const std::vector<FeatureFunction*> &features);
 
 
-  virtual void Process(const TranslationOption &inputPartialTranslOpt
+  void ProcessLegacy(const TranslationOption &inputPartialTranslOpt
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
