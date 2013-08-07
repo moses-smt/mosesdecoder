@@ -77,16 +77,6 @@ PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(Phrase const &src) const
   return GetImplementation().GetTargetPhraseCollection(src);
 }
 
-TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,WordsRange const &range) const
-{
-  if(GetImplementation().m_rangeCache.empty()) {
-    return GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
-  } else {
-    return GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-  }
-}
-
 void PhraseDictionaryTreeAdaptor::EnableCache()
 {
   GetImplementation().useCache=1;
@@ -110,6 +100,17 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
   dict = m_implementation.get();
   CHECK(dict);
   return *dict;
+}
+
+// legacy
+TargetPhraseCollection const*
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const &range) const
+{
+  if(GetImplementation().m_rangeCache.empty()) {
+    return GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
+  } else {
+    return GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
+  }
 }
 
 }

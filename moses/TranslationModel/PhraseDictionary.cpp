@@ -45,7 +45,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
 
 
 const TargetPhraseCollection *PhraseDictionary::
-GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
+GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
   //Phrase phrase = src.GetSubString(range);

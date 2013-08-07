@@ -66,7 +66,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const TargetPhraseCollection *phraseColl=
-    phraseDictionary->GetTargetPhraseCollection(toc->GetSource(),sourceWordsRange);
+    phraseDictionary->GetTargetPhraseCollectionLegacy(toc->GetSource(),sourceWordsRange);
 
   if (phraseColl != NULL) {
     TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
@@ -200,7 +200,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const WordsRange wordsRange(startPos, endPos);
-  const TargetPhraseCollection *phraseColl =	phraseDictionary->GetTargetPhraseCollection(source,wordsRange);
+  const TargetPhraseCollection *phraseColl =	phraseDictionary->GetTargetPhraseCollectionLegacy(source,wordsRange);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {

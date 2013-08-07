@@ -73,7 +73,7 @@ public:
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const;
 
   virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 

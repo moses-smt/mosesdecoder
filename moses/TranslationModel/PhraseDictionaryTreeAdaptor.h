@@ -61,7 +61,6 @@ public:
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
   TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
-  TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
   void InitializeForInput(InputType const& source);
   void CleanUpAfterSentenceProcessing(InputType const& source);
@@ -72,6 +71,10 @@ public:
     CHECK(false);
     return 0;
   }
+
+  // legacy
+  TargetPhraseCollection const* GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const & srcRange) const;
+
 };
 
 }
