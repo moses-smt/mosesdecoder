@@ -153,13 +153,21 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
         TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
     }
 
+    const std::vector<Phrase> &sourcePhrases = phraseColl->GetSourcePhrases();
+
     TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
+    std::vector<Phrase>::const_iterator iterSourcePhrase;
     iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
 
-    for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
-      const TargetPhrase	&targetPhrase = **iterTargetPhrase;
+    for (iterTargetPhrase = phraseColl->begin(), iterSourcePhrase =  sourcePhrases.begin()
+    		; iterTargetPhrase != iterEnd
+    		; ++iterTargetPhrase, ++iterSourcePhrase) {
+      CHECK(iterSourcePhrase != sourcePhrases.end());
 
-      const InputPath &inputPath = GetInputPathLegacy(targetPhrase, inputPathList);
+      const TargetPhrase	&targetPhrase = **iterTargetPhrase;
+      const Phrase			&sourcePhrase = *iterSourcePhrase;
+
+      const InputPath &inputPath = GetInputPathLegacy(targetPhrase, sourcePhrase, inputPathList);
 
       TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
       transOpt->SetSourcePhrase(inputPath.GetPhrase());
@@ -172,11 +180,12 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
   }
 }
 
-const InputPath &DecodeStepTranslation::GetInputPathLegacy(const TargetPhrase targetPhrase,
-    const InputPathList &inputPathList) const
+const InputPath &DecodeStepTranslation::GetInputPathLegacy(
+		const TargetPhrase targetPhrase,
+		const Phrase sourcePhrase,
+		const InputPathList &inputPathList) const
 {
-  const Phrase &phraseFromTP = targetPhrase.GetSourcePhraseAA();
-  const Word &wordTP =  phraseFromTP.GetWord(0);
+  const Word &wordFromPt =  sourcePhrase.GetWord(0);
 
   InputPathList::const_iterator iter;
   for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
@@ -186,7 +195,7 @@ const InputPath &DecodeStepTranslation::GetInputPathLegacy(const TargetPhrase ta
 
     const WordsRange &range = inputPath.GetWordsRange();
 
-    if (wordTP == wordIP) {
+    if (wordFromPt == wordIP) {
       return inputPath;
     }
   }

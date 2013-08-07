@@ -357,7 +357,7 @@ void WordTranslationFeature::EvaluateChart(
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++) {
-    const Phrase& sourcePhrase = targetPhrase.GetSourcePhraseAA();
+    const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
     int sourceIndex = alignmentPoint->first;
     int targetIndex = alignmentPoint->second;
     Word ws = sourcePhrase.GetWord(sourceIndex);

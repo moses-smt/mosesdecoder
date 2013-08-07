@@ -96,7 +96,7 @@ public:
   void SetSourcePhraseAA(const Phrase&  p) {
     m_sourcePhraseAA=p;
   }
-  const Phrase& GetSourcePhraseAA() const {
+  const Phrase& GetSourcePhrase() const {
     return m_sourcePhraseAA;
   }
 
@@ -139,7 +139,7 @@ struct TargetPhraseHasher {
   inline size_t operator()(const TargetPhrase& targetPhrase) const {
     size_t seed = 0;
     boost::hash_combine(seed, targetPhrase);
-    boost::hash_combine(seed, targetPhrase.GetSourcePhraseAA());
+    boost::hash_combine(seed, targetPhrase.GetSourcePhrase());
     boost::hash_combine(seed, targetPhrase.GetAlignTerm());
     boost::hash_combine(seed, targetPhrase.GetAlignNonTerm());
 
@@ -150,7 +150,7 @@ struct TargetPhraseHasher {
 struct TargetPhraseComparator {
   inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const {
     return lhs.Compare(rhs) == 0 &&
-           lhs.GetSourcePhraseAA().Compare(rhs.GetSourcePhraseAA()) == 0 &&
+           lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0 &&
            lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
            lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
   }
