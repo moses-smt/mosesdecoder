@@ -275,7 +275,6 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   for (size_t pos = 0; pos < sp->GetSize(); ++pos) {
     sp->GetWord(pos).ConvertToMoses(inputFactors, vocab, mosesSP.AddWord());
   }
-  ret->SetSourcePhrase(mosesSP);
 
   // scores
   ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);

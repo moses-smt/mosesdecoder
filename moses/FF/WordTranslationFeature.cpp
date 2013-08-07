@@ -141,12 +141,13 @@ void WordTranslationFeature::Evaluate
  ScoreComponentCollection* accumulator) const
 {
   const Sentence& input = static_cast<const Sentence&>(context.GetSource());
+  const TranslationOption& transOpt = context.GetTranslationOption();
   const TargetPhrase& targetPhrase = context.GetTargetPhrase();
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
-    const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
+    const Phrase& sourcePhrase = transOpt.GetSourcePhrase();
     int sourceIndex = alignmentPoint->first;
     int targetIndex = alignmentPoint->second;
     Word ws = sourcePhrase.GetWord(sourceIndex);
@@ -356,7 +357,7 @@ void WordTranslationFeature::EvaluateChart(
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++) {
-    const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
+    const Phrase& sourcePhrase = targetPhrase.GetSourcePhraseAA();
     int sourceIndex = alignmentPoint->first;
     int targetIndex = alignmentPoint->second;
     Word ws = sourcePhrase.GetWord(sourceIndex);

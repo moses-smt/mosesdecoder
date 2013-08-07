@@ -450,7 +450,7 @@ void OutputNBest(std::ostream& out
     }
 
     if (StaticData::Instance().IsPathRecoveryEnabled()) {
-      out << "|||";
+      out << " ||| ";
       OutputInput(out, edges[0]);
     }
 

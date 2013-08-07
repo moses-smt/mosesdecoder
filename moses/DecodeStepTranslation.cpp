@@ -232,7 +232,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
 const InputPath &DecodeStepTranslation::GetInputPathLegacy(const TargetPhrase targetPhrase,
 														const InputPathList &inputPathList) const
 {
-	const Phrase &phraseFromTP = targetPhrase.GetSourcePhrase();
+	const Phrase &phraseFromTP = targetPhrase.GetSourcePhraseAA();
 	const Word &wordTP =  phraseFromTP.GetWord(0);
 
 	InputPathList::const_iterator iter;

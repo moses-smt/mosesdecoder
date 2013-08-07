@@ -205,14 +205,6 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
     (m_source, *oldPtoc
      , startPos, endPos, adhereTableLimit, inputPathList );
 
-    PartialTranslOptColl::const_iterator iter;
-    for (iter = oldPtoc->begin(); iter != oldPtoc->end(); ++iter) {
-    	TranslationOption &transOpt = **iter;
-    	const TargetPhrase &tp = transOpt.GetTargetPhrase();
-    	const Phrase &sp = tp.GetSourcePhrase();
-    	cerr << "sp=" << sp << endl;
-    }
-
     // do rest of decode steps
     int indexStep = 0;
 

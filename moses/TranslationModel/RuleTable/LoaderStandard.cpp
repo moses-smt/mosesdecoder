@@ -228,7 +228,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // source
     Phrase sourcePhrase;
     sourcePhrase.CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
-    targetPhrase->SetSourcePhrase(sourcePhrase);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);

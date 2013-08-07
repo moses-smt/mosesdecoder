@@ -49,7 +49,7 @@ protected:
   ScoreComponentCollection m_scoreBreakdown;
 
   // in case of confusion net, ptr to source phrase
-  Phrase m_sourcePhrase;
+  Phrase m_sourcePhraseAA;
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
   const Word *m_lhsTarget;
 
@@ -93,11 +93,11 @@ public:
   }
 
   //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
-  void SetSourcePhrase(const Phrase&  p) {
-    m_sourcePhrase=p;
+  void SetSourcePhraseAA(const Phrase&  p) {
+    m_sourcePhraseAA=p;
   }
-  const Phrase& GetSourcePhrase() const {
-    return m_sourcePhrase;
+  const Phrase& GetSourcePhraseAA() const {
+    return m_sourcePhraseAA;
   }
 
   void SetTargetLHS(const Word *lhs) {
@@ -139,7 +139,7 @@ struct TargetPhraseHasher {
   inline size_t operator()(const TargetPhrase& targetPhrase) const {
     size_t seed = 0;
     boost::hash_combine(seed, targetPhrase);
-    boost::hash_combine(seed, targetPhrase.GetSourcePhrase());
+    boost::hash_combine(seed, targetPhrase.GetSourcePhraseAA());
     boost::hash_combine(seed, targetPhrase.GetAlignTerm());
     boost::hash_combine(seed, targetPhrase.GetAlignNonTerm());
 
@@ -150,7 +150,7 @@ struct TargetPhraseHasher {
 struct TargetPhraseComparator {
   inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const {
     return lhs.Compare(rhs) == 0 &&
-           lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0 &&
+           lhs.GetSourcePhraseAA().Compare(rhs.GetSourcePhraseAA()) == 0 &&
            lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
            lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
   }

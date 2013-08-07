@@ -94,7 +94,6 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
 
-      targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
 
@@ -120,7 +119,6 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
 
-      targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
 
       // chart rule
