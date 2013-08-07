@@ -44,7 +44,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
 }
 
 
-std::pair<const TargetPhraseCollection*, std::vector<Phrase> > PhraseDictionary::
+const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::
 GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");

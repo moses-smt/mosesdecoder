@@ -143,8 +143,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const WordsRange wordsRange(startPos, endPos);
-  std::pair<const TargetPhraseCollection*, std::vector<Phrase> > retPair =	phraseDictionary->GetTargetPhraseCollectionLegacy(source,wordsRange);
-  const TargetPhraseCollection *phraseColl = retPair.first;
+  const TargetPhraseCollectionWithSourcePhrase *phraseColl =	phraseDictionary->GetTargetPhraseCollectionLegacy(source,wordsRange);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
@@ -216,9 +215,8 @@ void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialT
   const size_t currSize = inPhrase.GetSize();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
-  std::pair<const TargetPhraseCollection*, std::vector<Phrase> >
-  	  retPair = phraseDictionary->GetTargetPhraseCollectionLegacy(toc->GetSource(),sourceWordsRange);
-  const TargetPhraseCollection *phraseColl = retPair.first;
+  const TargetPhraseCollectionWithSourcePhrase *phraseColl
+  	  = phraseDictionary->GetTargetPhraseCollectionLegacy(toc->GetSource(),sourceWordsRange);
 
 
   if (phraseColl != NULL) {

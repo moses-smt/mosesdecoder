@@ -57,10 +57,10 @@ public:
   std::vector<FactorType> m_input,m_output;
   PhraseDictionaryTree *m_dict;
   const InputFeature *m_inputFeature;
-  typedef std::vector<TargetPhraseCollection const*> vTPC;
+  typedef std::vector<TargetPhraseCollectionWithSourcePhrase const*> vTPC;
   mutable vTPC m_tgtColls;
 
-  typedef std::map<Phrase,TargetPhraseCollection const*> MapSrc2Tgt;
+  typedef std::map<Phrase,TargetPhraseCollectionWithSourcePhrase const*> MapSrc2Tgt;
   mutable MapSrc2Tgt m_cache;
   PhraseDictionaryTreeAdaptor *m_obj;
   int useCache;
@@ -125,7 +125,7 @@ public:
     uniqSrcPhr.clear();
   }
 
-  TargetPhraseCollection const*
+  TargetPhraseCollectionWithSourcePhrase const*
   GetTargetPhraseCollection(Phrase const &src) const {
 
     CHECK(m_dict);
@@ -133,7 +133,7 @@ public:
 
     std::pair<MapSrc2Tgt::iterator,bool> piter;
     if(useCache) {
-      piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollection const*>(0)));
+      piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollectionWithSourcePhrase const*>(0)));
       if(!piter.second) return piter.first->second;
     } else if (m_cache.size()) {
       MapSrc2Tgt::const_iterator i=m_cache.find(src);
@@ -194,7 +194,7 @@ public:
       sourcePhrases.push_back(src);
     }
 
-    TargetPhraseCollection *rv;
+    TargetPhraseCollectionWithSourcePhrase *rv;
     rv=PruneTargetCandidates(tCands,costs, sourcePhrases);
     if(rv->IsEmpty()) {
       delete rv;
@@ -308,12 +308,12 @@ public:
     targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
   }
 
-  TargetPhraseCollection* PruneTargetCandidates
+  TargetPhraseCollectionWithSourcePhrase* PruneTargetCandidates
      (const std::vector<TargetPhrase> & tCands,
       std::vector<std::pair<float,size_t> >& costs,
       const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
-    TargetPhraseCollection *rv=new TargetPhraseCollection;
+	  TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
 
 
     // set limit to tableLimit or actual size, whatever is smaller
@@ -543,7 +543,7 @@ public:
         //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;
       }
 
-      TargetPhraseCollection *rv=PruneTargetCandidates(tCands, costs, sourcePhrases);
+      TargetPhraseCollectionWithSourcePhrase *rv=PruneTargetCandidates(tCands, costs, sourcePhrases);
 
       if(rv->IsEmpty())
         delete rv;

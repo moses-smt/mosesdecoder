@@ -73,7 +73,7 @@ public:
   }
 
   // legacy
-  std::pair<const TargetPhraseCollection*, std::vector<Phrase> > GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const & srcRange) const;
+  const TargetPhraseCollectionWithSourcePhrase *GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const & srcRange) const;
 
 };
 

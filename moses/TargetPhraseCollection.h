@@ -93,6 +93,24 @@ public:
 
 };
 
+
+// LEGACY
+// DO NOT USE. NOT LEGACY CODE
+class TargetPhraseCollectionWithSourcePhrase : public TargetPhraseCollection
+{
+protected:
+  //friend std::ostream& operator<<(std::ostream &, const TargetPhraseCollectionWithSourcePhrase &);
+
+  // TODO boost::ptr_vector
+  std::vector<Phrase> m_sourcePhrases;
+
+public:
+  const std::vector<Phrase> &GetSourcePhrases() const {
+    return m_sourcePhrases;
+  }
+
+};
+
 }
 
 #endif

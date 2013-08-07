@@ -103,19 +103,15 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 }
 
 // legacy
-std::pair<const TargetPhraseCollection*, std::vector<Phrase> >
+const TargetPhraseCollectionWithSourcePhrase*
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const &range) const
 {
   if(GetImplementation().m_rangeCache.empty()) {
-    const TargetPhraseCollection *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
-    std::vector<Phrase> sourPhrases;
-    std::pair<const TargetPhraseCollection*, std::vector<Phrase> > ret(tpColl, sourPhrases);
-    return ret;
+    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
+    return tpColl;
   } else {
-	  const TargetPhraseCollection *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-	  std::vector<Phrase> sourPhrases;
-	  std::pair<const TargetPhraseCollection*, std::vector<Phrase> > ret(tpColl, sourPhrases);
-      return ret;
+	  const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
+	  return tpColl;
   }
 }
 

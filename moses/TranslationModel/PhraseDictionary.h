@@ -72,8 +72,6 @@ public:
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
-  //! find list of translations that can translates a portion of src. Used by confusion network decoding
-  virtual std::pair<const TargetPhraseCollection*, std::vector<Phrase> > GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const;
 
   virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
@@ -99,6 +97,10 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+
+  // LEGACY
+  //! find list of translations that can translates a portion of src. Used by confusion network decoding
+  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const;
 
 protected:
   size_t m_tableLimit;
