@@ -132,6 +132,7 @@ protected:
   const InputFeature *m_inputFeature;
 
   bool m_reportSegmentation;
+  bool m_reportSegmentationEnriched;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
@@ -345,8 +346,10 @@ public:
   void SetVerboseLevel(int x) const {
     m_verboseLevel = x;
   }
-  bool GetReportSegmentation() const {
-    return m_reportSegmentation;
+  char GetReportSegmentation() const {
+    if (m_reportSegmentation) return 1;
+    if (m_reportSegmentationEnriched) return 2;
+    return 0;
   }
   bool GetReportAllFactors() const {
     return m_reportAllFactors;

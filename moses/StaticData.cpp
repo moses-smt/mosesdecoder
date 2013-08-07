@@ -261,6 +261,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // printing source phrase spans
   SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
+  SetBooleanParameter( &m_reportSegmentationEnriched, "report-segmentation-enriched", false );
 
   // print all factors of output translations
   SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
