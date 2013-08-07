@@ -295,21 +295,33 @@ GetLexicalWeight(const PhrasePair& pp) const
     if (s < pp.m_startSource || t < pp.m_startTarget) continue;
     if ((sx = s - pp.m_startSource) >= src_size) continue;
     if ((tx = t - pp.m_startTarget) >= trg_size) continue;
-    sp[sx] += m_wrd_cooc.pbwd(sw[s],tw[t]);
-    tp[tx] += m_wrd_cooc.pfwd(sw[s],tw[t]);
+
+    sp[sx] += m_wrd_cooc.pfwd(sw[s],tw[t]);
+    tp[tx] += m_wrd_cooc.pbwd(sw[s],tw[t]);
     ++sc[sx];
     ++tc[tx];
+#if 0
+    cout << m_srcVocab->GetWord(sw[s])   << " -> "
+         << m_trgVocab->GetWord(tw[t])   << " "
+         << m_wrd_cooc.pfwd(sw[s],tw[t]) << " "
+         << m_wrd_cooc.pbwd(sw[s],tw[t]) << " "
+         << sp[sx] << " (" << sc[sx] << ") "
+         << tp[tx] << " (" << tc[tx] << ") "
+         << endl;
+#endif
   }
   pair<float,float> ret(1,1);
   wordID_t null_trg = m_trgVocab->GetkOOVWordID();
   wordID_t null_src = m_srcVocab->GetkOOVWordID();
-  for (size_t i = 0, k = pp.m_startSource; i < sp.size(); ++i, ++k) {
+  size_t soff = pp.m_startSource;
+  for (size_t i = 0; i < sp.size(); ++i) {
     if (sc[i]) ret.first *= sp[i]/sc[i];
-    else       ret.first *= m_wrd_cooc.pbwd(sw[k], null_trg);
+    else       ret.first *= m_wrd_cooc.pfwd(sw[soff+i], null_trg);
   }
-  for (size_t i = 0, k = pp.m_startTarget; i < tp.size(); ++i, ++k) {
+  size_t toff = pp.m_startTarget;
+  for (size_t i = 0; i < tp.size(); ++i) {
     if (tc[i]) ret.second *= tp[i]/tc[i];
-    else       ret.second *= m_wrd_cooc.pfwd(null_src,tw[k]);
+    else       ret.second *= m_wrd_cooc.pbwd(null_src,tw[toff+i]);
   }
   return ret;
 

@@ -20,6 +20,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <typeinfo>
 #include <algorithm>
 #include <typeinfo>
 #include "TranslationOptionCollection.h"
@@ -215,10 +216,10 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 
     isDigit = s.find_first_of("0123456789");
-    if (isDigit == 1)
-      isDigit = 1;
-    else
+    if (isDigit == string::npos)
       isDigit = 0;
+    else
+      isDigit = 1;
     // modify the starting bitmap
   }
 

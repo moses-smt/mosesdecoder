@@ -233,6 +233,26 @@ inline void TokenizeMultiCharSeparator(std::vector<std::string> &output
   output.push_back(Trim(str.substr(pos, nextPos - pos)));
 }
 
+/** only split of the first delimiter. Used by class FeatureFunction for parse key=value pair.
+ * Value may have = character
+*/
+inline std::vector<std::string> TokenizeFirstOnly(const std::string& str,
+    const std::string& delimiters = " \t")
+{
+  std::vector<std::string> tokens;
+  std::string::size_type pos     = str.find_first_of(delimiters);
+
+  if (std::string::npos != pos) {
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(0, pos));
+    tokens.push_back(str.substr(pos + 1, str.size() - pos  - 1));
+  } else {
+    tokens.push_back(str);
+  }
+
+  return tokens;
+}
+
 
 /**
  * Convert vector of type T to string

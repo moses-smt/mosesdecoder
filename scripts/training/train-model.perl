@@ -2055,11 +2055,12 @@ sub create_ini {
 
   # lattice feature
   if ($_NUM_LATTICE_FEATURES) {
-    print INI "\n\n#lattice or confusion net weights\n[weight-i]\n";
+    $feature_spec .= "InputFeature num-input-features=$_NUM_LATTICE_FEATURES\n";
+    $weight_spec .= "InputFeature0=";
     for (1..$_NUM_LATTICE_FEATURES) {
-      print INI "0.1\n";
+      $weight_spec .= " 0.1";
     }
-    print "\n";
+    $weight_spec .= "\n";
   }
 
   # get addititional content for config file from switch or file

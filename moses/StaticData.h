@@ -215,6 +215,8 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
+  FactorType m_placeHolderFactor;
+
   StaticData();
 
   void LoadChartDecodingParameters();
@@ -771,6 +773,9 @@ public:
 
   void OverrideFeatures();
 
+  FactorType GetPlaceholderFactor() const {
+    return m_placeHolderFactor;
+  }
 };
 
 }

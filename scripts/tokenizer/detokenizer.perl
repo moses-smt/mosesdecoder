@@ -14,6 +14,7 @@ my $language = "en";
 my $QUIET = 0;
 my $HELP = 0;
 my $UPPERCASE_SENT = 0;
+my $PENN = 0;
 
 while (@ARGV) {
 	$_ = shift;
@@ -22,19 +23,26 @@ while (@ARGV) {
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
 	/^-u$/ && ($UPPERCASE_SENT = 1, next);
+  /^-penn$/ && ($PENN = 1, next);
 }
 
 if ($HELP) {
 	print "Usage ./detokenizer.perl (-l [en|fr|it|cs|...]) < tokenizedfile > detokenizedfile\n";
         print "Options:\n";
-        print "  -u  ... uppercase the first char in the final sentence.\n";
-        print "  -q  ... don't report detokenizer revision.\n";
-        print "  -b  ... disable Perl buffering.\n";
+        print "  -u     ... uppercase the first char in the final sentence.\n";
+        print "  -q     ... don't report detokenizer revision.\n";
+        print "  -b     ... disable Perl buffering.\n";
+        print "  -penn  ... assume input is tokenized as per tokenizer.perl's -penn option.\n";
 	exit;
 }
 
 if ($language !~ /^(cs|en|fr|it)$/) {
   print STDERR "Warning: No built-in rules for language $language.\n"
+}
+
+if ($PENN && $language ne "en") {
+  print STDERR "Error: -penn option only supported for English text.\n";
+  exit;
 }
 
 if (!$QUIET) {
@@ -46,8 +54,9 @@ while(<STDIN>) {
 	if (/^<.+>$/ || /^\s*$/) {
 		#don't try to detokenize XML/HTML tag lines
 		print $_;
-	}
-	else {
+  } elsif ($PENN) {
+    print &detokenize_penn($_);
+  } else {
 		print &detokenize($_);
 	}
 }
@@ -60,12 +69,9 @@ sub ucsecondarg {
   return $arg1.uc($arg2);
 }
 
-sub detokenize {
-	my($text) = @_;
-	chomp($text);
-	$text = " $text ";
-  $text =~ s/ \@\-\@ /-/g;
+sub deescape {
   # de-escape special chars
+  my ($text) = @_;
   $text =~ s/\&bar;/\|/g;   # factor separator (legacy)
   $text =~ s/\&#124;/\|/g;  # factor separator
   $text =~ s/\&lt;/\</g;    # xml
@@ -77,6 +83,15 @@ sub detokenize {
   $text =~ s/\&#91;/\[/g;   # syntax non-terminal
   $text =~ s/\&#93;/\]/g;   # syntax non-terminal
   $text =~ s/\&amp;/\&/g;   # escape escape
+  return $text;
+}
+
+sub detokenize {
+	my($text) = @_;
+	chomp($text);
+	$text = " $text ";
+  $text =~ s/ \@\-\@ /-/g;
+  $text = &deescape($text);
 
 	my $word;
 	my $i;
@@ -180,6 +195,91 @@ sub detokenize {
         $text =~ s/^([[:punct:]\s]*)([[:alpha:]])/ucsecondarg($1, $2)/e if $UPPERCASE_SENT;
 
 	return $text;
+}
+
+sub detokenize_penn {
+  my($text) = @_;
+
+  chomp($text);
+  $text = " $text ";
+  $text =~ s/ \@\-\@ /-/g;
+  $text =~ s/ \@\/\@ /\//g;
+  $text = &deescape($text);
+
+  # merge de-contracted forms except where the second word begins with an
+  # apostrophe (those are handled later)
+  $text =~ s/ n't /n't /g;
+  $text =~ s/ N'T /N'T /g;
+  $text =~ s/ ([Cc])an not / $1annot /g;
+  $text =~ s/ ([Dd])' ye / $1'ye /g;
+  $text =~ s/ ([Gg])im me / $1imme /g;
+  $text =~ s/ ([Gg])on na / $1onna /g;
+  $text =~ s/ ([Gg])ot ta / $1otta /g;
+  $text =~ s/ ([Ll])em me / $1emme /g;
+  $text =~ s/ '([Tt]) is / '$1is /g;
+  $text =~ s/ '([Tt]) was / '$1was /g;
+  $text =~ s/ ([Ww])an na / $1anna /g;
+
+  # restore brackets
+  $text =~ s/-LRB-/\(/g;
+  $text =~ s/-RRB-/\)/g;
+  $text =~ s/-LSB-/\[/g;
+  $text =~ s/-RSB-/\]/g;
+  $text =~ s/-LCB-/{/g;
+  $text =~ s/-RCB-/}/g;
+
+  my $i;
+  my @words = split(/ /,$text);
+  $text = "";
+  my $prependSpace = " ";
+  for ($i=0;$i<(scalar(@words));$i++) {
+    if ($words[$i] =~ /^[\p{IsSc}\(\[\{\¿\¡]+$/) {
+      # perform right shift on currency and other random punctuation items
+      $text = $text.$prependSpace.$words[$i];
+      $prependSpace = "";
+    } elsif ($words[$i] =~ /^[\,\.\?\!\:\;\\\%\}\]\)]+$/){
+      # perform left shift on punctuation items
+      $text=$text.$words[$i];
+      $prependSpace = " ";
+    } elsif (($i>0) && ($words[$i] =~ /^[\'][\p{IsAlpha}]/) && ($words[$i-1] =~ /[\p{IsAlnum}]$/)) {
+      # left-shift the contraction
+      $text=$text.$words[$i];
+      $prependSpace = " ";
+    } elsif ($words[$i] eq "`") { # Assume that punctuation has been normalized and is one of `, ``, ', '' only
+      # opening single quote: convert to straight quote and right-shift
+      $text = $text.$prependSpace."\'";
+      $prependSpace = "";
+    } elsif ($words[$i] eq "``") {
+      # opening double quote: convert to straight quote and right-shift
+      $text = $text.$prependSpace."\"";
+      $prependSpace = "";
+    } elsif ($words[$i] eq "\'") {
+      # closing single quote: convert to straight quote and left shift
+      $text = $text."\'";
+      $prependSpace = " ";
+    } elsif ($words[$i] eq "\'\'") {
+      # closing double quote: convert to straight quote and left shift
+      $text = $text."\"";
+      $prependSpace = " ";
+    } else {
+      $text = $text.$prependSpace.$words[$i];
+      $prependSpace = " ";
+    }
+  }
+
+  # clean up spaces at head and tail of each line as well as any double-spacing
+  $text =~ s/ +/ /g;
+  $text =~ s/\n /\n/g;
+  $text =~ s/ \n/\n/g;
+  $text =~ s/^ //g;
+  $text =~ s/ $//g;
+
+  # add trailing break
+  $text .= "\n" unless $text =~ /\n$/;
+
+  $text =~ s/^([[:punct:]\s]*)([[:alpha:]])/ucsecondarg($1, $2)/e if $UPPERCASE_SENT;
+
+  return $text;
 }
 
 sub startsWithCJKChar {

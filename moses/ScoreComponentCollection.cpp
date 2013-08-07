@@ -21,7 +21,7 @@ void ScoreComponentCollection::RegisterScoreProducer
 {
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
-  VERBOSE(1, "FeatureFunction: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl);
+  VERBOSE(1, "FeatureFunction: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << (end-1) << endl);
   s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
   s_denseVectorSize = end;
 }
@@ -183,6 +183,19 @@ void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string li
     FName fname(sp->GetScoreProducerDescription(), namestring);
     m_scores[fname] = value;
   }
+}
+
+void ScoreComponentCollection::InvertDenseFeatures(const FeatureFunction* sp)
+{
+
+  Scores old_scores = GetScoresForProducer(sp);
+  Scores new_scores(old_scores.size());
+
+  for (size_t i = 0; i != old_scores.size(); ++i) {
+    new_scores[i] = -old_scores[i];
+  }
+
+  Assign(sp, new_scores);
 }
 
 void ScoreComponentCollection::ZeroDenseFeatures(const FeatureFunction* sp)

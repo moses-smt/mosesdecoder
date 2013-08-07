@@ -73,10 +73,6 @@ void PhraseDictionaryMultiModel::Load()
 {
   SetFeaturesToApply();
 
-  // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
-  // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
-
-
   for(size_t i = 0; i < m_numModels; ++i) {
     const string &ptName = m_pdStr[i];
 
@@ -84,26 +80,6 @@ void PhraseDictionaryMultiModel::Load()
     CHECK(pt);
     m_pd.push_back(pt);
   }
-}
-
-PhraseDictionary *PhraseDictionaryMultiModel::FindPhraseDictionary(const string &ptName) const
-{
-  cerr << ptName << endl;
-  const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
-
-  PhraseDictionary *pt = NULL;
-  std::vector<PhraseDictionary*>::const_iterator iter;
-  for (iter = pts.begin(); iter != pts.end(); ++iter) {
-    PhraseDictionary *currPt = *iter;
-    cerr << currPt->GetScoreProducerDescription() << endl;
-    if (currPt->GetScoreProducerDescription() == ptName) {
-      pt = currPt;
-      break;
-    }
-  }
-
-  return pt;
 }
 
 
@@ -160,19 +136,19 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
 
           multiModelStatistics * statistics = new multiModelStatistics;
           statistics->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
-
-          // zero out scores from original phrase table
-          statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
-
-          Scores scoreVector(m_numScoreComponents);
           statistics->p.resize(m_numScoreComponents);
           for(size_t j = 0; j < m_numScoreComponents; ++j) {
             statistics->p[j].resize(m_numModels);
-            scoreVector[j] = -raw_scores[j];
           }
 
-          statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector); // set scores to 0
-          statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
+          //correct future cost estimates and total score
+          statistics->targetPhrase->GetScoreBreakdown().InvertDenseFeatures(&pd);
+          vector<FeatureFunction*> pd_feature;
+          pd_feature.push_back(m_pd[i]);
+          const vector<FeatureFunction*> pd_feature_const(pd_feature);
+          statistics->targetPhrase->Evaluate(src, pd_feature_const);
+          // zero out scores from original phrase table
+          statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
 
           (*allStats)[targetString] = statistics;
 
@@ -207,7 +183,12 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
     scoreVector[m_numScoreComponents-1] = 1.0;
 
     statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-    statistics->targetPhrase->Evaluate(src, GetFeaturesToApply());
+
+    //correct future cost estimates and total score
+    vector<FeatureFunction*> pd_feature;
+    pd_feature.push_back(const_cast<PhraseDictionaryMultiModel*>(this));
+    const vector<FeatureFunction*> pd_feature_const(pd_feature);
+    statistics->targetPhrase->Evaluate(src, pd_feature_const);
 
     ret->Add(new TargetPhrase(*statistics->targetPhrase));
   }
@@ -479,5 +460,23 @@ double CrossEntropy::operator() ( const dlib::matrix<double,0,1>& arg) const
 }
 
 #endif
+
+PhraseDictionary *FindPhraseDictionary(const string &ptName)
+{
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
+
+  PhraseDictionary *pt = NULL;
+  std::vector<PhraseDictionary*>::const_iterator iter;
+  for (iter = pts.begin(); iter != pts.end(); ++iter) {
+    PhraseDictionary *currPt = *iter;
+    if (currPt->GetScoreProducerDescription() == ptName) {
+      pt = currPt;
+      break;
+    }
+  }
+
+  return pt;
+}
 
 } //namespace

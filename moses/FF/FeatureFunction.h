@@ -78,6 +78,7 @@ public:
   virtual bool IsTuneable() const {
     return m_tuneable;
   }
+  virtual std::vector<float> DefaultWeights() const;
 
   //! Called before search and collecting of translation options
   virtual void InitializeForInput(InputType const& source) {

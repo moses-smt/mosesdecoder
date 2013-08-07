@@ -35,8 +35,8 @@ extern std::vector<std::string> tokenize( const char*);
 namespace Moses
 {
 
-typedef boost::unordered_map<std::string, double > lexicalMap;
-typedef boost::unordered_map<std::string, lexicalMap > lexicalMapJoint;
+typedef boost::unordered_map<Word, double > lexicalMap;
+typedef boost::unordered_map<Word, lexicalMap > lexicalMapJoint;
 typedef std::pair<std::vector<float>, std::vector<float> > lexicalPair;
 typedef std::vector<std::vector<lexicalPair> > lexicalCache;
 
@@ -86,13 +86,13 @@ public:
   TargetPhraseCollection* CreateTargetPhraseCollectionCounts(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
   void CollectSufficientStatistics(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats) const;
   float GetTargetCount(const Phrase& target, size_t modelIndex) const;
-  double GetLexicalProbability( std::string &inner, std::string &outer, const std::vector<lexicalTable*> &tables, std::vector<float> &multimodelweights ) const;
-  double ComputeWeightedLexicalTranslation( const Phrase &phraseS, const Phrase &phraseT, AlignVector &alignment, const std::vector<lexicalTable*> &tables, std::vector<float> &multimodelweights, const std::vector<FactorType> &input_factors, const std::vector<FactorType> &output_factors ) const;
+  double GetLexicalProbability( Word &inner, Word &outer, const std::vector<lexicalTable*> &tables, std::vector<float> &multimodelweights ) const;
+  double ComputeWeightedLexicalTranslation( const Phrase &phraseS, const Phrase &phraseT, AlignVector &alignment, const std::vector<lexicalTable*> &tables, std::vector<float> &multimodelweights, bool is_input ) const;
   double ComputeWeightedLexicalTranslationFromCache( std::vector<std::vector<std::pair<std::vector<float>, std::vector<float> > > > &cache, std::vector<float> &weights ) const;
   std::pair<PhraseDictionaryMultiModelCounts::AlignVector,PhraseDictionaryMultiModelCounts::AlignVector> GetAlignmentsForLexWeights(const Phrase &phraseS, const Phrase &phraseT, const AlignmentInfo &alignment) const;
-  std::vector<std::vector<std::pair<std::vector<float>, std::vector<float> > > > CacheLexicalStatistics( const Phrase &phraseS, const Phrase &phraseT, AlignVector &alignment, const std::vector<lexicalTable*> &tables, const std::vector<FactorType> &input_factors, const std::vector<FactorType> &output_factors );
-  void FillLexicalCountsJoint(std::string &wordS, std::string &wordT, std::vector<float> &count, const std::vector<lexicalTable*> &tables) const;
-  void FillLexicalCountsMarginal(std::string &wordS, std::vector<float> &count, const std::vector<lexicalTable*> &tables) const;
+  std::vector<std::vector<std::pair<std::vector<float>, std::vector<float> > > > CacheLexicalStatistics( const Phrase &phraseS, const Phrase &phraseT, AlignVector &alignment, const std::vector<lexicalTable*> &tables, bool is_input );
+  void FillLexicalCountsJoint(Word &wordS, Word &wordT, std::vector<float> &count, const std::vector<lexicalTable*> &tables) const;
+  void FillLexicalCountsMarginal(Word &wordS, std::vector<float> &count, const std::vector<lexicalTable*> &tables) const;
   void LoadLexicalTable( std::string &fileName, lexicalTable* ltable);
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
 #ifdef WITH_DLIB

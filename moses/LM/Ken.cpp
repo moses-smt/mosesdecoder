@@ -66,7 +66,7 @@ struct KenLMState : public FFState {
 template <class Model> class LanguageModelKen : public LanguageModel
 {
 public:
-  LanguageModelKen(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy);
+  LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
   const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
     KenLMState *ret = new KenLMState();
@@ -137,8 +137,8 @@ private:
   std::vector<lm::WordIndex> &m_mapping;
 };
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy)
-  :LanguageModel(description, line)
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+  :LanguageModel("KENLM", line)
   ,m_factorType(factorType)
 {
   lm::ngram::Config config;
@@ -351,7 +351,7 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 
 } // namespace
 
-LanguageModel *ConstructKenLM(const std::string &description, const std::string &line)
+LanguageModel *ConstructKenLM(const std::string &line)
 {
   FactorType factorType;
   string filePath;
@@ -375,10 +375,10 @@ LanguageModel *ConstructKenLM(const std::string &description, const std::string 
     }
   }
 
-  return ConstructKenLM(description, line, filePath, factorType, lazy);
+  return ConstructKenLM(line, filePath, factorType, lazy);
 }
 
-LanguageModel *ConstructKenLM(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
 {
   try {
     lm::ngram::ModelType model_type;
@@ -386,23 +386,23 @@ LanguageModel *ConstructKenLM(const std::string &description, const std::string 
 
       switch(model_type) {
       case lm::ngram::PROBING:
-        return new LanguageModelKen<lm::ngram::ProbingModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
       case lm::ngram::REST_PROBING:
-        return new LanguageModelKen<lm::ngram::RestProbingModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
       case lm::ngram::TRIE:
-        return new LanguageModelKen<lm::ngram::TrieModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
       case lm::ngram::QUANT_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantTrieModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
       case lm::ngram::ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::ArrayTrieModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
       case lm::ngram::QUANT_ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
       default:
         std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
         abort();
       }
     } else {
-      return new LanguageModelKen<lm::ngram::ProbingModel>(description, line, file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
     }
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;

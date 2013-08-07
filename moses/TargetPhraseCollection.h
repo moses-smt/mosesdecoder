@@ -36,6 +36,7 @@ class TargetPhraseCollection
 protected:
   friend std::ostream& operator<<(std::ostream &, const TargetPhraseCollection &);
 
+  // TODO boost::ptr_vector
   std::vector<TargetPhrase*> m_collection;
 
 public:
@@ -57,7 +58,7 @@ public:
   }
 
   ~TargetPhraseCollection() {
-    RemoveAllInColl(m_collection);
+    Clear();
   }
 
   const std::vector<TargetPhrase*> &GetCollection() const {
@@ -82,6 +83,10 @@ public:
 
   void Prune(bool adhereTableLimit, size_t tableLimit);
   void Sort(bool adhereTableLimit, size_t tableLimit);
+
+  void Clear() {
+    RemoveAllInColl(m_collection);
+  }
 
 };
 
