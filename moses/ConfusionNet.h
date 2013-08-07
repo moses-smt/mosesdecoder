@@ -73,7 +73,7 @@ public:
   TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
-	  return m_defaultLabelSet;
+    return m_defaultLabelSet;
   }
 
 };

@@ -309,11 +309,13 @@ public:
   }
 
   TargetPhraseCollectionWithSourcePhrase* PruneTargetCandidates
-     (const std::vector<TargetPhrase> & tCands,
-      std::vector<std::pair<float,size_t> >& costs,
-      const std::vector<Phrase> &sourcePhrases) const {
+  (const std::vector<TargetPhrase> & tCands,
+   std::vector<std::pair<float,size_t> >& costs,
+   const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
-	  TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
+	  CHECK(tCands.size() == sourcePhrases.size());
+
+    TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
 
 
     // set limit to tableLimit or actual size, whatever is smaller

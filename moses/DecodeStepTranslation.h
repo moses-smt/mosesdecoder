@@ -61,22 +61,22 @@ public:
 
   // legacy
   void ProcessInitialTranslationLegacy(const InputType &source
-                                 , PartialTranslOptColl &outputPartialTranslOptColl
-                                 , size_t startPos, size_t endPos, bool adhereTableLimit
-                                 , const InputPathList &inputPathList) const;
+                                       , PartialTranslOptColl &outputPartialTranslOptColl
+                                       , size_t startPos, size_t endPos, bool adhereTableLimit
+                                       , const InputPathList &inputPathList) const;
   void ProcessLegacy(const TranslationOption &inputPartialTranslOpt
-                       , const DecodeStep &decodeStep
-                       , PartialTranslOptColl &outputPartialTranslOptColl
-                       , TranslationOptionCollection *toc
-                       , bool adhereTableLimit
-                       , const Phrase &src) const;
+                     , const DecodeStep &decodeStep
+                     , PartialTranslOptColl &outputPartialTranslOptColl
+                     , TranslationOptionCollection *toc
+                     , bool adhereTableLimit
+                     , const Phrase &src) const;
 
 private:
   // I'm not sure whether this actually works or not for binary phrase table.
   // The source phrase only appears to contain the 1st word, therefore, this function
   // only compares the 1st word
   const InputPath &GetInputPathLegacy(const TargetPhrase targetPhrase,
-		  	  	  	  	  	  	  	  const InputPathList &inputPathList) const;
+                                      const InputPathList &inputPathList) const;
 
 };
 

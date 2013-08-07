@@ -33,9 +33,9 @@ namespace Moses
 {
 
 TranslationOption::TranslationOption()
-:m_targetPhrase()
-,m_sourcePhrase(NULL)
-,m_sourceWordsRange(NOT_FOUND, NOT_FOUND)
+  :m_targetPhrase()
+  ,m_sourcePhrase(NULL)
+  ,m_sourceWordsRange(NOT_FOUND, NOT_FOUND)
 {
 }
 

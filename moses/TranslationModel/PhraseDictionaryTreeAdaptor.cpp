@@ -110,8 +110,8 @@ PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLegacy(InputType const& sr
     const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
     return tpColl;
   } else {
-	  const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-	  return tpColl;
+    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
+    return tpColl;
   }
 }
 

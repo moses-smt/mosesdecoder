@@ -96,8 +96,7 @@ public:
   /** returns source phrase */
   const Phrase &GetSourcePhrase() const;
 
-  void SetSourcePhrase(const Phrase &sourcePhrase)
-  {
+  void SetSourcePhrase(const Phrase &sourcePhrase) {
     m_sourcePhrase = &sourcePhrase;
   }
 

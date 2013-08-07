@@ -206,10 +206,10 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
 
       if (placeholderFactor != NOT_FOUND) {
-    	  const Factor *origFactor = phrase.GetFactor(pos, placeholderFactor);
-    	  if (origFactor) {
-    		  factor = origFactor;
-    	  }
+        const Factor *origFactor = phrase.GetFactor(pos, placeholderFactor);
+        if (origFactor) {
+          factor = origFactor;
+        }
       }
       CHECK(factor);
       out << *factor;
@@ -348,7 +348,7 @@ void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*
 void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 {
   if (hypo->GetPrevHypo()) {
-	OutputInput(map, hypo->GetPrevHypo());
+    OutputInput(map, hypo->GetPrevHypo());
     map[hypo->GetCurrSourceWordsRange().GetStartPos()] = &hypo->GetTranslationOption().GetSourcePhrase();
   }
 }

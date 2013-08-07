@@ -41,11 +41,11 @@ public:
 
 
   void Process(const TranslationOption &inputPartialTranslOpt
-                       , const DecodeStep &decodeStep
-                       , PartialTranslOptColl &outputPartialTranslOptColl
-                       , TranslationOptionCollection *toc
-                       , bool adhereTableLimit
-                       , const Phrase &src) const;
+               , const DecodeStep &decodeStep
+               , PartialTranslOptColl &outputPartialTranslOptColl
+               , TranslationOptionCollection *toc
+               , bool adhereTableLimit
+               , const Phrase &src) const;
 
 private:
 };

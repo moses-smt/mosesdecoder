@@ -51,8 +51,9 @@ public:
     return m_cellCollection.GetBase(WordsRange(begin, end)).GetTargetLabelSet();
   }
 
-  const ChartParser &GetParser() const
-  { return m_parser; }
+  const ChartParser &GetParser() const {
+    return m_parser;
+  }
   //const Sentence &GetSentence() const;
 
   const ChartCellLabel &GetSourceAt(size_t at) const {

@@ -232,6 +232,6 @@ size_t ChartParser::GetSize() const
 
 long ChartParser::GetTranslationId() const
 {
-	return m_source.GetTranslationId();
+  return m_source.GetTranslationId();
 }
 } // namespace Moses

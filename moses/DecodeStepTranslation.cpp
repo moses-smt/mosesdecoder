@@ -173,33 +173,33 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
 }
 
 const InputPath &DecodeStepTranslation::GetInputPathLegacy(const TargetPhrase targetPhrase,
-														const InputPathList &inputPathList) const
+    const InputPathList &inputPathList) const
 {
-	const Phrase &phraseFromTP = targetPhrase.GetSourcePhraseAA();
-	const Word &wordTP =  phraseFromTP.GetWord(0);
+  const Phrase &phraseFromTP = targetPhrase.GetSourcePhraseAA();
+  const Word &wordTP =  phraseFromTP.GetWord(0);
 
-	InputPathList::const_iterator iter;
-	for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
-		const InputPath &inputPath = **iter;
-		const Phrase &phraseFromIP = inputPath.GetPhrase();
-		const Word &wordIP =  phraseFromIP.GetWord(0);
+  InputPathList::const_iterator iter;
+  for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
+    const InputPath &inputPath = **iter;
+    const Phrase &phraseFromIP = inputPath.GetPhrase();
+    const Word &wordIP =  phraseFromIP.GetWord(0);
 
-		const WordsRange &range = inputPath.GetWordsRange();
+    const WordsRange &range = inputPath.GetWordsRange();
 
-		if (wordTP == wordIP) {
-			return inputPath;
-		}
-	}
+    if (wordTP == wordIP) {
+      return inputPath;
+    }
+  }
 
-	UTIL_THROW(util::Exception, "Input path not found");
+  UTIL_THROW(util::Exception, "Input path not found");
 }
 
 void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialTranslOpt
-                                    , const DecodeStep &decodeStep
-                                    , PartialTranslOptColl &outputPartialTranslOptColl
-                                    , TranslationOptionCollection *toc
-                                    , bool adhereTableLimit
-                                    , const Phrase &src) const
+    , const DecodeStep &decodeStep
+    , PartialTranslOptColl &outputPartialTranslOptColl
+    , TranslationOptionCollection *toc
+    , bool adhereTableLimit
+    , const Phrase &src) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion
@@ -216,7 +216,7 @@ void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialT
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const TargetPhraseCollectionWithSourcePhrase *phraseColl
-  	  = phraseDictionary->GetTargetPhraseCollectionLegacy(toc->GetSource(),sourceWordsRange);
+  = phraseDictionary->GetTargetPhraseCollectionLegacy(toc->GetSource(),sourceWordsRange);
 
 
   if (phraseColl != NULL) {

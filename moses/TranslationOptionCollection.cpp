@@ -262,9 +262,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
   }
 
   // source phrase
-	Phrase *unksrc = new Phrase(1);
-	unksrc->AddWord() = sourceWord;
-	m_unksrcs.push_back(unksrc);
+  Phrase *unksrc = new Phrase(1);
+  unksrc->AddWord() = sourceWord;
+  m_unksrcs.push_back(unksrc);
 
   targetPhrase.Evaluate(*unksrc);
 
@@ -482,12 +482,12 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         } else {
           const DecodeStepGeneration *genStep = dynamic_cast<const DecodeStepGeneration*>(decodeStep);
           assert(genStep);
-		  genStep->Process(inputPartialTranslOpt
-                              , *decodeStep
-                              , *newPtoc
-                              , this
-                              , adhereTableLimit
-                              , *sourcePhrase);
+          genStep->Process(inputPartialTranslOpt
+                           , *decodeStep
+                           , *newPtoc
+                           , this
+                           , adhereTableLimit
+                           , *sourcePhrase);
         }
       }
 
@@ -530,8 +530,8 @@ void TranslationOptionCollection::SetInputPath(const InputPath &inputPath, Parti
     transOpt.SetSourcePhrase(sourcePhrase);
 
     if (inputScore) {
-        ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-        scores.PlusEquals(*inputScore);
+      ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
+      scores.PlusEquals(*inputScore);
     }
   }
 }
@@ -663,7 +663,7 @@ void TranslationOptionCollection::CacheLexReordering()
             //Phrase sourcePhrase =  m_source.GetSubString(WordsRange(startPos,endPos));
             const Phrase &sourcePhrase = transOpt.GetSourcePhrase();
             Scores score = lexreordering.GetProb(sourcePhrase
-                                               , transOpt.GetTargetPhrase());
+                                                 , transOpt.GetTargetPhrase());
             if (!score.empty())
               transOpt.CacheLexReorderingScores(lexreordering, score);
           } // for(iterTransOpt

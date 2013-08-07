@@ -345,7 +345,7 @@ void Hypothesis::PrintHypothesis() const
   TRACE_ERR( ")"<<endl);
   TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
   TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()
-		    <<": " << m_transOpt.GetSourcePhrase() << endl);
+             <<": " << m_transOpt.GetSourcePhrase() << endl);
 
   TRACE_ERR( "\ttranslated as: "<<(Phrase&) GetCurrTargetPhrase()<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
 
@@ -398,7 +398,8 @@ void Hypothesis::CleanupArcList()
   }
 }
 
-const TargetPhrase &Hypothesis::GetCurrTargetPhrase() const {
+const TargetPhrase &Hypothesis::GetCurrTargetPhrase() const
+{
   return m_transOpt.GetTargetPhrase();
 }
 
