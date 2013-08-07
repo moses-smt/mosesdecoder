@@ -48,8 +48,6 @@ protected:
   float m_fullScore, m_futureScore;
   ScoreComponentCollection m_scoreBreakdown;
 
-  // in case of confusion net, ptr to source phrase
-  Phrase m_sourcePhraseAA;
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
   const Word *m_lhsTarget;
 
@@ -92,14 +90,6 @@ public:
     return m_scoreBreakdown;
   }
 
-  //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
-  void SetSourcePhraseAA(const Phrase&  p) {
-    m_sourcePhraseAA=p;
-  }
-  const Phrase& GetSourcePhrase() const {
-    return m_sourcePhraseAA;
-  }
-
   void SetTargetLHS(const Word *lhs) {
     m_lhsTarget = lhs;
   }
@@ -139,7 +129,6 @@ struct TargetPhraseHasher {
   inline size_t operator()(const TargetPhrase& targetPhrase) const {
     size_t seed = 0;
     boost::hash_combine(seed, targetPhrase);
-    boost::hash_combine(seed, targetPhrase.GetSourcePhrase());
     boost::hash_combine(seed, targetPhrase.GetAlignTerm());
     boost::hash_combine(seed, targetPhrase.GetAlignNonTerm());
 
@@ -150,7 +139,6 @@ struct TargetPhraseHasher {
 struct TargetPhraseComparator {
   inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const {
     return lhs.Compare(rhs) == 0 &&
-           lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0 &&
            lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
            lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
   }

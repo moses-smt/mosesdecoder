@@ -294,8 +294,6 @@ public:
       }
     }
 
-    targetPhrase.SetSourcePhraseAA(*srcPtr);
-
     if (alignmentString) {
       targetPhrase.SetAlignmentInfo(*alignmentString);
     }
