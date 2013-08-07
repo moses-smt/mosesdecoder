@@ -42,12 +42,6 @@ public:
                         const std::vector<FeatureFunction*> &features);
 
 
-  void ProcessLegacy(const TranslationOption &inputPartialTranslOpt
-                       , const DecodeStep &decodeStep
-                       , PartialTranslOptColl &outputPartialTranslOptColl
-                       , TranslationOptionCollection *toc
-                       , bool adhereTableLimit
-                       , const Phrase &src) const;
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
@@ -65,10 +59,17 @@ public:
                                  , size_t startPos, size_t endPos, bool adhereTableLimit
                                  , const TargetPhraseCollection *phraseColl) const;
 
+  // legacy
   void ProcessInitialTranslationLegacy(const InputType &source
                                  , PartialTranslOptColl &outputPartialTranslOptColl
                                  , size_t startPos, size_t endPos, bool adhereTableLimit
                                  , const InputPathList &inputPathList) const;
+  void ProcessLegacy(const TranslationOption &inputPartialTranslOpt
+                       , const DecodeStep &decodeStep
+                       , PartialTranslOptColl &outputPartialTranslOptColl
+                       , TranslationOptionCollection *toc
+                       , bool adhereTableLimit
+                       , const Phrase &src) const;
 
 private:
   // I'm not sure whether this actually works or not for binary phrase table.
