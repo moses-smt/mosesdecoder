@@ -313,7 +313,7 @@ public:
    std::vector<std::pair<float,size_t> >& costs,
    const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
-	  CHECK(tCands.size() == sourcePhrases.size());
+	CHECK(tCands.size() == sourcePhrases.size());
 
     TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
 
@@ -330,7 +330,10 @@ public:
     // add n top phrases to the return list
     for(std::vector<std::pair<float,size_t> >::iterator
         it = costs.begin(); it != nth; ++it) {
-      rv->Add(new TargetPhrase(tCands[it->second]));
+      size_t ind = it->second;
+      TargetPhrase *targetPhrase = new TargetPhrase(tCands[ind]);
+      const Phrase &sourcePhrase = sourcePhrases[ind];
+      rv->Add(targetPhrase, sourcePhrase);
 
     }
 

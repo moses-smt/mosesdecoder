@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <algorithm>
 #include "TargetPhraseCollection.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -83,6 +84,18 @@ std::ostream& operator<<(std::ostream &out, const TargetPhraseCollection &obj)
   }
   return out;
 }
+
+
+void TargetPhraseCollectionWithSourcePhrase::Add(TargetPhrase *targetPhrase)
+{
+  UTIL_THROW(util::Exception, "Must use method Add(TargetPhrase*, const Phrase&)");
+}
+
+void TargetPhraseCollectionWithSourcePhrase::Add(TargetPhrase *targetPhrase, const Phrase &sourcePhrase)
+{
+    m_collection.push_back(targetPhrase);
+    m_sourcePhrases.push_back(sourcePhrase);
+ }
 
 } // namespace
 

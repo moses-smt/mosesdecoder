@@ -109,6 +109,8 @@ public:
     return m_sourcePhrases;
   }
 
+  void Add(TargetPhrase *targetPhrase);
+  void Add(TargetPhrase *targetPhrase, const Phrase &sourcePhrase);
 };
 
 }
