@@ -1089,7 +1089,7 @@ bool StaticData::LoadAlternateWeightSettings()
         else if (args[0] == "ignore-ff") {
           set< string > *ffNameSet = new set< string >;
           m_weightSettingIgnoreFF[ currentId ] = *ffNameSet;
-          vector<string> featureFunctionName = Tokenize(args[1], " ");
+          vector<string> featureFunctionName = Tokenize(args[1], ",");
           for(size_t k=0; k<featureFunctionName.size(); k++) {
             // check if a valid nane
             map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(featureFunctionName[k]);
