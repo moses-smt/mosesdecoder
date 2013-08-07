@@ -109,7 +109,7 @@ protected:
     , size_t graphInd
     , InputPath &inputPath);
 
-  void AddInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc);
+  void SetInputPath(const InputPath &inputPath, PartialTranslOptColl &oldPtoc);
 
 public:
   virtual ~TranslationOptionCollection();
