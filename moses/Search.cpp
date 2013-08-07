@@ -7,6 +7,15 @@
 namespace Moses
 {
 
+Search::Search(Manager& manager)
+: m_manager(manager)
+,m_sourcePhrase(0)
+,m_initialTransOpt()
+{
+  m_initialTransOpt.SetSourcePhrase(m_sourcePhrase);
+}
+
+
 Search *Search::CreateSearch(Manager& manager, const InputType &source,
                              SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl)
 {

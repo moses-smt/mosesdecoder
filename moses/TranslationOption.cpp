@@ -34,6 +34,7 @@ namespace Moses
 
 TranslationOption::TranslationOption()
 :m_targetPhrase()
+,m_sourcePhrase(NULL)
 ,m_sourceWordsRange(NOT_FOUND, NOT_FOUND)
 {
 }
@@ -42,18 +43,11 @@ TranslationOption::TranslationOption()
 TranslationOption::TranslationOption(const WordsRange &wordsRange
                                      , const TargetPhrase &targetPhrase)
   : m_targetPhrase(targetPhrase)
+  , m_sourcePhrase(NULL)
   , m_sourceWordsRange(wordsRange)
   , m_futureScore(targetPhrase.GetFutureScore())
 {
 }
-
-TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
-  : m_targetPhrase(copy.m_targetPhrase)
-//, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
-  , m_sourceWordsRange(sourceWordsRange)
-  , m_futureScore(copy.m_futureScore)
-  , m_lexReorderingScores(copy.m_lexReorderingScores)
-{}
 
 bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const
 {
@@ -82,6 +76,13 @@ void TranslationOption::Evaluate(const InputType &source)
 {
   m_targetPhrase.Evaluate(source);
 }
+
+const Phrase &TranslationOption::GetSourcePhrase() const
+{
+  CHECK(m_sourcePhrase);
+  return *m_sourcePhrase;
+}
+
 
 TO_STRING_BODY(TranslationOption);
 

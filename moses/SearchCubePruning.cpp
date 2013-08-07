@@ -41,7 +41,6 @@ SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, 
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_initialTransOpt()
   ,m_start(clock())
   ,m_transOptColl(transOptColl)
 {

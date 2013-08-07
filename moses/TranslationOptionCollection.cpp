@@ -226,13 +226,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
     // modify the starting bitmap
   }
 
-  Phrase* m_unksrc = new Phrase(1);
-  m_unksrc->AddWord() = sourceWord;
-  m_unksrcs.push_back(m_unksrc);
-
-  TranslationOption *transOpt;
   TargetPhrase targetPhrase;
-  targetPhrase.SetSourcePhrase(*m_unksrc);
 
   if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
     // add to dictionary
@@ -266,9 +260,17 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
     targetPhrase.SetInputScore(*inputScores);
   }
 
-  targetPhrase.Evaluate(*m_unksrc);
+  // source phrase
+	Phrase *unksrc = new Phrase(1);
+	unksrc->AddWord() = sourceWord;
+	m_unksrcs.push_back(unksrc);
 
-  transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase);
+  targetPhrase.Evaluate(*unksrc);
+
+  WordsRange range(sourcePos, sourcePos + length - 1);
+
+  TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
+  transOpt->SetSourcePhrase(*unksrc);
   Add(transOpt);
 
 
@@ -517,16 +519,17 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 void TranslationOptionCollection::AddInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
 {
   const ScoreComponentCollection *inputScore = inputPath.GetInputScore();
-
-  if (inputScore == NULL) {
-    return;
-  }
+  const Phrase &sourcePhrase = inputPath.GetPhrase();
 
   const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
   for (size_t i = 0; i < transOpts.size(); ++i) {
     TranslationOption &transOpt = *transOpts[i];
-    ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-    scores.PlusEquals(*inputScore);
+    transOpt.SetSourcePhrase(sourcePhrase);
+
+    if (inputScore) {
+        ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
+        scores.PlusEquals(*inputScore);
+    }
   }
 }
 
