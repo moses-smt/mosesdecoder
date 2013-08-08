@@ -128,13 +128,13 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
   }
 }
 
-void TargetPhrase::Evaluate(const InputType &input)
+void TargetPhrase::Evaluate(const InputType &input, const Phrase &sourcePhrase)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    ff.Evaluate(input, m_scoreBreakdown);
+    ff.Evaluate(input, sourcePhrase, m_scoreBreakdown);
   }
 }
 

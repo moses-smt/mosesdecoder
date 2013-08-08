@@ -107,7 +107,11 @@ public:
   {
   }
 
-  virtual void Evaluate(const InputType &source
+  // This method is called once all the translation options are retrieved from the phrase table, and
+  // just before search.
+  // 'source' is guaranteed to be the raw substring from the input. No factors were added or taken away
+  virtual void Evaluate(const InputType &input
+		  	  	  	  	, const Phrase &source
                         , ScoreComponentCollection &scoreBreakdown) const {
   }
 

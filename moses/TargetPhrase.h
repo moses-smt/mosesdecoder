@@ -65,7 +65,8 @@ public:
   // so doesn't have a list of ffs
   void Evaluate(const Phrase &source);
 
-  void Evaluate(const InputType &input);
+  // 'source' is guaranteed to be the raw substring from the input. No factors were added or taken away
+  void Evaluate(const InputType &input, const Phrase &sourcePhrase);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 

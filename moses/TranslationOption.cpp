@@ -72,13 +72,13 @@ void TranslationOption::CacheLexReorderingScores(const LexicalReordering &produc
   m_lexReorderingScores[&producer] = score;
 }
 
-void TranslationOption::Evaluate(const InputType &source)
+void TranslationOption::Evaluate(const InputType &input)
 {
   const Phrase &sourcePhrase = GetSourcePhrase();
   cerr << m_sourceWordsRange << endl;
   cerr << sourcePhrase << endl;
 
-  m_targetPhrase.Evaluate(source);
+  m_targetPhrase.Evaluate(input, sourcePhrase);
 }
 
 const Phrase &TranslationOption::GetSourcePhrase() const
