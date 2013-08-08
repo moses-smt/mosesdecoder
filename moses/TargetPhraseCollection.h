@@ -36,13 +36,13 @@ class TargetPhraseCollection
 protected:
   friend std::ostream& operator<<(std::ostream &, const TargetPhraseCollection &);
 
-  // TODO boost::ptr_vector
-  std::vector<TargetPhrase*> m_collection;
+  typedef std::vector<const TargetPhrase*> CollType;
+  CollType m_collection;
 
 public:
   // iters
-  typedef std::vector<TargetPhrase*>::iterator iterator;
-  typedef std::vector<TargetPhrase*>::const_iterator const_iterator;
+  typedef CollType::iterator iterator;
+  typedef CollType::const_iterator const_iterator;
 
   iterator begin() {
     return m_collection.begin();
@@ -61,7 +61,7 @@ public:
     Remove();
   }
 
-  const std::vector<TargetPhrase*> &GetCollection() const {
+  const CollType &GetCollection() const {
     return m_collection;
   }
 

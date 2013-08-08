@@ -174,7 +174,7 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
       TargetPhraseCollection::iterator iterTargetPhrase;
       for (iterTargetPhrase = ret_raw->begin(); iterTargetPhrase != ret_raw->end();  ++iterTargetPhrase) {
 
-        TargetPhrase * targetPhrase = *iterTargetPhrase;
+        const TargetPhrase * targetPhrase = *iterTargetPhrase;
         vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
         string targetString = targetPhrase->GetStringRep(m_output);

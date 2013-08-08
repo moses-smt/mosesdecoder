@@ -36,7 +36,7 @@ struct CompareTargetPhrase {
 
 void TargetPhraseCollection::NthElement(size_t tableLimit)
 {
-  vector<TargetPhrase*>::iterator nth;
+	CollType::iterator nth;
   nth = (tableLimit && tableLimit <= m_collection.size()
          ? m_collection.begin() + tableLimit
          : m_collection.end());
@@ -49,7 +49,7 @@ void TargetPhraseCollection::Prune(bool adhereTableLimit, size_t tableLimit)
 
   if (adhereTableLimit && m_collection.size() > tableLimit) {
     for (size_t ind = tableLimit; ind < m_collection.size(); ++ind) {
-      TargetPhrase *targetPhrase = m_collection[ind];
+      const TargetPhrase *targetPhrase = m_collection[ind];
       delete targetPhrase;
     }
     m_collection.erase(m_collection.begin() + tableLimit, m_collection.end());
@@ -58,7 +58,7 @@ void TargetPhraseCollection::Prune(bool adhereTableLimit, size_t tableLimit)
 
 void TargetPhraseCollection::Sort(bool adhereTableLimit, size_t tableLimit)
 {
-  std::vector<TargetPhrase*>::iterator iterMiddle;
+	CollType::iterator iterMiddle;
   iterMiddle = (tableLimit == 0 || m_collection.size() < tableLimit)
                ? m_collection.end()
                : m_collection.begin()+tableLimit;
@@ -68,7 +68,7 @@ void TargetPhraseCollection::Sort(bool adhereTableLimit, size_t tableLimit)
 
   if (adhereTableLimit && tableLimit && m_collection.size() > tableLimit) {
     for (size_t i = tableLimit; i < m_collection.size(); ++i) {
-      TargetPhrase *targetPhrase = m_collection[i];
+    	const TargetPhrase *targetPhrase = m_collection[i];
       delete targetPhrase;
     }
     m_collection.erase(m_collection.begin()+tableLimit, m_collection.end());

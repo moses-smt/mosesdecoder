@@ -41,7 +41,7 @@ class TranslationDimension
 {
 public:
   TranslationDimension(std::size_t pos,
-                       const std::vector<TargetPhrase*> &orderedTargetPhrases)
+                       const std::vector<const TargetPhrase*> &orderedTargetPhrases)
     : m_pos(pos)
     , m_orderedTargetPhrases(&orderedTargetPhrases) {
   }
@@ -68,7 +68,7 @@ public:
 
 private:
   std::size_t m_pos;
-  const std::vector<TargetPhrase*> *m_orderedTargetPhrases;
+  const std::vector<const TargetPhrase*> *m_orderedTargetPhrases;
 };
 
 
