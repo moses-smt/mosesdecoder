@@ -96,11 +96,15 @@ public:
   // return true if the feature function can be evaluated
   virtual bool IsUseable(const FactorMask &mask) const = 0;
 
-  // used by stateless ff. And stateful ff to make initial score estimate during loading of phrase table
+  // used by stateless ff and stateful ff. Calculate initial score estimate during loading of phrase table
+  // source phrase is the substring that the phrase table uses to look up the target phrase,
+  // may have more factors than actually need, but not guaranteed.
+  // For SCFG decoding, the source contains non-terminals, NOT the raw source from the input sentence
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const {
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {
   }
 
   virtual void Evaluate(const InputType &source

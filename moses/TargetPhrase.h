@@ -58,8 +58,12 @@ public:
   explicit TargetPhrase(const Phrase &targetPhrase);
   ~TargetPhrase();
 
-  void Evaluate(const Phrase &source);
+  // 1st evaluate method. Called during loading of phrase table.
   void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
+
+  // as above, but used only for OOV processing. Doesn't have a phrase table connect with it
+  // so doesn't have a list of ffs
+  void Evaluate(const Phrase &source);
 
   void Evaluate(const InputType &input);
 
