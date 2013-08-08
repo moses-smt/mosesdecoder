@@ -212,7 +212,7 @@ void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialT
     , PartialTranslOptColl &outputPartialTranslOptColl
     , TranslationOptionCollection *toc
     , bool adhereTableLimit
-    , const Phrase &sourcePhrase) const
+    , const Phrase &deleteME) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion
@@ -222,6 +222,7 @@ void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialT
 
   // normal trans step
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
+  const Phrase &sourcePhrase = inputPartialTranslOpt.GetSourcePhrase();
   const PhraseDictionary* phraseDictionary  =
     decodeStep.GetPhraseDictionaryFeature();
   const TargetPhrase &inPhrase = inputPartialTranslOpt.GetTargetPhrase();

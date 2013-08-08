@@ -453,7 +453,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
      , startPos, endPos, adhereTableLimit
      , sourcePhrase, targetPhrases);
 
-    SetInputPath(inputPath, *oldPtoc);
+    SetInputScore(inputPath, *oldPtoc);
 
     // do rest of decode steps
     int indexStep = 0;
@@ -519,7 +519,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   }
 }
 
-void TranslationOptionCollection::SetInputPath(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
+void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
 {
   const ScoreComponentCollection *inputScore = inputPath.GetInputScore();
   if (inputScore == NULL) {
