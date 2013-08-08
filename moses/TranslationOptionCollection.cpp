@@ -477,7 +477,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                                  , *newPtoc
                                  , this
                                  , adhereTableLimit
-                                 , sourcePhrase
                                  , targetPhrases);
         } else {
           const DecodeStepGeneration *genStep = dynamic_cast<const DecodeStepGeneration*>(decodeStep);
@@ -486,8 +485,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                            , *decodeStep
                            , *newPtoc
                            , this
-                           , adhereTableLimit
-                           , sourcePhrase);
+                           , adhereTableLimit);
         }
       }
 

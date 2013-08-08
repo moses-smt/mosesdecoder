@@ -49,7 +49,6 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
                                     , PartialTranslOptColl &outputPartialTranslOptColl
                                     , TranslationOptionCollection *toc
                                     , bool adhereTableLimit
-                                    , const Phrase &sourcePhrase
                                     , const TargetPhraseCollection *phraseColl) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
@@ -60,6 +59,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 
   // normal trans step
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
+  const Phrase &sourcePhrase = inputPartialTranslOpt.GetSourcePhrase();
   const PhraseDictionary* phraseDictionary  =
     decodeStep.GetPhraseDictionaryFeature();
   const TargetPhrase &inPhrase = inputPartialTranslOpt.GetTargetPhrase();
@@ -211,8 +211,7 @@ void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialT
     , const DecodeStep &decodeStep
     , PartialTranslOptColl &outputPartialTranslOptColl
     , TranslationOptionCollection *toc
-    , bool adhereTableLimit
-    , const Phrase &deleteME) const
+    , bool adhereTableLimit) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion

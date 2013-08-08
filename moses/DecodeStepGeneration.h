@@ -44,8 +44,7 @@ public:
                , const DecodeStep &decodeStep
                , PartialTranslOptColl &outputPartialTranslOptColl
                , TranslationOptionCollection *toc
-               , bool adhereTableLimit
-               , const Phrase &src) const;
+               , bool adhereTableLimit) const;
 
 private:
 };

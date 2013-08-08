@@ -82,17 +82,19 @@ bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t start
 /**
  * Create xml-based translation options for the specific input span
  */
-void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosition, size_t endPosition)
+void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPos, size_t endPos)
 {
   Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  InputPath &inputPath = GetInputPath(startPos,endPos);
 
   vector <TranslationOption*> xmlOptions;
-
-  source.GetXmlTranslationOptions(xmlOptions,startPosition,endPosition);
+  source.GetXmlTranslationOptions(xmlOptions,startPos,endPos);
 
   //get vector of TranslationOptions from Sentence
   for(size_t i=0; i<xmlOptions.size(); i++) {
-    Add(xmlOptions[i]);
+	TranslationOption *transOpt = xmlOptions[i];
+	transOpt->SetSourcePhrase(inputPath.GetPhrase());
+    Add(transOpt);
   }
 
 };

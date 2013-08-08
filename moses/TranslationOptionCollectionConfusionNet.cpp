@@ -190,8 +190,6 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
   , size_t graphInd)
 {
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
-    Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
-
     InputPathList &inputPathList = GetInputPathList(startPos, endPos);
 
     // partial trans opt stored in here
@@ -228,16 +226,14 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
                                    , *decodeStep
                                    , *newPtoc
                                    , this
-                                   , adhereTableLimit
-                                   , *sourcePhrase);
+                                   , adhereTableLimit);
         } else {
           CHECK(genStep);
           genStep->Process(inputPartialTranslOpt
                            , *decodeStep
                            , *newPtoc
                            , this
-                           , adhereTableLimit
-                           , *sourcePhrase);
+                           , adhereTableLimit);
         }
       }
 

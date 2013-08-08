@@ -47,7 +47,6 @@ public:
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
                        , bool adhereTableLimit
-                       , const Phrase &sourcePhrase
                        , const TargetPhraseCollection *phraseColl) const;
 
 
@@ -69,8 +68,7 @@ public:
                      , const DecodeStep &decodeStep
                      , PartialTranslOptColl &outputPartialTranslOptColl
                      , TranslationOptionCollection *toc
-                     , bool adhereTableLimit
-                     , const Phrase &sourcePhrase) const;
+                     , bool adhereTableLimit) const;
 
 private:
   // I'm not sure whether this actually works or not for binary phrase table.
