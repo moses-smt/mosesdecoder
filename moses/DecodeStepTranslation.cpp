@@ -49,7 +49,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
                                     , PartialTranslOptColl &outputPartialTranslOptColl
                                     , TranslationOptionCollection *toc
                                     , bool adhereTableLimit
-                                    , const Phrase &src
+                                    , const Phrase &sourcePhrase
                                     , const TargetPhraseCollection *phraseColl) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
@@ -84,11 +84,12 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
       }
 
       outPhrase.Merge(targetPhrase, m_newOutputFactors);
-      outPhrase.Evaluate(src, m_featuresToApply); // need to do this as all non-transcores would be screwed up
-
+      outPhrase.Evaluate(sourcePhrase, m_featuresToApply); // need to do this as all non-transcores would be screwed up
 
       TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
       assert(newTransOpt != NULL);
+
+      newTransOpt->SetSourcePhrase(sourcePhrase);
 
       outputPartialTranslOptColl.Add(newTransOpt );
 
@@ -103,6 +104,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
   const InputType &source
   ,PartialTranslOptColl &outputPartialTranslOptColl
   , size_t startPos, size_t endPos, bool adhereTableLimit
+  , const Phrase &sourcePhrase
   , const TargetPhraseCollection *phraseColl) const
 {
   const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
@@ -124,6 +126,8 @@ void DecodeStepTranslation::ProcessInitialTranslation(
     for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
       TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
+
+      transOpt->SetSourcePhrase(sourcePhrase);
 
       outputPartialTranslOptColl.Add (transOpt);
 
@@ -208,7 +212,7 @@ void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialT
     , PartialTranslOptColl &outputPartialTranslOptColl
     , TranslationOptionCollection *toc
     , bool adhereTableLimit
-    , const Phrase &src) const
+    , const Phrase &sourcePhrase) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion
@@ -246,11 +250,13 @@ void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialT
       }
 
       outPhrase.Merge(targetPhrase, m_newOutputFactors);
-      outPhrase.Evaluate(src, m_featuresToApply); // need to do this as all non-transcores would be screwed up
+      outPhrase.Evaluate(sourcePhrase, m_featuresToApply); // need to do this as all non-transcores would be screwed up
 
 
       TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
       assert(newTransOpt != NULL);
+
+      newTransOpt->SetSourcePhrase(sourcePhrase);
 
       outputPartialTranslOptColl.Add(newTransOpt );
 

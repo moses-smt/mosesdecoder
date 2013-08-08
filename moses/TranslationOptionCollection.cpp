@@ -435,7 +435,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   , InputPath &inputPath)
 {
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
-    Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
+    const Phrase &sourcePhrase = inputPath.GetPhrase(); // can't initialise with substring, in case it's confusion network
 
     // partial trans opt stored in here
     PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
@@ -451,7 +451,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
     static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
     (m_source, *oldPtoc
      , startPos, endPos, adhereTableLimit
-     , targetPhrases);
+     , sourcePhrase, targetPhrases);
 
     SetInputPath(inputPath, *oldPtoc);
 
@@ -477,7 +477,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                                  , *newPtoc
                                  , this
                                  , adhereTableLimit
-                                 , *sourcePhrase
+                                 , sourcePhrase
                                  , targetPhrases);
         } else {
           const DecodeStepGeneration *genStep = dynamic_cast<const DecodeStepGeneration*>(decodeStep);
@@ -487,7 +487,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                            , *newPtoc
                            , this
                            , adhereTableLimit
-                           , *sourcePhrase);
+                           , sourcePhrase);
         }
       }
 
@@ -522,17 +522,17 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 void TranslationOptionCollection::SetInputPath(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
 {
   const ScoreComponentCollection *inputScore = inputPath.GetInputScore();
-  const Phrase &sourcePhrase = inputPath.GetPhrase();
+  if (inputScore == NULL) {
+	  return;
+  }
 
   const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
   for (size_t i = 0; i < transOpts.size(); ++i) {
     TranslationOption &transOpt = *transOpts[i];
-    transOpt.SetSourcePhrase(sourcePhrase);
 
-    if (inputScore) {
-      ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-      scores.PlusEquals(*inputScore);
-    }
+    ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
+    scores.PlusEquals(*inputScore);
+
   }
 }
 

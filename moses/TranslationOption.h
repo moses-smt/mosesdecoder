@@ -96,9 +96,7 @@ public:
   /** returns source phrase */
   const Phrase &GetSourcePhrase() const;
 
-  void SetSourcePhrase(const Phrase &sourcePhrase) {
-    m_sourcePhrase = &sourcePhrase;
-  }
+  void SetSourcePhrase(const Phrase &sourcePhrase);
 
   /** whether source span overlaps with those of a hypothesis */
   bool Overlap(const Hypothesis &hypothesis) const;

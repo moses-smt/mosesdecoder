@@ -47,7 +47,7 @@ public:
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
                        , bool adhereTableLimit
-                       , const Phrase &src
+                       , const Phrase &sourcePhrase
                        , const TargetPhraseCollection *phraseColl) const;
 
 
@@ -57,6 +57,7 @@ public:
   void ProcessInitialTranslation(const InputType &source
                                  , PartialTranslOptColl &outputPartialTranslOptColl
                                  , size_t startPos, size_t endPos, bool adhereTableLimit
+                                 , const Phrase &sourcePhrase
                                  , const TargetPhraseCollection *phraseColl) const;
 
   // legacy
@@ -69,7 +70,7 @@ public:
                      , PartialTranslOptColl &outputPartialTranslOptColl
                      , TranslationOptionCollection *toc
                      , bool adhereTableLimit
-                     , const Phrase &src) const;
+                     , const Phrase &sourcePhrase) const;
 
 private:
   // I'm not sure whether this actually works or not for binary phrase table.

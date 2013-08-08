@@ -83,6 +83,12 @@ const Phrase &TranslationOption::GetSourcePhrase() const
   return *m_sourcePhrase;
 }
 
+void TranslationOption::SetSourcePhrase(const Phrase &sourcePhrase)
+{
+  CHECK(m_sourcePhrase == NULL);
+  m_sourcePhrase = &sourcePhrase;
+}
+
 
 TO_STRING_BODY(TranslationOption);
 
