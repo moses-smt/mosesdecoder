@@ -50,7 +50,7 @@ ChartManager::ChartManager(InputType const& source)
   ,m_start(clock())
   ,m_hypothesisId(0)
   ,m_parser(source, m_hypoStackColl)
-  ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
+  ,m_translationOptionList(StaticData::Instance().GetRuleLimit(), source)
 {
 }
 
@@ -341,6 +341,5 @@ void ChartManager::CreateDeviantPaths(
     CreateDeviantPaths(basePath, child, queue);
   }
 }
-
 
 } // namespace Moses

@@ -30,12 +30,14 @@ namespace Moses
 
 class TargetPhraseCollection;
 class WordsRange;
+class InputType;
+class InputPath;
 
 //! a vector of translations options for a specific range, in a specific sentence
 class ChartTranslationOptionList : public ChartParserCallback
 {
 public:
-  ChartTranslationOptionList(size_t);
+  ChartTranslationOptionList(size_t ruleLimit, const InputType &input);
   ~ChartTranslationOptionList();
 
   const ChartTranslationOptions &Get(size_t i) const {
@@ -74,6 +76,13 @@ private:
   size_t m_size;
   float m_scoreThreshold;
   const size_t m_ruleLimit;
+
+  // input paths
+  typedef std::vector< std::vector<InputPath*> > InputPathMatrix;
+  InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
+
+  InputPath &GetInputPath(size_t startPos, size_t endPos);
+
 };
 
 }
