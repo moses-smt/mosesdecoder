@@ -45,14 +45,8 @@ public:
   ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
                           const StackVec &stackVec,
                           const WordsRange &wordsRange,
-                          float score)
-    : m_stackVec(stackVec)
-    , m_targetPhraseCollection(&targetPhraseColl)
-    , m_wordsRange(&wordsRange)
-    , m_estimateOfBestScore(score) {
-  }
-
-  ~ChartTranslationOptions() {}
+                          float score);
+  ~ChartTranslationOptions();
 
   static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
                                        const StackVec &);

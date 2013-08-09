@@ -26,6 +26,23 @@
 namespace Moses
 {
 
+ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
+                          const StackVec &stackVec,
+                          const WordsRange &wordsRange,
+                          float score)
+    : m_stackVec(stackVec)
+    , m_targetPhraseCollection(&targetPhraseColl)
+    , m_wordsRange(&wordsRange)
+    , m_estimateOfBestScore(score)
+{
+
+}
+
+ChartTranslationOptions::~ChartTranslationOptions()
+{
+
+}
+
 float ChartTranslationOptions::CalcEstimateOfBestScore(
   const TargetPhraseCollection &tpc,
   const StackVec &stackVec)
