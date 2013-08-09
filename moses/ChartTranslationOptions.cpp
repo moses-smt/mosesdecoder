@@ -37,7 +37,9 @@ ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &t
 	TargetPhraseCollection::const_iterator iter;
 	for (iter = targetPhraseColl.begin(); iter != targetPhraseColl.end(); ++iter) {
 		const TargetPhrase *origTP = *iter;
-		m_targetPhraseCollection.push_back(origTP);
+
+		boost::shared_ptr<TargetPhrase> ptr(new TargetPhrase(*origTP));
+		m_targetPhraseCollection.push_back(ptr);
 	}
 }
 

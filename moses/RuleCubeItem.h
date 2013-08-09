@@ -20,7 +20,7 @@
 #pragma once
 
 #include "StackVec.h"
-
+#include "ChartTranslationOptions.h"
 #include <vector>
 
 namespace Moses
@@ -29,7 +29,6 @@ namespace Moses
 class ChartCellCollection;
 class ChartHypothesis;
 class ChartManager;
-class ChartTranslationOptions;
 class TargetPhrase;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
@@ -41,9 +40,9 @@ class TranslationDimension
 {
 public:
   TranslationDimension(std::size_t pos,
-                       const std::vector<const TargetPhrase*> &orderedTargetPhrases)
+                       const ChartTranslationOptions::CollType &orderedTargetPhrases)
     : m_pos(pos)
-    , m_orderedTargetPhrases(&orderedTargetPhrases) {
+    , m_orderedTargetPhrases(orderedTargetPhrases) {
   }
 
   std::size_t IncrementPos() {
@@ -51,11 +50,11 @@ public:
   }
 
   bool HasMoreTranslations() const {
-    return m_pos+1 < m_orderedTargetPhrases->size();
+    return m_pos+1 < m_orderedTargetPhrases.size();
   }
 
-  const TargetPhrase *GetTargetPhrase() const {
-    return (*m_orderedTargetPhrases)[m_pos];
+  const boost::shared_ptr<TargetPhrase> &GetTargetPhrase() const {
+    return m_orderedTargetPhrases[m_pos];
   }
 
   bool operator<(const TranslationDimension &compare) const {
@@ -68,7 +67,7 @@ public:
 
 private:
   std::size_t m_pos;
-  const std::vector<const TargetPhrase*> *m_orderedTargetPhrases;
+  ChartTranslationOptions::CollType m_orderedTargetPhrases;
 };
 
 

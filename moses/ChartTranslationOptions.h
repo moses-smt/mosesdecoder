@@ -26,6 +26,7 @@
 
 #include "util/check.hh"
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
@@ -36,6 +37,8 @@ namespace Moses
 class ChartTranslationOptions
 {
 public:
+	typedef std::vector<boost::shared_ptr<TargetPhrase> > CollType;
+
   /** Constructor
       \param targetPhraseColl @todo dunno
       \param stackVec @todo dunno
@@ -57,7 +60,7 @@ public:
   }
 
   //! @todo isn't the translation suppose to just contain 1 target phrase, not a whole collection of them?
-  const std::vector<const TargetPhrase*> &GetTargetPhrases() const {
+  const CollType &GetTargetPhrases() const {
     return m_targetPhraseCollection;
   }
 
@@ -77,7 +80,8 @@ public:
 private:
 
   StackVec m_stackVec; //! vector of hypothesis list!
-  std::vector<const TargetPhrase*> m_targetPhraseCollection;
+  CollType m_targetPhraseCollection;
+
   const WordsRange *m_wordsRange;
   float m_estimateOfBestScore;
 };
