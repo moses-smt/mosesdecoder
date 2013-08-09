@@ -232,7 +232,7 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
     out << "|" << sourceStart << "-" << sourceEnd;
     // enriched "-tt"
     if (reportSegmentation == 2) {
-      out << ",0, "; 
+      out << ",0, ";
       const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
       OutputAlignment(out, ai, 0, 0);
     }

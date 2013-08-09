@@ -164,8 +164,8 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
     iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;
 
     for (iterTargetPhrase = phraseColl->begin(), iterSourcePhrase =  sourcePhrases.begin()
-    		; iterTargetPhrase != iterEnd
-    		; ++iterTargetPhrase, ++iterSourcePhrase) {
+         ; iterTargetPhrase != iterEnd
+         ; ++iterTargetPhrase, ++iterSourcePhrase) {
       CHECK(iterSourcePhrase != sourcePhrases.end());
 
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
@@ -185,9 +185,9 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
 }
 
 const InputPath &DecodeStepTranslation::GetInputPathLegacy(
-		const TargetPhrase targetPhrase,
-		const Phrase sourcePhrase,
-		const InputPathList &inputPathList) const
+  const TargetPhrase targetPhrase,
+  const Phrase sourcePhrase,
+  const InputPathList &inputPathList) const
 {
   const Word &wordFromPt =  sourcePhrase.GetWord(0);
 

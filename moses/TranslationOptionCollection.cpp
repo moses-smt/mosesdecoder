@@ -521,7 +521,7 @@ void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, Part
 {
   const ScoreComponentCollection *inputScore = inputPath.GetInputScore();
   if (inputScore == NULL) {
-	  return;
+    return;
   }
 
   const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();

@@ -27,20 +27,20 @@ namespace Moses
 {
 
 ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
-                          const StackVec &stackVec,
-                          const WordsRange &wordsRange,
-                          float score)
-    : m_stackVec(stackVec)
-    , m_wordsRange(&wordsRange)
-    , m_estimateOfBestScore(score)
+    const StackVec &stackVec,
+    const WordsRange &wordsRange,
+    float score)
+  : m_stackVec(stackVec)
+  , m_wordsRange(&wordsRange)
+  , m_estimateOfBestScore(score)
 {
-	TargetPhraseCollection::const_iterator iter;
-	for (iter = targetPhraseColl.begin(); iter != targetPhraseColl.end(); ++iter) {
-		const TargetPhrase *origTP = *iter;
+  TargetPhraseCollection::const_iterator iter;
+  for (iter = targetPhraseColl.begin(); iter != targetPhraseColl.end(); ++iter) {
+    const TargetPhrase *origTP = *iter;
 
-		boost::shared_ptr<TargetPhrase> ptr(new TargetPhrase(*origTP));
-		m_targetPhraseCollection.push_back(ptr);
-	}
+    boost::shared_ptr<TargetPhrase> ptr(new TargetPhrase(*origTP));
+    m_targetPhraseCollection.push_back(ptr);
+  }
 }
 
 ChartTranslationOptions::~ChartTranslationOptions()

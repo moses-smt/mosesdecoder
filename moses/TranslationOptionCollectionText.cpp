@@ -92,8 +92,8 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPos, 
 
   //get vector of TranslationOptions from Sentence
   for(size_t i=0; i<xmlOptions.size(); i++) {
-	TranslationOption *transOpt = xmlOptions[i];
-	transOpt->SetSourcePhrase(inputPath.GetPhrase());
+    TranslationOption *transOpt = xmlOptions[i];
+    transOpt->SetSourcePhrase(inputPath.GetPhrase());
     Add(transOpt);
   }
 

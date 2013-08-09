@@ -36,7 +36,7 @@ struct CompareTargetPhrase {
 
 void TargetPhraseCollection::NthElement(size_t tableLimit)
 {
-	CollType::iterator nth;
+  CollType::iterator nth;
   nth = (tableLimit && tableLimit <= m_collection.size()
          ? m_collection.begin() + tableLimit
          : m_collection.end());
@@ -58,7 +58,7 @@ void TargetPhraseCollection::Prune(bool adhereTableLimit, size_t tableLimit)
 
 void TargetPhraseCollection::Sort(bool adhereTableLimit, size_t tableLimit)
 {
-	CollType::iterator iterMiddle;
+  CollType::iterator iterMiddle;
   iterMiddle = (tableLimit == 0 || m_collection.size() < tableLimit)
                ? m_collection.end()
                : m_collection.begin()+tableLimit;
@@ -68,7 +68,7 @@ void TargetPhraseCollection::Sort(bool adhereTableLimit, size_t tableLimit)
 
   if (adhereTableLimit && tableLimit && m_collection.size() > tableLimit) {
     for (size_t i = tableLimit; i < m_collection.size(); ++i) {
-    	const TargetPhrase *targetPhrase = m_collection[i];
+      const TargetPhrase *targetPhrase = m_collection[i];
       delete targetPhrase;
     }
     m_collection.erase(m_collection.begin()+tableLimit, m_collection.end());
@@ -93,9 +93,9 @@ void TargetPhraseCollectionWithSourcePhrase::Add(TargetPhrase *targetPhrase)
 
 void TargetPhraseCollectionWithSourcePhrase::Add(TargetPhrase *targetPhrase, const Phrase &sourcePhrase)
 {
-    m_collection.push_back(targetPhrase);
-    m_sourcePhrases.push_back(sourcePhrase);
- }
+  m_collection.push_back(targetPhrase);
+  m_sourcePhrases.push_back(sourcePhrase);
+}
 
 } // namespace
 

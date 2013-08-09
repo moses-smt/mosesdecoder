@@ -37,7 +37,7 @@ namespace Moses
 class ChartTranslationOptions
 {
 public:
-	typedef std::vector<boost::shared_ptr<TargetPhrase> > CollType;
+  typedef std::vector<boost::shared_ptr<TargetPhrase> > CollType;
 
   /** Constructor
       \param targetPhraseColl @todo dunno

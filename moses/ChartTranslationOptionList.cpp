@@ -73,13 +73,13 @@ ChartTranslationOptionList::~ChartTranslationOptionList()
 
   InputPathMatrix::const_iterator iterOuter;
   for (iterOuter = m_inputPathMatrix.begin(); iterOuter != m_inputPathMatrix.end(); ++iterOuter) {
-	  const std::vector<InputPath*> &outer = *iterOuter;
+    const std::vector<InputPath*> &outer = *iterOuter;
 
-	  std::vector<InputPath*>::const_iterator iterInner;
-	  for (iterInner = outer.begin(); iterInner != outer.end(); ++iterInner) {
-		  InputPath *path = *iterInner;
-		  delete path;
-	  }
+    std::vector<InputPath*>::const_iterator iterInner;
+    for (iterInner = outer.begin(); iterInner != outer.end(); ++iterInner) {
+      InputPath *path = *iterInner;
+      delete path;
+    }
   }
 }
 

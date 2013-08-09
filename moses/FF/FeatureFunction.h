@@ -103,8 +103,7 @@ public:
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-  {
+                        , ScoreComponentCollection &estimatedFutureScore) const {
   }
 
   // This method is called once all the translation options are retrieved from the phrase table, and
@@ -112,7 +111,7 @@ public:
   // 'source' is guaranteed to be the raw substring from the input. No factors were added or taken away
   // Currently not used by any FF. Not called by moses_chart
   virtual void Evaluate(const InputType &input
-		  	  	  	  	, const Phrase &source
+                        , const Phrase &source
                         , ScoreComponentCollection &scoreBreakdown) const {
   }
 

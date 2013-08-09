@@ -75,7 +75,7 @@ private:
   // The source phrase only appears to contain the 1st word, therefore, this function
   // only compares the 1st word
   const InputPath &GetInputPathLegacy(const TargetPhrase targetPhrase,
-		  	  	  	  	  	  	  	  const Phrase sourcePhrase,
+                                      const Phrase sourcePhrase,
                                       const InputPathList &inputPathList) const;
 
 };

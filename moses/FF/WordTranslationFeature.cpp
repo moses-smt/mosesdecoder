@@ -352,7 +352,7 @@ void WordTranslationFeature::EvaluateChart(
   const ChartBasedFeatureContext& context,
   ScoreComponentCollection* accumulator) const
 {
-	UTIL_THROW(util::Exception, "Need source phrase. Can't be arsed at the moment");
+  UTIL_THROW(util::Exception, "Need source phrase. Can't be arsed at the moment");
 }
 
 bool WordTranslationFeature::IsUseable(const FactorMask &mask) const
