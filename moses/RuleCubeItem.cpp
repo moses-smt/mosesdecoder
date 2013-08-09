@@ -38,8 +38,7 @@ std::size_t hash_value(const HypothesisDimension &dimension)
 
 RuleCubeItem::RuleCubeItem(const ChartTranslationOptions &transOpt,
                            const ChartCellCollection &/*allChartCells*/)
-  : m_translationDimension(0,
-                           transOpt.GetTargetPhraseCollection().GetCollection())
+  : m_translationDimension(0, transOpt.GetTargetPhrases())
   , m_hypothesis(0)
 {
   CreateHypothesisDimensions(transOpt.GetStackVec());

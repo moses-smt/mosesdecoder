@@ -136,7 +136,7 @@ void ChartManager::AddXmlChartOptions()
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    const TargetPhrase &targetPhrase = *opt->GetTargetPhraseCollection().GetCollection()[0];
+    const TargetPhrase &targetPhrase = *opt->GetTargetPhrases()[0];
     const WordsRange &range = opt->GetSourceWordsRange();
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );

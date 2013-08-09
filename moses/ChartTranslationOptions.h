@@ -57,8 +57,8 @@ public:
   }
 
   //! @todo isn't the translation suppose to just contain 1 target phrase, not a whole collection of them?
-  const TargetPhraseCollection &GetTargetPhraseCollection() const {
-    return *m_targetPhraseCollection;
+  const std::vector<const TargetPhrase*> &GetTargetPhrases() const {
+    return m_targetPhraseCollection;
   }
 
   //! the range in the source sentence this translation option covers
@@ -77,7 +77,7 @@ public:
 private:
 
   StackVec m_stackVec; //! vector of hypothesis list!
-  const TargetPhraseCollection *m_targetPhraseCollection;
+  std::vector<const TargetPhrase*> m_targetPhraseCollection;
   const WordsRange *m_wordsRange;
   float m_estimateOfBestScore;
 };

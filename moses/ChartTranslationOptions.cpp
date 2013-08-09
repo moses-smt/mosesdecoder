@@ -31,11 +31,14 @@ ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &t
                           const WordsRange &wordsRange,
                           float score)
     : m_stackVec(stackVec)
-    , m_targetPhraseCollection(&targetPhraseColl)
     , m_wordsRange(&wordsRange)
     , m_estimateOfBestScore(score)
 {
-
+	TargetPhraseCollection::const_iterator iter;
+	for (iter = targetPhraseColl.begin(); iter != targetPhraseColl.end(); ++iter) {
+		const TargetPhrase *origTP = *iter;
+		m_targetPhraseCollection.push_back(origTP);
+	}
 }
 
 ChartTranslationOptions::~ChartTranslationOptions()
