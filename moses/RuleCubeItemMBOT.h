@@ -75,17 +75,6 @@ class RuleCubeItemMBOT : public RuleCubeItem
   RuleCubeItemMBOT(const RuleCubeItemMBOT* copyCube, int);
   ~RuleCubeItemMBOT();
 
-    const TranslationDimension &GetTranslationDimension() const {
-        std::cout << "Get non mbot translation dimension NOT IMPLEMENTED in translation dimension MBOT" << std::endl;
-  }
-
-  const TranslationDimension &GetTranslationDimensionMBOT() const {
-        return m_mbotTranslationDimension;
-  }
-
-  void IncrementTranslationDimension() {
-         m_mbotTranslationDimension.IncrementPos();
-   }
 
   const std::vector<HypothesisDimension> &GetHypothesisDimensions() const {
     std::cout << "Get non mbot hypothesis dimension NOT IMPLEMENTED in translation dimension MBOT" << std::endl;
@@ -123,7 +112,6 @@ class RuleCubeItemMBOT : public RuleCubeItem
   void CreateHypothesisDimensionsMBOT(const StackVec &stackVec);
 
  protected :
-  TranslationDimension m_mbotTranslationDimension;
   std::vector<HypothesisDimension> m_hypothesisDimensions;
   ChartHypothesisMBOT *m_mbotHypothesis;
   float m_mbotScore;
