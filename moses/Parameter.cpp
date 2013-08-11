@@ -782,6 +782,41 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
   m_setting.erase(oldFeatureName);
 }
 
+void Parameter::ConvertWeightArgsPhrasePenalty()
+{
+  const std::string oldWeightName = "weight-wd";
+  const std::string newWeightName = "PhrasePenalty";
+
+  bool isChartDecoding = true;
+  if (!isParamSpecified("search-algorithm") ||
+      (GetParam("search-algorithm").size() > 0
+       && (Trim(GetParam("search-algorithm")[0]) == "0"
+           ||Trim(GetParam("search-algorithm")[0]) == "1"
+          )
+      )
+     ) {
+    isChartDecoding = false;
+  }
+
+  PARAM_MAP::iterator iterMap;
+
+  iterMap = m_setting.find(oldWeightName);
+  if (iterMap != m_setting.end()) {
+    const PARAM_VEC &weights = iterMap->second;
+    for (size_t i = 0; i < weights.size(); ++i) {
+      float weight = Scan<float>(weights[i]);
+      if (isChartDecoding) {
+        weight *= 0.434294482;
+      }
+      SetWeight(newWeightName, i, weight);
+    }
+
+    m_setting.erase(iterMap);
+  }
+
+}
+
+
 void Parameter::ConvertWeightArgsWordPenalty()
 {
   const std::string oldWeightName = "weight-w";
@@ -830,6 +865,7 @@ void Parameter::ConvertWeightArgs()
     cerr << "Do not mix old and new format for specify weights";
   }
 
+  ConvertWeightArgsPhrasePenalty();
   ConvertWeightArgsWordPenalty();
   ConvertWeightArgsLM();
   ConvertWeightArgsSingleWeight("weight-slm", "SyntacticLM");
@@ -848,6 +884,7 @@ void Parameter::ConvertWeightArgs()
   ConvertWeightArgsSingleWeight("weight-e", "WordDeletion"); // TODO Can't find real name
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
 
+  AddFeature("PhrasePenalty");
   AddFeature("WordPenalty");
   AddFeature("UnknownWordPenalty");
 

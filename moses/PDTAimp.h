@@ -378,6 +378,7 @@ public:
     std::vector<float> weightTrans = StaticData::Instance().GetWeights(m_obj);
     std::vector<float> weightInput = StaticData::Instance().GetWeights(m_inputFeature);
     float weightWP = StaticData::Instance().GetWeightWordPenalty();
+    float weightPP = StaticData::Instance().GetWeightPhrasePenalty();
 
     while(!stack.empty()) {
       State curr(stack.back());
@@ -464,6 +465,7 @@ public:
 
               //count word penalty
               score-=tcands[i].tokens.size() * weightWP;
+              score-=weightPP;
 
               std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].tokens,TScores()));
 

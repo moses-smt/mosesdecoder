@@ -1,22 +1,24 @@
-
-#include "PhrasePenalty.h"
+#include "PhrasePenaltyProducer.h"
+#include "moses/TargetPhrase.h"
 #include "moses/ScoreComponentCollection.h"
+
+using namespace std;
 
 namespace Moses
 {
-PhrasePenalty::PhrasePenalty(const std::string &line)
+PhrasePenaltyProducer::PhrasePenaltyProducer(const std::string &line)
   : StatelessFeatureFunction("PhrasePenalty",1, line)
 {
   ReadParameters();
 }
 
-void PhrasePenalty::Evaluate(const Phrase &source
+void PhrasePenaltyProducer::Evaluate(const Phrase &source
                              , const TargetPhrase &targetPhrase
                              , ScoreComponentCollection &scoreBreakdown
                              , ScoreComponentCollection &estimatedFutureScore) const
 {
-  scoreBreakdown.Assign(this, 1.0f);
+  scoreBreakdown.Assign(this, - 1.0f);
 }
 
-} // namespace
+}
 

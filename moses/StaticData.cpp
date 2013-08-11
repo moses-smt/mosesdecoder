@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 
 #include "moses/FF/Factory.h"
+#include "moses/FF/PhrasePenaltyProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
@@ -57,6 +58,7 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
+  ,m_ppProducer(NULL)
   ,m_wpProducer(NULL)
   ,m_unknownWordPenaltyProducer(NULL)
   ,m_inputFeature(NULL)
@@ -949,6 +951,13 @@ const string &StaticData::GetBinDirectory() const
   return m_binPath;
 }
 
+float StaticData::GetWeightPhrasePenalty() const
+{
+  float weightPP = GetWeight(m_ppProducer);
+  //VERBOSE(1, "Read weightPP from translation sytem: " << weightPP << std::endl);
+  return weightPP;
+}
+
 float StaticData::GetWeightWordPenalty() const
 {
   float weightWP = GetWeight(m_wpProducer);
@@ -992,6 +1001,9 @@ void StaticData::LoadFeatureFunctions()
       doLoad = false;
     } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
       m_generationDictionary.push_back(ffCast);
+    } else if (PhrasePenaltyProducer *ffCast = dynamic_cast<PhrasePenaltyProducer*>(ff)) {
+      CHECK(m_ppProducer == NULL); // max 1 feature;
+      m_ppProducer = ffCast;
     } else if (WordPenaltyProducer *ffCast = dynamic_cast<WordPenaltyProducer*>(ff)) {
       CHECK(m_wpProducer == NULL); // max 1 feature;
       m_wpProducer = ffCast;

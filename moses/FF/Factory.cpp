@@ -25,9 +25,9 @@
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
+#include "moses/FF/PhrasePenaltyProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
-#include "moses/FF/PhrasePenalty.h"
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
 
@@ -124,6 +124,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("Generation", GenerationDictionary);
   MOSES_FNAME(BleuScoreFeature);
   MOSES_FNAME2("Distortion", DistortionScoreProducer);
+  MOSES_FNAME2("PhrasePenalty", PhrasePenaltyProducer);
   MOSES_FNAME2("WordPenalty", WordPenaltyProducer);
   MOSES_FNAME(InputFeature);
   MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
@@ -135,7 +136,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(OpSequenceModel);
-  MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
 

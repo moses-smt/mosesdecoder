@@ -31,6 +31,7 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "TreeInput.h"
+#include "moses/FF/PhrasePenaltyProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 
 using namespace std;
@@ -137,6 +138,7 @@ void ChartManager::AddXmlChartOptions()
     ChartTranslationOptions* opt = *i;
 
     TargetPhrase &targetPhrase = *opt->GetTargetPhraseCollection().GetCollection()[0];
+    targetPhrase.GetScoreBreakdown().Assign(staticData.GetPhrasePenaltyProducer(), -1);
     targetPhrase.GetScoreBreakdown().Assign(staticData.GetWordPenaltyProducer(), -1);
 
     const WordsRange &range = opt->GetSourceWordsRange();

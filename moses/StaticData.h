@@ -55,6 +55,7 @@ class InputType;
 class PhraseDictionary;
 class GenerationDictionary;
 class DecodeStep;
+class PhrasePenaltyProducer;
 class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
 class InputFeature;
@@ -127,6 +128,7 @@ protected:
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
+  PhrasePenaltyProducer* m_ppProducer;
   WordPenaltyProducer* m_wpProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
   const InputFeature *m_inputFeature;
@@ -428,6 +430,12 @@ public:
   }
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
+  }
+  const PhrasePenaltyProducer *GetPhrasePenaltyProducer() const {
+    return m_ppProducer;
+  }
+  PhrasePenaltyProducer *GetPhrasePenaltyProducer() { // for mira
+    return m_ppProducer;
   }
   const WordPenaltyProducer *GetWordPenaltyProducer() const {
     return m_wpProducer;
@@ -738,6 +746,7 @@ public:
     m_allWeights = *(i->second);
   }
 
+  float GetWeightPhrasePenalty() const;
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
 
