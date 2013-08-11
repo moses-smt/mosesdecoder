@@ -82,7 +82,6 @@ class TranslationDimension
       	const PhraseSequence *sequence = targetPhrase->GetMBOTPhrases();
       	assert(sequence);
 
-      	std::cerr << "GETTING MBOT TARGET : " << *sequence << std::endl;
       	return targetPhrase;
   }
 
