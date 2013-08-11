@@ -108,28 +108,28 @@ enum DistortionOrientationOptions {
 
 enum PhraseTableImplementation {
   Memory				= 0
-                  ,Binary				= 1
-                                  ,OnDisk				= 2
-                                      //,GlueRule		= 3
-                                      //,Joshua			= 4
-                                      //,MemorySourceLabel	= 5
-                                      ,SCFG					= 6
-                                          //,BerkeleyDb	= 7
-                                          ,SuffixArray	= 8
-                                              ,Hiero        = 9
-                                                  ,ALSuffixArray = 10
-                                                      ,FuzzyMatch    = 11
-                                                          ,Compact      = 12
-                                                              ,Interpolated = 13
-                                                                  ,DSuffixArray = 14
+  ,Binary				= 1
+  ,OnDisk				= 2
+  //,GlueRule		= 3
+  //,Joshua			= 4
+  //,MemorySourceLabel	= 5
+  ,SCFG					= 6
+  //,BerkeleyDb	= 7
+  ,SuffixArray	= 8
+  ,Hiero        = 9
+  ,ALSuffixArray = 10
+  ,FuzzyMatch    = 11
+  ,Compact      = 12
+  ,Interpolated = 13
+  ,DSuffixArray = 14
 };
 
 enum InputTypeEnum {
   SentenceInput						= 0
-                            ,ConfusionNetworkInput	= 1
-                                ,WordLatticeInput				= 2
-                                    ,TreeInputType					= 3
-                                        ,WordLatticeInput2			= 4
+  ,ConfusionNetworkInput	= 1
+  ,WordLatticeInput				= 2
+  ,TreeInputType					= 3
+  ,WordLatticeInput2			= 4
 
 };
 
@@ -142,7 +142,7 @@ enum XmlInputType {
 
 enum DictionaryFind {
   Best		= 0
-            ,All		= 1
+  ,All		= 1
 };
 
 enum ParsingAlgorithm {
@@ -152,22 +152,22 @@ enum ParsingAlgorithm {
 
 enum SearchAlgorithm {
   Normal				= 0
-                  ,CubePruning	= 1
-                                  ,CubeGrowing	= 2
-                                      ,ChartDecoding= 3
-                                          ,NormalBatch  = 4
-                                              ,ChartIncremental = 5
+  ,CubePruning	= 1
+  ,CubeGrowing	= 2
+  ,ChartDecoding= 3
+  ,NormalBatch  = 4
+  ,ChartIncremental = 5
 };
 
 enum SourceLabelOverlap {
   SourceLabelOverlapAdd = 0
-                          ,SourceLabelOverlapReplace = 1
-                              ,SourceLabelOverlapDiscard = 2
+  ,SourceLabelOverlapReplace = 1
+  ,SourceLabelOverlapDiscard = 2
 };
 
 enum WordAlignmentSort {
   NoSort = 0
-           ,TargetOrder = 1
+  ,TargetOrder = 1
 };
 
 enum FormatType {

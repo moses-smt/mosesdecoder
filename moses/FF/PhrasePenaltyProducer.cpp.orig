@@ -13,9 +13,9 @@ PhrasePenaltyProducer::PhrasePenaltyProducer(const std::string &line)
 }
 
 void PhrasePenaltyProducer::Evaluate(const Phrase &source
-                                     , const TargetPhrase &targetPhrase
-                                     , ScoreComponentCollection &scoreBreakdown
-                                     , ScoreComponentCollection &estimatedFutureScore) const
+                             , const TargetPhrase &targetPhrase
+                             , ScoreComponentCollection &scoreBreakdown
+                             , ScoreComponentCollection &estimatedFutureScore) const
 {
   scoreBreakdown.Assign(this, - 1.0f);
 }
