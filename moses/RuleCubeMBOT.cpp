@@ -32,10 +32,10 @@ RuleCubeMBOT::RuleCubeMBOT(const ChartTranslationOptions &transOpt,
 	if(StaticData::Instance().IsMatchingSourceAtRuleApplication() == 1)
 	{
 		//Fabienne Braune : if the matching option is on, then only create hypothesis for matching target phrase
-		if(item->GetTranslationDimensionMBOT().HasMoreMatchingTargetPhrase())
+		if(item->GetTranslationDimension().HasMoreMatchingTargetPhrase())
 		{
 			//increment the translation dimension until a target phrase matching the label of the chart cell is found
-			while(item->GetTranslationDimensionMBOT().GetPosition() != item->GetTranslationDimensionMBOT().GetPositionOfMatchingTargetPhrase())
+			while(item->GetTranslationDimension().GetPosition() != item->GetTranslationDimension().GetPositionOfMatchingTargetPhrase())
 			{
 				item->IncrementTranslationDimension();
 			}
@@ -75,7 +75,7 @@ void RuleCubeMBOT::CreateNeighborsMBOT(const RuleCubeItemMBOT* item, ChartManage
 {
   // create neighbor along translation dimension
   const TranslationDimension &translationDimension =
-    item->GetTranslationDimensionMBOT();
+    item->GetTranslationDimension();
 
   //Fabienne Braune : check matching option
   if(StaticData::Instance().IsMatchingSourceAtRuleApplication() == 1)
@@ -148,13 +148,13 @@ void RuleCubeMBOT::CreateMatchingNeighborMBOT(const RuleCubeItemMBOT* item, int 
     if (StaticData::Instance().GetCubePruningLazyScoring()) {
       newItem->EstimateScore();
     } else {
-      	if(newItem->GetTranslationDimensionMBOT().HasMoreMatchingTargetPhrase())
+      	if(newItem->GetTranslationDimension().HasMoreMatchingTargetPhrase())
       	{
-      		while(newItem->GetTranslationDimensionMBOT().GetPosition() != newItem->GetTranslationDimensionMBOT().GetPositionOfMatchingTargetPhrase())
+      		while(newItem->GetTranslationDimension().GetPosition() != newItem->GetTranslationDimension().GetPositionOfMatchingTargetPhrase())
       		{
       			newItem->IncrementTranslationDimension();
       		}
-      		//std::cerr << "WE HAVE A MATCHING TARGET PHRASE AT POSITION : " << newItem->GetTranslationDimensionMBOT().GetPosition() << std::endl;
+      		//std::cerr << "WE HAVE A MATCHING TARGET PHRASE AT POSITION : " << newItem->GetTranslationDimension().GetPosition() << std::endl;
       	    newItem->CreateHypothesis(m_mbotTransOpt, manager);
       	}
     }

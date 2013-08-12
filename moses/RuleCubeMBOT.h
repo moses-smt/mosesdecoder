@@ -70,7 +70,7 @@ class RuleCubeItemEqualityPredMBOT
  public:
   bool operator()(const RuleCubeItemMBOT *p, const RuleCubeItemMBOT *q) const {
     return p->GetHypothesisDimensionsMBOT() == q->GetHypothesisDimensionsMBOT() &&
-           p->GetTranslationDimensionMBOT() == q->GetTranslationDimensionMBOT();
+           p->GetTranslationDimension() == q->GetTranslationDimension();
   }
 };
 

@@ -50,7 +50,7 @@ ChartHypothesisMBOT::ChartHypothesisMBOT(const ChartTranslationOptions &transOpt
                                  ChartManager &manager)
   :ChartHypothesis(transOpt, mbotItem, manager)
   ,m_mbotTargetPhrase(const_cast <TargetPhraseMBOT*> (
-                                        mbotItem.GetTranslationDimensionMBOT().GetTargetPhraseMBOT()))
+                                        mbotItem.GetTranslationDimension().GetTargetPhraseMBOT()))
   //,m_mbotArcList(NULL)
   //,m_mbotWinningHypo(NULL)
 {
