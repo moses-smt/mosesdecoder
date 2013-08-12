@@ -202,6 +202,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartRuleLookupManager.h</locationURI>
 		</link>
 		<link>
+			<name>ChartTranslationOption.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTranslationOption.cpp</locationURI>
+		</link>
+		<link>
+			<name>ChartTranslationOption.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTranslationOption.h</locationURI>
+		</link>
+		<link>
 			<name>ChartTranslationOptionList.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTranslationOptionList.cpp</locationURI>

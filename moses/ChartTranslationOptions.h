@@ -27,27 +27,11 @@
 #include "util/check.hh"
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include "ChartTranslationOption.h"
 
 namespace Moses
 {
-
-class ChartTranslationOption
-{
-protected:
-  const TargetPhrase &m_targetPhrase;
-
-public:
-  ChartTranslationOption(const TargetPhrase &targetPhrase);
-
-  const TargetPhrase &GetPhrase() const {
-    return m_targetPhrase;
-  }
-
-  const ScoreComponentCollection &GetScores() const {
-    return m_targetPhrase.GetScoreBreakdown();
-  }
-
-};
+class ChartTranslationOption;
 
 /** Similar to a DottedRule, but contains a direct reference to a list
  * of translations and provdes an estimate of the best score. For a specific range in the input sentence

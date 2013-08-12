@@ -18,17 +18,12 @@
  ***********************************************************************/
 
 #include "ChartTranslationOptions.h"
-
 #include "ChartHypothesis.h"
-
 #include "ChartCellLabel.h"
+#include "ChartTranslationOption.h"
 
 namespace Moses
 {
-ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
-  :m_targetPhrase(targetPhrase)
-{
-}
 
 ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
     const StackVec &stackVec,
