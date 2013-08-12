@@ -144,7 +144,7 @@ vector< vector<const Word*> > MosesDecoder::runDecoder(const std::string& source
   m_manager->CalcNBest(nBestSize, nBestList, distinct);
 
   // optionally print nbest to file (to extract scores and features.. currently just for sentence bleu scoring)
-  if (filename != "") {
+  /*if (filename != "") {
     ofstream out(filename.c_str());
     if (!out) {
       ostringstream msg;
@@ -154,7 +154,7 @@ vector< vector<const Word*> > MosesDecoder::runDecoder(const std::string& source
     // TODO: handle sentence id (for now always 0)
     //OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(), 0, false);
     out.close();
-  }
+  }*/
 
   // read off the feature values and bleu scores for each sentence in the nbest list
   Moses::TrellisPathList::const_iterator iter;

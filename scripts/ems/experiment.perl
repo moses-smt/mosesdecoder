@@ -1698,14 +1698,8 @@ sub write_mira_config {
     my $tuning_decoder_settings = &check_and_get("TUNING:decoder-settings");
     my $start_weights = &backoff_and_get("TUNING:start-weight-config");
     my $tuning_settings = &check_and_get("TUNING:tuning-settings");
-    my $jobs = 10; # this overwrites the default in training-expt.perl
-    if ($tuning_settings =~ /^(.*)--jobs (\d+)(.*)$/) {
-	$jobs = $2;
-	$tuning_settings = $1.$3;
-	$tuning_settings =~ s/ +/ /;
-	$tuning_settings =~ s/^ //;
-	$tuning_settings =~ s/ $//;
-    }
+
+    my $parallel_settings = &backoff_and_get("TUNING:parallel-settings");
     my $use_jackknife = &backoff_and_get("TUNING:use-jackknife");
 
     # are we tuning a meta feature?
@@ -1794,7 +1788,11 @@ sub write_mira_config {
     }
     print CFG "decoder-settings=".$tuning_decoder_settings." -text-type \"dev\"\n";    
     print CFG "hours=48 \n"; 
-    print CFG "jobs=$jobs \n";
+    if ($parallel_settings) {
+	    foreach my $setting (split(" ", $parallel_settings)) {
+	      print  CFG $setting."\n";
+	    }
+    }
     print CFG "extra-args=".$tuning_settings."\n\n";   
     print CFG "[devtest] \n";
     if (&get("TRAINING:hierarchical-rule-set")) {
