@@ -34,16 +34,18 @@ namespace Moses
 class ChartTranslationOption
 {
 protected:
-	const TargetPhrase &m_targetPhrase;
+  const TargetPhrase &m_targetPhrase;
 
 public:
-	ChartTranslationOption(const TargetPhrase &targetPhrase);
+  ChartTranslationOption(const TargetPhrase &targetPhrase);
 
-	const TargetPhrase &GetPhrase() const
-	{ return m_targetPhrase; }
+  const TargetPhrase &GetPhrase() const {
+    return m_targetPhrase;
+  }
 
-	const ScoreComponentCollection &GetScores() const
-    { return m_targetPhrase.GetScoreBreakdown(); }
+  const ScoreComponentCollection &GetScores() const {
+    return m_targetPhrase.GetScoreBreakdown();
+  }
 
 };
 
