@@ -67,7 +67,7 @@ public:
 
 private:
   std::size_t m_pos;
-  ChartTranslationOptions::CollType m_orderedTargetPhrases;
+  const ChartTranslationOptions::CollType &m_orderedTargetPhrases;
 };
 
 
