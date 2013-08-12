@@ -53,7 +53,7 @@ public:
     return m_pos+1 < m_orderedTargetPhrases.size();
   }
 
-  const boost::shared_ptr<TargetPhrase> &GetTargetPhrase() const {
+  const boost::shared_ptr<ChartTranslationOption> &GetTargetPhrase() const {
     return m_orderedTargetPhrases[m_pos];
   }
 

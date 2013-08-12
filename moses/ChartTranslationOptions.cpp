@@ -25,6 +25,10 @@
 
 namespace Moses
 {
+ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
+:m_targetPhrase(targetPhrase)
+{
+}
 
 ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
     const StackVec &stackVec,
@@ -38,7 +42,7 @@ ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &t
   for (iter = targetPhraseColl.begin(); iter != targetPhraseColl.end(); ++iter) {
     const TargetPhrase *origTP = *iter;
 
-    boost::shared_ptr<TargetPhrase> ptr(new TargetPhrase(*origTP));
+    boost::shared_ptr<ChartTranslationOption> ptr(new ChartTranslationOption(*origTP));
     m_targetPhraseCollection.push_back(ptr);
   }
 }

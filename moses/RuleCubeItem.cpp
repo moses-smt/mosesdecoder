@@ -65,7 +65,7 @@ RuleCubeItem::~RuleCubeItem()
 
 void RuleCubeItem::EstimateScore()
 {
-  m_score = m_translationDimension.GetTargetPhrase()->GetFutureScore();
+  m_score = m_translationDimension.GetTargetPhrase()->GetPhrase().GetFutureScore();
   std::vector<HypothesisDimension>::const_iterator p;
   for (p = m_hypothesisDimensions.begin();
        p != m_hypothesisDimensions.end(); ++p) {

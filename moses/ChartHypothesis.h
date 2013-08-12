@@ -49,7 +49,7 @@ protected:
   static ObjectPool<ChartHypothesis> s_objectPool;
 #endif
 
-  boost::shared_ptr<TargetPhrase> m_targetPhrase;
+  boost::shared_ptr<ChartTranslationOption> m_targetPhrase;
 
   WordsRange					m_currSourceWordsRange;
   std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
@@ -102,7 +102,7 @@ public:
 
   //! Get the rule that created this hypothesis
   const TargetPhrase &GetCurrTargetPhrase()const {
-    return *m_targetPhrase;
+    return m_targetPhrase->GetPhrase();
   }
 
   //! the source range that this hypothesis spans
