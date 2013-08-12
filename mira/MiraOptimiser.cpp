@@ -356,15 +356,6 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     cerr << "Rank " << rank << ", epoch " << epoch << ", normalised constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;
   }
 
-  if (m_scale_margin) {
-    diff *= bleuScoreHope;
-    cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << bleuScoreHope << endl;
-  }
-  if (m_scale_margin_precision) {
-    diff *= (1+m_precision);
-    cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with 1+precision: "  << (1+m_precision) << endl;
-  }
-
   if (diff > epsilon) {
     // squash it between 0 and 1
     //diff = tanh(diff);
@@ -400,10 +391,6 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     if (m_scale_update) {
       cerr << "Rank " << rank << ", epoch " << epoch << ", scaling update with oracle bleu score " << bleuScoreHope << endl;
       alpha *= bleuScoreHope;
-    }
-    if (m_scale_update_precision) {
-      cerr << "Rank " << rank << ", epoch " << epoch << ", scaling update with 1+precision: " << (1+m_precision) << endl;
-      alpha *= (1+m_precision);
     }
 
     cerr << "Rank " << rank << ", epoch " << epoch << ", clipped/scaled alpha: " << alpha << endl;
