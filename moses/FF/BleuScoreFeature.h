@@ -67,6 +67,10 @@ public:
 
   BleuScoreFeature(const std::string &line);
 
+  void SetParameter(const std::string& key, const std::string& value);
+
+  std::vector<float> DefaultWeights() const;
+
   void PrintHistory(std::ostream& out) const;
   void LoadReferences(const std::vector< std::vector< std::string > > &);
   void SetCurrSourceLength(size_t);

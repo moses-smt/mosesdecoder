@@ -64,7 +64,7 @@ MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vect
   for (int i = 0; i < argc; ++i) {
     char *cstr = &(decoder_params[i])[0];
     mosesargv[BASE_ARGC + i] = cstr;
-    //cerr << "cstr=" << cstr << endl;
+    cerr << "cstr=" << cstr << endl;
   }
 
   if (!params->LoadParam(BASE_ARGC + argc,mosesargv)) {
