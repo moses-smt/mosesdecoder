@@ -41,7 +41,7 @@ public:
 protected:
   const Phrase *m_constraint;
   Manager& m_manager;
-  Phrase m_sourcePhrase; // for initial hypo
+  InputPath m_inputPath; // for initial hypo
   TranslationOption m_initialTransOpt; /**< used to seed 1st hypo */
 };
 

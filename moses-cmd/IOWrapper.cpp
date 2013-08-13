@@ -358,7 +358,7 @@ void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 {
   if (hypo->GetPrevHypo()) {
     OutputInput(map, hypo->GetPrevHypo());
-    map[hypo->GetCurrSourceWordsRange().GetStartPos()] = &hypo->GetTranslationOption().GetSourcePhrase();
+    map[hypo->GetCurrSourceWordsRange().GetStartPos()] = &hypo->GetTranslationOption().GetInputPath().GetPhrase();
   }
 }
 

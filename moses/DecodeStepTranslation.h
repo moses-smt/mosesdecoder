@@ -31,6 +31,7 @@ namespace Moses
 
 class PhraseDictionary;
 class TargetPhrase;
+class InputPath;
 
 //! subclass of DecodeStep for translation step
 class DecodeStepTranslation : public DecodeStep
@@ -56,7 +57,7 @@ public:
   void ProcessInitialTranslation(const InputType &source
                                  , PartialTranslOptColl &outputPartialTranslOptColl
                                  , size_t startPos, size_t endPos, bool adhereTableLimit
-                                 , const Phrase &sourcePhrase
+                                 , const InputPath &inputPath
                                  , const TargetPhraseCollection *phraseColl) const;
 
   // legacy

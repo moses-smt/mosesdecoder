@@ -80,7 +80,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
   const GenerationDictionary* generationDictionary  = decodeStep.GetGenerationDictionaryFeature();
 
   const Phrase &targetPhrase  = inputPartialTranslOpt.GetTargetPhrase();
-  const Phrase &sourcePhrase = inputPartialTranslOpt.GetSourcePhrase();
+  const InputPath &inputPath = inputPartialTranslOpt.GetInputPath();
   size_t targetLength         = targetPhrase.GetSize();
 
   // generation list for each word in phrase
@@ -148,14 +148,14 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
     outPhrase.GetScoreBreakdown().PlusEquals(generationScore);
 
     outPhrase.MergeFactors(genPhrase, m_newOutputFactors);
-    outPhrase.Evaluate(sourcePhrase, m_featuresToApply);
+    outPhrase.Evaluate(inputPath.GetPhrase(), m_featuresToApply);
 
     const WordsRange &sourceWordsRange = inputPartialTranslOpt.GetSourceWordsRange();
 
     TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
     assert(newTransOpt);
 
-    newTransOpt->SetSourcePhrase(sourcePhrase);
+    newTransOpt->SetInputPath(inputPath);
 
     outputPartialTranslOptColl.Add(newTransOpt);
 

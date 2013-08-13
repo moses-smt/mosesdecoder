@@ -46,7 +46,7 @@ void SentenceStats::AddDeletedWords(const Hypothesis& hypo)
 
   if(hypo.GetPrevHypo() && hypo.GetCurrTargetWordsRange().GetNumWordsCovered() == 0) {
 
-    m_deletedWords.push_back(&hypo.GetTranslationOption().GetSourcePhrase());
+    m_deletedWords.push_back(&hypo.GetTranslationOption().GetInputPath().GetPhrase());
   }
 }
 

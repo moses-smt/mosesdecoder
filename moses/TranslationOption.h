@@ -66,7 +66,7 @@ class TranslationOption
 protected:
 
   TargetPhrase 		m_targetPhrase; /*< output phrase when using this translation option */
-  const Phrase		*m_sourcePhrase;
+  const InputPath		*m_inputPath;
   const WordsRange	m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float             m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
@@ -94,9 +94,9 @@ public:
   }
 
   /** returns source phrase */
-  const Phrase &GetSourcePhrase() const;
+  const InputPath &GetInputPath() const;
 
-  void SetSourcePhrase(const Phrase &sourcePhrase);
+  void SetInputPath(const InputPath &inputPath);
 
   /** whether source span overlaps with those of a hypothesis */
   bool Overlap(const Hypothesis &hypothesis) const;

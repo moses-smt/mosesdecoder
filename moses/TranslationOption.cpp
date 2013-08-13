@@ -34,7 +34,7 @@ namespace Moses
 
 TranslationOption::TranslationOption()
   :m_targetPhrase()
-  ,m_sourcePhrase(NULL)
+  ,m_inputPath(NULL)
   ,m_sourceWordsRange(NOT_FOUND, NOT_FOUND)
 {
 }
@@ -43,7 +43,7 @@ TranslationOption::TranslationOption()
 TranslationOption::TranslationOption(const WordsRange &wordsRange
                                      , const TargetPhrase &targetPhrase)
   : m_targetPhrase(targetPhrase)
-  , m_sourcePhrase(NULL)
+  , m_inputPath(NULL)
   , m_sourceWordsRange(wordsRange)
   , m_futureScore(targetPhrase.GetFutureScore())
 {
@@ -74,20 +74,20 @@ void TranslationOption::CacheLexReorderingScores(const LexicalReordering &produc
 
 void TranslationOption::Evaluate(const InputType &input)
 {
-  const Phrase &sourcePhrase = GetSourcePhrase();
-  m_targetPhrase.Evaluate(input, sourcePhrase);
+  const InputPath &inputPath = GetInputPath();
+  m_targetPhrase.Evaluate(input, inputPath);
 }
 
-const Phrase &TranslationOption::GetSourcePhrase() const
+const InputPath &TranslationOption::GetInputPath() const
 {
-  CHECK(m_sourcePhrase);
-  return *m_sourcePhrase;
+  CHECK(m_inputPath);
+  return *m_inputPath;
 }
 
-void TranslationOption::SetSourcePhrase(const Phrase &sourcePhrase)
+void TranslationOption::SetInputPath(const InputPath &inputPath)
 {
-  CHECK(m_sourcePhrase == NULL);
-  m_sourcePhrase = &sourcePhrase;
+  CHECK(m_inputPath == NULL);
+  m_inputPath = &inputPath;
 }
 
 

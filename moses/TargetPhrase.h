@@ -36,8 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-
 class FeatureFunction;
+class InputPath;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
@@ -65,8 +65,8 @@ public:
   // so doesn't have a list of ffs
   void Evaluate(const Phrase &source);
 
-  // 'source' is guaranteed to be the raw substring from the input. No factors were added or taken away
-  void Evaluate(const InputType &input, const Phrase &sourcePhrase);
+  // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
+  void Evaluate(const InputType &input, const InputPath &inputPath);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 

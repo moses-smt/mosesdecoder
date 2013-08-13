@@ -78,7 +78,7 @@ FFState* PhraseBoundaryFeature::Evaluate
   const Word* rightTargetWord = &(targetPhrase.GetWord(0));
   AddFeatures(leftTargetWord,rightTargetWord,m_targetFactors,"tgt",scores);
 
-  const Phrase& sourcePhrase = cur_hypo.GetTranslationOption().GetSourcePhrase();
+  const Phrase& sourcePhrase = cur_hypo.GetTranslationOption().GetInputPath().GetPhrase();
   const Word* leftSourceWord = pbState->GetSourceWord();
   const Word* rightSourceWord = &(sourcePhrase.GetWord(0));
   AddFeatures(leftSourceWord,rightSourceWord,m_sourceFactors,"src",scores);

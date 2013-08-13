@@ -9,10 +9,10 @@ namespace Moses
 
 Search::Search(Manager& manager)
   : m_manager(manager)
-  ,m_sourcePhrase(0)
+  ,m_inputPath()
   ,m_initialTransOpt()
 {
-  m_initialTransOpt.SetSourcePhrase(m_sourcePhrase);
+  m_initialTransOpt.SetInputPath(m_inputPath);
 }
 
 

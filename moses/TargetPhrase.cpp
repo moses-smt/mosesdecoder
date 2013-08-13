@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "Util.h"
 #include "AlignmentInfoCollection.h"
+#include "InputPath.h"
 
 using namespace std;
 
@@ -128,9 +129,10 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
   }
 }
 
-void TargetPhrase::Evaluate(const InputType &input, const Phrase &sourcePhrase)
+void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const Phrase &sourcePhrase = inputPath.GetPhrase();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];

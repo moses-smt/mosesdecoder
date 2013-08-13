@@ -147,7 +147,7 @@ void WordTranslationFeature::Evaluate
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
-    const Phrase& sourcePhrase = transOpt.GetSourcePhrase();
+    const Phrase& sourcePhrase = transOpt.GetInputPath().GetPhrase();
     int sourceIndex = alignmentPoint->first;
     int targetIndex = alignmentPoint->second;
     Word ws = sourcePhrase.GetWord(sourceIndex);

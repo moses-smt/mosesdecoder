@@ -269,7 +269,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
   targetPhrase.Evaluate(sourcePhrase);
 
   TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
-  transOpt->SetSourcePhrase(sourcePhrase);
+  transOpt->SetInputPath(inputPath);
   Add(transOpt);
 
 
@@ -449,7 +449,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
     static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
     (m_source, *oldPtoc
      , startPos, endPos, adhereTableLimit
-     , sourcePhrase, targetPhrases);
+     , inputPath, targetPhrases);
 
     SetInputScore(inputPath, *oldPtoc);
 
@@ -652,7 +652,7 @@ void TranslationOptionCollection::CacheLexReordering()
           for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) {
             TranslationOption &transOpt = **iterTransOpt;
             //Phrase sourcePhrase =  m_source.GetSubString(WordsRange(startPos,endPos));
-            const Phrase &sourcePhrase = transOpt.GetSourcePhrase();
+            const Phrase &sourcePhrase = transOpt.GetInputPath().GetPhrase();
             Scores score = lexreordering.GetProb(sourcePhrase
                                                  , transOpt.GetTargetPhrase());
             if (!score.empty())
