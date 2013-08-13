@@ -76,6 +76,7 @@ protected:
   void CreateWeightsMap();
   void WeightOverwrite();
   void AddFeature(const std::string &line);
+  void AddFeaturesCmd();
 
 
 public:

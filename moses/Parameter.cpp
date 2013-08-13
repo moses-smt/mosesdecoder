@@ -193,9 +193,10 @@ Parameter::Parameter()
 
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
-  AddParam("feature-overwrite", "Override arguments in a particular featureu function with a particular key");
+  AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key");
+  AddParam("feature-add", "Add a feature function on the command line. Used by mira to add BLEU feature");
 
-  AddParam("feature", "");
+  AddParam("feature", "All the feature functions should be here");
   AddParam("print-id", "prefix translations with id. Default if false");
 
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
@@ -295,6 +296,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
     OverwriteParam("-" + paramShortName, paramName, argc, argv);
   }
 
+  AddFeaturesCmd();
+
   // logging of parameters that were set in either config or switch
   int verbose = 1;
   if (m_setting.find("verbose") != m_setting.end() &&
@@ -353,6 +356,22 @@ bool Parameter::LoadParam(int argc, char* argv[])
 
   // check if parameters make sense
   return Validate() && noErrorFlag;
+}
+
+void Parameter::AddFeaturesCmd()
+{
+  if (!isParamSpecified("feature-add")) {
+	  return;
+  }
+
+  const PARAM_VEC &params = GetParam("feature-add");
+
+  PARAM_VEC::const_iterator iter;
+  for (iter = params.begin(); iter != params.end(); ++iter) {
+	  const string &line = *iter;
+	  AddFeature(line);
+  }
+
 }
 
 std::vector<float> &Parameter::GetWeights(const std::string &name)

@@ -398,7 +398,7 @@ int main(int argc, char** argv)
   // initialise Moses
   // add references to initialize Bleu feature
   boost::trim(decoder_settings);
-  decoder_settings += " -mira -n-best-list - " + boost::lexical_cast<string>(n) + " distinct -weight-bl 1 -references";
+  decoder_settings += " -mira -n-best-list - " + boost::lexical_cast<string>(n) + " distinct -feature-add \"BleuScoreFeature tuneable=false\" -references";
   if (trainWithMultipleFolds) {
     decoder_settings += " ";
     decoder_settings += referenceFilesFolds[myFold];
