@@ -77,12 +77,6 @@ private:
   float m_scoreThreshold;
   const size_t m_ruleLimit;
 
-  // input paths
-  typedef std::vector< std::vector<InputPath*> > InputPathMatrix;
-  InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
-
-  InputPath &GetInputPath(size_t startPos, size_t endPos);
-
 };
 
 }

@@ -150,6 +150,17 @@ ChartParser::~ChartParser()
 {
   RemoveAllInColl(m_ruleLookupManagers);
   StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
+
+  InputPathMatrix::const_iterator iterOuter;
+  for (iterOuter = m_inputPathMatrix.begin(); iterOuter != m_inputPathMatrix.end(); ++iterOuter) {
+    const std::vector<InputPath*> &outer = *iterOuter;
+
+    std::vector<InputPath*>::const_iterator iterInner;
+    for (iterInner = outer.begin(); iterInner != outer.end(); ++iterInner) {
+      InputPath *path = *iterInner;
+      delete path;
+    }
+  }
 }
 
 void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
@@ -182,6 +193,8 @@ void ChartParser::CreateInputPaths(const InputType &input)
 {
   size_t size = input.GetSize();
   m_inputPathMatrix.resize(size);
+
+  CHECK(input.GetType() == SentenceInput || input.GetType() == TreeInputType);
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
