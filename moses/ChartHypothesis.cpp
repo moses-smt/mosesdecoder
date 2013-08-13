@@ -47,7 +47,7 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
 ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
-  :m_targetPhrase(item.GetTranslationDimension().GetTargetPhrase())
+  :m_transOpt(item.GetTranslationDimension().GetTranslationOption())
   ,m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   ,m_ffStates(StatefulFeatureFunction::GetStatefulFeatureFunctions().size())
   ,m_arcList(NULL)
