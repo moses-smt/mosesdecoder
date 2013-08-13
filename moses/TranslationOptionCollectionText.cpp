@@ -66,8 +66,8 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
 */
 void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos)
 {
-  const Word &sourceWord = m_source.GetWord(sourcePos);
-  ProcessOneUnknownWord(sourceWord,sourcePos);
+  const InputPath &inputPath = GetInputPath(sourcePos, sourcePos);
+  ProcessOneUnknownWord(inputPath,sourcePos);
 }
 
 /**

@@ -123,9 +123,18 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
   ConfusionNet const& source=dynamic_cast<ConfusionNet const&>(m_source);
 
   ConfusionNet::Column const& coll=source.GetColumn(sourcePos);
+  const InputPathList &inputPathList = GetInputPathList(sourcePos, sourcePos);
+
+  ConfusionNet::Column::const_iterator iterCol;
+  InputPathList::const_iterator iterInputPath;
   size_t j=0;
-  for(ConfusionNet::Column::const_iterator i=coll.begin(); i!=coll.end(); ++i) {
-    ProcessOneUnknownWord(i->first ,sourcePos, source.GetColumnIncrement(sourcePos, j++),&(i->second));
+  for(iterCol = coll.begin(), iterInputPath = inputPathList.begin();
+		  iterCol != coll.end();
+		  ++iterCol , ++iterInputPath) {
+	  const InputPath &inputPath = **iterInputPath;
+	  size_t length = source.GetColumnIncrement(sourcePos, j++);
+	  const Scores &inputScores = iterCol->second;
+    ProcessOneUnknownWord(inputPath ,sourcePos, length, &inputScores);
   }
 
 }

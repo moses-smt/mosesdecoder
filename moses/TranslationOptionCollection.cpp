@@ -201,12 +201,13 @@ void TranslationOptionCollection::ProcessUnknownWord()
 	* \param length length covered by this word (may be > 1 for lattice input)
 	* \param inputScores a set of scores associated with unknown word (input scores from latties/CNs)
  */
-void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,size_t sourcePos, size_t length, const Scores *inputScores)
+void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPath,size_t sourcePos, size_t length, const Scores *inputScores)
 
 {
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
   float unknownScore = FloorScore(TransformScore(0));
+  const Word &sourceWord = inputPath.GetPhrase().GetWord(0);
 
   // unknown word, add as trans opt
   FactorCollection &factorCollection = FactorCollection::Instance();
