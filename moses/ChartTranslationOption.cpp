@@ -1,4 +1,6 @@
 #include "ChartTranslationOptions.h"
+#include "InputType.h"
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -8,5 +10,14 @@ ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
 {
 }
 
+void ChartTranslationOption::Evaluate(const InputPath &inputPath, const InputType &input)
+{
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+
+  for (size_t i = 0; i < ffs.size(); ++i) {
+	const FeatureFunction &ff = *ffs[i];
+	ff.Evaluate(input, inputPath.GetPhrase(), m_scoreBreakdown);
+  }
+}
 }
 

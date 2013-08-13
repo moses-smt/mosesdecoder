@@ -147,4 +147,13 @@ void ChartTranslationOptionList::ApplyThreshold()
   m_size = std::distance(m_collection.begin(), bound);
 }
 
+void ChartTranslationOptionList::Evaluate(const InputPath &inputPath, const InputType &input)
+{
+  CollType::iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
+	  ChartTranslationOptions &transOpts = **iter;
+	  transOpts.Evaluate(inputPath, input);
+  }
+}
+
 }

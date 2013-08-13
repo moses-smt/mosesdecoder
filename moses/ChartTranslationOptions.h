@@ -32,6 +32,8 @@
 namespace Moses
 {
 class ChartTranslationOption;
+class InputPath;
+class InputType;
 
 /** Similar to a DottedRule, but contains a direct reference to a list
  * of translations and provdes an estimate of the best score. For a specific range in the input sentence
@@ -63,7 +65,7 @@ public:
 
   //! @todo isn't the translation suppose to just contain 1 target phrase, not a whole collection of them?
   const CollType &GetTargetPhrases() const {
-    return m_targetPhraseCollection;
+    return m_collection;
   }
 
   //! the range in the source sentence this translation option covers
@@ -79,10 +81,12 @@ public:
     return m_estimateOfBestScore;
   }
 
+  void Evaluate(const InputPath &inputPath, const InputType &input);
+
 private:
 
   StackVec m_stackVec; //! vector of hypothesis list!
-  CollType m_targetPhraseCollection;
+  CollType m_collection;
 
   const WordsRange *m_wordsRange;
   float m_estimateOfBestScore;

@@ -5,6 +5,8 @@
 namespace Moses
 {
 class TargetPhrase;
+class InputPath;
+class InputType;
 
 class ChartTranslationOption
 {
@@ -23,6 +25,7 @@ public:
     return m_scoreBreakdown;
   }
 
+  void Evaluate(const InputPath &inputPath, const InputType &input);
 };
 
 }

@@ -60,6 +60,7 @@ public:
 
   void Clear();
   void ApplyThreshold();
+  void Evaluate(const InputPath &inputPath, const InputType &input);
 
 private:
   typedef std::vector<ChartTranslationOptions*> CollType;

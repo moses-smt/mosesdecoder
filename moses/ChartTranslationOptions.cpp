@@ -38,7 +38,7 @@ ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &t
     const TargetPhrase *origTP = *iter;
 
     boost::shared_ptr<ChartTranslationOption> ptr(new ChartTranslationOption(*origTP));
-    m_targetPhraseCollection.push_back(ptr);
+    m_collection.push_back(ptr);
   }
 }
 
@@ -62,6 +62,16 @@ float ChartTranslationOptions::CalcEstimateOfBestScore(
     estimateOfBestScore += bestHypo.GetTotalScore();
   }
   return estimateOfBestScore;
+}
+
+void ChartTranslationOptions::Evaluate(const InputPath &inputPath, const InputType &input)
+{
+  CollType::iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
+	  ChartTranslationOption &transOpt = **iter;
+	  transOpt.Evaluate(inputPath, input);
+  }
+
 }
 
 }
