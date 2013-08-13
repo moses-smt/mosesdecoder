@@ -398,19 +398,25 @@ int main(int argc, char** argv)
   // initialise Moses
   // add references to initialize Bleu feature
   boost::trim(decoder_settings);
-  decoder_settings += " -mira -n-best-list - " + boost::lexical_cast<string>(n) + " distinct -weight-bl 1 -references";
-  if (trainWithMultipleFolds) {
-    decoder_settings += " ";
-    decoder_settings += referenceFilesFolds[myFold];
-  } else {
-    for (size_t i=0; i < referenceFiles.size(); ++i) {
-      decoder_settings += " ";
-      decoder_settings += referenceFiles[i];
-    }
-  }
+  decoder_settings += " -mira -n-best-list - " + boost::lexical_cast<string>(n) + " distinct";
 
   vector<string> decoder_params;
   boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
+
+  // bleu feature
+  decoder_params.push_back("-feature-add");
+
+  decoder_settings = "BleuScoreFeature tuneable=false references=";
+  if (trainWithMultipleFolds) {
+    decoder_settings += referenceFilesFolds[myFold];
+  } else {
+    decoder_settings += referenceFiles[0];
+    for (size_t i=1; i < referenceFiles.size(); ++i) {
+      decoder_settings += ",";
+      decoder_settings += referenceFiles[i];
+    }
+  }
+  decoder_params.push_back(decoder_settings);
 
   string configFile = trainWithMultipleFolds? mosesConfigFilesFolds[myFold] : mosesConfigFile;
   VERBOSE(1, "Rank " << rank << " reading config file from " << configFile << endl);
