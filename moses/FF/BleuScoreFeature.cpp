@@ -95,6 +95,7 @@ BleuScoreFeature::BleuScoreFeature(const std::string &line)
   m_tuneable = false;
 
   ReadParameters();
+  std::cerr << "Finished initializing BleuScoreFeature." << std::endl;
 }
 
 void BleuScoreFeature::SetParameter(const std::string& key, const std::string& value)
