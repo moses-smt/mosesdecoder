@@ -77,7 +77,6 @@ TranslationOptionCollection::TranslationOptionCollection(
 /** destructor, clears out data structures */
 TranslationOptionCollection::~TranslationOptionCollection()
 {
-  RemoveAllInColl(m_unksrcs);
   RemoveAllInColl(m_phraseDictionaryQueue);
 }
 
@@ -263,16 +262,14 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
   }
 
   // source phrase
-  Phrase *unksrc = new Phrase(1);
-  unksrc->AddWord() = sourceWord;
-  m_unksrcs.push_back(unksrc);
-
-  targetPhrase.Evaluate(*unksrc);
-
+  const Phrase &sourcePhrase = inputPath.GetPhrase();
+  m_unksrcs.push_back(&sourcePhrase);
   WordsRange range(sourcePos, sourcePos + length - 1);
 
+  targetPhrase.Evaluate(sourcePhrase);
+
   TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
-  transOpt->SetSourcePhrase(*unksrc);
+  transOpt->SetSourcePhrase(sourcePhrase);
   Add(transOpt);
 
 
@@ -632,11 +629,6 @@ std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& c
   //}
 
   return out;
-}
-
-const std::vector<Phrase*>& TranslationOptionCollection::GetUnknownSources() const
-{
-  return m_unksrcs;
 }
 
 void TranslationOptionCollection::CacheLexReordering()
