@@ -24,7 +24,7 @@ public:
 
   virtual void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range) = 0;
 
-  virtual void Evaluate(const InputPath &inputPath, const InputType &input) = 0;
+  virtual void Evaluate(const InputType &input, const InputPath &inputPath) = 0;
 };
 
 } // namespace Moses

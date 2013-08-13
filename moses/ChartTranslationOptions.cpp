@@ -64,12 +64,12 @@ float ChartTranslationOptions::CalcEstimateOfBestScore(
   return estimateOfBestScore;
 }
 
-void ChartTranslationOptions::Evaluate(const InputPath &inputPath, const InputType &input)
+void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   CollType::iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
 	  ChartTranslationOption &transOpt = **iter;
-	  transOpt.Evaluate(inputPath, input);
+	  transOpt.Evaluate(input, inputPath);
   }
 
 }

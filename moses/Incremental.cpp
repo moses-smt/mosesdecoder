@@ -97,7 +97,7 @@ public:
     return vertex.BestChild();
   }
 
-  void Evaluate(const InputPath &inputPath, const InputType &input)
+  void Evaluate(const InputType &input, const InputPath &inputPath)
   {
 	  // TODO for input lattice
   }

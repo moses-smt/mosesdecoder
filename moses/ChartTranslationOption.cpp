@@ -10,7 +10,7 @@ ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
 {
 }
 
-void ChartTranslationOption::Evaluate(const InputPath &inputPath, const InputType &input)
+void ChartTranslationOption::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 

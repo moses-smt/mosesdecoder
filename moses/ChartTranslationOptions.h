@@ -81,7 +81,7 @@ public:
     return m_estimateOfBestScore;
   }
 
-  void Evaluate(const InputPath &inputPath, const InputType &input);
+  void Evaluate(const InputType &input, const InputPath &inputPath);
 
 private:
 

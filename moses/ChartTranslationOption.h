@@ -25,7 +25,7 @@ public:
     return m_scoreBreakdown;
   }
 
-  void Evaluate(const InputPath &inputPath, const InputType &input);
+  void Evaluate(const InputType &input, const InputPath &inputPath);
 };
 
 }
