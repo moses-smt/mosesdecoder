@@ -400,6 +400,11 @@ bool StaticData::LoadData(Parameter *parameter)
     exit(1);
   }
 
+  // dynamic cache-based Phrase Dictionary
+  PhraseDictionaryCacheIndex = -1; //dummy value to consider as undefined
+  PhraseDictionaryCacheScoreType = 1000; //dummy value to consider as undefined
+  PhraseDictionaryCacheMaxAge = 1000; //default value for maximum age of the entries in the cache-based- translation model
+
   //mira training
   SetBooleanParameter( &m_mira, "mira", false );
 
@@ -1022,6 +1027,9 @@ void StaticData::LoadFeatureFunctions()
 
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
     PhraseDictionary *pt = m_phraseDictionary[i];
+//    if (pt->SSSSSS() == DCacheBased){
+//        PhraseDictionaryCacheIndex = i;
+//    }
     pt->Load();
   }
 

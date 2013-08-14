@@ -150,6 +150,10 @@ protected:
   XmlInputType m_xmlInputType; //! method for handling sentence XML input
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
+  int PhraseDictionaryCacheIndex; //Index of the PhraseDictionarCache
+  size_t PhraseDictionaryCacheScoreType; //Scoring type for PhraseDictionaryCache
+  unsigned int PhraseDictionaryCacheMaxAge; //maximum age of the entries in PhraseDictionaryCache
+
   bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
   bool m_mira; // do mira training
@@ -278,6 +282,16 @@ public:
   }
   const std::vector<FactorType> &GetOutputFactorOrder() const {
     return m_outputFactorOrder;
+  }
+
+  inline int GetPhraseDictionaryCacheIndex() const {
+    return PhraseDictionaryCacheIndex;
+  }
+  inline size_t GetPhraseDictionaryCacheScoreType() const {
+    return PhraseDictionaryCacheScoreType;
+  }
+  inline unsigned int GetPhraseDictionaryCacheMaxAge() const {
+    return PhraseDictionaryCacheMaxAge;
   }
 
   inline bool GetSourceStartPosMattersForRecombination() const {
