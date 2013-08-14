@@ -143,8 +143,8 @@ void BleuScoreFeature::SetParameter(const std::string& key, const std::string& v
 
 std::vector<float> BleuScoreFeature::DefaultWeights() const
 {
-	std::vector<float> ret(m_numScoreComponents, 1);
-	return ret;
+  std::vector<float> ret(m_numScoreComponents, 1);
+  return ret;
 }
 
 void BleuScoreFeature::PrintHistory(std::ostream& out) const

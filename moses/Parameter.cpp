@@ -361,15 +361,15 @@ bool Parameter::LoadParam(int argc, char* argv[])
 void Parameter::AddFeaturesCmd()
 {
   if (!isParamSpecified("feature-add")) {
-	  return;
+    return;
   }
 
   const PARAM_VEC &params = GetParam("feature-add");
 
   PARAM_VEC::const_iterator iter;
   for (iter = params.begin(); iter != params.end(); ++iter) {
-	  const string &line = *iter;
-	  AddFeature(line);
+    const string &line = *iter;
+    AddFeature(line);
   }
 
   m_setting.erase("feature-add");
@@ -838,15 +838,15 @@ void Parameter::ConvertWeightArgsWordPenalty()
 
 void Parameter::ConvertPhrasePenalty()
 {
-	string oldWeightName = "weight-p";
-	if (isParamSpecified(oldWeightName)) {
-		CHECK(m_setting[oldWeightName].size() == 1);
-		float weight = Scan<float>(m_setting[oldWeightName][0]);
-		AddFeature("PhrasePenalty");
-		SetWeight("PhrasePenalty", 0, weight);
+  string oldWeightName = "weight-p";
+  if (isParamSpecified(oldWeightName)) {
+    CHECK(m_setting[oldWeightName].size() == 1);
+    float weight = Scan<float>(m_setting[oldWeightName][0]);
+    AddFeature("PhrasePenalty");
+    SetWeight("PhrasePenalty", 0, weight);
 
-		m_setting.erase(oldWeightName);
-	}
+    m_setting.erase(oldWeightName);
+  }
 }
 
 void Parameter::ConvertWeightArgs()

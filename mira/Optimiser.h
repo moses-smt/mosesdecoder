@@ -70,16 +70,16 @@ public:
     Optimiser() { }
 
   MiraOptimiser(float slack) :
-      Optimiser(),
-      m_slack(slack),
-      m_scale_margin(false),
-      m_scale_update(false),
-      m_boost(false),
-      m_normaliseMargin(false),
-      m_sigmoidParam(1.0) { }
+    Optimiser(),
+    m_slack(slack),
+    m_scale_margin(false),
+    m_scale_update(false),
+    m_boost(false),
+    m_normaliseMargin(false),
+    m_sigmoidParam(1.0) { }
 
-  MiraOptimiser(float slack, bool scale_margin, bool scale_update, 
-		bool boost, bool normaliseMargin, float sigmoidParam) :
+  MiraOptimiser(float slack, bool scale_margin, bool scale_update,
+                bool boost, bool normaliseMargin, float sigmoidParam) :
     Optimiser(),
     m_slack(slack),
     m_scale_margin(scale_margin),
