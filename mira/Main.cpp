@@ -172,7 +172,7 @@ int main(int argc, char** argv)
   ("sparse-r0", po::value<float>(&sparse_r0)->default_value(1.0), "Start learning rate for sparse features")
   ("decay-core", po::value<float>(&decay_core)->default_value(0.01), "Decay for core feature learning rate")
   ("decay-sparse", po::value<float>(&decay_sparse)->default_value(0.01), "Decay for sparse feature learning rate")
-  
+
   ("tie-bw-to-lm", po::value<bool>(&bleu_weight_lm)->default_value(true), "Make bleu weight depend on lm weight")
   ("bw-lm-factor", po::value<float>(&bleu_weight_lm_factor)->default_value(2.0), "Make bleu weight depend on lm weight by this factor")
   ("bw-factor-fear", po::value<float>(&bleu_weight_fear_factor)->default_value(1.0), "Multiply fear weight by this factor")
@@ -450,8 +450,8 @@ int main(int argc, char** argv)
       if (normaliseMargin)
         cerr << "sigmoid parameter: " << sigmoidParam << endl;
     }
-   optimiser = new MiraOptimiser(slack, scale_margin, scale_update, boost, normaliseMargin, sigmoidParam);
-   learning_rate = mira_learning_rate;
+    optimiser = new MiraOptimiser(slack, scale_margin, scale_update, boost, normaliseMargin, sigmoidParam);
+    learning_rate = mira_learning_rate;
     perceptron_update = false;
   } else if (learner == "perceptron") {
     if (rank == 0) {
@@ -1026,20 +1026,19 @@ int main(int argc, char** argv)
               float bleuDiff = bleuHope - bleuScores[batchPosition][i];
               float modelDiff = modelScores[batchPosition][indexHope] - modelScores[batchPosition][i];
               if ((bleuDiff > epsilon) && (modelDiff < bleuDiff)) {
-								float diff = bleuDiff - modelDiff;
-								if (diff > epsilon) {
-								  if (all_violated) {
-								    cerr << ".. adding pair";
-								    bleuHopeList.push_back(bleuHope);
-								    bleuFearList.push_back(bleuScores[batchPosition][i]);
-								    indexHopeList.push_back(indexHope);
-								    indexFearList.push_back(i);
-						 		  }
-							  	else if (most_violated && diff > currentViolation) {
-								    currentViolation = diff;
-								    bleuFear = bleuScores[batchPosition][i];
-								    indexFear = i;
-								    cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << currentViolation << " (" << modelDiff << " >= " << bleuDiff << ")" << endl;
+                float diff = bleuDiff - modelDiff;
+                if (diff > epsilon) {
+                  if (all_violated) {
+                    cerr << ".. adding pair";
+                    bleuHopeList.push_back(bleuHope);
+                    bleuFearList.push_back(bleuScores[batchPosition][i]);
+                    indexHopeList.push_back(indexHope);
+                    indexFearList.push_back(i);
+                  } else if (most_violated && diff > currentViolation) {
+                    currentViolation = diff;
+                    bleuFear = bleuScores[batchPosition][i];
+                    indexFear = i;
+                    cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << currentViolation << " (" << modelDiff << " >= " << bleuDiff << ")" << endl;
                   }
                 }
               }
