@@ -130,11 +130,17 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     if ((*dlt_meta_it).find("cbtm-command") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cbtm-command:|" << (*dlt_meta_it)["cbtm-command"] << "|" << endl;
     }
+    if ((*dlt_meta_it).find("cbtm-file") != (*dlt_meta_it).end()) {
+      std::cerr << "Sentence:: cbtm-file:|" << (*dlt_meta_it)["cbtm-file"] << "|" << endl;
+    }
     if ((*dlt_meta_it).find("cblm") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cblm:|" << (*dlt_meta_it)["cblm"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cblm-command") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cblm-command:|" << (*dlt_meta_it)["cblm-command"] << "|" << endl;
+    }
+    if ((*dlt_meta_it).find("cblm-file") != (*dlt_meta_it).end()) {
+      std::cerr << "Sentence:: cblm-file:|" << (*dlt_meta_it)["cblm-file"] << "|" << endl;
     }
   }
 
