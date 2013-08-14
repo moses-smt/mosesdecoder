@@ -1,4 +1,4 @@
-// $Id$
+
 // vim:tabstop=2
 
 /***********************************************************************
@@ -116,6 +116,35 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   } else {
     this->SetSpecifiesWeightSetting(false);
   }
+
+  std::cerr << "Sentence:: line before DLT:|" << line << "|" << endl;
+  std::vector< std::map<std::string, std::string> > dlt_meta = ProcessAndStripDLT(line);
+  std::cerr << "Sentence:: line after DLT:|" << line << "|" << endl;
+
+  std::vector< std::map<std::string, std::string> >::iterator dlt_meta_it = dlt_meta.begin();
+  for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it)
+  {
+    std::cerr << "Sentence:: processing DLT info" << endl;
+    if ((*dlt_meta_it).find("cbtm") != (*dlt_meta_it).end())
+    {
+       std::cerr << "Sentence:: cbtm:|" << (*dlt_meta_it)["cbtm"] << "|" << endl;
+    }
+    if ((*dlt_meta_it).find("cbtm-command") != (*dlt_meta_it).end())
+    {
+       std::cerr << "Sentence:: cbtm-command:|" << (*dlt_meta_it)["cbtm-command"] << "|" << endl;
+    }
+    if ((*dlt_meta_it).find("cblm") != (*dlt_meta_it).end())
+    {
+       std::cerr << "Sentence:: cblm:|" << (*dlt_meta_it)["cblm"] << "|" << endl;
+    }
+    if ((*dlt_meta_it).find("cblm-command") != (*dlt_meta_it).end())
+    {
+       std::cerr << "Sentence:: cblm-command:|" << (*dlt_meta_it)["cblm-command"] << "|" << endl;
+    }
+  }
+
+//  exit(1);
+
 
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
