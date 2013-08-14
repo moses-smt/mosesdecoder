@@ -138,9 +138,6 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     }
   }
 
-//  exit(1);
-
-
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
   std::vector<XmlOption*> xmlOptionsList(0);

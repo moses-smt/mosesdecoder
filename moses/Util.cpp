@@ -132,7 +132,7 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
     line.erase(start,close-start+2);
     lline.erase(start,close-start+2);
 
-    if (dlt == ""){
+    if (dlt != ""){
 
     std::map<std::string, std::string> tmp_meta;
     for (size_t i = 1; i < dlt.size(); i++) {
