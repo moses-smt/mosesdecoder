@@ -114,19 +114,20 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
   bool check_dlt = true;
 
   std::cerr << "GLOBAL START" << endl;
-  while (check_dlt) {
+  while (check_dlt)
+  {
 //    std::cerr << "index:|" << index << "|" << endl;
     size_t start = lline.find("<dlt");
-    if (start == std::string::npos) {
-      //no more dlt tags
+    if (start == std::string::npos)
+    { //no more dlt tags
       check_dlt = false;
       continue;
     }
     size_t close = lline.find("/>");
-    if (close == std::string::npos) {
-      // error: dlt tag is not ended
-      check_dlt = false;
-      continue;
+    if (close == std::string::npos)
+    { // error: dlt tag is not ended
+      check_dlt = false; 
+      continue; 
     }
     std::string dlt = Trim(lline.substr(start+4, close-start-4));
 //    std::cerr << "dlt:|" << dlt << "|" << endl;
@@ -145,7 +146,7 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
         if (val[0] == '"') {
           val = val.substr(1);
           // it admits any double quotation mark in the value of the attribute
-          // it assumes that just one attribute is present in the tag,
+          // it assumes that just one attribute is present in the tag, 
           // it assumes that the value starts and ends with double quotation mark
           size_t close = val.rfind('"');
           if (close == std::string::npos) {
@@ -169,7 +170,7 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
         }
         label = Trim(label);
         dlt = Trim(dlt);
-
+      
         tmp_meta[label] = val;
       }
     }
