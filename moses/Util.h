@@ -372,6 +372,9 @@ void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
 
+// dump SGML parser for <dlt> tags
+std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string &line);
+
 // dump SGML parser for <seg> tags
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
 

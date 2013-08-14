@@ -107,6 +107,80 @@ double GetUserTime()
   return g_timer.get_elapsed_time();
 }
 
+std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string &line)
+{
+  std::vector< std::map<std::string, std::string> > meta;
+  std::string lline = ToLower(line);
+  bool check_dlt = true;
+
+  std::cerr << "GLOBAL START" << endl;
+  while (check_dlt)
+  {
+//    std::cerr << "index:|" << index << "|" << endl;
+    size_t start = lline.find("<dlt");
+    if (start == std::string::npos)
+    { //no more dlt tags
+      check_dlt = false;
+      continue;
+    }
+    size_t close = lline.find("/>");
+    if (close == std::string::npos)
+    { // error: dlt tag is not ended
+      check_dlt = false; 
+      continue; 
+    }
+    std::string dlt = Trim(lline.substr(start+4, close-start-4));
+//    std::cerr << "dlt:|" << dlt << "|" << endl;
+    line.erase(start,close+2);
+    lline.erase(start,close+2);
+
+    if (dlt == "") continue;
+
+    std::map<std::string, std::string> tmp_meta;
+    for (size_t i = 1; i < dlt.size(); i++) {
+      if (dlt[i] == '=') {
+        std::string label = dlt.substr(0, i);
+        std::string val = dlt.substr(i+1);
+//        std::cerr << "label:|" << label << "|" << endl;
+//        std::cerr << "val:|" << val << "|" << endl;
+        if (val[0] == '"') {
+          val = val.substr(1);
+          // it admits any double quotation mark in the value of the attribute
+          // it assumes that just one attribute is present in the tag, 
+          // it assumes that the value starts and ends with double quotation mark
+          size_t close = val.rfind('"');
+          if (close == std::string::npos) {
+            TRACE_ERR("SGML parse error: missing \"\n");
+            dlt = "";
+            i = 0;
+          } else {
+            dlt = val.substr(close+1);
+            val = val.substr(0, close);
+            i = 0;
+          }
+        } else {
+          size_t close = val.find(' ');
+          if (close == std::string::npos) {
+            dlt = "";
+            i = 0;
+          } else {
+            dlt = val.substr(close+1);
+            val = val.substr(0, close);
+          }
+        }
+        label = Trim(label);
+        dlt = Trim(dlt);
+      
+        tmp_meta[label] = val;
+      }
+    }
+
+    meta.push_back(tmp_meta);
+  }
+  std::cerr << "GLOBAL END" << endl;
+  return meta;
+}
+
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line)
 {
   std::map<std::string, std::string> meta;
