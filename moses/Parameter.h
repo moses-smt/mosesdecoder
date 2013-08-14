@@ -73,6 +73,7 @@ protected:
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
   void ConvertWeightArgsWordPenalty();
+  void ConvertPhrasePenalty();
   void CreateWeightsMap();
   void WeightOverwrite();
   void AddFeature(const std::string &line);

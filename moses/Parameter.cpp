@@ -372,6 +372,7 @@ void Parameter::AddFeaturesCmd()
 	  AddFeature(line);
   }
 
+  m_setting.erase("feature-add");
 }
 
 std::vector<float> &Parameter::GetWeights(const std::string &name)
@@ -835,6 +836,19 @@ void Parameter::ConvertWeightArgsWordPenalty()
 
 }
 
+void Parameter::ConvertPhrasePenalty()
+{
+	string oldWeightName = "weight-p";
+	if (isParamSpecified(oldWeightName)) {
+		CHECK(m_setting[oldWeightName].size() == 1);
+		float weight = Scan<float>(m_setting[oldWeightName][0]);
+		AddFeature("PhrasePenalty");
+		SetWeight("PhrasePenalty", 0, weight);
+
+		m_setting.erase(oldWeightName);
+	}
+}
+
 void Parameter::ConvertWeightArgs()
 {
   // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
@@ -866,6 +880,8 @@ void Parameter::ConvertWeightArgs()
 
   ConvertWeightArgsSingleWeight("weight-e", "WordDeletion"); // TODO Can't find real name
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
+
+  ConvertPhrasePenalty();
 
   AddFeature("WordPenalty");
   AddFeature("UnknownWordPenalty");
