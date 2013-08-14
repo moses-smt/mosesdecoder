@@ -112,10 +112,9 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
   std::vector< std::map<std::string, std::string> > meta;
   std::string lline = ToLower(line);
   bool check_dlt = true;
-
-  std::cerr << "GLOBAL START" << endl;
+ 
+ std::cerr << "GLOBAL START" << endl;
   while (check_dlt) {
-//    std::cerr << "index:|" << index << "|" << endl;
     size_t start = lline.find("<dlt");
     if (start == std::string::npos) {
       //no more dlt tags
@@ -130,10 +129,10 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
     }
     std::string dlt = Trim(lline.substr(start+4, close-start-4));
 //    std::cerr << "dlt:|" << dlt << "|" << endl;
-    line.erase(start,close+2);
-    lline.erase(start,close+2);
+    line.erase(start,close-start+2);
+    lline.erase(start,close-start+2);
 
-    if (dlt == "") continue;
+    if (dlt == ""){
 
     std::map<std::string, std::string> tmp_meta;
     for (size_t i = 1; i < dlt.size(); i++) {
@@ -175,6 +174,7 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
     }
 
     meta.push_back(tmp_meta);
+   }
   }
   std::cerr << "GLOBAL END" << endl;
   return meta;
