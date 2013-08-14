@@ -257,10 +257,6 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
 
   targetPhrase.GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
 
-  if (inputScores != NULL) {
-    targetPhrase.SetInputScore(*inputScores);
-  }
-
   // source phrase
   const Phrase &sourcePhrase = inputPath.GetPhrase();
   m_unksrcs.push_back(&sourcePhrase);

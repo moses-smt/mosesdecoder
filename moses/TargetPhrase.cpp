@@ -149,20 +149,6 @@ void TargetPhrase::SetXMLScore(float score)
   m_scoreBreakdown.Assign(prod, scoreVector);
 }
 
-void TargetPhrase::SetInputScore(const Scores &scoreVector)
-{
-  //we use an existing score producer to figure out information for score setting (number of scores and weights)
-  const StaticData &staticData = StaticData::Instance();
-  const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
-
-  //expand the input weight vector
-  CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
-  Scores sizedScoreVector = scoreVector;
-  sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
-
-  m_scoreBreakdown.Assign(prod, sizedScoreVector);
-}
-
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
   AlignmentInfo::CollType alignTerm, alignNonTerm;

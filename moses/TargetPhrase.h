@@ -72,7 +72,6 @@ public:
 
   // used to set translation or gen score
   void SetXMLScore(float score);
-  void SetInputScore(const Scores &scoreVector);
 
 #ifdef HAVE_PROTOBUF
   void WriteToRulePB(hgmert::Rule* pb) const;

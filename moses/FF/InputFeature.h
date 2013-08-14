@@ -16,6 +16,8 @@ protected:
 public:
   InputFeature(const std::string &line);
 
+  void SetParameter(const std::string& key, const std::string& value);
+
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
@@ -27,6 +29,9 @@ public:
     return m_numRealWordCount;
   }
 
+  virtual void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const;
 
 };
 
