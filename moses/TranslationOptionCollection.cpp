@@ -429,7 +429,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   , InputPath &inputPath)
 {
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
-    const Phrase &sourcePhrase = inputPath.GetPhrase(); // can't initialise with substring, in case it's confusion network
 
     // partial trans opt stored in here
     PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
@@ -497,7 +496,9 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
     vector<TranslationOption*>::const_iterator iterColl;
     for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
       TranslationOption *transOpt = *iterColl;
-      Add(transOpt);
+      if (StaticData::Instance().GetXmlInputType() != XmlConstraint || !ViolatesXmlOptionsConstraint(startPos,endPos,transOpt)) {
+        Add(transOpt);
+      }
     }
 
     lastPartialTranslOptColl.DetachAll();
@@ -546,7 +547,6 @@ void TranslationOptionCollection::EvaluateWithSource()
       }
     }
   }
-
 }
 
 void TranslationOptionCollection::Sort()

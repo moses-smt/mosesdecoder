@@ -89,36 +89,42 @@ bool TranslationOptionCollectionText::ViolatesXmlOptionsConstraint(size_t startP
   if (!source.XmlOverlap(startPosition,endPosition)) {
     return false;
   }
-  // check for all sub spans
-  for(size_t start=startPosition; start<=endPosition; start++) {
-    for(size_t end=start; end<=endPosition; end++) {
-      // get list of xml options for the subspan
-      vector <TranslationOption*> xmlOptions;
-      source.GetXmlTranslationOptions(xmlOptions,start,end);
-      if (xmlOptions.size() > 0) {
-        // check if any xml option matches
-        for(size_t i=0; i<xmlOptions.size(); i++) {
-          const TargetPhrase &phrase = transOpt->GetTargetPhrase();
-          const TargetPhrase &xmlPhrase = xmlOptions[i]->GetTargetPhrase();
-          // check this xml option (if shorter)
-          if (phrase.GetSize() >= xmlPhrase.GetSize()) {
-            // match may start in middle of phrase
-            for(size_t offset=0; offset <= phrase.GetSize()-xmlPhrase.GetSize(); offset++) {
-              bool match = true;
-              // match every word (only surface factor)
-              for(size_t wordPos=0; match && wordPos < xmlPhrase.GetSize(); wordPos++) {
-                if (phrase.GetFactor( wordPos+offset,0 )->Compare(*(xmlPhrase.GetFactor( wordPos,0 )))) {
-                  match = false;
-                }
-              }
-              if (match) {
-		return false; // no violation if matching xml option found
-              }
-            }
+  vector <TranslationOption*> xmlOptions;
+  source.GetXmlTranslationOptions(xmlOptions);
+  for(size_t i=0; i<xmlOptions.size(); i++) {
+    const WordsRange &range = xmlOptions[i]->GetSourceWordsRange();
+    // if transOpt is a subphrase of a xml specification, do not use it
+    if (range.GetStartPos() <= startPosition && range.GetEndPos() >= endPosition &&
+        (range.GetStartPos() < startPosition || range.GetEndPos() > endPosition)) {
+      return true;
+    }
+    // if transOpt is partially overlapping, do not use it
+    if ((range.GetStartPos() < startPosition && range.GetEndPos() >= startPosition && range.GetEndPos() < endPosition) ||
+        (range.GetEndPos() > endPosition && range.GetStartPos() <= endPosition && range.GetStartPos() > startPosition)) {
+      return true;
+    }
+    // if transOpt is match or superphrase, check
+    if (range.GetStartPos() >= startPosition && range.GetEndPos() <= endPosition) {
+      const TargetPhrase &phrase = transOpt->GetTargetPhrase();
+      const TargetPhrase &xmlPhrase = xmlOptions[i]->GetTargetPhrase();
+      // if transOpt target is shorter, do not use it
+      if (phrase.GetSize() < xmlPhrase.GetSize()) {
+        return true;
+      }
+      // match may start in middle of phrase
+      for(size_t offset=0; offset <= phrase.GetSize()-xmlPhrase.GetSize(); offset++) {
+        bool match = true;
+        // match every word (only surface factor)
+        for(size_t wordPos=0; match && wordPos < xmlPhrase.GetSize(); wordPos++) {
+          if (phrase.GetFactor( wordPos+offset,0 )->Compare(*(xmlPhrase.GetFactor( wordPos,0 )))) {
+            match = false;
           }
         }
-	return true; // there were xml options for this range, but none matched
-      } 
+        if (match) {
+          return false; // no violation if matching xml option found
+        } 
+      }
+      return true;
     }
   }
   return false;
