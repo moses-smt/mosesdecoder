@@ -364,6 +364,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
+  SetBooleanParameter( &m_markUnknown, "mark-unknown", false );
 
   SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 

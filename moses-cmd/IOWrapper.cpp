@@ -196,6 +196,7 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
 {
   CHECK(outputFactorOrder.size() > 0);
   const Phrase& phrase = edge.GetCurrTargetPhrase();
+  bool markUnknown = StaticData::Instance().GetMarkUnknown();
   if (reportAllFactors == true) {
     out << phrase;
   } else {
@@ -212,8 +213,16 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
         }
       }
       CHECK(factor);
-      out << *factor;
 
+      //preface surface form with UNK if marking unknowns
+      const Word &word = phrase.GetWord(pos);
+      if(markUnknown && word.IsOOV()) {
+	out << "UNK" << *factor;
+      }
+      else {
+	out << *factor;
+      }
+      
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
         CHECK(factor);
