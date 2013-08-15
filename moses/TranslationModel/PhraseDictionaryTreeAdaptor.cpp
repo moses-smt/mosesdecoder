@@ -28,16 +28,32 @@ namespace Moses
 PhraseDictionaryTreeAdaptor::
 PhraseDictionaryTreeAdaptor(const std::string &line)
   : PhraseDictionary("PhraseDictionaryBinary", line)
+  , m_useCache(true)
 {
   ReadParameters();
 }
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
+	std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+	for (iter = m_cache.begin(); iter != m_cache.end(); ++iter) {
+		const TargetPhraseCollection *coll = iter->second;
+		delete coll;
+	}
 }
+
 void PhraseDictionaryTreeAdaptor::Load()
 {
   SetFeaturesToApply();
+}
+
+void PhraseDictionaryTreeAdaptor::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "use-cache") {
+	  m_useCache = Scan<bool>(value);
+  } else {
+	  PhraseDictionary::SetParameter(key, value);
+  }
 }
 
 void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
@@ -74,7 +90,39 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
 TargetPhraseCollection const*
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(Phrase const &src) const
 {
-  return GetImplementation().GetTargetPhraseCollection(src);
+  const TargetPhraseCollection *ret;
+  if (m_useCache) {
+    size_t hash = hash_value(src);
+
+    std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+
+    { // scope of read lock
+	  #ifdef WITH_THREADS
+    	boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+	  #endif
+      iter = m_cache.find(hash);
+    }
+
+    if (iter == m_cache.end()) {
+      ret = GetImplementation().GetTargetPhraseCollection(src);
+      if (ret) {
+        ret = new TargetPhraseCollection(*ret);
+      }
+
+	  #ifdef WITH_THREADS
+   	    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+	  #endif
+      m_cache[hash] = ret;
+    }
+    else {
+    	ret = iter->second;
+    }
+  }
+  else {
+	ret = GetImplementation().GetTargetPhraseCollection(src);
+  }
+
+  return ret;
 }
 
 void PhraseDictionaryTreeAdaptor::EnableCache()

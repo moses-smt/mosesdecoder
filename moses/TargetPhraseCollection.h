@@ -57,6 +57,11 @@ public:
     return m_collection.end();
   }
 
+  TargetPhraseCollection()
+  {}
+
+  explicit TargetPhraseCollection(const TargetPhraseCollection &copy);
+
   ~TargetPhraseCollection() {
     Remove();
   }
