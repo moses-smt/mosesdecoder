@@ -51,7 +51,7 @@ public:
   TranslationOptionCollectionText(Sentence const& input, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
-
+  bool ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const;
   void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
 
   void CreateTranslationOptions();

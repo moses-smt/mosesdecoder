@@ -80,6 +80,51 @@ bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t start
 }
 
 /**
+ * Check if the given translation option violates a specified xml Option
+ */
+bool TranslationOptionCollectionText::ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const
+{
+  // skip if there is no overlap
+  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  if (!source.XmlOverlap(startPosition,endPosition)) {
+    return false;
+  }
+  // check for all sub spans
+  for(size_t start=startPosition; start<=endPosition; start++) {
+    for(size_t end=start; end<=endPosition; end++) {
+      // get list of xml options for the subspan
+      vector <TranslationOption*> xmlOptions;
+      source.GetXmlTranslationOptions(xmlOptions,start,end);
+      if (xmlOptions.size() > 0) {
+        // check if any xml option matches
+        for(size_t i=0; i<xmlOptions.size(); i++) {
+          const TargetPhrase &phrase = transOpt->GetTargetPhrase();
+          const TargetPhrase &xmlPhrase = xmlOptions[i]->GetTargetPhrase();
+          // check this xml option (if shorter)
+          if (phrase.GetSize() >= xmlPhrase.GetSize()) {
+            // match may start in middle of phrase
+            for(size_t offset=0; offset <= phrase.GetSize()-xmlPhrase.GetSize(); offset++) {
+              bool match = true;
+              // match every word (only surface factor)
+              for(size_t wordPos=0; match && wordPos < xmlPhrase.GetSize(); wordPos++) {
+                if (phrase.GetFactor( wordPos+offset,0 )->Compare(*(xmlPhrase.GetFactor( wordPos,0 )))) {
+                  match = false;
+                }
+              }
+              if (match) {
+		return false; // no violation if matching xml option found
+              }
+            }
+          }
+        }
+	return true; // there were xml options for this range, but none matched
+      } 
+    }
+  }
+  return false;
+}
+
+/**
  * Create xml-based translation options for the specific input span
  */
 void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPos, size_t endPos)
@@ -139,6 +184,4 @@ void TranslationOptionCollectionText::CreateTranslationOptionsForRange(
 
 
 }
-
-
 

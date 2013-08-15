@@ -140,6 +140,9 @@ public:
   //!Check if this range has XML options
   virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
 
+  //! Check if a subsumed XML option constraint is satisfied
+  virtual bool ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const;
+
   //! Create xml-based translation options for the specific input span
   virtual void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
 

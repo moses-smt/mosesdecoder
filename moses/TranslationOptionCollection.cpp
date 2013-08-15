@@ -569,9 +569,20 @@ void TranslationOptionCollection::Sort()
  * called by CreateTranslationOptionsForRange()
  * \param startPos first position in input sentence
  * \param lastPos last position in input sentence
- * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
 bool TranslationOptionCollection::HasXmlOptionsOverlappingRange(size_t, size_t) const
+{
+  return false;
+  //not implemented for base class
+}
+
+/** Check if an option conflicts with any constraint XML options. Okay, if XML option is substring in source and target.
+ * by default, we don't support XML options. subclasses need to override this function.
+ * called by CreateTranslationOptionsForRange()
+ * \param startPos first position in input sentence
+ * \param lastPos last position in input sentence
+ */
+bool TranslationOptionCollection::ViolatesXmlOptionsConstraint(size_t, size_t, TranslationOption *) const
 {
   return false;
   //not implemented for base class
@@ -588,9 +599,7 @@ void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t)
 };
 
 
-
-
-/** add translation option to the list
+/** Add translation option to the list
  * \param translationOption translation option to be added */
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
