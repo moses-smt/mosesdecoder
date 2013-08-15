@@ -43,34 +43,33 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
 {
   const TargetPhraseCollection *ret;
   if (m_useCache) {
-	size_t hash = hash_value(src);
+    size_t hash = hash_value(src);
 
-	std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+    std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
 
-	{ // scope of read lock
-	  #ifdef WITH_THREADS
-		boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-	  #endif
-	  iter = m_cache.find(hash);
-	}
+    {
+      // scope of read lock
+#ifdef WITH_THREADS
+      boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+#endif
+      iter = m_cache.find(hash);
+    }
 
-	if (iter == m_cache.end()) {
-	  ret = GetTargetPhraseCollectionNonCache(src);
-	  if (ret) {
-		ret = new TargetPhraseCollection(*ret);
-	  }
+    if (iter == m_cache.end()) {
+      ret = GetTargetPhraseCollectionNonCache(src);
+      if (ret) {
+        ret = new TargetPhraseCollection(*ret);
+      }
 
-	  #ifdef WITH_THREADS
-		boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-	  #endif
-	  m_cache[hash] = ret;
-	}
-	else {
-		ret = iter->second;
-	}
-  }
-  else {
-	ret = GetTargetPhraseCollectionNonCache(src);
+#ifdef WITH_THREADS
+      boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+#endif
+      m_cache[hash] = ret;
+    } else {
+      ret = iter->second;
+    }
+  } else {
+    ret = GetTargetPhraseCollectionNonCache(src);
   }
 
   return ret;

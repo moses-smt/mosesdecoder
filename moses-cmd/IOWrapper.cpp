@@ -379,9 +379,9 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
     Backtrack(hypo);
     VERBOSE(3,"0" << std::endl);
     if (!m_surpressSingleBestOutput) {
-		if (StaticData::Instance().GetOutputHypoScore()) {
-			cout << hypo->GetTotalScore() << " ";
-		}
+      if (StaticData::Instance().GetOutputHypoScore()) {
+        cout << hypo->GetTotalScore() << " ";
+      }
 
       if (StaticData::Instance().IsPathRecoveryEnabled()) {
         OutputInput(cout, hypo);
