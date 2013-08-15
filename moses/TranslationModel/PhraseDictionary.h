@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #endif
 
 #include "moses/Phrase.h"
@@ -112,6 +113,17 @@ protected:
 
   // MUST be called at the start of Load()
   void SetFeaturesToApply();
+
+  // cache
+  int m_useCache; // 666=not yet set, otherwise act like a bool
+  mutable std::map<size_t, const TargetPhraseCollection*> m_cache;
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_accessLock;
+#endif
+
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const Phrase& src) const;
+
 };
 
 }

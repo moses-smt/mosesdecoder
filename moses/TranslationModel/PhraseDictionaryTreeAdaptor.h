@@ -11,7 +11,6 @@
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #else
 #include <boost/scoped_ptr.hpp>
 #endif
@@ -45,20 +44,10 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
   PDTAimp& GetImplementation();
   const PDTAimp& GetImplementation() const;
 
-  // cache
-  bool m_useCache;
-  mutable std::map<size_t, const TargetPhraseCollection*> m_cache;
-#ifdef WITH_THREADS
-  //reader-writer lock
-  mutable boost::shared_mutex m_accessLock;
-#endif
-
 public:
   PhraseDictionaryTreeAdaptor(const std::string &line);
   virtual ~PhraseDictionaryTreeAdaptor();
   void Load();
-
-  void SetParameter(const std::string& key, const std::string& value);
 
   // enable/disable caching
   // you enable caching if you request the target candidates for a source phrase multiple times
@@ -71,7 +60,7 @@ public:
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
-  TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
+  TargetPhraseCollection const* GetTargetPhraseCollectionNonCache(Phrase const &src) const;
 
   void InitializeForInput(InputType const& source);
   void CleanUpAfterSentenceProcessing(InputType const& source);
