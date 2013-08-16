@@ -79,7 +79,8 @@ public:
   virtual void InitializeForInput(InputType const& source);
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
-  TargetPhraseCollection *GetTargetPhraseCollectionNonCached(const OnDiskPt::PhraseNode *ptNode) const;
+  const TargetPhraseCollection *GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
+  const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
 
 };
 

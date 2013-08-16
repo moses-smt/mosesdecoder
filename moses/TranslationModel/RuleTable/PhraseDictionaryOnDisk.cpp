@@ -127,7 +127,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
       } else {
         const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
         if (ptNode) {
-        	TargetPhraseCollection *targetPhrases = GetTargetPhraseCollectionNonCached(ptNode);
+        	const TargetPhraseCollection *targetPhrases = GetTargetPhraseCollection(ptNode);
             inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
         } else {
           inputPath.SetTargetPhrases(*this, NULL, NULL);
@@ -138,7 +138,43 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
     }
 }
 
-TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionNonCached(const OnDiskPt::PhraseNode *ptNode) const
+const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
+{
+	  const TargetPhraseCollection *ret;
+	  if (m_useCache) {
+	    size_t hash = (size_t) ptNode->GetFilePos();
+
+	    std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+
+	    {
+	      // scope of read lock
+	#ifdef WITH_THREADS
+	      boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+	#endif
+	      iter = m_cache.find(hash);
+	    }
+
+	    if (iter == m_cache.end()) {
+	      ret = GetTargetPhraseCollectionNonCache(ptNode);
+	      if (ret) {
+	        ret = new TargetPhraseCollection(*ret);
+	      }
+
+	#ifdef WITH_THREADS
+	      boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+	#endif
+	      m_cache[hash] = ret;
+	    } else {
+	      ret = iter->second;
+	    }
+	  } else {
+	    ret = GetTargetPhraseCollectionNonCache(ptNode);
+	  }
+
+	  return ret;
+}
+
+const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const
 {
     OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
 
