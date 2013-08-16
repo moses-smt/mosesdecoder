@@ -115,15 +115,15 @@ protected:
   void SetFeaturesToApply();
 
   // cache
-  int m_useCache; // 666=not yet set, otherwise act like a bool
-  mutable std::map<size_t, const TargetPhraseCollection*> m_cache;
+  size_t m_maxCacheSize; // 0 = no caching
+  mutable std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > m_cache;
 #ifdef WITH_THREADS
   //reader-writer lock
   mutable boost::shared_mutex m_accessLock;
 #endif
 
   virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const Phrase& src) const;
-
+  void ReduceCache() const;
 };
 
 }

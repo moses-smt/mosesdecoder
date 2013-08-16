@@ -79,6 +79,8 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
 
+  ReduceCache();
+
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
   if (!obj->BeginLoad(m_filePath))
     return;
@@ -141,10 +143,10 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
 const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
 {
 	  const TargetPhraseCollection *ret;
-	  if (m_useCache) {
+	  if (m_maxCacheSize) {
 	    size_t hash = (size_t) ptNode->GetFilePos();
 
-	    std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+	    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
 
 	    {
 	      // scope of read lock
@@ -155,17 +157,25 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
 	    }
 
 	    if (iter == m_cache.end()) {
+          // not in cache, need to look up from phrase table
 	      ret = GetTargetPhraseCollectionNonCache(ptNode);
 	      if (ret) {
 	        ret = new TargetPhraseCollection(*ret);
 	      }
 
+	      std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
+
 	#ifdef WITH_THREADS
 	      boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 	#endif
-	      m_cache[hash] = ret;
-	    } else {
-	      ret = iter->second;
+	      m_cache[hash] = value;
+	    }
+	    else {
+	    	// in cache. just use it
+	    	std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+	    	value.second = clock();
+
+	        ret = value.first;
 	    }
 	  } else {
 	    ret = GetTargetPhraseCollectionNonCache(ptNode);
