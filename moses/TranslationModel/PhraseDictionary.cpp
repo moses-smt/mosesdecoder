@@ -35,17 +35,17 @@ namespace Moses
 PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
   :DecodeFeature(description, line)
   ,m_tableLimit(20) // default
-  ,m_useCache(666)
+  ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const Phrase& src) const
 {
   const TargetPhraseCollection *ret;
-  if (m_useCache) {
+  if (m_maxCacheSize) {
     size_t hash = hash_value(src);
 
-    std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
 
     {
       // scope of read lock
@@ -56,19 +56,26 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
     }
 
     if (iter == m_cache.end()) {
+      // not in cache, need to look up from phrase table
       ret = GetTargetPhraseCollectionNonCache(src);
       if (ret) {
         ret = new TargetPhraseCollection(*ret);
       }
 
+      std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
 #ifdef WITH_THREADS
       boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
-      m_cache[hash] = ret;
+      m_cache[hash] = value;
     } else {
-      ret = iter->second;
+      // in cache. just use it
+    	std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+    	value.second = clock();
+
+    	ret = value.first;
     }
   } else {
+	// don't use cache. look up from phrase table
     ret = GetTargetPhraseCollectionNonCache(src);
   }
 
@@ -91,8 +98,8 @@ GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) co
 
 void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "use-cache") {
-    m_useCache = Scan<int>(value);
+  if (key == "cache-size") {
+	  m_maxCacheSize = Scan<size_t>(value);
   } else if (key == "path") {
     m_filePath = value;
   } else if (key == "table-limit") {
@@ -126,5 +133,37 @@ void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phras
   }
 }
 
+void PhraseDictionary::ReduceCache() const
+{
+  if (m_cache.size() <= m_maxCacheSize) return; // not full
+  clock_t t = clock();
+
+  // find cutoff for last used time
+  priority_queue< clock_t > lastUsedTimes;
+  std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
+  iter = m_cache.begin();
+  while( iter != m_cache.end() ) {
+    lastUsedTimes.push( iter->second.second );
+    iter++;
+  }
+  for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
+    lastUsedTimes.pop();
+  clock_t cutoffLastUsedTime = lastUsedTimes.top();
+
+  // remove all old entries
+#ifdef WITH_THREADS
+      boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+#endif
+
+  iter = m_cache.begin();
+  while( iter != m_cache.end() ) {
+    if (iter->second.second < cutoffLastUsedTime) {
+      std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
+      delete iterRemove->second.first;
+      m_cache.erase(iterRemove);
+    } else iter++;
+  }
+  VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
+}
 }
 

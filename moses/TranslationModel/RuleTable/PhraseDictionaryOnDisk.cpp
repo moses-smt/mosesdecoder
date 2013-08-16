@@ -79,6 +79,8 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
 
+  ReduceCache();
+
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
   if (!obj->BeginLoad(m_filePath))
     return;
@@ -91,13 +93,18 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   m_implementation.reset(obj);
 }
 
-void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
-  OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
-
   InputPathList::const_iterator iter;
-  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
+    GetTargetPhraseCollectionBatch(inputPath);
+  }
+}
+
+void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath) const
+{
+    OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
     const Phrase &phrase = inputPath.GetPhrase();
     const InputPath *prevInputPath = inputPath.GetPrevNode();
 
@@ -122,17 +129,8 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
       } else {
         const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
         if (ptNode) {
-          vector<float> weightT = StaticData::Instance().GetWeights(this);
-          OnDiskPt::Vocab &vocab = wrapper.GetVocab();
-
-          const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
-          TargetPhraseCollection *targetPhrases
-          = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
-
-          inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
-
-          delete targetPhrasesOnDisk;
-
+        	const TargetPhraseCollection *targetPhrases = GetTargetPhraseCollection(ptNode);
+            inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
         } else {
           inputPath.SetTargetPhrases(*this, NULL, NULL);
         }
@@ -140,8 +138,67 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
         delete lastWordOnDisk;
       }
     }
-  }
 }
 
+const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
+{
+	  const TargetPhraseCollection *ret;
+	  if (m_maxCacheSize) {
+	    size_t hash = (size_t) ptNode->GetFilePos();
+
+	    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
+
+	    {
+	      // scope of read lock
+	#ifdef WITH_THREADS
+	      boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+	#endif
+	      iter = m_cache.find(hash);
+	    }
+
+	    if (iter == m_cache.end()) {
+          // not in cache, need to look up from phrase table
+	      ret = GetTargetPhraseCollectionNonCache(ptNode);
+	      if (ret) {
+	        ret = new TargetPhraseCollection(*ret);
+	      }
+
+	      std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
+
+	#ifdef WITH_THREADS
+	      boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+	#endif
+	      m_cache[hash] = value;
+	    }
+	    else {
+	    	// in cache. just use it
+	    	std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+	    	value.second = clock();
+
+	        ret = value.first;
+	    }
+	  } else {
+	    ret = GetTargetPhraseCollectionNonCache(ptNode);
+	  }
+
+	  return ret;
 }
+
+const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const
+{
+    OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+
+    vector<float> weightT = StaticData::Instance().GetWeights(this);
+    OnDiskPt::Vocab &vocab = wrapper.GetVocab();
+
+    const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
+    TargetPhraseCollection *targetPhrases
+    	= targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+
+    delete targetPhrasesOnDisk;
+
+    return targetPhrases;
+}
+
+} // namespace
 

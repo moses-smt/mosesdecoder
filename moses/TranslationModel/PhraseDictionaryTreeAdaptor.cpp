@@ -34,9 +34,10 @@ PhraseDictionaryTreeAdaptor(const std::string &line)
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
-  std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+  std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::const_iterator iter;
   for (iter = m_cache.begin(); iter != m_cache.end(); ++iter) {
-    const TargetPhraseCollection *coll = iter->second;
+	const std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+    const TargetPhraseCollection *coll = value.first;
     delete coll;
   }
 }
@@ -49,6 +50,8 @@ void PhraseDictionaryTreeAdaptor::Load()
 void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
+
+  ReduceCache();
 
   PDTAimp *obj = new PDTAimp(this);
 

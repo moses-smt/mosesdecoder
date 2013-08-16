@@ -74,7 +74,7 @@ public:
 
   void Load();
 
-  const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &source) const;
+  const TargetPhraseCollection* GetTargetPhraseCollectionNonCache(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
 
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);

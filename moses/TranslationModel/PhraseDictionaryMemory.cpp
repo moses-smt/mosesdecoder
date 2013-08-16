@@ -44,6 +44,10 @@ PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
   : RuleTableTrie("PhraseDictionaryMemory", line)
 {
   ReadParameters();
+
+  // caching for memory pt is pointless
+  m_maxCacheSize = 0;
+
 }
 
 TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollection(

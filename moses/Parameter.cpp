@@ -131,7 +131,6 @@ Parameter::Parameter()
   AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
   AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
   AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
-  AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("show-weights", "print feature weights and exit");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
