@@ -122,7 +122,7 @@ bool TranslationOptionCollectionText::ViolatesXmlOptionsConstraint(size_t startP
         }
         if (match) {
           return false; // no violation if matching xml option found
-        } 
+        }
       }
       return true;
     }

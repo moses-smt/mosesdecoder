@@ -51,6 +51,7 @@ Parameter::Parameter()
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
   AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
+  AddParam("mark-unknown", "mu", "mark unknown words in output");
   AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
   AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
   AddParam("max-phrase-length", "maximum phrase length (default 20)");

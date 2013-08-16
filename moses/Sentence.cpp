@@ -250,7 +250,7 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const
   return false;
 }
 
-void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list) const 
+void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list) const
 {
   for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
        iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {

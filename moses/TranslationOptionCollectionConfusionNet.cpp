@@ -129,11 +129,11 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
   InputPathList::const_iterator iterInputPath;
   size_t j=0;
   for(iterCol = coll.begin(), iterInputPath = inputPathList.begin();
-		  iterCol != coll.end();
-		  ++iterCol , ++iterInputPath) {
-	  const InputPath &inputPath = **iterInputPath;
-	  size_t length = source.GetColumnIncrement(sourcePos, j++);
-	  const Scores &inputScores = iterCol->second;
+      iterCol != coll.end();
+      ++iterCol , ++iterInputPath) {
+    const InputPath &inputPath = **iterInputPath;
+    size_t length = source.GetColumnIncrement(sourcePos, j++);
+    const Scores &inputScores = iterCol->second;
     ProcessOneUnknownWord(inputPath ,sourcePos, length, &inputScores);
   }
 

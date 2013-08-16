@@ -120,8 +120,9 @@ public:
   }
 
   //!List of unknowns (OOVs)
-  const std::vector<const Phrase*>& GetUnknownSources() const
-  { return m_unksrcs; }
+  const std::vector<const Phrase*>& GetUnknownSources() const {
+    return m_unksrcs;
+  }
 
   //! get length/size of source input
   size_t GetSize() const {

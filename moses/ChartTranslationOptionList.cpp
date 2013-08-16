@@ -151,8 +151,8 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
 {
   CollType::iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
-	  ChartTranslationOptions &transOpts = **iter;
-	  transOpts.Evaluate(input, inputPath);
+    ChartTranslationOptions &transOpts = **iter;
+    transOpts.Evaluate(input, inputPath);
   }
 }
 

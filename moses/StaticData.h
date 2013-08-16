@@ -113,6 +113,7 @@ protected:
   std::string									m_nBestFilePath, m_latticeSamplesFilePath;
   bool                        m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
+  bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
   bool m_wordDeletionEnabled;
 
   bool m_disableDiscarding;
@@ -275,6 +276,9 @@ public:
   }
   inline bool GetDropUnknown() const {
     return m_dropUnknown;
+  }
+  inline bool GetMarkUnknown() const {
+    return m_markUnknown;
   }
   inline bool GetDisableDiscarding() const {
     return m_disableDiscarding;
