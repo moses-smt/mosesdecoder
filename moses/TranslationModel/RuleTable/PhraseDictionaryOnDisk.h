@@ -60,6 +60,8 @@ protected:
   OnDiskPt::OnDiskWrapper &GetImplementation();
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
+  void GetTargetPhraseCollectionBatch(InputPath &inputPath) const;
+
 public:
   PhraseDictionaryOnDisk(const std::string &line);
   ~PhraseDictionaryOnDisk();
@@ -75,7 +77,7 @@ public:
     const ChartCellCollectionBase &);
 
   virtual void InitializeForInput(InputType const& source);
-  void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
+  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
 };
 

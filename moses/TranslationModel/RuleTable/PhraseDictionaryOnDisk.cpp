@@ -91,13 +91,19 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   m_implementation.reset(obj);
 }
 
-void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
-  OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
-
   InputPathList::const_iterator iter;
-  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
+    GetTargetPhraseCollectionBatch(inputPath);
+  }
+}
+
+void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath) const
+{
+    OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+
     const Phrase &phrase = inputPath.GetPhrase();
     const InputPath *prevInputPath = inputPath.GetPrevNode();
 
@@ -140,7 +146,6 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
         delete lastWordOnDisk;
       }
     }
-  }
 }
 
 }
