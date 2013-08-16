@@ -246,4 +246,10 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
   }
 }
 
+bool OpSequenceModel::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[0];
+  return ret;
+}
+
 } // namespace
