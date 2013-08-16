@@ -89,6 +89,7 @@ public:
   bool XmlOverlap(size_t startPos, size_t endPos) const;
 
   //! populates vector argument with XML force translation options for the specific range passed
+  void GetXmlTranslationOptions(std::vector <TranslationOption*> &list) const;
   void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
   std::vector <ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 

@@ -429,7 +429,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   , InputPath &inputPath)
 {
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
-    const Phrase &sourcePhrase = inputPath.GetPhrase(); // can't initialise with substring, in case it's confusion network
 
     // partial trans opt stored in here
     PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
@@ -497,7 +496,9 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
     vector<TranslationOption*>::const_iterator iterColl;
     for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
       TranslationOption *transOpt = *iterColl;
-      Add(transOpt);
+      if (StaticData::Instance().GetXmlInputType() != XmlConstraint || !ViolatesXmlOptionsConstraint(startPos,endPos,transOpt)) {
+        Add(transOpt);
+      }
     }
 
     lastPartialTranslOptColl.DetachAll();
@@ -546,7 +547,6 @@ void TranslationOptionCollection::EvaluateWithSource()
       }
     }
   }
-
 }
 
 void TranslationOptionCollection::Sort()
@@ -569,9 +569,20 @@ void TranslationOptionCollection::Sort()
  * called by CreateTranslationOptionsForRange()
  * \param startPos first position in input sentence
  * \param lastPos last position in input sentence
- * \param adhereTableLimit whether phrase & generation table limits are adhered to
  */
 bool TranslationOptionCollection::HasXmlOptionsOverlappingRange(size_t, size_t) const
+{
+  return false;
+  //not implemented for base class
+}
+
+/** Check if an option conflicts with any constraint XML options. Okay, if XML option is substring in source and target.
+ * by default, we don't support XML options. subclasses need to override this function.
+ * called by CreateTranslationOptionsForRange()
+ * \param startPos first position in input sentence
+ * \param lastPos last position in input sentence
+ */
+bool TranslationOptionCollection::ViolatesXmlOptionsConstraint(size_t, size_t, TranslationOption *) const
 {
   return false;
   //not implemented for base class
@@ -588,9 +599,7 @@ void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t)
 };
 
 
-
-
-/** add translation option to the list
+/** Add translation option to the list
  * \param translationOption translation option to be added */
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {

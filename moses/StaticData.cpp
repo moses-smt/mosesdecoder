@@ -487,10 +487,11 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
   else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
   else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
+  else if (m_parameter->GetParam("xml-input")[0]=="constraint") m_xmlInputType = XmlConstraint;
   else if (m_parameter->GetParam("xml-input")[0]=="ignore") m_xmlInputType = XmlIgnore;
   else if (m_parameter->GetParam("xml-input")[0]=="pass-through") m_xmlInputType = XmlPassThrough;
   else {
-    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
+    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, constraint, or ignore");
     return false;
   }
 

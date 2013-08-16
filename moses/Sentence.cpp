@@ -250,6 +250,18 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const
   return false;
 }
 
+void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list) const 
+{
+  for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
+       iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
+    const XmlOption &xmlOption = **iterXMLOpts;
+    const WordsRange &range = xmlOption.range;
+    const TargetPhrase &targetPhrase = xmlOption.targetPhrase;
+    TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
+    list.push_back(transOpt);
+  }
+}
+
 void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const
 {
   //iterate over XmlOptions list, find exact source/target matches
