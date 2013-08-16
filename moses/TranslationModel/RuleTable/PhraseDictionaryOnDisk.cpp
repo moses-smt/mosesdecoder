@@ -103,7 +103,6 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
 void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath) const
 {
     OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
-
     const Phrase &phrase = inputPath.GetPhrase();
     const InputPath *prevInputPath = inputPath.GetPrevNode();
 
@@ -128,17 +127,8 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
       } else {
         const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
         if (ptNode) {
-          vector<float> weightT = StaticData::Instance().GetWeights(this);
-          OnDiskPt::Vocab &vocab = wrapper.GetVocab();
-
-          const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
-          TargetPhraseCollection *targetPhrases
-          = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
-
-          inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
-
-          delete targetPhrasesOnDisk;
-
+        	TargetPhraseCollection *targetPhrases = GetTargetPhraseCollectionNonCached(ptNode);
+            inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
         } else {
           inputPath.SetTargetPhrases(*this, NULL, NULL);
         }
@@ -148,5 +138,21 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
     }
 }
 
+TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionNonCached(const OnDiskPt::PhraseNode *ptNode) const
+{
+    OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+
+    vector<float> weightT = StaticData::Instance().GetWeights(this);
+    OnDiskPt::Vocab &vocab = wrapper.GetVocab();
+
+    const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
+    TargetPhraseCollection *targetPhrases
+    	= targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+
+    delete targetPhrasesOnDisk;
+
+    return targetPhrases;
 }
+
+} // namespace
 
