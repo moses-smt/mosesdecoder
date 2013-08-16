@@ -34,6 +34,15 @@ struct CompareTargetPhrase {
   }
 };
 
+TargetPhraseCollection::TargetPhraseCollection(const TargetPhraseCollection &copy)
+{
+  for (const_iterator iter = copy.begin(); iter != copy.end(); ++iter) {
+	  const TargetPhrase &origTP = **iter;
+	  TargetPhrase *newTP = new TargetPhrase(origTP);
+	  Add(newTP);
+  }
+}
+
 void TargetPhraseCollection::NthElement(size_t tableLimit)
 {
   CollType::iterator nth;

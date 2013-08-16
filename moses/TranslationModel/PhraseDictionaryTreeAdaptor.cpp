@@ -34,7 +34,13 @@ PhraseDictionaryTreeAdaptor(const std::string &line)
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
+	std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+	for (iter = m_cache.begin(); iter != m_cache.end(); ++iter) {
+		const TargetPhraseCollection *coll = iter->second;
+		delete coll;
+	}
 }
+
 void PhraseDictionaryTreeAdaptor::Load()
 {
   SetFeaturesToApply();
@@ -72,9 +78,10 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
 }
 
 TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(Phrase const &src) const
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCache(Phrase const &src) const
 {
-  return GetImplementation().GetTargetPhraseCollection(src);
+  const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
+  return ret;
 }
 
 void PhraseDictionaryTreeAdaptor::EnableCache()

@@ -35,10 +35,48 @@ namespace Moses
 PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
   :DecodeFeature(description, line)
   ,m_tableLimit(20) // default
+  ,m_useCache(666)
 {
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const Phrase& src) const
+{
+  const TargetPhraseCollection *ret;
+  if (m_useCache) {
+	size_t hash = hash_value(src);
+
+	std::map<size_t, const TargetPhraseCollection*>::const_iterator iter;
+
+	{ // scope of read lock
+	  #ifdef WITH_THREADS
+		boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+	  #endif
+	  iter = m_cache.find(hash);
+	}
+
+	if (iter == m_cache.end()) {
+	  ret = GetTargetPhraseCollectionNonCache(src);
+	  if (ret) {
+		ret = new TargetPhraseCollection(*ret);
+	  }
+
+	  #ifdef WITH_THREADS
+		boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+	  #endif
+	  m_cache[hash] = ret;
+	}
+	else {
+		ret = iter->second;
+	}
+  }
+  else {
+	ret = GetTargetPhraseCollectionNonCache(src);
+  }
+
+  return ret;
+}
+
+const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCache(const Phrase& src) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }
@@ -54,7 +92,9 @@ GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) co
 
 void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "path") {
+  if (key == "use-cache") {
+    m_useCache = Scan<int>(value);
+  } else if (key == "path") {
     m_filePath = value;
   } else if (key == "table-limit") {
     m_tableLimit = Scan<size_t>(value);

@@ -97,14 +97,14 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
 
   InputPathList::const_iterator iter;
   for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
-    InputPath &node = **iter;
-    const Phrase &phrase = node.GetPhrase();
-    const InputPath *prevNode = node.GetPrevNode();
+    InputPath &inputPath = **iter;
+    const Phrase &phrase = inputPath.GetPhrase();
+    const InputPath *prevInputPath = inputPath.GetPrevNode();
 
     const OnDiskPt::PhraseNode *prevPtNode = NULL;
 
-    if (prevNode) {
-      prevPtNode = static_cast<const OnDiskPt::PhraseNode*>(prevNode->GetPtNode(*this));
+    if (prevInputPath) {
+      prevPtNode = static_cast<const OnDiskPt::PhraseNode*>(prevInputPath->GetPtNode(*this));
     } else {
       // Starting subphrase.
       assert(phrase.GetSize() == 1);
@@ -118,7 +118,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
 
       if (lastWordOnDisk == NULL) {
         // OOV according to this phrase table. Not possible to extend
-        node.SetTargetPhrases(*this, NULL, NULL);
+        inputPath.SetTargetPhrases(*this, NULL, NULL);
       } else {
         const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
         if (ptNode) {
@@ -129,12 +129,12 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
           TargetPhraseCollection *targetPhrases
           = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
 
-          node.SetTargetPhrases(*this, targetPhrases, ptNode);
+          inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
 
           delete targetPhrasesOnDisk;
 
         } else {
-          node.SetTargetPhrases(*this, NULL, NULL);
+          inputPath.SetTargetPhrases(*this, NULL, NULL);
         }
 
         delete lastWordOnDisk;
