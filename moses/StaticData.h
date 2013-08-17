@@ -60,6 +60,9 @@ class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
 class InputFeature;
 
+class DynamicCacheBasedLanguageModel;
+//class DynamicCacheBasedPhraseDictionary;
+
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
 
@@ -132,6 +135,9 @@ protected:
   WordPenaltyProducer* m_wpProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
   const InputFeature *m_inputFeature;
+
+  DynamicCacheBasedLanguageModel* m_dynamicCBLM;
+//  DynamicCacheBasedPhraseDictionary* m_dynamicCBTM;
 
   bool m_reportSegmentation;
   bool m_reportSegmentationEnriched;
@@ -465,6 +471,24 @@ public:
   const InputFeature *GetInputFeature() const {
     return m_inputFeature;
   }
+
+  DynamicCacheBasedLanguageModel *GetDynamicCacheBasedLanguageModel() const {
+    return m_dynamicCBLM;
+  }
+
+  DynamicCacheBasedLanguageModel *GetDynamicCacheBasedLanguageModel() { // for mira
+    return m_dynamicCBLM;
+  }
+
+/*
+  DynamicCacheBasedPhraseDictionary *GetDynamicCacheBasedPhraseDictionary() const {
+    return m_dynamicCBPD;
+  }
+
+  const DynamicCacheBasedPhraseDictionary *GetDynamicCacheBasedPhraseDictionary() { // for mira
+    return m_dynamicCBPD;
+  }
+*/
 
   const ScoreComponentCollection& GetAllWeights() const {
     return m_allWeights;

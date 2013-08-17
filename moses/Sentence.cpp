@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Sentence.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
+#include "moses/FF/DynamicCacheBasedLanguageModel.h"
+//#include "DynamicCacheBasedPhraseDictionary.h"
 #include "Util.h"
 #include <boost/algorithm/string.hpp>
 
@@ -124,6 +126,8 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   std::vector< std::map<std::string, std::string> >::iterator dlt_meta_it = dlt_meta.begin();
   for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it) {
     std::cerr << "Sentence:: processing DLT info" << endl;
+    DynamicCacheBasedLanguageModel* cblm = StaticData::Instance().GetDynamicCacheBasedLanguageModel();
+    //DynamicCacheBasedPhraseDictionary* cbtm = StaticData::Instance().GetDynamicCacheBasedPhraseDictionary();
     if ((*dlt_meta_it).find("cbtm") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cbtm:|" << (*dlt_meta_it)["cbtm"] << "|" << endl;
     }
@@ -135,6 +139,8 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     }
     if ((*dlt_meta_it).find("cblm") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cblm:|" << (*dlt_meta_it)["cblm"] << "|" << endl;
+      if (cblm) cblm->Insert((*dlt_meta_it)["cblm"]);
+      if (cblm) std::cerr << "Inserted:|" << (*dlt_meta_it)["cblm"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cblm-command") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cblm-command:|" << (*dlt_meta_it)["cblm-command"] << "|" << endl;

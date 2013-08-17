@@ -31,6 +31,8 @@
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
 
+#include "DynamicCacheBasedLanguageModel.h"
+
 #include "moses/LM/Ken.h"
 #ifdef LM_IRST
 #include "moses/LM/IRST.h"
@@ -138,6 +140,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
+  MOSES_FNAME2("DynamicCBLM", DynamicCacheBasedLanguageModel);
 
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);

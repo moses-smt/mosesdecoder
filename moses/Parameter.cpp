@@ -162,6 +162,7 @@ Parameter::Parameter()
   AddParam("weight-pp", "pp", "DEPRECATED. DO NOT USE. weight for phrase pair feature");
   AddParam("weight-pb", "pb", "DEPRECATED. DO NOT USE. weight for phrase boundary feature");
   AddParam("weight-t", "tm", "DEPRECATED. DO NOT USE. weights for translation model components");
+  AddParam("weight-p", "w", "DEPRECATED. DO NOT USE. weight for phrase penalty");
   AddParam("weight-w", "w", "DEPRECATED. DO NOT USE. weight for word penalty");
   AddParam("weight-u", "u", "DEPRECATED. DO NOT USE. weight for unknown word penalty");
   AddParam("weight-e", "e", "DEPRECATED. DO NOT USE. weight for word deletion");
@@ -202,7 +203,13 @@ Parameter::Parameter()
 
   AddParam("placeholder-factor", "Which factor to use to store the original text for placeholders");
 
-  AddParam("cbtm-file", "location of the initialization data for the dynamic cache-based trasnslation model");
+  AddParam("weight-cblm", "tm", "DEPRECATED. DO NOT USE. weight for cache-based language model");
+  AddParam("cblm-file", "location of the initialization data for cache-based language model");
+  AddParam("cblm-query-type", "way of querying the cache-based Language model: 0=looks for all sub-string, 1=look for the whole string; default is 0");
+  AddParam("cblm-score-type", "scoring type for the cache-based language model: 0=hyperbola, 1=power, 2=negative exponential, 3=cosine, 10=hyperbola_reward, 11=power_reward, 12=negative exponential_reward; default is 0");
+  AddParam("cblm-max-age", "maximum age for entries in the cache-based language model; default is 1000");
+
+  AddParam("cbtm-file", "location of the initialization data for the dynamic cache-based translation model");
   AddParam("cbtm-score-type", "scoring type for the cache-based translation model: 0=hyperbola, 1=power, 2=negative exponential, 3=cosine, 10=hyperbola_reward, 11=power_reward, 12=negative exponential_reward; default is 0");
   AddParam("cbtm-max-age", "maximum age for entries in the cache-based translation model; default is 1000");
 

@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
+#include "moses/FF/DynamicCacheBasedLanguageModel.h"
 
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -62,6 +63,7 @@ StaticData::StaticData()
   ,m_wpProducer(NULL)
   ,m_unknownWordPenaltyProducer(NULL)
   ,m_inputFeature(NULL)
+  ,m_dynamicCBLM(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_needAlignmentInfo(false)
@@ -1018,6 +1020,9 @@ void StaticData::LoadFeatureFunctions()
     } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
       CHECK(m_inputFeature == NULL); // max 1 input feature;
       m_inputFeature = ffCast;
+    } else if (DynamicCacheBasedLanguageModel *ffCast = dynamic_cast<DynamicCacheBasedLanguageModel*>(ff)) {
+      CHECK(m_dynamicCBLM == NULL); // max 1 DynamicCacheBasedLanguageModel;
+      m_dynamicCBLM = ffCast;
     }
 
     if (doLoad) {
