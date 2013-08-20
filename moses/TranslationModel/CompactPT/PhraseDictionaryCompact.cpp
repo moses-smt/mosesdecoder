@@ -171,8 +171,6 @@ void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection* tpc)
   PhraseCache &ref = m_sentenceCache;
 #endif
   ref.push_back(tpc);
-
-  ReduceCache();
 }
 
 void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
@@ -197,6 +195,8 @@ void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &so
 
   PhraseCache temp;
   temp.swap(ref);
+
+  ReduceCache();
 }
 
 }
