@@ -19,7 +19,8 @@
 #--with-cmph=/path/to/cmph
 #
 #Thread-caching malloc (if present, used for multi-threaded builds by default)
-#--without-tcmalloc
+#--without-tcmalloc does not compile with tcmalloc even if present
+#--full-tcmalloc links against the full version (useful for memory profiling)
 #
 #REGRESSION TESTING
 #--with-regtest=/path/to/moses-reg-test-data
@@ -76,8 +77,13 @@ boost 103600 ;
 external-lib z ;
 
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
-  external-lib tcmalloc_minimal ;
-  requirements += <threading>multi:<library>tcmalloc_minimal ;
+  if [ option.get "full-tcmalloc" : : "yes" ] {
+    tcmalloc = "tcmalloc" ;
+  } else {
+    tcmalloc = "tcmalloc_minimal" ;
+  }
+  external-lib $(tcmalloc) ;
+  requirements += <threading>multi:<library>$(tcmalloc) ;
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
 }
