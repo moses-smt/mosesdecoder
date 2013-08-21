@@ -136,7 +136,6 @@ void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phras
 void PhraseDictionary::ReduceCache() const
 {
   if (m_cache.size() <= m_maxCacheSize) return; // not full
-  clock_t t = clock();
 
   // find cutoff for last used time
   priority_queue< clock_t > lastUsedTimes;
@@ -149,6 +148,8 @@ void PhraseDictionary::ReduceCache() const
   for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
     lastUsedTimes.pop();
   clock_t cutoffLastUsedTime = lastUsedTimes.top();
+  clock_t t = clock();
+  cutoffLastUsedTime = min(cutoffLastUsedTime, t - CLOCKS_PER_SEC * 10 * 60); // 10 minutes
 
   // remove all old entries
 #ifdef WITH_THREADS
