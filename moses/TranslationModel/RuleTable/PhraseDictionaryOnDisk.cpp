@@ -143,20 +143,16 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
 const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
 {
 	  const TargetPhraseCollection *ret;
+
 	  if (m_maxCacheSize) {
+		  CacheColl &cache = GetCache();
 	    size_t hash = (size_t) ptNode->GetFilePos();
 
 	    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
 
-	    {
-	      // scope of read lock
-	#ifdef WITH_THREADS
-	      boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-	#endif
-	      iter = m_cache.find(hash);
-	    }
+	    iter = cache.find(hash);
 
-	    if (iter == m_cache.end()) {
+	    if (iter == cache.end()) {
           // not in cache, need to look up from phrase table
 	      ret = GetTargetPhraseCollectionNonCache(ptNode);
 	      if (ret) {
@@ -164,11 +160,7 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
 	      }
 
 	      std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
-
-	#ifdef WITH_THREADS
-	      boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-	#endif
-	      m_cache[hash] = value;
+	      cache[hash] = value;
 	    }
 	    else {
 	    	// in cache. just use it

@@ -32,7 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
-#include <boost/thread/shared_mutex.hpp>
+#else
+#include <boost/scoped_ptr.hpp>
 #endif
 
 #include "moses/Phrase.h"
@@ -116,14 +117,21 @@ protected:
 
   // cache
   size_t m_maxCacheSize; // 0 = no caching
-  mutable std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > m_cache;
+
+  typedef std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > CacheColl;
 #ifdef WITH_THREADS
   //reader-writer lock
-  mutable boost::shared_mutex m_accessLock;
+  mutable boost::thread_specific_ptr<CacheColl> m_cache;
+#else
+  mutable boost::scoped_ptr<CacheColl> m_cache;
 #endif
 
   virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const Phrase& src) const;
   void ReduceCache() const;
+
+protected:
+  CacheColl &GetCache() const;
+
 };
 
 }
