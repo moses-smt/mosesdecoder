@@ -79,11 +79,14 @@ external-lib z ;
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
   if [ option.get "full-tcmalloc" : : "yes" ] {
     tcmalloc = "tcmalloc" ;
+    external-lib unwind ;
+    external-lib tcmalloc : : unwind ;
+    requirements += <library>tcmalloc <library>unwind <cflags>-fno-omit-frame-pointer <cxxflags>-fno-omit-frame-pointer ;
   } else {
     tcmalloc = "tcmalloc_minimal" ;
+    external-lib tcmalloc_minimal ;
+    requirements += <threading>multi:<library>$(tcmalloc) ;
   }
-  external-lib $(tcmalloc) ;
-  requirements += <threading>multi:<library>$(tcmalloc) ;
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
 }
