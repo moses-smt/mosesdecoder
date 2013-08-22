@@ -43,19 +43,15 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
 {
   const TargetPhraseCollection *ret;
   if (m_maxCacheSize) {
+    CacheColl &cache = GetCache();
+
     size_t hash = hash_value(src);
 
     std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
 
-    {
-      // scope of read lock
-#ifdef WITH_THREADS
-      boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-#endif
-      iter = m_cache.find(hash);
-    }
+    iter = cache.find(hash);
 
-    if (iter == m_cache.end()) {
+    if (iter == cache.end()) {
       // not in cache, need to look up from phrase table
       ret = GetTargetPhraseCollectionNonCache(src);
       if (ret) {
@@ -63,10 +59,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
       }
 
       std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
-#ifdef WITH_THREADS
-      boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-#endif
-      m_cache[hash] = value;
+      cache[hash] = value;
     } else {
       // in cache. just use it
     	std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
@@ -135,35 +128,45 @@ void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phras
 
 void PhraseDictionary::ReduceCache() const
 {
-  if (m_cache.size() <= m_maxCacheSize) return; // not full
-  clock_t t = clock();
+	CacheColl &cache = GetCache();
+  if (cache.size() <= m_maxCacheSize) return; // not full
 
   // find cutoff for last used time
   priority_queue< clock_t > lastUsedTimes;
   std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
-  iter = m_cache.begin();
-  while( iter != m_cache.end() ) {
+  iter = cache.begin();
+  while( iter != cache.end() ) {
     lastUsedTimes.push( iter->second.second );
     iter++;
   }
   for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
     lastUsedTimes.pop();
   clock_t cutoffLastUsedTime = lastUsedTimes.top();
+  clock_t t = clock();
 
   // remove all old entries
-#ifdef WITH_THREADS
-      boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-#endif
-
-  iter = m_cache.begin();
-  while( iter != m_cache.end() ) {
+  iter = cache.begin();
+  while( iter != cache.end() ) {
     if (iter->second.second < cutoffLastUsedTime) {
       std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
       delete iterRemove->second.first;
-      m_cache.erase(iterRemove);
+      cache.erase(iterRemove);
     } else iter++;
   }
   VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
 }
+
+PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
+{
+  CacheColl *cache;
+  cache = m_cache.get();
+  if (cache == NULL) {
+	  cache = new CacheColl;
+	  m_cache.reset(cache);
+  }
+  CHECK(cache);
+  return *cache;
 }
+
+} // namespace
 
