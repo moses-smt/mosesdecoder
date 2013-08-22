@@ -63,6 +63,13 @@ public:
   /** create phrase from vectors of words	*/
   explicit Phrase(const std::vector< const Word* > &mergeWords);
 
+  /* This isn't a swap function because classes inherit from Phrase and might
+   * not override swap, which would be bad.
+   */
+  void SwapWords(Phrase &other) {
+    swap(m_words, other.m_words);
+  }
+
   /** destructor */
   virtual ~Phrase();
 

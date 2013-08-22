@@ -63,8 +63,11 @@ namespace Moses
 class ScoreComponentCollection
 {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
+  friend void swap(ScoreComponentCollection &first, ScoreComponentCollection &second);
+
 private:
   FVector m_scores;
+
   typedef std::pair<size_t,size_t> IndexPair;
   typedef std::map<const FeatureFunction*,IndexPair> ScoreIndexMap;
   static  ScoreIndexMap s_scoreIndexes;
@@ -413,6 +416,10 @@ struct SCCPlus {
     return sum;
   }
 };
+
+inline void swap(ScoreComponentCollection &first, ScoreComponentCollection &second) {
+  swap(first.m_scores, second.m_scores);
+}
 
 }
 #endif

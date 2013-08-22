@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_TargetPhrase_h
 #define moses_TargetPhrase_h
 
+#include <algorithm>
 #include <vector>
 #include "TypeDef.h"
 #include "Phrase.h"
@@ -43,8 +44,10 @@ class InputPath;
  */
 class TargetPhrase: public Phrase
 {
+private:
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
-protected:
+  friend void swap(TargetPhrase &first, TargetPhrase &second);
+
   float m_fullScore, m_futureScore;
   ScoreComponentCollection m_scoreBreakdown;
 
@@ -123,6 +126,8 @@ public:
 
   TO_STRING();
 };
+
+void swap(TargetPhrase &first, TargetPhrase &second);
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 
