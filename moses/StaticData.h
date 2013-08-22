@@ -425,9 +425,6 @@ public:
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
   }
-  const WordPenaltyProducer *GetWordPenaltyProducer() const {
-    return m_wpProducer;
-  }
   WordPenaltyProducer *GetWordPenaltyProducer() { // for mira
     return m_wpProducer;
   }
