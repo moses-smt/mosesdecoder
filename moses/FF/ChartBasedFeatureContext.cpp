@@ -11,14 +11,6 @@ ChartBasedFeatureContext::ChartBasedFeatureContext
   m_source(hypothesis->GetManager().GetSource())
 {}
 
-ChartBasedFeatureContext::ChartBasedFeatureContext(
-  const TargetPhrase& targetPhrase,
-  const InputType& source):
-  m_hypothesis(NULL),
-  m_targetPhrase(targetPhrase),
-  m_source(source)
-{}
-
 
 }
 
