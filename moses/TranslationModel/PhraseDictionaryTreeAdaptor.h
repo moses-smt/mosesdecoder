@@ -60,7 +60,7 @@ public:
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
-  TargetPhraseCollection const* GetTargetPhraseCollectionNonCache(Phrase const &src) const;
+  TargetPhraseCollection const* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   void InitializeForInput(InputType const& source);
   void CleanUpAfterSentenceProcessing(InputType const& source);

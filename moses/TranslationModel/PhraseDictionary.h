@@ -126,7 +126,7 @@ protected:
   mutable boost::scoped_ptr<CacheColl> m_cache;
 #endif
 
-  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const Phrase& src) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const;
   void ReduceCache() const;
 
 protected:

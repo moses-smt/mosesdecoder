@@ -75,7 +75,7 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
 }
 
 TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCache(Phrase const &src) const
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
   const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
   return ret;

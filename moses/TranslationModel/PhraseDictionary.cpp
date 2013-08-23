@@ -53,7 +53,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
 
     if (iter == cache.end()) {
       // not in cache, need to look up from phrase table
-      ret = GetTargetPhraseCollectionNonCache(src);
+      ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
       if (ret) {
         ret = new TargetPhraseCollection(*ret);
       }
@@ -69,13 +69,13 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
     }
   } else {
     // don't use cache. look up from phrase table
-    ret = GetTargetPhraseCollectionNonCache(src);
+    ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
   }
 
   return ret;
 }
 
-const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCache(const Phrase& src) const
+const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }
