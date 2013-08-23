@@ -4,7 +4,6 @@
 #include <vector>
 #include <set>
 #include <string>
-#include "PhraseBasedFeatureContext.h"
 #include "ChartBasedFeatureContext.h"
 #include "moses/TypeDef.h"
 

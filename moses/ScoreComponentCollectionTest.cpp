@@ -34,7 +34,7 @@ class MockStatelessFeatureFunction : public StatelessFeatureFunction
 public:
   MockStatelessFeatureFunction(const string& desc, size_t n, const string &line) :
     StatelessFeatureFunction(desc,n, line) {}
-  virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
+  virtual void Evaluate(const Hypothesis&, ScoreComponentCollection*) const {}
   virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
   virtual void Evaluate(const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown

@@ -68,7 +68,7 @@ public:
 
   bool IsUseable(const FactorMask &mask) const;
 
-  void Evaluate(const PhraseBasedFeatureContext& context,
+  void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
 
 

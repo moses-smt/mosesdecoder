@@ -1172,16 +1172,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>FF/PhraseBasedFeatureContext.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/PhraseBasedFeatureContext.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.h</locationURI>
-		</link>
-		<link>
 			<name>FF/PhraseBoundaryFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBoundaryFeature.cpp</locationURI>

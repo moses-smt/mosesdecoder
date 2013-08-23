@@ -23,7 +23,7 @@ public:
   /**
     * This should be implemented for features that apply to phrase-based models.
     **/
-  virtual void Evaluate(const PhraseBasedFeatureContext& context,
+  virtual void Evaluate(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const {
   }
 

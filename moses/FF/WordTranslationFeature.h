@@ -47,7 +47,7 @@ public:
     return new DummyState();
   }
 
-  void Evaluate(const PhraseBasedFeatureContext& context,
+  void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
 
   void EvaluateChart(const ChartBasedFeatureContext& context,

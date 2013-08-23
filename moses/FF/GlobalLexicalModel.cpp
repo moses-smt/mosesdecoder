@@ -167,11 +167,11 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
 }
 
 void GlobalLexicalModel::Evaluate
-(const PhraseBasedFeatureContext& context,
+(const Hypothesis& hypo,
  ScoreComponentCollection* accumulator) const
 {
   accumulator->PlusEquals( this,
-                           GetFromCacheOrScorePhrase(context.GetHypothesis().GetCurrTargetPhrase()) );
+                           GetFromCacheOrScorePhrase(hypo.GetCurrTargetPhrase()) );
 }
 
 bool GlobalLexicalModel::IsUseable(const FactorMask &mask) const

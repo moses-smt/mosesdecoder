@@ -6,9 +6,6 @@ class ChartHypothesis;
 class InputType;
 class TargetPhrase;
 
-/**
- * Same as PhraseBasedFeatureContext, but for chart-based Moses.
- **/
 class ChartBasedFeatureContext
 {
   //The context either has a hypothesis (during search) or a
