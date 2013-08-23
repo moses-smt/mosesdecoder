@@ -62,13 +62,13 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
       cache[hash] = value;
     } else {
       // in cache. just use it
-    	std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
-    	value.second = clock();
+      std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+      value.second = clock();
 
-    	ret = value.first;
+      ret = value.first;
     }
   } else {
-	// don't use cache. look up from phrase table
+    // don't use cache. look up from phrase table
     ret = GetTargetPhraseCollectionNonCache(src);
   }
 
@@ -92,7 +92,7 @@ GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) co
 void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "cache-size") {
-	  m_maxCacheSize = Scan<size_t>(value);
+    m_maxCacheSize = Scan<size_t>(value);
   } else if (key == "path") {
     m_filePath = value;
   } else if (key == "table-limit") {
@@ -128,7 +128,7 @@ void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phras
 
 void PhraseDictionary::ReduceCache() const
 {
-	CacheColl &cache = GetCache();
+  CacheColl &cache = GetCache();
   if (cache.size() <= m_maxCacheSize) return; // not full
 
   // find cutoff for last used time
@@ -161,8 +161,8 @@ PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
   CacheColl *cache;
   cache = m_cache.get();
   if (cache == NULL) {
-	  cache = new CacheColl;
-	  m_cache.reset(cache);
+    cache = new CacheColl;
+    m_cache.reset(cache);
   }
   CHECK(cache);
   return *cache;

@@ -417,7 +417,8 @@ struct SCCPlus {
   }
 };
 
-inline void swap(ScoreComponentCollection &first, ScoreComponentCollection &second) {
+inline void swap(ScoreComponentCollection &first, ScoreComponentCollection &second)
+{
   swap(first.m_scores, second.m_scores);
 }
 

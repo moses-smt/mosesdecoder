@@ -201,7 +201,8 @@ void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>
   m_fullScore += copy.m_fullScore;
 }
 
-void swap(TargetPhrase &first, TargetPhrase &second) {
+void swap(TargetPhrase &first, TargetPhrase &second)
+{
   first.SwapWords(second);
   std::swap(first.m_fullScore, second.m_fullScore);
   std::swap(first.m_futureScore, second.m_futureScore);

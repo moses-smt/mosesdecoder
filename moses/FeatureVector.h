@@ -311,7 +311,8 @@ private:
 
 };
 
-inline void swap(FVector &first, FVector &second) {
+inline void swap(FVector &first, FVector &second)
+{
   swap(first.m_features, second.m_features);
   swap(first.m_coreFeatures, second.m_coreFeatures);
 }
