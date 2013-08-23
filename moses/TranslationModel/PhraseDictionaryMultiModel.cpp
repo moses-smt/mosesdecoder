@@ -83,7 +83,7 @@ void PhraseDictionaryMultiModel::Load()
 }
 
 
-const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollection(const Phrase& src) const
+const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
 
   std::vector<std::vector<float> > multimodelweights;
@@ -117,7 +117,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
   for(size_t i = 0; i < m_numModels; ++i) {
     const PhraseDictionary &pd = *m_pd[i];
 
-    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  pd.GetTargetPhraseCollection( src);
+    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  pd.GetTargetPhraseCollectionLEGACY( src);
     if (ret_raw != NULL) {
 
       TargetPhraseCollection::iterator iterTargetPhrase, iterLast;

@@ -39,7 +39,7 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
 {
 }
 
-const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const Phrase& src) const
+const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
   const TargetPhraseCollection *ret;
   if (m_maxCacheSize) {
@@ -85,8 +85,6 @@ const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::
 GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
-  //Phrase phrase = src.GetSubString(range);
-  //return GetTargetPhraseCollection(phrase);
 }
 
 void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
@@ -121,7 +119,7 @@ void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phras
     InputPath &node = **iter;
 
     const Phrase &phrase = node.GetPhrase();
-    const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollection(phrase);
+    const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollectionLEGACY(phrase);
     node.SetTargetPhrases(*this, targetPhrases, NULL);
   }
 }

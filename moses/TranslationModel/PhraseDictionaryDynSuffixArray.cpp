@@ -46,7 +46,7 @@ void PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const 
 
 const TargetPhraseCollection*
 PhraseDictionaryDynSuffixArray::
-GetTargetPhraseCollection(const Phrase& src) const
+GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
   typedef map<SAPhrase, vector<float> >::value_type pstat_entry;
   map<SAPhrase, vector<float> > pstats; // phrase (pair) statistics

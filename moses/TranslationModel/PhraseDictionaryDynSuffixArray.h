@@ -21,7 +21,7 @@ public:
   bool InitDictionary();
   void Load();
   // functions below required by base class
-  const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
+  const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
   void insertSnt(string&, string&, string&);
   void deleteSnt(unsigned, unsigned);
   ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&);

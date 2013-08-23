@@ -73,7 +73,7 @@ public:
   // LEGACY - The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
   virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
