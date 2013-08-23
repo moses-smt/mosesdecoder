@@ -73,7 +73,7 @@ public:
   }
 
   // legacy
-  const TargetPhraseCollectionWithSourcePhrase *GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const & srcRange) const;
+  const TargetPhraseCollectionWithSourcePhrase *GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const & srcRange) const;
 
 };
 

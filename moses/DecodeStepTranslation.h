@@ -61,11 +61,11 @@ public:
                                  , const TargetPhraseCollection *phraseColl) const;
 
   // legacy
-  void ProcessInitialTranslationLegacy(const InputType &source
+  void ProcessInitialTranslationLEGACY(const InputType &source
                                        , PartialTranslOptColl &outputPartialTranslOptColl
                                        , size_t startPos, size_t endPos, bool adhereTableLimit
                                        , const InputPathList &inputPathList) const;
-  void ProcessLegacy(const TranslationOption &inputPartialTranslOpt
+  void ProcessLEGACY(const TranslationOption &inputPartialTranslOpt
                      , const DecodeStep &decodeStep
                      , PartialTranslOptColl &outputPartialTranslOptColl
                      , TranslationOptionCollection *toc
@@ -75,7 +75,7 @@ private:
   // I'm not sure whether this actually works or not for binary phrase table.
   // The source phrase only appears to contain the 1st word, therefore, this function
   // only compares the 1st word
-  const InputPath &GetInputPathLegacy(const TargetPhrase targetPhrase,
+  const InputPath &GetInputPathLEGACY(const TargetPhrase targetPhrase,
                                       const Phrase sourcePhrase,
                                       const InputPathList &inputPathList) const;
 

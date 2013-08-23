@@ -82,7 +82,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCach
 
 
 const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::
-GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const
+GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }

@@ -102,7 +102,7 @@ public:
 
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
-  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const;
+  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
 
 protected:
   size_t m_tableLimit;
