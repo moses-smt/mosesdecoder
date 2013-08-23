@@ -30,7 +30,7 @@ public:
   /**
     * Same for chart-based features.
     **/
-  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
+  virtual void EvaluateChart(const ChartHypothesis &hypo,
                              ScoreComponentCollection* accumulator) const {
   }
 

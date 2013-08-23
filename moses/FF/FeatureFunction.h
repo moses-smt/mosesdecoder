@@ -4,7 +4,6 @@
 #include <vector>
 #include <set>
 #include <string>
-#include "ChartBasedFeatureContext.h"
 #include "moses/TypeDef.h"
 
 namespace Moses

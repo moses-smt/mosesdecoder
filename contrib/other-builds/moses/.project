@@ -1077,16 +1077,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/BleuScoreFeature.h</locationURI>
 		</link>
 		<link>
-			<name>FF/ChartBasedFeatureContext.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/ChartBasedFeatureContext.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.h</locationURI>
-		</link>
-		<link>
 			<name>FF/ControlRecombination.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.cpp</locationURI>

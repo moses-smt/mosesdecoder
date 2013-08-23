@@ -73,7 +73,7 @@ public:
 
 
   void EvaluateChart(
-    const ChartBasedFeatureContext& context,
+    const ChartHypothesis& hypo,
     ScoreComponentCollection* accumulator) const {
     throw std::logic_error("GlobalLexicalModel not supported in chart decoder, yet");
   }

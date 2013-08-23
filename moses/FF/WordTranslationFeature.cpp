@@ -349,7 +349,7 @@ void WordTranslationFeature::Evaluate
 }
 
 void WordTranslationFeature::EvaluateChart(
-  const ChartBasedFeatureContext& context,
+  const ChartHypothesis &hypo,
   ScoreComponentCollection* accumulator) const
 {
   UTIL_THROW(util::Exception, "Need source phrase. Can't be arsed at the moment");
