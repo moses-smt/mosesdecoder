@@ -109,8 +109,8 @@ void PhrasePairFeature::Evaluate(
   const PhraseBasedFeatureContext& context,
   ScoreComponentCollection* accumulator) const
 {
-  const TargetPhrase& target = context.GetTargetPhrase();
-  const Phrase& source = context.GetTranslationOption().GetInputPath().GetPhrase();
+  const TargetPhrase& target = context.GetHypothesis().GetCurrTargetPhrase();
+  const Phrase& source = context.GetHypothesis().GetTranslationOption().GetInputPath().GetPhrase();
   if (m_simple) {
     ostringstream namestr;
     namestr << "pp_";
@@ -131,7 +131,7 @@ void PhrasePairFeature::Evaluate(
     accumulator->SparsePlusEquals(namestr.str(),1);
   }
   if (m_domainTrigger) {
-    const Sentence& input = static_cast<const Sentence&>(context.GetSource());
+    const Sentence& input = static_cast<const Sentence&>(context.GetHypothesis().GetInput());
     const bool use_topicid = input.GetUseTopicId();
     const bool use_topicid_prob = input.GetUseTopicIdAndProb();
 
@@ -199,7 +199,7 @@ void PhrasePairFeature::Evaluate(
     }
   }
   if (m_sourceContext) {
-    const Sentence& input = static_cast<const Sentence&>(context.GetSource());
+    const Sentence& input = static_cast<const Sentence&>(context.GetHypothesis().GetInput());
 
     // range over source words to get context
     for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {

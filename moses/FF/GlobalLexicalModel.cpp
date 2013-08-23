@@ -171,7 +171,7 @@ void GlobalLexicalModel::Evaluate
  ScoreComponentCollection* accumulator) const
 {
   accumulator->PlusEquals( this,
-                           GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
+                           GetFromCacheOrScorePhrase(context.GetHypothesis().GetCurrTargetPhrase()) );
 }
 
 bool GlobalLexicalModel::IsUseable(const FactorMask &mask) const

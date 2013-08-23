@@ -25,17 +25,10 @@ class PhraseBasedFeatureContext
 
 public:
   PhraseBasedFeatureContext(const Hypothesis* hypothesis);
-  PhraseBasedFeatureContext(const TranslationOption& translationOption,
-                            const InputType& source);
 
-  const TranslationOption& GetTranslationOption() const {
-    return m_translationOption;
+  const Hypothesis& GetHypothesis() const {
+    return *m_hypothesis;
   }
-  const InputType& GetSource() const {
-    return m_source;
-  }
-  const TargetPhrase& GetTargetPhrase() const; //convenience method
-  const WordsBitmap& GetWordsBitmap() const;
 
 };
 

@@ -140,9 +140,9 @@ void WordTranslationFeature::Evaluate
 (const PhraseBasedFeatureContext& context,
  ScoreComponentCollection* accumulator) const
 {
-  const Sentence& input = static_cast<const Sentence&>(context.GetSource());
-  const TranslationOption& transOpt = context.GetTranslationOption();
-  const TargetPhrase& targetPhrase = context.GetTargetPhrase();
+  const Sentence& input = static_cast<const Sentence&>(context.GetHypothesis().GetInput());
+  const TranslationOption& transOpt = context.GetHypothesis().GetTranslationOption();
+  const TargetPhrase& targetPhrase = context.GetHypothesis().GetCurrTargetPhrase();
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
 
   // process aligned words
@@ -243,7 +243,7 @@ void WordTranslationFeature::Evaluate
       }
     }
     if (m_sourceContext) {
-      size_t globalSourceIndex = context.GetTranslationOption().GetStartPos() + sourceIndex;
+      size_t globalSourceIndex = context.GetHypothesis().GetTranslationOption().GetStartPos() + sourceIndex;
       if (!m_domainTrigger && globalSourceIndex == 0) {
         // add <s> trigger feature for source
         stringstream feature;
