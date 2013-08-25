@@ -137,7 +137,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
   }
 }
 
-void DecodeStepTranslation::ProcessInitialTranslationLegacy(
+void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
   const InputType &source
   ,PartialTranslOptColl &outputPartialTranslOptColl
   , size_t startPos, size_t endPos, bool adhereTableLimit
@@ -147,7 +147,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const WordsRange wordsRange(startPos, endPos);
-  const TargetPhraseCollectionWithSourcePhrase *phraseColl =	phraseDictionary->GetTargetPhraseCollectionLegacy(source,wordsRange);
+  const TargetPhraseCollectionWithSourcePhrase *phraseColl =	phraseDictionary->GetTargetPhraseCollectionLEGACY(source,wordsRange);
 
   if (phraseColl != NULL) {
     IFVERBOSE(3) {
@@ -171,7 +171,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
       const Phrase			&sourcePhrase = *iterSourcePhrase;
 
-      const InputPath &inputPath = GetInputPathLegacy(targetPhrase, sourcePhrase, inputPathList);
+      const InputPath &inputPath = GetInputPathLEGACY(targetPhrase, sourcePhrase, inputPathList);
 
       TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
       transOpt->SetInputPath(inputPath);
@@ -184,7 +184,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLegacy(
   }
 }
 
-const InputPath &DecodeStepTranslation::GetInputPathLegacy(
+const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
   const TargetPhrase targetPhrase,
   const Phrase sourcePhrase,
   const InputPathList &inputPathList) const
@@ -207,7 +207,7 @@ const InputPath &DecodeStepTranslation::GetInputPathLegacy(
   UTIL_THROW(util::Exception, "Input path not found");
 }
 
-void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialTranslOpt
+void DecodeStepTranslation::ProcessLEGACY(const TranslationOption &inputPartialTranslOpt
     , const DecodeStep &decodeStep
     , PartialTranslOptColl &outputPartialTranslOptColl
     , TranslationOptionCollection *toc
@@ -229,7 +229,7 @@ void DecodeStepTranslation::ProcessLegacy(const TranslationOption &inputPartialT
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const TargetPhraseCollectionWithSourcePhrase *phraseColl
-  = phraseDictionary->GetTargetPhraseCollectionLegacy(toc->GetSource(),sourceWordsRange);
+  = phraseDictionary->GetTargetPhraseCollectionLEGACY(toc->GetSource(),sourceWordsRange);
 
 
   if (phraseColl != NULL) {

@@ -89,7 +89,7 @@ public:
   void setState(const FFState* prev_state);
   osmState * saveState();
   void print();
-  void populateScores(std::vector <float> & scores);
+  void populateScores(std::vector <float> & scores , const int numFeatures);
   void setState(const lm::ngram::State & val) {
     lmState = val;
   }

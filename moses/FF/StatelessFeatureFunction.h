@@ -23,14 +23,14 @@ public:
   /**
     * This should be implemented for features that apply to phrase-based models.
     **/
-  virtual void Evaluate(const PhraseBasedFeatureContext& context,
+  virtual void Evaluate(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const {
   }
 
   /**
     * Same for chart-based features.
     **/
-  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
+  virtual void EvaluateChart(const ChartHypothesis &hypo,
                              ScoreComponentCollection* accumulator) const {
   }
 

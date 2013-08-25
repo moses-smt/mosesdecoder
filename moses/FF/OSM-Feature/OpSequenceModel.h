@@ -21,6 +21,9 @@ public:
 
   int lmOrder;
   float unkOpProb;
+  int sFactor;	// Source Factor ...
+  int tFactor;	// Target Factor ...
+  int numFeatures;   // Number of features used ...
 
   OpSequenceModel(const std::string &line);
 

@@ -47,10 +47,10 @@ public:
     return new DummyState();
   }
 
-  void Evaluate(const PhraseBasedFeatureContext& context,
+  void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartBasedFeatureContext& context,
+  void EvaluateChart(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const;
   void SetParameter(const std::string& key, const std::string& value);
 };

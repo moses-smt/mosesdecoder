@@ -39,7 +39,7 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
 {
 }
 
-const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const Phrase& src) const
+const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
   const TargetPhraseCollection *ret;
   if (m_maxCacheSize) {
@@ -53,7 +53,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
 
     if (iter == cache.end()) {
       // not in cache, need to look up from phrase table
-      ret = GetTargetPhraseCollectionNonCache(src);
+      ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
       if (ret) {
         ret = new TargetPhraseCollection(*ret);
       }
@@ -62,37 +62,35 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollection(const 
       cache[hash] = value;
     } else {
       // in cache. just use it
-    	std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
-    	value.second = clock();
+      std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+      value.second = clock();
 
-    	ret = value.first;
+      ret = value.first;
     }
   } else {
-	// don't use cache. look up from phrase table
-    ret = GetTargetPhraseCollectionNonCache(src);
+    // don't use cache. look up from phrase table
+    ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
   }
 
   return ret;
 }
 
-const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCache(const Phrase& src) const
+const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }
 
 
 const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::
-GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const
+GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
-  //Phrase phrase = src.GetSubString(range);
-  //return GetTargetPhraseCollection(phrase);
 }
 
 void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "cache-size") {
-	  m_maxCacheSize = Scan<size_t>(value);
+    m_maxCacheSize = Scan<size_t>(value);
   } else if (key == "path") {
     m_filePath = value;
   } else if (key == "table-limit") {
@@ -121,14 +119,14 @@ void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phras
     InputPath &node = **iter;
 
     const Phrase &phrase = node.GetPhrase();
-    const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollection(phrase);
+    const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollectionLEGACY(phrase);
     node.SetTargetPhrases(*this, targetPhrases, NULL);
   }
 }
 
 void PhraseDictionary::ReduceCache() const
 {
-	CacheColl &cache = GetCache();
+  CacheColl &cache = GetCache();
   if (cache.size() <= m_maxCacheSize) return; // not full
 
   // find cutoff for last used time
@@ -161,8 +159,8 @@ PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
   CacheColl *cache;
   cache = m_cache.get();
   if (cache == NULL) {
-	  cache = new CacheColl;
-	  m_cache.reset(cache);
+    cache = new CacheColl;
+    m_cache.reset(cache);
   }
   CHECK(cache);
   return *cache;

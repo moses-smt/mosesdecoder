@@ -30,8 +30,8 @@ protected:
       , bool adhereTableLimit
       , size_t graphInd);
 
-  void CheckLegacy();
-  void CreateTranslationOptionsForRangeLegacy(const DecodeGraph &decodeStepList
+  void CheckLEGACY();
+  void CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeStepList
       , size_t startPosition
       , size_t endPosition
       , bool adhereTableLimit

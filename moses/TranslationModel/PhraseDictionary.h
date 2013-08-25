@@ -73,7 +73,7 @@ public:
   // LEGACY - The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
   virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
@@ -102,7 +102,7 @@ public:
 
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
-  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const;
+  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
 
 protected:
   size_t m_tableLimit;
@@ -126,7 +126,7 @@ protected:
   mutable boost::scoped_ptr<CacheColl> m_cache;
 #endif
 
-  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const Phrase& src) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const;
   void ReduceCache() const;
 
 protected:

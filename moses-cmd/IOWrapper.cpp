@@ -217,12 +217,11 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
       //preface surface form with UNK if marking unknowns
       const Word &word = phrase.GetWord(pos);
       if(markUnknown && word.IsOOV()) {
-	out << "UNK" << *factor;
+        out << "UNK" << *factor;
+      } else {
+        out << *factor;
       }
-      else {
-	out << *factor;
-      }
-      
+
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
         CHECK(factor);

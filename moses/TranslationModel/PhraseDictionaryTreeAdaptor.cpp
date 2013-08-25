@@ -75,7 +75,7 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
 }
 
 TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCache(Phrase const &src) const
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
   const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
   return ret;
@@ -108,7 +108,7 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 
 // legacy
 const TargetPhraseCollectionWithSourcePhrase*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const &range) const
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
 {
   if(GetImplementation().m_rangeCache.empty()) {
     const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));

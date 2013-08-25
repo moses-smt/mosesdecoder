@@ -105,7 +105,6 @@ void osmHypothesis :: removeReorderingOperations()
   deletionCount = 0;
   openGapCount = 0;
   gapWidth = 0;
-  //cout<<"I came here"<<endl;
 
   std::vector <std::string> tupleSequence;
 
@@ -581,10 +580,14 @@ void osmHypothesis :: constructCepts(vector <int> & align , int startIndex , int
 
 }
 
-void osmHypothesis :: populateScores(vector <float> & scores)
+void osmHypothesis :: populateScores(vector <float> & scores , const int numFeatures)
 {
   scores.clear();
-  scores.push_back(opProb);
+  scores.push_back(opProb);	
+
+  if (numFeatures == 1)
+   return;
+
   scores.push_back(gapWidth);
   scores.push_back(gapCount);
   scores.push_back(openGapCount);

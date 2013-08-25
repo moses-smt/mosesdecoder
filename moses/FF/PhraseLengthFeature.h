@@ -24,7 +24,7 @@ public:
     return true;
   }
 
-  void EvaluateChart(const ChartBasedFeatureContext& context,
+  void EvaluateChart(const ChartHypothesis& hypo,
                      ScoreComponentCollection*) const {
     throw std::logic_error("PhraseLengthFeature not valid in chart decoder");
   }

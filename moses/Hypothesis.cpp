@@ -263,7 +263,7 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( slff )) {
-    slff.Evaluate(PhraseBasedFeatureContext(this), &m_scoreBreakdown);
+    slff.Evaluate(*this, &m_scoreBreakdown);
   }
 }
 
