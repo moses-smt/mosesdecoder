@@ -248,6 +248,7 @@ public:
   // convert target candidates from internal data structure to the external one
   void ConvertTgtCand(const TgtCands& tcands,std::vector<StringTgtCand>& extTgtCands,
                       std::vector<std::string>* wa) const {
+    extTgtCands.reserve(tcands.size());
     for(TgtCands::const_iterator iter=tcands.begin(); iter!=tcands.end(); ++iter) {
       const TgtCand &intTgtCand = *iter;
 
