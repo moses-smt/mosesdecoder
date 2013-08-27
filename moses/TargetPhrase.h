@@ -54,6 +54,7 @@ private:
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
   const Word *m_lhsTarget;
 
+  std::map<std::string, std::string> m_properties;
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);
@@ -121,6 +122,11 @@ public:
   const AlignmentInfo &GetAlignNonTerm() const {
     return *m_alignNonTerm;
   }
+
+  void SetProperty(const std::string &key, const std::string &value) {
+	  m_properties[key] = value;
+  }
+  void GetProperty(const std::string &key, std::string &value, bool &found) const;
 
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 

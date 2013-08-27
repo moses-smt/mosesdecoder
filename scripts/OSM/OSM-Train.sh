@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -e
 echo 'Training OSM - Start'
 date
 
