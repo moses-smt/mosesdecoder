@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "lm/left.hh"
 #include "lm/model.hh"
 
-#include "moses/FFState.h"
+#include "moses/FF/FFState.h"
 #include "moses/Hypothesis.h"
 #include "moses/Phrase.h"
 
@@ -39,7 +39,7 @@ namespace Moses
 {
 
 /** Constructs a new backward language model. */
-template <class Model> BackwardLanguageModel<Model>::BackwardLanguageModel(const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(file,factorType,lazy)
+template <class Model> BackwardLanguageModel<Model>::BackwardLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line,file,factorType,lazy)
 {
   //
   // This space intentionally left blank
@@ -288,30 +288,30 @@ template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Phr
 
 }
 
-LanguageModel *ConstructBackwardLM(const std::string &file, FactorType factorType, bool lazy)
+LanguageModel *ConstructBackwardLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
 {
   try {
     lm::ngram::ModelType model_type;
     if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
       switch(model_type) {
       case lm::ngram::PROBING:
-        return new BackwardLanguageModel<lm::ngram::ProbingModel>(file,  factorType, lazy);
+        return new BackwardLanguageModel<lm::ngram::ProbingModel>(line, file,  factorType, lazy);
       case lm::ngram::REST_PROBING:
-        return new BackwardLanguageModel<lm::ngram::RestProbingModel>(file, factorType, lazy);
+        return new BackwardLanguageModel<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
       case lm::ngram::TRIE:
-        return new BackwardLanguageModel<lm::ngram::TrieModel>(file, factorType, lazy);
+        return new BackwardLanguageModel<lm::ngram::TrieModel>(line, file, factorType, lazy);
       case lm::ngram::QUANT_TRIE:
-        return new BackwardLanguageModel<lm::ngram::QuantTrieModel>(file, factorType, lazy);
+        return new BackwardLanguageModel<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
       case lm::ngram::ARRAY_TRIE:
-        return new BackwardLanguageModel<lm::ngram::ArrayTrieModel>(file, factorType, lazy);
+        return new BackwardLanguageModel<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
       case lm::ngram::QUANT_ARRAY_TRIE:
-        return new BackwardLanguageModel<lm::ngram::QuantArrayTrieModel>(file, factorType, lazy);
+        return new BackwardLanguageModel<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
       default:
         std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
         abort();
       }
     } else {
-      return new BackwardLanguageModel<lm::ngram::ProbingModel>(file, factorType, lazy);
+      return new BackwardLanguageModel<lm::ngram::ProbingModel>(line, file, factorType, lazy);
     }
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
