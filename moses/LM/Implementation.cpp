@@ -42,20 +42,19 @@ using namespace std;
 namespace Moses
 {
 LanguageModelImplementation::LanguageModelImplementation(const std::string& description, const std::string &line)
-  :LanguageModel(description, line) {
+  :LanguageModel(description, line)
+{
 }
 
 void LanguageModelImplementation::SetParameter(const std::string& key, const std::string& value)
 {
- if (key == "order") {
-  m_nGramOrder = Scan<size_t>(value);
- }
- else if (key == "path") {
-	 m_filePath = value;
- }
- else {
-	 LanguageModel::SetParameter(key, value);
- }
+  if (key == "order") {
+    m_nGramOrder = Scan<size_t>(value);
+  } else if (key == "path") {
+    m_filePath = value;
+  } else {
+    LanguageModel::SetParameter(key, value);
+  }
 
 }
 

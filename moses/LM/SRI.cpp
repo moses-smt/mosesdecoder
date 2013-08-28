@@ -43,7 +43,7 @@ LanguageModelSRI::LanguageModelSRI(const std::string &line)
   ,m_srilmVocab(0)
   ,m_srilmModel(0)
 {
-	ReadParameters();
+  ReadParameters();
 }
 
 LanguageModelSRI::~LanguageModelSRI()

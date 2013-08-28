@@ -124,7 +124,7 @@ public:
   }
 
   void SetProperty(const std::string &key, const std::string &value) {
-	  m_properties[key] = value;
+    m_properties[key] = value;
   }
   void GetProperty(const std::string &key, std::string &value, bool &found) const;
 

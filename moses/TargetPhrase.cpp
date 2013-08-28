@@ -203,15 +203,14 @@ void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>
 
 void TargetPhrase::GetProperty(const std::string &key, std::string &value, bool &found) const
 {
-	std::map<std::string, std::string>::const_iterator iter;
-	iter = m_properties.find(key);
-	if (iter == m_properties.end()) {
-		found = false;
-	}
-	else {
-		found = true;
-		value = iter->second;
-	}
+  std::map<std::string, std::string>::const_iterator iter;
+  iter = m_properties.find(key);
+  if (iter == m_properties.end()) {
+    found = false;
+  } else {
+    found = true;
+    value = iter->second;
+  }
 }
 
 void swap(TargetPhrase &first, TargetPhrase &second)
