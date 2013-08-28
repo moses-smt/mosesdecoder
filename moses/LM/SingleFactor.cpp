@@ -72,6 +72,16 @@ bool LanguageModelSingleFactor::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
+void LanguageModelSingleFactor::SetParameter(const std::string& key, const std::string& value)
+{
+    if (key == "factor") {
+      m_factorType = Scan<FactorType>(value);
+    }
+    else {
+    	LanguageModelImplementation::SetParameter(key, value);
+    }
+}
+
 }
 
 
