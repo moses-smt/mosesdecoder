@@ -583,10 +583,10 @@ void osmHypothesis :: constructCepts(vector <int> & align , int startIndex , int
 void osmHypothesis :: populateScores(vector <float> & scores , const int numFeatures)
 {
   scores.clear();
-  scores.push_back(opProb);	
+  scores.push_back(opProb);
 
   if (numFeatures == 1)
-   return;
+    return;
 
   scores.push_back(gapWidth);
   scores.push_back(gapCount);

@@ -224,7 +224,7 @@ std::vector<float> OpSequenceModel::GetFutureScores(const Phrase &source, const 
     vector<float> scores(numFeatures, 0);
     scores[0] = unkOpProb;
     return scores;
-  } else{ 
+  } else {
     const vector<float> &scores = iter->second;
     return scores;
   }
@@ -235,16 +235,15 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
 
   if (key == "path") {
     m_lmPath = value;
-  }else if (key == "numFeatures"){
+  } else if (key == "numFeatures") {
     numFeatures = Scan<int>(value);
-  }else if (key == "order") {
+  } else if (key == "order") {
     lmOrder = Scan<int>(value);
-  }else if (key == "sFactor"){
+  } else if (key == "sFactor") {
     sFactor = Scan<int>(value);
-  }else if (key == "tFactor"){
+  } else if (key == "tFactor") {
     tFactor = Scan<int>(value);
-  }
-  else {
+  } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
