@@ -1880,7 +1880,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1902,35 +1902,19 @@
 				HEADER_SEARCH_PATHS = (
 					../..,
 					../../moses,
-					../../irstlm/include,
-					../../srilm/include,
 					../../kenlm,
-					../../randlm/include,
-					/opt/local/include,
-					../../synlm/hhmm/wsjparse/include,
-					../../synlm/hhmm/rvtl/include/,
+					"$(XCODE_MOSES_INCLUDE_BOOST)",
+					"$(XCODE_MOSES_INCLUDE_IRSTLM)",
+					"$(XCODE_MOSES_INCLUDE_RANDLM)",
+					"$(XCODE_MOSES_INCLUDE_SRILM)",
+					"$(XCODE_MOSES_INCLUDE_SYNLM_RVTL)",
+					"$(XCODE_MOSES_INCLUDE_SYNLM_WSJPARSE)",
 				);
 				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../moses/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/bin/darwin-4.2.1/release/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/LM/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/LM/bin/darwin-4.2.1/release/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/LM/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/fuzzy-match/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/fuzzy-match/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/Incremental/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/LM/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/RuleTable/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/Scope3Parser/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = moses;
 				SDKROOT = "";
-				USER_HEADER_SEARCH_PATHS = "../.. ../../moses ../../irstlm/include ../../srilm/include ../../kenlm ../../randlm/include /opt/local/include ../../synlm/hhmm/wsjparse/include ../../synlm/hhmm/rvtl/include/ ../.. ../../cmph/include";
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -1938,7 +1922,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1958,35 +1942,19 @@
 				HEADER_SEARCH_PATHS = (
 					../..,
 					../../moses,
-					../../irstlm/include,
-					../../srilm/include,
 					../../kenlm,
-					../../randlm/include,
-					/opt/local/include,
-					../../synlm/hhmm/wsjparse/include,
-					../../synlm/hhmm/rvtl/include/,
+					"$(XCODE_MOSES_INCLUDE_BOOST)",
+					"$(XCODE_MOSES_INCLUDE_IRSTLM)",
+					"$(XCODE_MOSES_INCLUDE_RANDLM)",
+					"$(XCODE_MOSES_INCLUDE_SRILM)",
+					"$(XCODE_MOSES_INCLUDE_SYNLM_RVTL)",
+					"$(XCODE_MOSES_INCLUDE_SYNLM_WSJPARSE)",
 				);
 				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../moses/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/bin/darwin-4.2.1/release/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/LM/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/LM/bin/darwin-4.2.1/release/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/LM/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/fuzzy-match/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/fuzzy-match/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/Incremental/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/LM/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/RuleTable/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-					"\"$(SRCROOT)/../../moses/Scope3Parser/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = moses;
 				SDKROOT = "";
-				USER_HEADER_SEARCH_PATHS = "../.. ../../moses ../../irstlm/include ../../srilm/include ../../kenlm ../../randlm/include /opt/local/include ../../synlm/hhmm/wsjparse/include ../../synlm/hhmm/rvtl/include/ ../.. ../../cmph/include";
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
@@ -1994,7 +1962,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2010,9 +1978,19 @@
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(XCODE_MOSES_BOOST)";
+				HEADER_SEARCH_PATHS = (
+					../..,
+					../../moses,
+					../../kenlm,
+					"$(XCODE_MOSES_INCLUDE_BOOST)",
+					"$(XCODE_MOSES_INCLUDE_IRSTLM)",
+					"$(XCODE_MOSES_INCLUDE_RANDLM)",
+					"$(XCODE_MOSES_INCLUDE_SRILM)",
+					"$(XCODE_MOSES_INCLUDE_SYNLM_RVTL)",
+					"$(XCODE_MOSES_INCLUDE_SYNLM_WSJPARSE)",
+				);
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
+				SDKROOT = "";
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -2021,7 +1999,7 @@
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					TRACE_ENABLE,
@@ -2036,15 +2014,18 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(XCODE_MOSES_BOOST)",
-					../irstlm/include,
-					../srilm/include,
-					../kenlm,
-					../randlm/include,
-					/opt/local/include,
+					../..,
+					../../moses,
+					../../kenlm,
+					"$(XCODE_MOSES_INCLUDE_BOOST)",
+					"$(XCODE_MOSES_INCLUDE_IRSTLM)",
+					"$(XCODE_MOSES_INCLUDE_RANDLM)",
+					"$(XCODE_MOSES_INCLUDE_SRILM)",
+					"$(XCODE_MOSES_INCLUDE_SYNLM_RVTL)",
+					"$(XCODE_MOSES_INCLUDE_SYNLM_WSJPARSE)",
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
+				SDKROOT = "";
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 			};
 			name = Release;
