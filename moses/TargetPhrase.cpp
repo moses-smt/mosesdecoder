@@ -201,6 +201,29 @@ void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>
   m_fullScore += copy.m_fullScore;
 }
 
+void TargetPhrase::SetProperties(const StringPiece &str)
+{
+	if (str.size() == 0) {
+		return;
+	}
+
+  vector<string> toks;
+  TokenizeMultiCharSeparator(toks, str.as_string(), "{{");
+  for (size_t i = 0; i < toks.size(); ++i) {
+	  string &tok = toks[i];
+	  if (tok.empty()) {
+		  continue;
+	  }
+	  size_t endPos = tok.rfind("}");
+
+	  tok = tok.substr(0, endPos - 1);
+
+	  vector<string> keyValue = TokenizeFirstOnly(tok, " ");
+	  CHECK(keyValue.size() == 2);
+	  SetProperty(keyValue[0], keyValue[1]);
+  }
+}
+
 void TargetPhrase::GetProperty(const std::string &key, std::string &value, bool &found) const
 {
   std::map<std::string, std::string>::const_iterator iter;
