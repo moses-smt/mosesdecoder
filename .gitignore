@@ -67,5 +67,7 @@ contrib/other-builds/*.xcodeproj/xcuserdata/
 */*.xcodeproj/xcuserdata
 
 mert/sentence-bleu
-**/._*
-**/.DS_Store
+._*
+.DS_Store
+*.pbxuser
+*.mode1v3

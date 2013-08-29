@@ -2,6 +2,13 @@
 // Oliver Wilson <oliver.wilson@ed.ac.uk>
 //
 
+// This file should be compiled only when the LM_RAND flag is enabled. 
+//
+// The following ifdef prevents XCode and other non-bjam build systems 
+// from attempting to compile this file when LM_RAND is disabled.
+//
+#ifdef LM_RAND
+
 #include "LM/Base.h"
 #include "LM/LDHT.h"
 #include "moses/FFState.h"
@@ -411,3 +418,4 @@ float LanguageModelLDHT::calcScoreFromState(LDHTLMState* state) const
 
 }  // namespace Moses.
 
+#endif
