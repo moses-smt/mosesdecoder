@@ -123,6 +123,7 @@ public:
     return *m_alignNonTerm;
   }
 
+  void SetProperties(const StringPiece &str);
   void SetProperty(const std::string &key, const std::string &value) {
     m_properties[key] = value;
   }
