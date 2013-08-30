@@ -358,6 +358,21 @@ void Phrase::OnlyTheseFactors(const FactorMask &factors)
   }
 }
 
+void Phrase::InitStartEndWord()
+{
+  FactorCollection &factorCollection = FactorCollection::Instance();
+
+  Word startWord(Input);
+  const Factor *factor = factorCollection.AddFactor(Input, 0, BOS_); // TODO - non-factored
+  startWord.SetFactor(0, factor);
+  PrependWord(startWord);
+
+  Word endWord(Input);
+  factor = factorCollection.AddFactor(Input, 0, EOS_); // TODO - non-factored
+  endWord.SetFactor(0, factor);
+  AddWord(endWord);
+}
+
 TO_STRING_BODY(Phrase);
 
 // friend

@@ -148,6 +148,8 @@ public:
     m_words.erase(m_words.begin() + pos);
   }
 
+  void InitStartEndWord();
+
   //! create new phrase class that is a substring of this phrase
   Phrase GetSubString(const WordsRange &wordsRange) const;
   Phrase GetSubString(const WordsRange &wordsRange, FactorType factorType) const;

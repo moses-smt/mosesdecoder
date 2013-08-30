@@ -59,6 +59,7 @@ private:
   std::auto_ptr<SentenceStats> m_sentenceStats;
   clock_t m_start; /**< starting time, used for logging */
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
+  const Phrase *m_constraint;
 
   ChartParser m_parser;
 
