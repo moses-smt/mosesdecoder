@@ -26,118 +26,45 @@
 
 /* Begin PBXBuildFile section */
 		3DFA7FD017D10B0E005EE8B8 /* bhiksha.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F4D17D10B0D005EE8B8 /* bhiksha.cc */; };
-		3DFA7FD117D10B0E005EE8B8 /* bhiksha.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F4E17D10B0D005EE8B8 /* bhiksha.hh */; };
 		3DFA7FD217D10B0E005EE8B8 /* binary_format.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F4F17D10B0D005EE8B8 /* binary_format.cc */; };
-		3DFA7FD317D10B0E005EE8B8 /* binary_format.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F5017D10B0D005EE8B8 /* binary_format.hh */; };
-		3DFA7FD417D10B0E005EE8B8 /* blank.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F5117D10B0D005EE8B8 /* blank.hh */; };
 		3DFA7FED17D10B0E005EE8B8 /* config.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F7317D10B0D005EE8B8 /* config.cc */; };
-		3DFA7FEE17D10B0E005EE8B8 /* config.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F7417D10B0D005EE8B8 /* config.hh */; };
-		3DFA7FEF17D10B0E005EE8B8 /* enumerate_vocab.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F7517D10B0D005EE8B8 /* enumerate_vocab.hh */; };
-		3DFA7FF017D10B0E005EE8B8 /* facade.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F7617D10B0D005EE8B8 /* facade.hh */; };
-		3DFA7FFE17D10B0E005EE8B8 /* left.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F8B17D10B0E005EE8B8 /* left.hh */; };
 		3DFA800017D10B0E005EE8B8 /* lm_exception.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F8D17D10B0E005EE8B8 /* lm_exception.cc */; };
-		3DFA800117D10B0E005EE8B8 /* lm_exception.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F8E17D10B0E005EE8B8 /* lm_exception.hh */; };
-		3DFA800217D10B0E005EE8B8 /* max_order.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F8F17D10B0E005EE8B8 /* max_order.hh */; };
 		3DFA800317D10B0E005EE8B8 /* model.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F9017D10B0E005EE8B8 /* model.cc */; };
-		3DFA800417D10B0E005EE8B8 /* model.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F9117D10B0E005EE8B8 /* model.hh */; };
-		3DFA800617D10B0E005EE8B8 /* model_type.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F9317D10B0E005EE8B8 /* model_type.hh */; };
-		3DFA800717D10B0E005EE8B8 /* ngram_query.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F9417D10B0E005EE8B8 /* ngram_query.hh */; };
-		3DFA800817D10B0E005EE8B8 /* partial.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F9517D10B0E005EE8B8 /* partial.hh */; };
 		3DFA800A17D10B0E005EE8B8 /* quantize.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F9717D10B0E005EE8B8 /* quantize.cc */; };
-		3DFA800B17D10B0E005EE8B8 /* quantize.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F9817D10B0E005EE8B8 /* quantize.hh */; };
 		3DFA800D17D10B0E005EE8B8 /* read_arpa.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F9A17D10B0E005EE8B8 /* read_arpa.cc */; };
-		3DFA800E17D10B0E005EE8B8 /* read_arpa.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F9B17D10B0E005EE8B8 /* read_arpa.hh */; };
-		3DFA800F17D10B0E005EE8B8 /* return.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F9C17D10B0E005EE8B8 /* return.hh */; };
 		3DFA801017D10B0E005EE8B8 /* search_hashed.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F9D17D10B0E005EE8B8 /* search_hashed.cc */; };
-		3DFA801117D10B0E005EE8B8 /* search_hashed.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7F9E17D10B0E005EE8B8 /* search_hashed.hh */; };
 		3DFA801217D10B0E005EE8B8 /* search_trie.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F9F17D10B0E005EE8B8 /* search_trie.cc */; };
-		3DFA801317D10B0E005EE8B8 /* search_trie.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FA017D10B0E005EE8B8 /* search_trie.hh */; };
 		3DFA801417D10B0E005EE8B8 /* sizes.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7FA117D10B0E005EE8B8 /* sizes.cc */; };
-		3DFA801517D10B0E005EE8B8 /* sizes.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FA217D10B0E005EE8B8 /* sizes.hh */; };
-		3DFA801617D10B0E005EE8B8 /* state.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FA317D10B0E005EE8B8 /* state.hh */; };
 		3DFA801717D10B0E005EE8B8 /* trie.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7FA617D10B0E005EE8B8 /* trie.cc */; };
-		3DFA801817D10B0E005EE8B8 /* trie.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FA717D10B0E005EE8B8 /* trie.hh */; };
 		3DFA801917D10B0E005EE8B8 /* trie_sort.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7FA817D10B0E005EE8B8 /* trie_sort.cc */; };
-		3DFA801A17D10B0E005EE8B8 /* trie_sort.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FA917D10B0E005EE8B8 /* trie_sort.hh */; };
-		3DFA801B17D10B0E005EE8B8 /* value.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FAA17D10B0E005EE8B8 /* value.hh */; };
 		3DFA801C17D10B0E005EE8B8 /* value_build.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7FAB17D10B0E005EE8B8 /* value_build.cc */; };
-		3DFA801D17D10B0E005EE8B8 /* value_build.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FAC17D10B0E005EE8B8 /* value_build.hh */; };
 		3DFA801E17D10B0E005EE8B8 /* virtual_interface.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7FAD17D10B0E005EE8B8 /* virtual_interface.cc */; };
-		3DFA801F17D10B0E005EE8B8 /* virtual_interface.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FAE17D10B0E005EE8B8 /* virtual_interface.hh */; };
 		3DFA802017D10B0E005EE8B8 /* vocab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7FAF17D10B0E005EE8B8 /* vocab.cc */; };
-		3DFA802117D10B0E005EE8B8 /* vocab.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FB017D10B0E005EE8B8 /* vocab.hh */; };
-		3DFA802217D10B0E005EE8B8 /* weights.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FB117D10B0E005EE8B8 /* weights.hh */; };
-		3DFA802317D10B0E005EE8B8 /* word_index.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA7FB217D10B0E005EE8B8 /* word_index.hh */; };
 		3DFA80AC17D10EEC005EE8B8 /* bit_packing.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA803C17D10EEC005EE8B8 /* bit_packing.cc */; };
-		3DFA80AD17D10EEC005EE8B8 /* bit_packing.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA803D17D10EEC005EE8B8 /* bit_packing.hh */; };
-		3DFA80AF17D10EEC005EE8B8 /* check.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA803F17D10EEC005EE8B8 /* check.hh */; };
 		3DFA80B117D10EEC005EE8B8 /* bignum-dtoa.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA804317D10EEC005EE8B8 /* bignum-dtoa.cc */; };
-		3DFA80B217D10EEC005EE8B8 /* bignum-dtoa.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA804417D10EEC005EE8B8 /* bignum-dtoa.h */; };
 		3DFA80B317D10EEC005EE8B8 /* bignum.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA804517D10EEC005EE8B8 /* bignum.cc */; };
-		3DFA80B417D10EEC005EE8B8 /* bignum.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA804617D10EEC005EE8B8 /* bignum.h */; };
 		3DFA80B517D10EEC005EE8B8 /* cached-powers.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA804717D10EEC005EE8B8 /* cached-powers.cc */; };
-		3DFA80B617D10EEC005EE8B8 /* cached-powers.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA804817D10EEC005EE8B8 /* cached-powers.h */; };
 		3DFA80B717D10EEC005EE8B8 /* diy-fp.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA804917D10EEC005EE8B8 /* diy-fp.cc */; };
-		3DFA80B817D10EEC005EE8B8 /* diy-fp.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA804A17D10EEC005EE8B8 /* diy-fp.h */; };
 		3DFA80B917D10EEC005EE8B8 /* double-conversion.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA804B17D10EEC005EE8B8 /* double-conversion.cc */; };
-		3DFA80BA17D10EEC005EE8B8 /* double-conversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA804C17D10EEC005EE8B8 /* double-conversion.h */; };
 		3DFA80BB17D10EEC005EE8B8 /* fast-dtoa.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA804D17D10EEC005EE8B8 /* fast-dtoa.cc */; };
-		3DFA80BC17D10EEC005EE8B8 /* fast-dtoa.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA804E17D10EEC005EE8B8 /* fast-dtoa.h */; };
 		3DFA80BD17D10EEC005EE8B8 /* fixed-dtoa.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA804F17D10EEC005EE8B8 /* fixed-dtoa.cc */; };
-		3DFA80BE17D10EEC005EE8B8 /* fixed-dtoa.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA805017D10EEC005EE8B8 /* fixed-dtoa.h */; };
-		3DFA80BF17D10EEC005EE8B8 /* ieee.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA805117D10EEC005EE8B8 /* ieee.h */; };
 		3DFA80C017D10EEC005EE8B8 /* strtod.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA805217D10EEC005EE8B8 /* strtod.cc */; };
-		3DFA80C117D10EEC005EE8B8 /* strtod.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA805317D10EEC005EE8B8 /* strtod.h */; };
-		3DFA80C217D10EEC005EE8B8 /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA805417D10EEC005EE8B8 /* utils.h */; };
 		3DFA80C317D10EEC005EE8B8 /* ersatz_progress.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA805B17D10EEC005EE8B8 /* ersatz_progress.cc */; };
-		3DFA80C417D10EEC005EE8B8 /* ersatz_progress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA805C17D10EEC005EE8B8 /* ersatz_progress.hh */; };
 		3DFA80C517D10EEC005EE8B8 /* exception.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA805D17D10EEC005EE8B8 /* exception.cc */; };
-		3DFA80C617D10EEC005EE8B8 /* exception.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA805E17D10EEC005EE8B8 /* exception.hh */; };
-		3DFA80C717D10EEC005EE8B8 /* fake_ofstream.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA805F17D10EEC005EE8B8 /* fake_ofstream.hh */; };
 		3DFA80C817D10EEC005EE8B8 /* file.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA806017D10EEC005EE8B8 /* file.cc */; };
-		3DFA80C917D10EEC005EE8B8 /* file.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA806117D10EEC005EE8B8 /* file.hh */; };
 		3DFA80CA17D10EEC005EE8B8 /* file_piece.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA806217D10EEC005EE8B8 /* file_piece.cc */; };
-		3DFA80CB17D10EEC005EE8B8 /* file_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA806317D10EEC005EE8B8 /* file_piece.hh */; };
 		3DFA80CD17D10EEC005EE8B8 /* getopt.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA806517D10EEC005EE8B8 /* getopt.c */; };
-		3DFA80CE17D10EEC005EE8B8 /* getopt.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA806617D10EEC005EE8B8 /* getopt.hh */; };
-		3DFA80CF17D10EEC005EE8B8 /* have.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA806717D10EEC005EE8B8 /* have.hh */; };
-		3DFA80D017D10EEC005EE8B8 /* joint_sort.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA806817D10EEC005EE8B8 /* joint_sort.hh */; };
 		3DFA80D217D10EEC005EE8B8 /* mmap.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA806A17D10EEC005EE8B8 /* mmap.cc */; };
-		3DFA80D317D10EEC005EE8B8 /* mmap.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA806B17D10EEC005EE8B8 /* mmap.hh */; };
-		3DFA80D417D10EEC005EE8B8 /* multi_intersection.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA806C17D10EEC005EE8B8 /* multi_intersection.hh */; };
 		3DFA80D617D10EEC005EE8B8 /* murmur_hash.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA806E17D10EEC005EE8B8 /* murmur_hash.cc */; };
-		3DFA80D717D10EEC005EE8B8 /* murmur_hash.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA806F17D10EEC005EE8B8 /* murmur_hash.hh */; };
-		3DFA80D817D10EEC005EE8B8 /* pcqueue.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA807017D10EEC005EE8B8 /* pcqueue.hh */; };
 		3DFA80D917D10EEC005EE8B8 /* pool.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA807117D10EEC005EE8B8 /* pool.cc */; };
-		3DFA80DA17D10EEC005EE8B8 /* pool.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA807217D10EEC005EE8B8 /* pool.hh */; };
-		3DFA80DB17D10EEC005EE8B8 /* probing_hash_table.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA807317D10EEC005EE8B8 /* probing_hash_table.hh */; };
-		3DFA80DD17D10EEC005EE8B8 /* proxy_iterator.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA807517D10EEC005EE8B8 /* proxy_iterator.hh */; };
 		3DFA80DE17D10EEC005EE8B8 /* read_compressed.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA807617D10EEC005EE8B8 /* read_compressed.cc */; };
-		3DFA80DF17D10EEC005EE8B8 /* read_compressed.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA807717D10EEC005EE8B8 /* read_compressed.hh */; };
 		3DFA80E117D10EEC005EE8B8 /* scoped.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA807917D10EEC005EE8B8 /* scoped.cc */; };
-		3DFA80E217D10EEC005EE8B8 /* scoped.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA807A17D10EEC005EE8B8 /* scoped.hh */; };
-		3DFA80E317D10EEC005EE8B8 /* sized_iterator.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA807B17D10EEC005EE8B8 /* sized_iterator.hh */; };
-		3DFA80E417D10EEC005EE8B8 /* sorted_uniform.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA807C17D10EEC005EE8B8 /* sorted_uniform.hh */; };
-		3DFA80E717D10EEC005EE8B8 /* block.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808017D10EEC005EE8B8 /* block.hh */; };
 		3DFA80E817D10EEC005EE8B8 /* chain.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA808117D10EEC005EE8B8 /* chain.cc */; };
-		3DFA80E917D10EEC005EE8B8 /* chain.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808217D10EEC005EE8B8 /* chain.hh */; };
-		3DFA80EA17D10EEC005EE8B8 /* config.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808317D10EEC005EE8B8 /* config.hh */; };
 		3DFA80EB17D10EEC005EE8B8 /* io.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA808417D10EEC005EE8B8 /* io.cc */; };
-		3DFA80EC17D10EEC005EE8B8 /* io.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808517D10EEC005EE8B8 /* io.hh */; };
 		3DFA80EE17D10EEC005EE8B8 /* line_input.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA808717D10EEC005EE8B8 /* line_input.cc */; };
-		3DFA80EF17D10EEC005EE8B8 /* line_input.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808817D10EEC005EE8B8 /* line_input.hh */; };
 		3DFA80F017D10EEC005EE8B8 /* multi_progress.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA808917D10EEC005EE8B8 /* multi_progress.cc */; };
-		3DFA80F117D10EEC005EE8B8 /* multi_progress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808A17D10EEC005EE8B8 /* multi_progress.hh */; };
-		3DFA80F217D10EEC005EE8B8 /* sort.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808B17D10EEC005EE8B8 /* sort.hh */; };
-		3DFA80F417D10EEC005EE8B8 /* stream.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808D17D10EEC005EE8B8 /* stream.hh */; };
-		3DFA80F617D10EEC005EE8B8 /* timer.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA808F17D10EEC005EE8B8 /* timer.hh */; };
 		3DFA80F717D10EEC005EE8B8 /* string_piece.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA809617D10EEC005EE8B8 /* string_piece.cc */; };
-		3DFA80F817D10EEC005EE8B8 /* string_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA809717D10EEC005EE8B8 /* string_piece.hh */; };
-		3DFA80F917D10EEC005EE8B8 /* string_piece_hash.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA809817D10EEC005EE8B8 /* string_piece_hash.hh */; };
-		3DFA80FA17D10EEC005EE8B8 /* thread_pool.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA809917D10EEC005EE8B8 /* thread_pool.hh */; };
-		3DFA80FB17D10EEC005EE8B8 /* tokenize_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA809A17D10EEC005EE8B8 /* tokenize_piece.hh */; };
 		3DFA80FD17D10EEC005EE8B8 /* usage.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA809C17D10EEC005EE8B8 /* usage.cc */; };
-		3DFA80FE17D10EEC005EE8B8 /* usage.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA809D17D10EEC005EE8B8 /* usage.hh */; };
 		3DFA810C17D10FDE005EE8B8 /* build_binary_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F5217D10B0D005EE8B8 /* build_binary_main.cc */; };
 		3DFA810F17D10FF3005EE8B8 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
 		3DFA815F17D11415005EE8B8 /* fragment_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F8A17D10B0D005EE8B8 /* fragment_main.cc */; };
@@ -145,38 +72,18 @@
 		3DFA817317D11483005EE8B8 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
 		3DFA817917D11495005EE8B8 /* query_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F9917D10B0E005EE8B8 /* query_main.cc */; };
 		3DFA820C17D116F0005EE8B8 /* adjust_counts.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81DC17D116F0005EE8B8 /* adjust_counts.cc */; };
-		3DFA820D17D116F0005EE8B8 /* adjust_counts.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81DD17D116F0005EE8B8 /* adjust_counts.hh */; };
 		3DFA820E17D116F0005EE8B8 /* adjust_counts_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81DE17D116F0005EE8B8 /* adjust_counts_test.cc */; };
 		3DFA820F17D116F0005EE8B8 /* corpus_count.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81DF17D116F0005EE8B8 /* corpus_count.cc */; };
-		3DFA821017D116F0005EE8B8 /* corpus_count.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81E017D116F0005EE8B8 /* corpus_count.hh */; };
 		3DFA821117D116F0005EE8B8 /* corpus_count_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81E117D116F0005EE8B8 /* corpus_count_test.cc */; };
-		3DFA821217D116F0005EE8B8 /* discount.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81E217D116F0005EE8B8 /* discount.hh */; };
-		3DFA821317D116F0005EE8B8 /* header_info.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81E317D116F0005EE8B8 /* header_info.hh */; };
 		3DFA821417D116F0005EE8B8 /* initial_probabilities.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81E417D116F0005EE8B8 /* initial_probabilities.cc */; };
-		3DFA821517D116F0005EE8B8 /* initial_probabilities.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81E517D116F0005EE8B8 /* initial_probabilities.hh */; };
 		3DFA821617D116F0005EE8B8 /* interpolate.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81E617D116F0005EE8B8 /* interpolate.cc */; };
-		3DFA821717D116F0005EE8B8 /* interpolate.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81E717D116F0005EE8B8 /* interpolate.hh */; };
-		3DFA821817D116F0005EE8B8 /* joint_order.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81E817D116F0005EE8B8 /* joint_order.hh */; };
 		3DFA821917D116F0005EE8B8 /* lmplz_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81E917D116F0005EE8B8 /* lmplz_main.cc */; };
-		3DFA821A17D116F0005EE8B8 /* multi_stream.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81EA17D116F0005EE8B8 /* multi_stream.hh */; };
-		3DFA821B17D116F0005EE8B8 /* ngram.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81EB17D116F0005EE8B8 /* ngram.hh */; };
-		3DFA821C17D116F0005EE8B8 /* ngram_stream.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81EC17D116F0005EE8B8 /* ngram_stream.hh */; };
 		3DFA821D17D116F0005EE8B8 /* pipeline.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81ED17D116F0005EE8B8 /* pipeline.cc */; };
-		3DFA821E17D116F0005EE8B8 /* pipeline.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81EE17D116F0005EE8B8 /* pipeline.hh */; };
 		3DFA821F17D116F0005EE8B8 /* print.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81EF17D116F0005EE8B8 /* print.cc */; };
-		3DFA822017D116F0005EE8B8 /* print.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81F017D116F0005EE8B8 /* print.hh */; };
-		3DFA822117D116F0005EE8B8 /* sort.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81F117D116F0005EE8B8 /* sort.hh */; };
 		3DFA822317D116F0005EE8B8 /* arpa_io.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81FA17D116F0005EE8B8 /* arpa_io.cc */; };
-		3DFA822417D116F0005EE8B8 /* arpa_io.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81FB17D116F0005EE8B8 /* arpa_io.hh */; };
-		3DFA822517D116F0005EE8B8 /* count_io.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81FC17D116F0005EE8B8 /* count_io.hh */; };
 		3DFA822617D116F0005EE8B8 /* filter_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81FD17D116F0005EE8B8 /* filter_main.cc */; };
-		3DFA822717D116F0005EE8B8 /* format.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA81FE17D116F0005EE8B8 /* format.hh */; };
 		3DFA822817D116F0005EE8B8 /* phrase.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81FF17D116F0005EE8B8 /* phrase.cc */; };
-		3DFA822917D116F0005EE8B8 /* phrase.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA820017D116F0005EE8B8 /* phrase.hh */; };
-		3DFA822A17D116F0005EE8B8 /* thread.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA820117D116F0005EE8B8 /* thread.hh */; };
 		3DFA822B17D116F0005EE8B8 /* vocab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA820217D116F0005EE8B8 /* vocab.cc */; };
-		3DFA822C17D116F0005EE8B8 /* vocab.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA820317D116F0005EE8B8 /* vocab.hh */; };
-		3DFA822D17D116F0005EE8B8 /* wrapper.hh in Headers */ = {isa = PBXBuildFile; fileRef = 3DFA820417D116F0005EE8B8 /* wrapper.hh */; };
 		3DFA824217D1172E005EE8B8 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
 		3DFA824317D1174C005EE8B8 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
 		3DFA824417D1177D005EE8B8 /* arpa_io.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA81FA17D116F0005EE8B8 /* arpa_io.cc */; };
@@ -222,402 +129,182 @@
 		3DFA82BF17D11EDE005EE8B8 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82B517D11E55005EE8B8 /* IOWrapper.cpp */; };
 		3DFA82C017D11EFD005EE8B8 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
 		3DFCD77B17C7E7E500BA3700 /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5C517C7E7E400BA3700 /* AlignmentInfo.cpp */; };
-		3DFCD77C17C7E7E500BA3700 /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5C617C7E7E400BA3700 /* AlignmentInfo.h */; };
 		3DFCD77D17C7E7E500BA3700 /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5C717C7E7E400BA3700 /* AlignmentInfoCollection.cpp */; };
-		3DFCD77E17C7E7E500BA3700 /* AlignmentInfoCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5C817C7E7E400BA3700 /* AlignmentInfoCollection.h */; };
 		3DFCD77F17C7E7E500BA3700 /* AlignmentInfoTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5C917C7E7E400BA3700 /* AlignmentInfoTest.cpp */; };
 		3DFCD78017C7E7E500BA3700 /* BitmapContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5CA17C7E7E400BA3700 /* BitmapContainer.cpp */; };
-		3DFCD78117C7E7E500BA3700 /* BitmapContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5CB17C7E7E400BA3700 /* BitmapContainer.h */; };
 		3DFCD78217C7E7E500BA3700 /* ChartCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5CC17C7E7E400BA3700 /* ChartCell.cpp */; };
-		3DFCD78317C7E7E500BA3700 /* ChartCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5CD17C7E7E400BA3700 /* ChartCell.h */; };
 		3DFCD78417C7E7E500BA3700 /* ChartCellCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5CE17C7E7E400BA3700 /* ChartCellCollection.cpp */; };
-		3DFCD78517C7E7E500BA3700 /* ChartCellCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5CF17C7E7E400BA3700 /* ChartCellCollection.h */; };
-		3DFCD78617C7E7E500BA3700 /* ChartCellLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5D017C7E7E400BA3700 /* ChartCellLabel.h */; };
-		3DFCD78717C7E7E500BA3700 /* ChartCellLabelSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5D117C7E7E400BA3700 /* ChartCellLabelSet.h */; };
 		3DFCD78817C7E7E500BA3700 /* ChartHypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5D217C7E7E400BA3700 /* ChartHypothesis.cpp */; };
-		3DFCD78917C7E7E500BA3700 /* ChartHypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5D317C7E7E400BA3700 /* ChartHypothesis.h */; };
 		3DFCD78A17C7E7E500BA3700 /* ChartHypothesisCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5D417C7E7E400BA3700 /* ChartHypothesisCollection.cpp */; };
-		3DFCD78B17C7E7E500BA3700 /* ChartHypothesisCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5D517C7E7E400BA3700 /* ChartHypothesisCollection.h */; };
 		3DFCD78C17C7E7E500BA3700 /* ChartManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5D617C7E7E400BA3700 /* ChartManager.cpp */; };
-		3DFCD78D17C7E7E500BA3700 /* ChartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5D717C7E7E400BA3700 /* ChartManager.h */; };
 		3DFCD78E17C7E7E500BA3700 /* ChartParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5D817C7E7E400BA3700 /* ChartParser.cpp */; };
-		3DFCD78F17C7E7E500BA3700 /* ChartParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5D917C7E7E400BA3700 /* ChartParser.h */; };
-		3DFCD79017C7E7E500BA3700 /* ChartParserCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5DA17C7E7E400BA3700 /* ChartParserCallback.h */; };
 		3DFCD79117C7E7E500BA3700 /* ChartRuleLookupManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5DB17C7E7E400BA3700 /* ChartRuleLookupManager.cpp */; };
-		3DFCD79217C7E7E500BA3700 /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5DC17C7E7E400BA3700 /* ChartRuleLookupManager.h */; };
 		3DFCD79317C7E7E500BA3700 /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5DD17C7E7E400BA3700 /* ChartTranslationOption.cpp */; };
-		3DFCD79417C7E7E500BA3700 /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5DE17C7E7E400BA3700 /* ChartTranslationOption.h */; };
 		3DFCD79517C7E7E500BA3700 /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5DF17C7E7E400BA3700 /* ChartTranslationOptionList.cpp */; };
-		3DFCD79617C7E7E500BA3700 /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5E017C7E7E400BA3700 /* ChartTranslationOptionList.h */; };
 		3DFCD79717C7E7E500BA3700 /* ChartTranslationOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5E117C7E7E400BA3700 /* ChartTranslationOptions.cpp */; };
-		3DFCD79817C7E7E500BA3700 /* ChartTranslationOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5E217C7E7E400BA3700 /* ChartTranslationOptions.h */; };
 		3DFCD79917C7E7E500BA3700 /* ChartTrellisDetour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5E317C7E7E400BA3700 /* ChartTrellisDetour.cpp */; };
-		3DFCD79A17C7E7E500BA3700 /* ChartTrellisDetour.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5E417C7E7E400BA3700 /* ChartTrellisDetour.h */; };
 		3DFCD79B17C7E7E500BA3700 /* ChartTrellisDetourQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5E517C7E7E400BA3700 /* ChartTrellisDetourQueue.cpp */; };
-		3DFCD79C17C7E7E500BA3700 /* ChartTrellisDetourQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5E617C7E7E400BA3700 /* ChartTrellisDetourQueue.h */; };
 		3DFCD79D17C7E7E500BA3700 /* ChartTrellisNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5E717C7E7E400BA3700 /* ChartTrellisNode.cpp */; };
-		3DFCD79E17C7E7E500BA3700 /* ChartTrellisNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5E817C7E7E400BA3700 /* ChartTrellisNode.h */; };
 		3DFCD79F17C7E7E500BA3700 /* ChartTrellisPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5E917C7E7E400BA3700 /* ChartTrellisPath.cpp */; };
-		3DFCD7A017C7E7E500BA3700 /* ChartTrellisPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5EA17C7E7E400BA3700 /* ChartTrellisPath.h */; };
-		3DFCD7A117C7E7E500BA3700 /* ChartTrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5EB17C7E7E400BA3700 /* ChartTrellisPathList.h */; };
 		3DFCD7A217C7E7E500BA3700 /* ConfusionNet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5EC17C7E7E400BA3700 /* ConfusionNet.cpp */; };
-		3DFCD7A317C7E7E500BA3700 /* ConfusionNet.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5ED17C7E7E400BA3700 /* ConfusionNet.h */; };
 		3DFCD7A417C7E7E500BA3700 /* DecodeFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5EE17C7E7E400BA3700 /* DecodeFeature.cpp */; };
-		3DFCD7A517C7E7E500BA3700 /* DecodeFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5EF17C7E7E400BA3700 /* DecodeFeature.h */; };
 		3DFCD7A617C7E7E500BA3700 /* DecodeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5F017C7E7E400BA3700 /* DecodeGraph.cpp */; };
-		3DFCD7A717C7E7E500BA3700 /* DecodeGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5F117C7E7E400BA3700 /* DecodeGraph.h */; };
 		3DFCD7A817C7E7E500BA3700 /* DecodeStep.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5F217C7E7E400BA3700 /* DecodeStep.cpp */; };
-		3DFCD7A917C7E7E500BA3700 /* DecodeStep.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5F317C7E7E400BA3700 /* DecodeStep.h */; };
 		3DFCD7AA17C7E7E500BA3700 /* DecodeStepGeneration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5F417C7E7E400BA3700 /* DecodeStepGeneration.cpp */; };
-		3DFCD7AB17C7E7E500BA3700 /* DecodeStepGeneration.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5F517C7E7E400BA3700 /* DecodeStepGeneration.h */; };
 		3DFCD7AC17C7E7E500BA3700 /* DecodeStepTranslation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5F617C7E7E400BA3700 /* DecodeStepTranslation.cpp */; };
-		3DFCD7AD17C7E7E500BA3700 /* DecodeStepTranslation.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5F717C7E7E400BA3700 /* DecodeStepTranslation.h */; };
 		3DFCD7AE17C7E7E500BA3700 /* Factor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5F817C7E7E400BA3700 /* Factor.cpp */; };
-		3DFCD7AF17C7E7E500BA3700 /* Factor.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5F917C7E7E400BA3700 /* Factor.h */; };
 		3DFCD7B017C7E7E500BA3700 /* FactorCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5FA17C7E7E400BA3700 /* FactorCollection.cpp */; };
-		3DFCD7B117C7E7E500BA3700 /* FactorCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5FB17C7E7E400BA3700 /* FactorCollection.h */; };
 		3DFCD7B217C7E7E500BA3700 /* FactorTypeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5FC17C7E7E400BA3700 /* FactorTypeSet.cpp */; };
-		3DFCD7B317C7E7E500BA3700 /* FactorTypeSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5FD17C7E7E400BA3700 /* FactorTypeSet.h */; };
 		3DFCD7B417C7E7E500BA3700 /* FeatureVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5FE17C7E7E400BA3700 /* FeatureVector.cpp */; };
-		3DFCD7B517C7E7E500BA3700 /* FeatureVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD5FF17C7E7E400BA3700 /* FeatureVector.h */; };
 		3DFCD7B617C7E7E500BA3700 /* FeatureVectorTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD60017C7E7E400BA3700 /* FeatureVectorTest.cpp */; };
 		3DFCD7B717C7E7E500BA3700 /* BleuScoreFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD60217C7E7E400BA3700 /* BleuScoreFeature.cpp */; };
-		3DFCD7B817C7E7E500BA3700 /* BleuScoreFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD60317C7E7E400BA3700 /* BleuScoreFeature.h */; };
 		3DFCD7BB17C7E7E500BA3700 /* ControlRecombination.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD60617C7E7E400BA3700 /* ControlRecombination.cpp */; };
-		3DFCD7BC17C7E7E500BA3700 /* ControlRecombination.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD60717C7E7E400BA3700 /* ControlRecombination.h */; };
 		3DFCD7BD17C7E7E500BA3700 /* DistortionScoreProducer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD60817C7E7E400BA3700 /* DistortionScoreProducer.cpp */; };
-		3DFCD7BE17C7E7E500BA3700 /* DistortionScoreProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD60917C7E7E400BA3700 /* DistortionScoreProducer.h */; };
 		3DFCD7BF17C7E7E500BA3700 /* FFState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD60A17C7E7E400BA3700 /* FFState.cpp */; };
-		3DFCD7C017C7E7E500BA3700 /* FFState.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD60B17C7E7E400BA3700 /* FFState.h */; };
 		3DFCD7C117C7E7E500BA3700 /* Factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD60C17C7E7E400BA3700 /* Factory.cpp */; };
-		3DFCD7C217C7E7E500BA3700 /* Factory.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD60D17C7E7E400BA3700 /* Factory.h */; };
 		3DFCD7C317C7E7E500BA3700 /* FeatureFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD60E17C7E7E400BA3700 /* FeatureFunction.cpp */; };
-		3DFCD7C417C7E7E500BA3700 /* FeatureFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD60F17C7E7E400BA3700 /* FeatureFunction.h */; };
 		3DFCD7C517C7E7E500BA3700 /* GlobalLexicalModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD61017C7E7E400BA3700 /* GlobalLexicalModel.cpp */; };
-		3DFCD7C617C7E7E500BA3700 /* GlobalLexicalModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD61117C7E7E400BA3700 /* GlobalLexicalModel.h */; };
 		3DFCD7C717C7E7E500BA3700 /* GlobalLexicalModelUnlimited.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD61217C7E7E400BA3700 /* GlobalLexicalModelUnlimited.cpp */; };
-		3DFCD7C817C7E7E500BA3700 /* GlobalLexicalModelUnlimited.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD61317C7E7E400BA3700 /* GlobalLexicalModelUnlimited.h */; };
 		3DFCD7C917C7E7E500BA3700 /* InputFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD61417C7E7E400BA3700 /* InputFeature.cpp */; };
-		3DFCD7CA17C7E7E500BA3700 /* InputFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD61517C7E7E400BA3700 /* InputFeature.h */; };
 		3DFCD7CB17C7E7E500BA3700 /* OpSequenceModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD61717C7E7E400BA3700 /* OpSequenceModel.cpp */; };
-		3DFCD7CC17C7E7E500BA3700 /* OpSequenceModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD61817C7E7E400BA3700 /* OpSequenceModel.h */; };
 		3DFCD7CD17C7E7E500BA3700 /* osmHyp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD61917C7E7E400BA3700 /* osmHyp.cpp */; };
-		3DFCD7CE17C7E7E500BA3700 /* osmHyp.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD61A17C7E7E400BA3700 /* osmHyp.h */; };
 		3DFCD7D117C7E7E500BA3700 /* PhraseBoundaryFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD61D17C7E7E400BA3700 /* PhraseBoundaryFeature.cpp */; };
-		3DFCD7D217C7E7E500BA3700 /* PhraseBoundaryFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD61E17C7E7E400BA3700 /* PhraseBoundaryFeature.h */; };
 		3DFCD7D317C7E7E500BA3700 /* PhraseLengthFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD61F17C7E7E400BA3700 /* PhraseLengthFeature.cpp */; };
-		3DFCD7D417C7E7E500BA3700 /* PhraseLengthFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD62017C7E7E400BA3700 /* PhraseLengthFeature.h */; };
 		3DFCD7D517C7E7E500BA3700 /* PhrasePairFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD62117C7E7E400BA3700 /* PhrasePairFeature.cpp */; };
-		3DFCD7D617C7E7E500BA3700 /* PhrasePairFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD62217C7E7E400BA3700 /* PhrasePairFeature.h */; };
 		3DFCD7D717C7E7E500BA3700 /* PhrasePenalty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD62317C7E7E400BA3700 /* PhrasePenalty.cpp */; };
-		3DFCD7D817C7E7E500BA3700 /* PhrasePenalty.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD62417C7E7E400BA3700 /* PhrasePenalty.h */; };
 		3DFCD7D917C7E7E500BA3700 /* SourceWordDeletionFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD62517C7E7E400BA3700 /* SourceWordDeletionFeature.cpp */; };
-		3DFCD7DA17C7E7E500BA3700 /* SourceWordDeletionFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD62617C7E7E400BA3700 /* SourceWordDeletionFeature.h */; };
 		3DFCD7DB17C7E7E500BA3700 /* StatefulFeatureFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD62717C7E7E400BA3700 /* StatefulFeatureFunction.cpp */; };
-		3DFCD7DC17C7E7E500BA3700 /* StatefulFeatureFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD62817C7E7E400BA3700 /* StatefulFeatureFunction.h */; };
 		3DFCD7DD17C7E7E500BA3700 /* StatelessFeatureFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD62917C7E7E400BA3700 /* StatelessFeatureFunction.cpp */; };
-		3DFCD7DE17C7E7E500BA3700 /* StatelessFeatureFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD62A17C7E7E400BA3700 /* StatelessFeatureFunction.h */; };
 		3DFCD7DF17C7E7E500BA3700 /* TargetBigramFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD62B17C7E7E400BA3700 /* TargetBigramFeature.cpp */; };
-		3DFCD7E017C7E7E500BA3700 /* TargetBigramFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD62C17C7E7E400BA3700 /* TargetBigramFeature.h */; };
 		3DFCD7E117C7E7E500BA3700 /* TargetNgramFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD62D17C7E7E400BA3700 /* TargetNgramFeature.cpp */; };
-		3DFCD7E217C7E7E500BA3700 /* TargetNgramFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD62E17C7E7E400BA3700 /* TargetNgramFeature.h */; };
 		3DFCD7E317C7E7E500BA3700 /* TargetWordInsertionFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD62F17C7E7E400BA3700 /* TargetWordInsertionFeature.cpp */; };
-		3DFCD7E417C7E7E500BA3700 /* TargetWordInsertionFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD63017C7E7E400BA3700 /* TargetWordInsertionFeature.h */; };
 		3DFCD7E517C7E7E500BA3700 /* UnknownWordPenaltyProducer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD63117C7E7E400BA3700 /* UnknownWordPenaltyProducer.cpp */; };
-		3DFCD7E617C7E7E500BA3700 /* UnknownWordPenaltyProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD63217C7E7E400BA3700 /* UnknownWordPenaltyProducer.h */; };
 		3DFCD7E717C7E7E500BA3700 /* WordPenaltyProducer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD63317C7E7E400BA3700 /* WordPenaltyProducer.cpp */; };
-		3DFCD7E817C7E7E500BA3700 /* WordPenaltyProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD63417C7E7E400BA3700 /* WordPenaltyProducer.h */; };
 		3DFCD7E917C7E7E500BA3700 /* WordTranslationFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD63517C7E7E400BA3700 /* WordTranslationFeature.cpp */; };
-		3DFCD7EA17C7E7E500BA3700 /* WordTranslationFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD63617C7E7E400BA3700 /* WordTranslationFeature.h */; };
 		3DFCD7EB17C7E7E500BA3700 /* File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD63717C7E7E400BA3700 /* File.cpp */; };
-		3DFCD7EC17C7E7E500BA3700 /* File.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD63817C7E7E400BA3700 /* File.h */; };
-		3DFCD7ED17C7E7E500BA3700 /* FilePtr.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD63917C7E7E400BA3700 /* FilePtr.h */; };
 		3DFCD7EE17C7E7E500BA3700 /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD63A17C7E7E400BA3700 /* FloydWarshall.cpp */; };
-		3DFCD7EF17C7E7E500BA3700 /* FloydWarshall.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD63B17C7E7E400BA3700 /* FloydWarshall.h */; };
 		3DFCD7F017C7E7E500BA3700 /* GenerationDictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD63C17C7E7E400BA3700 /* GenerationDictionary.cpp */; };
-		3DFCD7F117C7E7E500BA3700 /* GenerationDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD63D17C7E7E400BA3700 /* GenerationDictionary.h */; };
-		3DFCD7F217C7E7E500BA3700 /* Sampling.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64017C7E7E400BA3700 /* Sampling.h */; };
-		3DFCD7F317C7E7E500BA3700 /* NBestList.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64217C7E7E400BA3700 /* NBestList.h */; };
-		3DFCD7F417C7E7E500BA3700 /* VectorIndexSorter.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64317C7E7E400BA3700 /* VectorIndexSorter.h */; };
-		3DFCD7F517C7E7E500BA3700 /* gzfilebuf.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64417C7E7E400BA3700 /* gzfilebuf.h */; };
-		3DFCD7F617C7E7E500BA3700 /* HypoList.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64617C7E7E400BA3700 /* HypoList.h */; };
 		3DFCD7F717C7E7E500BA3700 /* Hypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD64717C7E7E400BA3700 /* Hypothesis.cpp */; };
-		3DFCD7F817C7E7E500BA3700 /* Hypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64817C7E7E400BA3700 /* Hypothesis.h */; };
 		3DFCD7F917C7E7E500BA3700 /* HypothesisStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD64917C7E7E400BA3700 /* HypothesisStack.cpp */; };
-		3DFCD7FA17C7E7E500BA3700 /* HypothesisStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64A17C7E7E400BA3700 /* HypothesisStack.h */; };
 		3DFCD7FB17C7E7E500BA3700 /* HypothesisStackCubePruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD64B17C7E7E400BA3700 /* HypothesisStackCubePruning.cpp */; };
-		3DFCD7FC17C7E7E500BA3700 /* HypothesisStackCubePruning.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64C17C7E7E400BA3700 /* HypothesisStackCubePruning.h */; };
 		3DFCD7FD17C7E7E500BA3700 /* HypothesisStackNormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD64D17C7E7E400BA3700 /* HypothesisStackNormal.cpp */; };
-		3DFCD7FE17C7E7E500BA3700 /* HypothesisStackNormal.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD64E17C7E7E400BA3700 /* HypothesisStackNormal.h */; };
 		3DFCD7FF17C7E7E500BA3700 /* Incremental.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD64F17C7E7E400BA3700 /* Incremental.cpp */; };
-		3DFCD80017C7E7E500BA3700 /* Incremental.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD65017C7E7E400BA3700 /* Incremental.h */; };
 		3DFCD80117C7E7E500BA3700 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD65117C7E7E400BA3700 /* InputFileStream.cpp */; };
-		3DFCD80217C7E7E500BA3700 /* InputFileStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD65217C7E7E400BA3700 /* InputFileStream.h */; };
 		3DFCD80317C7E7E500BA3700 /* InputPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD65317C7E7E400BA3700 /* InputPath.cpp */; };
-		3DFCD80417C7E7E500BA3700 /* InputPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD65417C7E7E400BA3700 /* InputPath.h */; };
 		3DFCD80517C7E7E500BA3700 /* InputType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD65517C7E7E400BA3700 /* InputType.cpp */; };
-		3DFCD80617C7E7E500BA3700 /* InputType.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD65617C7E7E400BA3700 /* InputType.h */; };
 		3DFCD80817C7E7E500BA3700 /* LexicalReordering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD65817C7E7E400BA3700 /* LexicalReordering.cpp */; };
-		3DFCD80917C7E7E500BA3700 /* LexicalReordering.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD65917C7E7E400BA3700 /* LexicalReordering.h */; };
 		3DFCD80A17C7E7E500BA3700 /* LexicalReorderingState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD65A17C7E7E400BA3700 /* LexicalReorderingState.cpp */; };
-		3DFCD80B17C7E7E500BA3700 /* LexicalReorderingState.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD65B17C7E7E400BA3700 /* LexicalReorderingState.h */; };
 		3DFCD80C17C7E7E500BA3700 /* LexicalReorderingTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD65C17C7E7E400BA3700 /* LexicalReorderingTable.cpp */; };
-		3DFCD80D17C7E7E500BA3700 /* LexicalReorderingTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD65D17C7E7E400BA3700 /* LexicalReorderingTable.h */; };
 		3DFCD80E17C7E7E500BA3700 /* Backward.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD65F17C7E7E400BA3700 /* Backward.cpp */; };
-		3DFCD80F17C7E7E500BA3700 /* Backward.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD66017C7E7E400BA3700 /* Backward.h */; };
 		3DFCD81017C7E7E500BA3700 /* BackwardLMState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD66117C7E7E400BA3700 /* BackwardLMState.cpp */; };
-		3DFCD81117C7E7E500BA3700 /* BackwardLMState.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD66217C7E7E400BA3700 /* BackwardLMState.h */; };
 		3DFCD81217C7E7E500BA3700 /* BackwardTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD66317C7E7E400BA3700 /* BackwardTest.cpp */; };
 		3DFCD81317C7E7E500BA3700 /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD66417C7E7E400BA3700 /* Base.cpp */; };
-		3DFCD81417C7E7E500BA3700 /* Base.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD66517C7E7E400BA3700 /* Base.h */; };
-		3DFCD81517C7E7E500BA3700 /* ChartState.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD66617C7E7E400BA3700 /* ChartState.h */; };
 		3DFCD81617C7E7E500BA3700 /* IRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD66717C7E7E400BA3700 /* IRST.cpp */; };
-		3DFCD81717C7E7E500BA3700 /* IRST.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD66817C7E7E400BA3700 /* IRST.h */; };
 		3DFCD81817C7E7E500BA3700 /* Implementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD66917C7E7E400BA3700 /* Implementation.cpp */; };
-		3DFCD81917C7E7E500BA3700 /* Implementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD66A17C7E7E400BA3700 /* Implementation.h */; };
 		3DFCD81B17C7E7E500BA3700 /* Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD66C17C7E7E400BA3700 /* Joint.cpp */; };
-		3DFCD81C17C7E7E500BA3700 /* Joint.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD66D17C7E7E400BA3700 /* Joint.h */; };
 		3DFCD81D17C7E7E500BA3700 /* Ken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD66E17C7E7E400BA3700 /* Ken.cpp */; };
-		3DFCD81E17C7E7E500BA3700 /* Ken.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD66F17C7E7E400BA3700 /* Ken.h */; };
 		3DFCD81F17C7E7E500BA3700 /* LDHT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD67017C7E7E400BA3700 /* LDHT.cpp */; };
-		3DFCD82017C7E7E500BA3700 /* LDHT.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD67117C7E7E400BA3700 /* LDHT.h */; };
 		3DFCD82117C7E7E500BA3700 /* MultiFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD67217C7E7E400BA3700 /* MultiFactor.cpp */; };
-		3DFCD82217C7E7E500BA3700 /* MultiFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD67317C7E7E400BA3700 /* MultiFactor.h */; };
 		3DFCD82317C7E7E500BA3700 /* ORLM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD67417C7E7E400BA3700 /* ORLM.cpp */; };
-		3DFCD82417C7E7E500BA3700 /* ORLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD67517C7E7E400BA3700 /* ORLM.h */; };
 		3DFCD82517C7E7E500BA3700 /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD67617C7E7E400BA3700 /* ParallelBackoff.cpp */; };
-		3DFCD82617C7E7E500BA3700 /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD67717C7E7E400BA3700 /* ParallelBackoff.h */; };
-		3DFCD82717C7E7E500BA3700 /* PointerState.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD67817C7E7E400BA3700 /* PointerState.h */; };
 		3DFCD82817C7E7E500BA3700 /* Rand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD67917C7E7E400BA3700 /* Rand.cpp */; };
-		3DFCD82917C7E7E500BA3700 /* Rand.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD67A17C7E7E400BA3700 /* Rand.h */; };
 		3DFCD82A17C7E7E500BA3700 /* Remote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD67B17C7E7E400BA3700 /* Remote.cpp */; };
-		3DFCD82B17C7E7E500BA3700 /* Remote.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD67C17C7E7E400BA3700 /* Remote.h */; };
 		3DFCD82C17C7E7E500BA3700 /* SRI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD67D17C7E7E400BA3700 /* SRI.cpp */; };
-		3DFCD82D17C7E7E500BA3700 /* SRI.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD67E17C7E7E400BA3700 /* SRI.h */; };
 		3DFCD82E17C7E7E500BA3700 /* SingleFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD67F17C7E7E400BA3700 /* SingleFactor.cpp */; };
-		3DFCD82F17C7E7E500BA3700 /* SingleFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD68017C7E7E400BA3700 /* SingleFactor.h */; };
 		3DFCD83017C7E7E500BA3700 /* LVoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD68817C7E7E400BA3700 /* LVoc.cpp */; };
-		3DFCD83117C7E7E500BA3700 /* LVoc.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD68917C7E7E400BA3700 /* LVoc.h */; };
 		3DFCD83217C7E7E500BA3700 /* Manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD68A17C7E7E400BA3700 /* Manager.cpp */; };
-		3DFCD83317C7E7E500BA3700 /* Manager.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD68B17C7E7E400BA3700 /* Manager.h */; };
 		3DFCD83417C7E7E500BA3700 /* MockHypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD68C17C7E7E400BA3700 /* MockHypothesis.cpp */; };
-		3DFCD83517C7E7E500BA3700 /* MockHypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD68D17C7E7E400BA3700 /* MockHypothesis.h */; };
 		3DFCD83617C7E7E500BA3700 /* MosesTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD68E17C7E7E400BA3700 /* MosesTest.cpp */; };
 		3DFCD83717C7E7E500BA3700 /* NonTerminal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD68F17C7E7E400BA3700 /* NonTerminal.cpp */; };
-		3DFCD83817C7E7E500BA3700 /* NonTerminal.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69017C7E7E400BA3700 /* NonTerminal.h */; };
-		3DFCD83917C7E7E500BA3700 /* ObjectPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69117C7E7E400BA3700 /* ObjectPool.h */; };
-		3DFCD83A17C7E7E500BA3700 /* OutputCollector.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69217C7E7E400BA3700 /* OutputCollector.h */; };
 		3DFCD83B17C7E7E500BA3700 /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD69317C7E7E400BA3700 /* Parameter.cpp */; };
-		3DFCD83C17C7E7E500BA3700 /* Parameter.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69417C7E7E400BA3700 /* Parameter.h */; };
 		3DFCD83D17C7E7E500BA3700 /* PartialTranslOptColl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD69517C7E7E400BA3700 /* PartialTranslOptColl.cpp */; };
-		3DFCD83E17C7E7E500BA3700 /* PartialTranslOptColl.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69617C7E7E400BA3700 /* PartialTranslOptColl.h */; };
 		3DFCD83F17C7E7E500BA3700 /* PCNTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD69717C7E7E400BA3700 /* PCNTools.cpp */; };
-		3DFCD84017C7E7E500BA3700 /* PCNTools.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69817C7E7E400BA3700 /* PCNTools.h */; };
-		3DFCD84117C7E7E500BA3700 /* PDTAimp.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69917C7E7E400BA3700 /* PDTAimp.h */; };
 		3DFCD84217C7E7E500BA3700 /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD69A17C7E7E400BA3700 /* Phrase.cpp */; };
-		3DFCD84317C7E7E500BA3700 /* Phrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69B17C7E7E400BA3700 /* Phrase.h */; };
-		3DFCD84417C7E7E500BA3700 /* PrefixTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69C17C7E7E400BA3700 /* PrefixTree.h */; };
 		3DFCD84517C7E7E500BA3700 /* PrefixTreeMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD69D17C7E7E400BA3700 /* PrefixTreeMap.cpp */; };
-		3DFCD84617C7E7E500BA3700 /* PrefixTreeMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD69E17C7E7E400BA3700 /* PrefixTreeMap.h */; };
 		3DFCD84717C7E7E500BA3700 /* ReorderingConstraint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD69F17C7E7E400BA3700 /* ReorderingConstraint.cpp */; };
-		3DFCD84817C7E7E500BA3700 /* ReorderingConstraint.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6A017C7E7E400BA3700 /* ReorderingConstraint.h */; };
 		3DFCD84917C7E7E500BA3700 /* ReorderingStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6A117C7E7E400BA3700 /* ReorderingStack.cpp */; };
-		3DFCD84A17C7E7E500BA3700 /* ReorderingStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6A217C7E7E400BA3700 /* ReorderingStack.h */; };
 		3DFCD84B17C7E7E500BA3700 /* RuleCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6A417C7E7E400BA3700 /* RuleCube.cpp */; };
-		3DFCD84C17C7E7E500BA3700 /* RuleCube.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6A517C7E7E400BA3700 /* RuleCube.h */; };
 		3DFCD84D17C7E7E500BA3700 /* RuleCubeItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6A617C7E7E400BA3700 /* RuleCubeItem.cpp */; };
-		3DFCD84E17C7E7E500BA3700 /* RuleCubeItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6A717C7E7E400BA3700 /* RuleCubeItem.h */; };
 		3DFCD84F17C7E7E500BA3700 /* RuleCubeQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6A817C7E7E400BA3700 /* RuleCubeQueue.cpp */; };
-		3DFCD85017C7E7E500BA3700 /* RuleCubeQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6A917C7E7E400BA3700 /* RuleCubeQueue.h */; };
 		3DFCD85117C7E7E500BA3700 /* ScoreComponentCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6AA17C7E7E400BA3700 /* ScoreComponentCollection.cpp */; };
-		3DFCD85217C7E7E500BA3700 /* ScoreComponentCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6AB17C7E7E400BA3700 /* ScoreComponentCollection.h */; };
 		3DFCD85317C7E7E500BA3700 /* ScoreComponentCollectionTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6AC17C7E7E400BA3700 /* ScoreComponentCollectionTest.cpp */; };
 		3DFCD85417C7E7E500BA3700 /* Search.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6AD17C7E7E400BA3700 /* Search.cpp */; };
-		3DFCD85517C7E7E500BA3700 /* Search.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6AE17C7E7E400BA3700 /* Search.h */; };
 		3DFCD85617C7E7E500BA3700 /* SearchCubePruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6AF17C7E7E400BA3700 /* SearchCubePruning.cpp */; };
-		3DFCD85717C7E7E500BA3700 /* SearchCubePruning.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6B017C7E7E400BA3700 /* SearchCubePruning.h */; };
 		3DFCD85817C7E7E500BA3700 /* SearchNormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6B117C7E7E400BA3700 /* SearchNormal.cpp */; };
-		3DFCD85917C7E7E500BA3700 /* SearchNormal.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6B217C7E7E400BA3700 /* SearchNormal.h */; };
 		3DFCD85A17C7E7E500BA3700 /* SearchNormalBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6B317C7E7E400BA3700 /* SearchNormalBatch.cpp */; };
-		3DFCD85B17C7E7E500BA3700 /* SearchNormalBatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6B417C7E7E400BA3700 /* SearchNormalBatch.h */; };
 		3DFCD85C17C7E7E500BA3700 /* Sentence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6B517C7E7E400BA3700 /* Sentence.cpp */; };
-		3DFCD85D17C7E7E500BA3700 /* Sentence.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6B617C7E7E400BA3700 /* Sentence.h */; };
 		3DFCD85E17C7E7E500BA3700 /* SentenceStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6B717C7E7E400BA3700 /* SentenceStats.cpp */; };
-		3DFCD85F17C7E7E500BA3700 /* SentenceStats.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6B817C7E7E400BA3700 /* SentenceStats.h */; };
 		3DFCD86017C7E7E500BA3700 /* SquareMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6B917C7E7E400BA3700 /* SquareMatrix.cpp */; };
-		3DFCD86117C7E7E500BA3700 /* SquareMatrix.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6BA17C7E7E400BA3700 /* SquareMatrix.h */; };
-		3DFCD86217C7E7E500BA3700 /* StackVec.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6BB17C7E7E400BA3700 /* StackVec.h */; };
 		3DFCD86317C7E7E500BA3700 /* StaticData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6BC17C7E7E400BA3700 /* StaticData.cpp */; };
-		3DFCD86417C7E7E500BA3700 /* StaticData.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6BD17C7E7E400BA3700 /* StaticData.h */; };
 		3DFCD86517C7E7E500BA3700 /* SyntacticLanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6BE17C7E7E400BA3700 /* SyntacticLanguageModel.cpp */; };
-		3DFCD86617C7E7E500BA3700 /* SyntacticLanguageModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6BF17C7E7E400BA3700 /* SyntacticLanguageModel.h */; };
-		3DFCD86717C7E7E500BA3700 /* SyntacticLanguageModelFiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6C017C7E7E400BA3700 /* SyntacticLanguageModelFiles.h */; };
-		3DFCD86817C7E7E500BA3700 /* SyntacticLanguageModelState.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6C117C7E7E400BA3700 /* SyntacticLanguageModelState.h */; };
 		3DFCD86917C7E7E500BA3700 /* TargetPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6C217C7E7E400BA3700 /* TargetPhrase.cpp */; };
-		3DFCD86A17C7E7E500BA3700 /* TargetPhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6C317C7E7E400BA3700 /* TargetPhrase.h */; };
 		3DFCD86B17C7E7E500BA3700 /* TargetPhraseCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6C417C7E7E400BA3700 /* TargetPhraseCollection.cpp */; };
-		3DFCD86C17C7E7E500BA3700 /* TargetPhraseCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6C517C7E7E400BA3700 /* TargetPhraseCollection.h */; };
-		3DFCD86D17C7E7E500BA3700 /* Terminal.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6C617C7E7E400BA3700 /* Terminal.h */; };
 		3DFCD86E17C7E7E500BA3700 /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6C717C7E7E400BA3700 /* ThreadPool.cpp */; };
-		3DFCD86F17C7E7E500BA3700 /* ThreadPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6C817C7E7E400BA3700 /* ThreadPool.h */; };
 		3DFCD87017C7E7E500BA3700 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6C917C7E7E400BA3700 /* Timer.cpp */; };
-		3DFCD87117C7E7E500BA3700 /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6CA17C7E7E400BA3700 /* Timer.h */; };
 		3DFCD87217C7E7E500BA3700 /* BilingualDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6CC17C7E7E400BA3700 /* BilingualDynSuffixArray.cpp */; };
-		3DFCD87317C7E7E500BA3700 /* BilingualDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6CD17C7E7E400BA3700 /* BilingualDynSuffixArray.h */; };
 		3DFCD87417C7E7E500BA3700 /* ChartRuleLookupManagerCYKPlus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6CF17C7E7E400BA3700 /* ChartRuleLookupManagerCYKPlus.cpp */; };
-		3DFCD87517C7E7E500BA3700 /* ChartRuleLookupManagerCYKPlus.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6D017C7E7E400BA3700 /* ChartRuleLookupManagerCYKPlus.h */; };
 		3DFCD87617C7E7E500BA3700 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6D117C7E7E400BA3700 /* ChartRuleLookupManagerMemory.cpp */; };
-		3DFCD87717C7E7E500BA3700 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6D217C7E7E400BA3700 /* ChartRuleLookupManagerMemory.h */; };
 		3DFCD87817C7E7E500BA3700 /* ChartRuleLookupManagerMemoryPerSentence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6D317C7E7E400BA3700 /* ChartRuleLookupManagerMemoryPerSentence.cpp */; };
-		3DFCD87917C7E7E500BA3700 /* ChartRuleLookupManagerMemoryPerSentence.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6D417C7E7E400BA3700 /* ChartRuleLookupManagerMemoryPerSentence.h */; };
 		3DFCD87A17C7E7E500BA3700 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6D517C7E7E400BA3700 /* ChartRuleLookupManagerOnDisk.cpp */; };
-		3DFCD87B17C7E7E500BA3700 /* ChartRuleLookupManagerOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6D617C7E7E400BA3700 /* ChartRuleLookupManagerOnDisk.h */; };
-		3DFCD87C17C7E7E500BA3700 /* DotChart.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6D717C7E7E400BA3700 /* DotChart.h */; };
 		3DFCD87D17C7E7E500BA3700 /* DotChartInMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6D817C7E7E400BA3700 /* DotChartInMemory.cpp */; };
-		3DFCD87E17C7E7E500BA3700 /* DotChartInMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6D917C7E7E400BA3700 /* DotChartInMemory.h */; };
 		3DFCD87F17C7E7E500BA3700 /* DotChartOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6DA17C7E7E400BA3700 /* DotChartOnDisk.cpp */; };
-		3DFCD88017C7E7E500BA3700 /* DotChartOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6DB17C7E7E400BA3700 /* DotChartOnDisk.h */; };
 		3DFCD88117C7E7E500BA3700 /* BlockHashIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6DD17C7E7E400BA3700 /* BlockHashIndex.cpp */; };
-		3DFCD88217C7E7E500BA3700 /* BlockHashIndex.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6DE17C7E7E400BA3700 /* BlockHashIndex.h */; };
-		3DFCD88317C7E7E500BA3700 /* CanonicalHuffman.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6DF17C7E7E400BA3700 /* CanonicalHuffman.h */; };
 		3DFCD88417C7E7E500BA3700 /* CmphStringVectorAdapter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6E017C7E7E400BA3700 /* CmphStringVectorAdapter.cpp */; };
-		3DFCD88517C7E7E500BA3700 /* CmphStringVectorAdapter.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6E117C7E7E400BA3700 /* CmphStringVectorAdapter.h */; };
-		3DFCD88617C7E7E500BA3700 /* ConsistentPhrases.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6E217C7E7E400BA3700 /* ConsistentPhrases.h */; };
 		3DFCD88817C7E7E500BA3700 /* LexicalReorderingTableCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6E417C7E7E400BA3700 /* LexicalReorderingTableCompact.cpp */; };
-		3DFCD88917C7E7E500BA3700 /* LexicalReorderingTableCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6E517C7E7E400BA3700 /* LexicalReorderingTableCompact.h */; };
 		3DFCD88A17C7E7E500BA3700 /* LexicalReorderingTableCreator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6E617C7E7E400BA3700 /* LexicalReorderingTableCreator.cpp */; };
-		3DFCD88B17C7E7E500BA3700 /* LexicalReorderingTableCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6E717C7E7E400BA3700 /* LexicalReorderingTableCreator.h */; };
-		3DFCD88C17C7E7E500BA3700 /* ListCoders.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6E817C7E7E400BA3700 /* ListCoders.h */; };
-		3DFCD88D17C7E7E500BA3700 /* MmapAllocator.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6E917C7E7E400BA3700 /* MmapAllocator.h */; };
-		3DFCD88E17C7E7E500BA3700 /* MonotonicVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6EA17C7E7E400BA3700 /* MonotonicVector.h */; };
 		3DFCD88F17C7E7E500BA3700 /* MurmurHash3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6EB17C7E7E400BA3700 /* MurmurHash3.cpp */; };
-		3DFCD89017C7E7E500BA3700 /* MurmurHash3.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6EC17C7E7E400BA3700 /* MurmurHash3.h */; };
-		3DFCD89117C7E7E500BA3700 /* PackedArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6ED17C7E7E400BA3700 /* PackedArray.h */; };
 		3DFCD89217C7E7E500BA3700 /* PhraseDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6EE17C7E7E400BA3700 /* PhraseDecoder.cpp */; };
-		3DFCD89317C7E7E500BA3700 /* PhraseDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6EF17C7E7E400BA3700 /* PhraseDecoder.h */; };
 		3DFCD89417C7E7E500BA3700 /* PhraseDictionaryCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6F017C7E7E400BA3700 /* PhraseDictionaryCompact.cpp */; };
-		3DFCD89517C7E7E500BA3700 /* PhraseDictionaryCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6F117C7E7E400BA3700 /* PhraseDictionaryCompact.h */; };
 		3DFCD89617C7E7E500BA3700 /* PhraseTableCreator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6F217C7E7E400BA3700 /* PhraseTableCreator.cpp */; };
-		3DFCD89717C7E7E500BA3700 /* PhraseTableCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6F317C7E7E400BA3700 /* PhraseTableCreator.h */; };
-		3DFCD89817C7E7E500BA3700 /* StringVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6F417C7E7E400BA3700 /* StringVector.h */; };
-		3DFCD89917C7E7E500BA3700 /* TargetPhraseCollectionCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6F517C7E7E400BA3700 /* TargetPhraseCollectionCache.h */; };
 		3DFCD89A17C7E7E500BA3700 /* ThrowingFwrite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD6F617C7E7E400BA3700 /* ThrowingFwrite.cpp */; };
-		3DFCD89B17C7E7E500BA3700 /* ThrowingFwrite.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD6F717C7E7E400BA3700 /* ThrowingFwrite.h */; };
 		3DFCD89F17C7E7E500BA3700 /* FileHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD70317C7E7E400BA3700 /* FileHandler.cpp */; };
-		3DFCD8A017C7E7E500BA3700 /* FileHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70417C7E7E400BA3700 /* FileHandler.h */; };
-		3DFCD8A217C7E7E500BA3700 /* RandLMCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70617C7E7E400BA3700 /* RandLMCache.h */; };
-		3DFCD8A317C7E7E500BA3700 /* RandLMFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70717C7E7E400BA3700 /* RandLMFilter.h */; };
-		3DFCD8A417C7E7E500BA3700 /* fdstream.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70817C7E7E400BA3700 /* fdstream.h */; };
-		3DFCD8A517C7E7E500BA3700 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70917C7E7E400BA3700 /* hash.h */; };
-		3DFCD8A617C7E7E500BA3700 /* onlineRLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70A17C7E7E400BA3700 /* onlineRLM.h */; };
 		3DFCD8A717C7E7E500BA3700 /* params.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD70B17C7E7E400BA3700 /* params.cpp */; };
-		3DFCD8A817C7E7E500BA3700 /* params.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70C17C7E7E400BA3700 /* params.h */; };
-		3DFCD8A917C7E7E500BA3700 /* perfectHash.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70D17C7E7E400BA3700 /* perfectHash.h */; };
-		3DFCD8AA17C7E7E500BA3700 /* quantizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70E17C7E7E400BA3700 /* quantizer.h */; };
-		3DFCD8AB17C7E7E500BA3700 /* types.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD70F17C7E7E400BA3700 /* types.h */; };
-		3DFCD8AC17C7E7E500BA3700 /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD71017C7E7E400BA3700 /* utils.h */; };
 		3DFCD8AD17C7E7E500BA3700 /* vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD71117C7E7E400BA3700 /* vocab.cpp */; };
-		3DFCD8AE17C7E7E500BA3700 /* vocab.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD71217C7E7E400BA3700 /* vocab.h */; };
 		3DFCD8AF17C7E7E500BA3700 /* DynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD71317C7E7E400BA3700 /* DynSuffixArray.cpp */; };
-		3DFCD8B017C7E7E500BA3700 /* DynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD71417C7E7E400BA3700 /* DynSuffixArray.h */; };
 		3DFCD8B117C7E7E500BA3700 /* PhraseDictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD71517C7E7E400BA3700 /* PhraseDictionary.cpp */; };
-		3DFCD8B217C7E7E500BA3700 /* PhraseDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD71617C7E7E400BA3700 /* PhraseDictionary.h */; };
 		3DFCD8B317C7E7E500BA3700 /* PhraseDictionaryDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD71817C7E7E400BA3700 /* PhraseDictionaryDynSuffixArray.cpp */; };
-		3DFCD8B417C7E7E500BA3700 /* PhraseDictionaryDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD71917C7E7E400BA3700 /* PhraseDictionaryDynSuffixArray.h */; };
 		3DFCD8B517C7E7E500BA3700 /* PhraseDictionaryMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD71A17C7E7E400BA3700 /* PhraseDictionaryMemory.cpp */; };
-		3DFCD8B617C7E7E500BA3700 /* PhraseDictionaryMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD71B17C7E7E400BA3700 /* PhraseDictionaryMemory.h */; };
 		3DFCD8B717C7E7E500BA3700 /* PhraseDictionaryMultiModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD71C17C7E7E400BA3700 /* PhraseDictionaryMultiModel.cpp */; };
-		3DFCD8B817C7E7E500BA3700 /* PhraseDictionaryMultiModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD71D17C7E7E400BA3700 /* PhraseDictionaryMultiModel.h */; };
 		3DFCD8B917C7E7E500BA3700 /* PhraseDictionaryMultiModelCounts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD71E17C7E7E400BA3700 /* PhraseDictionaryMultiModelCounts.cpp */; };
-		3DFCD8BA17C7E7E500BA3700 /* PhraseDictionaryMultiModelCounts.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD71F17C7E7E400BA3700 /* PhraseDictionaryMultiModelCounts.h */; };
 		3DFCD8BB17C7E7E500BA3700 /* PhraseDictionaryNodeMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD72017C7E7E400BA3700 /* PhraseDictionaryNodeMemory.cpp */; };
-		3DFCD8BC17C7E7E500BA3700 /* PhraseDictionaryNodeMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD72117C7E7E400BA3700 /* PhraseDictionaryNodeMemory.h */; };
 		3DFCD8BD17C7E7E500BA3700 /* PhraseDictionaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD72217C7E7E400BA3700 /* PhraseDictionaryTree.cpp */; };
-		3DFCD8BE17C7E7E500BA3700 /* PhraseDictionaryTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD72317C7E7E400BA3700 /* PhraseDictionaryTree.h */; };
 		3DFCD8BF17C7E7E500BA3700 /* PhraseDictionaryTreeAdaptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD72417C7E7E400BA3700 /* PhraseDictionaryTreeAdaptor.cpp */; };
-		3DFCD8C017C7E7E500BA3700 /* PhraseDictionaryTreeAdaptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD72517C7E7E400BA3700 /* PhraseDictionaryTreeAdaptor.h */; };
-		3DFCD8C117C7E7E500BA3700 /* Loader.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD72717C7E7E400BA3700 /* Loader.h */; };
 		3DFCD8C217C7E7E500BA3700 /* LoaderCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD72817C7E7E400BA3700 /* LoaderCompact.cpp */; };
-		3DFCD8C317C7E7E500BA3700 /* LoaderCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD72917C7E7E400BA3700 /* LoaderCompact.h */; };
 		3DFCD8C417C7E7E500BA3700 /* LoaderFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD72A17C7E7E400BA3700 /* LoaderFactory.cpp */; };
-		3DFCD8C517C7E7E500BA3700 /* LoaderFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD72B17C7E7E400BA3700 /* LoaderFactory.h */; };
 		3DFCD8C617C7E7E500BA3700 /* LoaderHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD72C17C7E7E400BA3700 /* LoaderHiero.cpp */; };
-		3DFCD8C717C7E7E500BA3700 /* LoaderHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD72D17C7E7E400BA3700 /* LoaderHiero.h */; };
 		3DFCD8C817C7E7E500BA3700 /* LoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD72E17C7E7E400BA3700 /* LoaderStandard.cpp */; };
-		3DFCD8C917C7E7E500BA3700 /* LoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD72F17C7E7E400BA3700 /* LoaderStandard.h */; };
 		3DFCD8CA17C7E7E500BA3700 /* PhraseDictionaryALSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD73017C7E7E400BA3700 /* PhraseDictionaryALSuffixArray.cpp */; };
-		3DFCD8CB17C7E7E500BA3700 /* PhraseDictionaryALSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD73117C7E7E400BA3700 /* PhraseDictionaryALSuffixArray.h */; };
 		3DFCD8CC17C7E7E500BA3700 /* PhraseDictionaryFuzzyMatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD73217C7E7E400BA3700 /* PhraseDictionaryFuzzyMatch.cpp */; };
-		3DFCD8CD17C7E7E500BA3700 /* PhraseDictionaryFuzzyMatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD73317C7E7E400BA3700 /* PhraseDictionaryFuzzyMatch.h */; };
 		3DFCD8CE17C7E7E500BA3700 /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD73417C7E7E400BA3700 /* PhraseDictionaryOnDisk.cpp */; };
-		3DFCD8CF17C7E7E500BA3700 /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD73517C7E7E400BA3700 /* PhraseDictionaryOnDisk.h */; };
 		3DFCD8D017C7E7E500BA3700 /* Trie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD73617C7E7E400BA3700 /* Trie.cpp */; };
-		3DFCD8D117C7E7E500BA3700 /* Trie.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD73717C7E7E400BA3700 /* Trie.h */; };
 		3DFCD8D217C7E7E500BA3700 /* UTrie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD73817C7E7E400BA3700 /* UTrie.cpp */; };
-		3DFCD8D317C7E7E500BA3700 /* UTrie.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD73917C7E7E500BA3700 /* UTrie.h */; };
 		3DFCD8D417C7E7E500BA3700 /* UTrieNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD73A17C7E7E500BA3700 /* UTrieNode.cpp */; };
-		3DFCD8D517C7E7E500BA3700 /* UTrieNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD73B17C7E7E500BA3700 /* UTrieNode.h */; };
 		3DFCD8D617C7E7E500BA3700 /* ApplicableRuleTrie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD73D17C7E7E500BA3700 /* ApplicableRuleTrie.cpp */; };
-		3DFCD8D717C7E7E500BA3700 /* ApplicableRuleTrie.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD73E17C7E7E500BA3700 /* ApplicableRuleTrie.h */; };
-		3DFCD8D817C7E7E500BA3700 /* IntermediateVarSpanNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD73F17C7E7E500BA3700 /* IntermediateVarSpanNode.h */; };
 		3DFCD8D917C7E7E500BA3700 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD74017C7E7E500BA3700 /* Parser.cpp */; };
-		3DFCD8DA17C7E7E500BA3700 /* Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74117C7E7E500BA3700 /* Parser.h */; };
-		3DFCD8DB17C7E7E500BA3700 /* SentenceMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74217C7E7E500BA3700 /* SentenceMap.h */; };
-		3DFCD8DC17C7E7E500BA3700 /* StackLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74317C7E7E500BA3700 /* StackLattice.h */; };
 		3DFCD8DD17C7E7E500BA3700 /* StackLatticeBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD74417C7E7E500BA3700 /* StackLatticeBuilder.cpp */; };
-		3DFCD8DE17C7E7E500BA3700 /* StackLatticeBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74517C7E7E500BA3700 /* StackLatticeBuilder.h */; };
-		3DFCD8DF17C7E7E500BA3700 /* StackLatticeSearcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74617C7E7E500BA3700 /* StackLatticeSearcher.h */; };
-		3DFCD8E017C7E7E500BA3700 /* VarSpanNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74717C7E7E500BA3700 /* VarSpanNode.h */; };
 		3DFCD8E117C7E7E500BA3700 /* VarSpanTrieBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD74817C7E7E500BA3700 /* VarSpanTrieBuilder.cpp */; };
-		3DFCD8E217C7E7E500BA3700 /* VarSpanTrieBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74917C7E7E500BA3700 /* VarSpanTrieBuilder.h */; };
 		3DFCD8E317C7E7E500BA3700 /* WordCoocTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD74A17C7E7E500BA3700 /* WordCoocTable.cpp */; };
-		3DFCD8E417C7E7E500BA3700 /* WordCoocTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74B17C7E7E500BA3700 /* WordCoocTable.h */; };
 		3DFCD8E517C7E7E500BA3700 /* Alignments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD74D17C7E7E500BA3700 /* Alignments.cpp */; };
-		3DFCD8E617C7E7E500BA3700 /* Alignments.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD74E17C7E7E500BA3700 /* Alignments.h */; };
 		3DFCD8E717C7E7E500BA3700 /* FuzzyMatchWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD74F17C7E7E500BA3700 /* FuzzyMatchWrapper.cpp */; };
-		3DFCD8E817C7E7E500BA3700 /* FuzzyMatchWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75017C7E7E500BA3700 /* FuzzyMatchWrapper.h */; };
-		3DFCD8E917C7E7E500BA3700 /* Match.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75117C7E7E500BA3700 /* Match.h */; };
 		3DFCD8EA17C7E7E500BA3700 /* SentenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD75217C7E7E500BA3700 /* SentenceAlignment.cpp */; };
-		3DFCD8EB17C7E7E500BA3700 /* SentenceAlignment.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75317C7E7E500BA3700 /* SentenceAlignment.h */; };
 		3DFCD8EC17C7E7E500BA3700 /* SuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD75417C7E7E500BA3700 /* SuffixArray.cpp */; };
-		3DFCD8ED17C7E7E500BA3700 /* SuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75517C7E7E500BA3700 /* SuffixArray.h */; };
 		3DFCD8EE17C7E7E500BA3700 /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD75617C7E7E500BA3700 /* Vocabulary.cpp */; };
-		3DFCD8EF17C7E7E500BA3700 /* Vocabulary.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75717C7E7E500BA3700 /* Vocabulary.h */; };
 		3DFCD8F017C7E7E500BA3700 /* create_xml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD75817C7E7E500BA3700 /* create_xml.cpp */; };
-		3DFCD8F117C7E7E500BA3700 /* create_xml.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75917C7E7E500BA3700 /* create_xml.h */; };
 		3DFCD8F217C7E7E500BA3700 /* TranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD75A17C7E7E500BA3700 /* TranslationOption.cpp */; };
-		3DFCD8F317C7E7E500BA3700 /* TranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75B17C7E7E500BA3700 /* TranslationOption.h */; };
 		3DFCD8F417C7E7E500BA3700 /* TranslationOptionCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD75C17C7E7E500BA3700 /* TranslationOptionCollection.cpp */; };
-		3DFCD8F517C7E7E500BA3700 /* TranslationOptionCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75D17C7E7E500BA3700 /* TranslationOptionCollection.h */; };
 		3DFCD8F617C7E7E500BA3700 /* TranslationOptionCollectionConfusionNet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD75E17C7E7E500BA3700 /* TranslationOptionCollectionConfusionNet.cpp */; };
-		3DFCD8F717C7E7E500BA3700 /* TranslationOptionCollectionConfusionNet.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD75F17C7E7E500BA3700 /* TranslationOptionCollectionConfusionNet.h */; };
 		3DFCD8F817C7E7E500BA3700 /* TranslationOptionCollectionText.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD76017C7E7E500BA3700 /* TranslationOptionCollectionText.cpp */; };
-		3DFCD8F917C7E7E500BA3700 /* TranslationOptionCollectionText.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76117C7E7E500BA3700 /* TranslationOptionCollectionText.h */; };
 		3DFCD8FA17C7E7E500BA3700 /* TranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD76217C7E7E500BA3700 /* TranslationOptionList.cpp */; };
-		3DFCD8FB17C7E7E500BA3700 /* TranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76317C7E7E500BA3700 /* TranslationOptionList.h */; };
 		3DFCD8FC17C7E7E500BA3700 /* TreeInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD76417C7E7E500BA3700 /* TreeInput.cpp */; };
-		3DFCD8FD17C7E7E500BA3700 /* TreeInput.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76517C7E7E500BA3700 /* TreeInput.h */; };
 		3DFCD8FE17C7E7E500BA3700 /* TrellisPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD76617C7E7E500BA3700 /* TrellisPath.cpp */; };
-		3DFCD8FF17C7E7E500BA3700 /* TrellisPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76717C7E7E500BA3700 /* TrellisPath.h */; };
 		3DFCD90017C7E7E500BA3700 /* TrellisPathCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD76817C7E7E500BA3700 /* TrellisPathCollection.cpp */; };
-		3DFCD90117C7E7E500BA3700 /* TrellisPathCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76917C7E7E500BA3700 /* TrellisPathCollection.h */; };
-		3DFCD90217C7E7E500BA3700 /* TrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76A17C7E7E500BA3700 /* TrellisPathList.h */; };
-		3DFCD90317C7E7E500BA3700 /* TypeDef.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76B17C7E7E500BA3700 /* TypeDef.h */; };
-		3DFCD90417C7E7E500BA3700 /* UniqueObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76C17C7E7E500BA3700 /* UniqueObject.h */; };
 		3DFCD90517C7E7E500BA3700 /* UserMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD76D17C7E7E500BA3700 /* UserMessage.cpp */; };
-		3DFCD90617C7E7E500BA3700 /* UserMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD76E17C7E7E500BA3700 /* UserMessage.h */; };
 		3DFCD90717C7E7E500BA3700 /* Util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD76F17C7E7E500BA3700 /* Util.cpp */; };
-		3DFCD90817C7E7E500BA3700 /* Util.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD77017C7E7E500BA3700 /* Util.h */; };
 		3DFCD90917C7E7E500BA3700 /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD77117C7E7E500BA3700 /* Word.cpp */; };
-		3DFCD90A17C7E7E500BA3700 /* Word.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD77217C7E7E500BA3700 /* Word.h */; };
 		3DFCD90B17C7E7E500BA3700 /* WordLattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD77317C7E7E500BA3700 /* WordLattice.cpp */; };
-		3DFCD90C17C7E7E500BA3700 /* WordLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD77417C7E7E500BA3700 /* WordLattice.h */; };
 		3DFCD90D17C7E7E500BA3700 /* WordsBitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD77517C7E7E500BA3700 /* WordsBitmap.cpp */; };
-		3DFCD90E17C7E7E500BA3700 /* WordsBitmap.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD77617C7E7E500BA3700 /* WordsBitmap.h */; };
 		3DFCD90F17C7E7E500BA3700 /* WordsRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD77717C7E7E500BA3700 /* WordsRange.cpp */; };
-		3DFCD91017C7E7E500BA3700 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD77817C7E7E500BA3700 /* WordsRange.h */; };
 		3DFCD91117C7E7E500BA3700 /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD77917C7E7E500BA3700 /* XmlOption.cpp */; };
-		3DFCD91217C7E7E500BA3700 /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DFCD77A17C7E7E500BA3700 /* XmlOption.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -2203,319 +1890,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3DFCD77C17C7E7E500BA3700 /* AlignmentInfo.h in Headers */,
-				3DFCD77E17C7E7E500BA3700 /* AlignmentInfoCollection.h in Headers */,
-				3DFCD78117C7E7E500BA3700 /* BitmapContainer.h in Headers */,
-				3DFCD78317C7E7E500BA3700 /* ChartCell.h in Headers */,
-				3DFCD78517C7E7E500BA3700 /* ChartCellCollection.h in Headers */,
-				3DFCD78617C7E7E500BA3700 /* ChartCellLabel.h in Headers */,
-				3DFCD78717C7E7E500BA3700 /* ChartCellLabelSet.h in Headers */,
-				3DFCD78917C7E7E500BA3700 /* ChartHypothesis.h in Headers */,
-				3DFCD78B17C7E7E500BA3700 /* ChartHypothesisCollection.h in Headers */,
-				3DFCD78D17C7E7E500BA3700 /* ChartManager.h in Headers */,
-				3DFCD78F17C7E7E500BA3700 /* ChartParser.h in Headers */,
-				3DFCD79017C7E7E500BA3700 /* ChartParserCallback.h in Headers */,
-				3DFCD79217C7E7E500BA3700 /* ChartRuleLookupManager.h in Headers */,
-				3DFCD79417C7E7E500BA3700 /* ChartTranslationOption.h in Headers */,
-				3DFCD79617C7E7E500BA3700 /* ChartTranslationOptionList.h in Headers */,
-				3DFCD79817C7E7E500BA3700 /* ChartTranslationOptions.h in Headers */,
-				3DFCD79A17C7E7E500BA3700 /* ChartTrellisDetour.h in Headers */,
-				3DFCD79C17C7E7E500BA3700 /* ChartTrellisDetourQueue.h in Headers */,
-				3DFCD79E17C7E7E500BA3700 /* ChartTrellisNode.h in Headers */,
-				3DFCD7A017C7E7E500BA3700 /* ChartTrellisPath.h in Headers */,
-				3DFCD7A117C7E7E500BA3700 /* ChartTrellisPathList.h in Headers */,
-				3DFCD7A317C7E7E500BA3700 /* ConfusionNet.h in Headers */,
-				3DFCD7A517C7E7E500BA3700 /* DecodeFeature.h in Headers */,
-				3DFCD7A717C7E7E500BA3700 /* DecodeGraph.h in Headers */,
-				3DFCD7A917C7E7E500BA3700 /* DecodeStep.h in Headers */,
-				3DFCD7AB17C7E7E500BA3700 /* DecodeStepGeneration.h in Headers */,
-				3DFCD7AD17C7E7E500BA3700 /* DecodeStepTranslation.h in Headers */,
-				3DFCD7AF17C7E7E500BA3700 /* Factor.h in Headers */,
-				3DFCD7B117C7E7E500BA3700 /* FactorCollection.h in Headers */,
-				3DFCD7B317C7E7E500BA3700 /* FactorTypeSet.h in Headers */,
-				3DFCD7B517C7E7E500BA3700 /* FeatureVector.h in Headers */,
-				3DFCD7B817C7E7E500BA3700 /* BleuScoreFeature.h in Headers */,
-				3DFCD7BC17C7E7E500BA3700 /* ControlRecombination.h in Headers */,
-				3DFCD7BE17C7E7E500BA3700 /* DistortionScoreProducer.h in Headers */,
-				3DFCD7C017C7E7E500BA3700 /* FFState.h in Headers */,
-				3DFCD7C217C7E7E500BA3700 /* Factory.h in Headers */,
-				3DFCD7C417C7E7E500BA3700 /* FeatureFunction.h in Headers */,
-				3DFCD7C617C7E7E500BA3700 /* GlobalLexicalModel.h in Headers */,
-				3DFCD7C817C7E7E500BA3700 /* GlobalLexicalModelUnlimited.h in Headers */,
-				3DFCD7CA17C7E7E500BA3700 /* InputFeature.h in Headers */,
-				3DFCD7CC17C7E7E500BA3700 /* OpSequenceModel.h in Headers */,
-				3DFCD7CE17C7E7E500BA3700 /* osmHyp.h in Headers */,
-				3DFCD7D217C7E7E500BA3700 /* PhraseBoundaryFeature.h in Headers */,
-				3DFCD7D417C7E7E500BA3700 /* PhraseLengthFeature.h in Headers */,
-				3DFCD7D617C7E7E500BA3700 /* PhrasePairFeature.h in Headers */,
-				3DFCD7D817C7E7E500BA3700 /* PhrasePenalty.h in Headers */,
-				3DFCD7DA17C7E7E500BA3700 /* SourceWordDeletionFeature.h in Headers */,
-				3DFCD7DC17C7E7E500BA3700 /* StatefulFeatureFunction.h in Headers */,
-				3DFCD7DE17C7E7E500BA3700 /* StatelessFeatureFunction.h in Headers */,
-				3DFCD7E017C7E7E500BA3700 /* TargetBigramFeature.h in Headers */,
-				3DFCD7E217C7E7E500BA3700 /* TargetNgramFeature.h in Headers */,
-				3DFCD7E417C7E7E500BA3700 /* TargetWordInsertionFeature.h in Headers */,
-				3DFCD7E617C7E7E500BA3700 /* UnknownWordPenaltyProducer.h in Headers */,
-				3DFCD7E817C7E7E500BA3700 /* WordPenaltyProducer.h in Headers */,
-				3DFCD7EA17C7E7E500BA3700 /* WordTranslationFeature.h in Headers */,
-				3DFCD7EC17C7E7E500BA3700 /* File.h in Headers */,
-				3DFCD7ED17C7E7E500BA3700 /* FilePtr.h in Headers */,
-				3DFCD7EF17C7E7E500BA3700 /* FloydWarshall.h in Headers */,
-				3DFCD7F117C7E7E500BA3700 /* GenerationDictionary.h in Headers */,
-				3DFCD7F217C7E7E500BA3700 /* Sampling.h in Headers */,
-				3DFCD7F317C7E7E500BA3700 /* NBestList.h in Headers */,
-				3DFCD7F417C7E7E500BA3700 /* VectorIndexSorter.h in Headers */,
-				3DFCD7F517C7E7E500BA3700 /* gzfilebuf.h in Headers */,
-				3DFCD7F617C7E7E500BA3700 /* HypoList.h in Headers */,
-				3DFCD7F817C7E7E500BA3700 /* Hypothesis.h in Headers */,
-				3DFCD7FA17C7E7E500BA3700 /* HypothesisStack.h in Headers */,
-				3DFCD7FC17C7E7E500BA3700 /* HypothesisStackCubePruning.h in Headers */,
-				3DFCD7FE17C7E7E500BA3700 /* HypothesisStackNormal.h in Headers */,
-				3DFCD80017C7E7E500BA3700 /* Incremental.h in Headers */,
-				3DFCD80217C7E7E500BA3700 /* InputFileStream.h in Headers */,
-				3DFCD80417C7E7E500BA3700 /* InputPath.h in Headers */,
-				3DFCD80617C7E7E500BA3700 /* InputType.h in Headers */,
-				3DFCD80917C7E7E500BA3700 /* LexicalReordering.h in Headers */,
-				3DFCD80B17C7E7E500BA3700 /* LexicalReorderingState.h in Headers */,
-				3DFCD80D17C7E7E500BA3700 /* LexicalReorderingTable.h in Headers */,
-				3DFCD80F17C7E7E500BA3700 /* Backward.h in Headers */,
-				3DFCD81117C7E7E500BA3700 /* BackwardLMState.h in Headers */,
-				3DFCD81417C7E7E500BA3700 /* Base.h in Headers */,
-				3DFCD81517C7E7E500BA3700 /* ChartState.h in Headers */,
-				3DFCD81717C7E7E500BA3700 /* IRST.h in Headers */,
-				3DFCD81917C7E7E500BA3700 /* Implementation.h in Headers */,
-				3DFCD81C17C7E7E500BA3700 /* Joint.h in Headers */,
-				3DFCD81E17C7E7E500BA3700 /* Ken.h in Headers */,
-				3DFCD82017C7E7E500BA3700 /* LDHT.h in Headers */,
-				3DFCD82217C7E7E500BA3700 /* MultiFactor.h in Headers */,
-				3DFCD82417C7E7E500BA3700 /* ORLM.h in Headers */,
-				3DFCD82617C7E7E500BA3700 /* ParallelBackoff.h in Headers */,
-				3DFCD82717C7E7E500BA3700 /* PointerState.h in Headers */,
-				3DFCD82917C7E7E500BA3700 /* Rand.h in Headers */,
-				3DFCD82B17C7E7E500BA3700 /* Remote.h in Headers */,
-				3DFCD82D17C7E7E500BA3700 /* SRI.h in Headers */,
-				3DFCD82F17C7E7E500BA3700 /* SingleFactor.h in Headers */,
-				3DFCD83117C7E7E500BA3700 /* LVoc.h in Headers */,
-				3DFCD83317C7E7E500BA3700 /* Manager.h in Headers */,
-				3DFCD83517C7E7E500BA3700 /* MockHypothesis.h in Headers */,
-				3DFCD83817C7E7E500BA3700 /* NonTerminal.h in Headers */,
-				3DFCD83917C7E7E500BA3700 /* ObjectPool.h in Headers */,
-				3DFCD83A17C7E7E500BA3700 /* OutputCollector.h in Headers */,
-				3DFCD83C17C7E7E500BA3700 /* Parameter.h in Headers */,
-				3DFCD83E17C7E7E500BA3700 /* PartialTranslOptColl.h in Headers */,
-				3DFCD84017C7E7E500BA3700 /* PCNTools.h in Headers */,
-				3DFCD84117C7E7E500BA3700 /* PDTAimp.h in Headers */,
-				3DFCD84317C7E7E500BA3700 /* Phrase.h in Headers */,
-				3DFCD84417C7E7E500BA3700 /* PrefixTree.h in Headers */,
-				3DFCD84617C7E7E500BA3700 /* PrefixTreeMap.h in Headers */,
-				3DFCD84817C7E7E500BA3700 /* ReorderingConstraint.h in Headers */,
-				3DFCD84A17C7E7E500BA3700 /* ReorderingStack.h in Headers */,
-				3DFCD84C17C7E7E500BA3700 /* RuleCube.h in Headers */,
-				3DFCD84E17C7E7E500BA3700 /* RuleCubeItem.h in Headers */,
-				3DFCD85017C7E7E500BA3700 /* RuleCubeQueue.h in Headers */,
-				3DFCD85217C7E7E500BA3700 /* ScoreComponentCollection.h in Headers */,
-				3DFCD85517C7E7E500BA3700 /* Search.h in Headers */,
-				3DFCD85717C7E7E500BA3700 /* SearchCubePruning.h in Headers */,
-				3DFCD85917C7E7E500BA3700 /* SearchNormal.h in Headers */,
-				3DFCD85B17C7E7E500BA3700 /* SearchNormalBatch.h in Headers */,
-				3DFCD85D17C7E7E500BA3700 /* Sentence.h in Headers */,
-				3DFCD85F17C7E7E500BA3700 /* SentenceStats.h in Headers */,
-				3DFCD86117C7E7E500BA3700 /* SquareMatrix.h in Headers */,
-				3DFCD86217C7E7E500BA3700 /* StackVec.h in Headers */,
-				3DFCD86417C7E7E500BA3700 /* StaticData.h in Headers */,
-				3DFCD86617C7E7E500BA3700 /* SyntacticLanguageModel.h in Headers */,
-				3DFCD86717C7E7E500BA3700 /* SyntacticLanguageModelFiles.h in Headers */,
-				3DFCD86817C7E7E500BA3700 /* SyntacticLanguageModelState.h in Headers */,
-				3DFCD86A17C7E7E500BA3700 /* TargetPhrase.h in Headers */,
-				3DFCD86C17C7E7E500BA3700 /* TargetPhraseCollection.h in Headers */,
-				3DFCD86D17C7E7E500BA3700 /* Terminal.h in Headers */,
-				3DFCD86F17C7E7E500BA3700 /* ThreadPool.h in Headers */,
-				3DFCD87117C7E7E500BA3700 /* Timer.h in Headers */,
-				3DFCD87317C7E7E500BA3700 /* BilingualDynSuffixArray.h in Headers */,
-				3DFCD87517C7E7E500BA3700 /* ChartRuleLookupManagerCYKPlus.h in Headers */,
-				3DFCD87717C7E7E500BA3700 /* ChartRuleLookupManagerMemory.h in Headers */,
-				3DFCD87917C7E7E500BA3700 /* ChartRuleLookupManagerMemoryPerSentence.h in Headers */,
-				3DFCD87B17C7E7E500BA3700 /* ChartRuleLookupManagerOnDisk.h in Headers */,
-				3DFCD87C17C7E7E500BA3700 /* DotChart.h in Headers */,
-				3DFCD87E17C7E7E500BA3700 /* DotChartInMemory.h in Headers */,
-				3DFCD88017C7E7E500BA3700 /* DotChartOnDisk.h in Headers */,
-				3DFCD88217C7E7E500BA3700 /* BlockHashIndex.h in Headers */,
-				3DFCD88317C7E7E500BA3700 /* CanonicalHuffman.h in Headers */,
-				3DFCD88517C7E7E500BA3700 /* CmphStringVectorAdapter.h in Headers */,
-				3DFCD88617C7E7E500BA3700 /* ConsistentPhrases.h in Headers */,
-				3DFCD88917C7E7E500BA3700 /* LexicalReorderingTableCompact.h in Headers */,
-				3DFCD88B17C7E7E500BA3700 /* LexicalReorderingTableCreator.h in Headers */,
-				3DFCD88C17C7E7E500BA3700 /* ListCoders.h in Headers */,
-				3DFCD88D17C7E7E500BA3700 /* MmapAllocator.h in Headers */,
-				3DFCD88E17C7E7E500BA3700 /* MonotonicVector.h in Headers */,
-				3DFCD89017C7E7E500BA3700 /* MurmurHash3.h in Headers */,
-				3DFCD89117C7E7E500BA3700 /* PackedArray.h in Headers */,
-				3DFCD89317C7E7E500BA3700 /* PhraseDecoder.h in Headers */,
-				3DFCD89517C7E7E500BA3700 /* PhraseDictionaryCompact.h in Headers */,
-				3DFCD89717C7E7E500BA3700 /* PhraseTableCreator.h in Headers */,
-				3DFCD89817C7E7E500BA3700 /* StringVector.h in Headers */,
-				3DFCD89917C7E7E500BA3700 /* TargetPhraseCollectionCache.h in Headers */,
-				3DFCD89B17C7E7E500BA3700 /* ThrowingFwrite.h in Headers */,
-				3DFCD8A017C7E7E500BA3700 /* FileHandler.h in Headers */,
-				3DFCD8A217C7E7E500BA3700 /* RandLMCache.h in Headers */,
-				3DFCD8A317C7E7E500BA3700 /* RandLMFilter.h in Headers */,
-				3DFCD8A417C7E7E500BA3700 /* fdstream.h in Headers */,
-				3DFCD8A517C7E7E500BA3700 /* hash.h in Headers */,
-				3DFCD8A617C7E7E500BA3700 /* onlineRLM.h in Headers */,
-				3DFCD8A817C7E7E500BA3700 /* params.h in Headers */,
-				3DFCD8A917C7E7E500BA3700 /* perfectHash.h in Headers */,
-				3DFCD8AA17C7E7E500BA3700 /* quantizer.h in Headers */,
-				3DFCD8AB17C7E7E500BA3700 /* types.h in Headers */,
-				3DFCD8AC17C7E7E500BA3700 /* utils.h in Headers */,
-				3DFCD8AE17C7E7E500BA3700 /* vocab.h in Headers */,
-				3DFCD8B017C7E7E500BA3700 /* DynSuffixArray.h in Headers */,
-				3DFCD8B217C7E7E500BA3700 /* PhraseDictionary.h in Headers */,
-				3DFCD8B417C7E7E500BA3700 /* PhraseDictionaryDynSuffixArray.h in Headers */,
-				3DFCD8B617C7E7E500BA3700 /* PhraseDictionaryMemory.h in Headers */,
-				3DFCD8B817C7E7E500BA3700 /* PhraseDictionaryMultiModel.h in Headers */,
-				3DFCD8BA17C7E7E500BA3700 /* PhraseDictionaryMultiModelCounts.h in Headers */,
-				3DFCD8BC17C7E7E500BA3700 /* PhraseDictionaryNodeMemory.h in Headers */,
-				3DFCD8BE17C7E7E500BA3700 /* PhraseDictionaryTree.h in Headers */,
-				3DFCD8C017C7E7E500BA3700 /* PhraseDictionaryTreeAdaptor.h in Headers */,
-				3DFCD8C117C7E7E500BA3700 /* Loader.h in Headers */,
-				3DFCD8C317C7E7E500BA3700 /* LoaderCompact.h in Headers */,
-				3DFCD8C517C7E7E500BA3700 /* LoaderFactory.h in Headers */,
-				3DFCD8C717C7E7E500BA3700 /* LoaderHiero.h in Headers */,
-				3DFCD8C917C7E7E500BA3700 /* LoaderStandard.h in Headers */,
-				3DFCD8CB17C7E7E500BA3700 /* PhraseDictionaryALSuffixArray.h in Headers */,
-				3DFCD8CD17C7E7E500BA3700 /* PhraseDictionaryFuzzyMatch.h in Headers */,
-				3DFCD8CF17C7E7E500BA3700 /* PhraseDictionaryOnDisk.h in Headers */,
-				3DFCD8D117C7E7E500BA3700 /* Trie.h in Headers */,
-				3DFCD8D317C7E7E500BA3700 /* UTrie.h in Headers */,
-				3DFCD8D517C7E7E500BA3700 /* UTrieNode.h in Headers */,
-				3DFCD8D717C7E7E500BA3700 /* ApplicableRuleTrie.h in Headers */,
-				3DFCD8D817C7E7E500BA3700 /* IntermediateVarSpanNode.h in Headers */,
-				3DFCD8DA17C7E7E500BA3700 /* Parser.h in Headers */,
-				3DFCD8DB17C7E7E500BA3700 /* SentenceMap.h in Headers */,
-				3DFCD8DC17C7E7E500BA3700 /* StackLattice.h in Headers */,
-				3DFCD8DE17C7E7E500BA3700 /* StackLatticeBuilder.h in Headers */,
-				3DFCD8DF17C7E7E500BA3700 /* StackLatticeSearcher.h in Headers */,
-				3DFCD8E017C7E7E500BA3700 /* VarSpanNode.h in Headers */,
-				3DFCD8E217C7E7E500BA3700 /* VarSpanTrieBuilder.h in Headers */,
-				3DFCD8E417C7E7E500BA3700 /* WordCoocTable.h in Headers */,
-				3DFCD8E617C7E7E500BA3700 /* Alignments.h in Headers */,
-				3DFCD8E817C7E7E500BA3700 /* FuzzyMatchWrapper.h in Headers */,
-				3DFCD8E917C7E7E500BA3700 /* Match.h in Headers */,
-				3DFCD8EB17C7E7E500BA3700 /* SentenceAlignment.h in Headers */,
-				3DFCD8ED17C7E7E500BA3700 /* SuffixArray.h in Headers */,
-				3DFCD8EF17C7E7E500BA3700 /* Vocabulary.h in Headers */,
-				3DFCD8F117C7E7E500BA3700 /* create_xml.h in Headers */,
-				3DFCD8F317C7E7E500BA3700 /* TranslationOption.h in Headers */,
-				3DFCD8F517C7E7E500BA3700 /* TranslationOptionCollection.h in Headers */,
-				3DFCD8F717C7E7E500BA3700 /* TranslationOptionCollectionConfusionNet.h in Headers */,
-				3DFCD8F917C7E7E500BA3700 /* TranslationOptionCollectionText.h in Headers */,
-				3DFCD8FB17C7E7E500BA3700 /* TranslationOptionList.h in Headers */,
-				3DFCD8FD17C7E7E500BA3700 /* TreeInput.h in Headers */,
-				3DFCD8FF17C7E7E500BA3700 /* TrellisPath.h in Headers */,
-				3DFCD90117C7E7E500BA3700 /* TrellisPathCollection.h in Headers */,
-				3DFCD90217C7E7E500BA3700 /* TrellisPathList.h in Headers */,
-				3DFCD90317C7E7E500BA3700 /* TypeDef.h in Headers */,
-				3DFCD90417C7E7E500BA3700 /* UniqueObject.h in Headers */,
-				3DFCD90617C7E7E500BA3700 /* UserMessage.h in Headers */,
-				3DFCD90817C7E7E500BA3700 /* Util.h in Headers */,
-				3DFCD90A17C7E7E500BA3700 /* Word.h in Headers */,
-				3DFCD90C17C7E7E500BA3700 /* WordLattice.h in Headers */,
-				3DFCD90E17C7E7E500BA3700 /* WordsBitmap.h in Headers */,
-				3DFCD91017C7E7E500BA3700 /* WordsRange.h in Headers */,
-				3DFCD91217C7E7E500BA3700 /* XmlOption.h in Headers */,
-				3DFA7FD117D10B0E005EE8B8 /* bhiksha.hh in Headers */,
-				3DFA7FD317D10B0E005EE8B8 /* binary_format.hh in Headers */,
-				3DFA7FD417D10B0E005EE8B8 /* blank.hh in Headers */,
-				3DFA7FEE17D10B0E005EE8B8 /* config.hh in Headers */,
-				3DFA7FEF17D10B0E005EE8B8 /* enumerate_vocab.hh in Headers */,
-				3DFA7FF017D10B0E005EE8B8 /* facade.hh in Headers */,
-				3DFA7FFE17D10B0E005EE8B8 /* left.hh in Headers */,
-				3DFA800117D10B0E005EE8B8 /* lm_exception.hh in Headers */,
-				3DFA800217D10B0E005EE8B8 /* max_order.hh in Headers */,
-				3DFA800417D10B0E005EE8B8 /* model.hh in Headers */,
-				3DFA800617D10B0E005EE8B8 /* model_type.hh in Headers */,
-				3DFA800717D10B0E005EE8B8 /* ngram_query.hh in Headers */,
-				3DFA800817D10B0E005EE8B8 /* partial.hh in Headers */,
-				3DFA800B17D10B0E005EE8B8 /* quantize.hh in Headers */,
-				3DFA800E17D10B0E005EE8B8 /* read_arpa.hh in Headers */,
-				3DFA800F17D10B0E005EE8B8 /* return.hh in Headers */,
-				3DFA801117D10B0E005EE8B8 /* search_hashed.hh in Headers */,
-				3DFA801317D10B0E005EE8B8 /* search_trie.hh in Headers */,
-				3DFA801517D10B0E005EE8B8 /* sizes.hh in Headers */,
-				3DFA801617D10B0E005EE8B8 /* state.hh in Headers */,
-				3DFA801817D10B0E005EE8B8 /* trie.hh in Headers */,
-				3DFA801A17D10B0E005EE8B8 /* trie_sort.hh in Headers */,
-				3DFA801B17D10B0E005EE8B8 /* value.hh in Headers */,
-				3DFA801D17D10B0E005EE8B8 /* value_build.hh in Headers */,
-				3DFA801F17D10B0E005EE8B8 /* virtual_interface.hh in Headers */,
-				3DFA802117D10B0E005EE8B8 /* vocab.hh in Headers */,
-				3DFA802217D10B0E005EE8B8 /* weights.hh in Headers */,
-				3DFA802317D10B0E005EE8B8 /* word_index.hh in Headers */,
-				3DFA80AD17D10EEC005EE8B8 /* bit_packing.hh in Headers */,
-				3DFA80AF17D10EEC005EE8B8 /* check.hh in Headers */,
-				3DFA80B217D10EEC005EE8B8 /* bignum-dtoa.h in Headers */,
-				3DFA80B417D10EEC005EE8B8 /* bignum.h in Headers */,
-				3DFA80B617D10EEC005EE8B8 /* cached-powers.h in Headers */,
-				3DFA80B817D10EEC005EE8B8 /* diy-fp.h in Headers */,
-				3DFA80BA17D10EEC005EE8B8 /* double-conversion.h in Headers */,
-				3DFA80BC17D10EEC005EE8B8 /* fast-dtoa.h in Headers */,
-				3DFA80BE17D10EEC005EE8B8 /* fixed-dtoa.h in Headers */,
-				3DFA80BF17D10EEC005EE8B8 /* ieee.h in Headers */,
-				3DFA80C117D10EEC005EE8B8 /* strtod.h in Headers */,
-				3DFA80C217D10EEC005EE8B8 /* utils.h in Headers */,
-				3DFA80C417D10EEC005EE8B8 /* ersatz_progress.hh in Headers */,
-				3DFA80C617D10EEC005EE8B8 /* exception.hh in Headers */,
-				3DFA80C717D10EEC005EE8B8 /* fake_ofstream.hh in Headers */,
-				3DFA80C917D10EEC005EE8B8 /* file.hh in Headers */,
-				3DFA80CB17D10EEC005EE8B8 /* file_piece.hh in Headers */,
-				3DFA80CE17D10EEC005EE8B8 /* getopt.hh in Headers */,
-				3DFA80CF17D10EEC005EE8B8 /* have.hh in Headers */,
-				3DFA80D017D10EEC005EE8B8 /* joint_sort.hh in Headers */,
-				3DFA80D317D10EEC005EE8B8 /* mmap.hh in Headers */,
-				3DFA80D417D10EEC005EE8B8 /* multi_intersection.hh in Headers */,
-				3DFA80D717D10EEC005EE8B8 /* murmur_hash.hh in Headers */,
-				3DFA80D817D10EEC005EE8B8 /* pcqueue.hh in Headers */,
-				3DFA80DA17D10EEC005EE8B8 /* pool.hh in Headers */,
-				3DFA80DB17D10EEC005EE8B8 /* probing_hash_table.hh in Headers */,
-				3DFA80DD17D10EEC005EE8B8 /* proxy_iterator.hh in Headers */,
-				3DFA80DF17D10EEC005EE8B8 /* read_compressed.hh in Headers */,
-				3DFA80E217D10EEC005EE8B8 /* scoped.hh in Headers */,
-				3DFA80E317D10EEC005EE8B8 /* sized_iterator.hh in Headers */,
-				3DFA80E417D10EEC005EE8B8 /* sorted_uniform.hh in Headers */,
-				3DFA80E717D10EEC005EE8B8 /* block.hh in Headers */,
-				3DFA80E917D10EEC005EE8B8 /* chain.hh in Headers */,
-				3DFA80EA17D10EEC005EE8B8 /* config.hh in Headers */,
-				3DFA80EC17D10EEC005EE8B8 /* io.hh in Headers */,
-				3DFA80EF17D10EEC005EE8B8 /* line_input.hh in Headers */,
-				3DFA80F117D10EEC005EE8B8 /* multi_progress.hh in Headers */,
-				3DFA80F217D10EEC005EE8B8 /* sort.hh in Headers */,
-				3DFA80F417D10EEC005EE8B8 /* stream.hh in Headers */,
-				3DFA80F617D10EEC005EE8B8 /* timer.hh in Headers */,
-				3DFA80F817D10EEC005EE8B8 /* string_piece.hh in Headers */,
-				3DFA80F917D10EEC005EE8B8 /* string_piece_hash.hh in Headers */,
-				3DFA80FA17D10EEC005EE8B8 /* thread_pool.hh in Headers */,
-				3DFA80FB17D10EEC005EE8B8 /* tokenize_piece.hh in Headers */,
-				3DFA80FE17D10EEC005EE8B8 /* usage.hh in Headers */,
-				3DFA820D17D116F0005EE8B8 /* adjust_counts.hh in Headers */,
-				3DFA821017D116F0005EE8B8 /* corpus_count.hh in Headers */,
-				3DFA821217D116F0005EE8B8 /* discount.hh in Headers */,
-				3DFA821317D116F0005EE8B8 /* header_info.hh in Headers */,
-				3DFA821517D116F0005EE8B8 /* initial_probabilities.hh in Headers */,
-				3DFA821717D116F0005EE8B8 /* interpolate.hh in Headers */,
-				3DFA821817D116F0005EE8B8 /* joint_order.hh in Headers */,
-				3DFA821A17D116F0005EE8B8 /* multi_stream.hh in Headers */,
-				3DFA821B17D116F0005EE8B8 /* ngram.hh in Headers */,
-				3DFA821C17D116F0005EE8B8 /* ngram_stream.hh in Headers */,
-				3DFA821E17D116F0005EE8B8 /* pipeline.hh in Headers */,
-				3DFA822017D116F0005EE8B8 /* print.hh in Headers */,
-				3DFA822117D116F0005EE8B8 /* sort.hh in Headers */,
-				3DFA822417D116F0005EE8B8 /* arpa_io.hh in Headers */,
-				3DFA822517D116F0005EE8B8 /* count_io.hh in Headers */,
-				3DFA822717D116F0005EE8B8 /* format.hh in Headers */,
-				3DFA822917D116F0005EE8B8 /* phrase.hh in Headers */,
-				3DFA822A17D116F0005EE8B8 /* thread.hh in Headers */,
-				3DFA822C17D116F0005EE8B8 /* vocab.hh in Headers */,
-				3DFA822D17D116F0005EE8B8 /* wrapper.hh in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
