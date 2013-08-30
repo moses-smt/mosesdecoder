@@ -63,6 +63,22 @@ public:
   bool IsUseable(const FactorMask &mask) const;
   void SetParameter(const std::string& key, const std::string& value);
 
+  void Evaluate(const Hypothesis& hypo,
+                        ScoreComponentCollection* accumulator) const
+  {}
+  void EvaluateChart(const ChartHypothesis &hypo,
+                             ScoreComponentCollection* accumulator) const
+  {}
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
 protected:
   std::vector<FactorType> m_input;
   std::vector<FactorType> m_output;

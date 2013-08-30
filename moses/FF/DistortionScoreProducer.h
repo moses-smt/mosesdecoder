@@ -40,6 +40,17 @@ public:
     ScoreComponentCollection*) const {
     throw std::logic_error("DistortionScoreProducer not supported in chart decoder, yet");
   }
+
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
 };
 }
 
