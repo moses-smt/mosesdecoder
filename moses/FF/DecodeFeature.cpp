@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 
 #include "DecodeFeature.h"
-#include "StaticData.h"
+#include "moses/StaticData.h"
 
 using namespace std;
 

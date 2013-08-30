@@ -39,8 +39,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Phrase.h"
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
-#include "moses/DecodeFeature.h"
 #include "moses/InputPath.h"
+#include "moses/FF/DecodeFeature.h"
 
 namespace Moses
 {
