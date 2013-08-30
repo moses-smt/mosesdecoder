@@ -10,7 +10,7 @@
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 
-#include "moses/LexicalReordering.h"
+#include "moses/FF/LexicalReordering/LexicalReordering.h"
 
 #include "moses/FF/BleuScoreFeature.h"
 #include "moses/FF/TargetWordInsertionFeature.h"

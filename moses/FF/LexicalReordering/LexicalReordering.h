@@ -3,11 +3,11 @@
 
 #include <string>
 #include <vector>
-#include "Factor.h"
-#include "Phrase.h"
-#include "TypeDef.h"
-#include "Util.h"
-#include "WordsRange.h"
+#include "moses/Factor.h"
+#include "moses/Phrase.h"
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
+#include "moses/WordsRange.h"
 
 #include "LexicalReorderingState.h"
 #include "LexicalReorderingTable.h"

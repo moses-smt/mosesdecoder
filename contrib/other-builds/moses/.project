@@ -517,36 +517,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LVoc.h</locationURI>
 		</link>
 		<link>
-			<name>LexicalReordering.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReordering.cpp</locationURI>
-		</link>
-		<link>
-			<name>LexicalReordering.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReordering.h</locationURI>
-		</link>
-		<link>
-			<name>LexicalReorderingState.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingState.cpp</locationURI>
-		</link>
-		<link>
-			<name>LexicalReorderingState.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingState.h</locationURI>
-		</link>
-		<link>
-			<name>LexicalReorderingTable.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingTable.cpp</locationURI>
-		</link>
-		<link>
-			<name>LexicalReorderingTable.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingTable.h</locationURI>
-		</link>
-		<link>
 			<name>Manager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Manager.cpp</locationURI>
@@ -1157,6 +1127,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/LexicalReordering</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>FF/OSM-Feature</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1630,6 +1605,36 @@
 			<name>bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReordering.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReordering.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReordering.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReordering.h</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReorderingState.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingState.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReorderingState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingState.h</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReorderingTable.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingTable.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReorderingTable.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingTable.h</locationURI>
 		</link>
 		<link>
 			<name>FF/OSM-Feature/OpSequenceModel.cpp</name>
