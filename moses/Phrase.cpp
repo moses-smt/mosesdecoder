@@ -373,6 +373,11 @@ void Phrase::InitStartEndWord()
   AddWord(endWord);
 }
 
+bool Phrase::Contains(const Phrase &sought) const
+{
+
+}
+
 TO_STRING_BODY(Phrase);
 
 // friend

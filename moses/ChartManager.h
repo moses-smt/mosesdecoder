@@ -102,6 +102,8 @@ public:
     return m_hypothesisId++;
   }
 
+  const Phrase *GetConstraint() const
+  { return m_constraint; }
 };
 
 }

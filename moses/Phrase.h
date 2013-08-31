@@ -128,6 +128,8 @@ public:
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
                 , const std::vector<FactorType> &inputFactor) const;
 
+  bool Contains(const Phrase &sought) const;
+
   //! create an empty word at the end of the phrase
   Word &AddWord();
   //! create copy of input word at the end of the phrase
