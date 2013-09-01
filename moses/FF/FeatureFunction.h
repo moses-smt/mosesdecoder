@@ -14,7 +14,6 @@ class TargetPhrase;
 class TranslationOption;
 class Hypothesis;
 class ChartHypothesis;
-class FFState;
 class InputType;
 class ScoreComponentCollection;
 class WordsBitmap;

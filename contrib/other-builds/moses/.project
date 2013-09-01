@@ -1182,6 +1182,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SkeletonStatefulFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatefulFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatelessFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatelessFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.cpp</locationURI>
