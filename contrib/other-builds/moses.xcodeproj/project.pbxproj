@@ -19,16 +19,17 @@
 			name = "OnDiskPt executables";
 			productName = "OnDiskPt executables";
 		};
-		3D0B8C2517D633B800250193 /* moses-cmd executables */ = {
+		3D0B8C2517D633B800250193 /* moses executables */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = 3D0B8C3217D6340100250193 /* Build configuration list for PBXAggregateTarget "moses-cmd executables" */;
+			buildConfigurationList = 3D0B8C3217D6340100250193 /* Build configuration list for PBXAggregateTarget "moses executables" */;
 			buildPhases = (
 			);
 			dependencies = (
+				3D0B8C6017D6353700250193 /* PBXTargetDependency */,
 				3D0B8C2917D633C500250193 /* PBXTargetDependency */,
 				3D0B8C2B17D633CB00250193 /* PBXTargetDependency */,
 			);
-			name = "moses-cmd executables";
+			name = "moses executables";
 			productName = "moses-cmd executables";
 		};
 		3DFA816517D11442005EE8B8 /* kenlm executables */ = {
@@ -54,6 +55,11 @@
 		3D0B8C1117D632A800250193 /* LatticeMBRGrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82A817D11E55005EE8B8 /* LatticeMBRGrid.cpp */; };
 		3D0B8C1F17D6336000250193 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82B517D11E55005EE8B8 /* IOWrapper.cpp */; };
 		3D0B8C2217D6337C00250193 /* LatticeMBR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82A617D11E55005EE8B8 /* LatticeMBR.cpp */; };
+		3D0B8C5017D634E900250193 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
+		3D0B8C5717D6350D00250193 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C3417D634BD00250193 /* IOWrapper.cpp */; };
+		3D0B8C5817D6350D00250193 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C3717D634BD00250193 /* Main.cpp */; };
+		3D0B8C5917D6350D00250193 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C3917D634BD00250193 /* TranslationAnalysis.cpp */; };
+		3D0B8C5A17D6350D00250193 /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C3B17D634BD00250193 /* mbr.cpp */; };
 		3D44CEF517D62C0F00E3925F /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
 		3DFA7FD017D10B0E005EE8B8 /* bhiksha.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F4D17D10B0D005EE8B8 /* bhiksha.cc */; };
 		3DFA7FD217D10B0E005EE8B8 /* binary_format.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F4F17D10B0D005EE8B8 /* binary_format.cc */; };
@@ -381,6 +387,13 @@
 			remoteGlobalIDString = 3D0B8BF817D6328300250193 /* lmbrgrid */;
 			remoteInfo = lmbrgrid;
 		};
+		3D0B8C5F17D6353700250193 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3D0B8C4317D634E900250193 /* moses_chart */;
+			remoteInfo = moses_chart;
+		};
 		3DFA816817D11448005EE8B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -420,6 +433,15 @@
 
 /* Begin PBXFileReference section */
 		3D0B8C0917D6328300250193 /* lmbrgrid */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lmbrgrid; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D0B8C3417D634BD00250193 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IOWrapper.cpp; sourceTree = "<group>"; };
+		3D0B8C3517D634BD00250193 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOWrapper.h; sourceTree = "<group>"; };
+		3D0B8C3717D634BD00250193 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Main.cpp; sourceTree = "<group>"; };
+		3D0B8C3817D634BD00250193 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Main.h; sourceTree = "<group>"; };
+		3D0B8C3917D634BD00250193 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TranslationAnalysis.cpp; sourceTree = "<group>"; };
+		3D0B8C3A17D634BD00250193 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TranslationAnalysis.h; sourceTree = "<group>"; };
+		3D0B8C3B17D634BD00250193 /* mbr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mbr.cpp; sourceTree = "<group>"; };
+		3D0B8C3C17D634BD00250193 /* mbr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mbr.h; sourceTree = "<group>"; };
+		3D0B8C5417D634E900250193 /* moses_chart */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = moses_chart; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D44CEF917D62C0F00E3925F /* queryOnDiskPt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = queryOnDiskPt; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DFA7F4D17D10B0D005EE8B8 /* bhiksha.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bhiksha.cc; sourceTree = "<group>"; };
 		3DFA7F4E17D10B0D005EE8B8 /* bhiksha.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bhiksha.hh; sourceTree = "<group>"; };
@@ -1051,6 +1073,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3D0B8C4F17D634E900250193 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D0B8C5017D634E900250193 /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3D44CEF417D62C0F00E3925F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1351,15 +1381,33 @@
 				3DFA829C17D11E20005EE8B8 /* moses */,
 				3D44CEF917D62C0F00E3925F /* queryOnDiskPt */,
 				3D0B8C0917D6328300250193 /* lmbrgrid */,
+				3D0B8C5417D634E900250193 /* moses_chart */,
 			);
 			name = Products;
 			sourceTree = "<group>";
+		};
+		3D0B8C3317D634BD00250193 /* moses-chart-cmd */ = {
+			isa = PBXGroup;
+			children = (
+				3D0B8C3417D634BD00250193 /* IOWrapper.cpp */,
+				3D0B8C3517D634BD00250193 /* IOWrapper.h */,
+				3D0B8C3717D634BD00250193 /* Main.cpp */,
+				3D0B8C3817D634BD00250193 /* Main.h */,
+				3D0B8C3917D634BD00250193 /* TranslationAnalysis.cpp */,
+				3D0B8C3A17D634BD00250193 /* TranslationAnalysis.h */,
+				3D0B8C3B17D634BD00250193 /* mbr.cpp */,
+				3D0B8C3C17D634BD00250193 /* mbr.h */,
+			);
+			name = "moses-chart-cmd";
+			path = "../../moses-chart-cmd";
+			sourceTree = SOURCE_ROOT;
 		};
 		3DFA7F4617D107C0005EE8B8 /* Source */ = {
 			isa = PBXGroup;
 			children = (
 				3DFA7F4B17D10B0D005EE8B8 /* lm */,
 				08FB7795FE84155DC02AAC07 /* moses */,
+				3D0B8C3317D634BD00250193 /* moses-chart-cmd */,
 				3DFA82A317D11E55005EE8B8 /* moses-cmd */,
 				3DFA82D817D12110005EE8B8 /* OnDiskPt */,
 				3DFA83B817D13712005EE8B8 /* search */,
@@ -2047,6 +2095,22 @@
 			productReference = 3D0B8C0917D6328300250193 /* lmbrgrid */;
 			productType = "com.apple.product-type.tool";
 		};
+		3D0B8C4317D634E900250193 /* moses_chart */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3D0B8C5117D634E900250193 /* Build configuration list for PBXNativeTarget "moses_chart" */;
+			buildPhases = (
+				3D0B8C4417D634E900250193 /* Sources */,
+				3D0B8C4F17D634E900250193 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = moses_chart;
+			productName = moses;
+			productReference = 3D0B8C5417D634E900250193 /* moses_chart */;
+			productType = "com.apple.product-type.tool";
+		};
 		3D44CEF117D62C0F00E3925F /* queryOnDiskPt */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3D44CEF617D62C0F00E3925F /* Build configuration list for PBXNativeTarget "queryOnDiskPt" */;
@@ -2215,8 +2279,9 @@
 			projectRoot = "";
 			targets = (
 				D2AAC045055464E500DB518D /* moses library */,
-				3D0B8C2517D633B800250193 /* moses-cmd executables */,
+				3D0B8C2517D633B800250193 /* moses executables */,
 				3DFA829B17D11E20005EE8B8 /* moses */,
+				3D0B8C4317D634E900250193 /* moses_chart */,
 				3D0B8BF817D6328300250193 /* lmbrgrid */,
 				3DFA816517D11442005EE8B8 /* kenlm executables */,
 				3DFA810717D10FCD005EE8B8 /* build_binary */,
@@ -2239,6 +2304,17 @@
 				3D0B8C1F17D6336000250193 /* IOWrapper.cpp in Sources */,
 				3D0B8C2217D6337C00250193 /* LatticeMBR.cpp in Sources */,
 				3D0B8C1117D632A800250193 /* LatticeMBRGrid.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3D0B8C4417D634E900250193 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D0B8C5717D6350D00250193 /* IOWrapper.cpp in Sources */,
+				3D0B8C5817D6350D00250193 /* Main.cpp in Sources */,
+				3D0B8C5917D6350D00250193 /* TranslationAnalysis.cpp in Sources */,
+				3D0B8C5A17D6350D00250193 /* mbr.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2617,6 +2693,11 @@
 			target = 3D0B8BF817D6328300250193 /* lmbrgrid */;
 			targetProxy = 3D0B8C2A17D633CB00250193 /* PBXContainerItemProxy */;
 		};
+		3D0B8C6017D6353700250193 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3D0B8C4317D634E900250193 /* moses_chart */;
+			targetProxy = 3D0B8C5F17D6353700250193 /* PBXContainerItemProxy */;
+		};
 		3DFA816917D11448005EE8B8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3DFA810717D10FCD005EE8B8 /* build_binary */;
@@ -2841,6 +2922,78 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = "moses-cmd executables";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		3D0B8C5217D634E900250193 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = ../..;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(XCODE_MOSES_LIBRARY_IRSTLM)",
+					"$(XCODE_MOSES_LIBRARY_SRILM)",
+					"$(XCODE_MOSES_LIBRARY_LBFGS)",
+				);
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-search_paths_first",
+					"-lboost_filesystem",
+					"-lboost_iostreams",
+					"-lboost_thread",
+					"-lboost_system",
+					"-llbfgs",
+					"-ldstruct",
+					"-liconv",
+					"-lirstlm",
+					"-lmisc",
+					"-loolm",
+					"-lz",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = moses_chart;
+			};
+			name = Debug;
+		};
+		3D0B8C5317D634E900250193 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = ../..;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(XCODE_MOSES_LIBRARY_IRSTLM)",
+					"$(XCODE_MOSES_LIBRARY_SRILM)",
+					"$(XCODE_MOSES_LIBRARY_LBFGS)",
+				);
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-search_paths_first",
+					"-lboost_filesystem",
+					"-lboost_iostreams",
+					"-lboost_thread",
+					"-lboost_system",
+					"-llbfgs",
+					"-ldstruct",
+					"-liconv",
+					"-lirstlm",
+					"-lmisc",
+					"-loolm",
+					"-lz",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = moses_chart;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -3305,11 +3458,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3D0B8C3217D6340100250193 /* Build configuration list for PBXAggregateTarget "moses-cmd executables" */ = {
+		3D0B8C3217D6340100250193 /* Build configuration list for PBXAggregateTarget "moses executables" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3D0B8C2617D633B900250193 /* Debug */,
 				3D0B8C2717D633B900250193 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3D0B8C5117D634E900250193 /* Build configuration list for PBXNativeTarget "moses_chart" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3D0B8C5217D634E900250193 /* Debug */,
+				3D0B8C5317D634E900250193 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
