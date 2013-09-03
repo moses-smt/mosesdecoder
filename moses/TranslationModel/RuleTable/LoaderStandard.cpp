@@ -193,12 +193,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
       StringPiece str(*pipes); //counts
     }
 
-    StringPiece propertiesString;
-    if (++pipes) {
-      StringPiece temp(*pipes);
-      propertiesString = temp;
-    }
-
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
       TRACE_ERR( ruleTable.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
@@ -239,13 +233,16 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->SetAlignmentInfo(alignString);
     targetPhrase->SetTargetLHS(targetLHS);
 
-    targetPhrase->SetProperties(propertiesString);
-
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
 
     if (++pipes) {
       StringPiece sparseString(*pipes);
       targetPhrase->SetSparseScore(&ruleTable, sparseString);
+    }
+
+    if (++pipes) {
+      StringPiece propertiesString(*pipes);
+      targetPhrase->SetProperties(propertiesString);
     }
 
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
