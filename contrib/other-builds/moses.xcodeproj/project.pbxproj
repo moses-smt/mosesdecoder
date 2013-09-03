@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
+		3D0B8BC117D62E3700250193 /* OnDiskPt executables */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 3D0B8BCA17D62E8400250193 /* Build configuration list for PBXAggregateTarget "OnDiskPt executables" */;
+			buildPhases = (
+			);
+			dependencies = (
+				3D0B8BC517D62E3F00250193 /* PBXTargetDependency */,
+				3D0B8BC717D62E4300250193 /* PBXTargetDependency */,
+			);
+			name = "OnDiskPt executables";
+			productName = "OnDiskPt executables";
+		};
 		3DFA816517D11442005EE8B8 /* kenlm executables */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 3DFA816E17D1147F005EE8B8 /* Build configuration list for PBXAggregateTarget "kenlm executables" */;
@@ -25,6 +37,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		3D44CEF317D62C0F00E3925F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82DA17D12110005EE8B8 /* Main.cpp */; };
+		3D44CEF517D62C0F00E3925F /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
 		3DFA7FD017D10B0E005EE8B8 /* bhiksha.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F4D17D10B0D005EE8B8 /* bhiksha.cc */; };
 		3DFA7FD217D10B0E005EE8B8 /* binary_format.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F4F17D10B0D005EE8B8 /* binary_format.cc */; };
 		3DFA7FED17D10B0E005EE8B8 /* config.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F7317D10B0D005EE8B8 /* config.cc */; };
@@ -323,6 +337,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		3D0B8BC417D62E3F00250193 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DFA835E17D12E92005EE8B8 /* CreateOnDiskPt */;
+			remoteInfo = CreateOnDiskPt;
+		};
+		3D0B8BC617D62E4300250193 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3D44CEF117D62C0F00E3925F /* queryOnDiskPt */;
+			remoteInfo = queryOnDiskPt;
+		};
 		3DFA816817D11448005EE8B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -361,6 +389,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D44CEF917D62C0F00E3925F /* queryOnDiskPt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = queryOnDiskPt; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DFA7F4D17D10B0D005EE8B8 /* bhiksha.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bhiksha.cc; sourceTree = "<group>"; };
 		3DFA7F4E17D10B0D005EE8B8 /* bhiksha.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bhiksha.hh; sourceTree = "<group>"; };
 		3DFA7F4F17D10B0D005EE8B8 /* binary_format.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = binary_format.cc; sourceTree = "<group>"; };
@@ -983,6 +1012,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3D44CEF417D62C0F00E3925F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D44CEF517D62C0F00E3925F /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3DFA810617D10FCD005EE8B8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1273,6 +1310,7 @@
 				3DFA817717D11483005EE8B8 /* query */,
 				3DFA836817D12E92005EE8B8 /* CreateOnDiskPt */,
 				3DFA829C17D11E20005EE8B8 /* moses */,
+				3D44CEF917D62C0F00E3925F /* queryOnDiskPt */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1953,6 +1991,22 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		3D44CEF117D62C0F00E3925F /* queryOnDiskPt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3D44CEF617D62C0F00E3925F /* Build configuration list for PBXNativeTarget "queryOnDiskPt" */;
+			buildPhases = (
+				3D44CEF217D62C0F00E3925F /* Sources */,
+				3D44CEF417D62C0F00E3925F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = queryOnDiskPt;
+			productName = build_binary;
+			productReference = 3D44CEF917D62C0F00E3925F /* queryOnDiskPt */;
+			productType = "com.apple.product-type.tool";
+		};
 		3DFA810717D10FCD005EE8B8 /* build_binary */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3DFA811217D11011005EE8B8 /* Build configuration list for PBXNativeTarget "build_binary" */;
@@ -2106,18 +2160,28 @@
 			targets = (
 				D2AAC045055464E500DB518D /* moses library */,
 				3DFA829B17D11E20005EE8B8 /* moses */,
-				3DFA835E17D12E92005EE8B8 /* CreateOnDiskPt */,
 				3DFA816517D11442005EE8B8 /* kenlm executables */,
 				3DFA810717D10FCD005EE8B8 /* build_binary */,
 				3DFA81CF17D116CF005EE8B8 /* filter */,
 				3DFA815917D113DF005EE8B8 /* fragment */,
 				3DFA81C017D1169E005EE8B8 /* lmplz */,
 				3DFA816F17D11483005EE8B8 /* query */,
+				3D0B8BC117D62E3700250193 /* OnDiskPt executables */,
+				3DFA835E17D12E92005EE8B8 /* CreateOnDiskPt */,
+				3D44CEF117D62C0F00E3925F /* queryOnDiskPt */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3D44CEF217D62C0F00E3925F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D44CEF317D62C0F00E3925F /* Main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3DFA810517D10FCD005EE8B8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2465,6 +2529,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		3D0B8BC517D62E3F00250193 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3DFA835E17D12E92005EE8B8 /* CreateOnDiskPt */;
+			targetProxy = 3D0B8BC417D62E3F00250193 /* PBXContainerItemProxy */;
+		};
+		3D0B8BC717D62E4300250193 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3D44CEF117D62C0F00E3925F /* queryOnDiskPt */;
+			targetProxy = 3D0B8BC617D62E4300250193 /* PBXContainerItemProxy */;
+		};
 		3DFA816917D11448005EE8B8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3DFA810717D10FCD005EE8B8 /* build_binary */;
@@ -2576,6 +2650,95 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = "";
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
+			};
+			name = Release;
+		};
+		3D0B8BC217D62E3700250193 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "OnDiskPt executables";
+			};
+			name = Debug;
+		};
+		3D0B8BC317D62E3700250193 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "OnDiskPt executables";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		3D44CEF717D62C0F00E3925F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = ../..;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(XCODE_MOSES_LIBRARY_SRILM)",
+					"$(XCODE_MOSES_LIBRARY_LBFGS)",
+					"$(XCODE_MOSES_LIBRARY_IRSTLM)",
+				);
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-search_paths_first",
+					"-lboost_system",
+					"-lboost_thread",
+					"-ldstruct",
+					"-liconv",
+					"-lirstlm",
+					"-llbfgs",
+					"-lz",
+					"-lmisc",
+					"-loolm",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = queryOnDiskPt;
+			};
+			name = Debug;
+		};
+		3D44CEF817D62C0F00E3925F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = ../..;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(XCODE_MOSES_LIBRARY_SRILM)",
+					"$(XCODE_MOSES_LIBRARY_LBFGS)",
+					"$(XCODE_MOSES_LIBRARY_IRSTLM)",
+				);
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-search_paths_first",
+					"-lboost_system",
+					"-lboost_thread",
+					"-ldstruct",
+					"-liconv",
+					"-lirstlm",
+					"-llbfgs",
+					"-lz",
+					"-lmisc",
+					"-loolm",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = queryOnDiskPt;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -2691,7 +2854,7 @@
 				HEADER_SEARCH_PATHS = ../..;
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
-				PRODUCT_NAME = fragment;
+				PRODUCT_NAME = query;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2882,8 +3045,26 @@
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = ../..;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(XCODE_MOSES_LIBRARY_SRILM)",
+					"$(XCODE_MOSES_LIBRARY_LBFGS)",
+					"$(XCODE_MOSES_LIBRARY_IRSTLM)",
+				);
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-search_paths_first",
+					"-lboost_system",
+					"-lboost_thread",
+					"-ldstruct",
+					"-liconv",
+					"-lirstlm",
+					"-llbfgs",
+					"-lz",
+					"-lmisc",
+					"-loolm",
+				);
 				PREBINDING = NO;
-				PRODUCT_NAME = build_binary;
+				PRODUCT_NAME = CreateOnDiskPt;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2905,6 +3086,24 @@
 			buildConfigurations = (
 				1DEB91F008733DB70010E9CD /* Debug */,
 				1DEB91F108733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3D0B8BCA17D62E8400250193 /* Build configuration list for PBXAggregateTarget "OnDiskPt executables" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3D0B8BC217D62E3700250193 /* Debug */,
+				3D0B8BC317D62E3700250193 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3D44CEF617D62C0F00E3925F /* Build configuration list for PBXNativeTarget "queryOnDiskPt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3D44CEF717D62C0F00E3925F /* Debug */,
+				3D44CEF817D62C0F00E3925F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
