@@ -128,6 +128,21 @@
 		3DFA82BE17D11EDE005EE8B8 /* mbr.h in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82AE17D11E55005EE8B8 /* mbr.h */; };
 		3DFA82BF17D11EDE005EE8B8 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82B517D11E55005EE8B8 /* IOWrapper.cpp */; };
 		3DFA82C017D11EFD005EE8B8 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
+		3DFA835317D12E3C005EE8B8 /* OnDiskQuery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82DC17D12110005EE8B8 /* OnDiskQuery.cpp */; };
+		3DFA835417D12E3C005EE8B8 /* OnDiskWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82DE17D12110005EE8B8 /* OnDiskWrapper.cpp */; };
+		3DFA835517D12E3C005EE8B8 /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82E017D12110005EE8B8 /* Phrase.cpp */; };
+		3DFA835617D12E3C005EE8B8 /* PhraseNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82E217D12110005EE8B8 /* PhraseNode.cpp */; };
+		3DFA835717D12E3C005EE8B8 /* SourcePhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82E417D12110005EE8B8 /* SourcePhrase.cpp */; };
+		3DFA835817D12E3C005EE8B8 /* TargetPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82E617D12110005EE8B8 /* TargetPhrase.cpp */; };
+		3DFA835917D12E3C005EE8B8 /* TargetPhraseCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82E817D12110005EE8B8 /* TargetPhraseCollection.cpp */; };
+		3DFA835A17D12E3C005EE8B8 /* Vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82EA17D12110005EE8B8 /* Vocab.cpp */; };
+		3DFA835B17D12E3C005EE8B8 /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82EC17D12110005EE8B8 /* Word.cpp */; };
+		3DFA836417D12E92005EE8B8 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
+		3DFA836A17D12EBC005EE8B8 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA82DA17D12110005EE8B8 /* Main.cpp */; };
+		3DFA83CF17D1372B005EE8B8 /* edge_generator.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA83BE17D13713005EE8B8 /* edge_generator.cc */; };
+		3DFA83D017D1372B005EE8B8 /* nbest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA83C117D13713005EE8B8 /* nbest.cc */; };
+		3DFA83D117D1372B005EE8B8 /* rule.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA83C317D13713005EE8B8 /* rule.cc */; };
+		3DFA83D217D1372B005EE8B8 /* vertex.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA83C617D13713005EE8B8 /* vertex.cc */; };
 		3DFCD77B17C7E7E500BA3700 /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5C517C7E7E400BA3700 /* AlignmentInfo.cpp */; };
 		3DFCD77D17C7E7E500BA3700 /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5C717C7E7E400BA3700 /* AlignmentInfoCollection.cpp */; };
 		3DFCD77F17C7E7E500BA3700 /* AlignmentInfoTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DFCD5C917C7E7E400BA3700 /* AlignmentInfoTest.cpp */; };
@@ -312,42 +327,35 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 3DFA810717D10FCD005EE8B8 /* build_binary */;
+			remoteGlobalIDString = 3DFA810717D10FCD005EE8B8;
 			remoteInfo = build_binary;
 		};
 		3DFA816A17D1144C005EE8B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 3DFA815917D113DF005EE8B8 /* fragment */;
+			remoteGlobalIDString = 3DFA815917D113DF005EE8B8;
 			remoteInfo = fragment;
 		};
 		3DFA817A17D11499005EE8B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 3DFA816F17D11483005EE8B8 /* query */;
+			remoteGlobalIDString = 3DFA816F17D11483005EE8B8;
 			remoteInfo = query;
 		};
 		3DFA81C517D116A9005EE8B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 3DFA81C017D1169E005EE8B8 /* lmplz */;
+			remoteGlobalIDString = 3DFA81C017D1169E005EE8B8;
 			remoteInfo = lmplz;
-		};
-		3DFA81D417D116D5005EE8B8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3DFA81CF17D116CF005EE8B8 /* filter */;
-			remoteInfo = filter;
 		};
 		3DFA81D617D116DE005EE8B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 3DFA81CF17D116CF005EE8B8 /* filter */;
+			remoteGlobalIDString = 3DFA81CF17D116CF005EE8B8;
 			remoteInfo = filter;
 		};
 /* End PBXContainerItemProxy section */
@@ -485,7 +493,7 @@
 		3DFA809D17D10EEC005EE8B8 /* usage.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = usage.hh; sourceTree = "<group>"; };
 		3DFA810817D10FCD005EE8B8 /* build_binary */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = build_binary; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DFA815A17D113DF005EE8B8 /* fragment */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = fragment; sourceTree = BUILT_PRODUCTS_DIR; };
-		3DFA817717D11483005EE8B8 /* fragment */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = fragment; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DFA817717D11483005EE8B8 /* query */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = query; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DFA81C117D1169E005EE8B8 /* lmplz */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lmplz; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DFA81D017D116CF005EE8B8 /* filter */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = filter; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DFA81DC17D116F0005EE8B8 /* adjust_counts.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = adjust_counts.cc; sourceTree = "<group>"; };
@@ -554,6 +562,22 @@
 		3DFA82EC17D12110005EE8B8 /* Word.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Word.cpp; sourceTree = "<group>"; };
 		3DFA82ED17D12110005EE8B8 /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Word.h; sourceTree = "<group>"; };
 		3DFA82EE17D12110005EE8B8 /* queryOnDiskPt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = queryOnDiskPt.cpp; sourceTree = "<group>"; };
+		3DFA836817D12E92005EE8B8 /* CreateOnDiskPt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateOnDiskPt; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DFA83BA17D13713005EE8B8 /* applied.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = applied.hh; sourceTree = "<group>"; };
+		3DFA83BB17D13713005EE8B8 /* config.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = config.hh; sourceTree = "<group>"; };
+		3DFA83BC17D13713005EE8B8 /* context.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = context.hh; sourceTree = "<group>"; };
+		3DFA83BD17D13713005EE8B8 /* edge.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = edge.hh; sourceTree = "<group>"; };
+		3DFA83BE17D13713005EE8B8 /* edge_generator.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = edge_generator.cc; sourceTree = "<group>"; };
+		3DFA83BF17D13713005EE8B8 /* edge_generator.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = edge_generator.hh; sourceTree = "<group>"; };
+		3DFA83C017D13713005EE8B8 /* header.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = header.hh; sourceTree = "<group>"; };
+		3DFA83C117D13713005EE8B8 /* nbest.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nbest.cc; sourceTree = "<group>"; };
+		3DFA83C217D13713005EE8B8 /* nbest.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = nbest.hh; sourceTree = "<group>"; };
+		3DFA83C317D13713005EE8B8 /* rule.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rule.cc; sourceTree = "<group>"; };
+		3DFA83C417D13713005EE8B8 /* rule.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rule.hh; sourceTree = "<group>"; };
+		3DFA83C517D13713005EE8B8 /* types.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = types.hh; sourceTree = "<group>"; };
+		3DFA83C617D13713005EE8B8 /* vertex.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertex.cc; sourceTree = "<group>"; };
+		3DFA83C717D13713005EE8B8 /* vertex.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vertex.hh; sourceTree = "<group>"; };
+		3DFA83C817D13713005EE8B8 /* vertex_generator.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vertex_generator.hh; sourceTree = "<group>"; };
 		3DFCD5C517C7E7E400BA3700 /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = ../../moses/AlignmentInfo.cpp; sourceTree = SOURCE_ROOT; };
 		3DFCD5C617C7E7E400BA3700 /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = ../../moses/AlignmentInfo.h; sourceTree = SOURCE_ROOT; };
 		3DFCD5C717C7E7E400BA3700 /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = ../../moses/AlignmentInfoCollection.cpp; sourceTree = SOURCE_ROOT; };
@@ -1007,6 +1031,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DFA836317D12E92005EE8B8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DFA836417D12E92005EE8B8 /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D289987405E68DCB004EDB86 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1235,10 +1267,11 @@
 			children = (
 				D2AAC046055464E500DB518D /* libmoses.a */,
 				3DFA810817D10FCD005EE8B8 /* build_binary */,
-				3DFA815A17D113DF005EE8B8 /* fragment */,
-				3DFA817717D11483005EE8B8 /* fragment */,
-				3DFA81C117D1169E005EE8B8 /* lmplz */,
 				3DFA81D017D116CF005EE8B8 /* filter */,
+				3DFA815A17D113DF005EE8B8 /* fragment */,
+				3DFA81C117D1169E005EE8B8 /* lmplz */,
+				3DFA817717D11483005EE8B8 /* query */,
+				3DFA836817D12E92005EE8B8 /* CreateOnDiskPt */,
 				3DFA829C17D11E20005EE8B8 /* moses */,
 			);
 			name = Products;
@@ -1251,6 +1284,7 @@
 				08FB7795FE84155DC02AAC07 /* moses */,
 				3DFA82A317D11E55005EE8B8 /* moses-cmd */,
 				3DFA82D817D12110005EE8B8 /* OnDiskPt */,
+				3DFA83B817D13712005EE8B8 /* search */,
 				3DFA803A17D10EEC005EE8B8 /* util */,
 			);
 			name = Source;
@@ -1513,6 +1547,29 @@
 			);
 			name = OnDiskPt;
 			path = ../../OnDiskPt;
+			sourceTree = SOURCE_ROOT;
+		};
+		3DFA83B817D13712005EE8B8 /* search */ = {
+			isa = PBXGroup;
+			children = (
+				3DFA83BA17D13713005EE8B8 /* applied.hh */,
+				3DFA83BB17D13713005EE8B8 /* config.hh */,
+				3DFA83BC17D13713005EE8B8 /* context.hh */,
+				3DFA83BD17D13713005EE8B8 /* edge.hh */,
+				3DFA83BE17D13713005EE8B8 /* edge_generator.cc */,
+				3DFA83BF17D13713005EE8B8 /* edge_generator.hh */,
+				3DFA83C017D13713005EE8B8 /* header.hh */,
+				3DFA83C117D13713005EE8B8 /* nbest.cc */,
+				3DFA83C217D13713005EE8B8 /* nbest.hh */,
+				3DFA83C317D13713005EE8B8 /* rule.cc */,
+				3DFA83C417D13713005EE8B8 /* rule.hh */,
+				3DFA83C517D13713005EE8B8 /* types.hh */,
+				3DFA83C617D13713005EE8B8 /* vertex.cc */,
+				3DFA83C717D13713005EE8B8 /* vertex.hh */,
+				3DFA83C817D13713005EE8B8 /* vertex_generator.hh */,
+			);
+			name = search;
+			path = ../../search;
 			sourceTree = SOURCE_ROOT;
 		};
 		3DFCD60117C7E7E400BA3700 /* FF */ = {
@@ -1906,7 +1963,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				3DFA81D517D116D5005EE8B8 /* PBXTargetDependency */,
 			);
 			name = build_binary;
 			productName = build_binary;
@@ -1942,7 +1998,7 @@
 			);
 			name = query;
 			productName = fragment;
-			productReference = 3DFA817717D11483005EE8B8 /* fragment */;
+			productReference = 3DFA817717D11483005EE8B8 /* query */;
 			productType = "com.apple.product-type.tool";
 		};
 		3DFA81C017D1169E005EE8B8 /* lmplz */ = {
@@ -1993,6 +2049,22 @@
 			productReference = 3DFA829C17D11E20005EE8B8 /* moses */;
 			productType = "com.apple.product-type.tool";
 		};
+		3DFA835E17D12E92005EE8B8 /* CreateOnDiskPt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DFA836517D12E92005EE8B8 /* Build configuration list for PBXNativeTarget "CreateOnDiskPt" */;
+			buildPhases = (
+				3DFA836117D12E92005EE8B8 /* Sources */,
+				3DFA836317D12E92005EE8B8 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CreateOnDiskPt;
+			productName = build_binary;
+			productReference = 3DFA836817D12E92005EE8B8 /* CreateOnDiskPt */;
+			productType = "com.apple.product-type.tool";
+		};
 		D2AAC045055464E500DB518D /* moses library */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "moses library" */;
@@ -2034,6 +2106,7 @@
 			targets = (
 				D2AAC045055464E500DB518D /* moses library */,
 				3DFA829B17D11E20005EE8B8 /* moses */,
+				3DFA835E17D12E92005EE8B8 /* CreateOnDiskPt */,
 				3DFA816517D11442005EE8B8 /* kenlm executables */,
 				3DFA810717D10FCD005EE8B8 /* build_binary */,
 				3DFA81CF17D116CF005EE8B8 /* filter */,
@@ -2131,10 +2204,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DFA836117D12E92005EE8B8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DFA836A17D12EBC005EE8B8 /* Main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D2AAC044055464E500DB518D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DFA83CF17D1372B005EE8B8 /* edge_generator.cc in Sources */,
+				3DFA83D017D1372B005EE8B8 /* nbest.cc in Sources */,
+				3DFA83D117D1372B005EE8B8 /* rule.cc in Sources */,
+				3DFA83D217D1372B005EE8B8 /* vertex.cc in Sources */,
+				3DFA835317D12E3C005EE8B8 /* OnDiskQuery.cpp in Sources */,
+				3DFA835417D12E3C005EE8B8 /* OnDiskWrapper.cpp in Sources */,
+				3DFA835517D12E3C005EE8B8 /* Phrase.cpp in Sources */,
+				3DFA835617D12E3C005EE8B8 /* PhraseNode.cpp in Sources */,
+				3DFA835717D12E3C005EE8B8 /* SourcePhrase.cpp in Sources */,
+				3DFA835817D12E3C005EE8B8 /* TargetPhrase.cpp in Sources */,
+				3DFA835917D12E3C005EE8B8 /* TargetPhraseCollection.cpp in Sources */,
+				3DFA835A17D12E3C005EE8B8 /* Vocab.cpp in Sources */,
+				3DFA835B17D12E3C005EE8B8 /* Word.cpp in Sources */,
 				3DFCD77B17C7E7E500BA3700 /* AlignmentInfo.cpp in Sources */,
 				3DFCD77D17C7E7E500BA3700 /* AlignmentInfoCollection.cpp in Sources */,
 				3DFCD77F17C7E7E500BA3700 /* AlignmentInfoTest.cpp in Sources */,
@@ -2391,11 +2485,6 @@
 			target = 3DFA81C017D1169E005EE8B8 /* lmplz */;
 			targetProxy = 3DFA81C517D116A9005EE8B8 /* PBXContainerItemProxy */;
 		};
-		3DFA81D517D116D5005EE8B8 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3DFA81CF17D116CF005EE8B8 /* filter */;
-			targetProxy = 3DFA81D417D116D5005EE8B8 /* PBXContainerItemProxy */;
-		};
 		3DFA81D717D116DE005EE8B8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3DFA81CF17D116CF005EE8B8 /* filter */;
@@ -2587,7 +2676,7 @@
 				HEADER_SEARCH_PATHS = ../..;
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
-				PRODUCT_NAME = fragment;
+				PRODUCT_NAME = query;
 			};
 			name = Debug;
 		};
@@ -2749,6 +2838,56 @@
 			};
 			name = Release;
 		};
+		3DFA836617D12E92005EE8B8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = ../..;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(XCODE_MOSES_LIBRARY_SRILM)",
+					"$(XCODE_MOSES_LIBRARY_LBFGS)",
+					"$(XCODE_MOSES_LIBRARY_IRSTLM)",
+				);
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-search_paths_first",
+					"-lboost_system",
+					"-lboost_thread",
+					"-ldstruct",
+					"-liconv",
+					"-lirstlm",
+					"-llbfgs",
+					"-lz",
+					"-lmisc",
+					"-loolm",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = CreateOnDiskPt;
+			};
+			name = Debug;
+		};
+		3DFA836717D12E92005EE8B8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = ../..;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = build_binary;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2829,6 +2968,15 @@
 			buildConfigurations = (
 				3DFA829E17D11E20005EE8B8 /* Debug */,
 				3DFA829F17D11E20005EE8B8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3DFA836517D12E92005EE8B8 /* Build configuration list for PBXNativeTarget "CreateOnDiskPt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DFA836617D12E92005EE8B8 /* Debug */,
+				3DFA836717D12E92005EE8B8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
