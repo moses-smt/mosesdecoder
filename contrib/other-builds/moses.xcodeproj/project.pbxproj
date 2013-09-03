@@ -60,6 +60,15 @@
 		3D0B8C5817D6350D00250193 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C3717D634BD00250193 /* Main.cpp */; };
 		3D0B8C5917D6350D00250193 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C3917D634BD00250193 /* TranslationAnalysis.cpp */; };
 		3D0B8C5A17D6350D00250193 /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C3B17D634BD00250193 /* mbr.cpp */; };
+		3D0B8C8B17D6362800250193 /* Alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C6917D635DD00250193 /* Alignment.cpp */; };
+		3D0B8C8C17D6362800250193 /* Mismatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C6C17D635DD00250193 /* Mismatch.cpp */; };
+		3D0B8C8D17D6362800250193 /* PhrasePair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C6E17D635DD00250193 /* PhrasePair.cpp */; };
+		3D0B8C8E17D6362800250193 /* PhrasePairCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C7017D635DD00250193 /* PhrasePairCollection.cpp */; };
+		3D0B8C8F17D6362800250193 /* SuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C7217D635DD00250193 /* SuffixArray.cpp */; };
+		3D0B8C9017D6362800250193 /* TargetCorpus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C7417D635DE00250193 /* TargetCorpus.cpp */; };
+		3D0B8C9117D6362800250193 /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C7617D635DE00250193 /* Vocabulary.cpp */; };
+		3D0B8C9217D6362800250193 /* base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C7817D635DE00250193 /* base64.cpp */; };
+		3D0B8C9317D6362800250193 /* biconcor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0B8C7A17D635DE00250193 /* biconcor.cpp */; };
 		3D44CEF517D62C0F00E3925F /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libmoses.a */; };
 		3DFA7FD017D10B0E005EE8B8 /* bhiksha.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F4D17D10B0D005EE8B8 /* bhiksha.cc */; };
 		3DFA7FD217D10B0E005EE8B8 /* binary_format.cc in Sources */ = {isa = PBXBuildFile; fileRef = 3DFA7F4F17D10B0D005EE8B8 /* binary_format.cc */; };
@@ -442,6 +451,24 @@
 		3D0B8C3B17D634BD00250193 /* mbr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mbr.cpp; sourceTree = "<group>"; };
 		3D0B8C3C17D634BD00250193 /* mbr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mbr.h; sourceTree = "<group>"; };
 		3D0B8C5417D634E900250193 /* moses_chart */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = moses_chart; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D0B8C6917D635DD00250193 /* Alignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Alignment.cpp; sourceTree = "<group>"; };
+		3D0B8C6A17D635DD00250193 /* Alignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Alignment.h; sourceTree = "<group>"; };
+		3D0B8C6C17D635DD00250193 /* Mismatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Mismatch.cpp; sourceTree = "<group>"; };
+		3D0B8C6D17D635DD00250193 /* Mismatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mismatch.h; sourceTree = "<group>"; };
+		3D0B8C6E17D635DD00250193 /* PhrasePair.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhrasePair.cpp; sourceTree = "<group>"; };
+		3D0B8C6F17D635DD00250193 /* PhrasePair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhrasePair.h; sourceTree = "<group>"; };
+		3D0B8C7017D635DD00250193 /* PhrasePairCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhrasePairCollection.cpp; sourceTree = "<group>"; };
+		3D0B8C7117D635DD00250193 /* PhrasePairCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhrasePairCollection.h; sourceTree = "<group>"; };
+		3D0B8C7217D635DD00250193 /* SuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SuffixArray.cpp; sourceTree = "<group>"; };
+		3D0B8C7317D635DD00250193 /* SuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SuffixArray.h; sourceTree = "<group>"; };
+		3D0B8C7417D635DE00250193 /* TargetCorpus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TargetCorpus.cpp; sourceTree = "<group>"; };
+		3D0B8C7517D635DE00250193 /* TargetCorpus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TargetCorpus.h; sourceTree = "<group>"; };
+		3D0B8C7617D635DE00250193 /* Vocabulary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vocabulary.cpp; sourceTree = "<group>"; };
+		3D0B8C7717D635DE00250193 /* Vocabulary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vocabulary.h; sourceTree = "<group>"; };
+		3D0B8C7817D635DE00250193 /* base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = base64.cpp; sourceTree = "<group>"; };
+		3D0B8C7917D635DE00250193 /* base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = base64.h; sourceTree = "<group>"; };
+		3D0B8C7A17D635DE00250193 /* biconcor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = biconcor.cpp; sourceTree = "<group>"; };
+		3D0B8C8917D6360100250193 /* biconcor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = biconcor; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D44CEF917D62C0F00E3925F /* queryOnDiskPt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = queryOnDiskPt; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DFA7F4D17D10B0D005EE8B8 /* bhiksha.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bhiksha.cc; sourceTree = "<group>"; };
 		3DFA7F4E17D10B0D005EE8B8 /* bhiksha.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bhiksha.hh; sourceTree = "<group>"; };
@@ -1081,6 +1108,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3D0B8C8417D6360100250193 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3D44CEF417D62C0F00E3925F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1382,6 +1416,7 @@
 				3D44CEF917D62C0F00E3925F /* queryOnDiskPt */,
 				3D0B8C0917D6328300250193 /* lmbrgrid */,
 				3D0B8C5417D634E900250193 /* moses_chart */,
+				3D0B8C8917D6360100250193 /* biconcor */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1402,9 +1437,35 @@
 			path = "../../moses-chart-cmd";
 			sourceTree = SOURCE_ROOT;
 		};
+		3D0B8C6817D635DD00250193 /* biconcor */ = {
+			isa = PBXGroup;
+			children = (
+				3D0B8C6917D635DD00250193 /* Alignment.cpp */,
+				3D0B8C6A17D635DD00250193 /* Alignment.h */,
+				3D0B8C6C17D635DD00250193 /* Mismatch.cpp */,
+				3D0B8C6D17D635DD00250193 /* Mismatch.h */,
+				3D0B8C6E17D635DD00250193 /* PhrasePair.cpp */,
+				3D0B8C6F17D635DD00250193 /* PhrasePair.h */,
+				3D0B8C7017D635DD00250193 /* PhrasePairCollection.cpp */,
+				3D0B8C7117D635DD00250193 /* PhrasePairCollection.h */,
+				3D0B8C7217D635DD00250193 /* SuffixArray.cpp */,
+				3D0B8C7317D635DD00250193 /* SuffixArray.h */,
+				3D0B8C7417D635DE00250193 /* TargetCorpus.cpp */,
+				3D0B8C7517D635DE00250193 /* TargetCorpus.h */,
+				3D0B8C7617D635DE00250193 /* Vocabulary.cpp */,
+				3D0B8C7717D635DE00250193 /* Vocabulary.h */,
+				3D0B8C7817D635DE00250193 /* base64.cpp */,
+				3D0B8C7917D635DE00250193 /* base64.h */,
+				3D0B8C7A17D635DE00250193 /* biconcor.cpp */,
+			);
+			name = biconcor;
+			path = ../../biconcor;
+			sourceTree = SOURCE_ROOT;
+		};
 		3DFA7F4617D107C0005EE8B8 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				3D0B8C6817D635DD00250193 /* biconcor */,
 				3DFA7F4B17D10B0D005EE8B8 /* lm */,
 				08FB7795FE84155DC02AAC07 /* moses */,
 				3D0B8C3317D634BD00250193 /* moses-chart-cmd */,
@@ -2111,6 +2172,22 @@
 			productReference = 3D0B8C5417D634E900250193 /* moses_chart */;
 			productType = "com.apple.product-type.tool";
 		};
+		3D0B8C8117D6360100250193 /* biconcor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3D0B8C8617D6360100250193 /* Build configuration list for PBXNativeTarget "biconcor" */;
+			buildPhases = (
+				3D0B8C8217D6360100250193 /* Sources */,
+				3D0B8C8417D6360100250193 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = biconcor;
+			productName = build_binary;
+			productReference = 3D0B8C8917D6360100250193 /* biconcor */;
+			productType = "com.apple.product-type.tool";
+		};
 		3D44CEF117D62C0F00E3925F /* queryOnDiskPt */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3D44CEF617D62C0F00E3925F /* Build configuration list for PBXNativeTarget "queryOnDiskPt" */;
@@ -2292,6 +2369,7 @@
 				3D0B8BC117D62E3700250193 /* OnDiskPt executables */,
 				3DFA835E17D12E92005EE8B8 /* CreateOnDiskPt */,
 				3D44CEF117D62C0F00E3925F /* queryOnDiskPt */,
+				3D0B8C8117D6360100250193 /* biconcor */,
 			);
 		};
 /* End PBXProject section */
@@ -2315,6 +2393,22 @@
 				3D0B8C5817D6350D00250193 /* Main.cpp in Sources */,
 				3D0B8C5917D6350D00250193 /* TranslationAnalysis.cpp in Sources */,
 				3D0B8C5A17D6350D00250193 /* mbr.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3D0B8C8217D6360100250193 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D0B8C8B17D6362800250193 /* Alignment.cpp in Sources */,
+				3D0B8C8C17D6362800250193 /* Mismatch.cpp in Sources */,
+				3D0B8C8D17D6362800250193 /* PhrasePair.cpp in Sources */,
+				3D0B8C8E17D6362800250193 /* PhrasePairCollection.cpp in Sources */,
+				3D0B8C8F17D6362800250193 /* SuffixArray.cpp in Sources */,
+				3D0B8C9017D6362800250193 /* TargetCorpus.cpp in Sources */,
+				3D0B8C9117D6362800250193 /* Vocabulary.cpp in Sources */,
+				3D0B8C9217D6362800250193 /* base64.cpp in Sources */,
+				3D0B8C9317D6362800250193 /* biconcor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2998,6 +3092,38 @@
 			};
 			name = Release;
 		};
+		3D0B8C8717D6360100250193 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = ../..;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = biconcor;
+			};
+			name = Debug;
+		};
+		3D0B8C8817D6360100250193 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = ../..;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = biconcor;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		3D44CEF717D62C0F00E3925F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3472,6 +3598,15 @@
 			buildConfigurations = (
 				3D0B8C5217D634E900250193 /* Debug */,
 				3D0B8C5317D634E900250193 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3D0B8C8617D6360100250193 /* Build configuration list for PBXNativeTarget "biconcor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3D0B8C8717D6360100250193 /* Debug */,
+				3D0B8C8817D6360100250193 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
