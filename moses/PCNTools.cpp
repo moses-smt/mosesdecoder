@@ -124,13 +124,13 @@ CNAlt getCNAlt(const std::string& in, int &c)
   }
 
   // sparse features
-  std::map<string, float> denseFeatures;
+  std::map<string, float> sparseFeatures;
   for (; ind < toks.size() - 1; ++ind) {
   	  const string &tok = toks[ind];
   	  vector<string> keyValue = Moses::Tokenize(tok, "=");
   	  CHECK(keyValue.size() == 2);
   	  float prob = Moses::Scan<float>(keyValue[1]);
-  	  denseFeatures[ keyValue[0] ] = prob;
+  	  sparseFeatures[ keyValue[0] ] = prob;
   }
 
   //last item is column increment
