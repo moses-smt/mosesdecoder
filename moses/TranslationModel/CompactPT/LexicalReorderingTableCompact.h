@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_LexicalReorderingTableCompact_h
 #define moses_LexicalReorderingTableCompact_h
 
-#include "moses/LexicalReorderingTable.h"
+#include "moses/FF/LexicalReordering/LexicalReorderingTable.h"
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/GenerationDictionary.h"

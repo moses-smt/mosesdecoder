@@ -34,12 +34,18 @@ class MockStatelessFeatureFunction : public StatelessFeatureFunction
 public:
   MockStatelessFeatureFunction(const string& desc, size_t n, const string &line) :
     StatelessFeatureFunction(desc,n, line) {}
-  virtual void Evaluate(const Hypothesis&, ScoreComponentCollection*) const {}
-  virtual void EvaluateChart(const ChartHypothesis&, ScoreComponentCollection*) const {}
-  virtual void Evaluate(const TargetPhrase &targetPhrase
+  void Evaluate(const Hypothesis&, ScoreComponentCollection*) const {}
+  void EvaluateChart(const ChartHypothesis&, ScoreComponentCollection*) const {}
+  void Evaluate(const InputType &input
+                          , const InputPath &inputPath
+                          , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const {
-  }
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
 };
 
 class MockSingleFeature : public MockStatelessFeatureFunction
@@ -60,6 +66,7 @@ public:
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
+
 };
 
 class MockSparseFeature : public MockStatelessFeatureFunction

@@ -29,14 +29,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LM/Base.h"
 #include "FactorCollection.h"
 #include "InputType.h"
-#include "LexicalReordering.h"
 #include "Util.h"
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "DecodeGraph.h"
-#include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "InputPath.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
+#include "moses/FF/LexicalReordering/LexicalReordering.h"
 
 using namespace std;
 

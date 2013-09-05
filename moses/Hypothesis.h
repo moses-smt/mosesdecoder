@@ -48,7 +48,6 @@ class FFState;
 class StatelessFeatureFunction;
 class StatefulFeatureFunction;
 class Manager;
-class LexicalReordering;
 
 typedef std::vector<Hypothesis*> ArcList;
 

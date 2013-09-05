@@ -221,9 +221,9 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
 
-  void ReduceTransOptCache() const;
-  bool m_continuePartialTranslation;
+  void ForcedDecoding();
 
+  bool m_continuePartialTranslation;
   std::string m_binPath;
 
 public:

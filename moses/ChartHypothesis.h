@@ -34,6 +34,7 @@ namespace Moses
 class ChartHypothesis;
 class ChartManager;
 class RuleCubeItem;
+class FFState;
 
 typedef std::vector<ChartHypothesis*> ChartArcList;
 

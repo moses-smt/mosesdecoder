@@ -3,15 +3,16 @@
 
 #include <string>
 #include <vector>
-#include "Factor.h"
-#include "Phrase.h"
-#include "TypeDef.h"
-#include "Util.h"
-#include "WordsRange.h"
+#include "moses/Factor.h"
+#include "moses/Phrase.h"
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
+#include "moses/WordsRange.h"
 
 #include "LexicalReorderingState.h"
 #include "LexicalReorderingTable.h"
 #include "moses/FF/StatefulFeatureFunction.h"
+#include "util/exception.hh"
 
 
 namespace Moses
@@ -48,9 +49,17 @@ public:
   virtual FFState* EvaluateChart(const ChartHypothesis&,
                                  int /* featureID */,
                                  ScoreComponentCollection*) const {
-    CHECK(0); // not valid for chart decoder
-    return NULL;
+    UTIL_THROW(util::Exception, "LexicalReordering is not valid for chart decoder");
   }
+  void Evaluate(const InputType &input
+                            , const InputPath &inputPath
+                            , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
 
 private:
   bool DecodeCondition(std::string s);
