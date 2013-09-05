@@ -114,12 +114,11 @@ CNAlt getCNAlt(const std::string& in, int &c)
 	  const string &tok = toks[ind];
 
 	  if (tok.find('=') == tok.npos) {
-		  // not sparse feature
 		  float val = Moses::Scan<float>(tok);
 		  probs.push_back(val);
 	  }
 	  else {
-		  // sparse feature
+		  // beginning of sparse feature
 		  break;
 	  }
   }
