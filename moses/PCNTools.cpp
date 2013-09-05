@@ -141,7 +141,7 @@ CNAlt getCNAlt(const std::string& in, int &c)
     return CNAlt();
   }
   eatws(in,c);
-  return CNAlt(std::pair<std::string, std::vector<float> >(word,probs), cnNext);
+  return CNAlt(word, probs, sparseFeatures, cnNext);
 }
 
 // parse (('foo', 0.23), ('bar', 0.77))
