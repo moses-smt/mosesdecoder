@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "Util.h"
 #include "SquareMatrix.h"
-#include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
 #include "Manager.h"

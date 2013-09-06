@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include <cstdlib>
+#include "Util.h"
+
+using namespace std;
 
 namespace PCN
 {
@@ -23,6 +26,17 @@ inline void eatws(const std::string& in, int& c)
   while (get(in,c) == ' ') {
     c++;
   }
+}
+
+std::string getString(const std::string& in, int &c)
+{
+  std::string ret;
+  eatws(in,c);
+  while (c < (int)in.size() && get(in,c) != ' ' && get(in,c) != ')' && get(in,c) != ',') {
+	ret += get(in,c++);
+  }
+  eatws(in,c);
+  return ret;
 }
 
 // from 'foo' return foo
@@ -82,29 +96,52 @@ CNAlt getCNAlt(const std::string& in, int &c)
     return CNAlt();
   }
   size_t cnNext = 1;
-  std::vector<float> probs;
-  probs.push_back(getFloat(in,c));
+
+  // read all tokens after the 1st
+  std::vector<string> toks;
+  toks.push_back(getString(in,c));
   while (get(in,c) == ',') {
     c++;
-    float val = getFloat(in,c);
-    probs.push_back(val);
+    string tok = getString(in,c);
+    toks.push_back(tok);
   }
-  //if we read more than one prob, this was a lattice, last item was column increment
-  if (probs.size()>1) {
-    cnNext = static_cast<size_t>(probs.back());
-    probs.pop_back();
-    if (cnNext < 1) {
-      ;  //throw "bad link length"
-      std::cerr << "PCN/PLF parse error: bad link length at last element of cn alt block\n";
-      return CNAlt();
-    }
+
+  std::vector<float> probs;
+
+  // dense scores
+  size_t ind;
+  for (ind = 0; ind < toks.size() - 1; ++ind) {
+	  const string &tok = toks[ind];
+
+	  if (tok.find('=') == tok.npos) {
+		  float val = Moses::Scan<float>(tok);
+		  probs.push_back(val);
+	  }
+	  else {
+		  // beginning of sparse feature
+		  break;
+	  }
   }
+
+  // sparse features
+  std::map<string, float> sparseFeatures;
+  for (; ind < toks.size() - 1; ++ind) {
+  	  const string &tok = toks[ind];
+  	  vector<string> keyValue = Moses::Tokenize(tok, "=");
+  	  CHECK(keyValue.size() == 2);
+  	  float prob = Moses::Scan<float>(keyValue[1]);
+  	  sparseFeatures[ keyValue[0] ] = prob;
+  }
+
+  //last item is column increment
+  cnNext = Moses::Scan<size_t>(toks.back());
+
   if (get(in,c++) != ')') {
     std::cerr << "PCN/PLF parse error: expected ) at end of cn alt block\n";  // throw "expected )";
     return CNAlt();
   }
   eatws(in,c);
-  return CNAlt(std::pair<std::string, std::vector<float> >(word,probs), cnNext);
+  return CNAlt(word, probs, sparseFeatures, cnNext);
 }
 
 // parse (('foo', 0.23), ('bar', 0.77))

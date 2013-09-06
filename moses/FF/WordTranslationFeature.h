@@ -39,6 +39,7 @@ private:
 public:
   WordTranslationFeature(const std::string &line);
 
+  void SetParameter(const std::string& key, const std::string& value);
   bool IsUseable(const FactorMask &mask) const;
 
   void Load();
@@ -52,7 +53,16 @@ public:
 
   void EvaluateChart(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const;
-  void SetParameter(const std::string& key, const std::string& value);
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
 };
 
 }

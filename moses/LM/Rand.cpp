@@ -17,6 +17,13 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+// This file should be compiled only when the LM_RAND flag is enabled. 
+//
+// The following ifdef prevents XCode and other non-bjam build systems 
+// from attempting to compile this file when LM_RAND is disabled.
+//
+#ifdef LM_RAND
+
 #include <limits>
 #include <iostream>
 #include <fstream>
@@ -140,3 +147,4 @@ void LanguageModelRandLM::CleanUpAfterSentenceProcessing(const InputType& source
 
 }
 
+#endif

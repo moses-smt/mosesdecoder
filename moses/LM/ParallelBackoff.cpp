@@ -35,6 +35,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 
+// By default, SRILM defines a function called zopen.
+// 
+// However, on Mac OS X (and possibly other BSDs),
+// <stdio.h> already defines a zopen function.
+//
+// To resolve this conflict, SRILM checks to see if HAVE_ZOPEN is defined.
+// If it is, SRILM will rename its zopen function as my_zopen.
+//
+// So, before importing any SRILM headers, 
+// it is important to define HAVE_ZOPEN if we are on an Apple OS:
+//
+#ifdef __APPLE__
+#define HAVE_ZOPEN
+#endif
+
 #include "FNgramSpecs.h"
 #include "FNgramStats.h"
 #include "FactoredVocab.h"

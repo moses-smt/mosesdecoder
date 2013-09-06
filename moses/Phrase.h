@@ -128,6 +128,8 @@ public:
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
                 , const std::vector<FactorType> &inputFactor) const;
 
+  bool Contains(const Phrase &sought) const;
+
   //! create an empty word at the end of the phrase
   Word &AddWord();
   //! create copy of input word at the end of the phrase
@@ -147,6 +149,8 @@ public:
     CHECK(pos < m_words.size());
     m_words.erase(m_words.begin() + pos);
   }
+
+  void InitStartEndWord();
 
   //! create new phrase class that is a substring of this phrase
   Phrase GetSubString(const WordsRange &wordsRange) const;

@@ -4,12 +4,12 @@
 #include <vector>
 #include <string>
 
-#include "Hypothesis.h"
+#include "moses/Hypothesis.h"
 #include "LexicalReordering.h"
-#include "WordsRange.h"
-#include "WordsBitmap.h"
-#include "ReorderingStack.h"
-#include "TranslationOption.h"
+#include "moses/WordsRange.h"
+#include "moses/WordsBitmap.h"
+#include "moses/ReorderingStack.h"
+#include "moses/TranslationOption.h"
 #include "moses/FF/FFState.h"
 
 

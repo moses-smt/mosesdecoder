@@ -54,17 +54,16 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
     for (size_t j=0; j<col.size(); ++j) {
       const PCN::CNAlt& alt = col[j];
 
-
       //check for correct number of link parameters
-      if (alt.first.second.size() != numInputScores) {
-        TRACE_ERR("ERROR: need " << numInputScores << " link parameters, found " << alt.first.second.size() << " while reading column " << i << " from " << debug_line << "\n");
+      if (alt.m_denseFeatures.size() != numInputScores) {
+        TRACE_ERR("ERROR: need " << numInputScores << " link parameters, found " << alt.m_denseFeatures.size() << " while reading column " << i << " from " << debug_line << "\n");
         return false;
       }
 
       //check each element for bounds
       std::vector<float>::const_iterator probsIterator;
       data[i][j].second = std::vector<float>(0);
-      for(probsIterator = alt.first.second.begin(); probsIterator < alt.first.second.end(); probsIterator++) {
+      for(probsIterator = alt.m_denseFeatures.begin(); probsIterator < alt.m_denseFeatures.end(); probsIterator++) {
         IFVERBOSE(1) {
           if (*probsIterator < 0.0f) {
             TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n");
@@ -80,11 +79,11 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
       //store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
       if (addRealWordCount) {
         //only add count if not epsilon
-        float value = (alt.first.first=="" || alt.first.first==EPSILON) ? 0.0f : -1.0f;
+        float value = (alt.m_word=="" || alt.m_word==EPSILON) ? 0.0f : -1.0f;
         data[i][j].second.push_back(value);
       }
-      String2Word(alt.first.first,data[i][j].first,factorOrder);
-      next_nodes[i][j] = alt.second;
+      String2Word(alt.m_word, data[i][j]. first, factorOrder);
+      next_nodes[i][j] = alt.m_next;
 
       if(next_nodes[i][j] > maxSizePhrase) {
         TRACE_ERR("ERROR: Jump length " << next_nodes[i][j] << " in word lattice exceeds maximum phrase length " << maxSizePhrase << ".\n");

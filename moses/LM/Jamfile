@@ -75,7 +75,11 @@ obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : 
 
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
-alias LM : Base.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
+alias LM : Backward.cpp BackwardLMState.cpp Base.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
   ../../lm//kenlm ..//headers $(dependencies) ;
 
 alias macros : : : : <define>$(lmmacros) ;
+
+#Unit test for Backward LM
+import testing ;
+run BackwardTest.cpp ..//moses LM ../../lm//kenlm /top//boost_unit_test_framework : : backward.arpa ;

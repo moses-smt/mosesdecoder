@@ -60,62 +60,62 @@ struct KenLMState : public FFState {
   }
 };
 
-/*
- * An implementation of single factor LM using Ken's code.
- */
-template <class Model> class LanguageModelKen : public LanguageModel
-{
-public:
-  LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
-
-  const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
-    KenLMState *ret = new KenLMState();
-    ret->state = m_ngram->BeginSentenceState();
-    return ret;
-  }
-
-  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
-
-  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
-
-  FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
-
-  void IncrementalCallback(Incremental::Manager &manager) const {
-    manager.LMCallback(*m_ngram, m_lmIdLookup);
-  }
-
-  bool IsUseable(const FactorMask &mask) const;
-private:
-  LanguageModelKen(const LanguageModelKen<Model> &copy_from);
-
-  lm::WordIndex TranslateID(const Word &word) const {
-    std::size_t factor = word.GetFactor(m_factorType)->GetId();
-    return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-  }
-
-  // Convert last words of hypothesis into vocab ids, returning an end pointer.
-  lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
-    lm::WordIndex *index = indices;
-    lm::WordIndex *end = indices + m_ngram->Order() - 1;
-    int position = hypo.GetCurrTargetWordsRange().GetEndPos();
-    for (; ; ++index, --position) {
-      if (index == end) return index;
-      if (position == -1) {
-        *index = m_ngram->GetVocabulary().BeginSentence();
-        return index + 1;
-      }
-      *index = TranslateID(hypo.GetWord(position));
-    }
-  }
-
-  boost::shared_ptr<Model> m_ngram;
-
-  std::vector<lm::WordIndex> m_lmIdLookup;
-
-  FactorType m_factorType;
-
-  const Factor *m_beginSentenceFactor;
-};
+///*
+// * An implementation of single factor LM using Ken's code.
+// */
+//template <class Model> class LanguageModelKen : public LanguageModel
+//{
+//public:
+//  LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
+//
+//  const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
+//    KenLMState *ret = new KenLMState();
+//    ret->state = m_ngram->BeginSentenceState();
+//    return ret;
+//  }
+//
+//  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+//
+//  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+//
+//  FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+//
+//  void IncrementalCallback(Incremental::Manager &manager) const {
+//    manager.LMCallback(*m_ngram, m_lmIdLookup);
+//  }
+//
+//  bool IsUseable(const FactorMask &mask) const;
+//private:
+//  LanguageModelKen(const LanguageModelKen<Model> &copy_from);
+//
+//  lm::WordIndex TranslateID(const Word &word) const {
+//    std::size_t factor = word.GetFactor(m_factorType)->GetId();
+//    return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+//  }
+//
+//  // Convert last words of hypothesis into vocab ids, returning an end pointer.
+//  lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
+//    lm::WordIndex *index = indices;
+//    lm::WordIndex *end = indices + m_ngram->Order() - 1;
+//    int position = hypo.GetCurrTargetWordsRange().GetEndPos();
+//    for (; ; ++index, --position) {
+//      if (index == end) return index;
+//      if (position == -1) {
+//        *index = m_ngram->GetVocabulary().BeginSentence();
+//        return index + 1;
+//      }
+//      *index = TranslateID(hypo.GetWord(position));
+//    }
+//  }
+//
+//  boost::shared_ptr<Model> m_ngram;
+//
+//  std::vector<lm::WordIndex> m_lmIdLookup;
+//
+//  FactorType m_factorType;
+//
+//  const Factor *m_beginSentenceFactor;
+//};
 
 class MappingBuilder : public lm::EnumerateVocab
 {
@@ -137,6 +137,8 @@ private:
   std::vector<lm::WordIndex> &m_mapping;
 };
 
+} // namespace
+  
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
   :LanguageModel("KENLM", line)
   ,m_factorType(factorType)
@@ -166,6 +168,13 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageM
    m_factorType(copy_from.m_factorType),
    m_beginSentenceFactor(copy_from.m_beginSentenceFactor)
 {
+}
+
+template <class Model> const FFState * LanguageModelKen<Model>::EmptyHypothesisState(const InputType &/*input*/) const
+{
+  KenLMState *ret = new KenLMState();
+  ret->state = m_ngram->BeginSentenceState();
+  return ret;
 }
 
 template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
@@ -342,6 +351,10 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
   return newState;
 }
 
+template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Incremental::Manager &manager) const {
+  manager.LMCallback(*m_ngram, m_lmIdLookup);
+}
+  
 template <class Model>
 bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 {
@@ -349,7 +362,6 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-} // namespace
 
 LanguageModel *ConstructKenLM(const std::string &line)
 {

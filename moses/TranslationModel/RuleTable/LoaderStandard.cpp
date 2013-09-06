@@ -240,6 +240,11 @@ bool RuleTableLoaderStandard::Load(FormatType format
       targetPhrase->SetSparseScore(&ruleTable, sparseString);
     }
 
+    if (++pipes) {
+      StringPiece propertiesString(*pipes);
+      targetPhrase->SetProperties(propertiesString);
+    }
+
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
     targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
 

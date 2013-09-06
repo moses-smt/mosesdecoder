@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "LexicalReordering.h"
 #include "SentenceStats.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
@@ -452,37 +451,7 @@ bool StaticData::LoadData(Parameter *parameter)
                          Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
 
   // Read in constraint decoding file, if provided
-  if(m_parameter->GetParam("constraint").size()) {
-    if (m_parameter->GetParam("search-algorithm").size() > 0
-        && Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) != 0) {
-      cerr << "Can use -constraint only with stack-based search (-search-algorithm 0)" << endl;
-      exit(1);
-    }
-    m_constraintFileName = m_parameter->GetParam("constraint")[0];
-
-    InputFileStream constraintFile(m_constraintFileName);
-
-    std::string line;
-
-    long sentenceID = GetStartTranslationId() - 1;
-    while (getline(constraintFile, line)) {
-      vector<string> vecStr = Tokenize(line, "\t");
-
-      if (vecStr.size() == 1) {
-        sentenceID++;
-        Phrase phrase(0);
-        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter(), NULL);
-        m_constraints.insert(make_pair(sentenceID,phrase));
-      } else if (vecStr.size() == 2) {
-        sentenceID = Scan<long>(vecStr[0]);
-        Phrase phrase(0);
-        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter(), NULL);
-        m_constraints.insert(make_pair(sentenceID,phrase));
-      } else {
-        CHECK(false);
-      }
-    }
-  }
+  ForcedDecoding();
 
   // use of xml in input
   if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
@@ -1078,6 +1047,40 @@ void StaticData::OverrideFeatures()
 
     }
   }
+
+}
+
+void StaticData::ForcedDecoding()
+{
+	  if(m_parameter->GetParam("constraint").size()) {
+		bool addBeginEndWord = (m_searchAlgorithm == ChartDecoding) || (m_searchAlgorithm == ChartIncremental);
+
+	    m_constraintFileName = m_parameter->GetParam("constraint")[0];
+
+	    InputFileStream constraintFile(m_constraintFileName);
+	    std::string line;
+	    long sentenceID = GetStartTranslationId() - 1;
+	    while (getline(constraintFile, line)) {
+	      vector<string> vecStr = Tokenize(line, "\t");
+
+          Phrase phrase(0);
+	      if (vecStr.size() == 1) {
+	        sentenceID++;
+	        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter(), NULL);
+	      } else if (vecStr.size() == 2) {
+	        sentenceID = Scan<long>(vecStr[0]);
+	        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter(), NULL);
+	      } else {
+	        CHECK(false);
+	      }
+
+		  if (addBeginEndWord) {
+			phrase.InitStartEndWord();
+		  }
+		  m_constraints.insert(make_pair(sentenceID,phrase));
+
+	    }
+	  }
 
 }
 

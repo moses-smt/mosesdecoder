@@ -52,6 +52,12 @@ ChartManager::ChartManager(InputType const& source)
   ,m_parser(source, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit(), source)
 {
+  const StaticData &staticData = StaticData::Instance();
+  long sentenceID = source.GetTranslationId();
+  m_constraint = staticData.GetConstrainingPhrase(sentenceID);
+  if (m_constraint) {
+	VERBOSE(1, "Search constraint to output: " << *m_constraint<<endl);
+  }
 }
 
 ChartManager::~ChartManager()
@@ -126,6 +132,8 @@ void ChartManager::ProcessSentence()
 void ChartManager::AddXmlChartOptions()
 {
   const StaticData &staticData = StaticData::Instance();
+  const Phrase *constraint = GetConstraint();
+
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {
     cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl;
@@ -141,6 +149,15 @@ void ChartManager::AddXmlChartOptions()
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
+    if (constraint) {
+    	Phrase hypoPhrase = hypo->GetOutputPhrase();
+    	if (!constraint->Contains(hypoPhrase)) {
+    		delete item;
+    		delete hypo;
+    		continue;
+    	}
+    }
+
     hypo->Evaluate();
 
     const Word &targetLHS = hypo->GetTargetLHS();
