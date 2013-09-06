@@ -1,13 +1,14 @@
 #ifndef __sampling_h
 #define __sampling_h
-
+#include <boost/dynamic_bitset.hpp>
+#include <vector>
 // Utility functions for proper sub-sampling.
 // (c) 2007-2012 Ulrich Germann
 
 
 namespace Moses
 {
-
+  using namespace std;
 inline
 size_t
 randInt(size_t N)

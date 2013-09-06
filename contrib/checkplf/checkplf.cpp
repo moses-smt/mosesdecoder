@@ -30,8 +30,8 @@ int main()
       num_edges += edges.size();
       for (unsigned j = 0; j < edges.size(); ++j) {
         const PCN::CNAlt& edge = edges[j];
-        size_t head = edge.second + node;
-        const string& label = edge.first.first;
+        size_t head = edge.m_next + node;
+        const string& label = edge.m_word;
         if (head <= node) {
           cerr << "Line " << lc << ": cycle detected at column position " << (node+1) << ", edge label = '" << label << "'" << endl;
           return 1;
