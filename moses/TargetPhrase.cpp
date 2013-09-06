@@ -201,6 +201,52 @@ void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>
   m_fullScore += copy.m_fullScore;
 }
 
+void TargetPhrase::SetProperties(const StringPiece &str)
+{
+	if (str.size() == 0) {
+		return;
+	}
+
+  vector<string> toks;
+  TokenizeMultiCharSeparator(toks, str.as_string(), "{{");
+  for (size_t i = 0; i < toks.size(); ++i) {
+	  string &tok = toks[i];
+	  if (tok.empty()) {
+		  continue;
+	  }
+	  size_t endPos = tok.rfind("}");
+
+	  tok = tok.substr(0, endPos - 1);
+
+	  vector<string> keyValue = TokenizeFirstOnly(tok, " ");
+	  CHECK(keyValue.size() == 2);
+	  SetProperty(keyValue[0], keyValue[1]);
+  }
+}
+
+void TargetPhrase::GetProperty(const std::string &key, std::string &value, bool &found) const
+{
+  std::map<std::string, std::string>::const_iterator iter;
+  iter = m_properties.find(key);
+  if (iter == m_properties.end()) {
+    found = false;
+  } else {
+    found = true;
+    value = iter->second;
+  }
+}
+
+void swap(TargetPhrase &first, TargetPhrase &second)
+{
+  first.SwapWords(second);
+  std::swap(first.m_fullScore, second.m_fullScore);
+  std::swap(first.m_futureScore, second.m_futureScore);
+  swap(first.m_scoreBreakdown, second.m_scoreBreakdown);
+  std::swap(first.m_alignTerm, second.m_alignTerm);
+  std::swap(first.m_alignNonTerm, second.m_alignNonTerm);
+  std::swap(first.m_lhsTarget, second.m_lhsTarget);
+}
+
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)

@@ -13,12 +13,12 @@
 #endif
 
 //moses dependencies:
-#include "TypeDef.h"
-#include "Phrase.h"
-#include "InputType.h"
-#include "ConfusionNet.h"
-#include "Sentence.h"
-#include "PrefixTreeMap.h"
+#include "moses/TypeDef.h"
+#include "moses/Phrase.h"
+#include "moses/InputType.h"
+#include "moses/ConfusionNet.h"
+#include "moses/Sentence.h"
+#include "moses/PrefixTreeMap.h"
 
 namespace Moses
 {

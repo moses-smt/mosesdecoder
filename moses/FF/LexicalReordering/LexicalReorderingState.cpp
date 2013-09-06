@@ -4,10 +4,10 @@
 #include "util/check.hh"
 
 #include "moses/FF/FFState.h"
-#include "Hypothesis.h"
-#include "WordsRange.h"
-#include "ReorderingStack.h"
-#include "TranslationOption.h"
+#include "moses/Hypothesis.h"
+#include "moses/WordsRange.h"
+#include "moses/ReorderingStack.h"
+#include "moses/TranslationOption.h"
 
 #include "LexicalReordering.h"
 #include "LexicalReorderingState.h"

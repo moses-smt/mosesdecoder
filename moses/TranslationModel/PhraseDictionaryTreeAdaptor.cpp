@@ -34,12 +34,6 @@ PhraseDictionaryTreeAdaptor(const std::string &line)
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
-  std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::const_iterator iter;
-  for (iter = m_cache.begin(); iter != m_cache.end(); ++iter) {
-	const std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
-    const TargetPhraseCollection *coll = value.first;
-    delete coll;
-  }
 }
 
 void PhraseDictionaryTreeAdaptor::Load()
@@ -81,7 +75,7 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
 }
 
 TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCache(Phrase const &src) const
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
   const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
   return ret;
@@ -114,7 +108,7 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 
 // legacy
 const TargetPhraseCollectionWithSourcePhrase*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const &range) const
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
 {
   if(GetImplementation().m_rangeCache.empty()) {
     const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));

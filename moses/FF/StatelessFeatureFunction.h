@@ -23,16 +23,14 @@ public:
   /**
     * This should be implemented for features that apply to phrase-based models.
     **/
-  virtual void Evaluate(const PhraseBasedFeatureContext& context,
-                        ScoreComponentCollection* accumulator) const {
-  }
+  virtual void Evaluate(const Hypothesis& hypo,
+                        ScoreComponentCollection* accumulator) const = 0;
 
   /**
     * Same for chart-based features.
     **/
-  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
-                             ScoreComponentCollection* accumulator) const {
-  }
+  virtual void EvaluateChart(const ChartHypothesis &hypo,
+                             ScoreComponentCollection* accumulator) const = 0;
 
   virtual bool IsStateless() const {
     return true;

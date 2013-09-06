@@ -191,6 +191,17 @@ public:
 
   virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
                                  ScoreComponentCollection* accumulator) const;
+
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
   void SetParameter(const std::string& key, const std::string& value);
 
 private:

@@ -31,7 +31,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
@@ -119,7 +119,8 @@ $_HELP = 1
 		       'xml' => \$_XML,
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
-		       'osm-model=s' => \$_OSM,	
+		       'osm-model=s' => \$_OSM,
+			'osm-setting=s' => \$_OSM_FACTORS,		
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
@@ -1997,9 +1998,31 @@ sub create_ini {
 
   if($_OSM)
   {
+    if (defined($_OSM_FACTORS))
+    {
+	my $count = 0;
+	my @factor_values = split(',', $_OSM_FACTORS);
+    	foreach my $factor_val (@factor_values) {
 
+		my ($factor_f,$factor_e) = split(/\-/,$factor_val);
+
+		if($count == 0){
+		$feature_spec .= "OpSequenceModel num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " sFactor=". $factor_f . " tFactor=". $factor_e . " numFeatures=5 \n";
+	       $weight_spec  .= "OpSequenceModel$count= 0.08 -0.02 0.02 -0.001 0.03\n";		
+		}
+		else{
+			$feature_spec .= "OpSequenceModel num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " sFactor=". $factor_f . " tFactor=". $factor_e . " numFeatures=1 \n";
+	       	$weight_spec  .= "OpSequenceModel$count= 0.08 \n";	
+
+		}
+		$count++;
+	}
+    }
+    else
+    {
       $feature_spec .= "OpSequenceModel num-features=5 path=". $_OSM . " \n";
       $weight_spec  .= "OpSequenceModel0= 0.08 -0.02 0.02 -0.001 0.03\n";
+    }
   }	
 
   # distance-based reordering

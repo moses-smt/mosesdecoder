@@ -162,7 +162,7 @@ void ChartHypothesis::Evaluate()
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) {
-      sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
+      sfs[i]->EvaluateChart(*this,&m_scoreBreakdown);
     }
   }
 

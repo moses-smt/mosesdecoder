@@ -287,16 +287,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ConfusionNet.h</locationURI>
 		</link>
 		<link>
-			<name>DecodeFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DecodeFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>DecodeFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DecodeFeature.h</locationURI>
-		</link>
-		<link>
 			<name>DecodeGraph.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/DecodeGraph.cpp</locationURI>
@@ -525,36 +515,6 @@
 			<name>LVoc.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LVoc.h</locationURI>
-		</link>
-		<link>
-			<name>LexicalReordering.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReordering.cpp</locationURI>
-		</link>
-		<link>
-			<name>LexicalReordering.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReordering.h</locationURI>
-		</link>
-		<link>
-			<name>LexicalReorderingState.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingState.cpp</locationURI>
-		</link>
-		<link>
-			<name>LexicalReorderingState.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingState.h</locationURI>
-		</link>
-		<link>
-			<name>LexicalReorderingTable.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingTable.cpp</locationURI>
-		</link>
-		<link>
-			<name>LexicalReorderingTable.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LexicalReorderingTable.h</locationURI>
 		</link>
 		<link>
 			<name>Manager.cpp</name>
@@ -1077,16 +1037,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/BleuScoreFeature.h</locationURI>
 		</link>
 		<link>
-			<name>FF/ChartBasedFeatureContext.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/ChartBasedFeatureContext.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ChartBasedFeatureContext.h</locationURI>
-		</link>
-		<link>
 			<name>FF/ControlRecombination.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.cpp</locationURI>
@@ -1095,6 +1045,16 @@
 			<name>FF/ControlRecombination.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
+		</link>
+		<link>
+			<name>FF/DecodeFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DecodeFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/DecodeFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DecodeFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/DistortionScoreProducer.cpp</name>
@@ -1167,19 +1127,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
-			<name>FF/OSM-Feature</name>
+			<name>FF/LexicalReordering</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>FF/PhraseBasedFeatureContext.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/PhraseBasedFeatureContext.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBasedFeatureContext.h</locationURI>
+			<name>FF/OSM-Feature</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>FF/PhraseBoundaryFeature.cpp</name>
@@ -1225,6 +1180,26 @@
 			<name>FF/PhrasePenalty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatefulFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatefulFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatelessFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatelessFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
@@ -1650,6 +1625,36 @@
 			<name>bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReordering.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReordering.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReordering.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReordering.h</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReorderingState.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingState.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReorderingState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingState.h</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReorderingTable.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingTable.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/LexicalReorderingTable.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingTable.h</locationURI>
 		</link>
 		<link>
 			<name>FF/OSM-Feature/OpSequenceModel.cpp</name>

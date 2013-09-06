@@ -59,7 +59,7 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
   return currNode.GetTargetPhraseCollection();
 }
 
-const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& sourceOrig) const
+const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
 {
   Phrase source(sourceOrig);
   source.OnlyTheseFactors(m_inputFactors);

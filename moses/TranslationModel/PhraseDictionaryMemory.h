@@ -55,7 +55,7 @@ public:
     const ChartCellCollectionBase &);
 
   // only used by multi-model phrase table, and other meta-features
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
+  const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
   void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
   TO_STRING();

@@ -78,12 +78,10 @@ external-lib z ;
 
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
   if [ option.get "full-tcmalloc" : : "yes" ] {
-    tcmalloc = "tcmalloc" ;
     external-lib unwind ;
-    external-lib tcmalloc : : unwind ;
-    requirements += <library>tcmalloc <library>unwind <cflags>-fno-omit-frame-pointer <cxxflags>-fno-omit-frame-pointer ;
+    external-lib tcmalloc_and_profiler : : unwind ;
+    requirements += <library>tcmalloc_and_profiler <library>unwind <cflags>-fno-omit-frame-pointer <cxxflags>-fno-omit-frame-pointer ;
   } else {
-    tcmalloc = "tcmalloc_minimal" ;
     external-lib tcmalloc_minimal ;
     requirements += <threading>multi:<library>$(tcmalloc) ;
   }

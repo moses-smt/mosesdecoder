@@ -2167,7 +2167,23 @@ sub define_training_create_config {
 
     my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
 
-    $cmd .= "-osm-model $osm/operationLM.bin " if $osm;
+    if($osm){
+      
+      my $osm_settings = &get("TRAINING:operation-sequence-model-settings"); 
+     
+
+	if($osm_settings =~ /factor/){
+	
+		$cmd .= "-osm-model $osm/ ";
+		my $find = "--factor";
+		my $replace = "-osm-setting";
+		$osm_settings =~ s/$find/$replace/g;
+      		$cmd .= "$osm_settings ";       
+       }
+	else{
+	 $cmd .= "-osm-model $osm/operationLM.bin ";
+	}
+    }
 	
     # sparse lexical features provide additional content for config file
     $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;

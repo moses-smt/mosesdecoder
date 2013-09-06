@@ -32,14 +32,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
-#include <boost/thread/shared_mutex.hpp>
+#else
+#include <boost/scoped_ptr.hpp>
 #endif
 
 #include "moses/Phrase.h"
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
-#include "moses/DecodeFeature.h"
 #include "moses/InputPath.h"
+#include "moses/FF/DecodeFeature.h"
 
 namespace Moses
 {
@@ -72,7 +73,7 @@ public:
   // LEGACY - The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
   virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
@@ -101,7 +102,7 @@ public:
 
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
-  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLegacy(InputType const& src,WordsRange const& range) const;
+  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
 
 protected:
   size_t m_tableLimit;
@@ -116,14 +117,21 @@ protected:
 
   // cache
   size_t m_maxCacheSize; // 0 = no caching
-  mutable std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > m_cache;
+
+  typedef std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > CacheColl;
 #ifdef WITH_THREADS
   //reader-writer lock
-  mutable boost::shared_mutex m_accessLock;
+  mutable boost::thread_specific_ptr<CacheColl> m_cache;
+#else
+  mutable boost::scoped_ptr<CacheColl> m_cache;
 #endif
 
-  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const Phrase& src) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const;
   void ReduceCache() const;
+
+protected:
+  CacheColl &GetCache() const;
+
 };
 
 }

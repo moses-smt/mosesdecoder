@@ -58,7 +58,6 @@ protected:
 
   NonTerminalSet m_defaultLabelSet;
 
-  void InitStartEndWord();
   void ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders);
 
 

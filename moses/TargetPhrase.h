@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_TargetPhrase_h
 #define moses_TargetPhrase_h
 
+#include <algorithm>
 #include <vector>
 #include "TypeDef.h"
 #include "Phrase.h"
@@ -43,14 +44,17 @@ class InputPath;
  */
 class TargetPhrase: public Phrase
 {
+private:
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
-protected:
+  friend void swap(TargetPhrase &first, TargetPhrase &second);
+
   float m_fullScore, m_futureScore;
   ScoreComponentCollection m_scoreBreakdown;
 
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
   const Word *m_lhsTarget;
 
+  std::map<std::string, std::string> m_properties;
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);
@@ -119,10 +123,18 @@ public:
     return *m_alignNonTerm;
   }
 
+  void SetProperties(const StringPiece &str);
+  void SetProperty(const std::string &key, const std::string &value) {
+    m_properties[key] = value;
+  }
+  void GetProperty(const std::string &key, std::string &value, bool &found) const;
+
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 
   TO_STRING();
 };
+
+void swap(TargetPhrase &first, TargetPhrase &second);
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 

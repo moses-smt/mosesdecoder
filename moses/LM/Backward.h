@@ -33,7 +33,7 @@ namespace Moses
 {
 
 //! This will also load. Returns a templated backward LM.
-LanguageModel *ConstructBackwardLM(const std::string &file, FactorType factorType, bool lazy);
+LanguageModel *ConstructBackwardLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
 class FFState;
 // template<typename M> class BackwardLanguageModelTest;
@@ -45,7 +45,7 @@ class BackwardLanguageModelTest;
 template <class Model> class BackwardLanguageModel : public LanguageModelKen<Model>
 {
 public:
-  BackwardLanguageModel(const std::string &file, FactorType factorType, bool lazy);
+  BackwardLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
   virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 

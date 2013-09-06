@@ -221,9 +221,9 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
 
-  void ReduceTransOptCache() const;
-  bool m_continuePartialTranslation;
+  void ForcedDecoding();
 
+  bool m_continuePartialTranslation;
   std::string m_binPath;
 
 public:
@@ -424,9 +424,6 @@ public:
   }
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
-  }
-  const WordPenaltyProducer *GetWordPenaltyProducer() const {
-    return m_wpProducer;
   }
   WordPenaltyProducer *GetWordPenaltyProducer() { // for mira
     return m_wpProducer;

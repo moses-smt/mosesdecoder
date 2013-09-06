@@ -104,7 +104,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 
   // check whether we should be using the old code to supportbinary phrase-table.
   // eventually, we'll stop support the binary phrase-table and delete this legacy code
-  CheckLegacy();
+  CheckLEGACY();
 }
 
 InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t startPos, size_t endPos)
@@ -164,7 +164,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRange(
   , size_t graphInd)
 {
   if (m_useLegacy) {
-    CreateTranslationOptionsForRangeLegacy(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
+    CreateTranslationOptionsForRangeLEGACY(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
   } else {
     CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
   }
@@ -191,7 +191,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeNe
   }
 }
 
-void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLegacy(
+void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLEGACY(
   const DecodeGraph &decodeGraph
   , size_t startPos
   , size_t endPos
@@ -209,7 +209,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
     list <const DecodeStep* >::const_iterator iterStep = decodeGraph.begin();
     const DecodeStep &decodeStep = **iterStep;
 
-    static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslationLegacy
+    static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslationLEGACY
     (m_source, *oldPtoc
      , startPos, endPos, adhereTableLimit, inputPathList );
 
@@ -231,7 +231,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
         TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 
         if (transStep) {
-          transStep->ProcessLegacy(inputPartialTranslOpt
+          transStep->ProcessLEGACY(inputPartialTranslOpt
                                    , *decodeStep
                                    , *newPtoc
                                    , this
@@ -275,7 +275,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLe
   }
 }
 
-void TranslationOptionCollectionConfusionNet::CheckLegacy()
+void TranslationOptionCollectionConfusionNet::CheckLEGACY()
 {
   const std::vector<PhraseDictionary*> &pts = StaticData::Instance().GetPhraseDictionaries();
   for (size_t i = 0; i < pts.size(); ++i) {
