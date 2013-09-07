@@ -706,8 +706,6 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   ostringstream outextractstr;
   ostringstream outextractstrInv;
   ostringstream outextractstrOrientation;
-  ostringstream outextractstrContext;
-  ostringstream outextractstrContextInv;
 
   if (m_options.isOnlyOutputSpanInfo()) {
     cout << startF << " " << endF << " " << startE << " " << endE << endl;
@@ -721,25 +719,19 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   for(int fi=startF; fi<=endF; fi++) {
     if (m_options.isTranslationFlag()) outextractstr << sentence.source[fi] << " ";
     if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.source[fi] << " ";
-    if (m_options.isFlexScoreFlag()) outextractstrContext << sentence.source[fi] << " ";
   }
   if (m_options.isTranslationFlag()) outextractstr << "||| ";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
-  if (m_options.isFlexScoreFlag()) outextractstrContext << "||| ";
 
   // target
   for(int ei=startE; ei<=endE; ei++) {
     if (m_options.isTranslationFlag()) outextractstr << sentence.target[ei] << " ";
     if (m_options.isTranslationFlag()) outextractstrInv << sentence.target[ei] << " ";
     if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.target[ei] << " ";
-    if (m_options.isFlexScoreFlag()) outextractstrContext << sentence.target[ei] << " ";
-    if (m_options.isFlexScoreFlag()) outextractstrContextInv << sentence.target[ei] << " ";
   }
   if (m_options.isTranslationFlag()) outextractstr << "|||";
   if (m_options.isTranslationFlag()) outextractstrInv << "||| ";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
-  if (m_options.isFlexScoreFlag()) outextractstrContext << "||| ";
-  if (m_options.isFlexScoreFlag()) outextractstrContextInv << "||| ";
 
   // source (for inverse)
 
@@ -747,11 +739,6 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
     for(int fi=startF; fi<=endF; fi++)
       outextractstrInv << sentence.source[fi] << " ";
     outextractstrInv << "|||";
-  }
- if (m_options.isFlexScoreFlag()) {
-    for(int fi=startF; fi<=endF; fi++)
-      outextractstrContextInv << sentence.source[fi] << " ";
-    outextractstrContextInv << "|||";
   }
 
   // alignment
@@ -787,6 +774,27 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   // generate two lines for every extracted phrase:
   // once with left, once with right context
   if (m_options.isFlexScoreFlag()) {
+
+    ostringstream outextractstrContext;
+    ostringstream outextractstrContextInv;
+
+    for(int fi=startF; fi<=endF; fi++) {
+      outextractstrContext << sentence.source[fi] << " ";
+    }
+    outextractstrContext << "||| ";
+
+    // target
+    for(int ei=startE; ei<=endE; ei++) {
+      outextractstrContext << sentence.target[ei] << " ";
+      outextractstrContextInv << sentence.target[ei] << " ";
+    }
+    outextractstrContext << "||| ";
+    outextractstrContextInv << "||| ";
+
+    for(int fi=startF; fi<=endF; fi++)
+      outextractstrContextInv << sentence.source[fi] << " ";
+
+    outextractstrContextInv << "|||";
 
     string strContext = outextractstrContext.str();
     string strContextInv = outextractstrContextInv.str();
@@ -862,8 +870,10 @@ void ExtractTask::writePhrasesToFile()
   m_extractFile << outextractFile.str();
   m_extractFileInv  << outextractFileInv.str();
   m_extractFileOrientation << outextractFileOrientation.str();
-  m_extractFileContext  << outextractFileContext.str();
-  m_extractFileContextInv << outextractFileContextInv.str();
+  if (m_options.isFlexScoreFlag()) {
+    m_extractFileContext  << outextractFileContext.str();
+    m_extractFileContextInv << outextractFileContextInv.str();
+  }
 }
 
 // if proper conditioning, we need the number of times a source phrase occured
