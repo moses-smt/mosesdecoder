@@ -152,12 +152,17 @@ foreach (@children) {
 my $catCmd = "gunzip -c ";
 my $catInvCmd = $catCmd;
 my $catOCmd = $catCmd;
+my $catContextCmd = $catCmd;
+my $catContextInvCmd = $catCmd;
+
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
 		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
 		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
 		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
+		$catContextCmd .= "$TMPDIR/extract.$numStr.context ";
+		$catContextInvCmd .= "$TMPDIR/extract.$numStr.context.inv ";
 }
 if (defined($baselineExtract)) {
 		my $sorted = -e "$baselineExtract.sorted.gz" ? ".sorted" : "";
@@ -169,6 +174,8 @@ if (defined($baselineExtract)) {
 $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.sorted.gz 2>> /dev/stderr \n";
 $catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
 $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
+$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
+$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
 
 
 @children = ();
@@ -184,6 +191,14 @@ if ($makeTTable)
 else {
   print STDERR "skipping extract, doing only extract.o\n";
 }
+
+if ($otherExtractArgs =~ /--FlexibilityScore/) {
+  $pid = RunFork($catContextCmd);
+  push(@children, $pid);
+
+  $pid = RunFork($catContextInvCmd);
+  push(@children, $pid);
+  }
 
 my $numStr = NumStr(0);
 if (-e "$TMPDIR/extract.$numStr.o.gz")

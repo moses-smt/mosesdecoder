@@ -54,6 +54,7 @@ public:
   bool unpairedExtractFormat;
   bool conditionOnTargetLhs;
   bool boundaryRules;
+  bool flexScoreFlag;
 
   RuleExtractionOptions()
     : maxSpan(10)
@@ -86,8 +87,8 @@ public:
     , gzOutput(false)
     , unpairedExtractFormat(false)
     , conditionOnTargetLhs(false)
-    , boundaryRules(false) {
-  }
+    , boundaryRules(false)
+    , flexScoreFlag(false) {}
 };
 
 }

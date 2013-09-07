@@ -41,6 +41,12 @@ public:
   std::string alignmentInv;
   std::string orientation;
   std::string orientationForward;
+  std::string sourceContextLeft;
+  std::string sourceContextRight;
+  std::string targetContextLeft;
+  std::string targetContextRight;
+  std::string sourceHoleString;
+  std::string targetHoleString;
   int startT;
   int endT;
   int startS;
@@ -57,6 +63,12 @@ public:
     , alignmentInv()
     , orientation()
     , orientationForward()
+    , sourceContextLeft()
+    , sourceContextRight()
+    , targetContextLeft()
+    , targetContextRight()
+    , sourceHoleString()
+    , targetHoleString()
     , startT(sT)
     , endT(eT)
     , startS(sS)
