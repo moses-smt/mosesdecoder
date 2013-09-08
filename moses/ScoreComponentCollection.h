@@ -41,6 +41,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+/**
+ * Smaller version for just 1 FF.
+ */
+struct ScorePair
+{
+	std::vector<float> denseScores;
+	std::map<std::string, float> sparseScores;
+
+	void PlusEquals(const std::vector<float> &other)
+	{
+		CHECK(denseScores.size() == other.size());
+		std::transform(denseScores.begin(),
+					denseScores.end(),
+					other.begin(),
+					denseScores.begin(),
+					std::plus<float>());
+	}
+};
 
 /*** An unweighted collection of scores for a translation or step in a translation.
  *
@@ -226,6 +244,8 @@ public:
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] += score;
   }
+
+  void PlusEquals(const FeatureFunction* sp, const ScorePair &scorePair);
 
   //For features which have an unbounded number of components
   void SparsePlusEquals(const std::string& full_name, float score) {

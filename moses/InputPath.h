@@ -13,9 +13,10 @@ namespace Moses
 class PhraseDictionary;
 class TargetPhraseCollection;
 class ScoreComponentCollection;
+class ScorePair;
 class TargetPhrase;
-
 class InputPath;
+
 typedef std::list<InputPath*> InputPathList;
 
 /** Each node contains
@@ -32,7 +33,7 @@ protected:
   const InputPath *m_prevNode;
   Phrase m_phrase;
   WordsRange m_range;
-  const ScoreComponentCollection *m_inputScore;
+  const ScorePair *m_inputScore;
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
   const NonTerminalSet m_sourceNonTerms;
 
@@ -47,7 +48,7 @@ public:
   }
 
   InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
-            ,const ScoreComponentCollection *inputScore);
+            ,const ScorePair *inputScore);
   ~InputPath();
 
   const Phrase &GetPhrase() const {
@@ -72,7 +73,7 @@ public:
 
   // pointer to internal node in phrase-table. Since this is implementation dependent, this is a void*
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;
-  const ScoreComponentCollection *GetInputScore() const {
+  const ScorePair *GetInputScore() const {
     return m_inputScore;
   }
 

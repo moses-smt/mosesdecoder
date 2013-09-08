@@ -11,7 +11,7 @@ using namespace std;
 namespace Moses
 {
 InputPath::InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
-                     ,const ScoreComponentCollection *inputScore)
+                     ,const ScorePair *inputScore)
   :m_prevNode(prevNode)
   ,m_phrase(phrase)
   ,m_sourceNonTerms(sourceNonTerms)

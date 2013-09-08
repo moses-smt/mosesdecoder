@@ -220,6 +220,18 @@ FVector ScoreComponentCollection::GetVectorForProducer(const FeatureFunction* sp
   return fv;
 }
 
+void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const ScorePair &scorePair)
+{
+	PlusEquals(sp, scorePair.denseScores);
+
+	std::map<std::string, float>::const_iterator iter;
+	for (iter = scorePair.sparseScores.begin(); iter != scorePair.sparseScores.end(); ++iter) {
+		const string &key = iter->first;
+		float value = iter->second;
+		PlusEquals(sp, key, value);
+	}
+}
+
 }
 
 

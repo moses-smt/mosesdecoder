@@ -47,7 +47,7 @@ void InputFeature::Evaluate(const InputType &input
 		return;
 	}
 
-  const ScoreComponentCollection *scores = inputPath.GetInputScore();
+  const ScorePair *scores = inputPath.GetInputScore();
   if (scores) {
 
   }
