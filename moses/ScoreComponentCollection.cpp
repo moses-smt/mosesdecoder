@@ -11,15 +11,15 @@ namespace Moses
 void ScorePair::PlusEquals(const ScorePair &other)
 {
 	PlusEquals(other.denseScores);
-	std::map<std::string, float>::const_iterator iter;
+	std::map<StringPiece, float>::const_iterator iter;
 	for (iter = other.sparseScores.begin(); iter != other.sparseScores.end(); ++iter) {
 		PlusEquals(iter->first, iter->second);
 	}
 }
 
-void ScorePair::PlusEquals(const std::string &key, float value)
+void ScorePair::PlusEquals(const StringPiece &key, float value)
 {
-	std::map<std::string, float>::iterator iter;
+	std::map<StringPiece, float>::iterator iter;
 	iter = sparseScores.find(key);
 	if (iter == sparseScores.end()) {
 		sparseScores[key] = value;
@@ -245,9 +245,9 @@ void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const Score
 {
 	PlusEquals(sp, scorePair.denseScores);
 
-	std::map<std::string, float>::const_iterator iter;
+	std::map<StringPiece, float>::const_iterator iter;
 	for (iter = scorePair.sparseScores.begin(); iter != scorePair.sparseScores.end(); ++iter) {
-		const string &key = iter->first;
+		const StringPiece &key = iter->first;
 		float value = iter->second;
 		PlusEquals(sp, key, value);
 	}

@@ -47,10 +47,10 @@ namespace Moses
 struct ScorePair
 {
 	std::vector<float> denseScores;
-	std::map<std::string, float> sparseScores;
+	std::map<StringPiece, float> sparseScores;
 
 	void PlusEquals(const ScorePair &other);
-	void PlusEquals(const std::string &key, float value);
+	void PlusEquals(const StringPiece &key, float value);
 
 	void PlusEquals(const std::vector<float> &other)
 	{
