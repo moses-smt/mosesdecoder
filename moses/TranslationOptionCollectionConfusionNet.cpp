@@ -42,9 +42,8 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       Phrase subphrase;
       subphrase.AddWord(word);
 
-      const std::vector<float> &scores = col[i].second;
-      ScorePair *inputScore = new ScorePair();
-      inputScore->denseScores = scores;
+      const ScorePair &scores = col[i].second;
+      ScorePair *inputScore = new ScorePair(scores);
 
       InputPath *node = new InputPath(subphrase, labels, range, NULL, inputScore);
       list.push_back(node);
@@ -87,7 +86,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
           Phrase subphrase(prevPhrase);
           subphrase.AddWord(word);
 
-          const std::vector<float> &scores = col[i].second;
+          const ScorePair &scores = col[i].second;
           ScorePair *inputScore = new ScorePair(*prevInputScore);
           inputScore->PlusEquals(scores);
 
@@ -133,7 +132,7 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
       ++iterCol , ++iterInputPath) {
     const InputPath &inputPath = **iterInputPath;
     size_t length = source.GetColumnIncrement(sourcePos, j++);
-    const Scores &inputScores = iterCol->second;
+    const ScorePair &inputScores = iterCol->second;
     ProcessOneUnknownWord(inputPath ,sourcePos, length, &inputScores);
   }
 

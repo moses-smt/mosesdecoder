@@ -1,3 +1,4 @@
+#include <map>
 #include "StaticData.h"
 #include "WordLattice.h"
 #include "PCNTools.h"
@@ -21,9 +22,19 @@ void WordLattice::Print(std::ostream& out) const
     out<<i<<" -- ";
     for(size_t j=0; j<data[i].size(); ++j) {
       out<<"("<<data[i][j].first.ToString()<<", ";
-      for(std::vector<float>::const_iterator scoreIterator = data[i][j].second.begin(); scoreIterator<data[i][j].second.end(); scoreIterator++) {
-        out<<*scoreIterator<<", ";
+
+      // dense
+      std::vector<float>::const_iterator iterDense;
+      for(iterDense = data[i][j].second.denseScores.begin(); iterDense < data[i][j].second.denseScores.end(); ++iterDense) {
+        out<<", "<<*iterDense;
       }
+
+      // sparse
+      std::map<StringPiece, float>::const_iterator iterSparse;
+      for(iterSparse = data[i][j].second.sparseScores.begin(); iterSparse != data[i][j].second.sparseScores.end(); ++iterSparse) {
+        out << ", " << iterSparse->first << "=" << iterSparse->second;
+      }
+
       out << GetColumnIncrement(i,j) << ") ";
     }
 
@@ -74,13 +85,16 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
             //*probsIterator = 1.0f;
           }
         }
-        data[i][j].second.push_back(std::max(static_cast<float>(log(*probsIterator)), LOWEST_SCORE));
+
+        float score = std::max(static_cast<float>(log(*probsIterator)), LOWEST_SCORE);
+        ScorePair &scorePair = data[i][j].second;
+        scorePair.denseScores.push_back(score);
       }
       //store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
       if (addRealWordCount) {
         //only add count if not epsilon
         float value = (alt.m_word=="" || alt.m_word==EPSILON) ? 0.0f : -1.0f;
-        data[i][j].second.push_back(value);
+        data[i][j].second.denseScores.push_back(value);
       }
       String2Word(alt.m_word, data[i][j]. first, factorOrder);
       next_nodes[i][j] = alt.m_next;

@@ -49,6 +49,12 @@ struct ScorePair
 	std::vector<float> denseScores;
 	std::map<StringPiece, float> sparseScores;
 
+	ScorePair()
+	{}
+	ScorePair(const std::vector<float> &other)
+	:denseScores(other)
+	{}
+
 	void PlusEquals(const ScorePair &other);
 	void PlusEquals(const StringPiece &key, float value);
 
