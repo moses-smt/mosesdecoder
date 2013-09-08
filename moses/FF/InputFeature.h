@@ -12,9 +12,12 @@ class InputFeature : public StatelessFeatureFunction
 protected:
   size_t m_numInputScores;
   size_t m_numRealWordCount;
+  bool m_legacy;
 
 public:
   InputFeature(const std::string &line);
+
+  void Load();
 
   void SetParameter(const std::string& key, const std::string& value);
 
