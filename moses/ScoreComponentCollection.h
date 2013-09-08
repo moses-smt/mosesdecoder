@@ -49,6 +49,9 @@ struct ScorePair
 	std::vector<float> denseScores;
 	std::map<std::string, float> sparseScores;
 
+	void PlusEquals(const ScorePair &other);
+	void PlusEquals(const std::string &key, float value);
+
 	void PlusEquals(const std::vector<float> &other)
 	{
 		CHECK(denseScores.size() == other.size());

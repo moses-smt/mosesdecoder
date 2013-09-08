@@ -8,6 +8,27 @@ using namespace std;
 
 namespace Moses
 {
+void ScorePair::PlusEquals(const ScorePair &other)
+{
+	PlusEquals(other.denseScores);
+	std::map<std::string, float>::const_iterator iter;
+	for (iter = other.sparseScores.begin(); iter != other.sparseScores.end(); ++iter) {
+		PlusEquals(iter->first, iter->second);
+	}
+}
+
+void ScorePair::PlusEquals(const std::string &key, float value)
+{
+	std::map<std::string, float>::iterator iter;
+	iter = sparseScores.find(key);
+	if (iter == sparseScores.end()) {
+		sparseScores[key] = value;
+	}
+	else {
+		float &existingval = iter->second;
+		existingval += value;
+	}
+}
 
 ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
 size_t ScoreComponentCollection::s_denseVectorSize = 0;
