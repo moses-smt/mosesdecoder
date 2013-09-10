@@ -18,6 +18,8 @@ InputPath::InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
   ,m_range(range)
   ,m_inputScore(inputScore)
 {
+  //cerr << "phrase=" << phrase << " m_inputScore=" << *m_inputScore << endl;
+
   FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
   if (placeholderFactor != NOT_FOUND) {
     for (size_t pos = 0; pos < m_phrase.GetSize(); ++pos) {
