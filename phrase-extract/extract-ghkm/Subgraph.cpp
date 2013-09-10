@@ -119,5 +119,36 @@ float Subgraph::CalcPcfgScore() const
   return score;
 }
 
+void Subgraph::PrintTree(std::ostream &out) const 
+{
+  RecursivelyPrintTree(m_root,out);
+}
+
+void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const 
+{
+
+    NodeType nodeType = n->GetType();
+
+    if (nodeType == TREE) {
+
+        out << "<tree label=\"" << n->GetLabel() << "\"> "; 
+
+        const std::vector<Node *> &children = n->GetChildren();
+
+        for (std::vector<Node *>::const_iterator p(children.begin());
+             p != children.end(); ++p) {
+            Node *child = *p;
+            if (!child->IsSink()) {
+                RecursivelyPrintTree(child,out);
+            }
+        }
+
+        out << " </tree>";
+
+    } else {
+        out << n->GetLabel();
+    }
+}
+
 }  // namespace Moses
 }  // namespace GHKM

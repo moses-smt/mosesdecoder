@@ -162,5 +162,12 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
   }
 }
 
+void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph *g) 
+{
+    Write(rule);
+    g->PrintTree(m_fwd);
+    m_fwd << std::endl << std::endl;
+}
+
 }  // namespace GHKM
 }  // namespace Moses

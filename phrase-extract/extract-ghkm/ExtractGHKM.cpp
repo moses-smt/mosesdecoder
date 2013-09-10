@@ -171,7 +171,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
         ScfgRule r(**q);
         // TODO Can scope pruning be done earlier?
         if (r.Scope() <= options.maxScope) {
-          writer.Write(r);
+//          writer.Write(r);
+          writer.Write(r,*q);
         }
       }
     }

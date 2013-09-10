@@ -21,6 +21,8 @@
 #ifndef EXTRACT_GHKM_RULE_WRITER_H_
 #define EXTRACT_GHKM_RULE_WRITER_H_
 
+#include "Subgraph.h"
+
 #include <ostream>
 
 namespace Moses
@@ -41,6 +43,8 @@ public:
     , m_options(options) {}
 
   void Write(const ScfgRule &);
+
+  void Write(const ScfgRule &rule, const Subgraph *g); 
 
 private:
   // Disallow copying
