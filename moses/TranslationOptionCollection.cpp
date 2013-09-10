@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputPath.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
+#include "moses/FF/InputFeature.h"
 
 using namespace std;
 
@@ -200,8 +201,10 @@ void TranslationOptionCollection::ProcessUnknownWord()
 	* \param length length covered by this word (may be > 1 for lattice input)
 	* \param inputScores a set of scores associated with unknown word (input scores from latties/CNs)
  */
-void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPath,size_t sourcePos, size_t length, const Scores *inputScores)
-
+void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPath,
+													size_t sourcePos,
+													size_t length,
+													const ScorePair *inputScores)
 {
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
@@ -514,17 +517,19 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
 {
-  const ScoreComponentCollection *inputScore = inputPath.GetInputScore();
+  const ScorePair *inputScore = inputPath.GetInputScore();
   if (inputScore == NULL) {
     return;
   }
+
+  const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
 
   const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
   for (size_t i = 0; i < transOpts.size(); ++i) {
     TranslationOption &transOpt = *transOpts[i];
 
     ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-    scores.PlusEquals(*inputScore);
+    scores.PlusEquals(inputFeature, *inputScore);
 
   }
 }

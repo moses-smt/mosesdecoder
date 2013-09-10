@@ -39,10 +39,9 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
-
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 $_HELP = 1
@@ -138,6 +137,7 @@ $_HELP = 1
 		       'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE,
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
+		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
                );
 
 if ($_HELP) {
@@ -323,6 +323,7 @@ my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
 $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_SCORE";
 
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
+my $FLEX_SCORER = "$SCRIPTS_ROOTDIR/training/flexibility_score.py";
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -1436,6 +1437,7 @@ sub extract_phrase {
     $cmd .= " --GZOutput ";
     $cmd .= " --InstanceWeights $_INSTANCE_WEIGHTS_FILE " if defined $_INSTANCE_WEIGHTS_FILE;
     $cmd .= " --BaselineExtract $_BASELINE_EXTRACT" if defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT =~ /extract-parallel.perl/;
+    $cmd .= " --FlexibilityScore" if $_FLEXIBILITY_SCORE;
     
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
@@ -1456,7 +1458,6 @@ sub extract_phrase {
     foreach my $f (@tempfiles) {
       unlink $f;
     }
-    
 }
 
 ### (6) PHRASE SCORING
@@ -1554,7 +1555,7 @@ sub score_phrase_phrase_extract {
 	      my $inverse = "";
               my $extract_filename = $extract_file;
 	      if ($direction eq "e2f") {
-	          $inverse = " --Inverse";
+	          $inverse = "--Inverse";
                   $extract_filename = $extract_file.".inv";
               }
               
@@ -1575,6 +1576,7 @@ sub score_phrase_phrase_extract {
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
         $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
+        $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
 
 				# sorting
 				if ($direction eq "e2f" || $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2) {
@@ -1895,6 +1897,8 @@ sub create_ini {
      $basic_weight_count += 2**$count-1 if $method eq "Subset";
    }     
    $basic_weight_count++ if $_PCFG;
+   $basic_weight_count+=4 if $_FLEXIBILITY_SCORE;
+   $basic_weight_count+=2 if $_FLEXIBILITY_SCORE && $_HIERARCHICAL;
 
    # go over each table
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {

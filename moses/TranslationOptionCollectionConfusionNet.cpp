@@ -42,9 +42,8 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       Phrase subphrase;
       subphrase.AddWord(word);
 
-      const std::vector<float> &scores = col[i].second;
-      ScoreComponentCollection *inputScore = new ScoreComponentCollection();
-      inputScore->Assign(inputFeature, scores);
+      const ScorePair &scores = col[i].second;
+      ScorePair *inputScore = new ScorePair(scores);
 
       InputPath *node = new InputPath(subphrase, labels, range, NULL, inputScore);
       list.push_back(node);
@@ -76,7 +75,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
         //const InputPath &prevNode = *prevNodes[pathInd];
 
         const Phrase &prevPhrase = prevNode.GetPhrase();
-        const ScoreComponentCollection *prevInputScore = prevNode.GetInputScore();
+        const ScorePair *prevInputScore = prevNode.GetInputScore();
         CHECK(prevInputScore);
 
         // loop thru every word at this position
@@ -87,9 +86,9 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
           Phrase subphrase(prevPhrase);
           subphrase.AddWord(word);
 
-          const std::vector<float> &scores = col[i].second;
-          ScoreComponentCollection *inputScore = new ScoreComponentCollection(*prevInputScore);
-          inputScore->PlusEquals(inputFeature, scores);
+          const ScorePair &scores = col[i].second;
+          ScorePair *inputScore = new ScorePair(*prevInputScore);
+          inputScore->PlusEquals(scores);
 
           InputPath *node = new InputPath(subphrase, labels, range, &prevNode, inputScore);
           list.push_back(node);
@@ -133,7 +132,7 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
       ++iterCol , ++iterInputPath) {
     const InputPath &inputPath = **iterInputPath;
     size_t length = source.GetColumnIncrement(sourcePos, j++);
-    const Scores &inputScores = iterCol->second;
+    const ScorePair &inputScores = iterCol->second;
     ProcessOneUnknownWord(inputPath ,sourcePos, length, &inputScores);
   }
 

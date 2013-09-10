@@ -60,7 +60,7 @@ public:
   TargetPhraseCollection()
   {}
 
-  explicit TargetPhraseCollection(const TargetPhraseCollection &copy);
+  TargetPhraseCollection(const TargetPhraseCollection &copy);
 
   ~TargetPhraseCollection() {
     Remove();

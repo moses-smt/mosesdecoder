@@ -8,6 +8,27 @@ using namespace std;
 
 namespace Moses
 {
+void ScorePair::PlusEquals(const ScorePair &other)
+{
+	PlusEquals(other.denseScores);
+	std::map<StringPiece, float>::const_iterator iter;
+	for (iter = other.sparseScores.begin(); iter != other.sparseScores.end(); ++iter) {
+		PlusEquals(iter->first, iter->second);
+	}
+}
+
+void ScorePair::PlusEquals(const StringPiece &key, float value)
+{
+	std::map<StringPiece, float>::iterator iter;
+	iter = sparseScores.find(key);
+	if (iter == sparseScores.end()) {
+		sparseScores[key] = value;
+	}
+	else {
+		float &existingval = iter->second;
+		existingval += value;
+	}
+}
 
 ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
 size_t ScoreComponentCollection::s_denseVectorSize = 0;
@@ -218,6 +239,18 @@ FVector ScoreComponentCollection::GetVectorForProducer(const FeatureFunction* sp
       fv[i->first] = i->second;
   }
   return fv;
+}
+
+void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const ScorePair &scorePair)
+{
+	PlusEquals(sp, scorePair.denseScores);
+
+	std::map<StringPiece, float>::const_iterator iter;
+	for (iter = scorePair.sparseScores.begin(); iter != scorePair.sparseScores.end(); ++iter) {
+		const StringPiece &key = iter->first;
+		float value = iter->second;
+		PlusEquals(sp, key, value);
+	}
 }
 
 }

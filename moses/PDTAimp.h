@@ -409,7 +409,7 @@ public:
         bool isEpsilon=(s=="" || s==EPSILON);
 
         //assert that we have the right number of link params in this CN option
-        CHECK(currCol[colidx].second.size() >= m_numInputScores);
+        CHECK(currCol[colidx].second.denseScores.size() >= m_numInputScores);
 
         // do not start with epsilon (except at first position)
         if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue;
@@ -425,7 +425,7 @@ public:
           float inputScoreSum = 0;
           std::vector<float> newInputScores(m_numInputScores,0.0);
           if (m_numInputScores) {
-            std::transform(currCol[colidx].second.begin(), currCol[colidx].second.end(),
+            std::transform(currCol[colidx].second.denseScores.begin(), currCol[colidx].second.denseScores.end(),
                            curr.GetScores().begin(),
                            newInputScores.begin(),
                            std::plus<float>());
