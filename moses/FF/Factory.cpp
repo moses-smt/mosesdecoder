@@ -25,6 +25,7 @@
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
+#include "moses/FF/SparseReorderingFeature.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/PhrasePenalty.h"
@@ -142,6 +143,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ControlRecombination);
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
+  MOSES_FNAME(SparseReorderingFeature);
 
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
