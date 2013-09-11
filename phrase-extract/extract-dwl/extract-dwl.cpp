@@ -226,11 +226,7 @@ int main(int argc, char**argv)
       if (hasTranslation) {
         srcSurvived++;
 
-        if (! newSentence && find(toAnnotate.begin(), toAnnotate.end(), sentID) != toAnnotate.end()) {
-          extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses, "sentnum^" + SPrint(sentID));
-        } else {
-          extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
-        }
+        extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
         newSentence = false;
       }
 
