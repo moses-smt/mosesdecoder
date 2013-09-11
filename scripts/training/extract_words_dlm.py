@@ -98,7 +98,7 @@ def extract_from_sentence(source, target, align_pairs):
     SENTENCE_ID += 1
 
 def extract_all(source_path, target_path, align_path):
-    input_files = itertools.zip_longest(
+    input_files = itertools.izip_longest(
         fileinput.input(source_path), 
         fileinput.input(target_path), 
         fileinput.input(align_path)

@@ -1,4 +1,5 @@
 #include "FeatureConsumer.h"
+//include "/home/alex/src/hal_vowpal_wabbit/vowpalwabbit/vw.h"
 #include "vw.h"
 #include "Util.h"
 #include "ezexample.h"
