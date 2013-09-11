@@ -6,7 +6,7 @@
 #include "Util.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
-#include "FeatureExtractor.h"
+#include "DWLFeatureExtractor.h"
 #include "FeatureConsumer.h"
 #include "TTableCollection.h"
 
@@ -17,30 +17,6 @@ using namespace PSD;
 
 //FB : Pass a list of spans instead of a single span
 
-class PSDLine
-{
-public:
-  PSDLine(const string &line)
-  {
-    vector<string> columns = Tokenize(line, "\t");
-    m_sentID   = Scan<size_t>(columns[0]);
-    m_srcStart = Scan<size_t>(columns[1]);
-    m_srcEnd   = Scan<size_t>(columns[2]);
-    m_srcPhrase = columns[5];
-    m_tgtPhrase = columns[6];
-  }
-  const string &GetSrcPhrase() { return m_srcPhrase; }
-  const string &GetTgtPhrase() { return m_tgtPhrase; }
-  size_t GetSentID()    { return m_sentID; }
-  size_t GetSrcStart()  { return m_srcStart; }
-  size_t GetSrcEnd()    { return m_srcEnd; }
-
-private:
-  PSDLine();
-  size_t m_sentID, m_srcStart, m_srcEnd;
-  string m_srcCept, m_tgtCept;
-};
-
 class DWLLine
 {
 public:
@@ -48,34 +24,12 @@ public:
   {
 
     vector<string> columns = Tokenize(line, "\t");
-    m_sentID   = Scan<size_t>(columns[0]);
+    m_sentID = Scan<size_t>(columns[0]);
 
     //get and tokenize list of source/target spans
     //0-2,3-4	0-1
-    vector<string> StartSpanList = Tokenize(columns[1],",");
-    vector<string> EndSpanList =  Tokenize(columns[2],",");
-
-    for(int i = StartSpanList.begin(); i != StartSpanList.end(); i++)
-    {
-    	vector<string> currentSpan= Tokenize(*i,"-");
-
-    	//each pair should contain exactly 2 elements
-    	CHECK(currentSpan.size() == 2);
-    	size_t firstSpan = Scan<size_t>(currentSpan[0]);
-    	size_t secondSpan = Scan<size_t>(currentSpan[1]);
-    	m_source_spans.push_back(std::make_pair(firstSpan,secondSpan));
-    }
-
-    for(int i = EndSpanList.begin(); i != EndSpanList.end(); i++)
-    {
-        vector<string> currentSpan= Tokenize(*i,"-");
-
-        //each pair should contain exactly 2 elements
-        CHECK(currentSpan.size() == 2);
-        size_t firstSpan = Scan<size_t>(currentSpan[0]);
-        size_t secondSpan = Scan<size_t>(currentSpan[1]);
-        m_source_spans.push_back(std::make_pair(firstSpan,secondSpan));
-     }
+    m_sourceSpans = ReadSpanList(columns[1]);
+    m_targetSpans = ReadSpanList(columns[2]);
 
     //Check that pairs are sorted
     CHECK(IsSourceSorted());
@@ -87,23 +41,40 @@ public:
   const string &GetSrcCept() { return m_srcCept; }
   const string &GetTgtCept() { return m_tgtCept; }
   size_t GetSentID()    { return m_sentID; }
-  size_t GetSourceSpanList()  { return m_source_spans; }
-  size_t GetTargetSpanList()  { return m_target_spans; }
+  vector<pair<int, int> > GetSourceSpanList()  { return m_sourceSpans; }
+  vector<pair<int, int> > GetTargetSpanList()  { return m_targetSpans; }
 
   //FB : TODO : Should we move this somewhere else ?
   bool IsSourceSorted()
   {
-	  for(i = m_source_spans.begin(); i != m_source_spans.end(); i++)
-	  {
-		  return (i.second < j.first);
+    int prevEnd = -1;
+    vector<string>::const_iterator it;
+    for (it = m_sourceSpans.begin(); it != m_sourceSpans.end(); it++) {
+      CHECK(it->first > prevEnd);
+      prevEnd = it->second;
 	  }
   }
 
 private:
+  vector<pair<int, int> > ReadSpanList(const string &spanListStr)
+  {
+    vector<pair<int, int> > out;
+    vector<string> spanList = Tokenize(spanListStr, ",");
+    vector<string>::const_iterator spanIt;
+    for (spanIt = spanList.begin(); spanIt != spanList.end(); spanIt++) {
+      vector<string> positions = Tokenize(*spanIt, "-");      
+      CHECK(positions.size() == 2);
+      out.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<Int>(positions[1])));
+    }
+    return out;
+  }
+
   DWLLine();
-  vector<pair<int,int> > m_source_spans;
-  vector<pair<int,int> > m_target_spans;
+  size_t m_sentID;
+  vector<pair<int,int> > m_sourceSpans;
+  vector<pair<int,int> > m_targetSpans;
   vector<string> m_source, m_target;
+  string m_srcCept, m_tgtCept;
 };
 
 
@@ -158,7 +129,7 @@ int main(int argc, char**argv)
 
   ExtractorConfig config;
   config.Load(argv[4]);
-  FeatureExtractor extractor(*ttables.GetTargetIndex(), config, true);
+  DWLFeatureExtractor extractor(*ttables.GetTargetIndex(), config, true);
   VWFileTrainConsumer consumer(argv[5]);
   WritePhraseIndex(ttables.GetTargetIndex(), argv[6]);
   bool ttable_intersection = false;

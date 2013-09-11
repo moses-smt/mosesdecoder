@@ -104,40 +104,6 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   fc->FinishExample();
 }
 
-ExtractorConfig::ExtractorConfig()
-: m_paired(false), m_bagOfWords(false), m_sourceExternal(false),
-    m_sourceInternal(false), m_targetInternal(false), m_windowSize(0)
-{}
-
-void ExtractorConfig::Load(const string &configFile)
-{
-  ptree pTree;
-  ini_parser::read_ini(configFile, pTree);
-  m_sourceInternal  = pTree.get<bool>("features.source-internal", false);
-  m_sourceExternal  = pTree.get<bool>("features.source-external", false);
-  m_targetInternal  = pTree.get<bool>("features.target-internal", false);
-  m_sourceIndicator = pTree.get<bool>("features.source-indicator", false);
-  m_targetIndicator = pTree.get<bool>("features.target-indicator", false);
-  m_sourceTargetIndicator = pTree.get<bool>("features.source-target-indicator", false);
-  m_paired          = pTree.get<bool>("features.paired", false);
-  m_bagOfWords      = pTree.get<bool>("features.bag-of-words", false);
-  m_mostFrequent    = pTree.get<bool>("features.most-frequent", false);
-  m_binnedScores    = pTree.get<bool>("features.binned-scores", false);
-  m_sourceTopic     = pTree.get<bool>("features.source-topic", false);
-  m_phraseFactor    = pTree.get<bool>("features.phrase-factor", false);
-  m_windowSize      = pTree.get<size_t>("features.window-size", 0);  
-
-  m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
-  m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
-  m_scoreBins = Scan<float>(Tokenize(pTree.get<string>("features.score-bins", ""), ","));
-
-  m_vwOptsTrain = pTree.get<string>("vw-options.train", "");
-  m_vwOptsPredict = pTree.get<string>("vw-options.predict", "");
-
-  m_normalization = pTree.get<string>("decoder.normalization", "");
-
-  m_isLoaded = true;
-}
 
 //
 // private methods
@@ -212,7 +178,7 @@ void DWLFeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &contex
 
 // XXX NULL feature!!!
 
-void GenerateGapFeatures(const ContextType &context, const vector<pair<int, int> > &sourceSpanList, FeatureConsumer *fc) {
+void DWLFeatureExtractor::GenerateGapFeatures(const ContextType &context, const vector<pair<int, int> > &sourceSpanList, FeatureConsumer *fc) {
   for (size_t i = 0; i < sourceSpanList.size(); i++) fc->AddFeature("gap^" + SPrint<int>(i));
 }
 
