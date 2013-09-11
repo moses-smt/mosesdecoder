@@ -46,13 +46,13 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 {  
   fc->SetNamespace('s', true);
 
-  if (m_config.GetSourceExternal()) GenerateContextFeatures(context, sourceSpanList, fc);
+  int globalStart = sourceSpanList.front().first;
+  int globalEnd   = sourceSpanList.back().second;
+  if (m_config.GetSourceExternal()) GenerateContextFeatures(context, globalStart, globalEnd, fc);
 
   // get words (surface forms) in source phrase
   vector<string> sourceForms;
   vector<pair<int, int> >::const_iterator spanIt;
-  int globalStart = sourceSpanList.front().first;
-  int globalEnd   = sourceSpanList.back().second;
   for (spanIt = sourceSpanList.begin(); spanIt != sourceSpanList.end(); spanIt++) {
     int spanStart = spanIt->first;
     int spanEnd = spanIt->second;
@@ -212,7 +212,7 @@ void DWLFeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &contex
 
 // XXX NULL feature!!!
 
-void GenerateGapFeatures(const ContextType &context, const vector<int, int> &sourceSpanList, FeatureConsumer *fc) {
+void GenerateGapFeatures(const ContextType &context, const vector<pair<int, int> > &sourceSpanList, FeatureConsumer *fc) {
   for (size_t i = 0; i < sourceSpanList.size(); i++) fc->AddFeature("gap^" + SPrint<int>(i));
 }
 

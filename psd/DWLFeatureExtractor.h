@@ -94,7 +94,7 @@ public:
   // an output variable where VW scores are written.
   void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
-    const vector<pair<int, int> > & sourceSpanList,
+    const std::vector<std::pair<int, int> > &sourceSpanList,
     const std::vector<Translation> &translations,
     std::vector<float> &losses);
 
@@ -108,14 +108,13 @@ private:
   std::map<std::string, float> GetMaxProb(const std::vector<Translation> &translations);
 
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
-  void GeneratePhraseFactorFeatures(const ContextType &context, const vector<pair<int, int> > &sourceSpanList, FeatureConsumer *fc);
+  void GeneratePhraseFactorFeatures(const ContextType &context, const std::vector<std::pair<int, int> > &sourceSpanList, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateIndicatorFeature(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateConcatIndicatorFeature(const std::vector<std::string> &span1, const std::vector<std::string> &span2, FeatureConsumer *fc);
-  void GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc);
+  void GenerateBagOfWordsFeatures(const ContextType &context, int spanStart, int spanEnd, size_t factorID, FeatureConsumer *fc);
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,
       const std::vector<std::string> &tgtPhrase,
-      const AlignmentType &align,
       FeatureConsumer *fc);
   void GenerateScoreFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc);
   void GenerateMostFrequentFeature(const std::vector<TTableEntry> &ttableScores,
