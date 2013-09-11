@@ -15,8 +15,7 @@ DESCRIPTION
     one) is output with following information:
 
     - Sentence ID;
-    - Start position of source sentence word span;
-    - End position of word span in source sentence;
+    - Space delimited source spans, e.g. "0-2 3-4" means "0,1,3";
     - Start of target span; 
     - End of target span.
    
