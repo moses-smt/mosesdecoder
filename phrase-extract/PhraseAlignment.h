@@ -32,6 +32,7 @@ public:
   float count;
   int sentenceId;
   std::string domain;
+  std::string ghkmParse;
 
   std::vector< std::set<size_t> > alignedToT;
   std::vector< std::set<size_t> > alignedToS;

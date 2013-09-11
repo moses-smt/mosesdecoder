@@ -131,22 +131,25 @@ void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const
 
     if (nodeType == TREE) {
 
-        out << "<tree label=\"" << n->GetLabel() << "\"> "; 
+        out << "( " << n->GetLabel() << " "; 
 
-        const std::vector<Node *> &children = n->GetChildren();
-
-        for (std::vector<Node *>::const_iterator p(children.begin());
-             p != children.end(); ++p) {
-            Node *child = *p;
-            if (!child->IsSink()) {
+        if (m_leaves.find(n) == m_leaves.end()) {
+            const std::vector<Node *> &children = n->GetChildren();
+            for (std::vector<Node *>::const_iterator p(children.begin());
+                 p != children.end(); ++p) {
+                Node *child = *p;
+//                if (!child->IsSink()) {
                 RecursivelyPrintTree(child,out);
+//                }
             }
         }
 
-        out << " </tree>";
+        out << ") ";
 
     } else {
-        out << n->GetLabel();
+        if (nodeType == TARGET) {
+            out << n->GetLabel() << " ";
+        }
     }
 }
 

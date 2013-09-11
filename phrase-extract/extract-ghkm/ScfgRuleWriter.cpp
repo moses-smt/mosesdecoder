@@ -35,7 +35,7 @@ namespace Moses
 namespace GHKM
 {
 
-void ScfgRuleWriter::Write(const ScfgRule &rule)
+void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
 {
   std::ostringstream sourceSS;
   std::ostringstream targetSS;
@@ -65,10 +65,13 @@ void ScfgRuleWriter::Write(const ScfgRule &rule)
     // Write the PCFG score.
     m_fwd << " " << std::exp(rule.GetPcfgScore());
   }
-  m_fwd << std::endl;
+  if (printEndl)
+    m_fwd << std::endl;
 
   // Write a count of 1 to the inverse extract file.
-  m_inv << " ||| 1" << std::endl;
+  m_inv << " ||| 1";
+  if (printEndl)
+    m_inv << std::endl;
 }
 
 void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule,
@@ -162,11 +165,13 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
   }
 }
 
-void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph *g) 
+void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g) 
 {
-    Write(rule);
-    g->PrintTree(m_fwd);
-    m_fwd << std::endl << std::endl;
+    Write(rule,false);
+    m_fwd << " GHKMParse ";
+    g.PrintTree(m_fwd);
+    m_fwd << std::endl;
+    m_inv << std::endl;
 }
 
 }  // namespace GHKM
