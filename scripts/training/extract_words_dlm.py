@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.4
 
 """
 NAME
@@ -58,8 +58,21 @@ def parse_alignment_pairs(align_line):
 
 # ---------------------------------------------------------------- Extraction --
 
-def cept_to_span(cept):
-    return (min(cept), max(cept) + 1)
+def cept_to_spans(cept):
+    SPANS = []
+    for index in sorted(cept):
+        if not SPANS:
+            SPANS.append([index, index + 1])
+            continue
+        if SPANS[-1][1] == index:
+            SPANS[-1][1] = index + 1
+        else:
+            SPANS.append([index, index + 1])
+
+    return SPANS
+
+def spans_to_string(spans):
+    return " ".join("-".join(map(str, span)) for span in spans)
 
 SENTENCE_ID = 1
 
@@ -74,24 +87,23 @@ def extract_from_sentence(source, target, align_pairs):
 
     for target_index in range(len(target)):
         cept = source_cept[target_index]
-        span = None if not cept else cept_to_span(cept)
+        spans = None if not cept else cept_to_spans(cept)
 
-        if span is None:
-            span = (last_aligned_position, last_aligned_position)        
+        if not cept:
+            spans = [[last_aligned_position, last_aligned_position]]
         else:
-            last_aligned_position = span[1]
+            last_aligned_position = max(cept) + 1
 
         params = (
-            SENTENCE_ID, 
-            span[0], 
-            span[1], 
-            target_index, 
+            SENTENCE_ID,
+            spans_to_string(spans),
+            target_index,
             target_index + 1,
             " ".join(source[index] for index in cept),
             target[target_index]
         )
 
-        print("%i\t%i\t%i\t%i\t%i\t%s\t%s" % (params))
+        print("%i\t%s\t%i\t%i\t%s\t%s" % (params))
 
     SENTENCE_ID += 1
 
