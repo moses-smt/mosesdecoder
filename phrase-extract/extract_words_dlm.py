@@ -1,41 +1,47 @@
 #!/usr/bin/env python3
 
-# NAME
-#
-#   extract_words_dlm.py -- extract samples for DLM training
-#
-# SYNOPSIS
-#
-#   extract_words_dlm.py SOURCE TARGET ALIGN
-# 
-#
-# DESCRIPTION
-#   Given aligments for source and target sentences, outputs examples for 
-#   discriminative lexicon model training. Every target word (even unaligned 
-#   one) is output with following information:
-#
-#   - Sentence ID;
-#   - Start position of source sentence word span;
-#   - End position of word span in source sentence;
-#   - Start of target span; 
-#   - End of target span.
-#   
-#   Spans are defined using numbering of positions between words (starting from 
-#   zero -- position before the first word).
-#
-# PARAMETERS
-#
-#   SOURCE
-#       filename of file with tokenized (space-delimited) source sentences, 
-#       one per line
-#
-#   TARGET
-#       path to file with tokenized target sentences
-#
-#   ALIGN
-#       path to file with combined alignments 
+"""
+NAME
+
+  extract_words_dlm.py -- extract samples for DLM training
+
+SYNOPSIS
+
+  extract_words_dlm.py SOURCE TARGET ALIGN > OUT
+ 
+
+DESCRIPTION
+   Given aligments for source and target sentences, outputs examples for 
+   discriminative lexicon model training. Every target word (even unaligned 
+   one) is output with following information:
+
+   - Sentence ID;
+   - Start position of source sentence word span;
+   - End position of word span in source sentence;
+   - Start of target span; 
+   - End of target span.
+   
+   Spans are defined using numbering of positions between words (starting from 
+   zero -- position before the first word).
+
+   Output is written to stdout.
+
+PARAMETERS
+
+  SOURCE
+      filename of file with tokenized (space-delimited) source sentences, 
+      one per line
+
+  TARGET
+      path to file with tokenized target sentences
+
+  ALIGN
+      path to file with combined alignments 
+"""
 
 import collections
+import fileinput
+import itertools
 import sys
 
 # ------------------------------------------------------- Parsing input files --
@@ -92,23 +98,20 @@ def extract_from_sentence(source, target, align_pairs):
     SENTENCE_ID += 1
 
 def extract_all(source_path, target_path, align_path):
-    source = open(source_path, "r").readlines()
-    target = open(target_path, "r").readlines()
-    align  = open(align_path, "r").readlines()
-    
-    if not (len(source) == len(target) == len(align)):
-        raise ValueError("Source, target and alignment files have different "
-                         "number of lines")
+    input_files = itertools.zip_longest(
+        fileinput.input(source_path), 
+        fileinput.input(target_path), 
+        fileinput.input(align_path)
+    ) 
 
-    N = len(source)
-    for i in range(N):
-        source_sentence = parse_sentence(source[i])
-        target_sentence = parse_sentence(target[i])
-        align_pairs = parse_alignment_pairs(align[i])
+    for source_line, target_line, align_line in input_files:
+        if source_line is None or target_line is None or align_line is None:
+            msg = "Source, target and align files have different # of lines"
+            raise Exception(msg)
 
-        #source_sentence = ["he", "likes", "hard", "work"]
-        #target_sentence = ["he", "likes", "to", "work"]
-        #align_pairs = [(0, 0), (1, 1), (2, 3), (3, 3)]
+        source_sentence = parse_sentence(source_line)
+        target_sentence = parse_sentence(target_line)
+        align_pairs = parse_alignment_pairs(align_line)
 
         extract_from_sentence(source_sentence, target_sentence, align_pairs)
 
