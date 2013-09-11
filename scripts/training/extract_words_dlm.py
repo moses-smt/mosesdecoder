@@ -2,41 +2,39 @@
 
 """
 NAME
-
-  extract_words_dlm.py -- extract samples for DLM training
+    extract_words_dlm.py -- extract samples for DLM training
 
 SYNOPSIS
 
-  extract_words_dlm.py SOURCE TARGET ALIGN > OUT
+    extract_words_dlm.py SOURCE TARGET ALIGN > OUT
  
 
 DESCRIPTION
-   Given aligments for source and target sentences, outputs examples for 
-   discriminative lexicon model training. Every target word (even unaligned 
-   one) is output with following information:
+    Given aligments for source and target sentences, outputs examples for 
+    discriminative lexicon model training. Every target word (even unaligned 
+    one) is output with following information:
 
-   - Sentence ID;
-   - Start position of source sentence word span;
-   - End position of word span in source sentence;
-   - Start of target span; 
-   - End of target span.
+    - Sentence ID;
+    - Start position of source sentence word span;
+    - End position of word span in source sentence;
+    - Start of target span; 
+    - End of target span.
    
-   Spans are defined using numbering of positions between words (starting from 
-   zero -- position before the first word).
+    Spans are defined using numbering of positions between words (starting from 
+    zero -- position before the first word).
 
-   Output is written to stdout.
+    Output is written to stdout.
 
 PARAMETERS
+    SOURCE
+        filename of file with tokenized (space-delimited) source sentences, 
+        one per line
 
-  SOURCE
-      filename of file with tokenized (space-delimited) source sentences, 
-      one per line
+    TARGET
+        path to file with tokenized target sentences
 
-  TARGET
-      path to file with tokenized target sentences
-
-  ALIGN
-      path to file with combined alignments 
+    ALIGN
+        path to file with combined alignments 
 """
 
 import collections
@@ -98,7 +96,7 @@ def extract_from_sentence(source, target, align_pairs):
     SENTENCE_ID += 1
 
 def extract_all(source_path, target_path, align_path):
-    input_files = itertools.izip_longest(
+    input_files = itertools.zip_longest(
         fileinput.input(source_path), 
         fileinput.input(target_path), 
         fileinput.input(align_path)
