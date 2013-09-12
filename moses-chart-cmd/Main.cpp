@@ -127,6 +127,10 @@ public:
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
     }
+    if (staticData.IsDetailedGhkmTranslationReportingEnabled()) {
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      m_ioWrapper.OutputDetailedGhkmTranslationReport(bestHypo, sentence, translationId);
+    }
 
     // n-best
     size_t nBestSize = staticData.GetNBestSize();

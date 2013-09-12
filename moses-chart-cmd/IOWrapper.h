@@ -70,10 +70,12 @@ protected:
   const Moses::FactorMask								&m_inputFactorUsed;
   std::ostream 				        					*m_outputSearchGraphStream;
   std::ostream                          *m_detailedTranslationReportingStream;
+  std::ostream                          *m_detailedGhkmTranslationReportingStream;
   std::ostream                          *m_alignmentInfoStream;
   std::string		        								m_inputFilePath;
   std::istream					        				*m_inputStream;
   Moses::OutputCollector                *m_detailOutputCollector;
+  Moses::OutputCollector                *m_detailGhkmOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
@@ -84,6 +86,7 @@ protected:
   size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
   void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
   void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputGhkmTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void ReconstructApplicationContext(const Moses::ChartHypothesis &hypo,
                                      const Moses::Sentence &sentence,
                                      ApplicationContext &context);
@@ -114,6 +117,7 @@ public:
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, long translationId);
   void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputDetailedGhkmTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 
   void ResetTranslationId();

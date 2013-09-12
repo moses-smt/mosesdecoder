@@ -71,6 +71,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_alignmentInfoStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
+  ,m_detailGhkmOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
@@ -116,6 +117,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
 
+  if (staticData.IsDetailedGhkmTranslationReportingEnabled()) {
+    const std::string &path = staticData.GetDetailedGhkmTranslationReportingFilePath();
+    m_detailedGhkmTranslationReportingStream = new std::ofstream(path.c_str());
+    m_detailGhkmOutputCollector = new Moses::OutputCollector(m_detailedGhkmTranslationReportingStream);
+  }
+
   if (!staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
     m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
@@ -130,6 +137,7 @@ IOWrapper::~IOWrapper()
   }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
+  delete m_detailedGhkmTranslationReportingStream;
   delete m_alignmentInfoStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
@@ -313,6 +321,39 @@ void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &
   }
 }
 
+void IOWrapper::OutputGhkmTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+  // recursive
+  if (hypo != NULL) {
+    const string key = "intlea";
+    string value;
+    bool hasprop;
+    const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
+    currTarPhr.GetProperty(key, value, hasprop);
+
+    ReconstructApplicationContext(*hypo, sentence, applicationContext);
+    out << "Trans Opt " << translationId
+        << " " << hypo->GetCurrSourceRange()
+        << ":";
+    WriteApplicationContext(out, applicationContext);
+    out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+        << "-> " << hypo->GetCurrTargetPhrase()
+        << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+
+    if (hasprop)
+      out << " " << value;
+
+    out << endl;
+  }
+
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputGhkmTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
 void IOWrapper::OutputDetailedTranslationReport(
   const ChartHypothesis *hypo,
   const Sentence &sentence,
@@ -329,6 +370,21 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
+void IOWrapper::OutputDetailedGhkmTranslationReport(
+  const ChartHypothesis *hypo,
+  const Sentence &sentence,
+  long translationId)
+{
+  if (hypo == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputGhkmTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+  CHECK(m_detailGhkmOutputCollector);
+  m_detailGhkmOutputCollector->Write(translationId, out.str());
+}
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {
