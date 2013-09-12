@@ -31,9 +31,6 @@ public:
     m_sourceSpans = ReadSpanList(columns[1]);
     m_targetSpans = ReadSpanList(columns[2]);
 
-    //Check that pairs are sorted
-    CHECK(IsSourceSorted());
-
     m_srcCept = columns[3];
     m_tgtCept = columns[4];
   }
@@ -45,10 +42,10 @@ public:
   vector<pair<int, int> > GetTargetSpanList()  { return m_targetSpans; }
 
   //FB : TODO : Should we move this somewhere else ?
-  bool IsSourceSorted()
+  void IsSourceSorted()
   {
     int prevEnd = -1;
-    vector<string>::const_iterator it;
+    vector<pair<int,int> >::const_iterator it;
     for (it = m_sourceSpans.begin(); it != m_sourceSpans.end(); it++) {
       CHECK(it->first > prevEnd);
       prevEnd = it->second;
@@ -59,12 +56,12 @@ private:
   vector<pair<int, int> > ReadSpanList(const string &spanListStr)
   {
     vector<pair<int, int> > out;
-    vector<string> spanList = Tokenize(spanListStr, ",");
+    vector<string> spanList = Tokenize(spanListStr, " ");
     vector<string>::const_iterator spanIt;
     for (spanIt = spanList.begin(); spanIt != spanList.end(); spanIt++) {
       vector<string> positions = Tokenize(*spanIt, "-");      
       CHECK(positions.size() == 2);
-      out.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<Int>(positions[1])));
+      out.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
     }
     return out;
   }
@@ -192,12 +189,12 @@ int main(int argc, char**argv)
       continue;
 
     // we have all correct translations of the current phrase
-    if (dwlLine.GetSrcCept() != srcCept || dwlLine.GetSrcStart() != spanStart || newSentence) {
+    if (dwlLine.GetSrcCept() != srcCept || dwlLine.GetSourceSpanList() != sourceSpanList || newSentence) {
       // generate features
       if (hasTranslation) {
         srcSurvived++;
 
-        extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
+        extractor.GenerateFeatures(&consumer, context, sourceSpanList, translations, losses);
         newSentence = false;
       }
 
@@ -206,14 +203,14 @@ int main(int argc, char**argv)
       srcCept = dwlLine.GetSrcCept();
       sourceSpanList = dwlLine.GetSourceSpanList();
       context = ReadFactoredLine(corpusLine, config.GetFactors().size());
-      translations = ttables.GetAllTranslations(srcPhrase, ttable_intersection);
+      translations = ttables.GetAllTranslations(srcCept, ttable_intersection);
       losses.clear();
       losses.resize(translations.size(), 1);
       srcTotal++;
     }
 
     bool foundTgt = false;
-    size_t tgtPhraseID = ttables.GetTgtPhraseID(dwlLine.GetTgtPhrase(), &foundTgt);
+    size_t tgtPhraseID = ttables.GetTgtPhraseID(dwlLine.GetTgtCept(), &foundTgt);
 
     if (foundTgt) {
       // add correct translation (i.e., set its loss to 0)
