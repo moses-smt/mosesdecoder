@@ -109,9 +109,18 @@ private:
   vector< string > m_extractedPsdOutput;
   void extractBase(SentenceAlignment &);
   void extract(SentenceAlignment &);
+  void extractAllMaxSize(SentenceAlignment &, int, int, HPhraseVector &,
+    HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, 
+    HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, bool);
+  void extractMTU(SentenceAlignment &, int, int, HPhraseVector &,
+    HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, 
+    HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, bool);
+  bool getAlignedSpan( int, int, int *, int *, vector< int >, vector<vector<int> > & );
+  void extractPhrase(SentenceAlignment &, int, int, int, int, int, HPhraseVector &,
+    HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &,
+    HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, bool);
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
   void writePhrasesToFile();
-  
 };
 }
 
@@ -157,6 +166,8 @@ int main(int argc, char* argv[])
       options.initSentenceIdFlag(true);  
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
       options.initGzOutput(true);  
+    } else if (strcmp(argv[i], "--MTU") == 0) { // minimal translation units
+      options.initMTU(true);
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -165,8 +176,6 @@ int main(int argc, char* argv[])
       char*  modelParams = argv[++i];
       char*  modelName = strtok(modelParams, "-");
       char*  modelType = strtok(NULL, "-");
-
-      REO_MODEL_TYPE intModelType;
 
       if(strcmp(modelName, "wbe") == 0) {
         options.initWordModel(true);
@@ -359,7 +368,6 @@ void ExtractTask::Run() {
   m_extractedPhrasesOri.clear();
   m_extractedPhrasesSid.clear();
   m_extractedPsdOutput.clear();
-
 }
 
 void ExtractTask::extract(SentenceAlignment &sentence)
@@ -381,86 +389,19 @@ void ExtractTask::extract(SentenceAlignment &sentence)
 
   HSentenceVertices::const_iterator it;
 
-  bool relaxLimit = m_options.isHierModel();
   bool buildExtraStructure = m_options.isPhraseModel() || m_options.isHierModel();
 
-  // check alignments for target phrase startE...endE
-  // loop over extracted phrases which are compatible with the word-alignments
-  for(int startE=0; startE<countE; startE++) {
-    for(int endE=startE;
-        (endE<countE && (relaxLimit || endE<startE+m_options.maxPhraseLength));
-        endE++) {
-
-      int minF = 9999;
-      int maxF = -1;
-      vector< int > usedF = sentence.alignedCountS;
-      for(int ei=startE; ei<=endE; ei++) {
-        for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
-          int fi = sentence.alignedToT[ei][i];
-          if (fi<minF) {
-            minF = fi;
-          }
-          if (fi>maxF) {
-            maxF = fi;
-          }
-          usedF[ fi ]--;
-        }
-      }
-
-      if (maxF >= 0 && // aligned to any source words at all
-          (relaxLimit || maxF-minF < m_options.maxPhraseLength)) { // source phrase within limits
-
-        // check if source words are aligned to out of bound target words
-        bool out_of_bounds = false;
-        for(int fi=minF; fi<=maxF && !out_of_bounds; fi++)
-          if (usedF[fi]>0) {
-            // cout << "ouf of bounds: " << fi << "\n";
-            out_of_bounds = true;
-          }
-
-        // cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n";
-        if (!out_of_bounds) {
-          // start point of source phrase may retreat over unaligned
-          for(int startF=minF;
-              (startF>=0 &&
-               (relaxLimit || startF>maxF-m_options.maxPhraseLength) && // within length limit
-               (startF==minF || sentence.alignedCountS[startF]==0)); // unaligned
-              startF--)
-            // end point of source phrase may advance over unaligned
-            for(int endF=maxF;
-                (endF<countF &&
-                 (relaxLimit || endF<startF+m_options.maxPhraseLength) && // within length limit
-                 (endF==maxF || sentence.alignedCountS[endF]==0)); // unaligned
-                endF++) { // at this point we have extracted a phrase
-              if(buildExtraStructure) { // phrase || hier
-                if(endE-startE < m_options.maxPhraseLength && endF-startF < m_options.maxPhraseLength) { // within limit
-                  inboundPhrases.push_back(HPhrase(HPhraseVertex(startF,startE),
-                                                   HPhraseVertex(endF,endE)));
-                  insertPhraseVertices(inTopLeft, inTopRight, inBottomLeft, inBottomRight,
-                                       startF, startE, endF, endE);
-                } else
-                  insertPhraseVertices(outTopLeft, outTopRight, outBottomLeft, outBottomRight,
-                                       startF, startE, endF, endE);
-              } else {
-                string orientationInfo = "";
-                if(m_options.isWordModel()) {
-                  REO_POS wordPrevOrient, wordNextOrient;
-                  bool connectedLeftTopP  = isAligned( sentence, startF-1, startE-1 );
-                  bool connectedRightTopP = isAligned( sentence, endF+1,   startE-1 );
-                  bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
-                  bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
-                  wordPrevOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopP, connectedRightTopP, startF, endF, startE, endE, countF, 0, 1, &ge, &lt);
-                  wordNextOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopN, connectedRightTopN, endF, startF, endE, startE, 0, countF, -1, &lt, &ge);
-                  orientationInfo += getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType());
-                  if(m_options.isAllModelsOutputFlag())
-                    " | | ";
-                }
-                addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
-              }
-            }
-        }
-      }
-    }
+  if (m_options.isMTU()) {
+    extractMTU( sentence, countE, countF, inboundPhrases,
+                inTopLeft, inTopRight, inBottomLeft, inBottomRight,
+                outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                buildExtraStructure);
+  }
+  else {
+    extractAllMaxSize( sentence, countE, countF, inboundPhrases,
+                       inTopLeft, inTopRight, inBottomLeft, inBottomRight,
+                       outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                       buildExtraStructure);
   }
 
   if(buildExtraStructure) { // phrase || hier
@@ -513,6 +454,218 @@ void ExtractTask::extract(SentenceAlignment &sentence)
 
       addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
     }
+  }
+}
+
+void ExtractTask::extractMTU(SentenceAlignment &sentence,
+  int countE, int countF,
+  HPhraseVector &inboundPhrases,
+  HSentenceVertices &inTopLeft, HSentenceVertices &inTopRight, 
+  HSentenceVertices &inBottomLeft, HSentenceVertices &inBottomRight,
+  HSentenceVertices &outTopLeft, HSentenceVertices &outTopRight, 
+  HSentenceVertices &outBottomLeft, HSentenceVertices &outBottomRight,
+  bool buildExtraStructure)
+{
+  bool relaxLimit = m_options.isHierModel();
+
+  // some handy data structures needed only for MTUs
+  vector<int> alignedCountT;
+  vector<vector<int> > alignedToS(countF);
+  for(int ei=0; ei<countE; ei++) {
+    alignedCountT.push_back(0);
+    for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
+      alignedToS[sentence.alignedToT[ei][i]].push_back(ei);
+      alignedCountT[ei]++;
+    }
+  }
+  set< pair<int,int> > processedSpan;
+
+  // try to find MTU for each English word
+  for(int ei=0; ei<countE; ei++) {
+    if (alignedCountT[ei] > 0) { // handle non-aligned words elsewhere
+      // transitive closure that contains ei
+      int minF, maxF;
+      int minE = ei;
+      int maxE = ei;
+      bool out_of_bounds = false;
+      do {
+        out_of_bounds = getAlignedSpan( minE, maxE, &minF, &maxF, sentence.alignedCountS, sentence.alignedToT);
+        if (!out_of_bounds || // transitive closure complete?
+            (!relaxLimit && maxF-minF >= m_options.maxPhraseLength)) { // aligned phrase too big?
+          break;
+        }  
+        out_of_bounds = getAlignedSpan( minF, maxF, &minE, &maxE, alignedCountT, alignedToS);
+      } 
+      while( out_of_bounds && maxE-minE < m_options.maxPhraseLength );
+
+      // found transitive closure that is not too big
+      if (maxE-minE < m_options.maxPhraseLength &&
+          (relaxLimit || maxF-minF < m_options.maxPhraseLength)) {
+
+        // check if this was already processed
+        pair< int, int> span = make_pair( minE, maxE );
+        if (!processedSpan.count( span )) {
+         processedSpan.insert( span );
+
+         // expand by null aligned words in all directions
+         for( int startE = minE; startE>=0 && (startE==minE || alignedCountT[startE] == 0); startE--) {
+          for( int endE = maxE; endE<countE && (endE==maxE || alignedCountT[endE] == 0) && endE-startE < m_options.maxPhraseLength; endE++) {
+            for( int startF = minF; startF>=0 && (startF==minF || sentence.alignedCountS[startF] == 0); startF--) {
+              for( int endF = maxF; endF<countF && (endF==maxF || sentence.alignedCountS[endF] == 0) && (relaxLimit || endF-startF < m_options.maxPhraseLength); endF++) {
+                // extract phrase pair
+                extractPhrase( sentence, startE, endE, startF, endF, countF, inboundPhrases,
+                               inTopLeft, inTopRight, inBottomLeft, inBottomRight,
+                               outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                               buildExtraStructure);
+              }
+            }
+          }
+         }
+        }
+      }
+    }
+  }
+}
+
+void ExtractTask::extractAllMaxSize(SentenceAlignment &sentence,
+  int countE, int countF,
+  HPhraseVector &inboundPhrases,
+  HSentenceVertices &inTopLeft, HSentenceVertices &inTopRight, 
+  HSentenceVertices &inBottomLeft, HSentenceVertices &inBottomRight,
+  HSentenceVertices &outTopLeft, HSentenceVertices &outTopRight, 
+  HSentenceVertices &outBottomLeft, HSentenceVertices &outBottomRight,
+  bool buildExtraStructure)
+{
+  bool relaxLimit = m_options.isHierModel();
+  // check alignments for target phrase startE...endE
+  // loop over extracted phrases which are compatible with the word-alignments
+  for(int startE=0; startE<countE; startE++) {
+    for(int endE=startE;
+        (endE<countE && (relaxLimit || endE<startE+m_options.maxPhraseLength));
+        endE++) {
+
+      int minF, maxF;
+      bool out_of_bounds = getAlignedSpan( startE, endE, &minF, &maxF, sentence.alignedCountS, sentence.alignedToT);
+      /* int minF = 9999;
+      int maxF = -1; 
+      vector< int > usedF = sentence.alignedCountS;
+      for(int ei=startE; ei<=endE; ei++) {
+        for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
+          int fi = sentence.alignedToT[ei][i];
+          if (fi<minF) {
+            minF = fi;
+          }
+          if (fi>maxF) {
+            maxF = fi;
+          }
+          usedF[ fi ]--;
+        }
+      } */
+
+      if (maxF >= 0 && // aligned to any source words at all
+          (relaxLimit || maxF-minF < m_options.maxPhraseLength)) { // source phrase within limits
+
+        // check if source words are aligned to out of bound target words
+        /* bool out_of_bounds = false;
+        for(int fi=minF; fi<=maxF && !out_of_bounds; fi++) {
+          if (usedF[fi]>0) {
+            // cout << "ouf of bounds: " << fi << "\n";
+            out_of_bounds = true;
+          }
+        } */
+
+        // cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n";
+        if (!out_of_bounds) {
+          // start point of source phrase may retreat over unaligned
+          for(int startF=minF;
+              (startF>=0 &&
+               (relaxLimit || startF>maxF-m_options.maxPhraseLength) && // within length limit
+               (startF==minF || sentence.alignedCountS[startF]==0)); // unaligned
+              startF--) {
+            // end point of source phrase may advance over unaligned
+            for(int endF=maxF;
+                (endF<countF &&
+                 (relaxLimit || endF<startF+m_options.maxPhraseLength) && // within length limit
+                 (endF==maxF || sentence.alignedCountS[endF]==0)); // unaligned
+                endF++) { 
+              // extract code:
+              // at this point we have extracted a phrase
+              extractPhrase( sentence, startE, endE, startF, endF, countF, inboundPhrases,
+                             inTopLeft, inTopRight, inBottomLeft, inBottomRight,
+                             outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                             buildExtraStructure);
+            } 
+          }
+        }
+      }
+    }
+  }
+}
+
+
+bool ExtractTask::getAlignedSpan( int minE, int maxE, int *minF, int *maxF, 
+                                  vector< int > usedF, vector<vector<int> > &alignedToE ) {
+  *minF = 9999;
+  *maxF = -1;
+  // go over all English words, aligned foreign words
+  for(int ei=minE; ei<=maxE; ei++) {
+    for(size_t i=0; i<alignedToE[ei].size(); i++) {
+      // extend span with each new aligned word
+      int fi = alignedToE[ei][i];
+      if (fi < *minF) {
+        *minF = fi;
+      }
+      if (fi > *maxF) {
+        *maxF = fi;
+      }
+      usedF[ fi ]--;
+    }
+  }
+  // check if there are any words f that have additional alignment points
+  bool out_of_bounds = false;
+  for(int fi=*minF; fi<=*maxF && !out_of_bounds; fi++) {
+    if (usedF[fi]>0) {
+      out_of_bounds = true;
+    }
+  }
+  return out_of_bounds;
+}
+
+
+void ExtractTask::extractPhrase(SentenceAlignment &sentence,
+  int startE, int endE, int startF, int endF, int countF,
+  HPhraseVector &inboundPhrases,
+  HSentenceVertices &inTopLeft, HSentenceVertices &inTopRight, 
+  HSentenceVertices &inBottomLeft, HSentenceVertices &inBottomRight,
+  HSentenceVertices &outTopLeft, HSentenceVertices &outTopRight, 
+  HSentenceVertices &outBottomLeft, HSentenceVertices &outBottomRight,
+  bool buildExtraStructure)
+{
+  if(buildExtraStructure) { // phrase || hier
+    if(endE-startE < m_options.maxPhraseLength && endF-startF < m_options.maxPhraseLength) { // within limit
+      inboundPhrases.push_back(HPhrase(HPhraseVertex(startF,startE),
+                               HPhraseVertex(endF,endE)));
+      insertPhraseVertices(inTopLeft, inTopRight, inBottomLeft, inBottomRight,
+                           startF, startE, endF, endE);
+    } 
+    else {
+      insertPhraseVertices(outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                           startF, startE, endF, endE);
+    } 
+  }
+  else {
+    string orientationInfo = "";
+    if(m_options.isWordModel()) {
+      REO_POS wordPrevOrient, wordNextOrient;
+      bool connectedLeftTopP  = isAligned( sentence, startF-1, startE-1 );
+      bool connectedRightTopP = isAligned( sentence, endF+1,   startE-1 );
+      bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
+      bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
+      wordPrevOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopP, connectedRightTopP, startF, endF, startE, endE, countF, 0, 1, &ge, &lt);
+      wordNextOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopN, connectedRightTopN, endF, startF, endE, startE, 0, countF, -1, &lt, &ge);
+      orientationInfo += getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType());
+    }
+    addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
   }
 }
 

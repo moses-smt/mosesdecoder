@@ -12,14 +12,21 @@ SYNOPSIS
 DESCRIPTION
     Given aligments for source and target sentences, outputs examples for 
     discriminative lexicon model training. Every target word (even unaligned 
-    one) is output with following information:
+    one) is output with following information (tab-delimited):
 
     - Sentence ID;
     - Space delimited source spans, e.g. "0-2 3-4" means "0,1,3";
-    - Target span in same format, e.g. "1-2" (always length 1).
+    - Target span in same format, e.g. "1-2" (always length 1);
+    - Source cept (as space-delimited string of words);
+    - Target word.
    
     Spans are defined using numbering of positions between words (starting from 
     zero -- position before the first word).
+
+    Empty cepts are written in a special way: they are replaced with following 
+    placeholder word:
+
+        __EMPTY__|__EMPTY__|-------------
 
     Output is written to stdout.
 
@@ -69,6 +76,13 @@ def cept_to_spans(cept):
 
     return SPANS
 
+EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|-------------"
+
+def cept_to_string(source, cept):
+    if not cept:
+        return EMPTY_PLACEHOLDER
+    return " ".join(source[index] for index in cept)
+
 def spans_to_string(spans):
     return " ".join("-".join(map(str, span)) for span in spans)
 
@@ -97,7 +111,7 @@ def extract_from_sentence(source, target, align_pairs):
             SENTENCE_ID,
             spans_to_string(spans),
             spans_to_string([target_span]),
-            " ".join(source[index] for index in cept),
+            cept_to_string(source, cept),
             target[target_index]
         )
 
