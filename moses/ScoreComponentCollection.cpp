@@ -1,6 +1,6 @@
 // $Id$
 #include <vector>
-
+#include "util/exception.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 
@@ -28,6 +28,20 @@ void ScorePair::PlusEquals(const StringPiece &key, float value)
 		float &existingval = iter->second;
 		existingval += value;
 	}
+}
+
+std::ostream& operator<<(std::ostream& os, const ScorePair& rhs)
+{
+	for (size_t i = 0; i < rhs.denseScores.size(); ++i) {
+		os << rhs.denseScores[i] << ",";
+	}
+
+	std::map<StringPiece, float>::const_iterator iter;
+	for (iter = rhs.sparseScores.begin(); iter != rhs.sparseScores.end(); ++iter) {
+		os << iter->first << "=" << iter->second << ",";
+	}
+
+	return os;
 }
 
 ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
@@ -205,6 +219,21 @@ void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string li
     m_scores[fname] = value;
   }
 }
+
+void ScoreComponentCollection::Assign(const FeatureFunction* sp, const std::vector<float>& scores) {
+  IndexPair indexes = GetIndexes(sp);
+  size_t numScores = indexes.second - indexes.first;
+
+  if (scores.size() != numScores) {
+	  UTIL_THROW(util::Exception, "Feature function " << sp->GetScoreProducerDescription() << " specified "
+			  << numScores << " dense scores or weights. Actually has " << scores.size());
+  }
+
+  for (size_t i = 0; i < scores.size(); ++i) {
+    m_scores[i + indexes.first] = scores[i];
+  }
+}
+
 
 void ScoreComponentCollection::InvertDenseFeatures(const FeatureFunction* sp)
 {
