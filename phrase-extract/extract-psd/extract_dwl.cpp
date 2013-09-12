@@ -9,6 +9,7 @@
 #include "DWLFeatureExtractor.h"
 #include "FeatureConsumer.h"
 #include "TTableCollection.h"
+#include "CeptTable.h"
 
 using namespace std;
 using namespace Moses;
@@ -122,13 +123,14 @@ int main(int argc, char**argv)
     cerr << "error: Failed to open " << argv[2] << endl;
     exit(1);
   }
-  TTableCollection ttables(argv[3]);
+
+  CeptTable ctable(argv[3]);
 
   ExtractorConfig config;
   config.Load(argv[4]);
-  DWLFeatureExtractor extractor(*ttables.GetTargetIndex(), config, true);
+  DWLFeatureExtractor extractor(*ctable.GetTargetIndex(), config, true);
   VWFileTrainConsumer consumer(argv[5]);
-  WritePhraseIndex(ttables.GetTargetIndex(), argv[6]);
+  WritePhraseIndex(ctable.GetTargetIndex(), argv[6]);
   bool ttable_intersection = false;
 
   // parse options
@@ -184,8 +186,8 @@ int main(int argc, char**argv)
       newSentence = true;
     }
 
-    //FB : reimplement ttables into cepts
-    if (! ttables.SrcExists(dwlLine.GetSrcCept()))
+    //FB : reimplement ctable into cepts
+    if (! ctable.SrcExists(dwlLine.GetSrcCept()))
       continue;
 
     // we have all correct translations of the current phrase
@@ -193,7 +195,6 @@ int main(int argc, char**argv)
       // generate features
       if (hasTranslation) {
         srcSurvived++;
-
         extractor.GenerateFeatures(&consumer, context, sourceSpanList, translations, losses);
         newSentence = false;
       }
@@ -203,14 +204,14 @@ int main(int argc, char**argv)
       srcCept = dwlLine.GetSrcCept();
       sourceSpanList = dwlLine.GetSourceSpanList();
       context = ReadFactoredLine(corpusLine, config.GetFactors().size());
-      translations = ttables.GetAllTranslations(srcCept, ttable_intersection);
+      translations = ctable.GetAllTranslations(srcCept, ttable_intersection);
       losses.clear();
       losses.resize(translations.size(), 1);
       srcTotal++;
     }
 
     bool foundTgt = false;
-    size_t tgtPhraseID = ttables.GetTgtPhraseID(dwlLine.GetTgtCept(), &foundTgt);
+    size_t tgtPhraseID = ctable.GetTgtPhraseID(dwlLine.GetTgtCept(), &foundTgt);
 
     if (foundTgt) {
       // add correct translation (i.e., set its loss to 0)
