@@ -1,0 +1,17 @@
+current_word
+current_lem
+current_tag		## tag as given from the parser
+en_tag			## removed sg/pl from noun tags -> number feature
+current_rel
+number
+parent_lem
+parent_pos
+grandparent_lem
+grandparent_pos
+leftmostchild_lem
+leftmostchild_pos
+leftmostchild_rel
+left_sister_lem
+left_sister_pos
+right_sister_lem
+right_sister_pos

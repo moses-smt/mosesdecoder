@@ -109,8 +109,7 @@ int main(int argc, char**argv)
 {
   if (argc < 7) {
     cerr << "error: wrong arguments" << endl;
-    cerr << "Usage: extract-dwl dwl-file corpus phrase-tables extractor-config output-train output-index" << endl;
-    cerr << "  For multiple phrase tables (=domains), use id1:file1:::id2:file2" << endl;
+    cerr << "Usage: extract-dwl dwl-file context-factors-file cept-table extractor-config output-train output-index" << endl;
     exit(1);
   }
   InputFileStream dwl(argv[1]);
