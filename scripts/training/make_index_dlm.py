@@ -69,8 +69,13 @@ def prune_group(group, num_top_lemmas=None):
 
 # --------------------------------------------------------------- Raw indices --
 
+EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|---------------"
+
 def parse_cept_and_target(input_line):
-    return input_line.strip().split("\t")[-2:]
+    cept, target = input_line.strip().split("\t")[-2:]
+    if cept == EMPTY_PLACEHOLDER:
+        cept = ""
+    return cept, target
 
 def make_indices(): 
     """
@@ -137,8 +142,6 @@ def append_frequencies(file):
     uniq = subprocess.Popen(["uniq", "-c"], stdin=file, stdout=subprocess.PIPE)
     return uniq.stdout
 
-EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|---------------"
-
 def parse_index(file):
     for line in file:
         line = line.decode("utf-8")
@@ -146,8 +149,6 @@ def parse_index(file):
         freq_source, target_lemma = line.strip().split("\t")
         freq, source = freq_source.split(" ", 1)
         freq = int(freq)
-        if target_lemma == EMPTY_PLACEHOLDER:
-            target_lemma = ""
 
         yield (freq, source, target_lemma)
 
