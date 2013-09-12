@@ -23,20 +23,20 @@ DWLFeatureExtractor::DWLFeatureExtractor(const IndexType &targetIndex, const Ext
     throw logic_error("configuration file not loaded");
 }
 
-map<string, float> DWLFeatureExtractor::GetMaxProb(const vector<CeptTranslation> &translations)
-{
-  map<string, float> maxProbs;
-  vector<CeptTranslation>::const_iterator it;
-  vector<TTableEntry>::const_iterator tableIt;
-  for (it = translations.begin(); it != translations.end(); it++) {
-    for (tableIt = it->m_ttableScores.begin(); tableIt != it->m_ttableScores.end(); tableIt++) {
-      if (tableIt->m_exists) {
-        maxProbs[tableIt->m_id] = max(tableIt->m_scores[P_E_F_INDEX], maxProbs[tableIt->m_id]);
-      }
-    }
-  }
-  return maxProbs;
-}
+// map<string, float> DWLFeatureExtractor::GetMaxProb(const vector<CeptTranslation> &translations)
+// {
+//   map<string, float> maxProbs;
+//   vector<CeptTranslation>::const_iterator it;
+//   vector<TTableEntry>::const_iterator tableIt;
+//   for (it = translations.begin(); it != translations.end(); it++) {
+//     for (tableIt = it->m_ttableScores.begin(); tableIt != it->m_ttableScores.end(); tableIt++) {
+//       if (tableIt->m_exists) {
+//         maxProbs[tableIt->m_id] = max(tableIt->m_scores[P_E_F_INDEX], maxProbs[tableIt->m_id]);
+//       }
+//     }
+//   }
+//   return maxProbs;
+// }
 
 void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,

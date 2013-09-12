@@ -16,8 +16,7 @@ DESCRIPTION
 
     - Sentence ID;
     - Space delimited source spans, e.g. "0-2 3-4" means "0,1,3";
-    - Start of target span; 
-    - End of target span.
+    - Target span in same format, e.g. "1-2" (always length 1).
    
     Spans are defined using numbering of positions between words (starting from 
     zero -- position before the first word).
@@ -86,23 +85,23 @@ def extract_from_sentence(source, target, align_pairs):
 
     for target_index in range(len(target)):
         cept = source_cept[target_index]
-        spans = None if not cept else cept_to_spans(cept)
+        target_span = [target_index, target_index + 1]
 
-        if not cept:
-            spans = [[last_aligned_position, last_aligned_position]]
-        else:
+        if cept:
+            spans = cept_to_spans(cept)
             last_aligned_position = max(cept) + 1
+        else:
+            spans = [[last_aligned_position, last_aligned_position]]
 
         params = (
             SENTENCE_ID,
             spans_to_string(spans),
-            target_index,
-            target_index + 1,
+            spans_to_string([target_span]),
             " ".join(source[index] for index in cept),
             target[target_index]
         )
 
-        print("%i\t%s\t%i\t%i\t%s\t%s" % (params))
+        print("%i\t%s\t%s\t%s\t%s" % (params))
 
     SENTENCE_ID += 1
 
