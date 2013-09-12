@@ -34,6 +34,7 @@ NOTES
 
 import argparse
 import collections
+import copy
 import fileinput
 import functools
 import itertools
@@ -85,12 +86,23 @@ def make_indices():
     INFLECTIONS_INDEX will be in-memory dict, that can be used to restore 
     inflections from target word lemmas:
     
-        # Contains set of target words, corresponding to lemma
-        INFLECTIONS_INDEX[target_lemma]
+        >>> # Contains set of target words (with frequencies), corresponding to 
+        >>> # given lemma
+        >>> INFLECTIONS_INDEX[target_lemma]
+        {
+            "target_1": 10,
+            "target_2": 1,
+            "target_3": 23,
+        }
 
     """
+    def make_frequency_counter():
+        return collections.defaultdict(lambda: 0)
+
     SOURCE_INDEX = tempfile.NamedTemporaryFile(mode="w+t")
-    INFLECTIONS_INDEX = collections.defaultdict(lambda: set())
+    INFLECTIONS_INDEX = collections.defaultdict(make_frequency_counter)
+
+    i = 0
 
     for line in fileinput.input("-"):
         cept, target = parse_cept_and_target(line)
@@ -100,10 +112,20 @@ def make_indices():
 
         for key in lookup_keys:
             SOURCE_INDEX.write("%s\t%s\n" % (key, lemma_key))
-            INFLECTIONS_INDEX[lemma_key].add(target)
+            INFLECTIONS_INDEX[lemma_key][target] += 1
+
+        #i += 1
+        #if i > 10:
+        #    break
 
     SOURCE_INDEX.seek(0)
     return (SOURCE_INDEX, INFLECTIONS_INDEX)
+
+def merge_inflections(to, from_):
+    RESULT = copy.copy(to)
+    for (inflection, freq) in from_.items():
+        RESULT[inflection] += freq
+    return RESULT
 
 # ------------------------------------------------- Index sorting and pruning --
 
@@ -138,10 +160,10 @@ def prune_and_expand(source_index, inflections_index, num_top_lemmas=None):
         group = prune_group(list(group), num_top_lemmas)
 
         lemmas = list(entry[2] for entry in group)
-        inflection_sets = (inflections_index[l] for l in lemmas)
-        target_inflections = functools.reduce(operator.or_, inflection_sets)
+        inflection_sets = list(inflections_index[l] for l in lemmas)
+        target_inflections = functools.reduce(merge_inflections, inflection_sets)
 
-        yield source, list(target_inflections)
+        yield source, target_inflections
 
 def inflections_expander(inflections_index, num_top_lemmas):
     def RESULT(source_index):
@@ -150,8 +172,8 @@ def inflections_expander(inflections_index, num_top_lemmas):
 
 def print_index(source_index):
     for source, target_inflections in source_index:
-        for inflection in target_inflections:
-            print("%s ||| %s" % (source, inflection))
+        for (text, freq) in target_inflections.items():
+            print("%s ||| %s ||| %i" % (source, text, freq))
 
 # ---------------------------------------------------------------------- Main --
 
