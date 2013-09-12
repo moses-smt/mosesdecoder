@@ -37,11 +37,24 @@ bool CeptTable::SrcExists(const string &phrase)
 
 const map<size_t, CTableTranslation> &CeptTable::GetTranslations(const string &srcPhrase)
 {
-  IndexType::left_map::const_iterator srcIt = m_sourceIndex->left.find(srcPhrase);
-  if (srcIt == m_sourceIndex->left.end())
+	vector<CeptTranslation> out;
+	IndexType::left_map::const_iterator srcIt = m_sourceIndex->left.find(srcPhrase);
+	if (srcIt == m_sourceIndex->left.end())
     throw logic_error("error: unknown source phrase " + srcPhrase);
-  DictionaryType::const_iterator it = m_ctable.find(srcIt->second);
-  return it->second;
+	DictionaryType::const_iterator it = m_ctable.find(srcIt->second);
+
+  //source index with several associated targets
+  map<size_t, CTableTranslation> translationsForIndex = it->second;
+
+  map<size_t, CTableTranslation> :: const_iterator itrIndex;
+  for(itrIndex = translationsForIndex.begin(); itrIndex != translationsForIndex.end(); itrIndex++)
+  {
+	  CeptTranslation currentTranslation;
+	  currentTranslation.m_index = it->first;
+	  currentTranslation.m_ctableScores = it->second;
+	  out.push_back(currentTranslation);
+  }
+  return out;
 }
 
 //
