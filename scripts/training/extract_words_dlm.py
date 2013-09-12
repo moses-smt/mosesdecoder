@@ -81,7 +81,7 @@ EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|---------------"
 def cept_to_string(source, cept):
     if not cept:
         return EMPTY_PLACEHOLDER
-    return " ".join(source[index] for index in cept),
+    return " ".join(source[index] for index in cept)
 
 def spans_to_string(spans):
     return " ".join("-".join(map(str, span)) for span in spans)
