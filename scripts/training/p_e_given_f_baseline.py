@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#i!/usr/bin/env python3
 
 """
 NAME
@@ -28,7 +28,11 @@ import math
 import sys
 
 def escape_vw(line):
-    return line.replace("///", "|").replace("___", " ").replace(";;;", ":")
+    if not line.startswith("p^"):
+        msg = "Wrong format: p^ prefix not found!"
+        raise Exception(msg)
+
+    return line[2:].replace("///", "|").replace("___", " ").replace(";;;", ":")
 
 def extract_from_phrase_table(line):
     fields = line.strip().split("|||")
@@ -95,8 +99,7 @@ def process_target_phrases(joint_counts,\
         params = (label, ":", LOG_PROBABILITY)
         print("%s%s %.3f" % params)
 
-def process(joint_counts, single_counts, alpha, vocabulary_size):
-    stream = open('/home/alborisov/MTM13/data/toy_vw_data', 'r')
+def process(stream, joint_counts, single_counts, alpha, vocabulary_size):
     while True:
         line = stream.readline()
         if not line:
@@ -130,7 +133,7 @@ def main():
     vocabulary_size = args.vocabulary_size
 
     joint_counts, single_counts = build_dictionaries(phrase_table)
-    process(joint_counts, single_counts, alpha, vocabulary_size)
+    process(sys.stdin, joint_counts, single_counts, alpha, vocabulary_size)
 
 if __name__ == "__main__":
     main()
