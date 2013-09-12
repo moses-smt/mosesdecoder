@@ -27,13 +27,24 @@ public:
     vector<string> columns = Tokenize(line, "\t");
     m_sentID = Scan<size_t>(columns[0]);
 
-    //get and tokenize list of source/target spans
-    //0-2,3-4	0-1
-    ReadSpanList(columns[1]);
-    ReadSpanList(columns[2]);
+    //get and tokenize list of source spans
+    //0-2 3-4	0-1
+    vector<string> spanList = Tokenize(columns[1], " ");
+    vector<string>::const_iterator spanIt;
+    for (spanIt = spanList.begin(); spanIt != spanList.end(); spanIt++) {
+      vector<string> positions = Tokenize(*spanIt, "-");      
+      cerr << positions.size() << endl;
+      CHECK(positions.size() == 2);
+      m_sourceSpans.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
+    }
+    IsSourceSorted();
 
-    m_srcCept = columns[3];
-    m_tgtCept = columns[4];
+    int targetStart = Scan<int>(columns[2]);
+    int targetEnd = Scan<int>(columns[3]);
+    m_targetSpans.push_back(make_pair<int, int>(targetStart, targetEnd));
+
+    m_srcCept = columns[4];
+    m_tgtCept = columns[5];
   }
 
   const string &GetSrcCept() { return m_srcCept; }
@@ -54,19 +65,6 @@ public:
   }
 
 private:
-  void ReadSpanList(const string &spanListStr)
-  {
-    vector<pair<int, int> > out;
-    vector<string> spanList = Tokenize(spanListStr, " ");
-    vector<string>::const_iterator spanIt;
-    for (spanIt = spanList.begin(); spanIt != spanList.end(); spanIt++) {
-      vector<string> positions = Tokenize(*spanIt, "-");      
-      CHECK(positions.size() == 2);
-      m_sourceSpans.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
-    }
-    IsSourceSorted();
-  }
-
   DWLLine();
   size_t m_sentID;
   vector<pair<int,int> > m_sourceSpans;
