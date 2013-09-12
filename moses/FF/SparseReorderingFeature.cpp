@@ -4,6 +4,8 @@
 #include "moses/ChartManager.h"
 #include "moses/Sentence.h"
 
+#include "util/exception.hh"
+
 #include "SparseReorderingFeature.h"
 
 using namespace std;
@@ -12,9 +14,47 @@ namespace Moses
 {
 
 SparseReorderingFeature::SparseReorderingFeature(const std::string &line)
-  :StatefulFeatureFunction("StatefulFeatureFunction",0, line)
+  :StatefulFeatureFunction("StatefulFeatureFunction",0, line),
+  m_sourceFactor(0),
+  m_targetFactor(0),
+  m_sourceVocabFile(""),
+  m_targetVocabFile("")
 {
+
+  /*
+    Configuration of features.
+      factor - Which factor should it apply to
+      type - what type of sparse reordering feature. e.g. block (modelled on Matthias
+        Huck's EAMT 2012 features)
+      word - which words to include, e.g. src_bdry, src_all, tgt_bdry , ...
+      vocab - vocab file to limit it to
+      orientation - e.g. lr, etc.
+  */
   cerr << "Constructing a Sparse Reordering feature" << endl;
+  ReadParameters();
+  LoadVocabulary(m_sourceVocabFile, m_sourceVocab);
+  LoadVocabulary(m_targetVocabFile, m_targetVocab);
+}
+
+void SparseReorderingFeature::SetParameter(const std::string& key, const std::string& value) {
+  if (key == "input-factor") {
+    m_sourceFactor = Scan<FactorType>(value);
+  } else if (key == "output-factor") {
+    m_targetFactor = Scan<FactorType>(value);
+  } else if (key == "input-vocab-file") {
+    m_sourceVocabFile = value;
+  } else if (key == "output-vocab-file") {
+    m_targetVocabFile = value;
+  } else {
+    FeatureFunction::SetParameter(key, value);
+  }
+}
+
+void SparseReorderingFeature::LoadVocabulary(const std::string& filename, boost::unordered_set<std::string>& vocab)
+{
+  if (filename.empty()) return;
+  ifstream in(filename.c_str());
+  UTIL_THROW_IF(!in, util::Exception, "Unable to open vocab file: " << filename);
 }
 
 static void AddFeatureWordPair(const string& prefix, const string& suffix,
@@ -54,9 +94,15 @@ FFState* SparseReorderingFeature::EvaluateChart(
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap();
   
-  //Find all the pairs of non-terminals
-  //Are they forward or reversed relative to each other?
-  //Add features for their boundary words
+  //The Huck features. For a rule with source side:
+  //   abXcdXef
+  //We first have to split into blocks:
+  // ab X cd X ef
+  //Then we extract features based in the boundary words of the neighbouring blocks
+  //For the block pair, we use the right word of the left block, and the left 
+  //word of the right block.
+
+  WordsRange sourceRange = cur_hypo.GetCurrSourceRange();
 
   //Get mapping from target to source, in target order
   vector<pair<size_t, size_t> > targetNTs; //(srcIdx,targetPos)

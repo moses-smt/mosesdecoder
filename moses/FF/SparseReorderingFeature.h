@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <boost/unordered_set.hpp>
+
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 
@@ -24,6 +26,8 @@ public:
 
 	bool IsUseable(const FactorMask &mask) const
 		{ return true; }
+
+  void SetParameter(const std::string& key, const std::string& value);
 
 	void Evaluate(const Phrase &source
 	                        , const TargetPhrase &targetPhrase
@@ -54,9 +58,19 @@ public:
 
 private:
 
-void AddNonTerminalPairFeatures(
-  const Sentence& sentence, const WordsRange& nt1, const WordsRange& nt2,
-    bool isMonotone, ScoreComponentCollection* accumulator) const;
+  void AddNonTerminalPairFeatures(
+    const Sentence& sentence, const WordsRange& nt1, const WordsRange& nt2,
+      bool isMonotone, ScoreComponentCollection* accumulator) const;
+
+  void LoadVocabulary(const std::string& filename, boost::unordered_set<std::string>& vocab);
+
+  FactorType m_sourceFactor;
+  FactorType m_targetFactor;
+  std::string m_sourceVocabFile;
+  std::string m_targetVocabFile;
+
+  boost::unordered_set<std::string> m_sourceVocab;
+  boost::unordered_set<std::string> m_targetVocab;
 
 };
 
