@@ -30,12 +30,7 @@ CeptTable::CeptTable(const string &fileName)
   }
 }
 
-bool CeptTable::SrcExists(const string &phrase)
-{
-  return m_sourceIndex->left.find(phrase) != m_sourceIndex->left.end();
-}
-
-const map<size_t, CTableTranslation> &CeptTable::GetTranslations(const string &srcPhrase)
+const vector<CeptTranslation> &CeptTable::GetTranslations(const string &srcPhrase)
 {
 	vector<CeptTranslation> out;
 	IndexType::left_map::const_iterator srcIt = m_sourceIndex->left.find(srcPhrase);
@@ -91,6 +86,18 @@ size_t CeptTable::AddCept(const string &phrase, IndexType *index)
     index->left.insert(IndexType::left_map::value_type(phrase, id));
   }
   return id;
+}
+
+size_t CeptTable::GetTgtPhraseID(const string &phrase, /* out */ bool *found)
+{
+  *found = false;
+  IndexType::left_map::const_iterator it = m_targetIndex->left.find(phrase);
+  if (it != m_targetIndex->left.end()) {
+    *found = true;
+    return it->second;
+  } else {
+    return 0; // user must test value of found!
+  }
 }
 
 
