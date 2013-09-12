@@ -1785,7 +1785,14 @@ sub define_training_psd_extract {
   my $extractor = &get("GENERAL:moses-script-dir") . "/generic/psd-feature-extract-parallel.perl";
   my $cores = &get("GENERAL:cores");
   my $extractor_bin = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
-  my $cmd = "$extractor $cores $extractor_bin $extract.psd.gz $src_corpus $phrase_table.gz $psd_config $out";
+
+  # ugly, but this gets the extract filename *with* factors
+  # See encode_factor_definition("translation-factors" ... for how to do this right
+  my $extract_factors =  &get_table_name_settings("translation-factors", "zzz", $extract);
+  $extract_factors =~ s/ $//;
+  $extract_factors =~ s/-zzz //;
+
+  my $cmd = "$extractor $cores $extractor_bin $extract_factors.psd.gz $src_corpus $phrase_table.gz $psd_config $out";
 
   my $hierarchical = &get("TRAINING:hierarchical-rule-set");
   if ($hierarchical) {
