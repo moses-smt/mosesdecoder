@@ -325,8 +325,8 @@ void IOWrapper::OutputGhkmTranslationOptions(std::ostream &out, ApplicationConte
 {
   // recursive
   if (hypo != NULL) {
-    const string key = "intlea";
-    string value;
+    const std::string key = "GHKMParse";
+    std::string value;
     bool hasprop;
     const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
     currTarPhr.GetProperty(key, value, hasprop);
@@ -340,10 +340,13 @@ void IOWrapper::OutputGhkmTranslationOptions(std::ostream &out, ApplicationConte
         << "-> " << hypo->GetCurrTargetPhrase()
         << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
 
+    out << std::endl;
     if (hasprop)
       out << " " << value;
+    else
+      out << " " << "noGHKMParseInfo";
 
-    out << endl;
+    out << std::endl;
   }
 
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
