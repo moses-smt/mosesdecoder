@@ -47,6 +47,7 @@ class PhraseExtractionOptions {
   bool onlyOutputSpanInfo;
   bool gzOutput;
   bool outputPsd;
+  bool mtu;
 
 public:  
   PhraseExtractionOptions(const int initmaxPhraseLength):
@@ -62,10 +63,9 @@ public:
             translationFlag(true),
             sentenceIdFlag(false),
             onlyOutputSpanInfo(false),
+            gzOutput(false),
             outputPsd(false),
-            gzOutput(false){}
-
-
+            mtu(false){}
  
     //functions for initialization of options
     void initAllModelsOutputFlag(const bool initallModelsOutputFlag){
@@ -104,10 +104,12 @@ public:
     void initGzOutput (const bool initgzOutput){
         gzOutput= initgzOutput;
     } 
-
     void initOutputPsd(bool initOutputPsd) {
       outputPsd = initOutputPsd;
     }
+    void initMTU (const bool initMTU){
+        mtu = initMTU;
+    } 
 
     // functions for getting values
     bool isAllModelsOutputFlag(){
@@ -148,7 +150,10 @@ public:
     } 
     bool isGzOutput (){
         return gzOutput;
-   } 
+    } 
+    bool isMTU (){
+        return mtu;
+    } 
 };
 
 }
