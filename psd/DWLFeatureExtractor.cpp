@@ -23,10 +23,10 @@ DWLFeatureExtractor::DWLFeatureExtractor(const IndexType &targetIndex, const Ext
     throw logic_error("configuration file not loaded");
 }
 
-map<string, float> DWLFeatureExtractor::GetMaxProb(const vector<Translation> &translations)
+map<string, float> DWLFeatureExtractor::GetMaxProb(const vector<CeptTranslation> &translations)
 {
   map<string, float> maxProbs;
-  vector<Translation>::const_iterator it;
+  vector<CeptTranslation>::const_iterator it;
   vector<TTableEntry>::const_iterator tableIt;
   for (it = translations.begin(); it != translations.end(); it++) {
     for (tableIt = it->m_ttableScores.begin(); tableIt != it->m_ttableScores.end(); tableIt++) {
@@ -41,7 +41,7 @@ map<string, float> DWLFeatureExtractor::GetMaxProb(const vector<Translation> &tr
 void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
   const vector<pair<int, int> > &sourceSpanList,
-  const vector<Translation> &translations,
+  const vector<CeptTranslation> &translations,
   vector<float> &losses)
 {  
   fc->SetNamespace('s', true);
@@ -61,7 +61,7 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   }
   
   map<string, float> maxProbs;
-  if (m_config.GetMostFrequent()) maxProbs = GetMaxProb(translations);
+//  if (m_config.GetMostFrequent()) maxProbs = GetMaxProb(translations);
 
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetPhraseFactor()) GeneratePhraseFactorFeatures(context, sourceSpanList, fc);
@@ -69,7 +69,7 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 
 	if (m_config.GetSourceIndicator()) GenerateIndicatorFeature(sourceForms, fc); 
 
-  vector<Translation>::const_iterator transIt = translations.begin();
+  vector<CeptTranslation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
   for (; transIt != translations.end(); transIt++, lossIt++) {
     assert(lossIt != losses.end());

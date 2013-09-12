@@ -12,6 +12,12 @@
 namespace PSD
 {
 
+struct CeptTranslation
+{
+  size_t m_index;                          // index in the target-phrase vocabulary
+  std::vector<TTableEntry> m_ttableScores; // phrase scores in each phrase table
+};
+
 // extract features
 class DWLFeatureExtractor
 {
@@ -26,7 +32,7 @@ public:
   void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
     const std::vector<std::pair<int, int> > &sourceSpanList,
-    const std::vector<Translation> &translations,
+    const std::vector<CeptTranslation> &translations,
     std::vector<float> &losses);
 
 private:
@@ -36,7 +42,7 @@ private:
 
   // Get the highest probability P(e|f) associated with any of the translation options,
   // separately for each phrase table (string keys are phrase-table IDs).
-  std::map<std::string, float> GetMaxProb(const std::vector<Translation> &translations);
+//  std::map<std::string, float> GetMaxProb(const std::vector<CeptTranslation> &translations);
 
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GeneratePhraseFactorFeatures(const ContextType &context, const std::vector<std::pair<int, int> > &sourceSpanList, FeatureConsumer *fc);
@@ -48,11 +54,11 @@ private:
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,
       const std::vector<std::string> &tgtPhrase,
       FeatureConsumer *fc);
-  void GenerateScoreFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc);
-  void GenerateMostFrequentFeature(const std::vector<TTableEntry> &ttableScores,
-      const std::map<std::string, float> &maxProbs,
-      FeatureConsumer *fc);
-  void GenerateTTableEntryFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc);
+//  void GenerateScoreFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc);
+//  void GenerateMostFrequentFeature(const std::vector<TTableEntry> &ttableScores,
+//      const std::map<std::string, float> &maxProbs,
+//      FeatureConsumer *fc);
+//  void GenerateTTableEntryFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc);
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 
