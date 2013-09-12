@@ -28,7 +28,8 @@ DESCRIPTION
 
         __EMPTY__|__EMPTY__|-------------
 
-    Output is written to stdout.
+    The output (a "dwl-file") is written to stdout and later used by
+    extract_dwl.
 
 PARAMETERS
     SOURCE
