@@ -29,8 +29,8 @@ public:
 
     //get and tokenize list of source/target spans
     //0-2,3-4	0-1
-    m_sourceSpans = ReadSpanList(columns[1]);
-    m_targetSpans = ReadSpanList(columns[2]);
+    ReadSpanList(columns[1]);
+    ReadSpanList(columns[2]);
 
     m_srcCept = columns[3];
     m_tgtCept = columns[4];
@@ -54,7 +54,7 @@ public:
   }
 
 private:
-  vector<pair<int, int> > ReadSpanList(const string &spanListStr)
+  void ReadSpanList(const string &spanListStr)
   {
     vector<pair<int, int> > out;
     vector<string> spanList = Tokenize(spanListStr, " ");
@@ -62,10 +62,9 @@ private:
     for (spanIt = spanList.begin(); spanIt != spanList.end(); spanIt++) {
       vector<string> positions = Tokenize(*spanIt, "-");      
       CHECK(positions.size() == 2);
-      out.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
+      m_sourceSpans.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
     }
-    CHECK(IsSourceSorted(out));
-    return out;
+    IsSourceSorted();
   }
 
   DWLLine();
