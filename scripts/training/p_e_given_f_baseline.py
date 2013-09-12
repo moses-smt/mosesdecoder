@@ -2,7 +2,7 @@
 
 """
 NAME
-    baseline_e_given_f.py -- predict p(e|f) based on relative frequences
+    p_e_given_f_baseline.py -- predict p(e|f) based on relative frequences
 
 SYNOPSIS
 
@@ -28,7 +28,7 @@ import math
 import sys
 
 def escape_vw(line):
-    return line.replace("///", "|").replace("___", " ")
+    return line.replace("///", "|").replace("___", " ").replace(";;;", ":")
 
 def extract_from_phrase_table(line):
     fields = line.strip().split("|||")
