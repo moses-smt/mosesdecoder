@@ -102,8 +102,6 @@ def make_indices():
     SOURCE_INDEX = tempfile.NamedTemporaryFile(mode="w+t")
     INFLECTIONS_INDEX = collections.defaultdict(make_frequency_counter)
 
-    i = 0
-
     for line in fileinput.input("-"):
         cept, target = parse_cept_and_target(line)
 
@@ -113,10 +111,6 @@ def make_indices():
         for key in lookup_keys:
             SOURCE_INDEX.write("%s\t%s\n" % (key, lemma_key))
             INFLECTIONS_INDEX[lemma_key][target] += 1
-
-        #i += 1
-        #if i > 10:
-        #    break
 
     SOURCE_INDEX.seek(0)
     return (SOURCE_INDEX, INFLECTIONS_INDEX)
