@@ -31,6 +31,7 @@ public:
     //0-2,3-4	0-1
     m_sourceSpans = ReadSpanList(columns[1]);
     m_targetSpans = ReadSpanList(columns[2]);
+    CHECK(IsSourceSorted());
 
     m_srcCept = columns[3];
     m_tgtCept = columns[4];
@@ -64,7 +65,6 @@ private:
       CHECK(positions.size() == 2);
       out.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
     }
-    CHECK(IsSourceSorted(out));
     return out;
   }
 
