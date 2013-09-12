@@ -42,6 +42,7 @@ public:
   vector<pair<int, int> > GetTargetSpanList()  { return m_targetSpans; }
 
   //FB : TODO : Should we move this somewhere else ?
+  // XXX this is not used anywhere
   void IsSourceSorted()
   {
     int prevEnd = -1;
