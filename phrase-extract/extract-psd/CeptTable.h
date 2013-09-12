@@ -25,8 +25,10 @@ typedef std::map<size_t, std::map<size_t, CTableTranslation> > DictionaryType;
 class CeptTable
 {
 public:
-  CeptTable(const std::string &fileName, PSD::IndexType *targetIndex);
+  CeptTable(const std::string &fileName);
   bool SrcExists(const std::string &phrase);
+
+ const PSD::IndexType *GetTargetIndex() { return m_targetIndex; }
 
   // get all translations of source phrase, assumes that srcPhrase is known
   // (throws logic_error otherwise)
