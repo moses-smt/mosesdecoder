@@ -15,7 +15,7 @@ namespace PSD
 struct CeptTranslation
 {
   size_t m_index;                          // index in the target-phrase vocabulary
-  std::vector<TTableEntry> m_ttableScores; // phrase scores in each phrase table
+  std::vector<float> m_scores;
 };
 
 // extract features

@@ -16,9 +16,9 @@ using namespace PSD;
 using namespace boost::bimaps;
 
 CeptTable::CeptTable(const string &fileName)
-  : m_targetIndex(targetIndex)
 {
   m_sourceIndex = new IndexType();
+  m_targetIndex = new IndexType();
   InputFileStream in(fileName);
   if (! in.good())
     throw runtime_error("error: cannot open " + fileName);
@@ -30,23 +30,23 @@ CeptTable::CeptTable(const string &fileName)
   }
 }
 
-const vector<CeptTranslation> &CeptTable::GetTranslations(const string &srcPhrase)
+vector<CeptTranslation> CeptTable::GetTranslations(const string &srcPhrase)
 {
 	vector<CeptTranslation> out;
 	IndexType::left_map::const_iterator srcIt = m_sourceIndex->left.find(srcPhrase);
 	if (srcIt == m_sourceIndex->left.end())
     throw logic_error("error: unknown source phrase " + srcPhrase);
-	DictionaryType::const_iterator it = m_ctable.find(srcIt->second);
+	CeptDictionaryType::const_iterator it = m_ctable.find(srcIt->second);
 
   //source index with several associated targets
-  map<size_t, CTableTranslation> translationsForIndex = it->second;
+  const map<size_t, CTableTranslation> &translationsForIndex = it->second;
 
-  map<size_t, CTableTranslation> :: const_iterator itrIndex;
-  for(itrIndex = translationsForIndex.begin(); itrIndex != translationsForIndex.end(); itrIndex++)
+  map<size_t, CTableTranslation>::const_iterator idxIt;
+  for(idxIt = translationsForIndex.begin(); idxIt != translationsForIndex.end(); idxIt++)
   {
 	  CeptTranslation currentTranslation;
-	  currentTranslation.m_index = it->first;
-	  currentTranslation.m_ctableScores = it->second;
+	  currentTranslation.m_index = idxIt->first;
+	  currentTranslation.m_scores = idxIt->second.m_scores;
 	  out.push_back(currentTranslation);
   }
   return out;
@@ -57,15 +57,14 @@ const vector<CeptTranslation> &CeptTable::GetTranslations(const string &srcPhras
 //
 
 void CeptTable::AddCeptPair(const std::string &src, const std::string &tgt,
-    const std::vector<float> &scores, const PSD::AlignmentType &align)
+    const std::vector<float> &scores)
 {
   size_t srcID = AddCept(src, m_sourceIndex);
-  pair<DictionaryType::iterator, bool> ret = m_ttable.insert(make_pair(srcID, map<size_t, TTableTranslation>()));
-  map<size_t, TTableTranslation> &translations = ret.first->second;
+  pair<CeptDictionaryType::iterator, bool> ret = m_ctable.insert(make_pair(srcID, map<size_t, CTableTranslation>()));
+  map<size_t, CTableTranslation> &translations = ret.first->second;
   size_t tgtID = AddCept(tgt, m_targetIndex);
 
-  TTableTranslation t;
-  t.m_alignment = align;
+  CTableTranslation t;
   t.m_scores = scores;
   translations.insert(make_pair(tgtID, t));
 }

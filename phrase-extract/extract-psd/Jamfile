@@ -1,7 +1,8 @@
 alias header_paths : : : : <include>. <include>.. <include>../../moses/src <include>../.. <include>../../psd ;
 
+obj CeptTable.o : CeptTable.cpp header_paths ;
 obj TranslationTable.o : TranslationTable.cpp header_paths ;
 obj TTableCollection.o : TTableCollection.cpp TranslationTable.o header_paths ;
 
-exe extract-dwl : extract_dwl.cpp TranslationTable.o TTableCollection.o ..//..//psd//psd ..//tables-core.o ..//OutputFileStream.cpp ..//InputFileStream header_paths ;
+exe extract-dwl : extract_dwl.cpp CeptTable.o ..//..//psd//psd ..//tables-core.o ..//OutputFileStream.cpp ..//InputFileStream header_paths ;
 exe extract-psd : psd_extract_features.cpp TranslationTable.o TTableCollection.o ..//..//psd//psd ..//tables-core.o ..//OutputFileStream.cpp ..//InputFileStream header_paths ;

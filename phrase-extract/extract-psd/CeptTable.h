@@ -36,7 +36,7 @@ public:
 
   // get all translations of source phrase, assumes that srcPhrase is known
   // (throws logic_error otherwise)
-  const std::vector<PSD::CeptTranslation> &GetTranslations(const std::string &srcCept);
+  std::vector<PSD::CeptTranslation> GetTranslations(const std::string &srcCept);
 
   size_t GetTgtPhraseID(const std::string &phrase, /* out */ bool *found);
 
@@ -45,7 +45,7 @@ private:
   PSD::IndexType *m_sourceIndex, *m_targetIndex;
 
   void AddCeptPair(const std::string &src, const std::string &tgt,
-      const std::vector<float> &scores, const PSD::AlignmentType &align);
+      const std::vector<float> &scores);
   std::vector<float> GetScores(const std::string &scoreStr);
 
   // add phrase to index (if it does not exist yet), return its ID
