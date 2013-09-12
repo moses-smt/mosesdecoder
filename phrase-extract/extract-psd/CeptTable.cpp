@@ -15,7 +15,7 @@ using namespace MosesTraining;
 using namespace PSD;
 using namespace boost::bimaps;
 
-CeptTable::CeptTable(const string &fileName, PSD::IndexType *targetIndex)
+CeptTable::CeptTable(const string &fileName)
   : m_targetIndex(targetIndex)
 {
   m_sourceIndex = new IndexType();
