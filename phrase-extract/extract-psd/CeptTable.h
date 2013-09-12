@@ -25,16 +25,20 @@ typedef std::map<size_t, std::map<size_t, CTableTranslation> > CeptDictionaryTyp
 class CeptTable
 {
 public:
-  CeptTable(const std::string &fileName);
-  bool SrcExists(const std::string &phrase);
+
+ CeptTable(const std::string &fileName);
 
  const PSD::IndexType *GetTargetIndex() { return m_targetIndex; }
+ bool SrcExists(const std::string &phrase)
+ {
+   return m_sourceIndex->left.find(phrase) != m_sourceIndex->left.end();
+ }
 
   // get all translations of source phrase, assumes that srcPhrase is known
   // (throws logic_error otherwise)
-  const std::map<size_t, CTableTranslation> &GetTranslations(const std::string &srcCept);
+  const std::vector<PSD::CeptTranslation> &GetTranslations(const std::string &srcCept);
 
-  const std::vector<CeptTranslation> &CeptTable::GetAllTranslations(const std::string &srcPhrase);
+  size_t GetTgtPhraseID(const std::string &phrase, /* out */ bool *found);
 
 private:
   CeptDictionaryType m_ctable;
@@ -46,8 +50,6 @@ private:
 
   // add phrase to index (if it does not exist yet), return its ID
   size_t AddCept(const std::string &phrase, PSD::IndexType *index);
-
-  size_t GetTgtPhraseID(const std::string &phrase, /* out */ bool *found);
 
 };
 
