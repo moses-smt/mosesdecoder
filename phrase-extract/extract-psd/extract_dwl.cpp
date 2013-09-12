@@ -132,26 +132,6 @@ int main(int argc, char**argv)
   DWLFeatureExtractor extractor(*ctable.GetTargetIndex(), config, true);
   VWFileTrainConsumer consumer(argv[5]);
   WritePhraseIndex(ctable.GetTargetIndex(), argv[6]);
-  bool ttable_intersection = false;
-
-  // parse options
-  // TODO use some library to do this
-  vector<size_t> toAnnotate;
-  for (int i = 7; i < argc; i++) {
-    string opt = argv[i];
-    if (opt == "--annotate") {
-      if (i + 1 >= argc) {
-        cerr << "No argument given to --annotate" << endl;
-        exit(1);
-      }
-      toAnnotate = Scan<size_t>(Tokenize(argv[++i], ","));
-    } else if (opt == "--intersection") {
-      ttable_intersection = true;
-    } else {
-      cerr << "Unknown option: " << opt << endl;
-      exit(1);
-    }
-  }
 
   // one source phrase can have multiple correct translations
   // these will be on consecutive lines in the input PSD file
@@ -205,7 +185,7 @@ int main(int argc, char**argv)
       srcCept = dwlLine.GetSrcCept();
       sourceSpanList = dwlLine.GetSourceSpanList();
       context = ReadFactoredLine(corpusLine, config.GetFactors().size());
-      translations = ctable.GetAllTranslations(srcCept, ttable_intersection);
+      translations = ctable.GetTranslations(srcCept);
       losses.clear();
       losses.resize(translations.size(), 1);
       srcTotal++;
