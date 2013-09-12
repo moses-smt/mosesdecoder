@@ -52,6 +52,11 @@ public:
 		  return new SparseReorderingState();
 	  }
 
+private:
+
+void AddNonTerminalPairFeatures(
+  const Sentence& sentence, const WordsRange& nt1, const WordsRange& nt2,
+    bool isMonotone, ScoreComponentCollection* accumulator) const;
 
 };
 
