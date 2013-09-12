@@ -9,7 +9,7 @@
 #define CEPTTABLE_H_
 
 #include "tables-core.h"
-#include "FeatureExtractor.h"
+#include "DWLFeatureExtractor.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -20,7 +20,7 @@ struct CTableTranslation
   std::vector<float> m_scores;
 };
 
-typedef std::map<size_t, std::map<size_t, CTableTranslation> > DictionaryType;
+typedef std::map<size_t, std::map<size_t, CTableTranslation> > CeptDictionaryType;
 
 class CeptTable
 {
@@ -34,8 +34,10 @@ public:
   // (throws logic_error otherwise)
   const std::map<size_t, CTableTranslation> &GetTranslations(const std::string &srcCept);
 
+  const std::vector<CeptTranslation> &CeptTable::GetAllTranslations(const std::string &srcPhrase);
+
 private:
-  DictionaryType m_ctable;
+  CeptDictionaryType m_ctable;
   PSD::IndexType *m_sourceIndex, *m_targetIndex;
 
   void AddCeptPair(const std::string &src, const std::string &tgt,
