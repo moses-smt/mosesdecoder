@@ -32,7 +32,7 @@ NOTES
     external-memory algorithms.
 """
 
-import argparse
+import optparse
 import collections
 import copy
 import fileinput
@@ -172,9 +172,9 @@ def print_index(source_index):
 # ---------------------------------------------------------------------- Main --
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--leave-top-lemmas", type=int)
-    args = parser.parse_args()
+    parser = optparse.OptionParser()
+    parser.add_option("--leave-top-lemmas", type=int)
+    args, _ = parser.parse_args()
     
     source_index, inflections_index = make_indices()
     
