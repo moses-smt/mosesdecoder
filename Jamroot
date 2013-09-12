@@ -75,6 +75,10 @@ include $(TOP)/jam-files/sanity.jam ;
 
 boost 103600 ;
 external-lib z ;
+external-lib dl ;
+
+requirements += <library>dl ;
+
 
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
   if [ option.get "full-tcmalloc" : : "yes" ] {
