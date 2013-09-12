@@ -143,7 +143,7 @@ def extract_features(words_path, phrase_table, no_oov=False):
             continue # Don't output this sample
 
         # Write 'source' line
-        print("shared |s %s" % cept)
+        print("shared |s %s" % escape(cept))
 
         # Write 'target' lines
         for candidate in candidates:
