@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# NAME
+#     vw_train_dlm -- run Vowpal Wabbit training of discriminative lexicon model
+# 
+# SYNOPSIS
+#     vw_train_dlm SAMPLE MODEL_OUT
+# 
+# DESCRIPTION
+#     Runs VW training for given data sample with parameters described at
+#     
+#         https://svn.ms.mff.cuni.cz/trac/mtmarathon-2013/wiki/LexiconMorphologicallyRich#VowpalWabbit
+# 
+#     Data file can be generated e.g. by extract_features_dlm_baseline.py 
+#     script. Output model coefficients are written to MODEL_OUT file.
+    
+MODEL=$2
+CACHE=__vwcache__
+
+rm -f $MODEL
+rm -f $CACHE
+
+vw --quadratic st \
+   --hash all \
+   --noconstant \
+   --passes 10 \
+   --bit_precision 26 \
+   --csoaa_ldf mc \
+   --cache_file $CACHE \
+   --final_regressor $MODEL \
+   < $1
