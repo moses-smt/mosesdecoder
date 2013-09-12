@@ -145,7 +145,6 @@ def parse_index(file):
 
         freq_source, target_lemma = line.strip().split("\t")
         freq, source = freq_source.split(" ", 1)
-        print(freq_source)
         freq = int(freq)
         if target_lemma == EMPTY_PLACEHOLDER:
             target_lemma = ""
