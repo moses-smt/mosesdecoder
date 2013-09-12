@@ -42,6 +42,9 @@ private:
 
   // add phrase to index (if it does not exist yet), return its ID
   size_t AddCept(const std::string &phrase, PSD::IndexType *index);
+
+  size_t GetTgtPhraseID(const std::string &phrase, /* out */ bool *found);
+
 };
 
 
