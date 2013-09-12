@@ -19,6 +19,7 @@
 
 #include "ScoreFeature.h"
 #include "domain.h"
+//#include "InternalStructFeature.h"
 
 using namespace std;
 
@@ -78,7 +79,12 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
     } else {
       UTIL_THROW(ScoreFeatureArgumentException,"Unknown score argument " << args[i]);
     }
+    //MARIA
+    //m_features.push_back(ScoreFeaturePtr(new InternalStructSparseFeature()));
   }
+  //MARIA
+  //m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureSparse()));
+  //InternalStructFeatureSparse *test=new InternalStructFeatureSparse();
 
 }
 

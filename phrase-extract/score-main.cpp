@@ -36,6 +36,7 @@
 #include "score.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
+#include "InternalStructFeature.h"
 
 using namespace std;
 using namespace MosesTraining;
