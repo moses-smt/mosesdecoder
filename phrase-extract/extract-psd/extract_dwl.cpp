@@ -29,22 +29,28 @@ public:
 
     //get and tokenize list of source spans
     //0-2 3-4	0-1
-    vector<string> spanList = Tokenize(columns[1], " ");
+    vector<string> spanListSource = Tokenize(columns[1], " ");
+    vector<string> spanListTarget = Tokenize(columns[2], " ");
+
+    //Read in source and target pairs
     vector<string>::const_iterator spanIt;
-    for (spanIt = spanList.begin(); spanIt != spanList.end(); spanIt++) {
+    for (spanIt = spanListSource.begin(); spanIt != spanListSource.end(); spanIt++) {
       vector<string> positions = Tokenize(*spanIt, "-");      
-      cerr << positions.size() << endl;
+      //cerr << positions.size() << endl;
       CHECK(positions.size() == 2);
       m_sourceSpans.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
     }
     IsSourceSorted();
 
-    int targetStart = Scan<int>(columns[2]);
-    int targetEnd = Scan<int>(columns[3]);
-    m_targetSpans.push_back(make_pair<int, int>(targetStart, targetEnd));
+    for (spanIt = spanListTarget.begin(); spanIt != spanListTarget.end(); spanIt++) {
+    	vector<string> positions = Tokenize(*spanIt, "-");
+        //cerr << positions.size() << endl;
+        CHECK(positions.size() == 2);
+        m_targetSpans.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
+    }
 
-    m_srcCept = columns[4];
-    m_tgtCept = columns[5];
+    m_srcCept = columns[3];
+    m_tgtCept = columns[4];
   }
 
   const string &GetSrcCept() { return m_srcCept; }
