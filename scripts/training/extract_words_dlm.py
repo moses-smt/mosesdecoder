@@ -26,7 +26,7 @@ DESCRIPTION
     Empty cepts are written in a special way: they are replaced with following 
     placeholder word:
 
-        __EMPTY__|__EMPTY__|---------------
+        __EMPTY__|__EMPTY__|-------------
 
     Output is written to stdout.
 
@@ -76,7 +76,7 @@ def cept_to_spans(cept):
 
     return SPANS
 
-EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|---------------"
+EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|-------------"
 
 def cept_to_string(source, cept):
     if not cept:

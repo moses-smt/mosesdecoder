@@ -69,7 +69,7 @@ def prune_group(group, num_top_lemmas=None):
 
 # --------------------------------------------------------------- Raw indices --
 
-EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|---------------"
+EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|-------------"
 
 def parse_cept_and_target(input_line):
     cept, target = input_line.strip().split("\t")[-2:]
