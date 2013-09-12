@@ -42,16 +42,15 @@ public:
   vector<pair<int, int> > GetSourceSpanList()  { return m_sourceSpans; }
   vector<pair<int, int> > GetTargetSpanList()  { return m_targetSpans; }
 
-  //FB : TODO : Should we move this somewhere else ?
-  // XXX this is not used anywhere
-  void IsSourceSorted()
+  bool IsSourceSorted()
   {
     int prevEnd = -1;
     vector<pair<int,int> >::const_iterator it;
     for (it = m_sourceSpans.begin(); it != m_sourceSpans.end(); it++) {
-      CHECK(it->first > prevEnd);
+      if (it->first <= prevEnd) return false;
       prevEnd = it->second;
 	  }
+    return true;
   }
 
 private:
@@ -65,6 +64,7 @@ private:
       CHECK(positions.size() == 2);
       out.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
     }
+    CHECK(IsSourceSorted(out));
     return out;
   }
 
