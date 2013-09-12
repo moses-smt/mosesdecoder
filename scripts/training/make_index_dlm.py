@@ -128,13 +128,14 @@ def sort_file(file):
         ["sort"], 
         stdin=file, 
         stdout=subprocess.PIPE, 
-        env={"LANG": "C"}
+        env={"LC_ALL": "C"}
     )
 
     return sort.stdout
 
 def append_frequencies(file):
-    uniq = subprocess.Popen(["uniq", "-c"], stdin=file, stdout=subprocess.PIPE)
+    uniq = subprocess.Popen(["uniq", "-c"], stdin=file, stdout=subprocess.PIPE,
+      env={"LC_ALL": "C"})
     return uniq.stdout
 
 def parse_index(file):
