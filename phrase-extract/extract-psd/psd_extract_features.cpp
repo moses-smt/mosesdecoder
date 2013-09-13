@@ -59,7 +59,7 @@ ContextType ReadFactoredLine(const string &line, size_t factorCount)
   vector<string>::const_iterator it;
   for (it = words.begin(); it != words.end(); it++) {
     vector<string> factors = Tokenize(*it, "|");
-    if (factors.size() != factorCount) {
+    if (factors.size() < factorCount) {
       cerr << "error: Wrong count of factors: " << *it << endl;
       exit(1);
     }
