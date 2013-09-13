@@ -1,14 +1,16 @@
 #!/usr/bin/perl -w
-# Reads CONLL-like format (or perhaps exactly CONLL format?)
-# produces factored format where each word is equipped with
-# factors carrying information from neighbouring words based on
-# Minwoo Jeong, Kristina Toutanova, Hisami Suzuki, and Chris Quirk (2010)
 
 use strict;
 
+my $en_file_parsed = shift;
+
+open(ENparsed, $en_file_parsed) or die "cannot open EN parsed: $en_file_parsed\n";
+
+#my $en_parsed_in = <ENparsed>;
+
 my $line_counter = 1;
 $/ = "";
-while(<>) {
+while(<ENparsed>) {
     chomp;
     s/^\n//;
     my @en_parsed = split(/\n/, $_);
@@ -49,6 +51,7 @@ sub get_dependency_features {
     my $len = @parsed;
 
     my %has_leftmostchild;
+    my %has_rightmostchild;
     my %has_child;
     my %has_parent;
     my %has_siblings;
@@ -85,6 +88,16 @@ sub get_dependency_features {
 	else {
 	    $has_leftmostchild{$parent} = $child;
 	}	
+
+	if (exists $has_rightmostchild{$parent}) {
+	    if ($has_rightmostchild{$parent} < $child) {
+		$has_rightmostchild{$parent} = $child;
+	    }
+	}
+	else {
+	    $has_rightmostchild{$parent} = $child;
+	}
+
     }
     
     for (my $i=1; $i<$len; $i++) {
@@ -175,7 +188,22 @@ sub get_dependency_features {
 	    $leftmostchild_rel = $rel[$leftmostchild_ind-1];
 	}
 
-	my $treefeatures = "$parent_lem|$parent_pos|$grandparent_lem|$grandparent_pos|$leftmostchild_lem|$leftmostchild_pos|$leftmostchild_rel|$left_sister_lem|$left_sister_pos|$right_sister_lem|$right_sister_pos";
+	## find RIGHTMOST CHILD
+	my $rightmostchild_word = "noRmChild";
+	my $rightmostchild_pos = "noRmChild";
+	my $rightmostchild_lem = "noRmChild";
+	my $rightmostchild_rel = "noRmChild";
+	my $rightmostchild_ind = "undef";
+	
+	if (exists $has_rightmostchild{$i}) {
+	    $rightmostchild_ind = $has_rightmostchild{$i};
+	    $rightmostchild_word = $word[$rightmostchild_ind-1];
+	    $rightmostchild_lem = $lemma[$rightmostchild_ind-1];
+	    $rightmostchild_pos = $pos[$rightmostchild_ind-1];
+	    $rightmostchild_rel = $rel[$rightmostchild_ind-1];
+	}
+	
+	my $treefeatures = "$parent_lem|$parent_pos|$grandparent_lem|$grandparent_pos|$leftmostchild_lem|$leftmostchild_pos|$leftmostchild_rel|$rightmostchild_lem|$rightmostchild_pos|$rightmostchild_rel|$left_sister_lem|$left_sister_pos|$right_sister_lem|$right_sister_pos";
 
 	## SIMPLE LOCAL FEATURES + MORPH FEATU:
 	my $current_word = $word[$i-1];
