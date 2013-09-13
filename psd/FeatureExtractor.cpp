@@ -125,6 +125,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_binnedScores    = pTree.get<bool>("features.binned-scores", false);
   m_sourceTopic     = pTree.get<bool>("features.source-topic", false);
   m_phraseFactor    = pTree.get<bool>("features.phrase-factor", false);
+  m_targetPhraseFactor = pTree.get<bool>("features.phrase-target-factor", false);
   m_windowSize      = pTree.get<size_t>("features.window-size", 0);  
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
