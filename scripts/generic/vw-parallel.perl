@@ -19,6 +19,10 @@ sub NumStr($);
 
 print "Started ".localtime() ."\n";
 
+my $workdir = `pwd`;
+chomp($workdir);
+print "running in $workdir\n";
+
 my ($numParallel, $trainFile, $cacheFile, $modelFile, $vwPath, @args) = @ARGV;
 die "Error in args. Usage: vw-parallel.perl cores train_file cache_prefix model_file vw_path vw_args" if ! defined $vwPath;
 
@@ -26,7 +30,7 @@ my $vwCmd = "$vwPath/bin/vw " . join(" ", @args);
 
 $numParallel = 1 if $numParallel < 1;
 
-my $TMPDIR="tmp.$$";
+my $TMPDIR="$workdir/tmp.$$";
 mkdir $TMPDIR;
 
 my $fileCount = 0;
