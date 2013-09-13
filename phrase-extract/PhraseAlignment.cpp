@@ -82,7 +82,7 @@ void PhraseAlignment::create( char line[], int lineID, bool includeSentenceIdFla
 {
   assert(phraseS.empty());
   assert(phraseT.empty());
-  ghkmParse.clear();
+  treeFragment.clear();
 
   vector< string > token = tokenize( line );
   int item = 1;
@@ -109,11 +109,11 @@ void PhraseAlignment::create( char line[], int lineID, bool includeSentenceIdFla
         alignedToT[t].insert( s );
         alignedToS[s].insert( t );
       }
-    } else if ( (item >= 4) && (token[j] == "GHKMParse") ) { // check for information with a key field
+    } else if ( (item >= 4) && (token[j] == "Tree") ) { // check for information with a key field
       ++j;
       while ( (j < token.size() ) && (token[j] != "|||") ) {
-        ghkmParse.append(" ");
-        ghkmParse.append(token[j]);
+        treeFragment.append(" ");
+        treeFragment.append(token[j]);
         ++j;
       }
       --j;

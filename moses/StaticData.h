@@ -137,7 +137,7 @@ protected:
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
-  std::string m_detailedGhkmTranslationReportingFilePath;
+  std::string m_detailedTreeFragmentsTranslationReportingFilePath;
   bool m_onlyDistinctNBest;
   bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
@@ -368,11 +368,11 @@ public:
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
   }
-  bool IsDetailedGhkmTranslationReportingEnabled() const {
-    return !m_detailedGhkmTranslationReportingFilePath.empty();
+  bool IsDetailedTreeFragmentsTranslationReportingEnabled() const {
+    return !m_detailedTreeFragmentsTranslationReportingFilePath.empty();
   }
-  const std::string &GetDetailedGhkmTranslationReportingFilePath() const {
-    return m_detailedGhkmTranslationReportingFilePath;
+  const std::string &GetDetailedTreeFragmentsTranslationReportingFilePath() const {
+    return m_detailedTreeFragmentsTranslationReportingFilePath;
   }
   bool IsLabeledNBestList() const {
     return m_labeledNBestList;

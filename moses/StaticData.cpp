@@ -60,7 +60,7 @@ StaticData::StaticData()
   ,m_unknownWordPenaltyProducer(NULL)
   ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
-  ,m_detailedGhkmTranslationReportingFilePath()
+  ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_needAlignmentInfo(false)
   ,m_factorDelimiter("|") // default delimiter between factors
@@ -308,12 +308,12 @@ bool StaticData::LoadData(Parameter *parameter)
       return false;
     }
   }
-  if (m_parameter->isParamSpecified("ghkm-translation-details")) {
-    const vector<string> &args = m_parameter->GetParam("ghkm-translation-details");
+  if (m_parameter->isParamSpecified("tree-translation-details")) {
+    const vector<string> &args = m_parameter->GetParam("tree-translation-details");
     if (args.size() == 1) {
-      m_detailedGhkmTranslationReportingFilePath = args[0];
+      m_detailedTreeFragmentsTranslationReportingFilePath = args[0];
     } else {
-      UserMessage::Add(string("the ghkm-translation-details option requires exactly one filename argument"));
+      UserMessage::Add(string("the tree-translation-details option requires exactly one filename argument"));
       return false;
     }
   }

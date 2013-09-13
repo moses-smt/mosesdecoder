@@ -71,7 +71,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_alignmentInfoStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
-  ,m_detailGhkmOutputCollector(NULL)
+  ,m_detailTreeFragmentsOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
@@ -117,10 +117,10 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
 
-  if (staticData.IsDetailedGhkmTranslationReportingEnabled()) {
-    const std::string &path = staticData.GetDetailedGhkmTranslationReportingFilePath();
-    m_detailedGhkmTranslationReportingStream = new std::ofstream(path.c_str());
-    m_detailGhkmOutputCollector = new Moses::OutputCollector(m_detailedGhkmTranslationReportingStream);
+  if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+    const std::string &path = staticData.GetDetailedTreeFragmentsTranslationReportingFilePath();
+    m_detailedTreeFragmentsTranslationReportingStream = new std::ofstream(path.c_str());
+    m_detailTreeFragmentsOutputCollector = new Moses::OutputCollector(m_detailedTreeFragmentsTranslationReportingStream);
   }
 
   if (!staticData.GetAlignmentOutputFile().empty()) {
@@ -137,7 +137,7 @@ IOWrapper::~IOWrapper()
   }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
-  delete m_detailedGhkmTranslationReportingStream;
+  delete m_detailedTreeFragmentsTranslationReportingStream;
   delete m_alignmentInfoStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
@@ -321,11 +321,11 @@ void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &
   }
 }
 
-void IOWrapper::OutputGhkmTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
   // recursive
   if (hypo != NULL) {
-    const std::string key = "GHKMParse";
+    const std::string key = "Tree";
     std::string value;
     bool hasprop;
     const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
@@ -340,11 +340,11 @@ void IOWrapper::OutputGhkmTranslationOptions(std::ostream &out, ApplicationConte
         << "-> " << hypo->GetCurrTargetPhrase()
         << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
 
-    out << std::endl;
+    out << " ||| ";
     if (hasprop)
       out << " " << value;
     else
-      out << " " << "noGHKMParseInfo";
+      out << " " << "noTreeInfo";
 
     out << std::endl;
   }
@@ -353,7 +353,7 @@ void IOWrapper::OutputGhkmTranslationOptions(std::ostream &out, ApplicationConte
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
     const ChartHypothesis *prevHypo = *iter;
-    OutputGhkmTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
   }
 }
 
@@ -373,7 +373,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputDetailedGhkmTranslationReport(
+void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
   const ChartHypothesis *hypo,
   const Sentence &sentence,
   long translationId)
@@ -384,9 +384,9 @@ void IOWrapper::OutputDetailedGhkmTranslationReport(
   std::ostringstream out;
   ApplicationContext applicationContext;
 
-  OutputGhkmTranslationOptions(out, applicationContext, hypo, sentence, translationId);
-  CHECK(m_detailGhkmOutputCollector);
-  m_detailGhkmOutputCollector->Write(translationId, out.str());
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+  CHECK(m_detailTreeFragmentsOutputCollector);
+  m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
 }
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
