@@ -198,20 +198,21 @@ void DWLFeatureExtractor::GenerateTargetFactorFeatures(vector<string> targetForm
 	  //In case we want to learn that these features appear together
 	  fc->AddFeature("trich^" + targetToken[2]);
 
-	  vector<string> morphFeatures = Tokenize(targetToken[2],"");
-	  vector<string> :: iterator itr_morph;
+	  string morphFeatures = targetToken[2];
+	  string::iterator itr_morph;
 	  int counter = 0;
 
 	  for(itr_morph = morphFeatures.begin(); itr_morph != morphFeatures.end(); itr_morph++)
 	  {
-		  string morphFeat = *itr_morph;
-		  if(*itr_morph == "-")
+		  string c;
+		  c += *itr_morph;
+		  if(c == "-")
 		  {
 			  fc->AddFeature("trich^"+SPrint(counter)+"^UNDEFINED");
 		  }
 		  else
 		  {
-			  fc->AddFeature("trich^"+SPrint(counter)+"^"+*itr_morph);
+			  fc->AddFeature("trich^"+SPrint(counter)+"^"+c);
 		  }
 	  }
   }
