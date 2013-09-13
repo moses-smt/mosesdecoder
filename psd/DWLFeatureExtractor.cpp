@@ -137,7 +137,7 @@ void DWLFeatureExtractor::GenerateContextFeatures(const ContextType &context,
 
 void DWLFeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, FeatureConsumer *fc)
 {
-  fc->AddFeature("p^" + Join("_", span));
+  fc->AddFeature("p^" + (span.empty() ? "__NULL__" : Join("_", span)));
 }
 
 void DWLFeatureExtractor::GenerateConcatIndicatorFeature(const vector<string> &span1, const vector<string> &span2, FeatureConsumer *fc)
@@ -185,9 +185,15 @@ void DWLFeatureExtractor::GenerateGapFeatures(const ContextType &context, const 
 void DWLFeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, const vector<string> &tgtPhrase, 
     FeatureConsumer *fc)
 {
-  for (size_t i = 0; i < srcPhrase.size(); i++) {
-    for (size_t j = 0; j < tgtPhrase.size(); j++) {
-      fc->AddFeature("pair^" + srcPhrase[i] + "^" + tgtPhrase[j]);
+  if (srcPhrase.empty()) {
+    for (size_t i = 0; i < tgtPhrase.size(); i++) {
+      fc->AddFeature("pair^__NULL__^" + tgtPhrase[i]);
+    }
+  } else {
+    for (size_t i = 0; i < srcPhrase.size(); i++) {
+      for (size_t j = 0; j < tgtPhrase.size(); j++) {
+        fc->AddFeature("pair^" + srcPhrase[i] + "^" + tgtPhrase[j]);
+      }
     }
   }
 }

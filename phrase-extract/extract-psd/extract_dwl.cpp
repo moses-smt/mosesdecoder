@@ -16,8 +16,6 @@ using namespace Moses;
 using namespace MosesTraining;
 using namespace PSD;
 
-const string EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|-------------";
-  
 //FB : Pass a list of spans instead of a single span
 
 class DWLLine
@@ -70,11 +68,6 @@ public:
       prevEnd = it->second;
     }
     return true;
-  }
-
-  bool IsEmpty()
-  {
-    return m_srcCept == EMPTY_PLACEHOLDER;
   }
 
 private:
