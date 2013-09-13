@@ -7,7 +7,7 @@ namespace MosesTraining
 
 InternalStructFeature::InternalStructFeature()
 	:m_type(0){
-	cout<<"InternalStructFeature: Construct "<<m_type<<"\n";
+	//cout<<"InternalStructFeature: Construct "<<m_type<<"\n";
 }
 
 bool InternalStructFeature::equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const{
@@ -25,21 +25,37 @@ bool InternalStructFeature::equals(const PhraseAlignment& lhs, const PhraseAlign
 void InternalStructFeature::add(const ScoreFeatureContext& context,
 	                   std::vector<float>& denseValues,
 	                   std::map<std::string,float>& sparseValues) const{
-	std::string *internalStruct=new string("(NP((DT)(NN)))");
-	add(internalStruct, denseValues, sparseValues);
+	for(size_t i=0; i<context.phrasePair.size(); i++) {
+		add(&context.phrasePair[i]->ghkmParse, denseValues, sparseValues);
+	}
+
 }
 
 void InternalStructFeatureDense::add(std::string *internalStruct,
 	                   std::vector<float>& denseValues,
 	                   std::map<std::string,float>& sparseValues) const{
-	cout<<internalStruct<<endl;
+	//cout<<"Dense: "<<*internalStruct<<endl;
+	size_t start=0;
+	int countNP=0;
+	while((start = internalStruct->find("NP", start)) != string::npos) {
+		countNP++;
+		start+=2; //length of "NP"
+	}
+	//should add e^countNP so in the decoder I get log(e^countNP)=countNP -> but is log or ln?
+	//should use this but don't know what it does? -> maybeLog( (bitmap == i) ? 2.718 : 1 )
+	denseValues.push_back(exp(countNP));
 
 }
 
 void InternalStructFeatureSparse::add(std::string *internalStruct,
 	                   std::vector<float>& denseValues,
 	                   std::map<std::string,float>& sparseValues) const{
-	cout<<internalStruct<<endl;
+	//cout<<"Sparse: "<<*internalStruct<<endl;
+	if(internalStruct->find("VBZ")!=std::string::npos)
+		sparseValues["NT_VBZ"] = 1;
+	if(internalStruct->find("VBD")!=std::string::npos)
+			sparseValues["NT_VBD"] = 1;
+
 }
 
 

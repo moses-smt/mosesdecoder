@@ -36,7 +36,7 @@ protected:
 	/** Overriden in subclass */
 	 virtual void add(std::string *internalStruct,
 	                   std::vector<float>& denseValues,
-	                   std::map<std::string,float>& sparseValues) const;
+	                   std::map<std::string,float>& sparseValues) const = 0;
 	int m_type;
 
 };
@@ -45,7 +45,7 @@ class InternalStructFeatureDense : public InternalStructFeature
 {
 public:
 	InternalStructFeatureDense()
-		:InternalStructFeature(){m_type=1; std::cout<<"InternalStructFeatureDense: Construct "<<m_type<<"\n";}
+		:InternalStructFeature(){m_type=1;} //std::cout<<"InternalStructFeatureDense: Construct "<<m_type<<"\n";}
 protected:
 	virtual void add(std::string *internalStruct,
 		             std::vector<float>& denseValues,
@@ -56,7 +56,7 @@ class InternalStructFeatureSparse : public InternalStructFeature
 {
 public:
 	InternalStructFeatureSparse()
-		:InternalStructFeature(){m_type=2; std::cout<<"InternalStructFeatureSparse: Construct "<<m_type<<"\n";}
+		:InternalStructFeature(){m_type=2;}// std::cout<<"InternalStructFeatureSparse: Construct "<<m_type<<"\n";}
 protected:
 	virtual void add(std::string *internalStruct,
 		             std::vector<float>& denseValues,
