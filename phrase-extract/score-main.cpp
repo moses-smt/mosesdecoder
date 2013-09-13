@@ -49,7 +49,7 @@ LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
 bool pcfgFlag = false;
-bool ghkmParseFlag = false;
+bool treeFragmentsFlag = false;
 bool unpairedExtractFormatFlag = false;
 bool conditionOnTargetLhsFlag = false;
 bool wordAlignmentFlag = true;
@@ -78,7 +78,7 @@ vector<string> tokenize( const char [] );
 void writeCountOfCounts( const string &fileNameCountOfCounts );
 void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager, const MaybeLog& maybeLog);
 const PhraseAlignment &findBestAlignment(const PhraseAlignmentCollection &phrasePair );
-const std::string &findBestGHKMParse(const PhraseAlignmentCollection &phrasePair );
+const std::string &findBestTreeFragment(const PhraseAlignmentCollection &phrasePair );
 void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager, const MaybeLog& maybeLog );
 double computeLexicalTranslation( const PHRASE &, const PHRASE &, const PhraseAlignment & );
 double computeUnalignedPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--GHKMParse] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] [--CrossedNonTerm] \n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--TreeFragments] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] [--CrossedNonTerm] \n";
     cerr << featureManager.usage() << endl;
     exit(1);
   }
@@ -119,9 +119,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--PCFG") == 0) {
       pcfgFlag = true;
       cerr << "including PCFG scores\n";
-    } else if (strcmp(argv[i],"--GHKMParse") == 0) {
-      ghkmParseFlag = true;
-      cerr << "including GHKM parse\n";
+    } else if (strcmp(argv[i],"--TreeFragments") == 0) {
+      treeFragmentsFlag = true;
+      cerr << "including tree fragments from syntactic parse\n";
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       unpairedExtractFormatFlag = true;
       cerr << "processing unpaired extract format\n";
@@ -381,27 +381,27 @@ const PhraseAlignment &findBestAlignment(const PhraseAlignmentCollection &phrase
   return *bestAlignment;
 }
 
-const std::string &findBestGHKMParse(const PhraseAlignmentCollection &phrasePair )
+const std::string &findBestTreeFragment(const PhraseAlignmentCollection &phrasePair )
 {
-  float bestGHKMParseCount = -1;
-  PhraseAlignment *bestGHKMParse = NULL;
+  float bestTreeFragmentCount = -1;
+  PhraseAlignment *bestTreeFragment = NULL;
 
   for(size_t i=0; i<phrasePair.size(); i++) {
-    size_t ghkmParseInd;
+    size_t treeFragmentInd;
     if (inverseFlag) {
       // count backwards, so that alignments for ties will be the same for both normal & inverse scores
-      ghkmParseInd = phrasePair.size() - i - 1;
+      treeFragmentInd = phrasePair.size() - i - 1;
     } else {
-      ghkmParseInd = i;
+      treeFragmentInd = i;
     }
 
-    if (phrasePair[ghkmParseInd]->count > bestGHKMParseCount) {
-      bestGHKMParseCount = phrasePair[ghkmParseInd]->count;
-      bestGHKMParse = phrasePair[ghkmParseInd];
+    if (phrasePair[treeFragmentInd]->count > bestTreeFragmentCount) {
+      bestTreeFragmentCount = phrasePair[treeFragmentInd]->count;
+      bestTreeFragment = phrasePair[treeFragmentInd];
     }
   }
 
-  return bestGHKMParse->ghkmParse;
+  return bestTreeFragment->treeFragment;
 }
 
 
@@ -708,12 +708,11 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     }
   }
 
-
-  // GHKM parse
-  if (ghkmParseFlag && !inverseFlag) {
-    const std::string &bestGHKMParse = findBestGHKMParse( phrasePair );
-    if ( !bestGHKMParse.empty() )
-      phraseTableFile << " ||| {{GHKMParse" << bestGHKMParse << "}}";
+  // tree fragments
+  if (treeFragmentsFlag && !inverseFlag) {
+    const std::string &bestTreeFragment = findBestTreeFragment( phrasePair );
+    if ( !bestTreeFragment.empty() )
+      phraseTableFile << " ||| {{Tree " << bestTreeFragment << "}}";
   }
 
 

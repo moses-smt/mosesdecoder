@@ -127,9 +127,9 @@ public:
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
     }
-    if (staticData.IsDetailedGhkmTranslationReportingEnabled()) {
+    if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-      m_ioWrapper.OutputDetailedGhkmTranslationReport(bestHypo, sentence, translationId);
+      m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
     }
 
     // n-best

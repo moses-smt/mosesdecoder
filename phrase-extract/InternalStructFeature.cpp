@@ -26,7 +26,7 @@ void InternalStructFeature::add(const ScoreFeatureContext& context,
 	                   std::vector<float>& denseValues,
 	                   std::map<std::string,float>& sparseValues) const{
 	for(size_t i=0; i<context.phrasePair.size(); i++) {
-		add(&context.phrasePair[i]->ghkmParse, denseValues, sparseValues);
+		add(&context.phrasePair[i]->treeFragment, denseValues, sparseValues);
 	}
 
 }
