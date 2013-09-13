@@ -1,0 +1,95 @@
+# -*- Makefile -*-
+
+rset = set=$2,type=$3,file=evaluation/$1/$2.$3
+analyses = $(foreach e, ${eval-sets}, \
+	   $(call rset,$1,$e,analysis-precision) \
+	   $(call rset,$1,$e,analysis-coverage))
+eval-scores = $(foreach e, ${eval-sets}, \
+	      $(foreach m, ${eval-metrics}, \
+	      $(call rset,$1,$e,$m)))
+eval-results = $(foreach e, ${eval-sets}, \
+	       $(foreach m, ${eval-metrics}, \
+	       evaluation/$1/$e.$m))
+
+
+.SECONDEXPANSION:
+# NOTA BENE: setup-experiments.make adds additional dependencies for 
+# evaluation/%/report in the file experiments.make!
+evaluation/%/report: sets  = $(call eval-scores,$*)
+#evaluation/%/report: sets  += $(call analyses,$*)
+#evaluation/%/report: tuned_moses_ini := $(if ${have_tuned_moses_ini},${have_tuned_moses_ini},tuning/$*/moses.tuned.ini)
+evaluation/%/report: prereqs = $(call eval-results,$*)
+evaluation/%/report: $$(prereqs)
+	echo $(foreach s, ${sets}, $s) $^
+	mkdir $@.lock
+	echo $(call lockline) > $@.lock/owner
+	${report} ${sets} > $@_
+	mv $@_ $@
+	rm $@.lock/owner 
+	rmdir $@.lock
+
+%.analysis: params1  = -input ${$(notdir $*)-src}
+%.analysis: params1 += -input-corpus ${crp_train}.${L1} 
+%.analysis: params1 += -ttable ${ttable} -dir $@
+%.analysis: params2  = -precision-by-coverage
+%.analysis: params2 += -reference ${$(notdir $*)-ref}
+%.analysis: params2 += -system $*.truecased
+%.analysis: params2 += -segmentation $*.output
+%.analysis: params2 += -system-alignment $*.output.wa
+%.analysis: params2 += -coverage $@
+%.analysis: | ${ttable} ${crp_train}.${L1} 
+%.analysis: %.output.wa %.output %.truecased
+	@echo ANALYSING $^
+	@mkdir $@.lock
+	@echo $(call lockline) > $@.lock/owner
+	${analyze} ${params1} 
+	${analyze} ${params1} ${params2}
+	@rm$@.lock/owner
+	@rmdir $@.lock
+
+%.multi-bleu: %.cleaned 
+	$(info )
+	$(info RUNNING MULTI-BLEU on $^)
+	@mkdir $@.lock
+	@echo $(call lockline) > $@.lock/owner
+	${multi-bleu} ${$(notdir $*)-ref} < $< > $@_
+	@mv $@_ $@
+	@rm $@.lock/owner 
+	@rmdir $@.lock
+
+%.truecased: %.cleaned
+	mkdir $@.lock
+	$(detruecase) < $< > $@_
+	mv $@_ $@
+	rmdir $@.lock
+
+%.cleaned: %.output
+	$(info )
+	$(info CLEANING UP DECODER OUTPUT: $<)
+	$(info )
+	mkdir $@.lock
+	echo $(call lockline) > $@.lock/owner
+	$(clean-decoder-output) < $< > $@_
+	mv $@_ $@
+	rm $@.lock/owner
+	rmdir $@.lock
+
+%.output.wa: %.output
+evaluation/%.output: decoder_flags += -threads ${moses.threads} -v 0
+evaluation/%.output: decoder_flags += -inputtype ${input-type}
+evaluation/%.output: decoder_flags += -alignment-output-file $@.wa
+evaluation/%.output: decoder_flags += -t -text-type "test"
+evaluation/%.output: decoder_flags += -f ${moses_ini}
+evaluation/%.output: input = ${$(notdir $*)-src}
+evaluation/%.output: 
+	echo MOSES_INI = ${moses_ini}
+	@mkdir -p $(@D)
+	@mkdir $@.lock
+	@echo $(call lockline) > $@.lock/owner
+	${decode} ${decoder_flags} < ${input} > $@_
+	@mv $@_ $@
+	@rm $@.lock/owner
+	@rmdir $@.lock
+
+.SECONDARY: 
+

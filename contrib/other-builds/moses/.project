@@ -1067,6 +1067,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ExternalFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExternalFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ExternalFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExternalFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/FFState.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FFState.cpp</locationURI>
