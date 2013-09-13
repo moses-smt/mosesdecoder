@@ -66,8 +66,8 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetPhraseFactor()) GeneratePhraseFactorFeatures(context, sourceSpanList, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, globalStart, globalEnd, FACTOR_FORM, fc);
-
   if (m_config.GetSourceIndicator()) GenerateIndicatorFeature(sourceForms, fc); 
+
 
   vector<CeptTranslation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
@@ -80,6 +80,7 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     // cerr << "Predicting score for phrase " << Join(" ", targetForms) << endl;
 
     if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
+    if (m_config.GetTargetPhraseFactor()) GenerateTargetFactorFeatures(targetForms, fc);
     if (m_config.GetPaired()) GeneratePairedFeatures(sourceForms, targetForms, fc); // everything is aligned to everything
 
 //  TODO no scores for now
@@ -145,6 +146,8 @@ void DWLFeatureExtractor::GenerateConcatIndicatorFeature(const vector<string> &s
   fc->AddFeature("p^" + Join("_", span1) + "^" + Join("_", span2));
 }
 
+//New feature to decompose target factor
+//
 void DWLFeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
 {
   vector<string>::const_iterator it;
@@ -175,6 +178,41 @@ void DWLFeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &contex
     }
   }
 }
+
+void DWLFeatureExtractor::GenerateTargetPhraseFactorFeatures(vector<string> targetForms, FeatureConsumer *fc)
+{
+  vector<string>::iterator itr_target;
+  for(itr_target = targetForms.begin(); itr_target != targetForms.end(); itr_target++)
+  {
+	  string currentWord = *itr_target;
+	  vector<string> targetToken = Tokenize(*itr_target,"|");
+	  vector<string>::iterator itr_target_token;
+	  CHECK(targetToken == 3);
+	  fc->AddFeature("trich^" + targetToken[0]);
+	  fc->AddFeature("trich^" + targetToken[1]);
+
+	  //In case we want to learn that these features appear together
+	  fc->AddFeature("trich^" + targetToken[2]);
+
+	  vector<string> morphFeatures = Tokenize(targetToken[2],"");
+	  vector<string> :: iterator itr_morph;
+	  int counter = 0;
+
+	  for(itr_morph = morphFeatures.begin(); itr_morph != morphFeatures.end(); itr_morph++)
+	  {
+		  string morphFeat = *itr_morph;
+		  if(*itr_morph == "-")
+		  {
+			  fc->AddFeature("trich^"+counter+"^UNDEFINED");
+		  }
+		  else
+		  {
+			  fc->AddFeature("trich^"+counter+"^"+*itr_morph);
+		  }
+	  }
+  }
+}
+
 
 // XXX NULL feature!!!
 
