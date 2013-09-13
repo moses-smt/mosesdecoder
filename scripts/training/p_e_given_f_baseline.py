@@ -32,7 +32,10 @@ def escape_vw(line):
         msg = "Wrong format: p^ prefix not found!"
         raise Exception(msg)
 
-    return line[2:].replace("///", "|").replace("___", " ").replace(";;;", ":")
+    return line[2:].replace("\\/",  "|" ) \
+                   .replace("\\_",  " " ) \
+                   .replace("\\;",  ":" ) \
+                   .replace("\\\\", "\\")
 
 def extract_from_phrase_table(line):
     fields = line.strip().split("|||")
