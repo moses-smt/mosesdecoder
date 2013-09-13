@@ -15,7 +15,7 @@ namespace Moses
 {
 
 SparseReorderingFeature::SparseReorderingFeature(const std::string &line)
-  :StatelessFeatureFunction("StatefulFeatureFunction",0, line),
+  :StatelessFeatureFunction("SparseReorderingFeature",0, line),
   m_type(SourceCombined),
   m_sourceFactor(0),
   m_targetFactor(0),
@@ -202,7 +202,7 @@ void SparseReorderingFeature::EvaluateChart(
       isMonotone = false;
     }
     stringstream buf;
-    buf << "sr_h_"; //sparse reordering, Huck
+    buf << "h_"; //sparse reordering, Huck
     if (m_type == SourceLeft || m_type == SourceCombined) {
       buf << GetFactor(sourceLeftBoundaryWord,m_sourceVocab,m_sourceFactor)->GetString();
       buf << "_";
@@ -212,7 +212,7 @@ void SparseReorderingFeature::EvaluateChart(
       buf << "_";
     }
     buf << (isMonotone ? "M" : "S");
-    accumulator->SparsePlusEquals(buf.str(), 1);
+    accumulator->PlusEquals(this,buf.str(), 1);
   }
 //  cerr << endl;
 }
