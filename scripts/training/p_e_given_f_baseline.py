@@ -118,7 +118,6 @@ def process(stream, joint_counts, single_counts, alpha, vocabulary_size):
         )
 
         print()
-        line = stream.readline()
 
 def main():
     parser = argparse.ArgumentParser()
