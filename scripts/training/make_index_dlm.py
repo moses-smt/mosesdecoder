@@ -49,7 +49,7 @@ def cept_to_lookup_keys(cept):
     return [cept]
 
 def target_to_lemma_key(target_word):
-    return target_word.split("|")[1]
+    return target_word
 
 def prune_group(group, num_top_lemmas=None):
     """
