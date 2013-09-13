@@ -1,8 +1,8 @@
-#i!/usr/bin/env python3
+#!/usr/bin/env python3
 
 """
 NAME
-    p_e_given_f_baseline.py -- predict p(e|f) based on relative frequences
+    p_e_given_f_baseline.py -- predict -ln p(e|f) based on relative frequences
 
 SYNOPSIS
 
@@ -96,7 +96,7 @@ def process_target_phrases(joint_counts,\
                 (single_counts[target_phrase] + vocabulary_size * alpha)
             )
 
-        params = (label, ":", LOG_PROBABILITY)
+        params = (label, ":", -LOG_PROBABILITY)
         print("%s%s %.3f" % params)
 
 def process(stream, joint_counts, single_counts, alpha, vocabulary_size):
