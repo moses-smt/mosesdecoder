@@ -6,22 +6,13 @@
 
 #include <util/string_piece.hh>
 
-#include "StatefulFeatureFunction.h"
+#include "StatelessFeatureFunction.h"
 #include "FFState.h"
 
 namespace Moses
 {
 
-class SparseReorderingState : public FFState
-{
-public:
-	int Compare(const FFState& other) const
-	{
-		return 0;
-	}
-};
-
-class SparseReorderingFeature : public StatefulFeatureFunction
+class SparseReorderingFeature : public StatelessFeatureFunction
 {
 public:
   enum Type {
@@ -46,23 +37,13 @@ public:
 	                        , const InputPath &inputPath
 	                        , ScoreComponentCollection &scoreBreakdown) const
 	{}
-	  FFState* Evaluate(
-	    const Hypothesis& cur_hypo,
-	    const FFState* prev_state,
-	    ScoreComponentCollection* accumulator) const
-	  {
-		  return new SparseReorderingState();
-	  }
 
-	  FFState* EvaluateChart(
-	    const ChartHypothesis& /* cur_hypo */,
-	    int /* featureID - used to index the state in the previous hypotheses */,
-	    ScoreComponentCollection* accumulator) const;
+  virtual void Evaluate(const Hypothesis& hypo,
+                        ScoreComponentCollection* accumulator) const
+  {}
+  void EvaluateChart(const ChartHypothesis &hypo,
+                             ScoreComponentCollection* accumulator) const;
 
-	  virtual const FFState* EmptyHypothesisState(const InputType &input) const
-	  {
-		  return new SparseReorderingState();
-	  }
 
 private:
 

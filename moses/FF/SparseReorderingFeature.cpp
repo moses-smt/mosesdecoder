@@ -15,7 +15,7 @@ namespace Moses
 {
 
 SparseReorderingFeature::SparseReorderingFeature(const std::string &line)
-  :StatefulFeatureFunction("StatefulFeatureFunction",0, line),
+  :StatelessFeatureFunction("StatefulFeatureFunction",0, line),
   m_type(SourceCombined),
   m_sourceFactor(0),
   m_targetFactor(0),
@@ -81,9 +81,8 @@ const Factor* SparseReorderingFeature::GetFactor(const Word& word, const Vocab& 
   return factor;
 }
 
-FFState* SparseReorderingFeature::EvaluateChart(
+void SparseReorderingFeature::EvaluateChart(
   const ChartHypothesis&  cur_hypo ,
-  int  featureID /*- used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
   // get index map for underlying hypotheses
@@ -216,7 +215,6 @@ FFState* SparseReorderingFeature::EvaluateChart(
     accumulator->SparsePlusEquals(buf.str(), 1);
   }
 //  cerr << endl;
-  return new SparseReorderingState();
 }
 
 
