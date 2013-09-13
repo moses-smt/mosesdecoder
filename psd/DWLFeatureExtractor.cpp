@@ -125,12 +125,16 @@ void DWLFeatureExtractor::GenerateContextFeatures(const ContextType &context,
     for (size_t i = 1; i <= m_config.GetWindowSize(); i++) {
       string left = "<s>";
       string right = "</s>"; 
-      if (spanStart >= i)
+      if (spanStart >= i) {
+        CHECK(context[spanStart - i].size() > *factIt);
         left = context[spanStart - i][*factIt];
+      }
       fc->AddFeature(BuildContextFeature(*factIt, -i, left));
       // spanEnd points beyond the last element
-      if (spanEnd - 1 + i < context.size()) 
+      if (spanEnd - 1 + i < context.size()) {
+        CHECK(context[spanEnd - 1 + i].size() > *factIt);
         right = context[spanEnd - 1 + i][*factIt];
+      }
       fc->AddFeature(BuildContextFeature(*factIt, i, right));
     }
   }
