@@ -2,6 +2,7 @@
 
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
+#include "moses/FactorCollection.h"
 #include "moses/Sentence.h"
 
 #include "util/exception.hh"
@@ -15,6 +16,7 @@ namespace Moses
 
 SparseReorderingFeature::SparseReorderingFeature(const std::string &line)
   :StatefulFeatureFunction("StatefulFeatureFunction",0, line),
+  m_type(SourceCombined),
   m_sourceFactor(0),
   m_targetFactor(0),
   m_sourceVocabFile(""),
@@ -32,6 +34,7 @@ SparseReorderingFeature::SparseReorderingFeature(const std::string &line)
   */
   cerr << "Constructing a Sparse Reordering feature" << endl;
   ReadParameters();
+  m_otherFactor = FactorCollection::Instance().AddFactor("##OTHER##");
   LoadVocabulary(m_sourceVocabFile, m_sourceVocab);
   LoadVocabulary(m_targetVocabFile, m_targetVocab);
 }
@@ -45,44 +48,37 @@ void SparseReorderingFeature::SetParameter(const std::string& key, const std::st
     m_sourceVocabFile = value;
   } else if (key == "output-vocab-file") {
     m_targetVocabFile = value;
+  } else if (key == "type") {
+    if (value == "SourceCombined") {
+      m_type = SourceCombined;
+    } else if (value == "SourceLeft") {
+      m_type = SourceLeft;
+    } else if (value == "SourceRight") {
+      m_type = SourceRight;
+    } else {
+      UTIL_THROW(util::Exception, "Unknown sparse reordering type " << value);
+    }
   } else {
     FeatureFunction::SetParameter(key, value);
   }
 }
 
-void SparseReorderingFeature::LoadVocabulary(const std::string& filename, boost::unordered_set<std::string>& vocab)
+void SparseReorderingFeature::LoadVocabulary(const std::string& filename, Vocab& vocab)
 {
   if (filename.empty()) return;
   ifstream in(filename.c_str());
   UTIL_THROW_IF(!in, util::Exception, "Unable to open vocab file: " << filename);
+  string line;
+  while(getline(in,line)) {
+    vocab.insert(FactorCollection::Instance().AddFactor(line)); 
+  }
+  in.close();
 }
 
-static void AddFeatureWordPair(const string& prefix, const string& suffix,
-  const Word& word1, const Word& word2, ScoreComponentCollection* accumulator, FactorType factor = 0) {
-  stringstream buf;
-  buf << prefix << word1[factor]->GetString() << "_" << word2[factor]->GetString() << suffix;
-  accumulator->SparsePlusEquals(buf.str(), 1);
-}
-  
-
-void SparseReorderingFeature::AddNonTerminalPairFeatures(
-  const Sentence& sentence, const WordsRange& nt1, const WordsRange& nt2,
-    bool isMonotone, ScoreComponentCollection* accumulator) const {
-  //TODO: remove string concatenation
-  const static string monotone = "_M";
-  const static string swap = "_S";
-  const static string prefixes[] = 
-    { "srf_slslw_", "srf_slsrw_", "srf_srslw_", "srf_srsrw_"};
-
-  string direction = isMonotone ? monotone : swap;
-  AddFeatureWordPair(prefixes[0], direction,
-     sentence.GetWord(nt1.GetStartPos()), sentence.GetWord(nt2.GetStartPos()), accumulator);
-  AddFeatureWordPair(prefixes[1], direction,
-     sentence.GetWord(nt1.GetStartPos()), sentence.GetWord(nt2.GetEndPos()),  accumulator);
-  AddFeatureWordPair(prefixes[2], direction,
-     sentence.GetWord(nt1.GetEndPos()), sentence.GetWord(nt2.GetStartPos()), accumulator);
-  AddFeatureWordPair(prefixes[3], direction,
-     sentence.GetWord(nt1.GetEndPos()), sentence.GetWord(nt2.GetStartPos()), accumulator);
+const Factor* SparseReorderingFeature::GetFactor(const Word& word, const Vocab& vocab, FactorType factorType) const {
+  const Factor* factor = word.GetFactor(factorType);
+  if (vocab.size() && vocab.find(factor) == vocab.end()) return m_otherFactor;
+  return factor;
 }
 
 FFState* SparseReorderingFeature::EvaluateChart(
@@ -141,10 +137,12 @@ FFState* SparseReorderingFeature::EvaluateChart(
       sourceBlocks.push_back(Block(WordsRange(prevHypoRange.GetEndPos()+1,lastBlock.first.GetEndPos()), false));
     }
   }
+  /*
   cerr << "Source Blocks: ";
   for (size_t i = 0; i < sourceBlocks.size(); ++i) cerr << sourceBlocks[i].first << " "
       << (sourceBlocks[i].second ? "NT" : "T") << " ";
   cerr << endl;
+  */
 
   //Mapping from source word to target rule position
   vector<size_t> sourceWordToTargetRulePos(sourceSize);
@@ -176,16 +174,6 @@ FFState* SparseReorderingFeature::EvaluateChart(
   }
   //cerr << endl;
 
-  /**
-  const InputPath* inputPath = cur_hypo.GetTranslationOption().GetInputPath();
-  cerr << "IP phrase: " << inputPath->GetPhrase() << endl;
-  cerr << "NTs ";
-  for (NonTerminalSet::const_iterator i = inputPath->GetNonTerminalSet().begin();
-    i != inputPath->GetNonTerminalSet().end(); ++i) {
-    cerr << *i << " ";
-  }
-  cerr << endl;
-  **/
   //Iterate through block pairs
   const Sentence& sentence = 
     dynamic_cast<const Sentence&>(cur_hypo.GetManager().GetSource());
@@ -214,55 +202,20 @@ FFState* SparseReorderingFeature::EvaluateChart(
     {
       isMonotone = false;
     }
-    cerr << sourceLeftBoundaryWord.GetFactor(0)->GetString() <<
-      "_" << sourceRightBoundaryWord.GetFactor(0)->GetString() << "_" 
-      <<  (isMonotone ? "M" : "S") << endl;
-  }
-  cerr << endl;
-
-  /*
-  cerr << "NT align ";
-  const AlignmentInfo& align = cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm();
-  for (AlignmentInfo::CollType::const_iterator i = align.begin(); i != align.end(); ++i) {
-    cerr << i->first << "," << i->second << " ";
-  }
-  cerr << endl;
-
-  cerr << "T align ";
-  const AlignmentInfo& alignT = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();
-  for (AlignmentInfo::CollType::const_iterator i = alignT.begin(); i != alignT.end(); ++i) {
-    cerr << i->first << "," << i->second << " ";
-  }
-  cerr << endl;
-  */
-
-  /*
-  //Get mapping from target to source, in target order
-  vector<pair<size_t, size_t> > targetNTs; //(srcIdx,targetPos)
-  for (size_t targetIdx = 0; targetIdx < nonTermIndexMap.size(); ++targetIdx) {
-    size_t srcNTIdx;
-    if ((srcNTIdx = nonTermIndexMap[targetIdx]) == NOT_FOUND) continue;
-    targetNTs.push_back(pair<size_t,size_t> (srcNTIdx,targetIdx));
-  }
-  //Add features for pairs of non-terminals
-  for (size_t i = 0; i < targetNTs.size(); ++i) {
-    for (size_t j = i+1; j < targetNTs.size(); ++j) {
-      size_t src1 = targetNTs[i].first;
-      size_t src2 = targetNTs[j].first;
-      //NT pair (src1,src2) maps to (i,j)
-      bool isMonotone = true;
-      if ((src1 < src2 && i > j) || (src1 > src2 && i < j)) isMonotone = false;
-      //NB: should throw bad_cast for Lattice input
-      const Sentence& sentence = 
-        dynamic_cast<const Sentence&>(cur_hypo.GetManager().GetSource());
-      AddNonTerminalPairFeatures(sentence,
-        cur_hypo.GetPrevHypo(src1)->GetCurrSourceRange(),
-        cur_hypo.GetPrevHypo(src2)->GetCurrSourceRange(),
-        isMonotone,
-        accumulator);
+    stringstream buf;
+    buf << "sr_h_"; //sparse reordering, Huck
+    if (m_type == SourceLeft || m_type == SourceCombined) {
+      buf << GetFactor(sourceLeftBoundaryWord,m_sourceVocab,m_sourceFactor)->GetString();
+      buf << "_";
     }
-  }*/
-
+    if (m_type == SourceRight || m_type == SourceCombined) {
+    buf << GetFactor(sourceRightBoundaryWord,m_sourceVocab,m_sourceFactor)->GetString();
+      buf << "_";
+    }
+    buf << (isMonotone ? "M" : "S");
+    accumulator->SparsePlusEquals(buf.str(), 1);
+  }
+//  cerr << endl;
   return new SparseReorderingState();
 }
 

@@ -4,6 +4,8 @@
 
 #include <boost/unordered_set.hpp>
 
+#include <util/string_piece.hh>
+
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 
@@ -22,6 +24,12 @@ public:
 class SparseReorderingFeature : public StatefulFeatureFunction
 {
 public:
+  enum Type {
+    SourceCombined,
+    SourceLeft,
+    SourceRight
+  };
+
 	SparseReorderingFeature(const std::string &line);
 
 	bool IsUseable(const FactorMask &mask) const
@@ -58,19 +66,25 @@ public:
 
 private:
 
+  typedef boost::unordered_set<const Factor*> Vocab;
+
   void AddNonTerminalPairFeatures(
     const Sentence& sentence, const WordsRange& nt1, const WordsRange& nt2,
       bool isMonotone, ScoreComponentCollection* accumulator) const;
 
-  void LoadVocabulary(const std::string& filename, boost::unordered_set<std::string>& vocab);
+  void LoadVocabulary(const std::string& filename, Vocab& vocab);
+  const Factor*  GetFactor(const Word& word, const Vocab& vocab, FactorType factor) const;
 
+  Type m_type;
   FactorType m_sourceFactor;
   FactorType m_targetFactor;
   std::string m_sourceVocabFile;
   std::string m_targetVocabFile;
 
-  boost::unordered_set<std::string> m_sourceVocab;
-  boost::unordered_set<std::string> m_targetVocab;
+  const Factor* m_otherFactor;
+  
+  Vocab m_sourceVocab;
+  Vocab m_targetVocab;
 
 };
 
