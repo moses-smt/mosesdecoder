@@ -633,11 +633,12 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     phraseTableFile << " " << extraDense[i];
   }
 
-  for (map<string,float>::const_iterator i = extraSparse.begin();
+  //MARIA -> seems this should go at the end of the rule table -> field 6
+/*  for (map<string,float>::const_iterator i = extraSparse.begin();
        i != extraSparse.end(); ++i) {
     phraseTableFile << " " << i->first << " " << i->second;
   }
-
+*/
   phraseTableFile << " ||| ";
 
   // alignment info for non-terminals
@@ -708,12 +709,22 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     }
   }
 
+  //MARIA
+  //sparse features
+  if(extraSparse.size()>0)
+    	phraseTableFile << " ||| ";
+    for (map<string,float>::const_iterator i = extraSparse.begin();
+           i != extraSparse.end(); ++i) {
+        phraseTableFile << " " << i->first << " " << i->second;
+      }
+
   // tree fragments
   if (treeFragmentsFlag && !inverseFlag) {
     const std::string &bestTreeFragment = findBestTreeFragment( phrasePair );
     if ( !bestTreeFragment.empty() )
       phraseTableFile << " ||| {{Tree " << bestTreeFragment << "}}";
   }
+
 
 
   phraseTableFile << endl;

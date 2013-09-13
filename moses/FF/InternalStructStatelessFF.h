@@ -19,8 +19,8 @@ public:
 	void Evaluate(const Phrase &source
 	                        , const TargetPhrase &targetPhrase
 	                        , ScoreComponentCollection &scoreBreakdown
-	                        , ScoreComponentCollection &estimatedFutureScore) const
-	{}
+	                        , ScoreComponentCollection &estimatedFutureScore) const;
+
 	void Evaluate(const InputType &input
 	                        , const InputPath &inputPath
 	                        , ScoreComponentCollection &scoreBreakdown) const;
