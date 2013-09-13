@@ -298,21 +298,26 @@ void IOWrapper::WriteApplicationContext(std::ostream &out,
   }
 }
 
+void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+  ReconstructApplicationContext(*hypo, sentence, applicationContext);
+  out << "Trans Opt " << translationId
+      << " " << hypo->GetCurrSourceRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+      << "->" << hypo->GetCurrTargetPhrase()
+      << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+}
+
 void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
-  // recursive
   if (hypo != NULL) {
-    ReconstructApplicationContext(*hypo, sentence, applicationContext);
-    out << "Trans Opt " << translationId
-        << " " << hypo->GetCurrSourceRange()
-        << ": ";
-    WriteApplicationContext(out, applicationContext);
-    out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
-        << "->" << hypo->GetCurrTargetPhrase()
-        << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
-        << endl;
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+    out << std::endl;
   }
 
+  // recursive
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
@@ -323,32 +328,25 @@ void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &
 
 void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
-  // recursive
+
   if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+
     const std::string key = "Tree";
     std::string value;
-    bool hasprop;
+    bool hasProperty;
     const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
-    currTarPhr.GetProperty(key, value, hasprop);
-
-    ReconstructApplicationContext(*hypo, sentence, applicationContext);
-    out << "Trans Opt " << translationId
-        << " " << hypo->GetCurrSourceRange()
-        << ":";
-    WriteApplicationContext(out, applicationContext);
-    out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
-        << "-> " << hypo->GetCurrTargetPhrase()
-        << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+    currTarPhr.GetProperty(key, value, hasProperty);
 
     out << " ||| ";
-    if (hasprop)
+    if (hasProperty)
       out << " " << value;
     else
       out << " " << "noTreeInfo";
-
     out << std::endl;
   }
 
+  // recursive
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
