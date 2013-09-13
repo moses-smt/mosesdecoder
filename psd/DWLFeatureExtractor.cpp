@@ -67,7 +67,7 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   if (m_config.GetPhraseFactor()) GeneratePhraseFactorFeatures(context, sourceSpanList, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, globalStart, globalEnd, FACTOR_FORM, fc);
 
-	if (m_config.GetSourceIndicator()) GenerateIndicatorFeature(sourceForms, fc); 
+  if (m_config.GetSourceIndicator()) GenerateIndicatorFeature(sourceForms, fc); 
 
   vector<CeptTranslation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
@@ -91,9 +91,9 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     // later, for DA;  "NOT_IN_" features
 //    if (m_config.GetBinnedScores() || m_config.GetMostFrequent()) GenerateTTableEntryFeatures(transIt->m_ttableScores, fc);
 
-		if (m_config.GetTargetIndicator()) GenerateIndicatorFeature(targetForms, fc); 
+    if (m_config.GetTargetIndicator()) GenerateIndicatorFeature(targetForms, fc); 
 
-		if (m_config.GetSourceTargetIndicator()) GenerateConcatIndicatorFeature(sourceForms, targetForms, fc); 
+    if (m_config.GetSourceTargetIndicator()) GenerateConcatIndicatorFeature(sourceForms, targetForms, fc); 
 
     if (m_train) {
       fc->Train(SPrint(transIt->m_index), *lossIt);

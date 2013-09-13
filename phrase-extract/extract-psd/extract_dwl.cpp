@@ -16,6 +16,8 @@ using namespace Moses;
 using namespace MosesTraining;
 using namespace PSD;
 
+const string EMPTY_PLACEHOLDER = "__EMPTY__|__EMPTY__|-------------";
+  
 //FB : Pass a list of spans instead of a single span
 
 class DWLLine
@@ -43,10 +45,10 @@ public:
     IsSourceSorted();
 
     for (spanIt = spanListTarget.begin(); spanIt != spanListTarget.end(); spanIt++) {
-    	vector<string> positions = Tokenize(*spanIt, "-");
-        //cerr << positions.size() << endl;
-        CHECK(positions.size() == 2);
-        m_targetSpans.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
+      vector<string> positions = Tokenize(*spanIt, "-");
+      //cerr << positions.size() << endl;
+      CHECK(positions.size() == 2);
+      m_targetSpans.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
     }
 
     m_srcCept = columns[3];
@@ -66,8 +68,13 @@ public:
     for (it = m_sourceSpans.begin(); it != m_sourceSpans.end(); it++) {
       if (it->first <= prevEnd) return false;
       prevEnd = it->second;
-	  }
+    }
     return true;
+  }
+
+  bool IsEmpty()
+  {
+    return m_srcCept == EMPTY_PLACEHOLDER;
   }
 
 private:
@@ -75,8 +82,8 @@ private:
   size_t m_sentID;
   vector<pair<int,int> > m_sourceSpans;
   vector<pair<int,int> > m_targetSpans;
-  vector<string> m_source, m_target;
   string m_srcCept, m_tgtCept;
+
 };
 
 
