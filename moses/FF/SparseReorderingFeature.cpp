@@ -102,7 +102,50 @@ FFState* SparseReorderingFeature::EvaluateChart(
   //For the block pair, we use the right word of the left block, and the left 
   //word of the right block.
 
-  WordsRange sourceRange = cur_hypo.GetCurrSourceRange();
+  //Need to get blocks, and their alignment. Each block has a word range (on the 
+  // on the source), a non-terminal flag, and  a set of alignment points in the target phrase
+
+  vector<WordsRange> sourceNTSpans;
+  for (size_t prevHypoId = 0; prevHypoId < cur_hypo.GetPrevHypos().size(); ++prevHypoId) {
+    sourceNTSpans.push_back(cur_hypo.GetPrevHypo(prevHypoId)->GetCurrSourceRange());
+  }
+  sort(sourceNTSpans.begin(), sourceNTSpans.end()); //put in source order
+  cerr << "Source NTs: ";
+  for (size_t i = 0; i < sourceNTSpans.size(); ++i) cerr << sourceNTSpans[i] << " ";
+  cerr << endl;
+
+  vector<WordsRange> blocks;
+  blocks.push_back(cur_hypo.GetCurrSourceRange());
+  for (vector<WordsRange>::const_iterator i = sourceNTSpans.begin(); 
+      i != sourceNTSpans.end(); ++i) {
+    const WordsRange& prevHypoRange = *i;
+    WordsRange lastRange = blocks.back();
+    blocks.pop_back();
+    //split this range into before NT, NT and after NT
+    if (prevHypoRange.GetStartPos() > lastRange.GetStartPos()) {
+      blocks.push_back(WordsRange(lastRange.GetStartPos(),prevHypoRange.GetStartPos()-1));
+    }
+    blocks.push_back(prevHypoRange);
+    if (prevHypoRange.GetEndPos() < lastRange.GetEndPos()) {
+      blocks.push_back(WordsRange(prevHypoRange.GetEndPos()+1,lastRange.GetEndPos()));
+    }
+  }
+  cerr << "Blocks: ";
+  for (size_t i = 0; i < blocks.size(); ++i) cerr << blocks[i] << " ";
+  cerr << endl;
+
+  //this currently doesn't work
+  const InputPath* inputPath = cur_hypo.GetTranslationOption().GetInputPath();
+  //The phrase is always dangling
+  //cerr << "IP: phrase " << inputPath << endl;
+  /*
+  cerr << "NTs ";
+  for (NonTerminalSet::const_iterator i = inputPath->GetNonTerminalSet().begin();
+    i != inputPath->GetNonTerminalSet().end(); ++i) {
+    cerr << *i << " ";
+  }
+  cerr << endl;
+  */
 
   //Get mapping from target to source, in target order
   vector<pair<size_t, size_t> > targetNTs; //(srcIdx,targetPos)
