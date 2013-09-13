@@ -109,20 +109,23 @@ def parse_words_line(line):
 OOV_TOKEN_TEXT = "__OOV__|__OOV__|-------------"
 
 def escape(feature):
-    """
+    r"""
     Escape a string so it can be safely used as name for single feature in 
     Vowpal Wabbit.
 
     Following chars are escaped:
 
-        - "|" (namespace separator in VW, replaced with "///")
-        - " " (feature separator, replaced with "___")
-        - ":" (separates feature name and feature value, replaced with ";;;")
+        - "|" (namespace separator in VW, replaced with "\/")
+        - " " (feature separator, replaced with "\_")
+        - ":" (separates feature name and feature value, replaced with "\;")
+        - "\" (chosen escape symbol, replaced with "\\")
 
     """
-    return feature.replace("|", "///") \
-                  .replace(" ", "___") \
-                  .replace(":", ";;;")
+    return feature.replace("|",  "\\/" ) \
+                  .replace(" ",  "\\_" ) \
+                  .replace(":",  "\\;" ) \
+                  .replace("\\", "\\\\")
+
 
 NO_CEPT_WARNING_PRINTED = False
 
