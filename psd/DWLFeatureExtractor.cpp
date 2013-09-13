@@ -179,7 +179,7 @@ void DWLFeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &contex
   }
 }
 
-void DWLFeatureExtractor::GenerateTargetPhraseFactorFeatures(vector<string> targetForms, FeatureConsumer *fc)
+void DWLFeatureExtractor::GenerateTargetFactorFeatures(vector<string> targetForms, FeatureConsumer *fc)
 {
   vector<string>::iterator itr_target;
   for(itr_target = targetForms.begin(); itr_target != targetForms.end(); itr_target++)
@@ -187,7 +187,7 @@ void DWLFeatureExtractor::GenerateTargetPhraseFactorFeatures(vector<string> targ
 	  string currentWord = *itr_target;
 	  vector<string> targetToken = Tokenize(*itr_target,"|");
 	  vector<string>::iterator itr_target_token;
-	  CHECK(targetToken == 3);
+	  CHECK(targetToken.size() == 3);
 	  fc->AddFeature("trich^" + targetToken[0]);
 	  fc->AddFeature("trich^" + targetToken[1]);
 
@@ -203,16 +203,15 @@ void DWLFeatureExtractor::GenerateTargetPhraseFactorFeatures(vector<string> targ
 		  string morphFeat = *itr_morph;
 		  if(*itr_morph == "-")
 		  {
-			  fc->AddFeature("trich^"+counter+"^UNDEFINED");
+			  fc->AddFeature("trich^"+SPrint(counter)+"^UNDEFINED");
 		  }
 		  else
 		  {
-			  fc->AddFeature("trich^"+counter+"^"+*itr_morph);
+			  fc->AddFeature("trich^"+SPrint(counter)+"^"+*itr_morph);
 		  }
 	  }
   }
 }
-
 
 // XXX NULL feature!!!
 
