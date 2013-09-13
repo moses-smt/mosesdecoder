@@ -1778,13 +1778,12 @@ sub define_training_build_ttable {
 
 sub define_training_psd_extract {
   my $step_id = shift;
-  my ($out, $phrase_table, $extract, $src_corpus, $psd_config) = &get_output_and_input($step_id);
-
-  die "error: no psd_config" unless defined($psd_config);
+  my ($out, $phrase_table, $extract, $src_corpus) = &get_output_and_input($step_id);
 
   my $extractor = &get("GENERAL:moses-script-dir") . "/generic/psd-feature-extract-parallel.perl";
   my $cores = &get("GENERAL:cores");
   my $extractor_bin = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
+  my $psd_config = &check_backoff_and_get("TRAINING:psd-config");
 
   # ugly, but this gets the extract filename *with* factors
   # See encode_factor_definition("translation-factors" ... for how to do this right
@@ -1807,11 +1806,13 @@ sub define_training_psd_extract {
 
 sub define_training_psd_model {
   my $step_id = shift;
-  my ($out, $psd_output, $psd_config) = &get_output_and_input($step_id);
+  my ($out, $psd_output) = &get_output_and_input($step_id);
   my $trainfile = "$psd_output.train.gz";
   my $cores = &get("GENERAL:cores");
   my $vwparallel = &get("GENERAL:moses-script-dir") . "/generic/vw-parallel.perl";
   my $vwpath = &get("GENERAL:vw-path");
+  my $psd_config = &check_backoff_and_get("TRAINING:psd-config");
+
   my $psd_parsed_config = read_ini_file($psd_config);
   if (! defined $psd_parsed_config->{'vw-options.train'}) {
     die "PSD configuration file does not contain the key 'train' in section [vw-options]";
@@ -1898,7 +1899,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_output,$psd_model,$psd_config,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_output,$psd_model,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
@@ -1906,6 +1907,8 @@ sub define_training_create_config {
 		# get model, and whether suffix array is used. Determines the pt implementation.
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $sa_exec_dir = &get("TRAINING:suffix-array");
+
+
 		
 		my ($ptImpl, $numFF);
 		if ($hierarchical) {
@@ -1949,7 +1952,7 @@ sub define_training_create_config {
     my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
     my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
     if (&get("TRAINING:use-psd")) {
-      die "ERROR: no psd_config" unless defined($psd_config);
+      my $psd_config = &check_backoff_and_get("TRAINING:psd-config");
       die "ERROR: no psd_output" unless defined $psd_output;
       my $psd_modelfile = "$psd_model.model";
       my $psd_index = "$psd_output.index";
@@ -2320,7 +2323,7 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_output, $psd_model, $psd_config) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_output, $psd_model) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2383,7 +2386,7 @@ sub define_tuningevaluation_filter {
     }
 
     if (&get("TRAINING:use-psd")) {
-      die "ERROR: psd_index is not defined" unless defined($psd_config);
+      my $psd_config = &check_backoff_and_get("TRAINING:psd-config");
       die "ERROR: no psd_output" unless defined $psd_output;
       my $psd_modelfile = "$psd_model.model";
       my $psd_index = "$psd_output.index";

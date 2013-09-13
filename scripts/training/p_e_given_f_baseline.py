@@ -91,8 +91,6 @@ def process_target_phrases(joint_counts,\
         target_phrase = escape_vw(escaped_target_phrase)
         label = extract_label_from_vw(line.strip())
 
-        joint_count = joint_counts[(source_phrase, target_phrase)]
-        single_count = single_counts[target_phrase]
         LOG_PROBABILITY = \
             math.log(\
                 (joint_counts[(source_phrase, target_phrase)] + alpha) /\

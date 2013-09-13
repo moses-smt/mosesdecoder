@@ -121,11 +121,10 @@ def escape(feature):
         - "\" (chosen escape symbol, replaced with "\\")
 
     """
-    return feature.replace("|",  "\\/" ) \
+    return feature.replace("\\", "\\\\") \
+                  .replace("|",  "\\/" ) \
                   .replace(" ",  "\\_" ) \
-                  .replace(":",  "\\;" ) \
-                  .replace("\\", "\\\\")
-
+                  .replace(":",  "\\;" )
 
 NO_CEPT_WARNING_PRINTED = False
 
