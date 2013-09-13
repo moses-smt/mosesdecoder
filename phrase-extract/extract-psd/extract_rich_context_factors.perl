@@ -1,16 +1,14 @@
 #!/usr/bin/perl -w
+# Reads CONLL-like format (or perhaps exactly CONLL format?)
+# produces factored format where each word is equipped with
+# factors carrying information from neighbouring words based on
+# Minwoo Jeong, Kristina Toutanova, Hisami Suzuki, and Chris Quirk (2010)
 
 use strict;
 
-my $en_file_parsed = shift;
-
-open(ENparsed, $en_file_parsed) or die "cannot open EN parsed: $en_file_parsed\n";
-
-#my $en_parsed_in = <ENparsed>;
-
 my $line_counter = 1;
 $/ = "";
-while(<ENparsed>) {
+while(<>) {
     chomp;
     s/^\n//;
     my @en_parsed = split(/\n/, $_);

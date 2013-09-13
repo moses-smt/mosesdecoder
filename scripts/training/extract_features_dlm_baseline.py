@@ -124,7 +124,11 @@ def escape(feature):
                   .replace(" ", "___") \
                   .replace(":", ";;;")
 
+NO_CEPT_WARNING_PRINTED = False
+
 def extract_features(words_path, phrase_table, no_oov=False):
+    global NO_CEPT_WARNING_PRINTED
+
     for line in fileinput.input(words_path):
         # Read source cept and target word
         line_index = 0
@@ -134,13 +138,24 @@ def extract_features(words_path, phrase_table, no_oov=False):
         try:
             candidates = phrase_table[cept]
         except KeyError:
-            msg = ("Cept '%s' is not found in cept table. This could only " + 
-                   "happen if data is inconsistent: cept table should be "  + 
-                   "built using same corpora of parallel sentences, that "  +
-                   "was used to 1) train alignments 2) which were used to " + 
-                   "generate WORDS file 3) that is now an input to this "   + 
-                   "script") % cept
-            raise KeyError(msg)
+            if NO_CEPT_WARNING_PRINTED:
+                continue
+
+            msg = """\
+Cept '%s' is not found in cept table. This could only happen if data is 
+inconsistent: cept table should be built using same corpora of parallel 
+sentences, that was used to 
+
+    1) train alignments 
+    2) which were used to generate WORDS file 
+    3) that is now an input to this script";
+
+This warning won't be printed again, samples will just be ommitted.
+Continuing...
+"""
+            print(msg % cept, file=sys.stderr)
+            NO_CEPT_WARNING_PRINTED = True
+            continue
 
         # Check if target word is OOV
         is_oov = target not in candidates
