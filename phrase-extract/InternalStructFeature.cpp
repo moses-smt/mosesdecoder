@@ -11,7 +11,7 @@ InternalStructFeature::InternalStructFeature()
 }
 
 bool InternalStructFeature::equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const{
-	cout<<"InternalStructFeature: Equals\n";
+	//cout<<"InternalStructFeature: Equals\n";
 	//don't know what it's used for and what we should compare
 	//-> if the dense score is the same
 	//-> if the sparse feature is set
@@ -19,7 +19,13 @@ bool InternalStructFeature::equals(const PhraseAlignment& lhs, const PhraseAlign
 	/** Return true if the two phrase pairs are equal from the point of this feature. Assume
 	      that they already compare true according to PhraseAlignment.equals()
 	   **/
-	return true;
+
+/*	if(lhs.ghkmParse==rhs.ghkmParse)
+		return true;
+	else
+		return false;
+*/
+	//return true;
 }
 
 void InternalStructFeature::add(const ScoreFeatureContext& context,
