@@ -52,9 +52,15 @@ void InternalStructFeatureSparse::add(std::string *internalStruct,
 	                   std::map<std::string,float>& sparseValues) const{
 	//cout<<"Sparse: "<<*internalStruct<<endl;
 	if(internalStruct->find("VBZ")!=std::string::npos)
-		sparseValues["NT_VBZ"] = 1;
+		sparseValues["NTVBZ"] = 1;
 	if(internalStruct->find("VBD")!=std::string::npos)
-			sparseValues["NT_VBD"] = 1;
+			sparseValues["NTVBD"] = 1;
+	if(internalStruct->find("VBP")!=std::string::npos)
+				sparseValues["NTVBP"] = 1;
+	if(internalStruct->find("PP")!=std::string::npos)
+				sparseValues["NTPP"] = 1;
+	if(internalStruct->find("SBAR")!=std::string::npos)
+				sparseValues["NTSBAR"] = 1;
 
 }
 
