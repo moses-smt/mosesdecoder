@@ -1,0 +1,70 @@
+# -*- Makefile -*-
+# This module specifies the locations of required scripts and programs
+
+# Moses directories: 
+# MOSES_ROOT: root directory of the distribution
+# MOSES_BIN:  where compiled binaries are kept
+# MGIZA_ROOT: root directory of the mgiza installation
+MOSES_ROOT     ?= ${HOME}/code/moses/master/mosesdecoder
+MOSES_BIN      ?= ${HOME}/bin
+MGIZA_ROOT     ?= ${HOME}/tools/mgiza
+
+# default location (unless specified otherwise above)
+MOSES_BIN      ?= ${MOSES_ROOT}/bin
+MOSES_SCRIPTS  ?= ${MOSES_ROOT}/scripts
+MERT_BIN       ?= ${MOSES_BIN}
+
+M4M_SCRIPTS    ?= ${m4mdir}scripts
+
+# default locations of scripts and executables
+
+# utilities
+parallel ?= $(shell which parallel)
+$(if ${parallel},,$(error GNU parallel utility not found!))
+
+# corpus preprocessing
+tokenize.${L1}       ?= ${MOSES_SCRIPTS}/tokenizer/tokenizer.perl -q -a -l ${L1}
+tokenize.${L2}       ?= ${MOSES_SCRIPTS}/tokenizer/tokenizer.perl -q -a -l ${L2}
+train-truecaser      ?= ${MOSES_SCRIPTS}/recaser/train-truecaser.perl
+run-truecaser        ?= ${MOSES_SCRIPTS}/recaser/truecase.perl
+run-detruecaser      ?= ${MOSES_SCRIPTS}/recaser/detruecase.perl
+run-lowercaser       ?= ${MOSES_SCRIPTS}/tokenizer/lowercase.perl
+
+# lm construction
+kenlm.build          ?= ${MOSES_BIN}/lmplz
+kenlm.binarize       ?= ${MOSES_BIN}/build_binary
+
+# word alignment with mgiza
+giza.txt2snt.sh        ?= ${M4M_SCRIPTS}/giza.txt2snt.sh
+giza2bal.pl            ?= ${MOSES_SCRIPTS}/training/giza2bal.pl
+mgiza.merge            ?= ${MGIZA_ROOT}/scripts/merge_alignment.py
+mgiza                  ?= ${MGIZA_ROOT}/bin/mgiza
+snt2cooc               ?= ${MGIZA_ROOT}/bin/snt2cooc
+plain2snt              ?= ${MGIZA_ROOT}/bin/plain2snt
+mkcls                  ?= ${MGIZA_ROOT}/bin/mkcls
+symal                  ?= ${MOSES_BIN}/symal
+merge-sorted           ?= ${MOSES_BIN}/merge-sorted
+
+# word alignment with fast_align
+fast_align             ?= ${HOME}/bin/fast_align
+
+# phrase and distortion table constuction
+# moses.make-lex: extracts word translation lexicon from a word-aligned corpus 
+#                 in text format
+moses.make-lex         ?= ${M4M_SCRIPTS}/moses.make-lex.py
+moses.extract-phrases  ?= ${M4M_SCRIPTS}/moses.phrase-extract.sh
+moses.score-phrases    ?= ${M4M_SCRIPTS}/moses.score-phrases.sh
+moses.score-reordering ?= ${MOSES_BIN}/lexical-reordering-score
+moses.extract          ?= ${MOSES_BIN}/extract
+
+# translation
+moses               ?= ${MOSES_BIN}/moses 
+
+# tuning and evaluation
+mert                 ?= ${MOSES_SCRIPTS}/training/mert-moses.pl
+clean-decoder-output ?= ${MOSES_SCRIPTS}/ems/support/remove-segmentation-markup.perl
+detruecase           ?= ${MOSES_SCRIPTS}/recaser/detruecase.perl
+multi-bleu           ?= ${MOSES_SCRIPTS}/generic/multi-bleu.perl
+analyze              ?= ${MOSES_SCRIPTS}/ems/support/analysis.perl
+report               ?= ${MOSES_SCRIPTS}/ems/support/report-experiment-scores.perl
+apply-weights        ?= ${MOSES_SCRIPTS}/ems/support/substitute-weights.perl

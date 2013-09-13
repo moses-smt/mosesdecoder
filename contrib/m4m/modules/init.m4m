@@ -1,0 +1,32 @@
+# -*- Makefile -*-
+.SUFFIXES:  # no implicit rules 
+.SECONDARY: # keep all files created during the make run
+
+# In this module we initialize a number of variables that we use throughout M4M.
+# The 'empty' := assignments are essential; they tell /make/ not to expand variables 
+# recursively but upon assignment.
+
+# standard features with one weight each
+STANDARD_FEATURES := UnknownWordPenalty WordPenalty Distortion
+WEIGHTS           := $(foreach x,$(STANDARD_FEATURES),$x0=;1.0)
+PTABLE_ENTRIES    := 
+DTABLE_ENTRIES    := 
+LMODEL_ENTRIES    := 
+MOSES_INI_PREREQ  := 
+MY_ENTRY          :=
+TUNED_SYSTEMS     :=
+DTABLES :=
+PTABLES := 
+LMODELS := 
+export MY_EXPERIMENT := 
+
+
+SHELL         = bash
+MAKEFLAGS    += --warn-undefined-variables
+.DEFAULT_GOAL = all
+
+# a little hack to be able to refer to a blank (in text substitution, for example)
+space := 
+space +=
+comma := ,
+

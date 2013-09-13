@@ -46,6 +46,8 @@ namespace Moses
  */
 struct ScorePair
 {
+	friend std::ostream& operator<<(std::ostream& os, const ScorePair& rhs);
+
 	std::vector<float> denseScores;
 	std::map<StringPiece, float> sparseScores;
 
@@ -262,13 +264,7 @@ public:
     m_scores[fname] += score;
   }
 
-  void Assign(const FeatureFunction* sp, const std::vector<float>& scores) {
-    IndexPair indexes = GetIndexes(sp);
-    CHECK(scores.size() == indexes.second - indexes.first);
-    for (size_t i = 0; i < scores.size(); ++i) {
-      m_scores[i + indexes.first] = scores[i];
-    }
-  }
+  void Assign(const FeatureFunction* sp, const std::vector<float>& scores);
 
   //! Special version Assign(ScoreProducer, vector<float>)
   //! to add the score from a single ScoreProducer that produces

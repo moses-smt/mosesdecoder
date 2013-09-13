@@ -1,0 +1,37 @@
+# -*- Makefile -*-
+
+# This make module deals with running the moses decoder.
+# It sets default parameters and checks that parameters that 
+# need to be set elsewhere are actually set.
+
+# The following parameters are translation-job specific and need to be set
+# explicitly for each job.
+
+moses.threads ?= 4
+moses.flags += -threads ${moses.threads}
+moses.flags += -v 0 -t -text-type "test"
+
+%.moses-out.wa: moses.flags += -alignment-output-file $*.output.wa
+%.moses-out.wa: %.moses-out
+
+
+.SECONDEXPANSION:
+%.moses-out: 
+	echo MOSES $^ 
+	$(checkvar,moses.input)
+	$(checkvar,moses.ini)
+	$(lock)
+	${moses} -i ${moses.input} -inputtype ${moses.inputtype} \
+	-f ${moses.ini} ${moses.flags} > $@_ && mv $@_ $@
+	$(unlock)
+
+%.cleaned: %.moses-out
+	$(lock)
+	$(clean-decoder-output) < $< > $@_ && mv $@_ $@
+	$(unlock)
+
+%.natcased: %.cleaned
+	$(eval $(call lock))
+	$(detruecase) < $*.cleaned > $@_ && mv $@_ $@
+	$(eval $(call unlock))
+

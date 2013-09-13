@@ -1,0 +1,40 @@
+# -*- Makefile -*-
+# Make module for translating some input.
+# the make module that specifies the target must also 
+# set some specific variables 
+
+decoder-settings = -threads 4 -v 0 -t -text-type "test"
+
+# What does the -t switch do?
+# What's the purpose of -text-type "test" ?
+
+%.output.${run-id}.wa: %.output.${run-id}
+%.output.${run-id}: decoder-input-file ?= $(error no decoder input given)
+%.output.${run-id}: decoder-input-type ?= $(error no decoder input type specified)
+%.output.${run-id}: moses_ini ?= tuning/moses.ini.${run-id}
+%.output.${run-id}: | ${moses_ini}
+%.output.${run-id}: | ${decoder_input_file}
+%.output.${run-id}: | decode_cmd  = ${decode} ${decoder-settings}
+%.output.${run-id}: | decode_cmd += -f ${moses_ini}
+%.output.${run-id}: | decode_cmd += < -inputtype ${decoder-input-type}
+%.output.${run-id}: | decode_cmd += < ${decoder-input-file}
+%.output.${run-id}: 
+	echo ${decoder-input-file}
+# ifndef ${decoder-input-type}
+#   $(error Fatal error: decoder input type must be specified explicitly!)
+# endif
+# mkdir $@.lock
+# echo $(call lockline) > $@.lock/owner
+# ${decode} ${decoder-settings} -alignment-output-file $@.wa_ -f ${moses_ini} < ${decoder_input_file} > $@_
+# rm $@.lock/owner
+# rmdir $@.lock
+
+.PNONEY = bla.output
+bla.output: run-id = 0
+bla.output: decoder-input-file = bla.cfn
+bla.output: decoder-input-type = 1
+bla.output: bla.output.${run-id}
+
+
+boo.output.1: decoder-input-file = boo.txt
+boo.output.0: decoder-input-type = 0

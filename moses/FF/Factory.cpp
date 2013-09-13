@@ -30,6 +30,9 @@
 #include "moses/FF/PhrasePenalty.h"
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
+#include "moses/FF/ExternalFeature.h"
+#include "moses/FF/InternalStructStatelessFF.h"
+
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 
@@ -142,6 +145,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ControlRecombination);
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
+  MOSES_FNAME(ExternalFeature);
+  MOSES_FNAME(InternalStructStatelessFF);
 
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);

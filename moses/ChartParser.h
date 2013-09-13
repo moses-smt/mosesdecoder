@@ -66,6 +66,7 @@ public:
   long GetTranslationId() const;
   size_t GetSize() const;
   const InputPath &GetInputPath(size_t startPos, size_t endPos) const;
+  const InputPath &GetInputPath(WordsRange &range) const;
 
 private:
   ChartParserUnknown m_unknown;
