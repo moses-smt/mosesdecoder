@@ -65,7 +65,7 @@ def prune_group(group, num_top_lemmas=None):
 
     get_freq = lambda entry: entry[0]
     group = sorted(group, key=get_freq, reverse=True)
-    return group[:20]
+    return group[:num_top_lemmas]
 
 # --------------------------------------------------------------- Raw indices --
 
