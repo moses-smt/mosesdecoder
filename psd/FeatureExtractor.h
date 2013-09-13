@@ -27,6 +27,7 @@ class ExtractorConfig
     inline bool GetSourceTargetIndicator() const { return m_sourceTargetIndicator; }
     inline bool GetSTSE() const { return m_STSE; }
     inline bool GetPhraseFactor() const   { return m_phraseFactor; }
+    inline bool GetTargetPhraseFactor() const   { return m_targetPhraseFactor; }
     inline bool GetPaired() const         { return m_paired; }
     inline bool GetBagOfWords() const     { return m_bagOfWords; }
     inline bool GetMostFrequent() const   { return m_mostFrequent; }
@@ -47,7 +48,7 @@ class ExtractorConfig
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal, m_mostFrequent,
          m_binnedScores, m_sourceIndicator, m_targetIndicator, 
-         m_sourceTargetIndicator, m_STSE, m_sourceTopic, m_phraseFactor;
+         m_sourceTargetIndicator, m_STSE, m_sourceTopic, m_phraseFactor, m_targetPhraseFactor;
     std::string m_vwOptsPredict, m_vwOptsTrain, m_normalization;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
