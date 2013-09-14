@@ -140,7 +140,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
-  MOSES_FNAME2("DynamicCBLM", DynamicCacheBasedLanguageModel);
+  MOSES_FNAME(DynamicCacheBasedLanguageModel);
 
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
