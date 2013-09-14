@@ -127,8 +127,9 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
       check_dlt = false;
       continue;
     }
-    std::string dlt = Trim(lline.substr(start+4, close-start-4));
-//    std::cerr << "dlt:|" << dlt << "|" << endl;
+    //std::string dlt = Trim(lline.substr(start+4, close-start-4));
+    std::string dlt = Trim(line.substr(start+4, close-start-4));
+    std::cerr << "dlt:|" << dlt << "|" << endl;
     line.erase(start,close-start+2);
     lline.erase(start,close-start+2);
 
@@ -139,8 +140,8 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
       if (dlt[i] == '=') {
         std::string label = dlt.substr(0, i);
         std::string val = dlt.substr(i+1);
-//        std::cerr << "label:|" << label << "|" << endl;
-//        std::cerr << "val:|" << val << "|" << endl;
+        std::cerr << "label:|" << label << "|" << endl;
+        std::cerr << "val:|" << val << "|" << endl;
         if (val[0] == '"') {
           val = val.substr(1);
           // it admits any double quotation mark in the value of the attribute
@@ -170,6 +171,7 @@ std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string
         dlt = Trim(dlt);
 
         tmp_meta[label] = val;
+    	std::cerr << "tmp_meta:|" << tmp_meta[label] << "|" << endl;
       }
     }
 
