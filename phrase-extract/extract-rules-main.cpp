@@ -129,7 +129,6 @@ int main(int argc, char* argv[])
          << " --GlueGrammar FILE"
          << " | --UnknownWordLabel FILE"
          << " | --OnlyDirect"
-         << " | --OutputNTLengths"
          << " | --MaxSpan[" << options.maxSpan << "]"
          << " | --MinHoleTarget[" << options.minHoleTarget << "]"
          << " | --MinHoleSource[" << options.minHoleSource << "]"
@@ -262,8 +261,6 @@ int main(int argc, char* argv[])
       options.fractionalCounting = false;
     } else if (strcmp(argv[i],"--PCFG") == 0) {
       options.pcfgScore = true;
-    } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
-      options.outputNTLengths = true;
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       options.unpairedExtractFormat = true;
     } else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
@@ -663,9 +660,6 @@ void ExtractTask::saveHieroAlignment( int startT, int endT, int startS, int endS
     rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
     if (!m_options.onlyDirectFlag)
       rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
-
-    rule.SetSpanLength(hole.GetPos(0), hole.GetSize(0), hole.GetSize(1) ) ;
-
   }
 
   rule.alignment.erase(rule.alignment.size()-1);
@@ -1077,9 +1071,6 @@ void ExtractTask::writeRulesToFile()
         << rule->target << " ||| "
         << rule->alignment << " ||| "
         << rule->count << " ||| ";
-    if (m_options.outputNTLengths) {
-      rule->OutputNTLengths(out);
-    }
     if (m_options.pcfgScore) {
       out << " ||| " << rule->pcfgScore;
     }

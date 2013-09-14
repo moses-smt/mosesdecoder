@@ -74,5 +74,5 @@ alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-#unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
 
