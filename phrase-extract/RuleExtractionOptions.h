@@ -49,7 +49,6 @@ public:
   bool duplicateRules;
   bool fractionalCounting;
   bool pcfgScore;
-  bool outputNTLengths;
   bool gzOutput;
   bool unpairedExtractFormat;
   bool conditionOnTargetLhs;
@@ -83,7 +82,6 @@ public:
     , duplicateRules(true)
     , fractionalCounting(true)
     , pcfgScore(false)
-    , outputNTLengths(false)
     , gzOutput(false)
     , unpairedExtractFormat(false)
     , conditionOnTargetLhs(false)

@@ -61,7 +61,6 @@ int negLogProb = 1;
 bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
-bool outputNTLengths = false;
 bool singletonFeature = false;
 bool crossedNonTerm = false;
 int countOfCounts[COC_MAX+1];
@@ -85,9 +84,6 @@ double computeUnalignedPenalty( const PHRASE &, const PHRASE &, const PhraseAlig
 set<string> functionWordList;
 void loadFunctionWords( const string &fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
-void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
-                      , map<size_t, map<size_t, float> > &sourceProb
-                      , map<size_t, map<size_t, float> > &targetProb);
 void printSourcePhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
 void printTargetPhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
 
@@ -98,7 +94,7 @@ int main(int argc, char* argv[])
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--TreeFragments] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] [--CrossedNonTerm] \n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] [--CrossedNonTerm] \n";
     cerr << featureManager.usage() << endl;
     exit(1);
   }
@@ -164,8 +160,6 @@ int main(int argc, char* argv[])
       minCountHierarchical = atof(argv[++i]);
       cerr << "dropping all phrase pairs occurring less than " << minCountHierarchical << " times\n";
       minCountHierarchical -= 0.00001; // account for rounding
-    } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
-      outputNTLengths = true;
     } else if (strcmp(argv[i],"--Singleton") == 0) {
       singletonFeature = true;
       cerr << "binary singleton feature\n";
@@ -405,86 +399,6 @@ const std::string &findBestTreeFragment(const PhraseAlignmentCollection &phraseP
 }
 
 
-void calcNTLengthProb(const map<size_t, map<size_t, size_t> > &lengths
-                      , size_t total
-                      , map<size_t, map<size_t, float> > &probs)
-{
-  map<size_t, map<size_t, size_t> >::const_iterator iterOuter;
-  for (iterOuter = lengths.begin(); iterOuter != lengths.end(); ++iterOuter) {
-    size_t sourcePos = iterOuter->first;
-    const map<size_t, size_t> &inner = iterOuter->second;
-
-    map<size_t, size_t>::const_iterator iterInner;
-    for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner) {
-      size_t length = iterInner->first;
-      size_t count = iterInner->second;
-      float prob = (float) count / (float) total;
-      probs[sourcePos][length] = prob;
-    }
-  }
-}
-
-void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
-                      , map<size_t, map<size_t, float> > &sourceProb
-                      , map<size_t, map<size_t, float> > &targetProb)
-{
-  map<size_t, map<size_t, size_t> > sourceLengths, targetLengths;
-  // 1st = position in source phrase, 2nd = length, 3rd = count
-  map<size_t, size_t> totals;
-  // 1st = position in source phrase, 2nd = total counts
-  // each source pos should have same count?
-
-  vector< PhraseAlignment* >::const_iterator iterOuter;
-  for (iterOuter = phrasePairs.begin(); iterOuter != phrasePairs.end(); ++iterOuter) {
-    const PhraseAlignment &phrasePair = **iterOuter;
-    const std::map<size_t, std::pair<size_t, size_t> > &ntLengths = phrasePair.GetNTLengths();
-
-    std::map<size_t, std::pair<size_t, size_t> >::const_iterator iterInner;
-    for (iterInner = ntLengths.begin(); iterInner != ntLengths.end(); ++iterInner) {
-      size_t sourcePos = iterInner->first;
-      size_t sourceLength = iterInner->second.first;
-      size_t targetLength = iterInner->second.second;
-
-      sourceLengths[sourcePos][sourceLength]++;
-      targetLengths[sourcePos][targetLength]++;
-
-      totals[sourcePos]++;
-    }
-  }
-
-  if (totals.size() == 0) {
-    // no non-term. Don't bother
-    return;
-  }
-
-  size_t total = totals.begin()->second;
-  if (totals.size() > 1) {
-    assert(total == (++totals.begin())->second );
-  }
-
-  calcNTLengthProb(sourceLengths, total, sourceProb);
-  calcNTLengthProb(targetLengths, total, targetProb);
-
-}
-
-void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t, float> > &probs, const string &prefix)
-{
-  map<size_t, map<size_t, float> >::const_iterator iterOuter;
-  for (iterOuter = probs.begin(); iterOuter != probs.end(); ++iterOuter) {
-    size_t sourcePos = iterOuter->first;
-    const map<size_t, float> &inner = iterOuter->second;
-
-    map<size_t, float>::const_iterator iterInner;
-    for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner) {
-      size_t length = iterInner->first;
-      float prob = iterInner->second;
-
-      phraseTableFile << sourcePos << "|" << prefix << "|" << length << "=" << prob << " ";
-    }
-  }
-
-}
-
 bool calcCrossedNonTerm(size_t sourcePos, size_t targetPos, const std::vector< std::set<size_t> > &alignedToS)
 {
   for (size_t currSource = 0; currSource < alignedToS.size(); ++currSource) {
@@ -694,21 +608,6 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   if (kneserNeyFlag)
     phraseTableFile << " " << distinctCount;
 
-  // nt lengths
-  if (outputNTLengths) {
-    phraseTableFile << " ||| ";
-
-    if (!inverseFlag) {
-      map<size_t, map<size_t, float> > sourceProb, targetProb;
-      // 1st sourcePos, 2nd = length, 3rd = prob
-
-      calcNTLengthProb(phrasePair, sourceProb, targetProb);
-
-      outputNTLengthProbs(phraseTableFile, sourceProb, "S");
-      outputNTLengthProbs(phraseTableFile, targetProb, "T");
-    }
-  }
-
   //MARIA
   //sparse features
   phraseTableFile << " ||| ";
@@ -725,7 +624,6 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     if ( !bestTreeFragment.empty() )
       phraseTableFile << " ||| {{Tree " << bestTreeFragment << "}}";
   }
-
 
 
   phraseTableFile << endl;
