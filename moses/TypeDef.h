@@ -122,7 +122,7 @@ enum PhraseTableImplementation {
                                                           ,Compact      = 12
                                                               ,Interpolated = 13
                                                                   ,DSuffixArray = 14
-                                                                       ,DCacheBased = 32
+                                                                      ,DCacheBased = 32
 };
 
 enum InputTypeEnum {

@@ -10,8 +10,8 @@
 #include <boost/thread/locks.hpp>
 #endif
 
-typedef std::pair<int, float> decaying_cache_value_t; 
-typedef std::map<std::string, decaying_cache_value_t > decaying_cache_t; 
+typedef std::pair<int, float> decaying_cache_value_t;
+typedef std::map<std::string, decaying_cache_value_t > decaying_cache_t;
 
 #define CBLM_QUERY_TYPE_ALLSUBSTRINGS 0
 #define CBLM_QUERY_TYPE_WHOLESTRING 1
@@ -57,10 +57,10 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
 
   void Decay();
   void Update(std::vector<std::string> words, int age);
-        
+
   void Execute(std::vector<std::string> commands);
   void Execute_Single_Command(std::string command);
-  
+
   void Load(std::vector<std::string> files);
   void Load_Single_File(const std::string file);
 
@@ -91,9 +91,9 @@ public:
   void Insert(std::string &entries);
 
   void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const;
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const;
 
 };
 
@@ -116,7 +116,7 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
 
   void Decay();
   void Update(std::vector<std::string> words, int age);
-	
+
   void Execute(std::vector<std::string> commands);
   void Execute_Single_Command(std::string command);
 
@@ -130,7 +130,7 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
   void Evaluate( const TargetPhrase&, ScoreComponentCollection* ) const;
 
 public:
-	
+
   DynamicCacheBasedLanguageModel(const std::string &line);
   ~DynamicCacheBasedLanguageModel();
 

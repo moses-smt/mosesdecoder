@@ -480,15 +480,15 @@ public:
     return m_dynamicCBLM;
   }
 
-/*
-  DynamicCacheBasedPhraseDictionary *GetDynamicCacheBasedPhraseDictionary() const {
-    return m_dynamicCBPD;
-  }
+  /*
+    DynamicCacheBasedPhraseDictionary *GetDynamicCacheBasedPhraseDictionary() const {
+      return m_dynamicCBPD;
+    }
 
-  const DynamicCacheBasedPhraseDictionary *GetDynamicCacheBasedPhraseDictionary() { // for mira
-    return m_dynamicCBPD;
-  }
-*/
+    const DynamicCacheBasedPhraseDictionary *GetDynamicCacheBasedPhraseDictionary() { // for mira
+      return m_dynamicCBPD;
+    }
+  */
 
   const ScoreComponentCollection& GetAllWeights() const {
     return m_allWeights;
