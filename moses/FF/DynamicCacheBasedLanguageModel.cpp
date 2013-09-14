@@ -10,17 +10,46 @@ namespace Moses
 	DynamicCacheBasedLanguageModel::DynamicCacheBasedLanguageModel(const std::string &line)
 	: StatelessFeatureFunction("DynamicCacheBasedLanguageModel", line)
 	{
-		query_type = ALLSUBSTRINGS;
+		std::cerr << "Initializing DynamicCacheBasedLanguageModel feature.." << std::endl;
+
+		query_type = CBLM_QUERY_TYPE_ALLSUBSTRINGS;
+		score_type = CBLM_SCORE_TYPE_HYPERBOLA;
+		maxAge = 1000;
 
 		ReadParameters();
 	}
+
+	DynamicCacheBasedLanguageModel::~DynamicCacheBasedLanguageModel(){};
 	
+        void DynamicCacheBasedLanguageModel::SetPreComputedScores()
+        {
+#ifdef WITH_THREADS
+                boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
+#endif          
+                precomputedScores.clear();
+                for (size_t i=0; i<maxAge; i++)
+                {
+                        precomputedScores.push_back(decaying_score(i));
+                }
+
+                if ( score_type == CBLM_SCORE_TYPE_HYPERBOLA
+                        || score_type == CBLM_SCORE_TYPE_POWER
+                        || score_type == CBLM_SCORE_TYPE_EXPONENTIAL
+                        || score_type == CBLM_SCORE_TYPE_COSINE )
+                {
+                        precomputedScores.push_back(decaying_score(maxAge));
+                }else{  // score_type = CBLM_SCORE_TYPE_XXXXXXXXX_REWARD
+                        precomputedScores.push_back(0.0);
+                }
+        }
+
 	void DynamicCacheBasedLanguageModel::SetParameter(const std::string& key, const std::string& value)
 	{
+		std::cerr << "DynamicCacheBasedLanguageModel::SetParameter" << std::endl;
 		if (key == "cblm-query-type") {
 			query_type = Scan<size_t>(value);
 		}
-		if (key == "cblm-score-type") {
+		else if (key == "cblm-score-type") {
 			score_type = Scan<size_t>(value);
 		}
 		else if (key == "cblm-file") {
@@ -30,96 +59,94 @@ namespace Moses
 		}
 	}
 
-	void DynamicCacheBasedLanguageModel::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
+	void DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp
+                                   , const TargetPhrase &tp
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection &estimatedFutureScore) const
 	{
-		if (query_type == WHOLESTRING)
-		{
-			Evaluate_Whole_String(tp,out);
-		}
-		else if (query_type == ALLSUBSTRINGS)
-		{
-			Evaluate_All_Substrings(tp,out);
-		}
-		else
-		{      
-			CHECK(false);
-		}
+		float score;
+                switch(query_type){
+                case CBLM_QUERY_TYPE_WHOLESTRING:
+                        score = Evaluate_Whole_String(tp);
+                        break;
+                case CBLM_QUERY_TYPE_ALLSUBSTRINGS:
+                        score = Evaluate_All_Substrings(tp);
+                        break;
+                default:
+                        CHECK(false);
+                }
+
+                VERBOSE(2,"cblm::Evaluate: score:|" << score << "|" << std::endl); 
+		scoreBreakdown.Assign(this, score);
 	}
-	
-	void DynamicCacheBasedLanguageModel::Evaluate(const PhraseBasedFeatureContext& context, ScoreComponentCollection* accumulator) const
-	{
-		const TargetPhrase& tp = context.GetTargetPhrase();
-		Evaluate(tp, accumulator);
-	}
-	
-	void DynamicCacheBasedLanguageModel::EvaluateChart(const ChartBasedFeatureContext& context, ScoreComponentCollection* accumulator) const
-	{
-		const TargetPhrase& tp = context.GetTargetPhrase();
-		Evaluate(tp, accumulator);
-	}
-	
-	void DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& tp, ScoreComponentCollection* out) const
+
+        float DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& tp) const
 	{
 		//consider all words in the TargetPhrase as one n-gram
-		// and compute the decaying_score for all words
-		// and return their sum
-		
-		decaying_cache_t::const_iterator it;
-		float score = 0.0;
+                // and compute the decaying_score for all words
+                // and return their sum
 
-		std::string w = "";
-		size_t endpos = tp.GetSize();
-		for (size_t pos = 0 ; pos < endpos ; ++pos) {
-			w += tp.GetWord(pos).GetFactor(0)->GetString().as_string();
-			if ((pos == 0) && (endpos > 1)){
-				w += " ";
-			}
-		}
-		it = m_cache.find(w);
-//		VERBOSE(1,"cblm::Evaluate: cheching cache for w:|" << w << "|" << std::endl);
-		
-		if (it != m_cache.end()) //found!
-		{
-			score += ((*it).second).second;
-			VERBOSE(3,"cblm::Evaluate: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" << score << "|" << std::endl);
-		}
-		
-		out->PlusEquals(this, score);
-	}
-	
-	void DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase& tp, ScoreComponentCollection* out) const
-	{
-		//loop over all n-grams in the TargetPhrase (no matter of n)
-		// and compute the decaying_score for all words
-		// and return their sum
-		
-		decaying_cache_t::const_iterator it;
-		float score = 0.0;
-		for (size_t startpos = 0 ; startpos < tp.GetSize() ; ++startpos) {
-			std::string w = "";
-			for (size_t endpos = startpos; endpos < tp.GetSize() ; ++endpos) {
-				w += tp.GetWord(endpos).GetFactor(0)->GetString().as_string();
-				//w += tp.GetWord(endpos).GetFactor(0)->GetString();
-				it = m_cache.find(w);
-				
-//				VERBOSE(1,"cblm::Evaluate: cheching cache for w:|" << w << "|" << std::endl);
-				if (it != m_cache.end()) //found!
-				{
-					score += ((*it).second).second;
-					VERBOSE(3,"cblm::Evaluate: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" << score << "|" << std::endl);
-				}
-				
-				if (endpos == startpos){
-					w += " ";
-				}
-				
-			}
-		}
-		out->PlusEquals(this, score);
-	}
-	
+                decaying_cache_t::const_iterator it;
+                float score = 0.0;
+
+                std::string w = "";
+                size_t endpos = tp.GetSize();
+                for (size_t pos = 0 ; pos < endpos ; ++pos) {
+                        w += tp.GetWord(pos).GetFactor(0)->GetString().as_string();
+                        if ((pos == 0) && (endpos > 1)){
+                                w += " ";
+                        }
+                }
+                it = m_cache.find(w);
+//              VERBOSE(1,"cblm::Evaluate: cheching cache for w:|" << w << "|" << std::endl);
+
+                if (it != m_cache.end()) //found!
+                {
+                        score += ((*it).second).second;
+                        VERBOSE(3,"cblm::Evaluate_Whole_String: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" << 
+score << "|" << std::endl);
+                }
+
+                VERBOSE(3,"cblm::Evaluate_Whole_String: returning score:|" << score << "|" << std::endl);
+                return score;
+        }
+
+        float DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase& tp) const
+        {
+                //loop over all n-grams in the TargetPhrase (no matter of n)
+                // and compute the decaying_score for all words
+                // and return their sum
+
+                decaying_cache_t::const_iterator it;
+                float score = 0.0;
+                for (size_t startpos = 0 ; startpos < tp.GetSize() ; ++startpos) {
+                        std::string w = "";
+                        for (size_t endpos = startpos; endpos < tp.GetSize() ; ++endpos) {
+                                w += tp.GetWord(endpos).GetFactor(0)->GetString().as_string();
+                                it = m_cache.find(w);
+
+//                              VERBOSE(1,"cblm::Evaluate_All_Substrings: cheching cache for w:|" << w << "|" << std::endl);
+                                if (it != m_cache.end()) //found!
+                                {
+                                        score += ((*it).second).second;
+                                        VERBOSE(3,"cblm::Evaluate_All_Substrings: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" << score << "|" << std::endl);
+                                }
+
+                                if (endpos == startpos){
+                                        w += " ";
+                                }
+
+                        }
+                }
+                VERBOSE(3,"cblm::Evaluate_All_Substrings: returning score:|" << score << "|" << std::endl);
+                return score;
+        }
+
 	void DynamicCacheBasedLanguageModel::Print() const
 	{
+#ifdef WITH_THREADS
+                boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
+#endif          
 		decaying_cache_t::const_iterator it;
 		std::cout << "Content of the cache of Cache-Based Language Model" << std::endl;
 		for ( it=m_cache.begin() ; it != m_cache.end(); it++ )
@@ -130,6 +157,9 @@ namespace Moses
 	
 	void DynamicCacheBasedLanguageModel::Decay()
 	{
+#ifdef WITH_THREADS
+                boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
+#endif          
 		decaying_cache_t::iterator it;
 		
 		int age;
@@ -153,6 +183,9 @@ namespace Moses
 	
 	void DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int age)
 	{
+#ifdef WITH_THREADS
+                boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
+#endif          
 		for (size_t j=0; j<words.size(); j++)
 		{
 			words[j] = Trim(words[j]);
@@ -183,31 +216,39 @@ namespace Moses
 		IFVERBOSE(2) Print();
 	}
 	
+	void DynamicCacheBasedLanguageModel::Execute(std::string command)
+	{
+		VERBOSE(1,"CacheBasedLanguageModel::Execute(std::string command:|" << command << "|" << std::endl);
+                std::vector<std::string> commands = Tokenize(command, "||");
+		Execute(commands);
+	}
+
 	void DynamicCacheBasedLanguageModel::Execute(std::vector<std::string> commands)
 	{
 		for (size_t j=0; j<commands.size(); j++)
 		{
-			Execute(commands[j]);
+			Execute_Single_Command(commands[j]);
 		}
 		IFVERBOSE(2) Print();
 	}
 	
-	void DynamicCacheBasedLanguageModel::Execute(std::string command)
+	void DynamicCacheBasedLanguageModel::Execute_Single_Command(std::string command)
 	{
+		VERBOSE(1,"CacheBasedLanguageModel::Execute_Single_Command(std::string command:|" << command << "|" << std::endl);
 		if (command == "clear")
 		{
 			VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Cache cleared." << std::endl);
-			m_cache.clear();
+			Clear();
 		}
 		else if (command == "settype_wholestring")
 		{
-			VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << WHOLESTRING << " (WHOLESTRING)." << std::endl);
-			SetQueryType(WHOLESTRING);
+			VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << CBLM_QUERY_TYPE_WHOLESTRING << " (CBLM_QUERY_TYPE_WHOLESTRING)." << std::endl);
+			SetQueryType(CBLM_QUERY_TYPE_WHOLESTRING);
 		}
 		else if (command == "settype_allsubstrings")
 		{
-			VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << ALLSUBSTRINGS << " (ALLSUBSTRINGS)." << std::endl);
-			SetQueryType(ALLSUBSTRINGS);
+			VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << CBLM_QUERY_TYPE_ALLSUBSTRINGS << " (CBLM_QUERY_TYPE_ALLSUBSTRINGS)." << std::endl);
+			SetQueryType(CBLM_QUERY_TYPE_ALLSUBSTRINGS);
 		}
 		else
 		{
@@ -215,15 +256,37 @@ namespace Moses
 		}        
 	}
 	
+	void DynamicCacheBasedLanguageModel::Clear()
+	{
+#ifdef WITH_THREADS
+                boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
+#endif
+                m_cache.clear();
+	}
+
+	void DynamicCacheBasedLanguageModel::Load()
+	{
+		VERBOSE(2,"DynamicCacheBasedLanguageModel::Load()" << std::endl);
+		Load(m_initfiles);
+	}
+
+        void DynamicCacheBasedLanguageModel::Load(const std::string file)
+        {
+                VERBOSE(2,"DynamicCacheBasedLanguageModel::Loadconst std::string file()" << std::endl);
+                std::vector<std::string> files = Tokenize(m_initfiles, "||");
+                Load(files);
+        }
+
+
 	void DynamicCacheBasedLanguageModel::Load(std::vector<std::string> files)
 	{
 		for(size_t j = 0; j < files.size(); ++j)
 		{
-			Load(files[j]);
+			Load_Single_File(files[j]);
 		}
 	}
 	
-	void DynamicCacheBasedLanguageModel::Load(const std::string file)
+	void DynamicCacheBasedLanguageModel::Load_Single_File(const std::string file)
 	{
 		//file format
 		//age || n-gram 
@@ -256,10 +319,78 @@ namespace Moses
 		}
 		IFVERBOSE(2) Print();
 	}
+
+        void DynamicCacheBasedLanguageModel::SetQueryType(size_t type) {
+#ifdef WITH_THREADS
+                boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
+#endif
+
+                query_type = type;
+                if ( query_type != CBLM_QUERY_TYPE_WHOLESTRING
+                        && query_type != CBLM_QUERY_TYPE_ALLSUBSTRINGS )
+                        {
+                               VERBOSE(2, "This query type " << query_type << " is unknown. Instead used " << CBLM_QUERY_TYPE_ALLSUBSTRINGS << "." << std::endl);
+                               query_type = CBLM_QUERY_TYPE_ALLSUBSTRINGS;
+                }
+                VERBOSE(2, "CacheBasedLanguageModel QueryType:  " << query_type << std::endl);
+
+        };
 	
-	float DynamicCacheBasedLanguageModel::decaying_score(const int age)
-	{
-		return (float) exp((float) 1/age);
-//		return (float) 1/age;
-	}
+        void DynamicCacheBasedLanguageModel::SetScoreType(size_t type) {
+#ifdef WITH_THREADS
+                boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
+#endif
+                score_type = type;
+                if ( score_type != CBLM_SCORE_TYPE_HYPERBOLA
+                        && score_type != CBLM_SCORE_TYPE_POWER
+                        && score_type != CBLM_SCORE_TYPE_EXPONENTIAL
+                        && score_type != CBLM_SCORE_TYPE_COSINE
+                        && score_type != CBLM_SCORE_TYPE_HYPERBOLA_REWARD
+                        && score_type != CBLM_SCORE_TYPE_POWER_REWARD
+                        && score_type != CBLM_SCORE_TYPE_EXPONENTIAL_REWARD )
+                        {
+                               VERBOSE(2, "This score type " << score_type << " is unknown. Instead used " << CBLM_SCORE_TYPE_HYPERBOLA << "." << std::endl);
+                               score_type = CBLM_SCORE_TYPE_HYPERBOLA;
+                }
+                VERBOSE(2, "CacheBasedLanguageModel ScoreType:  " << score_type << std::endl);
+        };
+
+        void DynamicCacheBasedLanguageModel::SetMaxAge(unsigned int age) {
+#ifdef WITH_THREADS
+                boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
+#endif
+                maxAge = age;
+                VERBOSE(2, "CacheBasedLanguageModel MaxAge:  " << maxAge << std::endl);
+        };
+
+        float DynamicCacheBasedLanguageModel::decaying_score(const int age)
+        {
+                float sc;
+                switch(score_type){
+                case CBLM_SCORE_TYPE_HYPERBOLA:
+                        sc = (float) 1.0/age - 1.0;
+                        break;
+                case CBLM_SCORE_TYPE_POWER:
+                        sc = (float) pow(age, -0.25) - 1.0;
+                        break;
+                case CBLM_SCORE_TYPE_EXPONENTIAL:
+                        sc = (age == 1) ? 0.0 : (float) exp( 1.0/age ) / exp(1.0) - 1.0;
+                        break;
+                case CBLM_SCORE_TYPE_COSINE:
+                        sc = (float) cos( (age-1) * (PI/2) / maxAge ) - 1.0;
+                        break;
+                case CBLM_SCORE_TYPE_HYPERBOLA_REWARD:
+                        sc = (float) 1.0/age;
+                        break;
+                case CBLM_SCORE_TYPE_POWER_REWARD:
+                        sc = (float) pow(age, -0.25);
+                        break;
+                case CBLM_SCORE_TYPE_EXPONENTIAL_REWARD:
+                        sc = (age == 1) ? 1.0 : (float) exp( 1.0/age ) / exp(1.0);
+                        break;
+                default:
+                        sc = -1.0;
+                }
+                return sc;
+        }
 }
