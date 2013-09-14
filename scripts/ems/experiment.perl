@@ -383,7 +383,7 @@ sub read_ini_file {
     } elsif ($line =~ m/^\[(.*)\]/) {
       $section = $1;    
     } elsif ($line =~ m/=/) {
-      my ($key, $value) = split / *= */;
+      my ($key, $value) = split / *= */, $line, 2;
       $value =~ s/^"//;
       $value =~ s/"\s*$//;
       $config{"$section.$key"} = $value;
