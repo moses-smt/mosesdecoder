@@ -127,7 +127,8 @@ inline std::string Replace(const std::string& str,
   size_t pos=0;
   std::string newStr=str;
   while ((pos=newStr.find(todelStr,pos))!=std::string::npos) {
-    newStr.replace(pos++,todelStr.size(),toaddStr);
+    newStr.replace(pos,todelStr.size(),toaddStr);
+    pos += toaddStr.size();
   }
   return newStr;
 }
