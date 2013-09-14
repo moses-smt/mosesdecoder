@@ -53,7 +53,6 @@ BOOST_AUTO_TEST_CASE(vector_sum_diff)
   BOOST_CHECK_CLOSE((FValue)diff[n3], -5.7, TOL);
   BOOST_CHECK_CLOSE((FValue)diff[n4], -0.6, TOL);
   f1 -= f3;
-  cerr << f1 << endl << f3 << endl ;
   BOOST_CHECK_CLOSE((FValue)f1[n1],0,TOL);
 }
 
