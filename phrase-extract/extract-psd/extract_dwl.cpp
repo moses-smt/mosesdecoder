@@ -40,7 +40,7 @@ public:
       CHECK(positions.size() == 2);
       m_sourceSpans.push_back(make_pair<int, int>(Scan<int>(positions[0]), Scan<int>(positions[1])));
     }
-    IsSourceSorted();
+    CHECK(IsSourceSorted());
 
     for (spanIt = spanListTarget.begin(); spanIt != spanListTarget.end(); spanIt++) {
       vector<string> positions = Tokenize(*spanIt, "-");
@@ -122,13 +122,17 @@ int main(int argc, char**argv)
     exit(1);
   }
 
+  cerr << "Reading translation table..." << flush;
   CeptTable ctable(argv[3]);
+  cerr << " DONE" << endl;
 
   ExtractorConfig config;
   config.Load(argv[4]);
   DWLFeatureExtractor extractor(*ctable.GetTargetIndex(), config, true);
   VWFileTrainConsumer consumer(argv[5]);
+  cerr << "Writing phrase index..." << flush;
   WritePhraseIndex(ctable.GetTargetIndex(), argv[6]);
+  cerr << " DONE" << endl;
 
   // one source phrase can have multiple correct translations
   // these will be on consecutive lines in the input PSD file
@@ -151,8 +155,10 @@ int main(int argc, char**argv)
 
   string corpusLine;
   string rawDWLLine;
+
+  cerr << "Generating training file..." << flush;
   while (getline(dwl, rawDWLLine)) {
-    tgtTotal++;
+    if (++tgtTotal % 1000 == 0) cerr << "." << flush;
 
     //FB : parse the extract.dwl file
     DWLLine dwlLine = DWLLine(rawDWLLine); // parse one line in PSD file
@@ -216,4 +222,5 @@ int main(int argc, char**argv)
 
   // flush FeatureConsumer
   consumer.Finish();
+  cerr << " DONE" << endl;
 }
