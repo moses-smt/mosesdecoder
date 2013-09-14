@@ -12,7 +12,7 @@
 namespace Moses
 {
 
-class SparseReorderingFeature : public StatelessFeatureFunction
+class SparseHieroReorderingFeature : public StatelessFeatureFunction
 {
 public:
   enum Type {
@@ -21,7 +21,7 @@ public:
     SourceRight
   };
 
-	SparseReorderingFeature(const std::string &line);
+	SparseHieroReorderingFeature(const std::string &line);
 
 	bool IsUseable(const FactorMask &mask) const
 		{ return true; }

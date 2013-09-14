@@ -7,15 +7,15 @@
 
 #include "util/exception.hh"
 
-#include "SparseReorderingFeature.h"
+#include "SparseHieroReorderingFeature.h"
 
 using namespace std;
 
 namespace Moses
 {
 
-SparseReorderingFeature::SparseReorderingFeature(const std::string &line)
-  :StatelessFeatureFunction("SparseReorderingFeature",0, line),
+SparseHieroReorderingFeature::SparseHieroReorderingFeature(const std::string &line)
+  :StatelessFeatureFunction("SparseHieroReorderingFeature",0, line),
   m_type(SourceCombined),
   m_sourceFactor(0),
   m_targetFactor(0),
@@ -39,7 +39,7 @@ SparseReorderingFeature::SparseReorderingFeature(const std::string &line)
   LoadVocabulary(m_targetVocabFile, m_targetVocab);
 }
 
-void SparseReorderingFeature::SetParameter(const std::string& key, const std::string& value) {
+void SparseHieroReorderingFeature::SetParameter(const std::string& key, const std::string& value) {
   if (key == "input-factor") {
     m_sourceFactor = Scan<FactorType>(value);
   } else if (key == "output-factor") {
@@ -63,7 +63,7 @@ void SparseReorderingFeature::SetParameter(const std::string& key, const std::st
   }
 }
 
-void SparseReorderingFeature::LoadVocabulary(const std::string& filename, Vocab& vocab)
+void SparseHieroReorderingFeature::LoadVocabulary(const std::string& filename, Vocab& vocab)
 {
   if (filename.empty()) return;
   ifstream in(filename.c_str());
@@ -75,13 +75,13 @@ void SparseReorderingFeature::LoadVocabulary(const std::string& filename, Vocab&
   in.close();
 }
 
-const Factor* SparseReorderingFeature::GetFactor(const Word& word, const Vocab& vocab, FactorType factorType) const {
+const Factor* SparseHieroReorderingFeature::GetFactor(const Word& word, const Vocab& vocab, FactorType factorType) const {
   const Factor* factor = word.GetFactor(factorType);
   if (vocab.size() && vocab.find(factor) == vocab.end()) return m_otherFactor;
   return factor;
 }
 
-void SparseReorderingFeature::EvaluateChart(
+void SparseHieroReorderingFeature::EvaluateChart(
   const ChartHypothesis&  cur_hypo ,
   ScoreComponentCollection* accumulator) const
 {
