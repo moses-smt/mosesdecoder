@@ -609,14 +609,12 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     phraseTableFile << " " << distinctCount;
 
   //MARIA
-  //sparse features
+  //sparse features -> 6th field -> empty if no sparse feature
   phraseTableFile << " ||| ";
 	for (map<string,float>::const_iterator i = extraSparse.begin();
 				 i != extraSparse.end(); ++i) {
 			phraseTableFile << " " << i->first << " " << i->second;
 		}
-//	if(extraSparse.size()==0) //leave empty slot for 6th position; 7th is the extra information -> TreeFragments maybe
-//		phraseTableFile << " ";
 
   // tree fragments
   if (treeFragmentsFlag && !inverseFlag) {
