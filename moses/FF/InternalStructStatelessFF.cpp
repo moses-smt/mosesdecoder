@@ -11,7 +11,7 @@ void InternalStructStatelessFF::Evaluate(const Phrase &source
                         , ScoreComponentCollection &estimatedFutureScore) const
 {
 //	cerr  << "MARIA!!!" << endl;
-//	scoreBreakdown.PlusEquals(this, 1);
+	scoreBreakdown.PlusEquals(this, 0);
 
 }
 
@@ -20,11 +20,12 @@ void InternalStructStatelessFF::Evaluate(const InputType &input
 	                        , ScoreComponentCollection &scoreBreakdown) const
 	{
 
-//cerr  << "HHHHH" << scoreBreakdown << endl;
-	FactorList f_mask;
+cerr  << "HHHHH" << scoreBreakdown << endl;
+scoreBreakdown.PlusEquals(this, 66);
+/*	FactorList f_mask;
 	f_mask.push_back(0);
 		//if(inputPath.GetPhrase().GetStringRep(f_mask).)
-	int score =0;
+	int score =50;
 	for(size_t i=0;i<inputPath.GetPhrase().GetSize();i++){
 		if(inputPath.GetPhrase(). GetFactor(i,0)->GetString().as_string()=="ist"){
 			//cout<<inputPath.GetPhrase().GetStringRep(f_mask);
@@ -32,6 +33,8 @@ void InternalStructStatelessFF::Evaluate(const InputType &input
 		}
 	}
 	scoreBreakdown.PlusEquals(this, score);
+*/
 }
+
 }
 
