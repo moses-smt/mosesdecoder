@@ -171,8 +171,11 @@ int ExtractGHKM::Main(int argc, char *argv[])
         ScfgRule r(**q);
         // TODO Can scope pruning be done earlier?
         if (r.Scope() <= options.maxScope) {
-//          writer.Write(r);
-          writer.Write(r,**q);
+          if (!options.treeFragments) {
+            writer.Write(r);
+          } else {
+            writer.Write(r,**q);
+          }
         }
       }
     }
@@ -292,6 +295,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "extract minimal rules only")
   ("PCFG",
    "include score based on PCFG scores in target corpus")
+  ("TreeFragments",
+   "output parse tree information")
   ("SentenceOffset",
    po::value(&options.sentenceOffset)->default_value(options.sentenceOffset),
    "set sentence number offset if processing split corpus")
@@ -382,6 +387,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   }
   if (vm.count("PCFG")) {
     options.pcfg = true;
+  }
+  if (vm.count("TreeFragments")) {
+    options.treeFragments = true;
   }
   if (vm.count("UnknownWordUniform")) {
     options.unknownWordUniform = true;
