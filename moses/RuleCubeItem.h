@@ -115,7 +115,6 @@ class TranslationDimension
        }
 
 
-
   bool operator<(const TranslationDimension &compare) const {
     return GetTargetPhrase() < compare.GetTargetPhrase();
   }
@@ -182,6 +181,10 @@ class RuleCubeItem
     return m_hypothesisDimensions;
   }
 
+  void IncrementTranslationDimension() {
+          m_translationDimension.IncrementPos();
+    }
+
   float GetScore() const { return m_score; }
 
   void EstimateScore();
@@ -192,7 +195,7 @@ class RuleCubeItem
 
   bool operator<(const RuleCubeItem &) const;
 
- private:
+ protected:
   RuleCubeItem(const RuleCubeItem &);  // Not implemented
   RuleCubeItem &operator=(const RuleCubeItem &);  // Not implemented
 

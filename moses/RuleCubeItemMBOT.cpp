@@ -34,7 +34,6 @@ namespace Moses
 RuleCubeItemMBOT::RuleCubeItemMBOT( const ChartTranslationOptions &transOpt,
                                     const ChartCellCollection &allChartCells)
 									: RuleCubeItem(transOpt,allChartCells)
-                                    , m_mbotTranslationDimension(0,transOpt.GetTargetPhraseCollection().GetCollection())
                                     , m_mbotHypothesis(0)
 {
   CreateHypothesisDimensionsMBOT(transOpt.GetStackVec());
@@ -43,14 +42,12 @@ RuleCubeItemMBOT::RuleCubeItemMBOT( const ChartTranslationOptions &transOpt,
 //new : create the RuleCubeMBOT from an existing one, differing only in one dimension
 RuleCubeItemMBOT::RuleCubeItemMBOT(const RuleCubeItemMBOT* copyCube, int hypoDimensionIncr)
    : RuleCubeItem(*(static_cast<const RuleCubeItem*> (copyCube)),hypoDimensionIncr)
-  , m_mbotTranslationDimension(copyCube->m_mbotTranslationDimension)
   , m_hypothesisDimensions(copyCube->m_hypothesisDimensions)
   , m_mbotHypothesis(0)
 {
     //std::cout << "Create Rule Cube from existing Dimension"<< std::endl;
 
   if (hypoDimensionIncr == -1) {
-    m_mbotTranslationDimension.IncrementPos();
   } else {
     HypothesisDimension &dimension = m_hypothesisDimensions[hypoDimensionIncr];
     dimension.IncrementPos();
@@ -64,7 +61,7 @@ RuleCubeItemMBOT::~RuleCubeItemMBOT()
 
 void RuleCubeItemMBOT::EstimateScoreMBOT()
 {
-  m_mbotScore = m_mbotTranslationDimension.GetTargetPhrase()->GetFutureScore();
+  m_mbotScore = m_translationDimension.GetTargetPhrase()->GetFutureScore();
   std::vector<HypothesisDimension>::const_iterator p;
   for (p = m_hypothesisDimensions.begin();
        p != m_hypothesisDimensions.end(); ++p) {
@@ -168,10 +165,10 @@ void RuleCubeItemMBOT::CreateHypothesisDimensionsMBOT(const StackVec &stackVec)
 bool RuleCubeItemMBOT::operator<(const RuleCubeItemMBOT &compare) const
 {
   //std::cout << "RCIM : Comparing translation dimensions : " << std::endl;
-  if (m_mbotTranslationDimension == compare.m_mbotTranslationDimension) {
+  if (GetTranslationDimension() == compare.GetTranslationDimension()) {
     return m_hypothesisDimensions < compare.m_hypothesisDimensions;
   }
-  return m_mbotTranslationDimension < compare.m_mbotTranslationDimension;
+  return GetTranslationDimension() < compare.GetTranslationDimension();
 }
 
 }
