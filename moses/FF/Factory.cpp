@@ -31,7 +31,7 @@
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
-#include "moses/FF/ConstrainedDecoding.h"
+//#include "moses/FF/ConstrainedDecoding.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -143,7 +143,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
-  MOSES_FNAME(ConstrainedDecoding);
+//  MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(ExternalFeature);
 
   MOSES_FNAME(SkeletonStatelessFF);
