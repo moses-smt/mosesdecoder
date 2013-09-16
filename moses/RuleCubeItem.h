@@ -20,7 +20,6 @@
 #pragma once
 
 #include "StackVec.h"
-#include "TargetPhraseMBOT.h"
 
 #include <vector>
 #include <cassert>
@@ -65,54 +64,14 @@ class TranslationDimension
     return (*m_orderedTargetPhrases)[m_pos];
   }
 
-  const TargetPhraseMBOT *GetTargetPhraseMBOT() const {
-      	const TargetPhrase * tpConst = (*m_orderedTargetPhrases)[m_pos];
-      	assert(tpConst);
-      	std::cerr << *tpConst << std::endl;
-
-      	TargetPhrase * tp = const_cast<TargetPhrase*>(tpConst);
-      	assert(tp);
-
-      	TargetPhraseMBOT * tpmbot = dynamic_cast<TargetPhraseMBOT*>(tp);
-      	assert(tpmbot);
-
-      	const TargetPhraseMBOT * targetPhrase = const_cast<TargetPhraseMBOT*>(tpmbot);
-      	assert(targetPhrase);
-
-      	const PhraseSequence *sequence = targetPhrase->GetMBOTPhrases();
-      	assert(sequence);
-
-      	return targetPhrase;
-  }
+  const TargetPhraseMBOT *GetTargetPhraseMBOT() const;
 
   //Fabienne Braune : check if target phrase matches input parse tree
   //In the current version, the input parse tree is matched when selecting applicable rules ( ChartRuleLookupManager )
   //Here we check during chart parsing if the used rules match the input parse
-  bool HasMoreMatchingTargetPhrase() const {
-	size_t index_to_check = m_pos;
-  	while(index_to_check < m_orderedTargetPhrases->size())
-  	{
-  	    if(static_cast<TargetPhraseMBOT*>((*m_orderedTargetPhrases)[index_to_check])->isMatchesSource())
-  	    {
-  	    	return true;
-  	    }
-  	    index_to_check++;
-  	}
-  	return false;
-  }
+  bool HasMoreMatchingTargetPhrase() const;
 
-  size_t GetPositionOfMatchingTargetPhrase() const {
-      size_t index_to_check = m_pos;
-      	    while(index_to_check < m_orderedTargetPhrases->size())
-      	    {
-      	    		if(static_cast<TargetPhraseMBOT*>((*m_orderedTargetPhrases)[index_to_check])->isMatchesSource())
-      	    		{
-      	    			return index_to_check;
-      	    		}
-      	    		 index_to_check++;
-      	    }
-      	    return 0;
-       }
+  std::size_t GetPositionOfMatchingTargetPhrase() const;
 
 
   bool operator<(const TranslationDimension &compare) const {

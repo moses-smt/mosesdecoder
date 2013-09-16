@@ -49,6 +49,7 @@ class ChartManager;
 
 //Fabienne Braune : Wanted to create derived class ChartCellBaseMBOT but this led to inheritance diamond in class ChartCellMBOT
 //so I put l-MBOT components into ChartCellBase
+
 class ChartCellBase {
   public:
     ChartCellBase(size_t startPos, size_t endPos);
@@ -77,6 +78,7 @@ class ChartCellBase {
     const WordsRange m_coverage;
     ChartCellLabelSet m_targetLabelSet;
     std::vector<WordsRange> m_mbotCoverage;
+    //Fabienne Braune : added MBOT fields in here
     ChartCellLabelSetMBOT m_mbotTargetLabelSet;
     ChartCellLabelMBOT *m_mbotSourceWordLabel;
 

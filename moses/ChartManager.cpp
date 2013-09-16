@@ -96,6 +96,7 @@ void ChartManager::ProcessSentence()
       ChartCell &cell = m_hypoStackColl.Get(range);
 
       cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+
       m_translationOptionList.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();
@@ -152,6 +153,8 @@ void ChartManager::ProcessSentenceWithMBOT()
 
       // decode
       ChartCellMBOT * cell = static_cast<ChartCellMBOT*> (&m_hypoStackColl.Get(range));
+
+      cerr << "LOOKING AT TO LIST" << m_translationOptionList << endl;
 
       //Fabienne Braune : Why does ProcessSentence not work although it is virtual in ChartCell (?)
       cell->ProcessSentenceWithMBOT(m_translationOptionList, m_hypoStackColl);

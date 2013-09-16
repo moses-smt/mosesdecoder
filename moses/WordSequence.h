@@ -8,26 +8,25 @@
 #include <vector>
 #include "Word.h"
 
-using namespace std;
-
 namespace Moses
 {
 
 class WordSequence
 {
-	friend std::ostream& operator<<(ostream& out, const WordSequence& ws);
+	friend std::ostream& operator<<(std::ostream& out, const WordSequence& ws);
 
 	protected:
-	vector<Word> m_wordSequence;
+	std::vector<Word> m_wordSequence;
 
 	public:
-	typedef vector<Word>::const_iterator const_iterator;
+	typedef std::vector<Word>::const_iterator const_iterator;
 	//TODO : Add constructor
 	 WordSequence();
 	 WordSequence(const Word word);
 	~WordSequence(){
 		std::cerr << "KILLING WORD SEQUENCE" << std::endl;
 	};
+
 
 	//! iterators
 	const_iterator begin() const {
@@ -39,10 +38,10 @@ class WordSequence
 
 	void Add(Word word);
 
-	void CreateWordFromString(StringPiece word, const FactorDirection &fd, const vector<FactorType> &fo);
+	void CreateWordFromString(StringPiece word, const FactorDirection &fd, const std::vector<FactorType> &fo);
 
 	bool operator< (const WordSequence& other) const {
-		vector<Word> :: iterator itr_words;
+		std::vector<Word> :: iterator itr_words;
 		if(GetSize() != other.GetSize())
 		{
 			return GetSize() < other.GetSize();
@@ -53,7 +52,7 @@ class WordSequence
 		}
 	}
 
-	vector<Word> *GetSequence();
+	std::vector<Word> *GetSequence();
 	Word *GetWord(size_t position) const;
 	size_t GetSize() const;
 	bool AreNonTerms() const;

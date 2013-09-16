@@ -140,4 +140,16 @@ void ChartTranslationOptionList::ApplyThreshold() {
   m_size = std::distance(m_collection.begin(), bound);
 }
 
+std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionList &obj)
+{
+	std::vector<ChartTranslationOptions*> :: const_iterator itropt;
+
+	for(itropt = obj.m_collection.begin(); itropt != obj.m_collection.end(); itropt++)
+	{
+		out << **itropt << std::endl;
+	}
+
+	return out;
+}
+
 }

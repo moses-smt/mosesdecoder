@@ -229,7 +229,12 @@ void ChartHypothesisMBOT::CalcScoreMBOT()
   }
 
   // translation models & word penalty
-  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhraseMBOT()->GetScoreBreakdown();
+  const TargetPhraseMBOT *tpMBOT = GetCurrTargetPhraseMBOT();
+  cerr << "CHECK NULL" << tpMBOT << endl;
+  cerr << *tpMBOT << endl;
+  const ScoreComponentCollection &scoreBreakdown = tpMBOT->GetScoreBreakdown();
+  cerr << scoreBreakdown << endl;
+
 
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 

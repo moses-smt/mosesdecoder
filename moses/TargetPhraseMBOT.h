@@ -123,7 +123,7 @@ public:
     m_targetLhs = lhs;
   }
 
-  const WordSequence GetTargetLHSMBOT() const {
+  const WordSequence &GetTargetLHSMBOT() const {
     return m_targetLhs;
   }
 

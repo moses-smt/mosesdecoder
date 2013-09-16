@@ -113,7 +113,6 @@ bool RuleTableLoaderMBOT::Load(const std::vector<FactorType> &input,
     //Fabienne Braune : source side of rule is stored in the target phrase (field of TargetPhraseMBOT)
     //For l-MBOT we need this to match the input tree during parsing
     TargetPhraseMBOT *targetPhrase = new TargetPhraseMBOT(sourcePhrase);
-
     targetPhrase->CreateFromStringForSequence(Output, output, targetPhraseString, factorDelimiter, targetLHS);
 
     //std::cerr << "Sequences in target : " << targetPhrase->GetMBOTPhrases() << std::endl;

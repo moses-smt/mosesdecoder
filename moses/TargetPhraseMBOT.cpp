@@ -458,7 +458,8 @@ ostream& operator<<(ostream& out, const TargetPhraseMBOT& targetPhrase)
   int counter = 1;
   for(itr_words = targetPhrase.GetTargetLHSMBOT().begin(); itr_words != targetPhrase.GetTargetLHSMBOT().end(); itr_words++)
   {
-        out << *itr_words << "(" << counter++ << ") ";
+	  const WordSequence &seq = *itr_words;
+        out << seq << "(" << counter++ << ") ";
   }
   out << endl;
   out << "-------------------------------------" << std::endl;

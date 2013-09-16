@@ -24,11 +24,52 @@
 #include "RuleCubeQueue.h"
 #include "WordsRange.h"
 #include "Util.h"
+#include "TargetPhraseMBOT.h"
 
 #include <boost/functional/hash.hpp>
 
 namespace Moses
 {
+
+const TargetPhraseMBOT *TranslationDimension::GetTargetPhraseMBOT() const {
+    	const TargetPhrase * tpConst = (*m_orderedTargetPhrases)[m_pos];
+    	CHECK(tpConst);
+    	std::cerr << "tpConst=" << *tpConst << std::endl;
+
+    	const TargetPhraseMBOT * tpmbot = dynamic_cast<const TargetPhraseMBOT*>(tpConst);
+    	CHECK(tpmbot);
+
+    	//const PhraseSequence *sequence = tpmbot->GetMBOTPhrases();
+    	//assert(sequence);
+
+    	return tpmbot;
+}
+
+size_t TranslationDimension::GetPositionOfMatchingTargetPhrase() const {
+    size_t index_to_check = m_pos;
+    	    while(index_to_check < m_orderedTargetPhrases->size())
+    	    {
+    	    		if(static_cast<TargetPhraseMBOT*>((*m_orderedTargetPhrases)[index_to_check])->isMatchesSource())
+    	    		{
+    	    			return index_to_check;
+    	    		}
+    	    		 index_to_check++;
+    	    }
+    	    return 0;
+     }
+
+bool TranslationDimension::HasMoreMatchingTargetPhrase() const {
+	size_t index_to_check = m_pos;
+	while(index_to_check < m_orderedTargetPhrases->size())
+	{
+	    if(static_cast<TargetPhraseMBOT*>((*m_orderedTargetPhrases)[index_to_check])->isMatchesSource())
+	    {
+	    	return true;
+	    }
+	    index_to_check++;
+	}
+	return false;
+}
 
 std::size_t hash_value(const HypothesisDimension &dimension)
 {
@@ -42,6 +83,15 @@ RuleCubeItem::RuleCubeItem(const ChartTranslationOptions &transOpt,
                            transOpt.GetTargetPhraseCollection().GetCollection())
   , m_hypothesis(0)
 {
+	const vector<TargetPhrase*> &coll = transOpt.GetTargetPhraseCollection().GetCollection();
+	for (TargetPhraseCollection::const_iterator iter = coll.begin(); iter !=  coll.end(); iter++)
+	{
+		 const TargetPhraseMBOT *tpmbot = dynamic_cast<TargetPhraseMBOT*>(*iter);
+		 CHECK(tpmbot);
+		cerr << "TPC" << *tpmbot << endl;
+	}
+
+
   CreateHypothesisDimensions(transOpt.GetStackVec());
 }
 

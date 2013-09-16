@@ -35,6 +35,8 @@ namespace Moses
  */
 class ChartTranslationOptions
 {
+	  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptions&);
+
  public:
   /** Constructor
       \param targetPhraseColl @todo dunno

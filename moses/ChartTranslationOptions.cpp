@@ -18,6 +18,7 @@
  ***********************************************************************/
 
 #include "ChartTranslationOptions.h"
+#include "TargetPhraseMBOT.h"
 
 #include "ChartHypothesis.h"
 
@@ -41,6 +42,21 @@ float ChartTranslationOptions::CalcEstimateOfBestScore(
     estimateOfBestScore += bestHypo.GetTotalScore();
   }
   return estimateOfBestScore;
+}
+
+std::ostream& operator<<(std::ostream &out, const ChartTranslationOptions &obj)
+{
+	std::vector<TargetPhrase*> tps = obj.GetTargetPhraseCollection().GetCollection();
+	std::vector<TargetPhrase*> :: const_iterator itr_tgt;
+
+	for(itr_tgt = tps.begin(); itr_tgt != tps.end(); itr_tgt++)
+	{
+		const TargetPhrase* tp = *itr_tgt;
+		const TargetPhraseMBOT *tpmbt = dynamic_cast<const TargetPhraseMBOT*>(tp);
+		CHECK(tpmbt);
+		out << "ChartTranslationOptions=" << *tpmbt << std::endl;
+	}
+	return out;
 }
 
 }

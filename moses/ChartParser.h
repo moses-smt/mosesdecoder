@@ -47,6 +47,9 @@ class ChartParserUnknown {
 
     void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
 
+    //DO process MBOT
+    void ProcessMBOT(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
+
   private:
     const TranslationSystem &m_system;
     std::vector<Phrase*> m_unksrcs;
