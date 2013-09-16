@@ -1037,6 +1037,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/BleuScoreFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ConstrainedDecoding.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ConstrainedDecoding.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ConstrainedDecoding.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ConstrainedDecoding.h</locationURI>
+		</link>
+		<link>
 			<name>FF/ControlRecombination.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.cpp</locationURI>
@@ -1105,6 +1115,11 @@
 			<name>FF/FeatureFunction.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FeatureFunction.h</locationURI>
+		</link>
+		<link>
+			<name>FF/ForceDecoding.h</name>
+			<type>1</type>
+			<location>/Users/hieuhoang/unison/workspace/github/mosesdecoder/moses/FF/ForceDecoding.h</location>
 		</link>
 		<link>
 			<name>FF/GlobalLexicalModel.cpp</name>
