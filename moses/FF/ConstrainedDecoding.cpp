@@ -35,7 +35,7 @@ FFState* ConstrainedDecoding::EvaluateChart(
 
 	ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
 
-	float score = ref->Contains(ret->GetPhrase()) ? 1 : - std::numeric_limits<float>::infinity();
+	float score = ref->Contains(ret->GetPhrase()) ? 0 : - std::numeric_limits<float>::infinity();
 	accumulator->PlusEquals(this, score);
 
 	return ret;

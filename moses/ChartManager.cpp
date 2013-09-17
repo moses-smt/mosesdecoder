@@ -135,7 +135,6 @@ void ChartManager::ProcessSentence()
 void ChartManager::AddXmlChartOptions()
 {
   const StaticData &staticData = StaticData::Instance();
-  const Phrase *constraint = GetConstraint();
 
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {
@@ -152,15 +151,6 @@ void ChartManager::AddXmlChartOptions()
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
-    if (constraint) {
-    	Phrase hypoPhrase = hypo->GetOutputPhrase();
-    	if (!constraint->Contains(hypoPhrase)) {
-    		delete item;
-    		delete hypo;
-    		continue;
-    	}
-    }
-
     hypo->Evaluate();
 
     const Word &targetLHS = hypo->GetTargetLHS();

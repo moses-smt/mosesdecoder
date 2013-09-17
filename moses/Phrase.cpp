@@ -375,7 +375,30 @@ void Phrase::InitStartEndWord()
 
 bool Phrase::Contains(const Phrase &sought) const
 {
+	size_t maxStartPos = GetSize() - sought.GetSize();
+	for (size_t startThisPos = 0; startThisPos <= maxStartPos; ++startThisPos) {
+		size_t thisPos = startThisPos;
+		size_t soughtPos;
+		for (soughtPos = 0; soughtPos < sought.GetSize(); ++soughtPos) {
+			const Word &soughtWord = sought.GetWord(soughtPos);
+			const Word &thisWord = GetWord(thisPos);
 
+			if (soughtWord == thisWord) {
+				++thisPos;
+			}
+			else {
+				break;
+			}
+		}
+
+		if (soughtPos == sought.GetSize()) {
+			cerr << "searched=" << *this << endl;
+			cerr << "sought=" << sought << endl;
+			return true;
+		}
+	}
+
+	return false;
 }
 
 TO_STRING_BODY(Phrase);
