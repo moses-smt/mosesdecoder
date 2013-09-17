@@ -53,6 +53,7 @@ private:
 
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
   const Word *m_lhsTarget;
+  mutable Phrase *m_ruleSource; // to be set by the feature function that needs it.
 
   std::map<std::string, std::string> m_properties;
 public:
@@ -122,6 +123,13 @@ public:
   const AlignmentInfo &GetAlignNonTerm() const {
     return *m_alignNonTerm;
   }
+
+  const Phrase *GetRuleSource() const
+  { return m_ruleSource; }
+
+  // To be set by the FF that needs it, by default the rule source = NULL
+  // make a copy of the source side of the rule
+  void SetRuleSource(const Phrase &ruleSource) const;
 
   void SetProperties(const StringPiece &str);
   void SetProperty(const std::string &key, const std::string &value) {

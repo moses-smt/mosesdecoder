@@ -45,6 +45,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 
   //ACAT
@@ -59,6 +60,7 @@ TargetPhrase::TargetPhrase()
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 }
 
@@ -69,6 +71,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 }
 
@@ -86,6 +89,12 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
     m_lhsTarget = NULL;
   }
 
+  if (copy.m_ruleSource) {
+	  m_lhsTarget = new Word(*copy.m_ruleSource);
+  }
+  else {
+	  m_ruleSource = NULL;
+  }
 }
 
 TargetPhrase::~TargetPhrase()
@@ -93,6 +102,7 @@ TargetPhrase::~TargetPhrase()
   //cerr << "m_lhsTarget=" << m_lhsTarget << endl;
 
   delete m_lhsTarget;
+  delete m_ruleSource;
 }
 
 #ifdef HAVE_PROTOBUF
@@ -233,6 +243,13 @@ void TargetPhrase::GetProperty(const std::string &key, std::string &value, bool 
   } else {
     found = true;
     value = iter->second;
+  }
+}
+
+void TargetPhrase::SetRuleSource(const Phrase &ruleSource) const
+{
+  if (m_ruleSource == NULL) {
+	  m_ruleSource = new Phrase(ruleSource);
   }
 }
 
