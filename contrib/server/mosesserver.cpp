@@ -325,7 +325,7 @@ public:
 
   void outputChartHypo(ostream& out, const ChartHypothesis* hypo) {
     Phrase outPhrase(20);
-    hypo->CreateOutputPhrase(outPhrase);
+    hypo->GetOutputPhrase(outPhrase);
 
     // delete 1st & last
     assert(outPhrase.GetSize() >= 2);

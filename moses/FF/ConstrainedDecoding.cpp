@@ -16,7 +16,7 @@ ConstrainedDecodingState::ConstrainedDecodingState(const Hypothesis &hypo)
 
 ConstrainedDecodingState::ConstrainedDecodingState(const ChartHypothesis &hypo)
 {
-	hypo.CreateOutputPhrase(m_outputPhrase);
+	hypo.GetOutputPhrase(m_outputPhrase);
 }
 
 int ConstrainedDecodingState::Compare(const FFState& other) const
