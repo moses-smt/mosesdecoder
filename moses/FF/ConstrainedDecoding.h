@@ -14,6 +14,7 @@ public:
 	ConstrainedDecodingState()
 	{}
 
+	ConstrainedDecodingState(const Hypothesis &hypo);
 	ConstrainedDecodingState(const ChartHypothesis &hypo);
 
 	int Compare(const FFState& other) const;

@@ -66,7 +66,7 @@ MockHypothesisGuard::MockHypothesisGuard(
     m_targetPhrases.back().CreateFromString(Input, factors, *ti, "|", NULL);
     m_toptions.push_back(new TranslationOption
                          (wordsRange,m_targetPhrases.back()));
-    m_hypothesis =  Hypothesis::Create(*prevHypo,*m_toptions.back(),NULL);
+    m_hypothesis =  Hypothesis::Create(*prevHypo,*m_toptions.back());
   }
 
 

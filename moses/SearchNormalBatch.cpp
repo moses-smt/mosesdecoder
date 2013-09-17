@@ -125,7 +125,7 @@ void SearchNormalBatch::ExpandHypothesis(const Hypothesis &hypothesis, const Tra
     IFVERBOSE(2) {
       t = clock();
     }
-    newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+    newHypo = hypothesis.CreateNext(transOpt);
     IFVERBOSE(2) {
       stats.AddTimeBuildHyp( clock()-t );
     }

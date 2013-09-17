@@ -147,49 +147,16 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const
+Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
 {
-  return Create(*this, transOpt, constraint);
+  return Create(*this, transOpt);
 }
 
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constrainingPhrase)
+Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 {
-
-  // This method includes code for constraint decoding
-
-  bool createHypothesis = true;
-
-  if (constrainingPhrase != NULL) {
-
-    size_t constraintSize = constrainingPhrase->GetSize();
-
-    size_t start = 1 + prevHypo.GetCurrTargetWordsRange().GetEndPos();
-
-    const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
-    size_t transOptSize = transOptPhrase.GetSize();
-
-    size_t endpoint = start + transOptSize - 1;
-
-
-    if (endpoint < constraintSize) {
-      WordsRange range(start, endpoint);
-      Phrase relevantConstraint = constrainingPhrase->GetSubString(range);
-
-      if ( ! relevantConstraint.IsCompatible(transOptPhrase) ) {
-        createHypothesis = false;
-
-      }
-    } else {
-      createHypothesis = false;
-    }
-
-  }
-
-
-  if (createHypothesis) {
 
 #ifdef USE_HYPO_POOL
     Hypothesis *ptr = s_objectPool.getPtr();
@@ -197,14 +164,6 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 #else
     return new Hypothesis(prevHypo, transOpt);
 #endif
-
-  } else {
-    // If the previous hypothesis plus the proposed translation option
-    //    fail to match the provided constraint,
-    //    return a null hypothesis.
-    return NULL;
-  }
-
 }
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase

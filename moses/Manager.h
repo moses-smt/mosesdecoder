@@ -120,6 +120,7 @@ protected:
   std::auto_ptr<SentenceStats> m_sentenceStats;
   int m_hypoId; //used to number the hypos as they are created.
   size_t m_lineNumber;
+  const Phrase *m_constraint;
 
   void GetConnectedGraph(
     std::map< int, bool >* pConnected,
@@ -156,6 +157,9 @@ public:
   const InputType& GetSource() const {
     return m_source;
   }
+
+  const Phrase *GetConstraint() const
+  { return m_constraint; }
 
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )

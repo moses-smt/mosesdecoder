@@ -39,7 +39,6 @@ public:
                               const TranslationOptionCollection &transOptColl);
 
 protected:
-  const Phrase *m_constraint;
   Manager& m_manager;
   InputPath m_inputPath; // for initial hypo
   TranslationOption m_initialTransOpt; /**< used to seed 1st hypo */
