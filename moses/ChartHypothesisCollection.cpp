@@ -182,6 +182,25 @@ void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
  */
 void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 {
+  /*
+  const Phrase *ref = manager.GetConstraint();
+  if (ref) {
+	// delete all hypos with -inf scores.
+	HCType::iterator iter = m_hypos.begin();
+	while (iter != m_hypos.end()) {
+	  ChartHypothesis *hypo = *iter;
+	  float score = hypo->GetTotalScore();
+	  if (score == - std::numeric_limits<float>::infinity()) {
+		HCType::iterator iterRemove = iter++;
+		Remove(iterRemove);
+		manager.GetSentenceStats().AddPruning();
+	  } else {
+		++iter;
+	  }
+	}
+  }
+  */
+
   if (GetSize() > m_maxHypoStackSize) { // ok, if not over the limit
     priority_queue<float> bestScores;
 
