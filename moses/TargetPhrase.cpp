@@ -90,7 +90,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   }
 
   if (copy.m_ruleSource) {
-	  m_lhsTarget = new Word(*copy.m_ruleSource);
+	  m_ruleSource = new Phrase(*copy.m_ruleSource);
   }
   else {
 	  m_ruleSource = NULL;
