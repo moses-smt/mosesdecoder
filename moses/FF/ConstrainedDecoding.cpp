@@ -3,6 +3,8 @@
 #include "moses/ChartManager.h"
 #include "util/exception.hh"
 
+using namespace std;
+
 namespace Moses
 {
 ConstrainedDecodingState::ConstrainedDecodingState(const ChartHypothesis &hypo)
@@ -30,12 +32,29 @@ FFState* ConstrainedDecoding::EvaluateChart(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-	const Phrase *ref = hypo.GetManager().GetConstraint();
+	const ChartManager &mgr = hypo.GetManager();
+
+	const Phrase *ref = mgr.GetConstraint();
 	CHECK(ref);
 
-	ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
+	const Sentence &source = static_cast<const Sentence&>(mgr.GetSource());
 
-	float score = ref->Contains(ret->GetPhrase()) ? 0 : - std::numeric_limits<float>::infinity();
+	ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
+	const Phrase &outputPhrase = ret->GetPhrase();
+
+	size_t searchPos = ref->Find(outputPhrase);
+
+	float score;
+	if (hypo.GetCurrSourceRange().GetStartPos() == 0 &&
+		hypo.GetCurrSourceRange().GetEndPos() == source.GetSize() - 1) {
+		// translated entire sentence.
+		score = (searchPos == 0) && (ref->GetSize() == outputPhrase.GetSize())
+						? 0 : - std::numeric_limits<float>::infinity();
+	}
+	else {
+		score = (searchPos != NOT_FOUND) ? 0 : - std::numeric_limits<float>::infinity();
+	}
+
 	accumulator->PlusEquals(this, score);
 
 	return ret;
