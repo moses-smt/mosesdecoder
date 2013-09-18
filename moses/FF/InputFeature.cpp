@@ -40,6 +40,7 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 
 void InputFeature::Evaluate(const InputType &input
                             , const InputPath &inputPath
+                            , const TargetPhrase &targetPhrase
                             , ScoreComponentCollection &scoreBreakdown) const
 {
 	if (m_legacy) {
