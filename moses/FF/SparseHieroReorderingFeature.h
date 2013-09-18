@@ -6,6 +6,9 @@
 
 #include <util/string_piece.hh>
 
+#include "moses/Factor.h"
+#include "moses/Sentence.h"
+
 #include "StatelessFeatureFunction.h"
 #include "FFState.h"
 
