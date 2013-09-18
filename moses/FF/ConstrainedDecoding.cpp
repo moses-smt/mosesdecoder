@@ -3,6 +3,8 @@
 #include "moses/Manager.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
+#include "moses/StaticData.h"
+#include "moses/InputFileStream.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -26,6 +28,37 @@ int ConstrainedDecodingState::Compare(const FFState& other) const
 	return ret;
 }
 
+//////////////////////////////////////////////////////////////////
+void ConstrainedDecoding::Load()
+{
+	const StaticData &staticData = StaticData::Instance();
+	bool addBeginEndWord = (staticData.GetSearchAlgorithm() == ChartDecoding) || (staticData.GetSearchAlgorithm() == ChartIncremental);
+
+	InputFileStream constraintFile(m_path);
+	std::string line;
+	long sentenceID = staticData.GetStartTranslationId() - 1;
+	while (getline(constraintFile, line)) {
+	  vector<string> vecStr = Tokenize(line, "\t");
+
+	  Phrase phrase(0);
+	  if (vecStr.size() == 1) {
+		sentenceID++;
+		phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[0], staticData.GetFactorDelimiter(), NULL);
+	  } else if (vecStr.size() == 2) {
+		sentenceID = Scan<long>(vecStr[0]);
+		phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[1], staticData.GetFactorDelimiter(), NULL);
+	  } else {
+		CHECK(false);
+	  }
+
+	  if (addBeginEndWord) {
+		phrase.InitStartEndWord();
+	  }
+	  m_constraints.insert(make_pair(sentenceID,phrase));
+
+	}
+}
+
 std::vector<float> ConstrainedDecoding::DefaultWeights() const
 {
 	CHECK(m_numScoreComponents == 1);
@@ -33,14 +66,30 @@ std::vector<float> ConstrainedDecoding::DefaultWeights() const
 	return ret;
 }
 
+template <class H, class M>
+const Phrase *GetConstraint(const std::map<long,Phrase> &constraints, const H &hypo)
+{
+	const M &mgr = hypo.GetManager();
+	const InputType &input = mgr.GetSource();
+	long id = input.GetTranslationId();
+
+	map<long,Phrase>::const_iterator iter;
+	iter = constraints.find(id);
+
+	if (iter == constraints.end()) {
+		return NULL;
+	}
+	else {
+		return &iter->second;
+	}
+}
+
 FFState* ConstrainedDecoding::Evaluate(
   const Hypothesis& hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
-	const Manager &mgr = hypo.GetManager();
-
-	const Phrase *ref = mgr.GetConstraint();
+	const Phrase *ref = GetConstraint<Hypothesis, Manager>(m_constraints, hypo);
 	CHECK(ref);
 
 	ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
@@ -68,11 +117,10 @@ FFState* ConstrainedDecoding::EvaluateChart(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-	const ChartManager &mgr = hypo.GetManager();
-
-	const Phrase *ref = mgr.GetConstraint();
+	const Phrase *ref = GetConstraint<ChartHypothesis, ChartManager>(m_constraints, hypo);
 	CHECK(ref);
 
+	const ChartManager &mgr = hypo.GetManager();
 	const Sentence &source = static_cast<const Sentence&>(mgr.GetSource());
 
 	ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
@@ -96,6 +144,15 @@ FFState* ConstrainedDecoding::EvaluateChart(
 	return ret;
 }
 
+void ConstrainedDecoding::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "path") {
+	  m_path = value;
+  }
+  else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
+}
 
 }
 

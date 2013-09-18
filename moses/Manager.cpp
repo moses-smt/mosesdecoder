@@ -60,15 +60,6 @@ Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm sea
   ,m_lineNumber(lineNumber)
   ,m_source(source)
 {
-  const StaticData &staticData = StaticData::Instance();
-  staticData.InitializeForInput(source);
-
-  long sentenceID = source.GetTranslationId();
-  m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-  if (m_constraint) {
-	VERBOSE(1, "Search constraint to output: " << *m_constraint<<endl);
-  }
-
 }
 
 Manager::~Manager()

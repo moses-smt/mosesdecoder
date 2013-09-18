@@ -71,8 +71,6 @@ class StaticData
 private:
   static StaticData									s_instance;
 protected:
-
-  std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionary*>	m_phraseDictionary;
   std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
@@ -106,9 +104,6 @@ protected:
   , m_maxNoTransOptPerCoverage
   , m_maxNoPartTransOpt
   , m_maxPhraseLength;
-
-  std::string
-  m_constraintFileName;
 
   std::string									m_nBestFilePath, m_latticeSamplesFilePath;
   bool                        m_labeledNBestList,m_nBestIncludesSegmentation;
@@ -221,8 +216,6 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
 
-  void ForcedDecoding();
-
   bool m_continuePartialTranslation;
   std::string m_binPath;
 
@@ -288,15 +281,6 @@ public:
   }
   inline size_t GetMaxNoPartTransOpt() const {
     return m_maxNoPartTransOpt;
-  }
-  inline const Phrase* GetConstrainingPhrase(long sentenceID) const {
-    std::map<long,Phrase>::const_iterator iter = m_constraints.find(sentenceID);
-    if (iter != m_constraints.end()) {
-      const Phrase& phrase = iter->second;
-      return &phrase;
-    } else {
-      return NULL;
-    }
   }
   inline size_t GetMaxPhraseLength() const {
     return m_maxPhraseLength;

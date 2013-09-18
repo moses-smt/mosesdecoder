@@ -450,9 +450,6 @@ bool StaticData::LoadData(Parameter *parameter)
   m_startTranslationId = (m_parameter->GetParam("start-translation-id").size() > 0) ?
                          Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
 
-  // Read in constraint decoding file, if provided
-  ForcedDecoding();
-
   // use of xml in input
   if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
   else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
@@ -1047,40 +1044,6 @@ void StaticData::OverrideFeatures()
 
     }
   }
-
-}
-
-void StaticData::ForcedDecoding()
-{
-	  if(m_parameter->GetParam("constraint").size()) {
-		bool addBeginEndWord = (m_searchAlgorithm == ChartDecoding) || (m_searchAlgorithm == ChartIncremental);
-
-	    m_constraintFileName = m_parameter->GetParam("constraint")[0];
-
-	    InputFileStream constraintFile(m_constraintFileName);
-	    std::string line;
-	    long sentenceID = GetStartTranslationId() - 1;
-	    while (getline(constraintFile, line)) {
-	      vector<string> vecStr = Tokenize(line, "\t");
-
-          Phrase phrase(0);
-	      if (vecStr.size() == 1) {
-	        sentenceID++;
-	        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter(), NULL);
-	      } else if (vecStr.size() == 2) {
-	        sentenceID = Scan<long>(vecStr[0]);
-	        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter(), NULL);
-	      } else {
-	        CHECK(false);
-	      }
-
-		  if (addBeginEndWord) {
-			phrase.InitStartEndWord();
-		  }
-		  m_constraints.insert(make_pair(sentenceID,phrase));
-
-	    }
-	  }
 
 }
 

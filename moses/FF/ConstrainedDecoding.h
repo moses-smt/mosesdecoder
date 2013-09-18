@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 #include "moses/Phrase.h"
@@ -26,6 +27,8 @@ protected:
 	Phrase m_outputPhrase;
 };
 
+//////////////////////////////////////////////////////////////////
+
 class ConstrainedDecoding : public StatefulFeatureFunction
 {
 public:
@@ -33,7 +36,10 @@ public:
 		:StatefulFeatureFunction("ConstrainedDecoding", 1, line)
 	{
 		m_tuneable = false;
+		ReadParameters();
 	}
+
+	void Load();
 
 	bool IsUseable(const FactorMask &mask) const
 		{ return true; }
@@ -63,6 +69,12 @@ public:
 	  }
 
 	  std::vector<float> DefaultWeights() const;
+
+		void SetParameter(const std::string& key, const std::string& value);
+
+protected:
+	  std::string m_path;
+	  std::map<long,Phrase> m_constraints;
 
 };
 
