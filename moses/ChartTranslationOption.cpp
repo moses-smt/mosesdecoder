@@ -10,13 +10,14 @@ ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
 {
 }
 
-void ChartTranslationOption::Evaluate(const InputType &input, const InputPath &inputPath)
+void ChartTranslationOption::Evaluate(const InputType &input, const InputPath &inputPath, const ChartTranslationOptions &list)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     ff.Evaluate(input, inputPath, m_targetPhrase, m_scoreBreakdown);
+    ff.Evaluate(input, inputPath, m_targetPhrase, list, m_scoreBreakdown);
   }
 }
 }

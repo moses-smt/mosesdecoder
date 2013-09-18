@@ -14,6 +14,7 @@ class TargetPhrase;
 class TranslationOption;
 class Hypothesis;
 class ChartHypothesis;
+class ChartTranslationOptions;
 class InputType;
 class ScoreComponentCollection;
 class WordsBitmap;
@@ -109,6 +110,13 @@ public:
                         , const InputPath &inputPath
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown) const = 0;
+
+  virtual void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , const ChartTranslationOptions &transOpts
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
 
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();
