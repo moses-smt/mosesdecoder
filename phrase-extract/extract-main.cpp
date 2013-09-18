@@ -928,6 +928,14 @@ bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int star
       if (sentence.alignedToT[pos].size() != 1) {
         return false;
       }
+      else {
+    	  // check it actually lines up to another placeholder
+    	  int targetPos = sentence.alignedToT[pos][0];
+    	  const string &otherWord = sentence.target[targetPos];
+    	  if (!isPlaceholder(otherWord)) {
+    		  return false;
+    	  }
+      }
     }
   }
 
