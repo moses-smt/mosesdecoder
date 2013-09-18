@@ -30,8 +30,10 @@ class ConstrainedDecoding : public StatefulFeatureFunction
 {
 public:
 	ConstrainedDecoding(const std::string &line)
-		:StatefulFeatureFunction("ConstrainedDecoding", line)
-		{}
+		:StatefulFeatureFunction("ConstrainedDecoding", 1, line)
+	{
+		m_tuneable = false;
+	}
 
 	bool IsUseable(const FactorMask &mask) const
 		{ return true; }
@@ -60,6 +62,7 @@ public:
 		  return new ConstrainedDecodingState();
 	  }
 
+	  std::vector<float> DefaultWeights() const;
 
 };
 

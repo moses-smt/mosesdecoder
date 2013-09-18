@@ -26,6 +26,13 @@ int ConstrainedDecodingState::Compare(const FFState& other) const
 	return ret;
 }
 
+std::vector<float> ConstrainedDecoding::DefaultWeights() const
+{
+	CHECK(m_numScoreComponents == 1);
+	vector<float> ret(1, 1);
+	return ret;
+}
+
 FFState* ConstrainedDecoding::Evaluate(
   const Hypothesis& hypo,
   const FFState* prev_state,
