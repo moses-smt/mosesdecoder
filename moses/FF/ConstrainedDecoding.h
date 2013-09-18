@@ -8,7 +8,6 @@
 
 namespace Moses
 {
-
 class ConstrainedDecodingState : public FFState
 {
 public:
@@ -29,6 +28,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////
 
+// only allow hypotheses which match reference
 class ConstrainedDecoding : public StatefulFeatureFunction
 {
 public:

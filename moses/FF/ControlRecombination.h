@@ -29,6 +29,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////
 
+// only allow recombination for the same output
 class ControlRecombination : public StatefulFeatureFunction
 {
 public:
