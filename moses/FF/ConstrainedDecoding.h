@@ -34,6 +34,7 @@ class ConstrainedDecoding : public StatefulFeatureFunction
 public:
 	ConstrainedDecoding(const std::string &line)
 		:StatefulFeatureFunction("ConstrainedDecoding", 1, line)
+		,m_maxUnknowns(0)
 	{
 		m_tuneable = false;
 		ReadParameters();
@@ -76,6 +77,7 @@ public:
 protected:
 	  std::string m_path;
 	  std::map<long,Phrase> m_constraints;
+	  int m_maxUnknowns;
 
 };
 

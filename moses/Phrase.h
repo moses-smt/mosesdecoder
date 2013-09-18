@@ -128,7 +128,7 @@ public:
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
                 , const std::vector<FactorType> &inputFactor) const;
 
-  size_t Find(const Phrase &sought) const;
+  size_t Find(const Phrase &sought, int maxUnknown) const;
 
   //! create an empty word at the end of the phrase
   Word &AddWord();
