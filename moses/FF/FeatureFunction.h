@@ -107,6 +107,7 @@ public:
   // Currently not used by any FF. Not called by moses_chart
   virtual void Evaluate(const InputType &input
                         , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown) const = 0;
 
   virtual void SetParameter(const std::string& key, const std::string& value);

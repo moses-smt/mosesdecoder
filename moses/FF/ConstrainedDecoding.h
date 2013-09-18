@@ -51,6 +51,7 @@ public:
 	{}
 	void Evaluate(const InputType &input
 	                        , const InputPath &inputPath
+	                        , const TargetPhrase &targetPhrase
 	                        , ScoreComponentCollection &scoreBreakdown) const
 	{}
 	  FFState* Evaluate(

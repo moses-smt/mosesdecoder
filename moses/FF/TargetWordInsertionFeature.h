@@ -34,6 +34,7 @@ public:
                         , ScoreComponentCollection &estimatedFutureScore) const;
   void Evaluate(const InputType &input
                         , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown) const
   {}
   void Evaluate(const Hypothesis& hypo,

@@ -37,6 +37,7 @@ public:
 
   void Evaluate(const InputType &input
                         , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown) const
   {}
   void Evaluate(const Phrase &source
