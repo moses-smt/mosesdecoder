@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # add flexibility scores to a phrase table half
-# you usually don't have to call this script directly, but you can run train_model.perl with the option "--flexibility-score" (will only affect steps 5 and 6)
+# you usually don't have to call this script directly; to add flexibility scores to your model, run train-model.perl with the option "--flexibility-score" (will only affect steps 5 and 6)
 # usage: python flexibility_score.py extract.context(.inv).sorted [--Inverse] [--Hierarchical] < phrasetable > output_file
 # author: Rico Sennrich
 
