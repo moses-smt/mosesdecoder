@@ -37,8 +37,6 @@ protected:
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
   const NonTerminalSet m_sourceNonTerms;
 
-  std::vector<size_t> m_placeholders;
-
   bool SetPlaceholders(TargetPhrase *targetPhrase) const;
 public:
   explicit InputPath()
