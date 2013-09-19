@@ -116,8 +116,13 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType)
 
 std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
+  bool markUnknown = StaticData::Instance().GetMarkUnknown();
+
   stringstream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
+	if(markUnknown && GetWord(pos).IsOOV()) {
+	  strme << "UNK";
+	}
     strme << GetWord(pos).GetString(factorsToPrint, (pos != GetSize()-1));
   }
 
