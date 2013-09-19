@@ -1,0 +1,1 @@
+$data_dir/models/score.hierarchical/extract.inv.sorted $data_dir/models/score.hierarchical/lex.e2f $outPath --Hierarchical --Inverse

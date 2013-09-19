@@ -1,0 +1,42 @@
+
+TRANSLATION HYPOTHESIS DETAILS:
+         SOURCE: [0..1] das ist
+  TRANSLATED AS: this is
+  WORD ALIGNED: 
+         SOURCE: [2..2] ein
+  TRANSLATED AS: a
+  WORD ALIGNED: 
+         SOURCE: [3..3] kleines
+  TRANSLATED AS: small
+  WORD ALIGNED: 
+         SOURCE: [4..4] haus
+  TRANSLATED AS: house
+  WORD ALIGNED: 
+
+SOURCE/TARGET SPANS:
+  SOURCE: 0-1 2 3 4
+  TARGET: 0-1 2 3 4
+
+
+SCORES (UNWEIGHTED/WEIGHTED): d: 0.000 w: -0.000 u: 0.000 lm: -27.091 tm: -1.833
+
+TRANSLATION HYPOTHESIS DETAILS:
+         SOURCE: [0..1] das ist
+  TRANSLATED AS: this is
+  WORD ALIGNED: 
+         SOURCE: [2..2] ein
+  TRANSLATED AS: a
+  WORD ALIGNED: 
+         SOURCE: [3..3] kleines
+  TRANSLATED AS: small
+  WORD ALIGNED: 
+         SOURCE: [4..4] haus
+  TRANSLATED AS: house
+  WORD ALIGNED: 
+
+SOURCE/TARGET SPANS:
+  SOURCE: 0-1 2 3 4
+  TARGET: 0-1 2 3 4
+
+
+SCORES (UNWEIGHTED/WEIGHTED): d: 0.000 w: -0.000 u: 0.000 lm: -27.091 tm: -1.833

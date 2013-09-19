@@ -1,0 +1,16 @@
+/analysis.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/berkeley-process.sh/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/berkeley-train.sh/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/consolidate-training-data.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/generic-multicore-parallelizer.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/generic-parallelizer.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/input-from-sgm.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/interpolate-lm.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/reference-from-sgm.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/remove-segmenation-markup.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/report-experiment-scores.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/reuse-weights.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/run-command-on-multiple-refsets.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/split-sentences.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+/wrap-xml.perl/1.1.1.1/Sun Jan  6 16:54:13 2013//
+D

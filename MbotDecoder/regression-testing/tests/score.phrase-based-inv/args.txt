@@ -1,0 +1,1 @@
+$data_dir/models/score.phrase-based/extract.inv.sorted $data_dir/models/score.phrase-based/lex.e2f $outPath  --Inverse

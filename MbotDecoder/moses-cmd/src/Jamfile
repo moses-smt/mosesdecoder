@@ -1,0 +1,7 @@
+alias deps : ../../moses/src//moses ../../OnDiskPt/src//OnDiskPt ;
+
+exe checkplf : checkplf.cpp deps ;
+exe moses : Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp LatticeMBR.cpp deps ;
+exe lmbrgrid : LatticeMBRGrid.cpp LatticeMBR.cpp IOWrapper.cpp deps ;
+
+alias programs : checkplf moses lmbrgrid ;

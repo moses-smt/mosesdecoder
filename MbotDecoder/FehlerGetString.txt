@@ -1,0 +1,5 @@
+Phrase.cpp: In member function 'void Moses::Phrase::CreateFromStringNewFormat(Moses::FactorDirection, const std::vector<long unsigned int>&, const std::string&, const std::string&, Moses::Word&)':
+Phrase.cpp:216:47: error: no matching function for call to 'Moses::Word::GetString()'
+Word.h:100:15: note: candidate is: std::string Moses::Word::GetString(std::vector<long unsigned int>, bool) const
+Phrase.cpp:218:61: error: no matching function for call to 'Moses::Word::GetString()'
+Word.h:100:15: note: candidate is: std::string Moses::Word::GetString(std::vector<long unsigned int>, bool) const

@@ -1,2 +1,0 @@
-exe merge-sorted : merge-sorted.cc ../../../moses/generic/file_io/ug_stream.o ;
-

@@ -1,0 +1,5 @@
+
+sample usage:
+
+../src/nbest -input-file nbest.small -output-file nbest.1best 1 -sort -weights weights
+

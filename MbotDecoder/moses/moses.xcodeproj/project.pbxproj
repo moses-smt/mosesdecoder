@@ -1,0 +1,1365 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */; };
+		1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */; };
+		1E078C1C14643AED00A707F4 /* PhraseDictionaryHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E078C1B14643AED00A707F4 /* PhraseDictionaryHiero.h */; };
+		1E078C1F14643C2000A707F4 /* PhraseDictionaryHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E078C1E14643C2000A707F4 /* PhraseDictionaryHiero.cpp */; };
+		1E078C21146440A900A707F4 /* RuleTableLoaderHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E078C20146440A900A707F4 /* RuleTableLoaderHiero.h */; };
+		1E078C23146440F700A707F4 /* RuleTableLoaderHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E078C22146440F700A707F4 /* RuleTableLoaderHiero.cpp */; };
+		1E16D0A3144DAA6C00B60B4F /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D087144DAA6C00B60B4F /* Base.cpp */; };
+		1E16D0A4144DAA6C00B60B4F /* Base.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D088144DAA6C00B60B4F /* Base.h */; };
+		1E16D0A7144DAA6C00B60B4F /* Factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08B144DAA6C00B60B4F /* Factory.cpp */; };
+		1E16D0A8144DAA6C00B60B4F /* Factory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D08C144DAA6C00B60B4F /* Factory.h */; };
+		1E16D0A9144DAA6C00B60B4F /* Implementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08D144DAA6C00B60B4F /* Implementation.cpp */; };
+		1E16D0AA144DAA6C00B60B4F /* Implementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D08E144DAA6C00B60B4F /* Implementation.h */; };
+		1E16D0AB144DAA6C00B60B4F /* IRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08F144DAA6C00B60B4F /* IRST.cpp */; };
+		1E16D0AC144DAA6C00B60B4F /* IRST.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D090144DAA6C00B60B4F /* IRST.h */; };
+		1E16D0AD144DAA6C00B60B4F /* Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D091144DAA6C00B60B4F /* Joint.cpp */; };
+		1E16D0AE144DAA6C00B60B4F /* Joint.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D092144DAA6C00B60B4F /* Joint.h */; };
+		1E16D0AF144DAA6C00B60B4F /* Ken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D093144DAA6C00B60B4F /* Ken.cpp */; };
+		1E16D0B0144DAA6C00B60B4F /* Ken.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D094144DAA6C00B60B4F /* Ken.h */; };
+		1E16D0B1144DAA6C00B60B4F /* MultiFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */; };
+		1E16D0B2144DAA6C00B60B4F /* MultiFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D096144DAA6C00B60B4F /* MultiFactor.h */; };
+		1E16D0B5144DAA6C00B60B4F /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */; };
+		1E16D0B6144DAA6C00B60B4F /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */; };
+		1E16D0BB144DAA6C00B60B4F /* SingleFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */; };
+		1E16D0BC144DAA6C00B60B4F /* SingleFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */; };
+		1E16D0BD144DAA6C00B60B4F /* SRI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D0A1144DAA6C00B60B4F /* SRI.cpp */; };
+		1E16D0BE144DAA6C00B60B4F /* SRI.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D0A2144DAA6C00B60B4F /* SRI.h */; };
+		1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */; };
+		1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */; };
+		1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */; };
+		1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */; };
+		1E2755B314667CA4009D1DF9 /* PhraseDictionaryALSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2755B214667CA3009D1DF9 /* PhraseDictionaryALSuffixArray.cpp */; };
+		1E2755B614667CC3009D1DF9 /* PhraseDictionaryALSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2755B514667CC2009D1DF9 /* PhraseDictionaryALSuffixArray.h */; };
+		1E2E161A132A890D00ED4085 /* ChartCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1604132A890D00ED4085 /* ChartCell.cpp */; };
+		1E2E161B132A890D00ED4085 /* ChartCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1605132A890D00ED4085 /* ChartCell.h */; };
+		1E2E161C132A890D00ED4085 /* ChartCellCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1606132A890D00ED4085 /* ChartCellCollection.cpp */; };
+		1E2E161D132A890D00ED4085 /* ChartCellCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1607132A890D00ED4085 /* ChartCellCollection.h */; };
+		1E2E161E132A890D00ED4085 /* ChartHypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1608132A890D00ED4085 /* ChartHypothesis.cpp */; };
+		1E2E161F132A890D00ED4085 /* ChartHypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1609132A890D00ED4085 /* ChartHypothesis.h */; };
+		1E2E1620132A890D00ED4085 /* ChartHypothesisCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E160A132A890D00ED4085 /* ChartHypothesisCollection.cpp */; };
+		1E2E1621132A890D00ED4085 /* ChartHypothesisCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E160B132A890D00ED4085 /* ChartHypothesisCollection.h */; };
+		1E2E1622132A890D00ED4085 /* ChartManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E160C132A890D00ED4085 /* ChartManager.cpp */; };
+		1E2E1623132A890D00ED4085 /* ChartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E160D132A890D00ED4085 /* ChartManager.h */; };
+		1E2E1624132A890D00ED4085 /* ChartTranslationOptionCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E160E132A890D00ED4085 /* ChartTranslationOptionCollection.cpp */; };
+		1E2E1625132A890D00ED4085 /* ChartTranslationOptionCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E160F132A890D00ED4085 /* ChartTranslationOptionCollection.h */; };
+		1E2E1626132A890D00ED4085 /* ChartTrellisNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1610132A890D00ED4085 /* ChartTrellisNode.cpp */; };
+		1E2E1627132A890D00ED4085 /* ChartTrellisNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1611132A890D00ED4085 /* ChartTrellisNode.h */; };
+		1E2E1628132A890D00ED4085 /* ChartTrellisPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1612132A890D00ED4085 /* ChartTrellisPath.cpp */; };
+		1E2E1629132A890D00ED4085 /* ChartTrellisPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1613132A890D00ED4085 /* ChartTrellisPath.h */; };
+		1E2E162D132A890D00ED4085 /* ChartTrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */; };
+		1E2E1639132A892800ED4085 /* OutputCollector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1632132A892800ED4085 /* OutputCollector.h */; };
+		1E2E163A132A892800ED4085 /* RuleCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1633132A892800ED4085 /* RuleCube.cpp */; };
+		1E2E163B132A892800ED4085 /* RuleCube.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1634132A892800ED4085 /* RuleCube.h */; };
+		1E2E163C132A892800ED4085 /* RuleCubeQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1635132A892800ED4085 /* RuleCubeQueue.cpp */; };
+		1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1636132A892800ED4085 /* RuleCubeQueue.h */; };
+		1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1637132A892800ED4085 /* ThreadPool.cpp */; };
+		1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1638132A892800ED4085 /* ThreadPool.h */; };
+		1E46B5A613BA5C7F0084F898 /* RuleCubeItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E46B5A413BA5C7F0084F898 /* RuleCubeItem.cpp */; };
+		1E46B5A713BA5C7F0084F898 /* RuleCubeItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */; };
+		1E474E12145575CA00178AD5 /* RuleTableLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E474E11145575CA00178AD5 /* RuleTableLoader.h */; };
+		1E528B9D13A12B2D00E9A67E /* params.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9B13A12B2D00E9A67E /* params.cpp */; };
+		1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */; };
+		1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */; };
+		1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */; };
+		1EBB262913A12DB500B51840 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262213A12DB500B51840 /* hash.h */; };
+		1EBB262A13A12DB500B51840 /* onlineRLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262313A12DB500B51840 /* onlineRLM.h */; };
+		1EBB262B13A12DB500B51840 /* params.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262413A12DB500B51840 /* params.h */; };
+		1EBB262C13A12DB500B51840 /* perfectHash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262513A12DB500B51840 /* perfectHash.h */; };
+		1EBB262D13A12DB500B51840 /* quantizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262613A12DB500B51840 /* quantizer.h */; };
+		1EBB262E13A12DB500B51840 /* RandLMCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262713A12DB500B51840 /* RandLMCache.h */; };
+		1EBB262F13A12DB500B51840 /* RandLMFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262813A12DB500B51840 /* RandLMFilter.h */; };
+		1ECA43AF146D585900209CEF /* ChartCellLabelSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ECA43AD146D585900209CEF /* ChartCellLabelSet.h */; };
+		1ECA43B0146D585900209CEF /* ChartTrellisDetour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ECA43AE146D585900209CEF /* ChartTrellisDetour.cpp */; };
+		1ECA43B4146D586D00209CEF /* ChartTrellisDetour.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ECA43B1146D586D00209CEF /* ChartTrellisDetour.h */; };
+		1ECA43B5146D586D00209CEF /* ChartTrellisDetourQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ECA43B2146D586D00209CEF /* ChartTrellisDetourQueue.cpp */; };
+		1ECA43B6146D586D00209CEF /* ChartTrellisDetourQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ECA43B3146D586D00209CEF /* ChartTrellisDetourQueue.h */; };
+		1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED00034124BC2690029177F /* ChartTranslationOption.cpp */; };
+		1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED00035124BC2690029177F /* ChartTranslationOption.h */; };
+		1ED0DE291432A0D200C20FBE /* RuleTableLoaderCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */; };
+		1ED0DE2A1432A0D200C20FBE /* RuleTableLoaderCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */; };
+		1ED0DE2C1432A0D200C20FBE /* RuleTableLoaderFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */; };
+		1ED0DE2D1432A0D200C20FBE /* RuleTableLoaderFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */; };
+		1ED0DE2F1432A0D200C20FBE /* RuleTableLoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */; };
+		1ED0DE301432A0D200C20FBE /* RuleTableLoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */; };
+		1ED0FE2A124BB9380029177F /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */; };
+		1ED0FE2B124BB9380029177F /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD4D124BB9380029177F /* AlignmentInfo.h */; };
+		1ED0FE2C124BB9380029177F /* BilingualDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */; };
+		1ED0FE2D124BB9380029177F /* BilingualDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD4F124BB9380029177F /* BilingualDynSuffixArray.h */; };
+		1ED0FE2E124BB9380029177F /* BitmapContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD50124BB9380029177F /* BitmapContainer.cpp */; };
+		1ED0FE2F124BB9380029177F /* BitmapContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD51124BB9380029177F /* BitmapContainer.h */; };
+		1ED0FE30124BB9380029177F /* CellCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD52124BB9380029177F /* CellCollection.h */; };
+		1ED0FE35124BB9380029177F /* ConfusionNet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD57124BB9380029177F /* ConfusionNet.cpp */; };
+		1ED0FE36124BB9380029177F /* ConfusionNet.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD58124BB9380029177F /* ConfusionNet.h */; };
+		1ED0FE37124BB9380029177F /* DecodeFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD59124BB9380029177F /* DecodeFeature.cpp */; };
+		1ED0FE38124BB9380029177F /* DecodeFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD5A124BB9380029177F /* DecodeFeature.h */; };
+		1ED0FE39124BB9380029177F /* DecodeGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD5B124BB9380029177F /* DecodeGraph.cpp */; };
+		1ED0FE3A124BB9380029177F /* DecodeGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD5C124BB9380029177F /* DecodeGraph.h */; };
+		1ED0FE3B124BB9380029177F /* DecodeStep.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD5D124BB9380029177F /* DecodeStep.cpp */; };
+		1ED0FE3C124BB9380029177F /* DecodeStep.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD5E124BB9380029177F /* DecodeStep.h */; };
+		1ED0FE3D124BB9380029177F /* DecodeStepGeneration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD5F124BB9380029177F /* DecodeStepGeneration.cpp */; };
+		1ED0FE3E124BB9380029177F /* DecodeStepGeneration.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD60124BB9380029177F /* DecodeStepGeneration.h */; };
+		1ED0FE3F124BB9380029177F /* DecodeStepTranslation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD61124BB9380029177F /* DecodeStepTranslation.cpp */; };
+		1ED0FE40124BB9380029177F /* DecodeStepTranslation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD62124BB9380029177F /* DecodeStepTranslation.h */; };
+		1ED0FE41124BB9380029177F /* Dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD63124BB9380029177F /* Dictionary.cpp */; };
+		1ED0FE42124BB9380029177F /* Dictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD64124BB9380029177F /* Dictionary.h */; };
+		1ED0FE43124BB9380029177F /* DotChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD65124BB9380029177F /* DotChart.cpp */; };
+		1ED0FE44124BB9380029177F /* DotChart.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD66124BB9380029177F /* DotChart.h */; };
+		1ED0FE45124BB9380029177F /* DotChartOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD67124BB9380029177F /* DotChartOnDisk.cpp */; };
+		1ED0FE46124BB9380029177F /* DotChartOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD68124BB9380029177F /* DotChartOnDisk.h */; };
+		1ED0FE47124BB9380029177F /* DummyScoreProducers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD69124BB9380029177F /* DummyScoreProducers.cpp */; };
+		1ED0FE48124BB9380029177F /* DummyScoreProducers.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD6A124BB9380029177F /* DummyScoreProducers.h */; };
+		1ED0FE49124BB9380029177F /* fdstream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD6C124BB9380029177F /* fdstream.h */; };
+		1ED0FE4A124BB9380029177F /* file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD6D124BB9380029177F /* file.cpp */; };
+		1ED0FE4B124BB9380029177F /* file.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD6E124BB9380029177F /* file.h */; };
+		1ED0FE4C124BB9380029177F /* types.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD6F124BB9380029177F /* types.h */; };
+		1ED0FE4D124BB9380029177F /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD70124BB9380029177F /* utils.h */; };
+		1ED0FE4E124BB9380029177F /* vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD71124BB9380029177F /* vocab.cpp */; };
+		1ED0FE4F124BB9380029177F /* vocab.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD72124BB9380029177F /* vocab.h */; };
+		1ED0FE50124BB9380029177F /* DynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD73124BB9380029177F /* DynSuffixArray.cpp */; };
+		1ED0FE51124BB9380029177F /* DynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD74124BB9380029177F /* DynSuffixArray.h */; };
+		1ED0FE52124BB9380029177F /* Factor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD75124BB9380029177F /* Factor.cpp */; };
+		1ED0FE53124BB9380029177F /* Factor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD76124BB9380029177F /* Factor.h */; };
+		1ED0FE54124BB9380029177F /* FactorCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD77124BB9380029177F /* FactorCollection.cpp */; };
+		1ED0FE55124BB9380029177F /* FactorCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD78124BB9380029177F /* FactorCollection.h */; };
+		1ED0FE56124BB9380029177F /* FactorTypeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD79124BB9380029177F /* FactorTypeSet.cpp */; };
+		1ED0FE57124BB9380029177F /* FactorTypeSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD7A124BB9380029177F /* FactorTypeSet.h */; };
+		1ED0FE58124BB9380029177F /* FeatureFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD7B124BB9380029177F /* FeatureFunction.cpp */; };
+		1ED0FE59124BB9380029177F /* FeatureFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD7C124BB9380029177F /* FeatureFunction.h */; };
+		1ED0FE5A124BB9380029177F /* FFState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD7D124BB9380029177F /* FFState.cpp */; };
+		1ED0FE5B124BB9380029177F /* FFState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD7E124BB9380029177F /* FFState.h */; };
+		1ED0FE5C124BB9380029177F /* File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD7F124BB9380029177F /* File.cpp */; };
+		1ED0FE5D124BB9380029177F /* File.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD80124BB9380029177F /* File.h */; };
+		1ED0FE5E124BB9380029177F /* FilePtr.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD81124BB9380029177F /* FilePtr.h */; };
+		1ED0FE5F124BB9380029177F /* FloydWarshall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD82124BB9380029177F /* FloydWarshall.cpp */; };
+		1ED0FE60124BB9380029177F /* FloydWarshall.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD83124BB9380029177F /* FloydWarshall.h */; };
+		1ED0FE61124BB9380029177F /* GenerationDictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD84124BB9380029177F /* GenerationDictionary.cpp */; };
+		1ED0FE62124BB9380029177F /* GenerationDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD85124BB9380029177F /* GenerationDictionary.h */; };
+		1ED0FE63124BB9380029177F /* GlobalLexicalModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD86124BB9380029177F /* GlobalLexicalModel.cpp */; };
+		1ED0FE64124BB9380029177F /* GlobalLexicalModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD87124BB9380029177F /* GlobalLexicalModel.h */; };
+		1ED0FE65124BB9380029177F /* gzfilebuf.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD88124BB9380029177F /* gzfilebuf.h */; };
+		1ED0FE66124BB9380029177F /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD89124BB9380029177F /* hash.cpp */; };
+		1ED0FE67124BB9380029177F /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD8A124BB9380029177F /* hash.h */; };
+		1ED0FE68124BB9380029177F /* Hypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD8C124BB9380029177F /* Hypothesis.cpp */; };
+		1ED0FE69124BB9380029177F /* Hypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD8D124BB9380029177F /* Hypothesis.h */; };
+		1ED0FE6A124BB9380029177F /* HypothesisStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD8E124BB9380029177F /* HypothesisStack.cpp */; };
+		1ED0FE6B124BB9380029177F /* HypothesisStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD8F124BB9380029177F /* HypothesisStack.h */; };
+		1ED0FE6C124BB9380029177F /* HypothesisStackCubePruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD90124BB9380029177F /* HypothesisStackCubePruning.cpp */; };
+		1ED0FE6D124BB9380029177F /* HypothesisStackCubePruning.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD91124BB9380029177F /* HypothesisStackCubePruning.h */; };
+		1ED0FE6E124BB9380029177F /* HypothesisStackNormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD92124BB9380029177F /* HypothesisStackNormal.cpp */; };
+		1ED0FE6F124BB9380029177F /* HypothesisStackNormal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD93124BB9380029177F /* HypothesisStackNormal.h */; };
+		1ED0FE70124BB9380029177F /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD94124BB9380029177F /* InputFileStream.cpp */; };
+		1ED0FE71124BB9380029177F /* InputFileStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD95124BB9380029177F /* InputFileStream.h */; };
+		1ED0FE72124BB9380029177F /* InputType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD96124BB9380029177F /* InputType.cpp */; };
+		1ED0FE73124BB9380029177F /* InputType.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD97124BB9380029177F /* InputType.h */; };
+		1ED0FE8F124BB9380029177F /* LexicalReordering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDB3124BB9380029177F /* LexicalReordering.cpp */; };
+		1ED0FE90124BB9380029177F /* LexicalReordering.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDB4124BB9380029177F /* LexicalReordering.h */; };
+		1ED0FE91124BB9380029177F /* LexicalReorderingState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDB5124BB9380029177F /* LexicalReorderingState.cpp */; };
+		1ED0FE92124BB9380029177F /* LexicalReorderingState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDB6124BB9380029177F /* LexicalReorderingState.h */; };
+		1ED0FE93124BB9380029177F /* LexicalReorderingTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDB7124BB9380029177F /* LexicalReorderingTable.cpp */; };
+		1ED0FE94124BB9380029177F /* LexicalReorderingTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDB8124BB9380029177F /* LexicalReorderingTable.h */; };
+		1ED0FE95124BB9380029177F /* LMList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDB9124BB9380029177F /* LMList.cpp */; };
+		1ED0FE96124BB9380029177F /* LMList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDBA124BB9380029177F /* LMList.h */; };
+		1ED0FE97124BB9380029177F /* LVoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDBB124BB9380029177F /* LVoc.cpp */; };
+		1ED0FE98124BB9380029177F /* LVoc.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDBC124BB9380029177F /* LVoc.h */; };
+		1ED0FE9A124BB9380029177F /* Manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDC0124BB9380029177F /* Manager.cpp */; };
+		1ED0FE9B124BB9380029177F /* Manager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDC1124BB9380029177F /* Manager.h */; };
+		1ED0FEA0124BB9380029177F /* ObjectPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDC6124BB9380029177F /* ObjectPool.h */; };
+		1ED0FEA1124BB9380029177F /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDC7124BB9380029177F /* Parameter.cpp */; };
+		1ED0FEA2124BB9380029177F /* Parameter.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDC8124BB9380029177F /* Parameter.h */; };
+		1ED0FEA3124BB9380029177F /* PartialTranslOptColl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDC9124BB9380029177F /* PartialTranslOptColl.cpp */; };
+		1ED0FEA4124BB9380029177F /* PartialTranslOptColl.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDCA124BB9380029177F /* PartialTranslOptColl.h */; };
+		1ED0FEA5124BB9380029177F /* PCNTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDCB124BB9380029177F /* PCNTools.cpp */; };
+		1ED0FEA6124BB9380029177F /* PCNTools.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDCC124BB9380029177F /* PCNTools.h */; };
+		1ED0FEA7124BB9380029177F /* PDTAimp.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDCD124BB9380029177F /* PDTAimp.h */; };
+		1ED0FEA8124BB9380029177F /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDCE124BB9380029177F /* Phrase.cpp */; };
+		1ED0FEA9124BB9380029177F /* Phrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDCF124BB9380029177F /* Phrase.h */; };
+		1ED0FEAA124BB9380029177F /* PhraseDictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDD0124BB9380029177F /* PhraseDictionary.cpp */; };
+		1ED0FEAB124BB9380029177F /* PhraseDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDD1124BB9380029177F /* PhraseDictionary.h */; };
+		1ED0FEAC124BB9380029177F /* PhraseDictionaryDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDD2124BB9380029177F /* PhraseDictionaryDynSuffixArray.cpp */; };
+		1ED0FEAD124BB9380029177F /* PhraseDictionaryDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDD3124BB9380029177F /* PhraseDictionaryDynSuffixArray.h */; };
+		1ED0FEAE124BB9380029177F /* PhraseDictionaryMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDD4124BB9380029177F /* PhraseDictionaryMemory.cpp */; };
+		1ED0FEAF124BB9380029177F /* PhraseDictionaryMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDD5124BB9380029177F /* PhraseDictionaryMemory.h */; };
+		1ED0FEB0124BB9380029177F /* PhraseDictionaryNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDD6124BB9380029177F /* PhraseDictionaryNode.cpp */; };
+		1ED0FEB1124BB9380029177F /* PhraseDictionaryNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDD7124BB9380029177F /* PhraseDictionaryNode.h */; };
+		1ED0FEB2124BB9380029177F /* PhraseDictionaryNodeSCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDD8124BB9380029177F /* PhraseDictionaryNodeSCFG.cpp */; };
+		1ED0FEB3124BB9380029177F /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */; };
+		1ED0FEB4124BB9380029177F /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */; };
+		1ED0FEB5124BB9380029177F /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */; };
+		1ED0FEB7124BB9380029177F /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */; };
+		1ED0FEB9124BB9380029177F /* PhraseDictionaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */; };
+		1ED0FEBA124BB9380029177F /* PhraseDictionaryTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */; };
+		1ED0FEBB124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */; };
+		1ED0FEBC124BB9380029177F /* PhraseDictionaryTreeAdaptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDE2124BB9380029177F /* PhraseDictionaryTreeAdaptor.h */; };
+		1ED0FEBD124BB9380029177F /* PrefixTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDE3124BB9380029177F /* PrefixTree.h */; };
+		1ED0FEBE124BB9380029177F /* PrefixTreeMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDE4124BB9380029177F /* PrefixTreeMap.cpp */; };
+		1ED0FEBF124BB9380029177F /* PrefixTreeMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDE5124BB9380029177F /* PrefixTreeMap.h */; };
+		1ED0FEC0124BB9380029177F /* ReorderingConstraint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDE6124BB9380029177F /* ReorderingConstraint.cpp */; };
+		1ED0FEC1124BB9380029177F /* ReorderingConstraint.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDE7124BB9380029177F /* ReorderingConstraint.h */; };
+		1ED0FEC2124BB9380029177F /* ReorderingStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDE8124BB9380029177F /* ReorderingStack.cpp */; };
+		1ED0FEC3124BB9380029177F /* ReorderingStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDE9124BB9380029177F /* ReorderingStack.h */; };
+		1ED0FEC4124BB9380029177F /* ScoreComponentCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDEB124BB9380029177F /* ScoreComponentCollection.cpp */; };
+		1ED0FEC5124BB9380029177F /* ScoreComponentCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDEC124BB9380029177F /* ScoreComponentCollection.h */; };
+		1ED0FEC6124BB9380029177F /* ScoreIndexManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDED124BB9380029177F /* ScoreIndexManager.cpp */; };
+		1ED0FEC7124BB9380029177F /* ScoreIndexManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDEE124BB9380029177F /* ScoreIndexManager.h */; };
+		1ED0FEC8124BB9380029177F /* ScoreProducer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDEF124BB9380029177F /* ScoreProducer.cpp */; };
+		1ED0FEC9124BB9380029177F /* ScoreProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDF0124BB9380029177F /* ScoreProducer.h */; };
+		1ED0FECA124BB9380029177F /* Search.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDF1124BB9380029177F /* Search.cpp */; };
+		1ED0FECB124BB9380029177F /* Search.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDF2124BB9380029177F /* Search.h */; };
+		1ED0FECC124BB9380029177F /* SearchCubePruning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDF3124BB9380029177F /* SearchCubePruning.cpp */; };
+		1ED0FECD124BB9380029177F /* SearchCubePruning.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDF4124BB9380029177F /* SearchCubePruning.h */; };
+		1ED0FECE124BB9380029177F /* SearchNormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDF5124BB9380029177F /* SearchNormal.cpp */; };
+		1ED0FECF124BB9380029177F /* SearchNormal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDF6124BB9380029177F /* SearchNormal.h */; };
+		1ED0FED0124BB9380029177F /* Sentence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDF7124BB9380029177F /* Sentence.cpp */; };
+		1ED0FED1124BB9380029177F /* Sentence.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDF8124BB9380029177F /* Sentence.h */; };
+		1ED0FED2124BB9380029177F /* SentenceStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDF9124BB9380029177F /* SentenceStats.cpp */; };
+		1ED0FED3124BB9380029177F /* SentenceStats.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDFA124BB9380029177F /* SentenceStats.h */; };
+		1ED0FED4124BB9380029177F /* SquareMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDFB124BB9380029177F /* SquareMatrix.cpp */; };
+		1ED0FED5124BB9380029177F /* SquareMatrix.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDFC124BB9380029177F /* SquareMatrix.h */; };
+		1ED0FED6124BB9380029177F /* StaticData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDFD124BB9380029177F /* StaticData.cpp */; };
+		1ED0FED7124BB9380029177F /* StaticData.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDFE124BB9380029177F /* StaticData.h */; };
+		1ED0FED8124BB9380029177F /* TargetPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDFF124BB9380029177F /* TargetPhrase.cpp */; };
+		1ED0FED9124BB9380029177F /* TargetPhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE00124BB9380029177F /* TargetPhrase.h */; };
+		1ED0FEDA124BB9380029177F /* TargetPhraseCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE01124BB9380029177F /* TargetPhraseCollection.cpp */; };
+		1ED0FEDB124BB9380029177F /* TargetPhraseCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE02124BB9380029177F /* TargetPhraseCollection.h */; };
+		1ED0FEDC124BB9380029177F /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE03124BB9380029177F /* Timer.cpp */; };
+		1ED0FEDD124BB9380029177F /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE04124BB9380029177F /* Timer.h */; };
+		1ED0FEDE124BB9380029177F /* TranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE05124BB9380029177F /* TranslationOption.cpp */; };
+		1ED0FEDF124BB9380029177F /* TranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE06124BB9380029177F /* TranslationOption.h */; };
+		1ED0FEE0124BB9380029177F /* TranslationOptionCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE07124BB9380029177F /* TranslationOptionCollection.cpp */; };
+		1ED0FEE1124BB9380029177F /* TranslationOptionCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE08124BB9380029177F /* TranslationOptionCollection.h */; };
+		1ED0FEE2124BB9380029177F /* TranslationOptionCollectionConfusionNet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE09124BB9380029177F /* TranslationOptionCollectionConfusionNet.cpp */; };
+		1ED0FEE3124BB9380029177F /* TranslationOptionCollectionConfusionNet.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE0A124BB9380029177F /* TranslationOptionCollectionConfusionNet.h */; };
+		1ED0FEE4124BB9380029177F /* TranslationOptionCollectionText.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE0B124BB9380029177F /* TranslationOptionCollectionText.cpp */; };
+		1ED0FEE5124BB9380029177F /* TranslationOptionCollectionText.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE0C124BB9380029177F /* TranslationOptionCollectionText.h */; };
+		1ED0FEE6124BB9380029177F /* TranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE0D124BB9380029177F /* TranslationOptionList.cpp */; };
+		1ED0FEE7124BB9380029177F /* TranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE0E124BB9380029177F /* TranslationOptionList.h */; };
+		1ED0FEE8124BB9380029177F /* TranslationSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE0F124BB9380029177F /* TranslationSystem.cpp */; };
+		1ED0FEE9124BB9380029177F /* TranslationSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE10124BB9380029177F /* TranslationSystem.h */; };
+		1ED0FEEA124BB9380029177F /* TreeInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE11124BB9380029177F /* TreeInput.cpp */; };
+		1ED0FEEB124BB9380029177F /* TreeInput.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE12124BB9380029177F /* TreeInput.h */; };
+		1ED0FEEC124BB9380029177F /* TrellisPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE13124BB9380029177F /* TrellisPath.cpp */; };
+		1ED0FEED124BB9380029177F /* TrellisPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE14124BB9380029177F /* TrellisPath.h */; };
+		1ED0FEEE124BB9380029177F /* TrellisPathCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE15124BB9380029177F /* TrellisPathCollection.cpp */; };
+		1ED0FEEF124BB9380029177F /* TrellisPathCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE16124BB9380029177F /* TrellisPathCollection.h */; };
+		1ED0FEF0124BB9380029177F /* TrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE17124BB9380029177F /* TrellisPathList.h */; };
+		1ED0FEF1124BB9380029177F /* TypeDef.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE18124BB9380029177F /* TypeDef.h */; };
+		1ED0FEF2124BB9380029177F /* UniqueObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE19124BB9380029177F /* UniqueObject.h */; };
+		1ED0FEF3124BB9380029177F /* UserMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE1A124BB9380029177F /* UserMessage.cpp */; };
+		1ED0FEF4124BB9380029177F /* UserMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE1B124BB9380029177F /* UserMessage.h */; };
+		1ED0FEF5124BB9380029177F /* Util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE1C124BB9380029177F /* Util.cpp */; };
+		1ED0FEF6124BB9380029177F /* Util.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE1D124BB9380029177F /* Util.h */; };
+		1ED0FEF7124BB9380029177F /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE1E124BB9380029177F /* Word.cpp */; };
+		1ED0FEF8124BB9380029177F /* Word.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE1F124BB9380029177F /* Word.h */; };
+		1ED0FEFB124BB9380029177F /* WordLattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE22124BB9380029177F /* WordLattice.cpp */; };
+		1ED0FEFC124BB9380029177F /* WordLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE23124BB9380029177F /* WordLattice.h */; };
+		1ED0FEFD124BB9380029177F /* WordsBitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE24124BB9380029177F /* WordsBitmap.cpp */; };
+		1ED0FEFE124BB9380029177F /* WordsBitmap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE25124BB9380029177F /* WordsBitmap.h */; };
+		1ED0FEFF124BB9380029177F /* WordsRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE26124BB9380029177F /* WordsRange.cpp */; };
+		1ED0FF00124BB9380029177F /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE27124BB9380029177F /* WordsRange.h */; };
+		1ED0FF01124BB9380029177F /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE28124BB9380029177F /* XmlOption.cpp */; };
+		1ED0FF02124BB9380029177F /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE29124BB9380029177F /* XmlOption.h */; };
+		1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */; };
+		1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */; };
+		1ED22EE513DD96B0000DE8C9 /* DotChartInMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED22EE313DD96B0000DE8C9 /* DotChartInMemory.cpp */; };
+		1ED22EE613DD96B0000DE8C9 /* DotChartInMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED22EE413DD96B0000DE8C9 /* DotChartInMemory.h */; };
+		1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EE58D9D133726C700D93158 /* NonTerminal.cpp */; };
+		1EE58DA0133726C700D93158 /* NonTerminal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE58D9E133726C700D93158 /* NonTerminal.h */; };
+		1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
+		1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfoCollection.h; path = src/AlignmentInfoCollection.h; sourceTree = "<group>"; };
+		1E078C1B14643AED00A707F4 /* PhraseDictionaryHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryHiero.h; path = src/PhraseDictionaryHiero.h; sourceTree = "<group>"; };
+		1E078C1E14643C2000A707F4 /* PhraseDictionaryHiero.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryHiero.cpp; path = src/PhraseDictionaryHiero.cpp; sourceTree = "<group>"; };
+		1E078C20146440A900A707F4 /* RuleTableLoaderHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderHiero.h; path = src/RuleTableLoaderHiero.h; sourceTree = "<group>"; };
+		1E078C22146440F700A707F4 /* RuleTableLoaderHiero.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderHiero.cpp; path = src/RuleTableLoaderHiero.cpp; sourceTree = "<group>"; };
+		1E16D087144DAA6C00B60B4F /* Base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base.cpp; path = src/LM/Base.cpp; sourceTree = "<group>"; };
+		1E16D088144DAA6C00B60B4F /* Base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Base.h; path = src/LM/Base.h; sourceTree = "<group>"; };
+		1E16D08B144DAA6C00B60B4F /* Factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Factory.cpp; path = src/LM/Factory.cpp; sourceTree = "<group>"; };
+		1E16D08C144DAA6C00B60B4F /* Factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Factory.h; path = src/LM/Factory.h; sourceTree = "<group>"; };
+		1E16D08D144DAA6C00B60B4F /* Implementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Implementation.cpp; path = src/LM/Implementation.cpp; sourceTree = "<group>"; };
+		1E16D08E144DAA6C00B60B4F /* Implementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Implementation.h; path = src/LM/Implementation.h; sourceTree = "<group>"; };
+		1E16D08F144DAA6C00B60B4F /* IRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IRST.cpp; path = src/LM/IRST.cpp; sourceTree = "<group>"; };
+		1E16D090144DAA6C00B60B4F /* IRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IRST.h; path = src/LM/IRST.h; sourceTree = "<group>"; };
+		1E16D091144DAA6C00B60B4F /* Joint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Joint.cpp; path = src/LM/Joint.cpp; sourceTree = "<group>"; };
+		1E16D092144DAA6C00B60B4F /* Joint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Joint.h; path = src/LM/Joint.h; sourceTree = "<group>"; };
+		1E16D093144DAA6C00B60B4F /* Ken.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ken.cpp; path = src/LM/Ken.cpp; sourceTree = "<group>"; };
+		1E16D094144DAA6C00B60B4F /* Ken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ken.h; path = src/LM/Ken.h; sourceTree = "<group>"; };
+		1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MultiFactor.cpp; path = src/LM/MultiFactor.cpp; sourceTree = "<group>"; };
+		1E16D096144DAA6C00B60B4F /* MultiFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MultiFactor.h; path = src/LM/MultiFactor.h; sourceTree = "<group>"; };
+		1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParallelBackoff.cpp; path = src/LM/ParallelBackoff.cpp; sourceTree = "<group>"; };
+		1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParallelBackoff.h; path = src/LM/ParallelBackoff.h; sourceTree = "<group>"; };
+		1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SingleFactor.cpp; path = src/LM/SingleFactor.cpp; sourceTree = "<group>"; };
+		1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SingleFactor.h; path = src/LM/SingleFactor.h; sourceTree = "<group>"; };
+		1E16D0A1144DAA6C00B60B4F /* SRI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SRI.cpp; path = src/LM/SRI.cpp; sourceTree = "<group>"; };
+		1E16D0A2144DAA6C00B60B4F /* SRI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SRI.h; path = src/LM/SRI.h; sourceTree = "<group>"; };
+		1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = src/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
+		1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = src/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
+		1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerOnDisk.cpp; path = src/ChartRuleLookupManagerOnDisk.cpp; sourceTree = "<group>"; };
+		1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerOnDisk.h; path = src/ChartRuleLookupManagerOnDisk.h; sourceTree = "<group>"; };
+		1E2755B214667CA3009D1DF9 /* PhraseDictionaryALSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryALSuffixArray.cpp; path = src/PhraseDictionaryALSuffixArray.cpp; sourceTree = "<group>"; };
+		1E2755B514667CC2009D1DF9 /* PhraseDictionaryALSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryALSuffixArray.h; path = src/PhraseDictionaryALSuffixArray.h; sourceTree = "<group>"; };
+		1E2E1604132A890D00ED4085 /* ChartCell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCell.cpp; path = src/ChartCell.cpp; sourceTree = "<group>"; };
+		1E2E1605132A890D00ED4085 /* ChartCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCell.h; path = src/ChartCell.h; sourceTree = "<group>"; };
+		1E2E1606132A890D00ED4085 /* ChartCellCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCellCollection.cpp; path = src/ChartCellCollection.cpp; sourceTree = "<group>"; };
+		1E2E1607132A890D00ED4085 /* ChartCellCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCellCollection.h; path = src/ChartCellCollection.h; sourceTree = "<group>"; };
+		1E2E1608132A890D00ED4085 /* ChartHypothesis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartHypothesis.cpp; path = src/ChartHypothesis.cpp; sourceTree = "<group>"; };
+		1E2E1609132A890D00ED4085 /* ChartHypothesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesis.h; path = src/ChartHypothesis.h; sourceTree = "<group>"; };
+		1E2E160A132A890D00ED4085 /* ChartHypothesisCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartHypothesisCollection.cpp; path = src/ChartHypothesisCollection.cpp; sourceTree = "<group>"; };
+		1E2E160B132A890D00ED4085 /* ChartHypothesisCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesisCollection.h; path = src/ChartHypothesisCollection.h; sourceTree = "<group>"; };
+		1E2E160C132A890D00ED4085 /* ChartManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartManager.cpp; path = src/ChartManager.cpp; sourceTree = "<group>"; };
+		1E2E160D132A890D00ED4085 /* ChartManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartManager.h; path = src/ChartManager.h; sourceTree = "<group>"; };
+		1E2E160E132A890D00ED4085 /* ChartTranslationOptionCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionCollection.cpp; path = src/ChartTranslationOptionCollection.cpp; sourceTree = "<group>"; };
+		1E2E160F132A890D00ED4085 /* ChartTranslationOptionCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionCollection.h; path = src/ChartTranslationOptionCollection.h; sourceTree = "<group>"; };
+		1E2E1610132A890D00ED4085 /* ChartTrellisNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisNode.cpp; path = src/ChartTrellisNode.cpp; sourceTree = "<group>"; };
+		1E2E1611132A890D00ED4085 /* ChartTrellisNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisNode.h; path = src/ChartTrellisNode.h; sourceTree = "<group>"; };
+		1E2E1612132A890D00ED4085 /* ChartTrellisPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPath.cpp; path = src/ChartTrellisPath.cpp; sourceTree = "<group>"; };
+		1E2E1613132A890D00ED4085 /* ChartTrellisPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPath.h; path = src/ChartTrellisPath.h; sourceTree = "<group>"; };
+		1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPathList.h; path = src/ChartTrellisPathList.h; sourceTree = "<group>"; };
+		1E2E1632132A892800ED4085 /* OutputCollector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OutputCollector.h; path = src/OutputCollector.h; sourceTree = "<group>"; };
+		1E2E1633132A892800ED4085 /* RuleCube.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCube.cpp; path = src/RuleCube.cpp; sourceTree = "<group>"; };
+		1E2E1634132A892800ED4085 /* RuleCube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCube.h; path = src/RuleCube.h; sourceTree = "<group>"; };
+		1E2E1635132A892800ED4085 /* RuleCubeQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCubeQueue.cpp; path = src/RuleCubeQueue.cpp; sourceTree = "<group>"; };
+		1E2E1636132A892800ED4085 /* RuleCubeQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeQueue.h; path = src/RuleCubeQueue.h; sourceTree = "<group>"; };
+		1E2E1637132A892800ED4085 /* ThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadPool.cpp; path = src/ThreadPool.cpp; sourceTree = "<group>"; };
+		1E2E1638132A892800ED4085 /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = src/ThreadPool.h; sourceTree = "<group>"; };
+		1E46B5A413BA5C7F0084F898 /* RuleCubeItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCubeItem.cpp; path = src/RuleCubeItem.cpp; sourceTree = "<group>"; };
+		1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeItem.h; path = src/RuleCubeItem.h; sourceTree = "<group>"; };
+		1E474E11145575CA00178AD5 /* RuleTableLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoader.h; path = src/RuleTableLoader.h; sourceTree = "<group>"; };
+		1E528B9B13A12B2D00E9A67E /* params.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = params.cpp; path = src/DynSAInclude/params.cpp; sourceTree = "<group>"; };
+		1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SyntacticLanguageModel.cpp; path = src/SyntacticLanguageModel.cpp; sourceTree = "<group>"; };
+		1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManager.cpp; path = src/ChartRuleLookupManager.cpp; sourceTree = "<group>"; };
+		1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
+		1EBB262213A12DB500B51840 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = src/DynSAInclude/hash.h; sourceTree = "<group>"; };
+		1EBB262313A12DB500B51840 /* onlineRLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = onlineRLM.h; path = src/DynSAInclude/onlineRLM.h; sourceTree = "<group>"; };
+		1EBB262413A12DB500B51840 /* params.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = params.h; path = src/DynSAInclude/params.h; sourceTree = "<group>"; };
+		1EBB262513A12DB500B51840 /* perfectHash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = perfectHash.h; path = src/DynSAInclude/perfectHash.h; sourceTree = "<group>"; };
+		1EBB262613A12DB500B51840 /* quantizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = quantizer.h; path = src/DynSAInclude/quantizer.h; sourceTree = "<group>"; };
+		1EBB262713A12DB500B51840 /* RandLMCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RandLMCache.h; path = src/DynSAInclude/RandLMCache.h; sourceTree = "<group>"; };
+		1EBB262813A12DB500B51840 /* RandLMFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RandLMFilter.h; path = src/DynSAInclude/RandLMFilter.h; sourceTree = "<group>"; };
+		1ECA43AD146D585900209CEF /* ChartCellLabelSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCellLabelSet.h; path = src/ChartCellLabelSet.h; sourceTree = "<group>"; };
+		1ECA43AE146D585900209CEF /* ChartTrellisDetour.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisDetour.cpp; path = src/ChartTrellisDetour.cpp; sourceTree = "<group>"; };
+		1ECA43B1146D586D00209CEF /* ChartTrellisDetour.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisDetour.h; path = src/ChartTrellisDetour.h; sourceTree = "<group>"; };
+		1ECA43B2146D586D00209CEF /* ChartTrellisDetourQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisDetourQueue.cpp; path = src/ChartTrellisDetourQueue.cpp; sourceTree = "<group>"; };
+		1ECA43B3146D586D00209CEF /* ChartTrellisDetourQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisDetourQueue.h; path = src/ChartTrellisDetourQueue.h; sourceTree = "<group>"; };
+		1ED00034124BC2690029177F /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
+		1ED00035124BC2690029177F /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = src/ChartTranslationOption.h; sourceTree = "<group>"; };
+		1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderCompact.cpp; path = src/RuleTableLoaderCompact.cpp; sourceTree = "<group>"; };
+		1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderCompact.h; path = src/RuleTableLoaderCompact.h; sourceTree = "<group>"; };
+		1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderFactory.cpp; path = src/RuleTableLoaderFactory.cpp; sourceTree = "<group>"; };
+		1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderFactory.h; path = src/RuleTableLoaderFactory.h; sourceTree = "<group>"; };
+		1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderStandard.cpp; path = src/RuleTableLoaderStandard.cpp; sourceTree = "<group>"; };
+		1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderStandard.h; path = src/RuleTableLoaderStandard.h; sourceTree = "<group>"; };
+		1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
+		1ED0FD4D124BB9380029177F /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = src/AlignmentInfo.h; sourceTree = "<group>"; };
+		1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BilingualDynSuffixArray.cpp; path = src/BilingualDynSuffixArray.cpp; sourceTree = "<group>"; };
+		1ED0FD4F124BB9380029177F /* BilingualDynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BilingualDynSuffixArray.h; path = src/BilingualDynSuffixArray.h; sourceTree = "<group>"; };
+		1ED0FD50124BB9380029177F /* BitmapContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BitmapContainer.cpp; path = src/BitmapContainer.cpp; sourceTree = "<group>"; };
+		1ED0FD51124BB9380029177F /* BitmapContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BitmapContainer.h; path = src/BitmapContainer.h; sourceTree = "<group>"; };
+		1ED0FD52124BB9380029177F /* CellCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CellCollection.h; path = src/CellCollection.h; sourceTree = "<group>"; };
+		1ED0FD57124BB9380029177F /* ConfusionNet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConfusionNet.cpp; path = src/ConfusionNet.cpp; sourceTree = "<group>"; };
+		1ED0FD58124BB9380029177F /* ConfusionNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConfusionNet.h; path = src/ConfusionNet.h; sourceTree = "<group>"; };
+		1ED0FD59124BB9380029177F /* DecodeFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeFeature.cpp; path = src/DecodeFeature.cpp; sourceTree = "<group>"; };
+		1ED0FD5A124BB9380029177F /* DecodeFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DecodeFeature.h; path = src/DecodeFeature.h; sourceTree = "<group>"; };
+		1ED0FD5B124BB9380029177F /* DecodeGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeGraph.cpp; path = src/DecodeGraph.cpp; sourceTree = "<group>"; };
+		1ED0FD5C124BB9380029177F /* DecodeGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DecodeGraph.h; path = src/DecodeGraph.h; sourceTree = "<group>"; };
+		1ED0FD5D124BB9380029177F /* DecodeStep.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeStep.cpp; path = src/DecodeStep.cpp; sourceTree = "<group>"; };
+		1ED0FD5E124BB9380029177F /* DecodeStep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DecodeStep.h; path = src/DecodeStep.h; sourceTree = "<group>"; };
+		1ED0FD5F124BB9380029177F /* DecodeStepGeneration.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeStepGeneration.cpp; path = src/DecodeStepGeneration.cpp; sourceTree = "<group>"; };
+		1ED0FD60124BB9380029177F /* DecodeStepGeneration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DecodeStepGeneration.h; path = src/DecodeStepGeneration.h; sourceTree = "<group>"; };
+		1ED0FD61124BB9380029177F /* DecodeStepTranslation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeStepTranslation.cpp; path = src/DecodeStepTranslation.cpp; sourceTree = "<group>"; };
+		1ED0FD62124BB9380029177F /* DecodeStepTranslation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DecodeStepTranslation.h; path = src/DecodeStepTranslation.h; sourceTree = "<group>"; };
+		1ED0FD63124BB9380029177F /* Dictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Dictionary.cpp; path = src/Dictionary.cpp; sourceTree = "<group>"; };
+		1ED0FD64124BB9380029177F /* Dictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dictionary.h; path = src/Dictionary.h; sourceTree = "<group>"; };
+		1ED0FD65124BB9380029177F /* DotChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChart.cpp; path = src/DotChart.cpp; sourceTree = "<group>"; };
+		1ED0FD66124BB9380029177F /* DotChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChart.h; path = src/DotChart.h; sourceTree = "<group>"; };
+		1ED0FD67124BB9380029177F /* DotChartOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartOnDisk.cpp; path = src/DotChartOnDisk.cpp; sourceTree = "<group>"; };
+		1ED0FD68124BB9380029177F /* DotChartOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartOnDisk.h; path = src/DotChartOnDisk.h; sourceTree = "<group>"; };
+		1ED0FD69124BB9380029177F /* DummyScoreProducers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DummyScoreProducers.cpp; path = src/DummyScoreProducers.cpp; sourceTree = "<group>"; };
+		1ED0FD6A124BB9380029177F /* DummyScoreProducers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DummyScoreProducers.h; path = src/DummyScoreProducers.h; sourceTree = "<group>"; };
+		1ED0FD6C124BB9380029177F /* fdstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdstream.h; sourceTree = "<group>"; };
+		1ED0FD6D124BB9380029177F /* file.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file.cpp; sourceTree = "<group>"; };
+		1ED0FD6E124BB9380029177F /* file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = file.h; sourceTree = "<group>"; };
+		1ED0FD6F124BB9380029177F /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
+		1ED0FD70124BB9380029177F /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		1ED0FD71124BB9380029177F /* vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vocab.cpp; sourceTree = "<group>"; };
+		1ED0FD72124BB9380029177F /* vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vocab.h; sourceTree = "<group>"; };
+		1ED0FD73124BB9380029177F /* DynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DynSuffixArray.cpp; path = src/DynSuffixArray.cpp; sourceTree = "<group>"; };
+		1ED0FD74124BB9380029177F /* DynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DynSuffixArray.h; path = src/DynSuffixArray.h; sourceTree = "<group>"; };
+		1ED0FD75124BB9380029177F /* Factor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Factor.cpp; path = src/Factor.cpp; sourceTree = "<group>"; };
+		1ED0FD76124BB9380029177F /* Factor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Factor.h; path = src/Factor.h; sourceTree = "<group>"; };
+		1ED0FD77124BB9380029177F /* FactorCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FactorCollection.cpp; path = src/FactorCollection.cpp; sourceTree = "<group>"; };
+		1ED0FD78124BB9380029177F /* FactorCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FactorCollection.h; path = src/FactorCollection.h; sourceTree = "<group>"; };
+		1ED0FD79124BB9380029177F /* FactorTypeSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FactorTypeSet.cpp; path = src/FactorTypeSet.cpp; sourceTree = "<group>"; };
+		1ED0FD7A124BB9380029177F /* FactorTypeSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FactorTypeSet.h; path = src/FactorTypeSet.h; sourceTree = "<group>"; };
+		1ED0FD7B124BB9380029177F /* FeatureFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FeatureFunction.cpp; path = src/FeatureFunction.cpp; sourceTree = "<group>"; };
+		1ED0FD7C124BB9380029177F /* FeatureFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureFunction.h; path = src/FeatureFunction.h; sourceTree = "<group>"; };
+		1ED0FD7D124BB9380029177F /* FFState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFState.cpp; path = src/FFState.cpp; sourceTree = "<group>"; };
+		1ED0FD7E124BB9380029177F /* FFState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FFState.h; path = src/FFState.h; sourceTree = "<group>"; };
+		1ED0FD7F124BB9380029177F /* File.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = File.cpp; path = src/File.cpp; sourceTree = "<group>"; };
+		1ED0FD80124BB9380029177F /* File.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = File.h; path = src/File.h; sourceTree = "<group>"; };
+		1ED0FD81124BB9380029177F /* FilePtr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FilePtr.h; path = src/FilePtr.h; sourceTree = "<group>"; };
+		1ED0FD82124BB9380029177F /* FloydWarshall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FloydWarshall.cpp; path = src/FloydWarshall.cpp; sourceTree = "<group>"; };
+		1ED0FD83124BB9380029177F /* FloydWarshall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FloydWarshall.h; path = src/FloydWarshall.h; sourceTree = "<group>"; };
+		1ED0FD84124BB9380029177F /* GenerationDictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GenerationDictionary.cpp; path = src/GenerationDictionary.cpp; sourceTree = "<group>"; };
+		1ED0FD85124BB9380029177F /* GenerationDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GenerationDictionary.h; path = src/GenerationDictionary.h; sourceTree = "<group>"; };
+		1ED0FD86124BB9380029177F /* GlobalLexicalModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalLexicalModel.cpp; path = src/GlobalLexicalModel.cpp; sourceTree = "<group>"; };
+		1ED0FD87124BB9380029177F /* GlobalLexicalModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalLexicalModel.h; path = src/GlobalLexicalModel.h; sourceTree = "<group>"; };
+		1ED0FD88124BB9380029177F /* gzfilebuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gzfilebuf.h; path = src/gzfilebuf.h; sourceTree = "<group>"; };
+		1ED0FD89124BB9380029177F /* hash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hash.cpp; path = src/hash.cpp; sourceTree = "<group>"; };
+		1ED0FD8A124BB9380029177F /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = src/hash.h; sourceTree = "<group>"; };
+		1ED0FD8B124BB9380029177F /* hypergraph.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = hypergraph.proto; path = src/hypergraph.proto; sourceTree = "<group>"; };
+		1ED0FD8C124BB9380029177F /* Hypothesis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Hypothesis.cpp; path = src/Hypothesis.cpp; sourceTree = "<group>"; };
+		1ED0FD8D124BB9380029177F /* Hypothesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Hypothesis.h; path = src/Hypothesis.h; sourceTree = "<group>"; };
+		1ED0FD8E124BB9380029177F /* HypothesisStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HypothesisStack.cpp; path = src/HypothesisStack.cpp; sourceTree = "<group>"; };
+		1ED0FD8F124BB9380029177F /* HypothesisStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HypothesisStack.h; path = src/HypothesisStack.h; sourceTree = "<group>"; };
+		1ED0FD90124BB9380029177F /* HypothesisStackCubePruning.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HypothesisStackCubePruning.cpp; path = src/HypothesisStackCubePruning.cpp; sourceTree = "<group>"; };
+		1ED0FD91124BB9380029177F /* HypothesisStackCubePruning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HypothesisStackCubePruning.h; path = src/HypothesisStackCubePruning.h; sourceTree = "<group>"; };
+		1ED0FD92124BB9380029177F /* HypothesisStackNormal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HypothesisStackNormal.cpp; path = src/HypothesisStackNormal.cpp; sourceTree = "<group>"; };
+		1ED0FD93124BB9380029177F /* HypothesisStackNormal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HypothesisStackNormal.h; path = src/HypothesisStackNormal.h; sourceTree = "<group>"; };
+		1ED0FD94124BB9380029177F /* InputFileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InputFileStream.cpp; path = src/InputFileStream.cpp; sourceTree = "<group>"; };
+		1ED0FD95124BB9380029177F /* InputFileStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputFileStream.h; path = src/InputFileStream.h; sourceTree = "<group>"; };
+		1ED0FD96124BB9380029177F /* InputType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InputType.cpp; path = src/InputType.cpp; sourceTree = "<group>"; };
+		1ED0FD97124BB9380029177F /* InputType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputType.h; path = src/InputType.h; sourceTree = "<group>"; };
+		1ED0FDB3124BB9380029177F /* LexicalReordering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReordering.cpp; path = src/LexicalReordering.cpp; sourceTree = "<group>"; };
+		1ED0FDB4124BB9380029177F /* LexicalReordering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexicalReordering.h; path = src/LexicalReordering.h; sourceTree = "<group>"; };
+		1ED0FDB5124BB9380029177F /* LexicalReorderingState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingState.cpp; path = src/LexicalReorderingState.cpp; sourceTree = "<group>"; };
+		1ED0FDB6124BB9380029177F /* LexicalReorderingState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexicalReorderingState.h; path = src/LexicalReorderingState.h; sourceTree = "<group>"; };
+		1ED0FDB7124BB9380029177F /* LexicalReorderingTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingTable.cpp; path = src/LexicalReorderingTable.cpp; sourceTree = "<group>"; };
+		1ED0FDB8124BB9380029177F /* LexicalReorderingTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexicalReorderingTable.h; path = src/LexicalReorderingTable.h; sourceTree = "<group>"; };
+		1ED0FDB9124BB9380029177F /* LMList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LMList.cpp; path = src/LMList.cpp; sourceTree = "<group>"; };
+		1ED0FDBA124BB9380029177F /* LMList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LMList.h; path = src/LMList.h; sourceTree = "<group>"; };
+		1ED0FDBB124BB9380029177F /* LVoc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LVoc.cpp; path = src/LVoc.cpp; sourceTree = "<group>"; };
+		1ED0FDBC124BB9380029177F /* LVoc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LVoc.h; path = src/LVoc.h; sourceTree = "<group>"; };
+		1ED0FDC0124BB9380029177F /* Manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Manager.cpp; path = src/Manager.cpp; sourceTree = "<group>"; };
+		1ED0FDC1124BB9380029177F /* Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Manager.h; path = src/Manager.h; sourceTree = "<group>"; };
+		1ED0FDC6124BB9380029177F /* ObjectPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjectPool.h; path = src/ObjectPool.h; sourceTree = "<group>"; };
+		1ED0FDC7124BB9380029177F /* Parameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Parameter.cpp; path = src/Parameter.cpp; sourceTree = "<group>"; };
+		1ED0FDC8124BB9380029177F /* Parameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Parameter.h; path = src/Parameter.h; sourceTree = "<group>"; };
+		1ED0FDC9124BB9380029177F /* PartialTranslOptColl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PartialTranslOptColl.cpp; path = src/PartialTranslOptColl.cpp; sourceTree = "<group>"; };
+		1ED0FDCA124BB9380029177F /* PartialTranslOptColl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PartialTranslOptColl.h; path = src/PartialTranslOptColl.h; sourceTree = "<group>"; };
+		1ED0FDCB124BB9380029177F /* PCNTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PCNTools.cpp; path = src/PCNTools.cpp; sourceTree = "<group>"; };
+		1ED0FDCC124BB9380029177F /* PCNTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PCNTools.h; path = src/PCNTools.h; sourceTree = "<group>"; };
+		1ED0FDCD124BB9380029177F /* PDTAimp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PDTAimp.h; path = src/PDTAimp.h; sourceTree = "<group>"; };
+		1ED0FDCE124BB9380029177F /* Phrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Phrase.cpp; path = src/Phrase.cpp; sourceTree = "<group>"; };
+		1ED0FDCF124BB9380029177F /* Phrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Phrase.h; path = src/Phrase.h; sourceTree = "<group>"; };
+		1ED0FDD0124BB9380029177F /* PhraseDictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionary.cpp; path = src/PhraseDictionary.cpp; sourceTree = "<group>"; };
+		1ED0FDD1124BB9380029177F /* PhraseDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionary.h; path = src/PhraseDictionary.h; sourceTree = "<group>"; };
+		1ED0FDD2124BB9380029177F /* PhraseDictionaryDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryDynSuffixArray.cpp; path = src/PhraseDictionaryDynSuffixArray.cpp; sourceTree = "<group>"; };
+		1ED0FDD3124BB9380029177F /* PhraseDictionaryDynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryDynSuffixArray.h; path = src/PhraseDictionaryDynSuffixArray.h; sourceTree = "<group>"; };
+		1ED0FDD4124BB9380029177F /* PhraseDictionaryMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryMemory.cpp; path = src/PhraseDictionaryMemory.cpp; sourceTree = "<group>"; };
+		1ED0FDD5124BB9380029177F /* PhraseDictionaryMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryMemory.h; path = src/PhraseDictionaryMemory.h; sourceTree = "<group>"; };
+		1ED0FDD6124BB9380029177F /* PhraseDictionaryNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNode.cpp; path = src/PhraseDictionaryNode.cpp; sourceTree = "<group>"; };
+		1ED0FDD7124BB9380029177F /* PhraseDictionaryNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNode.h; path = src/PhraseDictionaryNode.h; sourceTree = "<group>"; };
+		1ED0FDD8124BB9380029177F /* PhraseDictionaryNodeSCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNodeSCFG.cpp; path = src/PhraseDictionaryNodeSCFG.cpp; sourceTree = "<group>"; };
+		1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
+		1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = src/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
+		1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = src/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
+		1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
+		1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTree.cpp; path = src/PhraseDictionaryTree.cpp; sourceTree = "<group>"; };
+		1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTree.h; path = src/PhraseDictionaryTree.h; sourceTree = "<group>"; };
+		1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTreeAdaptor.cpp; path = src/PhraseDictionaryTreeAdaptor.cpp; sourceTree = "<group>"; };
+		1ED0FDE2124BB9380029177F /* PhraseDictionaryTreeAdaptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTreeAdaptor.h; path = src/PhraseDictionaryTreeAdaptor.h; sourceTree = "<group>"; };
+		1ED0FDE3124BB9380029177F /* PrefixTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrefixTree.h; path = src/PrefixTree.h; sourceTree = "<group>"; };
+		1ED0FDE4124BB9380029177F /* PrefixTreeMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PrefixTreeMap.cpp; path = src/PrefixTreeMap.cpp; sourceTree = "<group>"; };
+		1ED0FDE5124BB9380029177F /* PrefixTreeMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrefixTreeMap.h; path = src/PrefixTreeMap.h; sourceTree = "<group>"; };
+		1ED0FDE6124BB9380029177F /* ReorderingConstraint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ReorderingConstraint.cpp; path = src/ReorderingConstraint.cpp; sourceTree = "<group>"; };
+		1ED0FDE7124BB9380029177F /* ReorderingConstraint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReorderingConstraint.h; path = src/ReorderingConstraint.h; sourceTree = "<group>"; };
+		1ED0FDE8124BB9380029177F /* ReorderingStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ReorderingStack.cpp; path = src/ReorderingStack.cpp; sourceTree = "<group>"; };
+		1ED0FDE9124BB9380029177F /* ReorderingStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReorderingStack.h; path = src/ReorderingStack.h; sourceTree = "<group>"; };
+		1ED0FDEA124BB9380029177F /* rule.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = rule.proto; path = src/rule.proto; sourceTree = "<group>"; };
+		1ED0FDEB124BB9380029177F /* ScoreComponentCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreComponentCollection.cpp; path = src/ScoreComponentCollection.cpp; sourceTree = "<group>"; };
+		1ED0FDEC124BB9380029177F /* ScoreComponentCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScoreComponentCollection.h; path = src/ScoreComponentCollection.h; sourceTree = "<group>"; };
+		1ED0FDED124BB9380029177F /* ScoreIndexManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreIndexManager.cpp; path = src/ScoreIndexManager.cpp; sourceTree = "<group>"; };
+		1ED0FDEE124BB9380029177F /* ScoreIndexManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScoreIndexManager.h; path = src/ScoreIndexManager.h; sourceTree = "<group>"; };
+		1ED0FDEF124BB9380029177F /* ScoreProducer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreProducer.cpp; path = src/ScoreProducer.cpp; sourceTree = "<group>"; };
+		1ED0FDF0124BB9380029177F /* ScoreProducer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScoreProducer.h; path = src/ScoreProducer.h; sourceTree = "<group>"; };
+		1ED0FDF1124BB9380029177F /* Search.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Search.cpp; path = src/Search.cpp; sourceTree = "<group>"; };
+		1ED0FDF2124BB9380029177F /* Search.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Search.h; path = src/Search.h; sourceTree = "<group>"; };
+		1ED0FDF3124BB9380029177F /* SearchCubePruning.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SearchCubePruning.cpp; path = src/SearchCubePruning.cpp; sourceTree = "<group>"; };
+		1ED0FDF4124BB9380029177F /* SearchCubePruning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SearchCubePruning.h; path = src/SearchCubePruning.h; sourceTree = "<group>"; };
+		1ED0FDF5124BB9380029177F /* SearchNormal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SearchNormal.cpp; path = src/SearchNormal.cpp; sourceTree = "<group>"; };
+		1ED0FDF6124BB9380029177F /* SearchNormal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SearchNormal.h; path = src/SearchNormal.h; sourceTree = "<group>"; };
+		1ED0FDF7124BB9380029177F /* Sentence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Sentence.cpp; path = src/Sentence.cpp; sourceTree = "<group>"; };
+		1ED0FDF8124BB9380029177F /* Sentence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Sentence.h; path = src/Sentence.h; sourceTree = "<group>"; };
+		1ED0FDF9124BB9380029177F /* SentenceStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SentenceStats.cpp; path = src/SentenceStats.cpp; sourceTree = "<group>"; };
+		1ED0FDFA124BB9380029177F /* SentenceStats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SentenceStats.h; path = src/SentenceStats.h; sourceTree = "<group>"; };
+		1ED0FDFB124BB9380029177F /* SquareMatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SquareMatrix.cpp; path = src/SquareMatrix.cpp; sourceTree = "<group>"; };
+		1ED0FDFC124BB9380029177F /* SquareMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SquareMatrix.h; path = src/SquareMatrix.h; sourceTree = "<group>"; };
+		1ED0FDFD124BB9380029177F /* StaticData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StaticData.cpp; path = src/StaticData.cpp; sourceTree = "<group>"; };
+		1ED0FDFE124BB9380029177F /* StaticData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StaticData.h; path = src/StaticData.h; sourceTree = "<group>"; };
+		1ED0FDFF124BB9380029177F /* TargetPhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhrase.cpp; path = src/TargetPhrase.cpp; sourceTree = "<group>"; };
+		1ED0FE00124BB9380029177F /* TargetPhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhrase.h; path = src/TargetPhrase.h; sourceTree = "<group>"; };
+		1ED0FE01124BB9380029177F /* TargetPhraseCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhraseCollection.cpp; path = src/TargetPhraseCollection.cpp; sourceTree = "<group>"; };
+		1ED0FE02124BB9380029177F /* TargetPhraseCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhraseCollection.h; path = src/TargetPhraseCollection.h; sourceTree = "<group>"; };
+		1ED0FE03124BB9380029177F /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = src/Timer.cpp; sourceTree = "<group>"; };
+		1ED0FE04124BB9380029177F /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Timer.h; path = src/Timer.h; sourceTree = "<group>"; };
+		1ED0FE05124BB9380029177F /* TranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationOption.cpp; path = src/TranslationOption.cpp; sourceTree = "<group>"; };
+		1ED0FE06124BB9380029177F /* TranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationOption.h; path = src/TranslationOption.h; sourceTree = "<group>"; };
+		1ED0FE07124BB9380029177F /* TranslationOptionCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationOptionCollection.cpp; path = src/TranslationOptionCollection.cpp; sourceTree = "<group>"; };
+		1ED0FE08124BB9380029177F /* TranslationOptionCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationOptionCollection.h; path = src/TranslationOptionCollection.h; sourceTree = "<group>"; };
+		1ED0FE09124BB9380029177F /* TranslationOptionCollectionConfusionNet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationOptionCollectionConfusionNet.cpp; path = src/TranslationOptionCollectionConfusionNet.cpp; sourceTree = "<group>"; };
+		1ED0FE0A124BB9380029177F /* TranslationOptionCollectionConfusionNet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationOptionCollectionConfusionNet.h; path = src/TranslationOptionCollectionConfusionNet.h; sourceTree = "<group>"; };
+		1ED0FE0B124BB9380029177F /* TranslationOptionCollectionText.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationOptionCollectionText.cpp; path = src/TranslationOptionCollectionText.cpp; sourceTree = "<group>"; };
+		1ED0FE0C124BB9380029177F /* TranslationOptionCollectionText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationOptionCollectionText.h; path = src/TranslationOptionCollectionText.h; sourceTree = "<group>"; };
+		1ED0FE0D124BB9380029177F /* TranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationOptionList.cpp; path = src/TranslationOptionList.cpp; sourceTree = "<group>"; };
+		1ED0FE0E124BB9380029177F /* TranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationOptionList.h; path = src/TranslationOptionList.h; sourceTree = "<group>"; };
+		1ED0FE0F124BB9380029177F /* TranslationSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationSystem.cpp; path = src/TranslationSystem.cpp; sourceTree = "<group>"; };
+		1ED0FE10124BB9380029177F /* TranslationSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationSystem.h; path = src/TranslationSystem.h; sourceTree = "<group>"; };
+		1ED0FE11124BB9380029177F /* TreeInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TreeInput.cpp; path = src/TreeInput.cpp; sourceTree = "<group>"; };
+		1ED0FE12124BB9380029177F /* TreeInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TreeInput.h; path = src/TreeInput.h; sourceTree = "<group>"; };
+		1ED0FE13124BB9380029177F /* TrellisPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TrellisPath.cpp; path = src/TrellisPath.cpp; sourceTree = "<group>"; };
+		1ED0FE14124BB9380029177F /* TrellisPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrellisPath.h; path = src/TrellisPath.h; sourceTree = "<group>"; };
+		1ED0FE15124BB9380029177F /* TrellisPathCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TrellisPathCollection.cpp; path = src/TrellisPathCollection.cpp; sourceTree = "<group>"; };
+		1ED0FE16124BB9380029177F /* TrellisPathCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrellisPathCollection.h; path = src/TrellisPathCollection.h; sourceTree = "<group>"; };
+		1ED0FE17124BB9380029177F /* TrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrellisPathList.h; path = src/TrellisPathList.h; sourceTree = "<group>"; };
+		1ED0FE18124BB9380029177F /* TypeDef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TypeDef.h; path = src/TypeDef.h; sourceTree = "<group>"; };
+		1ED0FE19124BB9380029177F /* UniqueObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UniqueObject.h; path = src/UniqueObject.h; sourceTree = "<group>"; };
+		1ED0FE1A124BB9380029177F /* UserMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UserMessage.cpp; path = src/UserMessage.cpp; sourceTree = "<group>"; };
+		1ED0FE1B124BB9380029177F /* UserMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UserMessage.h; path = src/UserMessage.h; sourceTree = "<group>"; };
+		1ED0FE1C124BB9380029177F /* Util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Util.cpp; path = src/Util.cpp; sourceTree = "<group>"; };
+		1ED0FE1D124BB9380029177F /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Util.h; path = src/Util.h; sourceTree = "<group>"; };
+		1ED0FE1E124BB9380029177F /* Word.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Word.cpp; path = src/Word.cpp; sourceTree = "<group>"; };
+		1ED0FE1F124BB9380029177F /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Word.h; path = src/Word.h; sourceTree = "<group>"; };
+		1ED0FE22124BB9380029177F /* WordLattice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordLattice.cpp; path = src/WordLattice.cpp; sourceTree = "<group>"; };
+		1ED0FE23124BB9380029177F /* WordLattice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordLattice.h; path = src/WordLattice.h; sourceTree = "<group>"; };
+		1ED0FE24124BB9380029177F /* WordsBitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordsBitmap.cpp; path = src/WordsBitmap.cpp; sourceTree = "<group>"; };
+		1ED0FE25124BB9380029177F /* WordsBitmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordsBitmap.h; path = src/WordsBitmap.h; sourceTree = "<group>"; };
+		1ED0FE26124BB9380029177F /* WordsRange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordsRange.cpp; path = src/WordsRange.cpp; sourceTree = "<group>"; };
+		1ED0FE27124BB9380029177F /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
+		1ED0FE28124BB9380029177F /* XmlOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlOption.cpp; path = src/XmlOption.cpp; sourceTree = "<group>"; };
+		1ED0FE29124BB9380029177F /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
+		1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionList.cpp; path = src/ChartTranslationOptionList.cpp; sourceTree = "<group>"; };
+		1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionList.h; path = src/ChartTranslationOptionList.h; sourceTree = "<group>"; };
+		1ED22EE313DD96B0000DE8C9 /* DotChartInMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartInMemory.cpp; path = src/DotChartInMemory.cpp; sourceTree = "<group>"; };
+		1ED22EE413DD96B0000DE8C9 /* DotChartInMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartInMemory.h; path = src/DotChartInMemory.h; sourceTree = "<group>"; };
+		1EE58D9D133726C700D93158 /* NonTerminal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NonTerminal.cpp; path = src/NonTerminal.cpp; sourceTree = "<group>"; };
+		1EE58D9E133726C700D93158 /* NonTerminal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NonTerminal.h; path = src/NonTerminal.h; sourceTree = "<group>"; };
+		1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionarySCFG.h; path = src/PhraseDictionarySCFG.h; sourceTree = "<group>"; };
+		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D289987405E68DCB004EDB86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* moses */ = {
+			isa = PBXGroup;
+			children = (
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6A0FF2B0290797F04C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = moses;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				1ECA43B1146D586D00209CEF /* ChartTrellisDetour.h */,
+				1ECA43B2146D586D00209CEF /* ChartTrellisDetourQueue.cpp */,
+				1ECA43B3146D586D00209CEF /* ChartTrellisDetourQueue.h */,
+				1ECA43AD146D585900209CEF /* ChartCellLabelSet.h */,
+				1ECA43AE146D585900209CEF /* ChartTrellisDetour.cpp */,
+				1E16D086144DAA3F00B60B4F /* LM */,
+				1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */,
+				1ED0FD4D124BB9380029177F /* AlignmentInfo.h */,
+				1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */,
+				1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */,
+				1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */,
+				1ED0FD4F124BB9380029177F /* BilingualDynSuffixArray.h */,
+				1ED0FD50124BB9380029177F /* BitmapContainer.cpp */,
+				1ED0FD51124BB9380029177F /* BitmapContainer.h */,
+				1ED0FD52124BB9380029177F /* CellCollection.h */,
+				1E2E1604132A890D00ED4085 /* ChartCell.cpp */,
+				1E2E1605132A890D00ED4085 /* ChartCell.h */,
+				1E2E1606132A890D00ED4085 /* ChartCellCollection.cpp */,
+				1E2E1607132A890D00ED4085 /* ChartCellCollection.h */,
+				1E2E1608132A890D00ED4085 /* ChartHypothesis.cpp */,
+				1E2E1609132A890D00ED4085 /* ChartHypothesis.h */,
+				1E2E160A132A890D00ED4085 /* ChartHypothesisCollection.cpp */,
+				1E2E160B132A890D00ED4085 /* ChartHypothesisCollection.h */,
+				1E2E160C132A890D00ED4085 /* ChartManager.cpp */,
+				1E2E160D132A890D00ED4085 /* ChartManager.h */,
+				1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */,
+				1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */,
+				1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */,
+				1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */,
+				1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */,
+				1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */,
+				1ED00034124BC2690029177F /* ChartTranslationOption.cpp */,
+				1ED00035124BC2690029177F /* ChartTranslationOption.h */,
+				1E2E160E132A890D00ED4085 /* ChartTranslationOptionCollection.cpp */,
+				1E2E160F132A890D00ED4085 /* ChartTranslationOptionCollection.h */,
+				1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */,
+				1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */,
+				1E2E1610132A890D00ED4085 /* ChartTrellisNode.cpp */,
+				1E2E1611132A890D00ED4085 /* ChartTrellisNode.h */,
+				1E2E1612132A890D00ED4085 /* ChartTrellisPath.cpp */,
+				1E2E1613132A890D00ED4085 /* ChartTrellisPath.h */,
+				1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */,
+				1ED0FD57124BB9380029177F /* ConfusionNet.cpp */,
+				1ED0FD58124BB9380029177F /* ConfusionNet.h */,
+				1ED0FD59124BB9380029177F /* DecodeFeature.cpp */,
+				1ED0FD5A124BB9380029177F /* DecodeFeature.h */,
+				1ED0FD5B124BB9380029177F /* DecodeGraph.cpp */,
+				1ED0FD5C124BB9380029177F /* DecodeGraph.h */,
+				1ED0FD5D124BB9380029177F /* DecodeStep.cpp */,
+				1ED0FD5E124BB9380029177F /* DecodeStep.h */,
+				1ED0FD5F124BB9380029177F /* DecodeStepGeneration.cpp */,
+				1ED0FD60124BB9380029177F /* DecodeStepGeneration.h */,
+				1ED0FD61124BB9380029177F /* DecodeStepTranslation.cpp */,
+				1ED0FD62124BB9380029177F /* DecodeStepTranslation.h */,
+				1ED0FD63124BB9380029177F /* Dictionary.cpp */,
+				1ED0FD64124BB9380029177F /* Dictionary.h */,
+				1ED0FD65124BB9380029177F /* DotChart.cpp */,
+				1ED0FD66124BB9380029177F /* DotChart.h */,
+				1ED22EE313DD96B0000DE8C9 /* DotChartInMemory.cpp */,
+				1ED22EE413DD96B0000DE8C9 /* DotChartInMemory.h */,
+				1ED0FD67124BB9380029177F /* DotChartOnDisk.cpp */,
+				1ED0FD68124BB9380029177F /* DotChartOnDisk.h */,
+				1ED0FD69124BB9380029177F /* DummyScoreProducers.cpp */,
+				1ED0FD6A124BB9380029177F /* DummyScoreProducers.h */,
+				1ED0FD6B124BB9380029177F /* DynSAInclude */,
+				1ED0FD73124BB9380029177F /* DynSuffixArray.cpp */,
+				1ED0FD74124BB9380029177F /* DynSuffixArray.h */,
+				1ED0FD7D124BB9380029177F /* FFState.cpp */,
+				1ED0FD7E124BB9380029177F /* FFState.h */,
+				1ED0FD75124BB9380029177F /* Factor.cpp */,
+				1ED0FD76124BB9380029177F /* Factor.h */,
+				1ED0FD77124BB9380029177F /* FactorCollection.cpp */,
+				1ED0FD78124BB9380029177F /* FactorCollection.h */,
+				1ED0FD79124BB9380029177F /* FactorTypeSet.cpp */,
+				1ED0FD7A124BB9380029177F /* FactorTypeSet.h */,
+				1ED0FD7B124BB9380029177F /* FeatureFunction.cpp */,
+				1ED0FD7C124BB9380029177F /* FeatureFunction.h */,
+				1ED0FD7F124BB9380029177F /* File.cpp */,
+				1ED0FD80124BB9380029177F /* File.h */,
+				1ED0FD81124BB9380029177F /* FilePtr.h */,
+				1ED0FD82124BB9380029177F /* FloydWarshall.cpp */,
+				1ED0FD83124BB9380029177F /* FloydWarshall.h */,
+				1ED0FD84124BB9380029177F /* GenerationDictionary.cpp */,
+				1ED0FD85124BB9380029177F /* GenerationDictionary.h */,
+				1ED0FD86124BB9380029177F /* GlobalLexicalModel.cpp */,
+				1ED0FD87124BB9380029177F /* GlobalLexicalModel.h */,
+				1ED0FD8C124BB9380029177F /* Hypothesis.cpp */,
+				1ED0FD8D124BB9380029177F /* Hypothesis.h */,
+				1ED0FD8E124BB9380029177F /* HypothesisStack.cpp */,
+				1ED0FD8F124BB9380029177F /* HypothesisStack.h */,
+				1ED0FD90124BB9380029177F /* HypothesisStackCubePruning.cpp */,
+				1ED0FD91124BB9380029177F /* HypothesisStackCubePruning.h */,
+				1ED0FD92124BB9380029177F /* HypothesisStackNormal.cpp */,
+				1ED0FD93124BB9380029177F /* HypothesisStackNormal.h */,
+				1ED0FD94124BB9380029177F /* InputFileStream.cpp */,
+				1ED0FD95124BB9380029177F /* InputFileStream.h */,
+				1ED0FD96124BB9380029177F /* InputType.cpp */,
+				1ED0FD97124BB9380029177F /* InputType.h */,
+				1ED0FDB9124BB9380029177F /* LMList.cpp */,
+				1ED0FDBA124BB9380029177F /* LMList.h */,
+				1ED0FDBB124BB9380029177F /* LVoc.cpp */,
+				1ED0FDBC124BB9380029177F /* LVoc.h */,
+				1ED0FDB3124BB9380029177F /* LexicalReordering.cpp */,
+				1ED0FDB4124BB9380029177F /* LexicalReordering.h */,
+				1ED0FDB5124BB9380029177F /* LexicalReorderingState.cpp */,
+				1ED0FDB6124BB9380029177F /* LexicalReorderingState.h */,
+				1ED0FDB7124BB9380029177F /* LexicalReorderingTable.cpp */,
+				1ED0FDB8124BB9380029177F /* LexicalReorderingTable.h */,
+				1ED0FDC0124BB9380029177F /* Manager.cpp */,
+				1ED0FDC1124BB9380029177F /* Manager.h */,
+				1EE58D9D133726C700D93158 /* NonTerminal.cpp */,
+				1EE58D9E133726C700D93158 /* NonTerminal.h */,
+				1ED0FDC6124BB9380029177F /* ObjectPool.h */,
+				1E2E1632132A892800ED4085 /* OutputCollector.h */,
+				1ED0FDCB124BB9380029177F /* PCNTools.cpp */,
+				1ED0FDCC124BB9380029177F /* PCNTools.h */,
+				1ED0FDCD124BB9380029177F /* PDTAimp.h */,
+				1ED0FDC7124BB9380029177F /* Parameter.cpp */,
+				1ED0FDC8124BB9380029177F /* Parameter.h */,
+				1ED0FDC9124BB9380029177F /* PartialTranslOptColl.cpp */,
+				1ED0FDCA124BB9380029177F /* PartialTranslOptColl.h */,
+				1ED0FDCE124BB9380029177F /* Phrase.cpp */,
+				1ED0FDCF124BB9380029177F /* Phrase.h */,
+				1ED0FDD0124BB9380029177F /* PhraseDictionary.cpp */,
+				1ED0FDD1124BB9380029177F /* PhraseDictionary.h */,
+				1ED0FDD2124BB9380029177F /* PhraseDictionaryDynSuffixArray.cpp */,
+				1ED0FDD3124BB9380029177F /* PhraseDictionaryDynSuffixArray.h */,
+				1ED0FDD4124BB9380029177F /* PhraseDictionaryMemory.cpp */,
+				1ED0FDD5124BB9380029177F /* PhraseDictionaryMemory.h */,
+				1ED0FDD6124BB9380029177F /* PhraseDictionaryNode.cpp */,
+				1ED0FDD7124BB9380029177F /* PhraseDictionaryNode.h */,
+				1ED0FDD8124BB9380029177F /* PhraseDictionaryNodeSCFG.cpp */,
+				1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */,
+				1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */,
+				1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */,
+				1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */,
+				1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */,
+				1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */,
+				1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */,
+				1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */,
+				1ED0FDE2124BB9380029177F /* PhraseDictionaryTreeAdaptor.h */,
+				1E078C1E14643C2000A707F4 /* PhraseDictionaryHiero.cpp */,
+				1E078C1B14643AED00A707F4 /* PhraseDictionaryHiero.h */,
+				1E2755B214667CA3009D1DF9 /* PhraseDictionaryALSuffixArray.cpp */,
+				1E2755B514667CC2009D1DF9 /* PhraseDictionaryALSuffixArray.h */,
+				1ED0FDE3124BB9380029177F /* PrefixTree.h */,
+				1ED0FDE4124BB9380029177F /* PrefixTreeMap.cpp */,
+				1ED0FDE5124BB9380029177F /* PrefixTreeMap.h */,
+				1EBB262713A12DB500B51840 /* RandLMCache.h */,
+				1EBB262813A12DB500B51840 /* RandLMFilter.h */,
+				1ED0FDE6124BB9380029177F /* ReorderingConstraint.cpp */,
+				1ED0FDE7124BB9380029177F /* ReorderingConstraint.h */,
+				1ED0FDE8124BB9380029177F /* ReorderingStack.cpp */,
+				1ED0FDE9124BB9380029177F /* ReorderingStack.h */,
+				1E2E1633132A892800ED4085 /* RuleCube.cpp */,
+				1E2E1634132A892800ED4085 /* RuleCube.h */,
+				1E46B5A413BA5C7F0084F898 /* RuleCubeItem.cpp */,
+				1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */,
+				1E2E1635132A892800ED4085 /* RuleCubeQueue.cpp */,
+				1E2E1636132A892800ED4085 /* RuleCubeQueue.h */,
+				1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */,
+				1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */,
+				1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */,
+				1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */,
+				1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */,
+				1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */,
+				1E078C20146440A900A707F4 /* RuleTableLoaderHiero.h */,
+				1E078C22146440F700A707F4 /* RuleTableLoaderHiero.cpp */,
+				1E474E11145575CA00178AD5 /* RuleTableLoader.h */,
+				1ED0FDEB124BB9380029177F /* ScoreComponentCollection.cpp */,
+				1ED0FDEC124BB9380029177F /* ScoreComponentCollection.h */,
+				1ED0FDED124BB9380029177F /* ScoreIndexManager.cpp */,
+				1ED0FDEE124BB9380029177F /* ScoreIndexManager.h */,
+				1ED0FDEF124BB9380029177F /* ScoreProducer.cpp */,
+				1ED0FDF0124BB9380029177F /* ScoreProducer.h */,
+				1ED0FDF1124BB9380029177F /* Search.cpp */,
+				1ED0FDF2124BB9380029177F /* Search.h */,
+				1ED0FDF3124BB9380029177F /* SearchCubePruning.cpp */,
+				1ED0FDF4124BB9380029177F /* SearchCubePruning.h */,
+				1ED0FDF5124BB9380029177F /* SearchNormal.cpp */,
+				1ED0FDF6124BB9380029177F /* SearchNormal.h */,
+				1ED0FDF7124BB9380029177F /* Sentence.cpp */,
+				1ED0FDF8124BB9380029177F /* Sentence.h */,
+				1ED0FDF9124BB9380029177F /* SentenceStats.cpp */,
+				1ED0FDFA124BB9380029177F /* SentenceStats.h */,
+				1ED0FDFB124BB9380029177F /* SquareMatrix.cpp */,
+				1ED0FDFC124BB9380029177F /* SquareMatrix.h */,
+				1ED0FDFD124BB9380029177F /* StaticData.cpp */,
+				1ED0FDFE124BB9380029177F /* StaticData.h */,
+				1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */,
+				1ED0FDFF124BB9380029177F /* TargetPhrase.cpp */,
+				1ED0FE00124BB9380029177F /* TargetPhrase.h */,
+				1ED0FE01124BB9380029177F /* TargetPhraseCollection.cpp */,
+				1ED0FE02124BB9380029177F /* TargetPhraseCollection.h */,
+				1E2E1637132A892800ED4085 /* ThreadPool.cpp */,
+				1E2E1638132A892800ED4085 /* ThreadPool.h */,
+				1ED0FE03124BB9380029177F /* Timer.cpp */,
+				1ED0FE04124BB9380029177F /* Timer.h */,
+				1ED0FE05124BB9380029177F /* TranslationOption.cpp */,
+				1ED0FE06124BB9380029177F /* TranslationOption.h */,
+				1ED0FE07124BB9380029177F /* TranslationOptionCollection.cpp */,
+				1ED0FE08124BB9380029177F /* TranslationOptionCollection.h */,
+				1ED0FE09124BB9380029177F /* TranslationOptionCollectionConfusionNet.cpp */,
+				1ED0FE0A124BB9380029177F /* TranslationOptionCollectionConfusionNet.h */,
+				1ED0FE0B124BB9380029177F /* TranslationOptionCollectionText.cpp */,
+				1ED0FE0C124BB9380029177F /* TranslationOptionCollectionText.h */,
+				1ED0FE0D124BB9380029177F /* TranslationOptionList.cpp */,
+				1ED0FE0E124BB9380029177F /* TranslationOptionList.h */,
+				1ED0FE0F124BB9380029177F /* TranslationSystem.cpp */,
+				1ED0FE10124BB9380029177F /* TranslationSystem.h */,
+				1ED0FE11124BB9380029177F /* TreeInput.cpp */,
+				1ED0FE12124BB9380029177F /* TreeInput.h */,
+				1ED0FE13124BB9380029177F /* TrellisPath.cpp */,
+				1ED0FE14124BB9380029177F /* TrellisPath.h */,
+				1ED0FE15124BB9380029177F /* TrellisPathCollection.cpp */,
+				1ED0FE16124BB9380029177F /* TrellisPathCollection.h */,
+				1ED0FE17124BB9380029177F /* TrellisPathList.h */,
+				1ED0FE18124BB9380029177F /* TypeDef.h */,
+				1ED0FE19124BB9380029177F /* UniqueObject.h */,
+				1ED0FE1A124BB9380029177F /* UserMessage.cpp */,
+				1ED0FE1B124BB9380029177F /* UserMessage.h */,
+				1ED0FE1C124BB9380029177F /* Util.cpp */,
+				1ED0FE1D124BB9380029177F /* Util.h */,
+				1ED0FE1E124BB9380029177F /* Word.cpp */,
+				1ED0FE1F124BB9380029177F /* Word.h */,
+				1ED0FE22124BB9380029177F /* WordLattice.cpp */,
+				1ED0FE23124BB9380029177F /* WordLattice.h */,
+				1ED0FE24124BB9380029177F /* WordsBitmap.cpp */,
+				1ED0FE25124BB9380029177F /* WordsBitmap.h */,
+				1ED0FE26124BB9380029177F /* WordsRange.cpp */,
+				1ED0FE27124BB9380029177F /* WordsRange.h */,
+				1ED0FE28124BB9380029177F /* XmlOption.cpp */,
+				1ED0FE29124BB9380029177F /* XmlOption.h */,
+				1ED0FD88124BB9380029177F /* gzfilebuf.h */,
+				1ED0FD89124BB9380029177F /* hash.cpp */,
+				1EBB262213A12DB500B51840 /* hash.h */,
+				1ED0FD8A124BB9380029177F /* hash.h */,
+				1ED0FD8B124BB9380029177F /* hypergraph.proto */,
+				1EBB262313A12DB500B51840 /* onlineRLM.h */,
+				1E528B9B13A12B2D00E9A67E /* params.cpp */,
+				1EBB262413A12DB500B51840 /* params.h */,
+				1EBB262513A12DB500B51840 /* perfectHash.h */,
+				1EBB262613A12DB500B51840 /* quantizer.h */,
+				1ED0FDEA124BB9380029177F /* rule.proto */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC046055464E500DB518D /* libmoses.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1E16D086144DAA3F00B60B4F /* LM */ = {
+			isa = PBXGroup;
+			children = (
+				1E16D087144DAA6C00B60B4F /* Base.cpp */,
+				1E16D088144DAA6C00B60B4F /* Base.h */,
+				1E16D08B144DAA6C00B60B4F /* Factory.cpp */,
+				1E16D08C144DAA6C00B60B4F /* Factory.h */,
+				1E16D08D144DAA6C00B60B4F /* Implementation.cpp */,
+				1E16D08E144DAA6C00B60B4F /* Implementation.h */,
+				1E16D08F144DAA6C00B60B4F /* IRST.cpp */,
+				1E16D090144DAA6C00B60B4F /* IRST.h */,
+				1E16D091144DAA6C00B60B4F /* Joint.cpp */,
+				1E16D092144DAA6C00B60B4F /* Joint.h */,
+				1E16D093144DAA6C00B60B4F /* Ken.cpp */,
+				1E16D094144DAA6C00B60B4F /* Ken.h */,
+				1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */,
+				1E16D096144DAA6C00B60B4F /* MultiFactor.h */,
+				1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */,
+				1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */,
+				1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */,
+				1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */,
+				1E16D0A1144DAA6C00B60B4F /* SRI.cpp */,
+				1E16D0A2144DAA6C00B60B4F /* SRI.h */,
+			);
+			name = LM;
+			sourceTree = "<group>";
+		};
+		1ED0FD6B124BB9380029177F /* DynSAInclude */ = {
+			isa = PBXGroup;
+			children = (
+				1ED0FD6C124BB9380029177F /* fdstream.h */,
+				1ED0FD6D124BB9380029177F /* file.cpp */,
+				1ED0FD6E124BB9380029177F /* file.h */,
+				1ED0FD6F124BB9380029177F /* types.h */,
+				1ED0FD70124BB9380029177F /* utils.h */,
+				1ED0FD71124BB9380029177F /* vocab.cpp */,
+				1ED0FD72124BB9380029177F /* vocab.h */,
+			);
+			name = DynSAInclude;
+			path = src/DynSAInclude;
+			sourceTree = "<group>";
+		};
+		C6A0FF2B0290797F04C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC043055464E500DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1ED0FE2B124BB9380029177F /* AlignmentInfo.h in Headers */,
+				1ED0FE2D124BB9380029177F /* BilingualDynSuffixArray.h in Headers */,
+				1ED0FE2F124BB9380029177F /* BitmapContainer.h in Headers */,
+				1ED0FE30124BB9380029177F /* CellCollection.h in Headers */,
+				1ED0FE36124BB9380029177F /* ConfusionNet.h in Headers */,
+				1ED0FE38124BB9380029177F /* DecodeFeature.h in Headers */,
+				1ED0FE3A124BB9380029177F /* DecodeGraph.h in Headers */,
+				1ED0FE3C124BB9380029177F /* DecodeStep.h in Headers */,
+				1ED0FE3E124BB9380029177F /* DecodeStepGeneration.h in Headers */,
+				1ED0FE40124BB9380029177F /* DecodeStepTranslation.h in Headers */,
+				1ED0FE42124BB9380029177F /* Dictionary.h in Headers */,
+				1ED0FE44124BB9380029177F /* DotChart.h in Headers */,
+				1ED0FE46124BB9380029177F /* DotChartOnDisk.h in Headers */,
+				1ED0FE48124BB9380029177F /* DummyScoreProducers.h in Headers */,
+				1ED0FE49124BB9380029177F /* fdstream.h in Headers */,
+				1ED0FE4B124BB9380029177F /* file.h in Headers */,
+				1ED0FE4C124BB9380029177F /* types.h in Headers */,
+				1ED0FE4D124BB9380029177F /* utils.h in Headers */,
+				1ED0FE4F124BB9380029177F /* vocab.h in Headers */,
+				1ED0FE51124BB9380029177F /* DynSuffixArray.h in Headers */,
+				1ED0FE53124BB9380029177F /* Factor.h in Headers */,
+				1ED0FE55124BB9380029177F /* FactorCollection.h in Headers */,
+				1ED0FE57124BB9380029177F /* FactorTypeSet.h in Headers */,
+				1ED0FE59124BB9380029177F /* FeatureFunction.h in Headers */,
+				1ED0FE5B124BB9380029177F /* FFState.h in Headers */,
+				1ED0FE5D124BB9380029177F /* File.h in Headers */,
+				1ED0FE5E124BB9380029177F /* FilePtr.h in Headers */,
+				1ED0FE60124BB9380029177F /* FloydWarshall.h in Headers */,
+				1ED0FE62124BB9380029177F /* GenerationDictionary.h in Headers */,
+				1ED0FE64124BB9380029177F /* GlobalLexicalModel.h in Headers */,
+				1ED0FE65124BB9380029177F /* gzfilebuf.h in Headers */,
+				1ED0FE67124BB9380029177F /* hash.h in Headers */,
+				1ED0FE69124BB9380029177F /* Hypothesis.h in Headers */,
+				1ED0FE6B124BB9380029177F /* HypothesisStack.h in Headers */,
+				1ED0FE6D124BB9380029177F /* HypothesisStackCubePruning.h in Headers */,
+				1ED0FE6F124BB9380029177F /* HypothesisStackNormal.h in Headers */,
+				1ED0FE71124BB9380029177F /* InputFileStream.h in Headers */,
+				1ED0FE73124BB9380029177F /* InputType.h in Headers */,
+				1ED0FE90124BB9380029177F /* LexicalReordering.h in Headers */,
+				1ED0FE92124BB9380029177F /* LexicalReorderingState.h in Headers */,
+				1ED0FE94124BB9380029177F /* LexicalReorderingTable.h in Headers */,
+				1ED0FE96124BB9380029177F /* LMList.h in Headers */,
+				1ED0FE98124BB9380029177F /* LVoc.h in Headers */,
+				1ED0FE9B124BB9380029177F /* Manager.h in Headers */,
+				1ED0FEA0124BB9380029177F /* ObjectPool.h in Headers */,
+				1ED0FEA2124BB9380029177F /* Parameter.h in Headers */,
+				1ED0FEA4124BB9380029177F /* PartialTranslOptColl.h in Headers */,
+				1ED0FEA6124BB9380029177F /* PCNTools.h in Headers */,
+				1ED0FEA7124BB9380029177F /* PDTAimp.h in Headers */,
+				1ED0FEA9124BB9380029177F /* Phrase.h in Headers */,
+				1ED0FEAB124BB9380029177F /* PhraseDictionary.h in Headers */,
+				1ED0FEAD124BB9380029177F /* PhraseDictionaryDynSuffixArray.h in Headers */,
+				1ED0FEAF124BB9380029177F /* PhraseDictionaryMemory.h in Headers */,
+				1ED0FEB1124BB9380029177F /* PhraseDictionaryNode.h in Headers */,
+				1ED0FEB3124BB9380029177F /* PhraseDictionaryNodeSCFG.h in Headers */,
+				1ED0FEB5124BB9380029177F /* PhraseDictionaryOnDisk.h in Headers */,
+				1ED0FEBA124BB9380029177F /* PhraseDictionaryTree.h in Headers */,
+				1ED0FEBC124BB9380029177F /* PhraseDictionaryTreeAdaptor.h in Headers */,
+				1ED0FEBD124BB9380029177F /* PrefixTree.h in Headers */,
+				1ED0FEBF124BB9380029177F /* PrefixTreeMap.h in Headers */,
+				1ED0FEC1124BB9380029177F /* ReorderingConstraint.h in Headers */,
+				1ED0FEC3124BB9380029177F /* ReorderingStack.h in Headers */,
+				1ED0FEC5124BB9380029177F /* ScoreComponentCollection.h in Headers */,
+				1ED0FEC7124BB9380029177F /* ScoreIndexManager.h in Headers */,
+				1ED0FEC9124BB9380029177F /* ScoreProducer.h in Headers */,
+				1ED0FECB124BB9380029177F /* Search.h in Headers */,
+				1ED0FECD124BB9380029177F /* SearchCubePruning.h in Headers */,
+				1ED0FECF124BB9380029177F /* SearchNormal.h in Headers */,
+				1ED0FED1124BB9380029177F /* Sentence.h in Headers */,
+				1ED0FED3124BB9380029177F /* SentenceStats.h in Headers */,
+				1ED0FED5124BB9380029177F /* SquareMatrix.h in Headers */,
+				1ED0FED7124BB9380029177F /* StaticData.h in Headers */,
+				1ED0FED9124BB9380029177F /* TargetPhrase.h in Headers */,
+				1ED0FEDB124BB9380029177F /* TargetPhraseCollection.h in Headers */,
+				1ED0FEDD124BB9380029177F /* Timer.h in Headers */,
+				1ED0FEDF124BB9380029177F /* TranslationOption.h in Headers */,
+				1ED0FEE1124BB9380029177F /* TranslationOptionCollection.h in Headers */,
+				1ED0FEE3124BB9380029177F /* TranslationOptionCollectionConfusionNet.h in Headers */,
+				1ED0FEE5124BB9380029177F /* TranslationOptionCollectionText.h in Headers */,
+				1ED0FEE7124BB9380029177F /* TranslationOptionList.h in Headers */,
+				1ED0FEE9124BB9380029177F /* TranslationSystem.h in Headers */,
+				1ED0FEEB124BB9380029177F /* TreeInput.h in Headers */,
+				1ED0FEED124BB9380029177F /* TrellisPath.h in Headers */,
+				1ED0FEEF124BB9380029177F /* TrellisPathCollection.h in Headers */,
+				1ED0FEF0124BB9380029177F /* TrellisPathList.h in Headers */,
+				1ED0FEF1124BB9380029177F /* TypeDef.h in Headers */,
+				1ED0FEF2124BB9380029177F /* UniqueObject.h in Headers */,
+				1ED0FEF4124BB9380029177F /* UserMessage.h in Headers */,
+				1ED0FEF6124BB9380029177F /* Util.h in Headers */,
+				1ED0FEF8124BB9380029177F /* Word.h in Headers */,
+				1ED0FEFC124BB9380029177F /* WordLattice.h in Headers */,
+				1ED0FEFE124BB9380029177F /* WordsBitmap.h in Headers */,
+				1ED0FF00124BB9380029177F /* WordsRange.h in Headers */,
+				1ED0FF02124BB9380029177F /* XmlOption.h in Headers */,
+				1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */,
+				1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */,
+				1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */,
+				1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */,
+				1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */,
+				1E2E161B132A890D00ED4085 /* ChartCell.h in Headers */,
+				1E2E161D132A890D00ED4085 /* ChartCellCollection.h in Headers */,
+				1E2E161F132A890D00ED4085 /* ChartHypothesis.h in Headers */,
+				1E2E1621132A890D00ED4085 /* ChartHypothesisCollection.h in Headers */,
+				1E2E1623132A890D00ED4085 /* ChartManager.h in Headers */,
+				1E2E1625132A890D00ED4085 /* ChartTranslationOptionCollection.h in Headers */,
+				1E2E1627132A890D00ED4085 /* ChartTrellisNode.h in Headers */,
+				1E2E1629132A890D00ED4085 /* ChartTrellisPath.h in Headers */,
+				1E2E162D132A890D00ED4085 /* ChartTrellisPathList.h in Headers */,
+				1E2E1639132A892800ED4085 /* OutputCollector.h in Headers */,
+				1E2E163B132A892800ED4085 /* RuleCube.h in Headers */,
+				1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */,
+				1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */,
+				1EE58DA0133726C700D93158 /* NonTerminal.h in Headers */,
+				1EBB262913A12DB500B51840 /* hash.h in Headers */,
+				1EBB262A13A12DB500B51840 /* onlineRLM.h in Headers */,
+				1EBB262B13A12DB500B51840 /* params.h in Headers */,
+				1EBB262C13A12DB500B51840 /* perfectHash.h in Headers */,
+				1EBB262D13A12DB500B51840 /* quantizer.h in Headers */,
+				1EBB262E13A12DB500B51840 /* RandLMCache.h in Headers */,
+				1EBB262F13A12DB500B51840 /* RandLMFilter.h in Headers */,
+				1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */,
+				1E46B5A713BA5C7F0084F898 /* RuleCubeItem.h in Headers */,
+				1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */,
+				1ED22EE613DD96B0000DE8C9 /* DotChartInMemory.h in Headers */,
+				1ED0DE2A1432A0D200C20FBE /* RuleTableLoaderCompact.h in Headers */,
+				1ED0DE2D1432A0D200C20FBE /* RuleTableLoaderFactory.h in Headers */,
+				1ED0DE301432A0D200C20FBE /* RuleTableLoaderStandard.h in Headers */,
+				1E16D0A4144DAA6C00B60B4F /* Base.h in Headers */,
+				1E16D0A8144DAA6C00B60B4F /* Factory.h in Headers */,
+				1E16D0AA144DAA6C00B60B4F /* Implementation.h in Headers */,
+				1E16D0AC144DAA6C00B60B4F /* IRST.h in Headers */,
+				1E16D0AE144DAA6C00B60B4F /* Joint.h in Headers */,
+				1E16D0B0144DAA6C00B60B4F /* Ken.h in Headers */,
+				1E16D0B2144DAA6C00B60B4F /* MultiFactor.h in Headers */,
+				1E16D0B6144DAA6C00B60B4F /* ParallelBackoff.h in Headers */,
+				1E16D0BC144DAA6C00B60B4F /* SingleFactor.h in Headers */,
+				1E16D0BE144DAA6C00B60B4F /* SRI.h in Headers */,
+				1E474E12145575CA00178AD5 /* RuleTableLoader.h in Headers */,
+				1E078C1C14643AED00A707F4 /* PhraseDictionaryHiero.h in Headers */,
+				1E078C21146440A900A707F4 /* RuleTableLoaderHiero.h in Headers */,
+				1E2755B614667CC3009D1DF9 /* PhraseDictionaryALSuffixArray.h in Headers */,
+				1ECA43AF146D585900209CEF /* ChartCellLabelSet.h in Headers */,
+				1ECA43B4146D586D00209CEF /* ChartTrellisDetour.h in Headers */,
+				1ECA43B6146D586D00209CEF /* ChartTrellisDetourQueue.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC045055464E500DB518D /* moses */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "moses" */;
+			buildPhases = (
+				D2AAC043055464E500DB518D /* Headers */,
+				D2AAC044055464E500DB518D /* Sources */,
+				D289987405E68DCB004EDB86 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = moses;
+			productName = moses;
+			productReference = D2AAC046055464E500DB518D /* libmoses.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0410;
+			};
+			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "moses" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* moses */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2AAC045055464E500DB518D /* moses */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC044055464E500DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1ED0FE2A124BB9380029177F /* AlignmentInfo.cpp in Sources */,
+				1ED0FE2C124BB9380029177F /* BilingualDynSuffixArray.cpp in Sources */,
+				1ED0FE2E124BB9380029177F /* BitmapContainer.cpp in Sources */,
+				1ED0FE35124BB9380029177F /* ConfusionNet.cpp in Sources */,
+				1ED0FE37124BB9380029177F /* DecodeFeature.cpp in Sources */,
+				1ED0FE39124BB9380029177F /* DecodeGraph.cpp in Sources */,
+				1ED0FE3B124BB9380029177F /* DecodeStep.cpp in Sources */,
+				1ED0FE3D124BB9380029177F /* DecodeStepGeneration.cpp in Sources */,
+				1ED0FE3F124BB9380029177F /* DecodeStepTranslation.cpp in Sources */,
+				1ED0FE41124BB9380029177F /* Dictionary.cpp in Sources */,
+				1ED0FE43124BB9380029177F /* DotChart.cpp in Sources */,
+				1ED0FE45124BB9380029177F /* DotChartOnDisk.cpp in Sources */,
+				1ED0FE47124BB9380029177F /* DummyScoreProducers.cpp in Sources */,
+				1ED0FE4A124BB9380029177F /* file.cpp in Sources */,
+				1ED0FE4E124BB9380029177F /* vocab.cpp in Sources */,
+				1ED0FE50124BB9380029177F /* DynSuffixArray.cpp in Sources */,
+				1ED0FE52124BB9380029177F /* Factor.cpp in Sources */,
+				1ED0FE54124BB9380029177F /* FactorCollection.cpp in Sources */,
+				1ED0FE56124BB9380029177F /* FactorTypeSet.cpp in Sources */,
+				1ED0FE58124BB9380029177F /* FeatureFunction.cpp in Sources */,
+				1ED0FE5A124BB9380029177F /* FFState.cpp in Sources */,
+				1ED0FE5C124BB9380029177F /* File.cpp in Sources */,
+				1ED0FE5F124BB9380029177F /* FloydWarshall.cpp in Sources */,
+				1ED0FE61124BB9380029177F /* GenerationDictionary.cpp in Sources */,
+				1ED0FE63124BB9380029177F /* GlobalLexicalModel.cpp in Sources */,
+				1ED0FE66124BB9380029177F /* hash.cpp in Sources */,
+				1ED0FE68124BB9380029177F /* Hypothesis.cpp in Sources */,
+				1ED0FE6A124BB9380029177F /* HypothesisStack.cpp in Sources */,
+				1ED0FE6C124BB9380029177F /* HypothesisStackCubePruning.cpp in Sources */,
+				1ED0FE6E124BB9380029177F /* HypothesisStackNormal.cpp in Sources */,
+				1ED0FE70124BB9380029177F /* InputFileStream.cpp in Sources */,
+				1ED0FE72124BB9380029177F /* InputType.cpp in Sources */,
+				1ED0FE8F124BB9380029177F /* LexicalReordering.cpp in Sources */,
+				1ED0FE91124BB9380029177F /* LexicalReorderingState.cpp in Sources */,
+				1ED0FE93124BB9380029177F /* LexicalReorderingTable.cpp in Sources */,
+				1ED0FE95124BB9380029177F /* LMList.cpp in Sources */,
+				1ED0FE97124BB9380029177F /* LVoc.cpp in Sources */,
+				1ED0FE9A124BB9380029177F /* Manager.cpp in Sources */,
+				1ED0FEA1124BB9380029177F /* Parameter.cpp in Sources */,
+				1ED0FEA3124BB9380029177F /* PartialTranslOptColl.cpp in Sources */,
+				1ED0FEA5124BB9380029177F /* PCNTools.cpp in Sources */,
+				1ED0FEA8124BB9380029177F /* Phrase.cpp in Sources */,
+				1ED0FEAA124BB9380029177F /* PhraseDictionary.cpp in Sources */,
+				1ED0FEAC124BB9380029177F /* PhraseDictionaryDynSuffixArray.cpp in Sources */,
+				1ED0FEAE124BB9380029177F /* PhraseDictionaryMemory.cpp in Sources */,
+				1ED0FEB0124BB9380029177F /* PhraseDictionaryNode.cpp in Sources */,
+				1ED0FEB2124BB9380029177F /* PhraseDictionaryNodeSCFG.cpp in Sources */,
+				1ED0FEB4124BB9380029177F /* PhraseDictionaryOnDisk.cpp in Sources */,
+				1ED0FEB7124BB9380029177F /* PhraseDictionarySCFG.cpp in Sources */,
+				1ED0FEB9124BB9380029177F /* PhraseDictionaryTree.cpp in Sources */,
+				1ED0FEBB124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp in Sources */,
+				1ED0FEBE124BB9380029177F /* PrefixTreeMap.cpp in Sources */,
+				1ED0FEC0124BB9380029177F /* ReorderingConstraint.cpp in Sources */,
+				1ED0FEC2124BB9380029177F /* ReorderingStack.cpp in Sources */,
+				1ED0FEC4124BB9380029177F /* ScoreComponentCollection.cpp in Sources */,
+				1ED0FEC6124BB9380029177F /* ScoreIndexManager.cpp in Sources */,
+				1ED0FEC8124BB9380029177F /* ScoreProducer.cpp in Sources */,
+				1ED0FECA124BB9380029177F /* Search.cpp in Sources */,
+				1ED0FECC124BB9380029177F /* SearchCubePruning.cpp in Sources */,
+				1ED0FECE124BB9380029177F /* SearchNormal.cpp in Sources */,
+				1ED0FED0124BB9380029177F /* Sentence.cpp in Sources */,
+				1ED0FED2124BB9380029177F /* SentenceStats.cpp in Sources */,
+				1ED0FED4124BB9380029177F /* SquareMatrix.cpp in Sources */,
+				1ED0FED6124BB9380029177F /* StaticData.cpp in Sources */,
+				1ED0FED8124BB9380029177F /* TargetPhrase.cpp in Sources */,
+				1ED0FEDA124BB9380029177F /* TargetPhraseCollection.cpp in Sources */,
+				1ED0FEDC124BB9380029177F /* Timer.cpp in Sources */,
+				1ED0FEDE124BB9380029177F /* TranslationOption.cpp in Sources */,
+				1ED0FEE0124BB9380029177F /* TranslationOptionCollection.cpp in Sources */,
+				1ED0FEE2124BB9380029177F /* TranslationOptionCollectionConfusionNet.cpp in Sources */,
+				1ED0FEE4124BB9380029177F /* TranslationOptionCollectionText.cpp in Sources */,
+				1ED0FEE6124BB9380029177F /* TranslationOptionList.cpp in Sources */,
+				1ED0FEE8124BB9380029177F /* TranslationSystem.cpp in Sources */,
+				1ED0FEEA124BB9380029177F /* TreeInput.cpp in Sources */,
+				1ED0FEEC124BB9380029177F /* TrellisPath.cpp in Sources */,
+				1ED0FEEE124BB9380029177F /* TrellisPathCollection.cpp in Sources */,
+				1ED0FEF3124BB9380029177F /* UserMessage.cpp in Sources */,
+				1ED0FEF5124BB9380029177F /* Util.cpp in Sources */,
+				1ED0FEF7124BB9380029177F /* Word.cpp in Sources */,
+				1ED0FEFB124BB9380029177F /* WordLattice.cpp in Sources */,
+				1ED0FEFD124BB9380029177F /* WordsBitmap.cpp in Sources */,
+				1ED0FEFF124BB9380029177F /* WordsRange.cpp in Sources */,
+				1ED0FF01124BB9380029177F /* XmlOption.cpp in Sources */,
+				1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */,
+				1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */,
+				1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */,
+				1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */,
+				1E2E161A132A890D00ED4085 /* ChartCell.cpp in Sources */,
+				1E2E161C132A890D00ED4085 /* ChartCellCollection.cpp in Sources */,
+				1E2E161E132A890D00ED4085 /* ChartHypothesis.cpp in Sources */,
+				1E2E1620132A890D00ED4085 /* ChartHypothesisCollection.cpp in Sources */,
+				1E2E1622132A890D00ED4085 /* ChartManager.cpp in Sources */,
+				1E2E1624132A890D00ED4085 /* ChartTranslationOptionCollection.cpp in Sources */,
+				1E2E1626132A890D00ED4085 /* ChartTrellisNode.cpp in Sources */,
+				1E2E1628132A890D00ED4085 /* ChartTrellisPath.cpp in Sources */,
+				1E2E163A132A892800ED4085 /* RuleCube.cpp in Sources */,
+				1E2E163C132A892800ED4085 /* RuleCubeQueue.cpp in Sources */,
+				1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */,
+				1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */,
+				1E528B9D13A12B2D00E9A67E /* params.cpp in Sources */,
+				1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */,
+				1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */,
+				1E46B5A613BA5C7F0084F898 /* RuleCubeItem.cpp in Sources */,
+				1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */,
+				1ED22EE513DD96B0000DE8C9 /* DotChartInMemory.cpp in Sources */,
+				1ED0DE291432A0D200C20FBE /* RuleTableLoaderCompact.cpp in Sources */,
+				1ED0DE2C1432A0D200C20FBE /* RuleTableLoaderFactory.cpp in Sources */,
+				1ED0DE2F1432A0D200C20FBE /* RuleTableLoaderStandard.cpp in Sources */,
+				1E16D0A3144DAA6C00B60B4F /* Base.cpp in Sources */,
+				1E16D0A7144DAA6C00B60B4F /* Factory.cpp in Sources */,
+				1E16D0A9144DAA6C00B60B4F /* Implementation.cpp in Sources */,
+				1E16D0AB144DAA6C00B60B4F /* IRST.cpp in Sources */,
+				1E16D0AD144DAA6C00B60B4F /* Joint.cpp in Sources */,
+				1E16D0AF144DAA6C00B60B4F /* Ken.cpp in Sources */,
+				1E16D0B1144DAA6C00B60B4F /* MultiFactor.cpp in Sources */,
+				1E16D0B5144DAA6C00B60B4F /* ParallelBackoff.cpp in Sources */,
+				1E16D0BB144DAA6C00B60B4F /* SingleFactor.cpp in Sources */,
+				1E16D0BD144DAA6C00B60B4F /* SRI.cpp in Sources */,
+				1E078C1F14643C2000A707F4 /* PhraseDictionaryHiero.cpp in Sources */,
+				1E078C23146440F700A707F4 /* RuleTableLoaderHiero.cpp in Sources */,
+				1E2755B314667CA4009D1DF9 /* PhraseDictionaryALSuffixArray.cpp in Sources */,
+				1ECA43B0146D585900209CEF /* ChartTrellisDetour.cpp in Sources */,
+				1ECA43B5146D586D00209CEF /* ChartTrellisDetourQueue.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB91EC08733DB70010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					LM_SRI,
+					LM_IRST,
+					LM_INTERNAL,
+					LM_KEN,
+					LM_IRST,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
+				);
+				HEADER_SEARCH_PATHS = (
+					../,
+					src,
+					../irstlm/include,
+					../srilm/include,
+					../kenlm,
+					../randlm/include,
+					../,
+					/opt/local/include,
+					../synlm/hhmm/wsjparse/include,
+					../synlm/hhmm/rvtl/include/,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = moses;
+			};
+			name = Debug;
+		};
+		1DEB91ED08733DB70010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					LM_SRI,
+					LM_IRST,
+					LM_INTERNAL,
+					LM_KEN,
+					LM_IRST,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
+				);
+				HEADER_SEARCH_PATHS = (
+					../,
+					src,
+					../irstlm/include,
+					../srilm/include,
+					../kenlm,
+					../randlm/include,
+					../,
+					/opt/local/include,
+					../synlm/hhmm/wsjparse/include,
+					../synlm/hhmm/rvtl/include/,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = moses;
+			};
+			name = Release;
+		};
+		1DEB91F008733DB70010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					LM_SRI,
+					LM_IRST,
+					LM_INTERNAL,
+					LM_KEN,
+					LM_IRST,
+					LM_RAND,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/include,
+					../kenlm,
+					../randlm/include,
+					/opt/local/include,
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1DEB91F108733DB70010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					LM_SRI,
+					LM_IRST,
+					LM_INTERNAL,
+					LM_KEN,
+					LM_IRST,
+					LM_RAND,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/include,
+					../kenlm,
+					../randlm/include,
+					/opt/local/include,
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "moses" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91EC08733DB70010E9CD /* Debug */,
+				1DEB91ED08733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "moses" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB91F008733DB70010E9CD /* Debug */,
+				1DEB91F108733DB70010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

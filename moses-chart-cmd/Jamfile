@@ -1,2 +1,0 @@
-exe moses_chart : Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp ../moses//moses ;
-

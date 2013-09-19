@@ -1,0 +1,44 @@
+path-constant TOP : . ;
+
+import option ;
+
+#The linked Boost libraries we use so far.  Link shared because most people don't have the static version.  
+import boost ;
+boost.use-project ;
+#If boost static libraries are not installed, use dynamic linking.  
+if [ SHELL $(TOP)"/jam-files/test.sh -static -lboost_thread" ] = 1 {
+  force-boost-link = "<link>shared" ;
+}
+alias boost_thread : /boost//thread : $(force-boost-link) ;
+alias boost_unit_test_framework : /boost//unit_test_framework : $(force-boost-link) ;
+alias boost_program_options : /boost//program_options : $(force-boost-link) ;
+
+trace = [ option.get "notrace" : : <define>TRACE_ENABLE=1 ] ;
+
+project : default-build
+  <threading>multi
+  <warnings>on
+  <variant>release
+  <link>static
+  ;
+
+project : requirements 
+  <threading>multi:<define>WITH_THREADS
+  <threading>multi:<library>boost_thread
+  <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES <define>USE_HYPO_POOL
+  $(trace)
+  ;
+
+#Add directories here if they have other incidental targets
+build-project lm ; 
+build-project util ;
+
+install-location = [ option.get "install" : $(TOP)/dist ] ;
+install dist : 
+  lm//query
+  lm//build_binary
+  moses-chart-cmd/src//moses_chart 
+  moses-cmd/src//programs
+  CreateOnDisk/src//CreateOnDisk
+  mert//programs
+  : <location>$(install-location) <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(install-location) <link>shared:<install-type>LIB ;

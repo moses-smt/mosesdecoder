@@ -1,0 +1,332 @@
+AC_INIT(moses/src)
+
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(moses, 0.1)
+
+AC_CONFIG_MACRO_DIR([m4])
+
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AC_LANG_CPLUSPLUS
+
+AC_DISABLE_SHARED 
+AC_PROG_LIBTOOL
+# Shared library are disabled for default
+#LT_INIT([disable-shared])
+
+AX_XMLRPC_C
+BOOST_REQUIRE([1.36.0])
+BOOST_SMART_PTR
+BOOST_PROGRAM_OPTIONS
+
+AC_ARG_WITH(protobuf,
+            [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],
+            [with_protobuf=$withval],
+            [with_protobuf=no]
+           )
+
+AC_ARG_WITH(srilm,
+            [AC_HELP_STRING([--with-srilm=PATH], [(optional) path to SRI's LM toolkit])],
+            [with_srilm=$withval],
+            [with_srilm=no]
+           )
+
+AC_ARG_WITH(srilm-dynamic,
+            [AC_HELP_STRING([--with-srilm-dynamic], [(optional) link dynamically with srilm])],
+            [with_srilm_dynamic=yes],
+            [with_srilm_dynamic=no]
+            )
+
+AC_ARG_WITH(srilm-arch,
+            [AC_HELP_STRING([--with-srilm-arch=ARCH], [(optional) architecture for which SRILM was built])],
+            [with_srilm_arch=$withval],
+            [with_srilm_arch=no]
+           )
+
+
+AC_ARG_WITH(irstlm,
+            [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
+            [with_irstlm=$withval],
+            [with_irstlm=no]
+           )
+
+AC_ARG_WITH(randlm,
+            [AC_HELP_STRING([--with-randlm=PATH], [(optional) path to RandLM toolkit])],
+            [with_randlm=$withval],
+            [with_randlm=no]
+           )
+AC_ARG_WITH(orlm,
+            [AC_HELP_STRING([--with-orlm=PATH], [(optional) path to ORLM])],
+            [with_orlm=$withval],
+            [with_orlm=no]
+           )
+AC_ARG_WITH(dmaplm,
+            [AC_HELP_STRING([--with-dmaplm=PATH], [(optional) path to DMapLM])],
+            [with_dmaplm=$withval],
+            [with_dmaplm=no]
+           )
+
+AC_ARG_WITH(synlm,
+	   [AC_HELP_STRING([--with-synlm], [(optional) Include syntactic language model parser; default is no])],
+	   [with_synlm=$withval],
+	   [with_synlm=no]
+	   )
+
+AC_ARG_WITH(notrace,
+            [AC_HELP_STRING([--notrace], [disable trace])],
+            [without_trace=yes],
+           )
+
+
+
+AC_ARG_ENABLE(profiling,
+            [AC_HELP_STRING([--enable-profiling], [moses will dump profiling info])],
+            [CPPFLAGS="$CPPFLAGS -pg"; LDFLAGS="$LDFLAGS -pg" ]
+           )
+
+AC_ARG_ENABLE(optimization,
+            [AC_HELP_STRING([--enable-optimization], [compile with -O3 flag])],
+            [CPPFLAGS="$CPPFLAGS -O3"; LDFLAGS="$LDFLAGS -O3" ]
+           )
+
+AC_ARG_ENABLE(threads,
+            [AC_HELP_STRING([--enable-threads], [compile threadsafe library and multi-threaded moses (mosesmt)])],
+            [],
+            [enable_threads=no]
+        )
+
+AC_ARG_WITH(zlib,
+            [AC_HELP_STRING([--with-zlib=PATH], [(optional) path to zlib])],
+            [with_zlib=$withval],
+            [with_zlib=no]
+           )
+
+AC_ARG_WITH(tcmalloc,
+            [AC_HELP_STRING([--with-tcmalloc], [(optional) link with tcmalloc; default is no])],
+            [with_tcmalloc=$withval],
+            [with_tcmalloc=no]
+           )
+
+AC_ARG_ENABLE(boost-pool,
+              [AC_HELP_STRING([--enable-boost-pool], [(optional) try to improve speed by selectively using Boost pool allocation (may increase total memory use); default is yes if Boost enabled])],
+              [enable_boost_pool=yes],
+              [enable_boost_pool=no]
+             )
+
+
+AM_CONDITIONAL([INTERNAL_LM], false)
+AM_CONDITIONAL([SRI_LM], false)
+AM_CONDITIONAL([IRST_LM], false)
+AM_CONDITIONAL([KEN_LM], false)
+AM_CONDITIONAL([RAND_LM], false)
+AM_CONDITIONAL([ORLM_LM], false)
+AM_CONDITIONAL([DMAP_LM], false)
+AM_CONDITIONAL([SYN_LM], false)
+AM_CONDITIONAL([PROTOBUF], false)
+AM_CONDITIONAL([am__fastdepCC], false)
+AM_CONDITIONAL([WITH_THREADS],false)
+
+
+if test "x$without_trace" = 'xyes'
+then
+    AC_MSG_NOTICE([trace disabled, most regression test will fail])
+else
+    AC_MSG_NOTICE([trace enabled (default)])
+    CPPFLAGS="$CPPFLAGS -DTRACE_ENABLE=1" 
+fi
+
+if test "x$enable_threads" = 'xyes'
+then
+    AC_MSG_NOTICE([Building threaded moses])
+    BOOST_THREADS
+    CPPFLAGS="$CPPFLAGS -DWITH_THREADS" 
+    AM_CONDITIONAL([WITH_THREADS],true)
+else
+    AC_MSG_NOTICE([Building non-threaded moses. This will disable the moses server])
+fi
+
+if test "x$with_protobuf" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_protobuf}/include"
+
+  AC_CHECK_HEADER(google/protobuf/message.h,
+                 [AC_DEFINE([HAVE_PROTOBUF], [], [flag for protobuf])],
+                 [AC_MSG_ERROR([Cannot find protobuf!])])
+
+  LIB_PROTOBUF="-lprotobuf"
+  LDFLAGS="$LDFLAGS -L${with_protobuf}/lib"
+  LIBS="$LIBS $LIB_PROTOBUF"
+  AC_PATH_PROG(PROTOC,protoc,,"${PATH}:${with_protobuf}/bin")
+  FMTLIBS="$FMTLIBS libprotobuf.a"
+  AM_CONDITIONAL([PROTOBUF], true)
+fi
+
+if test "x$with_srilm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_srilm}/include"
+
+  AC_CHECK_HEADER(Ngram.h,
+                  [AC_DEFINE([HAVE_SRILM], [], [flag for SRILM])],
+                  [AC_MSG_ERROR([Cannot find SRILM!])])
+
+  if test "x$with_srilm_dynamic" != 'xyes'
+  then
+    LIB_SRILM="-loolm -ldstruct -lmisc -lflm"
+    # ROOT/lib/i686-m64/liboolm.a
+    # ROOT/lib/i686-m64/libdstruct.a
+    # ROOT/lib/i686-m64/libmisc.a
+    if test "x$with_srilm_arch" != 'xno'
+    then
+	MY_ARCH=${with_srilm_arch}    
+    else
+        MY_ARCH=`${with_srilm}/sbin/machine-type`
+    fi
+    LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH} -L${with_srilm}/flm/obj/${MY_ARCH}"
+    LIBS="$LIBS $LIB_SRILM"
+    FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
+  else
+    LDFLAGS="$LDFLAGS -L${with_srilm}/lib"
+    LIBS="$LIBS -lsrilm"
+  fi
+  AC_CHECK_LIB([oolm], [trigram_init], [], [AC_MSG_ERROR([Cannot find SRILM's library in ${with_srilm}/lib/${MY_ARCH} ])])
+  AM_CONDITIONAL([SRI_LM], true)
+fi
+
+if test "x$with_irstlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_irstlm}/include"
+
+  
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+  AC_MSG_NOTICE([!!! You are linking the IRSTLM library; be sure the release is >= 5.70.02 !!!])
+  AC_MSG_NOTICE([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+  AC_MSG_NOTICE([])
+
+
+  AC_CHECK_HEADER(n_gram.h,
+                 [AC_DEFINE([HAVE_IRSTLM], [], [flag for IRSTLM])],
+                 [AC_MSG_ERROR([Cannot find IRST-LM in ${with_irstlm}])])
+
+  MY_ARCH=`uname -m`
+  LIB_IRSTLM="-lirstlm"
+  LDFLAGS="$LDFLAGS -L${with_irstlm}/lib"
+  LIBS="$LIBS $LIB_IRSTLM"
+  FMTLIBS="$FMTLIBS libirstlm.a"
+  AM_CONDITIONAL([IRST_LM], true)
+fi
+
+CPPFLAGS="$CPPFLAGS -I\$(top_srcdir)"
+#LDFLAGS="$LDFLAGS -L\$(top_srcdir)/util -lkenutil -L\$(top_srcdir)/lm -lkenlm -lz"
+#KENUTIL_DEPS="\$(top_srcdir)/util/libkenutil.la"
+#KENLM_DEPS="\$(top_srcdir)/lm/libkenlm.la"
+#FMTLIBS="$FMTLIBS libkenutil.la libkenlm.la"
+#AC_SUBST(KENUTIL_DEPS)
+#AC_SUBST(KENLM_DEPS)
+
+if test "x$with_randlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_randlm}/include"
+
+  AC_CHECK_HEADER(RandLM.h,
+                 [AC_DEFINE([HAVE_RANDLM], [], [flag for RandLM])],
+                 [AC_MSG_ERROR([Cannot find RandLM!])])
+
+
+  MY_ARCH=`uname -m`
+  LIB_RANDLM="-lrandlm"
+  LDFLAGS="$LDFLAGS -L${with_randlm}/lib"
+  LIBS="$LIBS $LIB_RANDLM"
+  FMTLIBS="$FMTLIBS librandlm.a"
+  AM_CONDITIONAL([RAND_LM], true)
+fi
+
+if test "x$with_dmaplm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_dmaplm}/src/DMap"
+
+  AC_CHECK_HEADER(StructLanguageModel.h,
+                 [AC_DEFINE([HAVE_DMAPLM], [], [flag for DMapLM])],
+                 [AC_MSG_ERROR([Cannot find DMapLM!])])
+
+  LDFLAGS="$LDFLAGS -L${with_dmaplm}/src/DMap"
+  LIBS="$LIBS -lDMap"
+  FMTLIBS="FMTLIBS libdmap.la"
+  AM_CONDITIONAL([DMAP_LM], true)
+fi
+
+if test "x$with_orlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_orlm}/"
+
+  AC_CHECK_HEADER(onlineRLM.h,
+#AC_CHECK_HEADER(multiOnlineRLM.h,
+                 [AC_DEFINE([HAVE_ORLM], [], [flag for ORLM])],
+                 [AC_MSG_ERROR([Cannot find ORLM!])])
+
+  MY_ARCH=`uname -m`
+  AM_CONDITIONAL([ORLM_LM], true)
+fi
+if test "x$with_tcmalloc" != 'xno'
+then
+  AC_CHECK_LIB([tcmalloc], [malloc], [], [AC_MSG_ERROR([Cannot find tcmalloc])])
+fi
+
+
+if test "x$enable_boost_pool" != 'xno'
+then
+  AC_CHECK_HEADER(boost/pool/object_pool.hpp,
+                  [AC_DEFINE([USE_BOOST_POOL], [], [Flag to enable use of Boost pool])],
+                  [AC_MSG_WARN([Cannot find boost/pool/object_pool.hpp])]
+                 )
+fi
+
+if test "x$with_synlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS" 
+  CPPFLAGS="$CPPFLAGS -I${PWD}/synlm/hhmm/rvtl/include -I${PWD}/synlm/hhmm/wsjparse/include -lm"
+
+  AC_CHECK_HEADERS(nl-cpt.h,
+	[AC_DEFINE([HAVE_SYNLM], [], [flag for Syntactic Parser])],
+	[AC_MSG_ERROR([Cannot find SYNLM in ${PWD}/synlm/hhmm])])
+
+  AM_CONDITIONAL([SYN_LM], true)
+
+fi
+
+
+AM_CONDITIONAL([WITH_MERT],false)
+AC_CHECK_HEADERS([getopt.h],
+            [AM_CONDITIONAL([WITH_MERT],true)],
+            [AC_MSG_WARN([Cannot find getopt.h - disabling new mert])])
+
+AM_CONDITIONAL([WITH_SERVER],false)
+if test "x$have_xmlrpc_c" = "xyes" && test "x$enable_threads" = "xyes"; then
+    AM_CONDITIONAL([WITH_SERVER],true)
+else
+   AC_MSG_NOTICE([Disabling server])
+fi
+
+if test "x$with_zlib" != 'xno'
+then
+  CPPFLAGS="$CPPFLAGS -I${with_zlib}/include"
+  LDFLAGS="$LDFLAGS -L${with_zlib}/lib"
+fi
+
+# zlib is always required (see ./moses/src/gzfilebuf.h)
+# TODO: This shouldn't be presented to the user as a config option if it isn't actually an option
+AC_CHECK_HEADER(zlib.h,
+               [AC_DEFINE([HAVE_ZLIB], [], [flag for zlib])],
+               [AC_MSG_ERROR([Cannot find zlib.h. Please install it. For Debian, try 'sudo aptitude install zlib1g-dev'])]) 
+LIBS="$LIBS -lz"
+
+
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile util/Makefile lm/Makefile)
+
+AC_OUTPUT()

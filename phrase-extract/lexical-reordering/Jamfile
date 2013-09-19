@@ -1,2 +1,0 @@
-exe lexical-reordering-score : InputFileStream.cpp reordering_classes.cpp score.cpp ../../util//kenutil ../..//z ;
-

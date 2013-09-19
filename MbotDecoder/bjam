@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+which bjam >/dev/null 2>/dev/null && exec bjam "$@"
+
+top="$(dirname "$0")"
+if [ ! -x "$top"/jam-files/bjam ]; then
+  pushd "$top/jam-files/engine"
+  ./build.sh
+  cp -f bin.*/bjam ../bjam
+  popd
+fi
+
+export BOOST_BUILD_PATH="$top"/jam-files/boost-build 
+exec "$top"/jam-files/bjam "$@"

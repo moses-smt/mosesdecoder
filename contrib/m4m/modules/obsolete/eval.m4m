@@ -1,6 +1,0 @@
-# -*- Makefile -*-
-
-%.multi-bleu: | %.cleaned
-	$(lock)
-	${multi-bleu} ${bleu.ref} < $*.cleaned > $@_ && mv $@_ $@
-	$(unlock)

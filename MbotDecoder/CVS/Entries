@@ -1,0 +1,51 @@
+/.autotools/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/.cproject/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/.gitignore/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/.project/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/BUILD-INSTRUCTIONS.txt/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/ContextFactorsMBOT/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/FehlerGetString.txt/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/Jamroot/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/Makefile.am/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/Makefile.in/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/aclocal.m4/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/bjam/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/boost.jam/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/config.guess/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/config.h.in/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/config.sub/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/configure/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/configure.in/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/depcomp/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/install-sh/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/ltmain.sh/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/missing/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/mkinstalldirs/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/moses.sln/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/regenerate-makefiles.sh/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/validate_more_revisions.sh/1.1.1.1/Sun Jan  6 16:54:05 2013//
+/validate_revision.sh/1.1.1.1/Sun Jan  6 16:54:05 2013//
+D/.settings////
+D/CVSROOT////
+D/CreateOnDisk////
+D/OnDiskPt////
+D/autom4te.cache////
+D/cruise-control////
+D/jam-files////
+D/lm////
+D/lmserver////
+D/m4////
+D/mert////
+D/misc////
+D/moses////
+D/moses-chart-cmd////
+D/moses-cmd////
+D/regression-testing////
+D/reranking////
+D/sample-models////
+D/scripts////
+D/server////
+D/sigtest-filter////
+D/synlm////
+D/util////
+D/web////

@@ -1,0 +1,1 @@
+$data_dir/models/score.hierarchical/extract $data_dir/models/score.hierarchical/lex.f2e $outPath --Hierarchical 

@@ -1,0 +1,557 @@
+#!/usr/bin/env bash
+# create-1.37
+# copyright 2009,2010 João L. A. C. Rosas
+# date: 22/09/2010
+# licenced under the GPL licence, version 3
+# the Mosesdecoder (http://sourceforge.net/projects/mosesdecoder/), is a tool upon which this script depends that is licenced under the GNU Library or Lesser General Public License (LGPL)
+# Special thanks to Hilário Leal Fontes and Maria José Machado, who helped to test the script and made very helpful suggestions
+
+# *** Purpose ***: this script downloads, compiles and installs Moses together with MGIZA, IRSTLM, RandLM, the Moses scripts and a demonstration corpus. Tested in in Ubuntu 10.04 LTS (http://releases.ubuntu.com/10.04/)
+
+############################### REQUIREMENTS ################################
+# You should install the following packages (in Ubuntu 10.04 LTS:           # 
+# http://releases.ubuntu.com/10.04/) *** before launching *** this script:  #
+#       automake                                                            #
+#       bison                                                               #
+#       boost-build                                                         #
+#       build-essential                                                     #
+#       flex                                                                #
+#       help2man                                                            #
+#       libboost-all-dev                                                    #
+#       libpthread-stubs0-dev                                               #
+#       libgc-dev                                                           #
+#       libtool                                                             #
+#       zlibc                                                               #
+#       zlib1g-dev                                                          #
+#       gawk                                                                #
+#       tofrodos                                                            #
+#############################################################################
+
+######################################################################################
+# The values of the variables that follow should be filled according to your needs:  #
+######################################################################################
+#Full path of the base directory location of your Moses system 
+mosesdir="$HOME/moses-irstlm-randlm"
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# !!! Please set $mosesnumprocessors to the number of processors of your computer !!!
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#Number of processors in your computer
+mosesnumprocessors=1
+#Install small demo corpus: 1 = Install; Any other value = Do not install (!!! this will install a very small corpus that can be used to see what the scripts and Moses can do; if dodemocorpus is set to 1, this series of scripts will be able to use the demo corpus without you having to change their settings !!!)
+dodemocorpus=1
+#Remove the downloaded compressed packages and some directories no longer needed once the installation is done; 1 = remove the downloaded packages; any other value = do not remove those packages
+removedownloadedpackges=1
+######################################################################################
+# End of parameters that you should fill                                             #
+######################################################################################
+
+######################################################################################
+# DON'T CHANGE THE LINES THAT FOLLOW ... unless you know what you are doing!         #
+######################################################################################
+#Present working directory
+prworkdir=$PWD
+#Full path of the directory where the tools (Moses, IRSTLM, RandLM) will be placed
+toolsdir=$mosesdir/tools
+
+#create, if need be, some important directories
+if [ ! -d $mosesdir ]; then
+	mkdir -p $mosesdir
+	if [ ! -d $mosesdir ]; then
+		echo "The $mosesdir directory could not be created. Please make sure that you have enough disk space and that the \$mosesdir setting of this script is a legal name and points to a location in which you have write permissions. Exiting ..."
+		exit 0
+	fi
+fi
+
+# Directory with files used for corpus training, language model building, tuning, testing and recasing
+#if [ ! -d $mosesdir/corpora_for_training ]; then mkdir -p $mosesdir/corpora_for_training; fi
+
+# Directory with the tools used (Moses, IRSTLM, RandLM, giza-pp, MGIZA, ...)
+if [ ! -d $toolsdir ]; then mkdir -p $toolsdir; fi
+
+# Directory with new and modified scripts
+if [ ! -d $toolsdir/modified-scripts ]; then mkdir -p $toolsdir/modified-scripts; fi
+
+# Directory with the reference (human-made) translation files
+#if [ ! -d $mosesdir/translation_reference ]; then mkdir -p $mosesdir/translation_reference; fi
+
+# Directory with the files that need to be translated by Moses
+#if [ ! -d $mosesdir/translation_input ]; then mkdir -p $mosesdir/translation_input; fi
+
+
+#Addresses of packages used (*pack = name of package; *url = url of package; *dir = directory base name of decompressed, non-compiled package on disk; *newdir = base directory of compiled package on disk)
+#Name of the pack compressed file
+irstlmpack=irstlm-5.22.01.tar.gz
+#URL of package compressed file
+irstlmurl=http://heanet.dl.sourceforge.net/project/irstlm/irstlm/irstlm-5.22.01/$irstlmpack
+#Name of the decompressed package base directory
+irstlmdir=irstlm-5.22.01
+#Name of the compiled package base directory
+irstlmnewdir=irstlm
+randlmpack=randlm-v0.11.tar.gz
+randlmurl=http://kent.dl.sourceforge.net/project/randlm/randlm/randlm%20v0.11/$randlmpack
+randlmdir=randlm
+randlmnewdir=randlm
+mgizapack=mgiza-0.6.3-10-01-11.tar.gz
+mgizaurl=http://www.cs.cmu.edu/~qing/release/$mgizapack
+mgizadir=MGIZA
+mgizanewdir=mgiza
+mosespack=moses-2010-08-13.tgz
+mosesurl=http://sunet.dl.sourceforge.net/project/mosesdecoder/mosesdecoder/2010-08-13/$mosespack
+mosessoftdir=moses
+mosesnewdir=moses
+scriptspack=scripts.tgz
+scriptsurl=http://homepages.inf.ed.ac.uk/jschroe1/how-to/$scriptspack
+scriptsdir=scripts
+scriptsnewdir=scripts
+scorerpack=mteval-v11b.pl
+scorerurl=ftp://jaguar.ncsl.nist.gov/mt/resources/$scorerpack
+datapack=m3-data.tgz
+dataurl="http://www.statmt.org/moses/download/$datapack"
+
+cd $PWD
+cd ..
+wget $dataurl
+tar -xzvf $datapack
+cp -r data-files/corpora_for_training $mosesdir
+cp -r data-files/translation_input $mosesdir
+cp -r data-files/translation_reference $mosesdir
+rm -f $datapack
+if [ ! -f $mosesdir/corpora_for_training/300000.en ]; then
+    echo "Data files not correctly created. Exiting..."
+    exit 0
+fi
+cd $toolsdir
+
+
+cd $toolsdir
+if [ ! -f $mosesdir/create.moses.log ]; then
+	echo "did_irstlm=" > $mosesdir/create.moses.log
+	echo "did_randlm=" >> $mosesdir/create.moses.log
+	echo "did_mgiza=" >> $mosesdir/create.moses.log
+	echo "did_moses=" >> $mosesdir/create.moses.log
+	echo "did_mosesscripts=" >> $mosesdir/create.moses.log
+	echo "did_newscripts=" >> $mosesdir/create.moses.log
+	echo "did_scorer=" >> $mosesdir/create.moses.log
+	echo "Download IRSTLM package"
+	wget $irstlmurl
+	if [ ! -f $irstlmpack ]; then
+		echo "$irstlmpack pack not correctly downloaded. Please check your Internet connection. Exiting ..."
+		exit 0
+	fi
+	echo "Download RandLM package"
+	wget $randlmurl
+	echo "Download MGIZA package"
+	wget $mgizaurl
+	#echo "Download Moses package"
+	#wget $mosesurl
+	echo "Download Moses scripts package"
+	wget $scriptsurl
+	echo "Download scorer package"
+	wget $scorerurl
+	chmod -R +rwx $toolsdir/$scorerpack
+else
+	. $mosesdir/create.moses.log
+	if [ "$did_irstlm" = "0" ]; then
+		if [ -f $toolsdir/$irstlmpack ]; then
+			rm $toolsdir/$irstlmpack
+			if [ -d $toolsdir/$irstlmdir ]; then
+				rm -rf $toolsdir/$irstlmdir
+			fi
+			if [ -d $toolsdir/$irstlmnewdir ]; then
+				rm -rf $toolsdir/$irstlmnewdir
+			fi
+		fi
+		echo "Download IRSTLM package"
+		wget $irstlmurl
+		if [ ! -f $irstlmpack ]; then
+			echo "$irstlmpack pack not correctly downloaded. Please check your Internet connection. Exiting ..."
+			exit 0
+		fi
+	fi
+	if [ "$did_randlm" = "0" ]; then
+		if [ -f $toolsdir/$randlmpack ]; then
+			rm $toolsdir/$randlmpack
+			if [ -d $toolsdir/$randlmdir ]; then
+				rm -rf $toolsdir/$randlmdir
+			fi
+			if [ -d $toolsdir/$randlmnewdir ]; then
+				rm -rf $toolsdir/$randlmnewdir
+			fi
+		fi
+		echo "Download RandLM package"
+		wget $randlmurl
+	fi
+	if [ "$did_mgiza" = "0" ]; then
+		if [ -f $toolsdir/$mgizapack ]; then
+			rm $toolsdir/$mgizapack
+			if [ -d $toolsdir/$mgizadir ]; then
+				rm -rf $toolsdir/$mgizadir
+			fi
+			if [ -d $toolsdir/$mgizanewdir ]; then
+				rm -rf $toolsdir/$mgizanewdir
+			fi
+			echo "Download MGIZA package"
+			wget $mgizaurl
+		fi
+	fi
+	if [ "$did_moses" = "0" ]; then
+		if [ -f $toolsdir/$mosespack ]; then
+			rm $toolsdir/$mosespack
+			if [ -d $toolsdir/$mosessoftdir ]; then
+				rm -rf $toolsdir/$mosessoftdir
+			fi
+			if [ -d $toolsdir/$mosesnewdir ]; then
+				rm -rf $toolsdir/$mosesnewdir
+			fi
+		fi
+		#echo "Download Moses package"
+		#wget $mosesurl
+	fi
+	if [ "$did_mosesscripts" = "0" ]; then
+		if [ -f $toolsdir/$scriptspack ]; then
+			rm $toolsdir/$scriptspack
+			if [ -d $toolsdir/$scriptsdir ]; then
+				rm -rf $toolsdir/$scriptsdir
+			fi
+			if [ -d $toolsdir/$scriptsnewdir ]; then
+				rm -rf $toolsdir/$scriptsnewdir
+			fi
+		fi
+		echo "Download Moses script package"
+		wget $scriptsurl
+	fi
+	if [ "$did_scorer" = "0" ]; then
+		if [ -f $toolsdir/$scorerpack ]; then
+			rm $toolsdir/$scorerpack
+		fi
+		echo "Download scorer package"
+		wget $scorerurl
+	fi
+fi
+
+
+if [ -f $mosesdir/create.moses.log ]; then
+	. $mosesdir/create.moses.log
+fi
+if [ "$did_irstlm" != "1" ]; then
+	echo "****************************************** IRSTLM ..."
+	if [ -f $toolsdir/$irstlmpack ]; then
+		tar -xzvf $toolsdir/$irstlmpack
+		if [ -d $toolsdir/$irstlmdir ]; then
+			mv -f $toolsdir/$irstlmdir $toolsdir/$irstlmnewdir
+		fi
+	else
+		wget $irstlmurl
+		tar -xzvf $irstlmpack
+		if [ -d $toolsdir/$irstlmdir ]; then
+			mv -f $toolsdir/$irstlmdir $toolsdir/$irstlmnewdir
+		fi
+	fi
+	if [ -d $toolsdir/$irstlmnewdir ]; then
+		cd $toolsdir/$irstlmnewdir
+		#./regenerate-makefiles.sh
+		./configure --prefix=$toolsdir/$irstlmnewdir
+		make
+		make install
+	fi
+	MachType=`uname -m`
+	if [ ! -f $toolsdir/$irstlmnewdir/bin/$MachType/quantize-lm ]; then
+		echo "************************ IRSTLM not correctly installed. Script will now exit."
+		sed -ie 's/^did_irstlm=.*$/did_irstlm=0/g' $mosesdir/create.moses.log
+		exit 0
+	else
+		echo "************************ IRSTLM correctly installed."
+		sed -ie 's/^did_irstlm=.*$/did_irstlm=1/g' $mosesdir/create.moses.log
+		export PATH=$toolsdir/$irstlmnewdir/bin/$MachType:$toolsdir/$irstlmnewdir/bin:$PATH
+		if [ "$did_moses" = "1" ]; then
+			echo "Even though Moses was already correctly installed, it needs to be reinstalled after having recompiled IRSTLM."
+			sed -ie 's/^did_moses=.*$/did_moses=0/g' $mosesdir/create.moses.log
+		fi
+	fi
+else
+	echo "************************ IRSTLM already correctly installed. Reusing it."
+	export PATH=$toolsdir/$irstlmnewdir/bin/$MachType:$toolsdir/$irstlmnewdir/bin:$PATH
+fi
+
+cd $toolsdir
+. $mosesdir/create.moses.log
+if [ "$did_randlm" != "1" ]; then
+	echo "****************************************** RandLM ..."
+	cd $toolsdir
+	if [ -f $toolsdir/$randlmpack ]; then
+		tar -xzvf $randlmpack
+	else
+		wget $randlmurl
+		tar -xzvf $randlmpack
+	fi
+	if [ -d $toolsdir/$randlmdir/src ]; then
+		sed '28i\#include <cstdio>' $toolsdir/$randlmdir/src/RandLMUtils.h > $toolsdir/$randlmdir/src/RandLMUtils.hr
+		mv $toolsdir/$randlmdir/src/RandLMUtils.hr $toolsdir/$randlmdir/src/RandLMUtils.h
+		cd $toolsdir/$randlmdir/src
+		make all
+	fi
+	if [ ! -f $toolsdir/$randlmdir/bin/buildlm ]; then
+		echo "************************ RandLM not correctly installed. Script will now exit."
+		sed -ie 's/^did_randlm=.*$/did_randlm=0/g' $mosesdir/create.moses.log
+		exit 0
+	else
+		echo "************************ RandLM correctly installed."
+		sed -ie 's/^did_randlm=.*$/did_randlm=1/g' $mosesdir/create.moses.log
+		export PATH=$toolsdir/$randlmdir/bin:$PATH
+		if [ "$did_moses" = "1" ]; then
+			echo "Even though Moses was already correctly installed, it needs to be reinstalled after having recompiled RandLM."
+			sed -ie 's/^did_moses=.*$/did_moses=0/g' $mosesdir/create.moses.log
+		fi
+	fi
+else
+	echo "************************ RandLM already correctly installed. Reusing it."
+	export PATH=$toolsdir/$randlmdir/bin:$PATH
+fi
+
+cd $toolsdir
+. $mosesdir/create.moses.log
+
+if [ "$did_mgiza" != "1" ]; then
+	echo "****************************************** MGIZA ..."
+	cd $toolsdir
+	if [ -f $toolsdir/$mgizapack ]; then
+		tar -xvzf $toolsdir/$mgizapack
+	else
+		wget $mgizaurl
+		tar -xvzf $toolsdir/$mgizapack
+	fi
+	if [ -d $toolsdir/$mgizadir ]; then
+		mv $toolsdir/$mgizadir $toolsdir/$mgizanewdir
+		cd $toolsdir/$mgizanewdir
+		./configure --prefix=$toolsdir/$mgizanewdir
+		make
+		make install
+	fi
+	if [ ! -f $toolsdir/$mgizanewdir/bin/symal ]; then
+		echo "************************ MGIZA not correctly installed. Script will now exit."
+		sed -ie 's/^did_mgiza=.*$/did_mgiza=0/g' $mosesdir/create.moses.log
+		exit 0
+	else
+		echo "************************ MGIZA correctly installed."
+		sed -ie 's/^did_mgiza=.*$/did_mgiza=1/g' $mosesdir/create.moses.log
+
+		# the train-model.perl script, as it is used by these scripts (which enable you to access otherwise hidden parameters), insists on using giza-pp; therefore, rename the
+		# MGIZA executables so that they have the names that this script requires; another solution is probably possible, but no time to test it now
+		cp $toolsdir/$mgizanewdir/bin/mgiza $toolsdir/$mgizanewdir/bin/GIZA++
+		cp $toolsdir/$mgizanewdir/bin/snt2cooc $toolsdir/$mgizanewdir/bin/snt2cooc.out
+
+		export PATH=$toolsdir/$mgizanewdir/bin:$toolsdir/$mgizanewdir/scripts:$PATH
+	fi
+else
+	echo "************************ MGIZA already correctly installed. Reusing it."
+	export PATH=$toolsdir/$mgizanewdir/bin:$toolsdir/$mgizanewdir/scripts:$PATH
+fi
+
+if [ "$did_moses" != "1" ]; then
+	echo "****************************************** Moses ..."
+	cd $toolsdir
+	if [ -f $toolsdir/$mosespack ]; then
+		tar -xvzf $toolsdir/$mosespack
+		chmod -R +rwx $toolsdir/$mosesnewdir
+	else
+		wget $mosesurl
+		tar -xvzf $toolsdir/$mosespack
+		chmod -R +rwx $toolsdir/$mosesnewdir
+	fi
+
+	export mosesdir
+
+	if [ -d $toolsdir/$mosesnewdir ]; then
+		cd $toolsdir/$mosesnewdir
+		./regenerate-makefiles.sh
+		./configure --with-irstlm=$toolsdir/$irstlmnewdir --with-randlm=$toolsdir/$randlmnewdir
+
+		make -j $mosesnumprocessors
+		cp $toolsdir/$mosesnewdir/$scriptsdir $toolsdir/$mosesnewdir/$scriptsnewdir
+		cd $toolsdir/$mosesnewdir/scripts
+		sed -e 's#TARGETDIR=\/home\/pkoehn\/statmt\/bin#TARGETDIR=toolsdir/mosesnewdir#g' -e 's#BINDIR=\/home\/pkoehn\/statmt\/bin#BINDIR=toolsdir/mgizanewdir/bin#g' -e "s#toolsdir#$toolsdir#g" -e "s#mgizanewdir#$mgizanewdir#g" -e "s#mosesnewdir#$mosesnewdir#g" $toolsdir/$mosesnewdir/scripts/Makefile > $toolsdir/$mosesnewdir/scripts/Makefile.new
+		mv $toolsdir/$mosesnewdir/scripts/Makefile.new $toolsdir/$mosesnewdir/scripts/Makefile
+		make release
+		if [ -d $toolsdir/$mosesnewdir/scripts?* ]; then
+			rm -rf $toolsdir/$mosesnewdir/scripts
+		fi
+	fi
+	if [ ! -f $toolsdir/$mosesnewdir/moses-cmd/src/moses ]; then
+		echo "************************ Moses not correctly installed. Script will now exit."
+		sed -ie 's/^did_moses=.*$/did_moses=0/g' $mosesdir/create.moses.log
+		exit 0
+	else
+		echo "************************ Moses correctly installed."
+		sed -ie 's/^did_moses=.*$/did_moses=1/g' $mosesdir/create.moses.log
+		export SCRIPTS_ROOTDIR=$toolsdir/$mosesnewdir/script*
+	fi
+else
+	echo "************************ Moses already correctly installed. Reusing it."
+	export SCRIPTS_ROOTDIR=$toolsdir/$mosesnewdir/script*
+fi
+
+if [ "$did_mosesscripts" != "1" ]; then
+	echo "****************************************** Moses scripts ..."
+	. $mosesdir/create.moses.log
+	cd $toolsdir
+	if [ -f $toolsdir/$scriptspack ]; then
+		tar -xzvf $toolsdir/$scriptspack
+	else
+		wget $scriptsurl
+		tar -xvzf $toolsdir/$scriptspack
+	fi
+	if [ ! -f $toolsdir/$scriptsdir/tokenizer.perl ]; then
+		echo "************************ Moses scripts not correctly copied. Script will now exit."
+		sed -ie 's/^did_mosesscripts=.*$/did_mosesscripts=0/g' $mosesdir/create.moses.log
+		exit 0
+	else
+		echo "************************ Moses scripts correctly copied."
+		sed -ie 's/^did_mosesscripts=.*$/did_mosesscripts=1/g' $mosesdir/create.moses.log
+	fi
+else
+	echo "************************ Moses scripts already correctly installed. Reusing it."
+fi
+
+if [ "$did_newscripts" != "1" ]; then
+	echo "****************************************** New and modified scripts and demo files  ..."
+	SAVEIFS=$IFS
+	IFS=$(echo -en "\n\b")
+	cd $prworkdir
+	if [ -d $prworkdir/modified-scripts ]; then
+		echo "***************** Copy nonbreaking_prefix.pt ..."
+		cp -f $prworkdir/modified-scripts/nonbreaking_prefix.pt $toolsdir/scripts/nonbreaking_prefixes
+		chmod +x $toolsdir/scripts/nonbreaking_prefixes/nonbreaking_prefix.pt
+		echo "***************** Copy mert-moses-new-modif.pl ..."
+		cp -f $prworkdir/modified-scripts/mert-moses-new-modif.pl $toolsdir/modified-scripts/mert-moses-new-modif.pl
+		chmod +x $toolsdir/modified-scripts/mert-moses-new-modif.pl
+		if [ -f $toolsdir/scripts/nonbreaking_prefixes/nonbreaking_prefix.pt -a -f $toolsdir/modified-scripts/mert-moses-new-modif.pl ]; then
+			sed -ie 's/^did_newscripts=.*$/did_newscripts=1/g' $mosesdir/create.moses.log
+		else
+			sed -ie 's/^did_newscripts=.*$/did_newscripts=0/g' $mosesdir/create.moses.log
+			echo "Some new/modified scripts could not be copied. Exiting ..."
+			IFS=$SAVEIFS
+			exit 0
+		fi
+	else
+		sed -ie 's/^did_newscripts=.*$/did_newscripts=0/g' $mosesdir/create.moses.log
+		echo "The structure of Moses for Mere Mortals was changed. Please restore the initial structure so that the installation can proceed. New and modified Moses scripts cannot be installed. Exiting ..."
+		exit 0
+	fi
+	IFS=$SAVEIFS
+
+	if [ -d ../data-files/corpora_for_training ]; then
+		echo "***************** Copy corpora_for_training ..."
+		cp ../data-files/corpora_for_training/* $mosesdir/corpora_for_training
+		if [ -f $mosesdir/corpora_for_training/300000.en ]; then
+			sed -ie 's/^did_newscripts=.*$/did_newscripts=1/g' $mosesdir/create.moses.log
+		else
+			sed -ie 's/^did_newscripts=.*$/did_newscripts=0/g' $mosesdir/create.moses.log
+			echo "Some corpora files needed for the demo of this script could not be copied. Exiting ..."
+			exit 0
+		fi
+	else
+		sed -ie 's/^did_newscripts=.*$/did_newscripts=0/g' $mosesdir/create.moses.log
+		echo " The structure of Moses for Mere Mortals was changed. Corpora for training cannot be installed. Please restore the initial structure so that the installation can proceed. Exiting ..."
+		exit 0
+	fi
+
+	if [ -d ../data-files/translation_input ]; then
+		cp ../data-files/translation_input/* $mosesdir/translation_input
+		if [ -f $mosesdir/translation_input/100.pt ]; then
+			sed -ie 's/^did_newscripts=.*$/did_newscripts=1/g' $mosesdir/create.moses.log
+		else
+			sed -ie 's/^did_newscripts=.*$/did_newscripts=0/g' $mosesdir/create.moses.log
+			echo "A demo file needed for translation (100.pt) could not be copied. Exiting ..."
+			exit 0
+		fi
+	else
+		echo " The structure of Moses for Mere Mortals was changed. Please restore the initial structure so that the installation can proceed. Exiting ..."
+		sed -ie 's/^did_newscripts=.*$/did_newscripts=0/g' $mosesdir/create.moses.log
+		exit 0
+	fi
+
+	if [ -d ../data-files/translation_reference ]; then
+		cp ../data-files/translation_reference/* $mosesdir/translation_reference
+		if [ -f $mosesdir/translation_reference/100.en.ref ]; then
+			sed -ie 's/^did_newscripts=.*$/did_newscripts=1/g' $mosesdir/create.moses.log
+		else
+			sed -ie 's/^did_newscripts=.*$/did_newscripts=0/g' $mosesdir/create.moses.log
+			echo "A demo file needed for translation (100.en) could not be copied. Exiting ..."
+			exit 0
+		fi
+	else
+		echo " The structure of Moses for Mere Mortals was changed. Please restore the initial structure so that the installation can proceed. Exiting ..."
+		sed -ie 's/^did_newscripts=.*$/did_newscripts=0/g' $mosesdir/create.moses.log
+		exit 0
+	fi
+else
+	echo "************************ Modified scripts and demo files already correctly installed. Reusing them."
+fi
+
+if [ "$did_scorer" != "1" ]; then
+	echo "****************************************** Scorer ..."
+	if [ ! -f $toolsdir/$scorerpack ]; then
+		cd $toolsdir
+		wget $scorerurl
+		if [ ! -f $toolsdir/$scorerpack ]; then
+			echo "************************ Scorer not correctly copied. Script will now exit."
+			sed -ie 's/^did_scorer=.*$/did_scorer=0/g' $mosesdir/create.moses.log
+			exit 0
+		else
+			chmod +x $toolsdir/$scorerpack
+			echo "************************ Scorer correctly copied."
+			sed -ie 's/^did_scorer=.*$/did_scorer=1/g' $mosesdir/create.moses.log
+		fi
+	else
+		echo "************************ Scorer correctly copied."
+		sed -ie 's/^did_scorer=.*$/did_scorer=1/g' $mosesdir/create.moses.log
+	fi
+else
+	echo "************************ Scorer already correctly installed. Reusing it."
+fi
+
+
+cd $toolsdir
+if [ -f $mosesdir/create.moses.loge ]; then
+	rm $mosesdir/create.moses.loge
+fi
+
+if [ "$removedownloadedpackges" = "1" ]; then
+	if [ -f $toolsdir/$irstlmpack ]; then
+		rm $toolsdir/$irstlmpack
+	fi
+	if [ -f $toolsdir/$irstlmdir ]; then
+		rm $toolsdir/$irstlmdir
+	fi
+	if [ -f $toolsdir/$randlmpack ]; then
+		rm $toolsdir/$randlmpack
+	fi
+	if [ -f $toolsdir/$mgizapack ]; then
+		rm $toolsdir/$mgizapack
+	fi
+	if [ -f $toolsdir/$mosespack ]; then
+		rm $toolsdir/$mosespack
+	fi
+	if [ -f $toolsdir/$mosessoftdir ]; then
+		rm $toolsdir/$mosessoftdir
+	fi
+	if [ -f $toolsdir/$scriptspack ]; then
+		rm $toolsdir/$scriptspack
+	fi
+fi
+echo ""
+echo "!!! Successful end of Moses installation. !!!"
+echo "Moses base directory located in $mosesdir"
+
+#*************************************************************************************************
+# Changes in versions 1.36, 1.37
+#*************************************************************************************************
+#Changed the data files (containing namely the demo corpus) to another location
+#*************************************************************************************************
+# Changes in version 1.35
+#*************************************************************************************************
+# Uses new Moses decoder (published in August 13, 2010 and updated in August 14, 2010)
+# Updates package dependencies
+#Suppresses giza-pp installation (which is not used by the train script)
+# Works in Ubuntu 10.04 LTS (and, if you adapt the package dependencies, with Ubuntu 9.10 and 9.04)

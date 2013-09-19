@@ -1,0 +1,25 @@
+/absolutize_moses_model.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/analyse_moses_model.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/build-generation-table.perl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/clean-corpus-n.perl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/clone_moses_model.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/combine_factors.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/exodus.perl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/filter-model-given-input.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/filter-rule-table.py/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/mert-moses-multi.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/mert-moses-robin.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/mert-moses.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/postprocess-lopar.perl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/reduce_combine.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/train-global-lexicon-model.perl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/train-model.perl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+/zmert-moses.pl/1.1.1.1/Sun Jan  6 16:54:11 2013//
+D/compact-rule-table////
+D/eppex////
+D/lexical-reordering////
+D/mbr////
+D/memscore////
+D/phrase-extract////
+D/symal////
+D/wrappers////

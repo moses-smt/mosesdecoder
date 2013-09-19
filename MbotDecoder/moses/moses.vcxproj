@@ -1,0 +1,328 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}</ProjectGuid>
+    <RootNamespace>moses</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\boost\boost_1_47;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\boost\boost_1_47;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\AlignmentInfo.cpp" />
+    <ClCompile Include="src\AlignmentInfoCollection.cpp" />
+    <ClCompile Include="src\BitmapContainer.cpp" />
+    <ClCompile Include="src\ChartCell.cpp" />
+    <ClCompile Include="src\ChartCellCollection.cpp" />
+    <ClCompile Include="src\ChartHypothesis.cpp" />
+    <ClCompile Include="src\ChartHypothesisCollection.cpp" />
+    <ClCompile Include="src\ChartManager.cpp" />
+    <ClCompile Include="src\ChartRuleLookupManagerMemory.cpp" />
+    <ClCompile Include="src\ChartRuleLookupManagerOnDisk.cpp" />
+    <ClCompile Include="src\ChartTranslationOption.cpp" />
+    <ClCompile Include="src\ChartTranslationOptionCollection.cpp" />
+    <ClCompile Include="src\ChartTranslationOptionList.cpp" />
+    <ClCompile Include="src\ChartTrellisDetour.cpp" />
+    <ClCompile Include="src\ChartTrellisDetourQueue.cpp" />
+    <ClCompile Include="src\ChartTrellisNode.cpp" />
+    <ClCompile Include="src\ChartTrellisPath.cpp" />
+    <ClCompile Include="src\ConfusionNet.cpp" />
+    <ClCompile Include="src\DecodeFeature.cpp" />
+    <ClCompile Include="src\DecodeGraph.cpp" />
+    <ClCompile Include="src\DecodeStep.cpp" />
+    <ClCompile Include="src\DecodeStepGeneration.cpp" />
+    <ClCompile Include="src\DecodeStepTranslation.cpp" />
+    <ClCompile Include="src\Dictionary.cpp" />
+    <ClCompile Include="src\DotChart.cpp" />
+    <ClCompile Include="src\DotChartInMemory.cpp" />
+    <ClCompile Include="src\DotChartOnDisk.cpp" />
+    <ClCompile Include="src\DummyScoreProducers.cpp" />
+    <ClCompile Include="src\Factor.cpp" />
+    <ClCompile Include="src\FactorCollection.cpp" />
+    <ClCompile Include="src\FactorTypeSet.cpp" />
+    <ClCompile Include="src\FeatureFunction.cpp" />
+    <ClCompile Include="src\FFState.cpp" />
+    <ClCompile Include="src\File.cpp" />
+    <ClCompile Include="src\FloydWarshall.cpp" />
+    <ClCompile Include="src\GenerationDictionary.cpp" />
+    <ClCompile Include="src\GlobalLexicalModel.cpp" />
+    <ClCompile Include="src\hash.cpp" />
+    <ClCompile Include="src\Hypothesis.cpp" />
+    <ClCompile Include="src\HypothesisStack.cpp" />
+    <ClCompile Include="src\HypothesisStackCubePruning.cpp" />
+    <ClCompile Include="src\HypothesisStackNormal.cpp" />
+    <ClCompile Include="src\InputFileStream.cpp" />
+    <ClCompile Include="src\InputType.cpp" />
+    <ClCompile Include="src\LexicalReordering.cpp" />
+    <ClCompile Include="src\LexicalReorderingState.cpp" />
+    <ClCompile Include="src\LexicalReorderingTable.cpp" />
+    <ClCompile Include="src\LMList.cpp" />
+    <ClCompile Include="src\LM\Base.cpp" />
+    <ClCompile Include="src\LM\Factory.cpp" />
+    <ClCompile Include="src\LM\Implementation.cpp" />
+    <ClCompile Include="src\LM\Joint.cpp" />
+    <ClCompile Include="src\LM\MultiFactor.cpp" />
+    <ClCompile Include="src\LM\SingleFactor.cpp" />
+    <ClCompile Include="src\LVoc.cpp" />
+    <ClCompile Include="src\Manager.cpp" />
+    <ClCompile Include="src\Parameter.cpp" />
+    <ClCompile Include="src\PartialTranslOptColl.cpp" />
+    <ClCompile Include="src\PCNTools.cpp" />
+    <ClCompile Include="src\Phrase.cpp" />
+    <ClCompile Include="src\PhraseDictionary.cpp" />
+    <ClCompile Include="src\PhraseDictionaryMemory.cpp" />
+    <ClCompile Include="src\PhraseDictionaryNode.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
+      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
+    </ClCompile>
+    <ClCompile Include="src\PhraseDictionaryNodeSCFG.cpp" />
+    <ClCompile Include="src\PhraseDictionaryOnDisk.cpp" />
+    <ClCompile Include="src\PhraseDictionarySCFG.cpp" />
+    <ClCompile Include="src\PhraseDictionaryTree.cpp" />
+    <ClCompile Include="src\PhraseDictionaryTreeAdaptor.cpp" />
+    <ClCompile Include="src\PrefixTreeMap.cpp" />
+    <ClCompile Include="src\ReorderingConstraint.cpp" />
+    <ClCompile Include="src\ReorderingStack.cpp" />
+    <ClCompile Include="src\RuleCube.cpp" />
+    <ClCompile Include="src\RuleCubeItem.cpp" />
+    <ClCompile Include="src\RuleCubeQueue.cpp" />
+    <ClCompile Include="src\RuleTableLoaderCompact.cpp" />
+    <ClCompile Include="src\RuleTableLoaderFactory.cpp" />
+    <ClCompile Include="src\RuleTableLoaderStandard.cpp" />
+    <ClCompile Include="src\ScoreComponentCollection.cpp" />
+    <ClCompile Include="src\ScoreIndexManager.cpp" />
+    <ClCompile Include="src\ScoreProducer.cpp" />
+    <ClCompile Include="src\Search.cpp" />
+    <ClCompile Include="src\SearchCubePruning.cpp" />
+    <ClCompile Include="src\SearchNormal.cpp" />
+    <ClCompile Include="src\Sentence.cpp" />
+    <ClCompile Include="src\SentenceStats.cpp" />
+    <ClCompile Include="src\SquareMatrix.cpp" />
+    <ClCompile Include="src\StaticData.cpp" />
+    <ClCompile Include="src\TargetPhrase.cpp" />
+    <ClCompile Include="src\TargetPhraseCollection.cpp" />
+    <ClCompile Include="src\ThreadPool.cpp" />
+    <ClCompile Include="src\Timer.cpp" />
+    <ClCompile Include="src\TranslationOption.cpp" />
+    <ClCompile Include="src\TranslationOptionCollection.cpp" />
+    <ClCompile Include="src\TranslationOptionCollectionConfusionNet.cpp" />
+    <ClCompile Include="src\TranslationOptionCollectionText.cpp" />
+    <ClCompile Include="src\TranslationOptionList.cpp" />
+    <ClCompile Include="src\TranslationSystem.cpp" />
+    <ClCompile Include="src\TreeInput.cpp" />
+    <ClCompile Include="src\TrellisPath.cpp" />
+    <ClCompile Include="src\TrellisPathCollection.cpp" />
+    <ClCompile Include="src\UserMessage.cpp" />
+    <ClCompile Include="src\Util.cpp" />
+    <ClCompile Include="src\Word.cpp" />
+    <ClCompile Include="src\WordLattice.cpp" />
+    <ClCompile Include="src\WordsBitmap.cpp" />
+    <ClCompile Include="src\WordsRange.cpp" />
+    <ClCompile Include="src\XmlOption.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\AlignmentInfo.h" />
+    <ClInclude Include="src\AlignmentInfoCollection.h" />
+    <ClInclude Include="src\BilingualDynSuffixArray.h" />
+    <ClInclude Include="src\BitmapContainer.h" />
+    <ClInclude Include="src\CellCollection.h" />
+    <ClInclude Include="src\ChartCell.h" />
+    <ClInclude Include="src\ChartCellCollection.h" />
+    <ClInclude Include="src\ChartHypothesis.h" />
+    <ClInclude Include="src\ChartHypothesisCollection.h" />
+    <ClInclude Include="src\ChartManager.h" />
+    <ClInclude Include="src\ChartRuleLookupManager.h" />
+    <ClInclude Include="src\ChartRuleLookupManagerMemory.h" />
+    <ClInclude Include="src\ChartRuleLookupManagerOnDisk.h" />
+    <ClInclude Include="src\ChartTranslationOption.h" />
+    <ClInclude Include="src\ChartTranslationOptionCollection.h" />
+    <ClInclude Include="src\ChartTranslationOptionList.h" />
+    <ClInclude Include="src\ChartTrellisDetour.h" />
+    <ClInclude Include="src\ChartTrellisDetourQueue.h" />
+    <ClInclude Include="src\ChartTrellisNode.h" />
+    <ClInclude Include="src\ChartTrellisPath.h" />
+    <ClInclude Include="src\ChartTrellisPathCollection.h" />
+    <ClInclude Include="src\ChartTrellisPathList.h" />
+    <ClInclude Include="src\ConfusionNet.h" />
+    <ClInclude Include="src\DecodeFeature.h" />
+    <ClInclude Include="src\DecodeGraph.h" />
+    <ClInclude Include="src\DecodeStep.h" />
+    <ClInclude Include="src\DecodeStepGeneration.h" />
+    <ClInclude Include="src\DecodeStepTranslation.h" />
+    <ClInclude Include="src\Dictionary.h" />
+    <ClInclude Include="src\DotChart.h" />
+    <ClInclude Include="src\DotChartInMemory.h" />
+    <ClInclude Include="src\DotChartOnDisk.h" />
+    <ClInclude Include="src\DummyScoreProducers.h" />
+    <ClInclude Include="src\DynSuffixArray.h" />
+    <ClInclude Include="src\Factor.h" />
+    <ClInclude Include="src\FactorCollection.h" />
+    <ClInclude Include="src\FactorTypeSet.h" />
+    <ClInclude Include="src\FeatureFunction.h" />
+    <ClInclude Include="src\FFState.h" />
+    <ClInclude Include="src\File.h" />
+    <ClInclude Include="src\FilePtr.h" />
+    <ClInclude Include="src\FloydWarshall.h" />
+    <ClInclude Include="src\GenerationDictionary.h" />
+    <ClInclude Include="src\GlobalLexicalModel.h" />
+    <ClInclude Include="src\gzfilebuf.h" />
+    <ClInclude Include="src\hash.h" />
+    <ClInclude Include="src\Hypothesis.h" />
+    <ClInclude Include="src\HypothesisStack.h" />
+    <ClInclude Include="src\HypothesisStackCubePruning.h" />
+    <ClInclude Include="src\HypothesisStackNormal.h" />
+    <ClInclude Include="src\InputFileStream.h" />
+    <ClInclude Include="src\InputType.h" />
+    <ClInclude Include="src\LexicalReordering.h" />
+    <ClInclude Include="src\LexicalReorderingState.h" />
+    <ClInclude Include="src\LexicalReorderingTable.h" />
+    <ClInclude Include="src\LMList.h" />
+    <ClInclude Include="src\LM\Base.h" />
+    <ClInclude Include="src\LM\Factory.h" />
+    <ClInclude Include="src\LM\Implementation.h" />
+    <ClInclude Include="src\LM\Joint.h" />
+    <ClInclude Include="src\LM\MultiFactor.h" />
+    <ClInclude Include="src\LM\SingleFactor.h" />
+    <ClInclude Include="src\LVoc.h" />
+    <ClInclude Include="src\Manager.h" />
+    <ClInclude Include="src\NGramCollection.h" />
+    <ClInclude Include="src\NGramNode.h" />
+    <ClInclude Include="src\NonTerminal.h" />
+    <ClInclude Include="src\ObjectPool.h" />
+    <ClInclude Include="src\OutputCollector.h" />
+    <ClInclude Include="src\Parameter.h" />
+    <ClInclude Include="src\PartialTranslOptColl.h" />
+    <ClInclude Include="src\PCNTools.h" />
+    <ClInclude Include="src\PDTAimp.h" />
+    <ClInclude Include="src\Phrase.h" />
+    <ClInclude Include="src\PhraseDictionary.h" />
+    <ClInclude Include="src\PhraseDictionaryDynSuffixArray.h" />
+    <ClInclude Include="src\PhraseDictionaryMemory.h" />
+    <ClInclude Include="src\PhraseDictionaryNode.h" />
+    <ClInclude Include="src\PhraseDictionaryNodeSCFG.h" />
+    <ClInclude Include="src\PhraseDictionaryOnDisk.h" />
+    <ClInclude Include="src\PhraseDictionarySCFG.h" />
+    <ClInclude Include="src\PhraseDictionaryTree.h" />
+    <ClInclude Include="src\PhraseDictionaryTreeAdaptor.h" />
+    <ClInclude Include="src\PrefixTree.h" />
+    <ClInclude Include="src\PrefixTreeMap.h" />
+    <ClInclude Include="src\ReorderingConstraint.h" />
+    <ClInclude Include="src\ReorderingStack.h" />
+    <ClInclude Include="src\RuleCube.h" />
+    <ClInclude Include="src\RuleCubeItem.h" />
+    <ClInclude Include="src\RuleCubeQueue.h" />
+    <ClInclude Include="src\RuleTableLoader.h" />
+    <ClInclude Include="src\RuleTableLoaderCompact.h" />
+    <ClInclude Include="src\RuleTableLoaderFactory.h" />
+    <ClInclude Include="src\RuleTableLoaderStandard.h" />
+    <ClInclude Include="src\ScoreComponentCollection.h" />
+    <ClInclude Include="src\ScoreIndexManager.h" />
+    <ClInclude Include="src\ScoreProducer.h" />
+    <ClInclude Include="src\Search.h" />
+    <ClInclude Include="src\SearchCubePruning.h" />
+    <ClInclude Include="src\SearchNormal.h" />
+    <ClInclude Include="src\Sentence.h" />
+    <ClInclude Include="src\SentenceStats.h" />
+    <ClInclude Include="src\SquareMatrix.h" />
+    <ClInclude Include="src\StaticData.h" />
+    <ClInclude Include="src\TargetPhrase.h" />
+    <ClInclude Include="src\TargetPhraseCollection.h" />
+    <ClInclude Include="src\ThreadPool.h" />
+    <ClInclude Include="src\Timer.h" />
+    <ClInclude Include="src\TranslationOption.h" />
+    <ClInclude Include="src\TranslationOptionCollection.h" />
+    <ClInclude Include="src\TranslationOptionCollectionConfusionNet.h" />
+    <ClInclude Include="src\TranslationOptionCollectionText.h" />
+    <ClInclude Include="src\TranslationOptionList.h" />
+    <ClInclude Include="src\TranslationSystem.h" />
+    <ClInclude Include="src\TreeInput.h" />
+    <ClInclude Include="src\TrellisPath.h" />
+    <ClInclude Include="src\TrellisPathCollection.h" />
+    <ClInclude Include="src\TrellisPathList.h" />
+    <ClInclude Include="src\TypeDef.h" />
+    <ClInclude Include="src\UniqueObject.h" />
+    <ClInclude Include="src\UserMessage.h" />
+    <ClInclude Include="src\Util.h" />
+    <ClInclude Include="src\Word.h" />
+    <ClInclude Include="src\WordConsumed.h" />
+    <ClInclude Include="src\WordLattice.h" />
+    <ClInclude Include="src\WordsBitmap.h" />
+    <ClInclude Include="src\WordsRange.h" />
+    <ClInclude Include="src\XmlOption.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

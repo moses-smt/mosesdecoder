@@ -1,0 +1,171 @@
+// $Id: Phrase.h,v 1.1.1.1 2013/01/06 16:54:16 braunefe Exp $
+// vim:tabstop=2
+
+/***********************************************************************
+Moses - factored phrase-based language decoder
+Copyright (C) 2006 University of Edinburgh
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+***********************************************************************/
+
+#ifndef moses_Phrase_h
+#define moses_Phrase_h
+
+#include <iostream>
+#include <vector>
+#include <list>
+#include <string>
+#include "Word.h"
+#include "WordsBitmap.h"
+#include "TypeDef.h"
+#include "Util.h"
+
+#include "util/string_piece.hh"
+
+namespace Moses
+{
+
+class Phrase
+{
+  friend std::ostream& operator<<(std::ostream&, const Phrase&);
+private:
+
+  std::vector<Word>	m_words;
+
+public:
+  /** No longer does anything as not using mem pool for Phrase class anymore */
+  static void InitializeMemPool();
+  static void FinalizeMemPool();
+
+  /** create empty phrase
+  */
+  Phrase(size_t reserveSize);
+  /** create phrase from vectors of words	*/
+  Phrase(const std::vector< const Word* > &mergeWords);
+
+  /**mbot : copy constructor for getting source side*/
+  Phrase(const Phrase &copy);
+
+  /** destructor */
+  virtual ~Phrase();
+
+  /** Fills phrase with words from format string, typically from phrase table or sentence input
+  	* \param factorOrder factor types of each element in 2D string vector
+  	* \param phraseString formatted input string to parse
+  	*	\param factorDelimiter delimiter between factors.
+  */
+  void CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter);
+
+  virtual void CreateFromStringNewFormat(FactorDirection direction
+                                 , const std::vector<FactorType> &factorOrder
+                                 , const std::string &phraseString
+                                 , const std::string &factorDelimiter
+                                 , Word &lhs);
+
+  /**	copy factors from the other phrase to this phrase.
+  	IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
+  */
+  void MergeFactors(const Phrase &copy);
+  //! copy a single factor (specified by factorType)
+  void MergeFactors(const Phrase &copy, FactorType factorType);
+  //! copy all factors specified in factorVec and none others
+  void MergeFactors(const Phrase &copy, const std::vector<FactorType>& factorVec);
+
+  /** compare 2 phrases to ensure no factors are lost if the phrases are merged
+  *	must run IsCompatible() to ensure incompatible factors aren't being overwritten
+  */
+  bool IsCompatible(const Phrase &inputPhrase) const;
+  bool IsCompatible(const Phrase &inputPhrase, FactorType factorType) const;
+  bool IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
+
+  //! number of words
+  //new : all methods made virtual
+  virtual size_t GetSize() const {
+    return m_words.size();
+  }
+
+  virtual inline Word &GetWord(size_t pos) {
+    return m_words[pos];
+  }
+
+  //! word at a particular position
+  virtual inline const Word &GetWord(size_t pos) const {
+        return m_words[pos];
+  }
+
+  //! particular factor at a particular position
+  virtual inline const Factor *GetFactor(size_t pos, FactorType factorType) const {
+    const Word &ptr = m_words[pos];
+    return ptr[factorType];
+  }
+
+  virtual inline void SetFactor(size_t pos, FactorType factorType, const Factor *factor) {
+    Word &ptr = m_words[pos];
+    ptr[factorType] = factor;
+  }
+
+  virtual size_t GetNumTerminals() const;
+
+  //! whether the 2D vector is a substring of this phrase
+  virtual bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
+                , const std::vector<FactorType> &inputFactor) const;
+
+  //! create an empty word at the end of the phrase
+  virtual Word &AddWord();
+  //! create copy of input word at the end of the phrase
+  virtual void AddWord(const Word &newWord) {
+    AddWord() = newWord;
+  }
+
+  /** appends a phrase at the end of current phrase **/
+  virtual void Append(const Phrase &endPhrase);
+  virtual void PrependWord(const Word &newWord);
+
+  virtual void Clear() {
+    m_words.clear();
+  }
+
+  virtual void RemoveWord(size_t pos) {
+    CHECK(pos < m_words.size());
+    m_words.erase(m_words.begin() + pos);
+  }
+
+  //! create new phrase class that is a substring of this phrase
+  virtual Phrase GetSubString(const WordsRange &wordsRange) const;
+
+  //! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
+  virtual std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const;
+
+  TO_STRING();
+
+
+  virtual int Compare(const Phrase &other) const;
+
+  /** transitive comparison between 2 phrases
+   *		used to insert & find phrase in dictionary
+   */
+  virtual bool operator< (const Phrase &compare) const {
+    return Compare(compare) < 0;
+  }
+
+  virtual bool operator== (const Phrase &compare) const {
+    return Compare(compare) == 0;
+  }
+
+};
+
+
+}
+#endif
