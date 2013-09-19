@@ -122,5 +122,18 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
   return true;
 }
 
+void SentenceAlignment::invertAlignment()
+{
+	alignedToS.resize(source.size());
+	for (size_t targetPos = 0; targetPos < alignedToT.size(); ++targetPos) {
+		const std::vector<int> &vec = alignedToT[targetPos];
+		for (size_t i = 0; i < vec.size(); ++i) {
+			int sourcePos = vec[i];
+			alignedToS[sourcePos].push_back(targetPos);
+		}
+
+	}
+}
+
 }
 
