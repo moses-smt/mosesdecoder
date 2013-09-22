@@ -290,6 +290,10 @@ rule failure-message ( ok ? ) {
       echo "The build failed.  If you need support, run:" ;
       echo "  $(args) --debug-configuration -d2 >build.log" ;
       echo "then attach build.log to your e-mail." ;
+      echo "You MUST do 3 things before sending to the mailing list:" ;
+      echo "   1. Register at http://mailman.mit.edu/mailman/listinfo/moses-support" ;
+      echo "   2. Zip up your build.log file before attaching it to the email" ;
+      echo "   3. Say what is the EXACT command you executed when you got the error" ;
     }
     echo "ERROR" ;
   } else {
