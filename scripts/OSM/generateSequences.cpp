@@ -6,6 +6,7 @@
 #include <set>
 #include <cstdlib>
 
+
 using namespace std;
 
 
@@ -21,57 +22,40 @@ int stringToInteger(string s)
 void loadInput(const char * fileName, vector <string> & input)
 {
 
-  ifstream sr (fileName);
-  char* tmp;
-
-  if(sr.is_open()) {
-    while(! sr.eof() ) {
-
-      tmp= new char[5000];
-      sr.getline (tmp,5000);
-      input.push_back(tmp);
-      //cout<<tmp<<input.size()<<endl;
-      delete [] tmp;
-    }
-
-    sr.close();
-  } else {
-    cout<<"Unable to read "<<fileName<<endl;
-    exit(1);
-  }
+	ifstream sr (fileName);
+	string line;
+	
+	if(sr.is_open())
+	{
+		while(getline(sr , line ))
+		{			
+			input.push_back(line);	
+		}
+	
+		sr.close();
+	}
+	else
+	{
+		cout<<"Unable to read "<<fileName<<endl;
+		exit(1);
+	}
 
 }
 
-void getWords(string inp, vector <string> & currInput)
+void getWords(string s, vector <string> & currInput)
 {
-  currInput.clear();
+   istringstream iss(s);
+   currInput.clear();
+    do
+    {
+        string sub;
+        iss >> sub;
+	currInput.push_back(sub);
 
-  int a=0;
-  a = inp.find(' ', inp.length()-1);
+    } while (iss);
 
-  if( a == -1)
-    inp.append(" ");
-
-  a=0;
-  int b=0;
-
-  for (int j=0; j<inp.length(); j++) {
-
-    a=inp.find(' ',b);
-
-    if(a != -1) {
-      currInput.push_back(inp.substr(b,a-b));
-
-      b=a+1;
-      j=b;
-    } else {
-      j=inp.length();
-    }
-
-  }
-
+   currInput.pop_back();
 }
-
 
 string getTranslation(int index, vector < pair <string , vector <int> > > & gCepts , vector <string> & currF , map <string,int> & singletons)
 {
@@ -479,57 +463,58 @@ void constructCepts(vector < pair < set <int> , set <int> > > & ceptsInPhrase, s
 int main(int argc, char * argv[])
 {
 
-  vector <string> e;
-  vector <string> f;
-  vector <string> a;
-  vector <string> singletons;
-  map <string,int> sTons;
-  vector < pair < set <int> , set <int> > > ceptsInPhrase;
-  vector < pair < string , vector <int> > > gCepts;
+	vector <string> e;
+	vector <string> f;
+	vector <string> a;
+	vector <string> singletons;
+	map <string,int> sTons;
+	vector < pair < set <int> , set <int> > > ceptsInPhrase;
+	vector < pair < string , vector <int> > > gCepts; 
+	
+	set <int> sourceNullWords;
+	set <int> targetNullWords;
+	
+	vector <string> currE;
+	vector <string> currF;
+	vector <string> currA;
 
-  set <int> sourceNullWords;
-  set <int> targetNullWords;
+	loadInput(argv[4],singletons);
 
-  vector <string> currE;
-  vector <string> currF;
-  vector <string> currA;
+	for(int i=0; i<singletons.size(); i++)
+	  sTons[singletons[i]]=i;
 
-  loadInput(argv[4],singletons);
+	loadInput(argv[1],e);
+	loadInput(argv[2],f);
+	loadInput(argv[3],a);
+	
 
-  for(int i=0; i<singletons.size(); i++)
-    sTons[singletons[i]]=i;
+	for (int i=0; i<a.size(); i++)
+	{
+		
+	
+		getWords(e[i],currE);
+		getWords(f[i],currF);
+		getWords(a[i],currA);
+		
+		constructCepts(ceptsInPhrase, sourceNullWords , targetNullWords, currA , currE.size(), currF.size());
+		//cout<<"CC done"<<endl;
+		ceptsInGenerativeStoryFormat(ceptsInPhrase , gCepts , sourceNullWords, currE);
+		//cout<<"format done"<<endl;	
+		// printCepts(gCepts, currF);
+		generateStory(gCepts, targetNullWords ,currF,sTons);
 
-  loadInput(argv[1],e);
-  loadInput(argv[2],f);
-  loadInput(argv[3],a);
-
-
-  for (int i=0; i<a.size()-1; i++) {
-
-
-    getWords(e[i],currE);
-    getWords(f[i],currF);
-    getWords(a[i],currA);
-
-    constructCepts(ceptsInPhrase, sourceNullWords , targetNullWords, currA , currE.size(), currF.size());
-    //cout<<"CC done"<<endl;
-    ceptsInGenerativeStoryFormat(ceptsInPhrase , gCepts , sourceNullWords, currE);
-    //cout<<"format done"<<endl;
-    // printCepts(gCepts, currF);
-    generateStory(gCepts, targetNullWords ,currF,sTons);
-
-
-    /*
-    cout<<"________________________________________"<<endl;
-
-    cout<<"Press any integer to continue ..."<<endl;
-    int xx;
-    cin>>xx;
-    */
-
-  }
+		
+		/*
+		cout<<"________________________________________"<<endl;
+		
+		cout<<"Press any integer to continue ..."<<endl;
+		int xx;
+		cin>>xx;
+		*/
+		
+	}	
 
 
-  return 0;
-
+	return 0;
+	
 }
