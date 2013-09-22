@@ -6,6 +6,7 @@
 #include <set>
 #include <cstdlib>
 
+
 using namespace std;
 
 
@@ -22,18 +23,13 @@ void loadInput(const char * fileName, vector <string> & input)
 {
 
 	ifstream sr (fileName);
-	char* tmp;
+	string line;
 	
 	if(sr.is_open())
 	{
-		while(! sr.eof() )
-		{
-						
-			tmp= new char[5000];
-			sr.getline (tmp,5000);
-			input.push_back(tmp);
-			//cout<<tmp<<input.size()<<endl;
-			delete [] tmp;
+		while(getline(sr , line ))
+		{			
+			input.push_back(line);	
 		}
 	
 		sr.close();
@@ -46,38 +42,19 @@ void loadInput(const char * fileName, vector <string> & input)
 
 }
 
-void getWords(string inp, vector <string> & currInput)
+void getWords(string s, vector <string> & currInput)
 {
-	currInput.clear();
+   istringstream iss(s);
+   currInput.clear();
+    do
+    {
+        string sub;
+        iss >> sub;
+	currInput.push_back(sub);
 
-	int a=0;
-	a = inp.find(' ', inp.length()-1);
+    } while (iss);
 
-	if( a == -1)
-		inp.append(" ");
-
-	a=0;
-	int b=0;
-
-	for (int j=0; j<inp.length(); j++)
-	{
-			
-		a=inp.find(' ',b);
-	
-		if(a != -1)
-		{	
-			currInput.push_back(inp.substr(b,a-b));
-			
-			b=a+1;
-			j=b;
-		}
-		else
-		{
-			j=inp.length();
-		}
-	
-	}
-
+   currInput.pop_back();
 }
 
 
@@ -565,7 +542,7 @@ int main(int argc, char * argv[])
 	loadInput(argv[3],a);
 	
 
-	for (int i=0; i<a.size()-1; i++)
+	for (int i=0; i<a.size(); i++)
 	{
 		
 	
