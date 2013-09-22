@@ -1,0 +1,99 @@
+# -*- Makefile -*-
+
+# some variables need to be set before m4m modules are included
+.SECONDARY:
+
+MOSES_ROOT = ${HOME}/code/moses/master/mosesdecoder
+MGIZA_ROOT = ${HOME}/tools/mgiza
+fast_align = ${HOME}/bin/fast_align 
+
+# L1: source language; L2: target language
+L1   = de
+L2   = en
+WDIR = $(CURDIR)
+
+include ${MOSES_ROOT}/contrib/m4m/modules/m4m.m4m
+
+# both systems use the same language model
+L2raw    := $(wildcard ${WDIR}/crp/trn/*/raw/*.${L2}.gz)
+L2data   := $(subst /raw/,/cased/,${L2raw})
+lm.order  = 5
+lm.factor = 0
+lm.lazy   = 1 
+lm.file   = ${WDIR}/lm/${L2}.5-grams.kenlm
+${lm.file}: | $(L2data)
+$(eval $(call add_kenlm,${lm.file},${lm.order},${lm.factor},${lm.lazy}))
+.INTERMEDIATE: ${L2data}
+
+dmodels = wbe-mslr-bidirectional-fe-allff
+mysystem  = systems/${word-alignment}-aligned
+myptable  = model/tm/${aligner}.${L1}-${L2}
+mydtable  = model/dm/${aligner}.${L1}-${L2}
+
+wa ?= $(error wa not specified on command line)
+SYSTEMS :=
+aligner :=
+$(foreach a,${wa},\
+$(eval aligner:=${a});\
+$(eval $(clear-ptables));\
+$(eval $(clear-dtables));\
+$(eval SYSTEMS+=systems/${a}-aligned);\
+$(eval $(call add_binary_phrase_table,0,0,4,$${myptable}));\
+$(eval $(call add_binary_reordering_table,0,0,8,\
+       ${dmodels},$${mydtable},$${myptable}));\
+$(eval $(call create_moses_ini,$${mysystem})))
+
+aln: $(foreach a,${wa},${WDIR}/crp/trn/aln/$a/${L1}-${L2}.symal.gz)
+info:
+dtable: ${DTABLES}
+ptable: ${PTABLES}
+system: $(addsuffix /moses.ini.0,${SYSTEMS})
+eval:    ${EVALUATIONS}
+
+
+ifdef tune.runs
+
+TUNED_SYSTEMS :=
+EVALUATIONS   :=
+$(eval $(tune_all_systems))
+$(eval $(bleu_score_all_systems))
+tune: ${TUNED_SYSTEMS}
+	echo TUNED ${TUNED_SYSTEMS}
+all: ${EVALUATIONS} 
+
+else
+
+tune: all
+
+# The recursive calls below make sure that tuning runs happen sequentially 
+# (moses runs multi-threaded anyway). The reason is that we may want to have
+# first results as soon as possible.
+tune.runs := 1 1
+$(info TUNE RUNS ${tune.runs})
+all: 
+	$(foreach n,$(shell seq ${tune.runs}),\
+	${MAKE} -f $(word 1, ${MAKEFILE_LIST}) \
+	tune.runs="$n $n" ${MAKECMDGOALS} -${MAKEFLAGS})
+
+endif
+
+.PHONY: $(addprefix reset-,lm tm dm all aln tune eval systems)
+reset-aln: reset-mm
+	-rm -rf $(foreach a,${wa},crp/trn/aln/${a})
+reset-mm: reset-dm reset-tm
+	-rm -rf $(foreach a,${wa},crp/trn/mm/${a})
+reset-dm: reset-systems
+	-rm -rf $(foreach a,${wa},model/dm/${a}.*)
+reset-tm: reset-systems
+	-rm -rf $(foreach a,${wa},model/tm/${a}.*)
+reset-systems: 
+	-rm -rf ${SYSTEMS}
+reset-tune: 
+	-rm -rf $(foreach s,${SYSTEMS}/$s/tune)
+reset-eval: 
+	-rm -rf $(foreach s,${SYSTEMS},$s/eval)
+reset-lm: 
+	-rm -rf lm
+reset-all: reset-lm reset-aln
+	-rm -rf $(wildcard crp/trn/*/[ct]* crp/dev/[ct]* crp/tst/[ct]*) 
+	-rm -rf aux

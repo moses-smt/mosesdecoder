@@ -350,7 +350,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
       out << "||| ";
     }
     Phrase outPhrase(ARRAY_SIZE_INCR);
-    hypo->CreateOutputPhrase(outPhrase);
+    hypo->GetOutputPhrase(outPhrase);
 
     // delete 1st & last
     CHECK(outPhrase.GetSize() >= 2);

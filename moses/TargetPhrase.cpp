@@ -45,6 +45,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 
   //ACAT
@@ -59,6 +60,7 @@ TargetPhrase::TargetPhrase()
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 }
 
@@ -69,6 +71,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 }
 
@@ -86,6 +89,12 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
     m_lhsTarget = NULL;
   }
 
+  if (copy.m_ruleSource) {
+	  m_ruleSource = new Phrase(*copy.m_ruleSource);
+  }
+  else {
+	  m_ruleSource = NULL;
+  }
 }
 
 TargetPhrase::~TargetPhrase()
@@ -93,6 +102,7 @@ TargetPhrase::~TargetPhrase()
   //cerr << "m_lhsTarget=" << m_lhsTarget << endl;
 
   delete m_lhsTarget;
+  delete m_ruleSource;
 }
 
 #ifdef HAVE_PROTOBUF
@@ -135,7 +145,7 @@ void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    ff.Evaluate(input, inputPath, m_scoreBreakdown);
+    ff.Evaluate(input, inputPath, *this, m_scoreBreakdown);
   }
 }
 
@@ -201,17 +211,46 @@ void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>
   m_fullScore += copy.m_fullScore;
 }
 
+void TargetPhrase::SetProperties(const StringPiece &str)
+{
+	if (str.size() == 0) {
+		return;
+	}
+
+  vector<string> toks;
+  TokenizeMultiCharSeparator(toks, str.as_string(), "{{");
+  for (size_t i = 0; i < toks.size(); ++i) {
+	  string &tok = toks[i];
+	  if (tok.empty()) {
+		  continue;
+	  }
+	  size_t endPos = tok.rfind("}");
+
+	  tok = tok.substr(0, endPos - 1);
+
+	  vector<string> keyValue = TokenizeFirstOnly(tok, " ");
+	  CHECK(keyValue.size() == 2);
+	  SetProperty(keyValue[0], keyValue[1]);
+  }
+}
+
 void TargetPhrase::GetProperty(const std::string &key, std::string &value, bool &found) const
 {
-	std::map<std::string, std::string>::const_iterator iter;
-	iter = m_properties.find(key);
-	if (iter == m_properties.end()) {
-		found = false;
-	}
-	else {
-		found = true;
-		value = iter->second;
-	}
+  std::map<std::string, std::string>::const_iterator iter;
+  iter = m_properties.find(key);
+  if (iter == m_properties.end()) {
+    found = false;
+  } else {
+    found = true;
+    value = iter->second;
+  }
+}
+
+void TargetPhrase::SetRuleSource(const Phrase &ruleSource) const
+{
+  if (m_ruleSource == NULL) {
+	  m_ruleSource = new Phrase(ruleSource);
+  }
 }
 
 void swap(TargetPhrase &first, TargetPhrase &second)

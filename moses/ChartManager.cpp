@@ -87,6 +87,9 @@ void ChartManager::ProcessSentence()
       m_parser.Create(range, m_translationOptionList);
       m_translationOptionList.ApplyThreshold();
 
+      const InputPath &inputPath = m_parser.GetInputPath(range);
+      m_translationOptionList.Evaluate(m_source, inputPath);
+
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
 
@@ -126,6 +129,7 @@ void ChartManager::ProcessSentence()
 void ChartManager::AddXmlChartOptions()
 {
   const StaticData &staticData = StaticData::Instance();
+
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {
     cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl;

@@ -14,7 +14,6 @@ class TargetPhrase;
 class TranslationOption;
 class Hypothesis;
 class ChartHypothesis;
-class FFState;
 class InputType;
 class ScoreComponentCollection;
 class WordsBitmap;
@@ -100,8 +99,7 @@ public:
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const {
-  }
+                        , ScoreComponentCollection &estimatedFutureScore) const = 0;
 
   // This method is called once all the translation options are retrieved from the phrase table, and
   // just before search.
@@ -109,8 +107,8 @@ public:
   // Currently not used by any FF. Not called by moses_chart
   virtual void Evaluate(const InputType &input
                         , const InputPath &inputPath
-                        , ScoreComponentCollection &scoreBreakdown) const {
-  }
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown) const = 0;
 
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();

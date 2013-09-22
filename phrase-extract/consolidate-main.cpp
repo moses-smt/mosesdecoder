@@ -41,7 +41,6 @@ bool lowCountFlag = false;
 bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
 bool logProbFlag = false;
-bool outputNTLengths = false;
 inline float maybeLogProb( float a )
 {
   return logProbFlag ? log(a) : a;
@@ -62,7 +61,7 @@ int main(int argc, char* argv[])
        << "consolidating direct and indirect rule tables\n";
 
   if (argc < 4) {
-    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] [--OutputNTLengths] \n";
+    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] \n";
     exit(1);
   }
   char* &fileNameDirect = argv[1];
@@ -119,8 +118,6 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
-    } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
-      outputNTLengths = true;
     } else {
       cerr << "ERROR: unknown option " << argv[i] << endl;
       exit(1);
@@ -314,10 +311,6 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 
     // counts, for debugging
     fileConsolidated << "||| " << countE << " " << countF << " " << countEF;
-
-    if (outputNTLengths) {
-      fileConsolidated << " ||| " << itemDirect[5];
-    }
 
     // count bin feature (as a sparse feature)
     if (sparseCountBinFeatureFlag ||

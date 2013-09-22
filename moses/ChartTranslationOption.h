@@ -13,6 +13,7 @@ class ChartTranslationOption
 protected:
   const TargetPhrase &m_targetPhrase;
   ScoreComponentCollection m_scoreBreakdown;
+  const InputPath *m_inputPath;
 
 public:
   ChartTranslationOption(const TargetPhrase &targetPhrase);
@@ -20,6 +21,11 @@ public:
   const TargetPhrase &GetPhrase() const {
     return m_targetPhrase;
   }
+
+  void SetInputPath(const InputPath *inputPath)
+  { m_inputPath = inputPath; }
+  const InputPath *GetInputPath() const
+  { return m_inputPath; }
 
   const ScoreComponentCollection &GetScores() const {
     return m_scoreBreakdown;

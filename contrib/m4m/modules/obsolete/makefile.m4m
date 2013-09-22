@@ -1,0 +1,18 @@
+# -*- Makefile -*-
+
+runs/%/Makefile:
+	mkdir -p $(@D)
+	mkdir $@.lock
+	echo $(call lockline) > $@.lock/owner
+	$(foreach e,${eval-sets}, \
+	$(foreach m,${eval-metrics}, 
+	echo "evaluation/$*/report: sets += set=$e,type=$m,file=evaluation/$*/$e.$m" >> $@_;) \
+	echo "evaluation/$*/report: sets += set=$e,type=analysis-precision,file=evaluation/$*/$e.analysis" >> $@_; \
+	echo "evaluation/$*/report: sets += set=$e,type=analysis-coverage,file=evaluation/$*/$e.analysis" >> $@_;) 
+	$(foreach e,${eval-sets}, \
+	$(foreach m,${eval-metrics}, 
+	echo "evaluation/$*/report: evaluation/$*/$e.$m" >> $@_;) \
+	echo "evaluation/$*/report: evaluation/$*/$e.analysis" >> $@_;)
+	mv $@_ $@
+	rm $@.lock/owner
+	rmdir $@.lock

@@ -70,6 +70,7 @@ public:
     backwardLM(
       static_cast< BackwardLanguageModel<lm::ngram::ProbingModel> * >(
         ConstructBackwardLM(
+          "LM1=1.0",
           boost::unit_test::framework::master_test_suite().argv[1],
           0,
           false)
@@ -116,9 +117,11 @@ public:
       outputFactorOrder.push_back(0);
 
       phrase.CreateFromString(
+        Input,
         outputFactorOrder,
         "the",
-        StaticData::Instance().GetFactorDelimiter());
+        StaticData::Instance().GetFactorDelimiter(),
+        NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
 
@@ -141,9 +144,11 @@ public:
       outputFactorOrder.push_back(0);
 
       phrase.CreateFromString(
+        Input,
         outputFactorOrder,
         "the licenses",
-        StaticData::Instance().GetFactorDelimiter());
+        StaticData::Instance().GetFactorDelimiter(),
+        NULL);
 
       BOOST_CHECK( phrase.GetSize() == 2 );
 
@@ -166,9 +171,11 @@ public:
       outputFactorOrder.push_back(0);
 
       phrase.CreateFromString(
+        Input,
         outputFactorOrder,
         "the licenses for",
-        StaticData::Instance().GetFactorDelimiter());
+        StaticData::Instance().GetFactorDelimiter(),
+        NULL);
 
       BOOST_CHECK( phrase.GetSize() == 3 );
 
@@ -191,9 +198,11 @@ public:
       outputFactorOrder.push_back(0);
 
       phrase.CreateFromString(
+        Input,
         outputFactorOrder,
         "the licenses for most",
-        StaticData::Instance().GetFactorDelimiter());
+        StaticData::Instance().GetFactorDelimiter(),
+        NULL);
 
       BOOST_CHECK( phrase.GetSize() == 4 );
 
@@ -235,9 +244,11 @@ public:
       outputFactorOrder.push_back(0);
 
       phrase.CreateFromString(
+        Input,
         outputFactorOrder,
         "the",
-        StaticData::Instance().GetFactorDelimiter());
+        StaticData::Instance().GetFactorDelimiter(),
+        NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
 
@@ -261,9 +272,11 @@ public:
       outputFactorOrder.push_back(0);
 
       phrase.CreateFromString(
+        Input,
         outputFactorOrder,
         "licenses",
-        StaticData::Instance().GetFactorDelimiter());
+        StaticData::Instance().GetFactorDelimiter(),
+        NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
 
@@ -287,9 +300,11 @@ public:
       outputFactorOrder.push_back(0);
 
       phrase.CreateFromString(
+        Input,
         outputFactorOrder,
         "for",
-        StaticData::Instance().GetFactorDelimiter());
+        StaticData::Instance().GetFactorDelimiter(),
+        NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
 
@@ -313,9 +328,11 @@ public:
       outputFactorOrder.push_back(0);
 
       phrase.CreateFromString(
+        Input,
         outputFactorOrder,
         "most",
-        StaticData::Instance().GetFactorDelimiter());
+        StaticData::Instance().GetFactorDelimiter(),
+        NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
 

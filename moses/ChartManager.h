@@ -100,7 +100,6 @@ public:
   unsigned GetNextHypoId() {
     return m_hypothesisId++;
   }
-
 };
 
 }

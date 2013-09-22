@@ -1,3 +1,4 @@
+#include <map>
 #include "StaticData.h"
 #include "WordLattice.h"
 #include "PCNTools.h"
@@ -21,9 +22,19 @@ void WordLattice::Print(std::ostream& out) const
     out<<i<<" -- ";
     for(size_t j=0; j<data[i].size(); ++j) {
       out<<"("<<data[i][j].first.ToString()<<", ";
-      for(std::vector<float>::const_iterator scoreIterator = data[i][j].second.begin(); scoreIterator<data[i][j].second.end(); scoreIterator++) {
-        out<<*scoreIterator<<", ";
+
+      // dense
+      std::vector<float>::const_iterator iterDense;
+      for(iterDense = data[i][j].second.denseScores.begin(); iterDense < data[i][j].second.denseScores.end(); ++iterDense) {
+        out<<", "<<*iterDense;
       }
+
+      // sparse
+      std::map<StringPiece, float>::const_iterator iterSparse;
+      for(iterSparse = data[i][j].second.sparseScores.begin(); iterSparse != data[i][j].second.sparseScores.end(); ++iterSparse) {
+        out << ", " << iterSparse->first << "=" << iterSparse->second;
+      }
+
       out << GetColumnIncrement(i,j) << ") ";
     }
 
@@ -54,17 +65,16 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
     for (size_t j=0; j<col.size(); ++j) {
       const PCN::CNAlt& alt = col[j];
 
-
       //check for correct number of link parameters
-      if (alt.first.second.size() != numInputScores) {
-        TRACE_ERR("ERROR: need " << numInputScores << " link parameters, found " << alt.first.second.size() << " while reading column " << i << " from " << debug_line << "\n");
+      if (alt.m_denseFeatures.size() != numInputScores) {
+        TRACE_ERR("ERROR: need " << numInputScores << " link parameters, found " << alt.m_denseFeatures.size() << " while reading column " << i << " from " << debug_line << "\n");
         return false;
       }
 
       //check each element for bounds
       std::vector<float>::const_iterator probsIterator;
       data[i][j].second = std::vector<float>(0);
-      for(probsIterator = alt.first.second.begin(); probsIterator < alt.first.second.end(); probsIterator++) {
+      for(probsIterator = alt.m_denseFeatures.begin(); probsIterator < alt.m_denseFeatures.end(); probsIterator++) {
         IFVERBOSE(1) {
           if (*probsIterator < 0.0f) {
             TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n");
@@ -75,16 +85,19 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
             //*probsIterator = 1.0f;
           }
         }
-        data[i][j].second.push_back(std::max(static_cast<float>(log(*probsIterator)), LOWEST_SCORE));
+
+        float score = std::max(static_cast<float>(log(*probsIterator)), LOWEST_SCORE);
+        ScorePair &scorePair = data[i][j].second;
+        scorePair.denseScores.push_back(score);
       }
       //store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
       if (addRealWordCount) {
         //only add count if not epsilon
-        float value = (alt.first.first=="" || alt.first.first==EPSILON) ? 0.0f : -1.0f;
-        data[i][j].second.push_back(value);
+        float value = (alt.m_word=="" || alt.m_word==EPSILON) ? 0.0f : -1.0f;
+        data[i][j].second.denseScores.push_back(value);
       }
-      String2Word(alt.first.first,data[i][j].first,factorOrder);
-      next_nodes[i][j] = alt.second;
+      String2Word(alt.m_word, data[i][j]. first, factorOrder);
+      next_nodes[i][j] = alt.m_next;
 
       if(next_nodes[i][j] > maxSizePhrase) {
         TRACE_ERR("ERROR: Jump length " << next_nodes[i][j] << " in word lattice exceeds maximum phrase length " << maxSizePhrase << ".\n");

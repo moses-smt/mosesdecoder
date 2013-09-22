@@ -64,6 +64,8 @@ public:
   GlobalLexicalModel(const std::string &line);
   virtual ~GlobalLexicalModel();
 
+  void SetParameter(const std::string& key, const std::string& value);
+
   void InitializeForInput( Sentence const& in );
 
   bool IsUseable(const FactorMask &mask) const;
@@ -77,7 +79,18 @@ public:
     ScoreComponentCollection* accumulator) const {
     throw std::logic_error("GlobalLexicalModel not supported in chart decoder, yet");
   }
-  void SetParameter(const std::string& key, const std::string& value);
+
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
 
 };
 

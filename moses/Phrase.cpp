@@ -116,8 +116,13 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType)
 
 std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
+  bool markUnknown = StaticData::Instance().GetMarkUnknown();
+
   stringstream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
+	if(markUnknown && GetWord(pos).IsOOV()) {
+	  strme << "UNK";
+	}
     strme << GetWord(pos).GetString(factorsToPrint, (pos != GetSize()-1));
   }
 
@@ -356,6 +361,53 @@ void Phrase::OnlyTheseFactors(const FactorMask &factors)
       }
     }
   }
+}
+
+void Phrase::InitStartEndWord()
+{
+  FactorCollection &factorCollection = FactorCollection::Instance();
+
+  Word startWord(Input);
+  const Factor *factor = factorCollection.AddFactor(Input, 0, BOS_); // TODO - non-factored
+  startWord.SetFactor(0, factor);
+  PrependWord(startWord);
+
+  Word endWord(Input);
+  factor = factorCollection.AddFactor(Input, 0, EOS_); // TODO - non-factored
+  endWord.SetFactor(0, factor);
+  AddWord(endWord);
+}
+
+size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
+{
+	size_t maxStartPos = GetSize() - sought.GetSize();
+	for (size_t startThisPos = 0; startThisPos <= maxStartPos; ++startThisPos) {
+		size_t thisPos = startThisPos;
+		int currUnknowns = 0;
+		size_t soughtPos;
+		for (soughtPos = 0; soughtPos < sought.GetSize(); ++soughtPos) {
+			const Word &soughtWord = sought.GetWord(soughtPos);
+			const Word &thisWord = GetWord(thisPos);
+
+			if (soughtWord == thisWord) {
+				++thisPos;
+			}
+			else if (soughtWord.IsOOV() && (maxUnknown < 0 || currUnknowns < maxUnknown)) {
+				// the output has an OOV word. Allow a certain number of OOVs
+				++currUnknowns;
+				++thisPos;
+			}
+			else {
+				break;
+			}
+		}
+
+		if (soughtPos == sought.GetSize()) {
+			return startThisPos;
+		}
+	}
+
+	return NOT_FOUND;
 }
 
 TO_STRING_BODY(Phrase);

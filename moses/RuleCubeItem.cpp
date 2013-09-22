@@ -20,6 +20,7 @@
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
 #include "ChartTranslationOptions.h"
+#include "ChartManager.h"
 #include "RuleCubeItem.h"
 #include "RuleCubeQueue.h"
 #include "WordsRange.h"

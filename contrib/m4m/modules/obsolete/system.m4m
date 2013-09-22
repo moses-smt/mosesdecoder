@@ -1,0 +1,38 @@
+# -*- Makefile -*-
+
+# This module defines the actual system
+
+# Choose names for translation and distortion model
+ptable = model/tm/ptable.${L1}-${L2}
+dtable = model/dm/dtable.${L1}-${L2}
+
+# specify the underlying corpus
+pll.txt1 ?= crp/trn/aln/${word-alignment}/${L1}.txt.gz
+pll.txt2 ?= crp/trn/aln/${word-alignment}/${L2}.txt.gz
+pll.aln  ?= crp/trn/aln/${word-alignment}/${L1}-${L2}.symal.gz
+
+# specify the distortion model parameters; we bunch them 
+# all together in one string
+${ptable}: dmodels = wbe-mslr-bidirectional-fe-allff
+
+# phrase table parameters: maximum phrase length and smoothing
+ptable.max-phrase-length = 7
+ptable.smoothing         = --GoodTuring
+
+#$(info $(call add_binary_phrase_table,0,0,5,${ptable},info))
+$(eval $(call add_binary_phrase_table,0,0,5,${ptable}))
+
+$(eval $(call add_binary_reordering_table,\
+0-0,wbe-mslr-bidirectional-fe-allff,6,${dtable},${ptable}))
+
+$(info $(call add_binary_reordering_table,\
+0-0,wbe-mslr-bidirectional-fe-allff,6,${dtable},${ptable},info))
+
+# below: moses.ini.0 is the moses ini file PRE-TUNING!
+define build_system
+$1/moses.ini.0
+
+
+makefile:
+	$(info $(call add_binary_phrase_table,0,0,5,${ptable},info))
+

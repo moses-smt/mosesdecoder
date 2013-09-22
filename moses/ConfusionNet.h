@@ -22,7 +22,7 @@ class Sentence;
 class ConfusionNet : public InputType
 {
 public:
-  typedef std::vector<std::pair<Word,std::vector<float> > > Column;
+  typedef std::vector<std::pair<Word, ScorePair > > Column;
 
 protected:
   std::vector<Column> data;

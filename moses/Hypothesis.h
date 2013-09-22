@@ -48,7 +48,6 @@ class FFState;
 class StatelessFeatureFunction;
 class StatefulFeatureFunction;
 class Manager;
-class LexicalReordering;
 
 typedef std::vector<Hypothesis*> ArcList;
 
@@ -100,7 +99,7 @@ public:
   ~Hypothesis();
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
-  static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constraint);
+  static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
   static Hypothesis* Create(Manager& manager, const WordsBitmap &initialCoverage);
 
@@ -108,7 +107,7 @@ public:
   static Hypothesis* Create(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
-  Hypothesis* CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const;
+  Hypothesis* CreateNext(const TranslationOption &transOpt) const;
 
   void PrintHypothesis() const;
 

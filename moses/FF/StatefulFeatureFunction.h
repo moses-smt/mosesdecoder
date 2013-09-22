@@ -4,6 +4,7 @@
 
 namespace Moses
 {
+class FFState;
 
 /** base class for all stateful feature functions.
  * eg. LM, distortion penalty

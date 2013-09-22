@@ -118,6 +118,17 @@ public:
   FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
                          int featureID,
                          ScoreComponentCollection* accumulator) const;
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
   bool Enabled() const {
     return m_enabled;
   }

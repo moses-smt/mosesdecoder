@@ -1,15 +1,15 @@
 #include "LexicalReorderingTable.h"
-#include "InputFileStream.h"
+#include "moses/InputFileStream.h"
 //#include "LVoc.h" //need IPhrase
 
-#include "StaticData.h"
+#include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
-#include "GenerationDictionary.h"
-#include "TargetPhrase.h"
-#include "TargetPhraseCollection.h"
+#include "moses/GenerationDictionary.h"
+#include "moses/TargetPhrase.h"
+#include "moses/TargetPhraseCollection.h"
 
 #ifndef WIN32
-#include "TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
+#include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
 #endif
 
 namespace Moses

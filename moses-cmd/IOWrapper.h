@@ -56,6 +56,8 @@ POSSIBILITY OF SUCH DAMAGE.
 namespace Moses
 {
 class ScoreComponentCollection;
+class Hypothesis;
+class Factor;
 }
 
 namespace MosesCmd
@@ -153,6 +155,9 @@ void OutputFeatureScores( std::ostream& out
                           , const Moses::ScoreComponentCollection &features
                           , const Moses::FeatureFunction *ff
                           , std::string &lastName );
+
+// creates a map of target positions which should be replaced by word using placeholder
+std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor);
 
 }
 

@@ -1,58 +1,87 @@
 #pragma once
 
 #include <string>
+#include <map>
 #include "StatefulFeatureFunction.h"
-#include "moses/FF/FFState.h"
+#include "FFState.h"
+#include "moses/Phrase.h"
 
 namespace Moses
 {
 
-class ControlRecombinationState;
+class ControlRecombinationState : public FFState
+{
+public:
+	ControlRecombinationState()
+	{}
 
-// force hypotheses NOT to recombine. For forced decoding
+	ControlRecombinationState(const Hypothesis &hypo);
+	ControlRecombinationState(const ChartHypothesis &hypo);
+
+	int Compare(const FFState& other) const;
+
+	const Phrase &GetPhrase() const
+	{ return m_outputPhrase; }
+
+protected:
+	Phrase m_outputPhrase;
+};
+
+//////////////////////////////////////////////////////////////////
+
+// only allow recombination for the same output
 class ControlRecombination : public StatefulFeatureFunction
 {
 public:
-  enum Type {
-    None,
-    Output,
-    Segmentation
-  };
+	ControlRecombination(const std::string &line)
+		:StatefulFeatureFunction("ControlRecombination", 1, line)
+		,m_maxUnknowns(0)
+	{
+		m_tuneable = false;
+		ReadParameters();
+	}
 
-  ControlRecombination(const std::string &line);
+	void Load();
 
-  bool IsUseable(const FactorMask &mask) const {
-    return true;
-  }
+	bool IsUseable(const FactorMask &mask) const
+		{ return true; }
 
-  virtual FFState* Evaluate(
-    const Hypothesis& cur_hypo,
-    const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const;
+	void Evaluate(const Phrase &source
+	                        , const TargetPhrase &targetPhrase
+	                        , ScoreComponentCollection &scoreBreakdown
+	                        , ScoreComponentCollection &estimatedFutureScore) const
+	{}
+	void Evaluate(const InputType &input
+	                        , const InputPath &inputPath
+	                        , const TargetPhrase &targetPhrase
+	                        , ScoreComponentCollection &scoreBreakdown) const
+	{}
+	  FFState* Evaluate(
+	    const Hypothesis& cur_hypo,
+	    const FFState* prev_state,
+	    ScoreComponentCollection* accumulator) const;
 
-  virtual FFState* EvaluateChart(
-    const ChartHypothesis& /* cur_hypo */,
-    int /* featureID - used to index the state in the previous hypotheses */,
-    ScoreComponentCollection* accumulator) const;
+	  FFState* EvaluateChart(
+	    const ChartHypothesis& /* cur_hypo */,
+	    int /* featureID - used to index the state in the previous hypotheses */,
+	    ScoreComponentCollection* accumulator) const;
 
-  //! return the state associated with the empty hypothesis for a given sentence
-  virtual const FFState* EmptyHypothesisState(const InputType &input) const;
+	  virtual const FFState* EmptyHypothesisState(const InputType &input) const
+	  {
+		  return new ControlRecombinationState();
+	  }
 
-  void SetParameter(const std::string& key, const std::string& value);
+	  std::vector<float> DefaultWeights() const;
+
+		void SetParameter(const std::string& key, const std::string& value);
+
 protected:
-  Type m_type;
+	  std::string m_path;
+	  std::map<long,Phrase> m_constraints;
+	  int m_maxUnknowns;
+
 };
 
-class ControlRecombinationState : public FFState
-{
-protected:
-  const Hypothesis *m_hypo;
 
-public:
-  ControlRecombinationState();
-  ControlRecombinationState(const Hypothesis *hypo);
-  int Compare(const FFState& other) const;
+}
 
-};
-
-} // namespace

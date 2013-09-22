@@ -41,7 +41,6 @@ namespace mpi = boost::mpi;
 #include "moses/ChartTrellisPath.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/ThreadPool.h"
-#include "moses/LexicalReordering.h"
 #include "mert/BleuScorer.h"
 #include "moses/FeatureVector.h"
 

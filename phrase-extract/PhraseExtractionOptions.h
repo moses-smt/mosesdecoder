@@ -48,6 +48,7 @@ private:
   bool onlyOutputSpanInfo;
   bool gzOutput;
   std::string instanceWeightsFile; //weights for each sentence
+  bool flexScoreFlag;
 
 public:
   std::vector<std::string> placeholders;
@@ -65,7 +66,8 @@ public:
     translationFlag(true),
     includeSentenceIdFlag(false),
     onlyOutputSpanInfo(false),
-    gzOutput(false) {}
+    gzOutput(false),
+    flexScoreFlag(false) {}
 
   //functions for initialization of options
   void initAllModelsOutputFlag(const bool initallModelsOutputFlag) {
@@ -107,6 +109,9 @@ public:
   void initInstanceWeightsFile(const char* initInstanceWeightsFile) {
     instanceWeightsFile = std::string(initInstanceWeightsFile);
   }
+  void initFlexScoreFlag(const bool initflexScoreFlag){
+    flexScoreFlag=initflexScoreFlag;
+  }
 
   // functions for getting values
   bool isAllModelsOutputFlag() const {
@@ -147,6 +152,9 @@ public:
   }
   std::string getInstanceWeightsFile() const {
     return instanceWeightsFile;
+  }
+  bool isFlexScoreFlag() const {
+    return flexScoreFlag;
   }
 };
 

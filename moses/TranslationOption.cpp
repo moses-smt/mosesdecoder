@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "WordsBitmap.h"
 #include "GenerationDictionary.h"
-#include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
 

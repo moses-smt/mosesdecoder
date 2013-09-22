@@ -194,21 +194,6 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   return 1;
 }
 
-void Sentence::InitStartEndWord()
-{
-  FactorCollection &factorCollection = FactorCollection::Instance();
-
-  Word startWord(Input);
-  const Factor *factor = factorCollection.AddFactor(Input, 0, BOS_); // TODO - non-factored
-  startWord.SetFactor(0, factor);
-  PrependWord(startWord);
-
-  Word endWord(Input);
-  factor = factorCollection.AddFactor(Input, 0, EOS_); // TODO - non-factored
-  endWord.SetFactor(0, factor);
-  AddWord(endWord);
-}
-
 void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
   FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;

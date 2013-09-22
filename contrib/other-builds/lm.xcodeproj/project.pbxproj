@@ -34,7 +34,6 @@
 		1EBA44E314B97E22003CC0EA /* model_type.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA449114B97E22003CC0EA /* model_type.hh */; };
 		1EBA44E414B97E22003CC0EA /* model.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA449214B97E22003CC0EA /* model.cc */; };
 		1EBA44E514B97E22003CC0EA /* model.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA449314B97E22003CC0EA /* model.hh */; };
-		1EBA44E614B97E22003CC0EA /* ngram_query.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA449414B97E22003CC0EA /* ngram_query.cc */; };
 		1EBA44E714B97E22003CC0EA /* ngram_query.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA449514B97E22003CC0EA /* ngram_query.hh */; };
 		1EBA44E814B97E22003CC0EA /* quantize.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA449614B97E22003CC0EA /* quantize.cc */; };
 		1EBA44E914B97E22003CC0EA /* quantize.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA449714B97E22003CC0EA /* quantize.hh */; };
@@ -149,7 +148,6 @@
 		1EBA449114B97E22003CC0EA /* model_type.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = model_type.hh; path = ../../lm/model_type.hh; sourceTree = "<group>"; };
 		1EBA449214B97E22003CC0EA /* model.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = model.cc; path = ../../lm/model.cc; sourceTree = "<group>"; };
 		1EBA449314B97E22003CC0EA /* model.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = model.hh; path = ../../lm/model.hh; sourceTree = "<group>"; };
-		1EBA449414B97E22003CC0EA /* ngram_query.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngram_query.cc; path = ../../lm/ngram_query.cc; sourceTree = "<group>"; };
 		1EBA449514B97E22003CC0EA /* ngram_query.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ngram_query.hh; path = ../../lm/ngram_query.hh; sourceTree = "<group>"; };
 		1EBA449614B97E22003CC0EA /* quantize.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = quantize.cc; path = ../../lm/quantize.cc; sourceTree = "<group>"; };
 		1EBA449714B97E22003CC0EA /* quantize.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = quantize.hh; path = ../../lm/quantize.hh; sourceTree = "<group>"; };
@@ -266,7 +264,6 @@
 				1EBA449114B97E22003CC0EA /* model_type.hh */,
 				1EBA449214B97E22003CC0EA /* model.cc */,
 				1EBA449314B97E22003CC0EA /* model.hh */,
-				1EBA449414B97E22003CC0EA /* ngram_query.cc */,
 				1EBA449514B97E22003CC0EA /* ngram_query.hh */,
 				1EBA449614B97E22003CC0EA /* quantize.cc */,
 				1EBA449714B97E22003CC0EA /* quantize.hh */,
@@ -535,7 +532,6 @@
 				1EBA44DF14B97E22003CC0EA /* lm_exception.cc in Sources */,
 				1EBA44E214B97E22003CC0EA /* model_test.cc in Sources */,
 				1EBA44E414B97E22003CC0EA /* model.cc in Sources */,
-				1EBA44E614B97E22003CC0EA /* ngram_query.cc in Sources */,
 				1EBA44E814B97E22003CC0EA /* quantize.cc in Sources */,
 				1EBA44EA14B97E22003CC0EA /* read_arpa.cc in Sources */,
 				1EBA44ED14B97E22003CC0EA /* search_hashed.cc in Sources */,
@@ -589,6 +585,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -601,10 +598,11 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(LIBRARY_MY_BOOST)",
 					../..,
 					/opt/local/include,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -625,10 +623,11 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(XCODE_MOSES_BOOST)",
 					../..,
 					/opt/local/include,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				SDKROOT = macosx;
 			};
 			name = Release;

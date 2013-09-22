@@ -45,8 +45,19 @@ public:
   virtual FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */,
                                   int /* featureID */,
                                   ScoreComponentCollection* ) const {
-    abort();
+    throw std::logic_error("TargetBigramFeature not valid in chart decoder");
   }
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
   void SetParameter(const std::string& key, const std::string& value);
 
 private:

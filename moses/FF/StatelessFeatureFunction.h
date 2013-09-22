@@ -24,15 +24,13 @@ public:
     * This should be implemented for features that apply to phrase-based models.
     **/
   virtual void Evaluate(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const {
-  }
+                        ScoreComponentCollection* accumulator) const = 0;
 
   /**
     * Same for chart-based features.
     **/
   virtual void EvaluateChart(const ChartHypothesis &hypo,
-                             ScoreComponentCollection* accumulator) const {
-  }
+                             ScoreComponentCollection* accumulator) const = 0;
 
   virtual bool IsStateless() const {
     return true;

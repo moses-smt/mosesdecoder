@@ -1076,7 +1076,7 @@ bolt-bleu-c
 	rerun-on-change: bolt-bleu-c
 	template: $bolt-bleu-c IN > OUT
 multi-bleu
-	in: cleaned-output reference
+	in: cleaned-output tokenized-reference
 	out: multi-bleu-score
 	default-name: evaluation/multi-bleu
 	ignore-unless: multi-bleu

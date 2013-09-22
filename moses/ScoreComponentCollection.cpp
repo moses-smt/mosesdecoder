@@ -1,6 +1,6 @@
 // $Id$
 #include <vector>
-
+#include "util/exception.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 
@@ -8,6 +8,41 @@ using namespace std;
 
 namespace Moses
 {
+void ScorePair::PlusEquals(const ScorePair &other)
+{
+	PlusEquals(other.denseScores);
+	std::map<StringPiece, float>::const_iterator iter;
+	for (iter = other.sparseScores.begin(); iter != other.sparseScores.end(); ++iter) {
+		PlusEquals(iter->first, iter->second);
+	}
+}
+
+void ScorePair::PlusEquals(const StringPiece &key, float value)
+{
+	std::map<StringPiece, float>::iterator iter;
+	iter = sparseScores.find(key);
+	if (iter == sparseScores.end()) {
+		sparseScores[key] = value;
+	}
+	else {
+		float &existingval = iter->second;
+		existingval += value;
+	}
+}
+
+std::ostream& operator<<(std::ostream& os, const ScorePair& rhs)
+{
+	for (size_t i = 0; i < rhs.denseScores.size(); ++i) {
+		os << rhs.denseScores[i] << ",";
+	}
+
+	std::map<StringPiece, float>::const_iterator iter;
+	for (iter = rhs.sparseScores.begin(); iter != rhs.sparseScores.end(); ++iter) {
+		os << iter->first << "=" << iter->second << ",";
+	}
+
+	return os;
+}
 
 ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
 size_t ScoreComponentCollection::s_denseVectorSize = 0;
@@ -185,6 +220,21 @@ void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string li
   }
 }
 
+void ScoreComponentCollection::Assign(const FeatureFunction* sp, const std::vector<float>& scores) {
+  IndexPair indexes = GetIndexes(sp);
+  size_t numScores = indexes.second - indexes.first;
+
+  if (scores.size() != numScores) {
+	  UTIL_THROW(util::Exception, "Feature function " << sp->GetScoreProducerDescription() << " specified "
+			  << numScores << " dense scores or weights. Actually has " << scores.size());
+  }
+
+  for (size_t i = 0; i < scores.size(); ++i) {
+    m_scores[i + indexes.first] = scores[i];
+  }
+}
+
+
 void ScoreComponentCollection::InvertDenseFeatures(const FeatureFunction* sp)
 {
 
@@ -218,6 +268,18 @@ FVector ScoreComponentCollection::GetVectorForProducer(const FeatureFunction* sp
       fv[i->first] = i->second;
   }
   return fv;
+}
+
+void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const ScorePair &scorePair)
+{
+	PlusEquals(sp, scorePair.denseScores);
+
+	std::map<StringPiece, float>::const_iterator iter;
+	for (iter = scorePair.sparseScores.begin(); iter != scorePair.sparseScores.end(); ++iter) {
+		const StringPiece &key = iter->first;
+		float value = iter->second;
+		PlusEquals(sp, key, value);
+	}
 }
 
 }

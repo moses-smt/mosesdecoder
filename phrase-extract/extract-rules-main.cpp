@@ -62,6 +62,8 @@ private:
   const RuleExtractionOptions &m_options;
   Moses::OutputFileStream& m_extractFile;
   Moses::OutputFileStream& m_extractFileInv;
+  Moses::OutputFileStream& m_extractFileContext;
+  Moses::OutputFileStream& m_extractFileContextInv;
 
   vector< ExtractedRule > m_extractedRules;
 
@@ -94,11 +96,13 @@ private:
   }
 
 public:
-  ExtractTask(SentenceAlignmentWithSyntax &sentence, const RuleExtractionOptions &options, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv):
+  ExtractTask(SentenceAlignmentWithSyntax &sentence, const RuleExtractionOptions &options, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv, Moses::OutputFileStream &extractFileContext, Moses::OutputFileStream &extractFileContextInv):
     m_sentence(sentence),
     m_options(options),
     m_extractFile(extractFile),
-    m_extractFileInv(extractFileInv) {}
+    m_extractFileInv(extractFileInv),
+    m_extractFileContext(extractFileContext),
+    m_extractFileContextInv(extractFileContextInv) {}
   void Run();
 
 };
@@ -125,7 +129,6 @@ int main(int argc, char* argv[])
          << " --GlueGrammar FILE"
          << " | --UnknownWordLabel FILE"
          << " | --OnlyDirect"
-         << " | --OutputNTLengths"
          << " | --MaxSpan[" << options.maxSpan << "]"
          << " | --MinHoleTarget[" << options.minHoleTarget << "]"
          << " | --MinHoleSource[" << options.minHoleSource << "]"
@@ -138,7 +141,8 @@ int main(int argc, char* argv[])
          << " | --AllowOnlyUnalignedWords | --DisallowNonTermConsecTarget |--NonTermConsecSource |  --NoNonTermFirstWord | --NoFractionalCounting"
          << " | --UnpairedExtractFormat"
          << " | --ConditionOnTargetLHS ]"
-         << " | --BoundaryRules[" << options.boundaryRules << "]";
+         << " | --BoundaryRules[" << options.boundaryRules << "]"
+         << " | --FlexibilityScore\n";
 
     exit(1);
   }
@@ -257,12 +261,12 @@ int main(int argc, char* argv[])
       options.fractionalCounting = false;
     } else if (strcmp(argv[i],"--PCFG") == 0) {
       options.pcfgScore = true;
-    } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
-      options.outputNTLengths = true;
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       options.unpairedExtractFormat = true;
     } else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
       options.conditionOnTargetLhs = true;
+    } else if (strcmp(argv[i],"--FlexibilityScore") == 0) {
+      options.flexScoreFlag = true;
     } else if (strcmp(argv[i],"-threads") == 0 ||
                strcmp(argv[i],"--threads") == 0 ||
                strcmp(argv[i],"--Threads") == 0) {
@@ -301,10 +305,20 @@ int main(int argc, char* argv[])
   string fileNameExtractInv = fileNameExtract + ".inv" + (options.gzOutput?".gz":"");
   Moses::OutputFileStream extractFile;
   Moses::OutputFileStream extractFileInv;
+  Moses::OutputFileStream extractFileContext;
+  Moses::OutputFileStream extractFileContextInv;
   extractFile.Open((fileNameExtract  + (options.gzOutput?".gz":"")).c_str());
   if (!options.onlyDirectFlag)
     extractFileInv.Open(fileNameExtractInv.c_str());
 
+  if (options.flexScoreFlag) {
+    string fileNameExtractContext = fileNameExtract + ".context" + (options.gzOutput?".gz":"");
+    extractFileContext.Open(fileNameExtractContext.c_str());
+    if (!options.onlyDirectFlag) {
+        string fileNameExtractContextInv = fileNameExtract + ".context.inv" + (options.gzOutput?".gz":"");
+        extractFileContextInv.Open(fileNameExtractContextInv.c_str());
+    }
+  }
 
   // stats on labels for glue grammar and unknown word label probabilities
   set< string > targetLabelCollection, sourceLabelCollection;
@@ -339,7 +353,7 @@ int main(int argc, char* argv[])
       if (options.unknownWordLabelFlag) {
         collectWordLabelCounts(sentence);
       }
-      ExtractTask *task = new ExtractTask(sentence, options, extractFile, extractFileInv);
+      ExtractTask *task = new ExtractTask(sentence, options, extractFile, extractFileInv, extractFileContext, extractFileContextInv);
       task->Run();
       delete task;
     }
@@ -353,6 +367,11 @@ int main(int argc, char* argv[])
   if (!options.onlyOutputSpanInfo) {
     extractFile.Close();
     if (!options.onlyDirectFlag) extractFileInv.Close();
+  }
+
+  if (options.flexScoreFlag) {
+    extractFileContext.Close();
+    if (!options.onlyDirectFlag) extractFileContextInv.Close();
   }
 
   if (options.glueGrammarFlag)
@@ -641,9 +660,6 @@ void ExtractTask::saveHieroAlignment( int startT, int endT, int startS, int endS
     rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
     if (!m_options.onlyDirectFlag)
       rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
-
-    rule.SetSpanLength(hole.GetPos(0), hole.GetSize(0), hole.GetSize(1) ) ;
-
   }
 
   rule.alignment.erase(rule.alignment.size()-1);
@@ -698,6 +714,46 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
   // alignment
   saveHieroAlignment(startT, endT, startS, endS, indexS, indexT, holeColl, rule);
 
+  // context (words to left and right)
+  if (m_options.flexScoreFlag) {
+      rule.sourceContextLeft = startS == 0 ? "<s>" : m_sentence.source[startS-1];
+      rule.sourceContextRight = endS+1 == m_sentence.source.size() ? "<s>" : m_sentence.source[endS+1];
+      rule.targetContextLeft = startT == 0 ? "<s>" : m_sentence.target[startT-1];
+      rule.targetContextRight = endT+1 == m_sentence.target.size() ? "<s>" : m_sentence.target[endT+1];
+      rule.sourceHoleString = "";
+      rule.targetHoleString = "";
+
+      HoleList::const_iterator iterHole;
+      for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole) {
+          const Hole &hole = *iterHole;
+          rule.sourceHoleString += hole.GetLabel(0) + ": ";
+
+          // rule starts with nonterminal; end of NT is considered left context
+          if (hole.GetStart(0) == startS) {
+              rule.sourceContextLeft = m_sentence.source[hole.GetEnd(0)];
+          }
+          // rule ends with nonterminal; start of NT is considered right context
+          else if (hole.GetEnd(0) == endS) {
+              rule.sourceContextRight = m_sentence.source[hole.GetStart(0)];
+          }
+
+          if (hole.GetStart(1) == startT) {
+              rule.targetContextLeft = m_sentence.target[hole.GetEnd(1)];
+          }
+          else if (hole.GetEnd(1) == endT) {
+              rule.targetContextRight = m_sentence.target[hole.GetStart(1)];
+          }
+
+          for (int i = hole.GetStart(0); i <= hole.GetEnd(0); ++i) {
+              rule.sourceHoleString += m_sentence.source[i] + " ";
+          }
+          rule.targetHoleString += hole.GetLabel(1) + ": ";
+          for (int i = hole.GetStart(1); i <= hole.GetEnd(1); ++i) {
+              rule.targetHoleString += m_sentence.target[i] + " ";
+          }
+      }
+  }
+  
   addRuleToCollection( rule );
 }
 
@@ -938,6 +994,14 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
     }
   }
 
+  // context (words to left and right)
+  if (m_options.flexScoreFlag) {
+      rule.sourceContextLeft = startS == 0 ? "<s>" : m_sentence.source[startS-1];
+      rule.sourceContextRight = endS+1 == m_sentence.source.size() ? "<s>" : m_sentence.source[endS+1];
+      rule.targetContextLeft = startT == 0 ? "<s>" : m_sentence.target[startT-1];
+      rule.targetContextRight = endT+1 == m_sentence.target.size() ? "<s>" : m_sentence.target[endT+1];
+  }
+
   rule.alignment.erase(rule.alignment.size()-1);
   if (!m_options.onlyDirectFlag)
     rule.alignmentInv.erase(rule.alignmentInv.size()-1);
@@ -997,6 +1061,8 @@ void ExtractTask::writeRulesToFile()
   vector<ExtractedRule>::const_iterator rule;
   ostringstream out;
   ostringstream outInv;
+  ostringstream outContext;
+  ostringstream outContextInv;
   for(rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
     if (rule->count == 0)
       continue;
@@ -1005,9 +1071,6 @@ void ExtractTask::writeRulesToFile()
         << rule->target << " ||| "
         << rule->alignment << " ||| "
         << rule->count << " ||| ";
-    if (m_options.outputNTLengths) {
-      rule->OutputNTLengths(out);
-    }
     if (m_options.pcfgScore) {
       out << " ||| " << rule->pcfgScore;
     }
@@ -1019,9 +1082,41 @@ void ExtractTask::writeRulesToFile()
              << rule->alignmentInv << " ||| "
              << rule->count << "\n";
     }
+
+    if (m_options.flexScoreFlag) {
+        for(int iContext=0;iContext<2;iContext++){
+            outContext << rule->source << " ||| "
+                            << rule->target << " ||| "
+                            << rule->alignment << " ||| ";   
+            iContext ? outContext << "< " << rule->sourceContextLeft << "\n" : outContext << "> " << rule->sourceContextRight << "\n";
+
+            if (!m_options.onlyDirectFlag) {
+                outContextInv << rule->target << " ||| "
+                                    << rule->source << " ||| "
+                                    << rule->alignmentInv << " ||| ";
+                iContext ? outContextInv << "< " << rule->targetContextLeft << "\n" : outContextInv << "> " << rule->targetContextRight << "\n";
+            }
+        }
+
+        if (rule->sourceHoleString != "") {
+            outContext << rule->source << " ||| "
+                               << rule->target << " ||| "
+                               << rule->alignment << " ||| v "
+                               << rule->sourceHoleString << "\n";
+        }
+
+        if (!m_options.onlyDirectFlag and rule->targetHoleString != "") {
+            outContextInv << rule->target << " ||| "
+                                  << rule->source << " ||| "
+                                  << rule->alignmentInv << " ||| v "
+                                  << rule->targetHoleString << "\n";
+        }
+    }
   }
   m_extractFile << out.str();
   m_extractFileInv << outInv.str();
+  m_extractFileContext << outContext.str();
+  m_extractFileContextInv << outContextInv.str();
 }
 
 void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection )
