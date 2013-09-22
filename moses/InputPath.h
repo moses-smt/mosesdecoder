@@ -13,9 +13,9 @@ namespace Moses
 class PhraseDictionary;
 class TargetPhraseCollection;
 class ScoreComponentCollection;
-class ScorePair;
 class TargetPhrase;
 class InputPath;
+struct ScorePair;
 
 typedef std::list<InputPath*> InputPathList;
 

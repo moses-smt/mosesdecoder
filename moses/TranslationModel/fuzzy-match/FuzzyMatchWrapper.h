@@ -23,7 +23,7 @@
 namespace tmmt
 {
 class Match;
-class SentenceAlignment;
+struct SentenceAlignment;
 
 class FuzzyMatchWrapper
 {
