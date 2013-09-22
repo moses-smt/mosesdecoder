@@ -199,7 +199,7 @@ Parameter::Parameter()
 
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
 
-  AddParam("placeholder-factor", "Which factors to use to store the original text for placeholders. Must be 2, source target");
+  AddParam("placeholder-factor", "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
 }
 
 Parameter::~Parameter()

@@ -196,7 +196,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
 void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
   if (placeholderFactor == NOT_FOUND) {
     return;
   }

@@ -10,6 +10,8 @@ class InputType;
 
 class ChartTranslationOption
 {
+	friend std::ostream& operator<<(std::ostream&, const ChartTranslationOption&);
+
 protected:
   const TargetPhrase &m_targetPhrase;
   ScoreComponentCollection m_scoreBreakdown;

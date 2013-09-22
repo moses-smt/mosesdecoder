@@ -21,6 +21,10 @@
 #include "ChartHypothesis.h"
 #include "ChartCellLabel.h"
 #include "ChartTranslationOption.h"
+#include "InputPath.h"
+#include "StaticData.h"
+
+using namespace std;
 
 namespace Moses
 {
