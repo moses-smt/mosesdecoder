@@ -30,6 +30,9 @@ public:
   const ScoreComponentCollection &GetScores() const {
     return m_scoreBreakdown;
   }
+  ScoreComponentCollection &GetScores() {
+    return m_scoreBreakdown;
+  }
 
   void Evaluate(const InputType &input, const InputPath &inputPath);
 };

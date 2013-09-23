@@ -68,6 +68,10 @@ public:
     return m_collection;
   }
 
+  CollType &GetTargetPhrases() {
+    return m_collection;
+  }
+
   //! the range in the source sentence this translation option covers
   const WordsRange &GetSourceWordsRange() const {
     return *m_wordsRange;

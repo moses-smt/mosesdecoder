@@ -46,7 +46,7 @@ void ContextFeature::Evaluate(const InputType &input
 	                        , const InputPath &inputPath
 	                        , ChartTranslationOptions &transOpts) const
 	{
-/*
+
 	 vector<FactorType> srcFactors;
 	    srcFactors.push_back(0);
 	    string nonTermRep = "[X][X]";
@@ -58,13 +58,13 @@ void ContextFeature::Evaluate(const InputType &input
 
 	        std::string sourceSide = "";
 	        std::string targetRepresentation;
-	        TargetPhraseCollection::const_iterator itr_targets;
+	        ChartTranslationOptions::CollType::iterator itr_targets;
 
 	        //map source to accumulated target phrases
 	         RuleMap ruleMap;
 
 	         //Map target representation to targetPhrase
-	         std::map<std::string,TargetPhrase*> targetRepMap;
+	         std::map<std::string,ChartTranslationOption> targetRepMap;
 
 	         VERBOSE(5, "Looping over target phrase collection for recomputing feature scores" << endl);
 
@@ -74,23 +74,25 @@ void ContextFeature::Evaluate(const InputType &input
 	            itr_targets != transOpts.GetTargetPhrases().end();
 	            itr_targets++)
 	        {
+	        	ChartTranslationOption &transOpt = **itr_targets;
+	        	const TargetPhrase &tp = transOpt.GetPhrase();
 	            //get source side of rule
-	            CHECK((**itr_targets).GetRuleSource() != NULL);
+	            CHECK(tp.GetRuleSource() != NULL);
 
 	            //rewrite non-terminals non source side with "[][]"
-	            for(int i=0; i<(**itr_targets).GetRuleSource()->GetSize();i++)
+	            for(int i=0; i< tp.GetRuleSource()->GetSize();i++)
 	            {
 	                //replace X by [X][X] for coherence with rule table
-	                if((**itr_targets).GetRuleSource()->GetWord(i).IsNonTerminal())
+	                if(tp.GetRuleSource()->GetWord(i).IsNonTerminal())
 	                {
 	                    sourceSide += nonTermRep;
 	                }
 	                else
 	                {
-	                    sourceSide += (**itr_targets).GetRuleSource()->GetWord(i).GetString(srcFactors,0);
+	                    sourceSide += tp.GetRuleSource()->GetWord(i).GetString(srcFactors,0);
 	                }
 
-	                if(i<(**itr_targets).GetRuleSource()->GetSize() -1)
+	                if(i< tp.GetRuleSource()->GetSize() -1)
 	                {
 	                    sourceSide += " ";
 	                }
@@ -104,12 +106,12 @@ void ContextFeature::Evaluate(const InputType &input
 	            int wordCounter = 0;
 
 	            //NonTermCounter should stay smaller than nonTermIndexMap
-	            for(int i=0; i<(**itr_targets).GetSize();i++)
+	            for(int i=0; i<tp.GetSize();i++)
 	            {
-	                CHECK(wordCounter < (**itr_targets).GetSize());
+	                CHECK(wordCounter < tp.GetSize());
 
 	                //look for non-terminals
-	                if((**itr_targets).GetWord(i).IsNonTerminal() == 1)
+	                if(tp.GetWord(i).IsNonTerminal() == 1)
 	                {
 	                    //append non-terminal
 	                    targetRepresentation += nonTermRep;
@@ -118,8 +120,8 @@ void ContextFeature::Evaluate(const InputType &input
 	                    //for(int i=0; i < 3; i++)
 	                    //{std::cout << "TEST : Non Term index map : " << i << "=" << ntim[i] << std::endl;}
 
-	                    const AlignmentInfo alignInfo = (*itr_targets)->GetAlignNonTerm();
-	                    const AlignmentInfo::NonTermIndexMap alignInfoIndex = (*itr_targets)->GetAlignNonTerm().GetNonTermIndexMap();
+	                    const AlignmentInfo alignInfo = tp.GetAlignNonTerm();
+	                    const AlignmentInfo::NonTermIndexMap alignInfoIndex = tp.GetAlignNonTerm().GetNonTermIndexMap();
 	                    string alignInd;
 
 	                    //To get the annotation corresponding to the source, iterate through targets and get source representation
@@ -142,9 +144,9 @@ void ContextFeature::Evaluate(const InputType &input
 	                }
 	                else
 	                {
-	                    targetRepresentation += (**itr_targets).GetWord(i).GetString(srcFactors,0);
+	                    targetRepresentation += tp.GetWord(i).GetString(srcFactors,0);
 	                }
-	                if(i<(**itr_targets).GetSize() -1)
+	                if(i<tp.GetSize() -1)
 	                {
 	                    targetRepresentation += " ";
 	                }
@@ -157,8 +159,7 @@ void ContextFeature::Evaluate(const InputType &input
 
 	            VERBOSE(5, "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << endl);
 	            ruleMap.AddRule(sourceSide,targetRepresentation);
-	            targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
-	            targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
+	            targetRepMap.insert(std::make_pair(targetRepresentation,transOpt));
 
 	            //clean strings
 	            sourceSide = "";
@@ -176,7 +177,8 @@ void ContextFeature::Evaluate(const InputType &input
 	                                                                       //get end of span
 	                                                                       transOpts.GetSourceWordsRange().GetEndPos(),
 	                                                                       //get first of iter rule map
-	                                                                       itr_ruleMap->first,itr_ruleMap->second,
+	                                                                       itr_ruleMap->first,
+	                                                                       itr_ruleMap->second,
 	                                                                       input,
 	                                                                       &targetRepMap
 	                                                                       );
@@ -185,28 +187,29 @@ void ContextFeature::Evaluate(const InputType &input
 	            std::vector<ScoreComponentCollection>::const_iterator iterLCSP = scores.begin();
 	            std::vector<std::string> :: iterator itr_targetRep;
 	            for (itr_targetRep = (itr_ruleMap->second)->begin() ; itr_targetRep != (itr_ruleMap->second)->end() ; itr_targetRep++) {
-	                //Find target phrase corresponding to representation
-	                std::map<std::string,TargetPhrase*> :: iterator itr_rep;
 	                CHECK(targetRepMap.find(*itr_targetRep) != targetRepMap.end());
-	                itr_rep = targetRepMap.find(*itr_targetRep);
-	                VERBOSE(5, "Looking at target phrase : " << *itr_rep->second << std::endl);
+
+	                //Find target phrase corresponding to representation
+	            	const string &str = *itr_targetRep;
+	                std::map<std::string,ChartTranslationOption> :: iterator itr_rep;
+	                itr_rep = targetRepMap.find(str);
+
+	                VERBOSE(5, "Looking at target phrase : " << itr_rep->second.GetPhrase() << std::endl);
 	                //VERBOSE(5, "Target Phrase score vector before adding stateless : ");
 	                //StaticData::Instance().GetScoreIndexManager().PrintLabeledScores(std::cerr,(itr_rep->second)->GetScoreBreakdown());
 	                // std::cerr << std::endl;
-	                VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+	                //VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetPhrase().GetFutureScore() << std::endl);
 	                VERBOSE(5, "Score component collection : " << *iterLCSP << std::endl);
 
 	                //How do I put this into target phrase ?
 	                const ScoreComponentCollection &scores = *iterLCSP++;
-	                TargetPhrase &tp = *itr_rep->second;
-	                //(itr_rep->second)->AddStatelessScore(*iterLCSP++)
-	                VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+	                ChartTranslationOption &to = itr_rep->second;
+	                to.GetScores().PlusEquals(scores);
+	                VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second).GetPhrase().GetFutureScore() << std::endl);
 	                }
 	        }
 	        VERBOSE(5, "Estimate of best score before computing context : " << transOpts.GetEstimateOfBestScore() << std::endl);
-	        transOpts.CalcEstimateOfBestScore();
-	        VERBOSE(5, "Estimate of best score after computing context : " << transOpts.GetEstimateOfBestScore() << std::endl);
-*/
+	        //transOpts.CalcEstimateOfBestScore();
 }
 
 
@@ -253,7 +256,7 @@ bool ContextFeature::Initialize(const string &modelFile, const string &indexFile
   return isGood;
 }
 
-ScoreComponentCollection ContextFeature::ScoreFactory(float score)
+ScoreComponentCollection ContextFeature::ScoreFactory(float score) const
 {
   ScoreComponentCollection out;
   out.Assign(this, score);
@@ -266,7 +269,7 @@ void ContextFeature::CheckIndex(const std::string &targetRep)
     throw runtime_error("Phrase not in index: " + targetRep);
 }
 
-ChartTranslation ContextFeature::GetPSDTranslation(const string targetRep, const TargetPhrase *tp)
+ChartTranslation ContextFeature::GetPSDTranslation(const string targetRep, const TargetPhrase *tp) const
 {
   VERBOSE(5, "Target Phrase put into translation vector : " << (*tp) << " : " << tp->GetFutureScore() << std::endl);
   ChartTranslation psdOpt;
@@ -334,8 +337,8 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
                                                                         const std::string &sourceSide,
                                                                         std::vector<std::string> * targetRepresentations,
                                                                         const InputType &source,
-                                                                        map<string,TargetPhrase*> * targetMap
-                                                                      )
+                                                                        map<string,ChartTranslationOption> * targetMap
+                                                                      ) const
 {
 
     vector<ScoreComponentCollection> scores;
@@ -357,13 +360,14 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
         vector<float> pEgivenF(targetRepresentations->size());
         vector<ChartTranslation> psdOptions;
 
-        map<string,TargetPhrase*> :: iterator itr_rep;
+        map<string,ChartTranslationOption> :: iterator itr_rep;
         vector<std::string>::const_iterator tgtRepIt;
         for (tgtRepIt = targetRepresentations->begin(); tgtRepIt != targetRepresentations->end(); tgtRepIt++) {
           CHECK(targetMap->find(*tgtRepIt) != targetMap->end());
           itr_rep = targetMap->find(*tgtRepIt);
 
-          psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));
+          //Can I just get the reference target phrase of this translation option
+          psdOptions.push_back(GetPSDTranslation(*tgtRepIt,&(itr_rep->second.GetPhrase())));
         }
 
         VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
@@ -439,7 +443,7 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
     return scores;
 }
 
-void ContextFeature::Normalize0(vector<float> &losses)
+void ContextFeature::Normalize0(vector<float> &losses) const
 {
     float sum = 0;
 
@@ -487,7 +491,7 @@ void ContextFeature::Normalize0(vector<float> &losses)
 }
 
 
-void ContextFeature::Normalize1(vector<float> &losses)
+void ContextFeature::Normalize1(vector<float> &losses) const
 {
   float sum = 0;
   vector<float>::iterator it;
@@ -501,7 +505,7 @@ void ContextFeature::Normalize1(vector<float> &losses)
 }
 
 
-void ContextFeature::Interpolate(vector<float> &losses, vector<float> &pEgivenF, float interpolParam)
+void ContextFeature::Interpolate(vector<float> &losses, vector<float> &pEgivenF, float interpolParam) const
 {
 	vector<float>::iterator lossIt;
 	vector<float>::iterator pEgivenFit;
@@ -521,7 +525,7 @@ void ContextFeature::Interpolate(vector<float> &losses, vector<float> &pEgivenF,
 	    }
 }
 
-void ContextFeature::Normalize(std::vector<float> &losses)
+void ContextFeature::Normalize(std::vector<float> &losses) const
 {
     //Normalization
       vector<float>::iterator lossIt;
@@ -537,7 +541,7 @@ void ContextFeature::Normalize(std::vector<float> &losses)
         }
 }
 
-double ContextFeature::LogAddition(double logA, double logB, double logAddPrecision)
+double ContextFeature::LogAddition(double logA, double logB, double logAddPrecision) const
 {
 
 	if (logA == logB) {

@@ -20,6 +20,8 @@
 namespace Moses
 {
 
+class ChartTranslationOption;
+
 class ContextFeature : public StatelessFeatureFunction
 {
 public:
@@ -68,16 +70,16 @@ public:
 	                                                     const std::string &sourceSide,
 	                                                     std::vector<std::string> *targetRepresentations,
 	                                                     const InputType &source,
-	                                                     std::map<std::string,TargetPhrase*> * targetMap);
+	                                                     std::map<std::string,ChartTranslationOption> * targetMap) const;
 
 
 	   void CheckIndex(const std::string &targetRep);
-	   PSD::ChartTranslation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp);
-	   void Normalize(std::vector<float> &losses);
-	   void Normalize0(std::vector<float> &losses);
-	   void Normalize1(std::vector<float> &losses);
-	   double LogAddition(double logA, double logB, double logAddPrecision);
-	   void Interpolate(std::vector<float> &losses, std::vector<float> &pEgivenF, float interpolParam);
+	   PSD::ChartTranslation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp) const;
+	   void Normalize(std::vector<float> &losses) const;
+	   void Normalize0(std::vector<float> &losses) const;
+	   void Normalize1(std::vector<float> &losses) const;
+	   double LogAddition(double logA, double logB, double logAddPrecision) const;
+	   void Interpolate(std::vector<float> &losses, std::vector<float> &pEgivenF, float interpolParam) const;
 
 	private :
     PSD::TargetIndexType m_ruleIndex; //FB : this target index type remains empty during decoding
@@ -90,7 +92,7 @@ public:
     std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
 
     public :
-    ScoreComponentCollection ScoreFactory(float score);
+    ScoreComponentCollection ScoreFactory(float score) const;
 
 };
 
