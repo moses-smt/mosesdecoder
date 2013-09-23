@@ -1047,6 +1047,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ConstrainedDecoding.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ContextFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ContextFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ContextFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ContextFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/ControlRecombination.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.cpp</locationURI>

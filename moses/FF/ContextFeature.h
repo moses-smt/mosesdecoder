@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include <string>
-#include "StatelessFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+
 
 namespace Moses
 {
@@ -29,13 +29,20 @@ public:
 	void Evaluate(const Phrase &source
 	                        , const TargetPhrase &targetPhrase
 	                        , ScoreComponentCollection &scoreBreakdown
-	                        , ScoreComponentCollection &estimatedFutureScore) const
-	{}
+	                        , ScoreComponentCollection &estimatedFutureScore) const;
+
+	//Fabienne Braune : Do nothing in here
 	void Evaluate(const InputType &input
 	                        , const InputPath &inputPath
 	                        , ScoreComponentCollection &scoreBreakdown) const
 	{}
-	  virtual void Evaluate(const Hypothesis& hypo,
+
+    //Fabienne Braune : Call VW and re-score translation options
+	void Evaluate(const InputType &input
+	                        , const InputPath &inputPath
+	                        , ChartTranslationOptions &transOpts) const;
+
+  virtual void Evaluate(const Hypothesis& hypo,
 	                        ScoreComponentCollection* accumulator) const
 	  {}
 	  void EvaluateChart(const ChartHypothesis &hypo,
@@ -45,8 +52,6 @@ public:
 };
 
 }
-
-
 
 
 

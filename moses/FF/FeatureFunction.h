@@ -111,6 +111,7 @@ public:
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown) const = 0;
 
+  //override
   virtual void Evaluate(const InputType &input
                         , const InputPath &inputPath
                         , const TargetPhrase &targetPhrase

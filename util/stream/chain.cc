@@ -1,6 +1,5 @@
-#include "util/stream/chain.hh"
-
 #include "util/stream/io.hh"
+#include "util/stream/chain.hh"
 
 #include "util/exception.hh"
 #include "util/pcqueue.hh"
