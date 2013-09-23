@@ -672,6 +672,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleCubeQueue.h</locationURI>
 		</link>
 		<link>
+			<name>RuleMap.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleMap.cpp</locationURI>
+		</link>
+		<link>
+			<name>RuleMap.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleMap.h</locationURI>
+		</link>
+		<link>
 			<name>ScoreComponentCollection.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ScoreComponentCollection.cpp</locationURI>

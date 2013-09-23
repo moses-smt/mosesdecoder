@@ -17,7 +17,6 @@ void ChartTranslationOption::Evaluate(const InputType &input, const InputPath &i
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     ff.Evaluate(input, inputPath, m_targetPhrase, m_scoreBreakdown);
-    ff.Evaluate(input, inputPath, m_targetPhrase, list, m_scoreBreakdown);
   }
 }
 }

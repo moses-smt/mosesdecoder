@@ -8,9 +8,7 @@
  *  and source/target phrase data structures.
  */
 
-#ifndef RULEMAP_H_
-#define RULEMAP_H_
-
+#pragma once
 
 #include <vector>
 #include <iterator>
@@ -57,8 +55,4 @@ namespace Moses
 
     };
 }
-#endif
 
-
-
-#endif /* RULEMAP_H_ */
