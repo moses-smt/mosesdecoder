@@ -308,6 +308,17 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  //DIMw
+  if (m_parameter->isParamSpecified("translation-all-details")) {
+    const vector<string> &args = m_parameter->GetParam("translation-all-details");
+    if (args.size() == 1) {
+      m_detailedAllTranslationReportingFilePath = args[0];
+    } else {
+      UserMessage::Add(string("the translation-all-details option requires exactly one filename argument"));
+      return false;
+    }
+  }
+
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
                     Scan<int>(m_parameter->GetParam("distortion-limit")[0])
@@ -475,13 +486,9 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   if (m_parameter->GetParam("placeholder-factor").size() > 0) {
-    CHECK(m_parameter->GetParam("placeholder-factor").size() == 2);
-    m_placeHolderFactor = std::pair<FactorType, FactorType>(
-                            Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]),
-                            Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[1])
-                          );
+    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
   } else {
-    m_placeHolderFactor = std::pair<FactorType, FactorType>(NOT_FOUND, NOT_FOUND);
+    m_placeHolderFactor = NOT_FOUND;
   }
 
 

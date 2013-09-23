@@ -5,12 +5,12 @@
 #include <string>
 #include "WordsRange.h"
 #include "TargetPhrase.h"
-#include "ReorderingConstraint.h"
 
 namespace Moses
 {
 
 class TranslationOption;
+class ReorderingConstraint;
 
 /** This struct is used for storing XML force translation data for a given range in the sentence
  */

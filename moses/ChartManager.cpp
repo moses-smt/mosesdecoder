@@ -140,14 +140,12 @@ void ChartManager::AddXmlChartOptions()
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    const TargetPhrase &targetPhrase = opt->GetTargetPhrases()[0]->GetPhrase();
     const WordsRange &range = opt->GetSourceWordsRange();
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
     hypo->Evaluate();
 
-    const Word &targetLHS = hypo->GetTargetLHS();
 
     ChartCell &cell = m_hypoStackColl.Get(range);
     cell.AddHypothesis(hypo);

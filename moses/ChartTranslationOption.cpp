@@ -19,5 +19,13 @@ void ChartTranslationOption::Evaluate(const InputType &input, const InputPath &i
     ff.Evaluate(input, inputPath, m_targetPhrase, m_scoreBreakdown);
   }
 }
+
+
+std::ostream& operator<<(std::ostream &out, const ChartTranslationOption &transOpt)
+{
+	out << transOpt.m_targetPhrase << " " << transOpt.m_scoreBreakdown;
+	return out;
+}
+
 }
 

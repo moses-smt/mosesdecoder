@@ -112,6 +112,15 @@ public:
   inline Word &GetWord(size_t pos) {
     return m_words[pos];
   }
+
+  inline Word &Front() {
+    return m_words[0];
+  }
+
+  inline Word &Back() {
+    return m_words[GetSize() - 1];
+  }
+
   //! particular factor at a particular position
   inline const Factor *GetFactor(size_t pos, FactorType factorType) const {
     const Word &ptr = m_words[pos];
@@ -128,7 +137,7 @@ public:
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
                 , const std::vector<FactorType> &inputFactor) const;
 
-  size_t Find(const Phrase &sought) const;
+  size_t Find(const Phrase &sought, int maxUnknown) const;
 
   //! create an empty word at the end of the phrase
   Word &AddWord();

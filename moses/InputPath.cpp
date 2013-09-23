@@ -20,14 +20,6 @@ InputPath::InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
 {
   //cerr << "phrase=" << phrase << " m_inputScore=" << *m_inputScore << endl;
 
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
-  if (placeholderFactor != NOT_FOUND) {
-    for (size_t pos = 0; pos < m_phrase.GetSize(); ++pos) {
-      if (m_phrase.GetFactor(pos, placeholderFactor)) {
-        m_placeholders.push_back(pos);
-      }
-    }
-  }
 }
 
 InputPath::~InputPath()
@@ -61,26 +53,6 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
 {
   std::pair<const TargetPhraseCollection*, const void*> value(targetPhrases, ptNode);
   m_targetPhrases[&phraseDictionary] = value;
-}
-
-bool InputPath::SetPlaceholders(TargetPhrase *targetPhrase) const
-{
-  FactorType sourcePlaceholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
-  FactorType targetPlaceholderFactor = StaticData::Instance().GetPlaceholderFactor().second;
-
-  const AlignmentInfo &alignments = targetPhrase->GetAlignTerm();
-  for (size_t i = 0; i < m_placeholders.size(); ++i) {
-    size_t sourcePos = m_placeholders[i];
-    set<size_t> targetPos = alignments.GetAlignmentsForSource(sourcePos);
-    if (targetPos.size() == 1) {
-      const Word &sourceWord = m_phrase.GetWord(sourcePos);
-      Word &targetWord = targetPhrase->GetWord(*targetPos.begin());
-      targetWord[targetPlaceholderFactor] = sourceWord[sourcePlaceholderFactor];
-    } else {
-      return false;
-    }
-  }
-  return true;
 }
 
 const Word &InputPath::GetLastWord() const

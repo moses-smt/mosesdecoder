@@ -5,6 +5,7 @@
 #include "moses/ChartManager.h"
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
+#include "moses/Util.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -95,7 +96,7 @@ FFState* ConstrainedDecoding::Evaluate(
 	ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
 	const Phrase &outputPhrase = ret->GetPhrase();
 
-	size_t searchPos = ref->Find(outputPhrase);
+	size_t searchPos = ref->Find(outputPhrase, m_maxUnknowns);
 
 	float score;
 	if (hypo.IsSourceCompleted()) {
@@ -125,8 +126,7 @@ FFState* ConstrainedDecoding::EvaluateChart(
 
 	ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
 	const Phrase &outputPhrase = ret->GetPhrase();
-
-	size_t searchPos = ref->Find(outputPhrase);
+	size_t searchPos = ref->Find(outputPhrase, m_maxUnknowns);
 
 	float score;
 	if (hypo.GetCurrSourceRange().GetStartPos() == 0 &&
@@ -148,6 +148,9 @@ void ConstrainedDecoding::SetParameter(const std::string& key, const std::string
 {
   if (key == "path") {
 	  m_path = value;
+  }
+  else if (key == "max-unknowns") {
+	  m_maxUnknowns = Scan<int>(value);
   }
   else {
     StatefulFeatureFunction::SetParameter(key, value);

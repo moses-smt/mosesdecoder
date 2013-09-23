@@ -132,6 +132,10 @@ protected:
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
+
+  //DIMw
+  std::string m_detailedAllTranslationReportingFilePath;
+
   bool m_onlyDistinctNBest;
   bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
@@ -203,7 +207,7 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  std::pair<FactorType, FactorType> m_placeHolderFactor;
+  FactorType m_placeHolderFactor;
 
   StaticData();
 
@@ -348,6 +352,11 @@ public:
   bool IsDetailedTranslationReportingEnabled() const {
     return !m_detailedTranslationReportingFilePath.empty();
   }
+
+  bool IsDetailedAllTranslationReportingEnabled() const {
+      return !m_detailedAllTranslationReportingFilePath.empty();
+    }
+
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
   }
@@ -739,7 +748,7 @@ public:
 
   void OverrideFeatures();
 
-  const std::pair<FactorType, FactorType> &GetPlaceholderFactor() const {
+  FactorType GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
 };

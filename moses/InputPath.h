@@ -13,9 +13,9 @@ namespace Moses
 class PhraseDictionary;
 class TargetPhraseCollection;
 class ScoreComponentCollection;
-class ScorePair;
 class TargetPhrase;
 class InputPath;
+struct ScorePair;
 
 typedef std::list<InputPath*> InputPathList;
 
@@ -34,10 +34,14 @@ protected:
   Phrase m_phrase;
   WordsRange m_range;
   const ScorePair *m_inputScore;
-  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
   const NonTerminalSet m_sourceNonTerms;
 
-  std::vector<size_t> m_placeholders;
+  // for phrase-based model only
+  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
+
+  // for syntax model onlu
+  mutable std::vector<std::vector<const Word*> > m_ruleSourceFromInputPath;
+
 
   bool SetPlaceholders(TargetPhrase *targetPhrase) const;
 public:
@@ -75,6 +79,12 @@ public:
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;
   const ScorePair *GetInputScore() const {
     return m_inputScore;
+  }
+
+  std::vector<const Word*> &AddRuleSourceFromInputPath() const
+  {
+	  m_ruleSourceFromInputPath.push_back(std::vector<const Word*>());
+	  return m_ruleSourceFromInputPath.back();
   }
 
 };

@@ -87,6 +87,10 @@ public:
 
   void Evaluate(const InputType &input, const InputPath &inputPath);
 
+  void SetInputPath(const InputPath *inputPath);
+
+  void CreateSourceRuleFromInputPath();
+
 private:
 
   StackVec m_stackVec; //! vector of hypothesis list!

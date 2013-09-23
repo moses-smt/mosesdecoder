@@ -85,6 +85,11 @@ public:
     return *m_sentenceStats;
   }
 
+  //DIMw
+  const ChartCellCollection& GetChartCellCollection() const {
+    return m_hypoStackColl;
+  }
+
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
    * currently an empty function
