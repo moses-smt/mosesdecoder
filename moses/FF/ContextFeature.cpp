@@ -152,7 +152,35 @@ void ContextFeature::Evaluate(const InputType &input
      	        }
      	        */
 
-	//for()
+	//Add fake vector
+
+	  //Put target phrases into rule map and score
+	  //1. Put strings into rule map
+	  //2. Score strings -> vector of losses
+	  //3. For each string look for target phrase
+	  //4. Associate score to target phrase
+
+	  //loop over target phrases and add score
+	   std::vector<ScoreComponentCollection> scores;
+	   std::vector<ScoreComponentCollection>::const_iterator iterLCSP = scores.begin();
+	   std::vector<std::string> :: iterator itr_targetRep;
+
+	   for (itr_targetRep = (itr_ruleMap->second)->begin() ; itr_targetRep != (itr_ruleMap->second)->end() ; itr_targetRep++) {
+	                //Find target phrase corresponding to representation
+	                std::map<std::string,TargetPhrase*> :: iterator itr_rep;
+	                CHECK(targetRepMap.find(*itr_targetRep) != targetRepMap.end());
+	                itr_rep = targetRepMap.find(*itr_targetRep);
+	                VERBOSE(5, "Looking at target phrase : " << *itr_rep->second << std::endl);
+	                //VERBOSE(5, "Target Phrase score vector before adding stateless : ");
+	                //StaticData::Instance().GetScoreIndexManager().PrintLabeledScores(std::cerr,(itr_rep->second)->GetScoreBreakdown());
+	                // std::cerr << std::endl;
+	                VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+	                VERBOSE(5, "Score component collection : " << *iterLCSP << std::endl);
+	                (itr_rep->second)->AddStatelessScore(*iterLCSP++);
+	                VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+	                }
+
+
 	}
 
 
