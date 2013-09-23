@@ -45,6 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartTrellisPath.h"
 #include "search/applied.hh"
+#include "moses/ChartManager.h"
 
 namespace Moses
 {
@@ -70,10 +71,14 @@ protected:
   const Moses::FactorMask								&m_inputFactorUsed;
   std::ostream 				        					*m_outputSearchGraphStream;
   std::ostream                          *m_detailedTranslationReportingStream;
+  //DIMw
+  std::ostream                          *m_detailedAllTranslationReportingStream;
   std::ostream                          *m_alignmentInfoStream;
   std::string		        								m_inputFilePath;
   std::istream					        				*m_inputStream;
   Moses::OutputCollector                *m_detailOutputCollector;
+  //DIMw
+  Moses::OutputCollector                *m_detailAllOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
@@ -114,6 +119,7 @@ public:
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, long translationId);
   void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputDetailedAllTranslationReport(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 
   void ResetTranslationId();

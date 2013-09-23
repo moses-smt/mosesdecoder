@@ -128,6 +128,15 @@ public:
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
     }
 
+    //DIMw
+    if (staticData.IsDetailedAllTranslationReportingEnabled()) {
+          const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+          size_t nBestSize = staticData.GetNBestSize();
+          ChartTrellisPathList nBestList;
+          manager.CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
+          m_ioWrapper.OutputDetailedAllTranslationReport(nBestList, manager, sentence, translationId);
+        }
+
     // n-best
     size_t nBestSize = staticData.GetNBestSize();
     if (nBestSize > 0) {

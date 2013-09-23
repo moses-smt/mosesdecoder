@@ -308,6 +308,17 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  //DIMw
+  if (m_parameter->isParamSpecified("translation-all-details")) {
+    const vector<string> &args = m_parameter->GetParam("translation-all-details");
+    if (args.size() == 1) {
+      m_detailedAllTranslationReportingFilePath = args[0];
+    } else {
+      UserMessage::Add(string("the translation-all-details option requires exactly one filename argument"));
+      return false;
+    }
+  }
+
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
                     Scan<int>(m_parameter->GetParam("distortion-limit")[0])
