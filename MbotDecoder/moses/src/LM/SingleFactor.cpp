@@ -66,7 +66,11 @@ LanguageModelPointerState::LanguageModelPointerState()
   m_beginSentenceState = new PointerState(NULL);
 }
 
-LanguageModelPointerState::~LanguageModelPointerState() {}
+LanguageModelPointerState::~LanguageModelPointerState()
+{
+	delete m_nullContextState;
+	delete m_beginSentenceState;
+}
 
 const FFState *LanguageModelPointerState::GetNullContextState() const
 {
@@ -80,21 +84,11 @@ const FFState *LanguageModelPointerState::GetBeginSentenceState() const
 
 FFState *LanguageModelPointerState::NewState(const FFState *from) const
 {
-  //std::cout << "SINGLE FACTOR : MAKING NEW STATE" << std::endl;
   return new PointerState(from ? static_cast<const PointerState*>(from)->lmstate : NULL);
 }
 
 LMResult LanguageModelPointerState::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const
 {
-   //std::cout << "SINGLE FACTOR" << std::endl;
-    //std::cout << "DISPLAYING CONTEXT WORD : " <<  contextFactor.size() << std::endl;
-   /*std::vector<const Word*>::const_iterator itr_context;
-   for(itr_context = contextFactor.begin(); itr_context!=contextFactor.end();itr_context++)
-                            {
-                                std::cout << "CONTEXT FACTOR : " << **itr_context << std::endl;
-                            }
-
-  std::cout << "SINGLE FACTOR : get value for got state" << std::endl;*/
   return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate);
 }
 
