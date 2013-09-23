@@ -31,7 +31,7 @@ public:
     return m_scoreBreakdown;
   }
 
-  void Evaluate(const InputType &input, const InputPath &inputPath, const ChartTranslationOptions &list);
+  void Evaluate(const InputType &input, const InputPath &inputPath);
 };
 
 }
