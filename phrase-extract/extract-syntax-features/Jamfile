@@ -1,0 +1,9 @@
+alias header_paths : : : : <include>. <include>.. <include>../../moses/src <include>../.. <include>../../psd ;
+
+obj RuleTable.o : RuleTable.cpp header_paths ;
+
+obj InputTreeRep.o : InputTreeRep.cpp ..//XmlTree.o header_paths ;
+
+exe extract-syntax-features : extract-syntax-features.cpp ..//..//psd//psd ..//trees ..//tables-core ..//OutputFileStream.cpp ..//InputFileStream ..//SafeGetline.h RuleTable.o InputTreeRep.o header_paths ..//..//boost_iostreams ;
+
+exe extract-syntax-features-at-cell : extract-syntax-features-at-cell.cpp ..//..//psd//psd ..//trees ..//tables-core ..//OutputFileStream.cpp ..//InputFileStream ..//SafeGetline.h RuleTable.o InputTreeRep.o header_paths ..//..//boost_iostreams ;

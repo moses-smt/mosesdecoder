@@ -10,7 +10,7 @@
 #include "moses/StaticData.h"
 #include "moses/RuleMap.h"
 #include "Util.h"
-#include "../../phrase-extract/extract-syntax-features/InputTreeRep.h"
+#include "phrase-extract/extract-syntax-features/InputTreeRep.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
