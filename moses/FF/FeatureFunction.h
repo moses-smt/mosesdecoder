@@ -111,12 +111,10 @@ public:
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown) const = 0;
 
-  //override
+  // Fabienne Braune
   virtual void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , const TargetPhrase &targetPhrase
-                        , const ChartTranslationOptions &transOpts
-                        , ScoreComponentCollection &scoreBreakdown) const
+	                        , const InputPath &inputPath
+	                        , ChartTranslationOptions &transOpts) const
   {}
 
   virtual void SetParameter(const std::string& key, const std::string& value);
