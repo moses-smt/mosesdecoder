@@ -7,6 +7,7 @@ namespace Moses
 class TargetPhrase;
 class InputPath;
 class InputType;
+class Word;
 
 class ChartTranslationOption
 {
