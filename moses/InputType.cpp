@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "InputType.h"
 #include "ChartTranslationOptions.h"
+#include "moses/SyntaxFeatures/InputTreeRep.h"
 
 namespace Moses
 {
@@ -32,9 +33,16 @@ InputType::InputType(long translationId) : m_translationId(translationId)
 {
   m_frontSpanCoveredLength = 0;
   m_sourceCompleted.resize(0);
+
+  //chart for extracting syntax features
+   m_parseTree = new InputTreeRep(0);
+
 }
 
-InputType::~InputType() {}
+InputType::~InputType() {
+
+	delete m_parseTree;
+}
 
 TO_STRING_BODY(InputType);
 

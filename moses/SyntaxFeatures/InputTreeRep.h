@@ -4,7 +4,7 @@
 #include <vector>
 #include <vector>
 #include <string>
-#include "InputType.h"
+#include "util/check.hh"
 
 namespace Moses
 {

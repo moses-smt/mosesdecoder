@@ -1,6 +1,6 @@
 #include "FeatureConsumer.h"
 #include "vw.h"
-#include "Util.h"
+#include "moses/Util.h"
 #include "ezexample.h"
 #include <stdexcept>
 #include <exception>

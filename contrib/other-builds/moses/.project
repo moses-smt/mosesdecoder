@@ -497,6 +497,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/InputType.h</locationURI>
 		</link>
 		<link>
+			<name>Jamfile</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/psd/Jamfile</locationURI>
+		</link>
+		<link>
 			<name>LM</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -797,6 +802,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntacticLanguageModelState.h</locationURI>
 		</link>
 		<link>
+			<name>SyntaxFeatures</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>TargetPhrase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetPhrase.cpp</locationURI>
@@ -1025,6 +1035,11 @@
 			<name>hypergraph.proto</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/hypergraph.proto</locationURI>
+		</link>
+		<link>
+			<name>psd</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>rule.proto</name>
@@ -1502,6 +1517,36 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
 		</link>
 		<link>
+			<name>SyntaxFeatures/InputTreeRep.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntaxFeatures/InputTreeRep.cpp</locationURI>
+		</link>
+		<link>
+			<name>SyntaxFeatures/InputTreeRep.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntaxFeatures/InputTreeRep.h</locationURI>
+		</link>
+		<link>
+			<name>SyntaxFeatures/SyntaxTree.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntaxFeatures/SyntaxTree.cpp</locationURI>
+		</link>
+		<link>
+			<name>SyntaxFeatures/SyntaxTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntaxFeatures/SyntaxTree.h</locationURI>
+		</link>
+		<link>
+			<name>SyntaxFeatures/XmlTree.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntaxFeatures/XmlTree.cpp</locationURI>
+		</link>
+		<link>
+			<name>SyntaxFeatures/XmlTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntaxFeatures/XmlTree.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/BilingualDynSuffixArray.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.cpp</locationURI>
@@ -1660,6 +1705,36 @@
 			<name>bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
+		</link>
+		<link>
+			<name>psd/FeatureConsumer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/psd/FeatureConsumer.h</locationURI>
+		</link>
+		<link>
+			<name>psd/FeatureExtractor.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/psd/FeatureExtractor.cpp</locationURI>
+		</link>
+		<link>
+			<name>psd/FeatureExtractor.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/psd/FeatureExtractor.h</locationURI>
+		</link>
+		<link>
+			<name>psd/Jamfile</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/psd/Jamfile</locationURI>
+		</link>
+		<link>
+			<name>psd/VWFileConsumer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/psd/VWFileConsumer.cpp</locationURI>
+		</link>
+		<link>
+			<name>psd/VWLibraryConsumer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/psd/VWLibraryConsumer.cpp</locationURI>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/LexicalReordering.cpp</name>

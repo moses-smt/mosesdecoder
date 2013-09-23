@@ -29,10 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhraseCollection.h"
 #include "ReorderingConstraint.h"
 #include "NonTerminal.h"
+#include "moses/psd/FeatureExtractor.h"
 
 namespace Moses
 {
-
+class InputTreeRep;
 class WordsRange;
 class Factor;
 class PhraseDictionary;
@@ -65,6 +66,7 @@ public:
   std::vector<bool> m_sourceCompleted;
   std::string m_initialTargetPhrase;
   size_t m_frontSpanCoveredLength;
+
   // how many words from the beginning are covered
 
   InputType(long translationId = 0);
@@ -198,6 +200,17 @@ public:
   virtual std::vector <ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 
   TO_STRING();
+
+  //For context feature (damt-hiero)
+  //
+  PSD::ContextType m_PSDContext;
+  InputTreeRep *m_parseTree;
+  Phrase m_initialSourcePhrase;
+
+  const InputTreeRep * GetInputTreeRep() const
+   {
+       return m_parseTree;
+   }
 
 };
 

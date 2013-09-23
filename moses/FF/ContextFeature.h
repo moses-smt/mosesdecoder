@@ -8,11 +8,10 @@
 #pragma once
 
 #include "moses/FF/StatelessFeatureFunction.h"
-#include "TargetPhrase.h"
-#include "TypeDef.h"
-#include "ScoreComponentCollection.h"
-#include "psd/FeatureExtractor.h"
-#include "psd/FeatureConsumer.h"
+#include "moses/TypeDef.h"
+#include "moses/ScoreComponentCollection.h"
+#include "moses/psd/FeatureExtractor.h"
+#include "moses/psd/FeatureConsumer.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -27,6 +26,11 @@ public:
 	ContextFeature(const std::string &line)
 	:StatelessFeatureFunction("ContextFeature", line)
 	{}
+
+	//Is this allowed (?)
+	~ContextFeature();
+
+	void Load();
 
 	bool IsUseable(const FactorMask &mask) const
 	{ return true; }
@@ -74,6 +78,20 @@ public:
 	   void Normalize1(std::vector<float> &losses);
 	   double LogAddition(double logA, double logB, double logAddPrecision);
 	   void Interpolate(std::vector<float> &losses, std::vector<float> &pEgivenF, float interpolParam);
+
+	private :
+    PSD::TargetIndexType m_ruleIndex; //FB : this target index type remains empty during decoding
+    PSD::FeatureExtractor *m_extractor, *m_debugExtractor;
+    PSD::VWLibraryPredictConsumerFactory  *m_consumerFactory;
+    PSD::VWFileTrainConsumer      *m_debugConsumer;
+    PSD::ExtractorConfig m_extractorConfig;
+    bool IsOOV(const std::string &targetRep);
+    bool LoadRuleIndex(const std::string &indexFile);
+    std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
+
+    public :
+    ScoreComponentCollection ScoreFactory(float score);
+
 };
 
 }

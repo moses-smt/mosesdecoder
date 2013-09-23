@@ -268,6 +268,18 @@ std::string Join(const std::string& delimiter, const std::vector<T>& items)
   return outstr.str();
 }
 
+// Convert any container to string
+template<typename It>
+std::string Join(const std::string &delim, It begin, It end)
+{
+  std::ostringstream outstr;
+  if (begin != end)
+    outstr << *begin++;
+  for ( ; begin != end; ++begin)
+    outstr << delim << *begin;
+  return outstr.str();
+}
+
 //! transform prob to natural log score
 inline float TransformScore(float prob)
 {
@@ -403,6 +415,21 @@ inline std::string GetFirstString(const std::string& str, int& first_pos,  const
   first_pos = lastPos;
   return first_str;
 }
+
+const float EPS = 0.0001; // for floating point comparisons
+inline bool Equals(float a, float b)
+{
+  return fabs(a - b) < EPS;
+}
+
+//Fabienne Braune
+const long double VerySmallDiff = 0.0000000001; // for very precise comparisons
+inline bool PreciseEquals(float a, float b)
+{
+  return fabs(a - b) < VerySmallDiff;
+}
+
+
 
 template<class T>
 T log_sum (T log_a, T log_b)

@@ -7,6 +7,8 @@
 
 namespace Moses
 {
+class ChartTranslationOption;
+
 //! @todo what is this?
 class XMLParseOutput
 {
@@ -41,6 +43,15 @@ protected:
   }
 
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
+
+  //For context feature (soft syntax)
+  std::vector<std::vector<std::vector<std::string> > > m_stringChart;
+  std::vector <ChartTranslationOption*> m_xmlChartOptionsList;
+
+  //damt hiero
+  void AddChartString(size_t startPos, size_t endPos, const std::string &label);
+  void PopulateStringChart(std::string noTag);
+
 
 public:
   TreeInput() {
