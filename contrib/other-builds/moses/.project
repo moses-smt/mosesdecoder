@@ -497,11 +497,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/InputType.h</locationURI>
 		</link>
 		<link>
-			<name>Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Jamfile</locationURI>
-		</link>
-		<link>
 			<name>LM</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>

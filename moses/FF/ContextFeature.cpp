@@ -9,6 +9,17 @@
 #include "moses/Util.h"
 #include "moses/StaticData.h"
 #include "moses/RuleMap.h"
+#include "Util.h"
+#include "../../phrase-extract/extract-syntax-features/InputTreeRep.h"
+#include <vector>
+#include <iostream>
+#include <fstream>
+
+#include "FeatureExtractor.h"
+#include "FeatureConsumer.h"
+
+using namespace std;
+using namespace PSD;
 
 #include <cstdlib>
 #include <string>
