@@ -1,4 +1,4 @@
-#include "ChartTranslationOptions.h"
+#include "ChartTranslationOption.h"
 #include "InputType.h"
 #include "InputPath.h"
 
@@ -10,7 +10,7 @@ ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
 {
 }
 
-void ChartTranslationOption::Evaluate(const InputType &input, const InputPath &inputPath, const ChartTranslationOptions &list)
+void ChartTranslationOption::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
