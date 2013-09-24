@@ -37,11 +37,14 @@ FFState* ControlRecombination::EvaluateChart(
   ScoreComponentCollection* accumulator) const
 {
   UTIL_THROW(util::Exception, "Not implemented yet");
+  return NULL;
 }
 
 const FFState* ControlRecombination::EmptyHypothesisState(const InputType &input) const
 {
-  ControlRecombinationState *state = new ControlRecombinationState();
+  // ControlRecombinationState *state = new ControlRecombinationState();
+  UTIL_THROW(util::Exception, "Not implemented yet");
+  return NULL;
 }
 
 ControlRecombinationState::ControlRecombinationState()
