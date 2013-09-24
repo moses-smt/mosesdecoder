@@ -68,6 +68,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_inputFactorUsed(inputFactorUsed)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
+  ,m_detailedTreeFragmentsTranslationReportingStream(NULL)
   ,m_alignmentInfoStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
