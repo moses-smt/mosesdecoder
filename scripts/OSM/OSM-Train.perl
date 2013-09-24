@@ -39,11 +39,11 @@ die("ERROR: could not find output corpus file '$CORPUS_E'")
 die("ERROR: could not find algnment file '$ALIGNMENT'") 
     unless -e $ALIGNMENT;
 die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM") 
-    unless -e "$MOSES_SRC_DIR/scripts/OSM/flipAlignment";
+    unless -e "$MOSES_SRC_DIR/scripts/OSM/flipAlignment.perl";
 
 # create factors
 `mkdir $OUT_DIR`;
-`$MOSES_SRC_DIR/scripts/OSM/flipAlignment $ALIGNMENT > $OUT_DIR/align`;
+`$MOSES_SRC_DIR/scripts/OSM/flipAlignment.perl $ALIGNMENT > $OUT_DIR/align`;
 
 if (defined($FACTOR)) {
   
@@ -84,7 +84,7 @@ print "Extracting Singletons\n";
 `$MOSES_SRC_DIR/scripts/OSM/extract-singletons.perl $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align > $OUT_DIR/$factor_val/Singletons`;
 
 print "Converting Bilingual Sentence Pair into Operation Corpus\n";
-`$MOSES_SRC_DIR/scripts/OSM/generateSequences $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align $OUT_DIR/$factor_val/Singletons > $OUT_DIR/$factor_val/opCorpus`;
+`$MOSES_SRC_DIR/bin/generateSequences $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align $OUT_DIR/$factor_val/Singletons > $OUT_DIR/$factor_val/opCorpus`;
 
 print "Learning Operation Sequence Translation Model\n";
 `$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM`;
