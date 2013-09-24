@@ -375,7 +375,8 @@ void Phrase::InitStartEndWord()
 
 bool Phrase::Contains(const Phrase &sought) const
 {
-
+  throw "THIS FUNCTION IS NOT IMPLEMENTED YET!";
+  return false;
 }
 
 TO_STRING_BODY(Phrase);
