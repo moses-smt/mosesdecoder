@@ -41,11 +41,12 @@
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
-#include "util/file.hh"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
 #include "util/check.hh"
+#include "util/file.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -171,7 +172,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
   while(getline(inStream, lineOrig)) {
     const string *line;
     if (format == HieroFormat) { // reformat line
-      assert(false);
+      UTIL_THROW(util::Exception, "Cannot be Hiero format");
       //line = ReformatHieroRule(lineOrig);
     } else {
       // do nothing to format of line

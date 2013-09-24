@@ -157,8 +157,9 @@ void ChartTranslationOptionList::ApplyThreshold()
 
 void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPath &inputPath)
 {
+  // NEVER iterate over ALL of the collection. Just over the first m_size
   CollType::iterator iter;
-  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
+  for (iter = m_collection.begin(); iter != m_collection.begin() + m_size; ++iter) {
     ChartTranslationOptions &transOpts = **iter;
     transOpts.Evaluate(input, inputPath);
   }

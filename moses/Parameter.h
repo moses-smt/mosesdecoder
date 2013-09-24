@@ -1,4 +1,4 @@
-// $Id$
+/// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

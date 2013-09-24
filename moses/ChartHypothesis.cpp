@@ -89,6 +89,7 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
 {
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
 
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
@@ -99,6 +100,23 @@ void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
       prevHypo->GetOutputPhrase(outPhrase);
     } else {
       outPhrase.AddWord(word);
+
+      if (placeholderFactor != NOT_FOUND) {
+    	  std::set<size_t> sourcePosSet = GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
+    	  if (sourcePosSet.size() == 1) {
+    		  const std::vector<const Word*> *ruleSourceFromInputPath = GetTranslationOption().GetSourceRuleFromInputPath();
+    		  CHECK(ruleSourceFromInputPath);
+
+    	      size_t sourcePos = *sourcePosSet.begin();
+    		  const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
+    		  CHECK(sourceWord);
+    		  const Factor *factor = sourceWord->GetFactor(placeholderFactor);
+    		  if (factor) {
+    			  outPhrase.Back()[0] = factor;
+    		  }
+     	  }
+      }
+
     }
   }
 }

@@ -7,6 +7,8 @@ use FindBin qw($RealBin);
 sub Beautify($);
 
 print STDERR "RealBin=$RealBin \n\n";
+my $v = `astyle --version`;
+print STDERR "$v \n";
 
 Beautify("$RealBin/../..");
 

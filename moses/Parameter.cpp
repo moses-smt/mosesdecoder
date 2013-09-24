@@ -67,6 +67,8 @@ Parameter::Parameter()
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
+  //DIMw
+  AddParam("translation-all-details", "Tall", "for all hypotheses, report translation details to the given file");
   AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
   AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
   AddParam("verbose", "v", "verbosity level of the logging");
@@ -199,7 +201,7 @@ Parameter::Parameter()
 
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
 
-  AddParam("placeholder-factor", "Which factors to use to store the original text for placeholders. Must be 2, source target");
+  AddParam("placeholder-factor", "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
 }
 
 Parameter::~Parameter()

@@ -219,7 +219,7 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
   if (reportAllFactors == true) {
     out << phrase;
   } else {
-    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
+    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
 
     std::map<size_t, const Factor*> placeholders;
     if (placeholderFactor != NOT_FOUND) {

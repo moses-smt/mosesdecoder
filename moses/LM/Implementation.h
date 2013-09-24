@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Factor.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
-#include "moses/FF/FeatureFunction.h"
 #include "moses/Word.h"
 #include "Base.h"
 
