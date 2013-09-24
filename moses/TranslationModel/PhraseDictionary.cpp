@@ -75,19 +75,24 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
   return ret;
 }
 
-const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
+TargetPhraseCollection const *
+PhraseDictionary::
+GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }
 
 
-const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::
+TargetPhraseCollectionWithSourcePhrase const* 
+PhraseDictionary::
 GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }
 
-void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
+void 
+PhraseDictionary::
+SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "cache-size") {
     m_maxCacheSize = Scan<size_t>(value);
@@ -100,7 +105,9 @@ void PhraseDictionary::SetParameter(const std::string& key, const std::string& v
   }
 }
 
-void PhraseDictionary::SetFeaturesToApply()
+void 
+PhraseDictionary::
+SetFeaturesToApply()
 {
   // find out which feature function can be applied in this decode step
   const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
@@ -112,7 +119,9 @@ void PhraseDictionary::SetFeaturesToApply()
   }
 }
 
-void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+void 
+PhraseDictionary::
+GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
 {
   InputPathList::const_iterator iter;
   for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
