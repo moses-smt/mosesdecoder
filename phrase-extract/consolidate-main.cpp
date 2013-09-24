@@ -337,7 +337,9 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     }
 
     // arbitrary key-value pairs
-    fileConsolidated << " ||| " << itemDirect[6];
+    if (itemDirect.size() >= 7) {
+      fileConsolidated << " ||| " << itemDirect[6];
+    }
 
     fileConsolidated << endl;
   }
