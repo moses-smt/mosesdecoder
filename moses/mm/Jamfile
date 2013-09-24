@@ -1,0 +1,41 @@
+exe mtt-build : 
+mtt-build.cc 
+$(TOP)/moses/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mtt-dump : 
+mtt-dump.cc 
+$(TOP)/moses/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe symal2mam : 
+symal2mam.cc 
+$(TOP)/moses/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe custom-pt : 
+custom-pt.cc 
+$(TOP)/moses/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+
+install $(PREFIX)/bin :  mtt-build mtt-dump symal2mam custom-pt ; 
+
+fakelib mm : [ glob ug_*.cc tpt_*.cc ] ;
+
