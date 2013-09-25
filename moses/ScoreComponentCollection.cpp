@@ -47,22 +47,29 @@ std::ostream& operator<<(std::ostream& os, const ScorePair& rhs)
 ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
 size_t ScoreComponentCollection::s_denseVectorSize = 0;
 
-ScoreComponentCollection::ScoreComponentCollection() : m_scores(s_denseVectorSize)
+ScoreComponentCollection::
+ScoreComponentCollection() 
+  : m_scores(s_denseVectorSize)
 {}
 
 
-void ScoreComponentCollection::RegisterScoreProducer
-(const FeatureFunction* scoreProducer)
+void 
+ScoreComponentCollection::
+RegisterScoreProducer(const FeatureFunction* scoreProducer)
 {
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
-  VERBOSE(1, "FeatureFunction: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << (end-1) << endl);
+  VERBOSE(1, "FeatureFunction: " 
+	  << scoreProducer->GetScoreProducerDescription() 
+	  << " start: " << start << " end: " << (end-1) << endl);
   s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
   s_denseVectorSize = end;
 }
 
 
-float ScoreComponentCollection::GetWeightedScore() const
+float 
+ScoreComponentCollection::
+GetWeightedScore() const
 {
   return m_scores.inner_product(StaticData::Instance().GetAllWeights().m_scores);
 }
@@ -206,7 +213,9 @@ void ScoreComponentCollection::Save(const string& filename) const
   out.close();
 }
 
-void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string line)
+void 
+ScoreComponentCollection::
+Assign(const FeatureFunction* sp, const string line)
 {
   istringstream istr(line);
   while(istr) {
@@ -220,13 +229,18 @@ void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string li
   }
 }
 
-void ScoreComponentCollection::Assign(const FeatureFunction* sp, const std::vector<float>& scores) {
+void 
+ScoreComponentCollection::
+Assign(const FeatureFunction* sp, const std::vector<float>& scores) 
+{
   IndexPair indexes = GetIndexes(sp);
   size_t numScores = indexes.second - indexes.first;
 
   if (scores.size() != numScores) {
-	  UTIL_THROW(util::Exception, "Feature function " << sp->GetScoreProducerDescription() << " specified "
-			  << numScores << " dense scores or weights. Actually has " << scores.size());
+	  UTIL_THROW(util::Exception, "Feature function " 
+		     << sp->GetScoreProducerDescription() << " specified " 
+		     << numScores << " dense scores or weights. Actually has "
+		     << scores.size());
   }
 
   for (size_t i = 0; i < scores.size(); ++i) {

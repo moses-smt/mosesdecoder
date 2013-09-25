@@ -2,6 +2,7 @@
 #define __vector_index_sorter_h
 #include <boost/shared_ptr.hpp>
 #include <stdint.h>
+#include <vector>
 // VectorIndexSorter; (c) 2007-2012 Ulrich Germann
 
 // A VectorIndexSorter is a function object for sorting indices into a vector

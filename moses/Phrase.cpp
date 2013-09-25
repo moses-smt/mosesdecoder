@@ -380,34 +380,34 @@ void Phrase::InitStartEndWord()
 
 size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
 {
-	size_t maxStartPos = GetSize() - sought.GetSize();
-	for (size_t startThisPos = 0; startThisPos <= maxStartPos; ++startThisPos) {
-		size_t thisPos = startThisPos;
-		int currUnknowns = 0;
-		size_t soughtPos;
-		for (soughtPos = 0; soughtPos < sought.GetSize(); ++soughtPos) {
-			const Word &soughtWord = sought.GetWord(soughtPos);
-			const Word &thisWord = GetWord(thisPos);
-
-			if (soughtWord == thisWord) {
-				++thisPos;
-			}
-			else if (soughtWord.IsOOV() && (maxUnknown < 0 || currUnknowns < maxUnknown)) {
-				// the output has an OOV word. Allow a certain number of OOVs
-				++currUnknowns;
-				++thisPos;
-			}
-			else {
-				break;
-			}
-		}
-
-		if (soughtPos == sought.GetSize()) {
-			return startThisPos;
-		}
-	}
-
-	return NOT_FOUND;
+  size_t maxStartPos = GetSize() - sought.GetSize();
+  for (size_t startThisPos = 0; startThisPos <= maxStartPos; ++startThisPos) {
+    size_t thisPos = startThisPos;
+    int currUnknowns = 0;
+    size_t soughtPos;
+    for (soughtPos = 0; soughtPos < sought.GetSize(); ++soughtPos) {
+      const Word &soughtWord = sought.GetWord(soughtPos);
+      const Word &thisWord = GetWord(thisPos);
+      
+      if (soughtWord == thisWord) {
+	++thisPos;
+      }
+      else if (soughtWord.IsOOV() && (maxUnknown < 0 || currUnknowns < maxUnknown)) {
+	// the output has an OOV word. Allow a certain number of OOVs
+	++currUnknowns;
+	++thisPos;
+      }
+      else {
+	break;
+      }
+    }
+    
+    if (soughtPos == sought.GetSize()) {
+      return startThisPos;
+    }
+  }
+  
+  return NOT_FOUND;
 }
 
 TO_STRING_BODY(Phrase);

@@ -50,7 +50,8 @@ public:
     return m_collection;
   }
 
-  ChartRuleLookupManager *CreateRuleLookupManager(
+  ChartRuleLookupManager*
+  CreateRuleLookupManager(
     const ChartParser &,
     const ChartCellCollectionBase &);
 

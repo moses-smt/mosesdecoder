@@ -72,7 +72,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 
     for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase) {
       const TargetPhrase& targetPhrase = **iterTargetPhrase;
-      const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
+      // const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
       // skip if the
       if (targetPhrase.GetSize() != currSize) continue;
 
@@ -197,7 +197,7 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
     const Phrase &phraseFromIP = inputPath.GetPhrase();
     const Word &wordIP =  phraseFromIP.GetWord(0);
 
-    const WordsRange &range = inputPath.GetWordsRange();
+    // const WordsRange &range = inputPath.GetWordsRange();
 
     if (wordFromPt == wordIP) {
       return inputPath;
@@ -238,7 +238,7 @@ void DecodeStepTranslation::ProcessLEGACY(const TranslationOption &inputPartialT
 
     for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase) {
       const TargetPhrase& targetPhrase = **iterTargetPhrase;
-      const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
+      // const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
       // skip if the
       if (targetPhrase.GetSize() != currSize) continue;
 

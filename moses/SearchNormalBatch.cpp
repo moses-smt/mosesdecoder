@@ -108,7 +108,11 @@ void SearchNormalBatch::ProcessSentence()
  * \param expectedScore base score for early discarding
  *        (base hypothesis score plus future score estimation)
  */
-void SearchNormalBatch::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt, float expectedScore)
+
+void 
+SearchNormalBatch::
+ExpandHypothesis(const Hypothesis &hypothesis, 
+		 const TranslationOption &transOpt, float expectedScore)
 {
   // Check if the number of partial hypotheses exceeds the batch size.
   if (m_partial_hypos.size() >= m_batch_size) {
