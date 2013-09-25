@@ -24,13 +24,14 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   const StaticData &staticData = StaticData::Instance();
 
   // only if constraint decoding (having to match a specified output)
-  long sentenceID = source.GetTranslationId();
+  // long sentenceID = source.GetTranslationId();
 
   // initialize the stacks: create data structure and set limits
   std::vector < HypothesisStackNormal >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),staticData.GetMinHypoStackDiversity());
+    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),
+					staticData.GetMinHypoStackDiversity());
     sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
 
     m_hypoStackColl[ind] = sourceHypoColl;
