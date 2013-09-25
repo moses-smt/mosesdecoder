@@ -47,11 +47,12 @@ void InputFeature::Evaluate(const InputType &input
 		//binary phrase-table does input feature itself
 		return;
 	}
-
+	/*
   const ScorePair *scores = inputPath.GetInputScore();
   if (scores) {
-	  scoreBreakdown.PlusEquals(this, *scores);
+  	  scoreBreakdown.PlusEquals(this, *scores);
   }
+	*/
 }
 
 } // namespace
