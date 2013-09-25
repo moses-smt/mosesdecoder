@@ -1482,6 +1482,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SingleFactor.h</locationURI>
 		</link>
 		<link>
+			<name>LM/SkeletonLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SkeletonLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/SkeletonLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SkeletonLM.h</locationURI>
+		</link>
+		<link>
 			<name>LM/backward.arpa</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
@@ -1610,6 +1620,16 @@
 			<name>TranslationModel/Scope3Parser</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/SkeletonPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/SkeletonPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/WordCoocTable.cpp</name>

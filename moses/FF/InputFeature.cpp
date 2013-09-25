@@ -50,7 +50,7 @@ void InputFeature::Evaluate(const InputType &input
 
   const ScorePair *scores = inputPath.GetInputScore();
   if (scores) {
-
+	  scoreBreakdown.PlusEquals(this, *scores);
   }
 }
 
