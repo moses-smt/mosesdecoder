@@ -12,32 +12,48 @@ using namespace std;
 
 namespace Moses
 {
-ControlRecombinationState::ControlRecombinationState(const Hypothesis &hypo)
+ControlRecombinationState::ControlRecombinationState(const Hypothesis &hypo, const ControlRecombination &ff)
+:m_ff(ff)
 {
-	hypo.GetOutputPhrase(m_outputPhrase);
+	if (ff.GetType() == SameOutput) {
+		UTIL_THROW(util::Exception, "Implemented not yet completed for phrase-based model. Need to take into account the coverage");
+		hypo.GetOutputPhrase(m_outputPhrase);
+	}
+	else {
+		m_hypo = &hypo;
+	}
 }
 
-ControlRecombinationState::ControlRecombinationState(const ChartHypothesis &hypo)
+ControlRecombinationState::ControlRecombinationState(const ChartHypothesis &hypo, const ControlRecombination &ff)
+:m_ff(ff)
 {
-	hypo.GetOutputPhrase(m_outputPhrase);
+	if (ff.GetType() == SameOutput) {
+		hypo.GetOutputPhrase(m_outputPhrase);
+	}
+	else {
+		m_hypo = &hypo;
+	}
 }
 
 int ControlRecombinationState::Compare(const FFState& other) const
 {
 	const ControlRecombinationState &otherFF = static_cast<const ControlRecombinationState&>(other);
-	bool ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
-	return ret;
-}
-
-
-void ControlRecombination::Load()
-{
+	if (m_ff.GetType() == SameOutput) {
+		bool ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
+		return ret;
+	}
+	else {
+		// compare hypo address. Won't be equal unless they're actually the same hypo
+		if (m_hypo == otherFF.m_hypo)
+			return 0;
+		return (m_hypo < otherFF.m_hypo) ? -1 : +1;
+	}
 }
 
 std::vector<float> ControlRecombination::DefaultWeights() const
 {
-	CHECK(m_numScoreComponents == 1);
-	vector<float> ret(1, 1);
+	CHECK(m_numScoreComponents == 0);
+	vector<float> ret(0);
 	return ret;
 }
 
@@ -46,6 +62,7 @@ FFState* ControlRecombination::Evaluate(
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
+	return new ControlRecombinationState(hypo, *this);
 }
 
 FFState* ControlRecombination::EvaluateChart(
@@ -53,10 +70,17 @@ FFState* ControlRecombination::EvaluateChart(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
+	return new ControlRecombinationState(hypo, *this);
 }
 
 void ControlRecombination::SetParameter(const std::string& key, const std::string& value)
 {
+	  if (key == "type") {
+		  m_type = (ControlRecombinationType) Scan<int>(value);
+	  }
+	  else {
+	    StatefulFeatureFunction::SetParameter(key, value);
+	  }
 }
 
 }

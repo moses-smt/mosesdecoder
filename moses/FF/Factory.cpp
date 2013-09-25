@@ -37,6 +37,7 @@
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
+#include "moses/TranslationModel/SkeletonPT.h"
 
 #include "moses/LM/Ken.h"
 #ifdef LM_IRST
@@ -152,6 +153,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonLM);
+  MOSES_FNAME(SkeletonPT);
 
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);

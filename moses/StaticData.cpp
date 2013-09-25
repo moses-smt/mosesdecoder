@@ -35,12 +35,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "SentenceStats.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "ScoreComponentCollection.h"
+#include "DecodeGraph.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>

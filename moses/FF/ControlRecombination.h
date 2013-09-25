@@ -8,15 +8,23 @@
 
 namespace Moses
 {
+enum ControlRecombinationType
+{ // when to recombine
+  SameOutput = 1,
+  Never = 2
+};
+
+class ControlRecombination;
 
 class ControlRecombinationState : public FFState
 {
 public:
-	ControlRecombinationState()
+	ControlRecombinationState(const ControlRecombination &ff)
+	:m_ff(ff)
 	{}
 
-	ControlRecombinationState(const Hypothesis &hypo);
-	ControlRecombinationState(const ChartHypothesis &hypo);
+	ControlRecombinationState(const Hypothesis &hypo, const ControlRecombination &ff);
+	ControlRecombinationState(const ChartHypothesis &hypo, const ControlRecombination &ff);
 
 	int Compare(const FFState& other) const;
 
@@ -25,6 +33,8 @@ public:
 
 protected:
 	Phrase m_outputPhrase;
+	const ControlRecombination &m_ff;
+	const void *m_hypo;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -34,14 +44,13 @@ class ControlRecombination : public StatefulFeatureFunction
 {
 public:
 	ControlRecombination(const std::string &line)
-		:StatefulFeatureFunction("ControlRecombination", 1, line)
-		,m_maxUnknowns(0)
+		:StatefulFeatureFunction("ControlRecombination", 0, line)
+		,m_type(SameOutput)
+
 	{
 		m_tuneable = false;
 		ReadParameters();
 	}
-
-	void Load();
 
 	bool IsUseable(const FactorMask &mask) const
 		{ return true; }
@@ -68,18 +77,17 @@ public:
 
 	  virtual const FFState* EmptyHypothesisState(const InputType &input) const
 	  {
-		  return new ControlRecombinationState();
+		  return new ControlRecombinationState(*this);
 	  }
 
 	  std::vector<float> DefaultWeights() const;
 
 		void SetParameter(const std::string& key, const std::string& value);
 
+		ControlRecombinationType GetType() const
+		{ return m_type; }
 protected:
-	  std::string m_path;
-	  std::map<long,Phrase> m_constraints;
-	  int m_maxUnknowns;
-
+		ControlRecombinationType m_type;
 };
 
 

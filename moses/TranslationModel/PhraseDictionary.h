@@ -64,8 +64,6 @@ public:
   virtual ~PhraseDictionary() {
   }
 
-  virtual void Load() = 0;
-
   //! table limit number.
   size_t GetTableLimit() const {
     return m_tableLimit;

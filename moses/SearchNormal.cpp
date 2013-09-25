@@ -1,6 +1,7 @@
 #include "Manager.h"
 #include "Timer.h"
 #include "SearchNormal.h"
+#include "SentenceStats.h"
 
 using namespace std;
 

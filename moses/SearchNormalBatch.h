@@ -2,6 +2,7 @@
 #define moses_SearchNormalBatch_h
 
 #include "SearchNormal.h"
+#include "SentenceStats.h"
 
 namespace Moses
 {
