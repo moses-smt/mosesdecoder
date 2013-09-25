@@ -170,7 +170,8 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("n-best-list").size() >= 2) {
     m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
     m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
-    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
+    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 
+			 && m_parameter->GetParam("n-best-list")[2]=="distinct");
   } else if (m_parameter->GetParam("n-best-list").size() == 1) {
     UserMessage::Add(string("wrong format for switch -n-best-list file size"));
     return false;
@@ -877,7 +878,8 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
 
 void StaticData::LoadFeatureFunctions()
 {
-  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &ffs 
+    = FeatureFunction::GetFeatureFunctions();
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     FeatureFunction *ff = *iter;
@@ -886,12 +888,15 @@ void StaticData::LoadFeatureFunctions()
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
       m_phraseDictionary.push_back(ffCast);
       doLoad = false;
-    } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
+    } else if (const GenerationDictionary *ffCast 
+	       = dynamic_cast<const GenerationDictionary*>(ff)) {
       m_generationDictionary.push_back(ffCast);
-    } else if (WordPenaltyProducer *ffCast = dynamic_cast<WordPenaltyProducer*>(ff)) {
+    } else if (WordPenaltyProducer *ffCast 
+	       = dynamic_cast<WordPenaltyProducer*>(ff)) {
       CHECK(m_wpProducer == NULL); // max 1 feature;
       m_wpProducer = ffCast;
-    } else if (UnknownWordPenaltyProducer *ffCast = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
+    } else if (UnknownWordPenaltyProducer *ffCast 
+	       = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
       CHECK(m_unknownWordPenaltyProducer == NULL); // max 1 feature;
       m_unknownWordPenaltyProducer = ffCast;
     } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
@@ -988,9 +993,12 @@ bool StaticData::LoadAlternateWeightSettings()
           vector<string> featureFunctionName = Tokenize(args[1], ",");
           for(size_t k=0; k<featureFunctionName.size(); k++) {
             // check if a valid nane
-            map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(featureFunctionName[k]);
+            map<string,FeatureFunction*>::iterator ffLookUp 
+	      = nameToFF.find(featureFunctionName[k]);
             if (ffLookUp == nameToFF.end()) {
-              cerr << "ERROR: alternate weight setting " << currentId << " specifies to ignore feature function " << featureFunctionName[k] << " but there is no such feature function" << endl;
+              cerr << "ERROR: alternate weight setting " << currentId 
+		   << " specifies to ignore feature function " << featureFunctionName[k] 
+		   << " but there is no such feature function" << endl;
               hasErrors = true;
             } else {
               m_weightSettingIgnoreFF[ currentId ].insert( featureFunctionName[k] );
@@ -1018,7 +1026,9 @@ bool StaticData::LoadAlternateWeightSettings()
       // check if a valid nane
       map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(name);
       if (ffLookUp == nameToFF.end()) {
-        cerr << "ERROR: alternate weight setting " << currentId << " specifies weight(s) for " << name << " but there is no such feature function" << endl;
+        cerr << "ERROR: alternate weight setting " << currentId 
+	     << " specifies weight(s) for " << name 
+	     << " but there is no such feature function" << endl;
         hasErrors = true;
       } else {
         m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);

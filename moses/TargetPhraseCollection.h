@@ -118,6 +118,12 @@ public:
   void Add(TargetPhrase *targetPhrase, const Phrase &sourcePhrase);
 };
 
+struct CompareTargetPhrase 
+{
+  bool operator() (const TargetPhrase *a, const TargetPhrase *b) const;
+  bool operator() (const TargetPhrase &a, const TargetPhrase &b) const;
+};
+
 }
 
 #endif

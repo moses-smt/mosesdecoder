@@ -380,6 +380,7 @@ void Phrase::InitStartEndWord()
 
 size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
 {
+<<<<<<< HEAD
 	size_t maxStartPos = GetSize() - sought.GetSize();
 	for (size_t startThisPos = 0; startThisPos <= maxStartPos; ++startThisPos) {
 		size_t thisPos = startThisPos;
@@ -408,6 +409,10 @@ size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
 	}
 
 	return NOT_FOUND;
+=======
+  throw "THIS FUNCTION IS NOT IMPLEMENTED YET!";
+  return false;
+>>>>>>> dynamic-phrase-tables
 }
 
 TO_STRING_BODY(Phrase);

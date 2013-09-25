@@ -29,7 +29,7 @@ int ControlRecombinationState::Compare(const FFState& other) const
 	return ret;
 }
 
-//////////////////////////////////////////////////////////////////
+
 void ControlRecombination::Load()
 {
 }
