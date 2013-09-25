@@ -1,5 +1,6 @@
 // vim:tabstop=2
 #include "SkeletonPT.h"
+#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 
 using namespace std;
 
@@ -54,10 +55,10 @@ TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 	return tp;
 }
 
-ChartRuleLookupManager* SkeletonPT::CreateRuleLookupManager(const ChartParser&,
-															const ChartCellCollectionBase&)
+ChartRuleLookupManager* SkeletonPT::CreateRuleLookupManager(const ChartParser &parser,
+															const ChartCellCollectionBase &cellCollection)
 {
-  CHECK(false);
+  return new ChartRuleLookupManagerSkeleton(parser, cellCollection, *this);
 }
 
 TO_STRING_BODY(SkeletonPT);

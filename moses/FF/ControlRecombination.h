@@ -8,6 +8,10 @@
 
 namespace Moses
 {
+enum ControlRecombinationType
+{
+
+};
 
 class ControlRecombinationState : public FFState
 {
@@ -35,7 +39,6 @@ class ControlRecombination : public StatefulFeatureFunction
 public:
 	ControlRecombination(const std::string &line)
 		:StatefulFeatureFunction("ControlRecombination", 1, line)
-		,m_maxUnknowns(0)
 	{
 		m_tuneable = false;
 		ReadParameters();
@@ -76,10 +79,6 @@ public:
 		void SetParameter(const std::string& key, const std::string& value);
 
 protected:
-	  std::string m_path;
-	  std::map<long,Phrase> m_constraints;
-	  int m_maxUnknowns;
-
 };
 
 
