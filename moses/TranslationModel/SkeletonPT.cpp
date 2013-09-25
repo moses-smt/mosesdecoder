@@ -33,10 +33,16 @@ void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &phraseDicti
 
 TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 {
+	// create a target phrase from the 1st word of the source, prefix with 'SkeletonPT:'
 	CHECK(sourcePhrase.GetSize());
+	CHECK(m_output.size() == 1);
+
+	string str = sourcePhrase.GetWord(0).GetFactor(0)->GetString().as_string();
+	str = "SkeletonPT:" + str;
 
 	TargetPhrase *tp = new TargetPhrase();
-	tp->AddWord(sourcePhrase.GetWord(0));
+	Word &word = tp->AddWord();
+	word.CreateFromString(Output, m_output, str, false);
 
 	// score for this phrase table
 	vector<float> scores(m_numScoreComponents, 1.3);
