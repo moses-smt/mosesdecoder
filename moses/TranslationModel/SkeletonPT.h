@@ -16,6 +16,8 @@ class SkeletonPT : public PhraseDictionary
 public:
   SkeletonPT(const std::string &line);
 
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source);
+
   // for phrase-based model
   void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
@@ -24,6 +26,10 @@ public:
 
   TO_STRING();
 
+protected:
+  mutable std::list<TargetPhraseCollection*> m_allTPColl;
+
+  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase) const;
 };
 
 }  // namespace Moses

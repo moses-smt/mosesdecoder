@@ -44,6 +44,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/StaticData.h"
 #include "moses/FeatureVector.h"
 #include "moses/InputFileStream.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+
 #include "IOWrapper.h"
 
 using namespace std;

@@ -16,8 +16,6 @@ namespace Moses
 multiset<string> FeatureFunction::description_counts;
 
 std::vector<FeatureFunction*> FeatureFunction::m_producers;
-std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
-std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 
 FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 {

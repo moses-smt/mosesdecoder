@@ -3,6 +3,8 @@
 namespace Moses
 {
 
+std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
+
 StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, const std::string &line)
   :FeatureFunction(description, line)
 {
