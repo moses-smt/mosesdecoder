@@ -60,7 +60,7 @@ std::set<size_t> AlignmentInfo::GetAlignmentsForSource(size_t sourcePos) const
   std::set<size_t> ret;
   CollType::const_iterator iter;
   for (iter = begin(); iter != end(); ++iter) {
-    const std::pair<size_t,size_t> &align = *iter;
+    // const std::pair<size_t,size_t> &align = *iter;
     if (iter->first == sourcePos) {
       ret.insert(iter->second);
     }
@@ -73,10 +73,10 @@ std::set<size_t> AlignmentInfo::GetAlignmentsForTarget(size_t targetPos) const
   std::set<size_t> ret;
   CollType::const_iterator iter;
   for (iter = begin(); iter != end(); ++iter) {
-	const std::pair<size_t,size_t> &align = *iter;
-	if (iter->second == targetPos) {
-	  ret.insert(iter->first);
-	}
+    // const std::pair<size_t,size_t> &align = *iter;
+    if (iter->second == targetPos) {
+      ret.insert(iter->first);
+    }
   }
   return ret;
 }
