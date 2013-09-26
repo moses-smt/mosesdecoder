@@ -90,6 +90,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string targetLine;
   std::string sourceLine;
   std::string alignmentLine;
+  Alignment alignment;
   XmlTreeParser xmlTreeParser(labelSet, topLabelSet);
   ScfgRuleWriter writer(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
@@ -130,9 +131,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
     std::vector<std::string> sourceTokens(ReadTokens(sourceLine));
 
     // Read word alignments.
-    Alignment alignment;
     try {
-      alignment = ReadAlignment(alignmentLine);
+      ReadAlignment(alignmentLine, alignment);
     } catch (const Exception &e) {
       std::ostringstream s;
       s << "Failed to read alignment at line " << lineNum << ": ";
