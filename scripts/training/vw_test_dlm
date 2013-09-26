@@ -18,7 +18,7 @@
 #  
 #     SAMPLE
 #         sample file with extracted features (generated e.g. by 
-#         extract_features_dlm_baseline.py)
+#         extract_features_dlm_baseline.py), should be gzipped
 #
 #     RAW_PREDICTIONS_OUT
 #         path to file, where unnormalized VW predictions will be written
@@ -26,9 +26,6 @@
 MODEL=$1
 SAMPLE=$2
 RAW_PREDICTIONS_OUT=$3
-CACHE=__vwcache__
-
-rm -f $CACHE
 
 vw --quadratic st \
    --hash all \
@@ -37,6 +34,4 @@ vw --quadratic st \
    --csoaa_ldf mc \
    --testonly \
    --initial_regressor $MODEL \
-   --raw_predictions $3 \
-   < $2
-
+   --raw_predictions $RAW_PREDICTIONS_OUT
