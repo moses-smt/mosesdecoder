@@ -8,6 +8,7 @@ sub Beautify($);
 
 print STDERR "RealBin=$RealBin \n\n";
 my $version = `astyle --version 2> /dev/stdout`;
+chomp($version);
 print STDERR "version=$version";
 
 if ($version ne "Artistic Style Version 2.01") {
