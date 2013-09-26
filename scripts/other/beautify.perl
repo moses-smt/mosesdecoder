@@ -7,8 +7,8 @@ use FindBin qw($RealBin);
 sub Beautify($);
 
 print STDERR "RealBin=$RealBin \n\n";
-my $version = `astyle --version`;
-print STDERR "$version \n";
+my $version = `astyle --version 2> /dev/stdout`;
+print STDERR "version=$version";
 
 if ($version ne "Artistic Style Version 2.01") {
     print STDERR "Must be astyle version 2.01. Quitting\n";
