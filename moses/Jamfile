@@ -69,7 +69,9 @@ lib moses :
 ]
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt 
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-generic//generic mm//mm $(TOP)//boost_iostreams ;
+$(TOP)//boost_iostreams ;
+
+#generic//generic mm//mm
 
 alias headers-to-install : [ glob-tree *.h ] ;
 

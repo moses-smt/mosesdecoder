@@ -9,7 +9,6 @@
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
-#include "moses/TranslationModel/mmsapt.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -38,6 +37,10 @@
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
 #include "moses/TranslationModel/SkeletonPT.h"
+
+#ifdef PT_UG
+#include "moses/TranslationModel/mmsapt.h"
+#endif
 
 #include "moses/LM/Ken.h"
 #ifdef LM_IRST
@@ -142,7 +145,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
-  MOSES_FNAME(Mmsapt);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
@@ -155,6 +157,9 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonLM);
   MOSES_FNAME(SkeletonPT);
 
+#ifdef PT_UG
+  MOSES_FNAME(Mmsapt);
+#endif
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
 #endif
