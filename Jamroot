@@ -152,10 +152,10 @@ phrase-extract//pcfg-score
 biconcor 
 mira//mira 
 contrib/server//mosesserver 
-moses/mm//mtt-build 
-moses/mm//mtt-dump 
-moses/mm//symal2mam 
-moses/mm//custom-pt 
+#moses/mm//mtt-build 
+#moses/mm//mtt-dump 
+#moses/mm//symal2mam 
+#moses/mm//custom-pt 
 ;
 
 install-bin-libs programs ;
