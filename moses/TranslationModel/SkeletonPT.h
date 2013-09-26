@@ -26,6 +26,7 @@ public:
 
   TO_STRING();
 
+
 protected:
   mutable std::list<TargetPhraseCollection*> m_allTPColl;
 

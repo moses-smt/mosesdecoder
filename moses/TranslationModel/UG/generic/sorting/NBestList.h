@@ -1,7 +1,7 @@
 #ifndef __n_best_list_h
 #define __n_best_list_h
 #include <algorithm>
-#include "moses/generic/sorting/VectorIndexSorter.h"
+#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
 
 // NBest List; (c) 2007-2012 Ulrich Germann
 //

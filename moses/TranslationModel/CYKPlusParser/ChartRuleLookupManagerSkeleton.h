@@ -41,7 +41,7 @@ class ChartRuleLookupManagerSkeleton : public ChartRuleLookupManagerCYKPlus
 public:
   ChartRuleLookupManagerSkeleton(const ChartParser &parser,
                                const ChartCellCollectionBase &cellColl,
-                               const SkeletonPT &ruleTable);
+                               const SkeletonPT &skeletonPt);
 
   ~ChartRuleLookupManagerSkeleton();
 
@@ -50,6 +50,9 @@ public:
     ChartParserCallback &outColl);
 
 private:
+  TargetPhrase *CreateTargetPhrase(const Word &sourceWord) const;
+
+  const SkeletonPT &m_skeletonPT;
 };
 
 }  // namespace Moses
