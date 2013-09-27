@@ -18,6 +18,7 @@
  ***********************************************************************/
 
 #include <iostream>
+#include <sstream>
 #include "ChartRuleLookupManagerSkeleton.h"
 #include "DotChartInMemory.h"
 
@@ -39,7 +40,7 @@ ChartRuleLookupManagerSkeleton::ChartRuleLookupManagerSkeleton(
   const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
   const SkeletonPT &skeletonPt)
-: ChartRuleLookupManagerCYKPlus(parser, cellColl)
+: ChartRuleLookupManager(parser, cellColl)
 , m_skeletonPT(skeletonPt)
 {
 }
@@ -55,12 +56,11 @@ void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
 	const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
 	const Word &sourceWord = sourceWordLabel.GetLabel();
 
-	// almost the same as for SkeletonPT::GetTargetPhraseCollectionBatch()
-    TargetPhrase *tp = CreateTargetPhrase(sourceWord);
-    TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-    tpColl->Add(tp);
+	TargetPhrase *tp = CreateTargetPhrase(sourceWord);
+	TargetPhraseCollection *tpColl = new TargetPhraseCollection();
+	tpColl->Add(tp);
 
-    //outColl.Add(*tpColl, )
+	outColl.Add(*tpColl, m_stackVec, range);
 }
 
 TargetPhrase *ChartRuleLookupManagerSkeleton::CreateTargetPhrase(const Word &sourceWord) const

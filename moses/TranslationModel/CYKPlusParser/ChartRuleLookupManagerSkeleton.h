@@ -20,12 +20,8 @@
 #pragma once
 
 #include <vector>
-
-#ifdef USE_BOOST_POOL
-#include <boost/pool/object_pool.hpp>
-#endif
-
-#include "ChartRuleLookupManagerCYKPlus.h"
+#include "moses/ChartRuleLookupManager.h"
+#include "moses/StackVec.h"
 
 namespace Moses
 {
@@ -35,8 +31,7 @@ class DottedRuleColl;
 class WordsRange;
 class SkeletonPT;
 
-//! Implementation of ChartRuleLookupManager for in-memory rule tables.
-class ChartRuleLookupManagerSkeleton : public ChartRuleLookupManagerCYKPlus
+class ChartRuleLookupManagerSkeleton : public ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManagerSkeleton(const ChartParser &parser,
@@ -51,6 +46,8 @@ public:
 
 private:
   TargetPhrase *CreateTargetPhrase(const Word &sourceWord) const;
+
+  StackVec m_stackVec;
 
   const SkeletonPT &m_skeletonPT;
 };
