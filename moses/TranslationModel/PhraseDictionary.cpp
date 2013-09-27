@@ -83,14 +83,14 @@ GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 }
 
 
-TargetPhraseCollectionWithSourcePhrase const* 
+TargetPhraseCollectionWithSourcePhrase const*
 PhraseDictionary::
 GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }
 
-void 
+void
 PhraseDictionary::
 SetParameter(const std::string& key, const std::string& value)
 {
@@ -105,7 +105,7 @@ SetParameter(const std::string& key, const std::string& value)
   }
 }
 
-void 
+void
 PhraseDictionary::
 SetFeaturesToApply()
 {
@@ -119,7 +119,7 @@ SetFeaturesToApply()
   }
 }
 
-void 
+void
 PhraseDictionary::
 GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
 {

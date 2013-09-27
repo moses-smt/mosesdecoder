@@ -354,8 +354,8 @@ public:
   }
 
   bool IsDetailedAllTranslationReportingEnabled() const {
-      return !m_detailedAllTranslationReportingFilePath.empty();
-    }
+    return !m_detailedAllTranslationReportingFilePath.empty();
+  }
 
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;

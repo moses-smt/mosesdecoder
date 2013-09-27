@@ -109,7 +109,7 @@ public:
   void initInstanceWeightsFile(const char* initInstanceWeightsFile) {
     instanceWeightsFile = std::string(initInstanceWeightsFile);
   }
-  void initFlexScoreFlag(const bool initflexScoreFlag){
+  void initFlexScoreFlag(const bool initflexScoreFlag) {
     flexScoreFlag=initflexScoreFlag;
   }
 

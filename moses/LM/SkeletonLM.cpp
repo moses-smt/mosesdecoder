@@ -12,7 +12,7 @@ SkeletonLM::SkeletonLM(const std::string &line)
   ReadParameters();
 
   if (m_factorType == NOT_FOUND) {
-	  m_factorType = 0;
+    m_factorType = 0;
   }
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -39,10 +39,9 @@ LMResult SkeletonLM::GetValue(const vector<const Word*> &contextFactor, State* f
   const Factor *factor;
   size_t hash_value(const Factor &f);
   if (contextFactor.size()) {
-	  factor = contextFactor.back()->GetFactor(m_factorType);
-  }
-  else {
-	  factor = NULL;
+    factor = contextFactor.back()->GetFactor(m_factorType);
+  } else {
+    factor = NULL;
   }
 
   (*finalState) = (State*) factor;

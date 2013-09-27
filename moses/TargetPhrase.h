@@ -124,8 +124,9 @@ public:
     return *m_alignNonTerm;
   }
 
-  const Phrase *GetRuleSource() const
-  { return m_ruleSource; }
+  const Phrase *GetRuleSource() const {
+    return m_ruleSource;
+  }
 
   // To be set by the FF that needs it, by default the rule source = NULL
   // make a copy of the source side of the rule

@@ -138,7 +138,7 @@ private:
 };
 
 } // namespace
-  
+
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
   :LanguageModel("KENLM", line)
   ,m_factorType(factorType)
@@ -351,10 +351,11 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
   return newState;
 }
 
-template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Incremental::Manager &manager) const {
+template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Incremental::Manager &manager) const
+{
   manager.LMCallback(*m_ngram, m_lmIdLookup);
 }
-  
+
 template <class Model>
 bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 {

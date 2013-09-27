@@ -81,10 +81,9 @@ public:
     return m_inputScore;
   }
 
-  std::vector<const Word*> &AddRuleSourceFromInputPath() const
-  {
-	  m_ruleSourceFromInputPath.push_back(std::vector<const Word*>());
-	  return m_ruleSourceFromInputPath.back();
+  std::vector<const Word*> &AddRuleSourceFromInputPath() const {
+    m_ruleSourceFromInputPath.push_back(std::vector<const Word*>());
+    return m_ruleSourceFromInputPath.back();
   }
 
 };

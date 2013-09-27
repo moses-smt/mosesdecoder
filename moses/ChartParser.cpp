@@ -221,7 +221,7 @@ void ChartParser::CreateInputPaths(const InputType &input)
 
 const InputPath &ChartParser::GetInputPath(WordsRange &range) const
 {
-	return GetInputPath(range.GetStartPos(), range.GetEndPos());
+  return GetInputPath(range.GetStartPos(), range.GetEndPos());
 }
 
 const InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos) const

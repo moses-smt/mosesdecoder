@@ -18,7 +18,6 @@
  ***********************************************************************/
 
 #include <iostream>
-#include <sstream>
 #include "ChartRuleLookupManagerSkeleton.h"
 #include "DotChartInMemory.h"
 
@@ -40,8 +39,8 @@ ChartRuleLookupManagerSkeleton::ChartRuleLookupManagerSkeleton(
   const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
   const SkeletonPT &skeletonPt)
-: ChartRuleLookupManager(parser, cellColl)
-, m_skeletonPT(skeletonPt)
+  : ChartRuleLookupManager(parser, cellColl)
+  , m_skeletonPT(skeletonPt)
 {
 }
 
@@ -53,33 +52,43 @@ void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
   const WordsRange &range,
   ChartParserCallback &outColl)
 {
-	const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
-	const Word &sourceWord = sourceWordLabel.GetLabel();
+  const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
+  const Word &sourceWord = sourceWordLabel.GetLabel();
 
-	TargetPhrase *tp = CreateTargetPhrase(sourceWord);
-	TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-	tpColl->Add(tp);
+  // almost the same as for SkeletonPT::GetTargetPhraseCollectionBatch()
+  TargetPhraseCollection *tpColl = new TargetPhraseCollection();
 
-	outColl.Add(*tpColl, m_stackVec, range);
+  if (range.GetStartPos() > 0) {
+	  TargetPhrase *tp = CreateTargetPhrase(sourceWord);
+	  tpColl->Add(tp);
+  }
+
+  outColl.Add(*tpColl, m_stackVec, range);
 }
 
 TargetPhrase *ChartRuleLookupManagerSkeleton::CreateTargetPhrase(const Word &sourceWord) const
 {
-	// create a target phrase from the 1st word of the source, prefix with 'ChartManagerSkeleton:'
-	string str = sourceWord.GetFactor(0)->GetString().as_string();
-	str = "ChartManagerSkeleton:" + str;
+  // create a target phrase from the 1st word of the source, prefix with 'ChartManagerSkeleton:'
+  string str = sourceWord.GetFactor(0)->GetString().as_string();
+  str = "ChartManagerSkeleton:" + str;
+cerr << "str=" << str << endl;
+  TargetPhrase *tp = new TargetPhrase();
+  Word &word = tp->AddWord();
+  word.CreateFromString(Output, m_skeletonPT.GetOutput(), str, false);
 
-	TargetPhrase *tp = new TargetPhrase();
-	Word &word = tp->AddWord();
-	word.CreateFromString(Output, m_skeletonPT.GetOutput(), str, false);
+  Word *targetLHS = new Word();
+  targetLHS->CreateFromString(Output, m_skeletonPT.GetOutput(), "[X]", true);
+  tp->SetTargetLHS(targetLHS);
 
-	// score for this phrase table
-	vector<float> scores(m_skeletonPT.GetNumScoreComponents(), 1.3);
-	tp->GetScoreBreakdown().PlusEquals(&m_skeletonPT, scores);
+  tp->SetAlignmentInfo("0-0");
 
-	// score of all other ff when this rule is being loaded
-	//tp->Evaluate(sourcePhrase, m_skeletonPT.GetFeaturesToApply());
+  // score for this phrase table
+  vector<float> scores(m_skeletonPT.GetNumScoreComponents(), 1.3);
+  tp->GetScoreBreakdown().PlusEquals(&m_skeletonPT, scores);
 
-	return tp;
+  // score of all other ff when this rule is being loaded
+  //tp->Evaluate(sourcePhrase, m_skeletonPT.GetFeaturesToApply());
+
+  return tp;
 }
 }  // namespace Moses

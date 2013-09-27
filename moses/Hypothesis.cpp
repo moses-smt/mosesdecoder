@@ -159,10 +159,10 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
 {
 
 #ifdef USE_HYPO_POOL
-    Hypothesis *ptr = s_objectPool.getPtr();
-    return new(ptr) Hypothesis(prevHypo, transOpt);
+  Hypothesis *ptr = s_objectPool.getPtr();
+  return new(ptr) Hypothesis(prevHypo, transOpt);
 #else
-    return new Hypothesis(prevHypo, transOpt);
+  return new Hypothesis(prevHypo, transOpt);
 #endif
 }
 /***

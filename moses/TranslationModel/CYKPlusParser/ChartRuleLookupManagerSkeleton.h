@@ -35,8 +35,8 @@ class ChartRuleLookupManagerSkeleton : public ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManagerSkeleton(const ChartParser &parser,
-                               const ChartCellCollectionBase &cellColl,
-                               const SkeletonPT &skeletonPt);
+                                 const ChartCellCollectionBase &cellColl,
+                                 const SkeletonPT &skeletonPt);
 
   ~ChartRuleLookupManagerSkeleton();
 

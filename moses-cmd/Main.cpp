@@ -303,9 +303,8 @@ public:
           IFVERBOSE(1) {
             debug << "BEST TRANSLATION: " << *bestHypo << endl;
           }
-        }
-        else {
-      	  VERBOSE(1, "NO BEST TRANSLATION" << endl);
+        } else {
+          VERBOSE(1, "NO BEST TRANSLATION" << endl);
         }
 
         out << endl;

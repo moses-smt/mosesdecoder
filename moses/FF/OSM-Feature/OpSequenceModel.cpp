@@ -235,13 +235,14 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
 
   if (key == "path") {
     m_lmPath = value;
-  } else if (key == "numFeatures") {
-    numFeatures = Scan<int>(value);
-  } else if (key == "order") {
-    lmOrder = Scan<int>(value);
-  } else if (key == "sFactor") {
+  } else if (key == "support-features") {
+    if(value == "no")
+      numFeatures = 1;
+    else
+      numFeatures = 5;
+  } else if (key == "input-factor") {
     sFactor = Scan<int>(value);
-  } else if (key == "tFactor") {
+  } else if (key == "output-factor") {
     tFactor = Scan<int>(value);
   } else {
     StatefulFeatureFunction::SetParameter(key, value);

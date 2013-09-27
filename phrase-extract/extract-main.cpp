@@ -300,7 +300,7 @@ int main(int argc, char* argv[])
     }
     if (sentence.create( englishString, foreignString, alignmentString, weightString, i, false)) {
       if (options.placeholders.size()) {
-    	  sentence.invertAlignment();
+        sentence.invertAlignment();
       }
       ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileContext, extractFileContextInv);
       task->Run();
@@ -863,10 +863,10 @@ void ExtractTask::writePhrasesToFile()
   for(vector<string>::const_iterator phrase=m_extractedPhrasesOri.begin(); phrase!=m_extractedPhrasesOri.end(); phrase++) {
     outextractFileOrientation<<phrase->data();
   }
-  for(vector<string>::const_iterator phrase=m_extractedPhrasesContext.begin();phrase!=m_extractedPhrasesContext.end();phrase++){
+  for(vector<string>::const_iterator phrase=m_extractedPhrasesContext.begin(); phrase!=m_extractedPhrasesContext.end(); phrase++) {
     outextractFileContext<<phrase->data();
   }
-  for(vector<string>::const_iterator phrase=m_extractedPhrasesContextInv.begin();phrase!=m_extractedPhrasesContextInv.end();phrase++){
+  for(vector<string>::const_iterator phrase=m_extractedPhrasesContextInv.begin(); phrase!=m_extractedPhrasesContextInv.end(); phrase++) {
     outextractFileContextInv<<phrase->data();
   }
 
@@ -921,15 +921,14 @@ bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int star
     const string &sourceWord = sentence.source[pos];
     if (isPlaceholder(sourceWord)) {
       if (sentence.alignedToS.at(pos).size() != 1) {
-    	return false;
-      }
-      else {
-    	  // check it actually lines up to another placeholder
-    	  int targetPos = sentence.alignedToS.at(pos).at(0);
-    	  const string &otherWord = sentence.target[targetPos];
-    	  if (!isPlaceholder(otherWord)) {
-    		  return false;
-    	  }
+        return false;
+      } else {
+        // check it actually lines up to another placeholder
+        int targetPos = sentence.alignedToS.at(pos).at(0);
+        const string &otherWord = sentence.target[targetPos];
+        if (!isPlaceholder(otherWord)) {
+          return false;
+        }
       }
     }
   }
@@ -939,14 +938,13 @@ bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int star
     if (isPlaceholder(targetWord)) {
       if (sentence.alignedToT.at(pos).size() != 1) {
         return false;
-      }
-      else {
-    	  // check it actually lines up to another placeholder
-    	  int sourcePos = sentence.alignedToT.at(pos).at(0);
-    	  const string &otherWord = sentence.source[sourcePos];
-    	  if (!isPlaceholder(otherWord)) {
-    		  return false;
-    	  }
+      } else {
+        // check it actually lines up to another placeholder
+        int sourcePos = sentence.alignedToT.at(pos).at(0);
+        const string &otherWord = sentence.source[sourcePos];
+        if (!isPlaceholder(otherWord)) {
+          return false;
+        }
       }
     }
   }

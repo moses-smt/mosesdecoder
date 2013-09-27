@@ -127,11 +127,11 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     const HypoList &sortedList = iter->second.GetSortedHypotheses();
     if (sortedList.size() > 0) {
-		const ChartHypothesis *hypo = sortedList[0];
-		if (hypo->GetTotalScore() > bestScore) {
-		  bestScore = hypo->GetTotalScore();
-		  ret = hypo;
-		}
+      const ChartHypothesis *hypo = sortedList[0];
+      if (hypo->GetTotalScore() > bestScore) {
+        bestScore = hypo->GetTotalScore();
+        ret = hypo;
+      }
     }
   }
 

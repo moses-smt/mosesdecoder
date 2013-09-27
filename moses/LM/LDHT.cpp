@@ -2,9 +2,9 @@
 // Oliver Wilson <oliver.wilson@ed.ac.uk>
 //
 
-// This file should be compiled only when the LM_RAND flag is enabled. 
+// This file should be compiled only when the LM_RAND flag is enabled.
 //
-// The following ifdef prevents XCode and other non-bjam build systems 
+// The following ifdef prevents XCode and other non-bjam build systems
 // from attempting to compile this file when LM_RAND is disabled.
 //
 #ifdef LM_RAND

@@ -61,10 +61,10 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
 bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManager &manager)
 {
   if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
-	    manager.GetSentenceStats().AddDiscarded();
-	    VERBOSE(3,"discarded, -inf score" << std::endl);
-	    ChartHypothesis::Delete(hypo);
-	    return false;
+    manager.GetSentenceStats().AddDiscarded();
+    VERBOSE(3,"discarded, -inf score" << std::endl);
+    ChartHypothesis::Delete(hypo);
+    return false;
   }
 
   if (hypo->GetTotalScore() < m_bestScore + m_beamWidth) {

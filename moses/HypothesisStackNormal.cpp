@@ -89,10 +89,10 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 {
   if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
-      m_manager.GetSentenceStats().AddDiscarded();
-      VERBOSE(3,"discarded, constraint" << std::endl);
-      FREEHYPO(hypo);
-      return false;
+    m_manager.GetSentenceStats().AddDiscarded();
+    VERBOSE(3,"discarded, constraint" << std::endl);
+    FREEHYPO(hypo);
+    return false;
   }
 
   // too bad for stack. don't bother adding hypo into collection

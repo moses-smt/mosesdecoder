@@ -33,7 +33,7 @@ std::string getString(const std::string& in, int &c)
   std::string ret;
   eatws(in,c);
   while (c < (int)in.size() && get(in,c) != ' ' && get(in,c) != ')' && get(in,c) != ',') {
-	ret += get(in,c++);
+    ret += get(in,c++);
   }
   eatws(in,c);
   return ret;
@@ -111,26 +111,25 @@ CNAlt getCNAlt(const std::string& in, int &c)
   // dense scores
   size_t ind;
   for (ind = 0; ind < toks.size() - 1; ++ind) {
-	  const string &tok = toks[ind];
+    const string &tok = toks[ind];
 
-	  if (tok.find('=') == tok.npos) {
-		  float val = Moses::Scan<float>(tok);
-		  probs.push_back(val);
-	  }
-	  else {
-		  // beginning of sparse feature
-		  break;
-	  }
+    if (tok.find('=') == tok.npos) {
+      float val = Moses::Scan<float>(tok);
+      probs.push_back(val);
+    } else {
+      // beginning of sparse feature
+      break;
+    }
   }
 
   // sparse features
   std::map<string, float> sparseFeatures;
   for (; ind < toks.size() - 1; ++ind) {
-  	  const string &tok = toks[ind];
-  	  vector<string> keyValue = Moses::Tokenize(tok, "=");
-  	  CHECK(keyValue.size() == 2);
-  	  float prob = Moses::Scan<float>(keyValue[1]);
-  	  sparseFeatures[ keyValue[0] ] = prob;
+    const string &tok = toks[ind];
+    vector<string> keyValue = Moses::Tokenize(tok, "=");
+    CHECK(keyValue.size() == 2);
+    float prob = Moses::Scan<float>(keyValue[1]);
+    sparseFeatures[ keyValue[0] ] = prob;
   }
 
   //last item is column increment

@@ -109,10 +109,10 @@ void SearchNormalBatch::ProcessSentence()
  *        (base hypothesis score plus future score estimation)
  */
 
-void 
+void
 SearchNormalBatch::
-ExpandHypothesis(const Hypothesis &hypothesis, 
-		 const TranslationOption &transOpt, float expectedScore)
+ExpandHypothesis(const Hypothesis &hypothesis,
+                 const TranslationOption &transOpt, float expectedScore)
 {
   // Check if the number of partial hypotheses exceeds the batch size.
   if (m_partial_hypos.size() >= m_batch_size) {

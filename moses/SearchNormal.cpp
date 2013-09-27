@@ -32,7 +32,7 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal(m_manager);
     sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),
-					staticData.GetMinHypoStackDiversity());
+                                        staticData.GetMinHypoStackDiversity());
     sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
 
     m_hypoStackColl[ind] = sourceHypoColl;

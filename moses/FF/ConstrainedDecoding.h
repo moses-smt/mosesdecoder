@@ -11,19 +11,20 @@ namespace Moses
 class ConstrainedDecodingState : public FFState
 {
 public:
-	ConstrainedDecodingState()
-	{}
+  ConstrainedDecodingState()
+  {}
 
-	ConstrainedDecodingState(const Hypothesis &hypo);
-	ConstrainedDecodingState(const ChartHypothesis &hypo);
+  ConstrainedDecodingState(const Hypothesis &hypo);
+  ConstrainedDecodingState(const ChartHypothesis &hypo);
 
-	int Compare(const FFState& other) const;
+  int Compare(const FFState& other) const;
 
-	const Phrase &GetPhrase() const
-	{ return m_outputPhrase; }
+  const Phrase &GetPhrase() const {
+    return m_outputPhrase;
+  }
 
 protected:
-	Phrase m_outputPhrase;
+  Phrase m_outputPhrase;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -32,52 +33,51 @@ protected:
 class ConstrainedDecoding : public StatefulFeatureFunction
 {
 public:
-	ConstrainedDecoding(const std::string &line)
-		:StatefulFeatureFunction("ConstrainedDecoding", 1, line)
-		,m_maxUnknowns(0)
-	{
-		m_tuneable = false;
-		ReadParameters();
-	}
+  ConstrainedDecoding(const std::string &line)
+    :StatefulFeatureFunction("ConstrainedDecoding", 1, line)
+    ,m_maxUnknowns(0) {
+    m_tuneable = false;
+    ReadParameters();
+  }
 
-	void Load();
+  void Load();
 
-	bool IsUseable(const FactorMask &mask) const
-		{ return true; }
+  bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 
-	void Evaluate(const Phrase &source
-	                        , const TargetPhrase &targetPhrase
-	                        , ScoreComponentCollection &scoreBreakdown
-	                        , ScoreComponentCollection &estimatedFutureScore) const
-	{}
-	void Evaluate(const InputType &input
-	                        , const InputPath &inputPath
-	                        , const TargetPhrase &targetPhrase
-	                        , ScoreComponentCollection &scoreBreakdown) const
-	{}
-	  FFState* Evaluate(
-	    const Hypothesis& cur_hypo,
-	    const FFState* prev_state,
-	    ScoreComponentCollection* accumulator) const;
+  void Evaluate(const Phrase &source
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  FFState* Evaluate(
+    const Hypothesis& cur_hypo,
+    const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const;
 
-	  FFState* EvaluateChart(
-	    const ChartHypothesis& /* cur_hypo */,
-	    int /* featureID - used to index the state in the previous hypotheses */,
-	    ScoreComponentCollection* accumulator) const;
+  FFState* EvaluateChart(
+    const ChartHypothesis& /* cur_hypo */,
+    int /* featureID - used to index the state in the previous hypotheses */,
+    ScoreComponentCollection* accumulator) const;
 
-	  virtual const FFState* EmptyHypothesisState(const InputType &input) const
-	  {
-		  return new ConstrainedDecodingState();
-	  }
+  virtual const FFState* EmptyHypothesisState(const InputType &input) const {
+    return new ConstrainedDecodingState();
+  }
 
-	  std::vector<float> DefaultWeights() const;
+  std::vector<float> DefaultWeights() const;
 
-		void SetParameter(const std::string& key, const std::string& value);
+  void SetParameter(const std::string& key, const std::string& value);
 
 protected:
-	  std::string m_path;
-	  std::map<long,Phrase> m_constraints;
-	  int m_maxUnknowns;
+  std::string m_path;
+  std::map<long,Phrase> m_constraints;
+  int m_maxUnknowns;
 
 };
 

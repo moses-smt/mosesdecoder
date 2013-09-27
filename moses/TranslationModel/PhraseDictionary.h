@@ -69,17 +69,17 @@ public:
     return m_tableLimit;
   }
 
-  // LEGACY! 
+  // LEGACY!
   // The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
 
-  virtual 
+  virtual
   TargetPhraseCollection const *
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
-  virtual 
-  void 
+  virtual
+  void
   GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
   //! Create entry for translation of source to targetPhrase

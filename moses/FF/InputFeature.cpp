@@ -19,11 +19,11 @@ InputFeature::InputFeature(const std::string &line)
 
 void InputFeature::Load()
 {
-	const StaticData &staticData = StaticData::Instance();
-	const PhraseDictionary *pt = staticData.GetTranslationScoreProducer(0);
-	const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
+  const StaticData &staticData = StaticData::Instance();
+  const PhraseDictionary *pt = staticData.GetTranslationScoreProducer(0);
+  const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
 
-	m_legacy = (ptBin != NULL);
+  m_legacy = (ptBin != NULL);
 }
 
 void InputFeature::SetParameter(const std::string& key, const std::string& value)
@@ -43,16 +43,16 @@ void InputFeature::Evaluate(const InputType &input
                             , const TargetPhrase &targetPhrase
                             , ScoreComponentCollection &scoreBreakdown) const
 {
-	if (m_legacy) {
-		//binary phrase-table does input feature itself
-		return;
-	}
-	/*
+  if (m_legacy) {
+    //binary phrase-table does input feature itself
+    return;
+  }
+  /*
   const ScorePair *scores = inputPath.GetInputScore();
   if (scores) {
   	  scoreBreakdown.PlusEquals(this, *scores);
   }
-	*/
+  */
 }
 
 } // namespace
