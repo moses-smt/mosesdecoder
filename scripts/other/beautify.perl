@@ -39,6 +39,7 @@ sub Beautify($)
 		 next if ($name eq "randlm");
 		 next if ($name eq "srilm");
 		 next if ($name eq "irstlm");
+		 next if ($name eq "UG");
 
 		 $name = $path ."/" .$name;
 		 if (-d $name) {

@@ -315,8 +315,8 @@ int main(int argc, char* argv[])
     string fileNameExtractContext = fileNameExtract + ".context" + (options.gzOutput?".gz":"");
     extractFileContext.Open(fileNameExtractContext.c_str());
     if (!options.onlyDirectFlag) {
-        string fileNameExtractContextInv = fileNameExtract + ".context.inv" + (options.gzOutput?".gz":"");
-        extractFileContextInv.Open(fileNameExtractContextInv.c_str());
+      string fileNameExtractContextInv = fileNameExtract + ".context.inv" + (options.gzOutput?".gz":"");
+      extractFileContextInv.Open(fileNameExtractContextInv.c_str());
     }
   }
 
@@ -716,44 +716,43 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
 
   // context (words to left and right)
   if (m_options.flexScoreFlag) {
-      rule.sourceContextLeft = startS == 0 ? "<s>" : m_sentence.source[startS-1];
-      rule.sourceContextRight = endS+1 == m_sentence.source.size() ? "<s>" : m_sentence.source[endS+1];
-      rule.targetContextLeft = startT == 0 ? "<s>" : m_sentence.target[startT-1];
-      rule.targetContextRight = endT+1 == m_sentence.target.size() ? "<s>" : m_sentence.target[endT+1];
-      rule.sourceHoleString = "";
-      rule.targetHoleString = "";
+    rule.sourceContextLeft = startS == 0 ? "<s>" : m_sentence.source[startS-1];
+    rule.sourceContextRight = endS+1 == m_sentence.source.size() ? "<s>" : m_sentence.source[endS+1];
+    rule.targetContextLeft = startT == 0 ? "<s>" : m_sentence.target[startT-1];
+    rule.targetContextRight = endT+1 == m_sentence.target.size() ? "<s>" : m_sentence.target[endT+1];
+    rule.sourceHoleString = "";
+    rule.targetHoleString = "";
 
-      HoleList::const_iterator iterHole;
-      for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole) {
-          const Hole &hole = *iterHole;
-          rule.sourceHoleString += hole.GetLabel(0) + ": ";
+    HoleList::const_iterator iterHole;
+    for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole) {
+      const Hole &hole = *iterHole;
+      rule.sourceHoleString += hole.GetLabel(0) + ": ";
 
-          // rule starts with nonterminal; end of NT is considered left context
-          if (hole.GetStart(0) == startS) {
-              rule.sourceContextLeft = m_sentence.source[hole.GetEnd(0)];
-          }
-          // rule ends with nonterminal; start of NT is considered right context
-          else if (hole.GetEnd(0) == endS) {
-              rule.sourceContextRight = m_sentence.source[hole.GetStart(0)];
-          }
-
-          if (hole.GetStart(1) == startT) {
-              rule.targetContextLeft = m_sentence.target[hole.GetEnd(1)];
-          }
-          else if (hole.GetEnd(1) == endT) {
-              rule.targetContextRight = m_sentence.target[hole.GetStart(1)];
-          }
-
-          for (int i = hole.GetStart(0); i <= hole.GetEnd(0); ++i) {
-              rule.sourceHoleString += m_sentence.source[i] + " ";
-          }
-          rule.targetHoleString += hole.GetLabel(1) + ": ";
-          for (int i = hole.GetStart(1); i <= hole.GetEnd(1); ++i) {
-              rule.targetHoleString += m_sentence.target[i] + " ";
-          }
+      // rule starts with nonterminal; end of NT is considered left context
+      if (hole.GetStart(0) == startS) {
+        rule.sourceContextLeft = m_sentence.source[hole.GetEnd(0)];
       }
+      // rule ends with nonterminal; start of NT is considered right context
+      else if (hole.GetEnd(0) == endS) {
+        rule.sourceContextRight = m_sentence.source[hole.GetStart(0)];
+      }
+
+      if (hole.GetStart(1) == startT) {
+        rule.targetContextLeft = m_sentence.target[hole.GetEnd(1)];
+      } else if (hole.GetEnd(1) == endT) {
+        rule.targetContextRight = m_sentence.target[hole.GetStart(1)];
+      }
+
+      for (int i = hole.GetStart(0); i <= hole.GetEnd(0); ++i) {
+        rule.sourceHoleString += m_sentence.source[i] + " ";
+      }
+      rule.targetHoleString += hole.GetLabel(1) + ": ";
+      for (int i = hole.GetStart(1); i <= hole.GetEnd(1); ++i) {
+        rule.targetHoleString += m_sentence.target[i] + " ";
+      }
+    }
   }
-  
+
   addRuleToCollection( rule );
 }
 
@@ -996,10 +995,10 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
 
   // context (words to left and right)
   if (m_options.flexScoreFlag) {
-      rule.sourceContextLeft = startS == 0 ? "<s>" : m_sentence.source[startS-1];
-      rule.sourceContextRight = endS+1 == m_sentence.source.size() ? "<s>" : m_sentence.source[endS+1];
-      rule.targetContextLeft = startT == 0 ? "<s>" : m_sentence.target[startT-1];
-      rule.targetContextRight = endT+1 == m_sentence.target.size() ? "<s>" : m_sentence.target[endT+1];
+    rule.sourceContextLeft = startS == 0 ? "<s>" : m_sentence.source[startS-1];
+    rule.sourceContextRight = endS+1 == m_sentence.source.size() ? "<s>" : m_sentence.source[endS+1];
+    rule.targetContextLeft = startT == 0 ? "<s>" : m_sentence.target[startT-1];
+    rule.targetContextRight = endT+1 == m_sentence.target.size() ? "<s>" : m_sentence.target[endT+1];
   }
 
   rule.alignment.erase(rule.alignment.size()-1);
@@ -1084,33 +1083,33 @@ void ExtractTask::writeRulesToFile()
     }
 
     if (m_options.flexScoreFlag) {
-        for(int iContext=0;iContext<2;iContext++){
-            outContext << rule->source << " ||| "
-                            << rule->target << " ||| "
-                            << rule->alignment << " ||| ";   
-            iContext ? outContext << "< " << rule->sourceContextLeft << "\n" : outContext << "> " << rule->sourceContextRight << "\n";
+      for(int iContext=0; iContext<2; iContext++) {
+        outContext << rule->source << " ||| "
+                   << rule->target << " ||| "
+                   << rule->alignment << " ||| ";
+        iContext ? outContext << "< " << rule->sourceContextLeft << "\n" : outContext << "> " << rule->sourceContextRight << "\n";
 
-            if (!m_options.onlyDirectFlag) {
-                outContextInv << rule->target << " ||| "
-                                    << rule->source << " ||| "
-                                    << rule->alignmentInv << " ||| ";
-                iContext ? outContextInv << "< " << rule->targetContextLeft << "\n" : outContextInv << "> " << rule->targetContextRight << "\n";
-            }
+        if (!m_options.onlyDirectFlag) {
+          outContextInv << rule->target << " ||| "
+                        << rule->source << " ||| "
+                        << rule->alignmentInv << " ||| ";
+          iContext ? outContextInv << "< " << rule->targetContextLeft << "\n" : outContextInv << "> " << rule->targetContextRight << "\n";
         }
+      }
 
-        if (rule->sourceHoleString != "") {
-            outContext << rule->source << " ||| "
-                               << rule->target << " ||| "
-                               << rule->alignment << " ||| v "
-                               << rule->sourceHoleString << "\n";
-        }
+      if (rule->sourceHoleString != "") {
+        outContext << rule->source << " ||| "
+                   << rule->target << " ||| "
+                   << rule->alignment << " ||| v "
+                   << rule->sourceHoleString << "\n";
+      }
 
-        if (!m_options.onlyDirectFlag and rule->targetHoleString != "") {
-            outContextInv << rule->target << " ||| "
-                                  << rule->source << " ||| "
-                                  << rule->alignmentInv << " ||| v "
-                                  << rule->targetHoleString << "\n";
-        }
+      if (!m_options.onlyDirectFlag and rule->targetHoleString != "") {
+        outContextInv << rule->target << " ||| "
+                      << rule->source << " ||| "
+                      << rule->alignmentInv << " ||| v "
+                      << rule->targetHoleString << "\n";
+      }
     }
   }
   m_extractFile << out.str();

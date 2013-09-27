@@ -10,64 +10,63 @@ namespace Moses
 {
 void ScorePair::PlusEquals(const ScorePair &other)
 {
-	PlusEquals(other.denseScores);
-	std::map<StringPiece, float>::const_iterator iter;
-	for (iter = other.sparseScores.begin(); iter != other.sparseScores.end(); ++iter) {
-		PlusEquals(iter->first, iter->second);
-	}
+  PlusEquals(other.denseScores);
+  std::map<StringPiece, float>::const_iterator iter;
+  for (iter = other.sparseScores.begin(); iter != other.sparseScores.end(); ++iter) {
+    PlusEquals(iter->first, iter->second);
+  }
 }
 
 void ScorePair::PlusEquals(const StringPiece &key, float value)
 {
-	std::map<StringPiece, float>::iterator iter;
-	iter = sparseScores.find(key);
-	if (iter == sparseScores.end()) {
-		sparseScores[key] = value;
-	}
-	else {
-		float &existingval = iter->second;
-		existingval += value;
-	}
+  std::map<StringPiece, float>::iterator iter;
+  iter = sparseScores.find(key);
+  if (iter == sparseScores.end()) {
+    sparseScores[key] = value;
+  } else {
+    float &existingval = iter->second;
+    existingval += value;
+  }
 }
 
 std::ostream& operator<<(std::ostream& os, const ScorePair& rhs)
 {
-	for (size_t i = 0; i < rhs.denseScores.size(); ++i) {
-		os << rhs.denseScores[i] << ",";
-	}
+  for (size_t i = 0; i < rhs.denseScores.size(); ++i) {
+    os << rhs.denseScores[i] << ",";
+  }
 
-	std::map<StringPiece, float>::const_iterator iter;
-	for (iter = rhs.sparseScores.begin(); iter != rhs.sparseScores.end(); ++iter) {
-		os << iter->first << "=" << iter->second << ",";
-	}
+  std::map<StringPiece, float>::const_iterator iter;
+  for (iter = rhs.sparseScores.begin(); iter != rhs.sparseScores.end(); ++iter) {
+    os << iter->first << "=" << iter->second << ",";
+  }
 
-	return os;
+  return os;
 }
 
 ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
 size_t ScoreComponentCollection::s_denseVectorSize = 0;
 
 ScoreComponentCollection::
-ScoreComponentCollection() 
+ScoreComponentCollection()
   : m_scores(s_denseVectorSize)
 {}
 
 
-void 
+void
 ScoreComponentCollection::
 RegisterScoreProducer(const FeatureFunction* scoreProducer)
 {
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
-  VERBOSE(1, "FeatureFunction: " 
-	  << scoreProducer->GetScoreProducerDescription() 
-	  << " start: " << start << " end: " << (end-1) << endl);
+  VERBOSE(1, "FeatureFunction: "
+          << scoreProducer->GetScoreProducerDescription()
+          << " start: " << start << " end: " << (end-1) << endl);
   s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
   s_denseVectorSize = end;
 }
 
 
-float 
+float
 ScoreComponentCollection::
 GetWeightedScore() const
 {
@@ -213,7 +212,7 @@ void ScoreComponentCollection::Save(const string& filename) const
   out.close();
 }
 
-void 
+void
 ScoreComponentCollection::
 Assign(const FeatureFunction* sp, const string line)
 {
@@ -229,18 +228,18 @@ Assign(const FeatureFunction* sp, const string line)
   }
 }
 
-void 
+void
 ScoreComponentCollection::
-Assign(const FeatureFunction* sp, const std::vector<float>& scores) 
+Assign(const FeatureFunction* sp, const std::vector<float>& scores)
 {
   IndexPair indexes = GetIndexes(sp);
   size_t numScores = indexes.second - indexes.first;
 
   if (scores.size() != numScores) {
-	  UTIL_THROW(util::Exception, "Feature function " 
-		     << sp->GetScoreProducerDescription() << " specified " 
-		     << numScores << " dense scores or weights. Actually has "
-		     << scores.size());
+    UTIL_THROW(util::Exception, "Feature function "
+               << sp->GetScoreProducerDescription() << " specified "
+               << numScores << " dense scores or weights. Actually has "
+               << scores.size());
   }
 
   for (size_t i = 0; i < scores.size(); ++i) {
@@ -286,14 +285,14 @@ FVector ScoreComponentCollection::GetVectorForProducer(const FeatureFunction* sp
 
 void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const ScorePair &scorePair)
 {
-	PlusEquals(sp, scorePair.denseScores);
+  PlusEquals(sp, scorePair.denseScores);
 
-	std::map<StringPiece, float>::const_iterator iter;
-	for (iter = scorePair.sparseScores.begin(); iter != scorePair.sparseScores.end(); ++iter) {
-		const StringPiece &key = iter->first;
-		float value = iter->second;
-		PlusEquals(sp, key, value);
-	}
+  std::map<StringPiece, float>::const_iterator iter;
+  for (iter = scorePair.sparseScores.begin(); iter != scorePair.sparseScores.end(); ++iter) {
+    const StringPiece &key = iter->first;
+    float value = iter->second;
+    PlusEquals(sp, key, value);
+  }
 }
 
 }

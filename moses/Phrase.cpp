@@ -120,9 +120,9 @@ std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 
   stringstream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
-	if(markUnknown && GetWord(pos).IsOOV()) {
-	  strme << "UNK";
-	}
+    if(markUnknown && GetWord(pos).IsOOV()) {
+      strme << "UNK";
+    }
     strme << GetWord(pos).GetString(factorsToPrint, (pos != GetSize()-1));
   }
 
@@ -388,25 +388,23 @@ size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
     for (soughtPos = 0; soughtPos < sought.GetSize(); ++soughtPos) {
       const Word &soughtWord = sought.GetWord(soughtPos);
       const Word &thisWord = GetWord(thisPos);
-      
+
       if (soughtWord == thisWord) {
-	++thisPos;
-      }
-      else if (soughtWord.IsOOV() && (maxUnknown < 0 || currUnknowns < maxUnknown)) {
-	// the output has an OOV word. Allow a certain number of OOVs
-	++currUnknowns;
-	++thisPos;
-      }
-      else {
-	break;
+        ++thisPos;
+      } else if (soughtWord.IsOOV() && (maxUnknown < 0 || currUnknowns < maxUnknown)) {
+        // the output has an OOV word. Allow a certain number of OOVs
+        ++currUnknowns;
+        ++thisPos;
+      } else {
+        break;
       }
     }
-    
+
     if (soughtPos == sought.GetSize()) {
       return startThisPos;
     }
   }
-  
+
   return NOT_FOUND;
 }
 

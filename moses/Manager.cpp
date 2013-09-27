@@ -60,7 +60,7 @@ Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm sea
   ,m_lineNumber(lineNumber)
   ,m_source(source)
 {
-	StaticData::Instance().InitializeForInput(m_source);
+  StaticData::Instance().InitializeForInput(m_source);
 }
 
 Manager::~Manager()

@@ -93,19 +93,19 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
       ret.AddWord(word);
 
       if (placeholderFactor != NOT_FOUND) {
-    	  std::set<size_t> sourcePosSet = m_hypo.GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
-    	  if (sourcePosSet.size() == 1) {
-    		  const std::vector<const Word*> *ruleSourceFromInputPath = m_hypo.GetTranslationOption().GetSourceRuleFromInputPath();
-    		  CHECK(ruleSourceFromInputPath);
+        std::set<size_t> sourcePosSet = m_hypo.GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
+        if (sourcePosSet.size() == 1) {
+          const std::vector<const Word*> *ruleSourceFromInputPath = m_hypo.GetTranslationOption().GetSourceRuleFromInputPath();
+          CHECK(ruleSourceFromInputPath);
 
-    	      size_t sourcePos = *sourcePosSet.begin();
-    		  const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
-    		  CHECK(sourceWord);
-    		  const Factor *factor = sourceWord->GetFactor(placeholderFactor);
-    		  if (factor) {
-    			  ret.Back()[0] = factor;
-    		  }
-     	  }
+          size_t sourcePos = *sourcePosSet.begin();
+          const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
+          CHECK(sourceWord);
+          const Factor *factor = sourceWord->GetFactor(placeholderFactor);
+          if (factor) {
+            ret.Back()[0] = factor;
+          }
+        }
       }
     }
   }

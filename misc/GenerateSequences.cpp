@@ -22,39 +22,34 @@ int stringToInteger(string s)
 void loadInput(const char * fileName, vector <string> & input)
 {
 
-	ifstream sr (fileName);
-	string line;
-	
-	if(sr.is_open())
-	{
-		while(getline(sr , line ))
-		{			
-			input.push_back(line);	
-		}
-	
-		sr.close();
-	}
-	else
-	{
-		cout<<"Unable to read "<<fileName<<endl;
-		exit(1);
-	}
+  ifstream sr (fileName);
+  string line;
+
+  if(sr.is_open()) {
+    while(getline(sr , line )) {
+      input.push_back(line);
+    }
+
+    sr.close();
+  } else {
+    cout<<"Unable to read "<<fileName<<endl;
+    exit(1);
+  }
 
 }
 
 void getWords(string s, vector <string> & currInput)
 {
-   istringstream iss(s);
-   currInput.clear();
-    do
-    {
-        string sub;
-        iss >> sub;
-	currInput.push_back(sub);
+  istringstream iss(s);
+  currInput.clear();
+  do {
+    string sub;
+    iss >> sub;
+    currInput.push_back(sub);
 
-    } while (iss);
+  } while (iss);
 
-   currInput.pop_back();
+  currInput.pop_back();
 }
 
 string getTranslation(int index, vector < pair <string , vector <int> > > & gCepts , vector <string> & currF , map <string,int> & singletons)
@@ -463,58 +458,57 @@ void constructCepts(vector < pair < set <int> , set <int> > > & ceptsInPhrase, s
 int main(int argc, char * argv[])
 {
 
-	vector <string> e;
-	vector <string> f;
-	vector <string> a;
-	vector <string> singletons;
-	map <string,int> sTons;
-	vector < pair < set <int> , set <int> > > ceptsInPhrase;
-	vector < pair < string , vector <int> > > gCepts; 
-	
-	set <int> sourceNullWords;
-	set <int> targetNullWords;
-	
-	vector <string> currE;
-	vector <string> currF;
-	vector <string> currA;
+  vector <string> e;
+  vector <string> f;
+  vector <string> a;
+  vector <string> singletons;
+  map <string,int> sTons;
+  vector < pair < set <int> , set <int> > > ceptsInPhrase;
+  vector < pair < string , vector <int> > > gCepts;
 
-	loadInput(argv[4],singletons);
+  set <int> sourceNullWords;
+  set <int> targetNullWords;
 
-	for(int i=0; i<singletons.size(); i++)
-	  sTons[singletons[i]]=i;
+  vector <string> currE;
+  vector <string> currF;
+  vector <string> currA;
 
-	loadInput(argv[1],e);
-	loadInput(argv[2],f);
-	loadInput(argv[3],a);
-	
+  loadInput(argv[4],singletons);
 
-	for (int i=0; i<a.size(); i++)
-	{
-		
-	
-		getWords(e[i],currE);
-		getWords(f[i],currF);
-		getWords(a[i],currA);
-		
-		constructCepts(ceptsInPhrase, sourceNullWords , targetNullWords, currA , currE.size(), currF.size());
-		//cout<<"CC done"<<endl;
-		ceptsInGenerativeStoryFormat(ceptsInPhrase , gCepts , sourceNullWords, currE);
-		//cout<<"format done"<<endl;	
-		// printCepts(gCepts, currF);
-		generateStory(gCepts, targetNullWords ,currF,sTons);
+  for(int i=0; i<singletons.size(); i++)
+    sTons[singletons[i]]=i;
 
-		
-		/*
-		cout<<"________________________________________"<<endl;
-		
-		cout<<"Press any integer to continue ..."<<endl;
-		int xx;
-		cin>>xx;
-		*/
-		
-	}	
+  loadInput(argv[1],e);
+  loadInput(argv[2],f);
+  loadInput(argv[3],a);
 
 
-	return 0;
-	
+  for (int i=0; i<a.size(); i++) {
+
+
+    getWords(e[i],currE);
+    getWords(f[i],currF);
+    getWords(a[i],currA);
+
+    constructCepts(ceptsInPhrase, sourceNullWords , targetNullWords, currA , currE.size(), currF.size());
+    //cout<<"CC done"<<endl;
+    ceptsInGenerativeStoryFormat(ceptsInPhrase , gCepts , sourceNullWords, currE);
+    //cout<<"format done"<<endl;
+    // printCepts(gCepts, currF);
+    generateStory(gCepts, targetNullWords ,currF,sTons);
+
+
+    /*
+    cout<<"________________________________________"<<endl;
+
+    cout<<"Press any integer to continue ..."<<endl;
+    int xx;
+    cin>>xx;
+    */
+
+  }
+
+
+  return 0;
+
 }

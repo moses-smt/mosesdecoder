@@ -134,7 +134,7 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
 
     boost::unordered_set<uint64_t> alreadyScored;
     for(size_t sourceIndex = 0; sourceIndex < input.GetSize(); sourceIndex++ ) {
-      const StringPiece sourceString = input.GetWord(sourceIndex).GetString(0); 
+      const StringPiece sourceString = input.GetWord(sourceIndex).GetString(0);
       // TODO: change for other factors
 
       if (m_ignorePunctuation) {

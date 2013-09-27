@@ -133,7 +133,7 @@ void PhraseDictionaryMemory::SortAndPrune()
   }
 }
 
-void 
+void
 PhraseDictionaryMemory::
 GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
 {

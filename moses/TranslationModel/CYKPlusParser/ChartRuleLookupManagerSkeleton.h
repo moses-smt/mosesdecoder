@@ -40,8 +40,8 @@ class ChartRuleLookupManagerSkeleton : public ChartRuleLookupManagerCYKPlus
 {
 public:
   ChartRuleLookupManagerSkeleton(const ChartParser &parser,
-                               const ChartCellCollectionBase &cellColl,
-                               const SkeletonPT &skeletonPt);
+                                 const ChartCellCollectionBase &cellColl,
+                                 const SkeletonPT &skeletonPt);
 
   ~ChartRuleLookupManagerSkeleton();
 

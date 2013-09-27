@@ -29,14 +29,14 @@ namespace Moses
 {
 // helper for sort
 bool
-CompareTargetPhrase:: 
-operator() (const TargetPhrase *a, const TargetPhrase *b) const 
+CompareTargetPhrase::
+operator() (const TargetPhrase *a, const TargetPhrase *b) const
 {
   return a->GetFutureScore() > b->GetFutureScore();
 }
 
-bool 
-CompareTargetPhrase:: 
+bool
+CompareTargetPhrase::
 operator() (const TargetPhrase &a, const TargetPhrase &b) const
 {
   return a.GetFutureScore() > b.GetFutureScore();

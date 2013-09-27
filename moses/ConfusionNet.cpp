@@ -81,8 +81,8 @@ ConfusionNet::ConfusionNet(Sentence const& s)
 {
   data.resize(s.GetSize());
   for(size_t i=0; i<s.GetSize(); ++i) {
-	  ScorePair scorePair;
-	  std::pair<Word, ScorePair > temp = std::make_pair(s.GetWord(i), scorePair);
+    ScorePair scorePair;
+    std::pair<Word, ScorePair > temp = std::make_pair(s.GetWord(i), scorePair);
     data[i].push_back(temp);
   }
 }

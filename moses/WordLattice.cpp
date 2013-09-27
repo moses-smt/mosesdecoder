@@ -9,7 +9,7 @@
 
 namespace Moses
 {
-WordLattice::WordLattice() 
+WordLattice::WordLattice()
 {
   CHECK(StaticData::Instance().GetInputFeature());
 }

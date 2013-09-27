@@ -237,9 +237,9 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
     m_lmPath = value;
   } else if (key == "support-features") {
     if(value == "no")
-       numFeatures = 1;
+      numFeatures = 1;
     else
-       numFeatures = 5;	
+      numFeatures = 5;
   } else if (key == "input-factor") {
     sFactor = Scan<int>(value);
   } else if (key == "output-factor") {

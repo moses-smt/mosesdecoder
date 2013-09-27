@@ -199,12 +199,12 @@ std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorTy
   std::map<size_t, const Factor*> ret;
 
   for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
-	  const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
-	  if (factor) {
-		  std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
-		  CHECK(targetPos.size() == 1);
-		  ret[*targetPos.begin()] = factor;
-	  }
+    const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
+    if (factor) {
+      std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
+      CHECK(targetPos.size() == 1);
+      ret[*targetPos.begin()] = factor;
+    }
   }
 
   return ret;
@@ -226,8 +226,8 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
 
     std::map<size_t, const Factor*> placeholders;
     if (placeholderFactor != NOT_FOUND) {
-    	// creates map of target position -> factor for placeholders
-    	placeholders = GetPlaceholders(edge, placeholderFactor);
+      // creates map of target position -> factor for placeholders
+      placeholders = GetPlaceholders(edge, placeholderFactor);
     }
 
     size_t size = phrase.GetSize();
@@ -235,11 +235,11 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
 
       if (placeholders.size()) {
-    	  // do placeholders
-    	  std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
-    	  if (iter != placeholders.end()) {
-    		  factor = iter->second;
-    	  }
+        // do placeholders
+        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
+        if (iter != placeholders.end()) {
+          factor = iter->second;
+        }
       }
 
       CHECK(factor);

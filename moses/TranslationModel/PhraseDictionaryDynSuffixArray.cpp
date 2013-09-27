@@ -17,7 +17,7 @@ PhraseDictionaryDynSuffixArray(const std::string &line)
 }
 
 
-void 
+void
 PhraseDictionaryDynSuffixArray::
 Load()
 {
@@ -33,7 +33,7 @@ PhraseDictionaryDynSuffixArray::
   delete m_biSA;
 }
 
-void 
+void
 PhraseDictionaryDynSuffixArray::
 SetParameter(const std::string& key, const std::string& value)
 {

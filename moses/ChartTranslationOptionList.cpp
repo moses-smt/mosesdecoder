@@ -68,11 +68,11 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   }
 
   for (size_t i = 0; i < stackVec.size(); ++i) {
-	  const ChartCellLabel &chartCellLabel = *stackVec[i];
-	  size_t numHypos = chartCellLabel.GetStack().cube->size();
-	  if (numHypos == 0) {
-		  return; // empty stack. These rules can't be used
-	  }
+    const ChartCellLabel &chartCellLabel = *stackVec[i];
+    size_t numHypos = chartCellLabel.GetStack().cube->size();
+    if (numHypos == 0) {
+      return; // empty stack. These rules can't be used
+    }
   }
 
   float score = ChartTranslationOptions::CalcEstimateOfBestScore(tpc, stackVec);

@@ -46,14 +46,14 @@ public:
   }
 
   void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
   {}
   void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
   void Load();
