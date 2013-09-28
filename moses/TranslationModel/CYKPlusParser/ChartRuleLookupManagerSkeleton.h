@@ -25,7 +25,7 @@
 
 namespace Moses
 {
-
+class TargetPhraseCollection;
 class ChartParserCallback;
 class DottedRuleColl;
 class WordsRange;
@@ -48,7 +48,7 @@ private:
   TargetPhrase *CreateTargetPhrase(const Word &sourceWord) const;
 
   StackVec m_stackVec;
-
+  std::vector<TargetPhraseCollection*> m_tpColl;
   const SkeletonPT &m_skeletonPT;
 };
 

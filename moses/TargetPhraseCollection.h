@@ -62,7 +62,7 @@ public:
 
   TargetPhraseCollection(const TargetPhraseCollection &copy);
 
-  ~TargetPhraseCollection() {
+  virtual ~TargetPhraseCollection() {
     Remove();
   }
 

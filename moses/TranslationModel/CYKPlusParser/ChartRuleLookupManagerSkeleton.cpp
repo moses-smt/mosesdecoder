@@ -21,6 +21,7 @@
 #include "ChartRuleLookupManagerSkeleton.h"
 #include "DotChartInMemory.h"
 
+#include "moses/Util.h"
 #include "moses/ChartParser.h"
 #include "moses/InputType.h"
 #include "moses/ChartParserCallback.h"
@@ -46,19 +47,21 @@ ChartRuleLookupManagerSkeleton::ChartRuleLookupManagerSkeleton(
 
 ChartRuleLookupManagerSkeleton::~ChartRuleLookupManagerSkeleton()
 {
+  RemoveAllInColl(m_tpColl);
 }
 
 void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
   const WordsRange &range,
   ChartParserCallback &outColl)
 {
-  const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
-  const Word &sourceWord = sourceWordLabel.GetLabel();
-
-  // almost the same as for SkeletonPT::GetTargetPhraseCollectionBatch()
+  //m_tpColl.push_back(TargetPhraseCollection());
+  //TargetPhraseCollection &tpColl = m_tpColl.back();
   TargetPhraseCollection *tpColl = new TargetPhraseCollection();
+  m_tpColl.push_back(tpColl);
 
-  if (range.GetStartPos() > 0) {
+  if (range.GetNumWordsCovered() == 1) {
+	  const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
+	  const Word &sourceWord = sourceWordLabel.GetLabel();
 	  TargetPhrase *tp = CreateTargetPhrase(sourceWord);
 	  tpColl->Add(tp);
   }
@@ -71,15 +74,17 @@ TargetPhrase *ChartRuleLookupManagerSkeleton::CreateTargetPhrase(const Word &sou
   // create a target phrase from the 1st word of the source, prefix with 'ChartManagerSkeleton:'
   string str = sourceWord.GetFactor(0)->GetString().as_string();
   str = "ChartManagerSkeleton:" + str;
-cerr << "str=" << str << endl;
+
   TargetPhrase *tp = new TargetPhrase();
   Word &word = tp->AddWord();
   word.CreateFromString(Output, m_skeletonPT.GetOutput(), str, false);
 
+  // create hiero-style non-terminal for LHS
   Word *targetLHS = new Word();
-  targetLHS->CreateFromString(Output, m_skeletonPT.GetOutput(), "[X]", true);
+  targetLHS->CreateFromString(Output, m_skeletonPT.GetOutput(), "X", true);
   tp->SetTargetLHS(targetLHS);
 
+  // word alignement
   tp->SetAlignmentInfo("0-0");
 
   // score for this phrase table
@@ -87,6 +92,8 @@ cerr << "str=" << str << endl;
   tp->GetScoreBreakdown().PlusEquals(&m_skeletonPT, scores);
 
   // score of all other ff when this rule is being loaded
+  Phrase sourcePhrase;
+  sourcePhrase.AddWord(sourceWord);
   //tp->Evaluate(sourcePhrase, m_skeletonPT.GetFeaturesToApply());
 
   return tp;
