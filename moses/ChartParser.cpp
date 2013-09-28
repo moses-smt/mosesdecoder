@@ -134,16 +134,21 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
   const StaticData &staticData = StaticData::Instance();
 
   staticData.InitializeForInput(source);
+  CreateInputPaths(m_source);
+
   const std::vector<PhraseDictionary*> &dictionaries = staticData.GetPhraseDictionaries();
   m_ruleLookupManagers.reserve(dictionaries.size());
   for (std::vector<PhraseDictionary*>::const_iterator p = dictionaries.begin();
        p != dictionaries.end(); ++p) {
+
     const PhraseDictionary *dict = *p;
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
-    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(*this, cells));
+
+	ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells);
+
+    m_ruleLookupManagers.push_back(lookupMgr);
   }
 
-  CreateInputPaths(m_source);
 }
 
 ChartParser::~ChartParser()

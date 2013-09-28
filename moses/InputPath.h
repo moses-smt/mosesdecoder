@@ -34,13 +34,13 @@ protected:
   Phrase m_phrase;
   WordsRange m_range;
   const ScorePair *m_inputScore;
-  const NonTerminalSet m_sourceNonTerms;
 
   // for phrase-based model only
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
 
-  // for syntax model onlu
+  // for syntax model only
   mutable std::vector<std::vector<const Word*> > m_ruleSourceFromInputPath;
+  const NonTerminalSet m_sourceNonTerms;
 
 
   bool SetPlaceholders(TargetPhrase *targetPhrase) const;

@@ -43,6 +43,7 @@ ChartRuleLookupManagerSkeleton::ChartRuleLookupManagerSkeleton(
   : ChartRuleLookupManager(parser, cellColl)
   , m_skeletonPT(skeletonPt)
 {
+	cerr << "starting ChartRuleLookupManagerSkeleton" << endl;
 }
 
 ChartRuleLookupManagerSkeleton::~ChartRuleLookupManagerSkeleton()
