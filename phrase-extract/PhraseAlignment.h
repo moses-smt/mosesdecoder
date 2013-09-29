@@ -11,7 +11,6 @@
 
 #include <vector>
 #include <set>
-#include <map>
 
 namespace MosesTraining
 {
@@ -22,8 +21,6 @@ class PhraseAlignment
 protected:
   PHRASE phraseS;
   PHRASE phraseT;
-
-  std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
 
   void createAlignVec(size_t sourceSize, size_t targetSize);
   void addNTLength(const std::string &tok);
@@ -52,11 +49,6 @@ public:
   const PHRASE &GetTarget() const {
     return phraseT;
   }
-
-  const std::map<size_t, std::pair<size_t, size_t> > &GetNTLengths() const {
-    return m_ntLengths;
-  }
-
 };
 
 class PhraseAlignment;
