@@ -23,6 +23,7 @@ public:
 
 	void Evaluate(const InputType &input
 	                        , const InputPath &inputPath
+	                        , const TargetPhrase &targetPhrase
 	                        , ScoreComponentCollection &scoreBreakdown) const;
 	  virtual void Evaluate(const Hypothesis& hypo,
 	                        ScoreComponentCollection* accumulator) const

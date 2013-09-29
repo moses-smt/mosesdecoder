@@ -17,6 +17,7 @@ void InternalStructStatelessFF::Evaluate(const Phrase &source
 
 void InternalStructStatelessFF::Evaluate(const InputType &input
 	                        , const InputPath &inputPath
+	                        , const TargetPhrase &targetPhrase
 	                        , ScoreComponentCollection &scoreBreakdown) const
 	{
 
