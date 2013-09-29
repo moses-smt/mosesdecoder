@@ -155,7 +155,6 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
-  MOSES_FNAME(ExternalFeature);
   MOSES_FNAME(InternalStructStatelessFF);
   MOSES_FNAME(SkeletonLM);
   MOSES_FNAME(SkeletonPT);
