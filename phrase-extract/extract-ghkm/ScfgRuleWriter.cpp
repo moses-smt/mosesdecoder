@@ -58,8 +58,8 @@ void ScfgRuleWriter::Write(const ScfgRule &rule)
   }
 
   // Write a count of 1.
-  m_fwd << " ||| 1" << std::endl;
-  m_inv << " ||| 1" << std::endl;
+  m_fwd << " ||| 1";
+  m_inv << " ||| 1";
 
   // Write the PCFG score (if requested).
   if (m_options.pcfg) {
