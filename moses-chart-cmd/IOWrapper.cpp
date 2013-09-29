@@ -388,6 +388,39 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
   m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
 }
 
+//DIMw
+void IOWrapper::OutputDetailedAllTranslationReport(
+  const ChartTrellisPathList &nBestList,
+  const ChartManager &manager,
+  const Sentence &sentence,
+  long translationId)
+{
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  const ChartCellCollection& cells = manager.GetChartCellCollection();
+  size_t size = manager.GetSource().GetSize();
+  for (size_t width = 1; width <= size; ++width) {
+    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+      size_t endPos = startPos + width - 1;
+      WordsRange range(startPos, endPos);
+      const ChartCell& cell = cells.Get(range);
+      const HypoList* hyps = cell.GetAllSortedHypotheses();
+      out << "Chart Cell [" << startPos << ".." << endPos << "]" << endl;
+      HypoList::const_iterator iter;
+      size_t c = 1;
+      for (iter = hyps->begin(); iter != hyps->end(); ++iter) {
+        out << "----------------Item " << c++ << " ---------------------"
+            << endl;
+        OutputTranslationOptions(out, applicationContext, *iter,
+                                 sentence, translationId);
+      }
+    }
+  }
+  CHECK(m_detailAllOutputCollector);
+  m_detailAllOutputCollector->Write(translationId, out.str());
+}
+
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {
   if (!m_singleBestOutputCollector)
@@ -408,7 +441,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
       out << "||| ";
     }
     Phrase outPhrase(ARRAY_SIZE_INCR);
-    hypo->CreateOutputPhrase(outPhrase);
+    hypo->GetOutputPhrase(outPhrase);
 
     // delete 1st & last
     CHECK(outPhrase.GetSize() >= 2);

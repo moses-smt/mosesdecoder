@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
+#include "InputPath.h"
 
 namespace Moses
 {

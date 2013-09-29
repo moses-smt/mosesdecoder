@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FactorCollection.h"
 #include "moses/Phrase.h"
 #include "moses/StaticData.h"
+#include "moses/FactorTypeSet.h"
 
 using namespace std;
 

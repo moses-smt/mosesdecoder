@@ -52,13 +52,14 @@ public:
     UTIL_THROW(util::Exception, "LexicalReordering is not valid for chart decoder");
   }
   void Evaluate(const InputType &input
-                            , const InputPath &inputPath
-                            , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
   {}
   void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
 private:

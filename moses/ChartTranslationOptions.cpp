@@ -21,6 +21,10 @@
 #include "ChartHypothesis.h"
 #include "ChartCellLabel.h"
 #include "ChartTranslationOption.h"
+#include "InputPath.h"
+#include "StaticData.h"
+
+using namespace std;
 
 namespace Moses
 {
@@ -66,11 +70,67 @@ float ChartTranslationOptions::CalcEstimateOfBestScore(
 
 void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &inputPath)
 {
+  SetInputPath(&inputPath);
+  if (StaticData::Instance().GetPlaceholderFactor() != NOT_FOUND) {
+    CreateSourceRuleFromInputPath();
+  }
+
   CollType::iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
     ChartTranslationOption &transOpt = **iter;
     transOpt.SetInputPath(&inputPath);
     transOpt.Evaluate(input, inputPath);
+  }
+
+}
+
+void ChartTranslationOptions::SetInputPath(const InputPath *inputPath)
+{
+  CollType::iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
+    ChartTranslationOption &transOpt = **iter;
+    transOpt.SetInputPath(inputPath);
+  }
+}
+
+void ChartTranslationOptions::CreateSourceRuleFromInputPath()
+{
+  if (m_collection.size() == 0) {
+    return;
+  }
+
+  const InputPath *inputPath = m_collection.front()->GetInputPath();
+  CHECK(inputPath);
+  std::vector<const Word*> &ruleSourceFromInputPath = inputPath->AddRuleSourceFromInputPath();
+
+  size_t chartCellIndex = 0;
+  const ChartCellLabel *chartCellLabel = (chartCellIndex < m_stackVec.size()) ? m_stackVec[chartCellIndex] : NULL;
+
+  size_t ind = 0;
+  for (size_t sourcePos = m_wordsRange->GetStartPos(); sourcePos <= m_wordsRange->GetEndPos(); ++sourcePos, ++ind) {
+    if (chartCellLabel) {
+      if (sourcePos == chartCellLabel->GetCoverage().GetEndPos()) {
+        // end of child range. push an empty word to denote non-term
+        ruleSourceFromInputPath.push_back(NULL);
+        ++chartCellIndex;
+        chartCellLabel = (chartCellIndex < m_stackVec.size()) ? m_stackVec[chartCellIndex] : NULL;
+      } else if (sourcePos >= chartCellLabel->GetCoverage().GetStartPos()) {
+        // in the range of child hypo. do nothing
+      } else {
+        // not yet reached child range. add word
+        ruleSourceFromInputPath.push_back(&inputPath->GetPhrase().GetWord(ind));
+      }
+    } else {
+      // no child in sight. add word
+      ruleSourceFromInputPath.push_back(&inputPath->GetPhrase().GetWord(ind));
+    }
+  }
+
+  // save it to each trans opt
+  CollType::iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
+    ChartTranslationOption &transOpt = **iter;
+    transOpt.SetSourceRuleFromInputPath(&ruleSourceFromInputPath);
   }
 
 }

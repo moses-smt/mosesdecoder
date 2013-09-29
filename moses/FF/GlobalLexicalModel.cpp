@@ -4,6 +4,7 @@
 #include "moses/InputFileStream.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/FactorCollection.h"
 
 using namespace std;
 

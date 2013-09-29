@@ -32,9 +32,16 @@
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/InternalStructStatelessFF.h"
+#include "moses/FF/ConstrainedDecoding.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
+#include "moses/LM/SkeletonLM.h"
+#include "moses/TranslationModel/SkeletonPT.h"
+
+#ifdef PT_UG
+#include "moses/TranslationModel/mmsapt.h"
+#endif
 
 #include "moses/LM/Ken.h"
 #ifdef LM_IRST
@@ -143,11 +150,19 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
+  MOSES_FNAME(ConstrainedDecoding);
+  MOSES_FNAME(ExternalFeature);
+
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(ExternalFeature);
   MOSES_FNAME(InternalStructStatelessFF);
+  MOSES_FNAME(SkeletonLM);
+  MOSES_FNAME(SkeletonPT);
 
+#ifdef PT_UG
+  MOSES_FNAME(Mmsapt);
+#endif
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
 #endif

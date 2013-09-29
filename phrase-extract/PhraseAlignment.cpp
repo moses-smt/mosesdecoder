@@ -121,9 +121,7 @@ void PhraseAlignment::create( char line[], int lineID, bool includeSentenceIdFla
       sscanf(token[j].c_str(), "%d", &sentenceId);
     } else if (item + (includeSentenceIdFlag?-1:0) == 4) { // count
       sscanf(token[j].c_str(), "%f", &count);
-    } else if (item + (includeSentenceIdFlag?-1:0) == 5) { // non-term lengths
-      addNTLength(token[j]);
-    } else if (item + (includeSentenceIdFlag?-1:0) == 6) { // target syntax PCFG score
+    } else if (item + (includeSentenceIdFlag?-1:0) == 5) { // target syntax PCFG score
       float pcfgScore = std::atof(token[j].c_str());
       pcfgSum = pcfgScore * count;
     }
@@ -137,23 +135,6 @@ void PhraseAlignment::create( char line[], int lineID, bool includeSentenceIdFla
   if (item < 3 || item > 6) {
     cerr << "ERROR: faulty line " << lineID << ": " << line << endl;
   }
-}
-
-void PhraseAlignment::addNTLength(const std::string &tok)
-{
-  vector< string > tokens;
-
-  Tokenize(tokens, tok, "=");
-  assert(tokens.size() == 2);
-
-  size_t sourcePos = Scan<size_t>(tokens[0]);
-  assert(sourcePos < phraseS.size());
-
-  vector< size_t > ntLengths;
-  Tokenize<size_t>(ntLengths, tokens[1], ",");
-  assert(ntLengths.size() == 2);
-
-  m_ntLengths[sourcePos] = std::pair<size_t, size_t>(ntLengths[0], ntLengths[1]);
 }
 
 void PhraseAlignment::createAlignVec(size_t sourceSize, size_t targetSize)

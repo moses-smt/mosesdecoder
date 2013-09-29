@@ -35,12 +35,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "SentenceStats.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "ScoreComponentCollection.h"
+#include "DecodeGraph.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -171,7 +172,8 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("n-best-list").size() >= 2) {
     m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
     m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
-    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
+    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2
+                         && m_parameter->GetParam("n-best-list")[2]=="distinct");
   } else if (m_parameter->GetParam("n-best-list").size() == 1) {
     UserMessage::Add(string("wrong format for switch -n-best-list file size"));
     return false;
@@ -318,6 +320,17 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  //DIMw
+  if (m_parameter->isParamSpecified("translation-all-details")) {
+    const vector<string> &args = m_parameter->GetParam("translation-all-details");
+    if (args.size() == 1) {
+      m_detailedAllTranslationReportingFilePath = args[0];
+    } else {
+      UserMessage::Add(string("the translation-all-details option requires exactly one filename argument"));
+      return false;
+    }
+  }
+
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
                     Scan<int>(m_parameter->GetParam("distortion-limit")[0])
@@ -460,9 +473,6 @@ bool StaticData::LoadData(Parameter *parameter)
   m_startTranslationId = (m_parameter->GetParam("start-translation-id").size() > 0) ?
                          Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
 
-  // Read in constraint decoding file, if provided
-  ForcedDecoding();
-
   // use of xml in input
   if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
   else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
@@ -488,13 +498,9 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   if (m_parameter->GetParam("placeholder-factor").size() > 0) {
-    CHECK(m_parameter->GetParam("placeholder-factor").size() == 2);
-    m_placeHolderFactor = std::pair<FactorType, FactorType>(
-                            Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]),
-                            Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[1])
-                          );
+    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
   } else {
-    m_placeHolderFactor = std::pair<FactorType, FactorType>(NOT_FOUND, NOT_FOUND);
+    m_placeHolderFactor = NOT_FOUND;
   }
 
 
@@ -883,7 +889,8 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
 
 void StaticData::LoadFeatureFunctions()
 {
-  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &ffs
+  = FeatureFunction::GetFeatureFunctions();
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     FeatureFunction *ff = *iter;
@@ -892,12 +899,15 @@ void StaticData::LoadFeatureFunctions()
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
       m_phraseDictionary.push_back(ffCast);
       doLoad = false;
-    } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
+    } else if (const GenerationDictionary *ffCast
+               = dynamic_cast<const GenerationDictionary*>(ff)) {
       m_generationDictionary.push_back(ffCast);
-    } else if (WordPenaltyProducer *ffCast = dynamic_cast<WordPenaltyProducer*>(ff)) {
+    } else if (WordPenaltyProducer *ffCast
+               = dynamic_cast<WordPenaltyProducer*>(ff)) {
       CHECK(m_wpProducer == NULL); // max 1 feature;
       m_wpProducer = ffCast;
-    } else if (UnknownWordPenaltyProducer *ffCast = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
+    } else if (UnknownWordPenaltyProducer *ffCast
+               = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
       CHECK(m_unknownWordPenaltyProducer == NULL); // max 1 feature;
       m_unknownWordPenaltyProducer = ffCast;
     } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
@@ -994,9 +1004,12 @@ bool StaticData::LoadAlternateWeightSettings()
           vector<string> featureFunctionName = Tokenize(args[1], ",");
           for(size_t k=0; k<featureFunctionName.size(); k++) {
             // check if a valid nane
-            map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(featureFunctionName[k]);
+            map<string,FeatureFunction*>::iterator ffLookUp
+            = nameToFF.find(featureFunctionName[k]);
             if (ffLookUp == nameToFF.end()) {
-              cerr << "ERROR: alternate weight setting " << currentId << " specifies to ignore feature function " << featureFunctionName[k] << " but there is no such feature function" << endl;
+              cerr << "ERROR: alternate weight setting " << currentId
+                   << " specifies to ignore feature function " << featureFunctionName[k]
+                   << " but there is no such feature function" << endl;
               hasErrors = true;
             } else {
               m_weightSettingIgnoreFF[ currentId ].insert( featureFunctionName[k] );
@@ -1024,7 +1037,9 @@ bool StaticData::LoadAlternateWeightSettings()
       // check if a valid nane
       map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(name);
       if (ffLookUp == nameToFF.end()) {
-        cerr << "ERROR: alternate weight setting " << currentId << " specifies weight(s) for " << name << " but there is no such feature function" << endl;
+        cerr << "ERROR: alternate weight setting " << currentId
+             << " specifies weight(s) for " << name
+             << " but there is no such feature function" << endl;
         hasErrors = true;
       } else {
         m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);
@@ -1057,40 +1072,6 @@ void StaticData::OverrideFeatures()
 
     }
   }
-
-}
-
-void StaticData::ForcedDecoding()
-{
-	  if(m_parameter->GetParam("constraint").size()) {
-		bool addBeginEndWord = (m_searchAlgorithm == ChartDecoding) || (m_searchAlgorithm == ChartIncremental);
-
-	    m_constraintFileName = m_parameter->GetParam("constraint")[0];
-
-	    InputFileStream constraintFile(m_constraintFileName);
-	    std::string line;
-	    long sentenceID = GetStartTranslationId() - 1;
-	    while (getline(constraintFile, line)) {
-	      vector<string> vecStr = Tokenize(line, "\t");
-
-          Phrase phrase(0);
-	      if (vecStr.size() == 1) {
-	        sentenceID++;
-	        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter(), NULL);
-	      } else if (vecStr.size() == 2) {
-	        sentenceID = Scan<long>(vecStr[0]);
-	        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter(), NULL);
-	      } else {
-	        CHECK(false);
-	      }
-
-		  if (addBeginEndWord) {
-			phrase.InitStartEndWord();
-		  }
-		  m_constraints.insert(make_pair(sentenceID,phrase));
-
-	    }
-	  }
 
 }
 

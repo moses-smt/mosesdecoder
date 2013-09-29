@@ -299,6 +299,9 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
     if (sentence.create( englishString, foreignString, alignmentString, weightString, i, false)) {
+      if (options.placeholders.size()) {
+        sentence.invertAlignment();
+      }
       ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileContext, extractFileContextInv);
       task->Run();
       delete task;
@@ -712,7 +715,7 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
     return;
   }
 
-  if (!checkPlaceholders(sentence, startE, endE, startF, endF)) {
+  if (m_options.placeholders.size() && !checkPlaceholders(sentence, startE, endE, startF, endF)) {
     return;
   }
 
@@ -860,10 +863,10 @@ void ExtractTask::writePhrasesToFile()
   for(vector<string>::const_iterator phrase=m_extractedPhrasesOri.begin(); phrase!=m_extractedPhrasesOri.end(); phrase++) {
     outextractFileOrientation<<phrase->data();
   }
-  for(vector<string>::const_iterator phrase=m_extractedPhrasesContext.begin();phrase!=m_extractedPhrasesContext.end();phrase++){
+  for(vector<string>::const_iterator phrase=m_extractedPhrasesContext.begin(); phrase!=m_extractedPhrasesContext.end(); phrase++) {
     outextractFileContext<<phrase->data();
   }
-  for(vector<string>::const_iterator phrase=m_extractedPhrasesContextInv.begin();phrase!=m_extractedPhrasesContextInv.end();phrase++){
+  for(vector<string>::const_iterator phrase=m_extractedPhrasesContextInv.begin(); phrase!=m_extractedPhrasesContextInv.end(); phrase++) {
     outextractFileContextInv<<phrase->data();
   }
 
@@ -911,26 +914,40 @@ void ExtractTask::extractBase( SentenceAlignment &sentence )
 
 }
 
+
 bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF)
 {
   for (size_t pos = startF; pos <= endF; ++pos) {
-    const string &word = sentence.source[pos];
-    if (isPlaceholder(word)) {
-      if (sentence.alignedCountS[pos] != 1) {
+    const string &sourceWord = sentence.source[pos];
+    if (isPlaceholder(sourceWord)) {
+      if (sentence.alignedToS.at(pos).size() != 1) {
         return false;
+      } else {
+        // check it actually lines up to another placeholder
+        int targetPos = sentence.alignedToS.at(pos).at(0);
+        const string &otherWord = sentence.target[targetPos];
+        if (!isPlaceholder(otherWord)) {
+          return false;
+        }
       }
     }
   }
 
   for (size_t pos = startE; pos <= endE; ++pos) {
-    const string &word = sentence.target[pos];
-    if (isPlaceholder(word)) {
-      if (sentence.alignedToT[pos].size() != 1) {
+    const string &targetWord = sentence.target[pos];
+    if (isPlaceholder(targetWord)) {
+      if (sentence.alignedToT.at(pos).size() != 1) {
         return false;
+      } else {
+        // check it actually lines up to another placeholder
+        int sourcePos = sentence.alignedToT.at(pos).at(0);
+        const string &otherWord = sentence.source[sourcePos];
+        if (!isPlaceholder(otherWord)) {
+          return false;
+        }
       }
     }
   }
-
   return true;
 }
 

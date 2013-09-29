@@ -64,19 +64,20 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
 
   void Evaluate(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const
+                ScoreComponentCollection* accumulator) const
   {}
   void EvaluateChart(const ChartHypothesis &hypo,
-                             ScoreComponentCollection* accumulator) const
+                     ScoreComponentCollection* accumulator) const
   {}
   void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
   {}
   void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
 protected:

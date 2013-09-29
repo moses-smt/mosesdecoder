@@ -16,8 +16,6 @@ namespace Moses
 multiset<string> FeatureFunction::description_counts;
 
 std::vector<FeatureFunction*> FeatureFunction::m_producers;
-std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
-std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 
 FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 {
@@ -31,21 +29,28 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
   throw "Unknown feature " + name;
 }
 
-FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
+FeatureFunction::
+FeatureFunction(const std::string& description,
+                const std::string& line)
   : m_tuneable(true)
   , m_numScoreComponents(1)
 {
   Initialize(description, line);
 }
 
-FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
-  : m_numScoreComponents(numScoreComponents)
-  , m_tuneable(true)
+FeatureFunction::
+FeatureFunction(const std::string& description,
+                size_t numScoreComponents,
+                const std::string& line)
+  : m_tuneable(true)
+  , m_numScoreComponents(numScoreComponents)
 {
   Initialize(description, line);
 }
 
-void FeatureFunction::Initialize(const std::string& description, const std::string &line)
+void
+FeatureFunction::
+Initialize(const std::string& description, const std::string &line)
 {
   ParseLine(description, line);
 

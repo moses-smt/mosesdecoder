@@ -4,8 +4,8 @@
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 
-#include "moses/generic/sorting/NBestList.h"
-#include "moses/generic/sampling/Sampling.h"
+#include "moses/TranslationModel/UG/generic/sorting/NBestList.h"
+#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
 
 #include <boost/foreach.hpp>
 #include <iomanip>

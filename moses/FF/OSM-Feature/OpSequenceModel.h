@@ -18,8 +18,6 @@ public:
 
 
   lm::ngram::Model * OSM;
-
-  int lmOrder;
   float unkOpProb;
   int sFactor;	// Source Factor ...
   int tFactor;	// Target Factor ...
@@ -41,8 +39,9 @@ public:
     ScoreComponentCollection* accumulator) const;
 
   void Evaluate(const InputType &input
-                            , const InputPath &inputPath
-                            , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
   {}
   void  Evaluate(const Phrase &source
                  , const TargetPhrase &targetPhrase

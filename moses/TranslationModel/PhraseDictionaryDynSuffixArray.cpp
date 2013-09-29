@@ -17,7 +17,9 @@ PhraseDictionaryDynSuffixArray(const std::string &line)
 }
 
 
-void PhraseDictionaryDynSuffixArray::Load()
+void
+PhraseDictionaryDynSuffixArray::
+Load()
 {
   SetFeaturesToApply();
 
@@ -31,7 +33,9 @@ PhraseDictionaryDynSuffixArray::
   delete m_biSA;
 }
 
-void PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const std::string& value)
+void
+PhraseDictionaryDynSuffixArray::
+SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source") {
     m_source = value;

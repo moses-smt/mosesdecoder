@@ -71,8 +71,6 @@ class StaticData
 private:
   static StaticData									s_instance;
 protected:
-
-  std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionary*>	m_phraseDictionary;
   std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
@@ -107,9 +105,6 @@ protected:
   , m_maxNoPartTransOpt
   , m_maxPhraseLength;
 
-  std::string
-  m_constraintFileName;
-
   std::string									m_nBestFilePath, m_latticeSamplesFilePath;
   bool                        m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
@@ -138,6 +133,10 @@ protected:
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
   std::string m_detailedTreeFragmentsTranslationReportingFilePath;
+
+  //DIMw
+  std::string m_detailedAllTranslationReportingFilePath;
+
   bool m_onlyDistinctNBest;
   bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
@@ -209,7 +208,7 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  std::pair<FactorType, FactorType> m_placeHolderFactor;
+  FactorType m_placeHolderFactor;
 
   StaticData();
 
@@ -221,8 +220,6 @@ protected:
 
   //! load decoding steps
   bool LoadDecodeGraphs();
-
-  void ForcedDecoding();
 
   bool m_continuePartialTranslation;
   std::string m_binPath;
@@ -290,15 +287,6 @@ public:
   inline size_t GetMaxNoPartTransOpt() const {
     return m_maxNoPartTransOpt;
   }
-  inline const Phrase* GetConstrainingPhrase(long sentenceID) const {
-    std::map<long,Phrase>::const_iterator iter = m_constraints.find(sentenceID);
-    if (iter != m_constraints.end()) {
-      const Phrase& phrase = iter->second;
-      return &phrase;
-    } else {
-      return NULL;
-    }
-  }
   inline size_t GetMaxPhraseLength() const {
     return m_maxPhraseLength;
   }
@@ -365,6 +353,11 @@ public:
   bool IsDetailedTranslationReportingEnabled() const {
     return !m_detailedTranslationReportingFilePath.empty();
   }
+
+  bool IsDetailedAllTranslationReportingEnabled() const {
+    return !m_detailedAllTranslationReportingFilePath.empty();
+  }
+
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
   }
@@ -762,7 +755,7 @@ public:
 
   void OverrideFeatures();
 
-  const std::pair<FactorType, FactorType> &GetPlaceholderFactor() const {
+  FactorType GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
 };

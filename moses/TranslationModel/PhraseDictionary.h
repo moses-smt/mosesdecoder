@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -63,19 +64,23 @@ public:
   virtual ~PhraseDictionary() {
   }
 
-  virtual void Load() = 0;
-
   //! table limit number.
   size_t GetTableLimit() const {
     return m_tableLimit;
   }
 
-  // LEGACY - The preferred method is to override GetTargetPhraseCollectionBatch().
+  // LEGACY!
+  // The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
-  virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
+  virtual
+  TargetPhraseCollection const *
+  GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+
+  virtual
+  void
+  GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
   //! Create entry for translation of source to targetPhrase
   virtual void InitializeForInput(InputType const& source) {

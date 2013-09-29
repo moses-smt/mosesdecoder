@@ -7,6 +7,14 @@ use FindBin qw($RealBin);
 sub Beautify($);
 
 print STDERR "RealBin=$RealBin \n\n";
+my $version = `astyle --version 2> /dev/stdout`;
+chomp($version);
+print STDERR "version=$version";
+
+if ($version ne "Artistic Style Version 2.01") {
+    print STDERR "\nMust be astyle version 2.01. Quitting\n";
+    exit(1);
+}
 
 Beautify("$RealBin/../..");
 
@@ -31,6 +39,7 @@ sub Beautify($)
 		 next if ($name eq "randlm");
 		 next if ($name eq "srilm");
 		 next if ($name eq "irstlm");
+		 next if ($name eq "UG");
 
 		 $name = $path ."/" .$name;
 		 if (-d $name) {

@@ -5,10 +5,14 @@
 #include "Util.h"
 #include "FloydWarshall.h"
 #include "moses/FF/InputFeature.h"
+#include "util/check.hh"
 
 namespace Moses
 {
-WordLattice::WordLattice() {}
+WordLattice::WordLattice()
+{
+  CHECK(StaticData::Instance().GetInputFeature());
+}
 
 size_t WordLattice::GetColumnIncrement(size_t i, size_t j) const
 {

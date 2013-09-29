@@ -398,7 +398,6 @@ const std::string &findBestTreeFragment(const PhraseAlignmentCollection &phraseP
   return bestTreeFragment->treeFragment;
 }
 
-
 bool calcCrossedNonTerm(size_t sourcePos, size_t targetPos, const std::vector< std::set<size_t> > &alignedToS)
 {
   for (size_t currSource = 0; currSource < alignedToS.size(); ++currSource) {

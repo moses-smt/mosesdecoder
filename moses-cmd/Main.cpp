@@ -117,7 +117,7 @@ public:
     // shorthand for "global data"
     const StaticData &staticData = StaticData::Instance();
     // input sentence
-    Sentence sentence();
+    Sentence sentence;
 
     // execute the translation
     // note: this executes the search, resulting in a search graph
@@ -303,7 +303,10 @@ public:
           IFVERBOSE(1) {
             debug << "BEST TRANSLATION: " << *bestHypo << endl;
           }
+        } else {
+          VERBOSE(1, "NO BEST TRANSLATION" << endl);
         }
+
         out << endl;
       }
 

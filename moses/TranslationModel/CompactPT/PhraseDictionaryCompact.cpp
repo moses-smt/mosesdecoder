@@ -100,11 +100,13 @@ void PhraseDictionaryCompact::Load()
   CHECK(indexSize && coderSize && phraseSize);
 }
 
-struct CompareTargetPhrase {
-  bool operator() (const TargetPhrase &a, const TargetPhrase &b) {
-    return a.GetFutureScore() > b.GetFutureScore();
-  }
-};
+// now properly declared in TargetPhraseCollection.h
+// and defined in TargetPhraseCollection.cpp
+// struct CompareTargetPhrase {
+//   bool operator() (const TargetPhrase &a, const TargetPhrase &b) {
+//     return a.GetFutureScore() > b.GetFutureScore();
+//   }
+// };
 
 const TargetPhraseCollection*
 PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const

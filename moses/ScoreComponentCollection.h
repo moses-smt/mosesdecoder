@@ -44,31 +44,29 @@ namespace Moses
 /**
  * Smaller version for just 1 FF.
  */
-struct ScorePair
-{
-	friend std::ostream& operator<<(std::ostream& os, const ScorePair& rhs);
+struct ScorePair {
+  friend std::ostream& operator<<(std::ostream& os, const ScorePair& rhs);
 
-	std::vector<float> denseScores;
-	std::map<StringPiece, float> sparseScores;
+  std::vector<float> denseScores;
+  std::map<StringPiece, float> sparseScores;
 
-	ScorePair()
-	{}
-	ScorePair(const std::vector<float> &other)
-	:denseScores(other)
-	{}
+  ScorePair()
+  {}
+  ScorePair(const std::vector<float> &other)
+    :denseScores(other)
+  {}
 
-	void PlusEquals(const ScorePair &other);
-	void PlusEquals(const StringPiece &key, float value);
+  void PlusEquals(const ScorePair &other);
+  void PlusEquals(const StringPiece &key, float value);
 
-	void PlusEquals(const std::vector<float> &other)
-	{
-		CHECK(denseScores.size() == other.size());
-		std::transform(denseScores.begin(),
-					denseScores.end(),
-					other.begin(),
-					denseScores.begin(),
-					std::plus<float>());
-	}
+  void PlusEquals(const std::vector<float> &other) {
+    CHECK(denseScores.size() == other.size());
+    std::transform(denseScores.begin(),
+                   denseScores.end(),
+                   other.begin(),
+                   denseScores.begin(),
+                   std::plus<float>());
+  }
 };
 
 /*** An unweighted collection of scores for a translation or step in a translation.

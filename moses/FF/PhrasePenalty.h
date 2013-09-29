@@ -20,15 +20,16 @@ public:
                         , ScoreComponentCollection &estimatedFutureScore) const;
 
   void Evaluate(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const
+                ScoreComponentCollection* accumulator) const
   {}
   void EvaluateChart(const ChartHypothesis &hypo,
-                             ScoreComponentCollection* accumulator) const
+                     ScoreComponentCollection* accumulator) const
   {}
 
   void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
   {}
 
 };

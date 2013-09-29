@@ -2014,11 +2014,11 @@ sub create_ini {
 		my ($factor_f,$factor_e) = split(/\-/,$factor_val);
 
 		if($count == 0){
-		$feature_spec .= "OpSequenceModel num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " sFactor=". $factor_f . " tFactor=". $factor_e . " numFeatures=5 \n";
+		$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=yes \n";
 	       $weight_spec  .= "OpSequenceModel$count= 0.08 -0.02 0.02 -0.001 0.03\n";		
 		}
 		else{
-			$feature_spec .= "OpSequenceModel num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " sFactor=". $factor_f . " tFactor=". $factor_e . " numFeatures=1 \n";
+			$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=no \n";
 	       	$weight_spec  .= "OpSequenceModel$count= 0.08 \n";	
 
 		}
@@ -2027,7 +2027,7 @@ sub create_ini {
     }
     else
     {
-      $feature_spec .= "OpSequenceModel num-features=5 path=". $_OSM . " \n";
+      $feature_spec .= "OpSequenceModel name=OpSequenceModel0 num-features=5 path=". $_OSM . " \n";
       $weight_spec  .= "OpSequenceModel0= 0.08 -0.02 0.02 -0.001 0.03\n";
     }
   }	

@@ -378,9 +378,6 @@ public:
   }
 
 private:
-  FValue m_tmp;
-
-private:
   FVector* m_fv;
   const FName& m_name;
 

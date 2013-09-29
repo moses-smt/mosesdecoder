@@ -78,16 +78,6 @@ void RuleCubeItem::CreateHypothesis(const ChartTranslationOptions &transOpt,
                                     ChartManager &manager)
 {
   m_hypothesis = new ChartHypothesis(transOpt, *this, manager);
-
-  const Phrase *constraint = manager.GetConstraint();
-  if (constraint) {
-  	Phrase hypoPhrase = m_hypothesis->GetOutputPhrase();
-  	if (!constraint->Contains(hypoPhrase)) {
-  		delete m_hypothesis;
-  		m_hypothesis = NULL;
-  		return;
-  	}
-  }
   m_hypothesis->Evaluate();
   m_score = m_hypothesis->GetTotalScore();
 }

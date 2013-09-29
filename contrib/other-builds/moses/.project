@@ -1037,6 +1037,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/BleuScoreFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ConstrainedDecoding.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ConstrainedDecoding.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ConstrainedDecoding.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ConstrainedDecoding.h</locationURI>
+		</link>
+		<link>
 			<name>FF/ControlRecombination.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.cpp</locationURI>
@@ -1482,6 +1492,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SingleFactor.h</locationURI>
 		</link>
 		<link>
+			<name>LM/SkeletonLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SkeletonLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/SkeletonLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SkeletonLM.h</locationURI>
+		</link>
+		<link>
 			<name>LM/backward.arpa</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
@@ -1612,6 +1632,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/SkeletonPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/SkeletonPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/WordCoocTable.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/WordCoocTable.cpp</locationURI>
@@ -1735,6 +1765,16 @@
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/DotChart.h</name>

@@ -126,6 +126,7 @@ void Word::CreateUnknownWord(const Word &sourceWord)
       SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString()));
   }
   m_isNonTerminal = sourceWord.IsNonTerminal();
+  m_isOOV = true;
 }
 
 void Word::OnlyTheseFactors(const FactorMask &factors)

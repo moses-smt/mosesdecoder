@@ -28,11 +28,20 @@ using namespace std;
 namespace Moses
 {
 // helper for sort
-struct CompareTargetPhrase {
-  bool operator() (const TargetPhrase *a, const TargetPhrase *b) {
-    return a->GetFutureScore() > b->GetFutureScore();
-  }
-};
+bool
+CompareTargetPhrase::
+operator() (const TargetPhrase *a, const TargetPhrase *b) const
+{
+  return a->GetFutureScore() > b->GetFutureScore();
+}
+
+bool
+CompareTargetPhrase::
+operator() (const TargetPhrase &a, const TargetPhrase &b) const
+{
+  return a.GetFutureScore() > b.GetFutureScore();
+}
+
 
 TargetPhraseCollection::TargetPhraseCollection(const TargetPhraseCollection &copy)
 {

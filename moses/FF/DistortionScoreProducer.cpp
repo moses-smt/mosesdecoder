@@ -3,6 +3,7 @@
 #include "FFState.h"
 #include "moses/WordsRange.h"
 #include "moses/StaticData.h"
+#include "moses/Hypothesis.h"
 
 using namespace std;
 

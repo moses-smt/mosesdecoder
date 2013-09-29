@@ -1,0 +1,35 @@
+# -*- makefile -*-
+
+# Makefile for building a Moses system from a word-aligned corpus
+# (c) 2011 - 2012 Ulrich Germann
+
+define mmap_ttrack
+
+.INTERMEDIATE += $(strip $1).txt.gz
+$2/$(notdir $1).mct: | $2/$(notdir $1).sfa
+$2/$(notdir $1).tdx: | $2/$(notdir $1).sfa
+$2/$(notdir $1).sfa: | $(strip $1).txt.gz
+	$$(lock)
+	zcat -f $$< | ${MOSES_BIN}/mtt-build -i -o $$@.lock/$$(basename $${@F})
+	mv $$@.lock/$$(basename $${@F}).tdx $${@D}
+	mv $$@.lock/$$(basename $${@F}).sfa $${@D}
+	mv $$@.lock/$$(basename $${@F}).mct $${@D}
+	$$(unlock)
+
+endef
+
+# $1: base name of word-aligned corpus in text format
+# $2: directory for mmapped bitext
+define mmap_bitext
+
+$(call mmap_ttrack,$1${L1},$2)
+$(call mmap_ttrack,$1${L2},$2)
+$2/$(notdir $1)${L1}-${L2}.mam: | $(strip $1)${L1}-${L2}.symal.gz
+	$$(lock)
+	zcat -f $$< | ${MOSES_BIN}/symal2mam $$@_ && mv $$@_ $$@ 
+	$$(unlock)
+
+.INTERMEDIATE += $(strip $1)${L1}-${L2}.symal.gz
+
+endef
+

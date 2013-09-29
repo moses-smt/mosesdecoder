@@ -57,21 +57,19 @@ void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
     m_inv << " " << p->second << "-" << p->first;
   }
 
-  // Write a count of 1 and an empty NT length column to the forward extract
-  // file.
-  // TODO Add option to write NT length?
-  m_fwd << " ||| 1 ||| |||";
-  if (m_options.pcfg) {
-    // Write the PCFG score.
-    m_fwd << " " << std::exp(rule.GetPcfgScore());
-  }
-  if (printEndl)
-    m_fwd << std::endl;
-
-  // Write a count of 1 to the inverse extract file.
+  // Write a count of 1.
+  m_fwd << " ||| 1";
   m_inv << " ||| 1";
-  if (printEndl)
+
+  // Write the PCFG score (if requested).
+  if (m_options.pcfg) {
+    m_fwd << " ||| " << std::exp(rule.GetPcfgScore());
+  }
+
+  if (printEndl) {
+    m_fwd << std::endl;
     m_inv << std::endl;
+  }
 }
 
 void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule,

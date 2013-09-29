@@ -14,4 +14,11 @@ You'll need the following additional tools (in your PATH):
 *  BEAR WITH ME WHILE BUGS ARE BEING FIXED AND FUNCTIONALITY IS ADDED.       *
 ******************************************************************************
 
-- Ulrich Germann
+KNOWN ISSUES: 
+
+- giza phrase table creation sometimes fails when make is run in
+  multi-threaded mode. Running make without the -j switch seems to work.
+
+
+
+Ulrich Germann

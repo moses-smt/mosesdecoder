@@ -44,6 +44,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/StaticData.h"
 #include "moses/FeatureVector.h"
 #include "moses/InputFileStream.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+
 #include "IOWrapper.h"
 
 using namespace std;
@@ -188,6 +191,25 @@ InputType*IOWrapper::GetInput(InputType* inputType)
   }
 }
 
+std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
+{
+  const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
+  const Phrase &inputPhrase = inputPath.GetPhrase();
+
+  std::map<size_t, const Factor*> ret;
+
+  for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
+    const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
+    if (factor) {
+      std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
+      CHECK(targetPos.size() == 1);
+      ret[*targetPos.begin()] = factor;
+    }
+  }
+
+  return ret;
+}
+
 /***
  * print surface factor only for the given phrase
  */
@@ -195,23 +217,31 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
                    char reportSegmentation, bool reportAllFactors)
 {
   CHECK(outputFactorOrder.size() > 0);
-  const Phrase& phrase = edge.GetCurrTargetPhrase();
+  const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
   bool markUnknown = StaticData::Instance().GetMarkUnknown();
   if (reportAllFactors == true) {
     out << phrase;
   } else {
-    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().second;
+    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+
+    std::map<size_t, const Factor*> placeholders;
+    if (placeholderFactor != NOT_FOUND) {
+      // creates map of target position -> factor for placeholders
+      placeholders = GetPlaceholders(edge, placeholderFactor);
+    }
 
     size_t size = phrase.GetSize();
     for (size_t pos = 0 ; pos < size ; pos++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
 
-      if (placeholderFactor != NOT_FOUND) {
-        const Factor *origFactor = phrase.GetFactor(pos, placeholderFactor);
-        if (origFactor) {
-          factor = origFactor;
+      if (placeholders.size()) {
+        // do placeholders
+        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
+        if (iter != placeholders.end()) {
+          factor = iter->second;
         }
       }
+
       CHECK(factor);
 
       //preface surface form with UNK if marking unknowns

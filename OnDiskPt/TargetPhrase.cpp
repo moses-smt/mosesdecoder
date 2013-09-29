@@ -278,7 +278,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 
   // scores
   ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);
-  ret->Evaluate(mosesSP);
+  ret->Evaluate(mosesSP, phraseDict.GetFeaturesToApply());
 
   return ret;
 }

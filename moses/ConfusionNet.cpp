@@ -11,6 +11,7 @@
 #include "Sentence.h"
 #include "UserMessage.h"
 #include "moses/FF/InputFeature.h"
+#include "util/check.hh"
 
 namespace Moses
 {
@@ -69,6 +70,7 @@ ConfusionNet::ConfusionNet()
   if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
+  CHECK(StaticData::Instance().GetInputFeature());
 }
 ConfusionNet::~ConfusionNet()
 {
@@ -79,8 +81,8 @@ ConfusionNet::ConfusionNet(Sentence const& s)
 {
   data.resize(s.GetSize());
   for(size_t i=0; i<s.GetSize(); ++i) {
-	  ScorePair scorePair;
-	  std::pair<Word, ScorePair > temp = std::make_pair(s.GetWord(i), scorePair);
+    ScorePair scorePair;
+    std::pair<Word, ScorePair > temp = std::make_pair(s.GetWord(i), scorePair);
     data[i].push_back(temp);
   }
 }

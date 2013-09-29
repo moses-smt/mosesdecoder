@@ -59,7 +59,9 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
   return currNode.GetTargetPhraseCollection();
 }
 
-const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
+const TargetPhraseCollection*
+PhraseDictionaryMemory::
+GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
 {
   Phrase source(sourceOrig);
   source.OnlyTheseFactors(m_inputFactors);
@@ -131,7 +133,9 @@ void PhraseDictionaryMemory::SortAndPrune()
   }
 }
 
-void PhraseDictionaryMemory::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+void
+PhraseDictionaryMemory::
+GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
 {
   InputPathList::const_iterator iter;
   for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {

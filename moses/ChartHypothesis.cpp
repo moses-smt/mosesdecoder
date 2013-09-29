@@ -87,8 +87,9 @@ ChartHypothesis::~ChartHypothesis()
 /** Create full output phrase that is contained in the hypothesis (and its children)
  * \param outPhrase full output phrase as return argument
  */
-void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
+void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
 {
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
 
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
@@ -96,9 +97,26 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
       // non-term. fill out with prev hypo
       size_t nonTermInd = GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
-      prevHypo->CreateOutputPhrase(outPhrase);
+      prevHypo->GetOutputPhrase(outPhrase);
     } else {
       outPhrase.AddWord(word);
+
+      if (placeholderFactor != NOT_FOUND) {
+        std::set<size_t> sourcePosSet = GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
+        if (sourcePosSet.size() == 1) {
+          const std::vector<const Word*> *ruleSourceFromInputPath = GetTranslationOption().GetSourceRuleFromInputPath();
+          CHECK(ruleSourceFromInputPath);
+
+          size_t sourcePos = *sourcePosSet.begin();
+          const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
+          CHECK(sourceWord);
+          const Factor *factor = sourceWord->GetFactor(placeholderFactor);
+          if (factor) {
+            outPhrase.Back()[0] = factor;
+          }
+        }
+      }
+
     }
   }
 }
@@ -107,7 +125,7 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 Phrase ChartHypothesis::GetOutputPhrase() const
 {
   Phrase outPhrase(ARRAY_SIZE_INCR);
-  CreateOutputPhrase(outPhrase);
+  GetOutputPhrase(outPhrase);
   return outPhrase;
 }
 

@@ -1,6 +1,7 @@
 #include "Manager.h"
 #include "Timer.h"
 #include "SearchNormal.h"
+#include "SentenceStats.h"
 
 using namespace std;
 
@@ -24,17 +25,14 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   const StaticData &staticData = StaticData::Instance();
 
   // only if constraint decoding (having to match a specified output)
-  long sentenceID = source.GetTranslationId();
-  m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-  if (m_constraint) {
-    VERBOSE(1, "Search constraint to output: " << *m_constraint<<endl);
-  }
+  // long sentenceID = source.GetTranslationId();
 
   // initialize the stacks: create data structure and set limits
   std::vector < HypothesisStackNormal >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),staticData.GetMinHypoStackDiversity());
+    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),
+                                        staticData.GetMinHypoStackDiversity());
     sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
 
     m_hypoStackColl[ind] = sourceHypoColl;
@@ -292,7 +290,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
     IFVERBOSE(2) {
       t = clock();
     }
-    newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+    newHypo = hypothesis.CreateNext(transOpt);
     IFVERBOSE(2) {
       stats.AddTimeBuildHyp( clock()-t );
     }
@@ -327,7 +325,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
     IFVERBOSE(2) {
       t = clock();
     }
-    newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+    newHypo = hypothesis.CreateNext(transOpt);
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
       stats.AddTimeBuildHyp( clock()-t );
