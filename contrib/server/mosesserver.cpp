@@ -286,7 +286,7 @@ public:
           insertTranslationOptions(manager,retData);
         }
         if (nbest_size>0) {
-          outputNBest(manager, retData, nbest_size, nbest_distinct, reportAllFactors);
+          outputNBest(manager, retData, nbest_size, nbest_distinct, reportAllFactors, addAlignInfo);
         }
     }
     pair<string, xmlrpc_c::value>
@@ -376,7 +376,8 @@ public:
                    map<string, xmlrpc_c::value>& retData,
                    const int n=100,
                    const bool distinct=false,
-                   const bool reportAllFactors=false)
+                   const bool reportAllFactors=false,
+                   const bool addAlignmentInfo=false)
   {
     TrellisPathList nBestList;
     manager.CalcNBest(n, nBestList, distinct);
@@ -390,6 +391,7 @@ public:
 
       // output surface
       ostringstream out;
+      vector<xmlrpc_c::value> alignInfo;
       for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
         const Hypothesis &edge = *edges[currEdge];
         const Phrase& phrase = edge.GetCurrTargetPhrase();
@@ -401,8 +403,19 @@ public:
             out << *factor << " ";
           }
         }
+
+        if (addAlignmentInfo && currEdge != (int)edges.size() - 1) {
+          map<string, xmlrpc_c::value> phraseAlignInfo;
+          phraseAlignInfo["tgt-start"] = xmlrpc_c::value_int(edge.GetCurrTargetWordsRange().GetStartPos());
+          phraseAlignInfo["src-start"] = xmlrpc_c::value_int(edge.GetCurrSourceWordsRange().GetStartPos());
+          phraseAlignInfo["src-end"] = xmlrpc_c::value_int(edge.GetCurrSourceWordsRange().GetEndPos());
+          alignInfo.push_back(xmlrpc_c::value_struct(phraseAlignInfo));
+        }
       }
       nBestXMLItem["hyp"] = xmlrpc_c::value_string(out.str());
+
+      if (addAlignmentInfo)
+        nBestXMLItem["align"] = xmlrpc_c::value_array(alignInfo);
 
       // weighted score
       nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetTotalScore());
