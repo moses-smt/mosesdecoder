@@ -4,6 +4,7 @@
 #include "PCNTools.h"
 #include "Util.h"
 #include "FloydWarshall.h"
+#include "TranslationOptionCollectionLattice.h"
 #include "moses/FF/InputFeature.h"
 #include "util/check.hh"
 
@@ -203,6 +204,15 @@ bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
   return distances[start][end] < 100000;
 }
 
+TranslationOptionCollection*
+WordLattice::CreateTranslationOptionCollection() const
+{
+  size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
+  float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
+  TranslationOptionCollection *rv= new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  CHECK(rv);
+  return rv;
+}
 
 std::ostream& operator<<(std::ostream &out, const WordLattice &obj)
 {

@@ -1,0 +1,55 @@
+// $Id$
+#pragma once
+
+#include "TranslationOptionCollection.h"
+#include "InputPath.h"
+
+namespace Moses
+{
+
+class ConfusionNet;
+
+/** Holds all translation options, for all spans, of a particular confusion network input
+ * Inherited from TranslationOptionCollection.
+ */
+class TranslationOptionCollectionLattice : public TranslationOptionCollection
+{
+public:
+  typedef std::vector< std::vector<InputPathList> > InputPathMatrix;
+
+protected:
+  bool m_useLegacy;
+
+  InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
+
+  InputPathList &GetInputPathList(size_t startPos, size_t endPos);
+  void CreateTranslationOptionsForRangeNew(const DecodeGraph &decodeStepList
+      , size_t startPosition
+      , size_t endPosition
+      , bool adhereTableLimit
+      , size_t graphInd);
+
+  void CheckLEGACY();
+  void CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeStepList
+      , size_t startPosition
+      , size_t endPosition
+      , bool adhereTableLimit
+      , size_t graphInd);
+
+public:
+  TranslationOptionCollectionLattice(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+
+  void ProcessUnknownWord(size_t sourcePos);
+  void CreateTranslationOptions();
+  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
+                                        , size_t startPosition
+                                        , size_t endPosition
+                                        , bool adhereTableLimit
+                                        , size_t graphInd);
+
+protected:
+
+};
+
+}
+
