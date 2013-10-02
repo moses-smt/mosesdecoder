@@ -1,6 +1,7 @@
 #ifndef moses_WordLattice_h
 #define moses_WordLattice_h
 
+#include <iostream>
 #include <vector>
 #include "ConfusionNet.h"
 #include "PCNTools.h"
@@ -13,6 +14,7 @@ namespace Moses
  */
 class WordLattice: public ConfusionNet
 {
+  friend std::ostream& operator<<(std::ostream &out, const WordLattice &obj);
 private:
   std::vector<std::vector<size_t> > next_nodes;
   std::vector<std::vector<int> > distances;
@@ -39,6 +41,9 @@ public:
    * @note edges[1][2] means there is an edge from 1 to 2
    */
   void GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const;
+
+  const std::vector<size_t> &GetNextNodes(size_t pos) const
+  { return next_nodes[pos]; }
 
 };
 
