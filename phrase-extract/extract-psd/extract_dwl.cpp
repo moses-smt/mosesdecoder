@@ -140,7 +140,6 @@ int main(int argc, char**argv)
   ContextType context;
   vector<float> losses;
   vector<CeptTranslation> translations;
-  bool newSentence = false;
 
   //FB : Instead of spanStart and spanEnd list of spans
   vector<pair<int,int> > sourceSpanList;
@@ -167,32 +166,27 @@ int main(int argc, char**argv)
     while (dwlLine.GetSentID() > sentID) {
       getline(corpus, corpusLine);
       sentID++;
-      newSentence = true;
     }
 
     //FB : reimplement ctable into cepts
     if (! ctable.SrcExists(dwlLine.GetSrcCept()))
       continue;
 
-    // we have all correct translations of the current phrase
-    if (dwlLine.GetSrcCept() != srcCept || dwlLine.GetSourceSpanList() != sourceSpanList || newSentence) {
-      // generate features
-      if (hasTranslation) {
-        srcSurvived++;
-        extractor.GenerateFeatures(&consumer, context, sourceSpanList, translations, losses);
-        newSentence = false;
-      }
-
-      // set new source phrase, context, translations and losses
-      hasTranslation = false;
-      srcCept = dwlLine.GetSrcCept();
-      sourceSpanList = dwlLine.GetSourceSpanList();
-      context = ReadFactoredLine(corpusLine, config.GetFactors().size());
-      translations = ctable.GetTranslations(srcCept);
-      losses.clear();
-      losses.resize(translations.size(), 1);
-      srcTotal++;
+    // generate features
+    if (hasTranslation) {
+      srcSurvived++;
+      extractor.GenerateFeatures(&consumer, context, sourceSpanList, translations, losses);
     }
+
+    // set new source phrase, context, translations and losses
+    hasTranslation = false;
+    srcCept = dwlLine.GetSrcCept();
+    sourceSpanList = dwlLine.GetSourceSpanList();
+    context = ReadFactoredLine(corpusLine, config.GetFactors().size());
+    translations = ctable.GetTranslations(srcCept);
+    losses.clear();
+    losses.resize(translations.size(), 1);
+    srcTotal++;
 
     bool foundTgt = false;
     size_t tgtPhraseID = ctable.GetTgtPhraseID(dwlLine.GetTgtCept(), &foundTgt);
