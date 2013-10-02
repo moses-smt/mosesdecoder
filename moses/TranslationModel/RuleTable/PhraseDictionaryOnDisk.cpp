@@ -106,7 +106,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
 {
   OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
   const Phrase &phrase = inputPath.GetPhrase();
-  const InputPath *prevInputPath = inputPath.GetPrevNode();
+  const InputPath *prevInputPath = inputPath.GetPrevPath();
 
   const OnDiskPt::PhraseNode *prevPtNode = NULL;
 

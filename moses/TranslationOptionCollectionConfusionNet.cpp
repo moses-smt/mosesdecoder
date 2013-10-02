@@ -45,10 +45,10 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       const ScorePair &scores = col[i].second;
       ScorePair *inputScore = new ScorePair(scores);
 
-      InputPath *node = new InputPath(subphrase, labels, range, NULL, inputScore);
-      list.push_back(node);
+      InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
+      list.push_back(path);
 
-      m_phraseDictionaryQueue.push_back(node);
+      m_phraseDictionaryQueue.push_back(path);
     }
   }
 
@@ -65,17 +65,17 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       InputPathList &list = vec.back();
 
       // loop thru every previous path
-      const InputPathList &prevNodes = GetInputPathList(startPos, endPos - 1);
+      const InputPathList &prevPaths = GetInputPathList(startPos, endPos - 1);
 
       int prevNodesInd = 0;
       InputPathList::const_iterator iterPath;
-      for (iterPath = prevNodes.begin(); iterPath != prevNodes.end(); ++iterPath) {
-        //for (size_t pathInd = 0; pathInd < prevNodes.size(); ++pathInd) {
-        const InputPath &prevNode = **iterPath;
-        //const InputPath &prevNode = *prevNodes[pathInd];
+      for (iterPath = prevPaths.begin(); iterPath != prevPaths.end(); ++iterPath) {
+        //for (size_t pathInd = 0; pathInd < prevPaths.size(); ++pathInd) {
+        const InputPath &prevPath = **iterPath;
+        //const InputPath &prevPath = *prevPaths[pathInd];
 
-        const Phrase &prevPhrase = prevNode.GetPhrase();
-        const ScorePair *prevInputScore = prevNode.GetInputScore();
+        const Phrase &prevPhrase = prevPath.GetPhrase();
+        const ScorePair *prevInputScore = prevPath.GetInputScore();
         CHECK(prevInputScore);
 
         // loop thru every word at this position
@@ -90,14 +90,14 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
           ScorePair *inputScore = new ScorePair(*prevInputScore);
           inputScore->PlusEquals(scores);
 
-          InputPath *node = new InputPath(subphrase, labels, range, &prevNode, inputScore);
-          list.push_back(node);
+          InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+          list.push_back(path);
 
-          m_phraseDictionaryQueue.push_back(node);
+          m_phraseDictionaryQueue.push_back(path);
         } // for (size_t i = 0; i < col.size(); ++i) {
 
         ++prevNodesInd;
-      } // for (iterPath = prevNodes.begin(); iterPath != prevNodes.end(); ++iterPath) {
+      } // for (iterPath = prevPaths.begin(); iterPath != prevPaths.end(); ++iterPath) {
     }
   }
 

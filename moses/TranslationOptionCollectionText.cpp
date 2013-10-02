@@ -46,17 +46,17 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
       Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
-      InputPath *node;
+      InputPath *path;
       if (range.GetNumWordsCovered() == 1) {
-        node = new InputPath(subphrase, labels, range, NULL, NULL);
-        vec.push_back(node);
+        path = new InputPath(subphrase, labels, range, NULL, NULL);
+        vec.push_back(path);
       } else {
-        const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-        node = new InputPath(subphrase, labels, range, &prevNode, NULL);
-        vec.push_back(node);
+        const InputPath &prevPath = GetInputPath(startPos, endPos - 1);
+        path = new InputPath(subphrase, labels, range, &prevPath, NULL);
+        vec.push_back(path);
       }
 
-      m_phraseDictionaryQueue.push_back(node);
+      m_phraseDictionaryQueue.push_back(path);
     }
   }
 }
