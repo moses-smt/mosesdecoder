@@ -46,7 +46,6 @@ public:
   { return next_nodes[pos]; }
 
   TranslationOptionCollection *CreateTranslationOptionCollection() const;
-
 };
 
 }

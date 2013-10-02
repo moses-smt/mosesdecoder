@@ -126,10 +126,6 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
       } // for (iterPath = prevPaths.begin(); iterPath != prevPaths.end(); ++iterPath) {
     }
   }
-
-  // check whether we should be using the old code to supportbinary phrase-table.
-  // eventually, we'll stop support the binary phrase-table and delete this legacy code
-  CheckLEGACY();
 }
 
 InputPathList &TranslationOptionCollectionLattice::GetInputPathList(size_t startPos, size_t endPos)
@@ -166,7 +162,7 @@ void TranslationOptionCollectionLattice::ProcessUnknownWord(size_t sourcePos)
 
 void TranslationOptionCollectionLattice::CreateTranslationOptions()
 {
-  if (!m_useLegacy) {
+  if (!StaticData::Instance().GetUseLegacyPT()) {
     GetTargetPhraseCollectionBatch();
   }
   TranslationOptionCollection::CreateTranslationOptions();
@@ -188,7 +184,7 @@ void TranslationOptionCollectionLattice::CreateTranslationOptionsForRange(
   , bool adhereTableLimit
   , size_t graphInd)
 {
-  if (m_useLegacy) {
+  if (StaticData::Instance().GetUseLegacyPT()) {
     CreateTranslationOptionsForRangeLEGACY(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
   } else {
     CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
@@ -300,20 +296,7 @@ void TranslationOptionCollectionLattice::CreateTranslationOptionsForRangeLEGACY(
   }
 }
 
-void TranslationOptionCollectionLattice::CheckLEGACY()
-{
-  const std::vector<PhraseDictionary*> &pts = StaticData::Instance().GetPhraseDictionaries();
-  for (size_t i = 0; i < pts.size(); ++i) {
-    const PhraseDictionary *phraseDictionary = pts[i];
-    if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
-      m_useLegacy = true;
-      return;
-    }
-  }
 
-  m_useLegacy = false;
-}
-
-}
+} // namespace
 
 

@@ -208,6 +208,7 @@ protected:
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
   FactorType m_placeHolderFactor;
+  bool m_useLegacyPT;
 
   StaticData();
 
@@ -222,6 +223,7 @@ protected:
 
   bool m_continuePartialTranslation;
   std::string m_binPath;
+
 
 public:
 
@@ -751,6 +753,11 @@ public:
   FactorType GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
+
+  void CheckLEGACYPT();
+  bool GetUseLegacyPT() const
+  { return m_useLegacyPT; }
+
 };
 
 }

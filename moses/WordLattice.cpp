@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "FloydWarshall.h"
 #include "TranslationOptionCollectionLattice.h"
+#include "TranslationOptionCollectionConfusionNet.h"
 #include "moses/FF/InputFeature.h"
 #include "util/check.hh"
 
@@ -213,6 +214,7 @@ WordLattice::CreateTranslationOptionCollection() const
   CHECK(rv);
   return rv;
 }
+
 
 std::ostream& operator<<(std::ostream &out, const WordLattice &obj)
 {

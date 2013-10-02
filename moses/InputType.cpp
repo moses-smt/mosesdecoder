@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "InputType.h"
 #include "ChartTranslationOptions.h"
+#include "StaticData.h"
 
 namespace Moses
 {
