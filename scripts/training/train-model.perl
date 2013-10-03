@@ -39,6 +39,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    $_DICTIONARY, $_EPPEX, $IGNORE, $_PSD_MODEL, $_PSD_INDEX, $_PSD_CONFIG, $_EXTRACT_PSD);
 my $_CORES = 1;
+$_PHRASE_WORD_ALIGNMENT = 1;
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
