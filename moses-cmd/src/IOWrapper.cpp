@@ -44,6 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "DummyScoreProducers.h"
 #include "InputFileStream.h"
 #include "PSDScoreProducer.h"
+#include "DWLScoreProducer.h"
 
 using namespace std;
 using namespace Moses;
@@ -452,6 +453,15 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     if (psdProducer != NULL) {
       out << " " << psdProducer->GetScoreProducerWeightShortName(0) << ":";
       vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(psdProducer);
+      for (size_t j = 0; j<scores.size(); ++j) {
+        out << " " << scores[j];
+      }
+    }
+
+    DWLScoreProducer *dwlProducer = staticData.GetDWLScoreProducer();
+    if (dwlProducer != NULL) {
+      out << " " << dwlProducer->GetScoreProducerWeightShortName(0) << ":";
+      vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(dwlProducer);
       for (size_t j = 0; j<scores.size(); ++j) {
         out << " " << scores[j];
       }
