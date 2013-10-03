@@ -3,7 +3,6 @@
 #include <list>
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "ConfusionNet.h"
-#include "WordLattice.h"
 #include "DecodeGraph.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -25,11 +24,6 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
   CHECK(inputFeature);
 
-  const WordLattice *lattice = dynamic_cast<const WordLattice*>(&input);
-  if (lattice) {
-    cerr << *lattice << endl;
-  }
-
   size_t size = input.GetSize();
   m_inputPathMatrix.resize(size);
 
@@ -38,11 +32,6 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
     vector<InputPathList> &vec = m_inputPathMatrix[startPos];
     vec.push_back(InputPathList());
     InputPathList &list = vec.back();
-
-    const std::vector<size_t> *nextNodes = NULL;
-    if (lattice) {
-      nextNodes = &lattice->GetNextNodes(startPos);
-    }
 
     WordsRange range(startPos, startPos);
     const NonTerminalSet &labels = input.GetLabelSet(startPos, startPos);
@@ -57,11 +46,6 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       ScorePair *inputScore = new ScorePair(scores);
 
       InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
-      if (nextNodes) {
-        size_t nextNode = nextNodes->at(i);
-        path->SetNextNode(nextNode);
-      }
-
       list.push_back(path);
 
       m_phraseDictionaryQueue.push_back(path);
@@ -72,11 +56,6 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   for (size_t phaseSize = 2; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
-
-      const std::vector<size_t> *nextNodes = NULL;
-      if (lattice) {
-        nextNodes = &lattice->GetNextNodes(endPos);
-      }
 
       WordsRange range(startPos, endPos);
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
@@ -112,11 +91,6 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
           inputScore->PlusEquals(scores);
 
           InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
-          if (nextNodes) {
-            size_t nextNode = nextNodes->at(i);
-            path->SetNextNode(nextNode);
-          }
-
           list.push_back(path);
 
           m_phraseDictionaryQueue.push_back(path);

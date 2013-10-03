@@ -7,10 +7,10 @@
 namespace Moses
 {
 
-class ConfusionNet;
+class WordLattice;
 
-/** Holds all translation options, for all spans, of a particular confusion network input
- * Inherited from TranslationOptionCollection.
+/** Holds all translation options, for all spans, of a lattice input. NOT confusion networks
+ * No legacy phrase-tables, CANNOT be used with Zen's binary phrase-table.
  */
 class TranslationOptionCollectionLattice : public TranslationOptionCollection
 {
@@ -28,14 +28,8 @@ protected:
       , bool adhereTableLimit
       , size_t graphInd);
 
-  void CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeStepList
-      , size_t startPosition
-      , size_t endPosition
-      , bool adhereTableLimit
-      , size_t graphInd);
-
 public:
-  TranslationOptionCollectionLattice(const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+  TranslationOptionCollectionLattice(const WordLattice &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   void ProcessUnknownWord(size_t sourcePos);
   void CreateTranslationOptions();

@@ -210,7 +210,14 @@ WordLattice::CreateTranslationOptionCollection() const
 {
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-  TranslationOptionCollection *rv= new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+
+  TranslationOptionCollection *rv = NULL;
+  if (StaticData::Instance().GetUseLegacyPT()) {
+    rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  }
+  else {
+	rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  }
   CHECK(rv);
   return rv;
 }
