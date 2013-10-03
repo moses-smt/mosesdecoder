@@ -55,13 +55,9 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
     }
   }
 
-  // subphrases of 2+ words
-  for (size_t phaseSize = 2; phaseSize <= size; ++phaseSize) {
-    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
-      size_t endPos = startPos + phaseSize -1;
-
+  // iterately extend all paths
+    for (size_t endPos = 1; endPos < size; ++endPos) {
       const std::vector<size_t> &nextNodes = input.GetNextNodes(endPos);
-      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       // loop thru every previous paths
       size_t numPrevPaths = m_phraseDictionaryQueue.size();
@@ -75,7 +71,9 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
         	continue;
         }
 
-        WordsRange range(prevPath.GetWordsRange().GetStartPos(), endPos);
+        size_t startPos = prevPath.GetWordsRange().GetStartPos();
+        WordsRange range(startPos, endPos);
+        const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
         const Phrase &prevPhrase = prevPath.GetPhrase();
         const ScorePair *prevInputScore = prevPath.GetInputScore();
@@ -98,21 +96,11 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
           size_t nextNode = nextNodes[i];
           path->SetNextNode(nextNode);
 
-          cerr << *path << endl;
-
           m_phraseDictionaryQueue.push_back(path);
         } // for (size_t i = 0; i < col.size(); ++i) {
 
       } // for (size_t i = 0; i < numPrevPaths; ++i) {
     }
-  }
-
-
-  // debug
-  for (size_t i = 0; i < m_phraseDictionaryQueue.size(); ++i) {
-	  const InputPath &prevPath = *m_phraseDictionaryQueue[i];
-	  cerr << prevPath << endl;
-  }
 }
 
 /* forcibly create translation option for a particular source word.
