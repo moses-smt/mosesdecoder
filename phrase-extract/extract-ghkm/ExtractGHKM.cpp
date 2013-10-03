@@ -125,10 +125,16 @@ int ExtractGHKM::Main(int argc, char *argv[])
         s << ": " << e.GetMsg();
       }
       Error(s.str());
+
+      std::cerr << s << std::endl;
+      continue;
     }
 
     // Read source tokens.
     std::vector<std::string> sourceTokens(ReadTokens(sourceLine));
+
+    // Trim trailing whitespace from the alignment, since their presence hoses ReadAlignment()
+    boost::algorithm::trim(alignmentLine);
 
     // Read word alignments.
     try {
@@ -136,8 +142,11 @@ int ExtractGHKM::Main(int argc, char *argv[])
     } catch (const Exception &e) {
       std::ostringstream s;
       s << "Failed to read alignment at line " << lineNum << ": ";
+      s << "  line: " << alignmentLine << std::endl;
       s << e.GetMsg();
       Error(s.str());
+      std::cerr << s.str() << std::endl;
+      continue;
     }
     if (alignment.size() == 0) {
       std::cerr << "skipping line " << lineNum << " without alignment points\n";

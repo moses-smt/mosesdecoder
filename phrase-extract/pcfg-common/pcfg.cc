@@ -94,9 +94,9 @@ void Pcfg::Write(const Vocabulary &vocab, std::ostream &output) const {
     double score = p->second;
     std::vector<std::size_t>::const_iterator q = key.begin();
     std::vector<std::size_t>::const_iterator end = key.end();
-    output << vocab.Lookup(*q++) << " |||";
-    while (q != end) {
-      output << " " << vocab.Lookup(*q++);
+    output << vocab.Lookup(*q) << " |||";
+    while (++q != end) {
+      output << " " << vocab.Lookup(*q);
     }
     output << " ||| " << score << std::endl;
   }

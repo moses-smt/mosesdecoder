@@ -27,6 +27,9 @@ namespace Moses {
 namespace PCFG {
 
 void RuleCollection::Add(std::size_t lhs, const std::vector<std::size_t> &rhs) {
+  if (collection_.count(lhs) == 0 || collection_[lhs].count(rhs) == 0)
+    collection_[lhs][rhs] = 0;
+
   ++collection_[lhs][rhs];
 }
 
