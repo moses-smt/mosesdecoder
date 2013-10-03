@@ -427,8 +427,8 @@ public:
   void insertTranslationOptions(Manager& manager, map<string, xmlrpc_c::value>& retData) {
     const TranslationOptionCollection* toptsColl = manager.getSntTranslationOptions();
     vector<xmlrpc_c::value> toptsXml;
-    for (size_t startPos = 0 ; startPos < toptsColl->GetSize() ; ++startPos) {
-      size_t maxSize = toptsColl->GetSize() - startPos;
+    for (size_t startPos = 0 ; startPos < toptsColl->GetSource().GetSize() ; ++startPos) {
+      size_t maxSize = toptsColl->GetSource().GetSize() - startPos;
       size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
       maxSize = std::min(maxSize, maxSizePhrase);
 
