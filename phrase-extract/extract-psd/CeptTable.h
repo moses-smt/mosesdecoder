@@ -39,6 +39,7 @@ public:
   std::vector<PSD::CeptTranslation> GetTranslations(const std::string &srcCept);
 
   size_t GetTgtPhraseID(const std::string &phrase, /* out */ bool *found);
+  const std::string &GetTgtString(size_t tgtIdx);
 
 private:
   CeptDictionaryType m_ctable;

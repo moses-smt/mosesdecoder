@@ -65,6 +65,7 @@ class TranslationSystem;
 class LeftContextScoreProducer;
 //#ifdef HAVE_VW
 class PSDScoreProducer;
+class DWLScoreProducer;
 //#endif
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
@@ -148,6 +149,7 @@ protected:
   LeftContextScoreProducer * m_leftContextScoreProducer;
 //#ifdef HAVE_VW
   PSDScoreProducer * m_PSDScoreProducer;
+  DWLScoreProducer * m_DWLScoreProducer;
 //#endif
   bool m_reportSegmentation;
   bool m_reportAllFactors;
@@ -624,6 +626,10 @@ public:
 //#ifdef HAVE_VW
   PSDScoreProducer *GetPSDScoreProducer() const {
     return m_PSDScoreProducer;
+  }
+
+  DWLScoreProducer *GetDWLScoreProducer() const {
+    return m_DWLScoreProducer;
   }
 //#endif
 

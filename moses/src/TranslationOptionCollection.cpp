@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 //#ifdef HAVE_VW
 #include "PSDScoreProducer.h"
+#include "DWLScoreProducer.h"
 //#endif
 
 using namespace std;
@@ -519,12 +520,13 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
     PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
+    DWLScoreProducer *dwl = StaticData::Instance().GetDWLScoreProducer();
 
     // consult persistent (cross-sentence) cache for stored translation options
     bool skipTransOptCreation = false
                                 , useCache = StaticData::Instance().GetUseTransOptCache();
     // PSD relies on scores computed in context
-    if (useCache && psd == NULL) {
+    if (useCache && psd == NULL && dwl == NULL) {
       const WordsRange wordsRange(startPos, endPos);
       sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
 
@@ -591,6 +593,14 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
           (*iterColl)->AddStatelessScore(*iterPSD++);
         }
       }
+      if (dwl != NULL) {
+        vector<ScoreComponentCollection> scores = dwl->ScoreOptions(partTransOptList, m_source);
+        vector<ScoreComponentCollection>::const_iterator iterDWL = scores.begin();
+        for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
+          assert(iterDWL != scores.end());
+          (*iterColl)->AddStatelessScore(*iterDWL++);
+        }
+      }
 //#endif // HAVE_VW
 
       // add to fully formed translation option list
@@ -601,7 +611,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       }
 
       // storing translation options in persistent cache (kept across sentences)
-      if (useCache && psd == NULL) {
+      if (useCache && psd == NULL && dwl == NULL) {
         if (partTransOptList.size() > 0) {
           TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
           StaticData::Instance().AddTransOptListToCache(decodeGraph, *sourcePhrase, transOptList);

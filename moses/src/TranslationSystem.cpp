@@ -32,7 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 
 // #ifdef HAVE_VW
-  #include "PSDScoreProducer.h"
+#include "PSDScoreProducer.h"
+#include "DWLScoreProducer.h"
 // #endif
 
 using namespace std;

@@ -99,6 +99,12 @@ size_t CeptTable::GetTgtPhraseID(const string &phrase, /* out */ bool *found)
   }
 }
 
-
-
-
+const string &CeptTable::GetTgtString(size_t tgtIdx)
+{
+  IndexType::right_map::const_iterator it = m_targetIndex->right.find(tgtIdx);
+  if (it != m_targetIndex->right.end()) {
+    return it->second;
+  } else {
+    throw runtime_error("Index does not contain requested value");
+  }
+}

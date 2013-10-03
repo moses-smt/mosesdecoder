@@ -481,12 +481,11 @@ int main(int argc, char** argv)
     InputType* source = NULL;
     size_t lineCount = 0;
     ifstream *contextFile = NULL;
-    ifstream *topicFile = NULL;
+    ifstream *dwlContextFile = NULL;
     if (staticData.GetParam("psd-context").size() > 0)
       contextFile = new ifstream(staticData.GetParam("psd-context")[0].c_str());
-
-    if (staticData.GetParam("psd-topics").size() > 0)
-      topicFile = new ifstream(staticData.GetParam("psd-topics")[0].c_str());
+    if (staticData.GetParam("dwl-context").size() > 0)
+      dwlContextFile = new ifstream(staticData.GetParam("dwl-context")[0].c_str());
 
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
       if (contextFile != NULL) {
@@ -497,12 +496,12 @@ int main(int argc, char** argv)
           source->m_PSDContext.push_back(Tokenize(words[i], "|"));
         }
       }
-      if (topicFile != NULL) {
-        string topicLine; 
-        getline(*topicFile, topicLine);
-        vector<string> topics = Tokenize(topicLine, " ");
-        for (size_t i = 0; i < topics.size(); i++) {
-          source->m_topics.push_back(topics[i]);
+      if (dwlContextFile != NULL) {
+        string contextLine;
+        getline(*dwlContextFile, contextLine);
+        vector<string> words = Tokenize(contextLine, " ");
+        for (size_t i = 0; i < words.size(); i++) {
+          source->m_DWLContext.push_back(Tokenize(words[i], "|"));
         }
       }
           IFVERBOSE(1) {

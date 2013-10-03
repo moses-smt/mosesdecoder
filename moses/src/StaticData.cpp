@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 // #ifdef HAVE_VW
 #include "PSDScoreProducer.h"
+#include "DWLScoreProducer.h"
 //#endif
 
 #ifdef HAVE_SYNLM
@@ -184,6 +185,10 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add(string("psd-config not specified"));
       return false;
     }
+    if (m_parameter->GetParam("psd-context").size() <= 0) {
+      UserMessage::Add(string("psd-context not specified"));
+      return false;
+    }
     if (m_parameter->GetParam("weight-psd").size() <= 0) {
       UserMessage::Add(string("weight-psd not specified"));
       return false;
@@ -194,6 +199,34 @@ bool StaticData::LoadData(Parameter *parameter)
       m_parameter->GetParam("psd-index")[0],
       m_parameter->GetParam("psd-config")[0])) {
       UserMessage::Add(string("Failed to load phrase index from " + m_parameter->GetParam("psd-index")[0]));
+      return false;  
+    }
+  }
+
+  if (m_parameter->GetParam("dwl-model").size() > 0) {
+    if (m_parameter->GetParam("dwl-ctable").size() <= 0) {
+      UserMessage::Add(string("--dwl-ctable not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("dwl-context").size() <= 0) {
+      UserMessage::Add(string("dwl-context not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("dwl-config").size() <= 0) {
+      UserMessage::Add(string("dwl-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-dwl").size() <= 0) {
+      UserMessage::Add(string("weight-dwl not specified"));
+      return false;
+    }
+    vector<float> DWLWeights = Scan<float>(m_parameter->GetParam("weight-dwl"));
+    CHECK(DWLWeights.size() == 2);
+    m_DWLScoreProducer = new DWLScoreProducer(m_scoreIndexManager, DWLWeights);
+    if (! m_DWLScoreProducer->Initialize(m_parameter->GetParam("dwl-model")[0],
+      m_parameter->GetParam("dwl-config")[0],
+      m_parameter->GetParam("dwl-ctable")[0])) {
+      UserMessage::Add("Failed to init DWL");
       return false;  
     }
   }
@@ -633,6 +666,9 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_PSDScoreProducer != NULL ) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_PSDScoreProducer);
     }
+    if (m_DWLScoreProducer != NULL ) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_DWLScoreProducer);
+    }
 //#endif // HAVE_VW
 #ifdef HAVE_SYNLM
     if (m_syntacticLanguageModel != NULL) {
@@ -691,6 +727,7 @@ StaticData::~StaticData()
   delete m_leftContextScoreProducer;
 //#ifdef HAVE_VW
   delete m_PSDScoreProducer;
+  delete m_DWLScoreProducer;
 //#endif
 
   //delete m_parameter;
