@@ -27,7 +27,7 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
 
   const WordLattice *lattice = dynamic_cast<const WordLattice*>(&input);
   if (lattice) {
-	  cerr << *lattice << endl;
+    cerr << *lattice << endl;
   }
 
   size_t size = input.GetSize();
@@ -58,7 +58,7 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
 
       InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
       if (nextNodes) {
-    	size_t nextNode = nextNodes->at(i);
+        size_t nextNode = nextNodes->at(i);
         path->SetNextNode(nextNode);
       }
 

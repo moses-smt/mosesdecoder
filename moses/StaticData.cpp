@@ -1073,7 +1073,7 @@ void StaticData::CheckLEGACYPT()
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
     const PhraseDictionary *phraseDictionary = m_phraseDictionary[i];
     if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
-    	m_useLegacyPT = true;
+      m_useLegacyPT = true;
       return;
     }
   }

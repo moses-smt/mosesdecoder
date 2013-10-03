@@ -146,7 +146,7 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
     const PhraseDictionary *dict = *p;
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
 
-	ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells);
+    ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells);
 
     m_ruleLookupManagers.push_back(lookupMgr);
   }

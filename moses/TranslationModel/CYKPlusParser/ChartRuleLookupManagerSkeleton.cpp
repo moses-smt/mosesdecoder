@@ -43,7 +43,7 @@ ChartRuleLookupManagerSkeleton::ChartRuleLookupManagerSkeleton(
   : ChartRuleLookupManager(parser, cellColl)
   , m_skeletonPT(skeletonPt)
 {
-	cerr << "starting ChartRuleLookupManagerSkeleton" << endl;
+  cerr << "starting ChartRuleLookupManagerSkeleton" << endl;
 }
 
 ChartRuleLookupManagerSkeleton::~ChartRuleLookupManagerSkeleton()
@@ -61,10 +61,10 @@ void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
   m_tpColl.push_back(tpColl);
 
   if (range.GetNumWordsCovered() == 1) {
-	  const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
-	  const Word &sourceWord = sourceWordLabel.GetLabel();
-	  TargetPhrase *tp = CreateTargetPhrase(sourceWord);
-	  tpColl->Add(tp);
+    const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
+    const Word &sourceWord = sourceWordLabel.GetLabel();
+    TargetPhrase *tp = CreateTargetPhrase(sourceWord);
+    tpColl->Add(tp);
   }
 
   outColl.Add(*tpColl, m_stackVec, range);

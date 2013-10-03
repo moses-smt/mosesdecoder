@@ -72,11 +72,13 @@ public:
   }
 
   //! distance to next node in input lattice. For sentences and confusion networks, this should be 1 (default)
-  size_t GetNextNode() const
-  { return m_nextNode; }
+  size_t GetNextNode() const {
+    return m_nextNode;
+  }
 
-  void SetNextNode(size_t nextNode)
-  { m_nextNode = nextNode; }
+  void SetNextNode(size_t nextNode) {
+    m_nextNode = nextNode;
+  }
 
   void SetTargetPhrases(const PhraseDictionary &phraseDictionary
                         , const TargetPhraseCollection *targetPhrases

@@ -218,26 +218,26 @@ WordLattice::CreateTranslationOptionCollection() const
 
 std::ostream& operator<<(std::ostream &out, const WordLattice &obj)
 {
-	out << "next_nodes=";
-	for (size_t i = 0; i < obj.next_nodes.size(); ++i) {
-		out << i << ":";
+  out << "next_nodes=";
+  for (size_t i = 0; i < obj.next_nodes.size(); ++i) {
+    out << i << ":";
 
-		const std::vector<size_t> &inner = obj.next_nodes[i];
-		for (size_t j = 0; j < inner.size(); ++j) {
-			out << inner[j] << " ";
-		}
-	}
+    const std::vector<size_t> &inner = obj.next_nodes[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      out << inner[j] << " ";
+    }
+  }
 
-	out << "distances=";
-	for (size_t i = 0; i < obj.distances.size(); ++i) {
-		out << i << ":";
+  out << "distances=";
+  for (size_t i = 0; i < obj.distances.size(); ++i) {
+    out << i << ":";
 
-		const std::vector<int> &inner = obj.distances[i];
-		for (size_t j = 0; j < inner.size(); ++j) {
-			out << inner[j] << " ";
-		}
-	}
-	return out;
+    const std::vector<int> &inner = obj.distances[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      out << inner[j] << " ";
+    }
+  }
+  return out;
 }
 
 } // namespace

@@ -42,8 +42,9 @@ public:
    */
   void GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const;
 
-  const std::vector<size_t> &GetNextNodes(size_t pos) const
-  { return next_nodes[pos]; }
+  const std::vector<size_t> &GetNextNodes(size_t pos) const {
+    return next_nodes[pos];
+  }
 
   TranslationOptionCollection *CreateTranslationOptionCollection() const;
 };
