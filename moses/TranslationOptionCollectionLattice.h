@@ -15,22 +15,19 @@ class WordLattice;
 class TranslationOptionCollectionLattice : public TranslationOptionCollection
 {
 protected:
-  void CreateTranslationOptionsForRangeNew(const DecodeGraph &decodeStepList
-      , size_t startPosition
-      , size_t endPosition
-      , bool adhereTableLimit
-      , size_t graphInd);
+  void ProcessUnknownWord();
+  void ProcessUnknownWord(size_t sourcePos);
 
 public:
   TranslationOptionCollectionLattice(const WordLattice &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
-  void ProcessUnknownWord(size_t sourcePos);
   void CreateTranslationOptions();
+
   void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-                                        , size_t startPosition
-                                        , size_t endPosition
-                                        , bool adhereTableLimit
-                                        , size_t graphInd);
+      , size_t startPosition
+      , size_t endPosition
+      , bool adhereTableLimit
+      , size_t graphInd);
 
 protected:
 

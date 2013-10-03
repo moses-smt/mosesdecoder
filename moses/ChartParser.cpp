@@ -221,7 +221,7 @@ void ChartParser::CreateInputPaths(const InputType &input)
         vec.push_back(node);
       }
 
-      //m_phraseDictionaryQueue.push_back(node);
+      //m_inputPathQueue.push_back(node);
     }
   }
 }

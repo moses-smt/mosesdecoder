@@ -56,7 +56,7 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const 
         vec.push_back(path);
       }
 
-      m_phraseDictionaryQueue.push_back(path);
+      m_inputPathQueue.push_back(path);
     }
   }
 }

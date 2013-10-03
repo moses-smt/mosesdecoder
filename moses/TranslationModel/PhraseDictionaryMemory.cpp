@@ -135,10 +135,10 @@ void PhraseDictionaryMemory::SortAndPrune()
 
 void
 PhraseDictionaryMemory::
-GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   InputPathList::const_iterator iter;
-  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &node = **iter;
     const Phrase &phrase = node.GetPhrase();
     const InputPath *prevPath = node.GetPrevPath();

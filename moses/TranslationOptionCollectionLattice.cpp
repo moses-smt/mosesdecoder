@@ -10,6 +10,8 @@
 #include "FactorCollection.h"
 #include "FF/InputFeature.h"
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "util/check.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -51,20 +53,20 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
       size_t nextNode = nextNodes[i];
       path->SetNextNode(nextNode);
 
-      m_phraseDictionaryQueue.push_back(path);
+      m_inputPathQueue.push_back(path);
     }
   }
 
-  // iterately extend all paths
+  // iteratively extend all paths
     for (size_t endPos = 1; endPos < size; ++endPos) {
       const std::vector<size_t> &nextNodes = input.GetNextNodes(endPos);
 
       // loop thru every previous paths
-      size_t numPrevPaths = m_phraseDictionaryQueue.size();
+      size_t numPrevPaths = m_inputPathQueue.size();
 
       for (size_t i = 0; i < numPrevPaths; ++i) {
         //for (size_t pathInd = 0; pathInd < prevPaths.size(); ++pathInd) {
-        const InputPath &prevPath = *m_phraseDictionaryQueue[i];
+        const InputPath &prevPath = *m_inputPathQueue[i];
 
         size_t nextNode = prevPath.GetNextNode();
         if (prevPath.GetWordsRange().GetEndPos() + nextNode != endPos) {
@@ -96,11 +98,16 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
           size_t nextNode = nextNodes[i];
           path->SetNextNode(nextNode);
 
-          m_phraseDictionaryQueue.push_back(path);
+          m_inputPathQueue.push_back(path);
         } // for (size_t i = 0; i < col.size(); ++i) {
 
       } // for (size_t i = 0; i < numPrevPaths; ++i) {
     }
+}
+
+void TranslationOptionCollectionLattice::ProcessUnknownWord()
+{
+
 }
 
 /* forcibly create translation option for a particular source word.
@@ -114,29 +121,35 @@ void TranslationOptionCollectionLattice::ProcessUnknownWord(size_t sourcePos)
 
 void TranslationOptionCollectionLattice::CreateTranslationOptions()
 {
-  if (!StaticData::Instance().GetUseLegacyPT()) {
-    GetTargetPhraseCollectionBatch();
-  }
-  TranslationOptionCollection::CreateTranslationOptions();
+  GetTargetPhraseCollectionBatch();
+  //TranslationOptionCollection::CreateTranslationOptions();
+
+  VERBOSE(2,"Translation Option Collection\n " << *this << endl);
+
+  ProcessUnknownWord();
+
+  EvaluateWithSource();
+
+  // Prune
+  Prune();
+
+  Sort();
+
+  // future score matrix
+  CalcFutureScore();
+
+  // Cached lex reodering costs
+  CacheLexReordering();
+
 }
 
-
-/** create translation options that exactly cover a specific input span.
- * Called by CreateTranslationOptions() and ProcessUnknownWord()
- * \param decodeGraph list of decoding steps
- * \param factorCollection input sentence with all factors
- * \param startPos first position in input sentence
- * \param lastPos last position in input sentence
- * \param adhereTableLimit whether phrase & generation table limits are adhered to
- */
-void TranslationOptionCollectionLattice::CreateTranslationOptionsForRange(
-  const DecodeGraph &decodeGraph
-  , size_t startPos
-  , size_t endPos
-  , bool adhereTableLimit
-  , size_t graphInd)
+void TranslationOptionCollectionLattice::CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
+      , size_t startPosition
+      , size_t endPosition
+      , bool adhereTableLimit
+      , size_t graphInd)
 {
-  //CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
+	UTIL_THROW(util::Exception, "CreateTranslationOptionsForRange() not implemented for lattice");
 }
 
 } // namespace

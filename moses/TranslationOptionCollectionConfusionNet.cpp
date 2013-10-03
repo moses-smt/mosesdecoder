@@ -48,7 +48,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
       list.push_back(path);
 
-      m_phraseDictionaryQueue.push_back(path);
+      m_inputPathQueue.push_back(path);
     }
   }
 
@@ -93,7 +93,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
           InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
           list.push_back(path);
 
-          m_phraseDictionaryQueue.push_back(path);
+          m_inputPathQueue.push_back(path);
         } // for (size_t i = 0; i < col.size(); ++i) {
 
         ++prevNodesInd;
