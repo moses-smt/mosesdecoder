@@ -14,14 +14,7 @@ class WordLattice;
  */
 class TranslationOptionCollectionLattice : public TranslationOptionCollection
 {
-public:
-  typedef std::vector< std::vector<InputPathList> > InputPathMatrix;
-
 protected:
-
-  InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
-
-  InputPathList &GetInputPathList(size_t startPos, size_t endPos);
   void CreateTranslationOptionsForRangeNew(const DecodeGraph &decodeStepList
       , size_t startPosition
       , size_t endPosition

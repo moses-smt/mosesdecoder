@@ -108,7 +108,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
   const Phrase &phrase = inputPath.GetPhrase();
   const InputPath *prevInputPath = inputPath.GetPrevPath();
 
-  //cerr << "inputPath=" << inputPath << endl;
+  cerr << "inputPath=" << inputPath << endl;
 
   const OnDiskPt::PhraseNode *prevPtNode = NULL;
 

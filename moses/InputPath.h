@@ -2,7 +2,7 @@
 
 #include <map>
 #include <iostream>
-#include <list>
+#include <vector>
 #include "Phrase.h"
 #include "WordsRange.h"
 #include "NonTerminal.h"
@@ -17,7 +17,7 @@ class TargetPhrase;
 class InputPath;
 struct ScorePair;
 
-typedef std::list<InputPath*> InputPathList;
+typedef std::vector<InputPath*> InputPathList;
 
 /** Each node contains
 1. substring used to searching the phrase table
