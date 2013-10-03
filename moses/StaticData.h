@@ -38,7 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread/mutex.hpp>
 #endif
 
-#include "TypeDef.h"
 #include "Parameter.h"
 #include "SentenceStats.h"
 #include "ScoreComponentCollection.h"
