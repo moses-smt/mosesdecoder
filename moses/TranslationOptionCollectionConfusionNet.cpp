@@ -4,7 +4,7 @@
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "ConfusionNet.h"
 #include "WordLattice.h"
-#include "DecodeStep.h"
+#include "DecodeGraph.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "FactorCollection.h"

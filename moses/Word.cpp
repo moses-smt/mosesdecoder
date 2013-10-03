@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "TypeDef.h"
 #include "FactorTypeSet.h"
+#include "FactorCollection.h"
 #include "StaticData.h"  // needed to determine the FactorDelimiter
 #include "util/exception.hh"
 #include "util/tokenize_piece.hh"

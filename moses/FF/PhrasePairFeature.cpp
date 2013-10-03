@@ -5,6 +5,7 @@
 #include "moses/TargetPhrase.h"
 #include "moses/Hypothesis.h"
 #include "moses/TranslationOption.h"
+#include "moses/InputPath.h"
 #include "util/string_piece_hash.hh"
 #include "util/exception.hh"
 

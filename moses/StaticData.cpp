@@ -1067,8 +1067,6 @@ void StaticData::OverrideFeatures()
 
 }
 
-// check whether we should be using the old code to support binary phrase-table.
-// eventually, we'll stop support the binary phrase-table and delete this legacy code
 void StaticData::CheckLEGACYPT()
 {
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {

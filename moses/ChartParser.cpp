@@ -25,7 +25,9 @@
 #include "StaticData.h"
 #include "TreeInput.h"
 #include "Sentence.h"
+#include "DecodeGraph.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 using namespace Moses;

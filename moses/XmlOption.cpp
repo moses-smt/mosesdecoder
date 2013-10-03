@@ -29,6 +29,7 @@
 #include "WordsRange.h"
 #include "TargetPhrase.h"
 #include "ReorderingConstraint.h"
+#include "FactorCollection.h"
 
 namespace Moses
 {

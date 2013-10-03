@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // example file on how to use moses library
 
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 #include "IOWrapper.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
@@ -47,9 +48,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
-
-#include <boost/algorithm/string.hpp>
-
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 using namespace std;
 using namespace Moses;

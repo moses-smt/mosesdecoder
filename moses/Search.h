@@ -5,6 +5,7 @@
 #include "TypeDef.h"
 #include "TranslationOption.h"
 #include "Phrase.h"
+#include "InputPath.h"
 
 namespace Moses
 {

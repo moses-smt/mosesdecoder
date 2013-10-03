@@ -8,6 +8,7 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/InputPath.h"
 #include "util/string_piece_hash.hh"
 #include "util/exception.hh"
 

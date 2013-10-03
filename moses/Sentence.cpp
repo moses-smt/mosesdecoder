@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <stdexcept>
+#include <boost/algorithm/string.hpp>
 
 #include "Sentence.h"
 #include "TranslationOptionCollectionText.h"
@@ -28,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ChartTranslationOptions.h"
 #include "Util.h"
 #include "XmlOption.h"
-#include <boost/algorithm/string.hpp>
+#include "FactorCollection.h"
 
 using namespace std;
 

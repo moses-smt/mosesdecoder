@@ -40,6 +40,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
 #include "moses/FF/DistortionScoreProducer.h"
+#include "moses/LM/Base.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
