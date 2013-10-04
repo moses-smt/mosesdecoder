@@ -105,30 +105,41 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
     }
 }
 
-void TranslationOptionCollectionLattice::ProcessUnknownWord()
-{
-
-}
-
-/* forcibly create translation option for a particular source word.
-	* call the base class' ProcessOneUnknownWord() for each possible word in the confusion network
-	* at a particular source position
-*/
-void TranslationOptionCollectionLattice::ProcessUnknownWord(size_t sourcePos)
-{
-
-}
 
 void TranslationOptionCollectionLattice::CreateTranslationOptions()
 {
   GetTargetPhraseCollectionBatch();
-  //TranslationOptionCollection::CreateTranslationOptions();
 
   VERBOSE(2,"Translation Option Collection\n " << *this << endl);
+  const vector <DecodeGraph*> &decodeGraphs = StaticData::Instance().GetDecodeGraphs();
+  CHECK(decodeGraphs.size() == 1);
+  const DecodeGraph &decodeGraph = *decodeGraphs[0];
+  CHECK(decodeGraph.GetSize() == 1);
 
-  ProcessUnknownWord();
+  const DecodeStep &decodeStep = **decodeGraph.begin();
+  const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
 
-  EvaluateWithSource();
+  for (size_t i = 0; i < m_inputPathQueue.size(); ++i) {
+    const InputPath &path = *m_inputPathQueue[i];
+    const TargetPhraseCollection *tpColl = path.GetTargetPhrases(phraseDictionary);
+    const WordsRange &range = path.GetWordsRange();
+
+    if (tpColl) {
+    	TargetPhraseCollection::const_iterator iter;
+    	for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
+    		const TargetPhrase &tp = **iter;
+    		TranslationOption *transOpt = new TranslationOption(range, tp);
+    		transOpt->SetInputPath(path);
+    		transOpt->Evaluate(m_source);
+
+    		Add(transOpt);
+    	}
+    }
+    else if (path.GetPhrase().GetSize() == 1) {
+    	// unknown word processing
+    	ProcessOneUnknownWord(path, path.GetWordsRange().GetEndPos(), 1, path.GetInputScore());
+    }
+  }
 
   // Prune
   Prune();
@@ -141,6 +152,11 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
   // Cached lex reodering costs
   CacheLexReordering();
 
+}
+
+void TranslationOptionCollectionLattice::ProcessUnknownWord(size_t sourcePos)
+{
+	UTIL_THROW(util::Exception, "ProcessUnknownWord() not implemented for lattice");
 }
 
 void TranslationOptionCollectionLattice::CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
