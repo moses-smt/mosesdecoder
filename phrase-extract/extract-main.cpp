@@ -715,7 +715,7 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
     return;
   }
 
-  if (m_options.placeholders.size() && !checkPlaceholders(sentence, startE, endE, startF, endF)) {
+  if (m_options.placeholders.size() || !checkPlaceholders(sentence, startE, endE, startF, endF)) {
     return;
   }
 
