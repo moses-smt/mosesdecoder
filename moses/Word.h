@@ -103,6 +103,8 @@ public:
     m_isOOV = val;
   }
 
+  bool IsEpsilon() const;
+
   /** add the factors from sourceWord into this representation,
    * NULL elements in sourceWord will be skipped */
   void Merge(const Word &sourceWord);

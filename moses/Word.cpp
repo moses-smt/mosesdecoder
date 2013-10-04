@@ -139,6 +139,14 @@ void Word::OnlyTheseFactors(const FactorMask &factors)
   }
 }
 
+bool Word::IsEpsilon() const
+{
+       const Factor *factor = m_factorArray[0];
+       int compare = factor->GetString().compare(EPSILON);
+
+       return compare == 0;
+}
+
 TO_STRING_BODY(Word);
 
 // friend

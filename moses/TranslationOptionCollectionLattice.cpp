@@ -42,6 +42,8 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
     const ConfusionNet::Column &col = input.GetColumn(startPos);
     for (size_t i = 0; i < col.size(); ++i) {
       const Word &word = col[i].first;
+      CHECK(!word.IsEpsilon());
+
       Phrase subphrase;
       subphrase.AddWord(word);
 
