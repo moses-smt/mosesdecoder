@@ -68,7 +68,7 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
 
   if (options.size() != 0 && ! options[0]->IsOOV()) {
     vector<float> losses(options.size(), 0.0);
-    vector<bool> isPruned(options.size(), false);
+    vector<float> pruned(options.size(), 0.0);
 
     // over all translation options for span
     for (size_t optIdx = 0; optIdx < options.size(); optIdx++) {
@@ -113,25 +113,19 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
                 ? LOWEST_SCORE
                 : log(ceptLosses[tgtWordPosition]);
           } else {
-            isPruned[optIdx] = true;
-            break;
+            pruned[optIdx] += 1;
           }
         } else {
           // TODO should null-aligned words be handled here? or somewhere?
-          isPruned[optIdx] = true;
-          break;
+          pruned[optIdx] += 1;
         }
       } // words in translation options
     } // translation options
 
     // ok, losses now contains the product of translation probabilities (sum of their logs)
-    // let's fill in the scores, minding the translation options which were pruned out
+    // let's fill in the scores
     for (size_t i = 0; i < options.size(); i++) {
-      if (isPruned[i]) {
-        scores.push_back(ScoreFactory(0, 1));      
-      } else {
-        scores.push_back(ScoreFactory(losses[i], 0));
-      }
+      scores.push_back(ScoreFactory(losses[i], pruned[i]));
     }
   } else {
     for (size_t i = 0; i < options.size(); i++) {
