@@ -24,6 +24,7 @@
 #include "util/check.hh"
 #include <string>
 #include "OnDiskWrapper.h"
+#include "moses/Factor.h"
 
 using namespace std;
 

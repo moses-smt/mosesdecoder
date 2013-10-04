@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ReorderingConstraint.h"
 #include "InputType.h"
 #include "StaticData.h"
+#include "WordsBitmap.h"
 
 namespace Moses
 {
