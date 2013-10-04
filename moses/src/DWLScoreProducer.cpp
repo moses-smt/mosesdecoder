@@ -84,6 +84,7 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
       // over all words in translation option
       for (size_t tgtPos = 0; tgtPos < option.GetTargetPhrase().GetSize(); tgtPos++) {
         string tgtWord = option.GetTargetPhrase().GetWord(tgtPos).ToString(); // all target factors (is this correct?)
+        tgtWord.resize(tgtWord.size() - 1); // trim trailing space
         string srcCept = GetSourceCept(src, alignedSrcWords[tgtPos]);
         if (m_ceptTable->SrcExists(srcCept)) {
           const vector<CeptTranslation> &ceptTranslations = m_ceptTable->GetTranslations(srcCept);
@@ -252,7 +253,7 @@ string DWLScoreProducer::GetSourceCept(const InputType &src, const vector<size_t
   out.reserve(positions.size() * 10); // guess the memory needed
   vector<size_t>::const_iterator it;
   for (it = positions.begin(); it != positions.end(); it++) {
-    out += src.GetWord(*it).ToString() + " "; // implicitly get all factors  
+    out += src.GetWord(*it).ToString(); // implicitly get all factors  
   }
   if (out.size() > 0) out.resize(out.size() - 1); // get rid of last space
   return out;
@@ -276,8 +277,11 @@ vector<pair<int, int> > DWLScoreProducer::AlignToSpanList(const std::vector<size
       start = last = *it;    
     }
   }
-  if (start != -1)
+  if (start != -1) {
     out.push_back(make_pair<int, int>(start, last + 1)); // final span
+  } else {
+    out.push_back(make_pair<int, int>(0, 0)); // null alignment
+  }
 
   return out;
 }
