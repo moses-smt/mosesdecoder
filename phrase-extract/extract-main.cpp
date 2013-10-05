@@ -170,6 +170,8 @@ int main(int argc, char* argv[])
         exit(1);
       }
       options.initInstanceWeightsFile(argv[++i]);
+    } else if (strcmp(argv[i], "--Debug") == 0) {
+	options.debug = true;
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -717,6 +719,12 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
 
   if (m_options.placeholders.size() && !checkPlaceholders(sentence, startE, endE, startF, endF)) {
     return;
+  }
+
+  if (m_options.debug) {
+      outextractstr << "sentenceID=" << sentence.sentenceID << " ";
+      outextractstrInv << "sentenceID=" << sentence.sentenceID << " ";
+      outextractstrOrientation << "sentenceID=" << sentence.sentenceID << " ";
   }
 
   for(int fi=startF; fi<=endF; fi++) {
