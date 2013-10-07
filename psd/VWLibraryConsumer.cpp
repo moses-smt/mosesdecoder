@@ -2,12 +2,14 @@
 //include "/home/alex/src/hal_vowpal_wabbit/vowpalwabbit/vw.h"
 #include "vw.h"
 #include "Util.h"
+#include "StaticData.h"
 #include "ezexample.h"
 #include <stdexcept>
 #include <exception>
 #include <string>
 
 using namespace std;
+using namespace Moses;
 
 namespace PSD
 {
@@ -116,16 +118,19 @@ void VWLibraryConsumer::SetNamespace(char ns, bool shared)
 void VWLibraryConsumer::AddFeature(const string &name)
 {
   m_ex->addf(name);
+  VERBOSE(3, "[VW] Adding feature: " + name + "\n");
 }
 
 void VWLibraryConsumer::AddFeature(const string &name, float value)
 {
   m_ex->addf(name, value);
+  VERBOSE(3, "[VW] Adding feature: " + name + " : " + SPrint<float>(value) + "\n");
 }
 
 void VWLibraryConsumer::FinishExample()
 {
   m_shared = true; // avoid removing an empty namespace in next call of SetNamespace
+  VERBOSE(3, "[VW] Finishing example\n");
   m_ex->clear_features();
 }
 
@@ -192,7 +197,9 @@ void VWLibraryPredictConsumer::Train(const string &label, float loss)
 float VWLibraryPredictConsumer::Predict(const string &label)
 {
   m_ex->set_label(label);
-  return m_ex->predict();
+  float out = m_ex->predict();
+  VERBOSE(3, "[VW] Prediction: " + SPrint<float>(out) + "\n");
+  return out;
 }
 
 VWLibraryPredictConsumer::VWLibraryPredictConsumer(vw * instance, int index)
