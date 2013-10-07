@@ -56,7 +56,7 @@ private:
   static void NormalizeLogisticLossBasic(std::vector<float> &losses);
   static void Normalize2(std::vector<float> &losses);
   static void Normalize3(std::vector<float> &losses);
-  static std::string GetSourceCept(const InputType &src, const std::vector<size_t> &positions);
+  static std::string GetSourceCept(const InputType &src, size_t startPos, const std::vector<size_t> &positions);
   static std::vector<std::pair<int, int> > AlignToSpanList(const std::vector<size_t> &positions);
 
   std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
