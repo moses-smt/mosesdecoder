@@ -110,6 +110,7 @@ void VWLibraryConsumer::SetNamespace(char ns, bool shared)
   if (!m_shared) {
     m_ex->remns();
   }
+  VERBOSE(3, string("[VW] Setting namespace: ") + ns + "\n");
 
   m_ex->addns(ns);
   m_shared = shared;
