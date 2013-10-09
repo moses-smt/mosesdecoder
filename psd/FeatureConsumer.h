@@ -8,6 +8,8 @@
 #include <deque>
 #include <vector>
 
+#include "Util.h"
+
 #include <boost/noncopyable.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/locks.hpp>
@@ -51,13 +53,21 @@ public:
   virtual void Finish();
   virtual void Train(const std::string &label, float loss);
   virtual float Predict(const std::string &label);
+  static std::string EscapeSpecialChars(const std::string &str)
+  {
+    std::string out;
+    out = Moses::Replace(str, "\\", "\\\\");
+    out = Moses::Replace(out, "|", "\\/");
+    out = Moses::Replace(out, ":", "\\;");
+    out = Moses::Replace(out, " ", "\\_");
+    return out;
+  }
 
 private:
   boost::iostreams::filtering_ostream m_bfos;
   std::deque<std::string> m_outputBuffer;
 
   void WriteBuffer();
-  std::string EscapeSpecialChars(const std::string &str);
 };
 
 // #ifdef HAVE_VW

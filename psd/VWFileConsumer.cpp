@@ -72,17 +72,4 @@ void VWFileTrainConsumer::WriteBuffer()
   m_outputBuffer.clear();
 }
 
-std::string VWFileTrainConsumer::EscapeSpecialChars(const std::string &str)
-{
-  string out;
-//  out = Replace(str, "|", "_PIPE_");
-//  out = Replace(out, ":", "_COLON_");
-//  out = Replace(out, " ", "_");
-  out = Replace(str, "\\", "\\\\");
-  out = Replace(out, "|", "\\/");
-  out = Replace(out, ":", "\\;");
-  out = Replace(out, " ", "\\_");
-  return out;
-}
-
 } // namespace PSD

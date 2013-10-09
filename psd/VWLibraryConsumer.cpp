@@ -118,13 +118,13 @@ void VWLibraryConsumer::SetNamespace(char ns, bool shared)
 
 void VWLibraryConsumer::AddFeature(const string &name)
 {
-  m_ex->addf(name);
+  m_ex->addf(VWFileTrainConsumer::EscapeSpecialChars(name));
   if (m_debugOutput) m_debugOutput->AddFeature(name);
 }
 
 void VWLibraryConsumer::AddFeature(const string &name, float value)
 {
-  m_ex->addf(name, value);
+  m_ex->addf(VWFileTrainConsumer::EscapeSpecialChars(name), value);
   if (m_debugOutput) m_debugOutput->AddFeature(name, value);
 }
 
