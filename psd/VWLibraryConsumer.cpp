@@ -220,6 +220,7 @@ VWLibraryPredictConsumer::VWLibraryPredictConsumer(vw * instance, int index)
   m_ex = new ::ezexample(m_VWInstance, false);
   m_shared = true;
   m_index = index;
+  m_debugOutput = NULL;
 }
 
 } // namespace PSD
