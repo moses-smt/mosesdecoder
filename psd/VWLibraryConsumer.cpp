@@ -172,7 +172,7 @@ VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile, const st
 
 void VWLibraryTrainConsumer::Train(const string &label, float loss)
 {
-  m_ex->set_label(label + Moses::SPrint(loss));
+  m_ex->set_label(label + ":" + Moses::SPrint(loss));
   if (m_debugOutput) m_debugOutput->Train(label, loss);
 }
 
