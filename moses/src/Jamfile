@@ -19,6 +19,6 @@ lib moses_internal :
 [ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp PSDScoreProducer.cpp DWLScoreProducer.cpp ]
 PSDScoreProducer.o ..//..//phrase-extract//extract-psd//CeptTable.o DWLScoreProducer.o synlm ThreadPool headers ;
 
-alias moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
+alias moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../../OnDiskPt//OnDiskPt ../..//z ..//..//boost_iostreams ;
 
 alias headers-to-install : [ glob-tree *.h ] ;

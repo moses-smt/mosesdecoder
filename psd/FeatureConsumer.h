@@ -71,6 +71,8 @@ private:
     virtual void FinishExample();
     virtual void Finish();
   
+    virtual void SetDebugOutfile(const std::string &fileName);
+
   protected:
     ::vw *m_VWInstance;
     ::ezexample *m_ex;
@@ -80,6 +82,7 @@ private:
     // deleted at end; if false, then we own the VW instance and must clean up after it.
     bool m_sharedVwInstance;
     int m_index;
+    VWFileTrainConsumer *m_debugOutput;
 
     ~VWLibraryConsumer();
   };

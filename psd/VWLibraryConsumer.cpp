@@ -110,7 +110,7 @@ void VWLibraryConsumer::SetNamespace(char ns, bool shared)
   if (!m_shared) {
     m_ex->remns();
   }
-  VERBOSE(3, string("[VW] Setting namespace: ") + ns + "\n");
+  if (m_debugOutput) m_debugOutput->SetNamespace(ns, shared);
 
   m_ex->addns(ns);
   m_shared = shared;
@@ -119,33 +119,40 @@ void VWLibraryConsumer::SetNamespace(char ns, bool shared)
 void VWLibraryConsumer::AddFeature(const string &name)
 {
   m_ex->addf(name);
-  VERBOSE(3, "[VW] Adding feature: " + name + "\n");
+  if (m_debugOutput) m_debugOutput->AddFeature(name);
 }
 
 void VWLibraryConsumer::AddFeature(const string &name, float value)
 {
   m_ex->addf(name, value);
-  VERBOSE(3, "[VW] Adding feature: " + name + " : " + SPrint<float>(value) + "\n");
+  if (m_debugOutput) m_debugOutput->AddFeature(name, value);
 }
 
 void VWLibraryConsumer::FinishExample()
 {
   m_shared = true; // avoid removing an empty namespace in next call of SetNamespace
-  VERBOSE(3, "[VW] Finishing example\n");
+  if (m_debugOutput) m_debugOutput->FinishExample();
   m_ex->clear_features();
 }
 
 void VWLibraryConsumer::Finish()
 {
+  if (m_debugOutput) m_debugOutput->Finish();
   if (m_sharedVwInstance)
     m_VWInstance = NULL;
   else
     VW::finish(*m_VWInstance);
 }
 
+void VWLibraryConsumer::SetDebugOutfile(const string &fileName)
+{
+  m_debugOutput = new VWFileTrainConsumer(fileName);
+}
+
 VWLibraryConsumer::~VWLibraryConsumer()
 {
   delete m_ex;
+  if (m_debugOutput) delete m_debugOutput;
   if (!m_sharedVwInstance)
     VW::finish(*m_VWInstance);
 }
@@ -160,11 +167,13 @@ VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile, const st
   m_VWInstance = VW::initialize(vwOptions + " -f " + modelFile);
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
+  m_debugOutput = NULL;
 }
 
 void VWLibraryTrainConsumer::Train(const string &label, float loss)
 {
   m_ex->set_label(label + Moses::SPrint(loss));
+  if (m_debugOutput) m_debugOutput->Train(label, loss);
 }
 
 void VWLibraryTrainConsumer::FinishExample()
@@ -188,6 +197,7 @@ VWLibraryPredictConsumer::VWLibraryPredictConsumer(const string &modelFile, cons
   m_VWInstance = VW::initialize(vwOptions + " -i " + modelFile);
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
+  m_debugOutput = NULL;
 }
 
 void VWLibraryPredictConsumer::Train(const string &label, float loss)
@@ -198,9 +208,9 @@ void VWLibraryPredictConsumer::Train(const string &label, float loss)
 float VWLibraryPredictConsumer::Predict(const string &label)
 {
   m_ex->set_label(label);
-  float out = m_ex->predict();
-  VERBOSE(3, "[VW] Prediction: " + SPrint<float>(out) + "\n");
-  return out;
+  float pred = m_ex->predict();
+  if (m_debugOutput) m_debugOutput->Train(label, pred);
+  return pred;
 }
 
 VWLibraryPredictConsumer::VWLibraryPredictConsumer(vw * instance, int index)

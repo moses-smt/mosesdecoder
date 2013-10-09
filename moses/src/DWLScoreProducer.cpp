@@ -108,6 +108,7 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
             VERBOSE(3, "[DWL] Full cept found in cept table\n");
             vector<float> ceptLosses(ceptTranslations.size());
             VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
+
             m_extractor->GenerateFeatures(p_consumer, src.m_DWLContext,
                 AlignToSpanList(alignedSrcWords[tgtPos]), ceptTranslations, ceptLosses);
             m_consumerFactory->Release(p_consumer);
