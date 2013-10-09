@@ -29,6 +29,8 @@
 #include "StaticData.h"
 #include "ChartTranslationOptions.h"
 #include "moses/FF/FFState.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 using namespace std;
 

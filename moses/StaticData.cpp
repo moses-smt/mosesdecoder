@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "util/check.hh"
 
+#include "TypeDef.h"
 #include "moses/FF/Factory.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
@@ -41,7 +42,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "ScoreComponentCollection.h"
 #include "DecodeGraph.h"
-#include "moses/TranslationModel/PhraseDictionary.h"
+#include "TranslationModel/PhraseDictionary.h"
+#include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -925,6 +927,7 @@ void StaticData::LoadFeatureFunctions()
     pt->Load();
   }
 
+  CheckLEGACYPT();
 }
 
 bool StaticData::CheckWeights() const
@@ -1073,6 +1076,19 @@ void StaticData::OverrideFeatures()
     }
   }
 
+}
+
+void StaticData::CheckLEGACYPT()
+{
+  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
+    const PhraseDictionary *phraseDictionary = m_phraseDictionary[i];
+    if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
+      m_useLegacyPT = true;
+      return;
+    }
+  }
+
+  m_useLegacyPT = false;
 }
 
 } // namespace

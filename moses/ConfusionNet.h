@@ -76,6 +76,7 @@ public:
     return m_defaultLabelSet;
   }
 
+
 };
 
 std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn);

@@ -19,7 +19,7 @@ public:
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 
   // for phrase-based model
-  void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
+  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   // for syntax/hiero model (CKY+ decoding)
   ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&, const ChartCellCollectionBase&);

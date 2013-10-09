@@ -14,11 +14,12 @@ InputPath::
 InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
           const WordsRange &range, const InputPath *prevNode,
           const ScorePair *inputScore)
-  :m_prevNode(prevNode)
+  :m_prevPath(prevNode)
   ,m_phrase(phrase)
   ,m_range(range)
   ,m_inputScore(inputScore)
   ,m_sourceNonTerms(sourceNonTerms)
+  ,m_nextNode(1)
 {
   //cerr << "phrase=" << phrase << " m_inputScore=" << *m_inputScore << endl;
 
@@ -67,7 +68,7 @@ const Word &InputPath::GetLastWord() const
 
 std::ostream& operator<<(std::ostream& out, const InputPath& obj)
 {
-  out << &obj << " " << obj.GetWordsRange() << " " << obj.GetPrevNode() << " " << obj.GetPhrase();
+  out << &obj << " " << obj.GetWordsRange() << " " << obj.GetPrevPath() << " " << obj.GetPhrase();
 
   out << "pt: ";
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;

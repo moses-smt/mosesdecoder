@@ -22,7 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <iostream>
 #include "SentenceStats.h"
-#include "moses/TranslationOption.h"
+#include "InputPath.h"
+#include "TranslationOption.h"
 
 using std::cout;
 using std::endl;

@@ -872,6 +872,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionCollectionConfusionNet.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationOptionCollectionLattice.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionCollectionLattice.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationOptionCollectionLattice.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionCollectionLattice.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationOptionCollectionText.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionCollectionText.cpp</locationURI>

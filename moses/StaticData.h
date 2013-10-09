@@ -38,15 +38,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread/mutex.hpp>
 #endif
 
-#include "TypeDef.h"
-#include "FactorCollection.h"
 #include "Parameter.h"
-#include "LM/Base.h"
 #include "SentenceStats.h"
-#include "DecodeGraph.h"
-#include "TranslationOptionList.h"
 #include "ScoreComponentCollection.h"
-#include "moses/TranslationModel/PhraseDictionary.h"
 
 namespace Moses
 {
@@ -54,6 +48,7 @@ namespace Moses
 class InputType;
 class PhraseDictionary;
 class GenerationDictionary;
+class DecodeGraph;
 class DecodeStep;
 class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
@@ -209,6 +204,7 @@ protected:
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
   FactorType m_placeHolderFactor;
+  bool m_useLegacyPT;
 
   StaticData();
 
@@ -223,6 +219,7 @@ protected:
 
   bool m_continuePartialTranslation;
   std::string m_binPath;
+
 
 public:
 
@@ -732,10 +729,6 @@ public:
   const PhraseDictionary*GetTranslationScoreProducer(size_t index) const {
     return GetPhraseDictionaries().at(index);
   }
-  std::vector<float> GetTranslationWeights(size_t index) const {
-    std::vector<float> weights = GetWeights(GetTranslationScoreProducer(index));
-    return weights;
-  }
 
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;
@@ -758,6 +751,15 @@ public:
   FactorType GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
+
+  /** check whether we should be using the old code to support binary phrase-table.
+  ** eventually, we'll stop support the binary phrase-table and delete this legacy code
+  **/
+  void CheckLEGACYPT();
+  bool GetUseLegacyPT() const {
+    return m_useLegacyPT;
+  }
+
 };
 
 }

@@ -80,7 +80,7 @@ public:
 
   virtual
   void
-  GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
+  GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   //! Create entry for translation of source to targetPhrase
   virtual void InitializeForInput(InputType const& source) {

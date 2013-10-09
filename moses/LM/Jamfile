@@ -82,4 +82,6 @@ alias macros : : : : <define>$(lmmacros) ;
 
 #Unit test for Backward LM
 import testing ;
-run BackwardTest.cpp ..//moses LM ../../lm//kenlm /top//boost_unit_test_framework : : backward.arpa ;
+#run BackwardTest.cpp ..//moses LM ../../lm//kenlm /top//boost_unit_test_framework : : backward.arpa ;
+
+

@@ -59,6 +59,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTrellisPath.h"
 #include "moses/ChartTrellisPathList.h"
 #include "moses/Incremental.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 #include "util/usage.hh"
 

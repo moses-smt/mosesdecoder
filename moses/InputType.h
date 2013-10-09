@@ -29,11 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhraseCollection.h"
 #include "ReorderingConstraint.h"
 #include "NonTerminal.h"
+#include "WordsRange.h"
 
 namespace Moses
 {
-
-class WordsRange;
 class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;

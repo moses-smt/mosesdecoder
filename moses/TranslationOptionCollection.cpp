@@ -78,7 +78,7 @@ TranslationOptionCollection::TranslationOptionCollection(
 /** destructor, clears out data structures */
 TranslationOptionCollection::~TranslationOptionCollection()
 {
-  RemoveAllInColl(m_phraseDictionaryQueue);
+  RemoveAllInColl(m_inputPathQueue);
 }
 
 void TranslationOptionCollection::Prune()
@@ -617,7 +617,7 @@ TO_STRING_BODY(TranslationOptionCollection);
 
 std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
 {
-  size_t size = coll.GetSize();
+  size_t size = coll.m_source.GetSize();
   for (size_t startPos = 0 ; startPos < size ; ++startPos) {
     size_t maxSize = size - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
@@ -706,7 +706,7 @@ void TranslationOptionCollection::GetTargetPhraseCollectionBatch()
       const DecodeStepTranslation *transStep = dynamic_cast<const DecodeStepTranslation *>(&decodeStep);
       if (transStep) {
         const PhraseDictionary &phraseDictionary = *transStep->GetPhraseDictionaryFeature();
-        phraseDictionary.GetTargetPhraseCollectionBatch(m_phraseDictionaryQueue);
+        phraseDictionary.GetTargetPhraseCollectionBatch(m_inputPathQueue);
       }
     }
   }

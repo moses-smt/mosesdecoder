@@ -17,10 +17,10 @@ void SkeletonPT::CleanUpAfterSentenceProcessing(const InputType& source)
   RemoveAllInColl(m_allTPColl);
 }
 
-void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   InputPathList::const_iterator iter;
-  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
 
     TargetPhrase *tp = CreateTargetPhrase(inputPath.GetPhrase());

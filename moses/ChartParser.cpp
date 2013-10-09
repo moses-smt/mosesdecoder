@@ -25,7 +25,9 @@
 #include "StaticData.h"
 #include "TreeInput.h"
 #include "Sentence.h"
+#include "DecodeGraph.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 using namespace Moses;
@@ -147,7 +149,7 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
     const PhraseDictionary *dict = *p;
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
 
-	ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells);
+    ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells);
 
     m_ruleLookupManagers.push_back(lookupMgr);
   }
@@ -222,7 +224,7 @@ void ChartParser::CreateInputPaths(const InputType &input)
         vec.push_back(node);
       }
 
-      //m_phraseDictionaryQueue.push_back(node);
+      //m_inputPathQueue.push_back(node);
     }
   }
 }

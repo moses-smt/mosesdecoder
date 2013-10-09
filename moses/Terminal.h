@@ -21,6 +21,7 @@
 
 #include "TypeDef.h"
 #include "Word.h"
+#include "Factor.h"
 
 #include <boost/functional/hash.hpp>
 

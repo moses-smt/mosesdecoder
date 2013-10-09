@@ -47,6 +47,7 @@ namespace mpi = boost::mpi;
 #include "moses/FF/WordTranslationFeature.h"
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/WordPenaltyProducer.h"
+#include "moses/LM/Base.h"
 
 using namespace Mira;
 using namespace std;
@@ -128,7 +129,6 @@ int main(int argc, char** argv)
   bool most_violated, most_violated_reg, all_violated, max_bleu_diff;
   bool feature_confidence, signed_counts;
   float decay_core, decay_sparse, core_r0, sparse_r0;
-  bool selective, summed;
   float bleu_weight_fear_factor;
   bool hildreth;
   float add2lm;
@@ -158,8 +158,6 @@ int main(int argc, char** argv)
   ("rescale-slack", po::value<bool>(&rescaleSlack)->default_value(false), "Rescale slack in 1-slack formulation")
   ("add2lm", po::value<float>(&add2lm)->default_value(0.0), "Add the specified amount to all LM weights")
   ("hildreth", po::value<bool>(&hildreth)->default_value(false), "Prefer Hildreth over analytical update")
-  ("selective", po::value<bool>(&selective)->default_value(false), "Build constraints for every feature")
-  ("summed", po::value<bool>(&summed)->default_value(false), "Sum up all constraints")
   ("model-plus-bleu", po::value<bool>(&modelPlusBleu)->default_value(false), "Use the sum of model score and +/- bleu to select hope and fear translations")
   ("simple-history-bleu", po::value<bool>(&simpleHistoryBleu)->default_value(false), "Simple history Bleu")
 
@@ -445,7 +443,6 @@ int main(int argc, char** argv)
     if (rank == 0) {
       cerr << "Optimising using Mira" << endl;
       cerr << "slack: " << slack << ", learning rate: " << mira_learning_rate << endl;
-      cerr << "selective: " << selective << endl;
       if (normaliseMargin)
         cerr << "sigmoid parameter: " << sigmoidParam << endl;
     }
@@ -1237,29 +1234,19 @@ int main(int argc, char** argv)
           } else
             update_status = 1;
         } else if (kbest) {
-          if (selective)
-            update_status = ((MiraOptimiser*)optimiser)->updateWeightsHopeFearSelective(
-                              weightUpdate, featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear,
-                              modelScoresHope, modelScoresFear, learning_rate, rank, epoch);
-          else if (summed)
-            update_status = ((MiraOptimiser*)optimiser)->updateWeightsHopeFearSummed(
-                              weightUpdate, featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear,
-                              modelScoresHope, modelScoresFear, learning_rate, rank, epoch, rescaleSlack, makePairs);
-          else {
-            if (batchSize == 1 && featureValuesHope[0].size() == 1 && !hildreth) {
-              cerr << "Rank " << rank << ", epoch " << epoch << ", model score hope: " << modelScoresHope[0][0] << endl;
-              cerr << "Rank " << rank << ", epoch " << epoch << ", model score fear: " << modelScoresFear[0][0] << endl;
-              update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(
+          if (batchSize == 1 && featureValuesHope[0].size() == 1 && !hildreth) {
+            cerr << "Rank " << rank << ", epoch " << epoch << ", model score hope: " << modelScoresHope[0][0] << endl;
+            cerr << "Rank " << rank << ", epoch " << epoch << ", model score fear: " << modelScoresFear[0][0] << endl;
+            update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(
                                 weightUpdate, featureValuesHope[0][0], featureValuesFear[0][0],
                                 bleuScoresHope[0][0], bleuScoresFear[0][0], modelScoresHope[0][0],
                                 modelScoresFear[0][0], learning_rate, rank, epoch);
-            } else {
-              cerr << "Rank " << rank << ", epoch " << epoch << ", model score hope: " << modelScoresHope[0][0] << endl;
-              cerr << "Rank " << rank << ", epoch " << epoch << ", model score fear: " << modelScoresFear[0][0] << endl;
-              update_status = optimiser->updateWeightsHopeFear(weightUpdate, featureValuesHope,
+          } else {
+            cerr << "Rank " << rank << ", epoch " << epoch << ", model score hope: " << modelScoresHope[0][0] << endl;
+            cerr << "Rank " << rank << ", epoch " << epoch << ", model score fear: " << modelScoresFear[0][0] << endl;
+            update_status = optimiser->updateWeightsHopeFear(weightUpdate, featureValuesHope,
                               featureValuesFear, bleuScoresHope, bleuScoresFear, modelScoresHope,
                               modelScoresFear, learning_rate, rank, epoch);
-            }
           }
         } else {
           // model_hope_fear

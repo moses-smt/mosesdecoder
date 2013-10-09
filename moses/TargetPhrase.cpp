@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "AlignmentInfoCollection.h"
 #include "InputPath.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 

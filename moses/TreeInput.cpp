@@ -4,6 +4,7 @@
 #include "StaticData.h"
 #include "Util.h"
 #include "XmlOption.h"
+#include "FactorCollection.h"
 
 using namespace std;
 

@@ -31,8 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/functional/hash.hpp>
 
 #include "Word.h"
-#include "WordsBitmap.h"
-#include "TypeDef.h"
 #include "Util.h"
 
 #include "util/string_piece.hh"
@@ -40,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 class FactorMask;
+class WordsRange;
 
 /** Representation of a phrase, ie. a contiguous number of words.
  *  Wrapper for vector of words

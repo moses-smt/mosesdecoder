@@ -3,7 +3,7 @@
 #include <list>
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "ConfusionNet.h"
-#include "DecodeStep.h"
+#include "DecodeGraph.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "FactorCollection.h"
@@ -24,11 +24,14 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
   CHECK(inputFeature);
 
-  size_t size = input.GetSize();
-  m_inputPathMatrix.resize(size);
+  size_t inputSize = input.GetSize();
+  m_inputPathMatrix.resize(inputSize);
+
+  size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+  maxSizePhrase = std::min(inputSize, maxSizePhrase);
 
   // 1-word phrases
-  for (size_t startPos = 0; startPos < size; ++startPos) {
+  for (size_t startPos = 0; startPos < inputSize; ++startPos) {
     vector<InputPathList> &vec = m_inputPathMatrix[startPos];
     vec.push_back(InputPathList());
     InputPathList &list = vec.back();
@@ -45,17 +48,17 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       const ScorePair &scores = col[i].second;
       ScorePair *inputScore = new ScorePair(scores);
 
-      InputPath *node = new InputPath(subphrase, labels, range, NULL, inputScore);
-      list.push_back(node);
+      InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
+      list.push_back(path);
 
-      m_phraseDictionaryQueue.push_back(node);
+      m_inputPathQueue.push_back(path);
     }
   }
 
   // subphrases of 2+ words
-  for (size_t phaseSize = 2; phaseSize <= size; ++phaseSize) {
-    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
-      size_t endPos = startPos + phaseSize -1;
+  for (size_t phraseSize = 2; phraseSize <= maxSizePhrase; ++phraseSize) {
+    for (size_t startPos = 0; startPos < inputSize - phraseSize + 1; ++startPos) {
+      size_t endPos = startPos + phraseSize -1;
 
       WordsRange range(startPos, endPos);
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
@@ -65,17 +68,17 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
       InputPathList &list = vec.back();
 
       // loop thru every previous path
-      const InputPathList &prevNodes = GetInputPathList(startPos, endPos - 1);
+      const InputPathList &prevPaths = GetInputPathList(startPos, endPos - 1);
 
       int prevNodesInd = 0;
       InputPathList::const_iterator iterPath;
-      for (iterPath = prevNodes.begin(); iterPath != prevNodes.end(); ++iterPath) {
-        //for (size_t pathInd = 0; pathInd < prevNodes.size(); ++pathInd) {
-        const InputPath &prevNode = **iterPath;
-        //const InputPath &prevNode = *prevNodes[pathInd];
+      for (iterPath = prevPaths.begin(); iterPath != prevPaths.end(); ++iterPath) {
+        //for (size_t pathInd = 0; pathInd < prevPaths.size(); ++pathInd) {
+        const InputPath &prevPath = **iterPath;
+        //const InputPath &prevPath = *prevPaths[pathInd];
 
-        const Phrase &prevPhrase = prevNode.GetPhrase();
-        const ScorePair *prevInputScore = prevNode.GetInputScore();
+        const Phrase &prevPhrase = prevPath.GetPhrase();
+        const ScorePair *prevInputScore = prevPath.GetInputScore();
         CHECK(prevInputScore);
 
         // loop thru every word at this position
@@ -90,20 +93,16 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
           ScorePair *inputScore = new ScorePair(*prevInputScore);
           inputScore->PlusEquals(scores);
 
-          InputPath *node = new InputPath(subphrase, labels, range, &prevNode, inputScore);
-          list.push_back(node);
+          InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+          list.push_back(path);
 
-          m_phraseDictionaryQueue.push_back(node);
+          m_inputPathQueue.push_back(path);
         } // for (size_t i = 0; i < col.size(); ++i) {
 
         ++prevNodesInd;
-      } // for (iterPath = prevNodes.begin(); iterPath != prevNodes.end(); ++iterPath) {
+      } // for (iterPath = prevPaths.begin(); iterPath != prevPaths.end(); ++iterPath) {
     }
   }
-
-  // check whether we should be using the old code to supportbinary phrase-table.
-  // eventually, we'll stop support the binary phrase-table and delete this legacy code
-  CheckLEGACY();
 }
 
 InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t startPos, size_t endPos)
@@ -140,7 +139,7 @@ void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePo
 
 void TranslationOptionCollectionConfusionNet::CreateTranslationOptions()
 {
-  if (!m_useLegacy) {
+  if (!StaticData::Instance().GetUseLegacyPT()) {
     GetTargetPhraseCollectionBatch();
   }
   TranslationOptionCollection::CreateTranslationOptions();
@@ -162,7 +161,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRange(
   , bool adhereTableLimit
   , size_t graphInd)
 {
-  if (m_useLegacy) {
+  if (StaticData::Instance().GetUseLegacyPT()) {
     CreateTranslationOptionsForRangeLEGACY(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
   } else {
     CreateTranslationOptionsForRangeNew(decodeGraph, startPos, endPos, adhereTableLimit, graphInd);
@@ -274,19 +273,6 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLE
   }
 }
 
-void TranslationOptionCollectionConfusionNet::CheckLEGACY()
-{
-  const std::vector<PhraseDictionary*> &pts = StaticData::Instance().GetPhraseDictionaries();
-  for (size_t i = 0; i < pts.size(); ++i) {
-    const PhraseDictionary *phraseDictionary = pts[i];
-    if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
-      m_useLegacy = true;
-      return;
-    }
-  }
-
-  m_useLegacy = false;
-}
 
 }
 

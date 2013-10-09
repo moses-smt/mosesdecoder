@@ -4,6 +4,8 @@
 #include "PCNTools.h"
 #include "Util.h"
 #include "FloydWarshall.h"
+#include "TranslationOptionCollectionLattice.h"
+#include "TranslationOptionCollectionConfusionNet.h"
 #include "moses/FF/InputFeature.h"
 #include "util/check.hh"
 
@@ -203,6 +205,50 @@ bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
   return distances[start][end] < 100000;
 }
 
+TranslationOptionCollection*
+WordLattice::CreateTranslationOptionCollection() const
+{
+  size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
+  float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
 
+  TranslationOptionCollection *rv = NULL;
+  //rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+
+  if (StaticData::Instance().GetUseLegacyPT()) {
+    rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  }
+  else {
+	rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  }
+
+  CHECK(rv);
+  return rv;
 }
+
+
+std::ostream& operator<<(std::ostream &out, const WordLattice &obj)
+{
+  out << "next_nodes=";
+  for (size_t i = 0; i < obj.next_nodes.size(); ++i) {
+    out << i << ":";
+
+    const std::vector<size_t> &inner = obj.next_nodes[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      out << inner[j] << " ";
+    }
+  }
+
+  out << "distances=";
+  for (size_t i = 0; i < obj.distances.size(); ++i) {
+    out << i << ":";
+
+    const std::vector<int> &inner = obj.distances[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      out << inner[j] << " ";
+    }
+  }
+  return out;
+}
+
+} // namespace
 
