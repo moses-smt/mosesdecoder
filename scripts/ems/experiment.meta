@@ -747,7 +747,7 @@ split-input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 split-input-devtest
 	in: truecased-input-devtest SPLITTER:splitter-model
 	out: input-devtest
@@ -755,7 +755,7 @@ split-input-devtest
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
 	ignore-unless: use-mira
-	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
