@@ -127,6 +127,7 @@ protected:
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
+  std::string m_detailedTreeFragmentsTranslationReportingFilePath;
 
   //DIMw
   std::string m_detailedAllTranslationReportingFilePath;
@@ -356,6 +357,12 @@ public:
 
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
+  }
+  bool IsDetailedTreeFragmentsTranslationReportingEnabled() const {
+    return !m_detailedTreeFragmentsTranslationReportingFilePath.empty();
+  }
+  const std::string &GetDetailedTreeFragmentsTranslationReportingFilePath() const {
+    return m_detailedTreeFragmentsTranslationReportingFilePath;
   }
   bool IsLabeledNBestList() const {
     return m_labeledNBestList;

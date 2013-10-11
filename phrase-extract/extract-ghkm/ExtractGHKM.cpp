@@ -171,7 +171,11 @@ int ExtractGHKM::Main(int argc, char *argv[])
         ScfgRule r(**q);
         // TODO Can scope pruning be done earlier?
         if (r.Scope() <= options.maxScope) {
-          writer.Write(r);
+          if (!options.treeFragments) {
+            writer.Write(r);
+          } else {
+            writer.Write(r,**q);
+          }
         }
       }
     }
@@ -291,6 +295,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "extract minimal rules only")
   ("PCFG",
    "include score based on PCFG scores in target corpus")
+  ("TreeFragments",
+   "output parse tree information")
   ("SentenceOffset",
    po::value(&options.sentenceOffset)->default_value(options.sentenceOffset),
    "set sentence number offset if processing split corpus")
@@ -382,6 +388,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("PCFG")) {
     options.pcfg = true;
   }
+  if (vm.count("TreeFragments")) {
+    options.treeFragments = true;
+  }
   if (vm.count("UnknownWordUniform")) {
     options.unknownWordUniform = true;
   }
@@ -445,22 +454,22 @@ void ExtractGHKM::WriteGlueGrammar(
   }
 
   // basic rules
-  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1  ||| " << std::endl;
-  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 " << std::endl;
+  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| ||| ||| ||| {{Tree ( " << topLabel << " ( SSTART <s> ) )}}" << std::endl;
+  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| ||| {{Tree ( " << topLabel << " ( SEND </s> ) )}}" << std::endl;
 
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1" << std::endl;
+    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1 ||| ||| ||| {{Tree ( " << topLabel << " ( SSTART <s> ) ( " << i->first << " ) ( SEND </s> ) )}}" << std::endl;
   }
 
   // glue rules
   for(std::set<std::string>::const_iterator i = labelSet.begin();
       i != labelSet.end(); i++ ) {
-    out << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1" << std::endl;
+    out << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| ||| {{Tree ( " << topLabel << " ( "<< topLabel << " ) ( " << *i << " ) )}}" << std::endl;
   }
   // glue rule for unknown word...
-  out << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 |||  0-0 1-1 " << std::endl;
+  out << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| ||| {{Tree ( " << topLabel << " ( X ) )}}" << std::endl;
 }
 
 void ExtractGHKM::CollectWordLabelCounts(

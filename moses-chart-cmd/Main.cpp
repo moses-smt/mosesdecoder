@@ -129,6 +129,10 @@ public:
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
     }
+    if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
+    }
 
     //DIMw
     if (staticData.IsDetailedAllTranslationReportingEnabled()) {

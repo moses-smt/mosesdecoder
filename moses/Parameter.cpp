@@ -67,6 +67,7 @@ Parameter::Parameter()
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
+  AddParam("tree-translation-details", "Ttree", "for each hypothesis, report translation details with tree fragment info to given file");
   //DIMw
   AddParam("translation-all-details", "Tall", "for all hypotheses, report translation details to the given file");
   AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
@@ -352,7 +353,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
     }
   }
 
-  //Save("/tmp/moses.ini.new");
+  Save("/Users/mnadejde/Documents/workspace/MTM13/DATA/mtmGHKM/moses.ini.new");
 
   // check if parameters make sense
   return Validate() && noErrorFlag;

@@ -82,6 +82,7 @@ void PhraseAlignment::create( char line[], int lineID, bool includeSentenceIdFla
 {
   assert(phraseS.empty());
   assert(phraseT.empty());
+  treeFragment.clear();
 
   vector< string > token = tokenize( line );
   int item = 1;
@@ -108,6 +109,14 @@ void PhraseAlignment::create( char line[], int lineID, bool includeSentenceIdFla
         alignedToT[t].insert( s );
         alignedToS[s].insert( t );
       }
+    } else if ( (item >= 4) && (token[j] == "Tree") ) { // check for information with a key field
+      ++j;
+      while ( (j < token.size() ) && (token[j] != "|||") ) {
+        treeFragment.append(" ");
+        treeFragment.append(token[j]);
+        ++j;
+      }
+      --j;
     } else if (includeSentenceIdFlag && item == 4) { // optional sentence id
       sscanf(token[j].c_str(), "%d", &sentenceId);
     } else if (item + (includeSentenceIdFlag?-1:0) == 4) { // count
