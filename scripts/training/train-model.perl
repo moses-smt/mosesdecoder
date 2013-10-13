@@ -2005,7 +2005,7 @@ sub create_ini {
     if (defined($_OSM_FACTORS))
     {
 	my $count = 0;
-	my @factor_values = split(',', $_OSM_FACTORS);
+	my @factor_values = split(/\+/, $_OSM_FACTORS);
     	foreach my $factor_val (@factor_values) {
 
 		my ($factor_f,$factor_e) = split(/\-/,$factor_val);
