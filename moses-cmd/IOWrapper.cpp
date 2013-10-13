@@ -277,8 +277,7 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      out << scoreBreakdown;
-      
+      OutputAllFeatureScores(scoreBreakdown, out);
     }
     out << "| ";
   }
