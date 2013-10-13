@@ -273,7 +273,7 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
       const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
       OutputAlignment(out, ai, 0, 0);
       out << ",total=";
-      out << edge.GetTotalScore()-edge.GetPrevHypo()->GetTotalScore();
+      out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
       out << ",";
       ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
       scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
