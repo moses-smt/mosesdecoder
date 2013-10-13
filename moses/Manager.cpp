@@ -532,6 +532,18 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   outputWordGraphStream << endl;
 }
 
+void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) {
+  Phrase translation;
+  hypo->GetOutputPhrase(translation);
+  const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for (size_t i = 0; i < statefulFFs.size(); ++i) {
+    const StatefulFeatureFunction *ff = statefulFFs[i];
+    if (const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff)) {	
+      lm->ReportHistoryOrder(out, translation);
+    }
+  }
+}
+
 void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const
 {
   const StaticData &staticData = StaticData::Instance();
@@ -543,7 +555,6 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
                         << "UTTERANCE=" << translationId << endl;
 
   size_t linkId = 0;
-  size_t stackNo = 1;
   std::vector < HypothesisStack* >::const_iterator iterStack;
   for (iterStack = ++hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack) {
     const HypothesisStack &stack = **iterStack;

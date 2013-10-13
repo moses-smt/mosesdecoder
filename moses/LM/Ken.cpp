@@ -356,6 +356,36 @@ template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Increme
   manager.LMCallback(*m_ngram, m_lmIdLookup);
 }
 
+template <class Model> void LanguageModelKen<Model>::ReportHistoryOrder(std::ostream &out, const Phrase &phrase) const
+{
+  out << "!lm-history=(";
+  if (!phrase.GetSize()) return;
+
+  std::auto_ptr<KenLMState> initial(new KenLMState());
+  typename Model::State aux_state;
+  typename Model::State *state0 = &initial->state;
+  typename Model::State *state1 = &aux_state;
+
+  float score = 0;
+  for (std::size_t position=0; position<phrase.GetSize(); position++) {
+    const lm::WordIndex idx = TranslateID(phrase.GetWord(position));
+    score += m_ngram->Score(*state0, idx, *state1);
+    // out << phrase.GetWord(position) << " ";
+    // out << TransformLMScore(score) << " ";
+    if (position) {
+      out << ",";
+    }
+    if (idx == 0) {
+      out << "0";
+    }
+    else {
+      out << (int)state1->Length();
+    }
+    std::swap(state0, state1);
+  }
+  out << ")| ";
+}
+
 template <class Model>
 bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 {

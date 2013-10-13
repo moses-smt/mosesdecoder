@@ -262,17 +262,23 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
     }
   }
 
-  // trace option "-t" / "-tt"
+  // trace ("report segmentation") option "-t" / "-tt"
   if (reportSegmentation > 0 && phrase.GetSize() > 0) {
     const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
     const int sourceStart = sourceRange.GetStartPos();
     const int sourceEnd = sourceRange.GetEndPos();
-    out << "|" << sourceStart << "-" << sourceEnd;
-    // enriched "-tt"
+    out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
     if (reportSegmentation == 2) {
-      out << ",0, ";
+      out << ",wa=";
       const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
       OutputAlignment(out, ai, 0, 0);
+      out << ",total=";
+      out << edge.GetTotalScore()-edge.GetPrevHypo()->GetTotalScore();
+      out << ",";
+      ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
+      scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
+      out << scoreBreakdown;
+      
     }
     out << "| ";
   }
@@ -443,7 +449,6 @@ void OutputNBest(std::ostream& out
                  , char reportSegmentation)
 {
   const StaticData &staticData = StaticData::Instance();
-  bool labeledOutput = staticData.IsLabeledNBestList();
   bool reportAllFactors = staticData.GetReportAllFactorsNBest();
   bool includeSegmentation = staticData.NBestIncludesSegmentation();
   bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
