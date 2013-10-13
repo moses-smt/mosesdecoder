@@ -358,7 +358,7 @@ template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Increme
 
 template <class Model> void LanguageModelKen<Model>::ReportHistoryOrder(std::ostream &out, const Phrase &phrase) const
 {
-  out << "!lm-history=(";
+  out << "|lm-history=(";
   if (!phrase.GetSize()) return;
 
   std::auto_ptr<KenLMState> initial(new KenLMState());
