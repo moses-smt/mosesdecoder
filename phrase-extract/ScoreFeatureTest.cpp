@@ -69,7 +69,9 @@ static void checkDomainConfigured(
   ScoreFeatureManager manager;
   manager.configure(args);
   const std::vector<ScoreFeaturePtr>& features  = manager.getFeatures();
-  BOOST_REQUIRE_EQUAL(features.size(), 1);
+  //BOOST_REQUIRE_EQUAL(features.size(), 2);
+  //if I add to features this check will fail?
+  BOOST_REQUIRE_EQUAL(features.size(), 1); //MARIA -> what is this check and why does it fail when I add my feature?
   Expected* feature = dynamic_cast<Expected*>(features[0].get());
   BOOST_REQUIRE(feature);
   BOOST_CHECK(manager.includeSentenceId());

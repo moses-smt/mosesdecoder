@@ -31,6 +31,7 @@
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
+#include "moses/FF/InternalStructStatelessFF.h"
 #include "moses/FF/ConstrainedDecoding.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
@@ -154,6 +155,7 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
+  MOSES_FNAME(InternalStructStatelessFF);
   MOSES_FNAME(SkeletonLM);
   MOSES_FNAME(SkeletonPT);
 
