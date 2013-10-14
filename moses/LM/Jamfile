@@ -84,6 +84,16 @@ if $(with-ldhtlm) {
   dependencies += ldht ;
 }
 
+#NPLM
+local with-nplm = [ option.get "with-nplm" ] ;
+if $(with-nplm) {
+  lib neuralLM : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
+  obj NeuralLM.o : NeuralLM.cpp neuralLM ..//headers : <include>$(with-nplm)/src ;
+  alias nplm : NeuralLM.o neuralLM : : : <define>LM_NEURAL ;
+  dependencies += nplm ;
+  lmmacros += LM_NEURAL ;
+}
+
 #ORLM is always compiled but needs special headers
 obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
 

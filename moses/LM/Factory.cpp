@@ -50,6 +50,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #   include "LDHT.h"
 #endif
 
+#ifdef LM_NEURAL
+#   include "NeuralLM.h"
+#endif
+
 #include "Base.h"
 #include "Joint.h"
 
@@ -111,6 +115,11 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     return ConstructLDHTLM(languageModelFile,
                            scoreIndexManager,
                            factorTypes[0]);
+#endif
+    break;
+  case NPLM:
+#ifdef LM_NEURAL
+    lm = new NeuralLM();
 #endif
     break;
   default:
