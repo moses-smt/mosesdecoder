@@ -87,8 +87,13 @@ if $(with-ldhtlm) {
 #NPLM
 local with-nplm = [ option.get "with-nplm" ] ;
 if $(with-nplm) {
+
+  # Search system default paths for the GNU OpenMP library
+  lib gomp : : ;
+  dependencies += gomp ;
+
   lib neuralLM : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
-  obj NeuralLM.o : NeuralLM.cpp neuralLM ..//headers : <include>$(with-nplm)/src ;
+  obj NeuralLM.o : NeuralLM.cpp neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen-3.1.4 ;
   alias nplm : NeuralLM.o neuralLM : : : <define>LM_NEURAL ;
   dependencies += nplm ;
   lmmacros += LM_NEURAL ;
