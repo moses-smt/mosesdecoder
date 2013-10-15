@@ -108,16 +108,19 @@ void VWLibraryPredictConsumerFactory::Release(VWLibraryPredictConsumer * fc)
 void VWLibraryConsumer::SetNamespace(char ns, bool shared)
 {
   if (!m_shared) {
+//    cerr << "ex.remns();\n";
     m_ex->remns();
   }
   if (m_debugOutput) m_debugOutput->SetNamespace(ns, shared);
 
   m_ex->addns(ns);
+//  cerr << "ex.addns('" << ns << "');\n";
   m_shared = shared;
 }
 
 void VWLibraryConsumer::AddFeature(const string &name)
 {
+//  cerr << "ex.addf(\"" << VWFileTrainConsumer::EscapeSpecialChars(name) << "\");\n";
   m_ex->addf(VWFileTrainConsumer::EscapeSpecialChars(name));
   if (m_debugOutput) m_debugOutput->AddFeature(name);
 }
@@ -209,6 +212,9 @@ float VWLibraryPredictConsumer::Predict(const string &label)
 {
   m_ex->set_label(label);
   float pred = m_ex->predict();
+//  cerr << "ex.set_label(\"" << label << "\");\n";
+//  cerr << "ex.predict();\n";
+//  cerr << "// returned " << pred << "\n";
   if (m_debugOutput) m_debugOutput->Train(label, pred);
   return pred;
 }

@@ -109,8 +109,6 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
             vector<float> ceptLosses(ceptTranslations.size());
             VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
 
-            p_consumer->SetDebugOutfile("debug." + tgtWord);
-
             m_extractor->GenerateFeatures(p_consumer, src.m_DWLContext,
                 AlignToSpanList(alignedSrcWords[tgtPos]), ceptTranslations, ceptLosses);
             m_consumerFactory->Release(p_consumer);
