@@ -18,9 +18,7 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
 
-  virtual bool Load(const std::string &filePath
-		    , FactorType factorType
-		    , size_t nGramOrder);
+  virtual bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
 };
 
 
