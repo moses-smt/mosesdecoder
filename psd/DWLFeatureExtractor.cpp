@@ -59,6 +59,7 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     for (size_t i = spanStart; i < spanEnd; i++)
       sourceForms.push_back(context[i][FACTOR_FORM]);
   }
+  cerr << "[DWL] Generating features for source: " + Join("_", sourceForms) + "\n";
   
   map<string, float> maxProbs;
 //  if (m_config.GetMostFrequent()) maxProbs = GetMaxProb(translations);

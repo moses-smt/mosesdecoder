@@ -50,7 +50,7 @@ private:
   bool LoadTargetIndex(const std::string &indexFile);
 
   // Construct a ScoreComponentCollection with DWL feature set to given score
-  ScoreComponentCollection ScoreFactory(float classifierPrediction, float oovCount);
+  ScoreComponentCollection ScoreFactory(float classifierPrediction, float oovCount, float nullCount);
 
   static void NormalizeSquaredLoss(std::vector<float> &losses);
   static void NormalizeLogisticLossBasic(std::vector<float> &losses);

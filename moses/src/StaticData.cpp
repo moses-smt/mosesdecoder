@@ -221,7 +221,7 @@ bool StaticData::LoadData(Parameter *parameter)
       return false;
     }
     vector<float> DWLWeights = Scan<float>(m_parameter->GetParam("weight-dwl"));
-    CHECK(DWLWeights.size() == 2);
+    CHECK(DWLWeights.size() == 3);
     m_DWLScoreProducer = new DWLScoreProducer(m_scoreIndexManager, DWLWeights);
     if (! m_DWLScoreProducer->Initialize(m_parameter->GetParam("dwl-model")[0],
       m_parameter->GetParam("dwl-config")[0],

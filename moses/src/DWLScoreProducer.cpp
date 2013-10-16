@@ -52,24 +52,26 @@ bool DWLScoreProducer::Initialize(const string &modelFile, const string &configF
   return true;
 }
 
-ScoreComponentCollection DWLScoreProducer::ScoreFactory(float classifierPrediction, float oovCount)
+ScoreComponentCollection DWLScoreProducer::ScoreFactory(float classifierPrediction, float oovCount, float nullCount)
 {
   ScoreComponentCollection out;
-  vector<float> scores(2);
+  vector<float> scores(3);
   scores[0] = classifierPrediction;
   scores[1] = oovCount;
+  scores[2] = nullCount;
   out.Assign(this, scores);
   return out;
 }
 
 vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<TranslationOption *> &options, const InputType &src)
 {
-  VERBOSE(2, "[DWL] Scoring " + SPrint<size_t>(options.size()) + " translation options\n");
   vector<ScoreComponentCollection> scores;
 
   if (options.size() != 0 && ! options[0]->IsOOV()) {
+    VERBOSE(2, "[DWL] Scoring " + SPrint<size_t>(options.size()) + " translation options\n");
     vector<float> losses(options.size(), 0.0);
     vector<float> pruned(options.size(), 0.0);
+    vector<float> nullAligned(options.size(), 0.0);
 
     // over all translation options for span
     for (size_t optIdx = 0; optIdx < options.size(); optIdx++) {
@@ -87,45 +89,52 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
         string tgtWord = option.GetTargetPhrase().GetWord(tgtPos).ToString(); // all target factors (is this correct?)
         tgtWord.resize(tgtWord.size() - 1); // trim trailing space
         VERBOSE(2, "[DWL] At target word: " + tgtWord + "\n");
-        string srcCept = GetSourceCept(src, options[optIdx]->GetStartPos(), alignedSrcWords[tgtPos]);
-        VERBOSE(2, "[DWL] Source group: " + srcCept + "\n");
-        if (m_ceptTable->SrcExists(srcCept)) {
-          VERBOSE(2, "[DWL] Source found in cept table\n");
-          const vector<CeptTranslation> &ceptTranslations = m_ceptTable->GetTranslations(srcCept);
+        if (! alignedSrcWords[tgtPos].empty()) {
+          string srcCept = GetSourceCept(src, options[optIdx]->GetStartPos(), alignedSrcWords[tgtPos]);
+          VERBOSE(2, "[DWL] Source group: " + srcCept + "\n");
+          if (m_ceptTable->SrcExists(srcCept)) {
+            VERBOSE(2, "[DWL] Source found in cept table\n");
+            const vector<CeptTranslation> &ceptTranslations = m_ceptTable->GetTranslations(srcCept);
 
-          // check that we know the proposed translation (increment OOV counter otherwise),
-          // get its position in the vector of possible translations
-          vector<CeptTranslation>::const_iterator transIt;
-          int tgtWordPosition = -1;
-          for (transIt = ceptTranslations.begin(); transIt != ceptTranslations.end(); transIt++) {
-            if (tgtWord == m_ceptTable->GetTgtString(transIt->m_index)) {
-              tgtWordPosition = distance(ceptTranslations.begin(), transIt);
-              break;
+            // check that we know the proposed translation (increment OOV counter otherwise),
+            // get its position in the vector of possible translations
+            vector<CeptTranslation>::const_iterator transIt;
+            int tgtWordPosition = -1;
+            VERBOSE(2, "[DWL] Possible translations of source '" + srcCept + "':\n");
+            for (transIt = ceptTranslations.begin(); transIt != ceptTranslations.end(); transIt++) {
+              VERBOSE(2, "    " + m_ceptTable->GetTgtString(transIt->m_index) + "\n");
+              if (tgtWord == m_ceptTable->GetTgtString(transIt->m_index)) {
+                tgtWordPosition = distance(ceptTranslations.begin(), transIt);
+                //              break;
+              }
             }
-          }
 
-          if (tgtWordPosition != -1) {
-            VERBOSE(2, "[DWL] Full cept found in cept table\n");
-            vector<float> ceptLosses(ceptTranslations.size());
-            VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
+            if (tgtWordPosition != -1) {
+              VERBOSE(2, "[DWL] Full cept found in cept table\n");
+              vector<float> ceptLosses(ceptTranslations.size());
+              VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
 
-            m_extractor->GenerateFeatures(p_consumer, src.m_DWLContext,
-                AlignToSpanList(alignedSrcWords[tgtPos]), ceptTranslations, ceptLosses);
-            m_consumerFactory->Release(p_consumer);
+              m_extractor->GenerateFeatures(p_consumer, src.m_DWLContext,
+                  AlignToSpanList(alignedSrcWords[tgtPos]), ceptTranslations, ceptLosses);
+              m_consumerFactory->Release(p_consumer);
 
-            m_normalizer(ceptLosses); // normalize using the function specified in config file
+              m_normalizer(ceptLosses); // normalize using the function specified in config file
 
-            losses[optIdx] += Equals(ceptLosses[tgtWordPosition], 0)
+              losses[optIdx] += Equals(ceptLosses[tgtWordPosition], 0)
                 ? LOWEST_SCORE
                 : log(ceptLosses[tgtWordPosition]);
+            } else {
+              VERBOSE(2, "[DWL] Target word was pruned\n");
+              pruned[optIdx] += 1;
+            }
           } else {
-            VERBOSE(2, "[DWL] Target word was pruned\n");
+            // TODO should null-aligned words be handled here? or somewhere?
+            VERBOSE(2, "[DWL] Source NOT found in cept table\n");
             pruned[optIdx] += 1;
           }
         } else {
-          // TODO should null-aligned words be handled here? or somewhere?
-          VERBOSE(2, "[DWL] Source NOT found in cept table\n");
-          pruned[optIdx] += 1;
+          VERBOSE(2, "[DWL] Scoring null-aligned target\n");
+          nullAligned[optIdx] += 1;
         }
       } // words in translation options
     } // translation options
@@ -133,13 +142,13 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
     // ok, losses now contains the product of translation probabilities (sum of their logs)
     // let's fill in the scores
     for (size_t i = 0; i < options.size(); i++) {
-      scores.push_back(ScoreFactory(losses[i], pruned[i]));
+      scores.push_back(ScoreFactory(losses[i], pruned[i], nullAligned[i]));
     }
-  } else {
-    VERBOSE(2, "[DWL] OOV: " + src.ToString() + "\n");
+  } else if (options.size() != 0) {
+    VERBOSE(2, "[DWL] Not scoring OOV: " + src.GetWord(options[0]->GetStartPos()).ToString() + "\n");
     for (size_t i = 0; i < options.size(); i++) {
       // Moses' OOVs are our OOVs too (and they are always 1-word phrases)
-      scores.push_back(ScoreFactory(0, 1));
+      scores.push_back(ScoreFactory(0, 1, 0));
     }
   }
 
@@ -148,7 +157,7 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
 
 size_t DWLScoreProducer::GetNumScoreComponents() const
 {
-  return 2; // VW prediction, target-side OOV count
+  return 3; // VW prediction, target-side OOV count, null-aligned tgt word count
 }
 
 std::string DWLScoreProducer::GetScoreProducerDescription(unsigned) const
