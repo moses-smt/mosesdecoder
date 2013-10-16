@@ -64,7 +64,7 @@ ScoreComponentCollection DWLScoreProducer::ScoreFactory(float classifierPredicti
 
 vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<TranslationOption *> &options, const InputType &src)
 {
-  VERBOSE(3, "[DWL] Scoring " + SPrint<size_t>(options.size()) + " translation options\n");
+  VERBOSE(2, "[DWL] Scoring " + SPrint<size_t>(options.size()) + " translation options\n");
   vector<ScoreComponentCollection> scores;
 
   if (options.size() != 0 && ! options[0]->IsOOV()) {
@@ -86,11 +86,11 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
       for (size_t tgtPos = 0; tgtPos < option.GetTargetPhrase().GetSize(); tgtPos++) {
         string tgtWord = option.GetTargetPhrase().GetWord(tgtPos).ToString(); // all target factors (is this correct?)
         tgtWord.resize(tgtWord.size() - 1); // trim trailing space
-        VERBOSE(3, "[DWL] At target word: " + tgtWord + "\n");
+        VERBOSE(2, "[DWL] At target word: " + tgtWord + "\n");
         string srcCept = GetSourceCept(src, options[optIdx]->GetStartPos(), alignedSrcWords[tgtPos]);
-        VERBOSE(3, "[DWL] Source group: " + srcCept + "\n");
+        VERBOSE(2, "[DWL] Source group: " + srcCept + "\n");
         if (m_ceptTable->SrcExists(srcCept)) {
-          VERBOSE(3, "[DWL] Source found in cept table\n");
+          VERBOSE(2, "[DWL] Source found in cept table\n");
           const vector<CeptTranslation> &ceptTranslations = m_ceptTable->GetTranslations(srcCept);
 
           // check that we know the proposed translation (increment OOV counter otherwise),
@@ -105,7 +105,7 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
           }
 
           if (tgtWordPosition != -1) {
-            VERBOSE(3, "[DWL] Full cept found in cept table\n");
+            VERBOSE(2, "[DWL] Full cept found in cept table\n");
             vector<float> ceptLosses(ceptTranslations.size());
             VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
 
@@ -119,12 +119,12 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
                 ? LOWEST_SCORE
                 : log(ceptLosses[tgtWordPosition]);
           } else {
-            VERBOSE(3, "[DWL] Target word was pruned\n");
+            VERBOSE(2, "[DWL] Target word was pruned\n");
             pruned[optIdx] += 1;
           }
         } else {
           // TODO should null-aligned words be handled here? or somewhere?
-          VERBOSE(3, "[DWL] Source NOT found in cept table\n");
+          VERBOSE(2, "[DWL] Source NOT found in cept table\n");
           pruned[optIdx] += 1;
         }
       } // words in translation options
@@ -136,7 +136,7 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
       scores.push_back(ScoreFactory(losses[i], pruned[i]));
     }
   } else {
-    VERBOSE(3, "[DWL] OOV: " + src.ToString() + "\n");
+    VERBOSE(2, "[DWL] OOV: " + src.ToString() + "\n");
     for (size_t i = 0; i < options.size(); i++) {
       // Moses' OOVs are our OOVs too (and they are always 1-word phrases)
       scores.push_back(ScoreFactory(0, 1));
