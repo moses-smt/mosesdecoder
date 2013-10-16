@@ -17,6 +17,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <boost/unordered_map.hpp>
 
 namespace Moses
 {
@@ -59,6 +60,7 @@ private:
   static std::string GetSourceCept(const InputType &src, size_t startPos, const std::vector<size_t> &positions);
   static std::vector<std::pair<int, int> > AlignToSpanList(const std::vector<size_t> &positions);
 
+  boost::unordered_map<std::string, std::pair<float, float> > m_predictionCache;
   std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
   PSD::VWLibraryPredictConsumerFactory *m_consumerFactory;
   PSD::DWLFeatureExtractor *m_extractor;

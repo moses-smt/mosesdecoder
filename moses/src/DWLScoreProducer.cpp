@@ -90,47 +90,60 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
         tgtWord.resize(tgtWord.size() - 1); // trim trailing space
         VERBOSE(2, "[DWL] At target word: " + tgtWord + "\n");
         if (! alignedSrcWords[tgtPos].empty()) {
-          string srcCept = GetSourceCept(src, options[optIdx]->GetStartPos(), alignedSrcWords[tgtPos]);
-          VERBOSE(2, "[DWL] Source group: " + srcCept + "\n");
-          if (m_ceptTable->SrcExists(srcCept)) {
-            VERBOSE(2, "[DWL] Source found in cept table\n");
-            const vector<CeptTranslation> &ceptTranslations = m_ceptTable->GetTranslations(srcCept);
-
-            // check that we know the proposed translation (increment OOV counter otherwise),
-            // get its position in the vector of possible translations
-            vector<CeptTranslation>::const_iterator transIt;
-            int tgtWordPosition = -1;
-            VERBOSE(2, "[DWL] Possible translations of source '" + srcCept + "':\n");
-            for (transIt = ceptTranslations.begin(); transIt != ceptTranslations.end(); transIt++) {
-              VERBOSE(2, "    " + m_ceptTable->GetTgtString(transIt->m_index) + "\n");
-              if (tgtWord == m_ceptTable->GetTgtString(transIt->m_index)) {
-                tgtWordPosition = distance(ceptTranslations.begin(), transIt);
-                //              break;
-              }
-            }
-
-            if (tgtWordPosition != -1) {
-              VERBOSE(2, "[DWL] Full cept found in cept table\n");
-              vector<float> ceptLosses(ceptTranslations.size());
-              VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
-
-              m_extractor->GenerateFeatures(p_consumer, src.m_DWLContext,
-                  AlignToSpanList(alignedSrcWords[tgtPos]), ceptTranslations, ceptLosses);
-              m_consumerFactory->Release(p_consumer);
-
-              m_normalizer(ceptLosses); // normalize using the function specified in config file
-
-              losses[optIdx] += Equals(ceptLosses[tgtWordPosition], 0)
-                ? LOWEST_SCORE
-                : log(ceptLosses[tgtWordPosition]);
-            } else {
-              VERBOSE(2, "[DWL] Target word was pruned\n");
-              pruned[optIdx] += 1;
-            }
+          // key for prediction cache
+          string key = src.ToString() + "###" + SPrint(options[optIdx]->GetStartPos() + tgtPos) + "###" + tgtWord;
+          if (m_predictionCache.find(key) != m_predictionCache.end()) {
+            pair<float, float> cached = m_predictionCache[key];
+            losses[optIdx] += cached.first;
+            pruned[optIdx] += cached.second;
+            VERBOSE(2, "[DWL] Cache hit: " + key + "\n");
           } else {
-            // TODO should null-aligned words be handled here? or somewhere?
-            VERBOSE(2, "[DWL] Source NOT found in cept table\n");
-            pruned[optIdx] += 1;
+            VERBOSE(2, "[DWL] Cache miss: " + key + "\n");
+            string srcCept = GetSourceCept(src, options[optIdx]->GetStartPos(), alignedSrcWords[tgtPos]);
+            VERBOSE(2, "[DWL] Source group: " + srcCept + "\n");
+            if (m_ceptTable->SrcExists(srcCept)) {
+              VERBOSE(2, "[DWL] Source found in cept table\n");
+              const vector<CeptTranslation> &ceptTranslations = m_ceptTable->GetTranslations(srcCept);
+
+              // check that we know the proposed translation (increment OOV counter otherwise),
+              // get its position in the vector of possible translations
+              vector<CeptTranslation>::const_iterator transIt;
+              int tgtWordPosition = -1;
+              VERBOSE(2, "[DWL] Possible translations of source '" + srcCept + "':\n");
+              for (transIt = ceptTranslations.begin(); transIt != ceptTranslations.end(); transIt++) {
+                VERBOSE(2, "    " + m_ceptTable->GetTgtString(transIt->m_index) + "\n");
+                if (tgtWord == m_ceptTable->GetTgtString(transIt->m_index)) {
+                  tgtWordPosition = distance(ceptTranslations.begin(), transIt);
+                  //              break;
+                }
+              }
+
+              if (tgtWordPosition != -1) {
+                VERBOSE(2, "[DWL] Full cept found in cept table\n");
+                vector<float> ceptLosses(ceptTranslations.size());
+                VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
+
+                m_extractor->GenerateFeatures(p_consumer, src.m_DWLContext,
+                    AlignToSpanList(alignedSrcWords[tgtPos]), ceptTranslations, ceptLosses);
+                m_consumerFactory->Release(p_consumer);
+
+                m_normalizer(ceptLosses); // normalize using the function specified in config file
+
+                float loss = Equals(ceptLosses[tgtWordPosition], 0)
+                  ? LOWEST_SCORE
+                  : log(ceptLosses[tgtWordPosition]);
+                losses[optIdx] += loss;
+                m_predictionCache[key] = make_pair<float, float>(loss, 0);
+              } else {
+                VERBOSE(2, "[DWL] Target word was pruned\n");
+                pruned[optIdx] += 1;
+                m_predictionCache[key] = make_pair<float, float>(0, 1);
+              }
+            } else {
+              VERBOSE(2, "[DWL] Source NOT found in cept table\n");
+              pruned[optIdx] += 1;
+              m_predictionCache[key] = make_pair<float, float>(0, 1);
+            }
           }
         } else {
           VERBOSE(2, "[DWL] Scoring null-aligned target\n");
