@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationAnalysis.h"
 #include "OutputCollector.h"
 #include "PSDScoreProducer.h"
+#include "DWLScoreProducer.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -327,6 +328,9 @@ static void ShowWeights()
   }
   if (StaticData::Instance().GetPSDScoreProducer() != NULL) {
     PrintFeatureWeight(StaticData::Instance().GetPSDScoreProducer());
+  }
+  if (StaticData::Instance().GetDWLScoreProducer() != NULL) {
+    PrintFeatureWeight(StaticData::Instance().GetDWLScoreProducer());
   }
 }
 
