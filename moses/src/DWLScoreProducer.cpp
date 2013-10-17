@@ -28,7 +28,6 @@ DWLScoreProducer::DWLScoreProducer(ScoreIndexManager &scoreIndexManager, const v
 {
   scoreIndexManager.AddScoreProducer(this);
 
-  m_tgtFactors.push_back(0);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 }
 

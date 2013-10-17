@@ -56,6 +56,7 @@ void DWLFeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   for (spanIt = sourceSpanList.begin(); spanIt != sourceSpanList.end(); spanIt++) {
     int spanStart = spanIt->first;
     int spanEnd = spanIt->second;
+    CHECK(context.size() >= spanEnd);
     for (size_t i = spanStart; i < spanEnd; i++)
       sourceForms.push_back(context[i][FACTOR_FORM]);
   }

@@ -90,11 +90,9 @@ private:
   static std::string GetSourceCept(const InputType &src, size_t startPos, const std::vector<size_t> &positions);
   static std::vector<std::pair<int, int> > AlignToSpanList(const std::vector<size_t> &positions);
 
-  std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
   PSD::VWLibraryPredictConsumerFactory *m_consumerFactory;
   PSD::DWLFeatureExtractor *m_extractor;
   PSD::ExtractorConfig m_extractorConfig;
-  std::ifstream m_contextFile;
   void (*m_normalizer)(std::vector<float> &); // normalization function
   CeptTable *m_ceptTable;
   FIFOCache<std::string, std::pair<float, float> > m_predictionCache;
