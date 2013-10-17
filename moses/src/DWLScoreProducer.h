@@ -22,6 +22,36 @@
 namespace Moses
 {
 
+template <class KeyT, class ValueT>
+class FIFOCache
+{
+public:
+  FIFOCache(size_t maxItems) : m_maxItems(maxItems) {}
+
+  bool HasKey(const KeyT &key)
+  {
+    return m_predictionCache.find(key) != m_predictionCache.end();
+  }
+
+  ValueT &operator[](const KeyT &key)
+  {
+    if (! HasKey(key)) {
+      m_insertions.push(key);
+      if (m_insertions.size() > m_maxItems) {
+        const KeyT &oldest = m_insertions.front();
+        m_predictionCache.erase(oldest);
+        m_insertions.pop();
+      }
+    }    
+    return m_predictionCache[key];
+  }
+
+private:
+  size_t m_maxItems;
+  boost::unordered_map<KeyT, ValueT> m_predictionCache;
+  std::queue<KeyT> m_insertions;
+};
+
 class DWLScoreProducer : public StatelessFeatureFunction
 {
 public:
@@ -60,7 +90,6 @@ private:
   static std::string GetSourceCept(const InputType &src, size_t startPos, const std::vector<size_t> &positions);
   static std::vector<std::pair<int, int> > AlignToSpanList(const std::vector<size_t> &positions);
 
-  boost::unordered_map<std::string, std::pair<float, float> > m_predictionCache;
   std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
   PSD::VWLibraryPredictConsumerFactory *m_consumerFactory;
   PSD::DWLFeatureExtractor *m_extractor;
@@ -68,6 +97,8 @@ private:
   std::ifstream m_contextFile;
   void (*m_normalizer)(std::vector<float> &); // normalization function
   CeptTable *m_ceptTable;
+  FIFOCache<std::string, std::pair<float, float> > m_predictionCache;
+  boost::mutex m_cacheLock;
 };
 
 }

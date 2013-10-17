@@ -23,7 +23,8 @@ using namespace PSD;
 namespace Moses
 {
 
-DWLScoreProducer::DWLScoreProducer(ScoreIndexManager &scoreIndexManager, const vector<float> &weights)
+DWLScoreProducer::DWLScoreProducer(ScoreIndexManager &scoreIndexManager, const vector<float> &weights) 
+  : m_predictionCache(10000)
 {
   scoreIndexManager.AddScoreProducer(this);
 
@@ -50,7 +51,7 @@ bool DWLScoreProducer::Initialize(const string &modelFile, const string &configF
   }
 
   return true;
-}
+};
 
 ScoreComponentCollection DWLScoreProducer::ScoreFactory(float classifierPrediction, float oovCount, float nullCount)
 {
@@ -92,7 +93,7 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
         if (! alignedSrcWords[tgtPos].empty()) {
           // key for prediction cache
           string key = src.ToString() + "###" + SPrint(options[optIdx]->GetStartPos() + tgtPos) + "###" + tgtWord;
-          if (m_predictionCache.find(key) != m_predictionCache.end()) {
+          if (m_predictionCache.HasKey(key)) {
             pair<float, float> cached = m_predictionCache[key];
             losses[optIdx] += cached.first;
             pruned[optIdx] += cached.second;
@@ -133,16 +134,22 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
                   ? LOWEST_SCORE
                   : log(ceptLosses[tgtWordPosition]);
                 losses[optIdx] += loss;
+                m_cacheLock.lock();
                 m_predictionCache[key] = make_pair<float, float>(loss, 0);
+                m_cacheLock.unlock();
               } else {
                 VERBOSE(2, "[DWL] Target word was pruned\n");
                 pruned[optIdx] += 1;
+                m_cacheLock.lock();
                 m_predictionCache[key] = make_pair<float, float>(0, 1);
+                m_cacheLock.unlock();
               }
             } else {
               VERBOSE(2, "[DWL] Source NOT found in cept table\n");
               pruned[optIdx] += 1;
+              m_cacheLock.lock();
               m_predictionCache[key] = make_pair<float, float>(0, 1);
+              m_cacheLock.unlock();
             }
           }
         } else {
