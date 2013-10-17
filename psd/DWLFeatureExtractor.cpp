@@ -209,6 +209,7 @@ void DWLFeatureExtractor::GenerateTargetFactorFeatures(const vector<string> &tar
 }
 
 void DWLFeatureExtractor::GenerateGapFeatures(const ContextType &context, const vector<pair<int, int> > &sourceSpanList, FeatureConsumer *fc) {
+  // how many gaps there are, accumulative feature
   for (size_t i = 0; i < sourceSpanList.size(); i++)
     fc->AddFeature("gap^" + SPrint<int>(i));
 }
