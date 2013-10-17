@@ -183,14 +183,12 @@ void DWLFeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &contex
   }
 }
 
-void DWLFeatureExtractor::GenerateTargetFactorFeatures(vector<string> targetForms, FeatureConsumer *fc)
+void DWLFeatureExtractor::GenerateTargetFactorFeatures(const vector<string> &targetForms, FeatureConsumer *fc)
 {
-  vector<string>::iterator itr_target;
+  vector<string>::const_iterator itr_target;
   for(itr_target = targetForms.begin(); itr_target != targetForms.end(); itr_target++)
   {
-	  string currentWord = *itr_target;
 	  vector<string> targetToken = Tokenize(*itr_target,"|");
-	  vector<string>::iterator itr_target_token;
 	  CHECK(targetToken.size() == 3);
 	  fc->AddFeature("trich^" + targetToken[0]);
 	  fc->AddFeature("trich^" + targetToken[1]);
@@ -198,30 +196,21 @@ void DWLFeatureExtractor::GenerateTargetFactorFeatures(vector<string> targetForm
 	  //In case we want to learn that these features appear together
 	  fc->AddFeature("trich^" + targetToken[2]);
 
-	  string morphFeatures = targetToken[2];
-	  string::iterator itr_morph;
+	  const string &morphFeatures = targetToken[2];
+	  string::const_iterator itr_morph;
 	  int counter = 0;
 
 	  for(itr_morph = morphFeatures.begin(); itr_morph != morphFeatures.end(); itr_morph++)
 	  {
-		  string c;
-		  c += *itr_morph;
-		  if(c == "-")
-		  {
-			  fc->AddFeature("trich^"+SPrint(counter)+"^UNDEFINED");
-		  }
-		  else
-		  {
-			  fc->AddFeature("trich^"+SPrint(counter)+"^"+c);
-		  }
+      fc->AddFeature("trich^" + SPrint(counter++) + "^" 
+          + (*itr_morph == '-' ? "UNDEFINED" : SPrint<char>(*itr_morph)));
 	  }
   }
 }
 
-// XXX NULL feature!!!
-
 void DWLFeatureExtractor::GenerateGapFeatures(const ContextType &context, const vector<pair<int, int> > &sourceSpanList, FeatureConsumer *fc) {
-  for (size_t i = 0; i < sourceSpanList.size(); i++) fc->AddFeature("gap^" + SPrint<int>(i));
+  for (size_t i = 0; i < sourceSpanList.size(); i++)
+    fc->AddFeature("gap^" + SPrint<int>(i));
 }
 
 void DWLFeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, const vector<string> &tgtPhrase, 

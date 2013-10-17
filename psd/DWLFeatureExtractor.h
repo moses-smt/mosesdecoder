@@ -46,7 +46,7 @@ private:
 
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GeneratePhraseFactorFeatures(const ContextType &context, const std::vector<std::pair<int, int> > &sourceSpanList, FeatureConsumer *fc);
-  void GenerateTargetFactorFeatures(std::vector<std::string> targetForms, FeatureConsumer *fc);
+  void GenerateTargetFactorFeatures(const std::vector<std::string> &targetForms, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateIndicatorFeature(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateGapFeatures(const ContextType &context, const std::vector<std::pair<int, int> > &sourceSpanList, FeatureConsumer *fc);
