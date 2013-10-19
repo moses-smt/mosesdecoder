@@ -40,6 +40,7 @@ public:
     , maxScope(3)
     , minimal(false)
     , pcfg(false)
+    , treeFragments(false)
     , sentenceOffset(0)
     , unpairedExtractFormat(false)
     , unknownWordMinRelFreq(0.03f)
@@ -62,6 +63,7 @@ public:
   int maxScope;
   bool minimal;
   bool pcfg;
+  bool treeFragments;
   int sentenceOffset;
   bool unpairedExtractFormat;
   std::string unknownWordFile;

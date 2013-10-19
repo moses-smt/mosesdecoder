@@ -291,6 +291,9 @@ public:
             out << m_source->GetTranslationId() << " ";
           }
 
+	  if (staticData.GetReportSegmentation() == 2) {
+	    manager.GetOutputLanguageModelOrder(out, bestHypo);
+	  }
           OutputBestSurface(
             out,
             bestHypo,

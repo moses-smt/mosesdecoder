@@ -68,9 +68,11 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_inputFactorUsed(inputFactorUsed)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
+  ,m_detailedTreeFragmentsTranslationReportingStream(NULL)
   ,m_alignmentInfoStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
+  ,m_detailTreeFragmentsOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
@@ -116,6 +118,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
 
+  if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+    const std::string &path = staticData.GetDetailedTreeFragmentsTranslationReportingFilePath();
+    m_detailedTreeFragmentsTranslationReportingStream = new std::ofstream(path.c_str());
+    m_detailTreeFragmentsOutputCollector = new Moses::OutputCollector(m_detailedTreeFragmentsTranslationReportingStream);
+  }
+
   if (!staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
     m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
@@ -130,6 +138,7 @@ IOWrapper::~IOWrapper()
   }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
+  delete m_detailedTreeFragmentsTranslationReportingStream;
   delete m_alignmentInfoStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
@@ -290,26 +299,60 @@ void IOWrapper::WriteApplicationContext(std::ostream &out,
   }
 }
 
+void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+  ReconstructApplicationContext(*hypo, sentence, applicationContext);
+  out << "Trans Opt " << translationId
+      << " " << hypo->GetCurrSourceRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+      << "->" << hypo->GetCurrTargetPhrase()
+      << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+}
+
 void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
-  // recursive
   if (hypo != NULL) {
-    ReconstructApplicationContext(*hypo, sentence, applicationContext);
-    out << "Trans Opt " << translationId
-        << " " << hypo->GetCurrSourceRange()
-        << ": ";
-    WriteApplicationContext(out, applicationContext);
-    out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
-        << "->" << hypo->GetCurrTargetPhrase()
-        << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
-        << endl;
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+    out << std::endl;
   }
 
+  // recursive
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
     const ChartHypothesis *prevHypo = *iter;
     OutputTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
+void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+
+    const std::string key = "Tree";
+    std::string value;
+    bool hasProperty;
+    const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
+    currTarPhr.GetProperty(key, value, hasProperty);
+
+    out << " ||| ";
+    if (hasProperty)
+      out << " " << value;
+    else
+      out << " " << "noTreeInfo";
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
   }
 }
 
@@ -327,6 +370,22 @@ void IOWrapper::OutputDetailedTranslationReport(
   OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
+}
+
+void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
+  const ChartHypothesis *hypo,
+  const Sentence &sentence,
+  long translationId)
+{
+  if (hypo == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+  CHECK(m_detailTreeFragmentsOutputCollector);
+  m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
 }
 
 //DIMw
@@ -361,7 +420,6 @@ void IOWrapper::OutputDetailedAllTranslationReport(
   CHECK(m_detailAllOutputCollector);
   m_detailAllOutputCollector->Write(translationId, out.str());
 }
-
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {

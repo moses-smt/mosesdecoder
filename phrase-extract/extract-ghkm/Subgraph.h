@@ -81,12 +81,15 @@ public:
 
   void GetTargetLeaves(std::vector<const Node *> &) const;
 
+  void PrintTree(std::ostream &out) const;
+
 private:
   void GetTargetLeaves(const Node *, std::vector<const Node *> &) const;
   int CalcDepth(const Node *) const;
   int CalcSize(const Node *) const;
   float CalcPcfgScore() const;
   int CountNodes(const Node *) const;
+  void RecursivelyPrintTree(const Node *n, std::ostream &out) const;
 
   const Node *m_root;
   std::set<const Node *> m_leaves;

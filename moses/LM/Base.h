@@ -85,6 +85,7 @@ public:
 
   // KenLM only (others throw an exception): call incremental search with the model and mapping.
   virtual void IncrementalCallback(Incremental::Manager &manager) const;
+  virtual void ReportHistoryOrder(std::ostream &out,const Phrase &phrase) const;
 
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
