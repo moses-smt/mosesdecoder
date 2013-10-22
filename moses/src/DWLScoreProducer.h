@@ -38,8 +38,7 @@ public:
     if (! HasKey(key)) {
       m_insertions.push(key);
       if (m_insertions.size() > m_maxItems) {
-        const KeyT &oldest = m_insertions.front();
-        m_predictionCache.erase(oldest);
+        m_predictionCache.erase(m_insertions.front());
         m_insertions.pop();
       }
     }    
