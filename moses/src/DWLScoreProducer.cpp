@@ -24,7 +24,7 @@ namespace Moses
 {
 
 DWLScoreProducer::DWLScoreProducer(ScoreIndexManager &scoreIndexManager, const vector<float> &weights) 
-  : m_predictionCache(10000)
+  : m_predictionCache(100)
 {
   scoreIndexManager.AddScoreProducer(this);
 
@@ -63,6 +63,53 @@ ScoreComponentCollection DWLScoreProducer::ScoreFactory(float classifierPredicti
   return out;
 }
 
+const map<size_t, float> &DWLScoreProducer::GetCachedPredictions(
+    const string &key, const string &srcCept, const InputType &src,
+    const std::vector<std::pair<int, int> > &spanList)
+{
+  if (! m_predictionCache.HasKey(key)) {
+    VERBOSE(2, "[DWL] Cache miss: " + key + "\n");
+    if (m_ceptTable->SrcExists(srcCept)) {
+      VERBOSE(2, "[DWL] Source found in cept table\n");
+      const vector<CeptTranslation> &ceptTranslations = m_ceptTable->GetTranslations(srcCept);
+
+      vector<CeptTranslation>::const_iterator transIt;
+      IFVERBOSE(2) {
+        VERBOSE(2, "[DWL] Possible translations of source '" + srcCept + "':\n");
+        for (transIt = ceptTranslations.begin(); transIt != ceptTranslations.end(); transIt++) {
+          VERBOSE(2, "    " + m_ceptTable->GetTgtString(transIt->m_index) + "\n");
+        }
+      }
+
+      vector<float> ceptLosses(ceptTranslations.size());
+      VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
+
+      IFVERBOSE(2) {
+        p_consumer->SetDebugOutfile("dlm" + SPrint<size_t>(++m_debugFileCounter) + ".debug");
+      }
+      m_extractor->GenerateFeatures(p_consumer, src.m_DWLContext, spanList, ceptTranslations, ceptLosses);
+      m_consumerFactory->Release(p_consumer);
+
+      m_normalizer(ceptLosses); // normalize using the function specified in config file
+      
+      map<size_t, float> toCache;
+      vector<float>::const_iterator lossIt = ceptLosses.begin();
+      for (transIt = ceptTranslations.begin(); transIt != ceptTranslations.end(); transIt++, lossIt++) {
+        toCache[transIt->m_index] = *lossIt;
+      }
+      m_cacheLock.lock();
+      m_predictionCache[key] = toCache;
+      m_cacheLock.unlock();
+    } else {
+      m_cacheLock.lock();
+      m_predictionCache[key] = map<size_t, float>();
+      m_cacheLock.unlock();
+      VERBOSE(2, "[DWL] Source NOT found in cept table\n");
+    }
+  }
+  return m_predictionCache[key];
+}
+
 vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<TranslationOption *> &options, const InputType &src)
 {
   vector<ScoreComponentCollection> scores;
@@ -90,66 +137,23 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
         tgtWord.resize(tgtWord.size() - 1); // trim trailing space
         VERBOSE(2, "[DWL] At target word: " + tgtWord + "\n");
         if (! alignedSrcWords[tgtPos].empty()) {
+
           // key for prediction cache
-          string key = src.ToString() + "###" + SPrint(options[optIdx]->GetStartPos() + tgtPos) + "###" + tgtWord;
-          if (m_predictionCache.HasKey(key)) {
-            pair<float, float> cached = m_predictionCache[key];
-            losses[optIdx] += cached.first;
-            pruned[optIdx] += cached.second;
-            VERBOSE(2, "[DWL] Cache hit: " + key + "\n");
+          string srcCept = GetSourceCept(src, options[optIdx]->GetStartPos(), alignedSrcWords[tgtPos]);
+          VERBOSE(2, "[DWL] Source group: " + srcCept + "\n");
+          string key = src.ToString() + SPrint(options[optIdx]->GetStartPos()) + "\n" + srcCept;
+          
+          const map<size_t, float> &predictions = GetCachedPredictions(
+              key, srcCept, src, AlignToSpanList(options[optIdx]->GetStartPos(), alignedSrcWords[tgtPos]));
+          bool knownTgt = false;
+          size_t tgtIdx = m_ceptTable->GetTgtPhraseID(tgtWord, &knownTgt);
+          if (knownTgt && predictions.find(tgtIdx) != predictions.end()) {
+            float loss = predictions.find(tgtIdx)->second;
+            losses[optIdx] += (Equals(loss, 0) ? LOWEST_SCORE : log(loss));
           } else {
-            VERBOSE(2, "[DWL] Cache miss: " + key + "\n");
-            string srcCept = GetSourceCept(src, options[optIdx]->GetStartPos(), alignedSrcWords[tgtPos]);
-            VERBOSE(2, "[DWL] Source group: " + srcCept + "\n");
-            if (m_ceptTable->SrcExists(srcCept)) {
-              VERBOSE(2, "[DWL] Source found in cept table\n");
-              const vector<CeptTranslation> &ceptTranslations = m_ceptTable->GetTranslations(srcCept);
-
-              // check that we know the proposed translation (increment OOV counter otherwise),
-              // get its position in the vector of possible translations
-              vector<CeptTranslation>::const_iterator transIt;
-              int tgtWordPosition = -1;
-              VERBOSE(2, "[DWL] Possible translations of source '" + srcCept + "':\n");
-              for (transIt = ceptTranslations.begin(); transIt != ceptTranslations.end(); transIt++) {
-                VERBOSE(2, "    " + m_ceptTable->GetTgtString(transIt->m_index) + "\n");
-                if (tgtWord == m_ceptTable->GetTgtString(transIt->m_index)) {
-                  tgtWordPosition = distance(ceptTranslations.begin(), transIt);
-                  //              break;
-                }
-              }
-
-              if (tgtWordPosition != -1) {
-                VERBOSE(2, "[DWL] Full cept found in cept table\n");
-                vector<float> ceptLosses(ceptTranslations.size());
-                VWLibraryPredictConsumer *p_consumer = m_consumerFactory->Acquire();
-
-                m_extractor->GenerateFeatures(p_consumer, src.m_DWLContext,
-                    AlignToSpanList(alignedSrcWords[tgtPos]), ceptTranslations, ceptLosses);
-                m_consumerFactory->Release(p_consumer);
-
-                m_normalizer(ceptLosses); // normalize using the function specified in config file
-
-                float loss = Equals(ceptLosses[tgtWordPosition], 0)
-                  ? LOWEST_SCORE
-                  : log(ceptLosses[tgtWordPosition]);
-                losses[optIdx] += loss;
-                m_cacheLock.lock();
-                m_predictionCache[key] = make_pair<float, float>(loss, 0);
-                m_cacheLock.unlock();
-              } else {
-                VERBOSE(2, "[DWL] Target word was pruned\n");
-                pruned[optIdx] += 1;
-                m_cacheLock.lock();
-                m_predictionCache[key] = make_pair<float, float>(0, 1);
-                m_cacheLock.unlock();
-              }
-            } else {
-              VERBOSE(2, "[DWL] Source NOT found in cept table\n");
-              pruned[optIdx] += 1;
-              m_cacheLock.lock();
-              m_predictionCache[key] = make_pair<float, float>(0, 1);
-              m_cacheLock.unlock();
-            }
+            // source cept or target word was pruned
+            VERBOSE(2, "[DWL] Target word NOT found\n");
+            pruned[optIdx] += 1;
           }
         } else {
           VERBOSE(2, "[DWL] Scoring null-aligned target\n");
@@ -290,7 +294,7 @@ string DWLScoreProducer::GetSourceCept(const InputType &src, size_t startPos, co
   return out;
 }
 
-vector<pair<int, int> > DWLScoreProducer::AlignToSpanList(const std::vector<size_t> &positions)
+vector<pair<int, int> > DWLScoreProducer::AlignToSpanList(size_t startPos, const std::vector<size_t> &positions)
 {
   vector<pair<int, int> > out;
 
@@ -304,14 +308,15 @@ vector<pair<int, int> > DWLScoreProducer::AlignToSpanList(const std::vector<size
       last = *it; // the span is still contiguous    
     } else {
       // discontinuity
-      out.push_back(make_pair<int, int>(start, last + 1)); // C++-style interval: [begin, end)
+      out.push_back(make_pair<int, int>(startPos + start, startPos + last + 1)); // C++-style interval: [begin, end)
       start = last = *it;    
     }
   }
   if (start != -1) {
-    out.push_back(make_pair<int, int>(start, last + 1)); // final span
+    out.push_back(make_pair<int, int>(startPos + start, startPos + last + 1)); // final span
   } else {
-    out.push_back(make_pair<int, int>(0, 0)); // null alignment
+    throw logic_error("Asked for span list for null-aligned word");
+//    out.push_back(make_pair<int, int>(0, 0)); // null alignment
   }
 
   return out;

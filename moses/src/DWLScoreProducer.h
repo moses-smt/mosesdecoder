@@ -83,20 +83,26 @@ private:
   // Construct a ScoreComponentCollection with DWL feature set to given score
   ScoreComponentCollection ScoreFactory(float classifierPrediction, float oovCount, float nullCount);
 
+  const std::map<size_t, float> &GetCachedPredictions(const std::string &key);
+
+  const std::map<size_t, float> &GetCachedPredictions(
+    const std::string &key, const std::string &srcCept, const InputType &src,
+    const std::vector<std::pair<int, int> > &spanList);
   static void NormalizeSquaredLoss(std::vector<float> &losses);
   static void NormalizeLogisticLossBasic(std::vector<float> &losses);
   static void Normalize2(std::vector<float> &losses);
   static void Normalize3(std::vector<float> &losses);
   static std::string GetSourceCept(const InputType &src, size_t startPos, const std::vector<size_t> &positions);
-  static std::vector<std::pair<int, int> > AlignToSpanList(const std::vector<size_t> &positions);
+  static std::vector<std::pair<int, int> > AlignToSpanList(size_t startPos, const std::vector<size_t> &positions);
 
   PSD::VWLibraryPredictConsumerFactory *m_consumerFactory;
   PSD::DWLFeatureExtractor *m_extractor;
   PSD::ExtractorConfig m_extractorConfig;
   void (*m_normalizer)(std::vector<float> &); // normalization function
   CeptTable *m_ceptTable;
-  FIFOCache<std::string, std::pair<float, float> > m_predictionCache;
+  FIFOCache<std::string, std::map<size_t, float> > m_predictionCache;
   boost::mutex m_cacheLock;
+  size_t m_debugFileCounter;
 };
 
 }

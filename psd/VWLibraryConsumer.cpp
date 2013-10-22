@@ -120,7 +120,6 @@ void VWLibraryConsumer::SetNamespace(char ns, bool shared)
 
 void VWLibraryConsumer::AddFeature(const string &name)
 {
-//  cerr << "ex.addf(\"" << VWFileTrainConsumer::EscapeSpecialChars(name) << "\");\n";
   m_ex->addf(VWFileTrainConsumer::EscapeSpecialChars(name));
   if (m_debugOutput) m_debugOutput->AddFeature(name);
 }
@@ -134,7 +133,10 @@ void VWLibraryConsumer::AddFeature(const string &name, float value)
 void VWLibraryConsumer::FinishExample()
 {
   m_shared = true; // avoid removing an empty namespace in next call of SetNamespace
-  if (m_debugOutput) m_debugOutput->FinishExample();
+  if (m_debugOutput) {
+    m_debugOutput->FinishExample();
+    m_debugOutput->ForceWrite();
+  }
   m_ex->clear_features();
 }
 

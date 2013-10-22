@@ -33,6 +33,7 @@ void VWFileTrainConsumer::SetNamespace(char ns, bool shared)
 void VWFileTrainConsumer::AddFeature(const std::string &name)
 {
   m_outputBuffer.push_back(EscapeSpecialChars(name));
+  // cerr << "Written feature: " << EscapeSpecialChars(name) << "\n";
 }
 
 void VWFileTrainConsumer::AddFeature(const std::string &name, float value)

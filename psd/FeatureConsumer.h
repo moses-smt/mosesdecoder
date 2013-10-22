@@ -53,6 +53,11 @@ public:
   virtual void Finish();
   virtual void Train(const std::string &label, float loss);
   virtual float Predict(const std::string &label);
+  void ForceWrite()
+  {
+    m_bfos.flush();
+  }
+
   static std::string EscapeSpecialChars(const std::string &str)
   {
     std::string out;
