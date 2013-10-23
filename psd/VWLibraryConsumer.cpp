@@ -137,7 +137,7 @@ void VWLibraryConsumer::FinishExample()
     m_debugOutput->FinishExample();
     m_debugOutput->ForceWrite();
   }
-  m_ex->clear_features();
+  m_ex->finish();
 }
 
 void VWLibraryConsumer::Finish()
@@ -179,12 +179,6 @@ void VWLibraryTrainConsumer::Train(const string &label, float loss)
 {
   m_ex->set_label(label + ":" + Moses::SPrint(loss));
   if (m_debugOutput) m_debugOutput->Train(label, loss);
-}
-
-void VWLibraryTrainConsumer::FinishExample()
-{
-  m_ex->finish();
-  VWLibraryConsumer::FinishExample();
 }
 
 float VWLibraryTrainConsumer::Predict(const string &label)

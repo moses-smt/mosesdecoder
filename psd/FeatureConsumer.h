@@ -109,7 +109,6 @@ private:
     VWLibraryTrainConsumer(const std::string &modelFile, const std::string &vwOptions);
     virtual void Train(const std::string &label, float loss);
     virtual float Predict(const std::string &label);
-    virtual void FinishExample();
   };
   
   // predict using VW
