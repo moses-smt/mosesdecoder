@@ -35,6 +35,8 @@ class ExtractorConfig
     inline bool GetBinnedScores() const   { return m_binnedScores; }
     inline bool GetSourceTopic() const    { return m_sourceTopic; }
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
+    inline const std::vector<size_t> &GetDecoderSourceFactors() const { return m_decoderSourceFactors; }
+    inline const std::vector<size_t> &GetDecoderTargetFactors() const { return m_decoderTargetFactors; }
     inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
     inline const std::vector<float> &GetScoreBins() const { return m_scoreBins; }
     inline const std::string &GetVWOptionsTrain() const { return m_vwOptsTrain; }
@@ -51,7 +53,7 @@ class ExtractorConfig
          m_sourceTargetIndicator, m_STSE, m_sourceTopic, m_phraseFactor, m_targetPhraseFactor;
     std::string m_vwOptsPredict, m_vwOptsTrain, m_normalization;
     size_t m_windowSize;
-    std::vector<size_t> m_factors, m_scoreIndexes;
+    std::vector<size_t> m_factors, m_decoderSourceFactors, m_decoderTargetFactors, m_scoreIndexes;
     std::vector<float> m_scoreBins;
 
     // internal variables

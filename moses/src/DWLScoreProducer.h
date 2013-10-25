@@ -87,14 +87,16 @@ private:
   const std::map<size_t, float> &GetCachedPredictions(
     const std::string &key, const std::string &srcCept, const InputType &src,
     const std::vector<std::pair<int, int> > &spanList);
+  std::string GetSourceCept(const InputType &src, size_t startPos, const std::vector<size_t> &positions);
+
   static void NormalizeSquaredLoss(std::vector<float> &losses);
   static void NormalizeLogisticLossBasic(std::vector<float> &losses);
   static void Normalize2(std::vector<float> &losses);
   static void Normalize3(std::vector<float> &losses);
-  static std::string GetSourceCept(const InputType &src, size_t startPos, const std::vector<size_t> &positions);
   static std::vector<std::pair<int, int> > AlignToSpanList(size_t startPos, const std::vector<size_t> &positions);
 
   PSD::VWLibraryPredictConsumerFactory *m_consumerFactory;
+  std::vector<FactorType> m_srcFactors, m_tgtFactors;
   PSD::DWLFeatureExtractor *m_extractor;
   PSD::ExtractorConfig m_extractorConfig;
   void (*m_normalizer)(std::vector<float> &); // normalization function

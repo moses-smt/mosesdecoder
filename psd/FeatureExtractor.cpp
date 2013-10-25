@@ -136,6 +136,8 @@ void ExtractorConfig::Load(const string &configFile)
   m_vwOptsPredict = pTree.get<string>("vw-options.predict", "");
 
   m_normalization = pTree.get<string>("decoder.normalization", "");
+  m_decoderSourceFactors = Scan<size_t>(Tokenize(pTree.get<string>("decoder.source-factors", ""), ","));
+  m_decoderTargetFactors = Scan<size_t>(Tokenize(pTree.get<string>("decoder.target-factors", ""), ","));
 
   m_isLoaded = true;
 }

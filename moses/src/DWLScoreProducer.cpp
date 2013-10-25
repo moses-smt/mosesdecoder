@@ -49,6 +49,10 @@ bool DWLScoreProducer::Initialize(const string &modelFile, const string &configF
     throw runtime_error("Unknown normalization function: " + normFunc);
   }
 
+  // set factors
+  m_srcFactors = m_extractorConfig.GetDecoderSourceFactors();
+  m_tgtFactors = m_extractorConfig.GetDecoderTargetFactors();
+
   return true;
 };
 
@@ -133,8 +137,7 @@ vector<ScoreComponentCollection> DWLScoreProducer::ScoreOptions(const vector<Tra
 
       // over all words in translation option
       for (size_t tgtPos = 0; tgtPos < option.GetTargetPhrase().GetSize(); tgtPos++) {
-        string tgtWord = option.GetTargetPhrase().GetWord(tgtPos).ToString(); // all target factors (is this correct?)
-        tgtWord.resize(tgtWord.size() - 1); // trim trailing space
+        string tgtWord = option.GetTargetPhrase().GetWord(tgtPos).GetString(m_tgtFactors, false);
         VERBOSE(2, "[DWL] At target word: " + tgtWord + "\n");
         if (! alignedSrcWords[tgtPos].empty()) {
 
@@ -288,7 +291,7 @@ string DWLScoreProducer::GetSourceCept(const InputType &src, size_t startPos, co
   out.reserve(positions.size() * 10); // guess the memory needed
   vector<size_t>::const_iterator it;
   for (it = positions.begin(); it != positions.end(); it++) {
-    out += src.GetWord(startPos + *it).ToString(); // implicitly get all factors  
+    out += src.GetWord(startPos + *it).GetString(m_srcFactors, true);
   }
   if (out.size() > 0) out.resize(out.size() - 1); // get rid of last space
   return out;
