@@ -353,7 +353,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
     }
   }
 
-  Save("/Users/mnadejde/Documents/workspace/MTM13/DATA/mtmGHKM/moses.ini.new");
+  //Save("/Users/mnadejde/Documents/workspace/MTM13/DATA/mtmGHKM/moses.ini.new");
 
   // check if parameters make sense
   return Validate() && noErrorFlag;
