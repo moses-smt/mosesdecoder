@@ -20,6 +20,7 @@
 namespace ugdiss
 {
   using namespace std;
+  using namespace boost;
   namespace bio=boost::iostreams;
   
   //-----------------------------------------------------------------------
@@ -48,7 +49,9 @@ namespace ugdiss
     
   public:
     imTSA();
-    imTSA(Ttrack<TOKEN> const* c, bdBitset const& filt, ostream* log = NULL);
+    imTSA(shared_ptr<Ttrack<TOKEN> const> c, 
+	  bdBitset const& filt, 
+	  ostream* log = NULL);
     
     count_type 
     sntCnt(char const* p, char const * const q) const; 
@@ -128,7 +131,7 @@ namespace ugdiss
   // specified in filter
   template<typename TOKEN>
   imTSA<TOKEN>::
-  imTSA(Ttrack<TOKEN> const* c, bdBitset const& filter, ostream* log)
+  imTSA(shared_ptr<Ttrack<TOKEN> const> c, bdBitset const& filter, ostream* log)
   {
     assert(c);
     this->corpus = c;
@@ -181,7 +184,7 @@ namespace ugdiss
     // Now sort the array
     if (log) *log << "sorting ...." << endl;
     index.resize(wcnt.size()+1,0);
-    typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(c);
+    typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(c.get());
     for (size_t i = 0; i < wcnt.size(); i++)
       {
         if (log && wcnt[i] > 5000)
