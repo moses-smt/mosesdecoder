@@ -135,6 +135,20 @@ project : requirements
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;
 
+if [ option.get "with-mm" : : "yes" ]
+{
+ alias mm :  
+  moses/TranslationModel/UG/mm//mtt-build 
+  moses/TranslationModel/UG/mm//mtt-dump 
+  moses/TranslationModel/UG/mm//symal2mam 
+  moses/TranslationModel/UG/mm//custom-pt 
+  ;
+}
+else
+{
+ alias mm ; 
+}
+
 alias programs : 
 lm//programs 
 moses-chart-cmd//moses_chart 
@@ -152,11 +166,9 @@ phrase-extract//pcfg-score
 biconcor 
 mira//mira 
 contrib/server//mosesserver 
-#moses/mm//mtt-build 
-#moses/mm//mtt-dump 
-#moses/mm//symal2mam 
-#moses/mm//custom-pt 
+mm
 ;
+
 
 install-bin-libs programs ;
 install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
