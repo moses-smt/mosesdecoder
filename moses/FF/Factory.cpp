@@ -31,7 +31,6 @@
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
-#include "moses/FF/InternalStructStatelessFF.h"
 #include "moses/FF/ConstrainedDecoding.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
@@ -58,6 +57,10 @@
 
 #ifdef HAVE_SYNLM
 #include "moses/SyntacticLanguageModel.h"
+#endif
+
+#ifdef HAVE_NPLM
+#include "moses/LM/NeuralLM.h"
 #endif
 
 #include "util/exception.hh"
@@ -155,7 +158,6 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
-  MOSES_FNAME(InternalStructStatelessFF);
   MOSES_FNAME(SkeletonLM);
   MOSES_FNAME(SkeletonPT);
 
@@ -174,6 +176,10 @@ FeatureRegistry::FeatureRegistry()
 #ifdef LM_RAND
   MOSES_FNAME2("RANDLM", LanguageModelRandLM);
 #endif
+#ifdef HAVE_NPLM
+  MOSES_FNAME(NeuralLM);
+#endif
+
   Add("KENLM", new KenFactory());
 }
 
