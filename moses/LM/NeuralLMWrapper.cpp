@@ -22,18 +22,10 @@ NeuralLMWrapper::~NeuralLMWrapper()
 }
 
 
-bool NeuralLMWrapper::Load(const std::string &filePath, FactorType factorType, size_t nGramOrder)
+void NeuralLMWrapper::Load()
 {
 
-  TRACE_ERR("Loading NeuralLM " << filePath << endl);
-
-  // Store parameters
-  m_nGramOrder = nGramOrder;
-  m_filePath = filePath;
-  m_factorType = factorType;
-  if (factorType == NOT_FOUND) {
-    m_factorType = 0;
-  }
+  TRACE_ERR("Loading NeuralLM " << m_filePath << endl);
 
   // Set parameters required by ancestor classes
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -46,7 +38,6 @@ bool NeuralLMWrapper::Load(const std::string &filePath, FactorType factorType, s
   m_neuralLM->read(m_filePath);
   m_neuralLM->set_log_base(10);
 
-  return true;
   //TODO: Implement this
 }
 
