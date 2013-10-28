@@ -73,7 +73,7 @@ $(TOP)//boost_iostreams ;
 
 #generic//generic mm//mm
 
-alias headers-to-install : [ glob-tree *.h ] ;
+alias headers-to-install : [ glob-tree [^.]*.h ] ;
 
 import testing ;
 
