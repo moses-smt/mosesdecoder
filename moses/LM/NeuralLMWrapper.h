@@ -11,15 +11,15 @@ namespace Moses
 
 /** Implementation of single factor LM using IRST's code.
  */
-class NeuralLM : public LanguageModelSingleFactor
+class NeuralLMWrapper : public LanguageModelSingleFactor
 {
 protected:
   nplm::neuralLM *m_neuralLM;
 
 public:
-  NeuralLM(const std::string &line);
+  NeuralLMWrapper(const std::string &line);
   //  NeuralLM(const std::string &line);
-  ~NeuralLM();
+  ~NeuralLMWrapper();
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
 

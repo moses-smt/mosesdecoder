@@ -59,8 +59,8 @@
 #include "moses/SyntacticLanguageModel.h"
 #endif
 
-#ifdef HAVE_NPLM
-#include "moses/LM/NeuralLM.h"
+#ifdef LM_NEURAL
+#include "moses/LM/NeuralLMWrapper.h"
 #endif
 
 #include "util/exception.hh"
@@ -176,8 +176,8 @@ FeatureRegistry::FeatureRegistry()
 #ifdef LM_RAND
   MOSES_FNAME2("RANDLM", LanguageModelRandLM);
 #endif
-#ifdef HAVE_NPLM
-  MOSES_FNAME(NeuralLM);
+#ifdef LM_NEURAL
+  MOSES_FNAME2("NeuralLM", NeuralLMWrapper);
 #endif
 
   Add("KENLM", new KenFactory());

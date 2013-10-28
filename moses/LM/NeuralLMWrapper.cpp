@@ -1,28 +1,28 @@
 
 #include "moses/StaticData.h"
 #include "moses/FactorCollection.h"
-#include "NeuralLM.h"
+#include "NeuralLMWrapper.h"
 #include "neuralLM.h"
-#include "model.h"
+#include <model.h>
 
 using namespace std;
 
 namespace Moses
 {
-NeuralLM::NeuralLM(const std::string &line)
+NeuralLMWrapper::NeuralLMWrapper(const std::string &line)
 :LanguageModelSingleFactor("NeuralLM", line)
 {
   // This space intentionally left blank
 }
 
 
-NeuralLM::~NeuralLM()
+NeuralLMWrapper::~NeuralLMWrapper()
 {
   delete m_neuralLM;
 }
 
 
-bool NeuralLM::Load(const std::string &filePath, FactorType factorType, size_t nGramOrder)
+bool NeuralLMWrapper::Load(const std::string &filePath, FactorType factorType, size_t nGramOrder)
 {
 
   TRACE_ERR("Loading NeuralLM " << filePath << endl);
@@ -42,7 +42,7 @@ bool NeuralLM::Load(const std::string &filePath, FactorType factorType, size_t n
   m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
-  m_neuralLM = new nplm::neuralLM(24234);
+  m_neuralLM = new nplm::neuralLM();
   m_neuralLM->read(m_filePath);
   m_neuralLM->set_log_base(10);
 
@@ -51,7 +51,7 @@ bool NeuralLM::Load(const std::string &filePath, FactorType factorType, size_t n
 }
 
 
-LMResult NeuralLM::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
+LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
 
   unsigned int hashCode = 0;
