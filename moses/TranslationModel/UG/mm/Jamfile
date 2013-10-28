@@ -1,36 +1,36 @@
 exe mtt-build : 
 mtt-build.cc 
-$(TOP)/moses/generic//generic 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
-$(TOP)/moses/mm//mm 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
 $(TOP)/util//kenutil 
 ; 
 
 exe mtt-dump : 
 mtt-dump.cc 
-$(TOP)/moses/generic//generic 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
-$(TOP)/moses/mm//mm 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
 $(TOP)/util//kenutil 
 ; 
 
 exe symal2mam : 
 symal2mam.cc 
-$(TOP)/moses/generic//generic 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
-$(TOP)/moses/mm//mm 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
 $(TOP)/util//kenutil 
 ; 
 
 exe custom-pt : 
 custom-pt.cc 
-$(TOP)/moses/generic//generic 
+#$(TOP)/moses/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
-$(TOP)/moses/mm//mm 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
 $(TOP)/util//kenutil 
 ; 
 

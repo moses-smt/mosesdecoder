@@ -5,7 +5,7 @@
 #ifndef __ug_lexical_phrase_scorer_h
 #define __ug_lexical_phrase_scorer_h
 
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include "tpt_tokenindex.h"
 #include <string>
 #include <boost/unordered_map.hpp>

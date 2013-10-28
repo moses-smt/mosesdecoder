@@ -26,9 +26,9 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 
-#include "moses/generic/sorting/VectorIndexSorter.h"
-#include "moses/generic/sampling/Sampling.h"
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
+#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include "moses/Util.h"
 
 #include "util/exception.hh"
@@ -734,8 +734,8 @@ namespace Moses {
       this->V2->open(base+L2+".tdx"); this->V2->iniReverseIndex();
       mmTSA<TKN>& i1 = *reinterpret_cast<mmTSA<TKN>*>(this->I1.get());
       mmTSA<TKN>& i2 = *reinterpret_cast<mmTSA<TKN>*>(this->I2.get());
-      i1.open(base+L1+".sfa", this->T1.get());
-      i2.open(base+L2+".sfa", this->T2.get());
+      i1.open(base+L1+".sfa", this->T1);
+      i2.open(base+L2+".sfa", this->T2);
       assert(this->T1->size() == this->T2->size());
     }
     

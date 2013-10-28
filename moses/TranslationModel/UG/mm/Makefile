@@ -28,9 +28,9 @@ MAKEFLAGS    += --warn-undefined-variables
 HOST     ?= $(shell hostname)
 HOSTTYPE ?= $(shell uname -m)
 
-MOSES_ROOT  = ${HOME}/code/moses/master/mosesdecoder
+MOSES_ROOT  = ${HOME}/code/mosesdecoder
 WDIR        = build/${HOSTTYPE}/${OPTI}
-VPATH       = ${HOME}/code/moses/master/mosesdecoder/
+VPATH       = ${HOME}/code/mosesdecoder/
 CXXFLAGS    = ${PROF} -ggdb -Wall -O${OPTI} ${INCLUDES} 
 CXXFLAGS   += -DMAX_NUM_FACTORS=4
 CXXFLAGS   += -DKENLM_MAX_ORDER=5
@@ -50,7 +50,7 @@ REQLIBS = m z pthread lzma ${BZLIB} \
 # 	icuuc icuio icui18n \
 
 LIBS     = $(addprefix -l, ${REQLIBS} moses) 
-LIBDIRS  = -L${HOME}/code/moses/master/mosesdecoder/lib
+LIBDIRS  = -L${HOME}/code/mosesdecoder/lib
 BINDIR = bin
 ifeq "$(OPTI)" "0"
 BINPREF = debug.
@@ -81,7 +81,7 @@ clean:
 custom-pt: ${BINDIR}/${BINPREF}custom-pt
 	echo $^
 
-INMOGEN = $(wildcard ${MOSES_ROOT}/moses/generic/*/*.cpp)
+INMOGEN = $(wildcard ${MOSES_ROOT}/moses/TranslationModel/UG/generic/*/*.cpp)
 OBJ     = $(patsubst %.cc,%.o,$(wildcard $(patsubst %.h,%.cc,$(wildcard *.h))))
 OBJ    += $(patsubst %.cpp,%.o,${INMOGEN})
 EXE     = $(patsubst %.cc,%.o,$(filter-out $(patsubst %.h,%.cc,$(wildcard *.h)),$(wildcard *.cc)))

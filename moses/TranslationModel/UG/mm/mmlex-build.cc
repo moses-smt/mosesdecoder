@@ -15,7 +15,7 @@
 #include <boost/foreach.hpp>
 #include <boost/math/distributions/binomial.hpp>
 
-#include "moses/generic/program_options/ug_get_options.h"
+#include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
 // #include "ug_translation_finder.h"
 // #include "ug_sorters.h"
 // #include "ug_corpus_sampling.h"
