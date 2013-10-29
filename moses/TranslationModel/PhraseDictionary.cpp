@@ -33,7 +33,7 @@ namespace Moses
 {
 
 PhraseDictionary::PhraseDictionary(const std::string &line)
-  :DecodeFeature("kjkljlk", line)
+  :DecodeFeature(line)
   ,m_tableLimit(20) // default
   ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {

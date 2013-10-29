@@ -11,7 +11,7 @@ using namespace std;
 namespace Moses
 {
 GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line)
-  :StatelessFeatureFunction("GlobalLexicalModelUnlimited", 0, line)
+  :StatelessFeatureFunction(0, line)
 {
   CHECK(false); // TODO need to update arguments to key=value
 
