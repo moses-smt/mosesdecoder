@@ -1157,16 +1157,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
-			<name>FF/InternalStructStatelessFF.cpp</name>
-			<type>1</type>
-			<location>/Users/mnadejde/Documents/workspace/moses_120913/mosesdecoder/moses/FF/InternalStructStatelessFF.cpp</location>
-		</link>
-		<link>
-			<name>FF/InternalStructStatelessFF.h</name>
-			<type>1</type>
-			<location>/Users/mnadejde/Documents/workspace/moses_120913/mosesdecoder/moses/FF/InternalStructStatelessFF.h</location>
-		</link>
-		<link>
 			<name>FF/LexicalReordering</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1435,6 +1425,16 @@
 			<name>LM/MultiFactor.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/MultiFactor.h</locationURI>
+		</link>
+		<link>
+			<name>LM/NeuralLMWrapper.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/NeuralLMWrapper.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/NeuralLMWrapper.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/NeuralLMWrapper.h</locationURI>
 		</link>
 		<link>
 			<name>LM/ORLM.cpp</name>
