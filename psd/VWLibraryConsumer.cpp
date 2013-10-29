@@ -33,7 +33,7 @@ VWLibraryPredictConsumerFactory::VWLibraryPredictConsumerFactory(
   int lastFree = EMPTY_LIST;
   for (int i = 0; i < poolSize; ++i)
   {
-    m_consumers.push_back(new VWLibraryPredictConsumer(m_VWInstance, i));
+    m_consumers.push_back(new VWLibraryPredictConsumer(m_VWInstance, i, vwOptions));
     m_nextFree.push_back(lastFree);
     lastFree = i;
   }
@@ -143,10 +143,11 @@ void VWLibraryConsumer::FinishExample()
 void VWLibraryConsumer::Finish()
 {
   if (m_debugOutput) m_debugOutput->Finish();
+  VW::finish(*m_VWParser);
   if (m_sharedVwInstance)
-    m_VWInstance = NULL;
+    m_VWPredictor = NULL;
   else
-    VW::finish(*m_VWInstance);
+    VW::finish(*m_VWPredictor);
 }
 
 void VWLibraryConsumer::SetDebugOutfile(const string &fileName)
@@ -158,8 +159,9 @@ VWLibraryConsumer::~VWLibraryConsumer()
 {
   delete m_ex;
   if (m_debugOutput) delete m_debugOutput;
+  VW::finish(*m_VWParser);
   if (!m_sharedVwInstance)
-    VW::finish(*m_VWInstance);
+    VW::finish(*m_VWPredictor);
 }
 
 //
@@ -169,9 +171,10 @@ VWLibraryConsumer::~VWLibraryConsumer()
 VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile, const string &vwOptions)
 {
   m_shared = true;
-  m_VWInstance = VW::initialize(vwOptions + " -f " + modelFile);
+  m_VWPredictor = VW::initialize(vwOptions + " -f " + modelFile);
+  m_VWParser = VW::initialize(vwOptions + " -noop ");
   m_sharedVwInstance = false;
-  m_ex = new ::ezexample(m_VWInstance, false);
+  m_ex = new ::ezexample(m_VWPredictor, false, m_VWParser);
   m_debugOutput = NULL;
 }
 
@@ -193,9 +196,10 @@ float VWLibraryTrainConsumer::Predict(const string &label)
 VWLibraryPredictConsumer::VWLibraryPredictConsumer(const string &modelFile, const string &vwOptions)
 {
   m_shared = true;
-  m_VWInstance = VW::initialize(vwOptions + " -i " + modelFile);
+  m_VWPredictor = VW::initialize(vwOptions + " -i " + modelFile);
+  m_VWParser = VW::initialize(vwOptions + " --noop");
   m_sharedVwInstance = false;
-  m_ex = new ::ezexample(m_VWInstance, false);
+  m_ex = new ::ezexample(m_VWPredictor, false, m_VWParser);
   m_debugOutput = NULL;
 }
 
@@ -215,11 +219,12 @@ float VWLibraryPredictConsumer::Predict(const string &label)
   return pred;
 }
 
-VWLibraryPredictConsumer::VWLibraryPredictConsumer(vw * instance, int index)
+VWLibraryPredictConsumer::VWLibraryPredictConsumer(vw * instance, int index, const string &vwOptions)
 {
-  m_VWInstance = instance;
+  m_VWPredictor = instance;
+  m_VWParser = VW::initialize(vwOptions + " --noop");
   m_sharedVwInstance = true;
-  m_ex = new ::ezexample(m_VWInstance, false);
+  m_ex = new ::ezexample(m_VWPredictor, false, m_VWParser);
   m_shared = true;
   m_index = index;
   m_debugOutput = NULL;

@@ -89,7 +89,8 @@ private:
     virtual void SetDebugOutfile(const std::string &fileName);
 
   protected:
-    ::vw *m_VWInstance;
+    ::vw *m_VWPredictor;
+    ::vw *m_VWParser;
     ::ezexample *m_ex;
     // this contains state about which namespaces are shared
     bool m_shared;
@@ -122,7 +123,7 @@ private:
     friend class VWLibraryPredictConsumerFactory;
 
   private:
-    VWLibraryPredictConsumer(vw * instance, int index);
+    VWLibraryPredictConsumer(vw * instance, int index, const std::string &vwOptions);
   };
 
   // object pool of VWLibraryPredictConsumers
