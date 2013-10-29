@@ -10,7 +10,7 @@ namespace Moses
 {
 PhraseDictionaryDynSuffixArray::
 PhraseDictionaryDynSuffixArray(const std::string &line)
-  : PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
+  : PhraseDictionary(line)
   ,m_biSA(new BilingualDynSuffixArray())
 {
   ReadParameters();
