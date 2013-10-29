@@ -35,7 +35,7 @@ FeatureFunction(const std::string& description,
   : m_tuneable(true)
   , m_numScoreComponents(1)
 {
-  Initialize(description, line);
+  Initialize(line);
 }
 
 FeatureFunction::
@@ -45,25 +45,14 @@ FeatureFunction(const std::string& description,
   : m_tuneable(true)
   , m_numScoreComponents(numScoreComponents)
 {
-  Initialize(description, line);
+  Initialize(line);
 }
 
 void
 FeatureFunction::
-Initialize(const std::string& description, const std::string &line)
+Initialize(const std::string &line)
 {
-  ParseLine(description, line);
-
-  if (m_description == "") {
-    size_t index = description_counts.count(description);
-
-    ostringstream dstream;
-    dstream << description;
-    dstream << index;
-
-    description_counts.insert(description);
-    m_description = dstream.str();
-  }
+  ParseLine(line);
 
   ScoreComponentCollection::RegisterScoreProducer(this);
   m_producers.push_back(this);
@@ -71,10 +60,12 @@ Initialize(const std::string& description, const std::string &line)
 
 FeatureFunction::~FeatureFunction() {}
 
-void FeatureFunction::ParseLine(const std::string& description, const std::string &line)
+void FeatureFunction::ParseLine(const std::string &line)
 {
   vector<string> toks = Tokenize(line);
   CHECK(toks.size());
+
+  string nameStub = toks[0];
 
   set<string> keys;
 
@@ -93,6 +84,19 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
       m_args.push_back(args);
     }
   }
+
+  // name
+  if (m_description == "") {
+    size_t index = description_counts.count(nameStub);
+
+    ostringstream dstream;
+    dstream << nameStub;
+    dstream << index;
+
+    description_counts.insert(nameStub);
+    m_description = dstream.str();
+  }
+
 }
 
 void FeatureFunction::SetParameter(const std::string& key, const std::string& value)

@@ -36,8 +36,8 @@ protected:
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
-  void Initialize(const std::string& description, const std::string &line);
-  void ParseLine(const std::string& description, const std::string &line);
+  void Initialize(const std::string &line);
+  void ParseLine(const std::string &line);
 
 public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
