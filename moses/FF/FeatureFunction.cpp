@@ -30,8 +30,7 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 }
 
 FeatureFunction::
-FeatureFunction(const std::string& description,
-                const std::string& line)
+FeatureFunction(const std::string& line)
   : m_tuneable(true)
   , m_numScoreComponents(1)
 {
@@ -39,8 +38,7 @@ FeatureFunction(const std::string& description,
 }
 
 FeatureFunction::
-FeatureFunction(const std::string& description,
-                size_t numScoreComponents,
+FeatureFunction(size_t numScoreComponents,
                 const std::string& line)
   : m_tuneable(true)
   , m_numScoreComponents(numScoreComponents)

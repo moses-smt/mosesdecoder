@@ -11,7 +11,7 @@ namespace Moses
 {
 
 OpSequenceModel::OpSequenceModel(const std::string &line)
-  :StatefulFeatureFunction("OpSequenceModel", 5, line )
+  :StatefulFeatureFunction(5, line )
 {
   sFactor = 0;
   tFactor = 0;

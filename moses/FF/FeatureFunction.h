@@ -45,8 +45,8 @@ public:
   }
   static FeatureFunction &FindFeatureFunction(const std::string& name);
 
-  FeatureFunction(const std::string& description, const std::string &line);
-  FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
+  FeatureFunction(const std::string &line);
+  FeatureFunction(size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
 
