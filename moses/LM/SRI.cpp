@@ -54,7 +54,7 @@ using namespace std;
 namespace Moses
 {
 LanguageModelSRI::LanguageModelSRI(const std::string &line)
-  :LanguageModelSingleFactor("SRILM", line)
+  :LanguageModelSingleFactor(line)
   ,m_srilmVocab(0)
   ,m_srilmModel(0)
 {

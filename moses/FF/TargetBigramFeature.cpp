@@ -18,7 +18,7 @@ int TargetBigramState::Compare(const FFState& other) const
 }
 
 TargetBigramFeature::TargetBigramFeature(const std::string &line)
-  :StatefulFeatureFunction("TargetBigramFeature", 0, line)
+  :StatefulFeatureFunction(0, line)
 {
   std::cerr << "Initializing target bigram feature.." << std::endl;
   ReadParameters();

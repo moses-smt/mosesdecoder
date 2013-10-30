@@ -22,7 +22,7 @@ class SkeletonStatefulFF : public StatefulFeatureFunction
 {
 public:
   SkeletonStatefulFF(const std::string &line)
-    :StatefulFeatureFunction("SkeletonStatefulFF", 3, line)
+    :StatefulFeatureFunction(3, line)
   {}
 
   bool IsUseable(const FactorMask &mask) const {

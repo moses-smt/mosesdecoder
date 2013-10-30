@@ -39,8 +39,8 @@ class PhraseDictionaryMemory : public RuleTableTrie
   friend class RuleTableLoader;
 
 protected:
-  PhraseDictionaryMemory(const std::string &description, const std::string &line)
-    : RuleTableTrie(description, line) {
+  PhraseDictionaryMemory(int type, const std::string &line)
+    : RuleTableTrie(line) {
   }
 
 public:

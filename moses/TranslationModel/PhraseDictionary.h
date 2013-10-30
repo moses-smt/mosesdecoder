@@ -59,7 +59,7 @@ class ChartParser;
 class PhraseDictionary :  public DecodeFeature
 {
 public:
-  PhraseDictionary(const std::string &description, const std::string &line);
+  PhraseDictionary(const std::string &line);
 
   virtual ~PhraseDictionary() {
   }

@@ -36,7 +36,7 @@ namespace Moses
 {
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
-  : DecodeFeature("Generation", line)
+  : DecodeFeature(line)
 {
   ReadParameters();
 }

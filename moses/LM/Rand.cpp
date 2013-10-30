@@ -44,7 +44,7 @@ namespace Moses
 {
 
 LanguageModelRandLM::LanguageModelRandLM(const std::string &line)
-  :LanguageModelSingleFactor("RandLM", line)
+  :LanguageModelSingleFactor(line)
   , m_lm(0)
 {
 }

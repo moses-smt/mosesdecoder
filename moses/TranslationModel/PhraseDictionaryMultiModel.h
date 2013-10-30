@@ -61,7 +61,7 @@ class PhraseDictionaryMultiModel: public PhraseDictionary
 
 public:
   PhraseDictionaryMultiModel(const std::string &line);
-  PhraseDictionaryMultiModel(const std::string &description, const std::string &line);
+  PhraseDictionaryMultiModel(int type, const std::string &line);
   ~PhraseDictionaryMultiModel();
   void Load();
   virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;
