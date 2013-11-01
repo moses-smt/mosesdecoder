@@ -183,7 +183,9 @@ FeatureRegistry::FeatureRegistry()
   Add("KENLM", new KenFactory());
 }
 
-FeatureRegistry::~FeatureRegistry() {}
+FeatureRegistry::~FeatureRegistry()
+{
+}
 
 void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
 {
@@ -201,6 +203,17 @@ void FeatureRegistry::Construct(const std::string &name, const std::string &line
   Map::iterator i = registry_.find(name);
   UTIL_THROW_IF(i == registry_.end(), UnknownFeatureException, "Feature name " << name << " is not registered.");
   i->second->Create(line);
+}
+
+void FeatureRegistry::PrintFF() const
+{
+	std::cerr << "Available feature functions:" << std::endl;
+	Map::const_iterator iter;
+	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
+		const string &ffName = iter->first;
+		std::cerr << ffName << std::endl;
+	}
+
 }
 
 } // namespace Moses

@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 
 #include "TypeDef.h"
-#include "moses/FF/Factory.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
@@ -510,7 +509,6 @@ bool StaticData::LoadData(Parameter *parameter)
   map<string, int> featureIndexMap;
 
   const vector<string> &features = m_parameter->GetParam("feature");
-  FeatureRegistry registry;
   for (size_t i = 0; i < features.size(); ++i) {
     const string &line = Trim(features[i]);
     cerr << "line=" << line << endl;
@@ -521,7 +519,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
     const string &feature = toks[0];
 
-    registry.Construct(feature, line);
+    m_registry.Construct(feature, line);
   }
 
   OverrideFeatures();
