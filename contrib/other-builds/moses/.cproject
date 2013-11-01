@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.config.gnu.exe.debug.656913512">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.debug.656913512" moduleId="org.eclipse.cdt.core.settings" name="Debug">
@@ -42,7 +44,6 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.752586397" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="IS_ECLIPSE"/>
-									<listOptionValue builtIn="false" value="HAVE_CMPH"/>
 									<listOptionValue builtIn="false" value="HAVE_BOOST"/>
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
@@ -74,11 +75,17 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.511477442" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
+<<<<<<< HEAD
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.2052020199" name="NeuralLMWrapper.cpp" rcbsApplicability="disable" resourcePath="LM/NeuralLMWrapper.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327.565821439">
 						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327.565821439" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327"/>
 					</fileInfo>
 					<sourceEntries>
 						<entry excluding="LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+=======
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.907720569" name="NeuralLMWrapper.h" rcbsApplicability="disable" resourcePath="LM/NeuralLMWrapper.h" toolsToInvoke=""/>
+					<sourceEntries>
+						<entry excluding="LM/NeuralLMWrapper.h|LM/NeuralLMWrapper.cpp|TranslationModel/CompactPT|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+>>>>>>> 40eefd0fc504416de47dc6baec42d5692dc115b5
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -118,7 +118,7 @@ bool Vocab::Load(FileHandler* vcbin, const FactorDirection& direction,
   std::string line, word_str;
   wordID_t id;
 
-  void *ret = getline(*vcbin, line);
+  std::istream &ret = getline(*vcbin, line);
   CHECK(ret);
   std::istringstream first(line.c_str());
   uint32_t vcbsize(0);

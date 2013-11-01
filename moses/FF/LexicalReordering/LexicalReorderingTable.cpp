@@ -8,7 +8,7 @@
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
 
-#ifndef WIN32
+#ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
 #endif
 
@@ -52,8 +52,10 @@ void auxAppend(IPhrase& head, const IPhrase& tail)
 LexicalReorderingTable* LexicalReorderingTable::LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors)
 {
   //decide use Compact or Tree or Memory table
-  LexicalReorderingTable *compactLexr =
-    LexicalReorderingTableCompact::CheckAndLoad(filePath + ".minlexr", f_factors, e_factors, c_factors);
+  LexicalReorderingTable *compactLexr = NULL;
+#ifdef HAVE_CMPH
+  compactLexr = LexicalReorderingTableCompact::CheckAndLoad(filePath + ".minlexr", f_factors, e_factors, c_factors);
+#endif
   if(compactLexr)
     return compactLexr;
   if(FileExists(filePath+".binlexr.idx")) {
