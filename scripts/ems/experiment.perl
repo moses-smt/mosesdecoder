@@ -2342,8 +2342,10 @@ sub define_tuningevaluation_filter {
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
 
-    $binarizer .= " -alignment-info" 
-        if !$tuning_flag && $binarizer && $report_precision_by_coverage;
+## AMF removed, not necessary?
+#    $binarizer .= " -alignment-info" 
+#        if !$tuning_flag && $binarizer && $report_precision_by_coverage;
+
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 

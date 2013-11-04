@@ -124,7 +124,8 @@ for (my $i = 0; $i < $numParallel; ++$i)
 			$cmd .= " |& tee > $TMPDIR/run.$i.sh.log";
 	}
 	else {
-			$cmd = "zcat $TMPDIR/train.$i.gz | $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile.$numStr --node $i --total $numParallel --span_server localhost --unique_id $$ --save_per_pass";
+			## AMF removed -f parameter so that only thread 0 outputs a model, also removed save_per_pass for threads>0
+			$cmd = "zcat $TMPDIR/train.$i.gz | $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr --node $i --total $numParallel --span_server localhost --unique_id $$";
 			# save the output of the other pieces
 			$cmd .= " >& $TMPDIR/run.$i.sh.log";
 	}
