@@ -10,7 +10,7 @@ class InternalStructStatelessFF : public StatelessFeatureFunction
 {
 public:
 	InternalStructStatelessFF(const std::string &line)
-	:StatelessFeatureFunction("InternalStructStatelessFF", line)
+	:StatelessFeatureFunction(line)
 	{}
 
 	bool IsUseable(const FactorMask &mask) const

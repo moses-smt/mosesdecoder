@@ -4,7 +4,6 @@
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
-#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
@@ -38,6 +37,9 @@
 #include "moses/LM/SkeletonLM.h"
 #include "moses/TranslationModel/SkeletonPT.h"
 
+#ifdef HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#endif
 #ifdef PT_UG
 #include "moses/TranslationModel/mmsapt.h"
 #endif
@@ -144,7 +146,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
   MOSES_FNAME(PhraseDictionaryOnDisk);
   MOSES_FNAME(PhraseDictionaryMemory);
-  MOSES_FNAME(PhraseDictionaryCompact);
   MOSES_FNAME(PhraseDictionaryMultiModel);
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
@@ -161,6 +162,9 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonLM);
   MOSES_FNAME(SkeletonPT);
 
+#ifdef HAVE_CMPH
+  MOSES_FNAME(PhraseDictionaryCompact);
+#endif
 #ifdef PT_UG
   MOSES_FNAME(Mmsapt);
 #endif
@@ -183,7 +187,9 @@ FeatureRegistry::FeatureRegistry()
   Add("KENLM", new KenFactory());
 }
 
-FeatureRegistry::~FeatureRegistry() {}
+FeatureRegistry::~FeatureRegistry()
+{
+}
 
 void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
 {
@@ -201,6 +207,17 @@ void FeatureRegistry::Construct(const std::string &name, const std::string &line
   Map::iterator i = registry_.find(name);
   UTIL_THROW_IF(i == registry_.end(), UnknownFeatureException, "Feature name " << name << " is not registered.");
   i->second->Create(line);
+}
+
+void FeatureRegistry::PrintFF() const
+{
+	std::cerr << "Available feature functions:" << std::endl;
+	Map::const_iterator iter;
+	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
+		const string &ffName = iter->first;
+		std::cerr << ffName << std::endl;
+	}
+
 }
 
 } // namespace Moses

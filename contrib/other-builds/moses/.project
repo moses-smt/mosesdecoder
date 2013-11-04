@@ -1157,6 +1157,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/InternalStructStatelessFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/InternalStructStatelessFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.h</locationURI>
+		</link>
+		<link>
 			<name>FF/LexicalReordering</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>

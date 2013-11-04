@@ -26,7 +26,7 @@ namespace Moses
 
 {
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
-  :PhraseDictionary("PhraseDictionaryMultiModel", line)
+  :PhraseDictionary(line)
 {
   ReadParameters();
 
@@ -43,10 +43,11 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
   CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*numWeights == m_multimodelweights.size());
 }
 
-PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &description, const std::string &line)
-  :PhraseDictionary(description, line)
+PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(int type, const std::string &line)
+  :PhraseDictionary(line)
 {
-  if (description == "PhraseDictionaryMultiModelCounts") {
+  if (type == 1) {
+	// PhraseDictionaryMultiModelCounts
     CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*4 == m_multimodelweights.size());
   }
 }

@@ -5,14 +5,14 @@ namespace Moses
 
 std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 
-StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, const std::string &line)
-  : FeatureFunction(description, line)
+StatefulFeatureFunction::StatefulFeatureFunction(const std::string &line)
+  : FeatureFunction(line)
 {
   m_statefulFFs.push_back(this);
 }
 
-StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
-  : FeatureFunction(description,numScoreComponents, line)
+StatefulFeatureFunction::StatefulFeatureFunction(size_t numScoreComponents, const std::string &line)
+  : FeatureFunction(numScoreComponents, line)
 {
   m_statefulFFs.push_back(this);
 }

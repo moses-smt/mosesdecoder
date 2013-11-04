@@ -41,7 +41,7 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
-  : RuleTableTrie("PhraseDictionaryMemory", line)
+  : RuleTableTrie(line)
 {
   ReadParameters();
 

@@ -270,6 +270,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
        && (configPath = FindParam("-config", argc, argv)) == "") {
     PrintCredit();
     Explain();
+    PrintFF();
 
     cerr << endl;
     UserMessage::Add("No configuration file was specified.  Use -config or -f");
@@ -1300,6 +1301,11 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
     VERBOSE(2, " " << *iter);
   }
   VERBOSE(2, std::endl);
+}
+
+void Parameter::PrintFF() const
+{
+  StaticData::Instance().GetFeatureRegistry().PrintFF();
 }
 
 std::set<std::string> Parameter::GetWeightNames() const

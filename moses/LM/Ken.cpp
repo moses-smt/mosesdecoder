@@ -140,7 +140,7 @@ private:
 } // namespace
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
-  :LanguageModel("KENLM", line)
+  :LanguageModel(line)
   ,m_factorType(factorType)
 {
   lm::ngram::Config config;
@@ -161,7 +161,7 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
-  :LanguageModel(copy_from.GetScoreProducerDescription(), copy_from.GetArgLine()),
+  :LanguageModel(copy_from.GetArgLine()),
    m_ngram(copy_from.m_ngram),
 // TODO: don't copy this.
    m_lmIdLookup(copy_from.m_lmIdLookup),

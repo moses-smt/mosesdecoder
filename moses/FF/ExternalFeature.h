@@ -37,7 +37,7 @@ class ExternalFeature : public StatefulFeatureFunction
 {
 public:
   ExternalFeature(const std::string &line)
-    :StatefulFeatureFunction("ExternalFeature", line) {
+    :StatefulFeatureFunction(line) {
     ReadParameters();
   }
   ~ExternalFeature();

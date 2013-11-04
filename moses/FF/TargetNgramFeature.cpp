@@ -38,7 +38,7 @@ int TargetNgramState::Compare(const FFState& other) const
 }
 
 TargetNgramFeature::TargetNgramFeature(const std::string &line)
-  :StatefulFeatureFunction("TargetNgramFeature", 0, line)
+  :StatefulFeatureFunction(0, line)
 {
   std::cerr << "Initializing target ngram feature.." << std::endl;
   ReadParameters();

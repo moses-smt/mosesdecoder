@@ -15,7 +15,7 @@ namespace Moses
 {
 
 PhrasePairFeature::PhrasePairFeature(const std::string &line)
-  :StatelessFeatureFunction("PhrasePairFeature", 0, line)
+  :StatelessFeatureFunction(0, line)
 {
   std::cerr << "Initializing PhrasePairFeature.." << std::endl;
   ReadParameters();

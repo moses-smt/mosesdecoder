@@ -76,7 +76,7 @@ void BleuScoreState::AddNgramCountAndMatches(std::vector< size_t >& counts,
 
 
 BleuScoreFeature::BleuScoreFeature(const std::string &line)
-  :StatefulFeatureFunction("BleuScoreFeature",1, line),
+  :StatefulFeatureFunction(1, line),
    m_enabled(true),
    m_sentence_bleu(true),
    m_simple_history_bleu(false),
