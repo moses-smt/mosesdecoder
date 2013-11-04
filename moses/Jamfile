@@ -48,9 +48,11 @@ path-constant LM-LOG : bin/lm.log ;
 update-if-changed $(LM-LOG) $(current) ;
 
 obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm : <dependency>$(LM-LOG) ;
+obj ContextFeature.o : FF/ContextFeature.cpp headers : <include>..//psd <include>..//SyntaxFeatures ;
 
 lib moses :
 [ glob 
+  SyntaxFeatures/*.cpp
   *.cpp
   TranslationModel/*.cpp
   TranslationModel/fuzzy-match/*.cpp

@@ -10,8 +10,8 @@
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TypeDef.h"
 #include "moses/ScoreComponentCollection.h"
-#include "moses/psd/FeatureExtractor.h"
-#include "moses/psd/FeatureConsumer.h"
+#include "psd/FeatureExtractor.h"
+#include "psd/FeatureConsumer.h"
 #include <map>
 #include <string>
 #include <vector>

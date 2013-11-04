@@ -1517,6 +1517,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
 		</link>
 		<link>
+			<name>SyntaxFeatures/FileFormats.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/SoftSyntaxDecoder/phrase-extract/extract-syntax-features/FileFormats.cpp</locationURI>
+		</link>
+		<link>
+			<name>SyntaxFeatures/FileFormats.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/SoftSyntaxDecoder/phrase-extract/extract-syntax-features/FileFormats.h</locationURI>
+		</link>
+		<link>
 			<name>SyntaxFeatures/InputTreeRep.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntaxFeatures/InputTreeRep.cpp</locationURI>
@@ -1525,6 +1535,11 @@
 			<name>SyntaxFeatures/InputTreeRep.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntaxFeatures/InputTreeRep.h</locationURI>
+		</link>
+		<link>
+			<name>SyntaxFeatures/ReformatRuleTable.pl</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/SoftSyntaxDecoder/phrase-extract/extract-syntax-features/ReformatRuleTable.pl</locationURI>
 		</link>
 		<link>
 			<name>SyntaxFeatures/SyntaxTree.cpp</name>

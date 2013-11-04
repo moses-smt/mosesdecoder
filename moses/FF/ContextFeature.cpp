@@ -10,23 +10,22 @@
 #include "moses/StaticData.h"
 #include "moses/RuleMap.h"
 #include "moses/Util.h"
-#include "moses/SyntaxFeatures/InputTreeRep.h"
+#include "SyntaxFeatures/InputTreeRep.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
+#include <string>
 
-#include "moses/psd/FeatureExtractor.h"
-#include "moses/psd/FeatureConsumer.h"
+#include "psd/FeatureExtractor.h"
+#include "psd/FeatureConsumer.h"
 #include "moses/ChartTranslationOptions.h"
 #include "util/check.hh"
 
 using namespace std;
 using namespace PSD;
 
-#include <cstdlib>
-#include <string>
-#include <vector>
-#include <iostream>
+
 
 namespace Moses
 {

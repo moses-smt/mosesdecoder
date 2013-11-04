@@ -52,6 +52,7 @@ namespace Moses
 class FactorCollection;
 class ChartTrellisPathList;
 class ScoreComponentCollection;
+class InputType;
 }
 
 namespace MosesChartCmd
@@ -75,6 +76,7 @@ protected:
   std::ostream                          *m_detailedAllTranslationReportingStream;
   std::ostream                          *m_alignmentInfoStream;
   std::string		        								m_inputFilePath;
+
   std::istream					        				*m_inputStream;
   Moses::OutputCollector                *m_detailOutputCollector;
   //DIMw
@@ -83,6 +85,19 @@ protected:
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
   Moses::OutputCollector                *m_alignmentInfoCollector;
+
+  //Syntax Context : TODO : put this in ContextFeature, laod method
+   std::string m_contextFilePath;
+   //context feature : psd context file
+   std::string m_parseFilePath;
+   //context feature : psd context file
+   std::istream *m_contextStream;
+   //context feature: psd parsed file
+   std::istream *m_parseStream;
+
+   //context feature to output word-alignments
+   std::ofstream  *m_wordAlignmentStream;
+   Moses::OutputCollector  *m_wordAlignmentOutputCollector;
 
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
   size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t startTarget);
@@ -108,7 +123,13 @@ public:
             , const Moses::FactorMask							&inputFactorUsed
             , size_t												nBestSize
             , const std::string							&nBestFilePath
-            , const std::string							&inputFilePath="");
+            , const std::string							&inputFilePath=""
+            //context feature : psd context file
+            	, const std::string &contextFilePath=""
+            	//damt hiero : parse file
+            	, const std::string &parseFilePath=""
+
+  );
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
@@ -131,6 +152,13 @@ public:
   void OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo);
 
   static void FixPrecision(std::ostream &, size_t size=3);
+
+  //Context feature : TODO : put into context feature
+  //read psd context
+  int ReadContext(std::istream&, Moses::InputType *inputType);
+  //read parse file
+  int ReadParse(std::istream&, Moses::InputType *inputType);
+
 };
 
 }

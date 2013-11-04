@@ -47,7 +47,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
-
+#include "SyntaxFeatures/InputTreeRep.h"
 #include <boost/algorithm/string.hpp>
 
 
@@ -62,7 +62,11 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const FactorMask							&inputFactorUsed
                      , size_t												nBestSize
                      , const std::string							&nBestFilePath
-                     , const std::string							&inputFilePath)
+                     , const std::string							&inputFilePath
+                     //context feature : psd context file path
+                     , const std::string &contextFilePath
+                     //context feature : parse context file path
+                     , const std::string &parseFilePath)
   :m_inputFactorOrder(inputFactorOrder)
   ,m_outputFactorOrder(outputFactorOrder)
   ,m_inputFactorUsed(inputFactorUsed)
@@ -75,6 +79,9 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
   ,m_alignmentInfoCollector(NULL)
+  //context feature : TODO : put into ContextFeature, method load
+  ,m_contextFilePath(contextFilePath)
+  ,m_parseFilePath(parseFilePath)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -121,6 +128,21 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
     CHECK(m_alignmentInfoStream->good());
   }
+
+  //Context feature : TODO : put into master
+  //damt hiero : psd context file
+  if (m_contextFilePath.empty()) {
+    m_contextStream = &std::cin;
+  } else {
+    m_contextStream = new InputFileStream(contextFilePath);
+  }
+
+  //damt hiero : psd parse file
+  if (m_parseFilePath.empty()) {
+     m_parseStream = &std::cin;
+   } else {
+     m_parseStream = new InputFileStream(parseFilePath);
+   }
 }
 
 IOWrapper::~IOWrapper()
@@ -136,6 +158,17 @@ IOWrapper::~IOWrapper()
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
   delete m_alignmentInfoCollector;
+
+  //comtext feature : delete paths
+  if (!m_contextFilePath.empty()) {
+    delete m_contextStream;
+  }
+
+  //damt hiero : file to parse
+  if (!m_parseFilePath.empty()) {
+      delete m_parseStream;
+    }
+
 }
 
 void IOWrapper::ResetTranslationId()
@@ -805,6 +838,27 @@ void IOWrapper::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const A
     pair<set<size_t>::iterator, bool> ret = retAlignmentsS2T[alignPoint.first].insert(alignPoint.second);
     CHECK(ret.second);
   }
+}
+
+//Context feature : TODO put into context feature
+//Damt hiero : read input parse tree
+int IOWrapper::ReadParse(std::istream& in, InputType* input)
+{
+    string line;
+    if (getline(in, line, '\n').eof())
+    return 0;
+
+    //std::cerr << "READING PARSE : " << line << std::endl;
+
+    //Read in parse tree
+    size_t sourceSize = input->GetSize();
+    input->m_parseTree->PopulateChart(sourceSize);
+    input->m_parseTree->Read(line);
+
+    //std::cerr << "Read in parse tree : "<< std::endl;
+    //input->m_parseTree->Print(sourceSize);
+
+    return 1;
 }
 
 }

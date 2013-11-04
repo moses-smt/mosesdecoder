@@ -29,7 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhraseCollection.h"
 #include "ReorderingConstraint.h"
 #include "NonTerminal.h"
-#include "moses/psd/FeatureExtractor.h"
+#include "psd/FeatureExtractor.h"
+#include "moses/SyntaxFeatures/InputTreeRep.h"
 
 namespace Moses
 {
@@ -201,16 +202,15 @@ public:
 
   TO_STRING();
 
-  //For context feature (damt-hiero)
-  //
-  PSD::ContextType m_PSDContext;
-  InputTreeRep *m_parseTree;
-  Phrase m_initialSourcePhrase;
-
   const InputTreeRep * GetInputTreeRep() const
    {
        return m_parseTree;
    }
+
+  //Context feature : TODO : put into ContextFeature
+  PSD::ContextType m_PSDContext;
+  InputTreeRep *m_parseTree;
+  Phrase m_initialSourcePhrase;
 
 };
 

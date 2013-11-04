@@ -28,7 +28,7 @@
 #include <cstdlib>
 #include <sstream>
 #include "SyntaxTree.h"
-#include "XmlException.h"
+#include "phrase-extract/XmlException.h"
 
 using namespace std;
 
