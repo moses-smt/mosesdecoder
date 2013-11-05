@@ -59,7 +59,13 @@ namespace Moses
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
 
 //! delete white spaces at beginning and end of string
-const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
+inline const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r")
+{
+  std::string res = str;
+  res.erase(str.find_last_not_of(dropChars)+1);
+  return res.erase(0, res.find_first_not_of(dropChars));
+}
+
 const std::string ToLower(const std::string& str);
 
 //! get string representation of any object/variable, as long as it can pipe to a stream
