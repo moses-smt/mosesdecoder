@@ -39,7 +39,7 @@ class ExtractorConfig
     inline bool GetSourceTopic() const    { return m_sourceTopic; }
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
     inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
-    inline const std::vector<float> &GetScoreBins() const { return m_scoreBins; }
+    inline const std::vector<long double> &GetScoreBins() const { return m_scoreBins; }
     inline bool IsLoaded() const { return m_isLoaded; }
 
   private:
@@ -52,7 +52,7 @@ class ExtractorConfig
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
 
-    std::vector<float> m_scoreBins;
+    std::vector<long double> m_scoreBins;
 
     // internal variables
     bool m_isLoaded;
@@ -67,7 +67,7 @@ struct Translation
 {
   size_t m_index;
   AlignmentType m_alignment;
-  std::vector<float> m_scores;
+  std::vector<long double> m_scores;
 };
 
 struct ChartTranslation
@@ -76,7 +76,7 @@ struct ChartTranslation
   std::string m_targetRep;
   AlignmentType m_termAlignment;
   AlignmentType m_nonTermAlignment;
-  std::vector<float> m_scores;
+  std::vector<long double> m_scores;
 };
 
 // index of possible target spans
@@ -122,8 +122,8 @@ private:
   const ExtractorConfig &m_config;
   bool m_train;
 
-  float GetMaxProb(const std::vector<Translation> &translations);
-  float GetMaxProbChart(const std::vector<ChartTranslation> &translations);
+  long double GetMaxProb(const std::vector<Translation> &translations);
+  long double GetMaxProbChart(const std::vector<ChartTranslation> &translations);
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateInternalFeaturesChart(const std::vector<std::string> &span, FeatureConsumer *fc, AlignmentType a);
@@ -145,7 +145,7 @@ private:
       const AlignmentType &termAligns,
       const AlignmentType &nonTermAligns,
       FeatureConsumer *fc);
-  void GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc);
+  void GenerateScoreFeatures(const std::vector<long double> scores, FeatureConsumer *fc);
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 

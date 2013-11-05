@@ -47,7 +47,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
-#include "SyntaxFeatures/InputTreeRep.h"
+#include "moses/SyntaxFeatures/InputTreeRep.h"
 #include <boost/algorithm/string.hpp>
 
 

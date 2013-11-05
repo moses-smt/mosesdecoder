@@ -23,18 +23,18 @@ FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex, const Ext
     throw logic_error("configuration file not loaded");
 }
 
-float FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
+long double FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
 {
-  float maxProb = 0;
+  long double maxProb = 0;
   vector<Translation>::const_iterator it;
   for (it = translations.begin(); it != translations.end(); it++)
     maxProb = max(it->m_scores[P_E_F_INDEX], maxProb);
   return maxProb;
 }
 
-float FeatureExtractor::GetMaxProbChart(const vector<ChartTranslation> &translations)
+long double FeatureExtractor::GetMaxProbChart(const vector<ChartTranslation> &translations)
 {
-  float maxProb = 0;
+	long double maxProb = 0;
   vector<ChartTranslation>::const_iterator it;
   for (it = translations.begin(); it != translations.end(); it++)
     maxProb = max(it->m_scores[P_E_F_INDEX], maxProb);
@@ -235,7 +235,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_binnedScores    = pTree.get<bool>("features.binned-scores", false);
   m_sourceTopic     = pTree.get<bool>("features.source-topic", false);
   m_windowSize      = pTree.get<size_t>("features.window-size", 0);
-  m_scoreBins = Scan<float>(Tokenize(pTree.get<string>("features.score-bins", ""), ","));
+  m_scoreBins = Scan<long double>(Tokenize(pTree.get<string>("features.score-bins", ""), ","));
   m_syntaxParent = pTree.get<bool>("features.syntax-parent", false);
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
@@ -463,12 +463,12 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
 
 }
 
-void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc)
+void FeatureExtractor::GenerateScoreFeatures(const std::vector<long double> scores, FeatureConsumer *fc)
 {
   vector<size_t>::const_iterator scoreIt;
-  vector<float>::const_iterator binIt;
+  vector<long double>::const_iterator binIt;
   const vector<size_t> &scoreIDs = m_config.GetScoreIndexes();
-  const vector<float> &bins = m_config.GetScoreBins();
+  const vector<long double> &bins = m_config.GetScoreBins();
 
   for (scoreIt = scoreIDs.begin(); scoreIt != scoreIDs.end(); scoreIt++) {
     for (binIt = bins.begin(); binIt != bins.end(); binIt++) {

@@ -10,7 +10,7 @@
 #include "moses/StaticData.h"
 #include "moses/RuleMap.h"
 #include "moses/Util.h"
-#include "SyntaxFeatures/InputTreeRep.h"
+#include "moses/SyntaxFeatures/InputTreeRep.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -24,8 +24,6 @@
 
 using namespace std;
 using namespace PSD;
-
-
 
 namespace Moses
 {
@@ -412,7 +410,9 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
         VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
         //std::cerr << "LOOKING FOR SPAN : " << startSpan << " : " << endSpan << std::endl;
 
-        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses,pEgivenF);
+        //Fabienne Braune : uncomment if need to use pEgivenF to compare scores
+        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
+        //m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses,pEgivenF);
         m_consumerFactory->Release(p_consumer);
         //Normalize0(losses);
         Normalize1(losses);
@@ -421,7 +421,7 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
            VERBOSE(5, *lossIt << " ");}
         Interpolate(losses,pEgivenF,0.1);
-        //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses,pEgivenF);
+        //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         //Normalize(losses);
         VERBOSE(5, "VW losses after interpolation : " << std::endl);
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
