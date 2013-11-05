@@ -27,9 +27,6 @@
 #include <map>
 #include <sstream>
 
-namespace MosesTraining
-{
-
 class SyntaxNode
 {
 protected:
@@ -122,6 +119,4 @@ public:
 };
 
 std::ostream& operator<<(std::ostream&, const SyntaxTree&);
-
-}
 

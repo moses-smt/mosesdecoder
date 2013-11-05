@@ -32,9 +32,6 @@
 
 using namespace std;
 
-namespace MosesTraining
-{
-
 inline std::vector<std::string> Tokenize(const std::string& str,
     const std::string& delimiters = " \t")
 {
@@ -396,6 +393,4 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
   // return de-xml'ed sentence in line
   line = cleanLine;
   return true;
-}
-
 }

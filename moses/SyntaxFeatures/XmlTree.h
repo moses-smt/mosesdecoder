@@ -27,9 +27,6 @@
 #include <map>
 #include "SyntaxTree.h"
 
-namespace MosesTraining
-{
-
 std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName);
 std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
 std::string TrimXml(const std::string& str);
@@ -37,7 +34,4 @@ bool isXmlTag(const std::string& tag);
 std::vector<std::string> TokenizeXml(const std::string& str);
 bool ProcessAndStripXMLTags(std::string &line, SyntaxTree &tree, std::set< std::string > &labelCollection, std::map< std::string, int > &topLabelCollection, bool unescape = true);
 std::string unescape(const std::string &str);
-
-
-} // namespace
 

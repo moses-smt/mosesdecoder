@@ -26,8 +26,6 @@
 #include <cassert>
 #include <iostream>
 
-namespace MosesTraining
-{
 
 SyntaxTree::~SyntaxTree()
 {
@@ -182,7 +180,5 @@ std::ostream& operator<<(std::ostream& os, const SyntaxTree& t)
     os << std::endl;
   }
   return os;
-}
-
 }
 
