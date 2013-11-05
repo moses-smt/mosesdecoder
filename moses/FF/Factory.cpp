@@ -65,6 +65,10 @@
 #include "moses/LM/NeuralLMWrapper.h"
 #endif
 
+#ifdef LM_DALM
+#include "moses/LM/DALM.h"
+#endif
+
 #include "util/exception.hh"
 
 #include <vector>
@@ -182,6 +186,9 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_NEURAL
   MOSES_FNAME2("NeuralLM", NeuralLMWrapper);
+#endif
+#ifdef LM_DALM
+  MOSES_FNAME2("DALM", LanguageModelDALM);
 #endif
 
   Add("KENLM", new KenFactory());

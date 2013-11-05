@@ -1372,6 +1372,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ChartState.h</locationURI>
 		</link>
 		<link>
+			<name>LM/DALM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/DALM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALM.h</locationURI>
+		</link>
+		<link>
 			<name>LM/IRST.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/IRST.cpp</locationURI>
