@@ -387,9 +387,9 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 
 LanguageModel *ConstructKenLM(const std::string &line)
 {
-  FactorType factorType;
+  FactorType factorType = 0;
   string filePath;
-  bool lazy;
+  bool lazy = false;
 
   vector<string> toks = Tokenize(line);
   for (size_t i = 1; i < toks.size(); ++i) {
