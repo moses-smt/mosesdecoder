@@ -110,9 +110,9 @@ def parse_line(s):
     pattern = r"Trans Opt (\d+) " + \
               r"\[(\d+)\.\.(\d+)\]:" + \
               r"((?: \[\d+\.\.\d+\]=\S+  )+):" + \
-              r" (\S+) ->" + \
+              r" (\S+) ->\S+  -> " + \
               r"((?:\S+ )+):" + \
-              r"((?:\d+-\d+ )*): pC="
+              r"((?:\d+-\d+ )*): c="
     regexp = re.compile(pattern)
     match = regexp.match(s)
     if not match:
