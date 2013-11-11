@@ -4,7 +4,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/ChartHypothesis.h"
-
+#include "util/exception.hh"
 #include "util/string_piece_hash.hh"
 
 namespace Moses
@@ -52,17 +52,19 @@ void TargetNgramFeature::SetParameter(const std::string& key, const std::string&
     m_n = Scan<size_t>(value);
   } else if (key == "lower-ngrams") {
     m_lower_ngrams = Scan<bool>(value);
+  } else if (key == "file") {
+      m_file = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
 
-bool TargetNgramFeature::Load(const std::string &filePath)
+void TargetNgramFeature::Load()
 {
-  if (filePath == "*") return true; //allow all
-  ifstream inFile(filePath.c_str());
+  if (m_file == "*") return; //allow all
+  ifstream inFile(m_file.c_str());
   if (!inFile) {
-    return false;
+      UTIL_THROW(util::Exception, "Couldn't open file" << m_file);
   }
 
   std::string line;
@@ -73,7 +75,7 @@ bool TargetNgramFeature::Load(const std::string &filePath)
   }
 
   inFile.close();
-  return true;
+  return;
 }
 
 const FFState* TargetNgramFeature::EmptyHypothesisState(const InputType &/*input*/) const
