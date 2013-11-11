@@ -80,6 +80,16 @@ if $(with-nplm) {
   lmmacros += LM_NEURAL ;
 }
 
+#DALM
+local with-dalm = [ option.get "with-dalm" ] ;
+if $(with-dalm) {
+  lib dalm : : <search>$(with-dalm)/lib ;
+  obj DALMWrapper.o : DALM.cpp dalm ..//headers : <include>$(with-dalm)/include <include>$(with-dalm)/darts-clone ;
+  alias dalm : DALM.o dalm : : : <define>LM_DA ;
+  dependencies += dalm ;
+  lmmacros += LM_DA ;
+}
+
 #ORLM is always compiled but needs special headers
 obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
 
