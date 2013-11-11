@@ -61,6 +61,8 @@ void TargetNgramFeature::SetParameter(const std::string& key, const std::string&
 
 void TargetNgramFeature::Load()
 {
+  if (m_file == "") return; //allow all, for now
+
   if (m_file == "*") return; //allow all
   ifstream inFile(m_file.c_str());
   if (!inFile) {
