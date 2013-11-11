@@ -2,15 +2,11 @@
 #include "DALM.h"
 #include "moses/FactorCollection.h"
 #include "logger.h"
-#include "vocabulary.h"
 #include "lm.h"
+#include "vocabulary.h"
 
 using namespace std;
 
-
-
-namespace Moses
-{
 /////////////////////////
 void push(DALM::VocabId *ngram, size_t n, DALM::VocabId wid){
 	for(size_t i = n-1; i+1 >= 1 ; i--){
@@ -40,6 +36,8 @@ void read_ini(const char *inifile, string &model, string &words){
 /////////////////////////
 
 
+namespace Moses
+{
 LanguageModelDALM::LanguageModelDALM(const std::string &line)
   :LanguageModelSingleFactor(line)
 {
@@ -89,13 +87,32 @@ void LanguageModelDALM::Load()
 	// Load the language model.
 	m_lm = new DALM::LM(model, *m_vocab, *m_logger);
 
+	wid_start = m_vocab->lookup(BOS_);
+	wid_end = m_vocab->lookup(EOS_);
 }
 
 LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
   LMResult ret;
-  ret.score = contextFactor.size();
-  ret.unknown = false;
+
+  // initialize DALM array
+  DALM::VocabId ngram[m_nGramOrder];
+  for(size_t i = 0; i < m_nGramOrder; i++){
+	ngram[i] = wid_start;
+  }
+
+  DALM::VocabId wid;
+  for (size_t i = 0; i < contextFactor.size(); ++i) {
+	  const Word &word = *contextFactor[i];
+	  wid = GetVocabId(word.GetFactor(m_factorType));
+	  push(ngram, m_nGramOrder, wid);
+  }
+
+  // last word
+  ret.unknown = (wid == DALM_UNK_WORD);
+
+  float prob = m_lm->query(ngram, m_nGramOrder);
+  ret.score = TransformLMScore(prob);
 
   // use last word as state info
   const Factor *factor;
@@ -109,6 +126,20 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
   (*finalState) = (State*) factor;
 
   return ret;
+}
+
+DALM::VocabId LanguageModelDALM::GetVocabId(const Factor *factor) const
+{
+	VocabMap::left_map::const_iterator iter;
+	iter = m_vocabMap.left.find(factor);
+	if (iter != m_vocabMap.left.end()) {
+		return iter->second;
+	}
+	else {
+		StringPiece str = factor->GetString();
+		DALM::VocabId wid = m_vocab->lookup(str.as_string().c_str());
+		return wid;
+	}
 }
 
 }
