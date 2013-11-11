@@ -2,6 +2,7 @@
 #include "DALM.h"
 #include "moses/FactorCollection.h"
 #include "logger.h"
+//#include "DALM/include/lm.h"
 #include "lm.h"
 #include "vocabulary.h"
 
