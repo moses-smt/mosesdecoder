@@ -4,6 +4,13 @@
 #include <vector>
 #include "SingleFactor.h"
 
+namespace DALM
+{
+class Logger;
+class Vocabulary;
+class LM;
+}
+
 namespace Moses
 {
 
@@ -11,6 +18,9 @@ class LanguageModelDALM : public LanguageModelSingleFactor
 {
 protected:
 	std::string m_inifile;
+	DALM::Logger *m_logger;
+	DALM::Vocabulary *m_vocab;
+	DALM::LM *m_lm;
 
 public:
 	LanguageModelDALM(const std::string &line);

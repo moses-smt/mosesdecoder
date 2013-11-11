@@ -77,8 +77,14 @@ void LanguageModelDALM::Load()
 	////////////////
 
 	// Preparing a logger object.
-	DALM::Logger logger(stderr);
-	logger.setLevel(DALM::LOGGER_INFO);
+	m_logger = new DALM::Logger(stderr);
+	m_logger->setLevel(DALM::LOGGER_INFO);
+
+	// Load the vocabulary file.
+	m_vocab = new DALM::Vocabulary(words, *m_logger);
+
+	// Load the language model.
+	m_lm = new DALM::LM(model, *m_vocab, *m_logger);
 
 }
 
