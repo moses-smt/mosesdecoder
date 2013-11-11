@@ -1,9 +1,9 @@
 
 #include "DALM.h"
 #include "moses/FactorCollection.h"
-#include<logger.h>
-#include<vocabulary.h>
-#include<lm.h>
+#include "logger.h"
+#include "vocabulary.h"
+#include "lm.h"
 
 using namespace std;
 
@@ -61,6 +61,9 @@ LanguageModelDALM::LanguageModelDALM(const std::string &line)
 
 LanguageModelDALM::~LanguageModelDALM()
 {
+	delete m_logger;
+	delete m_vocab;
+	delete m_lm;
 }
 
 void LanguageModelDALM::Load()
