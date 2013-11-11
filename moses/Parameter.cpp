@@ -374,9 +374,9 @@ void Parameter::AddFeaturesCmd()
   m_setting.erase("feature-add");
 }
 
-std::vector<float> &Parameter::GetWeights(const std::string &name)
+std::vector<float> Parameter::GetWeights(const std::string &name)
 {
-  std::vector<float> &ret = m_weights[name];
+  std::vector<float> ret = m_weights[name];
 
   // cerr << "WEIGHT " << name << "=";
   // for (size_t i = 0; i < ret.size(); ++i) {

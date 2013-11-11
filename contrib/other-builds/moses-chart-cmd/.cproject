@@ -72,7 +72,6 @@
 									<listOptionValue builtIn="false" value="misc"/>
 									<listOptionValue builtIn="false" value="moses"/>
 									<listOptionValue builtIn="false" value="search"/>
-									<listOptionValue builtIn="false" value="irstlm"/>
 									<listOptionValue builtIn="false" value="RandLM"/>
 									<listOptionValue builtIn="false" value="OnDiskPt"/>
 									<listOptionValue builtIn="false" value="lm"/>

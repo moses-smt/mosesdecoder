@@ -114,7 +114,7 @@ public:
     OverwriteParam(GetFullName(paramShortName),values);
   }
 
-  std::vector<float> &GetWeights(const std::string &name);
+  std::vector<float> GetWeights(const std::string &name);
   std::set<std::string> GetWeightNames() const;
 
   const PARAM_MAP &GetParams() const {
