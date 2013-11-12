@@ -1,8 +1,41 @@
 
 #include "DALM.h"
 #include "moses/FactorCollection.h"
+#include "logger.h"
+//#include "DALM/include/lm.h"
+#include "lm.h"
+#include "vocabulary.h"
 
 using namespace std;
+
+/////////////////////////
+void push(DALM::VocabId *ngram, size_t n, DALM::VocabId wid){
+	for(size_t i = n-1; i+1 >= 1 ; i--){
+		ngram[i] = ngram[i-1];
+	}
+	ngram[0] = wid;
+}
+
+void read_ini(const char *inifile, string &model, string &words){
+	ifstream ifs(inifile);
+	string line;
+
+	getline(ifs, line);
+	while(ifs){
+		unsigned int pos = line.find("=");
+		string key = line.substr(0, pos);
+		string value = line.substr(pos+1, line.size()-pos);
+		if(key=="MODEL"){
+			model = value;
+		}else if(key=="WORDS"){
+			words = value;
+		}
+		getline(ifs, line);
+	}
+}
+
+/////////////////////////
+
 
 namespace Moses
 {
@@ -27,13 +60,60 @@ LanguageModelDALM::LanguageModelDALM(const std::string &line)
 
 LanguageModelDALM::~LanguageModelDALM()
 {
+	delete m_logger;
+	delete m_vocab;
+	delete m_lm;
+}
+
+void LanguageModelDALM::Load()
+{
+	/////////////////////
+	// READING INIFILE //
+	/////////////////////
+	string model; // Path to the double-array file.
+	string words; // Path to the vocabulary file.
+	read_ini(m_filePath.c_str(), model, words);
+
+	////////////////
+	// LOADING LM //
+	////////////////
+
+	// Preparing a logger object.
+	m_logger = new DALM::Logger(stderr);
+	m_logger->setLevel(DALM::LOGGER_INFO);
+
+	// Load the vocabulary file.
+	m_vocab = new DALM::Vocabulary(words, *m_logger);
+
+	// Load the language model.
+	m_lm = new DALM::LM(model, *m_vocab, *m_logger);
+
+	wid_start = m_vocab->lookup(BOS_);
+	wid_end = m_vocab->lookup(EOS_);
 }
 
 LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
   LMResult ret;
-  ret.score = contextFactor.size();
-  ret.unknown = false;
+
+  // initialize DALM array
+  DALM::VocabId ngram[m_nGramOrder];
+  for(size_t i = 0; i < m_nGramOrder; i++){
+	ngram[i] = wid_start;
+  }
+
+  DALM::VocabId wid;
+  for (size_t i = 0; i < contextFactor.size(); ++i) {
+	  const Word &word = *contextFactor[i];
+	  wid = GetVocabId(word.GetFactor(m_factorType));
+	  push(ngram, m_nGramOrder, wid);
+  }
+
+  // last word
+  ret.unknown = (wid == DALM_UNK_WORD);
+
+  float prob = m_lm->query(ngram, m_nGramOrder);
+  ret.score = TransformLMScore(prob);
 
   // use last word as state info
   const Factor *factor;
@@ -47,6 +127,20 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
   (*finalState) = (State*) factor;
 
   return ret;
+}
+
+DALM::VocabId LanguageModelDALM::GetVocabId(const Factor *factor) const
+{
+	VocabMap::left_map::const_iterator iter;
+	iter = m_vocabMap.left.find(factor);
+	if (iter != m_vocabMap.left.end()) {
+		return iter->second;
+	}
+	else {
+		StringPiece str = factor->GetString();
+		DALM::VocabId wid = m_vocab->lookup(str.as_string().c_str());
+		return wid;
+	}
 }
 
 }
