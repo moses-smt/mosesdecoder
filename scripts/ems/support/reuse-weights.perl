@@ -3,13 +3,14 @@
 # $Id: reuse-weights.perl 41 2007-03-14 22:54:18Z hieu $
 
 use strict;
+use warnings;
 
 die("ERROR: syntax: reuse-weights.perl weights.ini < moses.ini > weighted.ini")
     unless scalar @ARGV == 1;
 my ($weight_file) = @ARGV;
 
 my %WEIGHT;
-my $current_weight = "";
+my $is_weight = "";
 my $weights_file_spec = "";
 my $weights_file_flag = 0;
 open(WEIGHT,$weight_file)
@@ -19,49 +20,52 @@ while(<WEIGHT>) {
       $weights_file_spec = "\n".$_;
       $weights_file_flag = 1;
     }
-    elsif (/^\[weight]/) {
-		  $current_weight = $1;
+    elsif (/^\[weight\]/) {
+		$is_weight = 1;
     }
-    elsif ($current_weight && /^(([\-\d\.]+)([Ee][+-]?[\d]+)?)$/) {
-	push @{$WEIGHT{$current_weight}},$1;
+    elsif ($is_weight && /^([^=]*)\s*=\s*(.*)\s*$/) {
+        $WEIGHT{$1}=$2;
     }
     elsif ($weights_file_flag && !/^\[/ && !/^\s*$/) {
       $weights_file_spec .= $_;
     }
     elsif (/^\[/) {
-      $current_weight = "";
+      $is_weight = 0;
       $weights_file_flag = 0;
     }
 }
 close(WEIGHT);
+
+$is_weight = 0;
+
 
 my %IGNORE;
 while(<STDIN>) {
     if (/^\[weight-file\]/) {
 	$weights_file_flag = 1;
     }
-    elsif (/^\[weight\-(\S+)\]/) {
-	$current_weight = $1;
-	if (!defined($WEIGHT{$current_weight})) {    
-	    if (/^\[weight\-wt/ or /^\[weight\-pp/) {
-		print $_;
-		$_ = <STDIN>;
-		print $_;
-	    }
-	    else {
-		print STDERR "(reuse-weights) WARNING: no weights for weight-$1, deleting\n";
-		$current_weight = "xxx";
-	    }
-	}
-	else {
-	    print $_;
-	    foreach (@{$WEIGHT{$current_weight}}) {
-		print $_."\n";
-	    }
-	}
+    elsif (/^\[weight\]/) {
+        $is_weight=1;
+        print $_;
     }
-    elsif ($current_weight && /^([\-\d\.]+)([Ee][+-]?[\d]+)?$/) {
-	$IGNORE{$current_weight}++;
+    elsif ($is_weight) {
+       my $line = $_;
+	   if (/^([^=]*)\s*=\s*(.*)$/ ) {
+          my $key=$1;
+          my $value=$2;
+          if (exists $WEIGHT{$key}) {
+              print $key."= ".$WEIGHT{$key}."\n";
+              $IGNORE{$key}++;
+          } else {
+              if ($key =~ /^PhrasePairFeature/ or $key =~/^WordTranslationFeature/) {
+                 print $line;
+              } else {
+	        	 print STDERR "(reuse-weights) WARNING: no weights for $key, deleting\n";
+              }
+          }
+       } else {
+          print $line;
+       }
     }
     elsif ($weights_file_flag && !/^\[/ && !/^\s*$/) {
 	$weights_file_flag = 0;
@@ -69,27 +73,31 @@ while(<STDIN>) {
 	#$weights_file_spec = "\n[weight-file]\n".$_;
     }
     elsif (/^\[/) {
-	$current_weight = "";
-	print $_;
+        if ($is_weight) {
+            print_remaining(); 
+        }
+        $is_weight = 0;
+        print $_;
     }
     else {
 	print $_;
     }
 }
 
-foreach my $weight (keys %WEIGHT) {
-    if (! defined($IGNORE{$weight})) {
-	print STDERR "(reuse-weights) WARNING: new weights weight-$weight\n";
-	print "\n[weight-$weight]\n";
-	foreach (@{$WEIGHT{$weight}}) {
-	    print $_."\n";
-	}
-    }
-    else {
-	print STDERR "(reuse-weights) weight-$weight updated ($IGNORE{$weight} -> ".(scalar @{$WEIGHT{$weight}}).")\n";
-	if ($IGNORE{$weight} != scalar @{$WEIGHT{$weight}}) {
-	    print STDERR "(reuse-weights) WARNING: number of weights changed\n";
-	}
+if ($is_weight) {
+    print_remaining();
+}
+sub print_remaining {
+    foreach my $weight (keys %WEIGHT) {
+        if (! defined($IGNORE{$weight})) {
+            print STDERR "(reuse-weights) WARNING: new weights $weight\n";
+            print "\n$weight= ";
+            print $WEIGHT{$weight};
+            print "\n";
+        }
+        else {
+            print STDERR "(reuse-weights) $weight updated \n";
+        }
     }
 }
 
