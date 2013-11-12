@@ -41,8 +41,8 @@ using namespace std;
 
 namespace Moses
 {
-LanguageModelImplementation::LanguageModelImplementation(const std::string& description, const std::string &line)
-  :LanguageModel(description, line)
+LanguageModelImplementation::LanguageModelImplementation(const std::string &line)
+  :LanguageModel(line)
 {
 }
 

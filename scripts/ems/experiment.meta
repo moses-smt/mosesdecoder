@@ -747,7 +747,7 @@ split-input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 split-input-devtest
 	in: truecased-input-devtest SPLITTER:splitter-model
 	out: input-devtest
@@ -755,7 +755,7 @@ split-input-devtest
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
 	ignore-unless: use-mira
-	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -967,7 +967,7 @@ decode
 	default-name: evaluation/output
 	qsub-script: yes
 	ignore-if: use-hiero
-	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph
+	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph wade
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
 hiero-decode
@@ -1031,6 +1031,13 @@ lowercase-reference
   pass-if: recaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
+wade
+	in: filtered-dir truecased-input tokenized-reference alignment system-output
+	out: wade-analysis
+	default-name: evaluation/wade-analysis
+	ignore-unless: wade
+	rerun-on-change: wade
+	template: $moses-script-dir/ems/support/run-wade.perl $wade IN IN1 IN2 IN3 IN4 OUT
 nist-bleu
 	in: wrapped-output reference-sgm
 	out: nist-bleu-score
@@ -1131,6 +1138,6 @@ analysis-precision
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model 
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
 	out: report
 	default-name: evaluation/report

@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Parameter.h"
 #include "SentenceStats.h"
 #include "ScoreComponentCollection.h"
+#include "moses/FF/Factory.h"
 
 namespace Moses
 {
@@ -127,6 +128,7 @@ protected:
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
+  std::string m_detailedTreeFragmentsTranslationReportingFilePath;
 
   //DIMw
   std::string m_detailedAllTranslationReportingFilePath;
@@ -204,6 +206,8 @@ protected:
 
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
+
+  FeatureRegistry m_registry;
 
   StaticData();
 
@@ -356,6 +360,12 @@ public:
 
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
+  }
+  bool IsDetailedTreeFragmentsTranslationReportingEnabled() const {
+    return !m_detailedTreeFragmentsTranslationReportingFilePath.empty();
+  }
+  const std::string &GetDetailedTreeFragmentsTranslationReportingFilePath() const {
+    return m_detailedTreeFragmentsTranslationReportingFilePath;
   }
   bool IsLabeledNBestList() const {
     return m_labeledNBestList;
@@ -744,6 +754,9 @@ public:
   FactorType GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
+
+  const FeatureRegistry &GetFeatureRegistry() const
+  { return m_registry; }
 
   /** check whether we should be using the old code to support binary phrase-table.
   ** eventually, we'll stop support the binary phrase-table and delete this legacy code

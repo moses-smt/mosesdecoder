@@ -85,7 +85,7 @@ private:
 
 public:
   LanguageModelParallelBackoff(const std::string &line)
-    :LanguageModelMultiFactor("ParallelBackoffLM", line) {
+    :LanguageModelMultiFactor(line) {
   }
 
   ~LanguageModelParallelBackoff();

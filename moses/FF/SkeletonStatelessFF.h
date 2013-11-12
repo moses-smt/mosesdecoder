@@ -10,7 +10,7 @@ class SkeletonStatelessFF : public StatelessFeatureFunction
 {
 public:
   SkeletonStatelessFF(const std::string &line)
-    :StatelessFeatureFunction("SkeletonStatelessFF", 2, line)
+    :StatelessFeatureFunction(2, line)
   {}
 
   bool IsUseable(const FactorMask &mask) const {

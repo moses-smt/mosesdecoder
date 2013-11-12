@@ -67,6 +67,7 @@ Parameter::Parameter()
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
+  AddParam("tree-translation-details", "Ttree", "for each hypothesis, report translation details with tree fragment info to given file");
   //DIMw
   AddParam("translation-all-details", "Tall", "for all hypotheses, report translation details to the given file");
   AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
@@ -74,7 +75,6 @@ Parameter::Parameter()
   AddParam("verbose", "v", "verbosity level of the logging");
   AddParam("references", "Reference file(s) - used for bleu score feature");
   AddParam("output-factors", "list if factors in the output");
-  AddParam("cache-path", "?");
   AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
   AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
   AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
@@ -96,8 +96,6 @@ Parameter::Parameter()
   AddParam("lattice-hypo-set", "to use lattice as hypo set during lattice MBR");
   AddParam("lmodel-oov-feature", "add language model oov feature, one per model");
   AddParam("clean-lm-cache", "clean language model caches after N translations (default N=1)");
-  AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
-  AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");
   AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
   AddParam("output-word-graph", "owg", "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
   AddParam("time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
@@ -269,6 +267,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
        && (configPath = FindParam("-config", argc, argv)) == "") {
     PrintCredit();
     Explain();
+    PrintFF();
 
     cerr << endl;
     UserMessage::Add("No configuration file was specified.  Use -config or -f");
@@ -352,7 +351,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
     }
   }
 
-  //Save("/tmp/moses.ini.new");
+  //Save("/Users/mnadejde/Documents/workspace/MTM13/DATA/mtmGHKM/moses.ini.new");
 
   // check if parameters make sense
   return Validate() && noErrorFlag;
@@ -1299,6 +1298,11 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
     VERBOSE(2, " " << *iter);
   }
   VERBOSE(2, std::endl);
+}
+
+void Parameter::PrintFF() const
+{
+  StaticData::Instance().GetFeatureRegistry().PrintFF();
 }
 
 std::set<std::string> Parameter::GetWeightNames() const

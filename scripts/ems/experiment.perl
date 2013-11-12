@@ -2646,6 +2646,7 @@ sub define_evaluation_decode {
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
     my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
     my $report_precision_by_coverage = &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
+    my $use_wade = &backoff_and_get("EVALUATION:$set:wade");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
 
@@ -2665,6 +2666,9 @@ sub define_evaluation_decode {
       else {
         $settings .= " -t";
       }
+    }
+    if ($use_wade) {
+      $settings .= " -T $system_output.details";
     }
     $settings .= " -text-type \"test\"";
 

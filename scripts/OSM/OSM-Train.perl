@@ -47,7 +47,7 @@ die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM")
 
 if (defined($FACTOR)) {
   
-   my @factor_values = split(',', $FACTOR);
+   my @factor_values = split(/\+/, $FACTOR);
  
     foreach my $factor_val (@factor_values) {
     `mkdir $OUT_DIR/$factor_val`;

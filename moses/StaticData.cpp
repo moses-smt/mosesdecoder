@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 
 #include "TypeDef.h"
-#include "moses/FF/Factory.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
@@ -63,6 +62,7 @@ StaticData::StaticData()
   ,m_unknownWordPenaltyProducer(NULL)
   ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
+  ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_needAlignmentInfo(false)
   ,m_factorDelimiter("|") // default delimiter between factors
@@ -311,6 +311,15 @@ bool StaticData::LoadData(Parameter *parameter)
       return false;
     }
   }
+  if (m_parameter->isParamSpecified("tree-translation-details")) {
+    const vector<string> &args = m_parameter->GetParam("tree-translation-details");
+    if (args.size() == 1) {
+      m_detailedTreeFragmentsTranslationReportingFilePath = args[0];
+    } else {
+      UserMessage::Add(string("the tree-translation-details option requires exactly one filename argument"));
+      return false;
+    }
+  }
 
   //DIMw
   if (m_parameter->isParamSpecified("translation-all-details")) {
@@ -500,7 +509,6 @@ bool StaticData::LoadData(Parameter *parameter)
   map<string, int> featureIndexMap;
 
   const vector<string> &features = m_parameter->GetParam("feature");
-  FeatureRegistry registry;
   for (size_t i = 0; i < features.size(); ++i) {
     const string &line = Trim(features[i]);
     cerr << "line=" << line << endl;
@@ -511,7 +519,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
     const string &feature = toks[0];
 
-    registry.Construct(feature, line);
+    m_registry.Construct(feature, line);
   }
 
   OverrideFeatures();

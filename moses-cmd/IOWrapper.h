@@ -133,6 +133,7 @@ public:
 
 IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
+void OutputLanguageModelOrder(std::ostream &out, const Moses::Hypothesis *hypo, Moses::Manager &manager);
 void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors);
 void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,

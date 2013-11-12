@@ -12,7 +12,7 @@ using namespace std;
 namespace Moses
 {
 InputFeature::InputFeature(const std::string &line)
-  :StatelessFeatureFunction("InputFeature", line)
+  :StatelessFeatureFunction(line)
 {
   ReadParameters();
 }

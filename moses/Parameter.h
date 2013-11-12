@@ -62,6 +62,7 @@ protected:
   void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
 
   void PrintCredit();
+  void PrintFF() const;
 
   void SetWeight(const std::string &name, size_t ind, float weight);
   void SetWeight(const std::string &name, size_t ind, const std::vector<float> &weights);

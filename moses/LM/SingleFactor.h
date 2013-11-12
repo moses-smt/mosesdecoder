@@ -43,7 +43,7 @@ protected:
   FFState *m_nullContextState;
   FFState *m_beginSentenceState;
 
-  LanguageModelSingleFactor(const std::string& description, const std::string &line);
+  LanguageModelSingleFactor(const std::string &line);
 
 public:
   virtual ~LanguageModelSingleFactor();

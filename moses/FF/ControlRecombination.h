@@ -45,7 +45,7 @@ class ControlRecombination : public StatefulFeatureFunction
 {
 public:
   ControlRecombination(const std::string &line)
-    :StatefulFeatureFunction("ControlRecombination", 0, line)
+    :StatefulFeatureFunction(0, line)
     ,m_type(SameOutput)
 
   {

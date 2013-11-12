@@ -5,7 +5,7 @@
 namespace Moses
 {
 PhrasePenalty::PhrasePenalty(const std::string &line)
-  : StatelessFeatureFunction("PhrasePenalty",1, line)
+  : StatelessFeatureFunction(1, line)
 {
   ReadParameters();
 }

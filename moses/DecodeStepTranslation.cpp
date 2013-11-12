@@ -195,11 +195,19 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
   for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
     const InputPath &inputPath = **iter;
     const Phrase &phraseFromIP = inputPath.GetPhrase();
-    const Word &wordIP =  phraseFromIP.GetWord(0);
+
+    const Word *wordIP = NULL;
+    for (size_t i = 0; i < phraseFromIP.GetSize(); ++i) {
+    	const Word &tempWord =  phraseFromIP.GetWord(i);
+    	if (!tempWord.IsEpsilon()) {
+    		wordIP = &tempWord;
+    		break;
+    	}
+    }
 
     // const WordsRange &range = inputPath.GetWordsRange();
 
-    if (wordFromPt == wordIP) {
+    if (wordIP && *wordIP == wordFromPt) {
       return inputPath;
     }
   }

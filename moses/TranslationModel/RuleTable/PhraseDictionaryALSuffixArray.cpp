@@ -21,7 +21,7 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &line)
-  : PhraseDictionaryMemory("PhraseDictionaryALSuffixArray", line)
+  : PhraseDictionaryMemory(1, line)
 {
   const StaticData &staticData = StaticData::Instance();
   if (staticData.ThreadCount() > 1) {

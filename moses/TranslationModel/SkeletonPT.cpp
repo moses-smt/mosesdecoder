@@ -7,7 +7,7 @@ using namespace std;
 namespace Moses
 {
 SkeletonPT::SkeletonPT(const std::string &line)
-  : PhraseDictionary("SkeletonPT", line)
+  : PhraseDictionary(line)
 {
   ReadParameters();
 }

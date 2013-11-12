@@ -1157,6 +1157,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/InternalStructStatelessFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/InternalStructStatelessFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.h</locationURI>
+		</link>
+		<link>
 			<name>FF/LexicalReordering</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1362,6 +1372,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ChartState.h</locationURI>
 		</link>
 		<link>
+			<name>LM/DALM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/DALM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALM.h</locationURI>
+		</link>
+		<link>
 			<name>LM/IRST.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/IRST.cpp</locationURI>
@@ -1425,6 +1445,16 @@
 			<name>LM/MultiFactor.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/MultiFactor.h</locationURI>
+		</link>
+		<link>
+			<name>LM/NeuralLMWrapper.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/NeuralLMWrapper.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/NeuralLMWrapper.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/NeuralLMWrapper.h</locationURI>
 		</link>
 		<link>
 			<name>LM/ORLM.cpp</name>

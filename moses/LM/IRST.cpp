@@ -40,7 +40,7 @@ using namespace std;
 namespace Moses
 {
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
-  :LanguageModelSingleFactor("IRSTLM", line)
+  :LanguageModelSingleFactor(line)
 {
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();

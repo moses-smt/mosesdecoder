@@ -24,11 +24,14 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
   CHECK(inputFeature);
 
-  size_t size = input.GetSize();
-  m_inputPathMatrix.resize(size);
+  size_t inputSize = input.GetSize();
+  m_inputPathMatrix.resize(inputSize);
+
+  size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+  maxSizePhrase = std::min(inputSize, maxSizePhrase);
 
   // 1-word phrases
-  for (size_t startPos = 0; startPos < size; ++startPos) {
+  for (size_t startPos = 0; startPos < inputSize; ++startPos) {
     vector<InputPathList> &vec = m_inputPathMatrix[startPos];
     vec.push_back(InputPathList());
     InputPathList &list = vec.back();
@@ -53,9 +56,9 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   }
 
   // subphrases of 2+ words
-  for (size_t phaseSize = 2; phaseSize <= size; ++phaseSize) {
-    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
-      size_t endPos = startPos + phaseSize -1;
+  for (size_t phraseSize = 2; phraseSize <= maxSizePhrase; ++phraseSize) {
+    for (size_t startPos = 0; startPos < inputSize - phraseSize + 1; ++startPos) {
+      size_t endPos = startPos + phraseSize -1;
 
       WordsRange range(startPos, endPos);
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);

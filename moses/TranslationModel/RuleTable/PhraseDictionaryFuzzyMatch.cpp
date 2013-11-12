@@ -54,7 +54,7 @@ namespace Moses
 {
 
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
-  :PhraseDictionary("PhraseDictionaryFuzzyMatch", line)
+  :PhraseDictionary(line)
   ,m_FuzzyMatchWrapper(NULL)
 {
   CHECK(m_args.size() == 0);

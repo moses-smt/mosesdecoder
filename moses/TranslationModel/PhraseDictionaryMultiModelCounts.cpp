@@ -61,7 +61,7 @@ namespace Moses
 {
 
 PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::string &line)
-  :PhraseDictionaryMultiModel("PhraseDictionaryMultiModelCounts", line)
+  :PhraseDictionaryMultiModel(1, line)
 {
   m_mode = "instance_weighting";
   m_combineFunction = InstanceWeighting;

@@ -140,7 +140,7 @@ private:
 } // namespace
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
-  :LanguageModel("KENLM", line)
+  :LanguageModel(line)
   ,m_factorType(factorType)
 {
   lm::ngram::Config config;
@@ -161,7 +161,7 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
-  :LanguageModel(copy_from.GetScoreProducerDescription(), copy_from.GetArgLine()),
+  :LanguageModel(copy_from.GetArgLine()),
    m_ngram(copy_from.m_ngram),
 // TODO: don't copy this.
    m_lmIdLookup(copy_from.m_lmIdLookup),
@@ -356,6 +356,27 @@ template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Increme
   manager.LMCallback(*m_ngram, m_lmIdLookup);
 }
 
+template <class Model> void LanguageModelKen<Model>::ReportHistoryOrder(std::ostream &out, const Phrase &phrase) const
+{
+  out << "|lm=(";
+  if (!phrase.GetSize()) return;
+
+  typename Model::State aux_state;
+  typename Model::State start_of_sentence_state = m_ngram->BeginSentenceState();
+  typename Model::State *state0 = &start_of_sentence_state;
+  typename Model::State *state1 = &aux_state;
+
+  for (std::size_t position=0; position<phrase.GetSize(); position++) {
+    const lm::WordIndex idx = TranslateID(phrase.GetWord(position));
+    lm::FullScoreReturn ret(m_ngram->FullScore(*state0, idx, *state1));
+    if (position) out << ",";
+    out << (int) ret.ngram_length << ":" << TransformLMScore(ret.prob);
+    if (idx == 0) out << ":unk";
+    std::swap(state0, state1);
+  }
+  out << ")| ";
+}
+
 template <class Model>
 bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 {
@@ -366,9 +387,9 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 
 LanguageModel *ConstructKenLM(const std::string &line)
 {
-  FactorType factorType;
+  FactorType factorType = 0;
   string filePath;
-  bool lazy;
+  bool lazy = false;
 
   vector<string> toks = Tokenize(line);
   for (size_t i = 1; i < toks.size(); ++i) {

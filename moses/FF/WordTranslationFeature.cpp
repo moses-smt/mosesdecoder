@@ -18,7 +18,7 @@ namespace Moses
 {
 
 WordTranslationFeature::WordTranslationFeature(const std::string &line)
-  :StatelessFeatureFunction("WordTranslationFeature", 0, line)
+  :StatelessFeatureFunction(0, line)
   ,m_unrestricted(true)
   ,m_simple(true)
   ,m_sourceContext(false)

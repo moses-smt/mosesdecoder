@@ -39,7 +39,7 @@ foreach my $set (keys %SCORE) {
 if ((scalar keys %SCORE) > 1) {
     print  "avg:";
     my $first = 1;
-    foreach my $type (keys %AVERAGE) {
+    foreach my $type (sort keys %AVERAGE) {
       print " ;" unless $first; $first = 0;
       printf " %.02f $TYPE{$type}",$AVERAGE{$type}/(scalar keys %SCORE);
     }

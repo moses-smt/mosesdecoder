@@ -19,8 +19,8 @@ public:
     return m_statefulFFs;
   }
 
-  StatefulFeatureFunction(const std::string& description, const std::string &line);
-  StatefulFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
+  StatefulFeatureFunction(const std::string &line);
+  StatefulFeatureFunction(size_t numScoreComponents, const std::string &line);
 
   /**
    * \brief This interface should be implemented.

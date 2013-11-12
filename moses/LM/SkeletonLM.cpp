@@ -7,7 +7,7 @@ using namespace std;
 namespace Moses
 {
 SkeletonLM::SkeletonLM(const std::string &line)
-  :LanguageModelSingleFactor("SkeletonLM", line)
+  :LanguageModelSingleFactor(line)
 {
   ReadParameters();
 

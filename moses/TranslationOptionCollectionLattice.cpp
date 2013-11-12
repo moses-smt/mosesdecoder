@@ -29,6 +29,7 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
   const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
   CHECK(inputFeature);
 
+  size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
   size_t size = input.GetSize();
 
   // 1-word phrases
@@ -76,6 +77,11 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
         }
 
         size_t startPos = prevPath.GetWordsRange().GetStartPos();
+
+        if (endPos - startPos + 1 > maxPhraseLength) {
+        	continue;
+        }
+
         WordsRange range(startPos, endPos);
         const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
