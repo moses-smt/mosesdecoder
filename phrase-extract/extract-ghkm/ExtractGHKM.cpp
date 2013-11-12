@@ -454,22 +454,22 @@ void ExtractGHKM::WriteGlueGrammar(
   }
 
   // basic rules
-  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| ||| ||| ||| {{Tree ( " << topLabel << " ( SSTART <s> ) )}}" << std::endl;
-  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| ||| {{Tree ( " << topLabel << " ( SEND </s> ) )}}" << std::endl;
+  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| ||| ||| ||| {{Tree [" << topLabel << " <s>]}}" << std::endl;
+  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| ||| {{Tree [" << topLabel << " [" << topLabel << "] </s>]}}" << std::endl;
 
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1 ||| ||| ||| {{Tree ( " << topLabel << " ( SSTART <s> ) ( " << i->first << " ) ( SEND </s> ) )}}" << std::endl;
+    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1 ||| ||| ||| {{Tree [" << topLabel << " <s> [" << i->first << "] </s>]}}" << std::endl;
   }
 
   // glue rules
   for(std::set<std::string>::const_iterator i = labelSet.begin();
       i != labelSet.end(); i++ ) {
-    out << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| ||| {{Tree ( " << topLabel << " ( "<< topLabel << " ) ( " << *i << " ) )}}" << std::endl;
+    out << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| ||| {{Tree [" << topLabel << " ["<< topLabel << "] [" << *i << "]]}}" << std::endl;
   }
   // glue rule for unknown word...
-  out << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| ||| {{Tree ( " << topLabel << " ( X ) )}}" << std::endl;
+  out << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| ||| {{Tree [" << topLabel << " [" << topLabel << "] [X]]}}" << std::endl;
 }
 
 void ExtractGHKM::CollectWordLabelCounts(
