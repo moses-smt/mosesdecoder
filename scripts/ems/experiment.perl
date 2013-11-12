@@ -1712,8 +1712,8 @@ sub write_mira_config {
 	$tune_filtered_ini_start =  $expt_dir."/".$tune_filtered_ini_start.".start";
 	if ($start_weights) {
 	    # apply start weights to filtered ini file, and pass the new ini to mira
-	    print "DEBUG: $RealBin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start \n";
-	    system("$RealBin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start");
+	    print "DEBUG: $RealBin/support/substitute-weights.perl $start_weights $tune_filtered_ini $tune_filtered_ini_start \n";
+	    system("$RealBin/support/substitute-weights.perl $start_weights $tune_filtered_ini $tune_filtered_ini_start");
 	} 
     }
 
