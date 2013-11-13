@@ -55,6 +55,10 @@ public:
   bool boundaryRules;
   bool flexScoreFlag;
 
+  //Fabienne Braune : options to annotate extract file for training discriminative model
+  bool outputPsdInfo;
+
+
   RuleExtractionOptions()
     : maxSpan(10)
     , minHoleSource(2)
@@ -86,7 +90,9 @@ public:
     , unpairedExtractFormat(false)
     , conditionOnTargetLhs(false)
     , boundaryRules(false)
-    , flexScoreFlag(false) {}
+    , flexScoreFlag(false)
+    , outputPsdInfo(false)
+  {}
 };
 
 }

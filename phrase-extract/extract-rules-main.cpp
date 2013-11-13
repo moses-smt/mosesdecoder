@@ -46,6 +46,7 @@
 #include "XmlTree.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
+#include "extract-lex.h"
 
 #define LINE_MAX_LENGTH 500000
 
@@ -64,6 +65,7 @@ private:
   Moses::OutputFileStream& m_extractFileInv;
   Moses::OutputFileStream& m_extractFileContext;
   Moses::OutputFileStream& m_extractFileContextInv;
+  Moses::OutputFileStream& m_extractFilePsdInfo;
 
   vector< ExtractedRule > m_extractedRules;
 
@@ -71,7 +73,7 @@ private:
   void extractRules();
   void addRuleToCollection(ExtractedRule &rule);
   void consolidateRules();
-  void writeRulesToFile();
+  void writeRulesToFile(int sentID); //Fabienne Braune : for annotating data for training the discriminative model we need the sentence ID
 
   // subs
   void addRule( int, int, int, int, int, RuleExist &ruleExist);
@@ -96,14 +98,16 @@ private:
   }
 
 public:
-  ExtractTask(SentenceAlignmentWithSyntax &sentence, const RuleExtractionOptions &options, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv, Moses::OutputFileStream &extractFileContext, Moses::OutputFileStream &extractFileContextInv):
+  ExtractTask(SentenceAlignmentWithSyntax &sentence, const RuleExtractionOptions &options, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv, Moses::OutputFileStream &extractFileContext, Moses::OutputFileStream &extractFileContextInv, Moses::OutputFileStream &extractFilePsdInfo):
     m_sentence(sentence),
     m_options(options),
     m_extractFile(extractFile),
     m_extractFileInv(extractFileInv),
     m_extractFileContext(extractFileContext),
-    m_extractFileContextInv(extractFileContextInv) {}
-  void Run();
+    m_extractFileContextInv(extractFileContextInv),
+    m_extractFilePsdInfo(extractFilePsdInfo)
+    {}
+  void Run(int SentID);
 
 };
 
@@ -142,7 +146,8 @@ int main(int argc, char* argv[])
          << " | --UnpairedExtractFormat"
          << " | --ConditionOnTargetLHS ]"
          << " | --BoundaryRules[" << options.boundaryRules << "]"
-         << " | --FlexibilityScore\n";
+         << " | --FlexibilityScore"
+    	 << " | --OutputPsdInfo \n" ; //annotated extract file for discriminative model
 
     exit(1);
   }
@@ -259,7 +264,11 @@ int main(int argc, char* argv[])
     // if an source phrase is paired with two target phrases, then count(t|s) = 0.5
     else if (strcmp(argv[i],"--NoFractionalCounting") == 0) {
       options.fractionalCounting = false;
-    } else if (strcmp(argv[i],"--PCFG") == 0) {
+    }
+    else if (strcmp(argv[i], "--OutputPsdInfo") == 0) {
+                options.outputPsdInfo=true;
+    }
+    else if (strcmp(argv[i],"--PCFG") == 0) {
       options.pcfgScore = true;
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       options.unpairedExtractFormat = true;
@@ -307,6 +316,10 @@ int main(int argc, char* argv[])
   Moses::OutputFileStream extractFileInv;
   Moses::OutputFileStream extractFileContext;
   Moses::OutputFileStream extractFileContextInv;
+  //Fabienne Braune : Output file containing psd info
+  Moses::OutputFileStream extractFilePsdInfo;
+
+
   extractFile.Open((fileNameExtract  + (options.gzOutput?".gz":"")).c_str());
   if (!options.onlyDirectFlag)
     extractFileInv.Open(fileNameExtractInv.c_str());
@@ -317,8 +330,14 @@ int main(int argc, char* argv[])
     if (!options.onlyDirectFlag) {
         string fileNameExtractContextInv = fileNameExtract + ".context.inv" + (options.gzOutput?".gz":"");
         extractFileContextInv.Open(fileNameExtractContextInv.c_str());
-    }
-  }
+    }}
+
+    //Fabienne Braune : Open file with annotations for discriminative classifier
+    if (options.outputPsdInfo)
+        {
+            string psdFileNameExtract=fileNameExtract+".psd"+ (options.gzOutput?".gz":"");
+            extractFilePsdInfo.Open(psdFileNameExtract.c_str());
+        }
 
   // stats on labels for glue grammar and unknown word label probabilities
   set< string > targetLabelCollection, sourceLabelCollection;
@@ -353,8 +372,8 @@ int main(int argc, char* argv[])
       if (options.unknownWordLabelFlag) {
         collectWordLabelCounts(sentence);
       }
-      ExtractTask *task = new ExtractTask(sentence, options, extractFile, extractFileInv, extractFileContext, extractFileContextInv);
-      task->Run();
+      ExtractTask *task = new ExtractTask(sentence, options, extractFile, extractFileInv, extractFileContext, extractFileContextInv,extractFilePsdInfo);
+      task->Run(sentence.sentenceID);
       delete task;
     }
     if (options.onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
@@ -369,6 +388,9 @@ int main(int argc, char* argv[])
     if (!options.onlyDirectFlag) extractFileInv.Close();
   }
 
+  // close psd file
+  if (options.outputPsdInfo) extractFilePsdInfo.Close();
+
   if (options.flexScoreFlag) {
     extractFileContext.Close();
     if (!options.onlyDirectFlag) extractFileContextInv.Close();
@@ -381,11 +403,11 @@ int main(int argc, char* argv[])
     writeUnknownWordLabel(fileNameUnknownWordLabel);
 }
 
-void ExtractTask::Run()
+void ExtractTask::Run(int sentID)
 {
   extractRules();
   consolidateRules();
-  writeRulesToFile();
+  writeRulesToFile(sentID);
   m_extractedRules.clear();
 }
 
@@ -1056,13 +1078,16 @@ void ExtractTask::consolidateRules()
   }
 }
 
-void ExtractTask::writeRulesToFile()
+void ExtractTask::writeRulesToFile(int sentID)
 {
   vector<ExtractedRule>::const_iterator rule;
   ostringstream out;
   ostringstream outInv;
   ostringstream outContext;
   ostringstream outContextInv;
+  //Fabienne Braune : file containing psd info
+  ostringstream extractFilePsdInfo;
+
   for(rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
     if (rule->count == 0)
       continue;
@@ -1096,7 +1121,7 @@ void ExtractTask::writeRulesToFile()
                                     << rule->alignmentInv << " ||| ";
                 iContext ? outContextInv << "< " << rule->targetContextLeft << "\n" : outContextInv << "> " << rule->targetContextRight << "\n";
             }
-        }
+        }}
 
         if (rule->sourceHoleString != "") {
             outContext << rule->source << " ||| "
@@ -1111,12 +1136,63 @@ void ExtractTask::writeRulesToFile()
                                   << rule->alignmentInv << " ||| v "
                                   << rule->targetHoleString << "\n";
         }
+
+        if (m_options.outputPsdInfo)
+        {
+
+        //Annotate non terminals on target side with position of aligned non terminal on source
+        vector<string> tokenizedSource;
+        vector<string> tokenizedTarget;
+        vector<string> tokenizedAlignments;
+        MosesTraining::Tokenize(tokenizedSource, rule->source);
+        MosesTraining::Tokenize(tokenizedTarget, rule->target);
+        MosesTraining::Tokenize(tokenizedAlignments, rule->alignment);
+        string newTarget = "";
+
+
+       //Annotation for soft syntax : only count non-terminals in the source
+       int nonTermPos = 0;
+       int wordPos = 0;
+       while(wordPos < tokenizedSource.size() - 1)
+       {
+    	   	   string &sourceWord = tokenizedSource[wordPos];
+    	   	   if (sourceWord.substr(0, 1) == "[" && sourceWord.substr(sourceWord.size()-1, 1) == "]") {
+    	   		   //std::cout << "Found word position : " << wordPos << std::endl;
+
+        		 	//find source into alignment
+        		 	for(size_t alignPos = 0; alignPos < tokenizedAlignments.size(); alignPos++)
+        		 	{
+        		 		if(atoi(tokenizedAlignments[alignPos].substr(0,1).c_str()) == wordPos)
+        		 		{
+        		 			int targetAlign = atoi(tokenizedAlignments[alignPos].substr(tokenizedAlignments[alignPos].size()-1,1).c_str());
+        		 			//std::cout << "Found target align : " << targetAlign << std::endl;
+        		 			tokenizedTarget[targetAlign].append(IntToString(nonTermPos));
+        		 		}
+        		 	}
+        		 	nonTermPos++;
+        	  }
+    	   	  wordPos++;
+       }
+       for (int wordPos = 0 ; wordPos < tokenizedTarget.size(); wordPos++) {
+          	 newTarget.append(tokenizedTarget[wordPos]);
+		 if(wordPos != tokenizedTarget.size() -1)
+		   {newTarget.append(" ");}
+             }
+
+       extractFilePsdInfo << sentID << "\t"
+          << rule->startS << "\t"
+          << rule->endS << "\t"
+          << rule->startT << "\t"
+          << rule->endT << "\t"
+          << rule->source << "\t"
+          << newTarget << endl;
+        }
     }
-  }
   m_extractFile << out.str();
   m_extractFileInv << outInv.str();
   m_extractFileContext << outContext.str();
   m_extractFileContextInv << outContextInv.str();
+  m_extractFilePsdInfo << extractFilePsdInfo.str();
 }
 
 void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection )

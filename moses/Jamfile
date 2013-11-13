@@ -70,7 +70,7 @@ lib moses :
   FF/Factory.cpp
 ]
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
-..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt ;
+..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt ..//phrase-extract//SyntaxTree.o ..//phrase-extract//XmlTree.o ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
 

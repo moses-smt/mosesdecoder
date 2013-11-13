@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w 
 
 # example
-#  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation --GZOutput
+#  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation 
 
 use strict;
 use File::Basename;
@@ -11,6 +11,8 @@ sub systemCheck($);
 sub NumStr($);
 
 print "Started ".localtime() ."\n";
+
+die "FATAL: wrong usage\n" unless defined($ARGV[7]);
 
 my $numParallel= $ARGV[0];
 $numParallel = 1 if $numParallel < 1;
@@ -25,27 +27,12 @@ my $align = $ARGV[6]; # 3rd arg of extract argument
 my $extract = $ARGV[7]; # 4th arg of extract argument
 
 my $makeTTable = 1; # whether to build the ttable extract files
+my $outputPSD = 0; 
 my $otherExtractArgs= "";
-my $weights = "";
-my $baselineExtract;
-my $glueFile;
-
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
   $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
-  if ($ARGV[$i] eq '--BaselineExtract') {
-    $baselineExtract = $ARGV[++$i];
-    next;
-  }
-  if ($ARGV[$i] eq '--InstanceWeights') {
-    $weights = $ARGV[++$i];
-    next;
-  }
-  if ($ARGV[$i] eq '--GlueGrammar') {
-    $glueFile = $ARGV[++$i];
-    next;
-  }
-
+  $outputPSD = 1 if $ARGV[$i] eq "--OutputPsdInfo";
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
@@ -75,12 +62,6 @@ if ($numParallel > 1)
 	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
-
-  if ($weights) {
-    $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $weights $TMPDIR/weights.";
-    $pid = RunFork($cmd);
-    push(@children, $pid);
-  }
 	
 	# wait for everything is finished
 	foreach (@children) {
@@ -103,16 +84,11 @@ else
   $cmd = "ln -s $align $TMPDIR/align.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
-
-  if ($weights) {
-    $cmd = "ln -s $weights $TMPDIR/weights.$numStr";
-    print STDERR "Executing: $cmd \n";
-    `$cmd`;
-  }
 }
 
 # run extract
 @children = ();
+
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
@@ -120,18 +96,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
   if ($pid == 0)
   { # child
     my $numStr = NumStr($i);
-    my $weightsCmd = "";
-    if ($weights) {
-      $weightsCmd = "--InstanceWeights $TMPDIR/weights.$numStr";
-    }
-
-    my $glueArg = "";
-    if (defined($glueFile)) {
-      $glueArg = "--GlueGrammar $TMPDIR/glue.$numStr";
-    }
-    print "glueArg=$glueArg \n";
-
-    my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $glueArg $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
+    my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs 2>> /dev/stderr \n";
     print STDERR $cmd;
     `$cmd`;
 
@@ -148,57 +113,40 @@ foreach (@children) {
 	waitpid($_, 0);
 }
 
+
+# hack because gzip output flag is not implemented in damt_hiero
+$cmd = "gzip -9 $TMPDIR/extract*";
+warn "WARNING: trying to gzip extract files because gzip output is broken\n";
+print STDERR $cmd, "\n";
+`$cmd`;
+
+
 # merge
-my $catCmd = "gunzip -c ";
+my $is_osx = ($^O eq "darwin");
+my $catCmd = $is_osx?"gunzip -c ":"zcat ";
 my $catInvCmd = $catCmd;
 my $catOCmd = $catCmd;
-my $catContextCmd = $catCmd;
-my $catContextInvCmd = $catCmd;
-
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
 		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
 		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
 		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
-		$catContextCmd .= "$TMPDIR/extract.$numStr.context ";
-		$catContextInvCmd .= "$TMPDIR/extract.$numStr.context.inv ";
-}
-if (defined($baselineExtract)) {
-		my $sorted = -e "$baselineExtract.sorted.gz" ? ".sorted" : "";
-		$catCmd .= "$baselineExtract$sorted.gz ";
-		$catInvCmd .= "$baselineExtract.inv$sorted.gz ";
-		$catOCmd .= "$baselineExtract.o$sorted.gz ";
 }
 
-$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.sorted.gz 2>> /dev/stderr \n";
-$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
-$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
-$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
-$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
-
+$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
+$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
+$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
 
 @children = ();
 if ($makeTTable)
 {
-  print STDERR "merging extract / extract.inv\n";
   $pid = RunFork($catCmd);
   push(@children, $pid);
 
   $pid = RunFork($catInvCmd);
   push(@children, $pid);
 }
-else {
-  print STDERR "skipping extract, doing only extract.o\n";
-}
-
-if ($otherExtractArgs =~ /--FlexibilityScore/) {
-  $pid = RunFork($catContextCmd);
-  push(@children, $pid);
-
-  $pid = RunFork($catContextInvCmd);
-  push(@children, $pid);
-  }
 
 my $numStr = NumStr(0);
 if (-e "$TMPDIR/extract.$numStr.o.gz")
@@ -207,22 +155,45 @@ if (-e "$TMPDIR/extract.$numStr.o.gz")
 	push(@children, $pid);
 }
 
+my @psd_lines;
+if ($outputPSD) {
+    # need to renumber sentence ids in PSD output, (mis)use the parent process to do this...
+
+    open(OUTPSD, "| gzip -c > $extract.psd.unsorted.gz") or die "failed to open $extract.psd.unsorted.gz output pipe";
+    my $lineOffset = 0;
+    for (my $i = 0; $i < $numParallel; ++$i)
+    {
+	my $numStr = NumStr($i);
+	print STDERR "opening extract.$numStr.psd.gz pipe";
+	open(INPSD, "gzip -dc $TMPDIR/extract.$numStr.psd.gz |") or die "failed to open extract.$numStr.psd.gz input pipe";
+	while (<INPSD>) {
+	    chomp;
+	    my ($SNo, $rest) = split("\t", $_, 2);
+	    die unless defined($rest);
+	    $SNo += $lineOffset;
+	    print OUTPSD $SNo, "\t", $rest, "\n";
+	}
+	close(INPSD);
+
+	$lineOffset += `cat $TMPDIR/source.$numStr | wc -l`;
+    }
+    print STDERR "closing $extract.psd.unsorted.gz pipe";
+    close(OUTPSD) or die "failed to close $extract.psd.unsorted.gz output pipe";
+}
+
 # wait for all sorting to finish
 foreach (@children) {
 	waitpid($_, 0);
 }
 
-# glue rules
-if (defined($glueFile)) {
-  my $cmd = "cat $TMPDIR/glue.* | LC_ALL=C sort | uniq > $glueFile";
-  print STDERR "Merging glue rules: $cmd \n";
-  print STDERR `$cmd`;
-}
+#sort the PSD file numeric - in the future this will not be necessary once PSD feature extraction does not require sorted input
+print STDERR "WARNING, sorting PSD using LC_ALL=C $sortCmd -T $TMPDIR , if not parallel this will be slow\n";
+systemCheck("zcat $extract.psd.unsorted.gz | LC_ALL=C $sortCmd -T $TMPDIR -k1,1n -k2,2n -k3,3n -k4,4n -k5,5n | gzip -9 > $extract.psd.gz");
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
-print STDERR $cmd;
-`$cmd`;
+print STDERR "WARNING, SKIPPING: $cmd\n";
+#`$cmd`;
 
 print STDERR "Finished ".localtime() ."\n";
 

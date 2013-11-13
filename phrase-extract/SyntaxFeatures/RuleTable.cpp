@@ -132,6 +132,7 @@ PSD::AlignmentType RuleTable::GetTermAlignment(const std::string &alignStr, cons
     return out;
 }
 
+//TODO : ASSUMPTION THAT NON TERMS ARE FIRST IS NOT TRUE ANYMORE : REIMPLEMENT...
 PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, const std::string &targetStr, const std::string &sourceStr)
 {
   AlignmentType out;
@@ -140,7 +141,7 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
   //cerr << "READING SOURCE : " << sourceStr << endl;
   //cerr << "READING TARGET : " << targetStr << endl;
 
-    //check which alignments are form non-terminals by looking at target side
+    //check which alignments are from non-terminals by looking at target side
     //store target side of alignment between non-terminals
     std::map<size_t,size_t> targetAligns;
     std::map<size_t,size_t> sourceAligns;
@@ -190,23 +191,21 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
       CHECK(sourceAligns.size() == targetAligns.size());
       size_t numberOfNonTerms = sourceAligns.size();
 
+      //Iterate through all alignments to find the correct correspondence between source and target
       for (alignIt = points.begin(); alignIt != points.end(); alignIt++) {
+    	//cerr << "Splitting alignment point : " << *alignIt << std::endl;
         vector<string> point = Tokenize(*alignIt, "-");
         //look at size of source and target non term vectors
         if (point.size() == 2) {
 
-        //std::cerr << "CHECKING FOR POINT ON SOURCE : " << point[0] << " : " << std::endl;
-        //std::cerr << "CHECKING FOR POINT ON TARGET : " << point[1] << " : " << std::endl;
-        CHECK(sourceAligns.find(Scan<size_t>(point[0])) != sourceAligns.end());
-        CHECK(targetAligns.find(Scan<size_t>(point[1])) != targetAligns.end());
-
-        //cerr << "INSERTING : " << point[0] <<  " : " << point[1] << endl;
-        out.insert( make_pair(sourceAligns.find(Scan<size_t>(point[0]))->second,
-                               targetAligns.find(Scan<size_t>(point[1]))->second ) );
-        //std:cerr << "INSERTED PAIR : " << sourceAligns.find(Scan<size_t>(point[0]))->second << "  : " << targetAligns.find(Scan<size_t>(point[1]))->second << std::endl;
-        numberOfNonTerms--;
-        if(numberOfNonTerms == 0){break;}
-        }
+        //this alignment point contains a non-terminal
+        if(sourceAligns.find(Scan<size_t>(point[0])) != sourceAligns.end())
+        {
+        	//the target side should be contained in the list of target non-terminals
+        	CHECK(targetAligns.find(Scan<size_t>(point[1])) != targetAligns.end());
+        	//save the found alignment between non-terminals
+        	out.insert( make_pair(sourceAligns.find(Scan<size_t>(point[0]))->second, targetAligns.find(Scan<size_t>(point[1]))->second ) );
+        }}
         else{throw runtime_error("error: malformed alignment point " + *alignIt);}
       }
     return out;

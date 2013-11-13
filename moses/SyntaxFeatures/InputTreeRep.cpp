@@ -2,7 +2,8 @@
 
 #include "InputTreeRep.h"
 #include "moses/Util.h"
-#include "XmlTree.h"
+#include "phrase-extract/XmlTree.h"
+#include "phrase-extract/SyntaxTree.h"
 
 using namespace std;
 
