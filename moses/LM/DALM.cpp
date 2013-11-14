@@ -114,7 +114,7 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
 
   // calc score. Doesn't handle unk yet
   float score = m_lm->query(ngram, m_nGramOrder);
-  score = TransformLMScore(prob);
+  score = TransformLMScore(score);
   ret.score = score;
 
   // use last word as state info
