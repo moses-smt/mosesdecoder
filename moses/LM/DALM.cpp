@@ -3,7 +3,7 @@
 #include "moses/FactorCollection.h"
 #include "logger.h"
 //#include "DALM/include/lm.h"
-#include "lm.h"
+#include "dalm-header.h"
 #include "vocabulary.h"
 
 using namespace std;

@@ -1,9 +1,12 @@
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
+
 #include "PreProcessFilter.h"
 
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
 #include <csignal>
+
 
 #include "Fdstream.h"
 
@@ -134,3 +137,4 @@ PreProcessFilter::~PreProcessFilter()
 
 }
 
+#endif
