@@ -125,9 +125,11 @@ void Scorer::setFactors(const string& factors)
  */
 void Scorer::setFilter(const string& filterCommand)
 {
-#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
   if (filterCommand.empty()) return;
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
   m_filter = new PreProcessFilter(filterCommand);
+#else
+  throw runtime_error("Cannot use filter command as mert was compiled with non-gcc compiler");
 #endif
 }
 

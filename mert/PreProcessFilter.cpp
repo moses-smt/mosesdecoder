@@ -1,4 +1,3 @@
-#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 
 #include "PreProcessFilter.h"
 
@@ -7,6 +6,7 @@
 #include <unistd.h>
 #include <csignal>
 
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 
 #include "Fdstream.h"
 

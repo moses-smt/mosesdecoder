@@ -1,8 +1,8 @@
 #pragma once
 
-#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
-
 #include <string>
+
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 
 namespace MosesTuning
 {
