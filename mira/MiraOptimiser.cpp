@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Optimiser.h"
 #include "Hildreth.h"
 #include "moses/StaticData.h"
@@ -259,7 +260,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
         // apply boosting factor
         if (m_boost && modelScoreDiffs[k] <= 0) {
           // factor between 1.5 and 3 (for Bleu scores between 5 and 20, the factor is within the boundaries)
-          float factor = min(1.5, log2(bleuScoresHope[0][0])); // TODO: make independent of number of oracles!!
+          float factor = std::min(1.5f, log2(bleuScoresHope[0][0])); // TODO: make independent of number of oracles!!
           factor = min(3.0f, factor);
           alpha = alpha * factor;
           cerr << "Rank " << rank << ", epoch " << epoch << ", apply boosting factor " << factor << " to update." << endl;
@@ -398,7 +399,7 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     // apply boosting factor
     if (m_boost && modelScoreDiff <= 0) {
       // factor between 1.5 and 3 (for Bleu scores between 5 and 20, the factor is within the boundaries)
-      float factor = min(1.5, log2(bleuScoreHope));
+      float factor = min(1.5f, log2(bleuScoreHope));
       factor = min(3.0f, factor);
       alpha = alpha * factor;
       cerr << "Rank " << rank << ", epoch " << epoch << ", boosted alpha: " << alpha << endl;
