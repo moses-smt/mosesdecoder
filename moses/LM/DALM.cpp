@@ -118,7 +118,7 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
   score = TransformLMScore(score);
   ret.score = score;
 
-  // has of n-1 words to use as state
+  // hash of n-1 words to use as state
   size_t hash = 0;
   for (size_t i = 1; i < contextFactor.size(); ++i) {
 	  const Word &word = *contextFactor[i];

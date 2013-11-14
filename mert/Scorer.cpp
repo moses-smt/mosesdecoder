@@ -35,7 +35,9 @@ Scorer::Scorer(const string& name, const string& config)
 Scorer::~Scorer()
 {
   Singleton<mert::Vocabulary>::Delete();
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
   delete m_filter;
+#endif
 }
 
 void Scorer::InitConfig(const string& config)

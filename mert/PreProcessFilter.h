@@ -1,5 +1,6 @@
-#ifndef MERT_PREPROCESSFILTER_H_
-#define MERT_PREPROCESSFILTER_H_
+#pragma once
+
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 
 #include <string>
 
@@ -28,4 +29,4 @@ private:
 
 }
 
-#endif  // MERT_PREPROCESSFILTER_H_
+#endif
