@@ -42,11 +42,14 @@ public:
 	                        , ScoreComponentCollection &scoreBreakdown
 	                        , ScoreComponentCollection &estimatedFutureScore) const;
 
-	//Fabienne Braune : Do nothing in here
+
+	//Fabienne Braune : Do nothing in there
 	void Evaluate(const InputType &input
 	                        , const InputPath &inputPath
+	                        , const TargetPhrase &targetPhrase
 	                        , ScoreComponentCollection &scoreBreakdown) const
 	{}
+
 
     //Fabienne Braune : Call VW and re-score translation options
 	void Evaluate(const InputType &input

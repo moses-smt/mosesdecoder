@@ -202,6 +202,14 @@ Parameter::Parameter()
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
 
   AddParam("placeholder-factor", "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
+
+  AddParam("syntax-context", "Input data annotated with linguistic syntactic labels");
+
+  AddParam("weight-psd", "psd", "weight for phrase sense disambiguation");
+  AddParam("psd-model", "psdm", "classifier model for phrase sense disambiguation");
+  AddParam("psd-index", "psdi", "file with indexes of target phrases");
+  AddParam("psd-context", "psdc", "input data with rich factored annotation for PSD");
+  AddParam("psd-config", "psdf", "PSD configuration file for feature extraction");
 }
 
 Parameter::~Parameter()

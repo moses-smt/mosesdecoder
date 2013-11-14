@@ -2057,7 +2057,7 @@ sub create_ini {
 
    if(defined $_PSD_MODEL)
      {
-	$feature_spec .= "ContextFeature";
+	$feature_spec .= "ContextFeature\n";
 	$weight_spec .= "ContextFeature0= 0.1\n";
      }
         

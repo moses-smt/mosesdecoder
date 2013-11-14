@@ -159,6 +159,9 @@ public:
   //read parse file
   int ReadParse(std::istream&, Moses::InputType *inputType);
 
+private :
+  void SetPSDContext(const std::vector<std::string> &psdFact, Moses::InputType *inputType);
+
 };
 
 }

@@ -183,6 +183,18 @@ InputType*IOWrapper::GetInput(InputType* inputType)
       if (x>=m_translationId) m_translationId = x+1;
     } else inputType->SetTranslationId(m_translationId++);
 
+    //damt hiero : also read context file
+    if(!ReadContext(*m_contextStream, inputType))
+    {
+    	cerr << "Warning : If using psd, no context read" << endl;
+    }
+
+    //std::cerr << "Reading input parse tree... " << std::endl;
+    if(!ReadParse(*m_parseStream, inputType))
+    {
+    	cerr << "Warning : If using soft syntax, no context read" << endl;
+    }
+
     return inputType;
   } else {
     delete inputType;
@@ -840,7 +852,22 @@ void IOWrapper::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const A
   }
 }
 
-//Context feature : TODO put into context feature
+//Damt hiero : read psd context file
+int IOWrapper::ReadContext(std::istream& in, InputType* input)
+{
+    string line;
+    if (getline(in, line, '\n').eof())
+    return 0;
+
+    //std::cerr << "READING CONTEXT : " << line << std::endl;
+
+    vector<string> words = Tokenize(line, " ");
+    for (size_t i = 0; i < words.size(); i++) {
+    SetPSDContext(Tokenize(words[i], "|"),input);
+    }
+    return 1;
+}
+
 //Damt hiero : read input parse tree
 int IOWrapper::ReadParse(std::istream& in, InputType* input)
 {
@@ -859,6 +886,17 @@ int IOWrapper::ReadParse(std::istream& in, InputType* input)
     //input->m_parseTree->Print(sourceSize);
 
     return 1;
+}
+
+void IOWrapper::SetPSDContext(const std::vector<std::string> &psdFact, InputType* input)
+{
+    //damt hiero debugging
+    /*std::vector<std::string> :: const_iterator itr_fact;
+    for(itr_fact = psdFact.begin(); itr_fact != psdFact.end(); itr_fact++)
+    {
+        std::cerr << "Added source factor : " << *itr_fact << std::endl;
+    }*/
+    input->m_PSDContext.push_back(psdFact);
 }
 
 }
