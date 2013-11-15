@@ -79,8 +79,9 @@ MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vect
   }
   delete[] mosesargv;
 
-  //m_bleuScoreFeature = staticData.GetBleuScoreFeature(); TODO
-  assert(false);
+  const std::vector<BleuScoreFeature*> &bleuFFs = BleuScoreFeature::GetColl();
+  assert(bleuFFs.size() == 1);
+  m_bleuScoreFeature = bleuFFs[0];
 }
 
 void MosesDecoder::cleanup(bool chartDecoding)
