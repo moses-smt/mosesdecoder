@@ -58,6 +58,15 @@ namespace Moses
 #define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
 
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)
+// gcc nth_element() bug
+#define NTH_ELEMENT3(begin, middle, end) std::sort(begin, end)
+#define NTH_ELEMENT4(begin, middle, end, orderer) std::sort(begin, end, orderer)
+#else
+#define NTH_ELEMENT3(begin, middle, end) std::nth_element(begin, middle, end)
+#define NTH_ELEMENT4(begin, middle, end, orderer) std::nth_element(begin, middle, end, orderer)
+#endif
+
 //! delete white spaces at beginning and end of string
 const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
 const std::string ToLower(const std::string& str);

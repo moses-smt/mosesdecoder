@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"
 #include "BleuScorer.h"
+#include "Util.h"
 
 using namespace std;
 using namespace MosesTuning;
@@ -232,7 +233,7 @@ int main(int argc, char** argv)
 
     float sample_threshold = -1.0;
     if (samples.size() > n_samples) {
-      nth_element(scores.begin(), scores.begin() + (n_samples-1), scores.end());
+      NTH_ELEMENT3(scores.begin(), scores.begin() + (n_samples-1), scores.end());
       sample_threshold = 0.99999-scores[n_samples-1];
     }
 
