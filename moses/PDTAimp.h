@@ -47,7 +47,7 @@ protected:
     m_inputFeature = staticData.GetInputFeature();
 
     if (m_inputFeature) {
-      const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
+      const PhraseDictionary *firstPt = PhraseDictionary::GetColl()[0];
       if (firstPt == m_obj) {
         m_numInputScores = m_inputFeature->GetNumScoreComponents();
       }

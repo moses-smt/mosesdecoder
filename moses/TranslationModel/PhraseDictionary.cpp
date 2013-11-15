@@ -31,12 +31,14 @@ using namespace std;
 
 namespace Moses
 {
+std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
 PhraseDictionary::PhraseDictionary(const std::string &line)
   :DecodeFeature(line)
   ,m_tableLimit(20) // default
   ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
+	s_staticColl.push_back(this);
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const

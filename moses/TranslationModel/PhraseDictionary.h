@@ -59,6 +59,10 @@ class ChartParser;
 class PhraseDictionary :  public DecodeFeature
 {
 public:
+  static const std::vector<PhraseDictionary*>& GetColl() {
+	return s_staticColl;
+  }
+
   PhraseDictionary(const std::string &line);
 
   virtual ~PhraseDictionary() {
@@ -110,6 +114,8 @@ public:
   virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
 
 protected:
+  static std::vector<PhraseDictionary*> s_staticColl;
+
   size_t m_tableLimit;
   std::string m_filePath;
 

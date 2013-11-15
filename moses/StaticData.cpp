@@ -650,6 +650,7 @@ bool StaticData::LoadDecodeGraphs()
 {
   const vector<string> &mappingVector = m_parameter->GetParam("mapping");
   const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
+  const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
 
   const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
@@ -687,14 +688,14 @@ bool StaticData::LoadDecodeGraphs()
     DecodeStep* decodeStep = NULL;
     switch (decodeType) {
     case Translate:
-      if(index>=m_phraseDictionary.size()) {
+      if(index>=pts.size()) {
         stringstream strme;
         strme << "No phrase dictionary with index "
               << index << " available!";
         UserMessage::Add(strme.str());
         CHECK(false);
       }
-      decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev, *featuresRemaining);
+      decodeStep = new DecodeStepTranslation(pts[index], prev, *featuresRemaining);
       break;
     case Generate:
       if(index>=m_generationDictionary.size()) {
@@ -897,7 +898,6 @@ void StaticData::LoadFeatureFunctions()
     bool doLoad = true;
 
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
-      m_phraseDictionary.push_back(ffCast);
       doLoad = false;
     } else if (const GenerationDictionary *ffCast
                = dynamic_cast<const GenerationDictionary*>(ff)) {
@@ -920,8 +920,9 @@ void StaticData::LoadFeatureFunctions()
     }
   }
 
-  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-    PhraseDictionary *pt = m_phraseDictionary[i];
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    PhraseDictionary *pt = pts[i];
     pt->Load();
   }
 
@@ -1078,8 +1079,9 @@ void StaticData::OverrideFeatures()
 
 void StaticData::CheckLEGACYPT()
 {
-  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-    const PhraseDictionary *phraseDictionary = m_phraseDictionary[i];
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    const PhraseDictionary *phraseDictionary = pts[i];
     if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
       m_useLegacyPT = true;
       return;
