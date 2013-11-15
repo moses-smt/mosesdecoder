@@ -324,7 +324,7 @@ public:
                        m_obj->m_tableLimit : costs.size());
 
     // find the nth phrase according to future cost
-    std::nth_element(costs.begin(),nth ,costs.end());
+    NTH_ELEMENT3(costs.begin(),nth ,costs.end());
 
     // add n top phrases to the return list
     for(std::vector<std::pair<float,size_t> >::iterator

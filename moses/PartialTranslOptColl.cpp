@@ -82,7 +82,7 @@ void PartialTranslOptColl::Prune()
   //	TRACE_ERR( "pruning partial translation options from size " << m_list.size() << std::endl);
 
   // find nth element
-  nth_element(m_list.begin(),
+  NTH_ELEMENT4(m_list.begin(),
               m_list.begin() + m_maxSize,
               m_list.end(),
               ComparePartialTranslationOption);

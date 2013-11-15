@@ -129,7 +129,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
     TargetPhraseVector::iterator nth =
       (m_tableLimit == 0 || tpv->size() < m_tableLimit) ?
       tpv->end() : tpv->begin() + m_tableLimit;
-    std::nth_element(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
+    NTH_ELEMENT4(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
     for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++) {
       TargetPhrase *tp = new TargetPhrase(*it);
       phraseColl->Add(tp);

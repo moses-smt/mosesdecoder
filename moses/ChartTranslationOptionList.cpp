@@ -102,7 +102,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
 
   // Prune if bursting
   if (m_size == m_ruleLimit * 2) {
-    std::nth_element(m_collection.begin(),
+	NTH_ELEMENT4(m_collection.begin(),
                      m_collection.begin() + m_ruleLimit - 1,
                      m_collection.begin() + m_size,
                      ChartTranslationOptionOrderer());
@@ -128,7 +128,7 @@ void ChartTranslationOptionList::ApplyThreshold()
     assert(m_size < m_ruleLimit * 2);
     // Reduce the list to the best m_ruleLimit options.  The remaining
     // options can be overwritten on subsequent calls to Add().
-    std::nth_element(m_collection.begin(),
+    NTH_ELEMENT4(m_collection.begin(),
                      m_collection.begin()+m_ruleLimit,
                      m_collection.begin()+m_size,
                      ChartTranslationOptionOrderer());
