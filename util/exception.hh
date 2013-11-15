@@ -114,6 +114,13 @@ class ErrnoException : public Exception {
     int errno_;
 };
 
+// file wasn't there, or couldn't be open for some reason
+class FileOpenException : public Exception {
+  public:
+	FileOpenException() throw() {}
+    ~FileOpenException() throw() {}
+};
+
 // Utilities for overflow checking.  
 class OverflowException : public Exception {
   public:
