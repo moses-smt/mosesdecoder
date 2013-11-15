@@ -144,7 +144,10 @@ private:
   mert::Vocabulary* m_vocab;
   std::map<std::string, std::string> m_config;
   std::vector<int> m_factors;
+
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
   PreProcessFilter* m_filter;
+#endif
 
 protected:
   ScoreData* m_score_data;

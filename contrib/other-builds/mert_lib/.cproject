@@ -11,11 +11,11 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -46,8 +46,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.lib.debug.1721952013.933309045" name="PreProcessFilter.h" rcbsApplicability="disable" resourcePath="mert/PreProcessFilter.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="mert/UtilTest.cpp|mert/TimerTest.cpp|mert/SingletonTest.cpp|mert/PointTest.cpp|mert/OptimizerFactoryTest.cpp|mert/NgramTest.cpp|mert/FeatureDataTest.cpp|mert/DataTest.cpp|mert/ReferenceTest.cpp|mert/VocabularyTest.cpp|mert/extractor.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="mert/PreProcessFilter.h|mert/PreProcessFilter.cpp|mert/UtilTest.cpp|mert/TimerTest.cpp|mert/SingletonTest.cpp|mert/PointTest.cpp|mert/OptimizerFactoryTest.cpp|mert/NgramTest.cpp|mert/FeatureDataTest.cpp|mert/DataTest.cpp|mert/ReferenceTest.cpp|mert/VocabularyTest.cpp|mert/extractor.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -63,11 +64,11 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">

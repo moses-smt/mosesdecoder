@@ -63,14 +63,15 @@
 									<listOptionValue builtIn="false" value="/opt/local/lib"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.998577284" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="moses"/>
+									<listOptionValue builtIn="false" value="irstlm"/>
 									<listOptionValue builtIn="false" value="dstruct"/>
-									<listOptionValue builtIn="false" value="MurmurHash3"/>
-									<listOptionValue builtIn="false" value="dalm"/>
 									<listOptionValue builtIn="false" value="flm"/>
 									<listOptionValue builtIn="false" value="oolm"/>
 									<listOptionValue builtIn="false" value="lattice"/>
 									<listOptionValue builtIn="false" value="misc"/>
-									<listOptionValue builtIn="false" value="moses"/>
+									<listOptionValue builtIn="false" value="dalm"/>
+									<listOptionValue builtIn="false" value="MurmurHash3"/>
 									<listOptionValue builtIn="false" value="search"/>
 									<listOptionValue builtIn="false" value="RandLM"/>
 									<listOptionValue builtIn="false" value="OnDiskPt"/>

@@ -1,10 +1,11 @@
 
+#include <boost/functional/hash.hpp>
 #include "DALM.h"
-#include "moses/FactorCollection.h"
 #include "logger.h"
 //#include "DALM/include/lm.h"
-#include "lm.h"
+#include "dalm-header.h"
 #include "vocabulary.h"
+#include "moses/FactorCollection.h"
 
 using namespace std;
 
@@ -109,38 +110,32 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
 	  push(ngram, m_nGramOrder, wid);
   }
 
-  // last word
+  // last word is unk?
   ret.unknown = (wid == DALM_UNK_WORD);
 
-  float prob = m_lm->query(ngram, m_nGramOrder);
-  ret.score = TransformLMScore(prob);
+  // calc score. Doesn't handle unk yet
+  float score = m_lm->query(ngram, m_nGramOrder);
+  score = TransformLMScore(score);
+  ret.score = score;
 
-  // use last word as state info
-  const Factor *factor;
-  size_t hash_value(const Factor &f);
-  if (contextFactor.size()) {
-    factor = contextFactor.back()->GetFactor(m_factorType);
-  } else {
-    factor = NULL;
+  // hash of n-1 words to use as state
+  size_t hash = 0;
+  for (size_t i = 1; i < contextFactor.size(); ++i) {
+	  const Word &word = *contextFactor[i];
+	  const Factor *factor = word.GetFactor(m_factorType);
+      boost::hash_combine(hash, factor);
   }
 
-  (*finalState) = (State*) factor;
+  (*finalState) = (State*) hash;
 
   return ret;
 }
 
 DALM::VocabId LanguageModelDALM::GetVocabId(const Factor *factor) const
 {
-	VocabMap::left_map::const_iterator iter;
-	iter = m_vocabMap.left.find(factor);
-	if (iter != m_vocabMap.left.end()) {
-		return iter->second;
-	}
-	else {
-		StringPiece str = factor->GetString();
-		DALM::VocabId wid = m_vocab->lookup(str.as_string().c_str());
-		return wid;
-	}
+	StringPiece str = factor->GetString();
+	DALM::VocabId wid = m_vocab->lookup(str.as_string().c_str());
+	return wid;
 }
 
 }
