@@ -4,8 +4,11 @@
 #include "Vocabulary.h"
 #include "Util.h"
 #include "Singleton.h"
-#include "PreProcessFilter.h"
 #include "util/tokenize_piece.hh"
+
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
+#include "PreProcessFilter.h"
+#endif
 
 using namespace std;
 
@@ -32,7 +35,9 @@ Scorer::Scorer(const string& name, const string& config)
 Scorer::~Scorer()
 {
   Singleton<mert::Vocabulary>::Delete();
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
   delete m_filter;
+#endif
 }
 
 void Scorer::InitConfig(const string& config)
@@ -121,7 +126,11 @@ void Scorer::setFactors(const string& factors)
 void Scorer::setFilter(const string& filterCommand)
 {
   if (filterCommand.empty()) return;
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
   m_filter = new PreProcessFilter(filterCommand);
+#else
+  throw runtime_error("Cannot use filter command as mert was compiled with non-gcc compiler");
+#endif
 }
 
 /**
@@ -161,11 +170,13 @@ string Scorer::applyFactors(const string& sentence) const
  */
 string Scorer::applyFilter(const string& sentence) const
 {
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
   if (m_filter) {
     return m_filter->ProcessSentence(sentence);
   } else {
     return sentence;
   }
+#endif
 }
 
 float Scorer::score(const candidates_t& candidates) const

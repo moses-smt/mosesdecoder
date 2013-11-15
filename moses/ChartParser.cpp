@@ -99,7 +99,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
       if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
-        targetPhrase->SetProperty("Tree","( " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" )");
+        targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
       }
 
       // chart rule
