@@ -34,10 +34,13 @@ using namespace std;
 
 namespace Moses
 {
+std::vector<GenerationDictionary*> GenerationDictionary::s_staticColl;
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
   : DecodeFeature(line)
 {
+  s_staticColl.push_back(this);
+
   ReadParameters();
 }
 

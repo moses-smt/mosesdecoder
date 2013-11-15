@@ -651,6 +651,7 @@ bool StaticData::LoadDecodeGraphs()
   const vector<string> &mappingVector = m_parameter->GetParam("mapping");
   const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
   const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
+  const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
   const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
@@ -698,14 +699,14 @@ bool StaticData::LoadDecodeGraphs()
       decodeStep = new DecodeStepTranslation(pts[index], prev, *featuresRemaining);
       break;
     case Generate:
-      if(index>=m_generationDictionary.size()) {
+      if(index>=gens.size()) {
         stringstream strme;
         strme << "No generation dictionary with index "
               << index << " available!";
         UserMessage::Add(strme.str());
         CHECK(false);
       }
-      decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev, *featuresRemaining);
+      decodeStep = new DecodeStepGeneration(gens[index], prev, *featuresRemaining);
       break;
     case InsertNullFertilityWord:
       CHECK(!"Please implement NullFertilityInsertion.");
@@ -901,7 +902,7 @@ void StaticData::LoadFeatureFunctions()
       doLoad = false;
     } else if (const GenerationDictionary *ffCast
                = dynamic_cast<const GenerationDictionary*>(ff)) {
-      m_generationDictionary.push_back(ffCast);
+    	// do nothing
     } else if (WordPenaltyProducer *ffCast
                = dynamic_cast<WordPenaltyProducer*>(ff)) {
       CHECK(m_wpProducer == NULL); // max 1 feature;
