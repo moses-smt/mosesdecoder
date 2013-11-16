@@ -31,8 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/functional/hash.hpp>
 
 #include "Word.h"
-#include "WordsBitmap.h"
-#include "TypeDef.h"
 #include "Util.h"
 
 #include "util/string_piece.hh"
@@ -40,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 class FactorMask;
+class WordsRange;
 
 /** Representation of a phrase, ie. a contiguous number of words.
  *  Wrapper for vector of words
@@ -62,6 +61,13 @@ public:
   explicit Phrase(size_t reserveSize);
   /** create phrase from vectors of words	*/
   explicit Phrase(const std::vector< const Word* > &mergeWords);
+
+  /* This isn't a swap function because classes inherit from Phrase and might
+   * not override swap, which would be bad.
+   */
+  void SwapWords(Phrase &other) {
+    swap(m_words, other.m_words);
+  }
 
   /** destructor */
   virtual ~Phrase();
@@ -105,6 +111,15 @@ public:
   inline Word &GetWord(size_t pos) {
     return m_words[pos];
   }
+
+  inline Word &Front() {
+    return m_words[0];
+  }
+
+  inline Word &Back() {
+    return m_words[GetSize() - 1];
+  }
+
   //! particular factor at a particular position
   inline const Factor *GetFactor(size_t pos, FactorType factorType) const {
     const Word &ptr = m_words[pos];
@@ -120,6 +135,8 @@ public:
   //! whether the 2D vector is a substring of this phrase
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
                 , const std::vector<FactorType> &inputFactor) const;
+
+  size_t Find(const Phrase &sought, int maxUnknown) const;
 
   //! create an empty word at the end of the phrase
   Word &AddWord();
@@ -140,6 +157,8 @@ public:
     CHECK(pos < m_words.size());
     m_words.erase(m_words.begin() + pos);
   }
+
+  void InitStartEndWord();
 
   //! create new phrase class that is a substring of this phrase
   Phrase GetSubString(const WordsRange &wordsRange) const;

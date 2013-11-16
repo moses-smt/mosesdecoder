@@ -1,6 +1,7 @@
 #include "Manager.h"
 #include "Timer.h"
 #include "SearchNormal.h"
+#include "SentenceStats.h"
 
 using namespace std;
 
@@ -16,7 +17,6 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_initialTargetPhrase(source.m_initialTargetPhrase)
   ,m_start(clock())
   ,interrupted_flag(0)
   ,m_transOptColl(transOptColl)
@@ -24,22 +24,15 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   VERBOSE(1, "Translating: " << m_source << endl);
   const StaticData &staticData = StaticData::Instance();
 
-  if (m_initialTargetPhrase.GetSize() > 0) {
-    VERBOSE(1, "Search extends partial output: " << m_initialTargetPhrase<<endl);
-  }
-
   // only if constraint decoding (having to match a specified output)
-  long sentenceID = source.GetTranslationId();
-  m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-  if (m_constraint) {
-    VERBOSE(1, "Search constraint to output: " << *m_constraint<<endl);
-  }
+  // long sentenceID = source.GetTranslationId();
 
   // initialize the stacks: create data structure and set limits
   std::vector < HypothesisStackNormal >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),staticData.GetMinHypoStackDiversity());
+    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),
+                                        staticData.GetMinHypoStackDiversity());
     sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
 
     m_hypoStackColl[ind] = sourceHypoColl;
@@ -62,7 +55,7 @@ void SearchNormal::ProcessSentence()
   clock_t t=0; // used to track time for steps
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTargetPhrase);
+  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack
@@ -297,12 +290,12 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
     IFVERBOSE(2) {
       t = clock();
     }
-    newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+    newHypo = hypothesis.CreateNext(transOpt);
     IFVERBOSE(2) {
       stats.AddTimeBuildHyp( clock()-t );
     }
     if (newHypo==NULL) return;
-    newHypo->CalcScore(m_transOptColl.GetFutureScore());
+    newHypo->Evaluate(m_transOptColl.GetFutureScore());
   } else
     // early discarding: check if hypothesis is too bad to build
   {
@@ -332,7 +325,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
     IFVERBOSE(2) {
       t = clock();
     }
-    newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+    newHypo = hypothesis.CreateNext(transOpt);
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
       stats.AddTimeBuildHyp( clock()-t );

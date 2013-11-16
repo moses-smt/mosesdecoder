@@ -64,12 +64,6 @@ private:
 
   ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
 
-  //! Some features should be calculated prior to search
-  boost::unordered_map<TargetPhrase,ScoreComponentCollection, TargetPhraseHasher, TargetPhraseComparator> m_precalculatedScores;
-
-  //! Pre-calculate most stateless feature values
-  void PreCalculateScores();
-
 public:
   ChartManager(InputType const& source);
   ~ChartManager();
@@ -91,12 +85,17 @@ public:
     return *m_sentenceStats;
   }
 
+  //DIMw
+  const ChartCellCollection& GetChartCellCollection() const {
+    return m_hypoStackColl;
+  }
+
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
    * currently an empty function
    */
-  void CalcDecoderStatistics() const
-  { }
+  void CalcDecoderStatistics() const {
+  }
 
   void ResetSentenceStats(const InputType& source) {
     m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
@@ -106,11 +105,6 @@ public:
   unsigned GetNextHypoId() {
     return m_hypothesisId++;
   }
-
-  //! Access the pre-calculated values
-  void InsertPreCalculatedScores(const TargetPhrase& targetPhrase,
-                                 ScoreComponentCollection* scoreBreakdown) const;
-
 };
 
 }

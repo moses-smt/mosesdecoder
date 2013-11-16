@@ -1698,14 +1698,8 @@ sub write_mira_config {
     my $tuning_decoder_settings = &check_and_get("TUNING:decoder-settings");
     my $start_weights = &backoff_and_get("TUNING:start-weight-config");
     my $tuning_settings = &check_and_get("TUNING:tuning-settings");
-    my $jobs = 10; # this overwrites the default in training-expt.perl
-    if ($tuning_settings =~ /^(.*)--jobs (\d+)(.*)$/) {
-	$jobs = $2;
-	$tuning_settings = $1.$3;
-	$tuning_settings =~ s/ +/ /;
-	$tuning_settings =~ s/^ //;
-	$tuning_settings =~ s/ $//;
-    }
+
+    my $parallel_settings = &backoff_and_get("TUNING:parallel-settings");
     my $use_jackknife = &backoff_and_get("TUNING:use-jackknife");
 
     # are we tuning a meta feature?
@@ -1718,8 +1712,8 @@ sub write_mira_config {
 	$tune_filtered_ini_start =  $expt_dir."/".$tune_filtered_ini_start.".start";
 	if ($start_weights) {
 	    # apply start weights to filtered ini file, and pass the new ini to mira
-	    print "DEBUG: $RealBin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start \n";
-	    system("$RealBin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start");
+	    print "DEBUG: $RealBin/support/substitute-weights.perl $start_weights $tune_filtered_ini $tune_filtered_ini_start \n";
+	    system("$RealBin/support/substitute-weights.perl $start_weights $tune_filtered_ini $tune_filtered_ini_start");
 	} 
     }
 
@@ -1794,7 +1788,11 @@ sub write_mira_config {
     }
     print CFG "decoder-settings=".$tuning_decoder_settings." -text-type \"dev\"\n";    
     print CFG "hours=48 \n"; 
-    print CFG "jobs=$jobs \n";
+    if ($parallel_settings) {
+	    foreach my $setting (split(" ", $parallel_settings)) {
+	      print  CFG $setting."\n";
+	    }
+    }
     print CFG "extra-args=".$tuning_settings."\n\n";   
     print CFG "[devtest] \n";
     if (&get("TRAINING:hierarchical-rule-set")) {
@@ -2164,11 +2162,29 @@ sub get_config_tables {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,$osm, @LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
 
+    if($osm){
+      
+      my $osm_settings = &get("TRAINING:operation-sequence-model-settings"); 
+     
+
+	if($osm_settings =~ /factor/){
+	
+		$cmd .= "-osm-model $osm/ ";
+		my $find = "--factor";
+		my $replace = "-osm-setting";
+		$osm_settings =~ s/$find/$replace/g;
+      		$cmd .= "$osm_settings ";       
+       }
+	else{
+	 $cmd .= "-osm-model $osm/operationLM.bin ";
+	}
+    }
+	
     # sparse lexical features provide additional content for config file
     $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
 
@@ -2552,6 +2568,8 @@ sub define_tuningevaluation_filter {
 
     # get model, and whether suffix array is used. Determines the pt implementation.
     my $sa_exec_dir = &get("TRAINING:suffix-array");
+    my $sa_extractors = &get("GENERAL:sa_extractors");
+    $sa_extractors = 1 unless $sa_extractors;
 
     my ($ptImpl, $numFF);
     if ($hierarchical) {
@@ -2564,7 +2582,7 @@ sub define_tuningevaluation_filter {
 	}
     }
     else {
-	$ptImpl = 0; # phrase-based
+    	$ptImpl = 0; # phrase-based
     }
 
     # config file specified?
@@ -2589,11 +2607,14 @@ sub define_tuningevaluation_filter {
     # filter command
     if ($sa_exec_dir) {
 	# suffix array
-	$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
+	$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir $sa_extractors \n";
 	
 	my $escaped_filter_dir = $filter_dir;
 	$escaped_filter_dir =~ s/\//\\\\\//g;
 	$cmd .= "cat $config | sed s/10\\ 0\\ 0\\ 7.*/10\\ 0\\ 0\\ 7\\ $escaped_filter_dir/g > $filter_dir/moses.ini \n";
+    # kind of a hack -- the correct thing would be to make the generation of the config file ($filter_dir/moses.ini) 
+    # set the PhraseDictionaryALSuffixArray's path to the filtered directory rather than to the suffix array itself 
+    $cmd .= "sed -i 's%path=$phrase_translation_table%path=$filter_dir%' $filter_dir/moses.ini\n";
     }
     else {
 	# normal phrase table
@@ -2625,6 +2646,7 @@ sub define_evaluation_decode {
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
     my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
     my $report_precision_by_coverage = &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
+    my $use_wade = &backoff_and_get("EVALUATION:$set:wade");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
 
@@ -2644,6 +2666,9 @@ sub define_evaluation_decode {
       else {
         $settings .= " -t";
       }
+    }
+    if ($use_wade) {
+      $settings .= " -T $system_output.details";
     }
     $settings .= " -text-type \"test\"";
 

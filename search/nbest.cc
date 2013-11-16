@@ -1,6 +1,7 @@
 #include "search/nbest.hh"
 
 #include "util/pool.hh"
+#include "moses/Util.h"
 
 #include <algorithm>
 #include <functional>
@@ -16,7 +17,7 @@ NBestList::NBestList(std::vector<PartialEdge> &partials, util::Pool &entry_pool,
   std::vector<PartialEdge>::iterator end;
   if (partials.size() > keep) {
     end = partials.begin() + keep;
-    std::nth_element(partials.begin(), end, partials.end(), std::greater<PartialEdge>());
+    NTH_ELEMENT4(partials.begin(), end, partials.end(), std::greater<PartialEdge>());
   } else {
     end = partials.end();
   }

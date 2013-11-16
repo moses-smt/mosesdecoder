@@ -4,6 +4,7 @@
 #include <vector>
 #include "Search.h"
 #include "HypothesisStackCubePruning.h"
+#include "SentenceStats.h"
 
 namespace Moses
 {
@@ -20,7 +21,6 @@ protected:
   const InputType &m_source;
   std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */
   // no of elements = no of words in source + 1
-  TargetPhrase m_initialTargetPhrase; /**< used to seed 1st hypo */
   clock_t m_start; /**< used to track time spend on translation */
   const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 

@@ -1,0 +1,45 @@
+# -*- Makefile -*-
+# make module for tuning a system
+
+#tune.input ?= $(error missing 
+#tuned_moses_ini ?= tuning/moses.ini.${run_id}
+#$(tuned_moses_ini): | ${untuned_moses_ini}
+#$(tuned_moses_ini): | ${untuned_moses_ini}
+
+# make sure that all necessary variables are set
+untuned_moses_ini ?= $(error Fatal error: the required variable untuned_moses_ini is not set)
+tuning_input      ?= $(error Fatal error: the required variable tuning_input is not set)
+tuning_reference  ?= $(error Fatal error: the required variable tuning_reference is not set)
+tuning_itype      ?= $(error Fatal error: the required variable tuning_itype is not set)
+tuning_wdir       ?= $(error Fatal error: the required variable tuning_wdir is not set)
+
+$tuning_root_dir   ?= ${MOSES_ROOT}
+
+
+
+# default tuning parameters
+mert.nbest           ?= 100
+mert.decoder-threads ?=   4
+tuning/%/tmp/moses.ini: mertcmd = 
+tuning/%/tmp/moses.ini: mert_flags += --working-dir $(CURDIR)/tuning/$*/tmp
+tuning/%/tmp/moses.ini: mert_flags += --decoder-flags "${mert.decoder_flags} -inputtype ${input-type}" 
+tuning/%/tmp/moses.ini: mert_flags += --rootdir ${MOSES_ROOT}/scripts
+tuning/%/tmp/moses.ini: mert_flags += --mertdir ${MOSES_BIN}
+tuning/%/tmp/moses.ini: mert_flags += ${mert.options}
+tuning/%/tmp/moses.ini: ${untuned_moses_ini}
+	$(info TUNING: ${tune} ${tune-src} ${tune-ref} ${decode} ${untuned_moses_ini} ${mert_flags})
+	@mkdir -p $(@D)
+	@mkdir $@.lock
+	@echo $(call lockline) > $@.lock/owner
+	${tune} ${mert_flags} ${tune-src} ${tune-ref} ${decode} ${untuned_moses_ini} 
+	@rm $@.lock/owner
+	@rmdir $@.lock
+
+tuning/%/moses.tuned.ini: tuning/%/tmp/moses.ini
+	@mkdir -p $(@D)
+	@mkdir $@.lock
+	@echo $(call lockline) > $@.lock/owner
+	${apply-weights} tuning/$*/tmp/moses.ini < ${untuned_moses_ini} > $@_
+	@mv $@_ $@
+	@rm $@.lock/owner
+	@rmdir $@.lock

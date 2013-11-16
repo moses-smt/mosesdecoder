@@ -1,0 +1,289 @@
+# -*- makefile -*-
+
+# Makefile for building a Moses system from a word-aligned corpus
+# (c) 2011 - 2012 Ulrich Germann
+
+# by default, we use good-turing smoothing for phrase tables
+# (is that actually worth it?)
+
+# the following variables should be defined in moses-parameters.make:
+# ptable.max-phrase-length 
+# ptable.smoothing 
+# ptable.source-factors 
+# ptable.target-factors
+
+word-alignment ?= fast
+pll.txt1 = ${WDIR}/crp/trn/aln/${word-alignment}/${L1}.txt.gz
+pll.txt2 = ${WDIR}/crp/trn/aln/${word-alignment}/${L2}.txt.gz
+pll.aln  = ${WDIR}/crp/trn/aln/${word-alignment}/${L1}-${L2}.symal.gz
+
+define phrase_extract_cmd
+${moses.extract-phrases} ${moses.extract} $(1:.aln.gz=) ${L1} ${L2} \
+-l ${ptable.max-phrase-length} -m $2
+endef
+
+#################################################################################
+# create_phrase_table: add rules to create a standard phrase table
+# ADD RULES TO CREATE A STANDARD PHRASE TABLE FROM 
+# $(pll.txt1),$(pll.txt2),$(pll.aln) that are specified as target-specific
+# variables like this:
+# $1.txt.gz: pll.txt1 = ...
+# $1.txt.gz: pll.txt2 = ...
+# $1.txt.gz: pll.aln  = ...
+# This function is normally called indirectly via $(eval $(call add_bin_pt,...))
+#
+# Note: this section should be improved:
+# - split into shards
+# - create bash file with jobs
+# - run batch file in parallel 
+#--------------------------------------------------------------------------------
+define create_phrase_table
+
+SHARDS = $$(foreach x, $${L1} $${L2} aln, $1.shards/$$x-DONE)
+.SECONDARY:    $1.txt.gz
+.SECONDARY:    $1.${L2}-given-${L1}.lex.gz 
+.SECONDARY:    $1.${L1}-given-${L2}.lex.gz
+.INTERMEDIATE: $1.txt.gz
+.INTERMEDIATE: $$(SHARDS)
+.INTERMEDIATE: $1.tmp/fwd.scored.gz
+.INTERMEDIATE: $1.tmp/bwd/scoring.done
+.INTERMEDIATE: $1.${L2}-given-${L1}.lex.gz 
+.INTERMEDIATE: $1.${L1}-given-${L2}.lex.gz
+.INTERMEDIATE: $1.shards/${L1}-DONE
+.INTERMEDIATE: $1.shards/${L2}-DONE
+.INTERMEDIATE: $1.shards/aln-DONE
+.INTERMEDIATE: $1.shards/extract.batch
+.INTERMEDIATE: $1.shards/extract.done
+
+$1.shards/${L1}-DONE: $(if $2,$2,$$(pll.txt1))
+	$$(lock)
+	zcat -f $$< \
+	| ${parallel} --pipe -k -N ${SHARDSIZE} "gzip > $${@D}/{#}.${L1}.gz" 
+	touch $$@
+	$$(unlock)
+
+$1.shards/${L2}-DONE: $(if $3,$3,$$(pll.txt2))
+	$$(lock)
+	zcat -f $$< \
+	| ${parallel} --pipe -k -N ${SHARDSIZE} "gzip > $${@D}/{#}.${L2}.gz"
+	$$(unlock)
+
+$1.shards/aln-DONE: $(if $4,$4,$$(pll.aln))
+	$$(lock)
+	zcat -f $$< \
+	| ${parallel} --pipe -k -N ${SHARDSIZE} "gzip > $${@D}/{#}.aln.gz"
+	$$(unlock)
+
+$1.shards/extract.batch: $$(SHARDS)
+	$$(info SHARDS $1 $$(shell ls $${@D}/*.aln.gz))
+	$$(lock)
+	echo -n '' > $$@_
+	$$(foreach x, $$(shell ls $${@D}/*.aln.gz 2>/dev/null),\
+	echo "$$(call phrase_extract_cmd,$$x,$$(word 1,$${dmodels}))" >> $$@_;\
+	$$(foreach i, $$(shell seq 2 $$(words $${dmodels})),\
+	echo "$$(call phrase_extract_cmd,$$x,$$(word $$i,$${dmodels})) -x" >> $$@_))
+	mv $$@_ $$@;
+	$$(unlock)
+
+$1.shards/extract.done: $1.shards/extract.batch
+	$$(lock)
+	${parallel} -j$(shell echo $$((${NUMCORES}/1))) < $1.shards/extract.batch
+	touch $$@
+	$$(unlock)
+
+ptable: $1.txt.gz
+$1.txt.gz: | ${merge-sorted}
+$1.txt.gz: | ${MOSES_BIN}/consolidate
+$1.txt.gz: | $1.tmp/fwd.scored.gz
+$1.txt.gz: | $1.tmp/bwd/scoring.done
+	$$(lock)
+	${MOSES_BIN}/consolidate \
+	<(zcat -f $1.tmp/fwd.scored.gz) \
+	<(${merge-sorted} $1.tmp/bwd/scored.*.gz) \
+	/dev/stdout \
+	$(if $(ptable.smoothing), $(ptable.smoothing) $1.tmp/fwd.coc) \
+	| gzip > $$@_ && mv $$@_ $$@
+	$$(unlock)
+
+$1.tmp/fwd.scored.gz: | $(merge-sorted)
+$1.tmp/fwd.scored.gz: | $1.shards/extract.done
+$1.tmp/fwd.scored.gz: | $1.${L1}-given-${L2}.lex.gz
+	$$(lock)
+	$(merge-sorted) $1.shards/*.fwd.gz \
+	| $(moses.score-phrases) ${MOSES_BIN}/score - $1.${L1}-given-${L2}.lex.gz \
+	$${@D}/fwd $(ptable.smoothing) && mv $$@_ $$@
+	$$(unlock)
+
+$1.tmp/bwd/scoring.done: | $1.shards/extract.done
+$1.tmp/bwd/scoring.done: | $1.${L2}-given-${L1}.lex.gz
+	$$(lock)
+	$(merge-sorted) $1.shards/*.bwd.gz \
+	| ${moses.score-phrases} ${MOSES_BIN}/score - $1.${L2}-given-${L1}.lex.gz \
+	$${@D}/scored "$(ptable.smoothing)" --Inverse && touch $$@
+	$$(unlock)
+
+# reminder: $2,$3,$4 = L1text, L2text, alignment
+$1.${L2}-given-${L1}.lex.gz: | $1.${L1}-given-${L2}.lex.gz 
+$1.${L1}-given-${L2}.lex.gz: | $(if $2,$2,$$(pll.txt1))
+$1.${L1}-given-${L2}.lex.gz: | $(if $3,$3,$$(pll.txt2))
+$1.${L1}-given-${L2}.lex.gz: | $(if $4,$4,$$(pll.aln))
+	$$(lock)
+	$(moses.make-lex) \
+	$(if $2,$2,$$(pll.txt1)) \
+	$(if $3,$3,$$(pll.txt2)) \
+	$(if $4,$4,$$(pll.aln))	 \
+	$1.${L1}-given-${L2}.lex.gz \
+	$1.${L2}-given-${L1}.lex.gz 
+	$$(unlock)
+
+endef 
+# end of create_phrase_table
+#################################################################################
+
+#################################################################################
+# $1: input factor(s)
+# $2: output factor(s)
+# $3: number of features
+# $4: stem of phrase table 
+
+define add_binary_phrase_table
+
+$(call create_phrase_table,$4)
+mystem   := $(strip $4)
+ffname   := TranslationModel$(words ${PTABLE_ENTRIES})
+MY_ENTRY := PhraseDictionaryBinary
+MY_ENTRY += name=$$(ffname)
+MY_ENTRY += num-features=$(strip $3)
+MY_ENTRY += input-factor=$(strip $1)
+MY_ENTRY += output-factor=$(strip $2)
+MY_ENTRY += path=$(abspath $(strip $4))
+$(if ${moses.ini_ttable-limit},MY_ENTRY += table-limit=${moses.ini_ttable-limit})
+PTABLE_ENTRIES += $$(subst $$(space),;,$${MY_ENTRY})
+PTABLES        += $(strip $4).binphr.idx
+
+$(strip $4).binphr.idx: infactor=$1
+$(strip $4).binphr.idx: outfactor=$2
+$(strip $4).binphr.idx: nscores=$3
+
+endef
+#################################################################################
+
+%.binphr.idx: %.txt.gz | ${MOSES_BIN}/processPhraseTable
+	$(lock)
+	zcat -f $*.txt.gz | ${MOSES_BIN}/processPhraseTable \
+	-ttable $(infactor) $(outfactor) - -nscores $(nscores) -out $@.lock/$(notdir $*)
+	mv $@.lock/$(notdir $*).* ${@D}
+	$(unlock)
+
+
+
+#################################################################################
+# $1: input factor(s)
+# $2: output factor(s)
+# $3: number of features
+# $4: stem of phrase table 
+
+define add_text_phrase_table
+
+$(call create_phrase_table,$4)
+
+ffname   := TranslationModel$(words ${PTABLE_ENTRIES})
+MY_ENTRY := PhraseDictionaryMemory
+MY_ENTRY += name=$$(ffname)
+MY_ENTRY += num-features=$(strip $3)
+MY_ENTRY += input-factor=$(strip $1)
+MY_ENTRY += output-factor=$(strip $2)
+MY_ENTRY += path=$(abspath $4).txt.gz
+$(if ${moses.ini_ttable-limit},MY_ENTRY += table-limit=${moses.ini_ttable-limit})
+PTABLE_ENTRIES += $$(subst $$(space),;,$${MY_ENTRY})
+PTABLES        += $(strip $4).txt.gz
+
+endef
+#################################################################################
+
+# .SECONDEXPANSION:
+#################################################################################
+define create_lexical_reordering_table
+
+mystem := $(strip $1).$(strip $2)
+.INTERMEDIATE: $${mystem}.gz
+$${mystem}.gz: dmshards = $$(shell ls $3.shards/*.dst.gz 2>/dev/null)
+$${mystem}.gz: dm.type=$(word 1,$(subst -, ,$2))
+$${mystem}.gz: dm.orient=$(word 2,$(subst -, ,$2))
+$${mystem}.gz: ${strip $3}.shards/extract.done
+	$$(lock)
+	${moses.score-reordering} \
+	<(${merge-sorted} \
+	$$(if $${dmshards},$${dmshards},$$(warning No dst shards found!))) \
+	${dmodel.smooth} $$@.lock/$$(notdir $(strip $1)). --model "$${dm.type} $${dm.orient} $2" 
+	mv $$@.lock/$$(notdir $(strip $1).$(strip $2)).gz $${@D}
+	$$(unlock)
+
+endef
+
+#################################################################################
+define add_binary_reordering_table
+
+$(call create_lexical_reordering_table,$5,$4,$6)
+
+mystem   := $(strip $5).$(strip $4)
+ffname   := LexicalReordering$(words ${DTABLE_ENTRIES})
+MY_ENTRY := LexicalReordering
+MY_ENTRY += name=$$(ffname)
+MY_ENTRY += input-factor=$(strip $1)
+MY_ENTRY += output-factor=$(strip $2) 
+MY_ENTRY += num-features=$(strip $3)
+MY_ENTRY += type=$(strip $4)
+MY_ENTRY += path=$$(abspath $${mystem})
+DTABLE_ENTRIES += $$(subst $$(space),;,$${MY_ENTRY})
+DTABLES        += $(strip $5).$(strip $4).binlexr.idx
+
+endef
+
+%.binlexr.idx :| %.gz
+	$(lock)
+	${MOSES_BIN}/processLexicalTable \
+	-in <(zcat -f $*.gz) -out $@.lock/$(notdir $*)
+	mv $@.lock/$(notdir $*).* ${@D}
+	$(unlock)
+
+
+#################################################################################
+# add_dynsa_pt: add a dynamic suffix array phrase table
+# $1,$2,$3: source and target factors, number of features
+# $4,$5,$6: source and target text (gzipped), wrd-aln. in gzipped symal format
+#--------------------------------------------------------------------------------
+define add_dynsa_phrase_table
+
+ffname   := TranslationModel$(words ${PTABLE_ENTRIES})
+MY_ENTRY := PhraseDictionaryDynSuffixArray
+MY_ENTRY += name=$$(ffname)
+MY_ENTRY += input-factor=$(strip $1)
+MY_ENTRY += output-factor=$(strip $2)
+MY_ENTRY += num-features=$(strip $3)
+MY_ENTRY += source=$(abspath $4)
+MY_ENTRY += target=$(abspath $5)
+MY_ENTRY += alignment=$(strip $6)
+MOSES_INI_PREREQ += $4 $5 $6
+PTABLE_ENTRIES += $$(subst $$(space),;,$${MY_ENTRY})
+PTABLES        += $(strip $4) $(strip $5) $(strip $6)
+
+endef
+#################################################################################
+
+define add_mmsapt
+
+$(call mmap_bitext,$(strip $5),$(strip $4))
+ffname   := PT$(words ${PTABLE_ENTRIES})
+MY_ENTRY := Mmsapt
+MY_ENTRY += name=$$(ffname)
+MY_ETNRY += input-factor=$(strip $1)
+MY_ENTRY += output-factor=$(strip $2)
+MY_ENTRY += num-features=$(strip $3)
+MY_ENTRY += base=$(abspath $4)/ L1=${L1} L2=${L2}
+PTABLE_ENTRIES += $$(subst $$(space),;,$${MY_ENTRY})
+MOSES_INI_PREREQ += $(addprefix $(strip $4),${L1}.mct ${L1}.tdx ${L1}.sfa)
+MOSES_INI_PREREQ += $(addprefix $(strip $4),${L2}.mct ${L2}.tdx ${L2}.sfa)
+MOSES_INI_PREREQ += $(strip $4)${L1}-${L2}.mam
+
+endef

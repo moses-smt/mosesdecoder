@@ -46,13 +46,24 @@ class PartialTranslOptColl
   friend std::ostream& operator<<(std::ostream& out, const PartialTranslOptColl& possibleTranslation);
 
 protected:
-  std::vector<TranslationOption*> m_list;
+  typedef std::vector<TranslationOption*> Coll;
+  Coll m_list;
   float m_bestScore; /**< score of the best translation option */
   float m_worstScore; /**< score of the worse translation option */
   size_t m_maxSize; /**< maximum number of translation options allowed */
   size_t m_totalPruned; /**< number of options pruned */
 
 public:
+  typedef Coll::iterator iterator;
+  typedef Coll::const_iterator const_iterator;
+
+  const_iterator begin() const {
+    return m_list.begin();
+  }
+  const_iterator end() const {
+    return m_list.end();
+  }
+
   PartialTranslOptColl();
 
   /** destructor, cleans out list */

@@ -84,10 +84,10 @@ void SuffixArray::Sort(INDEX start, INDEX end)
   Sort( mid, end );
 
   // merge
-  int i = start;
-  int j = mid;
-  int k = 0;
-  int length = end-start+1;
+  size_t i = start;
+  size_t j = mid;
+  size_t k = 0;
+  size_t length = end-start+1;
   while( k<length ) {
     if (i == mid ) {
       m_buffer[ k++ ] = m_index[ j++ ];

@@ -68,20 +68,13 @@ protected:
 
   std::vector<float> m_weight;
 public:
-  PhraseDictionaryCompact(const std::string &line)
-    :PhraseDictionary("PhraseDictionaryCompact", line)
-    ,m_inMemory(true)
-    ,m_useAlignmentInfo(true)
-    ,m_hash(10, 16)
-    ,m_phraseDecoder(0)
-    ,m_weight(0) {
-  }
+  PhraseDictionaryCompact(const std::string &line);
 
   ~PhraseDictionaryCompact();
 
   void Load();
 
-  const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &source) const;
+  const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
 
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
@@ -90,7 +83,7 @@ public:
   void CleanUpAfterSentenceProcessing(const InputType &source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &,
     const ChartCellCollectionBase &) {
     assert(false);
     return 0;

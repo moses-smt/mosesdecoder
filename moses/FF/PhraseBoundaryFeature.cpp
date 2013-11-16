@@ -1,6 +1,8 @@
 #include "PhraseBoundaryFeature.h"
 
 #include "moses/Hypothesis.h"
+#include "moses/TranslationOption.h"
+#include "moses/InputPath.h"
 
 using namespace std;
 
@@ -16,20 +18,20 @@ int PhraseBoundaryState::Compare(const FFState& other) const
 }
 
 PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
-  : StatefulFeatureFunction("PhraseBoundaryFeature", 0, line)
+  : StatefulFeatureFunction(0, line)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
+  ReadParameters();
+}
 
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "source") {
-      m_sourceFactors = Tokenize<FactorType>(args[1], ",");
-    } else if (args[0] == "target") {
-      m_targetFactors = Tokenize<FactorType>(args[1], ",");
-    } else {
-      throw "Unknown argument " + args[0];
-    }
+void PhraseBoundaryFeature::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "source") {
+    m_sourceFactors = Tokenize<FactorType>(value, ",");
+  } else if (key == "target") {
+    m_targetFactors = Tokenize<FactorType>(value, ",");
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
   }
 }
 
@@ -77,12 +79,12 @@ FFState* PhraseBoundaryFeature::Evaluate
   const Word* rightTargetWord = &(targetPhrase.GetWord(0));
   AddFeatures(leftTargetWord,rightTargetWord,m_targetFactors,"tgt",scores);
 
-  const Phrase* sourcePhrase = cur_hypo.GetSourcePhrase();
+  const Phrase& sourcePhrase = cur_hypo.GetTranslationOption().GetInputPath().GetPhrase();
   const Word* leftSourceWord = pbState->GetSourceWord();
-  const Word* rightSourceWord = &(sourcePhrase->GetWord(0));
+  const Word* rightSourceWord = &(sourcePhrase.GetWord(0));
   AddFeatures(leftSourceWord,rightSourceWord,m_sourceFactors,"src",scores);
 
-  const Word* endSourceWord = &(sourcePhrase->GetWord(sourcePhrase->GetSize()-1));
+  const Word* endSourceWord = &(sourcePhrase.GetWord(sourcePhrase.GetSize()-1));
   const Word* endTargetWord = &(targetPhrase.GetWord(targetPhrase.GetSize()-1));
 
   //if end of sentence add EOS

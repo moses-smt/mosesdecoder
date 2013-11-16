@@ -40,19 +40,13 @@ class Word;
 class RuleTableTrie : public PhraseDictionary
 {
 public:
-  RuleTableTrie(const std::string &description, const std::string &line)
-    : PhraseDictionary(description, line)
-  {}
+  RuleTableTrie(const std::string &line)
+    : PhraseDictionary(line) {
+  }
 
   virtual ~RuleTableTrie();
 
   void Load();
-
-  // Required by PhraseDictionary.
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const {
-    CHECK(false);
-    return NULL;
-  }
 
 private:
   friend class RuleTableLoader;

@@ -1,0 +1,66 @@
+# -*- Makefile -*-
+
+define setup = 
+	echo 'experiments := ' >> $@_; \
+	$(foreach p, ${PREPROC}, \
+	echo '# NEW EXPERIMENT #####################################' >> $@_; \
+	echo 'experiments += ${tag}' >> $@_; \
+	echo 'ctr = $$(words $${experiments})'     >> $@_; \
+	echo '$: input-type = $(2)' >> $@_; \
+	echo '${tag}: eval-sets = ${tag}.eval' >> $@_; \
+	echo '${tag}: tune-src = input/${tag}.tune.tc'  >> $@_; \
+	echo '${tag}: tune-ref = ${tune-ref-ready}' >> $@_; \
+	echo '${tag}: ${tag}.eval-src = input/${tag}.eval.$(if $(findstring 1,$(2),cfn,tc))'  >> $@_; \
+	echo '${tag}: ${tag}.eval-ref = ${eval-ref-ready}' >> $@_; \
+	echo '${tag}: evaluation/$${ctr}/report' >> $@_; \
+	$(foreach e, ${tag}.eval, \
+	$(foreach m, ${eval-metrics}, \
+	echo 'evaluation/$${ctr}/report: evaluation/$${ctr}/$e.$m' >> $@_;) \
+	echo 'evaluation/$${ctr}/report: evaluation/$${ctr}/$e.analysis' >> $@_;) \
+	echo                                       >> $@_; \
+	echo 'evaluation/$${ctr}/${tag}.eval.output: input = input/${tag}.eval.tc' >> $@_; \
+	echo 'evaluation/$${ctr}/${tag}.eval.output: input/${tag}.eval.tc' >> $@_; \
+	echo $(if $(findstring ini,${tuned_moses_ini}), \
+	'evaluation/$${ctr}/${tag}.eval.output: ${tuned_moses_ini}', \
+	'evaluation/$${ctr}/${tag}.eval.output: tuning/$${ctr}/moses.tuned.ini') >> $@_; \
+	echo 'evaluation/$${ctr}/${tag}.eval.multi-bleu: $${${tag}.eval-ref}' >> $@_; \
+	echo                                       >> $@_;)
+	echo '.PHONY += $$(experiments)' >> $@_
+	@mv $@_ $@
+	@rm $@.lock/owner
+	@rmdir $@.lock
+
+
+# $(1): system / input processing
+# $(2): input type (cfn or text)
+define setup_experiment = 
+	echo 'experiments := ' >> $@_; \
+	$(foreach p, ${PREPROC}, \
+	echo '# NEW EXPERIMENT #####################################' >> $@_; \
+	echo 'experiments += $(1)' >> $@_; \
+	echo 'ctr = $$(words $${experiments})'     >> $@_; \
+	echo '$(1): input-type = $(2)' >> $@_; \
+	echo '$(1): eval-sets = $(1).eval' >> $@_; \
+	echo '$(1): tune-src = input/$(1).tune.tc'  >> $@_; \
+	echo '$(1): tune-ref = ${tune-ref-ready}' >> $@_; \
+	echo '$(1): $(1).eval-src = input/$(1).eval.$(if $(findstring 1,$(2),cfn,tc))'  >> $@_; \
+	echo '$(1): $(1).eval-ref = ${eval-ref-ready}' >> $@_; \
+	echo '$(1): evaluation/$${ctr}/report' >> $@_; \
+	$(foreach e, $(1).eval, \
+	$(foreach m, ${eval-metrics}, \
+	echo 'evaluation/$${ctr}/report: evaluation/$${ctr}/$e.$m' >> $@_;) \
+	echo 'evaluation/$${ctr}/report: evaluation/$${ctr}/$e.analysis' >> $@_;) \
+	echo                                       >> $@_; \
+	echo 'evaluation/$${ctr}/$(1).eval.output: input = input/$(1).eval.tc' >> $@_; \
+	echo 'evaluation/$${ctr}/$(1).eval.output: input/$(1).eval.tc' >> $@_; \
+	echo $(if $(findstring ini,${tuned_moses_ini}), \
+	'evaluation/$${ctr}/$(1).eval.output: ${tuned_moses_ini}', \
+	'evaluation/$${ctr}/$(1).eval.output: tuning/$${ctr}/moses.tuned.ini') >> $@_; \
+	echo 'evaluation/$${ctr}/$(1).eval.multi-bleu: $${$(1).eval-ref}' >> $@_; \
+	echo                                       >> $@_;)
+	echo '.PHONY += $$(experiments)' >> $@_
+	@mv $@_ $@
+	@rm $@.lock/owner
+	@rmdir $@.lock
+
+endef

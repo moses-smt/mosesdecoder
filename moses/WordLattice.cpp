@@ -1,12 +1,20 @@
+#include <map>
 #include "StaticData.h"
 #include "WordLattice.h"
 #include "PCNTools.h"
 #include "Util.h"
 #include "FloydWarshall.h"
+#include "TranslationOptionCollectionLattice.h"
+#include "TranslationOptionCollectionConfusionNet.h"
+#include "moses/FF/InputFeature.h"
+#include "util/check.hh"
 
 namespace Moses
 {
-WordLattice::WordLattice() {}
+WordLattice::WordLattice()
+{
+  CHECK(StaticData::Instance().GetInputFeature());
+}
 
 size_t WordLattice::GetColumnIncrement(size_t i, size_t j) const
 {
@@ -20,9 +28,19 @@ void WordLattice::Print(std::ostream& out) const
     out<<i<<" -- ";
     for(size_t j=0; j<data[i].size(); ++j) {
       out<<"("<<data[i][j].first.ToString()<<", ";
-      for(std::vector<float>::const_iterator scoreIterator = data[i][j].second.begin(); scoreIterator<data[i][j].second.end(); scoreIterator++) {
-        out<<*scoreIterator<<", ";
+
+      // dense
+      std::vector<float>::const_iterator iterDense;
+      for(iterDense = data[i][j].second.denseScores.begin(); iterDense < data[i][j].second.denseScores.end(); ++iterDense) {
+        out<<", "<<*iterDense;
       }
+
+      // sparse
+      std::map<StringPiece, float>::const_iterator iterSparse;
+      for(iterSparse = data[i][j].second.sparseScores.begin(); iterSparse != data[i][j].second.sparseScores.end(); ++iterSparse) {
+        out << ", " << iterSparse->first << "=" << iterSparse->second;
+      }
+
       out << GetColumnIncrement(i,j) << ") ";
     }
 
@@ -33,10 +51,13 @@ void WordLattice::Print(std::ostream& out) const
 
 int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line)
 {
+  const StaticData &staticData = StaticData::Instance();
+  const InputFeature *inputFeature = staticData.GetInputFeature();
+  size_t numInputScores = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 
-  size_t numInputScores = StaticData::Instance().GetNumInputScores();
-  size_t numRealWordCount = StaticData::Instance().GetNumRealWordsInInput();
   bool addRealWordCount = (numRealWordCount > 0);
 
   //when we have one more weight than params, we add a word count feature
@@ -50,17 +71,16 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
     for (size_t j=0; j<col.size(); ++j) {
       const PCN::CNAlt& alt = col[j];
 
-
       //check for correct number of link parameters
-      if (alt.first.second.size() != numInputScores) {
-        TRACE_ERR("ERROR: need " << numInputScores << " link parameters, found " << alt.first.second.size() << " while reading column " << i << " from " << debug_line << "\n");
+      if (alt.m_denseFeatures.size() != numInputScores) {
+        TRACE_ERR("ERROR: need " << numInputScores << " link parameters, found " << alt.m_denseFeatures.size() << " while reading column " << i << " from " << debug_line << "\n");
         return false;
       }
 
       //check each element for bounds
       std::vector<float>::const_iterator probsIterator;
       data[i][j].second = std::vector<float>(0);
-      for(probsIterator = alt.first.second.begin(); probsIterator < alt.first.second.end(); probsIterator++) {
+      for(probsIterator = alt.m_denseFeatures.begin(); probsIterator < alt.m_denseFeatures.end(); probsIterator++) {
         IFVERBOSE(1) {
           if (*probsIterator < 0.0f) {
             TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n");
@@ -71,16 +91,19 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
             //*probsIterator = 1.0f;
           }
         }
-        data[i][j].second.push_back(std::max(static_cast<float>(log(*probsIterator)), LOWEST_SCORE));
+
+        float score = std::max(static_cast<float>(log(*probsIterator)), LOWEST_SCORE);
+        ScorePair &scorePair = data[i][j].second;
+        scorePair.denseScores.push_back(score);
       }
       //store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
       if (addRealWordCount) {
         //only add count if not epsilon
-        float value = (alt.first.first=="" || alt.first.first==EPSILON) ? 0.0f : -1.0f;
-        data[i][j].second.push_back(value);
+        float value = (alt.m_word=="" || alt.m_word==EPSILON) ? 0.0f : -1.0f;
+        data[i][j].second.denseScores.push_back(value);
       }
-      String2Word(alt.first.first,data[i][j].first,factorOrder);
-      next_nodes[i][j] = alt.second;
+      String2Word(alt.m_word, data[i][j]. first, factorOrder);
+      next_nodes[i][j] = alt.m_next;
 
       if(next_nodes[i][j] > maxSizePhrase) {
         TRACE_ERR("ERROR: Jump length " << next_nodes[i][j] << " in word lattice exceeds maximum phrase length " << maxSizePhrase << ".\n");
@@ -182,6 +205,50 @@ bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
   return distances[start][end] < 100000;
 }
 
+TranslationOptionCollection*
+WordLattice::CreateTranslationOptionCollection() const
+{
+  size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
+  float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
 
+  TranslationOptionCollection *rv = NULL;
+  //rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+
+  if (StaticData::Instance().GetUseLegacyPT()) {
+    rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  }
+  else {
+	rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  }
+
+  CHECK(rv);
+  return rv;
 }
+
+
+std::ostream& operator<<(std::ostream &out, const WordLattice &obj)
+{
+  out << "next_nodes=";
+  for (size_t i = 0; i < obj.next_nodes.size(); ++i) {
+    out << i << ":";
+
+    const std::vector<size_t> &inner = obj.next_nodes[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      out << inner[j] << " ";
+    }
+  }
+
+  out << "distances=";
+  for (size_t i = 0; i < obj.distances.size(); ++i) {
+    out << i << ":";
+
+    const std::vector<int> &inner = obj.distances[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      out << inner[j] << " ";
+    }
+  }
+  return out;
+}
+
+} // namespace
 

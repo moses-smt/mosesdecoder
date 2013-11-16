@@ -22,14 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include "util/check.hh"
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
-#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
-#include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
-#include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
-#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+
+#include "TypeDef.h"
+#include "moses/FF/WordPenaltyProducer.h"
+#include "moses/FF/UnknownWordPenaltyProducer.h"
+#include "moses/FF/InputFeature.h"
 
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -38,41 +35,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "LexicalReordering.h"
-#include "SentenceStats.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "ScoreComponentCollection.h"
-
-#include "moses/FF/BleuScoreFeature.h"
-#include "moses/FF/TargetWordInsertionFeature.h"
-#include "moses/FF/SourceWordDeletionFeature.h"
-#include "moses/FF/GlobalLexicalModel.h"
-#include "moses/FF/GlobalLexicalModelUnlimited.h"
-#include "moses/FF/UnknownWordPenaltyProducer.h"
-#include "moses/FF/WordTranslationFeature.h"
-#include "moses/FF/TargetBigramFeature.h"
-#include "moses/FF/TargetNgramFeature.h"
-#include "moses/FF/PhraseBoundaryFeature.h"
-#include "moses/FF/PhrasePairFeature.h"
-#include "moses/FF/PhraseLengthFeature.h"
-#include "moses/FF/DistortionScoreProducer.h"
-#include "moses/FF/WordPenaltyProducer.h"
-
-#include "LM/Ken.h"
-#ifdef LM_IRST
-#include "LM/IRST.h"
-#endif
-
-#ifdef LM_SRI
-#include "LM/SRI.h"
-#endif
-
-#ifdef HAVE_SYNLM
-#include "SyntacticLanguageModel.h"
-#endif
+#include "DecodeGraph.h"
+#include "TranslationModel/PhraseDictionary.h"
+#include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -88,14 +58,17 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
+  ,m_wpProducer(NULL)
+  ,m_unknownWordPenaltyProducer(NULL)
+  ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
+  ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
+  ,m_needAlignmentInfo(false)
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
-  ,m_needAlignmentInfo(false)
-  ,m_numInputScores(0)
-  ,m_numRealWordsInInput(0)
+  ,m_currentWeightSetting("default")
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -107,14 +80,6 @@ StaticData::StaticData()
 StaticData::~StaticData()
 {
   RemoveAllInColl(m_decodeGraphs);
-
-  typedef std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > Coll;
-  Coll::iterator iter;
-  for (iter = m_transOptCache.begin(); iter != m_transOptCache.end(); ++iter) {
-    std::pair<TranslationOptionList*,clock_t> &valuePair =iter->second;
-    TranslationOptionList *transOptList = valuePair.first;
-    delete transOptList;
-  }
 
   /*
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
@@ -208,7 +173,8 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("n-best-list").size() >= 2) {
     m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
     m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
-    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
+    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2
+                         && m_parameter->GetParam("n-best-list")[2]=="distinct");
   } else if (m_parameter->GetParam("n-best-list").size() == 1) {
     UserMessage::Add(string("wrong format for switch -n-best-list file size"));
     return false;
@@ -298,21 +264,13 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // printing source phrase spans
   SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
+  SetBooleanParameter( &m_reportSegmentationEnriched, "report-segmentation-enriched", false );
 
   // print all factors of output translations
   SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
 
   // print all factors of output translations
   SetBooleanParameter( &m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
-
-  // caching of translation options
-  if (m_inputType == SentenceInput) {
-    SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", true );
-    m_transOptCacheMaxSize = (m_parameter->GetParam("persistent-cache-size").size() > 0)
-                             ? Scan<size_t>(m_parameter->GetParam("persistent-cache-size")[0]) : DEFAULT_MAX_TRANS_OPT_CACHE_SIZE;
-  } else {
-    m_useTransOptCache = false;
-  }
 
   //input factors
   const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
@@ -350,6 +308,26 @@ bool StaticData::LoadData(Parameter *parameter)
       m_detailedTranslationReportingFilePath = args[0];
     } else {
       UserMessage::Add(string("the translation-details option requires exactly one filename argument"));
+      return false;
+    }
+  }
+  if (m_parameter->isParamSpecified("tree-translation-details")) {
+    const vector<string> &args = m_parameter->GetParam("tree-translation-details");
+    if (args.size() == 1) {
+      m_detailedTreeFragmentsTranslationReportingFilePath = args[0];
+    } else {
+      UserMessage::Add(string("the tree-translation-details option requires exactly one filename argument"));
+      return false;
+    }
+  }
+
+  //DIMw
+  if (m_parameter->isParamSpecified("translation-all-details")) {
+    const vector<string> &args = m_parameter->GetParam("translation-all-details");
+    if (args.size() == 1) {
+      m_detailedAllTranslationReportingFilePath = args[0];
+    } else {
+      UserMessage::Add(string("the translation-all-details option requires exactly one filename argument"));
       return false;
     }
   }
@@ -409,6 +387,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
+  SetBooleanParameter( &m_markUnknown, "mark-unknown", false );
 
   SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
@@ -429,6 +408,7 @@ bool StaticData::LoadData(Parameter *parameter)
   //mira training
   SetBooleanParameter( &m_mira, "mira", false );
 
+  // lattice MBR
   if (m_useLatticeMBR) m_mbr = true;
 
   m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
@@ -494,56 +474,15 @@ bool StaticData::LoadData(Parameter *parameter)
   m_startTranslationId = (m_parameter->GetParam("start-translation-id").size() > 0) ?
                          Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
 
-  // Read in constraint decoding file, if provided
-  if(m_parameter->GetParam("constraint").size()) {
-    if (m_parameter->GetParam("search-algorithm").size() > 0
-        && Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) != 0) {
-      cerr << "Can use -constraint only with stack-based search (-search-algorithm 0)" << endl;
-      exit(1);
-    }
-    m_constraintFileName = m_parameter->GetParam("constraint")[0];
-
-    InputFileStream constraintFile(m_constraintFileName);
-
-    std::string line;
-
-    long sentenceID = GetStartTranslationId() - 1;
-    while (getline(constraintFile, line)) {
-      vector<string> vecStr = Tokenize(line, "\t");
-
-      if (vecStr.size() == 1) {
-        sentenceID++;
-        Phrase phrase(0);
-        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter(), NULL);
-        m_constraints.insert(make_pair(sentenceID,phrase));
-      } else if (vecStr.size() == 2) {
-        sentenceID = Scan<long>(vecStr[0]);
-        Phrase phrase(0);
-        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter(), NULL);
-        m_constraints.insert(make_pair(sentenceID,phrase));
-      } else {
-        CHECK(false);
-      }
-    }
-  }
-
-  // input scores for lattices & confusion network input. TODO - get rid of this
-  if (m_parameter->GetParam("input-scores").size() > 0) {
-    m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
-  }
-
-  if (m_parameter->GetParam("input-scores").size() > 1) {
-    m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
-  }
-
   // use of xml in input
   if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
   else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
   else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
+  else if (m_parameter->GetParam("xml-input")[0]=="constraint") m_xmlInputType = XmlConstraint;
   else if (m_parameter->GetParam("xml-input")[0]=="ignore") m_xmlInputType = XmlIgnore;
   else if (m_parameter->GetParam("xml-input")[0]=="pass-through") m_xmlInputType = XmlPassThrough;
   else {
-    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
+    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, constraint, or ignore");
     return false;
   }
 
@@ -559,6 +498,13 @@ bool StaticData::LoadData(Parameter *parameter)
     cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
   }
 
+  if (m_parameter->GetParam("placeholder-factor").size() > 0) {
+    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
+  } else {
+    m_placeHolderFactor = NOT_FOUND;
+  }
+
+
   // all features
   map<string, int> featureIndexMap;
 
@@ -572,141 +518,11 @@ bool StaticData::LoadData(Parameter *parameter)
     vector<string> toks = Tokenize(line);
 
     const string &feature = toks[0];
-    //int featureIndex = GetFeatureIndex(featureIndexMap, feature);
 
-    if (feature == "GlobalLexicalModel") {
-      GlobalLexicalModel *model = new GlobalLexicalModel(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "GlobalLexicalModelUnlimited") {
-      GlobalLexicalModelUnlimited *model = NULL; //new GlobalLexicalModelUnlimited(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "SourceWordDeletionFeature") {
-      SourceWordDeletionFeature *model = new SourceWordDeletionFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "TargetWordInsertionFeature") {
-      TargetWordInsertionFeature *model = new TargetWordInsertionFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "PhraseBoundaryFeature") {
-      PhraseBoundaryFeature *model = new PhraseBoundaryFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "PhraseLengthFeature") {
-      PhraseLengthFeature *model = new PhraseLengthFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "WordTranslationFeature") {
-      WordTranslationFeature *model = new WordTranslationFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "TargetBigramFeature") {
-      TargetBigramFeature *model = new TargetBigramFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "TargetNgramFeature") {
-      TargetNgramFeature *model = new TargetNgramFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "PhrasePairFeature") {
-      PhrasePairFeature *model = new PhrasePairFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      //SetWeights(model, weights);
-    } else if (feature == "LexicalReordering") {
-      LexicalReordering *model = new LexicalReordering(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "KENLM") {
-      LanguageModel *model = ConstructKenLM(feature, line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-#ifdef LM_IRST
-    else if (feature == "IRSTLM") {
-      LanguageModelIRST *model = new LanguageModelIRST(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-#endif
-#ifdef LM_SRI
-    else if (feature == "SRILM") {
-      LanguageModelSRI *model = new LanguageModelSRI(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-#endif
-    else if (feature == "Generation") {
-      GenerationDictionary *model = new GenerationDictionary(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "BleuScoreFeature") {
-      BleuScoreFeature *model = new BleuScoreFeature(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "Distortion") {
-      DistortionScoreProducer *model = new DistortionScoreProducer(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "WordPenalty") {
-      WordPenaltyProducer *model = new WordPenaltyProducer(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-      m_wpProducer = model;
-    } else if (feature == "UnknownWordPenalty") {
-      UnknownWordPenaltyProducer *model = new UnknownWordPenaltyProducer(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      if (weights.size() == 0)
-        weights.push_back(1.0f);
-      SetWeights(model, weights);
-      m_unknownWordPenaltyProducer = model;
-    } else if (feature == "PhraseDictionaryBinary") {
-      PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryOnDisk") {
-      PhraseDictionaryOnDisk* model = new PhraseDictionaryOnDisk(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryMemory") {
-      PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryCompact") {
-      PhraseDictionaryCompact* model = new PhraseDictionaryCompact(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryMultiModel") {
-      PhraseDictionaryMultiModel* model = new PhraseDictionaryMultiModel(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryMultiModelCounts") {
-      PhraseDictionaryMultiModelCounts* model = new PhraseDictionaryMultiModelCounts(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryALSuffixArray") {
-      PhraseDictionaryALSuffixArray* model = new PhraseDictionaryALSuffixArray(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    } else if (feature == "PhraseDictionaryDynSuffixArray") {
-      PhraseDictionaryDynSuffixArray* model = new PhraseDictionaryDynSuffixArray(line);
-	  vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-	  SetWeights(model, weights);
-	}
-
-#ifdef HAVE_SYNLM
-    else if (feature == "SyntacticLanguageModel") {
-      SyntacticLanguageModel *model = new SyntacticLanguageModel(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-    }
-#endif
-    else {
-      UserMessage::Add("Unknown feature function:" + feature);
-      return false;
-    }
+    m_registry.Construct(feature, line);
   }
+
+  OverrideFeatures();
 
   LoadFeatureFunctions();
 
@@ -719,7 +535,6 @@ bool StaticData::LoadData(Parameter *parameter)
   //Add any other features here.
 
   //Load extra feature weights
-  //NB: These are common to all translation systems (at the moment!)
   vector<string> extraWeightConfig = m_parameter->GetParam("weight-file");
   if (extraWeightConfig.size()) {
     if (extraWeightConfig.size() != 1) {
@@ -735,11 +550,11 @@ bool StaticData::LoadData(Parameter *parameter)
     m_allWeights.PlusEquals(extraWeights);
   }
 
-  //cerr << endl << "m_allWeights=" << m_allWeights << endl;
-
   // alternate weight settings
   if (m_parameter->GetParam("alternate-weight-setting").size() > 0) {
-    ProcessAlternateWeightSettings();
+    if (!LoadAlternateWeightSettings()) {
+      return false;
+    }
   }
   return true;
 }
@@ -835,6 +650,8 @@ bool StaticData::LoadDecodeGraphs()
 {
   const vector<string> &mappingVector = m_parameter->GetParam("mapping");
   const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
+  const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
+  const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
   const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
@@ -872,24 +689,24 @@ bool StaticData::LoadDecodeGraphs()
     DecodeStep* decodeStep = NULL;
     switch (decodeType) {
     case Translate:
-      if(index>=m_phraseDictionary.size()) {
+      if(index>=pts.size()) {
         stringstream strme;
         strme << "No phrase dictionary with index "
               << index << " available!";
         UserMessage::Add(strme.str());
         CHECK(false);
       }
-      decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev, *featuresRemaining);
+      decodeStep = new DecodeStepTranslation(pts[index], prev, *featuresRemaining);
       break;
     case Generate:
-      if(index>=m_generationDictionary.size()) {
+      if(index>=gens.size()) {
         stringstream strme;
         strme << "No generation dictionary with index "
               << index << " available!";
         UserMessage::Add(strme.str());
         CHECK(false);
       }
-      decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev, *featuresRemaining);
+      decodeStep = new DecodeStepGeneration(gens[index], prev, *featuresRemaining);
       break;
     case InsertNullFertilityWord:
       CHECK(!"Please implement NullFertilityInsertion.");
@@ -929,69 +746,6 @@ bool StaticData::LoadDecodeGraphs()
   }
 
   return true;
-}
-
-const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
-{
-  std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_transOptCacheMutex);
-#endif
-  std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
-  = m_transOptCache.find(key);
-  if (iter == m_transOptCache.end())
-    return NULL;
-  iter->second.second = clock(); // update last used time
-  return iter->second.first;
-}
-
-void StaticData::ReduceTransOptCache() const
-{
-  if (m_transOptCache.size() <= m_transOptCacheMaxSize) return; // not full
-  clock_t t = clock();
-
-  // find cutoff for last used time
-  priority_queue< clock_t > lastUsedTimes;
-  std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
-  iter = m_transOptCache.begin();
-  while( iter != m_transOptCache.end() ) {
-    lastUsedTimes.push( iter->second.second );
-    iter++;
-  }
-  for( size_t i=0; i < lastUsedTimes.size()-m_transOptCacheMaxSize/2; i++ )
-    lastUsedTimes.pop();
-  clock_t cutoffLastUsedTime = lastUsedTimes.top();
-
-  // remove all old entries
-  iter = m_transOptCache.begin();
-  while( iter != m_transOptCache.end() ) {
-    if (iter->second.second < cutoffLastUsedTime) {
-      std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
-      delete iterRemove->second.first;
-      m_transOptCache.erase(iterRemove);
-    } else iter++;
-  }
-  VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
-}
-
-void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
-{
-  if (m_transOptCacheMaxSize == 0) return;
-  std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
-  TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_transOptCacheMutex);
-#endif
-  m_transOptCache[key] = make_pair( storedTransOptList, clock() );
-  ReduceTransOptCache();
-}
-void StaticData::ClearTransOptionCache() const
-{
-  map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
-  for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
-    TranslationOptionList *transOptList = iterCache->second.first;
-    delete transOptList;
-  }
 }
 
 void StaticData::ReLoadParameter()
@@ -1137,32 +891,43 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
 
 void StaticData::LoadFeatureFunctions()
 {
-  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &ffs
+  = FeatureFunction::GetFeatureFunctions();
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     FeatureFunction *ff = *iter;
+    bool doLoad = true;
 
-    const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
-    if (generation) {
-      m_generationDictionary.push_back(generation);
+    if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+      doLoad = false;
+    } else if (const GenerationDictionary *ffCast
+               = dynamic_cast<const GenerationDictionary*>(ff)) {
+    	// do nothing
+    } else if (WordPenaltyProducer *ffCast
+               = dynamic_cast<WordPenaltyProducer*>(ff)) {
+      CHECK(m_wpProducer == NULL); // max 1 feature;
+      m_wpProducer = ffCast;
+    } else if (UnknownWordPenaltyProducer *ffCast
+               = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
+      CHECK(m_unknownWordPenaltyProducer == NULL); // max 1 feature;
+      m_unknownWordPenaltyProducer = ffCast;
+    } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
+      CHECK(m_inputFeature == NULL); // max 1 input feature;
+      m_inputFeature = ffCast;
     }
 
-    PhraseDictionary *pt = dynamic_cast<PhraseDictionary*>(ff);
-    if (pt) {
-      m_phraseDictionary.push_back(pt);
-    }
-    else {
-      // load phrase table last. They can depend on other features
+    if (doLoad) {
       ff->Load();
     }
   }
 
-  // load phrase table
-  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-	PhraseDictionary *pt = m_phraseDictionary[i];
-	pt->Load();
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    PhraseDictionary *pt = pts[i];
+    pt->Load();
   }
 
+  CheckLEGACYPT();
 }
 
 bool StaticData::CheckWeights() const
@@ -1194,9 +959,16 @@ bool StaticData::CheckWeights() const
   return true;
 }
 
-void StaticData::ProcessAlternateWeightSettings() {
+/**! Read in settings for alternative weights */
+bool StaticData::LoadAlternateWeightSettings()
+{
+  if (m_threadCount > 1) {
+    cerr << "ERROR: alternative weight settings currently not supported with multi-threading.";
+    return false;
+  }
+
   const vector<string> &weightSpecification = m_parameter->GetParam("alternate-weight-setting");
-  
+
   // get mapping from feature names to feature functions
   map<string,FeatureFunction*> nameToFF;
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
@@ -1224,13 +996,33 @@ void StaticData::ProcessAlternateWeightSettings() {
       // other specifications
       for(size_t j=1; j<tokens.size(); j++) {
         vector<string> args = Tokenize(tokens[j], "=");
+        // TODO: support for sparse weights
         if (args[0] == "weight-file") {
-          // TODO: support for sparse weights
+          cerr << "ERROR: sparse weight files currently not supported";
+        }
+        // ignore feature functions
+        else if (args[0] == "ignore-ff") {
+          set< string > *ffNameSet = new set< string >;
+          m_weightSettingIgnoreFF[ currentId ] = *ffNameSet;
+          vector<string> featureFunctionName = Tokenize(args[1], ",");
+          for(size_t k=0; k<featureFunctionName.size(); k++) {
+            // check if a valid nane
+            map<string,FeatureFunction*>::iterator ffLookUp
+            = nameToFF.find(featureFunctionName[k]);
+            if (ffLookUp == nameToFF.end()) {
+              cerr << "ERROR: alternate weight setting " << currentId
+                   << " specifies to ignore feature function " << featureFunctionName[k]
+                   << " but there is no such feature function" << endl;
+              hasErrors = true;
+            } else {
+              m_weightSettingIgnoreFF[ currentId ].insert( featureFunctionName[k] );
+            }
+          }
         }
       }
     }
- 
-   // weight lines
+
+    // weight lines
     else {
       CHECK(currentId != "");
       vector<string> tokens = Tokenize(weightSpecification[i]);
@@ -1248,15 +1040,56 @@ void StaticData::ProcessAlternateWeightSettings() {
       // check if a valid nane
       map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(name);
       if (ffLookUp == nameToFF.end()) {
-	cerr << "ERROR: alternate weight setting " << currentId << " specifies weight(s) for " << name << " but there is no such feature function" << endl;
-	hasErrors = true;
-      }
-      else {
-	m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);
+        cerr << "ERROR: alternate weight setting " << currentId
+             << " specifies weight(s) for " << name
+             << " but there is no such feature function" << endl;
+        hasErrors = true;
+      } else {
+        m_weightSetting[ currentId ]->Assign( nameToFF[name], weights);
       }
     }
   }
   CHECK(!hasErrors);
+  return true;
+}
+
+void StaticData::OverrideFeatures()
+{
+  const PARAM_VEC &params = m_parameter->GetParam("feature-overwrite");
+  for (size_t i = 0; i < params.size(); ++i) {
+    const string &str = params[i];
+    vector<string> toks = Tokenize(str);
+    CHECK(toks.size() > 1);
+
+    FeatureFunction &ff = FeatureFunction::FindFeatureFunction(toks[0]);
+
+    for (size_t j = 1; j < toks.size(); ++j) {
+      const string &keyValStr = toks[j];
+      vector<string> keyVal = Tokenize(keyValStr, "=");
+      CHECK(keyVal.size() == 2);
+
+      VERBOSE(1, "Override " << ff.GetScoreProducerDescription() << " "
+              << keyVal[0] << "=" << keyVal[1] << endl);
+
+      ff.SetParameter(keyVal[0], keyVal[1]);
+
+    }
+  }
+
+}
+
+void StaticData::CheckLEGACYPT()
+{
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    const PhraseDictionary *phraseDictionary = pts[i];
+    if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
+      m_useLegacyPT = true;
+      return;
+    }
+  }
+
+  m_useLegacyPT = false;
 }
 
 } // namespace

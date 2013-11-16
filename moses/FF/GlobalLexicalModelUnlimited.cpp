@@ -3,6 +3,7 @@
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
 #include "moses/UserMessage.h"
+#include "moses/Hypothesis.h"
 #include "util/string_piece_hash.hh"
 
 using namespace std;
@@ -10,8 +11,10 @@ using namespace std;
 namespace Moses
 {
 GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line)
-  :StatelessFeatureFunction("GlobalLexicalModelUnlimited", 0, line)
+  :StatelessFeatureFunction(0, line)
 {
+  CHECK(false); // TODO need to update arguments to key=value
+
   const vector<string> modelSpec = Tokenize(line);
 
   for (size_t i = 0; i < modelSpec.size(); i++ ) {
@@ -109,7 +112,7 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
   const Sentence& input = *(m_local->input);
   const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
 
-  for(int targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
+  for(size_t targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
     StringPiece targetString = targetPhrase.GetWord(targetIndex).GetString(0); // TODO: change for other factors
 
     if (m_ignorePunctuation) {
@@ -130,8 +133,9 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
     }
 
     boost::unordered_set<uint64_t> alreadyScored;
-    for(int sourceIndex = 0; sourceIndex < input.GetSize(); sourceIndex++ ) {
-      const StringPiece sourceString = input.GetWord(sourceIndex).GetString(0); // TODO: change for other factors
+    for(size_t sourceIndex = 0; sourceIndex < input.GetSize(); sourceIndex++ ) {
+      const StringPiece sourceString = input.GetWord(sourceIndex).GetString(0);
+      // TODO: change for other factors
 
       if (m_ignorePunctuation) {
         // check if first char is punctuation

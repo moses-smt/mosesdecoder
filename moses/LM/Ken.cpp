@@ -60,62 +60,62 @@ struct KenLMState : public FFState {
   }
 };
 
-/*
- * An implementation of single factor LM using Ken's code.
- */
-template <class Model> class LanguageModelKen : public LanguageModel
-{
-public:
-  LanguageModelKen(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy);
-
-  const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
-    KenLMState *ret = new KenLMState();
-    ret->state = m_ngram->BeginSentenceState();
-    return ret;
-  }
-
-  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
-
-  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
-
-  FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
-
-  void IncrementalCallback(Incremental::Manager &manager) const {
-    manager.LMCallback(*m_ngram, m_lmIdLookup);
-  }
-
-  bool IsUseable(const FactorMask &mask) const;
-private:
-  LanguageModelKen(const LanguageModelKen<Model> &copy_from);
-
-  lm::WordIndex TranslateID(const Word &word) const {
-    std::size_t factor = word.GetFactor(m_factorType)->GetId();
-    return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-  }
-
-  // Convert last words of hypothesis into vocab ids, returning an end pointer.
-  lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
-    lm::WordIndex *index = indices;
-    lm::WordIndex *end = indices + m_ngram->Order() - 1;
-    int position = hypo.GetCurrTargetWordsRange().GetEndPos();
-    for (; ; ++index, --position) {
-      if (index == end) return index;
-      if (position == -1) {
-        *index = m_ngram->GetVocabulary().BeginSentence();
-        return index + 1;
-      }
-      *index = TranslateID(hypo.GetWord(position));
-    }
-  }
-
-  boost::shared_ptr<Model> m_ngram;
-
-  std::vector<lm::WordIndex> m_lmIdLookup;
-
-  FactorType m_factorType;
-
-  const Factor *m_beginSentenceFactor;
-};
+///*
+// * An implementation of single factor LM using Ken's code.
+// */
+//template <class Model> class LanguageModelKen : public LanguageModel
+//{
+//public:
+//  LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
+//
+//  const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
+//    KenLMState *ret = new KenLMState();
+//    ret->state = m_ngram->BeginSentenceState();
+//    return ret;
+//  }
+//
+//  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+//
+//  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+//
+//  FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+//
+//  void IncrementalCallback(Incremental::Manager &manager) const {
+//    manager.LMCallback(*m_ngram, m_lmIdLookup);
+//  }
+//
+//  bool IsUseable(const FactorMask &mask) const;
+//private:
+//  LanguageModelKen(const LanguageModelKen<Model> &copy_from);
+//
+//  lm::WordIndex TranslateID(const Word &word) const {
+//    std::size_t factor = word.GetFactor(m_factorType)->GetId();
+//    return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+//  }
+//
+//  // Convert last words of hypothesis into vocab ids, returning an end pointer.
+//  lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
+//    lm::WordIndex *index = indices;
+//    lm::WordIndex *end = indices + m_ngram->Order() - 1;
+//    int position = hypo.GetCurrTargetWordsRange().GetEndPos();
+//    for (; ; ++index, --position) {
+//      if (index == end) return index;
+//      if (position == -1) {
+//        *index = m_ngram->GetVocabulary().BeginSentence();
+//        return index + 1;
+//      }
+//      *index = TranslateID(hypo.GetWord(position));
+//    }
+//  }
+//
+//  boost::shared_ptr<Model> m_ngram;
+//
+//  std::vector<lm::WordIndex> m_lmIdLookup;
+//
+//  FactorType m_factorType;
+//
+//  const Factor *m_beginSentenceFactor;
+//};
 
 class MappingBuilder : public lm::EnumerateVocab
 {
@@ -137,8 +137,10 @@ private:
   std::vector<lm::WordIndex> &m_mapping;
 };
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy)
-  :LanguageModel(description, line)
+} // namespace
+
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+  :LanguageModel(line)
   ,m_factorType(factorType)
 {
   lm::ngram::Config config;
@@ -159,13 +161,20 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
-  :LanguageModel(copy_from.GetScoreProducerDescription(), copy_from.GetArgLine()),
+  :LanguageModel(copy_from.GetArgLine()),
    m_ngram(copy_from.m_ngram),
 // TODO: don't copy this.
    m_lmIdLookup(copy_from.m_lmIdLookup),
    m_factorType(copy_from.m_factorType),
    m_beginSentenceFactor(copy_from.m_beginSentenceFactor)
 {
+}
+
+template <class Model> const FFState * LanguageModelKen<Model>::EmptyHypothesisState(const InputType &/*input*/) const
+{
+  KenLMState *ret = new KenLMState();
+  ret->state = m_ngram->BeginSentenceState();
+  return ret;
 }
 
 template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
@@ -342,6 +351,32 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
   return newState;
 }
 
+template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Incremental::Manager &manager) const
+{
+  manager.LMCallback(*m_ngram, m_lmIdLookup);
+}
+
+template <class Model> void LanguageModelKen<Model>::ReportHistoryOrder(std::ostream &out, const Phrase &phrase) const
+{
+  out << "|lm=(";
+  if (!phrase.GetSize()) return;
+
+  typename Model::State aux_state;
+  typename Model::State start_of_sentence_state = m_ngram->BeginSentenceState();
+  typename Model::State *state0 = &start_of_sentence_state;
+  typename Model::State *state1 = &aux_state;
+
+  for (std::size_t position=0; position<phrase.GetSize(); position++) {
+    const lm::WordIndex idx = TranslateID(phrase.GetWord(position));
+    lm::FullScoreReturn ret(m_ngram->FullScore(*state0, idx, *state1));
+    if (position) out << ",";
+    out << (int) ret.ngram_length << ":" << TransformLMScore(ret.prob);
+    if (idx == 0) out << ":unk";
+    std::swap(state0, state1);
+  }
+  out << ")| ";
+}
+
 template <class Model>
 bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 {
@@ -349,13 +384,12 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-} // namespace
 
-LanguageModel *ConstructKenLM(const std::string &description, const std::string &line)
+LanguageModel *ConstructKenLM(const std::string &line)
 {
-  FactorType factorType;
+  FactorType factorType = 0;
   string filePath;
-  bool lazy;
+  bool lazy = false;
 
   vector<string> toks = Tokenize(line);
   for (size_t i = 1; i < toks.size(); ++i) {
@@ -372,38 +406,37 @@ LanguageModel *ConstructKenLM(const std::string &description, const std::string 
       lazy = Scan<bool>(args[1]);
     } else if (args[0] == "name") {
       // that's ok. do nothing, passes onto LM constructor
-    } else {
-      throw "Unknown argument " + args[0];
     }
   }
 
-  return ConstructKenLM(description, line, filePath, factorType, lazy);
+  return ConstructKenLM(line, filePath, factorType, lazy);
 }
 
-LanguageModel *ConstructKenLM(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
 {
   try {
     lm::ngram::ModelType model_type;
     if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+
       switch(model_type) {
       case lm::ngram::PROBING:
-        return new LanguageModelKen<lm::ngram::ProbingModel>(description, line, file,  factorType, lazy);
+        return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
       case lm::ngram::REST_PROBING:
-        return new LanguageModelKen<lm::ngram::RestProbingModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
       case lm::ngram::TRIE:
-        return new LanguageModelKen<lm::ngram::TrieModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
       case lm::ngram::QUANT_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantTrieModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
       case lm::ngram::ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::ArrayTrieModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
       case lm::ngram::QUANT_ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(description, line, file, factorType, lazy);
+        return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
       default:
         std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
         abort();
       }
     } else {
-      return new LanguageModelKen<lm::ngram::ProbingModel>(description, line, file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
     }
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;

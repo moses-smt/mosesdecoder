@@ -41,6 +41,17 @@ using namespace std;
 namespace Moses
 {
 
+PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
+  :PhraseDictionary(line)
+  ,m_inMemory(true)
+  ,m_useAlignmentInfo(true)
+  ,m_hash(10, 16)
+  ,m_phraseDecoder(0)
+  ,m_weight(0)
+{
+  ReadParameters();
+}
+
 void PhraseDictionaryCompact::Load()
 {
   const StaticData &staticData = StaticData::Instance();
@@ -52,7 +63,7 @@ void PhraseDictionaryCompact::Load()
   std::string suffix = ".minphr";
   if(tFilePath.substr(tFilePath.length() - suffix.length(), suffix.length()) == suffix) {
     if(!FileExists(tFilePath)) {
-    	throw runtime_error("Error: File " + tFilePath + " does not exit.");
+      throw runtime_error("Error: File " + tFilePath + " does not exit.");
       exit(1);
     }
   } else {
@@ -89,14 +100,16 @@ void PhraseDictionaryCompact::Load()
   CHECK(indexSize && coderSize && phraseSize);
 }
 
-struct CompareTargetPhrase {
-  bool operator() (const TargetPhrase &a, const TargetPhrase &b) {
-    return a.GetFutureScore() > b.GetFutureScore();
-  }
-};
+// now properly declared in TargetPhraseCollection.h
+// and defined in TargetPhraseCollection.cpp
+// struct CompareTargetPhrase {
+//   bool operator() (const TargetPhrase &a, const TargetPhrase &b) {
+//     return a.GetFutureScore() > b.GetFutureScore();
+//   }
+// };
 
 const TargetPhraseCollection*
-PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) const
+PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
 {
 
   // There is no souch source phrase if source phrase is longer than longest
@@ -106,7 +119,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
 
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
-  = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true);
+  = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, true);
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));
@@ -116,10 +129,9 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
     TargetPhraseVector::iterator nth =
       (m_tableLimit == 0 || tpv->size() < m_tableLimit) ?
       tpv->end() : tpv->begin() + m_tableLimit;
-    std::nth_element(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
+    NTH_ELEMENT4(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
     for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++) {
       TargetPhrase *tp = new TargetPhrase(*it);
-      cerr << *tp << endl;
       phraseColl->Add(tp);
     }
 
@@ -141,7 +153,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase
     return TargetPhraseVectorPtr();
 
   // Retrieve target phrase collection from phrase table
-  return m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true);
+  return m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, false);
 }
 
 PhraseDictionaryCompact::~PhraseDictionaryCompact()
@@ -185,6 +197,8 @@ void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &so
 
   PhraseCache temp;
   temp.swap(ref);
+
+  ReduceCache();
 }
 
 }

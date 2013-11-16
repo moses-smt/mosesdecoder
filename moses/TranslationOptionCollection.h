@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -42,6 +43,8 @@ class InputType;
 class FactorMask;
 class Word;
 class DecodeGraph;
+class PhraseDictionary;
+class InputPath;
 
 /** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
@@ -66,7 +69,8 @@ protected:
   SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
   const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
-  std::vector<Phrase*> m_unksrcs;
+  std::vector<const Phrase*> m_unksrcs;
+  InputPathList m_inputPathQueue;
 
   TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
@@ -76,7 +80,7 @@ protected:
   //! Force a creation of a translation option where there are none for a particular source position.
   void ProcessUnknownWord();
   //! special handling of ONE unknown words.
-  virtual void ProcessOneUnknownWord(const Word &sourceWord, size_t sourcePos, size_t length = 1, const Scores *inputScores = NULL);
+  virtual void ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos, size_t length = 1, const ScorePair *inputScores = NULL);
 
   //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
   void Prune();
@@ -96,6 +100,18 @@ protected:
 
   void CacheLexReordering();
 
+  void GetTargetPhraseCollectionBatch();
+
+  void CreateTranslationOptionsForRange(
+    const DecodeGraph &decodeGraph
+    , size_t startPos
+    , size_t endPos
+    , bool adhereTableLimit
+    , size_t graphInd
+    , InputPath &inputPath);
+
+  void SetInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc);
+
 public:
   virtual ~TranslationOptionCollection();
 
@@ -105,12 +121,9 @@ public:
   }
 
   //!List of unknowns (OOVs)
-  const std::vector<Phrase*>& GetUnknownSources() const;
-
-  //! get length/size of source input
-  size_t GetSize() const {
-    return m_source.GetSize();
-  };
+  const std::vector<const Phrase*>& GetUnknownSources() const {
+    return m_unksrcs;
+  }
 
   //! Create all possible translations from the phrase tables
   virtual void CreateTranslationOptions();
@@ -119,10 +132,13 @@ public:
       , size_t startPosition
       , size_t endPosition
       , bool adhereTableLimit
-      , size_t graphInd);
+      , size_t graphInd) = 0;
 
   //!Check if this range has XML options
   virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
+
+  //! Check if a subsumed XML option constraint is satisfied
+  virtual bool ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const;
 
   //! Create xml-based translation options for the specific input span
   virtual void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);

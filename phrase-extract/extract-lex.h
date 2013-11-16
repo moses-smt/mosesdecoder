@@ -71,14 +71,14 @@ public:
   std::map<const std::string*, WordCount> m_coll;
 
   WordCount()
-    :m_count(0)
-  {}
+    :m_count(0) {
+  }
 
   //WordCount(const WordCount &copy);
 
   WordCount(float count)
-    :m_count(count)
-  {}
+    :m_count(count) {
+  }
 
   void AddCount(float incr);
 

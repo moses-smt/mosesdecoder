@@ -61,11 +61,18 @@ public:
 class BleuScoreFeature : public StatefulFeatureFunction
 {
 public:
+  static const std::vector<BleuScoreFeature*>& GetColl() {
+	return s_staticColl;
+  }
 
   typedef boost::unordered_map<size_t, RefValue > RefCounts;
   typedef boost::unordered_map<size_t, NGrams> Matches;
 
   BleuScoreFeature(const std::string &line);
+
+  void SetParameter(const std::string& key, const std::string& value);
+
+  std::vector<float> DefaultWeights() const;
 
   void PrintHistory(std::ostream& out) const;
   void LoadReferences(const std::vector< std::vector< std::string > > &);
@@ -114,6 +121,17 @@ public:
   FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
                          int featureID,
                          ScoreComponentCollection* accumulator) const;
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
   bool Enabled() const {
     return m_enabled;
   }
@@ -135,6 +153,8 @@ public:
   }
 
 private:
+  static std::vector<BleuScoreFeature*> s_staticColl;
+
   bool m_enabled;
   bool m_sentence_bleu;
   bool m_simple_history_bleu;

@@ -40,15 +40,15 @@ public:
     : m_start(2)
     , m_end(2)
     , m_pos(2)
-    , m_label(2)
-  {}
+    , m_label(2) {
+  }
 
   Hole(const Hole &copy)
     : m_start(copy.m_start)
     , m_end(copy.m_end)
     , m_pos(copy.m_pos)
-    , m_label(copy.m_label)
-  {}
+    , m_label(copy.m_label) {
+  }
 
   Hole(int startS, int endS, int startT, int endT)
     : m_start(2)

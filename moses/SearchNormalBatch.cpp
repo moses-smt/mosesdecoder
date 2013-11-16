@@ -46,7 +46,7 @@ void SearchNormalBatch::ProcessSentence()
   clock_t t=0; // used to track time for steps
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTargetPhrase);
+  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack
@@ -108,7 +108,11 @@ void SearchNormalBatch::ProcessSentence()
  * \param expectedScore base score for early discarding
  *        (base hypothesis score plus future score estimation)
  */
-void SearchNormalBatch::ExpandHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt, float expectedScore)
+
+void
+SearchNormalBatch::
+ExpandHypothesis(const Hypothesis &hypothesis,
+                 const TranslationOption &transOpt, float expectedScore)
 {
   // Check if the number of partial hypotheses exceeds the batch size.
   if (m_partial_hypos.size() >= m_batch_size) {
@@ -125,12 +129,12 @@ void SearchNormalBatch::ExpandHypothesis(const Hypothesis &hypothesis, const Tra
     IFVERBOSE(2) {
       t = clock();
     }
-    newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+    newHypo = hypothesis.CreateNext(transOpt);
     IFVERBOSE(2) {
       stats.AddTimeBuildHyp( clock()-t );
     }
     if (newHypo==NULL) return;
-    //newHypo->CalcScore(m_transOptColl.GetFutureScore());
+    //newHypo->Evaluate(m_transOptColl.GetFutureScore());
 
     // Issue DLM requests for new hypothesis and put into the list of
     // partial hypotheses.

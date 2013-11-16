@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "WordsBitmap.h"
 #include "GenerationDictionary.h"
-#include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
 
@@ -32,22 +31,22 @@ using namespace std;
 namespace Moses
 {
 
+TranslationOption::TranslationOption()
+  :m_targetPhrase()
+  ,m_inputPath(NULL)
+  ,m_sourceWordsRange(NOT_FOUND, NOT_FOUND)
+{
+}
+
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange
                                      , const TargetPhrase &targetPhrase)
   : m_targetPhrase(targetPhrase)
+  , m_inputPath(NULL)
   , m_sourceWordsRange(wordsRange)
   , m_futureScore(targetPhrase.GetFutureScore())
 {
 }
-
-TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
-  : m_targetPhrase(copy.m_targetPhrase)
-//, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
-  , m_sourceWordsRange(sourceWordsRange)
-  , m_futureScore(copy.m_futureScore)
-  , m_lexReorderingScores(copy.m_lexReorderingScores)
-{}
 
 bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const
 {
@@ -72,10 +71,24 @@ void TranslationOption::CacheLexReorderingScores(const LexicalReordering &produc
   m_lexReorderingScores[&producer] = score;
 }
 
-void TranslationOption::Evaluate(const InputType &source)
+void TranslationOption::Evaluate(const InputType &input)
 {
-  m_targetPhrase.Evaluate(source);
+  const InputPath &inputPath = GetInputPath();
+  m_targetPhrase.Evaluate(input, inputPath);
 }
+
+const InputPath &TranslationOption::GetInputPath() const
+{
+  CHECK(m_inputPath);
+  return *m_inputPath;
+}
+
+void TranslationOption::SetInputPath(const InputPath &inputPath)
+{
+  CHECK(m_inputPath == NULL);
+  m_inputPath = &inputPath;
+}
+
 
 TO_STRING_BODY(TranslationOption);
 

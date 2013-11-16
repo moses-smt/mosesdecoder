@@ -19,16 +19,21 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 #include "StaticData.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptions.h"
 #include "ChartCellCollection.h"
 #include "WordsRange.h"
+#include "InputType.h"
+#include "InputPath.h"
+
+using namespace std;
 
 namespace Moses
 {
 
-ChartTranslationOptionList::ChartTranslationOptionList(size_t ruleLimit)
+ChartTranslationOptionList::ChartTranslationOptionList(size_t ruleLimit, const InputType &input)
   : m_size(0)
   , m_ruleLimit(ruleLimit)
 {
@@ -62,6 +67,14 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
     return;
   }
 
+  for (size_t i = 0; i < stackVec.size(); ++i) {
+    const ChartCellLabel &chartCellLabel = *stackVec[i];
+    size_t numHypos = chartCellLabel.GetStack().cube->size();
+    if (numHypos == 0) {
+      return; // empty stack. These rules can't be used
+    }
+  }
+
   float score = ChartTranslationOptions::CalcEstimateOfBestScore(tpc, stackVec);
 
   // If the rule limit has already been reached then don't add the option
@@ -89,7 +102,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
 
   // Prune if bursting
   if (m_size == m_ruleLimit * 2) {
-    std::nth_element(m_collection.begin(),
+	NTH_ELEMENT4(m_collection.begin(),
                      m_collection.begin() + m_ruleLimit - 1,
                      m_collection.begin() + m_size,
                      ChartTranslationOptionOrderer());
@@ -115,7 +128,7 @@ void ChartTranslationOptionList::ApplyThreshold()
     assert(m_size < m_ruleLimit * 2);
     // Reduce the list to the best m_ruleLimit options.  The remaining
     // options can be overwritten on subsequent calls to Add().
-    std::nth_element(m_collection.begin(),
+    NTH_ELEMENT4(m_collection.begin(),
                      m_collection.begin()+m_ruleLimit,
                      m_collection.begin()+m_size,
                      ChartTranslationOptionOrderer());
@@ -140,6 +153,16 @@ void ChartTranslationOptionList::ApplyThreshold()
                              ScoreThresholdPred(scoreThreshold));
 
   m_size = std::distance(m_collection.begin(), bound);
+}
+
+void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPath &inputPath)
+{
+  // NEVER iterate over ALL of the collection. Just over the first m_size
+  CollType::iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.begin() + m_size; ++iter) {
+    ChartTranslationOptions &transOpts = **iter;
+    transOpts.Evaluate(input, inputPath);
+  }
 }
 
 }

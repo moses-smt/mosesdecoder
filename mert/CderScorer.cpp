@@ -69,13 +69,10 @@ void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>&
     tmp.clear();
     computeCD(cand, ref, tmp);
     int score = calculateScore(tmp);
-    if (rid == 0)
-    {
+    if (rid == 0) {
       stats = tmp;
       max = score;
-    }
-    else if (score > max) 
-    {
+    } else if (score > max) {
       stats = tmp;
       max = score;
     }
@@ -103,7 +100,7 @@ void CderScorer::computeCD(const sent_t& cand, const sent_t& ref,
 
   // Initialization of first row
   for (int i = 0; i < I; ++i) (*row)[i] = i;
-  
+
   // For CDER metric, the initialization is different
   if (m_allowed_long_jumps) {
     for (int i = 1; i < I; ++i) (*row)[i] = 1;

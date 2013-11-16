@@ -48,7 +48,6 @@ class FFState;
 class StatelessFeatureFunction;
 class StatefulFeatureFunction;
 class Manager;
-class LexicalReordering;
 
 typedef std::vector<Hypothesis*> ArcList;
 
@@ -68,8 +67,6 @@ protected:
 
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
 //	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
-  const TargetPhrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
-  Phrase const*     m_sourcePhrase; /*! input sentence */
   WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
   //TODO: how to integrate this into confusion network framework; what if
   //it's a confusion network in the end???
@@ -83,13 +80,13 @@ protected:
   std::vector<const FFState*> m_ffStates;
   const Hypothesis 	*m_winningHypo;
   ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
-  const TranslationOption *m_transOpt;
+  const TranslationOption &m_transOpt;
   Manager& m_manager;
 
   int m_id; /*! numeric ID of this hypothesis, used for logging */
 
   /*! used by initial seeding of the translation process */
-  Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
+  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
   /*! used when creating a new hypothesis using a translation option (phrase translation) */
   Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
@@ -102,15 +99,15 @@ public:
   ~Hypothesis();
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
-  static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constraint);
+  static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
   static Hypothesis* Create(Manager& manager, const WordsBitmap &initialCoverage);
 
   /** return the subclass of Hypothesis most appropriate to the given target phrase */
-  static Hypothesis* Create(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
+  static Hypothesis* Create(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
-  Hypothesis* CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const;
+  Hypothesis* CreateNext(const TranslationOption &transOpt) const;
 
   void PrintHypothesis() const;
 
@@ -120,10 +117,7 @@ public:
 
   /** return target phrase used to create this hypothesis */
 //	const Phrase &GetCurrTargetPhrase() const
-  const TargetPhrase &GetCurrTargetPhrase() const {
-    return m_targetPhrase;
-  }
-
+  const TargetPhrase &GetCurrTargetPhrase() const;
 
   /** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
   inline const WordsRange &GetCurrSourceWordsRange() const {
@@ -143,7 +137,7 @@ public:
     return m_currTargetWordsRange.GetNumWordsCovered();
   }
 
-  void CalcScore(const SquareMatrix &futureScore);
+  void Evaluate(const SquareMatrix &futureScore);
 
   int GetId()const {
     return m_id;
@@ -156,10 +150,6 @@ public:
     return m_currTargetWordsRange.GetEndPos() + 1;
   }
 
-  inline const Phrase* GetSourcePhrase() const {
-    return m_sourcePhrase;
-  }
-
   std::string GetSourcePhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
   std::string GetTargetPhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
   std::string GetSourcePhraseStringRep() const;
@@ -169,10 +159,10 @@ public:
    * (ie, start of sentence would be some negative number, which is
    * not allowed- USE WITH CAUTION) */
   inline const Word &GetCurrWord(size_t pos) const {
-    return m_targetPhrase.GetWord(pos);
+    return GetCurrTargetPhrase().GetWord(pos);
   }
   inline const Factor *GetCurrFactor(size_t pos, FactorType factorType) const {
-    return m_targetPhrase.GetFactor(pos, factorType);
+    return GetCurrTargetPhrase().GetFactor(pos, factorType);
   }
   /** recursive - pos is relative from start of sentence */
   inline const Word &GetWord(size_t pos) const {
@@ -200,11 +190,12 @@ public:
 
   int RecombineCompare(const Hypothesis &compare) const;
 
+  void GetOutputPhrase(Phrase &out) const;
+
   void ToStream(std::ostream& out) const {
-    if (m_prevHypo != NULL) {
-      m_prevHypo->ToStream(out);
-    }
-    out << (Phrase) GetCurrTargetPhrase();
+    Phrase ret;
+    GetOutputPhrase(ret);
+    out << ret;
   }
 
   void ToStringStream(std::stringstream& out) const {
@@ -264,7 +255,7 @@ public:
   }
 
   const TranslationOption &GetTranslationOption() const {
-    return *m_transOpt;
+    return m_transOpt;
   }
 };
 

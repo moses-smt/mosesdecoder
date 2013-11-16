@@ -65,8 +65,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
                                    , const DecodeStep &decodeStep
                                    , PartialTranslOptColl &outputPartialTranslOptColl
                                    , TranslationOptionCollection * /* toc */
-                                   , bool /*adhereTableLimit*/
-                                   , const Phrase &src) const
+                                   , bool /*adhereTableLimit*/) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion
@@ -81,6 +80,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
   const GenerationDictionary* generationDictionary  = decodeStep.GetGenerationDictionaryFeature();
 
   const Phrase &targetPhrase  = inputPartialTranslOpt.GetTargetPhrase();
+  const InputPath &inputPath = inputPartialTranslOpt.GetInputPath();
   size_t targetLength         = targetPhrase.GetSize();
 
   // generation list for each word in phrase
@@ -148,12 +148,14 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
     outPhrase.GetScoreBreakdown().PlusEquals(generationScore);
 
     outPhrase.MergeFactors(genPhrase, m_newOutputFactors);
-    outPhrase.Evaluate(src, m_featuresToApply);
+    outPhrase.Evaluate(inputPath.GetPhrase(), m_featuresToApply);
 
     const WordsRange &sourceWordsRange = inputPartialTranslOpt.GetSourceWordsRange();
 
     TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
     assert(newTransOpt);
+
+    newTransOpt->SetInputPath(inputPath);
 
     outputPartialTranslOptColl.Add(newTransOpt);
 

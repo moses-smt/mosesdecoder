@@ -41,6 +41,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+/**
+ * Smaller version for just 1 FF.
+ */
+struct ScorePair {
+  friend std::ostream& operator<<(std::ostream& os, const ScorePair& rhs);
+
+  std::vector<float> denseScores;
+  std::map<StringPiece, float> sparseScores;
+
+  ScorePair()
+  {}
+  ScorePair(const std::vector<float> &other)
+    :denseScores(other)
+  {}
+
+  void PlusEquals(const ScorePair &other);
+  void PlusEquals(const StringPiece &key, float value);
+
+  void PlusEquals(const std::vector<float> &other) {
+    CHECK(denseScores.size() == other.size());
+    std::transform(denseScores.begin(),
+                   denseScores.end(),
+                   other.begin(),
+                   denseScores.begin(),
+                   std::plus<float>());
+  }
+};
 
 /*** An unweighted collection of scores for a translation or step in a translation.
  *
@@ -63,8 +90,11 @@ namespace Moses
 class ScoreComponentCollection
 {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
+  friend void swap(ScoreComponentCollection &first, ScoreComponentCollection &second);
+
 private:
   FVector m_scores;
+
   typedef std::pair<size_t,size_t> IndexPair;
   typedef std::map<const FeatureFunction*,IndexPair> ScoreIndexMap;
   static  ScoreIndexMap s_scoreIndexes;
@@ -91,8 +121,8 @@ public:
 
   //! Clone a score collection
   ScoreComponentCollection(const ScoreComponentCollection& rhs)
-    : m_scores(rhs.m_scores)
-  {}
+    : m_scores(rhs.m_scores) {
+  }
 
   ScoreComponentCollection& operator=( const ScoreComponentCollection& rhs ) {
     m_scores = rhs.m_scores;
@@ -224,19 +254,15 @@ public:
     m_scores[fname] += score;
   }
 
+  void PlusEquals(const FeatureFunction* sp, const ScorePair &scorePair);
+
   //For features which have an unbounded number of components
   void SparsePlusEquals(const std::string& full_name, float score) {
     FName fname(full_name);
     m_scores[fname] += score;
   }
 
-  void Assign(const FeatureFunction* sp, const std::vector<float>& scores) {
-    IndexPair indexes = GetIndexes(sp);
-    CHECK(scores.size() == indexes.second - indexes.first);
-    for (size_t i = 0; i < scores.size(); ++i) {
-      m_scores[i + indexes.first] = scores[i];
-    }
-  }
+  void Assign(const FeatureFunction* sp, const std::vector<float>& scores);
 
   //! Special version Assign(ScoreProducer, vector<float>)
   //! to add the score from a single ScoreProducer that produces
@@ -335,6 +361,7 @@ public:
   float GetWeightedScore() const;
 
   void ZeroDenseFeatures(const FeatureFunction* sp);
+  void InvertDenseFeatures(const FeatureFunction* sp);
   void L1Normalise();
   float GetL1Norm() const;
   float GetL2Norm() const;
@@ -412,6 +439,11 @@ struct SCCPlus {
     return sum;
   }
 };
+
+inline void swap(ScoreComponentCollection &first, ScoreComponentCollection &second)
+{
+  swap(first.m_scores, second.m_scores);
+}
 
 }
 #endif

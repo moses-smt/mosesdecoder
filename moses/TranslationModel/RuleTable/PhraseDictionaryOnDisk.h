@@ -28,11 +28,20 @@
 #include "OnDiskPt/OnDiskWrapper.h"
 #include "OnDiskPt/Word.h"
 #include "OnDiskPt/PhraseNode.h"
+#include "util/check.hh"
+
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#else
+#include <boost/scoped_ptr.hpp>
+#endif
 
 namespace Moses
 {
 class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
+class InputPath;
+class ChartParser;
 
 /** Implementation of on-disk phrase table for hierarchical/syntax model.
  */
@@ -42,32 +51,36 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryOnDisk&);
 
 protected:
+#ifdef WITH_THREADS
   boost::thread_specific_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
+#else
+  boost::scoped_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
+#endif
 
   OnDiskPt::OnDiskWrapper &GetImplementation();
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
-public:
-  PhraseDictionaryOnDisk(const std::string &line)
-    : MyBase("PhraseDictionaryOnDisk", line)
-  {}
+  void GetTargetPhraseCollectionBatch(InputPath &inputPath) const;
 
-  virtual ~PhraseDictionaryOnDisk();
+public:
+  PhraseDictionaryOnDisk(const std::string &line);
+  ~PhraseDictionaryOnDisk();
+  void Load();
 
   PhraseTableImplementation GetPhraseTableImplementation() const {
     return OnDisk;
   }
 
   // PhraseDictionary impl
-  //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
-
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &parser,
     const ChartCellCollectionBase &);
 
   virtual void InitializeForInput(InputType const& source);
-  virtual void CleanUpAfterSentenceProcessing(InputType const& source);
+  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
+
+  const TargetPhraseCollection *GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
+  const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
 
 };
 

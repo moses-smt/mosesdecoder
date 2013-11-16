@@ -22,6 +22,7 @@
 #include "Factor.h"
 #include "Word.h"
 
+#include <iostream>
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_set.hpp>
 
@@ -60,5 +61,7 @@ public:
 typedef boost::unordered_set<Word,
         NonTerminalHasher,
         NonTerminalEqualityPred> NonTerminalSet;
+
+std::ostream& operator<<(std::ostream&, const NonTerminalSet&);
 
 }  // namespace Moses

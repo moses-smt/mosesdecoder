@@ -58,6 +58,15 @@ namespace Moses
 #define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
 
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)
+// gcc nth_element() bug
+#define NTH_ELEMENT3(begin, middle, end) std::sort(begin, end)
+#define NTH_ELEMENT4(begin, middle, end, orderer) std::sort(begin, end, orderer)
+#else
+#define NTH_ELEMENT3(begin, middle, end) std::nth_element(begin, middle, end)
+#define NTH_ELEMENT4(begin, middle, end, orderer) std::nth_element(begin, middle, end, orderer)
+#endif
+
 //! delete white spaces at beginning and end of string
 const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
 const std::string ToLower(const std::string& str);
@@ -231,6 +240,26 @@ inline void TokenizeMultiCharSeparator(std::vector<std::string> &output
     nextPos	= str.find(separator, pos);
   }
   output.push_back(Trim(str.substr(pos, nextPos - pos)));
+}
+
+/** only split of the first delimiter. Used by class FeatureFunction for parse key=value pair.
+ * Value may have = character
+*/
+inline std::vector<std::string> TokenizeFirstOnly(const std::string& str,
+    const std::string& delimiters = " \t")
+{
+  std::vector<std::string> tokens;
+  std::string::size_type pos     = str.find_first_of(delimiters);
+
+  if (std::string::npos != pos) {
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(0, pos));
+    tokens.push_back(str.substr(pos + 1, str.size() - pos  - 1));
+  } else {
+    tokens.push_back(str);
+  }
+
+  return tokens;
 }
 
 

@@ -97,6 +97,9 @@ public:
     return vertex.BestChild();
   }
 
+  void Evaluate(const InputType &input, const InputPath &inputPath) {
+    // TODO for input lattice
+  }
 private:
   lm::WordIndex Convert(const Word &word) const;
 
@@ -199,7 +202,7 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
   const LanguageModel &abstract = LanguageModel::GetFirstLM();
   const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
-  search::Config config(abstract.GetWeight(), data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
+  search::Config config(abstract.GetWeight() * M_LN10, data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
   search::Context<Model> context(config, model);
 
   size_t size = source_.GetSize();

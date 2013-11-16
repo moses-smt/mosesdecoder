@@ -36,7 +36,7 @@ namespace Moses
 class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
 {
 public:
-  ChartRuleLookupManagerOnDisk(const InputType &sentence,
+  ChartRuleLookupManagerOnDisk(const ChartParser &parser,
                                const ChartCellCollectionBase &cellColl,
                                const PhraseDictionaryOnDisk &dictionary,
                                OnDiskPt::OnDiskWrapper &dbWrapper,

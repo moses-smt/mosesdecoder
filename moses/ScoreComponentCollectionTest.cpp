@@ -32,20 +32,27 @@ BOOST_AUTO_TEST_SUITE(scc)
 class MockStatelessFeatureFunction : public StatelessFeatureFunction
 {
 public:
-  MockStatelessFeatureFunction(const string& desc, size_t n, const string &line) :
-    StatelessFeatureFunction(desc,n, line) {}
-  virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
-  virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
-  virtual void Evaluate(const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-  { }
+  MockStatelessFeatureFunction(size_t n, const string &line) :
+    StatelessFeatureFunction(n, line) {}
+  void Evaluate(const Hypothesis&, ScoreComponentCollection*) const {}
+  void EvaluateChart(const ChartHypothesis&, ScoreComponentCollection*) const {}
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
 };
 
 class MockSingleFeature : public MockStatelessFeatureFunction
 {
 public:
-  MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1, "MockSingle") {}
+  MockSingleFeature(): MockStatelessFeatureFunction(1, "MockSingle") {}
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -55,17 +62,18 @@ public:
 class MockMultiFeature : public MockStatelessFeatureFunction
 {
 public:
-  MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5, "MockMulti") {}
+  MockMultiFeature(): MockStatelessFeatureFunction(5, "MockMulti") {}
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
+
 };
 
 class MockSparseFeature : public MockStatelessFeatureFunction
 {
 public:
-  MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", 0, "MockSparse") {}
+  MockSparseFeature(): MockStatelessFeatureFunction(0, "MockSparse") {}
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

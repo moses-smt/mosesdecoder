@@ -41,10 +41,12 @@
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
-#include "util/file.hh"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
+#include "util/check.hh"
+#include "util/file.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -52,9 +54,11 @@ namespace Moses
 {
 
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
-:PhraseDictionary("PhraseDictionaryFuzzyMatch", line)
-,m_FuzzyMatchWrapper(NULL)
-{}
+  :PhraseDictionary(line)
+  ,m_FuzzyMatchWrapper(NULL)
+{
+  CHECK(m_args.size() == 0);
+}
 
 PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
 {
@@ -63,15 +67,17 @@ PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
 
 void PhraseDictionaryFuzzyMatch::Load()
 {
+  SetFeaturesToApply();
+
   assert(m_config.size() == 3);
   m_FuzzyMatchWrapper = new tmmt::FuzzyMatchWrapper(m_config[0], m_config[1], m_config[2]);
 }
 
 ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
-  const InputType &sentence,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellCollection)
 {
-  return new ChartRuleLookupManagerMemoryPerSentence(sentence, cellCollection, *this);
+  return new ChartRuleLookupManagerMemoryPerSentence(parser, cellCollection, *this);
 }
 
 
@@ -166,7 +172,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
   while(getline(inStream, lineOrig)) {
     const string *line;
     if (format == HieroFormat) { // reformat line
-      assert(false);
+      UTIL_THROW(util::Exception, "Cannot be Hiero format");
       //line = ReformatHieroRule(lineOrig);
     } else {
       // do nothing to format of line
@@ -258,7 +264,7 @@ TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseColle
     , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
-  return currNode.GetOrCreateTargetPhraseCollection();
+  return currNode.GetTargetPhraseCollection();
 }
 
 PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDictionaryNodeMemory &rootNode
@@ -314,10 +320,9 @@ void PhraseDictionaryFuzzyMatch::CleanUpAfterSentenceProcessing(const InputType 
   m_collection.erase(source.GetTranslationId());
 }
 
-const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source) const
+const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(long translationId) const
 {
-  long transId = source.GetTranslationId();
-  std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(transId);
+  std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(translationId);
   CHECK(iter != m_collection.end());
   return iter->second;
 }

@@ -41,16 +41,10 @@ SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, 
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_initialTargetPhrase(source.m_initialTargetPhrase)
   ,m_start(clock())
   ,m_transOptColl(transOptColl)
 {
   const StaticData &staticData = StaticData::Instance();
-
-  /* constraint search not implemented in cube pruning
-  	long sentenceID = source.GetTranslationId();
-  	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-  */
 
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
@@ -76,7 +70,7 @@ void SearchCubePruning::ProcessSentence()
   const StaticData &staticData = StaticData::Instance();
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTargetPhrase);
+  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
 
   HypothesisStackCubePruning &firstStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
   firstStack.AddInitial(hypo);

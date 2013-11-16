@@ -1,0 +1,2 @@
+exe merge-sorted : util/merge-sorted.cc $(TOP)/moses/generic//generic $(TOP)//boost_iostreams ; 
+install $(PREFIX)/bin :  merge-sorted ; 

@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "UserMessage.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -38,25 +39,19 @@ namespace Moses
 /** define allowed parameters */
 Parameter::Parameter()
 {
+  AddParam("mapping", "description of decoding steps");
   AddParam("beam-threshold", "b", "threshold for threshold pruning");
   AddParam("config", "f", "location of the configuration file");
-  AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
+  //AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam("decoding-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
-  AddParam("dlm-model", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
-  AddParam("generation-file", "location and properties of the generation table");
-  AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
-  AddParam("glm-feature", "discriminatively trained global lexical translation feature, sparse producer");
   AddParam("input-factors", "list of factors in the input");
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
   AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
-  AddParam("lmodel-file", "location and properties of the language models");
-  AddParam("lmodel-dub", "dictionary upper bounds of language models");
-  AddParam("lmodel-oov-feature", "add language model oov feature, one per model");
-  AddParam("mapping", "description of decoding steps");
+  AddParam("mark-unknown", "mu", "mark unknown words in output");
   AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
   AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
   AddParam("max-phrase-length", "maximum phrase length (default 20)");
@@ -68,29 +63,24 @@ Parameter::Parameter()
   AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
   AddParam("report-all-factors", "report all factors in output, not just first");
   AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
-#ifdef HAVE_SYNLM
-  AddParam("slmodel-file", "location of the syntactic language model file(s)");
-  AddParam("slmodel-factor", "factor to use with syntactic language model");
-  AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
-#endif
   AddParam("stack", "s", "maximum stack size for histogram pruning");
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
-  AddParam("ttable-file", "location and properties of the translation tables");
-  AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
+  AddParam("tree-translation-details", "Ttree", "for each hypothesis, report translation details with tree fragment info to given file");
+  //DIMw
+  AddParam("translation-all-details", "Tall", "for all hypotheses, report translation details to the given file");
   AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
   AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
   AddParam("verbose", "v", "verbosity level of the logging");
   AddParam("references", "Reference file(s) - used for bleu score feature");
   AddParam("output-factors", "list if factors in the output");
-  AddParam("cache-path", "?");
   AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
   AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
   AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
   AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
   AddParam("early-distortion-cost", "edc", "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
-  AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
+  AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'constraint', 'ignore'");
   AddParam("xml-brackets", "xb", "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode" );
   AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
   AddParam("lminimum-bayes-risk", "lmbr", "use lattice miminum Bayes risk to determine best translation");
@@ -104,9 +94,8 @@ Parameter::Parameter()
   AddParam("lmbr-r", "ngram precision decay value for lattice mbr");
   AddParam("lmbr-map-weight", "weight given to map solution when doing lattice MBR (default 0)");
   AddParam("lattice-hypo-set", "to use lattice as hypo set during lattice MBR");
+  AddParam("lmodel-oov-feature", "add language model oov feature, one per model");
   AddParam("clean-lm-cache", "clean language model caches after N translations (default N=1)");
-  AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
-  AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");
   AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
   AddParam("output-word-graph", "owg", "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
   AddParam("time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
@@ -122,7 +111,6 @@ Parameter::Parameter()
   AddParam("cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
   AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
   AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
-  AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
   AddParam("description", "Source language, target language, description");
   AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
   AddParam("non-terminals", "list of non-term symbols, space separated");
@@ -130,17 +118,9 @@ Parameter::Parameter()
   AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
   AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
   AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
-  AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
-  AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
-  AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
-  AddParam("phrase-length-feature", "Count features for source length, target length, both of each phrase");
-  AddParam("target-word-insertion-feature", "Count feature for each unaligned target word");
-  AddParam("source-word-deletion-feature", "Count feature for each unaligned source word");
-  AddParam("word-translation-feature", "Count feature for word translation according to word alignment");
   AddParam("cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
   AddParam("parsing-algorithm", "Which parsing algorithm to use. 0=CYK+, 1=scope-3. (default = 0)");
   AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing, 4=stack with batched lm requests (default = 0)");
-  AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
   AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
   AddParam("description", "Source language, target language, description");
 
@@ -149,7 +129,6 @@ Parameter::Parameter()
   AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
   AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
   AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
-  AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("show-weights", "print feature weights and exit");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
@@ -164,6 +143,7 @@ Parameter::Parameter()
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
+  AddParam("report-segmentation-enriched", "tt", "report phrase segmentation in the output with additional information");
   AddParam("link-param-count", "DEPRECATED. DO NOT USE. Number of parameters on word links when using confusion networks or lattices (default = 1)");
 
   AddParam("weight-slm", "slm", "DEPRECATED. DO NOT USE. weight(s) for syntactic language model");
@@ -184,17 +164,42 @@ Parameter::Parameter()
   AddParam("weight-u", "u", "DEPRECATED. DO NOT USE. weight for unknown word penalty");
   AddParam("weight-e", "e", "DEPRECATED. DO NOT USE. weight for word deletion");
   AddParam("text-type", "DEPRECATED. DO NOT USE. should be one of dev/devtest/test, used for domain adaptation features");
+  AddParam("input-scores", "DEPRECATED. DO NOT USE. 2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
+
+  AddParam("dlm-model", "DEPRECATED. DO NOT USE. Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
+  AddParam("generation-file", "DEPRECATED. DO NOT USE. location and properties of the generation table");
+  AddParam("global-lexical-file", "gl", "DEPRECATED. DO NOT USE. discriminatively trained global lexical translation model file");
+  AddParam("glm-feature", "DEPRECATED. DO NOT USE. discriminatively trained global lexical translation feature, sparse producer");
+  AddParam("lmodel-file", "DEPRECATED. DO NOT USE. location and properties of the language models");
+  AddParam("lmodel-dub", "DEPRECATED. DO NOT USE. dictionary upper bounds of language models");
+
+#ifdef HAVE_SYNLM
+  AddParam("slmodel-file", "DEPRECATED. DO NOT USE. location of the syntactic language model file(s)");
+  AddParam("slmodel-factor", "DEPRECATED. DO NOT USE. factor to use with syntactic language model");
+  AddParam("slmodel-beam", "DEPRECATED. DO NOT USE. beam width to use with syntactic language model's parser");
+#endif
+  AddParam("ttable-file", "DEPRECATED. DO NOT USE. location and properties of the translation tables");
+  AddParam("phrase-pair-feature", "DEPRECATED. DO NOT USE. Source and target factors for phrase pair feature");
+  AddParam("phrase-boundary-source-feature", "DEPRECATED. DO NOT USE. Source factors for phrase boundary feature");
+  AddParam("phrase-boundary-target-feature", "DEPRECATED. DO NOT USE. Target factors for phrase boundary feature");
+  AddParam("phrase-length-feature", "DEPRECATED. DO NOT USE. Count features for source length, target length, both of each phrase");
+  AddParam("target-word-insertion-feature", "DEPRECATED. DO NOT USE. Count feature for each unaligned target word");
+  AddParam("source-word-deletion-feature", "DEPRECATED. DO NOT USE. Count feature for each unaligned source word");
+  AddParam("word-translation-feature", "DEPRECATED. DO NOT USE. Count feature for word translation according to word alignment");
 
   AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
 
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
-  AddParam("input-scores", "2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
+  AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key");
+  AddParam("feature-add", "Add a feature function on the command line. Used by mira to add BLEU feature");
 
-  AddParam("feature", "");
+  AddParam("feature", "All the feature functions should be here");
   AddParam("print-id", "prefix translations with id. Default if false");
 
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
+
+  AddParam("placeholder-factor", "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
 }
 
 Parameter::~Parameter()
@@ -262,6 +267,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
        && (configPath = FindParam("-config", argc, argv)) == "") {
     PrintCredit();
     Explain();
+    PrintFF();
 
     cerr << endl;
     UserMessage::Add("No configuration file was specified.  Use -config or -f");
@@ -275,17 +281,21 @@ bool Parameter::LoadParam(int argc, char* argv[])
   }
 
   // overwrite parameters with values from switches
-  for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) {
+  for(PARAM_STRING::const_iterator iterParam = m_description.begin();
+      iterParam != m_description.end(); iterParam++) {
     const string paramName = iterParam->first;
     OverwriteParam("-" + paramName, paramName, argc, argv);
   }
 
   // ... also shortcuts
-  for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin(); iterParam != m_abbreviation.end(); iterParam++) {
+  for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin();
+      iterParam != m_abbreviation.end(); iterParam++) {
     const string paramName = iterParam->first;
     const string paramShortName = iterParam->second;
     OverwriteParam("-" + paramShortName, paramName, argc, argv);
   }
+
+  AddFeaturesCmd();
 
   // logging of parameters that were set in either config or switch
   int verbose = 1;
@@ -294,12 +304,32 @@ bool Parameter::LoadParam(int argc, char* argv[])
     verbose = Scan<int>(m_setting["verbose"][0]);
   if (verbose >= 1) { // only if verbose
     TRACE_ERR( "Defined parameters (per moses.ini or switch):" << endl);
-    for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; iterParam != m_setting.end(); iterParam++) {
+    for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ;
+        iterParam != m_setting.end(); iterParam++) {
       TRACE_ERR( "\t" << iterParam->first << ": ");
       for ( size_t i = 0; i < iterParam->second.size(); i++ )
         TRACE_ERR( iterParam->second[i] << " ");
       TRACE_ERR( endl);
     }
+  }
+
+  // don't mix old and new format
+  if ((isParamSpecified("feature") || isParamSpecified("weight"))
+      && (isParamSpecified("weight-slm") || isParamSpecified("weight-bl") || isParamSpecified("weight-d") ||
+          isParamSpecified("weight-dlm") || isParamSpecified("weight-lrl") || isParamSpecified("weight-generation") ||
+          isParamSpecified("weight-i") || isParamSpecified("weight-l") || isParamSpecified("weight-lex") ||
+          isParamSpecified("weight-glm") || isParamSpecified("weight-wt") || isParamSpecified("weight-pp") ||
+          isParamSpecified("weight-pb") || isParamSpecified("weight-t") || isParamSpecified("weight-w") ||
+          isParamSpecified("weight-u") || isParamSpecified("weight-e") ||
+          isParamSpecified("dlm-mode") || isParamSpecified("generation-file") || isParamSpecified("global-lexical-file") ||
+          isParamSpecified("glm-feature") || isParamSpecified("lmodel-file") || isParamSpecified("lmodel-dub") ||
+          isParamSpecified("slmodel-file") || isParamSpecified("slmodel-factor") ||
+          isParamSpecified("slmodel-beam") || isParamSpecified("ttable-file") || isParamSpecified("phrase-pair-feature") ||
+          isParamSpecified("phrase-boundary-source-feature") || isParamSpecified("phrase-boundary-target-feature") || isParamSpecified("phrase-length-feature") ||
+          isParamSpecified("target-word-insertion-feature") || isParamSpecified("source-word-deletion-feature") || isParamSpecified("word-translation-feature")
+         )
+     ) {
+    UTIL_THROW(util::Exception, "Don't mix old and new ini file format");
   }
 
   // convert old weights args to new format
@@ -321,19 +351,38 @@ bool Parameter::LoadParam(int argc, char* argv[])
     }
   }
 
+  //Save("/Users/mnadejde/Documents/workspace/MTM13/DATA/mtmGHKM/moses.ini.new");
+
   // check if parameters make sense
   return Validate() && noErrorFlag;
 }
 
-std::vector<float> &Parameter::GetWeights(const std::string &name)
+void Parameter::AddFeaturesCmd()
 {
-  std::vector<float> &ret = m_weights[name];
-
-  cerr << "WEIGHT " << name << "=";
-  for (size_t i = 0; i < ret.size(); ++i) {
-    cerr << ret[i] << ",";
+  if (!isParamSpecified("feature-add")) {
+    return;
   }
-  cerr << endl;
+
+  const PARAM_VEC &params = GetParam("feature-add");
+
+  PARAM_VEC::const_iterator iter;
+  for (iter = params.begin(); iter != params.end(); ++iter) {
+    const string &line = *iter;
+    AddFeature(line);
+  }
+
+  m_setting.erase("feature-add");
+}
+
+std::vector<float> Parameter::GetWeights(const std::string &name)
+{
+  std::vector<float> ret = m_weights[name];
+
+  // cerr << "WEIGHT " << name << "=";
+  // for (size_t i = 0; i < ret.size(); ++i) {
+  //   cerr << ret[i] << ",";
+  // }
+  // cerr << endl;
   return ret;
 }
 
@@ -355,7 +404,10 @@ void Parameter::SetWeight(const std::string &name, size_t ind, const vector<floa
   newWeights.push_back(line);
 }
 
-void Parameter::AddWeight(const std::string &name, size_t ind, const std::vector<float> &weights)
+void
+Parameter::
+AddWeight(const std::string &name, size_t ind,
+          const std::vector<float> &weights)
 {
   PARAM_VEC &newWeights = m_setting["weight"];
 
@@ -476,6 +528,12 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       case Compact:
         ptType = "PhraseDictionaryCompact";
         break;
+      case SuffixArray:
+        ptType = "PhraseDictionarySuffixArray";
+        break;
+      case DSuffixArray:
+        ptType = "PhraseDictionaryDynSuffixArray";
+        break;
       default:
         break;
       }
@@ -500,6 +558,9 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
         ++currOldInd;
       }
+
+      // cerr << weights.size() << " PHRASE TABLE WEIGHTS "
+      // << __FILE__ << ":" << __LINE__ << endl;
       AddWeight(ptType, ptInd, weights);
 
       // actual pt
@@ -523,10 +584,9 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       }
 
       ptLine << "num-features=" << numScoreComponent << " ";
-      ptLine << "num-input-features=" << (currDict==0 ? numInputScores + numRealWordsInInput : 0) << " ";
       ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
 
-      if (implementation == SuffixArray) {
+      if (implementation == SuffixArray || implementation == DSuffixArray) {
         ptLine << "target-path=" << token[5] << " ";
         ptLine << "alignment-path=" << token[6] << " ";
       }
@@ -632,7 +692,6 @@ void Parameter::ConvertWeightArgsLM()
     oovWeights = Scan<int>(m_setting["lmodel-oov-feature"]);
   }
 
-  size_t ind = 0;
   PARAM_MAP::iterator iterMap;
 
   iterMap = m_setting.find(oldWeightName);
@@ -678,11 +737,12 @@ void Parameter::ConvertWeightArgsLM()
         ++currOldInd;
       }
 
-      SetWeight(newFeatureName, ind, weightsLM);
+      SetWeight(newFeatureName, lmIndex, weightsLM);
 
       string featureLine = newFeatureName + " "
                            + "factor=" + modelToks[1] + " "  // factor
-                           + "order="  + modelToks[2] + " "; // order
+                           + "order="  + modelToks[2] + " " // order
+                           + "num-features=" + SPrint(numFF) + " ";
       if (lmType == 9) {
         featureLine += "lazyken=1 ";
       } else if (lmType == 8) {
@@ -775,6 +835,19 @@ void Parameter::ConvertWeightArgsWordPenalty()
 
 }
 
+void Parameter::ConvertPhrasePenalty()
+{
+  string oldWeightName = "weight-p";
+  if (isParamSpecified(oldWeightName)) {
+    CHECK(m_setting[oldWeightName].size() == 1);
+    float weight = Scan<float>(m_setting[oldWeightName][0]);
+    AddFeature("PhrasePenalty");
+    SetWeight("PhrasePenalty", 0, weight);
+
+    m_setting.erase(oldWeightName);
+  }
+}
+
 void Parameter::ConvertWeightArgs()
 {
   // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
@@ -806,6 +879,8 @@ void Parameter::ConvertWeightArgs()
 
   ConvertWeightArgsSingleWeight("weight-e", "WordDeletion"); // TODO Can't find real name
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
+
+  ConvertPhrasePenalty();
 
   AddFeature("WordPenalty");
   AddFeature("UnknownWordPenalty");
@@ -1225,6 +1300,11 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
   VERBOSE(2, std::endl);
 }
 
+void Parameter::PrintFF() const
+{
+  StaticData::Instance().GetFeatureRegistry().PrintFF();
+}
+
 std::set<std::string> Parameter::GetWeightNames() const
 {
   std::set<std::string> ret;
@@ -1234,6 +1314,31 @@ std::set<std::string> Parameter::GetWeightNames() const
     ret.insert(key);
   }
   return ret;
+}
+
+void Parameter::Save(const std::string path)
+{
+  ofstream file;
+  file.open(path.c_str());
+
+  PARAM_MAP::const_iterator iterOuter;
+  for (iterOuter = m_setting.begin(); iterOuter != m_setting.end(); ++iterOuter) {
+    const std::string &sectionName = iterOuter->first;
+    file << "[" << sectionName << "]" << endl;
+
+    const PARAM_VEC &values = iterOuter->second;
+
+    PARAM_VEC::const_iterator iterInner;
+    for (iterInner = values.begin(); iterInner != values.end(); ++iterInner) {
+      const std::string &value = *iterInner;
+      file << value << endl;
+    }
+
+    file << endl;
+  }
+
+
+  file.close();
 }
 
 }

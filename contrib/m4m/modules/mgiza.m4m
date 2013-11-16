@@ -1,0 +1,184 @@
+# -*- makefile -*-
+#
+# Makefile module for GIZA++ alignment (with mgiza)
+# (c) 2011-2012 Ulrich Germann 
+
+# --- Training Parameters ------------------------------------------------------
+#
+# mkcls: -n: iterations -c: classes. No space allowed after -n/-c!
+mkcls_args = -n10 -c50 
+
+# giza training
+%/mgiza.cfg: m1=5
+%/mgiza.cfg: m2=0
+%/mgiza.cfg: mh=5
+%/mgiza.cfg: m3=3
+%/mgiza.cfg: m4=3
+%/mgiza.cfg: nodumps=0
+%/mgiza.cfg: onlyaldumps=0
+%/mgiza.cfg: model1dumpfrequency=0
+%/mgiza.cfg: model4smoothfactor=0.4
+%/mgiza.cfg: nsmooth=4
+%/mgiza.cfg: NCPUS=8
+
+# symal 
+symal_grow_diag_final_and = -a=g -d=yes -f=yes -b=yes 
+symal_args = ${symal_grow_diag_final_and}
+
+# ------------------------------------------------------------------------------
+# You should not have to edit anything below this line
+# ------------------------------------------------------------------------------
+gizaln = ${WDIR}/crp/trn/aln/giza
+giztmp = $(gizaln)/tmp
+gizout = $(gizaln)
+gizaln.in = ${WDIR}/crp/trn/pll/clean/
+
+.PHONY: giza giza-prep
+
+giza: | $(gizout)/${L1}.txt.gz 
+giza: | $(gizout)/${L2}.txt.gz 
+giza: | $(gizout)/${L1}-${L2}.symal.gz
+	@echo "GIZA WORD ALIGNMENT COMPLETE!"
+
+other = $(if $(findstring $(1),${L1}),${L2},${L1})
+fwd   = $(1)-$(call other,$(1))
+bwd   = $(call other,$(1))-$(1)
+
+$(gizout)/${L1}.txt.gz: a3file = $(gizout)/${L2}-${L1}.A3.final.gz
+$(gizout)/${L1}.txt.gz: | $(gizout)/${L2}-${L1}.A3.final.gz
+	$(lock)
+	(zcat $(a3file) | perl -ne 'print if ++$$ctr%3 == 2;' | gzip > $@_) && mv $@_ $@
+	$(unlock)
+
+$(gizout)/${L2}.txt.gz: a3file = $(gizout)/${L1}-${L2}.A3.final.gz
+$(gizout)/${L2}.txt.gz: | $(gizout)/${L1}-${L2}.A3.final.gz
+	$(lock)
+	(zcat $(a3file) | perl -ne 'print if ++$$ctr%3 == 2;' | gzip > $@_) && mv $@_ $@
+	$(unlock)
+
+$(gizout)/${L1}-${L2}.symal.gz: A3fwd = $(gizout)/${L1}-${L2}.A3.final.gz 
+$(gizout)/${L1}-${L2}.symal.gz: A3bwd = $(gizout)/${L2}-${L1}.A3.final.gz 
+$(gizout)/${L1}-${L2}.symal.gz: | $(gizout)/${L1}-${L2}.A3.final.gz 
+$(gizout)/${L1}-${L2}.symal.gz: | $(gizout)/${L2}-${L1}.A3.final.gz $(giza2bal.pl)
+	$(lock)
+	$(giza2bal.pl) -d 'gunzip -c ${A3fwd}' -i 'gunzip -c ${A3bwd}' \
+	| $(symal) $(symal_args) | gzip > $@_ && mv $@_ $@
+	$(unlock)
+
+# merge alignments produced by mgiza
+$(gizout)/%.A3.final.gz: | $(giztmp)/%/mgiza.DONE 
+	mkdir -p ${@D}
+	$(lock)
+	$(mgiza.merge) $(shell ls $(giztmp)/$*/$*.A3.final.part* 2>/dev/null) | gzip > $@_
+	mv $@_ $@ 
+	$(unlock)
+
+# run mgiza:
+%/mgiza.DONE: | %/mgiza.cfg
+	$(lock)
+	$(mgiza) $| && touch $@
+	$(unlock)
+
+$(giztmp) $(gizout):
+	mkdir -p $@
+
+# --- run mkcls (to get word classes) ------------------------------------------
+# ATTENTION: mkcls does not accept spaces between option markers and 
+# option arguments mkcls -n 10 -c 50 ... will make it fail!
+# mkcls_classes and mkcls_iterations should be set in parameters.mak
+stream = find -L $(1) -type f -name "*.$(2)" -or -name "*.$(2).gz" | sort | xargs zcat -f
+mkcls_cmd = $(call stream,$(1),$(2)) | ${mkcls} $(mkcls_args) -p/dev/stdin -V$(3) opt
+# mkcls: -n: iterations 
+# mkcls: -c: classes 
+# mkcls: -p: input data 
+# mkcls: -V: word classes (output)
+
+$(giztmp)/%.vcb.classes: | $(gizaln.in)
+$(giztmp)/%.vcb.classes: ${mkcls}
+	@echo CREATING $@
+	$(lock)
+	mkdir -p $(@D)
+	@$(call mkcls_cmd,$|,$*,$@_) && mv $@_ $@
+	@mv $@_.cats $@.cats
+	$(unlock)
+
+# NUMBERIZED CORPUS FOR GIZA
+$(giztmp)/${L1}.vcb:       | $(giztmp)/${L1}-${L2}.snt
+$(giztmp)/${L1}.vcb:       | $(giztmp)/${L1}-${L2}.snt
+$(giztmp)/${L2}.vcb:       | $(giztmp)/${L1}-${L2}.snt
+$(giztmp)/${L2}-${L1}.snt: | $(giztmp)/${L1}-${L2}.snt
+$(giztmp)/${L1}-${L2}.snt: L1files = $(addprefix $(pll-clean), .${L1}.gz)
+$(giztmp)/${L1}-${L2}.snt: L2files = $(addprefix $(pll-clean), .${L2}.gz)
+$(giztmp)/${L1}-${L2}.snt: | $(giztmp) $(addprefix $(pll-clean), .${L1}.gz .${L2}.gz)
+	$(lock)
+	$(plain2snt) \
+		<(ls $(L1files) | xargs zcat -f) \
+		<(ls $(L2files) | xargs zcat -f) \
+		-vcb1 $(giztmp)/${L1}.vcb_ -vcb2 $(giztmp)/${L2}.vcb_ \
+		-snt1 $(giztmp)/${L1}-${L2}.snt_ -snt2 $(giztmp)/${L2}-${L1}.snt_
+	mv $(giztmp)/${L1}.vcb_ $(giztmp)/${L1}.vcb
+	mv $(giztmp)/${L2}.vcb_ $(giztmp)/${L2}.vcb
+	mv $(giztmp)/${L1}-${L2}.snt_ $(giztmp)/${L1}-${L2}.snt
+	mv $(giztmp)/${L2}-${L1}.snt_ $(giztmp)/${L2}-${L1}.snt
+	$(unlock)
+
+# .cooc files
+$(giztmp)/${L1}-${L2}.cooc: V1 = $(giztmp)/${L1}.vcb 
+$(giztmp)/${L1}-${L2}.cooc: V2 = $(giztmp)/${L2}.vcb 
+$(giztmp)/${L2}-${L1}.cooc: V1 = $(giztmp)/${L2}.vcb 
+$(giztmp)/${L2}-${L1}.cooc: V2 = $(giztmp)/${L1}.vcb 
+$(giztmp)/%.cooc: | $(giztmp)/%.snt
+	@echo CREATING $@
+	$(lock)
+	$(snt2cooc) $@_ ${V1} ${V2} $| && mv $@_ $@
+	$(unlock)
+
+################################################################################
+# MGIZA CONFIG FILE:
+#
+$(giztmp)/%/mgiza.cfg: SHELL=bash
+# --- CORPUS RESOURCES ---------------------------------------------------------
+$(giztmp)/%/mgiza.cfg: V1   = $(giztmp)/${FROM}.vcb
+$(giztmp)/%/mgiza.cfg: V2   = $(giztmp)/${TO}.vcb
+$(giztmp)/%/mgiza.cfg: SNT  = $(giztmp)/${FROM}-${TO}.snt
+$(giztmp)/%/mgiza.cfg: COOC = $(giztmp)/${FROM}-${TO}.cooc
+$(giztmp)/%/mgiza.cfg: ODIR = $(giztmp)/${FROM}-${TO}/${FROM}-${TO}
+#$(giztmp)/%/mgiza.cfg: | $(giztmp)/%.cooc $(giztmp)/%.snt 
+$(giztmp)/${L1}-${L2}/mgiza.cfg: FROM = ${L1}
+$(giztmp)/${L1}-${L2}/mgiza.cfg: TO   = ${L2}
+$(giztmp)/${L2}-${L1}/mgiza.cfg: FROM = ${L2}
+$(giztmp)/${L2}-${L1}/mgiza.cfg: TO   = ${L1}
+$(giztmp)/${L1}-${L2}/mgiza.cfg: | $(giztmp)/${L1}-${L2}.cooc 
+$(giztmp)/${L1}-${L2}/mgiza.cfg: | $(giztmp)/${L1}-${L2}.snt 
+$(giztmp)/${L2}-${L1}/mgiza.cfg: | $(giztmp)/${L2}-${L1}.cooc 
+$(giztmp)/${L2}-${L1}/mgiza.cfg: | $(giztmp)/${L2}-${L1}.snt 
+$(giztmp)/${L1}-${L2}/mgiza.cfg \
+$(giztmp)/${L2}-${L1}/mgiza.cfg: | \
+	$(giztmp)/${L1}.vcb $(giztmp)/${L1}.vcb.classes \
+	$(giztmp)/${L2}.vcb $(giztmp)/${L2}.vcb.classes 
+	mkdir -p $(dir $@)
+	touch $@
+	@echo "s    ${V1}"   >> $@
+	@echo "t    ${V2}"   >> $@
+	@echo "c    ${SNT}"  >> $@
+	@echo "cooc ${COOC}" >> $@
+	@echo "m1   ${m1}"   >> $@
+	@echo "m2   ${m2}"   >> $@
+	@echo "mh   ${mh}"   >> $@
+	@echo "m3   ${m3}"   >> $@
+	@echo "m4   ${m4}"   >> $@
+	@echo "o    ${ODIR}" >> $@
+	@echo "model1dumpfrequency ${model1dumpfrequency}" >> $@
+	@echo "model4smoothfactor ${model4smoothfactor}"   >> $@
+	@echo "onlyaldumps ${onlyaldumps}"                 >> $@
+	@echo "nodumps ${nodumps}"                         >> $@
+	@echo "nsmooth ${nsmooth}"                         >> $@
+	@echo "NCPUS ${NCPUS}"                             >> $@
+# # ------------------------------------------------------------------------------
+# sanity checks
+ifeq ($(gizaln),)
+$(warning Giza base directory not defined)
+endif
+ifeq ($(gizaln.in),)
+$(warning No directory for Giza++ training data specified!)
+endif

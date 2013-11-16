@@ -48,7 +48,7 @@ decoder = $moses-bin-dir/moses
 ttable-binarizer = $moses-bin-dir/processPhraseTable
 
 # conversion of rule table into binary on-disk format
-#ttable-binarizer = "$moses-bin-dir/CreateOnDiskPt 1 1 5 100 2"
+#ttable-binarizer = "$moses-bin-dir/CreateOnDiskPt 1 1 4 100 2"
 
 # tokenizers - comment out if all your data is already tokenized
 input-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $input-extension"
@@ -371,6 +371,25 @@ alignment-symmetrization-method = grow-diag-final-and
 #
 #biconcor = $moses-script-dir/ems/biconcor/biconcor
 
+############################################################
+
+### use of Operation Sequence Model 
+### Durrani, Schmid and Fraser. (2011): "A Joint Sequence Translation Model with Integrated Reordering"
+
+#operation-sequence-model = "yes"
+#operation-sequence-model-order = 5
+#operation-sequence-model-settings = ""
+
+### compile Moses with --max-kenlm-order=9 if higher order is required
+
+### if OSM training should be skipped,
+# point to OSM Model 
+#
+# osm-model =
+
+############################################################
+
+
 ### lexicalized reordering: specify orientation type
 # (default: only distance-based reordering model)
 #
@@ -415,7 +434,7 @@ score-settings = "--GoodTuring"
 
 ### sparse lexical features
 # 
-#sparse-lexical-features = "target-word-insertion top 50, source-word-deletion top 50, word-translation top 50 50, phrase-length"
+#sparse-features = "target-word-insertion top 50, source-word-deletion top 50, word-translation top 50 50, phrase-length"
 
 ### domain adaptation settings
 # options: sparse, any of: indicator, subset, ratio

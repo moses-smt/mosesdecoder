@@ -29,6 +29,7 @@ class Phrase;
 class TargetPhrase;
 class TargetPhraseCollection;
 class Word;
+class ChartParser;
 
 /** Implementation of RuleTableTrie.  A RuleTableUTrie is designed to store
  * string-to-tree SCFG grammars only (i.e. rules can have distinct labels on
@@ -45,19 +46,17 @@ class RuleTableUTrie : public RuleTableTrie
 {
 public:
   RuleTableUTrie(const std::string &line)
-    : RuleTableTrie("RuleTableUTrie", line)
-  {}
+    : RuleTableTrie(line) {
+  }
 
   const UTrieNode &GetRootNode() const {
     return m_root;
   }
 
-  ChartRuleLookupManager *CreateRuleLookupManager(const InputType &,
+  ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &,
       const ChartCellCollectionBase &);
 
 private:
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const;
-
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
     const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
 

@@ -11,7 +11,6 @@ if $(with-dlib) {
 }
 
 alias headers : ../util//kenutil : : : $(max-factors) $(dlib) ; 
-
 alias ThreadPool : ThreadPool.cpp ;
 
 if [ option.get "with-synlm" : no : yes ] = yes
@@ -31,6 +30,25 @@ if $(have-clock[2]) = 0 {
   alias rt ;
 }
 
+#This is a kludge to force rebuilding if different --with options are passed. 
+#Could have used features like <srilm>on but getting these to apply only to
+#linking was ugly and it still didn't trigger an install (since the install
+#path doesn't encode features).  It stores a file lm.log with the previous
+#options and forces a rebuild if the current options differ.  
+local current = ;
+for local i in srilm irstlm randlm {
+  local optval = [ option.get "with-$(i)" ] ;
+  if $(optval) {
+    current += "--with-$(i)=$(optval)" ;
+  }
+}
+current = $(current:J=" ") ;
+current ?= "" ;
+path-constant LM-LOG : bin/lm.log ;
+update-if-changed $(LM-LOG) $(current) ;
+
+obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm : <dependency>$(LM-LOG) ;
+
 lib moses :
 [ glob 
   *.cpp
@@ -41,17 +59,23 @@ lib moses :
   TranslationModel/Scope3Parser/*.cpp
   TranslationModel/CYKPlusParser/*.cpp
   FF/*.cpp
+  FF/OSM-Feature/*.cpp
+  FF/LexicalReordering/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp
+  FF/Factory.cpp
 ]
-headers LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
-..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt ;
+headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt 
+..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
+$(TOP)//boost_iostreams ;
+
+#generic//generic mm//mm
 
 alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-#unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
 

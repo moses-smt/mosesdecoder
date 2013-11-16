@@ -17,12 +17,13 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
-#include "util/check.hh"
 #include "PhraseNode.h"
 #include "OnDiskWrapper.h"
 #include "TargetPhraseCollection.h"
 #include "SourcePhrase.h"
 #include "moses/Util.h"
+#include "util/check.hh"
+#include "util/exception.hh"
 
 using namespace std;
 

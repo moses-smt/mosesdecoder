@@ -50,7 +50,7 @@ ChartManager::ChartManager(InputType const& source)
   ,m_start(clock())
   ,m_hypothesisId(0)
   ,m_parser(source, m_hypoStackColl)
-  ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
+  ,m_translationOptionList(StaticData::Instance().GetRuleLimit(), source)
 {
 }
 
@@ -86,7 +86,9 @@ void ChartManager::ProcessSentence()
       m_translationOptionList.Clear();
       m_parser.Create(range, m_translationOptionList);
       m_translationOptionList.ApplyThreshold();
-      PreCalculateScores();
+
+      const InputPath &inputPath = m_parser.GetInputPath(range);
+      m_translationOptionList.Evaluate(m_source, inputPath);
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
@@ -127,6 +129,7 @@ void ChartManager::ProcessSentence()
 void ChartManager::AddXmlChartOptions()
 {
   const StaticData &staticData = StaticData::Instance();
+
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {
     cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl;
@@ -137,13 +140,13 @@ void ChartManager::AddXmlChartOptions()
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    TargetPhrase &targetPhrase = *opt->GetTargetPhraseCollection().GetCollection()[0];
-    targetPhrase.GetScoreBreakdown().Assign(staticData.GetWordPenaltyProducer(), -1);
-
     const WordsRange &range = opt->GetSourceWordsRange();
+
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
-    hypo->CalcScore();
+    hypo->Evaluate();
+
+
     ChartCell &cell = m_hypoStackColl.Get(range);
     cell.AddHypothesis(hypo);
   }
@@ -340,41 +343,5 @@ void ChartManager::CreateDeviantPaths(
     CreateDeviantPaths(basePath, child, queue);
   }
 }
-
-
-void ChartManager::PreCalculateScores()
-{
-  for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
-    const ChartTranslationOptions& cto = m_translationOptionList.Get(i);
-    for (TargetPhraseCollection::const_iterator j  = cto.GetTargetPhraseCollection().begin();
-         j != cto.GetTargetPhraseCollection().end(); ++j) {
-      const TargetPhrase* targetPhrase = *j;
-      if (m_precalculatedScores.find(*targetPhrase) == m_precalculatedScores.end()) {
-        ChartBasedFeatureContext context(*targetPhrase,m_source);
-        const vector<const StatelessFeatureFunction*>& sfs =
-          StatelessFeatureFunction::GetStatelessFeatureFunctions();
-        ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
-        for (size_t k = 0; k < sfs.size(); ++k) {
-          sfs[k]->EvaluateChart(context,&breakdown);
-        }
-      }
-    }
-  }
-}
-
-void ChartManager::InsertPreCalculatedScores(
-  const TargetPhrase& targetPhrase, ScoreComponentCollection* scoreBreakdown) const
-{
-  boost::unordered_map<TargetPhrase,ScoreComponentCollection>::const_iterator scoreIter =
-    m_precalculatedScores.find(targetPhrase);
-  if (scoreIter != m_precalculatedScores.end()) {
-    scoreBreakdown->PlusEquals(scoreIter->second);
-  } else {
-    TRACE_ERR("ERROR: " << targetPhrase << " missing from precalculation cache" << endl);
-    assert(0);
-  }
-
-}
-
 
 } // namespace Moses

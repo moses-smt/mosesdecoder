@@ -1,8 +1,8 @@
 // $Id$
 
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include <sys/stat.h>
 #include <algorithm>
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include "moses/Phrase.h"
 #include "moses/FactorCollection.h"
@@ -14,6 +14,7 @@
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
 #include "moses/UserMessage.h"
+#include "util/check.hh"
 
 using namespace std;
 
@@ -26,19 +27,27 @@ namespace Moses
 
 PhraseDictionaryTreeAdaptor::
 PhraseDictionaryTreeAdaptor(const std::string &line)
-  : PhraseDictionary("PhraseDictionaryBinary", line)
+  : PhraseDictionary(line)
 {
+  ReadParameters();
 }
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
 }
 
+void PhraseDictionaryTreeAdaptor::Load()
+{
+  SetFeaturesToApply();
+}
+
 void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
 
-  PDTAimp *obj = new PDTAimp(this,m_numInputScores);
+  ReduceCache();
+
+  PDTAimp *obj = new PDTAimp(this);
 
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
@@ -66,19 +75,10 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
 }
 
 TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(Phrase const &src) const
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  return GetImplementation().GetTargetPhraseCollection(src);
-}
-
-TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,WordsRange const &range) const
-{
-  if(GetImplementation().m_rangeCache.empty()) {
-    return GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
-  } else {
-    return GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-  }
+  const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
+  return ret;
 }
 
 void PhraseDictionaryTreeAdaptor::EnableCache()
@@ -104,6 +104,19 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
   dict = m_implementation.get();
   CHECK(dict);
   return *dict;
+}
+
+// legacy
+const TargetPhraseCollectionWithSourcePhrase*
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
+{
+  if(GetImplementation().m_rangeCache.empty()) {
+    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
+    return tpColl;
+  } else {
+    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
+    return tpColl;
+  }
 }
 
 }

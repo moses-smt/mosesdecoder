@@ -21,12 +21,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <stdexcept>
+#include <boost/algorithm/string.hpp>
 
 #include "Sentence.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
+#include "ChartTranslationOptions.h"
 #include "Util.h"
-#include <boost/algorithm/string.hpp>
+#include "XmlOption.h"
+#include "FactorCollection.h"
 
 using namespace std;
 
@@ -41,6 +44,11 @@ Sentence::Sentence()
   if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
+}
+
+Sentence::~Sentence()
+{
+  RemoveAllInColl(m_xmlOptions);
 }
 
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
@@ -113,23 +121,35 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   if (meta.find("weight-setting") != meta.end()) {
     this->SetWeightSetting(meta["weight-setting"]);
     this->SetSpecifiesWeightSetting(true);
-  }
-  else {
+  } else {
     this->SetSpecifiesWeightSetting(false);
   }
 
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
-  std::vector<XmlOption*> xmlOptionsList(0);
   std::vector< size_t > xmlWalls;
+  std::vector< std::pair<size_t, std::string> > placeholders;
+
   if (staticData.GetXmlInputType() != XmlPassThrough) {
-    if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls, staticData.GetXmlBrackets().first, staticData.GetXmlBrackets().second)) {
+    int offset = 0;
+    if (staticData.IsChart()) {
+      offset = 1;
+    }
+
+    if (!ProcessAndStripXMLTags(line, m_xmlOptions, m_reorderingConstraint, xmlWalls, placeholders,
+                                offset,
+                                staticData.GetXmlBrackets().first,
+                                staticData.GetXmlBrackets().second)) {
       const string msg("Unable to parse XML in line: " + line);
       TRACE_ERR(msg << endl);
       throw runtime_error(msg);
     }
   }
+
   Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter, NULL);
+
+  // placeholders
+  ProcessPlaceholders(placeholders);
 
   if (staticData.IsChart()) {
     InitStartEndWord();
@@ -146,19 +166,15 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
     //iterXMLOpts will be empty for XmlIgnore
     //look at each column
-    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = xmlOptionsList.begin();
-        iterXmlOpts != xmlOptionsList.end(); iterXmlOpts++) {
+    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = m_xmlOptions.begin();
+        iterXmlOpts != m_xmlOptions.end(); iterXmlOpts++) {
 
       const XmlOption *xmlOption = *iterXmlOpts;
+      const WordsRange &range = xmlOption->range;
 
-      TranslationOption *transOpt = new TranslationOption(xmlOption->range, xmlOption->targetPhrase);
-      m_xmlOptionsList.push_back(transOpt);
-
-      for(size_t j=transOpt->GetSourceWordsRange().GetStartPos(); j<=transOpt->GetSourceWordsRange().GetEndPos(); j++) {
+      for(size_t j=range.GetStartPos(); j<=range.GetEndPos(); j++) {
         m_xmlCoverageMap[j]=true;
       }
-
-      delete xmlOption;
     }
 
   }
@@ -180,19 +196,20 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   return 1;
 }
 
-void Sentence::InitStartEndWord()
+void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorCollection &factorCollection = FactorCollection::Instance();
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  if (placeholderFactor == NOT_FOUND) {
+    return;
+  }
 
-  Word startWord(Input);
-  const Factor *factor = factorCollection.AddFactor(Input, 0, BOS_); // TODO - non-factored
-  startWord.SetFactor(0, factor);
-  PrependWord(startWord);
-
-  Word endWord(Input);
-  factor = factorCollection.AddFactor(Input, 0, EOS_); // TODO - non-factored
-  endWord.SetFactor(0, factor);
-  AddWord(endWord);
+  for (size_t i = 0; i < placeholders.size(); ++i) {
+    size_t pos = placeholders[i].first;
+    const string &str = placeholders[i].second;
+    const Factor *factor = FactorCollection::Instance().AddFactor(str);
+    Word &word = Phrase::GetWord(pos);
+    word[placeholderFactor] = factor;
+  }
 }
 
 TranslationOptionCollection*
@@ -220,16 +237,77 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const
   return false;
 }
 
+void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list) const
+{
+  for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
+       iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
+    const XmlOption &xmlOption = **iterXMLOpts;
+    const WordsRange &range = xmlOption.range;
+    const TargetPhrase &targetPhrase = xmlOption.targetPhrase;
+    TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
+    list.push_back(transOpt);
+  }
+}
+
 void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const
 {
   //iterate over XmlOptions list, find exact source/target matches
 
-  for (std::vector<TranslationOption*>::const_iterator iterXMLOpts = m_xmlOptionsList.begin();
-       iterXMLOpts != m_xmlOptionsList.end(); iterXMLOpts++) {
-    if (startPos == (**iterXMLOpts).GetSourceWordsRange().GetStartPos() && endPos == (**iterXMLOpts).GetSourceWordsRange().GetEndPos()) {
-      list.push_back(*iterXMLOpts);
+  for (std::vector<XmlOption*>::const_iterator iterXMLOpts = m_xmlOptions.begin();
+       iterXMLOpts != m_xmlOptions.end(); ++iterXMLOpts) {
+    const XmlOption &xmlOption = **iterXMLOpts;
+    const WordsRange &range = xmlOption.range;
+
+    if (startPos == range.GetStartPos()
+        && endPos == range.GetEndPos()) {
+      const TargetPhrase &targetPhrase = xmlOption.targetPhrase;
+
+      TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
+      list.push_back(transOpt);
     }
   }
+}
+
+std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions() const
+{
+  const StaticData &staticData = StaticData::Instance();
+  std::vector <ChartTranslationOptions*> ret;
+
+  // XML Options
+  // this code is a copy of the 1 in Sentence.
+
+  //only fill the vector if we are parsing XML
+  if (staticData.GetXmlInputType() != XmlPassThrough ) {
+    //TODO: needed to handle exclusive
+    //for (size_t i=0; i<GetSize(); i++) {
+    //  m_xmlCoverageMap.push_back(false);
+    //}
+
+    //iterXMLOpts will be empty for XmlIgnore
+    //look at each column
+    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = m_xmlOptions.begin();
+        iterXmlOpts != m_xmlOptions.end(); iterXmlOpts++) {
+
+      const XmlOption &xmlOption = **iterXmlOpts;
+      TargetPhrase *targetPhrase = new TargetPhrase(xmlOption.targetPhrase);
+
+      WordsRange *range = new WordsRange(xmlOption.range);
+      const StackVec emptyStackVec; // hmmm... maybe dangerous, but it is never consulted
+
+      TargetPhraseCollection *tpc = new TargetPhraseCollection;
+      tpc->Add(targetPhrase);
+
+      ChartTranslationOptions *transOpt = new ChartTranslationOptions(*tpc, emptyStackVec, *range, 0.0f);
+      ret.push_back(transOpt);
+
+      //TODO: needed to handle exclusive
+      //for(size_t j=transOpt->GetSourceWordsRange().GetStartPos(); j<=transOpt->GetSourceWordsRange().GetEndPos(); j++) {
+      //  m_xmlCoverageMap[j]=true;
+      //}
+    }
+  }
+
+  return ret;
 }
 
 void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder

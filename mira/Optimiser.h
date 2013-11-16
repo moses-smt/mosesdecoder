@@ -69,16 +69,21 @@ public:
   MiraOptimiser() :
     Optimiser() { }
 
-  MiraOptimiser(
-    float slack, bool scale_margin, bool scale_margin_precision,
-    bool scale_update, bool scale_update_precision, bool boost, bool normaliseMargin, float sigmoidParam) :
+  MiraOptimiser(float slack) :
+    Optimiser(),
+    m_slack(slack),
+    m_scale_margin(false),
+    m_scale_update(false),
+    m_boost(false),
+    m_normaliseMargin(false),
+    m_sigmoidParam(1.0) { }
+
+  MiraOptimiser(float slack, bool scale_margin, bool scale_update,
+                bool boost, bool normaliseMargin, float sigmoidParam) :
     Optimiser(),
     m_slack(slack),
     m_scale_margin(scale_margin),
-    m_scale_margin_precision(scale_margin_precision),
     m_scale_update(scale_update),
-    m_scale_update_precision(scale_update_precision),
-    m_precision(1),
     m_boost(boost),
     m_normaliseMargin(normaliseMargin),
     m_sigmoidParam(sigmoidParam) { }
@@ -107,31 +112,6 @@ public:
     size_t rank,
     size_t epoch,
     int updatePosition = -1);
-  size_t updateWeightsHopeFearSelective(
-    Moses::ScoreComponentCollection& weightUpdate,
-    const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-    const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
-    const std::vector<std::vector<float> >& bleuScoresHope,
-    const std::vector<std::vector<float> >& bleuScoresFear,
-    const std::vector<std::vector<float> >& modelScoresHope,
-    const std::vector<std::vector<float> >& modelScoresFear,
-    float learning_rate,
-    size_t rank,
-    size_t epoch,
-    int updatePosition = -1);
-  size_t updateWeightsHopeFearSummed(
-    Moses::ScoreComponentCollection& weightUpdate,
-    const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-    const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
-    const std::vector<std::vector<float> >& bleuScoresHope,
-    const std::vector<std::vector<float> >& bleuScoresFear,
-    const std::vector<std::vector<float> >& modelScoresHope,
-    const std::vector<std::vector<float> >& modelScoresFear,
-    float learning_rate,
-    size_t rank,
-    size_t epoch,
-    bool rescaleSlack,
-    bool makePairs);
   size_t updateWeightsAnalytically(
     Moses::ScoreComponentCollection& weightUpdate,
     Moses::ScoreComponentCollection& featureValuesHope,
@@ -148,21 +128,16 @@ public:
     m_slack = slack;
   }
 
-  void setPrecision(float precision) {
-    m_precision = precision;
-  }
-
 private:
   // regularise Hildreth updates
   float m_slack;
 
-  // scale margin with BLEU score or precision
-  bool m_scale_margin, m_scale_margin_precision;
 
-  // scale update with oracle BLEU score or precision
-  bool m_scale_update, m_scale_update_precision;
+  // scale margin with BLEU score
+  bool m_scale_margin;
 
-  float m_precision;
+  // scale update with oracle BLEU score
+  bool m_scale_update;
 
   // boosting of updates on misranked candidates
   bool m_boost;

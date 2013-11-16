@@ -95,15 +95,6 @@ public:
       bool distinct,
       size_t rank,
       size_t epoch);
-  void outputNBestList(const std::string& source,
-                       size_t sentenceid,
-                       size_t nBestSize,
-                       float bleuObjectiveWeight,
-                       float bleuScoreWeight,
-                       bool distinctNbest,
-                       bool avgRefLength,
-                       std::string filename,
-                       std::ofstream& streamOut);
   void initialize(Moses::StaticData& staticData, const std::string& source, size_t sentenceid,
                   float bleuObjectiveWeight, float bleuScoreWeight, bool avgRefLength, bool chartDecoding);
   void updateHistory(const std::vector<const Moses::Word*>& words);

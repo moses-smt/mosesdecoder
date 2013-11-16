@@ -3,11 +3,17 @@
 #ifndef moses_PhraseDictionaryTreeAdaptor_h
 #define moses_PhraseDictionaryTreeAdaptor_h
 
-#include <vector>
-#include "util/check.hh"
 #include "moses/TypeDef.h"
 #include "moses/TargetPhraseCollection.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "util/check.hh"
+#include <vector>
+
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#else
+#include <boost/scoped_ptr.hpp>
+#endif
 
 namespace Moses
 {
@@ -24,7 +30,11 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;
 
+#ifdef WITH_THREADS
   boost::thread_specific_ptr<PDTAimp> m_implementation;
+#else
+  boost::scoped_ptr<PDTAimp> m_implementation;
+#endif
 
   friend class PDTAimp;
   PhraseDictionaryTreeAdaptor();
@@ -37,6 +47,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 public:
   PhraseDictionaryTreeAdaptor(const std::string &line);
   virtual ~PhraseDictionaryTreeAdaptor();
+  void Load();
 
   // enable/disable caching
   // you enable caching if you request the target candidates for a source phrase multiple times
@@ -49,18 +60,21 @@ public:
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
-  TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
-  TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
+  TargetPhraseCollection const* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   void InitializeForInput(InputType const& source);
   void CleanUpAfterSentenceProcessing(InputType const& source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &,
     const ChartCellCollectionBase &) {
     CHECK(false);
     return 0;
   }
+
+  // legacy
+  const TargetPhraseCollectionWithSourcePhrase *GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const & srcRange) const;
+
 };
 
 }

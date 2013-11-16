@@ -21,9 +21,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <iostream>
+#include "SentenceStats.h"
+#include "InputPath.h"
+#include "TranslationOption.h"
+
 using std::cout;
 using std::endl;
-#include "SentenceStats.h"
 
 namespace Moses
 {
@@ -41,8 +44,10 @@ void SentenceStats::AddDeletedWords(const Hypothesis& hypo)
 {
   //don't check either a null pointer or the empty initial hypothesis (if we were given the empty hypo, the null check will save us)
   if(hypo.GetPrevHypo() != NULL && hypo.GetPrevHypo()->GetCurrSourceWordsRange().GetNumWordsCovered() > 0) AddDeletedWords(*hypo.GetPrevHypo());
-  if(hypo.GetCurrTargetWordsRange().GetNumWordsCovered() == 0) {
-    m_deletedWords.push_back(hypo.GetSourcePhrase());
+
+  if(hypo.GetPrevHypo() && hypo.GetCurrTargetWordsRange().GetNumWordsCovered() == 0) {
+
+    m_deletedWords.push_back(&hypo.GetTranslationOption().GetInputPath().GetPhrase());
   }
 }
 

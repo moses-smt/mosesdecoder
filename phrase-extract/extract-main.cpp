@@ -74,7 +74,13 @@ bool le(int, int);
 bool lt(int, int);
 
 bool isAligned (SentenceAlignment &, int, int);
+
 int sentenceOffset = 0;
+
+std::vector<std::string> Tokenize(const std::string& str,
+                                  const std::string& delimiters = " \t");
+
+bool flexScoreFlag = false;
 
 }
 
@@ -84,28 +90,36 @@ namespace MosesTraining
 class ExtractTask
 {
 public:
-  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation):
+  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation, Moses::OutputFileStream &extractFileContext, Moses::OutputFileStream &extractFileContextInv):
     m_sentence(sentence),
     m_options(initoptions),
     m_extractFile(extractFile),
     m_extractFileInv(extractFileInv),
-    m_extractFileOrientation(extractFileOrientation) {}
+    m_extractFileOrientation(extractFileOrientation),
+    m_extractFileContext(extractFileContext),
+    m_extractFileContextInv(extractFileContextInv) {}
   void Run();
 private:
   vector< string > m_extractedPhrases;
   vector< string > m_extractedPhrasesInv;
   vector< string > m_extractedPhrasesOri;
   vector< string > m_extractedPhrasesSid;
+  vector< string > m_extractedPhrasesContext;
+  vector< string > m_extractedPhrasesContextInv;
   void extractBase(SentenceAlignment &);
   void extract(SentenceAlignment &);
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
   void writePhrasesToFile();
+  bool checkPlaceholders (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF);
+  bool isPlaceholder(const string &word);
 
   SentenceAlignment &m_sentence;
   const PhraseExtractionOptions &m_options;
   Moses::OutputFileStream &m_extractFile;
   Moses::OutputFileStream &m_extractFileInv;
   Moses::OutputFileStream &m_extractFileOrientation;
+  Moses::OutputFileStream &m_extractFileContext;
+  Moses::OutputFileStream &m_extractFileContextInv;
 };
 }
 
@@ -123,6 +137,8 @@ int main(int argc, char* argv[])
   Moses::OutputFileStream extractFile;
   Moses::OutputFileStream extractFileInv;
   Moses::OutputFileStream extractFileOrientation;
+  Moses::OutputFileStream extractFileContext;
+  Moses::OutputFileStream extractFileContextInv;
   const char* const &fileNameE = argv[1];
   const char* const &fileNameF = argv[2];
   const char* const &fileNameA = argv[3];
@@ -134,6 +150,8 @@ int main(int argc, char* argv[])
       options.initOnlyOutputSpanInfo(true);
     } else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
       options.initOrientationFlag(true);
+    } else if (strcmp(argv[i],"--FlexibilityScore") == 0) {
+      options.initFlexScoreFlag(true);
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       options.initTranslationFlag(false);
     } else if (strcmp(argv[i], "--IncludeSentenceId") == 0) {
@@ -152,6 +170,8 @@ int main(int argc, char* argv[])
         exit(1);
       }
       options.initInstanceWeightsFile(argv[++i]);
+    } else if (strcmp(argv[i], "--Debug") == 0) {
+	options.debug = true;
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -205,7 +225,10 @@ int main(int argc, char* argv[])
       }
 
       options.initAllModelsOutputFlag(true);
-
+    } else if (strcmp(argv[i], "--Placeholders") == 0) {
+      ++i;
+      string str = argv[i];
+      options.placeholders = Tokenize(str.c_str(), ",");
     } else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
@@ -245,8 +268,15 @@ int main(int argc, char* argv[])
     string fileNameExtractOrientation = fileNameExtract + ".o" + (options.isGzOutput()?".gz":"");
     extractFileOrientation.Open(fileNameExtractOrientation.c_str());
   }
+  if (options.isFlexScoreFlag()) {
+    string fileNameExtractContext = fileNameExtract + ".context"  + (options.isGzOutput()?".gz":"");
+    string fileNameExtractContextInv = fileNameExtract + ".context.inv"  + (options.isGzOutput()?".gz":"");
+    extractFileContext.Open(fileNameExtractContext.c_str());
+    extractFileContextInv.Open(fileNameExtractContextInv.c_str());
+  }
 
   int i = sentenceOffset;
+
   while(true) {
     i++;
     if (i%10000 == 0) cerr << "." << flush;
@@ -271,7 +301,10 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
     if (sentence.create( englishString, foreignString, alignmentString, weightString, i, false)) {
-      ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation);
+      if (options.placeholders.size()) {
+        sentence.invertAlignment();
+      }
+      ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileContext, extractFileContextInv);
       task->Run();
       delete task;
 
@@ -293,6 +326,11 @@ int main(int argc, char* argv[])
     if (options.isOrientationFlag()) {
       extractFileOrientation.Close();
     }
+
+    if (options.isFlexScoreFlag()) {
+      extractFileContext.Close();
+      extractFileContextInv.Close();
+    }
   }
 }
 
@@ -306,6 +344,8 @@ void ExtractTask::Run()
   m_extractedPhrasesInv.clear();
   m_extractedPhrasesOri.clear();
   m_extractedPhrasesSid.clear();
+  m_extractedPhrasesContext.clear();
+  m_extractedPhrasesContextInv.clear();
 
 }
 
@@ -677,6 +717,16 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
     return;
   }
 
+  if (m_options.placeholders.size() && !checkPlaceholders(sentence, startE, endE, startF, endF)) {
+    return;
+  }
+
+  if (m_options.debug) {
+      outextractstr << "sentenceID=" << sentence.sentenceID << " ";
+      outextractstrInv << "sentenceID=" << sentence.sentenceID << " ";
+      outextractstrOrientation << "sentenceID=" << sentence.sentenceID << " ";
+  }
+
   for(int fi=startF; fi<=endF; fi++) {
     if (m_options.isTranslationFlag()) outextractstr << sentence.source[fi] << " ";
     if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.source[fi] << " ";
@@ -701,6 +751,7 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
       outextractstrInv << sentence.source[fi] << " ";
     outextractstrInv << "|||";
   }
+
   // alignment
   if (m_options.isTranslationFlag()) {
     for(int ei=startE; ei<=endE; ei++) {
@@ -730,6 +781,67 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   }
 
 
+
+  // generate two lines for every extracted phrase:
+  // once with left, once with right context
+  if (m_options.isFlexScoreFlag()) {
+
+    ostringstream outextractstrContext;
+    ostringstream outextractstrContextInv;
+
+    for(int fi=startF; fi<=endF; fi++) {
+      outextractstrContext << sentence.source[fi] << " ";
+    }
+    outextractstrContext << "||| ";
+
+    // target
+    for(int ei=startE; ei<=endE; ei++) {
+      outextractstrContext << sentence.target[ei] << " ";
+      outextractstrContextInv << sentence.target[ei] << " ";
+    }
+    outextractstrContext << "||| ";
+    outextractstrContextInv << "||| ";
+
+    for(int fi=startF; fi<=endF; fi++)
+      outextractstrContextInv << sentence.source[fi] << " ";
+
+    outextractstrContextInv << "|||";
+
+    string strContext = outextractstrContext.str();
+    string strContextInv = outextractstrContextInv.str();
+
+    ostringstream outextractstrContextRight(strContext, ostringstream::app);
+    ostringstream outextractstrContextRightInv(strContextInv, ostringstream::app);
+
+    // write context to left
+    outextractstrContext << "< ";
+    if (startF == 0) outextractstrContext << "<s>";
+    else outextractstrContext << sentence.source[startF-1];
+
+    outextractstrContextInv << " < ";
+    if (startE == 0) outextractstrContextInv << "<s>";
+    else outextractstrContextInv << sentence.target[startE-1];
+
+    // write context to right
+    outextractstrContextRight << "> ";
+    if (endF+1 == sentence.source.size()) outextractstrContextRight << "<s>";
+    else outextractstrContextRight << sentence.source[endF+1];
+
+    outextractstrContextRightInv << " > ";
+    if (endE+1 == sentence.target.size()) outextractstrContextRightInv << "<s>";
+    else outextractstrContextRightInv << sentence.target[endE+1];
+
+    outextractstrContext << "\n";
+    outextractstrContextInv << "\n";
+    outextractstrContextRight << "\n";
+    outextractstrContextRightInv << "\n";
+
+    m_extractedPhrasesContext.push_back(outextractstrContext.str());
+    m_extractedPhrasesContextInv.push_back(outextractstrContextInv.str());
+    m_extractedPhrasesContext.push_back(outextractstrContextRight.str());
+    m_extractedPhrasesContextInv.push_back(outextractstrContextRightInv.str());
+  }
+
   if (m_options.isTranslationFlag()) outextractstr << "\n";
   if (m_options.isTranslationFlag()) outextractstrInv << "\n";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "\n";
@@ -747,6 +859,8 @@ void ExtractTask::writePhrasesToFile()
   ostringstream outextractFile;
   ostringstream outextractFileInv;
   ostringstream outextractFileOrientation;
+  ostringstream outextractFileContext;
+  ostringstream outextractFileContextInv;
 
   for(vector<string>::const_iterator phrase=m_extractedPhrases.begin(); phrase!=m_extractedPhrases.end(); phrase++) {
     outextractFile<<phrase->data();
@@ -757,10 +871,20 @@ void ExtractTask::writePhrasesToFile()
   for(vector<string>::const_iterator phrase=m_extractedPhrasesOri.begin(); phrase!=m_extractedPhrasesOri.end(); phrase++) {
     outextractFileOrientation<<phrase->data();
   }
+  for(vector<string>::const_iterator phrase=m_extractedPhrasesContext.begin(); phrase!=m_extractedPhrasesContext.end(); phrase++) {
+    outextractFileContext<<phrase->data();
+  }
+  for(vector<string>::const_iterator phrase=m_extractedPhrasesContextInv.begin(); phrase!=m_extractedPhrasesContextInv.end(); phrase++) {
+    outextractFileContextInv<<phrase->data();
+  }
 
   m_extractFile << outextractFile.str();
   m_extractFileInv  << outextractFileInv.str();
   m_extractFileOrientation << outextractFileOrientation.str();
+  if (m_options.isFlexScoreFlag()) {
+    m_extractFileContext  << outextractFileContext.str();
+    m_extractFileContextInv << outextractFileContextInv.str();
+  }
 }
 
 // if proper conditioning, we need the number of times a source phrase occured
@@ -796,6 +920,77 @@ void ExtractTask::extractBase( SentenceAlignment &sentence )
   m_extractFile << outextractFile.str();
   m_extractFileInv << outextractFileInv.str();
 
+}
+
+
+bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF)
+{
+  for (size_t pos = startF; pos <= endF; ++pos) {
+    const string &sourceWord = sentence.source[pos];
+    if (isPlaceholder(sourceWord)) {
+      if (sentence.alignedToS.at(pos).size() != 1) {
+        return false;
+      } else {
+        // check it actually lines up to another placeholder
+        int targetPos = sentence.alignedToS.at(pos).at(0);
+        const string &otherWord = sentence.target[targetPos];
+        if (!isPlaceholder(otherWord)) {
+          return false;
+        }
+      }
+    }
+  }
+
+  for (size_t pos = startE; pos <= endE; ++pos) {
+    const string &targetWord = sentence.target[pos];
+    if (isPlaceholder(targetWord)) {
+      if (sentence.alignedToT.at(pos).size() != 1) {
+        return false;
+      } else {
+        // check it actually lines up to another placeholder
+        int sourcePos = sentence.alignedToT.at(pos).at(0);
+        const string &otherWord = sentence.source[sourcePos];
+        if (!isPlaceholder(otherWord)) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+bool ExtractTask::isPlaceholder(const string &word)
+{
+  for (size_t i = 0; i < m_options.placeholders.size(); ++i) {
+    const string &placeholder = m_options.placeholders[i];
+    if (word == placeholder) {
+      return true;
+    }
+  }
+  return false;
+}
+/** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument.
+		The separator can only be 1 character long. The default delimiters are space or tab
+*/
+std::vector<std::string> Tokenize(const std::string& str,
+                                  const std::string& delimiters)
+{
+  std::vector<std::string> tokens;
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+  while (std::string::npos != pos || std::string::npos != lastPos) {
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
+
+  return tokens;
 }
 
 }

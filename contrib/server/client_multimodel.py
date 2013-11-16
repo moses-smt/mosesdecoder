@@ -22,15 +22,16 @@ def translate(input_object, server, weights=None):
         params = {}
         params['text'] = line
         if weights:
-            params['weight-t-multimodel'] = weights
+            params['lambda'] = weights
 
         print server.translate(params)
 
 
-def optimize(phrase_pairs, server):
+def optimize(phrase_pairs, server, model_name):
 
     params = {}
     params['phrase_pairs'] = phrase_pairs
+    params['model_name'] = model_name
     weights = server.optimize(params)
     sys.stderr.write('weight vector (set lambda in moses.ini to this value to set as default): ')
     sys.stderr.write(','.join(map(str,weights)) + '\n')
@@ -64,7 +65,7 @@ def translate_single_line(args):
     params = {}
     params['text'] = line
     if weights:
-        params['weight-t-multimodel'] = weights
+        params['lambda'] = weights
 
     return server.translate(params)['text']
 
@@ -74,6 +75,6 @@ if __name__ == '__main__':
     server = xmlrpclib.ServerProxy(url)
 
     phrase_pairs = read_phrase_pairs(gzip.open('/path/to/moses-regression-tests/models/multimodel/extract.sorted.gz'))
-    weights = optimize(phrase_pairs, server)
+    weights = optimize(phrase_pairs, server, 'PhraseDictionaryMultiModelCounts0')
 
     translate(sys.stdin, server, weights)

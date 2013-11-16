@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #include <boost/unordered_map.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 #include "moses/Util.h"
@@ -60,7 +61,7 @@ class PhraseDictionaryMultiModel: public PhraseDictionary
 
 public:
   PhraseDictionaryMultiModel(const std::string &line);
-  PhraseDictionaryMultiModel(const std::string &description, const std::string &line);
+  PhraseDictionaryMultiModel(int type, const std::string &line);
   ~PhraseDictionaryMultiModel();
   void Load();
   virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;
@@ -75,11 +76,15 @@ public:
   std::vector<float> Optimize(OptimizationObjective * ObjectiveFunction, size_t numModels);
 #endif
   // functions below required by base class
-  virtual const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
+  virtual const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
   virtual void InitializeForInput(InputType const&) {
     /* Don't do anything source specific here as this object is shared between threads.*/
   }
-  ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
+  ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&);
+  void SetParameter(const std::string& key, const std::string& value);
+
+  const std::vector<float>* GetTemporaryMultiModelWeightsVector() const;
+  void SetTemporaryMultiModelWeightsVector(std::vector<float> weights);
 
 protected:
   std::string m_mode;
@@ -90,15 +95,35 @@ protected:
 
   typedef std::vector<TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS
-  boost::mutex m_sentenceMutex;
+  boost::shared_mutex m_lock_cache;
   typedef std::map<boost::thread::id, PhraseCache> SentenceCache;
 #else
   typedef PhraseCache SentenceCache;
 #endif
   SentenceCache m_sentenceCache;
 
-  PhraseDictionary *FindPhraseDictionary(const std::string &ptName) const;
+  PhraseCache& GetPhraseCache() {
+#ifdef WITH_THREADS
+    {
+      // first try read-only lock
+      boost::shared_lock<boost::shared_mutex> read_lock(m_lock_cache);
+      SentenceCache::iterator i = m_sentenceCache.find(boost::this_thread::get_id());
+      if (i != m_sentenceCache.end()) return i->second;
+    }
+    boost::unique_lock<boost::shared_mutex> lock(m_lock_cache);
+    return m_sentenceCache[boost::this_thread::get_id()];
+#else
+    return m_sentenceCache;
+#endif
+  }
 
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_lock_weights;
+  std::map<boost::thread::id, std::vector<float> > m_multimodelweights_tmp;
+#else
+  std::vector<float> m_multimodelweights_tmp;
+#endif
 };
 
 #ifdef WITH_DLIB
@@ -131,6 +156,8 @@ protected:
   size_t m_iFeature;
 };
 #endif
+
+PhraseDictionary *FindPhraseDictionary(const std::string &ptName);
 
 } // end namespace
 

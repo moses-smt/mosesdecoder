@@ -4,6 +4,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "util/string_piece_hash.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -17,33 +18,35 @@ int TargetBigramState::Compare(const FFState& other) const
 }
 
 TargetBigramFeature::TargetBigramFeature(const std::string &line)
-  :StatefulFeatureFunction("TargetBigramFeature", 0, line)
+  :StatefulFeatureFunction(0, line)
 {
   std::cerr << "Initializing target bigram feature.." << std::endl;
-
-  vector<string> tokens = Tokenize(line);
-  //CHECK(tokens[0] == m_description);
-
-  // set factor
-  m_factorType = Scan<FactorType>(tokens[1]);
+  ReadParameters();
 
   FactorCollection& factorCollection = FactorCollection::Instance();
   const Factor* bosFactor =
     factorCollection.AddFactor(Output,m_factorType,BOS_);
   m_bos.SetFactor(m_factorType,bosFactor);
 
-  const string &filePath = tokens[2];
-  Load(filePath);
-
 }
 
-bool TargetBigramFeature::Load(const std::string &filePath)
+void TargetBigramFeature::SetParameter(const std::string& key, const std::string& value)
 {
-  if (filePath == "*") return true; //allow all
-  ifstream inFile(filePath.c_str());
-  if (!inFile) {
-    return false;
+  if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
+  } else if (key == "path") {
+    m_filePath = value;
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
   }
+}
+
+void TargetBigramFeature::Load()
+{
+  if (m_filePath == "*")
+    return ; //allow all
+  ifstream inFile(m_filePath.c_str());
+  UTIL_THROW_IF(!inFile, util::Exception, "Can't open file " << m_filePath);
 
   std::string line;
   m_vocab.insert(BOS_);
@@ -53,7 +56,6 @@ bool TargetBigramFeature::Load(const std::string &filePath)
   }
 
   inFile.close();
-  return true;
 }
 
 

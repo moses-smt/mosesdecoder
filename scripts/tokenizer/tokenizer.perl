@@ -22,6 +22,8 @@ use Thread;
 my $mydir = "$RealBin/../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
+my @protected_patterns = ();
+my $protected_patterns_file = "";
 my $language = "en";
 my $QUIET = 0;
 my $HELP = 0;
@@ -30,6 +32,7 @@ my $SKIP_XML = 0;
 my $TIMING = 0;
 my $NUM_THREADS = 1;
 my $NUM_SENTENCES_PER_THREAD = 2000;
+my $PENN = 0;
 
 while (@ARGV) 
 {
@@ -41,8 +44,11 @@ while (@ARGV)
 	/^-x$/ && ($SKIP_XML = 1, next);
 	/^-a$/ && ($AGGRESSIVE = 1, next);
 	/^-time$/ && ($TIMING = 1, next);
+  # Option to add list of regexps to be protected
+  /^-protected/ && ($protected_patterns_file = shift, next);
 	/^-threads$/ && ($NUM_THREADS = int(shift), next);
 	/^-lines$/ && ($NUM_SENTENCES_PER_THREAD = int(shift), next);
+	/^-penn$/ && ($PENN = 1, next);
 }
 
 # for time calculation
@@ -61,6 +67,8 @@ if ($HELP)
         print "  -a     ... aggressive hyphen splitting.\n";
         print "  -b     ... disable Perl buffering.\n";
         print "  -time  ... enable processing time calculation.\n";
+        print "  -penn  ... use Penn treebank-like tokenization.\n";
+        print "  -protected FILE  ... specify file with patters to be protected in tokenisation.\n";
 	exit;
 }
 
@@ -77,6 +85,16 @@ load_prefixes($language,\%NONBREAKING_PREFIX);
 if (scalar(%NONBREAKING_PREFIX) eq 0)
 {
 	print STDERR "Warning: No known abbreviations for language '$language'\n";
+}
+
+# Load protected patterns
+if ($protected_patterns_file)
+{
+  open(PP,$protected_patterns_file) || die "Unable to open $protected_patterns_file";
+  while(<PP>) {
+    chomp;
+    push @protected_patterns, $_;
+  }
 }
 
 my @batch_sentences = ();
@@ -197,12 +215,30 @@ sub tokenize_batch
 sub tokenize 
 {
     my($text) = @_;
+
+    if ($PENN) {
+      return tokenize_penn($text);
+    }
+
     chomp($text);
     $text = " $text ";
     
     # remove ASCII junk
     $text =~ s/\s+/ /g;
     $text =~ s/[\000-\037]//g;
+
+    # Find protected patterns
+    my @protected = ();
+    foreach my $protected_pattern (@protected_patterns) {
+      foreach ($text =~ /($protected_pattern)/) {
+        push @protected, $_;
+      }
+    }
+
+    for (my $i = 0; $i < scalar(@protected); ++$i) {
+      my $subst = sprintf("THISISPROTECTED%.3d", $i);
+      $text =~ s,\Q$protected[$i],$subst,g;
+    }
 
     # seperate out all "other" special characters
     $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
@@ -222,10 +258,19 @@ sub tokenize
     }
 
     # seperate out "," except if within numbers (5,300)
-    $text =~ s/([^\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
+    #$text =~ s/([^\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
+
+    # separate out "," except if within numbers (5,300)
+    # previous "global" application skips some:  A,B,C,D,E > A , B,C , D,E
+    # first application uses up B so rule can't see B,C
+    # two-step version here may create extra spaces but these are removed later
+    # will also space digit,letter or letter,digit forms (redundant with next section)
+    $text =~ s/([^\p{IsN}])[,]/$1 , /g;
+    $text =~ s/[,]([^\p{IsN}])/ , $1/g;
+
     # separate , pre and post number
-    $text =~ s/([\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
-    $text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
+    #$text =~ s/([\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
+    #$text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
 	      
     # turn `into '
     $text =~ s/\`/\'/g;
@@ -286,12 +331,157 @@ sub tokenize
     $text =~ s/^ //g;
     $text =~ s/ $//g;
 
+    # restore protected
+    for (my $i = 0; $i < scalar(@protected); ++$i) {
+      my $subst = sprintf("THISISPROTECTED%.3d", $i);
+      $text =~ s/$subst/$protected[$i]/g;
+    }
+
     #restore multi-dots
     while($text =~ /DOTDOTMULTI/) 
     {
         $text =~ s/DOTDOTMULTI/DOTMULTI./g;
     }
     $text =~ s/DOTMULTI/./g;
+
+    #escape special chars
+    $text =~ s/\&/\&amp;/g;   # escape escape
+    $text =~ s/\|/\&#124;/g;  # factor separator
+    $text =~ s/\</\&lt;/g;    # xml
+    $text =~ s/\>/\&gt;/g;    # xml
+    $text =~ s/\'/\&apos;/g;  # xml
+    $text =~ s/\"/\&quot;/g;  # xml
+    $text =~ s/\[/\&#91;/g;   # syntax non-terminal
+    $text =~ s/\]/\&#93;/g;   # syntax non-terminal
+
+    #ensure final line break
+    $text .= "\n" unless $text =~ /\n$/;
+
+    return $text;
+}
+
+sub tokenize_penn
+{
+    # Improved compatibility with Penn Treebank tokenization.  Useful if
+    # the text is to later be parsed with a PTB-trained parser.
+    #
+    # Adapted from Robert MacIntyre's sed script:
+    #   http://www.cis.upenn.edu/~treebank/tokenizer.sed
+
+    my($text) = @_;
+    chomp($text);
+
+    # remove ASCII junk
+    $text =~ s/\s+/ /g;
+    $text =~ s/[\000-\037]//g;
+
+    # attempt to get correct directional quotes
+    $text =~ s/^``/`` /g;
+    $text =~ s/^"/`` /g;
+    $text =~ s/^`([^`])/` $1/g;
+    $text =~ s/^'/`  /g;
+    $text =~ s/([ ([{<])"/$1 `` /g;
+    $text =~ s/([ ([{<])``/$1 `` /g;
+    $text =~ s/([ ([{<])`([^`])/$1 ` $2/g;
+    $text =~ s/([ ([{<])'/$1 ` /g;
+    # close quotes handled at end
+
+    $text =~ s=\.\.\.= _ELLIPSIS_ =g;
+
+    # separate out "," except if within numbers (5,300)
+    $text =~ s/([^\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
+    # separate , pre and post number
+    $text =~ s/([\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
+    $text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
+
+    #$text =~ s=([;:@#\$%&\p{IsSc}])= $1 =g;
+$text =~ s=([;:@#\$%&\p{IsSc}\p{IsSo}])= $1 =g;
+
+    # Separate out intra-token slashes.  PTB tokenization doesn't do this, so
+    # the tokens should be merged prior to parsing with a PTB-trained parser
+    # (see syntax-hyphen-splitting.perl).
+    $text =~ s/([\p{IsAlnum}])\/([\p{IsAlnum}])/$1 \@\/\@ $2/g;
+
+    # Assume sentence tokenization has been done first, so split FINAL periods
+    # only.
+    $text =~ s=([^.])([.])([\]\)}>"']*) ?$=$1 $2$3 =g;
+    # however, we may as well split ALL question marks and exclamation points,
+    # since they shouldn't have the abbrev.-marker ambiguity problem
+    $text =~ s=([?!])= $1 =g;
+
+    # parentheses, brackets, etc.
+    $text =~ s=([\]\[\(\){}<>])= $1 =g;
+    $text =~ s/\(/-LRB-/g;
+    $text =~ s/\)/-RRB-/g;
+    $text =~ s/\[/-LSB-/g;
+    $text =~ s/\]/-RSB-/g;
+    $text =~ s/{/-LCB-/g;
+    $text =~ s/}/-RCB-/g;
+
+    $text =~ s=--= -- =g;
+
+    # First off, add a space to the beginning and end of each line, to reduce
+    # necessary number of regexps.
+    $text =~ s=$= =;
+    $text =~ s=^= =;
+
+    $text =~ s="= '' =g;
+    # possessive or close-single-quote
+    $text =~ s=([^'])' =$1 ' =g;
+    # as in it's, I'm, we'd
+    $text =~ s='([sSmMdD]) = '$1 =g;
+    $text =~ s='ll = 'll =g;
+    $text =~ s='re = 're =g;
+    $text =~ s='ve = 've =g;
+    $text =~ s=n't = n't =g;
+    $text =~ s='LL = 'LL =g;
+    $text =~ s='RE = 'RE =g;
+    $text =~ s='VE = 'VE =g;
+    $text =~ s=N'T = N'T =g;
+
+    $text =~ s= ([Cc])annot = $1an not =g;
+    $text =~ s= ([Dd])'ye = $1' ye =g;
+    $text =~ s= ([Gg])imme = $1im me =g;
+    $text =~ s= ([Gg])onna = $1on na =g;
+    $text =~ s= ([Gg])otta = $1ot ta =g;
+    $text =~ s= ([Ll])emme = $1em me =g;
+    $text =~ s= ([Mm])ore'n = $1ore 'n =g;
+    $text =~ s= '([Tt])is = '$1 is =g;
+    $text =~ s= '([Tt])was = '$1 was =g;
+    $text =~ s= ([Ww])anna = $1an na =g;
+
+    #word token method
+    my @words = split(/\s/,$text);
+    $text = "";
+    for (my $i=0;$i<(scalar(@words));$i++)
+    {
+        my $word = $words[$i];
+        if ( $word =~ /^(\S+)\.$/)
+        {
+            my $pre = $1;
+            if (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || ($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==1) || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/)))
+            {
+                #no change
+            }
+            elsif (($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==2) && ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[0-9]+/)))
+            {
+                #no change
+            }
+            else
+            {
+                $word = $pre." .";
+            }
+        }
+        $text .= $word." ";
+    }
+
+    # restore ellipses
+    $text =~ s=_ELLIPSIS_=\.\.\.=g;
+
+    # clean out extra spaces
+    $text =~ s=  *= =g;
+    $text =~ s=^ *==g;
+    $text =~ s= *$==g;
 
     #escape special chars
     $text =~ s/\&/\&amp;/g;   # escape escape

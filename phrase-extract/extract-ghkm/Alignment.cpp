@@ -29,47 +29,36 @@ namespace Moses
 namespace GHKM
 {
 
-Alignment ReadAlignment(const std::string &s)
+void ReadAlignment(const std::string &s, Alignment &a)
 {
-  Alignment a;
-
   const std::string digits = "0123456789";
 
-  std::string::size_type begin = s.find_first_of(digits);
-  if (begin == std::string::npos) {
-    // Empty word alignments are allowed
-    return a;
-  }
+  a.clear();
 
+  std::string::size_type begin = 0;
   while (true) {
     std::string::size_type end = s.find("-", begin);
     if (end == std::string::npos) {
-      throw Exception("Alignment separator '-' missing");
+      return;
     }
     int src = std::atoi(s.substr(begin, end-begin).c_str());
-
-    begin = s.find_first_of(digits, end);
-    if (begin == std::string::npos) {
+    if (end+1 == s.size()) {
       throw Exception("Target index missing");
     }
 
-    end = s.find(" ", begin);
+    begin = end+1;
+    end = s.find_first_not_of(digits, begin+1);
     int tgt;
     if (end == std::string::npos) {
       tgt = std::atoi(s.substr(begin).c_str());
+      a.push_back(std::make_pair(src, tgt));
+      return;
     } else {
       tgt = std::atoi(s.substr(begin, end-begin).c_str());
+      a.push_back(std::make_pair(src, tgt));
     }
-
-    a.push_back(std::make_pair(src, tgt));
-
-    if (end == std::string::npos) {
-      break;
-    }
-    begin = s.find_first_of(digits, end);
+    begin = end+1;
   }
-
-  return a;
 }
 
 }  // namespace GHKM

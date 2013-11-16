@@ -1,0 +1,12 @@
+# -*- Makefile -*-
+# ${system}/moses.ini.0 then defines the system
+system := dynsa
+SYSTEMS += ${system}
+.PHONY: ${system}
+${system}: ${system}/moses.ini.0
+MY_EXPERIMENT += $(call clear_variable,PTABLE_ENTRIES)
+MY_EXPERIMENT += $(call add_dynsa_phrase_table,0,0,5,${pll.txt1},${pll.txt2},${pll.aln})
+PTABLE_ENTRIES := 
+$(eval $(call add_dynsa_phrase_table,0,0,5,${pll.txt1},${pll.txt2},${pll.aln}))
+MY_EXPERIMENT += $(call create_moses_ini,${system})
+$(eval $(call create_moses_ini,${system}))

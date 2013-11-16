@@ -37,10 +37,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TrellisPath.h"
 #include "TrellisPathCollection.h"
 #include "TranslationOption.h"
-#include "LexicalReordering.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
 #include "moses/FF/DistortionScoreProducer.h"
+#include "moses/LM/Base.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -61,13 +62,14 @@ Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm sea
   ,m_lineNumber(lineNumber)
   ,m_source(source)
 {
-  StaticData::Instance().InitializeForInput(source);
+  StaticData::Instance().InitializeForInput(m_source);
 }
 
 Manager::~Manager()
 {
   delete m_transOptColl;
   delete m_search;
+  // this is a comment ...
 
   StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
 }
@@ -80,17 +82,13 @@ void Manager::ProcessSentence()
 {
   // reset statistics
   ResetSentenceStats(m_source);
-  
+
   // check if alternate weight setting is used
   // this is not thread safe! it changes StaticData
   if (StaticData::Instance().GetHasAlternateWeightSettings()) {
-    std::cerr << "config defines weight setting\n";
     if (m_source.GetSpecifiesWeightSetting()) {
-      std::cerr << "sentence specifies weight setting\n";
-      std::cerr << "calling SetWeightSetting( " << m_source.GetWeightSetting() << ")\n";
       StaticData::Instance().SetWeightSetting(m_source.GetWeightSetting());
-    }
-    else {
+    } else {
       StaticData::Instance().SetWeightSetting("default");
     }
   }
@@ -466,7 +464,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 
   // phrase table scores
   const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionary*> &phraseTables = staticData.GetPhraseDictionaries();
+  const std::vector<PhraseDictionary*> &phraseTables = PhraseDictionary::GetColl();
   std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
   for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable) {
     const PhraseDictionary *phraseTable = *iterPhraseTable;
@@ -534,6 +532,18 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   outputWordGraphStream << endl;
 }
 
+void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) {
+  Phrase translation;
+  hypo->GetOutputPhrase(translation);
+  const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for (size_t i = 0; i < statefulFFs.size(); ++i) {
+    const StatefulFeatureFunction *ff = statefulFFs[i];
+    if (const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff)) {	
+      lm->ReportHistoryOrder(out, translation);
+    }
+  }
+}
+
 void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const
 {
   const StaticData &staticData = StaticData::Instance();
@@ -545,7 +555,6 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
                         << "UTTERANCE=" << translationId << endl;
 
   size_t linkId = 0;
-  size_t stackNo = 1;
   std::vector < HypothesisStack* >::const_iterator iterStack;
   for (iterStack = ++hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack) {
     const HypothesisStack &stack = **iterStack;
@@ -678,11 +687,11 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
       featureIndex = OutputFeatureWeightsForSLF(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, gds[i], outputSearchGraphStream);
   }
@@ -717,11 +726,11 @@ void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std:
       featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, gds[i], outputSearchGraphStream);
   }
@@ -751,11 +760,11 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
       featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, gds[i], outputSearchGraphStream);
   }

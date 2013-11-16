@@ -38,8 +38,8 @@ protected:
   std::vector<WordPtr>	m_words;
 
 public:
-  Phrase()
-  {}
+  Phrase() {
+  }
 
   virtual ~Phrase() {}
 

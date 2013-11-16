@@ -24,35 +24,93 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/InputPath.h"
+#include "util/exception.hh"
 
 using namespace std;
 
 namespace Moses
 {
+std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
-PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
-  :DecodeFeature(description, line)
+PhraseDictionary::PhraseDictionary(const std::string &line)
+  :DecodeFeature(line)
+  ,m_tableLimit(20) // default
+  ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
-  m_tableLimit= 20; // TODO default?
+	s_staticColl.push_back(this);
+}
 
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
+const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
+{
+  const TargetPhraseCollection *ret;
+  if (m_maxCacheSize) {
+    CacheColl &cache = GetCache();
 
-    if (args[0] == "num-input-features") {
-      m_numInputScores = Scan<unsigned>(args[1]);
-    } else if (args[0] == "path") {
-      m_filePath = args[1];
-    } else if (args[0] == "table-limit") {
-      m_tableLimit = Scan<size_t>(args[1]);
-    } else if (args[0] == "target-path") {
-      m_targetFile = args[1];
-    } else if (args[0] == "alignment-path") {
-      m_alignmentsFile = args[1];
+    size_t hash = hash_value(src);
+
+    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
+
+    iter = cache.find(hash);
+
+    if (iter == cache.end()) {
+      // not in cache, need to look up from phrase table
+      ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
+      if (ret) {
+        ret = new TargetPhraseCollection(*ret);
+      }
+
+      std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
+      cache[hash] = value;
     } else {
-      //throw "Unknown argument " + args[0];
-    }
-  } // for (size_t i = 0; i < toks.size(); ++i) {
+      // in cache. just use it
+      std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+      value.second = clock();
 
+      ret = value.first;
+    }
+  } else {
+    // don't use cache. look up from phrase table
+    ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
+  }
+
+  return ret;
+}
+
+TargetPhraseCollection const *
+PhraseDictionary::
+GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
+{
+  UTIL_THROW(util::Exception, "Legacy method not implemented");
+}
+
+
+TargetPhraseCollectionWithSourcePhrase const*
+PhraseDictionary::
+GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
+{
+  UTIL_THROW(util::Exception, "Legacy method not implemented");
+}
+
+void
+PhraseDictionary::
+SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "cache-size") {
+    m_maxCacheSize = Scan<size_t>(value);
+  } else if (key == "path") {
+    m_filePath = value;
+  } else if (key == "table-limit") {
+    m_tableLimit = Scan<size_t>(value);
+  } else {
+    DecodeFeature::SetParameter(key, value);
+  }
+}
+
+void
+PhraseDictionary::
+SetFeaturesToApply()
+{
   // find out which feature function can be applied in this decode step
   const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
   for (size_t i = 0; i < allFeatures.size(); ++i) {
@@ -63,14 +121,61 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
   }
 }
 
-
-const TargetPhraseCollection *PhraseDictionary::
-GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
+void
+PhraseDictionary::
+GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
-  Phrase phrase = src.GetSubString(range);
-  phrase.OnlyTheseFactors(m_inputFactors);
-  return GetTargetPhraseCollection(phrase);
+  InputPathList::const_iterator iter;
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
+    InputPath &node = **iter;
+
+    const Phrase &phrase = node.GetPhrase();
+    const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollectionLEGACY(phrase);
+    node.SetTargetPhrases(*this, targetPhrases, NULL);
+  }
 }
 
+void PhraseDictionary::ReduceCache() const
+{
+  CacheColl &cache = GetCache();
+  if (cache.size() <= m_maxCacheSize) return; // not full
+
+  // find cutoff for last used time
+  priority_queue< clock_t > lastUsedTimes;
+  std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
+  iter = cache.begin();
+  while( iter != cache.end() ) {
+    lastUsedTimes.push( iter->second.second );
+    iter++;
+  }
+  for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
+    lastUsedTimes.pop();
+  clock_t cutoffLastUsedTime = lastUsedTimes.top();
+  clock_t t = clock();
+
+  // remove all old entries
+  iter = cache.begin();
+  while( iter != cache.end() ) {
+    if (iter->second.second < cutoffLastUsedTime) {
+      std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
+      delete iterRemove->second.first;
+      cache.erase(iterRemove);
+    } else iter++;
+  }
+  VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
 }
+
+PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
+{
+  CacheColl *cache;
+  cache = m_cache.get();
+  if (cache == NULL) {
+    cache = new CacheColl;
+    m_cache.reset(cache);
+  }
+  CHECK(cache);
+  return *cache;
+}
+
+} // namespace
 

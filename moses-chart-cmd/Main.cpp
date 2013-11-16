@@ -59,6 +59,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTrellisPath.h"
 #include "moses/ChartTrellisPathList.h"
 #include "moses/Incremental.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 #include "util/usage.hh"
 
@@ -81,8 +83,8 @@ class TranslationTask : public Task
 public:
   TranslationTask(InputType *source, IOWrapper &ioWrapper)
     : m_source(source)
-    , m_ioWrapper(ioWrapper)
-  {}
+    , m_ioWrapper(ioWrapper) {
+  }
 
   ~TranslationTask() {
     delete m_source;
@@ -126,6 +128,19 @@ public:
     if (staticData.IsDetailedTranslationReportingEnabled()) {
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
+    }
+    if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
+    }
+
+    //DIMw
+    if (staticData.IsDetailedAllTranslationReportingEnabled()) {
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      size_t nBestSize = staticData.GetNBestSize();
+      ChartTrellisPathList nBestList;
+      manager.CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
+      m_ioWrapper.OutputDetailedAllTranslationReport(nBestList, manager, sentence, translationId);
     }
 
     // n-best

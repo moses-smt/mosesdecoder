@@ -41,6 +41,22 @@ using namespace std;
 
 namespace Moses
 {
+LanguageModelImplementation::LanguageModelImplementation(const std::string &line)
+  :LanguageModel(line)
+{
+}
+
+void LanguageModelImplementation::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "order") {
+    m_nGramOrder = Scan<size_t>(value);
+  } else if (key == "path") {
+    m_filePath = value;
+  } else {
+    LanguageModel::SetParameter(key, value);
+  }
+
+}
 
 void LanguageModelImplementation::ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const
 {

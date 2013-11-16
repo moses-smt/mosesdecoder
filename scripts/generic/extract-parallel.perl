@@ -28,6 +28,8 @@ my $makeTTable = 1; # whether to build the ttable extract files
 my $otherExtractArgs= "";
 my $weights = "";
 my $baselineExtract;
+my $glueFile;
+
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
   $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
@@ -39,6 +41,11 @@ for (my $i = 8; $i < $#ARGV + 1; ++$i)
     $weights = $ARGV[++$i];
     next;
   }
+  if ($ARGV[$i] eq '--GlueGrammar') {
+    $glueFile = $ARGV[++$i];
+    next;
+  }
+
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
@@ -117,7 +124,14 @@ for (my $i = 0; $i < $numParallel; ++$i)
     if ($weights) {
       $weightsCmd = "--InstanceWeights $TMPDIR/weights.$numStr";
     }
-    my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
+
+    my $glueArg = "";
+    if (defined($glueFile)) {
+      $glueArg = "--GlueGrammar $TMPDIR/glue.$numStr";
+    }
+    print "glueArg=$glueArg \n";
+
+    my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $glueArg $otherExtractArgs $weightsCmd --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
     print STDERR $cmd;
     `$cmd`;
 
@@ -135,16 +149,20 @@ foreach (@children) {
 }
 
 # merge
-my $is_osx = ($^O eq "darwin");
-my $catCmd = $is_osx?"gunzip -c ":"zcat ";
+my $catCmd = "gunzip -c ";
 my $catInvCmd = $catCmd;
 my $catOCmd = $catCmd;
+my $catContextCmd = $catCmd;
+my $catContextInvCmd = $catCmd;
+
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
 		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
 		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
 		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
+		$catContextCmd .= "$TMPDIR/extract.$numStr.context ";
+		$catContextInvCmd .= "$TMPDIR/extract.$numStr.context.inv ";
 }
 if (defined($baselineExtract)) {
 		my $sorted = -e "$baselineExtract.sorted.gz" ? ".sorted" : "";
@@ -156,6 +174,8 @@ if (defined($baselineExtract)) {
 $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.sorted.gz 2>> /dev/stderr \n";
 $catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
 $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
+$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
+$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
 
 
 @children = ();
@@ -172,6 +192,14 @@ else {
   print STDERR "skipping extract, doing only extract.o\n";
 }
 
+if ($otherExtractArgs =~ /--FlexibilityScore/) {
+  $pid = RunFork($catContextCmd);
+  push(@children, $pid);
+
+  $pid = RunFork($catContextInvCmd);
+  push(@children, $pid);
+  }
+
 my $numStr = NumStr(0);
 if (-e "$TMPDIR/extract.$numStr.o.gz")
 {
@@ -182,6 +210,13 @@ if (-e "$TMPDIR/extract.$numStr.o.gz")
 # wait for all sorting to finish
 foreach (@children) {
 	waitpid($_, 0);
+}
+
+# glue rules
+if (defined($glueFile)) {
+  my $cmd = "cat $TMPDIR/glue.* | LC_ALL=C sort | uniq > $glueFile";
+  print STDERR "Merging glue rules: $cmd \n";
+  print STDERR `$cmd`;
 }
 
 # delete temporary files

@@ -19,14 +19,16 @@
 
 #pragma once
 
+#include "PhraseDictionaryNodeMemory.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
-#include "PhraseDictionaryNodeMemory.h"
 #include "moses/TranslationModel/RuleTable/Trie.h"
+#include "util/check.hh"
 
 namespace Moses
 {
+class ChartParser;
 
 /** Implementation of a SCFG rule table in a trie.  Looking up a rule of
  * length n symbols requires n look-ups to find the TargetPhraseCollection.
@@ -37,29 +39,31 @@ class PhraseDictionaryMemory : public RuleTableTrie
   friend class RuleTableLoader;
 
 protected:
-  PhraseDictionaryMemory(const std::string &description, const std::string &line)
-    : RuleTableTrie(description, line)
-  {}
+  PhraseDictionaryMemory(int type, const std::string &line)
+    : RuleTableTrie(line) {
+  }
 
 public:
-  PhraseDictionaryMemory(const std::string &line)
-    : RuleTableTrie("PhraseDictionaryMemory", line)
-  {}
+  PhraseDictionaryMemory(const std::string &line);
 
   const PhraseDictionaryNodeMemory &GetRootNode() const {
     return m_collection;
   }
 
-  ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+  ChartRuleLookupManager*
+  CreateRuleLookupManager(
+    const ChartParser &,
     const ChartCellCollectionBase &);
+
+  // only used by multi-model phrase table, and other meta-features
+  const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   TO_STRING();
 
 protected:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
     const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& source) const;
 
   PhraseDictionaryNodeMemory &GetOrCreateNode(const Phrase &source
       , const TargetPhrase &target

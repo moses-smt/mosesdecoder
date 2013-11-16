@@ -15,7 +15,7 @@
 #include "moses/PrefixTree.h"
 #include "moses/File.h"
 #include "moses/ObjectPool.h"
-#include "moses/LexicalReorderingTable.h"
+#include "moses/FF/LexicalReordering/LexicalReorderingTable.h"
 #include "moses/LVoc.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"

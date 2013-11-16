@@ -51,12 +51,11 @@ private:
 #endif
   Word *m_bias;
 
-  FactorMask m_inputFactors;
-  FactorMask m_outputFactors;
+  FactorMask m_inputFactors, m_outputFactors;
+  std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
+  std::string m_filePath;
 
-  void LoadData(const std::string &filePath,
-                const std::vector< FactorType >& inFactors,
-                const std::vector< FactorType >& outFactors);
+  void Load();
 
   float ScorePhrase( const TargetPhrase& targetPhrase ) const;
   float GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const;
@@ -65,19 +64,33 @@ public:
   GlobalLexicalModel(const std::string &line);
   virtual ~GlobalLexicalModel();
 
+  void SetParameter(const std::string& key, const std::string& value);
+
   void InitializeForInput( Sentence const& in );
 
   bool IsUseable(const FactorMask &mask) const;
 
-  void Evaluate(const PhraseBasedFeatureContext& context,
+  void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
 
 
   void EvaluateChart(
-    const ChartBasedFeatureContext& context,
+    const ChartHypothesis& hypo,
     ScoreComponentCollection* accumulator) const {
     throw std::logic_error("GlobalLexicalModel not supported in chart decoder, yet");
   }
+
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
 
 };
 

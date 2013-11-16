@@ -4,43 +4,37 @@
 #include "moses/InputFileStream.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/FactorCollection.h"
 
 using namespace std;
 
 namespace Moses
 {
 GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
-  : StatelessFeatureFunction("GlobalLexicalModel",1, line)
+  : StatelessFeatureFunction(1, line)
 {
   std::cerr << "Creating global lexical model...\n";
-
-  string filePath;
-  vector<FactorType> inputFactors, outputFactors;
-
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "file") {
-      CHECK(args.size() == 2);
-      filePath = args[1];
-    } else if (args[0] == "inputFactors") {
-      inputFactors = Tokenize<FactorType>(args[1],",");
-    } else if (args[0] == "outputFactors") {
-      outputFactors = Tokenize<FactorType>(args[1],",");
-    } else {
-      throw "Unknown argument " + args[0];
-    }
-  }
-
-  // load model
-  LoadData( filePath, inputFactors, outputFactors );
+  ReadParameters();
 
   // define bias word
   FactorCollection &factorCollection = FactorCollection::Instance();
   m_bias = new Word();
-  const Factor* factor = factorCollection.AddFactor( Input, inputFactors[0], "**BIAS**" );
-  m_bias->SetFactor( inputFactors[0], factor );
+  const Factor* factor = factorCollection.AddFactor( Input, m_inputFactorsVec[0], "**BIAS**" );
+  m_bias->SetFactor( m_inputFactorsVec[0], factor );
 
+}
+
+void GlobalLexicalModel::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "file") {
+    m_filePath = value;
+  } else if (key == "inputFactors") {
+    m_inputFactorsVec = Tokenize<FactorType>(value,",");
+  } else if (key == "outputFactors") {
+    m_outputFactorsVec = Tokenize<FactorType>(value,",");
+  } else {
+    StatelessFeatureFunction::SetParameter(key, value);
+  }
 }
 
 GlobalLexicalModel::~GlobalLexicalModel()
@@ -56,18 +50,16 @@ GlobalLexicalModel::~GlobalLexicalModel()
   }
 }
 
-void GlobalLexicalModel::LoadData(const string &filePath,
-                                  const vector< FactorType >& inFactors,
-                                  const vector< FactorType >& outFactors)
+void GlobalLexicalModel::Load()
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
-  VERBOSE(2, "Loading global lexical model from file " << filePath << endl);
+  VERBOSE(2, "Loading global lexical model from file " << m_filePath << endl);
 
-  m_inputFactors = FactorMask(inFactors);
-  m_outputFactors = FactorMask(outFactors);
-  InputFileStream inFile(filePath);
+  m_inputFactors = FactorMask(m_inputFactorsVec);
+  m_outputFactors = FactorMask(m_outputFactorsVec);
+  InputFileStream inFile(m_filePath);
 
   // reading in data one line at a time
   size_t lineNum = 0;
@@ -78,7 +70,7 @@ void GlobalLexicalModel::LoadData(const string &filePath,
 
     if (token.size() != 3) { // format checking
       stringstream errorMessage;
-      errorMessage << "Syntax error at " << filePath << ":" << lineNum << endl << line << endl;
+      errorMessage << "Syntax error at " << m_filePath << ":" << lineNum << endl << line << endl;
       UserMessage::Add(errorMessage.str());
       abort();
     }
@@ -86,9 +78,9 @@ void GlobalLexicalModel::LoadData(const string &filePath,
     // create the output word
     Word *outWord = new Word();
     vector<string> factorString = Tokenize( token[0], factorDelimiter );
-    for (size_t i=0 ; i < outFactors.size() ; i++) {
+    for (size_t i=0 ; i < m_outputFactorsVec.size() ; i++) {
       const FactorDirection& direction = Output;
-      const FactorType& factorType = outFactors[i];
+      const FactorType& factorType = m_outputFactorsVec[i];
       const Factor* factor = factorCollection.AddFactor( direction, factorType, factorString[i] );
       outWord->SetFactor( factorType, factor );
     }
@@ -96,9 +88,9 @@ void GlobalLexicalModel::LoadData(const string &filePath,
     // create the input word
     Word *inWord = new Word();
     factorString = Tokenize( token[1], factorDelimiter );
-    for (size_t i=0 ; i < inFactors.size() ; i++) {
+    for (size_t i=0 ; i < m_inputFactorsVec.size() ; i++) {
       const FactorDirection& direction = Input;
-      const FactorType& factorType = inFactors[i];
+      const FactorType& factorType = m_inputFactorsVec[i];
       const Factor* factor = factorCollection.AddFactor( direction, factorType, factorString[i] );
       inWord->SetFactor( factorType, factor );
     }
@@ -176,11 +168,11 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
 }
 
 void GlobalLexicalModel::Evaluate
-(const PhraseBasedFeatureContext& context,
+(const Hypothesis& hypo,
  ScoreComponentCollection* accumulator) const
 {
   accumulator->PlusEquals( this,
-                           GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
+                           GetFromCacheOrScorePhrase(hypo.GetCurrTargetPhrase()) );
 }
 
 bool GlobalLexicalModel::IsUseable(const FactorMask &mask) const

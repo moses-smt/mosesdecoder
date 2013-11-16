@@ -2,6 +2,8 @@
 
 #include "moses/StaticData.h"
 #include "moses/UserMessage.h"
+#include "moses/Hypothesis.h"
+#include "moses/FactorCollection.h"
 
 using namespace std;
 
@@ -9,6 +11,7 @@ namespace Moses
 {
 
 size_t BleuScoreState::bleu_order = 4;
+std::vector<BleuScoreFeature*> BleuScoreFeature::s_staticColl;
 
 BleuScoreState::BleuScoreState(): m_words(1),
   m_source_length(0),
@@ -24,10 +27,7 @@ int BleuScoreState::Compare(const FFState& o) const
   if (&o == this)
     return 0;
 
-  const StaticData &staticData = StaticData::Instance();
-  SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
-  bool chartDecoding = (searchAlgorithm == ChartDecoding);
-  if (chartDecoding)
+  if (StaticData::Instance().IsChart())
     return 0;
 
   const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
@@ -77,7 +77,7 @@ void BleuScoreState::AddNgramCountAndMatches(std::vector< size_t >& counts,
 
 
 BleuScoreFeature::BleuScoreFeature(const std::string &line)
-  :StatefulFeatureFunction("BleuScoreFeature",1, line),
+  :StatefulFeatureFunction(1, line),
    m_enabled(true),
    m_sentence_bleu(true),
    m_simple_history_bleu(false),
@@ -94,45 +94,62 @@ BleuScoreFeature::BleuScoreFeature(const std::string &line)
    m_historySmoothing(0.9),
    m_smoothing_scheme(PLUS_POINT_ONE)
 {
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
+  std::cerr << "Initializing BleuScoreFeature." << std::endl;
+  s_staticColl.push_back(this);
 
-    if (args[0] == "references") {
-      vector<string> referenceFiles = Tokenize(args[1]);
-      CHECK(referenceFiles.size());
-      vector<vector<string> > references(referenceFiles.size());
+  m_tuneable = false;
 
-      for (size_t i =0; i < referenceFiles.size(); ++i) {
-        ifstream in(referenceFiles[i].c_str());
-        if (!in) {
-          stringstream strme;
-          strme << "Unable to load references from " << referenceFiles[i];
-          UserMessage::Add(strme.str());
+  ReadParameters();
+  std::cerr << "Finished initializing BleuScoreFeature." << std::endl;
+}
+
+void BleuScoreFeature::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "references") {
+    vector<string> referenceFiles = Tokenize(value, ",");
+    CHECK(referenceFiles.size());
+    vector<vector<string> > references(referenceFiles.size());
+
+    for (size_t i =0; i < referenceFiles.size(); ++i) {
+      ifstream in(referenceFiles[i].c_str());
+      if (!in) {
+        stringstream strme;
+        strme << "Unable to load references from " << referenceFiles[i];
+        UserMessage::Add(strme.str());
+        abort();
+      }
+      string line;
+      while (getline(in,line)) {
+        /*  if (GetSearchAlgorithm() == ChartDecoding) {
+        stringstream tmp;
+        tmp << "<s> " << line << " </s>";
+        line = tmp.str();
+        }
+        */
+        references[i].push_back(line);
+      }
+      if (i > 0) {
+        if (references[i].size() != references[i-1].size()) {
+          UserMessage::Add("Reference files are of different lengths");
           abort();
         }
-        string line;
-        while (getline(in,line)) {
-          /*  if (GetSearchAlgorithm() == ChartDecoding) {
-          stringstream tmp;
-          tmp << "<s> " << line << " </s>";
-          line = tmp.str();
-          }
-          */
-          references[i].push_back(line);
-        }
-        if (i > 0) {
-          if (references[i].size() != references[i-1].size()) {
-            UserMessage::Add("Reference files are of different lengths");
-            abort();
-          }
-        }
-        in.close();
-      } // for (size_t i =0; i < referenceFiles.size(); ++i) {
+      }
+      in.close();
+    } // for (size_t i =0; i < referenceFiles.size(); ++i) {
 
-      //Set the references in the bleu feature
-      LoadReferences(references);
-    } // if (args[0] == "references") {
-  } // for (size_t i = 0; i < toks.size(); ++i) {
+    //Set the references in the bleu feature
+    LoadReferences(references);
+
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
+
+}
+
+std::vector<float> BleuScoreFeature::DefaultWeights() const
+{
+  std::vector<float> ret(m_numScoreComponents, 1);
+  return ret;
 }
 
 void BleuScoreFeature::PrintHistory(std::ostream& out) const

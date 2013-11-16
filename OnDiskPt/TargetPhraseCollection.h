@@ -73,8 +73,8 @@ public:
       , const std::vector<Moses::FactorType> &outputFactors
       , const Moses::PhraseDictionary &phraseDict
       , const std::vector<float> &weightT
-      , const std::string &filePath
-      , Vocab &vocab) const;
+      , Vocab &vocab
+      , bool isSyntax) const;
   void ReadFromFile(size_t tableLimit, UINT64 filePos, OnDiskWrapper &onDiskWrapper);
 
   const std::string GetDebugStr() const;

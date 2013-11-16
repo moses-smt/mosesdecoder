@@ -31,14 +31,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FactorCollection.h"
 #include "moses/Phrase.h"
 #include "moses/StaticData.h"
+#include "moses/FactorTypeSet.h"
 
 using namespace std;
 
 namespace Moses
 {
 
-LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string& description, const std::string &line)
-  :LanguageModelImplementation(description, line)
+LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string &line)
+  :LanguageModelImplementation(line)
 {
   m_nullContextState = new PointerState(NULL);
   m_beginSentenceState = new PointerState(NULL);
@@ -70,6 +71,15 @@ bool LanguageModelSingleFactor::IsUseable(const FactorMask &mask) const
 {
   bool ret = mask[m_factorType];
   return ret;
+}
+
+void LanguageModelSingleFactor::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
+  } else {
+    LanguageModelImplementation::SetParameter(key, value);
+  }
 }
 
 }

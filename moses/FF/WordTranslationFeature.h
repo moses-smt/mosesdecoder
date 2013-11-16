@@ -33,23 +33,37 @@ private:
   bool m_domainTrigger;
   bool m_ignorePunctuation;
   CharHash m_punctuationHash;
+  std::string m_filePathSource;
+  std::string m_filePathTarget;
 
 public:
   WordTranslationFeature(const std::string &line);
 
+  void SetParameter(const std::string& key, const std::string& value);
   bool IsUseable(const FactorMask &mask) const;
 
-  bool Load(const std::string &filePathSource, const std::string &filePathTarget);
+  void Load();
 
   const FFState* EmptyHypothesisState(const InputType &) const {
     return new DummyState();
   }
 
-  void Evaluate(const PhraseBasedFeatureContext& context,
+  void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartBasedFeatureContext& context,
+  void EvaluateChart(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const;
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
 };
 
 }

@@ -32,7 +32,7 @@ namespace GHKM
 
 typedef std::vector<std::pair<int, int> > Alignment;
 
-Alignment ReadAlignment(const std::string &);
+void ReadAlignment(const std::string &, Alignment &);
 
 }  // namespace GHKM
 }  // namespace Moses

@@ -75,8 +75,8 @@ public:
   typedef CacheMap::const_iterator const_iterator;
 
   TargetPhraseCollectionCache(size_t max = 5000, float tolerance = 0.2)
-    : m_max(max), m_tolerance(tolerance)
-  {}
+    : m_max(max), m_tolerance(tolerance) {
+  }
 
   iterator Begin() {
     return m_phraseCache.begin();

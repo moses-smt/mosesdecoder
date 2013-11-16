@@ -4,8 +4,6 @@
 #include <vector>
 #include <set>
 #include <string>
-#include "PhraseBasedFeatureContext.h"
-#include "ChartBasedFeatureContext.h"
 #include "moses/TypeDef.h"
 
 namespace Moses
@@ -16,14 +14,12 @@ class TargetPhrase;
 class TranslationOption;
 class Hypothesis;
 class ChartHypothesis;
-class FFState;
 class InputType;
 class ScoreComponentCollection;
 class WordsBitmap;
 class WordsRange;
 class FactorMask;
-
-
+class InputPath;
 
 /** base class for all feature functions.
  */
@@ -31,7 +27,7 @@ class FeatureFunction
 {
 protected:
   /**< all the score producers in this run */
-  static std::vector<FeatureFunction*> m_producers;
+  static std::vector<FeatureFunction*> s_staticColl;
 
   std::string m_description, m_argLine;
   std::vector<std::vector<std::string> > m_args;
@@ -40,20 +36,23 @@ protected:
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
-  void ParseLine(const std::string& description, const std::string &line);
+  void Initialize(const std::string &line);
+  void ParseLine(const std::string &line);
 
 public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() {
-    return m_producers;
+    return s_staticColl;
   }
+  static FeatureFunction &FindFeatureFunction(const std::string& name);
 
-  FeatureFunction(const std::string& description, const std::string &line);
-  FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
+  FeatureFunction(const std::string &line);
+  FeatureFunction(size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
 
-  virtual void Load()
-  {}
+  //! override to load model files
+  virtual void Load() {
+  }
 
   static void ResetDescriptionCounts() {
     description_counts.clear();
@@ -70,33 +69,49 @@ public:
     return m_description;
   }
 
+  //! if false, then this feature is not displayed in the n-best list.
+  // use with care
   virtual bool IsTuneable() const {
     return m_tuneable;
   }
+  virtual std::vector<float> DefaultWeights() const;
 
-  //!
-  virtual void InitializeForInput(InputType const& source)
-  {}
+  //! Called before search and collecting of translation options
+  virtual void InitializeForInput(InputType const& source) {
+  }
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
-  {}
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {
+  }
 
   const std::string &GetArgLine() const {
     return m_argLine;
   }
 
+  // given a target phrase containing only factors specified in mask
+  // return true if the feature function can be evaluated
   virtual bool IsUseable(const FactorMask &mask) const = 0;
 
+  // used by stateless ff and stateful ff. Calculate initial score estimate during loading of phrase table
+  // source phrase is the substring that the phrase table uses to look up the target phrase,
+  // may have more factors than actually need, but not guaranteed.
+  // For SCFG decoding, the source contains non-terminals, NOT the raw source from the input sentence
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+                        , ScoreComponentCollection &estimatedFutureScore) const = 0;
 
-  virtual void Evaluate(const InputType &source
-                        , ScoreComponentCollection &scoreBreakdown) const
-  {}
+  // This method is called once all the translation options are retrieved from the phrase table, and
+  // just before search.
+  // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
+  // Currently not used by any FF. Not called by moses_chart
+  virtual void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown) const = 0;
+
+  virtual void SetParameter(const std::string& key, const std::string& value);
+  virtual void ReadParameters();
 };
 
 }

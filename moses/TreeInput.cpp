@@ -4,6 +4,7 @@
 #include "StaticData.h"
 #include "Util.h"
 #include "XmlOption.h"
+#include "FactorCollection.h"
 
 using namespace std;
 
@@ -235,8 +236,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   //line = Trim(line);
 
   std::vector<XMLParseOutput> sourceLabels;
-  std::vector<XmlOption*> xmlOptionsList;
-  ProcessAndStripXMLTags(line, sourceLabels, xmlOptionsList);
+  ProcessAndStripXMLTags(line, sourceLabels, m_xmlOptions);
 
   // do words 1st - hack
   stringstream strme;
@@ -266,42 +266,6 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
       AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
     }
-  }
-
-  // XML Options
-
-  //only fill the vector if we are parsing XML
-  if (staticData.GetXmlInputType() != XmlPassThrough ) {
-    //TODO: needed to handle exclusive
-    //for (size_t i=0; i<GetSize(); i++) {
-    //  m_xmlCoverageMap.push_back(false);
-    //}
-
-    //iterXMLOpts will be empty for XmlIgnore
-    //look at each column
-    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = xmlOptionsList.begin();
-        iterXmlOpts != xmlOptionsList.end(); iterXmlOpts++) {
-
-      const XmlOption *xmlOption = *iterXmlOpts;
-      TargetPhrase *targetPhrase = new TargetPhrase(xmlOption->targetPhrase);
-      *targetPhrase = xmlOption->targetPhrase; // copy everything
-      WordsRange *range = new WordsRange(xmlOption->range);
-      const StackVec emptyStackVec; // hmmm... maybe dangerous, but it is never consulted
-
-      TargetPhraseCollection *tpc = new TargetPhraseCollection;
-      tpc->Add(targetPhrase);
-
-      ChartTranslationOptions *transOpt = new ChartTranslationOptions(*tpc, emptyStackVec, *range, 0.0f);
-      m_xmlChartOptionsList.push_back(transOpt);
-
-      //TODO: needed to handle exclusive
-      //for(size_t j=transOpt->GetSourceWordsRange().GetStartPos(); j<=transOpt->GetSourceWordsRange().GetEndPos(); j++) {
-      //  m_xmlCoverageMap[j]=true;
-      //}
-
-      delete xmlOption;
-    }
-
   }
 
   return 1;

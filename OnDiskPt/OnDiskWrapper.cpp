@@ -21,9 +21,11 @@
 #include <direct.h>
 #endif
 #include <sys/stat.h>
-#include "util/check.hh"
 #include <string>
 #include "OnDiskWrapper.h"
+#include "moses/Factor.h"
+#include "util/check.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -58,19 +60,29 @@ bool OnDiskWrapper::BeginLoad(const std::string &filePath)
 bool OnDiskWrapper::OpenForLoad(const std::string &filePath)
 {
   m_fileSource.open((filePath + "/Source.dat").c_str(), ios::in | ios::binary);
-  CHECK(m_fileSource.is_open());
+  UTIL_THROW_IF(!m_fileSource.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/Source.dat");
 
   m_fileTargetInd.open((filePath + "/TargetInd.dat").c_str(), ios::in | ios::binary);
-  CHECK(m_fileTargetInd.is_open());
+  UTIL_THROW_IF(!m_fileTargetInd.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/TargetInd.dat");
 
   m_fileTargetColl.open((filePath + "/TargetColl.dat").c_str(), ios::in | ios::binary);
-  CHECK(m_fileTargetColl.is_open());
+  UTIL_THROW_IF(!m_fileTargetColl.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/TargetColl.dat");
 
   m_fileVocab.open((filePath + "/Vocab.dat").c_str(), ios::in);
-  CHECK(m_fileVocab.is_open());
+  UTIL_THROW_IF(!m_fileVocab.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/Vocab.dat");
 
   m_fileMisc.open((filePath + "/Misc.dat").c_str(), ios::in);
-  CHECK(m_fileMisc.is_open());
+  UTIL_THROW_IF(!m_fileMisc.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/Misc.dat");
 
   // set up root node
   LoadMisc();
@@ -88,7 +100,9 @@ bool OnDiskWrapper::LoadMisc()
   while(m_fileMisc.getline(line, 100000)) {
     vector<string> tokens;
     Moses::Tokenize(tokens, line);
-    CHECK(tokens.size() == 2);
+    UTIL_THROW_IF2(tokens.size() != 2, "Except key value. Found " << line);
+
+
     const string &key = tokens[0];
     m_miscInfo[key] =  Moses::Scan<UINT64>(tokens[1]);
   }
@@ -111,33 +125,52 @@ bool OnDiskWrapper::BeginSave(const std::string &filePath
 #endif
 
   m_fileSource.open((filePath + "/Source.dat").c_str(), ios::out | ios::in | ios::binary | ios::ate | ios::trunc);
-  CHECK(m_fileSource.is_open());
+  UTIL_THROW_IF(!m_fileSource.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/Source.dat");
 
   m_fileTargetInd.open((filePath + "/TargetInd.dat").c_str(), ios::out | ios::binary | ios::ate | ios::trunc);
-  CHECK(m_fileTargetInd.is_open());
+  UTIL_THROW_IF(!m_fileTargetInd.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/TargetInd.dat");
 
   m_fileTargetColl.open((filePath + "/TargetColl.dat").c_str(), ios::out | ios::binary | ios::ate | ios::trunc);
-  CHECK(m_fileTargetColl.is_open());
+  UTIL_THROW_IF(!m_fileTargetColl.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/TargetColl.dat");
 
   m_fileVocab.open((filePath + "/Vocab.dat").c_str(), ios::out | ios::ate | ios::trunc);
-  CHECK(m_fileVocab.is_open());
+  UTIL_THROW_IF(!m_fileVocab.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/Vocab.dat");
 
   m_fileMisc.open((filePath + "/Misc.dat").c_str(), ios::out | ios::ate | ios::trunc);
-  CHECK(m_fileMisc.is_open());
+  UTIL_THROW_IF(!m_fileMisc.is_open(),
+		  util::FileOpenException,
+		  "Couldn't open file " << filePath << "/Misc.dat");
 
   // offset by 1. 0 offset is reserved
   char c = 0xff;
   m_fileSource.write(&c, 1);
-  CHECK(1 == m_fileSource.tellp());
+  UTIL_THROW_IF(1 != m_fileSource.tellp(),
+	  util::Exception,
+	"Couldn't write to stream m_fileSource");
 
   m_fileTargetInd.write(&c, 1);
-  CHECK(1 == m_fileTargetInd.tellp());
+  UTIL_THROW_IF(1 != m_fileTargetInd.tellp(),
+	  	  util::Exception,
+	  	"Couldn't write to stream m_fileTargetInd");
 
   m_fileTargetColl.write(&c, 1);
-  CHECK(1 == m_fileTargetColl.tellp());
+  UTIL_THROW_IF(1 != m_fileTargetColl.tellp(),
+		  	  util::Exception,
+		  	"Couldn't write to stream m_fileTargetColl");
 
   // set up root node
-  CHECK(GetNumCounts() == 1);
+  UTIL_THROW_IF(GetNumCounts() != 1,
+	  	  util::Exception,
+	  	"Not sure what this is...");
+
   vector<float> counts(GetNumCounts());
   counts[0] = DEFAULT_COUNT;
   m_rootSourceNode = new PhraseNode();
@@ -149,7 +182,7 @@ bool OnDiskWrapper::BeginSave(const std::string &filePath
 void OnDiskWrapper::EndSave()
 {
   bool ret = m_rootSourceNode->Saved();
-  CHECK(ret);
+  UTIL_THROW_IF(!ret, util::Exception, "Root node not saved");
 
   GetVocab().Save(*this);
 
@@ -186,18 +219,15 @@ UINT64 OnDiskWrapper::GetMisc(const std::string &key) const
 {
   std::map<std::string, UINT64>::const_iterator iter;
   iter = m_miscInfo.find(key);
-  CHECK(iter != m_miscInfo.end());
+  UTIL_THROW_IF(iter == m_miscInfo.end()
+		  	  , util::Exception
+		  	  , "Couldn't find value for key " << key
+  	  	  	  );
 
   return iter->second;
 }
 
-PhraseNode &OnDiskWrapper::GetRootSourceNode()
-{
-  return *m_rootSourceNode;
-}
-
-Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
-                                      , const std::vector<Moses::FactorType> &factorsVec
+Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &factorsVec
                                       , const Moses::Word &origWord) const
 {
   bool isNonTerminal = origWord.IsNonTerminal();
@@ -206,7 +236,7 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
 
   size_t factorType = factorsVec[0];
   const Moses::Factor *factor = origWord.GetFactor(factorType);
-  CHECK(factor);
+  UTIL_THROW_IF(factor == NULL, util::Exception, "Expecting factor " << factorType);
   strme << factor->GetString();
 
   for (size_t ind = 1 ; ind < factorsVec.size() ; ++ind) {
@@ -216,7 +246,9 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
       // can have less factors than factorType.size()
       break;
     }
-    CHECK(factor);
+    UTIL_THROW_IF(factor == NULL,
+    		util::Exception,
+    		"Expecting factor " << factorType << " at position " << ind);
     strme << "|" << factor->GetString();
   } // for (size_t factorType
 

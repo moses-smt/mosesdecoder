@@ -3,6 +3,9 @@
 #include "FFState.h"
 #include "moses/WordsRange.h"
 #include "moses/StaticData.h"
+#include "moses/Hypothesis.h"
+
+using namespace std;
 
 namespace Moses
 {
@@ -18,6 +21,12 @@ struct DistortionState_traditional : public FFState {
     return 0;
   }
 };
+
+DistortionScoreProducer::DistortionScoreProducer(const std::string &line)
+  : StatefulFeatureFunction(1, line)
+{
+  ReadParameters();
+}
 
 const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &input) const
 {

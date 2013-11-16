@@ -8,15 +8,17 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/InputPath.h"
 #include "util/string_piece_hash.hh"
+#include "util/exception.hh"
+
+using namespace std;
 
 namespace Moses
 {
 
-using namespace std;
-
 WordTranslationFeature::WordTranslationFeature(const std::string &line)
-  :StatelessFeatureFunction("WordTranslationFeature", 0, line)
+  :StatelessFeatureFunction(0, line)
   ,m_unrestricted(true)
   ,m_simple(true)
   ,m_sourceContext(false)
@@ -25,38 +27,7 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
   ,m_domainTrigger(false)
 {
   std::cerr << "Initializing word translation feature.. " << endl;
-
-  string texttype;
-  string filenameSource;
-  string filenameTarget;
-
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "input-factor") {
-      m_factorTypeSource = Scan<FactorType>(args[1]);
-    } else if (args[0] == "output-factor") {
-      m_factorTypeTarget = Scan<FactorType>(args[1]);
-    } else if (args[0] == "simple") {
-      m_simple = Scan<bool>(args[1]);
-    } else if (args[0] == "source-context") {
-      m_sourceContext = Scan<bool>(args[1]);
-    } else if (args[0] == "target-context") {
-      m_targetContext = Scan<bool>(args[1]);
-    } else if (args[0] == "ignore-punctuation") {
-      m_ignorePunctuation = Scan<bool>(args[1]);
-    } else if (args[0] == "domain-trigger") {
-      m_domainTrigger = Scan<bool>(args[1]);
-    } else if (args[0] == "texttype") {
-      texttype = args[1];
-    } else if (args[0] == "source-path") {
-      filenameSource = args[1];
-    } else if (args[0] == "target-path") {
-      filenameTarget = args[1];
-    } else {
-      throw "Unknown argument " + args[0];
-    }
-  }
+  ReadParameters();
 
   if (m_simple == 1) std::cerr << "using simple word translations.. ";
   if (m_sourceContext == 1) std::cerr << "using source context.. ";
@@ -74,15 +45,6 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
 
   std::cerr << "done." << std::endl;
 
-  // load word list for restricted feature set
-  if (filenameSource != "") {
-    cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
-    if (!Load(filenameSource, filenameTarget)) {
-      UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
-      //return false;
-    }
-  } //else if (tokens.size() == 8) {
-
   // TODO not sure about this
   /*
   if (weight[0] != 1) {
@@ -99,15 +61,45 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
 
 }
 
-bool WordTranslationFeature::Load(const std::string &filePathSource, const std::string &filePathTarget)
+void WordTranslationFeature::SetParameter(const std::string& key, const std::string& value)
 {
+  if (key == "input-factor") {
+    m_factorTypeSource = Scan<FactorType>(value);
+  } else if (key == "output-factor") {
+    m_factorTypeTarget = Scan<FactorType>(value);
+  } else if (key == "simple") {
+    m_simple = Scan<bool>(value);
+  } else if (key == "source-context") {
+    m_sourceContext = Scan<bool>(value);
+  } else if (key == "target-context") {
+    m_targetContext = Scan<bool>(value);
+  } else if (key == "ignore-punctuation") {
+    m_ignorePunctuation = Scan<bool>(value);
+  } else if (key == "domain-trigger") {
+    m_domainTrigger = Scan<bool>(value);
+  } else if (key == "texttype") {
+    //texttype = value; TODO not used
+  } else if (key == "source-path") {
+    m_filePathSource = value;
+  } else if (key == "target-path") {
+    m_filePathTarget = value;
+  } else {
+    StatelessFeatureFunction::SetParameter(key, value);
+  }
+}
+
+void WordTranslationFeature::Load()
+{
+  // load word list for restricted feature set
+  if (m_filePathSource.empty()) {
+    return;
+  } //else if (tokens.size() == 8) {
+
+  cerr << "loading word translation word lists from " << m_filePathSource << " and " << m_filePathTarget << endl;
   if (m_domainTrigger) {
     // domain trigger terms for each input document
-    ifstream inFileSource(filePathSource.c_str());
-    if (!inFileSource) {
-      cerr << "could not open file " << filePathSource << endl;
-      return false;
-    }
+    ifstream inFileSource(m_filePathSource.c_str());
+    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -121,11 +113,8 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
     inFileSource.close();
   } else {
     // restricted source word vocabulary
-    ifstream inFileSource(filePathSource.c_str());
-    if (!inFileSource) {
-      cerr << "could not open file " << filePathSource << endl;
-      return false;
-    }
+    ifstream inFileSource(m_filePathSource.c_str());
+    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -135,11 +124,8 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
     inFileSource.close();
 
     // restricted target word vocabulary
-    ifstream inFileTarget(filePathTarget.c_str());
-    if (!inFileTarget) {
-      cerr << "could not open file " << filePathTarget << endl;
-      return false;
-    }
+    ifstream inFileTarget(m_filePathTarget.c_str());
+    UTIL_THROW_IF(!inFileTarget, util::Exception, "could not open file " << m_filePathTarget);
 
     while (getline(inFileTarget, line)) {
       m_vocabTarget.insert(line);
@@ -149,20 +135,20 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
 
     m_unrestricted = false;
   }
-  return true;
 }
 
 void WordTranslationFeature::Evaluate
-(const PhraseBasedFeatureContext& context,
+(const Hypothesis& hypo,
  ScoreComponentCollection* accumulator) const
 {
-  const Sentence& input = static_cast<const Sentence&>(context.GetSource());
-  const TargetPhrase& targetPhrase = context.GetTargetPhrase();
+  const Sentence& input = static_cast<const Sentence&>(hypo.GetInput());
+  const TranslationOption& transOpt = hypo.GetTranslationOption();
+  const TargetPhrase& targetPhrase = hypo.GetCurrTargetPhrase();
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
-    const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
+    const Phrase& sourcePhrase = transOpt.GetInputPath().GetPhrase();
     int sourceIndex = alignmentPoint->first;
     int targetIndex = alignmentPoint->second;
     Word ws = sourcePhrase.GetWord(sourceIndex);
@@ -258,7 +244,7 @@ void WordTranslationFeature::Evaluate
       }
     }
     if (m_sourceContext) {
-      size_t globalSourceIndex = context.GetTranslationOption().GetStartPos() + sourceIndex;
+      size_t globalSourceIndex = hypo.GetTranslationOption().GetStartPos() + sourceIndex;
       if (!m_domainTrigger && globalSourceIndex == 0) {
         // add <s> trigger feature for source
         stringstream feature;
@@ -364,150 +350,10 @@ void WordTranslationFeature::Evaluate
 }
 
 void WordTranslationFeature::EvaluateChart(
-  const ChartBasedFeatureContext& context,
+  const ChartHypothesis &hypo,
   ScoreComponentCollection* accumulator) const
 {
-  const TargetPhrase& targetPhrase = context.GetTargetPhrase();
-  const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
-
-  // process aligned words
-  for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++) {
-    const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
-    int sourceIndex = alignmentPoint->first;
-    int targetIndex = alignmentPoint->second;
-    Word ws = sourcePhrase.GetWord(sourceIndex);
-    if (m_factorTypeSource == 0 && ws.IsNonTerminal()) continue;
-    Word wt = targetPhrase.GetWord(targetIndex);
-    if (m_factorTypeSource == 0 && wt.IsNonTerminal()) continue;
-    StringPiece sourceWord = ws.GetFactor(m_factorTypeSource)->GetString();
-    StringPiece targetWord = wt.GetFactor(m_factorTypeTarget)->GetString();
-    if (m_ignorePunctuation) {
-      // check if source or target are punctuation
-      char firstChar = sourceWord[0];
-      CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
-      if(charIterator != m_punctuationHash.end())
-        continue;
-      firstChar = targetWord[0];
-      charIterator = m_punctuationHash.find( firstChar );
-      if(charIterator != m_punctuationHash.end())
-        continue;
-    }
-
-    if (!m_unrestricted) {
-      if (FindStringPiece(m_vocabSource, sourceWord) == m_vocabSource.end())
-        sourceWord = "OTHER";
-      if (FindStringPiece(m_vocabTarget, targetWord) == m_vocabTarget.end())
-        targetWord = "OTHER";
-    }
-
-    if (m_simple) {
-      // construct feature name
-      stringstream featureName;
-      featureName << m_description << "_";
-      //featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
-      featureName << sourceWord;
-      featureName << "~";
-      //featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
-      featureName << targetWord;
-      accumulator->SparsePlusEquals(featureName.str(), 1);
-    }
-    /*  if (m_sourceContext) {
-      	size_t globalSourceIndex = cur_hypo.GetCurrSourceRange().GetStartPos() + sourceIndex;
-      	if (globalSourceIndex == 0) {
-      		// add <s> trigger feature for source
-      		stringstream feature;
-      		feature << "wt_";
-      		feature << "<s>,";
-      		feature << sourceWord;
-      		feature << "~";
-      		feature << targetWord;
-      		accumulator->SparsePlusEquals(feature.str(), 1);
-      		cerr << feature.str() << endl;
-      	}
-
-      	// range over source words to get context
-      	for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
-      		if (contextIndex == globalSourceIndex) continue;
-      		string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
-      		if (m_ignorePunctuation) {
-      			// check if trigger is punctuation
-      			char firstChar = sourceTrigger.at(0);
-      			CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
-      			if(charIterator != m_punctuationHash.end())
-      				continue;
-      		}
-
-      		bool sourceTriggerExists = false;
-      		if (!m_unrestricted)
-      			sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
-
-      		if (m_unrestricted || sourceTriggerExists) {
-      			stringstream feature;
-      			feature << "wt_";
-      			if (contextIndex < globalSourceIndex) {
-      				feature << sourceTrigger;
-      				feature << ",";
-      				feature << sourceWord;
-        		}
-      			else {
-      				feature << sourceWord;
-      				feature << ",";
-      				feature << sourceTrigger;
-        		}
-      			feature << "~";
-      			feature << targetWord;
-      			accumulator->SparsePlusEquals(feature.str(), 1);
-      			cerr << feature.str() << endl;
-      		}
-      	}
-    }*/
-    /*    if (m_targetContext) {
-        	size_t globalTargetIndex = 0; // TODO
-    //    	size_t globalTargetIndex = cur_hypo.GetCurrTargetWordsRange().GetStartPos() + targetIndex;
-        	if (globalTargetIndex == 0) {
-        		// add <s> trigger feature for source
-        		stringstream feature;
-        		feature << "wt_";
-        		feature << sourceWord;
-        		feature << "~";
-        		feature << "<s>,";
-        		feature << targetWord;
-        		accumulator->SparsePlusEquals(feature.str(), 1);
-        		cerr << feature.str() << endl;
-        	}
-
-        	// range over target words (up to current position) to get context
-        	for(size_t contextIndex = 0; contextIndex < globalTargetIndex; contextIndex++ ) {
-        		Phrase outputPhrase = cur_hypo.GetOutputPhrase();
-        		string targetTrigger = outputPhrase.GetWord(contextIndex).GetFactor(m_factorTypeTarget)->GetString();
-        		//string targetTrigger = cur_hypo.GetWord(contextIndex).GetFactor(m_factorTypeTarget)->GetString();
-        		if (m_ignorePunctuation) {
-        			// check if trigger is punctuation
-        			char firstChar = targetTrigger.at(0);
-        			CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
-        			if(charIterator != m_punctuationHash.end())
-        				continue;
-        		}
-
-        		bool targetTriggerExists = false;
-        		if (!m_unrestricted)
-        			targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
-
-        		if (m_unrestricted || targetTriggerExists) {
-        			stringstream feature;
-        			feature << "wt_";
-        			feature << sourceWord;
-        			feature << "~";
-        			feature << targetTrigger;
-        			feature << ",";
-        			feature << targetWord;
-        			accumulator->SparsePlusEquals(feature.str(), 1);
-        			cerr << feature.str() << endl;
-        		}
-        	}
-        }*/
-  }
-
+  UTIL_THROW(util::Exception, "Need source phrase. Can't be arsed at the moment");
 }
 
 bool WordTranslationFeature::IsUseable(const FactorMask &mask) const

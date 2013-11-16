@@ -24,7 +24,10 @@
 #include "ChartRuleLookupManager.h"
 #include "StaticData.h"
 #include "TreeInput.h"
+#include "Sentence.h"
+#include "DecodeGraph.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 using namespace Moses;
@@ -61,6 +64,9 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 
   Phrase* unksrc = new Phrase(1);
   unksrc->AddWord() = sourceWord;
+  Word &newWord = unksrc->GetWord(0);
+  newWord.SetIsOOV(true);
+
   m_unksrcs.push_back(unksrc);
 
   //TranslationOption *transOpt;
@@ -90,9 +96,11 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
 
-      targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
+      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+        targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
+      }
 
       // chart rule
       to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
@@ -116,7 +124,6 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
 
-      targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
 
       // chart rule
@@ -132,20 +139,38 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
   const StaticData &staticData = StaticData::Instance();
 
   staticData.InitializeForInput(source);
-  const std::vector<PhraseDictionary*> &dictionaries = staticData.GetPhraseDictionaries();
+  CreateInputPaths(m_source);
+
+  const std::vector<PhraseDictionary*> &dictionaries = PhraseDictionary::GetColl();
   m_ruleLookupManagers.reserve(dictionaries.size());
   for (std::vector<PhraseDictionary*>::const_iterator p = dictionaries.begin();
        p != dictionaries.end(); ++p) {
+
     const PhraseDictionary *dict = *p;
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
-    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, cells));
+
+    ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells);
+
+    m_ruleLookupManagers.push_back(lookupMgr);
   }
+
 }
 
 ChartParser::~ChartParser()
 {
   RemoveAllInColl(m_ruleLookupManagers);
   StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
+
+  InputPathMatrix::const_iterator iterOuter;
+  for (iterOuter = m_inputPathMatrix.begin(); iterOuter != m_inputPathMatrix.end(); ++iterOuter) {
+    const std::vector<InputPath*> &outer = *iterOuter;
+
+    std::vector<InputPath*>::const_iterator iterInner;
+    for (iterInner = outer.begin(); iterInner != outer.end(); ++iterInner) {
+      InputPath *path = *iterInner;
+      delete path;
+    }
+  }
 }
 
 void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
@@ -174,4 +199,67 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
   }
 }
 
+void ChartParser::CreateInputPaths(const InputType &input)
+{
+  size_t size = input.GetSize();
+  m_inputPathMatrix.resize(size);
+
+  CHECK(input.GetType() == SentenceInput || input.GetType() == TreeInputType);
+  for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
+    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
+      size_t endPos = startPos + phaseSize -1;
+      vector<InputPath*> &vec = m_inputPathMatrix[startPos];
+
+      WordsRange range(startPos, endPos);
+      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
+
+      InputPath *node;
+      if (range.GetNumWordsCovered() == 1) {
+        node = new InputPath(subphrase, labels, range, NULL, NULL);
+        vec.push_back(node);
+      } else {
+        const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
+        node = new InputPath(subphrase, labels, range, &prevNode, NULL);
+        vec.push_back(node);
+      }
+
+      //m_inputPathQueue.push_back(node);
+    }
+  }
+}
+
+const InputPath &ChartParser::GetInputPath(WordsRange &range) const
+{
+  return GetInputPath(range.GetStartPos(), range.GetEndPos());
+}
+
+const InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos) const
+{
+  size_t offset = endPos - startPos;
+  CHECK(offset < m_inputPathMatrix[startPos].size());
+  return *m_inputPathMatrix[startPos][offset];
+}
+
+InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
+{
+  size_t offset = endPos - startPos;
+  CHECK(offset < m_inputPathMatrix[startPos].size());
+  return *m_inputPathMatrix[startPos][offset];
+}
+/*
+const Sentence &ChartParser::GetSentence() const {
+  const Sentence &sentence = static_cast<const Sentence&>(m_source);
+  return sentence;
+}
+*/
+size_t ChartParser::GetSize() const
+{
+  return m_source.GetSize();
+}
+
+long ChartParser::GetTranslationId() const
+{
+  return m_source.GetTranslationId();
+}
 } // namespace Moses

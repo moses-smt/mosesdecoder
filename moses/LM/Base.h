@@ -43,7 +43,7 @@ class Phrase;
 class LanguageModel : public StatefulFeatureFunction
 {
 protected:
-  LanguageModel(const std::string& description, const std::string &line);
+  LanguageModel(const std::string &line);
 
   // This can't be in the constructor for virual function dispatch reasons
 
@@ -85,11 +85,17 @@ public:
 
   // KenLM only (others throw an exception): call incremental search with the model and mapping.
   virtual void IncrementalCallback(Incremental::Manager &manager) const;
+  virtual void ReportHistoryOrder(std::ostream &out,const Phrase &phrase) const;
 
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
+  {}
 
 };
 

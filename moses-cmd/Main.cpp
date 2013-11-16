@@ -53,6 +53,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Timer.h"
 #include "moses/ThreadPool.h"
 #include "moses/OutputCollector.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -117,7 +120,7 @@ public:
     // shorthand for "global data"
     const StaticData &staticData = StaticData::Instance();
     // input sentence
-    Sentence sentence();
+    Sentence sentence;
 
     // execute the translation
     // note: this executes the search, resulting in a search graph
@@ -288,6 +291,9 @@ public:
             out << m_source->GetTranslationId() << " ";
           }
 
+	  if (staticData.GetReportSegmentation() == 2) {
+	    manager.GetOutputLanguageModelOrder(out, bestHypo);
+	  }
           OutputBestSurface(
             out,
             bestHypo,
@@ -303,7 +309,10 @@ public:
           IFVERBOSE(1) {
             debug << "BEST TRANSLATION: " << *bestHypo << endl;
           }
+        } else {
+          VERBOSE(1, "NO BEST TRANSLATION" << endl);
         }
+
         out << endl;
       }
 
@@ -402,7 +411,7 @@ public:
 
     //list of unknown words
     if (m_unknownsCollector) {
-      const vector<Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
+      const vector<const Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
       ostringstream out;
       for (size_t i = 0; i < unknowns.size(); ++i) {
         out << *(unknowns[i]);
@@ -521,11 +530,11 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
       featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, gds[i], outputSearchGraphStream);
   }

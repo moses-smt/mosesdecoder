@@ -10,9 +10,9 @@ namespace Moses
 using namespace std;
 
 PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
-  :StatelessFeatureFunction("PhraseLengthFeature", 0, line)
+  :StatelessFeatureFunction(0, line)
 {
-
+  ReadParameters();
 }
 
 void PhraseLengthFeature::Evaluate(const Phrase &source

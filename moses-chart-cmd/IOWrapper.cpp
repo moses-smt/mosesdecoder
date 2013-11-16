@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // example file on how to use moses library
 
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 #include "IOWrapper.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
@@ -47,9 +48,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
-
-#include <boost/algorithm/string.hpp>
-
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 using namespace std;
 using namespace Moses;
@@ -68,9 +68,11 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_inputFactorUsed(inputFactorUsed)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
+  ,m_detailedTreeFragmentsTranslationReportingStream(NULL)
   ,m_alignmentInfoStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
+  ,m_detailTreeFragmentsOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
@@ -116,6 +118,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
 
+  if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+    const std::string &path = staticData.GetDetailedTreeFragmentsTranslationReportingFilePath();
+    m_detailedTreeFragmentsTranslationReportingStream = new std::ofstream(path.c_str());
+    m_detailTreeFragmentsOutputCollector = new Moses::OutputCollector(m_detailedTreeFragmentsTranslationReportingStream);
+  }
+
   if (!staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
     m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
@@ -130,6 +138,7 @@ IOWrapper::~IOWrapper()
   }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
+  delete m_detailedTreeFragmentsTranslationReportingStream;
   delete m_alignmentInfoStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
@@ -290,26 +299,60 @@ void IOWrapper::WriteApplicationContext(std::ostream &out,
   }
 }
 
+void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+  ReconstructApplicationContext(*hypo, sentence, applicationContext);
+  out << "Trans Opt " << translationId
+      << " " << hypo->GetCurrSourceRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+      << "->" << hypo->GetCurrTargetPhrase()
+      << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+}
+
 void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
-  // recursive
   if (hypo != NULL) {
-    ReconstructApplicationContext(*hypo, sentence, applicationContext);
-    out << "Trans Opt " << translationId
-        << " " << hypo->GetCurrSourceRange()
-        << ": ";
-    WriteApplicationContext(out, applicationContext);
-    out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
-        << "->" << hypo->GetCurrTargetPhrase()
-        << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
-        << endl;
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+    out << std::endl;
   }
 
+  // recursive
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
     const ChartHypothesis *prevHypo = *iter;
     OutputTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
+void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+
+    const std::string key = "Tree";
+    std::string value;
+    bool hasProperty;
+    const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
+    currTarPhr.GetProperty(key, value, hasProperty);
+
+    out << " ||| ";
+    if (hasProperty)
+      out << " " << value;
+    else
+      out << " " << "noTreeInfo";
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
   }
 }
 
@@ -329,6 +372,54 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
+void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
+  const ChartHypothesis *hypo,
+  const Sentence &sentence,
+  long translationId)
+{
+  if (hypo == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+  CHECK(m_detailTreeFragmentsOutputCollector);
+  m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
+}
+
+//DIMw
+void IOWrapper::OutputDetailedAllTranslationReport(
+  const ChartTrellisPathList &nBestList,
+  const ChartManager &manager,
+  const Sentence &sentence,
+  long translationId)
+{
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  const ChartCellCollection& cells = manager.GetChartCellCollection();
+  size_t size = manager.GetSource().GetSize();
+  for (size_t width = 1; width <= size; ++width) {
+    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+      size_t endPos = startPos + width - 1;
+      WordsRange range(startPos, endPos);
+      const ChartCell& cell = cells.Get(range);
+      const HypoList* hyps = cell.GetAllSortedHypotheses();
+      out << "Chart Cell [" << startPos << ".." << endPos << "]" << endl;
+      HypoList::const_iterator iter;
+      size_t c = 1;
+      for (iter = hyps->begin(); iter != hyps->end(); ++iter) {
+        out << "----------------Item " << c++ << " ---------------------"
+            << endl;
+        OutputTranslationOptions(out, applicationContext, *iter,
+                                 sentence, translationId);
+      }
+    }
+  }
+  CHECK(m_detailAllOutputCollector);
+  m_detailAllOutputCollector->Write(translationId, out.str());
+}
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {
@@ -350,7 +441,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
       out << "||| ";
     }
     Phrase outPhrase(ARRAY_SIZE_INCR);
-    hypo->CreateOutputPhrase(outPhrase);
+    hypo->GetOutputPhrase(outPhrase);
 
     // delete 1st & last
     CHECK(outPhrase.GetSize() >= 2);
@@ -389,6 +480,8 @@ void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
   out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
   out << '\n';
   m_singleBestOutputCollector->Write(translationId, out.str());
+
+  VERBOSE(1,"BEST TRANSLATION: " << outPhrase << "[total=" << applied.GetScore() << "]" << endl);
 }
 
 void IOWrapper::OutputBestNone(long translationId)
@@ -439,10 +532,9 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   }
 
   // sparse features
-  else {
-    const FVector scores = features.GetVectorForProducer( ff );
-    for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++)
-      out << " " << i->first << ": " << i->second;
+  const FVector scores = features.GetVectorForProducer( ff );
+  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+    out << " " << i->first << "= " << i->second;
   }
 }
 

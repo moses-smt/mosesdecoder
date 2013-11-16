@@ -51,14 +51,14 @@ int main(int argc, char **argv)
   const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
   const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");
   const_cast<std::vector<std::string>&>(parameter->GetParam("verbose")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
+  //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
+  //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
 
   StaticData::InstanceNonConst().LoadData(parameter);
 
-  PhraseDictionaryCompact pdc("input-factor=0 output-factor=0 num-features=5 path=" + ttable);
+  PhraseDictionaryCompact pdc("PhraseDictionaryCompact input-factor=0 output-factor=0 num-features=5 path=" + ttable);
   pdc.Load();
-  
+
   std::string line;
   while(getline(std::cin, line)) {
     Phrase sourcePhrase;

@@ -46,13 +46,13 @@ private:
   UINT64 m_vocabId;
 
 public:
-  explicit Word()
-  {}
+  explicit Word() {
+  }
 
   explicit Word(bool isNonTerminal)
     :m_isNonTerminal(isNonTerminal)
-    ,m_vocabId(0)
-  {}
+    ,m_vocabId(0) {
+  }
 
   Word(const Word &copy);
   ~Word();

@@ -4,7 +4,6 @@
 
 #include <vector>
 #include "Sentence.h"
-#include "ChartTranslationOptions.h"
 
 namespace Moses
 {
@@ -17,8 +16,8 @@ public:
 
   XMLParseOutput(const std::string &label, const WordsRange &range)
     : m_label(label)
-    , m_range(range)
-  {}
+    , m_range(range) {
+  }
 };
 
 /** An input to the decoder that represent a parse tree.
@@ -32,7 +31,6 @@ class TreeInput : public Sentence
 
 protected:
   std::vector<std::vector<NonTerminalSet> > m_sourceChart;
-  std::vector <ChartTranslationOptions*> m_xmlChartOptionsList;
 
   void AddChartLabel(size_t startPos, size_t endPos, const std::string &label
                      ,const std::vector<FactorType>& factorOrder);
@@ -45,8 +43,8 @@ protected:
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
 
 public:
-  TreeInput()
-  {}
+  TreeInput() {
+  }
 
   InputTypeEnum GetType() const {
     return TreeInputType;
@@ -64,10 +62,6 @@ public:
   virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const {
     return m_sourceChart[startPos][endPos - startPos];
   }
-
-  std::vector <ChartTranslationOptions*> GetXmlChartTranslationOptions() const {
-    return m_xmlChartOptionsList;
-  };
 };
 
 }

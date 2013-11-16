@@ -28,33 +28,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "UserMessage.h"
+#include "util/exception.hh"
 
 using namespace std;
 
 namespace Moses
 {
+std::vector<GenerationDictionary*> GenerationDictionary::s_staticColl;
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
-  : DecodeFeature("Generation", line)
+  : DecodeFeature(line)
 {
-  string filePath;
+  s_staticColl.push_back(this);
 
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
-
-    if (args[0] == "path") {
-      filePath = args[1];
-    } else {
-      //UserMessage::Add("Unknown argument " + args[0]);
-      //abort();
-    }
-  }
-
-  Load(filePath, Output);
-
+  ReadParameters();
 }
 
-bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
+void GenerationDictionary::Load()
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -62,13 +52,9 @@ bool GenerationDictionary::Load(const std::string &filePath, FactorDirection dir
 
 
   // data from file
-  InputFileStream inFile(filePath);
-  if (!inFile.good()) {
-    UserMessage::Add(string("Couldn't read ") + filePath);
-    return false;
-  }
+  InputFileStream inFile(m_filePath);
+  UTIL_THROW_IF(!inFile.good(), util::Exception, "Couldn't read " << m_filePath);
 
-  m_filePath = filePath;
   string line;
   size_t lineNum = 0;
   while(getline(inFile, line)) {
@@ -85,7 +71,7 @@ bool GenerationDictionary::Load(const std::string &filePath, FactorDirection dir
     vector<string> factorString = Tokenize( token[0], "|" );
     for (size_t i = 0 ; i < GetInput().size() ; i++) {
       FactorType factorType = GetInput()[i];
-      const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
+      const Factor *factor = factorCollection.AddFactor( Output, factorType, factorString[i]);
       inputWord->SetFactor(factorType, factor);
     }
 
@@ -93,17 +79,16 @@ bool GenerationDictionary::Load(const std::string &filePath, FactorDirection dir
     for (size_t i = 0 ; i < GetOutput().size() ; i++) {
       FactorType factorType = GetOutput()[i];
 
-      const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
+      const Factor *factor = factorCollection.AddFactor( Output, factorType, factorString[i]);
       outputWord.SetFactor(factorType, factor);
     }
 
     size_t numFeaturesInFile = token.size() - 2;
     if (numFeaturesInFile < numFeatureValuesInConfig) {
       stringstream strme;
-      strme << filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
+      strme << m_filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
             << " feature values, but found " << numFeaturesInFile << std::endl;
-      UserMessage::Add(strme.str());
-      return false;
+      throw strme.str();
     }
     std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
     for (size_t i = 0; i < numFeatureValuesInConfig; i++)
@@ -120,7 +105,6 @@ bool GenerationDictionary::Load(const std::string &filePath, FactorDirection dir
   }
 
   inFile.Close();
-  return true;
 }
 
 GenerationDictionary::~GenerationDictionary()
@@ -143,6 +127,15 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
     ret = &iter->second;
   }
   return ret;
+}
+
+void GenerationDictionary::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "path") {
+    m_filePath = value;
+  } else {
+    DecodeFeature::SetParameter(key, value);
+  }
 }
 
 }

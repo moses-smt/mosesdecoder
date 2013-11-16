@@ -22,9 +22,9 @@ class LanguageModelORLM : public LanguageModelSingleFactor
 public:
   typedef count_t T;  // type for ORLM filter
   LanguageModelORLM(const std::string &line)
-    :LanguageModelSingleFactor("ORLM", line)
-    ,m_lm(0)
-  {}
+    :LanguageModelSingleFactor(line)
+    ,m_lm(0) {
+  }
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
   ~LanguageModelORLM() {

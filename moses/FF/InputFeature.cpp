@@ -1,40 +1,58 @@
 #include <stdexcept>
-
 #include "InputFeature.h"
+#include "moses/Util.h"
+#include "moses/ScoreComponentCollection.h"
+#include "moses/InputPath.h"
+#include "moses/StaticData.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "util/check.hh"
 
 using namespace std;
 
 namespace Moses
 {
 InputFeature::InputFeature(const std::string &line)
-  :StatelessFeatureFunction("InputFeature", line)
+  :StatelessFeatureFunction(line)
 {
-
+  ReadParameters();
 }
 
-const InputFeature &InputFeature::GetInputFeature()
+void InputFeature::Load()
 {
-  static const InputFeature *staticObj = NULL;
+  const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];
+  const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
 
-  if (staticObj) {
-    return *staticObj;
+  m_legacy = (ptBin != NULL);
+}
+
+void InputFeature::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "num-input-features") {
+    m_numInputScores = Scan<size_t>(value);
+  } else if (key == "real-word-count") {
+    m_numRealWordCount = Scan<size_t>(value);
+  } else {
+    StatelessFeatureFunction::SetParameter(key, value);
   }
 
-  // 1st time looking up the feature
-  const std::vector<const StatelessFeatureFunction*> &statefulFFs = StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  for (size_t i = 0; i < statefulFFs.size(); ++i) {
-    const StatelessFeatureFunction *ff = statefulFFs[i];
-    const InputFeature *lm = dynamic_cast<const InputFeature*>(ff);
+}
 
-    if (lm) {
-      staticObj = lm;
-      return *staticObj;
-    }
+void InputFeature::Evaluate(const InputType &input
+                            , const InputPath &inputPath
+                            , const TargetPhrase &targetPhrase
+                            , ScoreComponentCollection &scoreBreakdown) const
+{
+  if (m_legacy) {
+    //binary phrase-table does input feature itself
+    return;
   }
-
-  throw std::logic_error("No input feature.");
-
+  /*
+  const ScorePair *scores = inputPath.GetInputScore();
+  if (scores) {
+  	  scoreBreakdown.PlusEquals(this, *scores);
+  }
+  */
 }
 
-}
+} // namespace
 

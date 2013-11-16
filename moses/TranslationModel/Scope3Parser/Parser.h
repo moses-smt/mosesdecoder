@@ -47,11 +47,11 @@ class WordsRange;
 class Scope3Parser : public ChartRuleLookupManager
 {
 public:
-  Scope3Parser(const InputType &sentence,
+  Scope3Parser(const ChartParser &parser,
                const ChartCellCollectionBase &cellColl,
                const RuleTableUTrie &ruleTable,
                size_t maxChartSpan)
-    : ChartRuleLookupManager(sentence, cellColl)
+    : ChartRuleLookupManager(parser, cellColl)
     , m_ruleTable(ruleTable)
     , m_maxChartSpan(maxChartSpan) {
     Init();
@@ -80,7 +80,7 @@ private:
 
   void Init();
   void InitRuleApplicationVector();
-  void FillSentenceMap(const Sentence &, SentenceMap &);
+  void FillSentenceMap(SentenceMap &);
   void AddRulesToCells(const ApplicableRuleTrie &, std::pair<int, int>, int,
                        int);
 

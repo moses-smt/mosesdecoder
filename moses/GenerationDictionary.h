@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 #include "TypeDef.h"
-#include "DecodeFeature.h"
+#include "moses/FF/DecodeFeature.h"
 
 namespace Moses
 {
@@ -46,17 +46,23 @@ class GenerationDictionary : public DecodeFeature
 {
   typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:
+  static std::vector<GenerationDictionary*> s_staticColl;
+
   Collection m_collection;
   // 1st = source
   // 2nd = target
   std::string						m_filePath;
 
 public:
+  static const std::vector<GenerationDictionary*>& GetColl() {
+	return s_staticColl;
+  }
+
   GenerationDictionary(const std::string &line);
   virtual ~GenerationDictionary();
 
   //! load data file
-  bool Load(const std::string &filePath, FactorDirection direction);
+  void Load();
 
   /** number of unique input entries in the generation table.
   * NOT the number of lines in the generation table
@@ -68,6 +74,7 @@ public:
   *	Or NULL if the input word isn't found. The search function used is the WordComparer functor
   */
   const OutputWordCollection *FindWord(const Word &word) const;
+  void SetParameter(const std::string& key, const std::string& value);
 
 };
 

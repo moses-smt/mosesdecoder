@@ -26,22 +26,24 @@
 #include "moses/StaticData.h"
 #include "moses/NonTerminal.h"
 #include "moses/ChartCellCollection.h"
+#include "moses/ChartParser.h"
 
 namespace Moses
 {
 
 ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence(
-  const InputType &src,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryFuzzyMatch &ruleTable)
-  : ChartRuleLookupManagerCYKPlus(src, cellColl)
+  : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_ruleTable(ruleTable)
 {
   CHECK(m_dottedRuleColls.size() == 0);
-  size_t sourceSize = src.GetSize();
+
+  size_t sourceSize = parser.GetSize();
   m_dottedRuleColls.resize(sourceSize);
 
-  const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode(src);
+  const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode(parser.GetTranslationId());
 
   for (size_t ind = 0; ind < m_dottedRuleColls.size(); ++ind) {
 #ifdef USE_BOOST_POOL
@@ -153,12 +155,10 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
     const PhraseDictionaryNodeMemory &node = dottedRule.GetLastNode();
 
     // look up target sides
-    const TargetPhraseCollection *tpc = node.GetTargetPhraseCollection();
+    const TargetPhraseCollection &tpc = node.GetTargetPhraseCollection();
 
     // add the fully expanded rule (with lexical target side)
-    if (tpc != NULL) {
-      AddCompletedRule(dottedRule, *tpc, range, outColl);
-    }
+    AddCompletedRule(dottedRule, tpc, range, outColl);
   }
 
   dottedRuleCol.Clear(relEndPos+1);
@@ -176,8 +176,7 @@ void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
   DottedRuleColl & dottedRuleColl)
 {
   // source non-terminal labels for the remainder
-  const NonTerminalSet &sourceNonTerms =
-    GetSentence().GetLabelSet(startPos, endPos);
+  const NonTerminalSet &sourceNonTerms = GetParser().GetInputPath(startPos, endPos).GetNonTerminalSet();
 
   // target non-terminal labels for the remainder
   const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
@@ -256,7 +255,7 @@ void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
       }
 
       // create new rule
-      const PhraseDictionaryNodeMemory &child = *p->second;
+      const PhraseDictionaryNodeMemory &child = p->second;
 #ifdef USE_BOOST_POOL
       DottedRuleInMemory *rule = m_dottedRulePool.malloc();
       new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);

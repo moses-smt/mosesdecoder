@@ -65,13 +65,17 @@ public:
   bool OpenReference(const char* filename, std::size_t file_id);
 
   // NOTE: this function is used for unit testing.
-  bool OpenReferenceStream(std::istream* is, std::size_t file_id);
+  virtual bool OpenReferenceStream(std::istream* is, std::size_t file_id);
 
-private:
+  //private:
+protected:
   ReferenceLengthType m_ref_length_type;
 
   // reference translations.
   ScopedVector<Reference> m_references;
+
+  // constructor used by subclasses
+  BleuScorer(const std::string& name, const std::string& config): StatisticsBasedScorer(name,config) {}
 
   // no copying allowed
   BleuScorer(const BleuScorer&);

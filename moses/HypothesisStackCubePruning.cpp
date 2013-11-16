@@ -81,6 +81,13 @@ pair<HypothesisStackCubePruning::iterator, bool> HypothesisStackCubePruning::Add
 
 bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 {
+  if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
+    m_manager.GetSentenceStats().AddDiscarded();
+    VERBOSE(3,"discarded, constraint" << std::endl);
+    FREEHYPO(hypo);
+    return false;
+  }
+
   if (hypo->GetTotalScore() < m_worstScore) {
     // too bad for stack. don't bother adding hypo into collection
     m_manager.GetSentenceStats().AddDiscarded();

@@ -17,9 +17,11 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <iostream>
 #include "ChartRuleLookupManagerMemory.h"
 #include "DotChartInMemory.h"
 
+#include "moses/ChartParser.h"
 #include "moses/InputType.h"
 #include "moses/ChartParserCallback.h"
 #include "moses/StaticData.h"
@@ -27,18 +29,21 @@
 #include "moses/ChartCellCollection.h"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
+using namespace std;
+
 namespace Moses
 {
 
 ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
-  const InputType &src,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryMemory &ruleTable)
-  : ChartRuleLookupManagerCYKPlus(src, cellColl)
+  : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_ruleTable(ruleTable)
 {
   CHECK(m_dottedRuleColls.size() == 0);
-  size_t sourceSize = src.GetSize();
+
+  size_t sourceSize = parser.GetSize();
   m_dottedRuleColls.resize(sourceSize);
 
   const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode();
@@ -154,12 +159,10 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
     const PhraseDictionaryNodeMemory &node = dottedRule.GetLastNode();
 
     // look up target sides
-    const TargetPhraseCollection *tpc = node.GetTargetPhraseCollection();
+    const TargetPhraseCollection &tpc = node.GetTargetPhraseCollection();
 
     // add the fully expanded rule (with lexical target side)
-    if (tpc != NULL) {
-      AddCompletedRule(dottedRule, *tpc, range, outColl);
-    }
+    AddCompletedRule(dottedRule, tpc, range, outColl);
   }
 
   dottedRuleCol.Clear(relEndPos+1);
@@ -177,8 +180,8 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
   DottedRuleColl & dottedRuleColl)
 {
   // source non-terminal labels for the remainder
-  const NonTerminalSet &sourceNonTerms =
-    GetSentence().GetLabelSet(startPos, endPos);
+  const InputPath &inputPath = GetParser().GetInputPath(startPos, endPos);
+  const NonTerminalSet &sourceNonTerms = inputPath.GetNonTerminalSet();
 
   // target non-terminal labels for the remainder
   const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
@@ -257,7 +260,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       }
 
       // create new rule
-      const PhraseDictionaryNodeMemory &child = *p->second;
+      const PhraseDictionaryNodeMemory &child = p->second;
 #ifdef USE_BOOST_POOL
       DottedRuleInMemory *rule = m_dottedRulePool.malloc();
       new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);

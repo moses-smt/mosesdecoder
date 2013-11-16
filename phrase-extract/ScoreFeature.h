@@ -70,8 +70,8 @@ struct ScoreFeatureContext {
   ) :
     phrasePair(thePhrasePair),
     count(theCount),
-    maybeLog(theMaybeLog)
-  {}
+    maybeLog(theMaybeLog) {
+  }
 
   const PhraseAlignmentCollection& phrasePair;
   float count;

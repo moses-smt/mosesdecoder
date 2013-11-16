@@ -5,11 +5,12 @@
 
 #include "FactorCollection.h"
 #include "Util.h"
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "StaticData.h"
 #include "Sentence.h"
 #include "UserMessage.h"
+#include "moses/FF/InputFeature.h"
+#include "util/check.hh"
 
 namespace Moses
 {
@@ -63,6 +64,12 @@ ConfusionNet::ConfusionNet()
   : InputType()
 {
   stats.createOne();
+
+  const StaticData& staticData = StaticData::Instance();
+  if (staticData.IsChart()) {
+    m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
+  }
+  CHECK(StaticData::Instance().GetInputFeature());
 }
 ConfusionNet::~ConfusionNet()
 {
@@ -72,8 +79,11 @@ ConfusionNet::~ConfusionNet()
 ConfusionNet::ConfusionNet(Sentence const& s)
 {
   data.resize(s.GetSize());
-  for(size_t i=0; i<s.GetSize(); ++i)
-    data[i].push_back(std::make_pair(s.GetWord(i),0.0));
+  for(size_t i=0; i<s.GetSize(); ++i) {
+    ScorePair scorePair;
+    std::pair<Word, ScorePair > temp = std::make_pair(s.GetWord(i), scorePair);
+    data[i].push_back(temp);
+  }
 }
 
 bool ConfusionNet::ReadF(std::istream& in,
@@ -118,8 +128,12 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
                                const std::vector<FactorType>& factorOrder)
 {
   Clear();
-  size_t numInputScores = StaticData::Instance().GetNumInputScores();
-  size_t numRealWordCount = StaticData::Instance().GetNumRealWordsInInput();
+
+  const StaticData &staticData = StaticData::Instance();
+  const InputFeature *inputFeature = staticData.GetInputFeature();
+  size_t numInputScores = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+
   size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);
 
@@ -152,7 +166,10 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
       //store 'real' word count in last feature if we have one more weight than we do arc scores and not epsilon
       if (addRealWordCount && word!=EPSILON && word!="")
         probs.back() = -1.0;
-      col.push_back(std::make_pair(w,probs));
+
+      ScorePair scorePair(probs);
+
+      col.push_back(std::make_pair(w,scorePair));
     }
     if(col.size()) {
       data.push_back(col);
@@ -181,11 +198,11 @@ bool ConfusionNet::ReadFormat1(std::istream& in,
     for(size_t j=0; j<s; ++j)
       if(is>>word>>prob) {
         //TODO: we are only reading one prob from this input format, should read many... but this function is unused anyway. -JS
-        data[i][j].second = std::vector<float> (1);
-        data[i][j].second.push_back((float) log(prob));
-        if(data[i][j].second[0]<0) {
-          VERBOSE(1, "WARN: neg costs: "<<data[i][j].second[0]<<" -> set to 0\n");
-          data[i][j].second[0]=0.0;
+        data[i][j].second.denseScores = std::vector<float> (1);
+        data[i][j].second.denseScores.push_back((float) log(prob));
+        if(data[i][j].second.denseScores[0]<0) {
+          VERBOSE(1, "WARN: neg costs: "<<data[i][j].second.denseScores[0]<<" -> set to 0\n");
+          data[i][j].second.denseScores[0]=0.0;
         }
         String2Word(word,data[i][j].first,factorOrder);
       } else return 0;
@@ -200,9 +217,19 @@ void ConfusionNet::Print(std::ostream& out) const
     out<<i<<" -- ";
     for(size_t j=0; j<data[i].size(); ++j) {
       out<<"("<<data[i][j].first.ToString()<<", ";
-      for(std::vector<float>::const_iterator scoreIterator = data[i][j].second.begin(); scoreIterator<data[i][j].second.end(); scoreIterator++) {
-        out<<", "<<*scoreIterator;
+
+      // dense
+      std::vector<float>::const_iterator iterDense;
+      for(iterDense = data[i][j].second.denseScores.begin(); iterDense < data[i][j].second.denseScores.end(); ++iterDense) {
+        out<<", "<<*iterDense;
       }
+
+      // sparse
+      std::map<StringPiece, float>::const_iterator iterSparse;
+      for(iterSparse = data[i][j].second.sparseScores.begin(); iterSparse != data[i][j].second.sparseScores.end(); ++iterSparse) {
+        out << ", " << iterSparse->first << "=" << iterSparse->second;
+      }
+
       out<<") ";
     }
     out<<"\n";

@@ -53,6 +53,19 @@ public:
     throw std::logic_error("PhraseBoundaryState not supported in chart decoder, yet");
   }
 
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
+  void SetParameter(const std::string& key, const std::string& value);
+
 private:
   void AddFeatures(
     const Word* leftWord, const Word* rightWord, const FactorList& factors,

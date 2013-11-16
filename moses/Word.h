@@ -30,14 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/murmur_hash.hh"
 
 #include "TypeDef.h"
-#include "Factor.h"
 #include "Util.h"
 #include "util/string_piece.hh"
 
 namespace Moses
 {
-
-class Phrase;
+class Factor;
+class FactorMask;
 
 /** Represent a word (terminal or non-term)
  * Wrapper around hold a set of factors for a single word
@@ -52,11 +51,13 @@ protected:
 
   FactorArray m_factorArray; /**< set of factors */
   bool m_isNonTerminal;
+  bool m_isOOV;
 
 public:
   /** deep copy */
   Word(const Word &copy)
-    :m_isNonTerminal(copy.m_isNonTerminal) {
+    :m_isNonTerminal(copy.m_isNonTerminal)
+    ,m_isOOV(copy.m_isOOV) {
     std::memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
   }
 
@@ -64,6 +65,7 @@ public:
   explicit Word(bool isNonTerminal = false) {
     std::memset(m_factorArray, 0, sizeof(FactorArray));
     m_isNonTerminal = isNonTerminal;
+    m_isOOV = false;
   }
 
   ~Word() {}
@@ -91,6 +93,15 @@ public:
   inline void SetIsNonTerminal(bool val) {
     m_isNonTerminal = val;
   }
+
+  inline bool IsOOV() const {
+    return m_isOOV;
+  }
+  inline void SetIsOOV(bool val) {
+    m_isOOV = val;
+  }
+
+  bool IsEpsilon() const;
 
   /** add the factors from sourceWord into this representation,
    * NULL elements in sourceWord will be skipped */
@@ -124,6 +135,11 @@ public:
     return Compare(*this, compare) != 0;
   }
 
+  int Compare(const Word &other) const {
+    return Compare(*this, other);
+  }
+
+
   /* static functions */
 
   /** transitive comparison of 2 word objects. Used by operator<.
@@ -138,6 +154,8 @@ public:
                         , bool isNonTerminal);
 
   void CreateUnknownWord(const Word &sourceWord);
+
+  void OnlyTheseFactors(const FactorMask &factors);
 
   inline size_t hash() const {
     return util::MurmurHashNative(m_factorArray, MAX_NUM_FACTORS*sizeof(Factor*), m_isNonTerminal);

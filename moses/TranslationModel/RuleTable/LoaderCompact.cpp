@@ -225,7 +225,6 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase);
     targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
-    targetPhrase->SetSourcePhrase(sourcePhrase);
 
     targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
 

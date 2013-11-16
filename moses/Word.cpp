@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "memory.h"
 #include "Word.h"
 #include "TypeDef.h"
+#include "FactorTypeSet.h"
+#include "FactorCollection.h"
 #include "StaticData.h"  // needed to determine the FactorDelimiter
 #include "util/exception.hh"
 #include "util/tokenize_piece.hh"
@@ -125,6 +127,24 @@ void Word::CreateUnknownWord(const Word &sourceWord)
       SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString()));
   }
   m_isNonTerminal = sourceWord.IsNonTerminal();
+  m_isOOV = true;
+}
+
+void Word::OnlyTheseFactors(const FactorMask &factors)
+{
+  for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
+    if (!factors[currFactor]) {
+      SetFactor(currFactor, NULL);
+    }
+  }
+}
+
+bool Word::IsEpsilon() const
+{
+       const Factor *factor = m_factorArray[0];
+       int compare = factor->GetString().compare(EPSILON);
+
+       return compare == 0;
 }
 
 TO_STRING_BODY(Word);

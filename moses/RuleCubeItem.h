@@ -20,7 +20,7 @@
 #pragma once
 
 #include "StackVec.h"
-
+#include "ChartTranslationOptions.h"
 #include <vector>
 
 namespace Moses
@@ -29,7 +29,6 @@ namespace Moses
 class ChartCellCollection;
 class ChartHypothesis;
 class ChartManager;
-class ChartTranslationOptions;
 class TargetPhrase;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
@@ -41,34 +40,34 @@ class TranslationDimension
 {
 public:
   TranslationDimension(std::size_t pos,
-                       const std::vector<TargetPhrase*> &orderedTargetPhrases)
+                       const ChartTranslationOptions::CollType &orderedTargetPhrases)
     : m_pos(pos)
-    , m_orderedTargetPhrases(&orderedTargetPhrases)
-  {}
+    , m_orderedTargetPhrases(orderedTargetPhrases) {
+  }
 
   std::size_t IncrementPos() {
     return m_pos++;
   }
 
   bool HasMoreTranslations() const {
-    return m_pos+1 < m_orderedTargetPhrases->size();
+    return m_pos+1 < m_orderedTargetPhrases.size();
   }
 
-  const TargetPhrase *GetTargetPhrase() const {
-    return (*m_orderedTargetPhrases)[m_pos];
+  const boost::shared_ptr<ChartTranslationOption> &GetTranslationOption() const {
+    return m_orderedTargetPhrases[m_pos];
   }
 
   bool operator<(const TranslationDimension &compare) const {
-    return GetTargetPhrase() < compare.GetTargetPhrase();
+    return GetTranslationOption()->GetPhrase() < compare.GetTranslationOption()->GetPhrase();
   }
 
   bool operator==(const TranslationDimension &compare) const {
-    return GetTargetPhrase() == compare.GetTargetPhrase();
+    return GetTranslationOption()->GetPhrase() == compare.GetTranslationOption()->GetPhrase();
   }
 
 private:
   std::size_t m_pos;
-  const std::vector<TargetPhrase*> *m_orderedTargetPhrases;
+  const ChartTranslationOptions::CollType &m_orderedTargetPhrases;
 };
 
 
@@ -80,8 +79,8 @@ class HypothesisDimension
 public:
   HypothesisDimension(std::size_t pos, const HypoList &orderedHypos)
     : m_pos(pos)
-    , m_orderedHypos(&orderedHypos)
-  {}
+    , m_orderedHypos(&orderedHypos) {
+  }
 
   std::size_t IncrementPos() {
     return m_pos++;

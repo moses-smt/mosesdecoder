@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "WordsRange.h"
-#include "StackVec.h"
-
 #include <list>
 #include <vector>
+#include "WordsRange.h"
+#include "StackVec.h"
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -33,6 +33,7 @@ namespace Moses
 class ChartParserCallback;
 class ChartRuleLookupManager;
 class InputType;
+class Sentence;
 class ChartCellCollectionBase;
 class Word;
 class Phrase;
@@ -50,7 +51,6 @@ public:
 private:
   std::vector<Phrase*> m_unksrcs;
   std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
-  StackVec m_emptyStackVec;
 };
 
 class ChartParser
@@ -61,11 +61,25 @@ public:
 
   void Create(const WordsRange &range, ChartParserCallback &to);
 
+  //! the sentence being decoded
+  //const Sentence &GetSentence() const;
+  long GetTranslationId() const;
+  size_t GetSize() const;
+  const InputPath &GetInputPath(size_t startPos, size_t endPos) const;
+  const InputPath &GetInputPath(WordsRange &range) const;
+
 private:
   ChartParserUnknown m_unknown;
   std::vector <DecodeGraph*> m_decodeGraphList;
   std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
   InputType const& m_source; /**< source sentence to be translated */
+
+  typedef std::vector< std::vector<InputPath*> > InputPathMatrix;
+  InputPathMatrix	m_inputPathMatrix;
+
+  void CreateInputPaths(const InputType &input);
+  InputPath &GetInputPath(size_t startPos, size_t endPos);
+
 };
 
 }

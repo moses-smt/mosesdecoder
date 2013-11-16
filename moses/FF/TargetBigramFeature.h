@@ -33,7 +33,7 @@ class TargetBigramFeature : public StatefulFeatureFunction
 public:
   TargetBigramFeature(const std::string &line);
 
-  bool Load(const std::string &filePath);
+  void Load();
 
   bool IsUseable(const FactorMask &mask) const;
 
@@ -45,12 +45,25 @@ public:
   virtual FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */,
                                   int /* featureID */,
                                   ScoreComponentCollection* ) const {
-    abort();
+    throw std::logic_error("TargetBigramFeature not valid in chart decoder");
   }
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
+  void SetParameter(const std::string& key, const std::string& value);
 
 private:
   FactorType m_factorType;
   Word m_bos;
+  std::string m_filePath;
   boost::unordered_set<std::string> m_vocab;
 };
 

@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Phrase.h"
 #include "InputType.h"
-#include "XmlOption.h"
 
 namespace Moses
 {
@@ -36,6 +35,8 @@ class WordsRange;
 class PhraseDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
+class ChartTranslationOptions;
+struct XmlOption;
 
 
 /**
@@ -45,22 +46,23 @@ class TranslationOptionCollection;
 class Sentence : public Phrase, public InputType
 {
 
-private:
+protected:
 
   /**
    * Utility method that takes in a string representing an XML tag and the name of the attribute,
    * and returns the value of that tag if present, empty string otherwise
    */
-  std::vector <TranslationOption*> m_xmlOptionsList;
+  std::vector<XmlOption*> m_xmlOptions;
   std::vector <bool> m_xmlCoverageMap;
 
   NonTerminalSet m_defaultLabelSet;
 
-  void InitStartEndWord();
+  void ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders);
 
 
 public:
   Sentence();
+  ~Sentence();
 
   InputTypeEnum GetType() const {
     return SentenceInput;
@@ -85,7 +87,9 @@ public:
   bool XmlOverlap(size_t startPos, size_t endPos) const;
 
   //! populates vector argument with XML force translation options for the specific range passed
+  void GetXmlTranslationOptions(std::vector <TranslationOption*> &list) const;
   void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
+  std::vector <ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 
   int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
   void Print(std::ostream& out) const;
