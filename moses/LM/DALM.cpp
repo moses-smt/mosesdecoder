@@ -3,7 +3,7 @@
 #include "DALM.h"
 #include "logger.h"
 //#include "DALM/include/lm.h"
-#include "dalm-header.h"
+#include "dalm.h"
 #include "vocabulary.h"
 #include "moses/FactorCollection.h"
 
@@ -17,7 +17,7 @@ void push(DALM::VocabId *ngram, size_t n, DALM::VocabId wid){
 	ngram[0] = wid;
 }
 
-void read_ini(const char *inifile, string &model, string &words){
+void read_ini(const char *inifile, string &model, string &words, string &wordstxt){
 	ifstream ifs(inifile);
 	string line;
 
@@ -30,6 +30,8 @@ void read_ini(const char *inifile, string &model, string &words){
 			model = value;
 		}else if(key=="WORDS"){
 			words = value;
+		}else if(key=="WORDSTXT"){
+			wordstxt = value;
 		}
 		getline(ifs, line);
 	}
@@ -73,7 +75,8 @@ void LanguageModelDALM::Load()
 	/////////////////////
 	string model; // Path to the double-array file.
 	string words; // Path to the vocabulary file.
-	read_ini(m_filePath.c_str(), model, words);
+	string wordstxt; //Path to the vocabulary file in text format.
+	read_ini(m_filePath.c_str(), model, words, wordstxt);
 
 	////////////////
 	// LOADING LM //
@@ -100,7 +103,7 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
   // initialize DALM array
   DALM::VocabId ngram[m_nGramOrder];
   for(size_t i = 0; i < m_nGramOrder; i++){
-	ngram[i] = wid_start;
+    ngram[i] = wid_start;
   }
 
   DALM::VocabId wid;
@@ -118,17 +121,7 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
   score = TransformLMScore(score);
   ret.score = score;
 
-  // hash of n-1 words to use as state
-  size_t startPos = (contextFactor.size() < m_nGramOrder) ? 0 : 1;
-
-  size_t hash = 0;
-  for (size_t i = startPos; i < contextFactor.size(); ++i) {
-	  const Word &word = *contextFactor[i];
-	  const Factor *factor = word.GetFactor(m_factorType);
-      boost::hash_combine(hash, factor);
-  }
-
-  (*finalState) = (State*) hash;
+  (*finalState) = (void *)m_lm->get_state(ngram, m_nGramOrder);
 
   return ret;
 }
