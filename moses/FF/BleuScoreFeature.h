@@ -61,6 +61,9 @@ public:
 class BleuScoreFeature : public StatefulFeatureFunction
 {
 public:
+  static const std::vector<BleuScoreFeature*>& GetColl() {
+	return s_staticColl;
+  }
 
   typedef boost::unordered_map<size_t, RefValue > RefCounts;
   typedef boost::unordered_map<size_t, NGrams> Matches;
@@ -150,6 +153,8 @@ public:
   }
 
 private:
+  static std::vector<BleuScoreFeature*> s_staticColl;
+
   bool m_enabled;
   bool m_sentence_bleu;
   bool m_simple_history_bleu;

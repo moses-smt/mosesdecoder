@@ -47,8 +47,6 @@ namespace Moses
 {
 
 class InputType;
-class PhraseDictionary;
-class GenerationDictionary;
 class DecodeGraph;
 class DecodeStep;
 class WordPenaltyProducer;
@@ -67,8 +65,6 @@ class StaticData
 private:
   static StaticData									s_instance;
 protected:
-  std::vector<PhraseDictionary*>	m_phraseDictionary;
-  std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
@@ -722,16 +718,6 @@ public:
 
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
-
-  const std::vector<PhraseDictionary*>& GetPhraseDictionaries() const {
-    return m_phraseDictionary;
-  }
-  const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const {
-    return m_generationDictionary;
-  }
-  const PhraseDictionary*GetTranslationScoreProducer(size_t index) const {
-    return GetPhraseDictionaries().at(index);
-  }
 
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;

@@ -530,11 +530,11 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
       featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, gds[i], outputSearchGraphStream);
   }

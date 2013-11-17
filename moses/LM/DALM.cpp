@@ -119,8 +119,10 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
   ret.score = score;
 
   // hash of n-1 words to use as state
+  size_t startPos = (contextFactor.size() < m_nGramOrder) ? 0 : 1;
+
   size_t hash = 0;
-  for (size_t i = 1; i < contextFactor.size(); ++i) {
+  for (size_t i = startPos; i < contextFactor.size(); ++i) {
 	  const Word &word = *contextFactor[i];
 	  const Factor *factor = word.GetFactor(m_factorType);
       boost::hash_combine(hash, factor);

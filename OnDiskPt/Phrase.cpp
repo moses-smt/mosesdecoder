@@ -18,9 +18,10 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 #include <iostream>
-#include "util/check.hh"
 #include "moses/Util.h"
 #include "Phrase.h"
+#include "util/check.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -35,7 +36,9 @@ void Phrase::AddWord(WordPtr word)
 
 void Phrase::AddWord(WordPtr word, size_t pos)
 {
-  CHECK(pos < m_words.size());
+	UTIL_THROW_IF(!(pos < m_words.size()),
+			util::Exception,
+			"Trying to get word " << pos << " when phrase size is " << m_words.size());
   m_words.insert(m_words.begin() + pos + 1, word);
 }
 
@@ -59,7 +62,7 @@ int Phrase::Compare(const Phrase &compare) const
   }
 
   if (ret == 0) {
-    CHECK(compare.GetSize() >= GetSize());
+    assert(compare.GetSize() >= GetSize());
     ret = (compare.GetSize() > GetSize()) ? 1 : 0;
   }
   return ret;

@@ -141,7 +141,7 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
   staticData.InitializeForInput(source);
   CreateInputPaths(m_source);
 
-  const std::vector<PhraseDictionary*> &dictionaries = staticData.GetPhraseDictionaries();
+  const std::vector<PhraseDictionary*> &dictionaries = PhraseDictionary::GetColl();
   m_ruleLookupManagers.reserve(dictionaries.size());
   for (std::vector<PhraseDictionary*>::const_iterator p = dictionaries.begin();
        p != dictionaries.end(); ++p) {

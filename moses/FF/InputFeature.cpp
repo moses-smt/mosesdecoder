@@ -19,8 +19,7 @@ InputFeature::InputFeature(const std::string &line)
 
 void InputFeature::Load()
 {
-  const StaticData &staticData = StaticData::Instance();
-  const PhraseDictionary *pt = staticData.GetTranslationScoreProducer(0);
+  const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];
   const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
 
   m_legacy = (ptBin != NULL);

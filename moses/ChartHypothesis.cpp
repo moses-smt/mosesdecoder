@@ -245,7 +245,7 @@ void ChartHypothesis::CleanupArcList()
 
   if (!distinctNBest && m_arcList->size() > nBestSize) {
     // prune arc list only if there too many arcs
-    nth_element(m_arcList->begin()
+	NTH_ELEMENT4(m_arcList->begin()
                 , m_arcList->begin() + nBestSize - 1
                 , m_arcList->end()
                 , CompareChartChartHypothesisTotalScore());

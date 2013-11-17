@@ -11,6 +11,7 @@ namespace Moses
 {
 
 size_t BleuScoreState::bleu_order = 4;
+std::vector<BleuScoreFeature*> BleuScoreFeature::s_staticColl;
 
 BleuScoreState::BleuScoreState(): m_words(1),
   m_source_length(0),
@@ -94,6 +95,8 @@ BleuScoreFeature::BleuScoreFeature(const std::string &line)
    m_smoothing_scheme(PLUS_POINT_ONE)
 {
   std::cerr << "Initializing BleuScoreFeature." << std::endl;
+  s_staticColl.push_back(this);
+
   m_tuneable = false;
 
   ReadParameters();

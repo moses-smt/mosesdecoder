@@ -464,8 +464,7 @@ double CrossEntropy::operator() ( const dlib::matrix<double,0,1>& arg) const
 
 PhraseDictionary *FindPhraseDictionary(const string &ptName)
 {
-  const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
 
   PhraseDictionary *pt = NULL;
   std::vector<PhraseDictionary*>::const_iterator iter;

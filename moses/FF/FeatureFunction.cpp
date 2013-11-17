@@ -15,12 +15,12 @@ namespace Moses
 
 multiset<string> FeatureFunction::description_counts;
 
-std::vector<FeatureFunction*> FeatureFunction::m_producers;
+std::vector<FeatureFunction*> FeatureFunction::s_staticColl;
 
 FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 {
-  for (size_t i = 0; i < m_producers.size(); ++i) {
-    FeatureFunction &ff = *m_producers[i];
+  for (size_t i = 0; i < s_staticColl.size(); ++i) {
+    FeatureFunction &ff = *s_staticColl[i];
     if (ff.GetScoreProducerDescription() == name) {
       return ff;
     }
@@ -53,7 +53,7 @@ Initialize(const std::string &line)
   ParseLine(line);
 
   ScoreComponentCollection::RegisterScoreProducer(this);
-  m_producers.push_back(this);
+  s_staticColl.push_back(this);
 }
 
 FeatureFunction::~FeatureFunction() {}

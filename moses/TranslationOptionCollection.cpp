@@ -107,7 +107,7 @@ void TranslationOptionCollection::Prune()
       if (m_maxNoTransOptPerCoverage > 0 &&
           fullList.size() > m_maxNoTransOptPerCoverage) {
         // sort in vector
-        nth_element(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
+    	NTH_ELEMENT4(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
         totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
 
         // delete the rest

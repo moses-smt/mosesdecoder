@@ -152,7 +152,7 @@ void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 void TargetPhrase::SetXMLScore(float score)
 {
   const StaticData &staticData = StaticData::Instance();
-  const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
+  const FeatureFunction* prod = PhraseDictionary::GetColl()[0];
   size_t numScores = prod->GetNumScoreComponents();
   vector <float> scoreVector(numScores,score/numScores);
 

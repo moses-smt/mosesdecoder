@@ -47,7 +47,7 @@ protected:
     m_inputFeature = staticData.GetInputFeature();
 
     if (m_inputFeature) {
-      const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
+      const PhraseDictionary *firstPt = PhraseDictionary::GetColl()[0];
       if (firstPt == m_obj) {
         m_numInputScores = m_inputFeature->GetNumScoreComponents();
       }
@@ -324,7 +324,7 @@ public:
                        m_obj->m_tableLimit : costs.size());
 
     // find the nth phrase according to future cost
-    std::nth_element(costs.begin(),nth ,costs.end());
+    NTH_ELEMENT3(costs.begin(),nth ,costs.end());
 
     // add n top phrases to the return list
     for(std::vector<std::pair<float,size_t> >::iterator

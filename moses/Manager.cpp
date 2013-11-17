@@ -464,7 +464,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 
   // phrase table scores
   const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionary*> &phraseTables = staticData.GetPhraseDictionaries();
+  const std::vector<PhraseDictionary*> &phraseTables = PhraseDictionary::GetColl();
   std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
   for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable) {
     const PhraseDictionary *phraseTable = *iterPhraseTable;
@@ -687,11 +687,11 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
       featureIndex = OutputFeatureWeightsForSLF(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, gds[i], outputSearchGraphStream);
   }
@@ -726,11 +726,11 @@ void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std:
       featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, gds[i], outputSearchGraphStream);
   }
@@ -760,11 +760,11 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
       featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, gds[i], outputSearchGraphStream);
   }
