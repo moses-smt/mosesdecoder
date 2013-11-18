@@ -25,6 +25,7 @@
 #include "ChartTrellisDetour.h"
 #include "ChartTrellisDetourQueue.h"
 #include "ChartTrellisNode.h"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -42,7 +43,7 @@ ChartTrellisPath::ChartTrellisPath(const ChartTrellisDetour &detour)
   , m_scoreBreakdown(detour.GetBasePath().m_scoreBreakdown)
   , m_totalScore(0)
 {
-  CHECK(m_deviationPoint);
+  UTIL_THROW_IF(m_deviationPoint == NULL, util::Exception, "No deviation point");
   ScoreComponentCollection scoreChange;
   scoreChange = detour.GetReplacementHypo().GetScoreBreakdown();
   scoreChange.MinusEquals(detour.GetSubstitutedNode().GetHypothesis().GetScoreBreakdown());
