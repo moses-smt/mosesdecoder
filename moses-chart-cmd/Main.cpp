@@ -63,6 +63,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FF/StatelessFeatureFunction.h"
 
 #include "util/usage.hh"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace Moses;
@@ -112,7 +113,7 @@ public:
     ChartManager manager(*m_source);
     manager.ProcessSentence();
 
-    CHECK(!staticData.UseMBR());
+    UTIL_THROW_IF(staticData.UseMBR(), util::Exception, "Cannot use MBR");
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
@@ -159,7 +160,7 @@ public:
       std::ostringstream out;
       manager.GetSearchGraph(translationId, out);
       OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
-      CHECK(oc);
+      UTIL_THROW_IF(oc == NULL, util::Exception, "File for search graph output not specified");
       oc->Write(translationId, out.str());
     }
 
@@ -260,7 +261,7 @@ int main(int argc, char* argv[])
       exit(0);
     }
 
-    CHECK(staticData.IsChart());
+    UTIL_THROW_IF(!staticData.IsChart(), util::Exception, "Must be SCFG model");
 
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);
