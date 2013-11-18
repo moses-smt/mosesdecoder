@@ -50,6 +50,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "LatticeMBR.h"
 #include "moses/Manager.h"
 #include "moses/StaticData.h"
+#include "util/exception.hh"
 
 
 using namespace std;
@@ -68,7 +69,9 @@ public:
   /** Add a parameter with key, command line argument, and default value */
   void addParam(gridkey key, const string& arg, float defaultValue) {
     m_args[arg] = key;
-    CHECK(m_grid.find(key) == m_grid.end());
+    UTIL_THROW_IF(m_grid.find(key) != m_grid.end(),
+    		  util::Exception,
+    		  "Couldn't find value for key " << (int) key);
     m_grid[key].push_back(defaultValue);
   }
 
