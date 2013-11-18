@@ -82,8 +82,7 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   ReduceCache();
 
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
-  if (!obj->BeginLoad(m_filePath))
-    return;
+  obj->BeginLoad(m_filePath);
 
   CHECK(obj->GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
   CHECK(obj->GetMisc("NumSourceFactors") == m_input.size());

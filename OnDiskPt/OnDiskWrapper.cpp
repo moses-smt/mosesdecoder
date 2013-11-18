@@ -43,18 +43,17 @@ OnDiskWrapper::~OnDiskWrapper()
   delete m_rootSourceNode;
 }
 
-bool OnDiskWrapper::BeginLoad(const std::string &filePath)
+void OnDiskWrapper::BeginLoad(const std::string &filePath)
 {
-  if (!OpenForLoad(filePath))
-    return false;
+  if (!OpenForLoad(filePath)) {
+    UTIL_THROW(util::FileOpenException, "Couldn't open for loading: " << filePath);
+  }
 
   if (!m_vocab.Load(*this))
-    return false;
+    UTIL_THROW(util::FileOpenException, "Couldn't load vocab");
 
   UINT64 rootFilePos = GetMisc("RootNodeOffset");
   m_rootSourceNode = new PhraseNode(rootFilePos, *this);
-
-  return true;
 }
 
 bool OnDiskWrapper::OpenForLoad(const std::string &filePath)
@@ -110,7 +109,7 @@ bool OnDiskWrapper::LoadMisc()
   return true;
 }
 
-bool OnDiskWrapper::BeginSave(const std::string &filePath
+void OnDiskWrapper::BeginSave(const std::string &filePath
                               , int numSourceFactors, int	numTargetFactors, int numScores)
 {
   m_numSourceFactors = numSourceFactors;
@@ -175,8 +174,6 @@ bool OnDiskWrapper::BeginSave(const std::string &filePath
   counts[0] = DEFAULT_COUNT;
   m_rootSourceNode = new PhraseNode();
   m_rootSourceNode->AddCounts(counts);
-
-  return true;
 }
 
 void OnDiskWrapper::EndSave()

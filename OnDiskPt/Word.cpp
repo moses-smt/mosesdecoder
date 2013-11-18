@@ -91,7 +91,7 @@ size_t Word::ReadFromFile(std::fstream &file)
   file.read(mem, memAlloc);
 
   size_t memUsed = ReadFromMemory(mem);
-  CHECK(memAlloc == memUsed);
+  assert(memAlloc == memUsed);
 
   return memAlloc;
 }

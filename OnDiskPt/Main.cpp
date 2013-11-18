@@ -62,8 +62,7 @@ int main (int argc, char * const argv[])
   Moses::InputFileStream inStream(filePath);
 
   OnDiskWrapper onDiskWrapper;
-  bool retDb = onDiskWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
-  assert(retDb);
+  onDiskWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
 
   PhraseNode &rootNode = onDiskWrapper.GetRootSourceNode();
   size_t lineNum = 0;
