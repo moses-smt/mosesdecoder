@@ -173,7 +173,7 @@ PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
     cache = new CacheColl;
     m_cache.reset(cache);
   }
-  CHECK(cache);
+  assert(cache);
   return *cache;
 }
 

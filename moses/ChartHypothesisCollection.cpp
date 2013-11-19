@@ -87,7 +87,8 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
   // equiv hypo exists, recombine with other hypo
   HCType::iterator &iterExisting = addRet.first;
   ChartHypothesis *hypoExisting = *iterExisting;
-  CHECK(iterExisting != m_hypos.end());
+  UTIL_THROW_IF(iterExisting == m_hypos.end(), util::Exception,
+		  "Adding a hypothesis should have returned a valid iterator");
 
   //StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 
@@ -251,7 +252,9 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
       for (iter = hyposOrdered.begin() + (m_maxHypoStackSize * 2); iter != hyposOrdered.end(); ++iter) {
         ChartHypothesis *hypo = *iter;
         HCType::iterator iterFindHypo = m_hypos.find(hypo);
-        CHECK(iterFindHypo != m_hypos.end());
+        UTIL_THROW_IF(iterFindHypo == m_hypos.end(), util::Exception,
+      		  "Adding a hypothesis should have returned a valid iterator");
+
         Remove(iterFindHypo);
       }
     }
@@ -261,7 +264,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 //! sort hypothses  by descending score. Put these hypos into a vector m_hyposOrdered to be returned by function GetSortedHypotheses()
 void ChartHypothesisCollection::SortHypotheses()
 {
-  CHECK(m_hyposOrdered.empty());
+  UTIL_THROW_IF(!m_hyposOrdered.empty(), util::Exception, "Hypotheses already sorted");
   if (!m_hypos.empty()) {
     // done everything for this cell.
     // sort

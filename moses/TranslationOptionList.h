@@ -2,7 +2,7 @@
 #define moses_TranslationOptionList_h
 
 #include <vector>
-#include "util/check.hh"
+#include "util/exception.hh"
 #include <iostream>
 #include "Util.h"
 
@@ -50,11 +50,11 @@ public:
   }
 
   const TranslationOption *Get(size_t ind) const {
-    CHECK(ind < m_coll.size());
-    return m_coll[ind];
+    return m_coll.at(ind);
   }
   void Remove( size_t ind ) {
-    CHECK(ind < m_coll.size());
+    UTIL_THROW_IF(ind >= m_coll.size(), util::Exception,
+    		"Out of bound index " << ind);
     m_coll.erase( m_coll.begin()+ind );
   }
   void Add(TranslationOption *transOpt) {

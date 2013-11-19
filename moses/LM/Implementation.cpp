@@ -113,7 +113,8 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
       }
     } else {
       ShiftOrPush(contextFactor, word);
-      CHECK(contextFactor.size() <= GetNGramOrder());
+      UTIL_THROW_IF(contextFactor.size() > GetNGramOrder(), util::Exception,
+    		  "Can only calculate LM score of phrases up to the n-gram order");
 
       if (word == GetSentenceStartWord()) {
         // do nothing, don't include prob for <s> unigram
@@ -255,7 +256,8 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 
       // beginning of sentence symbol <s>? -> just update state
       if (word == GetSentenceStartWord()) {
-        CHECK(phrasePos == 0);
+    	UTIL_THROW_IF(phrasePos != 0, util::Exception,
+    			"Sentence start symbol must be at the beginning of sentence");
         delete lmState;
         lmState = NewState( GetBeginSentenceState() );
       }

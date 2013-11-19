@@ -69,7 +69,8 @@ ConfusionNet::ConfusionNet()
   if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
-  CHECK(StaticData::Instance().GetInputFeature());
+  UTIL_THROW_IF(StaticData::Instance().GetInputFeature() == NULL, util::Exception,
+		  "Input feature must be specified");
 }
 ConfusionNet::~ConfusionNet()
 {
@@ -275,7 +276,7 @@ ConfusionNet::CreateTranslationOptionCollection() const
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
-  CHECK(rv);
+  assert(rv);
   return rv;
 }
 

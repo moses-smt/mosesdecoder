@@ -68,7 +68,7 @@ public:
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &,
     const ChartCellCollectionBase &) {
-    CHECK(false);
+    UTIL_THROW(util::Exception, "SCFG decoding not supported with binary phrase table");
     return 0;
   }
 

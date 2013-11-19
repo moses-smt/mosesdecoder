@@ -61,7 +61,7 @@ FeatureFunction::~FeatureFunction() {}
 void FeatureFunction::ParseLine(const std::string &line)
 {
   vector<string> toks = Tokenize(line);
-  CHECK(toks.size());
+  UTIL_THROW_IF(toks.empty(), util::Exception, "Empty line");
 
   string nameStub = toks[0];
 
@@ -69,7 +69,8 @@ void FeatureFunction::ParseLine(const std::string &line)
 
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = TokenizeFirstOnly(toks[i], "=");
-    CHECK(args.size() == 2);
+    UTIL_THROW_IF(args.size() != 2, util::Exception,
+    		"Incorrect format for feature function arg: " << toks[i]);
 
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
     UTIL_THROW_IF(!ret.second, util::Exception, "Duplicate key in line " << line);
