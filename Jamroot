@@ -133,7 +133,7 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;
+build-projects lm util phrase-extract psd search moses moses/LM mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;
 
 alias programs : lm//programs moses-chart-cmd//moses_chart moses-cmd//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor mira//mira contrib/server//mosesserver phrase-extract//SyntaxFeatures ;
 
