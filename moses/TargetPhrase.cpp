@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <algorithm>
 #include <stdlib.h>
-#include "util/check.hh"
 #include "util/exception.hh"
 #include "util/tokenize_piece.hh"
 
@@ -229,7 +228,8 @@ void TargetPhrase::SetProperties(const StringPiece &str)
     tok = tok.substr(0, endPos - 1);
 
     vector<string> keyValue = TokenizeFirstOnly(tok, " ");
-    CHECK(keyValue.size() == 2);
+    UTIL_THROW_IF(keyValue.size() != 2, util::Exception,
+    		"Incorrect format of property: " << str);
     SetProperty(keyValue[0], keyValue[1]);
   }
 }

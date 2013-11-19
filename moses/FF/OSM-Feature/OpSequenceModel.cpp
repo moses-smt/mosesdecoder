@@ -32,9 +32,7 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 
 void OpSequenceModel::Load()
 {
-
   readLanguageModel(m_lmPath.c_str());
-
 }
 
 

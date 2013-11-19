@@ -107,7 +107,7 @@ void BleuScoreFeature::SetParameter(const std::string& key, const std::string& v
 {
   if (key == "references") {
     vector<string> referenceFiles = Tokenize(value, ",");
-    CHECK(referenceFiles.size());
+    UTIL_THROW_IF(referenceFiles.size() == 0, util::Exception, "No reference file");
     vector<vector<string> > references(referenceFiles.size());
 
     for (size_t i =0; i < referenceFiles.size(); ++i) {

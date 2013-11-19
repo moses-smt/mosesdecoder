@@ -12,6 +12,7 @@
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "Util.h"
 #include "util/tokenize_piece.hh"
+#include "util/exception.hh"
 #include "moses/FF/InputFeature.h"
 
 namespace Moses
@@ -117,7 +118,7 @@ public:
   }
 
   void CleanUp() {
-    CHECK(m_dict);
+    assert(m_dict);
     m_dict->FreeMemory();
     for(size_t i=0; i<m_tgtColls.size(); ++i) delete m_tgtColls[i];
     m_tgtColls.clear();
@@ -129,7 +130,7 @@ public:
   TargetPhraseCollectionWithSourcePhrase const*
   GetTargetPhraseCollection(Phrase const &src) const {
 
-    CHECK(m_dict);
+	assert(m_dict);
     if(src.GetSize()==0) return 0;
 
     std::pair<MapSrc2Tgt::iterator,bool> piter;
@@ -312,7 +313,9 @@ public:
    std::vector<std::pair<float,size_t> >& costs,
    const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
-    CHECK(tCands.size() == sourcePhrases.size());
+    UTIL_THROW_IF(tCands.size() != sourcePhrases.size(),
+    		util::Exception,
+    		"Number of target phrases must equal number of source phrases");
 
     TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
 
@@ -349,7 +352,7 @@ public:
   };
 
   void CacheSource(ConfusionNet const& src) {
-    CHECK(m_dict);
+	assert(m_dict);
     const size_t srcSize=src.GetSize();
 
     std::vector<size_t> exploredPaths(srcSize+1,0);
@@ -400,7 +403,7 @@ public:
       State curr(stack.back());
       stack.pop_back();
 
-      CHECK(curr.end()<srcSize);
+      UTIL_THROW_IF(curr.end() >= srcSize, util::Exception, "Error");
       const ConfusionNet::Column &currCol=src[curr.end()];
       // in a given column, loop over all possibilities
       for(size_t colidx=0; colidx<currCol.size(); ++colidx) {
@@ -410,7 +413,9 @@ public:
         bool isEpsilon=(s=="" || s==EPSILON);
 
         //assert that we have the right number of link params in this CN option
-        CHECK(currCol[colidx].second.denseScores.size() >= m_numInputScores);
+        UTIL_THROW_IF(currCol[colidx].second.denseScores.size() < m_numInputScores,
+        		util::Exception,
+        		"Incorrect number of input scores");
 
         // do not start with epsilon (except at first position)
         if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue;
@@ -468,7 +473,8 @@ public:
             for(size_t i=0; i<tcands.size(); ++i) {
               //put input scores in first - already logged, just drop in directly
               std::vector<float> transcores(m_obj->GetNumScoreComponents());
-              CHECK(transcores.size()==weightTrans.size());
+              UTIL_THROW_IF(transcores.size() != weightTrans.size(), util::Exception,
+            		  "Incorrect number of translation scores");
 
               //put in phrase table scores, logging as we insert
               std::transform(tcands[i].scores.begin()

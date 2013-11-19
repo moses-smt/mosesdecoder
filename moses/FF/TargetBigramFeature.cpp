@@ -69,7 +69,7 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
                                        ScoreComponentCollection* accumulator) const
 {
   const TargetBigramState* tbState = dynamic_cast<const TargetBigramState*>(prev_state);
-  CHECK(tbState);
+  assert(tbState);
 
   // current hypothesis target phrase
   const Phrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();

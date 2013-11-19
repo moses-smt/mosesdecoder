@@ -162,7 +162,9 @@ LMResult LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, St
   }
   ngram[count] = Vocab_None;
 
-  CHECK((*contextFactor[count-1])[factorType] != NULL);
+  UTIL_THROW_IF((*contextFactor[count-1])[factorType] == NULL,
+		  util::Exception,
+		  "No factor " << factorType << " at position " << (count-1));
   // call sri lm fn
   VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType]);
   ret = GetValue(lmId, ngram+1);

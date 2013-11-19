@@ -58,7 +58,7 @@ private:
    * \param size maximum size of suffix
    */
   size_t CalcSuffix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const {
-    CHECK(m_contextPrefix.GetSize() <= m_numTargetTerminals);
+    UTIL_THROW_IF(m_contextPrefix.GetSize() > m_numTargetTerminals, util::Exception, "Error");
 
     // special handling for small hypotheses
     // does the prefix match the entire hypothesis string? -> just copy prefix

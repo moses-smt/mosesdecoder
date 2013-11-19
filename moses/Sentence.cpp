@@ -218,7 +218,7 @@ Sentence::CreateTranslationOptionCollection() const
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
-  CHECK(rv);
+  assert(rv);
   return rv;
 }
 void Sentence::Print(std::ostream& out) const

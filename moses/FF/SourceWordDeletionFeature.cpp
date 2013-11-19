@@ -84,7 +84,8 @@ void SourceWordDeletionFeature::ComputeFeatures(const Phrase &source,
 
   // flag aligned words
   bool aligned[16];
-  CHECK(sourceLength < 16);
+  UTIL_THROW_IF(sourceLength >= 16, util::Exception,
+		  "Source length must be less than 16 words");
   for(size_t i=0; i<sourceLength; i++)
     aligned[i] = false;
   for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++)

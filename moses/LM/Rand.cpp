@@ -59,7 +59,7 @@ void LanguageModelRandLM::Load()
   FactorCollection &factorCollection = FactorCollection::Instance();
   int cache_MB = 50; // increase cache size
   m_lm = randlm::RandLM::initRandLM(m_filePath, m_nGramOrder, cache_MB);
-  CHECK(m_lm != NULL);
+  UTIL_THROW_IF(m_lm == NULL, util::Exception, "RandLM object not created");
   // get special word ids
   m_oov_id = m_lm->getWordID(m_lm->getOOV());
   CreateFactors(factorCollection);

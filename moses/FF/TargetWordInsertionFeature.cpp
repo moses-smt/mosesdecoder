@@ -74,7 +74,8 @@ void TargetWordInsertionFeature::ComputeFeatures(const Phrase &source,
 
   // flag aligned words
   bool aligned[16];
-  CHECK(targetLength < 16);
+  UTIL_THROW_IF(targetLength >= 16, util::Exception,
+		  "Target length must be less than 16 words");
   for(size_t i=0; i<targetLength; i++) {
     aligned[i] = false;
   }
