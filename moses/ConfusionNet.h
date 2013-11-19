@@ -8,6 +8,7 @@
 #include "Word.h"
 #include "InputType.h"
 #include "NonTerminal.h"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -43,7 +44,9 @@ public:
   }
 
   const Column& GetColumn(size_t i) const {
-    CHECK(i<data.size());
+    UTIL_THROW_IF(i >= data.size(),
+    		util::Exception,
+    		"Out of bounds. Trying to access " << i << " when vector only contains " << data.size());
     return data[i];
   }
   const Column& operator[](size_t i) const {

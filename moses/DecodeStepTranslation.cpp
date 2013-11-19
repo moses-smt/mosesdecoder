@@ -166,7 +166,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
     for (iterTargetPhrase = phraseColl->begin(), iterSourcePhrase =  sourcePhrases.begin()
          ; iterTargetPhrase != iterEnd
          ; ++iterTargetPhrase, ++iterSourcePhrase) {
-      CHECK(iterSourcePhrase != sourcePhrases.end());
+      assert(iterSourcePhrase != sourcePhrases.end());
 
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
       const Phrase			&sourcePhrase = *iterSourcePhrase;

@@ -116,7 +116,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
   // equiv hypo exists, recombine with other hypo
   iterator &iterExisting = addRet.first;
   Hypothesis *hypoExisting = *iterExisting;
-  CHECK(iterExisting != m_hypos.end());
+  assert(iterExisting != m_hypos.end());
 
   m_manager.GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 

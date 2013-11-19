@@ -156,7 +156,8 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
 template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &)
 {
   std::vector<lm::WordIndex> words;
-  CHECK(phrase.GetSize() <= 1);
+  UTIL_THROW_IF(phrase.GetSize() > 1, util::Exception,
+		  "OOV target phrase should be 0 or 1 word in length");
   if (phrase.GetSize())
     words.push_back(Convert(phrase.GetWord(0)));
 
