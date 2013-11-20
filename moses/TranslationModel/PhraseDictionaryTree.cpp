@@ -106,7 +106,7 @@ public:
   }
 
   void SetFeatures(const IPhrase& names, const std::vector<FValue>& values) {
-    CHECK(names.size() == values.size());
+    UTIL_THROW_IF(names.size() != values.size(), util::Exception, "Error");
     fnames = names;
     fvalues = values;
   }
@@ -218,7 +218,7 @@ public:
     if(f.empty()) return;
     if(f[0]>=data.size()) return;
     if(!data[f[0]]) return;
-    CHECK(data[f[0]]->findKey(f[0])<data[f[0]]->size());
+    assert(data[f[0]]->findKey(f[0])<data[f[0]]->size());
     OFF_T tCandOffset=data[f[0]]->find(f);
     if(tCandOffset==InvalidOffT) return;
     fSeek(ot,tCandOffset);
@@ -232,7 +232,8 @@ public:
   typedef PhraseDictionaryTree::PrefixPtr PPtr;
 
   void GetTargetCandidates(PPtr p,TgtCands& tgtCands) {
-    CHECK(p);
+    UTIL_THROW_IF(p == NULL, util::Exception, "Error");
+
     if(p.imp->isRoot()) return;
     OFF_T tCandOffset=p.imp->ptr()->getData(p.imp->idx);
     if(tCandOffset==InvalidOffT) return;
@@ -276,7 +277,8 @@ public:
   }
 
   PPtr Extend(PPtr p,const std::string& w) {
-    CHECK(p);
+	UTIL_THROW_IF(p == NULL, util::Exception, "Error");
+
     if(w.empty() || w==EPSILON) return p;
 
     LabelId wi=sv.index(w);
@@ -285,7 +287,8 @@ public:
     else if(p.imp->isRoot()) {
       if(wi<data.size() && data[wi]) {
         const void* ptr = data[wi]->findKeyPtr(wi);
-        CHECK(ptr);
+        UTIL_THROW_IF(ptr == NULL, util::Exception, "Error");
+
         return PPtr(pPool.get(PPimp(data[wi],data[wi]->findKey(wi),0)));
       }
     } else if(PTF const* nextP=p.imp->ptr()->getPtr(p.imp->idx)) {
@@ -497,7 +500,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (numElement == NOT_FOUND) {
       // init numElement
       numElement = tokens.size();
-      CHECK(numElement >= (PrintWordAlignment()?4:3));
+      UTIL_THROW_IF(numElement < (PrintWordAlignment()?4:3), util::Exception,
+    		  "Format error");
     }
 
     if (tokens.size() != numElement) {
@@ -544,7 +548,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       ++count;
       currF=f;
       // insert src phrase in prefix tree
-      CHECK(psa);
+      UTIL_THROW_IF(psa == NULL, util::Exception, "Error");
+
       PSA::Data& d=psa->insert(f);
       if(d==InvalidOffT) d=fTell(ot);
       else {
@@ -597,7 +602,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       }
 
       // insert src phrase in prefix tree
-      CHECK(psa);
+      UTIL_THROW_IF(psa == NULL, util::Exception, "Error");
+
       PSA::Data& d=psa->insert(f);
       if(d==InvalidOffT) d=fTell(ot);
       else {
@@ -607,7 +613,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       }
     }
     tgtCands.push_back(TgtCand(e,sc, alignmentString));
-    CHECK(currFirstWord!=InvalidLabelId);
+    UTIL_THROW_IF(currFirstWord == InvalidLabelId, util::Exception,
+    		"Uninitialize word");
     tgtCands.back().SetFeatures(fnames, fvalues);
   }
   if (PrintWordAlignment())

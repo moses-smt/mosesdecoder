@@ -57,7 +57,7 @@ PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
   :PhraseDictionary(line)
   ,m_FuzzyMatchWrapper(NULL)
 {
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 }
 
 PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
@@ -136,7 +136,9 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
 {
   char dirName[] = "/tmp/moses.XXXXXX";
   char *temp = mkdtemp(dirName);
-  CHECK(temp);
+  UTIL_THROW_IF(temp == NULL, util::Exception,
+		  "Couldn't create temporary directory " << dirName);
+
   string dirNameStr(dirName);
 
   string inFileName(dirNameStr + "/in");
@@ -211,7 +213,9 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
       UserMessage::Add(strme.str());
       abort();
     }
-    CHECK(scoreVector.size() == numScoreComponents);
+
+    UTIL_THROW_IF(scoreVector.size() != numScoreComponents, util::Exception,
+    		"Number of scores incorrectly specified");
 
     // parse source & find pt node
 
@@ -286,8 +290,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      CHECK(iterAlign != alignmentInfo.end());
-      CHECK(iterAlign->first == pos);
+      UTIL_THROW_IF(iterAlign == alignmentInfo.end(), util::Exception,
+    		  "No alignment for non-term at position " << pos);
+      UTIL_THROW_IF(iterAlign->first != pos, util::Exception,
+    		  "Alignment info incorrect at position " << pos);
+
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
@@ -297,13 +304,13 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       currNode = currNode->GetOrCreateChild(word);
     }
 
-    CHECK(currNode != NULL);
+    UTIL_THROW_IF(currNode == NULL, util::Exception,
+    		"Node not found at position " << pos);
+
   }
 
   // finally, the source LHS
   //currNode = currNode->GetOrCreateChild(sourceLHS);
-  //CHECK(currNode != NULL);
-
 
   return *currNode;
 }
@@ -323,14 +330,16 @@ void PhraseDictionaryFuzzyMatch::CleanUpAfterSentenceProcessing(const InputType 
 const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(long translationId) const
 {
   std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(translationId);
-  CHECK(iter != m_collection.end());
+  UTIL_THROW_IF(iter == m_collection.end(), util::Exception,
+		  "Couldn't find root node for input: " << translationId);
   return iter->second;
 }
 PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source)
 {
   long transId = source.GetTranslationId();
   std::map<long, PhraseDictionaryNodeMemory>::iterator iter = m_collection.find(transId);
-  CHECK(iter != m_collection.end());
+  UTIL_THROW_IF(iter == m_collection.end(), util::Exception,
+		  "Couldn't find root node for input: " << transId);
   return iter->second;
 }
 
