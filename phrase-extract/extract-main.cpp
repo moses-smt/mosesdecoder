@@ -556,7 +556,7 @@ REO_POS getOrientPhraseModel (SentenceAlignment & sentence, REO_MODEL_TYPE model
       return DRIGHT;
   connectedRightTop = false;
   for(int indexF=endF+2*unit; (*lt)(indexF, countF) && !connectedRightTop; indexF=indexF+unit)
-    if(connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomRight.end() &&
+    if(connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomLeft.end() &&
                            it->second.find(indexF) != it->second.end())
       return DLEFT;
   return UNKNOWN;
@@ -606,9 +606,9 @@ REO_POS getOrientHierModel (SentenceAlignment & sentence, REO_MODEL_TYPE modelTy
   }
   connectedRightTop = false;
   for(int indexF=endF+2*unit; (*lt)(indexF, countF) && !connectedRightTop; indexF=indexF+unit) {
-    if((connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomRight.end() &&
+    if((connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomLeft.end() &&
                             it->second.find(indexF) != it->second.end()) ||
-        (connectedRightTop = (it = outBottomLeft.find(startE - unit)) != outBottomRight.end() &&
+        (connectedRightTop = (it = outBottomLeft.find(startE - unit)) != outBottomLeft.end() &&
                              it->second.find(indexF) != it->second.end()))
       return DLEFT;
   }
