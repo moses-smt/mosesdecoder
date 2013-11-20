@@ -63,7 +63,7 @@ OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation()
 {
   OnDiskPt::OnDiskWrapper* dict;
   dict = m_implementation.get();
-  CHECK(dict);
+  UTIL_THROW_IF(dict == NULL, util::Exception, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -71,7 +71,7 @@ const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
 {
   OnDiskPt::OnDiskWrapper* dict;
   dict = m_implementation.get();
-  CHECK(dict);
+  UTIL_THROW_IF(dict == NULL, util::Exception, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -84,10 +84,25 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
   obj->BeginLoad(m_filePath);
 
-  CHECK(obj->GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
-  CHECK(obj->GetMisc("NumSourceFactors") == m_input.size());
-  CHECK(obj->GetMisc("NumTargetFactors") == m_output.size());
-  CHECK(obj->GetMisc("NumScores") == m_numScoreComponents);
+  UTIL_THROW_IF(obj->GetMisc("Version") != OnDiskPt::OnDiskWrapper::VERSION_NUM,
+		  util::Exception,
+		  "On-disk phrase table is version " <<  obj->GetMisc("Version")
+		  << ". It is not compatible with version " << OnDiskPt::OnDiskWrapper::VERSION_NUM);
+
+  UTIL_THROW_IF(obj->GetMisc("NumSourceFactors") != m_input.size(),
+		  util::Exception,
+		  "On-disk phrase table has " <<  obj->GetMisc("NumSourceFactors") << " source factors."
+		  		  << ". The ini file specified " << m_input.size() << " source factors");
+
+  UTIL_THROW_IF(obj->GetMisc("NumTargetFactors") != m_output.size(),
+		  util::Exception,
+		  "On-disk phrase table has " <<  obj->GetMisc("NumTargetFactors") << " target factors."
+		  		  << ". The ini file specified " << m_output.size() << " target factors");
+
+  UTIL_THROW_IF(obj->GetMisc("NumScores") != m_numScoreComponents,
+		  util::Exception,
+		  "On-disk phrase table has " <<  obj->GetMisc("NumScores") << " scores."
+		  		  << ". The ini file specified " << m_numScoreComponents << " scores");
 
   m_implementation.reset(obj);
 }
