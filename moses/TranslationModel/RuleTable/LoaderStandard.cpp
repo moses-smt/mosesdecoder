@@ -71,7 +71,8 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
     if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]") {
       // no-term
       vector<string> split = Tokenize(tok, ",");
-      CHECK(split.size() == 2);
+      UTIL_THROW_IF(split.size() != 2, util::Exception,
+    		  "Incorrectly formmatted non-terminal: " << tok);
 
       tok = "[X]" + split[0] + "]";
       size_t coIndex = Scan<size_t>(split[1]);
@@ -97,7 +98,8 @@ void ReformateHieroScore(string &scoreString)
   for (size_t i = 0; i < toks.size(); ++i) {
     string &tok = toks[i];
     vector<string> nameValue = Tokenize(tok, "=");
-    CHECK(nameValue.size() == 2);
+    UTIL_THROW_IF(nameValue.size() != 2, util::Exception,
+    		"Incorrectly formatted score: " << tok);
 
     float score = Scan<float>(nameValue[1]);
     score = exp(-score);

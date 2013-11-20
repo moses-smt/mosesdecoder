@@ -384,7 +384,7 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
     //cout << " ||| " << best_match << " ||| " << best_path << endl;
 
     if (best_match == -1) {
-      CHECK(source.size());
+      UTIL_THROW_IF(source.size() == 0, util::Exception, "Empty source phrase");
       best_match = 0;
     }
 
