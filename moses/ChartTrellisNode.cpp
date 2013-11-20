@@ -24,6 +24,7 @@
 #include "ChartTrellisDetour.h"
 #include "ChartTrellisPath.h"
 #include "StaticData.h"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -96,11 +97,11 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
         std::set<size_t> sourcePosSet = m_hypo.GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
         if (sourcePosSet.size() == 1) {
           const std::vector<const Word*> *ruleSourceFromInputPath = m_hypo.GetTranslationOption().GetSourceRuleFromInputPath();
-          CHECK(ruleSourceFromInputPath);
+          UTIL_THROW_IF(ruleSourceFromInputPath == NULL, util::Exception, "Source Words in of the rules hasn't been filled out");
 
           size_t sourcePos = *sourcePosSet.begin();
           const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
-          CHECK(sourceWord);
+          UTIL_THROW_IF(sourceWord == NULL, util::Exception, "Null source word at position " << sourcePos);
           const Factor *factor = sourceWord->GetFactor(placeholderFactor);
           if (factor) {
             ret.Back()[0] = factor;
@@ -115,7 +116,8 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
 
 void ChartTrellisNode::CreateChildren()
 {
-  CHECK(m_children.empty());
+  UTIL_THROW_IF(!m_children.empty(), util::Exception, "Already created children");
+
   const std::vector<const ChartHypothesis*> &prevHypos = m_hypo.GetPrevHypos();
   m_children.reserve(prevHypos.size());
   for (size_t ind = 0; ind < prevHypos.size(); ++ind) {
@@ -130,7 +132,8 @@ void ChartTrellisNode::CreateChildren(const ChartTrellisNode &rootNode,
                                       const ChartHypothesis &replacementHypo,
                                       ChartTrellisNode *&deviationPoint)
 {
-  CHECK(m_children.empty());
+  UTIL_THROW_IF(!m_children.empty(), util::Exception, "Already created children");
+
   const NodeChildren &children = rootNode.GetChildren();
   m_children.reserve(children.size());
   for (size_t ind = 0; ind < children.size(); ++ind) {

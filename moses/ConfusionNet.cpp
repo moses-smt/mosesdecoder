@@ -10,7 +10,7 @@
 #include "Sentence.h"
 #include "UserMessage.h"
 #include "moses/FF/InputFeature.h"
-#include "util/check.hh"
+#include "util/exception.hh"
 
 namespace Moses
 {

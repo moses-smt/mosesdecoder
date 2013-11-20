@@ -526,10 +526,10 @@ public:
     m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize(),0));
 
     for(std::map<Range,E2Costs>::const_iterator i=cov2cand.begin(); i!=cov2cand.end(); ++i) {
-      CHECK(i->first.first<m_rangeCache.size());
-      CHECK(i->first.second>0);
-      CHECK(static_cast<size_t>(i->first.second-1)<m_rangeCache[i->first.first].size());
-      CHECK(m_rangeCache[i->first.first][i->first.second-1]==0);
+      assert(i->first.first<m_rangeCache.size());
+      assert(i->first.second>0);
+      assert(static_cast<size_t>(i->first.second-1)<m_rangeCache[i->first.first].size());
+      assert(m_rangeCache[i->first.first][i->first.second-1]==0);
 
       std::vector<TargetPhrase> tCands;
       tCands.reserve(i->second.size());

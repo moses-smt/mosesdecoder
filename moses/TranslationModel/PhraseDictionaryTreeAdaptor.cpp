@@ -14,7 +14,7 @@
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
 #include "moses/UserMessage.h"
-#include "util/check.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -94,7 +94,7 @@ PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation()
 {
   PDTAimp* dict;
   dict = m_implementation.get();
-  CHECK(dict);
+  UTIL_THROW_IF(dict == NULL, util::Exception, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -102,7 +102,7 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 {
   PDTAimp* dict;
   dict = m_implementation.get();
-  CHECK(dict);
+  UTIL_THROW_IF(dict == NULL, util::Exception, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
