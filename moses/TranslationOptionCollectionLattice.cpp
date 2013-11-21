@@ -24,10 +24,12 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
   , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
   : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
 {
-  CHECK(!StaticData::Instance().GetUseLegacyPT());
+  UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
+		  "Not for models using the legqacy binary phrase table");
 
   const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
-  CHECK(inputFeature);
+  UTIL_THROW_IF2(inputFeature == NULL,
+		  "Input feature must be specified");
 
   size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
   size_t size = input.GetSize();
@@ -43,7 +45,7 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
     const ConfusionNet::Column &col = input.GetColumn(startPos);
     for (size_t i = 0; i < col.size(); ++i) {
       const Word &word = col[i].first;
-      CHECK(!word.IsEpsilon());
+      UTIL_THROW_IF2(word.IsEpsilon(), "Epsilon not supported");
 
       Phrase subphrase;
       subphrase.AddWord(word);
@@ -87,7 +89,8 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
 
         const Phrase &prevPhrase = prevPath.GetPhrase();
         const ScorePair *prevInputScore = prevPath.GetInputScore();
-        CHECK(prevInputScore);
+        UTIL_THROW_IF2(prevInputScore == NULL,
+        		"Null previous score");
 
         // loop thru every word at this position
         const ConfusionNet::Column &col = input.GetColumn(endPos);
@@ -120,9 +123,9 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
 
   VERBOSE(2,"Translation Option Collection\n " << *this << endl);
   const vector <DecodeGraph*> &decodeGraphs = StaticData::Instance().GetDecodeGraphs();
-  CHECK(decodeGraphs.size() == 1);
+  UTIL_THROW_IF2(decodeGraphs.size() != 1, "Multiple decoder graphs not supported yet");
   const DecodeGraph &decodeGraph = *decodeGraphs[0];
-  CHECK(decodeGraph.GetSize() == 1);
+  UTIL_THROW_IF2(decodeGraph.GetSize() != 1, "Factored decomposition not supported yet");
 
   const DecodeStep &decodeStep = **decodeGraph.begin();
   const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
