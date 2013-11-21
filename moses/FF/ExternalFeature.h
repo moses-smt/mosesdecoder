@@ -2,7 +2,7 @@
 
 #include <string>
 #include <cstring>
-#include <malloc.h>
+#include <cstdlib>
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 

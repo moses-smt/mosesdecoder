@@ -66,7 +66,7 @@
 #endif
 
 #ifdef LM_DALM
-#include "moses/LM/DALM.h"
+#include "moses/LM/DALMWrapper.h"
 #endif
 
 #include "util/exception.hh"
