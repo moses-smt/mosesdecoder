@@ -58,7 +58,7 @@ Phrase::~Phrase()
 
 void Phrase::MergeFactors(const Phrase &copy)
 {
-  CHECK(GetSize() == copy.GetSize());
+  UTIL_THROW_IF2(GetSize() != copy.GetSize(), "Both phrases need to be the same size to merge");
   size_t size = GetSize();
   const size_t maxNumFactors = MAX_NUM_FACTORS;
   for (size_t currPos = 0 ; currPos < size ; currPos++) {
@@ -73,14 +73,14 @@ void Phrase::MergeFactors(const Phrase &copy)
 
 void Phrase::MergeFactors(const Phrase &copy, FactorType factorType)
 {
-  CHECK(GetSize() == copy.GetSize());
+  UTIL_THROW_IF2(GetSize() != copy.GetSize(), "Both phrases need to be the same size to merge");
   for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
     SetFactor(currPos, factorType, copy.GetFactor(currPos, factorType));
 }
 
 void Phrase::MergeFactors(const Phrase &copy, const std::vector<FactorType>& factorVec)
 {
-  CHECK(GetSize() == copy.GetSize());
+  UTIL_THROW_IF2(GetSize() != copy.GetSize(), "Both phrases need to be the same size to merge");
   for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
     for (std::vector<FactorType>::const_iterator i = factorVec.begin();
          i != factorVec.end(); ++i) {
@@ -194,7 +194,6 @@ void Phrase::CreateFromString(FactorDirection direction
     assert((*lhs)->IsNonTerminal());
   } else {
     numWords = annotatedWordVector.size();
-    //CHECK(lhs == NULL);
     if (lhs) {
       (*lhs) = NULL;
     }
@@ -211,7 +210,9 @@ void Phrase::CreateFromString(FactorDirection direction
       isNonTerminal = true;
 
       size_t nextPos = annotatedWord.find('[', 1);
-      CHECK(nextPos != string::npos);
+      UTIL_THROW_IF2(nextPos == string::npos,
+    		  "Incorrect formatting of non-terminal. Should have 2 non-terms, eg. [X][X]. "
+    		  << "Current string: " << annotatedWord);
 
       if (direction == Input)
         annotatedWord = annotatedWord.substr(1, nextPos - 2);
