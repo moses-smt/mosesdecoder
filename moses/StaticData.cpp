@@ -522,6 +522,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_registry.Construct(feature, line);
   }
 
+  NoCache();
   OverrideFeatures();
 
   LoadFeatureFunctions();
@@ -1053,6 +1054,20 @@ bool StaticData::LoadAlternateWeightSettings()
   return true;
 }
 
+void StaticData::NoCache()
+{
+	bool noCache;
+	SetBooleanParameter( &noCache, "no-cache", false );
+
+	if (noCache) {
+		const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+		for (size_t i = 0; i < pts.size(); ++i) {
+			PhraseDictionary &pt = *pts[i];
+			pt.SetParameter("cache-size", "0");
+		}
+	}
+}
+
 void StaticData::OverrideFeatures()
 {
   const PARAM_VEC &params = m_parameter->GetParam("feature-overwrite");
@@ -1091,6 +1106,7 @@ void StaticData::CheckLEGACYPT()
 
   m_useLegacyPT = false;
 }
+
 
 } // namespace
 
