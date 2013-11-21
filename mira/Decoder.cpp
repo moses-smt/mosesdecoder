@@ -47,7 +47,7 @@ static char* strToChar(const string& s)
 MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vector<string> decoder_params)
   : m_manager(NULL)
 {
-  static int BASE_ARGC = 4;
+  static int BASE_ARGC = 6;
   Parameter* params = new Parameter();
   char ** mosesargv = new char*[BASE_ARGC + argc];
   mosesargv[0] = strToChar("-f");
@@ -57,6 +57,8 @@ MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vect
   dbgin << debuglevel;
   mosesargv[3] = strToChar(dbgin.str());
 
+  mosesargv[4] = strToChar("-no-cache");
+  mosesargv[5] = strToChar("true");
   /*
   mosesargv[4] = strToChar("-use-persistent-cache");
   mosesargv[5] = strToChar("0");
