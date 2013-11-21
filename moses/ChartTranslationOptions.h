@@ -24,7 +24,6 @@
 #include "TargetPhraseCollection.h"
 #include "WordsRange.h"
 
-#include "util/check.hh"
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "ChartTranslationOption.h"

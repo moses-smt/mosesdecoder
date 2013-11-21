@@ -24,7 +24,6 @@
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
 #include "moses/TranslationModel/RuleTable/Trie.h"
-#include "util/check.hh"
 
 namespace Moses
 {

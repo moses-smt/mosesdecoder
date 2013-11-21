@@ -22,7 +22,6 @@
 #include "DotChart.h"
 #include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
 
-#include "util/check.hh"
 #include <vector>
 
 namespace Moses

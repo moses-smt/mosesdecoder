@@ -3,7 +3,6 @@
 #include <stdexcept>
 #include <string>
 #include "StatefulFeatureFunction.h"
-#include "util/check.hh"
 
 namespace Moses
 {

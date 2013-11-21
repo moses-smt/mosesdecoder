@@ -3,7 +3,6 @@
 #include "moses/FeatureVector.h"
 #include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include <map>
-#include "util/check.hh"
 #include <sstream>
 #include <iostream>
 #include <fstream>

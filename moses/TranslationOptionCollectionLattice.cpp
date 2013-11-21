@@ -10,7 +10,6 @@
 #include "FactorCollection.h"
 #include "FF/InputFeature.h"
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "util/check.hh"
 #include "util/exception.hh"
 
 using namespace std;

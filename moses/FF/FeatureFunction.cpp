@@ -1,6 +1,5 @@
 #include <stdexcept>
 
-#include "util/check.hh"
 #include "util/exception.hh"
 
 #include "FeatureFunction.h"

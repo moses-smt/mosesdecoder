@@ -20,7 +20,6 @@
 #include <iostream>
 #include "moses/Util.h"
 #include "Phrase.h"
-#include "util/check.hh"
 #include "util/exception.hh"
 
 using namespace std;

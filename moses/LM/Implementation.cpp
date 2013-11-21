@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/ChartManager.h"
 #include "moses/ChartHypothesis.h"
-#include "util/check.hh"
 
 using namespace std;
 

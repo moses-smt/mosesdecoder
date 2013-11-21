@@ -6,7 +6,6 @@
 #include "moses/TypeDef.h"
 #include "moses/TargetPhraseCollection.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
-#include "util/check.hh"
 #include <vector>
 
 #ifdef WITH_THREADS

@@ -44,7 +44,6 @@
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
-#include "util/check.hh"
 #include "util/file.hh"
 #include "util/exception.hh"
 

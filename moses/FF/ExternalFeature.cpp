@@ -1,5 +1,7 @@
 #include "ExternalFeature.h"
 #include <dlfcn.h>
+#include <stdlib.h>
+#include <iostream>
 
 using namespace std;
 
