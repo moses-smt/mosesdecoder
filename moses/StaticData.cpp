@@ -623,7 +623,8 @@ void StaticData::LoadNonTerminals()
     string line;
     while(getline(inStream, line)) {
       vector<string> tokens = Tokenize(line);
-      CHECK(tokens.size() == 2);
+      UTIL_THROW_IF2(tokens.size() != 2,
+    		  "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
     }
@@ -671,7 +672,8 @@ bool StaticData::LoadDecodeGraphs()
       // For specifying multiple translation model
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
-      CHECK(decodeGraphInd == prevDecodeGraphInd || decodeGraphInd == prevDecodeGraphInd + 1);
+      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
+    		  "Malformed mapping");
       if (decodeGraphInd > prevDecodeGraphInd) {
         prev = NULL;
       }
@@ -683,8 +685,7 @@ bool StaticData::LoadDecodeGraphs()
       decodeType = token[1] == "T" ? Translate : Generate;
       index = Scan<size_t>(token[2]);
     } else {
-      UserMessage::Add("Malformed mapping!");
-      CHECK(false);
+      UTIL_THROW(util::Exception, "Malformed mapping");
     }
 
     DecodeStep* decodeStep = NULL;
@@ -694,8 +695,7 @@ bool StaticData::LoadDecodeGraphs()
         stringstream strme;
         strme << "No phrase dictionary with index "
               << index << " available!";
-        UserMessage::Add(strme.str());
-        CHECK(false);
+        UTIL_THROW(util::Exception, strme.str());
       }
       decodeStep = new DecodeStepTranslation(pts[index], prev, *featuresRemaining);
       break;
@@ -704,19 +704,18 @@ bool StaticData::LoadDecodeGraphs()
         stringstream strme;
         strme << "No generation dictionary with index "
               << index << " available!";
-        UserMessage::Add(strme.str());
-        CHECK(false);
+        UTIL_THROW(util::Exception, strme.str());
       }
       decodeStep = new DecodeStepGeneration(gens[index], prev, *featuresRemaining);
       break;
     case InsertNullFertilityWord:
-      CHECK(!"Please implement NullFertilityInsertion.");
+      UTIL_THROW(util::Exception, "Please implement NullFertilityInsertion.");
       break;
     }
 
     featuresRemaining = &decodeStep->GetFeaturesRemaining();
 
-    CHECK(decodeStep);
+    UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
       if (IsChart()) {
@@ -906,14 +905,14 @@ void StaticData::LoadFeatureFunctions()
     	// do nothing
     } else if (WordPenaltyProducer *ffCast
                = dynamic_cast<WordPenaltyProducer*>(ff)) {
-      CHECK(m_wpProducer == NULL); // max 1 feature;
+      UTIL_THROW_IF2(m_wpProducer, "Only 1 word penalty allowed"); // max 1 feature;
       m_wpProducer = ffCast;
     } else if (UnknownWordPenaltyProducer *ffCast
                = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
-      CHECK(m_unknownWordPenaltyProducer == NULL); // max 1 feature;
+      UTIL_THROW_IF2(m_unknownWordPenaltyProducer, "Only 1 unknown word penalty allowed"); // max 1 feature;
       m_unknownWordPenaltyProducer = ffCast;
     } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
-      CHECK(m_inputFeature == NULL); // max 1 input feature;
+      UTIL_THROW_IF2(m_inputFeature, "Only 1 input feature allowed"); // max 1 input feature;
       m_inputFeature = ffCast;
     }
 
@@ -991,7 +990,8 @@ bool StaticData::LoadAlternateWeightSettings()
       vector<string> args = Tokenize(tokens[0], "=");
       currentId = args[1];
       cerr << "alternate weight setting " << currentId << endl;
-      CHECK(m_weightSetting.find(currentId) == m_weightSetting.end());
+      UTIL_THROW_IF2(m_weightSetting.find(currentId) != m_weightSetting.end(),
+    		  "Duplicate alternate weight id: " << currentId);
       m_weightSetting[ currentId ] = new ScoreComponentCollection;
 
       // other specifications
@@ -1025,9 +1025,10 @@ bool StaticData::LoadAlternateWeightSettings()
 
     // weight lines
     else {
-      CHECK(currentId != "");
+      UTIL_THROW_IF2(currentId.empty(), "No alternative weights specified");
       vector<string> tokens = Tokenize(weightSpecification[i]);
-      CHECK(tokens.size() >= 2);
+      UTIL_THROW_IF2(tokens.size() < 2
+    		  , "Incorrect format for alternate weights: " << weightSpecification[i]);
 
       // get name and weight values
       string name = tokens[0];
@@ -1050,7 +1051,7 @@ bool StaticData::LoadAlternateWeightSettings()
       }
     }
   }
-  CHECK(!hasErrors);
+  UTIL_THROW_IF2(hasErrors, "Errors loading alternate weights");
   return true;
 }
 
@@ -1074,14 +1075,14 @@ void StaticData::OverrideFeatures()
   for (size_t i = 0; i < params.size(); ++i) {
     const string &str = params[i];
     vector<string> toks = Tokenize(str);
-    CHECK(toks.size() > 1);
+    UTIL_THROW_IF2(toks.size() <= 1, "Incorrect format for feature override: " << str);
 
     FeatureFunction &ff = FeatureFunction::FindFeatureFunction(toks[0]);
 
     for (size_t j = 1; j < toks.size(); ++j) {
       const string &keyValStr = toks[j];
       vector<string> keyVal = Tokenize(keyValStr, "=");
-      CHECK(keyVal.size() == 2);
+      UTIL_THROW_IF2(keyVal.size() != 2, "Incorrect format for parameter override: " << keyValStr);
 
       VERBOSE(1, "Override " << ff.GetScoreProducerDescription() << " "
               << keyVal[0] << "=" << keyVal[1] << endl);

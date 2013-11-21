@@ -453,11 +453,11 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
     vector<float> inputWeights = Scan<float>(m_setting["weight-i"]);
     PARAM_VEC &numInputScores = m_setting["input-scores"];
     if (inputWeights.size() == 1) {
-      CHECK(numInputScores.size() == 0);
+      UTIL_THROW_IF2(numInputScores.size() != 0, "No [input-scores] section allowed");
       numInputScores.push_back("1");
       numInputScores.push_back("0");
     } else if (inputWeights.size() == 2) {
-      CHECK(numInputScores.size() == 0);
+      UTIL_THROW_IF2(numInputScores.size() != 0, "No [input-scores] section allowed");
       numInputScores.push_back("1");
       numInputScores.push_back("1");
     }
@@ -510,7 +510,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
         UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
         return;
       }
-      CHECK(token.size() >= 5);
+      UTIL_THROW_IF2(token.size() < 5, "Phrase table must have at least 5 scores");
 
       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
 
@@ -555,7 +555,8 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < oldWeights.size());
+    	UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
+    			"Errors converting old phrase-table weights to new weights");
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
 
@@ -645,7 +646,8 @@ void Parameter::ConvertWeightArgsDistortion()
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < oldWeights.size());
+    	UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
+    			  "Errors converting old distortion weights to new weights");
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
 
@@ -658,7 +660,9 @@ void Parameter::ConvertWeightArgsDistortion()
             << "type=" << toks[1] << " ";
 
       vector<FactorType> factors = Tokenize<FactorType>(toks[0], "-");
-      CHECK(factors.size() == 2);
+      UTIL_THROW_IF2(factors.size() != 2,
+    		  "Error in old factor specification for lexicalized reordering model: "
+    		  << toks[0]);
       strme << "input-factor=" << factors[0]
             << " output-factor=" << factors[1] << " ";
 
@@ -731,7 +735,8 @@ void Parameter::ConvertWeightArgsLM()
 
       vector<float> weightsLM(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < weights.size());
+    	UTIL_THROW_IF2(currOldInd >= weights.size(),
+    			"Errors converting old LM weights to new weights");
         weightsLM[currFF] = Scan<float>(weights[currOldInd]);
         if (isChartDecoding) {
           weightsLM[currFF] = UntransformLMScore(weightsLM[currFF]);
@@ -782,7 +787,8 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < oldWeights.size());
+    	UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
+    			  "Errors converting old generation weights to new weights");
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
 
@@ -842,7 +848,8 @@ void Parameter::ConvertPhrasePenalty()
 {
   string oldWeightName = "weight-p";
   if (isParamSpecified(oldWeightName)) {
-    CHECK(m_setting[oldWeightName].size() == 1);
+	UTIL_THROW_IF2(m_setting[oldWeightName].size() != 1,
+			"There should be only 1 phrase-penalty weight");
     float weight = Scan<float>(m_setting[oldWeightName][0]);
     AddFeature("PhrasePenalty");
     SetWeight("PhrasePenalty", 0, weight);
@@ -854,7 +861,8 @@ void Parameter::ConvertPhrasePenalty()
 void Parameter::ConvertWeightArgs()
 {
   // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
-  CHECK( m_setting.count("weight-dlm") == 0);
+  UTIL_THROW_IF2( m_setting.count("weight-dlm") != 0,
+		  "Can't handle discr LM. must do it manually 'cos of bigram/n-gram split");
 
   // check that old & new format aren't mixed
   if (m_setting.count("weight") &&
@@ -898,7 +906,8 @@ void Parameter::CreateWeightsMap()
   for (size_t i = 0; i < vec.size(); ++i) {
     const string &line = vec[i];
     vector<string> toks = Tokenize(line);
-    CHECK(toks.size() >= 2);
+    UTIL_THROW_IF2(toks.size() < 2,
+    		"Error in format of weights: " << line);
 
     string name = toks[0];
     name = name.substr(0, name.size() - 1);
@@ -920,8 +929,9 @@ void Parameter::WeightOverwrite()
   if (vec.size() == 0)
     return;
 
-  // should only be 1 line
-  CHECK(vec.size() == 1);
+  // should only be on 1 line
+  UTIL_THROW_IF2(vec.size() != 1,
+		  "Weight override should only be on 1 line");
 
   string name("");
   vector<float> weights;
@@ -1289,7 +1299,9 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
   m_setting[paramName]; // defines the parameter, important for boolean switches
   if (m_setting[paramName].size() > 1) {
     VERBOSE(2," (the parameter had " << m_setting[paramName].size() << " previous values)");
-    CHECK(m_setting[paramName].size() == values.size());
+    UTIL_THROW_IF2(m_setting[paramName].size() != values.size(),
+    		"Number of weight override for " << paramName
+    		<< " is not the same as the original number of weights");
   } else {
     VERBOSE(2," (the parameter does not have previous values)");
     m_setting[paramName].resize(values.size());
