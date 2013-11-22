@@ -34,34 +34,18 @@ class ChartParser;
  */
 class PhraseDictionaryScope3 : public RuleTableUTrie
 {
-  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryScope3&);
   friend class RuleTableLoader;
 
 public:
   PhraseDictionaryScope3(const std::string &line);
-
-  const PhraseDictionaryNodeMemory &GetRootNode() const {
-    return m_collection;
-  }
 
   ChartRuleLookupManager*
   CreateRuleLookupManager(
     const ChartParser &,
     const ChartCellCollectionBase &);
 
-  TO_STRING();
-
 protected:
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
 
-  PhraseDictionaryNodeMemory &GetOrCreateNode(const Phrase &source
-      , const TargetPhrase &target
-      , const Word *sourceLHS);
-
-  void SortAndPrune();
-
-  PhraseDictionaryNodeMemory m_collection;
 };
 
 }  // namespace Moses
