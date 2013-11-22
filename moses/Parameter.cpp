@@ -192,6 +192,7 @@ Parameter::Parameter()
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
   AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key");
   AddParam("feature-add", "Add a feature function on the command line. Used by mira to add BLEU feature");
+  AddParam("feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
   AddParam("feature", "All the feature functions should be here");
   AddParam("print-id", "prefix translations with id. Default if false");

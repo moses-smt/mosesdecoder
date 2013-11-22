@@ -500,6 +500,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_placeHolderFactor = NOT_FOUND;
   }
 
+  std::map<std::string, std::string> featureNameOverride = OverrideFeatureNames();
 
   // all features
   map<string, int> featureIndexMap;
@@ -513,9 +514,20 @@ bool StaticData::LoadData(Parameter *parameter)
 
     vector<string> toks = Tokenize(line);
 
-    const string &feature = toks[0];
+    string &feature = toks[0];
+    std::map<std::string, std::string>::const_iterator iter = featureNameOverride.find(feature);
+    if (iter == featureNameOverride.end()) {
+    	// feature name not override
+    	m_registry.Construct(feature, line);
+    }
+    else {
+    	// replace feature name with new name
+    	string newName = iter->second;
+    	feature = newName;
+    	string newLine = Join(" ", toks);
+    	m_registry.Construct(newName, newLine);
+    }
 
-    m_registry.Construct(feature, line);
   }
 
   NoCache();
@@ -746,7 +758,7 @@ bool StaticData::LoadDecodeGraphs()
 
 void StaticData::ReLoadParameter()
 {
-  assert(false); // TODO completely redo. Too many hardcoded ff
+  UTIL_THROW(util::Exception, "completely redo. Too many hardcoded ff"); // TODO completely redo. Too many hardcoded ff
   /*
   m_verboseLevel = 1;
   if (m_parameter->GetParam("verbose").size() == 1) {
@@ -1063,6 +1075,26 @@ void StaticData::NoCache()
 			pt.SetParameter("cache-size", "0");
 		}
 	}
+}
+
+std::map<std::string, std::string> StaticData::OverrideFeatureNames()
+{
+	std::map<std::string, std::string> ret;
+
+	const PARAM_VEC &params = m_parameter->GetParam("feature-name-overwrite");
+	if (params.size()) {
+		UTIL_THROW_IF2(params.size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
+		vector<string> toks = Tokenize(params[0]);
+		UTIL_THROW_IF2(toks.size() % 2 == 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
+
+		for (size_t i = 0; i < toks.size(); i += 2) {
+			const string &oldName = toks[i];
+			const string &newName = toks[i+1];
+			ret[oldName] = newName;
+		}
+	}
+
+	return ret;
 }
 
 void StaticData::OverrideFeatures()

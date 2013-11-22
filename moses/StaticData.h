@@ -733,6 +733,7 @@ public:
   bool LoadWeightSettings();
   bool LoadAlternateWeightSettings();
 
+  std::map<std::string, std::string> OverrideFeatureNames();
   void OverrideFeatures();
 
   FactorType GetPlaceholderFactor() const {
