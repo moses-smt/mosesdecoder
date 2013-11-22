@@ -8,6 +8,7 @@
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+#include "moses/TranslationModel/PhraseDictionaryScope3.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -151,6 +152,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
   MOSES_FNAME(PhraseDictionaryOnDisk);
   MOSES_FNAME(PhraseDictionaryMemory);
+  MOSES_FNAME(PhraseDictionaryScope3);
   MOSES_FNAME(PhraseDictionaryMultiModel);
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);

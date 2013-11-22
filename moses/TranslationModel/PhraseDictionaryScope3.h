@@ -23,28 +23,22 @@
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
-#include "moses/TranslationModel/RuleTable/Trie.h"
+#include "moses/TranslationModel/RuleTable/UTrie.h"
 #include "util/check.hh"
 
 namespace Moses
 {
 class ChartParser;
 
-/** Implementation of a in-memory rule table in a trie.  Looking up a rule of
- * length n symbols requires n look-ups to find the TargetPhraseCollection.
+/** Scope-3 only
  */
-class PhraseDictionaryMemory : public RuleTableTrie
+class PhraseDictionaryScope3 : public RuleTableUTrie
 {
-  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryScope3&);
   friend class RuleTableLoader;
 
-protected:
-  PhraseDictionaryMemory(int type, const std::string &line)
-    : RuleTableTrie(line) {
-  }
-
 public:
-  PhraseDictionaryMemory(const std::string &line);
+  PhraseDictionaryScope3(const std::string &line);
 
   const PhraseDictionaryNodeMemory &GetRootNode() const {
     return m_collection;
@@ -54,10 +48,6 @@ public:
   CreateRuleLookupManager(
     const ChartParser &,
     const ChartCellCollectionBase &);
-
-  // only used by multi-model phrase table, and other meta-features
-  const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
-  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   TO_STRING();
 

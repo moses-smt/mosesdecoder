@@ -1632,6 +1632,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNodeMemory.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryScope3.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryScope3.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryScope3.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryScope3.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryTree.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTree.cpp</locationURI>
