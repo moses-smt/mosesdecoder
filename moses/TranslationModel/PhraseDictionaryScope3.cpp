@@ -50,15 +50,4 @@ PhraseDictionaryScope3::PhraseDictionaryScope3(const std::string &line)
 
 }
 
-ChartRuleLookupManager *PhraseDictionaryScope3::CreateRuleLookupManager(
-  const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
-{
-  // FIXME This should be a parameter to CreateRuleLookupManager
-  size_t maxChartSpan = 0;
-
-  return new Scope3Parser(parser, cellCollection, *this, maxChartSpan);
-}
-
-
 }

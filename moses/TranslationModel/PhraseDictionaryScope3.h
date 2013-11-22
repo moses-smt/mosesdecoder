@@ -39,11 +39,6 @@ class PhraseDictionaryScope3 : public RuleTableUTrie
 public:
   PhraseDictionaryScope3(const std::string &line);
 
-  ChartRuleLookupManager*
-  CreateRuleLookupManager(
-    const ChartParser &,
-    const ChartCellCollectionBase &);
-
 protected:
 
 };

@@ -109,9 +109,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
   }
 
-  m_parsingAlgorithm = (m_parameter->GetParam("parsing-algorithm").size() > 0) ?
-                       (ParsingAlgorithm) Scan<size_t>(m_parameter->GetParam("parsing-algorithm")[0]) : ParseCYKPlus;
-
   // to cube or not to cube
   m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
                       (SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;

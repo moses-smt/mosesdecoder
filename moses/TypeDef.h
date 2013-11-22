@@ -147,11 +147,6 @@ enum DictionaryFind {
   ,All		= 1
 };
 
-enum ParsingAlgorithm {
-  ParseCYKPlus = 0,
-  ParseScope3 = 1
-};
-
 enum SearchAlgorithm {
   Normal				= 0
   ,CubePruning	= 1
