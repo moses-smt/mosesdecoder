@@ -1,7 +1,6 @@
 
 #include <vector>
 #include <string>
-#include "util/check.hh"
 
 #include "moses/FF/FFState.h"
 #include "moses/Hypothesis.h"

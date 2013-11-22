@@ -20,8 +20,6 @@
 #pragma once
 
 #include <vector>
-#include "util/check.hh"
-
 #include "DotChart.h"
 
 namespace OnDiskPt

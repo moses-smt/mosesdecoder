@@ -7,7 +7,6 @@
 #include "TranslationOptionCollectionLattice.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "moses/FF/InputFeature.h"
-#include "util/check.hh"
 
 namespace Moses
 {

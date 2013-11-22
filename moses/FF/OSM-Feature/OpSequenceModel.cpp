@@ -1,7 +1,6 @@
 #include <fstream>
 #include "OpSequenceModel.h"
 #include "osmHyp.h"
-#include "util/check.hh"
 #include "moses/Util.h"
 
 using namespace std;

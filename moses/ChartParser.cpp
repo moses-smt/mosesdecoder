@@ -83,7 +83,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       Word *targetLHS = new Word(true);
 
       targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS->GetFactor(0) != NULL);
+      UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       // add to dictionary
       TargetPhrase *targetPhrase = new TargetPhrase();
@@ -119,7 +119,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 
       Word *targetLHS = new Word(true);
       targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS->GetFactor(0) != NULL);
+      UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
@@ -204,7 +204,8 @@ void ChartParser::CreateInputPaths(const InputType &input)
   size_t size = input.GetSize();
   m_inputPathMatrix.resize(size);
 
-  CHECK(input.GetType() == SentenceInput || input.GetType() == TreeInputType);
+  UTIL_THROW_IF2(input.GetType() != SentenceInput && input.GetType() != TreeInputType,
+		  "Input must be a sentence or a tree, not lattice or confusion networks");
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
@@ -237,14 +238,16 @@ const InputPath &ChartParser::GetInputPath(WordsRange &range) const
 const InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos) const
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_inputPathMatrix[startPos].size());
+  UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
+		  "Out of bound: " << offset);
   return *m_inputPathMatrix[startPos][offset];
 }
 
 InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_inputPathMatrix[startPos].size());
+  UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
+		  "Out of bound: " << offset);
   return *m_inputPathMatrix[startPos][offset];
 }
 /*

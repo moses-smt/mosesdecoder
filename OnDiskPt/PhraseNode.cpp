@@ -22,7 +22,6 @@
 #include "TargetPhraseCollection.h"
 #include "SourcePhrase.h"
 #include "moses/Util.h"
-#include "util/check.hh"
 #include "util/exception.hh"
 
 using namespace std;

@@ -216,6 +216,8 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
 
+  void NoCache();
+
   bool m_continuePartialTranslation;
   std::string m_binPath;
 

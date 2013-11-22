@@ -2,7 +2,6 @@
 
 #include <string>
 #include "StatelessFeatureFunction.h"
-#include "util/check.hh"
 
 namespace Moses
 {

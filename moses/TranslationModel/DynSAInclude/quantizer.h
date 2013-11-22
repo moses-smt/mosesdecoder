@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <cmath>
-#include "util/check.hh"
 #include <algorithm>
 #include "types.h"
 

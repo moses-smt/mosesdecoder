@@ -1,6 +1,6 @@
 
 #include <boost/functional/hash.hpp>
-#include "DALM.h"
+#include "DALMWrapper.h"
 #include "logger.h"
 #include "dalm.h"
 #include "vocabulary.h"
