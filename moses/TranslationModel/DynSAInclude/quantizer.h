@@ -17,7 +17,7 @@ class LogQtizer
 {
 public:
   LogQtizer(float i): base_(pow(2, 1 / i)) {
-	UTIL_THROW_IF(base_ <= 1, util::Exception, "Can't calculate log base less than 1");
+	UTIL_THROW_IF2(base_ <= 1, "Can't calculate log base less than 1");
     max_code_ = 0;
     float value = 1; // code = 1 -> value = 1 for any base
     std::vector<float> code_to_value_vec;
@@ -40,12 +40,12 @@ public:
     std::cerr << "Initialized quantization (size = " << max_code_ + 1 << ")" << std::endl;
   }
   LogQtizer(FileHandler* fin) {
-	UTIL_THROW_IF(fin == NULL, util::Exception, "Null file handle");
+	UTIL_THROW_IF2(fin == NULL, "Null file handle");
     load(fin);
   }
   int code(float value) {
     // should just be: return log_b(value)
-    UTIL_THROW_IF(value < min_value_ || value > max_value_, util::Exception,
+    UTIL_THROW_IF2(value < min_value_ || value > max_value_,
     		"Value " << value << " out of bound");
 
     // but binary search removes errors due to floor operator above

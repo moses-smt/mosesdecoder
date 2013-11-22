@@ -199,7 +199,7 @@ Phrase TrellisPath::GetSurfacePhrase() const
     for (size_t i = 0 ; i < outputFactor.size() ; i++) {
       FactorType factorType = outputFactor[i];
       const Factor *factor = targetPhrase.GetFactor(pos, factorType);
-      UTIL_THROW_IF(factor == NULL, util::Exception,
+      UTIL_THROW_IF2(factor == NULL,
     		  "No factor " << factorType << " at position " << pos);
       newWord[factorType] = factor;
     }

@@ -59,7 +59,7 @@ void TargetPhrase::Create1AlignFromString(const std::string &align1Str)
 {
   vector<size_t> alignPoints;
   Moses::Tokenize<size_t>(alignPoints, align1Str, "-");
-  UTIL_THROW_IF(alignPoints.size() != 2, util::Exception, "Incorrectly formatted word alignment: " << align1Str);
+  UTIL_THROW_IF2(alignPoints.size() != 2, "Incorrectly formatted word alignment: " << align1Str);
   m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
 }
 
@@ -235,7 +235,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 
   // words
   size_t phraseSize = GetSize();
-  UTIL_THROW_IF(phraseSize == 0, util::Exception, "Target phrase cannot be empty"); // last word is lhs
+  UTIL_THROW_IF2(phraseSize == 0, "Target phrase cannot be empty"); // last word is lhs
   if (isSyntax) {
     --phraseSize;
   }
@@ -356,7 +356,7 @@ UINT64 TargetPhrase::ReadAlignFromFile(std::fstream &fileTPColl)
 
 UINT64 TargetPhrase::ReadScoresFromFile(std::fstream &fileTPColl)
 {
-  UTIL_THROW_IF(m_scores.size() == 0, util::Exception, "Translation rules must must have some scores");
+  UTIL_THROW_IF2(m_scores.size() == 0, "Translation rules must must have some scores");
 
   UINT64 bytesRead = 0;
 

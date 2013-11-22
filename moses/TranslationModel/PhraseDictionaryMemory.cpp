@@ -97,9 +97,9 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      UTIL_THROW_IF(iterAlign == alignmentInfo.end(), util::Exception,
+      UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
     		  "No alignment for non-term at position " << pos);
-      UTIL_THROW_IF(iterAlign->first != pos, util::Exception,
+      UTIL_THROW_IF2(iterAlign->first != pos,
     		  "Alignment info incorrect at position " << pos);
 
       size_t targetNonTermInd = iterAlign->second;
@@ -111,7 +111,7 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       currNode = currNode->GetOrCreateChild(word);
     }
 
-    UTIL_THROW_IF(currNode == NULL, util::Exception,
+    UTIL_THROW_IF2(currNode == NULL,
     		"Node not found at position " << pos);
   }
 

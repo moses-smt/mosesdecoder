@@ -62,7 +62,7 @@ void ConstrainedDecoding::Load()
 
 std::vector<float> ConstrainedDecoding::DefaultWeights() const
 {
-  UTIL_THROW_IF(m_numScoreComponents != 1, util::Exception,
+  UTIL_THROW_IF2(m_numScoreComponents != 1,
 		  "ConstrainedDecoding must only have 1 score");
   vector<float> ret(1, 1);
   return ret;

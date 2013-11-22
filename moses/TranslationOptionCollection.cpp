@@ -610,8 +610,8 @@ void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t)
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
   const WordsRange &coverage = translationOption->GetSourceWordsRange();
-  UTIL_THROW_IF(coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size(),
-		  util::Exception, "Out of bound access: " << coverage);
+  UTIL_THROW_IF2(coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size(),
+		  "Out of bound access: " << coverage);
   m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
 }
 
@@ -683,8 +683,8 @@ TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(siz
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
   maxSize = std::min(maxSize, maxSizePhrase);
 
-  UTIL_THROW_IF(maxSize >= m_collection[startPos].size(),
-		  util::Exception, "Out of bound access: " << maxSize);
+  UTIL_THROW_IF2(maxSize >= m_collection[startPos].size(),
+		  "Out of bound access: " << maxSize);
 
   return m_collection[startPos][maxSize];
 }
@@ -694,8 +694,8 @@ const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionLi
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
   maxSize = std::min(maxSize, maxSizePhrase);
 
-  UTIL_THROW_IF(maxSize >= m_collection[startPos].size(),
-		  util::Exception, "Out of bound access: " << maxSize);
+  UTIL_THROW_IF2(maxSize >= m_collection[startPos].size(),
+		  "Out of bound access: " << maxSize);
   return m_collection[startPos][maxSize];
 }
 

@@ -35,8 +35,7 @@ void Phrase::AddWord(WordPtr word)
 
 void Phrase::AddWord(WordPtr word, size_t pos)
 {
-	UTIL_THROW_IF(!(pos < m_words.size()),
-			util::Exception,
+	UTIL_THROW_IF2(!(pos < m_words.size()),
 			"Trying to get word " << pos << " when phrase size is " << m_words.size());
   m_words.insert(m_words.begin() + pos + 1, word);
 }

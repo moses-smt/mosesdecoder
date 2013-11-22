@@ -98,7 +98,7 @@ void PhraseDictionaryCompact::Load()
     // Keep target phrase collections on disk
     phraseSize = m_targetPhrasesMapped.load(pFile, true);
 
-  UTIL_THROW_IF(indexSize == 0 || coderSize == 0 || phraseSize == 0, util::Exception,
+  UTIL_THROW_IF2(indexSize == 0 || coderSize == 0 || phraseSize == 0,
 		  "Not successfully loaded");
 }
 

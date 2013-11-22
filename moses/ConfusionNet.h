@@ -44,8 +44,7 @@ public:
   }
 
   const Column& GetColumn(size_t i) const {
-    UTIL_THROW_IF(i >= data.size(),
-    		util::Exception,
+    UTIL_THROW_IF2(i >= data.size(),
     		"Out of bounds. Trying to access " << i << " when vector only contains " << data.size());
     return data[i];
   }

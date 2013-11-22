@@ -74,7 +74,7 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   for (unsigned int i = 0 ; i < factorType.size() ; i++) {
-	UTIL_THROW_IF(factorType[i] >= MAX_NUM_FACTORS, util::Exception,
+	UTIL_THROW_IF2(factorType[i] >= MAX_NUM_FACTORS,
 				"Trying to reference factor " << factorType[i] << ". Max factor is " << MAX_NUM_FACTORS);
 
     const Factor *factor = m_factorArray[factorType[i]];

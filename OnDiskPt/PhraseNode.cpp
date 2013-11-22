@@ -94,7 +94,7 @@ float PhraseNode::GetCount(size_t ind) const
 
 void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimit)
 {
-  UTIL_THROW_IF(m_saved, util::Exception, "Already saved");
+  UTIL_THROW_IF2(m_saved, "Already saved");
 
   // save this node
   m_targetPhraseColl.Sort(tableLimit);
@@ -115,7 +115,7 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
 
   // count info
   float *memFloat = (float*) (mem + memUsed);
-  UTIL_THROW_IF(numCounts != 1, util::Exception, "Can only store 1 phrase count");
+  UTIL_THROW_IF2(numCounts != 1, "Can only store 1 phrase count");
   memFloat[0] = (m_counts.size() == 0) ? DEFAULT_COUNT : m_counts[0]; // if count = 0, put in very large num to make sure its still used. HACK
   memUsed += sizeof(float) * numCounts;
 

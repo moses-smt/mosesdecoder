@@ -33,12 +33,12 @@ public:
     return H_;
   }
   virtual void save(FileHandler* fout) {
-    UTIL_THROW_IF(fout == 0, util::Exception, "Null file handle");
+    UTIL_THROW_IF2(fout == 0, "Null file handle");
     fout->write((char*)&m_, sizeof(m_));
     fout->write((char*)&H_, sizeof(H_));
   }
   virtual void load(FileHandler* fin) {
-    UTIL_THROW_IF(fin == 0, util::Exception, "Null file handle");
+    UTIL_THROW_IF2(fin == 0, "Null file handle");
     fin->read((char*)&m_, sizeof(m_));
     fin->read((char*)&H_, sizeof(H_));
   }
@@ -208,7 +208,7 @@ T UnivHash_tableXOR<T>::hash(const char* s, count_t h)
   unsigned char c;
   while((c = *s++) && (++pos < MAX_STR_LEN))
     value ^= table_[h][idx += c];
-  UTIL_THROW_IF(value >= this->m_, util::Exception, "Error");
+  UTIL_THROW_IF2(value >= this->m_, "Error");
   return value;
 }
 
@@ -304,7 +304,7 @@ template <typename T>
 inline T UnivHash_linear<T>::hash(const wordID_t* id, const int len,
                                   count_t h)
 {
-  UTIL_THROW_IF(h >= this->H_, util::Exception, "Error");
+  UTIL_THROW_IF2(h >= this->H_, "Error");
 
   T value = 0;
   int pos(0);
@@ -318,7 +318,7 @@ template <typename T>
 inline T UnivHash_linear<T>::hash(const wordID_t id, const count_t pos,
                                   const T prevValue, count_t h)
 {
-  UTIL_THROW_IF(h >= this->H_, util::Exception, "Error");
+  UTIL_THROW_IF2(h >= this->H_, "Error");
   T value = prevValue + ((a_[h][pos] * id) + b_[h][pos]); // % pr_;
   return value % this->m_;
 }

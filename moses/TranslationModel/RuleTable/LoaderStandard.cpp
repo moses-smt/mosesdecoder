@@ -71,7 +71,7 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
     if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]") {
       // no-term
       vector<string> split = Tokenize(tok, ",");
-      UTIL_THROW_IF(split.size() != 2, util::Exception,
+      UTIL_THROW_IF2(split.size() != 2,
     		  "Incorrectly formmatted non-terminal: " << tok);
 
       tok = "[X]" + split[0] + "]";
@@ -98,7 +98,7 @@ void ReformateHieroScore(string &scoreString)
   for (size_t i = 0; i < toks.size(); ++i) {
     string &tok = toks[i];
     vector<string> nameValue = Tokenize(tok, "=");
-    UTIL_THROW_IF(nameValue.size() != 2, util::Exception,
+    UTIL_THROW_IF2(nameValue.size() != 2,
     		"Incorrectly formatted score: " << tok);
 
     float score = Scan<float>(nameValue[1]);
@@ -205,7 +205,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     for (util::TokenIter<util::AnyCharacter, true> s(scoreString, " \t"); s; ++s) {
       int processed;
       float score = converter.StringToFloat(s->data(), s->length(), &processed);
-      UTIL_THROW_IF(isnan(score), util::Exception, "Bad score " << *s << " on line " << count);
+      UTIL_THROW_IF2(isnan(score), "Bad score " << *s << " on line " << count);
       scoreVector.push_back(FloorScore(TransformScore(score)));
     }
     const size_t numScoreComponents = ruleTable.GetNumScoreComponents();

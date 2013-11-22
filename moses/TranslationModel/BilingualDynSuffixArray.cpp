@@ -61,7 +61,7 @@ Load(
   cerr << "Loading target corpus...\n";
   LoadCorpus(Output, targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
 
-  UTIL_THROW_IF(m_srcSntBreaks.size() != m_trgSntBreaks.size(), util::Exception,
+  UTIL_THROW_IF2(m_srcSntBreaks.size() != m_trgSntBreaks.size(),
 		  "Source and target arrays aren't the same size");
 
   // build suffix arrays and auxilliary arrays
@@ -129,7 +129,7 @@ LoadRawAlignments(string& align)
   // stores the alignments in the raw file format
   vector<int> vtmp;
   Utils::splitToInt(align, vtmp, "- ");
-  UTIL_THROW_IF(vtmp.size() % 2 != 0, util::Exception,
+  UTIL_THROW_IF2(vtmp.size() % 2 != 0,
 		  "Alignment format is incorrect: " << align);
   vector<short> vAlgn;  // store as short ints for memory
   for (vector<int>::const_iterator itr = vtmp.begin();
@@ -326,14 +326,14 @@ CacheWordProbs(wordID_t srcWord) const
   map<wordID_t, int> counts;
   vector<wordID_t> sword(1, srcWord), wrdIndices;
   bool ret = m_srcSA->GetCorpusIndex(&sword, &wrdIndices);
-  UTIL_THROW_IF(!ret, util::Exception, "Error");
+  UTIL_THROW_IF2(!ret, "Error");
 
   vector<int> sntIndexes = GetSntIndexes(wrdIndices, 1, m_srcSntBreaks);
   float denom(0);
   // for each occurrence of this word
   for(size_t snt = 0; snt < sntIndexes.size(); ++snt) {
     int sntIdx = sntIndexes.at(snt); // get corpus index for sentence
-    UTIL_THROW_IF(sntIdx == -1, util::Exception, "Error");
+    UTIL_THROW_IF2(sntIdx == -1, "Error");
 
     int srcWrdSntIdx = wrdIndices.at(snt) - m_srcSntBreaks.at(sntIdx); // get word index in sentence
     const vector<int> srcAlg = GetSentenceAlignment(sntIdx).alignedList.at(srcWrdSntIdx); // list of target words for this source word
@@ -381,7 +381,7 @@ GetMosesFactorIDs(const SAPhrase& phrase, const Phrase& sourcePhrase) const
   TargetPhrase* targetPhrase = new TargetPhrase();
   for(size_t i=0; i < phrase.words.size(); ++i) { // look up trg words
     Word& word = m_trgVocab->GetWord( phrase.words[i]);
-    UTIL_THROW_IF(word == m_trgVocab->GetkOOVWord(), util::Exception,
+    UTIL_THROW_IF2(word == m_trgVocab->GetkOOVWord(),
     		"Unknown word at position " << i);
     targetPhrase->AddWord(word);
   }

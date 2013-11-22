@@ -107,12 +107,12 @@ void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
         std::set<size_t> sourcePosSet = GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
         if (sourcePosSet.size() == 1) {
           const std::vector<const Word*> *ruleSourceFromInputPath = GetTranslationOption().GetSourceRuleFromInputPath();
-          UTIL_THROW_IF(ruleSourceFromInputPath == NULL, util::Exception,
+          UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
         		  "No source rule");
 
           size_t sourcePos = *sourcePosSet.begin();
           const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
-          UTIL_THROW_IF(sourceWord == NULL, util::Exception,
+          UTIL_THROW_IF2(sourceWord == NULL,
         		  "No source word");
           const Factor *factor = sourceWord->GetFactor(placeholderFactor);
           if (factor) {

@@ -63,9 +63,9 @@ PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const W
 
 PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm)
 {
-  UTIL_THROW_IF(!sourceNonTerm.IsNonTerminal(), util::Exception,
+  UTIL_THROW_IF2(!sourceNonTerm.IsNonTerminal(),
 		  "Not a non-terminal: " << sourceNonTerm);
-  UTIL_THROW_IF(!targetNonTerm.IsNonTerminal(), util::Exception,
+  UTIL_THROW_IF2(!targetNonTerm.IsNonTerminal(),
 		  "Not a non-terminal: " << targetNonTerm);
 
   NonTerminalMapKey key(sourceNonTerm, targetNonTerm);
@@ -74,7 +74,7 @@ PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const W
 
 const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Word &sourceTerm) const
 {
-  UTIL_THROW_IF(sourceTerm.IsNonTerminal(), util::Exception,
+  UTIL_THROW_IF2(sourceTerm.IsNonTerminal(),
 		  "Not a terminal: " << sourceTerm);
 
   TerminalMap::const_iterator p = m_sourceTermMap.find(sourceTerm);
@@ -83,9 +83,9 @@ const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Wor
 
 const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const
 {
-  UTIL_THROW_IF(!sourceNonTerm.IsNonTerminal(), util::Exception,
+  UTIL_THROW_IF2(!sourceNonTerm.IsNonTerminal(),
 		  "Not a non-terminal: " << sourceNonTerm);
-  UTIL_THROW_IF(!targetNonTerm.IsNonTerminal(), util::Exception,
+  UTIL_THROW_IF2(!targetNonTerm.IsNonTerminal(),
 		  "Not a non-terminal: " << targetNonTerm);
 
   NonTerminalMapKey key(sourceNonTerm, targetNonTerm);

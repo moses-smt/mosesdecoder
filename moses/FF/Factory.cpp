@@ -204,7 +204,7 @@ FeatureRegistry::~FeatureRegistry()
 void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
 {
   std::pair<std::string, boost::shared_ptr<FeatureFactory> > to_ins(name, boost::shared_ptr<FeatureFactory>(factory));
-  UTIL_THROW_IF(!registry_.insert(to_ins).second, util::Exception, "Duplicate feature name " << name);
+  UTIL_THROW_IF2(!registry_.insert(to_ins).second, "Duplicate feature name " << name);
 }
 
 namespace

@@ -61,7 +61,7 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
 const Word &InputPath::GetLastWord() const
 {
   size_t len = m_phrase.GetSize();
-  UTIL_THROW_IF(len == 0, util::Exception, "Input path phrase cannot be empty");
+  UTIL_THROW_IF2(len == 0, "Input path phrase cannot be empty");
   const Word &ret = m_phrase.GetWord(len - 1);
   return ret;
 }

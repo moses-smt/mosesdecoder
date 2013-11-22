@@ -79,14 +79,14 @@ void TranslationOption::Evaluate(const InputType &input)
 
 const InputPath &TranslationOption::GetInputPath() const
 {
-  UTIL_THROW_IF(m_inputPath == NULL, util::Exception,
+  UTIL_THROW_IF2(m_inputPath == NULL,
 		  "No input path");
   return *m_inputPath;
 }
 
 void TranslationOption::SetInputPath(const InputPath &inputPath)
 {
-  UTIL_THROW_IF(m_inputPath, util::Exception,
+  UTIL_THROW_IF2(m_inputPath,
 		  "Input path already specified");
   m_inputPath = &inputPath;
 }

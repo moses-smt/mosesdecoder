@@ -46,7 +46,7 @@ void TargetBigramFeature::Load()
   if (m_filePath == "*")
     return ; //allow all
   ifstream inFile(m_filePath.c_str());
-  UTIL_THROW_IF(!inFile, util::Exception, "Can't open file " << m_filePath);
+  UTIL_THROW_IF2(!inFile, "Can't open file " << m_filePath);
 
   std::string line;
   m_vocab.insert(BOS_);

@@ -43,7 +43,7 @@ ChartTrellisPath::ChartTrellisPath(const ChartTrellisDetour &detour)
   , m_scoreBreakdown(detour.GetBasePath().m_scoreBreakdown)
   , m_totalScore(0)
 {
-  UTIL_THROW_IF(m_deviationPoint == NULL, util::Exception, "No deviation point");
+  UTIL_THROW_IF2(m_deviationPoint == NULL, "No deviation point");
   ScoreComponentCollection scoreChange;
   scoreChange = detour.GetReplacementHypo().GetScoreBreakdown();
   scoreChange.MinusEquals(detour.GetSubstitutedNode().GetHypothesis().GetScoreBreakdown());

@@ -125,8 +125,8 @@ LexicalReorderingState *LexicalReorderingConfiguration::CreateLexicalReorderingS
 void LexicalReorderingState::CopyScores(Scores& scores, const TranslationOption &topt, ReorderingType reoType) const
 {
   // don't call this on a bidirectional object
-  UTIL_THROW_IF(m_direction != LexicalReorderingConfiguration::Backward && m_direction != LexicalReorderingConfiguration::Forward,
-		  util::Exception, "Unknown direction: " << m_direction);
+  UTIL_THROW_IF2(m_direction != LexicalReorderingConfiguration::Backward && m_direction != LexicalReorderingConfiguration::Forward,
+		  "Unknown direction: " << m_direction);
   const Scores *cachedScores = (m_direction == LexicalReorderingConfiguration::Backward) ?
                                topt.GetLexReorderingScores(m_configuration.GetScoreProducer()) : m_prevScore;
 
@@ -190,7 +190,7 @@ int PhraseBasedReorderingState::Compare(const FFState& o) const
     return 0;
 
   const PhraseBasedReorderingState* other = dynamic_cast<const PhraseBasedReorderingState*>(&o);
-  UTIL_THROW_IF(other == NULL, util::Exception, "Wrong state type");
+  UTIL_THROW_IF2(other == NULL, "Wrong state type");
   if (m_prevRange == other->m_prevRange) {
     if (m_direction == LexicalReorderingConfiguration::Forward) {
       return ComparePrevScores(other->m_prevScore);
@@ -408,7 +408,7 @@ int HierarchicalReorderingForwardState::Compare(const FFState& o) const
     return 0;
 
   const HierarchicalReorderingForwardState* other = dynamic_cast<const HierarchicalReorderingForwardState*>(&o);
-  UTIL_THROW_IF(other == NULL, util::Exception, "Wrong state type");
+  UTIL_THROW_IF2(other == NULL, "Wrong state type");
 
   if (m_prevRange == other->m_prevRange) {
     return ComparePrevScores(other->m_prevScore);

@@ -95,7 +95,7 @@ public:
   }
 
   void Add(size_t pos, const DottedRuleInMemory *dottedRule) {
-    UTIL_THROW_IF(dottedRule == NULL, util::Exception, "Dotted rule is null");
+    UTIL_THROW_IF2(dottedRule == NULL, "Dotted rule is null");
     m_coll[pos].push_back(dottedRule);
     if (!dottedRule->GetLastNode().IsLeaf()) {
       m_expandableDottedRuleList.push_back(dottedRule);

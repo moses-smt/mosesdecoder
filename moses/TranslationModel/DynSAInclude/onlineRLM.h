@@ -24,7 +24,7 @@ public:
   OnlineRLM(uint16_t MBs, int width, int bucketRange, count_t order,
             Moses::Vocab* v, float qBase = 8): PerfectHash<T>(MBs, width, bucketRange, qBase),
     vocab_(v), bAdapting_(false), order_(order), corpusSize_(0), alpha_(0) {
-    UTIL_THROW_IF(vocab_ == 0, util::Exception, "Vocab object not set");
+    UTIL_THROW_IF2(vocab_ == 0, "Vocab object not set");
     //instantiate quantizer class here
     cache_ = new Cache<float>(8888.8888, 9999.9999); // unknown_value, null_value
     alpha_ = new float[order_ + 1];
@@ -148,7 +148,7 @@ int OnlineRLM<T>::query(const wordID_t* IDs, int len)
       //markQueried(hpdItr);  // mark this event as "hit"
       value -= ((value & this->hitMask_) != 0) ? this->hitMask_ : 0; // check for previous hit marks
     } else {
-    	UTIL_THROW_IF(filterIdx >= this->cells_, util::Exception,
+    	UTIL_THROW_IF2(filterIdx >= this->cells_,
     			"Out of bound: " << filterIdx);
       //markQueried(filterIdx);
     }

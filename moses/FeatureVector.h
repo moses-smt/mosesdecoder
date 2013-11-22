@@ -299,7 +299,7 @@ private:
     ar >> names;
     ar >> values;
     ar >> m_coreFeatures;
-    UTIL_THROW_IF(names.size() != values.size(), util::Exception, "Error");
+    UTIL_THROW_IF2(names.size() != values.size(), "Error");
     for (size_t i = 0; i < names.size(); ++i) {
       set(FName(names[i]), values[i]);
     }

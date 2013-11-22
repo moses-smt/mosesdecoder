@@ -109,7 +109,7 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 //! call SortHypotheses() in each hypo collection in this cell
 void ChartCell::SortHypotheses()
 {
-  UTIL_THROW_IF(!m_targetLabelSet.Empty(), util::Exception, "Already sorted");
+  UTIL_THROW_IF2(!m_targetLabelSet.Empty(), "Already sorted");
 
   MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {

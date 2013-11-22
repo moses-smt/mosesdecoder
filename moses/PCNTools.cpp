@@ -128,7 +128,7 @@ CNAlt getCNAlt(const std::string& in, int &c)
   for (; ind < toks.size() - 1; ++ind) {
     const string &tok = toks[ind];
     vector<string> keyValue = Moses::Tokenize(tok, "=");
-    UTIL_THROW_IF(keyValue.size() != 2, util::Exception, "Format error: " << tok);
+    UTIL_THROW_IF2(keyValue.size() != 2, "Format error: " << tok);
     float prob = Moses::Scan<float>(keyValue[1]);
     sparseFeatures[ keyValue[0] ] = prob;
   }

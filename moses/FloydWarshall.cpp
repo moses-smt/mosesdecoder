@@ -11,7 +11,7 @@ using namespace std;
 // All-pairs shortest path algorithm
 void floyd_warshall(const std::vector<std::vector<bool> >& edges, std::vector<std::vector<int> >& dist)
 {
-  UTIL_THROW_IF(edges.size() != edges.front().size(), util::Exception, "Error");
+  UTIL_THROW_IF2(edges.size() != edges.front().size(), "Error");
   dist.clear();
   dist.resize(edges.size(), std::vector<int>(edges.size(), 0));
 

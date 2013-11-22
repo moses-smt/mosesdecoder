@@ -129,9 +129,7 @@ template <class Model> void BackwardLanguageModel<Model>::CalcScore(const Phrase
   lm::ngram::ChartState discarded_sadly;
   lm::ngram::RuleScore<Model> scorer(*m_ngram, discarded_sadly);
 
-  UTIL_THROW_IF(
-    (m_beginSentenceFactor == phrase.GetWord(0).GetFactor(m_factorType)),
-    util::Exception,
+  UTIL_THROW_IF2(m_beginSentenceFactor == phrase.GetWord(0).GetFactor(m_factorType),
     "BackwardLanguageModel does not currently support rules that include <s>"
   );
 
@@ -144,9 +142,7 @@ template <class Model> void BackwardLanguageModel<Model>::CalcScore(const Phrase
   int position;
   for (position = lastWord; position >= 0; position-=1) {
     const Word &word = phrase.GetWord(position);
-    UTIL_THROW_IF(
-      (word.IsNonTerminal()),
-      util::Exception,
+    UTIL_THROW_IF2(word.IsNonTerminal(),
       "BackwardLanguageModel does not currently support rules that include non-terminals "
     );
 
@@ -261,9 +257,7 @@ template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Phr
   // that are now adjacent to words at the the beginning of this phrase
   for (int position=std::min( lastWord,  ngramBoundary - 1); position >= 0; position-=1) {
     const Word &word = phrase.GetWord(position);
-    UTIL_THROW_IF(
-      (word.IsNonTerminal()),
-      util::Exception,
+    UTIL_THROW_IF2(word.IsNonTerminal(),
       "BackwardLanguageModel does not currently support rules that include non-terminals "
     );
 

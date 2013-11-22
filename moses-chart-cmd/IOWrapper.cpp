@@ -128,8 +128,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   if (!staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
     m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
-    UTIL_THROW_IF(!m_alignmentInfoStream->good(),
-    		util::Exception,
+    UTIL_THROW_IF2(!m_alignmentInfoStream->good(),
     		"File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
   }
 }
@@ -175,8 +174,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
  */
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
-  UTIL_THROW_IF(outputFactorOrder.size() == 0,
-		  util::Exception,
+  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
 		  "Cannot be empty phrase");
   if (reportAllFactors == true) {
     out << phrase;
@@ -185,14 +183,12 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
     for (size_t pos = 0 ; pos < size ; pos++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
       out << *factor;
-      UTIL_THROW_IF(factor == NULL,
-    		  util::Exception,
+      UTIL_THROW_IF2(factor == NULL,
     		  "Empty factor 0 at position " << pos);
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        UTIL_THROW_IF(factor == NULL,
-      		  util::Exception,
+        UTIL_THROW_IF2(factor == NULL,
       		  "Empty factor " << i << " at position " << pos);
 
         out << "|" << *factor;
@@ -378,8 +374,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   ApplicationContext applicationContext;
 
   OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
-  UTIL_THROW_IF(m_detailOutputCollector == NULL,
-		  util::Exception,
+  UTIL_THROW_IF2(m_detailOutputCollector == NULL,
 		  "No ouput file for detailed reports specified");
   m_detailOutputCollector->Write(translationId, out.str());
 }
@@ -396,8 +391,7 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
   ApplicationContext applicationContext;
 
   OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
-  UTIL_THROW_IF(m_detailTreeFragmentsOutputCollector == NULL,
-		  util::Exception,
+  UTIL_THROW_IF2(m_detailTreeFragmentsOutputCollector == NULL,
 		  "No output file for tree fragments specified");
   m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
 }
@@ -431,8 +425,7 @@ void IOWrapper::OutputDetailedAllTranslationReport(
       }
     }
   }
-  UTIL_THROW_IF(m_detailAllOutputCollector == NULL,
-		  util::Exception,
+  UTIL_THROW_IF2(m_detailAllOutputCollector == NULL,
 		  "No output file for details specified");
   m_detailAllOutputCollector->Write(translationId, out.str());
 }
@@ -460,7 +453,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
     hypo->GetOutputPhrase(outPhrase);
 
     // delete 1st & last
-    UTIL_THROW_IF(outPhrase.GetSize() < 2, util::Exception,
+    UTIL_THROW_IF2(outPhrase.GetSize() < 2,
   		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
 
     outPhrase.RemoveWord(0);
@@ -492,7 +485,7 @@ void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
   Phrase outPhrase;
   Incremental::ToPhrase(applied, outPhrase);
   // delete 1st & last
-  UTIL_THROW_IF(outPhrase.GetSize() < 2, util::Exception,
+  UTIL_THROW_IF2(outPhrase.GetSize() < 2,
 		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
   outPhrase.RemoveWord(0);
   outPhrase.RemoveWord(outPhrase.GetSize() - 1);
@@ -581,7 +574,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long tran
     Moses::Phrase outputPhrase = path.GetOutputPhrase();
 
     // delete 1st & last
-    UTIL_THROW_IF(outputPhrase.GetSize() < 2, util::Exception,
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
   		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
 
     outputPhrase.RemoveWord(0);
@@ -657,7 +650,7 @@ void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long 
   for (std::vector<search::Applied>::const_iterator i = nbest.begin(); i != nbest.end(); ++i) {
     Incremental::PhraseAndFeatures(*i, outputPhrase, features);
     // <s> and </s>
-    UTIL_THROW_IF(outputPhrase.GetSize() < 2, util::Exception,
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
   		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
 
     outputPhrase.RemoveWord(0);
@@ -726,12 +719,12 @@ size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartT
   vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
   const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
 
-  UTIL_THROW_IF(sourceInd2pos.size() != prevNodes.size(), util::Exception, "Error");
+  UTIL_THROW_IF2(sourceInd2pos.size() != prevNodes.size(), "Error");
 
   size_t targetInd = 0;
   for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
     if (tp.GetWord(targetPos).IsNonTerminal()) {
-      UTIL_THROW_IF(targetPos >= targetPos2SourceInd.size(), util::Exception, "Error");
+      UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
       size_t sourceInd = targetPos2SourceInd[targetPos];
       size_t sourcePos = sourceInd2pos[sourceInd];
 
@@ -773,7 +766,7 @@ size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartT
 
     pair<size_t, size_t> alignPoint(absSource, absTarget);
     pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-    UTIL_THROW_IF(!ret.second, util::Exception, "Error");
+    UTIL_THROW_IF2(!ret.second, "Error");
   }
 
   return totalTargetSize;
@@ -819,12 +812,12 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
   vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
   const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
 
-  UTIL_THROW_IF(sourceInd2pos.size() != prevHypos.size(), util::Exception, "Error");
+  UTIL_THROW_IF2(sourceInd2pos.size() != prevHypos.size(), "Error");
 
   size_t targetInd = 0;
   for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
     if (tp.GetWord(targetPos).IsNonTerminal()) {
-  	  UTIL_THROW_IF(targetPos >= targetPos2SourceInd.size(), util::Exception, "Error");
+  	  UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
       size_t sourceInd = targetPos2SourceInd[targetPos];
       size_t sourcePos = sourceInd2pos[sourceInd];
 
@@ -866,7 +859,7 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
 
     pair<size_t, size_t> alignPoint(absSource, absTarget);
     pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-    UTIL_THROW_IF(!ret.second, util::Exception, "Error");
+    UTIL_THROW_IF2(!ret.second, "Error");
 
   }
 
@@ -882,9 +875,9 @@ void IOWrapper::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const A
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignPoint = **it;
 
-    UTIL_THROW_IF(alignPoint.first >= retAlignmentsS2T.size(), util::Exception, "Error");
+    UTIL_THROW_IF2(alignPoint.first >= retAlignmentsS2T.size(), "Error");
     pair<set<size_t>::iterator, bool> ret = retAlignmentsS2T[alignPoint.first].insert(alignPoint.second);
-    UTIL_THROW_IF(!ret.second, util::Exception, "Error");
+    UTIL_THROW_IF2(!ret.second, "Error");
   }
 }
 

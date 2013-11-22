@@ -64,10 +64,10 @@ bool Parameters::loadParams(int argc, char ** argv)
     //if the parameter is of type booL no corresponding value
     if( getValueType(param) == kBoolValue ) {
       jumpBy = 1;
-      UTIL_THROW_IF(!setParamValue(param, kTrueValue), util::Exception,
+      UTIL_THROW_IF2(!setParamValue(param, kTrueValue),
     		  "Couldn't set parameter " << param);
     } else { //not of type bool so must have corresponding value
-      UTIL_THROW_IF(i+1 >= argc, util::Exception,
+      UTIL_THROW_IF2(i+1 >= argc,
     		  "Out of bound error: " << i+1);
 
       jumpBy = 2;

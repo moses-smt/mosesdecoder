@@ -170,7 +170,7 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
     ++dash;
     size_t targetPos = strtoul(dash->data(), &endptr, 10);
     UTIL_THROW_IF(endptr != dash->data() + dash->size(), util::ErrnoException, "Error parsing alignment" << *dash);
-    UTIL_THROW_IF(++dash, util::Exception, "Extra gunk in alignment " << *token);
+    UTIL_THROW_IF2(++dash, "Extra gunk in alignment " << *token);
 
 
     if (GetWord(targetPos).IsNonTerminal()) {
@@ -228,7 +228,7 @@ void TargetPhrase::SetProperties(const StringPiece &str)
     tok = tok.substr(0, endPos - 1);
 
     vector<string> keyValue = TokenizeFirstOnly(tok, " ");
-    UTIL_THROW_IF(keyValue.size() != 2, util::Exception,
+    UTIL_THROW_IF2(keyValue.size() != 2,
     		"Incorrect format of property: " << str);
     SetProperty(keyValue[0], keyValue[1]);
   }

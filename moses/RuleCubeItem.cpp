@@ -85,7 +85,7 @@ void RuleCubeItem::CreateHypothesis(const ChartTranslationOptions &transOpt,
 
 ChartHypothesis *RuleCubeItem::ReleaseHypothesis()
 {
-  UTIL_THROW_IF(m_hypothesis == NULL, util::Exception, "Hypothesis is NULL");
+  UTIL_THROW_IF2(m_hypothesis == NULL, "Hypothesis is NULL");
   ChartHypothesis *hypo = m_hypothesis;
   m_hypothesis = NULL;
   return hypo;

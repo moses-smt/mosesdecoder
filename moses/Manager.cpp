@@ -963,9 +963,8 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
           mosesHypothesisID = searchGraph[lineNumber].hypo->GetId();
         }
         //	int actualHypergraphHypothesisID = mosesIDToHypergraphID[mosesHypothesisID];
-        UTIL_THROW_IF(
+        UTIL_THROW_IF2(
           (hypergraphHypothesisID != mosesIDToHypergraphID[mosesHypothesisID]),
-          util::Exception,
           "Error while writing search lattice as hypergraph for sentence " << translationId << ". " <<
           "Moses node " << mosesHypothesisID << " was expected to have hypergraph id " << hypergraphHypothesisID <<
           ", but actually had hypergraph id " << mosesIDToHypergraphID[mosesHypothesisID] <<
@@ -979,9 +978,8 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
         } else {
           int startNode = mosesIDToHypergraphID[prevHypo->GetId()];
           //	  VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " has parent node " << startNode << std::endl)
-          UTIL_THROW_IF(
+          UTIL_THROW_IF2(
             (startNode >= hypergraphHypothesisID),
-            util::Exception,
             "Error while writing search lattice as hypergraph for sentence" << translationId << ". " <<
             "The nodes must be output in topological order. The code attempted to violate this restriction."
           );

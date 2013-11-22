@@ -53,7 +53,7 @@ void GenerationDictionary::Load()
 
   // data from file
   InputFileStream inFile(m_filePath);
-  UTIL_THROW_IF(!inFile.good(), util::Exception, "Couldn't read " << m_filePath);
+  UTIL_THROW_IF2(!inFile.good(), "Couldn't read " << m_filePath);
 
   string line;
   size_t lineNum = 0;

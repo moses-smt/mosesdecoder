@@ -113,7 +113,7 @@ public:
     ChartManager manager(*m_source);
     manager.ProcessSentence();
 
-    UTIL_THROW_IF(staticData.UseMBR(), util::Exception, "Cannot use MBR");
+    UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
@@ -160,7 +160,7 @@ public:
       std::ostringstream out;
       manager.GetSearchGraph(translationId, out);
       OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
-      UTIL_THROW_IF(oc == NULL, util::Exception, "File for search graph output not specified");
+      UTIL_THROW_IF2(oc == NULL, "File for search graph output not specified");
       oc->Write(translationId, out.str());
     }
 
@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
       exit(0);
     }
 
-    UTIL_THROW_IF(!staticData.IsChart(), util::Exception, "Must be SCFG model");
+    UTIL_THROW_IF2(!staticData.IsChart(), "Must be SCFG model");
 
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);

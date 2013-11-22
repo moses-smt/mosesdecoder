@@ -78,9 +78,7 @@ public:
   }
 
   size_t GetMaxChartSpan() const {
-	UTIL_THROW_IF(m_maxChartSpan == NOT_FOUND,
-			util::Exception,
-			"Max chart span not specified");
+	UTIL_THROW_IF2(m_maxChartSpan == NOT_FOUND, "Max chart span not specified");
     return m_maxChartSpan;
   }
 

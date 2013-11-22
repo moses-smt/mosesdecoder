@@ -12,7 +12,7 @@ namespace Moses
 {
 WordLattice::WordLattice()
 {
-  UTIL_THROW_IF(StaticData::Instance().GetInputFeature() == NULL, util::Exception,
+  UTIL_THROW_IF2(StaticData::Instance().GetInputFeature() == NULL,
 		  "Input feature must be specified");
 }
 

@@ -119,7 +119,7 @@ bool Vocab::Load(FileHandler* vcbin, const FactorDirection& direction,
   wordID_t id;
 
   std::istream &ret = getline(*vcbin, line);
-  UTIL_THROW_IF(!ret, util::Exception, "Couldn't read file");
+  UTIL_THROW_IF2(!ret, "Couldn't read file");
   std::istringstream first(line.c_str());
   uint32_t vcbsize(0);
   first >> vcbsize;
@@ -133,8 +133,7 @@ bool Vocab::Load(FileHandler* vcbin, const FactorDirection& direction,
     // may be no id (i.e. file may just be a word list)
     if (id == 0 && word != GetkOOVWord())
       id = m_ids2words.size() + 1;	// assign ids sequentially starting from 1
-    UTIL_THROW_IF(m_ids2words.count(id) != 0 || m_words2ids.count(word) != 0,
-    		util::Exception,
+    UTIL_THROW_IF2(m_ids2words.count(id) != 0 || m_words2ids.count(word) != 0,
     		"Error");
 
     m_ids2words[id] = word;

@@ -150,23 +150,19 @@ void OnDiskWrapper::BeginSave(const std::string &filePath
   // offset by 1. 0 offset is reserved
   char c = 0xff;
   m_fileSource.write(&c, 1);
-  UTIL_THROW_IF(1 != m_fileSource.tellp(),
-	  util::Exception,
+  UTIL_THROW_IF2(1 != m_fileSource.tellp(),
 	"Couldn't write to stream m_fileSource");
 
   m_fileTargetInd.write(&c, 1);
-  UTIL_THROW_IF(1 != m_fileTargetInd.tellp(),
-	  	  util::Exception,
+  UTIL_THROW_IF2(1 != m_fileTargetInd.tellp(),
 	  	"Couldn't write to stream m_fileTargetInd");
 
   m_fileTargetColl.write(&c, 1);
-  UTIL_THROW_IF(1 != m_fileTargetColl.tellp(),
-		  	  util::Exception,
+  UTIL_THROW_IF2(1 != m_fileTargetColl.tellp(),
 		  	"Couldn't write to stream m_fileTargetColl");
 
   // set up root node
-  UTIL_THROW_IF(GetNumCounts() != 1,
-	  	  util::Exception,
+  UTIL_THROW_IF2(GetNumCounts() != 1,
 	  	"Not sure what this is...");
 
   vector<float> counts(GetNumCounts());
@@ -178,7 +174,7 @@ void OnDiskWrapper::BeginSave(const std::string &filePath
 void OnDiskWrapper::EndSave()
 {
   bool ret = m_rootSourceNode->Saved();
-  UTIL_THROW_IF(!ret, util::Exception, "Root node not saved");
+  UTIL_THROW_IF2(!ret, "Root node not saved");
 
   GetVocab().Save(*this);
 
@@ -215,8 +211,7 @@ UINT64 OnDiskWrapper::GetMisc(const std::string &key) const
 {
   std::map<std::string, UINT64>::const_iterator iter;
   iter = m_miscInfo.find(key);
-  UTIL_THROW_IF(iter == m_miscInfo.end()
-		  	  , util::Exception
+  UTIL_THROW_IF2(iter == m_miscInfo.end()
 		  	  , "Couldn't find value for key " << key
   	  	  	  );
 
@@ -232,7 +227,7 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
 
   size_t factorType = factorsVec[0];
   const Moses::Factor *factor = origWord.GetFactor(factorType);
-  UTIL_THROW_IF(factor == NULL, util::Exception, "Expecting factor " << factorType);
+  UTIL_THROW_IF2(factor == NULL, "Expecting factor " << factorType);
   strme << factor->GetString();
 
   for (size_t ind = 1 ; ind < factorsVec.size() ; ++ind) {
@@ -242,8 +237,7 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
       // can have less factors than factorType.size()
       break;
     }
-    UTIL_THROW_IF(factor == NULL,
-    		util::Exception,
+    UTIL_THROW_IF2(factor == NULL,
     		"Expecting factor " << factorType << " at position " << ind);
     strme << "|" << factor->GetString();
   } // for (size_t factorType

@@ -81,7 +81,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 
         const Phrase &prevPhrase = prevPath.GetPhrase();
         const ScorePair *prevInputScore = prevPath.GetInputScore();
-        UTIL_THROW_IF(prevInputScore == NULL, util::Exception,
+        UTIL_THROW_IF2(prevInputScore == NULL,
         		"No input score for path: " << prevPath);
 
         // loop thru every word at this position
@@ -111,8 +111,8 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
-  UTIL_THROW_IF(offset >= m_inputPathMatrix[startPos].size(),
-                 util::Exception, "Out of bound access: " << offset);
+  UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
+                 "Out of bound access: " << offset);
 
   return m_inputPathMatrix[startPos][offset];
 }

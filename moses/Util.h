@@ -315,7 +315,7 @@ inline float FloorScore(float logScore)
 inline float CalcTranslationScore(const std::vector<float> &probVector,
                                   const std::vector<float> &weightT)
 {
-  UTIL_THROW_IF(weightT.size() != probVector.size(), util::Exception,
+  UTIL_THROW_IF2(weightT.size() != probVector.size(),
 		  "Weight and score vector sizes not the same");
   float rv=0.0;
   for(float const *sb=&probVector[0],*se=sb+probVector.size(),*wb=&weightT[0];

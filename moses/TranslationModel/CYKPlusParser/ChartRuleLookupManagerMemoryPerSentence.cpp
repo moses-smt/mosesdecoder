@@ -38,8 +38,7 @@ ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence
   : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_ruleTable(ruleTable)
 {
-  UTIL_THROW_IF(m_dottedRuleColls.size() != 0, util::Exception,
-		  "Dotted rule collection not correctly initialized");
+  UTIL_THROW_IF2(m_dottedRuleColls.size() != 0, "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_dottedRuleColls.resize(sourceSize);

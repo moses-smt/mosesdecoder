@@ -313,8 +313,7 @@ public:
    std::vector<std::pair<float,size_t> >& costs,
    const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
-    UTIL_THROW_IF(tCands.size() != sourcePhrases.size(),
-    		util::Exception,
+    UTIL_THROW_IF2(tCands.size() != sourcePhrases.size(),
     		"Number of target phrases must equal number of source phrases");
 
     TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
@@ -403,7 +402,7 @@ public:
       State curr(stack.back());
       stack.pop_back();
 
-      UTIL_THROW_IF(curr.end() >= srcSize, util::Exception, "Error");
+      UTIL_THROW_IF2(curr.end() >= srcSize, "Error");
       const ConfusionNet::Column &currCol=src[curr.end()];
       // in a given column, loop over all possibilities
       for(size_t colidx=0; colidx<currCol.size(); ++colidx) {
@@ -413,8 +412,7 @@ public:
         bool isEpsilon=(s=="" || s==EPSILON);
 
         //assert that we have the right number of link params in this CN option
-        UTIL_THROW_IF(currCol[colidx].second.denseScores.size() < m_numInputScores,
-        		util::Exception,
+        UTIL_THROW_IF2(currCol[colidx].second.denseScores.size() < m_numInputScores,
         		"Incorrect number of input scores");
 
         // do not start with epsilon (except at first position)
@@ -473,7 +471,7 @@ public:
             for(size_t i=0; i<tcands.size(); ++i) {
               //put input scores in first - already logged, just drop in directly
               std::vector<float> transcores(m_obj->GetNumScoreComponents());
-              UTIL_THROW_IF(transcores.size() != weightTrans.size(), util::Exception,
+              UTIL_THROW_IF2(transcores.size() != weightTrans.size(),
             		  "Incorrect number of translation scores");
 
               //put in phrase table scores, logging as we insert

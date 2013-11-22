@@ -53,7 +53,7 @@ public:
     return m_coll.at(ind);
   }
   void Remove( size_t ind ) {
-    UTIL_THROW_IF(ind >= m_coll.size(), util::Exception,
+    UTIL_THROW_IF2(ind >= m_coll.size(),
     		"Out of bound index " << ind);
     m_coll.erase( m_coll.begin()+ind );
   }

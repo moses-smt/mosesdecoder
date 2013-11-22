@@ -144,7 +144,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
 {
   std::pair<iterator, bool> addRet = Add(hypo);
-  UTIL_THROW_IF(!addRet.second, util::Exception,
+  UTIL_THROW_IF2(!addRet.second,
 		  	 "Should have added hypothesis " << *hypo);
 
   const WordsBitmap &bitmap = hypo->GetWordsBitmap();

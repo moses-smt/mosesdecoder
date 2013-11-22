@@ -80,7 +80,7 @@ public:
   }
 
   inline size_t GetNumWordsBetween(const WordsRange& x) const {
-    UTIL_THROW_IF(Overlap(x), util::Exception, "Overlapping ranges");
+    UTIL_THROW_IF2(Overlap(x), "Overlapping ranges");
 
     if (x.m_endPos < m_startPos) {
       return m_startPos - x.m_endPos - 1;

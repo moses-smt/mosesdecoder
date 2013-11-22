@@ -97,11 +97,11 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
         std::set<size_t> sourcePosSet = m_hypo.GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
         if (sourcePosSet.size() == 1) {
           const std::vector<const Word*> *ruleSourceFromInputPath = m_hypo.GetTranslationOption().GetSourceRuleFromInputPath();
-          UTIL_THROW_IF(ruleSourceFromInputPath == NULL, util::Exception, "Source Words in of the rules hasn't been filled out");
+          UTIL_THROW_IF2(ruleSourceFromInputPath == NULL, "Source Words in of the rules hasn't been filled out");
 
           size_t sourcePos = *sourcePosSet.begin();
           const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
-          UTIL_THROW_IF(sourceWord == NULL, util::Exception, "Null source word at position " << sourcePos);
+          UTIL_THROW_IF2(sourceWord == NULL, "Null source word at position " << sourcePos);
           const Factor *factor = sourceWord->GetFactor(placeholderFactor);
           if (factor) {
             ret.Back()[0] = factor;
@@ -116,7 +116,7 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
 
 void ChartTrellisNode::CreateChildren()
 {
-  UTIL_THROW_IF(!m_children.empty(), util::Exception, "Already created children");
+  UTIL_THROW_IF2(!m_children.empty(), "Already created children");
 
   const std::vector<const ChartHypothesis*> &prevHypos = m_hypo.GetPrevHypos();
   m_children.reserve(prevHypos.size());
@@ -132,7 +132,7 @@ void ChartTrellisNode::CreateChildren(const ChartTrellisNode &rootNode,
                                       const ChartHypothesis &replacementHypo,
                                       ChartTrellisNode *&deviationPoint)
 {
-  UTIL_THROW_IF(!m_children.empty(), util::Exception, "Already created children");
+  UTIL_THROW_IF2(!m_children.empty(), "Already created children");
 
   const NodeChildren &children = rootNode.GetChildren();
   m_children.reserve(children.size());

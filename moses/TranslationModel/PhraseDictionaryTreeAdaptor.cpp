@@ -94,7 +94,7 @@ PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation()
 {
   PDTAimp* dict;
   dict = m_implementation.get();
-  UTIL_THROW_IF(dict == NULL, util::Exception, "Dictionary object not yet created for this thread");
+  UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -102,7 +102,7 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 {
   PDTAimp* dict;
   dict = m_implementation.get();
-  UTIL_THROW_IF(dict == NULL, util::Exception, "Dictionary object not yet created for this thread");
+  UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
   return *dict;
 }
 

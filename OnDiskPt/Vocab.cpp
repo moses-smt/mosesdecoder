@@ -36,7 +36,7 @@ bool Vocab::Load(OnDiskWrapper &onDiskWrapper)
   while(getline(file, line)) {
     vector<string> tokens;
     Moses::Tokenize(tokens, line);
-    UTIL_THROW_IF(tokens.size() != 2, util::Exception, "Vocab file corrupted");
+    UTIL_THROW_IF2(tokens.size() != 2, "Vocab file corrupted");
     const string &key = tokens[0];
     m_vocabColl[key] =  Moses::Scan<UINT64>(tokens[1]);
   }

@@ -69,7 +69,7 @@ ConfusionNet::ConfusionNet()
   if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
-  UTIL_THROW_IF(StaticData::Instance().GetInputFeature() == NULL, util::Exception,
+  UTIL_THROW_IF2(StaticData::Instance().GetInputFeature() == NULL,
 		  "Input feature must be specified");
 }
 ConfusionNet::~ConfusionNet()

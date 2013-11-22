@@ -63,7 +63,7 @@ OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation()
 {
   OnDiskPt::OnDiskWrapper* dict;
   dict = m_implementation.get();
-  UTIL_THROW_IF(dict == NULL, util::Exception, "Dictionary object not yet created for this thread");
+  UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -71,7 +71,7 @@ const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
 {
   OnDiskPt::OnDiskWrapper* dict;
   dict = m_implementation.get();
-  UTIL_THROW_IF(dict == NULL, util::Exception, "Dictionary object not yet created for this thread");
+  UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -84,23 +84,19 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
   obj->BeginLoad(m_filePath);
 
-  UTIL_THROW_IF(obj->GetMisc("Version") != OnDiskPt::OnDiskWrapper::VERSION_NUM,
-		  util::Exception,
+  UTIL_THROW_IF2(obj->GetMisc("Version") != OnDiskPt::OnDiskWrapper::VERSION_NUM,
 		  "On-disk phrase table is version " <<  obj->GetMisc("Version")
 		  << ". It is not compatible with version " << OnDiskPt::OnDiskWrapper::VERSION_NUM);
 
-  UTIL_THROW_IF(obj->GetMisc("NumSourceFactors") != m_input.size(),
-		  util::Exception,
+  UTIL_THROW_IF2(obj->GetMisc("NumSourceFactors") != m_input.size(),
 		  "On-disk phrase table has " <<  obj->GetMisc("NumSourceFactors") << " source factors."
 		  		  << ". The ini file specified " << m_input.size() << " source factors");
 
-  UTIL_THROW_IF(obj->GetMisc("NumTargetFactors") != m_output.size(),
-		  util::Exception,
+  UTIL_THROW_IF2(obj->GetMisc("NumTargetFactors") != m_output.size(),
 		  "On-disk phrase table has " <<  obj->GetMisc("NumTargetFactors") << " target factors."
 		  		  << ". The ini file specified " << m_output.size() << " target factors");
 
-  UTIL_THROW_IF(obj->GetMisc("NumScores") != m_numScoreComponents,
-		  util::Exception,
+  UTIL_THROW_IF2(obj->GetMisc("NumScores") != m_numScoreComponents,
 		  "On-disk phrase table has " <<  obj->GetMisc("NumScores") << " scores."
 		  		  << ". The ini file specified " << m_numScoreComponents << " scores");
 

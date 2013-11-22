@@ -112,7 +112,7 @@ class SavedNodeOnDisk
 public:
   SavedNodeOnDisk(const DottedRuleOnDisk *dottedRule)
     :m_dottedRule(dottedRule) {
-    UTIL_THROW_IF(m_dottedRule == NULL, util::Exception, "Dotted rule is null");
+    UTIL_THROW_IF2(m_dottedRule == NULL, "Dotted rule is null");
   }
 
   ~SavedNodeOnDisk() {
@@ -168,7 +168,7 @@ public:
   }
 
   void Add(size_t pos, const DottedRuleOnDisk *dottedRule) {
-    UTIL_THROW_IF(dottedRule == NULL, util::Exception, "Dotted rule is null");
+    UTIL_THROW_IF2(dottedRule == NULL, "Dotted rule is null");
 
     m_coll[pos]->Add(dottedRule);
     m_savedNode.push_back(new SavedNodeOnDisk(dottedRule));
