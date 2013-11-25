@@ -6,7 +6,7 @@ NAME
 
 SYNOPSIS
 
-    extract_words_dlm.py SOURCE TARGET ALIGN > OUT
+    extract_words_dlm.py SOURCE TARGET ALIGN [TESTSOURCE] > OUT
  
 
 DESCRIPTION
@@ -87,9 +87,18 @@ def cept_to_string(source, cept):
 def spans_to_string(spans):
     return " ".join("-".join(map(str, span)) for span in spans)
 
+def confirm_source(source, cept, onlywords):
+    if onlywords:
+        for index in cept:
+            if not source[index] in onlywords:
+                return False
+        return True
+    else:
+        return True
+
 SENTENCE_ID = 1
 
-def extract_from_sentence(source, target, align_pairs):
+def extract_from_sentence(source, target, align_pairs, onlywords):
     global SENTENCE_ID
 
     source_cept = collections.defaultdict(lambda: [])
@@ -105,6 +114,8 @@ def extract_from_sentence(source, target, align_pairs):
         if cept:
             spans = cept_to_spans(cept)
             last_aligned_position = max(cept) + 1
+            if not confirm_source(source, cept, onlywords):
+                continue
         else:
             spans = [[last_aligned_position, last_aligned_position]]
 
@@ -120,7 +131,7 @@ def extract_from_sentence(source, target, align_pairs):
 
     SENTENCE_ID += 1
 
-def extract_all(source_path, target_path, align_path):
+def extract_all(source_path, target_path, align_path, onlywords):
     input_files = itertools.zip_longest(
         fileinput.input(source_path), 
         fileinput.input(target_path), 
@@ -136,12 +147,18 @@ def extract_all(source_path, target_path, align_path):
         target_sentence = parse_sentence(target_line)
         align_pairs = parse_alignment_pairs(align_line)
 
-        extract_from_sentence(source_sentence, target_sentence, align_pairs)
+        extract_from_sentence(source_sentence, target_sentence, align_pairs, onlywords)
 
 # ---------------------------------------------------------------------- Main --
 
 def main():
-    extract_all(sys.argv[1], sys.argv[2], sys.argv[3])
+    onlywords = []
+    if len(sys.argv) > 4:
+        testsrc = open(sys.argv[4], "r")
+        for line in testsrc:
+            onlywords.append(line.rstrip())
+
+    extract_all(sys.argv[1], sys.argv[2], sys.argv[3], onlywords)
 
 if __name__ == "__main__":
     main()
