@@ -121,6 +121,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   if (meta.find("weight-setting") != meta.end()) {
     this->SetWeightSetting(meta["weight-setting"]);
     this->SetSpecifiesWeightSetting(true);
+    staticData.SetWeightSetting(meta["weight-setting"]);
   } else {
     this->SetSpecifiesWeightSetting(false);
   }
