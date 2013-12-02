@@ -32,9 +32,9 @@ void TransliterationPhraseDictionary::GetTargetPhraseCollectionBatch(const Input
     InputPath::TargetPhrases::const_iterator iter;
     for (iter = inputPath.GetTargetPhrases().begin(); iter != inputPath.GetTargetPhrases().end(); ++iter) {
     	const std::pair<const TargetPhraseCollection*, const void*> &temp = iter->second;
-    	const TargetPhraseCollection *tpColl = temp.first;
+    	const TargetPhraseCollection *tpCollPrev = temp.first;
 
-    	if (tpColl && tpColl->GetSize()) {
+    	if (tpCollPrev && tpCollPrev->GetSize()) {
     		// already have translation from another pt. Don't transliterate
     		break;
     	}
