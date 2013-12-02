@@ -1067,6 +1067,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
 		</link>
 		<link>
+			<name>FF/CoveredReferenceFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CoveredReferenceFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/DecodeFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DecodeFeature.cpp</locationURI>
@@ -1680,6 +1690,16 @@
 			<name>TranslationModel/SkeletonPT.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/TransliterationPhraseDictionary.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/TransliterationPhraseDictionary.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/TransliterationPhraseDictionary.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/TransliterationPhraseDictionary.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/WordCoocTable.cpp</name>

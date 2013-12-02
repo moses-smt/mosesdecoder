@@ -9,6 +9,7 @@
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryScope3.h"
+#include "moses/TranslationModel/TransliterationPhraseDictionary.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -158,6 +159,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
+  MOSES_FNAME(TransliterationPhraseDictionary);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
