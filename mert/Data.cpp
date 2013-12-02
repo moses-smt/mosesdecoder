@@ -14,7 +14,7 @@
 #include "Scorer.h"
 #include "ScorerFactory.h"
 #include "Util.h"
-#include "util/check.hh"
+#include "util/exception.hh"
 
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
@@ -261,12 +261,15 @@ void Data::AddFeatures(const string& str,
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
                         vector<Data>& shards)
 {
-  CHECK(shard_count);
-  CHECK(shard_size >= 0);
-  CHECK(shard_size <= 1);
+  UTIL_THROW_IF(shard_count == 0, util::Exception, "Must have at least 1 shard");
+  UTIL_THROW_IF(shard_size < 0 || shard_size > 1,
+		  util::Exception,
+		  "Shard size must be between 0 and 1, inclusive. Currently " << shard_size);
 
   size_t data_size = m_score_data->size();
-  CHECK(data_size == m_feature_data->size());
+  UTIL_THROW_IF(data_size != m_feature_data->size(),
+  	  	  util::Exception,
+  	  	  "Error");
 
   shard_size *= data_size;
   const float coeff = static_cast<float>(data_size) / shard_count;

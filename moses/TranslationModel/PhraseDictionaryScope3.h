@@ -1,7 +1,6 @@
-// $Id$
 /***********************************************************************
- Moses - factored phrase-based, hierarchical and syntactic language decoder
- Copyright (C) 2009 Hieu Hoang
+ Moses - statistical machine translation system
+ Copyright (C) 2006-2011 University of Edinburgh
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -16,12 +15,31 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************************/
-#include "SourcePhrase.h"
+***********************************************************************/
 
-namespace OnDiskPt
+#pragma once
+
+#include "PhraseDictionaryNodeMemory.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/InputType.h"
+#include "moses/NonTerminal.h"
+#include "moses/TranslationModel/RuleTable/UTrie.h"
+
+namespace Moses
 {
+class ChartParser;
 
-}
+/** Scope-3 only
+ */
+class PhraseDictionaryScope3 : public RuleTableUTrie
+{
+  friend class RuleTableLoader;
 
+public:
+  PhraseDictionaryScope3(const std::string &line);
 
+protected:
+
+};
+
+}  // namespace Moses

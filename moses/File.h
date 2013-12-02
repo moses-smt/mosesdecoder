@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
-#include "util/check.hh"
+#include "util/exception.hh"
 #include "UserMessage.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -161,7 +161,7 @@ inline FILE* fOpen(const char* fn,const char* m)
     return f;
   else {
     UserMessage::Add(std::string("ERROR: could not open file ") + fn + " with mode " + m + "\n");
-    CHECK(false);
+    UTIL_THROW(util::Exception, "Couldn't open file " << fn);
     return NULL;
   }
 }

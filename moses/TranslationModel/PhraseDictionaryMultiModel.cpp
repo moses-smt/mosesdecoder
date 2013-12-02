@@ -40,7 +40,9 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
   if (m_mode == "interpolate") {
     numWeights--;
   }
-  CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*numWeights == m_multimodelweights.size());
+  UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &
+		  m_pdStr.size()*numWeights != m_multimodelweights.size(),
+		  "Number of scores and weights are not equal");
 }
 
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(int type, const std::string &line)
@@ -48,7 +50,9 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(int type, const std::stri
 {
   if (type == 1) {
 	// PhraseDictionaryMultiModelCounts
-    CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*4 == m_multimodelweights.size());
+    UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
+    		m_pdStr.size()*4 != m_multimodelweights.size(),
+  		  "Number of scores and weights are not equal");
   }
 }
 
@@ -78,7 +82,8 @@ void PhraseDictionaryMultiModel::Load()
     const string &ptName = m_pdStr[i];
 
     PhraseDictionary *pt = FindPhraseDictionary(ptName);
-    CHECK(pt);
+    UTIL_THROW_IF2(pt == NULL,
+    		"Could not find component phrase table " << ptName);
     m_pd.push_back(pt);
   }
 }

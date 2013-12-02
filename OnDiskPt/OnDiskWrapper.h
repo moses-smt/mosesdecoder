@@ -55,9 +55,9 @@ public:
   OnDiskWrapper();
   ~OnDiskWrapper();
 
-  bool BeginLoad(const std::string &filePath);
+  void BeginLoad(const std::string &filePath);
 
-  bool BeginSave(const std::string &filePath
+  void BeginSave(const std::string &filePath
                  , int numSourceFactors, int	numTargetFactors, int numScores);
   void EndSave();
 

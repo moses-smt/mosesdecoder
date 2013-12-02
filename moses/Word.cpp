@@ -71,10 +71,12 @@ void Word::Merge(const Word &sourceWord)
 std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
 {
   stringstream strme;
-  CHECK(factorType.size() <= MAX_NUM_FACTORS);
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   for (unsigned int i = 0 ; i < factorType.size() ; i++) {
+	UTIL_THROW_IF2(factorType[i] >= MAX_NUM_FACTORS,
+				"Trying to reference factor " << factorType[i] << ". Max factor is " << MAX_NUM_FACTORS);
+
     const Factor *factor = m_factorArray[factorType[i]];
     if (factor != NULL) {
       if (firstPass) {

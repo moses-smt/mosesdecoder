@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <algorithm>
 #include <stdlib.h>
-#include "util/check.hh"
 #include "util/exception.hh"
 #include "util/tokenize_piece.hh"
 
@@ -142,10 +141,12 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
 void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-
+  const StaticData &staticData = StaticData::Instance();
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    ff.Evaluate(input, inputPath, *this, m_scoreBreakdown);
+    if (! staticData.IsFeatureFunctionIgnored( ff )) {
+      ff.Evaluate(input, inputPath, *this, m_scoreBreakdown);
+    }
   }
 }
 
@@ -171,7 +172,7 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
     ++dash;
     size_t targetPos = strtoul(dash->data(), &endptr, 10);
     UTIL_THROW_IF(endptr != dash->data() + dash->size(), util::ErrnoException, "Error parsing alignment" << *dash);
-    UTIL_THROW_IF(++dash, util::Exception, "Extra gunk in alignment " << *token);
+    UTIL_THROW_IF2(++dash, "Extra gunk in alignment " << *token);
 
 
     if (GetWord(targetPos).IsNonTerminal()) {
@@ -229,7 +230,8 @@ void TargetPhrase::SetProperties(const StringPiece &str)
     tok = tok.substr(0, endPos - 1);
 
     vector<string> keyValue = TokenizeFirstOnly(tok, " ");
-    CHECK(keyValue.size() == 2);
+    UTIL_THROW_IF2(keyValue.size() != 2,
+    		"Incorrect format of property: " << str);
     SetProperty(keyValue[0], keyValue[1]);
   }
 }

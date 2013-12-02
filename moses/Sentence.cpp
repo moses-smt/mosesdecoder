@@ -121,6 +121,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   if (meta.find("weight-setting") != meta.end()) {
     this->SetWeightSetting(meta["weight-setting"]);
     this->SetSpecifiesWeightSetting(true);
+    staticData.SetWeightSetting(meta["weight-setting"]);
   } else {
     this->SetSpecifiesWeightSetting(false);
   }
@@ -218,7 +219,7 @@ Sentence::CreateTranslationOptionCollection() const
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
-  CHECK(rv);
+  assert(rv);
   return rv;
 }
 void Sentence::Print(std::ostream& out) const

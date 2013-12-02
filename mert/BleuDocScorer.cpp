@@ -9,7 +9,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "util/check.hh"
+#include "util/exception.hh"
 #include "Ngram.h"
 #include "Reference.h"
 #include "Util.h"
@@ -165,7 +165,7 @@ std::vector<std::string> BleuDocScorer::splitDoc(const std::string& text)
 
 statscore_t BleuDocScorer::calculateScore(const vector<int>& comps) const
 {
-  CHECK(comps.size() == kBleuNgramOrder * 2 + 1);
+  UTIL_THROW_IF(comps.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
   for (int i = 0; i < kBleuNgramOrder; ++i) {

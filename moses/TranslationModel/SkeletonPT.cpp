@@ -35,8 +35,8 @@ void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQu
 TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 {
   // create a target phrase from the 1st word of the source, prefix with 'SkeletonPT:'
-  CHECK(sourcePhrase.GetSize());
-  CHECK(m_output.size() == 1);
+  assert(sourcePhrase.GetSize());
+  assert(m_output.size() == 1);
 
   string str = sourcePhrase.GetWord(0).GetFactor(0)->GetString().as_string();
   str = "SkeletonPT:" + str;

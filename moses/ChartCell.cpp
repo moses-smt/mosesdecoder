@@ -30,6 +30,7 @@
 #include "ChartTranslationOptions.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartManager.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -108,7 +109,8 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 //! call SortHypotheses() in each hypo collection in this cell
 void ChartCell::SortHypotheses()
 {
-  CHECK(m_targetLabelSet.Empty());
+  UTIL_THROW_IF2(!m_targetLabelSet.Empty(), "Already sorted");
+
   MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;

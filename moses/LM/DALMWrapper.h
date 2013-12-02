@@ -28,6 +28,10 @@ protected:
 
 	DALM::VocabId wid_start, wid_end;
 
+	typedef boost::bimap<const Factor *, DALM::VocabId> VocabMap;
+	mutable VocabMap m_vocabMap;
+
+	void CreateVocabMapping(const std::string &wordstxt);
 	DALM::VocabId GetVocabId(const Factor *factor) const;
 
 public:

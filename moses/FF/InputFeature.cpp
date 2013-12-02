@@ -5,7 +5,6 @@
 #include "moses/InputPath.h"
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "util/check.hh"
 
 using namespace std;
 

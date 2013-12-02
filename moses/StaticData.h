@@ -110,7 +110,6 @@ protected:
   bool m_recoverPath;
   bool m_outputHypoScore;
 
-  ParsingAlgorithm m_parsingAlgorithm;
   SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
 
@@ -215,6 +214,8 @@ protected:
 
   //! load decoding steps
   bool LoadDecodeGraphs();
+
+  void NoCache();
 
   bool m_continuePartialTranslation;
   std::string m_binPath;
@@ -411,9 +412,6 @@ public:
   //! Sets the global score vector weights for a given FeatureFunction.
   InputTypeEnum GetInputType() const {
     return m_inputType;
-  }
-  ParsingAlgorithm GetParsingAlgorithm() const {
-    return m_parsingAlgorithm;
   }
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
@@ -735,6 +733,7 @@ public:
   bool LoadWeightSettings();
   bool LoadAlternateWeightSettings();
 
+  std::map<std::string, std::string> OverrideFeatureNames();
   void OverrideFeatures();
 
   FactorType GetPlaceholderFactor() const {

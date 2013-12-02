@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_DecodeGraph_h
 #define moses_DecodeGraph_h
 
-#include "util/check.hh"
+#include "util/exception.hh"
 #include <list>
 #include <iterator>
 #include "TypeDef.h"
@@ -78,7 +78,7 @@ public:
   }
 
   size_t GetMaxChartSpan() const {
-    CHECK(m_maxChartSpan != NOT_FOUND);
+	UTIL_THROW_IF2(m_maxChartSpan == NOT_FOUND, "Max chart span not specified");
     return m_maxChartSpan;
   }
 

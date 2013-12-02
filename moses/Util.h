@@ -28,11 +28,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include <cmath>
+#include <cassert>
 #include <limits>
 #include <map>
 #include <cstdlib>
 #include <cstring>
-#include "util/check.hh"
+#include "util/exception.hh"
 #include "TypeDef.h"
 
 namespace Moses
@@ -314,7 +315,8 @@ inline float FloorScore(float logScore)
 inline float CalcTranslationScore(const std::vector<float> &probVector,
                                   const std::vector<float> &weightT)
 {
-  CHECK(weightT.size()==probVector.size());
+  UTIL_THROW_IF2(weightT.size() != probVector.size(),
+		  "Weight and score vector sizes not the same");
   float rv=0.0;
   for(float const *sb=&probVector[0],*se=sb+probVector.size(),*wb=&weightT[0];
       sb!=se; ++sb, ++wb)
@@ -371,7 +373,7 @@ inline void ShrinkToFit(T& v)
 {
   if(v.capacity()>v.size())
     T(v).swap(v);
-  CHECK(v.capacity()==v.size());
+  assert(v.capacity()==v.size());
 }
 
 bool FileExists(const std::string& filePath);

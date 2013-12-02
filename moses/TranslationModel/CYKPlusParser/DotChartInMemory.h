@@ -22,7 +22,6 @@
 #include "DotChart.h"
 #include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
 
-#include "util/check.hh"
 #include <vector>
 
 namespace Moses
@@ -96,7 +95,7 @@ public:
   }
 
   void Add(size_t pos, const DottedRuleInMemory *dottedRule) {
-    CHECK(dottedRule);
+    UTIL_THROW_IF2(dottedRule == NULL, "Dotted rule is null");
     m_coll[pos].push_back(dottedRule);
     if (!dottedRule->GetLastNode().IsLeaf()) {
       m_expandableDottedRuleList.push_back(dottedRule);

@@ -5,7 +5,6 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "util/check.hh"
 #include "FileHandler.h"
 #include "utils.h"
 #include "types.h"

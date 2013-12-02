@@ -61,7 +61,7 @@ void PhrasePairFeature::Load()
   if (m_domainTrigger) {
     // domain trigger terms for each input document
     ifstream inFileSource(m_filePathSource.c_str());
-    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
+    UTIL_THROW_IF2(!inFileSource, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -79,7 +79,7 @@ void PhrasePairFeature::Load()
   } else {
     // restricted source word vocabulary
     ifstream inFileSource(m_filePathSource.c_str());
-    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
+    UTIL_THROW_IF2(!inFileSource, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {

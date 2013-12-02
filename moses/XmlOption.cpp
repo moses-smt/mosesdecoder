@@ -373,8 +373,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               targetPhrase.Evaluate(sourcePhrase);
 
               XmlOption *option = new XmlOption(range,targetPhrase);
-
-              CHECK(option);
+              assert(option);
 
               res.push_back(option);
             }

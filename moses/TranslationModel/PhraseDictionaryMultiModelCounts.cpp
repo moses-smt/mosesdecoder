@@ -68,7 +68,8 @@ PhraseDictionaryMultiModelCounts::PhraseDictionaryMultiModelCounts(const std::st
   cerr << "m_args=" << m_args.size() << endl;
   ReadParameters();
 
-  CHECK(m_targetTable.size() == m_pdStr.size());
+  UTIL_THROW_IF2(m_targetTable.size() != m_pdStr.size(),
+		  "List of phrase tables and target tables must be equal");
 
 }
 
@@ -87,10 +88,12 @@ void PhraseDictionaryMultiModelCounts::SetParameter(const std::string& key, cons
     }
   } else if (key == "lex-e2f") {
     m_lexE2FStr = Tokenize(value, ",");
-    CHECK(m_lexE2FStr.size() == m_pdStr.size());
+    UTIL_THROW_IF2(m_lexE2FStr.size() != m_pdStr.size(),
+    		"Number of scores for lexical probability p(f|e) incorrectly specified");
   } else if (key == "lex-f2e") {
     m_lexF2EStr = Tokenize(value, ",");
-    CHECK(m_lexF2EStr.size() == m_pdStr.size());
+    UTIL_THROW_IF2(m_lexF2EStr.size() != m_pdStr.size(),
+    		"Number of scores for lexical probability p(e|f) incorrectly specified");
   } else if (key == "target-table") {
     m_targetTable = Tokenize(value, ",");
   } else {
@@ -115,13 +118,15 @@ void PhraseDictionaryMultiModelCounts::Load()
 
     PhraseDictionary *pt;
     pt = FindPhraseDictionary(ptName);
-    CHECK(pt);
+    UTIL_THROW_IF2(pt == NULL,
+    		"Could not find component phrase table " << ptName);
     m_pd.push_back(pt);
 
     // reverse
     const string &target_table = m_targetTable[i];
     pt = FindPhraseDictionary(target_table);
-    CHECK(pt);
+    UTIL_THROW_IF2(pt == NULL,
+    		"Could not find component phrase table " << target_table);
     m_inverse_pd.push_back(pt);
 
     // lex
