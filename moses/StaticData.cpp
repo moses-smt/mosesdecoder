@@ -925,6 +925,7 @@ void StaticData::LoadFeatureFunctions()
     }
 
     if (doLoad) {
+      VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
       ff->Load();
     }
   }
@@ -932,6 +933,7 @@ void StaticData::LoadFeatureFunctions()
   const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
   for (size_t i = 0; i < pts.size(); ++i) {
     PhraseDictionary *pt = pts[i];
+    VERBOSE(1, "Loading " << pt->GetScoreProducerDescription() << endl);
     pt->Load();
   }
 
