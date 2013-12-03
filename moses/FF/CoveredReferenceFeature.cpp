@@ -90,6 +90,7 @@ FFState* CoveredReferenceFeature::Evaluate(
   // which words from the reference remain uncovered
   multiset<string> remaining;
   boost::unordered_map<long, std::multiset<string> >::const_iterator refIt = m_refs.find(id);
+  if (refIt == m_refs.end()) UTIL_THROW(util::Exception, "Sentence id out of range: " + SPrint<long>(id));
   set_difference(refIt->second.begin(), refIt->second.end(),
       ret->m_coveredRef.begin(), ret->m_coveredRef.end(),
       inserter(remaining, remaining.begin()));
