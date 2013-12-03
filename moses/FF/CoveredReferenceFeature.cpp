@@ -51,7 +51,20 @@ void CoveredReferenceFeature::Evaluate(const InputType &input
                                   , const TargetPhrase &targetPhrase
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection *estimatedFutureScore) const
-{}
+{
+  long id = input.GetTranslationId();
+  boost::unordered_map<long, std::multiset<string> >::const_iterator refIt = m_refs.find(id);
+  multiset<string> wordsInPhrase = GetWordsInPhrase(targetPhrase);
+  multiset<string> covered;
+  set_intersection(wordsInPhrase.begin(), wordsInPhrase.end(),
+      refIt->second.begin(), refIt->second.end(),
+      inserter(covered, covered.begin()));
+  vector<float> scores;
+  scores.push_back(covered.size());
+
+  scoreBreakdown.Assign(this, scores);
+  estimatedFutureScore->Assign(this, scores);
+}
 
 void CoveredReferenceFeature::Load() {
   InputFileStream refFile(m_path);
