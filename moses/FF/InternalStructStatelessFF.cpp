@@ -18,7 +18,8 @@ void InternalStructStatelessFF::Evaluate(const Phrase &source
 void InternalStructStatelessFF::Evaluate(const InputType &input
 	                        , const InputPath &inputPath
 	                        , const TargetPhrase &targetPhrase
-	                        , ScoreComponentCollection &scoreBreakdown) const
+	                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore) const
 	{
 
 cerr  << "HHHHH" << scoreBreakdown << endl;
