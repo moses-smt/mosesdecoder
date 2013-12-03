@@ -97,7 +97,7 @@ BleuScoreFeature::BleuScoreFeature(const std::string &line)
   std::cerr << "Initializing BleuScoreFeature." << std::endl;
   s_staticColl.push_back(this);
 
-  m_tuneable = true;
+  m_tuneable = false;
 
   ReadParameters();
   std::cerr << "Finished initializing BleuScoreFeature." << std::endl;
