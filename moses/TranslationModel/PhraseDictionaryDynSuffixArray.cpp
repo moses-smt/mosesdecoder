@@ -103,7 +103,7 @@ ChartRuleLookupManager*
 PhraseDictionaryDynSuffixArray::
 CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
 {
-  CHECK(false);
+  UTIL_THROW(util::Exception, "SCFG decoding not supported with dynamic suffix array");
   return 0;
 }
 

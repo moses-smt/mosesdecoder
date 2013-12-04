@@ -19,7 +19,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "util/check.hh"
 #include <limits>
 #include <iostream>
 #include <fstream>
@@ -162,7 +161,8 @@ LMResult LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, St
   }
   ngram[count] = Vocab_None;
 
-  CHECK((*contextFactor[count-1])[factorType] != NULL);
+  UTIL_THROW_IF2((*contextFactor[count-1])[factorType] == NULL,
+		  "No factor " << factorType << " at position " << (count-1));
   // call sri lm fn
   VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType]);
   ret = GetValue(lmId, ngram+1);

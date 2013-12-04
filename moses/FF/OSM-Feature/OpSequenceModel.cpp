@@ -1,7 +1,6 @@
 #include <fstream>
 #include "OpSequenceModel.h"
 #include "osmHyp.h"
-#include "util/check.hh"
 #include "moses/Util.h"
 
 using namespace std;
@@ -32,9 +31,7 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 
 void OpSequenceModel::Load()
 {
-
   readLanguageModel(m_lmPath.c_str());
-
 }
 
 

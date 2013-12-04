@@ -100,7 +100,7 @@ void ChartTranslationOptions::CreateSourceRuleFromInputPath()
   }
 
   const InputPath *inputPath = m_collection.front()->GetInputPath();
-  CHECK(inputPath);
+  assert(inputPath);
   std::vector<const Word*> &ruleSourceFromInputPath = inputPath->AddRuleSourceFromInputPath();
 
   size_t chartCellIndex = 0;

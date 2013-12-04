@@ -8,6 +8,8 @@
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+#include "moses/TranslationModel/PhraseDictionaryScope3.h"
+#include "moses/TranslationModel/TransliterationPhraseDictionary.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -31,6 +33,7 @@
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
+#include "moses/FF/CoveredReferenceFeature.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -66,7 +69,7 @@
 #endif
 
 #ifdef LM_DALM
-#include "moses/LM/DALM.h"
+#include "moses/LM/DALMWrapper.h"
 #endif
 
 #include "util/exception.hh"
@@ -151,15 +154,18 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
   MOSES_FNAME(PhraseDictionaryOnDisk);
   MOSES_FNAME(PhraseDictionaryMemory);
+  MOSES_FNAME(PhraseDictionaryScope3);
   MOSES_FNAME(PhraseDictionaryMultiModel);
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
+  MOSES_FNAME(TransliterationPhraseDictionary);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
   MOSES_FNAME(ConstrainedDecoding);
+  MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
 
   MOSES_FNAME(SkeletonStatelessFF);
@@ -202,7 +208,7 @@ FeatureRegistry::~FeatureRegistry()
 void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
 {
   std::pair<std::string, boost::shared_ptr<FeatureFactory> > to_ins(name, boost::shared_ptr<FeatureFactory>(factory));
-  UTIL_THROW_IF(!registry_.insert(to_ins).second, util::Exception, "Duplicate feature name " << name);
+  UTIL_THROW_IF2(!registry_.insert(to_ins).second, "Duplicate feature name " << name);
 }
 
 namespace

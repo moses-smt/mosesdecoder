@@ -124,7 +124,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   void Evaluate(const Phrase &source
                 , const TargetPhrase &targetPhrase

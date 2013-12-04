@@ -39,7 +39,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <ostream>
 #include <vector>
-#include "util/check.hh"
 
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"

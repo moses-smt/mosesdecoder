@@ -54,7 +54,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   FFState* Evaluate(
     const Hypothesis& cur_hypo,

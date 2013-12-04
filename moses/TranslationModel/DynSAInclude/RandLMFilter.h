@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include "FileHandler.h"
+#include "util/check.hh"
 
 #ifdef WIN32
 #define log2(X) (log((double)X)/log((double)2))

@@ -30,8 +30,7 @@ public:
   }
 
   void SetId(size_t pos, wordID_t id) {
-    CHECK(pos < words.size());
-    words[pos] = id;
+    words.at(pos) = id;
   }
   bool operator<(const SAPhrase& phr2) const {
     return words < phr2.words;

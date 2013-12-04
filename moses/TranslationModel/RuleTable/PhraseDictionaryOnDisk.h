@@ -28,7 +28,6 @@
 #include "OnDiskPt/OnDiskWrapper.h"
 #include "OnDiskPt/Word.h"
 #include "OnDiskPt/PhraseNode.h"
-#include "util/check.hh"
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>

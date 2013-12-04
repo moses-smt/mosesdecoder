@@ -5,7 +5,6 @@
 #include "moses/InputPath.h"
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "util/check.hh"
 
 using namespace std;
 
@@ -40,7 +39,8 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 void InputFeature::Evaluate(const InputType &input
                             , const InputPath &inputPath
                             , const TargetPhrase &targetPhrase
-                            , ScoreComponentCollection &scoreBreakdown) const
+                            , ScoreComponentCollection &scoreBreakdown
+                            , ScoreComponentCollection *estimatedFutureScore) const
 {
   if (m_legacy) {
     //binary phrase-table does input feature itself

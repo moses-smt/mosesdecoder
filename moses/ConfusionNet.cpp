@@ -10,7 +10,7 @@
 #include "Sentence.h"
 #include "UserMessage.h"
 #include "moses/FF/InputFeature.h"
-#include "util/check.hh"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -69,7 +69,8 @@ ConfusionNet::ConfusionNet()
   if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
-  CHECK(StaticData::Instance().GetInputFeature());
+  UTIL_THROW_IF2(StaticData::Instance().GetInputFeature() == NULL,
+		  "Input feature must be specified");
 }
 ConfusionNet::~ConfusionNet()
 {
@@ -275,7 +276,7 @@ ConfusionNet::CreateTranslationOptionCollection() const
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
-  CHECK(rv);
+  assert(rv);
   return rv;
 }
 

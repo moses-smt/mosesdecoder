@@ -48,7 +48,8 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_outputFactorsVec(outputFactorsVec)
   , m_filePath(filePath)
 {
-  CHECK(m_expandableDottedRuleListVec.size() == 0);
+  UTIL_THROW_IF2(m_expandableDottedRuleListVec.size() != 0,
+		  "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
@@ -250,7 +251,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
             targetPhraseCollection = iterCache->second;
           }
 
-          CHECK(targetPhraseCollection);
+          UTIL_THROW_IF2(targetPhraseCollection == NULL, "Error");
           if (!targetPhraseCollection->IsEmpty()) {
             AddCompletedRule(prevDottedRule, *targetPhraseCollection,
                              range, outColl);

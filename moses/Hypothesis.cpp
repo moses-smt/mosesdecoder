@@ -19,7 +19,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "util/check.hh"
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -97,7 +96,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
   // assert that we are not extending our hypothesis by retranslating something
   // that this hypothesis has already translated!
-  CHECK(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
+  assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
 
   //_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);

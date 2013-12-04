@@ -49,7 +49,7 @@ void ConstrainedDecoding::Load()
       sentenceID = Scan<long>(vecStr[0]);
       phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[1], staticData.GetFactorDelimiter(), NULL);
     } else {
-      CHECK(false);
+      UTIL_THROW(util::Exception, "Reference file not loaded");
     }
 
     if (addBeginEndWord) {
@@ -62,7 +62,8 @@ void ConstrainedDecoding::Load()
 
 std::vector<float> ConstrainedDecoding::DefaultWeights() const
 {
-  CHECK(m_numScoreComponents == 1);
+  UTIL_THROW_IF2(m_numScoreComponents != 1,
+		  "ConstrainedDecoding must only have 1 score");
   vector<float> ret(1, 1);
   return ret;
 }
@@ -78,6 +79,8 @@ const Phrase *GetConstraint(const std::map<long,Phrase> &constraints, const H &h
   iter = constraints.find(id);
 
   if (iter == constraints.end()) {
+    UTIL_THROW(util::Exception, "Couldn't find reference " << id);
+
     return NULL;
   } else {
     return &iter->second;
@@ -90,7 +93,7 @@ FFState* ConstrainedDecoding::Evaluate(
   ScoreComponentCollection* accumulator) const
 {
   const Phrase *ref = GetConstraint<Hypothesis, Manager>(m_constraints, hypo);
-  CHECK(ref);
+  assert(ref);
 
   ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
   const Phrase &outputPhrase = ret->GetPhrase();
@@ -117,7 +120,7 @@ FFState* ConstrainedDecoding::EvaluateChart(
   ScoreComponentCollection* accumulator) const
 {
   const Phrase *ref = GetConstraint<ChartHypothesis, ChartManager>(m_constraints, hypo);
-  CHECK(ref);
+  assert(ref);
 
   const ChartManager &mgr = hypo.GetManager();
   const Sentence &source = static_cast<const Sentence&>(mgr.GetSource());

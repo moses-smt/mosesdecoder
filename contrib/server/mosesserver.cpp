@@ -42,7 +42,7 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     const params_t params = paramList.getStruct(0);
     breakOutParams(params);
-    const PhraseDictionary* pdf = StaticData::Instance().GetPhraseDictionaries()[0];
+    const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
     PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
@@ -244,7 +244,7 @@ public:
     }
 
     if (multiModelWeights.size() > 0) {
-      PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
+      PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) PhraseDictionary::GetColl()[0]; //TODO: only works if multimodel is first phrase table
       pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
     }
 

@@ -204,7 +204,7 @@ public:
 
   //! converts bitmap into an integer ID: it consists of two parts: the first 16 bit are the pattern between the first gap and the last word-1, the second 16 bit are the number of filled positions. enforces a sentence length limit of 65535 and a max distortion of 16
   WordsBitmapID GetID() const {
-    CHECK(m_size < (1<<16));
+    assert(m_size < (1<<16));
 
     size_t start = GetFirstGapPos();
     if (start == NOT_FOUND) start = m_size; // nothing left
@@ -212,7 +212,7 @@ public:
     size_t end = GetLastPos();
     if (end == NOT_FOUND) end = 0; // nothing translated yet
 
-    CHECK(end < start || end-start <= 16);
+    assert(end < start || end-start <= 16);
     WordsBitmapID id = 0;
     for(size_t pos = end; pos > start; pos--) {
       id = id*2 + (int) GetValue(pos);
@@ -222,7 +222,7 @@ public:
 
   //! converts bitmap into an integer ID, with an additional span covered
   WordsBitmapID GetIDPlus( size_t startPos, size_t endPos ) const {
-    CHECK(m_size < (1<<16));
+	  assert(m_size < (1<<16));
 
     size_t start = GetFirstGapPos();
     if (start == NOT_FOUND) start = m_size; // nothing left
@@ -233,7 +233,7 @@ public:
     if (start == startPos) start = endPos+1;
     if (end < endPos) end = endPos;
 
-    CHECK(end < start || end-start <= 16);
+    assert(end < start || end-start <= 16);
     WordsBitmapID id = 0;
     for(size_t pos = end; pos > start; pos--) {
       id = id*2;

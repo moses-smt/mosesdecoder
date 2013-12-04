@@ -1067,6 +1067,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
 		</link>
 		<link>
+			<name>FF/CoveredReferenceFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CoveredReferenceFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/DecodeFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DecodeFeature.cpp</locationURI>
@@ -1372,14 +1382,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ChartState.h</locationURI>
 		</link>
 		<link>
-			<name>LM/DALM.cpp</name>
+			<name>LM/DALMWrapper.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALM.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALMWrapper.cpp</locationURI>
 		</link>
 		<link>
-			<name>LM/DALM.h</name>
+			<name>LM/DALMWrapper.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALM.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALMWrapper.h</locationURI>
 		</link>
 		<link>
 			<name>LM/IRST.cpp</name>
@@ -1632,6 +1642,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNodeMemory.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryScope3.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryScope3.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryScope3.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryScope3.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryTree.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTree.cpp</locationURI>
@@ -1670,6 +1690,16 @@
 			<name>TranslationModel/SkeletonPT.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/TransliterationPhraseDictionary.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/TransliterationPhraseDictionary.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/TransliterationPhraseDictionary.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/TransliterationPhraseDictionary.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/WordCoocTable.cpp</name>

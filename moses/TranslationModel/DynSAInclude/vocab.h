@@ -39,7 +39,7 @@ public:
     m_kBOSWordID(1) {
     InitSpecialWords();
     bool ret = Load(vocab_path, direction, factors, closed);
-    CHECK(ret);
+    UTIL_THROW_IF2(!ret, "Unable to load vocab file: " << vocab_path);
   }
   Vocab(FileHandler * fin, const FactorDirection& direction,
         const FactorList& factors, bool closed = true):
@@ -47,7 +47,7 @@ public:
     m_kBOSWordID(1) {
     InitSpecialWords();
     bool ret = Load(fin, direction, factors, closed);
-    CHECK(ret);
+    UTIL_THROW_IF2(!ret, "Unable to load vocab file");
   }
   Vocab(FileHandler *fin):
     m_kOOVWordID(0),

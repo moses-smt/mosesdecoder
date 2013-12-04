@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 #include "moses/FF/InputFeature.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -609,7 +610,8 @@ void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t)
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
   const WordsRange &coverage = translationOption->GetSourceWordsRange();
-  CHECK(coverage.GetEndPos() - coverage.GetStartPos() < m_collection[coverage.GetStartPos()].size());
+  UTIL_THROW_IF2(coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size(),
+		  "Out of bound access: " << coverage);
   m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
 }
 
@@ -681,7 +683,9 @@ TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(siz
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
   maxSize = std::min(maxSize, maxSizePhrase);
 
-  CHECK(maxSize < m_collection[startPos].size());
+  UTIL_THROW_IF2(maxSize >= m_collection[startPos].size(),
+		  "Out of bound access: " << maxSize);
+
   return m_collection[startPos][maxSize];
 }
 const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
@@ -690,7 +694,8 @@ const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionLi
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
   maxSize = std::min(maxSize, maxSizePhrase);
 
-  CHECK(maxSize < m_collection[startPos].size());
+  UTIL_THROW_IF2(maxSize >= m_collection[startPos].size(),
+		  "Out of bound access: " << maxSize);
   return m_collection[startPos][maxSize];
 }
 

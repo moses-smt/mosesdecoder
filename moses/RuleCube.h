@@ -27,7 +27,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/version.hpp>
 
-#include "util/check.hh"
+#include "util/exception.hh"
 #include <queue>
 #include <set>
 #include <vector>
@@ -97,7 +97,7 @@ public:
   ~RuleCube();
 
   float GetTopScore() const {
-    CHECK(!m_queue.empty());
+	UTIL_THROW_IF2(m_queue.empty(), "Empty queue, nothing to pop");
     RuleCubeItem *item = m_queue.top();
     return item->GetScore();
   }

@@ -394,7 +394,8 @@ LanguageModel *ConstructKenLM(const std::string &line)
   vector<string> toks = Tokenize(line);
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
-    CHECK(args.size() == 2);
+    UTIL_THROW_IF2(args.size() != 2,
+    		"Incorrect format of KenLM property: " << toks[i]);
 
     if (args[0] == "factor") {
       factorType = Scan<FactorType>(args[1]);

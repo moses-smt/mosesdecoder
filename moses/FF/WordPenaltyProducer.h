@@ -2,7 +2,6 @@
 
 #include <string>
 #include "StatelessFeatureFunction.h"
-#include "util/check.hh"
 
 namespace Moses
 {
@@ -31,7 +30,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
 };

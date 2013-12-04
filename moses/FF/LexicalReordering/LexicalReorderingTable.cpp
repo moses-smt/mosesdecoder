@@ -268,7 +268,7 @@ Scores LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, co
   }
 
   if(m_FactorsC.empty()) {
-    CHECK(1 == cands.size());
+	UTIL_THROW_IF2(1 != cands.size(), "Error");
     return cands[0].GetScore(0);
   } else {
     score = auxFindScoreForContext(cands, c);
@@ -283,7 +283,8 @@ Scores LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, co
 Scores LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cands, const Phrase& context)
 {
   if(m_FactorsC.empty()) {
-    CHECK(cands.size() <= 1);
+	UTIL_THROW_IF2(cands.size() > 1, "Error");
+
     return (1 == cands.size())?(cands[0].GetScore(0)):(Scores());
   } else {
     std::vector<std::string> cvec;
@@ -382,7 +383,8 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
       }
     } else {
       //sanity check ALL lines must have same number of tokens
-      CHECK(numTokens == tokens.size());
+      UTIL_THROW_IF2(numTokens != tokens.size(),
+    		  "Lines do not have the same number of tokens");
     }
     size_t phrase = 0;
     for(; phrase < numKeyTokens; ++phrase) {
@@ -426,7 +428,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
     if(currKey.empty()) {
       currKey = key;
       //insert key into tree
-      CHECK(psa);
+      UTIL_THROW_IF2(psa == NULL, "Object not yet created");
       PSA::Data& d = psa->insert(key);
       if(d == InvalidOffT) {
         d = fTell(ot);
@@ -456,7 +458,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
         currFirstWord = key[0];
       }
       //c) insert key into tree
-      CHECK(psa);
+      UTIL_THROW_IF2(psa == NULL, "Object not yet created");
       PSA::Data& d = psa->insert(key);
       if(d == InvalidOffT) {
         d = fTell(ot);
