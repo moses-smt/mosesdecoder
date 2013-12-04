@@ -1,4 +1,5 @@
 // vim:tabstop=2
+#include <stdlib.h>
 #include "TransliterationPhraseDictionary.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 
@@ -19,6 +20,13 @@ void TransliterationPhraseDictionary::CleanUpAfterSentenceProcessing(const Input
 
 void TransliterationPhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
+	string mosesDir = "/home/hieu/workspace/github/mosesdecoder";
+	string scriptDir = mosesDir + "/scripts";
+	string externalDir = "/home/hieu/workspace/bin/training-tools";
+	string modelDir = "/home/hieu/workspace/experiment/data/issues/transliteration/Transliteration.3";
+	string inputLang = "en";
+	string outputLang = "ar";
+
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
@@ -40,40 +48,76 @@ void TransliterationPhraseDictionary::GetTargetPhraseCollectionBatch(const Input
     	}
 
     	// TRANSLITERATE
-    	// /home/nadir/mosesdecoder/scripts/Transliteration/prepare-transliteration-phrase-table.pl --transliteration-model-dir /home/nadir/iwslt13-en-ar/model/Transliteration.3 --moses-src-dir /home/nadir/mosesdecoder --external-bin-dir /home/pkoehn/statmt/bin --input-extension en --output-extension ar --oov-file /fs/syn4/nadir/iwslt13-en-ar/evaluation/temp.oov --out-dir /home/nadir/iwslt13-en-ar/model/Transliteration-Phrase-Table.3
-        TargetPhrase *tp = CreateTargetPhrase(sourcePhrase);
+    	char *ptr = tmpnam(NULL);
+    	string inFile(ptr);
+    	ptr = tmpnam(NULL);
+    	string outDir(ptr);
+
+    	ofstream inStream(inFile.c_str());
+    	inStream << sourcePhrase.ToString() << endl;
+    	inStream.close();
+
+    	string cmd = scriptDir + "/Transliteration/prepare-transliteration-phrase-table.pl" +
+    			" --transliteration-model-dir " + modelDir +
+    			" --moses-src-dir " + mosesDir +
+    			" --external-bin-dir " + externalDir +
+    			" --input-extension " + inputLang +
+    			" --output-extension " + outputLang +
+    			" --oov-file " + inFile +
+    			" --out-dir " + outDir;
+
+    	int ret = system(cmd.c_str());
+    	UTIL_THROW_IF2(ret != 0, "Transliteration script error");
+
         TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-        tpColl->Add(tp);
+    	vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir);
+    	vector<TargetPhrase*>::const_iterator iter;
+    	for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
+    		TargetPhrase *tp = *iter;
+    		tpColl->Add(tp);
+    	}
 
         m_allTPColl.push_back(tpColl);
         inputPath.SetTargetPhrases(*this, tpColl, NULL);
 
+        remove(inFile.c_str());
+
+        cmd = "rm -rf " + outDir;
+        system(cmd.c_str());
     }
 
   }
 }
 
-TargetPhrase *TransliterationPhraseDictionary::CreateTargetPhrase(const Phrase &sourcePhrase) const
+std::vector<TargetPhrase*> TransliterationPhraseDictionary::CreateTargetPhrases(const Phrase &sourcePhrase, const string &outDir) const
 {
-  // create a target phrase from the 1st word of the source, prefix with 'TransliterationPhraseDictionary:'
-  assert(sourcePhrase.GetSize());
-  assert(m_output.size() == 1);
+	std::vector<TargetPhrase*> ret;
 
-  string str = sourcePhrase.GetWord(0).GetFactor(0)->GetString().as_string();
-  str = "TransliterationPhraseDictionary:" + str;
+	string outPath = outDir + "/out.txt";
+	ifstream outStream(outPath.c_str());
 
-  TargetPhrase *tp = new TargetPhrase();
-  Word &word = tp->AddWord();
-  word.CreateFromString(Output, m_output, str, false);
+	string line;
+	while (getline(outStream, line)) {
+		vector<string> toks;
+		Tokenize(toks, line, "\t");
+		UTIL_THROW_IF2(toks.size() != 2, "Error in transliteration output file. Expecting word\tscore");
 
-  // score for this phrase table
-  vector<float> scores(m_numScoreComponents, 1.3);
-  tp->GetScoreBreakdown().PlusEquals(this, scores);
+	  TargetPhrase *tp = new TargetPhrase();
+	  Word &word = tp->AddWord();
+	  word.CreateFromString(Output, m_output, toks[0], false);
 
-  // score of all other ff when this rule is being loaded
-  tp->Evaluate(sourcePhrase, GetFeaturesToApply());
+	  float score = Scan<float>(toks[1]);
+	  tp->GetScoreBreakdown().PlusEquals(this, score);
 
-  return tp;
+	  // score of all other ff when this rule is being loaded
+	  tp->Evaluate(sourcePhrase, GetFeaturesToApply());
+
+	  ret.push_back(tp);
+	}
+
+	outStream.close();
+
+  return ret;
 }
 
 ChartRuleLookupManager* TransliterationPhraseDictionary::CreateRuleLookupManager(const ChartParser &parser,

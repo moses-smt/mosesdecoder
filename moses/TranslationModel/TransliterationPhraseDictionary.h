@@ -30,7 +30,7 @@ public:
 protected:
   mutable std::list<TargetPhraseCollection*> m_allTPColl;
 
-  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase) const;
+  std::vector<TargetPhrase*> CreateTargetPhrases(const Phrase &sourcePhrase, const std::string &outDir) const;
 };
 
 }  // namespace Moses

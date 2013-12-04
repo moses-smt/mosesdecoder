@@ -129,9 +129,10 @@ sub form_corpus
 
 	my $UNK_FILE_NAME = basename($OOV_FILE);
 	my $target = $EVAL_DIR . "/$UNK_FILE_NAME/training/corpus.$OUTPUT_EXTENSION";
-	
+	my $outFile = "$EVAL_DIR/out.txt";
 	
 	open MYFILE,  "<:encoding(UTF-8)", $testFile or die "Can't open $testFile: $!\n";
+	open OUTFILE,  ">:encoding(UTF-8)", $outFile or die "Can't open $outFile: $!\n";
 
 
 	while (<MYFILE>) 
@@ -162,8 +163,9 @@ sub form_corpus
 		$i++;
 		$prob = $words[$i];
         	
-		print "$thisStr \t $prob\n";
+		print OUTFILE "$thisStr\t$prob\n";
  	}
  	close (MYFILE);
+  close (OUTFILE);
 }
 
