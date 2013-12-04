@@ -42,11 +42,11 @@ die("ERROR: could not find OOV file '$OOV_FILE'")
 
 my $translitFile = "$OUT_DIR/" . $UNK_FILE_NAME . "/" . $UNK_FILE_NAME . ".translit";
 
-print "Preparing for Transliteration\n";
+print STDERR "Preparing for Transliteration\n";
 prepare_for_transliteration ($OOV_FILE , $translitFile);
-print "Run Transliteration\n";
+print STDERR "Run Transliteration\n";
 run_transliteration ($MOSES_SRC_DIR , $EXTERNAL_BIN_DIR , $TRANSLIT_MODEL , $translitFile);
-print "Form Transliteration Corpus\n";
+print STDERR "Form Transliteration Corpus\n";
 form_corpus ($translitFile , $translitFile.".op.nBest" , $OUT_DIR);
 
 
@@ -97,7 +97,7 @@ sub run_transliteration
 
 	`touch $eval_file.moses.table.ini`;
 	
-	print "Filter Table\n";
+	print STDERR "Filter Table\n";
 
 	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -phrase-translation-table $TRANSLIT_MODEL/model/phrase-table -reordering-table $TRANSLIT_MODEL/model/reordering-table -config $eval_file.moses.table.ini -lm 0:3:$eval_file.moses.table.ini:8`;
 	
@@ -105,7 +105,7 @@ sub run_transliteration
 
 	`rm  $eval_file.moses.table.ini`;
 
-	print "Apply Filter\n";
+	print STDERR "Apply Filter\n";
 
 	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables-and-weights.perl $eval_file.filtered/moses.ini $TRANSLIT_MODEL/model/moses.ini $TRANSLIT_MODEL/tuning/moses.tuned.ini $eval_file.filtered.ini`;
 
