@@ -116,9 +116,10 @@ FFState* CoveredReferenceFeature::Evaluate(
       remaining.begin(), remaining.end(),
       inserter(newCovered, newCovered.begin()));
 
-  // score is just the count of newly-covered words
+  vector<float> estimateScore =
+    cur_hypo.GetCurrTargetPhrase().GetScoreBreakdown().GetScoresForProducer(this);
   vector<float> scores;
-  scores.push_back(newCovered.size());
+  scores.push_back(newCovered.size() - estimateScore[0]);
   accumulator->PlusEquals(this, scores);
 
   // update feature state
