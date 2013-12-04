@@ -11,6 +11,11 @@ TransliterationPhraseDictionary::TransliterationPhraseDictionary(const std::stri
   : PhraseDictionary(line)
 {
   ReadParameters();
+  UTIL_THROW_IF2(m_mosesDir.empty() ||
+		  m_scriptDir.empty() ||
+		  m_externalDir.empty() ||
+		  m_inputLang.empty() ||
+		  m_outputLang.empty(), "Must specify all arguments");
 }
 
 void TransliterationPhraseDictionary::CleanUpAfterSentenceProcessing(const InputType& source)
@@ -20,12 +25,6 @@ void TransliterationPhraseDictionary::CleanUpAfterSentenceProcessing(const Input
 
 void TransliterationPhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
-	string mosesDir = "/home/hieu/workspace/github/mosesdecoder";
-	string scriptDir = mosesDir + "/scripts";
-	string externalDir = "/home/hieu/workspace/bin/training-tools";
-	string modelDir = "/home/hieu/workspace/experiment/data/issues/transliteration/Transliteration.3";
-	string inputLang = "en";
-	string outputLang = "ar";
 
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
@@ -57,12 +56,12 @@ void TransliterationPhraseDictionary::GetTargetPhraseCollectionBatch(const Input
     	inStream << sourcePhrase.ToString() << endl;
     	inStream.close();
 
-    	string cmd = scriptDir + "/Transliteration/prepare-transliteration-phrase-table.pl" +
-    			" --transliteration-model-dir " + modelDir +
-    			" --moses-src-dir " + mosesDir +
-    			" --external-bin-dir " + externalDir +
-    			" --input-extension " + inputLang +
-    			" --output-extension " + outputLang +
+    	string cmd = m_scriptDir + "/Transliteration/prepare-transliteration-phrase-table.pl" +
+    			" --transliteration-model-dir " + m_filePath +
+    			" --moses-src-dir " + m_mosesDir +
+    			" --external-bin-dir " + m_externalDir +
+    			" --input-extension " + m_inputLang +
+    			" --output-extension " + m_outputLang +
     			" --oov-file " + inFile +
     			" --out-dir " + outDir;
 
@@ -125,6 +124,25 @@ ChartRuleLookupManager* TransliterationPhraseDictionary::CreateRuleLookupManager
 {
 	return NULL;
   //return new ChartRuleLookupManagerSkeleton(parser, cellCollection, *this);
+}
+
+void
+TransliterationPhraseDictionary::
+SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "moses-dir") {
+	  m_mosesDir = value;
+  } else if (key == "script-dir") {
+	  m_scriptDir = value;
+  } else if (key == "external-dir") {
+	  m_externalDir = value;
+  } else if (key == "input-lang") {
+	  m_inputLang = value;
+  } else if (key == "output-lang") {
+	  m_outputLang = value;
+  } else {
+	  PhraseDictionary::SetParameter(key, value);
+  }
 }
 
 TO_STRING_BODY(TransliterationPhraseDictionary);

@@ -24,11 +24,15 @@ public:
   // for syntax/hiero model (CKY+ decoding)
   ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&, const ChartCellCollectionBase&);
 
+  void SetParameter(const std::string& key, const std::string& value);
+
   TO_STRING();
 
 
 protected:
   mutable std::list<TargetPhraseCollection*> m_allTPColl;
+
+  std::string m_mosesDir, m_scriptDir, m_externalDir, m_inputLang, m_outputLang;
 
   std::vector<TargetPhrase*> CreateTargetPhrases(const Phrase &sourcePhrase, const std::string &outDir) const;
 };
