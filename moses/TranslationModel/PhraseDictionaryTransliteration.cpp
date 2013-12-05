@@ -1,6 +1,6 @@
 // vim:tabstop=2
 #include <stdlib.h>
-#include "TransliterationPhraseDictionary.h"
+#include "PhraseDictionaryTransliteration.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "moses/DecodeGraph.h"
 #include "moses/DecodeStep.h"
@@ -9,7 +9,7 @@ using namespace std;
 
 namespace Moses
 {
-TransliterationPhraseDictionary::TransliterationPhraseDictionary(const std::string &line)
+PhraseDictionaryTransliteration::PhraseDictionaryTransliteration(const std::string &line)
   : PhraseDictionary(line)
 {
   ReadParameters();
@@ -20,12 +20,12 @@ TransliterationPhraseDictionary::TransliterationPhraseDictionary(const std::stri
 		  m_outputLang.empty(), "Must specify all arguments");
 }
 
-void TransliterationPhraseDictionary::CleanUpAfterSentenceProcessing(const InputType& source)
+void PhraseDictionaryTransliteration::CleanUpAfterSentenceProcessing(const InputType& source)
 {
   RemoveAllInColl(m_allTPColl);
 }
 
-void TransliterationPhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
+void PhraseDictionaryTransliteration::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
 
   InputPathList::const_iterator iter;
@@ -84,7 +84,7 @@ void TransliterationPhraseDictionary::GetTargetPhraseCollectionBatch(const Input
   }
 }
 
-std::vector<TargetPhrase*> TransliterationPhraseDictionary::CreateTargetPhrases(const Phrase &sourcePhrase, const string &outDir) const
+std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(const Phrase &sourcePhrase, const string &outDir) const
 {
 	std::vector<TargetPhrase*> ret;
 
@@ -115,7 +115,7 @@ std::vector<TargetPhrase*> TransliterationPhraseDictionary::CreateTargetPhrases(
   return ret;
 }
 
-ChartRuleLookupManager* TransliterationPhraseDictionary::CreateRuleLookupManager(const ChartParser &parser,
+ChartRuleLookupManager* PhraseDictionaryTransliteration::CreateRuleLookupManager(const ChartParser &parser,
     const ChartCellCollectionBase &cellCollection)
 {
 	return NULL;
@@ -123,7 +123,7 @@ ChartRuleLookupManager* TransliterationPhraseDictionary::CreateRuleLookupManager
 }
 
 void
-TransliterationPhraseDictionary::
+PhraseDictionaryTransliteration::
 SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "moses-dir") {
@@ -141,7 +141,7 @@ SetParameter(const std::string& key, const std::string& value)
   }
 }
 
-bool TransliterationPhraseDictionary::SatisfyBackoff(const InputPath &inputPath) const
+bool PhraseDictionaryTransliteration::SatisfyBackoff(const InputPath &inputPath) const
 {
   const Phrase &sourcePhrase = inputPath.GetPhrase();
 
@@ -174,10 +174,10 @@ bool TransliterationPhraseDictionary::SatisfyBackoff(const InputPath &inputPath)
   return true;
 }
 
-TO_STRING_BODY(TransliterationPhraseDictionary);
+TO_STRING_BODY(PhraseDictionaryTransliteration);
 
 // friend
-ostream& operator<<(ostream& out, const TransliterationPhraseDictionary& phraseDict)
+ostream& operator<<(ostream& out, const PhraseDictionaryTransliteration& phraseDict)
 {
   return out;
 }

@@ -1652,6 +1652,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryScope3.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryTransliteration.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTransliteration.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryTransliteration.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTransliteration.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryTree.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTree.cpp</locationURI>
@@ -1690,16 +1700,6 @@
 			<name>TranslationModel/SkeletonPT.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/TransliterationPhraseDictionary.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/TransliterationPhraseDictionary.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/TransliterationPhraseDictionary.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/TransliterationPhraseDictionary.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/WordCoocTable.cpp</name>

@@ -10,12 +10,12 @@ class ChartCellCollectionBase;
 class ChartRuleLookupManager;
 class InputPath;
 
-class TransliterationPhraseDictionary : public PhraseDictionary
+class PhraseDictionaryTransliteration : public PhraseDictionary
 {
-  friend std::ostream& operator<<(std::ostream&, const TransliterationPhraseDictionary&);
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryTransliteration&);
 
 public:
-  TransliterationPhraseDictionary(const std::string &line);
+  PhraseDictionaryTransliteration(const std::string &line);
 
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 
