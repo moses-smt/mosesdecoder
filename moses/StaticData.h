@@ -70,7 +70,7 @@ protected:
   mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
-  std::vector<size_t> m_decodeGraphBackoff;
+
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
   float
@@ -719,9 +719,6 @@ public:
 
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;
-  }
-  const std::vector<size_t>& GetDecodeGraphBackoff() const {
-    return m_decodeGraphBackoff;
   }
 
   //sentence (and thread) specific initialisationn and cleanup

@@ -744,13 +744,14 @@ bool StaticData::LoadDecodeGraphs()
 
   // set maximum n-gram size for backoff approach to decoding paths
   // default is always use subsequent paths (value = 0)
-  for(size_t i=0; i<m_decodeGraphs.size(); i++) {
-    m_decodeGraphBackoff.push_back( 0 );
-  }
   // if specified, record maxmimum unseen n-gram size
   const vector<string> &backoffVector = m_parameter->GetParam("decoding-graph-backoff");
   for(size_t i=0; i<m_decodeGraphs.size() && i<backoffVector.size(); i++) {
-    m_decodeGraphBackoff[i] = Scan<size_t>(backoffVector[i]);
+	DecodeGraph &decodeGraph = *m_decodeGraphs[i];
+
+	if (i < backoffVector.size()) {
+		decodeGraph.SetBackoff(Scan<size_t>(backoffVector[i]));
+	}
   }
 
   return true;

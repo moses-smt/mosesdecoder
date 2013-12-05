@@ -371,7 +371,6 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // there may be multiple decoding graphs (factorizations of decoding)
   const vector <DecodeGraph*> &decodeGraphList = StaticData::Instance().GetDecodeGraphs();
-  const vector <size_t> &decodeGraphBackoff = StaticData::Instance().GetDecodeGraphBackoff();
 
   // length of the sentence
   const size_t size = m_source.GetSize();
@@ -383,6 +382,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
     }
 
     const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
+    size_t backoff = decodeGraph.GetBackoff();
     // generate phrases that start at startPos ...
     for (size_t startPos = 0 ; startPos < size; startPos++) {
       size_t maxSize = size - startPos; // don't go over end of sentence
@@ -392,8 +392,8 @@ void TranslationOptionCollection::CreateTranslationOptions()
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
         if (graphInd > 0 && // only skip subsequent graphs
-            decodeGraphBackoff[graphInd] != 0 && // use of backoff specified
-            (endPos-startPos+1 >= decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
+        	backoff != 0 && // use of backoff specified
+            (endPos-startPos+1 >= backoff || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options

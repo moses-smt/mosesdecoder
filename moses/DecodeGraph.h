@@ -40,6 +40,7 @@ protected:
   std::list<const DecodeStep*> m_steps;
   size_t m_position;
   size_t m_maxChartSpan;
+  size_t m_backoff;
 
 public:
   /**
@@ -47,8 +48,9 @@ public:
     **/
   DecodeGraph(size_t position)
     : m_position(position)
-    , m_maxChartSpan(NOT_FOUND) {
-  }
+    , m_maxChartSpan(NOT_FOUND)
+	, m_backoff(0)
+	{}
 
   // for chart decoding
   DecodeGraph(size_t position, size_t maxChartSpan)
@@ -80,6 +82,14 @@ public:
   size_t GetMaxChartSpan() const {
 	UTIL_THROW_IF2(m_maxChartSpan == NOT_FOUND, "Max chart span not specified");
     return m_maxChartSpan;
+  }
+
+  size_t GetBackoff() const {
+    return m_backoff;
+  }
+
+  void SetBackoff(size_t backoff){
+    m_backoff = backoff;
   }
 
   size_t GetPosition() const {
