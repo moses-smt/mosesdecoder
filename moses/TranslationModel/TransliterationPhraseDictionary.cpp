@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "TransliterationPhraseDictionary.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
+#include "moses/DecodeGraph.h"
+#include "moses/DecodeStep.h"
 
 using namespace std;
 
@@ -29,62 +31,56 @@ void TransliterationPhraseDictionary::GetTargetPhraseCollectionBatch(const Input
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
-    const Phrase &sourcePhrase = inputPath.GetPhrase();
 
-    if (sourcePhrase.GetSize() != 1) {
-    	// only translit single words. This should be user configurable
+    if (!SatisfyBackoff(inputPath)) {
     	continue;
     }
 
-    InputPath::TargetPhrases::const_iterator iter;
-    for (iter = inputPath.GetTargetPhrases().begin(); iter != inputPath.GetTargetPhrases().end(); ++iter) {
-    	const std::pair<const TargetPhraseCollection*, const void*> &temp = iter->second;
-    	const TargetPhraseCollection *tpCollPrev = temp.first;
+    const Phrase &sourcePhrase = inputPath.GetPhrase();
 
-    	if (tpCollPrev && tpCollPrev->GetSize()) {
-    		// already have translation from another pt. Don't transliterate
-    		break;
-    	}
-
-    	// TRANSLITERATE
-    	char *ptr = tmpnam(NULL);
-    	string inFile(ptr);
-    	ptr = tmpnam(NULL);
-    	string outDir(ptr);
-
-    	ofstream inStream(inFile.c_str());
-    	inStream << sourcePhrase.ToString() << endl;
-    	inStream.close();
-
-    	string cmd = m_scriptDir + "/Transliteration/prepare-transliteration-phrase-table.pl" +
-    			" --transliteration-model-dir " + m_filePath +
-    			" --moses-src-dir " + m_mosesDir +
-    			" --external-bin-dir " + m_externalDir +
-    			" --input-extension " + m_inputLang +
-    			" --output-extension " + m_outputLang +
-    			" --oov-file " + inFile +
-    			" --out-dir " + outDir;
-
-    	int ret = system(cmd.c_str());
-    	UTIL_THROW_IF2(ret != 0, "Transliteration script error");
-
-        TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-    	vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir);
-    	vector<TargetPhrase*>::const_iterator iter;
-    	for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
-    		TargetPhrase *tp = *iter;
-    		tpColl->Add(tp);
-    	}
-
-        m_allTPColl.push_back(tpColl);
-        inputPath.SetTargetPhrases(*this, tpColl, NULL);
-
-        remove(inFile.c_str());
-
-        cmd = "rm -rf " + outDir;
-        system(cmd.c_str());
+    if (sourcePhrase.GetSize() != 1) {
+    	// only translit single words. A limitation of the translit script
+    	continue;
     }
 
+	// TRANSLITERATE
+	char *ptr = tmpnam(NULL);
+	string inFile(ptr);
+	ptr = tmpnam(NULL);
+	string outDir(ptr);
+
+	ofstream inStream(inFile.c_str());
+	inStream << sourcePhrase.ToString() << endl;
+	inStream.close();
+
+	string cmd = m_scriptDir + "/Transliteration/prepare-transliteration-phrase-table.pl" +
+			" --transliteration-model-dir " + m_filePath +
+			" --moses-src-dir " + m_mosesDir +
+			" --external-bin-dir " + m_externalDir +
+			" --input-extension " + m_inputLang +
+			" --output-extension " + m_outputLang +
+			" --oov-file " + inFile +
+			" --out-dir " + outDir;
+
+	int ret = system(cmd.c_str());
+	UTIL_THROW_IF2(ret != 0, "Transliteration script error");
+
+	TargetPhraseCollection *tpColl = new TargetPhraseCollection();
+	vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir);
+	vector<TargetPhrase*>::const_iterator iter;
+	for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
+		TargetPhrase *tp = *iter;
+		tpColl->Add(tp);
+	}
+
+	m_allTPColl.push_back(tpColl);
+	inputPath.SetTargetPhrases(*this, tpColl, NULL);
+
+	// clean up temporary files
+	remove(inFile.c_str());
+
+	cmd = "rm -rf " + outDir;
+	system(cmd.c_str());
   }
 }
 
@@ -143,6 +139,39 @@ SetParameter(const std::string& key, const std::string& value)
   } else {
 	  PhraseDictionary::SetParameter(key, value);
   }
+}
+
+bool TransliterationPhraseDictionary::SatisfyBackoff(const InputPath &inputPath) const
+{
+  const Phrase &sourcePhrase = inputPath.GetPhrase();
+
+  assert(m_container);
+  const DecodeGraph *decodeGraph = m_container->GetContainer();
+  size_t backoff = decodeGraph->GetBackoff();
+
+  if (backoff == 0) {
+	  // ie. don't backoff. Collect ALL translations
+	  return true;
+  }
+
+  if (sourcePhrase.GetSize() > backoff) {
+	  // source phrase too big
+	  return false;
+  }
+
+  // lookup translation only if no other translations
+  InputPath::TargetPhrases::const_iterator iter;
+  for (iter = inputPath.GetTargetPhrases().begin(); iter != inputPath.GetTargetPhrases().end(); ++iter) {
+  	const std::pair<const TargetPhraseCollection*, const void*> &temp = iter->second;
+  	const TargetPhraseCollection *tpCollPrev = temp.first;
+
+  	if (tpCollPrev && tpCollPrev->GetSize()) {
+  		// already have translation from another pt. Don't create translations
+  		return false;
+  	}
+  }
+
+  return true;
 }
 
 TO_STRING_BODY(TransliterationPhraseDictionary);

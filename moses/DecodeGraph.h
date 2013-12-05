@@ -71,9 +71,7 @@ public:
   virtual ~DecodeGraph();
 
   //! Add another decode step to the graph
-  void Add(const DecodeStep *decodeStep) {
-    m_steps.push_back(decodeStep);
-  }
+  void Add(DecodeStep *decodeStep);
 
   size_t GetSize() const {
     return m_steps.size();

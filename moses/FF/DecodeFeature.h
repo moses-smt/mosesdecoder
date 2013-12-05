@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+class DecodeStep;
 
 /**
   * Baseclass for phrase-table or generation table feature function
@@ -78,11 +79,15 @@ public:
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
+  void SetContainer(const DecodeStep *container)
+  { m_container = container; }
+
 protected:
   std::vector<FactorType> m_input;
   std::vector<FactorType> m_output;
   FactorMask m_inputFactors;
   FactorMask m_outputFactors;
+  const DecodeStep *m_container;
 };
 
 }

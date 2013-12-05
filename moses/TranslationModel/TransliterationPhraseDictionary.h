@@ -8,6 +8,7 @@ namespace Moses
 class ChartParser;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
+class InputPath;
 
 class TransliterationPhraseDictionary : public PhraseDictionary
 {
@@ -28,13 +29,14 @@ public:
 
   TO_STRING();
 
-
 protected:
   mutable std::list<TargetPhraseCollection*> m_allTPColl;
 
   std::string m_mosesDir, m_scriptDir, m_externalDir, m_inputLang, m_outputLang;
 
   std::vector<TargetPhrase*> CreateTargetPhrases(const Phrase &sourcePhrase, const std::string &outDir) const;
+  bool SatisfyBackoff(const InputPath &inputPath) const;
+
 };
 
 }  // namespace Moses
