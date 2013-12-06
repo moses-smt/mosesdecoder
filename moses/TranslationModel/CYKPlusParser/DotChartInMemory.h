@@ -52,6 +52,7 @@ private:
 };
 
 typedef std::vector<const DottedRuleInMemory*> DottedRuleList;
+typedef std::map<size_t, DottedRuleList> DottedRuleMap;
 
 // Collection of all in-memory DottedRules that share a common start point,
 // grouped by end point.  Additionally, maintains a list of all
@@ -63,6 +64,7 @@ protected:
   typedef std::vector<DottedRuleList> CollType;
   CollType m_coll;
   DottedRuleList m_expandableDottedRuleList;
+  DottedRuleMap m_expandableDottedRuleListTerminalsOnly;
 
 public:
   typedef CollType::iterator iterator;
@@ -98,7 +100,13 @@ public:
     UTIL_THROW_IF2(dottedRule == NULL, "Dotted rule is null");
     m_coll[pos].push_back(dottedRule);
     if (!dottedRule->GetLastNode().IsLeaf()) {
-      m_expandableDottedRuleList.push_back(dottedRule);
+      if (dottedRule->GetLastNode().GetNonTerminalMap().empty() && !dottedRule->IsRoot()) {
+        size_t startPos = dottedRule->GetWordsRange().GetEndPos() + 1;
+        m_expandableDottedRuleListTerminalsOnly[startPos].push_back(dottedRule);
+      }
+      else {
+        m_expandableDottedRuleList.push_back(dottedRule);
+      }
     }
   }
 
@@ -110,6 +118,10 @@ public:
 
   const DottedRuleList &GetExpandableDottedRuleList() const {
     return m_expandableDottedRuleList;
+  }
+
+  DottedRuleMap &GetExpandableDottedRuleListTerminalsOnly() {
+    return m_expandableDottedRuleListTerminalsOnly;
   }
 
 };

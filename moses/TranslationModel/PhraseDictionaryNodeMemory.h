@@ -142,6 +142,10 @@ public:
     return m_targetPhraseCollection;
   }
 
+  const TerminalMap & GetTerminalMap() const {
+    return m_sourceTermMap;
+  }
+
   const NonTerminalMap & GetNonTerminalMap() const {
     return m_nonTermMap;
   }
