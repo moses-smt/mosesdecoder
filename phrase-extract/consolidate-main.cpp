@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
        << "consolidating direct and indirect rule tables\n";
 
   if (argc < 4) {
-    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] \n";
+    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] [--PhraseCount] \n";
     exit(1);
   }
   char* &fileNameDirect = argv[1];
