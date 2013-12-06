@@ -10,7 +10,17 @@ class ScoreComponentCollection;
 
 class WordPenaltyProducer : public StatelessFeatureFunction
 {
+protected:
+  static WordPenaltyProducer *s_instance;
+
 public:
+  static const WordPenaltyProducer& Instance() {
+    return *s_instance;
+  }
+  static WordPenaltyProducer& InstanceNonConst() {
+    return *s_instance;
+  }
+
   WordPenaltyProducer(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {

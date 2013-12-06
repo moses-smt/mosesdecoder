@@ -57,7 +57,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_wpProducer(NULL)
   ,m_unknownWordPenaltyProducer(NULL)
   ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
@@ -870,7 +869,7 @@ const string &StaticData::GetBinDirectory() const
 
 float StaticData::GetWeightWordPenalty() const
 {
-  float weightWP = GetWeight(m_wpProducer);
+  float weightWP = GetWeight(&WordPenaltyProducer::Instance());
   //VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
   return weightWP;
 }
@@ -912,10 +911,6 @@ void StaticData::LoadFeatureFunctions()
     } else if (const GenerationDictionary *ffCast
                = dynamic_cast<const GenerationDictionary*>(ff)) {
     	// do nothing
-    } else if (WordPenaltyProducer *ffCast
-               = dynamic_cast<WordPenaltyProducer*>(ff)) {
-      UTIL_THROW_IF2(m_wpProducer, "Only 1 word penalty allowed"); // max 1 feature;
-      m_wpProducer = ffCast;
     } else if (UnknownWordPenaltyProducer *ffCast
                = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
       UTIL_THROW_IF2(m_unknownWordPenaltyProducer, "Only 1 unknown word penalty allowed"); // max 1 feature;

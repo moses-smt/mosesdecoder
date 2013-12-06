@@ -6,10 +6,15 @@ using namespace std;
 
 namespace Moses
 {
+WordPenaltyProducer *WordPenaltyProducer::s_instance = NULL;
+
 WordPenaltyProducer::WordPenaltyProducer(const std::string &line)
   : StatelessFeatureFunction(1, line)
 {
   ReadParameters();
+
+  UTIL_THROW_IF2(s_instance, "Can only have 1 word penalty feature");
+  s_instance = this;
 }
 
 void WordPenaltyProducer::Evaluate(const Phrase &source

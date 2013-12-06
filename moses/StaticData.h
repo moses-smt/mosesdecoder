@@ -49,7 +49,6 @@ namespace Moses
 class InputType;
 class DecodeGraph;
 class DecodeStep;
-class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
 class InputFeature;
 
@@ -114,7 +113,6 @@ protected:
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
-  WordPenaltyProducer* m_wpProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
   const InputFeature *m_inputFeature;
 
@@ -418,9 +416,6 @@ public:
   }
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
-  }
-  WordPenaltyProducer *GetWordPenaltyProducer() { // for mira
-    return m_wpProducer;
   }
 
   const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const {
