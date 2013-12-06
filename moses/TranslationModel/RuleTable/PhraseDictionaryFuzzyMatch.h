@@ -53,6 +53,8 @@ public:
   void InitializeForInput(InputType const& inputSentence);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
+  void SetParameter(const std::string& key, const std::string& value);
+
   TO_STRING();
 
 protected:

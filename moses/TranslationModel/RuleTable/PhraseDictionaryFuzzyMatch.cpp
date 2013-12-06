@@ -55,6 +55,7 @@ namespace Moses
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
   :PhraseDictionary(line)
   ,m_FuzzyMatchWrapper(NULL)
+  ,m_config(3)
 {
   ReadParameters();
 }
@@ -68,7 +69,6 @@ void PhraseDictionaryFuzzyMatch::Load()
 {
   SetFeaturesToApply();
 
-  assert(m_config.size() == 3);
   m_FuzzyMatchWrapper = new tmmt::FuzzyMatchWrapper(m_config[0], m_config[1], m_config[2]);
 }
 
@@ -79,6 +79,20 @@ ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
   return new ChartRuleLookupManagerMemoryPerSentence(parser, cellCollection, *this);
 }
 
+void
+PhraseDictionaryFuzzyMatch::
+SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "source") {
+	  m_config[0] = value;
+  } else if (key == "target") {
+	  m_config[1] = value;
+  } else if (key == "alignment") {
+	  m_config[2] = value;
+  } else {
+	PhraseDictionary::SetParameter(key, value);
+  }
+}
 
 int removedirectoryrecursively(const char *dirname)
 {
