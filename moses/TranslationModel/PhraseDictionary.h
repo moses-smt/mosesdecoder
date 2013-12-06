@@ -130,6 +130,10 @@ protected:
   size_t m_maxCacheSize; // 0 = no caching
 
   typedef std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > CacheColl;
+  // 1st = hash of source phrase/ address of phrase-table node
+  // 2nd = all translations
+  // 3rd = time of last access
+
 #ifdef WITH_THREADS
   //reader-writer lock
   mutable boost::thread_specific_ptr<CacheColl> m_cache;
