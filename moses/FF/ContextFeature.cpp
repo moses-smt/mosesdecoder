@@ -35,8 +35,6 @@ void ContextFeature::Evaluate(const Phrase &source
 	                        , ScoreComponentCollection &estimatedFutureScore) const
 	{
 		targetPhrase.SetRuleSource(source);
-
-
 	}
 
 void ContextFeature::Evaluate(const InputType &input
@@ -214,18 +212,8 @@ void ContextFeature::Load()
 {
 	  m_srcFactors.push_back(0);
 	  m_tgtFactors.push_back(0);
-
+	  this->Initialize(StaticData::Instance().GetParam("psd-model")[0],StaticData::Instance().GetParam("psd-index")[0],StaticData::Instance().GetParam("psd-config")[0]);
 }
-
-//Was in constructor : add to load method?
-//ContextFeature::ContextFeature(ScoreIndexManager &scoreIndexManager, float weight)
-//{scoreIndexManager.AddScoreProducer(this);
-//vector<float> weights;
-//weights.push_back(weight);
-//m_srcFactors.push_back(0);
-//m_tgtFactors.push_back(0);
-//const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
-//}
 
 ContextFeature::~ContextFeature()
 {
@@ -242,7 +230,10 @@ bool ContextFeature::Initialize(const string &modelFile, const string &indexFile
 
   m_consumerFactory = new VWLibraryPredictConsumerFactory(modelFile, 255);
   if (! LoadRuleIndex(indexFile))
-  isGood = false;
+  {
+	  cerr << "WARNING : No rule index loaded !" << std::endl;
+	  isGood = false;
+  }
 
   m_extractorConfig.Load(configFile);
   m_extractor = new FeatureExtractor(m_ruleIndex,m_extractorConfig, false);
@@ -268,14 +259,14 @@ void ContextFeature::CheckIndex(const std::string &targetRep)
 
 ChartTranslation ContextFeature::GetPSDTranslation(const string targetRep, const TargetPhrase *tp) const
 {
-  VERBOSE(5, "Target Phrase put into translation vector : " << (*tp) << " : " << tp->GetFutureScore() << std::endl);
+  VERBOSE(1, "Target Phrase put into translation vector : " << (*tp) << " : " << tp->GetFutureScore() << std::endl);
   ChartTranslation psdOpt;
 
   // phrase ID
-   VERBOSE(6, "LOOKED UP TARGET REP : " << targetRep << endl);
+   VERBOSE(2, "LOOKED UP TARGET REP : " << targetRep << endl);
    CHECK(m_ruleIndex.left.find(targetRep) != m_ruleIndex.left.end());
    psdOpt.m_index = m_ruleIndex.left.find(targetRep)->second;
-   VERBOSE(6, "FOUND INDEX : " << m_ruleIndex.left.find(targetRep)->second << endl);
+   VERBOSE(2, "FOUND INDEX : " << m_ruleIndex.left.find(targetRep)->second << endl);
 
   //alignment between terminals and non-terminals
   // alignment between terminals
@@ -321,6 +312,7 @@ bool ContextFeature::LoadRuleIndex(const string &indexFile)
   string line;
   size_t index = 0;
   while (getline(in, line)) {
+	VERBOSE(2,"LOAD RULE INDEX and INSERT: " << line << endl);
     m_ruleIndex.insert(TargetIndexType::value_type(line, ++index));
   }
   in.close();

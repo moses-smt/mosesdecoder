@@ -11,7 +11,7 @@ using namespace std;
 namespace PSD
 {
 
-const char * VW_INIT_OPTIONS = "--hash all --noconstant -b 26 -q st --passes 20 --csoaa_ldf mc --loss_function=logistic";
+const char * VW_INIT_OPTIONS = "-t --hash all --noconstant -b 26 -q st --csoaa_ldf mc --loss_function=logistic";
 
 //
 // VWLibraryPredictConsumerFactory

@@ -464,7 +464,11 @@ int main(int argc, char * argv[])
   std::string prev = "";
   std::vector<PTEntry*> options;
   size_t pt_lines = 0;
+
+  int counter = 0;
+
   while(!cin.eof()) {
+	counter++;
     cin.getline(tmpString,10000,'\n');
     if(++pt_lines%10000==0) { 
       std::cerr << ".";

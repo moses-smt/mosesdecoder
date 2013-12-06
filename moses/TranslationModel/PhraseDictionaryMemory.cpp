@@ -94,7 +94,6 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
     if (word.IsNonTerminal()) {
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
-
       CHECK(iterAlign != alignmentInfo.end());
       CHECK(iterAlign->first == pos);
       size_t targetNonTermInd = iterAlign->second;

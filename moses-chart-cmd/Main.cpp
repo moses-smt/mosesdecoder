@@ -321,29 +321,67 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
   FactorMask inputFactorUsed(inputFactorOrder);
 
   // io
-  if (staticData.GetParam("input-file").size() == 1) {
-    VERBOSE(2,"IO from File" << endl);
-    string filePath = staticData.GetParam("input-file")[0];
+    if ( (staticData.GetParam("input-file").size() == 1) && (staticData.GetParam("psd-context").size() > 0 ) && (staticData.GetParam("syntax-context").size() > 0) )
+    {
+        VERBOSE(1,"IO from File" << endl);
+        VERBOSE(1,"Context and syntax from File" << endl);
+        string filePath1 = staticData.GetParam("input-file")[0];
+        //damt hiero : psd context file
+        string filePath2 = staticData.GetParam("psd-context")[0];
+        //damt hiero : parse file
+        string filePath3 = staticData.GetParam("syntax-context")[0];
 
-    //damt hiero : psd context file
-    string filePath2 = staticData.GetParam("psd-context")[0];
-    //damt hiero : parse file
-    string filePath3 = staticData.GetParam("syntax-context")[0];
+        //std::cerr << "Syntax file parse : " << filePath3 << std::endl;
 
-    ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                              , staticData.GetNBestSize()
-                              , staticData.GetNBestFilePath()
-                              , filePath);
-  } else {
-    VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-    ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                              , staticData.GetNBestSize()
-                              , staticData.GetNBestFilePath());
-  }
-  ioWrapper->ResetTranslationId();
+        ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+                                , staticData.GetNBestSize()
+                                , staticData.GetNBestFilePath()
+                                , filePath1
+                                , filePath2
+                                , filePath3);
+    }
+    else
+    {
+  	  if ( (staticData.GetParam("input-file").size() == 1) && (staticData.GetParam("psd-context").size() > 0 ) && (staticData.GetParam("syntax-context").size() == 0) )
+  	  {
+  		   VERBOSE(1,"IO from File" << endl);
+  		   VERBOSE(1,"Context from File" << endl);
+  		   string filePath1 = staticData.GetParam("input-file")[0];
+  		   //damt hiero : psd context file
+  		   string filePath2 = staticData.GetParam("psd-context")[0];
 
-  IFVERBOSE(1)
-  PrintUserTime("Created input-output object");
+  		   ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+  								   , staticData.GetNBestSize()
+  								   , staticData.GetNBestFilePath()
+  								   , filePath1
+  								   , filePath2);
+  	  }
+  	  else
+  	  {
+  		  if(staticData.GetParam("input-file").size() == 1 && staticData.GetParam("psd-context").size() == 0 && staticData.GetParam("syntax-context").size() == 0)
+  		    {
+  		      VERBOSE(1,"IO from File : " << endl);
+  		      VERBOSE(1,"Context from STDIN" << endl);
+  		      string filePath = staticData.GetParam("input-file")[0];
+
+  		      ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+  		                                , staticData.GetNBestSize()
+  		                                , staticData.GetNBestFilePath()
+  		                                , filePath);
+  		    }
+  		  else
+  		  {
+  			  VERBOSE(1,"IO from STDOUT/STDIN" << endl);
+  			     ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+  			                               , staticData.GetNBestSize()
+  			                               , staticData.GetNBestFilePath());
+  		  }
+
+  	  }
+     }
+    ioWrapper->ResetTranslationId();
+    IFVERBOSE(1)
+    PrintUserTime("Created input-output object");
 
   return ioWrapper;
 }

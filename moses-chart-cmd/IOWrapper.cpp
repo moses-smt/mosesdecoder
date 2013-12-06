@@ -57,6 +57,7 @@ using namespace Moses;
 namespace MosesChartCmd
 {
 
+//Fabienne Braune : At some point, we should not pass feature context here
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const std::vector<FactorType>	&outputFactorOrder
                      , const FactorMask							&inputFactorUsed
@@ -159,12 +160,11 @@ IOWrapper::~IOWrapper()
   delete m_singleBestOutputCollector;
   delete m_alignmentInfoCollector;
 
-  //comtext feature : delete paths
+  //context feature : delete paths
   if (!m_contextFilePath.empty()) {
     delete m_contextStream;
   }
 
-  //damt hiero : file to parse
   if (!m_parseFilePath.empty()) {
       delete m_parseStream;
     }
