@@ -49,8 +49,6 @@ namespace Moses
 class InputType;
 class DecodeGraph;
 class DecodeStep;
-class UnknownWordPenaltyProducer;
-class InputFeature;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -113,8 +111,6 @@ protected:
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
-  UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
-  const InputFeature *m_inputFeature;
 
   bool m_reportSegmentation;
   bool m_reportSegmentationEnriched;
@@ -416,14 +412,6 @@ public:
   }
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
-  }
-
-  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const {
-    return m_unknownWordPenaltyProducer;
-  }
-
-  const InputFeature *GetInputFeature() const {
-    return m_inputFeature;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {

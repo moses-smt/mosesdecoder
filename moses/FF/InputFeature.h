@@ -10,11 +10,20 @@ namespace Moses
 class InputFeature : public StatelessFeatureFunction
 {
 protected:
+  static InputFeature *s_instance;
+
   size_t m_numInputScores;
   size_t m_numRealWordCount;
   bool m_legacy;
 
 public:
+  static const InputFeature& Instance() {
+    return *s_instance;
+  }
+  static InputFeature& InstanceNonConst() {
+    return *s_instance;
+  }
+
   InputFeature(const std::string &line);
 
   void Load();

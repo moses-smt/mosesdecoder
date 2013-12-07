@@ -69,8 +69,7 @@ ConfusionNet::ConfusionNet()
   if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
-  UTIL_THROW_IF2(StaticData::Instance().GetInputFeature() == NULL,
-		  "Input feature must be specified");
+  UTIL_THROW_IF2(&InputFeature::Instance() == NULL, "Input feature must be specified");
 }
 ConfusionNet::~ConfusionNet()
 {
@@ -131,9 +130,9 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
   Clear();
 
   const StaticData &staticData = StaticData::Instance();
-  const InputFeature *inputFeature = staticData.GetInputFeature();
-  size_t numInputScores = inputFeature->GetNumInputScores();
-  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+  const InputFeature &inputFeature = InputFeature::Instance();
+  size_t numInputScores = inputFeature.GetNumInputScores();
+  size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();
 
   size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);

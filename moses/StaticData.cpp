@@ -57,8 +57,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_unknownWordPenaltyProducer(NULL)
-  ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
@@ -876,7 +874,7 @@ float StaticData::GetWeightWordPenalty() const
 
 float StaticData::GetWeightUnknownWordPenalty() const
 {
-  return GetWeight(m_unknownWordPenaltyProducer);
+  return GetWeight(&UnknownWordPenaltyProducer::Instance());
 }
 
 void StaticData::InitializeForInput(const InputType& source) const
@@ -908,16 +906,6 @@ void StaticData::LoadFeatureFunctions()
 
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
-    } else if (const GenerationDictionary *ffCast
-               = dynamic_cast<const GenerationDictionary*>(ff)) {
-    	// do nothing
-    } else if (UnknownWordPenaltyProducer *ffCast
-               = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
-      UTIL_THROW_IF2(m_unknownWordPenaltyProducer, "Only 1 unknown word penalty allowed"); // max 1 feature;
-      m_unknownWordPenaltyProducer = ffCast;
-    } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
-      UTIL_THROW_IF2(m_inputFeature, "Only 1 input feature allowed"); // max 1 input feature;
-      m_inputFeature = ffCast;
     }
 
     if (doLoad) {

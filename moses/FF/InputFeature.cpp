@@ -10,10 +10,15 @@ using namespace std;
 
 namespace Moses
 {
+InputFeature *InputFeature::s_instance = NULL;
+
 InputFeature::InputFeature(const std::string &line)
   :StatelessFeatureFunction(line)
 {
   ReadParameters();
+
+  UTIL_THROW_IF2(s_instance, "Can only have 1 input feature");
+  s_instance = this;
 }
 
 void InputFeature::Load()

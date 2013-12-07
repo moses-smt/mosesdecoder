@@ -208,7 +208,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
     const ScorePair *inputScores)
 {
   const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+  const UnknownWordPenaltyProducer &unknownWordPenaltyProducer = UnknownWordPenaltyProducer::Instance();
   float unknownScore = FloorScore(TransformScore(0));
   const Word &sourceWord = inputPath.GetPhrase().GetWord(0);
 
@@ -259,7 +259,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
 
   }
 
-  targetPhrase.GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
+  targetPhrase.GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
 
   // source phrase
   const Phrase &sourcePhrase = inputPath.GetPhrase();
@@ -523,14 +523,14 @@ void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, Part
     return;
   }
 
-  const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
+  const InputFeature &inputFeature = InputFeature::Instance();
 
   const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
   for (size_t i = 0; i < transOpts.size(); ++i) {
     TranslationOption &transOpt = *transOpts[i];
 
     ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-    scores.PlusEquals(inputFeature, *inputScore);
+    scores.PlusEquals(&inputFeature, *inputScore);
 
   }
 }

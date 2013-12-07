@@ -22,9 +22,8 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
   : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
 {
-  const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
-  UTIL_THROW_IF2(inputFeature == NULL,
-		  "Input feature must be specified");
+  const InputFeature &inputFeature = InputFeature::Instance();
+  UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
 
   size_t inputSize = input.GetSize();
   m_inputPathMatrix.resize(inputSize);

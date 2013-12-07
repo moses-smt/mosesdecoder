@@ -48,7 +48,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+  const UnknownWordPenaltyProducer &unknownWordPenaltyProducer = UnknownWordPenaltyProducer::Instance();
 
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
@@ -93,7 +93,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       // scores
       float unknownScore = FloorScore(TransformScore(prob));
 
-      targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
+      targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
 
       targetPhrase->SetTargetLHS(targetLHS);
@@ -121,7 +121,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
       UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
-      targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
+      targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
 
       targetPhrase->SetTargetLHS(targetLHS);
