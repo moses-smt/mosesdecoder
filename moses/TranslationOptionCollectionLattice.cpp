@@ -26,9 +26,8 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
 		  "Not for models using the legqacy binary phrase table");
 
-  const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
-  UTIL_THROW_IF2(inputFeature == NULL,
-		  "Input feature must be specified");
+  const InputFeature &inputFeature = InputFeature::Instance();
+  UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
 
   size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
   size_t size = input.GetSize();

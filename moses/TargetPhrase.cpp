@@ -142,12 +142,16 @@ void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   const StaticData &staticData = StaticData::Instance();
+  ScoreComponentCollection futureScoreBreakdown;
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     if (! staticData.IsFeatureFunctionIgnored( ff )) {
-      ff.Evaluate(input, inputPath, *this, m_scoreBreakdown);
+      ff.Evaluate(input, inputPath, *this, m_scoreBreakdown, &futureScoreBreakdown);
     }
   }
+  float weightedScore = m_scoreBreakdown.GetWeightedScore();
+  m_futureScore += futureScoreBreakdown.GetWeightedScore();
+  m_fullScore = weightedScore + m_futureScore;
 }
 
 void TargetPhrase::SetXMLScore(float score)

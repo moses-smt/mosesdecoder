@@ -12,6 +12,11 @@ SkeletonPT::SkeletonPT(const std::string &line)
   ReadParameters();
 }
 
+void SkeletonPT::Load()
+{
+	SetFeaturesToApply();
+}
+
 void SkeletonPT::CleanUpAfterSentenceProcessing(const InputType& source)
 {
   RemoveAllInColl(m_allTPColl);

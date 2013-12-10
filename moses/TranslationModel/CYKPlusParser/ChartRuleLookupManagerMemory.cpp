@@ -81,6 +81,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   // get list of all rules that apply to spans at same starting position
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
+  DottedRuleMap &expandableDottedRuleListTerminalsOnly = dottedRuleCol.GetExpandableDottedRuleListTerminalsOnly();
 
   const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
 
@@ -148,6 +149,38 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
     ExtendPartialRuleApplication(prevDottedRule, startPos, endPos, stackInd,
                                  dottedRuleCol);
+  }
+
+  // search for terminal symbol
+  // (if only one more word position needs to be covered)
+  DottedRuleMap::iterator it = expandableDottedRuleListTerminalsOnly.find(absEndPos);
+  if (it != expandableDottedRuleListTerminalsOnly.end()) {
+    for (size_t ind = 0; ind < it->second.size(); ++ind) {
+      // rule we are about to extend
+      const DottedRuleInMemory &prevDottedRule = *it->second[ind];
+
+      // look up in rule dictionary, if the current rule can be extended
+      // with the source word in the last position
+      const Word &sourceWord = sourceWordLabel.GetLabel();
+      const PhraseDictionaryNodeMemory *node = prevDottedRule.GetLastNode().GetChild(sourceWord);
+
+      // if we found a new rule -> create it and add it to the list
+      if (node != NULL) {
+        // create the rule
+#ifdef USE_BOOST_POOL
+        DottedRuleInMemory *dottedRule = m_dottedRulePool.malloc();
+        new (dottedRule) DottedRuleInMemory(*node, sourceWordLabel,
+                                            prevDottedRule);
+#else
+        DottedRuleInMemory *dottedRule = new DottedRuleInMemory(*node,
+            sourceWordLabel,
+            prevDottedRule);
+#endif
+        dottedRuleCol.Add(relEndPos+1, dottedRule);
+      }
+    }
+  // we only need to check once if a terminal matches the input at a given position.
+  expandableDottedRuleListTerminalsOnly.erase(it);
   }
 
   // list of rules that that cover the entire span

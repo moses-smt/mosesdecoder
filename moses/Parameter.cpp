@@ -190,7 +190,7 @@ Parameter::Parameter()
 
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
-  AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key");
+  AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
   AddParam("feature-add", "Add a feature function on the command line. Used by mira to add BLEU feature");
   AddParam("feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 

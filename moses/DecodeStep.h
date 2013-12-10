@@ -38,6 +38,7 @@ class PartialTranslOptColl;
 class FactorCollection;
 class InputType;
 class FeatureFunction;
+class DecodeGraph;
 
 /** Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
@@ -52,11 +53,12 @@ protected:
   std::vector<FactorType> m_conflictFactors; //! list of the factors that may conflict during this step
   std::vector<FactorType> m_newOutputFactors; //! list of the factors that are new in this step, may be empty
   const DecodeFeature* m_decodeFeature;
+  const DecodeGraph *m_container;
 
   std::vector<FeatureFunction*> m_featuresToApply, m_featuresRemaining;
 public:
   DecodeStep(); //! not implemented
-  DecodeStep(const DecodeFeature *featurePtr,
+  DecodeStep(DecodeFeature *featurePtr,
              const DecodeStep* prevDecodeStep,
              const std::vector<FeatureFunction*> &features);
   virtual ~DecodeStep();
@@ -101,8 +103,12 @@ public:
   /*! returns generation table feature for generation step */
   const GenerationDictionary* GetGenerationDictionaryFeature() const;
 
-
   void RemoveFeature(const FeatureFunction *ff);
+
+  void SetContainer(const DecodeGraph *container)
+  { m_container = container; }
+  const DecodeGraph *GetContainer() const
+  { return m_container; }
 
 };
 

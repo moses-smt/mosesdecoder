@@ -57,9 +57,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_wpProducer(NULL)
-  ,m_unknownWordPenaltyProducer(NULL)
-  ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
@@ -744,13 +741,14 @@ bool StaticData::LoadDecodeGraphs()
 
   // set maximum n-gram size for backoff approach to decoding paths
   // default is always use subsequent paths (value = 0)
-  for(size_t i=0; i<m_decodeGraphs.size(); i++) {
-    m_decodeGraphBackoff.push_back( 0 );
-  }
   // if specified, record maxmimum unseen n-gram size
   const vector<string> &backoffVector = m_parameter->GetParam("decoding-graph-backoff");
   for(size_t i=0; i<m_decodeGraphs.size() && i<backoffVector.size(); i++) {
-    m_decodeGraphBackoff[i] = Scan<size_t>(backoffVector[i]);
+	DecodeGraph &decodeGraph = *m_decodeGraphs[i];
+
+	if (i < backoffVector.size()) {
+		decodeGraph.SetBackoff(Scan<size_t>(backoffVector[i]));
+	}
   }
 
   return true;
@@ -869,14 +867,14 @@ const string &StaticData::GetBinDirectory() const
 
 float StaticData::GetWeightWordPenalty() const
 {
-  float weightWP = GetWeight(m_wpProducer);
+  float weightWP = GetWeight(&WordPenaltyProducer::Instance());
   //VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
   return weightWP;
 }
 
 float StaticData::GetWeightUnknownWordPenalty() const
 {
-  return GetWeight(m_unknownWordPenaltyProducer);
+  return GetWeight(&UnknownWordPenaltyProducer::Instance());
 }
 
 void StaticData::InitializeForInput(const InputType& source) const
@@ -908,23 +906,10 @@ void StaticData::LoadFeatureFunctions()
 
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
-    } else if (const GenerationDictionary *ffCast
-               = dynamic_cast<const GenerationDictionary*>(ff)) {
-    	// do nothing
-    } else if (WordPenaltyProducer *ffCast
-               = dynamic_cast<WordPenaltyProducer*>(ff)) {
-      UTIL_THROW_IF2(m_wpProducer, "Only 1 word penalty allowed"); // max 1 feature;
-      m_wpProducer = ffCast;
-    } else if (UnknownWordPenaltyProducer *ffCast
-               = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
-      UTIL_THROW_IF2(m_unknownWordPenaltyProducer, "Only 1 unknown word penalty allowed"); // max 1 feature;
-      m_unknownWordPenaltyProducer = ffCast;
-    } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
-      UTIL_THROW_IF2(m_inputFeature, "Only 1 input feature allowed"); // max 1 input feature;
-      m_inputFeature = ffCast;
     }
 
     if (doLoad) {
+      VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
       ff->Load();
     }
   }
@@ -932,6 +917,7 @@ void StaticData::LoadFeatureFunctions()
   const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
   for (size_t i = 0; i < pts.size(); ++i) {
     PhraseDictionary *pt = pts[i];
+    VERBOSE(1, "Loading " << pt->GetScoreProducerDescription() << endl);
     pt->Load();
   }
 

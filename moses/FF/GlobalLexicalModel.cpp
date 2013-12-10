@@ -26,11 +26,11 @@ GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
 
 void GlobalLexicalModel::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "file") {
+  if (key == "path") {
     m_filePath = value;
-  } else if (key == "inputFactors") {
+  } else if (key == "input-factor") {
     m_inputFactorsVec = Tokenize<FactorType>(value,",");
-  } else if (key == "outputFactors") {
+  } else if (key == "output-factor") {
     m_outputFactorsVec = Tokenize<FactorType>(value,",");
   } else {
     StatelessFeatureFunction::SetParameter(key, value);

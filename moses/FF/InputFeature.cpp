@@ -10,10 +10,15 @@ using namespace std;
 
 namespace Moses
 {
+InputFeature *InputFeature::s_instance = NULL;
+
 InputFeature::InputFeature(const std::string &line)
   :StatelessFeatureFunction(line)
 {
   ReadParameters();
+
+  UTIL_THROW_IF2(s_instance, "Can only have 1 input feature");
+  s_instance = this;
 }
 
 void InputFeature::Load()
@@ -39,7 +44,8 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 void InputFeature::Evaluate(const InputType &input
                             , const InputPath &inputPath
                             , const TargetPhrase &targetPhrase
-                            , ScoreComponentCollection &scoreBreakdown) const
+                            , ScoreComponentCollection &scoreBreakdown
+                            , ScoreComponentCollection *estimatedFutureScore) const
 {
   if (m_legacy) {
     //binary phrase-table does input feature itself

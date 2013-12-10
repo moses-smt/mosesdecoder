@@ -49,9 +49,6 @@ namespace Moses
 class InputType;
 class DecodeGraph;
 class DecodeStep;
-class WordPenaltyProducer;
-class UnknownWordPenaltyProducer;
-class InputFeature;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -70,7 +67,7 @@ protected:
   mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
-  std::vector<size_t> m_decodeGraphBackoff;
+
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
   float
@@ -114,9 +111,6 @@ protected:
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
-  WordPenaltyProducer* m_wpProducer;
-  UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
-  const InputFeature *m_inputFeature;
 
   bool m_reportSegmentation;
   bool m_reportSegmentationEnriched;
@@ -419,17 +413,6 @@ public:
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
   }
-  WordPenaltyProducer *GetWordPenaltyProducer() { // for mira
-    return m_wpProducer;
-  }
-
-  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const {
-    return m_unknownWordPenaltyProducer;
-  }
-
-  const InputFeature *GetInputFeature() const {
-    return m_inputFeature;
-  }
 
   const ScoreComponentCollection& GetAllWeights() const {
     return m_allWeights;
@@ -719,9 +702,6 @@ public:
 
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;
-  }
-  const std::vector<size_t>& GetDecodeGraphBackoff() const {
-    return m_decodeGraphBackoff;
   }
 
   //sentence (and thread) specific initialisationn and cleanup

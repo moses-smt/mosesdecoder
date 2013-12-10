@@ -49,8 +49,22 @@ void CoveredReferenceFeature::Evaluate(const Phrase &source
 void CoveredReferenceFeature::Evaluate(const InputType &input
                                   , const InputPath &inputPath
                                   , const TargetPhrase &targetPhrase
-                                  , ScoreComponentCollection &scoreBreakdown) const
-{}
+                                  , ScoreComponentCollection &scoreBreakdown
+                                  , ScoreComponentCollection *estimatedFutureScore) const
+{
+  long id = input.GetTranslationId();
+  boost::unordered_map<long, std::multiset<string> >::const_iterator refIt = m_refs.find(id);
+  multiset<string> wordsInPhrase = GetWordsInPhrase(targetPhrase);
+  multiset<string> covered;
+  set_intersection(wordsInPhrase.begin(), wordsInPhrase.end(),
+      refIt->second.begin(), refIt->second.end(),
+      inserter(covered, covered.begin()));
+  vector<float> scores;
+  scores.push_back(covered.size());
+
+  scoreBreakdown.Assign(this, scores);
+  estimatedFutureScore->Assign(this, scores);
+}
 
 void CoveredReferenceFeature::Load() {
   InputFileStream refFile(m_path);
@@ -90,6 +104,7 @@ FFState* CoveredReferenceFeature::Evaluate(
   // which words from the reference remain uncovered
   multiset<string> remaining;
   boost::unordered_map<long, std::multiset<string> >::const_iterator refIt = m_refs.find(id);
+  if (refIt == m_refs.end()) UTIL_THROW(util::Exception, "Sentence id out of range: " + SPrint<long>(id));
   set_difference(refIt->second.begin(), refIt->second.end(),
       ret->m_coveredRef.begin(), ret->m_coveredRef.end(),
       inserter(remaining, remaining.begin()));
@@ -101,9 +116,10 @@ FFState* CoveredReferenceFeature::Evaluate(
       remaining.begin(), remaining.end(),
       inserter(newCovered, newCovered.begin()));
 
-  // score is just the count of newly-covered words
+  vector<float> estimateScore =
+    cur_hypo.GetCurrTargetPhrase().GetScoreBreakdown().GetScoresForProducer(this);
   vector<float> scores;
-  scores.push_back(newCovered.size());
+  scores.push_back(newCovered.size() - estimateScore[0]);
   accumulator->PlusEquals(this, scores);
 
   // update feature state

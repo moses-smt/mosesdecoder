@@ -25,7 +25,7 @@ ConstrainedDecodingState::ConstrainedDecodingState(const ChartHypothesis &hypo)
 int ConstrainedDecodingState::Compare(const FFState& other) const
 {
   const ConstrainedDecodingState &otherFF = static_cast<const ConstrainedDecodingState&>(other);
-  bool ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
+  int ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
   return ret;
 }
 

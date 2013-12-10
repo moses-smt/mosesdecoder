@@ -16,6 +16,8 @@ class SkeletonPT : public PhraseDictionary
 public:
   SkeletonPT(const std::string &line);
 
+  void Load();
+
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 
   // for phrase-based model

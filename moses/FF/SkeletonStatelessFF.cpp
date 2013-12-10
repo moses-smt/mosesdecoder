@@ -25,7 +25,8 @@ void SkeletonStatelessFF::Evaluate(const Phrase &source
 void SkeletonStatelessFF::Evaluate(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
-                                   , ScoreComponentCollection &scoreBreakdown) const
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection *estimatedFutureScore) const
 {}
 
 void SkeletonStatelessFF::Evaluate(const Hypothesis& hypo,
