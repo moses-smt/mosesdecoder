@@ -1,10 +1,10 @@
-README - 16 Jan 2011
-Author: Jason Riesa <riesa@isi.edu>
+README - 16 Jan 2011b
+Author: Jason Riesa <jason.riesa@gmail.com>
 
-Picaro [v1.0]: A simple command-line alignment visualzation tool.
+Picaro [v1.0]: A simple command-line alignment visualization tool.
 Visualize alignments in grid-format. 
 
-This brief README is oragnized as follows:
+This brief README is organized as follows:
 I. REQUIREMENTS
 II. USAGE
 III. INPUT FORMAT
@@ -39,10 +39,10 @@ See included sample files in zh/ and es/.
 IV. EXAMPLE USAGE
 =================
 WITH A SINGLE ALIGNMENT:
-$ picaro.py -e zh/sample.e -f zh/sample.f -a1 zh/sample.a
+$ picaro.py -e zh/sample.e -f zh/sample.f -a1 zh/sample.aln
 
 COMPARING TWO ALIGNMENTS:
-$ picaro.py -e zh/sample.e -f zh/sample.f -a1 zh/alternate.a -a2 zh/sample.a
+$ picaro.py -e zh/sample.e -f zh/sample.f -a1 zh/alternate.aln -a2 zh/sample.aln
 
 When visualizing two alignments at once, refer to the following color scheme:
 Green blocks: alignments a1 and a2 agree
