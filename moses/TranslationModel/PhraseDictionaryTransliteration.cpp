@@ -20,6 +20,11 @@ PhraseDictionaryTransliteration::PhraseDictionaryTransliteration(const std::stri
 		  m_outputLang.empty(), "Must specify all arguments");
 }
 
+void PhraseDictionaryTransliteration::Load()
+{
+	SetFeaturesToApply();
+}
+
 void PhraseDictionaryTransliteration::CleanUpAfterSentenceProcessing(const InputType& source)
 {
 	ReduceCache();

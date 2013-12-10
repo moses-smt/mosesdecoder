@@ -18,6 +18,8 @@ class PhraseDictionaryTransliteration : public PhraseDictionary
 public:
   PhraseDictionaryTransliteration(const std::string &line);
 
+  void Load();
+
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 
   // for phrase-based model
