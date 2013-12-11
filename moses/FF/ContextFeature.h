@@ -25,9 +25,7 @@ class ChartTranslationOption;
 class ContextFeature : public StatelessFeatureFunction
 {
 public:
-	ContextFeature(const std::string &line)
-	:StatelessFeatureFunction("ContextFeature", line)
-	{}
+	ContextFeature(const std::string &line);
 
 	//Is this allowed (?)
 	~ContextFeature();
@@ -88,7 +86,7 @@ public:
     PSD::TargetIndexType m_ruleIndex; //FB : this target index type remains empty during decoding
     PSD::FeatureExtractor *m_extractor, *m_debugExtractor;
     PSD::VWLibraryPredictConsumerFactory  *m_consumerFactory;
-    PSD::VWFileTrainConsumer      *m_debugConsumer;
+    PSD::VWFileTrainConsumer *m_debugConsumer;
     PSD::ExtractorConfig m_extractorConfig;
     bool IsOOV(const std::string &targetRep);
     bool LoadRuleIndex(const std::string &indexFile);

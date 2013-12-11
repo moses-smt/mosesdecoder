@@ -28,6 +28,12 @@ using namespace PSD;
 namespace Moses
 {
 
+ContextFeature::ContextFeature(const std::string &line)
+  : StatelessFeatureFunction("ContextFeature",1, line)
+{
+  ReadParameters();
+}
+
 //override
 void ContextFeature::Evaluate(const Phrase &source
 	                        , const TargetPhrase &targetPhrase
@@ -42,7 +48,7 @@ void ContextFeature::Evaluate(const InputType &input
 	                        , ChartTranslationOptions &transOpts) const
 	{
 
-	 vector<FactorType> srcFactors;
+	    vector<FactorType> srcFactors;
 	    srcFactors.push_back(0);
 	    string nonTermRep = "[X][X]";
 
@@ -70,6 +76,11 @@ void ContextFeature::Evaluate(const InputType &input
 	            itr_targets++)
 	        {
 	        	ChartTranslationOption &transOpt = **itr_targets;
+
+	        	//FB : debugging
+	        	std::cerr << "UPDATING TO SCORE" << std::endl;
+	        	(*itr_targets)->GetScores().PlusEquals(6666);
+
 	        	const TargetPhrase &tp = transOpt.GetPhrase();
 	            //get source side of rule
 	            CHECK(tp.GetRuleSource() != NULL);
@@ -164,8 +175,8 @@ void ContextFeature::Evaluate(const InputType &input
 	        RuleMap::const_iterator itr_ruleMap;
 	        for(itr_ruleMap = ruleMap.begin(); itr_ruleMap != ruleMap.end(); itr_ruleMap++)
 	        {
-	            VERBOSE(3, "Calling vw for source side : " << itr_ruleMap->first << endl);
-	            VERBOSE(3, "Calling vw for source context : " << input << endl);
+	            VERBOSE(1, "Calling vw for source side : " << itr_ruleMap->first << endl);
+	            VERBOSE(1, "Calling vw for source context : " << input << endl);
 
 	            vector<ScoreComponentCollection> scores = ScoreRules(	   //get begin of span
 	                                                                       transOpts.GetSourceWordsRange().GetStartPos(),
@@ -189,21 +200,22 @@ void ContextFeature::Evaluate(const InputType &input
 	                std::map<std::string,ChartTranslationOption> :: iterator itr_rep;
 	                itr_rep = targetRepMap.find(str);
 
-	                VERBOSE(5, "Looking at target phrase : " << itr_rep->second.GetPhrase() << std::endl);
+	                VERBOSE(1, "Looking at target phrase : " << itr_rep->second.GetPhrase() << std::endl);
 	                //VERBOSE(5, "Target Phrase score vector before adding stateless : ");
 	                //StaticData::Instance().GetScoreIndexManager().PrintLabeledScores(std::cerr,(itr_rep->second)->GetScoreBreakdown());
 	                // std::cerr << std::endl;
 	                //VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetPhrase().GetFutureScore() << std::endl);
-	                VERBOSE(5, "Score component collection : " << *iterLCSP << std::endl);
+	                VERBOSE(1, "Score component collection : " << *iterLCSP << std::endl);
 
 	                //How do I put this into target phrase ?
 	                const ScoreComponentCollection &scores = *iterLCSP++;
 	                ChartTranslationOption &to = itr_rep->second;
-	                to.GetScores().PlusEquals(scores);
-	                VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second).GetPhrase().GetFutureScore() << std::endl);
+	                //to.GetScores().PlusEquals(scores);
+	                to.GetScores().PlusEquals(6666);
+	                VERBOSE(1, "Target Phrase score after adding stateless : " << (itr_rep->second).GetPhrase().GetFutureScore() << std::endl);
 	                }
 	        }
-	        VERBOSE(5, "Estimate of best score before computing context : " << transOpts.GetEstimateOfBestScore() << std::endl);
+	        VERBOSE(1, "Estimate of best score before computing context : " << transOpts.GetEstimateOfBestScore() << std::endl);
 	        //transOpts.CalcEstimateOfBestScore();
 }
 
@@ -329,6 +341,7 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
                                                                         map<string,ChartTranslationOption> * targetMap
                                                                       ) const
 {
+	VERBOSE(1, "Scoring rules for target Representation : " << targetRepresentations->size() << endl);
 
     vector<ScoreComponentCollection> scores;
     float sum = 0.0;
@@ -342,7 +355,6 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
 
     if(targetRepresentations->size() > 1)
     {
-
         vector<float> losses(targetRepresentations->size());
 
         //Fabienne Braune : vector of pEgivenF for interpolation
@@ -359,10 +371,9 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
           psdOptions.push_back(GetPSDTranslation(*tgtRepIt,&(itr_rep->second.GetPhrase())));
         }
 
-        VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
-        VERBOSE(5, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
+        VERBOSE(1, "Extracting features for source : " << sourceSide << endl);
+        VERBOSE(1, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
 
-        //std::cerr << "GETTING SYNTAX LABELS" << std::endl;
         bool IsBegin = false;
         //skip first symbol in sentence which is <s>
         vector<SyntaxLabel> syntaxLabels = source.GetInputTreeRep()->GetLabels(startSpan-1,endSpan-1);
@@ -408,21 +419,21 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
         m_consumerFactory->Release(p_consumer);
         //Normalize0(losses);
         Normalize1(losses);
-        VERBOSE(5, "VW losses BEFORE interpolation : " << std::endl);
+        VERBOSE(1, "VW losses BEFORE interpolation : " << std::endl);
         vector<float>::iterator lossIt;
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
-           VERBOSE(5, *lossIt << " ");}
+           VERBOSE(1, *lossIt << " ");}
         Interpolate(losses,pEgivenF,0.1);
         //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         //Normalize(losses);
-        VERBOSE(5, "VW losses after interpolation : " << std::endl);
+        VERBOSE(1, "VW losses after interpolation : " << std::endl);
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
-        VERBOSE(5, *lossIt << " ");
+        VERBOSE(1, *lossIt << " ");
         float logScore = PreciseEquals( (long double) *lossIt, 0.0) ? LOWEST_SCORE : log(*lossIt);
         *lossIt = logScore;
-        VERBOSE(5, "Interpolated loss : " << *lossIt << " ");
+        VERBOSE(1, "Interpolated loss : " << *lossIt << " ");
         scores.push_back(ScoreFactory(logScore));
-        VERBOSE(5, std::endl;);
+        VERBOSE(1, std::endl;);
         }
     }
     else //make sure that when sum is zero, then all factors are 0

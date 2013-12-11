@@ -22,6 +22,7 @@ public:
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
+
   void Evaluate(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const
   {}
