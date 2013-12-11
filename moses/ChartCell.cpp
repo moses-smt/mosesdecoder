@@ -36,6 +36,7 @@ using namespace std;
 
 namespace Moses
 {
+extern bool g_mosesDebug;
 
 ChartCellBase::ChartCellBase(size_t startPos, size_t endPos) :
   m_coverage(startPos, endPos),
@@ -94,6 +95,10 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   for (size_t i = 0; i < transOptList.GetSize(); ++i) {
     const ChartTranslationOptions &transOpt = transOptList.Get(i);
     RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
+    if (g_mosesDebug) {
+  	  cerr << *ruleCube << endl;
+    }
+
     queue.Add(ruleCube);
   }
 

@@ -90,6 +90,8 @@ public:
  */
 class RuleCube
 {
+  friend std::ostream& operator<<(std::ostream &out, const RuleCube &obj);
+
 public:
   RuleCube(const ChartTranslationOptions &, const ChartCellCollection &,
            ChartManager &);
@@ -111,6 +113,9 @@ public:
   const ChartTranslationOptions &GetTranslationOption() const {
     return m_transOpt;
   }
+
+  size_t GetItemSetSize() const
+  { return m_covered.size(); }
 
 private:
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)

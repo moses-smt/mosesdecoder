@@ -30,8 +30,11 @@
 
 #include <boost/functional/hash.hpp>
 
+using namespace std;
+
 namespace Moses
 {
+extern bool g_mosesDebug;
 
 // initialise the RuleCube by creating the top-left corner item
 RuleCube::RuleCube(const ChartTranslationOptions &transOpt,
@@ -39,6 +42,10 @@ RuleCube::RuleCube(const ChartTranslationOptions &transOpt,
                    ChartManager &manager)
   : m_transOpt(transOpt)
 {
+  if (g_mosesDebug) {
+	  cerr << transOpt.GetSize() << endl;
+  }
+
   RuleCubeItem *item = new RuleCubeItem(transOpt, allChartCells);
   m_covered.insert(item);
   if (StaticData::Instance().GetCubePruningLazyScoring()) {
@@ -98,4 +105,9 @@ void RuleCube::CreateNeighbor(const RuleCubeItem &item, int dimensionIndex,
   }
 }
 
+std::ostream& operator<<(std::ostream &out, const RuleCube &obj)
+{
+	out << obj.GetItemSetSize();
+	return out;
+}
 }
