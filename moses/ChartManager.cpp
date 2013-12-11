@@ -38,7 +38,7 @@ using namespace Moses;
 
 namespace Moses
 {
-extern bool g_debug;
+extern bool g_mosesDebug;
 
 /* constructor. Initialize everything prior to decoding a particular sentence.
  * \param source the sentence to be decoded

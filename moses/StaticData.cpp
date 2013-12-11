@@ -51,6 +51,7 @@ using namespace std;
 
 namespace Moses
 {
+bool g_mosesDebug = false;
 
 StaticData StaticData::s_instance;
 

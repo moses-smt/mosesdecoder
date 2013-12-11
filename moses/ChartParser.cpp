@@ -34,7 +34,6 @@ using namespace Moses;
 
 namespace Moses
 {
-extern bool g_debug;
 
 ChartParserUnknown::ChartParserUnknown() {}
 
