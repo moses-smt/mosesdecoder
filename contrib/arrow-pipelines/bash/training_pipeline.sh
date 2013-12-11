@@ -163,11 +163,12 @@ function mert() {
     fi
     mkdir -p ${WORKING_DIR}
 
+    WORKING_DIR=`realpath ${WORKING_DIR}`
     MERT_INI_FILENAME="${WORKING_DIR}/trained-moses.ini"
     local SED_PROG="/\[lmodel-file\]/,/^[[:space:]]*\$/c\[lmodel-file\]\n${MODEL_TYPE} 0 ${MODEL_ORDER} ${COMPILED_LM_FILENAME}\n"
     eval cat ${MOSES_INI_FILENAME} | sed "${SED_PROG}" > ${MERT_INI_FILENAME}
 
-    ${MOSES_HOME}/scripts/training/mert-moses.pl --mertdir ${MOSES_HOME}/bin --working-dir ${WORKING_DIR} ${INFILENAME}.${_SRC_LANG} ${INFILENAME}.${_TGT_LANG} ${MOSES_HOME}/bin/moses ${MERT_INI_FILENAME}
+    ${MOSES_HOME}/scripts/training/mert-moses.pl --mertdir ${MOSES_HOME}/bin --working-dir ${WORKING_DIR} ${INFILENAME}.${_SRC_LANG} ${INFILENAME}.${_TGT_LANG} ${MOSES_HOME}/bin/moses ${MERT_INI_FILENAME} 2> ${WORKING_DIR}/log
 }
 
 
@@ -214,11 +215,11 @@ declare -r MOSES_TT_INI_FILENAME="${MOSES_INI_FILE}"
 echo ${MOSES_TT_INI_FILENAME}
 
 # Language model training
-language_model_train "${TGT_TOKENISED_FILENAME}" "improved-kneser-ney" "test_data/lm"
+language_model_train "${TGT_TOKENISED_FILENAME}" "improved-kneser-ney" "training/lm"
 
 echo ${COMPILED_LM_FILENAME}
 
 # MERT
-mert "${MOSES_TT_INI_FILENAME}" "${COMPILED_LM_FILENAME}" "${SRC_EVAL_FILENAME}" "${SRC_LANG}" "${TGT_LANG}" 3 9 "test_data/mert"
+mert "${MOSES_TT_INI_FILENAME}" "${COMPILED_LM_FILENAME}" "${SRC_EVAL_FILENAME}" "${SRC_LANG}" "${TGT_LANG}" 3 9 "training/mert"
 
 echo ${MERT_INI_FILENAME}
