@@ -42,10 +42,6 @@ RuleCube::RuleCube(const ChartTranslationOptions &transOpt,
                    ChartManager &manager)
   : m_transOpt(transOpt)
 {
-  if (g_mosesDebug) {
-	  cerr << transOpt.GetSize() << endl;
-  }
-
   RuleCubeItem *item = new RuleCubeItem(transOpt, allChartCells);
   m_covered.insert(item);
   if (StaticData::Instance().GetCubePruningLazyScoring()) {
