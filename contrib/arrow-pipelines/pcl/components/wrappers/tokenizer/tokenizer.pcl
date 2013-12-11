@@ -1,0 +1,38 @@
+import pcl.io.file as file
+import pcl.os.path as path
+import pcl.system.process as process
+import pcl.util.list as list
+import pcl.util.string as string
+
+component tokenizer
+  input corpus.filename
+  output corpus.tokenised.filename
+  configuration corpus.language, working.directory.root, moses.installation
+  do
+    language <- string.lower(@corpus.language)
+
+    corpus.file.basename <- path.basename(corpus.filename)
+    corpus.file.basename.bits <- string.split(corpus.file.basename, ".")
+    list.insert(corpus.file.basename.bits, -1, "tok")
+    result.basename <- string.join(corpus.file.basename.bits, ".")
+    result.pathname <- path.join(@working.directory.root, result.basename)
+
+    working.exists <- path.exists(@working.directory.root)
+    if working.exists == False then
+      path.makedirs(@working.directory.root)
+      return ()
+    else
+      return ()
+    endif
+
+    tokeniser.cmd <- path.join(@moses.installation, "scripts",
+                               "tokenizer", "tokenizer.perl")
+    tokeniser.cmd.line <- list.cons(tokeniser.cmd, "-l", language, "-q")
+
+    corpus.file <- file.openFile(corpus.filename, "r")
+    result.file <- file.openFile(result.pathname, "w")
+    process.callAndCheck(tokeniser.cmd.line, corpus.file, result.file)
+    file.closeFile(result.file)
+    file.closeFile(corpus.file)
+
+    return corpus.tokenised.filename <- result.pathname
