@@ -39,6 +39,8 @@ class InputType;
  */
 class ChartTranslationOptions
 {
+  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptions&);
+
 public:
   typedef std::vector<boost::shared_ptr<ChartTranslationOption> > CollType;
 

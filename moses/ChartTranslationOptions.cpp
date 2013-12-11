@@ -135,4 +135,14 @@ void ChartTranslationOptions::CreateSourceRuleFromInputPath()
 
 }
 
+std::ostream& operator<<(std::ostream &out, const ChartTranslationOptions &obj)
+{
+	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+		const ChartTranslationOption &transOpt = *obj.m_collection[i];
+		out << transOpt << endl;
+	}
+
+	return out;
+}
+
 }
