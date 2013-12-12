@@ -90,19 +90,9 @@ void ChartManager::ProcessSentence()
       const InputPath &inputPath = m_parser.GetInputPath(range);
       m_translationOptionList.Evaluate(m_source, inputPath);
 
-      g_mosesDebug = false;
-      if (startPos == 1 && endPos == 1) {
-    	  cerr << m_translationOptionList << endl;
-    	  g_mosesDebug = true;
-      }
-
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
-
       cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
-      if (g_mosesDebug) {
-    	  cerr << cell << endl;
-      }
 
       m_translationOptionList.Clear();
       cell.PruneToSize();
