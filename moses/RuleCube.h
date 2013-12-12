@@ -70,7 +70,7 @@ public:
   size_t operator()(const RuleCubeItem *p) const {
     size_t seed = 0;
     boost::hash_combine(seed, p->GetHypothesisDimensions());
-    boost::hash_combine(seed, p->GetTranslationDimension().GetTranslationOption());
+    boost::hash_combine(seed, p->GetTranslationDimension().GetTranslationOption().get());
     return seed;
   }
 };
