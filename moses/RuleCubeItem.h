@@ -58,11 +58,11 @@ public:
   }
 
   bool operator<(const TranslationDimension &compare) const {
-    return GetTranslationOption()->GetPhrase() < compare.GetTranslationOption()->GetPhrase();
+    return GetTranslationOption().get() < compare.GetTranslationOption().get();
   }
 
   bool operator==(const TranslationDimension &compare) const {
-    return GetTranslationOption()->GetPhrase() == compare.GetTranslationOption()->GetPhrase();
+    return GetTranslationOption().get() == compare.GetTranslationOption().get();
   }
 
 private:

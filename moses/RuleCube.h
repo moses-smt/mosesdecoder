@@ -57,8 +57,13 @@ class RuleCubeItemHasher
 public:
   size_t operator()(const RuleCubeItem *p) const {
     size_t seed = 0;
-    boost::hash_combine(seed, p->GetHypothesisDimensions());
-    boost::hash_combine(seed, p->GetTranslationDimension().GetTranslationOption().get());
+    const std::vector<HypothesisDimension> &hypoDim = p->GetHypothesisDimensions();
+    const ChartTranslationOption *transOpt = p->GetTranslationDimension().GetTranslationOption().get();
+
+    boost::hash_combine(seed, hypoDim);
+    boost::hash_combine(seed, transOpt);
+
+    std::cerr << seed << " ";
     return seed;
   }
 };
@@ -69,8 +74,9 @@ class RuleCubeItemEqualityPred
 {
 public:
   bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
-    return p->GetHypothesisDimensions() == q->GetHypothesisDimensions() &&
-           p->GetTranslationDimension() == q->GetTranslationDimension();
+    bool ret = p->GetHypothesisDimensions() == q->GetHypothesisDimensions() &&
+            p->GetTranslationDimension() == q->GetTranslationDimension();
+    return ret;
   }
 };
 
