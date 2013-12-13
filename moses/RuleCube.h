@@ -50,18 +50,6 @@ public:
   }
 };
 
-/** Define an ordering between RuleCubeItems based on their positions in the
- * cube.  This is used to record which positions in the cube have been covered
- * during search.
- */
-class RuleCubeItemPositionOrderer
-{
-public:
-  bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
-    return *p < *q;
-  }
-};
-
 /** @todo what is this?
  */
 class RuleCubeItemHasher
