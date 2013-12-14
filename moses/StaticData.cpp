@@ -553,7 +553,6 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
       return false;
     }
-
     m_allWeights.PlusEquals(extraWeights);
   }
 
@@ -992,9 +991,18 @@ bool StaticData::LoadAlternateWeightSettings()
       // other specifications
       for(size_t j=1; j<tokens.size(); j++) {
         vector<string> args = Tokenize(tokens[j], "=");
-        // TODO: support for sparse weights
+        // sparse weights
         if (args[0] == "weight-file") {
-          cerr << "ERROR: sparse weight files currently not supported";
+          if (args.size() != 2) {
+            UserMessage::Add("One argument should be supplied for weight-file");
+            return false;
+          }
+          ScoreComponentCollection extraWeights;
+          if (!extraWeights.Load(args[1])) {
+            UserMessage::Add("Unable to load weights from " + args[1]);
+            return false;
+          }
+          m_weightSetting[ currentId ]->PlusEquals(extraWeights);
         }
         // ignore feature functions
         else if (args[0] == "ignore-ff") {
