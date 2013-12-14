@@ -63,7 +63,6 @@ public:
     boost::hash_combine(seed, hypoDim);
     boost::hash_combine(seed, transOpt);
 
-    std::cerr << seed << " ";
     return seed;
   }
 };
