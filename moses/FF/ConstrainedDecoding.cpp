@@ -30,6 +30,15 @@ int ConstrainedDecodingState::Compare(const FFState& other) const
 }
 
 //////////////////////////////////////////////////////////////////
+ConstrainedDecoding::ConstrainedDecoding(const std::string &line)
+  :StatefulFeatureFunction(1, line)
+  ,m_maxUnknowns(0)
+  ,m_negate(false)
+{
+  m_tuneable = false;
+  ReadParameters();
+}
+
 void ConstrainedDecoding::Load()
 {
   const StaticData &staticData = StaticData::Instance();
@@ -103,9 +112,18 @@ FFState* ConstrainedDecoding::Evaluate(
   float score;
   if (hypo.IsSourceCompleted()) {
     // translated entire sentence.
-    score = (searchPos == 0) && (ref->GetSize() == outputPhrase.GetSize())
-            ? 0 : - std::numeric_limits<float>::infinity();
-  } else {
+	bool match = (searchPos == 0) && (ref->GetSize() == outputPhrase.GetSize());
+	if (!m_negate) {
+		score = match ? 0 : - std::numeric_limits<float>::infinity();
+	}
+	else {
+		score = !match ? 0 : - std::numeric_limits<float>::infinity();
+	}
+  } else if (m_negate) {
+	// keep all derivations
+	score = 0;
+  }
+  else {
     score = (searchPos != NOT_FOUND) ? 0 : - std::numeric_limits<float>::infinity();
   }
 
@@ -133,8 +151,17 @@ FFState* ConstrainedDecoding::EvaluateChart(
   if (hypo.GetCurrSourceRange().GetStartPos() == 0 &&
       hypo.GetCurrSourceRange().GetEndPos() == source.GetSize() - 1) {
     // translated entire sentence.
-    score = (searchPos == 0) && (ref->GetSize() == outputPhrase.GetSize())
-            ? 0 : - std::numeric_limits<float>::infinity();
+	bool match = (searchPos == 0) && (ref->GetSize() == outputPhrase.GetSize());
+
+	if (!m_negate) {
+		score = match ? 0 : - std::numeric_limits<float>::infinity();
+	}
+	else {
+		score = !match ? 0 : - std::numeric_limits<float>::infinity();
+	}
+  } else if (m_negate) {
+	// keep all derivations
+	score = 0;
   } else {
     score = (searchPos != NOT_FOUND) ? 0 : - std::numeric_limits<float>::infinity();
   }
@@ -150,6 +177,8 @@ void ConstrainedDecoding::SetParameter(const std::string& key, const std::string
     m_path = value;
   } else if (key == "max-unknowns") {
     m_maxUnknowns = Scan<int>(value);
+  } else if (key == "negate") {
+	m_negate = Scan<bool>(value);
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
