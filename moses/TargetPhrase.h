@@ -140,6 +140,9 @@ public:
 
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 
+  bool operator< (const TargetPhrase &compare) const; // NOT IMPLEMENTED
+  bool operator== (const TargetPhrase &compare) const; // NOT IMPLEMENTED
+
   TO_STRING();
 };
 

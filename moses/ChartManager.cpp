@@ -38,7 +38,7 @@ using namespace Moses;
 
 namespace Moses
 {
-extern bool g_debug;
+extern bool g_mosesDebug;
 
 /* constructor. Initialize everything prior to decoding a particular sentence.
  * \param source the sentence to be decoded
@@ -92,8 +92,8 @@ void ChartManager::ProcessSentence()
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
-
       cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+
       m_translationOptionList.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();

@@ -36,7 +36,7 @@ using namespace std;
 
 namespace Moses
 {
-extern bool g_debug;
+extern bool g_mosesDebug;
 
 ChartCellBase::ChartCellBase(size_t startPos, size_t endPos) :
   m_coverage(startPos, endPos),

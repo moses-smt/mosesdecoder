@@ -50,18 +50,6 @@ public:
   }
 };
 
-/** Define an ordering between RuleCubeItems based on their positions in the
- * cube.  This is used to record which positions in the cube have been covered
- * during search.
- */
-class RuleCubeItemPositionOrderer
-{
-public:
-  bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
-    return *p < *q;
-  }
-};
-
 /** @todo what is this?
  */
 class RuleCubeItemHasher
@@ -69,8 +57,12 @@ class RuleCubeItemHasher
 public:
   size_t operator()(const RuleCubeItem *p) const {
     size_t seed = 0;
-    boost::hash_combine(seed, p->GetHypothesisDimensions());
-    boost::hash_combine(seed, p->GetTranslationDimension().GetTranslationOption());
+    const std::vector<HypothesisDimension> &hypoDim = p->GetHypothesisDimensions();
+    const ChartTranslationOption *transOpt = p->GetTranslationDimension().GetTranslationOption().get();
+
+    boost::hash_combine(seed, hypoDim);
+    boost::hash_combine(seed, transOpt);
+
     return seed;
   }
 };
@@ -81,8 +73,9 @@ class RuleCubeItemEqualityPred
 {
 public:
   bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
-    return p->GetHypothesisDimensions() == q->GetHypothesisDimensions() &&
-           p->GetTranslationDimension() == q->GetTranslationDimension();
+    bool ret = p->GetHypothesisDimensions() == q->GetHypothesisDimensions() &&
+            p->GetTranslationDimension() == q->GetTranslationDimension();
+    return ret;
   }
 };
 
@@ -90,6 +83,8 @@ public:
  */
 class RuleCube
 {
+  friend std::ostream& operator<<(std::ostream &out, const RuleCube &obj);
+
 public:
   RuleCube(const ChartTranslationOptions &, const ChartCellCollection &,
            ChartManager &);
@@ -112,15 +107,14 @@ public:
     return m_transOpt;
   }
 
+  size_t GetItemSetSize() const
+  { return m_covered.size(); }
+
 private:
-#if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_set<RuleCubeItem*,
           RuleCubeItemHasher,
           RuleCubeItemEqualityPred
           > ItemSet;
-#else
-  typedef std::set<RuleCubeItem*, RuleCubeItemPositionOrderer> ItemSet;
-#endif
 
   typedef std::priority_queue<RuleCubeItem*,
           std::vector<RuleCubeItem*>,

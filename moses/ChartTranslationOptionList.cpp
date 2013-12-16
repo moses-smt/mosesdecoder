@@ -165,4 +165,13 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
   }
 }
 
+std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionList &obj)
+{
+	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+		const ChartTranslationOptions &transOpts = *obj.m_collection[i];
+		out << transOpts << endl;
+	}
+	return out;
+}
+
 }
