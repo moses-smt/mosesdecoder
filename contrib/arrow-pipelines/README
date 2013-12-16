@@ -27,6 +27,7 @@ To use the PCL compiler and run-time set the following environment variables (as
 
 $ export PATH=$PATH:`pwd`/python/pcl/src/pclc:`pwd`/python/pcl/src/pcl-run
 $ export PYTHONPATH=$PYTHONPATH:`pwd`/python/pcl/libs/pypeline/src
+$ export PCL_IMPORT_PATH=`pwd`/python/pcl/src/runtime:`pwd`/pcl
 
 Three environment variables need to be set before the pipeline can be run, they are:
 
