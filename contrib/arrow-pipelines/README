@@ -52,7 +52,7 @@ $ pcl-run.py training_pipeline
 
 Once complete the output of the pipeline can be found in the directories:
 
- - test_data/tokenisation
- - test_data/model
- - test_data/lm
- - test_data/mert
+ - training/tokenisation
+ - training/model
+ - training/lm
+ - training/mert
