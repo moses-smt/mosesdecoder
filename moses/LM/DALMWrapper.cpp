@@ -61,20 +61,7 @@ public:
 		const DALMState &o = static_cast<const DALMState &>(other);
 		if(state->get_count() < o.state->get_count()) return -1;
 		else if(state->get_count() > o.state->get_count()) return 1;
-		else{
-			// s->count==o.state->count;
-			unsigned short count = state->get_count();
-			for(size_t i = 0; i < count; i++){
-				DALM::VocabId w1 = state->get_word(i);
-				DALM::VocabId w2 = o.state->get_word(i);
-				if(w1 < w2){
-					return -1;
-				}else if(w1 > w2){
-					return 1;
-				}
-			}
-			return 0;
-		}
+		else return state->compare(o.state);
 	}
 
 	DALM::State *get_state() const{
