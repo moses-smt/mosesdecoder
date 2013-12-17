@@ -8,6 +8,10 @@ exe queryLexicalTable : queryLexicalTable.cpp ../moses//moses ;
 
 exe generateSequences : GenerateSequences.cpp ../moses//moses ; 
 
+exe TMining : TransliterationMining.cpp ../moses//moses ;
+
+exe 1-1-Extraction : 1-1-Extraction.cpp ../moses//moses ;
+
 local with-cmph = [ option.get "with-cmph" ] ;
 if $(with-cmph) {
     exe processPhraseTableMin : processPhraseTableMin.cpp ../moses//moses ;
@@ -21,4 +25,4 @@ else {
     alias programsMin ;
 }
 
-alias programs : generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin ;
+alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin ;

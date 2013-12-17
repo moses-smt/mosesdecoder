@@ -149,6 +149,7 @@ function mert() {
     declare -ri MODEL_ORDER="$6"
     declare -ri MODEL_TYPE="$7"
     local WORKING_DIR="$8"
+    declare -ri MAX_NO_ITERS="$9"
 
     local INFILENAME=`realpath ${EVAL_FILENAME}`
     INFILENAME=`echo ${INFILENAME} | gawk '{split($0, a, "."); for(i = 1; i < length(a); i++) { printf a[i]; if (i < length(a) - 1) { printf "."; } } }'`
@@ -168,7 +169,7 @@ function mert() {
     local SED_PROG="/\[lmodel-file\]/,/^[[:space:]]*\$/c\[lmodel-file\]\n${MODEL_TYPE} 0 ${MODEL_ORDER} ${COMPILED_LM_FILENAME}\n"
     eval cat ${MOSES_INI_FILENAME} | sed "${SED_PROG}" > ${MERT_INI_FILENAME}
 
-    ${MOSES_HOME}/scripts/training/mert-moses.pl --mertdir ${MOSES_HOME}/bin --working-dir ${WORKING_DIR} ${INFILENAME}.${_SRC_LANG} ${INFILENAME}.${_TGT_LANG} ${MOSES_HOME}/bin/moses ${MERT_INI_FILENAME} 2> ${WORKING_DIR}/log
+    ${MOSES_HOME}/scripts/training/mert-moses.pl --maximum-iterations ${MAX_NO_ITERS} --mertdir ${MOSES_HOME}/bin --working-dir ${WORKING_DIR} ${INFILENAME}.${_SRC_LANG} ${INFILENAME}.${_TGT_LANG} ${MOSES_HOME}/bin/moses ${MERT_INI_FILENAME} 2> ${WORKING_DIR}/log
 }
 
 
@@ -220,6 +221,6 @@ language_model_train "${TGT_TOKENISED_FILENAME}" "improved-kneser-ney" "training
 echo ${COMPILED_LM_FILENAME}
 
 # MERT
-mert "${MOSES_TT_INI_FILENAME}" "${COMPILED_LM_FILENAME}" "${SRC_EVAL_FILENAME}" "${SRC_LANG}" "${TGT_LANG}" 3 9 "training/mert"
+mert "${MOSES_TT_INI_FILENAME}" "${COMPILED_LM_FILENAME}" "${SRC_EVAL_FILENAME}" "${SRC_LANG}" "${TGT_LANG}" 3 9 "training/mert" 1
 
 echo ${MERT_INI_FILENAME}

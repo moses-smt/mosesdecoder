@@ -518,6 +518,13 @@ build-osm
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
 	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --srilm-dir $srilm-dir $operation-sequence-model-settings
 	default-name: model/OSM
+build-transliteration-model
+       in: corpus word-alignment
+       out: transliteration-model
+       ignore-unless: transliteration-module
+       rerun-on-change: transliteration-module training-options script giza-settings
+       template: $moses-script-dir/Transliteration/train-transliteration-module.pl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --out-dir OUT --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --srilm-dir $srilm-dir --input-extension $input-extension --output-extension $output-extension
+	default-name: model/Transliteration
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
@@ -586,7 +593,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-model generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
