@@ -175,7 +175,7 @@ void ChartHypothesis::Evaluate()
   }
 
   // scores from current translation rule. eg. translation models & word penalty
-  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
+  const ScoreComponentCollection &scoreBreakdown = GetTranslationOption().GetScores();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
   // compute values of stateless feature functions that were not
