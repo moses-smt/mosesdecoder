@@ -160,6 +160,9 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
  */
 void ChartHypothesis::Evaluate()
 {
+
+  //std::cerr << "SCORE COMPONENT BEFORE EVALUATE : " << m_scoreBreakdown << std::endl;
+
   const StaticData &staticData = StaticData::Instance();
   // total scores from prev hypos
   std::vector<const ChartHypothesis*>::iterator iter;
@@ -171,8 +174,13 @@ void ChartHypothesis::Evaluate()
   }
 
   // scores from current translation rule. eg. translation models & word penalty
-  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
-  m_scoreBreakdown.PlusEquals(scoreBreakdown);
+  //Fabienne Braune : Outcommented in this branch because I need the scores of the whole translation option, not just the target phrase
+  //const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
+  //  m_scoreBreakdown.PlusEquals(scoreBreakdown);
+
+  // scores from current translation rule. eg. translation models & word penalty and others from translation options
+   const ScoreComponentCollection &scoreBreakdown = GetTranslationOption().GetScores();
+   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
   // compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
@@ -221,7 +229,8 @@ void ChartHypothesis::AddArc(ChartHypothesis *loserHypo)
 
 // sorting helper
 struct CompareChartChartHypothesisTotalScore {
-  bool operator()(const ChartHypothesis* hypo1, const ChartHypothesis* hypo2) const {
+  bool operator()(const ChartHypothesis* hypo1, const ChartHypothesis* hypo2) const
+  {
     return hypo1->GetTotalScore() > hypo2->GetTotalScore();
   }
 };
@@ -241,9 +250,21 @@ void ChartHypothesis::CleanupArcList()
   size_t nBestSize = staticData.GetNBestSize();
   bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph();
 
-  if (!distinctNBest && m_arcList->size() > nBestSize) {
+  //Fabienne Braune : this is broken but no idea why...
+  /*if (!distinctNBest && m_arcList->size() > nBestSize) {
+
+	std::cerr << "Size of arc list : " << m_arcList->size() << std::endl;
+
+	//For debugging
+	/*int counter = 0;
+	vector<ChartHypothesis*> :: iterator itr_hypos;
+	for(itr_hypos = m_arcList->begin();itr_hypos != m_arcList->begin() + nBestSize - 1; itr_hypos++)
+	{
+		std::cerr << "EXISTING HYPO : " << (*itr_hypos)->GetCurrTargetPhrase() << std::endl;
+	}*/
+
     // prune arc list only if there too many arcs
-    nth_element(m_arcList->begin()
+    /*nth_element(m_arcList->begin()
                 , m_arcList->begin() + nBestSize - 1
                 , m_arcList->end()
                 , CompareChartChartHypothesisTotalScore());
@@ -252,11 +273,13 @@ void ChartHypothesis::CleanupArcList()
     ChartArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) {
       ChartHypothesis *arc = *iter;
-      ChartHypothesis::Delete(arc);
+      //Check if hypo is NULL
+      if(arc != NULL)
+      {ChartHypothesis::Delete(arc);}
     }
     m_arcList->erase(m_arcList->begin() + nBestSize
                      , m_arcList->end());
-  }
+  }*/
 
   // set all arc's main hypo variable to this hypo
   ChartArcList::iterator iter = m_arcList->begin();

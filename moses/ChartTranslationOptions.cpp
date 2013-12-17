@@ -82,7 +82,7 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
     transOpt.Evaluate(input, inputPath);
   }
 
-  // for fabienne : Change score of translation option
+  // for fabienne
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];

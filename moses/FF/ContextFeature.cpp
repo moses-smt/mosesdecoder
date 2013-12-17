@@ -65,7 +65,7 @@ void ContextFeature::Evaluate(const InputType &input
 	         RuleMap ruleMap;
 
 	         //Map target representation to targetPhrase
-	         std::map<std::string,ChartTranslationOption> targetRepMap;
+	         std::map<std::string,boost::shared_ptr<ChartTranslationOption> > targetRepMap;
 
 	         VERBOSE(5, "Looping over target phrase collection for recomputing feature scores" << endl);
 
@@ -75,13 +75,8 @@ void ContextFeature::Evaluate(const InputType &input
 	            itr_targets != transOpts.GetTargetPhrases().end();
 	            itr_targets++)
 	        {
-	        	ChartTranslationOption &transOpt = **itr_targets;
 
-	        	//FB : debugging
-	        	std::cerr << "UPDATING TO SCORE" << std::endl;
-	        	(*itr_targets)->GetScores().PlusEquals(6666);
-
-	        	const TargetPhrase &tp = transOpt.GetPhrase();
+	        	const TargetPhrase &tp = (*itr_targets)->GetPhrase();
 	            //get source side of rule
 	            CHECK(tp.GetRuleSource() != NULL);
 
@@ -122,10 +117,6 @@ void ContextFeature::Evaluate(const InputType &input
 	                    //append non-terminal
 	                    targetRepresentation += nonTermRep;
 
-	                    //Debugging : everything OK in non term index map
-	                    //for(int i=0; i < 3; i++)
-	                    //{std::cout << "TEST : Non Term index map : " << i << "=" << ntim[i] << std::endl;}
-
 	                    const AlignmentInfo alignInfo = tp.GetAlignNonTerm();
 	                    const AlignmentInfo::NonTermIndexMap alignInfoIndex = tp.GetAlignNonTerm().GetNonTermIndexMap();
 	                    string alignInd;
@@ -165,7 +156,7 @@ void ContextFeature::Evaluate(const InputType &input
 
 	            VERBOSE(5, "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << endl);
 	            ruleMap.AddRule(sourceSide,targetRepresentation);
-	            targetRepMap.insert(std::make_pair(targetRepresentation,transOpt));
+	            targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
 
 	            //clean strings
 	            sourceSide = "";
@@ -197,22 +188,17 @@ void ContextFeature::Evaluate(const InputType &input
 
 	                //Find target phrase corresponding to representation
 	            	const string &str = *itr_targetRep;
-	                std::map<std::string,ChartTranslationOption> :: iterator itr_rep;
+	                std::map<std::string,boost::shared_ptr<ChartTranslationOption> > :: iterator itr_rep;
 	                itr_rep = targetRepMap.find(str);
 
-	                VERBOSE(1, "Looking at target phrase : " << itr_rep->second.GetPhrase() << std::endl);
-	                //VERBOSE(5, "Target Phrase score vector before adding stateless : ");
-	                //StaticData::Instance().GetScoreIndexManager().PrintLabeledScores(std::cerr,(itr_rep->second)->GetScoreBreakdown());
-	                // std::cerr << std::endl;
-	                //VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetPhrase().GetFutureScore() << std::endl);
+	                VERBOSE(1, "Looking at target phrase : " << itr_rep->second->GetPhrase() << std::endl);
 	                VERBOSE(1, "Score component collection : " << *iterLCSP << std::endl);
 
-	                //How do I put this into target phrase ?
 	                const ScoreComponentCollection &scores = *iterLCSP++;
-	                ChartTranslationOption &to = itr_rep->second;
-	                //to.GetScores().PlusEquals(scores);
-	                to.GetScores().PlusEquals(6666);
-	                VERBOSE(1, "Target Phrase score after adding stateless : " << (itr_rep->second).GetPhrase().GetFutureScore() << std::endl);
+	                boost::shared_ptr<ChartTranslationOption> to = itr_rep->second;
+	                VERBOSE(1, "Translation Option score before adding stateless : " << to->GetScores() << std::endl);
+	                to->GetScores().PlusEquals(scores);
+	                VERBOSE(1, "Translation Option score after adding stateless : " << to->GetScores() << std::endl);
 	                }
 	        }
 	        VERBOSE(1, "Estimate of best score before computing context : " << transOpts.GetEstimateOfBestScore() << std::endl);
@@ -338,7 +324,7 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
                                                                         const std::string &sourceSide,
                                                                         std::vector<std::string> * targetRepresentations,
                                                                         const InputType &source,
-                                                                        map<string,ChartTranslationOption> * targetMap
+                                                                        map<string,boost::shared_ptr<ChartTranslationOption> > * targetMap
                                                                       ) const
 {
 	VERBOSE(1, "Scoring rules for target Representation : " << targetRepresentations->size() << endl);
@@ -361,14 +347,14 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
         vector<float> pEgivenF(targetRepresentations->size());
         vector<ChartTranslation> psdOptions;
 
-        map<string,ChartTranslationOption> :: iterator itr_rep;
+        map<string,boost::shared_ptr<ChartTranslationOption> > :: iterator itr_rep;
         vector<std::string>::const_iterator tgtRepIt;
         for (tgtRepIt = targetRepresentations->begin(); tgtRepIt != targetRepresentations->end(); tgtRepIt++) {
           CHECK(targetMap->find(*tgtRepIt) != targetMap->end());
           itr_rep = targetMap->find(*tgtRepIt);
 
           //Can I just get the reference target phrase of this translation option
-          psdOptions.push_back(GetPSDTranslation(*tgtRepIt,&(itr_rep->second.GetPhrase())));
+          psdOptions.push_back(GetPSDTranslation(*tgtRepIt,&(itr_rep->second->GetPhrase())));
         }
 
         VERBOSE(1, "Extracting features for source : " << sourceSide << endl);
@@ -418,12 +404,12 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
         //m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses,pEgivenF);
         m_consumerFactory->Release(p_consumer);
         //Normalize0(losses);
-        Normalize1(losses);
-        VERBOSE(1, "VW losses BEFORE interpolation : " << std::endl);
+        NormalizeLogisticLossBasic(losses);
+        //VERBOSE(1, "VW losses BEFORE interpolation : " << std::endl);
         vector<float>::iterator lossIt;
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
            VERBOSE(1, *lossIt << " ");}
-        Interpolate(losses,pEgivenF,0.1);
+        //Interpolate(losses,pEgivenF,0.1);
         //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         //Normalize(losses);
         VERBOSE(1, "VW losses after interpolation : " << std::endl);
@@ -445,56 +431,38 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
     return scores;
 }
 
-void ContextFeature::Normalize0(vector<float> &losses) const
+void ContextFeature::NormalizeSquaredLoss(vector<float> &losses) const
 {
-    float sum = 0;
 
-    VERBOSE(3, "VW losses before normalization : " << std::endl);
+	// This is (?) a good choice for sqrt loss (default loss function in VW)
 
-    // clip to [0,1] and take 1-Z as non-normalized prob
-    vector<float>::iterator it;
-    for (it = losses.begin(); it != losses.end(); it++) {
-      VERBOSE(3, "" <<  *it << " ");
-      //clip and 1-Z at the same time
-      if (*it <= 0.0) {
-    	  //VERBOSE(3, "Smaller or equal 0, putting to " << *it << std::endl);
-    	  	  *it = 1.0;
-      }
-      else {
-    	  	  if (*it >= 1.0) {
-    	  		  *it = 0.0;
-    	  		  //VERBOSE(3, "Greater or equal 1, putting to " << *it << std::endl);
-    	  	  }
-    	  	  else
-    	  	  {
-    	  		 //VERBOSE(3, "Between 0 and 1, taking 1 - " << *it << std::endl);
-    	  		  *it = 1 - *it;
-    	  		//VERBOSE(3, "= " << *it << std::endl);
-    	  	  }
-           }
-      sum += *it;
-      //VERBOSE(3, "My sum is " << sum << std::endl);
-    }
-    if (! Equals(sum, 0)) {
-    	//VERBOSE(3, "Sum not equals 0 . Divide each loss by sum" << std::endl);
-      // normalize
-      for (it = losses.begin(); it != losses.end(); it++)
-    	  //VERBOSE(3, "Dividing " << *it << " by " << sum << std::endl);
-	*it /= sum;
-		  //VERBOSE(3, "Result of division " << *it << std::endl);
-    } else {
-    	//VERBOSE(3, "Sum equals 0 : make uniform");
-      // sum of non-normalized probs is 0, then take uniform probs
-      for (it = losses.begin(); it != losses.end(); it++)
-	{*it = 1.0 / losses.size();}
-      //VERBOSE(3, "Created uniform proba : " << *it << " ");
-    }
-    VERBOSE(3, std::endl;);
+  float sum = 0;
+
+	// clip to [0,1] and take 1-Z as non-normalized prob
+  vector<float>::iterator it;
+  for (it = losses.begin(); it != losses.end(); it++) {
+		if (*it <= 0.0) *it = 1.0;
+		else if (*it >= 1.0) *it = 0.0;
+		else *it = 1.0 - *it;
+		sum += *it;
+  }
+
+  if (! Equals(sum, 0)) {
+		// normalize
+    for (it = losses.begin(); it != losses.end(); it++)
+      *it /= sum;
+  } else {
+		// sum of non-normalized probs is 0, then take uniform probs
+    for (it = losses.begin(); it != losses.end(); it++)
+      *it = 1.0 / losses.size();
+  }
 }
 
-
-void ContextFeature::Normalize1(vector<float> &losses) const
+void ContextFeature::NormalizeLogisticLossBasic(vector<float> &losses) const
 {
+
+	// Use this with logistic loss (we switched to this in April/May 2013)
+
   float sum = 0;
   vector<float>::iterator it;
   for (it = losses.begin(); it != losses.end(); it++) {

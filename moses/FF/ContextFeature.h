@@ -48,7 +48,6 @@ public:
 	                        , ScoreComponentCollection &scoreBreakdown) const
 	{}
 
-
     //Fabienne Braune : Call VW and re-score translation options
 	void Evaluate(const InputType &input
 	                        , const InputPath &inputPath
@@ -71,14 +70,14 @@ public:
 	                                                     const std::string &sourceSide,
 	                                                     std::vector<std::string> *targetRepresentations,
 	                                                     const InputType &source,
-	                                                     std::map<std::string,ChartTranslationOption> * targetMap) const;
+	                                                     std::map<std::string,boost::shared_ptr<ChartTranslationOption> > * targetMap) const;
 
 
 	   void CheckIndex(const std::string &targetRep);
 	   PSD::ChartTranslation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp) const;
 	   void Normalize(std::vector<float> &losses) const;
-	   void Normalize0(std::vector<float> &losses) const;
-	   void Normalize1(std::vector<float> &losses) const;
+	   void NormalizeSquaredLoss(std::vector<float> &losses) const;
+	   void NormalizeLogisticLossBasic(std::vector<float> &losses) const;
 	   double LogAddition(double logA, double logB, double logAddPrecision) const;
 	   void Interpolate(std::vector<float> &losses, std::vector<float> &pEgivenF, float interpolParam) const;
 
