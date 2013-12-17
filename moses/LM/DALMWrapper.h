@@ -3,12 +3,14 @@
 
 #include <vector>
 #include <boost/bimap.hpp>
-#include "SingleFactor.h"
+#include "Implementation.h"
+#include "moses/Hypothesis.h"
 
 namespace DALM
 {
 class Logger;
 class Vocabulary;
+class State;
 class LM;
 
 typedef unsigned int VocabId;
@@ -18,14 +20,37 @@ namespace Moses
 {
 class Factor;
 
-class LanguageModelDALM : public LanguageModelSingleFactor
+class LanguageModelDALM : public LanguageModel
 {
+public:
+  LanguageModelDALM(const std::string &line);
+  virtual ~LanguageModelDALM();
+  
+  void Load();
+
+  virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
+
+  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+
+  virtual FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+
+  virtual FFState *EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const;
+
+  virtual bool IsUseable(const FactorMask &mask) const;
+
+	virtual void SetParameter(const std::string& key, const std::string& value);
+	
 protected:
-	std::string m_inifile;
+  const Factor *m_beginSentenceFactor;
+
+  FactorType m_factorType;
+
+  std::string	m_filePath;
+  size_t			m_nGramOrder; //! max n-gram length contained in this LM
+
 	DALM::Logger *m_logger;
 	DALM::Vocabulary *m_vocab;
 	DALM::LM *m_lm;
-
 	DALM::VocabId wid_start, wid_end;
 
 	typedef boost::bimap<const Factor *, DALM::VocabId> VocabMap;
@@ -34,13 +59,26 @@ protected:
 	void CreateVocabMapping(const std::string &wordstxt);
 	DALM::VocabId GetVocabId(const Factor *factor) const;
 
-public:
-	LanguageModelDALM(const std::string &line);
-  ~LanguageModelDALM();
-  void Load();
-
-  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
+private:
+  LMResult GetValue(DALM::VocabId wid, DALM::State* finalState) const;
+	LMResult GetValue(const Word &word, DALM::State* finalState) const;
+	void updateChartScore(float *prefixScore, float *finalizedScore, float score, size_t wordPos) const;
+	
+  // Convert last words of hypothesis into vocab ids, returning an end pointer.
+  DALM::VocabId *LastIDs(const Hypothesis &hypo, DALM::VocabId *indices) const {
+    DALM::VocabId *index = indices;
+    DALM::VocabId *end = indices + m_nGramOrder - 1;
+    int position = hypo.GetCurrTargetWordsRange().GetEndPos();
+    for (; ; ++index, --position) {
+      if (index == end) return index;
+      if (position == -1) {
+        *index = wid_start;
+        return index + 1;
+      }
+      *index = GetVocabId(hypo.GetWord(position).GetFactor(m_factorType));
+    }
+  }
 };
 
-
 }
+
