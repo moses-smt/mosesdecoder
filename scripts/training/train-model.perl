@@ -31,7 +31,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
@@ -120,7 +120,8 @@ $_HELP = 1
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
 		       'osm-model=s' => \$_OSM,
-			'osm-setting=s' => \$_OSM_FACTORS,		
+			'osm-setting=s' => \$_OSM_FACTORS,
+			'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,		
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
@@ -2052,9 +2053,15 @@ sub create_ini {
     $type_name = "IRSTLM" if $type == 1;
     $type_name = "KENLM lazyken=0" if $type == 8;
     $type_name = "KENLM lazyken=1" if $type == 9;
-    
+	
+    my $lm_oov_prob = 0.1;
+	
+    if ($_POST_DECODING_TRANSLIT){
+	$lm_oov_prob = -100.0;
+    } 	   
+ 
     $feature_spec .= "$type_name name=LM$i factor=$f path=$fn order=$o\n";
-    $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" 0.1":"")."\n";
+    $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
   }
   if ($_LMODEL_OOV_FEATURE) {
