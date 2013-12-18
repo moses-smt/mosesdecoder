@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef WITH_THREADS
 #include "moses/ThreadPool.h"
+#else
+#include <time.h>
 #endif
 
 namespace Moses

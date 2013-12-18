@@ -49,6 +49,32 @@
 
 using namespace std;
 
+#if defined __MINGW32__ && !defined mkdtemp
+#include <windows.h>
+#include <errno.h>
+char *mkdtemp(char *tempbuf) {
+  int rand_value = 0;
+  char* tempbase = NULL;
+  char tempbasebuf[MAX_PATH] = "";
+
+  if (strcmp(&tempbuf[strlen(tempbuf)-6], "XXXXXX")) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  srand((unsigned)time(0));
+  rand_value = (int)((rand() / ((double)RAND_MAX+1.0)) * 1e6);
+  tempbase = strrchr(tempbuf, '/');
+  tempbase = tempbase ? tempbase+1 : tempbuf;
+  strcpy(tempbasebuf, tempbase);
+  sprintf(&tempbasebuf[strlen(tempbasebuf)-6], "%d", rand_value);
+  ::GetTempPath(MAX_PATH, tempbuf);
+  strcat(tempbuf, tempbasebuf);
+  ::CreateDirectory(tempbuf, NULL);
+  return tempbuf;
+}
+#endif
+
 namespace Moses
 {
 
@@ -82,6 +108,9 @@ ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
 
 int removedirectoryrecursively(const char *dirname)
 {
+#if defined __MINGW32__
+    //TODO(jie): replace this function with boost implementation
+#else
   DIR *dir;
   struct dirent *entry;
   char path[PATH_MAX];
@@ -127,13 +156,17 @@ int removedirectoryrecursively(const char *dirname)
    * printing here, see above)
    */
   //printf("(not really) Deleting: %s\n", dirname);
-
+#endif
   return 1;
 }
 
 void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSentence)
 {
+#if defined __MINGW32__
+  char dirName[] = "moses.XXXXXX";
+#else
   char dirName[] = "/tmp/moses.XXXXXX";
+#endif // defined
   char *temp = mkdtemp(dirName);
   CHECK(temp);
   string dirNameStr(dirName);

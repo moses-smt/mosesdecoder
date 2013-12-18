@@ -6,10 +6,14 @@
 #include <sys/time.h>
 #endif
 
+#if defined __MINGW32__
+#include <sys/time.h>
+#endif // defined
+
 namespace
 {
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if (!defined(_WIN32) && !defined(_WIN64)) || defined __MINGW32__
 uint64_t GetMicroSeconds(const struct timeval& tv)
 {
   return static_cast<uint64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;

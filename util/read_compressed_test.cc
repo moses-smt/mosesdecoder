@@ -12,6 +12,22 @@
 
 #include <stdlib.h>
 
+#if defined __MINGW32__
+#include <time.h>
+#include <fcntl.h>
+
+#if !defined mkstemp
+int mkstemp(char * stemplate)
+{
+    char *filename = mktemp(stemplate);
+    if (filename == NULL)
+        return -1;
+    return open(filename, O_RDWR | O_CREAT, 0600);
+}
+#endif
+
+#endif // defined
+
 namespace util {
 namespace {
 

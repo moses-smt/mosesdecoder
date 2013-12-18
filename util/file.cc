@@ -17,7 +17,10 @@
 #include <fcntl.h>
 #include <stdint.h>
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined __MINGW32__
+#include <windows.h>
+#include <unistd.h>
+#elif defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #include <io.h>
 #include <algorithm>
@@ -76,7 +79,12 @@ int CreateOrThrow(const char *name) {
 }
 
 uint64_t SizeFile(int fd) {
-#if defined(_WIN32) || defined(_WIN64)
+#if defined __MINGW32__
+  struct stat sb;
+  int ret = fstat(fd, &sb);
+  if (ret == -1 || (!sb.st_size && !S_ISREG(sb.st_mode))) return kBadSize;
+  return sb.st_size;
+#elif defined(_WIN32) || defined(_WIN64)
   __int64 ret = _filelengthi64(fd);
   return (ret == -1) ? kBadSize : ret;
 #else // Not windows.
@@ -100,7 +108,9 @@ uint64_t SizeOrThrow(int fd) {
 }
 
 void ResizeOrThrow(int fd, uint64_t to) {
-#if defined(_WIN32) || defined(_WIN64)
+#if defined __MINGW32__
+    int ret = ftruncate
+#elif defined(_WIN32) || defined(_WIN64)
     errno_t ret = _chsize_s
 #elif defined(OS_ANDROID)
     int ret = ftruncate64
@@ -162,7 +172,7 @@ std::size_t ReadOrEOF(int fd, void *to_void, std::size_t amount) {
 void PReadOrThrow(int fd, void *to_void, std::size_t size, uint64_t off) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
 #if defined(_WIN32) || defined(_WIN64)
-  UTIL_THROW(Exception, "This pread implementation for windows is broken.  Please send me a patch that does not change the file pointer.  Atomically.  Or send me an implementation of pwrite that is allowed to change the file pointer but can be called concurrently with pread.");
+  //UTIL_THROW(Exception, "This pread implementation for windows is broken.  Please send me a patch that does not change the file pointer.  Atomically.  Or send me an implementation of pwrite that is allowed to change the file pointer but can be called concurrently with pread.");
   const std::size_t kMaxDWORD = static_cast<std::size_t>(4294967295UL);
 #endif
   for (;size ;) {
@@ -251,7 +261,9 @@ typedef CheckOffT<sizeof(off_t)>::True IgnoredType;
 // Can't we all just get along?
 void InternalSeek(int fd, int64_t off, int whence) {
   if (
-#if defined(_WIN32) || defined(_WIN64)
+#if defined __MINGW32__
+    (off_t)-1 == lseek(fd, off, whence)
+#elif defined(_WIN32) || defined(_WIN64)
     (__int64)-1 == _lseeki64(fd, off, whence)
 #elif defined(OS_ANDROID)
     (off64_t)-1 == lseek64(fd, off, whence)

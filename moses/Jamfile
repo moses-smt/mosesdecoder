@@ -22,7 +22,11 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
-local have-clock = [ SHELL "bash -c \"g++ -dM -x c++ -E /dev/null -include time.h 2>/dev/null |grep CLOCK_MONOTONIC\"" : exit-status ] ;
+local cmd = "bash -c \"g++ -dM -x c++ -E /dev/null -include time.h 2>/dev/null |grep CLOCK_MONOTONIC\"" ;
+if $NT {
+	cmd = "g++ -dM -x c++ -E NUL -include time.h 2>NUL | find \"CLOCK_MONOTONIC\"" ;
+}
+local have-clock = [ SHELL "$(cmd)" : exit-status ] ;
 if $(have-clock[2]) = 0 {
   #required for clock_gettime.  Threads already have rt.  
   lib rt : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;

@@ -543,7 +543,7 @@ int main(int argc, char** argv)
 #ifdef HAVE_PROTOBUF
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
-
+    
     // echo command line, if verbose
     IFVERBOSE(1) {
       TRACE_ERR("command: ");

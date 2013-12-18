@@ -4,7 +4,10 @@
 #include <iostream>
 
 #include <ctype.h>
+
+#if !defined __MINGW32__
 #include <err.h>
+#endif
 
 namespace lm {
 namespace vocab {
@@ -31,7 +34,7 @@ bool IsLineEnd(std::istream &in) {
 }// namespace
 
 // Read space separated words in enter separated lines.  These lines can be
-// very long, so don't read an entire line at a time.  
+// very long, so don't read an entire line at a time.
 unsigned int ReadMultiple(std::istream &in, boost::unordered_map<std::string, std::vector<unsigned int> > &out) {
   in.exceptions(std::istream::badbit);
   unsigned int sentence = 0;

@@ -33,12 +33,12 @@ class Callback {
       pay.complete.prob = pay.uninterp.prob + pay.uninterp.gamma * probs_[order_minus_1];
       probs_[order_minus_1 + 1] = pay.complete.prob;
       pay.complete.prob = log10(pay.complete.prob);
-      // TODO: this is a hack to skip n-grams that don't appear as context.  Pruning will require some different handling.  
-      if (order_minus_1 < backoffs_.size() && *(gram.end() - 1) != kUNK && *(gram.end() - 1) != kEOS) {
+      // TODO: this is a hack to skip n-grams that don't appear as context.  Pruning will require some different handling.
+      if (order_minus_1 < backoffs_.size() && *(gram.end() - 1) != kUNK && *(gram.end() - 1) != kEOS && backoffs_[order_minus_1].Get()) { // check valid pointer at tht end
         pay.complete.backoff = log10(*static_cast<const float*>(backoffs_[order_minus_1].Get()));
         ++backoffs_[order_minus_1];
       } else {
-        // Not a context.  
+        // Not a context.
         pay.complete.backoff = 0.0;
       }
     }
@@ -52,7 +52,7 @@ class Callback {
 };
 } // namespace
 
-Interpolate::Interpolate(uint64_t unigram_count, const ChainPositions &backoffs) 
+Interpolate::Interpolate(uint64_t unigram_count, const ChainPositions &backoffs)
   : uniform_prob_(1.0 / static_cast<float>(unigram_count - 1)), backoffs_(backoffs) {}
 
 // perform order-wise interpolation

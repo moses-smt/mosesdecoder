@@ -8,7 +8,7 @@
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
 
-#ifndef WIN32
+#if !defined WIN32 || defined __MINGW32__
 #include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
 #endif
 
