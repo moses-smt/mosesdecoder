@@ -11,10 +11,6 @@ SkeletonLM::SkeletonLM(const std::string &line)
 {
   ReadParameters();
 
-  if (m_factorType == NOT_FOUND) {
-    m_factorType = 0;
-  }
-
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   // needed by parent language model classes. Why didn't they set these themselves?
