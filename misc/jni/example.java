@@ -5,7 +5,7 @@ import java.io.*;
 public class example {
     
     static {
-        System.loadLibrary("JavaQueryPhraseTableMin");
+        System.loadLibrary("jniQueryPt");
     }
 
     public static void main(String argv[]) {

@@ -1,0 +1,13 @@
+
+local includes = <include>. ;
+local with-java = [ option.get "with-java" ] ;
+if $(with-java) {
+    includes += <include>$(with-java)/include ;
+    includes += <include>$(with-java)/include/linux ;
+}
+
+alias moses : ../../moses/src//moses ;
+lib jniQueryPt : QueryPhraseTableMin.cpp src/queryPhraseTableMin_wrap.cxx moses : <link>shared $(includes) ;
+exe test : test.cpp jniQueryPt ;
+
+alias jni : jniQueryPt test ;

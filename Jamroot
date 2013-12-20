@@ -97,10 +97,11 @@ if ( $(max-order) != 6 ) {
 
 project : default-build
   <threading>multi
-  <warnings>on
+  <warnings>off
   <debug-symbols>on
   <variant>release
   <link>static
+  <cxxflags>-fPIC
   ;
 
 project : requirements 

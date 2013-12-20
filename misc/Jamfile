@@ -12,7 +12,15 @@ if $(with-cmph) {
     exe processLexicalTableMin : processLexicalTableMin.cpp ../moses/src//moses ;
     exe queryPhraseTableMin : queryPhraseTableMin.cpp ../moses/src//moses ;
 
-    alias programsMin : processPhraseTableMin processLexicalTableMin queryPhraseTableMin ;
+    local with-java = [ option.get "with-java" ] ;
+    if $(with-java) {
+        alias jniMin : jni//jni ;
+    }
+    else {
+        alias jniMin ;
+    }
+    alias programsMin : processPhraseTableMin processLexicalTableMin queryPhraseTableMin jniMin ;
+
 }
 else {
     alias programsMin ;
