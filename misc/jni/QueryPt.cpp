@@ -6,14 +6,14 @@
 #include <string>
 #include <vector>
 
-#include "QueryPhraseTableMin.h"
+#include "QueryPt.h"
 #include "CompactPT/PhraseDictionaryCompact.h"
 #include "LMList.h"
 #include "Util.h"
 
 using namespace Moses;
 
-QueryPhraseTableMin::QueryPhraseTableMin(const std::string& ttable)
+QueryPt::QueryPt(const std::string& ttable)
 {
   m_nscores = 5;
   m_useAlignments = true;
@@ -67,7 +67,7 @@ QueryPhraseTableMin::QueryPhraseTableMin(const std::string& ttable)
   assert(ret);
 }
 
-std::string QueryPhraseTableMin::query(std::string phrase)
+std::string QueryPt::query(std::string phrase)
 {
     
   std::string sourceString = phrase;
@@ -100,7 +100,7 @@ std::string QueryPhraseTableMin::query(std::string phrase)
   return output.str();
 }
 
-void QueryPhraseTableMin::usage()
+void QueryPt::usage()
 {
   std::cerr << 	"Usage: queryPhraseTable [-n <nscores>] [-a] -t <ttable>\n"
             "-n <nscores>      number of scores in phrase table (default: 5)\n"

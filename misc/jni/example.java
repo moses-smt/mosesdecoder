@@ -5,13 +5,13 @@ import java.io.*;
 public class example {
     
     static {
-        System.loadLibrary("jniQueryPt");
+        System.loadLibrary("JniQueryPt");
     }
 
     public static void main(String argv[]) {
         String mosesModelPath = argv[0];
             
-        QueryPhraseTableMin pt = new QueryPhraseTableMin(mosesModelPath);
+        QueryPt pt = new QueryPt(mosesModelPath);
         if(pt != null) {
             try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(System.in));

@@ -1,4 +1,4 @@
 #!/bin/bash
-export LD_LIBRARY_PATH=../../lib
 SD=`dirname $0`
-java -Djava.library.path=$LD_LIBRARY_PATH -cp $SD/build example $1
+export LD_LIBRARY_PATH=$SD/../../lib
+java -Djava.library.path=$LD_LIBRARY_PATH -cp $SD example $1

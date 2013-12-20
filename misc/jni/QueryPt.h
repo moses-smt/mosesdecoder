@@ -17,7 +17,7 @@ namespace Moses {
   class LMList;
 }
 
-class QueryPhraseTableMin {
+class QueryPt {
   private:
     int m_nscores;
     bool m_useAlignments;
@@ -31,7 +31,7 @@ class QueryPhraseTableMin {
     boost::shared_ptr<Moses::LMList> m_lmList;
   
   public:
-    QueryPhraseTableMin(const std::string& ttable);
+    QueryPt(const std::string& ttable);
     std::string query(std::string phrase);
     void usage();
 };

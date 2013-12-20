@@ -7,7 +7,6 @@ if $(with-java) {
 }
 
 alias moses : ../../moses/src//moses ;
-lib jniQueryPt : QueryPhraseTableMin.cpp src/queryPhraseTableMin_wrap.cxx moses : <link>shared $(includes) ;
-exe test : test.cpp jniQueryPt ;
+lib JniQueryPt : QueryPt.cpp QueryPt_wrap.cpp moses : <link>shared $(includes) ;
 
-alias jni : jniQueryPt test ;
+alias jni : JniQueryPt ;
