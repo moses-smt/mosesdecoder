@@ -123,7 +123,7 @@ LMResult LanguageModelDALM::GetValue(const vector<const Word*> &contextFactor, S
   }
 
   // last word is unk?
-  ret.unknown = (wid == DALM_UNK_WORD);
+  ret.unknown = (wid == m_vocab->unk());
 
   // calc score. Doesn't handle unk yet
   float score = m_lm->query(ngram, m_nGramOrder);
@@ -159,7 +159,7 @@ DALM::VocabId LanguageModelDALM::GetVocabId(const Factor *factor) const
 	}
 	else {
 		// not in mapping. Must be UNK
-		return DALM_UNK_WORD;
+		return m_vocab->unk();
 	}
 }
 
