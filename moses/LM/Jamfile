@@ -25,6 +25,7 @@ if $(with-irstlm) {
 
 #SRILM
 local with-srilm = [ option.get "with-srilm" ] ;
+local with-maxent-srilm = [ option.get "with-maxent-srilm" ] ;
 if $(with-srilm) {
   if [ option.get "with-srilm-dynamic" : no : yes ] = yes {
     lib srilm ;
@@ -44,9 +45,18 @@ if $(with-srilm) {
 
   obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
   obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
-  alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
-  dependencies += sri ;
-  lmmacros += LM_SRI ;
+  if $(with-maxent-srilm) {
+  	lib lbfgs : : $(sri-lib) ;
+  	obj MaxEntSRI.o : MaxEntSRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/lm/src <include>$(with-srilm)/include/srilm <warnings>off ;
+  	alias sri : SRI.o MaxEntSRI.o ParallelBackoff.o lbfgs sri-libs : : : <define>LM_SRI <define>LM_MAXENT_SRI ;
+  	dependencies += sri ;
+  	lmmacros += LM_SRI ;
+  	lmmacros += LM_MAXENT_SRI ;  	
+  } else {
+  	alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
+  	dependencies += sri ;
+  	lmmacros += LM_SRI ;
+  }
 }
 
 #RandLM
