@@ -1,34 +1,13 @@
-/* File: javaforcealigner.i */
+/* File: queryPhraseTableMin.i */
 %include "std_string.i"
 
-%module javaforcealigner
+%module queryPhraseTableMin
 %{
-#include "ForceAligner.h"
-#include "SymForceAligner.h"
+#include "QueryPhraseTableMin.h"
 %}
 
-class Corpus {
+class QueryPhraseTableMin {
   public:
-    Corpus();
-    void addSentence(std::string e, std::string f);
-};
-
-class ForceAligner {
-  public:
-    ForceAligner(std::string src, std::string trg, std::string path);
-    
-    std::string alignCorpusStr(Corpus& corpus);
-    std::string alignSentenceStr(std::string e, std::string f);
-    bool errorOccurred();
-};
-
-class SymForceAligner {
-  public:
-    enum Mode { Src2Trg, Trg2Src, Intersection, Union, Grow, GrowDiag, GrowDiagFinal, GrowDiagFinalAnd };
-    SymForceAligner(std::string src, std::string trg, std::string path);
-    void setMode(Mode mode);
-    
-    std::string alignCorpusStr(Corpus& corpus);
-    std::string alignSentenceStr(std::string e, std::string f);
-    bool errorOccurred();
+    QueryPhraseTableMin(std::string path);
+    std::string query(std::string phrase);
 };

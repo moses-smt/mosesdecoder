@@ -1,28 +1,40 @@
 JAVA_INCLUDES=/usr/lib/jvm/java-7-openjdk-amd64/include
 
-JAVA_SOURCES=example.java exampleThreads.java src/javaforcealignerJNI.java src/ForceAligner.java src/SymForceAligner.java src/Corpus.java
-JAVA_CLASSES=build/example.class build/exampleThreads.class
+JAVA_SOURCES=example.java src/queryPhraseTableMin.java src/queryPhraseTableMinJNI.java src/QueryPhraseTableMin.java
+JAVA_CLASSES=build/example.class
 
 all: java
 
 ###########################################################################################
 
-src/javaforcealigner_wrap.cxx: javaforcealigner.i
+src/queryPhraseTableMin_wrap.cxx: queryPhraseTableMin.i
 	mkdir -p src build
-	swig -java -c++ -I../src -outdir src -o src/javaforcealigner_wrap.cxx javaforcealigner.i
+	swig -java -c++ -I.. -I../src -outdir src -o src/queryPhraseTableMin_wrap.cxx queryPhraseTableMin.i
 
-build/libjavaforcealigner.so: src/javaforcealigner_wrap.cxx ../src/libgiza.a
-	g++ -Wno-deprecated -shared -Xlinker -zmuldefs -fPIC \
-	src/javaforcealigner_wrap.cxx \
-	../src/libgiza.a \
+build/libJavaQueryPhraseTableMin.so: QueryPhraseTableMin.cpp src/queryPhraseTableMin_wrap.cxx ../../lib/*.a
+	g++ -Wno-deprecated -shared -fPIC -g -O2 \
+	QueryPhraseTableMin.cpp src/queryPhraseTableMin_wrap.cxx \
+	../../lib/*.a ../../lib/libfuzzy-match.a ../../lib/libCYKPlusParser.a ../../lib/libCompactPT.a ../../lib/libOnDiskPt.a ../../lib/libmoses.a ../../lib/libmoses_internal.a ../../lib/libkenutil.a \
+	../../lib/libCompactPT.a ../../lib/libmoses.a ../../lib/libmoses_internal.a ../../lib/libRuleTable.a ../../lib/libOnDiskPt.a ../../lib/libRuleTable.a ../../lib/libOnDiskPt.a ../../lib/libLM.a ../../lib/libkenutil.a ../../lib/libkenlm.a \
+	../../lib/libCompactPT.a ../../lib/libScope3Parser.a ../../lib/libkenutil.a ../../lib/libmoses.a ../../lib/libRuleTable.a ../../lib/libCompactPT.a ../../lib/libmoses_internal.a \
+	../../lib/*.a \
+	-I../../moses/src -I../.. \
 	-I${JAVA_INCLUDES} -I${JAVA_INCLUDES}/linux \
-	-I../src \
-	-o build/libjavaforcealigner.so
-	
-${JAVA_CLASSES}: src/javaforcealigner_wrap.cxx
+	-I../src -I.. -I. \
+	-lboost_thread -lcmph -lz -lboost_filesystem \
+	-o build/libJavaQueryPhraseTableMin.so
+
+build/test: test.cpp
+	g++ -Wno-deprecated -g -O2 \
+	test.cpp \
+	-I../src -I.. -I. \
+	-Lbuild -lJavaQueryPhraseTableMin \
+	-o test
+
+${JAVA_CLASSES}: src/queryPhraseTableMin_wrap.cxx
 	javac -d build ${JAVA_SOURCES}
 	
-java: build/libjavaforcealigner.so ${JAVA_CLASSES}
+java: build/libJavaQueryPhraseTableMin.so build/test ${JAVA_CLASSES}
 
 ###########################################################################################
 
