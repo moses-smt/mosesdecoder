@@ -1,0 +1,45 @@
+<project name="JniQueryPt" basedir="." default="main">
+
+    <property name="src.dir"     value="java"/>
+
+    <property name="build.dir"   value="classes"/>
+    <property name="dist.dir"    value="lib"/>
+    <property name="classes.dir" value="${build.dir}"/>
+    <property name="jar.dir"     value="${dist.dir}"/>
+
+    <property name="main-class"  value="example"/>
+
+    <path id="compile.classpath">
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" encoding="UTF-8">
+        </javac>
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" excludes="**/*.java"/>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <manifestclasspath property="jar.classpath" jarfile="${jar.dir}/${ant.project.name}.jar">
+            <classpath refid="compile.classpath"/> <!-- HERE! -->
+        </manifestclasspath>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="clean-build" depends="clean,jar"/>
+
+    <target name="main" depends="compile,jar"/>
+
+</project>

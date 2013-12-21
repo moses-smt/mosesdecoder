@@ -6,7 +6,13 @@ if $(with-java) {
     includes += <include>$(with-java)/include/linux ;
 }
 
-alias moses : ../../moses/src//moses ;
-lib JniQueryPt : QueryPt.cpp QueryPt_wrap.cpp moses : <link>shared $(includes) ;
+lib JniQueryPt : QueryPt.cpp QueryPt_wrap.cpp ../../moses/src//moses : <link>shared $(includes) ;
 
-alias jni : JniQueryPt ;
+make JniQueryPt.jar : build.xml : @ant ;
+
+actions ant
+{
+    ant -f $(2)
+}
+
+alias jni : JniQueryPt JniQueryPt.jar ;

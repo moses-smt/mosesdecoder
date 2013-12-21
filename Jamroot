@@ -101,7 +101,6 @@ project : default-build
   <debug-symbols>on
   <variant>release
   <link>static
-  <cxxflags>-fPIC
   ;
 
 project : requirements 
