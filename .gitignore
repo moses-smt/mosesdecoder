@@ -53,3 +53,4 @@ scripts/training/train-model.perl
 dist
 bin
 previous.sh
+classes

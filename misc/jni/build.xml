@@ -3,9 +3,9 @@
     <property name="src.dir"     value="java"/>
 
     <property name="build.dir"   value="classes"/>
-    <property name="dist.dir"    value="lib"/>
+    <property name="dist.dir"    value="${build.dir}"/>
     <property name="classes.dir" value="${build.dir}"/>
-    <property name="jar.dir"     value="${dist.dir}"/>
+    <property name="jar.dir"     value="."/>
 
     <property name="main-class"  value="example"/>
 
@@ -38,7 +38,7 @@
         </jar>
     </target>
 
-    <target name="clean-build" depends="clean,jar"/>
+    <target name="clean-build" depends="clean"/>
 
     <target name="main" depends="compile,jar"/>
 

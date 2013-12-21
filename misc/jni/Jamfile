@@ -1,3 +1,4 @@
+path-constant CWD : . ;
 
 local includes = <include>. ;
 local with-java = [ option.get "with-java" ] ;
@@ -8,11 +9,16 @@ if $(with-java) {
 
 lib JniQueryPt : QueryPt.cpp QueryPt_wrap.cpp ../../moses/src//moses : <link>shared $(includes) ;
 
-make JniQueryPt.jar : build.xml : @ant ;
+make JniQueryPt.jar : JniQueryPt : @ant ;
 
 actions ant
 {
-    ant -f $(2)
+    ant -f $(CWD)/build.xml
+    mv $(CWD)/JniQueryPt.jar $(1)
+    cp $(1) $(TOP)/bin/.
 }
 
-alias jni : JniQueryPt JniQueryPt.jar ;
+make $(TOP)/bin/JniQueryPt.jar : JniQueryPt.jar : @common.copy ;
+make $(TOP)/bin/JniQueryPt_example.sh : example.sh : @common.copy ;
+
+alias jni : $(TOP)/bin/JniQueryPt.jar $(TOP)/bin/JniQueryPt_example.sh ;
