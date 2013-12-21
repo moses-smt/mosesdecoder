@@ -21,4 +21,9 @@ actions ant
 make $(TOP)/bin/JniQueryPt.jar : JniQueryPt.jar : @common.copy ;
 make $(TOP)/bin/JniQueryPt_example.sh : example.sh : @common.copy ;
 
-alias jni : $(TOP)/bin/JniQueryPt.jar $(TOP)/bin/JniQueryPt_example.sh ;
+if $(with-java) {
+    alias jni : $(TOP)/bin/JniQueryPt.jar $(TOP)/bin/JniQueryPt_example.sh ;
+}
+else {
+    alias jni : ;
+}
