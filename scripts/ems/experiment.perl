@@ -2652,7 +2652,7 @@ sub define_evaluation_decode {
     my $post_decoding_transliteration = &get("TRAINING:post-decoding-transliteration");
 		
    # If Transliteration Module is to be used as post-decoding step ...	
-   if ($post_decoding_transliteration eq "yes"){
+   if (defined($post_decoding_transliteration) && $post_decoding_transliteration eq "yes"){
 	$settings .= " -output-unknowns $system_output.oov";
    }
   	
