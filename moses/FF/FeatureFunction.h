@@ -44,6 +44,7 @@ public:
     return s_staticColl;
   }
   static FeatureFunction &FindFeatureFunction(const std::string& name);
+  static void Destroy();
 
   FeatureFunction(const std::string &line);
   FeatureFunction(size_t numScoreComponents, const std::string &line);
