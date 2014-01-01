@@ -301,6 +301,7 @@ int main(int argc, char* argv[])
 #endif
 
     delete ioWrapper;
+    FeatureFunction::Destroy();
 
     IFVERBOSE(1)
     PrintUserTime("End.");

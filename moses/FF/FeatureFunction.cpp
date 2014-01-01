@@ -6,6 +6,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
+#include "moses/Util.h"
 
 using namespace std;
 
@@ -26,6 +27,11 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
   }
 
   throw "Unknown feature " + name;
+}
+
+void FeatureFunction::Destroy()
+{
+  RemoveAllInColl(s_staticColl);
 }
 
 FeatureFunction::
