@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
     std::string text, arpa;
 
     options.add_options()
+      ("help", po::bool_switch(), "Show this help message")
       ("order,o", po::value<std::size_t>(&pipeline.order)
 #if BOOST_VERSION >= 104200
          ->required()
@@ -52,7 +53,10 @@ int main(int argc, char *argv[]) {
       ("verbose_header", po::bool_switch(&pipeline.verbose_header), "Add a verbose header to the ARPA file that includes information such as token count, smoothing type, etc.")
       ("text", po::value<std::string>(&text), "Read text from a file instead of stdin")
       ("arpa", po::value<std::string>(&arpa), "Write ARPA to a file instead of stdout");
-    if (argc == 1) {
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, options), vm);
+
+    if (argc == 1 || vm["help"].as<bool>()) {
       std::cerr << 
         "Builds unpruned language models with modified Kneser-Ney smoothing.\n\n"
         "Please cite:\n"
@@ -70,12 +74,17 @@ int main(int argc, char *argv[]) {
         "setting the temporary file location (-T) and sorting memory (-S) is recommended.\n\n"
         "Memory sizes are specified like GNU sort: a number followed by a unit character.\n"
         "Valid units are \% for percentage of memory (supported platforms only) and (in\n"
-        "increasing powers of 1024): b, K, M, G, T, P, E, Z, Y.  Default is K (*1024).\n\n";
+        "increasing powers of 1024): b, K, M, G, T, P, E, Z, Y.  Default is K (*1024).\n";
+      uint64_t mem = util::GuessPhysicalMemory();
+      if (mem) {
+        std::cerr << "This machine has " << mem << " bytes of memory.\n\n";
+      } else {
+        std::cerr << "Unable to determine the amount of memory on this machine.\n\n";
+      } 
       std::cerr << options << std::endl;
       return 1;
     }
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, options), vm);
+
     po::notify(vm);
 
     // required() appeared in Boost 1.42.0.

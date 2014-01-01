@@ -22,15 +22,12 @@ private:
   bool running;
   // note: this only has the resolution of seconds, we'd often like better resolution
   // we make our best effort to do this on a system-by-system basis
-  time_t start_time;
-
-  // in seconds
-  double elapsed_time();
+  double start_time;
 
 public:
   /***
    * 'running' is initially false.  A timer needs to be explicitly started
-   * using 'start' or 'restart'
+   * using 'start'
    */
   Timer() : running(false) {
     start_time = 0;
