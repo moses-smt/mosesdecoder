@@ -1,4 +1,3 @@
-#include "util/check.hh"
 #include <stdexcept>
 #include <iostream>
 #include <vector>
@@ -536,7 +535,6 @@ int main(int argc, char** argv)
   } else {
     myAbyssServer.run();
   }
-  // xmlrpc_c::serverAbyss.run() never returns
-  CHECK(false);
-  return 0;
+  std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
+  return 1;
 }
