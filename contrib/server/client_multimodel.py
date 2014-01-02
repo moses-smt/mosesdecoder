@@ -17,6 +17,10 @@ else:
 
 
 def translate(input_object, server, weights=None):
+    """translate each sentence in an input_object (list, file-like object or other object that iterates over sentences)
+       server is a xmlrpclib.ServerProxy
+       weights is a list of floats (one float per model, or one float per model per feature)
+    """
 
     for line in input_object:
         params = {}
