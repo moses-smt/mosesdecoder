@@ -237,15 +237,17 @@ public:
         }
     }
 
+    si = params.find("model_name");
+    if (si != params.end() && multiModelWeights.size() > 0) {
+        const string model_name = xmlrpc_c::value_string(si->second);
+        PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+        pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
+    }
+
     const StaticData &staticData = StaticData::Instance();
 
     if (addGraphInfo) {
       (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
-    }
-
-    if (multiModelWeights.size() > 0) {
-      PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) PhraseDictionary::GetColl()[0]; //TODO: only works if multimodel is first phrase table
-      pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
     }
 
     stringstream out, graphInfo, transCollOpts;
