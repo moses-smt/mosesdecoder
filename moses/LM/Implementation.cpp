@@ -145,14 +145,13 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
   if(GetNGramOrder() <= 1)
     return NULL;
 
-  clock_t t = 0;
-  IFVERBOSE(2) {
-    t = clock();  // track time
-  }
-
   // Empty phrase added? nothing to be done
   if (hypo.GetCurrTargetLength() == 0)
     return ps ? NewState(ps) : NULL;
+
+  IFVERBOSE(2) {
+    hypo.GetManager().GetSentenceStats().StartTimeCalcLM();
+  }
 
   const size_t currEndPos = hypo.GetCurrTargetWordsRange().GetEndPos();
   const size_t startPos = hypo.GetCurrTargetWordsRange().GetStartPos();
@@ -217,9 +216,8 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
     out->PlusEquals(this, lmScore);
   }
 
-
   IFVERBOSE(2) {
-    hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t );
+    hypo.GetManager().GetSentenceStats().StopTimeCalcLM();
   }
   return res;
 }

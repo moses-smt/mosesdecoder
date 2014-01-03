@@ -525,7 +525,6 @@ bool StaticData::LoadData(Parameter *parameter)
     	string newLine = Join(" ", toks);
     	m_registry.Construct(newName, newLine);
     }
-
   }
 
   NoCache();

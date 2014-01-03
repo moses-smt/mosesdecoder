@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisStackCubePruning.h"
 #include "moses/FF/DistortionScoreProducer.h"
 #include "TranslationOptionList.h"
+#include "Manager.h"
 
 namespace Moses
 {
@@ -199,7 +200,13 @@ BackwardsEdge::Initialize()
 Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt)
 {
   // create hypothesis and calculate all its scores
+  IFVERBOSE(2) {
+    hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
+  }
   Hypothesis *newHypo = hypothesis.CreateNext(transOpt); // TODO FIXME This is absolutely broken - don't pass null here
+  IFVERBOSE(2) {
+    hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
+  }
   newHypo->Evaluate(m_futurescore);
 
   return newHypo;
@@ -302,7 +309,13 @@ BitmapContainer::Enqueue(int hypothesis_pos
       , translation_pos
       , hypothesis
       , edge);
+  IFVERBOSE(2) {
+    item->GetHypothesis()->GetManager().GetSentenceStats().StartTimeManageCubes();
+  }
   m_queue.push(item);
+  IFVERBOSE(2) {
+    item->GetHypothesis()->GetManager().GetSentenceStats().StopTimeManageCubes();
+  }
 }
 
 HypothesisQueueItem*
@@ -434,7 +447,6 @@ BitmapContainer::ProcessBestHypothesis()
 
   // Logging for the criminally insane
   IFVERBOSE(3) {
-    //		const StaticData &staticData = StaticData::Instance();
     item->GetHypothesis()->PrintHypothesis();
   }
 

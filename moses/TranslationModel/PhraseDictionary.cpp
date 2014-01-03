@@ -135,6 +135,32 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
   }
 }
 
+// persistent cache handling
+// saving presistent cache to disk
+//void PhraseDictionary::SaveCache() const
+//{
+//  CacheColl &cache = GetCache();
+//  for( std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter,
+//       iter != cache.end(),
+//       iter++ ) {
+//    
+//  }
+//}
+
+// loading persistent cache from disk
+//void PhraseDictionary::LoadCache() const
+//{
+//  CacheColl &cache = GetCache();
+//  std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
+//  iter = cache.begin();
+//  while( iter != cache.end() ) {
+//    std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
+//    delete iterRemove->second.first;
+//    cache.erase(iterRemove);
+//  }
+//}
+
+// reduce presistent cache by half of maximum size
 void PhraseDictionary::ReduceCache() const
 {
   CacheColl &cache = GetCache();

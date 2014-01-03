@@ -43,7 +43,6 @@ void SearchNormalBatch::ProcessSentence()
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
-  clock_t t=0; // used to track time for steps
 
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
@@ -64,13 +63,13 @@ void SearchNormalBatch::ProcessSentence()
     // the stack is pruned before processing (lazy pruning):
     VERBOSE(3,"processing hypothesis from next stack");
     IFVERBOSE(2) {
-      t = clock();
+      stats.StartTimeStack();
     }
     sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
     VERBOSE(3,std::endl);
     sourceHypoColl.CleanupArcList();
     IFVERBOSE(2) {
-      stats.AddTimeStack( clock()-t );
+      stats.StopTimeStack();
     }
 
     // go through each hypothesis on the stack and try to expand it
@@ -91,12 +90,6 @@ void SearchNormalBatch::ProcessSentence()
   }
 
   EvalAndMergePartialHypos();
-
-  // some more logging
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().SetTimeTotal( clock()-m_start );
-  }
-  VERBOSE(2, m_manager.GetSentenceStats());
 }
 
 /**
@@ -121,17 +114,16 @@ ExpandHypothesis(const Hypothesis &hypothesis,
 
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
-  clock_t t=0; // used to track time for steps
 
   Hypothesis *newHypo;
   if (! staticData.UseEarlyDiscarding()) {
     // simple build, no questions asked
     IFVERBOSE(2) {
-      t = clock();
+      stats.StartTimeBuildHyp();
     }
     newHypo = hypothesis.CreateNext(transOpt);
     IFVERBOSE(2) {
-      stats.AddTimeBuildHyp( clock()-t );
+      stats.StopTimeBuildHyp();
     }
     if (newHypo==NULL) return;
     //newHypo->Evaluate(m_transOptColl.GetFutureScore());

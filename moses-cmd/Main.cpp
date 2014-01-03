@@ -67,7 +67,7 @@ using namespace MosesCmd;
 
 namespace MosesCmd
 {
-// output floats with three significant digits
+// output floats with five significant digits
 static const size_t PRECISION = 3;
 
 /** Enforce rounding */
