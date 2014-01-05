@@ -109,6 +109,13 @@ public:
   /** Translate one sentence
    * gets called by main function implemented at end of this source file */
   void Run() {
+    // shorthand for "global data"
+    const StaticData &staticData = StaticData::Instance();
+
+    // input sentence
+    Sentence sentence;
+
+    // report wall time spent on translation
     Timer translationTime;
     translationTime.start();
 
@@ -117,16 +124,14 @@ public:
     TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
 
-    // shorthand for "global data"
-    const StaticData &staticData = StaticData::Instance();
-
-    // input sentence
-    Sentence sentence;
 
     // execute the translation
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
+    Timer initTime;
+    initTime.start();
     Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm());
+    VERBOSE(1, "Line " << m_lineNumber << ": Initialize search took " << initTime << " seconds total" << endl);
     manager.ProcessSentence();
 
     // we are done with search, let's look what we got

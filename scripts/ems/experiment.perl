@@ -2558,7 +2558,7 @@ sub define_tuningevaluation_filter {
     $input_filter = $input unless $input_filter;
     
     my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;
-    $settings = &get("TUNING:filter-settings") if $tuning_flag;
+    $settings = &backoff_and_get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
 
     $binarizer .= " -no-alignment-info" if defined ($binarizer) && !$hierarchical && defined $word_alignment && $word_alignment eq "no";
