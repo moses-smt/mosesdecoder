@@ -231,8 +231,9 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
  */
 void Hypothesis::Evaluate(const SquareMatrix &futureScore)
 {
-  clock_t t=0; // used to track time
-
+  IFVERBOSE(2) {
+    m_manager.GetSentenceStats().StartTimeOtherScore();
+  }
   // some stateless score producers cache their values in the translation
   // option: add these here
   // language model scores for n-grams completely contained within a target
@@ -260,7 +261,8 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
   }
 
   IFVERBOSE(2) {
-    t = clock();  // track time excluding LM
+    m_manager.GetSentenceStats().StopTimeOtherScore();
+    m_manager.GetSentenceStats().StartTimeEstimateScore();
   }
 
   // FUTURE COST
@@ -270,7 +272,7 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
   m_totalScore = m_scoreBreakdown.GetWeightedScore() + m_futureScore;
 
   IFVERBOSE(2) {
-    m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t );
+    m_manager.GetSentenceStats().StopTimeEstimateScore();
   }
 }
 

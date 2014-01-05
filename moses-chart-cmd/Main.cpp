@@ -215,7 +215,6 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
 static void ShowWeights()
 {
   fix(cout,6);
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 

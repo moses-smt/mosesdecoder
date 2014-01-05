@@ -80,8 +80,11 @@ Manager::~Manager()
  */
 void Manager::ProcessSentence()
 {
-  // reset statistics
+  // initialize statistics
   ResetSentenceStats(m_source);
+  IFVERBOSE(2) {
+    GetSentenceStats().StartTimeTotal();
+  }
 
   // check if alternate weight setting is used
   // this is not thread safe! it changes StaticData
@@ -94,15 +97,15 @@ void Manager::ProcessSentence()
   }
 
   // get translation options
-  Timer getOptionsTime;
-  getOptionsTime.start();
+  IFVERBOSE(1) {
+    GetSentenceStats().StartTimeCollectOpts();
+  }
   m_transOptColl->CreateTranslationOptions();
-  VERBOSE(1, "Line "<< m_lineNumber << ": Collecting options took " << getOptionsTime << " seconds" << endl);
 
   // some reporting on how long this took
-  IFVERBOSE(2) {
-    // TODO: XXX: Hack: SentenceStats.h currently requires all values to be of type clock_t
-    GetSentenceStats().AddTimeCollectOpts((clock_t) (getOptionsTime.get_elapsed_time() * CLOCKS_PER_SEC));
+  IFVERBOSE(1) {
+    GetSentenceStats().StopTimeCollectOpts();
+    TRACE_ERR("Line "<< m_lineNumber << ": Collecting options took " << GetSentenceStats().GetTimeCollectOpts() << " seconds" << endl);
   }
 
   // search for best translation with the specified algorithm
@@ -110,6 +113,10 @@ void Manager::ProcessSentence()
   searchTime.start();
   m_search->ProcessSentence();
   VERBOSE(1, "Line " << m_lineNumber << ": Search took " << searchTime << " seconds" << endl);
+    IFVERBOSE(2) {
+    GetSentenceStats().StopTimeTotal();
+    TRACE_ERR(GetSentenceStats());
+  }
 }
 
 /**
@@ -470,7 +477,6 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
                         << "\ta=";
 
   // phrase table scores
-  const StaticData &staticData = StaticData::Instance();
   const std::vector<PhraseDictionary*> &phraseTables = PhraseDictionary::GetColl();
   std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
   for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable) {
@@ -676,7 +682,6 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
   outputSearchGraphStream.setf(std::ios::fixed);
   outputSearchGraphStream.precision(6);
 
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf  = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff   = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -702,7 +707,6 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, gds[i], outputSearchGraphStream);
   }
-
 }
 
 void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std::ostream &outputSearchGraphStream) const
@@ -715,7 +719,6 @@ void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std:
   // const ScoreComponentCollection& scoreCollection = hypo->GetScoreBreakdown();
   // outputSearchGraphStream << scoreCollection << endl;
 
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -749,7 +752,6 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
   outputSearchGraphStream.setf(std::ios::fixed);
   outputSearchGraphStream.precision(6);
 
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;

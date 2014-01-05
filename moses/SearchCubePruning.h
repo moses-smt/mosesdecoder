@@ -21,7 +21,6 @@ protected:
   const InputType &m_source;
   std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */
   // no of elements = no of words in source + 1
-  clock_t m_start; /**< used to track time spend on translation */
   const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 
   //! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
