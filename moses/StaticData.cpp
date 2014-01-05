@@ -881,7 +881,12 @@ void StaticData::InitializeForInput(const InputType& source) const
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
-    ff.InitializeForInput(source);
+    if (! IsFeatureFunctionIgnored(ff)) {
+      Timer iTime;
+      iTime.start();
+      ff.InitializeForInput(source);
+      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " ) = " << iTime << endl);
+    }
   }
 }
 
@@ -890,7 +895,9 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
-    ff.CleanUpAfterSentenceProcessing(source);
+    if (! IsFeatureFunctionIgnored(ff)) {
+      ff.CleanUpAfterSentenceProcessing(source);
+    }
   }
 }
 
