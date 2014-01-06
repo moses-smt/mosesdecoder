@@ -598,6 +598,20 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
   return "";
 }
 
+int getClass(const std::string &str)
+{
+	size_t pos = str.find("swap");
+	if (pos == str.npos) {
+		return 0;
+	}
+	else if (pos == 0) {
+		return 1;
+	}
+	else {
+		return 2;
+	}
+}
+
 void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
 {
   if (m_options.isOnlyOutputSpanInfo()) {
@@ -606,7 +620,10 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   }
 
   m_extractFileOrientation << sentence.sentenceID << " ||| ";
-  m_extractFileOrientation << orientationInfo << " ||| ";
+  m_extractFileOrientation << getClass(orientationInfo) << " ||| ";
+
+  // position
+  m_extractFileOrientation << startF << " " << endF << " ||| ";
 
   // start
   m_extractFileOrientation << "<s> ";
