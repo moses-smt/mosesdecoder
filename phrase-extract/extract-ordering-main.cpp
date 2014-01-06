@@ -154,6 +154,8 @@ int main(int argc, char* argv[])
     	options.debug = true;
     } else if (strcmp(argv[i], "--MinPhraseLength") == 0) {
     	options.minPhraseLength = atoi(argv[++i]);
+    } else if (strcmp(argv[i], "--Separator") == 0) {
+    	options.separator = argv[++i];
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -622,32 +624,32 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
     return;
   }
 
-  m_extractFileOrientation << sentence.sentenceID << " ||| ";
-  m_extractFileOrientation << getClass(orientationInfo) << " ||| ";
+  const string &sep = m_options.separator;
+
+  m_extractFileOrientation << sentence.sentenceID << " " << sep << " ";
+  m_extractFileOrientation << getClass(orientationInfo) << " " << sep << " ";
 
   // position
-  m_extractFileOrientation << startF << " " << endF << " ||| ";
+  m_extractFileOrientation << startF << " " << endF << " " << sep << " ";
 
   // start
   m_extractFileOrientation << "<s> ";
   for(int fi=0; fi<startF; fi++) {
 	  m_extractFileOrientation << sentence.source[fi] << " ";
   }
-  m_extractFileOrientation << "||| ";
+  m_extractFileOrientation << sep << " ";
 
   // middle
   for(int fi=startF; fi<=endF; fi++) {
 	  m_extractFileOrientation << sentence.source[fi] << " ";
   }
-  m_extractFileOrientation << "||| ";
+  m_extractFileOrientation << sep << " ";
 
   // end
   for(int fi=endF+1; fi<sentence.source.size(); fi++) {
 	  m_extractFileOrientation << sentence.source[fi] << " ";
   }
   m_extractFileOrientation << "</s> ";
-
-  m_extractFileOrientation << "||| ";
 
 
   // target
