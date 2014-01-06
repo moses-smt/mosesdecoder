@@ -151,7 +151,9 @@ int main(int argc, char* argv[])
       }
       options.initInstanceWeightsFile(argv[++i]);
     } else if (strcmp(argv[i], "--Debug") == 0) {
-	options.debug = true;
+    	options.debug = true;
+    } else if (strcmp(argv[i], "--MinPhraseLength") == 0) {
+    	options.minPhraseLength = atoi(argv[++i]);
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -361,6 +363,7 @@ void ExtractTask::extract(SentenceAlignment &sentence)
             for(int endF=maxF;
                 (endF<countF &&
                  (relaxLimit || endF<startF+m_options.maxPhraseLength) && // within length limit
+                 (endF - startF + 1 > m_options.minPhraseLength) && // within length limit
                  (endF==maxF || sentence.alignedCountS[endF]==0)); // unaligned
                 endF++) { // at this point we have extracted a phrase
               if(buildExtraStructure) { // phrase || hier
