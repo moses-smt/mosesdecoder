@@ -53,6 +53,16 @@ class ChartCellCollectionBase;
 class ChartRuleLookupManager;
 class ChartParser;
 
+class CacheColl : public std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >
+{
+// 1st = hash of source phrase/ address of phrase-table node
+// 2nd = all translations
+// 3rd = time of last access
+
+public:
+	~CacheColl();
+};
+
 /**
   * Abstract base class for phrase dictionaries (tables).
   **/
@@ -128,11 +138,6 @@ protected:
 
   // cache
   size_t m_maxCacheSize; // 0 = no caching
-
-  typedef std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > CacheColl;
-  // 1st = hash of source phrase/ address of phrase-table node
-  // 2nd = all translations
-  // 3rd = time of last access
 
 #ifdef WITH_THREADS
   //reader-writer lock

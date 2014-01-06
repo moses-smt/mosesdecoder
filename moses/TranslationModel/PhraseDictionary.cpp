@@ -33,6 +33,15 @@ namespace Moses
 {
 std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
+CacheColl::~CacheColl()
+{
+	for (iterator iter = begin(); iter != end(); ++iter) {
+		std::pair<const TargetPhraseCollection*, clock_t> &key = iter->second;
+		const TargetPhraseCollection *tps = key.first;
+		delete tps;
+	}
+}
+
 PhraseDictionary::PhraseDictionary(const std::string &line)
   :DecodeFeature(line)
   ,m_tableLimit(20) // default
@@ -191,7 +200,7 @@ void PhraseDictionary::ReduceCache() const
   VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
 }
 
-PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
+CacheColl &PhraseDictionary::GetCache() const
 {
   CacheColl *cache;
   cache = m_cache.get();
