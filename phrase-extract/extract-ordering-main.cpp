@@ -606,19 +606,36 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   }
 
   m_extractFileOrientation << sentence.sentenceID << " ||| ";
+  m_extractFileOrientation << orientationInfo << " ||| ";
 
+  // start
+  m_extractFileOrientation << "<s> ";
+  for(int fi=0; fi<startF; fi++) {
+	  m_extractFileOrientation << sentence.source[fi] << " ";
+  }
+  m_extractFileOrientation << "||| ";
+
+  // middle
   for(int fi=startF; fi<=endF; fi++) {
 	  m_extractFileOrientation << sentence.source[fi] << " ";
   }
   m_extractFileOrientation << "||| ";
 
+  // end
+  for(int fi=endF+1; fi<sentence.source.size(); fi++) {
+	  m_extractFileOrientation << sentence.source[fi] << " ";
+  }
+  m_extractFileOrientation << "</s> ";
+
+  m_extractFileOrientation << "||| ";
+
+
   // target
+  /*
   for(int ei=startE; ei<=endE; ei++) {
 	  m_extractFileOrientation << sentence.target[ei] << " ";
   }
-  m_extractFileOrientation << "||| ";
-
-  m_extractFileOrientation << orientationInfo;
+  */
   m_extractFileOrientation << endl;
 }
 
