@@ -97,7 +97,6 @@ public:
 	{}
   void Run();
 private:
-  vector< string > m_extractedPhrasesOri;
   void extract(SentenceAlignment &);
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
   void writePhrasesToFile();
@@ -292,8 +291,6 @@ namespace MosesTraining
 void ExtractTask::Run()
 {
   extract(m_sentence);
-  writePhrasesToFile();
-  m_extractedPhrasesOri.clear();
 }
 
 void ExtractTask::extract(SentenceAlignment &sentence)
@@ -397,57 +394,7 @@ void ExtractTask::extract(SentenceAlignment &sentence)
     }
   }
 
-  if(buildExtraStructure) { // phrase || hier
-    string orientationInfo = "";
-    REO_POS wordPrevOrient, wordNextOrient, phrasePrevOrient, phraseNextOrient, hierPrevOrient, hierNextOrient;
 
-    for(size_t i = 0; i < inboundPhrases.size(); i++) {
-      int startF = inboundPhrases[i].first.first;
-      int startE = inboundPhrases[i].first.second;
-      int endF = inboundPhrases[i].second.first;
-      int endE = inboundPhrases[i].second.second;
-
-      bool connectedLeftTopP  = isAligned( sentence, startF-1, startE-1 );
-      bool connectedRightTopP = isAligned( sentence, endF+1,   startE-1 );
-      bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
-      bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
-
-      if(m_options.isWordModel()) {
-        wordPrevOrient = getOrientWordModel(sentence, m_options.isWordType(),
-                                            connectedLeftTopP, connectedRightTopP,
-                                            startF, endF, startE, endE, countF, 0, 1,
-                                            &ge, &lt);
-        wordNextOrient = getOrientWordModel(sentence, m_options.isWordType(),
-                                            connectedLeftTopN, connectedRightTopN,
-                                            endF, startF, endE, startE, 0, countF, -1,
-                                            &lt, &ge);
-      }
-      if (m_options.isPhraseModel()) {
-        phrasePrevOrient = getOrientPhraseModel(sentence, m_options.isPhraseType(),
-                                                connectedLeftTopP, connectedRightTopP,
-                                                startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft);
-        phraseNextOrient = getOrientPhraseModel(sentence, m_options.isPhraseType(),
-                                                connectedLeftTopN, connectedRightTopN,
-                                                endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight);
-      } else {
-        phrasePrevOrient = phraseNextOrient = UNKNOWN;
-      }
-      if(m_options.isHierModel()) {
-        hierPrevOrient = getOrientHierModel(sentence, m_options.isHierType(),
-                                            connectedLeftTopP, connectedRightTopP,
-                                            startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft, outBottomRight, outBottomLeft, phrasePrevOrient);
-        hierNextOrient = getOrientHierModel(sentence, m_options.isHierType(),
-                                            connectedLeftTopN, connectedRightTopN,
-                                            endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight, outBottomLeft, outBottomRight, phraseNextOrient);
-      }
-
-      orientationInfo = ((m_options.isWordModel())? getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType()) : "") + " | " +
-                        ((m_options.isPhraseModel())? getOrientString(phrasePrevOrient, m_options.isPhraseType()) + " " + getOrientString(phraseNextOrient, m_options.isPhraseType()) : "") + " | " +
-                        ((m_options.isHierModel())? getOrientString(hierPrevOrient, m_options.isHierType()) + " " + getOrientString(hierNextOrient, m_options.isHierType()) : "");
-
-      addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
-    }
-  }
 }
 
 REO_POS getOrientWordModel(SentenceAlignment & sentence, REO_MODEL_TYPE modelType,
@@ -653,61 +600,28 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
 
 void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
 {
-  // source
-  //   // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n";
-  ostringstream outextractstrOrientation;
-
   if (m_options.isOnlyOutputSpanInfo()) {
     cout << startF << " " << endF << " " << startE << " " << endE << endl;
     return;
   }
 
-  if (m_options.debug) {
-      outextractstrOrientation << "sentenceID=" << sentence.sentenceID << " ";
-  }
+  m_extractFileOrientation << sentence.sentenceID << " ||| ";
 
   for(int fi=startF; fi<=endF; fi++) {
-    if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.source[fi] << " ";
+	  m_extractFileOrientation << sentence.source[fi] << " ";
   }
-  if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
+  m_extractFileOrientation << "||| ";
 
   // target
   for(int ei=startE; ei<=endE; ei++) {
-    if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.target[ei] << " ";
+	  m_extractFileOrientation << sentence.target[ei] << " ";
   }
-  if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
+  m_extractFileOrientation << "||| ";
 
-  // source (for inverse)
-
-  if (m_options.isOrientationFlag())
-    outextractstrOrientation << orientationInfo;
-
-  if (m_options.getInstanceWeightsFile().length()) {
-    if (m_options.isOrientationFlag()) {
-      outextractstrOrientation << " ||| " << sentence.weightString;
-    }
-  }
-
-
-  if (m_options.isOrientationFlag()) outextractstrOrientation << "\n";
-
-
-  m_extractedPhrasesOri.push_back(outextractstrOrientation.str());
+  m_extractFileOrientation << orientationInfo;
+  m_extractFileOrientation << endl;
 }
 
-
-void ExtractTask::writePhrasesToFile()
-{
-
-  ostringstream outextractFile;
-  ostringstream outextractFileInv;
-  ostringstream outextractFileOrientation;
-
-  for(vector<string>::const_iterator phrase=m_extractedPhrasesOri.begin(); phrase!=m_extractedPhrasesOri.end(); phrase++) {
-    outextractFileOrientation<<phrase->data();
-  }
-  m_extractFileOrientation << outextractFileOrientation.str();
-}
 
 /** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument.
 		The separator can only be 1 character long. The default delimiters are space or tab
