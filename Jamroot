@@ -4,6 +4,8 @@
 #Language models (optional):
 #--with-irstlm=/path/to/irstlm 
 #--with-srilm=/path/to/srilm See moses/LM/Jamfile for more options.
+#--with-maxent-srilm=true (requires a maxent-enabled version of SRILM to be specified via --with-srilm)
+#--with-nplm=/path/to/nplm
 #--with-randlm=/path/to/randlm
 #KenLM is always compiled.  
 #

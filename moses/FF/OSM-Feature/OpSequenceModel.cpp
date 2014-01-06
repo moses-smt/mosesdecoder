@@ -199,7 +199,7 @@ FFState* OpSequenceModel::EvaluateChart(
 
 const FFState* OpSequenceModel::EmptyHypothesisState(const InputType &input) const
 {
-  cerr << "OpSequenceModel::EmptyHypothesisState()" << endl;
+  VERBOSE(3,"OpSequenceModel::EmptyHypothesisState()" << endl);
 
   State startState = OSM->BeginSentenceState();
 

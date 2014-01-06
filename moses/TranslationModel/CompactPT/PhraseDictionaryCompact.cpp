@@ -137,7 +137,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
       phraseColl->Add(tp);
     }
 
-    // Cache phrase pair for for clean-up or retrieval with PREnc
+    // Cache phrase pair for clean-up or retrieval with PREnc
     const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
 
     return phraseColl;
@@ -149,7 +149,7 @@ TargetPhraseVectorPtr
 PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase) const
 {
 
-  // There is no souch source phrase if source phrase is longer than longest
+  // There is no such source phrase if source phrase is longer than longest
   // observed source phrase during compilation
   if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())
     return TargetPhraseVectorPtr();

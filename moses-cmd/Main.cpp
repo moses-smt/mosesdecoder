@@ -67,7 +67,7 @@ using namespace MosesCmd;
 
 namespace MosesCmd
 {
-// output floats with three significant digits
+// output floats with five significant digits
 static const size_t PRECISION = 3;
 
 /** Enforce rounding */
@@ -755,6 +755,7 @@ int main(int argc, char** argv)
 #endif
 
     delete ioWrapper;
+    FeatureFunction::Destroy();
 
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;

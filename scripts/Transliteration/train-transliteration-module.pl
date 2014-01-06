@@ -19,7 +19,7 @@ my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$EXTERNAL_B
 my $ZCAT = "gzip -cd";
 my $BZCAT = "bzcat";
 
-die("ERROR: wrong syntax when invoking TransliterationModel.perl")
+die("ERROR: wrong syntax when invoking train-transliteration-module.perl")
     unless &GetOptions('moses-src-dir=s' => \$MOSES_SRC_DIR,
 			'external-bin-dir=s' => \$EXTERNAL_BIN_DIR,
 			'input-extension=s' => \$INPUT_EXTENSION,
@@ -97,23 +97,21 @@ sub learn_transliteration_model{
 
    print "Align Corpus\n";
 		
-  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -last-step 1 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -corpus $OUT_DIR/training/corpus$t -corpus-dir $OUT_DIR/training/prepared`;
+  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -last-step 1 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -corpus $OUT_DIR/training/corpus$t -corpus-dir $OUT_DIR/training/prepared`;
 
-  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 2 -last-step 2 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -corpus-dir $OUT_DIR/training/prepared -giza-e2f $OUT_DIR/training/giza -direction 2`;
+  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 2 -last-step 2 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -corpus-dir $OUT_DIR/training/prepared -giza-e2f $OUT_DIR/training/giza -direction 2`;
 
-  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 2 -last-step 2 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe  -score-options '--KneserNey' -corpus-dir $OUT_DIR/training/prepared -giza-f2e $OUT_DIR/training/giza-inverse -direction 1`;
+  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 2 -last-step 2 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -corpus-dir $OUT_DIR/training/prepared -giza-f2e $OUT_DIR/training/giza-inverse -direction 1`;
 
-  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 3 -last-step 3 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe  -score-options '--KneserNey' -giza-e2f $OUT_DIR/training/giza -giza-f2e $OUT_DIR/training/giza-inverse -alignment-file $OUT_DIR/model/aligned -alignment-stem $OUT_DIR/model/aligned -alignment grow-diag-final-and`;
+  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 3 -last-step 3 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -giza-e2f $OUT_DIR/training/giza -giza-f2e $OUT_DIR/training/giza-inverse -alignment-file $OUT_DIR/model/aligned -alignment-stem $OUT_DIR/model/aligned -alignment grow-diag-final-and`;
 
   print "Train Translation Models\n";
 	
- `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 4 -last-step 4 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -lexical-file $OUT_DIR/model/lex -alignment-file $OUT_DIR/model/aligned -alignment-stem $OUT_DIR/model/aligned -corpus $OUT_DIR/training/corpus$t`;
+ `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 4 -last-step 4 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -lexical-file $OUT_DIR/model/lex -alignment-file $OUT_DIR/model/aligned -alignment-stem $OUT_DIR/model/aligned -corpus $OUT_DIR/training/corpus$t`;
 
-  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 5 -last-step 5 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -alignment-file $OUT_DIR/model/aligned -alignment-stem $OUT_DIR/model/aligned -extract-file $OUT_DIR/model/extract -corpus $OUT_DIR/training/corpus$t`;
+  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 5 -last-step 5 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -alignment-file $OUT_DIR/model/aligned -alignment-stem $OUT_DIR/model/aligned -extract-file $OUT_DIR/model/extract -corpus $OUT_DIR/training/corpus$t`;
 
-  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 6 -last-step 6 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -extract-file $OUT_DIR/model/extract -lexical-file $OUT_DIR/model/lex -phrase-translation-table $OUT_DIR/model/phrase-table`;
-
-  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 7 -last-step 7 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -extract-file $OUT_DIR/model/extract -reordering-table $OUT_DIR/model/reordering-table`;
+  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 6 -last-step 6 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -extract-file $OUT_DIR/model/extract -lexical-file $OUT_DIR/model/lex -phrase-translation-table $OUT_DIR/model/phrase-table`;
 	
   print "Train Language Models\n";
 
@@ -123,7 +121,7 @@ sub learn_transliteration_model{
 
   print "Create Config File\n";	
 
-  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -phrase-translation-table $OUT_DIR/model/phrase-table -reordering-table $OUT_DIR/model/reordering-table -config $OUT_DIR/model/moses.ini -lm 0:5:$OUT_DIR/lm/targetLM.bin:8`;
+  `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -phrase-translation-table $OUT_DIR/model/phrase-table -config $OUT_DIR/model/moses.ini -lm 0:5:$OUT_DIR/lm/targetLM.bin:8`;
 	
 }
 
@@ -163,7 +161,7 @@ sub train_transliteration_module{
 
     `touch $OUT_DIR/tuning/moses.table.ini`;
 
-    `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -reordering msd-bidirectional-fe -score-options '--KneserNey' -phrase-translation-table $OUT_DIR/model/phrase-table -reordering-table $OUT_DIR/model/reordering-table -config $OUT_DIR/tuning/moses.table.ini -lm 0:3:$OUT_DIR/tuning/moses.table.ini:8`;
+    `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -phrase-translation-table $OUT_DIR/model/phrase-table -config $OUT_DIR/tuning/moses.table.ini -lm 0:3:$OUT_DIR/tuning/moses.table.ini:8`;
 
     `$MOSES_SRC_DIR/scripts/training/filter-model-given-input.pl $OUT_DIR/tuning/filtered $OUT_DIR/tuning/moses.table.ini $OUT_DIR/tuning/input  -Binarizer "$MOSES_SRC_DIR/bin/processPhraseTable"`;
 

@@ -40,6 +40,7 @@ namespace Moses
 
 LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string &line)
   :LanguageModelImplementation(line)
+  ,m_factorType(0)
 {
   m_nullContextState = new PointerState(NULL);
   m_beginSentenceState = new PointerState(NULL);

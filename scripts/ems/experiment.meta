@@ -519,7 +519,7 @@ build-osm
 	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --srilm-dir $srilm-dir $operation-sequence-model-settings
 	default-name: model/OSM
 build-transliteration-model
-       in: corpus word-alignment
+       in: corpus word-alignment 
        out: transliteration-model
        ignore-unless: transliteration-module
        rerun-on-change: transliteration-module training-options script giza-settings
@@ -992,15 +992,21 @@ remove-markup
 	pass-if: TRAINING:hierarchical-rule-set
 	pass-unless: report-segmentation
 	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
+post-decoding-transliteration
+	in: cleaned-output system-output TRAINING:transliteration-model LM:binlm
+	out: transliterated-output
+	default-name: evaluation/transliterated
+	pass-unless: TRAINING:post-decoding-transliteration
+	template: $moses-script-dir/Transliteration/post-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN2 --input-extension $input-extension --output-extension $output-extension --language-model IN3 --output-file IN0 --oov-file IN1.oov
 recase-output
-	in: cleaned-output RECASING:recase-config
+	in: transliterated-output RECASING:recase-config
 	out: recased-output
 	default-name: evaluation/recased
 	pass-unless: recaser
 	ignore-if: output-truecaser
 	template: $recaser -moses $RECASING:decoder -in IN -model IN1 > OUT
 detruecase-output
-	in: cleaned-output
+	in: transliterated-output
 	out: recased-output
 	default-name: evaluation/truecased
 	ignore-unless: output-truecaser
@@ -1090,7 +1096,7 @@ bolt-bleu-c
 	rerun-on-change: bolt-bleu-c
 	template: $bolt-bleu-c IN > OUT
 multi-bleu
-	in: cleaned-output tokenized-reference
+	in: transliterated-output tokenized-reference
 	out: multi-bleu-score
 	default-name: evaluation/multi-bleu
 	ignore-unless: multi-bleu
@@ -1117,7 +1123,7 @@ wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
 meteor
-	in: cleaned-output reference
+	in: transliterated-output reference
 	out: meteor-score
 	default-name: evaluation/meteor
 	ignore-unless: meteor

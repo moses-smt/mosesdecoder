@@ -95,10 +95,16 @@ void LanguageModelDALM::Load()
 	/////////////////////
 	// READING INIFILE //
 	/////////////////////
+    string inifile= m_filePath + "/dalm.ini";
+
 	string model; // Path to the double-array file.
 	string words; // Path to the vocabulary file.
 	string wordstxt; //Path to the vocabulary file in text format.
-	read_ini(m_filePath.c_str(), model, words, wordstxt);
+	read_ini(inifile.c_str(), model, words, wordstxt);
+
+	model = m_filePath + "/" + model;
+    words = m_filePath + "/" + words;
+    wordstxt = m_filePath + "/" + wordstxt;
 
 	UTIL_THROW_IF(model.empty() || words.empty() || wordstxt.empty(),
 			util::FileOpenException,

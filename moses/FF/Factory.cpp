@@ -56,6 +56,10 @@
 #include "moses/LM/SRI.h"
 #endif
 
+#ifdef LM_MAXENT_SRI
+#include "moses/LM/MaxEntSRI.h"
+#endif
+
 #ifdef LM_RAND
 #include "moses/LM/Rand.h"
 #endif
@@ -187,6 +191,9 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_SRI
   MOSES_FNAME2("SRILM", LanguageModelSRI);
+#endif
+#ifdef LM_MAXENT_SRI
+  MOSES_FNAME2("MaxEntLM", LanguageModelMaxEntSRI);
 #endif
 #ifdef LM_RAND
   MOSES_FNAME2("RANDLM", LanguageModelRandLM);
