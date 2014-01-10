@@ -396,8 +396,6 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
       if(scores.size() == m_numScoreComponent) {
         targetPhrase->GetScoreBreakdown().Assign(&m_phraseDictionary, scores);
-        if(eval)
-          targetPhrase->Evaluate(sourcePhrase);
 
         if(m_containsAlignmentInfo)
           state = Alignment;
@@ -417,6 +415,10 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     if(state == Add) {
       if(m_phraseDictionary.m_useAlignmentInfo) {
         targetPhrase->SetAlignTerm(alignment);
+      }
+
+      if(eval) {
+        targetPhrase->Evaluate(sourcePhrase);
       }
 
       if(m_coding == PREnc) {
