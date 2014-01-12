@@ -24,6 +24,7 @@ public:
   int numFeatures;   // Number of features used ...
 
   OpSequenceModel(const std::string &line);
+  ~OpSequenceModel();
 
   void readLanguageModel(const char *);
   void Load();
