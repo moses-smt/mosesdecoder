@@ -1354,7 +1354,7 @@ sub check_if_crashed {
 			     'died at','exit code','permission denied',
            'segmentation fault','abort',
            'no space left on device',
-           'can\'t locate', 'unrecognized option') {
+           'can\'t locate', 'unrecognized option', 'Exception') {
 	    if (/$pattern/i) {
 		my $not_error = 0;
 		if (defined($NOT_ERROR{&defined_step_id($i)})) {
