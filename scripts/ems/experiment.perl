@@ -2545,7 +2545,9 @@ sub define_tuningevaluation_filter {
 
     my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains) = &get_output_and_input($step_id);
 
-    my $binarizer = &get("GENERAL:ttable-binarizer");
+    my $binarizer;
+    $binarizer = &backoff_and_get("EVALUATION:$set:ttable-binarizer") unless $tuning_flag;
+    $binarizer = &backoff_and_get("TUNING:ttable-binarizer") if $tuning_flag;
     my $report_precision_by_coverage = !$tuning_flag && &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     
     # occasionally, lattices and conf nets need to be able 
