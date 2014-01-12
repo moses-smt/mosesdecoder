@@ -46,7 +46,11 @@ LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string &line)
   m_beginSentenceState = new PointerState(NULL);
 }
 
-LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
+LanguageModelSingleFactor::~LanguageModelSingleFactor()
+{
+	delete m_nullContextState;
+	delete m_beginSentenceState;
+}
 
 const FFState *LanguageModelSingleFactor::GetNullContextState() const
 {
