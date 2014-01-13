@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "MurmurHash3.h"
 #include "StringVector.h"
 #include "PackedArray.h"
+#include "util/exception.hh"
 
 #ifdef WITH_THREADS
 #include "moses/ThreadPool.h"

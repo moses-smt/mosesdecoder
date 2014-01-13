@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ThrowingFwrite.h"
 #include "BlockHashIndex.h"
 #include "CmphStringVectorAdapter.h"
+#include "util/exception.hh"
 
 #ifdef HAVE_CMPH
 #include "cmph.h"

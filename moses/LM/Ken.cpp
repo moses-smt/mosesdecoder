@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "lm/enumerate_vocab.hh"
 #include "lm/left.hh"
 #include "lm/model.hh"
+#include "util/exception.hh"
 
 #include "Ken.h"
 #include "Base.h"

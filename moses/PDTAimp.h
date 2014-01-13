@@ -14,6 +14,7 @@
 #include "util/tokenize_piece.hh"
 #include "util/exception.hh"
 #include "moses/FF/InputFeature.h"
+#include "util/exception.hh"
 
 namespace Moses
 {

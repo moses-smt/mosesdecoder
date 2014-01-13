@@ -2,6 +2,8 @@
 // vim:tabstop=2
 #include "moses/FeatureVector.h"
 #include "moses/TranslationModel/PhraseDictionaryTree.h"
+#include "util/exception.hh"
+
 #include <map>
 #include <sstream>
 #include <iostream>

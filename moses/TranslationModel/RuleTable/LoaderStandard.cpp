@@ -40,6 +40,7 @@
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
 #include "util/double-conversion/double-conversion.h"
+#include "util/exception.hh"
 
 using namespace std;
 

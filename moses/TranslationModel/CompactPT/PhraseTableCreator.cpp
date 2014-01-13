@@ -24,8 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseTableCreator.h"
 #include "ConsistentPhrases.h"
 #include "ThrowingFwrite.h"
-
 #include "util/file.hh"
+#include "util/exception.hh"
 
 namespace Moses
 {

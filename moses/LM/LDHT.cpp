@@ -15,6 +15,7 @@
 #include "moses/TypeDef.h"
 #include "moses/Hypothesis.h"
 #include "moses/StaticData.h"
+#include "util/exception.hh"
 
 #include <LDHT/Client.h>
 #include <LDHT/ClientLocal.h>

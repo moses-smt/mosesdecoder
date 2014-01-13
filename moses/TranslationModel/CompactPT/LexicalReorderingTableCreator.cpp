@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReorderingTableCreator.h"
 #include "ThrowingFwrite.h"
 #include "moses/Util.h"
-
 #include "util/file.hh"
+#include "util/exception.hh"
 
 namespace Moses
 {

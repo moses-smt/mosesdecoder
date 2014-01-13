@@ -24,6 +24,7 @@
 #include "ChartHypothesisCollection.h"
 #include "ChartHypothesis.h"
 #include "ChartManager.h"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace Moses;

@@ -30,12 +30,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/serialization/split_member.hpp>
 #endif
 
-
 #include "moses/FF/FeatureFunction.h"
 #include "FeatureVector.h"
 #include "TypeDef.h"
 #include "Util.h"
-
+#include "util/exception.hh"
 
 namespace Moses
 {

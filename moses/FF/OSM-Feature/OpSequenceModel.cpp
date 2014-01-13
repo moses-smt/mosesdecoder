@@ -2,6 +2,7 @@
 #include "OpSequenceModel.h"
 #include "osmHyp.h"
 #include "moses/Util.h"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace lm::ngram;
@@ -198,7 +199,7 @@ FFState* OpSequenceModel::EvaluateChart(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  abort();
+	UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
 
 }
 

@@ -2,6 +2,7 @@
 #include "LM/Base.h"
 #include "Manager.h"
 #include "Hypothesis.h"
+#include "util/exception.hh"
 
 //#include <google/profiler.h>
 
