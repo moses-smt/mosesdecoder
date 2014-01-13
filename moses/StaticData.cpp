@@ -1019,16 +1019,14 @@ void StaticData::LoadFeatureFunctions()
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
       cerr << "m_phraseDictionary here" << endl;
       m_phraseDictionary.push_back(ffCast);
-//      ffCast->SetFeaturesToApply();
       doLoad = false;
-//      doLoad = true;
       if (PhraseDictionaryDynamicCacheBased *ffCast2 = dynamic_cast<PhraseDictionaryDynamicCacheBased*>(ff)){
         CHECK(m_dynamicPDCB == NULL); // max 1 PhraseDictionaryDynamicCacheBased
         cerr << "m_dynamicPDCB here" << endl;
 	m_dynamicPDCB = ffCast2;
         if (m_dynamicPDCB_MaxAge > 0) m_dynamicPDCB->SetMaxAge(m_dynamicPDCB_MaxAge);
         if (m_dynamicPDCB_ScoreType != CBTM_SCORE_TYPE_UNDEFINED) m_dynamicPDCB->SetScoreType(m_dynamicPDCB_ScoreType);
-//        doLoad = true;
+        doLoad = true;
       }
     } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
       cerr << "m_generationDictionary here" << endl;
