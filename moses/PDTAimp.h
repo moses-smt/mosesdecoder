@@ -228,8 +228,7 @@ public:
 
     std::string binFname=filePath+".binphr.idx";
     if(!FileExists(binFname.c_str())) {
-      UserMessage::Add( "bin ttable does not exist\n");
-      abort();
+      UTIL_THROW2( "bin ttable does not exist");
       //TRACE_ERR( "bin ttable does not exist -> create it\n");
       //InputFileStream in(filePath);
       //m_dict->Create(in,filePath);

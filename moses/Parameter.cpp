@@ -726,7 +726,7 @@ void Parameter::ConvertWeightArgsLM()
         newFeatureName = "KENLM";
         break;
       default:
-        abort();
+    	UTIL_THROW2("Unkown language model type id:"  << lmType);
       }
 
       size_t numFF = 1;

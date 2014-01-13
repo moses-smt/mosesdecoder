@@ -108,8 +108,7 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
     bool added = Add(hypo, manager).second;
     if (!added) {
       iterExisting = m_hypos.find(hypo);
-      TRACE_ERR("Offending hypo = " << **iterExisting << endl);
-      abort();
+      UTIL_THROW2("Offending hypo = " << **iterExisting);
     }
     return false;
   } else {

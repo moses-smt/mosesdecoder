@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_BlockHashIndex_h
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <queue>
@@ -140,10 +141,11 @@ public:
     size_t current = m_landmarks.size();
 
     if(m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
-      std::cerr << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
-      std::cerr << "1: " << m_landmarks.back().str() << std::endl;
-      std::cerr << "2: " << keys[0] << std::endl;
-      abort();
+      std::stringstream strme;
+      strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
+      strme << "1: " << m_landmarks.back().str() << std::endl;
+      strme << "2: " << keys[0] << std::endl;
+      UTIL_THROW2(strme.str());
     }
 
     m_landmarks.push_back(keys[0]);

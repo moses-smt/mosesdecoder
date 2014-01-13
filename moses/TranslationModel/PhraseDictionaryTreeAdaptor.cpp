@@ -52,10 +52,8 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
     std::stringstream strme;
-    strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
-          <<" "<<m_numScoreComponents<<"\n";
-    UserMessage::Add(strme.str());
-    abort();
+    UTIL_THROW2("ERROR: mismatch of number of scaling factors: " << weight.size()
+    			<< " " << m_numScoreComponents);
   }
 
   obj->Create(m_input, m_output, m_filePath, weight);

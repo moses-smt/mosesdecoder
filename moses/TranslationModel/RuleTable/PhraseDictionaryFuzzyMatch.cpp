@@ -200,10 +200,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
     if (tokens.size() != 4 && tokens.size() != 5) {
-      stringstream strme;
-      strme << "Syntax error at " << ptFileName << ":" << count;
-      UserMessage::Add(strme.str());
-      abort();
+      UTIL_THROW2("Syntax error at " << ptFileName << ":" << count);
     }
 
     const string &sourcePhraseString = tokens[0]
@@ -220,11 +217,8 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     Tokenize<float>(scoreVector, scoreString);
     const size_t numScoreComponents = GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
-      stringstream strme;
-      strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
-            << numScoreComponents << ") of score components on line " << count;
-      UserMessage::Add(strme.str());
-      abort();
+      UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
+            << numScoreComponents << ") of score components on line " << count);
     }
 
     UTIL_THROW_IF2(scoreVector.size() != numScoreComponents,

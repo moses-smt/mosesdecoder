@@ -211,11 +211,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
     }
     const size_t numScoreComponents = ruleTable.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
-      stringstream strme;
-      strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
-            << numScoreComponents << ") of score components on line " << count;
-      UserMessage::Add(strme.str());
-      abort();
+      UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
+    		  	  << numScoreComponents << ") of score components on line " << count);
     }
 
     // parse source & find pt node

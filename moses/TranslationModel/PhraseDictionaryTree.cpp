@@ -380,10 +380,8 @@ PhraseDictionaryTree::PhraseDictionaryTree()
   : imp(new PDTimp)
 {
   if(sizeof(OFF_T)!=8) {
-    TRACE_ERR("ERROR: size of type 'OFF_T' has to be 64 bit!\n"
-              "In gcc, use compiler settings '-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES'\n"
-              " -> abort \n\n");
-    abort();
+	UTIL_THROW2("ERROR: size of type 'OFF_T' has to be 64 bit!\n"
+              "In gcc, use compiler settings '-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES'\n");
   }
 }
 
@@ -506,10 +504,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     }
 
     if (tokens.size() != numElement) {
-      std::stringstream strme;
-      strme << "Syntax error at line " << lnc  << " : " << line;
-      UserMessage::Add(strme.str());
-      abort();
+      UTIL_THROW2("Syntax error at line " << lnc  << " : " << line);
     }
 
     const std::string &sourcePhraseString	=tokens[0]
@@ -554,9 +549,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       PSA::Data& d=psa->insert(f);
       if(d==InvalidOffT) d=fTell(ot);
       else {
-        TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '"
-                  <<line<<"'\nf: "<<f<<"\n");
-        abort();
+    	UTIL_THROW2("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '"
+                  <<line);
       }
     }
 
@@ -565,9 +559,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (!sparseFeatureString.empty()) {
       std::vector<std::string> sparseTokens = Tokenize(sparseFeatureString);
       if (sparseTokens.size() % 2 != 0) {
-        TRACE_ERR("ERROR: incorrectly formatted sparse feature string: " <<
-                  sparseFeatureString << std::endl);
-        abort();
+    	UTIL_THROW2("ERROR: incorrectly formatted sparse feature string: " <<
+                  sparseFeatureString);
       }
       for (size_t i = 0; i < sparseTokens.size(); i+=2) {
         fnames.push_back(imp->tv.add(sparseTokens[i]));
@@ -608,9 +601,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       PSA::Data& d=psa->insert(f);
       if(d==InvalidOffT) d=fTell(ot);
       else {
-        TRACE_ERR("ERROR: xsource phrase already inserted (B)!\nline(" << lnc << "): '"
-                  <<line<<"'\nf: "<<f<<"\n");
-        abort();
+    	UTIL_THROW2("ERROR: xsource phrase already inserted (B)!\nline(" << lnc << "): '"
+                  <<line);
       }
     }
     tgtCands.push_back(TgtCand(e,sc, alignmentString));

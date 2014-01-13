@@ -714,10 +714,11 @@ std::string PhraseTableCreator::EncodeLine(std::vector<std::string>& tokens, siz
   std::vector<float> scores = Tokenize<float>(scoresStr);
 
   if(scores.size() != m_numScoreComponent) {
-    std::cerr << "Error: Wrong number of scores detected ("
+	std::stringstream strme;
+	strme << "Error: Wrong number of scores detected ("
               << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
-    std::cerr << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[3] << " ..." << std::endl;
-    abort();
+	strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[3] << " ..." << std::endl;
+    UTIL_THROW2(strme.str());
   }
 
   std::set<AlignPoint> a;
@@ -1039,27 +1040,30 @@ void RankingTask::operator()()
         *it = Moses::Trim(*it);
 
       if(tokens.size() < 4) {
-        std::cerr << "Error: It seems the following line has a wrong format:" << std::endl;
-        std::cerr << "Line " << i << ": " << lines[i] << std::endl;
-        abort();
+    	std::stringstream strme;
+    	strme << "Error: It seems the following line has a wrong format:" << std::endl;
+    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        UTIL_THROW2(strme.str());
       }
 
       if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
-        std::cerr << "Error: It seems the following line contains no alignment information, " << std::endl;
-        std::cerr << "but you are using ";
-        std::cerr << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
-        std::cerr << " encoding which makes use of alignment data. " << std::endl;
-        std::cerr << "Use -encoding None" << std::endl;
-        std::cerr << "Line " << i << ": " << lines[i] << std::endl;
-        abort();
+    	std::stringstream strme;
+    	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
+    	strme << "but you are using ";
+    	strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+    	strme << " encoding which makes use of alignment data. " << std::endl;
+    	strme << "Use -encoding None" << std::endl;
+    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        UTIL_THROW2(strme.str());
       }
 
       std::vector<float> scores = Tokenize<float>(tokens[2]);
       if(scores.size() != m_creator.m_numScoreComponent) {
-        std::cerr << "Error: It seems the following line has a wrong number of scores ("
+      	std::stringstream strme;
+      	strme << "Error: It seems the following line has a wrong number of scores ("
                   << scores.size() << " != " << m_creator.m_numScoreComponent << ") :" << std::endl;
-        std::cerr << "Line " << i << ": " << lines[i] << std::endl;
-        abort();
+      	strme << "Line " << i << ": " << lines[i] << std::endl;
+      	UTIL_THROW2(strme.str());
       }
 
       float sortScore = scores[m_creator.m_sortScoreIndex];
@@ -1136,19 +1140,21 @@ void EncodingTask::operator()()
         *it = Moses::Trim(*it);
 
       if(tokens.size() < 3) {
-        std::cerr << "Error: It seems the following line has a wrong format:" << std::endl;
-        std::cerr << "Line " << i << ": " << lines[i] << std::endl;
-        abort();
+    	std::stringstream strme;
+    	strme << "Error: It seems the following line has a wrong format:" << std::endl;
+    	strme << "Line " << i << ": " << lines[i] << std::endl;
+        UTIL_THROW2(strme.str());
       }
 
       if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
-        std::cerr << "Error: It seems the following line contains no alignment information, " << std::endl;
-        std::cerr << "but you are using ";
-        std::cerr << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
-        std::cerr << " encoding which makes use of alignment data. " << std::endl;
-        std::cerr << "Use -encoding None" << std::endl;
-        std::cerr << "Line " << i << ": " << lines[i] << std::endl;
-        abort();
+    	std::stringstream strme;
+      	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
+      	strme << "but you are using ";
+      	strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+      	strme << " encoding which makes use of alignment data. " << std::endl;
+      	strme << "Use -encoding None" << std::endl;
+      	strme << "Line " << i << ": " << lines[i] << std::endl;
+        UTIL_THROW2(strme.str());
       }
 
       size_t ownRank = 0;
