@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
 #include "moses/FF/DynamicCacheBasedLanguageModel.h"
-//#include "DynamicCacheBasedPhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
 #include "Util.h"
 #include <boost/algorithm/string.hpp>
 
@@ -127,16 +127,22 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it) {
     std::cerr << "Sentence:: processing DLT info" << endl;
     DynamicCacheBasedLanguageModel* cblm = StaticData::Instance().GetDynamicCacheBasedLanguageModel();
-    //DynamicCacheBasedPhraseDictionary* cbtm = StaticData::Instance().GetDynamicCacheBasedPhraseDictionary();
+    PhraseDictionaryDynamicCacheBased* cbtm = StaticData::Instance().GetPhraseDictionaryDynamicCacheBased();
     if ((*dlt_meta_it).find("cbtm") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cbtm:|" << (*dlt_meta_it)["cbtm"] << "|" << endl;
+      if (cbtm) cbtm->Insert((*dlt_meta_it)["cbtm"]);
+      if (cbtm) std::cerr << "Inserted:|" << (*dlt_meta_it)["cbtm"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cbtm-command") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cbtm-command:|" << (*dlt_meta_it)["cbtm-command"] << "|" << endl;
+      if (cbtm) cbtm->Execute((*dlt_meta_it)["cbtm-command"]);
+      if (cbtm) std::cerr << "Sentence:: Executed:|" << (*dlt_meta_it)["cbtm-command"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cbtm-file") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cbtm-file:|" << (*dlt_meta_it)["cbtm-file"] << "|" << endl;
-    }
+//      if (cbtm) cbtm->Load((*dlt_meta_it)["cbtm-file"]);
+      if (cbtm) std::cerr << "Sentence:: Loaded:|" << (*dlt_meta_it)["cbtm-file"] << "|" << endl;
+     }
     if ((*dlt_meta_it).find("cblm") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cblm:|" << (*dlt_meta_it)["cblm"] << "|" << endl;
       if (cblm) cblm->Insert((*dlt_meta_it)["cblm"]);
@@ -145,12 +151,12 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     if ((*dlt_meta_it).find("cblm-command") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cblm-command:|" << (*dlt_meta_it)["cblm-command"] << "|" << endl;
       if (cblm) cblm->Execute((*dlt_meta_it)["cblm-command"]);
-      std::cerr << "Sentence:: Executed:|" << (*dlt_meta_it)["cblm-command"] << "|" << endl;
+      if (cblm) std::cerr << "Sentence:: Executed:|" << (*dlt_meta_it)["cblm-command"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cblm-file") != (*dlt_meta_it).end()) {
       std::cerr << "Sentence:: cblm-file:|" << (*dlt_meta_it)["cblm-file"] << "|" << endl;
       if (cblm) cblm->Load((*dlt_meta_it)["cblm-file"]);
-      std::cerr << "Sentence:: Loaded:|" << (*dlt_meta_it)["cblm-file"] << "|" << endl;
+      if (cblm) std::cerr << "Sentence:: Loaded:|" << (*dlt_meta_it)["cblm-file"] << "|" << endl;
     }
   }
 

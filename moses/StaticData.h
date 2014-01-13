@@ -61,7 +61,7 @@ class UnknownWordPenaltyProducer;
 class InputFeature;
 
 class DynamicCacheBasedLanguageModel;
-//class DynamicCacheBasedPhraseDictionary;
+class PhraseDictionaryDynamicCacheBased;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -121,6 +121,7 @@ protected:
 
   bool m_disableDiscarding;
   bool m_printAllDerivations;
+  bool m_printTranslationOptions;
 
   bool m_sourceStartPosMattersForRecombination;
   bool m_recoverPath;
@@ -137,7 +138,7 @@ protected:
   const InputFeature *m_inputFeature;
 
   DynamicCacheBasedLanguageModel* m_dynamicCBLM;
-//  DynamicCacheBasedPhraseDictionary* m_dynamicCBTM;
+  PhraseDictionaryDynamicCacheBased* m_dynamicPDCB;
 
   bool m_reportSegmentation;
   bool m_reportSegmentationEnriched;
@@ -156,7 +157,7 @@ protected:
   XmlInputType m_xmlInputType; //! method for handling sentence XML input
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
-  int PhraseDictionaryCacheIndex; //Index of the PhraseDictionarCache
+  int PhraseDictionaryCacheIndex; //Index of the PhraseDictionaryDynamicCacheBased
   size_t PhraseDictionaryCacheScoreType; //Scoring type for PhraseDictionaryCache
   unsigned int PhraseDictionaryCacheMaxAge; //maximum age of the entries in PhraseDictionaryCache
 
@@ -210,6 +211,12 @@ protected:
   // Whether to load compact phrase table and reordering table into memory
   bool m_minphrMemory;
   bool m_minlexrMemory;
+
+  size_t m_dynamicCBLM_QueryType;
+  size_t m_dynamicCBLM_ScoreType;
+  unsigned int m_dynamicCBLM_MaxAge;
+  size_t m_dynamicPDCB_ScoreType;
+  unsigned int m_dynamicPDCB_MaxAge;
 
   // Initial = 0 = can be used when creating poss trans
   // Other = 1 = used to calculate LM score once all steps have been processed
@@ -480,15 +487,13 @@ public:
     return m_dynamicCBLM;
   }
 
-  /*
-    DynamicCacheBasedPhraseDictionary *GetDynamicCacheBasedPhraseDictionary() const {
-      return m_dynamicCBPD;
-    }
+  PhraseDictionaryDynamicCacheBased *GetPhraseDictionaryDynamicCacheBased() const {
+    return m_dynamicPDCB;
+  }
 
-    const DynamicCacheBasedPhraseDictionary *GetDynamicCacheBasedPhraseDictionary() { // for mira
-      return m_dynamicCBPD;
-    }
-  */
+  const PhraseDictionaryDynamicCacheBased *GetPhraseDictionaryDynamicCacheBased() { // for mira
+    return m_dynamicPDCB;
+  }
 
   const ScoreComponentCollection& GetAllWeights() const {
     return m_allWeights;
@@ -640,6 +645,10 @@ public:
 
 
   const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
+
+  bool PrintTranslationOptions() const {
+    return m_printTranslationOptions;
+  }
 
   bool PrintAllDerivations() const {
     return m_printAllDerivations;

@@ -197,6 +197,7 @@ Parameter::Parameter()
   AddParam("feature-overwrite", "Override arguments in a particular featureu function with a particular key");
 
   AddParam("feature", "");
+  AddParam("print-translation-option", "pto", "print translation option (without setting verbosity)");
   AddParam("print-id", "prefix translations with id. Default if false");
 
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
@@ -330,6 +331,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
           isParamSpecified("weight-i") || isParamSpecified("weight-l") || isParamSpecified("weight-lex") ||
           isParamSpecified("weight-glm") || isParamSpecified("weight-wt") || isParamSpecified("weight-pp") ||
           isParamSpecified("weight-pb") || isParamSpecified("weight-t") || isParamSpecified("weight-w") ||
+          isParamSpecified("weight-p") ||
           isParamSpecified("weight-u") || isParamSpecified("weight-e") ||
           isParamSpecified("dlm-mode") || isParamSpecified("generation-file") || isParamSpecified("global-lexical-file") ||
           isParamSpecified("glm-feature") || isParamSpecified("lmodel-file") || isParamSpecified("lmodel-dub") ||
@@ -528,7 +530,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
         ptType = "PhraseDictionaryDynSuffixArray";
         break;
       case DCacheBased:
-        ptType = "PhraseDictionaryCacheBased";
+        ptType = "PhraseDictionaryDynamicCacheBased";
         break;
       default:
         break;

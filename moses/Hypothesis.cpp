@@ -254,13 +254,17 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
 void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
                               int state_idx)
 {
+  cerr << "Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff, int state_idx) START" << endl;
+  cerr << "sfff Description:|" << sfff.GetScoreProducerDescription() << "|" << endl;
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( sfff )) {
+    cerr << "feature is not ignored" << endl;
     m_ffStates[state_idx] = sfff.Evaluate(
                               *this,
                               m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
                               &m_scoreBreakdown);
   }
+  cerr << "Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff, int state_idx) END" << endl;
 }
 
 void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)

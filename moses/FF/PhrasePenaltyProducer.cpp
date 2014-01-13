@@ -17,7 +17,20 @@ void PhrasePenaltyProducer::Evaluate(const Phrase &source
                                      , ScoreComponentCollection &scoreBreakdown
                                      , ScoreComponentCollection &estimatedFutureScore) const
 {
-  scoreBreakdown.Assign(this, - 1.0f);
+  std::cerr << "void PhrasePenaltyProducer::Evaluate(const Phrase &source, ...) START" << std::endl;
+//  scoreBreakdown.Assign(this, - 1.0f);
+  scoreBreakdown.PlusEquals(this, - 1.0f);
+  std::cerr << "void PhrasePenaltyProducer::Evaluate(const Phrase &source, ...) END" << std::endl;
+}
+
+void PhrasePenaltyProducer::Evaluate(const InputType &source
+                      , ScoreComponentCollection &scoreBreakdown) const
+{
+  std::cerr << "void PhrasePenaltyProducer::Evaluate(const InputType &source, ...) START" << std::endl;
+//  scoreBreakdown.Assign(this, - 1.0f);
+  scoreBreakdown.PlusEquals(this, - 1.0f);
+  std::cerr << "void PhrasePenaltyProducer::Evaluate(const InputType &source, ...) END" << std::endl;
+
 }
 
 }

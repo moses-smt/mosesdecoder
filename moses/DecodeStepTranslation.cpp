@@ -85,6 +85,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
       }
 
       outPhrase.Merge(targetPhrase, m_newOutputFactors);
+cerr << "DecodeStepTranslation::Process   is calling outPhrase.Evaluate(src, m_featuresToApply)" << endl;
       outPhrase.Evaluate(src, m_featuresToApply); // need to do this as all non-transcores would be screwed up
 
 

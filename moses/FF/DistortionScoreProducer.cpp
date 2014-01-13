@@ -91,6 +91,7 @@ FFState* DistortionScoreProducer::Evaluate(
   const FFState* prev_state,
   ScoreComponentCollection* out) const
 {
+  std::cerr << "FFState* DistortionScoreProducer::Evaluate(const Hypothesis& hypo, ...)  START " << std::endl;
   const DistortionState_traditional* prev = static_cast<const DistortionState_traditional*>(prev_state);
   const float distortionScore = CalculateDistortionScore(
                                   hypo,
@@ -101,6 +102,7 @@ FFState* DistortionScoreProducer::Evaluate(
   DistortionState_traditional* res = new DistortionState_traditional(
     hypo.GetCurrSourceWordsRange(),
     hypo.GetWordsBitmap().GetFirstGapPos());
+  std::cerr << "FFState* DistortionScoreProducer::Evaluate(const Hypothesis& hypo, ...) END" << std::endl;
   return res;
 }
 

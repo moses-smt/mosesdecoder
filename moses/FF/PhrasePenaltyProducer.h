@@ -22,6 +22,10 @@ public:
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
+
+  virtual void Evaluate(const InputType &source
+                        , ScoreComponentCollection &scoreBreakdown) const;
+
 };
 
 }

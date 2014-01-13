@@ -49,6 +49,7 @@ public:
                                  int /* featureID */,
                                  ScoreComponentCollection*) const {
     CHECK(0); // not valid for chart decoder
+    std::cerr << "LexicalReordering::EvaluateChartr(const ChartHypothesis& hypo,...) START" << std::endl;
     return NULL;
   }
 

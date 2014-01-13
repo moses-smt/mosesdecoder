@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/DynamicCacheBasedLanguageModel.h"
+#include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
 
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -64,6 +65,7 @@ StaticData::StaticData()
   ,m_unknownWordPenaltyProducer(NULL)
   ,m_inputFeature(NULL)
   ,m_dynamicCBLM(NULL)
+  ,m_dynamicPDCB(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_needAlignmentInfo(false)
@@ -316,6 +318,9 @@ bool StaticData::LoadData(Parameter *parameter)
   //Disable discarding
   SetBooleanParameter(&m_disableDiscarding, "disable-discarding", false);
 
+  //Print Translation Options
+  SetBooleanParameter( &m_printTranslationOptions, "print-translation-option", false );
+
   //Print All Derivations
   SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
 
@@ -398,14 +403,23 @@ bool StaticData::LoadData(Parameter *parameter)
   //lattice mbr
   SetBooleanParameter( &m_useLatticeMBR, "lminimum-bayes-risk", false );
   if (m_useLatticeMBR && m_mbr) {
-    cerr << "Errror: Cannot use both n-best mbr and lattice mbr together" << endl;
+    cerr << "Error: Cannot use both n-best mbr and lattice mbr together" << endl;
     exit(1);
   }
 
-  // dynamic cache-based Phrase Dictionary
-  PhraseDictionaryCacheIndex = -1; //dummy value to consider as undefined
-  PhraseDictionaryCacheScoreType = 1000; //dummy value to consider as undefined
-  PhraseDictionaryCacheMaxAge = 1000; //default value for maximum age of the entries in the cache-based- translation model
+  // Parameters specific for dynamic cache-based Phrase Dictionary
+   m_dynamicPDCB_MaxAge = (m_parameter->GetParam("cbtm-max-age").size() > 0) ?
+                          Scan<int>(m_parameter->GetParam("cbtm-max-age")[0]) : 0;
+   m_dynamicPDCB_ScoreType = (m_parameter->GetParam("cbtm-score-type").size() > 0) ?
+                          Scan<int>(m_parameter->GetParam("cbtm-score-type")[0]) : CBTM_SCORE_TYPE_UNDEFINED;
+
+  // Parameters specific for dynamic cache-based Phrase Dictionary
+   m_dynamicCBLM_MaxAge = (m_parameter->GetParam("cblm-max-age").size() > 0) ?
+                          Scan<int>(m_parameter->GetParam("cblm-max-age")[0]) : 0;
+   m_dynamicCBLM_ScoreType = (m_parameter->GetParam("cblm-score-type").size() > 0) ?
+                          Scan<int>(m_parameter->GetParam("cblm-score-type")[0]) : CBLM_SCORE_TYPE_UNDEFINED;
+   m_dynamicCBLM_QueryType = (m_parameter->GetParam("cblm-query-type").size() > 0) ?
+                          Scan<int>(m_parameter->GetParam("cblm-query-type")[0]) : CBLM_QUERY_TYPE_UNDEFINED;
 
   //mira training
   SetBooleanParameter( &m_mira, "mira", false );
@@ -439,7 +453,6 @@ bool StaticData::LoadData(Parameter *parameter)
   m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
                         Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
   m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
-
 
   m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
                                 Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
@@ -877,9 +890,9 @@ void StaticData::ReLoadParameter()
       } else { //lexicalized reordering model takes the other
         Weights.erase(Weights.begin()); //remove the first element
       }
-      //			std::cerr << "this is the Distortion Score Producer -> " << (*iterSP)->GetScoreProducerDescription() << std::cerr;
-      //			std::cerr << "this is the Distortion Score Producer; it has " << (*iterSP)->GetNumScoreComponents() << " weights"<< std::cerr;
-      //  	std::cerr << Weights << std::endl;
+      std::cerr << "this is the Distortion Score Producer -> " << (*iterSP)->GetScoreProducerDescription() << std::cerr;
+      std::cerr << "this is the Distortion Score Producer; it has " << (*iterSP)->GetNumScoreComponents() << " weights"<< std::cerr;
+      std::cerr << Weights << std::endl;
     } else if (paramShortName == "tm") {
       continue;
     }
@@ -961,14 +974,14 @@ const string &StaticData::GetBinDirectory() const
 float StaticData::GetWeightPhrasePenalty() const
 {
   float weightPP = GetWeight(m_ppProducer);
-  //VERBOSE(1, "Read weightPP from translation sytem: " << weightPP << std::endl);
+  VERBOSE(1, "Read weightPP from translation sytem: " << weightPP << std::endl);
   return weightPP;
 }
 
 float StaticData::GetWeightWordPenalty() const
 {
   float weightWP = GetWeight(m_wpProducer);
-  //VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
+  VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
   return weightWP;
 }
 
@@ -1004,40 +1017,50 @@ void StaticData::LoadFeatureFunctions()
     bool doLoad = true;
 
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+      cerr << "m_phraseDictionary here" << endl;
       m_phraseDictionary.push_back(ffCast);
+//      ffCast->SetFeaturesToApply();
       doLoad = false;
+//      doLoad = true;
+      if (PhraseDictionaryDynamicCacheBased *ffCast2 = dynamic_cast<PhraseDictionaryDynamicCacheBased*>(ff)){
+        CHECK(m_dynamicPDCB == NULL); // max 1 PhraseDictionaryDynamicCacheBased
+        cerr << "m_dynamicPDCB here" << endl;
+	m_dynamicPDCB = ffCast2;
+        if (m_dynamicPDCB_MaxAge > 0) m_dynamicPDCB->SetMaxAge(m_dynamicPDCB_MaxAge);
+        if (m_dynamicPDCB_ScoreType != CBTM_SCORE_TYPE_UNDEFINED) m_dynamicPDCB->SetScoreType(m_dynamicPDCB_ScoreType);
+//        doLoad = true;
+      }
     } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
+      cerr << "m_generationDictionary here" << endl;
       m_generationDictionary.push_back(ffCast);
     } else if (PhrasePenaltyProducer *ffCast = dynamic_cast<PhrasePenaltyProducer*>(ff)) {
       CHECK(m_ppProducer == NULL); // max 1 feature;
+      cerr << "m_ppProducer here" << endl;
       m_ppProducer = ffCast;
     } else if (WordPenaltyProducer *ffCast = dynamic_cast<WordPenaltyProducer*>(ff)) {
       CHECK(m_wpProducer == NULL); // max 1 feature;
+      cerr << "m_wpProducer here" << endl;
       m_wpProducer = ffCast;
     } else if (UnknownWordPenaltyProducer *ffCast = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
       CHECK(m_unknownWordPenaltyProducer == NULL); // max 1 feature;
+      cerr << "m_unknownWordPenaltyProducer here" << endl;
       m_unknownWordPenaltyProducer = ffCast;
     } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
       CHECK(m_inputFeature == NULL); // max 1 input feature;
+      cerr << "m_inputFeature here" << endl;
       m_inputFeature = ffCast;
     } else if (DynamicCacheBasedLanguageModel *ffCast = dynamic_cast<DynamicCacheBasedLanguageModel*>(ff)) {
       CHECK(m_dynamicCBLM == NULL); // max 1 DynamicCacheBasedLanguageModel;
+      cerr << "m_dynamicCBLM here" << endl;
       m_dynamicCBLM = ffCast;
+      if (m_dynamicCBLM_MaxAge > 0) m_dynamicCBLM->SetMaxAge(m_dynamicCBLM_MaxAge);
+      if (m_dynamicCBLM_ScoreType != CBLM_SCORE_TYPE_UNDEFINED) m_dynamicCBLM->SetScoreType(m_dynamicCBLM_ScoreType);
+      if (m_dynamicCBLM_QueryType != CBLM_QUERY_TYPE_UNDEFINED) m_dynamicCBLM->SetQueryType(m_dynamicCBLM_QueryType);
     }
-
     if (doLoad) {
       ff->Load();
     }
   }
-
-  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-    PhraseDictionary *pt = m_phraseDictionary[i];
-//    if (pt->SSSSSS() == DCacheBased){
-//        PhraseDictionaryCacheIndex = i;
-//    }
-    pt->Load();
-  }
-
 }
 
 bool StaticData::CheckWeights() const

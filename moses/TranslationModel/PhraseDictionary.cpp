@@ -57,14 +57,17 @@ void PhraseDictionary::SetParameter(const std::string& key, const std::string& v
 
 void PhraseDictionary::SetFeaturesToApply()
 {
+  VERBOSE(2,"PhraseDictionary::SetFeaturesToApply() START" << std::endl);
   // find out which feature function can be applied in this decode step
   const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
+  VERBOSE(2,"PhraseDictionary::SetFeaturesToApply() allFeatures.size:|" << allFeatures.size() << "|" << std::endl);
   for (size_t i = 0; i < allFeatures.size(); ++i) {
     FeatureFunction *feature = allFeatures[i];
     if (feature->IsUseable(m_outputFactors)) {
       m_featuresToApply.push_back(feature);
     }
   }
+  VERBOSE(2,"PhraseDictionary::SetFeaturesToApply() END" << std::endl);
 }
 
 }

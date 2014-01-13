@@ -9,6 +9,7 @@
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+#include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
 
 #include "moses/LexicalReordering.h"
 
@@ -31,7 +32,7 @@
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
 
-#include "DynamicCacheBasedLanguageModel.h"
+#include "moses/FF/DynamicCacheBasedLanguageModel.h"
 
 #include "moses/LM/Ken.h"
 #ifdef LM_IRST
@@ -137,6 +138,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
+  MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);

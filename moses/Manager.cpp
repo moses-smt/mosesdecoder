@@ -96,6 +96,10 @@ void Manager::ProcessSentence()
   Timer getOptionsTime;
   getOptionsTime.start();
   m_transOptColl->CreateTranslationOptions();
+
+  if (StaticData::Instance().PrintTranslationOptions()) {
+    std::cerr << "Translation Option Collection\n " << *m_transOptColl << std::endl;
+  }
   VERBOSE(1, "Line "<< m_lineNumber << ": Collecting options took " << getOptionsTime << " seconds" << endl);
 
   // some reporting on how long this took
