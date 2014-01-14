@@ -125,44 +125,31 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     this->SetSpecifiesWeightSetting(false);
   }
 
-  std::cerr << "Sentence:: line before DLT:|" << line << "|" << endl;
+//  std::cerr << "Sentence:: line before DLT:|" << line << "|" << endl;
   std::vector< std::map<std::string, std::string> > dlt_meta = ProcessAndStripDLT(line);
-  std::cerr << "Sentence:: line after DLT:|" << line << "|" << endl;
+//  std::cerr << "Sentence:: line after DLT:|" << line << "|" << endl;
 
   std::vector< std::map<std::string, std::string> >::iterator dlt_meta_it = dlt_meta.begin();
   for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it) {
-    std::cerr << "Sentence:: processing DLT info" << endl;
     DynamicCacheBasedLanguageModel* cblm = StaticData::Instance().GetDynamicCacheBasedLanguageModel();
     PhraseDictionaryDynamicCacheBased* cbtm = StaticData::Instance().GetPhraseDictionaryDynamicCacheBased();
     if ((*dlt_meta_it).find("cbtm") != (*dlt_meta_it).end()) {
-      std::cerr << "Sentence:: cbtm:|" << (*dlt_meta_it)["cbtm"] << "|" << endl;
       if (cbtm) cbtm->Insert((*dlt_meta_it)["cbtm"]);
-      if (cbtm) std::cerr << "Inserted:|" << (*dlt_meta_it)["cbtm"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cbtm-command") != (*dlt_meta_it).end()) {
-      std::cerr << "Sentence:: cbtm-command:|" << (*dlt_meta_it)["cbtm-command"] << "|" << endl;
       if (cbtm) cbtm->Execute((*dlt_meta_it)["cbtm-command"]);
-      if (cbtm) std::cerr << "Sentence:: Executed:|" << (*dlt_meta_it)["cbtm-command"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cbtm-file") != (*dlt_meta_it).end()) {
-      std::cerr << "Sentence:: cbtm-file:|" << (*dlt_meta_it)["cbtm-file"] << "|" << endl;
-//      if (cbtm) cbtm->Load((*dlt_meta_it)["cbtm-file"]);
-      if (cbtm) std::cerr << "Sentence:: Loaded:|" << (*dlt_meta_it)["cbtm-file"] << "|" << endl;
+      if (cbtm) cbtm->Load((*dlt_meta_it)["cbtm-file"]);
      }
     if ((*dlt_meta_it).find("cblm") != (*dlt_meta_it).end()) {
-      std::cerr << "Sentence:: cblm:|" << (*dlt_meta_it)["cblm"] << "|" << endl;
       if (cblm) cblm->Insert((*dlt_meta_it)["cblm"]);
-      if (cblm) std::cerr << "Inserted:|" << (*dlt_meta_it)["cblm"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cblm-command") != (*dlt_meta_it).end()) {
-      std::cerr << "Sentence:: cblm-command:|" << (*dlt_meta_it)["cblm-command"] << "|" << endl;
       if (cblm) cblm->Execute((*dlt_meta_it)["cblm-command"]);
-      if (cblm) std::cerr << "Sentence:: Executed:|" << (*dlt_meta_it)["cblm-command"] << "|" << endl;
     }
     if ((*dlt_meta_it).find("cblm-file") != (*dlt_meta_it).end()) {
-      std::cerr << "Sentence:: cblm-file:|" << (*dlt_meta_it)["cblm-file"] << "|" << endl;
       if (cblm) cblm->Load((*dlt_meta_it)["cblm-file"]);
-      if (cblm) std::cerr << "Sentence:: Loaded:|" << (*dlt_meta_it)["cblm-file"] << "|" << endl;
     }
   }
 

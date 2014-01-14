@@ -109,7 +109,6 @@ float DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& 
     }
   }
   it = m_cache.find(w);
-//              VERBOSE(1,"cblm::Evaluate: cheching cache for w:|" << w << "|" << std::endl);
 
   if (it != m_cache.end()) { //found!
     score = ((*it).second).second;
@@ -138,7 +137,6 @@ float DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase
       w += tp.GetWord(endpos).GetFactor(0)->GetString().as_string();
       it = m_cache.find(w);
 
-//    VERBOSE(1,"cblm::Evaluate_All_Substrings: cheching cache for w:|" << w << "|" << std::endl);
       if (it != m_cache.end()) { //found!
         score += ((*it).second).second;
         VERBOSE(3,"cblm::Evaluate_All_Substrings: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" << score << "|" << std::endl);
@@ -197,7 +195,7 @@ void DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int 
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
-  VERBOSE(1,"words.size():|" << words.size() << "|" << std::endl);
+  VERBOSE(3,"words.size():|" << words.size() << "|" << std::endl);
   for (size_t j=0; j<words.size(); j++) {
     words[j] = Trim(words[j]);
     VERBOSE(3,"CacheBasedLanguageModel::Update   word[" << j << "]:"<< words[j] << " age:" << age << " decaying_score(age):" << decaying_score(age) << std::endl);
@@ -211,16 +209,16 @@ void DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int 
 void DynamicCacheBasedLanguageModel::Insert(std::string &entries)
 {
   if (entries != "") {
-    VERBOSE(1,"entries:|" << entries << "|" << std::endl);
+    VERBOSE(3,"entries:|" << entries << "|" << std::endl);
     std::vector<std::string> elements = TokenizeMultiCharSeparator(entries, "||");
-    VERBOSE(1,"elements.size() after:|" << elements.size() << "|" << std::endl);
+    VERBOSE(3,"elements.size() after:|" << elements.size() << "|" << std::endl);
     Insert(elements);
   }
 }
 
 void DynamicCacheBasedLanguageModel::Insert(std::vector<std::string> ngrams)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel Insert ngrams.size():|" << ngrams.size() << "|" << std::endl);
+  VERBOSE(3,"DynamicCacheBasedLanguageModel Insert ngrams.size():|" << ngrams.size() << "|" << std::endl);
   Decay();
   Update(ngrams,1);
 //  Print();
@@ -229,7 +227,7 @@ void DynamicCacheBasedLanguageModel::Insert(std::vector<std::string> ngrams)
 
 void DynamicCacheBasedLanguageModel::Execute(std::string command)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Execute(std::string command:|" << command << "|" << std::endl);
+  VERBOSE(2,"DynamicCacheBasedLanguageModel::Execute(std::string command:|" << command << "|" << std::endl);
   std::vector<std::string> commands = Tokenize(command, "||");
   Execute(commands);
 }
@@ -244,18 +242,18 @@ void DynamicCacheBasedLanguageModel::Execute(std::vector<std::string> commands)
 
 void DynamicCacheBasedLanguageModel::Execute_Single_Command(std::string command)
 {
-  VERBOSE(1,"CacheBasedLanguageModel::Execute_Single_Command(std::string command:|" << command << "|" << std::endl);
+  VERBOSE(2,"CacheBasedLanguageModel::Execute_Single_Command(std::string command:|" << command << "|" << std::endl);
   if (command == "clear") {
-    VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Cache cleared." << std::endl);
+    VERBOSE(2,"CacheBasedLanguageModel Execute command:|"<< command << "|. Cache cleared." << std::endl);
     Clear();
   } else if (command == "settype_wholestring") {
-    VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << CBLM_QUERY_TYPE_WHOLESTRING << " (CBLM_QUERY_TYPE_WHOLESTRING)." << std::endl);
+    VERBOSE(2,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << CBLM_QUERY_TYPE_WHOLESTRING << " (CBLM_QUERY_TYPE_WHOLESTRING)." << std::endl);
     SetQueryType(CBLM_QUERY_TYPE_WHOLESTRING);
   } else if (command == "settype_allsubstrings") {
-    VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << CBLM_QUERY_TYPE_ALLSUBSTRINGS << " (CBLM_QUERY_TYPE_ALLSUBSTRINGS)." << std::endl);
+    VERBOSE(2,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << CBLM_QUERY_TYPE_ALLSUBSTRINGS << " (CBLM_QUERY_TYPE_ALLSUBSTRINGS)." << std::endl);
     SetQueryType(CBLM_QUERY_TYPE_ALLSUBSTRINGS);
   } else {
-    VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "| is unknown. Skipped." << std::endl);
+    VERBOSE(2,"CacheBasedLanguageModel Execute command:|"<< command << "| is unknown. Skipped." << std::endl);
   }
 }
 
