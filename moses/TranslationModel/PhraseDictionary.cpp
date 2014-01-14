@@ -41,7 +41,6 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
-  VERBOSE(2,"const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const START" << std::endl);
   const TargetPhraseCollection *ret;
   if (m_maxCacheSize) {
     CacheColl &cache = GetCache();
@@ -54,7 +53,6 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
 
     if (iter == cache.end()) {
       // not in cache, need to look up from phrase table
-      VERBOSE(2,"HERE 1 calling GetTargetPhraseCollectionNonCacheLEGACY" << std::endl);
       ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
       if (ret) {
         ret = new TargetPhraseCollection(*ret);
@@ -64,7 +62,6 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
       cache[hash] = value;
     } else {
       // in cache. just use it
-      VERBOSE(2,"HERE 1 in cache use it" << std::endl);
       std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
       value.second = clock();
 
@@ -73,27 +70,21 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
   } else {
     // don't use cache. look up from phrase table
 
-    VERBOSE(2,"HERE 2 calling GetTargetPhraseCollectionNonCacheLEGACY" << std::endl);
     ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
   }
 
-  VERBOSE(2,"const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const END" << std::endl);
   return ret;
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 {
-  VERBOSE(2,"const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const START" << std::endl);
   UTIL_THROW(util::Exception, "Legacy method not implemented");
-  VERBOSE(2,"const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const END" << std::endl);
 }
 
 
 const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
 {
-  VERBOSE(2,"const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const START" << std::endl);
   UTIL_THROW(util::Exception, "Legacy method not implemented");
-  VERBOSE(2,"const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const END" << std::endl);
 }
 
 void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
@@ -111,17 +102,14 @@ void PhraseDictionary::SetParameter(const std::string& key, const std::string& v
 
 void PhraseDictionary::SetFeaturesToApply()
 {
-  VERBOSE(2,"PhraseDictionary::SetFeaturesToApply() START" << std::endl);
   // find out which feature function can be applied in this decode step
   const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
-  VERBOSE(2,"PhraseDictionary::SetFeaturesToApply() allFeatures.size:|" << allFeatures.size() << "|" << std::endl);
   for (size_t i = 0; i < allFeatures.size(); ++i) {
     FeatureFunction *feature = allFeatures[i];
     if (feature->IsUseable(m_outputFactors)) {
       m_featuresToApply.push_back(feature);
     }
   }
-  VERBOSE(2,"PhraseDictionary::SetFeaturesToApply() END" << std::endl);
 }
 
 void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const

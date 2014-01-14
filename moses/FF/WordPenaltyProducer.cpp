@@ -23,18 +23,5 @@ void WordPenaltyProducer::Evaluate(const Phrase &source
   std::cerr << "WordPenaltyProducer::Evaluate(const Phrase &source, ....) END" << std::endl;
 }
 
-/*
-void WordPenaltyProducer::Evaluate(const Phrase &source
-                                   , const TargetPhrase &targetPhrase
-                                   , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection &estimatedFutureScore) const
-{
-  std::cerr << "WordPenaltyProducer::Evaluate(const Phrase &source, ....) START" << std::endl;
-  float score = - (float) targetPhrase.GetNumTerminals();
-  scoreBreakdown.Assign(this, score);
-  std::cerr << "WordPenaltyProducer::Evaluate(const Phrase &source, ....) END" << std::endl;
-}
-*/
-
 }
 

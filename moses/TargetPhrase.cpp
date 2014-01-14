@@ -106,57 +106,35 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 
 void TargetPhrase::Evaluate(const Phrase &source)
 {
-  cerr << "TargetPhrase::Evaluate(const Phrase &source) START" << endl;
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-  cerr << "there are ffs.size():|" << ffs.size() << "|" << endl;
   Evaluate(source, ffs);
-  cerr << "TargetPhrase::Evaluate(const Phrase &source) END" << endl;
 }
 
 void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
 {
-  cerr << "TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs) START" << endl;
-  cerr << "ffs.size():|" << ffs.size() << "|" << endl;
-  cerr << "source:|" << source << "|" << endl;
-  cerr << "target:|" << *this << "|" << endl;
   if (ffs.size()) {
     const StaticData &staticData = StaticData::Instance();
     ScoreComponentCollection futureScoreBreakdown;
     for (size_t i = 0; i < ffs.size(); ++i) {
-      cerr << "ffs index:|" << i << "|" << endl;
       const FeatureFunction &ff = *ffs[i];
-      cerr << "ffs description:|" << ff.GetScoreProducerDescription() << "|" << endl;
       if (! staticData.IsFeatureFunctionIgnored( ff )) {
-        cerr << "feature is not ignored" << endl;
         ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
-      }
-      else{
-        cerr << "feature is ignored" << endl;
       }
     }
 
     float weightedScore = m_scoreBreakdown.GetWeightedScore();
     m_futureScore += futureScoreBreakdown.GetWeightedScore();
     m_fullScore = weightedScore + m_futureScore;
-    cerr << "m_scoreBreakdown:|" << m_scoreBreakdown << "|" << endl;
   }
-  cerr << "TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs) END" << endl;
 }
 
 void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 {
-  cerr << "TargetPhrase::Evaluate(const InputType &input) START" << endl;
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-  cerr << "input:|" << input << "|" << endl;
-  cerr << "target:|" << *this << "|" << endl;
-  cerr << "ffs.size():|" << ffs.size() << "|" << endl;
-
   for (size_t i = 0; i < ffs.size(); ++i) {
-    cerr << "ffs index:|" << i << "|" << endl;
     const FeatureFunction &ff = *ffs[i];
     ff.Evaluate(input, inputPath, m_scoreBreakdown);
   }
-  cerr << "TargetPhrase::Evaluate(const InputType &input) END" << endl;
 }
 
 void TargetPhrase::SetXMLScore(float score)

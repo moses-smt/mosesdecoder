@@ -45,8 +45,6 @@ void DynamicCacheBasedLanguageModel::SetPreComputedScores()
 
 float DynamicCacheBasedLanguageModel::GetPreComputedScores(const unsigned int age)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::GetPreComputedScores(const unsigned int) START" << std::endl);
-  VERBOSE(1,"age:|" << age << "|" << std::endl);
   if (age < precomputedScores.size())
   {
     return precomputedScores.at(age);
@@ -55,7 +53,6 @@ float DynamicCacheBasedLanguageModel::GetPreComputedScores(const unsigned int ag
   {
     return precomputedScores.at(m_maxAge);
   }
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::GetPreComputedScores(const unsigned int) END" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::SetParameter(const std::string& key, const std::string& value)
@@ -79,8 +76,6 @@ void DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const
 {
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp, ....) START" << std::endl);
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate: |" << sp << "|" << std::endl);
   float score;
   switch(m_query_type) {
   case CBLM_QUERY_TYPE_WHOLESTRING:
@@ -93,16 +88,11 @@ void DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp
     CHECK(false);
   }
 
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate: |" << tp << "| score:|" << score << "|" << std::endl);
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp, ....) scoreBreakdown before:|" << scoreBreakdown << "|" << std::endl);
   scoreBreakdown.Assign(this, score);
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp, ....) scoreBreakdown  after:|" << scoreBreakdown << "|" << std::endl);
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp, ....) END" << std::endl);
 }
 
 float DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& tp) const
 {
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& tp) START" << std::endl);
   //consider all words in the TargetPhrase as one n-gram
   // and compute the decaying_score for the whole n-gram
   // and return this value
@@ -123,21 +113,18 @@ float DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& 
 
   if (it != m_cache.end()) { //found!
     score = ((*it).second).second;
-    VERBOSE(3,"cblm::Evaluate_Whole_String: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" <<
-            score << "|" << std::endl);
+    VERBOSE(3,"cblm::Evaluate_Whole_String: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" << score << "|" << std::endl);
   }
   else{
     score = m_lower_score;
   }
 
   VERBOSE(3,"cblm::Evaluate_Whole_String: returning score:|" << score << "|" << std::endl);
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& tp) END" << std::endl);
   return score;
 }
 
 float DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase& tp) const
 {
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase& tp) START" << std::endl);
   //loop over all n-grams in the TargetPhrase (no matter of n)
   //and compute the decaying_score for all words
   //and return their sum
@@ -167,7 +154,6 @@ float DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase
     }
   }
   VERBOSE(3,"cblm::Evaluate_All_Substrings: returning score:|" << score << "|" << std::endl);
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase& tp) END" << std::endl);
   return score;
 }
 
@@ -186,13 +172,12 @@ void DynamicCacheBasedLanguageModel::Print() const
 
 void DynamicCacheBasedLanguageModel::Decay()
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Decay() START" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
   decaying_cache_t::iterator it;
 
-  int age;
+  unsigned int age;
   float score;
   for ( it=m_cache.begin() ; it != m_cache.end(); it++ ) {
     age=((*it).second).first + 1;
@@ -205,12 +190,10 @@ void DynamicCacheBasedLanguageModel::Decay()
       (*it).second = p;
     }
   }
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Decay() END" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int age)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int age) START" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
@@ -223,54 +206,44 @@ void DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int 
     m_cache.erase(words[j]); //always erase the element (do nothing if the entry does not exist)
     m_cache.insert(e); //insert the entry
   }
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int age) END" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::Insert(std::string &entries)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Insert(std::string &entries) START" << std::endl);
   if (entries != "") {
     VERBOSE(1,"entries:|" << entries << "|" << std::endl);
     std::vector<std::string> elements = TokenizeMultiCharSeparator(entries, "||");
     VERBOSE(1,"elements.size() after:|" << elements.size() << "|" << std::endl);
     Insert(elements);
   }
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Insert(std::string &entries) END" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::Insert(std::vector<std::string> ngrams)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Insert(std::vector<std::string> ngrams) START" << std::endl);
   VERBOSE(1,"DynamicCacheBasedLanguageModel Insert ngrams.size():|" << ngrams.size() << "|" << std::endl);
   Decay();
   Update(ngrams,1);
 //  Print();
   IFVERBOSE(2) Print();
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Insert(std::vector<std::string> ngrams) END" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::Execute(std::string command)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Execute(std::string command) START" << std::endl);
   VERBOSE(1,"DynamicCacheBasedLanguageModel::Execute(std::string command:|" << command << "|" << std::endl);
   std::vector<std::string> commands = Tokenize(command, "||");
   Execute(commands);
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Execute(std::string command) END" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::Execute(std::vector<std::string> commands)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Execute(std::vector<std::string> commands) START" << std::endl);
   for (size_t j=0; j<commands.size(); j++) {
     Execute_Single_Command(commands[j]);
   }
   IFVERBOSE(2) Print();
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Execute(std::vector<std::string> commands) END" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::Execute_Single_Command(std::string command)
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Execute_Single_Command(std::string command) START" << std::endl);
   VERBOSE(1,"CacheBasedLanguageModel::Execute_Single_Command(std::string command:|" << command << "|" << std::endl);
   if (command == "clear") {
     VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Cache cleared." << std::endl);
@@ -284,17 +257,14 @@ void DynamicCacheBasedLanguageModel::Execute_Single_Command(std::string command)
   } else {
     VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "| is unknown. Skipped." << std::endl);
   }
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Execute_Single_Command(std::string command) END" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::Clear()
 {
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Clear() START" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
   m_cache.clear();
-  VERBOSE(1,"DynamicCacheBasedLanguageModel::Clear() START" << std::endl);
 }
 
 void DynamicCacheBasedLanguageModel::Load()
