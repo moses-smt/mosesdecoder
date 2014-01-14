@@ -172,6 +172,8 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 // reduce presistent cache by half of maximum size
 void PhraseDictionary::ReduceCache() const
 {
+  Timer reduceCacheTime;
+  reduceCacheTime.start();
   CacheColl &cache = GetCache();
   if (cache.size() <= m_maxCacheSize) return; // not full
 
@@ -186,7 +188,6 @@ void PhraseDictionary::ReduceCache() const
   for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
     lastUsedTimes.pop();
   clock_t cutoffLastUsedTime = lastUsedTimes.top();
-  clock_t t = clock();
 
   // remove all old entries
   iter = cache.begin();
@@ -197,7 +198,7 @@ void PhraseDictionary::ReduceCache() const
       cache.erase(iterRemove);
     } else iter++;
   }
-  VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
+  VERBOSE(2,"Reduced persistent translation option cache in " << reduceCacheTime << " seconds." << std::endl);
 }
 
 CacheColl &PhraseDictionary::GetCache() const

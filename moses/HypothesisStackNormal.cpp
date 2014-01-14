@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "StaticData.h"
 #include "Manager.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -135,8 +136,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
     bool added = Add(hypo).second;
     if (!added) {
       iterExisting = m_hypos.find(hypo);
-      TRACE_ERR("Offending hypo = " << **iterExisting << endl);
-      abort();
+      UTIL_THROW2("Offending hypo = " << **iterExisting);
     }
     return false;
   } else {

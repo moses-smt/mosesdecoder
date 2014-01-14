@@ -242,8 +242,7 @@ void ConfusionNet::Print(std::ostream& out) const
 #endif
 Phrase ConfusionNet::GetSubString(const WordsRange&) const
 {
-  TRACE_ERR("ERROR: call to ConfusionNet::GetSubString\n");
-  abort();
+  UTIL_THROW2("ERROR: call to ConfusionNet::GetSubString\n");
   //return Phrase(Input);
 }
 
@@ -257,8 +256,7 @@ std::string ConfusionNet::GetStringRep(const std::vector<FactorType> /* factorsT
 #endif
 const Word& ConfusionNet::GetWord(size_t) const
 {
-  TRACE_ERR("ERROR: call to ConfusionNet::GetFactorArray\n");
-  abort();
+  UTIL_THROW2("ERROR: call to ConfusionNet::GetFactorArray\n");
 }
 #ifdef _WIN32
 #pragma warning(default:4716)

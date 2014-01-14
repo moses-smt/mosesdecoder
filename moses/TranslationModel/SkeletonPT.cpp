@@ -17,22 +17,29 @@ void SkeletonPT::Load()
 	SetFeaturesToApply();
 }
 
-void SkeletonPT::CleanUpAfterSentenceProcessing(const InputType& source)
+void SkeletonPT::InitializeForInput(InputType const& source)
 {
-  RemoveAllInColl(m_allTPColl);
+  ReduceCache();
 }
 
 void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
+  CacheColl &cache = GetCache();
+
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
+    const Phrase &sourcePhrase = inputPath.GetPhrase();
 
-    TargetPhrase *tp = CreateTargetPhrase(inputPath.GetPhrase());
+    TargetPhrase *tp = CreateTargetPhrase(sourcePhrase);
     TargetPhraseCollection *tpColl = new TargetPhraseCollection();
     tpColl->Add(tp);
 
-    m_allTPColl.push_back(tpColl);
+    // add target phrase to phrase-table cache
+    size_t hash = hash_value(sourcePhrase);
+	std::pair<const TargetPhraseCollection*, clock_t> value(tpColl, clock());
+	cache[hash] = value;
+
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
   }
 }

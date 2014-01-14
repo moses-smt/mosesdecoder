@@ -881,7 +881,12 @@ void StaticData::InitializeForInput(const InputType& source) const
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
-    ff.InitializeForInput(source);
+    if (! IsFeatureFunctionIgnored(ff)) {
+      Timer iTime;
+      iTime.start();
+      ff.InitializeForInput(source);
+      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " ) = " << iTime << endl);
+    }
   }
 }
 
@@ -890,7 +895,9 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
-    ff.CleanUpAfterSentenceProcessing(source);
+    if (! IsFeatureFunctionIgnored(ff)) {
+      ff.CleanUpAfterSentenceProcessing(source);
+    }
   }
 }
 
@@ -1079,7 +1086,7 @@ std::map<std::string, std::string> StaticData::OverrideFeatureNames()
 	if (params.size()) {
 		UTIL_THROW_IF2(params.size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
 		vector<string> toks = Tokenize(params[0]);
-		UTIL_THROW_IF2(toks.size() % 2 == 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
+		UTIL_THROW_IF2(toks.size() % 2 != 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
 
 		for (size_t i = 0; i < toks.size(); i += 2) {
 			const string &oldName = toks[i];

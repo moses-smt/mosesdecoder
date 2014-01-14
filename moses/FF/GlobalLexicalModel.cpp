@@ -5,6 +5,7 @@
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
 #include "moses/FactorCollection.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -69,10 +70,7 @@ void GlobalLexicalModel::Load()
     vector<string> token = Tokenize<string>(line, " ");
 
     if (token.size() != 3) { // format checking
-      stringstream errorMessage;
-      errorMessage << "Syntax error at " << m_filePath << ":" << lineNum << endl << line << endl;
-      UserMessage::Add(errorMessage.str());
-      abort();
+      UTIL_THROW2("Syntax error at " << m_filePath << ":" << lineNum << ":" << line);
     }
 
     // create the output word

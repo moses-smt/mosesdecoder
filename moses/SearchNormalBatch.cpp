@@ -2,6 +2,7 @@
 #include "LM/Base.h"
 #include "Manager.h"
 #include "Hypothesis.h"
+#include "util/exception.hh"
 
 //#include <google/profiler.h>
 
@@ -139,8 +140,7 @@ ExpandHypothesis(const Hypothesis &hypothesis,
     }
     m_partial_hypos.push_back(newHypo);
   } else {
-    std::cerr << "can't use early discarding with batch decoding!" << std::endl;
-    abort();
+	UTIL_THROW2("can't use early discarding with batch decoding!");
   }
 }
 

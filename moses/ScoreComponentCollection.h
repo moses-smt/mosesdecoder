@@ -30,12 +30,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/serialization/split_member.hpp>
 #endif
 
-
 #include "moses/FF/FeatureFunction.h"
 #include "FeatureVector.h"
 #include "TypeDef.h"
 #include "Util.h"
-
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -101,11 +100,12 @@ private:
   static IndexPair GetIndexes(const FeatureFunction* sp) {
     ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
     if (indexIter == s_scoreIndexes.end()) {
-      std::cerr << "ERROR: FeatureFunction: " << sp->GetScoreProducerDescription() <<
+      std::stringstream strme;
+      strme << "ERROR: FeatureFunction: " << sp->GetScoreProducerDescription() <<
                 " not registered with ScoreIndexMap" << std::endl;
-      std::cerr << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
+      strme << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
                 " for every FeatureFunction" << std::endl;
-      abort();
+      UTIL_THROW2(strme.str());
     }
     return indexIter->second;
   }

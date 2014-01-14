@@ -1354,7 +1354,7 @@ sub check_if_crashed {
 			     'died at','exit code','permission denied',
            'segmentation fault','abort',
            'no space left on device',
-           'can\'t locate', 'unrecognized option') {
+           'can\'t locate', 'unrecognized option', 'Exception') {
 	    if (/$pattern/i) {
 		my $not_error = 0;
 		if (defined($NOT_ERROR{&defined_step_id($i)})) {
@@ -2545,7 +2545,9 @@ sub define_tuningevaluation_filter {
 
     my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains) = &get_output_and_input($step_id);
 
-    my $binarizer = &get("GENERAL:ttable-binarizer");
+    my $binarizer;
+    $binarizer = &backoff_and_get("EVALUATION:$set:ttable-binarizer") unless $tuning_flag;
+    $binarizer = &backoff_and_get("TUNING:ttable-binarizer") if $tuning_flag;
     my $report_precision_by_coverage = !$tuning_flag && &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     
     # occasionally, lattices and conf nets need to be able 
@@ -2558,7 +2560,7 @@ sub define_tuningevaluation_filter {
     $input_filter = $input unless $input_filter;
     
     my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;
-    $settings = &get("TUNING:filter-settings") if $tuning_flag;
+    $settings = &backoff_and_get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
 
     $binarizer .= " -no-alignment-info" if defined ($binarizer) && !$hierarchical && defined $word_alignment && $word_alignment eq "no";

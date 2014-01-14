@@ -40,6 +40,7 @@
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
 #include "util/double-conversion/double-conversion.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -210,11 +211,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
     }
     const size_t numScoreComponents = ruleTable.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
-      stringstream strme;
-      strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
-            << numScoreComponents << ") of score components on line " << count;
-      UserMessage::Add(strme.str());
-      abort();
+      UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
+    		  	  << numScoreComponents << ") of score components on line " << count);
     }
 
     // parse source & find pt node

@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/LM/Ken.h"
 #include "moses/LM/Backward.h"
+#include "util/exception.hh"
 
 //#include "moses/Util.h"
 //#include "moses/StaticData.h"
@@ -284,7 +285,6 @@ template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Phr
 
 LanguageModel *ConstructBackwardLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
 {
-  try {
     lm::ngram::ModelType model_type;
     if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
       switch(model_type) {
@@ -301,16 +301,11 @@ LanguageModel *ConstructBackwardLM(const std::string &line, const std::string &f
       case lm::ngram::QUANT_ARRAY_TRIE:
         return new BackwardLanguageModel<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
       default:
-        std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
-        abort();
+        UTIL_THROW2("Unrecognized kenlm model type " << model_type);
       }
     } else {
       return new BackwardLanguageModel<lm::ngram::ProbingModel>(line, file, factorType, lazy);
     }
-  } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    abort();
-  }
 }
 
 } // namespace Moses

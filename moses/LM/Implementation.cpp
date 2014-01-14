@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/ChartManager.h"
 #include "moses/ChartHypothesis.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -118,8 +119,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
       if (word == GetSentenceStartWord()) {
         // do nothing, don't include prob for <s> unigram
         if (currPos != 0) {
-          std::cerr << "Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?" << std::endl;
-          abort();
+          UTIL_THROW2("Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?");
         }
       } else {
         LMResult result = GetValueGivenState(contextFactor, *state);

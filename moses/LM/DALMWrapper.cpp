@@ -10,6 +10,7 @@
 #include "moses/InputFileStream.h"
 #include "util/exception.hh"
 #include "ChartState.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -166,8 +167,7 @@ void LanguageModelDALM::CalcScore(const Phrase &phrase, float &fullScore, float 
       if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
         // do nothing, don't include prob for <s> unigram
         if (currPos != 0) {
-          std::cerr << "Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?" << std::endl;
-          abort();
+          UTIL_THROW2("Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?");
         }
     		m_lm->init_state(*dalm_state->get_state());
       } else {

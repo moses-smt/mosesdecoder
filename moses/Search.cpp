@@ -3,6 +3,7 @@
 #include "SearchNormal.h"
 #include "SearchNormalBatch.h"
 #include "UserMessage.h"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -29,8 +30,7 @@ Search *Search::CreateSearch(Manager& manager, const InputType &source,
   case NormalBatch:
     return new SearchNormalBatch(manager, source, transOptColl);
   default:
-    UserMessage::Add("ERROR: search. Aborting\n");
-    abort();
+	UTIL_THROW2("ERROR: search. Aborting\n");
     return NULL;
   }
 }

@@ -18,7 +18,7 @@ public:
 
   void Load();
 
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source);
+  void InitializeForInput(InputType const& source);
 
   // for phrase-based model
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
@@ -30,8 +30,6 @@ public:
 
 
 protected:
-  mutable std::list<TargetPhraseCollection*> m_allTPColl;
-
   TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase) const;
 };
 
