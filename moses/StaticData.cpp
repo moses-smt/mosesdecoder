@@ -901,7 +901,7 @@ void StaticData::LoadFeatureFunctions()
 
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
       cerr << "m_phraseDictionary here" << endl;
-      m_phraseDictionary.push_back(ffCast);
+//      m_phraseDictionary.push_back(ffCast);
       doLoad = false;
       if (PhraseDictionaryDynamicCacheBased *ffCast2 = dynamic_cast<PhraseDictionaryDynamicCacheBased*>(ff)){
         CHECK(m_dynamicPDCB == NULL); // max 1 PhraseDictionaryDynamicCacheBased
@@ -910,6 +910,15 @@ void StaticData::LoadFeatureFunctions()
         if (m_dynamicPDCB_MaxAge > 0) m_dynamicPDCB->SetMaxAge(m_dynamicPDCB_MaxAge);
         if (m_dynamicPDCB_ScoreType != CBTM_SCORE_TYPE_UNDEFINED) m_dynamicPDCB->SetScoreType(m_dynamicPDCB_ScoreType);
       }
+    } else if (DynamicCacheBasedLanguageModel *ffCast = dynamic_cast<DynamicCacheBasedLanguageModel*>(ff)) {
+      CHECK(m_dynamicCBLM == NULL); // max 1 DynamicCacheBasedLanguageModel;
+      cerr << "m_dynamicCBLM here" << endl;
+      m_dynamicCBLM = ffCast;
+      if (m_dynamicCBLM_MaxAge > 0) m_dynamicCBLM->SetMaxAge(m_dynamicCBLM_MaxAge);
+      if (m_dynamicCBLM_ScoreType != CBLM_SCORE_TYPE_UNDEFINED) m_dynamicCBLM->SetScoreType(m_dynamicCBLM_ScoreType);
+      if (m_dynamicCBLM_QueryType != CBLM_QUERY_TYPE_UNDEFINED) m_dynamicCBLM->SetQueryType(m_dynamicCBLM_QueryType);
+    }
+/*
     } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
       cerr << "m_generationDictionary here" << endl;
       m_generationDictionary.push_back(ffCast);
@@ -925,24 +934,28 @@ void StaticData::LoadFeatureFunctions()
       CHECK(m_inputFeature == NULL); // max 1 input feature;
       cerr << "m_inputFeature here" << endl;
       m_inputFeature = ffCast;
-    } else if (DynamicCacheBasedLanguageModel *ffCast = dynamic_cast<DynamicCacheBasedLanguageModel*>(ff)) {
-      CHECK(m_dynamicCBLM == NULL); // max 1 DynamicCacheBasedLanguageModel;
-      cerr << "m_dynamicCBLM here" << endl;
-      m_dynamicCBLM = ffCast;
-      if (m_dynamicCBLM_MaxAge > 0) m_dynamicCBLM->SetMaxAge(m_dynamicCBLM_MaxAge);
-      if (m_dynamicCBLM_ScoreType != CBLM_SCORE_TYPE_UNDEFINED) m_dynamicCBLM->SetScoreType(m_dynamicCBLM_ScoreType);
-      if (m_dynamicCBLM_QueryType != CBLM_QUERY_TYPE_UNDEFINED) m_dynamicCBLM->SetQueryType(m_dynamicCBLM_QueryType);
-    }
+*/
+
     if (doLoad) {
+      VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
       ff->Load();
     }
   }
 
-  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-    PhraseDictionary *pt = m_phraseDictionary[i];
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    PhraseDictionary *pt = pts[i];
+    VERBOSE(1, "Loading " << pt->GetScoreProducerDescription() << endl);
     pt->Load();
   }
 
+/*  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
+    PhraseDictionary *pt = m_phraseDictionary[i];
+    pt->Load();
+  }
+*/
+
+  CheckLEGACYPT();
 }
 
 bool StaticData::CheckWeights() const
@@ -1120,6 +1133,20 @@ void StaticData::ForcedDecoding()
 	    }
 	  }
 
+}
+
+void StaticData::CheckLEGACYPT()
+{
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    const PhraseDictionary *phraseDictionary = pts[i];
+    if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
+      m_useLegacyPT = true;
+      return;
+    }
+  }
+
+  m_useLegacyPT = false;
 }
 
 } // namespace

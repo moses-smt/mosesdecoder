@@ -83,7 +83,7 @@ void PhraseDictionaryDynamicCacheBased::Load_Single_File(const std::string file)
 
 void PhraseDictionaryDynamicCacheBased::SetParameter(const std::string& key, const std::string& value)
 {
-  VERBOSE(2,"PhraseDictionaryDynamicCacheBased::SetParameter" << std::endl);
+  VERBOSE(2, "PhraseDictionaryDynamicCacheBased::SetParameter key:|" << key << "| value:|" << value << "|" << std::endl);
 
   if(key == "cbtm-score-type") {
     SetScoreType(Scan<size_t>(value));

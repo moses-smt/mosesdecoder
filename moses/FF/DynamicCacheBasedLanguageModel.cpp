@@ -10,7 +10,7 @@ namespace Moses
 DynamicCacheBasedLanguageModel::DynamicCacheBasedLanguageModel(const std::string &line)
   : StatelessFeatureFunction("DynamicCacheBasedLanguageModel", line)
 {
-  std::cerr << "Initializing DynamicCacheBasedLanguageModel feature..." << std::endl;
+  VERBOSE(2,"Initializing DynamicCacheBasedLanguageModel feature..." << std::endl);
 
   m_query_type = CBLM_QUERY_TYPE_ALLSUBSTRINGS;
   m_score_type = CBLM_SCORE_TYPE_HYPERBOLA;
@@ -57,7 +57,7 @@ float DynamicCacheBasedLanguageModel::GetPreComputedScores(const unsigned int ag
 
 void DynamicCacheBasedLanguageModel::SetParameter(const std::string& key, const std::string& value)
 {
-  std::cerr << "DynamicCacheBasedLanguageModel::SetParameter" << std::endl;
+  VERBOSE(2, "DynamicCacheBasedLanguageModel::SetParameter key:|" << key << "| value:|" << value << "|" << std::endl);
   if (key == "cblm-query-type") {
     SetQueryType(Scan<size_t>(value));
   } else if (key == "cblm-score-type") {

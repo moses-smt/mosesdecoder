@@ -52,12 +52,8 @@ namespace Moses
 {
 
 class InputType;
-class PhraseDictionary;
-class GenerationDictionary;
+class DecodeGraph;
 class DecodeStep;
-class WordPenaltyProducer;
-class UnknownWordPenaltyProducer;
-class InputFeature;
 
 class DynamicCacheBasedLanguageModel;
 class PhraseDictionaryDynamicCacheBased;
@@ -75,15 +71,12 @@ private:
   static StaticData									s_instance;
 protected:
 
-  std::map<long,Phrase> m_constraints;
-  std::vector<PhraseDictionary*>	m_phraseDictionary;
-  std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
-  std::vector<size_t> m_decodeGraphBackoff;
+
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
   float
@@ -110,11 +103,8 @@ protected:
   , m_maxNoPartTransOpt
   , m_maxPhraseLength;
 
-  std::string
-  m_constraintFileName;
-
-  std::string									m_nBestFilePath, m_latticeSamplesFilePath;
-  bool                        m_labeledNBestList,m_nBestIncludesSegmentation;
+  std::string		m_nBestFilePath, m_latticeSamplesFilePath;
+  bool                  m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
   bool m_wordDeletionEnabled;
@@ -127,15 +117,10 @@ protected:
   bool m_recoverPath;
   bool m_outputHypoScore;
 
-  ParsingAlgorithm m_parsingAlgorithm;
   SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
-  WordPenaltyProducer* m_wpProducer;
-  UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
-  const InputFeature *m_inputFeature;
-
   DynamicCacheBasedLanguageModel* m_dynamicCBLM;
   PhraseDictionaryDynamicCacheBased* m_dynamicPDCB;
 
@@ -225,7 +210,10 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  std::pair<FactorType, FactorType> m_placeHolderFactor;
+  FactorType m_placeHolderFactor;
+  bool m_useLegacyPT;
+
+  FeatureRegistry m_registry;
 
   StaticData();
 
@@ -238,7 +226,10 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
 
-  void ForcedDecoding();
+  void NoCache();
+
+  bool m_continuePartialTranslation;
+  std::string m_binPath;
 
   bool m_continuePartialTranslation;
   std::string m_binPath;
@@ -780,7 +771,7 @@ public:
   const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const {
     return m_generationDictionary;
   }
-  const PhraseDictionary*GetTranslationScoreProducer(size_t index) const {
+  const PhraseDictionary* GetTranslationScoreProducer(size_t index) const {
     return GetPhraseDictionaries().at(index);
   }
   std::vector<float> GetTranslationWeights(size_t index) const {
