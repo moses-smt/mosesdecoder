@@ -105,14 +105,8 @@ public:
 
   void Evaluate(const InputType &input
                         , const InputPath &inputPath
-                        , ScoreComponentCollection &scoreBreakdown) const;
-/*
-  void Evaluate(const InputType &input
-                        , const InputPath &inputPath
                         , ScoreComponentCollection &scoreBreakdown) const
   {}
-*/
-
 
   void SetQueryType(size_t type);
   void SetScoreType(size_t type);

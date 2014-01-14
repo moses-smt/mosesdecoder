@@ -53,14 +53,6 @@ class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
   typedef std::pair<TargetPhraseCollection*, AgeCollection*> TargetCollectionAgePair;
   typedef std::map<Phrase, TargetCollectionAgePair> cacheMap;
 
-/*
-  typedef std::pair<int, size_t> AgePosPair;
-  typedef std::pair<Phrase, AgePosPair> TargetAgePosPair;
-  typedef std::map<Phrase, AgePosPair> TargetAgeMap;
-  typedef std::pair<TargetPhraseCollection*, TargetAgeMap*> TargetCollectionAgePair;
-*/
-
-
   // data structure for the cache
   cacheMap m_cacheTM;
   std::vector<Scores> precomputedScores;
@@ -75,6 +67,8 @@ class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
   mutable boost::shared_mutex m_cacheLock;
 #endif
 
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryDynamicCacheBased&);
+
 public:
   PhraseDictionaryDynamicCacheBased(const std::string &line);
   ~PhraseDictionaryDynamicCacheBased();
@@ -82,16 +76,20 @@ public:
   void Load(const std::string file);
 
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &src) const;
-//  const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
   const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
+
+  // for phrase-based model
+//  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &);
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  virtual void InitializeForInput(InputType const&) {
-    /* Don't do anything source specific here as this object is shared between threads.*/
-  }
+  void InitializeForInput(InputType const& source);
+
+//  virtual void InitializeForInput(InputType const&) {
+//    /* Don't do anything source specific here as this object is shared between threads.*/
+//  }
 
   void Print() const;             // prints the cache
 
@@ -121,9 +119,9 @@ protected:
 
   void Load_Multiple_Files(std::vector<std::string> files);
   void Load_Single_File(const std::string file);
-};
 
-std::ostream& operator<<(std::ostream&, const PhraseDictionaryDynamicCacheBased&);
+  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase) const;
+};
 
 }  // namespace Moses
 

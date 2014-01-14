@@ -909,7 +909,6 @@ void StaticData::LoadFeatureFunctions()
 	m_dynamicPDCB = ffCast2;
         if (m_dynamicPDCB_MaxAge > 0) m_dynamicPDCB->SetMaxAge(m_dynamicPDCB_MaxAge);
         if (m_dynamicPDCB_ScoreType != CBTM_SCORE_TYPE_UNDEFINED) m_dynamicPDCB->SetScoreType(m_dynamicPDCB_ScoreType);
-        doLoad = true;
       }
     } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
       cerr << "m_generationDictionary here" << endl;

@@ -97,20 +97,43 @@ void PhraseDictionaryDynamicCacheBased::SetParameter(const std::string& key, con
   }
 }
 
+void PhraseDictionaryDynamicCacheBased::InitializeForInput(InputType const& source)
+{
+  ReduceCache();
+}
+
 const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) const
 {
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) const START" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
 #endif
-  const TargetPhraseCollection* tpc = NULL;
+  TargetPhraseCollection* tpc = NULL;
   VERBOSE(2,"source:|" << source << "|" << std::endl);
-  std::map<Phrase, TargetCollectionAgePair>::const_iterator it = m_cacheTM.find(source);
+  cacheMap::const_iterator it = m_cacheTM.find(source);
   if(it != m_cacheTM.end())
   {
     VERBOSE(2,"source:|" << source << "| FOUND" << std::endl);
     tpc = (it->second).first;
+
+    VERBOSE(2,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) TPC before:|" << *tpc << "|" << std::endl);
+
+    std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
+
+    while (it2 != tpc->end())
+    {
+      VERBOSE(2,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) HERE I AM *(*it2) before:|" << *(*it2) << "|" << std::endl);
+      ((TargetPhrase*) *it2)->Evaluate(source, GetFeaturesToApply());
+
+      VERBOSE(2,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) HERE I AM *(*it2(  after:|" << *(*it2) << "|" << std::endl);
+      it2++;
+    }
+    VERBOSE(2,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) TPC before:|" << *tpc << "|" << std::endl);
   }
+  if (tpc)  {
+    tpc->NthElement(m_tableLimit); // sort the phrases for the decoder
+  }
+
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) const END" << std::endl);
   return tpc;
 }
@@ -121,7 +144,7 @@ const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhrase
   return ret;
 }
 
-ChartRuleLookupManager* PhraseDictionaryDynamicCacheBased::CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
+ChartRuleLookupManager* PhraseDictionaryDynamicCacheBased::CreateRuleLookupManager(const ChartParser &parser, const ChartCellCollectionBase &cellCollection)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
@@ -157,6 +180,7 @@ void PhraseDictionaryDynamicCacheBased::SetMaxAge(unsigned int age) {
  VERBOSE(2, "PhraseDictionaryCache MaxAge:  " << m_maxAge << std::endl);
  VERBOSE(2, "PhraseDictionaryCache MaxAge(unsigned int age) END" << std::endl);
 }
+
 
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionaryDynamicCacheBased& phraseDict)
@@ -321,8 +345,7 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
 #endif
   VERBOSE(2, "PhraseDictionaryCache inserting sp:|" << sp << "| tp:|" << tp << "| age:|" << age << "|" << std::endl);
 
-//  std::map<Phrase, TargetCollectionAgePair>::const_iterator it = m_cacheTM.find(sp);
-  std::map<Phrase, TargetCollectionAgePair>::const_iterator it = m_cacheTM.begin();
+  cacheMap::const_iterator it = m_cacheTM.find(sp);
   VERBOSE(1,"sp:|" << sp << "|" << std::endl);
   if(it!=m_cacheTM.end())
   {
@@ -341,7 +364,6 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
     {
       tp_ptr = (const Phrase*) tpc->GetTargetPhrase(tp_pos);
       if (tp == *tp_ptr)
-//      if (tp == tp_ptr->GetSourcePhrase())
       {
         found = true;
         continue;
@@ -351,11 +373,6 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
     if (!found)
     {
       VERBOSE(1,"tp:|" << tp << "| NOT FOUND" << std::endl);
-/*
-      std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
-      //Now that the source phrase is ready, we give the target phrase a copy
-      targetPhrase->SetSourcePhrase(sp);
-*/
       std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
 
       targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
@@ -381,11 +398,6 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
     VERBOSE(1,"HERE 1" << std::endl);
 
     //tp is not found
-/*      
-    std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
-    //Now that the source phrase is ready, we give the target phrase a copy
-    targetPhrase->SetSourcePhrase(sp);
-*/      
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
 
     targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
@@ -408,8 +420,7 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
 #endif          
   VERBOSE(2, "PhraseDictionaryCache inserting sp:|" << sp << "| tp:|" << tp << "| age:|" << age << "|" << std::endl);
                 
-//  std::map<Phrase, TargetCollectionAgePair>::const_iterator it = m_cacheTM.find(sp);
-  std::map<Phrase, TargetCollectionAgePair>::const_iterator it = m_cacheTM.begin();
+  cacheMap::const_iterator it = m_cacheTM.find(sp);
   VERBOSE(1,"sp:|" << sp << "|" << std::endl);
   if(it!=m_cacheTM.end())
   {
@@ -488,7 +499,7 @@ void PhraseDictionaryDynamicCacheBased::Decay()
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif          
-  std::map<Phrase, TargetCollectionAgePair>::iterator it;
+  cacheMap::iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++)
   {
     Decay((*it).first);
@@ -559,7 +570,7 @@ void PhraseDictionaryDynamicCacheBased::Decay(Phrase p)
 {
   VERBOSE(1,"PhraseDictionaryDynamicCacheBased::Decay(Phrase p) START" << std::endl);
   VERBOSE(1,"p:|" << p << "|" << std::endl);
-  std::map<Phrase, TargetCollectionAgePair>::const_iterator it = m_cacheTM.find(p);
+  cacheMap::const_iterator it = m_cacheTM.find(p);
   VERBOSE(1,"searching:|" << p << "|" << std::endl);
   if (it != m_cacheTM.end())
   {
@@ -638,7 +649,7 @@ void PhraseDictionaryDynamicCacheBased::Clear()
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
-  std::map<Phrase, TargetCollectionAgePair>::iterator it;
+  cacheMap::const_iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++)
   {
     (((*it).second).second)->clear();
@@ -657,18 +668,12 @@ void PhraseDictionaryDynamicCacheBased::Print() const
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
 #endif          
-  std::map<Phrase, TargetCollectionAgePair>::const_iterator it;
+  cacheMap::const_iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++)
   {
     std::string source = (it->first).ToString();
     TargetPhraseCollection* tpc = (it->second).first;
-//    std::vector<const TargetPhrase*> TPCvector;// = tpc->GetCollection();
-//    TPCvector.reserve(tpc->GetSize());
-//    TPCvector = tpc->GetCollection();
-//    std::vector<TargetPhrase*>::iterator itr;
-//    for(itr = TPCvector.begin(); itr != TPCvector.end(); itr++)
     TargetPhraseCollection::iterator itr;
-//    std::vector<TargetPhrase*>::iterator itr;
     for(itr = tpc->begin(); itr != tpc->end(); itr++)
     {
       std::string target = (*itr)->ToString();

@@ -54,6 +54,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
 
     if (iter == cache.end()) {
       // not in cache, need to look up from phrase table
+      VERBOSE(2,"HERE 1 calling GetTargetPhraseCollectionNonCacheLEGACY" << std::endl);
       ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
       if (ret) {
         ret = new TargetPhraseCollection(*ret);
@@ -63,6 +64,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
       cache[hash] = value;
     } else {
       // in cache. just use it
+      VERBOSE(2,"HERE 1 in cache use it" << std::endl);
       std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
       value.second = clock();
 
@@ -71,7 +73,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
   } else {
     // don't use cache. look up from phrase table
 
-    VERBOSE(2,"calling GetTargetPhraseCollectionNonCacheLEGACY" << std::endl);
+    VERBOSE(2,"HERE 2 calling GetTargetPhraseCollectionNonCacheLEGACY" << std::endl);
     ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
   }
 
