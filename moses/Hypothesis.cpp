@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Hypothesis.h"
 #include "Util.h"
 #include "SquareMatrix.h"
-#include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
 #include "Manager.h"
@@ -45,22 +44,20 @@ namespace Moses
 ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 #endif
 
-Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget)
+Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt)
   : m_prevHypo(NULL)
-  , m_targetPhrase(emptyTarget)
-  , m_sourcePhrase(0)
   , m_sourceCompleted(source.GetSize(), manager.m_source.m_sourceCompleted)
   , m_sourceInput(source)
   , m_currSourceWordsRange(
     m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
     m_sourceCompleted.GetFirstGapPos()>0 ? m_sourceCompleted.GetFirstGapPos()-1 : NOT_FOUND)
-  , m_currTargetWordsRange(0, emptyTarget.GetSize()-1)
+  , m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
   , m_wordDeleted(false)
   , m_totalScore(0.0f)
   , m_futureScore(0.0f)
   , m_ffStates(StatefulFeatureFunction::GetStatefulFeatureFunctions().size())
   , m_arcList(NULL)
-  , m_transOpt(NULL)
+  , m_transOpt(initialTransOpt)
   , m_manager(manager)
   , m_id(m_manager.GetNextHypoId())
 {
@@ -79,8 +76,6 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
  */
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
   : m_prevHypo(&prevHypo)
-  , m_targetPhrase(transOpt.GetTargetPhrase())
-  , m_sourcePhrase(transOpt.GetSourcePhrase())
   , m_sourceCompleted				(prevHypo.m_sourceCompleted )
   , m_sourceInput						(prevHypo.m_sourceInput)
   , m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
@@ -92,7 +87,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   , m_scoreBreakdown(prevHypo.GetScoreBreakdown())
   , m_ffStates(prevHypo.m_ffStates.size())
   , m_arcList(NULL)
-  , m_transOpt(&transOpt)
+  , m_transOpt(transOpt)
   , m_manager(prevHypo.GetManager())
   , m_id(m_manager.GetNextHypoId())
 {
@@ -215,13 +210,13 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
 
-Hypothesis* Hypothesis::Create(Manager& manager, InputType const& m_source, const TargetPhrase &emptyTarget)
+Hypothesis* Hypothesis::Create(Manager& manager, InputType const& m_source, const TranslationOption &initialTransOpt)
 {
 #ifdef USE_HYPO_POOL
   Hypothesis *ptr = s_objectPool.getPtr();
-  return new(ptr) Hypothesis(manager, m_source, emptyTarget);
+  return new(ptr) Hypothesis(manager, m_source, initialTransOpt);
 #else
-  return new Hypothesis(manager, m_source, emptyTarget);
+  return new Hypothesis(manager, m_source, initialTransOpt);
 #endif
 }
 
@@ -271,7 +266,7 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( slff )) {
-    slff.Evaluate(PhraseBasedFeatureContext(this), &m_scoreBreakdown);
+    slff.Evaluate(*this, &m_scoreBreakdown);
   }
 }
 
@@ -338,7 +333,7 @@ void Hypothesis::PrintHypothesis() const
     return;
   }
   TRACE_ERR(endl << "creating hypothesis "<< m_id <<" from "<< m_prevHypo->m_id<<" ( ");
-  int end = (int)(m_prevHypo->m_targetPhrase.GetSize()-1);
+  int end = (int)(m_prevHypo->GetCurrTargetPhrase().GetSize()-1);
   int start = end-1;
   if ( start < 0 ) start = 0;
   if ( m_prevHypo->m_currTargetWordsRange.GetStartPos() == NOT_FOUND ) {
@@ -348,13 +343,14 @@ void Hypothesis::PrintHypothesis() const
   }
   if (end>=0) {
     WordsRange range(start, end);
-    TRACE_ERR( m_prevHypo->m_targetPhrase.GetSubString(range) << " ");
+    TRACE_ERR( m_prevHypo->GetCurrTargetPhrase().GetSubString(range) << " ");
   }
   TRACE_ERR( ")"<<endl);
   TRACE_ERR( "\tbase score "<< (m_prevHypo->m_totalScore - m_prevHypo->m_futureScore) <<endl);
-  TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "
-             << *m_sourcePhrase <<endl);
-  TRACE_ERR( "\ttranslated as: "<<(Phrase&) m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
+  TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()
+             <<": " << m_transOpt.GetInputPath().GetPhrase() << endl);
+
+  TRACE_ERR( "\ttranslated as: "<<(Phrase&) GetCurrTargetPhrase()<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
 
   if (m_wordDeleted) TRACE_ERR( "\tword deleted"<<endl);
   //	TRACE_ERR( "\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
@@ -405,6 +401,11 @@ void Hypothesis::CleanupArcList()
   }
 }
 
+const TargetPhrase &Hypothesis::GetCurrTargetPhrase() const
+{
+  return m_transOpt.GetTargetPhrase();
+}
+
 void Hypothesis::GetOutputPhrase(Phrase &out) const
 {
   if (m_prevHypo != NULL) {
@@ -441,24 +442,15 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 
 std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const
 {
-  if (!m_prevHypo) {
-    return "";
-  }
-  return m_sourcePhrase->GetStringRep(factorsToPrint);
-#if 0
-  if(m_sourcePhrase) {
-    return m_sourcePhrase->GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
-  } else {
-    return m_sourceInput.GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
-  }
-#endif
+  return m_transOpt.GetInputPath().GetPhrase().GetStringRep(factorsToPrint);
 }
+
 std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const
 {
   if (!m_prevHypo) {
     return "";
   }
-  return m_targetPhrase.GetStringRep(factorsToPrint);
+  return GetCurrTargetPhrase().GetStringRep(factorsToPrint);
 }
 
 std::string Hypothesis::GetSourcePhraseStringRep() const

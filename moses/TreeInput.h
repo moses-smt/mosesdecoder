@@ -4,7 +4,6 @@
 
 #include <vector>
 #include "Sentence.h"
-#include "ChartTranslationOptions.h"
 
 namespace Moses
 {
@@ -32,7 +31,6 @@ class TreeInput : public Sentence
 
 protected:
   std::vector<std::vector<NonTerminalSet> > m_sourceChart;
-  std::vector <ChartTranslationOptions*> m_xmlChartOptionsList;
 
   void AddChartLabel(size_t startPos, size_t endPos, const std::string &label
                      ,const std::vector<FactorType>& factorOrder);
@@ -64,10 +62,6 @@ public:
   virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const {
     return m_sourceChart[startPos][endPos - startPos];
   }
-
-  std::vector <ChartTranslationOptions*> GetXmlChartTranslationOptions() const {
-    return m_xmlChartOptionsList;
-  };
 };
 
 }

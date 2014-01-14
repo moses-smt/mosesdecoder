@@ -55,7 +55,6 @@ class InputType;
 class PhraseDictionary;
 class GenerationDictionary;
 class DecodeStep;
-class PhrasePenaltyProducer;
 class WordPenaltyProducer;
 class UnknownWordPenaltyProducer;
 class InputFeature;
@@ -117,6 +116,7 @@ protected:
   std::string									m_nBestFilePath, m_latticeSamplesFilePath;
   bool                        m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
+  bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
   bool m_wordDeletionEnabled;
 
   bool m_disableDiscarding;
@@ -132,7 +132,6 @@ protected:
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
-  PhrasePenaltyProducer* m_ppProducer;
   WordPenaltyProducer* m_wpProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
   const InputFeature *m_inputFeature;
@@ -180,14 +179,6 @@ protected:
   bool m_timeout; //! use timeout
   size_t m_timeout_threshold; //! seconds after which time out is activated
 
-  bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
-  mutable std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
-  size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
-  //FIXME: Single lock for cache not most efficient. However using a
-  //reader-writer for LRU cache is tricky - how to record last used time?
-#ifdef WITH_THREADS
-  mutable boost::mutex m_transOptCacheMutex;
-#endif
   bool m_isAlwaysCreateDirectTranslationOption;
   //! constructor. only the 1 static variable can be created
 
@@ -234,7 +225,7 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  FactorType m_placeHolderFactor;
+  std::pair<FactorType, FactorType> m_placeHolderFactor;
 
   StaticData();
 
@@ -247,9 +238,9 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
 
-  void ReduceTransOptCache() const;
-  bool m_continuePartialTranslation;
+  void ForcedDecoding();
 
+  bool m_continuePartialTranslation;
   std::string m_binPath;
 
 public:
@@ -312,6 +303,9 @@ public:
   }
   inline bool GetDropUnknown() const {
     return m_dropUnknown;
+  }
+  inline bool GetMarkUnknown() const {
+    return m_markUnknown;
   }
   inline bool GetDisableDiscarding() const {
     return m_disableDiscarding;
@@ -458,12 +452,7 @@ public:
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
   }
-  const PhrasePenaltyProducer *GetPhrasePenaltyProducer() const {
-    return m_ppProducer;
-  }
-  PhrasePenaltyProducer *GetPhrasePenaltyProducer() { // for mira
-    return m_ppProducer;
-  }
+
   const WordPenaltyProducer *GetWordPenaltyProducer() const {
     return m_wpProducer;
   }
@@ -635,17 +624,6 @@ public:
     return m_xmlBrackets;
   }
 
-  bool GetUseTransOptCache() const {
-    return m_useTransOptCache;
-  }
-
-  void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
-
-  void ClearTransOptionCache() const;
-
-
-  const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
-
   bool PrintTranslationOptions() const {
     return m_printTranslationOptions;
   }
@@ -733,7 +711,7 @@ public:
       return false;
     }
     std::map< std::string, std::set< std::string > >::const_iterator lookupIgnoreFF
-      =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
+    =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
     if (lookupIgnoreFF == m_weightSettingIgnoreFF.end()) {
       return false;
     }
@@ -751,7 +729,7 @@ public:
       return false;
     }
     std::map< std::string, std::set< size_t > >::const_iterator lookupIgnoreDP
-      =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
+    =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
     if (lookupIgnoreDP == m_weightSettingIgnoreDP.end()) {
       return false;
     }
@@ -793,7 +771,6 @@ public:
     m_allWeights = *(i->second);
   }
 
-  float GetWeightPhrasePenalty() const;
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
 
@@ -829,7 +806,7 @@ public:
 
   void OverrideFeatures();
 
-  FactorType GetPlaceholderFactor() const {
+  const std::pair<FactorType, FactorType> &GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
 };

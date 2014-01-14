@@ -91,9 +91,14 @@ if (-d $dir) {
     exit 0;
 }
 
-
 # filter the translation and distortion tables
 safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
+
+my $inputStrippedXML = "$dir/input.$$";
+my $cmd = "$RealBin/../generic/strip-xml.perl < $input > $inputStrippedXML";
+print STDERR "Stripping XML: $cmd \n";
+print `$cmd`;
+$input = $inputStrippedXML;
 
 # get tables to be filtered (and modify config file)
 my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%KNOWN_TTABLE,@TABLE_WEIGHTS,%TABLE_NUMBER);
@@ -392,7 +397,12 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       }
       # reordering model
       else {
-        my $lexbin = $binarizer; 
+        my $lexbin;
+        $lexbin = $binarizer;
+        if ($binarizer =~ /CreateOnDiskPt/) {
+          $lexbin =~ s/CreateOnDiskPt/processLexicalTable/;
+        }
+
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {

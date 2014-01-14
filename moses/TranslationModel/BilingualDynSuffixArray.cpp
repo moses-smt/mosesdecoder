@@ -478,7 +478,6 @@ GetMosesFactorIDs(const SAPhrase& phrase, const Phrase& sourcePhrase) const
     CHECK(word != m_trgVocab->GetkOOVWord());
     targetPhrase->AddWord(word);
   }
-  targetPhrase->SetSourcePhrase(sourcePhrase);
   // scoring
   return targetPhrase;
 }

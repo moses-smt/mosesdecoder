@@ -230,10 +230,19 @@ sub tokenize
     }
 
     # seperate out "," except if within numbers (5,300)
-    $text =~ s/([^\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
+    #$text =~ s/([^\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
+
+    # separate out "," except if within numbers (5,300)
+    # previous "global" application skips some:  A,B,C,D,E > A , B,C , D,E
+    # first application uses up B so rule can't see B,C
+    # two-step version here may create extra spaces but these are removed later
+    # will also space digit,letter or letter,digit forms (redundant with next section)
+    $text =~ s/([^\p{IsN}])[,]/$1 , /g;
+    $text =~ s/[,]([^\p{IsN}])/ , $1/g;
+
     # separate , pre and post number
-    $text =~ s/([\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
-    $text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
+    #$text =~ s/([\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
+    #$text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
 	      
     # turn `into '
     $text =~ s/\`/\'/g;

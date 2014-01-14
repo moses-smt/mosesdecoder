@@ -36,9 +36,9 @@ class WordsRange;
 class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
 {
 public:
-  ChartRuleLookupManagerCYKPlus(const InputType &sentence,
+  ChartRuleLookupManagerCYKPlus(const ChartParser &parser,
                                 const ChartCellCollectionBase &cellColl)
-    : ChartRuleLookupManager(sentence, cellColl) {}
+    : ChartRuleLookupManager(parser, cellColl) {}
 
 protected:
   void AddCompletedRule(

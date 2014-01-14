@@ -47,7 +47,7 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
 ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
-  :m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
+  :m_transOpt(item.GetTranslationDimension().GetTranslationOption())
   ,m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   ,m_ffStates(StatefulFeatureFunction::GetStatefulFeatureFunctions().size())
   ,m_arcList(NULL)
@@ -162,7 +162,7 @@ void ChartHypothesis::Evaluate()
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) {
-      sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
+      sfs[i]->EvaluateChart(*this,&m_scoreBreakdown);
     }
   }
 

@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/WordPenaltyProducer.h"
 #include "Hypothesis.h"
 #include "Manager.h"
+#include "TranslationOption.h"
 
 namespace MosesTest
 {
@@ -57,7 +58,7 @@ public:
   ~MockHypothesisGuard();
 
 private:
-  Moses::TargetPhrase m_emptyTarget;
+  Moses::TranslationOption m_initialTransOpt;
   Moses::Sentence m_sentence;
   Moses::PhrasePenaltyProducer m_pp;
   Moses::WordPenaltyProducer m_wp;

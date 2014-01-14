@@ -22,8 +22,12 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/TargetPhraseCollection.h"
+#include "moses/InputPath.h"
 #include "moses/TranslationModel/CYKPlusParser/DotChartOnDisk.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h"
+
+#include "OnDiskPt/OnDiskWrapper.h"
+#include "OnDiskPt/Word.h"
 
 using namespace std;
 
@@ -45,18 +49,11 @@ void PhraseDictionaryOnDisk::Load()
   SetFeaturesToApply();
 }
 
-//! find list of translations that can translates src. Only for phrase input
-const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const Phrase& /* src */) const
-{
-  CHECK(false);
-  return NULL;
-}
-
 ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
-  const InputType &sentence,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellCollection)
 {
-  return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
+  return new ChartRuleLookupManagerOnDisk(parser, cellCollection, *this,
                                           GetImplementation(),
                                           m_input,
                                           m_output, m_filePath);
@@ -82,6 +79,8 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
 
+  ReduceCache();
+
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
   if (!obj->BeginLoad(m_filePath))
     return;
@@ -92,9 +91,105 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   CHECK(obj->GetMisc("NumScores") == m_numScoreComponents);
 
   m_implementation.reset(obj);
-
-  return;
 }
 
+void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
+{
+  InputPathList::const_iterator iter;
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
+    InputPath &inputPath = **iter;
+    GetTargetPhraseCollectionBatch(inputPath);
+  }
 }
+
+void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath) const
+{
+  OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+  const Phrase &phrase = inputPath.GetPhrase();
+  const InputPath *prevInputPath = inputPath.GetPrevNode();
+
+  const OnDiskPt::PhraseNode *prevPtNode = NULL;
+
+  if (prevInputPath) {
+    prevPtNode = static_cast<const OnDiskPt::PhraseNode*>(prevInputPath->GetPtNode(*this));
+  } else {
+    // Starting subphrase.
+    assert(phrase.GetSize() == 1);
+    prevPtNode = &wrapper.GetRootSourceNode();
+  }
+
+  if (prevPtNode) {
+    Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
+    lastWord.OnlyTheseFactors(m_inputFactors);
+    OnDiskPt::Word *lastWordOnDisk = wrapper.ConvertFromMoses(m_input, lastWord);
+
+    if (lastWordOnDisk == NULL) {
+      // OOV according to this phrase table. Not possible to extend
+      inputPath.SetTargetPhrases(*this, NULL, NULL);
+    } else {
+      const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
+      if (ptNode) {
+        const TargetPhraseCollection *targetPhrases = GetTargetPhraseCollection(ptNode);
+        inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
+      } else {
+        inputPath.SetTargetPhrases(*this, NULL, NULL);
+      }
+
+      delete lastWordOnDisk;
+    }
+  }
+}
+
+const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
+{
+  const TargetPhraseCollection *ret;
+
+  if (m_maxCacheSize) {
+    CacheColl &cache = GetCache();
+    size_t hash = (size_t) ptNode->GetFilePos();
+
+    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
+
+    iter = cache.find(hash);
+
+    if (iter == cache.end()) {
+      // not in cache, need to look up from phrase table
+      ret = GetTargetPhraseCollectionNonCache(ptNode);
+      if (ret) {
+        ret = new TargetPhraseCollection(*ret);
+      }
+
+      std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
+      cache[hash] = value;
+    } else {
+      // in cache. just use it
+      std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+      value.second = clock();
+
+      ret = value.first;
+    }
+  } else {
+    ret = GetTargetPhraseCollectionNonCache(ptNode);
+  }
+
+  return ret;
+}
+
+const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const
+{
+  OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+
+  vector<float> weightT = StaticData::Instance().GetWeights(this);
+  OnDiskPt::Vocab &vocab = wrapper.GetVocab();
+
+  const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
+  TargetPhraseCollection *targetPhrases
+  = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+
+  delete targetPhrasesOnDisk;
+
+  return targetPhrases;
+}
+
+} // namespace
 

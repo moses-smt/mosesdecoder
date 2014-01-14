@@ -46,7 +46,7 @@ void SearchNormalBatch::ProcessSentence()
   clock_t t=0; // used to track time for steps
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTargetPhrase);
+  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack

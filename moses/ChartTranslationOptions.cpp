@@ -18,13 +18,34 @@
  ***********************************************************************/
 
 #include "ChartTranslationOptions.h"
-
 #include "ChartHypothesis.h"
-
 #include "ChartCellLabel.h"
+#include "ChartTranslationOption.h"
 
 namespace Moses
 {
+
+ChartTranslationOptions::ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
+    const StackVec &stackVec,
+    const WordsRange &wordsRange,
+    float score)
+  : m_stackVec(stackVec)
+  , m_wordsRange(&wordsRange)
+  , m_estimateOfBestScore(score)
+{
+  TargetPhraseCollection::const_iterator iter;
+  for (iter = targetPhraseColl.begin(); iter != targetPhraseColl.end(); ++iter) {
+    const TargetPhrase *origTP = *iter;
+
+    boost::shared_ptr<ChartTranslationOption> ptr(new ChartTranslationOption(*origTP));
+    m_collection.push_back(ptr);
+  }
+}
+
+ChartTranslationOptions::~ChartTranslationOptions()
+{
+
+}
 
 float ChartTranslationOptions::CalcEstimateOfBestScore(
   const TargetPhraseCollection &tpc,
@@ -41,6 +62,16 @@ float ChartTranslationOptions::CalcEstimateOfBestScore(
     estimateOfBestScore += bestHypo.GetTotalScore();
   }
   return estimateOfBestScore;
+}
+
+void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &inputPath)
+{
+  CollType::iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
+    ChartTranslationOption &transOpt = **iter;
+    transOpt.Evaluate(input, inputPath);
+  }
+
 }
 
 }

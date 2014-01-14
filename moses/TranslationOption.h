@@ -66,6 +66,7 @@ class TranslationOption
 protected:
 
   TargetPhrase 		m_targetPhrase; /*< output phrase when using this translation option */
+  const InputPath		*m_inputPath;
   const WordsRange	m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float             m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
@@ -73,13 +74,11 @@ protected:
   _ScoreCacheMap m_lexReorderingScores;
 
 public:
+  explicit TranslationOption(); // For initial hypo that does translate nothing
+
   /** constructor. Used by initial translation step */
   TranslationOption(const WordsRange &wordsRange
                     , const TargetPhrase &targetPhrase);
-
-  /** copy constructor, but change words range. used by caching */
-  TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange);
-
 
   /** returns true if all feature types in featuresToCheck are compatible between the two phrases */
   bool IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const;
@@ -95,9 +94,9 @@ public:
   }
 
   /** returns source phrase */
-  const Phrase *GetSourcePhrase() const {
-    return &(m_targetPhrase.GetSourcePhrase());
-  }
+  const InputPath &GetInputPath() const;
+
+  void SetInputPath(const InputPath &inputPath);
 
   /** whether source span overlaps with those of a hypothesis */
   bool Overlap(const Hypothesis &hypothesis) const;
@@ -132,7 +131,11 @@ public:
     return m_targetPhrase.GetScoreBreakdown();
   }
 
-  void Evaluate(const InputType &source);
+  inline ScoreComponentCollection &GetScoreBreakdown() {
+    return m_targetPhrase.GetScoreBreakdown();
+  }
+
+  void Evaluate(const InputType &input);
 
   /** returns cached scores */
   inline const Scores *GetLexReorderingScores(const LexicalReordering *scoreProducer) const {

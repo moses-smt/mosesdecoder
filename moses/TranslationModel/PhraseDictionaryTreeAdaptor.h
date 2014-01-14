@@ -60,18 +60,21 @@ public:
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
-  TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
-  TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
+  TargetPhraseCollection const* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   void InitializeForInput(InputType const& source);
   void CleanUpAfterSentenceProcessing(InputType const& source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &,
     const ChartCellCollectionBase &) {
     CHECK(false);
     return 0;
   }
+
+  // legacy
+  const TargetPhraseCollectionWithSourcePhrase *GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const & srcRange) const;
+
 };
 
 }

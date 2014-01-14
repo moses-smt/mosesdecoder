@@ -5,7 +5,7 @@
 #include "moses/FactorCollection.h"
 #include "moses/Timer.h"
 #include "moses/InputFileStream.h"
-#include "moses/LexicalReorderingTable.h"
+#include "moses/FF/LexicalReordering/LexicalReorderingTable.h"
 
 using namespace Moses;
 

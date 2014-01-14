@@ -1,3 +1,10 @@
+// This file should be compiled only when the HAVE_SYNLM flag is enabled. 
+//
+// The following ifdef prevents XCode and other non-bjam build systems 
+// from attempting to compile this file when HAVE_SYNLM is disabled.
+//
+#ifdef HAVE_SYNLM
+
 //
 
 #include "StaticData.h"
@@ -166,3 +173,5 @@ FFState* SyntacticLanguageModel::Evaluate(const Hypothesis& cur_hypo,
 }
 
 }
+
+#endif

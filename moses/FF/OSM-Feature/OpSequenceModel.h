@@ -21,6 +21,9 @@ public:
 
   int lmOrder;
   float unkOpProb;
+  int sFactor;	// Source Factor ...
+  int tFactor;	// Target Factor ...
+  int numFeatures;   // Number of features used ...
 
   OpSequenceModel(const std::string &line);
 
@@ -32,15 +35,19 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
-  void  Evaluate(const Phrase &source
-                 , const TargetPhrase &targetPhrase
-                 , ScoreComponentCollection &scoreBreakdown
-                 , ScoreComponentCollection &estimatedFutureScore) const;
-
   virtual FFState* EvaluateChart(
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;
+
+  void Evaluate(const InputType &input
+                            , const InputPath &inputPath
+                            , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void  Evaluate(const Phrase &source
+                 , const TargetPhrase &targetPhrase
+                 , ScoreComponentCollection &scoreBreakdown
+                 , ScoreComponentCollection &estimatedFutureScore) const;
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
@@ -49,9 +56,7 @@ public:
   std::vector<float> GetFutureScores(const Phrase &source, const Phrase &target) const;
   void SetParameter(const std::string& key, const std::string& value);
 
-  bool IsUseable(const FactorMask &mask) const {
-    return true;
-  }
+  bool IsUseable(const FactorMask &mask) const;
 
 protected:
   typedef std::pair<Phrase, Phrase> ParallelPhrase;

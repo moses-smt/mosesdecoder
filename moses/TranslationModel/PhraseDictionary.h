@@ -32,12 +32,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
+#else
+#include <boost/scoped_ptr.hpp>
 #endif
 
 #include "moses/Phrase.h"
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
-#include "moses/DecodeFeature.h"
+#include "moses/InputPath.h"
+#include "moses/FF/DecodeFeature.h"
 
 namespace Moses
 {
@@ -47,6 +50,7 @@ class InputType;
 class WordsRange;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
+class ChartParser;
 
 /**
   * Abstract base class for phrase dictionaries (tables).
@@ -66,10 +70,12 @@ public:
     return m_tableLimit;
   }
 
+  // LEGACY - The preferred method is to override GetTargetPhraseCollectionBatch().
+  // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
-  //! find list of translations that can translates a portion of src. Used by confusion network decoding
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+
+  virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
   //! Create entry for translation of source to targetPhrase
   virtual void InitializeForInput(InputType const& source) {
@@ -80,7 +86,7 @@ public:
 
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &,
     const ChartCellCollectionBase &) = 0;
 
   const std::string &GetFilePath() const {
@@ -93,6 +99,11 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+
+  // LEGACY
+  //! find list of translations that can translates a portion of src. Used by confusion network decoding
+  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
+
 protected:
   size_t m_tableLimit;
   std::string m_filePath;
@@ -103,6 +114,24 @@ protected:
 
   // MUST be called at the start of Load()
   void SetFeaturesToApply();
+
+  // cache
+  size_t m_maxCacheSize; // 0 = no caching
+
+  typedef std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > CacheColl;
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::thread_specific_ptr<CacheColl> m_cache;
+#else
+  mutable boost::scoped_ptr<CacheColl> m_cache;
+#endif
+
+  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const;
+  void ReduceCache() const;
+
+protected:
+  CacheColl &GetCache() const;
+
 };
 
 }

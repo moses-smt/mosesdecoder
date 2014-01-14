@@ -1,6 +1,7 @@
 #include "PhraseBoundaryFeature.h"
 
 #include "moses/Hypothesis.h"
+#include "moses/TranslationOption.h"
 
 using namespace std;
 
@@ -77,12 +78,12 @@ FFState* PhraseBoundaryFeature::Evaluate
   const Word* rightTargetWord = &(targetPhrase.GetWord(0));
   AddFeatures(leftTargetWord,rightTargetWord,m_targetFactors,"tgt",scores);
 
-  const Phrase* sourcePhrase = cur_hypo.GetSourcePhrase();
+  const Phrase& sourcePhrase = cur_hypo.GetTranslationOption().GetInputPath().GetPhrase();
   const Word* leftSourceWord = pbState->GetSourceWord();
-  const Word* rightSourceWord = &(sourcePhrase->GetWord(0));
+  const Word* rightSourceWord = &(sourcePhrase.GetWord(0));
   AddFeatures(leftSourceWord,rightSourceWord,m_sourceFactors,"src",scores);
 
-  const Word* endSourceWord = &(sourcePhrase->GetWord(sourcePhrase->GetSize()-1));
+  const Word* endSourceWord = &(sourcePhrase.GetWord(sourcePhrase.GetSize()-1));
   const Word* endTargetWord = &(targetPhrase.GetWord(targetPhrase.GetSize()-1));
 
   //if end of sentence add EOS

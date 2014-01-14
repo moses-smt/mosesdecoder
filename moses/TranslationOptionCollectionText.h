@@ -23,6 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_TranslationOptionCollectionText_h
 
 #include "TranslationOptionCollection.h"
+#include "InputPath.h"
+#include <map>
+#include <vector>
 
 namespace Moses
 {
@@ -35,14 +38,29 @@ class Sentence;
 class TranslationOptionCollectionText : public TranslationOptionCollection
 {
 public:
+  typedef std::vector< std::vector<InputPath*> > InputPathMatrix;
+
+protected:
+  InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
+
+  InputPath &GetInputPath(size_t startPos, size_t endPos);
+
+public:
   void ProcessUnknownWord(size_t sourcePos);
 
-  TranslationOptionCollectionText(Sentence const& inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+  TranslationOptionCollectionText(Sentence const& input, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
-
+  bool ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const;
   void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
 
+  void CreateTranslationOptions();
+
+  void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
+                                        , size_t startPosition
+                                        , size_t endPosition
+                                        , bool adhereTableLimit
+                                        , size_t graphInd);
 
 };
 

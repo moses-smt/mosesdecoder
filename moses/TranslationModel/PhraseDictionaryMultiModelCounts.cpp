@@ -140,7 +140,7 @@ void PhraseDictionaryMultiModelCounts::Load()
 }
 
 
-const TargetPhraseCollection *PhraseDictionaryMultiModelCounts::GetTargetPhraseCollection(const Phrase& src) const
+const TargetPhraseCollection *PhraseDictionaryMultiModelCounts::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
   vector<vector<float> > multimodelweights;
   bool normalize;
@@ -168,13 +168,13 @@ void PhraseDictionaryMultiModelCounts::CollectSufficientStatistics(const Phrase&
   for(size_t i = 0; i < m_numModels; ++i) {
     const PhraseDictionary &pd = *m_pd[i];
 
-    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  pd.GetTargetPhraseCollection( src);
+    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  pd.GetTargetPhraseCollectionLEGACY( src);
     if (ret_raw != NULL) {
 
       TargetPhraseCollection::iterator iterTargetPhrase;
       for (iterTargetPhrase = ret_raw->begin(); iterTargetPhrase != ret_raw->end();  ++iterTargetPhrase) {
 
-        TargetPhrase * targetPhrase = *iterTargetPhrase;
+        const TargetPhrase * targetPhrase = *iterTargetPhrase;
         vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
         string targetString = targetPhrase->GetStringRep(m_output);
@@ -269,7 +269,7 @@ float PhraseDictionaryMultiModelCounts::GetTargetCount(const Phrase &target, siz
 {
 
   const PhraseDictionary &pd = *m_inverse_pd[modelIndex];
-  const TargetPhraseCollection *ret_raw = pd.GetTargetPhraseCollection(target);
+  const TargetPhraseCollection *ret_raw = pd.GetTargetPhraseCollectionLEGACY(target);
 
   // in inverse mode, we want the first score of the first phrase pair (note: if we were to work with truly symmetric models, it would be the third score)
   if (ret_raw && ret_raw->GetSize() > 0) {

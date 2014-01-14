@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 
 #include "moses/FF/Factory.h"
-#include "moses/FF/PhrasePenaltyProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
@@ -38,7 +37,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "LexicalReordering.h"
 #include "SentenceStats.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
@@ -60,7 +58,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_ppProducer(NULL)
   ,m_wpProducer(NULL)
   ,m_unknownWordPenaltyProducer(NULL)
   ,m_inputFeature(NULL)
@@ -84,14 +81,6 @@ StaticData::StaticData()
 StaticData::~StaticData()
 {
   RemoveAllInColl(m_decodeGraphs);
-
-  typedef std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> > Coll;
-  Coll::iterator iter;
-  for (iter = m_transOptCache.begin(); iter != m_transOptCache.end(); ++iter) {
-    std::pair<TranslationOptionList*,clock_t> &valuePair =iter->second;
-    TranslationOptionList *transOptList = valuePair.first;
-    delete transOptList;
-  }
 
   /*
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
@@ -283,15 +272,6 @@ bool StaticData::LoadData(Parameter *parameter)
   // print all factors of output translations
   SetBooleanParameter( &m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
 
-  // caching of translation options
-  if (m_inputType == SentenceInput) {
-    SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", true );
-    m_transOptCacheMaxSize = (m_parameter->GetParam("persistent-cache-size").size() > 0)
-                             ? Scan<size_t>(m_parameter->GetParam("persistent-cache-size")[0]) : DEFAULT_MAX_TRANS_OPT_CACHE_SIZE;
-  } else {
-    m_useTransOptCache = false;
-  }
-
   //input factors
   const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
   for(size_t i=0; i<inputFactorVector.size(); i++) {
@@ -390,6 +370,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
+  SetBooleanParameter( &m_markUnknown, "mark-unknown", false );
 
   SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
@@ -490,46 +471,17 @@ bool StaticData::LoadData(Parameter *parameter)
                          Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
 
   // Read in constraint decoding file, if provided
-  if(m_parameter->GetParam("constraint").size()) {
-    if (m_parameter->GetParam("search-algorithm").size() > 0
-        && Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) != 0) {
-      cerr << "Can use -constraint only with stack-based search (-search-algorithm 0)" << endl;
-      exit(1);
-    }
-    m_constraintFileName = m_parameter->GetParam("constraint")[0];
-
-    InputFileStream constraintFile(m_constraintFileName);
-
-    std::string line;
-
-    long sentenceID = GetStartTranslationId() - 1;
-    while (getline(constraintFile, line)) {
-      vector<string> vecStr = Tokenize(line, "\t");
-
-      if (vecStr.size() == 1) {
-        sentenceID++;
-        Phrase phrase(0);
-        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter(), NULL);
-        m_constraints.insert(make_pair(sentenceID,phrase));
-      } else if (vecStr.size() == 2) {
-        sentenceID = Scan<long>(vecStr[0]);
-        Phrase phrase(0);
-        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter(), NULL);
-        m_constraints.insert(make_pair(sentenceID,phrase));
-      } else {
-        CHECK(false);
-      }
-    }
-  }
+  ForcedDecoding();
 
   // use of xml in input
   if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
   else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
   else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
+  else if (m_parameter->GetParam("xml-input")[0]=="constraint") m_xmlInputType = XmlConstraint;
   else if (m_parameter->GetParam("xml-input")[0]=="ignore") m_xmlInputType = XmlIgnore;
   else if (m_parameter->GetParam("xml-input")[0]=="pass-through") m_xmlInputType = XmlPassThrough;
   else {
-    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
+    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, constraint, or ignore");
     return false;
   }
 
@@ -546,9 +498,13 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   if (m_parameter->GetParam("placeholder-factor").size() > 0) {
-    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
+    CHECK(m_parameter->GetParam("placeholder-factor").size() == 2);
+    m_placeHolderFactor = std::pair<FactorType, FactorType>(
+                            Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]),
+                            Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[1])
+                          );
   } else {
-    m_placeHolderFactor = NOT_FOUND;
+    m_placeHolderFactor = std::pair<FactorType, FactorType>(NOT_FOUND, NOT_FOUND);
   }
 
 
@@ -794,72 +750,6 @@ bool StaticData::LoadDecodeGraphs()
   return true;
 }
 
-const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
-{
-  std::pair<size_t, std::string> cacheKey(decodeGraph.GetPosition(), m_currentWeightSetting);
-  std::pair<std::pair<size_t, std::string>, Phrase> key(cacheKey, sourcePhrase);
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_transOptCacheMutex);
-#endif
-  std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
-    = m_transOptCache.find(key);
-  if (iter == m_transOptCache.end())
-    return NULL;
-  iter->second.second = clock(); // update last used time
-  return iter->second.first;
-}
-
-void StaticData::ReduceTransOptCache() const
-{
-  if (m_transOptCache.size() <= m_transOptCacheMaxSize) return; // not full
-  clock_t t = clock();
-
-  // find cutoff for last used time
-  priority_queue< clock_t > lastUsedTimes;
-
-  std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
-  iter = m_transOptCache.begin();
-  while( iter != m_transOptCache.end() ) {
-    lastUsedTimes.push( iter->second.second );
-    iter++;
-  }
-  for( size_t i=0; i < lastUsedTimes.size()-m_transOptCacheMaxSize/2; i++ )
-    lastUsedTimes.pop();
-  clock_t cutoffLastUsedTime = lastUsedTimes.top();
-
-  // remove all old entries
-  iter = m_transOptCache.begin();
-  while( iter != m_transOptCache.end() ) {
-    if (iter->second.second < cutoffLastUsedTime) {
-      std::map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
-      delete iterRemove->second.first;
-      m_transOptCache.erase(iterRemove);
-    } else iter++;
-  }
-  VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
-}
-
-void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
-{
-  if (m_transOptCacheMaxSize == 0) return;
-  std::pair<size_t, std::string> cacheKey(decodeGraph.GetPosition(), m_currentWeightSetting);
-  std::pair<std::pair<size_t, std::string>, Phrase> key(cacheKey, sourcePhrase);
-  TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_transOptCacheMutex);
-#endif
-  m_transOptCache[key] = make_pair( storedTransOptList, clock() );
-  ReduceTransOptCache();
-}
-void StaticData::ClearTransOptionCache() const
-{
-  map<std::pair<std::pair<size_t, std::string>, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
-  for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
-    TranslationOptionList *transOptList = iterCache->second.first;
-    delete transOptList;
-  }
-}
-
 void StaticData::ReLoadParameter()
 {
   assert(false); // TODO completely redo. Too many hardcoded ff
@@ -971,13 +861,6 @@ const string &StaticData::GetBinDirectory() const
   return m_binPath;
 }
 
-float StaticData::GetWeightPhrasePenalty() const
-{
-  float weightPP = GetWeight(m_ppProducer);
-  VERBOSE(1, "Read weightPP from translation sytem: " << weightPP << std::endl);
-  return weightPP;
-}
-
 float StaticData::GetWeightWordPenalty() const
 {
   float weightWP = GetWeight(m_wpProducer);
@@ -1031,10 +914,6 @@ void StaticData::LoadFeatureFunctions()
     } else if (const GenerationDictionary *ffCast = dynamic_cast<const GenerationDictionary*>(ff)) {
       cerr << "m_generationDictionary here" << endl;
       m_generationDictionary.push_back(ffCast);
-    } else if (PhrasePenaltyProducer *ffCast = dynamic_cast<PhrasePenaltyProducer*>(ff)) {
-      CHECK(m_ppProducer == NULL); // max 1 feature;
-      cerr << "m_ppProducer here" << endl;
-      m_ppProducer = ffCast;
     } else if (WordPenaltyProducer *ffCast = dynamic_cast<WordPenaltyProducer*>(ff)) {
       CHECK(m_wpProducer == NULL); // max 1 feature;
       cerr << "m_wpProducer here" << endl;
@@ -1059,6 +938,12 @@ void StaticData::LoadFeatureFunctions()
       ff->Load();
     }
   }
+
+  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
+    PhraseDictionary *pt = m_phraseDictionary[i];
+    pt->Load();
+  }
+
 }
 
 bool StaticData::CheckWeights() const
@@ -1201,6 +1086,40 @@ void StaticData::OverrideFeatures()
 
     }
   }
+
+}
+
+void StaticData::ForcedDecoding()
+{
+	  if(m_parameter->GetParam("constraint").size()) {
+		bool addBeginEndWord = (m_searchAlgorithm == ChartDecoding) || (m_searchAlgorithm == ChartIncremental);
+
+	    m_constraintFileName = m_parameter->GetParam("constraint")[0];
+
+	    InputFileStream constraintFile(m_constraintFileName);
+	    std::string line;
+	    long sentenceID = GetStartTranslationId() - 1;
+	    while (getline(constraintFile, line)) {
+	      vector<string> vecStr = Tokenize(line, "\t");
+
+          Phrase phrase(0);
+	      if (vecStr.size() == 1) {
+	        sentenceID++;
+	        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter(), NULL);
+	      } else if (vecStr.size() == 2) {
+	        sentenceID = Scan<long>(vecStr[0]);
+	        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter(), NULL);
+	      } else {
+	        CHECK(false);
+	      }
+
+		  if (addBeginEndWord) {
+			phrase.InitStartEndWord();
+		  }
+		  m_constraints.insert(make_pair(sentenceID,phrase));
+
+	    }
+	  }
 
 }
 

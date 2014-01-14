@@ -64,6 +64,11 @@ ConfusionNet::ConfusionNet()
   : InputType()
 {
   stats.createOne();
+
+  const StaticData& staticData = StaticData::Instance();
+  if (staticData.IsChart()) {
+    m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
+  }
 }
 ConfusionNet::~ConfusionNet()
 {

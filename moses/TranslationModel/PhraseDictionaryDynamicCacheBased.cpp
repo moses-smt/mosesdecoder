@@ -18,6 +18,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
+#include "util/exception.hh"
 
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
@@ -30,9 +31,12 @@ using namespace std;
 
 namespace Moses
 {
+//! contructor
+//the parent "PhraseDictionary" is created disabling its internal cache for translation options (third parameter set to 0)
 PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::string &line)
-: PhraseDictionary("PhraseDictionaryDynamicCacheBased", line)
+: PhraseDictionary("PhraseDictionaryDynamicCacheBased", line, 0)
 {
+
   std::cerr << "Initializing PhraseDictionaryDynamicCacheBased feature..." << std::endl;
 
   m_score_type = CBTM_SCORE_TYPE_HYPERBOLA;
@@ -110,11 +114,15 @@ const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhrase
   return tpc;
 }
 
-
-ChartRuleLookupManager* PhraseDictionaryDynamicCacheBased::CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
+const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  CHECK(false);
-  return NULL;
+  const TargetPhraseCollection *ret = GetTargetPhraseCollection(src);
+  return ret;
+}
+
+ChartRuleLookupManager* PhraseDictionaryDynamicCacheBased::CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
+{
+  UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
 
 void PhraseDictionaryDynamicCacheBased::SetScoreType(size_t type) {
@@ -325,13 +333,14 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
     TargetCollectionAgePair TgtCollAgePair = it->second;
     TargetPhraseCollection* tpc = TgtCollAgePair.first;
     AgeCollection* ac = TgtCollAgePair.second;
-    TargetPhrase* tp_ptr = NULL;
+    const Phrase* tp_ptr = NULL;
     bool found = false;
     size_t tp_pos=0;
     while (!found && tp_pos < tpc->GetSize())
     {
-      tp_ptr = tpc->GetTargetPhrase(tp_pos);
-      if (tp == tp_ptr->GetSourcePhrase())
+      tp_ptr = (const Phrase*) tpc->GetTargetPhrase(tp_pos);
+      if (tp == *tp_ptr)
+//      if (tp == tp_ptr->GetSourcePhrase())
       {
         found = true;
         continue;
@@ -341,9 +350,13 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
     if (!found)
     {
       VERBOSE(1,"tp:|" << tp << "| NOT FOUND" << std::endl);
+/*
       std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
       //Now that the source phrase is ready, we give the target phrase a copy
       targetPhrase->SetSourcePhrase(sp);
+*/
+      std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
+
       targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
       tpc->Add(targetPhrase.release());
       tp_pos = tpc->GetSize()-1;
@@ -367,9 +380,13 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
     VERBOSE(1,"HERE 1" << std::endl);
 
     //tp is not found
+/*      
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
     //Now that the source phrase is ready, we give the target phrase a copy
     targetPhrase->SetSourcePhrase(sp);
+*/      
+    std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
+
     targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
     tpc->Add(targetPhrase.release());
     ac->push_back(age);
@@ -501,7 +518,7 @@ void PhraseDictionaryDynamicCacheBased::Decay(Phrase p)
       tp_age++; //increase the age by 1
       VERBOSE(1,"p:|" << p << "| " << " new tp_age:|" << tp_age << "|" << std::endl);
 
-      TargetPhrase* tp_ptr = tpc->GetTargetPhrase(tp_pos);
+      TargetPhrase* tp_ptr = (TargetPhrase*) tpc->GetTargetPhrase(tp_pos);
       VERBOSE(1,"p:|" << p << "| " << "tp_age:|" << tp_age << "| " <<  "*tp_ptr:|" << *tp_ptr << "|" << std::endl);
       VERBOSE(1,"precomputedScores.size():|" << precomputedScores.size() << "|" << std::endl);
 
@@ -642,20 +659,21 @@ void PhraseDictionaryDynamicCacheBased::Print() const
   std::map<Phrase, TargetCollectionAgePair>::const_iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++)
   {
-    std::vector<size_t>::size_type sz;
     std::string source = (it->first).ToString();
     TargetPhraseCollection* tpc = (it->second).first;
-    std::vector<TargetPhrase*> TPCvector;// = tpc->GetCollection();
-    sz = TPCvector.capacity();
-    TPCvector.reserve(tpc->GetSize());
-    TPCvector = tpc->GetCollection();
-    std::vector<TargetPhrase*>::iterator itr;
-    for(itr = TPCvector.begin(); itr != TPCvector.end(); itr++)
+//    std::vector<const TargetPhrase*> TPCvector;// = tpc->GetCollection();
+//    TPCvector.reserve(tpc->GetSize());
+//    TPCvector = tpc->GetCollection();
+//    std::vector<TargetPhrase*>::iterator itr;
+//    for(itr = TPCvector.begin(); itr != TPCvector.end(); itr++)
+    TargetPhraseCollection::iterator itr;
+//    std::vector<TargetPhrase*>::iterator itr;
+    for(itr = tpc->begin(); itr != tpc->end(); itr++)
     {
       std::string target = (*itr)->ToString();
       VERBOSE(1, source << " ||| " << target << std::endl);
     }
-    TPCvector.clear();
+//    TPCvector.clear();
     source.clear();
   }
 }

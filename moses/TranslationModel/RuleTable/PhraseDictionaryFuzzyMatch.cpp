@@ -73,10 +73,10 @@ void PhraseDictionaryFuzzyMatch::Load()
 }
 
 ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
-  const InputType &sentence,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellCollection)
 {
-  return new ChartRuleLookupManagerMemoryPerSentence(sentence, cellCollection, *this);
+  return new ChartRuleLookupManagerMemoryPerSentence(parser, cellCollection, *this);
 }
 
 
@@ -319,10 +319,9 @@ void PhraseDictionaryFuzzyMatch::CleanUpAfterSentenceProcessing(const InputType 
   m_collection.erase(source.GetTranslationId());
 }
 
-const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source) const
+const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(long translationId) const
 {
-  long transId = source.GetTranslationId();
-  std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(transId);
+  std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(translationId);
   CHECK(iter != m_collection.end());
   return iter->second;
 }

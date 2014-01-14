@@ -40,6 +40,8 @@ namespace Moses
 {
 class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
+class InputPath;
+class ChartParser;
 
 /** Implementation of on-disk phrase table for hierarchical/syntax model.
  */
@@ -58,6 +60,8 @@ protected:
   OnDiskPt::OnDiskWrapper &GetImplementation();
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
+  void GetTargetPhraseCollectionBatch(InputPath &inputPath) const;
+
 public:
   PhraseDictionaryOnDisk(const std::string &line);
   ~PhraseDictionaryOnDisk();
@@ -68,14 +72,15 @@ public:
   }
 
   // PhraseDictionary impl
-  //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
-
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &parser,
     const ChartCellCollectionBase &);
 
   virtual void InitializeForInput(InputType const& source);
+  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
+
+  const TargetPhraseCollection *GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
+  const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
 
 };
 

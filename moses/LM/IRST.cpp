@@ -48,19 +48,8 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
     throw runtime_error("Error: " + SPrint(threadCount) + " number of threads specified but IRST LM is not threadsafe.");
   }
 
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const vector<string> &args = m_args[i];
+  ReadParameters();
 
-    if (args[0] == "factor") {
-      m_factorType = Scan<FactorType>(args[1]);
-    } else if (args[0] == "order") {
-      m_nGramOrder = Scan<size_t>(args[1]);
-    } else if (args[0] == "path") {
-      m_filePath = args[1];
-    } else {
-      throw "Unknown argument " + args[0];
-    }
-  }
 }
 
 LanguageModelIRST::~LanguageModelIRST()

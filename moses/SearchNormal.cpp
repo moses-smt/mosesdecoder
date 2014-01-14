@@ -16,17 +16,12 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_initialTargetPhrase(source.m_initialTargetPhrase)
   ,m_start(clock())
   ,interrupted_flag(0)
   ,m_transOptColl(transOptColl)
 {
   VERBOSE(1, "Translating: " << m_source << endl);
   const StaticData &staticData = StaticData::Instance();
-
-  if (m_initialTargetPhrase.GetSize() > 0) {
-    VERBOSE(1, "Search extends partial output: " << m_initialTargetPhrase<<endl);
-  }
 
   // only if constraint decoding (having to match a specified output)
   long sentenceID = source.GetTranslationId();
@@ -62,7 +57,7 @@ void SearchNormal::ProcessSentence()
   clock_t t=0; // used to track time for steps
 
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTargetPhrase);
+  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack

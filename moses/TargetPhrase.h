@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_TargetPhrase_h
 #define moses_TargetPhrase_h
 
+#include <algorithm>
 #include <vector>
 #include "TypeDef.h"
 #include "Phrase.h"
@@ -36,23 +37,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-
 class FeatureFunction;
+class InputPath;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
 class TargetPhrase: public Phrase
 {
+private:
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
-protected:
+  friend void swap(TargetPhrase &first, TargetPhrase &second);
+
   float m_fullScore, m_futureScore;
   ScoreComponentCollection m_scoreBreakdown;
 
-  // in case of confusion net, ptr to source phrase
-  Phrase m_sourcePhrase;
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
   const Word *m_lhsTarget;
 
+  std::map<std::string, std::string> m_properties;
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);
@@ -60,16 +62,20 @@ public:
   explicit TargetPhrase(const Phrase &targetPhrase);
   ~TargetPhrase();
 
-  void Evaluate(const Phrase &source);
+  // 1st evaluate method. Called during loading of phrase table.
   void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
 
-  void Evaluate(const InputType &input);
+  // as above, but used only for OOV processing. Doesn't have a phrase table connect with it
+  // so doesn't have a list of ffs
+  void Evaluate(const Phrase &source);
+
+  // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
+  void Evaluate(const InputType &input, const InputPath &inputPath);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
   // used to set translation or gen score
   void SetXMLScore(float score);
-  void SetInputScore(const Scores &scoreVector);
 
 #ifdef HAVE_PROTOBUF
   void WriteToRulePB(hgmert::Rule* pb) const;
@@ -92,6 +98,7 @@ public:
     return m_scoreBreakdown;
   }
 
+/*
   //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
   void SetSourcePhrase(const Phrase&  p) {
     m_sourcePhrase=p;
@@ -99,7 +106,7 @@ public:
   const Phrase& GetSourcePhrase() const {
     return m_sourcePhrase;
   }
-
+*/
   void SetTargetLHS(const Word *lhs) {
     m_lhsTarget = lhs;
   }
@@ -125,10 +132,18 @@ public:
     return *m_alignNonTerm;
   }
 
+  void SetProperties(const StringPiece &str);
+  void SetProperty(const std::string &key, const std::string &value) {
+    m_properties[key] = value;
+  }
+  void GetProperty(const std::string &key, std::string &value, bool &found) const;
+
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 
   TO_STRING();
 };
+
+void swap(TargetPhrase &first, TargetPhrase &second);
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 
@@ -139,7 +154,6 @@ struct TargetPhraseHasher {
   inline size_t operator()(const TargetPhrase& targetPhrase) const {
     size_t seed = 0;
     boost::hash_combine(seed, targetPhrase);
-    boost::hash_combine(seed, targetPhrase.GetSourcePhrase());
     boost::hash_combine(seed, targetPhrase.GetAlignTerm());
     boost::hash_combine(seed, targetPhrase.GetAlignNonTerm());
 
@@ -150,7 +164,6 @@ struct TargetPhraseHasher {
 struct TargetPhraseComparator {
   inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const {
     return lhs.Compare(rhs) == 0 &&
-           lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0 &&
            lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
            lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
   }

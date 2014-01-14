@@ -35,6 +35,7 @@ PhraseDictionaryTreeAdaptor(const std::string &line)
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
 }
+
 void PhraseDictionaryTreeAdaptor::Load()
 {
   SetFeaturesToApply();
@@ -43,6 +44,8 @@ void PhraseDictionaryTreeAdaptor::Load()
 void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 {
   const StaticData &staticData = StaticData::Instance();
+
+  ReduceCache();
 
   PDTAimp *obj = new PDTAimp(this);
 
@@ -72,19 +75,10 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
 }
 
 TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(Phrase const &src) const
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  return GetImplementation().GetTargetPhraseCollection(src);
-}
-
-TargetPhraseCollection const*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,WordsRange const &range) const
-{
-  if(GetImplementation().m_rangeCache.empty()) {
-    return GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
-  } else {
-    return GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-  }
+  const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
+  return ret;
 }
 
 void PhraseDictionaryTreeAdaptor::EnableCache()
@@ -110,6 +104,19 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
   dict = m_implementation.get();
   CHECK(dict);
   return *dict;
+}
+
+// legacy
+const TargetPhraseCollectionWithSourcePhrase*
+PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
+{
+  if(GetImplementation().m_rangeCache.empty()) {
+    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
+    return tpColl;
+  } else {
+    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
+    return tpColl;
+  }
 }
 
 }

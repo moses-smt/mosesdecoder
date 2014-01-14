@@ -19,16 +19,21 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 #include "StaticData.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptions.h"
 #include "ChartCellCollection.h"
 #include "WordsRange.h"
+#include "InputType.h"
+#include "InputPath.h"
+
+using namespace std;
 
 namespace Moses
 {
 
-ChartTranslationOptionList::ChartTranslationOptionList(size_t ruleLimit)
+ChartTranslationOptionList::ChartTranslationOptionList(size_t ruleLimit, const InputType &input)
   : m_size(0)
   , m_ruleLimit(ruleLimit)
 {
@@ -140,6 +145,15 @@ void ChartTranslationOptionList::ApplyThreshold()
                              ScoreThresholdPred(scoreThreshold));
 
   m_size = std::distance(m_collection.begin(), bound);
+}
+
+void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPath &inputPath)
+{
+  CollType::iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
+    ChartTranslationOptions &transOpts = **iter;
+    transOpts.Evaluate(input, inputPath);
+  }
 }
 
 }

@@ -26,9 +26,14 @@
 
 #include "util/check.hh"
 #include <vector>
+#include <boost/shared_ptr.hpp>
+#include "ChartTranslationOption.h"
 
 namespace Moses
 {
+class ChartTranslationOption;
+class InputPath;
+class InputType;
 
 /** Similar to a DottedRule, but contains a direct reference to a list
  * of translations and provdes an estimate of the best score. For a specific range in the input sentence
@@ -36,6 +41,8 @@ namespace Moses
 class ChartTranslationOptions
 {
 public:
+  typedef std::vector<boost::shared_ptr<ChartTranslationOption> > CollType;
+
   /** Constructor
       \param targetPhraseColl @todo dunno
       \param stackVec @todo dunno
@@ -45,14 +52,8 @@ public:
   ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
                           const StackVec &stackVec,
                           const WordsRange &wordsRange,
-                          float score)
-    : m_stackVec(stackVec)
-    , m_targetPhraseCollection(&targetPhraseColl)
-    , m_wordsRange(&wordsRange)
-    , m_estimateOfBestScore(score) {
-  }
-
-  ~ChartTranslationOptions() {}
+                          float score);
+  ~ChartTranslationOptions();
 
   static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
                                        const StackVec &);
@@ -63,8 +64,8 @@ public:
   }
 
   //! @todo isn't the translation suppose to just contain 1 target phrase, not a whole collection of them?
-  const TargetPhraseCollection &GetTargetPhraseCollection() const {
-    return *m_targetPhraseCollection;
+  const CollType &GetTargetPhrases() const {
+    return m_collection;
   }
 
   //! the range in the source sentence this translation option covers
@@ -80,10 +81,13 @@ public:
     return m_estimateOfBestScore;
   }
 
+  void Evaluate(const InputType &input, const InputPath &inputPath);
+
 private:
 
   StackVec m_stackVec; //! vector of hypothesis list!
-  const TargetPhraseCollection *m_targetPhraseCollection;
+  CollType m_collection;
+
   const WordsRange *m_wordsRange;
   float m_estimateOfBestScore;
 };

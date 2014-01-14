@@ -3,6 +3,8 @@
 
 #include <vector>
 #include "TypeDef.h"
+#include "TranslationOption.h"
+#include "Phrase.h"
 
 namespace Moses
 {
@@ -29,7 +31,7 @@ public:
   //! Decode the sentence according to the specified search algorithm.
   virtual void ProcessSentence() = 0;
 
-  explicit Search(Manager& manager) : m_manager(manager) {}
+  explicit Search(Manager& manager);
   virtual ~Search() {}
 
   // Factory method
@@ -39,6 +41,8 @@ public:
 protected:
   const Phrase *m_constraint;
   Manager& m_manager;
+  InputPath m_inputPath; // for initial hypo
+  TranslationOption m_initialTransOpt; /**< used to seed 1st hypo */
 };
 
 }

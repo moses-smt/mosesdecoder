@@ -73,17 +73,30 @@ rule test_library ( name ) {
   constant CLEANING : $(cleaning) ;
 }
 
+shared-command-line = ;
+local argv = [ modules.peek : ARGV ] ;
+while $(argv) {
+  if $(argv[1]) = "link=shared" {
+    shared-command-line = <link>shared ;
+  }
+  argv = $(argv[2-]) ;
+}
+
 #Determine if a library can be compiled statically.  
 rule auto-shared ( name : additional * ) {
   additional ?= "" ;
-  if [ test_flags $(additional)" -static -l"$(name) ] {
-    return ;
+  if $(shared-command-line) = "<link>shared" {
+    return "<link>shared" ;
   } else {
-    if $(FORCE-STATIC) {
-      echo "Could not statically link against lib $(name).  Your build will probably fail." ;
+    if [ test_flags $(additional)" -static -l"$(name) ] {
       return ;
     } else {
-      return "<link>shared" ;
+      if $(FORCE-STATIC) {
+        echo "Could not statically link against lib $(name).  Your build will probably fail." ;
+        return ;
+      } else {
+        return "<link>shared" ;
+      }
     }
   }
 }
@@ -133,8 +146,8 @@ rule boost-lib ( name macro : deps * ) {
     flags += " -static" ;
   }
   if [ test_flags $(flags) : $(main) ] {
-    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name)$(boost-lib-version) : : <library>$(deps) ;
-    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt$(boost-lib-version) : : <library>$(deps) ;
+    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name)$(boost-lib-version) : <link>static : <library>$(deps) ;
+    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt$(boost-lib-version) : <link>static : <library>$(deps) ;
   } else {
     lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name)$(boost-lib-version) : : <library>$(deps) ;
   }
@@ -143,7 +156,7 @@ rule boost-lib ( name macro : deps * ) {
     alias boost_$(name) : inner_boost_$(name) : <link>shared ;
     requirements += <define>BOOST_$(macro) ;
   } else {
-    alias boost_$(name) : inner_boost_$(name) : : : <link>shared:<define>BOOST_$(macro) ;
+    alias boost_$(name) : inner_boost_$(name) : <link>static ;
   }
 }
 
@@ -184,8 +197,8 @@ rule boost ( min-version ) {
 }
  
 #Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
-rule external-lib ( name : search-path * ) {
-  lib $(name) : : [ auto-shared $(name) : "-L"$(search-path) ] <search>$(search-path) ;
+rule external-lib ( name : search-path * : deps * ) {
+  lib $(name) : : [ auto-shared $(name) : "-L"$(search-path) ] <search>$(search-path) <use>$(deps) ;
 }
 
 #Write the current command line to previous.sh.  This does not do shell escaping.  

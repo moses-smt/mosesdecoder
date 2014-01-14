@@ -4,8 +4,6 @@
 #include <vector>
 #include <set>
 #include <string>
-#include "PhraseBasedFeatureContext.h"
-#include "ChartBasedFeatureContext.h"
 #include "moses/TypeDef.h"
 
 namespace Moses
@@ -22,8 +20,7 @@ class ScoreComponentCollection;
 class WordsBitmap;
 class WordsRange;
 class FactorMask;
-
-
+class InputPath;
 
 /** base class for all feature functions.
  */
@@ -96,16 +93,22 @@ public:
   // return true if the feature function can be evaluated
   virtual bool IsUseable(const FactorMask &mask) const = 0;
 
-  // used by stateless ff. And stateful ff to make initial score estimate during loading of phrase table
+  // used by stateless ff and stateful ff. Calculate initial score estimate during loading of phrase table
+  // source phrase is the substring that the phrase table uses to look up the target phrase,
+  // may have more factors than actually need, but not guaranteed.
+  // For SCFG decoding, the source contains non-terminals, NOT the raw source from the input sentence
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const {
-  }
+                        , ScoreComponentCollection &estimatedFutureScore) const = 0;
 
-  virtual void Evaluate(const InputType &source
-                        , ScoreComponentCollection &scoreBreakdown) const {
-  }
+  // This method is called once all the translation options are retrieved from the phrase table, and
+  // just before search.
+  // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
+  // Currently not used by any FF. Not called by moses_chart
+  virtual void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const = 0;
 
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();

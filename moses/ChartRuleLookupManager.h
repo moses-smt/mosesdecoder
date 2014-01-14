@@ -26,9 +26,10 @@
 
 namespace Moses
 {
-
+class ChartParser;
 class ChartParserCallback;
 class WordsRange;
+class Sentence;
 
 /** Defines an interface for looking up rules in a rule table.  Concrete
  *  implementation classes should correspond to specific PhraseDictionary
@@ -39,21 +40,21 @@ class WordsRange;
 class ChartRuleLookupManager
 {
 public:
-  ChartRuleLookupManager(const InputType &sentence,
+  ChartRuleLookupManager(const ChartParser &parser,
                          const ChartCellCollectionBase &cellColl)
-    : m_sentence(sentence)
+    : m_parser(parser)
     , m_cellCollection(cellColl) {}
 
   virtual ~ChartRuleLookupManager() {}
 
-  //! the sentence being decoded
-  const InputType &GetSentence() const {
-    return m_sentence;
-  }
-
   const ChartCellLabelSet &GetTargetLabelSet(size_t begin, size_t end) const {
     return m_cellCollection.GetBase(WordsRange(begin, end)).GetTargetLabelSet();
   }
+
+  const ChartParser &GetParser() const {
+    return m_parser;
+  }
+  //const Sentence &GetSentence() const;
 
   const ChartCellLabel &GetSourceAt(size_t at) const {
     return m_cellCollection.GetSourceWordLabel(at);
@@ -73,7 +74,7 @@ private:
   //! Non-copyable: copy constructor and assignment operator not implemented.
   ChartRuleLookupManager &operator=(const ChartRuleLookupManager &);
 
-  const InputType &m_sentence;
+  const ChartParser &m_parser;
   const ChartCellCollectionBase &m_cellCollection;
 };
 

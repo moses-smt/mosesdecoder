@@ -74,9 +74,11 @@ protected:
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
   void ConvertWeightArgsPhrasePenalty();
   void ConvertWeightArgsWordPenalty();
+  void ConvertPhrasePenalty();
   void CreateWeightsMap();
   void WeightOverwrite();
   void AddFeature(const std::string &line);
+  void AddFeaturesCmd();
 
 
 public:

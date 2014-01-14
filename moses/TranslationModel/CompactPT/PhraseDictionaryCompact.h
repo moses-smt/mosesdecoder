@@ -74,7 +74,7 @@ public:
 
   void Load();
 
-  const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &source) const;
+  const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
 
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
@@ -83,7 +83,7 @@ public:
   void CleanUpAfterSentenceProcessing(const InputType &source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &,
     const ChartCellCollectionBase &) {
     assert(false);
     return 0;

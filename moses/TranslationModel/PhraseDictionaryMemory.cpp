@@ -34,6 +34,7 @@
 #include "moses/TranslationModel/RuleTable/LoaderFactory.h"
 #include "moses/TranslationModel/RuleTable/Loader.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.h"
+#include "moses/InputPath.h"
 
 using namespace std;
 
@@ -43,6 +44,10 @@ PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
   : RuleTableTrie("PhraseDictionaryMemory", line)
 {
   ReadParameters();
+
+  // caching for memory pt is pointless
+  m_maxCacheSize = 0;
+
 }
 
 TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollection(
@@ -54,7 +59,7 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
   return currNode.GetTargetPhraseCollection();
 }
 
-const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase& sourceOrig) const
+const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
 {
   Phrase source(sourceOrig);
   source.OnlyTheseFactors(m_inputFactors);
@@ -113,16 +118,49 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
 }
 
 ChartRuleLookupManager *PhraseDictionaryMemory::CreateRuleLookupManager(
-  const InputType &sentence,
+  const ChartParser &parser,
   const ChartCellCollectionBase &cellCollection)
 {
-  return new ChartRuleLookupManagerMemory(sentence, cellCollection, *this);
+  return new ChartRuleLookupManagerMemory(parser, cellCollection, *this);
 }
 
 void PhraseDictionaryMemory::SortAndPrune()
 {
   if (GetTableLimit()) {
     m_collection.Sort(GetTableLimit());
+  }
+}
+
+void PhraseDictionaryMemory::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+{
+  InputPathList::const_iterator iter;
+  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+    InputPath &node = **iter;
+    const Phrase &phrase = node.GetPhrase();
+    const InputPath *prevNode = node.GetPrevNode();
+
+    const PhraseDictionaryNodeMemory *prevPtNode = NULL;
+
+    if (prevNode) {
+      prevPtNode = static_cast<const PhraseDictionaryNodeMemory*>(prevNode->GetPtNode(*this));
+    } else {
+      // Starting subphrase.
+      assert(phrase.GetSize() == 1);
+      prevPtNode = &GetRootNode();
+    }
+
+    if (prevPtNode) {
+      Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
+      lastWord.OnlyTheseFactors(m_inputFactors);
+
+      const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
+      if (ptNode) {
+        const TargetPhraseCollection &targetPhrases = ptNode->GetTargetPhraseCollection();
+        node.SetTargetPhrases(*this, &targetPhrases, ptNode);
+      } else {
+        node.SetTargetPhrases(*this, NULL, NULL);
+      }
+    }
   }
 }
 

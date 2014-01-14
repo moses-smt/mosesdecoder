@@ -46,7 +46,7 @@ void PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const 
 
 const TargetPhraseCollection*
 PhraseDictionaryDynSuffixArray::
-GetTargetPhraseCollection(const Phrase& src) const
+GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
   typedef map<SAPhrase, vector<float> >::value_type pstat_entry;
   map<SAPhrase, vector<float> > pstats; // phrase (pair) statistics
@@ -97,7 +97,7 @@ deleteSnt(unsigned /* idx */, unsigned /* num2Del */)
 
 ChartRuleLookupManager*
 PhraseDictionaryDynSuffixArray::
-CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
+CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
 {
   CHECK(false);
   return 0;

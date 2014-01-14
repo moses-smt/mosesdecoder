@@ -36,7 +36,7 @@ MockHypothesisGuard::MockHypothesisGuard(
   const string& sourceSentence,
   const vector<Alignment>& alignments,
   const vector<string>& targetSegments)
-  : m_emptyTarget(),
+  : m_initialTransOpt(),
     m_sentence(),
     m_pp("PhrasePenalty"),
     m_wp("WordPenalty"),
@@ -55,7 +55,7 @@ MockHypothesisGuard::MockHypothesisGuard(
 
   //Initial empty hypothesis
   m_manager.ResetSentenceStats(m_sentence);
-  m_hypothesis = Hypothesis::Create(m_manager, m_sentence, m_emptyTarget);
+  m_hypothesis = Hypothesis::Create(m_manager, m_sentence, m_initialTransOpt);
 
   //create the chain
   vector<Alignment>::const_iterator ai = alignments.begin();

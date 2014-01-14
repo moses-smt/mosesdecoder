@@ -28,6 +28,7 @@
 
 namespace Moses
 {
+class ChartParser;
 
 /** Implementation of a SCFG rule table in a trie.  Looking up a rule of
  * length n symbols requires n look-ups to find the TargetPhraseCollection.
@@ -50,15 +51,18 @@ public:
   }
 
   ChartRuleLookupManager *CreateRuleLookupManager(
-    const InputType &,
+    const ChartParser &,
     const ChartCellCollectionBase &);
+
+  // only used by multi-model phrase table, and other meta-features
+  const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+  void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
 
   TO_STRING();
 
 protected:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
     const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& source) const;
 
   PhraseDictionaryNodeMemory &GetOrCreateNode(const Phrase &source
       , const TargetPhrase &target

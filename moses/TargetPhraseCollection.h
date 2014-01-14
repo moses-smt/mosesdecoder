@@ -36,13 +36,13 @@ class TargetPhraseCollection
 protected:
   friend std::ostream& operator<<(std::ostream &, const TargetPhraseCollection &);
 
-  // TODO boost::ptr_vector
-  std::vector<TargetPhrase*> m_collection;
+  typedef std::vector<const TargetPhrase*> CollType;
+  CollType m_collection;
 
 public:
   // iters
-  typedef std::vector<TargetPhrase*>::iterator iterator;
-  typedef std::vector<TargetPhrase*>::const_iterator const_iterator;
+  typedef CollType::iterator iterator;
+  typedef CollType::const_iterator const_iterator;
 
   iterator begin() {
     return m_collection.begin();
@@ -57,11 +57,16 @@ public:
     return m_collection.end();
   }
 
+  TargetPhraseCollection()
+  {}
+
+  explicit TargetPhraseCollection(const TargetPhraseCollection &copy);
+
   ~TargetPhraseCollection() {
-    Clear();
+    Remove();
   }
 
-  const std::vector<TargetPhrase*> &GetCollection() const {
+  const CollType &GetCollection() const {
     return m_collection;
   }
 
@@ -74,7 +79,7 @@ public:
   }
 
   //! return an entry of the collection
-  TargetPhrase* GetTargetPhrase(const size_t pos) const {
+  const TargetPhrase* GetTargetPhrase(const size_t pos) const {
      return m_collection[pos];
   }
 
@@ -97,10 +102,33 @@ public:
   void Prune(bool adhereTableLimit, size_t tableLimit);
   void Sort(bool adhereTableLimit, size_t tableLimit);
 
-  void Clear() {
+  void Remove() {
     RemoveAllInColl(m_collection);
   }
+  void Detach() {
+    m_collection.clear();
+  }
 
+};
+
+
+// LEGACY
+// DO NOT USE. NOT LEGACY CODE
+class TargetPhraseCollectionWithSourcePhrase : public TargetPhraseCollection
+{
+protected:
+  //friend std::ostream& operator<<(std::ostream &, const TargetPhraseCollectionWithSourcePhrase &);
+
+  // TODO boost::ptr_vector
+  std::vector<Phrase> m_sourcePhrases;
+
+public:
+  const std::vector<Phrase> &GetSourcePhrases() const {
+    return m_sourcePhrases;
+  }
+
+  void Add(TargetPhrase *targetPhrase);
+  void Add(TargetPhrase *targetPhrase, const Phrase &sourcePhrase);
 };
 
 }

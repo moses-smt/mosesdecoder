@@ -7,6 +7,7 @@
 #include <iostream>
 #include "Word.h"
 #include "InputType.h"
+#include "NonTerminal.h"
 
 namespace Moses
 {
@@ -25,6 +26,7 @@ public:
 
 protected:
   std::vector<Column> data;
+  NonTerminalSet m_defaultLabelSet;
 
   bool ReadFormat0(std::istream&,const std::vector<FactorType>& factorOrder);
   bool ReadFormat1(std::istream&,const std::vector<FactorType>& factorOrder);
@@ -71,8 +73,7 @@ public:
   TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
-    CHECK(false);
-    return *(new NonTerminalSet());
+    return m_defaultLabelSet;
   }
 
 };

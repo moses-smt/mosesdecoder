@@ -13,7 +13,9 @@ namespace Moses
 OpSequenceModel::OpSequenceModel(const std::string &line)
   :StatefulFeatureFunction("OpSequenceModel", 5, line )
 {
-
+  sFactor = 0;
+  tFactor = 0;
+  numFeatures = 5;
   ReadParameters();
 }
 
@@ -48,7 +50,7 @@ void OpSequenceModel:: Evaluate(const Phrase &source
   WordsBitmap myBitmap(source.GetSize());
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
-  vector<float> scores(5);
+  vector<float> scores;
   vector <int> alignments;
   int startIndex = 0;
   int endIndex = source.GetSize();
@@ -56,28 +58,27 @@ void OpSequenceModel:: Evaluate(const Phrase &source
   const AlignmentInfo &align = targetPhrase.GetAlignTerm();
   AlignmentInfo::const_iterator iter;
 
-
   for (iter = align.begin(); iter != align.end(); ++iter) {
     alignments.push_back(iter->first);
     alignments.push_back(iter->second);
   }
 
   for (int i = 0; i < targetPhrase.GetSize(); i++) {
-    if (targetPhrase.GetWord(i).IsOOV())
+    if (targetPhrase.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
     else
-      myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(0)->GetString().as_string());
+      myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(tFactor)->GetString().as_string());
   }
 
   for (int i = 0; i < source.GetSize(); i++) {
-    mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString().as_string());
+    mySourcePhrase.push_back(source.GetWord(i).GetFactor(sFactor)->GetString().as_string());
   }
 
   obj.setPhrases(mySourcePhrase , myTargetPhrase);
   obj.constructCepts(alignments,startIndex,endIndex-1,targetPhrase.GetSize());
   obj.computeOSMFeature(startIndex,myBitmap);
   obj.calculateOSMProb(*OSM);
-  obj.populateScores(scores);
+  obj.populateScores(scores,numFeatures);
   estimatedFutureScore.PlusEquals(this, scores);
 
 }
@@ -97,7 +98,7 @@ FFState* OpSequenceModel::Evaluate(
   osmHypothesis obj;
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
-  vector<float> scores(5);
+  vector<float> scores;
 
 
   //target.GetWord(0)
@@ -141,16 +142,16 @@ FFState* OpSequenceModel::Evaluate(
 
   for (int i = startIndex; i <= endIndex; i++) {
     myBitmap.SetValue(i,0); // resetting coverage of this phrase ...
-    mySourcePhrase.push_back(source.GetWord(i).GetFactor(0)->GetString().as_string());
+    mySourcePhrase.push_back(source.GetWord(i).GetFactor(sFactor)->GetString().as_string());
     // cerr<<mySourcePhrase[i]<<endl;
   }
 
   for (int i = 0; i < target.GetSize(); i++) {
 
-    if (target.GetWord(i).IsOOV())
+    if (target.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
     else
-      myTargetPhrase.push_back(target.GetWord(i).GetFactor(0)->GetString().as_string());
+      myTargetPhrase.push_back(target.GetWord(i).GetFactor(tFactor)->GetString().as_string());
 
   }
 
@@ -162,7 +163,8 @@ FFState* OpSequenceModel::Evaluate(
   obj.setPhrases(mySourcePhrase , myTargetPhrase);
   obj.computeOSMFeature(startIndex,myBitmap);
   obj.calculateOSMProb(*OSM);
-  obj.populateScores(scores);
+  obj.populateScores(scores,numFeatures);
+  //obj.print();
 
   /*
     if (bitmap.GetFirstGapPos() == NOT_FOUND)
@@ -176,14 +178,7 @@ FFState* OpSequenceModel::Evaluate(
     }
     */
 
-  /*
-    vector<float> scores(5);
-    scores[0] = 0.343423f;
-    scores[1] = 1.343423f;
-    scores[2] = 2.343423f;
-    scores[3] = 3.343423f;
-    scores[4] = 4.343423f;
-    */
+
 
   accumulator->PlusEquals(this, scores);
 
@@ -226,7 +221,7 @@ std::vector<float> OpSequenceModel::GetFutureScores(const Phrase &source, const 
   iter = m_futureCost.find(pp);
 //iter = m_coll.find(pp);
   if (iter == m_futureCost.end()) {
-    vector<float> scores(5, 0);
+    vector<float> scores(numFeatures, 0);
     scores[0] = unkOpProb;
     return scores;
   } else {
@@ -240,11 +235,23 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
 
   if (key == "path") {
     m_lmPath = value;
+  } else if (key == "numFeatures") {
+    numFeatures = Scan<int>(value);
   } else if (key == "order") {
     lmOrder = Scan<int>(value);
+  } else if (key == "sFactor") {
+    sFactor = Scan<int>(value);
+  } else if (key == "tFactor") {
+    tFactor = Scan<int>(value);
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
+}
+
+bool OpSequenceModel::IsUseable(const FactorMask &mask) const
+{
+  bool ret = mask[0];
+  return ret;
 }
 
 } // namespace

@@ -1,18 +1,14 @@
 #pragma once
 
-#include <string>
 #include "StatelessFeatureFunction.h"
-#include "util/check.hh"
 
 namespace Moses
 {
-class TargetPhrase;
-class ScoreComponentCollection;
 
-class PhrasePenaltyProducer : public StatelessFeatureFunction
+class PhrasePenalty : public StatelessFeatureFunction
 {
 public:
-  PhrasePenaltyProducer(const std::string &line);
+  PhrasePenalty(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -23,9 +19,20 @@ public:
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
 
-  virtual void Evaluate(const InputType &source
-                        , ScoreComponentCollection &scoreBreakdown) const;
+  void Evaluate(const Hypothesis& hypo,
+                        ScoreComponentCollection* accumulator) const
+  {}
+
+  void EvaluateChart(const ChartHypothesis &hypo,
+                             ScoreComponentCollection* accumulator) const
+  {}
+
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
 
 };
 
-}
+} //namespace
+

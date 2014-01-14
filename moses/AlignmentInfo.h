@@ -69,6 +69,8 @@ public:
     return m_collection;
   }
 
+  std::set<size_t> GetAlignmentsForSource(size_t sourcePos) const;
+
   size_t GetSize() const {
     return m_collection.size();
   }

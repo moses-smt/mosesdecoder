@@ -45,7 +45,7 @@ class WordsRange;
 class ChartRuleLookupManagerMemoryPerSentence : public ChartRuleLookupManagerCYKPlus
 {
 public:
-  ChartRuleLookupManagerMemoryPerSentence(const InputType &sentence,
+  ChartRuleLookupManagerMemoryPerSentence(const ChartParser &parser,
                                           const ChartCellCollectionBase &cellColl,
                                           const PhraseDictionaryFuzzyMatch &ruleTable);
 

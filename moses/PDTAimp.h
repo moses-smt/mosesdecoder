@@ -57,10 +57,10 @@ public:
   std::vector<FactorType> m_input,m_output;
   PhraseDictionaryTree *m_dict;
   const InputFeature *m_inputFeature;
-  typedef std::vector<TargetPhraseCollection const*> vTPC;
+  typedef std::vector<TargetPhraseCollectionWithSourcePhrase const*> vTPC;
   mutable vTPC m_tgtColls;
 
-  typedef std::map<Phrase,TargetPhraseCollection const*> MapSrc2Tgt;
+  typedef std::map<Phrase,TargetPhraseCollectionWithSourcePhrase const*> MapSrc2Tgt;
   mutable MapSrc2Tgt m_cache;
   PhraseDictionaryTreeAdaptor *m_obj;
   int useCache;
@@ -125,7 +125,7 @@ public:
     uniqSrcPhr.clear();
   }
 
-  TargetPhraseCollection const*
+  TargetPhraseCollectionWithSourcePhrase const*
   GetTargetPhraseCollection(Phrase const &src) const {
 
     CHECK(m_dict);
@@ -133,7 +133,7 @@ public:
 
     std::pair<MapSrc2Tgt::iterator,bool> piter;
     if(useCache) {
-      piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollection const*>(0)));
+      piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollectionWithSourcePhrase const*>(0)));
       if(!piter.second) return piter.first->second;
     } else if (m_cache.size()) {
       MapSrc2Tgt::const_iterator i=m_cache.find(src);
@@ -159,8 +159,13 @@ public:
 
     std::vector<TargetPhrase> tCands;
     tCands.reserve(cands.size());
+
     std::vector<std::pair<float,size_t> > costs;
     costs.reserve(cands.size());
+
+    std::vector<Phrase> sourcePhrases;
+    sourcePhrases.reserve(cands.size());
+
 
     // convert into TargetPhrases
     for(size_t i=0; i<cands.size(); ++i) {
@@ -182,12 +187,15 @@ public:
       }
 
       CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), &wacands[i], &src);
+
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);
+
+      sourcePhrases.push_back(src);
     }
 
-    TargetPhraseCollection *rv;
-    rv=PruneTargetCandidates(tCands,costs);
+    TargetPhraseCollectionWithSourcePhrase *rv;
+    rv=PruneTargetCandidates(tCands,costs, sourcePhrases);
     if(rv->IsEmpty()) {
       delete rv;
       return 0;
@@ -286,8 +294,6 @@ public:
       }
     }
 
-    targetPhrase.SetSourcePhrase(*srcPtr);
-
     if (alignmentString) {
       targetPhrase.SetAlignmentInfo(*alignmentString);
     }
@@ -300,10 +306,15 @@ public:
     targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
   }
 
-  TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,
-      std::vector<std::pair<float,size_t> >& costs) const {
+  TargetPhraseCollectionWithSourcePhrase* PruneTargetCandidates
+  (const std::vector<TargetPhrase> & tCands,
+   std::vector<std::pair<float,size_t> >& costs,
+   const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
-    TargetPhraseCollection *rv=new TargetPhraseCollection;
+    CHECK(tCands.size() == sourcePhrases.size());
+
+    TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
+
 
     // set limit to tableLimit or actual size, whatever is smaller
     std::vector<std::pair<float,size_t> >::iterator nth =
@@ -316,8 +327,13 @@ public:
 
     // add n top phrases to the return list
     for(std::vector<std::pair<float,size_t> >::iterator
-        it = costs.begin(); it != nth; ++it)
-      rv->Add(new TargetPhrase(tCands[it->second]));
+        it = costs.begin(); it != nth; ++it) {
+      size_t ind = it->second;
+      TargetPhrase *targetPhrase = new TargetPhrase(tCands[ind]);
+      const Phrase &sourcePhrase = sourcePhrases[ind];
+      rv->Add(targetPhrase, sourcePhrase);
+
+    }
 
     return rv;
   }
@@ -378,7 +394,7 @@ public:
     std::vector<float> weightTrans = StaticData::Instance().GetWeights(m_obj);
     std::vector<float> weightInput = StaticData::Instance().GetWeights(m_inputFeature);
     float weightWP = StaticData::Instance().GetWeightWordPenalty();
-    float weightPP = StaticData::Instance().GetWeightPhrasePenalty();
+//    float weightPP = StaticData::Instance().GetWeightPhrasePenalty();
 
     while(!stack.empty()) {
       State curr(stack.back());
@@ -465,7 +481,7 @@ public:
 
               //count word penalty
               score-=tcands[i].tokens.size() * weightWP;
-              score-=weightPP;
+//              score-=weightPP;
 
               std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].tokens,TScores()));
 
@@ -508,8 +524,12 @@ public:
 
       std::vector<TargetPhrase> tCands;
       tCands.reserve(i->second.size());
+
       std::vector<std::pair<float,size_t> > costs;
       costs.reserve(i->second.size());
+
+      std::vector<Phrase> sourcePhrases;
+      sourcePhrases.reserve(i->second.size());
 
       for(E2Costs::const_iterator j=i->second.begin(); j!=i->second.end(); ++j) {
         TScores const & scores=j->second;
@@ -522,10 +542,13 @@ public:
                            , scores.src);
         costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
         tCands.push_back(targetPhrase);
+
+        sourcePhrases.push_back(*scores.src);
+
         //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;
       }
 
-      TargetPhraseCollection *rv=PruneTargetCandidates(tCands,costs);
+      TargetPhraseCollectionWithSourcePhrase *rv=PruneTargetCandidates(tCands, costs, sourcePhrases);
 
       if(rv->IsEmpty())
         delete rv;

@@ -53,7 +53,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
 
 void PhraseDictionaryALSuffixArray::CleanUpAfterSentenceProcessing(const InputType &source)
 {
-  m_collection.Clear();
+  m_collection.Remove();
 }
 
 }

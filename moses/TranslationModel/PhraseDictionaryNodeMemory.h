@@ -144,7 +144,7 @@ public:
     return m_nonTermMap;
   }
 
-  void Clear();
+  void Remove();
 
   TO_STRING();
 };

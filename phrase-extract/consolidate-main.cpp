@@ -36,7 +36,7 @@ using namespace std;
 
 bool hierarchicalFlag = false;
 bool onlyDirectFlag = false;
-bool phraseCountFlag = true;
+bool phraseCountFlag = false;
 bool lowCountFlag = false;
 bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
@@ -77,9 +77,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--OnlyDirect") == 0) {
       onlyDirectFlag = true;
       cerr << "only including direct translation scores p(e|f)\n";
-    } else if (strcmp(argv[i],"--NoPhraseCount") == 0) {
-      phraseCountFlag = false;
-      cerr << "not including the phrase count feature\n";
+    } else if (strcmp(argv[i],"--PhraseCount") == 0) {
+      phraseCountFlag = true;
+      cerr << "including the phrase count feature\n";
     } else if (strcmp(argv[i],"--GoodTuring") == 0) {
       goodTuringFlag = true;
       if (i+1==argc) {

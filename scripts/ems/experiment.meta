@@ -515,13 +515,13 @@ build-osm
 	in: corpus word-alignment
 	out: osm-model
 	ignore-unless: operation-sequence-model
-	rerun-on-change: operation-sequence-model training-options script giza-settings 
-	template: $moses-script-dir/OSM/OSM-Train.sh IN0.$output-extension IN0.$input-extension IN1.$alignment-symmetrization-method $operation-sequence-model-order OUT $moses-src-dir $srilm-dir
+	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --srilm-dir $srilm-dir $operation-sequence-model-settings
 	default-name: model/OSM
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
-	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm domain-features baseline-extract
+	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm domain-features baseline-extract lexicalized-reordering
         only-existence-matters: domain-features
 	default-name: model/extract
 	ignore-if: suffix-array
@@ -834,14 +834,14 @@ filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains
 	out: filtered-dir
 	default-name: tuning/filtered
-	rerun-on-change: filter-settings
+	rerun-on-change: filter-settings ttable-binarizer
 	ignore-if: TRAINING:binarize-all
 	error: already exists. Please delete
 filter-devtest
 	in: input-devtest TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table
 	out: filtered-dir-devtest
 	default-name: tuning/filtered.devtest
- 	rerun-on-change: filter-settings
+ 	rerun-on-change: filter-settings ttable-binarizer
 	ignore-if: TRAINING:binarize-all
 	ignore-unless: use-mira	
 	error: already exists. Please delete
@@ -951,7 +951,7 @@ filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains
 	out: filtered-dir
 	default-name: evaluation/filtered
-	rerun-on-change: filter-settings report-precision-by-coverage
+	rerun-on-change: filter-settings report-precision-by-coverage ttable-binarizer
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
 	error: already exists. Please delete

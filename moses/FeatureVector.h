@@ -264,6 +264,7 @@ public:
 #endif
 
 private:
+  friend void swap(FVector &first, FVector &second);
 
   /** Internal get and set. */
   const FValue& get(const FName& name) const;
@@ -309,6 +310,12 @@ private:
 #endif
 
 };
+
+inline void swap(FVector &first, FVector &second)
+{
+  swap(first.m_features, second.m_features);
+  swap(first.m_coreFeatures, second.m_coreFeatures);
+}
 
 std::ostream& operator<<( std::ostream& out, const FVector& fv);
 //Element-wise operations

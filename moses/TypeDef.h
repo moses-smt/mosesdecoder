@@ -135,10 +135,11 @@ enum InputTypeEnum {
 };
 
 enum XmlInputType {
-  XmlPassThrough	= 0,
-  XmlIgnore				= 1,
-  XmlExclusive		= 2,
-  XmlInclusive		= 3
+  XmlPassThrough = 0,
+  XmlIgnore      = 1,
+  XmlExclusive   = 2,
+  XmlInclusive   = 3,
+  XmlConstraint	 = 4
 };
 
 enum DictionaryFind {

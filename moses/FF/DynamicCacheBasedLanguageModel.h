@@ -90,20 +90,29 @@ public:
 
   void Insert(std::string &entries);
 
-/*
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const;
-*/
-
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
 
-  virtual void Evaluate(const InputType &source
+  void Evaluate(const Hypothesis& hypo,
+                        ScoreComponentCollection* accumulator) const
+  {}
+
+  void EvaluateChart(const ChartHypothesis &hypo,
+                             ScoreComponentCollection* accumulator) const
+  {}
+
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
                         , ScoreComponentCollection &scoreBreakdown) const;
+/*
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+*/
+
 
   void SetQueryType(size_t type);
   void SetScoreType(size_t type);

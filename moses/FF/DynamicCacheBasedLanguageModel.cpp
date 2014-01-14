@@ -80,7 +80,7 @@ void DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp
     , ScoreComponentCollection &estimatedFutureScore) const
 {
   VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp, ....) START" << std::endl);
-  VERBOSE(2,"DynamicCacheBasedLanguageModeldd::Evaluate: |" << sp << "|" << std::endl);
+  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate: |" << sp << "|" << std::endl);
   float score;
   switch(m_query_type) {
   case CBLM_QUERY_TYPE_WHOLESTRING:
@@ -94,7 +94,7 @@ void DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp
   }
 
   score=-0.333333;
-  VERBOSE(2,"DynamicCacheBasedLanguageModeldd::Evaluate: |" << tp << "| score:|" << score << "|" << std::endl);
+  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate: |" << tp << "| score:|" << score << "|" << std::endl);
   VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp, ....) scoreBreakdown before:|" << scoreBreakdown << "|" << std::endl);
 //  scoreBreakdown.Assign(this, score);
   scoreBreakdown.PlusEquals(this, score);
@@ -102,6 +102,22 @@ void DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp
   VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp, ....) END" << std::endl);
 }
 
+void DynamicCacheBasedLanguageModel::Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const
+{
+  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const InputType &input, ....) START" << std::endl);
+  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate: |" << input << "|" << std::endl);
+  float score=-0.222222;
+  VERBOSE(2,"DynamicCacheBasedLanguageModeldd::Evaluate: score:|" << score << "|" << std::endl);
+//  scoreBreakdown.Assign(this, score);
+  scoreBreakdown.PlusEquals(this, score);
+
+  VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const InputType &input, ....) END" << std::endl);
+}
+
+
+/*
 void DynamicCacheBasedLanguageModel::Evaluate(const InputType &source
                         , ScoreComponentCollection &scoreBreakdown) const
 {
@@ -114,6 +130,7 @@ void DynamicCacheBasedLanguageModel::Evaluate(const InputType &source
 
   VERBOSE(2,"DynamicCacheBasedLanguageModel::Evaluate(const InputType &source, ....) END" << std::endl);
 }
+*/
 
 float DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& tp) const
 {

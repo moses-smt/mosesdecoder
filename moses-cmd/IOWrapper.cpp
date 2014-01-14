@@ -196,14 +196,31 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
 {
   CHECK(outputFactorOrder.size() > 0);
   const Phrase& phrase = edge.GetCurrTargetPhrase();
+  bool markUnknown = StaticData::Instance().GetMarkUnknown();
   if (reportAllFactors == true) {
     out << phrase;
   } else {
+    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().second;
+
     size_t size = phrase.GetSize();
     for (size_t pos = 0 ; pos < size ; pos++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-      out << *factor;
+
+      if (placeholderFactor != NOT_FOUND) {
+        const Factor *origFactor = phrase.GetFactor(pos, placeholderFactor);
+        if (origFactor) {
+          factor = origFactor;
+        }
+      }
       CHECK(factor);
+
+      //preface surface form with UNK if marking unknowns
+      const Word &word = phrase.GetWord(pos);
+      if(markUnknown && word.IsOOV()) {
+        out << "UNK" << *factor;
+      } else {
+        out << *factor;
+      }
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
@@ -349,7 +366,7 @@ void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 {
   if (hypo->GetPrevHypo()) {
     OutputInput(map, hypo->GetPrevHypo());
-    map[hypo->GetCurrSourceWordsRange().GetStartPos()] = hypo->GetSourcePhrase();
+    map[hypo->GetCurrSourceWordsRange().GetStartPos()] = &hypo->GetTranslationOption().GetInputPath().GetPhrase();
   }
 }
 
@@ -370,6 +387,10 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
     Backtrack(hypo);
     VERBOSE(3,"0" << std::endl);
     if (!m_surpressSingleBestOutput) {
+      if (StaticData::Instance().GetOutputHypoScore()) {
+        cout << hypo->GetTotalScore() << " ";
+      }
+
       if (StaticData::Instance().IsPathRecoveryEnabled()) {
         OutputInput(cout, hypo);
         cout << "||| ";
@@ -450,7 +471,7 @@ void OutputNBest(std::ostream& out
     }
 
     if (StaticData::Instance().IsPathRecoveryEnabled()) {
-      out << "|||";
+      out << " ||| ";
       OutputInput(out, edges[0]);
     }
 

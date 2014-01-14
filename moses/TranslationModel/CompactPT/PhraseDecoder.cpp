@@ -279,7 +279,6 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       tpv->push_back(TargetPhrase());
       targetPhrase = &tpv->back();
 
-      targetPhrase->SetSourcePhrase(sourcePhrase);
       alignment.clear();
       scores.clear();
 

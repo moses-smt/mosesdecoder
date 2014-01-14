@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_BackwardLMState_h
 #define moses_BackwardLMState_h
 
-#include "moses/FFState.h"
+#include "moses/FF/FFState.h"
 #include "moses/LM/Backward.h"
 
 #include "lm/state.hh"

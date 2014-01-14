@@ -11,7 +11,7 @@
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
 
-#include "moses/LexicalReordering.h"
+#include "moses/FF/LexicalReordering/LexicalReordering.h"
 
 #include "moses/FF/BleuScoreFeature.h"
 #include "moses/FF/TargetWordInsertionFeature.h"
@@ -127,7 +127,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("Generation", GenerationDictionary);
   MOSES_FNAME(BleuScoreFeature);
   MOSES_FNAME2("Distortion", DistortionScoreProducer);
-  MOSES_FNAME2("PhrasePenalty", PhrasePenaltyProducer);
   MOSES_FNAME2("WordPenalty", WordPenaltyProducer);
   MOSES_FNAME(InputFeature);
   MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
@@ -140,6 +139,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(OpSequenceModel);
+  MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
   MOSES_FNAME(DynamicCacheBasedLanguageModel);

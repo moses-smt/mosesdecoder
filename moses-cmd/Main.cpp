@@ -402,7 +402,7 @@ public:
 
     //list of unknown words
     if (m_unknownsCollector) {
-      const vector<Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
+      const vector<const Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
       ostringstream out;
       for (size_t i = 0; i < unknowns.size(); ++i) {
         out << *(unknowns[i]);

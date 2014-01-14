@@ -42,7 +42,7 @@ Parameter::Parameter()
   AddParam("mapping", "description of decoding steps");
   AddParam("beam-threshold", "b", "threshold for threshold pruning");
   AddParam("config", "f", "location of the configuration file");
-  AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
+  //AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam("decoding-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
@@ -51,6 +51,7 @@ Parameter::Parameter()
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
   AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
+  AddParam("mark-unknown", "mu", "mark unknown words in output");
   AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
   AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
   AddParam("max-phrase-length", "maximum phrase length (default 20)");
@@ -77,7 +78,7 @@ Parameter::Parameter()
   AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
   AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
   AddParam("early-distortion-cost", "edc", "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
-  AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
+  AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'constraint', 'ignore'");
   AddParam("xml-brackets", "xb", "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode" );
   AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
   AddParam("lminimum-bayes-risk", "lmbr", "use lattice miminum Bayes risk to determine best translation");
@@ -130,7 +131,6 @@ Parameter::Parameter()
   AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
   AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
   AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
-  AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("show-weights", "print feature weights and exit");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
@@ -194,8 +194,10 @@ Parameter::Parameter()
 
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
-  AddParam("feature-overwrite", "Override arguments in a particular featureu function with a particular key");
+  AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key");
+  AddParam("feature-add", "Add a feature function on the command line. Used by mira to add BLEU feature");
 
+  AddParam("feature", "All the feature functions should be here");
   AddParam("feature", "");
   AddParam("print-translation-option", "pto", "print translation option (without setting verbosity)");
   AddParam("print-id", "prefix translations with id. Default if false");
@@ -308,6 +310,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
     OverwriteParam("-" + paramShortName, paramName, argc, argv);
   }
 
+  AddFeaturesCmd();
+
   // logging of parameters that were set in either config or switch
   int verbose = 1;
   if (m_setting.find("verbose") != m_setting.end() &&
@@ -367,6 +371,23 @@ bool Parameter::LoadParam(int argc, char* argv[])
 
   // check if parameters make sense
   return Validate() && noErrorFlag;
+}
+
+void Parameter::AddFeaturesCmd()
+{
+  if (!isParamSpecified("feature-add")) {
+    return;
+  }
+
+  const PARAM_VEC &params = GetParam("feature-add");
+
+  PARAM_VEC::const_iterator iter;
+  for (iter = params.begin(); iter != params.end(); ++iter) {
+    const string &line = *iter;
+    AddFeature(line);
+  }
+
+  m_setting.erase("feature-add");
 }
 
 std::vector<float> &Parameter::GetWeights(const std::string &name)
@@ -868,6 +889,19 @@ void Parameter::ConvertWeightArgsWordPenalty()
 
 }
 
+void Parameter::ConvertPhrasePenalty()
+{
+  string oldWeightName = "weight-p";
+  if (isParamSpecified(oldWeightName)) {
+    CHECK(m_setting[oldWeightName].size() == 1);
+    float weight = Scan<float>(m_setting[oldWeightName][0]);
+    AddFeature("PhrasePenalty");
+    SetWeight("PhrasePenalty", 0, weight);
+
+    m_setting.erase(oldWeightName);
+  }
+}
+
 void Parameter::ConvertWeightArgs()
 {
   // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
@@ -882,7 +916,6 @@ void Parameter::ConvertWeightArgs()
     cerr << "Do not mix old and new format for specify weights";
   }
 
-  ConvertWeightArgsPhrasePenalty();
   ConvertWeightArgsWordPenalty();
   ConvertWeightArgsLM();
   ConvertWeightArgsSingleWeight("weight-slm", "SyntacticLM");
@@ -901,7 +934,8 @@ void Parameter::ConvertWeightArgs()
   ConvertWeightArgsSingleWeight("weight-e", "WordDeletion"); // TODO Can't find real name
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
 
-  AddFeature("PhrasePenalty");
+  ConvertPhrasePenalty();
+
   AddFeature("WordPenalty");
   AddFeature("UnknownWordPenalty");
 

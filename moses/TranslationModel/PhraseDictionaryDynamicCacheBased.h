@@ -81,8 +81,12 @@ public:
   void Load();
   void Load(const std::string file);
 
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &src) const;
-  ChartRuleLookupManager *CreateRuleLookupManager(const InputType &, const ChartCellCollectionBase &); 
+  const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &src) const;
+//  const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+  const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
+
+  ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &);
+
   void SetParameter(const std::string& key, const std::string& value);
 
   virtual void InitializeForInput(InputType const&) {

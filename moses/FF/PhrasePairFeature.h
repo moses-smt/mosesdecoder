@@ -37,13 +37,23 @@ public:
 
   bool IsUseable(const FactorMask &mask) const;
 
-  void Evaluate(const PhraseBasedFeatureContext& context,
+  void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartBasedFeatureContext& context,
+  void EvaluateChart(const ChartHypothesis& hypo,
                      ScoreComponentCollection*) const {
     throw std::logic_error("PhrasePairFeature not valid in chart decoder");
   }
+
+  void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , ScoreComponentCollection &scoreBreakdown) const
+  {}
+  void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
 
   void Load();
   void SetParameter(const std::string& key, const std::string& value);

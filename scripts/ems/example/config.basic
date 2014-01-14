@@ -378,6 +378,8 @@ alignment-symmetrization-method = grow-diag-final-and
 
 #operation-sequence-model = "yes"
 #operation-sequence-model-order = 5
+#operation-sequence-model-settings = ""
+
 ### compile Moses with --max-kenlm-order=9 if higher order is required
 
 ### if OSM training should be skipped,

@@ -74,7 +74,11 @@ bool le(int, int);
 bool lt(int, int);
 
 bool isAligned (SentenceAlignment &, int, int);
+
 int sentenceOffset = 0;
+
+std::vector<std::string> Tokenize(const std::string& str,
+                                  const std::string& delimiters = " \t");
 
 }
 
@@ -100,6 +104,8 @@ private:
   void extract(SentenceAlignment &);
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
   void writePhrasesToFile();
+  bool checkPlaceholders (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF);
+  bool isPlaceholder(const string &word);
 
   SentenceAlignment &m_sentence;
   const PhraseExtractionOptions &m_options;
@@ -205,7 +211,10 @@ int main(int argc, char* argv[])
       }
 
       options.initAllModelsOutputFlag(true);
-
+    } else if (strcmp(argv[i], "--Placeholders") == 0) {
+      ++i;
+      string str = argv[i];
+      options.placeholders = Tokenize(str.c_str(), ",");
     } else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
@@ -677,6 +686,10 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
     return;
   }
 
+  if (!checkPlaceholders(sentence, startE, endE, startF, endF)) {
+    return;
+  }
+
   for(int fi=startF; fi<=endF; fi++) {
     if (m_options.isTranslationFlag()) outextractstr << sentence.source[fi] << " ";
     if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.source[fi] << " ";
@@ -796,6 +809,63 @@ void ExtractTask::extractBase( SentenceAlignment &sentence )
   m_extractFile << outextractFile.str();
   m_extractFileInv << outextractFileInv.str();
 
+}
+
+bool ExtractTask::checkPlaceholders (const SentenceAlignment &sentence, int startE, int endE, int startF, int endF)
+{
+  for (size_t pos = startF; pos <= endF; ++pos) {
+    const string &word = sentence.source[pos];
+    if (isPlaceholder(word)) {
+      if (sentence.alignedCountS[pos] != 1) {
+        return false;
+      }
+    }
+  }
+
+  for (size_t pos = startE; pos <= endE; ++pos) {
+    const string &word = sentence.target[pos];
+    if (isPlaceholder(word)) {
+      if (sentence.alignedToT[pos].size() != 1) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool ExtractTask::isPlaceholder(const string &word)
+{
+  for (size_t i = 0; i < m_options.placeholders.size(); ++i) {
+    const string &placeholder = m_options.placeholders[i];
+    if (word == placeholder) {
+      return true;
+    }
+  }
+  return false;
+}
+/** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument.
+		The separator can only be 1 character long. The default delimiters are space or tab
+*/
+std::vector<std::string> Tokenize(const std::string& str,
+                                  const std::string& delimiters)
+{
+  std::vector<std::string> tokens;
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+  while (std::string::npos != pos || std::string::npos != lastPos) {
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
+
+  return tokens;
 }
 
 }

@@ -97,6 +97,9 @@ public:
     return vertex.BestChild();
   }
 
+  void Evaluate(const InputType &input, const InputPath &inputPath) {
+    // TODO for input lattice
+  }
 private:
   lm::WordIndex Convert(const Word &word) const;
 

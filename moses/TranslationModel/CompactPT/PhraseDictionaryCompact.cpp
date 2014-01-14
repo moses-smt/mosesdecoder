@@ -107,7 +107,7 @@ struct CompareTargetPhrase {
 };
 
 const TargetPhraseCollection*
-PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) const
+PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
 {
 
   // There is no souch source phrase if source phrase is longer than longest
@@ -195,6 +195,8 @@ void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &so
 
   PhraseCache temp;
   temp.swap(ref);
+
+  ReduceCache();
 }
 
 }

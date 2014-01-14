@@ -20,6 +20,7 @@
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
 #include "ChartTranslationOptions.h"
+#include "ChartManager.h"
 #include "RuleCubeItem.h"
 #include "RuleCubeQueue.h"
 #include "WordsRange.h"
@@ -38,8 +39,7 @@ std::size_t hash_value(const HypothesisDimension &dimension)
 
 RuleCubeItem::RuleCubeItem(const ChartTranslationOptions &transOpt,
                            const ChartCellCollection &/*allChartCells*/)
-  : m_translationDimension(0,
-                           transOpt.GetTargetPhraseCollection().GetCollection())
+  : m_translationDimension(0, transOpt.GetTargetPhrases())
   , m_hypothesis(0)
 {
   CreateHypothesisDimensions(transOpt.GetStackVec());
@@ -66,7 +66,7 @@ RuleCubeItem::~RuleCubeItem()
 
 void RuleCubeItem::EstimateScore()
 {
-  m_score = m_translationDimension.GetTargetPhrase()->GetFutureScore();
+  m_score = m_translationDimension.GetTranslationOption()->GetPhrase().GetFutureScore();
   std::vector<HypothesisDimension>::const_iterator p;
   for (p = m_hypothesisDimensions.begin();
        p != m_hypothesisDimensions.end(); ++p) {
@@ -78,6 +78,16 @@ void RuleCubeItem::CreateHypothesis(const ChartTranslationOptions &transOpt,
                                     ChartManager &manager)
 {
   m_hypothesis = new ChartHypothesis(transOpt, *this, manager);
+
+  const Phrase *constraint = manager.GetConstraint();
+  if (constraint) {
+  	Phrase hypoPhrase = m_hypothesis->GetOutputPhrase();
+  	if (!constraint->Contains(hypoPhrase)) {
+  		delete m_hypothesis;
+  		m_hypothesis = NULL;
+  		return;
+  	}
+  }
   m_hypothesis->Evaluate();
   m_score = m_hypothesis->GetTotalScore();
 }
