@@ -32,12 +32,13 @@ using namespace std;
 namespace Moses
 {
 //! contructor
-//the parent "PhraseDictionary" is created disabling its internal cache for translation options (third parameter set to 0)
 PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::string &line)
-: PhraseDictionary("PhraseDictionaryDynamicCacheBased", line, 0)
+: PhraseDictionary("PhraseDictionaryDynamicCacheBased", line)
 {
-
   std::cerr << "Initializing PhraseDictionaryDynamicCacheBased feature..." << std::endl;
+
+  //disabling internal cache (provided by PhraseDictionary) for translation options (third parameter set to 0)
+  m_maxCacheSize = 0;
 
   m_score_type = CBTM_SCORE_TYPE_HYPERBOLA;
   m_maxAge = 1000;
