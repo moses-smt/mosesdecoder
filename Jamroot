@@ -4,6 +4,8 @@
 #Language models (optional):
 #--with-irstlm=/path/to/irstlm 
 #--with-srilm=/path/to/srilm See moses/LM/Jamfile for more options.
+#--with-maxent-srilm=true (requires a maxent-enabled version of SRILM to be specified via --with-srilm)
+#--with-nplm=/path/to/nplm
 #--with-randlm=/path/to/randlm
 #KenLM is always compiled.  
 #
@@ -78,6 +80,7 @@ external-lib z ;
 
 lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
 requirements += <library>dl ;
+requirements += <toolset>gcc:<cxxflags>-std=c++0x ;
 
 if $NT {
 	lib mman : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
@@ -91,7 +94,7 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
     requirements += <library>tcmalloc_and_profiler <library>unwind <cflags>-fno-omit-frame-pointer <cxxflags>-fno-omit-frame-pointer ;
   } else {
     external-lib tcmalloc_minimal ;
-    requirements += <threading>multi:<library>$(tcmalloc) ;
+    requirements += <threading>multi:<library>$(tcmalloc_minimal) ;
   }
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
@@ -139,7 +142,28 @@ project : requirements
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;
 
-alias programs : lm//programs moses-chart-cmd//moses_chart moses-cmd//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor mira//mira contrib/server//mosesserver  ;
+alias programs : 
+lm//programs 
+moses-chart-cmd//moses_chart 
+moses-cmd//programs 
+OnDiskPt//CreateOnDiskPt 
+OnDiskPt//queryOnDiskPt 
+mert//programs 
+misc//programs 
+symal 
+phrase-extract 
+phrase-extract//lexical-reordering 
+phrase-extract//extract-ghkm 
+phrase-extract//pcfg-extract 
+phrase-extract//pcfg-score 
+biconcor 
+mira//mira 
+contrib/server//mosesserver 
+#moses/mm//mtt-build 
+#moses/mm//mtt-dump 
+#moses/mm//symal2mam 
+#moses/mm//custom-pt 
+;
 
 install-bin-libs programs ;
 install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;

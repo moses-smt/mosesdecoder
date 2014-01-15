@@ -1,5 +1,8 @@
 #include "ExternalFeature.h"
 #include <dlfcn.h>
+#include <stdlib.h>
+#include <iostream>
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -7,9 +10,9 @@ namespace Moses
 {
 ExternalFeatureState::ExternalFeatureState(int stateSize, void *data)
 {
-	m_stateSize = stateSize;
-	m_data = malloc(stateSize);
-	memcpy(m_data, data, stateSize);
+  m_stateSize = stateSize;
+  m_data = malloc(stateSize);
+  memcpy(m_data, data, stateSize);
 }
 
 void ExternalFeature::Load()
@@ -17,27 +20,24 @@ void ExternalFeature::Load()
   string nparam = "testing";
 
   if (m_path.size() < 1) {
-	cerr << "External requires a path to a dynamic library!\n";
-	abort();
+    UTIL_THROW2("External requires a path to a dynamic library");
   }
   lib_handle = dlopen(m_path.c_str(), RTLD_LAZY);
   if (!lib_handle) {
-	cerr << "dlopen reports: " << dlerror() << endl;
-	cerr << "Did you provide a full path to the dynamic library?\n";
-	abort();
+    UTIL_THROW2("dlopen reports: " << dlerror() << ". Did you provide a full path to the dynamic library?";);
   }
   CdecFF* (*fn)(const string&) =
-	(CdecFF* (*)(const string&))(dlsym(lib_handle, "create_ff"));
+    (CdecFF* (*)(const string&))(dlsym(lib_handle, "create_ff"));
   if (!fn) {
-	cerr << "dlsym reports: " << dlerror() << endl;
-	abort();
+    UTIL_THROW2("dlsym reports: " << dlerror());
   }
   ff_ext = (*fn)(nparam);
   m_stateSize = ff_ext->StateSize();
 
 }
 
-ExternalFeature::~ExternalFeature() {
+ExternalFeature::~ExternalFeature()
+{
   delete ff_ext;
   dlclose(lib_handle);
 }
@@ -45,9 +45,8 @@ ExternalFeature::~ExternalFeature() {
 void ExternalFeature::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "path") {
-	  m_path = value;
-  }
-  else {
+    m_path = value;
+  } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
@@ -57,7 +56,7 @@ FFState* ExternalFeature::Evaluate(
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
-	  return new ExternalFeatureState(m_stateSize);
+  return new ExternalFeatureState(m_stateSize);
 }
 
 FFState* ExternalFeature::EvaluateChart(
@@ -65,7 +64,7 @@ FFState* ExternalFeature::EvaluateChart(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-	  return new ExternalFeatureState(m_stateSize);
+  return new ExternalFeatureState(m_stateSize);
 }
 
 

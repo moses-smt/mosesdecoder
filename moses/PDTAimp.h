@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 // vim:tabstop=2
 
@@ -11,7 +12,9 @@
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "Util.h"
 #include "util/tokenize_piece.hh"
+#include "util/exception.hh"
 #include "moses/FF/InputFeature.h"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -43,10 +46,10 @@ protected:
       distinctE(0) {
     m_numInputScores = 0;
     const StaticData &staticData = StaticData::Instance();
-    m_inputFeature = staticData.GetInputFeature();
+    m_inputFeature = &InputFeature::Instance();
 
     if (m_inputFeature) {
-      const PhraseDictionary *firstPt = staticData.GetPhraseDictionaries()[0];
+      const PhraseDictionary *firstPt = PhraseDictionary::GetColl()[0];
       if (firstPt == m_obj) {
         m_numInputScores = m_inputFeature->GetNumScoreComponents();
       }
@@ -116,7 +119,7 @@ public:
   }
 
   void CleanUp() {
-    CHECK(m_dict);
+    assert(m_dict);
     m_dict->FreeMemory();
     for(size_t i=0; i<m_tgtColls.size(); ++i) delete m_tgtColls[i];
     m_tgtColls.clear();
@@ -128,7 +131,7 @@ public:
   TargetPhraseCollectionWithSourcePhrase const*
   GetTargetPhraseCollection(Phrase const &src) const {
 
-    CHECK(m_dict);
+	assert(m_dict);
     if(src.GetSize()==0) return 0;
 
     std::pair<MapSrc2Tgt::iterator,bool> piter;
@@ -225,8 +228,7 @@ public:
 
     std::string binFname=filePath+".binphr.idx";
     if(!FileExists(binFname.c_str())) {
-      UserMessage::Add( "bin ttable does not exist\n");
-      abort();
+      UTIL_THROW2( "bin ttable does not exist");
       //TRACE_ERR( "bin ttable does not exist -> create it\n");
       //InputFileStream in(filePath);
       //m_dict->Create(in,filePath);
@@ -311,7 +313,8 @@ public:
    std::vector<std::pair<float,size_t> >& costs,
    const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
-    CHECK(tCands.size() == sourcePhrases.size());
+    UTIL_THROW_IF2(tCands.size() != sourcePhrases.size(),
+    		"Number of target phrases must equal number of source phrases");
 
     TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
 
@@ -323,7 +326,7 @@ public:
                        m_obj->m_tableLimit : costs.size());
 
     // find the nth phrase according to future cost
-    std::nth_element(costs.begin(),nth ,costs.end());
+    NTH_ELEMENT3(costs.begin(),nth ,costs.end());
 
     // add n top phrases to the return list
     for(std::vector<std::pair<float,size_t> >::iterator
@@ -348,7 +351,7 @@ public:
   };
 
   void CacheSource(ConfusionNet const& src) {
-    CHECK(m_dict);
+	assert(m_dict);
     const size_t srcSize=src.GetSize();
 
     std::vector<size_t> exploredPaths(srcSize+1,0);
@@ -399,7 +402,7 @@ public:
       State curr(stack.back());
       stack.pop_back();
 
-      CHECK(curr.end()<srcSize);
+      UTIL_THROW_IF2(curr.end() >= srcSize, "Error");
       const ConfusionNet::Column &currCol=src[curr.end()];
       // in a given column, loop over all possibilities
       for(size_t colidx=0; colidx<currCol.size(); ++colidx) {
@@ -409,7 +412,8 @@ public:
         bool isEpsilon=(s=="" || s==EPSILON);
 
         //assert that we have the right number of link params in this CN option
-        CHECK(currCol[colidx].second.denseScores.size() >= m_numInputScores);
+        UTIL_THROW_IF2(currCol[colidx].second.denseScores.size() < m_numInputScores,
+        		"Incorrect number of input scores");
 
         // do not start with epsilon (except at first position)
         if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue;
@@ -446,10 +450,14 @@ public:
             stack.back().src=newSrc;
           }
 
+          std::cerr << "newSrc=" << newSrc << std::endl;
+
           std::vector<StringTgtCand> tcands;
           // now, look up the target candidates (aprx. TargetPhraseCollection) for
           // the current path through the CN
           m_dict->GetTargetCandidates(nextP,tcands);
+
+          std::cerr << "tcands=" << tcands.size() << std::endl;
 
           if(newRange.second>=exploredPaths.size()+newRange.first)
             exploredPaths.resize(newRange.second-newRange.first+1,0);
@@ -463,7 +471,8 @@ public:
             for(size_t i=0; i<tcands.size(); ++i) {
               //put input scores in first - already logged, just drop in directly
               std::vector<float> transcores(m_obj->GetNumScoreComponents());
-              CHECK(transcores.size()==weightTrans.size());
+              UTIL_THROW_IF2(transcores.size() != weightTrans.size(),
+            		  "Incorrect number of translation scores");
 
               //put in phrase table scores, logging as we insert
               std::transform(tcands[i].scores.begin()
@@ -515,10 +524,10 @@ public:
     m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize(),0));
 
     for(std::map<Range,E2Costs>::const_iterator i=cov2cand.begin(); i!=cov2cand.end(); ++i) {
-      CHECK(i->first.first<m_rangeCache.size());
-      CHECK(i->first.second>0);
-      CHECK(static_cast<size_t>(i->first.second-1)<m_rangeCache[i->first.first].size());
-      CHECK(m_rangeCache[i->first.first][i->first.second-1]==0);
+      assert(i->first.first<m_rangeCache.size());
+      assert(i->first.second>0);
+      assert(static_cast<size_t>(i->first.second-1)<m_rangeCache[i->first.first].size());
+      assert(m_rangeCache[i->first.first][i->first.second-1]==0);
 
       std::vector<TargetPhrase> tCands;
       tCands.reserve(i->second.size());

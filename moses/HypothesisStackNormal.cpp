@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "StaticData.h"
 #include "Manager.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -88,6 +89,13 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 
 bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 {
+  if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
+    m_manager.GetSentenceStats().AddDiscarded();
+    VERBOSE(3,"discarded, constraint" << std::endl);
+    FREEHYPO(hypo);
+    return false;
+  }
+
   // too bad for stack. don't bother adding hypo into collection
   if (!StaticData::Instance().GetDisableDiscarding() &&
       hypo->GetTotalScore() < m_worstScore
@@ -109,7 +117,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
   // equiv hypo exists, recombine with other hypo
   iterator &iterExisting = addRet.first;
   Hypothesis *hypoExisting = *iterExisting;
-  CHECK(iterExisting != m_hypos.end());
+  assert(iterExisting != m_hypos.end());
 
   m_manager.GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 
@@ -128,8 +136,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
     bool added = Add(hypo).second;
     if (!added) {
       iterExisting = m_hypos.find(hypo);
-      TRACE_ERR("Offending hypo = " << **iterExisting << endl);
-      abort();
+      UTIL_THROW2("Offending hypo = " << **iterExisting);
     }
     return false;
   } else {

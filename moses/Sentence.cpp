@@ -21,13 +21,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <stdexcept>
+#include <boost/algorithm/string.hpp>
 
 #include "Sentence.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
 #include "ChartTranslationOptions.h"
 #include "Util.h"
-#include <boost/algorithm/string.hpp>
+#include "XmlOption.h"
+#include "FactorCollection.h"
 
 using namespace std;
 
@@ -119,6 +121,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   if (meta.find("weight-setting") != meta.end()) {
     this->SetWeightSetting(meta["weight-setting"]);
     this->SetSpecifiesWeightSetting(true);
+    staticData.SetWeightSetting(meta["weight-setting"]);
   } else {
     this->SetSpecifiesWeightSetting(false);
   }
@@ -196,7 +199,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
 void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
   if (placeholderFactor == NOT_FOUND) {
     return;
   }
@@ -216,7 +219,7 @@ Sentence::CreateTranslationOptionCollection() const
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
-  CHECK(rv);
+  assert(rv);
   return rv;
 }
 void Sentence::Print(std::ostream& out) const

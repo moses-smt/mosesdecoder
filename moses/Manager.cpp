@@ -40,6 +40,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
 #include "moses/FF/DistortionScoreProducer.h"
+#include "moses/LM/Base.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -60,7 +62,7 @@ Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm sea
   ,m_lineNumber(lineNumber)
   ,m_source(source)
 {
-  StaticData::Instance().InitializeForInput(source);
+  StaticData::Instance().InitializeForInput(m_source);
 }
 
 Manager::~Manager()
@@ -78,8 +80,11 @@ Manager::~Manager()
  */
 void Manager::ProcessSentence()
 {
-  // reset statistics
+  // initialize statistics
   ResetSentenceStats(m_source);
+  IFVERBOSE(2) {
+    GetSentenceStats().StartTimeTotal();
+  }
 
   // check if alternate weight setting is used
   // this is not thread safe! it changes StaticData
@@ -92,15 +97,15 @@ void Manager::ProcessSentence()
   }
 
   // get translation options
-  Timer getOptionsTime;
-  getOptionsTime.start();
+  IFVERBOSE(1) {
+    GetSentenceStats().StartTimeCollectOpts();
+  }
   m_transOptColl->CreateTranslationOptions();
-  VERBOSE(1, "Line "<< m_lineNumber << ": Collecting options took " << getOptionsTime << " seconds" << endl);
 
   // some reporting on how long this took
-  IFVERBOSE(2) {
-    // TODO: XXX: Hack: SentenceStats.h currently requires all values to be of type clock_t
-    GetSentenceStats().AddTimeCollectOpts((clock_t) (getOptionsTime.get_elapsed_time() * CLOCKS_PER_SEC));
+  IFVERBOSE(1) {
+    GetSentenceStats().StopTimeCollectOpts();
+    TRACE_ERR("Line "<< m_lineNumber << ": Collecting options took " << GetSentenceStats().GetTimeCollectOpts() << " seconds" << endl);
   }
 
   // search for best translation with the specified algorithm
@@ -108,6 +113,10 @@ void Manager::ProcessSentence()
   searchTime.start();
   m_search->ProcessSentence();
   VERBOSE(1, "Line " << m_lineNumber << ": Search took " << searchTime << " seconds" << endl);
+    IFVERBOSE(2) {
+    GetSentenceStats().StopTimeTotal();
+    TRACE_ERR(GetSentenceStats());
+  }
 }
 
 /**
@@ -238,7 +247,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
   for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * nBestFactor) ; iteration++) {
     // get next best from list of contenders
     TrellisPath *path = contenders.pop();
-    CHECK(path);
+    UTIL_THROW_IF2(path == NULL, "path is NULL");
     // create deviations from current best
     path->CreateDeviantPaths(contenders);
     if(onlyDistinct) {
@@ -311,11 +320,13 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
     //forward from current
     if (i->forward >= 0) {
       map<int,const Hypothesis*>::const_iterator idToHypIter = idToHyp.find(i->forward);
-      CHECK(idToHypIter != idToHyp.end());
+      UTIL_THROW_IF2(idToHypIter == idToHyp.end(),
+    		  "Couldn't find hypothesis " << i->forward);
       const Hypothesis* nextHypo = idToHypIter->second;
       outgoingHyps[hypo].insert(nextHypo);
       map<int,float>::const_iterator fscoreIter = fscores.find(nextHypo->GetId());
-      CHECK(fscoreIter != fscores.end());
+      UTIL_THROW_IF2(fscoreIter == fscores.end(),
+    		  "Couldn't find scores for hypothsis " << nextHypo->GetId());
       edgeScores[Edge(hypo->GetId(),nextHypo->GetId())] =
         i->fscore - fscoreIter->second;
     }
@@ -332,15 +343,18 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
       map<const Hypothesis*, set<const Hypothesis*> >::const_iterator outIter =
         outgoingHyps.find(i->hypo);
 
-      CHECK(outIter != outgoingHyps.end());
+      UTIL_THROW_IF2(outIter == outgoingHyps.end(),
+    		  "Couldn't find hypothesis " << i->hypo->GetId());
       float sigma = 0;
       for (set<const Hypothesis*>::const_iterator j = outIter->second.begin();
            j != outIter->second.end(); ++j) {
         map<const Hypothesis*, float>::const_iterator succIter = sigmas.find(*j);
-        CHECK(succIter != sigmas.end());
+        UTIL_THROW_IF2(succIter == sigmas.end(),
+        		"Couldn't find hypothesis " << (*j)->GetId());
         map<Edge,float>::const_iterator edgeScoreIter =
           edgeScores.find(Edge(i->hypo->GetId(),(*j)->GetId()));
-        CHECK(edgeScoreIter != edgeScores.end());
+        UTIL_THROW_IF2(edgeScoreIter == edgeScores.end(),
+        		"Couldn't find edge for hypothesis " << (*j)->GetId());
         float term = edgeScoreIter->second + succIter->second; // Add sigma(*j)
         if (sigma == 0) {
           sigma = term;
@@ -354,7 +368,7 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
 
   //The actual sampling!
   const Hypothesis* startHypo = searchGraph.back().hypo;
-  CHECK(startHypo->GetId() == 0);
+  UTIL_THROW_IF2(startHypo->GetId() != 0, "Expecting the start hypothesis ");
   for (size_t i = 0; i < count; ++i) {
     vector<const Hypothesis*> path;
     path.push_back(startHypo);
@@ -372,9 +386,11 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
       for (set<const Hypothesis*>::const_iterator j = outIter->second.begin();
            j != outIter->second.end(); ++j) {
         candidates.push_back(*j);
-        CHECK(sigmas.find(*j) != sigmas.end());
+        UTIL_THROW_IF2(sigmas.find(*j) == sigmas.end(),
+        		"Hypothesis " << (*j)->GetId() << " not found");
         Edge edge(path.back()->GetId(),(*j)->GetId());
-        CHECK(edgeScores.find(edge) != edgeScores.end());
+        UTIL_THROW_IF2(edgeScores.find(edge) == edgeScores.end(),
+        		"Edge not found");
         candidateScores.push_back(sigmas[*j]  + edgeScores[edge]);
         if (scoreTotal == 0) {
           scoreTotal = candidateScores.back();
@@ -461,8 +477,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
                         << "\ta=";
 
   // phrase table scores
-  const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionary*> &phraseTables = staticData.GetPhraseDictionaries();
+  const std::vector<PhraseDictionary*> &phraseTables = PhraseDictionary::GetColl();
   std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
   for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable) {
     const PhraseDictionary *phraseTable = *iterPhraseTable;
@@ -530,6 +545,18 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   outputWordGraphStream << endl;
 }
 
+void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) {
+  Phrase translation;
+  hypo->GetOutputPhrase(translation);
+  const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for (size_t i = 0; i < statefulFFs.size(); ++i) {
+    const StatefulFeatureFunction *ff = statefulFFs[i];
+    if (const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff)) {	
+      lm->ReportHistoryOrder(out, translation);
+    }
+  }
+}
+
 void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const
 {
   const StaticData &staticData = StaticData::Instance();
@@ -541,7 +568,6 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
                         << "UTTERANCE=" << translationId << endl;
 
   size_t linkId = 0;
-  size_t stackNo = 1;
   std::vector < HypothesisStack* >::const_iterator iterStack;
   for (iterStack = ++hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack) {
     const HypothesisStack &stack = **iterStack;
@@ -656,7 +682,6 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
   outputSearchGraphStream.setf(std::ios::fixed);
   outputSearchGraphStream.precision(6);
 
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf  = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff   = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -674,15 +699,14 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
       featureIndex = OutputFeatureWeightsForSLF(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, gds[i], outputSearchGraphStream);
   }
-
 }
 
 void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std::ostream &outputSearchGraphStream) const
@@ -695,7 +719,6 @@ void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std:
   // const ScoreComponentCollection& scoreCollection = hypo->GetScoreBreakdown();
   // outputSearchGraphStream << scoreCollection << endl;
 
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -713,11 +736,11 @@ void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std:
       featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, gds[i], outputSearchGraphStream);
   }
@@ -729,7 +752,6 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
   outputSearchGraphStream.setf(std::ios::fixed);
   outputSearchGraphStream.precision(6);
 
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -747,11 +769,11 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
       featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, gds[i], outputSearchGraphStream);
   }
@@ -943,9 +965,8 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
           mosesHypothesisID = searchGraph[lineNumber].hypo->GetId();
         }
         //	int actualHypergraphHypothesisID = mosesIDToHypergraphID[mosesHypothesisID];
-        UTIL_THROW_IF(
+        UTIL_THROW_IF2(
           (hypergraphHypothesisID != mosesIDToHypergraphID[mosesHypothesisID]),
-          util::Exception,
           "Error while writing search lattice as hypergraph for sentence " << translationId << ". " <<
           "Moses node " << mosesHypothesisID << " was expected to have hypergraph id " << hypergraphHypothesisID <<
           ", but actually had hypergraph id " << mosesIDToHypergraphID[mosesHypothesisID] <<
@@ -959,9 +980,8 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
         } else {
           int startNode = mosesIDToHypergraphID[prevHypo->GetId()];
           //	  VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " has parent node " << startNode << std::endl)
-          UTIL_THROW_IF(
+          UTIL_THROW_IF2(
             (startNode >= hypergraphHypothesisID),
-            util::Exception,
             "Error while writing search lattice as hypergraph for sentence" << translationId << ". " <<
             "The nodes must be output in topological order. The code attempted to violate this restriction."
           );
@@ -1324,7 +1344,8 @@ void Manager::SerializeSearchGraphPB(
           ArcList::const_iterator iterArcList;
           for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList) {
             const Hypothesis *loserHypo = *iterArcList;
-            CHECK(connected[loserHypo->GetId()]);
+            UTIL_THROW_IF2(!connected[loserHypo->GetId()],
+            		"Hypothesis " << loserHypo->GetId() << " is not connected");
             Hypergraph_Edge* edge = hg.add_edges();
             SerializeEdgeInfo(loserHypo, edge);
             edge->set_head_node(headNodeIdx);
@@ -1419,7 +1440,7 @@ void Manager::GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
     } // end for hypo
   } // end for stack
 
-  for (std::vector< const Hypothesis *>::iterator it = connectedList.begin(); it != connectedList.end(); ++it) {
+  for (auto it = connectedList.begin(); it != connectedList.end(); ++it) {
     float estimatedScore = (*it)->GetScore() + forwardScore[(*it)->GetId()];
     estimatedScores.push_back(estimatedScore);
   }

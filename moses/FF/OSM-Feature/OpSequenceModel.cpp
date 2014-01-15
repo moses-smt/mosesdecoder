@@ -1,8 +1,8 @@
 #include <fstream>
 #include "OpSequenceModel.h"
 #include "osmHyp.h"
-#include "util/check.hh"
 #include "moses/Util.h"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace lm::ngram;
@@ -11,12 +11,17 @@ namespace Moses
 {
 
 OpSequenceModel::OpSequenceModel(const std::string &line)
-  :StatefulFeatureFunction("OpSequenceModel", 5, line )
+  :StatefulFeatureFunction(5, line )
 {
   sFactor = 0;
   tFactor = 0;
   numFeatures = 5;
   ReadParameters();
+}
+
+OpSequenceModel::~OpSequenceModel()
+{
+	delete OSM;
 }
 
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
@@ -32,9 +37,7 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 
 void OpSequenceModel::Load()
 {
-
   readLanguageModel(m_lmPath.c_str());
-
 }
 
 
@@ -196,13 +199,13 @@ FFState* OpSequenceModel::EvaluateChart(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  abort();
+	UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
 
 }
 
 const FFState* OpSequenceModel::EmptyHypothesisState(const InputType &input) const
 {
-  cerr << "OpSequenceModel::EmptyHypothesisState()" << endl;
+  VERBOSE(3,"OpSequenceModel::EmptyHypothesisState()" << endl);
 
   State startState = OSM->BeginSentenceState();
 
@@ -235,13 +238,14 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
 
   if (key == "path") {
     m_lmPath = value;
-  } else if (key == "numFeatures") {
-    numFeatures = Scan<int>(value);
-  } else if (key == "order") {
-    lmOrder = Scan<int>(value);
-  } else if (key == "sFactor") {
+  } else if (key == "support-features") {
+    if(value == "no")
+      numFeatures = 1;
+    else
+      numFeatures = 5;
+  } else if (key == "input-factor") {
     sFactor = Scan<int>(value);
-  } else if (key == "tFactor") {
+  } else if (key == "output-factor") {
     tFactor = Scan<int>(value);
   } else {
     StatefulFeatureFunction::SetParameter(key, value);

@@ -22,7 +22,7 @@
 #include <fstream>
 #include "Vocab.h"
 #include "PhraseNode.h"
-#include "../moses/Word.h"
+#include "moses/Word.h"
 
 namespace OnDiskPt
 {
@@ -55,15 +55,16 @@ public:
   OnDiskWrapper();
   ~OnDiskWrapper();
 
-  bool BeginLoad(const std::string &filePath);
+  void BeginLoad(const std::string &filePath);
 
-  bool BeginSave(const std::string &filePath
+  void BeginSave(const std::string &filePath
                  , int numSourceFactors, int	numTargetFactors, int numScores);
   void EndSave();
 
-  Vocab &GetVocab() {
-    return m_vocab;
-  }
+  Vocab &GetVocab()
+  { return m_vocab; }
+  const Vocab &GetVocab() const
+  { return m_vocab; }
 
   size_t GetSourceWordSize() const;
   size_t GetTargetWordSize() const;

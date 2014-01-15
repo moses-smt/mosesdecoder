@@ -38,6 +38,7 @@ namespace Moses
 {
 
 class PhraseDictionaryMemory;
+class PhraseDictionaryScope3;
 class PhraseDictionaryFuzzyMatch;
 
 //! @todo why?
@@ -112,6 +113,7 @@ public:
 
 private:
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryScope3&);
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryFuzzyMatch&);
 
   TerminalMap m_sourceTermMap;
@@ -138,6 +140,10 @@ public:
   }
   TargetPhraseCollection &GetTargetPhraseCollection() {
     return m_targetPhraseCollection;
+  }
+
+  const TerminalMap & GetTerminalMap() const {
+    return m_sourceTermMap;
   }
 
   const NonTerminalMap & GetNonTerminalMap() const {

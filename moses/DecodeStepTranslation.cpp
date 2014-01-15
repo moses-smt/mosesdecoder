@@ -30,7 +30,7 @@ using namespace std;
 
 namespace Moses
 {
-DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf,
+DecodeStepTranslation::DecodeStepTranslation(PhraseDictionary* pdf,
     const DecodeStep* prev,
     const std::vector<FeatureFunction*> &features)
   : DecodeStep(pdf, prev, features)
@@ -72,7 +72,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 
     for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase) {
       const TargetPhrase& targetPhrase = **iterTargetPhrase;
-      const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
+      // const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
       // skip if the
       if (targetPhrase.GetSize() != currSize) continue;
 
@@ -166,7 +166,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
     for (iterTargetPhrase = phraseColl->begin(), iterSourcePhrase =  sourcePhrases.begin()
          ; iterTargetPhrase != iterEnd
          ; ++iterTargetPhrase, ++iterSourcePhrase) {
-      CHECK(iterSourcePhrase != sourcePhrases.end());
+      assert(iterSourcePhrase != sourcePhrases.end());
 
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
       const Phrase			&sourcePhrase = *iterSourcePhrase;
@@ -195,11 +195,19 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
   for (iter = inputPathList.begin(); iter != inputPathList.end(); ++iter) {
     const InputPath &inputPath = **iter;
     const Phrase &phraseFromIP = inputPath.GetPhrase();
-    const Word &wordIP =  phraseFromIP.GetWord(0);
 
-    const WordsRange &range = inputPath.GetWordsRange();
+    const Word *wordIP = NULL;
+    for (size_t i = 0; i < phraseFromIP.GetSize(); ++i) {
+    	const Word &tempWord =  phraseFromIP.GetWord(i);
+    	if (!tempWord.IsEpsilon()) {
+    		wordIP = &tempWord;
+    		break;
+    	}
+    }
 
-    if (wordFromPt == wordIP) {
+    // const WordsRange &range = inputPath.GetWordsRange();
+
+    if (wordIP && *wordIP == wordFromPt) {
       return inputPath;
     }
   }
@@ -238,7 +246,7 @@ void DecodeStepTranslation::ProcessLEGACY(const TranslationOption &inputPartialT
 
     for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase) {
       const TargetPhrase& targetPhrase = **iterTargetPhrase;
-      const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
+      // const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
       // skip if the
       if (targetPhrase.GetSize() != currSize) continue;
 

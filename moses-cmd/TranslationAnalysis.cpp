@@ -6,6 +6,9 @@
 #include "moses/StaticData.h"
 #include "moses/Hypothesis.h"
 #include "TranslationAnalysis.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/LM/Base.h"
 
 using namespace Moses;
 

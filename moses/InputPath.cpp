@@ -4,30 +4,25 @@
 #include "StaticData.h"
 #include "TypeDef.h"
 #include "AlignmentInfo.h"
-#include "util/check.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
 namespace Moses
 {
-InputPath::InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
-                     ,const ScorePair *inputScore)
-  :m_prevNode(prevNode)
+InputPath::
+InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
+          const WordsRange &range, const InputPath *prevNode,
+          const ScorePair *inputScore)
+  :m_prevPath(prevNode)
   ,m_phrase(phrase)
-  ,m_sourceNonTerms(sourceNonTerms)
   ,m_range(range)
   ,m_inputScore(inputScore)
+  ,m_sourceNonTerms(sourceNonTerms)
+  ,m_nextNode(1)
 {
   //cerr << "phrase=" << phrase << " m_inputScore=" << *m_inputScore << endl;
 
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
-  if (placeholderFactor != NOT_FOUND) {
-    for (size_t pos = 0; pos < m_phrase.GetSize(); ++pos) {
-      if (m_phrase.GetFactor(pos, placeholderFactor)) {
-        m_placeholders.push_back(pos);
-      }
-    }
-  }
 }
 
 InputPath::~InputPath()
@@ -63,37 +58,17 @@ void InputPath::SetTargetPhrases(const PhraseDictionary &phraseDictionary
   m_targetPhrases[&phraseDictionary] = value;
 }
 
-bool InputPath::SetPlaceholders(TargetPhrase *targetPhrase) const
-{
-  FactorType sourcePlaceholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
-  FactorType targetPlaceholderFactor = StaticData::Instance().GetPlaceholderFactor().second;
-
-  const AlignmentInfo &alignments = targetPhrase->GetAlignTerm();
-  for (size_t i = 0; i < m_placeholders.size(); ++i) {
-    size_t sourcePos = m_placeholders[i];
-    set<size_t> targetPos = alignments.GetAlignmentsForSource(sourcePos);
-    if (targetPos.size() == 1) {
-      const Word &sourceWord = m_phrase.GetWord(sourcePos);
-      Word &targetWord = targetPhrase->GetWord(*targetPos.begin());
-      targetWord[targetPlaceholderFactor] = sourceWord[sourcePlaceholderFactor];
-    } else {
-      return false;
-    }
-  }
-  return true;
-}
-
 const Word &InputPath::GetLastWord() const
 {
   size_t len = m_phrase.GetSize();
-  CHECK(len);
+  UTIL_THROW_IF2(len == 0, "Input path phrase cannot be empty");
   const Word &ret = m_phrase.GetWord(len - 1);
   return ret;
 }
 
 std::ostream& operator<<(std::ostream& out, const InputPath& obj)
 {
-  out << &obj << " " << obj.GetWordsRange() << " " << obj.GetPrevNode() << " " << obj.GetPhrase();
+  out << &obj << " " << obj.GetWordsRange() << " " << obj.GetPrevPath() << " " << obj.GetPhrase();
 
   out << "pt: ";
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;

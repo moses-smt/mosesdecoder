@@ -393,7 +393,11 @@ class Moses():
             origin_features = b' '.join([b'%.4f' %(f) for f in origin_features]) + ' '
         else:
             origin_features = b''
-        line = b"%s ||| %s ||| %s 2.718 %s||| %s%s||| %s\n" %(src,target,features,origin_features,alignment,extra_space,comments)
+        if flags['write_phrase_penalty']:
+          phrase_penalty = b' 2.718'
+        else:
+          phrase_penalty = b''
+        line = b"%s ||| %s ||| %s%s %s||| %s%s||| %s\n" %(src,target,features,origin_features,phrase_penalty,alignment,extra_space,comments)
         return line
         
         
@@ -1307,6 +1311,7 @@ class Combine_TMs():
             'normalize_s_given_t':None, 
             'normalize-lexical_weights':True, 
             'add_origin_features':False,
+            'write_phrase_penalty':False,
             'lowmem': False,
             'i_e2f':0,
             'i_e2f_lex':1,
@@ -1916,6 +1921,9 @@ def parse_command_line():
 
     group2.add_argument('--normalized', action="store_true",
                     help=('for each phrase pair x,y: ignore models with p(y)=0, and distribute probability mass among models with p(y)>0. (default: missing entries (x,y) are always interpreted as p(x|y)=0). Only relevant in mode "interpolate".'))
+    
+    group2.add_argument('--write-phrase-penalty', action="store_true",
+      help=("Include phrase penalty in phrase table"))
 
     group2.add_argument('--recompute_lexweights', action="store_true",
                     help=('don\'t directly interpolate lexical weights, but interpolate word translation probabilities instead and recompute the lexical weights. Only relevant in mode "interpolate".'))
@@ -1947,7 +1955,8 @@ if __name__ == "__main__":
                                i_e2f=args.i_e2f,
                                i_e2f_lex=args.i_e2f_lex,
                                i_f2e=args.i_f2e,
-                               i_f2e_lex=args.i_f2e_lex)
+                               i_f2e_lex=args.i_f2e_lex,
+                               write_phrase_penalty=args.write_phrase_penalty)
         # execute right method
         f_string = "combiner."+args.action+'()'
         exec(f_string)

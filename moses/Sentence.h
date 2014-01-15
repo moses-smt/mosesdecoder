@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Phrase.h"
 #include "InputType.h"
-#include "XmlOption.h"
 
 namespace Moses
 {
@@ -37,7 +36,7 @@ class PhraseDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
 class ChartTranslationOptions;
-class XmlOption;
+struct XmlOption;
 
 
 /**

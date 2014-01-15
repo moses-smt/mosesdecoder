@@ -2,6 +2,7 @@
 #define moses_SearchNormalBatch_h
 
 #include "SearchNormal.h"
+#include "SentenceStats.h"
 
 namespace Moses
 {
@@ -23,7 +24,7 @@ protected:
   std::map<int, LanguageModel*> m_dlm_ffs;
   std::map<int, StatefulFeatureFunction*> m_stateful_ffs;
   std::vector<Hypothesis*> m_partial_hypos;
-  int m_batch_size;
+  uint32_t m_batch_size;
   int m_max_stack_size;
 
   // functions for creating hypotheses

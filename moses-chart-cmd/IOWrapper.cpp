@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // example file on how to use moses library
 
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 #include "IOWrapper.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
@@ -47,9 +48,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
-
-#include <boost/algorithm/string.hpp>
-
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace Moses;
@@ -68,9 +69,11 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_inputFactorUsed(inputFactorUsed)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
+  ,m_detailedTreeFragmentsTranslationReportingStream(NULL)
   ,m_alignmentInfoStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
+  ,m_detailTreeFragmentsOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
@@ -116,10 +119,17 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
 
+  if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+    const std::string &path = staticData.GetDetailedTreeFragmentsTranslationReportingFilePath();
+    m_detailedTreeFragmentsTranslationReportingStream = new std::ofstream(path.c_str());
+    m_detailTreeFragmentsOutputCollector = new Moses::OutputCollector(m_detailedTreeFragmentsTranslationReportingStream);
+  }
+
   if (!staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
     m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
-    CHECK(m_alignmentInfoStream->good());
+    UTIL_THROW_IF2(!m_alignmentInfoStream->good(),
+    		"File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
   }
 }
 
@@ -130,6 +140,7 @@ IOWrapper::~IOWrapper()
   }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
+  delete m_detailedTreeFragmentsTranslationReportingStream;
   delete m_alignmentInfoStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
@@ -163,7 +174,8 @@ InputType*IOWrapper::GetInput(InputType* inputType)
  */
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
-  CHECK(outputFactorOrder.size() > 0);
+  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
+		  "Cannot be empty phrase");
   if (reportAllFactors == true) {
     out << phrase;
   } else {
@@ -171,11 +183,13 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
     for (size_t pos = 0 ; pos < size ; pos++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
       out << *factor;
-      CHECK(factor);
+      UTIL_THROW_IF2(factor == NULL,
+    		  "Empty factor 0 at position " << pos);
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        CHECK(factor);
+        UTIL_THROW_IF2(factor == NULL,
+      		  "Empty factor " << i << " at position " << pos);
 
         out << "|" << *factor;
       }
@@ -218,7 +232,8 @@ void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, l
 {
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i];
-    CHECK(factor);
+    UTIL_THROW_IF(factor == NULL, util::Exception,
+    		"No factor at position " << i );
 
     cout << *factor << " ";
   }
@@ -290,26 +305,60 @@ void IOWrapper::WriteApplicationContext(std::ostream &out,
   }
 }
 
+void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+  ReconstructApplicationContext(*hypo, sentence, applicationContext);
+  out << "Trans Opt " << translationId
+      << " " << hypo->GetCurrSourceRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+      << "->" << hypo->GetCurrTargetPhrase()
+      << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+}
+
 void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
-  // recursive
   if (hypo != NULL) {
-    ReconstructApplicationContext(*hypo, sentence, applicationContext);
-    out << "Trans Opt " << translationId
-        << " " << hypo->GetCurrSourceRange()
-        << ": ";
-    WriteApplicationContext(out, applicationContext);
-    out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
-        << "->" << hypo->GetCurrTargetPhrase()
-        << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
-        << endl;
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+    out << std::endl;
   }
 
+  // recursive
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
     const ChartHypothesis *prevHypo = *iter;
     OutputTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
+void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+
+    const std::string key = "Tree";
+    std::string value;
+    bool hasProperty;
+    const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
+    currTarPhr.GetProperty(key, value, hasProperty);
+
+    out << " ||| ";
+    if (hasProperty)
+      out << " " << value;
+    else
+      out << " " << "noTreeInfo";
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
   }
 }
 
@@ -325,10 +374,61 @@ void IOWrapper::OutputDetailedTranslationReport(
   ApplicationContext applicationContext;
 
   OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
-  CHECK(m_detailOutputCollector);
+  UTIL_THROW_IF2(m_detailOutputCollector == NULL,
+		  "No ouput file for detailed reports specified");
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
+void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
+  const ChartHypothesis *hypo,
+  const Sentence &sentence,
+  long translationId)
+{
+  if (hypo == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+  UTIL_THROW_IF2(m_detailTreeFragmentsOutputCollector == NULL,
+		  "No output file for tree fragments specified");
+  m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
+}
+
+//DIMw
+void IOWrapper::OutputDetailedAllTranslationReport(
+  const ChartTrellisPathList &nBestList,
+  const ChartManager &manager,
+  const Sentence &sentence,
+  long translationId)
+{
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  const ChartCellCollection& cells = manager.GetChartCellCollection();
+  size_t size = manager.GetSource().GetSize();
+  for (size_t width = 1; width <= size; ++width) {
+    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+      size_t endPos = startPos + width - 1;
+      WordsRange range(startPos, endPos);
+      const ChartCell& cell = cells.Get(range);
+      const HypoList* hyps = cell.GetAllSortedHypotheses();
+      out << "Chart Cell [" << startPos << ".." << endPos << "]" << endl;
+      HypoList::const_iterator iter;
+      size_t c = 1;
+      for (iter = hyps->begin(); iter != hyps->end(); ++iter) {
+        out << "----------------Item " << c++ << " ---------------------"
+            << endl;
+        OutputTranslationOptions(out, applicationContext, *iter,
+                                 sentence, translationId);
+      }
+    }
+  }
+  UTIL_THROW_IF2(m_detailAllOutputCollector == NULL,
+		  "No output file for details specified");
+  m_detailAllOutputCollector->Write(translationId, out.str());
+}
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {
@@ -350,10 +450,12 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
       out << "||| ";
     }
     Phrase outPhrase(ARRAY_SIZE_INCR);
-    hypo->CreateOutputPhrase(outPhrase);
+    hypo->GetOutputPhrase(outPhrase);
 
     // delete 1st & last
-    CHECK(outPhrase.GetSize() >= 2);
+    UTIL_THROW_IF2(outPhrase.GetSize() < 2,
+  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+
     outPhrase.RemoveWord(0);
     outPhrase.RemoveWord(outPhrase.GetSize() - 1);
 
@@ -383,7 +485,8 @@ void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
   Phrase outPhrase;
   Incremental::ToPhrase(applied, outPhrase);
   // delete 1st & last
-  CHECK(outPhrase.GetSize() >= 2);
+  UTIL_THROW_IF2(outPhrase.GetSize() < 2,
+		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
   outPhrase.RemoveWord(0);
   outPhrase.RemoveWord(outPhrase.GetSize() - 1);
   out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
@@ -471,7 +574,9 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long tran
     Moses::Phrase outputPhrase = path.GetOutputPhrase();
 
     // delete 1st & last
-    CHECK(outputPhrase.GetSize() >= 2);
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
+  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
 
@@ -545,7 +650,9 @@ void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long 
   for (std::vector<search::Applied>::const_iterator i = nbest.begin(); i != nbest.end(); ++i) {
     Incremental::PhraseAndFeatures(*i, outputPhrase, features);
     // <s> and </s>
-    CHECK(outputPhrase.GetSize() >= 2);
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
+  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
     out << translationId << " ||| ";
@@ -612,12 +719,12 @@ size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartT
   vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
   const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
 
-  CHECK(sourceInd2pos.size() == prevNodes.size());
+  UTIL_THROW_IF2(sourceInd2pos.size() != prevNodes.size(), "Error");
 
   size_t targetInd = 0;
   for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
     if (tp.GetWord(targetPos).IsNonTerminal()) {
-      CHECK(targetPos < targetPos2SourceInd.size());
+      UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
       size_t sourceInd = targetPos2SourceInd[targetPos];
       size_t sourcePos = sourceInd2pos[sourceInd];
 
@@ -659,7 +766,7 @@ size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartT
 
     pair<size_t, size_t> alignPoint(absSource, absTarget);
     pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-    CHECK(ret.second);
+    UTIL_THROW_IF2(!ret.second, "Error");
   }
 
   return totalTargetSize;
@@ -705,12 +812,12 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
   vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
   const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
 
-  CHECK(sourceInd2pos.size() == prevHypos.size());
+  UTIL_THROW_IF2(sourceInd2pos.size() != prevHypos.size(), "Error");
 
   size_t targetInd = 0;
   for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
     if (tp.GetWord(targetPos).IsNonTerminal()) {
-      CHECK(targetPos < targetPos2SourceInd.size());
+  	  UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
       size_t sourceInd = targetPos2SourceInd[targetPos];
       size_t sourcePos = sourceInd2pos[sourceInd];
 
@@ -752,7 +859,7 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
 
     pair<size_t, size_t> alignPoint(absSource, absTarget);
     pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-    CHECK(ret.second);
+    UTIL_THROW_IF2(!ret.second, "Error");
 
   }
 
@@ -768,9 +875,9 @@ void IOWrapper::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const A
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignPoint = **it;
 
-    CHECK(alignPoint.first < retAlignmentsS2T.size());
+    UTIL_THROW_IF2(alignPoint.first >= retAlignmentsS2T.size(), "Error");
     pair<set<size_t>::iterator, bool> ret = retAlignmentsS2T[alignPoint.first].insert(alignPoint.second);
-    CHECK(ret.second);
+    UTIL_THROW_IF2(!ret.second, "Error");
   }
 }
 

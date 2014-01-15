@@ -39,7 +39,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <ostream>
 #include <vector>
-#include "util/check.hh"
 
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"
@@ -56,6 +55,8 @@ POSSIBILITY OF SUCH DAMAGE.
 namespace Moses
 {
 class ScoreComponentCollection;
+class Hypothesis;
+class Factor;
 }
 
 namespace MosesCmd
@@ -131,6 +132,7 @@ public:
 
 IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
+void OutputLanguageModelOrder(std::ostream &out, const Moses::Hypothesis *hypo, Moses::Manager &manager);
 void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors);
 void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
@@ -153,6 +155,9 @@ void OutputFeatureScores( std::ostream& out
                           , const Moses::ScoreComponentCollection &features
                           , const Moses::FeatureFunction *ff
                           , std::string &lastName );
+
+// creates a map of TARGET positions which should be replaced by word using placeholder
+std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor);
 
 }
 

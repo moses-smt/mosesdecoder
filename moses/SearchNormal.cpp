@@ -1,6 +1,7 @@
 #include "Manager.h"
 #include "Timer.h"
 #include "SearchNormal.h"
+#include "SentenceStats.h"
 
 using namespace std;
 
@@ -16,7 +17,6 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_start(clock())
   ,interrupted_flag(0)
   ,m_transOptColl(transOptColl)
 {
@@ -24,17 +24,14 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   const StaticData &staticData = StaticData::Instance();
 
   // only if constraint decoding (having to match a specified output)
-  long sentenceID = source.GetTranslationId();
-  m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-  if (m_constraint) {
-    VERBOSE(1, "Search constraint to output: " << *m_constraint<<endl);
-  }
+  // long sentenceID = source.GetTranslationId();
 
   // initialize the stacks: create data structure and set limits
   std::vector < HypothesisStackNormal >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackNormal *sourceHypoColl = new HypothesisStackNormal(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),staticData.GetMinHypoStackDiversity());
+    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize(),
+                                        staticData.GetMinHypoStackDiversity());
     sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
 
     m_hypoStackColl[ind] = sourceHypoColl;
@@ -54,7 +51,6 @@ void SearchNormal::ProcessSentence()
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
-  clock_t t=0; // used to track time for steps
 
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
@@ -75,13 +71,13 @@ void SearchNormal::ProcessSentence()
     // the stack is pruned before processing (lazy pruning):
     VERBOSE(3,"processing hypothesis from next stack");
     IFVERBOSE(2) {
-      t = clock();
+      stats.StartTimeStack();
     }
     sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
     VERBOSE(3,std::endl);
     sourceHypoColl.CleanupArcList();
     IFVERBOSE(2) {
-      stats.AddTimeStack( clock()-t );
+      stats.StopTimeStack();
     }
 
     // go through each hypothesis on the stack and try to expand it
@@ -98,12 +94,6 @@ void SearchNormal::ProcessSentence()
     // this stack is fully expanded;
     actual_hypoStack = &sourceHypoColl;
   }
-
-  // some more logging
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().SetTimeTotal( clock()-m_start );
-  }
-  VERBOSE(2, m_manager.GetSentenceStats());
 }
 
 
@@ -284,17 +274,16 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
-  clock_t t=0; // used to track time for steps
 
   Hypothesis *newHypo;
   if (! staticData.UseEarlyDiscarding()) {
     // simple build, no questions asked
     IFVERBOSE(2) {
-      t = clock();
+      stats.StartTimeBuildHyp();
     }
-    newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+    newHypo = hypothesis.CreateNext(transOpt);
     IFVERBOSE(2) {
-      stats.AddTimeBuildHyp( clock()-t );
+      stats.StopTimeBuildHyp();
     }
     if (newHypo==NULL) return;
     newHypo->Evaluate(m_transOptColl.GetFutureScore());
@@ -313,7 +302,6 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 
     // add expected score of translation option
     expectedScore += transOpt.GetFutureScore();
-    // TRACE_ERR("EXPECTED diff: " << (newHypo->GetTotalScore()-expectedScore) << " (pre " << (newHypo->GetTotalScore()-expectedScorePre) << ") " << hypothesis.GetTargetPhrase() << " ... " << transOpt.GetTargetPhrase() << " [" << expectedScorePre << "," << expectedScore << "," << newHypo->GetTotalScore() << "]" << endl);
 
     // check if transOpt score push it already below limit
     if (expectedScore < allowedScore) {
@@ -325,12 +313,12 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 
     // build the hypothesis without scoring
     IFVERBOSE(2) {
-      t = clock();
+      stats.StartTimeBuildHyp();
     }
-    newHypo = hypothesis.CreateNext(transOpt, m_constraint);
+    newHypo = hypothesis.CreateNext(transOpt);
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
-      stats.AddTimeBuildHyp( clock()-t );
+      stats.StopTimeBuildHyp();
     }
 
     // ... and check if that is below the limit
@@ -352,11 +340,11 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
   // add to hypothesis stack
   size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();
   IFVERBOSE(2) {
-    t = clock();
+    stats.StartTimeStack();
   }
   m_hypoStackColl[wordsTranslated]->AddPrune(newHypo);
   IFVERBOSE(2) {
-    stats.AddTimeStack( clock()-t );
+    stats.StopTimeStack();
   }
 }
 

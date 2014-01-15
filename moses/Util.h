@@ -28,11 +28,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include <cmath>
+#include <cassert>
 #include <limits>
 #include <map>
 #include <cstdlib>
 #include <cstring>
-#include "util/check.hh"
+#include "util/exception.hh"
 #include "TypeDef.h"
 
 namespace Moses
@@ -57,6 +58,15 @@ namespace Moses
  * */
 #define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
+
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)
+// gcc nth_element() bug
+#define NTH_ELEMENT3(begin, middle, end) std::sort(begin, end)
+#define NTH_ELEMENT4(begin, middle, end, orderer) std::sort(begin, end, orderer)
+#else
+#define NTH_ELEMENT3(begin, middle, end) std::nth_element(begin, middle, end)
+#define NTH_ELEMENT4(begin, middle, end, orderer) std::nth_element(begin, middle, end, orderer)
+#endif
 
 //! delete white spaces at beginning and end of string
 const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
@@ -305,7 +315,8 @@ inline float FloorScore(float logScore)
 inline float CalcTranslationScore(const std::vector<float> &probVector,
                                   const std::vector<float> &weightT)
 {
-  CHECK(weightT.size()==probVector.size());
+  UTIL_THROW_IF2(weightT.size() != probVector.size(),
+		  "Weight and score vector sizes not the same");
   float rv=0.0;
   for(float const *sb=&probVector[0],*se=sb+probVector.size(),*wb=&weightT[0];
       sb!=se; ++sb, ++wb)
@@ -362,7 +373,7 @@ inline void ShrinkToFit(T& v)
 {
   if(v.capacity()>v.size())
     T(v).swap(v);
-  CHECK(v.capacity()==v.size());
+  assert(v.capacity()==v.size());
 }
 
 bool FileExists(const std::string& filePath);

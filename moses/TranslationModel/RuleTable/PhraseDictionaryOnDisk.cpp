@@ -35,7 +35,7 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryOnDisk::PhraseDictionaryOnDisk(const std::string &line)
-  : MyBase("PhraseDictionaryOnDisk", line)
+  : MyBase(line)
 {
   ReadParameters();
 }
@@ -63,7 +63,7 @@ OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation()
 {
   OnDiskPt::OnDiskWrapper* dict;
   dict = m_implementation.get();
-  CHECK(dict);
+  UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -71,7 +71,7 @@ const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
 {
   OnDiskPt::OnDiskWrapper* dict;
   dict = m_implementation.get();
-  CHECK(dict);
+  UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -82,13 +82,23 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
   ReduceCache();
 
   OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
-  if (!obj->BeginLoad(m_filePath))
-    return;
+  obj->BeginLoad(m_filePath);
 
-  CHECK(obj->GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
-  CHECK(obj->GetMisc("NumSourceFactors") == m_input.size());
-  CHECK(obj->GetMisc("NumTargetFactors") == m_output.size());
-  CHECK(obj->GetMisc("NumScores") == m_numScoreComponents);
+  UTIL_THROW_IF2(obj->GetMisc("Version") != OnDiskPt::OnDiskWrapper::VERSION_NUM,
+		  "On-disk phrase table is version " <<  obj->GetMisc("Version")
+		  << ". It is not compatible with version " << OnDiskPt::OnDiskWrapper::VERSION_NUM);
+
+  UTIL_THROW_IF2(obj->GetMisc("NumSourceFactors") != m_input.size(),
+		  "On-disk phrase table has " <<  obj->GetMisc("NumSourceFactors") << " source factors."
+		  		  << ". The ini file specified " << m_input.size() << " source factors");
+
+  UTIL_THROW_IF2(obj->GetMisc("NumTargetFactors") != m_output.size(),
+		  "On-disk phrase table has " <<  obj->GetMisc("NumTargetFactors") << " target factors."
+		  		  << ". The ini file specified " << m_output.size() << " target factors");
+
+  UTIL_THROW_IF2(obj->GetMisc("NumScores") != m_numScoreComponents,
+		  "On-disk phrase table has " <<  obj->GetMisc("NumScores") << " scores."
+		  		  << ". The ini file specified " << m_numScoreComponents << " scores");
 
   m_implementation.reset(obj);
 }
@@ -106,7 +116,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
 {
   OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
   const Phrase &phrase = inputPath.GetPhrase();
-  const InputPath *prevInputPath = inputPath.GetPrevNode();
+  const InputPath *prevInputPath = inputPath.GetPrevPath();
 
   const OnDiskPt::PhraseNode *prevPtNode = NULL;
 

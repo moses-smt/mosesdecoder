@@ -2,6 +2,7 @@
 
 #include "moses/Hypothesis.h"
 #include "moses/TranslationOption.h"
+#include "moses/InputPath.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ int PhraseBoundaryState::Compare(const FFState& other) const
 }
 
 PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
-  : StatefulFeatureFunction("PhraseBoundaryFeature", 0, line)
+  : StatefulFeatureFunction(0, line)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
   ReadParameters();

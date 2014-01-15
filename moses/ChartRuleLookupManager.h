@@ -45,7 +45,7 @@ public:
     : m_parser(parser)
     , m_cellCollection(cellColl) {}
 
-  virtual ~ChartRuleLookupManager() {}
+  virtual ~ChartRuleLookupManager();
 
   const ChartCellLabelSet &GetTargetLabelSet(size_t begin, size_t end) const {
     return m_cellCollection.GetBase(WordsRange(begin, end)).GetTargetLabelSet();

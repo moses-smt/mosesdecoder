@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "TypeDef.h"
 #include "FactorTypeSet.h"
+#include "FactorCollection.h"
 #include "StaticData.h"  // needed to determine the FactorDelimiter
 #include "util/exception.hh"
 #include "util/tokenize_piece.hh"
@@ -70,10 +71,12 @@ void Word::Merge(const Word &sourceWord)
 std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
 {
   stringstream strme;
-  CHECK(factorType.size() <= MAX_NUM_FACTORS);
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   for (unsigned int i = 0 ; i < factorType.size() ; i++) {
+	UTIL_THROW_IF2(factorType[i] >= MAX_NUM_FACTORS,
+				"Trying to reference factor " << factorType[i] << ". Max factor is " << MAX_NUM_FACTORS);
+
     const Factor *factor = m_factorArray[factorType[i]];
     if (factor != NULL) {
       if (firstPass) {
@@ -126,6 +129,7 @@ void Word::CreateUnknownWord(const Word &sourceWord)
       SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString()));
   }
   m_isNonTerminal = sourceWord.IsNonTerminal();
+  m_isOOV = true;
 }
 
 void Word::OnlyTheseFactors(const FactorMask &factors)
@@ -135,6 +139,14 @@ void Word::OnlyTheseFactors(const FactorMask &factors)
       SetFactor(currFactor, NULL);
     }
   }
+}
+
+bool Word::IsEpsilon() const
+{
+       const Factor *factor = m_factorArray[0];
+       int compare = factor->GetString().compare(EPSILON);
+
+       return compare == 0;
 }
 
 TO_STRING_BODY(Word);

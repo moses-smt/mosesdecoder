@@ -10,11 +10,20 @@ namespace Moses
 class InputFeature : public StatelessFeatureFunction
 {
 protected:
+  static InputFeature *s_instance;
+
   size_t m_numInputScores;
   size_t m_numRealWordCount;
   bool m_legacy;
 
 public:
+  static const InputFeature& Instance() {
+    return *s_instance;
+  }
+  static InputFeature& InstanceNonConst() {
+    return *s_instance;
+  }
+
   InputFeature(const std::string &line);
 
   void Load();
@@ -33,19 +42,21 @@ public:
   }
 
   void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
   {}
   void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , ScoreComponentCollection &scoreBreakdown) const;
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
   void Evaluate(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const
+                ScoreComponentCollection* accumulator) const
   {}
   void EvaluateChart(const ChartHypothesis &hypo,
-                             ScoreComponentCollection* accumulator) const
+                     ScoreComponentCollection* accumulator) const
   {}
 
 

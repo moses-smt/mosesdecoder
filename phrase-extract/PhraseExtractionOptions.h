@@ -52,6 +52,7 @@ private:
 
 public:
   std::vector<std::string> placeholders;
+  bool debug;
 
   PhraseExtractionOptions(const int initmaxPhraseLength):
     maxPhraseLength(initmaxPhraseLength),
@@ -67,7 +68,9 @@ public:
     includeSentenceIdFlag(false),
     onlyOutputSpanInfo(false),
     gzOutput(false),
-    flexScoreFlag(false) {}
+	flexScoreFlag(false), 
+	debug(false)
+{}
 
   //functions for initialization of options
   void initAllModelsOutputFlag(const bool initallModelsOutputFlag) {
@@ -109,7 +112,7 @@ public:
   void initInstanceWeightsFile(const char* initInstanceWeightsFile) {
     instanceWeightsFile = std::string(initInstanceWeightsFile);
   }
-  void initFlexScoreFlag(const bool initflexScoreFlag){
+  void initFlexScoreFlag(const bool initflexScoreFlag) {
     flexScoreFlag=initflexScoreFlag;
   }
 

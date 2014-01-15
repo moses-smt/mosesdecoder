@@ -59,7 +59,6 @@ private:
   std::auto_ptr<SentenceStats> m_sentenceStats;
   clock_t m_start; /**< starting time, used for logging */
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
-  const Phrase *m_constraint;
 
   ChartParser m_parser;
 
@@ -86,6 +85,11 @@ public:
     return *m_sentenceStats;
   }
 
+  //DIMw
+  const ChartCellCollection& GetChartCellCollection() const {
+    return m_hypoStackColl;
+  }
+
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
    * currently an empty function
@@ -101,9 +105,6 @@ public:
   unsigned GetNextHypoId() {
     return m_hypothesisId++;
   }
-
-  const Phrase *GetConstraint() const
-  { return m_constraint; }
 };
 
 }

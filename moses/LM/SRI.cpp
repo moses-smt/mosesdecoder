@@ -19,7 +19,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "util/check.hh"
 #include <limits>
 #include <iostream>
 #include <fstream>
@@ -32,14 +31,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 
 // By default, SRILM defines a function called zopen.
-// 
+//
 // However, on Mac OS X (and possibly other BSDs),
 // <stdio.h> already defines a zopen function.
 //
 // To resolve this conflict, SRILM checks to see if HAVE_ZOPEN is defined.
 // If it is, SRILM will rename its zopen function as my_zopen.
 //
-// So, before importing any SRILM headers, 
+// So, before importing any SRILM headers,
 // it is important to define HAVE_ZOPEN if we are on an Apple OS:
 //
 #ifdef __APPLE__
@@ -54,7 +53,7 @@ using namespace std;
 namespace Moses
 {
 LanguageModelSRI::LanguageModelSRI(const std::string &line)
-  :LanguageModelSingleFactor("SRILM", line)
+  :LanguageModelSingleFactor(line)
   ,m_srilmVocab(0)
   ,m_srilmModel(0)
 {
@@ -162,7 +161,8 @@ LMResult LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, St
   }
   ngram[count] = Vocab_None;
 
-  CHECK((*contextFactor[count-1])[factorType] != NULL);
+  UTIL_THROW_IF2((*contextFactor[count-1])[factorType] == NULL,
+		  "No factor " << factorType << " at position " << (count-1));
   // call sri lm fn
   VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType]);
   ret = GetValue(lmId, ngram+1);

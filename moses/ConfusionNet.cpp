@@ -5,12 +5,12 @@
 
 #include "FactorCollection.h"
 #include "Util.h"
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "StaticData.h"
 #include "Sentence.h"
 #include "UserMessage.h"
 #include "moses/FF/InputFeature.h"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -69,6 +69,7 @@ ConfusionNet::ConfusionNet()
   if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
+  UTIL_THROW_IF2(&InputFeature::Instance() == NULL, "Input feature must be specified");
 }
 ConfusionNet::~ConfusionNet()
 {
@@ -79,8 +80,8 @@ ConfusionNet::ConfusionNet(Sentence const& s)
 {
   data.resize(s.GetSize());
   for(size_t i=0; i<s.GetSize(); ++i) {
-	  ScorePair scorePair;
-	  std::pair<Word, ScorePair > temp = std::make_pair(s.GetWord(i), scorePair);
+    ScorePair scorePair;
+    std::pair<Word, ScorePair > temp = std::make_pair(s.GetWord(i), scorePair);
     data[i].push_back(temp);
   }
 }
@@ -129,9 +130,9 @@ bool ConfusionNet::ReadFormat0(std::istream& in,
   Clear();
 
   const StaticData &staticData = StaticData::Instance();
-  const InputFeature *inputFeature = staticData.GetInputFeature();
-  size_t numInputScores = inputFeature->GetNumInputScores();
-  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+  const InputFeature &inputFeature = InputFeature::Instance();
+  size_t numInputScores = inputFeature.GetNumInputScores();
+  size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();
 
   size_t totalCount = numInputScores + numRealWordCount;
   bool addRealWordCount = (numRealWordCount > 0);
@@ -241,8 +242,7 @@ void ConfusionNet::Print(std::ostream& out) const
 #endif
 Phrase ConfusionNet::GetSubString(const WordsRange&) const
 {
-  TRACE_ERR("ERROR: call to ConfusionNet::GetSubString\n");
-  abort();
+  UTIL_THROW2("ERROR: call to ConfusionNet::GetSubString\n");
   //return Phrase(Input);
 }
 
@@ -256,8 +256,7 @@ std::string ConfusionNet::GetStringRep(const std::vector<FactorType> /* factorsT
 #endif
 const Word& ConfusionNet::GetWord(size_t) const
 {
-  TRACE_ERR("ERROR: call to ConfusionNet::GetFactorArray\n");
-  abort();
+  UTIL_THROW2("ERROR: call to ConfusionNet::GetFactorArray\n");
 }
 #ifdef _WIN32
 #pragma warning(default:4716)
@@ -274,7 +273,7 @@ ConfusionNet::CreateTranslationOptionCollection() const
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
-  CHECK(rv);
+  assert(rv);
   return rv;
 }
 

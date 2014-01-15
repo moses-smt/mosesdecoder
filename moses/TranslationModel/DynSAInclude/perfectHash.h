@@ -25,7 +25,7 @@ class PerfectHash
 public:
   PerfectHash(uint16_t MBs, int width, int bucketRange, float qBase);
   PerfectHash(FileHandler* fin) {
-    CHECK(fin != 0);
+    UTIL_THROW_IF2(fin == 0, "Invalid file handle");
   }
   virtual ~PerfectHash();
   void analyze();
@@ -124,7 +124,7 @@ uint64_t PerfectHash<T>::insert(const wordID_t* IDs, const int len,
       }
       ++index;
     }
-    CHECK((emptyidx < index) && (filter_->read(emptyidx) == 0)); // should have found empty index if it gets here
+    UTIL_THROW_IF2((emptyidx >= index) || (filter_->read(emptyidx) != 0), "Error"); // should have found empty index if it gets here
     T code = (T)qtizer_->code(value);
     filter_->write(emptyidx, fp); // insert the fprint
     values_->write(emptyidx, code);
@@ -228,8 +228,8 @@ void PerfectHash<T>::remove(const wordID_t* IDs, const int len)
 template<typename T> // clear filter index
 void PerfectHash<T>::remove(uint64_t index)
 {
-  CHECK(index < cells_);
-  CHECK(filter_->read(index) != 0); // slow
+  UTIL_THROW_IF2(index >= cells_, "Out of bound: " << index);
+  UTIL_THROW_IF2(filter_->read(index) == 0, "Error"); // slow
   filter_->write(index, 0);
   values_->write(index, 0);
   //reduce bucket size
@@ -279,7 +279,7 @@ count_t PerfectHash<T>::bucketsMemUse()
 template<typename T>
 void PerfectHash<T>::save(FileHandler* fout)
 {
-  CHECK(fout != 0);
+  UTIL_THROW_IF2(fout == 0, "Invalid file handle");
   cerr << "\tSaving perfect hash parameters...\n";
   fout->write((char*)&hitMask_, sizeof(hitMask_));
   fout->write((char*)&memBound_, sizeof(memBound_));
@@ -306,7 +306,7 @@ void PerfectHash<T>::save(FileHandler* fout)
 template<typename T>
 void PerfectHash<T>::load(FileHandler* fin)
 {
-  CHECK(fin != 0);
+  UTIL_THROW_IF2(fin == 0, "Invalid file handle");
   cerr << "\tLoading perfect hash parameters...\n";
   fin->read((char*)&hitMask_, sizeof(hitMask_));
   fin->read((char*)&memBound_, sizeof(memBound_));

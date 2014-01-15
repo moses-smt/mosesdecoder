@@ -41,11 +41,11 @@
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
-#include "util/file.hh"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
-#include "util/check.hh"
+#include "util/file.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -79,10 +79,11 @@ namespace Moses
 {
 
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
-  :PhraseDictionary("PhraseDictionaryFuzzyMatch", line)
+  :PhraseDictionary(line)
   ,m_FuzzyMatchWrapper(NULL)
+  ,m_config(3)
 {
-  CHECK(m_args.size() == 0);
+  ReadParameters();
 }
 
 PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
@@ -94,7 +95,6 @@ void PhraseDictionaryFuzzyMatch::Load()
 {
   SetFeaturesToApply();
 
-  assert(m_config.size() == 3);
   m_FuzzyMatchWrapper = new tmmt::FuzzyMatchWrapper(m_config[0], m_config[1], m_config[2]);
 }
 
@@ -105,6 +105,20 @@ ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
   return new ChartRuleLookupManagerMemoryPerSentence(parser, cellCollection, *this);
 }
 
+void
+PhraseDictionaryFuzzyMatch::
+SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "source") {
+	  m_config[0] = value;
+  } else if (key == "target") {
+	  m_config[1] = value;
+  } else if (key == "alignment") {
+	  m_config[2] = value;
+  } else {
+	PhraseDictionary::SetParameter(key, value);
+  }
+}
 
 int removedirectoryrecursively(const char *dirname)
 {
@@ -168,7 +182,9 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
   char dirName[] = "/tmp/moses.XXXXXX";
 #endif // defined
   char *temp = mkdtemp(dirName);
-  CHECK(temp);
+  UTIL_THROW_IF2(temp == NULL,
+		  "Couldn't create temporary directory " << dirName);
+
   string dirNameStr(dirName);
 
   string inFileName(dirNameStr + "/in");
@@ -204,7 +220,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
   while(getline(inStream, lineOrig)) {
     const string *line;
     if (format == HieroFormat) { // reformat line
-      assert(false);
+      UTIL_THROW(util::Exception, "Cannot be Hiero format");
       //line = ReformatHieroRule(lineOrig);
     } else {
       // do nothing to format of line
@@ -217,10 +233,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
     if (tokens.size() != 4 && tokens.size() != 5) {
-      stringstream strme;
-      strme << "Syntax error at " << ptFileName << ":" << count;
-      UserMessage::Add(strme.str());
-      abort();
+      UTIL_THROW2("Syntax error at " << ptFileName << ":" << count);
     }
 
     const string &sourcePhraseString = tokens[0]
@@ -237,13 +250,12 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     Tokenize<float>(scoreVector, scoreString);
     const size_t numScoreComponents = GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
-      stringstream strme;
-      strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
-            << numScoreComponents << ") of score components on line " << count;
-      UserMessage::Add(strme.str());
-      abort();
+      UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
+            << numScoreComponents << ") of score components on line " << count);
     }
-    CHECK(scoreVector.size() == numScoreComponents);
+
+    UTIL_THROW_IF2(scoreVector.size() != numScoreComponents,
+    		"Number of scores incorrectly specified");
 
     // parse source & find pt node
 
@@ -318,8 +330,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      CHECK(iterAlign != alignmentInfo.end());
-      CHECK(iterAlign->first == pos);
+      UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
+    		  "No alignment for non-term at position " << pos);
+      UTIL_THROW_IF2(iterAlign->first != pos,
+    		  "Alignment info incorrect at position " << pos);
+
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
@@ -329,13 +344,13 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       currNode = currNode->GetOrCreateChild(word);
     }
 
-    CHECK(currNode != NULL);
+    UTIL_THROW_IF2(currNode == NULL,
+    		"Node not found at position " << pos);
+
   }
 
   // finally, the source LHS
   //currNode = currNode->GetOrCreateChild(sourceLHS);
-  //CHECK(currNode != NULL);
-
 
   return *currNode;
 }
@@ -355,14 +370,16 @@ void PhraseDictionaryFuzzyMatch::CleanUpAfterSentenceProcessing(const InputType 
 const PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(long translationId) const
 {
   std::map<long, PhraseDictionaryNodeMemory>::const_iterator iter = m_collection.find(translationId);
-  CHECK(iter != m_collection.end());
+  UTIL_THROW_IF2(iter == m_collection.end(),
+		  "Couldn't find root node for input: " << translationId);
   return iter->second;
 }
 PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source)
 {
   long transId = source.GetTranslationId();
   std::map<long, PhraseDictionaryNodeMemory>::iterator iter = m_collection.find(transId);
-  CHECK(iter != m_collection.end());
+  UTIL_THROW_IF2(iter == m_collection.end(),
+		  "Couldn't find root node for input: " << transId);
   return iter->second;
 }
 

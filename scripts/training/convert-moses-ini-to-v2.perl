@@ -6,7 +6,8 @@ my $header = "";
 my @INI = <STDIN>;
 
 my %TTABLE_IMPLEMENTATION = ( 0 => "PhraseDictionaryMemory",
-			      1 => "PhraseDictionaryBinary" );
+			      1 => "PhraseDictionaryBinary" ,
+			      6 => "PhraseDictionaryMemory");
 my %LM_IMPLEMENTATION = ( 0 => "SRILM",
 			  8 => "KENLM lazyken=0" );
 

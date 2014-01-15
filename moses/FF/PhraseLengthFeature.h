@@ -25,7 +25,7 @@ public:
   }
 
   void Evaluate(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const
+                ScoreComponentCollection* accumulator) const
   {}
 
   void EvaluateChart(const ChartHypothesis& hypo,
@@ -34,8 +34,10 @@ public:
   }
 
   void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
   virtual void Evaluate(const Phrase &source

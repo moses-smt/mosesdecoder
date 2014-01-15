@@ -130,7 +130,7 @@ public:
     return m_manager;
   }
 
-  void CreateOutputPhrase(Phrase &outPhrase) const;
+  void GetOutputPhrase(Phrase &outPhrase) const;
   Phrase GetOutputPhrase() const;
 
   int RecombineCompare(const ChartHypothesis &compare) const;

@@ -52,13 +52,13 @@ BOOST_AUTO_TEST_CASE(manager_configure_domain_except)
 {
   //Check that configure rejects illegal domain arg combinations
   ScoreFeatureManager manager;
-  vector<string> args = boost::assign::list_of("--DomainRatio")("/dev/null")("--DomainIndicator")("/dev/null");
+  vector<string> args = {"--DomainRatio","/dev/null","--DomainIndicator","/dev/null"};
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args = boost::assign::list_of("--SparseDomainSubset")("/dev/null")("--SparseDomainRatio")("/dev/null");
+  args = {"--SparseDomainSubset","/dev/null","--SparseDomainRatio","/dev/null"};
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args = boost::assign::list_of("--SparseDomainBlah")("/dev/null");
+  args = {"--SparseDomainBlah","/dev/null"};
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args = boost::assign::list_of("--DomainSubset");
+  args = {"--DomainSubset"};
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
 }
 
@@ -69,7 +69,9 @@ static void checkDomainConfigured(
   ScoreFeatureManager manager;
   manager.configure(args);
   const std::vector<ScoreFeaturePtr>& features  = manager.getFeatures();
-  BOOST_REQUIRE_EQUAL(features.size(), 1);
+  //BOOST_REQUIRE_EQUAL(features.size(), 2);
+  //if I add to features this check will fail?
+  BOOST_REQUIRE_EQUAL(features.size(), 1); //MARIA -> what is this check and why does it fail when I add my feature?
   Expected* feature = dynamic_cast<Expected*>(features[0].get());
   BOOST_REQUIRE(feature);
   BOOST_CHECK(manager.includeSentenceId());
@@ -78,17 +80,17 @@ static void checkDomainConfigured(
 BOOST_AUTO_TEST_CASE(manager_config_domain)
 {
   checkDomainConfigured<RatioDomainFeature>
-  (boost::assign::list_of ("--DomainRatio")("/dev/null"));
+  ({"--DomainRatio","/dev/null"});
   checkDomainConfigured<IndicatorDomainFeature>
-  (boost::assign::list_of("--DomainIndicator")("/dev/null"));
+  ({"--DomainIndicator","/dev/null"});
   checkDomainConfigured<SubsetDomainFeature>
-  (boost::assign::list_of("--DomainSubset")("/dev/null"));
+  ({"--DomainSubset","/dev/null"});
   checkDomainConfigured<SparseRatioDomainFeature>
-  (boost::assign::list_of("--SparseDomainRatio")("/dev/null"));
+  ({"--SparseDomainRatio","/dev/null"});
   checkDomainConfigured<SparseIndicatorDomainFeature>
-  (boost::assign::list_of("--SparseDomainIndicator")("/dev/null"));
+  ({"--SparseDomainIndicator","/dev/null"});
   checkDomainConfigured<SparseSubsetDomainFeature>
-  (boost::assign::list_of("--SparseDomainSubset")("/dev/null"));
+  ({"--SparseDomainSubset","/dev/null"});
 }
 
 

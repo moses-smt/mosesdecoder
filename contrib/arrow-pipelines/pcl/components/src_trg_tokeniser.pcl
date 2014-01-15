@@ -25,16 +25,16 @@ component src_trg_tokeniser
                 tokeniser.moses.installation
   declare
     src_tokeniser := new tokeniser with
-      tokeniser.src.language -> language,
-      tokeniser.src.tokenisation_dir -> tokenisation_dir,
-      tokeniser.moses.installation -> moses_installation_dir
+      tokeniser.src.language -> corpus.language,
+      tokeniser.src.tokenisation_dir -> working.directory.root,
+      tokeniser.moses.installation -> moses.installation
     trg_tokeniser := new tokeniser with
-      tokeniser.trg.language -> language,
-      tokeniser.trg.tokenisation_dir -> tokenisation_dir,
-      tokeniser.moses.installation -> moses_installation_dir
+      tokeniser.trg.language -> corpus.language,
+      tokeniser.trg.tokenisation_dir -> working.directory.root,
+      tokeniser.moses.installation -> moses.installation
   as
-    wire (src_filename -> filename),
-         (trg_filename -> filename) >>>
+    wire (src_filename -> corpus.filename),
+         (trg_filename -> corpus.filename) >>>
     (src_tokeniser *** trg_tokeniser) >>>
-    wire (tokenised_filename -> tokenised_src_filename),
-         (tokenised_filename -> tokenised_trg_filename)
+    wire (corpus.tokenised.filename -> tokenised_src_filename),
+         (corpus.tokenised.filename -> tokenised_trg_filename)

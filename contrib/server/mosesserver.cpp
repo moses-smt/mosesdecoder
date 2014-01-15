@@ -1,4 +1,3 @@
-#include "util/check.hh"
 #include <stdexcept>
 #include <iostream>
 #include <vector>
@@ -42,7 +41,7 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     const params_t params = paramList.getStruct(0);
     breakOutParams(params);
-    const PhraseDictionary* pdf = StaticData::Instance().GetPhraseDictionaries()[0];
+    const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
     PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
@@ -237,15 +236,17 @@ public:
         }
     }
 
+    si = params.find("model_name");
+    if (si != params.end() && multiModelWeights.size() > 0) {
+        const string model_name = xmlrpc_c::value_string(si->second);
+        PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+        pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
+    }
+
     const StaticData &staticData = StaticData::Instance();
 
     if (addGraphInfo) {
       (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
-    }
-
-    if (multiModelWeights.size() > 0) {
-      PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
-      pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
     }
 
     stringstream out, graphInfo, transCollOpts;
@@ -286,7 +287,7 @@ public:
           insertTranslationOptions(manager,retData);
         }
         if (nbest_size>0) {
-          outputNBest(manager, retData, nbest_size, nbest_distinct, reportAllFactors);
+          outputNBest(manager, retData, nbest_size, nbest_distinct, reportAllFactors, addAlignInfo);
         }
     }
     pair<string, xmlrpc_c::value>
@@ -325,7 +326,7 @@ public:
 
   void outputChartHypo(ostream& out, const ChartHypothesis* hypo) {
     Phrase outPhrase(20);
-    hypo->CreateOutputPhrase(outPhrase);
+    hypo->GetOutputPhrase(outPhrase);
 
     // delete 1st & last
     assert(outPhrase.GetSize() >= 2);
@@ -376,7 +377,8 @@ public:
                    map<string, xmlrpc_c::value>& retData,
                    const int n=100,
                    const bool distinct=false,
-                   const bool reportAllFactors=false)
+                   const bool reportAllFactors=false,
+                   const bool addAlignmentInfo=false)
   {
     TrellisPathList nBestList;
     manager.CalcNBest(n, nBestList, distinct);
@@ -390,6 +392,7 @@ public:
 
       // output surface
       ostringstream out;
+      vector<xmlrpc_c::value> alignInfo;
       for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
         const Hypothesis &edge = *edges[currEdge];
         const Phrase& phrase = edge.GetCurrTargetPhrase();
@@ -401,8 +404,19 @@ public:
             out << *factor << " ";
           }
         }
+
+        if (addAlignmentInfo && currEdge != (int)edges.size() - 1) {
+          map<string, xmlrpc_c::value> phraseAlignInfo;
+          phraseAlignInfo["tgt-start"] = xmlrpc_c::value_int(edge.GetCurrTargetWordsRange().GetStartPos());
+          phraseAlignInfo["src-start"] = xmlrpc_c::value_int(edge.GetCurrSourceWordsRange().GetStartPos());
+          phraseAlignInfo["src-end"] = xmlrpc_c::value_int(edge.GetCurrSourceWordsRange().GetEndPos());
+          alignInfo.push_back(xmlrpc_c::value_struct(phraseAlignInfo));
+        }
       }
       nBestXMLItem["hyp"] = xmlrpc_c::value_string(out.str());
+
+      if (addAlignmentInfo)
+        nBestXMLItem["align"] = xmlrpc_c::value_array(alignInfo);
 
       // weighted score
       nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetTotalScore());
@@ -414,8 +428,8 @@ public:
   void insertTranslationOptions(Manager& manager, map<string, xmlrpc_c::value>& retData) {
     const TranslationOptionCollection* toptsColl = manager.getSntTranslationOptions();
     vector<xmlrpc_c::value> toptsXml;
-    for (size_t startPos = 0 ; startPos < toptsColl->GetSize() ; ++startPos) {
-      size_t maxSize = toptsColl->GetSize() - startPos;
+    for (size_t startPos = 0 ; startPos < toptsColl->GetSource().GetSize() ; ++startPos) {
+      size_t maxSize = toptsColl->GetSource().GetSize() - startPos;
       size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
       maxSize = std::min(maxSize, maxSizePhrase);
 
@@ -521,7 +535,6 @@ int main(int argc, char** argv)
   } else {
     myAbyssServer.run();
   }
-  // xmlrpc_c::serverAbyss.run() never returns
-  CHECK(false);
-  return 0;
+  std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
+  return 1;
 }

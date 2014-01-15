@@ -1,6 +1,11 @@
 /*
  * This class creates c++ like stream from file descriptor
+ * It uses gcc-specific functions, therefore is not portable
+ *
+ * Jeroen Vermeulen reckons that it can be replaced with Boost's io::stream_buffer
+ *
  */
+
 
 #ifndef _FDSTREAM_
 #define _FDSTREAM_

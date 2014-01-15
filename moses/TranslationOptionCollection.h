@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -69,7 +70,7 @@ protected:
   const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<const Phrase*> m_unksrcs;
-  InputPathList m_phraseDictionaryQueue;
+  InputPathList m_inputPathQueue;
 
   TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage,
                               float translationOptionThreshold);
@@ -123,11 +124,6 @@ public:
   const std::vector<const Phrase*>& GetUnknownSources() const {
     return m_unksrcs;
   }
-
-  //! get length/size of source input
-  size_t GetSize() const {
-    return m_source.GetSize();
-  };
 
   //! Create all possible translations from the phrase tables
   virtual void CreateTranslationOptions();

@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include <time.h>
+#include "Timer.h"
 #include "Phrase.h"
 #include "Hypothesis.h"
 #include "TypeDef.h" //FactorArray
@@ -60,16 +61,11 @@ public:
   }
   void Initialize(const InputType& source) {
     m_numHyposCreated = 0;
+    m_numHyposPopped = 0;
     m_numHyposPruned = 0;
     m_numHyposDiscarded = 0;
     m_numHyposEarlyDiscarded = 0;
     m_numHyposNotBuilt = 0;
-    m_timeCollectOpts = 0;
-    m_timeBuildHyp = 0;
-    m_timeEstimateScore = 0;
-    m_timeCalcLM = 0;
-    m_timeOtherScore = 0;
-    m_timeStack = 0;
     m_totalSourceWords = source.GetSize();
     m_recombinationInfos.clear();
     m_deletedWords.clear();
@@ -83,6 +79,9 @@ public:
 
   unsigned int GetTotalHypos() const {
     return m_numHyposCreated + m_numHyposNotBuilt;
+  }
+  unsigned int GetNumHyposPopped() const {
+    return m_numHyposPopped;
   }
   size_t GetNumHyposRecombined() const {
     return m_recombinationInfos.size();
@@ -99,26 +98,32 @@ public:
   unsigned int GetNumHyposNotBuilt() const {
     return m_numHyposNotBuilt;
   }
-  float GetTimeCollectOpts() const {
-    return m_timeCollectOpts/(float)CLOCKS_PER_SEC;
+  double GetTimeCollectOpts() const {
+    return m_timeCollectOpts.get_elapsed_time();
   }
-  float GetTimeBuildHyp() const {
-    return m_timeBuildHyp/(float)CLOCKS_PER_SEC;
+  double GetTimeBuildHyp() const {
+    return m_timeBuildHyp.get_elapsed_time();
   }
-  float GetTimeCalcLM() const {
-    return m_timeCalcLM/(float)CLOCKS_PER_SEC;
+  double GetTimeCalcLM() const {
+    return m_timeCalcLM.get_elapsed_time();
   }
-  float GetTimeEstimateScore() const {
-    return m_timeEstimateScore/(float)CLOCKS_PER_SEC;
+  double GetTimeOtherScore() const {
+    return m_timeOtherScore.get_elapsed_time();
   }
-  float GetTimeOtherScore() const {
-    return m_timeOtherScore/(float)CLOCKS_PER_SEC;
+  double GetTimeEstimateScore() const {
+    return m_timeEstimateScore.get_elapsed_time();
   }
-  float GetTimeStack() const {
-    return m_timeStack/(float)CLOCKS_PER_SEC;
+  double GetTimeStack() const {
+    return m_timeStack.get_elapsed_time();
   }
-  float GetTimeTotal() const {
-    return m_timeTotal/(float)CLOCKS_PER_SEC;
+  double GetTimeSetupCubes() const {
+    return m_timeSetupCubes.get_elapsed_time();
+  }
+  double GetTimeManageCubes() const {
+    return m_timeManageCubes.get_elapsed_time();
+  }
+  double GetTimeTotal() const {
+    return m_timeTotal.get_elapsed_time();
   }
   size_t GetTotalSourceWords() const {
     return m_totalSourceWords;
@@ -143,6 +148,9 @@ public:
   void AddCreated() {
     m_numHyposCreated++;
   }
+  void AddPopped() {
+    m_numHyposPopped++;
+  }
   void AddPruning() {
     m_numHyposPruned++;
   }
@@ -156,26 +164,59 @@ public:
     m_numHyposDiscarded++;
   }
 
-  void AddTimeCollectOpts( clock_t t ) {
-    m_timeCollectOpts += t;
+  void StartTimeCollectOpts() {
+    m_timeCollectOpts.start();
   }
-  void AddTimeBuildHyp( clock_t t ) {
-    m_timeBuildHyp += t;
+  void StopTimeCollectOpts() {
+    m_timeCollectOpts.stop();
   }
-  void AddTimeCalcLM( clock_t t ) {
-    m_timeCalcLM += t;
+  void StartTimeBuildHyp() {
+    m_timeBuildHyp.start();
   }
-  void AddTimeEstimateScore( clock_t t ) {
-    m_timeEstimateScore += t;
+  void StopTimeBuildHyp() {
+    m_timeBuildHyp.stop();
   }
-  void AddTimeOtherScore( clock_t t ) {
-    m_timeOtherScore += t;
+  void StartTimeCalcLM() {
+    m_timeCalcLM.start();
   }
-  void AddTimeStack( clock_t t ) {
-    m_timeStack += t;
+  void StopTimeCalcLM() {
+    m_timeCalcLM.stop();
   }
-  void SetTimeTotal( clock_t t ) {
-    m_timeTotal = t;
+  void StartTimeOtherScore() {
+    m_timeOtherScore.start();
+  }
+  void StopTimeOtherScore() {
+    m_timeOtherScore.stop();
+  }
+  void StartTimeEstimateScore() {
+    m_timeEstimateScore.start();
+  }
+  void StopTimeEstimateScore() {
+    m_timeEstimateScore.stop();
+  }
+  void StartTimeSetupCubes() {
+    m_timeSetupCubes.start();
+  }
+  void StopTimeSetupCubes() {
+    m_timeSetupCubes.stop();
+  }
+  void StartTimeManageCubes() {
+    m_timeManageCubes.start();
+  }
+  void StopTimeManageCubes() {
+    m_timeManageCubes.stop();
+  }
+  void StartTimeStack() {
+    m_timeStack.start();
+  }
+  void StopTimeStack() {
+    m_timeStack.stop();
+  }
+  void StartTimeTotal() {
+    m_timeTotal.start();
+  }
+  void StopTimeTotal() {
+    m_timeTotal.stop();
   }
 
 protected:
@@ -191,17 +232,20 @@ protected:
   // (see Manager.cpp for some initial work moving in this direction)
   std::vector<RecombinationInfo> m_recombinationInfos;
   unsigned int m_numHyposCreated;
+  unsigned int m_numHyposPopped;
   unsigned int m_numHyposPruned;
   unsigned int m_numHyposDiscarded;
   unsigned int m_numHyposEarlyDiscarded;
   unsigned int m_numHyposNotBuilt;
-  clock_t m_timeCollectOpts;
-  clock_t m_timeBuildHyp;
-  clock_t m_timeEstimateScore;
-  clock_t m_timeCalcLM;
-  clock_t m_timeOtherScore;
-  clock_t m_timeStack;
-  clock_t m_timeTotal;
+  Timer m_timeCollectOpts;
+  Timer m_timeBuildHyp;
+  Timer m_timeEstimateScore;
+  Timer m_timeOtherScore;
+  Timer m_timeCalcLM;
+  Timer m_timeStack;
+  Timer m_timeSetupCubes;
+  Timer m_timeManageCubes;
+  Timer m_timeTotal;
 
   //words
   size_t m_totalSourceWords;
@@ -211,10 +255,11 @@ protected:
 
 inline std::ostream& operator<<(std::ostream& os, const SentenceStats& ss)
 {
-  float totalTime = ss.GetTimeTotal();
-  float otherTime = totalTime - (ss.GetTimeCollectOpts() + ss.GetTimeBuildHyp() + ss.GetTimeEstimateScore() + ss.GetTimeCalcLM() + ss.GetTimeOtherScore() + ss.GetTimeStack());
+  double totalTime = ss.GetTimeTotal();
+  double otherTime = totalTime - (ss.GetTimeCollectOpts() + ss.GetTimeBuildHyp() + ss.GetTimeEstimateScore() + ss.GetTimeCalcLM() + ss.GetTimeOtherScore() + ss.GetTimeStack() + ss.GetTimeSetupCubes() + ss.GetTimeManageCubes());
 
   return os << "total hypotheses considered = " << ss.GetTotalHypos() << std::endl
+         << "    number popped from cube = " << ss.GetNumHyposPopped() << std::endl
          << "           number not built = " << ss.GetNumHyposNotBuilt() << std::endl
          << "     number discarded early = " << ss.GetNumHyposEarlyDiscarded() << std::endl
          << "           number discarded = " << ss.GetNumHyposDiscarded() << std::endl
@@ -226,6 +271,8 @@ inline std::ostream& operator<<(std::ostream& os, const SentenceStats& ss)
          << "        estimate score  " << ss.GetTimeEstimateScore() << " (" << (int)(100 * ss.GetTimeEstimateScore()/totalTime) << "%)" << std::endl
          << "        calc lm         " << ss.GetTimeCalcLM()        << " (" << (int)(100 * ss.GetTimeCalcLM()/totalTime) << "%)" << std::endl
          << "        other hyp score " << ss.GetTimeOtherScore()    << " (" << (int)(100 * ss.GetTimeOtherScore()/totalTime) << "%)" << std::endl
+         << "        set up cubes    " << ss.GetTimeSetupCubes()    << " (" << (int)(100 * ss.GetTimeSetupCubes()/totalTime) << "%)" << std::endl
+         << "        manage cubes    " << ss.GetTimeManageCubes()   << " (" << (int)(100 * ss.GetTimeManageCubes()/totalTime) << "%)" << std::endl
          << "        manage stacks   " << ss.GetTimeStack()         << " (" << (int)(100 * ss.GetTimeStack()/totalTime) << "%)" << std::endl
          << "        other           " << otherTime                 << " (" << (int)(100 * otherTime/totalTime) << "%)" << std::endl
 

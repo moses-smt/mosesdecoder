@@ -10,14 +10,16 @@ namespace Moses
 {
 PhraseDictionaryDynSuffixArray::
 PhraseDictionaryDynSuffixArray(const std::string &line)
-  : PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
+  : PhraseDictionary(line)
   ,m_biSA(new BilingualDynSuffixArray())
 {
   ReadParameters();
 }
 
 
-void PhraseDictionaryDynSuffixArray::Load()
+void
+PhraseDictionaryDynSuffixArray::
+Load()
 {
   SetFeaturesToApply();
 
@@ -31,7 +33,9 @@ PhraseDictionaryDynSuffixArray::
   delete m_biSA;
 }
 
-void PhraseDictionaryDynSuffixArray::SetParameter(const std::string& key, const std::string& value)
+void
+PhraseDictionaryDynSuffixArray::
+SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source") {
     m_source = value;
@@ -99,7 +103,7 @@ ChartRuleLookupManager*
 PhraseDictionaryDynSuffixArray::
 CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
 {
-  CHECK(false);
+  UTIL_THROW(util::Exception, "SCFG decoding not supported with dynamic suffix array");
   return 0;
 }
 

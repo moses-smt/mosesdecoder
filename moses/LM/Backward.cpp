@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/LM/Ken.h"
 #include "moses/LM/Backward.h"
+#include "util/exception.hh"
 
 //#include "moses/Util.h"
 //#include "moses/StaticData.h"
@@ -129,9 +130,7 @@ template <class Model> void BackwardLanguageModel<Model>::CalcScore(const Phrase
   lm::ngram::ChartState discarded_sadly;
   lm::ngram::RuleScore<Model> scorer(*m_ngram, discarded_sadly);
 
-  UTIL_THROW_IF(
-    (m_beginSentenceFactor == phrase.GetWord(0).GetFactor(m_factorType)),
-    util::Exception,
+  UTIL_THROW_IF2(m_beginSentenceFactor == phrase.GetWord(0).GetFactor(m_factorType),
     "BackwardLanguageModel does not currently support rules that include <s>"
   );
 
@@ -144,9 +143,7 @@ template <class Model> void BackwardLanguageModel<Model>::CalcScore(const Phrase
   int position;
   for (position = lastWord; position >= 0; position-=1) {
     const Word &word = phrase.GetWord(position);
-    UTIL_THROW_IF(
-      (word.IsNonTerminal()),
-      util::Exception,
+    UTIL_THROW_IF2(word.IsNonTerminal(),
       "BackwardLanguageModel does not currently support rules that include non-terminals "
     );
 
@@ -261,9 +258,7 @@ template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Phr
   // that are now adjacent to words at the the beginning of this phrase
   for (int position=std::min( lastWord,  ngramBoundary - 1); position >= 0; position-=1) {
     const Word &word = phrase.GetWord(position);
-    UTIL_THROW_IF(
-      (word.IsNonTerminal()),
-      util::Exception,
+    UTIL_THROW_IF2(word.IsNonTerminal(),
       "BackwardLanguageModel does not currently support rules that include non-terminals "
     );
 
@@ -290,7 +285,6 @@ template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Phr
 
 LanguageModel *ConstructBackwardLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
 {
-  try {
     lm::ngram::ModelType model_type;
     if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
       switch(model_type) {
@@ -307,16 +301,11 @@ LanguageModel *ConstructBackwardLM(const std::string &line, const std::string &f
       case lm::ngram::QUANT_ARRAY_TRIE:
         return new BackwardLanguageModel<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
       default:
-        std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
-        abort();
+        UTIL_THROW2("Unrecognized kenlm model type " << model_type);
       }
     } else {
       return new BackwardLanguageModel<lm::ngram::ProbingModel>(line, file, factorType, lazy);
     }
-  } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    abort();
-  }
 }
 
 } // namespace Moses

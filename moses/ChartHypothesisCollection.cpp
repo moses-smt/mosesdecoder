@@ -24,6 +24,7 @@
 #include "ChartHypothesisCollection.h"
 #include "ChartHypothesis.h"
 #include "ChartManager.h"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace Moses;
@@ -60,6 +61,13 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
  */
 bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManager &manager)
 {
+  if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
+    manager.GetSentenceStats().AddDiscarded();
+    VERBOSE(3,"discarded, -inf score" << std::endl);
+    ChartHypothesis::Delete(hypo);
+    return false;
+  }
+
   if (hypo->GetTotalScore() < m_bestScore + m_beamWidth) {
     // really bad score. don't bother adding hypo into collection
     manager.GetSentenceStats().AddDiscarded();
@@ -80,7 +88,8 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
   // equiv hypo exists, recombine with other hypo
   HCType::iterator &iterExisting = addRet.first;
   ChartHypothesis *hypoExisting = *iterExisting;
-  CHECK(iterExisting != m_hypos.end());
+  UTIL_THROW_IF2(iterExisting == m_hypos.end(),
+		  "Adding a hypothesis should have returned a valid iterator");
 
   //StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 
@@ -99,8 +108,7 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
     bool added = Add(hypo, manager).second;
     if (!added) {
       iterExisting = m_hypos.find(hypo);
-      TRACE_ERR("Offending hypo = " << **iterExisting << endl);
-      abort();
+      UTIL_THROW2("Offending hypo = " << **iterExisting);
     }
     return false;
   } else {
@@ -244,7 +252,9 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
       for (iter = hyposOrdered.begin() + (m_maxHypoStackSize * 2); iter != hyposOrdered.end(); ++iter) {
         ChartHypothesis *hypo = *iter;
         HCType::iterator iterFindHypo = m_hypos.find(hypo);
-        CHECK(iterFindHypo != m_hypos.end());
+        UTIL_THROW_IF2(iterFindHypo == m_hypos.end(),
+      		  "Adding a hypothesis should have returned a valid iterator");
+
         Remove(iterFindHypo);
       }
     }
@@ -254,7 +264,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 //! sort hypothses  by descending score. Put these hypos into a vector m_hyposOrdered to be returned by function GetSortedHypotheses()
 void ChartHypothesisCollection::SortHypotheses()
 {
-  CHECK(m_hyposOrdered.empty());
+  UTIL_THROW_IF2(!m_hyposOrdered.empty(), "Hypotheses already sorted");
   if (!m_hypos.empty()) {
     // done everything for this cell.
     // sort

@@ -97,7 +97,22 @@ ln -sf libbz2.so.1.0 $LIBDIR/libbz2.so
 
 #For Boost:
 ./bootstrap.sh
-./b2 --prefix=$PREFIX --libdir=$LIBDIR --layout=tagged link=static,shared threading=multi,single install || echo FAILURE
+./b2 --prefix=$PWD --libdir=$PWD/lib64 --layout=tagged link=static,shared threading=multi,single install || echo FAILURE
+
+This will put the header files and libraries files in the current directory, rather than the system directory.
+
+For most Linux systems, you should replace
+  link=static,shared
+with
+  link=static
+so it will only create static libraries. The minimised headaches when linking with Moses. 
+
+To link Moses to your version of boost,
+   ./bjam --with-boost=[boost/path]
+
+Alternatively, you run 
+   ./b2 --prefix=/usr/ --libdir=/usr/lib
+to install boost in the systems folder. However, this may override the built in boost and causes problems for your OS, therefore, it is not recommended.
 
 --------------------------------------------------------------------------
 

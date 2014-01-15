@@ -34,8 +34,8 @@ using namespace std;
 namespace Moses
 {
 
-LanguageModel::LanguageModel(const std::string& description, const std::string &line) :
-  StatefulFeatureFunction(description, StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1, line )
+LanguageModel::LanguageModel(const std::string &line) :
+  StatefulFeatureFunction(StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1, line )
 {
   m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature();
 }
@@ -62,6 +62,11 @@ float LanguageModel::GetOOVWeight() const
 void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const
 {
   UTIL_THROW(util::Exception, "Incremental search is only supported by KenLM.");
+}
+
+void LanguageModel::ReportHistoryOrder(std::ostream &out,const Phrase &phrase) const
+{
+  // out << "ReportHistoryOrder not implemented";
 }
 
 void LanguageModel::Evaluate(const Phrase &source

@@ -7,9 +7,9 @@
 # The benefit is that models can be combined quickly, with the same results as if we trained a model on the concatenation of all data (excepting differences in word alignment).
 # Also, each model can be given a weight, which is applied to all frequencies of the model for the combination.
 
-# Note: the input phrase table must have alignment information (--phrase-word-alignment in train-model.perl);
+# Note: the input phrase table must have alignment information;
 #       it must be unsmoothed;
-#       additionally, the online model type requires the lexical counts files lex.counts.e2f and lex.counts.f2e to be in the same folder (--write-lexical-counts in train-model.perl)
+#       additionally, the phrase table type PhraseDictionaryMultiModelCounts requires the lexical counts files lex.counts.e2f and lex.counts.f2e (obtained by using the option --write-lexical-counts in train-model.perl)
 # The results may differ from training on the concatenation of all data due to differences in word alignment, and rounding errors.
 
 

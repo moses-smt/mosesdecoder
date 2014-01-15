@@ -18,6 +18,7 @@ public:
   ~FeatureRegistry();
 
   void Construct(const std::string &name, const std::string &line);
+  void PrintFF() const;
 
 private:
   void Add(const std::string &name, FeatureFactory *factory);

@@ -1,7 +1,8 @@
-#ifndef MERT_PREPROCESSFILTER_H_
-#define MERT_PREPROCESSFILTER_H_
+#pragma once
 
 #include <string>
+
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 
 namespace MosesTuning
 {
@@ -28,4 +29,4 @@ private:
 
 }
 
-#endif  // MERT_PREPROCESSFILTER_H_
+#endif
