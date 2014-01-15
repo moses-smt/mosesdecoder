@@ -55,7 +55,11 @@ int main(int argc, char** argv)
   size_t lineNum = 1;
 
   while (getline(cin, line)) {
-    cerr << lineNum << ":" << line << endl;
+    //cerr << lineNum << ":" << line << endl;
+    if (lineNum % 1000 == 0) {
+      cerr << lineNum << " ";
+    }
+
     Phrase source = Tokenize(line);
 
     LabelDeEn(source, cout);

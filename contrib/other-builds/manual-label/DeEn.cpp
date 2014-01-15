@@ -38,25 +38,49 @@ bool Contains(const Phrase &source, int start, int end, int factor, const string
 
 void LabelDeEn(const Phrase &source, ostream &out)
 {
-  list<pair<int,int> > ranges;
+  typedef pair<int,int> Range;
+  typedef list<Range> Ranges;
+  Ranges ranges;
 
+  // find ranges to label
   for (int start = 0; start < source.size(); ++start) {
     for (int end = start; end < source.size(); ++end) {
      if (IsA(source, start, -1, 1, "VAFIN")
           && IsA(source, end, +1, 1, "VVINF VVPP")
           && !Contains(source, start, end, 1, "VAFIN VVINF VVPP VVFIN")) {
-       cerr << start << " " << end << endl;
-       //ranges.push_back(pair<int,int>(start, end);
+       Range range(start, end);
+       ranges.push_back(range);
       }
       else if ((start == 0 || IsA(source, start, -1, 1, "$,"))
           && IsA(source, end, +1, 0, "zu")
           && IsA(source, end, +2, 1, "VVINF")
           && !Contains(source, start, end, 1, "$,")) {
-        cerr << start << " " << end << endl;
-        //ranges.push_back(pair<int,int>(start, end);
+        Range range(start, end);
+        ranges.push_back(range);
       }
     }
   }
 
+  // output sentence, with labels
+  for (int pos = 0; pos < source.size(); ++pos) {
+    // output beginning of label
+    for (Ranges::const_iterator iter = ranges.begin(); iter != ranges.end(); ++iter) {
+      const Range &range = *iter;
+      if (range.first == pos) {
+        out << "<tree label=\"REORDER-LABEL\"> ";
+      }
+    }
+
+    const Word &word = source[pos];
+    out << word[0] << " ";
+
+    for (Ranges::const_iterator iter = ranges.begin(); iter != ranges.end(); ++iter) {
+      const Range &range = *iter;
+      if (range.second == pos) {
+        out << "</tree> ";
+      }
+    }
+  }
+  out << endl;
 
 }
