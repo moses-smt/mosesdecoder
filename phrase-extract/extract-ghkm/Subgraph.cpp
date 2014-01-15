@@ -119,12 +119,12 @@ float Subgraph::CalcPcfgScore() const
   return score;
 }
 
-void Subgraph::PrintTree(std::ostream &out) const 
+void Subgraph::PrintTree(std::ostream &out) const
 {
   RecursivelyPrintTree(m_root,out);
 }
 
-void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const 
+void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const
 {
   NodeType nodeType = n->GetType();
   if (nodeType == TREE) {

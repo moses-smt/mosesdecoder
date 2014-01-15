@@ -1,0 +1,28 @@
+/*
+ *  Util.cpp
+ *  mert - Minimum Error Rate Training
+ *
+ *  Created by Nicola Bertoldi on 13/05/08.
+ *
+ */
+
+#include "Util.h"
+
+using namespace std;
+
+namespace MosesTuning
+{
+
+void Tokenize(const char *str, const char delim,
+              std::vector<std::string> *res)
+{
+  while (1) {
+    const char *begin = str;
+    while (*str != delim && *str) str++;
+    if (begin != str)            // Don't create empty string objects.
+      res->push_back(std::string(begin, str));
+    if (*str++ == 0) break;
+  }
+}
+
+}

@@ -21,7 +21,7 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
 
 OpSequenceModel::~OpSequenceModel()
 {
-	delete OSM;
+  delete OSM;
 }
 
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
@@ -199,7 +199,7 @@ FFState* OpSequenceModel::EvaluateChart(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-	UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
+  UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
 
 }
 

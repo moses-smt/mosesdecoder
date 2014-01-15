@@ -42,7 +42,7 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
   , m_ruleTable(ruleTable)
 {
   UTIL_THROW_IF2(m_dottedRuleColls.size() != 0,
-		  "Dotted rule collection not correctly initialized");
+                 "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_dottedRuleColls.resize(sourceSize);
@@ -179,8 +179,8 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
         dottedRuleCol.Add(relEndPos+1, dottedRule);
       }
     }
-  // we only need to check once if a terminal matches the input at a given position.
-  expandableDottedRuleListTerminalsOnly.erase(it);
+    // we only need to check once if a terminal matches the input at a given position.
+    expandableDottedRuleListTerminalsOnly.erase(it);
   }
 
   // list of rules that that cover the entire span

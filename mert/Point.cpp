@@ -40,8 +40,8 @@ Point::Point(const vector<parameter_t>& init,
       m_max[i] = max[i];
     }
   } else {
-	UTIL_THROW_IF(init.size() != m_pdim, util::Exception, "Error");
-	UTIL_THROW_IF(m_opt_indices.size() != Point::m_dim, util::Exception, "Error");
+    UTIL_THROW_IF(init.size() != m_pdim, util::Exception, "Error");
+    UTIL_THROW_IF(m_opt_indices.size() != Point::m_dim, util::Exception, "Error");
     for (unsigned int i = 0; i < Point::m_dim; i++) {
       operator[](i) = init[m_opt_indices[i]];
       m_min[i] = min[m_opt_indices[i]];

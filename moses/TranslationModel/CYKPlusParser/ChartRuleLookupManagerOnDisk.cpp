@@ -49,7 +49,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_filePath(filePath)
 {
   UTIL_THROW_IF2(m_expandableDottedRuleListVec.size() != 0,
-		  "Dotted rule collection not correctly initialized");
+                 "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
@@ -237,12 +237,12 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
             std::vector<float> weightT = staticData.GetWeights(&m_dictionary);
             targetPhraseCollection
-            = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
-                                               ,m_outputFactorsVec
-                                               ,m_dictionary
-                                               ,weightT
-                                               ,m_dbWrapper.GetVocab()
-                                               ,true);
+              = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
+                                                 ,m_outputFactorsVec
+                                                 ,m_dictionary
+                                                 ,weightT
+                                                 ,m_dbWrapper.GetVocab()
+                                                 ,true);
 
             delete tpcollBerkeleyDb;
             m_cache[tpCollFilePos] = targetPhraseCollection;

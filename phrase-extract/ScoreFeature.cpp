@@ -39,7 +39,7 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
   bool sparseDomainAdded = false;
 
   for (size_t i = 0; i < args.size(); ++i) {
-  	if (args[i] == "--IgnoreSentenceId") {
+    if (args[i] == "--IgnoreSentenceId") {
       m_includeSentenceId = true;
     } else if (args[i].substr(0,8) == "--Domain") {
       string type = args[i].substr(8);
@@ -77,15 +77,15 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
       }
       sparseDomainAdded = true;
       m_includeSentenceId = true;
-    } else if(args[i] == "--GHKMFeatureSparse"){
-    	//MARIA
-    	m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureSparse()));
-    } else if(args[i] == "--GHKMFeatureDense"){
-    	//MARIA
-    	m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureDense()));
+    } else if(args[i] == "--GHKMFeatureSparse") {
+      //MARIA
+      m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureSparse()));
+    } else if(args[i] == "--GHKMFeatureDense") {
+      //MARIA
+      m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureDense()));
     } else {
       UTIL_THROW(ScoreFeatureArgumentException,"Unknown score argument " << args[i]);
-    	}
+    }
 
   }
 

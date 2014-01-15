@@ -126,7 +126,7 @@ void LexicalReorderingState::CopyScores(Scores& scores, const TranslationOption 
 {
   // don't call this on a bidirectional object
   UTIL_THROW_IF2(m_direction != LexicalReorderingConfiguration::Backward && m_direction != LexicalReorderingConfiguration::Forward,
-		  "Unknown direction: " << m_direction);
+                 "Unknown direction: " << m_direction);
   const Scores *cachedScores = (m_direction == LexicalReorderingConfiguration::Backward) ?
                                topt.GetLexReorderingScores(m_configuration.GetScoreProducer()) : m_prevScore;
 

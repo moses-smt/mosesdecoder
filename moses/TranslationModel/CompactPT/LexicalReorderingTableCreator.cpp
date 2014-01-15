@@ -206,7 +206,7 @@ std::string LexicalReorderingTableCreator::EncodeLine(std::vector<std::string>& 
   if(m_numScoreComponent != scores.size()) {
     std::stringstream strme;
     strme << "Error: Wrong number of scores detected ("
-              << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
+          << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
     strme << "Line: " << tokens[0] << " ||| ... ||| " << scoresString << std::endl;
     UTIL_THROW2(strme.str());
   }

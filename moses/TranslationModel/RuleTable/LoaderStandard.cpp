@@ -73,7 +73,7 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
       // no-term
       vector<string> split = Tokenize(tok, ",");
       UTIL_THROW_IF2(split.size() != 2,
-    		  "Incorrectly formmatted non-terminal: " << tok);
+                     "Incorrectly formmatted non-terminal: " << tok);
 
       tok = "[X]" + split[0] + "]";
       size_t coIndex = Scan<size_t>(split[1]);
@@ -100,7 +100,7 @@ void ReformateHieroScore(string &scoreString)
     string &tok = toks[i];
     vector<string> nameValue = Tokenize(tok, "=");
     UTIL_THROW_IF2(nameValue.size() != 2,
-    		"Incorrectly formatted score: " << tok);
+                   "Incorrectly formatted score: " << tok);
 
     float score = Scan<float>(nameValue[1]);
     score = exp(-score);
@@ -212,7 +212,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     const size_t numScoreComponents = ruleTable.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
-    		  	  << numScoreComponents << ") of score components on line " << count);
+                  << numScoreComponents << ") of score components on line " << count);
     }
 
     // parse source & find pt node

@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(manager_configure_domain_except)
   args.clear();
   args = Tokenize("--DomainSubset"," ");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  
+
 }
 
 template <class Expected>

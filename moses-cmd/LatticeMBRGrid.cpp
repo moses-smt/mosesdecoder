@@ -70,7 +70,7 @@ public:
   void addParam(gridkey key, const string& arg, float defaultValue) {
     m_args[arg] = key;
     UTIL_THROW_IF2(m_grid.find(key) != m_grid.end(),
-    		  "Couldn't find value for key " << (int) key);
+                   "Couldn't find value for key " << (int) key);
     m_grid[key].push_back(defaultValue);
   }
 
