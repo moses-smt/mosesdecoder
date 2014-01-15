@@ -31,12 +31,23 @@ using namespace std;
 
 namespace Moses
 {
+std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
-PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
-  :DecodeFeature(description, line)
+CacheColl::~CacheColl()
+{
+	for (iterator iter = begin(); iter != end(); ++iter) {
+		std::pair<const TargetPhraseCollection*, clock_t> &key = iter->second;
+		const TargetPhraseCollection *tps = key.first;
+		delete tps;
+	}
+}
+
+PhraseDictionary::PhraseDictionary(const std::string &line)
+  :DecodeFeature(line)
   ,m_tableLimit(20) // default
   ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
+	s_staticColl.push_back(this);
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
@@ -69,25 +80,30 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
     }
   } else {
     // don't use cache. look up from phrase table
-
     ret = GetTargetPhraseCollectionNonCacheLEGACY(src);
   }
 
   return ret;
 }
 
-const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
+TargetPhraseCollection const *
+PhraseDictionary::
+GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }
 
 
-const TargetPhraseCollectionWithSourcePhrase* PhraseDictionary::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
+TargetPhraseCollectionWithSourcePhrase const*
+PhraseDictionary::
+GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const
 {
   UTIL_THROW(util::Exception, "Legacy method not implemented");
 }
 
-void PhraseDictionary::SetParameter(const std::string& key, const std::string& value)
+void
+PhraseDictionary::
+SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "cache-size") {
     m_maxCacheSize = Scan<size_t>(value);
@@ -100,7 +116,9 @@ void PhraseDictionary::SetParameter(const std::string& key, const std::string& v
   }
 }
 
-void PhraseDictionary::SetFeaturesToApply()
+void
+PhraseDictionary::
+SetFeaturesToApply()
 {
   // find out which feature function can be applied in this decode step
   const std::vector<FeatureFunction*> &allFeatures = FeatureFunction::GetFeatureFunctions();
@@ -112,10 +130,12 @@ void PhraseDictionary::SetFeaturesToApply()
   }
 }
 
-void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+void
+PhraseDictionary::
+GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   InputPathList::const_iterator iter;
-  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &node = **iter;
 
     const Phrase &phrase = node.GetPhrase();
@@ -126,6 +146,8 @@ void PhraseDictionary::GetTargetPhraseCollectionBatch(const InputPathList &phras
 
 void PhraseDictionary::ReduceCache() const
 {
+  Timer reduceCacheTime;
+  reduceCacheTime.start();
   CacheColl &cache = GetCache();
   if (cache.size() <= m_maxCacheSize) return; // not full
 
@@ -140,7 +162,6 @@ void PhraseDictionary::ReduceCache() const
   for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
     lastUsedTimes.pop();
   clock_t cutoffLastUsedTime = lastUsedTimes.top();
-  clock_t t = clock();
 
   // remove all old entries
   iter = cache.begin();
@@ -151,10 +172,10 @@ void PhraseDictionary::ReduceCache() const
       cache.erase(iterRemove);
     } else iter++;
   }
-  VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
+  VERBOSE(2,"Reduced persistent translation option cache in " << reduceCacheTime << " seconds." << std::endl);
 }
 
-PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
+CacheColl &PhraseDictionary::GetCache() const
 {
   CacheColl *cache;
   cache = m_cache.get();
@@ -162,7 +183,7 @@ PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
     cache = new CacheColl;
     m_cache.reset(cache);
   }
-  CHECK(cache);
+  assert(cache);
   return *cache;
 }
 

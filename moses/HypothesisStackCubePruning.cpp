@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "StaticData.h"
 #include "Manager.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -81,6 +82,13 @@ pair<HypothesisStackCubePruning::iterator, bool> HypothesisStackCubePruning::Add
 
 bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 {
+  if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
+    m_manager.GetSentenceStats().AddDiscarded();
+    VERBOSE(3,"discarded, constraint" << std::endl);
+    FREEHYPO(hypo);
+    return false;
+  }
+
   if (hypo->GetTotalScore() < m_worstScore) {
     // too bad for stack. don't bother adding hypo into collection
     m_manager.GetSentenceStats().AddDiscarded();
@@ -98,8 +106,8 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 
   // equiv hypo exists, recombine with other hypo
   iterator &iterExisting = addRet.first;
+  assert(iterExisting != m_hypos.end());
   Hypothesis *hypoExisting = *iterExisting;
-  CHECK(iterExisting != m_hypos.end());
 
   m_manager.GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 
@@ -118,8 +126,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
     bool added = Add(hypo).second;
     if (!added) {
       iterExisting = m_hypos.find(hypo);
-      TRACE_ERR("Offending hypo = " << **iterExisting << endl);
-      CHECK(false);
+      UTIL_THROW(util::Exception, "Should have added hypothesis " << **iterExisting);
     }
     return false;
   } else {
@@ -137,7 +144,8 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
 {
   std::pair<iterator, bool> addRet = Add(hypo);
-  CHECK(addRet.second);
+  UTIL_THROW_IF2(!addRet.second,
+		  	 "Should have added hypothesis " << *hypo);
 
   const WordsBitmap &bitmap = hypo->GetWordsBitmap();
   m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this);

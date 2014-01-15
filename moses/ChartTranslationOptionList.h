@@ -36,6 +36,8 @@ class InputPath;
 //! a vector of translations options for a specific range, in a specific sentence
 class ChartTranslationOptionList : public ChartParserCallback
 {
+  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionList&);
+
 public:
   ChartTranslationOptionList(size_t ruleLimit, const InputType &input);
   ~ChartTranslationOptionList();

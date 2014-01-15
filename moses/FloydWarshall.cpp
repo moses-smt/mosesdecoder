@@ -1,4 +1,4 @@
-#include "util/check.hh"
+#include "util/exception.hh"
 #include <climits>
 #include <vector>
 
@@ -11,7 +11,7 @@ using namespace std;
 // All-pairs shortest path algorithm
 void floyd_warshall(const std::vector<std::vector<bool> >& edges, std::vector<std::vector<int> >& dist)
 {
-  CHECK(edges.size() == edges.front().size());
+  UTIL_THROW_IF2(edges.size() != edges.front().size(), "Error");
   dist.clear();
   dist.resize(edges.size(), std::vector<int>(edges.size(), 0));
 

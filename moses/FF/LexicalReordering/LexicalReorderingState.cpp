@@ -1,7 +1,6 @@
 
 #include <vector>
 #include <string>
-#include "util/check.hh"
 
 #include "moses/FF/FFState.h"
 #include "moses/Hypothesis.h"
@@ -126,7 +125,8 @@ LexicalReorderingState *LexicalReorderingConfiguration::CreateLexicalReorderingS
 void LexicalReorderingState::CopyScores(Scores& scores, const TranslationOption &topt, ReorderingType reoType) const
 {
   // don't call this on a bidirectional object
-  CHECK(m_direction == LexicalReorderingConfiguration::Backward || m_direction == LexicalReorderingConfiguration::Forward);
+  UTIL_THROW_IF2(m_direction != LexicalReorderingConfiguration::Backward && m_direction != LexicalReorderingConfiguration::Forward,
+		  "Unknown direction: " << m_direction);
   const Scores *cachedScores = (m_direction == LexicalReorderingConfiguration::Backward) ?
                                topt.GetLexReorderingScores(m_configuration.GetScoreProducer()) : m_prevScore;
 
@@ -190,7 +190,7 @@ int PhraseBasedReorderingState::Compare(const FFState& o) const
     return 0;
 
   const PhraseBasedReorderingState* other = dynamic_cast<const PhraseBasedReorderingState*>(&o);
-  CHECK(other != NULL);
+  UTIL_THROW_IF2(other == NULL, "Wrong state type");
   if (m_prevRange == other->m_prevRange) {
     if (m_direction == LexicalReorderingConfiguration::Forward) {
       return ComparePrevScores(other->m_prevScore);
@@ -408,7 +408,8 @@ int HierarchicalReorderingForwardState::Compare(const FFState& o) const
     return 0;
 
   const HierarchicalReorderingForwardState* other = dynamic_cast<const HierarchicalReorderingForwardState*>(&o);
-  CHECK(other != NULL);
+  UTIL_THROW_IF2(other == NULL, "Wrong state type");
+
   if (m_prevRange == other->m_prevRange) {
     return ComparePrevScores(other->m_prevScore);
   } else if (m_prevRange < other->m_prevRange) {

@@ -40,6 +40,7 @@
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
 #include "util/double-conversion/double-conversion.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -71,7 +72,8 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
     if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]") {
       // no-term
       vector<string> split = Tokenize(tok, ",");
-      CHECK(split.size() == 2);
+      UTIL_THROW_IF2(split.size() != 2,
+    		  "Incorrectly formmatted non-terminal: " << tok);
 
       tok = "[X]" + split[0] + "]";
       size_t coIndex = Scan<size_t>(split[1]);
@@ -97,7 +99,8 @@ void ReformateHieroScore(string &scoreString)
   for (size_t i = 0; i < toks.size(); ++i) {
     string &tok = toks[i];
     vector<string> nameValue = Tokenize(tok, "=");
-    CHECK(nameValue.size() == 2);
+    UTIL_THROW_IF2(nameValue.size() != 2,
+    		"Incorrectly formatted score: " << tok);
 
     float score = Scan<float>(nameValue[1]);
     score = exp(-score);
@@ -193,12 +196,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
       StringPiece str(*pipes); //counts
     }
 
-    StringPiece propertiesString;
-    if (++pipes) {
-      StringPiece temp(*pipes);
-      propertiesString = temp;
-    }
-
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
       TRACE_ERR( ruleTable.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
@@ -209,16 +206,13 @@ bool RuleTableLoaderStandard::Load(FormatType format
     for (util::TokenIter<util::AnyCharacter, true> s(scoreString, " \t"); s; ++s) {
       int processed;
       float score = converter.StringToFloat(s->data(), s->length(), &processed);
-      UTIL_THROW_IF(isnan(score), util::Exception, "Bad score " << *s << " on line " << count);
+      UTIL_THROW_IF2(isnan(score), "Bad score " << *s << " on line " << count);
       scoreVector.push_back(FloorScore(TransformScore(score)));
     }
     const size_t numScoreComponents = ruleTable.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
-      stringstream strme;
-      strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
-            << numScoreComponents << ") of score components on line " << count;
-      UserMessage::Add(strme.str());
-      abort();
+      UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
+    		  	  << numScoreComponents << ") of score components on line " << count);
     }
 
     // parse source & find pt node
@@ -239,13 +233,16 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->SetAlignmentInfo(alignString);
     targetPhrase->SetTargetLHS(targetLHS);
 
-    targetPhrase->SetProperties(propertiesString);
-
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
 
     if (++pipes) {
       StringPiece sparseString(*pipes);
       targetPhrase->SetSparseScore(&ruleTable, sparseString);
+    }
+
+    if (++pipes) {
+      StringPiece propertiesString(*pipes);
+      targetPhrase->SetProperties(propertiesString);
     }
 
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);

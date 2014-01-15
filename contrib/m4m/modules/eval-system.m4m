@@ -1,0 +1,72 @@
+# -*- Makefile -*-
+
+moses.threads ?= 4
+moses.flags += -threads ${moses.threads}
+moses.flags += -v 0 -t -text-type "test"
+
+%.multi-bleu: | %.cleaned 
+	$(lock)
+	${multi-bleu} ${bleu.ref} < $*.cleaned > $@_ && mv $@_ $@
+	$(unlock)
+
+%.moses-out.wa: moses.flags += -alignment-output-file $*.output.wa
+%.moses-out.wa: %.moses-out
+
+# .SECONDEXPANSION:
+moses.ini ?= 
+%.moses-out: | ${moses.ini}
+	echo MOSES $^ 
+	$(lock)
+	${moses} -i ${moses.input} -inputtype ${moses.inputtype} \
+	-f ${moses.ini} ${moses.flags} > $@_ && mv $@_ $@
+	$(unlock)
+
+%.cleaned: %.moses-out
+	$(lock)
+	$(clean-decoder-output) < $< > $@_ && mv $@_ $@
+	$(unlock)
+
+%.natcased: %.cleaned
+	$(eval $(call lock))
+	$(detruecase) < $*.cleaned > $@_ && mv $@_ $@
+	$(eval $(call unlock))
+
+
+# $1: output base name
+# $2: system to be evaluated
+# $3: evaluation input
+# $4: evaluation input type
+# $5: evaluation reference
+
+define bleu_eval
+
+EVALUATIONS += $1
+.INTERMEDIATE: $3 $5
+$1: moses.ini       := $2
+$1: moses.input     := $3
+$1: moses.inputtype := $4
+$1: bleu.ref        := $5
+$1.moses-out:  | $2 $3
+$1.multi-bleu: | $5
+$1: | $1.multi-bleu 
+
+endef
+
+EVALUATIONS :=
+
+eval.sets ?= $(patsubst %.${L1}.gz,%,$(subst /raw/,/cased/,$(wildcard ${WDIR}/crp/tst/raw/*.${L1}.gz)))
+
+ifdef tune.runs
+define bleu_score_all_systems
+
+$(foreach system,${SYSTEMS},\
+$(foreach tuneset,${tune.sets},\
+$(foreach evalset,${eval.sets},\
+$(foreach run,$(shell seq ${tune.runs}),\
+$(eval $(call bleu_eval,${system}/eval/$(notdir ${tuneset})/${run}/$(notdir ${evalset}),\
+${system}/tuned/$(notdir ${tuneset})/${run}/moses.ini,\
+${evalset}.${L1},${moses.inputtype.plaintext},${evalset}.${L2}))))))
+
+endef
+endif
+

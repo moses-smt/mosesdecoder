@@ -518,6 +518,13 @@ build-osm
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
 	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --srilm-dir $srilm-dir $operation-sequence-model-settings
 	default-name: model/OSM
+build-transliteration-model
+       in: corpus word-alignment 
+       out: transliteration-model
+       ignore-unless: transliteration-module
+       rerun-on-change: transliteration-module training-options script giza-settings
+       template: $moses-script-dir/Transliteration/train-transliteration-module.pl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --out-dir OUT --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --srilm-dir $srilm-dir --input-extension $input-extension --output-extension $output-extension
+	default-name: model/Transliteration
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
@@ -586,7 +593,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-model generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
@@ -747,7 +754,7 @@ split-input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 split-input-devtest
 	in: truecased-input-devtest SPLITTER:splitter-model
 	out: input-devtest
@@ -755,7 +762,7 @@ split-input-devtest
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
 	ignore-unless: use-mira
-	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -967,7 +974,7 @@ decode
 	default-name: evaluation/output
 	qsub-script: yes
 	ignore-if: use-hiero
-	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph
+	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph wade
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
 hiero-decode
@@ -985,15 +992,21 @@ remove-markup
 	pass-if: TRAINING:hierarchical-rule-set
 	pass-unless: report-segmentation
 	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
+post-decoding-transliteration
+	in: cleaned-output system-output TRAINING:transliteration-model LM:binlm
+	out: transliterated-output
+	default-name: evaluation/transliterated
+	pass-unless: TRAINING:post-decoding-transliteration
+	template: $moses-script-dir/Transliteration/post-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN2 --input-extension $input-extension --output-extension $output-extension --language-model IN3 --output-file IN0 --oov-file IN1.oov
 recase-output
-	in: cleaned-output RECASING:recase-config
+	in: transliterated-output RECASING:recase-config
 	out: recased-output
 	default-name: evaluation/recased
 	pass-unless: recaser
 	ignore-if: output-truecaser
 	template: $recaser -moses $RECASING:decoder -in IN -model IN1 > OUT
 detruecase-output
-	in: cleaned-output
+	in: transliterated-output
 	out: recased-output
 	default-name: evaluation/truecased
 	ignore-unless: output-truecaser
@@ -1031,6 +1044,13 @@ lowercase-reference
   pass-if: recaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
+wade
+	in: filtered-dir truecased-input tokenized-reference alignment system-output
+	out: wade-analysis
+	default-name: evaluation/wade-analysis
+	ignore-unless: wade
+	rerun-on-change: wade
+	template: $moses-script-dir/ems/support/run-wade.perl $wade IN IN1 IN2 IN3 IN4 OUT
 nist-bleu
 	in: wrapped-output reference-sgm
 	out: nist-bleu-score
@@ -1076,7 +1096,7 @@ bolt-bleu-c
 	rerun-on-change: bolt-bleu-c
 	template: $bolt-bleu-c IN > OUT
 multi-bleu
-	in: cleaned-output reference
+	in: transliterated-output tokenized-reference
 	out: multi-bleu-score
 	default-name: evaluation/multi-bleu
 	ignore-unless: multi-bleu
@@ -1103,7 +1123,7 @@ wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
 meteor
-	in: cleaned-output reference
+	in: transliterated-output reference
 	out: meteor-score
 	default-name: evaluation/meteor
 	ignore-unless: meteor
@@ -1131,6 +1151,6 @@ analysis-precision
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model 
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
 	out: report
 	default-name: evaluation/report

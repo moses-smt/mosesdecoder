@@ -19,8 +19,6 @@ public:
   typedef std::vector< std::vector<InputPathList> > InputPathMatrix;
 
 protected:
-  bool m_useLegacy;
-
   InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
 
   InputPathList &GetInputPathList(size_t startPos, size_t endPos);
@@ -30,7 +28,6 @@ protected:
       , bool adhereTableLimit
       , size_t graphInd);
 
-  void CheckLEGACY();
   void CreateTranslationOptionsForRangeLEGACY(const DecodeGraph &decodeStepList
       , size_t startPosition
       , size_t endPosition

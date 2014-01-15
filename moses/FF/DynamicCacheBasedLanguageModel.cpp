@@ -1,5 +1,4 @@
 #include <utility>
-#include "util/check.hh"
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
 #include "DynamicCacheBasedLanguageModel.h"
@@ -7,8 +6,10 @@
 namespace Moses
 {
 
+DynamicCacheBasedLanguageModel *DynamicCacheBasedLanguageModel::s_instance = NULL;
+
 DynamicCacheBasedLanguageModel::DynamicCacheBasedLanguageModel(const std::string &line)
-  : StatelessFeatureFunction("DynamicCacheBasedLanguageModel", line)
+  : StatelessFeatureFunction(1, line)
 {
   VERBOSE(2,"Initializing DynamicCacheBasedLanguageModel feature..." << std::endl);
 
@@ -17,6 +18,9 @@ DynamicCacheBasedLanguageModel::DynamicCacheBasedLanguageModel(const std::string
   m_maxAge = 1000;
 
   ReadParameters();
+
+  UTIL_THROW_IF2(s_instance, "Can only have 1 DynamicCacheBasedLanguageModel feature");
+  s_instance = this;
 }
 
 DynamicCacheBasedLanguageModel::~DynamicCacheBasedLanguageModel() {};
@@ -85,7 +89,7 @@ void DynamicCacheBasedLanguageModel::Evaluate(const Phrase &sp
     score = Evaluate_All_Substrings(tp);
     break;
   default:
-    CHECK(false);
+    UTIL_THROW_IF2(false, "This score type (" << m_query_type << ") is unknown.");
   }
 
   scoreBreakdown.Assign(this, score);
@@ -316,8 +320,7 @@ void DynamicCacheBasedLanguageModel::Load_Single_File(const std::string file)
       vecStr.erase(vecStr.begin());
       Update(vecStr,age);
     } else {
-      TRACE_ERR("ERROR: The format of the loaded file is wrong: " << line << std::endl);
-      CHECK(false);
+      UTIL_THROW_IF2(false, "The format of the loaded file is wrong: " << line);
     }
   }
   IFVERBOSE(2) Print();

@@ -3,16 +3,30 @@
 #include "moses/Util.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/InputPath.h"
-#include "util/check.hh"
+#include "moses/StaticData.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 
 using namespace std;
 
 namespace Moses
 {
+InputFeature *InputFeature::s_instance = NULL;
+
 InputFeature::InputFeature(const std::string &line)
-  :StatelessFeatureFunction("InputFeature", line)
+  :StatelessFeatureFunction(line)
 {
   ReadParameters();
+
+  UTIL_THROW_IF2(s_instance, "Can only have 1 input feature");
+  s_instance = this;
+}
+
+void InputFeature::Load()
+{
+  const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];
+  const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
+
+  m_legacy = (ptBin != NULL);
 }
 
 void InputFeature::SetParameter(const std::string& key, const std::string& value)
@@ -29,12 +43,20 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 
 void InputFeature::Evaluate(const InputType &input
                             , const InputPath &inputPath
-                            , ScoreComponentCollection &scoreBreakdown) const
+                            , const TargetPhrase &targetPhrase
+                            , ScoreComponentCollection &scoreBreakdown
+                            , ScoreComponentCollection *estimatedFutureScore) const
 {
-  const ScoreComponentCollection *scores = inputPath.GetInputScore();
-  if (scores) {
-
+  if (m_legacy) {
+    //binary phrase-table does input feature itself
+    return;
   }
+  /*
+  const ScorePair *scores = inputPath.GetInputScore();
+  if (scores) {
+  	  scoreBreakdown.PlusEquals(this, *scores);
+  }
+  */
 }
 
 } // namespace

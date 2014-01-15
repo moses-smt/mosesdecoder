@@ -29,6 +29,8 @@
 #include "StaticData.h"
 #include "ChartTranslationOptions.h"
 #include "moses/FF/FFState.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 using namespace std;
 
@@ -87,8 +89,9 @@ ChartHypothesis::~ChartHypothesis()
 /** Create full output phrase that is contained in the hypothesis (and its children)
  * \param outPhrase full output phrase as return argument
  */
-void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
+void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
 {
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
 
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
@@ -96,9 +99,28 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
       // non-term. fill out with prev hypo
       size_t nonTermInd = GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
-      prevHypo->CreateOutputPhrase(outPhrase);
+      prevHypo->GetOutputPhrase(outPhrase);
     } else {
       outPhrase.AddWord(word);
+
+      if (placeholderFactor != NOT_FOUND) {
+        std::set<size_t> sourcePosSet = GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
+        if (sourcePosSet.size() == 1) {
+          const std::vector<const Word*> *ruleSourceFromInputPath = GetTranslationOption().GetSourceRuleFromInputPath();
+          UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
+        		  "No source rule");
+
+          size_t sourcePos = *sourcePosSet.begin();
+          const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
+          UTIL_THROW_IF2(sourceWord == NULL,
+        		  "No source word");
+          const Factor *factor = sourceWord->GetFactor(placeholderFactor);
+          if (factor) {
+            outPhrase.Back()[0] = factor;
+          }
+        }
+      }
+
     }
   }
 }
@@ -107,7 +129,7 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 Phrase ChartHypothesis::GetOutputPhrase() const
 {
   Phrase outPhrase(ARRAY_SIZE_INCR);
-  CreateOutputPhrase(outPhrase);
+  GetOutputPhrase(outPhrase);
   return outPhrase;
 }
 
@@ -153,7 +175,7 @@ void ChartHypothesis::Evaluate()
   }
 
   // scores from current translation rule. eg. translation models & word penalty
-  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
+  const ScoreComponentCollection &scoreBreakdown = GetTranslationOption().GetScores();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
   // compute values of stateless feature functions that were not
@@ -225,7 +247,7 @@ void ChartHypothesis::CleanupArcList()
 
   if (!distinctNBest && m_arcList->size() > nBestSize) {
     // prune arc list only if there too many arcs
-    nth_element(m_arcList->begin()
+	NTH_ELEMENT4(m_arcList->begin()
                 , m_arcList->begin() + nBestSize - 1
                 , m_arcList->end()
                 , CompareChartChartHypothesisTotalScore());

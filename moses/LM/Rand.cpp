@@ -17,12 +17,11 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-// This file should be compiled only when the LM_RAND flag is enabled. 
+// This file should be compiled only when the LM_RAND flag is enabled.
 //
-// The following ifdef prevents XCode and other non-bjam build systems 
+// The following ifdef prevents XCode and other non-bjam build systems
 // from attempting to compile this file when LM_RAND is disabled.
 //
-#ifdef LM_RAND
 
 #include <limits>
 #include <iostream>
@@ -35,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Phrase.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "util/check.hh"
 #include "RandLM.h"
 
 using namespace std;
@@ -44,7 +42,7 @@ namespace Moses
 {
 
 LanguageModelRandLM::LanguageModelRandLM(const std::string &line)
-  :LanguageModelSingleFactor("RandLM", line)
+  :LanguageModelSingleFactor(line)
   , m_lm(0)
 {
 }
@@ -60,7 +58,7 @@ void LanguageModelRandLM::Load()
   FactorCollection &factorCollection = FactorCollection::Instance();
   int cache_MB = 50; // increase cache size
   m_lm = randlm::RandLM::initRandLM(m_filePath, m_nGramOrder, cache_MB);
-  CHECK(m_lm != NULL);
+  UTIL_THROW_IF2(m_lm == NULL, "RandLM object not created");
   // get special word ids
   m_oov_id = m_lm->getWordID(m_lm->getOOV());
   CreateFactors(factorCollection);
@@ -147,4 +145,3 @@ void LanguageModelRandLM::CleanUpAfterSentenceProcessing(const InputType& source
 
 }
 
-#endif

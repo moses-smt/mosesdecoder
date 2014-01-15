@@ -52,6 +52,7 @@ void Usage(const char *name, const char *default_mem) {
 "-a compresses pointers using an array of offsets.  The parameter is the\n"
 "   maximum number of bits encoded by the array.  Memory is minimized subject\n"
 "   to the maximum, so pick 255 to minimize memory.\n\n"
+"-h print this help message.\n\n"
 "Get a memory estimate by passing an ARPA file without an output file name.\n";
   exit(1);
 }
@@ -104,12 +105,15 @@ int main(int argc, char *argv[]) {
 
   const char *default_mem = util::GuessPhysicalMemory() ? "80%" : "1G";
 
+  if (argc == 2 && !strcmp(argv[1], "--help"))
+    Usage(argv[0], default_mem);
+
   try {
     bool quantize = false, set_backoff_bits = false, bhiksha = false, set_write_method = false, rest = false;
     lm::ngram::Config config;
     config.building_memory = util::ParseSize(default_mem);
     int opt;
-    while ((opt = getopt(argc, argv, "q:b:a:u:p:t:T:m:S:w:sir:")) != -1) {
+    while ((opt = getopt(argc, argv, "q:b:a:u:p:t:T:m:S:w:sir:h")) != -1) {
       switch(opt) {
         case 'q':
           config.prob_bits = ParseBitCount(optarg);
@@ -161,6 +165,7 @@ int main(int argc, char *argv[]) {
           ParseFileList(optarg, config.rest_lower_files);
           config.rest_function = Config::REST_LOWER;
           break;
+        case 'h': // help
         default:
           Usage(argv[0], default_mem);
       }
@@ -186,6 +191,7 @@ int main(int argc, char *argv[]) {
       config.write_mmap = argv[optind + 2];
     } else {
       Usage(argv[0], default_mem);
+      return 1;
     }
     if (!strcmp(model_type, "probing")) {
       if (!set_write_method) config.write_method = Config::WRITE_AFTER;

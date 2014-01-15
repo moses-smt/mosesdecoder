@@ -38,7 +38,7 @@ class DecodeStepTranslation : public DecodeStep
 {
 public:
   DecodeStepTranslation(); //! not implemented
-  DecodeStepTranslation(const PhraseDictionary* phraseFeature,
+  DecodeStepTranslation(PhraseDictionary* phraseFeature,
                         const DecodeStep* prev,
                         const std::vector<FeatureFunction*> &features);
 

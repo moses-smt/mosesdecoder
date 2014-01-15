@@ -1,0 +1,85 @@
+# -*- makefile -*-
+# M4M module for word alignment with fast_align
+# see http://aclweb.org/anthology-new/N/N13/N13-1073 (paper)
+# see https://github.com/clab/fast_align (github)
+
+fstaln   ?= ${WDIR}/crp/trn/aln/fast
+fstaln.in = $(addprefix ${WDIR}/crp/trn/pll/clean/, ${pllshards})
+# symal 
+symal_grow_diag_final_and = -a=g -d=yes -f=yes -b=yes 
+symal_args = ${symal_grow_diag_final_and}
+
+fastalign: | pll-ready
+fastalign: options = -d -v -o 
+fastalign: $(fstaln)/${L1}.txt.gz
+fastalign: $(fstaln)/${L2}.txt.gz
+fastalign: $(fstaln)/${L1}-${L2}.symal.gz
+
+.INTERMEDIATE: $(fstaln)/tmp/${L1}-${L2}.fwd.gz
+.INTERMEDIATE: $(fstaln)/tmp/${L1}-${L2}.bwd.gz
+$(fstaln)/${L1}-${L2}.symal.gz: | $(fstaln)/tmp/${L1}-${L2}.fwd.gz
+$(fstaln)/${L1}-${L2}.symal.gz: | $(fstaln)/tmp/${L1}-${L2}.bwd.gz
+$(fstaln)/${L1}-${L2}.symal.gz: | $(fstaln)/${L1}.txt.gz
+$(fstaln)/${L1}-${L2}.symal.gz: | $(fstaln)/${L2}.txt.gz
+	$(lock)
+	${m4mdir}/scripts/fast-align2bal.py \
+		<(zcat $(fstaln)/${L1}.txt.gz) \
+		<(zcat $(fstaln)/${L2}.txt.gz) \
+		<(zcat $(fstaln)/tmp/${L1}-${L2}.fwd.gz) \
+		<(zcat $(fstaln)/tmp/${L1}-${L2}.bwd.gz) \
+		| ${symal} ${symal_args} | gzip > $@_ && mv $@_ $@
+	rm -rf $(fstaln)/tmp
+	$(unlock)
+
+.INTERMEDIATE: $(fstaln)/tmp/${L1}-${L2}.txt
+$(fstaln)/tmp/${L1}-${L2}.txt: | $(fstaln)/${L1}.txt.gz
+$(fstaln)/tmp/${L1}-${L2}.txt: | $(fstaln)/${L2}.txt.gz
+	$(lock)
+	paste -d '\t' <(zcat $(fstaln)/${L1}.txt.gz) <(zcat $(fstaln)/${L2}.txt.gz) \
+		| perl -pe 's/\t/ \|\|\| /' > $@_ && mv $@_ $@
+	$(unlock)
+
+$(fstaln)/tmp/${L1}-${L2}.fwd.gz: options ?= 
+$(fstaln)/tmp/${L1}-${L2}.fwd.gz: | $(fast_align)
+$(fstaln)/tmp/${L1}-${L2}.fwd.gz: | $(fstaln)/tmp/${L1}-${L2}.txt
+$(fstaln)/tmp/${L1}-${L2}.fwd.gz: 
+	$(lock)
+	${fast_align} -i ${@D}/${L1}-${L2}.txt ${options} | gzip > $@_ && mv $@_ $@
+	$(unlock)
+
+$(fstaln)/tmp/${L1}-${L2}.bwd.gz: options ?= 
+$(fstaln)/tmp/${L1}-${L2}.bwd.gz: | $(fast_align)
+$(fstaln)/tmp/${L1}-${L2}.bwd.gz: | $(fstaln)/tmp/${L1}-${L2}.txt
+$(fstaln)/tmp/${L1}-${L2}.bwd.gz: 
+	$(lock)
+	${fast_align} -r -i ${@D}/${L1}-${L2}.txt ${options} | gzip > $@_ && mv $@_ $@
+	$(unlock)
+
+$(fstaln)/${L2}.txt.gz: | $(addsuffix .${L2}.gz, ${fstaln.in})
+	$(lock)
+ifeq ($(words ${pllshards}),1)
+	@cp -l $| $@ || cp $| $@
+else
+	@cat $| > $@_ && mv $@_ $@
+endif
+	$(unlock)
+
+$(fstaln)/${L1}.txt.gz: | $(addsuffix .${L1}.gz, ${fstaln.in})
+	$(lock)
+ifeq ($(words ${pllshards}),1)
+	@cp -l $| $@ || cp $| $@
+else
+	@cat $| > $@_ && mv $@_ $@
+endif
+	$(unlock)
+
+# install fast-align if you don't have it
+fast-align.git = https://github.com/clab/fast_align.git
+${fast_align}:
+	$(lock)
+	git clone ${fast-align.git}
+	cd fast_align && make
+	mkdir -p $(dir ${fast_align})
+	cp fast_align/fast_align $(dir ${fast_align})
+	rm -rf fast_align
+	$(unlock)

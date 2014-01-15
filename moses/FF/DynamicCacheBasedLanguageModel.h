@@ -75,9 +75,19 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
 
   void Clear();
 
+protected:
+  static DynamicCacheBasedLanguageModel *s_instance;
+
 public:
   DynamicCacheBasedLanguageModel(const std::string &line);
   ~DynamicCacheBasedLanguageModel();
+
+  static const DynamicCacheBasedLanguageModel& Instance() {
+    return *s_instance;
+  }
+  static DynamicCacheBasedLanguageModel& InstanceNonConst() {
+    return *s_instance;
+  }
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -94,6 +104,13 @@ public:
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
+
+  void Evaluate(const InputType &input
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  {}
 
   void Evaluate(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const

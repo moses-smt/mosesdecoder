@@ -72,6 +72,14 @@ class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
 public:
   PhraseDictionaryDynamicCacheBased(const std::string &line);
   ~PhraseDictionaryDynamicCacheBased();
+
+  static const PhraseDictionaryDynamicCacheBased& Instance() {
+    return *s_instance;
+  }
+  static PhraseDictionaryDynamicCacheBased& InstanceNonConst() {
+    return *s_instance;
+  }
+
   void Load();
   void Load(const std::string file);
 
@@ -100,6 +108,8 @@ public:
   void SetMaxAge(unsigned int age);
         
 protected:
+  static PhraseDictionaryDynamicCacheBased *s_instance;
+
   float decaying_score(const int age);  // calculates the decay score given the age
   void Insert(std::vector<std::string> entries);
 

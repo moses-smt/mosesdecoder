@@ -32,8 +32,6 @@ namespace MosesTraining
 // sentence-level collection of rules
 class ExtractedRule
 {
-  friend std::ostream& operator<<(std::ostream &, const ExtractedRule &);
-
 public:
   std::string source;
   std::string target;
@@ -41,14 +39,18 @@ public:
   std::string alignmentInv;
   std::string orientation;
   std::string orientationForward;
+  std::string sourceContextLeft;
+  std::string sourceContextRight;
+  std::string targetContextLeft;
+  std::string targetContextRight;
+  std::string sourceHoleString;
+  std::string targetHoleString;
   int startT;
   int endT;
   int startS;
   int endS;
   float count;
   double pcfgScore;
-
-  std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
 
   ExtractedRule(int sT, int eT, int sS, int eS)
     : source()
@@ -57,6 +59,12 @@ public:
     , alignmentInv()
     , orientation()
     , orientationForward()
+    , sourceContextLeft()
+    , sourceContextRight()
+    , targetContextLeft()
+    , targetContextRight()
+    , sourceHoleString()
+    , targetHoleString()
     , startT(sT)
     , endT(eT)
     , startS(sS)
@@ -64,13 +72,6 @@ public:
     , count(0)
     , pcfgScore(0.0) {
   }
-
-  void SetSpanLength(size_t sourcePos, size_t sourceLength, size_t targetLength) {
-    m_ntLengths[sourcePos] = std::pair<size_t, size_t>(sourceLength, targetLength);
-  }
-
-  void OutputNTLengths(std::ostream &out) const;
-  void OutputNTLengths(std::ostringstream &out) const;
 };
 
 }

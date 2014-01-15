@@ -20,28 +20,23 @@ class Timer
 
 private:
   bool running;
-  // note: this only has the resolution of seconds, we'd often like better resolution
-  // we make our best effort to do this on a system-by-system basis
-  time_t start_time;
-
-  // in seconds
-  double elapsed_time();
+  bool stopped;
+  double start_time;
+  double stop_time;
 
 public:
   /***
    * 'running' is initially false.  A timer needs to be explicitly started
-   * using 'start' or 'restart'
+   * using 'start'
    */
-  Timer() : running(false) {
+  Timer() : running(false),stopped(false) {
     start_time = 0;
   }
 
   void start(const char* msg = 0);
-//  void restart(const char* msg = 0);
-//  void stop(const char* msg = 0);
+  void stop(const char* msg = 0);
   void check(const char* msg = 0);
-  double get_elapsed_time();
-
+  double get_elapsed_time() const;
 };
 
 }

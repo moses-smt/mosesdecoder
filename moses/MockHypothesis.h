@@ -60,7 +60,7 @@ public:
 private:
   Moses::TranslationOption m_initialTransOpt;
   Moses::Sentence m_sentence;
-  Moses::PhrasePenaltyProducer m_pp;
+  Moses::PhrasePenalty m_pp;
   Moses::WordPenaltyProducer m_wp;
   Moses::UnknownWordPenaltyProducer m_uwp;
   Moses::DistortionScoreProducer m_dist;

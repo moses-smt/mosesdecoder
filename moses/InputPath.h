@@ -2,7 +2,7 @@
 
 #include <map>
 #include <iostream>
-#include <list>
+#include <vector>
 #include "Phrase.h"
 #include "WordsRange.h"
 #include "NonTerminal.h"
@@ -14,9 +14,10 @@ class PhraseDictionary;
 class TargetPhraseCollection;
 class ScoreComponentCollection;
 class TargetPhrase;
-
 class InputPath;
-typedef std::list<InputPath*> InputPathList;
+struct ScorePair;
+
+typedef std::vector<InputPath*> InputPathList;
 
 /** Each node contains
 1. substring used to searching the phrase table
@@ -28,26 +29,34 @@ class InputPath
 {
   friend std::ostream& operator<<(std::ostream& out, const InputPath &obj);
 
+public:
+  typedef std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > TargetPhrases;
+
 protected:
-  const InputPath *m_prevNode;
+  const InputPath *m_prevPath;
   Phrase m_phrase;
   WordsRange m_range;
-  const ScoreComponentCollection *m_inputScore;
-  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
+  const ScorePair *m_inputScore;
+  size_t m_nextNode; // distance to next node. For lattices
+
+  // for phrase-based model only
+  TargetPhrases m_targetPhrases;
+
+  // for syntax model only
+  mutable std::vector<std::vector<const Word*> > m_ruleSourceFromInputPath;
   const NonTerminalSet m_sourceNonTerms;
 
-  std::vector<size_t> m_placeholders;
 
-  bool SetPlaceholders(TargetPhrase *targetPhrase) const;
 public:
   explicit InputPath()
-    : m_prevNode(NULL)
+    : m_prevPath(NULL)
     , m_range(NOT_FOUND, NOT_FOUND)
-    , m_inputScore(NULL) {
-  }
+    , m_inputScore(NULL)
+    , m_nextNode(NOT_FOUND)
+  {}
 
   InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms, const WordsRange &range, const InputPath *prevNode
-            ,const ScoreComponentCollection *inputScore);
+            ,const ScorePair *inputScore);
   ~InputPath();
 
   const Phrase &GetPhrase() const {
@@ -61,19 +70,35 @@ public:
   }
   const Word &GetLastWord() const;
 
-  const InputPath *GetPrevNode() const {
-    return m_prevNode;
+  const InputPath *GetPrevPath() const {
+    return m_prevPath;
+  }
+
+  //! distance to next node in input lattice. For sentences and confusion networks, this should be 1 (default)
+  size_t GetNextNode() const {
+    return m_nextNode;
+  }
+
+  void SetNextNode(size_t nextNode) {
+    m_nextNode = nextNode;
   }
 
   void SetTargetPhrases(const PhraseDictionary &phraseDictionary
                         , const TargetPhraseCollection *targetPhrases
                         , const void *ptNode);
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
+  const TargetPhrases &GetTargetPhrases() const
+  { return m_targetPhrases; }
 
   // pointer to internal node in phrase-table. Since this is implementation dependent, this is a void*
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;
-  const ScoreComponentCollection *GetInputScore() const {
+  const ScorePair *GetInputScore() const {
     return m_inputScore;
+  }
+
+  std::vector<const Word*> &AddRuleSourceFromInputPath() const {
+    m_ruleSourceFromInputPath.push_back(std::vector<const Word*>());
+    return m_ruleSourceFromInputPath.back();
   }
 
 };

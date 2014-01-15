@@ -38,15 +38,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread/mutex.hpp>
 #endif
 
-#include "TypeDef.h"
-#include "FactorCollection.h"
 #include "Parameter.h"
-#include "LM/Base.h"
 #include "SentenceStats.h"
-#include "DecodeGraph.h"
-#include "TranslationOptionList.h"
 #include "ScoreComponentCollection.h"
-#include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/FF/Factory.h"
 
 namespace Moses
 {
@@ -70,7 +65,6 @@ class StaticData
 private:
   static StaticData									s_instance;
 protected:
-
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
@@ -121,14 +115,17 @@ protected:
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
-  DynamicCacheBasedLanguageModel* m_dynamicCBLM;
-  PhraseDictionaryDynamicCacheBased* m_dynamicPDCB;
 
   bool m_reportSegmentation;
   bool m_reportSegmentationEnriched;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
+  std::string m_detailedTreeFragmentsTranslationReportingFilePath;
+
+  //DIMw
+  std::string m_detailedAllTranslationReportingFilePath;
+
   bool m_onlyDistinctNBest;
   bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
@@ -140,10 +137,6 @@ protected:
 
   XmlInputType m_xmlInputType; //! method for handling sentence XML input
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
-
-  int PhraseDictionaryCacheIndex; //Index of the PhraseDictionaryDynamicCacheBased
-  size_t PhraseDictionaryCacheScoreType; //Scoring type for PhraseDictionaryCache
-  unsigned int PhraseDictionaryCacheMaxAge; //maximum age of the entries in PhraseDictionaryCache
 
   bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
@@ -188,12 +181,6 @@ protected:
   bool m_minphrMemory;
   bool m_minlexrMemory;
 
-  size_t m_dynamicCBLM_QueryType;
-  size_t m_dynamicCBLM_ScoreType;
-  unsigned int m_dynamicCBLM_MaxAge;
-  size_t m_dynamicPDCB_ScoreType;
-  unsigned int m_dynamicPDCB_MaxAge;
-
   // Initial = 0 = can be used when creating poss trans
   // Other = 1 = used to calculate LM score once all steps have been processed
   Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
@@ -231,8 +218,6 @@ protected:
   bool m_continuePartialTranslation;
   std::string m_binPath;
 
-  bool m_continuePartialTranslation;
-  std::string m_binPath;
 
 public:
 
@@ -279,16 +264,6 @@ public:
     return m_outputFactorOrder;
   }
 
-  inline int GetPhraseDictionaryCacheIndex() const {
-    return PhraseDictionaryCacheIndex;
-  }
-  inline size_t GetPhraseDictionaryCacheScoreType() const {
-    return PhraseDictionaryCacheScoreType;
-  }
-  inline unsigned int GetPhraseDictionaryCacheMaxAge() const {
-    return PhraseDictionaryCacheMaxAge;
-  }
-
   inline bool GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
   }
@@ -306,15 +281,6 @@ public:
   }
   inline size_t GetMaxNoPartTransOpt() const {
     return m_maxNoPartTransOpt;
-  }
-  inline const Phrase* GetConstrainingPhrase(long sentenceID) const {
-    std::map<long,Phrase>::const_iterator iter = m_constraints.find(sentenceID);
-    if (iter != m_constraints.end()) {
-      const Phrase& phrase = iter->second;
-      return &phrase;
-    } else {
-      return NULL;
-    }
   }
   inline size_t GetMaxPhraseLength() const {
     return m_maxPhraseLength;
@@ -382,8 +348,19 @@ public:
   bool IsDetailedTranslationReportingEnabled() const {
     return !m_detailedTranslationReportingFilePath.empty();
   }
+
+  bool IsDetailedAllTranslationReportingEnabled() const {
+    return !m_detailedAllTranslationReportingFilePath.empty();
+  }
+
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
+  }
+  bool IsDetailedTreeFragmentsTranslationReportingEnabled() const {
+    return !m_detailedTreeFragmentsTranslationReportingFilePath.empty();
+  }
+  const std::string &GetDetailedTreeFragmentsTranslationReportingFilePath() const {
+    return m_detailedTreeFragmentsTranslationReportingFilePath;
   }
   bool IsLabeledNBestList() const {
     return m_labeledNBestList;
@@ -434,45 +411,11 @@ public:
   InputTypeEnum GetInputType() const {
     return m_inputType;
   }
-  ParsingAlgorithm GetParsingAlgorithm() const {
-    return m_parsingAlgorithm;
-  }
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
-  }
-
-  const WordPenaltyProducer *GetWordPenaltyProducer() const {
-    return m_wpProducer;
-  }
-  WordPenaltyProducer *GetWordPenaltyProducer() { // for mira
-    return m_wpProducer;
-  }
-
-  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const {
-    return m_unknownWordPenaltyProducer;
-  }
-
-  const InputFeature *GetInputFeature() const {
-    return m_inputFeature;
-  }
-
-  DynamicCacheBasedLanguageModel *GetDynamicCacheBasedLanguageModel() const {
-    return m_dynamicCBLM;
-  }
-
-  DynamicCacheBasedLanguageModel *GetDynamicCacheBasedLanguageModel() { // for mira
-    return m_dynamicCBLM;
-  }
-
-  PhraseDictionaryDynamicCacheBased *GetPhraseDictionaryDynamicCacheBased() const {
-    return m_dynamicPDCB;
-  }
-
-  const PhraseDictionaryDynamicCacheBased *GetPhraseDictionaryDynamicCacheBased() { // for mira
-    return m_dynamicPDCB;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
@@ -765,25 +708,8 @@ public:
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
 
-  const std::vector<PhraseDictionary*>& GetPhraseDictionaries() const {
-    return m_phraseDictionary;
-  }
-  const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const {
-    return m_generationDictionary;
-  }
-  const PhraseDictionary* GetTranslationScoreProducer(size_t index) const {
-    return GetPhraseDictionaries().at(index);
-  }
-  std::vector<float> GetTranslationWeights(size_t index) const {
-    std::vector<float> weights = GetWeights(GetTranslationScoreProducer(index));
-    return weights;
-  }
-
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;
-  }
-  const std::vector<size_t>& GetDecodeGraphBackoff() const {
-    return m_decodeGraphBackoff;
   }
 
   //sentence (and thread) specific initialisationn and cleanup
@@ -795,11 +721,24 @@ public:
   bool LoadWeightSettings();
   bool LoadAlternateWeightSettings();
 
+  std::map<std::string, std::string> OverrideFeatureNames();
   void OverrideFeatures();
 
-  const std::pair<FactorType, FactorType> &GetPlaceholderFactor() const {
+  FactorType GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
+
+  const FeatureRegistry &GetFeatureRegistry() const
+  { return m_registry; }
+
+  /** check whether we should be using the old code to support binary phrase-table.
+  ** eventually, we'll stop support the binary phrase-table and delete this legacy code
+  **/
+  void CheckLEGACYPT();
+  bool GetUseLegacyPT() const {
+    return m_useLegacyPT;
+  }
+
 };
 
 }

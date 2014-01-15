@@ -67,12 +67,14 @@ Parameter::Parameter()
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
+  AddParam("tree-translation-details", "Ttree", "for each hypothesis, report translation details with tree fragment info to given file");
+  //DIMw
+  AddParam("translation-all-details", "Tall", "for all hypotheses, report translation details to the given file");
   AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
   AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
   AddParam("verbose", "v", "verbosity level of the logging");
   AddParam("references", "Reference file(s) - used for bleu score feature");
   AddParam("output-factors", "list if factors in the output");
-  AddParam("cache-path", "?");
   AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
   AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
   AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
@@ -94,8 +96,6 @@ Parameter::Parameter()
   AddParam("lattice-hypo-set", "to use lattice as hypo set during lattice MBR");
   AddParam("lmodel-oov-feature", "add language model oov feature, one per model");
   AddParam("clean-lm-cache", "clean language model caches after N translations (default N=1)");
-  AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
-  AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");
   AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
   AddParam("output-word-graph", "owg", "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
   AddParam("time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
@@ -111,7 +111,6 @@ Parameter::Parameter()
   AddParam("cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
   AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
   AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
-  AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
   AddParam("description", "Source language, target language, description");
   AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
   AddParam("non-terminals", "list of non-term symbols, space separated");
@@ -120,9 +119,7 @@ Parameter::Parameter()
   AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
   AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
-  AddParam("parsing-algorithm", "Which parsing algorithm to use. 0=CYK+, 1=scope-3. (default = 0)");
   AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing, 4=stack with batched lm requests (default = 0)");
-  AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
   AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
   AddParam("description", "Source language, target language, description");
 
@@ -194,27 +191,18 @@ Parameter::Parameter()
 
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
-  AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key");
+  AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
   AddParam("feature-add", "Add a feature function on the command line. Used by mira to add BLEU feature");
+  AddParam("feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
   AddParam("feature", "All the feature functions should be here");
-  AddParam("feature", "");
-  AddParam("print-translation-option", "pto", "print translation option (without setting verbosity)");
   AddParam("print-id", "prefix translations with id. Default if false");
 
   AddParam("alternate-weight-setting", "aws", "alternate set of weights to used per xml specification");
 
-  AddParam("placeholder-factor", "Which factor to use to store the original text for placeholders");
+  AddParam("placeholder-factor", "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
+  AddParam("no-cache", "Disable all phrase-table caching. Default = false (ie. enable caching)");
 
-  AddParam("weight-cblm", "tm", "DEPRECATED. DO NOT USE. weight for cache-based language model");
-  AddParam("cblm-file", "location of the initialization data for cache-based language model");
-  AddParam("cblm-query-type", "way of querying the cache-based Language model: 0=looks for all sub-string, 1=look for the whole string; default is 0");
-  AddParam("cblm-score-type", "scoring type for the cache-based language model: 0=hyperbola, 1=power, 2=negative exponential, 3=cosine, 10=hyperbola_reward, 11=power_reward, 12=negative exponential_reward; default is 0");
-  AddParam("cblm-max-age", "maximum age for entries in the cache-based language model; default is 1000");
-
-  AddParam("cbtm-file", "location of the initialization data for the dynamic cache-based translation model");
-  AddParam("cbtm-score-type", "scoring type for the cache-based translation model: 0=hyperbola, 1=power, 2=negative exponential, 3=cosine, 10=hyperbola_reward, 11=power_reward, 12=negative exponential_reward; default is 0");
-  AddParam("cbtm-max-age", "maximum age for entries in the cache-based translation model; default is 1000");
 
 }
 
@@ -283,6 +271,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
        && (configPath = FindParam("-config", argc, argv)) == "") {
     PrintCredit();
     Explain();
+    PrintFF();
 
     cerr << endl;
     UserMessage::Add("No configuration file was specified.  Use -config or -f");
@@ -390,9 +379,9 @@ void Parameter::AddFeaturesCmd()
   m_setting.erase("feature-add");
 }
 
-std::vector<float> &Parameter::GetWeights(const std::string &name)
+std::vector<float> Parameter::GetWeights(const std::string &name)
 {
-  std::vector<float> &ret = m_weights[name];
+  std::vector<float> ret = m_weights[name];
 
   // cerr << "WEIGHT " << name << "=";
   // for (size_t i = 0; i < ret.size(); ++i) {
@@ -466,11 +455,11 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
     vector<float> inputWeights = Scan<float>(m_setting["weight-i"]);
     PARAM_VEC &numInputScores = m_setting["input-scores"];
     if (inputWeights.size() == 1) {
-      CHECK(numInputScores.size() == 0);
+      UTIL_THROW_IF2(numInputScores.size() != 0, "No [input-scores] section allowed");
       numInputScores.push_back("1");
       numInputScores.push_back("0");
     } else if (inputWeights.size() == 2) {
-      CHECK(numInputScores.size() == 0);
+      UTIL_THROW_IF2(numInputScores.size() != 0, "No [input-scores] section allowed");
       numInputScores.push_back("1");
       numInputScores.push_back("1");
     }
@@ -523,7 +512,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
         UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
         return;
       }
-      CHECK(token.size() >= 5);
+      UTIL_THROW_IF2(token.size() < 5, "Phrase table must have at least 5 scores");
 
       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
 
@@ -571,7 +560,8 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < oldWeights.size());
+    	UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
+    			"Errors converting old phrase-table weights to new weights");
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
 
@@ -661,7 +651,8 @@ void Parameter::ConvertWeightArgsDistortion()
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < oldWeights.size());
+    	UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
+    			  "Errors converting old distortion weights to new weights");
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
 
@@ -674,7 +665,9 @@ void Parameter::ConvertWeightArgsDistortion()
             << "type=" << toks[1] << " ";
 
       vector<FactorType> factors = Tokenize<FactorType>(toks[0], "-");
-      CHECK(factors.size() == 2);
+      UTIL_THROW_IF2(factors.size() != 2,
+    		  "Error in old factor specification for lexicalized reordering model: "
+    		  << toks[0]);
       strme << "input-factor=" << factors[0]
             << " output-factor=" << factors[1] << " ";
 
@@ -738,7 +731,7 @@ void Parameter::ConvertWeightArgsLM()
         newFeatureName = "KENLM";
         break;
       default:
-        abort();
+    	UTIL_THROW2("Unkown language model type id:"  << lmType);
       }
 
       size_t numFF = 1;
@@ -747,7 +740,8 @@ void Parameter::ConvertWeightArgsLM()
 
       vector<float> weightsLM(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < weights.size());
+    	UTIL_THROW_IF2(currOldInd >= weights.size(),
+    			"Errors converting old LM weights to new weights");
         weightsLM[currFF] = Scan<float>(weights[currOldInd]);
         if (isChartDecoding) {
           weightsLM[currFF] = UntransformLMScore(weightsLM[currFF]);
@@ -798,7 +792,8 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < oldWeights.size());
+    	UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
+    			  "Errors converting old generation weights to new weights");
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
 
@@ -819,41 +814,6 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
   m_setting.erase(oldWeightName);
   m_setting.erase(oldFeatureName);
 }
-
-void Parameter::ConvertWeightArgsPhrasePenalty()
-{
-  const std::string oldWeightName = "weight-wd";
-  const std::string newWeightName = "PhrasePenalty";
-
-  bool isChartDecoding = true;
-  if (!isParamSpecified("search-algorithm") ||
-      (GetParam("search-algorithm").size() > 0
-       && (Trim(GetParam("search-algorithm")[0]) == "0"
-           ||Trim(GetParam("search-algorithm")[0]) == "1"
-          )
-      )
-     ) {
-    isChartDecoding = false;
-  }
-
-  PARAM_MAP::iterator iterMap;
-
-  iterMap = m_setting.find(oldWeightName);
-  if (iterMap != m_setting.end()) {
-    const PARAM_VEC &weights = iterMap->second;
-    for (size_t i = 0; i < weights.size(); ++i) {
-      float weight = Scan<float>(weights[i]);
-      if (isChartDecoding) {
-        weight *= 0.434294482;
-      }
-      SetWeight(newWeightName, i, weight);
-    }
-
-    m_setting.erase(iterMap);
-  }
-
-}
-
 
 void Parameter::ConvertWeightArgsWordPenalty()
 {
@@ -893,7 +853,8 @@ void Parameter::ConvertPhrasePenalty()
 {
   string oldWeightName = "weight-p";
   if (isParamSpecified(oldWeightName)) {
-    CHECK(m_setting[oldWeightName].size() == 1);
+	UTIL_THROW_IF2(m_setting[oldWeightName].size() != 1,
+			"There should be only 1 phrase-penalty weight");
     float weight = Scan<float>(m_setting[oldWeightName][0]);
     AddFeature("PhrasePenalty");
     SetWeight("PhrasePenalty", 0, weight);
@@ -905,7 +866,8 @@ void Parameter::ConvertPhrasePenalty()
 void Parameter::ConvertWeightArgs()
 {
   // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
-  CHECK( m_setting.count("weight-dlm") == 0);
+  UTIL_THROW_IF2( m_setting.count("weight-dlm") != 0,
+		  "Can't handle discr LM. must do it manually 'cos of bigram/n-gram split");
 
   // check that old & new format aren't mixed
   if (m_setting.count("weight") &&
@@ -949,7 +911,8 @@ void Parameter::CreateWeightsMap()
   for (size_t i = 0; i < vec.size(); ++i) {
     const string &line = vec[i];
     vector<string> toks = Tokenize(line);
-    CHECK(toks.size() >= 2);
+    UTIL_THROW_IF2(toks.size() < 2,
+    		"Error in format of weights: " << line);
 
     string name = toks[0];
     name = name.substr(0, name.size() - 1);
@@ -971,8 +934,9 @@ void Parameter::WeightOverwrite()
   if (vec.size() == 0)
     return;
 
-  // should only be 1 line
-  CHECK(vec.size() == 1);
+  // should only be on 1 line
+  UTIL_THROW_IF2(vec.size() != 1,
+		  "Weight override should only be on 1 line");
 
   string name("");
   vector<float> weights;
@@ -1340,7 +1304,9 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
   m_setting[paramName]; // defines the parameter, important for boolean switches
   if (m_setting[paramName].size() > 1) {
     VERBOSE(2," (the parameter had " << m_setting[paramName].size() << " previous values)");
-    CHECK(m_setting[paramName].size() == values.size());
+    UTIL_THROW_IF2(m_setting[paramName].size() != values.size(),
+    		"Number of weight override for " << paramName
+    		<< " is not the same as the original number of weights");
   } else {
     VERBOSE(2," (the parameter does not have previous values)");
     m_setting[paramName].resize(values.size());
@@ -1352,6 +1318,11 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
     VERBOSE(2, " " << *iter);
   }
   VERBOSE(2, std::endl);
+}
+
+void Parameter::PrintFF() const
+{
+  StaticData::Instance().GetFeatureRegistry().PrintFF();
 }
 
 std::set<std::string> Parameter::GetWeightNames() const

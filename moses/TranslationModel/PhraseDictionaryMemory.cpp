@@ -41,7 +41,7 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
-  : RuleTableTrie("PhraseDictionaryMemory", line)
+  : RuleTableTrie(line)
 {
   ReadParameters();
 
@@ -59,7 +59,9 @@ TargetPhraseCollection &PhraseDictionaryMemory::GetOrCreateTargetPhraseCollectio
   return currNode.GetTargetPhraseCollection();
 }
 
-const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
+const TargetPhraseCollection*
+PhraseDictionaryMemory::
+GetTargetPhraseCollectionLEGACY(const Phrase& sourceOrig) const
 {
   Phrase source(sourceOrig);
   source.OnlyTheseFactors(m_inputFactors);
@@ -95,8 +97,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      CHECK(iterAlign != alignmentInfo.end());
-      CHECK(iterAlign->first == pos);
+      UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
+    		  "No alignment for non-term at position " << pos);
+      UTIL_THROW_IF2(iterAlign->first != pos,
+    		  "Alignment info incorrect at position " << pos);
+
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
@@ -106,13 +111,12 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       currNode = currNode->GetOrCreateChild(word);
     }
 
-    CHECK(currNode != NULL);
+    UTIL_THROW_IF2(currNode == NULL,
+    		"Node not found at position " << pos);
   }
 
   // finally, the source LHS
   //currNode = currNode->GetOrCreateChild(sourceLHS);
-  //CHECK(currNode != NULL);
-
 
   return *currNode;
 }
@@ -131,18 +135,20 @@ void PhraseDictionaryMemory::SortAndPrune()
   }
 }
 
-void PhraseDictionaryMemory::GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const
+void
+PhraseDictionaryMemory::
+GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   InputPathList::const_iterator iter;
-  for (iter = phraseDictionaryQueue.begin(); iter != phraseDictionaryQueue.end(); ++iter) {
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &node = **iter;
     const Phrase &phrase = node.GetPhrase();
-    const InputPath *prevNode = node.GetPrevNode();
+    const InputPath *prevPath = node.GetPrevPath();
 
     const PhraseDictionaryNodeMemory *prevPtNode = NULL;
 
-    if (prevNode) {
-      prevPtNode = static_cast<const PhraseDictionaryNodeMemory*>(prevNode->GetPtNode(*this));
+    if (prevPath) {
+      prevPtNode = static_cast<const PhraseDictionaryNodeMemory*>(prevPath->GetPtNode(*this));
     } else {
       // Starting subphrase.
       assert(phrase.GetSize() == 1);

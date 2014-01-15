@@ -53,6 +53,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Timer.h"
 #include "moses/ThreadPool.h"
 #include "moses/OutputCollector.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -64,7 +67,7 @@ using namespace MosesCmd;
 
 namespace MosesCmd
 {
-// output floats with three significant digits
+// output floats with five significant digits
 static const size_t PRECISION = 3;
 
 /** Enforce rounding */
@@ -106,24 +109,34 @@ public:
   /** Translate one sentence
    * gets called by main function implemented at end of this source file */
   void Run() {
+    // shorthand for "global data"
+    const StaticData &staticData = StaticData::Instance();
+
+    // input sentence
+    Sentence sentence;
+
+    // report wall time spent on translation
+    Timer translationTime;
+    translationTime.start();
 
     // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
     TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
 
-    Timer translationTime;
-    translationTime.start();
-    // shorthand for "global data"
-    const StaticData &staticData = StaticData::Instance();
-    // input sentence
-    Sentence sentence();
 
     // execute the translation
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
+    Timer initTime;
+    initTime.start();
     Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm());
+    VERBOSE(1, "Line " << m_lineNumber << ": Initialize search took " << initTime << " seconds total" << endl);
     manager.ProcessSentence();
+
+    // we are done with search, let's look what we got
+    Timer additionalReportingTime;
+    additionalReportingTime.start();
 
     // output word graph
     if (m_wordGraphCollector) {
@@ -263,6 +276,7 @@ public:
         delete file;
       }
     }
+    additionalReportingTime.stop();
 
     // apply decision rule and output best translation(s)
     if (m_outputCollector) {
@@ -272,8 +286,13 @@ public:
 
       // all derivations - send them to debug stream
       if (staticData.PrintAllDerivations()) {
+        additionalReportingTime.start();
         manager.PrintAllDerivations(m_lineNumber, debug);
+        additionalReportingTime.stop();
       }
+
+      Timer decisionRuleTime;
+      decisionRuleTime.start();
 
       // MAP decoding: best hypothesis
       const Hypothesis* bestHypo = NULL;
@@ -288,6 +307,9 @@ public:
             out << m_source->GetTranslationId() << " ";
           }
 
+	  if (staticData.GetReportSegmentation() == 2) {
+	    manager.GetOutputLanguageModelOrder(out, bestHypo);
+	  }
           OutputBestSurface(
             out,
             bestHypo,
@@ -303,7 +325,10 @@ public:
           IFVERBOSE(1) {
             debug << "BEST TRANSLATION: " << *bestHypo << endl;
           }
+        } else {
+          VERBOSE(1, "NO BEST TRANSLATION" << endl);
         }
+
         out << endl;
       }
 
@@ -370,7 +395,12 @@ public:
 
       // report best translation to output collector
       m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
+
+      decisionRuleTime.stop();
+      VERBOSE(1, "Line " << m_lineNumber << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
     }
+
+    additionalReportingTime.start();
 
     // output n-best list
     if (m_nbestCollector && !staticData.UseLatticeMBR()) {
@@ -412,12 +442,12 @@ public:
     }
 
     // report additional statistics
+    manager.CalcDecoderStatistics();
+    VERBOSE(1, "Line " << m_lineNumber << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
+    VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
     IFVERBOSE(2) {
       PrintUserTime("Sentence Decoding Time:");
     }
-    manager.CalcDecoderStatistics();
-
-    VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
   }
 
   ~TranslationTask() {
@@ -457,7 +487,6 @@ static void ShowWeights()
 {
   //TODO: Find a way of ensuring this order is synced with the nbest
   fix(cout,6);
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 
@@ -503,7 +532,6 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
   outputSearchGraphStream.setf(std::ios::fixed);
   outputSearchGraphStream.precision(6);
 
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -521,11 +549,11 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
       featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, gds[i], outputSearchGraphStream);
   }
@@ -746,6 +774,7 @@ int main(int argc, char** argv)
 #endif
 
     delete ioWrapper;
+    FeatureFunction::Destroy();
 
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;

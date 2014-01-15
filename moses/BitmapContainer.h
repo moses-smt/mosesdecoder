@@ -42,6 +42,7 @@ class Hypothesis;
 class HypothesisStackCubePruning;
 class HypothesisQueueItem;
 class QueueItemOrderer;
+class TranslationOptionList;
 
 typedef std::vector< Hypothesis* > HypothesisSet;
 typedef std::set< BackwardsEdge* > BackwardsEdgeSet;

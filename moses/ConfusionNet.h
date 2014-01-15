@@ -8,6 +8,7 @@
 #include "Word.h"
 #include "InputType.h"
 #include "NonTerminal.h"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -22,7 +23,7 @@ class Sentence;
 class ConfusionNet : public InputType
 {
 public:
-  typedef std::vector<std::pair<Word,std::vector<float> > > Column;
+  typedef std::vector<std::pair<Word, ScorePair > > Column;
 
 protected:
   std::vector<Column> data;
@@ -43,7 +44,8 @@ public:
   }
 
   const Column& GetColumn(size_t i) const {
-    CHECK(i<data.size());
+    UTIL_THROW_IF2(i >= data.size(),
+    		"Out of bounds. Trying to access " << i << " when vector only contains " << data.size());
     return data[i];
   }
   const Column& operator[](size_t i) const {
@@ -75,6 +77,7 @@ public:
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
     return m_defaultLabelSet;
   }
+
 
 };
 

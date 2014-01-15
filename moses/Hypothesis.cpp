@@ -19,7 +19,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "util/check.hh"
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -34,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "Manager.h"
 #include "moses/FF/FFState.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 using namespace std;
 
@@ -95,7 +96,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
   // assert that we are not extending our hypothesis by retranslating something
   // that this hypothesis has already translated!
-  CHECK(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
+  assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
 
   //_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
@@ -147,64 +148,23 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const
+Hypothesis* Hypothesis::CreateNext(const TranslationOption &transOpt) const
 {
-  return Create(*this, transOpt, constraint);
+  return Create(*this, transOpt);
 }
 
 /***
  * return the subclass of Hypothesis most appropriate to the given translation option
  */
-Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constrainingPhrase)
+Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 {
 
-  // This method includes code for constraint decoding
-
-  bool createHypothesis = true;
-
-  if (constrainingPhrase != NULL) {
-
-    size_t constraintSize = constrainingPhrase->GetSize();
-
-    size_t start = 1 + prevHypo.GetCurrTargetWordsRange().GetEndPos();
-
-    const Phrase &transOptPhrase = transOpt.GetTargetPhrase();
-    size_t transOptSize = transOptPhrase.GetSize();
-
-    size_t endpoint = start + transOptSize - 1;
-
-
-    if (endpoint < constraintSize) {
-      WordsRange range(start, endpoint);
-      Phrase relevantConstraint = constrainingPhrase->GetSubString(range);
-
-      if ( ! relevantConstraint.IsCompatible(transOptPhrase) ) {
-        createHypothesis = false;
-
-      }
-    } else {
-      createHypothesis = false;
-    }
-
-  }
-
-
-  if (createHypothesis) {
-
 #ifdef USE_HYPO_POOL
-    Hypothesis *ptr = s_objectPool.getPtr();
-    return new(ptr) Hypothesis(prevHypo, transOpt);
+  Hypothesis *ptr = s_objectPool.getPtr();
+  return new(ptr) Hypothesis(prevHypo, transOpt);
 #else
-    return new Hypothesis(prevHypo, transOpt);
+  return new Hypothesis(prevHypo, transOpt);
 #endif
-
-  } else {
-    // If the previous hypothesis plus the proposed translation option
-    //    fail to match the provided constraint,
-    //    return a null hypothesis.
-    return NULL;
-  }
-
 }
 /***
  * return the subclass of Hypothesis most appropriate to the given target phrase
@@ -275,8 +235,9 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
  */
 void Hypothesis::Evaluate(const SquareMatrix &futureScore)
 {
-  clock_t t=0; // used to track time
-
+  IFVERBOSE(2) {
+    m_manager.GetSentenceStats().StartTimeOtherScore();
+  }
   // some stateless score producers cache their values in the translation
   // option: add these here
   // language model scores for n-grams completely contained within a target
@@ -304,7 +265,8 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
   }
 
   IFVERBOSE(2) {
-    t = clock();  // track time excluding LM
+    m_manager.GetSentenceStats().StopTimeOtherScore();
+    m_manager.GetSentenceStats().StartTimeEstimateScore();
   }
 
   // FUTURE COST
@@ -314,7 +276,7 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
   m_totalScore = m_scoreBreakdown.GetWeightedScore() + m_futureScore;
 
   IFVERBOSE(2) {
-    m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t );
+    m_manager.GetSentenceStats().StopTimeEstimateScore();
   }
 }
 
@@ -378,7 +340,7 @@ void Hypothesis::CleanupArcList()
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
-    nth_element(m_arcList->begin()
+	NTH_ELEMENT4(m_arcList->begin()
                 , m_arcList->begin() + nBestSize - 1
                 , m_arcList->end()
                 , CompareHypothesisTotalScore());

@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -52,30 +53,48 @@ class ChartCellCollectionBase;
 class ChartRuleLookupManager;
 class ChartParser;
 
+class CacheColl : public std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >
+{
+// 1st = hash of source phrase/ address of phrase-table node
+// 2nd = all translations
+// 3rd = time of last access
+
+public:
+	~CacheColl();
+};
+
 /**
   * Abstract base class for phrase dictionaries (tables).
   **/
 class PhraseDictionary :  public DecodeFeature
 {
 public:
-  PhraseDictionary(const std::string &description, const std::string &line);
+  static const std::vector<PhraseDictionary*>& GetColl() {
+	return s_staticColl;
+  }
+
+  PhraseDictionary(const std::string &line);
 
   virtual ~PhraseDictionary() {
   }
-
-  virtual void Load() = 0;
 
   //! table limit number.
   size_t GetTableLimit() const {
     return m_tableLimit;
   }
 
-  // LEGACY - The preferred method is to override GetTargetPhraseCollectionBatch().
+  // LEGACY!
+  // The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
   //! find list of translations that can translates src. Only for phrase input
-  virtual const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
-  virtual void GetTargetPhraseCollectionBatch(const InputPathList &phraseDictionaryQueue) const;
+  virtual
+  TargetPhraseCollection const *
+  GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+
+  virtual
+  void
+  GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   //! Create entry for translation of source to targetPhrase
   virtual void InitializeForInput(InputType const& source) {
@@ -105,6 +124,8 @@ public:
   virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
 
 protected:
+  static std::vector<PhraseDictionary*> s_staticColl;
+
   size_t m_tableLimit;
   std::string m_filePath;
 
@@ -118,7 +139,6 @@ protected:
   // cache
   size_t m_maxCacheSize; // 0 = no caching
 
-  typedef std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > CacheColl;
 #ifdef WITH_THREADS
   //reader-writer lock
   mutable boost::thread_specific_ptr<CacheColl> m_cache;

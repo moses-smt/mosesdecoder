@@ -5,6 +5,7 @@
 #include "TypeDef.h"
 #include "TranslationOption.h"
 #include "Phrase.h"
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -39,7 +40,6 @@ public:
                               const TranslationOptionCollection &transOptColl);
 
 protected:
-  const Phrase *m_constraint;
   Manager& m_manager;
   InputPath m_inputPath; // for initial hypo
   TranslationOption m_initialTransOpt; /**< used to seed 1st hypo */

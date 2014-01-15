@@ -38,7 +38,7 @@ using namespace Moses;
 
 namespace Moses
 {
-extern bool g_debug;
+extern bool g_mosesDebug;
 
 /* constructor. Initialize everything prior to decoding a particular sentence.
  * \param source the sentence to be decoded
@@ -52,12 +52,6 @@ ChartManager::ChartManager(InputType const& source)
   ,m_parser(source, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit(), source)
 {
-  const StaticData &staticData = StaticData::Instance();
-  long sentenceID = source.GetTranslationId();
-  m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-  if (m_constraint) {
-	VERBOSE(1, "Search constraint to output: " << *m_constraint<<endl);
-  }
 }
 
 ChartManager::~ChartManager()
@@ -93,10 +87,13 @@ void ChartManager::ProcessSentence()
       m_parser.Create(range, m_translationOptionList);
       m_translationOptionList.ApplyThreshold();
 
+      const InputPath &inputPath = m_parser.GetInputPath(range);
+      m_translationOptionList.Evaluate(m_source, inputPath);
+
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
-
       cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+
       m_translationOptionList.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();
@@ -132,7 +129,6 @@ void ChartManager::ProcessSentence()
 void ChartManager::AddXmlChartOptions()
 {
   const StaticData &staticData = StaticData::Instance();
-  const Phrase *constraint = GetConstraint();
 
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {
@@ -144,23 +140,12 @@ void ChartManager::AddXmlChartOptions()
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    const TargetPhrase &targetPhrase = opt->GetTargetPhrases()[0]->GetPhrase();
     const WordsRange &range = opt->GetSourceWordsRange();
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
-    if (constraint) {
-    	Phrase hypoPhrase = hypo->GetOutputPhrase();
-    	if (!constraint->Contains(hypoPhrase)) {
-    		delete item;
-    		delete hypo;
-    		continue;
-    	}
-    }
-
     hypo->Evaluate();
 
-    const Word &targetLHS = hypo->GetTargetLHS();
 
     ChartCell &cell = m_hypoStackColl.Get(range);
     cell.AddHypothesis(hypo);
@@ -250,7 +235,7 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   for (size_t i = 0; ret.GetSize() < count && !contenders.Empty() && i < popLimit; ++i) {
     // Get the best detour from the queue.
     std::auto_ptr<const ChartTrellisDetour> detour(contenders.Pop());
-    CHECK(detour.get());
+    UTIL_THROW_IF2(detour.get() == NULL, "Empty detour");
 
     // Create a full base path from the chosen detour.
     //basePath.reset(new ChartTrellisPath(*detour));
@@ -259,7 +244,7 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
     // Generate new detours from this base path and add them to the queue of
     // contenders.  The new detours deviate from the base path by a single
     // replacement along the previous detour sub-path.
-    CHECK(path->GetDeviationPoint());
+    UTIL_THROW_IF2(path->GetDeviationPoint() == NULL, "Empty deviant path");
     CreateDeviantPaths(path, *(path->GetDeviationPoint()), contenders);
 
     // If the n-best list is allowed to contain duplicate translations (at the

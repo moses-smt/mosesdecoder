@@ -1,4 +1,4 @@
-// $Id$
+/// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -31,8 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-typedef std::vector<std::string>						PARAM_VEC;
-typedef std::map<std::string, PARAM_VEC > 	PARAM_MAP;
+typedef std::vector<std::string>            PARAM_VEC;
+typedef std::map<std::string, PARAM_VEC >   PARAM_MAP;
 typedef std::map<std::string, bool>         PARAM_BOOL;
 typedef std::map<std::string, std::string > PARAM_STRING;
 
@@ -62,6 +62,7 @@ protected:
   void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
 
   void PrintCredit();
+  void PrintFF() const;
 
   void SetWeight(const std::string &name, size_t ind, float weight);
   void SetWeight(const std::string &name, size_t ind, const std::vector<float> &weights);
@@ -114,7 +115,7 @@ public:
     OverwriteParam(GetFullName(paramShortName),values);
   }
 
-  std::vector<float> &GetWeights(const std::string &name);
+  std::vector<float> GetWeights(const std::string &name);
   std::set<std::string> GetWeightNames() const;
 
   const PARAM_MAP &GetParams() const {

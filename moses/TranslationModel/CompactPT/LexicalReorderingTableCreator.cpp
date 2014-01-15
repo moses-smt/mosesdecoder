@@ -19,11 +19,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <sstream>
 #include "LexicalReorderingTableCreator.h"
 #include "ThrowingFwrite.h"
 #include "moses/Util.h"
-
 #include "util/file.hh"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -203,10 +204,11 @@ std::string LexicalReorderingTableCreator::EncodeLine(std::vector<std::string>& 
   }
 
   if(m_numScoreComponent != scores.size()) {
-    std::cerr << "Error: Wrong number of scores detected ("
+    std::stringstream strme;
+    strme << "Error: Wrong number of scores detected ("
               << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
-    std::cerr << "Line: " << tokens[0] << " ||| ... ||| " << scoresString << std::endl;
-    abort();
+    strme << "Line: " << tokens[0] << " ||| ... ||| " << scoresString << std::endl;
+    UTIL_THROW2(strme.str());
   }
 
   size_t c = 0;

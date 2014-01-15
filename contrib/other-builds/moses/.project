@@ -872,6 +872,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionCollectionConfusionNet.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationOptionCollectionLattice.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionCollectionLattice.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationOptionCollectionLattice.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionCollectionLattice.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationOptionCollectionText.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionCollectionText.cpp</locationURI>
@@ -1037,6 +1047,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/BleuScoreFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ConstrainedDecoding.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ConstrainedDecoding.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ConstrainedDecoding.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ConstrainedDecoding.h</locationURI>
+		</link>
+		<link>
 			<name>FF/ControlRecombination.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.cpp</locationURI>
@@ -1045,6 +1065,16 @@
 			<name>FF/ControlRecombination.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
+		</link>
+		<link>
+			<name>FF/CoveredReferenceFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CoveredReferenceFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/DecodeFeature.cpp</name>
@@ -1065,6 +1095,16 @@
 			<name>FF/DistortionScoreProducer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.h</locationURI>
+		</link>
+		<link>
+			<name>FF/ExternalFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExternalFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ExternalFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExternalFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/FFState.cpp</name>
@@ -1127,6 +1167,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/InternalStructStatelessFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/InternalStructStatelessFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.h</locationURI>
+		</link>
+		<link>
 			<name>FF/LexicalReordering</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1180,6 +1230,26 @@
 			<name>FF/PhrasePenalty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatefulFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatefulFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatelessFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SkeletonStatelessFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
@@ -1312,6 +1382,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ChartState.h</locationURI>
 		</link>
 		<link>
+			<name>LM/DALMWrapper.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALMWrapper.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/DALMWrapper.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALMWrapper.h</locationURI>
+		</link>
+		<link>
 			<name>LM/IRST.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/IRST.cpp</locationURI>
@@ -1377,6 +1457,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/MultiFactor.h</locationURI>
 		</link>
 		<link>
+			<name>LM/NeuralLMWrapper.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/NeuralLMWrapper.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/NeuralLMWrapper.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/NeuralLMWrapper.h</locationURI>
+		</link>
+		<link>
 			<name>LM/ORLM.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ORLM.cpp</locationURI>
@@ -1440,6 +1530,16 @@
 			<name>LM/SingleFactor.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SingleFactor.h</locationURI>
+		</link>
+		<link>
+			<name>LM/SkeletonLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SkeletonLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/SkeletonLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SkeletonLM.h</locationURI>
 		</link>
 		<link>
 			<name>LM/backward.arpa</name>
@@ -1542,6 +1642,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNodeMemory.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryScope3.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryScope3.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryScope3.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryScope3.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryTransliteration.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTransliteration.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryTransliteration.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTransliteration.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryTree.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTree.cpp</locationURI>
@@ -1570,6 +1690,16 @@
 			<name>TranslationModel/Scope3Parser</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/SkeletonPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/SkeletonPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/WordCoocTable.cpp</name>
@@ -1695,6 +1825,16 @@
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/DotChart.h</name>

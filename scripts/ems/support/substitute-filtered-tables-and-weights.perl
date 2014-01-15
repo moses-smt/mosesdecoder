@@ -30,3 +30,5 @@ $cmd = "$RealBin/substitute-weights.perl $tempPath $tunedPath $outPath ";
 print STDERR "cmd=$cmd \n";
 system($cmd);
 
+unlink($tempPath) or warn "ERROR: could not delete $tempPath: $!";
+

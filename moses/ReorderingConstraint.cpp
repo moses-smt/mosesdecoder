@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ReorderingConstraint.h"
 #include "InputType.h"
 #include "StaticData.h"
+#include "WordsBitmap.h"
 
 namespace Moses
 {
@@ -109,7 +110,7 @@ bool ReorderingConstraint::Check( const WordsBitmap &bitmap, size_t startPos, si
   // nothing to be checked, we are done
   if (! IsActive() ) return true;
 
-  VERBOSE(3,"CHECK " << bitmap << " " << startPos << "-" << endPos);
+  VERBOSE(3,"Check " << bitmap << " " << startPos << "-" << endPos);
 
   // check walls
   size_t firstGapPos = bitmap.GetFirstGapPos();

@@ -1,0 +1,20 @@
+# -*- Makefile -*-
+.SUFFIXES:
+.DEFAULT_GOAL := all
+
+m4mdir := $(patsubst %modules/,%,\
+	$(dir $(word $(words $(MAKEFILE_LIST)),\
+	$(MAKEFILE_LIST))))
+
+# m4m modules to be included
+M4M_MODULES := aux init 
+#M4M_MODULES += directory-structure 
+M4M_MODULES += tools moses-parameters prepare-corpus 
+M4M_MODULES += mgiza fastalign mmbitext phrase-table moses-ini 
+M4M_MODULES += tune-moses eval-system kenlm
+
+NUMCORES  = $(shell parallel --number-of-cores)
+SHARDSIZE = 100000
+
+# include all make modules
+$(foreach m,${M4M_MODULES}, $(eval include $(m4mdir)modules/$m.m4m);)

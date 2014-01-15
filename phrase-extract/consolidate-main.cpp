@@ -41,7 +41,6 @@ bool lowCountFlag = false;
 bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
 bool logProbFlag = false;
-bool outputNTLengths = false;
 inline float maybeLogProb( float a )
 {
   return logProbFlag ? log(a) : a;
@@ -62,7 +61,7 @@ int main(int argc, char* argv[])
        << "consolidating direct and indirect rule tables\n";
 
   if (argc < 4) {
-    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] [--OutputNTLengths] \n";
+    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect] [--PhraseCount] \n";
     exit(1);
   }
   char* &fileNameDirect = argv[1];
@@ -119,8 +118,6 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
-    } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
-      outputNTLengths = true;
     } else {
       cerr << "ERROR: unknown option " << argv[i] << endl;
       exit(1);
@@ -315,36 +312,33 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // counts, for debugging
     fileConsolidated << "||| " << countE << " " << countF << " " << countEF;
 
-    if (outputNTLengths) {
-      fileConsolidated << " ||| " << itemDirect[5];
-    }
-
     // count bin feature (as a sparse feature)
-    if (sparseCountBinFeatureFlag ||
-        directSparseScores.compare("") != 0 ||
-        indirectSparseScores.compare("") != 0) {
-      fileConsolidated << " |||";
-      if (directSparseScores.compare("") != 0)
-        fileConsolidated << " " << directSparseScores;
-      if (indirectSparseScores.compare("") != 0)
-        fileConsolidated << " " << indirectSparseScores;
-      if (sparseCountBinFeatureFlag) {
-        bool foundBin = false;
-        for(size_t i=0; i < countBin.size(); i++) {
-          if (!foundBin && countEF <= countBin[i]) {
-            fileConsolidated << " cb_";
-            if (i == 0 && countBin[i] > 1)
-              fileConsolidated << "1_";
-            else if (i > 0 && countBin[i-1]+1 < countBin[i])
-              fileConsolidated << (countBin[i-1]+1) << "_";
-            fileConsolidated << countBin[i] << " 1";
-            foundBin = true;
-          }
-        }
-        if (!foundBin) {
-          fileConsolidated << " cb_max 1";
+    fileConsolidated << " |||";
+    if (directSparseScores.compare("") != 0)
+      fileConsolidated << " " << directSparseScores;
+    if (indirectSparseScores.compare("") != 0)
+      fileConsolidated << " " << indirectSparseScores;
+    if (sparseCountBinFeatureFlag) {
+      bool foundBin = false;
+      for(size_t i=0; i < countBin.size(); i++) {
+        if (!foundBin && countEF <= countBin[i]) {
+          fileConsolidated << " cb_";
+          if (i == 0 && countBin[i] > 1)
+            fileConsolidated << "1_";
+          else if (i > 0 && countBin[i-1]+1 < countBin[i])
+            fileConsolidated << (countBin[i-1]+1) << "_";
+          fileConsolidated << countBin[i] << " 1";
+          foundBin = true;
         }
       }
+      if (!foundBin) {
+        fileConsolidated << " cb_max 1";
+      }
+    }
+
+    // arbitrary key-value pairs
+    if (itemDirect.size() >= 6) {
+      fileConsolidated << " ||| " << itemDirect[5];
     }
 
     fileConsolidated << endl;

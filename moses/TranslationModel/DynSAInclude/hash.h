@@ -1,11 +1,12 @@
 #ifndef INC_ALLHASHFUNCS_H
 #define INC_ALLHASHFUNCS_H
 
-#include "util/check.hh"
 #include <cmath>
 #include "types.h"
 #include "utils.h"
 #include "FileHandler.h"
+#include "util/exception.hh"
+
 using namespace Moses;
 typedef uint64_t P;   // largest input range is 2^64
 
@@ -32,12 +33,12 @@ public:
     return H_;
   }
   virtual void save(FileHandler* fout) {
-    CHECK(fout != 0);
+    UTIL_THROW_IF2(fout == 0, "Null file handle");
     fout->write((char*)&m_, sizeof(m_));
     fout->write((char*)&H_, sizeof(H_));
   }
   virtual void load(FileHandler* fin) {
-    CHECK(fin != 0);
+    UTIL_THROW_IF2(fin == 0, "Null file handle");
     fin->read((char*)&m_, sizeof(m_));
     fin->read((char*)&H_, sizeof(H_));
   }
@@ -50,7 +51,6 @@ class UnivHash_linear: public HashBase<T>
 public:
   UnivHash_linear(float m, count_t H, P pr):
     HashBase<T>(m, H), pr_(pr) {
-    //CHECK(isPrime(pr_));
     initSeeds();
   }
   UnivHash_linear(FileHandler* fin):
@@ -208,7 +208,7 @@ T UnivHash_tableXOR<T>::hash(const char* s, count_t h)
   unsigned char c;
   while((c = *s++) && (++pos < MAX_STR_LEN))
     value ^= table_[h][idx += c];
-  CHECK(value < this->m_);
+  UTIL_THROW_IF2(value >= this->m_, "Error");
   return value;
 }
 
@@ -304,7 +304,8 @@ template <typename T>
 inline T UnivHash_linear<T>::hash(const wordID_t* id, const int len,
                                   count_t h)
 {
-  CHECK(h < this->H_);
+  UTIL_THROW_IF2(h >= this->H_, "Error");
+
   T value = 0;
   int pos(0);
   while(pos < len) {
@@ -317,7 +318,7 @@ template <typename T>
 inline T UnivHash_linear<T>::hash(const wordID_t id, const count_t pos,
                                   const T prevValue, count_t h)
 {
-  CHECK(h < this->H_);
+  UTIL_THROW_IF2(h >= this->H_, "Error");
   T value = prevValue + ((a_[h][pos] * id) + b_[h][pos]); // % pr_;
   return value % this->m_;
 }
@@ -354,16 +355,4 @@ void UnivHash_linear<T>::load(FileHandler* fin)
     }
   }
 }
-/*
-template <typename T>
-T UnivHash_linear<T>::hash(const char* s, count_t h=0) {
-  CHECK(h < this->H_);
-  T value = 0;
-  int pos(0);
-  unsigned char c;
-  while((c = *s++) && (++pos < MAX_STR_LEN)) {
-    value += ((a_[h][pos] * c) + b_[h][pos]);// % pr_;
-  }
-  return value % this->m_;
-}*/
 #endif

@@ -2,6 +2,9 @@
 
 #include "moses/StaticData.h"
 #include "moses/UserMessage.h"
+#include "moses/Hypothesis.h"
+#include "moses/FactorCollection.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -9,6 +12,7 @@ namespace Moses
 {
 
 size_t BleuScoreState::bleu_order = 4;
+std::vector<BleuScoreFeature*> BleuScoreFeature::s_staticColl;
 
 BleuScoreState::BleuScoreState(): m_words(1),
   m_source_length(0),
@@ -74,7 +78,7 @@ void BleuScoreState::AddNgramCountAndMatches(std::vector< size_t >& counts,
 
 
 BleuScoreFeature::BleuScoreFeature(const std::string &line)
-  :StatefulFeatureFunction("BleuScoreFeature",1, line),
+  :StatefulFeatureFunction(1, line),
    m_enabled(true),
    m_sentence_bleu(true),
    m_simple_history_bleu(false),
@@ -92,6 +96,8 @@ BleuScoreFeature::BleuScoreFeature(const std::string &line)
    m_smoothing_scheme(PLUS_POINT_ONE)
 {
   std::cerr << "Initializing BleuScoreFeature." << std::endl;
+  s_staticColl.push_back(this);
+
   m_tuneable = false;
 
   ReadParameters();
@@ -102,16 +108,13 @@ void BleuScoreFeature::SetParameter(const std::string& key, const std::string& v
 {
   if (key == "references") {
     vector<string> referenceFiles = Tokenize(value, ",");
-    CHECK(referenceFiles.size());
+    UTIL_THROW_IF2(referenceFiles.size() == 0, "No reference file");
     vector<vector<string> > references(referenceFiles.size());
 
     for (size_t i =0; i < referenceFiles.size(); ++i) {
       ifstream in(referenceFiles[i].c_str());
       if (!in) {
-        stringstream strme;
-        strme << "Unable to load references from " << referenceFiles[i];
-        UserMessage::Add(strme.str());
-        abort();
+        UTIL_THROW2("Unable to load references from " << referenceFiles[i]);
       }
       string line;
       while (getline(in,line)) {
@@ -125,8 +128,7 @@ void BleuScoreFeature::SetParameter(const std::string& key, const std::string& v
       }
       if (i > 0) {
         if (references[i].size() != references[i-1].size()) {
-          UserMessage::Add("Reference files are of different lengths");
-          abort();
+          UTIL_THROW2("Reference files are of different lengths");
         }
       }
       in.close();

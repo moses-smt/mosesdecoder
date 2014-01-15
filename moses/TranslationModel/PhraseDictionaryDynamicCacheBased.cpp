@@ -31,9 +31,11 @@ using namespace std;
 
 namespace Moses
 {
+PhraseDictionaryDynamicCacheBased *PhraseDictionaryDynamicCacheBased::s_instance = NULL;
+
 //! contructor
 PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::string &line)
-: PhraseDictionary("PhraseDictionaryDynamicCacheBased", line)
+: PhraseDictionary(line)
 {
   std::cerr << "Initializing PhraseDictionaryDynamicCacheBased feature..." << std::endl;
 
@@ -44,6 +46,8 @@ PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::
   m_maxAge = 1000;
   m_entries = 0;
   ReadParameters();
+  UTIL_THROW_IF2(s_instance, "Can only have 1 PhraseDictionaryDynamicCacheBased feature");
+  s_instance = this;
 }
 
 PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()

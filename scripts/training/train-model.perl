@@ -31,18 +31,17 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
-
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 $_HELP = 1
@@ -109,6 +108,7 @@ $_HELP = 1
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'ghkm' => \$_GHKM,
+		       'ghkm-tree-fragments' => \$_GHKM_TREE_FRAGMENTS,
 		       'pcfg' => \$_PCFG,
 		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
 		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
@@ -120,7 +120,8 @@ $_HELP = 1
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
 		       'osm-model=s' => \$_OSM,
-			'osm-setting=s' => \$_OSM_FACTORS,		
+			'osm-setting=s' => \$_OSM_FACTORS,
+			'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,		
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
@@ -138,6 +139,7 @@ $_HELP = 1
 		       'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE,
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
+		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
                );
 
 if ($_HELP) {
@@ -323,6 +325,7 @@ my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
 $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_SCORE";
 
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
+my $FLEX_SCORER = "$SCRIPTS_ROOTDIR/training/flexibility_score.py";
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -1405,6 +1408,7 @@ sub extract_phrase {
         $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
+        $cmd .= " --TreeFragments" if $_GHKM_TREE_FRAGMENTS;
         if (!defined($_GHKM)) {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
@@ -1436,6 +1440,7 @@ sub extract_phrase {
     $cmd .= " --GZOutput ";
     $cmd .= " --InstanceWeights $_INSTANCE_WEIGHTS_FILE " if defined $_INSTANCE_WEIGHTS_FILE;
     $cmd .= " --BaselineExtract $_BASELINE_EXTRACT" if defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT =~ /extract-parallel.perl/;
+    $cmd .= " --FlexibilityScore" if $_FLEXIBILITY_SCORE;
     
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
@@ -1456,7 +1461,6 @@ sub extract_phrase {
     foreach my $f (@tempfiles) {
       unlink $f;
     }
-    
 }
 
 ### (6) PHRASE SCORING
@@ -1554,7 +1558,7 @@ sub score_phrase_phrase_extract {
 	      my $inverse = "";
               my $extract_filename = $extract_file;
 	      if ($direction eq "e2f") {
-	          $inverse = " --Inverse";
+	          $inverse = "--Inverse";
                   $extract_filename = $extract_file.".inv";
               }
               
@@ -1573,8 +1577,10 @@ sub score_phrase_phrase_extract {
         $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
+        $cmd .= " --TreeFragments" if $_GHKM_TREE_FRAGMENTS;
         $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
+        $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
 
 				# sorting
 				if ($direction eq "e2f" || $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2) {
@@ -1895,6 +1901,8 @@ sub create_ini {
      $basic_weight_count += 2**$count-1 if $method eq "Subset";
    }     
    $basic_weight_count++ if $_PCFG;
+   $basic_weight_count+=4 if $_FLEXIBILITY_SCORE;
+   $basic_weight_count+=2 if $_FLEXIBILITY_SCORE && $_HIERARCHICAL;
 
    # go over each table
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
@@ -2001,17 +2009,17 @@ sub create_ini {
     if (defined($_OSM_FACTORS))
     {
 	my $count = 0;
-	my @factor_values = split(',', $_OSM_FACTORS);
+	my @factor_values = split(/\+/, $_OSM_FACTORS);
     	foreach my $factor_val (@factor_values) {
 
 		my ($factor_f,$factor_e) = split(/\-/,$factor_val);
 
 		if($count == 0){
-		$feature_spec .= "OpSequenceModel num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " sFactor=". $factor_f . " tFactor=". $factor_e . " numFeatures=5 \n";
+		$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=yes \n";
 	       $weight_spec  .= "OpSequenceModel$count= 0.08 -0.02 0.02 -0.001 0.03\n";		
 		}
 		else{
-			$feature_spec .= "OpSequenceModel num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " sFactor=". $factor_f . " tFactor=". $factor_e . " numFeatures=1 \n";
+			$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=no \n";
 	       	$weight_spec  .= "OpSequenceModel$count= 0.08 \n";	
 
 		}
@@ -2020,7 +2028,7 @@ sub create_ini {
     }
     else
     {
-      $feature_spec .= "OpSequenceModel num-features=5 path=". $_OSM . " \n";
+      $feature_spec .= "OpSequenceModel name=OpSequenceModel0 num-features=5 path=". $_OSM . " \n";
       $weight_spec  .= "OpSequenceModel0= 0.08 -0.02 0.02 -0.001 0.03\n";
     }
   }	
@@ -2045,9 +2053,15 @@ sub create_ini {
     $type_name = "IRSTLM" if $type == 1;
     $type_name = "KENLM lazyken=0" if $type == 8;
     $type_name = "KENLM lazyken=1" if $type == 9;
-    
+	
+    my $lm_oov_prob = 0.1;
+	
+    if ($_POST_DECODING_TRANSLIT){
+	$lm_oov_prob = -100.0;
+    } 	   
+ 
     $feature_spec .= "$type_name name=LM$i factor=$f path=$fn order=$o\n";
-    $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" 0.1":"")."\n";
+    $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
   }
   if ($_LMODEL_OOV_FEATURE) {

@@ -8,6 +8,7 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/InputPath.h"
 #include "util/string_piece_hash.hh"
 #include "util/exception.hh"
 
@@ -17,7 +18,7 @@ namespace Moses
 {
 
 WordTranslationFeature::WordTranslationFeature(const std::string &line)
-  :StatelessFeatureFunction("WordTranslationFeature", 0, line)
+  :StatelessFeatureFunction(0, line)
   ,m_unrestricted(true)
   ,m_simple(true)
   ,m_sourceContext(false)
@@ -98,7 +99,7 @@ void WordTranslationFeature::Load()
   if (m_domainTrigger) {
     // domain trigger terms for each input document
     ifstream inFileSource(m_filePathSource.c_str());
-    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
+    UTIL_THROW_IF2(!inFileSource, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -113,7 +114,7 @@ void WordTranslationFeature::Load()
   } else {
     // restricted source word vocabulary
     ifstream inFileSource(m_filePathSource.c_str());
-    UTIL_THROW_IF(!inFileSource, util::Exception, "could not open file " << m_filePathSource);
+    UTIL_THROW_IF2(!inFileSource, "could not open file " << m_filePathSource);
 
     std::string line;
     while (getline(inFileSource, line)) {
@@ -124,7 +125,7 @@ void WordTranslationFeature::Load()
 
     // restricted target word vocabulary
     ifstream inFileTarget(m_filePathTarget.c_str());
-    UTIL_THROW_IF(!inFileTarget, util::Exception, "could not open file " << m_filePathTarget);
+    UTIL_THROW_IF2(!inFileTarget, "could not open file " << m_filePathTarget);
 
     while (getline(inFileTarget, line)) {
       m_vocabTarget.insert(line);

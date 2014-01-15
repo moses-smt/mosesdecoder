@@ -25,6 +25,7 @@
 #include "RuleCubeQueue.h"
 #include "WordsRange.h"
 #include "Util.h"
+#include "util/exception.hh"
 
 #include <boost/functional/hash.hpp>
 
@@ -78,25 +79,15 @@ void RuleCubeItem::CreateHypothesis(const ChartTranslationOptions &transOpt,
                                     ChartManager &manager)
 {
   m_hypothesis = new ChartHypothesis(transOpt, *this, manager);
-
-  const Phrase *constraint = manager.GetConstraint();
-  if (constraint) {
-  	Phrase hypoPhrase = m_hypothesis->GetOutputPhrase();
-  	if (!constraint->Contains(hypoPhrase)) {
-  		delete m_hypothesis;
-  		m_hypothesis = NULL;
-  		return;
-  	}
-  }
   m_hypothesis->Evaluate();
   m_score = m_hypothesis->GetTotalScore();
 }
 
 ChartHypothesis *RuleCubeItem::ReleaseHypothesis()
 {
-  CHECK(m_hypothesis);
+  UTIL_THROW_IF2(m_hypothesis == NULL, "Hypothesis is NULL");
   ChartHypothesis *hypo = m_hypothesis;
-  m_hypothesis = 0;
+  m_hypothesis = NULL;
   return hypo;
 }
 

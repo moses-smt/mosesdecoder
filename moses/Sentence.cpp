@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <stdexcept>
+#include <boost/algorithm/string.hpp>
 
 #include "Sentence.h"
 #include "TranslationOptionCollectionText.h"
@@ -29,7 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
 #include "ChartTranslationOptions.h"
 #include "Util.h"
-#include <boost/algorithm/string.hpp>
+#include "XmlOption.h"
+#include "FactorCollection.h"
 
 using namespace std;
 
@@ -121,6 +123,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   if (meta.find("weight-setting") != meta.end()) {
     this->SetWeightSetting(meta["weight-setting"]);
     this->SetSpecifiesWeightSetting(true);
+    staticData.SetWeightSetting(meta["weight-setting"]);
   } else {
     this->SetSpecifiesWeightSetting(false);
   }
@@ -131,30 +134,30 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   std::vector< std::map<std::string, std::string> >::iterator dlt_meta_it = dlt_meta.begin();
   for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it) {
-    DynamicCacheBasedLanguageModel* cblm = StaticData::Instance().GetDynamicCacheBasedLanguageModel();
-    PhraseDictionaryDynamicCacheBased* cbtm = StaticData::Instance().GetPhraseDictionaryDynamicCacheBased();
+    DynamicCacheBasedLanguageModel& cblm = DynamicCacheBasedLanguageModel::InstanceNonConst();
+std::cerr << "&cblm:|" << &cblm << "|" << std::endl;
+    PhraseDictionaryDynamicCacheBased& cbtm = PhraseDictionaryDynamicCacheBased::InstanceNonConst();
     if ((*dlt_meta_it).find("cbtm") != (*dlt_meta_it).end()) {
-      if (cbtm) cbtm->Insert((*dlt_meta_it)["cbtm"]);
+      if (&cbtm) cbtm.Insert((*dlt_meta_it)["cbtm"]);
     }
     if ((*dlt_meta_it).find("cbtm-command") != (*dlt_meta_it).end()) {
-      if (cbtm) cbtm->Execute((*dlt_meta_it)["cbtm-command"]);
+      if (&cbtm) cbtm.Execute((*dlt_meta_it)["cbtm-command"]);
     }
     if ((*dlt_meta_it).find("cbtm-file") != (*dlt_meta_it).end()) {
-      if (cbtm) cbtm->Load((*dlt_meta_it)["cbtm-file"]);
+      if (&cbtm) cbtm.Load((*dlt_meta_it)["cbtm-file"]);
      }
     if ((*dlt_meta_it).find("cblm") != (*dlt_meta_it).end()) {
-      if (cblm) cblm->Insert((*dlt_meta_it)["cblm"]);
+      if (&cblm) cblm.Insert((*dlt_meta_it)["cblm"]);
     }
     if ((*dlt_meta_it).find("cblm-command") != (*dlt_meta_it).end()) {
-      if (cblm) cblm->Execute((*dlt_meta_it)["cblm-command"]);
+      if (&cblm) cblm.Execute((*dlt_meta_it)["cblm-command"]);
     }
     if ((*dlt_meta_it).find("cblm-file") != (*dlt_meta_it).end()) {
-      if (cblm) cblm->Load((*dlt_meta_it)["cblm-file"]);
+      if (&cblm) cblm.Load((*dlt_meta_it)["cblm-file"]);
     }
   }
 
   // parse XML markup in translation line
-  //const StaticData &staticData = StaticData::Instance();
   std::vector< size_t > xmlWalls;
   std::vector< std::pair<size_t, std::string> > placeholders;
 
@@ -226,7 +229,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
 void Sentence::ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor().first;
+  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
   if (placeholderFactor == NOT_FOUND) {
     return;
   }
@@ -246,7 +249,7 @@ Sentence::CreateTranslationOptionCollection() const
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
-  CHECK(rv);
+  assert(rv);
   return rv;
 }
 void Sentence::Print(std::ostream& out) const

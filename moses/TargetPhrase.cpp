@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <algorithm>
 #include <stdlib.h>
-#include "util/check.hh"
 #include "util/exception.hh"
 #include "util/tokenize_piece.hh"
 
@@ -33,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "AlignmentInfoCollection.h"
 #include "InputPath.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 
@@ -45,6 +45,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 
   //ACAT
@@ -59,6 +60,7 @@ TargetPhrase::TargetPhrase()
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 }
 
@@ -69,6 +71,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
+  , m_ruleSource(NULL)
 {
 }
 
@@ -86,6 +89,11 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
     m_lhsTarget = NULL;
   }
 
+  if (copy.m_ruleSource) {
+    m_ruleSource = new Phrase(*copy.m_ruleSource);
+  } else {
+    m_ruleSource = NULL;
+  }
 }
 
 TargetPhrase::~TargetPhrase()
@@ -93,6 +101,7 @@ TargetPhrase::~TargetPhrase()
   //cerr << "m_lhsTarget=" << m_lhsTarget << endl;
 
   delete m_lhsTarget;
+  delete m_ruleSource;
 }
 
 #ifdef HAVE_PROTOBUF
@@ -131,16 +140,23 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
 void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  ScoreComponentCollection futureScoreBreakdown;
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    ff.Evaluate(input, inputPath, m_scoreBreakdown);
+    if (! staticData.IsFeatureFunctionIgnored( ff )) {
+      ff.Evaluate(input, inputPath, *this, m_scoreBreakdown, &futureScoreBreakdown);
+    }
   }
+  float weightedScore = m_scoreBreakdown.GetWeightedScore();
+  m_futureScore += futureScoreBreakdown.GetWeightedScore();
+  m_fullScore = weightedScore + m_futureScore;
 }
 
 void TargetPhrase::SetXMLScore(float score)
 {
   const StaticData &staticData = StaticData::Instance();
-  const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
+  const FeatureFunction* prod = PhraseDictionary::GetColl()[0];
   size_t numScores = prod->GetNumScoreComponents();
   vector <float> scoreVector(numScores,score/numScores);
 
@@ -159,7 +175,7 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
     ++dash;
     size_t targetPos = strtoul(dash->data(), &endptr, 10);
     UTIL_THROW_IF(endptr != dash->data() + dash->size(), util::ErrnoException, "Error parsing alignment" << *dash);
-    UTIL_THROW_IF(++dash, util::Exception, "Extra gunk in alignment " << *token);
+    UTIL_THROW_IF2(++dash, "Extra gunk in alignment " << *token);
 
 
     if (GetWord(targetPos).IsNonTerminal()) {
@@ -201,24 +217,25 @@ void TargetPhrase::Merge(const TargetPhrase &copy, const std::vector<FactorType>
 
 void TargetPhrase::SetProperties(const StringPiece &str)
 {
-	if (str.size() == 0) {
-		return;
-	}
+  if (str.size() == 0) {
+    return;
+  }
 
   vector<string> toks;
   TokenizeMultiCharSeparator(toks, str.as_string(), "{{");
   for (size_t i = 0; i < toks.size(); ++i) {
-	  string &tok = toks[i];
-	  if (tok.empty()) {
-		  continue;
-	  }
-	  size_t endPos = tok.rfind("}");
+    string &tok = toks[i];
+    if (tok.empty()) {
+      continue;
+    }
+    size_t endPos = tok.rfind("}");
 
-	  tok = tok.substr(0, endPos - 1);
+    tok = tok.substr(0, endPos - 1);
 
-	  vector<string> keyValue = TokenizeFirstOnly(tok, " ");
-	  CHECK(keyValue.size() == 2);
-	  SetProperty(keyValue[0], keyValue[1]);
+    vector<string> keyValue = TokenizeFirstOnly(tok, " ");
+    UTIL_THROW_IF2(keyValue.size() != 2,
+    		"Incorrect format of property: " << str);
+    SetProperty(keyValue[0], keyValue[1]);
   }
 }
 
@@ -231,6 +248,13 @@ void TargetPhrase::GetProperty(const std::string &key, std::string &value, bool 
   } else {
     found = true;
     value = iter->second;
+  }
+}
+
+void TargetPhrase::SetRuleSource(const Phrase &ruleSource) const
+{
+  if (m_ruleSource == NULL) {
+    m_ruleSource = new Phrase(ruleSource);
   }
 }
 

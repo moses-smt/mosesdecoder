@@ -2,9 +2,9 @@
 // Oliver Wilson <oliver.wilson@ed.ac.uk>
 //
 
-// This file should be compiled only when the LM_RAND flag is enabled. 
+// This file should be compiled only when the LM_RAND flag is enabled.
 //
-// The following ifdef prevents XCode and other non-bjam build systems 
+// The following ifdef prevents XCode and other non-bjam build systems
 // from attempting to compile this file when LM_RAND is disabled.
 //
 #ifdef LM_RAND
@@ -15,6 +15,7 @@
 #include "moses/TypeDef.h"
 #include "moses/Hypothesis.h"
 #include "moses/StaticData.h"
+#include "util/exception.hh"
 
 #include <LDHT/Client.h>
 #include <LDHT/ClientLocal.h>
@@ -321,14 +322,12 @@ void LanguageModelLDHT::IssueRequestsFor(Hypothesis& hypo,
   LDHTLMState* new_state = new LDHTLMState();
   if (input_state == NULL) {
     if (hypo.GetCurrTargetWordsRange().GetStartPos() != 0) {
-      V("got a null state but not at start of sentence");
-      abort();
+      UTIL_THROW2("got a null state but not at start of sentence");
     }
     new_state->gram_fingerprints.appendGram(BOS_);
   } else {
     if (hypo.GetCurrTargetWordsRange().GetStartPos() == 0) {
-      V("got a non null state but at start of sentence");
-      abort();
+      UTIL_THROW2("got a non null state but at start of sentence");
     }
     new_state->copyFrom(static_cast<const LDHTLMState&>(*input_state));
   }
