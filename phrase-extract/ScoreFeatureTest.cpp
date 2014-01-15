@@ -52,13 +52,13 @@ BOOST_AUTO_TEST_CASE(manager_configure_domain_except)
 {
   //Check that configure rejects illegal domain arg combinations
   ScoreFeatureManager manager;
-  vector<string> args = {"--DomainRatio","/dev/null","--DomainIndicator","/dev/null"};
+  vector<string> args = boost::assign::list_of("--DomainRatio")("/dev/null")("--DomainIndicator")("/dev/null");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args = {"--SparseDomainSubset","/dev/null","--SparseDomainRatio","/dev/null"};
+  args = boost::assign::list_of("--SparseDomainSubset")("/dev/null")("--SparseDomainRatio")("/dev/null");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args = {"--SparseDomainBlah","/dev/null"};
+  args = boost::assign::list_of("--SparseDomainBlah")("/dev/null");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args = {"--DomainSubset"};
+  args = boost::assign::list_of("--DomainSubset");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
 }
 
@@ -80,17 +80,17 @@ static void checkDomainConfigured(
 BOOST_AUTO_TEST_CASE(manager_config_domain)
 {
   checkDomainConfigured<RatioDomainFeature>
-  ({"--DomainRatio","/dev/null"});
+  (boost::assign::list_of ("--DomainRatio")("/dev/null"));
   checkDomainConfigured<IndicatorDomainFeature>
-  ({"--DomainIndicator","/dev/null"});
+  (boost::assign::list_of("--DomainIndicator")("/dev/null"));
   checkDomainConfigured<SubsetDomainFeature>
-  ({"--DomainSubset","/dev/null"});
+  (boost::assign::list_of("--DomainSubset")("/dev/null"));
   checkDomainConfigured<SparseRatioDomainFeature>
-  ({"--SparseDomainRatio","/dev/null"});
+  (boost::assign::list_of("--SparseDomainRatio")("/dev/null"));
   checkDomainConfigured<SparseIndicatorDomainFeature>
-  ({"--SparseDomainIndicator","/dev/null"});
+  (boost::assign::list_of("--SparseDomainIndicator")("/dev/null"));
   checkDomainConfigured<SparseSubsetDomainFeature>
-  ({"--SparseDomainSubset","/dev/null"});
+  (boost::assign::list_of("--SparseDomainSubset")("/dev/null"));
 }
 
 
