@@ -75,7 +75,7 @@ void FeatureFunction::ParseLine(const std::string &line)
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = TokenizeFirstOnly(toks[i], "=");
     UTIL_THROW_IF2(args.size() != 2,
-    		"Incorrect format for feature function arg: " << toks[i]);
+                   "Incorrect format for feature function arg: " << toks[i]);
 
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
     UTIL_THROW_IF2(!ret.second, "Duplicate key in line " << line);

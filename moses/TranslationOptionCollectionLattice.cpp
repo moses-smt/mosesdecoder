@@ -24,7 +24,7 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
   : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
 {
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
-		  "Not for models using the legqacy binary phrase table");
+                 "Not for models using the legqacy binary phrase table");
 
   const InputFeature &inputFeature = InputFeature::Instance();
   UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
@@ -61,57 +61,57 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
   }
 
   // iteratively extend all paths
-    for (size_t endPos = 1; endPos < size; ++endPos) {
-      const std::vector<size_t> &nextNodes = input.GetNextNodes(endPos);
+  for (size_t endPos = 1; endPos < size; ++endPos) {
+    const std::vector<size_t> &nextNodes = input.GetNextNodes(endPos);
 
-      // loop thru every previous paths
-      size_t numPrevPaths = m_inputPathQueue.size();
+    // loop thru every previous paths
+    size_t numPrevPaths = m_inputPathQueue.size();
 
-      for (size_t i = 0; i < numPrevPaths; ++i) {
-        //for (size_t pathInd = 0; pathInd < prevPaths.size(); ++pathInd) {
-        const InputPath &prevPath = *m_inputPathQueue[i];
+    for (size_t i = 0; i < numPrevPaths; ++i) {
+      //for (size_t pathInd = 0; pathInd < prevPaths.size(); ++pathInd) {
+      const InputPath &prevPath = *m_inputPathQueue[i];
 
-        size_t nextNode = prevPath.GetNextNode();
-        if (prevPath.GetWordsRange().GetEndPos() + nextNode != endPos) {
-        	continue;
-        }
+      size_t nextNode = prevPath.GetNextNode();
+      if (prevPath.GetWordsRange().GetEndPos() + nextNode != endPos) {
+        continue;
+      }
 
-        size_t startPos = prevPath.GetWordsRange().GetStartPos();
+      size_t startPos = prevPath.GetWordsRange().GetStartPos();
 
-        if (endPos - startPos + 1 > maxPhraseLength) {
-        	continue;
-        }
+      if (endPos - startPos + 1 > maxPhraseLength) {
+        continue;
+      }
 
-        WordsRange range(startPos, endPos);
-        const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
+      WordsRange range(startPos, endPos);
+      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
-        const Phrase &prevPhrase = prevPath.GetPhrase();
-        const ScorePair *prevInputScore = prevPath.GetInputScore();
-        UTIL_THROW_IF2(prevInputScore == NULL,
-        		"Null previous score");
+      const Phrase &prevPhrase = prevPath.GetPhrase();
+      const ScorePair *prevInputScore = prevPath.GetInputScore();
+      UTIL_THROW_IF2(prevInputScore == NULL,
+                     "Null previous score");
 
-        // loop thru every word at this position
-        const ConfusionNet::Column &col = input.GetColumn(endPos);
+      // loop thru every word at this position
+      const ConfusionNet::Column &col = input.GetColumn(endPos);
 
-        for (size_t i = 0; i < col.size(); ++i) {
-          const Word &word = col[i].first;
-          Phrase subphrase(prevPhrase);
-          subphrase.AddWord(word);
+      for (size_t i = 0; i < col.size(); ++i) {
+        const Word &word = col[i].first;
+        Phrase subphrase(prevPhrase);
+        subphrase.AddWord(word);
 
-          const ScorePair &scores = col[i].second;
-          ScorePair *inputScore = new ScorePair(*prevInputScore);
-          inputScore->PlusEquals(scores);
+        const ScorePair &scores = col[i].second;
+        ScorePair *inputScore = new ScorePair(*prevInputScore);
+        inputScore->PlusEquals(scores);
 
-          InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+        InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
 
-          size_t nextNode = nextNodes[i];
-          path->SetNextNode(nextNode);
+        size_t nextNode = nextNodes[i];
+        path->SetNextNode(nextNode);
 
-          m_inputPathQueue.push_back(path);
-        } // for (size_t i = 0; i < col.size(); ++i) {
+        m_inputPathQueue.push_back(path);
+      } // for (size_t i = 0; i < col.size(); ++i) {
 
-      } // for (size_t i = 0; i < numPrevPaths; ++i) {
-    }
+    } // for (size_t i = 0; i < numPrevPaths; ++i) {
+  }
 }
 
 
@@ -134,19 +134,18 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
     const WordsRange &range = path.GetWordsRange();
 
     if (tpColl) {
-    	TargetPhraseCollection::const_iterator iter;
-    	for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
-    		const TargetPhrase &tp = **iter;
-    		TranslationOption *transOpt = new TranslationOption(range, tp);
-    		transOpt->SetInputPath(path);
-    		transOpt->Evaluate(m_source);
+      TargetPhraseCollection::const_iterator iter;
+      for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
+        const TargetPhrase &tp = **iter;
+        TranslationOption *transOpt = new TranslationOption(range, tp);
+        transOpt->SetInputPath(path);
+        transOpt->Evaluate(m_source);
 
-    		Add(transOpt);
-    	}
-    }
-    else if (path.GetPhrase().GetSize() == 1) {
-    	// unknown word processing
-    	ProcessOneUnknownWord(path, path.GetWordsRange().GetEndPos(), 1, path.GetInputScore());
+        Add(transOpt);
+      }
+    } else if (path.GetPhrase().GetSize() == 1) {
+      // unknown word processing
+      ProcessOneUnknownWord(path, path.GetWordsRange().GetEndPos(), 1, path.GetInputScore());
     }
   }
 
@@ -165,16 +164,16 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
 
 void TranslationOptionCollectionLattice::ProcessUnknownWord(size_t sourcePos)
 {
-	UTIL_THROW(util::Exception, "ProcessUnknownWord() not implemented for lattice");
+  UTIL_THROW(util::Exception, "ProcessUnknownWord() not implemented for lattice");
 }
 
 void TranslationOptionCollectionLattice::CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-      , size_t startPosition
-      , size_t endPosition
-      , bool adhereTableLimit
-      , size_t graphInd)
+    , size_t startPosition
+    , size_t endPosition
+    , bool adhereTableLimit
+    , size_t graphInd)
 {
-	UTIL_THROW(util::Exception, "CreateTranslationOptionsForRange() not implemented for lattice");
+  UTIL_THROW(util::Exception, "CreateTranslationOptionsForRange() not implemented for lattice");
 }
 
 } // namespace

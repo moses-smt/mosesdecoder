@@ -30,7 +30,7 @@ Search *Search::CreateSearch(Manager& manager, const InputType &source,
   case NormalBatch:
     return new SearchNormalBatch(manager, source, transOptColl);
   default:
-	UTIL_THROW2("ERROR: search. Aborting\n");
+    UTIL_THROW2("ERROR: search. Aborting\n");
     return NULL;
   }
 }

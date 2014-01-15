@@ -49,12 +49,9 @@ void DynamicCacheBasedLanguageModel::SetPreComputedScores()
 
 float DynamicCacheBasedLanguageModel::GetPreComputedScores(const unsigned int age)
 {
-  if (age < precomputedScores.size())
-  {
+  if (age < precomputedScores.size()) {
     return precomputedScores.at(age);
-  }
-  else
-  {
+  } else {
     return precomputedScores.at(m_maxAge);
   }
 }
@@ -117,8 +114,7 @@ float DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& 
   if (it != m_cache.end()) { //found!
     score = ((*it).second).second;
     VERBOSE(3,"cblm::Evaluate_Whole_String: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" << score << "|" << std::endl);
-  }
-  else{
+  } else {
     score = m_lower_score;
   }
 
@@ -134,7 +130,7 @@ float DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase
 
   decaying_cache_t::const_iterator it;
   float score = 0.0;
- 
+
   for (size_t startpos = 0 ; startpos < tp.GetSize() ; ++startpos) {
     std::string w = "";
     for (size_t endpos = startpos; endpos < tp.GetSize() ; ++endpos) {
@@ -144,9 +140,8 @@ float DynamicCacheBasedLanguageModel::Evaluate_All_Substrings(const TargetPhrase
       if (it != m_cache.end()) { //found!
         score += ((*it).second).second;
         VERBOSE(3,"cblm::Evaluate_All_Substrings: found w:|" << w << "| actual score:|" << ((*it).second).second << "| score:|" << score << "|" << std::endl);
-      }
-      else{
-        score += m_lower_score; 
+      } else {
+        score += m_lower_score;
       }
 
       if (endpos == startpos) {

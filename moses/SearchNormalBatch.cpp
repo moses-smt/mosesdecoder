@@ -140,7 +140,7 @@ ExpandHypothesis(const Hypothesis &hypothesis,
     }
     m_partial_hypos.push_back(newHypo);
   } else {
-	UTIL_THROW2("can't use early discarding with batch decoding!");
+    UTIL_THROW2("can't use early discarding with batch decoding!");
   }
 }
 

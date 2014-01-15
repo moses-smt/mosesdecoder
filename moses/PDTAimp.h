@@ -131,7 +131,7 @@ public:
   TargetPhraseCollectionWithSourcePhrase const*
   GetTargetPhraseCollection(Phrase const &src) const {
 
-	assert(m_dict);
+    assert(m_dict);
     if(src.GetSize()==0) return 0;
 
     std::pair<MapSrc2Tgt::iterator,bool> piter;
@@ -314,7 +314,7 @@ public:
    const std::vector<Phrase> &sourcePhrases) const {
     // convert into TargetPhraseCollection
     UTIL_THROW_IF2(tCands.size() != sourcePhrases.size(),
-    		"Number of target phrases must equal number of source phrases");
+                   "Number of target phrases must equal number of source phrases");
 
     TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
 
@@ -351,7 +351,7 @@ public:
   };
 
   void CacheSource(ConfusionNet const& src) {
-	assert(m_dict);
+    assert(m_dict);
     const size_t srcSize=src.GetSize();
 
     std::vector<size_t> exploredPaths(srcSize+1,0);
@@ -414,7 +414,7 @@ public:
 
         //assert that we have the right number of link params in this CN option
         UTIL_THROW_IF2(currCol[colidx].second.denseScores.size() < m_numInputScores,
-        		"Incorrect number of input scores");
+                       "Incorrect number of input scores");
 
         // do not start with epsilon (except at first position)
         if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue;
@@ -473,7 +473,7 @@ public:
               //put input scores in first - already logged, just drop in directly
               std::vector<float> transcores(m_obj->GetNumScoreComponents());
               UTIL_THROW_IF2(transcores.size() != weightTrans.size(),
-            		  "Incorrect number of translation scores");
+                             "Incorrect number of translation scores");
 
               //put in phrase table scores, logging as we insert
               std::transform(tcands[i].scores.begin()

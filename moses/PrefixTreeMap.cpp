@@ -148,7 +148,7 @@ void PrefixTreeMap::GetCandidates(const IPhrase& key, Candidates* cands)
     return;
   }
   UTIL_THROW_IF2(m_Data[key[0]]->findKey(key[0]) >= m_Data[key[0]]->size(),
-		  "Key not found: " << key[0]);
+                 "Key not found: " << key[0]);
 
   OFF_T candOffset = m_Data[key[0]]->find(key);
   if(candOffset == InvalidOffT) {
@@ -175,7 +175,7 @@ void PrefixTreeMap::GetCandidates(const PPimp& p, Candidates* cands)
 std::vector< std::string const * > PrefixTreeMap::ConvertPhrase(const IPhrase& p, unsigned int voc) const
 {
   UTIL_THROW_IF2(voc >= m_Voc.size() || m_Voc[voc] == 0,
-		  "Invalid vocab id: " << voc);
+                 "Invalid vocab id: " << voc);
   std::vector< std::string const * > result;
   result.reserve(p.size());
   for(IPhrase::const_iterator i = p.begin(); i != p.end(); ++i) {
@@ -187,7 +187,7 @@ std::vector< std::string const * > PrefixTreeMap::ConvertPhrase(const IPhrase& p
 IPhrase PrefixTreeMap::ConvertPhrase(const std::vector< std::string >& p, unsigned int voc) const
 {
   UTIL_THROW_IF2(voc >= m_Voc.size() || m_Voc[voc] == 0,
-		  "Invalid vocab id: " << voc);
+                 "Invalid vocab id: " << voc);
   IPhrase result;
   result.reserve(p.size());
   for(size_t i = 0; i < p.size(); ++i) {
@@ -199,14 +199,14 @@ IPhrase PrefixTreeMap::ConvertPhrase(const std::vector< std::string >& p, unsign
 LabelId PrefixTreeMap::ConvertWord(const std::string& w, unsigned int voc) const
 {
   UTIL_THROW_IF2(voc >= m_Voc.size() || m_Voc[voc] == 0,
-		  "Invalid vocab id: " << voc);
+                 "Invalid vocab id: " << voc);
   return m_Voc[voc]->index(w);
 }
 
 std::string PrefixTreeMap::ConvertWord(LabelId w, unsigned int voc) const
 {
   UTIL_THROW_IF2(voc >= m_Voc.size() || m_Voc[voc] == 0,
-		  "Invalid vocab id: " << voc);
+                 "Invalid vocab id: " << voc);
   if(w == PrefixTreeMap::MagicWord) {
     return "|||";
   } else if (w == InvalidLabelId) {

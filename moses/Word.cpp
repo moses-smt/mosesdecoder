@@ -74,8 +74,8 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   for (unsigned int i = 0 ; i < factorType.size() ; i++) {
-	UTIL_THROW_IF2(factorType[i] >= MAX_NUM_FACTORS,
-				"Trying to reference factor " << factorType[i] << ". Max factor is " << MAX_NUM_FACTORS);
+    UTIL_THROW_IF2(factorType[i] >= MAX_NUM_FACTORS,
+                   "Trying to reference factor " << factorType[i] << ". Max factor is " << MAX_NUM_FACTORS);
 
     const Factor *factor = m_factorArray[factorType[i]];
     if (factor != NULL) {
@@ -143,10 +143,10 @@ void Word::OnlyTheseFactors(const FactorMask &factors)
 
 bool Word::IsEpsilon() const
 {
-       const Factor *factor = m_factorArray[0];
-       int compare = factor->GetString().compare(EPSILON);
+  const Factor *factor = m_factorArray[0];
+  int compare = factor->GetString().compare(EPSILON);
 
-       return compare == 0;
+  return compare == 0;
 }
 
 TO_STRING_BODY(Word);

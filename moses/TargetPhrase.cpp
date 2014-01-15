@@ -234,7 +234,7 @@ void TargetPhrase::SetProperties(const StringPiece &str)
 
     vector<string> keyValue = TokenizeFirstOnly(tok, " ");
     UTIL_THROW_IF2(keyValue.size() != 2,
-    		"Incorrect format of property: " << str);
+                   "Incorrect format of property: " << str);
     SetProperty(keyValue[0], keyValue[1]);
   }
 }

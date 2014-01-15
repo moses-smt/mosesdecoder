@@ -135,7 +135,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   std::vector< std::map<std::string, std::string> >::iterator dlt_meta_it = dlt_meta.begin();
   for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it) {
     DynamicCacheBasedLanguageModel& cblm = DynamicCacheBasedLanguageModel::InstanceNonConst();
-std::cerr << "&cblm:|" << &cblm << "|" << std::endl;
+    std::cerr << "&cblm:|" << &cblm << "|" << std::endl;
     PhraseDictionaryDynamicCacheBased& cbtm = PhraseDictionaryDynamicCacheBased::InstanceNonConst();
     if ((*dlt_meta_it).find("cbtm") != (*dlt_meta_it).end()) {
       if (&cbtm) cbtm.Insert((*dlt_meta_it)["cbtm"]);
@@ -145,7 +145,7 @@ std::cerr << "&cblm:|" << &cblm << "|" << std::endl;
     }
     if ((*dlt_meta_it).find("cbtm-file") != (*dlt_meta_it).end()) {
       if (&cbtm) cbtm.Load((*dlt_meta_it)["cbtm-file"]);
-     }
+    }
     if ((*dlt_meta_it).find("cblm") != (*dlt_meta_it).end()) {
       if (&cblm) cblm.Insert((*dlt_meta_it)["cblm"]);
     }

@@ -42,9 +42,10 @@
 #define PI 3.14159265
 
 
-namespace Moses {
+namespace Moses
+{
 
-/** Implementation of a Cache-based phrase table.  
+/** Implementation of a Cache-based phrase table.
  */
 class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
 {
@@ -106,7 +107,7 @@ public:
 
   void SetScoreType(size_t type);
   void SetMaxAge(unsigned int age);
-        
+
 protected:
   static PhraseDictionaryDynamicCacheBased *s_instance;
 

@@ -25,7 +25,7 @@ class LanguageModelDALM : public LanguageModel
 public:
   LanguageModelDALM(const std::string &line);
   virtual ~LanguageModelDALM();
-  
+
   void Load();
 
   virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
@@ -38,8 +38,8 @@ public:
 
   virtual bool IsUseable(const FactorMask &mask) const;
 
-	virtual void SetParameter(const std::string& key, const std::string& value);
-	
+  virtual void SetParameter(const std::string& key, const std::string& value);
+
 protected:
   const Factor *m_beginSentenceFactor;
 
@@ -48,22 +48,22 @@ protected:
   std::string	m_filePath;
   size_t			m_nGramOrder; //! max n-gram length contained in this LM
 
-	DALM::Logger *m_logger;
-	DALM::Vocabulary *m_vocab;
-	DALM::LM *m_lm;
-	DALM::VocabId wid_start, wid_end;
+  DALM::Logger *m_logger;
+  DALM::Vocabulary *m_vocab;
+  DALM::LM *m_lm;
+  DALM::VocabId wid_start, wid_end;
 
-	typedef boost::bimap<const Factor *, DALM::VocabId> VocabMap;
-	mutable VocabMap m_vocabMap;
+  typedef boost::bimap<const Factor *, DALM::VocabId> VocabMap;
+  mutable VocabMap m_vocabMap;
 
-	void CreateVocabMapping(const std::string &wordstxt);
-	DALM::VocabId GetVocabId(const Factor *factor) const;
+  void CreateVocabMapping(const std::string &wordstxt);
+  DALM::VocabId GetVocabId(const Factor *factor) const;
 
 private:
   LMResult GetValue(DALM::VocabId wid, DALM::State* finalState) const;
-	LMResult GetValue(const Word &word, DALM::State* finalState) const;
-	void updateChartScore(float *prefixScore, float *finalizedScore, float score, size_t wordPos) const;
-	
+  LMResult GetValue(const Word &word, DALM::State* finalState) const;
+  void updateChartScore(float *prefixScore, float *finalizedScore, float score, size_t wordPos) const;
+
   // Convert last words of hypothesis into vocab ids, returning an end pointer.
   DALM::VocabId *LastIDs(const Hypothesis &hypo, DALM::VocabId *indices) const {
     DALM::VocabId *index = indices;

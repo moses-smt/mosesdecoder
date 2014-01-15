@@ -113,16 +113,16 @@ public:
   {}
 
   void Evaluate(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const
+                ScoreComponentCollection* accumulator) const
   {}
 
   void EvaluateChart(const ChartHypothesis &hypo,
-                             ScoreComponentCollection* accumulator) const
+                     ScoreComponentCollection* accumulator) const
   {}
 
   void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , ScoreComponentCollection &scoreBreakdown) const
   {}
 
   void SetQueryType(size_t type);

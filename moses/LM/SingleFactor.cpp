@@ -48,8 +48,8 @@ LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string &line)
 
 LanguageModelSingleFactor::~LanguageModelSingleFactor()
 {
-	delete m_nullContextState;
-	delete m_beginSentenceState;
+  delete m_nullContextState;
+  delete m_beginSentenceState;
 }
 
 const FFState *LanguageModelSingleFactor::GetNullContextState() const

@@ -61,7 +61,7 @@ void TargetNgramFeature::SetParameter(const std::string& key, const std::string&
   } else if (key == "lower-ngrams") {
     m_lower_ngrams = Scan<bool>(value);
   } else if (key == "file") {
-      m_file = value;
+    m_file = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
@@ -74,7 +74,7 @@ void TargetNgramFeature::Load()
   if (m_file == "*") return; //allow all
   ifstream inFile(m_file.c_str());
   if (!inFile) {
-      UTIL_THROW(util::Exception, "Couldn't open file" << m_file);
+    UTIL_THROW(util::Exception, "Couldn't open file" << m_file);
   }
 
   std::string line;

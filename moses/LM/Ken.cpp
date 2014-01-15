@@ -396,7 +396,7 @@ LanguageModel *ConstructKenLM(const std::string &line)
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
     UTIL_THROW_IF2(args.size() != 2,
-    		"Incorrect format of KenLM property: " << toks[i]);
+                   "Incorrect format of KenLM property: " << toks[i]);
 
     if (args[0] == "factor") {
       factorType = Scan<FactorType>(args[1]);
@@ -416,28 +416,28 @@ LanguageModel *ConstructKenLM(const std::string &line)
 
 LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
 {
-    lm::ngram::ModelType model_type;
-    if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+  lm::ngram::ModelType model_type;
+  if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
 
-      switch(model_type) {
-      case lm::ngram::PROBING:
-        return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
-      case lm::ngram::REST_PROBING:
-        return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
-      case lm::ngram::TRIE:
-        return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
-      case lm::ngram::QUANT_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
-      case lm::ngram::ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
-      case lm::ngram::QUANT_ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
-      default:
-    	UTIL_THROW2("Unrecognized kenlm model type " << model_type);
-      }
-    } else {
+    switch(model_type) {
+    case lm::ngram::PROBING:
       return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+    case lm::ngram::REST_PROBING:
+      return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
+    case lm::ngram::TRIE:
+      return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
+    case lm::ngram::QUANT_TRIE:
+      return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
+    case lm::ngram::ARRAY_TRIE:
+      return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
+    case lm::ngram::QUANT_ARRAY_TRIE:
+      return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
+    default:
+      UTIL_THROW2("Unrecognized kenlm model type " << model_type);
     }
+  } else {
+    return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+  }
 }
 
 }

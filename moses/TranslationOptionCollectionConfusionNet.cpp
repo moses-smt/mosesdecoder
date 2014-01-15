@@ -81,7 +81,7 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
         const Phrase &prevPhrase = prevPath.GetPhrase();
         const ScorePair *prevInputScore = prevPath.GetInputScore();
         UTIL_THROW_IF2(prevInputScore == NULL,
-        		"No input score for path: " << prevPath);
+                       "No input score for path: " << prevPath);
 
         // loop thru every word at this position
         const ConfusionNet::Column &col = input.GetColumn(endPos);

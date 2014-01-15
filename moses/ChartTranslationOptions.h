@@ -59,8 +59,9 @@ public:
   static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
                                        const StackVec &);
 
-  size_t GetSize() const
-  { return m_collection.size(); }
+  size_t GetSize() const {
+    return m_collection.size();
+  }
 
   //! @todo dunno
   const StackVec &GetStackVec() const {

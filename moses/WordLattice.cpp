@@ -13,7 +13,7 @@ namespace Moses
 WordLattice::WordLattice()
 {
   UTIL_THROW_IF2(&InputFeature::Instance() == NULL,
-		  "Input feature must be specified");
+                 "Input feature must be specified");
 }
 
 size_t WordLattice::GetColumnIncrement(size_t i, size_t j) const
@@ -216,9 +216,8 @@ WordLattice::CreateTranslationOptionCollection() const
 
   if (StaticData::Instance().GetUseLegacyPT()) {
     rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
-  }
-  else {
-	rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  } else {
+    rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
   }
 
   assert(rv);

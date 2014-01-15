@@ -10,7 +10,7 @@ using namespace std;
 namespace Moses
 {
 NeuralLMWrapper::NeuralLMWrapper(const std::string &line)
-:LanguageModelSingleFactor(line)
+  :LanguageModelSingleFactor(line)
 {
   // This space intentionally left blank
 }

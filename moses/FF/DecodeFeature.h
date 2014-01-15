@@ -42,12 +42,12 @@ public:
   DecodeFeature(const std::string &line);
 
   DecodeFeature(size_t numScoreComponents
-                  , const std::string &line);
+                , const std::string &line);
 
   DecodeFeature(size_t numScoreComponents
-                  , const std::vector<FactorType> &input
-                  , const std::vector<FactorType> &output
-                  , const std::string &line);
+                , const std::vector<FactorType> &input
+                , const std::vector<FactorType> &output
+                , const std::string &line);
 
   //! returns output factor types as specified by the ini file
   const FactorMask& GetOutputFactorMask() const;
@@ -79,8 +79,9 @@ public:
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
-  void SetContainer(const DecodeStep *container)
-  { m_container = container; }
+  void SetContainer(const DecodeStep *container) {
+    m_container = container;
+  }
 
 protected:
   std::vector<FactorType> m_input;

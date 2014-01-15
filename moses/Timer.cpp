@@ -10,7 +10,7 @@ namespace Moses
 
 /***
  * Return the total wall time that the timer has been in the "running"
- * state since it was first "started".  
+ * state since it was first "started".
  */
 double Timer::get_elapsed_time() const
 {
@@ -39,8 +39,7 @@ void Timer::start(const char* msg)
   if (stopped) {
     start_time = util::WallTime() - (stop_time - start_time);
     stopped = false;
-  }
-  else {
+  } else {
     start_time = util::WallTime();
     running = true;
   }

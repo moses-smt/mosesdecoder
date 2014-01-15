@@ -36,7 +36,7 @@ DecodeFeature::DecodeFeature(const std::string &line)
 }
 
 DecodeFeature::DecodeFeature(size_t numScoreComponents
-                               , const std::string &line)
+                             , const std::string &line)
   : StatelessFeatureFunction(numScoreComponents, line)
 {
   VERBOSE(2,"DecodeFeature: no factors yet" << std::endl);

@@ -89,7 +89,7 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
   HCType::iterator &iterExisting = addRet.first;
   ChartHypothesis *hypoExisting = *iterExisting;
   UTIL_THROW_IF2(iterExisting == m_hypos.end(),
-		  "Adding a hypothesis should have returned a valid iterator");
+                 "Adding a hypothesis should have returned a valid iterator");
 
   //StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 
@@ -253,7 +253,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
         ChartHypothesis *hypo = *iter;
         HCType::iterator iterFindHypo = m_hypos.find(hypo);
         UTIL_THROW_IF2(iterFindHypo == m_hypos.end(),
-      		  "Adding a hypothesis should have returned a valid iterator");
+                       "Adding a hypothesis should have returned a valid iterator");
 
         Remove(iterFindHypo);
       }

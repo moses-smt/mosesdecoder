@@ -204,7 +204,7 @@ void ChartParser::CreateInputPaths(const InputType &input)
   m_inputPathMatrix.resize(size);
 
   UTIL_THROW_IF2(input.GetType() != SentenceInput && input.GetType() != TreeInputType,
-		  "Input must be a sentence or a tree, not lattice or confusion networks");
+                 "Input must be a sentence or a tree, not lattice or confusion networks");
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
@@ -238,7 +238,7 @@ const InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos) const
 {
   size_t offset = endPos - startPos;
   UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
-		  "Out of bound: " << offset);
+                 "Out of bound: " << offset);
   return *m_inputPathMatrix[startPos][offset];
 }
 
@@ -246,7 +246,7 @@ InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
   UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
-		  "Out of bound: " << offset);
+                 "Out of bound: " << offset);
   return *m_inputPathMatrix[startPos][offset];
 }
 /*

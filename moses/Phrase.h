@@ -155,8 +155,8 @@ public:
   }
 
   void RemoveWord(size_t pos) {
-	UTIL_THROW_IF2(pos >= m_words.size(),
-			"Referencing position " << pos << " out of bound");
+    UTIL_THROW_IF2(pos >= m_words.size(),
+                   "Referencing position " << pos << " out of bound");
     m_words.erase(m_words.begin() + pos);
   }
 

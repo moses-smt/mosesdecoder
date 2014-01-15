@@ -102,10 +102,10 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
 
   // Prune if bursting
   if (m_size == m_ruleLimit * 2) {
-	NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin() + m_ruleLimit - 1,
-                     m_collection.begin() + m_size,
-                     ChartTranslationOptionOrderer());
+    NTH_ELEMENT4(m_collection.begin(),
+                 m_collection.begin() + m_ruleLimit - 1,
+                 m_collection.begin() + m_size,
+                 ChartTranslationOptionOrderer());
     m_scoreThreshold = m_collection[m_ruleLimit-1]->GetEstimateOfBestScore();
     m_size = m_ruleLimit;
   }
@@ -129,9 +129,9 @@ void ChartTranslationOptionList::ApplyThreshold()
     // Reduce the list to the best m_ruleLimit options.  The remaining
     // options can be overwritten on subsequent calls to Add().
     NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin()+m_ruleLimit,
-                     m_collection.begin()+m_size,
-                     ChartTranslationOptionOrderer());
+                 m_collection.begin()+m_ruleLimit,
+                 m_collection.begin()+m_size,
+                 ChartTranslationOptionOrderer());
     m_size = m_ruleLimit;
   }
 
@@ -167,11 +167,11 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionList &obj)
 {
-	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
-		const ChartTranslationOptions &transOpts = *obj.m_collection[i];
-		out << transOpts << endl;
-	}
-	return out;
+  for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+    const ChartTranslationOptions &transOpts = *obj.m_collection[i];
+    out << transOpts << endl;
+  }
+  return out;
 }
 
 }

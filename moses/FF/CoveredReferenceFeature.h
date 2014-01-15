@@ -37,8 +37,7 @@ class CoveredReferenceFeature : public StatefulFeatureFunction
 
 public:
   CoveredReferenceFeature(const std::string &line)
-    :StatefulFeatureFunction(1, line)
-  {
+    :StatefulFeatureFunction(1, line) {
     m_tuneable = true;
     ReadParameters();
   }

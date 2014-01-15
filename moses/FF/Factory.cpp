@@ -236,12 +236,12 @@ void FeatureRegistry::Construct(const std::string &name, const std::string &line
 
 void FeatureRegistry::PrintFF() const
 {
-	std::cerr << "Available feature functions:" << std::endl;
-	Map::const_iterator iter;
-	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
-		const string &ffName = iter->first;
-		std::cerr << ffName << std::endl;
-	}
+  std::cerr << "Available feature functions:" << std::endl;
+  Map::const_iterator iter;
+  for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
+    const string &ffName = iter->first;
+    std::cerr << ffName << std::endl;
+  }
 
 }
 

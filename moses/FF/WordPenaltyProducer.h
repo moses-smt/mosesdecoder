@@ -45,10 +45,10 @@ public:
   {}
 
 
-/*
-  virtual void Evaluate(const InputType &source
-                        , ScoreComponentCollection &scoreBreakdown) const;
-*/
+  /*
+    virtual void Evaluate(const InputType &source
+                          , ScoreComponentCollection &scoreBreakdown) const;
+  */
 };
 
 }

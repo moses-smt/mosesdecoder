@@ -2,8 +2,9 @@
 
 #include "SingleFactor.h"
 
-namespace nplm {
-  class neuralLM;
+namespace nplm
+{
+class neuralLM;
 }
 
 namespace Moses

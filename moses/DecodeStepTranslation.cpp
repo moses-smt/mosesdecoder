@@ -85,7 +85,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
 
       outPhrase.Merge(targetPhrase, m_newOutputFactors);
       outPhrase.Evaluate(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
-cerr << "DecodeStepTranslation::Process   is calling outPhrase.Evaluate(inputPath.GetPhrase(), m_featuresToApply)" << endl;
+      cerr << "DecodeStepTranslation::Process   is calling outPhrase.Evaluate(inputPath.GetPhrase(), m_featuresToApply)" << endl;
 
       TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
       assert(newTransOpt != NULL);
@@ -199,11 +199,11 @@ const InputPath &DecodeStepTranslation::GetInputPathLEGACY(
 
     const Word *wordIP = NULL;
     for (size_t i = 0; i < phraseFromIP.GetSize(); ++i) {
-    	const Word &tempWord =  phraseFromIP.GetWord(i);
-    	if (!tempWord.IsEpsilon()) {
-    		wordIP = &tempWord;
-    		break;
-    	}
+      const Word &tempWord =  phraseFromIP.GetWord(i);
+      if (!tempWord.IsEpsilon()) {
+        wordIP = &tempWord;
+        break;
+      }
     }
 
     // const WordsRange &range = inputPath.GetWordsRange();
@@ -238,7 +238,7 @@ void DecodeStepTranslation::ProcessLEGACY(const TranslationOption &inputPartialT
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const TargetPhraseCollectionWithSourcePhrase *phraseColl
-  = phraseDictionary->GetTargetPhraseCollectionLEGACY(toc->GetSource(),sourceWordsRange);
+    = phraseDictionary->GetTargetPhraseCollectionLEGACY(toc->GetSource(),sourceWordsRange);
 
 
   if (phraseColl != NULL) {

@@ -113,7 +113,7 @@ void Manager::ProcessSentence()
   searchTime.start();
   m_search->ProcessSentence();
   VERBOSE(1, "Line " << m_lineNumber << ": Search took " << searchTime << " seconds" << endl);
-    IFVERBOSE(2) {
+  IFVERBOSE(2) {
     GetSentenceStats().StopTimeTotal();
     TRACE_ERR(GetSentenceStats());
   }
@@ -321,12 +321,12 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
     if (i->forward >= 0) {
       map<int,const Hypothesis*>::const_iterator idToHypIter = idToHyp.find(i->forward);
       UTIL_THROW_IF2(idToHypIter == idToHyp.end(),
-    		  "Couldn't find hypothesis " << i->forward);
+                     "Couldn't find hypothesis " << i->forward);
       const Hypothesis* nextHypo = idToHypIter->second;
       outgoingHyps[hypo].insert(nextHypo);
       map<int,float>::const_iterator fscoreIter = fscores.find(nextHypo->GetId());
       UTIL_THROW_IF2(fscoreIter == fscores.end(),
-    		  "Couldn't find scores for hypothsis " << nextHypo->GetId());
+                     "Couldn't find scores for hypothsis " << nextHypo->GetId());
       edgeScores[Edge(hypo->GetId(),nextHypo->GetId())] =
         i->fscore - fscoreIter->second;
     }
@@ -344,17 +344,17 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
         outgoingHyps.find(i->hypo);
 
       UTIL_THROW_IF2(outIter == outgoingHyps.end(),
-    		  "Couldn't find hypothesis " << i->hypo->GetId());
+                     "Couldn't find hypothesis " << i->hypo->GetId());
       float sigma = 0;
       for (set<const Hypothesis*>::const_iterator j = outIter->second.begin();
            j != outIter->second.end(); ++j) {
         map<const Hypothesis*, float>::const_iterator succIter = sigmas.find(*j);
         UTIL_THROW_IF2(succIter == sigmas.end(),
-        		"Couldn't find hypothesis " << (*j)->GetId());
+                       "Couldn't find hypothesis " << (*j)->GetId());
         map<Edge,float>::const_iterator edgeScoreIter =
           edgeScores.find(Edge(i->hypo->GetId(),(*j)->GetId()));
         UTIL_THROW_IF2(edgeScoreIter == edgeScores.end(),
-        		"Couldn't find edge for hypothesis " << (*j)->GetId());
+                       "Couldn't find edge for hypothesis " << (*j)->GetId());
         float term = edgeScoreIter->second + succIter->second; // Add sigma(*j)
         if (sigma == 0) {
           sigma = term;
@@ -387,10 +387,10 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
            j != outIter->second.end(); ++j) {
         candidates.push_back(*j);
         UTIL_THROW_IF2(sigmas.find(*j) == sigmas.end(),
-        		"Hypothesis " << (*j)->GetId() << " not found");
+                       "Hypothesis " << (*j)->GetId() << " not found");
         Edge edge(path.back()->GetId(),(*j)->GetId());
         UTIL_THROW_IF2(edgeScores.find(edge) == edgeScores.end(),
-        		"Edge not found");
+                       "Edge not found");
         candidateScores.push_back(sigmas[*j]  + edgeScores[edge]);
         if (scoreTotal == 0) {
           scoreTotal = candidateScores.back();
@@ -545,13 +545,14 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   outputWordGraphStream << endl;
 }
 
-void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo ) {
+void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo )
+{
   Phrase translation;
   hypo->GetOutputPhrase(translation);
   const std::vector<const StatefulFeatureFunction*> &statefulFFs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (size_t i = 0; i < statefulFFs.size(); ++i) {
     const StatefulFeatureFunction *ff = statefulFFs[i];
-    if (const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff)) {	
+    if (const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff)) {
       lm->ReportHistoryOrder(out, translation);
     }
   }
@@ -1345,7 +1346,7 @@ void Manager::SerializeSearchGraphPB(
           for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList) {
             const Hypothesis *loserHypo = *iterArcList;
             UTIL_THROW_IF2(!connected[loserHypo->GetId()],
-            		"Hypothesis " << loserHypo->GetId() << " is not connected");
+                           "Hypothesis " << loserHypo->GetId() << " is not connected");
             Hypergraph_Edge* edge = hg.add_edges();
             SerializeEdgeInfo(loserHypo, edge);
             edge->set_head_node(headNodeIdx);

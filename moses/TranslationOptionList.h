@@ -54,7 +54,7 @@ public:
   }
   void Remove( size_t ind ) {
     UTIL_THROW_IF2(ind >= m_coll.size(),
-    		"Out of bound index " << ind);
+                   "Out of bound index " << ind);
     m_coll.erase( m_coll.begin()+ind );
   }
   void Add(TranslationOption *transOpt) {

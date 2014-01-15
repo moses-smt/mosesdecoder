@@ -520,15 +520,14 @@ bool StaticData::LoadData(Parameter *parameter)
     string &feature = toks[0];
     std::map<std::string, std::string>::const_iterator iter = featureNameOverride.find(feature);
     if (iter == featureNameOverride.end()) {
-    	// feature name not override
-    	m_registry.Construct(feature, line);
-    }
-    else {
-    	// replace feature name with new name
-    	string newName = iter->second;
-    	feature = newName;
-    	string newLine = Join(" ", toks);
-    	m_registry.Construct(newName, newLine);
+      // feature name not override
+      m_registry.Construct(feature, line);
+    } else {
+      // replace feature name with new name
+      string newName = iter->second;
+      feature = newName;
+      string newLine = Join(" ", toks);
+      m_registry.Construct(newName, newLine);
     }
   }
 
@@ -633,7 +632,7 @@ void StaticData::LoadNonTerminals()
     while(getline(inStream, line)) {
       vector<string> tokens = Tokenize(line);
       UTIL_THROW_IF2(tokens.size() != 2,
-    		  "Incorrect unknown LHS format: " << line);
+                     "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
     }
@@ -682,7 +681,7 @@ bool StaticData::LoadDecodeGraphs()
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
       UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
-    		  "Malformed mapping");
+                     "Malformed mapping");
       if (decodeGraphInd > prevDecodeGraphInd) {
         prev = NULL;
       }
@@ -748,11 +747,11 @@ bool StaticData::LoadDecodeGraphs()
   // if specified, record maxmimum unseen n-gram size
   const vector<string> &backoffVector = m_parameter->GetParam("decoding-graph-backoff");
   for(size_t i=0; i<m_decodeGraphs.size() && i<backoffVector.size(); i++) {
-	DecodeGraph &decodeGraph = *m_decodeGraphs[i];
+    DecodeGraph &decodeGraph = *m_decodeGraphs[i];
 
-	if (i < backoffVector.size()) {
-		decodeGraph.SetBackoff(Scan<size_t>(backoffVector[i]));
-	}
+    if (i < backoffVector.size()) {
+      decodeGraph.SetBackoff(Scan<size_t>(backoffVector[i]));
+    }
   }
 
   return true;
@@ -995,7 +994,7 @@ bool StaticData::LoadAlternateWeightSettings()
       currentId = args[1];
       cerr << "alternate weight setting " << currentId << endl;
       UTIL_THROW_IF2(m_weightSetting.find(currentId) != m_weightSetting.end(),
-    		  "Duplicate alternate weight id: " << currentId);
+                     "Duplicate alternate weight id: " << currentId);
       m_weightSetting[ currentId ] = new ScoreComponentCollection;
 
       // other specifications
@@ -1040,7 +1039,7 @@ bool StaticData::LoadAlternateWeightSettings()
       UTIL_THROW_IF2(currentId.empty(), "No alternative weights specified");
       vector<string> tokens = Tokenize(weightSpecification[i]);
       UTIL_THROW_IF2(tokens.size() < 2
-    		  , "Incorrect format for alternate weights: " << weightSpecification[i]);
+                     , "Incorrect format for alternate weights: " << weightSpecification[i]);
 
       // get name and weight values
       string name = tokens[0];
@@ -1069,36 +1068,36 @@ bool StaticData::LoadAlternateWeightSettings()
 
 void StaticData::NoCache()
 {
-	bool noCache;
-	SetBooleanParameter( &noCache, "no-cache", false );
+  bool noCache;
+  SetBooleanParameter( &noCache, "no-cache", false );
 
-	if (noCache) {
-		const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
-		for (size_t i = 0; i < pts.size(); ++i) {
-			PhraseDictionary &pt = *pts[i];
-			pt.SetParameter("cache-size", "0");
-		}
-	}
+  if (noCache) {
+    const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+    for (size_t i = 0; i < pts.size(); ++i) {
+      PhraseDictionary &pt = *pts[i];
+      pt.SetParameter("cache-size", "0");
+    }
+  }
 }
 
 std::map<std::string, std::string> StaticData::OverrideFeatureNames()
 {
-	std::map<std::string, std::string> ret;
+  std::map<std::string, std::string> ret;
 
-	const PARAM_VEC &params = m_parameter->GetParam("feature-name-overwrite");
-	if (params.size()) {
-		UTIL_THROW_IF2(params.size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
-		vector<string> toks = Tokenize(params[0]);
-		UTIL_THROW_IF2(toks.size() % 2 != 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
+  const PARAM_VEC &params = m_parameter->GetParam("feature-name-overwrite");
+  if (params.size()) {
+    UTIL_THROW_IF2(params.size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
+    vector<string> toks = Tokenize(params[0]);
+    UTIL_THROW_IF2(toks.size() % 2 != 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
 
-		for (size_t i = 0; i < toks.size(); i += 2) {
-			const string &oldName = toks[i];
-			const string &newName = toks[i+1];
-			ret[oldName] = newName;
-		}
-	}
+    for (size_t i = 0; i < toks.size(); i += 2) {
+      const string &oldName = toks[i];
+      const string &newName = toks[i+1];
+      ret[oldName] = newName;
+    }
+  }
 
-	return ret;
+  return ret;
 }
 
 void StaticData::OverrideFeatures()

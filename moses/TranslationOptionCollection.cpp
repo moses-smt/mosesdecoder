@@ -108,7 +108,7 @@ void TranslationOptionCollection::Prune()
       if (m_maxNoTransOptPerCoverage > 0 &&
           fullList.size() > m_maxNoTransOptPerCoverage) {
         // sort in vector
-    	NTH_ELEMENT4(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
+        NTH_ELEMENT4(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
         totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
 
         // delete the rest
@@ -392,7 +392,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
         if (graphInd > 0 && // only skip subsequent graphs
-        	backoff != 0 && // use of backoff specified
+            backoff != 0 && // use of backoff specified
             (endPos-startPos+1 >= backoff || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
@@ -611,7 +611,7 @@ void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
   const WordsRange &coverage = translationOption->GetSourceWordsRange();
   UTIL_THROW_IF2(coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size(),
-		  "Out of bound access: " << coverage);
+                 "Out of bound access: " << coverage);
   m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
 }
 
@@ -684,7 +684,7 @@ TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(siz
   maxSize = std::min(maxSize, maxSizePhrase);
 
   UTIL_THROW_IF2(maxSize >= m_collection[startPos].size(),
-		  "Out of bound access: " << maxSize);
+                 "Out of bound access: " << maxSize);
 
   return m_collection[startPos][maxSize];
 }
@@ -695,7 +695,7 @@ const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionLi
   maxSize = std::min(maxSize, maxSizePhrase);
 
   UTIL_THROW_IF2(maxSize >= m_collection[startPos].size(),
-		  "Out of bound access: " << maxSize);
+                 "Out of bound access: " << maxSize);
   return m_collection[startPos][maxSize];
 }
 

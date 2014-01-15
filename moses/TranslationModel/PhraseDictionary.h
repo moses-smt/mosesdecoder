@@ -60,7 +60,7 @@ class CacheColl : public std::map<size_t, std::pair<const TargetPhraseCollection
 // 3rd = time of last access
 
 public:
-	~CacheColl();
+  ~CacheColl();
 };
 
 /**
@@ -70,7 +70,7 @@ class PhraseDictionary :  public DecodeFeature
 {
 public:
   static const std::vector<PhraseDictionary*>& GetColl() {
-	return s_staticColl;
+    return s_staticColl;
   }
 
   PhraseDictionary(const std::string &line);

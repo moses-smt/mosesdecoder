@@ -35,11 +35,11 @@ std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
 CacheColl::~CacheColl()
 {
-	for (iterator iter = begin(); iter != end(); ++iter) {
-		std::pair<const TargetPhraseCollection*, clock_t> &key = iter->second;
-		const TargetPhraseCollection *tps = key.first;
-		delete tps;
-	}
+  for (iterator iter = begin(); iter != end(); ++iter) {
+    std::pair<const TargetPhraseCollection*, clock_t> &key = iter->second;
+    const TargetPhraseCollection *tps = key.first;
+    delete tps;
+  }
 }
 
 PhraseDictionary::PhraseDictionary(const std::string &line)
@@ -47,7 +47,7 @@ PhraseDictionary::PhraseDictionary(const std::string &line)
   ,m_tableLimit(20) // default
   ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
-	s_staticColl.push_back(this);
+  s_staticColl.push_back(this);
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
