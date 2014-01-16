@@ -25,6 +25,10 @@
 #include <sstream>
 #include <stdexcept>
 
+#if defined __MINGW32__ && defined WITH_THREADS
+#include <boost/thread/locks.hpp>
+#endif // WITH_THREADS
+
 #include "FeatureVector.h"
 #include "util/string_piece_hash.hh"
 

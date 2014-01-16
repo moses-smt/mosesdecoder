@@ -8,7 +8,7 @@
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
 
-#ifdef HAVE_CMPH
+#if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
 #endif
 

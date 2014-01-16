@@ -18,6 +18,12 @@
 
 using namespace std;
 
+#if defined __MINGW32__
+#ifndef uint
+#define uint uint16_t
+#endif // uint
+#endif // if
+
 namespace
 {
 
