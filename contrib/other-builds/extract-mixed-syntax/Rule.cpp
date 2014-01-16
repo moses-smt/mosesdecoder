@@ -583,7 +583,7 @@ void Rule::OutputInv(std::ostream &out) const
 
     if (!isTerminal)
     {
-      out << element.m_alignmentPos.first << "-" << element.m_alignmentPos.second << " ";
+      out << element.m_alignmentPos.second << "-" << element.m_alignmentPos.first << " ";
     }
   }
 
