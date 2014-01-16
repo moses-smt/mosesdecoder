@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 	
 	Global *global = new Global();
 	g_global = global;
-
+	int sentenceOffset = 0;
 		
 	if (argc < 5) {
 		cerr << "syntax: extract-mixed-syntax corpus.target corpus.source corpus.align extract "
@@ -167,15 +167,27 @@ int main(int argc, char* argv[])
     }
 		else if (strcmp(argv[i],"--AllowDefaultNonTermEdge") == 0) {
 			global->allowDefaultNonTermEdge = atoi(argv[++i]);
-    } else if (strcmp(argv[i], "--GZOutput") == 0) {
+    }
+		else if (strcmp(argv[i], "--GZOutput") == 0) {
       global->gzOutput = true;
     }
-
+		else if (strcmp(argv[i],"--MaxSpan") == 0) {
+		  // ignore
+      ++i;
+		}
+    else if (strcmp(argv[i],"--SentenceOffset") == 0) {
+      if (i+1 >= argc || argv[i+1][0] < '0' || argv[i+1][0] > '9') {
+        cerr << "extract: syntax error, used switch --SentenceOffset without a number" << endl;
+        exit(1);
+      }
+      sentenceOffset = atoi(argv[++i]);
+    }
     else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
     }
   }
+
 
 	// open input files
 	Moses::InputFileStream tFile(fileNameT);
@@ -196,7 +208,7 @@ int main(int argc, char* argv[])
   
   
 	// loop through all sentence pairs
-  int i=0;
+  int i = sentenceOffset;
   while(true) {
     i++;
 
@@ -240,7 +252,6 @@ int main(int argc, char* argv[])
 			sentencePair.GetLattice().GetRules().Output(extractFile);
       sentencePair.GetLattice().GetRules().OutputInv(extractFileInv);
     }
-
   }
 	
   tFile.Close();
