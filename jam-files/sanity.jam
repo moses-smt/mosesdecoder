@@ -33,10 +33,7 @@ rule test_flags ( flags * : main ? ) {
     main = "int main() {}" ;
   }
   local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'$(main)' -o $(TOP)/dummy >/dev/null 2>/dev/null && rm $(TOP)/dummy 2>/dev/null\"" ;
-  if $NT {
-    cmd = "echo $(main) | g++ "$(flags:J=" ")" -x c++ - -o $(TOP)\\dummy >NUL 2>NUL && del $(TOP)\\dummy 2>NUL " ;
-  }
-  local ret = [ SHELL "$(cmd)" : exit-status ] ;
+  local ret = [ SHELL $(cmd) : exit-status ] ;
   if --debug-configuration in [ modules.peek : ARGV ] {
     echo $(cmd) ;
     echo $(ret) ;
@@ -166,9 +163,6 @@ rule boost-lib ( name macro : deps * ) {
 #Argument is e.g. 103600
 rule boost ( min-version ) {
   local cmd = "bash -c \"g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp 2>/dev/null |grep '#define BOOST_'\"" ;
-  if $NT {
-    cmd = "g++ "$(I-boost-include)" -dM -x c++ -E NUL -include boost/version.hpp 2>NUL | find \"#define BOOST_\"" ;
-  }
   local boost-shell = [ SHELL "$(cmd)" : exit-status ] ;
   if $(boost-shell[2]) != 0 && $(CLEANING) = no {
     echo Failed to run "$(cmd)" ;
@@ -320,11 +314,7 @@ actions write-options {
 #file.  This file can then be used with <dependency>$(file) to force
 #recompilation.
 rule update-if-changed ( file current ) {
-  local cmd = "cat $(file)" ;
-  if $NT {
-	cmd = "type $(file)" ;
-  }
-  if ( ! [ path.exists $(file) ] ) || ( [ _shell "$(cmd)" ] != $(current) ) {
+  if ( ! [ path.exists $(file) ] ) || ( [ _shell "cat $(file)" ] != $(current) ) {
     make $(file) : : $(__name__).write-options : <options-to-write>$(current) ;
     always $(file) ;
   }

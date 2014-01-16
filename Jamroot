@@ -82,10 +82,6 @@ lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
 requirements += <library>dl ;
 requirements += <toolset>gcc:<cxxflags>-std=c++0x ;
 
-if $NT {
-	lib mman : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-	requirements += <library>mman ;
-}
 
 if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
   if [ option.get "full-tcmalloc" : : "yes" ] {
