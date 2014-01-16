@@ -1440,7 +1440,11 @@ void Manager::GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
     } // end for hypo
   } // end for stack
 
+#if __cplusplus >= 201103L
   for (auto it = connectedList.begin(); it != connectedList.end(); ++it) {
+#else
+  for (std::vector< const Hypothesis *>::iterator it = connectedList.begin(); it != connectedList.end(); ++it) {
+#endif
     float estimatedScore = (*it)->GetScore() + forwardScore[(*it)->GetId()];
     estimatedScores.push_back(estimatedScore);
   }
