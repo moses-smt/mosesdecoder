@@ -26,8 +26,10 @@
 #include <time.h>
 #include <cstring>
 #include <sstream>
+#include <iostream>
 #include "extract.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 #include "Lattice.h"
 
 #ifdef WIN32
@@ -165,8 +167,10 @@ int main(int argc, char* argv[])
     }
 		else if (strcmp(argv[i],"--AllowDefaultNonTermEdge") == 0) {
 			global->allowDefaultNonTermEdge = atoi(argv[++i]);
-		}
-		
+    } else if (strcmp(argv[i], "--GZOutput") == 0) {
+      global->gzOutput = true;
+    }
+
     else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
@@ -180,8 +184,15 @@ int main(int argc, char* argv[])
 
 	// open output files
   string fileNameExtractInv = fileNameExtract + ".inv";
-  string fileNameExtractOrientation = fileNameExtract + ".o";
-  extractFile.open(fileNameExtract.c_str());
+  if (global->gzOutput) {
+    fileNameExtract += ".gz";
+    fileNameExtractInv += ".gz";
+  }
+
+  Moses::OutputFileStream extractFile;
+  Moses::OutputFileStream extractFileInv;
+  extractFile.Open(fileNameExtract.c_str());
+  extractFileInv.Open(fileNameExtractInv.c_str());
   
   
 	// loop through all sentence pairs
@@ -226,7 +237,8 @@ int main(int argc, char* argv[])
 			//cerr << "E " << (time(NULL) - starttime) << endl;
 
 			//cerr << sentence.lattice->GetRules().GetSize() << endl;
-			extractFile << sentencePair.GetLattice().GetRules();
+			sentencePair.GetLattice().GetRules().Output(extractFile);
+      sentencePair.GetLattice().GetRules().OutputInv(extractFileInv);
     }
 
   }
@@ -234,7 +246,10 @@ int main(int argc, char* argv[])
   tFile.Close();
   sFile.Close();
   aFile.Close();
-	
+
+  extractFile.Close();
+  extractFileInv.Close();
+
 	delete global;
 }
  

@@ -165,7 +165,7 @@ std::ostream& operator<<(std::ostream &out, const Lattice &obj)
 	for (iter = obj.m_stacks.begin(); iter != obj.m_stacks.end(); ++iter)
 	{
 		const Stack &stack = *iter;
-		
+
 		Stack::const_iterator iterStack;
 		for (iterStack = stack.begin(); iterStack != stack.end(); ++iterStack)
 		{
@@ -173,7 +173,7 @@ std::ostream& operator<<(std::ostream &out, const Lattice &obj)
 			out << node << " ";
 		}
 	}
-	
+
 	return out;
 }
 

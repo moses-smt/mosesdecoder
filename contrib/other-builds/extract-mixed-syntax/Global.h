@@ -30,7 +30,8 @@ public:
 	int maxUnaligned;
 	bool uppermostOnly;
 	bool allowDefaultNonTermEdge;
-	
+  bool gzOutput;
+
 	Global();
 
 	Global(const Global&);

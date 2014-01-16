@@ -499,55 +499,96 @@ const LatticeNode &Rule::GetLatticeNode(size_t ind) const
 
 void Rule::DebugOutput() const
 {
-	std::stringstream strme;			
-	strme << *this;								
-	cerr << strme.str();						
-	
+	Output(cerr);
 }
 
-std::ostream& operator<<(std::ostream &out, const Rule &obj)
+void Rule::Output(std::ostream &out) const
 {
-	
-	stringstream strmeS, strmeT;
-	
-	std::vector<Symbol>::const_iterator iterSymbol;
-	for (iterSymbol = obj.m_source.begin(); iterSymbol != obj.m_source.end(); ++iterSymbol)
-	{
-		const Symbol &symbol = *iterSymbol;
-		strmeS << symbol << " ";
-	}
-	
-	for (iterSymbol = obj.m_target.begin(); iterSymbol != obj.m_target.end(); ++iterSymbol)
-	{
-		const Symbol &symbol = *iterSymbol;
-		strmeT << symbol << " ";
-	}
-	
-	// lhs
-	if (obj.m_lhs)
-	{
-		strmeS << obj.m_lhs->GetSyntaxNode(0).GetLabel();
-		strmeT << obj.m_lhs->GetSyntaxNode(1).GetLabel();
-	}
-	
-	out << strmeS.str() << " ||| " << strmeT.str() << " ||| ";
-	
-	// alignment
-	Rule::CollType::const_iterator iter;
-	for (iter = obj.m_coll.begin(); iter != obj.m_coll.end(); ++iter)
-	{
-		const RuleElement &element = *iter;
-		const LatticeNode &node = element.GetLatticeNode();
-		bool isTerminal = node.IsTerminal();
-		
-		if (!isTerminal)
-		{
-			out << element.m_alignmentPos.first << "-" << element.m_alignmentPos.second << " ";
-		}
-	}
-	
-	out << "||| 1";
-	
-	return out;
+
+  stringstream strmeS, strmeT;
+
+  std::vector<Symbol>::const_iterator iterSymbol;
+  for (iterSymbol = m_source.begin(); iterSymbol != m_source.end(); ++iterSymbol)
+  {
+    const Symbol &symbol = *iterSymbol;
+    strmeS << symbol << " ";
+  }
+
+  for (iterSymbol = m_target.begin(); iterSymbol != m_target.end(); ++iterSymbol)
+  {
+    const Symbol &symbol = *iterSymbol;
+    strmeT << symbol << " ";
+  }
+
+  // lhs
+  if (m_lhs)
+  {
+    strmeS << m_lhs->GetSyntaxNode(0).GetLabel();
+    strmeT << m_lhs->GetSyntaxNode(1).GetLabel();
+  }
+
+  out << strmeS.str() << " ||| " << strmeT.str() << " ||| ";
+
+  // alignment
+  Rule::CollType::const_iterator iter;
+  for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
+  {
+    const RuleElement &element = *iter;
+    const LatticeNode &node = element.GetLatticeNode();
+    bool isTerminal = node.IsTerminal();
+
+    if (!isTerminal)
+    {
+      out << element.m_alignmentPos.first << "-" << element.m_alignmentPos.second << " ";
+    }
+  }
+
+  out << "||| 1";
+
 }
+
+void Rule::OutputInv(std::ostream &out) const
+{
+  stringstream strmeS, strmeT;
+
+  std::vector<Symbol>::const_iterator iterSymbol;
+  for (iterSymbol = m_source.begin(); iterSymbol != m_source.end(); ++iterSymbol)
+  {
+    const Symbol &symbol = *iterSymbol;
+    strmeS << symbol << " ";
+  }
+
+  for (iterSymbol = m_target.begin(); iterSymbol != m_target.end(); ++iterSymbol)
+  {
+    const Symbol &symbol = *iterSymbol;
+    strmeT << symbol << " ";
+  }
+
+  // lhs
+  if (m_lhs)
+  {
+    strmeS << m_lhs->GetSyntaxNode(0).GetLabel();
+    strmeT << m_lhs->GetSyntaxNode(1).GetLabel();
+  }
+
+  out << strmeT.str() << " ||| " << strmeS.str() << " ||| ";
+
+  // alignment
+  Rule::CollType::const_iterator iter;
+  for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
+  {
+    const RuleElement &element = *iter;
+    const LatticeNode &node = element.GetLatticeNode();
+    bool isTerminal = node.IsTerminal();
+
+    if (!isTerminal)
+    {
+      out << element.m_alignmentPos.first << "-" << element.m_alignmentPos.second << " ";
+    }
+  }
+
+  out << "||| 1";
+
+}
+
 

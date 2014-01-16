@@ -5,7 +5,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <algorithm>
 #include "SyntaxTree.h"
@@ -30,10 +29,6 @@ std::vector<std::string> tokenize( const char [] );
 #define LINE_MAX_LENGTH 1000000
 
 const Global *g_global;
-
-std::ofstream extractFile;
-std::ofstream extractFileInv;
-std::ofstream extractFileOrientation;
 
 std::set< std::string > targetLabelCollection, sourceLabelCollection;
 std::map< std::string, int > targetTopLabelCollection, sourceTopLabelCollection;

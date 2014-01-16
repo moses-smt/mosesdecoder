@@ -38,8 +38,6 @@ struct CompareRule
 
 class RuleCollection
 {
-	friend std::ostream& operator<<(std::ostream &out, const RuleCollection &obj);
-
 protected:
 	typedef std::set<const Rule*, CompareRule> CollType;
 	CollType m_coll;
@@ -49,5 +47,9 @@ public:
 	void Add(const Global &global, Rule *rule, const SentenceAlignment &sentence);
 	size_t GetSize() const
 	{ return m_coll.size(); }
+
+  void Output(std::ostream &out) const;
+  void OutputInv(std::ostream &out) const;
+
 };
 

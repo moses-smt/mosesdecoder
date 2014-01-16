@@ -76,19 +76,27 @@ void RuleCollection::Add(const Global &global, Rule *rule, const SentenceAlignme
 
 }
 
-
-std::ostream& operator<<(std::ostream &out, const RuleCollection &obj)
-{	
-	RuleCollection::CollType::const_iterator iter;
-	for (iter = obj.m_coll.begin(); iter != obj.m_coll.end(); ++iter)
-	{
-		const Rule &rule = **iter;
-		out << rule << endl;
-	}
-	
-	return out;
+void RuleCollection::Output(std::ostream &out) const
+{
+  RuleCollection::CollType::const_iterator iter;
+  for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
+  {
+    const Rule &rule = **iter;
+    rule.Output(out);
+    out << endl;
+  }
 }
 
+void RuleCollection::OutputInv(std::ostream &out) const
+{
+  RuleCollection::CollType::const_iterator iter;
+  for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
+  {
+    const Rule &rule = **iter;
+    rule.OutputInv(out);
+    out << endl;
+  }
+}
 
 
 

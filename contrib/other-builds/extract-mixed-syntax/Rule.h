@@ -41,8 +41,6 @@ public:
 
 class Rule
 {
-	friend std::ostream& operator<<(std::ostream &out, const Rule &obj);
-
 protected:
 	typedef std::vector<RuleElement> CollType;
 	CollType m_coll;
@@ -91,4 +89,8 @@ public:
 	Range GetSourceRange() const;
 	
 	DEBUG_OUTPUT();
+
+  void Output(std::ostream &out) const;
+  void OutputInv(std::ostream &out) const;
+
 };

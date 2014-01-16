@@ -32,4 +32,6 @@ Global::Global()
 , mixed(true)
 , uppermostOnly(true)
 , allowDefaultNonTermEdge(true)
+, gzOutput(false)
+
 {}
