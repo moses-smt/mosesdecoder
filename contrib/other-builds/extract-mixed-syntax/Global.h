@@ -19,7 +19,7 @@ public:
 	int minHoleSpanSourceSyntax;
 	int maxHoleSpanSourceSyntax;
 
-	int maxSymbolsSource;
+	int maxSymbols;
 	bool glueGrammarFlag;
 	bool unknownWordLabelFlag;
 	int maxNonTerm;

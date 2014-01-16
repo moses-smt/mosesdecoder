@@ -18,7 +18,7 @@ Global::Global()
 , maxHoleSpanSourceSyntax(1000)
 , maxUnaligned(5)
 
-, maxSymbolsSource(5)
+, maxSymbols(5)
 , maxNonTerm(3)
 , maxNonTermDefault(2)
 

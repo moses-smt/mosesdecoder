@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 					<< " | --MinHoleSpanSourceSyntax[" << global->minHoleSpanSourceSyntax << "]"
 					<< " | --MaxHoleSpanSourceSyntax[" << global->maxHoleSpanSourceSyntax << "]"
 
-				<< " | --MaxSymbolsSource[" << global->maxSymbolsSource << "]"
+				<< " | --MaxSymbols[" << global->maxSymbols<< "]"
 				 << " | --MaxNonTerm[" << global->maxNonTerm << "]"
 		     << " | --SourceSyntax | --TargetSyntax" 
 				<<	" | --UppermostOnly[" << g_global->uppermostOnly << "]"
@@ -109,10 +109,10 @@ int main(int argc, char* argv[])
 		}
 		
 		// maximum number of words in hierarchical phrase
-		else if (strcmp(argv[i],"--MaxSymbolsSource") == 0) {
-			global->maxSymbolsSource = atoi(argv[++i]);
-			if (global->maxSymbolsSource < 1) {
-				cerr << "extract error: --MaxSymbolsSource should be at least 1" << endl;
+		else if (strcmp(argv[i],"--maxSymbols") == 0) {
+			global->maxSymbols = atoi(argv[++i]);
+			if (global->maxSymbols < 1) {
+				cerr << "extract error: --maxSymbols should be at least 1" << endl;
 				exit(1);
 			}
 		}
