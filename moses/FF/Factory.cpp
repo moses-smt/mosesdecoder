@@ -34,6 +34,7 @@
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/CoveredReferenceFeature.h"
+#include "moses/FF/SoftMatchingFeature.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -171,6 +172,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
+  MOSES_FNAME(SoftMatchingFeature);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
