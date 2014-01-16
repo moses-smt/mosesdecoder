@@ -226,6 +226,11 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
   const PhraseDictionaryNodeMemory::NonTerminalMap & nonTermMap =
     node.GetNonTerminalMap();
 
+  // permissible soft nonterminal matches (target side)
+  const StaticData &staticData = StaticData::Instance();
+  const std::map<Word, std::set<Word> >* m_soft_matches_map = staticData.Get_Soft_Matches();
+  const std::map<Word, std::set<Word> >* m_soft_matches_map_reverse = staticData.Get_Soft_Matches_Reverse();
+
   const size_t numChildren = nonTermMap.size();
   if (numChildren == 0) {
     return;
@@ -254,6 +259,34 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       ChartCellLabelSet::const_iterator tEnd = targetNonTerms.end();
       for (; q != tEnd; ++q) {
         const ChartCellLabel &cellLabel = q->second;
+
+        //soft matching of NTs
+        const Word& targetNonTerm = cellLabel.GetLabel();
+        if (m_soft_matches_map->find(targetNonTerm) != m_soft_matches_map->end()) {
+          const std::set<Word>& softMatches = m_soft_matches_map->find(targetNonTerm)->second;
+
+          for (std::set<Word>::const_iterator softMatch = softMatches.begin(); softMatch != softMatches.end(); ++softMatch) {
+
+            // try to match both source and target non-terminal
+            const PhraseDictionaryNodeMemory * child =
+            node.GetChild(sourceNonTerm, *softMatch);
+
+            // nothing found? then we are done
+            if (child == NULL) {
+              continue;
+            }
+
+            // create new rule
+#ifdef USE_BOOST_POOL
+            DottedRuleInMemory *rule = m_dottedRulePool.malloc();
+            new (rule) DottedRuleInMemory(*child, cellLabel, prevDottedRule);
+#else
+            DottedRuleInMemory *rule = new DottedRuleInMemory(*child, cellLabel,
+                prevDottedRule);
+#endif
+            dottedRuleColl.Add(stackInd, rule);
+          }
+        } // end of soft matching
 
         // try to match both source and target non-terminal
         const PhraseDictionaryNodeMemory * child =
@@ -288,6 +321,29 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
         continue;
       }
       const Word &targetNonTerm = key.second;
+
+      //soft matching of NTs
+      if (m_soft_matches_map_reverse->find(targetNonTerm) != m_soft_matches_map_reverse->end()) {
+        const std::set<Word>& softMatches = m_soft_matches_map_reverse->find(targetNonTerm)->second;
+        for (std::set<Word>::const_iterator softMatch = softMatches.begin(); softMatch != softMatches.end(); ++softMatch) {
+          const ChartCellLabel *cellLabel = targetNonTerms.Find(*softMatch);
+          if (!cellLabel) {
+            continue;
+          }
+
+          // create new rule
+          const PhraseDictionaryNodeMemory &child = p->second;
+#ifdef USE_BOOST_POOL
+          DottedRuleInMemory *rule = m_dottedRulePool.malloc();
+          new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);
+#else
+          DottedRuleInMemory *rule = new DottedRuleInMemory(child, *cellLabel,
+            prevDottedRule);
+#endif
+          dottedRuleColl.Add(stackInd, rule);
+        }
+      } // end of soft matches lookup
+
       const ChartCellLabel *cellLabel = targetNonTerms.Find(targetNonTerm);
       if (!cellLabel) {
         continue;
