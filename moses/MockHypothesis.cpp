@@ -38,7 +38,6 @@ MockHypothesisGuard::MockHypothesisGuard(
   const vector<string>& targetSegments)
   : m_initialTransOpt(),
     m_sentence(),
-    m_pp("PhrasePenalty"),
     m_wp("WordPenalty"),
     m_uwp("UnknownWordPenalty"),
     m_dist("Distortion"),

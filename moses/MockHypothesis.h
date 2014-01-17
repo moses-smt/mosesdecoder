@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/DistortionScoreProducer.h"
-#include "moses/FF/PhrasePenaltyProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "Hypothesis.h"
 #include "Manager.h"
@@ -60,7 +59,6 @@ public:
 private:
   Moses::TranslationOption m_initialTransOpt;
   Moses::Sentence m_sentence;
-  Moses::PhrasePenalty m_pp;
   Moses::WordPenaltyProducer m_wp;
   Moses::UnknownWordPenaltyProducer m_uwp;
   Moses::DistortionScoreProducer m_dist;

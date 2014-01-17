@@ -1,4 +1,4 @@
-#include "PhrasePenaltyProducer.h"
+#include "PhrasePenalty.h"
 #include "moses/TargetPhrase.h"
 #include "moses/ScoreComponentCollection.h"
 
