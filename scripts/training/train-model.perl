@@ -39,7 +39,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE, $_EXTRACT_COMMAND);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -140,6 +140,7 @@ $_HELP = 1
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
+		       'extract-command' => \$_EXTRACT_COMMAND,
                );
 
 if ($_HELP) {
@@ -303,11 +304,19 @@ my $__SORT_PARALLEL = "";
 $__SORT_PARALLEL = "--parallel $_SORT_PARALLEL" if $_SORT_PARALLEL;
 
 # supporting scripts/binaries from this package
-my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/extract";
+my $PHRASE_EXTRACT;
+if (defined($_EXTRACT_COMMAND) {
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/$_EXTRACT_COMMAND";
+else {
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/extract";
+}
 $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl $_CORES $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_EXTRACT";
 
 my $RULE_EXTRACT;
-if (defined($_GHKM)) {
+if (defined($_EXTRACT_COMMAND) {
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/$_EXTRACT_COMMAND";
+}
+elsif (defined($_GHKM)) {
   $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/extract-ghkm";
 }
 else {
