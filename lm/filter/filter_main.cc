@@ -57,7 +57,7 @@ typedef enum {MODE_COPY, MODE_SINGLE, MODE_MULTIPLE, MODE_UNION, MODE_UNSET} Fil
 typedef enum {FORMAT_ARPA, FORMAT_COUNT} Format;
 
 struct Config {
-  Config() : 
+  Config() :
 #ifndef NTHREAD
   batch_size(25000),
   threads(boost::thread::hardware_concurrency()),
@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
   }
-  
+
   if (config.mode == lm::MODE_UNSET) {
     lm::DisplayHelp(argv[0]);
     return 1;
@@ -221,7 +221,12 @@ int main(int argc, char *argv[]) {
   } else if (!strncmp(cmd_input, "model:", 6)) {
     cmd_input += 6;
   } else if (strchr(cmd_input, ':')) {
+#if defined __MINGW32__
+    std::cerr << "Specify vocab: or model: before the input file name, not " << cmd_input << std::endl;
+    exit(1);
+#else
     errx(1, "Specify vocab: or model: before the input file name, not \"%s\"", cmd_input);
+#endif // defined
   } else {
     std::cerr << "Assuming that " << cmd_input << " is a model file" << std::endl;
   }
@@ -232,7 +237,12 @@ int main(int argc, char *argv[]) {
   } else {
     cmd_file.open(cmd_input, std::ios::in);
     if (!cmd_file) {
+#if defined __MINGW32__
+      std::cerr << "Could not open input file " << cmd_input << std::endl;
+      exit(2);
+#else
       err(2, "Could not open input file %s", cmd_input);
+#endif // defined
     }
     vocab = &cmd_file;
   }

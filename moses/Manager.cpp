@@ -405,13 +405,13 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const
       //cerr << endl;
 
       //draw the sample
-      float random = log((float)rand()/RAND_MAX);
+      float frandom = log((float)rand()/RAND_MAX);
       size_t position = 1;
       float sum = candidateScores[0];
-      for (; position < candidateScores.size() && sum < random; ++position) {
+      for (; position < candidateScores.size() && sum < frandom; ++position) {
         sum = log_sum(sum,candidateScores[position]);
       }
-      //cerr << "Random: " << random << " Chose " << position-1 << endl;
+      //cerr << "Random: " << frandom << " Chose " << position-1 << endl;
       const Hypothesis* chosen =  candidates[position-1];
       path.push_back(chosen);
     }

@@ -20,9 +20,15 @@ namespace Moses
 {
 
 #ifdef WIN32
+#ifdef __MINGW32__
+#define OFF_T __int64
+#define FTELLO(f) ftello64(f)
+#define FSEEKO(file, offset, origin) fseeko64(file, offset, origin)
+#else
 #define OFF_T __int64
 #define FTELLO(file) _ftelli64(file)
 #define FSEEKO(file, offset, origin) _fseeki64(file, offset, origin)
+#endif
 
 #else
 #define OFF_T off_t

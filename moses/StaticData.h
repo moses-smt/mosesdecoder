@@ -218,6 +218,9 @@ protected:
   bool m_continuePartialTranslation;
   std::string m_binPath;
 
+  // soft NT lookup for chart models
+  std::map<Word, std::set<Word> > m_soft_matches_map;
+  std::map<Word, std::set<Word> > m_soft_matches_map_reverse;
 
 public:
 
@@ -738,6 +741,22 @@ public:
   void CheckLEGACYPT();
   bool GetUseLegacyPT() const {
     return m_useLegacyPT;
+  }
+
+  void Set_Soft_Matches(std::map<Word, std::set<Word> >& soft_matches_map) {
+    m_soft_matches_map = soft_matches_map;
+  }
+
+  const std::map<Word, std::set<Word> >* Get_Soft_Matches() const {
+    return &m_soft_matches_map;
+  }
+
+  void Set_Soft_Matches_Reverse(std::map<Word, std::set<Word> >& soft_matches_map) {
+    m_soft_matches_map_reverse = soft_matches_map;
+  }
+
+  const std::map<Word, std::set<Word> >* Get_Soft_Matches_Reverse() const {
+    return &m_soft_matches_map_reverse;
   }
 
 };

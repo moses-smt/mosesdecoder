@@ -6,6 +6,10 @@
 #include <getopt.h>
 #include <math.h>
 
+#if defined __MINGW32__
+#include <time.h>
+#endif // defined
+
 #include "Scorer.h"
 #include "ScorerFactory.h"
 #include "Timer.h"

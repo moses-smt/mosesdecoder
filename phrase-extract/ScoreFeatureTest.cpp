@@ -17,7 +17,6 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "moses/Util.h"
 #include "domain.h"
 #include "ScoreFeature.h"
 #include "tables-core.h"
@@ -29,7 +28,6 @@
 #include <boost/assign/list_of.hpp>
 
 using namespace MosesTraining;
-using namespace Moses;
 using namespace std;
 
 //pesky global variables
@@ -54,21 +52,14 @@ BOOST_AUTO_TEST_CASE(manager_configure_domain_except)
 {
   //Check that configure rejects illegal domain arg combinations
   ScoreFeatureManager manager;
-
-  vector<string> args = Tokenize("--DomainRatio /dev/null --DomainIndicator /dev/null"," ");
-
-  std::cerr << "args.size():" << args.size() << std::endl;
+  vector<string> args = boost::assign::list_of("--DomainRatio")("/dev/null")("--DomainIndicator")("/dev/null");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args.clear();
-  args = Tokenize("--SparseDomainSubset /dev/null --SparseDomainRatio /dev/null"," ");
+  args = boost::assign::list_of("--SparseDomainSubset")("/dev/null")("--SparseDomainRatio")("/dev/null");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args.clear();
-  args = Tokenize("--SparseDomainBlah /dev/null"," ");
+  args = boost::assign::list_of("--SparseDomainBlah")("/dev/null");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-  args.clear();
-  args = Tokenize("--DomainSubset"," ");
+  args = boost::assign::list_of("--DomainSubset");
   BOOST_CHECK_THROW(manager.configure(args), ScoreFeatureArgumentException);
-
 }
 
 template <class Expected>
@@ -82,30 +73,24 @@ static void checkDomainConfigured(
   //if I add to features this check will fail?
   BOOST_REQUIRE_EQUAL(features.size(), 1); //MARIA -> what is this check and why does it fail when I add my feature?
   Expected* feature = dynamic_cast<Expected*>(features[0].get());
-//  BOOST_REQUIRE(feature);
+  BOOST_REQUIRE(feature);
   BOOST_CHECK(manager.includeSentenceId());
 }
 
 BOOST_AUTO_TEST_CASE(manager_config_domain)
 {
-
-  std::vector<std::string> args = Tokenize("--DomainRatio /dev/null"," ");
-  checkDomainConfigured<RatioDomainFeature>(args);
-  args.clear();
-  args = Tokenize("--DomainIndicator /dev/null"," ");
-  checkDomainConfigured<RatioDomainFeature>(args);
-  args.clear();
-  args = Tokenize("--DomainSubset /dev/null"," ");
-  checkDomainConfigured<RatioDomainFeature>(args);
-  args.clear();
-  args = Tokenize("--SparseDomainRatio /dev/null"," ");
-  checkDomainConfigured<RatioDomainFeature>(args);
-  args.clear();
-  args = Tokenize("--SparseDomainIndicator /dev/null"," ");
-  checkDomainConfigured<RatioDomainFeature>(args);
-  args.clear();
-  args = Tokenize("--SparseDomainSubset /dev/null"," ");
-  checkDomainConfigured<RatioDomainFeature>(args);
+  checkDomainConfigured<RatioDomainFeature>
+  (boost::assign::list_of ("--DomainRatio")("/dev/null"));
+  checkDomainConfigured<IndicatorDomainFeature>
+  (boost::assign::list_of("--DomainIndicator")("/dev/null"));
+  checkDomainConfigured<SubsetDomainFeature>
+  (boost::assign::list_of("--DomainSubset")("/dev/null"));
+  checkDomainConfigured<SparseRatioDomainFeature>
+  (boost::assign::list_of("--SparseDomainRatio")("/dev/null"));
+  checkDomainConfigured<SparseIndicatorDomainFeature>
+  (boost::assign::list_of("--SparseDomainIndicator")("/dev/null"));
+  checkDomainConfigured<SparseSubsetDomainFeature>
+  (boost::assign::list_of("--SparseDomainSubset")("/dev/null"));
 }
 
 

@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread/tss.hpp>
 #else
 #include <boost/scoped_ptr.hpp>
+#include <time.h>
 #endif
 
 #include "moses/Phrase.h"

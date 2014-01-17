@@ -5,7 +5,9 @@
 #include <iostream>
 #include <string>
 
+#if !defined __MINGW32__
 #include <err.h>
+#endif
 
 #include "util/file_piece.hh"
 
@@ -17,7 +19,12 @@ class CountOutput : boost::noncopyable {
 
     void AddNGram(const StringPiece &line) {
       if (!(file_ << line << '\n')) {
+#if defined __MINGW32__
+        std::cerr<<"Writing counts file failed"<<std::endl;
+        exit(3);
+#else
         err(3, "Writing counts file failed");
+#endif
       }
     }
 
@@ -35,7 +42,7 @@ class CountOutput : boost::noncopyable {
 
 class CountBatch {
   public:
-    explicit CountBatch(std::streamsize initial_read) 
+    explicit CountBatch(std::streamsize initial_read)
       : initial_read_(initial_read) {
       buffer_.reserve(initial_read);
     }
@@ -68,7 +75,7 @@ class CountBatch {
   private:
     std::streamsize initial_read_;
 
-    // This could have been a std::string but that's less happy with raw writes.  
+    // This could have been a std::string but that's less happy with raw writes.
     std::vector<char> buffer_;
 };
 

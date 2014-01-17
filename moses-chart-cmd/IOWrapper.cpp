@@ -50,6 +50,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FeatureVector.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/FF/SyntaxConstraintFeature.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -129,7 +130,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
     m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
     UTIL_THROW_IF2(!m_alignmentInfoStream->good(),
-                   "File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
+    		"File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
   }
 }
 
@@ -175,7 +176,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
-                 "Cannot be empty phrase");
+		  "Cannot be empty phrase");
   if (reportAllFactors == true) {
     out << phrase;
   } else {
@@ -184,12 +185,12 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
       out << *factor;
       UTIL_THROW_IF2(factor == NULL,
-                     "Empty factor 0 at position " << pos);
+    		  "Empty factor 0 at position " << pos);
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
         UTIL_THROW_IF2(factor == NULL,
-                       "Empty factor " << i << " at position " << pos);
+      		  "Empty factor " << i << " at position " << pos);
 
         out << "|" << *factor;
       }
@@ -233,7 +234,7 @@ void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, l
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i];
     UTIL_THROW_IF(factor == NULL, util::Exception,
-                  "No factor at position " << i );
+    		"No factor at position " << i );
 
     cout << *factor << " ";
   }
@@ -375,7 +376,7 @@ void IOWrapper::OutputDetailedTranslationReport(
 
   OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
   UTIL_THROW_IF2(m_detailOutputCollector == NULL,
-                 "No ouput file for detailed reports specified");
+		  "No ouput file for detailed reports specified");
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
@@ -392,8 +393,21 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
 
   OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
   UTIL_THROW_IF2(m_detailTreeFragmentsOutputCollector == NULL,
-                 "No output file for tree fragments specified");
+		  "No output file for tree fragments specified");
+
+  //Tree of full sentence (to stderr)
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for( size_t i=0; i<sff.size(); i++ ) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->GetScoreProducerDescription() == "SyntaxConstraintFeature0") {
+      const TreeState* tree = dynamic_cast<const TreeState*>(hypo->GetFFState(i));
+      out << "Full Tree " << translationId << ": " << tree->GetTree()->GetString() << "\n";
+      break;
+    }
+  }
+
   m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
+
 }
 
 //DIMw
@@ -426,7 +440,7 @@ void IOWrapper::OutputDetailedAllTranslationReport(
     }
   }
   UTIL_THROW_IF2(m_detailAllOutputCollector == NULL,
-                 "No output file for details specified");
+		  "No output file for details specified");
   m_detailAllOutputCollector->Write(translationId, out.str());
 }
 
@@ -454,7 +468,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 
     // delete 1st & last
     UTIL_THROW_IF2(outPhrase.GetSize() < 2,
-                   "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
 
     outPhrase.RemoveWord(0);
     outPhrase.RemoveWord(outPhrase.GetSize() - 1);
@@ -486,7 +500,7 @@ void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
   Incremental::ToPhrase(applied, outPhrase);
   // delete 1st & last
   UTIL_THROW_IF2(outPhrase.GetSize() < 2,
-                 "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
   outPhrase.RemoveWord(0);
   outPhrase.RemoveWord(outPhrase.GetSize() - 1);
   out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
@@ -575,7 +589,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long tran
 
     // delete 1st & last
     UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
-                   "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
 
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
@@ -651,7 +665,7 @@ void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long 
     Incremental::PhraseAndFeatures(*i, outputPhrase, features);
     // <s> and </s>
     UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
-                   "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
 
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
@@ -817,7 +831,7 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
   size_t targetInd = 0;
   for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
     if (tp.GetWord(targetPos).IsNonTerminal()) {
-      UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
+  	  UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
       size_t sourceInd = targetPos2SourceInd[targetPos];
       size_t sourcePos = sourceInd2pos[sourceInd];
 

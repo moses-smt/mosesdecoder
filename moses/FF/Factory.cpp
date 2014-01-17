@@ -27,14 +27,16 @@
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
-#include "moses/FF/PhrasePenaltyProducer.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
+#include "moses/FF/PhrasePenalty.h"
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/CoveredReferenceFeature.h"
+#include "moses/FF/SyntaxConstraintFeature.h"
+#include "moses/FF/SoftMatchingFeature.h"
 #include "moses/FF/DynamicCacheBasedLanguageModel.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
@@ -174,6 +176,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
+  MOSES_FNAME(SyntaxConstraintFeature);
+  MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(DynamicCacheBasedLanguageModel);
 
   MOSES_FNAME(SkeletonStatelessFF);
@@ -236,12 +240,12 @@ void FeatureRegistry::Construct(const std::string &name, const std::string &line
 
 void FeatureRegistry::PrintFF() const
 {
-  std::cerr << "Available feature functions:" << std::endl;
-  Map::const_iterator iter;
-  for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
-    const string &ffName = iter->first;
-    std::cerr << ffName << std::endl;
-  }
+	std::cerr << "Available feature functions:" << std::endl;
+	Map::const_iterator iter;
+	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
+		const string &ffName = iter->first;
+		std::cerr << ffName << std::endl;
+	}
 
 }
 
