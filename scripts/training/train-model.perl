@@ -305,15 +305,16 @@ $__SORT_PARALLEL = "--parallel $_SORT_PARALLEL" if $_SORT_PARALLEL;
 
 # supporting scripts/binaries from this package
 my $PHRASE_EXTRACT;
-if (defined($_EXTRACT_COMMAND) {
+if (defined($_EXTRACT_COMMAND)) {
   $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/$_EXTRACT_COMMAND";
+}
 else {
   $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/extract";
 }
 $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl $_CORES $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_EXTRACT";
 
 my $RULE_EXTRACT;
-if (defined($_EXTRACT_COMMAND) {
+if (defined($_EXTRACT_COMMAND)) {
   $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/$_EXTRACT_COMMAND";
 }
 elsif (defined($_GHKM)) {
