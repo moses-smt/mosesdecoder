@@ -59,6 +59,8 @@ typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
  */
 class StaticData
 {
+  friend class HyperParameterAsWeight;
+
 private:
   static StaticData									s_instance;
 protected:
