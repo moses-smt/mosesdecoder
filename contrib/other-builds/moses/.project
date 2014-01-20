@@ -1264,12 +1264,12 @@
 		<link>
 			<name>FF/SoftMatchingFeature.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-9-PROJECT_LOC/home/s0565741/workspace/github/mosesdecoder/moses/FF/SoftMatchingFeature.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.cpp</locationURI>
 		</link>
 		<link>
 			<name>FF/SoftMatchingFeature.h</name>
 			<type>1</type>
-			<locationURI>PARENT-9-PROJECT_LOC/home/s0565741/workspace/github/mosesdecoder/moses/FF/SoftMatchingFeature.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
@@ -1304,12 +1304,12 @@
 		<link>
 			<name>FF/SyntaxConstraintFeature.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-9-PROJECT_LOC/home/s0565741/workspace/github/mosesdecoder/moses/FF/SyntaxConstraintFeature.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxConstraintFeature.cpp</locationURI>
 		</link>
 		<link>
 			<name>FF/SyntaxConstraintFeature.h</name>
 			<type>1</type>
-			<locationURI>PARENT-9-PROJECT_LOC/home/s0565741/workspace/github/mosesdecoder/moses/FF/SyntaxConstraintFeature.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxConstraintFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/TargetBigramFeature.cpp</name>

@@ -75,7 +75,9 @@ class SyntaxConstraintFeature : public StatefulFeatureFunction
 {
 public:
   SyntaxConstraintFeature(const std::string &line)
-    :StatefulFeatureFunction(0, line) {}
+    :StatefulFeatureFunction(0, line) {
+      ReadParameters();
+    }
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
     return new TreeState(TreePointer());

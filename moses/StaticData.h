@@ -715,6 +715,7 @@ public:
 
   void LoadFeatureFunctions();
   bool CheckWeights() const;
+  void LoadSparseWeightsFromConfig();
   bool LoadWeightSettings();
   bool LoadAlternateWeightSettings();
 
