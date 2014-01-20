@@ -67,7 +67,7 @@ void LabelDeEn(const Phrase &source, ostream &out)
     for (Ranges::const_iterator iter = ranges.begin(); iter != ranges.end(); ++iter) {
       const Range &range = *iter;
       if (range.first == pos) {
-        out << "<tree label=\"REORDER-LABEL\"> ";
+        out << "<tree label=\"reorder-label\"> ";
       }
     }
 

@@ -55,8 +55,16 @@ truecase
 	template-if: input-truecaser IN.$input-extension OUT.$input-extension -model IN1.$input-extension
 	template-if: output-truecaser IN.$output-extension OUT.$output-extension -model IN1.$output-extension
 	parallelizable: yes
+
+source-label
+        in: truecased-stem
+        out: source-labelled
+        default-name: corpus/labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN.$input-extension OUT.$input-extension
+
 lowercase
-	in: truecased-stem
+	in: source-labelled
 	out: lowercased-stem
 	default-name: corpus/lowercased
 	pass-unless: input-lowercaser output-lowercaser
