@@ -108,7 +108,7 @@ template <class F> void FeatureFactory::DefaultSetup(F *feature)
     // if it's tuneable, ini file MUST have weights
     // even it it's not tuneable, people can still set the weights in the ini file
     static_data.SetWeights(feature, weights);
-  } else {
+  } else if (feature->GetNumScoreComponents() > 0) {
     std::vector<float> defaultWeights = feature->DefaultWeights();
     static_data.SetWeights(feature, defaultWeights);
   }

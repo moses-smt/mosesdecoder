@@ -11,16 +11,23 @@ namespace Moses
 SoftMatchingFeature::SoftMatchingFeature(const std::string &line)
   : StatelessFeatureFunction(0, line)
 {
-  std::cerr << "Initializing SoftMatchingFeature.." << std::endl;
-
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    const std::vector<std::string> &args = m_args[i];
-    if (args[0] == "path") {
-      const std::string filePath = args[1];
-      Load(filePath);
-    }
-  } // for
+  ReadParameters();
 }
+
+void SoftMatchingFeature::SetParameter(const std::string& key, const std::string& value)
+{
+  std::cerr << "setting: " << this->GetScoreProducerDescription() << " - " << key << "\n";
+  if (key == "tuneable") {
+    m_tuneable = Scan<bool>(value);
+  } else if (key == "filterable") { //ignore
+  } else if (key == "path") {
+      const std::string filePath = value;
+      Load(filePath);
+  } else {
+    UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
+  }
+}
+
 
 bool SoftMatchingFeature::Load(const std::string& filePath)
 {
@@ -102,7 +109,6 @@ const std::string& SoftMatchingFeature::GetFeatureName(const Word& LHS, const Wo
   m_soft_matching_cache[key] = name;
   return m_soft_matching_cache.find(key)->second;
 }
-
 
 }
 
