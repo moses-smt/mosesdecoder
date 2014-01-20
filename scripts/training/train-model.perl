@@ -140,7 +140,7 @@ $_HELP = 1
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
-		       'extract-command' => \$_EXTRACT_COMMAND,
+		       'extract-command=s' => \$_EXTRACT_COMMAND,
                );
 
 if ($_HELP) {
