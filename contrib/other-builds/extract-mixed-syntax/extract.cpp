@@ -39,6 +39,8 @@
 
 using namespace std;
 
+void writeGlueGrammar(const string &, Global &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection);
+
 int main(int argc, char* argv[]) 
 {
   cerr << "Extract v2.0, written by Philipp Koehn\n"
@@ -261,8 +263,48 @@ int main(int argc, char* argv[])
   extractFile.Close();
   extractFileInv.Close();
 
-	delete global;
+  if (global->glueGrammarFlag) {
+    writeGlueGrammar(fileNameGlueGrammar, *global, targetLabelCollection, targetTopLabelCollection);
+  }
+
+  delete global;
 }
  
 
+void writeGlueGrammar( const string & fileName, Global &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection )
+{
+  ofstream grammarFile;
+  grammarFile.open(fileName.c_str());
+  if (!options.targetSyntax) {
+    grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| ||| 0" << endl
+                << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 ||| 0" << endl
+                << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << endl;
+  } else {
+    // chose a top label that is not already a label
+    string topLabel = "QQQQQQ";
+    for( unsigned int i=1; i<=topLabel.length(); i++) {
+      if(targetLabelCollection.find( topLabel.substr(0,i) ) == targetLabelCollection.end() ) {
+        topLabel = topLabel.substr(0,i);
+        break;
+      }
+    }
+    // basic rules
+    grammarFile << "<s> [X] ||| <s> [" << topLabel << "] ||| 1  ||| " << endl
+                << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 " << endl;
+
+    // top rules
+    for( map<string,int>::const_iterator i =  targetTopLabelCollection.begin();
+         i !=  targetTopLabelCollection.end(); i++ ) {
+      grammarFile << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1" << endl;
+    }
+
+    // glue rules
+    for( set<string>::const_iterator i =  targetLabelCollection.begin();
+         i !=  targetLabelCollection.end(); i++ ) {
+      grammarFile << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1" << endl;
+    }
+    grammarFile << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 |||  0-0 1-1 " << endl; // glue rule for unknown word...
+  }
+  grammarFile.close();
+}
 
