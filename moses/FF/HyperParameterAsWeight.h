@@ -14,6 +14,12 @@ class HyperParameterAsWeight : public StatelessFeatureFunction
 public:
   HyperParameterAsWeight(const std::string &line);
 
+  virtual void Evaluate(const Phrase &source
+                        , const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
   virtual void Evaluate(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const
   {}

@@ -36,6 +36,7 @@
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/SyntaxConstraintFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
+#include "moses/FF/HyperParameterAsWeight.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -175,6 +176,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ExternalFeature);
   MOSES_FNAME(SyntaxConstraintFeature);
   MOSES_FNAME(SoftMatchingFeature);
+  MOSES_FNAME(HyperParameterAsWeight);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
