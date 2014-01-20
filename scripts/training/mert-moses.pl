@@ -1278,6 +1278,7 @@ sub get_featlist_from_file {
   # read feature list
   my @names = ();
   my @startvalues = ();
+  my @untuneables = ();
   open my $fh, '<', $featlistfn or die "Can't read $featlistfn : $!";
   my $nr = 0;
   my @errs = ();
@@ -1296,6 +1297,10 @@ sub get_featlist_from_file {
 			  push @startvalues, $value;
       }
     }
+    elsif (/^(\S+) UNTUNEABLE$/) {
+      my ($longname) = ($1);
+      push @untuneables, $longname;
+    }
   }
   close $fh;
 
@@ -1303,7 +1308,7 @@ sub get_featlist_from_file {
     warn join("", @errs);
     exit 1;
   }
-  return {"names"=>\@names, "values"=>\@startvalues};
+  return {"names"=>\@names, "values"=>\@startvalues, "untuneables"=>\@untuneables};
 }
 
 
@@ -1352,6 +1357,8 @@ sub create_config {
   my $iteration           = shift;  # just for verbosity
   my $bleu_achieved       = shift; # just for verbosity
   my $sparse_weights_file = shift; # only defined when optimizing sparse features
+
+  my @keep_weights = ();
 
   for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
     my $name = $featlist->{"names"}->[$i];
@@ -1415,6 +1422,13 @@ sub create_config {
 			# leave weights 'til last. We're changing it
 			while ($line = <$ini_fh>) {
 			  last if $line =~ /^\[/;
+			  if ($line =~ /^([^=\s]+)/) {
+			    for( @{$featlist->{"untuneables"}} ){
+			      if ($1 eq $_ ) {# if weight is untuneable, copy it into new config
+			        push @keep_weights, $line;
+			      }
+			    }
+			  }
 			}
 		}
 	  elsif (defined($P{$parameter})) {
@@ -1460,6 +1474,10 @@ sub create_config {
     }
   }
 	print $out "$outStr\n";
+
+  for (@keep_weights) {
+     print $out $_;
+  }
 
   close $ini_fh;
   close $out;
