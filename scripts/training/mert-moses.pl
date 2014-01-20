@@ -1422,7 +1422,7 @@ sub create_config {
 			# leave weights 'til last. We're changing it
 			while ($line = <$ini_fh>) {
 			  last if $line =~ /^\[/;
-			  if ($line =~ /^([^=\s]+)/) {
+			  if ($line =~ /^([^_=\s]+)/) {
 			    for( @{$featlist->{"untuneables"}} ){
 			      if ($1 eq $_ ) {# if weight is untuneable, copy it into new config
 			        push @keep_weights, $line;
