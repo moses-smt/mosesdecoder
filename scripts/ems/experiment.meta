@@ -62,6 +62,8 @@ source-label
         default-name: corpus/labelled
         pass-unless: source-labeller
         template-if: source-labeller IN.$input-extension OUT.$input-extension
+        template-if: cat IN.$output-extension OUT.$output-extension
+	parallelizable: yes
 
 lowercase
 	in: source-labelled
