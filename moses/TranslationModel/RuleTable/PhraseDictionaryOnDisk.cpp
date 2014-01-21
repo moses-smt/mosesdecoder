@@ -110,6 +110,14 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
     InputPath &inputPath = **iter;
     GetTargetPhraseCollectionBatch(inputPath);
   }
+
+  // delete nodes that's been saved
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
+    InputPath &inputPath = **iter;
+    const OnDiskPt::PhraseNode *ptNode = static_cast<const OnDiskPt::PhraseNode*>(inputPath.GetPtNode(*this));
+    delete ptNode;
+  }
+
 }
 
 void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath) const
@@ -154,32 +162,25 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
 {
   const TargetPhraseCollection *ret;
 
-  if (m_maxCacheSize) {
-    CacheColl &cache = GetCache();
-    size_t hash = (size_t) ptNode->GetFilePos();
+  CacheColl &cache = GetCache();
+  size_t hash = (size_t) ptNode->GetFilePos();
 
-    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
+  std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
 
-    iter = cache.find(hash);
+  iter = cache.find(hash);
 
-    if (iter == cache.end()) {
-      // not in cache, need to look up from phrase table
-      ret = GetTargetPhraseCollectionNonCache(ptNode);
-      if (ret) {
-        ret = new TargetPhraseCollection(*ret);
-      }
-
-      std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
-      cache[hash] = value;
-    } else {
-      // in cache. just use it
-      std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
-      value.second = clock();
-
-      ret = value.first;
-    }
-  } else {
+  if (iter == cache.end()) {
+    // not in cache, need to look up from phrase table
     ret = GetTargetPhraseCollectionNonCache(ptNode);
+
+    std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
+    cache[hash] = value;
+  } else {
+    // in cache. just use it
+    std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
+    value.second = clock();
+
+    ret = value.first;
   }
 
   return ret;
