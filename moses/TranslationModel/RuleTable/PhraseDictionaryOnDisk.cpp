@@ -110,6 +110,14 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
     InputPath &inputPath = **iter;
     GetTargetPhraseCollectionBatch(inputPath);
   }
+
+  // delete nodes that's been saved
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
+    InputPath &inputPath = **iter;
+    const OnDiskPt::PhraseNode *ptNode = static_cast<const OnDiskPt::PhraseNode*>(inputPath.GetPtNode(*this));
+    delete ptNode;
+  }
+
 }
 
 void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath) const
