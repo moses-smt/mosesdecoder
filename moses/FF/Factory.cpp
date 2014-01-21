@@ -36,6 +36,7 @@
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/SyntaxConstraintFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
+#include "moses/FF/HyperParameterAsWeight.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -108,7 +109,7 @@ template <class F> void FeatureFactory::DefaultSetup(F *feature)
     // if it's tuneable, ini file MUST have weights
     // even it it's not tuneable, people can still set the weights in the ini file
     static_data.SetWeights(feature, weights);
-  } else {
+  } else if (feature->GetNumScoreComponents() > 0) {
     std::vector<float> defaultWeights = feature->DefaultWeights();
     static_data.SetWeights(feature, defaultWeights);
   }
@@ -175,6 +176,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ExternalFeature);
   MOSES_FNAME(SyntaxConstraintFeature);
   MOSES_FNAME(SoftMatchingFeature);
+  MOSES_FNAME(HyperParameterAsWeight);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);

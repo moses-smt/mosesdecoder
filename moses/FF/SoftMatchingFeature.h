@@ -48,6 +48,7 @@ public:
   }
 
   const std::string& GetFeatureName(const Word& LHS, const Word& RHS) const;
+  void SetParameter(const std::string& key, const std::string& value);
 
 private:
   std::map<Word, std::set<Word> > m_soft_matches; // map LHS of old rule to RHS of new rle

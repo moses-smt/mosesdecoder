@@ -534,6 +534,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
   if (!LoadDecodeGraphs()) return false;
 
+
   if (!CheckWeights()) {
     return false;
   }
@@ -554,6 +555,9 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     m_allWeights.PlusEquals(extraWeights);
   }
+
+  //Load sparse features from config (overrules weight file)
+  LoadSparseWeightsFromConfig();
 
   // alternate weight settings
   if (m_parameter->GetParam("alternate-weight-setting").size() > 0) {
@@ -933,17 +937,34 @@ void StaticData::LoadFeatureFunctions()
 bool StaticData::CheckWeights() const
 {
   set<string> weightNames = m_parameter->GetWeightNames();
+  set<string> featureNames;
 
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     const string &descr = ff.GetScoreProducerDescription();
+    featureNames.insert(descr);
 
     set<string>::iterator iter = weightNames.find(descr);
     if (iter == weightNames.end()) {
       cerr << "Can't find weights for feature function " << descr << endl;
     } else {
       weightNames.erase(iter);
+    }
+  }
+
+  //sparse features
+  if (!weightNames.empty()) {
+    set<string>::iterator iter;
+    for (iter = weightNames.begin(); iter != weightNames.end(); ) {
+      string fname = (*iter).substr(0, (*iter).find("_"));
+      cerr << fname << "\n";
+      if (featureNames.find(fname) != featureNames.end()) {
+        weightNames.erase(iter++);
+      }
+      else {
+        ++iter;
+      }
     }
   }
 
@@ -958,6 +979,29 @@ bool StaticData::CheckWeights() const
 
   return true;
 }
+
+
+void StaticData::LoadSparseWeightsFromConfig() {
+  set<string> featureNames;
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction &ff = *ffs[i];
+    const string &descr = ff.GetScoreProducerDescription();
+    featureNames.insert(descr);
+  }
+
+  std::map<std::string, std::vector<float> > weights = m_parameter->GetAllWeights();
+  std::map<std::string, std::vector<float> >::iterator iter;
+  for (iter = weights.begin(); iter != weights.end(); ++iter) {
+    // this indicates that it is sparse feature
+    if (featureNames.find(iter->first) == featureNames.end()) {
+      UTIL_THROW_IF2(iter->second.size() != 1, "ERROR: only one weight per sparse feature allowed: " << iter->first);
+        m_allWeights.Assign(iter->first, iter->second[0]);
+    }
+  }
+
+}
+
 
 /**! Read in settings for alternative weights */
 bool StaticData::LoadAlternateWeightSettings()

@@ -223,11 +223,17 @@ static void ShowWeights()
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
     }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
+    }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
     }
   }
 }
