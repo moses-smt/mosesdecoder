@@ -45,15 +45,15 @@ void LabelDeEn(const Phrase &source, ostream &out)
   // find ranges to label
   for (int start = 0; start < source.size(); ++start) {
     for (int end = start; end < source.size(); ++end) {
-     if (IsA(source, start, -1, 1, "vafin")
-          && IsA(source, end, +1, 1, "vvinf vvpp")
-          && !Contains(source, start, end, 1, "vafin vvinf vvpp vvfin")) {
+     if (IsA(source, start, -1, 1, "VAFIN")
+          && IsA(source, end, +1, 1, "VVINF VVPP")
+          && !Contains(source, start, end, 1, "VAFIN VVINF VVPP VVFIN")) {
        Range range(start, end);
        ranges.push_back(range);
       }
       else if ((start == 0 || IsA(source, start, -1, 1, "$,"))
           && IsA(source, end, +1, 0, "zu")
-          && IsA(source, end, +2, 1, "vvinf")
+          && IsA(source, end, +2, 1, "VVINF")
           && !Contains(source, start, end, 1, "$,")) {
         Range range(start, end);
         ranges.push_back(range);
