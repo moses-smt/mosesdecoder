@@ -47,9 +47,7 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
     InputPath &inputPath = **iter;
     const Phrase &sourcePhrase = inputPath.GetPhrase();
 
-    TargetPhrase *tp = CreateTargetPhrase(sourcePhrase);
-    TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-    tpColl->Add(tp);
+    TargetPhraseCollection *tpColl = CreateTargetPhrase(sourcePhrase);
 
     // add target phrase to phrase-table cache
     size_t hash = hash_value(sourcePhrase);
@@ -60,30 +58,52 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
   }
 }
 
-TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
+TargetPhraseCollection *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 {
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   assert(sourcePhrase.GetSize());
 
   vector<uint64_t> source;
-  std::pair<bool, std::vector<target_text>> query_result;
+  std::pair<bool, std::vector<target_text> > query_result;
+
+  TargetPhraseCollection *tpColl = NULL;
 
   //Actual lookup
-  std::string cinstr = "adsadsadas fasdasd sad sadasd";
-  query_result = queries.query(source);
+  std::string cinstr = sourcePhrase.ToString();
+  query_result = m_engine->query(source);
 
-	if (query_result.first) {
-		queries.printTargetInfo(query_result.second);
-	} else {
-		std::cout << "Key not found!" << std::endl;
-	}
+  if (query_result.first) {
+	  m_engine->printTargetInfo(query_result.second);
+	  tpColl = new TargetPhraseCollection();
 
-  string str = sourcePhrase.GetWord(0).GetFactor(0)->GetString().as_string();
-  str = "ProbingPT:" + str;
+	  const std::vector<target_text> &probingTargetPhrases = query_result.second;
+	  for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
+		  const target_text &probingTargetPhrase = probingTargetPhrases[i];
+		  TargetPhrase *tp = CreateTargetPhrase(sourcePhrase, probingTargetPhrase);
+
+		  tpColl->Add(tp);
+	  }
+
+  } else {
+    std::cerr << "Key not found!" << std::endl;
+  }
+
+  return tpColl;
+}
+
+TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const
+{
+  const std::vector<uint64_t> &probingPhrase = probingTargetPhrase.target_phrase;
+  size_t size = probingPhrase.size();
 
   TargetPhrase *tp = new TargetPhrase();
-  Word &word = tp->AddWord();
-  word.CreateFromString(Output, m_output, str, false);
+
+  for (size_t i = 0; i < size; ++i) {
+	  string str; // TODO get string from vocab id. Preferably create map<id, factor>
+
+	  Word &word = tp->AddWord();
+	  word.CreateFromString(Output, m_output, str, false);
+  }
 
   // score for this phrase table
   vector<float> scores(m_numScoreComponents, 1.3);
@@ -91,8 +111,6 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 
   // score of all other ff when this rule is being loaded
   tp->Evaluate(sourcePhrase, GetFeaturesToApply());
-
-  return tp;
 }
 
 ChartRuleLookupManager* ProbingPT::CreateRuleLookupManager(const ChartParser &parser,

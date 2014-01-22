@@ -1107,11 +1107,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExternalFeature.h</locationURI>
 		</link>
 		<link>
-			<name>FF/FF</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>FF/FFState.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FFState.cpp</locationURI>
@@ -1780,16 +1775,6 @@
 			<name>bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
-		</link>
-		<link>
-			<name>FF/FF/HyperParameterAsWeight.cpp</name>
-			<type>1</type>
-			<location>/Users/hieu/unison/workspace/github/mosesdecoder/moses/FF/HyperParameterAsWeight.cpp</location>
-		</link>
-		<link>
-			<name>FF/FF/HyperParameterAsWeight.h</name>
-			<type>1</type>
-			<location>/Users/hieu/unison/workspace/github/mosesdecoder/moses/FF/HyperParameterAsWeight.h</location>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/LexicalReordering.cpp</name>

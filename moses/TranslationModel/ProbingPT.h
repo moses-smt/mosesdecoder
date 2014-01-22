@@ -4,6 +4,7 @@
 #include "PhraseDictionary.h"
 
 class QueryEngine;
+class target_text;
 
 namespace Moses
 {
@@ -35,7 +36,8 @@ public:
 protected:
   QueryEngine *m_engine;
 
-  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase) const;
+  TargetPhraseCollection *CreateTargetPhrase(const Phrase &sourcePhrase) const;
+  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
 
 };
 

@@ -48,6 +48,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.816413868" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.330225535" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../nplm/lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../probingPT/helpers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../DALM/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../cmph/lib&quot;"/>
@@ -68,6 +69,7 @@
 								<option id="gnu.cpp.link.option.libs.1177721357" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="moses"/>
 									<listOptionValue builtIn="false" value="irstlm"/>
+									<listOptionValue builtIn="false" value="probingPT"/>
 									<listOptionValue builtIn="false" value="dstruct"/>
 									<listOptionValue builtIn="false" value="dalm"/>
 									<listOptionValue builtIn="false" value="MurmurHash3"/>
@@ -81,6 +83,7 @@
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
 									<listOptionValue builtIn="false" value="boost_iostreams-mt"/>
+									<listOptionValue builtIn="false" value="boost_serialization"/>
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 									<listOptionValue builtIn="false" value="boost_filesystem-mt"/>
