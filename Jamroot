@@ -113,6 +113,10 @@ if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
 }
 
+if [ option.get "with-probing-pt" ] {
+  requirements += <define>HAVE_PROBINGPT ;
+}
+
 project : default-build
   <threading>multi
   <warnings>on
