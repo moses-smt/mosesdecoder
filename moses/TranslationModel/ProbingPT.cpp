@@ -98,6 +98,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
 
   TargetPhrase *tp = new TargetPhrase();
 
+  // words
   for (size_t i = 0; i < size; ++i) {
 	  string str; // TODO get string from vocab id. Preferably create map<id, factor>
 
@@ -106,8 +107,26 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
   }
 
   // score for this phrase table
-  vector<float> scores(m_numScoreComponents, 1.3);
+  vector<float> scores;
+
+  // convert double --> float --> log. TODO - tell nik to store as float
+  const vector<double> &prob = probingTargetPhrase.prob;
+  std::copy(prob.begin(), prob.end(), back_inserter(scores));
+  std::transform(scores.begin(), scores.end(), scores.begin(),TransformScore);
+
   tp->GetScoreBreakdown().PlusEquals(this, scores);
+
+  // alignment
+  const std::vector<int> &alignS = probingTargetPhrase.word_all1;
+  const std::vector<int> &alignT = probingTargetPhrase.word_all2;
+  assert(alignS.size() == alignT.size());
+
+  /*
+  AlignmentInfo &aligns = tp->GetAlignTerm();
+  for (size_t i = 0; i < alignS.size(); ++i) {
+	  aligns.Add(alignS[i], alignT[i]);
+  }
+  */
 
   // score of all other ff when this rule is being loaded
   tp->Evaluate(sourcePhrase, GetFeaturesToApply());
