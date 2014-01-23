@@ -50,7 +50,7 @@
 #include "moses/TranslationModel/mmsapt.h"
 #endif
 #ifdef HAVE_PROBINGPT
-#include "moses/TranslationModel/ProbingPT.h"
+#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
 #endif
 
 #include "moses/LM/Ken.h"
