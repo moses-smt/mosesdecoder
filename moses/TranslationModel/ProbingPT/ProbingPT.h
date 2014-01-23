@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "PhraseDictionary.h"
+#include "../PhraseDictionary.h"
 
 class QueryEngine;
 class target_text;

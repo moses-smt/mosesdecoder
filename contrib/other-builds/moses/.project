@@ -1712,14 +1712,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTreeAdaptor.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT.h</locationURI>
+			<name>TranslationModel/ProbingPT</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/RuleTable</name>
@@ -2120,6 +2115,21 @@
 			<name>TranslationModel/DynSAInclude/vocab.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/vocab.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/Jamfile</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/Jamfile</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/ProbingPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/ProbingPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/RuleTable/Loader.h</name>

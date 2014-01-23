@@ -23,14 +23,14 @@ void ProbingPT::Load()
 {
 	SetFeaturesToApply();
 
-	string hashPath = m_filePath + "/probing_hash.dat";
-	string binPath = m_filePath + "/binfile.dat";
-	string vocabPath = m_filePath + "/vocabid.dat";
-	string tableSize = "";
-	string maxEntry = "";
+	m_engine = new QueryEngine(m_filePath.c_str());
 
-	m_engine = new QueryEngine(hashPath.c_str(), binPath.c_str(), vocabPath.c_str(), tableSize.c_str(), maxEntry.c_str());
+	// vocab
+	const std::map<uint64_t, std::string> &probingVocab = m_engine->getVocab();
+	std::map<uint64_t, std::string>::const_iterator iter;
+	for (iter = probingVocab.begin(); iter != probingVocab.end(); ++iter) {
 
+	}
 }
 
 void ProbingPT::InitializeForInput(InputType const& source)
