@@ -114,7 +114,9 @@ if [ option.get "with-cmph" ] {
 }
 
 if [ option.get "with-probing-pt" ] {
+  external-lib boost_serialization ;
   requirements += <define>HAVE_PROBINGPT ;
+  requirements += <library>boost_serialization ;
 }
 
 project : default-build
