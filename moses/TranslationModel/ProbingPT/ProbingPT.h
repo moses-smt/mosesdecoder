@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <boost/bimap.hpp>
 #include "../PhraseDictionary.h"
 
 class QueryEngine;
@@ -36,9 +37,17 @@ public:
 protected:
   QueryEngine *m_engine;
 
+  typedef boost::bimap<const Factor *, uint64_t> VocabMap;
+  mutable VocabMap m_vocabMap;
+
   TargetPhraseCollection *CreateTargetPhrase(const Phrase &sourcePhrase) const;
   TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
+  const Factor *GetFactor(uint64_t probingId) const;
+  uint64_t GetProbingId(const Factor *factor) const;
 
+  std::vector<uint64_t> ConvertToProbingPhrase(const Phrase &sourcePhrase, bool &ok) const;
+
+  uint64_t m_unkId;
 };
 
 }  // namespace Moses
