@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 
 # $Id: experiment.perl 1095 2009-11-16 18:19:49Z philipp $
 
@@ -2121,10 +2121,12 @@ sub get_config_tables {
     }
 
     # additional settings for factored models
-    my $ptCmd = $phrase_translation_table;
-    $ptCmd .= ":$ptImpl" if $ptImpl>0;
-    $ptCmd .= ":$numFF" if defined($numFF);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $phrase_translation_table);
+    $cmd = trim($cmd);
+    $cmd .= ":$ptImpl" if $ptImpl>0;
+    $cmd .= ":$numFF" if defined($numFF);
+    $cmd .= " ";
+
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table) if $reordering_table;
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
