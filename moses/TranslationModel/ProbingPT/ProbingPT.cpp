@@ -1,5 +1,6 @@
 // vim:tabstop=2
 #include "ProbingPT.h"
+#include "moses/StaticData.h"
 #include "moses/FactorCollection.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "quering.hh"
@@ -60,6 +61,10 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
     InputPath &inputPath = **iter;
     const Phrase &sourcePhrase = inputPath.GetPhrase();
 
+    if (sourcePhrase.GetSize() > StaticData::Instance().GetMaxPhraseLength()) {
+    	continue;
+    }
+
     TargetPhraseCollection *tpColl = CreateTargetPhrase(sourcePhrase);
 
     // add target phrase to phrase-table cache
@@ -109,7 +114,6 @@ TargetPhraseCollection *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase
   TargetPhraseCollection *tpColl = NULL;
 
   //Actual lookup
-  std::string cinstr = sourcePhrase.ToString();
   query_result = m_engine->query(probingSource);
 
   if (query_result.first) {
@@ -124,8 +128,7 @@ TargetPhraseCollection *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase
 		  tpColl->Add(tp);
 	  }
 
-  } else {
-    std::cerr << "Key not found!" << std::endl;
+	  tpColl->Prune(true, m_tableLimit);
   }
 
   return tpColl;
@@ -159,11 +162,11 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
   tp->GetScoreBreakdown().PlusEquals(this, scores);
 
   // alignment
+  /*
   const std::vector<int> &alignS = probingTargetPhrase.word_all1;
   const std::vector<int> &alignT = probingTargetPhrase.word_all2;
   assert(alignS.size() == alignT.size());
 
-  /*
   AlignmentInfo &aligns = tp->GetAlignTerm();
   for (size_t i = 0; i < alignS.size(); ++i) {
 	  aligns.Add(alignS[i], alignT[i]);
@@ -172,6 +175,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
 
   // score of all other ff when this rule is being loaded
   tp->Evaluate(sourcePhrase, GetFeaturesToApply());
+  return tp;
 }
 
 const Factor *ProbingPT::GetFactor(uint64_t probingId) const
