@@ -742,7 +742,7 @@ sub reduce_factors {
         $firstline =~ s/^\s*//;
         $firstline =~ s/\s.*//;
         # count factors
-        my $maxfactorindex = $firstline =~ tr/|/|/;
+        my $maxfactorindex = $firstline =~ tr/$___FACTOR_DELIMITER/$___FACTOR_DELIMITER/;
         if (join(",", @INCLUDE) eq join(",", 0..$maxfactorindex)) {
           # create just symlink; preserving compression
           my $realfull = $full;
@@ -775,7 +775,7 @@ sub reduce_factors {
 	    $first = 0;
 	    my $first_factor = 1;
             foreach my $outfactor (@INCLUDE) {
-              print OUT "|" unless $first_factor;
+              print OUT $___FACTOR_DELIMITER unless $first_factor;
               $first_factor = 0;
               my $out = $FACTOR[$outfactor];
               die "ERROR: Couldn't find factor $outfactor in token \"$_\" in $full LINE $nr" if !defined $out;
@@ -1775,19 +1775,19 @@ sub get_generation {
     while(<E>) {
 	chomp;
 	foreach (split) {
-	    my @FACTOR = split(/\|/);
+	    my @FACTOR = split /\Q$___FACTOR_DELIMITER/;
 
 	    my ($source,$target);
 	    my $first_factor = 1;
 	    foreach my $factor (split(/,/,$factor_e_source)) {
-		$source .= "|" unless $first_factor;
+		$source .= $___FACTOR_DELIMITER unless $first_factor;
 		$first_factor = 0;
 		$source .= $FACTOR[$factor];
 	    }
 
 	    $first_factor = 1;
 	    foreach my $factor (split(/,/,$factor_e)) {
-		$target .= "|" unless $first_factor;
+		$target .= $___FACTOR_DELIMITER unless $first_factor;
 		$first_factor = 0;
 		$target .= $FACTOR[$factor];
 	    }	    
