@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 
 # $Id$
 # Given a moses.ini file and an input text prepare minimized translation
@@ -255,7 +255,9 @@ if ($opt_hierarchical) {
 		open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
 		$TMP_INPUT_FILENAME{$key} = $filename;
 		my @FACTOR = split(/,/, $key);
-		open(PIPE,"$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |");
+		my $cmd = "$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |";
+		print STDERR "Executing: $cmd\n";
+		open(PIPE,$cmd);
 		while (my $line = <PIPE>) {
 			print FILEHANDLE $line
 		}
