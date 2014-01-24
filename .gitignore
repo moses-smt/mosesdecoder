@@ -76,3 +76,6 @@ mert/sentence-bleu
 build/
 nbproject/
 
+mingw/MosesGUI/MosesGUI.e4p
+mingw/MosesGUI/_eric4project/
+
