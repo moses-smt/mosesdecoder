@@ -295,6 +295,7 @@ if ($opt_filter) {
 }
 
 # filter files
+print STDERR "Filtering files...\n";
 for(my $i=0;$i<=$#TABLE;$i++) {
     my ($used,$total) = (0,0);
     my $file = $TABLE[$i];
@@ -308,7 +309,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         $file .= ".gz";
       }
       $mid_file .= ".gz" if $file =~ /\.gz$/;
-      safesystem("ln -s $file $mid_file");
+      $cmd = "ln -s $file $mid_file";
+      print STDERR "Executing: $cmd\n";
+      safesystem($cmd);
     } else {
 
       $mid_file .= ".gz"
@@ -331,7 +334,11 @@ for(my $i=0;$i<=$#TABLE;$i++) {
           my $tmp_input = $TMP_INPUT_FILENAME{$factors};
           my $options = "";
           $options .= "--min-non-initial-rule-count=$opt_min_non_initial_rule_count" if defined($opt_min_non_initial_rule_count);
-          open(PIPE,"$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $options $tmp_input |");
+
+          $cmd = "$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $options $tmp_input |";
+          print STDERR "Executing: $cmd\n";
+
+          open(PIPE,$cmd);
           while (my $line = <PIPE>) {
               print FILE_OUT $line
           }
