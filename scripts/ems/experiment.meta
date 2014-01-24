@@ -961,15 +961,24 @@ factorize-input
 	pass-unless: TRAINING:input-factors
 	error: can't open
 	error: incompatible number of words in factor
+
+source-label-input
+        in: factorized-input
+        out: source-labelled-input
+        default-name: evaluation/input.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+
 lowercase-input
-	in: factorized-input
+	in: source-labelled-input
 	out: truecased-input
 	default-name: evaluation/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
-	in: factorized-input TRUECASER:truecase-model
+	in: source-labelled-input TRUECASER:truecase-model
 	out: truecased-input
 	default-name: evaluation/input.tc
 	rerun-on-change: input-truecaser
