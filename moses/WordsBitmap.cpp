@@ -65,6 +65,10 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 
 bool WordsBitmap::IsAdjacent(size_t startPos, size_t endPos) const
 {
+  if (GetNumWordsCovered() == 0) {
+	  return true;
+  }
+
   size_t first = GetFirstGapPos();
   size_t last = GetLastGapPos();
 
