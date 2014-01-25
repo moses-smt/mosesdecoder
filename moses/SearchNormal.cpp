@@ -253,6 +253,11 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
     expectedScore += m_transOptColl.GetFutureScore().CalcFutureScore( hypothesis.GetWordsBitmap(), startPos, endPos );
   }
 
+  if (StaticData::Instance().AdjacentOnly() &&
+	  !hypothesis.GetWordsBitmap().IsAdjacent(startPos, endPos)) {
+	return;
+  }
+
   // loop through all translation options
   const TranslationOptionList &transOptList = m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
   TranslationOptionList::const_iterator iter;

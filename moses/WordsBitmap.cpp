@@ -63,6 +63,18 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
   return sum;
 }
 
+bool WordsBitmap::IsAdjacent(size_t startPos, size_t endPos) const
+{
+  size_t first = GetFirstGapPos();
+  size_t last = GetLastGapPos();
+
+  if (startPos == last || endPos == first) {
+    return true;
+  }
+
+  return false;
+}
+
 
 }
 
