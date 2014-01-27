@@ -197,7 +197,6 @@ protected:
 
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
-  bool m_adjacentOnly;
 
   FeatureRegistry m_registry;
 
@@ -753,9 +752,6 @@ public:
   const std::map<Word, std::set<Word> >* Get_Soft_Matches_Reverse() const {
     return &m_soft_matches_map_reverse;
   }
-
-  bool AdjacentOnly() const
-  { return m_adjacentOnly; }
 };
 
 }

@@ -385,8 +385,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
   SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
-  SetBooleanParameter( &m_adjacentOnly, "adjacent-only", false);
-
   // minimum Bayes risk decoding
   SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
   m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?

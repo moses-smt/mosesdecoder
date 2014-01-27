@@ -201,9 +201,6 @@ Parameter::Parameter()
 
   AddParam("placeholder-factor", "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
   AddParam("no-cache", "Disable all phrase-table caching. Default = false (ie. enable caching)");
-
-  AddParam("adjacent-only", "Only allow hypotheses which are adjacent to current derivation. ITG without block moves");
-
 }
 
 Parameter::~Parameter()
