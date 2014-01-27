@@ -48,6 +48,7 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryOnDisk&);
+  friend class ChartRuleLookupManagerOnDisk;
 
 protected:
 #ifdef WITH_THREADS
@@ -55,6 +56,8 @@ protected:
 #else
   boost::scoped_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
 #endif
+
+  size_t m_maxSpanDefault, m_maxSpanLabelled;
 
   OnDiskPt::OnDiskWrapper &GetImplementation();
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
@@ -80,6 +83,8 @@ public:
 
   const TargetPhraseCollection *GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
   const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
+
+  void SetParameter(const std::string& key, const std::string& value);
 
 };
 
