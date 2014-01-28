@@ -214,41 +214,39 @@ bool Rule::SourceHasEdgeDefaultNonTerm() const
 
 bool Rule::IsValid(const Global &global, const TunnelCollection &tunnelColl) const
 {
-	if (m_coll.size() == 1 && !m_coll[0].GetLatticeNode().IsTerminal()) // can't be only 1 terminal
-	{
+	if (m_coll.size() == 1 && !m_coll[0].GetLatticeNode().IsTerminal()) {
+		// can't be only 1 terminal
 		return false;
 	}
 
-	if (MoreDefaultNonTermThanTerm()) 
-	{ // must have at least as many terms as non-syntax non-terms
+	if (MoreDefaultNonTermThanTerm()) {
+	  // must have at least as many terms as non-syntax non-terms
+	  return false;
+	}
+
+	if (!global.allowDefaultNonTermEdge && SourceHasEdgeDefaultNonTerm()) {
+		return false;
+	}
+	
+	if (GetNumSymbols() > global.maxSymbols) {
+		return false;
+	}
+	
+	if (AdjacentDefaultNonTerms()) {
+		return false;
+	}
+	
+	if (!IsHole(tunnelColl)) {
 		return false;
 	}
 
-	if (!global.allowDefaultNonTermEdge && SourceHasEdgeDefaultNonTerm())
-	{
+	if (NonTermOverlap()) {
 		return false;
 	}
-	
-	if (GetNumSymbols() > global.maxSymbols)
-	{
-		return false;
-	}
-	
-	if (AdjacentDefaultNonTerms())
-	{
-		return false;
-	}
-	
-	if (!IsHole(tunnelColl))
-	{
+	if (!WithinNonTermSpans(global)) {
 		return false;
 	}
 
-	if (NonTermOverlap())
-	{
-		return false;
-	}
-	
 	/*
 	std::pair<size_t, size_t> spanS	= GetSpan(0)
 														,spanT= GetSpan(1);
@@ -316,14 +314,19 @@ bool Rule::IsHole(const TunnelCollection &tunnelColl) const
 
 bool Rule::CanRecurse(const Global &global, const TunnelCollection &tunnelColl) const
 {
-	if (GetNumSymbols() >= global.maxSymbols)
+	if (GetNumSymbols() >= global.maxSymbols) {
 		return false;
-	if (AdjacentDefaultNonTerms())
+	}
+	if (AdjacentDefaultNonTerms()) {
 		return false;
-	if (MaxNonTerm(global))
+	}
+	if (MaxNonTerm(global)) {
 		return false;
-	if (NonTermOverlap())
-	{
+	}
+	if (NonTermOverlap()) {
+		return false;
+	}
+	if (!WithinNonTermSpans(global)) {
 		return false;
 	}
 	
@@ -335,6 +338,27 @@ bool Rule::CanRecurse(const Global &global, const TunnelCollection &tunnelColl) 
 //		return false;
 	
 	
+	return true;
+}
+
+bool Rule::WithinNonTermSpans(const Global &global) const
+{
+	assert(m_coll.size());
+	const RuleElement &ruleElement = m_coll.back();
+	const LatticeNode &latticeNode = ruleElement.GetLatticeNode();
+	if (!latticeNode.IsTerminal()) {
+		// non-term
+		bool isSyntax = latticeNode.IsSyntax();
+		size_t minSpan = isSyntax ? global.minHoleSpanSourceSyntax : global.minHoleSpanSourceDefault;
+		size_t maxSpan = isSyntax ? global.maxHoleSpanSourceSyntax : global.maxHoleSpanSourceDefault;
+
+		size_t width = latticeNode.GetSourceRange().GetWidth();
+
+		if (width < minSpan || width > maxSpan) {
+			return false;
+		}
+	}
+
 	return true;
 }
 

@@ -54,6 +54,13 @@ protected:
 	const LatticeNode &GetLatticeNode(size_t ind) const;
 	void CreateSymbols(const Global &global, bool &isValid, const SentenceAlignment &sentence);
 
+	size_t GetNumSymbols() const;
+	bool AdjacentDefaultNonTerms() const;
+	bool MaxNonTerm(const Global &global) const;
+	bool MoreDefaultNonTermThanTerm() const;
+	bool SourceHasEdgeDefaultNonTerm() const;
+	bool WithinNonTermSpans(const Global &global) const;
+
 public:
 	// init
 	Rule(const LatticeNode *latticeNode);
@@ -71,12 +78,6 @@ public:
 
 	// can add this to the set of rules
 	bool IsValid(const Global &global, const TunnelCollection &tunnelColl) const;
-
-	size_t GetNumSymbols() const;
-	bool AdjacentDefaultNonTerms() const;
-	bool MaxNonTerm(const Global &global) const;
-	bool MoreDefaultNonTermThanTerm() const;
-	bool SourceHasEdgeDefaultNonTerm() const;
 
 	void CreateRules(RuleCollection &rules
 									 , const Lattice &lattice

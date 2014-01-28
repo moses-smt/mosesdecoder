@@ -63,9 +63,8 @@ public:
 	}
 	
 	const Range &GetSourceRange() const
-	{
-		return m_sourceRange;
-	}
+	{ return m_sourceRange; }
+
 	const SyntaxNode &GetSyntaxNode(size_t direction) const
 	{
 		const SyntaxNode *node = direction == 0 ? m_sourceTreeNode : m_targetTreeNode;
