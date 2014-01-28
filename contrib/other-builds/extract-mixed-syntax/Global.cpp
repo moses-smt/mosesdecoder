@@ -13,12 +13,12 @@ bool g_debug = false;
 
 Global::Global()
 : minHoleSpanSourceDefault(2)
-, maxHoleSpanSourceDefault(7)
+, maxHoleSpanSourceDefault(10)
 , minHoleSpanSourceSyntax(1)
 , maxHoleSpanSourceSyntax(1000)
 , maxUnaligned(5)
 
-, maxSymbols(5)
+, maxSymbols(6)
 , maxNonTerm(3)
 , maxNonTermDefault(2)
 
