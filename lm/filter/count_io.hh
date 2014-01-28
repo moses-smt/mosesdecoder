@@ -5,27 +5,18 @@
 #include <iostream>
 #include <string>
 
-#if !defined __MINGW32__
-#include <err.h>
-#endif
-
+#include "util/fake_ofstream.hh"
+#include "util/file.hh"
 #include "util/file_piece.hh"
 
 namespace lm {
 
 class CountOutput : boost::noncopyable {
   public:
-    explicit CountOutput(const char *name) : file_(name, std::ios::out) {}
+    explicit CountOutput(const char *name) : file_(util::CreateOrThrow(name)) {}
 
     void AddNGram(const StringPiece &line) {
-      if (!(file_ << line << '\n')) {
-#if defined __MINGW32__
-        std::cerr<<"Writing counts file failed"<<std::endl;
-        exit(3);
-#else
-        err(3, "Writing counts file failed");
-#endif
-      }
+      file_ << line << '\n';
     }
 
     template <class Iterator> void AddNGram(const Iterator &begin, const Iterator &end, const StringPiece &line) {
@@ -37,12 +28,12 @@ class CountOutput : boost::noncopyable {
     }
 
   private:
-    std::fstream file_;
+    util::FakeOFStream file_;
 };
 
 class CountBatch {
   public:
-    explicit CountBatch(std::streamsize initial_read)
+    explicit CountBatch(std::streamsize initial_read) 
       : initial_read_(initial_read) {
       buffer_.reserve(initial_read);
     }
@@ -75,7 +66,7 @@ class CountBatch {
   private:
     std::streamsize initial_read_;
 
-    // This could have been a std::string but that's less happy with raw writes.
+    // This could have been a std::string but that's less happy with raw writes.  
     std::vector<char> buffer_;
 };
 
