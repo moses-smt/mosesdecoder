@@ -74,7 +74,7 @@ sub split_xml {
       $MARKUP[$i] .= $1." ";
       $line = $2;
     }
-    elsif ($line =~ /^\s*(\S+)(.*)$/) {
+    elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {
       $WORD[$i++] = $1;
       $MARKUP[$i] = "";
       $line = $2;
