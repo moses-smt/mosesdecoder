@@ -8,7 +8,7 @@ License: LGPL
 Group: Development/Tools
 Vendor: Capita Translation and Interpreting
 Packager: Ian Johnson <ian.johnson@capita-ti.com>
-Requires: boost >= 1.48, python >= 2.6, perl >= 5
+Requires: python >= 2.6, perl >= 5
 BuildRoot: /home/ian/rpmbuild/builds/%{name}-%{version}-%{release}
 %description
 Moses is a statistical machine translation system that allows you to automatically train translation models for any language pair. All you need is a collection of translated texts (parallel corpus). An efficient search algorithm finds quickly the highest probability translation among the exponential number of choices.
