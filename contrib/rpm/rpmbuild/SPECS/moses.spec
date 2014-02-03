@@ -54,7 +54,7 @@ cp -R scripts/training $RPM_BUILD_ROOT/opt/moses/scripts
 %files
 %defattr(-,root,root)
 /opt/moses/bin/*
-/opt/moses/scripts/OMS/*
+/opt/moses/scripts/OSM/*
 /opt/moses/scripts/Transliteration/*
 /opt/moses/scripts/analysis/*
 /opt/moses/scripts/ems/*
