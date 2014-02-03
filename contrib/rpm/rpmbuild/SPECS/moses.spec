@@ -43,7 +43,6 @@ cp -R scripts/OSM $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/Transliteration $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/analysis $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/ems $RPM_BUILD_ROOT/opt/moses/scripts
-cp -R scripts/fuzzy-match $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/generic $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/other $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/recaser $RPM_BUILD_ROOT/opt/moses/scripts
@@ -58,7 +57,6 @@ cp -R scripts/training $RPM_BUILD_ROOT/opt/moses/scripts
 /opt/moses/scripts/Transliteration/*
 /opt/moses/scripts/analysis/*
 /opt/moses/scripts/ems/*
-/opt/moses/scripts/fuzzy-match/*
 /opt/moses/scripts/generic/*
 /opt/moses/scripts/other/*
 /opt/moses/scripts/recaser/*
