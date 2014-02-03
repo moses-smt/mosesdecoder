@@ -1986,6 +1986,10 @@ sub define_training_extract_phrases {
       if (&get("TRAINING:use-ghkm")) {
         $cmd .= "-ghkm ";
       }
+
+      if (&get("TRAINING:ghkm-tree-fragments")) {
+        $cmd .= "-ghkm-tree-fragments ";
+      }
     }
 
     my $extract_settings = &get("TRAINING:extract-settings");
@@ -2013,6 +2017,12 @@ sub define_training_build_ttable {
     $cmd .=  "-no-word-alignment " if  defined($word_alignment) && $word_alignment eq "no";
 
     $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
+
+    if (&get("TRAINING:hierarchical-rule-set")) {
+      if (&get("TRAINING:ghkm-tree-fragments")) {
+        $cmd .= "-ghkm-tree-fragments ";
+      }
+    }
     
     &create_step($step_id,$cmd);
 }
