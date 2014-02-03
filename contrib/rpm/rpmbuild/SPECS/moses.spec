@@ -39,7 +39,7 @@ cp $RPM_BUILD_DIR/giza-pp/GIZA++-v2/GIZA++ $RPM_BUILD_DIR/giza-pp/GIZA++-v2/snt2
 %install
 mkdir -p $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R bin $RPM_BUILD_ROOT/opt/moses
-cp -R scripts/OSM $RPM_BUILD_ROOT/op/moses/scripts
+cp -R scripts/OSM $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/Transliteration $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/analysis $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/ems $RPM_BUILD_ROOT/opt/moses/scripts
