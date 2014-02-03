@@ -1,9 +1,0 @@
-#!/usr/bin/perl
-
-$x=0;
-while (<>) {
-  chomp;
-
-  $x++;
-  print "STDERR_$x=$_\n";
-}
