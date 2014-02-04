@@ -106,7 +106,7 @@ class Moses():
                 scores = line[2].split()
                 if len(scores) <self.number_of_features:
                     sys.stderr.write('Error: model only has {0} features. Expected {1}.\n'.format(len(scores),self.number_of_features))
-                    exit()
+                    exit(1)
                     
                 scores = scores[:self.number_of_features]
                 model_probabilities = map(float,scores)
@@ -179,7 +179,7 @@ class Moses():
                 reordering_probabilities[j][i] = p
         except IndexError:
             sys.stderr.write('\nIndexError: Did you correctly specify the number of reordering features? (--number_of_features N in command line)\n')
-            exit()
+            exit(1)
 
     def traverse_incrementally(self,table,models,load_lines,store_flag,mode='interpolate',inverted=False,lowmem=False,flags=None):
         """hack-ish way to find common phrase pairs in multiple models in one traversal without storing it all in memory
@@ -307,13 +307,13 @@ class Moses():
         elif len(line) == 4:
             if self.require_alignment:
                 sys.stderr.write('Error: unexpected phrase table format. Your current configuration requires alignment information. Make sure you trained your model with -phrase-word-alignment (default in newer Moses versions)\n')
-                exit()
+                exit(1)
             
             self.phrase_pairs[src][target][1] = [b'',line[3].lstrip(b'| ')]
    
         else:
             sys.stderr.write('Error: unexpected phrase table format. Are you using a very old/new version of Moses with different formatting?\n')
-            exit()
+            exit(1)
    
    
     def get_word_alignments(self,src,target,cache=False,mycache={}):
@@ -515,7 +515,7 @@ class TigerXML():
         
         if not src or not target:
             sys.stderr.write('Error: Source and/or target language not specified. Required for TigerXML extraction.\n')
-            exit()
+            exit(1)
         
         alignments = self._get_aligned_ids(src,target)
         self._textualize_alignments(src,target,alignments)
@@ -1261,7 +1261,7 @@ def handle_file(filename,action,fileobj=None,mode='r'):
                     sys.stderr.write('For a weighted counts combination, we need statistics that Moses doesn\'t write to disk by default.\n')
                     sys.stderr.write('Repeat step 4 of Moses training for all models with the option -write-lexical-counts.\n')
                 
-                exit()
+                exit(1)
 
         if filename.endswith('.gz'):
             fileobj = gzip.open(filename,mode)
@@ -1435,7 +1435,7 @@ class Combine_TMs():
 
         if mode not in ['interpolate','loglinear','counts']:
             sys.stderr.write('Error: mode must be either "interpolate", "loglinear" or "counts"\n')
-            sys.exit()
+            sys.exit(1)
 
         models,number_of_features,weights = self._sanity_checks(models,number_of_features,weights)
         

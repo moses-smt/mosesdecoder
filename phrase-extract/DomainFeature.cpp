@@ -1,6 +1,5 @@
-// $Id$
-//#include "beammain.h"
-#include "domain.h"
+#include "DomainFeature.h"
+#include "ExtractionPhrasePair.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
 #include "SafeGetline.h"
@@ -26,7 +25,7 @@ void Domain::load( const std::string &domainFileName )
     int lineNumber;
     if (domainSpecLine.size() != 2 ||
         ! sscanf(domainSpecLine[0].c_str(), "%d", &lineNumber)) {
-      cerr << "ERROR: in domain specification line: '" << line << "'" << endl;
+      std::cerr << "ERROR: in domain specification line: '" << line << "'" << endl;
       exit(1);
     }
     // store
@@ -50,29 +49,34 @@ string Domain::getDomainOfSentence( int sentenceId ) const
   return "undefined";
 }
 
-DomainFeature::DomainFeature(const string& domainFile)
+DomainFeature::DomainFeature(const string& domainFile) : m_propertyKey("domain")
 {
   //process domain file
   m_domain.load(domainFile);
+}
+
+void DomainFeature::addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
+                                              float count, 
+                                              int sentenceId) const
+{
+  std::string value = m_domain.getDomainOfSentence(sentenceId);
+  phrasePair.AddProperty(m_propertyKey, value, count);
 }
 
 void DomainFeature::add(const ScoreFeatureContext& context,
                         std::vector<float>& denseValues,
                         std::map<std::string,float>& sparseValues)  const
 {
-  map< string, float > domainCount;
-  for(size_t i=0; i<context.phrasePair.size(); i++) {
-    string d = m_domain.getDomainOfSentence(context.phrasePair[i]->sentenceId );
-    if (domainCount.find( d ) == domainCount.end()) {
-      domainCount[d] = context.phrasePair[i]->count;
-    } else {
-      domainCount[d] += context.phrasePair[i]->count;
-    }
-  }
-  add(domainCount, context.count, context.maybeLog, denseValues, sparseValues);
+  const map<string,float> *domainCount = context.phrasePair.GetProperty(m_propertyKey);
+  assert( domainCount != NULL );
+  add(*domainCount, 
+      context.phrasePair.GetCount(), 
+      context.maybeLog, 
+      denseValues, sparseValues);
 }
 
-void SubsetDomainFeature::add(const map<string,float>& domainCount,float count,
+void SubsetDomainFeature::add(const map<string,float>& domainCount, 
+                              float count,
                               const MaybeLog& maybeLog,
                               std::vector<float>& denseValues,
                               std::map<std::string,float>& sparseValues)  const
@@ -152,7 +156,6 @@ void IndicatorDomainFeature::add(const map<string,float>& domainCount,float coun
       denseValues.push_back(maybeLog(2.718));
     }
   }
-
 }
 
 void SparseIndicatorDomainFeature::add(const map<string,float>& domainCount,float count,
@@ -165,13 +168,6 @@ void SparseIndicatorDomainFeature::add(const map<string,float>& domainCount,floa
     sparseValues["dom_" + i->first] = 1;
   }
 }
-
-bool DomainFeature::equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const
-{
-  return m_domain.getDomainOfSentence(lhs.sentenceId) ==
-         m_domain.getDomainOfSentence( rhs.sentenceId);
-}
-
 
 }
 
