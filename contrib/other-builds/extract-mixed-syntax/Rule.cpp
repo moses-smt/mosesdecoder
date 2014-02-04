@@ -219,10 +219,12 @@ bool Rule::IsValid(const Global &global, const TunnelCollection &tunnelColl) con
 		return false;
 	}
 
+	/*
 	if (MoreDefaultNonTermThanTerm()) {
 	  // must have at least as many terms as non-syntax non-terms
 	  return false;
 	}
+	*/
 
 	if (!global.allowDefaultNonTermEdge && SourceHasEdgeDefaultNonTerm()) {
 		return false;
@@ -320,9 +322,11 @@ bool Rule::CanRecurse(const Global &global, const TunnelCollection &tunnelColl) 
 	if (AdjacentDefaultNonTerms()) {
 		return false;
 	}
+	/*
 	if (MaxNonTerm(global)) {
 		return false;
 	}
+	*/
 	if (NonTermOverlap()) {
 		return false;
 	}
@@ -419,6 +423,8 @@ void Rule::CreateRules(RuleCollection &rules
 											 , const SentenceAlignment &sentence
 											 , const Global &global)
 {
+	//static int debug = 0;
+
 	assert(m_coll.size() > 0);
 	const LatticeNode *latticeNode = &m_coll.back().GetLatticeNode();
 	size_t endPos = latticeNode->GetSourceRange().GetEndPos() + 1;
@@ -428,16 +434,26 @@ void Rule::CreateRules(RuleCollection &rules
 	Stack::const_iterator iter;
 	for (iter = stack.begin(); iter != stack.end(); ++iter)
 	{
+		/*
+		++debug;
+		cerr << debug << " ";
+		if (debug == 54) {
+			cerr << " ";
+		}
+		*/
+
 		const LatticeNode *newLatticeNode = *iter;
 		Rule *newRule = new Rule(*this, newLatticeNode);
-		//cerr << *newRule << endl;
+		//newRule->DebugOutput();
+		//cerr << endl;
 		
-		if (newRule->CanRecurse(global, sentence.GetTunnelCollection()))
+		const TunnelCollection &tunnels = sentence.GetTunnelCollection();
+		if (newRule->CanRecurse(global, tunnels))
 		{ // may or maynot be valid, but can continue to build on this rule
 			newRule->CreateRules(rules, lattice, sentence, global);
 		}
 		
-		if (newRule->IsValid(global, sentence.GetTunnelCollection()))
+		if (newRule->IsValid(global, tunnels))
 		{ // add to rule collection
 			rules.Add(global, newRule, sentence);
 		}	
@@ -526,11 +542,11 @@ void Rule::DebugOutput() const
 	cerr << "Nodes:";
 	for (size_t i = 0; i < m_coll.size(); ++i) {
 		const RuleElement &element = m_coll[i];
-		cerr << element.GetLatticeNode();
+		cerr << element.GetLatticeNode() << " ";
 	}
 
-	cerr << " Output: ";
-	Output(cerr);
+	//cerr << " Output: ";
+	//Output(cerr);
 }
 
 void Rule::Output(std::ostream &out) const
