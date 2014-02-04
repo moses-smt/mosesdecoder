@@ -523,6 +523,13 @@ const LatticeNode &Rule::GetLatticeNode(size_t ind) const
 
 void Rule::DebugOutput() const
 {
+	cerr << "Nodes:";
+	for (size_t i = 0; i < m_coll.size(); ++i) {
+		const RuleElement &element = m_coll[i];
+		cerr << element.GetLatticeNode();
+	}
+
+	cerr << " Output: ";
 	Output(cerr);
 }
 

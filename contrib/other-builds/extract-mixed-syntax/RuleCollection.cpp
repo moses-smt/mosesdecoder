@@ -36,7 +36,7 @@ void RuleCollection::Add(const Global &global, Rule *rule, const SentenceAlignme
 		// create rules with LHS
 		//cerr << "old:" << *rule << endl;
 		Rule *newRule = new Rule(global, isValid, *rule, &node, sentence);
-		
+
 		if (!isValid)
 		{ // lhs doesn't match non-term spans
 			delete newRule;
