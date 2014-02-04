@@ -2,7 +2,9 @@
 #include <cstdlib>
 #include <boost/program_options.hpp>
 #include "moses/Util.h"
+#include "manual-label.h"
 #include "DeEn.h"
+#include "EnPhrasalVerb.h"
 
 using namespace std;
 
@@ -62,7 +64,12 @@ int main(int argc, char** argv)
 
     Phrase source = Tokenize(line);
 
-    LabelDeEn(source, cout);
+    if (sourceLang == "de" && targetLang == "en") {
+    	LabelDeEn(source, cout);
+    }
+    else if (sourceLang == "en") {
+    	EnPhrasalVerb(source, cout);
+    }
 
     ++lineNum;
   }
