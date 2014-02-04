@@ -13,7 +13,7 @@ bool g_debug = false;
 
 Global::Global()
 : minHoleSpanSourceDefault(2)
-, maxHoleSpanSourceDefault(10)
+, maxHoleSpanSourceDefault(7)
 , minHoleSpanSourceSyntax(1)
 , maxHoleSpanSourceSyntax(1000)
 , maxUnaligned(5)
