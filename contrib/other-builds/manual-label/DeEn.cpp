@@ -1,29 +1,11 @@
 #include <list>
 #include "DeEn.h"
+#include "manual-label.h"
 #include "moses/Util.h"
 
 using namespace std;
 
 extern bool g_debug;
-
-bool IsA(const Phrase &source, int pos, int offset, int factor, const string &str)
-{
-  pos += offset;
-  if (pos >= source.size() || pos < 0) {
-    return false;
-  }
-
-  const string &word = source[pos][factor];
-  vector<string> soughts = Moses::Tokenize(str, " ");
-  for (int i = 0; i < soughts.size(); ++i) {
-    string &sought = soughts[i];
-    bool found = (word == sought);
-    if (found) {
-      return true;
-    }
-  }
-  return false;
-}
 
 bool Contains(const Phrase &source, int start, int end, int factor, const string &str)
 {
@@ -82,5 +64,10 @@ void LabelDeEn(const Phrase &source, ostream &out)
     }
   }
   out << endl;
+
+}
+
+void OutputWithLabels()
+{
 
 }
