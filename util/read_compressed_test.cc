@@ -17,6 +17,7 @@
 #include <fcntl.h>
 
 #if !defined mkstemp
+// TODO insecure
 int mkstemp(char * stemplate)
 {
     char *filename = mktemp(stemplate);

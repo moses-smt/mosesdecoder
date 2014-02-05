@@ -12,6 +12,7 @@ if $(with-dlib) {
 
 alias headers : ../util//kenutil : : : $(max-factors) $(dlib) ; 
 alias ThreadPool : ThreadPool.cpp ;
+alias Util : Util.cpp Timer.cpp ;
 
 if [ option.get "with-synlm" : no : yes ] = yes
 {

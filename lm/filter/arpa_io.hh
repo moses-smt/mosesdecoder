@@ -14,10 +14,6 @@
 #include <string>
 #include <vector>
 
-#if !defined __MINGW32__
-#include <err.h>
-#endif
-
 #include <string.h>
 #include <stdint.h>
 

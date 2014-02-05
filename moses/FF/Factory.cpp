@@ -249,9 +249,9 @@ void FeatureRegistry::PrintFF() const
 	Map::const_iterator iter;
 	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
 		const string &ffName = iter->first;
-		std::cerr << ffName << std::endl;
+		std::cerr << ffName << " ";
 	}
-
+	std::cerr << std::endl;
 }
 
 } // namespace Moses

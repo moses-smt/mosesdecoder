@@ -34,13 +34,17 @@ class DomainFeature : public ScoreFeature
 public:
 
   DomainFeature(const std::string& domainFile);
-  bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const;
+
+  void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
+                                 float count, 
+                                 int sentenceId) const;
+
   void add(const ScoreFeatureContext& context,
            std::vector<float>& denseValues,
            std::map<std::string,float>& sparseValues) const;
 
 protected:
-  /** Overriden in subclass */
+  /** Overridden in subclass */
   virtual void add(const std::map<std::string,float>& domainCounts, float count,
                    const MaybeLog& maybeLog,
                    std::vector<float>& denseValues,
@@ -48,6 +52,8 @@ protected:
 
 
   Domain m_domain;
+
+  const std::string m_propertyKey;
 
 };
 

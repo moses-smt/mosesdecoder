@@ -25,13 +25,13 @@ open(CORPUS,$CORPUS) || die("ERROR: could not open '$CORPUS'");
 binmode(CORPUS, ":utf8");
 while(<CORPUS>) {
   chop;
-  my @WORD = split;
+  my ($WORD,$MARKUP) = split_xml($_);
   my $start = 0;
-  while($start<=$#WORD && defined($DELAYED_SENTENCE_START{$WORD[$start]})) { $start++; }
+  while($start<=$#$WORD && defined($DELAYED_SENTENCE_START{$$WORD[$start]})) { $start++; }
   my $firstWordOfSentence = 1;
-  for(my $i=$start;$i<=$#WORD;$i++) {
-    my $currentWord = $WORD[$i];
-    if (! $firstWordOfSentence && defined($SENTENCE_END{$WORD[$i-1]})) {
+  for(my $i=$start;$i<=$#$WORD;$i++) {
+    my $currentWord = $$WORD[$i];
+    if (! $firstWordOfSentence && defined($SENTENCE_END{$$WORD[$i-1]})) {
       $firstWordOfSentence = 1;
     }
 
@@ -44,7 +44,7 @@ while(<CORPUS>) {
       if (lc($firstChar) eq $firstChar) {
         # if the first character is not upper case, count the token as full evidence (because if it's not capitalized, then there's no reason to be wary that the given casing is only due to being sentence-initial)
 	$currentWordWeight = 1;
-      } elsif (scalar(@WORD) == 1) {
+      } elsif (scalar(@$WORD) == 1) {
 	# if the first character is upper case, but the current token is the only token of the segment, then count the token as partial evidence (because the segment is presumably not a sentence and the token is therefore not the first word of a sentence and is possibly in its natural case)
 	$currentWordWeight = 0.1;
       }
@@ -77,3 +77,28 @@ foreach my $type (keys %CASING) {
   print MODEL "\n";
 }
 close(MODEL);
+
+
+# store away xml markup
+sub split_xml {
+  my ($line) = @_;
+  my (@WORD,@MARKUP);
+  my $i = 0;
+  $MARKUP[0] = "";
+  while($line =~ /\S/) {
+    if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
+      $MARKUP[$i] .= $1." ";
+      $line = $2;
+    }
+    elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {
+      $WORD[$i++] = $1;
+      $MARKUP[$i] = "";
+      $line = $2;
+    }
+    else {
+      die("ERROR: huh? $line\n");
+    }
+  }
+  chop($MARKUP[$#MARKUP]);
+  return (\@WORD,\@MARKUP);
+}
