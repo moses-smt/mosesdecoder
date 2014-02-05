@@ -160,11 +160,13 @@ void EnPhrasalVerb(const Phrase &source, ostream &out)
 
 size_t Found(const Phrase &source, int pos, int factor, const std::string &str)
 {
+  const size_t MAX_RANGE = 10;
+
   vector<string> soughts = Moses::Tokenize(str, " ");
   vector<string> puncts = Moses::Tokenize(str, ". : , ;");
 
 
-  size_t maxEnd = std::min(source.size(), (size_t) pos + 10);
+  size_t maxEnd = std::min(source.size(), (size_t) pos + MAX_RANGE);
   for (size_t i = pos + 1; i < maxEnd; ++i) {
 	const Word &word = source[i];
 	bool found;
