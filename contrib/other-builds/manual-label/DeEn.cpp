@@ -20,8 +20,6 @@ bool Contains(const Phrase &source, int start, int end, int factor, const string
 
 void LabelDeEn(const Phrase &source, ostream &out)
 {
-  typedef pair<int,int> Range;
-  typedef list<Range> Ranges;
   Ranges ranges;
 
   // find ranges to label
@@ -43,31 +41,6 @@ void LabelDeEn(const Phrase &source, ostream &out)
     }
   }
 
-  // output sentence, with labels
-  for (int pos = 0; pos < source.size(); ++pos) {
-    // output beginning of label
-    for (Ranges::const_iterator iter = ranges.begin(); iter != ranges.end(); ++iter) {
-      const Range &range = *iter;
-      if (range.first == pos) {
-        out << "<tree label=\"reorder-label\"> ";
-      }
-    }
-
-    const Word &word = source[pos];
-    out << word[0] << " ";
-
-    for (Ranges::const_iterator iter = ranges.begin(); iter != ranges.end(); ++iter) {
-      const Range &range = *iter;
-      if (range.second == pos) {
-        out << "</tree> ";
-      }
-    }
-  }
-  out << endl;
-
+  OutputWithLabels(source, ranges, out);
 }
 
-void OutputWithLabels()
-{
-
-}

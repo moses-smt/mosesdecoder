@@ -155,8 +155,7 @@ void EnPhrasalVerb(const Phrase &source, ostream &out)
 	}
   }
 
-
-
+  OutputWithLabels(source, ranges, out);
 }
 
 size_t Found(const Phrase &source, int pos, int factor, const std::string &str)
