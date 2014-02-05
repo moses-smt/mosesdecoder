@@ -150,7 +150,7 @@ void EnPhrasalVerb(const Phrase &source, ostream &out)
 	// found range to label
 	if (end == std::numeric_limits<size_t>::max() &&
 			end > start + 1) {
-        Range range(start, end);
+        Range range(start + 1, end - 1);
         ranges.push_back(range);
 	}
   }
