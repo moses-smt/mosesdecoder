@@ -506,7 +506,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
                       const ScoreFeatureManager& featureManager,
                       const MaybeLog& maybeLogProb )
 {
-  assert(phrasePair.isValid());
+  assert(phrasePair.IsValid());
 
   const ALIGNMENT *bestAlignmentT2S = phrasePair.FindBestAlignmentTargetToSource();
   float count = phrasePair.GetCount();
