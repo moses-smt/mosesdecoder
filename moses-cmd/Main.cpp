@@ -180,6 +180,7 @@ public:
       } else {
         TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
       }
+      delete file;
     }
 
     // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
@@ -233,7 +234,7 @@ public:
 
         } else {
           stringstream hypergraphDirName;
-          hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
+          hypergraphDirName << boost::filesystem::current_path().string() << "/hypergraph";
           hypergraphDir = hypergraphDirName.str();
         }
       }
@@ -527,9 +528,7 @@ size_t OutputFeatureWeightsForHypergraph(size_t index, const FeatureFunction* ff
     }
     return index+numScoreComps;
   } else {
-    cerr << "Sparse features are not yet supported when outputting hypergraph format" << endl;
-    assert(false);
-    return 0;
+    UTIL_THROW2("Sparse features are not yet supported when outputting hypergraph format");
   }
 }
 
@@ -641,7 +640,7 @@ int main(int argc, char** argv)
           boost::filesystem::path nbestPath(nbestFile);
           weightsFilename << nbestPath.parent_path().filename() << "/weights";
         } else {
-          weightsFilename << boost::filesystem::current_path() << "/hypergraph/weights";
+          weightsFilename << boost::filesystem::current_path().string() << "/hypergraph/weights";
         }
       }
       boost::filesystem::path weightsFilePath(weightsFilename.str());
