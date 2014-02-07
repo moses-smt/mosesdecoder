@@ -163,7 +163,7 @@ size_t Found(const Phrase &source, int pos, int factor, const std::string &str)
   const size_t MAX_RANGE = 10;
 
   vector<string> soughts = Moses::Tokenize(str, " ");
-  vector<string> puncts = Moses::Tokenize(str, ". : , ;");
+  vector<string> puncts = Moses::Tokenize(". : , ;", " ");
 
 
   size_t maxEnd = std::min(source.size(), (size_t) pos + MAX_RANGE);

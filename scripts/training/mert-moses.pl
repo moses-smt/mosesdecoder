@@ -1201,6 +1201,7 @@ sub run_decoder {
       $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
     }
 
+    print STDERR "Executing: $decoder_cmd \n";
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
 
     sanity_check_order_of_lambdas($featlist, $filename);
@@ -1268,6 +1269,7 @@ sub get_featlist_from_moses {
   } else {
     print STDERR "Asking moses for feature names and values from $___CONFIG\n";
     my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
+    print STDERR "Executing: $cmd\n";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }
   return get_featlist_from_file($featlistfn);
