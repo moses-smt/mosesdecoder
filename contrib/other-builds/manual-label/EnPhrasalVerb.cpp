@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void EnPhrasalVerb(const Phrase &source, ostream &out)
+void EnPhrasalVerb(const Phrase &source, int revision, ostream &out)
 {
   typedef pair<int,int> Range;
   typedef list<Range> Ranges;
@@ -150,12 +150,38 @@ void EnPhrasalVerb(const Phrase &source, ostream &out)
 	// found range to label
 	if (end != std::numeric_limits<size_t>::max() &&
 			end > start + 1) {
-        Range range(start + 1, end - 1);
-        ranges.push_back(range);
+		bool add = true;
+		if (revision == 1 && Exist(source,
+									start + 1,
+									end - 1,
+									1,
+									"VB VBD VBG VBN VBP VBZ")) {
+			// there's a verb in between
+			add = false;
+		}
+
+		if (add) {
+			Range range(start + 1, end - 1);
+			ranges.push_back(range);
+		}
 	}
   }
 
   OutputWithLabels(source, ranges, out);
+}
+
+bool Exist(const Phrase &source, int start, int end, int factor, const std::string &str)
+{
+  vector<string> soughts = Moses::Tokenize(str, " ");
+  for (size_t i = start; i <= end; ++i) {
+	const Word &word = source[i];
+    bool found = Found(word, factor, soughts);
+    if (found) {
+    	return true;
+    }
+  }
+
+  return false;
 }
 
 size_t Found(const Phrase &source, int pos, int factor, const std::string &str)

@@ -22,7 +22,8 @@ int main(int argc, char** argv)
     ("help", "Print help messages")
     ("add", "additional options")
     ("source-language,s", po::value<string>()->required(), "Source Language")
-    ("target-language,t", po::value<string>()->required(), "Target Language");
+    ("target-language,t", po::value<string>()->required(), "Target Language")
+    ("revision,r", po::value<int>()->default_value(0), "Revision");
 
   po::variables_map vm;
   try
@@ -51,7 +52,9 @@ int main(int argc, char** argv)
 
   string sourceLang = vm["source-language"].as<string>();
   string targetLang = vm["target-language"].as<string>();
-  cerr << sourceLang << " " << targetLang << endl;
+  int revision = vm["revision"].as<int>();
+
+  cerr << sourceLang << " " << targetLang << " " << revision << endl;
 
   string line;
   size_t lineNum = 1;
@@ -68,7 +71,7 @@ int main(int argc, char** argv)
     	LabelDeEn(source, cout);
     }
     else if (sourceLang == "en") {
-    	EnPhrasalVerb(source, cout);
+    	EnPhrasalVerb(source, revision, cout);
     }
 
     ++lineNum;
