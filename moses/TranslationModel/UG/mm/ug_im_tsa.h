@@ -11,6 +11,7 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/foreach.hpp>
 
 #include "tpt_tightindex.h"
 #include "tpt_tokenindex.h"
@@ -22,12 +23,15 @@ namespace ugdiss
   using namespace std;
   using namespace boost;
   namespace bio=boost::iostreams;
-  
-  //-----------------------------------------------------------------------
+   
+  // template<typename TOKEN> class imBitext<TOKEN>;
+
+ //-----------------------------------------------------------------------
   template<typename TOKEN>
   class imTSA : public TSA<TOKEN>
   {
     typedef typename Ttrack<TOKEN>::Position cpos;
+    // friend class imBitext<TOKEN>;
   public:
     class tree_iterator;
     friend class tree_iterator;
@@ -36,7 +40,6 @@ namespace ugdiss
     vector<cpos>          sufa; // stores the actual array
     vector<filepos_type> index; /* top-level index into regions in sufa 
                                  * (for faster access) */
-    
   private:
     char const* 
     index_jump(char const* a, char const* z, float ratio) const;
@@ -50,9 +53,13 @@ namespace ugdiss
   public:
     imTSA();
     imTSA(shared_ptr<Ttrack<TOKEN> const> c, 
-	  bdBitset const& filt, 
+	  bdBitset const* filt, 
 	  ostream* log = NULL);
-    
+
+    imTSA(imTSA<TOKEN> const& prior, 
+	  shared_ptr<imTtrack<TOKEN> const> const&   crp,
+	  vector<id_type> const& newsids, size_t const vsize);
+
     count_type 
     sntCnt(char const* p, char const * const q) const; 
 
@@ -81,6 +88,9 @@ namespace ugdiss
     void 
     save_as_mm_tsa(string fname) const;
     
+    /// add a sentence to the database
+    // shared_ptr<imTSA<TOKEN> > add(vector<TOKEN> const& snt) const; 
+
   };
 
   template<typename TOKEN>
@@ -118,12 +128,11 @@ namespace ugdiss
   imTSA<TOKEN>::
   imTSA() 
   {
-    this->corpus  = NULL;
-    this->indexSize = 0;
-    this->data    = NULL;
+    this->indexSize  = 0;
+    // this->data       = NULL;
     this->startArray = NULL;
-    this->endArray = NULL;
-    this->corpusSize=0;
+    this->endArray   = NULL;
+    this->corpusSize = 0;
     this->BitSetCachingThreshold=4096;
   };
   
@@ -131,11 +140,17 @@ namespace ugdiss
   // specified in filter
   template<typename TOKEN>
   imTSA<TOKEN>::
-  imTSA(shared_ptr<Ttrack<TOKEN> const> c, bdBitset const& filter, ostream* log)
+  imTSA(shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filter, ostream* log)
   {
     assert(c);
     this->corpus = c;
-    
+    bdBitset  filter2;
+    if (!filter)
+      {
+	filter2.resize(c->size());
+	filter2.set();
+	filter = &filter2;
+      }
     // In the first iteration over the corpus, we obtain word counts.
     // They allows us to 
     //    a. allocate the exact amount of memory we need
@@ -163,9 +178,9 @@ namespace ugdiss
     
     // Now dump all token positions into the right place in sufa
     this->corpusSize = 0;
-    for (id_type sid = filter.find_first();
-	 sid < filter.size();
-	 sid = filter.find_next(sid))
+    for (id_type sid = filter->find_first();
+	 sid < filter->size();
+	 sid = filter->find_next(sid))
       {
 	TOKEN const* k = c->sntStart(sid);
 	TOKEN const* const stop = c->sntEnd(sid);
@@ -326,8 +341,92 @@ namespace ugdiss
     for (size_t i = 0; i < mmIndex.size(); i++)
       numwrite(out,mmIndex[i]-mmIndex[0]);
     out.seekp(0);
-    numwrite(out,idxStart);
+    numwrite(out,idxStart);  
     out.close();
   }
+
+  template<typename TOKEN>
+  imTSA<TOKEN>::
+  imTSA(imTSA<TOKEN> const& prior, 
+  	shared_ptr<imTtrack<TOKEN> const> const&   crp,
+  	vector<id_type> const& newsids, size_t const vsize)
+  {
+    typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(crp.get());
+    
+    // count how many tokens will be added to the TSA
+    // and index the new additions to the corpus
+    size_t newToks = 0;
+    BOOST_FOREACH(id_type sid, newsids) 
+      newToks += crp->sntLen(sid);
+    vector<cpos> nidx(newToks); // new array entries
+    
+    size_t n = 0;
+    BOOST_FOREACH(id_type sid, newsids) 
+      {
+  	for (size_t o = 0; o < (*crp)[sid].size(); ++o, ++n)
+  	  { nidx[n].offset = o; nidx[n].sid  = sid; }
+      }
+    sort(nidx.begin(),nidx.end(),sorter);
+  
+    // create the new suffix array
+    this->numTokens = newToks + prior.sufa.size();
+    this->sufa.resize(this->numTokens);
+    this->startArray = reinterpret_cast<char const*>(&(*this->sufa.begin()));
+    this->endArray   = reinterpret_cast<char const*>(&(*this->sufa.end()));
+    this->corpusSize = crp->size();
+    this->corpus     = crp;
+    this->index.resize(vsize+1);
+    
+    size_t i = 0;
+    typename vector<cpos>::iterator k = this->sufa.begin();
+    this->index[0] = 0;
+    for (size_t n = 0; n < nidx.size();)
+      {
+  	id_type nid = crp->getToken(nidx[n])->id();
+  	assert(nid >= i);
+  	while (i < nid)
+  	  {
+  	    if (++i < prior.index.size() && prior.index[i-1] < prior.index[i])
+  	      {
+  		k = copy(prior.sufa.begin() + prior.index[i-1], 
+  			 prior.sufa.begin() + prior.index[i], k);
+  	      }
+  	    this->index[i] = k - prior.sufa.begin();
+  	  }
+  	if (++i < prior.index.size() && prior.index[i] > prior.index[i-1])
+  	  {
+  	    size_t j = prior.index[i-1];
+  	    while (j < prior.index[i] && n < nidx.size() 
+  		   && crp->getToken(nidx[n])->id() < i)
+  	      {
+  		assert(k < this->sufa.end());
+  		if (sorter(prior.sufa[j],nidx[n]))
+  		  *k++ = prior.sufa[j++];
+  		else 
+  		  *k++ = nidx[n++];
+  	      }
+  	    while (j < prior.index[i])
+  	      {
+  		assert(k < this->sufa.end());
+  		*k++ = prior.sufa[j++];
+  	      }
+  	  }
+  	while (n < nidx.size() && this->corpus->getToken(nidx[n])->id() < i)
+  	  {
+  	    assert(k < this->sufa.end());
+  	    *k++ = nidx[n++];
+  	  }
+  	this->index[i] = k - this->sufa.begin();
+      }
+    while (++i < this->index.size())
+      {
+  	if (i < prior.index.size() && prior.index[i-1] < prior.index[i])
+  	  k = copy(prior.sufa.begin() + prior.index[i-1], 
+  		   prior.sufa.begin() + prior.index[i], k);
+  	this->index[i] = k - this->sufa.begin();
+      }
+  }
+
 }
+  
 #endif
