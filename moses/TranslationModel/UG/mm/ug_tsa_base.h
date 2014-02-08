@@ -11,6 +11,7 @@
 #include <boost/shared_ptr.hpp>
 #include "tpt_tokenindex.h"
 #include "ug_ttrack_base.h"
+#include "ug_im_ttrack.h"
 #include "ug_corpus_token.h"
 #include "ug_tsa_tree_iterator.h"
 #include "ug_tsa_array_entry.h"
@@ -736,7 +737,7 @@ namespace ugdiss
   TSA<TKN>::
   getCorpus() const
   {
-    return corpus;
+    return corpus.get();
   }
 
   //---------------------------------------------------------------------------
