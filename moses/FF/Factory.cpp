@@ -40,7 +40,7 @@
 #include "moses/TranslationModel/SkeletonPT.h"
 
 #ifdef PT_UG
-#include "moses/TranslationModel/mmsapt.h"
+#include "moses/TranslationModel/UG/mmsapt.h"
 #endif
 
 #include "moses/LM/Ken.h"
