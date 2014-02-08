@@ -26,7 +26,7 @@
 #include "tpt_pickler.h"
 #include "ug_deptree.h"
 #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
-#include "ug_im_tsa.h"
+#include "moses/TranslationModel/UG/mm/ug_im_tsa.h"
 
 using namespace std;
 using namespace ugdiss;
@@ -364,7 +364,7 @@ build_mmTSA(string infile, string outfile)
   shared_ptr<mmTtrack<Token> > T(new mmTtrack<Token>(infile));
   bdBitset filter;
   filter.resize(T->size(),true);
-  imTSA<Token> S(T,filter,(quiet?NULL:&cerr));
+  imTSA<Token> S(T,&filter,(quiet?NULL:&cerr));
   S.save_as_mm_tsa(outfile);
   exit(0);
 }
