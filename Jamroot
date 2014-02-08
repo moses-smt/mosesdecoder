@@ -106,6 +106,8 @@ if [ option.get "enable-mpi" : : "yes" ] {
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
+requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
+requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
 
 if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
@@ -142,6 +144,8 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG/mm//mtt-dump 
   moses/TranslationModel/UG/mm//symal2mam 
   moses/TranslationModel/UG/mm//custom-pt 
+  moses/TranslationModel/UG/mm//mmlex-build 
+  moses/TranslationModel/UG/mm//mtt-count-words 
   ;
 }
 else
