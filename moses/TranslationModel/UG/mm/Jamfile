@@ -1,3 +1,21 @@
+exe mmlex-build : 
+mmlex-build.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mtt-count-words : 
+mtt-count-words.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
 exe mtt-build : 
 mtt-build.cc 
 $(TOP)/moses/TranslationModel/UG/generic//generic 
@@ -35,7 +53,7 @@ $(TOP)/util//kenutil
 ; 
 
 
-install $(PREFIX)/bin :  mtt-build mtt-dump symal2mam custom-pt ; 
+install $(PREFIX)/bin : mtt-build mtt-dump mtt-count-words symal2mam custom-pt mmlex-build ; 
 
 fakelib mm : [ glob ug_*.cc tpt_*.cc ] ;
 
