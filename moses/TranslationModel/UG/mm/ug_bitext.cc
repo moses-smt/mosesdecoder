@@ -38,7 +38,7 @@ namespace Moses
       this->lock.unlock();
     }
 
-    void
+    bool
     pstats::
     add(uint64_t pid, float const w, 
 	vector<uchar> const& a, 
@@ -51,9 +51,11 @@ namespace Moses
       if (this->good < entry.rcnt())
 	{
 	  this->lock.lock();
-	  UTIL_THROW(util::Exception, "more joint counts than good counts!" 
-		     << entry.rcnt() << "/" << this->good);
+	  return false;
+	  // UTIL_THROW(util::Exception, "more joint counts than good counts!" 
+	  // 	     << entry.rcnt() << "/" << this->good);
 	}
+      return true;
     }
 
     jstats::
@@ -112,6 +114,20 @@ namespace Moses
     aln() const 
     { return my_aln; }
 
+    void 
+    jstats::
+    invalidate()
+    {
+      my_rcnt = 0;
+    }
+
+    bool
+    jstats::
+    valid()
+    {
+      return my_rcnt != 0;
+    }
+
     bool
     PhrasePair::
     operator<(PhrasePair const& other) const
@@ -140,6 +156,22 @@ namespace Moses
       good2   = 0;
       fvals.resize(numfeats);
     }
+
+    void
+    PhrasePair::
+    init(uint64_t const pid1, 
+	 pstats const& ps1, 
+	 pstats const& ps2, 
+	 size_t const numfeats)
+    {
+      p1      = pid1;
+      raw1    = ps1.raw_cnt    + ps2.raw_cnt;
+      sample1 = ps1.sample_cnt + ps2.sample_cnt;
+      sample2 = 0;
+      good1   = ps1.good       + ps2.good;
+      good2   = 0;
+      fvals.resize(numfeats);
+    }
     
     float 
     lbop(size_t const tries, size_t const succ, float const confidence)
@@ -149,7 +181,7 @@ namespace Moses
 	find_lower_bound_on_p(tries, succ, confidence);
     }
     
-    void 
+    PhrasePair const&
     PhrasePair::
     update(uint64_t const pid2, jstats const& js)   
     {
@@ -159,8 +191,39 @@ namespace Moses
       assert(js.aln().size());
       if (js.aln().size()) 
 	aln = js.aln()[0].second;
+      return *this;
     }
-    
+
+    PhrasePair const&
+    PhrasePair::
+    update(uint64_t const pid2, jstats const& js1, jstats const& js2)   
+    {
+      p2    = pid2;
+      raw2  = js1.cnt2() + js2.cnt2();
+      joint = js1.rcnt() + js2.rcnt();
+      assert(js1.aln().size() || js2.aln().size());
+      if (js1.aln().size()) 
+	aln = js1.aln()[0].second;
+      else if (js2.aln().size()) 
+	aln = js2.aln()[0].second;
+      return *this;
+    }
+
+    PhrasePair const&
+    PhrasePair::
+    update(uint64_t const pid2, 
+	   size_t   const raw2extra,
+	   jstats   const& js)   
+    {
+      p2    = pid2;
+      raw2  = js.cnt2() + raw2extra;
+      joint = js.rcnt();
+      assert(js.aln().size());
+      if (js.aln().size()) 
+	aln = js.aln()[0].second;
+      return *this;
+    }
+
     float
     PhrasePair::
     eval(vector<float> const& w)
@@ -172,5 +235,81 @@ namespace Moses
       return this->score;
     }
   
+    template<>
+    sptr<imBitext<L2R_Token<SimpleWordId> > > 
+    imBitext<L2R_Token<SimpleWordId> >::
+    add(vector<string> const& s1, 
+	vector<string> const& s2, 
+	vector<string> const& aln) const
+    {
+      typedef L2R_Token<SimpleWordId> TKN;
+      assert(s1.size() == s2.size() && s1.size() == aln.size());
+      
+      sptr<imBitext<TKN> > ret;
+      {
+	lock_guard<mutex> guard(this->lock);
+	ret.reset(new imBitext<TKN>(*this));
+      }
+      
+      // we add the sentences in separate threads (so it's faster)
+      boost::thread thread1(snt_adder<TKN>(s1,*ret->V1,ret->myT1,ret->myI1));
+      thread1.join(); // for debugging
+      boost::thread thread2(snt_adder<TKN>(s2,*ret->V2,ret->myT2,ret->myI2));
+      BOOST_FOREACH(string const& a, aln)
+	{
+	  istringstream ibuf(a);
+	  ostringstream obuf;
+	  uint32_t row,col; char c;
+	  while (ibuf>>row>>c>>col)
+	    {
+	      assert(c == '-');
+	      binwrite(obuf,row);
+	      binwrite(obuf,col);
+	    }
+	  char const* x = obuf.str().c_str();
+	  vector<char> v(x,x+obuf.str().size());
+	  ret->myTx = append(ret->myTx, v);
+	}
+      thread1.join();
+      thread2.join();
+      ret->Tx = ret->myTx;
+      ret->T1 = ret->myT1;
+      ret->T2 = ret->myT2;
+      ret->I1 = ret->myI1;
+      ret->I2 = ret->myI2;
+      return ret;
+    }
+
+    // template<>
+    void
+    snt_adder<L2R_Token<SimpleWordId> >::
+    operator()()
+    {
+	vector<id_type> sids;
+	sids.reserve(snt.size());
+	BOOST_FOREACH(string const& s, snt)
+	  {
+	    sids.push_back(track ? track->size() : 0);
+	    istringstream buf(s);
+	    string w;
+	    vector<L2R_Token<SimpleWordId > > s;
+	    s.reserve(100);
+	    while (buf >> w) 
+	      s.push_back(L2R_Token<SimpleWordId>(V[w]));
+	    track = append(track,s);
+	  }
+	if (index)
+	  index.reset(new imTSA<L2R_Token<SimpleWordId> >(*index,track,sids,V.tsize()));
+	else
+	  index.reset(new imTSA<L2R_Token<SimpleWordId> >(track,NULL,NULL));
+    }
+
+    snt_adder<L2R_Token<SimpleWordId> >::
+    snt_adder(vector<string> const& s, TokenIndex& v, 
+     	      sptr<imTtrack<L2R_Token<SimpleWordId> > >& t, 
+	      sptr<imTSA<L2R_Token<SimpleWordId> > >& i)
+      : snt(s), V(v), track(t), index(i) 
+    { }
+
   }
 }
