@@ -53,6 +53,7 @@ lib moses :
 [ glob 
   *.cpp
   TranslationModel/*.cpp
+  TranslationModel/UG/*.cpp
   TranslationModel/fuzzy-match/*.cpp
   TranslationModel/DynSAInclude/*.cpp
   TranslationModel/RuleTable/*.cpp
@@ -69,9 +70,9 @@ lib moses :
 ]
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt 
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
+TranslationModel/UG/generic//generic TranslationModel/UG/mm//mm
 $(TOP)//boost_iostreams ;
 
-#generic//generic mm//mm
 
 alias headers-to-install : [ glob-tree [^.]*.h ] ;
 
