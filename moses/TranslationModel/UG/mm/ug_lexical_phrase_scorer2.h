@@ -96,8 +96,8 @@ namespace ugdiss
   {
     if (COOC.m1(s) == 0 || COOC.m2(t) == 0) return 1.0;
     // if (!COOC[s][t]) cout << s << " " << t << endl;
-    assert(COOC[s][t]);
-    return float(COOC[s][t])/COOC.m1(s);
+    // assert(COOC[s][t]);
+    return float(COOC[s][t]+1)/(COOC.m1(s)+1);
   }
 
   template<typename TKN>
@@ -106,8 +106,8 @@ namespace ugdiss
   plup_bwd(id_type const s, id_type const t) const
   {
     if (COOC.m1(s) == 0 || COOC.m2(t) == 0) return 1.0;
-    assert(COOC[s][t]);
-    return float(COOC[s][t])/COOC.m2(t);
+    // assert(COOC[s][t]);
+    return float(COOC[s][t]+1)/(COOC.m2(t)+1);
   }
 
   template<typename TKN>
