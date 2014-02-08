@@ -28,10 +28,6 @@ namespace ugdiss
   template<typename TKN=id_type>
   class Ttrack
   {
-  protected:
-    id_type numSent;
-    id_type numWords;
-
   public:
 
     virtual ~Ttrack() {};
@@ -98,7 +94,7 @@ namespace ugdiss
     
     /** counts the tokens in the corpus; used for example in the construction of 
      *  token sequence arrays */
-    count_type count_tokens(vector<count_type>& cnt, bdBitset const& filter,
+    count_type count_tokens(vector<count_type>& cnt, bdBitset const* filter,
                             int lengthCutoff=0, ostream* log=NULL) const;
 
     // static id_type toID(TKN const& t);
@@ -145,16 +141,27 @@ namespace ugdiss
   template<typename TKN>
   count_type
   Ttrack<TKN>::
-  count_tokens(vector<count_type>& cnt, bdBitset const& filter,
-               int lengthCutoff, ostream* log) const
+  count_tokens(vector<count_type>& cnt, bdBitset const* filter, 
+	       int lengthCutoff, ostream* log) const
   {
+    bdBitset filter2; 
+    if (!filter) 
+      {
+	filter2.resize(this->size());
+	filter2.set();
+	filter = &filter2;
+      }
     cnt.clear();
     cnt.reserve(500000);
     count_type totalCount=0;
-    int64_t expectedTotal=numTokens();
-    for (size_t sid = filter.find_first();
-	 sid < filter.size();
-	 sid = filter.find_next(sid))
+    
+    int64_t expectedTotal=0;
+    for (size_t sid = 0; sid < this->size(); ++sid)
+      expectedTotal += this->sntLen(sid);
+    
+    for (size_t sid = filter->find_first();
+	 sid < filter->size();
+	 sid = filter->find_next(sid))
       {
 	TKN const* k = sntStart(sid);
 	TKN const* const stop = sntEnd(sid);
@@ -177,7 +184,7 @@ namespace ugdiss
               }
           }
       }
-    if (this->size() == filter.count())
+    if (this->size() == filter->count())
       {
         if (totalCount != expectedTotal)
           cerr << "OOPS: expected " << expectedTotal 
