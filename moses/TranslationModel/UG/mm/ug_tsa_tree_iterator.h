@@ -55,7 +55,7 @@ namespace ugdiss
     // TSA_tree_iterator(TSA_tree_iterator const& other);
     TSA_tree_iterator(TSA<Token> const* s);
     // TSA_tree_iterator(TSA<Token> const* s, Token const& t);
-    // TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, Token const* kend);
+    TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, Token const* kend);
     // TSA_tree_iterator(TSA<Token> const* s, 
     // 		      TokenIndex const& V, 
     // 		      string const& key);
@@ -354,6 +354,8 @@ namespace ugdiss
 
   // ---------------------------------------------------------------------------
 
+#endif
+
   template<typename Token>
   TSA_tree_iterator<Token>::
   TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, Token const* kend)
@@ -368,7 +370,7 @@ namespace ugdiss
         upper.clear();
       }
   };
-#endif
+
   // ---------------------------------------------------------------------------
   // EXTEND
   // ---------------------------------------------------------------------------
@@ -449,6 +451,7 @@ namespace ugdiss
   TSA_tree_iterator<Token>::
   getPid(int p) const 
   { 
+    if (this->size() == 0) return 0;
     if (p < 0) p += upper.size();
     char const* lb = lower_bound(p);
     char const* ub = upper_bound(p);
@@ -845,8 +848,9 @@ namespace ugdiss
     
     size_t m=0; // number of samples selected so far
     typename Token::ArrayEntry I(lower.at(level));
+
     char const* stop = upper.at(level);
-    while (m < N && I.next < stop)
+    while (m < N && (I.next) < stop)
       {
         root->readEntry(I.next,I);
         
@@ -860,9 +864,9 @@ namespace ugdiss
           }
       }
     ret->resize(m);
+
     return ret;
   }
-
   
 } // end of namespace ugdiss
 #endif
