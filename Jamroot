@@ -132,7 +132,7 @@ project : requirements
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(requirements)
   <include>.
-  ;
+ ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;

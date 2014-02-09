@@ -2,6 +2,10 @@ import testing ;
 
 lib m ;
 
+external-lib boost_python ;
+external-lib python2.7 ;
+external-lib ssl ;
+
 lib mert_lib :
 Util.cpp
 GzFileBuf.cpp
@@ -43,17 +47,22 @@ TER/tercalc.cpp
 TER/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
+M2Scorer.cpp
 Vocabulary.cpp
 PreProcessFilter.cpp
 SentenceLevelScorer.cpp
 Permutation.cpp
 PermutationScorer.cpp
 StatisticsBasedScorer.cpp
-../util//kenutil m ..//z ;
+../util//kenutil m ..//z 
+../moses//ThreadPool
+ssl/<link>shared boost_python/<link>shared python2.7/<link>shared
+: <include>/usr/include/python2.7
+;
 
-exe mert : mert.cpp mert_lib ../moses//ThreadPool ;
+exe mert : mert.cpp mert_lib ;
 
-exe extractor : extractor.cpp mert_lib ;
+exe extractor : extractor.cpp mert_lib  ;
 
 exe evaluator : evaluator.cpp mert_lib ;
 
@@ -67,7 +76,7 @@ alias programs : mert extractor evaluator pro kbmira sentence-bleu ;
 
 unit-test bleu_scorer_test : BleuScorerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ;
-unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ;
+# unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ../moses//ThreadPool ;
 unit-test ngram_test : NgramTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test optimizer_factory_test : OptimizerFactoryTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test point_test : PointTest.cpp mert_lib ..//boost_unit_test_framework ;
