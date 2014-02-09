@@ -779,11 +779,18 @@ while (1) {
   my $base_score_file   = "scores.dat";
   my $feature_file      = "run$run.${base_feature_file}";
   my $score_file        = "run$run.${base_score_file}";
-
-  my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r " . join(",", @references) . " -n $nbest_file";
-  $cmd .= " -d" if $__PROMIX_TRAINING; # Allow duplicates
+  
+  my $cmd =
+    "zcat $nbest_file | split -a 4 -d -l 50000 --filter='gzip > \$FILE.gz' - temp/run.\n"
+  . "find temp/run.*.gz | parallel -k -j $__THREADS $mert_extract_cmd $mert_extract_args --scfile {.}.scores.dat --ffile {.}.features.dat -r " . join(",", @references) . " -n {}\n"
+  . "cat temp/run.*.scores.dat | perl $RealBin/join_extractor_parts.perl > $score_file\n"
+  . "cat temp/run.*.features.dat | perl $RealBin/join_extractor_parts.perl > $feature_file\n";
+  
+  #my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r " . join(",", @references) . " -n $nbest_file";
+  #$cmd .= " -d" if $__PROMIX_TRAINING; # Allow duplicates
   # remove segmentation
-  $cmd .= " -l $__REMOVE_SEGMENTATION" if  $__PROMIX_TRAINING;
+  #$cmd .= " -l $__REMOVE_SEGMENTATION" if  $__PROMIX_TRAINING;
+  
   $cmd = &create_extractor_script($cmd, $___WORKING_DIR);
   &submit_or_exec($cmd, "extract.out","extract.err");
 
@@ -1564,9 +1571,11 @@ sub create_extractor_script() {
 
   open my $out, '>', $script_path
       or die "Couldn't open $script_path for writing: $!\n";
-  print $out "#!/bin/bash\n";
+  print $out "#!/bin/bash -v\n";
   print $out "cd $outdir\n";
+  print $out "mkdir -p temp\n";
   print $out "$cmd\n";
+  print $out "rm -rf temp\n";
   close $out;
 
   `chmod +x $script_path`;
