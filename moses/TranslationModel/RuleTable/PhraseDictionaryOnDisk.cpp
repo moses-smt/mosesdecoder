@@ -165,7 +165,7 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
   CacheColl &cache = GetCache();
   size_t hash = (size_t) ptNode->GetFilePos();
 
-  std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
+  CacheColl::iterator iter;
 
   iter = cache.find(hash);
 
