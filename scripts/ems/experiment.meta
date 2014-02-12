@@ -55,8 +55,18 @@ truecase
 	template-if: input-truecaser IN.$input-extension OUT.$input-extension -model IN1.$input-extension
 	template-if: output-truecaser IN.$output-extension OUT.$output-extension -model IN1.$output-extension
 	parallelizable: yes
+
+source-label
+        in: truecased-stem
+        out: source-labelled
+        default-name: corpus/labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN.$input-extension OUT.$input-extension
+        template-if: cat IN.$output-extension OUT.$output-extension
+	parallelizable: yes
+
 lowercase
-	in: truecased-stem
+	in: source-labelled
 	out: lowercased-stem
 	default-name: corpus/lowercased
 	pass-unless: input-lowercaser output-lowercaser
@@ -718,15 +728,32 @@ factorize-input-devtest
 	ignore-unless: use-mira
 	error: can't open
 	error: incompatible number of words in factor
+
+source-label-input
+        in: factorized-input
+        out: source-labelled-input
+        default-name: tuning/input.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+
+source-label-input-devtest
+        in: factorized-input-devtest
+        out: source-labelled-input-devtest
+        default-name: tuning/input.devtest.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+
 lowercase-input
-	in: factorized-input
+	in: source-labelled-input
 	out: truecased-input
 	default-name: tuning/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 lowercase-input-devtest
-	in: factorized-input-devtest
+	in: source-labelled-input-devtest
 	out: truecased-input-devtest
 	default-name: tuning/input.devtest.lc
 	pass-unless: input-lowercaser
@@ -734,14 +761,14 @@ lowercase-input-devtest
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
-	in: factorized-input TRUECASER:truecase-model
+	in: source-labelled-input TRUECASER:truecase-model
 	out: truecased-input
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.tc
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 truecase-input-devtest
-	in: factorized-input-devtest TRUECASER:truecase-model
+	in: source-labelled-input-devtest TRUECASER:truecase-model
 	out: truecased-input-devtest
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.devtest.tc
@@ -933,15 +960,24 @@ factorize-input
 	pass-unless: TRAINING:input-factors
 	error: can't open
 	error: incompatible number of words in factor
+
+source-label-input
+        in: factorized-input
+        out: source-labelled-input
+        default-name: evaluation/input.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+
 lowercase-input
-	in: factorized-input
+	in: source-labelled-input
 	out: truecased-input
 	default-name: evaluation/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
-	in: factorized-input TRUECASER:truecase-model
+	in: source-labelled-input TRUECASER:truecase-model
 	out: truecased-input
 	default-name: evaluation/input.tc
 	rerun-on-change: input-truecaser

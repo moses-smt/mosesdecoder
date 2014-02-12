@@ -8,7 +8,7 @@ License: LGPL
 Group: Development/Tools
 Vendor: Capita Translation and Interpreting
 Packager: Ian Johnson <ian.johnson@capita-ti.com>
-Requires: boost >= 1.48, python >= 2.6, perl >= 5
+Requires: python >= 2.6, perl >= 5
 BuildRoot: /home/ian/rpmbuild/builds/%{name}-%{version}-%{release}
 %description
 Moses is a statistical machine translation system that allows you to automatically train translation models for any language pair. All you need is a collection of translated texts (parallel corpus). An efficient search algorithm finds quickly the highest probability translation among the exponential number of choices.
@@ -35,16 +35,17 @@ cd ../giza-pp
 make
 cp $RPM_BUILD_DIR/giza-pp/GIZA++-v2/GIZA++ $RPM_BUILD_DIR/giza-pp/GIZA++-v2/snt2cooc.out $RPM_BUILD_DIR/giza-pp/mkcls-v2/mkcls $RPM_BUILD_ROOT/opt/moses/giza++-v1.0.7
 %build
-./bjam --with-irstlm=$RPM_BUILD_ROOT/opt/moses/irstlm-5.70.04 --with-giza=$RPM_BUILD_ROOT/opt/moses/giza++-v1.0.7 -j2
+./bjam --with-boost=___BOOST_LOCATION__ --with-irstlm=$RPM_BUILD_ROOT/opt/moses/irstlm-5.70.04 --with-giza=$RPM_BUILD_ROOT/opt/moses/giza++-v1.0.7 -j2
 %install
 mkdir -p $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R bin $RPM_BUILD_ROOT/opt/moses
+cp -R scripts/OSM $RPM_BUILD_ROOT/opt/moses/scripts
+cp -R scripts/Transliteration $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/analysis $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/ems $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/generic $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/other $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/recaser $RPM_BUILD_ROOT/opt/moses/scripts
-cp -R scripts/regression-testing $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/share $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/tokenizer $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R scripts/training $RPM_BUILD_ROOT/opt/moses/scripts
@@ -52,12 +53,13 @@ cp -R scripts/training $RPM_BUILD_ROOT/opt/moses/scripts
 %files
 %defattr(-,root,root)
 /opt/moses/bin/*
+/opt/moses/scripts/OSM/*
+/opt/moses/scripts/Transliteration/*
 /opt/moses/scripts/analysis/*
 /opt/moses/scripts/ems/*
 /opt/moses/scripts/generic/*
 /opt/moses/scripts/other/*
 /opt/moses/scripts/recaser/*
-/opt/moses/scripts/regression-testing/*
 /opt/moses/scripts/share/*
 /opt/moses/scripts/tokenizer/*
 /opt/moses/scripts/training/*

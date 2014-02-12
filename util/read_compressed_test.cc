@@ -17,6 +17,7 @@
 #include <fcntl.h>
 
 #if !defined mkstemp
+// TODO insecure
 int mkstemp(char * stemplate)
 {
     char *filename = mktemp(stemplate);
@@ -109,6 +110,11 @@ BOOST_AUTO_TEST_CASE(ReadBZ) {
 #ifdef HAVE_XZLIB
 BOOST_AUTO_TEST_CASE(ReadXZ) {
   TestRandom("xz");
+}
+#endif
+
+#ifdef HAVE_ZLIB
+BOOST_AUTO_TEST_CASE(AppendGZ) {
 }
 #endif
 
