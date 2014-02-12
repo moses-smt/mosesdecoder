@@ -981,6 +981,9 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:create-config' || $DO_STEP[$i] eq 'TRAINING:create-config-interpolated-lm') {
 	    &define_training_create_config($i);
 	}
+	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:factorize-tuning') {
+	    &define_interpolated_lm_factorize_tuning($i);
+	}
 	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:interpolate') {
 	    &define_interpolated_lm_interpolate($i);
 	}
@@ -1503,6 +1506,21 @@ sub define_lm_factorize {
     my ($output,$input) = &get_output_and_input($step_id);
     print "LM:$set:factors\n" if $VERBOSE;
     my $factor = &check_backoff_and_get_array("LM:$set:factors");
+    
+    my $dir = &check_and_get("GENERAL:working-dir");
+    my $temp_dir = &check_and_get("INPUT-FACTOR:temp-dir") . ".$VERSION";
+    my $cmd = "mkdir -p $temp_dir\n"
+	. &factorize_one_language("OUTPUT-FACTOR",$input,$output,$factor,$step_id);
+    
+    &create_step($step_id,$cmd);
+}
+
+sub define_interpolated_lm_factorize_tuning {
+    my ($step_id) = @_;
+    my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
+
+    my ($output,$input) = &get_output_and_input($step_id);
+    my $factor = &check_backoff_and_get_array("TRAINING:output-factors");
     
     my $dir = &check_and_get("GENERAL:working-dir");
     my $temp_dir = &check_and_get("INPUT-FACTOR:temp-dir") . ".$VERSION";
@@ -2265,6 +2283,7 @@ sub define_interpolated_lm_interpolate {
 	$interpolation_script, $tuning, @LM) = &get_output_and_input($step_id);
     my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
     my $group = &get("INTERPOLATED-LM:group");
+    my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
 
     my $cmd = "";
 
@@ -2297,9 +2316,12 @@ sub define_interpolated_lm_interpolate {
           $group_string =~ s/ $//;
           $group_string .= " ";
           while($group_string =~ /^([^ ,]+)([ ,]+)(.*)$/) {
-            die("ERROR: unknown set $1 in INTERPOLATED-LM:group definition")
-          if ! defined($POSITION{$1});
-            $numbered_string .= $POSITION{$1}.$2;
+        #    die("ERROR: unknown set $1 in INTERPOLATED-LM:group definition")
+        #  if ! defined($POSITION{$1});
+# detect that elsewhere!
+            if (defined($POSITION{$1})) {
+              $numbered_string .= $POSITION{$1}.$2;
+            }
             $group_string = $3;
           }
           chop($numbered_string);
@@ -2311,7 +2333,12 @@ sub define_interpolated_lm_interpolate {
           $name .= ".$$FACTOR[$factor]" if defined($FACTOR);
           $name .= ".order$order";
         }
-        $cmd .= "$interpolation_script --tuning $tuning --name $name --srilm $srilm_dir --lm $lm_list";
+        my $factored_tuning = $tuning;
+        if (&backoff_and_get("TRAINING:output-factors")) {
+          $factored_tuning = "$tuning.factor$factor";
+          $cmd .= "$scripts/training/reduce-factors.perl --corpus $tuning --reduced $factored_tuning --factor $factor\n";
+        }
+        $cmd .= "$interpolation_script --tuning $factored_tuning --name $name --srilm $srilm_dir --lm $lm_list";
         $cmd .= " --group \"$numbered_string\"" if defined($group);
         $cmd .= "\n";
       }
