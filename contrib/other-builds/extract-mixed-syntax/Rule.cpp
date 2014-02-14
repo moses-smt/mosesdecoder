@@ -106,6 +106,10 @@ void Rule::CreateSymbols(const Global &global, bool &isValid, const SentenceAlig
 	
 	const Range &lhsTargetRange = m_lhs->GetTunnel().GetRange(1);
 
+	if (lhsTargetRange.GetWidth() > global.maxSpan) {
+		isValid = false;
+	}
+
 	// check spans of target non-terms
 	if (nonTerms.size())
 	{
@@ -218,7 +222,12 @@ bool Rule::IsValid(const Global &global, const TunnelCollection &tunnelColl) con
 		// can't be only 1 terminal
 		return false;
 	}
-
+	if (OverSourceMaxSpan(global)) {
+		return false;
+	}
+	if (OverMaxNonTerm(global)) {
+		return false;
+	}
 	/*
 	if (MoreDefaultNonTermThanTerm()) {
 	  // must have at least as many terms as non-syntax non-terms
@@ -322,11 +331,12 @@ bool Rule::CanRecurse(const Global &global, const TunnelCollection &tunnelColl) 
 	if (AdjacentDefaultNonTerms()) {
 		return false;
 	}
-	/*
-	if (MaxNonTerm(global)) {
+	if (OverSourceMaxSpan(global)) {
 		return false;
 	}
-	*/
+	if (OverMaxNonTerm(global)) {
+		return false;
+	}
 	if (NonTermOverlap()) {
 		return false;
 	}
@@ -336,8 +346,8 @@ bool Rule::CanRecurse(const Global &global, const TunnelCollection &tunnelColl) 
 	
 	const Range spanS	= GetSourceRange();
 
-	if (tunnelColl.NumUnalignedWord(0, spanS.GetStartPos(), spanS.GetEndPos()) >= global.maxUnaligned)
-		return false;
+	//if (tunnelColl.NumUnalignedWord(0, spanS.GetStartPos(), spanS.GetEndPos()) >= global.maxUnaligned)
+	//	return false;
 //	if (tunnelColl.NumUnalignedWord(1, spanT.first, spanT.second) >= global.maxUnaligned)
 //		return false;
 	
@@ -366,7 +376,7 @@ bool Rule::WithinNonTermSpans(const Global &global) const
 	return true;
 }
 
-bool Rule::MaxNonTerm(const Global &global) const
+bool Rule::OverMaxNonTerm(const Global &global) const
 {
 	//cerr << *this << endl;
 	size_t numNonTerm = 0, numNonTermDefault = 0;
@@ -377,12 +387,12 @@ bool Rule::MaxNonTerm(const Global &global) const
 		const LatticeNode *node = &(*iter).GetLatticeNode();
 		if (!node->IsTerminal()  )
 		{
-			numNonTerm++;
+			++numNonTerm;
 			if (!node->IsSyntax())
 			{
-				numNonTermDefault++;
+				++numNonTermDefault;
 			}
-			if (numNonTerm >= global.maxNonTerm || numNonTermDefault >= global.maxNonTermDefault)
+			if (numNonTerm > global.maxNonTerm || numNonTermDefault > global.maxNonTermDefault)
 				return true;
 		}
 	}
@@ -390,6 +400,24 @@ bool Rule::MaxNonTerm(const Global &global) const
 	return false;
 }
 
+bool Rule::OverSourceMaxSpan(const Global &global) const
+{
+  size_t startSource = std::numeric_limits<size_t>::max(),
+		  endSource = 0;
+
+	CollType::const_iterator iter;
+	for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
+	{
+		const LatticeNode *node = &(*iter).GetLatticeNode();
+
+		const Range &sourceRange = node->GetSourceRange();
+		startSource = sourceRange.GetStartPos() < startSource ? sourceRange.GetStartPos() : startSource;
+		endSource = sourceRange.GetEndPos() > endSource ? sourceRange.GetEndPos() : endSource;
+	}
+
+	int sourceSpan = endSource - startSource + 1;
+	return (sourceSpan > global.maxSpan) ? true:false;
+}
 
 bool Rule::AdjacentDefaultNonTerms() const
 {

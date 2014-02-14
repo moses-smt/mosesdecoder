@@ -56,7 +56,8 @@ protected:
 
 	size_t GetNumSymbols() const;
 	bool AdjacentDefaultNonTerms() const;
-	bool MaxNonTerm(const Global &global) const;
+	bool OverMaxNonTerm(const Global &global) const;
+	bool OverSourceMaxSpan(const Global &global) const;
 	bool MoreDefaultNonTermThanTerm() const;
 	bool SourceHasEdgeDefaultNonTerm() const;
 	bool WithinNonTermSpans(const Global &global) const;
