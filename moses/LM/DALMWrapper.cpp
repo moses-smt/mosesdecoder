@@ -150,58 +150,38 @@ void LanguageModelDALM::CalcScore(const Phrase &phrase, float &fullScore, float 
   size_t phraseSize = phrase.GetSize();
   if (!phraseSize) return;
   
-  DALMState *dalm_state = new DALMState(m_nGramOrder);
-  
   size_t currPos = 0;
   size_t hist_count = 0;
+  DALMState *dalm_state = new DALMState(m_nGramOrder);
+	DALM::State *state = dalm_state->get_state();
+
+	if(phrase.GetWord(0).GetFactor(m_factorType) == m_beginSentenceFactor){
+		m_lm->init_state(*state);
+		currPos++;
+		hist_count++;
+	}
   
   while (currPos < phraseSize) {
     const Word &word = phrase.GetWord(currPos);
     hist_count++;
 
     if (word.IsNonTerminal()) {
-      // do nothing. reset ngram. needed to score target phrases during pt loading in chart decoding
-      dalm_state->refresh();
+      state->refresh();
       hist_count = 0;
     } else {
-      if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
-        // do nothing, don't include prob for <s> unigram
-        if (currPos != 0) {
-          UTIL_THROW2("Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?");
-        }
-    		m_lm->init_state(*dalm_state->get_state());
-      } else {
-        LMResult result = GetValue(word, dalm_state->get_state());
-        fullScore += result.score;
-        if (hist_count >= m_nGramOrder) ngramScore += result.score;
-        if (result.unknown) ++oovCount;
-      }
+			DALM::VocabId wid = GetVocabId(word.GetFactor(m_factorType));
+			float score = m_lm->query(wid, *state);
+  		fullScore += score;
+      if (hist_count >= m_nGramOrder) ngramScore += score;
+      if (wid==m_vocab->unk()) ++oovCount;
     }
 
     currPos++;
   }
+
+	fullScore = TransformLMScore(fullScore);
+	ngramScore = TransformLMScore(ngramScore);
 	delete dalm_state;
-}
-
-LMResult LanguageModelDALM::GetValue(DALM::VocabId wid, DALM::State* finalState) const{
-  LMResult ret;
-
-  // last word is unk?
-  ret.unknown = (wid == m_vocab->unk());
-
-  // calc score.
-  float score = m_lm->query(wid, *finalState);
-  score = TransformLMScore(score);
-  ret.score = score;
-
-  return ret;
-}
-
-LMResult LanguageModelDALM::GetValue(const Word &word, DALM::State* finalState) const
-{
-  DALM::VocabId wid = GetVocabId(word.GetFactor(m_factorType));
-  
-  return GetValue(wid, finalState);
 }
 
 FFState *LanguageModelDALM::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const{
@@ -222,28 +202,28 @@ FFState *LanguageModelDALM::Evaluate(const Hypothesis &hypo, const FFState *ps, 
   const std::size_t adjust_end = std::min(end, begin + m_nGramOrder - 1);
   
   DALMState *dalm_state = new DALMState(*dalm_ps);
+	DALM::State *state = dalm_state->get_state();
   
-  std::size_t position = begin;
   float score = 0.0;
-  for(; position < adjust_end; position++){
-  	score += GetValue(hypo.GetWord(position), dalm_state->get_state()).score;
+  for(std::size_t position=begin; position < adjust_end; position++){
+  	score += m_lm->query(GetVocabId(hypo.GetWord(position).GetFactor(m_factorType)), *state);
   }
   
   if (hypo.IsSourceCompleted()) {
     // Score end of sentence.
     std::vector<DALM::VocabId> indices(m_nGramOrder-1);
     const DALM::VocabId *last = LastIDs(hypo, &indices.front());
-    m_lm->set_state(&indices.front(), (last-&indices.front()), *dalm_state->get_state());
+    m_lm->set_state(&indices.front(), (last-&indices.front()), *state);
     
-    float s = GetValue(wid_end, dalm_state->get_state()).score;
-    score += s;
+  	score += m_lm->query(wid_end, *state);
   } else if (adjust_end < end) {
     // Get state after adding a long phrase.
     std::vector<DALM::VocabId> indices(m_nGramOrder-1);
     const DALM::VocabId *last = LastIDs(hypo, &indices.front());
-    m_lm->set_state(&indices.front(), (last-&indices.front()), *dalm_state->get_state());
+    m_lm->set_state(&indices.front(), (last-&indices.front()), *state);
   }
 
+	score = TransformLMScore(score);
   if (OOVFeatureEnabled()) {
     std::vector<float> scores(2);
     scores[0] = score;
@@ -260,6 +240,7 @@ FFState *LanguageModelDALM::EvaluateChart(const ChartHypothesis& hypo, int featu
   LanguageModelChartState *ret = new LanguageModelChartState(hypo, featureID, m_nGramOrder);
   // initialize language model context state
 	DALMState *dalm_state = new DALMState(m_nGramOrder);
+	DALM::State *state = dalm_state->get_state();
 
   // initial language model scores
   float prefixScore = 0.0;    // not yet final for initial words (lack context)
@@ -282,11 +263,13 @@ FFState *LanguageModelDALM::EvaluateChart(const ChartHypothesis& hypo, int featu
       if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
       UTIL_THROW_IF2(phrasePos != 0,
           "Sentence start symbol must be at the beginning of sentence");
-				m_lm->init_state(*dalm_state->get_state());
+				m_lm->init_state(*state);
       }
       // score a regular word added by the rule
       else {
-        updateChartScore( &prefixScore, &finalizedScore, GetValue(word, dalm_state->get_state()).score, ++wordPos );
+				float score = m_lm->query(GetVocabId(word.GetFactor(m_factorType)), *state);
+
+        updateChartScore( &prefixScore, &finalizedScore, score, ++wordPos );
       }
     }
 
@@ -304,12 +287,13 @@ FFState *LanguageModelDALM::EvaluateChart(const ChartHypothesis& hypo, int featu
       if (phrasePos == 0) {
 
         // get prefixScore and finalizedScore
-        prefixScore = prevState->GetPrefixScore();
-        finalizedScore = prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0] - prefixScore;
+        prefixScore = UntransformLMScore(prevState->GetPrefixScore());
+        finalizedScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]) - prefixScore;
 
         // get language model state
         delete dalm_state;
         dalm_state = new DALMState( *static_cast<DALMState*>(prevState->GetRightContext()) );
+				state = dalm_state->get_state();
 				wordPos += subPhraseLength;
       }
 
@@ -322,24 +306,29 @@ FFState *LanguageModelDALM::EvaluateChart(const ChartHypothesis& hypo, int featu
             && prefixPos < subPhraseLength; // up to length
             prefixPos++) {
           const Word &word = prevState->GetPrefix().GetWord(prefixPos);
-          updateChartScore( &prefixScore, &finalizedScore, GetValue(word, dalm_state->get_state()).score, ++wpos );
+					float score = m_lm->query(GetVocabId(word.GetFactor(m_factorType)), *state);
+          updateChartScore( &prefixScore, &finalizedScore, score, ++wpos );
         }
 				wordPos += subPhraseLength;
 
         // check if we are dealing with a large sub-phrase
         if (subPhraseLength > m_nGramOrder - 1) {
           // add its finalized language model score
-          finalizedScore +=
+          finalizedScore += UntransformLMScore(
             prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0] // full score
-            - prevState->GetPrefixScore();                              // - prefix score
+            - prevState->GetPrefixScore());                              // - prefix score
 
           // copy language model state
           delete dalm_state;
           dalm_state = new DALMState( *static_cast<DALMState*>(prevState->GetRightContext()) );
+					state = dalm_state->get_state();
         }
       }
     }
   }
+
+	prefixScore = TransformLMScore(prefixScore);
+	finalizedScore = TransformLMScore(finalizedScore);
 
   // assign combined score to score breakdown
   out->Assign(this, prefixScore + finalizedScore);
@@ -358,28 +347,36 @@ void LanguageModelDALM::CreateVocabMapping(const std::string &wordstxt)
 {
   InputFileStream vocabStrm(wordstxt);
 
+	std::vector< std::pair<std::size_t, DALM::VocabId> > vlist;
   string line;
+	std::size_t max_fid = 0;
   while(getline(vocabStrm, line)) {
 	  const Factor *factor = FactorCollection::Instance().AddFactor(line);
+		std::size_t fid = factor->GetId();
 	  DALM::VocabId wid = m_vocab->lookup(line.c_str());
 
-	  VocabMap::value_type entry(factor, wid);
-	  m_vocabMap.insert(entry);
+	  vlist.push_back(std::pair<std::size_t, DALM::VocabId>(fid, wid));
+		if(max_fid < fid) max_fid = fid;
   }
 
+	for(std::size_t i = 0; i < m_vocabMap.size(); i++){
+		m_vocabMap[i] = m_vocab->unk();
+	}
+
+	m_vocabMap.resize(max_fid+1, m_vocab->unk());
+	std::vector< std::pair<std::size_t, DALM::VocabId> >::iterator it = vlist.begin();
+	while(it != vlist.end()){
+		std::pair<std::size_t, DALM::VocabId> &entry = *it;
+		m_vocabMap[entry.first] = entry.second;
+
+		++it;
+	}
 }
 
 DALM::VocabId LanguageModelDALM::GetVocabId(const Factor *factor) const
 {
-	VocabMap::left_map::const_iterator iter;
-	iter = m_vocabMap.left.find(factor);
-	if (iter != m_vocabMap.left.end()) {
-		return iter->second;
-	}
-	else {
-		// not in mapping. Must be UNK
-		return m_vocab->unk();
-	}
+	std::size_t fid = factor->GetId();
+	return (m_vocabMap.size() > fid)? m_vocabMap[fid] : m_vocab->unk();
 }
 
 void LanguageModelDALM::SetParameter(const std::string& key, const std::string& value)
