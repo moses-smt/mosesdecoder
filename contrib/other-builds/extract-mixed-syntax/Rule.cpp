@@ -162,7 +162,7 @@ void Rule::CreateSymbols(const Global &global, bool &isValid, const SentenceAlig
 				
 		assert(indNonTerm == nonTerms.size());
 
-		if (m_target.GetSize() > global.maxSymbols) {
+		if (m_target.GetSize() > global.maxSymbolsTarget) {
 		  isValid = false;
 	    //cerr << "m_source=" << m_source.GetSize() << ":" << m_source << endl;
 	    //cerr << "m_target=" << m_target.GetSize() << ":" << m_target << endl;
@@ -230,7 +230,7 @@ bool Rule::IsValid(const Global &global, const TunnelCollection &tunnelColl) con
 		return false;
 	}
 	
-	if (GetNumSymbols() > global.maxSymbols) {
+	if (GetNumSymbols() > global.maxSymbolsSource) {
 		return false;
 	}
 	
@@ -316,7 +316,7 @@ bool Rule::IsHole(const TunnelCollection &tunnelColl) const
 
 bool Rule::CanRecurse(const Global &global, const TunnelCollection &tunnelColl) const
 {
-	if (GetNumSymbols() >= global.maxSymbols) {
+	if (GetNumSymbols() >= global.maxSymbolsSource) {
 		return false;
 	}
 	if (AdjacentDefaultNonTerms()) {
