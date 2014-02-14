@@ -28,7 +28,7 @@ public:
 	bool sourceSyntax;
 	bool targetSyntax;
 	bool mixed;
-	//int maxUnaligned;
+	int maxUnaligned;
 	bool uppermostOnly;
 	bool allowDefaultNonTermEdge;
   bool gzOutput;

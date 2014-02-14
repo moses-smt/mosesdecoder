@@ -16,7 +16,7 @@ Global::Global()
 , maxHoleSpanSourceDefault(7)
 , minHoleSpanSourceSyntax(1)
 , maxHoleSpanSourceSyntax(1000)
-//, maxUnaligned(5)
+, maxUnaligned(99999)
 
 , maxSpan(10)
 , maxSymbolsSource(5)
