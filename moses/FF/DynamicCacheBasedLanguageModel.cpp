@@ -205,6 +205,28 @@ void DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int 
   }
 }
 
+void DynamicCacheBasedLanguageModel::ClearEntries(std::string &entries)
+{
+  if (entries != "") {
+    VERBOSE(3,"entries:|" << entries << "|" << std::endl);
+    std::vector<std::string> elements = TokenizeMultiCharSeparator(entries, "||");
+    VERBOSE(3,"elements.size() after:|" << elements.size() << "|" << std::endl);
+    ClearEntries(elements);
+  }
+}
+
+void DynamicCacheBasedLanguageModel::ClearEntries(std::vector<std::string> words)
+{
+#ifdef WITH_THREADS
+  boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
+#endif
+  VERBOSE(3,"words.size():|" << words.size() << "|" << std::endl);
+  for (size_t j=0; j<words.size(); j++) {    words[j] = Trim(words[j]);
+    VERBOSE(3,"CacheBasedLanguageModel::ClearEntries   word[" << j << "]:"<< words[j] << std::endl);
+    m_cache.erase(words[j]); //always erase the element (do nothing if the entry does not exist)
+  }
+}
+
 void DynamicCacheBasedLanguageModel::Insert(std::string &entries)
 {
   if (entries != "") {

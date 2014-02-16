@@ -146,6 +146,15 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     if ((*dlt_meta_it).find("cbtm-file") != (*dlt_meta_it).end()) {
       if (&cbtm) cbtm.Load((*dlt_meta_it)["cbtm-file"]);
     }
+    if ((*dlt_meta_it).find("cbtm-clear-source") != (*dlt_meta_it).end()) {
+      if (&cbtm) cbtm.ClearSource((*dlt_meta_it)["cbtm-clear-source"]);
+    }
+    if ((*dlt_meta_it).find("cbtm-clear-entries") != (*dlt_meta_it).end()) {
+      if (&cbtm) cbtm.ClearEntries((*dlt_meta_it)["cbtm-clear-entries"]);
+    }
+    if ((*dlt_meta_it).find("cbtm-clear-all") != (*dlt_meta_it).end()) {
+      if (&cbtm) cbtm.Clear();
+    }
     if ((*dlt_meta_it).find("cblm") != (*dlt_meta_it).end()) {
       if (&cblm) cblm.Insert((*dlt_meta_it)["cblm"]);
     }
@@ -154,6 +163,12 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     }
     if ((*dlt_meta_it).find("cblm-file") != (*dlt_meta_it).end()) {
       if (&cblm) cblm.Load((*dlt_meta_it)["cblm-file"]);
+    }
+    if ((*dlt_meta_it).find("cblm-clear-entries") != (*dlt_meta_it).end()) {
+      if (&cblm) cblm.ClearEntries((*dlt_meta_it)["cblm-clear-entries"]);
+    }
+    if ((*dlt_meta_it).find("cblm-clear-all") != (*dlt_meta_it).end()) {
+      if (&cblm) cblm.Clear();
     }
   }
 

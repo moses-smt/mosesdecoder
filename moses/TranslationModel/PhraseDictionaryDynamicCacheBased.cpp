@@ -108,6 +108,8 @@ void PhraseDictionaryDynamicCacheBased::InitializeForInput(InputType const& sour
 
 const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) const
 {
+  VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection" << std::endl);
+  VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection src:|" << source << "|" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
 #endif
@@ -116,7 +118,8 @@ const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhrase
   cacheMap::const_iterator it = m_cacheTM.find(source);
   if(it != m_cacheTM.end()) {
     VERBOSE(3,"source:|" << source << "| FOUND" << std::endl);
-    tpc = (it->second).first;
+//    tpc = (it->second).first;
+    tpc = new TargetPhraseCollection(*(it->second).first);
 
     std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
 
@@ -129,11 +132,17 @@ const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhrase
     tpc->NthElement(m_tableLimit); // sort the phrases for the decoder
   }
 
+  if (tpc){
+    VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY tpc->size():" << tpc->GetSize() << std::endl);
+  }else{
+    VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY tpc->size():" << 0 << std::endl);
+  }
   return tpc;
 }
 
 const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
+  VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY" << std::endl);
   const TargetPhraseCollection *ret = GetTargetPhraseCollection(src);
   return ret;
 }
@@ -251,6 +260,177 @@ Scores PhraseDictionaryDynamicCacheBased::GetPreComputedScores(const unsigned in
   }
 }
 
+void PhraseDictionaryDynamicCacheBased::ClearEntries(std::string &entries)
+{
+  if (entries != "") {
+    VERBOSE(3,"entries:|" << entries << "|" << std::endl);
+    std::vector<std::string> elements = TokenizeMultiCharSeparator(entries, "||||");
+    VERBOSE(3,"elements.size() after:|" << elements.size() << "|" << std::endl);
+    ClearEntries(elements);
+  }
+}
+
+void PhraseDictionaryDynamicCacheBased::ClearEntries(std::vector<std::string> entries)
+{
+  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::ClearEntries(std::vector<std::string> entries)" << std::endl);
+  std::vector<std::string> pp;
+
+  std::vector<std::string>::iterator it;
+  for(it = entries.begin(); it!=entries.end(); it++) {
+    pp.clear();
+    pp = TokenizeMultiCharSeparator((*it), "|||");
+    VERBOSE(3,"pp[0]:|" << pp[0] << "|" << std::endl);
+    VERBOSE(3,"pp[1]:|" << pp[1] << "|" << std::endl);
+
+    ClearEntries(pp[0], pp[1]);
+  }
+}
+
+void PhraseDictionaryDynamicCacheBased::ClearEntries(std::string sourcePhraseString, std::string targetPhraseString)
+{
+  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::ClearEntries(std::string sourcePhraseString, std::string targetPhraseString)" << std::endl);
+  const StaticData &staticData = StaticData::Instance();
+  const std::string& factorDelimiter = staticData.GetFactorDelimiter();
+  Phrase sourcePhrase(0);
+  Phrase targetPhrase(0);
+
+  //target
+  targetPhrase.Clear();
+  VERBOSE(3, "targetPhraseString:|" << targetPhraseString << "|" << std::endl);
+  targetPhrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetPhraseString, factorDelimiter, NULL);
+  VERBOSE(2, "targetPhrase:|" << targetPhrase << "|" << std::endl);
+
+  //TODO: Would be better to reuse source phrases, but ownership has to be
+  //consistent across phrase table implementations
+  sourcePhrase.Clear();
+  VERBOSE(3, "sourcePhraseString:|" << sourcePhraseString << "|" << std::endl);
+  sourcePhrase.CreateFromString(Input, staticData.GetInputFactorOrder(), sourcePhraseString, factorDelimiter, NULL);
+  VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
+  ClearEntries(sourcePhrase, targetPhrase);
+
+}
+
+void PhraseDictionaryDynamicCacheBased::ClearEntries(Phrase sp, Phrase tp)
+{
+  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::ClearEntries(Phrase sp, Phrase tp)" << std::endl);
+#ifdef WITH_THREADS
+  boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
+#endif
+  VERBOSE(3, "PhraseDictionaryCache deleting sp:|" << sp << "| tp:|" << tp << "|" << std::endl);
+
+  cacheMap::const_iterator it = m_cacheTM.find(sp);
+  VERBOSE(3,"sp:|" << sp << "|" << std::endl);
+  if(it!=m_cacheTM.end()) {
+    VERBOSE(3,"sp:|" << sp << "| FOUND" << std::endl);
+    // sp is found
+    // here we have to remove the target phrase from targetphrasecollection and from the TargetAgeMap
+    // and then add new entry
+
+    TargetCollectionAgePair TgtCollAgePair = it->second;
+    TargetPhraseCollection* tpc = TgtCollAgePair.first;
+    AgeCollection* ac = TgtCollAgePair.second;
+    const Phrase* p_ptr = NULL;
+    TargetPhrase* tp_ptr = NULL;
+    bool found = false;
+    size_t tp_pos=0;
+    while (!found && tp_pos < tpc->GetSize()) {
+      tp_ptr = (TargetPhrase*) tpc->GetTargetPhrase(tp_pos);
+      p_ptr = (const Phrase*) tp_ptr;
+      if (tp == *p_ptr) {
+        found = true;
+        continue;
+      }
+      tp_pos++;
+    }
+    if (!found) {
+      VERBOSE(3,"tp:|" << tp << "| NOT FOUND" << std::endl);
+      //do nothing
+    }
+    else{
+      VERBOSE(3,"tp:|" << tp << "| FOUND" << std::endl);
+
+      tpc->Remove(tp_pos); //delete entry in the Target Phrase Collection
+      ac->erase(ac->begin() + tp_pos); //delete entry in the Age Collection
+      m_entries--;
+      VERBOSE(3,"tpc size:|" << tpc->GetSize() << "|" << std::endl);
+      VERBOSE(3,"ac size:|" << ac->size() << "|" << std::endl);
+      VERBOSE(3,"tp:|" << tp << "| DELETED" << std::endl);      
+    }
+    if (tpc->GetSize() == 0) {
+      // delete the entry from m_cacheTM in case it points to an empty TargetPhraseCollection and AgeCollection
+      ac->clear();
+      delete tpc;
+      delete ac;
+      m_cacheTM.erase(sp);
+    }
+
+  } else {
+    VERBOSE(3,"sp:|" << sp << "| NOT FOUND" << std::endl);
+    //do nothing
+  }
+}
+
+
+
+
+void PhraseDictionaryDynamicCacheBased::ClearSource(std::string &entries)
+{
+  if (entries != "") {
+    VERBOSE(3,"entries:|" << entries << "|" << std::endl);
+    std::vector<std::string> elements = TokenizeMultiCharSeparator(entries, "||||");
+    VERBOSE(3,"elements.size() after:|" << elements.size() << "|" << std::endl);
+    ClearEntries(elements);
+  }
+}
+
+void PhraseDictionaryDynamicCacheBased::ClearSource(std::vector<std::string> entries)
+{
+  VERBOSE(3,"entries.size():|" << entries.size() << "|" << std::endl);
+  const StaticData &staticData = StaticData::Instance();
+  const std::string& factorDelimiter = staticData.GetFactorDelimiter();
+  Phrase sourcePhrase(0);
+
+  std::vector<std::string>::iterator it;
+  for(it = entries.begin(); it!=entries.end(); it++) {
+
+    sourcePhrase.Clear();
+    VERBOSE(3, "sourcePhraseString:|" << (*it) << "|" << std::endl);
+    sourcePhrase.CreateFromString(Input, staticData.GetInputFactorOrder(), *it, factorDelimiter, NULL);
+    VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
+
+    ClearSource(sourcePhrase);
+  }
+
+  IFVERBOSE(2) Print();
+}
+
+void PhraseDictionaryDynamicCacheBased::ClearSource(Phrase sp)
+{
+  VERBOSE(3,"sp:|" << sp << "|" << std::endl);
+  cacheMap::const_iterator it = m_cacheTM.find(sp);
+  VERBOSE(3,"searching:|" << sp << "|" << std::endl);
+  if (it != m_cacheTM.end()) {
+    VERBOSE(3,"found:|" << sp << "|" << std::endl);
+    //sp is found
+
+    TargetCollectionAgePair TgtCollAgePair = it->second;
+    TargetPhraseCollection* tpc = TgtCollAgePair.first;
+    AgeCollection* ac = TgtCollAgePair.second;
+
+    m_entries-=tpc->GetSize(); //reduce the total amount of entries of the cache
+
+    // delete the entry from m_cacheTM in case it points to an empty TargetPhraseCollection and AgeCollection
+    ac->clear();
+    delete tpc;
+    delete ac;
+    m_cacheTM.erase(sp);
+  }
+  else
+  {
+    //do nothing
+  }
+}
+
 void PhraseDictionaryDynamicCacheBased::Insert(std::string &entries)
 {
   if (entries != "") {
@@ -323,19 +503,21 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
   VERBOSE(3,"sp:|" << sp << "|" << std::endl);
   if(it!=m_cacheTM.end()) {
     VERBOSE(3,"sp:|" << sp << "| FOUND" << std::endl);
-    // p is found
+    // sp is found
     // here we have to remove the target phrase from targetphrasecollection and from the TargetAgeMap
     // and then add new entry
 
     TargetCollectionAgePair TgtCollAgePair = it->second;
     TargetPhraseCollection* tpc = TgtCollAgePair.first;
     AgeCollection* ac = TgtCollAgePair.second;
-    const Phrase* tp_ptr = NULL;
+    const Phrase* p_ptr = NULL;
+    TargetPhrase* tp_ptr = NULL;
     bool found = false;
     size_t tp_pos=0;
     while (!found && tp_pos < tpc->GetSize()) {
-      tp_ptr = (const Phrase*) tpc->GetTargetPhrase(tp_pos);
-      if (tp == *tp_ptr) {
+      tp_ptr = (TargetPhrase*) tpc->GetTargetPhrase(tp_pos);
+      p_ptr = (const Phrase*) tp_ptr;
+      if (tp == *p_ptr) {
         found = true;
         continue;
       }
@@ -353,6 +535,14 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
       VERBOSE(3,"tpc size:|" << tpc->GetSize() << "|" << std::endl);
       VERBOSE(3,"ac size:|" << ac->size() << "|" << std::endl);
       VERBOSE(3,"tp:|" << tp << "| INSERTED" << std::endl);
+    }
+    else{
+      VERBOSE(3,"tp:|" << tp << "| FOUND" << std::endl);
+      tp_ptr->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
+      ac->at(tp_pos) = age;
+      VERBOSE(3,"tpc size:|" << tpc->GetSize() << "|" << std::endl);
+      VERBOSE(3,"ac size:|" << ac->size() << "|" << std::endl);
+      VERBOSE(3,"tp:|" << tp << "| UPDATED" << std::endl);	
     }
   } else {
     VERBOSE(3,"sp:|" << sp << "| NOT FOUND" << std::endl);

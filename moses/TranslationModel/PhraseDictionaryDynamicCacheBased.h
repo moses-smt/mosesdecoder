@@ -101,7 +101,10 @@ public:
 //  }
 
   void Print() const;             // prints the cache
+  void Clear();           // clears the cache
 
+  void ClearEntries(std::string &entries);
+  void ClearSource(std::string &entries);
   void Insert(std::string &entries);
   void Execute(std::string command);
 
@@ -120,11 +123,17 @@ protected:
   void Update(std::string sourceString, std::string targetString, std::string ageString);
   void Update(Phrase p, Phrase tp, int age);
 
+  void ClearEntries(std::vector<std::string> entries);
+  void ClearEntries(std::string sourceString, std::string targetString);
+  void ClearEntries(Phrase p, Phrase tp);
+
+  void ClearSource(std::vector<std::string> entries);
+  void ClearSource(Phrase sp);
+
   void Execute(std::vector<std::string> commands);
   void Execute_Single_Command(std::string command);
 
 
-  void Clear();           // clears the cache
   void SetPreComputedScores(const unsigned int numScoreComponent);
   Scores GetPreComputedScores(const unsigned int age);
 

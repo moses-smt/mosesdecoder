@@ -61,6 +61,8 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
   void Decay();
   void Update(std::vector<std::string> words, int age);
 
+  void ClearEntries(std::vector<std::string> entries);
+
   void Execute(std::vector<std::string> commands);
   void Execute_Single_Command(std::string command);
 
@@ -73,7 +75,6 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
 
   void Print() const;
 
-  void Clear();
 
 protected:
   static DynamicCacheBasedLanguageModel *s_instance;
@@ -98,7 +99,9 @@ public:
   void Execute(std::string command);
   void SetParameter(const std::string& key, const std::string& value);
 
+  void ClearEntries(std::string &entries);
   void Insert(std::string &entries);
+  void Clear();
 
   virtual void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase

@@ -384,24 +384,30 @@ void TranslationOptionCollection::CreateTranslationOptions()
     const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
     size_t backoff = decodeGraph.GetBackoff();
     // generate phrases that start at startPos ...
+    VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptions() graphInd:" << graphInd << endl);
     for (size_t startPos = 0 ; startPos < size; startPos++) {
+      VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptions() startPos:" << startPos << endl);
       size_t maxSize = size - startPos; // don't go over end of sentence
       size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
       maxSize = std::min(maxSize, maxSizePhrase);
 
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
+        VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptions() endPos:" << endPos << endl);
         if (graphInd > 0 && // only skip subsequent graphs
             backoff != 0 && // use of backoff specified
             (endPos-startPos+1 >= backoff || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options
+          VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptions() continue:" << endl);
           continue;
         }
 
         // create translation options for that range
+        VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptions() before CreateTranslationOptionsForRange" << endl);
         CreateTranslationOptionsForRange( decodeGraph, startPos, endPos, true, graphInd);
+        VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptions() after CreateTranslationOptionsForRange" << endl);
       }
     }
   }
@@ -432,6 +438,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   , size_t graphInd
   , InputPath &inputPath)
 {
+VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptionsForRange() START startPos:" << startPos << " endPos:" << endPos << endl);
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
 
     // partial trans opt stored in here
@@ -445,10 +452,12 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
     const PhraseDictionary &phraseDictionary = *decodeStep.GetPhraseDictionaryFeature();
     const TargetPhraseCollection *targetPhrases = inputPath.GetTargetPhrases(phraseDictionary);
 
+    VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptionsForRange() before ProcessInitialTranslation" << endl);
     static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
     (m_source, *oldPtoc
      , startPos, endPos, adhereTableLimit
      , inputPath, targetPhrases);
+    VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptionsForRange() after ProcessInitialTranslation" << endl);
 
     SetInputScore(inputPath, *oldPtoc);
 
@@ -511,9 +520,11 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
     // TRACE_ERR( "Early translation options pruned: " << totalEarlyPruned << endl);
   } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 
+  VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptionsForRange() before CreateXmlOptionsForRange" << endl);
   if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
     CreateXmlOptionsForRange(startPos, endPos);
   }
+  VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptionsForRange() after CreateXmlOptionsForRange" << endl);
 }
 
 void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, PartialTranslOptColl &oldPtoc)
