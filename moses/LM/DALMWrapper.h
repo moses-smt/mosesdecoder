@@ -59,8 +59,6 @@ protected:
 	DALM::VocabId GetVocabId(const Factor *factor) const;
 
 private:
-	void updateChartScore(float *prefixScore, float *finalizedScore, float score, size_t wordPos) const;
-	
   // Convert last words of hypothesis into vocab ids, returning an end pointer.
   DALM::VocabId *LastIDs(const Hypothesis &hypo, DALM::VocabId *indices) const {
     DALM::VocabId *index = indices;
