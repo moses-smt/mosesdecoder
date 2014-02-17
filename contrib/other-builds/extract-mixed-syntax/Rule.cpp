@@ -172,6 +172,27 @@ void Rule::CreateSymbols(const Global &global, bool &isValid, const SentenceAlig
 	    //cerr << "m_target=" << m_target.GetSize() << ":" << m_target << endl;
 		}
 	}	
+
+
+	if (isValid) {
+		isValid = false;
+		for (size_t i = 0; i < m_source.GetSize(); ++i) {
+			const Symbol &symbol = m_source.GetSymbol(i);
+			if (symbol.IsTerminal()) {
+				isValid = true;
+			}
+		}
+	}
+
+	if (isValid) {
+		isValid = false;
+		for (size_t i = 0; i < m_target.GetSize(); ++i) {
+			const Symbol &symbol = m_target.GetSymbol(i);
+			if (symbol.IsTerminal()) {
+				isValid = true;
+			}
+		}
+	}
 }
 
 bool Rule::MoreDefaultNonTermThanTerm() const

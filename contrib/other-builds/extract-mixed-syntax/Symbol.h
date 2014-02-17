@@ -32,5 +32,6 @@ public:
 				 , bool isSourceSyntax, bool isTargetSyntax);
 
 	int Compare(const Symbol &other) const;
-
+	bool IsTerminal() const
+	{ return m_isTerminal; }
 };
