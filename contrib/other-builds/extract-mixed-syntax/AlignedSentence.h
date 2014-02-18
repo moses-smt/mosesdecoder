@@ -12,8 +12,9 @@
 #include "Word.h"
 #include "SyntaxTree.h"
 #include "ConsistentPhrase.h"
+#include "moses/TypeDef.h"
 
-typedef std::pair<size_t, size_t> AlignmentPair;
+typedef std::vector<Word*> Phrase;
 
 class Parameter;
 
@@ -25,8 +26,14 @@ public:
 	virtual ~AlignedSentence();
 	void CreateConsistentPhrases(const Parameter &params);
 
+	const Phrase &GetPhrase(Moses::FactorDirection direction) const
+	{ return (direction == Moses::Input) ? m_source : m_target; }
+
+	const std::vector<ConsistentPhrase> &GetConsistentPhrases() const
+	{ return m_consistentPhrases; }
+
 protected:
-  std::vector<Word*> m_source, m_target;
+  Phrase m_source, m_target;
   SyntaxTree sourceTree, targetTree;
 
   std::vector<ConsistentPhrase> m_consistentPhrases;

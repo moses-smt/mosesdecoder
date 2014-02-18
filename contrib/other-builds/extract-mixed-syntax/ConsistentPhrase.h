@@ -7,9 +7,10 @@
 #pragma once
 
 #include <string>
-#include "LatticeNode.h"
+#include "LatticeArc.h"
+#include "moses/TypeDef.h"
 
-class ConsistentRange : public LatticeNode
+class ConsistentRange : public LatticeArc
 {
 public:
 	ConsistentRange(int start, int end, const std::string &label)
@@ -26,6 +27,12 @@ public:
 	void SetOtherRange(const ConsistentRange &otherRange)
 	{ m_otherRange = &otherRange; }
 
+	int GetStart() const
+	{ return m_start; }
+
+	int GetEnd() const
+	{ return m_end; }
+
 protected:
 	int m_start, m_end;
 	std::string m_label;
@@ -35,10 +42,11 @@ protected:
 class ConsistentPhrase
 {
 public:
-  int startSource, endSource, startTarget, endTarget;
-
   ConsistentPhrase(int startSource, int endSource, int startTarget, int endTarget,
 		  	  		const std::string &sourceLabel, const std::string &targetLabel);
+
+  const ConsistentRange &GetConsistentRange(Moses::FactorDirection direction) const
+  { return (direction == Moses::Input) ? m_source : m_target; }
 
 protected:
   ConsistentRange m_source, m_target;

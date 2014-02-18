@@ -8,8 +8,10 @@
 
 #include <string>
 #include <set>
+#include "LatticeArc.h"
 
-class Word {
+class Word : public LatticeArc
+{
 public:
 	Word(const std::string &str);
 	virtual ~Word();

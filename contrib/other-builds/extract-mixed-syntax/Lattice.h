@@ -6,10 +6,22 @@
  */
 #pragma once
 
+#include <vector>
+#include "LatticeArc.h"
+
+class AlignedSentence;
+
 class Lattice
 {
 public:
-	Lattice();
+	typedef std::vector<const LatticeArc*> LatticeNode;
+
+	Lattice(const AlignedSentence &alignedSentence);
 	virtual ~Lattice();
+
+protected:
+	// all terms and non-terms, placed in stack according to their starting point
+	std::vector<LatticeNode> m_coll;
+
 };
 
