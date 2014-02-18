@@ -146,7 +146,8 @@ void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 			continue;
 
 		  // take note that this is a valid phrase alignment
-		  m_consistentPhrases.push_back(ConsistentPhrase(startS, endS, startT, endT, "[X]", "[X]"));
+		  ConsistentPhrase phrasePair(startS, endS, startT, endT, "[X]", "[X]");
+		  m_consistentPhrases.Add(phrasePair);
 		}
 	  }
 	}

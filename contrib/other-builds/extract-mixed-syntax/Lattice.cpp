@@ -23,9 +23,10 @@ Lattice::Lattice(const AlignedSentence &alignedSentence)
 	}
 
 	// add non-terms
-	const std::vector<ConsistentPhrase> &consistentPhrases = alignedSentence.GetConsistentPhrases();
-	for (size_t i = 0; i < consistentPhrases.size(); ++i) {
-		const ConsistentPhrase &consistentPhrase = consistentPhrases[i];
+	const ConsistentPhrases &consistentPhrases = alignedSentence.GetConsistentPhrases();
+	ConsistentPhrases::const_iterator iter;
+	for (iter = consistentPhrases.begin(); iter != consistentPhrases.end(); ++iter) {
+		const ConsistentPhrase &consistentPhrase = *iter;
 		const ConsistentRange &nonTerm = consistentPhrase.GetConsistentRange(Moses::Input);
 
 		int start = nonTerm.GetStart();

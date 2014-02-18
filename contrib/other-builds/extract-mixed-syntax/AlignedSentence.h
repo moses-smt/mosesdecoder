@@ -7,11 +7,10 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <set>
 #include "Word.h"
 #include "SyntaxTree.h"
-#include "ConsistentPhrase.h"
+#include "ConsistentPhrases.h"
 #include "moses/TypeDef.h"
 
 typedef std::vector<Word*> Phrase;
@@ -29,14 +28,14 @@ public:
 	const Phrase &GetPhrase(Moses::FactorDirection direction) const
 	{ return (direction == Moses::Input) ? m_source : m_target; }
 
-	const std::vector<ConsistentPhrase> &GetConsistentPhrases() const
+	const ConsistentPhrases &GetConsistentPhrases() const
 	{ return m_consistentPhrases; }
 
 protected:
   Phrase m_source, m_target;
   SyntaxTree sourceTree, targetTree;
 
-  std::vector<ConsistentPhrase> m_consistentPhrases;
+  ConsistentPhrases m_consistentPhrases;
 
 	void PopulateWordVec(std::vector<Word*> &vec, const std::string &line);
 	void PopulateAlignment(const std::string &line);
