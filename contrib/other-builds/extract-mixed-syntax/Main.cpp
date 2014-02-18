@@ -7,6 +7,7 @@
 #include "AlignedSentence.h"
 #include "Parameter.h"
 #include "Lattice.h"
+#include "Rules.h"
 
 using namespace std;
 
@@ -58,6 +59,8 @@ int main(int argc, char** argv)
 	  alignedSentence.CreateConsistentPhrases(params);
 
 	  Lattice lattice(alignedSentence);
+	  Rules rules(lattice, alignedSentence);
+	  rules.CreateRules();
 
   }
 
