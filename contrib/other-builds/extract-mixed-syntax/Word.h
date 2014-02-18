@@ -15,7 +15,8 @@ public:
 	virtual ~Word();
 
 	void AddAlignment(int align);
-
+	const std::set<int> &GetAlignment() const
+	{ return m_alignment; }
 protected:
 	std::set<int> m_alignment;
 	int m_highestAlignment, m_lowestAlignment;

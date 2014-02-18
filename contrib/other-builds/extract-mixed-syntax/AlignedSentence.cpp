@@ -59,7 +59,96 @@ void AlignedSentence::PopulateAlignment(const std::string &line)
 	}
 }
 
+vector<int> AlignedSentence::GetSourceAlignmentCount() const
+{
+	vector<int> ret(m_source.size());
+
+	for (size_t i = 0; i < m_source.size(); ++i) {
+		const Word &word = *m_source[i];
+		ret[i] = word.GetAlignment().size();
+	}
+	return ret;
+}
+
 void AlignedSentence::CreateTunnels(const Parameter &params)
 {
+  int countT = m_target.size();
+  int countS = m_source.size();
 
+  // check alignments for target phrase startT...endT
+  for(int lengthT=1;
+	  lengthT <= params.maxSpan && lengthT <= countT;
+	  lengthT++) {
+	for(int startT=0; startT < countT-(lengthT-1); startT++) {
+
+	  // that's nice to have
+	  int endT = startT + lengthT - 1;
+
+	  // if there is target side syntax, there has to be a node
+	  if (params.targetSyntax && !targetTree.HasNode(startT,endT))
+		continue;
+
+	  // find find aligned source words
+	  // first: find minimum and maximum source word
+	  int minS = 9999;
+	  int maxS = -1;
+	  vector< int > usedS = GetSourceAlignmentCount();
+	  for(int ti=startT; ti<=endT; ti++) {
+		const Word &word = *m_target[ti];
+		const std::set<int> &alignment = word.GetAlignment();
+
+		std::set<int>::const_iterator iterAlign;
+		for(iterAlign = alignment.begin(); iterAlign != alignment.end(); ++iterAlign) {
+		  int si = *iterAlign;
+		  if (si<minS) {
+			minS = si;
+		  }
+		  if (si>maxS) {
+			maxS = si;
+		  }
+		  usedS[ si ]--;
+		}
+	  }
+
+	  // unaligned phrases are not allowed
+	  if( maxS == -1 )
+		continue;
+
+	  // source phrase has to be within limits
+	  if( maxS-minS >= params.maxSpan )
+		continue;
+
+	  // check if source words are aligned to out of bound target words
+	  bool out_of_bounds = false;
+	  for(int si=minS; si<=maxS && !out_of_bounds; si++)
+		if (usedS[si]>0) {
+		  out_of_bounds = true;
+		}
+
+	  // if out of bound, you gotta go
+	  if (out_of_bounds)
+		continue;
+
+	  // done with all the checks, lets go over all consistent phrase pairs
+	  // start point of source phrase may retreat over unaligned
+	  for(int startS=minS;
+		  (startS>=0 &&
+		   startS>maxS - params.maxSpan && // within length limit
+		   (startS==minS || m_source[startS]->GetAlignment().size()==0)); // unaligned
+		  startS--) {
+		// end point of source phrase may advance over unaligned
+		for(int endS=maxS;
+			(endS<countS && endS<startS + params.maxSpan && // within length limit
+			 (endS==maxS || m_source[endS]->GetAlignment().size()==0)); // unaligned
+			endS++) {
+		  // if there is source side syntax, there has to be a node
+		  if (params.sourceSyntax && !sourceTree.HasNode(startS,endS))
+			continue;
+
+		  // take note that this is a valid phrase alignment
+		  m_consistentPhrases.push_back(ConsistentPhrase(startS, endS, startT, endT));
+		}
+	  }
+	}
+  }
 }

@@ -7,10 +7,6 @@
 
 #include "Parameter.h"
 
-Parameter::Parameter() {
-	// TODO Auto-generated constructor stub
-
-}
 
 Parameter::~Parameter() {
 	// TODO Auto-generated destructor stub
