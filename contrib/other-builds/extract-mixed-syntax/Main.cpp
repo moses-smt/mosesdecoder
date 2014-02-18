@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 
 	  Lattice lattice(alignedSentence);
 	  Rules rules(lattice, alignedSentence);
-	  rules.CreateRules();
+	  rules.CreateRules(params);
 
   }
 

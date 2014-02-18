@@ -6,6 +6,7 @@
  */
 
 #include "Rule.h"
+#include "Parameter.h"
 
 Rule::Rule(const LatticeArc &arc)
 {
@@ -22,12 +23,12 @@ Rule::~Rule() {
 	// TODO Auto-generated destructor stub
 }
 
-bool Rule::IsValid() const
+bool Rule::IsValid(const Parameter &params) const
 {
 
 }
 
-bool Rule::CanExtend() const
+bool Rule::CanExtend(const Parameter &params) const
 {
 
 }

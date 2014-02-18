@@ -9,6 +9,7 @@
 #include "Rule.h"
 #include "Lattice.h"
 #include "LatticeArc.h"
+#include "Parameter.h"
 
 Rules::Rules(const Lattice &lattice, const AlignedSentence &alignedSentence)
 :m_lattice(lattice)
@@ -29,7 +30,7 @@ Rules::~Rules() {
 	// TODO Auto-generated destructor stub
 }
 
-void Rules::CreateRules()
+void Rules::CreateRules(const Parameter &params)
 {
 	while (m_activeRules.size()) {
 		std::set<Rule*> todoRules(m_activeRules);
@@ -40,9 +41,9 @@ void Rules::CreateRules()
 			Rule *rule = *iterRules;
 
 			rule->Fillout();
-			Extend(*rule);
+			Extend(*rule, params);
 
-			if (rule->IsValid()) {
+			if (rule->IsValid(params)) {
 				m_keepRules.insert(rule);
 			}
 			else {
@@ -53,9 +54,9 @@ void Rules::CreateRules()
 	}
 }
 
-void Rules::Extend(const Rule &rule)
+void Rules::Extend(const Rule &rule, const Parameter &params)
 {
-	if (!rule.CanExtend()) {
+	if (!rule.CanExtend(params)) {
 		return;
 	}
 

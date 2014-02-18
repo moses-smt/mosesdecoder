@@ -11,13 +11,14 @@
 class Lattice;
 class AlignedSentence;
 class Rule;
+class Parameter;
 
 class Rules {
 public:
 	Rules(const Lattice &lattice, const AlignedSentence &alignedSentence);
 	virtual ~Rules();
 
-	void CreateRules();
+	void CreateRules(const Parameter &params);
 
 
 protected:
@@ -26,6 +27,6 @@ protected:
 
 	std::set<Rule*> m_activeRules, m_keepRules;;
 
-	void Extend(const Rule &rule);
+	void Extend(const Rule &rule, const Parameter &params);
 };
 

@@ -9,6 +9,7 @@
 #include <vector>
 
 class LatticeArc;
+class Parameter;
 
 class Rule {
 public:
@@ -17,8 +18,8 @@ public:
 
 	virtual ~Rule();
 
-	bool IsValid() const;
-	bool CanExtend() const;
+	bool IsValid(const Parameter &params) const;
+	bool CanExtend(const Parameter &params) const;
 	void Fillout();
 
 	const LatticeArc &GetLastArc() const
