@@ -10,10 +10,10 @@
 ConsistentPhrase::ConsistentPhrase(int startSource, int endSource,
 					int startTarget, int endTarget,
 		  	  		const std::string &sourceLabel, const std::string &targetLabel)
-:m_source(startSource, endSource, sourceLabel)
-,m_target(startTarget, endTarget, targetLabel)
+:m_ranges(ConsistentRange(startSource, endSource, sourceLabel),
+		ConsistentRange(startTarget, endTarget, targetLabel))
 {
-	m_source.SetOtherRange(m_target);
-	m_target.SetOtherRange(m_source);
+	m_ranges.first.SetOtherRange(m_ranges.second);
+	m_ranges.second.SetOtherRange(m_ranges.first);
 }
 

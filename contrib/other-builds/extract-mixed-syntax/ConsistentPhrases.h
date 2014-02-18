@@ -6,12 +6,12 @@
  */
 #pragma once
 
-#include <vector>
+#include <set>
 #include "ConsistentPhrase.h"
 
 class ConsistentPhrases {
 
-  typedef std::vector<ConsistentPhrase> Coll;
+  typedef std::set<ConsistentPhrase> Coll;
 
 public:
   typedef Coll::iterator iterator;

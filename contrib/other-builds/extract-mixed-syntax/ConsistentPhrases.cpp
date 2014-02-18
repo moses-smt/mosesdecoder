@@ -4,8 +4,10 @@
  *  Created on: 18 Feb 2014
  *      Author: s0565741
  */
-
+#include <cassert>
 #include "ConsistentPhrases.h"
+
+using namespace std;
 
 ConsistentPhrases::ConsistentPhrases() {
 	// TODO Auto-generated constructor stub
@@ -18,5 +20,7 @@ ConsistentPhrases::~ConsistentPhrases() {
 
 void ConsistentPhrases::Add(ConsistentPhrase &phrasePair)
 {
-	m_coll.push_back(phrasePair);
+	pair<iterator,bool> success = m_coll.insert(phrasePair);
+	assert(success.second);
+
 }

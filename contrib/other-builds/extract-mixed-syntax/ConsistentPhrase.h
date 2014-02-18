@@ -14,8 +14,7 @@ class ConsistentRange : public LatticeArc
 {
 public:
 	ConsistentRange(int start, int end, const std::string &label)
-	:m_start(start)
-	,m_end(end)
+	:m_startEnd(start, end)
 	,m_label(label)
 	{}
 
@@ -28,13 +27,17 @@ public:
 	{ m_otherRange = &otherRange; }
 
 	int GetStart() const
-	{ return m_start; }
+	{ return m_startEnd.first; }
 
 	int GetEnd() const
-	{ return m_end; }
+	{ return m_startEnd.second; }
+
+  inline bool operator<(const ConsistentRange &other) const {
+	return m_startEnd < other.m_startEnd;
+  }
 
 protected:
-	int m_start, m_end;
+	std::pair<int, int> m_startEnd;
 	std::string m_label;
 	const ConsistentRange *m_otherRange;
 };
@@ -46,9 +49,13 @@ public:
 		  	  		const std::string &sourceLabel, const std::string &targetLabel);
 
   const ConsistentRange &GetConsistentRange(Moses::FactorDirection direction) const
-  { return (direction == Moses::Input) ? m_source : m_target; }
+  { return (direction == Moses::Input) ? m_ranges.first : m_ranges.second; }
+
+  inline bool operator<(const ConsistentPhrase &other) const {
+	return m_ranges < other.m_ranges;
+  }
 
 protected:
-  ConsistentRange m_source, m_target;
+  std::pair<ConsistentRange, ConsistentRange> m_ranges;
 };
 
