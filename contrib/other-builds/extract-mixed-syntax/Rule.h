@@ -13,6 +13,8 @@ class LatticeArc;
 class Rule {
 public:
 	Rule(const LatticeArc &arc);
+	Rule(const Rule &prevRule, const LatticeArc &arc);
+
 	virtual ~Rule();
 
 	bool IsValid() const;
