@@ -35,7 +35,7 @@ public:
 			const std::string &target,
 			const std::string &alignment);
 	virtual ~AlignedSentence();
-	void CreateTunnels(const Parameter &params);
+	void CreateConsistentPhrases(const Parameter &params);
 
 protected:
   std::vector<Word*> m_source, m_target;

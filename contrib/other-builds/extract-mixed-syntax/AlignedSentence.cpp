@@ -70,7 +70,7 @@ vector<int> AlignedSentence::GetSourceAlignmentCount() const
 	return ret;
 }
 
-void AlignedSentence::CreateTunnels(const Parameter &params)
+void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 {
   int countT = m_target.size();
   int countS = m_source.size();

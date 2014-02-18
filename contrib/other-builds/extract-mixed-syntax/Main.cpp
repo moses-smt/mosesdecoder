@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 	  cerr << "lineAlignment=" << lineAlignment << endl;
 
 	  AlignedSentence alignedSentence(lineSource, lineTarget, lineAlignment);
-	  alignedSentence.CreateTunnels(params);
+	  alignedSentence.CreateConsistentPhrases(params);
 
   }
 
