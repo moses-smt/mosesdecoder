@@ -10,7 +10,8 @@
 using namespace std;
 
 Word::Word(const std::string &str)
-:m_highestAlignment(-1)
+:m_str(str)
+,m_highestAlignment(-1)
 ,m_lowestAlignment(numeric_limits<int>::max())
 {
 	// TODO Auto-generated constructor stub

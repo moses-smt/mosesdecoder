@@ -11,23 +11,11 @@
 #include <set>
 #include "Word.h"
 #include "SyntaxTree.h"
+#include "ConsistentPhrase.h"
 
 typedef std::pair<size_t, size_t> AlignmentPair;
 
 class Parameter;
-
-struct ConsistentPhrase
-{
-  int startSource, endSource, startTarget, endTarget;
-
-  ConsistentPhrase(int a, int b, int c, int d)
-  {
-	  startSource = a;
-	  endSource = b;
-	  startTarget = c;
-	  endTarget = d;
-  }
-};
 
 class AlignedSentence {
 public:
