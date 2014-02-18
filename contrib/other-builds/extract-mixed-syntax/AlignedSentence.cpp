@@ -33,7 +33,7 @@ void AlignedSentence::PopulateWordVec(std::vector<Word*> &vec, const std::string
 	vec.resize(toks.size());
 	for (size_t i = 0; i < vec.size(); ++i) {
 		const string &tok = toks[i];
-		Word *word = new Word(tok);
+		Word *word = new Word(i, tok);
 		vec[i] = word;
 	}
 }

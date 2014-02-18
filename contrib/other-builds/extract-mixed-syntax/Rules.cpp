@@ -16,9 +16,9 @@ Rules::Rules(const Lattice &lattice, const AlignedSentence &alignedSentence)
 {
 	// fill collection with all 1-arc rules
 	for (size_t i = 0; i < lattice.GetSize(); ++i) {
-		const Lattice::LatticeNode &node = lattice.GetLatticeNode(i);
+		const Lattice::Node &node = lattice.GetNode(i);
 		for (size_t j = 0; j < node.size(); ++j) {
-			const LatticeArc *arc = node[j];
+			const LatticeArc &arc = *node[j];
 			Rule *rule = new Rule(arc);
 			m_activeRules.insert(rule);
 		}
@@ -37,21 +37,42 @@ void Rules::CreateRules()
 
 		std::set<Rule*>::const_iterator iterRules;
 		for (iterRules = todoRules.begin(); iterRules != todoRules.end(); ++iterRules) {
-			Rule &rule = **iterRules;
+			Rule *rule = *iterRules;
 
-			rule.Fillout();
+			rule->Fillout();
+			Extend(*rule);
 
-			if (rule.IsValid()) {
-				m_keepRules.insert(&rule);
+			if (rule->IsValid()) {
+				m_keepRules.insert(rule);
+			}
+			else {
+				delete rule;
 			}
 
-			Extend(rule);
 		}
 	}
 }
 
 void Rules::Extend(const Rule &rule)
 {
+	if (!rule.CanExtend()) {
+		return;
+	}
+
+	const LatticeArc &lastArc = rule.GetLastArc();
+	int nextPos = lastArc.GetEnd() + 1;
+
+	if (nextPos < m_lattice.GetSize()) {
+		// not at the end yet
+		const Lattice::Node &node = m_lattice.GetNode(nextPos);
+		Lattice::Node::const_iterator iterNode;
+
+		for (iterNode = node.begin(); iterNode != node.end(); ++iterNode) {
+			const LatticeArc &arc = **iterNode;
+			Rule *newRule = rule.Extend(arc);
+			m_activeRules.insert(newRule);
+		}
+	}
 
 
 }

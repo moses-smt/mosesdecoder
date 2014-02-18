@@ -18,7 +18,7 @@ Lattice::Lattice(const AlignedSentence &alignedSentence)
 
 	for (size_t i = 0; i < sourcePhrase.size(); ++i) {
 		const Word *word = sourcePhrase[i];
-		LatticeNode &node = m_coll[i];
+		Node &node = m_coll[i];
 		node.push_back(word);
 	}
 
@@ -29,7 +29,7 @@ Lattice::Lattice(const AlignedSentence &alignedSentence)
 		const ConsistentRange &nonTerm = consistentPhrase.GetConsistentRange(Moses::Input);
 
 		int start = nonTerm.GetStart();
-		LatticeNode &node = m_coll[start];
+		Node &node = m_coll[start];
 		node.push_back(&nonTerm);
 
 	}

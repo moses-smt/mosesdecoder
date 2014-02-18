@@ -12,11 +12,17 @@ class LatticeArc;
 
 class Rule {
 public:
-	Rule(const LatticeArc *arc);
+	Rule(const LatticeArc &arc);
 	virtual ~Rule();
 
 	bool IsValid() const;
+	bool CanExtend() const;
 	void Fillout();
+
+	const LatticeArc &GetLastArc() const
+	{ return *m_arcs.back(); }
+
+	Rule *Extend(const LatticeArc &arc) const;
 
 protected:
 	std::vector<const LatticeArc*> m_arcs;

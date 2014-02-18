@@ -16,5 +16,6 @@ public:
 	virtual bool IsNonTerm() const = 0;
 	virtual const std::string &GetString() const = 0;
 
+	virtual int GetEnd() const = 0;
 };
 

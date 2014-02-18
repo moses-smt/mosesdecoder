@@ -9,8 +9,9 @@
 
 using namespace std;
 
-Word::Word(const std::string &str)
-:m_str(str)
+Word::Word(int pos, const std::string &str)
+:m_pos(pos)
+,m_str(str)
 ,m_highestAlignment(-1)
 ,m_lowestAlignment(numeric_limits<int>::max())
 {

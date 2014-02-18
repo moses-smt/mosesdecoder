@@ -14,7 +14,7 @@ class AlignedSentence;
 class Lattice
 {
 public:
-	typedef std::vector<const LatticeArc*> LatticeNode;
+	typedef std::vector<const LatticeArc*> Node;
 
 	Lattice(const AlignedSentence &alignedSentence);
 	virtual ~Lattice();
@@ -22,12 +22,12 @@ public:
 	size_t GetSize() const
 	{ return m_coll.size(); }
 
-	const LatticeNode &GetLatticeNode(size_t ind) const
+	const Node &GetNode(size_t ind) const
 	{ return m_coll[ind]; }
 
 protected:
 	// all terms and non-terms, placed in stack according to their starting point
-	std::vector<LatticeNode> m_coll;
+	std::vector<Node> m_coll;
 
 };
 
