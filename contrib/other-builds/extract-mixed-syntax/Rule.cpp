@@ -180,3 +180,13 @@ void Rule::Output(std::ostream &out) const
 	out << " ||| ";
 	Output(out, m_arcs);
 }
+
+void Rule::Debug(std::ostream &out) const
+{
+	Output(out, m_arcs);
+	out << "||| ";
+	Output(out, m_targetArcs);
+	out << "||| ";
+	out << endl;
+}
+

@@ -24,6 +24,7 @@ public:
 	virtual int GetHighestAlignment() const = 0;
 
 	virtual void Output(std::ostream &out) const = 0;
+	virtual void Debug(std::ostream &out) const = 0;
 
 };
 

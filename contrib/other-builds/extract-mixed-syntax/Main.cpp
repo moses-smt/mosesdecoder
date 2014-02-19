@@ -59,6 +59,9 @@ int main(int argc, char** argv)
 	  alignedSentence.CreateConsistentPhrases(params);
 
 	  Lattice lattice(alignedSentence);
+	  cerr << "LATTICE:";
+	  lattice.Debug(cerr);
+
 	  Rules rules(lattice, alignedSentence);
 	  rules.CreateRules(params, alignedSentence.GetConsistentPhrases());
 	  rules.Output(cout);

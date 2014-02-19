@@ -35,6 +35,7 @@ public:
 
 	Rule *Extend(const LatticeArc &arc) const;
 	void Output(std::ostream &out) const;
+	void Debug(std::ostream &out) const;
 
 protected:
 	std::vector<const LatticeArc*> m_arcs;

@@ -16,3 +16,4 @@ LatticeArc::~LatticeArc() {
 	// TODO Auto-generated destructor stub
 }
 
+

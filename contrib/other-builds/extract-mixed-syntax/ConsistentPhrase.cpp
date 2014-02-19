@@ -40,6 +40,11 @@ void ConsistentRange::Output(std::ostream &out) const
 	out << m_label;
 }
 
+void ConsistentRange::Debug(std::ostream &out) const
+{
+	out << m_label << "[" << GetStart() << "-" << GetEnd() << "]";
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 
 ConsistentPhrase::ConsistentPhrase(int startSource, int endSource,

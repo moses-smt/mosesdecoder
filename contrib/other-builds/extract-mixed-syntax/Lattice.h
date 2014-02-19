@@ -25,6 +25,8 @@ public:
 	const Node &GetNode(size_t ind) const
 	{ return m_coll[ind]; }
 
+	void Debug(std::ostream &out) const;
+
 protected:
 	// all terms and non-terms, placed in stack according to their starting point
 	std::vector<Node> m_coll;

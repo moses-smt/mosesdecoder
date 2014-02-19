@@ -10,6 +10,8 @@
 #include "Word.h"
 #include "ConsistentPhrase.h"
 
+using namespace std;
+
 Lattice::Lattice(const AlignedSentence &alignedSentence)
 :m_coll(alignedSentence.GetPhrase(Moses::Input).size())
 {
@@ -40,3 +42,14 @@ Lattice::~Lattice() {
 	// TODO Auto-generated destructor stub
 }
 
+void Lattice::Debug(std::ostream &out) const
+{
+	for (size_t i = 0; i < m_coll.size(); ++i) {
+		const Node &node = m_coll[i];
+		for (size_t j = 0; j < node.size(); ++j) {
+			const LatticeArc &arc = *node[j];
+			arc.Debug(out);
+			out << endl;
+		}
+	}
+}

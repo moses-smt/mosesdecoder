@@ -38,3 +38,8 @@ void Word::Output(std::ostream &out) const
 {
 	out << m_str;
 }
+
+void Word::Debug(std::ostream &out) const
+{
+	out << m_str;
+}

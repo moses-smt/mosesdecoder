@@ -38,6 +38,7 @@ public:
 	int GetHighestAlignment() const;
 
 	void Output(std::ostream &out) const;
+	void Debug(std::ostream &out) const;
 
   inline bool operator<(const ConsistentRange &other) const {
 	return m_startEnd < other.m_startEnd;

@@ -40,6 +40,7 @@ public:
 	{ return m_lowestAlignment; }
 
 	void Output(std::ostream &out) const;
+	void Debug(std::ostream &out) const;
 
 protected:
 	int m_pos;
