@@ -9,6 +9,7 @@
 #include "Rule.h"
 #include "Parameter.h"
 #include "LatticeArc.h"
+#include "ConsistentPhrases.h"
 
 using namespace std;
 
@@ -29,12 +30,16 @@ Rule::~Rule() {
 
 bool Rule::IsValid(const Parameter &params) const
 {
+  if (m_consistentPhrase == NULL) {
+	  return false;
+  }
 
+  return true;
 }
 
 bool Rule::CanExtend(const Parameter &params) const
 {
-
+  return true;
 }
 
 void Rule::Fillout(const ConsistentPhrases &consistentPhrases)
@@ -55,7 +60,7 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases)
 	  }
   }
 
-
+  m_consistentPhrase = consistentPhrases.Find(sourceStart, sourceEnd, targetStart, targetEnd);
 }
 
 

@@ -6,12 +6,39 @@
  */
 #pragma once
 
-#include <set>
+#include <vector>
+#include <map>
 #include "ConsistentPhrase.h"
 
+///////////////////////////////////////////////////////////////////
+
+// just the range, for finding
+struct PhrasePairRange
+{
+  typedef std::pair<int, int> Range;
+  std::pair<Range, Range> sourceTarget;
+
+  PhrasePairRange(int sourceStart, int sourceEnd, int targetStart, int targetEnd)
+  {
+    sourceTarget.first.first = sourceStart;
+	sourceTarget.first.second = sourceEnd;
+
+	sourceTarget.second.first = targetStart;
+	sourceTarget.second.second = targetEnd;
+
+  }
+
+  inline bool operator<(const PhrasePairRange &other) const {
+	return sourceTarget < other.sourceTarget;
+  }
+
+};
+
+///////////////////////////////////////////////////////////////////
 class ConsistentPhrases {
 
-  typedef std::set<ConsistentPhrase> Coll;
+  typedef std::vector<ConsistentPhrase> Coll;
+  typedef std::map<PhrasePairRange, const ConsistentPhrase*> RangeToColl;
 
 public:
   typedef Coll::iterator iterator;
@@ -28,9 +55,11 @@ public:
   virtual ~ConsistentPhrases();
 
   void Add(ConsistentPhrase &phrasePair);
+  const ConsistentPhrase *Find(int sourceStart, int sourceEnd, int targetStart, int targetEnd) const;
 
 protected:
   Coll m_coll;
+  RangeToColl m_rangeToColl;
 
 };
 
