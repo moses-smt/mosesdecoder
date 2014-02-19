@@ -35,6 +35,11 @@ bool ConsistentRange::Overlap(int pos) const
 	  true : false;
 }
 
+void ConsistentRange::Output(std::ostream &out) const
+{
+	out << m_label;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 
 ConsistentPhrase::ConsistentPhrase(int startSource, int endSource,

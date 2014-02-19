@@ -12,6 +12,8 @@
 #include "Parameter.h"
 #include "moses/Util.h"
 
+using namespace std;
+
 Rules::Rules(const Lattice &lattice, const AlignedSentence &alignedSentence)
 :m_lattice(lattice)
 ,m_alignedSentence(alignedSentence)
@@ -76,7 +78,14 @@ void Rules::Extend(const Rule &rule, const Parameter &params)
 			m_activeRules.insert(newRule);
 		}
 	}
-
-
 }
 
+void Rules::Output(std::ostream &out) const
+{
+	std::set<Rule*>::const_iterator iter;
+	for (iter = m_keepRules.begin(); iter != m_keepRules.end(); ++iter) {
+		const Rule &rule = **iter;
+		rule.Output(out);
+		out << endl;
+	}
+}

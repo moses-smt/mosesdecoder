@@ -158,3 +158,19 @@ Rule *Rule::Extend(const LatticeArc &arc) const
 
 	return ret;
 }
+
+void Rule::Output(std::ostream &out, const std::vector<const LatticeArc*> &arcs) const
+{
+  for (size_t i = 0; i < arcs.size(); ++i) {
+	  const LatticeArc &arc = *arcs[i];
+	  arc.Output(out);
+	  out << " ";
+  }
+}
+
+void Rule::Output(std::ostream &out) const
+{
+	Output(out, m_arcs);
+	out << " ||| ";
+	Output(out, m_arcs);
+}

@@ -61,6 +61,7 @@ int main(int argc, char** argv)
 	  Lattice lattice(alignedSentence);
 	  Rules rules(lattice, alignedSentence);
 	  rules.CreateRules(params, alignedSentence.GetConsistentPhrases());
+	  rules.Output(cout);
 
   }
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 
 class LatticeArc {
 public:
@@ -21,6 +22,8 @@ public:
 
 	virtual int GetLowestAlignment() const = 0;
 	virtual int GetHighestAlignment() const = 0;
+
+	virtual void Output(std::ostream &out) const = 0;
 
 };
 

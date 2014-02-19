@@ -7,6 +7,7 @@
 #pragma once
 
 #include <set>
+#include <iostream>
 
 class Lattice;
 class AlignedSentence;
@@ -20,7 +21,7 @@ public:
 	virtual ~Rules();
 
 	void CreateRules(const Parameter &params, const ConsistentPhrases &consistentPhrases);
-
+	void Output(std::ostream &out) const;
 
 protected:
 	const Lattice &m_lattice;

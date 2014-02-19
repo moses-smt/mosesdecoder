@@ -39,6 +39,8 @@ public:
 	int GetLowestAlignment() const
 	{ return m_lowestAlignment; }
 
+	void Output(std::ostream &out) const;
+
 protected:
 	int m_pos;
 	std::string m_str;

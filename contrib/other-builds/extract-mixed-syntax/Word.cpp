@@ -33,3 +33,8 @@ void Word::AddAlignment(int align)
 		m_lowestAlignment = align;
 	}
 }
+
+void Word::Output(std::ostream &out) const
+{
+	out << m_str;
+}

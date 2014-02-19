@@ -7,6 +7,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
 class LatticeArc;
 class Parameter;
@@ -32,6 +33,7 @@ public:
 	{ return *m_arcs.back(); }
 
 	Rule *Extend(const LatticeArc &arc) const;
+	void Output(std::ostream &out) const;
 
 protected:
 	std::vector<const LatticeArc*> m_arcs;
@@ -45,5 +47,7 @@ protected:
 			int targetEnd,
 			std::vector<const ConsistentRange*> &targetNonTerms);
 	const ConsistentRange *Overlap(int pos, std::vector<const ConsistentRange*> &targetNonTerms);
+	void Output(std::ostream &out, const std::vector<const LatticeArc*> &arcs) const;
+
 };
 
