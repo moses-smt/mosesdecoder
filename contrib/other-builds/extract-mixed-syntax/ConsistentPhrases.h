@@ -57,6 +57,8 @@ public:
   void Add(ConsistentPhrase &phrasePair);
   const ConsistentPhrase *Find(int sourceStart, int sourceEnd, int targetStart, int targetEnd) const;
 
+  void Debug(std::ostream &out) const;
+
 protected:
   Coll m_coll;
   RangeToColl m_rangeToColl;

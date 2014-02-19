@@ -57,3 +57,8 @@ ConsistentPhrase::ConsistentPhrase(int startSource, int endSource,
 	m_ranges.second.SetOtherRange(m_ranges.first);
 }
 
+void ConsistentPhrase::Debug(std::ostream &out) const
+{
+	m_ranges.first.Debug(out);
+	m_ranges.second.Debug(out);
+}

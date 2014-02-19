@@ -47,3 +47,14 @@ const ConsistentPhrase *ConsistentPhrases::Find(
 		return iter->second;
 	}
 }
+
+void ConsistentPhrases::Debug(std::ostream &out) const
+{
+  out << "m_rangeToColl=" << m_rangeToColl.size()
+	  << " m_coll=" << m_coll.size() <<endl;
+  for (size_t i = 0; i < m_coll.size(); ++i) {
+	  const ConsistentPhrase &consistentPhrase = m_coll[i];
+	  consistentPhrase.Debug(out);
+	  out << endl;
+  }
+}

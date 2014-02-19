@@ -11,6 +11,14 @@
 
 using namespace std;
 
+void Phrase::Debug(std::ostream &out) const
+{
+	for (size_t i = 0; i < size(); ++i) {
+		Word &word = *at(i);
+		word.Debug(out);
+		out << " ";
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 AlignedSentence::AlignedSentence(const std::string &source,
@@ -72,6 +80,22 @@ vector<int> AlignedSentence::GetSourceAlignmentCount() const
 	}
 	return ret;
 }
+
+void AlignedSentence::Debug(std::ostream &out) const
+{
+	out << "m_source:";
+	m_source.Debug(out);
+	out << endl;
+
+	out << "m_target:";
+	m_target.Debug(out);
+	out << endl;
+
+	out << "m_consistentPhrases:";
+	m_consistentPhrases.Debug(out);
+	out << endl;
+}
+
 
 void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 {

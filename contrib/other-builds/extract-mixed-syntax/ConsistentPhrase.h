@@ -62,6 +62,8 @@ public:
   const ConsistentRange &GetConsistentRange(Moses::FactorDirection direction) const
   { return (direction == Moses::Input) ? m_ranges.first : m_ranges.second; }
 
+  void Debug(std::ostream &out) const;
+
   inline bool operator<(const ConsistentPhrase &other) const {
 	return m_ranges < other.m_ranges;
   }

@@ -17,6 +17,9 @@ class Parameter;
 
 class Phrase : public std::vector<Word*>
 {
+public:
+	void Debug(std::ostream &out) const;
+
 };
 
 class AlignedSentence {
@@ -32,6 +35,8 @@ public:
 
 	const ConsistentPhrases &GetConsistentPhrases() const
 	{ return m_consistentPhrases; }
+
+	void Debug(std::ostream &out) const;
 
 protected:
   Phrase m_source, m_target;
