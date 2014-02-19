@@ -24,8 +24,6 @@ Rules::Rules(const Lattice &lattice, const AlignedSentence &alignedSentence)
 		for (size_t j = 0; j < node.size(); ++j) {
 			const LatticeArc &arc = *node[j];
 			Rule *rule = new Rule(arc);
-			cerr << "ADD:";
-			rule->Debug(cerr);
 			m_activeRules.insert(rule);
 		}
 	}
@@ -79,9 +77,6 @@ void Rules::Extend(const Rule &rule, const Parameter &params)
 		for (iterNode = node.begin(); iterNode != node.end(); ++iterNode) {
 			const LatticeArc &arc = **iterNode;
 			Rule *newRule = rule.Extend(arc);
-			cerr << "ADD:";
-			newRule->Debug(cerr);
-
 			m_activeRules.insert(newRule);
 		}
 	}

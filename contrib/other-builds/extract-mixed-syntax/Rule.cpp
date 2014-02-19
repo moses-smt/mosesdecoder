@@ -192,7 +192,10 @@ void Rule::Debug(std::ostream &out) const
 	Output(out, m_arcs);
 	out << "||| ";
 	Output(out, m_targetArcs);
-	out << "||| ";
+	if (m_consistentPhrase) {
+		cerr << "||| m_consistentPhrase=";
+		m_consistentPhrase->Debug(out);
+	}
 	out << endl;
 }
 

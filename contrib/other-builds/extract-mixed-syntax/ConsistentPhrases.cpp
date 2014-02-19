@@ -43,14 +43,19 @@ const ConsistentPhrase *ConsistentPhrases::Find(
 		int targetEnd) const
 {
 	PhrasePairRange phrasePairRange(sourceStart, sourceEnd, targetStart, targetEnd);
+    cerr << "FINDING ";
+    phrasePairRange.Debug(cerr);
 
+    const ConsistentPhrase *ret;
 	const_iterator iter = m_coll.find(phrasePairRange);
 	if (iter == m_coll.end()) {
-		return NULL;
+		ret = NULL;
 	}
 	else {
-		return iter->second;
+		ret = iter->second;
 	}
+	cerr << ret;
+	return ret;
 }
 
 void ConsistentPhrases::Debug(std::ostream &out) const
