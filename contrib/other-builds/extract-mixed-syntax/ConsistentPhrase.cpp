@@ -19,6 +19,11 @@ int ConsistentRange::GetHighestAlignment() const
 	return m_otherRange->GetEnd();
 }
 
+bool ConsistentRange::Overlap(const ConsistentRange &other) const
+{
+
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 
 ConsistentPhrase::ConsistentPhrase(int startSource, int endSource,

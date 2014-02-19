@@ -23,6 +23,8 @@ public:
 	virtual const std::string &GetString() const
 	{ return m_label; }
 
+	const ConsistentRange &GetOtherRange() const
+	{ return *m_otherRange; }
 	void SetOtherRange(const ConsistentRange &otherRange)
 	{ m_otherRange = &otherRange; }
 
@@ -38,6 +40,8 @@ public:
   inline bool operator<(const ConsistentRange &other) const {
 	return m_startEnd < other.m_startEnd;
   }
+
+  bool Overlap(const ConsistentRange &other) const;
 
 protected:
 	std::pair<int, int> m_startEnd;

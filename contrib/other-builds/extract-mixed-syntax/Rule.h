@@ -34,5 +34,6 @@ protected:
 	std::vector<const LatticeArc*> m_targetArcs;
 
 	const ConsistentPhrase *m_consistentPhrase;
+	bool m_isValid, m_canExtend;
 };
 
