@@ -11,6 +11,8 @@
 
 using namespace std;
 
+
+/////////////////////////////////////////////////////////////////////////////////
 AlignedSentence::AlignedSentence(const std::string &source,
 			const std::string &target,
 			const std::string &alignment)
@@ -22,7 +24,8 @@ AlignedSentence::AlignedSentence(const std::string &source,
 }
 
 AlignedSentence::~AlignedSentence() {
-	// TODO Auto-generated destructor stub
+	Moses::RemoveAllInColl(m_source);
+	Moses::RemoveAllInColl(m_target);
 }
 
 void AlignedSentence::PopulateWordVec(std::vector<Word*> &vec, const std::string &line)

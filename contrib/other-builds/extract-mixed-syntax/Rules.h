@@ -26,7 +26,7 @@ protected:
 	const Lattice &m_lattice;
 	const AlignedSentence &m_alignedSentence;
 
-	std::set<Rule*> m_activeRules, m_keepRules;;
+	std::set<Rule*> m_activeRules, m_keepRules;
 
 	void Extend(const Rule &rule, const Parameter &params);
 };

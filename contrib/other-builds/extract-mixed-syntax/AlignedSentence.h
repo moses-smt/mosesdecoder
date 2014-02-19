@@ -13,12 +13,11 @@
 #include "ConsistentPhrases.h"
 #include "moses/TypeDef.h"
 
+class Parameter;
+
 class Phrase : public std::vector<Word*>
 {
-
 };
-
-class Parameter;
 
 class AlignedSentence {
 public:

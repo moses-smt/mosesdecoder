@@ -4,12 +4,13 @@
  *  Created on: 18 Feb 2014
  *      Author: s0565741
  */
-
+#include <cassert>
 #include "Rules.h"
 #include "Rule.h"
 #include "Lattice.h"
 #include "LatticeArc.h"
 #include "Parameter.h"
+#include "moses/Util.h"
 
 Rules::Rules(const Lattice &lattice, const AlignedSentence &alignedSentence)
 :m_lattice(lattice)
@@ -27,7 +28,8 @@ Rules::Rules(const Lattice &lattice, const AlignedSentence &alignedSentence)
 }
 
 Rules::~Rules() {
-	// TODO Auto-generated destructor stub
+	assert(m_activeRules.empty());
+	Moses::RemoveAllInColl(m_keepRules);
 }
 
 void Rules::CreateRules(const Parameter &params, const ConsistentPhrases &consistentPhrases)

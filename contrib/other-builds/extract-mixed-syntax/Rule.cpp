@@ -113,7 +113,7 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 		  targetStart,
 		  targetEnd,
 		  targetNonTerms);
-  assert(targetNonTerms.size() == 0);
+  //assert(targetNonTerms.size() == 0);
 }
 
 void Rule::CreateTargetPhrase(const Phrase &targetPhrase,
