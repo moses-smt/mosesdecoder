@@ -87,7 +87,7 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases)
   }
 
   m_consistentPhrase = consistentPhrases.Find(sourceStart, sourceEnd, targetStart, targetEnd);
-  if (m_consistentPhrase != NULL) {
+  if (m_consistentPhrase == NULL) {
 	  m_isValid = false;
 	  return;
   }
