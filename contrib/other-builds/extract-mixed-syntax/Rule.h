@@ -27,7 +27,8 @@ public:
 	bool IsValid(const Parameter &params) const;
 	bool CanExtend(const Parameter &params) const;
 	void Fillout(const ConsistentPhrases &consistentPhrases,
-				const AlignedSentence &alignedSentence);
+				const AlignedSentence &alignedSentence,
+				const Parameter &params);
 
 	const LatticeArc &GetLastArc() const
 	{ return *m_arcs.back(); }

@@ -49,7 +49,8 @@ bool Rule::CanExtend(const Parameter &params) const
 }
 
 void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
-				const AlignedSentence &alignedSentence)
+				const AlignedSentence &alignedSentence,
+				const Parameter &params)
 {
   // if last word is a non-term, check to see if it overlaps with any other non-terms
   if (m_arcs.back()->IsNonTerm()) {
@@ -106,6 +107,11 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 		  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
 		  targetNonTerms.push_back(&targetRange);
 	  }
+  }
+
+  if (targetNonTerms.size() > params.maxNonTerm) {
+	  m_isValid = false;
+	  return;
   }
 
   // targetNonTerms will be deleted element-by-element as it is used
