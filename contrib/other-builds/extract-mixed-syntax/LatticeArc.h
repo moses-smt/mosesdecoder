@@ -16,6 +16,11 @@ public:
 	virtual bool IsNonTerm() const = 0;
 	virtual const std::string &GetString() const = 0;
 
+	virtual int GetStart() const = 0;
 	virtual int GetEnd() const = 0;
+
+	virtual int GetLowestAlignment() const = 0;
+	virtual int GetHighestAlignment() const = 0;
+
 };
 

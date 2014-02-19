@@ -12,13 +12,14 @@ class Lattice;
 class AlignedSentence;
 class Rule;
 class Parameter;
+class ConsistentPhrases;
 
 class Rules {
 public:
 	Rules(const Lattice &lattice, const AlignedSentence &alignedSentence);
 	virtual ~Rules();
 
-	void CreateRules(const Parameter &params);
+	void CreateRules(const Parameter &params, const ConsistentPhrases &consistentPhrases);
 
 
 protected:

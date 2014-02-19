@@ -22,12 +22,23 @@ public:
 	const std::string &GetString() const
 	{ return m_str; }
 
+	int GetStart() const
+	{ return m_pos; }
+
 	int GetEnd() const
 	{ return m_pos; }
 
 	void AddAlignment(int align);
+
 	const std::set<int> &GetAlignment() const
 	{ return m_alignment; }
+
+	int GetHighestAlignment() const
+	{ return m_highestAlignment; }
+
+	int GetLowestAlignment() const
+	{ return m_lowestAlignment; }
+
 protected:
 	int m_pos;
 	std::string m_str;

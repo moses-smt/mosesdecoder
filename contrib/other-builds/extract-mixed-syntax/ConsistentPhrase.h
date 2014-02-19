@@ -32,6 +32,9 @@ public:
 	int GetEnd() const
 	{ return m_startEnd.second; }
 
+	int GetLowestAlignment() const;
+	int GetHighestAlignment() const;
+
   inline bool operator<(const ConsistentRange &other) const {
 	return m_startEnd < other.m_startEnd;
   }

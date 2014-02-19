@@ -5,8 +5,12 @@
  *      Author: s0565741
  */
 
+#include <limits>
 #include "Rule.h"
 #include "Parameter.h"
+#include "LatticeArc.h"
+
+using namespace std;
 
 Rule::Rule(const LatticeArc &arc)
 {
@@ -33,8 +37,24 @@ bool Rule::CanExtend(const Parameter &params) const
 
 }
 
-void Rule::Fillout()
+void Rule::Fillout(const ConsistentPhrases &consistentPhrases)
 {
+  int sourceStart = m_arcs.front()->GetStart();
+  int sourceEnd = m_arcs.back()->GetEnd();
+
+  int targetStart = numeric_limits<int>::max();
+  int targetEnd = -1;
+
+  for (size_t i = 0; i < m_arcs.size(); ++i) {
+	  const LatticeArc &arc = *m_arcs[i];
+	  if (arc.GetStart() < targetStart) {
+		  targetStart = arc.GetStart();
+	  }
+	  if (arc.GetEnd() > targetEnd) {
+		  targetEnd = arc.GetEnd();
+	  }
+  }
+
 
 }
 

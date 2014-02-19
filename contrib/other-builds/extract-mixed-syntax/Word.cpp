@@ -12,8 +12,8 @@ using namespace std;
 Word::Word(int pos, const std::string &str)
 :m_pos(pos)
 ,m_str(str)
-,m_highestAlignment(-1)
 ,m_lowestAlignment(numeric_limits<int>::max())
+,m_highestAlignment(-1)
 {
 	// TODO Auto-generated constructor stub
 

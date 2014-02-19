@@ -30,7 +30,7 @@ Rules::~Rules() {
 	// TODO Auto-generated destructor stub
 }
 
-void Rules::CreateRules(const Parameter &params)
+void Rules::CreateRules(const Parameter &params, const ConsistentPhrases &consistentPhrases)
 {
 	while (m_activeRules.size()) {
 		std::set<Rule*> todoRules(m_activeRules);
@@ -40,7 +40,7 @@ void Rules::CreateRules(const Parameter &params)
 		for (iterRules = todoRules.begin(); iterRules != todoRules.end(); ++iterRules) {
 			Rule *rule = *iterRules;
 
-			rule->Fillout();
+			rule->Fillout(consistentPhrases);
 			Extend(*rule, params);
 
 			if (rule->IsValid(params)) {
