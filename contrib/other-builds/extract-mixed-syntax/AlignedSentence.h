@@ -13,7 +13,10 @@
 #include "ConsistentPhrases.h"
 #include "moses/TypeDef.h"
 
-typedef std::vector<Word*> Phrase;
+class Phrase : public std::vector<Word*>
+{
+
+};
 
 class Parameter;
 

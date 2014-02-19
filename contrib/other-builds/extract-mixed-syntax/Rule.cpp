@@ -11,6 +11,7 @@
 #include "Parameter.h"
 #include "LatticeArc.h"
 #include "ConsistentPhrases.h"
+#include "AlignedSentence.h"
 
 using namespace std;
 
@@ -108,13 +109,14 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
   }
 
   // targetNonTerms will be deleted element-by-element as it is used
-  CreateTargetPhrase(targetStart, targetEnd, targetNonTerms);
+  CreateTargetPhrase(alignedSentence.GetPhrase(Moses::Output),
+		  targetStart,
+		  targetEnd,
+		  targetNonTerms);
   assert(targetNonTerms.size() == 0);
-
-
 }
 
-void Rule::CreateTargetPhrase(
+void Rule::CreateTargetPhrase(const Phrase &targetPhrase,
 		int targetStart,
 		int targetEnd,
 		vector<const ConsistentRange*> &targetNonTerms)
@@ -129,6 +131,7 @@ void Rule::CreateTargetPhrase(
 		}
 		else {
 			// just use the word
+			const Word *word = targetPhrase[pos];
 			m_targetArcs.push_back(word);
 		}
 	}
@@ -140,6 +143,7 @@ const ConsistentRange *Rule::Overlap(int pos, vector<const ConsistentRange*> &ta
 	for (iter = targetNonTerms.begin(); iter != targetNonTerms.end(); ++iter) {
 		const ConsistentRange *range = *iter;
 		if (range->Overlap(pos)) {
+			// is part of a non-term. Delete the range
 			targetNonTerms.erase(iter);
 			return range;
 		}

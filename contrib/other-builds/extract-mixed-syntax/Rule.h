@@ -14,6 +14,7 @@ class ConsistentPhrase;
 class ConsistentPhrases;
 class ConsistentRange;
 class AlignedSentence;
+class Phrase;
 
 class Rule {
 public:
@@ -39,7 +40,7 @@ protected:
 	const ConsistentPhrase *m_consistentPhrase;
 	bool m_isValid, m_canExtend;
 
-	void CreateTargetPhrase(
+	void CreateTargetPhrase(const Phrase &targetPhrase,
 			int targetStart,
 			int targetEnd,
 			std::vector<const ConsistentRange*> &targetNonTerms);
