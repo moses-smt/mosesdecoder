@@ -28,6 +28,8 @@ struct PhrasePairRange
 
   }
 
+  void Debug(std::ostream &out) const;
+
   inline bool operator<(const PhrasePairRange &other) const {
 	return sourceTarget < other.sourceTarget;
   }

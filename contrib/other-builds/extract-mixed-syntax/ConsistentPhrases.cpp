@@ -9,6 +9,13 @@
 
 using namespace std;
 
+void PhrasePairRange::Debug(std::ostream &out) const
+{
+	out << "[" << sourceTarget.first.first << "-" << sourceTarget.first.second << "]["
+			<< sourceTarget.second.first << "-" << sourceTarget.second.second << "]";
+}
+
+//////////////////////////////////////////////////////////////////////
 ConsistentPhrases::ConsistentPhrases() {
 	// TODO Auto-generated constructor stub
 
@@ -51,10 +58,15 @@ const ConsistentPhrase *ConsistentPhrases::Find(
 void ConsistentPhrases::Debug(std::ostream &out) const
 {
   out << "m_rangeToColl=" << m_rangeToColl.size()
-	  << " m_coll=" << m_coll.size() <<endl;
-  for (size_t i = 0; i < m_coll.size(); ++i) {
-	  const ConsistentPhrase &consistentPhrase = m_coll[i];
-	  consistentPhrase.Debug(out);
+	  << " m_coll=" << m_coll.size() << endl;
+  RangeToColl::const_iterator iter;
+  for (iter = m_rangeToColl.begin(); iter != m_rangeToColl.end(); ++iter) {
+	  const PhrasePairRange &range = iter->first;
+	  const ConsistentPhrase *consistentPhrase = iter->second;
+	  range.Debug(out);
+	  out << "=";
+	  out << consistentPhrase;
+	  consistentPhrase->Debug(out);
 	  out << endl;
   }
 }
