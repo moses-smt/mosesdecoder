@@ -38,9 +38,7 @@ struct PhrasePairRange
 
 ///////////////////////////////////////////////////////////////////
 class ConsistentPhrases {
-
-  typedef std::vector<ConsistentPhrase> Coll;
-  typedef std::map<PhrasePairRange, const ConsistentPhrase*> RangeToColl;
+  typedef std::map<PhrasePairRange, const ConsistentPhrase*> Coll;
 
 public:
   typedef Coll::iterator iterator;
@@ -56,14 +54,13 @@ public:
   ConsistentPhrases();
   virtual ~ConsistentPhrases();
 
-  void Add(ConsistentPhrase &phrasePair);
+  void Add(ConsistentPhrase *phrasePair);
   const ConsistentPhrase *Find(int sourceStart, int sourceEnd, int targetStart, int targetEnd) const;
 
   void Debug(std::ostream &out) const;
 
 protected:
   Coll m_coll;
-  RangeToColl m_rangeToColl;
 
 };
 

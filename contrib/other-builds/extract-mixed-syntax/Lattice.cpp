@@ -28,7 +28,7 @@ Lattice::Lattice(const AlignedSentence &alignedSentence)
 	const ConsistentPhrases &consistentPhrases = alignedSentence.GetConsistentPhrases();
 	ConsistentPhrases::const_iterator iter;
 	for (iter = consistentPhrases.begin(); iter != consistentPhrases.end(); ++iter) {
-		const ConsistentPhrase &consistentPhrase = *iter;
+		const ConsistentPhrase &consistentPhrase = *iter->second;
 		const ConsistentRange &nonTerm = consistentPhrase.GetConsistentRange(Moses::Input);
 
 		int start = nonTerm.GetStart();
