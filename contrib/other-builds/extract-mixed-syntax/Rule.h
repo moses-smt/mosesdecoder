@@ -12,6 +12,8 @@ class LatticeArc;
 class Parameter;
 class ConsistentPhrase;
 class ConsistentPhrases;
+class ConsistentRange;
+class AlignedSentence;
 
 class Rule {
 public:
@@ -22,7 +24,8 @@ public:
 
 	bool IsValid(const Parameter &params) const;
 	bool CanExtend(const Parameter &params) const;
-	void Fillout(const ConsistentPhrases &consistentPhrases);
+	void Fillout(const ConsistentPhrases &consistentPhrases,
+				const AlignedSentence &alignedSentence);
 
 	const LatticeArc &GetLastArc() const
 	{ return *m_arcs.back(); }
@@ -35,5 +38,11 @@ protected:
 
 	const ConsistentPhrase *m_consistentPhrase;
 	bool m_isValid, m_canExtend;
+
+	void CreateTargetPhrase(
+			int targetStart,
+			int targetEnd,
+			std::vector<const ConsistentRange*> &targetNonTerms);
+	const ConsistentRange *Overlap(int pos, std::vector<const ConsistentRange*> &targetNonTerms);
 };
 

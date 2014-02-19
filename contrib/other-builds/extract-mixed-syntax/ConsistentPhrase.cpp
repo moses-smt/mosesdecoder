@@ -21,7 +21,18 @@ int ConsistentRange::GetHighestAlignment() const
 
 bool ConsistentRange::Overlap(const ConsistentRange &other) const
 {
+    if ( other.m_startEnd.second < m_startEnd.first
+    		|| other.m_startEnd.first > m_startEnd.second) {
+    	return false;
+    }
 
+    return true;
+}
+
+bool ConsistentRange::Overlap(int pos) const
+{
+  return (m_startEnd.first <= pos && pos <= m_startEnd.second) ?
+	  true : false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -40,7 +40,7 @@ void Rules::CreateRules(const Parameter &params, const ConsistentPhrases &consis
 		for (iterRules = todoRules.begin(); iterRules != todoRules.end(); ++iterRules) {
 			Rule *rule = *iterRules;
 
-			rule->Fillout(consistentPhrases);
+			rule->Fillout(consistentPhrases, m_alignedSentence);
 			Extend(*rule, params);
 
 			if (rule->IsValid(params)) {

@@ -42,6 +42,7 @@ public:
   }
 
   bool Overlap(const ConsistentRange &other) const;
+  bool Overlap(int pos) const;
 
 protected:
 	std::pair<int, int> m_startEnd;

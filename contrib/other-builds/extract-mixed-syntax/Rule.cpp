@@ -6,6 +6,7 @@
  */
 
 #include <limits>
+#include <cassert>
 #include "Rule.h"
 #include "Parameter.h"
 #include "LatticeArc.h"
@@ -46,7 +47,8 @@ bool Rule::CanExtend(const Parameter &params) const
   return true;
 }
 
-void Rule::Fillout(const ConsistentPhrases &consistentPhrases)
+void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
+				const AlignedSentence &alignedSentence)
 {
   // if last word is a non-term, check to see if it overlaps with any other non-terms
   if (m_arcs.back()->IsNonTerm()) {
@@ -92,10 +94,59 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases)
 	  return;
   }
 
+  // everything looks ok, create target phrase
+  // get a list of all target non-term
+  vector<const ConsistentRange*> targetNonTerms;
+  for (size_t i = 0; i < m_arcs.size(); ++i) {
+	  const LatticeArc *arc = m_arcs[i];
+
+	  if (arc->IsNonTerm()) {
+		  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(arc);
+		  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
+		  targetNonTerms.push_back(&targetRange);
+	  }
+  }
+
+  // targetNonTerms will be deleted element-by-element as it is used
+  CreateTargetPhrase(targetStart, targetEnd, targetNonTerms);
+  assert(targetNonTerms.size() == 0);
 
 
 }
 
+void Rule::CreateTargetPhrase(
+		int targetStart,
+		int targetEnd,
+		vector<const ConsistentRange*> &targetNonTerms)
+{
+	for (int pos = targetStart; pos <= targetEnd; ++pos) {
+		const ConsistentRange *range = Overlap(pos, targetNonTerms);
+		if (range) {
+			// part of non-term.
+			m_targetArcs.push_back(range);
+
+			pos = range->GetEnd();
+		}
+		else {
+			// just use the word
+			m_targetArcs.push_back(word);
+		}
+	}
+}
+
+const ConsistentRange *Rule::Overlap(int pos, vector<const ConsistentRange*> &targetNonTerms)
+{
+	vector<const ConsistentRange*>::iterator iter;
+	for (iter = targetNonTerms.begin(); iter != targetNonTerms.end(); ++iter) {
+		const ConsistentRange *range = *iter;
+		if (range->Overlap(pos)) {
+			targetNonTerms.erase(iter);
+			return range;
+		}
+	}
+
+	return NULL;
+}
 
 Rule *Rule::Extend(const LatticeArc &arc) const
 {
