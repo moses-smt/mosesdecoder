@@ -19,21 +19,25 @@ namespace ugdiss
   template<typename T>
   void display(T const* x, string label)
   {
-    cout << label << ":"; for (;x;x=next(x)) cout << " " << x->lemma; cout << endl; 
+    cout << label << ":"; 
+    for (;x;x=next(x)) cout << " " << x->lemma; 
+    cout << endl; 
   }
 #endif
 
   template<typename T> class TSA;
 
   // CLASS DEFINITION
-  // The TSA_tree_iterator allows traversal of a Token Sequence Array as if it was a trie.
+  // The TSA_tree_iterator allows traversal of a Token Sequence Array 
+  // as if it was a trie.
+  //
   // down(): go to first child
   // over(): go to next sibling 
   // up():   go to parent
   // extend(id): go to a specific child node
   // all four functions return true if successful, false otherwise
-  // lower_bound() and upper_bound() give the range of entries in the array covered by the 
-  // "virtual trie node".
+  // lower_bound() and upper_bound() give the range of entries in the 
+  // array covered by the "virtual trie node".
   template<typename TKN>
   class
   TSA_tree_iterator
@@ -50,12 +54,16 @@ namespace ugdiss
     virtual ~TSA_tree_iterator() {};
 
     TSA<Token> const* root; 
-    // TO BE DONE: make the pointer private and add a const function to return the pointer
+    // TO BE DONE: make the pointer private and add a const function
+    // to return the pointer
 
     // TSA_tree_iterator(TSA_tree_iterator const& other);
     TSA_tree_iterator(TSA<Token> const* s);
     // TSA_tree_iterator(TSA<Token> const* s, Token const& t);
-    TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, Token const* kend);
+    TSA_tree_iterator(TSA<Token> const* s, 
+		      Token const* kstart, 
+		      Token const* kend, 
+		      bool full_match_only=true);
     // TSA_tree_iterator(TSA<Token> const* s, 
     // 		      TokenIndex const& V, 
     // 		      string const& key);
@@ -358,13 +366,14 @@ namespace ugdiss
 
   template<typename Token>
   TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, Token const* kend)
+  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, 
+		    Token const* kend, bool full_match_only)
     : root(s) 
   {
     for (;kstart != kend; kstart = kstart->next()) 
       if (!extend(*kstart)) 
         break;
-    if (kstart != kend) 
+    if (full_match_only && kstart != kend) 
       {
         lower.clear();
         upper.clear();
