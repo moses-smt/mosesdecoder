@@ -17,7 +17,10 @@ namespace Moses
       , good        (0)
       , sum_pairs   (0)
       , in_progress (0)
-    {}
+    {
+      ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = ofwd[5] = ofwd[6] = 0;
+      obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = obwd[5] = obwd[6] = 0;
+    }
 
     void
     pstats::
@@ -126,6 +129,20 @@ namespace Moses
     valid()
     {
       return my_rcnt != 0;
+    }
+
+    bool
+    PhrasePair::
+    operator<=(PhrasePair const& other) const
+    {
+      return this->score <= other.score;
+    }
+
+    bool
+    PhrasePair::
+    operator>=(PhrasePair const& other) const
+    {
+      return this->score >= other.score;
     }
 
     bool
@@ -287,10 +304,10 @@ namespace Moses
     {
 	vector<id_type> sids;
 	sids.reserve(snt.size());
-	BOOST_FOREACH(string const& s, snt)
+	BOOST_FOREACH(string const& foo, snt)
 	  {
 	    sids.push_back(track ? track->size() : 0);
-	    istringstream buf(s);
+	    istringstream buf(foo);
 	    string w;
 	    vector<L2R_Token<SimpleWordId > > s;
 	    s.reserve(100);
@@ -311,5 +328,167 @@ namespace Moses
       : snt(s), V(v), track(t), index(i) 
     { }
 
+
+    bool 
+    expand_phrase_pair
+    (vector<vector<ushort> >& a1,
+     vector<vector<ushort> >& a2,
+     ushort const seed, 
+     ushort const L1, // hard left  limit source
+     ushort const R1, // hard right limit source
+     ushort const L2, // hard left  limit target
+     ushort const R2, // hard right limit target
+     ushort & s1, ushort & e1, // start/end src phrase
+     ushort & s2, ushort & e2) // start/end trg phrase
+    {
+      if (a1[seed].size() == 0) return false;
+      assert(L1 <= seed);
+      assert(R1 >  seed);
+      bitvector done1(a1.size());
+      bitvector done2(a2.size());
+      vector <pair<ushort,ushort> > agenda; 
+      agenda.reserve(a1.size() + a2.size());
+      agenda.push_back(pair<ushort,ushort>(seed,0));
+      s1 = seed;
+      e1 = seed;
+      s2 = e2 = a1[seed].front();
+
+      BOOST_FOREACH(ushort k, a1[seed])
+	{
+	  if (s2 < k) s2 = k;
+	  if (e2 > k) e2 = k;
+	}
+
+      for (ushort j = s2; j <= e2; ++j)
+	{
+	  if (a2[j].size() == 0) continue;
+	  done2.set(j);
+	  agenda.push_back(pair<ushort,ushort>(j,1));
+	}
+
+      while (agenda.size())
+	{
+	  ushort side = agenda[0].second;
+	  ushort i    = agenda[0].first;
+	  agenda.pop_back();
+	  if (side)
+	    {
+	      BOOST_FOREACH(ushort k, a2[i])
+		{
+		  if (k < L1 || k > R1) 
+		    return false;
+		  if (done1[k]) 
+		    continue;
+		  while (s1 > k)
+		    {
+		      --s1;
+		      if (done1[s1] || !a1[s1].size()) 
+			continue;
+		      done1.set(s1);
+		      agenda.push_back(pair<ushort,ushort>(s1,0));
+		    }
+		  while (e1 < k)
+		    {
+		      ++e1;
+		      if (done1[e1] || !a1[e1].size())
+			continue;
+		      done1.set(e1);
+		      agenda.push_back(pair<ushort,ushort>(e1,0));
+		    }
+		}
+	    }
+	  else
+	    {
+	      BOOST_FOREACH(ushort k, a1[i])
+		{
+		  if (k < L2 || k > R2) 
+		    return false;
+		  if (done2[k]) 
+		    continue;
+		  while (s2 > k)
+		    {
+		      --s2;
+		      if (done2[s2] || !a2[s2].size()) 
+			continue;
+		      done1.set(s2);
+		      agenda.push_back(pair<ushort,ushort>(s2,1));
+		    }
+		  while (e2 < k)
+		    {
+		      ++e2;
+		      if (done1[e2] || !a1[e2].size())
+			continue;
+		      done2.set(e2);
+		      agenda.push_back(pair<ushort,ushort>(e2,1));
+		    }
+		}
+	    }
+	}
+      ++e1;
+      ++e2;
+      return true;
+    }
+
+    PhraseOrientation 
+    find_po_fwd(vector<vector<ushort> >& a1,
+		vector<vector<ushort> >& a2,
+		size_t b1, size_t e1,
+		size_t b2, size_t e2)
+    {
+      size_t n2 = e2;
+      while (n2 < a2.size() && a2[n2].size() == 0) ++n2;
+      if (n2 == a2.size()) return po_last;
+      
+      ushort ns1,ns2,ne1,ne2;
+      bool OK = expand_phrase_pair(a2,a1,n2,
+				   e2, a2.size()-1,
+				   0,  a1.size()-1,
+				   ns2,ne2,ns1,ne1);
+      if (!OK) return po_other;
+      if (ns1 >= e1)
+	{
+	  for (ushort j = e1; j < ns2; ++j)
+	    if (a1[j].size()) return po_jfwd;
+	  return po_mono;
+	}
+      else
+	{
+	  for (ushort j = ne1; j < b1; ++j)
+	    if (a1[j].size()) return po_jbwd;
+	  return po_swap;
+	}
+    }
+
+
+    PhraseOrientation 
+    find_po_bwd(vector<vector<ushort> >& a1,
+		vector<vector<ushort> >& a2,
+		size_t b1, size_t e1,
+		size_t b2, size_t e2)
+    {
+      int p2 = b2-1;
+      while (p2 >= 0 && !a2[p2].size()) --p2;
+      if (p2 < 0) return po_first;
+      ushort ps1,ps2,pe1,pe2;
+      bool OK = expand_phrase_pair(a2,a1,p2,
+				   0, b2-1,
+				   0, a1.size()-1,
+				   ps2,pe2,ps1,pe1);
+      if (!OK) return po_other;
+      
+      if (pe1 < b1)
+	{
+	  for (ushort j = pe1; j < b1; ++j)
+	    if (a1[j].size()) return po_jfwd;
+	  return po_mono;
+	}
+      else
+	{
+	  for (ushort j = e1; j < ps1; ++j)
+	    if (a1[j].size()) return po_jbwd;
+	  return po_swap;
+	}
+      return po_other; 
+    }
   }
 }
