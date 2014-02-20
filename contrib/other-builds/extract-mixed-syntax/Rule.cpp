@@ -54,71 +54,88 @@ bool Rule::CanExtend(const Parameter &params) const
 
 void Rule::Prevalidate(const Parameter &params)
 {
-	  if (m_arcs.size() >= params.maxSymbolsSource) {
-		  m_canExtend = false;
-		  if (m_arcs.size() > params.maxSymbolsSource) {
-			  m_isValid = false;
+  if (m_arcs.size() >= params.maxSymbolsSource) {
+	  m_canExtend = false;
+	  if (m_arcs.size() > params.maxSymbolsSource) {
+		  m_isValid = false;
+		  return;
+	  }
+  }
+
+  // last word is a non-term
+  if (m_arcs.back()->IsNonTerm()) {
+	  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(m_arcs.back());
+
+	  // check number of non-terms
+	  int numNonTerms = 0;
+	  for (size_t i = 0; i < m_arcs.size(); ++i) {
+		  const LatticeArc *arc = m_arcs[i];
+		  if (arc->IsNonTerm()) {
+			  ++numNonTerms;
 		  }
 	  }
 
-	  // last word is a non-term
-	  if (m_arcs.back()->IsNonTerm()) {
-		  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(m_arcs.back());
+	  if (numNonTerms > params.maxNonTerm) {
+		  m_isValid = false;
+		  m_canExtend = false;
+		  return;
+	  }
 
-		  // check number of non-terms
-		  int numNonTerms = 0;
-		  for (size_t i = 0; i < m_arcs.size(); ++i) {
-			  const LatticeArc *arc = m_arcs[i];
-			  if (arc->IsNonTerm()) {
-				  ++numNonTerms;
-			  }
-		  }
+	  // check if non-term is big enough
+	  if (sourceRange->GetWidth() < params.minHoleSource) {
+		  m_isValid = false;
+		  m_canExtend = false;
+		  return;
+	  }
 
-		  if (numNonTerms > params.maxNonTerm) {
+	  // check if 2 consecutive non-terms in source
+	  if (!params.nonTermConsecSource) {
+		  size_t numSymbols = m_arcs.size();
+		  if (numSymbols > 1 && m_arcs[numSymbols - 2]->IsNonTerm()) {
 			  m_isValid = false;
 			  m_canExtend = false;
 			  return;
 		  }
+	  }
 
-		  // check if non-term is big enough
-		  if (sourceRange->GetWidth() < params.minHoleSource) {
-			  m_isValid = false;
-			  m_canExtend = false;
-			  return;
-		  }
+	  //check to see if it overlaps with any other non-terms
+	  const ConsistentRange &lastTargetRange = sourceRange->GetOtherRange();
 
-		  // check if 2 consecutive non-terms in source
-		  if (!params.nonTermConsecSource) {
-			  size_t numSymbols = m_arcs.size();
-			  if (numSymbols > 1 && m_arcs[numSymbols - 2]->IsNonTerm()) {
+	  for (size_t i = 0; i < m_arcs.size() - 1; ++i) {
+		  const LatticeArc *arc = m_arcs[i];
+
+		  if (arc->IsNonTerm()) {
+			  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(arc);
+			  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
+
+			  if (lastTargetRange.Overlap(targetRange)) {
 				  m_isValid = false;
 				  m_canExtend = false;
 				  return;
 			  }
 		  }
+	  }
+  }
 
-		  //check to see if it overlaps with any other non-terms
-		  const ConsistentRange &lastTargetRange = sourceRange->GetOtherRange();
+  if (params.requireAlignedWord) {
+	  bool ok = false;
+	  for (size_t i = 0; i < m_arcs.size(); ++i) {
+		  const LatticeArc *arc = m_arcs[i];
 
-		  for (size_t i = 0; i < m_arcs.size() - 1; ++i) {
-			  const LatticeArc *arc = m_arcs[i];
-
-			  if (arc->IsNonTerm()) {
-				  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(arc);
-				  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
-
-				  if (lastTargetRange.Overlap(targetRange)) {
-					  m_isValid = false;
-					  m_canExtend = false;
-					  return;
-				  }
+		  if (!arc->IsNonTerm()) {
+			  const Word *word = static_cast<const Word *>(arc);
+			  if (word->GetAlignment().size()) {
+				  ok = true;
+				  break;
 			  }
 		  }
 	  }
 
-	  if (params.requireAlignedWord) {
-
+	  if (!ok) {
+		  m_isValid = false;
 	  }
+
+  }
 }
 
 void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
