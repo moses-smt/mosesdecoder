@@ -84,11 +84,11 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 
   for (size_t i = 0; i < m_arcs.size(); ++i) {
 	  const LatticeArc &arc = *m_arcs[i];
-	  if (arc.GetStart() < targetStart) {
-		  targetStart = arc.GetStart();
+	  if (arc.GetLowestAlignment() < targetStart) {
+		  targetStart = arc.GetLowestAlignment();
 	  }
-	  if (arc.GetEnd() > targetEnd) {
-		  targetEnd = arc.GetEnd();
+	  if (arc.GetHighestAlignment() > targetEnd) {
+		  targetEnd = arc.GetHighestAlignment();
 	  }
   }
 
@@ -183,7 +183,7 @@ void Rule::Output(std::ostream &out, const std::vector<const LatticeArc*> &arcs)
 void Rule::Output(std::ostream &out) const
 {
 	Output(out, m_arcs);
-	out << " ||| ";
+	out << "||| ";
 	Output(out, m_arcs);
 }
 
