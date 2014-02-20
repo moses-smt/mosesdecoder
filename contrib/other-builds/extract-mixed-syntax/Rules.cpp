@@ -52,6 +52,10 @@ void Rules::CreateRules(const Parameter &params, const ConsistentPhrases &consis
 				m_keepRules.insert(rule);
 			}
 			else {
+				cerr << "DELETED:";
+				rule->Debug(cerr);
+  			    cerr << endl;
+
 				delete rule;
 			}
 

@@ -18,6 +18,7 @@ using namespace std;
 Rule::Rule(const LatticeArc &arc)
 :m_isValid(true)
 ,m_canExtend(true)
+,m_consistentPhrase(NULL)
 {
 	m_arcs.push_back(&arc);
 }
@@ -26,6 +27,7 @@ Rule::Rule(const Rule &prevRule, const LatticeArc &arc)
 :m_arcs(prevRule.m_arcs)
 ,m_isValid(true)
 ,m_canExtend(true)
+,m_consistentPhrase(NULL)
 {
 	m_arcs.push_back(&arc);
 }
@@ -54,6 +56,14 @@ bool Rule::CanExtend(const Parameter &params) const
 
 void Rule::Prevalidate(const Parameter &params)
 {
+  int sourceStart = m_arcs.front()->GetStart();
+  int sourceEnd = m_arcs.back()->GetEnd();
+
+  if (sourceStart == 7 && sourceEnd == 8) {
+	  Debug(cerr);
+	  cerr << endl;
+  }
+
   if (m_arcs.size() >= params.maxSymbolsSource) {
 	  m_canExtend = false;
 	  if (m_arcs.size() > params.maxSymbolsSource) {
@@ -149,6 +159,11 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
   // find out if it's a consistent phrase
   int sourceStart = m_arcs.front()->GetStart();
   int sourceEnd = m_arcs.back()->GetEnd();
+
+  if (sourceStart == 7 && sourceEnd == 8) {
+	  Debug(cerr);
+	  cerr << endl;
+  }
 
   if (sourceEnd - sourceStart + 1 >= params.maxSpan) {
 	  m_canExtend = false;
@@ -277,6 +292,10 @@ void Rule::Debug(std::ostream &out) const
 	if (m_consistentPhrase) {
 		m_consistentPhrase->GetConsistentRange(Moses::Input).Output(out);
 	}
+	else {
+		out << "_BLANK_";
+	}
+
 
 	out << "||| ";
 
@@ -288,6 +307,8 @@ void Rule::Debug(std::ostream &out) const
 		cerr << "||| m_consistentPhrase=";
 		m_consistentPhrase->Debug(out);
 	}
-	out << endl;
+	else {
+		out << "_BLANK_";
+	}
 }
 
