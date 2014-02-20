@@ -24,6 +24,7 @@ public:
 
 	virtual ~Rule();
 
+	void Prevalidate(const Parameter &params);
 	bool IsValid(const Parameter &params) const;
 	bool CanExtend(const Parameter &params) const;
 	void Fillout(const ConsistentPhrases &consistentPhrases,

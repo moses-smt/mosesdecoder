@@ -13,6 +13,7 @@ Parameter::Parameter()
 ,maxSymbolsSource(5)
 ,minHoleSource(2)
 ,nonTermConsecSource(false)
+,requireAlignedWord(true)
 
 ,sourceSyntax(false)
 ,targetSyntax(false)

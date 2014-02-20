@@ -52,48 +52,81 @@ bool Rule::CanExtend(const Parameter &params) const
   return true;
 }
 
-void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
-				const AlignedSentence &alignedSentence,
-				const Parameter &params)
+void Rule::Prevalidate(const Parameter &params)
 {
-  // last word is a non-term
-  if (m_arcs.back()->IsNonTerm()) {
-	  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(m_arcs.back());
-
-	  // check if non-term is big enough
-	  if (sourceRange->GetWidth() < params.minHoleSource) {
-		  m_isValid = false;
+	  if (m_arcs.size() >= params.maxSymbolsSource) {
 		  m_canExtend = false;
-		  return;
+		  if (m_arcs.size() > params.maxSymbolsSource) {
+			  m_isValid = false;
+		  }
 	  }
 
-	  // check if 2 consecutive non-terms in source
-	  if (!params.nonTermConsecSource) {
-		  size_t numSymbols = m_arcs.size();
-		  if (numSymbols > 1 && m_arcs[numSymbols - 2]->IsNonTerm()) {
+	  // last word is a non-term
+	  if (m_arcs.back()->IsNonTerm()) {
+		  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(m_arcs.back());
+
+		  // check number of non-terms
+		  int numNonTerms = 0;
+		  for (size_t i = 0; i < m_arcs.size(); ++i) {
+			  const LatticeArc *arc = m_arcs[i];
+			  if (arc->IsNonTerm()) {
+				  ++numNonTerms;
+			  }
+		  }
+
+		  if (numNonTerms > params.maxNonTerm) {
 			  m_isValid = false;
 			  m_canExtend = false;
 			  return;
 		  }
-	  }
 
-	  //check to see if it overlaps with any other non-terms
-	  const ConsistentRange &lastTargetRange = sourceRange->GetOtherRange();
+		  // check if non-term is big enough
+		  if (sourceRange->GetWidth() < params.minHoleSource) {
+			  m_isValid = false;
+			  m_canExtend = false;
+			  return;
+		  }
 
-	  for (size_t i = 0; i < m_arcs.size() - 1; ++i) {
-		  const LatticeArc *arc = m_arcs[i];
-
-		  if (arc->IsNonTerm()) {
-			  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(arc);
-			  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
-
-			  if (lastTargetRange.Overlap(targetRange)) {
+		  // check if 2 consecutive non-terms in source
+		  if (!params.nonTermConsecSource) {
+			  size_t numSymbols = m_arcs.size();
+			  if (numSymbols > 1 && m_arcs[numSymbols - 2]->IsNonTerm()) {
 				  m_isValid = false;
 				  m_canExtend = false;
 				  return;
 			  }
 		  }
+
+		  //check to see if it overlaps with any other non-terms
+		  const ConsistentRange &lastTargetRange = sourceRange->GetOtherRange();
+
+		  for (size_t i = 0; i < m_arcs.size() - 1; ++i) {
+			  const LatticeArc *arc = m_arcs[i];
+
+			  if (arc->IsNonTerm()) {
+				  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(arc);
+				  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
+
+				  if (lastTargetRange.Overlap(targetRange)) {
+					  m_isValid = false;
+					  m_canExtend = false;
+					  return;
+				  }
+			  }
+		  }
 	  }
+
+	  if (params.requireAlignedWord) {
+
+	  }
+}
+
+void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
+				const AlignedSentence &alignedSentence,
+				const Parameter &params)
+{
+  if (!m_isValid) {
+	  return;
   }
 
   // find out if it's a consistent phrase
@@ -136,18 +169,6 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 		  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(arc);
 		  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
 		  targetNonTerms.push_back(&targetRange);
-	  }
-  }
-
-  if (targetNonTerms.size() > params.maxNonTerm) {
-	  m_isValid = false;
-	  return;
-  }
-
-  if (m_arcs.size() >= params.maxSymbolsSource) {
-	  m_canExtend = false;
-	  if (m_arcs.size() > params.maxSymbolsSource) {
-		  m_isValid = false;
 	  }
   }
 

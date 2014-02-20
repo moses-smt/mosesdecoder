@@ -20,6 +20,7 @@ public:
   int minHoleSource;
 
   bool nonTermConsecSource;
+  bool requireAlignedWord;
 
   bool sourceSyntax, targetSyntax;
 };
