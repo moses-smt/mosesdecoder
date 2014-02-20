@@ -259,17 +259,32 @@ void Rule::Output(std::ostream &out, const std::vector<const LatticeArc*> &arcs)
 
 void Rule::Output(std::ostream &out) const
 {
+	assert(m_consistentPhrase);
+
 	Output(out, m_arcs);
+	m_consistentPhrase->GetConsistentRange(Moses::Input).Output(out);
+
 	out << "||| ";
+
 	Output(out, m_targetArcs);
+	m_consistentPhrase->GetConsistentRange(Moses::Output).Output(out);
 }
 
 void Rule::Debug(std::ostream &out) const
 {
 	Output(out, m_arcs);
-	out << "||| ";
-	Output(out, m_targetArcs);
+
 	if (m_consistentPhrase) {
+		m_consistentPhrase->GetConsistentRange(Moses::Input).Output(out);
+	}
+
+	out << "||| ";
+
+	Output(out, m_targetArcs);
+
+	if (m_consistentPhrase) {
+		m_consistentPhrase->GetConsistentRange(Moses::Output).Output(out);
+
 		cerr << "||| m_consistentPhrase=";
 		m_consistentPhrase->Debug(out);
 	}
