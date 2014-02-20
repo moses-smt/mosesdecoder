@@ -5,9 +5,10 @@
  *      Author: hieu
  */
 
-#include <Rule.h>
+#include "Rule.h"
 
-Rule::Rule() {
+Rule::Rule(const ConsistentPhrase &consistentPhrase)
+{
 	// TODO Auto-generated constructor stub
 
 }

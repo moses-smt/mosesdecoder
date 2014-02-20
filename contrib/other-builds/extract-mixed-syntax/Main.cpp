@@ -6,6 +6,7 @@
 #include "OutputFileStream.h"
 #include "AlignedSentence.h"
 #include "Parameter.h"
+#include "Rules.h"
 
 using namespace std;
 
@@ -58,6 +59,8 @@ int main(int argc, char** argv)
 	  AlignedSentence alignedSentence(lineSource, lineTarget, lineAlignment);
 	  alignedSentence.CreateConsistentPhrases(params);
 	  alignedSentence.Debug(cerr);
+
+	  Rules rules(alignedSentence);
 
   }
 

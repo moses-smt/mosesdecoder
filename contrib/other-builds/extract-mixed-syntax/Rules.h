@@ -17,8 +17,12 @@ class Rules {
 public:
 	Rules(const AlignedSentence &alignedSentence);
 	virtual ~Rules();
+	void CreateRules();
 
 protected:
-	std::set<Rule*> m_keepRules;
+	std::set<Rule*> m_todoRules, m_keepRules;
+
+	void Extend(const Rule &rule);
+
 };
 
