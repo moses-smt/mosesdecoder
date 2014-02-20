@@ -302,7 +302,7 @@ namespace ugdiss
   getCounts(char const* p, char const* const q, 
 	    count_type& sids, count_type& raw) const
   {
-    id_type sid; uint16_t off;
+    id_type sid; // uint16_t off;
     bdBitset check(this->corpus->size());
     cpos const* xp = reinterpret_cast<cpos const*>(p);
     cpos const* xq = reinterpret_cast<cpos const*>(q);
@@ -310,7 +310,7 @@ namespace ugdiss
     for (;xp < xq;xp++)
       {
 	sid = xp->sid;
-	off = xp->offset;
+	// off = xp->offset;
 	check.set(sid);
       }
     sids = check.count();
