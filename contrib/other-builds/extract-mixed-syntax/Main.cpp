@@ -32,10 +32,12 @@ int main(int argc, char** argv)
   string pathTarget = argv[1];
   string pathSource = argv[2];
   string pathAlignment = argv[3];
+  string pathExtract = argv[4];
 
   Moses::InputFileStream strmTarget(pathTarget);
   Moses::InputFileStream strmSource(pathSource);
   Moses::InputFileStream strmAlignment(pathAlignment);
+  Moses::OutputFileStream m_extractFile(pathExtract);
 
 
   // MAIN LOOP
@@ -65,7 +67,7 @@ int main(int argc, char** argv)
 
 	  Rules rules(lattice, alignedSentence);
 	  rules.CreateRules(params, alignedSentence.GetConsistentPhrases());
-	  rules.Output(cout);
+	  rules.Output(m_extractFile);
 
   }
 
