@@ -6,6 +6,7 @@
 #include "OutputFileStream.h"
 #include "AlignedSentence.h"
 #include "Parameter.h"
+#include "Lattice.h"
 
 using namespace std;
 
@@ -59,6 +60,7 @@ int main(int argc, char** argv)
 	  alignedSentence.CreateConsistentPhrases(params);
 	  alignedSentence.Debug(cerr);
 
+	  Lattice lattice(alignedSentence);
   }
 
 
