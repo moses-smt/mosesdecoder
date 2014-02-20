@@ -65,8 +65,6 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 			  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
 
 			  if (lastTargetRange.Overlap(targetRange)) {
-				  cerr << "NOT VALID1";
-				  Debug(cerr);
 				  m_isValid = false;
 				  m_canExtend = false;
 				  return;
@@ -94,8 +92,6 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 
   m_consistentPhrase = consistentPhrases.Find(sourceStart, sourceEnd, targetStart, targetEnd);
   if (m_consistentPhrase == NULL) {
-	  cerr << "NOT VALID2";
-	  Debug(cerr);
 	  m_isValid = false;
 	  return;
   }
@@ -114,8 +110,6 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
   }
 
   if (targetNonTerms.size() > params.maxNonTerm) {
-	  cerr << "NOT VALID3";
-	  Debug(cerr);
 	  m_isValid = false;
 	  return;
   }
@@ -125,7 +119,7 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 		  targetStart,
 		  targetEnd,
 		  targetNonTerms);
-  //assert(targetNonTerms.size() == 0);
+  assert(targetNonTerms.size() == 0);
 }
 
 void Rule::CreateTargetPhrase(const Phrase &targetPhrase,

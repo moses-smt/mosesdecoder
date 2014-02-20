@@ -43,8 +43,6 @@ const ConsistentPhrase *ConsistentPhrases::Find(
 		int targetEnd) const
 {
 	PhrasePairRange phrasePairRange(sourceStart, sourceEnd, targetStart, targetEnd);
-    cerr << "FINDING ";
-    phrasePairRange.Debug(cerr);
 
     const ConsistentPhrase *ret;
 	const_iterator iter = m_coll.find(phrasePairRange);
@@ -54,7 +52,7 @@ const ConsistentPhrase *ConsistentPhrases::Find(
 	else {
 		ret = iter->second;
 	}
-	cerr << ret;
+
 	return ret;
 }
 

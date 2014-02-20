@@ -57,11 +57,11 @@ int main(int argc, char** argv)
 
 	  AlignedSentence alignedSentence(lineSource, lineTarget, lineAlignment);
 	  alignedSentence.CreateConsistentPhrases(params);
-	  alignedSentence.Debug(cerr);
+	  //alignedSentence.Debug(cerr);
 
 	  Lattice lattice(alignedSentence);
-	  cerr << "LATTICE:";
-	  lattice.Debug(cerr);
+	  //cerr << "LATTICE:";
+	  //lattice.Debug(cerr);
 
 	  Rules rules(lattice, alignedSentence);
 	  rules.CreateRules(params, alignedSentence.GetConsistentPhrases());
