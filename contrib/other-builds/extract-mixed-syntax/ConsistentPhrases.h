@@ -31,8 +31,8 @@ public:
 	size_t GetSize() const
 	{ return m_coll.size(); }
 
-	void Add(const Word *sourceStart, const Word *sourceEnd,
-			const Word *targetStart, const Word *targetEnd);
+	void Add(int sourceStart, int sourceEnd,
+			int targetStart, int targetEnd);
 
 	void Debug(std::ostream &out) const;
 

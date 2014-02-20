@@ -9,10 +9,8 @@
 #include <Word.h>
 
 ConsistentPhrase::ConsistentPhrase(
-		const Word *sourceStart,
-		const Word *sourceEnd,
-		const Word *targetStart,
-		const Word *targetEnd)
+		int sourceStart, int sourceEnd,
+		int targetStart, int targetEnd)
 :corners(4)
 {
 	corners[0] = sourceStart;
@@ -32,6 +30,6 @@ bool ConsistentPhrase::operator<(const ConsistentPhrase &other) const
 
 void ConsistentPhrase::Debug(std::ostream &out) const
 {
-  out << "[" << corners[0]->GetPos() << "-" << corners[1]->GetPos()
-		  << "][" << corners[2]->GetPos() << "-" << corners[3]->GetPos() << "]";
+  out << "[" << corners[0] << "-" << corners[1]
+		  << "][" << corners[2] << "-" << corners[3] << "]";
 }

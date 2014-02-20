@@ -17,8 +17,8 @@ ConsistentPhrases::~ConsistentPhrases() {
 	// TODO Auto-generated destructor stub
 }
 
-void ConsistentPhrases::Add(const Word *sourceStart, const Word *sourceEnd,
-			const Word *targetStart, const Word *targetEnd)
+void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
+		int targetStart, int targetEnd)
 {
 	m_coll.insert(ConsistentPhrase(sourceStart,
 					sourceEnd,
