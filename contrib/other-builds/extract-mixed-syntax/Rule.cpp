@@ -56,8 +56,18 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 				const AlignedSentence &alignedSentence,
 				const Parameter &params)
 {
-  // if last word is a non-term, check to see if it overlaps with any other non-terms
+  // last word is a non-term
   if (m_arcs.back()->IsNonTerm()) {
+	  // check if 2 consecutive non-terms in source
+	  if (!params.nonTermConsecSource) {
+		  size_t numSymbols = m_arcs.size();
+		  if (numSymbols > 1 && m_arcs[numSymbols - 2]->IsNonTerm()) {
+			  m_isValid = false;
+			  m_canExtend = false;
+		  }
+	  }
+
+	  //check to see if it overlaps with any other non-terms
 	  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(m_arcs.back());
 	  const ConsistentRange &lastTargetRange = sourceRange->GetOtherRange();
 

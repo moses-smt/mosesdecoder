@@ -10,14 +10,16 @@
 class Parameter
 {
 public:
-	Parameter();
-	virtual ~Parameter();
+  Parameter();
+  virtual ~Parameter();
 
-	int maxSpan;
-	int maxNonTerm;
-	  int maxSymbolsTarget;
-	  int maxSymbolsSource;
+  int maxSpan;
+  int maxNonTerm;
+  int maxSymbolsTarget;
+  int maxSymbolsSource;
 
-	bool sourceSyntax, targetSyntax;
+  bool nonTermConsecSource;
+
+  bool sourceSyntax, targetSyntax;
 };
 
