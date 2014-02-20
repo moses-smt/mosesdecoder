@@ -34,6 +34,9 @@ public:
 	int GetEnd() const
 	{ return m_startEnd.second; }
 
+	int GetWidth() const
+	{ return m_startEnd.second - m_startEnd.first + 1; }
+
 	int GetLowestAlignment() const;
 	int GetHighestAlignment() const;
 

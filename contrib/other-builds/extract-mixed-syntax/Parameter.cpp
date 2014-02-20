@@ -11,6 +11,7 @@ Parameter::Parameter()
 ,maxNonTerm(2)
 ,maxSymbolsTarget(999)
 ,maxSymbolsSource(5)
+,minHoleSource(2)
 ,nonTermConsecSource(false)
 
 ,sourceSyntax(false)

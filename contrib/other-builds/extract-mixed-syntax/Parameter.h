@@ -17,6 +17,7 @@ public:
   int maxNonTerm;
   int maxSymbolsTarget;
   int maxSymbolsSource;
+  int minHoleSource;
 
   bool nonTermConsecSource;
 

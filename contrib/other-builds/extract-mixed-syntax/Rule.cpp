@@ -58,17 +58,26 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 {
   // last word is a non-term
   if (m_arcs.back()->IsNonTerm()) {
+	  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(m_arcs.back());
+
+	  // check if non-term is big enough
+	  if (sourceRange->GetWidth() < params.minHoleSource) {
+		  m_isValid = false;
+		  m_canExtend = false;
+		  return;
+	  }
+
 	  // check if 2 consecutive non-terms in source
 	  if (!params.nonTermConsecSource) {
 		  size_t numSymbols = m_arcs.size();
 		  if (numSymbols > 1 && m_arcs[numSymbols - 2]->IsNonTerm()) {
 			  m_isValid = false;
 			  m_canExtend = false;
+			  return;
 		  }
 	  }
 
 	  //check to see if it overlaps with any other non-terms
-	  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(m_arcs.back());
 	  const ConsistentRange &lastTargetRange = sourceRange->GetOtherRange();
 
 	  for (size_t i = 0; i < m_arcs.size() - 1; ++i) {
@@ -90,6 +99,13 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
   // find out if it's a consistent phrase
   int sourceStart = m_arcs.front()->GetStart();
   int sourceEnd = m_arcs.back()->GetEnd();
+
+  if (sourceEnd - sourceStart + 1 >= params.maxSpan) {
+	  m_canExtend = false;
+	  if (sourceEnd - sourceStart + 1 > params.maxSpan) {
+		  m_isValid = false;
+	  }
+  }
 
   int targetStart = numeric_limits<int>::max();
   int targetEnd = -1;
