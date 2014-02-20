@@ -12,8 +12,6 @@ using namespace std;
 Word::Word(int pos, const std::string &str)
 :m_pos(pos)
 ,m_str(str)
-,m_lowestAlignment(numeric_limits<int>::max())
-,m_highestAlignment(-1)
 {
 	// TODO Auto-generated constructor stub
 
@@ -23,15 +21,23 @@ Word::~Word() {
 	// TODO Auto-generated destructor stub
 }
 
-void Word::AddAlignment(int align)
+void Word::AddAlignment(const Word *other)
 {
-	m_alignment.insert(align);
-	if (align > m_highestAlignment) {
-		m_highestAlignment = align;
+	m_alignment.insert(other);
+}
+
+std::set<int> Word::GetAlignment() const
+{
+	std::set<int> ret;
+
+	std::set<const Word *>::const_iterator iter;
+	for (iter = m_alignment.begin(); iter != m_alignment.end(); ++iter) {
+		const Word &otherWord = **iter;
+		int otherPos = otherWord.GetPos();
+		ret.insert(otherPos);
 	}
-	if (align < m_lowestAlignment) {
-		m_lowestAlignment = align;
-	}
+
+	return ret;
 }
 
 void Word::Output(std::ostream &out) const

@@ -1,66 +1,32 @@
 /*
  * ConsistentPhrases.h
  *
- *  Created on: 18 Feb 2014
- *      Author: s0565741
+ *  Created on: 20 Feb 2014
+ *      Author: hieu
  */
 #pragma once
 
-#include <vector>
-#include <map>
-#include "ConsistentPhrase.h"
+#include <set>
+#include <iostream>
+#include <ConsistentPhrase.h>
 
-///////////////////////////////////////////////////////////////////
+class Word;
 
-// just the range, for finding
-struct PhrasePairRange
-{
-  typedef std::pair<int, int> Range;
-  std::pair<Range, Range> sourceTarget;
-
-  PhrasePairRange(int sourceStart, int sourceEnd, int targetStart, int targetEnd)
-  {
-    sourceTarget.first.first = sourceStart;
-	sourceTarget.first.second = sourceEnd;
-
-	sourceTarget.second.first = targetStart;
-	sourceTarget.second.second = targetEnd;
-
-  }
-
-  void Debug(std::ostream &out) const;
-
-  inline bool operator<(const PhrasePairRange &other) const {
-	return sourceTarget < other.sourceTarget;
-  }
-
-};
-
-///////////////////////////////////////////////////////////////////
 class ConsistentPhrases {
-  typedef std::map<PhrasePairRange, const ConsistentPhrase*> Coll;
-
 public:
-  typedef Coll::iterator iterator;
-  typedef Coll::const_iterator const_iterator;
-  //! iterators
-  const_iterator begin() const {
-	return m_coll.begin();
-  }
-  const_iterator end() const {
-	return m_coll.end();
-  }
+	ConsistentPhrases();
+	virtual ~ConsistentPhrases();
 
-  ConsistentPhrases();
-  virtual ~ConsistentPhrases();
+	size_t GetSize() const
+	{ return m_coll.size(); }
 
-  void Add(ConsistentPhrase *phrasePair);
-  const ConsistentPhrase *Find(int sourceStart, int sourceEnd, int targetStart, int targetEnd) const;
+	void Add(const Word *sourceStart, const Word *sourceEnd,
+			const Word *targetStart, const Word *targetEnd);
 
-  void Debug(std::ostream &out) const;
+	void Debug(std::ostream &out) const;
 
 protected:
-  Coll m_coll;
-
+	typedef std::set<ConsistentPhrase> Coll;
+	Coll m_coll;
 };
 

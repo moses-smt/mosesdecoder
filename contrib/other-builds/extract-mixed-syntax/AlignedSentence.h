@@ -33,15 +33,11 @@ public:
 	const Phrase &GetPhrase(Moses::FactorDirection direction) const
 	{ return (direction == Moses::Input) ? m_source : m_target; }
 
-	const ConsistentPhrases &GetConsistentPhrases() const
-	{ return m_consistentPhrases; }
-
 	void Debug(std::ostream &out) const;
 
 protected:
   Phrase m_source, m_target;
   SyntaxTree sourceTree, targetTree;
-
   ConsistentPhrases m_consistentPhrases;
 
 	void PopulateWordVec(std::vector<Word*> &vec, const std::string &line);

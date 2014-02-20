@@ -63,22 +63,11 @@ void AlignedSentence::PopulateAlignment(const std::string &line)
 		int targetPos = alignPair[1];
 
 		Word *sourceWord = m_source[sourcePos];
-		sourceWord->AddAlignment(targetPos);
-
 		Word *targetWord = m_target[targetPos];
-		targetWord->AddAlignment(sourcePos);
-	}
-}
 
-vector<int> AlignedSentence::GetSourceAlignmentCount() const
-{
-	vector<int> ret(m_source.size());
-
-	for (size_t i = 0; i < m_source.size(); ++i) {
-		const Word &word = *m_source[i];
-		ret[i] = word.GetAlignment().size();
+		sourceWord->AddAlignment(targetWord);
+		targetWord->AddAlignment(sourceWord);
 	}
-	return ret;
 }
 
 void AlignedSentence::Debug(std::ostream &out) const
@@ -91,11 +80,21 @@ void AlignedSentence::Debug(std::ostream &out) const
 	m_target.Debug(out);
 	out << endl;
 
-	out << "m_consistentPhrases:";
+	out << "consistent phrases=" << m_consistentPhrases.GetSize() << endl;
 	m_consistentPhrases.Debug(out);
 	out << endl;
 }
 
+std::vector<int> AlignedSentence::GetSourceAlignmentCount() const
+{
+	vector<int> ret(m_source.size());
+
+	for (size_t i = 0; i < m_source.size(); ++i) {
+		const Word &word = *m_source[i];
+		ret[i] = word.GetAlignment().size();
+	}
+	return ret;
+}
 
 void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 {
@@ -173,8 +172,8 @@ void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 			continue;
 
 		  // take note that this is a valid phrase alignment
-		  ConsistentPhrase *phrasePair = new ConsistentPhrase(startS, endS, startT, endT, "[X]", "[X]");
-		  m_consistentPhrases.Add(phrasePair);
+		  m_consistentPhrases.Add(m_source[startS], m_source[endS],
+				  m_target[startT], m_target[endT]);
 		}
 	  }
 	}

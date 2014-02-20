@@ -8,9 +8,8 @@
 
 #include <string>
 #include <set>
-#include "LatticeArc.h"
 
-class Word : public LatticeArc
+class Word
 {
 public:
 	Word(int pos, const std::string &str);
@@ -22,30 +21,19 @@ public:
 	const std::string &GetString() const
 	{ return m_str; }
 
-	int GetStart() const
+	int GetPos() const
 	{ return m_pos; }
 
-	int GetEnd() const
-	{ return m_pos; }
+	void AddAlignment(const Word *other);
 
-	void AddAlignment(int align);
-
-	const std::set<int> &GetAlignment() const
-	{ return m_alignment; }
-
-	int GetHighestAlignment() const
-	{ return m_highestAlignment; }
-
-	int GetLowestAlignment() const
-	{ return m_lowestAlignment; }
+	std::set<int> GetAlignment() const;
 
 	void Output(std::ostream &out) const;
 	void Debug(std::ostream &out) const;
 
 protected:
-	int m_pos;
+	int m_pos; // original position in sentence, NOT in lattice
 	std::string m_str;
-	std::set<int> m_alignment;
-	int m_highestAlignment, m_lowestAlignment;
+	std::set<const Word *> m_alignment;
 };
 
