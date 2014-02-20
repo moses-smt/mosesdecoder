@@ -45,6 +45,10 @@ bool Rule::IsValid(const Parameter &params) const
 
 bool Rule::CanExtend(const Parameter &params) const
 {
+  if (!m_canExtend) {
+	  return false;
+  }
+
   return true;
 }
 
@@ -114,12 +118,27 @@ void Rule::Fillout(const ConsistentPhrases &consistentPhrases,
 	  return;
   }
 
+  if (m_arcs.size() >= params.maxSymbolsSource) {
+	  m_canExtend = false;
+	  if (m_arcs.size() > params.maxSymbolsSource) {
+		  m_isValid = false;
+	  }
+  }
+
   // targetNonTerms will be deleted element-by-element as it is used
   CreateTargetPhrase(alignedSentence.GetPhrase(Moses::Output),
 		  targetStart,
 		  targetEnd,
 		  targetNonTerms);
   assert(targetNonTerms.size() == 0);
+
+  if (m_targetArcs.size() >= params.maxSymbolsTarget) {
+	  m_canExtend = false;
+	  if (m_targetArcs.size() > params.maxSymbolsTarget) {
+		  m_isValid = false;
+	  }
+  }
+
 }
 
 void Rule::CreateTargetPhrase(const Phrase &targetPhrase,
@@ -178,7 +197,7 @@ void Rule::Output(std::ostream &out) const
 {
 	Output(out, m_arcs);
 	out << "||| ";
-	Output(out, m_arcs);
+	Output(out, m_targetArcs);
 }
 
 void Rule::Debug(std::ostream &out) const

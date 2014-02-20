@@ -10,18 +10,13 @@
 class Parameter
 {
 public:
-
-	Parameter()
-	:maxSpan(10)
-	,maxNonTerm(2)
-	,sourceSyntax(false)
-	,targetSyntax(false)
-	{}
-
+	Parameter();
 	virtual ~Parameter();
 
 	int maxSpan;
 	int maxNonTerm;
+	  int maxSymbolsTarget;
+	  int maxSymbolsSource;
 
 	bool sourceSyntax, targetSyntax;
 };
