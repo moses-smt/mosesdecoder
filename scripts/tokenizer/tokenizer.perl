@@ -32,6 +32,7 @@ my $SKIP_ALL_XML = 0;
 my $TIMING = 0;
 my $NUM_THREADS = 1;
 my $NUM_SENTENCES_PER_THREAD = 2000;
+my $ESCAPE = 1;
 
 while (@ARGV)
 {
@@ -43,6 +44,7 @@ while (@ARGV)
 	/^-x$/ && ($SKIP_XML = 1, next);
 	/^-X$/ && ($SKIP_ALL_XML = 1, next);
 	/^-a$/ && ($AGGRESSIVE = 1, next);
+        /^-n$/ && ($ESCAPE = 0, next);
 	/^-time$/ && ($TIMING = 1, next);
 	/^-threads$/ && ($NUM_THREADS = int(shift), next);
 	/^-lines$/ && ($NUM_SENTENCES_PER_THREAD = int(shift), next);
@@ -388,14 +390,16 @@ sub tokenize
 sub escape_special_chars
 {
     my($text) = @_;
-    $text =~ s/\&/\&amp;/g;   # escape escape
-    $text =~ s/\|/\&#124;/g;  # factor separator
-    $text =~ s/\</\&lt;/g;    # xml
-    $text =~ s/\>/\&gt;/g;    # xml
-    $text =~ s/\'/\&apos;/g;  # xml
-    $text =~ s/\"/\&quot;/g;  # xml
-    $text =~ s/\[/\&#91;/g;   # syntax non-terminal
-    $text =~ s/\]/\&#93;/g;   # syntax non-terminal
+    if ($ESCAPE) {
+        $text =~ s/\&/\&amp;/g;   # escape escape
+        $text =~ s/\|/\&#124;/g;  # factor separator
+        $text =~ s/\</\&lt;/g;    # xml
+        $text =~ s/\>/\&gt;/g;    # xml
+        $text =~ s/\'/\&apos;/g;  # xml
+        $text =~ s/\"/\&quot;/g;  # xml
+        $text =~ s/\[/\&#91;/g;   # syntax non-terminal
+        $text =~ s/\]/\&#93;/g;   # syntax non-terminal
+    }
     return $text;
 }
 
