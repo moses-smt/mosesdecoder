@@ -62,7 +62,6 @@ const vector<const AlignmentInfoMBOT*> *AlignmentInfoCollectionMBOT::AddVector(
 	std::vector<std::set<std::pair<size_t,size_t> > > :: iterator itr_align_vector;
 	for(itr_align_vector = alignmentVector.begin(); itr_align_vector != alignmentVector.end(); itr_align_vector++)
 	{
-		//std::cerr << "Added alignment info : " << *(Add((*itr_align_vector), allSources, isMBOT)) << std::endl;
 		alignVector.push_back(Add((*itr_align_vector), allSources, isMBOT));
 	}
     std::pair<AlignmentInfoVectorSet::iterator, bool> ret =

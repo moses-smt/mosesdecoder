@@ -205,20 +205,6 @@ void IOWrapper::Backtrack(const ChartHypothesis *hypo)
   }
 }
 
-//New : backtrack for mbot hypothesis
-/*void IOWrapper::BacktrackMBOT(const ChartHypothesisMBOT *hypo)
-{
-  const vector<const ChartHypothesisMBOT*> &prevHypos = hypo->GetPrevHyposMBOT();
-
-  vector<const ChartHypothesisMBOT*>::const_iterator iter;
-  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
-    const ChartHypothesisMBOT *prevHypo = *iter;
-
-    VERBOSE(3,prevHypo->GetId() << " <= ");
-    BacktrackMBOT(prevHypo);
-  }
-}*/
-
 void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool /* reportSegmentation */, bool /* reportAllFactors */)
 {
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
@@ -226,25 +212,6 @@ void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, l
     cout << *factor << " ";
   }
 }
-/*
-void OutputInput(std::vector<const Phrase*>& map, const ChartHypothesis* hypo)
-{
-	if (hypo->GetPrevHypos())
-	{
-	  	OutputInput(map, hypo->GetPrevHypos());
-		map[hypo->GetCurrSourceWordsRange().GetStartPos()] = hypo->GetSourcePhrase();
-	}
-}
-
-void OutputInput(std::ostream& os, const ChartHypothesis* hypo)
-{
-	size_t len = StaticData::Instance().GetInput()->GetSize();
-	std::vector<const Phrase*> inp_phrases(len, 0);
-	OutputInput(inp_phrases, hypo);
-	for (size_t i=0; i<len; ++i)
-		if (inp_phrases[i]) os << *inp_phrases[i];
-}
-*/
 
 void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, long translationId)
 {
@@ -530,26 +497,6 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     // total
     out << " |||" << path.GetTotalScore();
 
-    /*
-    if (includeAlignment) {
-    	*m_nBestStream << " |||";
-    	for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
-    	{
-    		const ChartHypothesis &edge = *edges[currEdge];
-    		WordsRange sourceRange = edge.GetCurrSourceWordsRange();
-    		WordsRange targetRange = edge.GetCurrTargetWordsRange();
-    		*m_nBestStream << " " << sourceRange.GetStartPos();
-    		if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
-    			*m_nBestStream << "-" << sourceRange.GetEndPos();
-    		}
-    		*m_nBestStream << "=" << targetRange.GetStartPos();
-    		if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
-    			*m_nBestStream << "-" << targetRange.GetEndPos();
-    		}
-    	}
-    }
-    */
-
     out << endl;
   }
 
@@ -583,8 +530,8 @@ void IOWrapper::OutputNBestListMBOT(string sourceSent, const ChartTreillisPathLi
   bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
   //bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
 
-
-  if(bestHypo == NULL)
+  //Handling for empty hypos
+ /* if(bestHypo == NULL)
   {
 	  out << translationId << " ||| ";
 	  out << sourceSent;
@@ -595,7 +542,7 @@ void IOWrapper::OutputNBestListMBOT(string sourceSent, const ChartTreillisPathLi
 	  out << endl;
   }
   else
-  {
+  {*/
 
   ChartTreillisPathListMBOT::const_iterator iter;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
@@ -688,29 +635,9 @@ void IOWrapper::OutputNBestListMBOT(string sourceSent, const ChartTreillisPathLi
     // total
     out << " |||" << path.GetTotalScoreMBOT();
 
-    /*
-    if (includeAlignment) {
-    	*m_nBestStream << " |||";
-    	for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
-    	{
-    		const ChartHypothesis &edge = *edges[currEdge];
-    		WordsRange sourceRange = edge.GetCurrSourceWordsRange();
-    		WordsRange targetRange = edge.GetCurrTargetWordsRange();
-    		*m_nBestStream << " " << sourceRange.GetStartPos();
-    		if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
-    			*m_nBestStream << "-" << sourceRange.GetEndPos();
-    		}
-    		*m_nBestStream << "=" << targetRange.GetStartPos();
-    		if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
-    			*m_nBestStream << "-" << targetRange.GetEndPos();
-    		}
-    	}
-    }
-    */
-
     out << endl;
   }
- }
+// } End of else
   out <<std::flush;
 
   CHECK(m_nBestOutputCollector);

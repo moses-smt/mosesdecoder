@@ -3,6 +3,7 @@
 	<name>MBOTDecoder</name>
 	<comment></comment>
 	<projects>
+		<project>RemoteSystemsTempFiles</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

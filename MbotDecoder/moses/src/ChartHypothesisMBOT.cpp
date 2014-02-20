@@ -64,10 +64,6 @@ ChartHypothesisMBOT::ChartHypothesisMBOT(const ChartTranslationOptionMBOT &mbotT
   {
     m_mbotPrevHypos.push_back(iter->GetHypothesis());
   }
-
-  //m_processingPhrase = new HypothesisStatus();
-  //m_forCounting = new HypothesisStatusForCounting();
-  //std::cout << "Chart Hypothesis DONE." << std::endl;
 }
 
 ChartHypothesisMBOT::~ChartHypothesisMBOT()
@@ -92,115 +88,46 @@ ChartHypothesisMBOT::~ChartHypothesisMBOT()
 //! has to create a possibly discontinuous output phrase
 void ChartHypothesisMBOT::CreateOutputPhrase(Phrase &outPhrase, ProcessedNonTerminals & processedNonTerminals) const
 {
-  // add word as parameter
-   //std::cout << "AT BEGINNING OF METHOD : ADDED HYPOTHESIS : " << (*this) << std::endl;
    processedNonTerminals.AddHypothesis(this);
    processedNonTerminals.AddStatus(this->GetId(),1);
 
-   //std::cout << "NUMBER OF RECURSION " << processedNonTerminals.GetRecNumber() << std::endl;
    const ChartHypothesisMBOT * currentHypo = processedNonTerminals.GetHypothesis();
-   //std::cout << "CURRENT HYPOTHESIS : " << currentHypo << std::endl;
-   //const TargetPhraseMBOT currentTarget = currentHypo->GetCurrTargetPhraseMBOT();
-   //std::cout << "CREATING TARGET PHRASE : " << currentTarget << std::endl;
-
-   //look at size : if there is only one m_mbot phrase, process as usual
-   //if there are several mbot phrases : split hypotheses
-
-   //std::vector<Phrase> targetPhrases = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases();
    const std::vector<const AlignmentInfoMBOT*> *alignedTargets = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTAlignments();
-   //std::vector<Word> targetLHS = currentHypo->GetCurrTargetPhraseMBOT().GetTargetLHSMBOT();
 
-   //while(GetProcessingPhrase()->GetStatus() < targetPhrases.size())
-   //{
         int currentlyProcessed = processedNonTerminals.GetStatus(currentHypo->GetId()) -1;
-        //std::cout << "CURRENTLY PROCESSED : " << currentlyProcessed << std::endl;
-
-        //GetProcessingPhrase()->IncrementStatus();
-        //std::cout << "CURENT STATUS : " << GetProcessingPhrase()->GetStatus() << std::endl;
-
         CHECK(currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() > currentlyProcessed);
         size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().size();
-        //std::cout << "Getting current Phrase : " << GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() << std::endl;
 
         //if several mbot phrases, look at status
          Phrase currentPhrase = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases()[currentlyProcessed];
-         //std::cout << "Current MBOT Phrase : " << currentPhrase << std::endl;
-        //std::vector<Phrase>::iterator itr_mbot_phrases;
-
-        //if(targetPhrases.size() == 1)
-        //{
-
-         //if several mbot phrases, look at status
-        //if(mbotSize > 1)
-        //{
-           int position = 0;
+         int position = 0;
         //Phrase currentPhrase = targetPhrases.front();
-            //std::cout << "CURRENT PHRASE : " << currentPhrase << std::endl;
             for (size_t pos = 0; pos < currentPhrase.GetSize(); ++pos) {
 
-                //std::cout << "POSITION : " << pos << std::endl;
                 const Word &word = currentPhrase.GetWord(pos);
-                //std::cout << "CURRENT WORD : " << word << std::endl;
                 if (word.IsNonTerminal()) {
                     const AlignmentInfoMBOT::NonTermIndexMapPointer nonTermIndexMap =
                     alignedTargets->at(currentlyProcessed)->GetNonTermIndexMap();
 
                     int sizeOfMap = nonTermIndexMap->size();
-                    //std::cout << "MBOT current map : " << sizeOfMap << std::endl;
-                // non-term. fill out with prev hypo
-                //get hypo corresponding to mbot phrase
                 size_t nonTermInd = nonTermIndexMap->at(pos);
-                //std::cout << "NON TERM IND : " << nonTermInd << std::endl;
                 processedNonTerminals.IncrementRec();
-                //std::cout << "TAKING PREVIOUS HYPO of " << *currentHypo << std::endl;
-                const ChartHypothesisMBOT *prevHypo = currentHypo->GetPrevHypoMBOT(nonTermInd);
-                //MBOT CONDITION HERE ::::
 
-                //std::cout << "PREVIOUS HYPO" << *prevHypo << std::endl;
-                //Check if hypothesis has already been used
-                /*while(processedNonTerminals.FindRange(prevHypo->GetCurrSourceRange()))
-                {
-                    std::cout << "ALREADY PROCESSED TAKE NEXT"<< std::endl;
-                    nonTermInd++;
-                    prevHypo = currentHypo->GetPrevHypoMBOT(nonTermInd);
-                }
-                //if hypo is not found then look at first associated
-                std::cout << "BEFORE NULL : CURRENT HYPO IS : " << *currentHypo << std::endl;
-                std::cout << "THIS HYPOTHESIS : " << *prevHypo << std::endl;
-                //prevHypo->GetProcessingPhrase()->ResetStatus();
-                */
+                const ChartHypothesisMBOT *prevHypo = currentHypo->GetPrevHypoMBOT(nonTermInd);
                 prevHypo->CreateOutputPhrase(outPhrase,processedNonTerminals);
                 }
                 else {
-                //std::cout << "ADDED WORD :" << word << std::endl;
                 outPhrase.AddWord(word);
-                //std::cout << "MBOT SIZE : " << mbotSize << " : Status : " << processedNonTerminals.GetStatus(currentHypo->GetId()) << std::endl;
-                //std::cout << "CURRENT POSITION : " << pos << std::endl;
-                //Add processed leaves to processed span unless leaf is mbot target phrase
                 }
-                //std::cout << "MbotSize and status " << mbotSize << " : " << processedNonTerminals.GetStatus(currentHypo->GetId()) << std::endl;
-                 if(//(currentHypo->GetCurrSourceRange().GetStartPos() == currentHypo->GetCurrSourceRange().GetEndPos())
-                    //&& (
+                 if(
                         mbotSize > (processedNonTerminals.GetStatus(currentHypo->GetId()))
-                          //)
+
                         && (pos == currentPhrase.GetSize() - 1) )
                         {
                             processedNonTerminals.IncrementStatus(currentHypo->GetId());
                             }
-                /*if(
-                   (pos == currentPhrase.GetSize() - 1)
-                   //(currentHypo->GetCurrSourceRange().GetStartPos() == currentHypo->GetCurrSourceRange().GetEndPos())
-                   && ( mbotSize == (currentHypo->GetProcessingPhrase()->GetStatus() ) || mbotSize == 1))
-                   //&& (currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() == 1))
-                   processedNonTerminals.AddRangeMergeAll(currentHypo->GetCurrSourceRange());
-                }*/
         }
-        //std::cout << "GOES OUT OF RECURSION" << std::endl;
-        //std::cout << "CURRENT HYPOTHESIS : " << currentHypo << std::endl;
-        //mark this hypothesis as done.
         processedNonTerminals.DecrementRec();
-    //}
-//std::cout << "THIS HYPOTHESIS : " << *prevHypo << std::endl;
 }
 
 /** check, if two hypothesis can be recombined.
@@ -244,57 +171,32 @@ void ChartHypothesisMBOT::CalcScoreMBOT()
 
   // translation models & word penalty
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhraseMBOT().GetScoreBreakdown();
-
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
-
-	// compute values of stateless feature functions that were not
-  // cached in the translation option-- there is no principled distinction
-
-  //const vector<const StatelessFeatureFunction*>& sfs =
-  //  m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
-	// TODO!
-  //for (unsigned i = 0; i < sfs.size(); ++i) {
-  //  sfs[i]->ChartEvaluate(m_targetPhrase, &m_scoreBreakdown);
-  //}
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
 
-  //std::cerr << "Computing score for hypothesis : " << *this << std::endl;
-  //std::cerr << "Current Target Phrase : " << this->GetCurrTargetPhraseMBOT() << std::endl;
   for (unsigned i = 0; i < ffs.size(); ++i) {
         //std::cout << "Evaluating MBOT" << std::endl;
 		m_ffStates[i] = ffs[i]->EvaluateMBOT(*this,i,&m_scoreBreakdown);
   }
 
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
-  //std::cerr << "Computed score for hypothesis : " << *this << std::endl;
-  //std::cerr << "TOTAL SCORE COMPUTED FOR HYPOTHESIS : " << m_totalScore << std::endl;
 }
 
 void ChartHypothesisMBOT::AddArc(ChartHypothesisMBOT *loserHypo)
 {
-  //std::cout << "Adding arc" << std::endl;
-  //std::cout << "Looser Hypo . " << (*loserHypo) << std::endl;
   if (!m_mbotArcList) {
     if (loserHypo->m_mbotArcList) {
-       // std::cout << "Getting Arc" << std::endl; // we don't have an arcList, but loser does
       this->m_mbotArcList = loserHypo->m_mbotArcList;  // take ownership, we'll delete
       loserHypo->m_mbotArcList = 0;                // prevent a double deletion
     } else {
-       // std::cout << "Getting Arc 2" << std::endl;
       this->m_mbotArcList = new ChartArcListMBOT();
-      // std::cout << "New arc here" << std::endl;
-
     }
   } else {
-      // std::cout << "Getting Arc 3" << std::endl;
     if (loserHypo->m_mbotArcList) {  // both have an arc list: merge. delete loser
-      // std::cout << "Getting Arc 4" << std::endl;
       size_t my_size = m_mbotArcList->size();
-      //std::cout << "Size of ArcList : " << m_mbotArcList->size() << std::endl;
       size_t add_size = loserHypo->m_mbotArcList->size();
-      //std::cout << "Size of looser ArcList : " << m_mbotArcList->size() << std::endl;
       this->m_mbotArcList->resize(my_size + add_size, 0);
       std::memcpy(&(*m_mbotArcList)[0] + my_size, &(*loserHypo->m_mbotArcList)[0], add_size * sizeof(ChartHypothesisMBOT *));
       delete loserHypo->m_mbotArcList;
@@ -310,18 +212,17 @@ void ChartHypothesisMBOT::AddArc(ChartHypothesisMBOT *loserHypo)
 
 struct CompareChartChartHypothesisMBOTTotalScore {
   bool operator()(const ChartHypothesis* hypo1, const ChartHypothesis* hypo2) const {
-    return hypo1->GetTotalScore() > hypo2->GetTotalScore();
+	if(hypo1 != NULL && hypo2 != NULL)
+    {
+		return hypo1->GetTotalScore() > hypo2->GetTotalScore();
+    }
   }
 };
 
 void ChartHypothesisMBOT::CleanupArcList()
 {
-
-  //std::cout << "CLEANING UP ARC LIST IN HYPO MBOT" << std::endl;
   // point this hypo's main hypo to itself
   m_mbotWinningHypo = this;
-
-  //std::cout << "Winning Hypo : " << (*m_mbotWinningHypo) << std::endl;
 
   if (!m_mbotArcList)
   {
@@ -334,32 +235,25 @@ void ChartHypothesisMBOT::CleanupArcList()
    * so we'll keep all of arc list if nedd distinct n-best list
    */
   const StaticData &staticData = StaticData::Instance();
-  //std::cout << "Static data instance here" << std::endl;
   size_t nBestSize = staticData.GetNBestSize();
-  //std::cout << "Nbest size here : " << nBestSize<< std::endl;
   bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph();
-  //std::cout << "Nbest size here 2" << distinctNBest << std::endl;
 
-  if (!distinctNBest && m_mbotArcList->size() > nBestSize) {
-    //std::cout << "Arc List bigger : " << m_mbotArcList->size() << std::endl;
-    // prune arc list only if there too many arcs
-    nth_element(m_mbotArcList->begin()
+  //Fabienne Braune : Pruning disabled for MBOT hypotheses
+  /*	if (!distinctNBest && m_mbotArcList->size() > nBestSize) {
+    	nth_element(m_mbotArcList->begin()
                 , m_mbotArcList->begin() + nBestSize - 1
                 , m_mbotArcList->end()
                 , CompareChartChartHypothesisMBOTTotalScore());
-    //std::cout << "List sorted" << std::endl;
 
     // delete bad ones
     ChartArcListMBOT::iterator iter;
     for (iter = m_mbotArcList->begin() + nBestSize ; iter != m_mbotArcList->end() ; ++iter) {
-      //std::cout << "Trying to get arcs" << std::endl;
       ChartHypothesisMBOT *arc = *iter;
-      //std::cout << "Before deleting arcs" << std::endl;
       ChartHypothesisMBOT::DeleteMBOT(arc);
     }
     m_mbotArcList->erase(m_mbotArcList->begin() + nBestSize
                      , m_mbotArcList->end());
-  }
+  }*/
 
   // set all arc's main hypo variable to this hypo
   ChartArcListMBOT::iterator iter = m_mbotArcList->begin();

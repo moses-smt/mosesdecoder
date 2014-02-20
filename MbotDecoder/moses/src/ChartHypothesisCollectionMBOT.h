@@ -33,7 +33,6 @@ class ChartHypothesisScoreOrdererMBOT : public ChartHypothesisScoreOrderer
 {
 public:
   virtual bool operator()(const ChartHypothesisMBOT* hypoA, const ChartHypothesisMBOT* hypoB) const {
-      //std::cout << "Comparing scores : " << hypoA->GetTotalScore() << " : " << hypoB->GetTotalScore() << std::endl;
     return hypoA->GetTotalScore() > hypoB->GetTotalScore();
   }
 };
@@ -42,22 +41,11 @@ class ChartHypothesisRecombinationOrdererMBOT : public ChartHypothesisRecombinat
 {
 public:
 
-  //std::cout << "Recombination orderer : " << std::endl;
   bool operator()(const ChartHypothesisMBOT* hypoA, const ChartHypothesisMBOT* hypoB) const {
     // assert in same cell
-    // std::cout << "Recombination orderer : " << std::endl;
-
-         //PRINT COMPARED HYPOS
-    //std::cout << "PRINT COMPARED HYPOS : " << std::endl;
-    //std::cout << "Comparing Hypos (1) : " << (*hypoA) << std::endl;
-    //std::cout << "Comparing Hypos (2) : " << (*hypoB) << std::endl;
-
     const WordsRange &rangeA	= hypoA->GetCurrSourceRange()
                                       , &rangeB	= hypoB->GetCurrSourceRange();
-    //std::cout << "Compare : " << rangeA << " : " << rangeB << std::endl;
     CHECK(rangeA == rangeB);
-
-    //std::cout << "Comparre LHS" << std::endl;
     CHECK(hypoA->GetTargetLHSMBOT() == hypoB->GetTargetLHSMBOT());
 
     int ret = hypoA->RecombineCompare(*hypoB);
@@ -147,7 +135,6 @@ public:
   void CleanupArcList();
 
   const HypoListMBOT &GetSortedHypothesesMBOT() const {
-     //std::cout << "Getting Sorted Hypotheses " << m_mbotHyposOrdered.size()<< std::endl;
     return m_mbotHyposOrdered;
   }
 

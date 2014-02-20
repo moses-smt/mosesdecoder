@@ -53,45 +53,31 @@ ChartHypothesisCollectionMBOT::~ChartHypothesisCollectionMBOT()
 
 bool ChartHypothesisCollectionMBOT::AddHypothesis(ChartHypothesisMBOT *hypo, ChartManager &manager)
 {
-    //std::cout << "CYADD : ADDING HYPOTHESIS (1) " << *hypo << std::endl;
   if (hypo->GetTotalScore() < m_bestScore + m_beamWidth) {
-      //std::cout << "SCORE TOO LOW!" << std::endl;
-      //std::cout << "SCORE TOO LOW!" << std::endl;
-    // really bad score. don't bother adding hypo into collection
     manager.GetSentenceStats().AddDiscarded();
-    //std::cout << "DISCARDED ADDED " << std::endl;
     //VERBOSE(3,"discarded, too bad for stack" << std::endl);
     ChartHypothesisMBOT::DeleteMBOT(hypo);
-    //std::cout << "HYPO DELETED " << std::endl;
     return false;
   }
 
   // over threshold, try to add to collection
 
   std::pair<HCTypeMBOT::iterator, bool> addRet = Add(hypo, manager);
-  //std::cout << "ADDED HYPO TO COLLECTION "<< std::endl;
 
   // does it have the same state as an existing hypothesis?
   if (addRet.second) {
-      //std::cout << "NOTHING FOUND ADD TO COLLECTION" << std::endl;
     // nothing found. add to collection
     return true;
   }
-
-  //std::cout << "Equivalent hypo exists : recombine : " << std::endl;
   // equiv hypo exists, recombine with other hypo
   HCTypeMBOT::iterator &iterExisting = addRet.first;
   ChartHypothesisMBOT *hypoExisting = *iterExisting;
-  //std::cout << "Existing hypo : " << *hypoExisting << std::endl;
   CHECK(iterExisting != m_mbotHypos.end());
-
-  //StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 
   // found existing hypo with same target ending.
   // keep the best 1
   if (hypo->GetTotalScore() > hypoExisting->GetTotalScore()) {
     // incoming hypo is better than the one we have
-    //std::cout << "Better than matching hypo!" << std::endl;
     VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
     if (m_nBestIsEnabled) {
       hypo->AddArc(hypoExisting);
@@ -101,7 +87,6 @@ bool ChartHypothesisCollectionMBOT::AddHypothesis(ChartHypothesisMBOT *hypo, Cha
     }
 
     bool added = Add(hypo, manager).second;
-    //std::cout << "Value of added " << added << std::endl;
     if (!added) {
       iterExisting = m_mbotHypos.find(hypo);
       TRACE_ERR("Offending hypo = " << **iterExisting << endl);
@@ -109,17 +94,12 @@ bool ChartHypothesisCollectionMBOT::AddHypothesis(ChartHypothesisMBOT *hypo, Cha
     }
     return false;
   } else {
-      //std::cout << "Existing is worse than matching  : " << std::endl;
-    //std::cout << "Existing hypo : " << *hypoExisting << std::endl;
-    //std::cout << "Current hypo : " << *hypoExisting << std::endl;
     // already storing the best hypo. discard current hypo
     VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
     if (m_nBestIsEnabled) {
-      //std::cout << "Adding Arc for hypo"<< std::endl;
       hypoExisting->AddArc(hypo);
     }
     else {
-      //std::cout << "DELETING HYPO after added to arc" << std::endl;
       ChartHypothesisMBOT::DeleteMBOT(hypo);
     }
     return false;
@@ -128,35 +108,27 @@ bool ChartHypothesisCollectionMBOT::AddHypothesis(ChartHypothesisMBOT *hypo, Cha
 
 pair<ChartHypothesisCollectionMBOT::HCTypeMBOT::iterator, bool> ChartHypothesisCollectionMBOT::Add(ChartHypothesisMBOT *hypo, ChartManager &manager)
 {
-  //std::cout << "CYADD : ADDING HYPOTHESIS (2) : " << (*hypo) << std::endl;
 
   std::pair<HCTypeMBOT::iterator, bool> ret = m_mbotHypos.insert(hypo);
   if (ret.second) {
-    //std::cout << "No equivalent hypo exists " << std::endl;
+
     // equiv hypo doesn't exists
     VERBOSE(3,"added hyp to stack");
-    //std::cout << "ADDED TO STACK" << std::endl;
+
     // Update best score, if this hypothesis is new best
     if (hypo->GetTotalScore() > m_bestScore) {
-        //std::cout << "Hypo is new best " << std::endl;
       VERBOSE(3,", best on stack");
-      //std::cout << "BEST ON STACK" << std::endl;
       m_bestScore = hypo->GetTotalScore();
     }
 
     // Prune only if stack is twice as big as needed (lazy pruning)
     VERBOSE(3,", now size " << m_mbotHypos.size());
-    //std::cout << "NEW SIZE" << m_mbotHypos.size();
     if (m_mbotHypos.size() > 2*m_maxHypoStackSize-1) {
-      //std::cout << "TO BIG : PRUNE" << std::endl;
       PruneToSize(manager);
     } else {
       VERBOSE(3,std::endl);
-      //std::cout << std::endl;
-
     }
   }
-  //std::cout << "EQUIVALENT HYPO FOUND : not inserted" << std::endl;
   return ret;
 }
 
@@ -169,27 +141,12 @@ void ChartHypothesisCollectionMBOT::Detach(const HCTypeMBOT::iterator &iter)
 void ChartHypothesisCollectionMBOT::Remove(const HCTypeMBOT::iterator &iter)
 {
   ChartHypothesisMBOT *h = *iter;
-
-  /*
-   stringstream strme("");
-   strme << h->GetOutputPhrase();
-   string toFind = "the goal of gene scientists is ";
-   size_t pos = toFind.find(strme.str());
-
-   if (pos == 0)
-   {
-   cerr << pos << " " << strme.str() << *h << endl;
-   cerr << *this << endl;
-   }
-   */
-
   Detach(iter);
   ChartHypothesisMBOT::DeleteMBOT(h);
 }
 
 void ChartHypothesisCollectionMBOT::PruneToSize(ChartManager &manager)
 {
-  //std::cout << "CYPRUNE : PRUNING COLLECTION" << std::endl;
   if (GetSizeMBOT() > m_maxHypoStackSize) { // ok, if not over the limit
     priority_queue<float> bestScores;
 
@@ -261,15 +218,7 @@ void ChartHypothesisCollectionMBOT::PruneToSize(ChartManager &manager)
 
 void ChartHypothesisCollectionMBOT::SortHypotheses()
 {
-  //std::cout << "SORT SORT SORT" << std::endl;
   CHECK(m_mbotHyposOrdered.empty());
-  //std::cout << "NON ordered MBOT Hypos : " << m_mbotHypos.size() << std::endl;
-  //ChartHypothesisCollectionMBOT::HCTypeMBOT::const_iterator iter;
-  //for(iter = m_mbotHypos.begin(); iter != m_mbotHypos.end(); iter++)
-  //{
-  //const ChartHypothesisMBOT &testHypo = **iter;
-      //std::cout << "HYPO : " << testHypo << std::endl;
-  //}
 
   if (!m_mbotHypos.empty()) {
     // done everything for this cell.
@@ -277,8 +226,6 @@ void ChartHypothesisCollectionMBOT::SortHypotheses()
     // put into vec
     m_mbotHyposOrdered.reserve(m_mbotHypos.size());
     std::copy(m_mbotHypos.begin(), m_mbotHypos.end(), back_inserter(m_mbotHyposOrdered));
-    //std::cout << "Size after copy : " << m_mbotHyposOrdered.size() << " : " << *m_mbotHyposOrdered.front() << std::endl;
-
     std::sort(m_mbotHyposOrdered.begin(), m_mbotHyposOrdered.end(), ChartHypothesisScoreOrdererMBOT());
   }
 }
@@ -286,10 +233,8 @@ void ChartHypothesisCollectionMBOT::SortHypotheses()
 void ChartHypothesisCollectionMBOT::CleanupArcList()
 {
   HCTypeMBOT::iterator iter;
-  //std::cout << "Size of Collection : " << m_mbotHypos.size() << std::endl;
   for (iter = m_mbotHypos.begin() ; iter != m_mbotHypos.end() ; ++iter) {
     ChartHypothesisMBOT *mainHypo = *iter;
-    //std::cout << "Main Hypo : " << (*mainHypo) << std::endl;
     mainHypo->CleanupArcList();
   }
 }
@@ -322,10 +267,12 @@ std::ostream& operator<<(std::ostream &out, const ChartHypothesisCollectionMBOT 
   HypoListMBOT::const_iterator iterInside;
   ChartHypothesisCollectionMBOT::iterator itrSet;
 
-  if(coll.GetSizeMBOT() == 0){std::cout << "EMPTY COLLECTION" << std::endl;}
+  if(coll.GetSizeMBOT() == 0){
+	  //std::cout << "EMPTY COLLECTION" << std::endl;
+  }
   else{
-      std::cout << "Size of collection : " << coll.GetHypoMBOT().size() << std::endl;
-      std::cout << "Size of sorted collection : " << coll.GetSortedHypothesesMBOT().size() << std::endl;
+      //std::cout << "Size of collection : " << coll.GetHypoMBOT().size() << std::endl;
+      //std::cout << "Size of sorted collection : " << coll.GetSortedHypothesesMBOT().size() << std::endl;
 
   std::cout << "PRINTING UNSORTED COLLECTION" << std::endl;
   for(itrSet = coll.begin(); itrSet != coll.end(); itrSet++)
