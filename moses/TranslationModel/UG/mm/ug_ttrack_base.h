@@ -88,6 +88,8 @@ namespace ugdiss
      *  Currently only defined for Ttrack<id_type> */
     string str(id_type sid, TokenIndex const& T) const;
 
+    string pid2str(TokenIndex const* V, uint64_t pid) const;
+
     // /** @return string representation of sentence /sid/ 
     //  *  Currently only defined for Ttrack<id_type> */
     // string str(id_type sid, Vocab const& V) const;
@@ -351,5 +353,36 @@ namespace ugdiss
       return Position(this->size(),0);
   }
 
+  template<typename TKN>
+  string
+  Ttrack<TKN>::
+  pid2str(TokenIndex const* V, uint64_t pid) const
+  {
+    uint32_t len = pid % (1<<16);
+    pid >>= 16;
+    uint32_t off = pid % (1<<16);
+    uint32_t sid = pid>>16;
+    ostringstream buf;
+    TKN const* t    = sntStart(sid) + off;
+    TKN const* stop = t + len;
+    if (V)
+      {
+	while (t < stop)
+	  {
+	    buf << (*V)[t->id()];
+	    if ((t = t->next()) != stop) buf << " ";
+	  }
+      }
+    else
+      {
+	while (t < stop)
+	  {
+	    buf << t->id();
+	    if ((t = t->next()) != stop) buf << " ";
+	  }
+      }
+    return buf.str();
+  }
+  
 }
 #endif

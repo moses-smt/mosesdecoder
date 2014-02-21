@@ -411,7 +411,7 @@ namespace Moses
     // is set to a new copy of the dynamic bitext every time a sentence pair
     // is added. /dyn/ keeps the old bitext around as long as we need it.
     sptr<imBitext<Token> > dyn;
-    { // braces needed for scoping mutex lock guard
+    { // braces are needed for scoping mutex lock guard!
       boost::lock_guard<boost::mutex> guard(this->lock);
       dyn = btdyn;
     }
@@ -472,5 +472,14 @@ namespace Moses
   {
     throw "CreateRuleLookupManager is currently not supported in Mmsapt!";
   }
+
+  template<typename Token>
+  void 
+  fill_token_seq(TokenIndex& V, string const& line, vector<Token>& dest)
+  {
+    istringstream buf(line); string w;
+    while (buf>>w) dest.push_back(Token(V[w]));
+  }
+
 
 }

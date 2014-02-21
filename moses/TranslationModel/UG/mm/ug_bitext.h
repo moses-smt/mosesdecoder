@@ -54,6 +54,29 @@ namespace Moses {
 
     template<typename TKN> class Bitext;
 
+    enum PhraseOrientation 
+    {
+      po_first=0,
+      po_mono=1,
+      po_jfwd=2,
+      po_swap=3,
+      po_jbwd=4,
+      po_last=5,
+      po_other=6
+    };
+
+    PhraseOrientation 
+    find_po_fwd(vector<vector<ushort> >& a1,
+		vector<vector<ushort> >& a2,
+		size_t b1, size_t e1,
+		size_t b2, size_t e2);
+
+    PhraseOrientation 
+    find_po_bwd(vector<vector<ushort> >& a1,
+		vector<vector<ushort> >& a2,
+		size_t b1, size_t e1,
+		size_t b2, size_t e2);
+
     template<typename sid_t, typename off_t, typename len_t>
     void 
     parse_pid(uint64_t const pid, sid_t & sid, 
@@ -103,6 +126,9 @@ namespace Moses {
       size_t good;       // number of selected instances with valid word alignments
       size_t sum_pairs;
       size_t in_progress; // keeps track of how many threads are currently working on this
+
+      uint32_t ofwd[7], obwd[7];
+
       typename boost::unordered_map<uint64_t, jstats> trg;
       pstats(); 
       void release();
@@ -119,7 +145,6 @@ namespace Moses {
     public:
       uint64_t p1, p2;
       uint32_t raw1,raw2,sample1,sample2,good1,good2,joint;
-      uint32_t mono,swap,left,right;
       vector<float> fvals;
       vector<uchar> aln;
       // float    avlex12,avlex21; // average lexical probs (Moses std)
@@ -129,6 +154,8 @@ namespace Moses {
       PhrasePair();
       bool operator<(PhrasePair const& other) const;
       bool operator>(PhrasePair const& other) const;
+      bool operator<=(PhrasePair const& other) const;
+      bool operator>=(PhrasePair const& other) const;
 
       void init(uint64_t const pid1, pstats const& ps,  size_t const numfeats);
       void init(uint64_t const pid1, pstats const& ps1, pstats const& ps2, 
@@ -187,7 +214,9 @@ namespace Moses {
       }
 
       void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
+      operator()(Bitext<Token> const& bt, 
+		 PhrasePair & pp, 
+		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
 	if (pp.joint > pp.good1) 
@@ -326,6 +355,9 @@ namespace Moses {
       
     };
 
+
+    
+
     template<typename TKN>
     class Bitext 
     {
@@ -362,6 +394,7 @@ namespace Moses {
       find_trg_phr_bounds
       (size_t const sid, size_t const start, size_t const stop, 
        size_t & s1, size_t & s2, size_t & e1, size_t & e2, 
+       int& po_fwd, int& po_bwd,
        vector<uchar> * core_alignment, 
        bitvector* full_alignment,
        bool const flip) const;
@@ -596,20 +629,23 @@ namespace Moses {
 	  while (j->step(sid,offset))
 	    {
 	      aln.clear();
+	      int po_fwd=5,po_bwd=5;
 	      if (j->fwd)
 		{
 		  if (!ag.bt.find_trg_phr_bounds
-		      (sid,offset,offset+j->len,s1,s2,e1,e2, 
+		      (sid,offset,offset+j->len,s1,s2,e1,e2,po_fwd,po_bwd,
 		       &aln,&full_alignment,false))
 		    continue;
 		}
 	      else if (!ag.bt.find_trg_phr_bounds
-		       (sid,offset,offset+j->len,s1,s2,e1,e2,
+		       (sid,offset,offset+j->len,s1,s2,e1,e2,po_fwd,po_bwd,
 			NULL,NULL,true))
 		continue;
 	      j->stats->lock.lock(); 
 	      j->stats->good += 1; 
 	      j->stats->sum_pairs += (s2-s1+1)*(e2-e1+1);
+	      ++j->stats->ofwd[po_fwd];
+	      ++j->stats->obwd[po_bwd];
 	      j->stats->lock.unlock();
 	      for (size_t k = j->fwd ? 1 : 0; k < aln.size(); k += 2) 
 		aln[k] += s2 - s1;
@@ -623,10 +659,14 @@ namespace Moses {
 		  // assert(b);
 		  for (size_t i = e1; i <= e2; ++i)
 		    {
-		      if (!j->stats->add(b->getPid(),sample_weight,aln,b->approxOccurrenceCount()))
+		      if (!j->stats->add(b->getPid(),sample_weight,aln,
+					 b->approxOccurrenceCount()))
 			{
 			  for (size_t z = 0; z < j->len; ++z)
-			    cout << (*ag.bt.V1)[ag.bt.T1->sntStart(sid)[offset+z].id()] << " "; 
+			    {
+			      id_type tid = ag.bt.T1->sntStart(sid)[offset+z].id();
+			      cout << (*ag.bt.V1)[tid] << " "; 
+			    }
 			  cout << endl;
 			  for (size_t z = s; z <= i; ++z)
 			    cout << (*ag.bt.V2)[(o+z)->id()] << " "; 
@@ -1014,6 +1054,7 @@ namespace Moses {
     Bitext<Token>::
     find_trg_phr_bounds(size_t const sid, size_t const start, size_t const stop,
 			size_t & s1, size_t & s2, size_t & e1, size_t & e2,
+			int & po_fwd, int & po_bwd,
 			vector<uchar>* core_alignment, 
 			bitvector* full_alignment, 
 			bool const flip) const
@@ -1036,7 +1077,7 @@ namespace Moses {
       size_t src,trg;
       size_t lft = forbidden.size();
       size_t rgt = 0;
-      vector<vector<ushort> > aln(slen1);
+      vector<vector<ushort> > aln1(slen1),aln2(slen2);
       char const* p = Tx->sntStart(sid);
       char const* x = Tx->sntEnd(sid);
 
@@ -1052,16 +1093,24 @@ namespace Moses {
 	    {
 	      lft = min(lft,trg);
 	      rgt = max(rgt,trg);
-	      if (core_alignment) 
+	    }
+	  if (core_alignment) 
+	    {
+	      if (flip) 
 		{
-		  if (flip) aln[trg].push_back(src);
-		  else      aln[src].push_back(trg);
+		  aln1[trg].push_back(src);
+		  aln2[src].push_back(trg);
 		}
-	      if (full_alignment)
+	      else      
 		{
-		  if (flip) full_alignment->set(trg*slen2 + src);
-		  else      full_alignment->set(src*slen2 + trg);
+		  aln1[src].push_back(trg);
+		  aln2[trg].push_back(src);
 		}
+	    }
+	  if (full_alignment)
+	    {
+	      if (flip) full_alignment->set(trg*slen2 + src);
+	      else      full_alignment->set(src*slen2 + trg);
 	    }
 	}
       
@@ -1080,8 +1129,8 @@ namespace Moses {
 	    {
 	      for (size_t i = lft; i <= rgt; ++i)
 		{
-		  sort(aln[i].begin(),aln[i].end());
-		  BOOST_FOREACH(ushort x, aln[i])
+		  sort(aln1[i].begin(),aln1[i].end());
+		  BOOST_FOREACH(ushort x, aln1[i])
 		    {
 		      core_alignment->push_back(i-lft);
 		      core_alignment->push_back(x-start);
@@ -1092,14 +1141,25 @@ namespace Moses {
 	    {
 	      for (size_t i = start; i < stop; ++i)
 		{
-		  BOOST_FOREACH(ushort x, aln[i])
+		  BOOST_FOREACH(ushort x, aln1[i])
 		    {
 		      core_alignment->push_back(i-start);
 		      core_alignment->push_back(x-lft);
 		    }
 		}
 	    }
-	  
+
+	  // now determine fwd and bwd phrase orientation
+	  if (flip) 
+	    {
+	      po_fwd = find_po_fwd(aln2,aln1,start,stop,s1,e2);
+	      po_bwd = find_po_bwd(aln2,aln1,start,stop,s1,e2);
+	    }
+	  else  	  
+	    {
+	      po_fwd = find_po_fwd(aln1,aln2,start,stop,s1,e2);
+	      po_bwd = find_po_bwd(aln1,aln2,start,stop,s1,e2);
+	    }
 #if 0
 	  // if (e1 - s1 > 3)
 	    {

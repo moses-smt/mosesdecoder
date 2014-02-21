@@ -38,14 +38,18 @@ using namespace std;
 namespace Moses
 {
   using namespace bitext;
-  class Mmsapt : public PhraseDictionary
+  class Mmsapt 
+#ifndef NO_MOSES
+    : public PhraseDictionary
+#endif
   {
   public:    
     typedef L2R_Token<SimpleWordId> Token;
     typedef mmBitext<Token> mmbitext;
     typedef imBitext<Token> imbitext;
+    typedef TSA<Token>           tsa;
   private:
-    mmbitext btfix;
+    mmbitext btfix; 
     sptr<imbitext> btdyn;
     string bname;
     string L1;
@@ -64,6 +68,9 @@ namespace Moses
     mutable boost::mutex lock;
     bool poolCounts;
     vector<FactorType> ofactor;
+
+    // phrase table feature weights for alignment:
+    vector<float> feature_weights; 
 
     TargetPhrase* 
     createTargetPhrase
@@ -111,15 +118,21 @@ namespace Moses
     void
     Load();
     
+#ifndef NO_MOSES
     TargetPhraseCollection const* 
     GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
-
     //! Create a sentence-specific manager for SCFG rule lookup.
     ChartRuleLookupManager*
     CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &);
+#endif
 
     void add(string const& s1, string const& s2, string const& a);
 
+    // align two new sentences
+    sptr<vector<int> >
+    align(string const& src, string const& trg) const;
+
+    void setWeights(vector<float> const& w);
   private:
   };
 } // end namespace
