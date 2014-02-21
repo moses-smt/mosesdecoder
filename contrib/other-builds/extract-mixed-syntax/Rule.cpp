@@ -60,6 +60,25 @@ void Rule::CreateSource()
   }
 }
 
+int Rule::GetNextSourcePosForNonTerm() const
+{
+	if (m_nonterms.empty()) {
+		// no non-terms so far. Can start next non-term on left corner
+		return m_consistentPhrase.corners[0];
+	}
+	else {
+		// next non-term can start just left of previous
+		const ConsistentPhrase &cp = *m_nonterms.back();
+		int nextPos = cp.corners[1] + 1;
+		if (nextPos >= m_alignedSentence.GetPhrase(Moses::Input).size()) {
+			return -1;
+		}
+		else {
+			return nextPos;
+		}
+	}
+}
+
 void Rule::Debug(std::ostream &out) const
 {
   // source

@@ -27,6 +27,11 @@ public:
 	bool CanRecurse() const
 	{ return m_canRecurse; }
 
+	const ConsistentPhrase &GetConsistentPhrase() const
+	{ return m_consistentPhrase; }
+
+	int GetNextSourcePosForNonTerm() const;
+
 	void Debug(std::ostream &out) const;
 
 protected:

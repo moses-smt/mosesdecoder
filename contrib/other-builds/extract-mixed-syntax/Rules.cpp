@@ -44,7 +44,15 @@ void Rules::CreateRules()
 
 void Rules::Extend(const Rule &rule)
 {
+	int sourceMin = rule.GetNextSourcePosForNonTerm();
+	int sourceMax = rule.GetConsistentPhrase().corners[1];
 
+	for (int sourceStart = sourceMin; sourceStart <= sourceMax; ++sourceStart) {
+		for (int sourceEnd = sourceStart; sourceEnd <= sourceMax; ++sourceEnd) {
+
+
+		}
+	}
 }
 
 void Rules::Debug(std::ostream &out) const

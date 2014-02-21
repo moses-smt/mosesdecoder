@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #include <ConsistentPhrases.h>
+#include <cassert>
 
 using namespace std;
 
@@ -20,10 +21,15 @@ ConsistentPhrases::~ConsistentPhrases() {
 void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
 		int targetStart, int targetEnd)
 {
-	m_coll.insert(ConsistentPhrase(sourceStart,
+  pair<Coll::iterator, bool> inserted = m_coll.insert(ConsistentPhrase(sourceStart,
 					sourceEnd,
 					targetStart,
 					targetEnd));
+  assert(inserted.second);
+
+  const ConsistentPhrase &cp = inserted.first;
+
+  m_bySourceRange[sourceStart][sourceEnd - sourceStart] = &cp;
 }
 
 void ConsistentPhrases::Debug(std::ostream &out) const

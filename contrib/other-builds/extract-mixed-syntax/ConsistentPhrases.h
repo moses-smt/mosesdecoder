@@ -38,5 +38,8 @@ public:
 
 protected:
 	Coll m_coll;
+
+
+	std::vector< std::vector<const ConsistentPhrase*> > m_bySourceRange;
 };
 
