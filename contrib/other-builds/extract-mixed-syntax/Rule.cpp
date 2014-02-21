@@ -18,6 +18,17 @@ Rule::Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alig
 	CreateSource();
 }
 
+Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
+:m_consistentPhrase(copy.m_consistentPhrase)
+,m_alignedSentence(copy.m_alignedSentence)
+,m_isValid(true)
+,m_canRecurse(true)
+,m_nonterms(copy.m_nonterms)
+{
+	m_nonterms.push_back(&cp);
+	CreateSource();
+}
+
 Rule::~Rule() {
 	// TODO Auto-generated destructor stub
 }

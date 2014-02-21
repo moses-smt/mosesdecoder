@@ -4,8 +4,8 @@
  *  Created on: 20 Feb 2014
  *      Author: hieu
  */
-#include <ConsistentPhrases.h>
 #include <cassert>
+#include "ConsistentPhrases.h"
 
 using namespace std;
 
@@ -36,10 +36,6 @@ void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
 					targetStart,
 					targetEnd));
   assert(inserted.second);
-
-  //const ConsistentPhrase &cp = *inserted;
-
-  //m_coll[sourceStart][sourceEnd - sourceStart] = &cp;
 }
 
 const ConsistentPhrases::Coll &ConsistentPhrases::GetColl(int sourceStart, int sourceEnd) const

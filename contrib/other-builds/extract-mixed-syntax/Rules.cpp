@@ -13,6 +13,7 @@
 using namespace std;
 
 Rules::Rules(const AlignedSentence &alignedSentence)
+:m_alignedSentence(alignedSentence)
 {
 	const ConsistentPhrases &allCPS = alignedSentence.GetConsistentPhrases();
 
@@ -52,15 +53,34 @@ void Rules::CreateRules()
 
 void Rules::Extend(const Rule &rule)
 {
+	const ConsistentPhrases &allCPS = m_alignedSentence.GetConsistentPhrases();
 	int sourceMin = rule.GetNextSourcePosForNonTerm();
 	int sourceMax = rule.GetConsistentPhrase().corners[1];
 
 	for (int sourceStart = sourceMin; sourceStart <= sourceMax; ++sourceStart) {
 		for (int sourceEnd = sourceStart; sourceEnd <= sourceMax; ++sourceEnd) {
-
-
+			const ConsistentPhrases::Coll cps = allCPS.GetColl(sourceStart, sourceEnd);
+			Extend(rule, cps);
 		}
 	}
+}
+
+void Rules::Extend(const Rule &rule, const ConsistentPhrases::Coll &cps)
+{
+	ConsistentPhrases::Coll::const_iterator iter;
+	for (iter = cps.begin(); iter != cps.end(); ++iter) {
+		const ConsistentPhrase &cp = *iter;
+		Extend(rule, cp);
+	}
+}
+
+void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp)
+{
+	Rule *newRule = new Rule(rule, cp);
+	m_todoRules.insert(newRule);
+
+	// recursively extend
+	Extend(*newRule);
 }
 
 void Rules::Debug(std::ostream &out) const

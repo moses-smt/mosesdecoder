@@ -18,7 +18,12 @@ class RulePhrase : public std::vector<const RuleSymbol*>
 
 class Rule {
 public:
+	// original rule with no non-term
 	Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence);
+
+	// extend a rule, adding 1 new non-term
+	Rule(const Rule &copy, const ConsistentPhrase &cp);
+
 	virtual ~Rule();
 
 	bool IsValid() const

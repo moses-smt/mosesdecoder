@@ -9,6 +9,7 @@
 
 #include <set>
 #include <iostream>
+#include "ConsistentPhrases.h"
 
 class AlignedSentence;
 class Rule;
@@ -22,9 +23,12 @@ public:
 	void Debug(std::ostream &out) const;
 
 protected:
+	const AlignedSentence &m_alignedSentence;
 	std::set<Rule*> m_todoRules, m_keepRules;
 
 	void Extend(const Rule &rule);
+	void Extend(const Rule &rule, const ConsistentPhrases::Coll &cps);
+	void Extend(const Rule &rule, const ConsistentPhrase &cp);
 
 };
 
