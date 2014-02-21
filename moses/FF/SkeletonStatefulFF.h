@@ -22,7 +22,7 @@ class SkeletonStatefulFF : public StatefulFeatureFunction
 {
 public:
   SkeletonStatefulFF(const std::string &line)
-    :StatefulFeatureFunction("SkeletonStatefulFF", 3, line)
+    :StatefulFeatureFunction(3, line)
   {}
 
   bool IsUseable(const FactorMask &mask) const {
@@ -39,7 +39,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const;
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
   FFState* Evaluate(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

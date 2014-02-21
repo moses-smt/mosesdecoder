@@ -170,6 +170,8 @@ int main(int argc, char* argv[])
         exit(1);
       }
       options.initInstanceWeightsFile(argv[++i]);
+    } else if (strcmp(argv[i], "--Debug") == 0) {
+	options.debug = true;
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -556,7 +558,7 @@ REO_POS getOrientPhraseModel (SentenceAlignment & sentence, REO_MODEL_TYPE model
       return DRIGHT;
   connectedRightTop = false;
   for(int indexF=endF+2*unit; (*lt)(indexF, countF) && !connectedRightTop; indexF=indexF+unit)
-    if(connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomRight.end() &&
+    if(connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomLeft.end() &&
                            it->second.find(indexF) != it->second.end())
       return DLEFT;
   return UNKNOWN;
@@ -606,9 +608,9 @@ REO_POS getOrientHierModel (SentenceAlignment & sentence, REO_MODEL_TYPE modelTy
   }
   connectedRightTop = false;
   for(int indexF=endF+2*unit; (*lt)(indexF, countF) && !connectedRightTop; indexF=indexF+unit) {
-    if((connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomRight.end() &&
+    if((connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomLeft.end() &&
                             it->second.find(indexF) != it->second.end()) ||
-        (connectedRightTop = (it = outBottomLeft.find(startE - unit)) != outBottomRight.end() &&
+        (connectedRightTop = (it = outBottomLeft.find(startE - unit)) != outBottomLeft.end() &&
                              it->second.find(indexF) != it->second.end()))
       return DLEFT;
   }
@@ -717,6 +719,12 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
 
   if (m_options.placeholders.size() && !checkPlaceholders(sentence, startE, endE, startF, endF)) {
     return;
+  }
+
+  if (m_options.debug) {
+      outextractstr << "sentenceID=" << sentence.sentenceID << " ";
+      outextractstrInv << "sentenceID=" << sentence.sentenceID << " ";
+      outextractstrOrientation << "sentenceID=" << sentence.sentenceID << " ";
   }
 
   for(int fi=startF; fi<=endF; fi++) {

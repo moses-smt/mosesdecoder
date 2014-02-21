@@ -18,7 +18,7 @@
  ***********************************************************************/
 
 #include "ScoreFeature.h"
-#include "domain.h"
+#include "DomainFeature.h"
 #include "InternalStructFeature.h"
 
 using namespace std;
@@ -77,10 +77,10 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
       }
       sparseDomainAdded = true;
       m_includeSentenceId = true;
-    } else if(args[i] == "--GHKMFeatureSparse"){
+    } else if(args[i] == "--TreeFeatureSparse"){
     	//MARIA
     	m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureSparse()));
-    } else if(args[i] == "--GHKMFeatureDense"){
+    } else if(args[i] == "--TreeFeatureDense"){
     	//MARIA
     	m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureDense()));
     } else {
@@ -91,12 +91,13 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
 
 }
 
-bool ScoreFeatureManager::equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const
+void ScoreFeatureManager::addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
+                                                    float count, 
+                                                    int sentenceId) const
 {
   for (size_t i = 0; i < m_features.size(); ++i) {
-    if (!m_features[i]->equals(lhs,rhs)) return false;
+    m_features[i]->addPropertiesToPhrasePair(phrasePair, count, sentenceId);
   }
-  return true;
 }
 
 void ScoreFeatureManager::addFeatures(const ScoreFeatureContext& context,

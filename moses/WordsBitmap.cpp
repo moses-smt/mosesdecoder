@@ -37,9 +37,13 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
     aip1 = (i+1==m_size || m_bitmap[i+1]);
 
 #ifndef NDEBUG
-    if( i>0 ) CHECK( aim1==(i==0||m_bitmap[i-1]==1));
-    //CHECK( ai==a[i] );
-    if( i+1<m_size ) CHECK( aip1==m_bitmap[i+1]);
+    if( i>0 ) {
+      assert( aim1==(i==0||m_bitmap[i-1]==1));
+    }
+
+    if( i+1<m_size ) {
+      assert( aip1==m_bitmap[i+1]);
+    }
 #endif
     if((i==0||aim1)&&ai==0) {
       sum+=abs(lastPos-static_cast<int>(i)+1);
@@ -52,11 +56,27 @@ int WordsBitmap::GetFutureCosts(int lastPos) const
 
   //  sum+=getJumpCosts(lastPos,as,maxJumpWidth);
   sum+=abs(lastPos-static_cast<int>(m_size)+1); //getCosts(lastPos,as);
-  CHECK(sum>=0);
+  assert(sum>=0);
 
   //	TRACE_ERR(sum<<"\n");
 
   return sum;
+}
+
+bool WordsBitmap::IsAdjacent(size_t startPos, size_t endPos) const
+{
+  if (GetNumWordsCovered() == 0) {
+	  return true;
+  }
+
+  size_t first = GetFirstGapPos();
+  size_t last = GetLastGapPos();
+
+  if (startPos == last || endPos == first) {
+    return true;
+  }
+
+  return false;
 }
 
 

@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "TypeDef.h"
 #include "Util.h"
+#include "util/exception.hh"
 
 #ifdef WIN32
 #undef max
@@ -79,7 +80,7 @@ public:
   }
 
   inline size_t GetNumWordsBetween(const WordsRange& x) const {
-    CHECK(!Overlap(x));
+    UTIL_THROW_IF2(Overlap(x), "Overlapping ranges");
 
     if (x.m_endPos < m_startPos) {
       return m_startPos - x.m_endPos - 1;

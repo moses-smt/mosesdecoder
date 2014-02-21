@@ -21,22 +21,21 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <stdlib.h>
 #include <assert.h>
 #include <cstring>
+#include <map>
 #include <set>
+#include <vector>
 #include <algorithm>
 
 #include "SafeGetline.h"
 #include "ScoreFeature.h"
 #include "tables-core.h"
-#include "domain.h"
-#include "PhraseAlignment.h"
+#include "ExtractionPhrasePair.h"
 #include "score.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
-#include "InternalStructFeature.h"
 
 using namespace std;
 using namespace MosesTraining;
@@ -61,111 +60,120 @@ int negLogProb = 1;
 bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
-bool singletonFeature = false;
 bool crossedNonTerm = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
+std::map<std::string,float> sourceLHSCounts;
+std::map<std::string, std::map<std::string,float>* > targetLHSAndSourceLHSJointCounts;
+
+std::set<std::string> sourceLabelSet;
+std::map<std::string,size_t> sourceLabels; 
+std::vector<std::string> sourceLabelsByIndex;
 
 Vocabulary vcbT;
 Vocabulary vcbS;
 
 } // namespace
 
-vector<string> tokenize( const char [] );
+std::vector<std::string> tokenize( const char [] );
 
-void writeCountOfCounts( const string &fileNameCountOfCounts );
-void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager, const MaybeLog& maybeLog);
-const PhraseAlignment &findBestAlignment(const PhraseAlignmentCollection &phrasePair );
-const std::string &findBestTreeFragment(const PhraseAlignmentCollection &phrasePair );
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager, const MaybeLog& maybeLog );
-double computeLexicalTranslation( const PHRASE &, const PHRASE &, const PhraseAlignment & );
-double computeUnalignedPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
-set<string> functionWordList;
+void processLine( std::string line,
+                  int lineID, bool includeSentenceIdFlag, int &sentenceId,  
+                  PHRASE *phraseSource, PHRASE *phraseTarget, ALIGNMENT *targetToSourceAlignment,
+                  std::string &additionalPropertiesString,
+                  float &count, float &pcfgSum );
+void writeCountOfCounts( const std::string &fileNameCountOfCounts );
+void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile, 
+                         const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb );
+void outputPhrasePair(const ExtractionPhrasePair &phrasePair, float, int, ostream &phraseTableFile, const ScoreFeatureManager &featureManager, const MaybeLog &maybeLog );
+double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
+double computeUnalignedPenalty( const ALIGNMENT *alignmentTargetToSource );
+set<std::string> functionWordList;
 void loadFunctionWords( const string &fileNameFunctionWords );
-double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
-void printSourcePhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
-void printTargetPhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
+double computeUnalignedFWPenalty( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
+int calcCrossedNonTerm( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
+void printSourcePhrase( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *targetToSourceAlignment, ostream &out );
+void printTargetPhrase( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *targetToSourceAlignment, ostream &out );
+void invertAlignment( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *inTargetToSourceAlignment, ALIGNMENT *outSourceToTargetAlignment );
+
 
 int main(int argc, char* argv[])
 {
-  cerr << "Score v2.0 written by Philipp Koehn\n"
-       << "scoring methods for extracted rules\n";
+  std::cerr << "Score v2.1 -- " 
+            << "scoring methods for extracted rules" << std::endl;
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] [--CrossedNonTerm] \n";
-    cerr << featureManager.usage() << endl;
+    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+    std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }
-  string fileNameExtract = argv[1];
-  string fileNameLex = argv[2];
-  string fileNamePhraseTable = argv[3];
-  string fileNameCountOfCounts;
-  char* fileNameFunctionWords = NULL;
-  vector<string> featureArgs; //all unknown args passed to feature manager
+  std::string fileNameExtract = argv[1];
+  std::string fileNameLex = argv[2];
+  std::string fileNamePhraseTable = argv[3];
+  std::string fileNameCountOfCounts;
+  std::string fileNameFunctionWords;
+  std::vector<std::string> featureArgs; // all unknown args passed to feature manager
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {
       inverseFlag = true;
-      cerr << "using inverse mode\n";
+      std::cerr << "using inverse mode" << std::endl;
     } else if (strcmp(argv[i],"--Hierarchical") == 0) {
       hierarchicalFlag = true;
-      cerr << "processing hierarchical rules\n";
+      std::cerr << "processing hierarchical rules" << std::endl;
     } else if (strcmp(argv[i],"--PCFG") == 0) {
       pcfgFlag = true;
-      cerr << "including PCFG scores\n";
+      std::cerr << "including PCFG scores" << std::endl;
     } else if (strcmp(argv[i],"--TreeFragments") == 0) {
       treeFragmentsFlag = true;
-      cerr << "including tree fragments from syntactic parse\n";
+      std::cerr << "including tree fragment information from syntactic parse\n";
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       unpairedExtractFormatFlag = true;
-      cerr << "processing unpaired extract format\n";
+      std::cerr << "processing unpaired extract format" << std::endl;
     } else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
       conditionOnTargetLhsFlag = true;
-      cerr << "processing unpaired extract format\n";
+      std::cerr << "processing unpaired extract format" << std::endl;
     } else if (strcmp(argv[i],"--NoWordAlignment") == 0) {
       wordAlignmentFlag = false;
-      cerr << "omitting word alignment" << endl;
+      std::cerr << "omitting word alignment" << std::endl;
     } else if (strcmp(argv[i],"--NoLex") == 0) {
       lexFlag = false;
-      cerr << "not computing lexical translation score\n";
+      std::cerr << "not computing lexical translation score" << std::endl;
     } else if (strcmp(argv[i],"--GoodTuring") == 0) {
       goodTuringFlag = true;
-      fileNameCountOfCounts = string(fileNamePhraseTable) + ".coc";
-      cerr << "adjusting phrase translation probabilities with Good Turing discounting\n";
+      fileNameCountOfCounts = std::string(fileNamePhraseTable) + ".coc";
+      std::cerr << "adjusting phrase translation probabilities with Good Turing discounting" << std::endl;
     } else if (strcmp(argv[i],"--KneserNey") == 0) {
       kneserNeyFlag = true;
-      fileNameCountOfCounts = string(fileNamePhraseTable) + ".coc";
-      cerr << "adjusting phrase translation probabilities with Kneser Ney discounting\n";
+      fileNameCountOfCounts = std::string(fileNamePhraseTable) + ".coc";
+      std::cerr << "adjusting phrase translation probabilities with Kneser Ney discounting" << std::endl;
     } else if (strcmp(argv[i],"--UnalignedPenalty") == 0) {
       unalignedFlag = true;
-      cerr << "using unaligned word penalty\n";
+      std::cerr << "using unaligned word penalty" << std::endl;
     } else if (strcmp(argv[i],"--UnalignedFunctionWordPenalty") == 0) {
       unalignedFWFlag = true;
       if (i+1==argc) {
-        cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
+          std::cerr << "ERROR: specify function words file for unaligned function word penalty!" << std::endl;
         exit(1);
       }
       fileNameFunctionWords = argv[++i];
-      cerr << "using unaligned function word penalty with function words from " << fileNameFunctionWords << endl;
+      std::cerr << "using unaligned function word penalty with function words from " << fileNameFunctionWords << std::endl;
     }  else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
-      cerr << "using log-probabilities\n";
+      std::cerr << "using log-probabilities" << std::endl;
     } else if (strcmp(argv[i],"--NegLogProb") == 0) {
       logProbFlag = true;
       negLogProb = -1;
-      cerr << "using negative log-probabilities\n";
+      std::cerr << "using negative log-probabilities" << std::endl;
     } else if (strcmp(argv[i],"--MinCountHierarchical") == 0) {
       minCountHierarchical = atof(argv[++i]);
-      cerr << "dropping all phrase pairs occurring less than " << minCountHierarchical << " times\n";
+      std::cerr << "dropping all phrase pairs occurring less than " << minCountHierarchical << " times" << std::endl;
       minCountHierarchical -= 0.00001; // account for rounding
-    } else if (strcmp(argv[i],"--Singleton") == 0) {
-      singletonFeature = true;
-      cerr << "binary singleton feature\n";
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
       crossedNonTerm = true;
-      cerr << "crossed non-term reordering feature\n";
+      std::cerr << "crossed non-term reordering feature" << std::endl;
     } else {
       featureArgs.push_back(argv[i]);
       ++i;
@@ -178,16 +186,20 @@ int main(int argc, char* argv[])
 
   MaybeLog maybeLogProb(logProbFlag, negLogProb);
 
-  //configure extra features
-  if (!inverseFlag) featureManager.configure(featureArgs);
+  // configure extra features
+  if (!inverseFlag) {
+    featureManager.configure(featureArgs);
+  }
 
   // lexical translation table
-  if (lexFlag)
+  if (lexFlag) {
     lexTable.load( fileNameLex );
+  }
 
   // function word list
-  if (unalignedFWFlag)
+  if (unalignedFWFlag) {
     loadFunctionWords( fileNameFunctionWords );
+  }
 
   // compute count of counts for Good Turing discounting
   if (goodTuringFlag || kneserNeyFlag) {
@@ -198,7 +210,7 @@ int main(int argc, char* argv[])
   Moses::InputFileStream extractFile(fileNameExtract);
 
   if (extractFile.fail()) {
-    cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
+    std::cerr << "ERROR: could not open extract file " << fileNameExtract << std::endl;
     exit(1);
   }
   istream &extractFileP = extractFile;
@@ -207,76 +219,160 @@ int main(int argc, char* argv[])
   ostream *phraseTableFile;
 
   if (fileNamePhraseTable == "-") {
-    phraseTableFile = &cout;
+    phraseTableFile = &std::cout;
   } else {
     Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
     bool success = outputFile->Open(fileNamePhraseTable);
     if (!success) {
-      cerr << "ERROR: could not open file phrase table file "
-           << fileNamePhraseTable << endl;
+        std::cerr << "ERROR: could not open file phrase table file "
+                  << fileNamePhraseTable << std::endl;
       exit(1);
     }
     phraseTableFile = outputFile;
   }
 
   // loop through all extracted phrase translations
-  float lastCount = 0.0f;
-  float lastPcfgSum = 0.0f;
-  vector< PhraseAlignment > phrasePairsWithSameF;
-  bool isSingleton = true;
-  int i=0;
-  char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
+  char line[LINE_MAX_LENGTH], lastLine[LINE_MAX_LENGTH];
   lastLine[0] = '\0';
-  PhraseAlignment *lastPhrasePair = NULL;
-  while(true) {
-    if (extractFileP.eof()) break;
-    if (++i % 100000 == 0) cerr << "." << flush;
-    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (extractFileP.eof())	break;
+  ExtractionPhrasePair *phrasePair = NULL;
+  std::vector< ExtractionPhrasePair* > phrasePairsWithSameSource;
+  std::vector< ExtractionPhrasePair* > phrasePairsWithSameSourceAndTarget; // required for hierarchical rules only, as non-terminal alignments might make the phrases incompatible
+
+  int tmpSentenceId;
+  PHRASE *tmpPhraseSource, *tmpPhraseTarget;
+  ALIGNMENT *tmpTargetToSourceAlignment;
+  std::string tmpAdditionalPropertiesString;
+  float tmpCount=0.0f, tmpPcfgSum=0.0f;
+
+  int i=0;
+  SAFE_GETLINE( (extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__ );
+  if ( !extractFileP.eof() ) {
+    ++i;
+    tmpPhraseSource = new PHRASE();
+    tmpPhraseTarget = new PHRASE();
+    tmpTargetToSourceAlignment = new ALIGNMENT();
+    processLine( std::string(line), 
+                 i, featureManager.includeSentenceId(), tmpSentenceId,
+                 tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment, 
+                 tmpAdditionalPropertiesString,
+                 tmpCount, tmpPcfgSum);
+    phrasePair = new ExtractionPhrasePair( tmpPhraseSource, tmpPhraseTarget, 
+                                           tmpTargetToSourceAlignment,
+                                           tmpCount, tmpPcfgSum );
+    phrasePair->AddProperties( tmpAdditionalPropertiesString, tmpCount );
+    featureManager.addPropertiesToPhrasePair( *phrasePair, tmpCount, tmpSentenceId );
+    phrasePairsWithSameSource.push_back( phrasePair );
+    if ( hierarchicalFlag ) {
+      phrasePairsWithSameSourceAndTarget.push_back( phrasePair );
+    }
+    strcpy( lastLine, line );
+    SAFE_GETLINE( (extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__ );
+  }
+
+  while ( !extractFileP.eof() ) {
+
+    if ( ++i % 100000 == 0 ) {
+      std::cerr << "." << std::flush;
+    }
 
     // identical to last line? just add count
     if (strcmp(line,lastLine) == 0) {
-      lastPhrasePair->count += lastCount;
-      lastPhrasePair->pcfgSum += lastPcfgSum;
+      phrasePair->IncrementPrevious(tmpCount,tmpPcfgSum);
+      SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
       continue;
-    }
-    strcpy( lastLine, line );
-
-    // create new phrase pair
-    PhraseAlignment phrasePair;
-    phrasePair.create( line, i, featureManager.includeSentenceId());
-    lastCount = phrasePair.count;
-    lastPcfgSum = phrasePair.pcfgSum;
-
-    // only differs in count? just add count
-    if (lastPhrasePair != NULL
-        && lastPhrasePair->equals( phrasePair )
-        && featureManager.equals(*lastPhrasePair, phrasePair)) {
-      lastPhrasePair->count += phrasePair.count;
-      lastPhrasePair->pcfgSum += phrasePair.pcfgSum;
-      continue;
-    }
-
-    // if new source phrase, process last batch
-    if (lastPhrasePair != NULL &&
-        lastPhrasePair->GetSource() != phrasePair.GetSource()) {
-      processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton, featureManager, maybeLogProb );
-
-      phrasePairsWithSameF.clear();
-      isSingleton = false;
-      lastPhrasePair = NULL;
     } else {
-      isSingleton = true;
+      strcpy( lastLine, line );
     }
 
-    // add phrase pairs to list, it's now the last one
-    phrasePairsWithSameF.push_back( phrasePair );
-    lastPhrasePair = &phrasePairsWithSameF.back();
+    tmpPhraseSource = new PHRASE();
+    tmpPhraseTarget = new PHRASE();
+    tmpTargetToSourceAlignment = new ALIGNMENT();
+    tmpAdditionalPropertiesString.clear();
+    processLine( std::string(line), 
+                 i, featureManager.includeSentenceId(), tmpSentenceId,
+                 tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment, 
+                 tmpAdditionalPropertiesString,
+                 tmpCount, tmpPcfgSum); 
+
+    bool matchesPrevious = false;
+    bool sourceMatch = true; bool targetMatch = true; bool alignmentMatch = true; // be careful with these,
+    // ExtractionPhrasePair::Matches() checks them in order and does not continue with the others
+    // once the first of them has been found to have to be set to false
+
+    if ( hierarchicalFlag ) {
+      for ( std::vector< ExtractionPhrasePair* >::const_iterator iter = phrasePairsWithSameSourceAndTarget.begin();
+            iter != phrasePairsWithSameSourceAndTarget.end(); ++iter ) {
+        if ( (*iter)->Matches( tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment,
+                               sourceMatch, targetMatch, alignmentMatch ) ) {
+          matchesPrevious = true;
+          phrasePair = (*iter);
+          break;
+        }
+      }
+    } else {
+      if ( phrasePair->Matches( tmpPhraseSource, tmpPhraseTarget, tmpTargetToSourceAlignment,
+                                sourceMatch, targetMatch, alignmentMatch ) ) {
+        matchesPrevious = true;
+      }
+    }
+
+    if ( matchesPrevious ) {
+      delete tmpPhraseSource;
+      delete tmpPhraseTarget;
+      if ( !phrasePair->Add( tmpTargetToSourceAlignment,
+                             tmpCount, tmpPcfgSum ) ) {
+        delete tmpTargetToSourceAlignment;
+      }
+      phrasePair->AddProperties( tmpAdditionalPropertiesString, tmpCount );
+      featureManager.addPropertiesToPhrasePair( *phrasePair, tmpCount, tmpSentenceId );
+    } else {
+
+      if ( !phrasePairsWithSameSource.empty() &&
+           !sourceMatch ) {
+        processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
+        for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin(); 
+              iter!=phrasePairsWithSameSource.end(); ++iter) {
+          delete *iter;
+        }
+        phrasePairsWithSameSource.clear();
+        if ( hierarchicalFlag ) {
+          phrasePairsWithSameSourceAndTarget.clear();
+        }
+      }
+
+      if ( hierarchicalFlag ) {
+        if ( !phrasePairsWithSameSourceAndTarget.empty() &&
+             !targetMatch ) {
+          phrasePairsWithSameSourceAndTarget.clear();
+        }
+      }
+
+      phrasePair = new ExtractionPhrasePair( tmpPhraseSource, tmpPhraseTarget, 
+                                             tmpTargetToSourceAlignment, 
+                                             tmpCount, tmpPcfgSum );
+      phrasePair->AddProperties( tmpAdditionalPropertiesString, tmpCount );
+      featureManager.addPropertiesToPhrasePair( *phrasePair, tmpCount, tmpSentenceId );
+      phrasePairsWithSameSource.push_back(phrasePair);
+
+      if ( hierarchicalFlag ) {
+        phrasePairsWithSameSourceAndTarget.push_back(phrasePair);
+      }
+    }
+
+    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
+
   }
-  processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton, featureManager, maybeLogProb );
+
+  processPhrasePairs( phrasePairsWithSameSource, *phraseTableFile, featureManager, maybeLogProb );
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin(); 
+        iter!=phrasePairsWithSameSource.end(); ++iter) {
+    delete *iter;
+  }
+  phrasePairsWithSameSource.clear();
+
 
   phraseTableFile->flush();
-  if (phraseTableFile != &cout) {
+  if (phraseTableFile != &std::cout) {
     delete phraseTableFile;
   }
 
@@ -286,177 +382,134 @@ int main(int argc, char* argv[])
   }
 }
 
+
+void processLine( std::string line,
+                  int lineID, bool includeSentenceIdFlag, int &sentenceId,  
+                  PHRASE *phraseSource, PHRASE *phraseTarget, ALIGNMENT *targetToSourceAlignment,
+                  std::string &additionalPropertiesString,
+                  float &count, float &pcfgSum )
+{
+  size_t foundAdditionalProperties = line.find("{{");
+  if (foundAdditionalProperties != std::string::npos) {
+    additionalPropertiesString = line.substr(foundAdditionalProperties);
+    line = line.substr(0,foundAdditionalProperties);
+  } else {
+    additionalPropertiesString.clear();
+  }
+
+  phraseSource->clear();
+  phraseTarget->clear();
+  targetToSourceAlignment->clear();
+
+  std::vector<std::string> token = tokenize( line.c_str() );
+  int item = 1;
+  for ( size_t j=0; j<token.size(); ++j ) {
+    if (token[j] == "|||") {
+      ++item;
+    } else if (item == 1) { // source phrase
+      phraseSource->push_back( vcbS.storeIfNew( token[j] ) );
+    } else if (item == 2) { // target phrase
+      phraseTarget->push_back( vcbT.storeIfNew( token[j] ) );
+    } else if (item == 3) { // alignment
+      int s,t;
+      sscanf(token[j].c_str(), "%d-%d", &s, &t);
+      if ((size_t)t >= phraseTarget->size() || (size_t)s >= phraseSource->size()) {
+        std::cerr << "WARNING: phrase pair " << lineID
+                  << " has alignment point (" << s << ", " << t << ")"
+                  << " out of bounds (" << phraseSource->size() << ", " << phraseTarget->size() << ")"
+                  << std::endl;
+      } else {
+        // first alignment point? -> initialize
+        if ( targetToSourceAlignment->size() == 0 ) {
+          size_t numberOfTargetSymbols = (hierarchicalFlag ? phraseTarget->size()-1 : phraseTarget->size());
+          targetToSourceAlignment->resize(numberOfTargetSymbols);
+        }
+        // add alignment point
+        targetToSourceAlignment->at(t).insert(s);
+      }
+    } else if (includeSentenceIdFlag && item == 4) { // optional sentence id
+      sscanf(token[j].c_str(), "%d", &sentenceId);
+    } else if (item + (includeSentenceIdFlag?-1:0) == 4) { // count
+      sscanf(token[j].c_str(), "%f", &count);
+    } else if (item + (includeSentenceIdFlag?-1:0) == 5) { // target syntax PCFG score
+      float pcfgScore = std::atof(token[j].c_str());
+      pcfgSum = pcfgScore * count;
+    }
+  }
+
+  if ( targetToSourceAlignment->size() == 0 ) {
+    size_t numberOfTargetSymbols = (hierarchicalFlag ? phraseTarget->size()-1 : phraseTarget->size());
+    targetToSourceAlignment->resize(numberOfTargetSymbols);
+  }
+
+  if (item + (includeSentenceIdFlag?-1:0) == 3) {
+    count = 1.0;
+  }
+  if (item < 3 || item > 6) {
+    std::cerr << "ERROR: faulty line " << lineID << ": " << line << endl;
+  }
+
+}
+
+
 void writeCountOfCounts( const string &fileNameCountOfCounts )
 {
   // open file
   Moses::OutputFileStream countOfCountsFile;
   bool success = countOfCountsFile.Open(fileNameCountOfCounts.c_str());
   if (!success) {
-    cerr << "ERROR: could not open count-of-counts file "
-         << fileNameCountOfCounts << endl;
+    std::cerr << "ERROR: could not open count-of-counts file "
+              << fileNameCountOfCounts << std::endl;
     return;
   }
 
   // Kneser-Ney needs the total number of phrase pairs
-  countOfCountsFile << totalDistinct << endl;
+  countOfCountsFile << totalDistinct << std::endl;
 
   // write out counts
   for(int i=1; i<=COC_MAX; i++) {
-    countOfCountsFile << countOfCounts[ i ] << endl;
+    countOfCountsFile << countOfCounts[ i ] << std::endl;
   }
   countOfCountsFile.Close();
 }
 
-void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb )
-{
-  if (phrasePair.size() == 0) return;
 
-  // group phrase pairs based on alignments that matter
-  // (i.e. that re-arrange non-terminals)
-  PhrasePairGroup phrasePairGroup;
+void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile, 
+                         const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb )
+{
+  if (phrasePairsWithSameSource.size() == 0) {
+    return;
+  }
 
   float totalSource = 0;
 
-  //cerr << "phrasePair.size() = " << phrasePair.size() << endl;
+  //std::cerr << "phrasePairs.size() = " << phrasePairs.size() << std::endl;
 
   // loop through phrase pairs
-  for(size_t i=0; i<phrasePair.size(); i++) {
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin(); 
+        iter!=phrasePairsWithSameSource.end(); ++iter) {
     // add to total count
-    PhraseAlignment &currPhrasePair = phrasePair[i];
-
-    totalSource += phrasePair[i].count;
-
-    // check for matches
-    //cerr << "phrasePairGroup.size() = " << phrasePairGroup.size() << endl;
-
-    PhraseAlignmentCollection phraseAlignColl;
-    phraseAlignColl.push_back(&currPhrasePair);
-    pair<PhrasePairGroup::iterator, bool> retInsert;
-    retInsert = phrasePairGroup.insert(phraseAlignColl);
-    if (!retInsert.second) {
-      // already exist. Add to that collection instead
-      PhraseAlignmentCollection &existingColl = const_cast<PhraseAlignmentCollection&>(*retInsert.first);
-      existingColl.push_back(&currPhrasePair);
-    }
-
+    totalSource += (*iter)->GetCount();
   }
 
   // output the distinct phrase pairs, one at a time
-  const PhrasePairGroup::SortedColl &sortedColl = phrasePairGroup.GetSortedColl();
-  PhrasePairGroup::SortedColl::const_iterator iter;
-
-  for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter) {
-    const PhraseAlignmentCollection &group = **iter;
-    outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile, isSingleton, featureManager, maybeLogProb );
+  for ( std::vector< ExtractionPhrasePair* >::const_iterator iter=phrasePairsWithSameSource.begin(); 
+        iter!=phrasePairsWithSameSource.end(); ++iter) {
+    // add to total count
+    outputPhrasePair( **iter, totalSource, phrasePairsWithSameSource.size(), phraseTableFile, featureManager, maybeLogProb );
   }
-
 }
 
-const PhraseAlignment &findBestAlignment(const PhraseAlignmentCollection &phrasePair )
-{
-  float bestAlignmentCount = -1;
-  PhraseAlignment* bestAlignment = NULL;
-
-  for(size_t i=0; i<phrasePair.size(); i++) {
-    size_t alignInd;
-    if (inverseFlag) {
-      // count backwards, so that alignments for ties will be the same for both normal & inverse scores
-      alignInd = phrasePair.size() - i - 1;
-    } else {
-      alignInd = i;
-    }
-
-    if (phrasePair[alignInd]->count > bestAlignmentCount) {
-      bestAlignmentCount = phrasePair[alignInd]->count;
-      bestAlignment = phrasePair[alignInd];
-    }
-  }
-
-  return *bestAlignment;
-}
-
-const std::string &findBestTreeFragment(const PhraseAlignmentCollection &phrasePair )
-{
-  float bestTreeFragmentCount = -1;
-  PhraseAlignment *bestTreeFragment = NULL;
-
-  for(size_t i=0; i<phrasePair.size(); i++) {
-    size_t treeFragmentInd;
-    if (inverseFlag) {
-      // count backwards, so that alignments for ties will be the same for both normal & inverse scores
-      treeFragmentInd = phrasePair.size() - i - 1;
-    } else {
-      treeFragmentInd = i;
-    }
-
-    if (phrasePair[treeFragmentInd]->count > bestTreeFragmentCount) {
-      bestTreeFragmentCount = phrasePair[treeFragmentInd]->count;
-      bestTreeFragment = phrasePair[treeFragmentInd];
-    }
-  }
-
-  return bestTreeFragment->treeFragment;
-}
-
-bool calcCrossedNonTerm(size_t sourcePos, size_t targetPos, const std::vector< std::set<size_t> > &alignedToS)
-{
-  for (size_t currSource = 0; currSource < alignedToS.size(); ++currSource) {
-    if (currSource == sourcePos) {
-      // skip
-    } else {
-      const std::set<size_t> &targetSet = alignedToS[currSource];
-      std::set<size_t>::const_iterator iter;
-      for (iter = targetSet.begin(); iter != targetSet.end(); ++iter) {
-        size_t currTarget = *iter;
-
-        if ((currSource < sourcePos && currTarget > targetPos)
-            || (currSource > sourcePos && currTarget < targetPos)
-           ) {
-          return true;
-        }
-      }
-
-    }
-  }
-
-  return false;
-}
-
-int calcCrossedNonTerm(const PHRASE &phraseS, const PhraseAlignment &bestAlignment)
-{
-  const std::vector< std::set<size_t> > &alignedToS = bestAlignment.alignedToS;
-
-  for (size_t sourcePos = 0; sourcePos < alignedToS.size(); ++sourcePos) {
-    const std::set<size_t> &targetSet = alignedToS[sourcePos];
-
-    WORD_ID wordId = phraseS[sourcePos];
-    const WORD &word = vcbS.getWord(wordId);
-    bool isNonTerm = isNonTerminal(word);
-
-    if (isNonTerm) {
-      assert(targetSet.size() == 1);
-      size_t targetPos = *targetSet.begin();
-      bool ret = calcCrossedNonTerm(sourcePos, targetPos, alignedToS);
-      if (ret)
-        return 1;
-    }
-  }
-
-  return 0;
-}
-
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager,
+void outputPhrasePair(const ExtractionPhrasePair &phrasePair, 
+                      float totalCount, int distinctCount, 
+                      ostream &phraseTableFile, 
+                      const ScoreFeatureManager& featureManager,
                       const MaybeLog& maybeLogProb )
 {
-  if (phrasePair.size() == 0) return;
+  assert(phrasePair.IsValid());
 
-  const PhraseAlignment &bestAlignment = findBestAlignment( phrasePair );
-
-  // compute count
-  float count = 0;
-  for(size_t i=0; i<phrasePair.size(); i++) {
-    count += phrasePair[i]->count;
-  }
+  const ALIGNMENT *bestAlignmentT2S = phrasePair.FindBestAlignmentTargetToSource();
+  float count = phrasePair.GetCount();
 
   map< string, float > domainCount;
 
@@ -464,82 +517,74 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   if (goodTuringFlag || kneserNeyFlag) {
     totalDistinct++;
     int countInt = count + 0.99999;
-    if(countInt <= COC_MAX)
+    if (countInt <= COC_MAX)
       countOfCounts[ countInt ]++;
   }
 
   // compute PCFG score
   float pcfgScore = 0;
   if (pcfgFlag && !inverseFlag) {
-    float pcfgSum = 0;
-    for(size_t i=0; i<phrasePair.size(); ++i) {
-      pcfgSum += phrasePair[i]->pcfgSum;
-    }
-    pcfgScore = pcfgSum / count;
+    pcfgScore = phrasePair.GetPcfgScore() / count;
   }
 
   // output phrases
-  const PHRASE &phraseS = phrasePair[0]->GetSource();
-  const PHRASE &phraseT = phrasePair[0]->GetTarget();
+  const PHRASE *phraseSource = phrasePair.GetSource();
+  const PHRASE *phraseTarget = phrasePair.GetTarget();
 
   // do not output if hierarchical and count below threshold
   if (hierarchicalFlag && count < minCountHierarchical) {
-    for(size_t j=0; j<phraseS.size()-1; j++) {
-      if (isNonTerminal(vcbS.getWord( phraseS[j] )))
+    for(size_t j=0; j<phraseSource->size()-1; ++j) {
+      if (isNonTerminal(vcbS.getWord( phraseSource->at(j) )))
         return;
     }
   }
 
   // source phrase (unless inverse)
-  if (! inverseFlag) {
-    printSourcePhrase(phraseS, phraseT, bestAlignment, phraseTableFile);
+  if (!inverseFlag) {
+    printSourcePhrase(phraseSource, phraseTarget, bestAlignmentT2S, phraseTableFile);
     phraseTableFile << " ||| ";
   }
 
   // target phrase
-  printTargetPhrase(phraseS, phraseT, bestAlignment, phraseTableFile);
+  printTargetPhrase(phraseSource, phraseTarget, bestAlignmentT2S, phraseTableFile);
   phraseTableFile << " ||| ";
 
   // source phrase (if inverse)
   if (inverseFlag) {
-    printSourcePhrase(phraseS, phraseT, bestAlignment, phraseTableFile);
+    printSourcePhrase(phraseSource, phraseTarget, bestAlignmentT2S, phraseTableFile);
     phraseTableFile << " ||| ";
   }
 
   // lexical translation probability
   if (lexFlag) {
-    double lexScore = computeLexicalTranslation( phraseS, phraseT, bestAlignment);
-    phraseTableFile << maybeLogProb(lexScore );
+    double lexScore = computeLexicalTranslation( phraseSource, phraseTarget, bestAlignmentT2S );
+    phraseTableFile << maybeLogProb( lexScore );
   }
 
   // unaligned word penalty
   if (unalignedFlag) {
-    double penalty = computeUnalignedPenalty( phraseS, phraseT, bestAlignment);
-    phraseTableFile << " " << maybeLogProb(penalty );
+    double penalty = computeUnalignedPenalty( bestAlignmentT2S );
+    phraseTableFile << " " << maybeLogProb( penalty );
   }
 
   // unaligned function word penalty
   if (unalignedFWFlag) {
-    double penalty = computeUnalignedFWPenalty( phraseS, phraseT, bestAlignment);
-    phraseTableFile << " " << maybeLogProb(penalty );
-  }
-
-  if (singletonFeature) {
-    phraseTableFile << " " << (isSingleton ? 1 : 0);
+    double penalty = computeUnalignedFWPenalty( phraseTarget, bestAlignmentT2S );
+    phraseTableFile << " " << maybeLogProb( penalty );
   }
 
   if (crossedNonTerm && !inverseFlag) {
-    phraseTableFile << " " << calcCrossedNonTerm(phraseS, bestAlignment);
+    phraseTableFile << " " << calcCrossedNonTerm( phraseTarget, bestAlignmentT2S );
   }
 
   // target-side PCFG score
   if (pcfgFlag && !inverseFlag) {
-    phraseTableFile << " " << maybeLogProb(pcfgScore );
+    phraseTableFile << " " << maybeLogProb( pcfgScore );
   }
 
   // extra features
-  ScoreFeatureContext context(phrasePair, count, maybeLogProb);
-  vector<float> extraDense;
+  ScoreFeatureContext context(phrasePair, maybeLogProb);
+  std::vector<float> extraDense;
   map<string,float> extraSparse;
   featureManager.addFeatures(context, extraDense, extraSparse);
   for (size_t i = 0; i < extraDense.size(); ++i) {
@@ -553,30 +598,28 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
 
   phraseTableFile << " ||| ";
 
-  // alignment info for non-terminals
-  if (! inverseFlag) {
-    if (hierarchicalFlag) {
-      // always output alignment if hiero style, but only for non-terms
-      // (eh: output all alignments, needed for some feature functions)
-      assert(phraseT.size() == bestAlignment.alignedToT.size() + 1);
+  // output alignment info
+  if ( !inverseFlag ) {
+    if ( hierarchicalFlag ) {
+      // always output alignment if hiero style
+      assert(phraseTarget->size() == bestAlignmentT2S->size()+1);
       std::vector<std::string> alignment;
-      for(size_t j = 0; j < phraseT.size() - 1; j++) {
-        if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
-          if (bestAlignment.alignedToT[ j ].size() != 1) {
-            cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
+      for ( size_t j = 0; j < phraseTarget->size() - 1; ++j ) {
+        if ( isNonTerminal(vcbT.getWord( phraseTarget->at(j) ))) {
+          if ( bestAlignmentT2S->at(j).size() != 1 ) {
+            std::cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << std::endl;
             phraseTableFile.flush();
-            assert(bestAlignment.alignedToT[ j ].size() == 1);
+            assert(bestAlignmentT2S->at(j).size() == 1);
           }
-          int sourcePos = *(bestAlignment.alignedToT[ j ].begin());
+          size_t sourcePos = *(bestAlignmentT2S->at(j).begin());
           //phraseTableFile << sourcePos << "-" << j << " ";
           std::stringstream point;
           point << sourcePos << "-" << j;
           alignment.push_back(point.str());
         } else {
-          set<size_t>::iterator setIter;
-          for(setIter = (bestAlignment.alignedToT[j]).begin(); setIter != (bestAlignment.alignedToT[j]).end(); setIter++) {
-            int sourcePos = *setIter;
-            //phraseTableFile << sourcePos << "-" << j << " ";
+          for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
+                setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
+            size_t sourcePos = *setIter;
             std::stringstream point;
             point << sourcePos << "-" << j;
             alignment.push_back(point.str());
@@ -590,40 +633,90 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       }
     } else if (wordAlignmentFlag) {
       // alignment info in pb model
-      for(size_t j=0; j<bestAlignment.alignedToT.size(); j++) {
-        const set< size_t > &aligned = bestAlignment.alignedToT[j];
-        for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p) {
-          phraseTableFile << *p << "-" << j << " ";
+      for (size_t j = 0; j < bestAlignmentT2S->size(); ++j) {
+        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
+              setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
+          size_t sourcePos = *setIter;
+          phraseTableFile << sourcePos << "-" << j << " ";
         }
       }
     }
   }
 
-
   // counts
-
   phraseTableFile << " ||| " << totalCount << " " << count;
   if (kneserNeyFlag)
     phraseTableFile << " " << distinctCount;
 
-  // tree fragments
-  if (treeFragmentsFlag && !inverseFlag) {
-    const std::string &bestTreeFragment = findBestTreeFragment( phrasePair );
-    if ( !bestTreeFragment.empty() )
-      phraseTableFile << " ||| {{Tree " << bestTreeFragment << "}}";
+  if ((treeFragmentsFlag) && 
+      !inverseFlag) {
+    phraseTableFile << " |||";
   }
 
+  // tree fragments
+  if (treeFragmentsFlag && !inverseFlag) {
+    const std::string *bestTreeFragment = phrasePair.FindBestPropertyValue("Tree");
+    if (bestTreeFragment) {
+      phraseTableFile << " {{Tree " << *bestTreeFragment << "}}";
+    }
+  }
 
-  phraseTableFile << endl;
+  phraseTableFile << std::endl;
 }
 
-double computeUnalignedPenalty( const PHRASE &phraseS, const PHRASE &phraseT, const PhraseAlignment &alignment )
+
+
+bool calcCrossedNonTerm( size_t targetPos, size_t sourcePos, const ALIGNMENT *alignmentTargetToSource )
+{
+  for (size_t currTarget = 0; currTarget < alignmentTargetToSource->size(); ++currTarget) {
+    if (currTarget == targetPos) {
+      // skip
+    } else {
+      const std::set<size_t> &sourceSet = alignmentTargetToSource->at(currTarget);
+      for (std::set<size_t>::const_iterator iter = sourceSet.begin(); 
+           iter != sourceSet.end(); ++iter) {
+        size_t currSource = *iter;
+
+        if ((currTarget < targetPos && currSource > sourcePos)
+            || (currTarget > targetPos && currSource < sourcePos)
+           ) {
+          return true;
+        }
+      }
+
+    }
+  }
+
+  return false;
+}
+
+int calcCrossedNonTerm( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource )
+{
+  assert(phraseTarget->size() >= alignmentTargetToSource->size() );
+
+  for (size_t targetPos = 0; targetPos < alignmentTargetToSource->size(); ++targetPos) {
+
+    if ( isNonTerminal(vcbT.getWord( phraseTarget->at(targetPos) ))) {
+      const std::set<size_t> &alignmentPoints = alignmentTargetToSource->at(targetPos);
+      assert( alignmentPoints.size() == 1 );
+      size_t sourcePos = *alignmentPoints.begin();
+      bool ret = calcCrossedNonTerm(targetPos, sourcePos, alignmentTargetToSource);
+      if (ret)
+        return 1;
+    }
+  }
+
+  return 0;
+}
+
+
+double computeUnalignedPenalty( const ALIGNMENT *alignmentTargetToSource )
 {
   // unaligned word counter
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
-  for(size_t ti=0; ti<alignment.alignedToT.size(); ti++) {
-    const set< size_t > & srcIndices = alignment.alignedToT[ ti ];
+  for(size_t ti=0; ti<alignmentTargetToSource->size(); ++ti) {
+    const set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
     if (srcIndices.empty()) {
       unaligned *= 2.718;
     }
@@ -631,14 +724,15 @@ double computeUnalignedPenalty( const PHRASE &phraseS, const PHRASE &phraseT, co
   return unaligned;
 }
 
-double computeUnalignedFWPenalty( const PHRASE &phraseS, const PHRASE &phraseT, const PhraseAlignment &alignment )
+
+double computeUnalignedFWPenalty( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource )
 {
   // unaligned word counter
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
-  for(size_t ti=0; ti<alignment.alignedToT.size(); ti++) {
-    const set< size_t > & srcIndices = alignment.alignedToT[ ti ];
-    if (srcIndices.empty() && functionWordList.find( vcbT.getWord( phraseT[ ti ] ) ) != functionWordList.end()) {
+  for(size_t ti=0; ti<alignmentTargetToSource->size(); ++ti) {
+    const set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
+    if (srcIndices.empty() && functionWordList.find( vcbT.getWord( phraseTarget->at(ti) ) ) != functionWordList.end()) {
       unaligned *= 2.718;
     }
   }
@@ -647,11 +741,11 @@ double computeUnalignedFWPenalty( const PHRASE &phraseS, const PHRASE &phraseT, 
 
 void loadFunctionWords( const string &fileName )
 {
-  cerr << "Loading function word list from " << fileName;
+  std::cerr << "Loading function word list from " << fileName;
   ifstream inFile;
   inFile.open(fileName.c_str());
   if (inFile.fail()) {
-    cerr << " - ERROR: could not open file\n";
+    std::cerr << " - ERROR: could not open file" << std::endl;
     exit(1);
   }
   istream *inFileP = &inFile;
@@ -660,32 +754,32 @@ void loadFunctionWords( const string &fileName )
   while(true) {
     SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     if (inFileP->eof()) break;
-    vector<string> token = tokenize( line );
+    std::vector<string> token = tokenize( line );
     if (token.size() > 0)
       functionWordList.insert( token[0] );
   }
-  inFile.close();
 
-  cerr << " - read " << functionWordList.size() << " function words\n";
+  std::cerr << " - read " << functionWordList.size() << " function words" << std::endl;
   inFile.close();
 }
 
-double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, const PhraseAlignment &alignment )
+
+double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource )
 {
   // lexical translation probability
   double lexScore = 1.0;
   int null = vcbS.getWordID("NULL");
   // all target words have to be explained
-  for(size_t ti=0; ti<alignment.alignedToT.size(); ti++) {
-    const set< size_t > & srcIndices = alignment.alignedToT[ ti ];
+  for(size_t ti=0; ti<alignmentTargetToSource->size(); ti++) {
+    const set< size_t > & srcIndices = alignmentTargetToSource->at(ti);
     if (srcIndices.empty()) {
       // explain unaligned word by NULL
-      lexScore *= lexTable.permissiveLookup( null, phraseT[ ti ] );
+      lexScore *= lexTable.permissiveLookup( null, phraseTarget->at(ti) );
     } else {
       // go through all the aligned words to compute average
       double thisWordScore = 0;
       for (set< size_t >::const_iterator p(srcIndices.begin()); p != srcIndices.end(); ++p) {
-        thisWordScore += lexTable.permissiveLookup( phraseS[ *p ], phraseT[ ti ] );
+        thisWordScore += lexTable.permissiveLookup( phraseSource->at(*p), phraseTarget->at(ti) );
       }
       lexScore *= thisWordScore / (double)srcIndices.size();
     }
@@ -693,13 +787,14 @@ double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, 
   return lexScore;
 }
 
+
 void LexicalTable::load( const string &fileName )
 {
-  cerr << "Loading lexical translation table from " << fileName;
+  std::cerr << "Loading lexical translation table from " << fileName;
   ifstream inFile;
   inFile.open(fileName.c_str());
   if (inFile.fail()) {
-    cerr << " - ERROR: could not open file\n";
+    std::cerr << " - ERROR: could not open file" << std::endl;
     exit(1);
   }
   istream *inFileP = &inFile;
@@ -709,15 +804,15 @@ void LexicalTable::load( const string &fileName )
   int i=0;
   while(true) {
     i++;
-    if (i%100000 == 0) cerr << "." << flush;
+    if (i%100000 == 0) std::cerr << "." << flush;
     SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     if (inFileP->eof()) break;
 
-    vector<string> token = tokenize( line );
+    std::vector<string> token = tokenize( line );
     if (token.size() != 3) {
-      cerr << "line " << i << " in " << fileName
-           << " has wrong number of tokens, skipping:\n"
-           << token.size() << " " << token[0] << " " << line << endl;
+        std::cerr << "line " << i << " in " << fileName
+           << " has wrong number of tokens, skipping:" << std::endl
+           << token.size() << " " << token[0] << " " << line << std::endl;
       continue;
     }
 
@@ -726,55 +821,60 @@ void LexicalTable::load( const string &fileName )
     WORD_ID wordS = vcbS.storeIfNew( token[1] );
     ltable[ wordS ][ wordT ] = prob;
   }
-  cerr << endl;
+  std::cerr << std::endl;
 }
 
-void printSourcePhrase(const PHRASE &phraseS, const PHRASE &phraseT,
-                       const PhraseAlignment &bestAlignment, ostream &out)
+
+void printSourcePhrase(const PHRASE *phraseSource, const PHRASE *phraseTarget,
+                       const ALIGNMENT *targetToSourceAlignment, ostream &out)
 {
+  // get corresponding target non-terminal and output pair
+  ALIGNMENT *sourceToTargetAlignment = new ALIGNMENT();
+  invertAlignment(phraseSource, phraseTarget, targetToSourceAlignment, sourceToTargetAlignment);
   // output source symbols, except root, in rule table format
-  for (std::size_t i = 0; i < phraseS.size()-1; ++i) {
-    const std::string &word = vcbS.getWord(phraseS[i]);
+  for (std::size_t i = 0; i < phraseSource->size()-1; ++i) {
+    const std::string &word = vcbS.getWord(phraseSource->at(i));
     if (!unpairedExtractFormatFlag || !isNonTerminal(word)) {
       out << word << " ";
       continue;
     }
-    // get corresponding target non-terminal and output pair
-    std::set<std::size_t> alignmentPoints = bestAlignment.alignedToS[i];
+    const std::set<std::size_t> &alignmentPoints = sourceToTargetAlignment->at(i);
     assert(alignmentPoints.size() == 1);
-    int j = *(alignmentPoints.begin());
+    size_t j = *(alignmentPoints.begin());
     if (inverseFlag) {
-      out << vcbT.getWord(phraseT[j]) << word << " ";
+      out << vcbT.getWord(phraseTarget->at(j)) << word << " ";
     } else {
-      out << word << vcbT.getWord(phraseT[j]) << " ";
+      out << word << vcbT.getWord(phraseTarget->at(j)) << " ";
     }
   }
   // output source root symbol
   if (conditionOnTargetLhsFlag && !inverseFlag) {
     out << "[X]";
   } else {
-    out << vcbS.getWord(phraseS.back());
+    out << vcbS.getWord(phraseSource->back());
   }
+  delete sourceToTargetAlignment;
 }
 
-void printTargetPhrase(const PHRASE &phraseS, const PHRASE &phraseT,
-                       const PhraseAlignment &bestAlignment, ostream &out)
+
+void printTargetPhrase(const PHRASE *phraseSource, const PHRASE *phraseTarget,
+                       const ALIGNMENT *targetToSourceAlignment, ostream &out)
 {
   // output target symbols, except root, in rule table format
-  for (std::size_t i = 0; i < phraseT.size()-1; ++i) {
-    const std::string &word = vcbT.getWord(phraseT[i]);
+  for (std::size_t i = 0; i < phraseTarget->size()-1; ++i) {
+    const std::string &word = vcbT.getWord(phraseTarget->at(i));
     if (!unpairedExtractFormatFlag || !isNonTerminal(word)) {
       out << word << " ";
       continue;
     }
     // get corresponding source non-terminal and output pair
-    std::set<std::size_t> alignmentPoints = bestAlignment.alignedToT[i];
+    std::set<std::size_t> alignmentPoints = targetToSourceAlignment->at(i);
     assert(alignmentPoints.size() == 1);
     int j = *(alignmentPoints.begin());
     if (inverseFlag) {
-      out << word << vcbS.getWord(phraseS[j]) << " ";
+      out << word << vcbS.getWord(phraseSource->at(j)) << " ";
     } else {
-      out << vcbS.getWord(phraseS[j]) << word << " ";
+      out << vcbS.getWord(phraseSource->at(j)) << word << " ";
     }
   }
   // output target root symbol
@@ -782,24 +882,28 @@ void printTargetPhrase(const PHRASE &phraseS, const PHRASE &phraseT,
     if (inverseFlag) {
       out << "[X]";
     } else {
-      out << vcbS.getWord(phraseS.back());
+      out << vcbS.getWord(phraseSource->back());
     }
   } else {
-    out << vcbT.getWord(phraseT.back());
+    out << vcbT.getWord(phraseTarget->back());
   }
 }
 
-std::pair<PhrasePairGroup::Coll::iterator,bool> PhrasePairGroup::insert ( const PhraseAlignmentCollection& obj )
-{
-  std::pair<iterator,bool> ret = m_coll.insert(obj);
 
-  if (ret.second) {
-    // obj inserted. Also add to sorted vector
-    const PhraseAlignmentCollection &insertedObj = *ret.first;
-    m_sortedColl.push_back(&insertedObj);
+void invertAlignment(const PHRASE *phraseSource, const PHRASE *phraseTarget,
+                     const ALIGNMENT *inTargetToSourceAlignment, ALIGNMENT *outSourceToTargetAlignment) {
+// typedef std::vector< std::set<size_t> > ALIGNMENT; 
+
+  outSourceToTargetAlignment->clear();
+  size_t numberOfSourceSymbols = (hierarchicalFlag ? phraseSource->size()-1 : phraseSource->size());
+  outSourceToTargetAlignment->resize(numberOfSourceSymbols);
+  // add alignment point
+  for (size_t targetPosition = 0; targetPosition < inTargetToSourceAlignment->size(); ++targetPosition) {
+    for ( std::set<size_t>::iterator setIter = (inTargetToSourceAlignment->at(targetPosition)).begin(); 
+          setIter != (inTargetToSourceAlignment->at(targetPosition)).end(); ++setIter ) {
+      size_t sourcePosition = *setIter;
+      outSourceToTargetAlignment->at(sourcePosition).insert(targetPosition);
+    }
   }
-
-  return ret;
 }
-
 

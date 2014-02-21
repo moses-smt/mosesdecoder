@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstring>
+#include <cstdlib>
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 
@@ -37,7 +38,7 @@ class ExternalFeature : public StatefulFeatureFunction
 {
 public:
   ExternalFeature(const std::string &line)
-    :StatefulFeatureFunction("ExternalFeature", line) {
+    :StatefulFeatureFunction(line) {
     ReadParameters();
   }
   ~ExternalFeature();
@@ -58,7 +59,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   FFState* Evaluate(
     const Hypothesis& cur_hypo,

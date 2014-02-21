@@ -22,7 +22,7 @@ class LanguageModelORLM : public LanguageModelSingleFactor
 public:
   typedef count_t T;  // type for ORLM filter
   LanguageModelORLM(const std::string &line)
-    :LanguageModelSingleFactor("ORLM", line)
+    :LanguageModelSingleFactor(line)
     ,m_lm(0) {
   }
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);

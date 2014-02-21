@@ -10,7 +10,7 @@ class InternalStructStatelessFF : public StatelessFeatureFunction
 {
 public:
 	InternalStructStatelessFF(const std::string &line)
-	:StatelessFeatureFunction("InternalStructStatelessFF", line)
+	:StatelessFeatureFunction(line)
 	{}
 
 	bool IsUseable(const FactorMask &mask) const
@@ -24,7 +24,8 @@ public:
 	void Evaluate(const InputType &input
 	                        , const InputPath &inputPath
 	                        , const TargetPhrase &targetPhrase
-	                        , ScoreComponentCollection &scoreBreakdown) const;
+	                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 	  virtual void Evaluate(const Hypothesis& hypo,
 	                        ScoreComponentCollection* accumulator) const
 	  {}

@@ -7,13 +7,9 @@ using namespace std;
 namespace Moses
 {
 SkeletonLM::SkeletonLM(const std::string &line)
-  :LanguageModelSingleFactor("SkeletonLM", line)
+  :LanguageModelSingleFactor(line)
 {
   ReadParameters();
-
-  if (m_factorType == NOT_FOUND) {
-    m_factorType = 0;
-  }
 
   FactorCollection &factorCollection = FactorCollection::Instance();
 

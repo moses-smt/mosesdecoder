@@ -18,10 +18,10 @@
 ***********************************************************************/
 #include <algorithm>
 #include <set>
-#include "util/check.hh"
 #include "AlignmentInfo.h"
 #include "TypeDef.h"
 #include "StaticData.h"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -112,7 +112,7 @@ std::vector< const std::pair<size_t,size_t>* > AlignmentInfo::GetSortedAlignment
     break;
 
   default:
-    CHECK(false);
+    UTIL_THROW(util::Exception, "Unknown alignment sort option: " << wordAlignmentSort);
   }
 
   return ret;

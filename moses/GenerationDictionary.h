@@ -46,12 +46,18 @@ class GenerationDictionary : public DecodeFeature
 {
   typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:
+  static std::vector<GenerationDictionary*> s_staticColl;
+
   Collection m_collection;
   // 1st = source
   // 2nd = target
   std::string						m_filePath;
 
 public:
+  static const std::vector<GenerationDictionary*>& GetColl() {
+	return s_staticColl;
+  }
+
   GenerationDictionary(const std::string &line);
   virtual ~GenerationDictionary();
 

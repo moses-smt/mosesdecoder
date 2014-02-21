@@ -31,7 +31,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
@@ -39,7 +39,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE, $_EXTRACT_COMMAND);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -120,7 +120,8 @@ $_HELP = 1
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
 		       'osm-model=s' => \$_OSM,
-			'osm-setting=s' => \$_OSM_FACTORS,		
+			'osm-setting=s' => \$_OSM_FACTORS,
+			'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,		
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
@@ -139,6 +140,7 @@ $_HELP = 1
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
+		       'extract-command=s' => \$_EXTRACT_COMMAND,
                );
 
 if ($_HELP) {
@@ -302,11 +304,20 @@ my $__SORT_PARALLEL = "";
 $__SORT_PARALLEL = "--parallel $_SORT_PARALLEL" if $_SORT_PARALLEL;
 
 # supporting scripts/binaries from this package
-my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/extract";
+my $PHRASE_EXTRACT;
+if (defined($_EXTRACT_COMMAND)) {
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/$_EXTRACT_COMMAND";
+}
+else {
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/extract";
+}
 $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl $_CORES $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_EXTRACT";
 
 my $RULE_EXTRACT;
-if (defined($_GHKM)) {
+if (defined($_EXTRACT_COMMAND)) {
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/$_EXTRACT_COMMAND";
+}
+elsif (defined($_GHKM)) {
   $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/../bin/extract-ghkm";
 }
 else {
@@ -741,7 +752,7 @@ sub reduce_factors {
         $firstline =~ s/^\s*//;
         $firstline =~ s/\s.*//;
         # count factors
-        my $maxfactorindex = $firstline =~ tr/|/|/;
+        my $maxfactorindex = $firstline =~ tr/$___FACTOR_DELIMITER/$___FACTOR_DELIMITER/;
         if (join(",", @INCLUDE) eq join(",", 0..$maxfactorindex)) {
           # create just symlink; preserving compression
           my $realfull = $full;
@@ -774,7 +785,7 @@ sub reduce_factors {
 	    $first = 0;
 	    my $first_factor = 1;
             foreach my $outfactor (@INCLUDE) {
-              print OUT "|" unless $first_factor;
+              print OUT $___FACTOR_DELIMITER unless $first_factor;
               $first_factor = 0;
               my $out = $FACTOR[$outfactor];
               die "ERROR: Couldn't find factor $outfactor in token \"$_\" in $full LINE $nr" if !defined $out;
@@ -1774,19 +1785,19 @@ sub get_generation {
     while(<E>) {
 	chomp;
 	foreach (split) {
-	    my @FACTOR = split(/\|/);
+	    my @FACTOR = split /\Q$___FACTOR_DELIMITER/;
 
 	    my ($source,$target);
 	    my $first_factor = 1;
 	    foreach my $factor (split(/,/,$factor_e_source)) {
-		$source .= "|" unless $first_factor;
+		$source .= $___FACTOR_DELIMITER unless $first_factor;
 		$first_factor = 0;
 		$source .= $FACTOR[$factor];
 	    }
 
 	    $first_factor = 1;
 	    foreach my $factor (split(/,/,$factor_e)) {
-		$target .= "|" unless $first_factor;
+		$target .= $___FACTOR_DELIMITER unless $first_factor;
 		$first_factor = 0;
 		$target .= $FACTOR[$factor];
 	    }	    
@@ -2052,9 +2063,15 @@ sub create_ini {
     $type_name = "IRSTLM" if $type == 1;
     $type_name = "KENLM lazyken=0" if $type == 8;
     $type_name = "KENLM lazyken=1" if $type == 9;
-    
+	
+    my $lm_oov_prob = 0.1;
+	
+    if ($_POST_DECODING_TRANSLIT){
+	$lm_oov_prob = -100.0;
+    } 	   
+ 
     $feature_spec .= "$type_name name=LM$i factor=$f path=$fn order=$o\n";
-    $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" 0.1":"")."\n";
+    $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
   }
   if ($_LMODEL_OOV_FEATURE) {

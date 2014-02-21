@@ -16,7 +16,7 @@ namespace Moses
 using namespace std;
 
 TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
-  :StatelessFeatureFunction("TargetWordInsertionFeature", 0, line),
+  :StatelessFeatureFunction(0, line),
    m_unrestricted(true)
 {
   std::cerr << "Initializing target word insertion feature.." << std::endl;
@@ -41,7 +41,7 @@ void TargetWordInsertionFeature::Load()
 
   cerr << "loading target word insertion word list from " << m_filename << endl;
   ifstream inFile(m_filename.c_str());
-  UTIL_THROW_IF(!inFile, util::Exception, "could not open file " << m_filename);
+  UTIL_THROW_IF2(!inFile, "could not open file " << m_filename);
 
   std::string line;
   while (getline(inFile, line)) {
@@ -74,7 +74,7 @@ void TargetWordInsertionFeature::ComputeFeatures(const Phrase &source,
 
   // flag aligned words
   bool aligned[16];
-  CHECK(targetLength < 16);
+  UTIL_THROW_IF2(targetLength >= 16, "Target length must be less than 16 words");
   for(size_t i=0; i<targetLength; i++) {
     aligned[i] = false;
   }

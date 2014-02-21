@@ -34,10 +34,13 @@ using namespace std;
 
 namespace Moses
 {
+std::vector<GenerationDictionary*> GenerationDictionary::s_staticColl;
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
-  : DecodeFeature("Generation", line)
+  : DecodeFeature(line)
 {
+  s_staticColl.push_back(this);
+
   ReadParameters();
 }
 
@@ -50,7 +53,7 @@ void GenerationDictionary::Load()
 
   // data from file
   InputFileStream inFile(m_filePath);
-  UTIL_THROW_IF(!inFile.good(), util::Exception, "Couldn't read " << m_filePath);
+  UTIL_THROW_IF2(!inFile.good(), "Couldn't read " << m_filePath);
 
   string line;
   size_t lineNum = 0;

@@ -60,7 +60,9 @@ Load(
   LoadCorpus(Input, sourceStrme, m_inputFactors, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
   cerr << "Loading target corpus...\n";
   LoadCorpus(Output, targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
-  CHECK(m_srcSntBreaks.size() == m_trgSntBreaks.size());
+
+  UTIL_THROW_IF2(m_srcSntBreaks.size() != m_trgSntBreaks.size(),
+		  "Source and target arrays aren't the same size");
 
   // build suffix arrays and auxilliary arrays
   cerr << "Building Source Suffix Array...\n";
@@ -127,7 +129,8 @@ LoadRawAlignments(string& align)
   // stores the alignments in the raw file format
   vector<int> vtmp;
   Utils::splitToInt(align, vtmp, "- ");
-  CHECK(vtmp.size() % 2 == 0);
+  UTIL_THROW_IF2(vtmp.size() % 2 != 0,
+		  "Alignment format is incorrect: " << align);
   vector<short> vAlgn;  // store as short ints for memory
   for (vector<int>::const_iterator itr = vtmp.begin();
        itr != vtmp.end(); ++itr) {
@@ -136,42 +139,6 @@ LoadRawAlignments(string& align)
   m_rawAlignments.push_back(vAlgn);
   return m_rawAlignments.size();
 }
-
-// int
-// BilingualDynSuffixArray::
-// LoadAlignments(InputFileStream& align)
-// {
-//   string line;
-//   vector<int> vtmp;
-//   int sntIndex = 0;
-
-//   while(getline(align, line))
-//     {
-// 	Utils::splitToInt(line, vtmp, "- ");
-// 	CHECK(vtmp.size() % 2 == 0);
-
-// 	int sourceSize = GetSourceSentenceSize(sntIndex);
-// 	int targetSize = GetTargetSentenceSize(sntIndex);
-
-// 	SentenceAlignment curSnt(sntIndex, sourceSize, targetSize); // initialize empty sentence
-// 	for(int i=0; i < (int)vtmp.size(); i+=2)
-// 	  {
-// 	    int sourcePos = vtmp[i];
-// 	    int targetPos = vtmp[i+1];
-// 	    CHECK(sourcePos < sourceSize);
-// 	    CHECK(targetPos < targetSize);
-
-// 	    curSnt.alignedList[sourcePos].push_back(targetPos);	// list of target nodes for each source word
-// 	    curSnt.numberAligned[targetPos]++; // cnt of how many source words connect to this target word
-// 	  }
-// 	curSnt.srcSnt = m_srcCorpus + sntIndex;	// point source and target sentence
-// 	curSnt.trgSnt = m_trgCorpus + sntIndex;
-// 	m_alignments.push_back(curSnt);
-
-// 	sntIndex++;
-//     }
-//   return m_alignments.size();
-// }
 
 SentenceAlignment
 BilingualDynSuffixArray::
@@ -324,69 +291,6 @@ GetLexicalWeight(const PhrasePair& pp) const
     else       ret.second *= m_wrd_cooc.pbwd(null_src,tw[toff+i]);
   }
   return ret;
-
-  // //return pair<float, float>(1, 1);
-  // float srcLexWeight(1.0), trgLexWeight(1.0);
-  // map<pair<wordID_t, wordID_t>, float> targetProbs;
-  // // collects sum of target probs given source words
-
-  // //const SentenceAlignment& alignment = m_alignments[phrasepair.m_sntIndex];
-  // const SentenceAlignment alignment = GetSentenceAlignment(phrasepair.m_sntIndex);
-  // map<pair<wordID_t, wordID_t>, pair<float, float> >::const_iterator itrCache;
-  // // for each source word
-  // for(int srcIdx = phrasepair.m_startSource; srcIdx <= phrasepair.m_endSource; ++srcIdx) {
-  //   float srcSumPairProbs(0);
-  //   wordID_t srcWord = m_srcCorpus->at(srcIdx + m_srcSntBreaks[phrasepair.m_sntIndex]);	// localIDs
-  //   const vector<int>& srcWordAlignments = alignment.alignedList.at(srcIdx);
-  //   // for each target word aligned to this source word in this alignment
-  //   if(srcWordAlignments.size() == 0) { // get p(NULL|src)
-  // 	pair<wordID_t, wordID_t> wordpair = make_pair(srcWord, m_srcVocab->GetkOOVWordID());
-  // 	itrCache = m_wordPairCache.find(wordpair);
-  // 	if(itrCache == m_wordPairCache.end()) { // if not in cache
-  // 	  CacheWordProbs(srcWord);
-  // 	  itrCache = m_wordPairCache.find(wordpair); // search cache again
-  // 	}
-  // 	CHECK(itrCache != m_wordPairCache.end());
-  // 	srcSumPairProbs += itrCache->second.first;
-  // 	targetProbs[wordpair] = itrCache->second.second;
-  //   }
-  //   else { // extract p(trg|src)
-  // 	for(size_t i = 0; i < srcWordAlignments.size(); ++i) { // for each aligned word
-  // 	  int trgIdx = srcWordAlignments[i];
-  // 	  wordID_t trgWord = m_trgCorpus->at(trgIdx + m_trgSntBreaks[phrasepair.m_sntIndex]);
-  // 	  // get probability of this source->target word pair
-  // 	  pair<wordID_t, wordID_t> wordpair = make_pair(srcWord, trgWord);
-  // 	  itrCache = m_wordPairCache.find(wordpair);
-  // 	  if(itrCache == m_wordPairCache.end()) { // if not in cache
-  // 	    CacheWordProbs(srcWord);
-  // 	    itrCache = m_wordPairCache.find(wordpair); // search cache again
-  // 	  }
-  // 	  CHECK(itrCache != m_wordPairCache.end());
-  // 	  srcSumPairProbs += itrCache->second.first;
-  // 	  targetProbs[wordpair] = itrCache->second.second;
-  // 	}
-  //   }
-  //   float srcNormalizer = srcWordAlignments.size() < 2 ? 1.0 : 1.0 / float(srcWordAlignments.size());
-  //   srcLexWeight *= (srcNormalizer * srcSumPairProbs);
-  // }	// end for each source word
-
-  // for(int trgIdx = phrasepair.m_startTarget; trgIdx <= phrasepair.m_endTarget; ++trgIdx) {
-  //   float trgSumPairProbs(0);
-  //   wordID_t trgWord = m_trgCorpus->at(trgIdx + m_trgSntBreaks[phrasepair.m_sntIndex]);
-  //   for (map<pair<wordID_t, wordID_t>, float>::const_iterator trgItr
-  // 	     = targetProbs.begin(); trgItr != targetProbs.end(); ++trgItr) {
-  // 	if(trgItr->first.second == trgWord)
-  // 	  trgSumPairProbs += trgItr->second;
-  //   }
-  //   if(trgSumPairProbs == 0) continue;	// currently don't store target-side SA
-  //   int noAligned = alignment.numberAligned.at(trgIdx);
-  //   float trgNormalizer = noAligned < 2 ? 1.0 : 1.0 / float(noAligned);
-  //   trgLexWeight *= (trgNormalizer * trgSumPairProbs);
-  // }
-
-  // // TODO::Need to get p(NULL|trg)
-
-  // return pair<float, float>(srcLexWeight, trgLexWeight);
 }
 
 void
@@ -422,13 +326,15 @@ CacheWordProbs(wordID_t srcWord) const
   map<wordID_t, int> counts;
   vector<wordID_t> sword(1, srcWord), wrdIndices;
   bool ret = m_srcSA->GetCorpusIndex(&sword, &wrdIndices);
-  CHECK(ret);
+  UTIL_THROW_IF2(!ret, "Error");
+
   vector<int> sntIndexes = GetSntIndexes(wrdIndices, 1, m_srcSntBreaks);
   float denom(0);
   // for each occurrence of this word
   for(size_t snt = 0; snt < sntIndexes.size(); ++snt) {
     int sntIdx = sntIndexes.at(snt); // get corpus index for sentence
-    CHECK(sntIdx != -1);
+    UTIL_THROW_IF2(sntIdx == -1, "Error");
+
     int srcWrdSntIdx = wrdIndices.at(snt) - m_srcSntBreaks.at(sntIdx); // get word index in sentence
     const vector<int> srcAlg = GetSentenceAlignment(sntIdx).alignedList.at(srcWrdSntIdx); // list of target words for this source word
     if(srcAlg.size() == 0) {
@@ -475,7 +381,8 @@ GetMosesFactorIDs(const SAPhrase& phrase, const Phrase& sourcePhrase) const
   TargetPhrase* targetPhrase = new TargetPhrase();
   for(size_t i=0; i < phrase.words.size(); ++i) { // look up trg words
     Word& word = m_trgVocab->GetWord( phrase.words[i]);
-    CHECK(word != m_trgVocab->GetkOOVWord());
+    UTIL_THROW_IF2(word == m_trgVocab->GetkOOVWord(),
+    		"Unknown word at position " << i);
     targetPhrase->AddWord(word);
   }
   // scoring
@@ -550,95 +457,6 @@ GatherCands(Phrase const& src, map<SAPhrase, vector<float> >& pstats) const
   }
   return ret;
 }
-
-// void
-// BilingualDynSuffixArray::
-// GetTargetPhrasesByLexicalWeight
-// (const Phrase& src, vector< pair<Scores, TargetPhrase*> > & target)
-//   const
-// {
-//   size_t sourceSize = src.GetSize();
-//   SAPhrase localIDs(sourceSize);
-//   if(!GetLocalVocabIDs(src, localIDs))
-//     return; // source phrase contains OOVs
-
-//   float totalTrgPhrases(0);
-//   map<SAPhrase, int> phraseCounts;
-//   map<SAPhrase, pair<float, float> > lexicalWeights;
-//   map<SAPhrase, pair<float, float> >::iterator itrLexW;
-
-//   // find all occurrences of the phrase in the corpus;
-//   // wrdIndices stores the rightmost position
-//   vector<unsigned> wrdIndices;
-//   if(!m_srcSA->GetCorpusIndex(&(localIDs.words), &wrdIndices))
-//     return; // none found
-
-//   // select a sample of the occurrences for phrase extraction
-//   size_t m1 = wrdIndices.size();
-//   SampleSelection(wrdIndices);
-//   float  sampleRate = float(wrdIndices.size())/m1;
-
-//   // determine the sentences in which these phrases occur
-//   vector<int> sntIndexes = GetSntIndexes(wrdIndices, sourceSize, m_srcSntBreaks);
-
-//   // for each sentence with this phrase
-//   for(size_t s = 0; s < sntIndexes.size(); ++s)
-//     {
-// 	vector<PhrasePair*> phrasePairs;
-// 	int sntIndex = sntIndexes.at(s);
-// 	if(sntIndex == -1) continue;	// bad flag set by GetSntIndexes()
-// 	ExtractPhrases(sntIndex, wrdIndices[s], sourceSize, phrasePairs);
-// 	totalTrgPhrases += phrasePairs.size();
-// 	vector<PhrasePair*>::iterator p;
-// 	for (p = phrasePairs.begin(); p != phrasePairs.end(); ++p)
-// 	  {
-// 	    PhrasePair* px = *p;
-// 	    assert(px);
-// 	    SAPhrase phrase = TrgPhraseFromSntIdx(*px);
-// 	    phraseCounts[phrase]++;	// count each unique phrase
-// 	    // NOTE::Correct but slow to extract lexical weight here. could do
-// 	    // it later for only the top phrases chosen by phrase prob p(e|f)
-// 	    pair<float, float> lexWeight = GetLexicalWeight(**p);
-// 	    itrLexW = lexicalWeights.find(phrase);
-// 	    if((itrLexW != lexicalWeights.end()) &&
-// 	       (itrLexW->second.first < lexWeight.first))
-// 	      itrLexW->second = lexWeight; // if this lex weight is greater save it
-// 	    else lexicalWeights[phrase] = lexWeight; // else save
-// 	  }
-// 	// done with sentence. delete SA phrase pairs
-// 	BOOST_FOREACH(PhrasePair* p, phrasePairs) delete p;
-//     } // done with all sentences
-
-//   cerr << "Done extracting ... "  << endl;
-
-//   // convert to moses phrase pairs
-//   map<SAPhrase, int>::iterator pcnt;
-//   BetterPhrase better(*m_scoreCmp);
-//   NBestList<pair<Scores,SAPhrase const*>,BetterPhrase> nbest(m_maxPTEntries,better);
-//   for(pcnt = phraseCounts.begin(); pcnt != phraseCounts.end(); ++pcnt)
-//     {
-// 	float tmarginal = (m_trgSA->GetCount(pcnt->first.words) * sampleRate);
-// 	float pfwd = pcnt->second / totalTrgPhrases;
-// 	float pbwd = pcnt->second / tmarginal;
-// 	pair<float, float> lexWeight = lexicalWeights[pcnt->first];
-// 	pair<Scores, SAPhrase const*> entry;
-// 	entry.first.resize(5);
-// 	entry.first[0] = pbwd;
-// 	entry.first[1] = itrLexW->second.first;
-// 	entry.first[2] = pfwd;
-// 	entry.first[3] = itrLexW->second.second;
-// 	entry.first[4] = 2.718; // exp(1);
-// 	entry.second = &pcnt->first;
-// 	nbest.add(entry);
-//     }
-
-//   // return top scoring phrases
-//   for (size_t n = 0; n < nbest.size(); ++n)
-//     {
-// 	pair<Scores, SAPhrase const*> e = nbest[n];
-// 	target.push_back(make_pair(e.first,GetMosesFactorIDs(*e.second, src)));
-//     }
-// }
 
 vector<int>
 BilingualDynSuffixArray::

@@ -30,7 +30,7 @@ using namespace std;
 
 namespace Moses
 {
-DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf,
+DecodeStepTranslation::DecodeStepTranslation(PhraseDictionary* pdf,
     const DecodeStep* prev,
     const std::vector<FeatureFunction*> &features)
   : DecodeStep(pdf, prev, features)
@@ -166,7 +166,7 @@ void DecodeStepTranslation::ProcessInitialTranslationLEGACY(
     for (iterTargetPhrase = phraseColl->begin(), iterSourcePhrase =  sourcePhrases.begin()
          ; iterTargetPhrase != iterEnd
          ; ++iterTargetPhrase, ++iterSourcePhrase) {
-      CHECK(iterSourcePhrase != sourcePhrases.end());
+      assert(iterSourcePhrase != sourcePhrases.end());
 
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
       const Phrase			&sourcePhrase = *iterSourcePhrase;

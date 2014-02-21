@@ -41,18 +41,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Parameter.h"
 #include "SentenceStats.h"
 #include "ScoreComponentCollection.h"
+#include "moses/FF/Factory.h"
 
 namespace Moses
 {
 
 class InputType;
-class PhraseDictionary;
-class GenerationDictionary;
 class DecodeGraph;
 class DecodeStep;
-class WordPenaltyProducer;
-class UnknownWordPenaltyProducer;
-class InputFeature;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -63,17 +59,17 @@ typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
  */
 class StaticData
 {
+  friend class HyperParameterAsWeight;
+
 private:
   static StaticData									s_instance;
 protected:
-  std::vector<PhraseDictionary*>	m_phraseDictionary;
-  std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
-  std::vector<size_t> m_decodeGraphBackoff;
+
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
   float
@@ -113,14 +109,10 @@ protected:
   bool m_recoverPath;
   bool m_outputHypoScore;
 
-  ParsingAlgorithm m_parsingAlgorithm;
   SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
-  WordPenaltyProducer* m_wpProducer;
-  UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
-  const InputFeature *m_inputFeature;
 
   bool m_reportSegmentation;
   bool m_reportSegmentationEnriched;
@@ -205,6 +197,9 @@ protected:
 
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
+  bool m_adjacentOnly;
+
+  FeatureRegistry m_registry;
 
   StaticData();
 
@@ -217,9 +212,14 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
 
+  void NoCache();
+
   bool m_continuePartialTranslation;
   std::string m_binPath;
 
+  // soft NT lookup for chart models
+  std::map<Word, std::set<Word> > m_soft_matches_map;
+  std::map<Word, std::set<Word> > m_soft_matches_map_reverse;
 
 public:
 
@@ -413,25 +413,11 @@ public:
   InputTypeEnum GetInputType() const {
     return m_inputType;
   }
-  ParsingAlgorithm GetParsingAlgorithm() const {
-    return m_parsingAlgorithm;
-  }
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
-  }
-  WordPenaltyProducer *GetWordPenaltyProducer() { // for mira
-    return m_wpProducer;
-  }
-
-  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const {
-    return m_unknownWordPenaltyProducer;
-  }
-
-  const InputFeature *GetInputFeature() const {
-    return m_inputFeature;
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
@@ -720,21 +706,8 @@ public:
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
 
-  const std::vector<PhraseDictionary*>& GetPhraseDictionaries() const {
-    return m_phraseDictionary;
-  }
-  const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const {
-    return m_generationDictionary;
-  }
-  const PhraseDictionary*GetTranslationScoreProducer(size_t index) const {
-    return GetPhraseDictionaries().at(index);
-  }
-
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;
-  }
-  const std::vector<size_t>& GetDecodeGraphBackoff() const {
-    return m_decodeGraphBackoff;
   }
 
   //sentence (and thread) specific initialisationn and cleanup
@@ -743,14 +716,19 @@ public:
 
   void LoadFeatureFunctions();
   bool CheckWeights() const;
+  void LoadSparseWeightsFromConfig();
   bool LoadWeightSettings();
   bool LoadAlternateWeightSettings();
 
+  std::map<std::string, std::string> OverrideFeatureNames();
   void OverrideFeatures();
 
   FactorType GetPlaceholderFactor() const {
     return m_placeHolderFactor;
   }
+
+  const FeatureRegistry &GetFeatureRegistry() const
+  { return m_registry; }
 
   /** check whether we should be using the old code to support binary phrase-table.
   ** eventually, we'll stop support the binary phrase-table and delete this legacy code
@@ -760,6 +738,24 @@ public:
     return m_useLegacyPT;
   }
 
+  void Set_Soft_Matches(std::map<Word, std::set<Word> >& soft_matches_map) {
+    m_soft_matches_map = soft_matches_map;
+  }
+
+  const std::map<Word, std::set<Word> >* Get_Soft_Matches() const {
+    return &m_soft_matches_map;
+  }
+
+  void Set_Soft_Matches_Reverse(std::map<Word, std::set<Word> >& soft_matches_map) {
+    m_soft_matches_map_reverse = soft_matches_map;
+  }
+
+  const std::map<Word, std::set<Word> >* Get_Soft_Matches_Reverse() const {
+    return &m_soft_matches_map_reverse;
+  }
+
+  bool AdjacentOnly() const
+  { return m_adjacentOnly; }
 };
 
 }

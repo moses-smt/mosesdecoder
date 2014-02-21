@@ -38,7 +38,7 @@ using namespace Moses;
 
 namespace Moses
 {
-extern bool g_debug;
+extern bool g_mosesDebug;
 
 /* constructor. Initialize everything prior to decoding a particular sentence.
  * \param source the sentence to be decoded
@@ -92,8 +92,8 @@ void ChartManager::ProcessSentence()
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
-
       cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+
       m_translationOptionList.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();
@@ -235,7 +235,7 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   for (size_t i = 0; ret.GetSize() < count && !contenders.Empty() && i < popLimit; ++i) {
     // Get the best detour from the queue.
     std::auto_ptr<const ChartTrellisDetour> detour(contenders.Pop());
-    CHECK(detour.get());
+    UTIL_THROW_IF2(detour.get() == NULL, "Empty detour");
 
     // Create a full base path from the chosen detour.
     //basePath.reset(new ChartTrellisPath(*detour));
@@ -244,7 +244,7 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
     // Generate new detours from this base path and add them to the queue of
     // contenders.  The new detours deviate from the base path by a single
     // replacement along the previous detour sub-path.
-    CHECK(path->GetDeviationPoint());
+    UTIL_THROW_IF2(path->GetDeviationPoint() == NULL, "Empty deviant path");
     CreateDeviantPaths(path, *(path->GetDeviationPoint()), contenders);
 
     // If the n-best list is allowed to contain duplicate translations (at the

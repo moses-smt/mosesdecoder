@@ -4,6 +4,8 @@
 #Language models (optional):
 #--with-irstlm=/path/to/irstlm 
 #--with-srilm=/path/to/srilm See moses/LM/Jamfile for more options.
+#--with-maxent-srilm=true (requires a maxent-enabled version of SRILM to be specified via --with-srilm)
+#--with-nplm=/path/to/nplm
 #--with-randlm=/path/to/randlm
 #KenLM is always compiled.  
 #
@@ -87,7 +89,7 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
     requirements += <library>tcmalloc_and_profiler <library>unwind <cflags>-fno-omit-frame-pointer <cxxflags>-fno-omit-frame-pointer ;
   } else {
     external-lib tcmalloc_minimal ;
-    requirements += <threading>multi:<library>$(tcmalloc) ;
+    requirements += <threading>multi:<library>$(tcmalloc_minimal) ;
   }
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;

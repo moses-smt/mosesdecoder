@@ -1168,14 +1168,14 @@ int main(int argc, char** argv)
         // scale WP
         if (scale_wp) {
           // scale up weight
-          WordPenaltyProducer *wp = StaticData::InstanceNonConst().GetWordPenaltyProducer();
+          WordPenaltyProducer &wp = WordPenaltyProducer::InstanceNonConst();
 
           // scale down score
           if (model_hope_fear) {
-            scaleFeatureScore(wp, scale_wp_factor, featureValues, rank, epoch);
+            scaleFeatureScore(&wp, scale_wp_factor, featureValues, rank, epoch);
           } else {
-            scaleFeatureScore(wp, scale_wp_factor, featureValuesHope, rank, epoch);
-            scaleFeatureScore(wp, scale_wp_factor, featureValuesFear, rank, epoch);
+            scaleFeatureScore(&wp, scale_wp_factor, featureValuesHope, rank, epoch);
+            scaleFeatureScore(&wp, scale_wp_factor, featureValuesFear, rank, epoch);
           }
         }
 

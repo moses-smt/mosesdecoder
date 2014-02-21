@@ -18,8 +18,8 @@ public:
     return m_statelessFFs;
   }
 
-  StatelessFeatureFunction(const std::string& description, const std::string &line);
-  StatelessFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
+  StatelessFeatureFunction(const std::string &line);
+  StatelessFeatureFunction(size_t numScoreComponents, const std::string &line);
   /**
     * This should be implemented for features that apply to phrase-based models.
     **/

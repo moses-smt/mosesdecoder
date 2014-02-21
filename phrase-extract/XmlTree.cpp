@@ -138,7 +138,7 @@ string unescape(const string& str)
       s += string("[");
     } else if (name == "ket") {
       s += string("]");
-    } else if (name == "bar") {
+    } else if (name == "bar" || name == "#124") {
       s += string("|");
     } else if (name == "amp") {
       s += string("&");

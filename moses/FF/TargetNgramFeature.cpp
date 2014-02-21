@@ -4,7 +4,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/ChartHypothesis.h"
-
+#include "util/exception.hh"
 #include "util/string_piece_hash.hh"
 
 namespace Moses
@@ -38,10 +38,18 @@ int TargetNgramState::Compare(const FFState& other) const
 }
 
 TargetNgramFeature::TargetNgramFeature(const std::string &line)
-  :StatefulFeatureFunction("TargetNgramFeature", 0, line)
+  :StatefulFeatureFunction(0, line)
 {
   std::cerr << "Initializing target ngram feature.." << std::endl;
+
   ReadParameters();
+
+  FactorCollection& factorCollection = FactorCollection::Instance();
+  const Factor* bosFactor = factorCollection.AddFactor(Output,m_factorType,BOS_);
+  m_bos.SetFactor(m_factorType,bosFactor);
+
+  m_baseName = GetScoreProducerDescription();
+  m_baseName.append("_");
 }
 
 void TargetNgramFeature::SetParameter(const std::string& key, const std::string& value)
@@ -52,17 +60,21 @@ void TargetNgramFeature::SetParameter(const std::string& key, const std::string&
     m_n = Scan<size_t>(value);
   } else if (key == "lower-ngrams") {
     m_lower_ngrams = Scan<bool>(value);
+  } else if (key == "file") {
+      m_file = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
 
-bool TargetNgramFeature::Load(const std::string &filePath)
+void TargetNgramFeature::Load()
 {
-  if (filePath == "*") return true; //allow all
-  ifstream inFile(filePath.c_str());
+  if (m_file == "") return; //allow all, for now
+
+  if (m_file == "*") return; //allow all
+  ifstream inFile(m_file.c_str());
   if (!inFile) {
-    return false;
+      UTIL_THROW(util::Exception, "Couldn't open file" << m_file);
   }
 
   std::string line;
@@ -73,7 +85,7 @@ bool TargetNgramFeature::Load(const std::string &filePath)
   }
 
   inFile.close();
-  return true;
+  return;
 }
 
 const FFState* TargetNgramFeature::EmptyHypothesisState(const InputType &/*input*/) const
@@ -94,7 +106,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
   if (targetPhrase.GetSize() == 0) return new TargetNgramState(*tnState);
 
   // extract all ngrams from current hypothesis
-  vector<Word> prev_words = tnState->GetWords();
+  vector<Word> prev_words(tnState->GetWords());
   stringstream curr_ngram;
   bool skip = false;
 
@@ -105,7 +117,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
   for (size_t n = m_n; n >= smallest_n; --n) { // iterate over ngram size
     for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
 //  		const string& curr_w = targetPhrase.GetWord(i).GetFactor(m_factorType)->GetString();
-      const StringPiece& curr_w = targetPhrase.GetWord(i).GetString(m_factorType);
+      const StringPiece curr_w = targetPhrase.GetWord(i).GetString(m_factorType);
 
       if (m_vocab.size() && (FindStringPiece(m_vocab, curr_w) == m_vocab.end())) continue; // skip ngrams
 
@@ -183,7 +195,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream &ngram) const
 {
 //	const string& w = word.GetFactor(m_factorType)->GetString();
-  const StringPiece& w = word.GetString(m_factorType);
+  const StringPiece w = word.GetString(m_factorType);
   if (m_vocab.size() && (FindStringPiece(m_vocab, w) == m_vocab.end())) skip = true;
   else {
     ngram << w;
