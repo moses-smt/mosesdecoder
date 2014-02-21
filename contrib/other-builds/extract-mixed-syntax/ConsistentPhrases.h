@@ -13,33 +13,22 @@
 class Word;
 
 class ConsistentPhrases {
-	typedef std::set<ConsistentPhrase> Coll;
 public:
-	  typedef Coll::iterator iterator;
-	  typedef Coll::const_iterator const_iterator;
-	  //! iterators
-	  const_iterator begin() const {
-		return m_coll.begin();
-	  }
-	  const_iterator end() const {
-		return m_coll.end();
-	  }
+	typedef std::set<ConsistentPhrase> Coll;
 
 	ConsistentPhrases();
 	virtual ~ConsistentPhrases();
 
-	size_t GetSize() const
-	{ return m_coll.size(); }
+	void Initialize(size_t size);
 
 	void Add(int sourceStart, int sourceEnd,
 			int targetStart, int targetEnd);
 
+	const Coll &GetColl(int sourceStart, int sourceEnd) const;
+
 	void Debug(std::ostream &out) const;
 
 protected:
-	Coll m_coll;
-
-
-	std::vector< std::vector<const ConsistentPhrase*> > m_bySourceRange;
+	std::vector< std::vector<Coll> > m_coll;
 };
 

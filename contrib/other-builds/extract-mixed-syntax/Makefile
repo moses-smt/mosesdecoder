@@ -7,7 +7,8 @@ clean:
 	g++ -O4 -g -c -I../../../boost/include -I../../../ $<
 
 OBJECTS = AlignedSentence.o ConsistentPhrase.o ConsistentPhrases.o InputFileStream.o \
-	Main.o OutputFileStream.o Parameter.o SyntaxTree.o Word.o
+	Main.o OutputFileStream.o Parameter.o Phrase.o Rule.o Rules.o RuleSymbol.o \
+	SyntaxTree.o Word.o
 
 extract-mixed-syntax: $(OBJECTS) 
 

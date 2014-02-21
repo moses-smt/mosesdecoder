@@ -14,14 +14,22 @@ using namespace std;
 
 Rules::Rules(const AlignedSentence &alignedSentence)
 {
-	const ConsistentPhrases &cps = alignedSentence.GetConsistentPhrases();
-	ConsistentPhrases::const_iterator iter;
-	for (iter = cps.begin(); iter != cps.end(); ++iter) {
-		const ConsistentPhrase &cp = *iter;
-		Rule *rule = new Rule(cp, alignedSentence);
-		m_todoRules.insert(rule);
-	}
+	const ConsistentPhrases &allCPS = alignedSentence.GetConsistentPhrases();
 
+	size_t size = alignedSentence.GetPhrase(Moses::Input).size();
+	for (size_t sourceStart = 0; sourceStart < size; ++sourceStart) {
+		for (size_t sourceEnd = sourceStart; sourceEnd < size; ++sourceEnd) {
+			const ConsistentPhrases::Coll &cps = allCPS.GetColl(sourceStart, sourceEnd);
+
+			ConsistentPhrases::Coll::const_iterator iter;
+			for (iter = cps.begin(); iter != cps.end(); ++iter) {
+				const ConsistentPhrase &cp = *iter;
+				Rule *rule = new Rule(cp, alignedSentence);
+				m_todoRules.insert(rule);
+			}
+
+		}
+	}
 }
 
 Rules::~Rules() {

@@ -29,6 +29,7 @@ AlignedSentence::AlignedSentence(const std::string &source,
 	PopulateWordVec(m_target, target);
 	PopulateAlignment(alignment);
 
+	m_consistentPhrases.Initialize(m_source.size());
 }
 
 AlignedSentence::~AlignedSentence() {
@@ -80,7 +81,7 @@ void AlignedSentence::Debug(std::ostream &out) const
 	m_target.Debug(out);
 	out << endl;
 
-	out << "consistent phrases=" << m_consistentPhrases.GetSize() << endl;
+	out << "consistent phrases=" << endl;
 	m_consistentPhrases.Debug(out);
 	out << endl;
 }
