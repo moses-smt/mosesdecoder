@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <iostream>
+#include "moses/TypeDef.h"
 
 class ConsistentPhrase {
 public:
@@ -16,6 +17,9 @@ public:
 			int targetStart, int targetEnd);
 
 	virtual ~ConsistentPhrase();
+
+	int GetWidth(Moses::FactorDirection direction) const
+	{ return (direction == Moses::Input) ? corners[1] - corners[0] + 1 : corners[3] - corners[2] + 1; }
 
 	std::vector<int> corners;
 

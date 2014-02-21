@@ -6,11 +6,16 @@
  */
 
 #include "Rule.h"
+#include "AlignedSentence.h"
 
-Rule::Rule(const ConsistentPhrase &consistentPhrase)
+Rule::Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence)
+:m_source(consistentPhrase.GetWidth(Moses::Input))
 {
-	// TODO Auto-generated constructor stub
-
+  int sourcePos = 0;
+  for (int i = consistentPhrase.corners[0]; i <= consistentPhrase.corners[1]; ++i) {
+	  m_source[sourcePos] = alignedSentence.GetPhrase(Moses::Input)[i];
+	  ++sourcePos;
+  }
 }
 
 Rule::~Rule() {

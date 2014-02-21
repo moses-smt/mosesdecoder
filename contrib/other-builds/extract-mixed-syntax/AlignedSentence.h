@@ -8,19 +8,12 @@
 
 #include <string>
 #include <set>
-#include "Word.h"
 #include "SyntaxTree.h"
 #include "ConsistentPhrases.h"
+#include "Phrase.h"
 #include "moses/TypeDef.h"
 
 class Parameter;
-
-class Phrase : public std::vector<Word*>
-{
-public:
-	void Debug(std::ostream &out) const;
-
-};
 
 class AlignedSentence {
 public:
