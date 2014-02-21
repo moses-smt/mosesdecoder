@@ -8,8 +8,9 @@
 
 #include <string>
 #include <set>
+#include "RuleSymbol.h"
 
-class Word
+class Word : public RuleSymbol
 {
 public:
 	Word(int pos, const std::string &str);

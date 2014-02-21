@@ -19,6 +19,8 @@ public:
 	virtual ~Rules();
 	void CreateRules();
 
+	void Debug(std::ostream &out) const;
+
 protected:
 	std::set<Rule*> m_todoRules, m_keepRules;
 

@@ -11,6 +11,11 @@
 class ConsistentPhrase;
 class AlignedSentence;
 
+class RulePhrase : public std::vector<const RuleSymbol*>
+{
+
+};
+
 class Rule {
 public:
 	Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence);
@@ -22,10 +27,12 @@ public:
 	bool CanRecurse() const
 	{ return m_canRecurse; }
 
+	void Debug(std::ostream &out) const;
+
 protected:
 	const ConsistentPhrase &m_consistentPhrase;
 	const AlignedSentence &m_alignedSentence;
-	Phrase m_source, m_target;
+	RulePhrase m_source, m_target;
 
 	// in source order
 	std::vector<const ConsistentPhrase*> m_nonterms;

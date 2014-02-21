@@ -10,6 +10,8 @@
 #include "AlignedSentence.h"
 #include "Rule.h"
 
+using namespace std;
+
 Rules::Rules(const AlignedSentence &alignedSentence)
 {
 	const ConsistentPhrases &cps = alignedSentence.GetConsistentPhrases();
@@ -42,5 +44,24 @@ void Rules::CreateRules()
 
 void Rules::Extend(const Rule &rule)
 {
+
+}
+
+void Rules::Debug(std::ostream &out) const
+{
+	std::set<Rule*>::const_iterator iter;
+	out << "m_todoRules:" << endl;
+	for (iter = m_todoRules.begin(); iter != m_todoRules.end(); ++iter) {
+		const Rule &rule = **iter;
+		rule.Debug(out);
+		cerr << endl;
+	}
+
+	out << "m_keepRules:" << endl;
+	for (iter = m_keepRules.begin(); iter != m_keepRules.end(); ++iter) {
+		const Rule &rule = **iter;
+		rule.Debug(out);
+		cerr << endl;
+	}
 
 }

@@ -10,8 +10,10 @@
 #include <vector>
 #include <iostream>
 #include "moses/TypeDef.h"
+#include "RuleSymbol.h"
 
-class ConsistentPhrase {
+class ConsistentPhrase : public RuleSymbol
+{
 public:
 	ConsistentPhrase(int sourceStart, int sourceEnd,
 			int targetStart, int targetEnd);

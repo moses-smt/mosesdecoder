@@ -61,6 +61,8 @@ int main(int argc, char** argv)
 	  alignedSentence.Debug(cerr);
 
 	  Rules rules(alignedSentence);
+	  rules.CreateRules();
+	  rules.Debug(cerr);
 
   }
 
