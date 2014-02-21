@@ -10,6 +10,7 @@
 #include "InterpolatedScorer.h"
 #include "SemposScorer.h"
 #include "PermutationScorer.h"
+#include "Reference.h"
 
 using namespace std;
 

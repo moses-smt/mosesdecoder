@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisStackCubePruning.h"
 #include "moses/FF/DistortionScoreProducer.h"
 #include "TranslationOptionList.h"
+#include "Manager.h"
 
 namespace Moses
 {
@@ -57,7 +58,7 @@ public:
   const WordsRange* m_transOptRange;
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
-    CHECK(m_transOptRange != NULL);
+    UTIL_THROW_IF2(m_transOptRange == NULL, "Words range not set");
 
     const StaticData &staticData = StaticData::Instance();
 
@@ -160,11 +161,13 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   if (m_translations.size() > 1) {
-    CHECK(m_translations.Get(0)->GetFutureScore() >= m_translations.Get(1)->GetFutureScore());
+	UTIL_THROW_IF2(m_translations.Get(0)->GetFutureScore() < m_translations.Get(1)->GetFutureScore(),
+			"Non-monotonic future score");
   }
 
   if (m_hypotheses.size() > 1) {
-    CHECK(m_hypotheses[0]->GetTotalScore() >= m_hypotheses[1]->GetTotalScore());
+    UTIL_THROW_IF2(m_hypotheses[0]->GetTotalScore() < m_hypotheses[1]->GetTotalScore(),
+			  "Non-monotonic total score");
   }
 
   HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
@@ -197,7 +200,13 @@ BackwardsEdge::Initialize()
 Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt)
 {
   // create hypothesis and calculate all its scores
+  IFVERBOSE(2) {
+    hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
+  }
   Hypothesis *newHypo = hypothesis.CreateNext(transOpt); // TODO FIXME This is absolutely broken - don't pass null here
+  IFVERBOSE(2) {
+    hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
+  }
   newHypo->Evaluate(m_futurescore);
 
   return newHypo;
@@ -213,8 +222,8 @@ BackwardsEdge::SeenPosition(const size_t x, const size_t y)
 void
 BackwardsEdge::SetSeenPosition(const size_t x, const size_t y)
 {
-  CHECK(x < (1<<17));
-  CHECK(y < (1<<17));
+  UTIL_THROW_IF2(x >= (1<<17), "Error");
+  UTIL_THROW_IF2(y >= (1<<17), "Error");
 
   m_seenPosition.insert((x<<16) + y);
 }
@@ -300,7 +309,13 @@ BitmapContainer::Enqueue(int hypothesis_pos
       , translation_pos
       , hypothesis
       , edge);
+  IFVERBOSE(2) {
+    item->GetHypothesis()->GetManager().GetSentenceStats().StartTimeManageCubes();
+  }
   m_queue.push(item);
+  IFVERBOSE(2) {
+    item->GetHypothesis()->GetManager().GetSentenceStats().StopTimeManageCubes();
+  }
 }
 
 HypothesisQueueItem*
@@ -378,7 +393,7 @@ BitmapContainer::AddHypothesis(Hypothesis *hypothesis)
 
     ++iter;
   }
-  CHECK(itemExists == false);
+  UTIL_THROW_IF2(itemExists, "Duplicate hypotheses");
   m_hypotheses.push_back(hypothesis);
 }
 
@@ -421,17 +436,17 @@ BitmapContainer::ProcessBestHypothesis()
   HypothesisQueueItem *item = Dequeue();
 
   // If the priority queue is exhausted, we are done and should have exited
-  CHECK(item != NULL);
+  UTIL_THROW_IF2(item == NULL, "Null object");
 
   // check we are pulling things off of priority queue in right order
   if (!Empty()) {
     HypothesisQueueItem *check = Dequeue(true);
-    CHECK(item->GetHypothesis()->GetTotalScore() >= check->GetHypothesis()->GetTotalScore());
+    UTIL_THROW_IF2(item->GetHypothesis()->GetTotalScore() < check->GetHypothesis()->GetTotalScore(),
+    		"Non-monotonic total score");
   }
 
   // Logging for the criminally insane
   IFVERBOSE(3) {
-    //		const StaticData &staticData = StaticData::Instance();
     item->GetHypothesis()->PrintHypothesis();
   }
 

@@ -49,7 +49,8 @@ int ControlRecombinationState::Compare(const FFState& other) const
 
 std::vector<float> ControlRecombination::DefaultWeights() const
 {
-  CHECK(m_numScoreComponents == 0);
+  UTIL_THROW_IF2(m_numScoreComponents,
+		  "ControlRecombination should not have any scores");
   vector<float> ret(0);
   return ret;
 }

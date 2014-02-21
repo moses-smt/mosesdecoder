@@ -45,7 +45,7 @@ class ControlRecombination : public StatefulFeatureFunction
 {
 public:
   ControlRecombination(const std::string &line)
-    :StatefulFeatureFunction("ControlRecombination", 0, line)
+    :StatefulFeatureFunction(0, line)
     ,m_type(SameOutput)
 
   {
@@ -65,7 +65,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   FFState* Evaluate(
     const Hypothesis& cur_hypo,

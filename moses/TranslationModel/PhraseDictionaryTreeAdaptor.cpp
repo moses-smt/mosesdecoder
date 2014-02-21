@@ -14,7 +14,7 @@
 #include "moses/UniqueObject.h"
 #include "moses/PDTAimp.h"
 #include "moses/UserMessage.h"
-#include "util/check.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -27,7 +27,7 @@ namespace Moses
 
 PhraseDictionaryTreeAdaptor::
 PhraseDictionaryTreeAdaptor(const std::string &line)
-  : PhraseDictionary("PhraseDictionaryBinary", line)
+  : PhraseDictionary(line)
 {
   ReadParameters();
 }
@@ -52,10 +52,8 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
     std::stringstream strme;
-    strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
-          <<" "<<m_numScoreComponents<<"\n";
-    UserMessage::Add(strme.str());
-    abort();
+    UTIL_THROW2("ERROR: mismatch of number of scaling factors: " << weight.size()
+    			<< " " << m_numScoreComponents);
   }
 
   obj->Create(m_input, m_output, m_filePath, weight);
@@ -94,7 +92,7 @@ PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation()
 {
   PDTAimp* dict;
   dict = m_implementation.get();
-  CHECK(dict);
+  UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
   return *dict;
 }
 
@@ -102,7 +100,7 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 {
   PDTAimp* dict;
   dict = m_implementation.get();
-  CHECK(dict);
+  UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
   return *dict;
 }
 

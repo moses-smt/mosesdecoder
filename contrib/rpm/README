@@ -12,12 +12,13 @@ Building the RPM SPEC file
 The first phase is to construct the RPM SPEC file in $HOME/rpmbuild. The build_source.sh script builds all the artefacts needed to build. This script needs the following information:
 
  - The Git repository from which an installer will be built,
- - The branch in the Git repository to build, and
+ - The branch in the Git repository to build,
+ - The location of Boost on the build machine, and
  - The version of the installed Moses distribution.
 
-For example, to build the RELEASE-1.0 branch in the mosesdecode repository (git://github.com/moses-smt/mosesdecoder.git):
+For example, to build the RELEASE-1.0 branch in the mosesdecoder repository (git://github.com/moses-smt/mosesdecoder.git):
 
-$ build_source.sh -r git://github.com/moses-smt/mosesdecoder.git -b RELASE-1.0 -v 1.0
+$ build_source.sh -r git://github.com/moses-smt/mosesdecoder.git -b RELASE-1.0 -v 1.0 -t /usr
 
 This builds the source tarballs in the $HOME/rpmbuild/SOURCES directory and the moses.spec file in $HOME/rpmbuild/SPECS.
 

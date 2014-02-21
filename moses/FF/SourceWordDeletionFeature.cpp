@@ -18,7 +18,7 @@ namespace Moses
 using namespace std;
 
 SourceWordDeletionFeature::SourceWordDeletionFeature(const std::string &line)
-  :StatelessFeatureFunction("SourceWordDeletionFeature", 0, line),
+  :StatelessFeatureFunction(0, line),
    m_unrestricted(true)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
@@ -45,7 +45,7 @@ void SourceWordDeletionFeature::Load()
   cerr << "loading source word deletion word list from " << m_filename << endl;
 
   ifstream inFile(m_filename.c_str());
-  UTIL_THROW_IF(!inFile, util::Exception, "Can't open file " << m_filename);
+  UTIL_THROW_IF2(!inFile, "Can't open file " << m_filename);
 
   std::string line;
   while (getline(inFile, line)) {
@@ -84,7 +84,7 @@ void SourceWordDeletionFeature::ComputeFeatures(const Phrase &source,
 
   // flag aligned words
   bool aligned[16];
-  CHECK(sourceLength < 16);
+  UTIL_THROW_IF2(sourceLength >= 16, "Source length must be less than 16 words");
   for(size_t i=0; i<sourceLength; i++)
     aligned[i] = false;
   for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++)

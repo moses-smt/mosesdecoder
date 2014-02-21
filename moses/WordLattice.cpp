@@ -7,13 +7,13 @@
 #include "TranslationOptionCollectionLattice.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "moses/FF/InputFeature.h"
-#include "util/check.hh"
 
 namespace Moses
 {
 WordLattice::WordLattice()
 {
-  CHECK(StaticData::Instance().GetInputFeature());
+  UTIL_THROW_IF2(&InputFeature::Instance() == NULL,
+		  "Input feature must be specified");
 }
 
 size_t WordLattice::GetColumnIncrement(size_t i, size_t j) const
@@ -52,9 +52,9 @@ void WordLattice::Print(std::ostream& out) const
 int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line)
 {
   const StaticData &staticData = StaticData::Instance();
-  const InputFeature *inputFeature = staticData.GetInputFeature();
-  size_t numInputScores = inputFeature->GetNumInputScores();
-  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+  const InputFeature &inputFeature = InputFeature::Instance();
+  size_t numInputScores = inputFeature.GetNumInputScores();
+  size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();
 
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 
@@ -221,7 +221,7 @@ WordLattice::CreateTranslationOptionCollection() const
 	rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
   }
 
-  CHECK(rv);
+  assert(rv);
   return rv;
 }
 

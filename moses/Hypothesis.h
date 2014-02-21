@@ -169,7 +169,7 @@ public:
     const Hypothesis *hypo = this;
     while (pos < hypo->GetCurrTargetWordsRange().GetStartPos()) {
       hypo = hypo->GetPrevHypo();
-      CHECK(hypo != NULL);
+      UTIL_THROW_IF2(hypo == NULL, "Previous hypothesis should not be NULL");
     }
     return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
   }

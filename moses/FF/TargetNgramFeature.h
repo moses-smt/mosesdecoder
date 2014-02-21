@@ -180,7 +180,7 @@ class TargetNgramFeature : public StatefulFeatureFunction
 public:
   TargetNgramFeature(const std::string &line);
 
-  bool Load(const std::string &filePath);
+  void Load();
 
   bool IsUseable(const FactorMask &mask) const;
 
@@ -195,7 +195,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   void Evaluate(const Phrase &source
                 , const TargetPhrase &targetPhrase
@@ -211,6 +212,7 @@ private:
   boost::unordered_set<std::string> m_vocab;
   size_t m_n;
   bool m_lower_ngrams;
+  std::string m_file;
 
   std::string m_baseName;
 

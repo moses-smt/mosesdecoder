@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <cstdlib>
-#include "util/check.hh"
+#include "util/exception.hh"
 #include "FeatureStats.h"
 #include "Optimizer.h"
 
@@ -40,8 +40,8 @@ Point::Point(const vector<parameter_t>& init,
       m_max[i] = max[i];
     }
   } else {
-    CHECK(init.size() == m_pdim);
-    CHECK(m_opt_indices.size() == Point::m_dim);
+	UTIL_THROW_IF(init.size() != m_pdim, util::Exception, "Error");
+	UTIL_THROW_IF(m_opt_indices.size() != Point::m_dim, util::Exception, "Error");
     for (unsigned int i = 0; i < Point::m_dim; i++) {
       operator[](i) = init[m_opt_indices[i]];
       m_min[i] = min[m_opt_indices[i]];
@@ -54,8 +54,9 @@ Point::~Point() {}
 
 void Point::Randomize()
 {
-  CHECK(m_min.size() == Point::m_dim);
-  CHECK(m_max.size() == Point::m_dim);
+  UTIL_THROW_IF(m_min.size() != Point::m_dim, util::Exception, "Error");
+  UTIL_THROW_IF(m_max.size() != Point::m_dim, util::Exception, "Error");
+
   for (unsigned int i = 0; i < size(); i++) {
     operator[](i) = m_min[i] +
                     static_cast<float>(random()) / static_cast<float>(RAND_MAX) * (m_max[i] - m_min[i]);
@@ -81,7 +82,8 @@ double Point::operator*(const FeatureStats& F) const
 
 const Point Point::operator+(const Point& p2) const
 {
-  CHECK(p2.size() == size());
+  UTIL_THROW_IF(p2.size() != size(), util::Exception, "Error");
+
   Point Res(*this);
   for (unsigned i = 0; i < size(); i++) {
     Res[i] += p2[i];
@@ -93,7 +95,7 @@ const Point Point::operator+(const Point& p2) const
 
 void Point::operator+=(const Point& p2)
 {
-  CHECK(p2.size() == size());
+  UTIL_THROW_IF(p2.size() != size(), util::Exception, "Error");
   for (unsigned i = 0; i < size(); i++) {
     operator[](i) += p2[i];
   }

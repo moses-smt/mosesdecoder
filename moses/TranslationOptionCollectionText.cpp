@@ -153,7 +153,7 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPos, 
 InputPath &TranslationOptionCollectionText::GetInputPath(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_inputPathMatrix[startPos].size());
+  assert(offset < m_inputPathMatrix[startPos].size());
   return *m_inputPathMatrix[startPos][offset];
 }
 

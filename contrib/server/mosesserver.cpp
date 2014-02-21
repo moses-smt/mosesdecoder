@@ -1,4 +1,3 @@
-#include "util/check.hh"
 #include <stdexcept>
 #include <iostream>
 #include <vector>
@@ -42,7 +41,7 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     const params_t params = paramList.getStruct(0);
     breakOutParams(params);
-    const PhraseDictionary* pdf = StaticData::Instance().GetPhraseDictionaries()[0];
+    const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
     PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
@@ -237,15 +236,17 @@ public:
         }
     }
 
+    si = params.find("model_name");
+    if (si != params.end() && multiModelWeights.size() > 0) {
+        const string model_name = xmlrpc_c::value_string(si->second);
+        PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+        pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
+    }
+
     const StaticData &staticData = StaticData::Instance();
 
     if (addGraphInfo) {
       (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
-    }
-
-    if (multiModelWeights.size() > 0) {
-      PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) staticData.GetPhraseDictionaries()[0]; //TODO: only works if multimodel is first phrase table
-      pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
     }
 
     stringstream out, graphInfo, transCollOpts;
@@ -534,7 +535,6 @@ int main(int argc, char** argv)
   } else {
     myAbyssServer.run();
   }
-  // xmlrpc_c::serverAbyss.run() never returns
-  CHECK(false);
-  return 0;
+  std::cerr << "xmlrpc_c::serverAbyss.run() returned but should not." << std::endl;
+  return 1;
 }

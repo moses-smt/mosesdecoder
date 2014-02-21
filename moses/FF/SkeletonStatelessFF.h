@@ -10,7 +10,7 @@ class SkeletonStatelessFF : public StatelessFeatureFunction
 {
 public:
   SkeletonStatelessFF(const std::string &line)
-    :StatelessFeatureFunction("SkeletonStatelessFF", 2, line)
+    :StatelessFeatureFunction(2, line)
   {}
 
   bool IsUseable(const FactorMask &mask) const {
@@ -24,7 +24,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const;
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
   void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
   void EvaluateChart(const ChartHypothesis &hypo,

@@ -2,7 +2,6 @@
 
 #include <string>
 #include "StatelessFeatureFunction.h"
-#include "util/check.hh"
 
 namespace Moses
 {
@@ -11,7 +10,17 @@ class ScoreComponentCollection;
 
 class WordPenaltyProducer : public StatelessFeatureFunction
 {
+protected:
+  static WordPenaltyProducer *s_instance;
+
 public:
+  static const WordPenaltyProducer& Instance() {
+    return *s_instance;
+  }
+  static WordPenaltyProducer& InstanceNonConst() {
+    return *s_instance;
+  }
+
   WordPenaltyProducer(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
@@ -31,7 +40,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
 };

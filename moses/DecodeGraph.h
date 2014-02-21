@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_DecodeGraph_h
 #define moses_DecodeGraph_h
 
-#include "util/check.hh"
+#include "util/exception.hh"
 #include <list>
 #include <iterator>
 #include "TypeDef.h"
@@ -40,6 +40,7 @@ protected:
   std::list<const DecodeStep*> m_steps;
   size_t m_position;
   size_t m_maxChartSpan;
+  size_t m_backoff;
 
 public:
   /**
@@ -47,8 +48,9 @@ public:
     **/
   DecodeGraph(size_t position)
     : m_position(position)
-    , m_maxChartSpan(NOT_FOUND) {
-  }
+    , m_maxChartSpan(NOT_FOUND)
+	, m_backoff(0)
+	{}
 
   // for chart decoding
   DecodeGraph(size_t position, size_t maxChartSpan)
@@ -69,17 +71,23 @@ public:
   virtual ~DecodeGraph();
 
   //! Add another decode step to the graph
-  void Add(const DecodeStep *decodeStep) {
-    m_steps.push_back(decodeStep);
-  }
+  void Add(DecodeStep *decodeStep);
 
   size_t GetSize() const {
     return m_steps.size();
   }
 
   size_t GetMaxChartSpan() const {
-    CHECK(m_maxChartSpan != NOT_FOUND);
+	UTIL_THROW_IF2(m_maxChartSpan == NOT_FOUND, "Max chart span not specified");
     return m_maxChartSpan;
+  }
+
+  size_t GetBackoff() const {
+    return m_backoff;
+  }
+
+  void SetBackoff(size_t backoff){
+    m_backoff = backoff;
   }
 
   size_t GetPosition() const {

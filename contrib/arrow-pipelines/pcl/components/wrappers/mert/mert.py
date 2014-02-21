@@ -15,7 +15,8 @@ def get_outputs():
 
 def get_configuration():
     return ['source_language', 'target_language',
-            'moses_installation_dir', 'mert_working_directory']
+            'moses_installation_dir', 'mert_working_directory',
+            'mert_max_no_iterations']
 
 def configure(args):
     result = {}
@@ -23,6 +24,7 @@ def configure(args):
     result['trg_lang'] = args['target_language']
     result['moses_installation_dir'] = args['moses_installation_dir']
     result['mert_working_dir'] = args['mert_working_directory']
+    result['max_no_iterations'] = args['mert_max_no_iterations']
     return result
 
 def initialise(config):
@@ -32,6 +34,7 @@ def initialise(config):
         lm_file = os.path.abspath(a['trg_language_model_filename'])
         lm_order = int(a['trg_language_model_order'])
         lm_type = int(a['trg_language_model_type'])
+        max_no_iters = int(config['max_no_iterations'])
         orig_moses_ini = os.path.abspath(a['moses_ini_filename'])
         
         if not os.path.exists(orig_moses_ini):
@@ -59,7 +62,7 @@ def initialise(config):
         os.system(cmd)
         
         #the command
-        cmd = '%(mert_perl)s --mertdir %(bin_dir)s --working-dir %(workdir)s %(src_file)s %(ref_file)s %(moses_bin)s %(moses_ini)s 2> %(logfile)s'
+        cmd = '%(mert_perl)s --maximum-iterations %(max_no_iters)d --mertdir %(bin_dir)s --working-dir %(workdir)s %(src_file)s %(ref_file)s %(moses_bin)s %(moses_ini)s 2> %(logfile)s'
         cmd = cmd % locals()
 
         pipe = subprocess.Popen(cmd, stdin = subprocess.PIPE, stdout = subprocess.PIPE, shell=True)

@@ -19,7 +19,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "util/check.hh"
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -97,7 +96,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 
   // assert that we are not extending our hypothesis by retranslating something
   // that this hypothesis has already translated!
-  CHECK(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
+  assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
 
   //_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
@@ -232,8 +231,9 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
  */
 void Hypothesis::Evaluate(const SquareMatrix &futureScore)
 {
-  clock_t t=0; // used to track time
-
+  IFVERBOSE(2) {
+    m_manager.GetSentenceStats().StartTimeOtherScore();
+  }
   // some stateless score producers cache their values in the translation
   // option: add these here
   // language model scores for n-grams completely contained within a target
@@ -261,7 +261,8 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
   }
 
   IFVERBOSE(2) {
-    t = clock();  // track time excluding LM
+    m_manager.GetSentenceStats().StopTimeOtherScore();
+    m_manager.GetSentenceStats().StartTimeEstimateScore();
   }
 
   // FUTURE COST
@@ -271,7 +272,7 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
   m_totalScore = m_scoreBreakdown.GetWeightedScore() + m_futureScore;
 
   IFVERBOSE(2) {
-    m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t );
+    m_manager.GetSentenceStats().StopTimeEstimateScore();
   }
 }
 
@@ -335,7 +336,7 @@ void Hypothesis::CleanupArcList()
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
-    nth_element(m_arcList->begin()
+	NTH_ELEMENT4(m_arcList->begin()
                 , m_arcList->begin() + nBestSize - 1
                 , m_arcList->end()
                 , CompareHypothesisTotalScore());

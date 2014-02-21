@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
 #include "moses/ThreadPool.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -42,7 +43,7 @@ namespace Moses
 {
 
 PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
-  :PhraseDictionary("PhraseDictionaryCompact", line)
+  :PhraseDictionary(line)
   ,m_inMemory(true)
   ,m_useAlignmentInfo(true)
   ,m_hash(10, 16)
@@ -97,7 +98,8 @@ void PhraseDictionaryCompact::Load()
     // Keep target phrase collections on disk
     phraseSize = m_targetPhrasesMapped.load(pFile, true);
 
-  CHECK(indexSize && coderSize && phraseSize);
+  UTIL_THROW_IF2(indexSize == 0 || coderSize == 0 || phraseSize == 0,
+		  "Not successfully loaded");
 }
 
 // now properly declared in TargetPhraseCollection.h
@@ -129,13 +131,13 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
     TargetPhraseVector::iterator nth =
       (m_tableLimit == 0 || tpv->size() < m_tableLimit) ?
       tpv->end() : tpv->begin() + m_tableLimit;
-    std::nth_element(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
+    NTH_ELEMENT4(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
     for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++) {
       TargetPhrase *tp = new TargetPhrase(*it);
       phraseColl->Add(tp);
     }
 
-    // Cache phrase pair for for clean-up or retrieval with PREnc
+    // Cache phrase pair for clean-up or retrieval with PREnc
     const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
 
     return phraseColl;
@@ -147,7 +149,7 @@ TargetPhraseVectorPtr
 PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase) const
 {
 
-  // There is no souch source phrase if source phrase is longer than longest
+  // There is no such source phrase if source phrase is longer than longest
   // observed source phrase during compilation
   if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())
     return TargetPhraseVectorPtr();

@@ -38,14 +38,19 @@ using namespace std;
 namespace Moses
 {
 
-LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string& description, const std::string &line)
-  :LanguageModelImplementation(description, line)
+LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string &line)
+  :LanguageModelImplementation(line)
+  ,m_factorType(0)
 {
   m_nullContextState = new PointerState(NULL);
   m_beginSentenceState = new PointerState(NULL);
 }
 
-LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
+LanguageModelSingleFactor::~LanguageModelSingleFactor()
+{
+	delete m_nullContextState;
+	delete m_beginSentenceState;
+}
 
 const FFState *LanguageModelSingleFactor::GetNullContextState() const
 {

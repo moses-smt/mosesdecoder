@@ -1,12 +1,12 @@
 #include <stdexcept>
 
-#include "util/check.hh"
 #include "util/exception.hh"
 
 #include "FeatureFunction.h"
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
+#include "moses/Util.h"
 
 using namespace std;
 
@@ -15,12 +15,12 @@ namespace Moses
 
 multiset<string> FeatureFunction::description_counts;
 
-std::vector<FeatureFunction*> FeatureFunction::m_producers;
+std::vector<FeatureFunction*> FeatureFunction::s_staticColl;
 
 FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
 {
-  for (size_t i = 0; i < m_producers.size(); ++i) {
-    FeatureFunction &ff = *m_producers[i];
+  for (size_t i = 0; i < s_staticColl.size(); ++i) {
+    FeatureFunction &ff = *s_staticColl[i];
     if (ff.GetScoreProducerDescription() == name) {
       return ff;
     }
@@ -29,61 +29,56 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
   throw "Unknown feature " + name;
 }
 
-FeatureFunction::
-FeatureFunction(const std::string& description,
-                const std::string& line)
-  : m_tuneable(true)
-  , m_numScoreComponents(1)
+void FeatureFunction::Destroy()
 {
-  Initialize(description, line);
+  RemoveAllInColl(s_staticColl);
 }
 
 FeatureFunction::
-FeatureFunction(const std::string& description,
-                size_t numScoreComponents,
+FeatureFunction(const std::string& line)
+  : m_tuneable(true)
+  , m_numScoreComponents(1)
+{
+  Initialize(line);
+}
+
+FeatureFunction::
+FeatureFunction(size_t numScoreComponents,
                 const std::string& line)
   : m_tuneable(true)
   , m_numScoreComponents(numScoreComponents)
 {
-  Initialize(description, line);
+  Initialize(line);
 }
 
 void
 FeatureFunction::
-Initialize(const std::string& description, const std::string &line)
+Initialize(const std::string &line)
 {
-  ParseLine(description, line);
-
-  if (m_description == "") {
-    size_t index = description_counts.count(description);
-
-    ostringstream dstream;
-    dstream << description;
-    dstream << index;
-
-    description_counts.insert(description);
-    m_description = dstream.str();
-  }
+  ParseLine(line);
 
   ScoreComponentCollection::RegisterScoreProducer(this);
-  m_producers.push_back(this);
+  s_staticColl.push_back(this);
 }
 
 FeatureFunction::~FeatureFunction() {}
 
-void FeatureFunction::ParseLine(const std::string& description, const std::string &line)
+void FeatureFunction::ParseLine(const std::string &line)
 {
   vector<string> toks = Tokenize(line);
-  CHECK(toks.size());
+  UTIL_THROW_IF2(toks.empty(), "Empty line");
+
+  string nameStub = toks[0];
 
   set<string> keys;
 
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = TokenizeFirstOnly(toks[i], "=");
-    CHECK(args.size() == 2);
+    UTIL_THROW_IF2(args.size() != 2,
+    		"Incorrect format for feature function arg: " << toks[i]);
 
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
-    UTIL_THROW_IF(!ret.second, util::Exception, "Duplicate key in line " << line);
+    UTIL_THROW_IF2(!ret.second, "Duplicate key in line " << line);
 
     if (args[0] == "num-features") {
       m_numScoreComponents = Scan<size_t>(args[1]);
@@ -93,6 +88,19 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
       m_args.push_back(args);
     }
   }
+
+  // name
+  if (m_description == "") {
+    size_t index = description_counts.count(nameStub);
+
+    ostringstream dstream;
+    dstream << nameStub;
+    dstream << index;
+
+    description_counts.insert(nameStub);
+    m_description = dstream.str();
+  }
+
 }
 
 void FeatureFunction::SetParameter(const std::string& key, const std::string& value)

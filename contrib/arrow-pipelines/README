@@ -27,6 +27,7 @@ To use the PCL compiler and run-time set the following environment variables (as
 
 $ export PATH=$PATH:`pwd`/python/pcl/src/pclc:`pwd`/python/pcl/src/pcl-run
 $ export PYTHONPATH=$PYTHONPATH:`pwd`/python/pcl/libs/pypeline/src
+$ export PCL_IMPORT_PATH=`pwd`/python/pcl/src/runtime:`pwd`/pcl
 
 Three environment variables need to be set before the pipeline can be run, they are:
 
@@ -51,7 +52,7 @@ $ pcl-run.py training_pipeline
 
 Once complete the output of the pipeline can be found in the directories:
 
- - test_data/tokenisation
- - test_data/model
- - test_data/lm
- - test_data/mert
+ - training/tokenisation
+ - training/model
+ - training/lm
+ - training/mert

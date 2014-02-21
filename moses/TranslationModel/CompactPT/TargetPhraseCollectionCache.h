@@ -44,6 +44,7 @@ namespace Moses
 typedef std::vector<TargetPhrase> TargetPhraseVector;
 typedef boost::shared_ptr<TargetPhraseVector> TargetPhraseVectorPtr;
 
+/** Implementation of Persistent Cache **/
 class TargetPhraseCollectionCache
 {
 private:
@@ -94,16 +95,20 @@ public:
     return m_phraseCache.end();
   }
 
+  /** retrieve translations for source phrase from persistent cache **/
   void Cache(const Phrase &sourcePhrase, TargetPhraseVectorPtr tpv,
              size_t bitsLeft = 0, size_t maxRank = 0) {
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);
 #endif
 
+    // check if source phrase is already in cache
     iterator it = m_phraseCache.find(sourcePhrase);
     if(it != m_phraseCache.end())
+      // if found, just update clock
       it->second.m_clock = clock();
     else {
+      // else, add to cache
       if(maxRank && tpv->size() > maxRank) {
         TargetPhraseVectorPtr tpv_temp(new TargetPhraseVector());
         tpv_temp->resize(maxRank);
@@ -128,6 +133,7 @@ public:
       return std::make_pair(TargetPhraseVectorPtr(), 0);
   }
 
+  // if cache full, reduce
   void Prune() {
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);

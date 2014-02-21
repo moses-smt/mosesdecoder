@@ -5,13 +5,14 @@
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
 #include "moses/FactorCollection.h"
+#include "util/exception.hh"
 
 using namespace std;
 
 namespace Moses
 {
 GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
-  : StatelessFeatureFunction("GlobalLexicalModel",1, line)
+  : StatelessFeatureFunction(1, line)
 {
   std::cerr << "Creating global lexical model...\n";
   ReadParameters();
@@ -26,11 +27,11 @@ GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
 
 void GlobalLexicalModel::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "file") {
+  if (key == "path") {
     m_filePath = value;
-  } else if (key == "inputFactors") {
+  } else if (key == "input-factor") {
     m_inputFactorsVec = Tokenize<FactorType>(value,",");
-  } else if (key == "outputFactors") {
+  } else if (key == "output-factor") {
     m_outputFactorsVec = Tokenize<FactorType>(value,",");
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
@@ -69,10 +70,7 @@ void GlobalLexicalModel::Load()
     vector<string> token = Tokenize<string>(line, " ");
 
     if (token.size() != 3) { // format checking
-      stringstream errorMessage;
-      errorMessage << "Syntax error at " << m_filePath << ":" << lineNum << endl << line << endl;
-      UserMessage::Add(errorMessage.str());
-      abort();
+      UTIL_THROW2("Syntax error at " << m_filePath << ":" << lineNum << ":" << line);
     }
 
     // create the output word

@@ -25,6 +25,10 @@
 #include <sstream>
 #include <stdexcept>
 
+#if defined __MINGW32__ && defined WITH_THREADS
+#include <boost/thread/locks.hpp>
+#endif // WITH_THREADS
+
 #include "FeatureVector.h"
 #include "util/string_piece_hash.hh"
 
@@ -792,7 +796,7 @@ FValue FVector::sum() const
 
 FValue FVector::inner_product(const FVector& rhs) const
 {
-  CHECK(m_coreFeatures.size() == rhs.m_coreFeatures.size());
+  assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
   FValue product = 0.0;
   for (const_iterator i = cbegin(); i != cend(); ++i) {
     product += ((i->second)*(rhs.get(i->first)));
@@ -811,7 +815,7 @@ void FVector::merge(const FVector &other)
     const FValue otherVal = other.m_coreFeatures[i];
 
     if (otherVal) {
-      CHECK(thisVal == 0 || thisVal == otherVal);
+      assert(thisVal == 0 || thisVal == otherVal);
       thisVal = otherVal;
     }
   }

@@ -41,12 +41,19 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
   : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_ruleTable(ruleTable)
 {
-  CHECK(m_dottedRuleColls.size() == 0);
+  UTIL_THROW_IF2(m_dottedRuleColls.size() != 0,
+		  "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_dottedRuleColls.resize(sourceSize);
 
   const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode();
+
+  // permissible soft nonterminal matches (target side)
+  const StaticData &staticData = StaticData::Instance();
+  m_soft_matches_map = staticData.Get_Soft_Matches();
+  m_soft_matches_map_reverse = staticData.Get_Soft_Matches_Reverse();
+  m_soft_matching = !m_soft_matches_map->empty();
 
   for (size_t ind = 0; ind < m_dottedRuleColls.size(); ++ind) {
 #ifdef USE_BOOST_POOL
@@ -80,6 +87,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   // get list of all rules that apply to spans at same starting position
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
+  DottedRuleMap &expandableDottedRuleListTerminalsOnly = dottedRuleCol.GetExpandableDottedRuleListTerminalsOnly();
 
   const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
 
@@ -147,6 +155,38 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
     ExtendPartialRuleApplication(prevDottedRule, startPos, endPos, stackInd,
                                  dottedRuleCol);
+  }
+
+  // search for terminal symbol
+  // (if only one more word position needs to be covered)
+  DottedRuleMap::iterator it = expandableDottedRuleListTerminalsOnly.find(absEndPos);
+  if (it != expandableDottedRuleListTerminalsOnly.end()) {
+    for (size_t ind = 0; ind < it->second.size(); ++ind) {
+      // rule we are about to extend
+      const DottedRuleInMemory &prevDottedRule = *it->second[ind];
+
+      // look up in rule dictionary, if the current rule can be extended
+      // with the source word in the last position
+      const Word &sourceWord = sourceWordLabel.GetLabel();
+      const PhraseDictionaryNodeMemory *node = prevDottedRule.GetLastNode().GetChild(sourceWord);
+
+      // if we found a new rule -> create it and add it to the list
+      if (node != NULL) {
+        // create the rule
+#ifdef USE_BOOST_POOL
+        DottedRuleInMemory *dottedRule = m_dottedRulePool.malloc();
+        new (dottedRule) DottedRuleInMemory(*node, sourceWordLabel,
+                                            prevDottedRule);
+#else
+        DottedRuleInMemory *dottedRule = new DottedRuleInMemory(*node,
+            sourceWordLabel,
+            prevDottedRule);
+#endif
+        dottedRuleCol.Add(relEndPos+1, dottedRule);
+      }
+    }
+  // we only need to check once if a terminal matches the input at a given position.
+  expandableDottedRuleListTerminalsOnly.erase(it);
   }
 
   // list of rules that that cover the entire span
@@ -221,9 +261,37 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       for (; q != tEnd; ++q) {
         const ChartCellLabel &cellLabel = q->second;
 
+        //soft matching of NTs
+        const Word& targetNonTerm = cellLabel.GetLabel();
+        if (m_soft_matching && m_soft_matches_map->find(targetNonTerm) != m_soft_matches_map->end()) {
+          const std::set<Word>& softMatches = m_soft_matches_map->find(targetNonTerm)->second;
+
+          for (std::set<Word>::const_iterator softMatch = softMatches.begin(); softMatch != softMatches.end(); ++softMatch) {
+
+            // try to match both source and target non-terminal
+            const PhraseDictionaryNodeMemory * child =
+            node.GetChild(sourceNonTerm, *softMatch);
+
+            // nothing found? then we are done
+            if (child == NULL) {
+              continue;
+            }
+
+            // create new rule
+#ifdef USE_BOOST_POOL
+            DottedRuleInMemory *rule = m_dottedRulePool.malloc();
+            new (rule) DottedRuleInMemory(*child, cellLabel, prevDottedRule);
+#else
+            DottedRuleInMemory *rule = new DottedRuleInMemory(*child, cellLabel,
+                prevDottedRule);
+#endif
+            dottedRuleColl.Add(stackInd, rule);
+          }
+        } // end of soft matching
+
         // try to match both source and target non-terminal
         const PhraseDictionaryNodeMemory * child =
-          node.GetChild(sourceNonTerm, cellLabel.GetLabel());
+          node.GetChild(sourceNonTerm, targetNonTerm);
 
         // nothing found? then we are done
         if (child == NULL) {
@@ -254,6 +322,29 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
         continue;
       }
       const Word &targetNonTerm = key.second;
+
+      //soft matching of NTs
+      if (m_soft_matching && m_soft_matches_map_reverse->find(targetNonTerm) != m_soft_matches_map_reverse->end()) {
+        const std::set<Word>& softMatches = m_soft_matches_map_reverse->find(targetNonTerm)->second;
+        for (std::set<Word>::const_iterator softMatch = softMatches.begin(); softMatch != softMatches.end(); ++softMatch) {
+          const ChartCellLabel *cellLabel = targetNonTerms.Find(*softMatch);
+          if (!cellLabel) {
+            continue;
+          }
+
+          // create new rule
+          const PhraseDictionaryNodeMemory &child = p->second;
+#ifdef USE_BOOST_POOL
+          DottedRuleInMemory *rule = m_dottedRulePool.malloc();
+          new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);
+#else
+          DottedRuleInMemory *rule = new DottedRuleInMemory(child, *cellLabel,
+            prevDottedRule);
+#endif
+          dottedRuleColl.Add(stackInd, rule);
+        }
+      } // end of soft matches lookup
+
       const ChartCellLabel *cellLabel = targetNonTerms.Find(targetNonTerm);
       if (!cellLabel) {
         continue;

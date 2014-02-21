@@ -30,13 +30,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/serialization/split_member.hpp>
 #endif
 
-#include "util/check.hh"
-
 #include "moses/FF/FeatureFunction.h"
 #include "FeatureVector.h"
 #include "TypeDef.h"
 #include "Util.h"
-
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -60,7 +58,7 @@ struct ScorePair {
   void PlusEquals(const StringPiece &key, float value);
 
   void PlusEquals(const std::vector<float> &other) {
-    CHECK(denseScores.size() == other.size());
+    UTIL_THROW_IF2(denseScores.size() != other.size(), "Number of scores incorrect");
     std::transform(denseScores.begin(),
                    denseScores.end(),
                    other.begin(),
@@ -102,11 +100,12 @@ private:
   static IndexPair GetIndexes(const FeatureFunction* sp) {
     ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
     if (indexIter == s_scoreIndexes.end()) {
-      std::cerr << "ERROR: FeatureFunction: " << sp->GetScoreProducerDescription() <<
+      std::stringstream strme;
+      strme << "ERROR: FeatureFunction: " << sp->GetScoreProducerDescription() <<
                 " not registered with ScoreIndexMap" << std::endl;
-      std::cerr << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
+      strme << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
                 " for every FeatureFunction" << std::endl;
-      abort();
+      UTIL_THROW2(strme.str());
     }
     return indexIter->second;
   }
@@ -233,7 +232,8 @@ public:
   //! produced by sp
   void PlusEquals(const FeatureFunction* sp, const std::vector<float>& scores) {
     IndexPair indexes = GetIndexes(sp);
-    CHECK(scores.size() == indexes.second - indexes.first);
+    UTIL_THROW_IF2(scores.size() != indexes.second - indexes.first,
+    		"Number of scores is incorrect");
     for (size_t i = 0; i < scores.size(); ++i) {
       m_scores[i + indexes.first] += scores[i];
     }
@@ -244,7 +244,8 @@ public:
   //! a single value
   void PlusEquals(const FeatureFunction* sp, float score) {
     IndexPair indexes = GetIndexes(sp);
-    CHECK(1 == indexes.second - indexes.first);
+    UTIL_THROW_IF2(1 != indexes.second - indexes.first,
+    		"Number of scores is incorrect");
     m_scores[indexes.first] += score;
   }
 
@@ -269,7 +270,8 @@ public:
   //! a single value
   void Assign(const FeatureFunction* sp, float score) {
     IndexPair indexes = GetIndexes(sp);
-    CHECK(1 == indexes.second - indexes.first);
+    UTIL_THROW_IF2(1 != indexes.second - indexes.first,
+    		"Feature function must must only contain 1 score");
     m_scores[indexes.first] = score;
   }
 
@@ -299,7 +301,8 @@ public:
 
   float PartialInnerProduct(const FeatureFunction* sp, const std::vector<float>& rhs) const {
     std::vector<float> lhs = GetScoresForProducer(sp);
-    CHECK(lhs.size() == rhs.size());
+    UTIL_THROW_IF2(lhs.size() != rhs.size(),
+    		"Number of weights must match number of scores");
     return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f);
   }
 
@@ -347,7 +350,8 @@ public:
   //! this will return it.  If not, this method will throw
   float GetScoreForProducer(const FeatureFunction* sp) const {
     IndexPair indexes = GetIndexes(sp);
-    CHECK(indexes.second - indexes.first == 1);
+    UTIL_THROW_IF2(indexes.second - indexes.first != 1,
+    		"Feature function must must only contain 1 score");
     return m_scores[indexes.first];
   }
 

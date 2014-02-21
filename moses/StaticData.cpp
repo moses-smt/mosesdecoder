@@ -21,10 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <string>
-#include "util/check.hh"
 
 #include "TypeDef.h"
-#include "moses/FF/Factory.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
@@ -53,15 +51,13 @@ using namespace std;
 
 namespace Moses
 {
+bool g_mosesDebug = false;
 
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_wpProducer(NULL)
-  ,m_unknownWordPenaltyProducer(NULL)
-  ,m_inputFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
@@ -110,9 +106,6 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("verbose").size() == 1) {
     m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
   }
-
-  m_parsingAlgorithm = (m_parameter->GetParam("parsing-algorithm").size() > 0) ?
-                       (ParsingAlgorithm) Scan<size_t>(m_parameter->GetParam("parsing-algorithm")[0]) : ParseCYKPlus;
 
   // to cube or not to cube
   m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
@@ -392,6 +385,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
+  SetBooleanParameter( &m_adjacentOnly, "adjacent-only", false);
+
   // minimum Bayes risk decoding
   SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
   m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
@@ -505,12 +500,12 @@ bool StaticData::LoadData(Parameter *parameter)
     m_placeHolderFactor = NOT_FOUND;
   }
 
+  std::map<std::string, std::string> featureNameOverride = OverrideFeatureNames();
 
   // all features
   map<string, int> featureIndexMap;
 
   const vector<string> &features = m_parameter->GetParam("feature");
-  FeatureRegistry registry;
   for (size_t i = 0; i < features.size(); ++i) {
     const string &line = Trim(features[i]);
     cerr << "line=" << line << endl;
@@ -519,16 +514,28 @@ bool StaticData::LoadData(Parameter *parameter)
 
     vector<string> toks = Tokenize(line);
 
-    const string &feature = toks[0];
-
-    registry.Construct(feature, line);
+    string &feature = toks[0];
+    std::map<std::string, std::string>::const_iterator iter = featureNameOverride.find(feature);
+    if (iter == featureNameOverride.end()) {
+    	// feature name not override
+    	m_registry.Construct(feature, line);
+    }
+    else {
+    	// replace feature name with new name
+    	string newName = iter->second;
+    	feature = newName;
+    	string newLine = Join(" ", toks);
+    	m_registry.Construct(newName, newLine);
+    }
   }
 
+  NoCache();
   OverrideFeatures();
 
   LoadFeatureFunctions();
 
   if (!LoadDecodeGraphs()) return false;
+
 
   if (!CheckWeights()) {
     return false;
@@ -548,9 +555,11 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
       return false;
     }
-
     m_allWeights.PlusEquals(extraWeights);
   }
+
+  //Load sparse features from config (overrules weight file)
+  LoadSparseWeightsFromConfig();
 
   // alternate weight settings
   if (m_parameter->GetParam("alternate-weight-setting").size() > 0) {
@@ -624,7 +633,8 @@ void StaticData::LoadNonTerminals()
     string line;
     while(getline(inStream, line)) {
       vector<string> tokens = Tokenize(line);
-      CHECK(tokens.size() == 2);
+      UTIL_THROW_IF2(tokens.size() != 2,
+    		  "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
     }
@@ -652,6 +662,8 @@ bool StaticData::LoadDecodeGraphs()
 {
   const vector<string> &mappingVector = m_parameter->GetParam("mapping");
   const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
+  const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
+  const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
   const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
@@ -670,7 +682,8 @@ bool StaticData::LoadDecodeGraphs()
       // For specifying multiple translation model
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
-      CHECK(decodeGraphInd == prevDecodeGraphInd || decodeGraphInd == prevDecodeGraphInd + 1);
+      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
+    		  "Malformed mapping");
       if (decodeGraphInd > prevDecodeGraphInd) {
         prev = NULL;
       }
@@ -682,40 +695,37 @@ bool StaticData::LoadDecodeGraphs()
       decodeType = token[1] == "T" ? Translate : Generate;
       index = Scan<size_t>(token[2]);
     } else {
-      UserMessage::Add("Malformed mapping!");
-      CHECK(false);
+      UTIL_THROW(util::Exception, "Malformed mapping");
     }
 
     DecodeStep* decodeStep = NULL;
     switch (decodeType) {
     case Translate:
-      if(index>=m_phraseDictionary.size()) {
+      if(index>=pts.size()) {
         stringstream strme;
         strme << "No phrase dictionary with index "
               << index << " available!";
-        UserMessage::Add(strme.str());
-        CHECK(false);
+        UTIL_THROW(util::Exception, strme.str());
       }
-      decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev, *featuresRemaining);
+      decodeStep = new DecodeStepTranslation(pts[index], prev, *featuresRemaining);
       break;
     case Generate:
-      if(index>=m_generationDictionary.size()) {
+      if(index>=gens.size()) {
         stringstream strme;
         strme << "No generation dictionary with index "
               << index << " available!";
-        UserMessage::Add(strme.str());
-        CHECK(false);
+        UTIL_THROW(util::Exception, strme.str());
       }
-      decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev, *featuresRemaining);
+      decodeStep = new DecodeStepGeneration(gens[index], prev, *featuresRemaining);
       break;
     case InsertNullFertilityWord:
-      CHECK(!"Please implement NullFertilityInsertion.");
+      UTIL_THROW(util::Exception, "Please implement NullFertilityInsertion.");
       break;
     }
 
     featuresRemaining = &decodeStep->GetFeaturesRemaining();
 
-    CHECK(decodeStep);
+    UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
       if (IsChart()) {
@@ -736,13 +746,14 @@ bool StaticData::LoadDecodeGraphs()
 
   // set maximum n-gram size for backoff approach to decoding paths
   // default is always use subsequent paths (value = 0)
-  for(size_t i=0; i<m_decodeGraphs.size(); i++) {
-    m_decodeGraphBackoff.push_back( 0 );
-  }
   // if specified, record maxmimum unseen n-gram size
   const vector<string> &backoffVector = m_parameter->GetParam("decoding-graph-backoff");
   for(size_t i=0; i<m_decodeGraphs.size() && i<backoffVector.size(); i++) {
-    m_decodeGraphBackoff[i] = Scan<size_t>(backoffVector[i]);
+	DecodeGraph &decodeGraph = *m_decodeGraphs[i];
+
+	if (i < backoffVector.size()) {
+		decodeGraph.SetBackoff(Scan<size_t>(backoffVector[i]));
+	}
   }
 
   return true;
@@ -750,7 +761,7 @@ bool StaticData::LoadDecodeGraphs()
 
 void StaticData::ReLoadParameter()
 {
-  assert(false); // TODO completely redo. Too many hardcoded ff
+  UTIL_THROW(util::Exception, "completely redo. Too many hardcoded ff"); // TODO completely redo. Too many hardcoded ff
   /*
   m_verboseLevel = 1;
   if (m_parameter->GetParam("verbose").size() == 1) {
@@ -861,14 +872,14 @@ const string &StaticData::GetBinDirectory() const
 
 float StaticData::GetWeightWordPenalty() const
 {
-  float weightWP = GetWeight(m_wpProducer);
+  float weightWP = GetWeight(&WordPenaltyProducer::Instance());
   //VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
   return weightWP;
 }
 
 float StaticData::GetWeightUnknownWordPenalty() const
 {
-  return GetWeight(m_unknownWordPenaltyProducer);
+  return GetWeight(&UnknownWordPenaltyProducer::Instance());
 }
 
 void StaticData::InitializeForInput(const InputType& source) const
@@ -876,7 +887,12 @@ void StaticData::InitializeForInput(const InputType& source) const
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
-    ff.InitializeForInput(source);
+    if (! IsFeatureFunctionIgnored(ff)) {
+      Timer iTime;
+      iTime.start();
+      ff.InitializeForInput(source);
+      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " ) = " << iTime << endl);
+    }
   }
 }
 
@@ -885,7 +901,9 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
-    ff.CleanUpAfterSentenceProcessing(source);
+    if (! IsFeatureFunctionIgnored(ff)) {
+      ff.CleanUpAfterSentenceProcessing(source);
+    }
   }
 }
 
@@ -899,31 +917,19 @@ void StaticData::LoadFeatureFunctions()
     bool doLoad = true;
 
     if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
-      m_phraseDictionary.push_back(ffCast);
       doLoad = false;
-    } else if (const GenerationDictionary *ffCast
-               = dynamic_cast<const GenerationDictionary*>(ff)) {
-      m_generationDictionary.push_back(ffCast);
-    } else if (WordPenaltyProducer *ffCast
-               = dynamic_cast<WordPenaltyProducer*>(ff)) {
-      CHECK(m_wpProducer == NULL); // max 1 feature;
-      m_wpProducer = ffCast;
-    } else if (UnknownWordPenaltyProducer *ffCast
-               = dynamic_cast<UnknownWordPenaltyProducer*>(ff)) {
-      CHECK(m_unknownWordPenaltyProducer == NULL); // max 1 feature;
-      m_unknownWordPenaltyProducer = ffCast;
-    } else if (const InputFeature *ffCast = dynamic_cast<const InputFeature*>(ff)) {
-      CHECK(m_inputFeature == NULL); // max 1 input feature;
-      m_inputFeature = ffCast;
     }
 
     if (doLoad) {
+      VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
       ff->Load();
     }
   }
 
-  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-    PhraseDictionary *pt = m_phraseDictionary[i];
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    PhraseDictionary *pt = pts[i];
+    VERBOSE(1, "Loading " << pt->GetScoreProducerDescription() << endl);
     pt->Load();
   }
 
@@ -933,17 +939,34 @@ void StaticData::LoadFeatureFunctions()
 bool StaticData::CheckWeights() const
 {
   set<string> weightNames = m_parameter->GetWeightNames();
+  set<string> featureNames;
 
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     const string &descr = ff.GetScoreProducerDescription();
+    featureNames.insert(descr);
 
     set<string>::iterator iter = weightNames.find(descr);
     if (iter == weightNames.end()) {
       cerr << "Can't find weights for feature function " << descr << endl;
     } else {
       weightNames.erase(iter);
+    }
+  }
+
+  //sparse features
+  if (!weightNames.empty()) {
+    set<string>::iterator iter;
+    for (iter = weightNames.begin(); iter != weightNames.end(); ) {
+      string fname = (*iter).substr(0, (*iter).find("_"));
+      cerr << fname << "\n";
+      if (featureNames.find(fname) != featureNames.end()) {
+        weightNames.erase(iter++);
+      }
+      else {
+        ++iter;
+      }
     }
   }
 
@@ -958,6 +981,29 @@ bool StaticData::CheckWeights() const
 
   return true;
 }
+
+
+void StaticData::LoadSparseWeightsFromConfig() {
+  set<string> featureNames;
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction &ff = *ffs[i];
+    const string &descr = ff.GetScoreProducerDescription();
+    featureNames.insert(descr);
+  }
+
+  std::map<std::string, std::vector<float> > weights = m_parameter->GetAllWeights();
+  std::map<std::string, std::vector<float> >::iterator iter;
+  for (iter = weights.begin(); iter != weights.end(); ++iter) {
+    // this indicates that it is sparse feature
+    if (featureNames.find(iter->first) == featureNames.end()) {
+      UTIL_THROW_IF2(iter->second.size() != 1, "ERROR: only one weight per sparse feature allowed: " << iter->first);
+        m_allWeights.Assign(iter->first, iter->second[0]);
+    }
+  }
+
+}
+
 
 /**! Read in settings for alternative weights */
 bool StaticData::LoadAlternateWeightSettings()
@@ -990,15 +1036,25 @@ bool StaticData::LoadAlternateWeightSettings()
       vector<string> args = Tokenize(tokens[0], "=");
       currentId = args[1];
       cerr << "alternate weight setting " << currentId << endl;
-      CHECK(m_weightSetting.find(currentId) == m_weightSetting.end());
+      UTIL_THROW_IF2(m_weightSetting.find(currentId) != m_weightSetting.end(),
+    		  "Duplicate alternate weight id: " << currentId);
       m_weightSetting[ currentId ] = new ScoreComponentCollection;
 
       // other specifications
       for(size_t j=1; j<tokens.size(); j++) {
         vector<string> args = Tokenize(tokens[j], "=");
-        // TODO: support for sparse weights
+        // sparse weights
         if (args[0] == "weight-file") {
-          cerr << "ERROR: sparse weight files currently not supported";
+          if (args.size() != 2) {
+            UserMessage::Add("One argument should be supplied for weight-file");
+            return false;
+          }
+          ScoreComponentCollection extraWeights;
+          if (!extraWeights.Load(args[1])) {
+            UserMessage::Add("Unable to load weights from " + args[1]);
+            return false;
+          }
+          m_weightSetting[ currentId ]->PlusEquals(extraWeights);
         }
         // ignore feature functions
         else if (args[0] == "ignore-ff") {
@@ -1024,9 +1080,10 @@ bool StaticData::LoadAlternateWeightSettings()
 
     // weight lines
     else {
-      CHECK(currentId != "");
+      UTIL_THROW_IF2(currentId.empty(), "No alternative weights specified");
       vector<string> tokens = Tokenize(weightSpecification[i]);
-      CHECK(tokens.size() >= 2);
+      UTIL_THROW_IF2(tokens.size() < 2
+    		  , "Incorrect format for alternate weights: " << weightSpecification[i]);
 
       // get name and weight values
       string name = tokens[0];
@@ -1049,8 +1106,42 @@ bool StaticData::LoadAlternateWeightSettings()
       }
     }
   }
-  CHECK(!hasErrors);
+  UTIL_THROW_IF2(hasErrors, "Errors loading alternate weights");
   return true;
+}
+
+void StaticData::NoCache()
+{
+	bool noCache;
+	SetBooleanParameter( &noCache, "no-cache", false );
+
+	if (noCache) {
+		const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+		for (size_t i = 0; i < pts.size(); ++i) {
+			PhraseDictionary &pt = *pts[i];
+			pt.SetParameter("cache-size", "0");
+		}
+	}
+}
+
+std::map<std::string, std::string> StaticData::OverrideFeatureNames()
+{
+	std::map<std::string, std::string> ret;
+
+	const PARAM_VEC &params = m_parameter->GetParam("feature-name-overwrite");
+	if (params.size()) {
+		UTIL_THROW_IF2(params.size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
+		vector<string> toks = Tokenize(params[0]);
+		UTIL_THROW_IF2(toks.size() % 2 != 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
+
+		for (size_t i = 0; i < toks.size(); i += 2) {
+			const string &oldName = toks[i];
+			const string &newName = toks[i+1];
+			ret[oldName] = newName;
+		}
+	}
+
+	return ret;
 }
 
 void StaticData::OverrideFeatures()
@@ -1059,14 +1150,14 @@ void StaticData::OverrideFeatures()
   for (size_t i = 0; i < params.size(); ++i) {
     const string &str = params[i];
     vector<string> toks = Tokenize(str);
-    CHECK(toks.size() > 1);
+    UTIL_THROW_IF2(toks.size() <= 1, "Incorrect format for feature override: " << str);
 
     FeatureFunction &ff = FeatureFunction::FindFeatureFunction(toks[0]);
 
     for (size_t j = 1; j < toks.size(); ++j) {
       const string &keyValStr = toks[j];
       vector<string> keyVal = Tokenize(keyValStr, "=");
-      CHECK(keyVal.size() == 2);
+      UTIL_THROW_IF2(keyVal.size() != 2, "Incorrect format for parameter override: " << keyValStr);
 
       VERBOSE(1, "Override " << ff.GetScoreProducerDescription() << " "
               << keyVal[0] << "=" << keyVal[1] << endl);
@@ -1080,8 +1171,9 @@ void StaticData::OverrideFeatures()
 
 void StaticData::CheckLEGACYPT()
 {
-  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-    const PhraseDictionary *phraseDictionary = m_phraseDictionary[i];
+  const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+  for (size_t i = 0; i < pts.size(); ++i) {
+    const PhraseDictionary *phraseDictionary = pts[i];
     if (dynamic_cast<const PhraseDictionaryTreeAdaptor*>(phraseDictionary) != NULL) {
       m_useLegacyPT = true;
       return;
@@ -1090,6 +1182,7 @@ void StaticData::CheckLEGACYPT()
 
   m_useLegacyPT = false;
 }
+
 
 } // namespace
 

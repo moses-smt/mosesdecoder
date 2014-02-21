@@ -17,6 +17,7 @@
 #ifndef INC_RANDLM_FILTER_H
 #define INC_RANDLM_FILTER_H
 
+#include <cassert>
 #include <cmath>
 #include "FileHandler.h"
 
@@ -44,15 +45,15 @@ public:
     // number of bits in T
     cell_width_ = sizeof(T) << 3;
     // current implementation has following constraints
-    CHECK(cell_width_ > 0 && cell_width_ <= 64 && cell_width_ >= width);
+    assert(cell_width_ > 0 && cell_width_ <= 64 && cell_width_ >= width);
     // used for >> division
     log_cell_width_ = static_cast<int>(floor(log((double)cell_width_)/log((double)2) + 0.000001));
     // size of underlying data in Ts
     cells_ = ((addresses * width) + cell_width_ - 1) >> log_cell_width_;
     // instantiate underlying data
     data_ = new T[cells_];
-    CHECK(data_ != NULL);
-    CHECK(reset());
+    assert(data_ != NULL);
+    assert(reset());
     // 'first_bit' marks the first bit used by 'address' (left padded with zeros).
     first_bit_ = (width % cell_width_ == 0) ? 0 : cell_width_ - (width % cell_width_);
     // mask for full cell
@@ -61,9 +62,9 @@ public:
     address_mask_ = full_mask_ >> first_bit_;
   }
   Filter(FileHandler* fin, bool loaddata = true) : data_(NULL) {
-    CHECK(loadHeader(fin));
+	assert(loadHeader(fin));
     if (loaddata)
-      CHECK(loadData(fin));
+    	assert(loadData(fin));
   }
   virtual ~Filter() {
     delete[] data_;
@@ -79,7 +80,7 @@ public:
   }
   // read / write functions
   inline bool read(uint64_t address, T* value) {
-    CHECK(address <= addresses_);
+	assert(address <= addresses_);
     // copy address to 'value'
     uint64_t data_bit = address * width_;
     uint32_t data_cell = (data_bit >> log_cell_width_); // % cells_;
@@ -101,7 +102,7 @@ public:
     return true;
   }
   inline T read(uint64_t address) {
-    CHECK(address <= addresses_);
+	assert(address <= addresses_);
     // return value at address
     T value = 0;
     uint64_t data_bit = address * width_;
@@ -123,8 +124,8 @@ public:
     return value;
   }
   inline bool write(uint64_t address, T value) {
-    CHECK(address <= addresses_);
-    CHECK(log2(value) <= width_);
+	assert(address <= addresses_);
+    assert(log2(value) <= width_);
     // write 'value' to address
     uint64_t data_bit = address * width_;
     uint32_t data_cell = (data_bit >> log_cell_width_); // % cells_;
@@ -222,50 +223,50 @@ public:
     return cells_;
   }
   virtual bool save(FileHandler* out) {
-    CHECK(out != NULL);
-    CHECK(out->write((char*)&cells_, sizeof(cells_)));
-    CHECK(out->write((char*)&cell_width_, sizeof(cell_width_)));
-    CHECK(out->write((char*)&log_cell_width_, sizeof(log_cell_width_)));
-    CHECK(out->write((char*)&addresses_, sizeof(addresses_)));
-    CHECK(out->write((char*)&width_, sizeof(width_)));
-    CHECK(out->write((char*)&first_bit_, sizeof(first_bit_)));
-    CHECK(out->write((char*)&full_mask_, sizeof(full_mask_)));
-    CHECK(out->write((char*)&address_mask_, sizeof(address_mask_)));
-    //CHECK(out->write((char*)data_, cells_ * sizeof(T)));
+    assert(out != NULL);
+    assert(out->write((char*)&cells_, sizeof(cells_)));
+    assert(out->write((char*)&cell_width_, sizeof(cell_width_)));
+    assert(out->write((char*)&log_cell_width_, sizeof(log_cell_width_)));
+    assert(out->write((char*)&addresses_, sizeof(addresses_)));
+    assert(out->write((char*)&width_, sizeof(width_)));
+    assert(out->write((char*)&first_bit_, sizeof(first_bit_)));
+    assert(out->write((char*)&full_mask_, sizeof(full_mask_)));
+    assert(out->write((char*)&address_mask_, sizeof(address_mask_)));
+    //assert(out->write((char*)data_, cells_ * sizeof(T)));
     const uint64_t jump  =  524288032ul; //(uint64_t)pow(2, 29);
     if((width_ == 1) || cells_ < jump)
-      CHECK(out->write((char*)data_, cells_ * sizeof(T)));
+      assert(out->write((char*)data_, cells_ * sizeof(T)));
     else {
       uint64_t idx(0);
       while(idx + jump < cells_) {
-        CHECK(out->write((char*)&data_[idx], jump * sizeof(T)));
+        assert(out->write((char*)&data_[idx], jump * sizeof(T)));
         idx += jump;
       }
-      CHECK(out->write((char*)&data_[idx], (cells_ - idx) * sizeof(T)));
+      assert(out->write((char*)&data_[idx], (cells_ - idx) * sizeof(T)));
     }
     return true;
   }
 protected:
   bool loadHeader(FileHandler* fin) {
-    CHECK(fin != NULL);
-    CHECK(fin->read((char*)&cells_, sizeof(cells_)));
-    CHECK(fin->read((char*)&cell_width_, sizeof(cell_width_)));
-    CHECK(cell_width_ == sizeof(T) << 3); // make sure correct underlying data type
-    CHECK(fin->read((char*)&log_cell_width_, sizeof(log_cell_width_)));
-    CHECK(fin->read((char*)&addresses_, sizeof(addresses_)));
-    CHECK(fin->read((char*)&width_, sizeof(width_)));
-    CHECK(fin->read((char*)&first_bit_, sizeof(first_bit_)));
-    CHECK(fin->read((char*)&full_mask_, sizeof(full_mask_)));
-    CHECK(fin->read((char*)&address_mask_, sizeof(address_mask_)));
+    assert(fin != NULL);
+    assert(fin->read((char*)&cells_, sizeof(cells_)));
+    assert(fin->read((char*)&cell_width_, sizeof(cell_width_)));
+    assert(cell_width_ == sizeof(T) << 3); // make sure correct underlying data type
+    assert(fin->read((char*)&log_cell_width_, sizeof(log_cell_width_)));
+    assert(fin->read((char*)&addresses_, sizeof(addresses_)));
+    assert(fin->read((char*)&width_, sizeof(width_)));
+    assert(fin->read((char*)&first_bit_, sizeof(first_bit_)));
+    assert(fin->read((char*)&full_mask_, sizeof(full_mask_)));
+    assert(fin->read((char*)&address_mask_, sizeof(address_mask_)));
     return true;
   }
   bool loadData(FileHandler* fin) {
     // instantiate underlying array
     data_ = new T[cells_];
-    CHECK(data_ != NULL);
-    CHECK(fin->read((char*)data_, cells_ * sizeof(T)));
-    //CHECK(fin->read((char*)&data_[0], ceil(float(cells_) / 2.0) * sizeof(T)));
-    //CHECK(fin->read((char*)&data_[cells_ / 2], (cells_ / 2) * sizeof(T)));
+    assert(data_ != NULL);
+    assert(fin->read((char*)data_, cells_ * sizeof(T)));
+    //assert(fin->read((char*)&data_[0], ceil(float(cells_) / 2.0) * sizeof(T)));
+    //assert(fin->read((char*)&data_[cells_ / 2], (cells_ / 2) * sizeof(T)));
     return true;
   }
   uint64_t cells_;  // number T making up 'data_'
@@ -287,7 +288,7 @@ public:
   BitFilter(FileHandler* fin, bool loaddata = true)
     : Filter<uint8_t>(fin, loaddata) {
     if (loaddata)
-      CHECK(load(fin));
+      assert(load(fin));
   }
   // TODO: overload operator[]
   virtual bool testBit(uint64_t location) {
@@ -305,7 +306,7 @@ public:
     return true;
   }
   bool save(FileHandler* fout) {
-    CHECK(Filter<uint8_t>::save(fout));
+    assert(Filter<uint8_t>::save(fout));
     std::cerr << "Saved BitFilter. Rho = " << rho() << "." << std::endl;;
     return true;
   }
@@ -332,10 +333,10 @@ protected:
   class ResizedBitFilter : public BitFilter {
   public:
     ResizedBitFilter(FileHandler* fin) : BitFilter(fin) {
-      CHECK(load(fin));
+      assert(load(fin));
     }
     ResizedBitFilter(FileHandler* fin, uint64_t newsize) : BitFilter(newsize) {
-      CHECK(resizeFromFile(fin, newsize));
+      assert(resizeFromFile(fin, newsize));
     }
     bool resizeFromFile(FileHandler* oldin, uint64_t newsize);
     virtual bool testBit(uint64_t location) {
@@ -348,10 +349,10 @@ protected:
     }
     bool save(FileHandler* fout) {
       // re-hashing parameters
-      CHECK(BitFilter::save(fout));
+      assert(BitFilter::save(fout));
       std::cerr << "Saved ResizedBitFilter. Rho = " << rho() << "." << std::endl;
-      CHECK(fout->write((char*)&old_addresses_, sizeof(old_addresses_)));
-      CHECK(fout->write((char*)&a_, sizeof(a_)));
+      assert(fout->write((char*)&old_addresses_, sizeof(old_addresses_)));
+      assert(fout->write((char*)&a_, sizeof(a_)));
       return fout->write((char*)&b_, sizeof(b_));
     }
   protected:

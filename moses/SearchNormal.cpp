@@ -17,7 +17,6 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_start(clock())
   ,interrupted_flag(0)
   ,m_transOptColl(transOptColl)
 {
@@ -52,7 +51,6 @@ void SearchNormal::ProcessSentence()
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
-  clock_t t=0; // used to track time for steps
 
   // initial seed hypothesis: nothing translated, no words produced
   Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
@@ -73,13 +71,13 @@ void SearchNormal::ProcessSentence()
     // the stack is pruned before processing (lazy pruning):
     VERBOSE(3,"processing hypothesis from next stack");
     IFVERBOSE(2) {
-      t = clock();
+      stats.StartTimeStack();
     }
     sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
     VERBOSE(3,std::endl);
     sourceHypoColl.CleanupArcList();
     IFVERBOSE(2) {
-      stats.AddTimeStack( clock()-t );
+      stats.StopTimeStack();
     }
 
     // go through each hypothesis on the stack and try to expand it
@@ -96,12 +94,6 @@ void SearchNormal::ProcessSentence()
     // this stack is fully expanded;
     actual_hypoStack = &sourceHypoColl;
   }
-
-  // some more logging
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().SetTimeTotal( clock()-m_start );
-  }
-  VERBOSE(2, m_manager.GetSentenceStats());
 }
 
 
@@ -261,6 +253,11 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
     expectedScore += m_transOptColl.GetFutureScore().CalcFutureScore( hypothesis.GetWordsBitmap(), startPos, endPos );
   }
 
+  if (StaticData::Instance().AdjacentOnly() &&
+	  !hypothesis.GetWordsBitmap().IsAdjacent(startPos, endPos)) {
+	return;
+  }
+
   // loop through all translation options
   const TranslationOptionList &transOptList = m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
   TranslationOptionList::const_iterator iter;
@@ -282,17 +279,16 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 {
   const StaticData &staticData = StaticData::Instance();
   SentenceStats &stats = m_manager.GetSentenceStats();
-  clock_t t=0; // used to track time for steps
 
   Hypothesis *newHypo;
   if (! staticData.UseEarlyDiscarding()) {
     // simple build, no questions asked
     IFVERBOSE(2) {
-      t = clock();
+      stats.StartTimeBuildHyp();
     }
     newHypo = hypothesis.CreateNext(transOpt);
     IFVERBOSE(2) {
-      stats.AddTimeBuildHyp( clock()-t );
+      stats.StopTimeBuildHyp();
     }
     if (newHypo==NULL) return;
     newHypo->Evaluate(m_transOptColl.GetFutureScore());
@@ -311,7 +307,6 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 
     // add expected score of translation option
     expectedScore += transOpt.GetFutureScore();
-    // TRACE_ERR("EXPECTED diff: " << (newHypo->GetTotalScore()-expectedScore) << " (pre " << (newHypo->GetTotalScore()-expectedScorePre) << ") " << hypothesis.GetTargetPhrase() << " ... " << transOpt.GetTargetPhrase() << " [" << expectedScorePre << "," << expectedScore << "," << newHypo->GetTotalScore() << "]" << endl);
 
     // check if transOpt score push it already below limit
     if (expectedScore < allowedScore) {
@@ -323,12 +318,12 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 
     // build the hypothesis without scoring
     IFVERBOSE(2) {
-      t = clock();
+      stats.StartTimeBuildHyp();
     }
     newHypo = hypothesis.CreateNext(transOpt);
     if (newHypo==NULL) return;
     IFVERBOSE(2) {
-      stats.AddTimeBuildHyp( clock()-t );
+      stats.StopTimeBuildHyp();
     }
 
     // ... and check if that is below the limit
@@ -350,11 +345,11 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
   // add to hypothesis stack
   size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();
   IFVERBOSE(2) {
-    t = clock();
+    stats.StartTimeStack();
   }
   m_hypoStackColl[wordsTranslated]->AddPrune(newHypo);
   IFVERBOSE(2) {
-    stats.AddTimeStack( clock()-t );
+    stats.StopTimeStack();
   }
 }
 

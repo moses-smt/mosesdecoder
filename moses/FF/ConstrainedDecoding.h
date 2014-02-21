@@ -33,12 +33,7 @@ protected:
 class ConstrainedDecoding : public StatefulFeatureFunction
 {
 public:
-  ConstrainedDecoding(const std::string &line)
-    :StatefulFeatureFunction("ConstrainedDecoding", 1, line)
-    ,m_maxUnknowns(0) {
-    m_tuneable = false;
-    ReadParameters();
-  }
+  ConstrainedDecoding(const std::string &line);
 
   void Load();
 
@@ -54,7 +49,8 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown) const
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   FFState* Evaluate(
     const Hypothesis& cur_hypo,
@@ -78,6 +74,7 @@ protected:
   std::string m_path;
   std::map<long,Phrase> m_constraints;
   int m_maxUnknowns;
+  bool m_negate; // only keep translations which DON'T match the reference
 
 };
 

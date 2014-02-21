@@ -1,5 +1,8 @@
 #include "ExternalFeature.h"
 #include <dlfcn.h>
+#include <stdlib.h>
+#include <iostream>
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -17,20 +20,16 @@ void ExternalFeature::Load()
   string nparam = "testing";
 
   if (m_path.size() < 1) {
-    cerr << "External requires a path to a dynamic library!\n";
-    abort();
+    UTIL_THROW2("External requires a path to a dynamic library");
   }
   lib_handle = dlopen(m_path.c_str(), RTLD_LAZY);
   if (!lib_handle) {
-    cerr << "dlopen reports: " << dlerror() << endl;
-    cerr << "Did you provide a full path to the dynamic library?\n";
-    abort();
+    UTIL_THROW2("dlopen reports: " << dlerror() << ". Did you provide a full path to the dynamic library?";);
   }
   CdecFF* (*fn)(const string&) =
     (CdecFF* (*)(const string&))(dlsym(lib_handle, "create_ff"));
   if (!fn) {
-    cerr << "dlsym reports: " << dlerror() << endl;
-    abort();
+    UTIL_THROW2("dlsym reports: " << dlerror());
   }
   ff_ext = (*fn)(nparam);
   m_stateSize = ff_ext->StateSize();

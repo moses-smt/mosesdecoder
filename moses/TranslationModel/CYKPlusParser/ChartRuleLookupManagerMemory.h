@@ -71,6 +71,11 @@ private:
   // performance, especially for multithreaded decoding.
   boost::object_pool<DottedRuleInMemory> m_dottedRulePool;
 #endif
+
+  // permissible soft nonterminal matches (target side)
+  bool m_soft_matching;
+  const std::map<Word, std::set<Word> >* m_soft_matches_map;
+  const std::map<Word, std::set<Word> >* m_soft_matches_map_reverse;
 };
 
 }  // namespace Moses

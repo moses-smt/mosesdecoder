@@ -47,10 +47,10 @@ public:
     // assert in same cell
     const WordsRange &rangeA	= hypoA->GetCurrSourceRange()
                                 , &rangeB	= hypoB->GetCurrSourceRange();
-    CHECK(rangeA == rangeB);
+    assert(rangeA == rangeB);
 
     // shouldn't be mixing hypos with different lhs
-    CHECK(hypoA->GetTargetLHS() == hypoB->GetTargetLHS());
+    assert(hypoA->GetTargetLHS() == hypoB->GetTargetLHS());
 
     int ret = hypoA->RecombineCompare(*hypoB);
     if (ret != 0)

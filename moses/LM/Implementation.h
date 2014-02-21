@@ -60,7 +60,7 @@ protected:
   Word m_sentenceStartWord, m_sentenceEndWord; //! Contains factors which represents the beging and end words for this LM.
   //! Usually <s> and </s>
 
-  LanguageModelImplementation(const std::string& description, const std::string &line);
+  LanguageModelImplementation(const std::string &line);
 
 public:
 

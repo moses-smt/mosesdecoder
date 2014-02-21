@@ -62,7 +62,7 @@ public:
   }
 
   bool OutputIsCout() const {
-    return (m_outStream == std::cout);
+    return (m_outStream == &std::cout);
   }
 
   /**
