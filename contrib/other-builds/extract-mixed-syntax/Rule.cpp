@@ -28,6 +28,7 @@ Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
 ,m_canRecurse(true)
 ,m_nonterms(copy.m_nonterms)
 {
+	cerr << &copy << "-->" << this << " ";
 	cerr << "Extending " << m_consistentPhrase.Debug();
 	cerr << " with " << cp.Debug();
 
