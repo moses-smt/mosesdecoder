@@ -58,11 +58,11 @@ int main(int argc, char** argv)
 
 	  AlignedSentence alignedSentence(lineSource, lineTarget, lineAlignment);
 	  alignedSentence.CreateConsistentPhrases(params);
-	  alignedSentence.Debug(cerr);
+	  cerr << alignedSentence.Debug();
 
 	  Rules rules(alignedSentence);
 	  rules.CreateRules();
-	  rules.Debug(cerr);
+	  cerr << rules.Debug();
 
   }
 

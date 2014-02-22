@@ -45,7 +45,7 @@ void Word::Output(std::ostream &out) const
 	out << m_str;
 }
 
-void Word::Debug(std::ostream &out) const
+std::string Word::Debug() const
 {
-	out << m_str;
+	return m_str;
 }

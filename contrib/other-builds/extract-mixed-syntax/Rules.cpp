@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <sstream>
 #include "Rules.h"
 #include "ConsistentPhrases.h"
 #include "AlignedSentence.h"
@@ -83,21 +84,22 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp)
 	Extend(*newRule);
 }
 
-void Rules::Debug(std::ostream &out) const
+std::string Rules::Debug() const
 {
+	stringstream out;
+
 	std::set<Rule*>::const_iterator iter;
 	out << "m_todoRules:" << endl;
 	for (iter = m_todoRules.begin(); iter != m_todoRules.end(); ++iter) {
 		const Rule &rule = **iter;
-		rule.Debug(out);
-		cerr << endl;
+		out << rule.Debug() << endl;
 	}
 
 	out << "m_keepRules:" << endl;
 	for (iter = m_keepRules.begin(); iter != m_keepRules.end(); ++iter) {
 		const Rule &rule = **iter;
-		rule.Debug(out);
-		cerr << endl;
+		out << rule.Debug() << endl;
 	}
 
+	return out.str();
 }

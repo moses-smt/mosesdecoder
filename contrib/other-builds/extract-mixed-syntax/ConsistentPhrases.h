@@ -26,7 +26,7 @@ public:
 
 	const Coll &GetColl(int sourceStart, int sourceEnd) const;
 
-	void Debug(std::ostream &out) const;
+	std::string Debug() const;
 
 protected:
 	std::vector< std::vector<Coll> > m_coll;

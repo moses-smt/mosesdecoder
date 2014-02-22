@@ -4,9 +4,11 @@
  *  Created on: 20 Feb 2014
  *      Author: hieu
  */
+#include <sstream>
+#include "ConsistentPhrase.h"
+#include "Word.h"
 
-#include <ConsistentPhrase.h>
-#include <Word.h>
+using namespace std;
 
 ConsistentPhrase::ConsistentPhrase(
 		int sourceStart, int sourceEnd,
@@ -28,8 +30,11 @@ bool ConsistentPhrase::operator<(const ConsistentPhrase &other) const
   return corners < other.corners;
 }
 
-void ConsistentPhrase::Debug(std::ostream &out) const
+std::string ConsistentPhrase::Debug() const
 {
+  stringstream out;
   out << "[" << corners[0] << "-" << corners[1]
 		  << "][" << corners[2] << "-" << corners[3] << "]";
+
+  return out.str();
 }

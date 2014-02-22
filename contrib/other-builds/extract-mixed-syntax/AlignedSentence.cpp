@@ -5,20 +5,13 @@
  *      Author: s0565741
  */
 
+#include <sstream>
 #include "moses/Util.h"
 #include "AlignedSentence.h"
 #include "Parameter.h"
 
 using namespace std;
 
-void Phrase::Debug(std::ostream &out) const
-{
-	for (size_t i = 0; i < size(); ++i) {
-		Word &word = *at(i);
-		word.Debug(out);
-		out << " ";
-	}
-}
 
 /////////////////////////////////////////////////////////////////////////////////
 AlignedSentence::AlignedSentence(const std::string &source,
@@ -71,19 +64,23 @@ void AlignedSentence::PopulateAlignment(const std::string &line)
 	}
 }
 
-void AlignedSentence::Debug(std::ostream &out) const
+std::string AlignedSentence::Debug() const
 {
+  stringstream out;
+
 	out << "m_source:";
-	m_source.Debug(out);
+	out << m_source.Debug();
 	out << endl;
 
 	out << "m_target:";
-	m_target.Debug(out);
+	out << m_target.Debug();
 	out << endl;
 
-	out << "consistent phrases=" << endl;
-	m_consistentPhrases.Debug(out);
+	out << "consistent phrases:" << endl;
+	out << m_consistentPhrases.Debug();
 	out << endl;
+
+	return out.str();
 }
 
 std::vector<int> AlignedSentence::GetSourceAlignmentCount() const

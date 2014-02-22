@@ -9,13 +9,14 @@
 #define RULESYMBOL_H_
 
 #include <iostream>
+#include <string>
 
 class RuleSymbol {
 public:
 	RuleSymbol();
 	virtual ~RuleSymbol();
 
-	virtual void Debug(std::ostream &out) const = 0;
+	virtual std::string Debug() const = 0;
 
 };
 

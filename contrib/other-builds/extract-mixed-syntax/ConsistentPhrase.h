@@ -27,7 +27,7 @@ public:
 
   bool operator<(const ConsistentPhrase &other) const;
 
-	void Debug(std::ostream &out) const;
+  std::string Debug() const;
 
 };
 

@@ -20,7 +20,7 @@ public:
 	virtual ~Rules();
 	void CreateRules();
 
-	void Debug(std::ostream &out) const;
+	std::string Debug() const;
 
 protected:
 	const AlignedSentence &m_alignedSentence;

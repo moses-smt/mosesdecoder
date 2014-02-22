@@ -30,7 +30,7 @@ public:
 	std::set<int> GetAlignment() const;
 
 	void Output(std::ostream &out) const;
-	void Debug(std::ostream &out) const;
+	std::string Debug() const;
 
 protected:
 	int m_pos; // original position in sentence, NOT in lattice

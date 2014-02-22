@@ -29,7 +29,7 @@ public:
 	const ConsistentPhrases &GetConsistentPhrases() const
 	{ return m_consistentPhrases; }
 
-	void Debug(std::ostream &out) const;
+	std::string Debug() const;
 
 protected:
   Phrase m_source, m_target;

@@ -13,6 +13,6 @@ public:
 	:std::vector<Word*>(size)
 	 {}
 
-	void Debug(std::ostream &out) const;
+	std::string Debug() const;
 
 };

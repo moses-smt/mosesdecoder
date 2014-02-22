@@ -5,9 +5,12 @@
  *      Author: hieu
  */
 
+#include <sstream>
 #include "Rule.h"
 #include "AlignedSentence.h"
 #include "ConsistentPhrase.h"
+
+using namespace std;
 
 Rule::Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence)
 :m_consistentPhrase(consistentPhrase)
@@ -25,6 +28,10 @@ Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
 ,m_canRecurse(true)
 ,m_nonterms(copy.m_nonterms)
 {
+	cerr << "Extending " << m_consistentPhrase.Debug();
+	cerr << " with " << cp.Debug();
+	cerr << endl;
+
 	m_nonterms.push_back(&cp);
 	CreateSource();
 }
@@ -90,25 +97,25 @@ int Rule::GetNextSourcePosForNonTerm() const
 	}
 }
 
-void Rule::Debug(std::ostream &out) const
+std::string Rule::Debug() const
 {
+  stringstream out;
+
   // source
   for (size_t i =  0; i < m_source.size(); ++i) {
 	  const RuleSymbol &symbol = *m_source[i];
-	  symbol.Debug(out);
-	  out << " ";
+	  out << symbol.Debug() << " ";
   }
 
   // target
   out << "||| ";
   for (size_t i =  0; i < m_target.size(); ++i) {
 	  const RuleSymbol &symbol = *m_target[i];
-	  symbol.Debug(out);
-	  out << " ";
+	  out << symbol.Debug() << " ";
   }
 
   // overall range
-  out << "||| ";
-  m_consistentPhrase.Debug(out);
+  out << "||| " << m_consistentPhrase.Debug();
 
+  return out.str();
 }

@@ -4,6 +4,7 @@
  *  Created on: 20 Feb 2014
  *      Author: hieu
  */
+#include <sstream>
 #include <cassert>
 #include "ConsistentPhrases.h"
 
@@ -45,8 +46,9 @@ const ConsistentPhrases::Coll &ConsistentPhrases::GetColl(int sourceStart, int s
 	return ret;
 }
 
-void ConsistentPhrases::Debug(std::ostream &out) const
+std::string ConsistentPhrases::Debug() const
 {
+	std::stringstream out;
 	for (int start = 0; start < m_coll.size(); ++start) {
 		const std::vector<Coll> &allSourceStart = m_coll[start];
 
@@ -56,10 +58,10 @@ void ConsistentPhrases::Debug(std::ostream &out) const
 			Coll::const_iterator iter;
 			for (iter = coll.begin(); iter != coll.end(); ++iter) {
 				const ConsistentPhrase &consistentPhrase = *iter;
-				consistentPhrase.Debug(out);
-				out << endl;
+				out << consistentPhrase.Debug() << endl;
 			}
-
 		}
 	}
+
+	return out.str();
 }

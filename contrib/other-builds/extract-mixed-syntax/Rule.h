@@ -37,7 +37,7 @@ public:
 
 	int GetNextSourcePosForNonTerm() const;
 
-	void Debug(std::ostream &out) const;
+	std::string Debug() const;
 
 protected:
 	const ConsistentPhrase &m_consistentPhrase;
