@@ -113,7 +113,7 @@ namespace Moses
      ) const;
 
   public:
-    Mmsapt(string const& description, string const& line);
+    // Mmsapt(string const& description, string const& line);
     Mmsapt(string const& line);
     void
     Load();
