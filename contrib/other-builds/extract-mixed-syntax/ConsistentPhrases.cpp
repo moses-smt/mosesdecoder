@@ -7,6 +7,7 @@
 #include <sstream>
 #include <cassert>
 #include "ConsistentPhrases.h"
+#include "NonTerm.h"
 
 using namespace std;
 
@@ -32,11 +33,17 @@ void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
 		int targetStart, int targetEnd)
 {
   Coll &coll = m_coll[sourceStart][sourceEnd - sourceEnd];
-  ConsistentPhrase cp(sourceStart,
+  ConsistentPhrase cpInsert(sourceStart,
   					sourceEnd,
   					targetStart,
   					targetEnd);
-  coll[cp] = NonTerms();
+  NonTerms nonTermsInsert;
+  pair<Coll::iterator,bool> inserted = coll.insert(pair<ConsistentPhrase, NonTerms>(cpInsert, nonTermsInsert));
+
+  const ConsistentPhrase &cp = inserted.first->first;
+  NonTerms &nonTerms = inserted.first->second;
+  NonTerm *nt = new NonTerm(cp, "[XXXX]", "[XXXX]");
+  nonTerms.push_back(nt);
 }
 
 const ConsistentPhrases::Coll &ConsistentPhrases::GetColl(int sourceStart, int sourceEnd) const
