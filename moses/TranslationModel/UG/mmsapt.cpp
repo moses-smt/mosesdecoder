@@ -23,7 +23,7 @@ namespace Moses
 	params[t.substr(i,j)] = t.substr(k);
       }
   }
-
+#if 0
   Mmsapt::
   Mmsapt(string const& description, string const& line)
     : PhraseDictionary(description,line), ofactor(1,0)
@@ -37,6 +37,7 @@ namespace Moses
   {
     this->init(line);
   }
+#endif
 
   void
   Mmsapt::
