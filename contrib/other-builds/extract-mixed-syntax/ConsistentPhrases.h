@@ -7,13 +7,16 @@
 #pragma once
 
 #include <set>
+#include <vector>
 #include <iostream>
 #include <ConsistentPhrase.h>
 
 class Word;
+class NonTerm;
 
 class ConsistentPhrases {
 public:
+	typedef std::vector<NonTerm*> NonTerms;
 	typedef std::set<ConsistentPhrase> Coll;
 
 	ConsistentPhrases();
