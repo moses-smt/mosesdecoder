@@ -66,7 +66,7 @@ void Rules::Extend(const Rule &rule)
 				continue;
 			}
 
-			const ConsistentPhrases::Coll cps = allCPS.GetColl(sourceStart, sourceEnd);
+			const ConsistentPhrases::Coll &cps = allCPS.GetColl(sourceStart, sourceEnd);
 			Extend(rule, cps);
 		}
 	}
@@ -108,4 +108,14 @@ std::string Rules::Debug() const
 	}
 
 	return out.str();
+}
+
+void Rules::Output(std::ostream &out) const
+{
+	std::set<Rule*>::const_iterator iter;
+	for (iter = m_keepRules.begin(); iter != m_keepRules.end(); ++iter) {
+		const Rule &rule = **iter;
+		rule.Output(out);
+		out << endl;
+	}
 }

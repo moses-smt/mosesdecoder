@@ -28,14 +28,8 @@ Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
 ,m_canRecurse(true)
 ,m_nonterms(copy.m_nonterms)
 {
-	cerr << &copy << "-->" << this << " ";
-	cerr << "Extending " << m_consistentPhrase.Debug();
-	cerr << " with " << cp.Debug();
-
 	m_nonterms.push_back(&cp);
 	CreateSource();
-
-	cerr << " rule:" << Debug() << endl;
 }
 
 Rule::~Rule() {
@@ -120,4 +114,15 @@ std::string Rule::Debug() const
   out << "||| " << m_consistentPhrase.Debug();
 
   return out.str();
+}
+
+void Rule::Output(std::ostream &out) const
+{
+  // source
+  for (size_t i =  0; i < m_source.size(); ++i) {
+	  const RuleSymbol &symbol = *m_source[i];
+	  symbol.Output(out);
+	  out << " ";
+  }
+
 }

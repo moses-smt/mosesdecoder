@@ -21,6 +21,7 @@ public:
 	void CreateRules();
 
 	std::string Debug() const;
+	void Output(std::ostream &out) const;
 
 protected:
 	const AlignedSentence &m_alignedSentence;

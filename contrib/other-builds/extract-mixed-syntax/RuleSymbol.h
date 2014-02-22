@@ -17,6 +17,7 @@ public:
 	virtual ~RuleSymbol();
 
 	virtual std::string Debug() const = 0;
+	virtual void Output(std::ostream &out) const = 0;
 
 };
 

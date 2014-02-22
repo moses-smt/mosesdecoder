@@ -64,6 +64,7 @@ int main(int argc, char** argv)
 	  rules.CreateRules();
 	  cerr << rules.Debug();
 
+	  rules.Output(cout);
   }
 
 
