@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include <set>
+#include <map>
 #include <vector>
 #include <iostream>
 #include <ConsistentPhrase.h>
@@ -17,7 +17,7 @@ class NonTerm;
 class ConsistentPhrases {
 public:
 	typedef std::vector<NonTerm*> NonTerms;
-	typedef std::set<ConsistentPhrase> Coll;
+	typedef std::map<ConsistentPhrase, NonTerms> Coll;
 
 	ConsistentPhrases();
 	virtual ~ConsistentPhrases();

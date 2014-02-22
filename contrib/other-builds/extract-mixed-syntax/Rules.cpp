@@ -25,7 +25,7 @@ Rules::Rules(const AlignedSentence &alignedSentence)
 
 			ConsistentPhrases::Coll::const_iterator iter;
 			for (iter = cps.begin(); iter != cps.end(); ++iter) {
-				const ConsistentPhrase &cp = *iter;
+				const ConsistentPhrase &cp = iter->first;
 				Rule *rule = new Rule(cp, alignedSentence);
 				m_todoRules.insert(rule);
 			}
@@ -76,7 +76,7 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrases::Coll &cps)
 {
 	ConsistentPhrases::Coll::const_iterator iter;
 	for (iter = cps.begin(); iter != cps.end(); ++iter) {
-		const ConsistentPhrase &cp = *iter;
+		const ConsistentPhrase &cp = iter->first;
 		Extend(rule, cp);
 	}
 }
