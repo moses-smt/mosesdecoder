@@ -124,5 +124,16 @@ void Rule::Output(std::ostream &out) const
 	  symbol.Output(out);
 	  out << " ";
   }
+  m_consistentPhrase.Output(out, Moses::Input);
+
+  out << " ||| ";
+
+  // target
+  for (size_t i =  0; i < m_target.size(); ++i) {
+	  const RuleSymbol &symbol = *m_target[i];
+	  symbol.Output(out);
+	  out << " ";
+  }
+  m_consistentPhrase.Output(out, Moses::Output);
 
 }

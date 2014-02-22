@@ -44,3 +44,7 @@ void ConsistentPhrase::Output(std::ostream &out) const
   out << "[X][X]";
 }
 
+void ConsistentPhrase::Output(std::ostream &out, Moses::FactorDirection direction) const
+{
+  out << "[X]";
+}

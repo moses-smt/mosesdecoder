@@ -29,6 +29,7 @@ public:
 
   std::string Debug() const;
   void Output(std::ostream &out) const;
+  void Output(std::ostream &out, Moses::FactorDirection direction) const;
 
 };
 
