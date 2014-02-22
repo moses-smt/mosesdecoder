@@ -12,9 +12,15 @@
 #include "moses/TypeDef.h"
 #include "RuleSymbol.h"
 
+class NonTerm;
+
 class ConsistentPhrase : public RuleSymbol
 {
 public:
+	typedef std::vector<NonTerm*> NonTerms;
+
+	std::vector<int> corners;
+
 	ConsistentPhrase(int sourceStart, int sourceEnd,
 			int targetStart, int targetEnd);
 
@@ -23,7 +29,9 @@ public:
 	int GetWidth(Moses::FactorDirection direction) const
 	{ return (direction == Moses::Input) ? corners[1] - corners[0] + 1 : corners[3] - corners[2] + 1; }
 
-	std::vector<int> corners;
+
+	void AddNonTerms(const std::string &source,
+						const std::string &target);
 
   bool operator<(const ConsistentPhrase &other) const;
 
@@ -31,5 +39,7 @@ public:
   void Output(std::ostream &out) const;
   void Output(std::ostream &out, Moses::FactorDirection direction) const;
 
+protected:
+  NonTerms m_nonTerms;
 };
 

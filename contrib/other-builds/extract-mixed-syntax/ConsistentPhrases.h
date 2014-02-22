@@ -6,18 +6,16 @@
  */
 #pragma once
 
-#include <map>
+#include <set>
 #include <vector>
 #include <iostream>
 #include <ConsistentPhrase.h>
 
 class Word;
-class NonTerm;
 
 class ConsistentPhrases {
 public:
-	typedef std::vector<NonTerm*> NonTerms;
-	typedef std::map<ConsistentPhrase, NonTerms> Coll;
+	typedef std::set<ConsistentPhrase> Coll;
 
 	ConsistentPhrases();
 	virtual ~ConsistentPhrases();

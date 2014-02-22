@@ -30,6 +30,12 @@ bool ConsistentPhrase::operator<(const ConsistentPhrase &other) const
   return corners < other.corners;
 }
 
+void ConsistentPhrase::AddNonTerms(const std::string &source,
+					const std::string &target)
+{
+
+}
+
 std::string ConsistentPhrase::Debug() const
 {
   stringstream out;
@@ -48,3 +54,4 @@ void ConsistentPhrase::Output(std::ostream &out, Moses::FactorDirection directio
 {
   out << "[X]";
 }
+

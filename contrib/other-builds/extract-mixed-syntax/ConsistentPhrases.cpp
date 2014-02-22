@@ -33,18 +33,16 @@ void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
 		int targetStart, int targetEnd)
 {
   Coll &coll = m_coll[sourceStart][sourceEnd - sourceEnd];
-  ConsistentPhrase cpInsert(sourceStart,
+  ConsistentPhrase cp(sourceStart,
   					sourceEnd,
   					targetStart,
   					targetEnd);
-  NonTerms nonTermsInsert;
-  pair<Coll::iterator,bool> inserted = coll.insert(pair<ConsistentPhrase, NonTerms>(cpInsert, nonTermsInsert));
+  cp.AddNonTerms("[XXXX]", "[ZZZZ]");
 
-  const ConsistentPhrase &cp = inserted.first->first;
-  NonTerms &nonTerms = inserted.first->second;
-  NonTerm *nt = new NonTerm(cp, "[XXXX]", "[XXXX]");
-  nonTerms.push_back(nt);
+  pair<Coll::iterator, bool> inserted = coll.insert(cp);
+  assert(inserted.second);
 }
+
 
 const ConsistentPhrases::Coll &ConsistentPhrases::GetColl(int sourceStart, int sourceEnd) const
 {
@@ -64,7 +62,7 @@ std::string ConsistentPhrases::Debug() const
 
 			Coll::const_iterator iter;
 			for (iter = coll.begin(); iter != coll.end(); ++iter) {
-				const ConsistentPhrase &consistentPhrase = iter->first;
+				const ConsistentPhrase &consistentPhrase = *iter;
 				out << consistentPhrase.Debug() << endl;
 			}
 		}
