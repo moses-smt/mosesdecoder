@@ -30,10 +30,11 @@ Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
 {
 	cerr << "Extending " << m_consistentPhrase.Debug();
 	cerr << " with " << cp.Debug();
-	cerr << endl;
 
 	m_nonterms.push_back(&cp);
 	CreateSource();
+
+	cerr << " rule:" << Debug() << endl;
 }
 
 Rule::~Rule() {

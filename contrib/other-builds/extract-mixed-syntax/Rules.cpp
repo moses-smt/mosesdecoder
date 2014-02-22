@@ -60,6 +60,12 @@ void Rules::Extend(const Rule &rule)
 
 	for (int sourceStart = sourceMin; sourceStart <= sourceMax; ++sourceStart) {
 		for (int sourceEnd = sourceStart; sourceEnd <= sourceMax; ++sourceEnd) {
+			if (sourceStart == rule.GetConsistentPhrase().corners[0] &&
+				sourceMin == rule.GetConsistentPhrase().corners[1]) {
+				// don't cover whole rule with 1 non-term
+				continue;
+			}
+
 			const ConsistentPhrases::Coll cps = allCPS.GetColl(sourceStart, sourceEnd);
 			Extend(rule, cps);
 		}
