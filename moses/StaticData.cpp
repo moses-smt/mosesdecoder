@@ -1186,6 +1186,8 @@ void StaticData::CheckLEGACYPT()
 
 void StaticData::ResetWeights(const std::string &denseWeights, const std::string &sparseFile)
 {
+  m_allWeights = ScoreComponentCollection();
+
   // dense weights
   string name("");
   vector<float> weights;
