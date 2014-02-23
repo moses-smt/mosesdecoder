@@ -20,9 +20,6 @@ ConsistentPhrase::ConsistentPhrase(
 	corners[1] = sourceEnd;
 	corners[2] = targetStart;
 	corners[3] = targetEnd;
-
-	m_nonTerms.push_back(new NonTerm(*this, "[XXXX]", "[ZZZZ]"));
-
 }
 
 ConsistentPhrase::~ConsistentPhrase() {
@@ -37,7 +34,7 @@ bool ConsistentPhrase::operator<(const ConsistentPhrase &other) const
 void ConsistentPhrase::AddNonTerms(const std::string &source,
 					const std::string &target)
 {
-
+	m_nonTerms.push_back(new NonTerm(*this, source, target));
 }
 
 std::string ConsistentPhrase::Debug() const
