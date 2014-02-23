@@ -1111,7 +1111,9 @@ if($___RETURN_BEST_DEV) {
   if(defined $sparse_weights_file) {
       $best_sparse_file = "run$bestit.sparse-weights";
   }
-  create_config($___CONFIG_ORIG, "./moses.ini", get_featlist_from_file("run$bestit.dense"),
+  my $best_featlist = get_featlist_from_file("run$bestit.dense");
+  $best_featlist->{"untuneables"} = $featlist->{"untuneables"};
+  create_config($___CONFIG_ORIG, "./moses.ini", $best_featlist,
                 $bestit, $bestbleu, $best_sparse_file);
 }
 else {
