@@ -33,7 +33,7 @@ public:
 	{ return m_canRecurse; }
 
 	const ConsistentPhrase &GetConsistentPhrase() const
-	{ return m_consistentPhrase; }
+	{ return m_nonTerm; }
 
 	int GetNextSourcePosForNonTerm() const;
 
@@ -41,7 +41,7 @@ public:
 	void Output(std::ostream &out) const;
 
 protected:
-	const ConsistentPhrase &m_consistentPhrase;
+	const ConsistentPhrase &m_nonTerm;
 	const AlignedSentence &m_alignedSentence;
 	RulePhrase m_source, m_target;
 

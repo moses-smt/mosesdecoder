@@ -13,7 +13,7 @@
 using namespace std;
 
 Rule::Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence)
-:m_consistentPhrase(consistentPhrase)
+:m_nonTerm(consistentPhrase)
 ,m_alignedSentence(alignedSentence)
 ,m_isValid(true)
 ,m_canRecurse(true)
@@ -22,7 +22,7 @@ Rule::Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alig
 }
 
 Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
-:m_consistentPhrase(copy.m_consistentPhrase)
+:m_nonTerm(copy.m_nonTerm)
 ,m_alignedSentence(copy.m_alignedSentence)
 ,m_isValid(true)
 ,m_canRecurse(true)
@@ -44,8 +44,8 @@ void Rule::CreateSource()
 	  cp = m_nonterms[nonTermInd];
   }
 
-  for (int sourcePos = m_consistentPhrase.corners[0];
-		  sourcePos <= m_consistentPhrase.corners[1];
+  for (int sourcePos = m_nonTerm.corners[0];
+		  sourcePos <= m_nonTerm.corners[1];
 		  ++sourcePos) {
 
 	  const RuleSymbol *ruleSymbol;
@@ -78,7 +78,7 @@ int Rule::GetNextSourcePosForNonTerm() const
 {
 	if (m_nonterms.empty()) {
 		// no non-terms so far. Can start next non-term on left corner
-		return m_consistentPhrase.corners[0];
+		return m_nonTerm.corners[0];
 	}
 	else {
 		// next non-term can start just left of previous
@@ -111,7 +111,7 @@ std::string Rule::Debug() const
   }
 
   // overall range
-  out << "||| " << m_consistentPhrase.Debug();
+  out << "||| " << m_nonTerm.Debug();
 
   return out.str();
 }
@@ -124,7 +124,7 @@ void Rule::Output(std::ostream &out) const
 	  symbol.Output(out);
 	  out << " ";
   }
-  m_consistentPhrase.Output(out, Moses::Input);
+  m_nonTerm.Output(out, Moses::Input);
 
   out << " ||| ";
 
@@ -134,6 +134,6 @@ void Rule::Output(std::ostream &out) const
 	  symbol.Output(out);
 	  out << " ";
   }
-  m_consistentPhrase.Output(out, Moses::Output);
+  m_nonTerm.Output(out, Moses::Output);
 
 }
