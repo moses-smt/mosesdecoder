@@ -7,6 +7,7 @@
 #include <sstream>
 #include "ConsistentPhrase.h"
 #include "Word.h"
+#include "NonTerm.h"
 
 using namespace std;
 
@@ -19,6 +20,9 @@ ConsistentPhrase::ConsistentPhrase(
 	corners[1] = sourceEnd;
 	corners[2] = targetStart;
 	corners[3] = targetEnd;
+
+	m_nonTerms.push_back(new NonTerm(*this, "[XXXX]", "[ZZZZ]"));
+
 }
 
 ConsistentPhrase::~ConsistentPhrase() {
