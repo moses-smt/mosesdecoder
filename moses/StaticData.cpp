@@ -1184,5 +1184,36 @@ void StaticData::CheckLEGACYPT()
 }
 
 
+void StaticData::ResetWeights(const std::string &denseWeights, const std::string &sparseFile)
+{
+  // dense weights
+  string name("");
+  vector<float> weights;
+  vector<string> toks = Tokenize(denseWeights);
+  for (size_t i = 0; i < toks.size(); ++i) {
+	const string &tok = toks[i];
+
+	if (tok.substr(tok.size() - 1, 1) == "=") {
+	  // start of new feature
+
+	  if (name != "") {
+		// save previous ff
+		const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
+		m_allWeights.Assign(&ff, weights);
+		weights.clear();
+	  }
+
+	  name = tok.substr(0, tok.size() - 1);
+	} else {
+	  // a weight for curr ff
+	  float weight = Scan<float>(toks[i]);
+	  weights.push_back(weight);
+	}
+  }
+
+  // sparse weights
+
+}
+
 } // namespace
 
