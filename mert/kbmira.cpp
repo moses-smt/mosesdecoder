@@ -39,7 +39,7 @@ de recherches du Canada
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "BleuScorer.h"
+#include "M2Scorer.h"
 #include "HypPackEnumerator.h"
 #include "MiraFeatureVector.h"
 #include "MiraWeightVector.h"
@@ -51,7 +51,7 @@ namespace po = boost::program_options;
 
 ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv)
 {
-  vector<ValType> stats(kBleuNgramOrder*2+1,0);
+  vector<ValType> stats(3, 0);
   for(train->reset(); !train->finished(); train->next()) {
     // Find max model
     size_t max_index=0;
@@ -70,8 +70,9 @@ ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv)
       stats[i]+=sent[i];
     }
   }
-  return unsmoothedBleu(stats);
+  return sentenceM2(stats);
 }
+
 
 int main(int argc, char** argv)
 {
@@ -181,12 +182,7 @@ int main(int argc, char** argv)
   MiraWeightVector wv(initParams);
 
   // Initialize background corpus
-  vector<ValType> bg;
-  for(int j=0; j<kBleuNgramOrder; j++) {
-    bg.push_back(kBleuNgramOrder-j);
-    bg.push_back(kBleuNgramOrder-j);
-  }
-  bg.push_back(kBleuNgramOrder);
+  vector<ValType> bg(3, 1);
 
   // Training loop
   boost::scoped_ptr<HypPackEnumerator> train;
@@ -194,7 +190,7 @@ int main(int argc, char** argv)
     train.reset(new StreamingHypPackEnumerator(featureFiles, scoreFiles));
   else
     train.reset(new RandomAccessHypPackEnumerator(featureFiles, scoreFiles, no_shuffle));
-  cerr << "Initial BLEU = " << evaluate(train.get(), wv.avg()) << endl;
+  cerr << "Initial M2 = " << evaluate(train.get(), wv.avg()) << endl;
   ValType bestBleu = 0;
   for(int j=0; j<n_iters; j++) {
     // MIRA train for one epoch
@@ -214,7 +210,7 @@ int main(int argc, char** argv)
         for(size_t i=0; i< train->cur_size(); i++) {
           const MiraFeatureVector& vec=train->featuresAt(i);
           ValType score = wv.score(vec);
-          ValType bleu = sentenceLevelBackgroundBleu(train->scoresAt(i),bg);
+          ValType bleu = sentenceBackgroundM2(train->scoresAt(i), bg);
           // Hope
           if(i==0 || (hope_scale*score + bleu) > hope_score) {
             hope_score = hope_scale*score + bleu;
@@ -249,9 +245,9 @@ int main(int argc, char** argv)
         MiraFeatureVector diff = hope - fear;
         // Bleu difference
         const vector<float>& hope_stats = train->scoresAt(hope_index);
-        ValType hopeBleu = sentenceLevelBackgroundBleu(hope_stats, bg);
+        ValType hopeBleu = sentenceBackgroundM2(hope_stats, bg);
         const vector<float>& fear_stats = train->scoresAt(fear_index);
-        ValType fearBleu = sentenceLevelBackgroundBleu(fear_stats, bg);
+        ValType fearBleu = sentenceBackgroundM2(fear_stats, bg);
         assert(hopeBleu + 1e-8 >= fearBleu);
         ValType delta = hopeBleu - fearBleu;
         // Loss and update
@@ -260,9 +256,9 @@ int main(int argc, char** argv)
         if(verbose) {
           cerr << "Updating sent " << train->cur_id() << endl;
           cerr << "Wght: " << wv << endl;
-          cerr << "Hope: " << hope << " BLEU:" << hopeBleu << " Score:" << wv.score(hope) << endl;
-          cerr << "Fear: " << fear << " BLEU:" << fearBleu << " Score:" << wv.score(fear) << endl;
-          cerr << "Diff: " << diff << " BLEU:" << delta << " Score:" << diff_score << endl;
+          cerr << "Hope: " << hope << " M2:" << hopeBleu << " Score:" << wv.score(hope) << endl;
+          cerr << "Fear: " << fear << " M2:" << fearBleu << " Score:" << wv.score(fear) << endl;
+          cerr << "Diff: " << diff << " M2:" << delta << " Score:" << diff_score << endl;
           cerr << "Loss: " << loss << " Scale: " << hope_scale << endl;
           cerr << endl;
         }
@@ -292,7 +288,7 @@ int main(int argc, char** argv)
     // Evaluate current average weights
     AvgWeightVector avg = wv.avg();
     ValType bleu = evaluate(train.get(), avg);
-    cerr << ", BLEU = " << bleu << endl;
+    cerr << ", M2 = " << bleu << endl;
     if(bleu > bestBleu) {
       size_t num_dense = train->num_dense();
       if(initDenseSize>0 && initDenseSize!=num_dense) {
@@ -325,7 +321,7 @@ int main(int argc, char** argv)
       bestBleu = bleu;
     }
   }
-  cerr << "Best BLEU = " << bestBleu << endl;
+  cerr << "Best M2 = " << bestBleu << endl;
 }
 // --Emacs trickery--
 // Local Variables:

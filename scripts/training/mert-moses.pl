@@ -148,6 +148,9 @@ my $___CONFIG_ORIG = undef; # pathname to startup ini file before filtering
 my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
+my $___INACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to skip
+                                  # if undef work on all features
+                                  # (others are fixed to the starting values)
 my $___RANGES = undef;
 my $___USE_CONFIG_WEIGHTS_FIRST = 0; # use weights in configuration file for first iteration
 my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loading data (default =-1)
@@ -198,6 +201,7 @@ GetOptions(
   "random-restarts=i" => \$___RANDOM_RESTARTS, # number of random restarts
   "return-best-dev" => \$___RETURN_BEST_DEV, # return the best weights according to dev, not the last
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
+  "inactivate-features=s" => \$___INACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "range=s@" => \$___RANGES,
   "use-config-weights-for-first-run" => \$___USE_CONFIG_WEIGHTS_FIRST, # use the weights in the configuration file when running the decoder for the first time
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
@@ -551,7 +555,20 @@ if (defined $___ACTIVATE_FEATURES) {
     $featlist->{"enabled"}->[$i] = $enabled{$name . "_" . $cnt{$name}};
     $cnt{$name}++;
   }
-} else {
+}
+elsif(defined $___INACTIVATE_FEATURES) {
+  my %disabled = map { ($_, 1) } split /[, ]+/, $___INACTIVATE_FEATURES;
+  use Data::Dumper;
+  print STDERR Dumper(\%disabled);
+  my %cnt;
+  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    $cnt{$name} = 0 if !defined $cnt{$name};
+    $featlist->{"enabled"}->[$i] = 1 - (exists($disabled{$name . "_" . $cnt{$name}}) ? 1 : 0);
+    $cnt{$name}++;
+  }
+}
+else {
   # all enabled
   for(my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
     $featlist->{"enabled"}->[$i] = 1;
@@ -781,7 +798,7 @@ while (1) {
   my $score_file        = "run$run.${base_score_file}";
   
   my $cmd =
-    "zcat $nbest_file | split -a 4 -d -l 50000 --filter='gzip > \$FILE.gz' - temp/run.\n"
+    "zcat $nbest_file | split -a 4 -d -l 10000 --filter='gzip > \$FILE.gz' - temp/run.\n"
   . "find temp/run.*.gz | parallel -k -j $__THREADS $mert_extract_cmd $mert_extract_args --scfile {.}.scores.dat --ffile {.}.features.dat -r " . join(",", @references) . " -n {}\n"
   . "cat temp/run.*.scores.dat | perl $RealBin/join_extractor_parts.perl > $score_file\n"
   . "cat temp/run.*.features.dat | perl $RealBin/join_extractor_parts.perl > $feature_file\n";
@@ -1077,7 +1094,7 @@ if($___RETURN_BEST_DEV) {
   my $bestbleu=0;
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
-    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " -s BLEU --candidate run$i.out";
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " $mertargs $scconfig --candidate run$i.out";
     $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
     safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";

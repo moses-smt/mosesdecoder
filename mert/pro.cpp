@@ -38,10 +38,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/program_options.hpp>
 
-#include "BleuScorer.h"
+//#include "BleuScorer.h"
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"
-#include "BleuScorer.h"
+//#include "BleuScorer.h"
+#include "M2Scorer.h"
 #include "Util.h"
 
 using namespace std;
@@ -213,12 +214,17 @@ int main(int argc, char** argv)
     for(size_t  i=0; i<n_candidates; i++) {
       size_t rand1 = rand() % n_translations;
       pair<size_t,size_t> translation1 = hypotheses[rand1];
-      float bleu1 = smoothedSentenceBleu(scoreDataIters[translation1.first]->operator[](translation1.second), bleuSmoothing, smoothBP);
+      //float bleu1 = smoothedSentenceBleu(scoreDataIters[translation1.first]->operator[](translation1.second), bleuSmoothing, smoothBP); 
+     //float bleu1 = sentenceSmoothingM2(scoreDataIters[translation1.first]->operator[](translation1.second), bleuSmoothing);
+     float bleu1 = sentenceM2(scoreDataIters[translation1.first]->operator[](translation1.second));
 
+      
       size_t rand2 = rand() % n_translations;
       pair<size_t,size_t> translation2 = hypotheses[rand2];
-      float bleu2 = smoothedSentenceBleu(scoreDataIters[translation2.first]->operator[](translation2.second), bleuSmoothing, smoothBP);
-
+      //float bleu2 = smoothedSentenceBleu(scoreDataIters[translation2.first]->operator[](translation2.second), bleuSmoothing, smoothBP);
+      //float bleu2 = sentenceSmoothingM2(scoreDataIters[translation2.first]->operator[](translation2.second), bleuSmoothing);
+      float bleu2 = sentenceM2(scoreDataIters[translation2.first]->operator[](translation2.second));
+      
       /*
       cerr << "t(" << translation1.first << "," << translation1.second << ") = " << bleu1 <<
         " t(" << translation2.first << "," << translation2.second << ") = " <<

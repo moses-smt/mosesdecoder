@@ -43,6 +43,13 @@ private:
   M2Scorer& operator=(const M2Scorer&);
 };
 
+/** Computes sentence-level BLEU+1 score.
+ * This function is used in PRO.
+ */
+float sentenceM2 (const std::vector<float>& stats);
+float sentenceSmoothingM2(const std::vector<float>& stats, float smoothing);
+float sentenceBackgroundM2(const std::vector<float>& stats, const std::vector<float>& bg);
+
 }
 
 #endif  // MERT_CDER_SCORER_H_

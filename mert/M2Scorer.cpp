@@ -100,6 +100,87 @@ float M2Scorer::calculateScore(const vector<int>& comps) const
   return f;
 }
 
+float sentenceBackgroundM2(const std::vector<float>& stats, const std::vector<float>& bg)
+{
+  float beta = 0.5;
+  
+  float p = 0.0;
+  float r = 0.0;
+  float f = 0.0;
+    
+  if(stats[1] + bg[1] != 0)
+    p = (stats[0] + bg[0]) / (stats[1] + bg[1]);
+  else
+    p = 1.0;
+    
+  if(stats[2] + bg[2] != 0)
+    r = (stats[0] + bg[0]) / (stats[2] + bg[2]);
+  else
+    r = 1.0;
+  
+  float denom = beta * beta * p + r;
+  if(denom != 0)
+    f = (1.0 + beta * beta) * p * r / denom;
+  else
+    f = 0.0;
+  
+  return f;
+}
+
+float sentenceSmoothingM2(const std::vector<float>& stats, float smoothing)
+{
+  float beta = 0.5;
+  
+  float p = 0.0;
+  float r = 0.0;
+  float f = 0.0;
+    
+  if(stats[1] + smoothing != 0)
+    p = (stats[0] + smoothing) / (stats[1] + smoothing);
+  else
+    p = 1.0;
+    
+  if(stats[2] + smoothing != 0)
+    r = (stats[0] + smoothing) / (stats[2] + smoothing);
+  else
+    r = 1.0;
+  
+  float denom = beta * beta * p + r;
+  if(denom != 0)
+    f = (1.0 + beta * beta) * p * r / denom;
+  else
+    f = 0.0;
+  
+  return f;
+}
+
+float sentenceM2(const std::vector<float>& stats)
+{
+  float beta = 0.5;
+  
+  float p = 0.0;
+  float r = 0.0;
+  float f = 0.0;
+    
+  if(stats[1] != 0)
+    p = stats[0] / stats[1];
+  else
+    p = 1.0;
+    
+  if(stats[2] != 0)
+    r = stats[0] / stats[2];
+  else
+    r = 1.0;
+  
+  float denom = beta * beta * p + r;
+  if(denom != 0)
+    f = (1.0 + beta * beta) * p * r / denom;
+  else
+    f = 0.0;
+  
+  return f;
+}
+
 const char* M2Scorer::code() {
   return
     "import sys\n"
