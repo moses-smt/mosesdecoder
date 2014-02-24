@@ -31,6 +31,7 @@ Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
 {
 	m_nonterms.push_back(&cp.GetNonTerm());
 	CreateSource();
+
 }
 
 Rule::~Rule() {
@@ -140,5 +141,10 @@ void Rule::Output(std::ostream &out) const
 	  out << " ";
   }
   m_nonTerm.Output(out, Moses::Output);
+
+}
+
+void Rule::Prevalidate(const Parameter &params)
+{
 
 }

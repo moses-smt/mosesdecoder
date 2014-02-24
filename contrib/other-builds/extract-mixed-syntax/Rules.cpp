@@ -38,13 +38,13 @@ Rules::~Rules() {
 	// TODO Auto-generated destructor stub
 }
 
-void Rules::CreateRules()
+void Rules::CreateRules(const Parameter &params)
 {
 	while (!m_todoRules.empty()) {
 		Rule *origRule = *m_todoRules.begin();
 		m_todoRules.erase(m_todoRules.begin());
 
-		Extend(*origRule);
+		Extend(*origRule, params);
 
 		if (origRule->IsValid()) {
 			m_keepRules.insert(origRule);
@@ -52,7 +52,7 @@ void Rules::CreateRules()
 	}
 }
 
-void Rules::Extend(const Rule &rule)
+void Rules::Extend(const Rule &rule, const Parameter &params)
 {
 	const ConsistentPhrases &allCPS = m_alignedSentence.GetConsistentPhrases();
 	int sourceMin = rule.GetNextSourcePosForNonTerm();
@@ -67,27 +67,31 @@ void Rules::Extend(const Rule &rule)
 			}
 
 			const ConsistentPhrases::Coll &cps = allCPS.GetColl(sourceStart, sourceEnd);
-			Extend(rule, cps);
+			Extend(rule, cps, params);
 		}
 	}
 }
 
-void Rules::Extend(const Rule &rule, const ConsistentPhrases::Coll &cps)
+void Rules::Extend(const Rule &rule, const ConsistentPhrases::Coll &cps, const Parameter &params)
 {
 	ConsistentPhrases::Coll::const_iterator iter;
 	for (iter = cps.begin(); iter != cps.end(); ++iter) {
 		const ConsistentPhrase &cp = *iter;
-		Extend(rule, cp);
+		Extend(rule, cp, params);
 	}
 }
 
-void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp)
+void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter &params)
 {
 	Rule *newRule = new Rule(rule, cp);
-	m_todoRules.insert(newRule);
+	newRule->Prevalidate(params);
+
+	if (newRule->CanRecurse()) {
+		m_todoRules.insert(newRule);
+	}
 
 	// recursively extend
-	Extend(*newRule);
+	Extend(*newRule, params);
 }
 
 std::string Rules::Debug() const

@@ -11,6 +11,7 @@
 class ConsistentPhrase;
 class AlignedSentence;
 class NonTerm;
+class Parameter;
 
 class RulePhrase : public std::vector<const RuleSymbol*>
 {
@@ -44,6 +45,8 @@ public:
 
 	std::string Debug() const;
 	void Output(std::ostream &out) const;
+
+	void Prevalidate(const Parameter &params);
 
 protected:
 	const NonTerm &m_nonTerm;
