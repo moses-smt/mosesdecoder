@@ -23,14 +23,14 @@ Rule::Rule(const NonTerm &lhsNonTerm, const AlignedSentence &alignedSentence)
 	CreateSource();
 }
 
-Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
+Rule::Rule(const Rule &copy, const NonTerm &nonTerm)
 :m_nonTerm(copy.m_nonTerm)
 ,m_alignedSentence(copy.m_alignedSentence)
 ,m_isValid(true)
 ,m_canRecurse(true)
 ,m_nonterms(copy.m_nonterms)
 {
-	m_nonterms.push_back(&cp.GetNonTerm());
+	m_nonterms.push_back(&nonTerm);
 	CreateSource();
 
 }

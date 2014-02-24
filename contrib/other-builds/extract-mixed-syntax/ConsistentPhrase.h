@@ -32,11 +32,6 @@ public:
 
 	void AddNonTerms(const std::string &source,
 						const std::string &target);
-	const NonTerm &GetNonTerm() const
-	{
-		assert(m_nonTerms.size() == 1);
-		return m_nonTerms[0];
-	}
 	const NonTerms &GetNonTerms() const
 	{ return m_nonTerms;}
 

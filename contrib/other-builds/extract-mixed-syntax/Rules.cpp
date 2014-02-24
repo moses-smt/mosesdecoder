@@ -94,18 +94,23 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrases::Coll &cps, const P
 
 void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter &params)
 {
-	Rule *newRule = new Rule(rule, cp);
-	newRule->Prevalidate(params);
+	const ConsistentPhrase::NonTerms &nonTerms = cp.GetNonTerms();
+	for (size_t i = 0; i < nonTerms.size(); ++i) {
+		const NonTerm &nonTerm = nonTerms[i];
 
-	if (newRule->IsValid()) {
-		m_keepRules.insert(newRule);
-	}
-	if (newRule->CanRecurse()) {
-		m_todoRules.insert(newRule);
-	}
+		Rule *newRule = new Rule(rule, nonTerm);
+		newRule->Prevalidate(params);
 
-	// recursively extend
-	Extend(*newRule, params);
+		if (newRule->IsValid()) {
+			m_keepRules.insert(newRule);
+		}
+		if (newRule->CanRecurse()) {
+			m_todoRules.insert(newRule);
+		}
+
+		// recursively extend
+		Extend(*newRule, params);
+	}
 }
 
 std::string Rules::Debug() const

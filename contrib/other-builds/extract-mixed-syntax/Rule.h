@@ -26,7 +26,7 @@ public:
 	Rule(const NonTerm &lhsNonTerm, const AlignedSentence &alignedSentence);
 
 	// extend a rule, adding 1 new non-term
-	Rule(const Rule &copy, const ConsistentPhrase &cp);
+	Rule(const Rule &copy, const NonTerm &nonTerm);
 
 	virtual ~Rule();
 
