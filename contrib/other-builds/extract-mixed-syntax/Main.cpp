@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 	  alignedSentence.CreateConsistentPhrases(params);
 	  cerr << alignedSentence.Debug();
 
-	  Rules rules(alignedSentence);
+	  Rules rules(alignedSentence, params);
 	  rules.Extend(params);
 	  cerr << rules.Debug();
 

@@ -184,6 +184,29 @@ void Rule::Prevalidate(const Parameter &params)
 	  }
   }
 
+  //check to see if it overlaps with any other non-terms
+  if (m_nonterms.size() >= 2) {
+	  const NonTerm &lastNonTerm = *m_nonterms.back();
 
+	  for (size_t i = 0; i < m_nonterms.size() - 1; ++i) {
+		  const NonTerm *arc = m_nonterms[i];
+		  /*
+		  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(arc);
+		  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
+
+		  if (lastTargetRange.Overlap(targetRange)) {
+			  m_isValid = false;
+			  m_canExtend = false;
+			  return;
+		  }
+		  */
+	  }
+  }
+}
+
+void Rule::CreateTargetPhrase(const AlignedSentence &alignedSentence,
+				const Parameter &params)
+{
 
 }
+

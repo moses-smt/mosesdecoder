@@ -17,7 +17,7 @@ class Parameter;
 
 class Rules {
 public:
-	Rules(const AlignedSentence &alignedSentence);
+	Rules(const AlignedSentence &alignedSentence, const Parameter &params);
 	virtual ~Rules();
 	void Extend(const Parameter &params);
 
@@ -33,7 +33,8 @@ protected:
 	void Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter &params);
 
 	// create original rules
-	void CreateRules(const ConsistentPhrase &cp, const AlignedSentence &alignedSentence);
+	void CreateRules(const ConsistentPhrase &cp,
+			const Parameter &params);
 
 };
 

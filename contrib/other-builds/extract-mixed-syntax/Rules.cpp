@@ -14,7 +14,7 @@
 
 using namespace std;
 
-Rules::Rules(const AlignedSentence &alignedSentence)
+Rules::Rules(const AlignedSentence &alignedSentence, const Parameter &params)
 :m_alignedSentence(alignedSentence)
 {
 	const ConsistentPhrases &allCPS = alignedSentence.GetConsistentPhrases();
@@ -27,7 +27,7 @@ Rules::Rules(const AlignedSentence &alignedSentence)
 			ConsistentPhrases::Coll::const_iterator iter;
 			for (iter = cps.begin(); iter != cps.end(); ++iter) {
 				const ConsistentPhrase &cp = *iter;
-				CreateRules(cp, alignedSentence);
+				CreateRules(cp, params);
 			}
 		}
 	}
@@ -37,12 +37,15 @@ Rules::~Rules() {
 	// TODO Auto-generated destructor stub
 }
 
-void Rules::CreateRules(const ConsistentPhrase &cp, const AlignedSentence &alignedSentence)
+void Rules::CreateRules(const ConsistentPhrase &cp,
+		const Parameter &params)
 {
 	const ConsistentPhrase::NonTerms &nonTerms = cp.GetNonTerms();
 	for (size_t i = 0; i < nonTerms.size(); ++i) {
 		const NonTerm &nonTerm = nonTerms[i];
-		Rule *rule = new Rule(nonTerm, alignedSentence);
+		Rule *rule = new Rule(nonTerm, m_alignedSentence);
+		rule->Prevalidate(params);
+		rule->CreateTargetPhrase(m_alignedSentence, params);
 
 		if (rule->IsValid()) {
 			m_keepRules.insert(rule);
@@ -100,6 +103,7 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter
 
 		Rule *newRule = new Rule(rule, nonTerm);
 		newRule->Prevalidate(params);
+		newRule->CreateTargetPhrase(m_alignedSentence, params);
 
 		if (newRule->IsValid()) {
 			m_keepRules.insert(newRule);
