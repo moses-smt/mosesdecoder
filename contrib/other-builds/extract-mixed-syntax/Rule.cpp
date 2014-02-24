@@ -155,5 +155,22 @@ void Rule::Prevalidate(const Parameter &params)
 	  }
   }
 
+  // check number of non-terms
+  int numNonTerms = 0;
+  for (size_t i = 0; i < m_source.size(); ++i) {
+	  const RuleSymbol *arc = m_source[i];
+	  if (arc->IsNonTerm()) {
+		  ++numNonTerms;
+	  }
+  }
+
+  if (numNonTerms >= params.maxNonTerm) {
+	  m_canRecurse = false;
+	  if (numNonTerms > params.maxNonTerm) {
+		  m_isValid = false;
+		  return;
+	  }
+  }
+
 
 }

@@ -22,6 +22,9 @@ public:
 	const ConsistentPhrase &GetConsistentPhrase() const
 	{ return m_consistentPhrase; }
 
+	virtual bool IsNonTerm() const
+	{ return true; }
+
 	virtual std::string Debug() const;
 	virtual void Output(std::ostream &out) const;
   void Output(std::ostream &out, Moses::FactorDirection direction) const;
