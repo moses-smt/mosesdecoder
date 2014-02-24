@@ -8,7 +8,7 @@
 #include <sstream>
 #include "NonTerm.h"
 #include "Word.h"
-#include "ConsistentPhrase.h".h"
+#include "ConsistentPhrase.h"
 
 using namespace std;
 

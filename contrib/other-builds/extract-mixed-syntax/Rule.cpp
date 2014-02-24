@@ -10,6 +10,7 @@
 #include "AlignedSentence.h"
 #include "ConsistentPhrase.h"
 #include "NonTerm.h"
+#include "Parameter.h"
 
 using namespace std;
 
@@ -146,5 +147,13 @@ void Rule::Output(std::ostream &out) const
 
 void Rule::Prevalidate(const Parameter &params)
 {
+  if (m_source.size() >= params.maxSymbolsSource) {
+	  m_canRecurse = false;
+	  if (m_source.size() > params.maxSymbolsSource) {
+		  m_isValid = false;
+		  return;
+	  }
+  }
+
 
 }

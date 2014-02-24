@@ -11,10 +11,9 @@
 #include <vector>
 #include <iostream>
 #include "moses/TypeDef.h"
-#include "RuleSymbol.h"
 #include "NonTerm.h"
 
-class ConsistentPhrase : public RuleSymbol
+class ConsistentPhrase
 {
 public:
 	typedef std::vector<NonTerm> NonTerms;
