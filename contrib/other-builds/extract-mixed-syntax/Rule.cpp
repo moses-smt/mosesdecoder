@@ -172,5 +172,18 @@ void Rule::Prevalidate(const Parameter &params)
 	  }
   }
 
+  // check if 2 consecutive non-terms in source
+  if (!params.nonTermConsecSource && m_nonterms.size() >= 2) {
+	  const NonTerm &lastNonTerm = *m_nonterms.back();
+	  const NonTerm &secondLastNonTerm = *m_nonterms[m_nonterms.size() - 2];
+	  if (secondLastNonTerm.GetConsistentPhrase().corners[1] + 1 ==
+			  lastNonTerm.GetConsistentPhrase().corners[0]) {
+		  m_isValid = false;
+		  m_canRecurse = false;
+		  return;
+	  }
+  }
+
+
 
 }
