@@ -51,7 +51,7 @@ namespace po = boost::program_options;
 
 ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv)
 {
-  vector<ValType> stats(3, 0);
+  vector<ValType> stats(7, 0);
   for(train->reset(); !train->finished(); train->next()) {
     // Find max model
     size_t max_index=0;
@@ -182,7 +182,7 @@ int main(int argc, char** argv)
   MiraWeightVector wv(initParams);
 
   // Initialize background corpus
-  vector<ValType> bg(3, 1);
+  vector<ValType> bg(7, 1);
 
   // Training loop
   boost::scoped_ptr<HypPackEnumerator> train;

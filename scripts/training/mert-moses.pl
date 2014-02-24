@@ -590,6 +590,7 @@ for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
   }
 }
 
+my %dummy; # sparse features
 if ($continue) {
   # getting the last finished step
   print STDERR "Trying to continue an interrupted optimization.\n";
@@ -656,8 +657,12 @@ if ($continue) {
     print STDERR "All needed data are available\n";
     print STDERR "Loading information from last step ($step)\n";
 
-    my %dummy; # sparse features
     ($bestpoint, $devbleu) = &get_weights_from_mert("run$step.$mert_outfile","run$step.$mert_logfile", scalar @{$featlist->{"names"}}, \%dummy);
+    
+    if (scalar keys %dummy) {
+      $sparse_weights_file = "run" . $step . ".sparse-weights";
+    }
+    
     die "Failed to parse mert.log, missed Best point there."
       if !defined $bestpoint || !defined $devbleu;
     print "($step) BEST at $step $bestpoint => $devbleu at ".`date`;
@@ -1014,7 +1019,7 @@ while (1) {
   }
 
   $featlist->{"values"} = \@newweights;
-
+  
   if (scalar keys %sparse_weights) {
     $sparse_weights_file = "run" . ($run + 1) . ".sparse-weights";
     open my $sparse_fh, '>', $sparse_weights_file or die "$sparse_weights_file: $!";
@@ -1108,7 +1113,7 @@ if($___RETURN_BEST_DEV) {
   }
   print "copying weights from best iteration ($bestit, bleu=$bestbleu) to moses.ini\n";
   my $best_sparse_file = undef;
-  if(defined $sparse_weights_file) {
+  if(-e "run$bestit.sparse-weights") {
       $best_sparse_file = "run$bestit.sparse-weights";
   }
   my $best_featlist = get_featlist_from_file("run$bestit.dense");

@@ -7,21 +7,20 @@
 
 #include <boost/lexical_cast.hpp>
 
+
 using namespace std;
 using namespace boost::python;
 
 namespace MosesTuning
 {
 
-
 M2Scorer::M2Scorer(const string& config)
   : StatisticsBasedScorer("M2Scorer", config),
-    beta_(getConfig("beta", "0.5")),
-    max_unchanged_words_(getConfig("max_unchanged_words", "2")),
-    ignore_whitespace_casing_(getConfig("ignore_whitespace_casing", "false"))
+    beta_(Scan<float>(getConfig("beta", "0.5"))),
+    max_unchanged_words_(Scan<int>(getConfig("max_unchanged_words", "2"))),
+    ignore_whitespace_casing_(Scan<bool>(getConfig("ignore_whitespace_casing", "false")))
 {
   Py_Initialize();
-
   object main_module = import("__main__");
   main_namespace_ = main_module.attr("__dict__");
   exec(code(), main_namespace_);
@@ -30,21 +29,21 @@ M2Scorer::M2Scorer(const string& config)
 void M2Scorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   for(size_t i = 0; i < referenceFiles.size(); ++i) {
-    std::stringstream call;
-    call << "m2 = M2Obj(\"\"\""
-      << referenceFiles[i] << "\"\"\", "
-      << beta_ << ", "
-      << max_unchanged_words_ << ", "
-      << (ignore_whitespace_casing_ == "true" ? "True" : "False") << ")";
     
-    exec(call.str().c_str(), main_namespace_);
+    m2_ = main_namespace_["M2Obj"](
+        referenceFiles[i],
+        beta_,
+        max_unchanged_words_,
+        ignore_whitespace_casing_
+    );
+    
     break;
   }
 }
 
 void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
-  string sentence = this->preprocessSentence(text);
+  string sentence = trimStr(this->preprocessSentence(text));
   
   if(seen_.count(sentence) != 0) {
     entry.set(seen_[sentence]);
@@ -53,17 +52,15 @@ void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   
   std::vector<int> stats;
   
-  std::stringstream call;
-  call << "(correct, proposed, gold) = m2.sufstats(\"\"\"" << sentence << "\"\"\", " << sid << ")";
-  exec(call.str().c_str(), main_namespace_);
+  boost::python::object list = m2_.attr("sufstats")(sentence, sid);
   
-  int correct = extract<int>(main_namespace_["correct"]);
-  int proposed = extract<int>(main_namespace_["proposed"]);
-  int gold = extract<int>(main_namespace_["gold"]);
-
+  int correct = extract<int>(list[0]);
+  int proposed = extract<int>(list[1]);
+  int gold = extract<int>(list[2]);
+  
   stats.push_back(correct);
   stats.push_back(proposed);
-  stats.push_back(gold);    
+  stats.push_back(gold);
   
   seen_[sentence] = stats;
   entry.set(stats);
@@ -127,7 +124,7 @@ float sentenceBackgroundM2(const std::vector<float>& stats, const std::vector<fl
   return f;
 }
 
-float sentenceSmoothingM2(const std::vector<float>& stats, float smoothing)
+float sentenceScaledM2(const std::vector<float>& stats)
 {
   float beta = 0.5;
   
@@ -135,6 +132,8 @@ float sentenceSmoothingM2(const std::vector<float>& stats, float smoothing)
   float r = 0.0;
   float f = 0.0;
     
+  float smoothing = 0.0;  
+  
   if(stats[1] + smoothing != 0)
     p = (stats[0] + smoothing) / (stats[1] + smoothing);
   else
