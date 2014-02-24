@@ -53,7 +53,7 @@ void Rules::CreateRules(const ConsistentPhrase &cp, const AlignedSentence &align
 	}
 }
 
-void Rules::CreateRules(const Parameter &params)
+void Rules::Extend(const Parameter &params)
 {
 	while (!m_todoRules.empty()) {
 		Rule *origRule = *m_todoRules.begin();

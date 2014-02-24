@@ -19,7 +19,7 @@ class Rules {
 public:
 	Rules(const AlignedSentence &alignedSentence);
 	virtual ~Rules();
-	void CreateRules(const Parameter &params);
+	void Extend(const Parameter &params);
 
 	std::string Debug() const;
 	void Output(std::ostream &out) const;
