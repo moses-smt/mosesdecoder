@@ -36,8 +36,8 @@ public:
 	bool CanRecurse() const
 	{ return m_canRecurse; }
 
-	const NonTerm &GetNonTerm() const
-	{ return m_nonTerm; }
+	const NonTerm &GetLHS() const
+	{ return m_lhs; }
 
 	const ConsistentPhrase &GetConsistentPhrase() const;
 
@@ -49,7 +49,7 @@ public:
 	void Prevalidate(const Parameter &params);
 
 protected:
-	const NonTerm &m_nonTerm;
+	const NonTerm &m_lhs;
 	const AlignedSentence &m_alignedSentence;
 	RulePhrase m_source, m_target;
 
