@@ -37,7 +37,7 @@ void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
   					sourceEnd,
   					targetStart,
   					targetEnd);
-  cp.AddNonTerms("[XXXX]", "[ZZZZ]");
+  cp.AddNonTerms("[X]", "[Z]");
   cerr << "OLD From:" << cp.corners[0] <<
 		  " TO " << cp.corners[1] << endl;
 

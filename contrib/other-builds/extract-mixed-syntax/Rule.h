@@ -51,7 +51,7 @@ protected:
 	RulePhrase m_source, m_target;
 
 	// in source order
-	std::vector<const ConsistentPhrase*> m_nonterms;
+	std::vector<const NonTerm*> m_nonterms;
 
 	bool m_isValid, m_canRecurse;
 

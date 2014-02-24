@@ -29,7 +29,7 @@ Rule::Rule(const Rule &copy, const ConsistentPhrase &cp)
 ,m_canRecurse(true)
 ,m_nonterms(copy.m_nonterms)
 {
-	m_nonterms.push_back(&cp);
+	m_nonterms.push_back(&cp.GetNonTerm());
 	CreateSource();
 }
 
@@ -42,7 +42,7 @@ const ConsistentPhrase &Rule::GetConsistentPhrase() const
 
 void Rule::CreateSource()
 {
-  const ConsistentPhrase *cp = NULL;
+  const NonTerm *cp = NULL;
   size_t nonTermInd = 0;
   if (nonTermInd < m_nonterms.size()) {
 	  cp = m_nonterms[nonTermInd];
@@ -53,10 +53,10 @@ void Rule::CreateSource()
 		  ++sourcePos) {
 
 	  const RuleSymbol *ruleSymbol;
-	  if (cp && cp->corners[0] <= sourcePos && sourcePos <= cp->corners[1]) {
+	  if (cp && cp->GetConsistentPhrase().corners[0] <= sourcePos && sourcePos <= cp->GetConsistentPhrase().corners[1]) {
 		  // replace words with non-term
 		  ruleSymbol = cp;
-		  sourcePos = cp->corners[1];
+		  sourcePos = cp->GetConsistentPhrase().corners[1];
 		  if (m_nonterms.size()) {
 			  cp = m_nonterms[nonTermInd];
 		  }
@@ -87,7 +87,7 @@ int Rule::GetNextSourcePosForNonTerm() const
 	}
 	else {
 		// next non-term can start just left of previous
-		const ConsistentPhrase &cp = *m_nonterms.back();
+		const ConsistentPhrase &cp = m_nonterms.back()->GetConsistentPhrase();
 		int nextPos = cp.corners[1] + 1;
 		if (nextPos >= m_alignedSentence.GetPhrase(Moses::Input).size()) {
 			return -1;
