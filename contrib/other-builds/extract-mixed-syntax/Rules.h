@@ -32,5 +32,8 @@ protected:
 	void Extend(const Rule &rule, const ConsistentPhrases::Coll &cps, const Parameter &params);
 	void Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter &params);
 
+	// create original rules
+	void CreateRules(const ConsistentPhrase &cp, const AlignedSentence &alignedSentence);
+
 };
 

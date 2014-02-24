@@ -7,6 +7,7 @@
 
 #include <sstream>
 #include "Rules.h"
+#include "ConsistentPhrase.h"
 #include "ConsistentPhrases.h"
 #include "AlignedSentence.h"
 #include "Rule.h"
@@ -26,16 +27,7 @@ Rules::Rules(const AlignedSentence &alignedSentence)
 			ConsistentPhrases::Coll::const_iterator iter;
 			for (iter = cps.begin(); iter != cps.end(); ++iter) {
 				const ConsistentPhrase &cp = *iter;
-
-				Rule *rule = new Rule(cp, alignedSentence);
-
-				if (rule->IsValid()) {
-					m_keepRules.insert(rule);
-				}
-				if (rule->CanRecurse()) {
-					m_todoRules.insert(rule);
-				}
-
+				CreateRules(cp, alignedSentence);
 			}
 		}
 	}
@@ -43,6 +35,22 @@ Rules::Rules(const AlignedSentence &alignedSentence)
 
 Rules::~Rules() {
 	// TODO Auto-generated destructor stub
+}
+
+void Rules::CreateRules(const ConsistentPhrase &cp, const AlignedSentence &alignedSentence)
+{
+	const ConsistentPhrase::NonTerms &nonTerms = cp.GetNonTerms();
+	for (size_t i = 0; i < nonTerms.size(); ++i) {
+		const NonTerm &nonTerm = nonTerms[i];
+		Rule *rule = new Rule(nonTerm, alignedSentence);
+
+		if (rule->IsValid()) {
+			m_keepRules.insert(rule);
+		}
+		if (rule->CanRecurse()) {
+			m_todoRules.insert(rule);
+		}
+	}
 }
 
 void Rules::CreateRules(const Parameter &params)

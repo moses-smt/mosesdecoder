@@ -14,8 +14,8 @@
 
 using namespace std;
 
-Rule::Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence)
-:m_nonTerm(consistentPhrase.GetNonTerm())
+Rule::Rule(const NonTerm &lhsNonTerm, const AlignedSentence &alignedSentence)
+:m_nonTerm(lhsNonTerm)
 ,m_alignedSentence(alignedSentence)
 ,m_isValid(true)
 ,m_canRecurse(true)

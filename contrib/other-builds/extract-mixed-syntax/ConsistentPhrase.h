@@ -37,6 +37,8 @@ public:
 		assert(m_nonTerms.size() == 1);
 		return m_nonTerms[0];
 	}
+	const NonTerms &GetNonTerms() const
+	{ return m_nonTerms;}
 
   bool operator<(const ConsistentPhrase &other) const;
 

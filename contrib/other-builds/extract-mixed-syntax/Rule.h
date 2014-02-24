@@ -23,7 +23,7 @@ public:
 	Rule(const Rule &copy); // do not implement
 
 	// original rule with no non-term
-	Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence);
+	Rule(const NonTerm &lhsNonTerm, const AlignedSentence &alignedSentence);
 
 	// extend a rule, adding 1 new non-term
 	Rule(const Rule &copy, const ConsistentPhrase &cp);
