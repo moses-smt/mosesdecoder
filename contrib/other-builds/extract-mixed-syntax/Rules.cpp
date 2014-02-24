@@ -28,7 +28,14 @@ Rules::Rules(const AlignedSentence &alignedSentence)
 				const ConsistentPhrase &cp = *iter;
 
 				Rule *rule = new Rule(cp, alignedSentence);
-				m_todoRules.insert(rule);
+
+				if (rule->IsValid()) {
+					m_keepRules.insert(rule);
+				}
+				if (rule->CanRecurse()) {
+					m_todoRules.insert(rule);
+				}
+
 			}
 		}
 	}
@@ -45,10 +52,6 @@ void Rules::CreateRules(const Parameter &params)
 		m_todoRules.erase(m_todoRules.begin());
 
 		Extend(*origRule, params);
-
-		if (origRule->IsValid()) {
-			m_keepRules.insert(origRule);
-		}
 	}
 }
 
@@ -86,6 +89,9 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter
 	Rule *newRule = new Rule(rule, cp);
 	newRule->Prevalidate(params);
 
+	if (newRule->IsValid()) {
+		m_keepRules.insert(newRule);
+	}
 	if (newRule->CanRecurse()) {
 		m_todoRules.insert(newRule);
 	}
