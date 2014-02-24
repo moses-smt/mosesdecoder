@@ -212,8 +212,7 @@ class SortByTargetPos
 	}
 };
 
-void Rule::CreateTarget(const AlignedSentence &alignedSentence,
-				const Parameter &params)
+void Rule::CreateTarget(const Parameter &params)
 {
   if (!m_isValid) {
 	  return;

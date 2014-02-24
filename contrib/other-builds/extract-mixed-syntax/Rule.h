@@ -47,8 +47,7 @@ public:
 	void Output(std::ostream &out) const;
 
 	void Prevalidate(const Parameter &params);
-	void CreateTarget(const AlignedSentence &alignedSentence,
-					const Parameter &params);
+	void CreateTarget(const Parameter &params);
 
 protected:
 	const NonTerm &m_lhs;
