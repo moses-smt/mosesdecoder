@@ -7,6 +7,7 @@
 #pragma once
 #include <string>
 #include "RuleSymbol.h"
+#include "moses/TypeDef.h"
 
 class ConsistentPhrase;
 
@@ -18,11 +19,14 @@ public:
 			const std::string &target);
 	virtual ~NonTerm();
 
-	const ConsistentPhrase &GetConsistentPhrase()
+	const ConsistentPhrase &GetConsistentPhrase() const
 	{ return m_consistentPhrase; }
 
 	virtual std::string Debug() const;
 	virtual void Output(std::ostream &out) const;
+  void Output(std::ostream &out, Moses::FactorDirection direction) const;
+
+  const std::string &GetLabel(Moses::FactorDirection direction) const;
 
 protected:
 	const ConsistentPhrase &m_consistentPhrase;

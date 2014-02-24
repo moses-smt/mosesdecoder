@@ -8,6 +8,7 @@
 #include <sstream>
 #include "NonTerm.h"
 #include "Word.h"
+#include "ConsistentPhrase.h".h"
 
 using namespace std;
 
@@ -30,6 +31,7 @@ std::string NonTerm::Debug() const
 {
   stringstream out;
   out << m_source << m_target;
+  out << "m_consistentPhrase=" << m_consistentPhrase.Debug();
   return out.str();
 }
 
@@ -38,3 +40,12 @@ void NonTerm::Output(std::ostream &out) const
   out << m_source << m_target;
 }
 
+void NonTerm::Output(std::ostream &out, Moses::FactorDirection direction) const
+{
+	out << GetLabel(direction);
+}
+
+const std::string &NonTerm::GetLabel(Moses::FactorDirection direction) const
+{
+  return (direction == Moses::Input) ? m_source : m_target;
+}

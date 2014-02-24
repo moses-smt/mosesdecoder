@@ -9,11 +9,12 @@
 #include "Rule.h"
 #include "AlignedSentence.h"
 #include "ConsistentPhrase.h"
+#include "NonTerm.h"
 
 using namespace std;
 
 Rule::Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence)
-:m_nonTerm(consistentPhrase)
+:m_nonTerm(consistentPhrase.GetNonTerm())
 ,m_alignedSentence(alignedSentence)
 ,m_isValid(true)
 ,m_canRecurse(true)
@@ -36,6 +37,9 @@ Rule::~Rule() {
 	// TODO Auto-generated destructor stub
 }
 
+const ConsistentPhrase &Rule::GetConsistentPhrase() const
+{ return m_nonTerm.GetConsistentPhrase(); }
+
 void Rule::CreateSource()
 {
   const ConsistentPhrase *cp = NULL;
@@ -44,8 +48,8 @@ void Rule::CreateSource()
 	  cp = m_nonterms[nonTermInd];
   }
 
-  for (int sourcePos = m_nonTerm.corners[0];
-		  sourcePos <= m_nonTerm.corners[1];
+  for (int sourcePos = m_nonTerm.GetConsistentPhrase().corners[0];
+		  sourcePos <= m_nonTerm.GetConsistentPhrase().corners[1];
 		  ++sourcePos) {
 
 	  const RuleSymbol *ruleSymbol;
@@ -67,6 +71,7 @@ void Rule::CreateSource()
 		  }
 	  }
 	  else {
+		  // terminal
 		  ruleSymbol = m_alignedSentence.GetPhrase(Moses::Input)[sourcePos];
 	  }
 
@@ -78,7 +83,7 @@ int Rule::GetNextSourcePosForNonTerm() const
 {
 	if (m_nonterms.empty()) {
 		// no non-terms so far. Can start next non-term on left corner
-		return m_nonTerm.corners[0];
+		return m_nonTerm.GetConsistentPhrase().corners[0];
 	}
 	else {
 		// next non-term can start just left of previous

@@ -10,6 +10,7 @@
 
 class ConsistentPhrase;
 class AlignedSentence;
+class NonTerm;
 
 class RulePhrase : public std::vector<const RuleSymbol*>
 {
@@ -18,6 +19,8 @@ class RulePhrase : public std::vector<const RuleSymbol*>
 
 class Rule {
 public:
+	Rule(const Rule &copy); // do not implement
+
 	// original rule with no non-term
 	Rule(const ConsistentPhrase &consistentPhrase, const AlignedSentence &alignedSentence);
 
@@ -32,8 +35,10 @@ public:
 	bool CanRecurse() const
 	{ return m_canRecurse; }
 
-	const ConsistentPhrase &GetConsistentPhrase() const
+	const NonTerm &GetNonTerm() const
 	{ return m_nonTerm; }
+
+	const ConsistentPhrase &GetConsistentPhrase() const;
 
 	int GetNextSourcePosForNonTerm() const;
 
@@ -41,7 +46,7 @@ public:
 	void Output(std::ostream &out) const;
 
 protected:
-	const ConsistentPhrase &m_nonTerm;
+	const NonTerm &m_nonTerm;
 	const AlignedSentence &m_alignedSentence;
 	RulePhrase m_source, m_target;
 

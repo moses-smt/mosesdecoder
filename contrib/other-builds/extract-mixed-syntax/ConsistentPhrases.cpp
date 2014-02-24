@@ -38,9 +38,15 @@ void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
   					targetStart,
   					targetEnd);
   cp.AddNonTerms("[XXXX]", "[ZZZZ]");
+  cerr << "OLD From:" << cp.corners[0] <<
+		  " TO " << cp.corners[1] << endl;
 
   pair<Coll::iterator, bool> inserted = coll.insert(cp);
   assert(inserted.second);
+
+  const ConsistentPhrase &cpNew = *inserted.first;
+  cerr << "NEW From:" << cp.corners[0] <<
+		  " TO " << cp.corners[1] << endl;
 }
 
 

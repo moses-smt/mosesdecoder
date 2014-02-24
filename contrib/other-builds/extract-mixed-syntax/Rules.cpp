@@ -26,6 +26,7 @@ Rules::Rules(const AlignedSentence &alignedSentence)
 			ConsistentPhrases::Coll::const_iterator iter;
 			for (iter = cps.begin(); iter != cps.end(); ++iter) {
 				const ConsistentPhrase &cp = *iter;
+
 				Rule *rule = new Rule(cp, alignedSentence);
 				m_todoRules.insert(rule);
 			}

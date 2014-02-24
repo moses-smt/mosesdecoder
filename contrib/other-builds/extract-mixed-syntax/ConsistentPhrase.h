@@ -12,16 +12,16 @@
 #include <iostream>
 #include "moses/TypeDef.h"
 #include "RuleSymbol.h"
-
-class NonTerm;
+#include "NonTerm.h"
 
 class ConsistentPhrase : public RuleSymbol
 {
 public:
-	typedef std::vector<NonTerm*> NonTerms;
+	typedef std::vector<NonTerm> NonTerms;
 
 	std::vector<int> corners;
 
+	ConsistentPhrase(const ConsistentPhrase &copy);
 	ConsistentPhrase(int sourceStart, int sourceEnd,
 			int targetStart, int targetEnd);
 
@@ -36,7 +36,7 @@ public:
 	const NonTerm &GetNonTerm() const
 	{
 		assert(m_nonTerms.size() == 1);
-		return *m_nonTerms[0];
+		return m_nonTerms[0];
 	}
 
   bool operator<(const ConsistentPhrase &other) const;
