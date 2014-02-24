@@ -45,7 +45,7 @@ void Rules::CreateRules(const ConsistentPhrase &cp,
 		const NonTerm &nonTerm = nonTerms[i];
 		Rule *rule = new Rule(nonTerm, m_alignedSentence);
 		rule->Prevalidate(params);
-		rule->CreateTargetPhrase(m_alignedSentence, params);
+		rule->CreateTarget(m_alignedSentence, params);
 
 		if (rule->IsValid()) {
 			m_keepRules.insert(rule);
@@ -103,7 +103,7 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter
 
 		Rule *newRule = new Rule(rule, nonTerm);
 		newRule->Prevalidate(params);
-		newRule->CreateTargetPhrase(m_alignedSentence, params);
+		newRule->CreateTarget(m_alignedSentence, params);
 
 		if (newRule->IsValid()) {
 			m_keepRules.insert(newRule);

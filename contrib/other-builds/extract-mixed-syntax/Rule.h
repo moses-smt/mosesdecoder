@@ -47,7 +47,7 @@ public:
 	void Output(std::ostream &out) const;
 
 	void Prevalidate(const Parameter &params);
-	void CreateTargetPhrase(const AlignedSentence &alignedSentence,
+	void CreateTarget(const AlignedSentence &alignedSentence,
 					const Parameter &params);
 
 protected:

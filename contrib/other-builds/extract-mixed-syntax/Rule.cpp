@@ -204,9 +204,59 @@ void Rule::Prevalidate(const Parameter &params)
   }
 }
 
-void Rule::CreateTargetPhrase(const AlignedSentence &alignedSentence,
+class SortByTargetPos
+{
+	bool operator()(const NonTerm *a, const NonTerm *b) {
+
+		return true;
+	}
+};
+
+void Rule::CreateTarget(const AlignedSentence &alignedSentence,
 				const Parameter &params)
 {
+  if (!m_isValid) {
+	  return;
+  }
 
+  vector<const NonTerm*> targetNonTerm(m_nonterms);
+  //std::sort(targetNonTerm, SortByTargetPos);
+
+
+  const NonTerm *cp = NULL;
+  size_t nonTermInd = 0;
+  if (nonTermInd < targetNonTerm.size()) {
+	  cp = targetNonTerm[nonTermInd];
+  }
+
+  for (int targetPos = m_lhs.GetConsistentPhrase().corners[2];
+		  targetPos <= m_lhs.GetConsistentPhrase().corners[3];
+		  ++targetPos) {
+
+	  const RuleSymbol *ruleSymbol;
+	  if (cp && cp->GetConsistentPhrase().corners[2] <= targetPos && targetPos <= cp->GetConsistentPhrase().corners[3]) {
+		  // replace words with non-term
+		  ruleSymbol = cp;
+		  targetPos = cp->GetConsistentPhrase().corners[3];
+		  if (m_nonterms.size()) {
+			  cp = m_nonterms[nonTermInd];
+		  }
+
+		  // move to next non-term
+		  ++nonTermInd;
+		  if (nonTermInd < m_nonterms.size()) {
+			  cp = m_nonterms[nonTermInd];
+		  }
+		  else {
+			  cp = NULL;
+		  }
+	  }
+	  else {
+		  // terminal
+		  ruleSymbol = m_alignedSentence.GetPhrase(Moses::Output)[targetPos];
+	  }
+
+	  m_target.push_back(ruleSymbol);
+  }
 }
 
