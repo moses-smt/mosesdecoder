@@ -43,6 +43,11 @@ public:
 
 	int GetNextSourcePosForNonTerm() const;
 
+	void SetCount(float count)
+	{ m_count = count; }
+	float GetCount() const
+	{ return m_count; }
+
 	std::string Debug() const;
 	void Output(std::ostream &out) const;
 
@@ -53,6 +58,7 @@ protected:
 	const NonTerm &m_lhs;
 	const AlignedSentence &m_alignedSentence;
 	RulePhrase m_source, m_target;
+	float m_count;
 
 	// in source order
 	std::vector<const NonTerm*> m_nonterms;

@@ -62,6 +62,7 @@ int main(int argc, char** argv)
 
 	  Rules rules(alignedSentence);
 	  rules.Extend(params);
+	  rules.Consolidate(params);
 	  cerr << rules.Debug();
 
 	  rules.Output(m_extractFile);

@@ -11,6 +11,7 @@
 #include "ConsistentPhrases.h"
 #include "AlignedSentence.h"
 #include "Rule.h"
+#include "Parameter.h"
 #include "moses/Util.h"
 
 using namespace std;
@@ -142,3 +143,30 @@ void Rules::Output(std::ostream &out) const
 		out << endl;
 	}
 }
+
+void Rules::Consolidate(const Parameter &params)
+{
+	if (params.fractionalCounting) {
+
+	}
+	else {
+		std::set<Rule*>::iterator iter;
+		for (iter = m_keepRules.begin(); iter != m_keepRules.end(); ++iter) {
+			Rule &rule = **iter;
+			rule.SetCount(1);
+		}
+	}
+
+	MergeRules(params);
+}
+
+void Rules::MergeRules(const Parameter &params)
+{
+	std::set<Rule*>::const_iterator iterOrig;
+	for (iterOrig = m_keepRules.begin(); iterOrig != m_keepRules.end(); ++iterOrig) {
+		const Rule *origRule = *iterOrig;
+
+	}
+
+}
+

@@ -21,7 +21,9 @@ public:
 
   bool nonTermConsecSource;
   bool requireAlignedWord;
+  bool fractionalCounting;
 
   bool sourceSyntax, targetSyntax;
+
 };
 
