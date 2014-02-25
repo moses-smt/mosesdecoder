@@ -765,6 +765,9 @@ int main(int argc, char** argv)
         lineCount = 0;
       } else if (header == "print") {
         std::cerr << StaticData::Instance().GetAllWeights() << std::endl;
+      } else if (header == "show-weights") {
+        ShowWeights();
+        std::cout << "END WEIGHTS" << std::endl;
       } else if (header == "wait") {
         pool->Stop(true);
         pool.reset(new ThreadPool(staticData.ThreadCount()));
@@ -799,7 +802,7 @@ int main(int argc, char** argv)
         source = NULL; //make sure it doesn't get deleted
         ++lineCount;
       } else {
-        std::cerr << "Expected header, not " << header << std::endl;
+        std::cerr << "Expected header, not \"" << header << "\"" << std::endl;
         abort();
       }
     }
