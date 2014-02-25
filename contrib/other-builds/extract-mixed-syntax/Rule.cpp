@@ -149,6 +149,11 @@ void Rule::Output(std::ostream &out) const
 	  const std::pair<int,int> &alignPair = *iterAlign;
 	  out << alignPair.first << "-" << alignPair.second << " ";
   }
+
+  out << " ||| ";
+
+  // count
+  out << m_count;
 }
 
 void Rule::Prevalidate(const Parameter &params)
