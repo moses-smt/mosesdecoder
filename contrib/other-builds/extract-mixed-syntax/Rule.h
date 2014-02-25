@@ -20,6 +20,8 @@ class RulePhrase : public std::vector<const RuleSymbol*>
 
 class Rule {
 public:
+	typedef std::set<std::pair<int,int> > Alignments;
+
 	Rule(const Rule &copy); // do not implement
 
 	// original rule with no non-term
@@ -48,6 +50,9 @@ public:
 	float GetCount() const
 	{ return m_count; }
 
+	const Alignments &GetAlignments() const
+	{ return m_alignments; }
+
 	std::string Debug() const;
 	void Output(std::ostream &out) const;
 
@@ -60,7 +65,6 @@ protected:
 	RulePhrase m_source, m_target;
 	float m_count;
 
-	typedef std::set<std::pair<int,int> > Alignments;
 	Alignments m_alignments;
 
 	// in source order
