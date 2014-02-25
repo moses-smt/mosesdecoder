@@ -30,14 +30,15 @@ namespace Moses
   {
     this->init(line);
   }
+#endif
 
   Mmsapt::
   Mmsapt(string const& line)
-    : PhraseDictionary("Mmsapt",line), ofactor(1,0)
+    // : PhraseDictionary("Mmsapt",line), ofactor(1,0)
+    : PhraseDictionary(line), ofactor(1,0)
   {
     this->init(line);
   }
-#endif
 
   void
   Mmsapt::
