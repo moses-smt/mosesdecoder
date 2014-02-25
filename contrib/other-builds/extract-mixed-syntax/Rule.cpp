@@ -203,6 +203,27 @@ void Rule::Prevalidate(const Parameter &params)
 		  }
 	  }
   }
+
+  // check that at least 1 word is aligned
+  if (params.requireAlignedWord) {
+	  m_isValid = false;
+	  for (size_t i = 0; i < m_source.size(); ++i) {
+		  const RuleSymbol &symbol = *m_source[i];
+		  if (!symbol.IsNonTerm()) {
+			  const Word &word = static_cast<const Word&>(symbol);
+			  if (word.GetAlignment().size()) {
+				  m_isValid = true;
+				  break;
+			  }
+		  }
+	  }
+
+	  if (!m_isValid) {
+		  m_canRecurse = false;
+		  return;
+	  }
+  }
+
 }
 
 bool CompareTargetNonTerms(const NonTerm *a, const NonTerm *b)

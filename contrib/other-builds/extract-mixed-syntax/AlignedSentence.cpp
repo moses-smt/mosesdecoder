@@ -89,7 +89,7 @@ std::vector<int> AlignedSentence::GetSourceAlignmentCount() const
 
 	for (size_t i = 0; i < m_source.size(); ++i) {
 		const Word &word = *m_source[i];
-		ret[i] = word.GetAlignment().size();
+		ret[i] = word.GetAlignmentIndex().size();
 	}
 	return ret;
 }
@@ -119,7 +119,7 @@ void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 	  vector< int > usedS = GetSourceAlignmentCount();
 	  for(int ti=startT; ti<=endT; ti++) {
 		const Word &word = *m_target[ti];
-		const std::set<int> &alignment = word.GetAlignment();
+		const std::set<int> &alignment = word.GetAlignmentIndex();
 
 		std::set<int>::const_iterator iterAlign;
 		for(iterAlign = alignment.begin(); iterAlign != alignment.end(); ++iterAlign) {
