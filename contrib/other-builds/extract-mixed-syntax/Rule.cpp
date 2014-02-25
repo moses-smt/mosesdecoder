@@ -151,6 +151,7 @@ void Rule::Prevalidate(const Parameter &params)
   if (m_nonterms.size()) {
 	  const NonTerm &lastNonTerm = *m_nonterms.back();
 	  const ConsistentPhrase &cp = lastNonTerm.GetConsistentPhrase();
+
 	  int sourceWidth = cp.corners[1]  - cp.corners[0] + 1;
 	  if (sourceWidth < params.minHoleSource) {
 		  m_isValid = false;

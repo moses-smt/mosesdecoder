@@ -60,11 +60,11 @@ int main(int argc, char** argv)
 	  alignedSentence.CreateConsistentPhrases(params);
 	  cerr << alignedSentence.Debug();
 
-	  Rules rules(alignedSentence, params);
+	  Rules rules(alignedSentence);
 	  rules.Extend(params);
 	  //cerr << rules.Debug();
 
-	  rules.Output(cout);
+	  rules.Output(m_extractFile);
   }
 
 

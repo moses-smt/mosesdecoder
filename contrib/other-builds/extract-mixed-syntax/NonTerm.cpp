@@ -31,7 +31,7 @@ std::string NonTerm::Debug() const
 {
   stringstream out;
   out << m_source << m_target;
-  out << "m_consistentPhrase=" << m_consistentPhrase->Debug();
+  out << m_consistentPhrase->Debug();
   return out.str();
 }
 

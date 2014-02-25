@@ -17,7 +17,7 @@ class Parameter;
 
 class Rules {
 public:
-	Rules(const AlignedSentence &alignedSentence, const Parameter &params);
+	Rules(const AlignedSentence &alignedSentence);
 	virtual ~Rules();
 	void Extend(const Parameter &params);
 
@@ -26,7 +26,7 @@ public:
 
 protected:
 	const AlignedSentence &m_alignedSentence;
-	std::set<Rule*> m_todoRules, m_keepRules;
+	std::set<Rule*> m_keepRules;
 
 	void Extend(const Rule &rule, const Parameter &params);
 	void Extend(const Rule &rule, const ConsistentPhrases::Coll &cps, const Parameter &params);

@@ -32,21 +32,17 @@ void ConsistentPhrases::Initialize(size_t size)
 void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
 		int targetStart, int targetEnd)
 {
-  Coll &coll = m_coll[sourceStart][sourceEnd - sourceEnd];
+  Coll &coll = m_coll[sourceStart][sourceEnd - sourceStart];
   ConsistentPhrase cp(sourceStart,
   					sourceEnd,
   					targetStart,
   					targetEnd);
-  cp.AddNonTerms("[X]", "[Z]");
-  cerr << "OLD From:" << cp.corners[0] <<
-		  " TO " << cp.corners[1] << endl;
+  cp.AddNonTerms("[X]", "[X]");
 
   pair<Coll::iterator, bool> inserted = coll.insert(cp);
   assert(inserted.second);
 
   const ConsistentPhrase &cpNew = *inserted.first;
-  cerr << "NEW From:" << cp.corners[0] <<
-		  " TO " << cp.corners[1] << endl;
 }
 
 
