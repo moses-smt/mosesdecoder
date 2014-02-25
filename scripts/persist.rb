@@ -39,11 +39,9 @@ else
     command = ENV["MOSES"] + ' ' + Shellwords.join(line) + " -n-best-list /dev/null 100"
     $stderr.puts "Launching " + command
     moses = IO.popen(command, "w+")
-    log = File.new("/fs/tyr1/heafield/mosesdecoder/test/log", "w")
     while c = serv.accept
       c.send_io(moses)
       while l = c.gets
-        log.puts l
         moses.puts l
       end
     end
