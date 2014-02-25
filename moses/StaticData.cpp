@@ -1213,19 +1213,23 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
 	}
   }
 
+  ScoreComponentCollection extraWeights;
+  UTIL_THROW_IF2(!extraWeights.Load(sparseFile), "Failed to load weights file " << sparseFile);
+  m_allWeights.PlusEquals(extraWeights);
+
   // sparse weights
-  InputFileStream sparseStrme(sparseFile);
+  /*InputFileStream sparseStrme(sparseFile);
   string line;
   while (getline(sparseStrme, line)) {
 	  vector<string> toks = Tokenize(line);
 	  UTIL_THROW_IF2(toks.size() != 2, "Incorrect sparse weight format. Should be FFName_spareseName weight");
 
 	  vector<string> names = Tokenize(toks[0], "_");
-	  UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name. Should be FFName_spareseName");
+	  UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name \"" << toks[0] << "\".  Should be FFName_spareseName");
 
       const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
 	  m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
-  }
+  }*/
 }
 
 } // namespace
