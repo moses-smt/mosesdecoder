@@ -138,10 +138,23 @@ void Rule::Output(std::ostream &out) const
 
 void Rule::Prevalidate(const Parameter &params)
 {
+  // check number of source symbols in rule
   if (m_source.size() >= params.maxSymbolsSource) {
 	  m_canRecurse = false;
 	  if (m_source.size() > params.maxSymbolsSource) {
 		  m_isValid = false;
+		  return;
+	  }
+  }
+
+  // check that last non-term added isn't too small
+  if (m_nonterms.size()) {
+	  const NonTerm &lastNonTerm = *m_nonterms.back();
+	  const ConsistentPhrase &cp = lastNonTerm.GetConsistentPhrase();
+	  int sourceWidth = cp.corners[1]  - cp.corners[0] + 1;
+	  if (sourceWidth < params.minHoleSource) {
+		  m_isValid = false;
+		  m_canRecurse = false;
 		  return;
 	  }
   }
