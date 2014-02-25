@@ -154,7 +154,7 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   FactorCollection &collection = FactorCollection::Instance();
   MappingBuilder builder(collection, m_lmIdLookup);
   config.enumerate_vocab = &builder;
-  config.load_method = lazy ? util::LAZY : util::POPULATE_OR_READ;
+  config.load_method = util::READ;//lazy ? util::LAZY : util::POPULATE_OR_READ;
 
   m_ngram.reset(new Model(file.c_str(), config));
 

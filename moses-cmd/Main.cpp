@@ -740,43 +740,73 @@ int main(int argc, char** argv)
     }
 
 #ifdef WITH_THREADS
-    ThreadPool pool(staticData.ThreadCount());
+    boost::scoped_ptr<ThreadPool> pool(new ThreadPool(staticData.ThreadCount()));
 #endif
 
     // main loop over set of input sentences
     InputType* source = NULL;
     size_t lineCount = staticData.GetStartTranslationId();
-    while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
-      IFVERBOSE(1) {
-        ResetUserTime();
-      }
-      // set up task of translating one sentence
-      TranslationTask* task =
-        new TranslationTask(lineCount,source, outputCollector.get(),
-                            nbestCollector.get(),
-                            latticeSamplesCollector.get(),
-                            wordGraphCollector.get(),
-                            searchGraphCollector.get(),
-                            detailedTranslationCollector.get(),
-                            alignmentInfoCollector.get(),
-                            unknownsCollector.get(),
-                            staticData.GetOutputSearchGraphSLF(),
-                            staticData.GetOutputSearchGraphHypergraph());
-      // execute task
+    std::string header;
+    while (std::cin >> header) {
+      if (header == "reweight") {
+        std::string file;
+        std::cin >> file;
+        outputCollector.reset(new OutputCollector(new std::ofstream(file.c_str())));
+        outputCollector->HoldOutputStream();
+        std::cin >> file;
+        nbestCollector.reset(new OutputCollector(new std::ofstream(file.c_str())));
+        nbestCollector->HoldOutputStream();
+        std::cin >> file;
+        std::string dense;
+        getline(std::cin, dense);
+        pool->Stop(true);
+        StaticData::InstanceNonConst().ResetWeights(dense, file);
+        pool.reset(new ThreadPool(staticData.ThreadCount()));
+        lineCount = 0;
+      } else if (header == "print") {
+        std::cerr << StaticData::Instance().GetAllWeights() << std::endl;
+      } else if (header == "wait") {
+        pool->Stop(true);
+        pool.reset(new ThreadPool(staticData.ThreadCount()));
+        outputCollector->Flush();
+        nbestCollector->Flush();
+        std::cout << "Waited" << std::endl;
+      } else if (header == "translate") {
+        if (!ReadInput(*ioWrapper,staticData.GetInputType(),source)) break;
+        IFVERBOSE(1) {
+          ResetUserTime();
+        }
+        // set up task of translating one sentence
+        TranslationTask* task =
+          new TranslationTask(lineCount,source, outputCollector.get(),
+              nbestCollector.get(),
+              latticeSamplesCollector.get(),
+              wordGraphCollector.get(),
+              searchGraphCollector.get(),
+              detailedTranslationCollector.get(),
+              alignmentInfoCollector.get(),
+              unknownsCollector.get(),
+              staticData.GetOutputSearchGraphSLF(),
+              staticData.GetOutputSearchGraphHypergraph());
+        // execute task
 #ifdef WITH_THREADS
-      pool.Submit(task);
+        pool->Submit(task);
 #else
-      task->Run();
-      delete task;
+        task->Run();
+        delete task;
 #endif
 
-      source = NULL; //make sure it doesn't get deleted
-      ++lineCount;
+        source = NULL; //make sure it doesn't get deleted
+        ++lineCount;
+      } else {
+        std::cerr << "Expected header, not " << header << std::endl;
+        abort();
+      }
     }
 
     // we are done, finishing up
 #ifdef WITH_THREADS
-    pool.Stop(true); //flush remaining jobs
+    pool->Stop(true); //flush remaining jobs
 #endif
 
     delete ioWrapper;

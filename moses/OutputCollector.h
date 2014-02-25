@@ -65,6 +65,11 @@ public:
     return (m_outStream == &std::cout);
   }
 
+  void Flush() {
+    *m_outStream << std::flush;
+    *m_debugStream << std::flush;
+  }
+
   /**
     * Write or cache the output, as appropriate.
     **/
@@ -74,18 +79,18 @@ public:
 #endif
     if (sourceId == m_nextOutput) {
       //This is the one we were expecting
-      *m_outStream << output << std::flush;
-      *m_debugStream << debug << std::flush;
+      *m_outStream << output; //<< std::flush;
+      *m_debugStream << debug;// << std::flush;
       ++m_nextOutput;
       //see if there's any more
       std::map<int,std::string>::iterator iter;
       while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
-        *m_outStream << iter->second << std::flush;
+        *m_outStream << iter->second;// << std::flush;
         ++m_nextOutput;
         std::map<int,std::string>::iterator debugIter = m_debugs.find(iter->first);
         m_outputs.erase(iter);
         if (debugIter != m_debugs.end()) {
-          *m_debugStream << debugIter->second << std::flush;
+          *m_debugStream << debugIter->second;// << std::flush;
           m_debugs.erase(debugIter);
         }
       }
