@@ -16,10 +16,10 @@ ConsistentPhrase::ConsistentPhrase(const ConsistentPhrase &copy)
 {
   for (size_t i = 0; i < copy.m_nonTerms.size(); ++i) {
 	  const NonTerm &oldNonTerm = copy.m_nonTerms[i];
-	  m_nonTerms.push_back(NonTerm(
-			  *this,
-			  oldNonTerm.GetLabel(Moses::Input),
-			  oldNonTerm.GetLabel(Moses::Output)));
+
+	  m_nonTerms.push_back(NonTerm (*this,
+  			  oldNonTerm.GetLabel(Moses::Input),
+  			  oldNonTerm.GetLabel(Moses::Output)));
   }
 }
 

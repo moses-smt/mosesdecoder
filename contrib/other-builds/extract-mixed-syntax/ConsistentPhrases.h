@@ -9,7 +9,7 @@
 #include <set>
 #include <vector>
 #include <iostream>
-#include <ConsistentPhrase.h>
+#include "ConsistentPhrase.h"
 
 class Word;
 

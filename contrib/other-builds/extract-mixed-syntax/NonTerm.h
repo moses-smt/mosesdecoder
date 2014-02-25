@@ -14,13 +14,14 @@ class ConsistentPhrase;
 class NonTerm : public RuleSymbol
 {
 public:
+
 	NonTerm(const ConsistentPhrase &consistentPhrase,
 			const std::string &source,
 			const std::string &target);
 	virtual ~NonTerm();
 
 	const ConsistentPhrase &GetConsistentPhrase() const
-	{ return m_consistentPhrase; }
+	{ return *m_consistentPhrase; }
 
 	virtual bool IsNonTerm() const
 	{ return true; }
@@ -32,7 +33,7 @@ public:
   const std::string &GetLabel(Moses::FactorDirection direction) const;
 
 protected:
-	const ConsistentPhrase &m_consistentPhrase;
+	const ConsistentPhrase *m_consistentPhrase;
 	std::string m_source, m_target;
 };
 

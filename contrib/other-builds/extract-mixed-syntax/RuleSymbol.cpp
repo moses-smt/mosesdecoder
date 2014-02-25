@@ -5,7 +5,7 @@
  *      Author: hieu
  */
 
-#include <RuleSymbol.h>
+#include "RuleSymbol.h"
 
 RuleSymbol::RuleSymbol() {
 	// TODO Auto-generated constructor stub

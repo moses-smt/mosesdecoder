@@ -15,7 +15,7 @@ using namespace std;
 NonTerm::NonTerm(const ConsistentPhrase &consistentPhrase,
 				const std::string &source,
 				const std::string &target)
-:m_consistentPhrase(consistentPhrase)
+:m_consistentPhrase(&consistentPhrase)
 ,m_source(source)
 ,m_target(target)
 {
@@ -31,7 +31,7 @@ std::string NonTerm::Debug() const
 {
   stringstream out;
   out << m_source << m_target;
-  out << "m_consistentPhrase=" << m_consistentPhrase.Debug();
+  out << "m_consistentPhrase=" << m_consistentPhrase->Debug();
   return out.str();
 }
 
