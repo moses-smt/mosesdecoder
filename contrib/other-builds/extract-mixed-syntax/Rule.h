@@ -60,11 +60,18 @@ protected:
 	RulePhrase m_source, m_target;
 	float m_count;
 
+	typedef std::set<std::pair<int,int> > Alignments;
+	Alignments m_alignments;
+
 	// in source order
 	std::vector<const NonTerm*> m_nonterms;
 
 	bool m_isValid, m_canRecurse;
 
 	void CreateSource();
+	void CreateAlignments();
+	void CreateAlignments(int sourcePos, const std::set<const Word *> &targetWords);
+	void CreateAlignments(int sourcePos, const RuleSymbol *targetSought);
+
 };
 

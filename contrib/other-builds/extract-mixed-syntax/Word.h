@@ -27,7 +27,7 @@ public:
 
 	void AddAlignment(const Word *other);
 
-	std::set<const Word *> GetAlignment() const
+	const std::set<const Word *> &GetAlignment() const
 	{ return m_alignment; }
 
 	std::set<int> GetAlignmentIndex() const;

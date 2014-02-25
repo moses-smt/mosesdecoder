@@ -108,8 +108,15 @@ std::string Rule::Debug() const
 	  out << symbol.Debug() << " ";
   }
 
+  out << "||| ";
+  Alignments::const_iterator iterAlign;
+  for (iterAlign =  m_alignments.begin(); iterAlign != m_alignments.end(); ++iterAlign) {
+	  const std::pair<int,int> &alignPair = *iterAlign;
+	  out << alignPair.first << "-" << alignPair.second << " ";
+  }
+
   // overall range
-  out << "||| " << m_lhs.Debug();
+  out << "||| LHS=" << m_lhs.Debug();
 
   return out.str();
 }
@@ -134,6 +141,14 @@ void Rule::Output(std::ostream &out) const
   }
   m_lhs.Output(out, Moses::Output);
 
+  out << " ||| ";
+
+  // alignment
+  Alignments::const_iterator iterAlign;
+  for (iterAlign =  m_alignments.begin(); iterAlign != m_alignments.end(); ++iterAlign) {
+	  const std::pair<int,int> &alignPair = *iterAlign;
+	  out << alignPair.first << "-" << alignPair.second << " ";
+  }
 }
 
 void Rule::Prevalidate(const Parameter &params)
@@ -272,5 +287,52 @@ void Rule::CreateTarget(const Parameter &params)
 
 	  m_target.push_back(ruleSymbol);
   }
+
+  CreateAlignments();
+}
+
+
+void Rule::CreateAlignments()
+{
+	int sourceStart = GetConsistentPhrase().corners[0];
+	int targetStart = GetConsistentPhrase().corners[2];
+
+  for (size_t sourcePos = 0; sourcePos < m_source.size(); ++sourcePos) {
+	  const RuleSymbol *symbol = m_source[sourcePos];
+	  if (!symbol->IsNonTerm()) {
+		  // terminals
+		  const Word &sourceWord = static_cast<const Word&>(*symbol);
+		  const std::set<const Word *> &targetWords = sourceWord.GetAlignment();
+		  CreateAlignments(sourcePos, targetWords);
+	  }
+	  else {
+		  // non-terms. same object in both source & target
+		  CreateAlignments(sourcePos, symbol);
+	  }
+  }
+}
+
+void Rule::CreateAlignments(int sourcePos, const std::set<const Word *> &targetWords)
+{
+	std::set<const Word *>::const_iterator iterTarget;
+	for (iterTarget = targetWords.begin(); iterTarget != targetWords.end(); ++iterTarget) {
+		const Word *targetWord = *iterTarget;
+		CreateAlignments(sourcePos, targetWord);
+	}
+}
+
+void Rule::CreateAlignments(int sourcePos, const RuleSymbol *targetSought)
+{
+	// should be in target phrase
+	for (size_t targetPos = 0; targetPos < m_target.size(); ++targetPos) {
+		const RuleSymbol *foundSymbol = m_target[targetPos];
+		if (targetSought == foundSymbol) {
+			pair<int, int> alignPoint(sourcePos, targetPos);
+			m_alignments.insert(alignPoint);
+			return;
+		}
+	}
+
+	throw "not found";
 }
 
