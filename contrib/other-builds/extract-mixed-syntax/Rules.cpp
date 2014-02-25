@@ -11,6 +11,7 @@
 #include "ConsistentPhrases.h"
 #include "AlignedSentence.h"
 #include "Rule.h"
+#include "moses/Util.h"
 
 using namespace std;
 
@@ -20,7 +21,7 @@ Rules::Rules(const AlignedSentence &alignedSentence)
 }
 
 Rules::~Rules() {
-	// TODO Auto-generated destructor stub
+	Moses::RemoveAllInColl(m_keepRules);
 }
 
 void Rules::CreateRules(const ConsistentPhrase &cp,
@@ -33,11 +34,15 @@ void Rules::CreateRules(const ConsistentPhrase &cp,
 		rule->Prevalidate(params);
 		rule->CreateTarget(params);
 
+		if (rule->CanRecurse()) {
+			Extend(*rule, params);
+		}
+
 		if (rule->IsValid()) {
 			m_keepRules.insert(rule);
 		}
-		if (rule->CanRecurse()) {
-			Extend(*rule, params);
+		else {
+			delete rule;
 		}
 	}
 }
@@ -100,14 +105,17 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrase &cp, const Parameter
 		newRule->Prevalidate(params);
 		newRule->CreateTarget(params);
 
-		if (newRule->IsValid()) {
-			m_keepRules.insert(newRule);
-		}
 		if (newRule->CanRecurse()) {
 			// recursively extend
 			Extend(*newRule, params);
 		}
 
+		if (newRule->IsValid()) {
+			m_keepRules.insert(newRule);
+		}
+		else {
+			delete newRule;
+		}
 	}
 }
 
