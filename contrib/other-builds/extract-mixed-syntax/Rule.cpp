@@ -6,6 +6,7 @@
  */
 
 #include <sstream>
+#include <algorithm>
 #include "Rule.h"
 #include "AlignedSentence.h"
 #include "ConsistentPhrase.h"
@@ -65,12 +66,7 @@ void Rule::CreateSource()
 
 		  // move to next non-term
 		  ++nonTermInd;
-		  if (nonTermInd < m_nonterms.size()) {
-			  cp = m_nonterms[nonTermInd];
-		  }
-		  else {
-			  cp = NULL;
-		  }
+		  cp = (nonTermInd < m_nonterms.size()) ? m_nonterms[nonTermInd] : NULL;
 	  }
 	  else {
 		  // terminal
@@ -91,12 +87,7 @@ int Rule::GetNextSourcePosForNonTerm() const
 		// next non-term can start just left of previous
 		const ConsistentPhrase &cp = m_nonterms.back()->GetConsistentPhrase();
 		int nextPos = cp.corners[1] + 1;
-		if (nextPos >= m_alignedSentence.GetPhrase(Moses::Input).size()) {
-			return -1;
-		}
-		else {
-			return nextPos;
-		}
+		return nextPos;
 	}
 }
 
@@ -189,28 +180,23 @@ void Rule::Prevalidate(const Parameter &params)
 	  const NonTerm &lastNonTerm = *m_nonterms.back();
 
 	  for (size_t i = 0; i < m_nonterms.size() - 1; ++i) {
-		  const NonTerm *arc = m_nonterms[i];
-		  /*
-		  const ConsistentRange *sourceRange = static_cast<const ConsistentRange *>(arc);
-		  const ConsistentRange &targetRange = sourceRange->GetOtherRange();
+		  const NonTerm &otherNonTerm = *m_nonterms[i];
+		  bool overlap = lastNonTerm.GetConsistentPhrase().TargetOverlap(otherNonTerm.GetConsistentPhrase());
 
-		  if (lastTargetRange.Overlap(targetRange)) {
+		  if (overlap) {
 			  m_isValid = false;
-			  m_canExtend = false;
+			  m_canRecurse = false;
 			  return;
 		  }
-		  */
 	  }
   }
 }
 
-class SortByTargetPos
+bool CompareTargetNonTerms(const NonTerm *a, const NonTerm *b)
 {
-	bool operator()(const NonTerm *a, const NonTerm *b) {
-
-		return true;
-	}
-};
+	// compare just start target pos
+	return a->GetConsistentPhrase().corners[2] < b->GetConsistentPhrase().corners[2];
+}
 
 void Rule::CreateTarget(const Parameter &params)
 {
@@ -219,8 +205,7 @@ void Rule::CreateTarget(const Parameter &params)
   }
 
   vector<const NonTerm*> targetNonTerm(m_nonterms);
-  //std::sort(targetNonTerm, SortByTargetPos);
-
+  std::sort(targetNonTerm.begin(), targetNonTerm.end(), CompareTargetNonTerms);
 
   const NonTerm *cp = NULL;
   size_t nonTermInd = 0;
@@ -237,18 +222,13 @@ void Rule::CreateTarget(const Parameter &params)
 		  // replace words with non-term
 		  ruleSymbol = cp;
 		  targetPos = cp->GetConsistentPhrase().corners[3];
-		  if (m_nonterms.size()) {
-			  cp = m_nonterms[nonTermInd];
+		  if (targetNonTerm.size()) {
+			  cp = targetNonTerm[nonTermInd];
 		  }
 
 		  // move to next non-term
 		  ++nonTermInd;
-		  if (nonTermInd < m_nonterms.size()) {
-			  cp = m_nonterms[nonTermInd];
-		  }
-		  else {
-			  cp = NULL;
-		  }
+		  cp = (nonTermInd < targetNonTerm.size()) ? targetNonTerm[nonTermInd] : NULL;
 	  }
 	  else {
 		  // terminal

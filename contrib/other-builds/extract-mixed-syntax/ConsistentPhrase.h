@@ -35,6 +35,8 @@ public:
 	const NonTerms &GetNonTerms() const
 	{ return m_nonTerms;}
 
+	bool TargetOverlap(const ConsistentPhrase &other) const;
+
   bool operator<(const ConsistentPhrase &other) const;
 
   std::string Debug() const;

@@ -49,6 +49,14 @@ void ConsistentPhrase::AddNonTerms(const std::string &source,
 	m_nonTerms.push_back(NonTerm(*this, source, target));
 }
 
+bool ConsistentPhrase::TargetOverlap(const ConsistentPhrase &other) const
+{
+	if ( other.corners[3] < corners[2] || other.corners[2] > corners[3])
+		return false;
+
+	return true;
+}
+
 std::string ConsistentPhrase::Debug() const
 {
   stringstream out;
