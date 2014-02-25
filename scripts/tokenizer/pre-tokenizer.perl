@@ -28,7 +28,16 @@ if ($args{'l'} eq "en")
       }
       
   }
+elsif ($args{'l'} eq "fr")
+  {
+    while (<>)
+      {
+	s/\b([[:alpha:]]\')\s+(?=[[:alpha:]])/$1/g;
+	print;
+      }
+  }
 else
-{
+  {
+    
     print while <>;
-}
+  }
