@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 #include "Phrase.h"
+#include "moses/TypeDef.h"
 
 class ConsistentPhrase;
 class AlignedSentence;
@@ -58,6 +59,9 @@ public:
 
 	void Prevalidate(const Parameter &params);
 	void CreateTarget(const Parameter &params);
+
+	const RulePhrase &GetPhrase(Moses::FactorDirection direction) const
+	{ return (direction == Moses::Input) ? m_source : m_target; }
 
 protected:
 	const NonTerm &m_lhs;

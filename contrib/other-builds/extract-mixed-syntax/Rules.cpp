@@ -136,8 +136,8 @@ std::string Rules::Debug() const
 
 void Rules::Output(std::ostream &out) const
 {
-	std::set<Rule*>::const_iterator iter;
-	for (iter = m_keepRules.begin(); iter != m_keepRules.end(); ++iter) {
+	std::set<Rule*, CompareRules>::const_iterator iter;
+	for (iter = m_mergeRules.begin(); iter != m_mergeRules.end(); ++iter) {
 		const Rule &rule = **iter;
 		rule.Output(out);
 		out << endl;
@@ -162,9 +162,19 @@ void Rules::Consolidate(const Parameter &params)
 
 void Rules::MergeRules(const Parameter &params)
 {
+	typedef std::set<Rule*, CompareRules> MergeRules;
+
 	std::set<Rule*>::const_iterator iterOrig;
 	for (iterOrig = m_keepRules.begin(); iterOrig != m_keepRules.end(); ++iterOrig) {
-		const Rule *origRule = *iterOrig;
+		Rule *origRule = *iterOrig;
+
+		pair<MergeRules::iterator, bool> inserted = m_mergeRules.insert(origRule);
+		if (!inserted.second) {
+			// already there, just add count
+			Rule &rule = **inserted.first;
+			float newCount = rule.GetCount() + origRule->GetCount();
+			rule.SetCount(newCount);
+		}
 
 	}
 

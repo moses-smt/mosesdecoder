@@ -18,7 +18,18 @@ class Parameter;
 struct CompareRules {
 	bool operator()(const Rule *a, const Rule *b)
 	{
+		bool lessthan;
 
+		lessthan = a->GetPhrase(Moses::Input) < b->GetPhrase(Moses::Input);
+		if (lessthan) return true;
+
+		lessthan = a->GetPhrase(Moses::Output) < b->GetPhrase(Moses::Output);
+		if (lessthan) return true;
+
+		lessthan = a->GetAlignments() < b->GetAlignments();
+		if (lessthan) return true;
+
+		return false;
 	}
 };
 
