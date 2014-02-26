@@ -29,6 +29,9 @@ struct CompareRules {
 		lessthan = a->GetAlignments() < b->GetAlignments();
 		if (lessthan) return true;
 
+		lessthan = a->GetLHS().GetString() < b->GetLHS().GetString();
+		if (lessthan) return true;
+
 		return false;
 	}
 };
