@@ -64,6 +64,7 @@ protected:
 			const Parameter &params);
 
 	void MergeRules(const Parameter &params);
+	void CalcFractionalCount();
 
 };
 

@@ -151,7 +151,7 @@ void Rules::Output(std::ostream &out) const
 void Rules::Consolidate(const Parameter &params)
 {
 	if (params.fractionalCounting) {
-
+		CalcFractionalCount();
 	}
 	else {
 		std::set<Rule*>::iterator iter;
@@ -179,8 +179,36 @@ void Rules::MergeRules(const Parameter &params)
 			float newCount = rule.GetCount() + origRule->GetCount();
 			rule.SetCount(newCount);
 		}
-
 	}
+}
+
+void Rules::CalcFractionalCount()
+{
+  typedef std::set<Rule*> RuleColl;
+  typedef std::map<const ConsistentPhrase*, RuleColl> RuleByConsistentPhrase;
+  RuleByConsistentPhrase allRules;
+
+  // sort by source AND target ranges
+  std::set<Rule*>::const_iterator iter;
+  for (iter = m_keepRules.begin(); iter != m_keepRules.end(); ++iter) {
+	Rule *rule = *iter;
+	const ConsistentPhrase &cp = rule->GetConsistentPhrase();
+	RuleColl &ruleColl =  allRules[&cp];
+	ruleColl.insert(rule);
+  }
+
+  // fractional count
+  RuleByConsistentPhrase::iterator iterOuter;
+  for (iterOuter = allRules.begin(); iterOuter != allRules.end(); ++iterOuter) {
+	  RuleColl &rules = iterOuter->second;
+
+	  RuleColl::iterator iterInner;
+	  for (iterInner = rules.begin(); iterInner != rules.end(); ++iterInner) {
+		  Rule &rule = **iterInner;
+		  rule.SetCount(1.0f / (float) rules.size());
+	  }
+  }
 
 }
+
 

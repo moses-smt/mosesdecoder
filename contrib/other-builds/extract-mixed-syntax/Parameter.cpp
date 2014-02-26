@@ -14,7 +14,7 @@ Parameter::Parameter()
 ,minHoleSource(2)
 ,nonTermConsecSource(false)
 ,requireAlignedWord(true)
-,fractionalCounting(false)
+,fractionalCounting(true)
 
 ,sourceSyntax(false)
 ,targetSyntax(false)
