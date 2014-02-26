@@ -749,6 +749,7 @@ int main(int argc, char** argv)
     std::string header;
     while (std::cin >> header) {
       if (header == "reweight") {
+        pool->Stop(true);
         std::string file;
         std::cin >> file;
         outputCollector.reset(new OutputCollector(new std::ofstream(file.c_str())));
@@ -759,7 +760,6 @@ int main(int argc, char** argv)
         std::cin >> file;
         std::string dense;
         getline(std::cin, dense);
-        pool->Stop(true);
         StaticData::InstanceNonConst().ResetWeights(dense, file);
         pool.reset(new ThreadPool(staticData.ThreadCount()));
         lineCount = 0;
