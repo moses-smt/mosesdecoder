@@ -752,6 +752,9 @@ public:
   const std::map<Word, std::set<Word> >* Get_Soft_Matches_Reverse() const {
     return &m_soft_matches_map_reverse;
   }
+
+  void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
+
 };
 
 }

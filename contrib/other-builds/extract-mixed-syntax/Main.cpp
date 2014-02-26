@@ -5,6 +5,7 @@
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 #include "AlignedSentence.h"
+#include "AlignedSentenceSyntax.h"
 #include "Parameter.h"
 #include "Rules.h"
 
@@ -61,17 +62,23 @@ int main(int argc, char** argv)
 	  cerr << "lineAlignment=" << lineAlignment << endl;
 	   */
 
-	  AlignedSentence alignedSentence(lineSource, lineTarget, lineAlignment);
-	  alignedSentence.CreateConsistentPhrases(params);
+	  AlignedSentence *alignedSentence;
+
+	  //alignedSentence = new AlignedSentence(lineSource, lineTarget, lineAlignment);
+	  alignedSentence = new AlignedSentenceSyntax(lineSource, lineTarget, lineAlignment);
+
+	  alignedSentence->CreateConsistentPhrases(params);
 	  //cerr << alignedSentence.Debug();
 
-	  Rules rules(alignedSentence);
+	  Rules rules(*alignedSentence);
 	  rules.Extend(params);
 	  rules.Consolidate(params);
 	  //cerr << rules.Debug();
 
 	  rules.Output(m_extractFile, true);
 	  rules.Output(m_extractInvFile, false);
+
+	  delete alignedSentence;
   }
 
 
