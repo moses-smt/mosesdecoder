@@ -138,12 +138,12 @@ std::string Rules::Debug() const
 	return out.str();
 }
 
-void Rules::Output(std::ostream &out) const
+void Rules::Output(std::ostream &out, bool forward) const
 {
 	std::set<Rule*, CompareRules>::const_iterator iter;
 	for (iter = m_mergeRules.begin(); iter != m_mergeRules.end(); ++iter) {
 		const Rule &rule = **iter;
-		rule.Output(out);
+		rule.Output(out, forward);
 		out << endl;
 	}
 }

@@ -121,25 +121,30 @@ std::string Rule::Debug() const
   return out.str();
 }
 
-void Rule::Output(std::ostream &out) const
+void Rule::Output(std::ostream &out, bool forward) const
 {
-  // source
-  for (size_t i =  0; i < m_source.GetSize(); ++i) {
-	  const RuleSymbol &symbol = *m_source[i];
-	  symbol.Output(out);
-	  out << " ";
-  }
-  m_lhs.Output(out, Moses::Input);
+  if (forward) {
+	  // source
+	  m_source.Output(out);
+	  m_lhs.Output(out, Moses::Input);
 
-  out << " ||| ";
+	  out << " ||| ";
 
-  // target
-  for (size_t i =  0; i < m_target.GetSize(); ++i) {
-	  const RuleSymbol &symbol = *m_target[i];
-	  symbol.Output(out);
-	  out << " ";
+	  // target
+	  m_target.Output(out);
+	  m_lhs.Output(out, Moses::Output);
   }
-  m_lhs.Output(out, Moses::Output);
+  else {
+	  // target
+	  m_target.Output(out);
+	  m_lhs.Output(out, Moses::Output);
+
+	  out << " ||| ";
+
+	  // source
+	  m_source.Output(out);
+	  m_lhs.Output(out, Moses::Input);
+  }
 
   out << " ||| ";
 
@@ -147,7 +152,13 @@ void Rule::Output(std::ostream &out) const
   Alignments::const_iterator iterAlign;
   for (iterAlign =  m_alignments.begin(); iterAlign != m_alignments.end(); ++iterAlign) {
 	  const std::pair<int,int> &alignPair = *iterAlign;
-	  out << alignPair.first << "-" << alignPair.second << " ";
+
+	  if (forward) {
+		  out << alignPair.first << "-" << alignPair.second << " ";
+	  }
+	  else {
+		  out << alignPair.second << "-" << alignPair.first << " ";
+	  }
   }
 
   out << "||| ";

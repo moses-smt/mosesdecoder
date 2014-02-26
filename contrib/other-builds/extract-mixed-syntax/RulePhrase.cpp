@@ -30,3 +30,12 @@ int RulePhrase::Compare(const RulePhrase &other) const
 
   return 0;
 }
+
+void RulePhrase::Output(std::ostream &out) const
+{
+  for (size_t i =  0; i < m_coll.size(); ++i) {
+	  const RuleSymbol &symbol = *m_coll[i];
+	  symbol.Output(out);
+	  out << " ";
+  }
+}

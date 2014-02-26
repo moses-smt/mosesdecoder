@@ -52,7 +52,7 @@ public:
 	{ return m_alignments; }
 
 	std::string Debug() const;
-	void Output(std::ostream &out) const;
+	void Output(std::ostream &out, bool forward) const;
 
 	void Prevalidate(const Parameter &params);
 	void CreateTarget(const Parameter &params);

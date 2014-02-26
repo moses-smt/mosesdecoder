@@ -39,6 +39,7 @@ int main(int argc, char** argv)
   Moses::InputFileStream strmSource(pathSource);
   Moses::InputFileStream strmAlignment(pathAlignment);
   Moses::OutputFileStream m_extractFile(pathExtract);
+  Moses::OutputFileStream m_extractInvFile(pathExtract + ".inv");
 
 
   // MAIN LOOP
@@ -69,7 +70,8 @@ int main(int argc, char** argv)
 	  rules.Consolidate(params);
 	  //cerr << rules.Debug();
 
-	  rules.Output(m_extractFile);
+	  rules.Output(m_extractFile, true);
+	  rules.Output(m_extractInvFile, false);
   }
 
 

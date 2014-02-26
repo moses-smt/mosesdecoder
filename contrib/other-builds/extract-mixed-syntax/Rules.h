@@ -48,7 +48,7 @@ public:
 	void Consolidate(const Parameter &params);
 
 	std::string Debug() const;
-	void Output(std::ostream &out) const;
+	void Output(std::ostream &out, bool forward) const;
 
 protected:
 	const AlignedSentence &m_alignedSentence;

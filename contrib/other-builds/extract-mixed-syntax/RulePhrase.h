@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <cstddef>
+#include <iostream>
 
 class RuleSymbol;
 
@@ -33,6 +34,7 @@ public:
 
   int Compare(const RulePhrase &other) const;
 
+  void Output(std::ostream &out) const;
 };
 
 #endif /* RULEPHRASE_H_ */
