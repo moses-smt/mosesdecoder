@@ -818,6 +818,9 @@ int main(int argc, char** argv)
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
+  } catch (const std::string &s) {
+    std::cerr << s << std::endl;
+    return EXIT_FAILURE;
   }
 
   IFVERBOSE(1) util::PrintUsage(std::cerr);
