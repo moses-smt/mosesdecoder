@@ -6,6 +6,7 @@
  */
 
 #include "AlignedSentenceSyntax.h"
+#include "pugixml.hpp"
 
 AlignedSentenceSyntax::AlignedSentenceSyntax(const std::string &source,
 		const std::string &target,
@@ -20,3 +21,9 @@ AlignedSentenceSyntax::~AlignedSentenceSyntax() {
 	// TODO Auto-generated destructor stub
 }
 
+void AlignedSentenceSyntax::CreateConsistentPhrases(const Parameter &params)
+{
+	pugi::xml_document doc;
+
+	pugi::xml_parse_result result = doc.load_file("tree.xml");
+}

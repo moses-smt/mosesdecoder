@@ -17,6 +17,8 @@ public:
 			const std::string &target,
 			const std::string &alignment);
 	virtual ~AlignedSentenceSyntax();
+
+	void CreateConsistentPhrases(const Parameter &params);
 };
 
 #endif /* ALIGNEDSENTENCESYNTAX_H_ */
