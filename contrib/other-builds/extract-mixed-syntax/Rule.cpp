@@ -150,21 +150,19 @@ void Rule::Output(std::ostream &out) const
 	  out << alignPair.first << "-" << alignPair.second << " ";
   }
 
-  out << " ||| ";
+  out << "||| ";
 
   // count
   out << m_count;
+
+  out << " ||| ";
 }
 
 void Rule::Prevalidate(const Parameter &params)
 {
   // check number of source symbols in rule
-  if (m_source.GetSize() >= params.maxSymbolsSource) {
-	  m_canRecurse = false;
-	  if (m_source.GetSize() > params.maxSymbolsSource) {
-		  m_isValid = false;
-		  return;
-	  }
+  if (m_source.GetSize() > params.maxSymbolsSource) {
+	  m_isValid = false;
   }
 
   // check that last non-term added isn't too small
@@ -227,19 +225,20 @@ void Rule::Prevalidate(const Parameter &params)
 
   // check that at least 1 word is aligned
   if (params.requireAlignedWord) {
-	  m_isValid = false;
+	  bool ok = false;
 	  for (size_t i = 0; i < m_source.GetSize(); ++i) {
 		  const RuleSymbol &symbol = *m_source[i];
 		  if (!symbol.IsNonTerm()) {
 			  const Word &word = static_cast<const Word&>(symbol);
 			  if (word.GetAlignment().size()) {
-				  m_isValid = true;
+				  ok = true;
 				  break;
 			  }
 		  }
 	  }
 
-	  if (!m_isValid) {
+	  if (!ok) {
+		  m_isValid = false;
 		  m_canRecurse = false;
 		  return;
 	  }

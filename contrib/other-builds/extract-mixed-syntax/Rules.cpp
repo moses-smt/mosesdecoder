@@ -32,8 +32,10 @@ void Rules::CreateRules(const ConsistentPhrase &cp,
 	for (size_t i = 0; i < nonTerms.size(); ++i) {
 		const NonTerm &nonTerm = nonTerms[i];
 		Rule *rule = new Rule(nonTerm, m_alignedSentence);
+
 		rule->Prevalidate(params);
 		rule->CreateTarget(params);
+
 
 		if (rule->CanRecurse()) {
 			Extend(*rule, params);
