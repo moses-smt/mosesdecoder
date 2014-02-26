@@ -12,12 +12,20 @@
 #include "ConsistentPhrases.h"
 #include "Rule.h"
 
+extern bool g_debug;
+
 class AlignedSentence;
 class Parameter;
 
 struct CompareRules {
 	bool operator()(const Rule *a, const Rule *b)
 	{
+
+	  if (g_debug) {
+		std::cerr  << "   *  " << a->Debug() << std::endl
+				   << "   ***" << b->Debug() << std::endl << std::endl;
+	  }
+
 		bool lessthan;
 
 		lessthan = a->GetPhrase(Moses::Input) < b->GetPhrase(Moses::Input);

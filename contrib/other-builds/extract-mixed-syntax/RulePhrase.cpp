@@ -8,6 +8,9 @@
 #include "RulePhrase.h"
 #include "RuleSymbol.h"
 
+using namespace std;
+
+extern bool g_debug;
 
 bool RulePhrase::operator<(const RulePhrase &other) const
 {

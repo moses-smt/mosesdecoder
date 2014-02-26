@@ -10,6 +10,8 @@
 
 using namespace std;
 
+bool g_debug = false;
+
 int main(int argc, char** argv)
 {
   cerr << "Starting" << endl;
