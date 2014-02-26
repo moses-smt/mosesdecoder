@@ -54,18 +54,20 @@ int main(int argc, char** argv)
 		  throw "Couldn't read alignment";
 	  }
 
+	  /*
 	  cerr << "lineTarget=" << lineTarget << endl;
 	  cerr << "lineSource=" << lineSource << endl;
 	  cerr << "lineAlignment=" << lineAlignment << endl;
+	   */
 
 	  AlignedSentence alignedSentence(lineSource, lineTarget, lineAlignment);
 	  alignedSentence.CreateConsistentPhrases(params);
-	  cerr << alignedSentence.Debug();
+	  //cerr << alignedSentence.Debug();
 
 	  Rules rules(alignedSentence);
 	  rules.Extend(params);
 	  rules.Consolidate(params);
-	  cerr << rules.Debug();
+	  //cerr << rules.Debug();
 
 	  rules.Output(m_extractFile);
   }
