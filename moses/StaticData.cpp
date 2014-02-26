@@ -1187,6 +1187,7 @@ void StaticData::CheckLEGACYPT()
 void StaticData::ResetWeights(const std::string &denseWeights, const std::string &sparseFile)
 {
   m_allWeights = ScoreComponentCollection();
+  m_allWeights.Assign(&FeatureFunction::FindFeatureFunction("UnknownWordPenalty0"), UnknownWordPenaltyProducer::Instance().DefaultWeights());
 
   // dense weights
   string name("");
