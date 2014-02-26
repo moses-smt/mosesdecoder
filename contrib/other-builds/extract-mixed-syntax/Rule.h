@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 #include "Phrase.h"
+#include "RulePhrase.h"
 #include "moses/TypeDef.h"
 
 class ConsistentPhrase;
@@ -14,10 +15,6 @@ class AlignedSentence;
 class NonTerm;
 class Parameter;
 
-class RulePhrase : public std::vector<const RuleSymbol*>
-{
-
-};
 
 class Rule {
 public:
