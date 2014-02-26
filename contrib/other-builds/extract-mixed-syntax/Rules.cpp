@@ -172,15 +172,6 @@ void Rules::MergeRules(const Parameter &params)
 	for (iterOrig = m_keepRules.begin(); iterOrig != m_keepRules.end(); ++iterOrig) {
 		Rule *origRule = *iterOrig;
 
-		const ConsistentPhrase &cp = origRule->GetConsistentPhrase();
-		if (cp.corners[0] == 0 && (cp.corners[1] == 5 || cp.corners[1] == 6)) {
-			cerr << origRule->Debug() << endl;
-			g_debug = true;
-		}
-		else {
-			g_debug = false;
-		}
-
 		pair<MergeRules::iterator, bool> inserted = m_mergeRules.insert(origRule);
 		if (!inserted.second) {
 			// already there, just add count

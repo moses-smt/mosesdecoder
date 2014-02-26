@@ -20,25 +20,21 @@ class Parameter;
 struct CompareRules {
 	bool operator()(const Rule *a, const Rule *b)
 	{
+		int compare;
 
-	  if (g_debug) {
-		std::cerr  << "   *  " << a->Debug() << std::endl
-				   << "   ***" << b->Debug() << std::endl << std::endl;
-	  }
+		compare = a->GetPhrase(Moses::Input).Compare(b->GetPhrase(Moses::Input));
+		if (compare) return compare < 0;
 
-		bool lessthan;
+		compare = a->GetPhrase(Moses::Output).Compare(b->GetPhrase(Moses::Output));
+		if (compare) return compare < 0;
 
-		lessthan = a->GetPhrase(Moses::Input) < b->GetPhrase(Moses::Input);
-		if (lessthan) return true;
+		if (a->GetAlignments() != b->GetAlignments()) {
+			return a->GetAlignments() < b->GetAlignments();
+		}
 
-		lessthan = a->GetPhrase(Moses::Output) < b->GetPhrase(Moses::Output);
-		if (lessthan) return true;
-
-		lessthan = a->GetAlignments() < b->GetAlignments();
-		if (lessthan) return true;
-
-		lessthan = a->GetLHS().GetString() < b->GetLHS().GetString();
-		if (lessthan) return true;
+		if (a->GetLHS().GetString() != b->GetLHS().GetString()) {
+			return a->GetLHS().GetString() < b->GetLHS().GetString();
+		}
 
 		return false;
 	}

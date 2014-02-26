@@ -7,6 +7,8 @@
 
 #include "RuleSymbol.h"
 
+using namespace std;
+
 RuleSymbol::RuleSymbol() {
 	// TODO Auto-generated constructor stub
 
@@ -16,7 +18,19 @@ RuleSymbol::~RuleSymbol() {
 	// TODO Auto-generated destructor stub
 }
 
-bool RuleSymbol::operator<(const RuleSymbol &other) const
+int RuleSymbol::Compare(const RuleSymbol &other) const
 {
-	return GetString() < other.GetString();
+	if (IsNonTerm() != other.IsNonTerm()) {
+		return IsNonTerm() ? -1 : +1;
+	}
+
+	string str = GetString();
+	string otherStr = other.GetString();
+
+	if (str == otherStr) {
+		return 0;
+	}
+	else {
+		return  (str < otherStr) ? -1 : +1;
+	}
 }

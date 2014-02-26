@@ -23,7 +23,7 @@ public:
 
 	virtual std::string GetString() const = 0;
 
-	bool operator<(const RuleSymbol &other) const;
+	int Compare(const RuleSymbol &other) const;
 
 };
 

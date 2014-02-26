@@ -31,7 +31,7 @@ public:
     return m_coll[index];
   }
 
-  bool operator<(const RulePhrase &other) const;
+  int Compare(const RulePhrase &other) const;
 
 };
 

@@ -12,20 +12,21 @@ using namespace std;
 
 extern bool g_debug;
 
-bool RulePhrase::operator<(const RulePhrase &other) const
+int RulePhrase::Compare(const RulePhrase &other) const
 {
   if (GetSize() != other.GetSize()) {
-	return GetSize() < other.GetSize();
+	return GetSize() < other.GetSize() ? -1 : +1;
   }
 
   for (size_t i = 0; i < m_coll.size(); ++i) {
 	  const RuleSymbol &symbol = *m_coll[i];
 	  const RuleSymbol &otherSymbol = *other.m_coll[i];
+	  int compare = symbol.Compare(otherSymbol);
 
-	  if (symbol < otherSymbol) {
-		  return true;
+	  if (compare) {
+		  return compare;
 	  }
   }
 
-  return false;
+  return 0;
 }
