@@ -73,7 +73,7 @@ void Rule::CreateSource()
 		  ruleSymbol = m_alignedSentence.GetPhrase(Moses::Input)[sourcePos];
 	  }
 
-	  m_source.push_back(ruleSymbol);
+	  m_source.Add(ruleSymbol);
   }
 }
 
@@ -96,14 +96,14 @@ std::string Rule::Debug() const
   stringstream out;
 
   // source
-  for (size_t i =  0; i < m_source.size(); ++i) {
+  for (size_t i =  0; i < m_source.GetSize(); ++i) {
 	  const RuleSymbol &symbol = *m_source[i];
 	  out << symbol.Debug() << " ";
   }
 
   // target
   out << "||| ";
-  for (size_t i =  0; i < m_target.size(); ++i) {
+  for (size_t i =  0; i < m_target.GetSize(); ++i) {
 	  const RuleSymbol &symbol = *m_target[i];
 	  out << symbol.Debug() << " ";
   }
@@ -124,7 +124,7 @@ std::string Rule::Debug() const
 void Rule::Output(std::ostream &out) const
 {
   // source
-  for (size_t i =  0; i < m_source.size(); ++i) {
+  for (size_t i =  0; i < m_source.GetSize(); ++i) {
 	  const RuleSymbol &symbol = *m_source[i];
 	  symbol.Output(out);
 	  out << " ";
@@ -134,7 +134,7 @@ void Rule::Output(std::ostream &out) const
   out << " ||| ";
 
   // target
-  for (size_t i =  0; i < m_target.size(); ++i) {
+  for (size_t i =  0; i < m_target.GetSize(); ++i) {
 	  const RuleSymbol &symbol = *m_target[i];
 	  symbol.Output(out);
 	  out << " ";
@@ -159,9 +159,9 @@ void Rule::Output(std::ostream &out) const
 void Rule::Prevalidate(const Parameter &params)
 {
   // check number of source symbols in rule
-  if (m_source.size() >= params.maxSymbolsSource) {
+  if (m_source.GetSize() >= params.maxSymbolsSource) {
 	  m_canRecurse = false;
-	  if (m_source.size() > params.maxSymbolsSource) {
+	  if (m_source.GetSize() > params.maxSymbolsSource) {
 		  m_isValid = false;
 		  return;
 	  }
@@ -182,7 +182,7 @@ void Rule::Prevalidate(const Parameter &params)
 
   // check number of non-terms
   int numNonTerms = 0;
-  for (size_t i = 0; i < m_source.size(); ++i) {
+  for (size_t i = 0; i < m_source.GetSize(); ++i) {
 	  const RuleSymbol *arc = m_source[i];
 	  if (arc->IsNonTerm()) {
 		  ++numNonTerms;
@@ -228,7 +228,7 @@ void Rule::Prevalidate(const Parameter &params)
   // check that at least 1 word is aligned
   if (params.requireAlignedWord) {
 	  m_isValid = false;
-	  for (size_t i = 0; i < m_source.size(); ++i) {
+	  for (size_t i = 0; i < m_source.GetSize(); ++i) {
 		  const RuleSymbol &symbol = *m_source[i];
 		  if (!symbol.IsNonTerm()) {
 			  const Word &word = static_cast<const Word&>(symbol);
@@ -290,7 +290,7 @@ void Rule::CreateTarget(const Parameter &params)
 		  ruleSymbol = m_alignedSentence.GetPhrase(Moses::Output)[targetPos];
 	  }
 
-	  m_target.push_back(ruleSymbol);
+	  m_target.Add(ruleSymbol);
   }
 
   CreateAlignments();
@@ -302,7 +302,7 @@ void Rule::CreateAlignments()
 	int sourceStart = GetConsistentPhrase().corners[0];
 	int targetStart = GetConsistentPhrase().corners[2];
 
-  for (size_t sourcePos = 0; sourcePos < m_source.size(); ++sourcePos) {
+  for (size_t sourcePos = 0; sourcePos < m_source.GetSize(); ++sourcePos) {
 	  const RuleSymbol *symbol = m_source[sourcePos];
 	  if (!symbol->IsNonTerm()) {
 		  // terminals
@@ -329,7 +329,7 @@ void Rule::CreateAlignments(int sourcePos, const std::set<const Word *> &targetW
 void Rule::CreateAlignments(int sourcePos, const RuleSymbol *targetSought)
 {
 	// should be in target phrase
-	for (size_t targetPos = 0; targetPos < m_target.size(); ++targetPos) {
+	for (size_t targetPos = 0; targetPos < m_target.GetSize(); ++targetPos) {
 		const RuleSymbol *foundSymbol = m_target[targetPos];
 		if (targetSought == foundSymbol) {
 			pair<int, int> alignPoint(sourcePos, targetPos);

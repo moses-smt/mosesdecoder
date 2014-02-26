@@ -19,7 +19,7 @@ public:
 	virtual bool IsNonTerm() const
 	{ return false; }
 
-	const std::string &GetString() const
+	std::string GetString() const
 	{ return m_str; }
 
 	int GetPos() const

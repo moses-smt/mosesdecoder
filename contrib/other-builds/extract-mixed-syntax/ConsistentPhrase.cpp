@@ -66,13 +66,4 @@ std::string ConsistentPhrase::Debug() const
   return out.str();
 }
 
-void ConsistentPhrase::Output(std::ostream &out) const
-{
-  out << "[X][X]";
-}
-
-void ConsistentPhrase::Output(std::ostream &out, Moses::FactorDirection direction) const
-{
-  out << "[X]";
-}
 

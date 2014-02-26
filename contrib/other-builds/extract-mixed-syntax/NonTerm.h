@@ -26,6 +26,9 @@ public:
 	virtual bool IsNonTerm() const
 	{ return true; }
 
+	std::string GetString() const
+	{ return m_source + m_target; }
+
 	virtual std::string Debug() const;
 	virtual void Output(std::ostream &out) const;
   void Output(std::ostream &out, Moses::FactorDirection direction) const;

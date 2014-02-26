@@ -40,8 +40,6 @@ public:
   bool operator<(const ConsistentPhrase &other) const;
 
   std::string Debug() const;
-  void Output(std::ostream &out) const;
-  void Output(std::ostream &out, Moses::FactorDirection direction) const;
 
 protected:
   NonTerms m_nonTerms;

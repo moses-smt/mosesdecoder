@@ -16,3 +16,7 @@ RuleSymbol::~RuleSymbol() {
 	// TODO Auto-generated destructor stub
 }
 
+bool RuleSymbol::operator<(const RuleSymbol &other) const
+{
+	return GetString() < other.GetString();
+}
