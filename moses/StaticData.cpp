@@ -1213,6 +1213,9 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
 	}
   }
 
+  const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
+  m_allWeights.Assign(&ff, weights);
+
   // sparse weights
   InputFileStream sparseStrme(sparseFile);
   string line;
