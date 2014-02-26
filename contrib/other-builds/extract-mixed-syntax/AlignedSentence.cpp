@@ -108,10 +108,6 @@ void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 	  // that's nice to have
 	  int endT = startT + lengthT - 1;
 
-	  // if there is target side syntax, there has to be a node
-	  if (params.targetSyntax && !targetTree.HasNode(startT,endT))
-		continue;
-
 	  // find find aligned source words
 	  // first: find minimum and maximum source word
 	  int minS = 9999;
@@ -165,9 +161,6 @@ void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 			(endS<countS && endS<startS + params.maxSpan && // within length limit
 			 (endS==maxS || m_source[endS]->GetAlignment().size()==0)); // unaligned
 			endS++) {
-		  // if there is source side syntax, there has to be a node
-		  if (params.sourceSyntax && !sourceTree.HasNode(startS,endS))
-			continue;
 
 		  // take note that this is a valid phrase alignment
 		  m_consistentPhrases.Add(startS, endS, startT, endT);

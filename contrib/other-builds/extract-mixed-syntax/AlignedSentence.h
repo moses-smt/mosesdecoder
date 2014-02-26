@@ -8,7 +8,6 @@
 
 #include <string>
 #include <set>
-#include "SyntaxTree.h"
 #include "ConsistentPhrases.h"
 #include "Phrase.h"
 #include "moses/TypeDef.h"
@@ -17,11 +16,14 @@ class Parameter;
 
 class AlignedSentence {
 public:
+	AlignedSentence()
+	{}
+
 	AlignedSentence(const std::string &source,
 			const std::string &target,
 			const std::string &alignment);
 	virtual ~AlignedSentence();
-	void CreateConsistentPhrases(const Parameter &params);
+	virtual void CreateConsistentPhrases(const Parameter &params);
 
 	const Phrase &GetPhrase(Moses::FactorDirection direction) const
 	{ return (direction == Moses::Input) ? m_source : m_target; }
@@ -33,7 +35,6 @@ public:
 
 protected:
   Phrase m_source, m_target;
-  SyntaxTree sourceTree, targetTree;
   ConsistentPhrases m_consistentPhrases;
 
 	void PopulateWordVec(std::vector<Word*> &vec, const std::string &line);

@@ -5,10 +5,10 @@
  *      Author: hieu
  */
 
-#ifndef ALIGNEDSENTENCESYNTAX_H_
-#define ALIGNEDSENTENCESYNTAX_H_
+#pragma once
 
 #include "AlignedSentence.h"
+#include "SyntaxTree.h"
 
 class AlignedSentenceSyntax : public AlignedSentence
 {
@@ -19,6 +19,10 @@ public:
 	virtual ~AlignedSentenceSyntax();
 
 	void CreateConsistentPhrases(const Parameter &params);
+
+protected:
+	std::string m_source, m_target, m_alignment;
+	SyntaxTree sourceTree, targetTree;
+
 };
 
-#endif /* ALIGNEDSENTENCESYNTAX_H_ */
