@@ -37,6 +37,7 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	}
 	else {
 		PopulateWordVec(m_source, m_sourceStr);
+		m_sourceTree.SetDefaultLabel("[X]");
 	}
 
 	if (params.targetSyntax) {
@@ -45,6 +46,7 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	}
 	else {
 		PopulateWordVec(m_target, m_targetStr);
+		m_targetTree.SetDefaultLabel("[X]");
 	}
 
 	PopulateAlignment(m_alignmentStr);

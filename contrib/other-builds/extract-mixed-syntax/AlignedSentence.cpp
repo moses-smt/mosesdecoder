@@ -97,18 +97,7 @@ std::vector<int> AlignedSentence::GetSourceAlignmentCount() const
 void AlignedSentence::Create(const Parameter &params)
 {
 	CreateConsistentPhrases(params);
-
-	// add [X] labels everywhere
-	for (int start = 0; start < m_source.size(); ++start) {
-		for (int end = start; end < m_source.size(); ++end) {
-			ConsistentPhrases::Coll &coll = m_consistentPhrases.GetColl(start, end);
-			ConsistentPhrases::Coll::iterator iter;
-			for (iter = coll.begin(); iter != coll.end(); ++iter) {
-				ConsistentPhrase &cp = **iter;
-				cp.AddNonTerms("[X]", "[X]");
-			}
-		}
-	}
+	m_consistentPhrases.AddHieroNonTerms(false);
 }
 
 void AlignedSentence::CreateConsistentPhrases(const Parameter &params)

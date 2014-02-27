@@ -25,6 +25,8 @@ public:
 	void Add(int sourceStart, int sourceEnd,
 			int targetStart, int targetEnd);
 
+	void AddHieroNonTerms(bool onlyIfNoNonTerm);
+
 	const Coll &GetColl(int sourceStart, int sourceEnd) const;
 	Coll &GetColl(int sourceStart, int sourceEnd);
 

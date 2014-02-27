@@ -14,6 +14,10 @@ public:
   void Add(int startPos, int endPos, const std::string &label);
   const Labels &Find(int startPos, int endPos) const;
 
+  void SetDefaultLabel(const std::string &label) {
+	  m_defaultLabels.push_back(label);
+  }
+
 protected:
 
   Coll m_coll;

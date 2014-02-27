@@ -83,3 +83,24 @@ std::string ConsistentPhrases::Debug() const
 
 	return out.str();
 }
+
+void ConsistentPhrases::AddHieroNonTerms(bool onlyIfNoNonTerm)
+{
+	// add [X] labels everywhere
+	for (int i = 0; i < m_coll.size(); ++i) {
+		vector<Coll> &inner = m_coll[i];
+		for (int j = 0; j < inner.size(); ++j) {
+			ConsistentPhrases::Coll &coll = inner[j];
+			ConsistentPhrases::Coll::iterator iter;
+			for (iter = coll.begin(); iter != coll.end(); ++iter) {
+				ConsistentPhrase &cp = **iter;
+
+				if (onlyIfNoNonTerm && cp.GetNonTerms().size()) {
+					continue;
+				}
+				cp.AddNonTerms("[X]", "[X]");
+			}
+		}
+	}
+}
+
