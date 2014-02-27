@@ -55,10 +55,20 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	CreateNonTerms();
 }
 
+void Escape(string &text)
+{
+	text = Moses::Replace(text, "<", "&lt;");
+	text = Moses::Replace(text, ">", "&gt;");
+	text = Moses::Replace(text, "'", "&apos;");
+	text = Moses::Replace(text, "\"", "&quot;");
+
+}
+
 void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std::string input, const Parameter &params)
 {
 	pugi::xml_document doc;
-	pugi::xml_parse_result result = doc.load(input.c_str(), pugi::parse_default | pugi::parse_comments);
+	pugi::xml_parse_result result = doc.load(input.c_str(),
+			pugi::parse_default | pugi::parse_comments);
 
 	pugi::xml_node topNode = doc.child("xml");
 
@@ -69,6 +79,7 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std
 
         // fill phrase vector
     	string text = node.text().as_string();
+    	Escape(text);
 
     	std::vector<string> toks;
     	Moses::Tokenize(toks, text);
@@ -81,9 +92,11 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std
     	int endPos = output.size() - 1;
 
     	// fill syntax labels
-        string nodeName = node.name();
+    	pugi::xml_attribute attribute = node.attribute("label");
+        string nodeName = attribute.as_string();
 
         if (!nodeName.empty()) {
+        	nodeName = "[" + nodeName + "]";
         	tree.Add(startPos, endPos, nodeName);
         }
     }
