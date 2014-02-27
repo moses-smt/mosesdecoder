@@ -16,7 +16,7 @@ Parameter::Parameter()
 ,requireAlignedWord(true)
 ,fractionalCounting(true)
 
-,sourceSyntax(false)
+,sourceSyntax(true)
 ,targetSyntax(false)
 {}
 

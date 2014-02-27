@@ -18,11 +18,14 @@ public:
 			const std::string &alignment);
 	virtual ~AlignedSentenceSyntax();
 
-	void CreateConsistentPhrases(const Parameter &params);
+	void Create(const Parameter &params);
 
+	//virtual std::string Debug() const;
 protected:
-	std::string m_source, m_target, m_alignment;
+	std::string m_sourceStr, m_targetStr, m_alignmentStr;
 	SyntaxTree sourceTree, targetTree;
+
+	void XMLParse(Phrase &output, const std::string input, const Parameter &params);
 
 };
 

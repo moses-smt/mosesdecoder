@@ -30,7 +30,7 @@ AlignedSentence::~AlignedSentence() {
 	Moses::RemoveAllInColl(m_target);
 }
 
-void AlignedSentence::PopulateWordVec(std::vector<Word*> &vec, const std::string &line)
+void AlignedSentence::PopulateWordVec(Phrase &vec, const std::string &line)
 {
 	std::vector<string> toks;
 	Moses::Tokenize(toks, line);
@@ -92,6 +92,11 @@ std::vector<int> AlignedSentence::GetSourceAlignmentCount() const
 		ret[i] = word.GetAlignmentIndex().size();
 	}
 	return ret;
+}
+
+void AlignedSentence::Create(const Parameter &params)
+{
+	CreateConsistentPhrases(params);
 }
 
 void AlignedSentence::CreateConsistentPhrases(const Parameter &params)

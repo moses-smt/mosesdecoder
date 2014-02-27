@@ -64,11 +64,15 @@ int main(int argc, char** argv)
 
 	  AlignedSentence *alignedSentence;
 
-	  //alignedSentence = new AlignedSentence(lineSource, lineTarget, lineAlignment);
-	  alignedSentence = new AlignedSentenceSyntax(lineSource, lineTarget, lineAlignment);
+	  if (params.sourceSyntax || params.targetSyntax) {
+		  alignedSentence = new AlignedSentenceSyntax(lineSource, lineTarget, lineAlignment);
+	  }
+	  else {
+		  alignedSentence = new AlignedSentence(lineSource, lineTarget, lineAlignment);
+	  }
 
-	  alignedSentence->CreateConsistentPhrases(params);
-	  //cerr << alignedSentence.Debug();
+	  alignedSentence->Create(params);
+	  cerr << alignedSentence->Debug();
 
 	  Rules rules(*alignedSentence);
 	  rules.Extend(params);

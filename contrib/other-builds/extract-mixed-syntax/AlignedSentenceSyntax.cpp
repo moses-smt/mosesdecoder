@@ -6,15 +6,19 @@
  */
 
 #include "AlignedSentenceSyntax.h"
-#include "pugixml.hpp"
+#include "Parameter.h"
+#include "pugixml/pugixml.hpp"
+#include "moses/Util.h"
+
+using namespace std;
 
 AlignedSentenceSyntax::AlignedSentenceSyntax(const std::string &source,
 		const std::string &target,
 		const std::string &alignment)
 :AlignedSentence()
-,m_source(source)
-,m_target(target)
-,m_alignment(alignment)
+,m_sourceStr(source)
+,m_targetStr(target)
+,m_alignmentStr(alignment)
 {
 	// TODO Auto-generated constructor stub
 
@@ -24,37 +28,73 @@ AlignedSentenceSyntax::~AlignedSentenceSyntax() {
 	// TODO Auto-generated destructor stub
 }
 
-void AlignedSentenceSyntax::CreateConsistentPhrases(const Parameter &params)
+void AlignedSentenceSyntax::Create(const Parameter &params)
 {
+	if (params.sourceSyntax) {
+		m_sourceStr = "<xml>" + m_sourceStr + "</xml>";
+		XMLParse(m_source, m_sourceStr, params);
+	}
+	else {
+		PopulateWordVec(m_source, m_sourceStr);
+	}
+
+	if (params.targetSyntax) {
+		m_targetStr = "<xml>" + m_targetStr + "</xml>";
+		XMLParse(m_target, m_targetStr, params);
+	}
+	else {
+		PopulateWordVec(m_target, m_targetStr);
+	}
+
+	PopulateAlignment(m_alignmentStr);
+
+	m_consistentPhrases.Initialize(m_source.size());
+
+	CreateConsistentPhrases(params);
+}
+
+void AlignedSentenceSyntax::XMLParse(Phrase &output, const std::string input, const Parameter &params)
+{
+	cerr << "input=" << input << endl;
+
 	pugi::xml_document doc;
-	pugi::xml_parse_result result = doc.load("<node id='123'>text</node><!-- comment -->", pugi::parse_default | pugi::parse_comments);
+	pugi::xml_parse_result result = doc.load(input.c_str(), pugi::parse_default | pugi::parse_comments);
 
-	pugi::xml_node node = doc.child("node");
+	pugi::xml_node topNode = doc.child("xml");
+	std::cerr << topNode.name() << std::endl;
 
-	// change node name
-	std::cout << node.set_name("notnode");
-	std::cout << ", new node name: " << node.name() << std::endl;
+    for (pugi::xml_node node = topNode.first_child(); node; node = node.next_sibling())
+    {
+        std::cerr << node.name() << std::endl;
 
-	// change comment text
-	std::cout << doc.last_child().set_value("useless comment");
-	std::cout << ", new comment text: " << doc.last_child().value() << std::endl;
+        for (pugi::xml_attribute attr = node.first_attribute(); attr; attr = attr.next_attribute())
+        {
+            std::cerr << " " << attr.name() << "=" << attr.value() << std::endl;
+        }
+        std::cerr << node.text().as_string() << std::endl;
 
-	// we can't change value of the element or name of the comment
-	std::cout << node.set_value("1") << ", " << doc.last_child().set_name("2") << std::endl;
-	//]
+        // fill data structures
+        int startPos = output.size();
 
-	//[code_modify_base_attr
-	pugi::xml_attribute attr = node.attribute("id");
+        // fill phrase vector
+    	string text = node.text().as_string();
 
-	// change attribute name/value
-	std::cout << attr.set_name("key") << ", " << attr.set_value("345");
-	std::cout << ", new attribute: " << attr.name() << "=" << attr.value() << std::endl;
+    	std::vector<string> toks;
+    	Moses::Tokenize(toks, text);
 
-	// we can use numbers or booleans
-	attr.set_value(1.234);
-	std::cout << "new attribute value: " << attr.value() << std::endl;
+    	for (size_t i = 0; i < toks.size(); ++i) {
+    		const string &tok = toks[i];
+    		Word *word = new Word(i, tok);
+    		output.push_back(word);
+    	}
+    	int endPos = output.size() - 1;
 
-	// we can also use assignment operators for more concise code
-	attr = true;
-	std::cout << "final attribute value: " << attr.value() << std::endl;
+    	// fill syntax labels
+        string nodeName = node.name();
+
+        if (!nodeName.empty()) {
+        	cerr << nodeName << " " << startPos << "-" << endPos << endl;
+        }
+    }
+    std::cerr << std::endl;
 }

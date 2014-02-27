@@ -23,7 +23,7 @@ public:
 			const std::string &target,
 			const std::string &alignment);
 	virtual ~AlignedSentence();
-	virtual void CreateConsistentPhrases(const Parameter &params);
+	virtual void Create(const Parameter &params);
 
 	const Phrase &GetPhrase(Moses::FactorDirection direction) const
 	{ return (direction == Moses::Input) ? m_source : m_target; }
@@ -31,13 +31,14 @@ public:
 	const ConsistentPhrases &GetConsistentPhrases() const
 	{ return m_consistentPhrases; }
 
-	std::string Debug() const;
+	virtual std::string Debug() const;
 
 protected:
   Phrase m_source, m_target;
   ConsistentPhrases m_consistentPhrases;
 
-	void PopulateWordVec(std::vector<Word*> &vec, const std::string &line);
+  	void CreateConsistentPhrases(const Parameter &params);
+	void PopulateWordVec(Phrase &vec, const std::string &line);
 	void PopulateAlignment(const std::string &line);
 	std::vector<int> GetSourceAlignmentCount() const;
 };
