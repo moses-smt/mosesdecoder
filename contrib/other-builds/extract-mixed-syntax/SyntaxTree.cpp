@@ -7,6 +7,15 @@ void SyntaxTree::Add(int startPos, int endPos, const std::string &label)
 	labels.push_back(label);
 }
 
+void SyntaxTree::AddToAll(const std::string &label)
+{
+	Coll::iterator iter;
+	for (iter = m_coll.begin(); iter != m_coll.end(); ++iter) {
+		Labels &labels = iter->second;
+		labels.push_back(label);
+	}
+}
+
 const SyntaxTree::Labels &SyntaxTree::Find(int startPos, int endPos) const
 {
 	Coll::const_iterator iter;

@@ -36,6 +36,9 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 		if (params.mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
 			m_sourceTree.SetDefaultLabel("[X]");
+			if (params.mixedSyntaxType == 2) {
+				m_sourceTree.AddToAll("[X]");
+			}
 		}
 	}
 	else {
@@ -50,6 +53,9 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 		if (params.mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
 			m_targetTree.SetDefaultLabel("[X]");
+			if (params.mixedSyntaxType == 2) {
+				m_targetTree.AddToAll("[X]");
+			}
 		}
 	}
 	else {
