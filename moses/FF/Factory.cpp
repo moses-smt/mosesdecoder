@@ -37,6 +37,7 @@
 #include "moses/FF/SyntaxConstraintFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
+#include "moses/FF/CorrectionPattern.h";
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -146,6 +147,7 @@ FeatureRegistry::FeatureRegistry()
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
   MOSES_FNAME(SourceWordDeletionFeature);
   MOSES_FNAME(TargetWordInsertionFeature);
+  MOSES_FNAME(CorrectionPattern);
   MOSES_FNAME(PhraseBoundaryFeature);
   MOSES_FNAME(PhraseLengthFeature);
   MOSES_FNAME(WordTranslationFeature);
