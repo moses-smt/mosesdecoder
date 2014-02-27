@@ -30,6 +30,7 @@ AlignedSentenceSyntax::~AlignedSentenceSyntax() {
 
 void AlignedSentenceSyntax::Create(const Parameter &params)
 {
+	// parse source and target string
 	if (params.sourceSyntax) {
 		m_sourceStr = "<xml>" + m_sourceStr + "</xml>";
 		XMLParse(m_source, m_sourceStr, params);
@@ -47,10 +48,10 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	}
 
 	PopulateAlignment(m_alignmentStr);
-
-	m_consistentPhrases.Initialize(m_source.size());
-
 	CreateConsistentPhrases(params);
+
+	// create labels
+
 }
 
 void AlignedSentenceSyntax::XMLParse(Phrase &output, const std::string input, const Parameter &params)

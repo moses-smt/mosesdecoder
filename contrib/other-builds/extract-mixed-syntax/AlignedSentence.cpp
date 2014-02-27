@@ -23,8 +23,6 @@ AlignedSentence::AlignedSentence(const std::string &source,
 	PopulateWordVec(m_source, source);
 	PopulateWordVec(m_target, target);
 	PopulateAlignment(alignment);
-
-	m_consistentPhrases.Initialize(m_source.size());
 }
 
 AlignedSentence::~AlignedSentence() {
@@ -117,6 +115,8 @@ void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 {
   int countT = m_target.size();
   int countS = m_source.size();
+
+  m_consistentPhrases.Initialize(countS);
 
   // check alignments for target phrase startT...endT
   for(int lengthT=1;
