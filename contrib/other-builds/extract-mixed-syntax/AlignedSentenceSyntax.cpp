@@ -20,8 +20,6 @@ AlignedSentenceSyntax::AlignedSentenceSyntax(const std::string &source,
 ,m_targetStr(target)
 ,m_alignmentStr(alignment)
 {
-	cerr << "syntax" << endl;
-
 }
 
 AlignedSentenceSyntax::~AlignedSentenceSyntax() {
@@ -30,6 +28,9 @@ AlignedSentenceSyntax::~AlignedSentenceSyntax() {
 
 void AlignedSentenceSyntax::Create(const Parameter &params)
 {
+	m_sourceTree.SetDefaultLabel("[X]");
+	m_targetTree.SetDefaultLabel("[X]");
+
 	// parse source and target string
 	if (params.sourceSyntax) {
 		m_sourceStr = "<xml>" + m_sourceStr + "</xml>";
@@ -37,7 +38,6 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	}
 	else {
 		PopulateWordVec(m_source, m_sourceStr);
-		m_sourceTree.SetDefaultLabel("[X]");
 	}
 
 	if (params.targetSyntax) {
@@ -46,7 +46,6 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	}
 	else {
 		PopulateWordVec(m_target, m_targetStr);
-		m_targetTree.SetDefaultLabel("[X]");
 	}
 
 	PopulateAlignment(m_alignmentStr);
@@ -58,8 +57,6 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 
 void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std::string input, const Parameter &params)
 {
-	cerr << "input=" << input << endl;
-
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load(input.c_str(), pugi::parse_default | pugi::parse_comments);
 
@@ -87,7 +84,7 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std
 
     	for (size_t i = 0; i < toks.size(); ++i) {
     		const string &tok = toks[i];
-    		Word *word = new Word(i, tok);
+    		Word *word = new Word(output.size(), tok);
     		output.push_back(word);
     	}
     	int endPos = output.size() - 1;
@@ -115,7 +112,7 @@ void AlignedSentenceSyntax::CreateNonTerms()
 
 				int targetStart = cp.corners[2];
 				int targetEnd = cp.corners[3];
-				const SyntaxTree::Labels &targetLabels = m_sourceTree.Find(targetStart, targetEnd);
+				const SyntaxTree::Labels &targetLabels = m_targetTree.Find(targetStart, targetEnd);
 
 				CreateNonTerms(cp, sourceLabels, targetLabels);
 			}
@@ -130,9 +127,9 @@ void AlignedSentenceSyntax::CreateNonTerms(ConsistentPhrase &cp,
 {
 	SyntaxTree::Labels::const_iterator iterSource;
 	for (iterSource = sourceLabels.begin(); iterSource != sourceLabels.end(); ++iterSource) {
-		SyntaxTree::Labels::const_iterator iterTarget;
 		const string &sourceLabel = *iterSource;
 
+		SyntaxTree::Labels::const_iterator iterTarget;
 		for (iterTarget = targetLabels.begin(); iterTarget != targetLabels.end(); ++iterTarget) {
 			const string &targetLabel = *iterTarget;
 			cp.AddNonTerms(sourceLabel, targetLabel);

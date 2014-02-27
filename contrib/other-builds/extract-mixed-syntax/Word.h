@@ -13,6 +13,7 @@
 class Word : public RuleSymbol
 {
 public:
+	Word(const Word&); // do not implement
 	Word(int pos, const std::string &str);
 	virtual ~Word();
 

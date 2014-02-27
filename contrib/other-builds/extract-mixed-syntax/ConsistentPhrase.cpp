@@ -16,6 +16,9 @@ ConsistentPhrase::ConsistentPhrase(
 		int targetStart, int targetEnd)
 :corners(4)
 {
+	if (sourceStart == 0 && targetStart == 15) {
+		cerr << "oh dear";
+	}
 	corners[0] = sourceStart;
 	corners[1] = sourceEnd;
 	corners[2] = targetStart;
