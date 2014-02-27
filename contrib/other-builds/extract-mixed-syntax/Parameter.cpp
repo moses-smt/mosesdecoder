@@ -15,12 +15,13 @@ Parameter::Parameter()
 ,nonTermConsecSource(false)
 ,requireAlignedWord(true)
 ,fractionalCounting(true)
+,gzOutput(false)
 
 ,sourceSyntax(false)
 ,targetSyntax(false)
 ,mixedSyntaxType(0)
 
-,defaultNonTerm("[X]")
+,hieroNonTerm("[X]")
 {}
 
 Parameter::~Parameter() {

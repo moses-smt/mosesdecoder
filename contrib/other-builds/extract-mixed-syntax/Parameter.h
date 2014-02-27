@@ -23,10 +23,12 @@ public:
   bool nonTermConsecSource;
   bool requireAlignedWord;
   bool fractionalCounting;
+  bool gzOutput;
 
   bool sourceSyntax, targetSyntax;
   int mixedSyntaxType;
 
-  std::string defaultNonTerm;
+  std::string hieroNonTerm;
+  std::string gluePath;
 };
 

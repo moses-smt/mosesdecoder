@@ -95,7 +95,7 @@ void ConsistentPhrases::AddHieroNonTerms(const Parameter &params)
 			ConsistentPhrases::Coll::iterator iter;
 			for (iter = coll.begin(); iter != coll.end(); ++iter) {
 				ConsistentPhrase &cp = **iter;
-				cp.AddNonTerms(params.defaultNonTerm, params.defaultNonTerm);
+				cp.AddNonTerms(params.hieroNonTerm, params.hieroNonTerm);
 			}
 		}
 	}

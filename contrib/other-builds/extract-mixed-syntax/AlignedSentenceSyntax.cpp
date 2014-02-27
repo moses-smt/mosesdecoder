@@ -36,15 +36,15 @@ void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, const P
 
 		if (mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
-			tree.SetDefaultLabel(params.defaultNonTerm);
+			tree.SetDefaultLabel(params.hieroNonTerm);
 			if (mixedSyntaxType == 2) {
-				tree.AddToAll(params.defaultNonTerm);
+				tree.AddToAll(params.hieroNonTerm);
 			}
 		}
 	}
 	else {
 		PopulateWordVec(phrase, line);
-		tree.SetDefaultLabel(params.defaultNonTerm);
+		tree.SetDefaultLabel(params.hieroNonTerm);
 	}
 
 }
