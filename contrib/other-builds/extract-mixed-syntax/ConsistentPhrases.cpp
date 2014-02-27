@@ -8,6 +8,7 @@
 #include <cassert>
 #include "ConsistentPhrases.h"
 #include "NonTerm.h"
+#include "moses/Util.h"
 
 using namespace std;
 
@@ -16,7 +17,14 @@ ConsistentPhrases::ConsistentPhrases()
 }
 
 ConsistentPhrases::~ConsistentPhrases() {
-	// TODO Auto-generated destructor stub
+	for (int start = 0; start < m_coll.size(); ++start) {
+		std::vector<Coll> &allSourceStart = m_coll[start];
+
+		for (int size = 0; size < allSourceStart.size(); ++size) {
+			Coll &coll = allSourceStart[size];
+			Moses::RemoveAllInColl(coll);
+		}
+	}
 }
 
 void ConsistentPhrases::Initialize(size_t size)
@@ -33,16 +41,14 @@ void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
 		int targetStart, int targetEnd)
 {
   Coll &coll = m_coll[sourceStart][sourceEnd - sourceStart];
-  ConsistentPhrase cp(sourceStart,
-  					sourceEnd,
-  					targetStart,
-  					targetEnd);
-  cp.AddNonTerms("[X]", "[X]");
+  ConsistentPhrase *cp = new ConsistentPhrase(sourceStart,
+											sourceEnd,
+											targetStart,
+											targetEnd);
+  cp->AddNonTerms("[X]", "[X]");
 
   pair<Coll::iterator, bool> inserted = coll.insert(cp);
   assert(inserted.second);
-
-  const ConsistentPhrase &cpNew = *inserted.first;
 }
 
 
@@ -64,7 +70,7 @@ std::string ConsistentPhrases::Debug() const
 
 			Coll::const_iterator iter;
 			for (iter = coll.begin(); iter != coll.end(); ++iter) {
-				const ConsistentPhrase &consistentPhrase = *iter;
+				const ConsistentPhrase &consistentPhrase = **iter;
 				out << consistentPhrase.Debug() << endl;
 			}
 		}

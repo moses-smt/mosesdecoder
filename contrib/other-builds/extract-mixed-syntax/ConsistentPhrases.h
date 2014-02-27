@@ -15,7 +15,7 @@ class Word;
 
 class ConsistentPhrases {
 public:
-	typedef std::set<ConsistentPhrase> Coll;
+	typedef std::set<ConsistentPhrase*> Coll;
 
 	ConsistentPhrases();
 	virtual ~ConsistentPhrases();

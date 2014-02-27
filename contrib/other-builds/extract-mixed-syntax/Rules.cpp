@@ -63,7 +63,7 @@ void Rules::Extend(const Parameter &params)
 
 			ConsistentPhrases::Coll::const_iterator iter;
 			for (iter = cps.begin(); iter != cps.end(); ++iter) {
-				const ConsistentPhrase &cp = *iter;
+				const ConsistentPhrase &cp = **iter;
 				CreateRules(cp, params);
 			}
 		}
@@ -95,7 +95,7 @@ void Rules::Extend(const Rule &rule, const ConsistentPhrases::Coll &cps, const P
 {
 	ConsistentPhrases::Coll::const_iterator iter;
 	for (iter = cps.begin(); iter != cps.end(); ++iter) {
-		const ConsistentPhrase &cp = *iter;
+		const ConsistentPhrase &cp = **iter;
 		Extend(rule, cp, params);
 	}
 }

@@ -20,7 +20,7 @@ public:
 
 	std::vector<int> corners;
 
-	ConsistentPhrase(const ConsistentPhrase &copy);
+	ConsistentPhrase(const ConsistentPhrase &copy); // do not implement
 	ConsistentPhrase(int sourceStart, int sourceEnd,
 			int targetStart, int targetEnd);
 

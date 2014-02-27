@@ -11,18 +11,6 @@
 
 using namespace std;
 
-ConsistentPhrase::ConsistentPhrase(const ConsistentPhrase &copy)
-:corners(copy.corners)
-{
-  for (size_t i = 0; i < copy.m_nonTerms.size(); ++i) {
-	  const NonTerm &oldNonTerm = copy.m_nonTerms[i];
-
-	  m_nonTerms.push_back(NonTerm (*this,
-  			  oldNonTerm.GetLabel(Moses::Input),
-  			  oldNonTerm.GetLabel(Moses::Output)));
-  }
-}
-
 ConsistentPhrase::ConsistentPhrase(
 		int sourceStart, int sourceEnd,
 		int targetStart, int targetEnd)
