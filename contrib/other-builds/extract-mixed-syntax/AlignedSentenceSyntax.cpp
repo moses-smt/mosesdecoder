@@ -26,42 +26,35 @@ AlignedSentenceSyntax::~AlignedSentenceSyntax() {
 	// TODO Auto-generated destructor stub
 }
 
-void AlignedSentenceSyntax::Create(const Parameter &params)
+void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, string line,
+		Phrase &phrase, SyntaxTree &tree)
 {
 	// parse source and target string
-	if (params.sourceSyntax) {
-		m_sourceStr = "<xml>" + m_sourceStr + "</xml>";
-		XMLParse(m_source, m_sourceTree, m_sourceStr);
+	if (isSyntax) {
+		line = "<xml>" + line + "</xml>";
+		XMLParse(phrase, tree, line);
 
-		if (params.mixedSyntaxType != 0) {
+		if (mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
-			m_sourceTree.SetDefaultLabel("[X]");
-			if (params.mixedSyntaxType == 2) {
-				m_sourceTree.AddToAll("[X]");
+			tree.SetDefaultLabel("[X]");
+			if (mixedSyntaxType == 2) {
+				tree.AddToAll("[X]");
 			}
 		}
 	}
 	else {
-		PopulateWordVec(m_source, m_sourceStr);
-		m_sourceTree.SetDefaultLabel("[X]");
+		PopulateWordVec(phrase, line);
+		tree.SetDefaultLabel("[X]");
 	}
 
-	if (params.targetSyntax) {
-		m_targetStr = "<xml>" + m_targetStr + "</xml>";
-		XMLParse(m_target, m_targetTree, m_targetStr);
+}
 
-		if (params.mixedSyntaxType != 0) {
-			// mixed syntax. Always add [X] where there isn't 1
-			m_targetTree.SetDefaultLabel("[X]");
-			if (params.mixedSyntaxType == 2) {
-				m_targetTree.AddToAll("[X]");
-			}
-		}
-	}
-	else {
-		PopulateWordVec(m_target, m_targetStr);
-		m_targetTree.SetDefaultLabel("[X]");
-	}
+void AlignedSentenceSyntax::Create(const Parameter &params)
+{
+	Populate(params.sourceSyntax, params.mixedSyntaxType, m_sourceStr,
+			m_source, m_sourceTree);
+	Populate(params.targetSyntax, params.mixedSyntaxType, m_targetStr,
+			m_target, m_targetTree);
 
 	PopulateAlignment(m_alignmentStr);
 	CreateConsistentPhrases(params);
