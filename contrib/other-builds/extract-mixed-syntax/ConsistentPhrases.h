@@ -26,6 +26,7 @@ public:
 			int targetStart, int targetEnd);
 
 	const Coll &GetColl(int sourceStart, int sourceEnd) const;
+	Coll &GetColl(int sourceStart, int sourceEnd);
 
 	std::string Debug() const;
 

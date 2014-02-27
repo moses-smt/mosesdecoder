@@ -45,17 +45,22 @@ void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
 											sourceEnd,
 											targetStart,
 											targetEnd);
-  cp->AddNonTerms("[X]", "[X]");
 
   pair<Coll::iterator, bool> inserted = coll.insert(cp);
   assert(inserted.second);
 }
 
-
 const ConsistentPhrases::Coll &ConsistentPhrases::GetColl(int sourceStart, int sourceEnd) const
 {
 	const std::vector<Coll> &allSourceStart = m_coll[sourceStart];
 	const Coll &ret = allSourceStart[sourceEnd - sourceStart];
+	return ret;
+}
+
+ConsistentPhrases::Coll &ConsistentPhrases::GetColl(int sourceStart, int sourceEnd)
+{
+	std::vector<Coll> &allSourceStart = m_coll[sourceStart];
+	Coll &ret = allSourceStart[sourceEnd - sourceStart];
 	return ret;
 }
 
