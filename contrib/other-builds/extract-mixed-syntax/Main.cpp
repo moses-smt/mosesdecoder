@@ -23,12 +23,38 @@ int main(int argc, char** argv)
   po::options_description desc("Options");
   desc.add_options()
     ("help", "Print help messages")
-    ("add", "additional options")
-    ("revision,r", po::value<int>()->default_value(0), "Revision");
+    ("MaxSpan", po::value<int>()->default_value(params.maxSpan), "Max (source) span of a rule. ie. number of words in the source")
+    ("SourceSyntax", "Source sentence is a parse tree")
+    ("TargetSyntax", "Target sentence is a parse tree");
 
   po::variables_map vm;
+  try
+  {
+    po::store(po::parse_command_line(argc, argv, desc),
+              vm); // can throw
 
+    /** --help option
+     */
+    if ( vm.count("help") || argc < 5 )
+    {
+      std::cout << "Basic Command Line Parameter App" << std::endl
+                << desc << std::endl;
+      return EXIT_SUCCESS;
+    }
 
+    po::notify(vm); // throws on error, so do after help in case
+                    // there are any problems
+  }
+  catch(po::error& e)
+  {
+    std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+    std::cerr << desc << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  if (vm.count("maxSpan")) params.maxSpan = vm["maxSpan"].as<int>();
+  if (vm.count("SourceSyntax")) params.sourceSyntax = true;
+  if (vm.count("TargetSyntax")) params.targetSyntax = true;
 
   // input files;
   string pathTarget = argv[1];

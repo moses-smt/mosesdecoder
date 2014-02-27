@@ -7,7 +7,7 @@
 
 #include "AlignedSentenceSyntax.h"
 #include "Parameter.h"
-#include "pugixml/pugixml.hpp"
+#include "pugixml.hpp"
 #include "moses/Util.h"
 
 using namespace std;
@@ -20,7 +20,7 @@ AlignedSentenceSyntax::AlignedSentenceSyntax(const std::string &source,
 ,m_targetStr(target)
 ,m_alignmentStr(alignment)
 {
-	// TODO Auto-generated constructor stub
+	cerr << "syntax" << endl;
 
 }
 

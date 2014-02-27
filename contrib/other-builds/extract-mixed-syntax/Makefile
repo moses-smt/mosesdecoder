@@ -8,7 +8,7 @@ clean:
 
 OBJECTS = AlignedSentence.o ConsistentPhrase.o ConsistentPhrases.o InputFileStream.o \
 	Main.o OutputFileStream.o Parameter.o Phrase.o Rule.o Rules.o RuleSymbol.o \
-	SyntaxTree.o Word.o NonTerm.o RulePhrase.o AlignedSentenceSyntax.o pugixml/pugixml.o
+	SyntaxTree.o Word.o NonTerm.o RulePhrase.o AlignedSentenceSyntax.o pugixml.o
 
 extract-mixed-syntax: $(OBJECTS) 
 

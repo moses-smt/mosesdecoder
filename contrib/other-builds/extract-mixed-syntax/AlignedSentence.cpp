@@ -18,6 +18,8 @@ AlignedSentence::AlignedSentence(const std::string &source,
 			const std::string &target,
 			const std::string &alignment)
 {
+	cerr << "plain text" << endl;
+
 	PopulateWordVec(m_source, source);
 	PopulateWordVec(m_target, target);
 	PopulateAlignment(alignment);
