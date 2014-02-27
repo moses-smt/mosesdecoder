@@ -31,7 +31,7 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	// parse source and target string
 	if (params.sourceSyntax) {
 		m_sourceStr = "<xml>" + m_sourceStr + "</xml>";
-		XMLParse(m_source, m_sourceTree, m_sourceStr, params);
+		XMLParse(m_source, m_sourceTree, m_sourceStr);
 
 		if (params.mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
@@ -48,7 +48,7 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 
 	if (params.targetSyntax) {
 		m_targetStr = "<xml>" + m_targetStr + "</xml>";
-		XMLParse(m_target, m_targetTree, m_targetStr, params);
+		XMLParse(m_target, m_targetTree, m_targetStr);
 
 		if (params.mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
@@ -79,7 +79,7 @@ void Escape(string &text)
 
 }
 
-void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std::string input, const Parameter &params)
+void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std::string input)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load(input.c_str(),

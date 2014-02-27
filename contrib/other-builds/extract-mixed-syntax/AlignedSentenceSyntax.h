@@ -25,7 +25,7 @@ protected:
 	std::string m_sourceStr, m_targetStr, m_alignmentStr;
 	SyntaxTree m_sourceTree, m_targetTree;
 
-	void XMLParse(Phrase &output, SyntaxTree &tree, const std::string input, const Parameter &params);
+	void XMLParse(Phrase &output, SyntaxTree &tree, const std::string input);
 	void CreateNonTerms();
 	void CreateNonTerms(ConsistentPhrase &cp,
 			const SyntaxTree::Labels &sourceLabels,
