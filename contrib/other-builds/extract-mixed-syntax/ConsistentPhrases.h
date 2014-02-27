@@ -12,6 +12,7 @@
 #include "ConsistentPhrase.h"
 
 class Word;
+class Parameter;
 
 class ConsistentPhrases {
 public:
@@ -25,7 +26,7 @@ public:
 	void Add(int sourceStart, int sourceEnd,
 			int targetStart, int targetEnd);
 
-	void AddHieroNonTerms();
+	void AddHieroNonTerms(const Parameter &params);
 
 	const Coll &GetColl(int sourceStart, int sourceEnd) const;
 	Coll &GetColl(int sourceStart, int sourceEnd);

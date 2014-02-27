@@ -30,8 +30,8 @@ protected:
 	void CreateNonTerms(ConsistentPhrase &cp,
 			const SyntaxTree::Labels &sourceLabels,
 			const SyntaxTree::Labels &targetLabels);
-	void Populate(bool isSyntax, int mixedSyntaxType, std::string line,
-			Phrase &phrase, SyntaxTree &tree);
+	void Populate(bool isSyntax, int mixedSyntaxType, const Parameter &params,
+			std::string line, Phrase &phrase, SyntaxTree &tree);
 
 };
 

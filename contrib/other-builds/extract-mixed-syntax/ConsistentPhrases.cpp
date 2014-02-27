@@ -8,6 +8,7 @@
 #include <cassert>
 #include "ConsistentPhrases.h"
 #include "NonTerm.h"
+#include "Parameter.h"
 #include "moses/Util.h"
 
 using namespace std;
@@ -84,7 +85,7 @@ std::string ConsistentPhrases::Debug() const
 	return out.str();
 }
 
-void ConsistentPhrases::AddHieroNonTerms()
+void ConsistentPhrases::AddHieroNonTerms(const Parameter &params)
 {
 	// add [X] labels everywhere
 	for (int i = 0; i < m_coll.size(); ++i) {
@@ -94,7 +95,7 @@ void ConsistentPhrases::AddHieroNonTerms()
 			ConsistentPhrases::Coll::iterator iter;
 			for (iter = coll.begin(); iter != coll.end(); ++iter) {
 				ConsistentPhrase &cp = **iter;
-				cp.AddNonTerms("[X]", "[X]");
+				cp.AddNonTerms(params.defaultNonTerm, params.defaultNonTerm);
 			}
 		}
 	}

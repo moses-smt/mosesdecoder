@@ -26,8 +26,8 @@ AlignedSentenceSyntax::~AlignedSentenceSyntax() {
 	// TODO Auto-generated destructor stub
 }
 
-void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, string line,
-		Phrase &phrase, SyntaxTree &tree)
+void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, const Parameter &params,
+		string line, Phrase &phrase, SyntaxTree &tree)
 {
 	// parse source and target string
 	if (isSyntax) {
@@ -36,24 +36,24 @@ void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, string 
 
 		if (mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
-			tree.SetDefaultLabel("[X]");
+			tree.SetDefaultLabel(params.defaultNonTerm);
 			if (mixedSyntaxType == 2) {
-				tree.AddToAll("[X]");
+				tree.AddToAll(params.defaultNonTerm);
 			}
 		}
 	}
 	else {
 		PopulateWordVec(phrase, line);
-		tree.SetDefaultLabel("[X]");
+		tree.SetDefaultLabel(params.defaultNonTerm);
 	}
 
 }
 
 void AlignedSentenceSyntax::Create(const Parameter &params)
 {
-	Populate(params.sourceSyntax, params.mixedSyntaxType, m_sourceStr,
+	Populate(params.sourceSyntax, params.mixedSyntaxType, params, m_sourceStr,
 			m_source, m_sourceTree);
-	Populate(params.targetSyntax, params.mixedSyntaxType, m_targetStr,
+	Populate(params.targetSyntax, params.mixedSyntaxType, params, m_targetStr,
 			m_target, m_targetTree);
 
 	PopulateAlignment(m_alignmentStr);

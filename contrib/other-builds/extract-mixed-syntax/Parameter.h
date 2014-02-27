@@ -4,8 +4,9 @@
  *  Created on: 17 Feb 2014
  *      Author: hieu
  */
-
 #pragma once
+
+#include <string>
 
 class Parameter
 {
@@ -26,5 +27,6 @@ public:
   bool sourceSyntax, targetSyntax;
   int mixedSyntaxType;
 
+  std::string defaultNonTerm;
 };
 
