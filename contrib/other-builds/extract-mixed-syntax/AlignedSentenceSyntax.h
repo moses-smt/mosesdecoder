@@ -23,9 +23,12 @@ public:
 	//virtual std::string Debug() const;
 protected:
 	std::string m_sourceStr, m_targetStr, m_alignmentStr;
-	SyntaxTree sourceTree, targetTree;
+	SyntaxTree m_sourceTree, m_targetTree;
 
-	void XMLParse(Phrase &output, const std::string input, const Parameter &params);
-
+	void XMLParse(Phrase &output, SyntaxTree &tree, const std::string input, const Parameter &params);
+	void CreateNonTerms();
+	void CreateNonTerms(ConsistentPhrase &cp,
+			const SyntaxTree::Labels &sourceLabels,
+			const SyntaxTree::Labels &targetLabels);
 };
 

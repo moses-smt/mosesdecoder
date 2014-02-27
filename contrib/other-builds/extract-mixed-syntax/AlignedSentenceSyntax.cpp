@@ -33,7 +33,7 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	// parse source and target string
 	if (params.sourceSyntax) {
 		m_sourceStr = "<xml>" + m_sourceStr + "</xml>";
-		XMLParse(m_source, m_sourceStr, params);
+		XMLParse(m_source, m_sourceTree, m_sourceStr, params);
 	}
 	else {
 		PopulateWordVec(m_source, m_sourceStr);
@@ -41,7 +41,7 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 
 	if (params.targetSyntax) {
 		m_targetStr = "<xml>" + m_targetStr + "</xml>";
-		XMLParse(m_target, m_targetStr, params);
+		XMLParse(m_target, m_targetTree, m_targetStr, params);
 	}
 	else {
 		PopulateWordVec(m_target, m_targetStr);
@@ -51,10 +51,10 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 	CreateConsistentPhrases(params);
 
 	// create labels
-
+	CreateNonTerms();
 }
 
-void AlignedSentenceSyntax::XMLParse(Phrase &output, const std::string input, const Parameter &params)
+void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std::string input, const Parameter &params)
 {
 	cerr << "input=" << input << endl;
 
@@ -94,8 +94,48 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, const std::string input, co
         string nodeName = node.name();
 
         if (!nodeName.empty()) {
-        	cerr << nodeName << " " << startPos << "-" << endPos << endl;
+        	tree.Add(startPos, endPos, nodeName);
         }
     }
     std::cerr << std::endl;
 }
+
+void AlignedSentenceSyntax::CreateNonTerms()
+{
+	for (int sourceStart = 0; sourceStart < m_source.size(); ++sourceStart) {
+		for (int sourceEnd = sourceStart; sourceEnd < m_source.size(); ++sourceEnd) {
+			ConsistentPhrases::Coll &coll = m_consistentPhrases.GetColl(sourceStart, sourceEnd);
+			const SyntaxTree::Labels &sourceLabels = m_sourceTree.Find(sourceStart, sourceEnd);
+
+			ConsistentPhrases::Coll::iterator iter;
+			for (iter = coll.begin(); iter != coll.end(); ++iter) {
+				ConsistentPhrase &cp = **iter;
+
+				int targetStart = cp.corners[2];
+				int targetEnd = cp.corners[3];
+				const SyntaxTree::Labels &targetLabels = m_sourceTree.Find(targetStart, targetEnd);
+
+				CreateNonTerms(cp, sourceLabels, targetLabels);
+			}
+		}
+	}
+
+}
+
+void AlignedSentenceSyntax::CreateNonTerms(ConsistentPhrase &cp,
+		const SyntaxTree::Labels &sourceLabels,
+		const SyntaxTree::Labels &targetLabels)
+{
+	SyntaxTree::Labels::const_iterator iterSource;
+	for (iterSource = sourceLabels.begin(); iterSource != sourceLabels.end(); ++iterSource) {
+		SyntaxTree::Labels::const_iterator iterTarget;
+		const string &sourceLabel = *iterSource;
+
+		for (iterTarget = targetLabels.begin(); iterTarget != targetLabels.end(); ++iterTarget) {
+			const string &targetLabel = *iterTarget;
+			cp.AddNonTerms(sourceLabel, targetLabel);
+		}
+	}
+}
+
+
