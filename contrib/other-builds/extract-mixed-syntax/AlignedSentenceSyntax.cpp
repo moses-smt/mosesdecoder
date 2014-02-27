@@ -28,24 +28,33 @@ AlignedSentenceSyntax::~AlignedSentenceSyntax() {
 
 void AlignedSentenceSyntax::Create(const Parameter &params)
 {
-	m_sourceTree.SetDefaultLabel("[X]");
-	m_targetTree.SetDefaultLabel("[X]");
-
 	// parse source and target string
 	if (params.sourceSyntax) {
 		m_sourceStr = "<xml>" + m_sourceStr + "</xml>";
 		XMLParse(m_source, m_sourceTree, m_sourceStr, params);
+
+		if (params.mixedSyntaxType != 0) {
+			// mixed syntax. Always add [X] where there isn't 1
+			m_sourceTree.SetDefaultLabel("[X]");
+		}
 	}
 	else {
 		PopulateWordVec(m_source, m_sourceStr);
+		m_sourceTree.SetDefaultLabel("[X]");
 	}
 
 	if (params.targetSyntax) {
 		m_targetStr = "<xml>" + m_targetStr + "</xml>";
 		XMLParse(m_target, m_targetTree, m_targetStr, params);
+
+		if (params.mixedSyntaxType != 0) {
+			// mixed syntax. Always add [X] where there isn't 1
+			m_targetTree.SetDefaultLabel("[X]");
+		}
 	}
 	else {
 		PopulateWordVec(m_target, m_targetStr);
+		m_targetTree.SetDefaultLabel("[X]");
 	}
 
 	PopulateAlignment(m_alignmentStr);

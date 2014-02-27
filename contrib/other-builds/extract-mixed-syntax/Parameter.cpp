@@ -18,6 +18,7 @@ Parameter::Parameter()
 
 ,sourceSyntax(false)
 ,targetSyntax(false)
+,mixedSyntaxType(0)
 {}
 
 Parameter::~Parameter() {

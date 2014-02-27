@@ -24,6 +24,7 @@ public:
   bool fractionalCounting;
 
   bool sourceSyntax, targetSyntax;
+  int mixedSyntaxType;
 
 };
 

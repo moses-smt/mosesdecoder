@@ -84,7 +84,7 @@ std::string ConsistentPhrases::Debug() const
 	return out.str();
 }
 
-void ConsistentPhrases::AddHieroNonTerms(bool onlyIfNoNonTerm)
+void ConsistentPhrases::AddHieroNonTerms()
 {
 	// add [X] labels everywhere
 	for (int i = 0; i < m_coll.size(); ++i) {
@@ -94,10 +94,6 @@ void ConsistentPhrases::AddHieroNonTerms(bool onlyIfNoNonTerm)
 			ConsistentPhrases::Coll::iterator iter;
 			for (iter = coll.begin(); iter != coll.end(); ++iter) {
 				ConsistentPhrase &cp = **iter;
-
-				if (onlyIfNoNonTerm && cp.GetNonTerms().size()) {
-					continue;
-				}
 				cp.AddNonTerms("[X]", "[X]");
 			}
 		}

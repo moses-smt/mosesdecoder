@@ -95,7 +95,7 @@ std::vector<int> AlignedSentence::GetSourceAlignmentCount() const
 void AlignedSentence::Create(const Parameter &params)
 {
 	CreateConsistentPhrases(params);
-	m_consistentPhrases.AddHieroNonTerms(false);
+	m_consistentPhrases.AddHieroNonTerms();
 }
 
 void AlignedSentence::CreateConsistentPhrases(const Parameter &params)

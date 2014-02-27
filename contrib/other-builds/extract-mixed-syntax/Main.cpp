@@ -25,7 +25,8 @@ int main(int argc, char** argv)
     ("help", "Print help messages")
     ("MaxSpan", po::value<int>()->default_value(params.maxSpan), "Max (source) span of a rule. ie. number of words in the source")
     ("SourceSyntax", "Source sentence is a parse tree")
-    ("TargetSyntax", "Target sentence is a parse tree");
+    ("TargetSyntax", "Target sentence is a parse tree")
+    ("MixedSyntaxType", po::value<int>()->default_value(params.mixedSyntaxType), "Hieu's Mixed syntax type. 0(default)=no mixed syntax, 1=add [X] only if no syntactic label. 2=add [X] everywhere");
 
   po::variables_map vm;
   try
@@ -52,9 +53,10 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
-  if (vm.count("maxSpan")) params.maxSpan = vm["maxSpan"].as<int>();
+  if (vm.count("MaxSpan")) params.maxSpan = vm["MaxSpan"].as<int>();
   if (vm.count("SourceSyntax")) params.sourceSyntax = true;
   if (vm.count("TargetSyntax")) params.targetSyntax = true;
+  if (vm.count("MixedSyntaxType")) params.mixedSyntaxType = vm["MixedSyntaxType"].as<int>();
 
   // input files;
   string pathTarget = argv[1];
