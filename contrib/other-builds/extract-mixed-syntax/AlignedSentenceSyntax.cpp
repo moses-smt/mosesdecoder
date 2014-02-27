@@ -61,18 +61,9 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std
 	pugi::xml_parse_result result = doc.load(input.c_str(), pugi::parse_default | pugi::parse_comments);
 
 	pugi::xml_node topNode = doc.child("xml");
-	std::cerr << topNode.name() << std::endl;
 
     for (pugi::xml_node node = topNode.first_child(); node; node = node.next_sibling())
     {
-        std::cerr << node.name() << std::endl;
-
-        for (pugi::xml_attribute attr = node.first_attribute(); attr; attr = attr.next_attribute())
-        {
-            std::cerr << " " << attr.name() << "=" << attr.value() << std::endl;
-        }
-        std::cerr << node.text().as_string() << std::endl;
-
         // fill data structures
         int startPos = output.size();
 
@@ -96,7 +87,6 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std
         	tree.Add(startPos, endPos, nodeName);
         }
     }
-    std::cerr << std::endl;
 }
 
 void AlignedSentenceSyntax::CreateNonTerms()
