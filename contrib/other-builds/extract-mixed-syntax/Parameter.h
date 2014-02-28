@@ -20,6 +20,8 @@ public:
   int maxSymbolsSource;
   int minHoleSource;
 
+  long sentenceOffset;
+
   bool nonTermConsecSource;
   bool requireAlignedWord;
   bool fractionalCounting;

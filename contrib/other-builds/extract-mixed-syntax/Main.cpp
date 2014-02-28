@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     ("MaxSpan", po::value<int>()->default_value(params.maxSpan), "Max (source) span of a rule. ie. number of words in the source")
     ("GZOutput", po::value<bool>()->default_value(params.gzOutput), "Compress extract files")
     ("GlueGrammar", po::value<string>()->default_value(params.gluePath), "Output glue grammar to here")
-
+    ("SentenceOffset", po::value<long>()->default_value(params.sentenceOffset), "Starting sentence id. Not used")
 
     ("SourceSyntax", po::value<bool>()->default_value(params.sourceSyntax), "Source sentence is a parse tree")
     ("TargetSyntax", po::value<bool>()->default_value(params.targetSyntax), "Target sentence is a parse tree")
@@ -59,6 +59,9 @@ int main(int argc, char** argv)
 
   if (vm.count("MaxSpan")) params.maxSpan = vm["MaxSpan"].as<int>();
   if (vm.count("GZOutput")) params.gzOutput = true;
+  if (vm.count("GlueGrammar")) params.gluePath = vm["GlueGrammar"].as<string>();
+  if (vm.count("SentenceOffset")) params.sentenceOffset = vm["SentenceOffset"].as<long>();
+
   if (vm.count("SourceSyntax")) params.sourceSyntax = true;
   if (vm.count("TargetSyntax")) params.targetSyntax = true;
   if (vm.count("MixedSyntaxType")) params.mixedSyntaxType = vm["MixedSyntaxType"].as<int>();
@@ -78,8 +81,8 @@ int main(int argc, char** argv)
   Moses::InputFileStream strmTarget(pathTarget);
   Moses::InputFileStream strmSource(pathSource);
   Moses::InputFileStream strmAlignment(pathAlignment);
-  Moses::OutputFileStream m_extractFile(pathExtract);
-  Moses::OutputFileStream m_extractInvFile(pathExtractInv);
+  Moses::OutputFileStream extractFile(pathExtract);
+  Moses::OutputFileStream extractInvFile(pathExtractInv);
 
 
   // MAIN LOOP
@@ -118,8 +121,8 @@ int main(int argc, char** argv)
 	  rules.Consolidate(params);
 	  //cerr << rules.Debug();
 
-	  rules.Output(m_extractFile, true);
-	  rules.Output(m_extractInvFile, false);
+	  rules.Output(extractFile, true);
+	  rules.Output(extractInvFile, false);
 
 	  delete alignedSentence;
   }
