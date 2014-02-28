@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     ("target-language,t", po::value<string>()->required(), "Target Language")
     ("revision,r", po::value<int>()->default_value(0), "Revision")
 
-    ("opennlp-path", po::value<int>()->default_value(0), "Path to Apache OpenNLP toolkit")
+    ("opennlp", po::value<string>()->default_value(""), "Path to Apache OpenNLP toolkit")
 
     ;
 
@@ -63,7 +63,11 @@ int main(int argc, char** argv)
 
 
   if (sourceLang == "en" && revision == 2) {
-	string openNLPPath = vm["opennlp-path"].as<string>();
+	if (vm.count("opennlp") == 0) {
+		throw "Need path to openNLP toolkit";
+	}
+
+	string openNLPPath = vm["opennlp"].as<string>();
   	EnOpenNLPChunker chunker(openNLPPath);
   	chunker.Process(cin, cout);
   }

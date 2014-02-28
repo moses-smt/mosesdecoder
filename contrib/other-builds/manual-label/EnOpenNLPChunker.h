@@ -17,5 +17,7 @@ public:
 	void Process(std::istream &in, std::ostream &out);
 protected:
 	const std::string m_openNLPPath;
+
+	void MosesReformat(const std::string &line, std::ostream &out);
 };
 
