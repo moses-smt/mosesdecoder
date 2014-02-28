@@ -25,12 +25,12 @@ int main(int argc, char** argv)
   desc.add_options()
     ("help", "Print help messages")
     ("MaxSpan", po::value<int>()->default_value(params.maxSpan), "Max (source) span of a rule. ie. number of words in the source")
-    ("GZOutput", po::value<bool>()->default_value(params.gzOutput), "Compress extract files")
     ("GlueGrammar", po::value<string>()->default_value(params.gluePath), "Output glue grammar to here")
     ("SentenceOffset", po::value<long>()->default_value(params.sentenceOffset), "Starting sentence id. Not used")
+    ("GZOutput", "Compress extract files")
 
-    ("SourceSyntax", po::value<bool>()->default_value(params.sourceSyntax), "Source sentence is a parse tree")
-    ("TargetSyntax", po::value<bool>()->default_value(params.targetSyntax), "Target sentence is a parse tree")
+    ("SourceSyntax", "Source sentence is a parse tree")
+    ("TargetSyntax", "Target sentence is a parse tree")
     ("MixedSyntaxType", po::value<int>()->default_value(params.mixedSyntaxType), "Hieu's Mixed syntax type. 0(default)=no mixed syntax, 1=add [X] only if no syntactic label. 2=add [X] everywhere");
 
   po::variables_map vm;
