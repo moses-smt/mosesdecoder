@@ -46,13 +46,13 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 			+ m_openNLPPath + "/bin/opennlp ChunkerME "
 				+ m_openNLPPath + "/models/en-chunker.bin > "
 			+ outStr;
-	cerr << "Executing:" << cmd << endl;
+	//cerr << "Executing:" << cmd << endl;
 	int ret = system(cmd.c_str());
 
 	// read result of chunker and output as Moses xml trees
 	ifstream outFile(outStr.c_str());
 	while (getline(outFile, line)) {
-		cerr << line << endl;
+		//cerr << line << endl;
 		MosesReformat(line, out);
 		out << endl;
 	}
@@ -87,7 +87,6 @@ void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
 			out << "</tree> ";
 		}
 		else {
-			cerr << "tok=" << tok << endl;
 			vector<string> factors;
 			Moses::Tokenize(factors, tok, "_");
 			assert(factors.size() == 2);
