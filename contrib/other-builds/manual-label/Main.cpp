@@ -21,7 +21,10 @@ int main(int argc, char** argv)
   po::options_description desc("Options");
   desc.add_options()
     ("help", "Print help messages")
-    ("add", "additional options")
+
+    ("input,i", po::value<string>(), "Input file. Otherwise it will read from standard in")
+    ("output,o", po::value<string>(), "Output file. Otherwise it will print from standard out")
+
     ("source-language,s", po::value<string>()->required(), "Source Language")
     ("target-language,t", po::value<string>()->required(), "Target Language")
     ("revision,r", po::value<int>()->default_value(0), "Revision")
@@ -55,6 +58,22 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
   }
 
+  istream *inStrm = &cin;
+  if (vm.count("input")) {
+	  string inStr =  vm["input"].as<string>();
+	  cerr << "inStr=" << inStr << endl;
+	  ifstream *inFile = new ifstream(inStr.c_str());
+	  inStrm = inFile;
+  }
+
+  ostream *outStrm = &cout;
+  if (vm.count("output")) {
+	  string outStr =  vm["output"].as<string>();
+	  cerr << "outStr=" << outStr << endl;
+	  ostream *outFile = new ofstream(outStr.c_str());
+	  outStrm = outFile;
+  }
+
   string sourceLang = vm["source-language"].as<string>();
   string targetLang = vm["target-language"].as<string>();
   int revision = vm["revision"].as<int>();
@@ -69,7 +88,7 @@ int main(int argc, char** argv)
 
 	string openNLPPath = vm["opennlp"].as<string>();
   	EnOpenNLPChunker chunker(openNLPPath);
-  	chunker.Process(cin, cout);
+  	chunker.Process(*inStrm, *outStrm);
   }
   else {
 	  // process line-by-line
