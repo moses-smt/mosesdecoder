@@ -4,7 +4,7 @@ clean:
 	rm -f *.o manual-label
 
 .cpp.o:
-	g++ -I../../../boost/include -I../../../ -O6 -g -c $<
+	g++ -I../../../boost/include -I../../../ -O3 -g -c $<
 
 OBJECTS = DeEn.o EnOpenNLPChunker.o EnPhrasalVerb.o Main.o 
 
