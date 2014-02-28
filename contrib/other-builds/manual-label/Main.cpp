@@ -2,9 +2,10 @@
 #include <cstdlib>
 #include <boost/program_options.hpp>
 #include "moses/Util.h"
-#include "manual-label.h"
+#include "Main.h"
 #include "DeEn.h"
 #include "EnPhrasalVerb.h"
+#include "EnOpenNLPChunker.h"
 
 using namespace std;
 
@@ -23,7 +24,11 @@ int main(int argc, char** argv)
     ("add", "additional options")
     ("source-language,s", po::value<string>()->required(), "Source Language")
     ("target-language,t", po::value<string>()->required(), "Target Language")
-    ("revision,r", po::value<int>()->default_value(0), "Revision");
+    ("revision,r", po::value<int>()->default_value(0), "Revision")
+
+    ("opennlp-path", po::value<int>()->default_value(0), "Path to Apache OpenNLP toolkit")
+
+    ;
 
   po::variables_map vm;
   try
@@ -56,27 +61,41 @@ int main(int argc, char** argv)
 
   cerr << sourceLang << " " << targetLang << " " << revision << endl;
 
-  string line;
-  size_t lineNum = 1;
 
-  while (getline(cin, line)) {
-    //cerr << lineNum << ":" << line << endl;
-    if (lineNum % 1000 == 0) {
-      cerr << lineNum << " ";
-    }
-
-    Phrase source = Tokenize(line);
-
-    if (sourceLang == "de" && targetLang == "en") {
-    	LabelDeEn(source, cout);
-    }
-    else if (sourceLang == "en") {
-    	EnPhrasalVerb(source, revision, cout);
-    }
-
-    ++lineNum;
+  if (sourceLang == "en" && revision == 2) {
+	string openNLPPath = vm["opennlp-path"].as<string>();
+  	EnOpenNLPChunker chunker(openNLPPath);
+  	chunker.Process(cin, cout);
   }
+  else {
+	  // process line-by-line
+	  string line;
+	  size_t lineNum = 1;
 
+	  while (getline(cin, line)) {
+		//cerr << lineNum << ":" << line << endl;
+		if (lineNum % 1000 == 0) {
+		  cerr << lineNum << " ";
+		}
+
+		Phrase source = Tokenize(line);
+
+		if (sourceLang == "de" && targetLang == "en") {
+			LabelDeEn(source, cout);
+		}
+		else if (sourceLang == "en") {
+			if (revision == 0 || revision == 1) {
+				EnPhrasalVerb(source, revision, cout);
+			}
+			else if (revision == 2) {
+				  string openNLPPath = vm["opennlp-path"].as<string>();
+				  EnOpenNLPChunker chunker(openNLPPath);
+			}
+		}
+
+		++lineNum;
+	  }
+  }
 
 
   cerr << "Finished" << endl;

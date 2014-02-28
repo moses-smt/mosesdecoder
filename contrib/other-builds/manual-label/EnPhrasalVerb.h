@@ -1,7 +1,8 @@
 #pragma once
 
-#include "manual-label.h"
+#include "Main.h"
 
+// roll your own identification of phrasal verbs
 void EnPhrasalVerb(const Phrase &source, int revision, std::ostream &out);
 
 bool Exist(const Phrase &source, int start, int end, int factor, const std::string &str);

@@ -1,6 +1,6 @@
 #include <list>
 #include "DeEn.h"
-#include "manual-label.h"
+#include "Main.h"
 #include "moses/Util.h"
 
 using namespace std;

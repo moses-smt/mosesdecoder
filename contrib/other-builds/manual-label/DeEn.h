@@ -1,5 +1,5 @@
 #pragma once
 
-#include "manual-label.h"
+#include "Main.h"
 
 void LabelDeEn(const Phrase &source, std::ostream &out);
