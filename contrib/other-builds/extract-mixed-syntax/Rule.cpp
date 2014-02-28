@@ -212,9 +212,22 @@ void Rule::Prevalidate(const Parameter &params)
 	  const NonTerm &secondLastNonTerm = *m_nonterms[m_nonterms.size() - 2];
 	  if (secondLastNonTerm.GetConsistentPhrase().corners[1] + 1 ==
 			  lastNonTerm.GetConsistentPhrase().corners[0]) {
-		  m_isValid = false;
-		  m_canRecurse = false;
-		  return;
+		  if (params.mixedSyntaxType == 0) {
+			  // ordinary hiero or syntax model
+			  m_isValid = false;
+			  m_canRecurse = false;
+			  return;
+		  }
+		  else {
+			  // Hieu's mixed syntax
+			  if (lastNonTerm.IsHiero(Moses::Input, params)
+				  || secondLastNonTerm.IsHiero(Moses::Input, params)) {
+				  m_isValid = false;
+				  m_canRecurse = false;
+				  return;
+			  }
+		  }
+
 	  }
   }
 

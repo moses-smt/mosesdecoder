@@ -10,6 +10,7 @@
 #include "moses/TypeDef.h"
 
 class ConsistentPhrase;
+class Parameter;
 
 class NonTerm : public RuleSymbol
 {
@@ -34,6 +35,7 @@ public:
   void Output(std::ostream &out, Moses::FactorDirection direction) const;
 
   const std::string &GetLabel(Moses::FactorDirection direction) const;
+  bool IsHiero(Moses::FactorDirection direction, const Parameter &params) const;
 
 protected:
 	const ConsistentPhrase *m_consistentPhrase;

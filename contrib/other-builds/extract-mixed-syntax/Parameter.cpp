@@ -18,11 +18,12 @@ Parameter::Parameter()
 ,fractionalCounting(true)
 ,gzOutput(false)
 
+,hieroNonTerm("[X]")
 ,sourceSyntax(false)
 ,targetSyntax(false)
-,mixedSyntaxType(0)
 
-,hieroNonTerm("[X]")
+,mixedSyntaxType(0)
+,nonTermConsecSourceMixed(true)
 {}
 
 Parameter::~Parameter() {

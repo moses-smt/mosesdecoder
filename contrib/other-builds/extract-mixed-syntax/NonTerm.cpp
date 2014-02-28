@@ -9,6 +9,7 @@
 #include "NonTerm.h"
 #include "Word.h"
 #include "ConsistentPhrase.h"
+#include "Parameter.h"
 
 using namespace std;
 
@@ -48,4 +49,10 @@ void NonTerm::Output(std::ostream &out, Moses::FactorDirection direction) const
 const std::string &NonTerm::GetLabel(Moses::FactorDirection direction) const
 {
   return (direction == Moses::Input) ? m_source : m_target;
+}
+
+bool NonTerm::IsHiero(Moses::FactorDirection direction, const Parameter &params) const
+{
+	const std::string &label = NonTerm::GetLabel(direction);
+	return label == params.hieroNonTerm;
 }

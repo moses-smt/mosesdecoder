@@ -27,10 +27,13 @@ public:
   bool fractionalCounting;
   bool gzOutput;
 
-  bool sourceSyntax, targetSyntax;
-  int mixedSyntaxType;
-
   std::string hieroNonTerm;
   std::string gluePath;
+
+  bool sourceSyntax, targetSyntax;
+
+  int mixedSyntaxType;
+  bool nonTermConsecSourceMixed;
+
 };
 
