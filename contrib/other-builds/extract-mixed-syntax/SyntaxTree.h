@@ -16,7 +16,7 @@ public:
 
   const Labels &Find(int startPos, int endPos) const;
 
-  void SetDefaultLabel(const std::string &label) {
+  void SetHieroLabel(const std::string &label) {
 	  m_defaultLabels.push_back(label);
   }
 

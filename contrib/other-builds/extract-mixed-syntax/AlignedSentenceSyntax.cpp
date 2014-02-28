@@ -36,7 +36,7 @@ void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, const P
 
 		if (mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
-			tree.SetDefaultLabel(params.hieroNonTerm);
+			tree.SetHieroLabel(params.hieroNonTerm);
 			if (mixedSyntaxType == 2) {
 				tree.AddToAll(params.hieroNonTerm);
 			}
@@ -44,7 +44,7 @@ void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, const P
 	}
 	else {
 		PopulateWordVec(phrase, line);
-		tree.SetDefaultLabel(params.hieroNonTerm);
+		tree.SetHieroLabel(params.hieroNonTerm);
 	}
 
 }
