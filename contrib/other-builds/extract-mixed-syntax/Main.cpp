@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <boost/program_options.hpp>
 
+#include "Main.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 #include "AlignedSentence.h"
@@ -127,7 +128,18 @@ int main(int argc, char** argv)
 	  delete alignedSentence;
   }
 
+  if (!params.gluePath.empty()) {
+	  Moses::OutputFileStream glueFile(params.gluePath);
+	  CreateGlueGrammar(glueFile);
+  }
 
   cerr << "Finished" << endl;
 }
 
+void CreateGlueGrammar(Moses::OutputFileStream &glueFile)
+{
+	glueFile << "<s> [X] ||| <s> [S] ||| 1 ||| ||| 0" << endl
+			<< "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 ||| 0" << endl
+			<< "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << endl;
+
+}
