@@ -9,6 +9,7 @@
 
 #include "AlignedSentence.h"
 #include "SyntaxTree.h"
+#include "pugixml.hpp"
 
 class AlignedSentenceSyntax : public AlignedSentence
 {
@@ -26,6 +27,7 @@ protected:
 	SyntaxTree m_sourceTree, m_targetTree;
 
 	void XMLParse(Phrase &output, SyntaxTree &tree, const std::string input);
+	void XMLParse(Phrase &output, SyntaxTree &tree, const pugi::xml_node &parentNode);
 	void CreateNonTerms();
 	void CreateNonTerms(ConsistentPhrase &cp,
 			const SyntaxTree::Labels &sourceLabels,

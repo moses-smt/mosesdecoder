@@ -31,7 +31,7 @@ void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, const P
 {
 	// parse source and target string
 	if (isSyntax) {
-		line = "<xml>" + line + "</xml>";
+		line = "<xml><tree label='X'>" + line + "</tree></xml>";
 		XMLParse(phrase, tree, line);
 
 		if (mixedSyntaxType != 0) {
@@ -72,22 +72,29 @@ void Escape(string &text)
 
 }
 
-void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std::string input)
+void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const pugi::xml_node &parentNode)
 {
-	pugi::xml_document doc;
-	pugi::xml_parse_result result = doc.load(input.c_str(),
-			pugi::parse_default | pugi::parse_comments);
-
-	pugi::xml_node topNode = doc.child("xml");
-
-    for (pugi::xml_node node = topNode.first_child(); node; node = node.next_sibling())
+	int childNum = 0;
+    for (pugi::xml_node childNode = parentNode.first_child(); childNode; childNode = childNode.next_sibling())
     {
+    	// span label
+    	pugi::xml_attribute attribute = childNode.attribute("label");
+        string nodeName = attribute.as_string();
+
+        if (childNum == 0 && nodeName.empty()) {
+        	// don't worry about this 1. Would be caught by the parent node
+        	//string text = childNode.text().as_string();
+        	//cerr << childNum << " " << nodeName << "=" << text << endl;
+        	continue;
+        }
+
         // fill data structures
         int startPos = output.size();
 
         // fill phrase vector
-    	string text = node.text().as_string();
+    	string text = childNode.text().as_string();
     	Escape(text);
+    	//cerr << childNum << " " << nodeName << "=" << text << endl;
 
     	std::vector<string> toks;
     	Moses::Tokenize(toks, text);
@@ -97,17 +104,32 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std
     		Word *word = new Word(output.size(), tok);
     		output.push_back(word);
     	}
+
+        // recursively call this function. For proper recursive trees
+        XMLParse(output, tree, childNode);
+
+        // is it a labelled span?
     	int endPos = output.size() - 1;
 
     	// fill syntax labels
-    	pugi::xml_attribute attribute = node.attribute("label");
-        string nodeName = attribute.as_string();
-
         if (!nodeName.empty()) {
         	nodeName = "[" + nodeName + "]";
         	tree.Add(startPos, endPos, nodeName);
         }
+
+        ++childNum;
     }
+
+}
+
+void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std::string input)
+{
+	pugi::xml_document doc;
+	pugi::xml_parse_result result = doc.load(input.c_str(),
+			pugi::parse_default | pugi::parse_comments);
+
+	pugi::xml_node topNode = doc.child("xml");
+	XMLParse(output, tree, topNode);
 }
 
 void AlignedSentenceSyntax::CreateNonTerms()
