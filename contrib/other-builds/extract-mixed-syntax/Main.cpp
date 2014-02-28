@@ -73,7 +73,7 @@ int main(int argc, char** argv)
   string pathAlignment = argv[3];
 
   string pathExtract = argv[4];
-  string pathExtractInv = pathExtract;
+  string pathExtractInv = pathExtract + ".inv";
   if (params.gzOutput) {
 	  pathExtract += ".gz";
 	  pathExtractInv += ".gz";
