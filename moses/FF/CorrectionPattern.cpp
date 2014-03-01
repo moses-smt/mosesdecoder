@@ -21,34 +21,34 @@ namespace Moses
 
 using namespace std;
 
-typedef std::pair<size_t, char> Diff;
+typedef char Diff;
 typedef std::vector<Diff> Diffs;
 
 template <class Sequence, class Pred>
-void diff_rec(size_t** c,
-              Sequence s1,
-              Sequence s2,
+void CreateDiffRec(size_t** c,
+              const Sequence &s1,
+              const Sequence &s2,
               size_t start,
               size_t i,
               size_t j,
               Diffs& diffs,
               Pred pred) {
   if(i > 0 && j > 0 && pred(s1[i - 1 + start], s2[j - 1 + start])) {
-    diff_rec(c, s1, s2, start, i - 1, j - 1, diffs, pred);
-    diffs.push_back(Diff(j - 1 + start, 'm'));
+    CreateDiffRec(c, s1, s2, start, i - 1, j - 1, diffs, pred);
+    diffs.push_back(Diff('m'));
   }
   else if(j > 0 && (i == 0 || c[i][j-1] >= c[i-1][j])) {
-    diff_rec(c, s1, s2, start, i, j-1, diffs, pred);
-    diffs.push_back(Diff(j - 1 + start, 'i'));
+    CreateDiffRec(c, s1, s2, start, i, j-1, diffs, pred);
+    diffs.push_back(Diff('i'));
   }
   else if(i > 0 && (j == 0 || c[i][j-1] < c[i-1][j])) {
-    diff_rec(c, s1, s2, start, i-1, j, diffs, pred);
-    diffs.push_back(Diff(i - 1 + start, 'd'));
+    CreateDiffRec(c, s1, s2, start, i-1, j, diffs, pred);
+    diffs.push_back(Diff('d'));
   }
 }
 
 template <class Sequence, class Pred>
-Diffs diff(const Sequence& s1,
+Diffs CreateDiff(const Sequence& s1,
            const Sequence& s2,
            Pred pred) {
   
@@ -61,7 +61,7 @@ Diffs diff(const Sequence& s1,
   int n_end = s2.size() - 1;
     
   while(start <= m_end && start <= n_end && pred(s1[start], s2[start])) {
-    diffs.push_back(Diff(start, 'm'));
+    diffs.push_back(Diff('m'));
     start++;
   }
   while(start <= m_end && start <= n_end && pred(s1[m_end], s2[n_end])) {
@@ -86,28 +86,119 @@ Diffs diff(const Sequence& s1,
       else
         c[i][j] = c[i][j-1] > c[i-1][j] ? c[i][j-1] : c[i-1][j];
   
-  //size_t length = c[m_new][n_new] + (m - m_end - 1) + start;
-  
-  diff_rec(c, s1, s2, start, m_new, n_new, diffs, pred);
+  CreateDiffRec(c, s1, s2, start, m_new, n_new, diffs, pred);
   
   for(size_t i = 0; i <= m_new; ++i)
     delete[] c[i];
   delete[] c;
     
   for (size_t i = n_end + 1; i < n; ++i)
-    diffs.push_back(Diff(i, 'm'));
+    diffs.push_back(Diff('m'));
   
   return diffs;
 }
 
 template <class Sequence>
-Diffs diff(const Sequence& s1,
-          const Sequence& s2) {
-  return diff(s1, s2, std::equal_to<typename Sequence::value_type>());
+Diffs CreateDiff(const Sequence& s1, const Sequence& s2) {
+  return CreateDiff(s1, s2, std::equal_to<typename Sequence::value_type>());
+}
+
+std::string GeneralizePair(const std::string &s1, const std::string &s2) {
+  Diffs diffs = CreateDiff(s1, s2);
+  
+  size_t i = 0, j = 0;
+  char lastType = 'm';
+  
+  std::vector<std::string> sourceList;
+  std::vector<std::string> targetList;
+  
+  std::string source, target;  
+  std::string match;
+  
+  BOOST_FOREACH(Diff type, diffs) {
+    if(type == 'm') {
+      if(lastType != 'm') {
+        sourceList.push_back(source);
+        targetList.push_back(target);
+      }
+      source.clear();
+      target.clear();
+      
+      if(s1[i] == '+') {
+        if(match.size() >= 3) {
+          sourceList.push_back("(\\w{3,})·");
+          targetList.push_back("\\1·");
+        }
+        else {
+          sourceList.push_back(match + "·");
+          targetList.push_back(match + "·");  
+        }
+        match.clear();
+      }
+      else 
+        match.push_back(s1[i]);
+      
+      i++;
+      j++;
+    }
+    else if(type == 'd') {
+      if(s1[i] == '+')
+        source += "·";
+      else
+        source.push_back(s1[i]);
+      i++;
+    }
+    else if(type == 'i') {
+      if(s2[j] == '+')
+        target += "·";
+      else
+        target.push_back(s2[j]);
+      j++;
+    }
+    if(type != 'm' && !match.empty()) {      
+      if(match.size() >= 3) {
+        sourceList.push_back("(\\w{3,})");
+        targetList.push_back("\\1");
+      }
+      else {
+        sourceList.push_back(match);
+        targetList.push_back(match);  
+      }
+    
+      match.clear();
+    }
+
+    lastType = type;
+  }
+  if(lastType != 'm') {
+    sourceList.push_back(source);
+    targetList.push_back(target);
+  }
+  
+  if(!match.empty()) {
+    if(match.size() >= 3) {
+      sourceList.push_back("(\\w{3,})");
+      targetList.push_back("\\1");
+    }
+    else {
+      sourceList.push_back(match);
+      targetList.push_back(match);  
+    }
+  }
+  match.clear();
+  
+  std::stringstream out;
+  out << "sub(«";
+  out << boost::join(sourceList, "");
+  out << "»,«";
+  out << boost::join(targetList, "");
+  out << "»)";
+  
+  return out.str();
 }
 
 template <class Sequence>
-std::string make_pattern(const Sequence &s1, const Sequence &s2) {
+std::string CreateSinglePattern(const Sequence &s1, const Sequence &s2) {
   typedef typename Sequence::value_type Item;
   
   std::stringstream out;
@@ -115,26 +206,29 @@ std::string make_pattern(const Sequence &s1, const Sequence &s2) {
     out << "ins(«" << boost::join(s2, "·") << "»)";
   else if(s2.empty())
     out << "del(«" << boost::join(s1, "·") << "»)";
-  else
-    out << "sub(«" << boost::join(s1, "·") << "»,«"
-      << boost::join(s2, "·") << "»)";
+  else {
+    typename Sequence::value_type v1 = boost::join(s1, "+");
+    typename Sequence::value_type v2 = boost::join(s2, "+");
+    out << GeneralizePair(v1, v2);
+    //out << "sub(«" << boost::join(s1, "·") << "»,«"
+    //  << boost::join(s2, "·") << "»)";
+  }
   return out.str();
 }
 
 template <class Sequence>
-std::vector<std::string> pattern(const Sequence &s1, const Sequence &s2) {
-  Diffs diffs = diff(s1, s2);
+std::vector<std::string> CreatePattern(const Sequence &s1, const Sequence &s2) {
+  Diffs diffs = CreateDiff(s1, s2);
   size_t i = 0, j = 0;
   char lastType = 'm';
   
   std::vector<std::string> patternList;
   
   Sequence source, target;
-  BOOST_FOREACH(Diff item, diffs) {
-    char type = item.second;
+  BOOST_FOREACH(Diff type, diffs) {
     if(type == 'm') {
       if(lastType != 'm')
-        patternList.push_back(make_pattern(source, target));
+        patternList.push_back(CreateSinglePattern(source, target));
       source.clear();
       target.clear();
       if(s1[i] != s2[j]) {
@@ -155,7 +249,7 @@ std::vector<std::string> pattern(const Sequence &s1, const Sequence &s2) {
     lastType = type;
   }
   if(lastType != 'm')
-    patternList.push_back(make_pattern(source, target));
+    patternList.push_back(CreateSinglePattern(source, target));
     
   return patternList;
 }
@@ -219,7 +313,7 @@ void CorrectionPattern::ComputeFeatures(
   for(size_t i = 0; i < target.GetSize(); ++i)
     targetTokens.push_back(target.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
   
-  std::vector<std::string> patternList = pattern(sourceTokens, targetTokens);
+  std::vector<std::string> patternList = CreatePattern(sourceTokens, targetTokens);
   for(size_t i = 0; i < patternList.size(); ++i)
     accumulator->PlusEquals(this, patternList[i], 1);
   
