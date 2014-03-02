@@ -235,8 +235,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 
     // SCORES ...
     string directScores, directSparseScores, indirectScores, indirectSparseScores;
-    breakdownCoreAndSparse( itemDirect[2], directScores, directSparseScores );
-    breakdownCoreAndSparse( itemIndirect[2], indirectScores, indirectSparseScores );
+    breakdownCoreAndSparse( itemDirect[3], directScores, directSparseScores );
+    breakdownCoreAndSparse( itemIndirect[3], indirectScores, indirectSparseScores );
 
     vector<string> directCounts = tokenize(itemDirect[4].c_str());
     vector<string> indirectCounts = tokenize(itemIndirect[4].c_str());
@@ -307,7 +307,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     }
 
     // alignment
-    fileConsolidated << " ||| " << itemDirect[3];
+    fileConsolidated << " ||| " << itemDirect[2];
 
     // counts, for debugging
     fileConsolidated << "||| " << countE << " " << countF << " " << countEF;
