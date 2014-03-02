@@ -115,6 +115,8 @@ std::string GeneralizePair(const std::string &s1, const std::string &s2) {
   std::string source, target;  
   std::string match;
   
+  size_t count = 1;
+  
   BOOST_FOREACH(Diff type, diffs) {
     if(type == 'm') {
       if(lastType != 'm') {
@@ -127,7 +129,10 @@ std::string GeneralizePair(const std::string &s1, const std::string &s2) {
       if(s1[i] == '+') {
         if(match.size() >= 3) {
           sourceList.push_back("(\\w{3,})·");
-          targetList.push_back("\\1·");
+          std::string temp;
+          sprintf((char*)temp.c_str(), "%d", count);
+          targetList.push_back("\\" + temp + "·");
+          count++;
         }
         else {
           sourceList.push_back(match + "·");
@@ -158,7 +163,10 @@ std::string GeneralizePair(const std::string &s1, const std::string &s2) {
     if(type != 'm' && !match.empty()) {      
       if(match.size() >= 3) {
         sourceList.push_back("(\\w{3,})");
-        targetList.push_back("\\1");
+        std::string temp;
+        sprintf((char*)temp.c_str(), "%d", count);
+        targetList.push_back("\\" + temp);
+        count++;
       }
       else {
         sourceList.push_back(match);
@@ -178,7 +186,10 @@ std::string GeneralizePair(const std::string &s1, const std::string &s2) {
   if(!match.empty()) {
     if(match.size() >= 3) {
       sourceList.push_back("(\\w{3,})");
-      targetList.push_back("\\1");
+      std::string temp;
+      sprintf((char*)temp.c_str(), "%d", count);
+      targetList.push_back("\\"+ temp);
+      count++;
     }
     else {
       sourceList.push_back(match);
