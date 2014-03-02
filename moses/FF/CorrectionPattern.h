@@ -11,6 +11,8 @@
 namespace Moses
 {
 
+typedef std::vector<std::string> Tokens;
+
 /** Sets the features for length of source phrase, target phrase, both.
  */
 class CorrectionPattern : public StatelessFeatureFunction
@@ -49,6 +51,9 @@ public:
                        const TargetPhrase& targetPhrase,
                        ScoreComponentCollection* accumulator) const;
   void SetParameter(const std::string& key, const std::string& value);
+  
+  std::string CreateSinglePattern(const Tokens &s1, const Tokens &s2) const;
+  std::vector<std::string> CreatePattern(const Tokens &s1, const Tokens &s2) const;
 
 };
 

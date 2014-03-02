@@ -197,34 +197,43 @@ std::string GeneralizePair(const std::string &s1, const std::string &s2) {
   return out.str();
 }
 
-template <class Sequence>
-std::string CreateSinglePattern(const Sequence &s1, const Sequence &s2) {
-  typedef typename Sequence::value_type Item;
+std::string CorrectionPattern::CreateSinglePattern(const Tokens &s1, const Tokens &s2) const {
+  typedef typename Tokens::value_type Item;
   
   std::stringstream out;
-  if(s1.empty())
+  if(s1.empty()) {
     out << "ins(«" << boost::join(s2, "·") << "»)";
-  else if(s2.empty())
-    out << "del(«" << boost::join(s1, "·") << "»)";
-  else {
-    typename Sequence::value_type v1 = boost::join(s1, "+");
-    typename Sequence::value_type v2 = boost::join(s2, "+");
-    out << GeneralizePair(v1, v2);
-    //out << "sub(«" << boost::join(s1, "·") << "»,«"
-    //  << boost::join(s2, "·") << "»)";
+    if(m_unrestricted || m_vocab.count(out.str()))
+      return out.str();
+    else
+      return "ins(OTHER)";
   }
-  return out.str();
+  else if(s2.empty()) {
+    out << "del(«" << boost::join(s1, "·") << "»)";
+    if(m_unrestricted || m_vocab.count(out.str()))
+      return out.str();
+    else
+      return "del(OTHER)";
+  }
+  else {
+    typename Tokens::value_type v1 = boost::join(s1, "+");
+    typename Tokens::value_type v2 = boost::join(s2, "+");
+    out << GeneralizePair(v1, v2);
+    if(m_unrestricted || m_vocab.count(out.str()))
+      return out.str();
+    else
+      return "sub(OTHER1,OTHER2)";
+  }
 }
 
-template <class Sequence>
-std::vector<std::string> CreatePattern(const Sequence &s1, const Sequence &s2) {
+std::vector<std::string> CorrectionPattern::CreatePattern(const Tokens &s1, const Tokens &s2) const {
   Diffs diffs = CreateDiff(s1, s2);
   size_t i = 0, j = 0;
   char lastType = 'm';
   
   std::vector<std::string> patternList;
   
-  Sequence source, target;
+  Tokens source, target;
   BOOST_FOREACH(Diff type, diffs) {
     if(type == 'm') {
       if(lastType != 'm')
