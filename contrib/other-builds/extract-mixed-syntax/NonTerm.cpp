@@ -56,3 +56,8 @@ bool NonTerm::IsHiero(Moses::FactorDirection direction, const Parameter &params)
 	const std::string &label = NonTerm::GetLabel(direction);
 	return label == params.hieroNonTerm;
 }
+
+bool NonTerm::IsHiero(const Parameter &params) const
+{
+ return IsHiero(Moses::Input, params) && IsHiero(Moses::Output, params);
+}

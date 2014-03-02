@@ -28,6 +28,8 @@ int main(int argc, char** argv)
     ("GlueGrammar", po::value<string>()->default_value(params.gluePath), "Output glue grammar to here")
     ("SentenceOffset", po::value<long>()->default_value(params.sentenceOffset), "Starting sentence id. Not used")
     ("GZOutput", "Compress extract files")
+    ("MaxNonTerm", po::value<int>()->default_value(params.maxNonTerm), "Maximum number of non-terms allowed per rule")
+    ("MaxHieroNonTerm", po::value<int>()->default_value(params.maxHieroNonTerm), "Maximum number of Hiero non-term. Usually, --MaxNonTerm is the normal constraint")
 
     ("SourceSyntax", "Source sentence is a parse tree")
     ("TargetSyntax", "Target sentence is a parse tree")
@@ -62,6 +64,8 @@ int main(int argc, char** argv)
   if (vm.count("GZOutput")) params.gzOutput = true;
   if (vm.count("GlueGrammar")) params.gluePath = vm["GlueGrammar"].as<string>();
   if (vm.count("SentenceOffset")) params.sentenceOffset = vm["SentenceOffset"].as<long>();
+  if (vm.count("MaxNonTerm")) params.maxNonTerm = vm["MaxNonTerm"].as<int>();
+  if (vm.count("MaxHieroNonTerm")) params.maxHieroNonTerm = vm["MaxHieroNonTerm"].as<int>();
 
   if (vm.count("SourceSyntax")) params.sourceSyntax = true;
   if (vm.count("TargetSyntax")) params.targetSyntax = true;

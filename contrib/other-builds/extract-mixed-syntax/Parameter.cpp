@@ -9,6 +9,7 @@
 Parameter::Parameter()
 :maxSpan(10)
 ,maxNonTerm(2)
+,maxHieroNonTerm(999)
 ,maxSymbolsTarget(999)
 ,maxSymbolsSource(5)
 ,minHoleSource(2)

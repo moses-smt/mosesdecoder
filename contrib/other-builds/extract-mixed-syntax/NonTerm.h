@@ -36,6 +36,7 @@ public:
 
   const std::string &GetLabel(Moses::FactorDirection direction) const;
   bool IsHiero(Moses::FactorDirection direction, const Parameter &params) const;
+  bool IsHiero(const Parameter &params) const;
 
 protected:
 	const ConsistentPhrase *m_consistentPhrase;

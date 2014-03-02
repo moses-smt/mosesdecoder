@@ -16,6 +16,7 @@ public:
 
   int maxSpan;
   int maxNonTerm;
+  int maxHieroNonTerm;
   int maxSymbolsTarget;
   int maxSymbolsSource;
   int minHoleSource;

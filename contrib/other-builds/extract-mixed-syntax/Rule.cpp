@@ -191,16 +191,30 @@ void Rule::Prevalidate(const Parameter &params)
 
   // check number of non-terms
   int numNonTerms = 0;
+  int numHieroNonTerms = 0;
   for (size_t i = 0; i < m_source.GetSize(); ++i) {
 	  const RuleSymbol *arc = m_source[i];
 	  if (arc->IsNonTerm()) {
 		  ++numNonTerms;
+		  const NonTerm &nonTerm = *static_cast<const NonTerm*>(arc);
+		  bool isHiero = nonTerm.IsHiero(params);
+		  if (isHiero) {
+			  ++numHieroNonTerms;
+		  }
 	  }
   }
 
   if (numNonTerms >= params.maxNonTerm) {
 	  m_canRecurse = false;
 	  if (numNonTerms > params.maxNonTerm) {
+		  m_isValid = false;
+		  return;
+	  }
+  }
+
+  if (numHieroNonTerms >= params.maxHieroNonTerm) {
+	  m_canRecurse = false;
+	  if (numHieroNonTerms > params.maxHieroNonTerm) {
 		  m_isValid = false;
 		  return;
 	  }
