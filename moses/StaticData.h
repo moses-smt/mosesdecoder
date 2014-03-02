@@ -756,6 +756,9 @@ public:
 
   bool AdjacentOnly() const
   { return m_adjacentOnly; }
+
+
+  void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
 };
 
 }

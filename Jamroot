@@ -89,7 +89,7 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
     requirements += <library>tcmalloc_and_profiler <library>unwind <cflags>-fno-omit-frame-pointer <cxxflags>-fno-omit-frame-pointer ;
   } else {
     external-lib tcmalloc_minimal ;
-    requirements += <threading>multi:<library>$(tcmalloc_minimal) ;
+    requirements += <threading>multi:<library>tcmalloc_minimal ;
   }
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
