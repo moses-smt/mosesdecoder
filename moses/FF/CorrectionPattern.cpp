@@ -115,7 +115,7 @@ std::string GeneralizePair(const std::string &s1, const std::string &s2) {
   std::string source, target;  
   std::string match;
   
-  size_t count = 1;
+  int count = 1;
   
   BOOST_FOREACH(Diff type, diffs) {
     if(type == 'm') {
