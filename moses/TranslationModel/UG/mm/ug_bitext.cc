@@ -45,12 +45,14 @@ namespace Moses
     pstats::
     add(uint64_t pid, float const w, 
 	vector<uchar> const& a, 
-	uint32_t const cnt2)
+	uint32_t const cnt2, 
+	uint32_t fwd_o, 
+	uint32_t bwd_o)
     {
       this->lock.lock();
       jstats& entry = this->trg[pid];
       this->lock.unlock();
-      entry.add(w,a,cnt2);
+      entry.add(w,a,cnt2,fwd_o,bwd_o);
       if (this->good < entry.rcnt())
 	{
 	  this->lock.lock();
@@ -65,6 +67,8 @@ namespace Moses
     jstats()
       : my_rcnt(0), my_wcnt(0), my_cnt2(0)
     { 
+      ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = ofwd[5] = ofwd[6] = 0;
+      obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = obwd[5] = obwd[6] = 0;
       my_aln.reserve(1); 
     }
 
@@ -74,11 +78,33 @@ namespace Moses
       my_rcnt = other.rcnt();
       my_wcnt = other.wcnt();
       my_aln  = other.aln();
+      for (int i = po_first; i <= po_other; i++)
+	{
+	  ofwd[i] = other.ofwd[i];
+	  obwd[i] = other.obwd[i];
+	}
     }
   
+    uint32_t 
+    jstats::
+    dcnt_fwd(PhraseOrientation const idx) const
+    {
+      assert(idx <= po_other);
+      return ofwd[idx];
+    }
+
+    uint32_t 
+    jstats::
+    dcnt_bwd(PhraseOrientation const idx) const
+    {
+      assert(idx <= po_other);
+      return obwd[idx];
+    }
+    
     void 
     jstats::
-    add(float w, vector<uchar> const& a, uint32_t const cnt2)
+    add(float w, vector<uchar> const& a, uint32_t const cnt2,
+	uint32_t fwd_orient, uint32_t bwd_orient)
     {
       boost::lock_guard<boost::mutex> lk(this->lock);
       my_rcnt += 1;
@@ -95,6 +121,8 @@ namespace Moses
 	  if (my_aln[i].first > my_aln[i/2].first)
 	    push_heap(my_aln.begin(),my_aln.begin()+i+1);
 	}
+      ++ofwd[fwd_orient];
+      ++obwd[bwd_orient];
     }
     
     uint32_t 
@@ -159,7 +187,30 @@ namespace Moses
       return this->score > other.score;
     }
     
-    PhrasePair::PhrasePair() {}
+    PhrasePair::
+    PhrasePair() {}
+
+    PhrasePair::
+    PhrasePair(PhrasePair const& o) 
+      : p1(o.p1), 
+	p2(o.p2),
+	raw1(o.raw1), 
+	raw2(o.raw2), 
+	sample1(o.sample1),
+	sample2(o.sample2),
+	good1(o.good1),
+	good2(o.good2),
+	joint(o.joint),
+	fvals(o.fvals),
+	aln(o.aln),
+	score(o.score)
+    {
+      for (size_t i = 0; i <= po_other; ++i)
+	{
+	  dfwd[i] = o.dfwd[i];
+	  dbwd[i] = o.dbwd[i];
+	}
+    }
     
     void
     PhrasePair::
@@ -208,6 +259,19 @@ namespace Moses
       assert(js.aln().size());
       if (js.aln().size()) 
 	aln = js.aln()[0].second;
+      float total_fwd = 0, total_bwd = 0;
+      for (int i = po_first; i <= po_other; i++)
+	{
+	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
+	  total_fwd += js.dcnt_fwd(po)+1;
+	  total_bwd += js.dcnt_bwd(po)+1;
+	}
+      for (int i = po_first; i <= po_other; i++)
+	{
+	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
+	  dfwd[i] = float(js.dcnt_fwd(po)+1)/total_fwd;
+	  dbwd[i] = float(js.dcnt_bwd(po)+1)/total_bwd;
+	}
       return *this;
     }
 
@@ -223,6 +287,12 @@ namespace Moses
 	aln = js1.aln()[0].second;
       else if (js2.aln().size()) 
 	aln = js2.aln()[0].second;
+      for (int i = po_first; i < po_other; i++)
+	{
+	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
+	  dfwd[i] = float(js1.dcnt_fwd(po) + js2.dcnt_fwd(po) + 1)/(sample1+po_other);
+	  dbwd[i] = float(js1.dcnt_bwd(po) + js2.dcnt_bwd(po) + 1)/(sample1+po_other);
+	}
       return *this;
     }
 
@@ -238,6 +308,12 @@ namespace Moses
       assert(js.aln().size());
       if (js.aln().size()) 
 	aln = js.aln()[0].second;
+      for (int i = po_first; i <= po_other; i++)
+	{
+	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
+	  dfwd[i] = float(js.dcnt_fwd(po)+1)/(sample1+po_other);
+	  dbwd[i] = float(js.dcnt_bwd(po)+1)/(sample1+po_other);
+	}
       return *this;
     }
 
@@ -331,24 +407,53 @@ namespace Moses
 
     bool 
     expand_phrase_pair
-    (vector<vector<ushort> >& a1,
+    (vector<vector<ushort> >& a1, 
      vector<vector<ushort> >& a2,
-     ushort const seed, 
-     ushort const L1, // hard left  limit source
-     ushort const R1, // hard right limit source
-     ushort const L2, // hard left  limit target
-     ushort const R2, // hard right limit target
-     ushort & s1, ushort & e1, // start/end src phrase
-     ushort & s2, ushort & e2) // start/end trg phrase
+     ushort const s2, // next word on in target side
+     ushort const L1, ushort const R1, // limits of previous phrase
+     ushort & s1, ushort & e1, ushort& e2) // start/end src; end trg
     {
       if (a1[seed].size() == 0) return false;
-      assert(L1 <= seed);
-      assert(R1 >  seed);
       bitvector done1(a1.size());
       bitvector done2(a2.size());
       vector <pair<ushort,ushort> > agenda; 
+      // x.first:  side (1 or 2)
+      // x.second: word position
       agenda.reserve(a1.size() + a2.size());
-      agenda.push_back(pair<ushort,ushort>(seed,0));
+      agenda.push_back(pair<ushort,ushort>(2,s2));
+      e2 = s2;
+      s1 = e1 = a2[s2].front();
+      if (s1 >= L1 && s1 < R1) return false;
+      for (size_t i = 1; i < a2[s2].size(); ++i)
+	{
+	  ushort p = a2[s2][i];
+	  if (s1 >= R1)
+	    { if (p < R1) return false; }
+	  else if (e1 < L1)
+	    { if (p > L1) return false; }
+	  if (s1 > p) s1 = p;
+	  if (e1 < p) e1 = p;
+	}
+      done2.set(s2);
+      
+
+      while (agenda.size())
+	{
+	  ushort side = agenda.back().first;
+	  ushort p    = agenda.back().second;
+	  agenda.pop_back();
+	  if (side == 1)
+	    {
+	      done1.set(p);
+	      BOOST_FOREACH(ushort i, a1[p])
+		{
+		  if (i < seed) return false;
+		  if (done2[i]) continue;
+		  for (;e2 <= i;++e2)
+		    if (!done2[e2]) 
+		      agenda.push_back(pair<ushort,ushort>(2,e2));
+		  if (e2 < i) e2 = i;
+		}
       s1 = seed;
       e1 = seed;
       s2 = e2 = a1[seed].front();
@@ -437,13 +542,16 @@ namespace Moses
     {
       size_t n2 = e2;
       while (n2 < a2.size() && a2[n2].size() == 0) ++n2;
-      if (n2 == a2.size()) return po_last;
+
+      if (n2 == a2.size()) 
+	return po_last;
       
       ushort ns1,ns2,ne1,ne2;
       bool OK = expand_phrase_pair(a2,a1,n2,
 				   e2, a2.size()-1,
 				   0,  a1.size()-1,
 				   ns2,ne2,ns1,ne1);
+
       if (!OK) return po_other;
       if (ns1 >= e1)
 	{

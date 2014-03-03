@@ -56,13 +56,13 @@ namespace Moses {
 
     enum PhraseOrientation 
     {
-      po_first=0,
-      po_mono=1,
-      po_jfwd=2,
-      po_swap=3,
-      po_jbwd=4,
-      po_last=5,
-      po_other=6
+      po_first,
+      po_mono,
+      po_jfwd,
+      po_swap,
+      po_jbwd,
+      po_last,
+      po_other
     };
 
     PhraseOrientation 
@@ -102,6 +102,7 @@ namespace Moses {
       float    my_wcnt; // weighted count 
       uint32_t my_cnt2;
       vector<pair<size_t, vector<uchar> > > my_aln; 
+      uint32_t ofwd[7], obwd[7];
     public:
       jstats();
       jstats(jstats const& other);
@@ -110,9 +111,12 @@ namespace Moses {
       float    wcnt() const;
       
       vector<pair<size_t, vector<uchar> > > const & aln() const;
-      void add(float w, vector<uchar> const& a, uint32_t const cnt2);
+      void add(float w, vector<uchar> const& a, uint32_t const cnt2,
+	       uint32_t fwd_orient, uint32_t bwd_orient);
       void invalidate();
       bool valid();
+      uint32_t dcnt_fwd(PhraseOrientation const idx) const;
+      uint32_t dcnt_bwd(PhraseOrientation const idx) const;
     };
 
     struct 
@@ -127,7 +131,7 @@ namespace Moses {
       size_t sum_pairs;
       size_t in_progress; // keeps track of how many threads are currently working on this
 
-      uint32_t ofwd[7], obwd[7];
+      uint32_t ofwd[po_other+1], obwd[po_other+1];
 
       typename boost::unordered_map<uint64_t, jstats> trg;
       pstats(); 
@@ -135,8 +139,12 @@ namespace Moses {
       void register_worker();
       size_t count_workers() { return in_progress; } 
 
-      bool add(uint64_t const pid, float const w, 
-	       vector<uchar> const& a, uint32_t const cnt2);
+      bool 
+      add(uint64_t const pid, 
+	  float    const w, 
+	  vector<uchar> const& a, 
+	  uint32_t      const cnt2,
+	  uint32_t fwd_o, uint32_t bwd_o);
     };
     
     class 
@@ -146,12 +154,15 @@ namespace Moses {
       uint64_t p1, p2;
       uint32_t raw1,raw2,sample1,sample2,good1,good2,joint;
       vector<float> fvals;
+      float dfwd[po_other+1];
+      float dbwd[po_other+1];
       vector<uchar> aln;
       // float    avlex12,avlex21; // average lexical probs (Moses std)
       // float    znlex1,znlex2;   // zens-ney lexical smoothing
       // float    colex1,colex2;   // based on raw lexical occurrences
       float score;
       PhrasePair();
+      PhrasePair(PhrasePair const& o);
       bool operator<(PhrasePair const& other) const;
       bool operator>(PhrasePair const& other) const;
       bool operator<=(PhrasePair const& other) const;
@@ -161,13 +172,15 @@ namespace Moses {
       void init(uint64_t const pid1, pstats const& ps1, pstats const& ps2, 
 		size_t const numfeats);
 
-      PhrasePair const& update(uint64_t const pid2, jstats const& js);
-      PhrasePair const& update(uint64_t const pid2, 
-			       jstats   const& js1, 
-			       jstats   const& js2);
-      PhrasePair const& update(uint64_t const pid2, 
-			       size_t const raw2extra, 
-			       jstats const& js);
+      PhrasePair const& 
+      update(uint64_t const pid2, jstats const& js);
+
+      PhrasePair const& 
+      update(uint64_t const pid2, jstats   const& js1, jstats   const& js2);
+
+      PhrasePair const& 
+      update(uint64_t const pid2, size_t const raw2extra, jstats const& js);
+
       float eval(vector<float> const& w);
     };
 
@@ -354,9 +367,6 @@ namespace Moses {
       }
       
     };
-
-
-    
 
     template<typename TKN>
     class Bitext 
@@ -660,7 +670,8 @@ namespace Moses {
 		  for (size_t i = e1; i <= e2; ++i)
 		    {
 		      if (!j->stats->add(b->getPid(),sample_weight,aln,
-					 b->approxOccurrenceCount()))
+					 b->approxOccurrenceCount(),
+					 po_fwd,po_bwd))
 			{
 			  for (size_t z = 0; z < j->len; ++z)
 			    {

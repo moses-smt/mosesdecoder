@@ -18,59 +18,70 @@ namespace Moses
   Mmsapt::
   setWeights(vector<float> const & w)
   {
-    assert(w.size() == this->numScoreComponents);
+    assert(w.size() == this->m_numScoreComponents);
     this->feature_weights = w;
   }
 
   struct PhraseAlnHyp
   {
-    int     s1,e1,s2,e2;
-    uint64_t      p1,p2;
-    float        pscore; 
-    sptr<pstats>  ps;
-    jstats const* js;
-    PhraseAlnHyp(PhrasePair& pp, 
+    PhrasePair pp;
+    ushort   s1,e1,s2,e2; // start and end positions
+    int             prev; // preceding alignment hypothesis
+    float          score; 
+    bitvector       scov; // source coverage
+    PhraseAlnHyp(PhrasePair const& ppx, int slen,
 		 pair<uint32_t,uint32_t> const& sspan,
-		 pair<uint32_t,uint32_t> const& tspan,
-		 sptr<pstats> const& ps_,
-		 jstats const* js_)
-      : js(js_)
+		 pair<uint32_t,uint32_t> const& tspan)
+      : pp(ppx), prev(-1), score(ppx.score), scov(slen)
     {
-      s1 = sspan.first;
-      e1 = sspan.second;
-      s2 = tspan.first;
-      e2 = tspan.second;
-      p1 = pp.p1;
-      p2 = pp.p2;
-      pscore = pp.score;
-      ps = ps_;
-    }
-
-    PhraseAlnHyp(PhraseAlnHyp const& other)
-    : s1(other.s1), e1(other.e1), s2(other.s2), e2(other.e2)
-    , p1(other.p1), p2(other.p2), pscore(other.pscore), js(other.js)
-    {
-      ps = other.ps;
+      s1 = sspan.first; e1 = sspan.second;
+      s2 = tspan.first; e2 = tspan.second;
     }
 
     bool operator<(PhraseAlnHyp const& other) const
     {
-      return this->pscore < other.pscore;
+      return this->score < other.score;
     }
 
     bool operator>(PhraseAlnHyp const& other) const
     {
-      return this->pscore > other.pscore;
+      return this->score > other.score;
+    }
+
+    PhraseOrientation
+    po_bwd(PhraseAlnHyp const* prev) const
+    {
+      if (s2 == 0) return po_first;
+      assert(prev);
+      assert(prev->e2 <= s2);
+      if (prev->e2 < s2)  return po_other;
+      if (prev->e1 == s1) return po_mono;
+      if (prev->e1 < s1)  return po_jfwd;
+      if (prev->s1 == e1) return po_swap;
+      if (prev->s1 > e1)  return po_jbwd;
+      return po_other;
+    }
+
+    PhraseOrientation
+    po_fwd(PhraseAlnHyp const* next) const
+    {
+      if (!next) return po_last;
+      assert(next->s2 >= e2);
+      if (next->s2 < e2)  return po_other;
+      if (next->e1 == s1) return po_swap;
+      if (next->e1 < s1)  return po_jbwd;
+      if (next->s1 == e1) return po_mono;
+      if (next->s1 > e1)  return po_jfwd;
+      return po_other;
     }
   };
-
 
   sptr<vector<int> >
   Mmsapt::
   align(string const& src, string const& trg) const
   {
     // For the time being, we consult only the fixed bitext.
-    // We might also consider the dynamic bitext. TO DO.
+    // We might also consider the dynamic bitext. => TO DO.
 
     vector<id_type> s,t; 
     btfix.V1->fillIdSeq(src,s);
@@ -89,6 +100,8 @@ namespace Moses
     pid2span_t spid2span,tpid2span;
     vector<vector<sptr<pstats> > > spstats(s.size());
 
+    // Fill the lookup maps for target span to target phrase id
+    // and vice versa:
     for (size_t i = 0; i < t.size(); ++i)
       {
 	tsa::tree_iterator m(btfix.I2.get());
@@ -98,8 +111,10 @@ namespace Moses
 	    tpid2span[pid].push_back(pair<uint32_t,uint32_t>(i,k+1));
 	    tspan2pid[i][k] = pid;
 	  }
-      }
+      } // done filling lookup maps
 	
+    // Fill the lookup maps for the source side, and gather 
+    // phrase statistics from the bitext
     for (size_t i = 0; i < s.size(); ++i)
       {
 	tsa::tree_iterator m(btfix.I1.get());
@@ -122,75 +137,75 @@ namespace Moses
     // now fill the association score table
     vector<PhrasePair> PP;
     vector<PhrasePair> cands;
-    vector<vector<PhraseAlnHyp> > ahyps(t.size());
-    for (pid2span_t::iterator x = spid2span.begin(); 
-	 x != spid2span.end(); ++x)
+    vector<PhraseAlnHyp> PAH; PAH.reserve(1000000);
+    vector<vector<int> > tpos2ahyp(t.size());
+    typedef pid2span_t::iterator psiter;
+    typedef boost::unordered_map<uint64_t,jstats> jStatsTable;
+    typedef pair<uint32_t,uint32_t> xspan;
+    for (psiter L = spid2span.begin(); L != spid2span.end(); ++L)
       {
-	int i = x->second[0].first;
-	int k = x->second[0].second - i -1;
+	if (!L->second.size()) continue; // should never happen anyway
+	int i = L->second[0].first;
+	int k = L->second[0].second - i -1;
 	sptr<pstats> ps = spstats[i][k];
-	boost::unordered_map<uint64_t,jstats> & j = ps->trg;
-	typedef boost::unordered_map<uint64_t,jstats>::iterator jiter;
 	PhrasePair pp;
-	pp.init(x->first,*ps, this->m_numScoreComponents);
-	for (jiter y = j.begin(); y != j.end(); ++y)
+	pp.init(L->first,*ps, this->m_numScoreComponents);
+	jStatsTable & J = ps->trg;
+	for (jStatsTable::iterator y = J.begin(); y != J.end(); ++y)
 	  {
-	    pid2span_t::iterator z = tpid2span.find(y->first);
-	    if (z != tpid2span.end())
+	    psiter R = tpid2span.find(y->first);
+	    if (R == tpid2span.end()) continue;
+	    pp.update(y->first, y->second);
+	    calc_lex(btfix,pp);
+	    calc_pfwd_fix(btfix,pp);
+	    calc_pbwd_fix(btfix,pp);
+	    pp.eval(this->feature_weights);
+	    PP.push_back(pp);
+	    BOOST_FOREACH(xspan const& sspan, L->second)
 	      {
-		pp.update(y->first, y->second);
-		calc_lex(btfix,pp);
-		calc_pfwd_fix(btfix,pp);
-		calc_pbwd_fix(btfix,pp);
-		pp.eval(this->feature_weights);
-		for (size_t js = 0; js < x->second.size(); ++js)
+		BOOST_FOREACH(xspan const& tspan, R->second)
 		  {
-		    pair<uint32_t,uint32_t> const& sspan = x->second[js];
-		    for (size_t jt = 0; jt < z->second.size(); ++jt)
-		      {
-			pair<uint32_t,uint32_t> & tspan = z->second[jt];
-			PhraseAlnHyp pah(pp,sspan,tspan,ps,&y->second);
-			ahyps[tspan.first].push_back(pah);
-		      }
+		    tpos2ahyp[tspan.first].push_back(PAH.size());
+		    PAH.push_back(PhraseAlnHyp(PP.back(),s.size(),sspan,tspan));
 		  }
-		// cands.push_back(pp);
-		// pair<uint32_t,uint32_t> ss = x->second[0];
-		// pair<uint32_t,uint32_t> ts = tpid2span[y->first][0];
-		// cout << btfix.V1->toString(&s[ss.first],&s[ss.second]) 
-		// << " <=> "
-		// << btfix.V2->toString(&t[ts.first],&t[ts.second]) 
-		// << endl;
 	      }
 	  }
       }
+    
+    // show what we have so far ...
     for (size_t s2 = 0; s2 < t.size(); ++s2)
       {
-	sort(ahyps[s2].begin(), ahyps[s2].end(), greater<PhraseAlnHyp>());
-	for (size_t h = 0; h < ahyps[s2].size(); ++h)
+	VectorIndexSorter<PhraseAlnHyp> foo(PAH);
+	sort(tpos2ahyp[s2].begin(), tpos2ahyp[s2].end(), foo);
+	for (size_t h = 0; h < tpos2ahyp[s2].size(); ++h)
 	  {
-	    PhraseAlnHyp const& ah = ahyps[s2][h];
-	    pstats const & s = *ah.ps;
-	    cout << setw(10) << exp(ah.pscore) << " "
-		 << btfix.T2->pid2str(btfix.V2.get(), ah.p2) 
+	    PhraseAlnHyp const& ah = PAH[tpos2ahyp[s2][h]];
+	    // pstats const & s = *ah.ps;
+	    cout << setw(10) << exp(ah.score) << " "
+		 << btfix.T2->pid2str(btfix.V2.get(), ah.pp.p2) 
 		 << " <=> "
-		 << btfix.T1->pid2str(btfix.V1.get(), ah.p1);
-	    vector<uchar> const& a = ah.js->aln()[0].second;
+		 << btfix.T1->pid2str(btfix.V1.get(), ah.pp.p1);
+	    vector<uchar> const& a = ah.pp.aln;
 	    for (size_t u = 0; u +1 < a.size(); ++u)
 	      cout << " " << int(a[u+1]) << "-" << int(a[u]);
 	    cout << endl;
-	    cout << "   [first: " << s.ofwd[po_first] 
-		 << " last: "  << s.ofwd[po_last] 
-		 << " mono: "  << s.ofwd[po_mono] 
-		 << " jfwd: "  << s.ofwd[po_jfwd] 
-		 << " swap: "  << s.ofwd[po_swap] 
-		 << " jbwd: "  << s.ofwd[po_jbwd] 
+	    float const* ofwdj = ah.pp.dfwd;
+	    float const* obwdj = ah.pp.dbwd;
+	    uint32_t const* ofwdm = spstats[ah.s1][ah.e1-ah.s1-1]->ofwd;
+	    uint32_t const* obwdm = spstats[ah.s1][ah.e1-ah.s1-1]->obwd;
+	    cout << "   [first: " << ofwdj[po_first]<<"/"<<ofwdm[po_first]
+		 <<     " last: " << ofwdj[po_last]<<"/"<<ofwdm[po_last]
+		 <<     " mono: " << ofwdj[po_mono]<<"/"<<ofwdm[po_mono]
+		 <<     " jfwd: " << ofwdj[po_jfwd]<<"/"<<ofwdm[po_jfwd]
+		 <<     " swap: " << ofwdj[po_swap]<<"/"<<ofwdm[po_swap]
+		 <<     " jbwd: " << ofwdj[po_jbwd]<<"/"<<ofwdm[po_jbwd]
 		 << "]" << endl
-		 << "   [first: " << s.obwd[po_first] 
-		 << " last: "  << s.obwd[po_last] 
-		 << " mono: "  << s.obwd[po_mono] 
-		 << " jfwd: "  << s.obwd[po_jfwd] 
-		 << " swap: "  << s.obwd[po_swap] 
-		 << " jbwd: "  << s.obwd[po_jbwd] 
+		 << "   [first: " << obwdj[po_first]<<"/"<<obwdm[po_first]
+		 <<     " last: " << obwdj[po_last]<<"/"<<obwdm[po_last]
+		 <<     " mono: " << obwdj[po_mono]<<"/"<<obwdm[po_mono]
+		 <<     " jfwd: " << obwdj[po_jfwd]<<"/"<<obwdm[po_jfwd]
+		 <<     " swap: " << obwdj[po_swap]<<"/"<<obwdm[po_swap]
+		 <<     " jbwd: " << obwdj[po_jbwd]<<"/"<<obwdm[po_jbwd]
 		 << "]" << endl;
 	  }
       }
