@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <boost/unordered_map.hpp>
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
@@ -54,7 +55,7 @@ class ChartCellCollectionBase;
 class ChartRuleLookupManager;
 class ChartParser;
 
-class CacheColl : public std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >
+class CacheColl : public boost::unordered_map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >
 {
 // 1st = hash of source phrase/ address of phrase-table node
 // 2nd = all translations

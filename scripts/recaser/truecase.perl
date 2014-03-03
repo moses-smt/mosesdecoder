@@ -70,15 +70,23 @@ sub split_xml {
   my $i = 0;
   $MARKUP[0] = "";
   while($line =~ /\S/) {
+    # XML tag
     if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
       $MARKUP[$i] .= $1." ";
       $line = $2;
     }
+    # non-XML text
     elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {
       $WORD[$i++] = $1;
       $MARKUP[$i] = "";
       $line = $2;
     }
+    # '<' or '>' occurs in word, but it's not an XML tag
+    elsif ($line =~ /^\s*(\S+)(.*)$/) {
+      $WORD[$i++] = $1;
+      $MARKUP[$i] = "";
+      $line = $2;
+      }
     else {
       die("ERROR: huh? $line\n");
     }

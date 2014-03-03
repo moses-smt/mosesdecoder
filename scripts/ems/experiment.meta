@@ -236,9 +236,8 @@ tokenize-tuning
 factorize-tuning
 	in: tokenized-tuning
 	out: factorized-tuning
-	rerun-on-change: TRAINING:output-factors
 	default-name: lm/interpolate-tuning.factored
-	pass-unless: factors	
+	pass-unless: TRAINING:output-factors	
 	parallelizable: yes
 	error: can't open
 	error: incompatible number of words in factor

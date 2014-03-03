@@ -94,9 +94,16 @@ if $(with-nplm) {
 local with-dalm = [ option.get "with-dalm" ] ;
 if $(with-dalm) {
   lib dalm : : <search>$(with-dalm)/lib ;
-  lib MurmurHash3 : : <search>$(with-dalm)/lib ;
-  obj DALM.o : DALMWrapper.cpp dalm MurmurHash3 ..//headers : <include>$(with-dalm)/include <include>$(with-dalm)/darts-clone ;
-  alias dalmALIAS : DALM.o dalm MurmurHash3 : : : <define>LM_DALM ;
+
+	if [ path.exists $(with-dalm)/lib/libMurmurHash3.a ] {
+  	lib MurmurHash3 : : <search>$(with-dalm)/lib ;
+		alias dalm-libs : dalm MurmurHash3 ;
+	} else {
+		alias dalm-libs : dalm ;
+	}
+
+  obj DALM.o : DALMWrapper.cpp dalm-libs ..//headers : <include>$(with-dalm)/include <include>$(with-dalm)/darts-clone ;
+  alias dalmALIAS : DALM.o dalm-libs : : : <define>LM_DALM ;
   dependencies += dalmALIAS ;
   lmmacros += LM_DALM ;
 }

@@ -59,7 +59,7 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
 
     CacheColl &cache = GetCache();
 
-    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
+    CacheColl::iterator iter;
     iter = cache.find(hash);
 
     if (iter != cache.end()) {
