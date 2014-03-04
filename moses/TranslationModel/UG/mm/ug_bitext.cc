@@ -424,19 +424,7 @@ namespace Moses
       e2 = s2;
       s1 = e1 = a2[s2].front();
       if (s1 >= L1 && s1 < R1) return false;
-      for (size_t i = 1; i < a2[s2].size(); ++i)
-	{
-	  ushort p = a2[s2][i];
-	  if (s1 >= R1)
-	    { if (p < R1) return false; }
-	  else if (e1 < L1)
-	    { if (p > L1) return false; }
-	  if (s1 > p) s1 = p;
-	  if (e1 < p) e1 = p;
-	}
-      done2.set(s2);
-      
-
+      agenda.push_back(pair<ushort,ushort>(2,s2));
       while (agenda.size())
 	{
 	  ushort side = agenda.back().first;
@@ -447,92 +435,117 @@ namespace Moses
 	      done1.set(p);
 	      BOOST_FOREACH(ushort i, a1[p])
 		{
-		  if (i < seed) return false;
+		  if (i < s2) return false;
 		  if (done2[i]) continue;
 		  for (;e2 <= i;++e2)
 		    if (!done2[e2]) 
 		      agenda.push_back(pair<ushort,ushort>(2,e2));
-		  if (e2 < i) e2 = i;
-		}
-      s1 = seed;
-      e1 = seed;
-      s2 = e2 = a1[seed].front();
-
-      BOOST_FOREACH(ushort k, a1[seed])
-	{
-	  if (s2 < k) s2 = k;
-	  if (e2 > k) e2 = k;
-	}
-
-      for (ushort j = s2; j <= e2; ++j)
-	{
-	  if (a2[j].size() == 0) continue;
-	  done2.set(j);
-	  agenda.push_back(pair<ushort,ushort>(j,1));
-	}
-
-      while (agenda.size())
-	{
-	  ushort side = agenda[0].second;
-	  ushort i    = agenda[0].first;
-	  agenda.pop_back();
-	  if (side)
-	    {
-	      BOOST_FOREACH(ushort k, a2[i])
-		{
-		  if (k < L1 || k > R1) 
-		    return false;
-		  if (done1[k]) 
-		    continue;
-		  while (s1 > k)
-		    {
-		      --s1;
-		      if (done1[s1] || !a1[s1].size()) 
-			continue;
-		      done1.set(s1);
-		      agenda.push_back(pair<ushort,ushort>(s1,0));
-		    }
-		  while (e1 < k)
-		    {
-		      ++e1;
-		      if (done1[e1] || !a1[e1].size())
-			continue;
-		      done1.set(e1);
-		      agenda.push_back(pair<ushort,ushort>(e1,0));
-		    }
 		}
 	    }
 	  else
 	    {
-	      BOOST_FOREACH(ushort k, a1[i])
+	      done2.set(p);
+	      BOOST_FOREACH(ushort i, a2[p])
 		{
-		  if (k < L2 || k > R2) 
-		    return false;
-		  if (done2[k]) 
-		    continue;
-		  while (s2 > k)
+		  if (e1 < i)
 		    {
-		      --s2;
-		      if (done2[s2] || !a2[s2].size()) 
-			continue;
-		      done1.set(s2);
-		      agenda.push_back(pair<ushort,ushort>(s2,1));
+		      if (i >= L1) return false;
+		      for (; e1 <= i; ++e1)
+			if (!done1[e1])
+			  agenda.push_back(pair<ushort,ushort>(1,e1));
 		    }
-		  while (e2 < k)
+		  else
 		    {
-		      ++e2;
-		      if (done1[e2] || !a1[e2].size())
-			continue;
-		      done2.set(e2);
-		      agenda.push_back(pair<ushort,ushort>(e2,1));
+		      if (i <= R1) return false;
+		      for (; i <= s1; ++i)
+			if (!done1[i])
+			  agenda.push_back(pair<ushort,ushort>(1,i));
 		    }
 		}
 	    }
 	}
       ++e1;
       ++e2;
-      return true;
     }
+    //   s1 = seed;
+    //   e1 = seed;
+    //   s2 = e2 = a1[seed].front();
+
+    //   BOOST_FOREACH(ushort k, a1[seed])
+    // 	{
+    // 	  if (s2 < k) s2 = k;
+    // 	  if (e2 > k) e2 = k;
+    // 	}
+
+    //   for (ushort j = s2; j <= e2; ++j)
+    // 	{
+    // 	  if (a2[j].size() == 0) continue;
+    // 	  done2.set(j);
+    // 	  agenda.push_back(pair<ushort,ushort>(j,1));
+    // 	}
+
+    //   while (agenda.size())
+    // 	{
+    // 	  ushort side = agenda[0].second;
+    // 	  ushort i    = agenda[0].first;
+    // 	  agenda.pop_back();
+    // 	  if (side)
+    // 	    {
+    // 	      BOOST_FOREACH(ushort k, a2[i])
+    // 		{
+    // 		  if (k < L1 || k > R1) 
+    // 		    return false;
+    // 		  if (done1[k]) 
+    // 		    continue;
+    // 		  while (s1 > k)
+    // 		    {
+    // 		      --s1;
+    // 		      if (done1[s1] || !a1[s1].size()) 
+    // 			continue;
+    // 		      done1.set(s1);
+    // 		      agenda.push_back(pair<ushort,ushort>(s1,0));
+    // 		    }
+    // 		  while (e1 < k)
+    // 		    {
+    // 		      ++e1;
+    // 		      if (done1[e1] || !a1[e1].size())
+    // 			continue;
+    // 		      done1.set(e1);
+    // 		      agenda.push_back(pair<ushort,ushort>(e1,0));
+    // 		    }
+    // 		}
+    // 	    }
+    // 	  else
+    // 	    {
+    // 	      BOOST_FOREACH(ushort k, a1[i])
+    // 		{
+    // 		  if (k < L2 || k > R2) 
+    // 		    return false;
+    // 		  if (done2[k]) 
+    // 		    continue;
+    // 		  while (s2 > k)
+    // 		    {
+    // 		      --s2;
+    // 		      if (done2[s2] || !a2[s2].size()) 
+    // 			continue;
+    // 		      done1.set(s2);
+    // 		      agenda.push_back(pair<ushort,ushort>(s2,1));
+    // 		    }
+    // 		  while (e2 < k)
+    // 		    {
+    // 		      ++e2;
+    // 		      if (done1[e2] || !a1[e2].size())
+    // 			continue;
+    // 		      done2.set(e2);
+    // 		      agenda.push_back(pair<ushort,ushort>(e2,1));
+    // 		    }
+    // 		}
+    // 	    }
+    // 	}
+    //   ++e1;
+    //   ++e2;
+    //   return true;
+    // }
 
     PhraseOrientation 
     find_po_fwd(vector<vector<ushort> >& a1,
@@ -547,10 +560,7 @@ namespace Moses
 	return po_last;
       
       ushort ns1,ns2,ne1,ne2;
-      bool OK = expand_phrase_pair(a2,a1,n2,
-				   e2, a2.size()-1,
-				   0,  a1.size()-1,
-				   ns2,ne2,ns1,ne1);
+      bool OK = expand_phrase_pair(a1,a2,n2,b1,e1-1,ns1,ne1,ne2);
 
       if (!OK) return po_other;
       if (ns1 >= e1)
