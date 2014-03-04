@@ -51,10 +51,13 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 
 	// read result of chunker and output as Moses xml trees
 	ifstream outFile(outStr.c_str());
+
+	size_t lineNum = 0;
 	while (getline(outFile, line)) {
 		//cerr << line << endl;
 		MosesReformat(line, out);
 		out << endl;
+		++lineNum;
 	}
 	outFile.close();
 
@@ -65,16 +68,19 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 
 void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
 {
+	cerr << "REFORMATING:" << line << endl;
 	vector<string> toks;
 	Moses::Tokenize(toks, line);
 	for (size_t i = 0; i < toks.size(); ++i) {
 		const string &tok = toks[i];
 
 		if (tok.substr(0, 1) == "[") {
+			// start of chunk
 			string label = tok.substr(1);
 			out << "<tree label='" << label << "'>";
 		}
 		else if (tok.substr(tok.size()-1, 1) == "]") {
+			// end of chunk
 			if (tok.size() > 1) {
 				string word = tok.substr(0, tok.size()-1);
 
@@ -87,10 +93,20 @@ void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
 			out << "</tree> ";
 		}
 		else {
+			// lexical item
 			vector<string> factors;
 			Moses::Tokenize(factors, tok, "_");
-			assert(factors.size() == 2);
-			out << factors[0] << " ";
+			if (factors.size() == 2) {
+				out << factors[0] << " ";
+			}
+			else if (factors.size() == 1) {
+				// word is _
+				assert(tok.substr(0, 2) == "__");
+				out << "_ ";
+			}
+			else {
+				throw "Unknown format:" + tok;
+			}
 		}
 	}
 }
