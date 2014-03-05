@@ -68,7 +68,7 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 
 void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
 {
-	cerr << "REFORMATING:" << line << endl;
+    //cerr << "REFORMATING:" << line << endl;
 	vector<string> toks;
 	Moses::Tokenize(toks, line);
 	for (size_t i = 0; i < toks.size(); ++i) {
