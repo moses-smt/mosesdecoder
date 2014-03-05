@@ -1221,7 +1221,8 @@ namespace Moses {
 	  if (!ag) 
 	    {
 	      ag.reset(new agenda(*this));
-	      ag->add_workers(20);
+	      // ag->add_workers(20);
+	      ag->add_workers(1);
 	    }
 	}
       typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
