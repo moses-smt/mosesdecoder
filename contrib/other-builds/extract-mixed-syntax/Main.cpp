@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 	  }
 
 	  alignedSentence->Create(params);
-	  //cerr << alignedSentence->Debug();
+	  cerr << alignedSentence->Debug();
 
 	  Rules rules(*alignedSentence);
 	  rules.Extend(params);

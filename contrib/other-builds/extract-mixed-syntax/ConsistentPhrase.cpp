@@ -51,6 +51,12 @@ std::string ConsistentPhrase::Debug() const
   out << "[" << corners[0] << "-" << corners[1]
 		  << "][" << corners[2] << "-" << corners[3] << "]";
 
+  out << "NT:";
+  for (size_t i = 0; i < m_nonTerms.size(); ++i) {
+	  const NonTerm &nonTerm = m_nonTerms[i];
+	  out << nonTerm.GetLabel(Moses::Input) << ":" << nonTerm.GetLabel(Moses::Output);
+  }
+
   return out.str();
 }
 
