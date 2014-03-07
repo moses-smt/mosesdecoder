@@ -6,6 +6,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <algorithm>
 #include <fstream>
 #include "EnOpenNLPChunker.h"
 #include "moses/Util.h"
@@ -32,6 +33,7 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 
 	string line;
 	while (getline(in, line)) {
+		Unescape(line);
 		inFile << line << endl;
 	}
 	inFile.close();
@@ -46,7 +48,7 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 			+ m_openNLPPath + "/bin/opennlp ChunkerME "
 				+ m_openNLPPath + "/models/en-chunker.bin > "
 			+ outStr;
-	//cerr << "Executing:" << cmd << endl;
+	//g << "Executing:" << cmd << endl;
 	int ret = system(cmd.c_str());
 
 	// read result of chunker and output as Moses xml trees
@@ -68,35 +70,53 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 
 void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
 {
-	cerr << "REFORMATING:" << line << endl;
+	//cerr << "REFORMATING:" << line << endl;
 	vector<string> toks;
 	Moses::Tokenize(toks, line);
 	for (size_t i = 0; i < toks.size(); ++i) {
 		const string &tok = toks[i];
 
-		if (tok.substr(0, 1) == "[") {
+		if (tok.substr(0, 1) == "[" && tok.substr(1,1) != "_") {
 			// start of chunk
 			string label = tok.substr(1);
-			out << "<tree label='" << label << "'>";
+			out << "<tree label=\"" << label << "\">";
 		}
 		else if (tok.substr(tok.size()-1, 1) == "]") {
 			// end of chunk
 			if (tok.size() > 1) {
-				string word = tok.substr(0, tok.size()-1);
+				if (tok.substr(1,1) == "_") {
+					// just a word that happens to be ]
+					vector<string> factors;
+					Moses::Tokenize(factors, tok, "_");
+					assert(factors.size() == 2);
 
-				vector<string> factors;
-				Moses::Tokenize(factors, word, "_");
-				assert(factors.size() == 2);
-				out << factors[0] << " ";
+					Escape(factors[0]);
+					out << factors[0] << " ";
+				}
+				else {
+					// a word and end of tree
+					string word = tok.substr(0, tok.size()-1);
+
+					vector<string> factors;
+					Moses::Tokenize(factors, word, "_");
+					assert(factors.size() == 2);
+
+					Escape(factors[0]);
+					out << factors[0] << " ";
+				}
+				out << "</tree> ";
+			}
+			else {
+				out << "</tree> ";
 			}
 
-			out << "</tree> ";
 		}
 		else {
 			// lexical item
 			vector<string> factors;
 			Moses::Tokenize(factors, tok, "_");
 			if (factors.size() == 2) {
+				Escape(factors[0]);
 				out << factors[0] << " ";
 			}
 			else if (factors.size() == 1) {
@@ -109,4 +129,48 @@ void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
 			}
 		}
 	}
+}
+
+std::string
+replaceAll( std::string const& original,
+            std::string const& before,
+            std::string const& after )
+{
+    std::string retval;
+    std::string::const_iterator end     = original.end();
+    std::string::const_iterator current = original.begin();
+    std::string::const_iterator next    =
+            std::search( current, end, before.begin(), before.end() );
+    while ( next != end ) {
+        retval.append( current, next );
+        retval.append( after );
+        current = next + before.size();
+        next = std::search( current, end, before.begin(), before.end() );
+    }
+    retval.append( current, next );
+    return retval;
+}
+
+void EnOpenNLPChunker::Escape(string &line)
+{
+	line = replaceAll(line, "&", "&amp;");
+	line = replaceAll(line, "|", "&#124;");
+	line = replaceAll(line, "<", "&lt;");
+	line = replaceAll(line, ">", "&gt;");
+	line = replaceAll(line, "'", "&apos;");
+	line = replaceAll(line, "\"", "&quot;");
+	line = replaceAll(line, "[", "&#91;");
+	line = replaceAll(line, "]", "&#93;");
+}
+
+void EnOpenNLPChunker::Unescape(string &line)
+{
+	line = replaceAll(line, "&#124;", "|");
+	line = replaceAll(line, "&lt;", "<");
+	line = replaceAll(line, "&gt;", ">");
+	line = replaceAll(line, "&quot;", "\"");
+	line = replaceAll(line, "&apos;", "'");
+	line = replaceAll(line, "&#91;", "[");
+	line = replaceAll(line, "&#93;", "]");
+	line = replaceAll(line, "&amp;", "&");
 }

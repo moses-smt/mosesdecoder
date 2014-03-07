@@ -18,6 +18,9 @@ public:
 protected:
 	const std::string m_openNLPPath;
 
+	void Escape(std::string &line);
+	void Unescape(std::string &line);
+
 	void MosesReformat(const std::string &line, std::ostream &out);
 };
 
