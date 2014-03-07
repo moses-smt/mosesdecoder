@@ -28,6 +28,7 @@ int main(int argc, char** argv)
     ("source-language,s", po::value<string>()->required(), "Source Language")
     ("target-language,t", po::value<string>()->required(), "Target Language")
     ("revision,r", po::value<int>()->default_value(0), "Revision")
+    ("filter", po::value<string>(), "Only use labels from this comma-separated list")
 
     ("opennlp", po::value<string>()->default_value(""), "Path to Apache OpenNLP toolkit")
 
@@ -74,12 +75,17 @@ int main(int argc, char** argv)
 	  outStrm = outFile;
   }
 
+  vector<string> filterList;
+  if (vm.count("filter")) {
+	  string filter = vm["filter"].as<string>();
+	  Moses::Tokenize(filterList, filter, ",");
+  }
+
   string sourceLang = vm["source-language"].as<string>();
   string targetLang = vm["target-language"].as<string>();
   int revision = vm["revision"].as<int>();
 
   cerr << sourceLang << " " << targetLang << " " << revision << endl;
-
 
   if (sourceLang == "en" && revision == 2) {
 	if (vm.count("opennlp") == 0) {
@@ -88,7 +94,7 @@ int main(int argc, char** argv)
 
 	string openNLPPath = vm["opennlp"].as<string>();
   	EnOpenNLPChunker chunker(openNLPPath);
-  	chunker.Process(*inStrm, *outStrm);
+  	chunker.Process(*inStrm, *outStrm, filterList);
   }
   else {
 	  // process line-by-line

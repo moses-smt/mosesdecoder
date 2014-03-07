@@ -24,7 +24,7 @@ EnOpenNLPChunker::~EnOpenNLPChunker() {
 	// TODO Auto-generated destructor stub
 }
 
-void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
+void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out, const vector<string> &filterList)
 {
 	// read all input to a temp file
 	char *ptr = tmpnam(NULL);
@@ -57,7 +57,7 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 	size_t lineNum = 0;
 	while (getline(outFile, line)) {
 		//cerr << line << endl;
-		MosesReformat(line, out);
+		MosesReformat(line, out, filterList);
 		out << endl;
 		++lineNum;
 	}
@@ -68,9 +68,10 @@ void EnOpenNLPChunker::Process(std::istream &in, std::ostream &out)
 	remove(outStr.c_str());
 }
 
-void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
+void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out, const vector<string> &filterList)
 {
 	//cerr << "REFORMATING:" << line << endl;
+	bool inLabel = false;
 	vector<string> toks;
 	Moses::Tokenize(toks, line);
 	for (size_t i = 0; i < toks.size(); ++i) {
@@ -79,7 +80,10 @@ void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
 		if (tok.substr(0, 1) == "[" && tok.substr(1,1) != "_") {
 			// start of chunk
 			string label = tok.substr(1);
-			out << "<tree label=\"" << label << "\">";
+			if (UseLabel(label, filterList)) {
+				out << "<tree label=\"" << label << "\">";
+				inLabel = true;
+			}
 		}
 		else if (tok.substr(tok.size()-1, 1) == "]") {
 			// end of chunk
@@ -104,10 +108,17 @@ void EnOpenNLPChunker::MosesReformat(const string &line, std::ostream &out)
 					Escape(factors[0]);
 					out << factors[0] << " ";
 				}
-				out << "</tree> ";
+
+				if (inLabel) {
+					out << "</tree> ";
+					inLabel = false;
+				}
 			}
 			else {
-				out << "</tree> ";
+				if (inLabel) {
+					out << "</tree> ";
+					inLabel = false;
+				}
 			}
 
 		}
@@ -173,4 +184,18 @@ void EnOpenNLPChunker::Unescape(string &line)
 	line = replaceAll(line, "&#91;", "[");
 	line = replaceAll(line, "&#93;", "]");
 	line = replaceAll(line, "&amp;", "&");
+}
+
+bool EnOpenNLPChunker::UseLabel(const std::string &label, const std::vector<std::string> &filterList) const
+{
+	if (filterList.size() == 0) {
+		return true;
+	}
+
+	for (size_t i = 0; i < filterList.size(); ++i) {
+		if (label == filterList[i]) {
+			return true;
+		}
+	}
+	return false;
 }
