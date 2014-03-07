@@ -78,7 +78,6 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const pug
     for (pugi::xml_node childNode = parentNode.first_child(); childNode; childNode = childNode.next_sibling())
     {
     	string nodeName = childNode.name();
-    	cerr << "nodeName=" << nodeName << endl;
 
     	// span label
     	string label;
@@ -87,7 +86,6 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const pug
     	if (!nodeName.empty()) {
         	pugi::xml_attribute attribute = childNode.attribute("label");
             label = attribute.as_string();
-            cerr << "label=" << label << endl;
 
             // recursively call this function. For proper recursive trees
 			XMLParse(output, tree, childNode);
@@ -97,7 +95,6 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const pug
 
         // fill phrase vector
     	string text = childNode.value();
-    	cerr << "text=" << text << endl;
     	Escape(text);
     	//cerr << childNum << " " << label << "=" << text << endl;
 

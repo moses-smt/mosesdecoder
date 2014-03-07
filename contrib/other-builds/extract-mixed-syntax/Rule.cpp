@@ -171,6 +171,8 @@ void Rule::Output(std::ostream &out, bool forward) const
 
 void Rule::Prevalidate(const Parameter &params)
 {
+  const ConsistentPhrase &cp = m_lhs.GetConsistentPhrase();
+
   // check number of source symbols in rule
   if (m_source.GetSize() > params.maxSymbolsSource) {
 	  m_isValid = false;
@@ -235,7 +237,7 @@ void Rule::Prevalidate(const Parameter &params)
 		  else {
 			  // Hieu's mixed syntax
 			  if (lastNonTerm.IsHiero(Moses::Input, params)
-				  || secondLastNonTerm.IsHiero(Moses::Input, params)) {
+				  && secondLastNonTerm.IsHiero(Moses::Input, params)) {
 				  m_isValid = false;
 				  m_canRecurse = false;
 				  return;
