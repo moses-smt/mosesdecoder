@@ -299,6 +299,9 @@ public:
       if (!staticData.UseMBR()) {
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
+          if (StaticData::Instance().GetOutputHypoScore()) {
+            out << bestHypo->GetTotalScore() << ' ';
+          }
           if (staticData.IsPathRecoveryEnabled()) {
             OutputInput(out, bestHypo);
             out << "||| ";
