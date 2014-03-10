@@ -272,8 +272,8 @@ namespace Moses {
     class
     PScoreLex : public PhraseScorer<Token>
     {
-      LexicalPhraseScorer2<Token> scorer;
     public:
+      LexicalPhraseScorer2<Token> scorer;
 
       PScoreLex() { this->num_feats = 2; }
 
@@ -1212,18 +1212,14 @@ namespace Moses {
     template<typename Token>
     sptr<pstats> 
     Bitext<Token>::
-      prep2(iter const& phrase, size_t const max_sample) const
+    prep2(iter const& phrase, size_t const max_sample) const
     {
       // boost::lock_guard<boost::mutex>(this->lock);
       if (!ag) 
 	{
-	  // boost::lock_guard<boost::mutex>(this->lock);
-	  if (!ag) 
-	    {
-	      ag.reset(new agenda(*this));
-	      // ag->add_workers(20);
-	      ag->add_workers(1);
-	    }
+	  ag.reset(new agenda(*this));
+	  // ag->add_workers(1);
+	  ag->add_workers(20);
 	}
       typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
       sptr<pstats> ret;
