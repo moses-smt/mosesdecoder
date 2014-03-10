@@ -43,6 +43,7 @@ namespace Moses
     : public PhraseDictionary
 #endif
   {
+    friend class Alignment;
   public:    
     typedef L2R_Token<SimpleWordId> Token;
     typedef mmBitext<Token> mmbitext;
@@ -71,6 +72,11 @@ namespace Moses
 
     // phrase table feature weights for alignment:
     vector<float> feature_weights; 
+
+    vector<vector<id_type> > wlex21; 
+    // word translation lexicon (without counts, get these from calc_lex.COOC)
+    typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> mm2dtable_t;
+    mm2dtable_t COOCraw;
 
     TargetPhrase* 
     createTargetPhrase
