@@ -19,9 +19,9 @@ namespace ugdiss
   class 
   LexicalPhraseScorer2
   {
+  public:
     typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> table_t;
     table_t COOC;
-  public:
     void open(string const& fname);
 
     template<typename someint>
