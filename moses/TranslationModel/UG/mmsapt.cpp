@@ -93,6 +93,15 @@ namespace Moses
       }
     // cerr << "MMSAPT provides " << num_feats << " features at " 
     // << __FILE__ << ":" << __LINE__ << endl;
+
+    LexicalPhraseScorer2<Token>::table_t & COOC = calc_lex.scorer.COOC;
+    typedef LexicalPhraseScorer2<Token>::table_t::Cell cell_t;
+    wlex21.resize(COOC.numCols);
+    for (size_t r = 0; r < COOC.numRows; ++r)
+      for (cell_t const* c = COOC[r].start; c < COOC[r].stop; ++c)
+	wlex21[c->id].push_back(r);
+    COOCraw.open(bname + L1 + "-" + L2 + ".coc");
+
   }
 
   void
