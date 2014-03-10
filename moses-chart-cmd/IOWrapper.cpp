@@ -50,7 +50,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FeatureVector.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
-#include "moses/FF/SyntaxConstraintFeature.h"
+#include "moses/FF/TreeStructureFeature.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -395,14 +395,16 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
   UTIL_THROW_IF2(m_detailTreeFragmentsOutputCollector == NULL,
 		  "No output file for tree fragments specified");
 
-  //Tree of full sentence (to stderr)
-  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  for( size_t i=0; i<sff.size(); i++ ) {
-    const StatefulFeatureFunction *ff = sff[i];
-    if (ff->GetScoreProducerDescription() == "SyntaxConstraintFeature0") {
-      const TreeState* tree = dynamic_cast<const TreeState*>(hypo->GetFFState(i));
-      out << "Full Tree " << translationId << ": " << tree->GetTree()->GetString() << "\n";
-      break;
+  //Tree of full sentence
+  const StatefulFeatureFunction* treeStructure = StaticData::Instance().GetTreeStructure();
+  if (treeStructure != NULL) {
+    const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+    for( size_t i=0; i<sff.size(); i++ ) {
+        if (sff[i] == treeStructure) {
+        const TreeState* tree = dynamic_cast<const TreeState*>(hypo->GetFFState(i));
+        out << "Full Tree " << translationId << ": " << tree->GetTree()->GetString() << "\n";
+        break;
+        }
     }
   }
 

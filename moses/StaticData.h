@@ -221,6 +221,8 @@ protected:
   std::map<Word, std::set<Word> > m_soft_matches_map;
   std::map<Word, std::set<Word> > m_soft_matches_map_reverse;
 
+  const StatefulFeatureFunction* m_treeStructure;
+
 public:
 
   bool IsAlwaysCreateDirectTranslationOption() const {
@@ -756,6 +758,20 @@ public:
 
   bool AdjacentOnly() const
   { return m_adjacentOnly; }
+
+
+  void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
+
+
+  // need global access for output of tree structure
+  const StatefulFeatureFunction* GetTreeStructure() const {
+      return m_treeStructure;
+  }
+
+  void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
+      m_treeStructure = treeStructure;
+  }
+
 };
 
 }

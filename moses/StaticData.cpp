@@ -66,6 +66,7 @@ StaticData::StaticData()
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
+  ,m_treeStructure(NULL)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -1183,6 +1184,53 @@ void StaticData::CheckLEGACYPT()
   m_useLegacyPT = false;
 }
 
+
+void StaticData::ResetWeights(const std::string &denseWeights, const std::string &sparseFile)
+{
+  m_allWeights = ScoreComponentCollection();
+
+  // dense weights
+  string name("");
+  vector<float> weights;
+  vector<string> toks = Tokenize(denseWeights);
+  for (size_t i = 0; i < toks.size(); ++i) {
+	const string &tok = toks[i];
+
+	if (tok.substr(tok.size() - 1, 1) == "=") {
+	  // start of new feature
+
+	  if (name != "") {
+		// save previous ff
+		const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
+		m_allWeights.Assign(&ff, weights);
+		weights.clear();
+	  }
+
+	  name = tok.substr(0, tok.size() - 1);
+	} else {
+	  // a weight for curr ff
+	  float weight = Scan<float>(toks[i]);
+	  weights.push_back(weight);
+	}
+  }
+
+  const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
+  m_allWeights.Assign(&ff, weights);
+
+  // sparse weights
+  InputFileStream sparseStrme(sparseFile);
+  string line;
+  while (getline(sparseStrme, line)) {
+	  vector<string> toks = Tokenize(line);
+	  UTIL_THROW_IF2(toks.size() != 2, "Incorrect sparse weight format. Should be FFName_spareseName weight");
+
+	  vector<string> names = Tokenize(toks[0], "_");
+	  UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name. Should be FFName_spareseName");
+
+      const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
+	  m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
+  }
+}
 
 } // namespace
 
