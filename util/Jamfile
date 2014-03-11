@@ -24,7 +24,10 @@ fakelib kenutil : bit_packing.cc ersatz_progress.cc exception.cc file.cc file_pi
 import testing ;
 
 run file_piece_test.o kenutil /top//boost_unit_test_framework : : file_piece.cc ;
-for local t in [ glob *_test.cc : file_piece_test.cc read_compressed_test.cc ] {
+unit-test pcqueue_test : pcqueue_test.cc kenutil /top//boost_unit_test_framework /top//boost_system : <threading>single:<build>no ;
+
+for local t in [ glob *_test.cc : file_piece_test.cc read_compressed_test.cc pcqueue_test.cc ] {
     local name = [ MATCH "(.*)\.cc" : $(t) ] ;
     unit-test $(name) : $(t) kenutil /top//boost_unit_test_framework /top//boost_system ;
 }
+
