@@ -23,14 +23,6 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
-local have-clock = [ SHELL "bash -c \"g++ -dM -x c++ -E /dev/null -include time.h 2>/dev/null |grep CLOCK_MONOTONIC\"" : exit-status ] ;
-if $(have-clock[2]) = 0 {
-  #required for clock_gettime.  Threads already have rt.  
-  lib rt : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-} else {
-  alias rt ;
-}
-
 #This is a kludge to force rebuilding if different --with options are passed. 
 #Could have used features like <srilm>on but getting these to apply only to
 #linking was ugly and it still didn't trigger an install (since the install
@@ -75,7 +67,7 @@ TranslationModel/UG/generic//generic TranslationModel/UG/mm//mm
 $(TOP)//boost_iostreams ;
 
 
-alias headers-to-install : [ glob-tree [^.]*.h ] ;
+alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
