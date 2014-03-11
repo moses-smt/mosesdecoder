@@ -555,51 +555,6 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     phraseTableFile << " ||| ";
   }
 
-  // alignment
-  if ( hierarchicalFlag ) {
-      // always output alignment if hiero style
-      assert(phraseTarget->size() == bestAlignmentT2S->size()+1);
-      std::vector<std::string> alignment;
-      for ( size_t j = 0; j < phraseTarget->size() - 1; ++j ) {
-        if ( isNonTerminal(vcbT.getWord( phraseTarget->at(j) ))) {
-          if ( bestAlignmentT2S->at(j).size() != 1 ) {
-            std::cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << std::endl;
-            phraseTableFile.flush();
-            assert(bestAlignmentT2S->at(j).size() == 1);
-          }
-          size_t sourcePos = *(bestAlignmentT2S->at(j).begin());
-          //phraseTableFile << sourcePos << "-" << j << " ";
-          std::stringstream point;
-          point << sourcePos << "-" << j;
-          alignment.push_back(point.str());
-        } else {
-          for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
-                setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
-            size_t sourcePos = *setIter;
-            std::stringstream point;
-            point << sourcePos << "-" << j;
-            alignment.push_back(point.str());
-          }
-        }
-      }
-      // now print all alignments, sorted by source index
-      sort(alignment.begin(), alignment.end());
-      for (size_t i = 0; i < alignment.size(); ++i) {
-        phraseTableFile << alignment[i] << " ";
-      }
-  } else if ( !inverseFlag && wordAlignmentFlag) {
-      // alignment info in pb model
-      for (size_t j = 0; j < bestAlignmentT2S->size(); ++j) {
-        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
-              setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
-          size_t sourcePos = *setIter;
-          phraseTableFile << sourcePos << "-" << j << " ";
-        }
-      }
-  }
-
-  phraseTableFile << " ||| ";
-
   // lexical translation probability
   if (lexFlag) {
     double lexScore = computeLexicalTranslation( phraseSource, phraseTarget, bestAlignmentT2S );
@@ -639,6 +594,53 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   for (map<string,float>::const_iterator i = extraSparse.begin();
        i != extraSparse.end(); ++i) {
     phraseTableFile << " " << i->first << " " << i->second;
+  }
+
+  phraseTableFile << " ||| ";
+
+  // output alignment info
+  if ( !inverseFlag ) {
+    if ( hierarchicalFlag ) {
+      // always output alignment if hiero style
+      assert(phraseTarget->size() == bestAlignmentT2S->size()+1);
+      std::vector<std::string> alignment;
+      for ( size_t j = 0; j < phraseTarget->size() - 1; ++j ) {
+        if ( isNonTerminal(vcbT.getWord( phraseTarget->at(j) ))) {
+          if ( bestAlignmentT2S->at(j).size() != 1 ) {
+            std::cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << std::endl;
+            phraseTableFile.flush();
+            assert(bestAlignmentT2S->at(j).size() == 1);
+          }
+          size_t sourcePos = *(bestAlignmentT2S->at(j).begin());
+          //phraseTableFile << sourcePos << "-" << j << " ";
+          std::stringstream point;
+          point << sourcePos << "-" << j;
+          alignment.push_back(point.str());
+        } else {
+          for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
+                setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
+            size_t sourcePos = *setIter;
+            std::stringstream point;
+            point << sourcePos << "-" << j;
+            alignment.push_back(point.str());
+          }
+        }
+      }
+      // now print all alignments, sorted by source index
+      sort(alignment.begin(), alignment.end());
+      for (size_t i = 0; i < alignment.size(); ++i) {
+        phraseTableFile << alignment[i] << " ";
+      }
+    } else if (wordAlignmentFlag) {
+      // alignment info in pb model
+      for (size_t j = 0; j < bestAlignmentT2S->size(); ++j) {
+        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
+              setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
+          size_t sourcePos = *setIter;
+          phraseTableFile << sourcePos << "-" << j << " ";
+        }
+      }
+    }
   }
 
   // counts

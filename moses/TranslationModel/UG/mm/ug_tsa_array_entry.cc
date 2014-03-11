@@ -1,6 +1,6 @@
 #include "ug_tsa_array_entry.h"
 #include "ug_ttrack_position.h"
-#include "moses/generic/sampling/Sampling.h"
+#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
 
 // (c) 2007-2010 Ulrich Germann
 
