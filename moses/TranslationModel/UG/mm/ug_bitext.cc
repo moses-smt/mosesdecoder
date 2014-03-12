@@ -346,7 +346,7 @@ namespace Moses
       
       // we add the sentences in separate threads (so it's faster)
       boost::thread thread1(snt_adder<TKN>(s1,*ret->V1,ret->myT1,ret->myI1));
-      thread1.join(); // for debugging
+      // thread1.join(); // for debugging
       boost::thread thread2(snt_adder<TKN>(s2,*ret->V2,ret->myT2,ret->myI2));
       BOOST_FOREACH(string const& a, aln)
 	{

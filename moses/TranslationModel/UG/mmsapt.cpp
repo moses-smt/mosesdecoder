@@ -62,8 +62,45 @@ namespace Moses
     m = param.find("ifactor");
     input_factor = m != param.end() ? atoi(m->second.c_str()) : 0;
     poolCounts = true;
+    m = param.find("extra");
+    if (m != param.end()) 
+      {
+	extra_data = m->second;
+	cerr << "have extra data" << endl;
+      }
   }
 
+  void
+  Mmsapt::
+  load_extra_data(string bname)
+  {
+    vector<string> text1,text2,symal;
+    string line;
+    filtering_istream in1,in2,ina; 
+    open_input_stream(bname+L1+".txt.gz",in1);
+    cerr << __FILE__ << ":" << __LINE__ << endl;
+    while(getline(in1,line)) text1.push_back(line);
+    cerr << __FILE__ << ":" << __LINE__ << endl;
+    open_input_stream(bname+L2+".txt.gz",in2);
+    cerr << __FILE__ << ":" << __LINE__ << endl;
+    while(getline(in2,line)) text2.push_back(line);
+    cerr << __FILE__ << ":" << __LINE__ << endl;
+    open_input_stream(bname+L1+"-"+L2+".symal.gz",ina);
+    cerr << __FILE__ << ":" << __LINE__ << endl;
+    while(getline(ina,line)) 
+      {
+	cerr << line << endl;
+	symal.push_back(line);
+      }
+    cerr << __FILE__ << ":" << __LINE__ << endl;
+    // cerr << "Read " << btdyn->T1->size() << " sentence pairs" << endl;
+    lock_guard<mutex> guard(this->lock);
+    cerr << __FILE__ << ":" << __LINE__ << endl;
+    btdyn = btdyn->add(text1,text2,symal);
+    cerr << __FILE__ << ":" << __LINE__ << endl;
+    cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
+  }
+  
   void
   Mmsapt::
   Load()
@@ -82,7 +119,7 @@ namespace Moses
 	num_feats  = calc_pfwd_dyn.init(num_feats,lbop_parameter);
 	num_feats  = calc_pbwd_dyn.init(num_feats,lbop_parameter);
       }
-    btdyn.reset(new imBitext<Token>(btfix.V1, btfix.V2));
+
     if (num_feats != this->m_numScoreComponents)
       {
 	ostringstream buf;
@@ -93,6 +130,11 @@ namespace Moses
       }
     // cerr << "MMSAPT provides " << num_feats << " features at " 
     // << __FILE__ << ":" << __LINE__ << endl;
+
+    btdyn.reset(new imBitext<Token>(btfix.V1, btfix.V2));
+    cerr << "btdyn initialized at " << __FILE__ << ":" << __LINE__ << endl;
+    if (extra_data.size()) load_extra_data(extra_data);
+
 
     LexicalPhraseScorer2<Token>::table_t & COOC = calc_lex.scorer.COOC;
     typedef LexicalPhraseScorer2<Token>::table_t::Cell cell_t;

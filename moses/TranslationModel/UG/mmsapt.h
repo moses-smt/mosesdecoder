@@ -52,7 +52,7 @@ namespace Moses
   private:
     mmbitext btfix; 
     sptr<imbitext> btdyn;
-    string bname;
+    string bname,extra_data;
     string L1;
     string L2;
     float  lbop_parameter;
@@ -117,6 +117,9 @@ namespace Moses
      Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll
      ) const;
+
+    void
+    load_extra_data(string bname);
 
   public:
     // Mmsapt(string const& description, string const& line);

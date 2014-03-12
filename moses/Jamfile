@@ -46,7 +46,6 @@ lib moses :
 [ glob 
   *.cpp
   TranslationModel/*.cpp
-  TranslationModel/UG/*.cpp
   TranslationModel/fuzzy-match/*.cpp
   TranslationModel/DynSAInclude/*.cpp
   TranslationModel/RuleTable/*.cpp
@@ -61,12 +60,14 @@ lib moses :
   *Test.cpp Mock*.cpp
   FF/Factory.cpp
 ]
-#headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt 
-headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool  
+headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-TranslationModel/UG/generic//generic TranslationModel/UG/mm//mm
-$(TOP)//boost_iostreams ;
+$(TOP)//boost_iostreams TranslationModel/UG/generic//generic TranslationModel/UG/mm//mm
+:
+<threading>single:<source>../util//rt
+;
 
+#generic//generic mm//mm
 
 alias headers-to-install : [ glob-tree *.h ] ;
 

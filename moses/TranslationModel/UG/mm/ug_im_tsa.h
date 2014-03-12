@@ -151,6 +151,7 @@ namespace ugdiss
 	filter2.set();
 	filter = &filter2;
       }
+    assert(filter);
     // In the first iteration over the corpus, we obtain word counts.
     // They allows us to 
     //    a. allocate the exact amount of memory we need
