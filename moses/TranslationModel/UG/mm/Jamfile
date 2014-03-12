@@ -1,3 +1,5 @@
+external-lib bz2 ;
+
 exe mmlex-build : 
 mmlex-build.cc 
 $(TOP)/moses/TranslationModel/UG/generic//generic 
@@ -34,8 +36,26 @@ $(TOP)/moses/TranslationModel/UG/mm//mm
 $(TOP)/util//kenutil 
 ; 
 
+exe mam2symal : 
+mam2symal.cc
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
 exe symal2mam : 
 symal2mam.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mam_verify : 
+mam_verify.cc 
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
@@ -53,7 +73,16 @@ $(TOP)/util//kenutil
 ; 
 
 
-install $(PREFIX)/bin : mtt-build mtt-dump mtt-count-words symal2mam custom-pt mmlex-build ; 
+install $(PREFIX)/bin : 
+mtt-build 
+mtt-dump 
+mtt-count-words 
+symal2mam 
+mam2symal 
+custom-pt 
+mmlex-build 
+mam_verify 
+; 
 
 fakelib mm : [ glob ug_*.cc tpt_*.cc ] ;
 
