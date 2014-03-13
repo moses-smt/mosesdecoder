@@ -26,6 +26,26 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>DomainFeature.cpp</name>
+			<type>1</type>
+			<location>/home/hieu/workspace/github/mosesdecoder/phrase-extract/DomainFeature.cpp</location>
+		</link>
+		<link>
+			<name>DomainFeature.h</name>
+			<type>1</type>
+			<location>/home/hieu/workspace/github/mosesdecoder/phrase-extract/DomainFeature.h</location>
+		</link>
+		<link>
+			<name>ExtractionPhrasePair.cpp</name>
+			<type>1</type>
+			<location>/home/hieu/workspace/github/mosesdecoder/phrase-extract/ExtractionPhrasePair.cpp</location>
+		</link>
+		<link>
+			<name>ExtractionPhrasePair.h</name>
+			<type>1</type>
+			<location>/home/hieu/workspace/github/mosesdecoder/phrase-extract/ExtractionPhrasePair.h</location>
+		</link>
+		<link>
 			<name>InputFileStream.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/InputFileStream.cpp</locationURI>
@@ -56,11 +76,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/OutputFileStream.h</locationURI>
 		</link>
 		<link>
-			<name>PhraseAlignment.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseAlignment.cpp</locationURI>
-		</link>
-		<link>
 			<name>ScoreFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ScoreFeature.cpp</locationURI>
@@ -71,14 +86,19 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ScoreFeature.h</locationURI>
 		</link>
 		<link>
-			<name>domain.cpp</name>
+			<name>Timer.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/domain.cpp</locationURI>
+			<location>/home/hieu/workspace/github/mosesdecoder/moses/Timer.cpp</location>
 		</link>
 		<link>
-			<name>domain.h</name>
+			<name>Timer.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/domain.h</locationURI>
+			<location>/home/hieu/workspace/github/mosesdecoder/moses/Timer.h</location>
+		</link>
+		<link>
+			<name>Util.cpp</name>
+			<type>1</type>
+			<location>/home/hieu/workspace/github/mosesdecoder/moses/Util.cpp</location>
 		</link>
 		<link>
 			<name>exception.cc</name>
@@ -104,6 +124,16 @@
 			<name>tables-core.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/tables-core.h</locationURI>
+		</link>
+		<link>
+			<name>usage.cc</name>
+			<type>1</type>
+			<location>/home/hieu/workspace/github/mosesdecoder/util/usage.cc</location>
+		</link>
+		<link>
+			<name>usage.hh</name>
+			<type>1</type>
+			<location>/home/hieu/workspace/github/mosesdecoder/util/usage.hh</location>
 		</link>
 	</linkedResources>
 </projectDescription>
