@@ -526,7 +526,7 @@ namespace Moses {
 	job(typename TSA<Token>::tree_iterator const& m, 
 	    sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd);
       };
-      
+    public:      
       class 
       worker
       {
@@ -535,7 +535,7 @@ namespace Moses {
 	worker(agenda& a) : ag(a) {}
 	void operator()();
       };
-      
+    private:
       list<sptr<job> > joblist;
       vector<sptr<boost::thread> > workers;
       bool shutdown;
@@ -638,8 +638,9 @@ namespace Moses {
 	  bitvector full_alignment(100*100);
 	  while (j->step(sid,offset))
 	    {
+	      cerr << sid << ":" << offset << " at " << __FILE__<< ":" << __LINE__ << endl;
 	      aln.clear();
-	      int po_fwd=5,po_bwd=5;
+	      int po_fwd=po_other,po_bwd=po_other;
 	      if (j->fwd)
 		{
 		  if (!ag.bt.find_trg_phr_bounds
@@ -1063,12 +1064,13 @@ namespace Moses {
     template<typename Token>
     bool
     Bitext<Token>::
-    find_trg_phr_bounds(size_t const sid, size_t const start, size_t const stop,
-			size_t & s1, size_t & s2, size_t & e1, size_t & e2,
-			int & po_fwd, int & po_bwd,
-			vector<uchar>* core_alignment, 
-			bitvector* full_alignment, 
-			bool const flip) const
+    find_trg_phr_bounds
+    (size_t const sid, 
+     size_t const start, size_t const stop,
+     size_t & s1, size_t & s2, size_t & e1, size_t & e2,
+     int & po_fwd, int & po_bwd,
+     vector<uchar>* core_alignment, bitvector* full_alignment, 
+     bool const flip) const
     {
       // if (core_alignment) cout << "HAVE CORE ALIGNMENT" << endl;
       // a word on the core_alignment:
@@ -1076,6 +1078,10 @@ namespace Moses {
       // are be definition unaligned, we store only the core alignment in *core_alignment
       // it is up to the calling function to shift alignment points over for start positions
       // of extracted phrases that start with a fringe word
+      assert(T1);
+      assert(T2);
+      assert(Tx);
+
       bitvector forbidden((flip ? T1 : T2)->sntLen(sid));
       size_t slen1 = (*T1).sntLen(sid);
       size_t slen2 = (*T2).sntLen(sid);
@@ -1098,6 +1104,7 @@ namespace Moses {
 	{
 	  if (flip) { p = binread(p,trg); assert(p<x); p = binread(p,src); }
 	  else      { p = binread(p,src); assert(p<x); p = binread(p,trg); }
+	  // cerr << src << "/" << slen1 << " " << trg << "/" << slen2 << endl;
 	  if (src < start || src >= stop) 
 	    forbidden.set(trg);
 	  else
@@ -1219,22 +1226,23 @@ namespace Moses {
 	{
 	  ag.reset(new agenda(*this));
 	  // ag->add_workers(1);
-	  ag->add_workers(20);
+	  // ag->add_workers(20);
 	}
       typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
       sptr<pstats> ret;
       if (max_sample == this->default_sample_size)
       	{
+#if 0
       	  uint64_t pid = phrase.getPid();
       	  pcache_t & cache(phrase.root == &(*this->I1) ? cache1 : cache2);
       	  pcache_t::value_type entry(pid,sptr<pstats>());
 	  pair<pcache_t::iterator,bool> foo;
-	  {
-	    // boost::lock_guard<boost::mutex>(this->lock);
-	    foo = cache.emplace(entry);
-	  }
+	  foo = cache.emplace(entry);
       	  if (foo.second) foo.first->second = ag->add_job(phrase, max_sample);
 	  ret = foo.first->second;
+#else
+      	  ret = ag->add_job(phrase, max_sample);
+#endif
       	}
       else ret = ag->add_job(phrase, max_sample);
       return ret;
@@ -1249,6 +1257,12 @@ namespace Moses {
       sptr<pstats> ret;
       ret = prep2(phrase, this->default_sample_size);
       assert(ret);
+
+      // single worker (for debugging)
+      typename agenda::worker w(*this->ag);
+      w();
+      return ret;
+
       boost::unique_lock<boost::mutex> lock(ret->lock);
       while (ret->in_progress)
 	ret->ready.wait(lock);

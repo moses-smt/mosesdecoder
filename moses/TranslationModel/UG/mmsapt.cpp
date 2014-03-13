@@ -74,29 +74,27 @@ namespace Moses
   Mmsapt::
   load_extra_data(string bname)
   {
+    // TO DO: ADD CHECKS FOR ROBUSTNESS
+    // - file existence?
+    // - same number of lines?
+    // - sane word alignment?
     vector<string> text1,text2,symal;
     string line;
     filtering_istream in1,in2,ina; 
+
     open_input_stream(bname+L1+".txt.gz",in1);
-    cerr << __FILE__ << ":" << __LINE__ << endl;
-    while(getline(in1,line)) text1.push_back(line);
-    cerr << __FILE__ << ":" << __LINE__ << endl;
     open_input_stream(bname+L2+".txt.gz",in2);
-    cerr << __FILE__ << ":" << __LINE__ << endl;
-    while(getline(in2,line)) text2.push_back(line);
-    cerr << __FILE__ << ":" << __LINE__ << endl;
     open_input_stream(bname+L1+"-"+L2+".symal.gz",ina);
-    cerr << __FILE__ << ":" << __LINE__ << endl;
-    while(getline(ina,line)) 
-      {
-	cerr << line << endl;
-	symal.push_back(line);
-      }
-    cerr << __FILE__ << ":" << __LINE__ << endl;
+
+    while(getline(in1,line)) text1.push_back(line);
+    while(getline(in2,line)) text2.push_back(line);
+    while(getline(ina,line)) symal.push_back(line);
+
     // cerr << "Read " << btdyn->T1->size() << " sentence pairs" << endl;
     lock_guard<mutex> guard(this->lock);
     cerr << __FILE__ << ":" << __LINE__ << endl;
     btdyn = btdyn->add(text1,text2,symal);
+    assert(btdyn);
     cerr << __FILE__ << ":" << __LINE__ << endl;
     cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
   }
@@ -264,7 +262,7 @@ namespace Moses
 	parse_pid(a->first, sid, off, len);
 	if (btb.T2)
 	  {
-	    Token const* x = btb.T2->sntStart(sid) + off;
+	    Token const* x = bta.T2->sntStart(sid) + off;
 	    TSA<Token>::tree_iterator m(btb.I2.get(), x, x+len);
 	    if (m.size() == len) 
 	      pp.update(a->first,m.approxOccurrenceCount(),a->second);
@@ -469,13 +467,17 @@ namespace Moses
       dyn = btdyn;
     }
 
+    assert(dyn);
+    
     vector<id_type> sphrase(src.GetSize());
     for (size_t i = 0; i < src.GetSize(); ++i)
       {
 	Factor const* f = src.GetFactor(i,input_factor);
 	id_type wid = (*btfix.V1)[f->ToString()]; 
+	cerr << f->ToString() << " ";
 	sphrase[i] = wid;
       }
+    cerr << endl;
 
     TSA<Token>::tree_iterator mfix(btfix.I1.get()), mdyn(dyn->I1.get());
     for (size_t i = 0; mfix.size() == i && i < sphrase.size(); ++i)
@@ -493,10 +495,20 @@ namespace Moses
 	// do we need this lock here? 
 	// Is it used here to control the total number of running threads???
 	boost::lock_guard<boost::mutex> guard(this->lock);
-	sfix = btfix.lookup(mfix);
+	// sfix = btfix.lookup(mfix);
       }
+
+    cerr << "Fixed lookup OK mdyn.size() = " << mdyn.size() << endl;
+
     if (mdyn.size() == sphrase.size())
-      sdyn = dyn->lookup(mdyn);
+      {
+	cerr << "count: " << mdyn.approxOccurrenceCount() << endl;
+	sdyn = dyn->lookup(mdyn);
+      }
+
+
+    cerr << "Dynamic lookup OK" << endl;
+
     if (poolCounts)
       {
 	if (!pool_pstats(src, mfix.getPid(),sfix.get(),btfix, 
