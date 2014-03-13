@@ -590,13 +590,15 @@ int main(int argc, char** argv)
       exit(1);
     }
 
-
+std::cerr <<"Before StaticData::LoadDataStatic" << std::endl;
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
     if (!StaticData::LoadDataStatic(&params, argv[0])) {
       exit(1);
     }
+std::cerr <<"After StaticData::LoadDataStatic" << std::endl;
 
+std::cerr <<"Before ShowWeights" << std::endl;
     // setting "-show-weights" -> just dump out weights and exit
     if (params.isParamSpecified("show-weights")) {
       ShowWeights();

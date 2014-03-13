@@ -534,7 +534,19 @@ bool StaticData::LoadData(Parameter *parameter)
   NoCache();
   OverrideFeatures();
 
+std::cerr <<"After StaticData::LoadDataStatic" << std::endl;
+
+std::cerr <<"Before ShowWeights" << std::endl;
+    // setting "-show-weights" -> just dump out weights and exit
+    if (params.isParamSpecified("show-weights")) {
+      MosesCmd::ShowWeights();
+      exit(0);
+    }
+std::cerr <<"After ShowWeights" << std::endl;
+
+std::cerr <<"Before LoadFeatureFunctions" << std::endl;
   LoadFeatureFunctions();
+std::cerr <<"After LoadFeatureFunctions" << std::endl;
 
   if (!LoadDecodeGraphs()) return false;
 
