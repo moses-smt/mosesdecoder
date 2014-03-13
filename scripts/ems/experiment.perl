@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+!/usr/bin/perl -w
 
 # $Id: experiment.perl 1095 2009-11-16 18:19:49Z philipp $
 
