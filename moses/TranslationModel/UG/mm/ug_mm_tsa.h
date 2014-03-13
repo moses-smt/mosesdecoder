@@ -44,7 +44,7 @@ namespace ugdiss
   public:
     mmTSA();
     mmTSA(string fname, Ttrack<TOKEN> const* c);
-    void open(string fname, Ttrack<TOKEN> const* c);
+    void open(string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c);
 
     count_type
     sntCnt(char const* p, char const * const q) const;
@@ -100,7 +100,6 @@ namespace ugdiss
   mmTSA<TOKEN>::
   mmTSA() 
   {
-    this->corpus       = NULL;
     this->startArray   = NULL;
     this->endArray     = NULL;
     this->BitSetCachingThreshold=4096;
@@ -120,7 +119,7 @@ namespace ugdiss
   template<typename TOKEN>
   void
   mmTSA<TOKEN>::
-  open(string fname, Ttrack<TOKEN> const* c)
+  open(string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c)
   {
     this->bsc.reset(new BitSetCache<TSA<TOKEN> >(this));
     if (access(fname.c_str(),F_OK))

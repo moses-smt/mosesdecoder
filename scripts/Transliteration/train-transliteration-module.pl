@@ -57,20 +57,20 @@ if (defined($FACTOR)) {
    my @factor_values = split(',', $FACTOR);
  
     foreach my $factor_val (@factor_values) {
-    `mkdir $OUT_DIR/$factor_val`;
+
   my ($factor_f,$factor_e) = split(/\-/,$factor_val);
     
     $CORPUS_F =~ /^(.+)\.([^\.]+)/;
-    my ($corpus_stem_f,$ext_f) = ($1,$OUT_DIR);
+    my ($corpus_stem_f,$ext_f) = ($1,$2);
     $CORPUS_E =~ /^(.+)\.([^\.]+)/;
-    my ($corpus_stem_e,$ext_e) = ($1,$OUT_DIR);
+    my ($corpus_stem_e,$ext_e) = ($1,$2);
     &reduce_factors($CORPUS_F,"$corpus_stem_f.$factor_val.$ext_f",$factor_f);
     &reduce_factors($CORPUS_E,"$corpus_stem_e.$factor_val.$ext_e",$factor_e);
 
-    `ln -s $corpus_stem_f.$factor_val.$ext_f $OUT_DIR/$factor_val/f`;
-    `ln -s $corpus_stem_e.$factor_val.$ext_e $OUT_DIR/$factor_val/e`;
-    `ln -s $ALIGNMENT $OUT_DIR/$factor_val/a`; 		
-     mine_transliterations($factor_val, $INPUT_EXTENSION, $OUTPUT_EXTENSION);
+    `ln -s $corpus_stem_f.$factor_val.$ext_f $OUT_DIR/f`;
+    `ln -s $corpus_stem_e.$factor_val.$ext_e $OUT_DIR/e`;
+    `ln -s $ALIGNMENT $OUT_DIR/a`; 		
+
      
   }
 }
@@ -78,9 +78,10 @@ else {
     `ln -s $CORPUS_F $OUT_DIR/f`;
     `ln -s $CORPUS_E $OUT_DIR/e`;
     `ln -s $ALIGNMENT $OUT_DIR/a`; 	
-     mine_transliterations("", $INPUT_EXTENSION, $OUTPUT_EXTENSION);	
+
      }
- 
+
+     mine_transliterations($INPUT_EXTENSION, $OUTPUT_EXTENSION); 
      train_transliteration_module();
      retrain_transliteration_module();
 
@@ -181,35 +182,34 @@ sub train_transliteration_module{
 sub mine_transliterations{
 
 my @list = @_;
-my $factor_val = $list[0];
-my $inp_ext = $list[1];
-my $op_ext = $list[2];
+my $inp_ext = $list[0];
+my $op_ext = $list[1];
 my $count = 0;
 my $l1 = 1;
 my $l2 = 1;
 
-print "Creating Model ".$factor_val."\n";
+print "Creating Model\n";
 
 print "Extracting 1-1 Alignments\n";
-`$MOSES_SRC_DIR/bin/1-1-Extraction $OUT_DIR/$factor_val/f $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/a > $OUT_DIR/$factor_val/1-1.$inp_ext-$op_ext`;
+`$MOSES_SRC_DIR/bin/1-1-Extraction $OUT_DIR/f $OUT_DIR/e $OUT_DIR/a > $OUT_DIR/1-1.$inp_ext-$op_ext`;
 
 print "Cleaning the list for Miner\n";
 
-`$MOSES_SRC_DIR/scripts/Transliteration/clean.pl $OUT_DIR/$factor_val/1-1.$inp_ext-$op_ext > $OUT_DIR/$factor_val/1-1.$inp_ext-$op_ext.cleaned`;
+`$MOSES_SRC_DIR/scripts/Transliteration/clean.pl $OUT_DIR/1-1.$inp_ext-$op_ext > $OUT_DIR/1-1.$inp_ext-$op_ext.cleaned`;
 
 
-	if (-e "$OUT_DIR/$factor_val/1-1.$inp_ext-$op_ext.pair-probs") 
+	if (-e "$OUT_DIR/1-1.$inp_ext-$op_ext.pair-probs") 
 	{
 		print STDERR "1-1.$inp_ext-$op_ext.pair-probs in place, reusing\n";
 	}
 	else
 	{
 	print "Extracting Transliteration Pairs \n";
-	 `$MOSES_SRC_DIR/bin/TMining $OUT_DIR/$factor_val/1-1.$inp_ext-$op_ext.cleaned > $OUT_DIR/$factor_val/1-1.$inp_ext-$op_ext.pair-probs`;
+	 `$MOSES_SRC_DIR/bin/TMining $OUT_DIR/1-1.$inp_ext-$op_ext.cleaned > $OUT_DIR/1-1.$inp_ext-$op_ext.pair-probs`;
 	}
 
 print "Selecting Transliteration Pairs with threshold 0.5 \n";
-`echo 0.5 | $MOSES_SRC_DIR/scripts/Transliteration/threshold.pl $OUT_DIR/$factor_val/1-1.$inp_ext-$op_ext.pair-probs > $OUT_DIR/$factor_val/1-1.$inp_ext-$op_ext.mined-pairs`;
+`echo 0.5 | $MOSES_SRC_DIR/scripts/Transliteration/threshold.pl $OUT_DIR/1-1.$inp_ext-$op_ext.pair-probs > $OUT_DIR/1-1.$inp_ext-$op_ext.mined-pairs`;
 
 }
 
@@ -302,3 +302,23 @@ sub open_or_zcat {
   open($hdl,$read) or die "Can't read $fn ($read)";
   return $hdl;
 }
+
+sub safesystem {
+  print STDERR "Executing: @_\n";
+  system(@_);
+  if ($? == -1) {
+      print STDERR "ERROR: Failed to execute: @_\n  $!\n";
+      exit(1);
+  }
+  elsif ($? & 127) {
+      printf STDERR "ERROR: Execution of: @_\n  died with signal %d, %s coredump\n",
+          ($? & 127),  ($? & 128) ? 'with' : 'without';
+      exit(1);
+  }
+  else {
+    my $exitcode = $? >> 8;
+    print STDERR "Exit code: $exitcode\n" if $exitcode;
+    return ! $exitcode;
+  }
+}
+

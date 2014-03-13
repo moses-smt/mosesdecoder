@@ -573,7 +573,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
           point << sourcePos << "-" << j;
           alignment.push_back(point.str());
         } else {
-          for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
+          for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin();
                 setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
             size_t sourcePos = *setIter;
             std::stringstream point;
@@ -590,7 +590,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   } else if ( !inverseFlag && wordAlignmentFlag) {
       // alignment info in pb model
       for (size_t j = 0; j < bestAlignmentT2S->size(); ++j) {
-        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
+        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin();
               setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
           size_t sourcePos = *setIter;
           phraseTableFile << sourcePos << "-" << j << " ";
@@ -904,4 +904,3 @@ void invertAlignment(const PHRASE *phraseSource, const PHRASE *phraseTarget,
     }
   }
 }
-

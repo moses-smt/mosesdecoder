@@ -1,6 +1,5 @@
-// build a phrase table for the given input
+// count words in a memory-mapped corpus
 #include "ug_mm_ttrack.h"
-#include "ug_mm_tsa.h"
 #include "tpt_tokenindex.h"
 #include "ug_corpus_token.h"
 #include <string>
@@ -11,9 +10,9 @@
 #include <iomanip>
 #include "ug_typedefs.h"
 #include "tpt_pickler.h"
-#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
-#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
-#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
+// #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
+// #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
+// #include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include <algorithm>
 #include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
 
@@ -21,14 +20,14 @@ using namespace std;
 using namespace ugdiss;
 using namespace Moses;
 typedef L2R_Token<SimpleWordId> Token;
-typedef mmTSA<Token>::tree_iterator iter;
+// typedef mmTSA<Token>::tree_iterator iter;
 typedef boost::unordered_map<pair<size_t,size_t>,size_t> phrase_counter_t;
 
 #define CACHING_THRESHOLD 1000
 
 mmTtrack<Token> T; // token tracks
 TokenIndex      V; // vocabs
-mmTSA<Token>    I; // suffix arrays
+// mmTSA<Token>    I; // suffix arrays
 
 void interpret_args(int ac, char* av[]);
 string bname;
@@ -36,22 +35,16 @@ bool   echo;
 int main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
-  
   T.open(bname+".mct");
-  V.open(bname+".tdx"); V.iniReverseIndex();
-  I.open(bname+".sfa",&T);
-  string line;
-  while (getline(cin,line))
+  V.open(bname+".tdx"); 
+  vector<size_t> cnt(V.ksize(),0);
+  for (size_t sid = 0; sid < T.size(); ++sid)
     {
-      vector<id_type> phr; 
-      V.fillIdSeq(line,phr);
-      TSA<Token>::tree_iterator m(&I);
-      size_t i = 0;
-      while (i < phr.size() && m.extend(phr[i])) ++i;
-      if (echo) cout << line << ": ";
-      if (i < phr.size()) cout << 0 << endl;
-      else                cout << m.rawCnt() << endl;
+      Token const* stop = T.sntEnd(sid);
+      for (Token const* t = T.sntStart(sid); t < stop; ++cnt[(t++)->id()]);
     }
+  for (size_t wid = 2; wid < V.ksize(); ++wid)
+    cout << V[wid] << " " << cnt[wid] << endl;
   exit(0);
 }
 
@@ -66,7 +59,6 @@ interpret_args(int ac, char* av[])
 
   o.add_options()
     ("help,h",    "print this message")
-    ("echo,e", po::bool_switch(&echo), "repeat lookup phrases")
     ;
   
   h.add_options()

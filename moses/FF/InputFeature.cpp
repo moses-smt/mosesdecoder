@@ -13,7 +13,9 @@ namespace Moses
 InputFeature *InputFeature::s_instance = NULL;
 
 InputFeature::InputFeature(const std::string &line)
-  :StatelessFeatureFunction(line)
+  : StatelessFeatureFunction(line)
+  , m_numInputScores(0)
+  , m_numRealWordCount(0)
 {
   ReadParameters();
 
@@ -23,6 +25,7 @@ InputFeature::InputFeature(const std::string &line)
 
 void InputFeature::Load()
 {
+  
   const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];
   const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
 

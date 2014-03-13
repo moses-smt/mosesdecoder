@@ -1,4 +1,4 @@
-// -*- c++-mode -*-
+// -*- c++ -*-
 // In-memory corpus track
 // (c) 2006-2012 Ulrich Germann. 
 
@@ -10,6 +10,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/foreach.hpp>
 
 #include "tpt_typedefs.h"
 #include "tpt_tokenindex.h"
@@ -17,24 +18,44 @@
 #include "tpt_tokenindex.h"
 // #include "ug_vocab.h"
 
+// define the corpus buffer size (in sentences) and the
+// for adding additional sentences:
+#define IMTTRACK_INCREMENT_SIZE 100000
+#define IMTSA_INCREMENT_SIZE   1000000
+
 namespace ugdiss
 {
   using namespace std;
+  using namespace boost;
   namespace bio=boost::iostreams;
 
-  template<typename Token=id_type>
+  template<typename Token> class imTSA;
+  template<typename Token> class imTtrack;
+
+  template<typename TOKEN>
+  typename boost::shared_ptr<imTtrack<TOKEN> > 
+  append(typename boost::shared_ptr<imTtrack<TOKEN> > const &  crp, vector<TOKEN> const & snt);
+
+  template<typename Token>
   class imTtrack : public Ttrack<Token>
   {
+    
   private:
     size_t numToks;
     boost::shared_ptr<vector<vector<Token> > > myData;  // pointer to corpus data
+    friend class imTSA<Token>;
+
+    friend 
+    typename boost::shared_ptr<imTtrack<Token> > 
+    append<Token>(typename boost::shared_ptr<imTtrack<Token> > const & crp, vector<Token> const & snt);
+
   public:
 
     imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d);
     imTtrack(istream& in, TokenIndex const& V, ostream* log);
-    imTtrack();
+    imTtrack(size_t reserve = 0);
     // imTtrack(istream& in, Vocab& V);
-
+    
     /** return pointer to beginning of sentence */
     Token const* sntStart(size_t sid) const; 
 
@@ -65,7 +86,7 @@ namespace ugdiss
   {
     assert(sid < size());
     if ((*myData)[sid].size() == 0) return NULL;
-    return &(*myData)[sid].back();
+    return &(*myData)[sid].back()+1;
   }
   
   template<typename Token>
@@ -76,7 +97,7 @@ namespace ugdiss
     // we assume that myIndex has pointers to both the beginning of the
     // first sentence and the end point of the last, so there's one more
     // offset in the myIndex than there are sentences
-    return myData.size();
+    return myData->size();
   }
   
   template<typename Token>
@@ -113,9 +134,10 @@ namespace ugdiss
   
   template<typename Token>
   imTtrack<Token>::
-  imTtrack()
+  imTtrack(size_t reserve)
   {
     myData.reset(new vector<vector<Token> >());
+    if (reserve) myData->reserve(reserve);
   }
 
   template<typename Token>
@@ -123,8 +145,11 @@ namespace ugdiss
   imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d)
   {
     myData  = d;
+    numTokens = 0;
+    BOOST_FOREACH(vector<Token> const& v, d)
+      numTokens += v.size();
   }
-
+  
   template<typename Token>
   id_type
   imTtrack<Token>::
@@ -139,6 +164,28 @@ namespace ugdiss
 	  break;
       }
     return i;
+  }
+
+  /// add a sentence to the database
+  template<typename TOKEN>
+  shared_ptr<imTtrack<TOKEN> > 
+  append(shared_ptr<imTtrack<TOKEN> > const& crp, vector<TOKEN> const & snt)
+  {
+    shared_ptr<imTtrack<TOKEN> > ret;
+    if (crp == NULL)
+      {
+  	ret.reset(new imTtrack<TOKEN>());
+	ret->myData->reserve(IMTTRACK_INCREMENT_SIZE);
+      }
+    else if (crp->myData->capacity() == crp->size())
+      {
+  	ret.reset(new imTtrack<TOKEN>());
+	ret->myData->reserve(crp->size() + IMTTRACK_INCREMENT_SIZE);
+	copy(crp->myData->begin(),crp->myData->end(),ret->myData->begin());
+      }
+    else ret = crp;
+    ret->myData->push_back(snt);
+    return ret;
   }
 
 }
