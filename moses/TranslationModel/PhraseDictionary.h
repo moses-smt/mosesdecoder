@@ -108,7 +108,8 @@ public:
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &,
-    const ChartCellCollectionBase &) = 0;
+    const ChartCellCollectionBase &,
+    std::size_t) = 0;
 
   const std::string &GetFilePath() const {
     return m_filePath;

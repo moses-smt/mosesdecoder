@@ -52,7 +52,8 @@ public:
   ChartRuleLookupManager*
   CreateRuleLookupManager(
     const ChartParser &,
-    const ChartCellCollectionBase &);
+    const ChartCellCollectionBase &,
+    std::size_t);
 
   // only used by multi-model phrase table, and other meta-features
   const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
