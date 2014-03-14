@@ -143,7 +143,8 @@ std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(
 }
 
 ChartRuleLookupManager* PhraseDictionaryTransliteration::CreateRuleLookupManager(const ChartParser &parser,
-    const ChartCellCollectionBase &cellCollection)
+    const ChartCellCollectionBase &cellCollection,
+    std::size_t /*maxChartSpan*/)
 {
 	return NULL;
   //return new ChartRuleLookupManagerSkeleton(parser, cellCollection, *this);

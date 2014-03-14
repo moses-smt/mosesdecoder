@@ -100,7 +100,8 @@ void PhraseDictionaryFuzzyMatch::Load()
 
 ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t /*maxChartSpan*/)
 {
   return new ChartRuleLookupManagerMemoryPerSentence(parser, cellCollection, *this);
 }
