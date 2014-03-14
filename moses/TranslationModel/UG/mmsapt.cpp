@@ -130,9 +130,7 @@ namespace Moses
     // << __FILE__ << ":" << __LINE__ << endl;
 
     btdyn.reset(new imBitext<Token>(btfix.V1, btfix.V2));
-    cerr << "btdyn initialized at " << __FILE__ << ":" << __LINE__ << endl;
     if (extra_data.size()) load_extra_data(extra_data);
-
 
     LexicalPhraseScorer2<Token>::table_t & COOC = calc_lex.scorer.COOC;
     typedef LexicalPhraseScorer2<Token>::table_t::Cell cell_t;
@@ -456,8 +454,6 @@ namespace Moses
   Mmsapt::
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const
   {
-    TargetPhraseCollection* ret = new TargetPhraseCollection();
-
     // Reserve a local copy of the dynamic bitext in its current form. /btdyn/
     // is set to a new copy of the dynamic bitext every time a sentence pair
     // is added. /dyn/ keeps the old bitext around as long as we need it.
@@ -474,10 +470,8 @@ namespace Moses
       {
 	Factor const* f = src.GetFactor(i,input_factor);
 	id_type wid = (*btfix.V1)[f->ToString()]; 
-	cerr << f->ToString() << " ";
 	sphrase[i] = wid;
       }
-    cerr << endl;
 
     TSA<Token>::tree_iterator mfix(btfix.I1.get()), mdyn(dyn->I1.get());
     for (size_t i = 0; mfix.size() == i && i < sphrase.size(); ++i)
@@ -495,29 +489,25 @@ namespace Moses
 	// do we need this lock here? 
 	// Is it used here to control the total number of running threads???
 	boost::lock_guard<boost::mutex> guard(this->lock);
-	// sfix = btfix.lookup(mfix);
+	sfix = btfix.lookup(mfix);
       }
-
-    cerr << "Fixed lookup OK mdyn.size() = " << mdyn.size() << endl;
 
     if (mdyn.size() == sphrase.size())
-      {
-	cerr << "count: " << mdyn.approxOccurrenceCount() << endl;
-	sdyn = dyn->lookup(mdyn);
-      }
+      sdyn = dyn->lookup(mdyn);
+    
+    if (mfix.size() != sphrase.size() && mdyn.size() != sphrase.size())
+      return NULL;
 
-
-    cerr << "Dynamic lookup OK" << endl;
-
+    TargetPhraseCollection* ret = new TargetPhraseCollection();
     if (poolCounts)
       {
 	if (!pool_pstats(src, mfix.getPid(),sfix.get(),btfix, 
 			 mdyn.getPid(),sdyn.get(),*dyn,ret))
-	  return NULL;
+	  return ret;
       }
     else if (!combine_pstats(src, mfix.getPid(),sfix.get(),btfix, 
 			     mdyn.getPid(),sdyn.get(),*dyn,ret))
-      return NULL;
+      return ret;
     ret->NthElement(m_tableLimit);
 #if 0
     sort(ret->begin(), ret->end(), CompareTargetPhrase());

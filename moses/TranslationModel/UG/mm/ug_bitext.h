@@ -412,11 +412,12 @@ namespace Moses {
       mutable boost::unordered_map<uint64_t,sptr<pstats> > cache1,cache2;
     protected:
       size_t default_sample_size;
+      size_t num_workers;
     private:
       sptr<pstats> 
 	prep2(iter const& phrase, size_t const max_sample) const;
     public:
-      Bitext(size_t const max_sample=5000);
+      Bitext(size_t const max_sample=5000, size_t const xnum_workers=4);
 
       Bitext(Ttrack<Token>* const t1, 
 	     Ttrack<Token>* const t2, 
@@ -425,7 +426,8 @@ namespace Moses {
 	     TokenIndex*    const v2,
 	     TSA<Token>* const i1, 
 	     TSA<Token>* const i2,
-	     size_t const max_sample=5000);
+	     size_t const max_sample=5000,
+	     size_t const xnum_workers=4);
 	     
       virtual void open(string const base, string const L1, string const L2) = 0;
       
@@ -481,8 +483,9 @@ namespace Moses {
 
     template<typename Token>
     Bitext<Token>::
-    Bitext(size_t const max_sample)
+    Bitext(size_t const max_sample, size_t const xnum_workers)
       : default_sample_size(max_sample)
+      , num_workers(xnum_workers)
     { }
 
     template<typename Token>
@@ -494,9 +497,11 @@ namespace Moses {
 	   TokenIndex*    const v2,
 	   TSA<Token>* const i1, 
 	   TSA<Token>* const i2,
-	   size_t const max_sample)
+	   size_t const max_sample,
+	   size_t const xnum_workers)
       : Tx(tx), T1(t1), T2(t2), V1(v1), V2(v2), I1(i1), I2(i2)
       , default_sample_size(max_sample)
+      , num_workers(xnum_workers)
     { }
 
     // agenda is a pool of jobs 
@@ -638,7 +643,6 @@ namespace Moses {
 	  bitvector full_alignment(100*100);
 	  while (j->step(sid,offset))
 	    {
-	      cerr << sid << ":" << offset << " at " << __FILE__<< ":" << __LINE__ << endl;
 	      aln.clear();
 	      int po_fwd=po_other,po_bwd=po_other;
 	      if (j->fwd)
@@ -771,7 +775,6 @@ namespace Moses {
       // cerr << workers.size() << " workers on record" << endl;
       sptr<job> ret;
       if (this->shutdown) return ret;
-      // add_workers(0);
       boost::unique_lock<boost::mutex> lock(this->lock);
       if (this->doomed) 
 	{
@@ -1098,13 +1101,19 @@ namespace Moses {
       char const* p = Tx->sntStart(sid);
       char const* x = Tx->sntEnd(sid);
 
-      // cerr << "flip = " << flip << " " << __FILE__ << ":" << __LINE__ << endl;
-
       while (p < x)
 	{
 	  if (flip) { p = binread(p,trg); assert(p<x); p = binread(p,src); }
 	  else      { p = binread(p,src); assert(p<x); p = binread(p,trg); }
-	  // cerr << src << "/" << slen1 << " " << trg << "/" << slen2 << endl;
+
+	  if (src >= slen1 || trg >= slen2)
+	    {
+	      ostringstream buf;
+	      buf << "Alignment range error at sentence " << sid << "!"; 
+	      cerr << buf.str() << endl;
+	      throw(buf.str().c_str());
+	    }
+	      
 	  if (src < start || src >= stop) 
 	    forbidden.set(trg);
 	  else
@@ -1225,25 +1234,25 @@ namespace Moses {
       if (!ag) 
 	{
 	  ag.reset(new agenda(*this));
-	  // ag->add_workers(1);
-	  // ag->add_workers(20);
+	  if (this->num_workers > 1)
+	    ag->add_workers(this->num_workers);
 	}
       typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
       sptr<pstats> ret;
-      if (max_sample == this->default_sample_size)
+      if (max_sample == this->default_sample_size && 
+	  phrase.approxOccurrenceCount() > 100)
       	{
-#if 0
-      	  uint64_t pid = phrase.getPid();
-      	  pcache_t & cache(phrase.root == &(*this->I1) ? cache1 : cache2);
-      	  pcache_t::value_type entry(pid,sptr<pstats>());
+	  // need to test what a good caching threshold is
+	  // is caching here the cause of the apparent memory leak in 
+	  // confusion network decoding ????
+	  uint64_t pid = phrase.getPid();
+	  pcache_t & cache(phrase.root == &(*this->I1) ? cache1 : cache2);
+	  pcache_t::value_type entry(pid,sptr<pstats>());
 	  pair<pcache_t::iterator,bool> foo;
 	  foo = cache.emplace(entry);
-      	  if (foo.second) foo.first->second = ag->add_job(phrase, max_sample);
+	  if (foo.second) foo.first->second = ag->add_job(phrase, max_sample);
 	  ret = foo.first->second;
-#else
-      	  ret = ag->add_job(phrase, max_sample);
-#endif
-      	}
+	}
       else ret = ag->add_job(phrase, max_sample);
       return ret;
     }
@@ -1258,14 +1267,14 @@ namespace Moses {
       ret = prep2(phrase, this->default_sample_size);
       assert(ret);
 
-      // single worker (for debugging)
-      typename agenda::worker w(*this->ag);
-      w();
-      return ret;
-
-      boost::unique_lock<boost::mutex> lock(ret->lock);
-      while (ret->in_progress)
-	ret->ready.wait(lock);
+      if (this->num_workers <= 1)
+	typename agenda::worker(*this->ag)();
+      else 
+	{
+	  boost::unique_lock<boost::mutex> lock(ret->lock);
+	  while (ret->in_progress)
+	    ret->ready.wait(lock);
+	}
       return ret;
     }
 
@@ -1276,9 +1285,14 @@ namespace Moses {
     {
       boost::lock_guard<boost::mutex>(this->lock);
       sptr<pstats> ret = prep2(phrase, max_sample);
-      boost::unique_lock<boost::mutex> lock(ret->lock);
-      while (ret->in_progress)
-	ret->ready.wait(lock);
+      if (this->num_workers <= 1)
+	typename agenda::worker(*this->ag)();
+      else 
+	{
+	  boost::unique_lock<boost::mutex> lock(ret->lock);
+	  while (ret->in_progress)
+	    ret->ready.wait(lock);
+	}
       return ret;
     }
 
