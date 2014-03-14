@@ -16,20 +16,20 @@ class SkeletonPT : public PhraseDictionary
 public:
   SkeletonPT(const std::string &line);
 
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source);
+  void Load();
+
+  void InitializeForInput(InputType const& source);
 
   // for phrase-based model
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   // for syntax/hiero model (CKY+ decoding)
-  ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&, const ChartCellCollectionBase&);
+  ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&, const ChartCellCollectionBase&, std::size_t);
 
   TO_STRING();
 
 
 protected:
-  mutable std::list<TargetPhraseCollection*> m_allTPColl;
-
   TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase) const;
 };
 

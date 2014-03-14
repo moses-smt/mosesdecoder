@@ -369,7 +369,7 @@ alignment-symmetrization-method = grow-diag-final-and
 
 ### create a bilingual concordancer for the model
 #
-#biconcor = $moses-script-dir/ems/biconcor/biconcor
+#biconcor = $moses-bin-dir/biconcor
 
 ### lexicalized reordering: specify orientation type
 # (default: only distance-based reordering model)

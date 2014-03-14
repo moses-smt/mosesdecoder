@@ -25,12 +25,13 @@
 #include "ug_mm_ttrack.h"
 #include "tpt_pickler.h"
 #include "ug_deptree.h"
-#include "moses/generic/sorting/VectorIndexSorter.h"
-#include "ug_im_tsa.h"
+#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
+#include "moses/TranslationModel/UG/mm/ug_im_tsa.h"
 
 using namespace std;
 using namespace ugdiss;
 using namespace Moses;
+using namespace boost;
 namespace po=boost::program_options;
 
 int with_pfas;
@@ -360,10 +361,10 @@ build_mmTSA(string infile, string outfile)
 {
   size_t mypid = fork();
   if(mypid) return mypid;
-  mmTtrack<Token> T(infile);
+  shared_ptr<mmTtrack<Token> > T(new mmTtrack<Token>(infile));
   bdBitset filter;
-  filter.resize(T.size(),true);
-  imTSA<Token> S(&T,filter,(quiet?NULL:&cerr));
+  filter.resize(T->size(),true);
+  imTSA<Token> S(T,&filter,(quiet?NULL:&cerr));
   S.save_as_mm_tsa(outfile);
   exit(0);
 }

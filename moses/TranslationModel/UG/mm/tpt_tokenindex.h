@@ -138,7 +138,7 @@ namespace ugdiss
   void
   mkTokenIndex(string ofile,MYMAP const& M,string unkToken)
   {
-    typedef pair<uint32_t,id_type> IndexEntry; // offset and id
+    // typedef pair<uint32_t,id_type> IndexEntry; // offset and id
     typedef pair<string,uint32_t>  Token;      // token and id
 
 

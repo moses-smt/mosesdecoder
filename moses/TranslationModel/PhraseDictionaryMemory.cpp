@@ -97,8 +97,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      CHECK(iterAlign != alignmentInfo.end());
-      CHECK(iterAlign->first == pos);
+      UTIL_THROW_IF2(iterAlign == alignmentInfo.end(),
+    		  "No alignment for non-term at position " << pos);
+      UTIL_THROW_IF2(iterAlign->first != pos,
+    		  "Alignment info incorrect at position " << pos);
+
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
@@ -108,20 +111,20 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       currNode = currNode->GetOrCreateChild(word);
     }
 
-    CHECK(currNode != NULL);
+    UTIL_THROW_IF2(currNode == NULL,
+    		"Node not found at position " << pos);
   }
 
   // finally, the source LHS
   //currNode = currNode->GetOrCreateChild(sourceLHS);
-  //CHECK(currNode != NULL);
-
 
   return *currNode;
 }
 
 ChartRuleLookupManager *PhraseDictionaryMemory::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t /*maxChartSpan */)
 {
   return new ChartRuleLookupManagerMemory(parser, cellCollection, *this);
 }

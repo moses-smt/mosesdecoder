@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/ChartManager.h"
 #include "moses/ChartHypothesis.h"
-#include "util/check.hh"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -113,13 +113,13 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
       }
     } else {
       ShiftOrPush(contextFactor, word);
-      CHECK(contextFactor.size() <= GetNGramOrder());
+      UTIL_THROW_IF2(contextFactor.size() > GetNGramOrder(),
+    		  "Can only calculate LM score of phrases up to the n-gram order");
 
       if (word == GetSentenceStartWord()) {
         // do nothing, don't include prob for <s> unigram
         if (currPos != 0) {
-          std::cerr << "Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?" << std::endl;
-          abort();
+          UTIL_THROW2("Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?");
         }
       } else {
         LMResult result = GetValueGivenState(contextFactor, *state);
@@ -145,14 +145,13 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
   if(GetNGramOrder() <= 1)
     return NULL;
 
-  clock_t t = 0;
-  IFVERBOSE(2) {
-    t = clock();  // track time
-  }
-
   // Empty phrase added? nothing to be done
   if (hypo.GetCurrTargetLength() == 0)
     return ps ? NewState(ps) : NULL;
+
+  IFVERBOSE(2) {
+    hypo.GetManager().GetSentenceStats().StartTimeCalcLM();
+  }
 
   const size_t currEndPos = hypo.GetCurrTargetWordsRange().GetEndPos();
   const size_t startPos = hypo.GetCurrTargetWordsRange().GetStartPos();
@@ -217,9 +216,8 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
     out->PlusEquals(this, lmScore);
   }
 
-
   IFVERBOSE(2) {
-    hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t );
+    hypo.GetManager().GetSentenceStats().StopTimeCalcLM();
   }
   return res;
 }
@@ -255,7 +253,8 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 
       // beginning of sentence symbol <s>? -> just update state
       if (word == GetSentenceStartWord()) {
-        CHECK(phrasePos == 0);
+    	UTIL_THROW_IF2(phrasePos != 0,
+    			"Sentence start symbol must be at the beginning of sentence");
         delete lmState;
         lmState = NewState( GetBeginSentenceState() );
       }

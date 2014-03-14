@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Phrase.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "util/check.hh"
 #include "RandLM.h"
 
 using namespace std;
@@ -59,7 +58,7 @@ void LanguageModelRandLM::Load()
   FactorCollection &factorCollection = FactorCollection::Instance();
   int cache_MB = 50; // increase cache size
   m_lm = randlm::RandLM::initRandLM(m_filePath, m_nGramOrder, cache_MB);
-  CHECK(m_lm != NULL);
+  UTIL_THROW_IF2(m_lm == NULL, "RandLM object not created");
   // get special word ids
   m_oov_id = m_lm->getWordID(m_lm->getOOV());
   CreateFactors(factorCollection);

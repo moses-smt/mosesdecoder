@@ -100,7 +100,7 @@ void ChartTranslationOptions::CreateSourceRuleFromInputPath()
   }
 
   const InputPath *inputPath = m_collection.front()->GetInputPath();
-  CHECK(inputPath);
+  assert(inputPath);
   std::vector<const Word*> &ruleSourceFromInputPath = inputPath->AddRuleSourceFromInputPath();
 
   size_t chartCellIndex = 0;
@@ -133,6 +133,16 @@ void ChartTranslationOptions::CreateSourceRuleFromInputPath()
     transOpt.SetSourceRuleFromInputPath(&ruleSourceFromInputPath);
   }
 
+}
+
+std::ostream& operator<<(std::ostream &out, const ChartTranslationOptions &obj)
+{
+	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+		const ChartTranslationOption &transOpt = *obj.m_collection[i];
+		out << transOpt << endl;
+	}
+
+	return out;
 }
 
 }

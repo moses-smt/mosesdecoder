@@ -179,6 +179,7 @@ string Scorer::applyFilter(const string& sentence) const
     return sentence;
   }
 #endif
+  return sentence;
 }
 
 float Scorer::score(const candidates_t& candidates) const

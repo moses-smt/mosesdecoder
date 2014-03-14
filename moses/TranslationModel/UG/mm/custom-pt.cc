@@ -8,9 +8,9 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "moses/generic/sorting/VectorIndexSorter.h"
-#include "moses/generic/sampling/Sampling.h"
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
+#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 
 #include <boost/math/distributions/binomial.hpp>
 #include <boost/unordered_map.hpp>

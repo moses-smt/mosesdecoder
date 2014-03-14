@@ -11,8 +11,13 @@ if [ test_library "lzma" ] && [ test_header "lzma.h" ] {
   compressed_deps += lzma ;
 }
 
-#rt is needed for clock_gettime on linux.  But it's already included with threading=multi
-lib rt ;
+local have-clock = [ SHELL "bash -c \"g++ -dM -x c++ -E /dev/null -include time.h 2>/dev/null |grep CLOCK_MONOTONIC\"" : exit-status ] ;
+if $(have-clock[2]) = 0 {
+  #required for clock_gettime.  Threads already have rt.  
+  lib rt : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+} else {
+  alias rt ;
+}
 
 obj read_compressed.o : read_compressed.cc : $(compressed_flags) ;
 alias read_compressed : read_compressed.o $(compressed_deps) ;
@@ -23,11 +28,11 @@ fakelib kenutil : bit_packing.cc ersatz_progress.cc exception.cc file.cc file_pi
 
 import testing ;
 
-unit-test bit_packing_test : bit_packing_test.cc kenutil /top//boost_unit_test_framework ;
 run file_piece_test.o kenutil /top//boost_unit_test_framework : : file_piece.cc ;
-unit-test read_compressed_test : read_compressed_test.o kenutil /top//boost_unit_test_framework ;
-unit-test joint_sort_test : joint_sort_test.cc kenutil /top//boost_unit_test_framework ;
-unit-test probing_hash_table_test : probing_hash_table_test.cc kenutil /top//boost_unit_test_framework ;
-unit-test sorted_uniform_test : sorted_uniform_test.cc kenutil /top//boost_unit_test_framework ;
-unit-test tokenize_piece_test : tokenize_piece_test.cc kenutil /top//boost_unit_test_framework ;
-unit-test multi_intersection_test : multi_intersection_test.cc kenutil /top//boost_unit_test_framework ;
+unit-test pcqueue_test : pcqueue_test.cc kenutil /top//boost_unit_test_framework /top//boost_system : <threading>single:<build>no ;
+
+for local t in [ glob *_test.cc : file_piece_test.cc read_compressed_test.cc pcqueue_test.cc ] {
+    local name = [ MATCH "(.*)\.cc" : $(t) ] ;
+    unit-test $(name) : $(t) kenutil /top//boost_unit_test_framework /top//boost_system ;
+}
+

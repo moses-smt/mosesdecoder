@@ -58,7 +58,6 @@ scripts/training/phrase-extract/relax-parse
 scripts/training/phrase-extract/score
 scripts/training/phrase-extract/statistics
 scripts/training/symal/symal
-scripts/training/train-model.perl
 dist
 bin
 previous.sh
@@ -72,3 +71,11 @@ mert/sentence-bleu
 .DS_Store
 *.pbxuser
 *.mode1v3
+
+*.exe
+build/
+nbproject/
+
+mingw/MosesGUI/MosesGUI.e4p
+mingw/MosesGUI/_eric4project/
+

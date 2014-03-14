@@ -10,6 +10,8 @@
 #include "InterpolatedScorer.h"
 #include "SemposScorer.h"
 #include "PermutationScorer.h"
+#include "MeteorScorer.h"
+#include "Reference.h"
 
 using namespace std;
 
@@ -29,6 +31,7 @@ vector<string> ScorerFactory::getTypes()
   types.push_back(string("MERGE"));
   types.push_back(string("SEMPOS"));
   types.push_back(string("LRSCORE"));
+  types.push_back(string("METEOR"));
   return types;
 }
 
@@ -51,6 +54,8 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config)
     return new SemposScorer(config);
   } else if ((type == "HAMMING") || (type == "KENDALL")) {
     return (PermutationScorer*) new PermutationScorer(type, config);
+  } else if (type == "METEOR") {
+    return new MeteorScorer(config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);

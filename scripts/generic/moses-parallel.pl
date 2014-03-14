@@ -23,6 +23,11 @@ use strict;
 #parameters for submiiting processes through Sun GridEngine
 my $queueparameters="";
 
+#SGE-make-it-work:
+# my $queueparameters="-l q1w -l mem_free=0.5G -hard";
+# my $queueparameters="-l q1dm -pe pe_mth 2 -hard";
+# etc.
+
 # look for the correct pwdcmd 
 my $pwdcmd = getPwdCmd();
 
@@ -73,6 +78,9 @@ my $searchgraphflag=0;
 my $qsubname="MOSES";
 my $old_sge = 0; # assume old Sun Grid Engine (<6.0) where qsub does not
                  # implement -sync and -b
+
+#SGE-make-it-work:
+# my $old_sge = "1";
 
 #######################
 # Command line options processing
@@ -563,9 +571,22 @@ sub preparing_script(){
     $scriptheader.="\#\! /bin/bash\n\n";
       # !!! this is useless. qsub ignores the first line of the script.
       # Pass '-S /bin/bash' to qsub instead.
+
+#SGE-make-it-work:
+#    $scriptheader.="## Sun's Grid Engine parameters\n";
+#    $scriptheader.="# ... (see 'man qsub' for complete documentation)\n";
+#    $scriptheader.="# ... job name\n";
+#    $scriptheader.="#\$ -N mert-$qsubname\n";
+#    $scriptheader.="# ... make sure to use proper shell\n";
+#    $scriptheader.="#\$ -S /bin/bash\n";
+#    $scriptheader.="# ... e-mail address to send notifications\n";
+#    $scriptheader.="#\$ -M ww.xx\@yy.zz\n\n";
+
     $scriptheader.="uname -a\n\n";
     $scriptheader.="ulimit -c 0\n\n"; # avoid coredumps
     $scriptheader.="cd $workingdir\n\n";
+
+
 
     open (OUT, "> ${jobscript}${idx}.bash");
     print OUT $scriptheader;

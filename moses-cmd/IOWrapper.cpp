@@ -46,6 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/InputFileStream.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
+#include "util/exception.hh"
 
 #include "IOWrapper.h"
 
@@ -166,18 +167,24 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
   if (staticData.IsDetailedTranslationReportingEnabled()) {
     const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
-    CHECK(m_detailedTranslationReportingStream->good());
+    UTIL_THROW_IF(!m_detailedTranslationReportingStream->good(),
+    		util::FileOpenException,
+    		"File for output of detailed translation report could not be open");
   }
 
   // sentence alignment output
   if (! staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentOutputStream = new ofstream(staticData.GetAlignmentOutputFile().c_str());
-    CHECK(m_alignmentOutputStream->good());
+    UTIL_THROW_IF(!m_alignmentOutputStream->good(),
+    		util::FileOpenException,
+    		"File for output of word alignment could not be open");
   }
 
 }
 
-InputType*IOWrapper::GetInput(InputType* inputType)
+InputType*
+IOWrapper::
+GetInput(InputType* inputType)
 {
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
     if (long x = inputType->GetTranslationId()) {
@@ -202,7 +209,8 @@ std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorTy
     const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
     if (factor) {
       std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
-      CHECK(targetPos.size() == 1);
+      UTIL_THROW_IF2(targetPos.size() != 1,
+    		  "Placeholder should be aligned to 1, and only 1, word");
       ret[*targetPos.begin()] = factor;
     }
   }
@@ -216,7 +224,8 @@ std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorTy
 void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
                    char reportSegmentation, bool reportAllFactors)
 {
-  CHECK(outputFactorOrder.size() > 0);
+  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
+		  "Must specific at least 1 output factor");
   const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
   bool markUnknown = StaticData::Instance().GetMarkUnknown();
   if (reportAllFactors == true) {
@@ -242,7 +251,8 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
         }
       }
 
-      CHECK(factor);
+      UTIL_THROW_IF2(factor == NULL,
+    		  "No factor 0 at position " << pos);
 
       //preface surface form with UNK if marking unknowns
       const Word &word = phrase.GetWord(pos);
@@ -254,7 +264,8 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        CHECK(factor);
+        UTIL_THROW_IF2(factor == NULL,
+      		  "No factor " << i << " at position " << pos);
 
         out << "|" << *factor;
       }
@@ -389,7 +400,8 @@ void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*
 
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
-    CHECK(factor);
+    UTIL_THROW_IF2(factor == NULL,
+  		  "No factor 0 at position " << i);
     if (i>0) out << " " << *factor;
     else     out << *factor;
   }
@@ -595,7 +607,7 @@ void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solu
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
 {
-  delete source;
+  if (source) delete source;
   switch(inputType) {
   case SentenceInput:
     source = ioWrapper.GetInput(new Sentence);
@@ -608,6 +620,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
     break;
   default:
     TRACE_ERR("Unknown input type: " << inputType << "\n");
+    source = NULL;
   }
   return (source ? true : false);
 }

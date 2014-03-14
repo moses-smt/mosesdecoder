@@ -30,11 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <boost/unordered_map.hpp>
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
 #else
 #include <boost/scoped_ptr.hpp>
+#include <time.h>
 #endif
 
 #include "moses/Phrase.h"
@@ -52,6 +54,16 @@ class WordsRange;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
 class ChartParser;
+
+class CacheColl : public boost::unordered_map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >
+{
+// 1st = hash of source phrase/ address of phrase-table node
+// 2nd = all translations
+// 3rd = time of last access
+
+public:
+	~CacheColl();
+};
 
 /**
   * Abstract base class for phrase dictionaries (tables).
@@ -96,7 +108,8 @@ public:
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &,
-    const ChartCellCollectionBase &) = 0;
+    const ChartCellCollectionBase &,
+    std::size_t) = 0;
 
   const std::string &GetFilePath() const {
     return m_filePath;
@@ -129,7 +142,6 @@ protected:
   // cache
   size_t m_maxCacheSize; // 0 = no caching
 
-  typedef std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> > CacheColl;
 #ifdef WITH_THREADS
   //reader-writer lock
   mutable boost::thread_specific_ptr<CacheColl> m_cache;

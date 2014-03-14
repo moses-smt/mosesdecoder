@@ -107,11 +107,13 @@ void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
         std::set<size_t> sourcePosSet = GetCurrTargetPhrase().GetAlignTerm().GetAlignmentsForTarget(pos);
         if (sourcePosSet.size() == 1) {
           const std::vector<const Word*> *ruleSourceFromInputPath = GetTranslationOption().GetSourceRuleFromInputPath();
-          CHECK(ruleSourceFromInputPath);
+          UTIL_THROW_IF2(ruleSourceFromInputPath == NULL,
+        		  "No source rule");
 
           size_t sourcePos = *sourcePosSet.begin();
           const Word *sourceWord = ruleSourceFromInputPath->at(sourcePos);
-          CHECK(sourceWord);
+          UTIL_THROW_IF2(sourceWord == NULL,
+        		  "No source word");
           const Factor *factor = sourceWord->GetFactor(placeholderFactor);
           if (factor) {
             outPhrase.Back()[0] = factor;
@@ -173,7 +175,7 @@ void ChartHypothesis::Evaluate()
   }
 
   // scores from current translation rule. eg. translation models & word penalty
-  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
+  const ScoreComponentCollection &scoreBreakdown = GetTranslationOption().GetScores();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
   // compute values of stateless feature functions that were not

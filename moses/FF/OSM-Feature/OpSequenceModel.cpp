@@ -1,8 +1,8 @@
 #include <fstream>
 #include "OpSequenceModel.h"
 #include "osmHyp.h"
-#include "util/check.hh"
 #include "moses/Util.h"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace lm::ngram;
@@ -19,6 +19,11 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
   ReadParameters();
 }
 
+OpSequenceModel::~OpSequenceModel()
+{
+	delete OSM;
+}
+
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
 
@@ -32,9 +37,7 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 
 void OpSequenceModel::Load()
 {
-
   readLanguageModel(m_lmPath.c_str());
-
 }
 
 
@@ -196,13 +199,13 @@ FFState* OpSequenceModel::EvaluateChart(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  abort();
+	UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
 
 }
 
 const FFState* OpSequenceModel::EmptyHypothesisState(const InputType &input) const
 {
-  cerr << "OpSequenceModel::EmptyHypothesisState()" << endl;
+  VERBOSE(3,"OpSequenceModel::EmptyHypothesisState()" << endl);
 
   State startState = OSM->BeginSentenceState();
 

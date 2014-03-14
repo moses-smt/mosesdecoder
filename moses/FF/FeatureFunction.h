@@ -44,6 +44,7 @@ public:
     return s_staticColl;
   }
   static FeatureFunction &FindFeatureFunction(const std::string& name);
+  static void Destroy();
 
   FeatureFunction(const std::string &line);
   FeatureFunction(size_t numScoreComponents, const std::string &line);
@@ -105,10 +106,12 @@ public:
   // just before search.
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
   // Currently not used by any FF. Not called by moses_chart
+  // No FF should set estimatedFutureScore in both overloads!
   virtual void Evaluate(const InputType &input
                         , const InputPath &inputPath
                         , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown) const = 0;
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
 
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();

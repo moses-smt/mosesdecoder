@@ -29,6 +29,9 @@ class InputPath
 {
   friend std::ostream& operator<<(std::ostream& out, const InputPath &obj);
 
+public:
+  typedef std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > TargetPhrases;
+
 protected:
   const InputPath *m_prevPath;
   Phrase m_phrase;
@@ -37,7 +40,7 @@ protected:
   size_t m_nextNode; // distance to next node. For lattices
 
   // for phrase-based model only
-  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> > m_targetPhrases;
+  TargetPhrases m_targetPhrases;
 
   // for syntax model only
   mutable std::vector<std::vector<const Word*> > m_ruleSourceFromInputPath;
@@ -84,6 +87,8 @@ public:
                         , const TargetPhraseCollection *targetPhrases
                         , const void *ptNode);
   const TargetPhraseCollection *GetTargetPhrases(const PhraseDictionary &phraseDictionary) const;
+  const TargetPhrases &GetTargetPhrases() const
+  { return m_targetPhrases; }
 
   // pointer to internal node in phrase-table. Since this is implementation dependent, this is a void*
   const void *GetPtNode(const PhraseDictionary &phraseDictionary) const;

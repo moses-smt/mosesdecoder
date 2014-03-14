@@ -33,6 +33,15 @@ namespace Moses
 {
 std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
+CacheColl::~CacheColl()
+{
+	for (iterator iter = begin(); iter != end(); ++iter) {
+		std::pair<const TargetPhraseCollection*, clock_t> &key = iter->second;
+		const TargetPhraseCollection *tps = key.first;
+		delete tps;
+	}
+}
+
 PhraseDictionary::PhraseDictionary(const std::string &line)
   :DecodeFeature(line)
   ,m_tableLimit(20) // default
@@ -49,8 +58,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
 
     size_t hash = hash_value(src);
 
-    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
-
+    CacheColl::iterator iter;
     iter = cache.find(hash);
 
     if (iter == cache.end()) {
@@ -135,14 +143,42 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
   }
 }
 
+// persistent cache handling
+// saving presistent cache to disk
+//void PhraseDictionary::SaveCache() const
+//{
+//  CacheColl &cache = GetCache();
+//  for( std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter,
+//       iter != cache.end(),
+//       iter++ ) {
+//    
+//  }
+//}
+
+// loading persistent cache from disk
+//void PhraseDictionary::LoadCache() const
+//{
+//  CacheColl &cache = GetCache();
+//  std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
+//  iter = cache.begin();
+//  while( iter != cache.end() ) {
+//    std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
+//    delete iterRemove->second.first;
+//    cache.erase(iterRemove);
+//  }
+//}
+
+// reduce presistent cache by half of maximum size
 void PhraseDictionary::ReduceCache() const
 {
+  Timer reduceCacheTime;
+  reduceCacheTime.start();
   CacheColl &cache = GetCache();
   if (cache.size() <= m_maxCacheSize) return; // not full
 
   // find cutoff for last used time
   priority_queue< clock_t > lastUsedTimes;
-  std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
+  CacheColl::iterator iter;
   iter = cache.begin();
   while( iter != cache.end() ) {
     lastUsedTimes.push( iter->second.second );
@@ -151,21 +187,20 @@ void PhraseDictionary::ReduceCache() const
   for( size_t i=0; i < lastUsedTimes.size()-m_maxCacheSize/2; i++ )
     lastUsedTimes.pop();
   clock_t cutoffLastUsedTime = lastUsedTimes.top();
-  clock_t t = clock();
 
   // remove all old entries
   iter = cache.begin();
   while( iter != cache.end() ) {
     if (iter->second.second < cutoffLastUsedTime) {
-      std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
+      CacheColl::iterator iterRemove = iter++;
       delete iterRemove->second.first;
       cache.erase(iterRemove);
     } else iter++;
   }
-  VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
+  VERBOSE(2,"Reduced persistent translation option cache in " << reduceCacheTime << " seconds." << std::endl);
 }
 
-PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
+CacheColl &PhraseDictionary::GetCache() const
 {
   CacheColl *cache;
   cache = m_cache.get();
@@ -173,7 +208,7 @@ PhraseDictionary::CacheColl &PhraseDictionary::GetCache() const
     cache = new CacheColl;
     m_cache.reset(cache);
   }
-  CHECK(cache);
+  assert(cache);
   return *cache;
 }
 

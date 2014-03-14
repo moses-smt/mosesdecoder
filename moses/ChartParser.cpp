@@ -34,7 +34,6 @@ using namespace Moses;
 
 namespace Moses
 {
-extern bool g_debug;
 
 ChartParserUnknown::ChartParserUnknown() {}
 
@@ -48,7 +47,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+  const UnknownWordPenaltyProducer &unknownWordPenaltyProducer = UnknownWordPenaltyProducer::Instance();
 
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
@@ -83,7 +82,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       Word *targetLHS = new Word(true);
 
       targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS->GetFactor(0) != NULL);
+      UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       // add to dictionary
       TargetPhrase *targetPhrase = new TargetPhrase();
@@ -93,12 +92,12 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       // scores
       float unknownScore = FloorScore(TransformScore(prob));
 
-      targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
+      targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
 
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
-      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.GetTreeStructure() != NULL) {
         targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
       }
 
@@ -119,9 +118,9 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 
       Word *targetLHS = new Word(true);
       targetLHS->CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS->GetFactor(0) != NULL);
+      UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
-      targetPhrase->GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
+      targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
       targetPhrase->Evaluate(*unksrc);
 
       targetPhrase->SetTargetLHS(targetLHS);
@@ -142,15 +141,13 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
   CreateInputPaths(m_source);
 
   const std::vector<PhraseDictionary*> &dictionaries = PhraseDictionary::GetColl();
+  assert(dictionaries.size() == m_decodeGraphList.size());
   m_ruleLookupManagers.reserve(dictionaries.size());
-  for (std::vector<PhraseDictionary*>::const_iterator p = dictionaries.begin();
-       p != dictionaries.end(); ++p) {
-
-    const PhraseDictionary *dict = *p;
+  for (std::size_t i = 0; i < dictionaries.size(); ++i) {
+    const PhraseDictionary *dict = dictionaries[i];
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
-
-    ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells);
-
+    std::size_t maxChartSpan = m_decodeGraphList[i]->GetMaxChartSpan();
+    ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells, maxChartSpan);
     m_ruleLookupManagers.push_back(lookupMgr);
   }
 
@@ -204,7 +201,8 @@ void ChartParser::CreateInputPaths(const InputType &input)
   size_t size = input.GetSize();
   m_inputPathMatrix.resize(size);
 
-  CHECK(input.GetType() == SentenceInput || input.GetType() == TreeInputType);
+  UTIL_THROW_IF2(input.GetType() != SentenceInput && input.GetType() != TreeInputType,
+		  "Input must be a sentence or a tree, not lattice or confusion networks");
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
@@ -237,14 +235,16 @@ const InputPath &ChartParser::GetInputPath(WordsRange &range) const
 const InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos) const
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_inputPathMatrix[startPos].size());
+  UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
+		  "Out of bound: " << offset);
   return *m_inputPathMatrix[startPos][offset];
 }
 
 InputPath &ChartParser::GetInputPath(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_inputPathMatrix[startPos].size());
+  UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
+		  "Out of bound: " << offset);
   return *m_inputPathMatrix[startPos][offset];
 }
 /*

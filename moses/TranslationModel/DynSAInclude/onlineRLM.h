@@ -24,7 +24,7 @@ public:
   OnlineRLM(uint16_t MBs, int width, int bucketRange, count_t order,
             Moses::Vocab* v, float qBase = 8): PerfectHash<T>(MBs, width, bucketRange, qBase),
     vocab_(v), bAdapting_(false), order_(order), corpusSize_(0), alpha_(0) {
-    CHECK(vocab_ != 0);
+    UTIL_THROW_IF2(vocab_ == 0, "Vocab object not set");
     //instantiate quantizer class here
     cache_ = new Cache<float>(8888.8888, 9999.9999); // unknown_value, null_value
     alpha_ = new float[order_ + 1];
@@ -43,10 +43,10 @@ public:
       alpha_[i] = i * log10(0.4);
   }
   ~OnlineRLM() {
-    if(alpha_) delete[] alpha_;
+    delete[] alpha_;
     if(bAdapting_) delete vocab_;
     else vocab_ = NULL;
-    if(cache_) delete cache_;
+    delete cache_;
     delete bPrefix_;
     delete bHit_;
   }
@@ -148,7 +148,8 @@ int OnlineRLM<T>::query(const wordID_t* IDs, int len)
       //markQueried(hpdItr);  // mark this event as "hit"
       value -= ((value & this->hitMask_) != 0) ? this->hitMask_ : 0; // check for previous hit marks
     } else {
-      CHECK(filterIdx < this->cells_);
+    	UTIL_THROW_IF2(filterIdx >= this->cells_,
+    			"Out of bound: " << filterIdx);
       //markQueried(filterIdx);
     }
   }
@@ -171,11 +172,11 @@ bool OnlineRLM<T>::markPrefix(const wordID_t* IDs, const int len, bool bSet)
       return false;
     }
     if(filterIndex != this->cells_ + 1) {
-      CHECK(hpdItr == this->dict_.end());
+      UTIL_THROW_IF2(hpdItr != this->dict_.end(), "Error");
       if(bSet) bPrefix_->setBit(filterIndex); // mark index
       else bPrefix_->clearBit(filterIndex);   // unset index
     } else {
-      CHECK(filterIndex == this->cells_ + 1);
+      UTIL_THROW_IF2(filterIndex != this->cells_ + 1, "Error");
       //how to handle hpd prefixes?
     }
     if(pfCache.nodes() > 10000) pfCache.clear();
@@ -313,14 +314,14 @@ float OnlineRLM<T>::getProb(const wordID_t* ngram, int len,
       logprob = alpha_[len] + oovprob;
       break;
     case 1: // unigram found only
-      CHECK(in[len - 1] > 0);
+      UTIL_THROW_IF2(in[len - 1] <= 0, "Error");
       logprob = alpha_[len - 1] + (corpusSize_ > 0 ?
                                    log10(static_cast<float>(in[len - 1]) / static_cast<float>(corpusSize_)) : 0);
       //logprob = alpha_[len - 1] +
       //log10(static_cast<float>(in[len - 1]) / static_cast<float>(corpusSize_));
       break;
     default:
-      CHECK(den_val > 0);
+      UTIL_THROW_IF2(den_val <= 0, "Error");
       //if(subgram == in[len - found]) ++subgram; // avoid returning zero probs????
       logprob = alpha_[len - num_fnd] +
                 log10(static_cast<float>(in[len - num_fnd]) / static_cast<float>(den_val));
@@ -339,7 +340,8 @@ const void* OnlineRLM<T>::getContext(const wordID_t* ngram, int len)
 {
   int dummy(0);
   float**addresses = new float*[len];  // only interested in addresses of cache
-  CHECK(cache_->getCache2(ngram, len, &addresses[0], &dummy) == len);
+  UTIL_THROW_IF2(cache_->getCache2(ngram, len, &addresses[0], &dummy) != len,
+		  "Error");
   // return address of cache node
 
   float *addr0 = addresses[0];
@@ -434,7 +436,7 @@ void OnlineRLM<T>::load(FileHandler* fin)
   cerr << "Loading ORLM...\n";
   // load vocab first
   vocab_ = new Moses::Vocab(fin);
-  CHECK(vocab_ != 0);
+  UTIL_THROW_IF2(vocab_ == 0, "Vocab object not set");
   fin->read((char*)&corpusSize_, sizeof(corpusSize_));
   cerr << "\tCorpus size = " << corpusSize_ << endl;
   fin->read((char*)&order_, sizeof(order_));

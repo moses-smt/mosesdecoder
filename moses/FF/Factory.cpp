@@ -8,6 +8,8 @@
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+#include "moses/TranslationModel/PhraseDictionaryScope3.h"
+#include "moses/TranslationModel/PhraseDictionaryTransliteration.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -31,6 +33,10 @@
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
+#include "moses/FF/CoveredReferenceFeature.h"
+#include "moses/FF/TreeStructureFeature.h"
+#include "moses/FF/SoftMatchingFeature.h"
+#include "moses/FF/HyperParameterAsWeight.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -41,7 +47,7 @@
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
 #ifdef PT_UG
-#include "moses/TranslationModel/mmsapt.h"
+#include "moses/TranslationModel/UG/mmsapt.h"
 #endif
 
 #include "moses/LM/Ken.h"
@@ -51,6 +57,10 @@
 
 #ifdef LM_SRI
 #include "moses/LM/SRI.h"
+#endif
+
+#ifdef LM_MAXENT_SRI
+#include "moses/LM/MaxEntSRI.h"
 #endif
 
 #ifdef LM_RAND
@@ -66,7 +76,7 @@
 #endif
 
 #ifdef LM_DALM
-#include "moses/LM/DALM.h"
+#include "moses/LM/DALMWrapper.h"
 #endif
 
 #include "util/exception.hh"
@@ -99,7 +109,7 @@ template <class F> void FeatureFactory::DefaultSetup(F *feature)
     // if it's tuneable, ini file MUST have weights
     // even it it's not tuneable, people can still set the weights in the ini file
     static_data.SetWeights(feature, weights);
-  } else {
+  } else if (feature->GetNumScoreComponents() > 0) {
     std::vector<float> defaultWeights = feature->DefaultWeights();
     static_data.SetWeights(feature, defaultWeights);
   }
@@ -151,16 +161,22 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
   MOSES_FNAME(PhraseDictionaryOnDisk);
   MOSES_FNAME(PhraseDictionaryMemory);
+  MOSES_FNAME(PhraseDictionaryScope3);
   MOSES_FNAME(PhraseDictionaryMultiModel);
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryALSuffixArray);
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
+  MOSES_FNAME(PhraseDictionaryTransliteration);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
   MOSES_FNAME(ConstrainedDecoding);
+  MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
+  MOSES_FNAME(TreeStructureFeature);
+  MOSES_FNAME(SoftMatchingFeature);
+  MOSES_FNAME(HyperParameterAsWeight);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
@@ -182,6 +198,9 @@ FeatureRegistry::FeatureRegistry()
 #ifdef LM_SRI
   MOSES_FNAME2("SRILM", LanguageModelSRI);
 #endif
+#ifdef LM_MAXENT_SRI
+  MOSES_FNAME2("MaxEntLM", LanguageModelMaxEntSRI);
+#endif
 #ifdef LM_RAND
   MOSES_FNAME2("RANDLM", LanguageModelRandLM);
 #endif
@@ -202,7 +221,7 @@ FeatureRegistry::~FeatureRegistry()
 void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
 {
   std::pair<std::string, boost::shared_ptr<FeatureFactory> > to_ins(name, boost::shared_ptr<FeatureFactory>(factory));
-  UTIL_THROW_IF(!registry_.insert(to_ins).second, util::Exception, "Duplicate feature name " << name);
+  UTIL_THROW_IF2(!registry_.insert(to_ins).second, "Duplicate feature name " << name);
 }
 
 namespace
@@ -223,9 +242,9 @@ void FeatureRegistry::PrintFF() const
 	Map::const_iterator iter;
 	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
 		const string &ffName = iter->first;
-		std::cerr << ffName << std::endl;
+		std::cerr << ffName << " ";
 	}
-
+	std::cerr << std::endl;
 }
 
 } // namespace Moses

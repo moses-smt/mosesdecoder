@@ -242,7 +242,7 @@ public:
       size_t valPos = std::ftell(in);
       Allocator<ValueT> alloc(in, valPos);
       std::vector<ValueT, Allocator<ValueT> > charArrayTemp(alloc);
-      charArrayTemp.resize(valSize);
+      charArrayTemp.resize(valSize, 0);
       c.swap(charArrayTemp);
 
       byteSize += valSize * sizeof(ValueT);

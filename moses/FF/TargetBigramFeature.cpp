@@ -46,7 +46,7 @@ void TargetBigramFeature::Load()
   if (m_filePath == "*")
     return ; //allow all
   ifstream inFile(m_filePath.c_str());
-  UTIL_THROW_IF(!inFile, util::Exception, "Can't open file " << m_filePath);
+  UTIL_THROW_IF2(!inFile, "Can't open file " << m_filePath);
 
   std::string line;
   m_vocab.insert(BOS_);
@@ -69,7 +69,7 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
                                        ScoreComponentCollection* accumulator) const
 {
   const TargetBigramState* tbState = dynamic_cast<const TargetBigramState*>(prev_state);
-  CHECK(tbState);
+  assert(tbState);
 
   // current hypothesis target phrase
   const Phrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();

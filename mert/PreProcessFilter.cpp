@@ -34,6 +34,9 @@ PreProcessFilter::PreProcessFilter(const string& filterCommand)
   : m_toFilter(NULL),
     m_fromFilter(NULL)
 {
+#if defined __MINGW32__
+    //TODO(jie): replace this function with boost implementation
+#else
   // Child error signal install
   // sigaction is the replacement for the traditional signal() method
   struct sigaction action;
@@ -119,6 +122,7 @@ PreProcessFilter::PreProcessFilter(const string& filterCommand)
     perror("Error: fork failed");
     exit(EXIT_FAILURE);
   }
+#endif // defined
 }
 
 string PreProcessFilter::ProcessSentence(const string& sentence)

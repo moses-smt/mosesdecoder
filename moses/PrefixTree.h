@@ -9,7 +9,6 @@
 
 #include <vector>
 #include <algorithm>
-#include "util/check.hh"
 #include <deque>
 #include "Util.h"
 #include "FilePtr.h"

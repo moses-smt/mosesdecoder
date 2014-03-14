@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "util/check.hh"
+#include "util/exception.hh"
 #include "Ngram.h"
 #include "Reference.h"
 #include "Util.h"
@@ -188,7 +188,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 
 statscore_t BleuScorer::calculateScore(const vector<int>& comps) const
 {
-  CHECK(comps.size() == kBleuNgramOrder * 2 + 1);
+  UTIL_THROW_IF(comps.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
   for (int i = 0; i < kBleuNgramOrder; ++i) {
@@ -246,8 +246,7 @@ void BleuScorer::DumpCounts(ostream* os,
 float smoothedSentenceBleu
 (const std::vector<float>& stats, float smoothing, bool smoothBP)
 {
-
-  CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
+  UTIL_THROW_IF(stats.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
   for (int j = 0; j < kBleuNgramOrder; j++) {
@@ -268,8 +267,9 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
 {
   // Sum sent and background
   std::vector<float> stats;
-  CHECK(sent.size()==bg.size());
-  CHECK(sent.size()==kBleuNgramOrder*2+1);
+  UTIL_THROW_IF(sent.size()!=bg.size(), util::Exception, "Error");
+  UTIL_THROW_IF(sent.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
+
   for(size_t i=0; i<sent.size(); i++)
     stats.push_back(sent[i]+bg[i]);
 
@@ -291,7 +291,7 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
 
 float unsmoothedBleu(const std::vector<float>& stats)
 {
-  CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
+  UTIL_THROW_IF(stats.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
   for (int j = 0; j < kBleuNgramOrder; j++) {

@@ -12,6 +12,7 @@ if $(with-dlib) {
 
 alias headers : ../util//kenutil : : : $(max-factors) $(dlib) ; 
 alias ThreadPool : ThreadPool.cpp ;
+alias Util : Util.cpp Timer.cpp ;
 
 if [ option.get "with-synlm" : no : yes ] = yes
 {
@@ -20,14 +21,6 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm : SyntacticLanguageModel.o m : : : <define>HAVE_SYNLM ;
 } else {
   alias synlm ;
-}
-
-local have-clock = [ SHELL "bash -c \"g++ -dM -x c++ -E /dev/null -include time.h 2>/dev/null |grep CLOCK_MONOTONIC\"" : exit-status ] ;
-if $(have-clock[2]) = 0 {
-  #required for clock_gettime.  Threads already have rt.  
-  lib rt : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-} else {
-  alias rt ;
 }
 
 #This is a kludge to force rebuilding if different --with options are passed. 
@@ -67,9 +60,12 @@ lib moses :
   *Test.cpp Mock*.cpp
   FF/Factory.cpp
 ]
-headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt 
+headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-$(TOP)//boost_iostreams ;
+$(TOP)//boost_iostreams 
+:
+<threading>single:<source>../util//rt
+;
 
 #generic//generic mm//mm
 

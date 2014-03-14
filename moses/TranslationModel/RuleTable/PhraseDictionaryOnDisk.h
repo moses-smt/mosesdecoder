@@ -28,7 +28,6 @@
 #include "OnDiskPt/OnDiskWrapper.h"
 #include "OnDiskPt/Word.h"
 #include "OnDiskPt/PhraseNode.h"
-#include "util/check.hh"
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
@@ -74,7 +73,8 @@ public:
   // PhraseDictionary impl
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &parser,
-    const ChartCellCollectionBase &);
+    const ChartCellCollectionBase &,
+    std::size_t);
 
   virtual void InitializeForInput(InputType const& source);
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;

@@ -1,12 +1,12 @@
 #include <stdexcept>
 
-#include "util/check.hh"
 #include "util/exception.hh"
 
 #include "FeatureFunction.h"
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
+#include "moses/Util.h"
 
 using namespace std;
 
@@ -27,6 +27,11 @@ FeatureFunction &FeatureFunction::FindFeatureFunction(const std::string& name)
   }
 
   throw "Unknown feature " + name;
+}
+
+void FeatureFunction::Destroy()
+{
+  RemoveAllInColl(s_staticColl);
 }
 
 FeatureFunction::
@@ -61,7 +66,7 @@ FeatureFunction::~FeatureFunction() {}
 void FeatureFunction::ParseLine(const std::string &line)
 {
   vector<string> toks = Tokenize(line);
-  CHECK(toks.size());
+  UTIL_THROW_IF2(toks.empty(), "Empty line");
 
   string nameStub = toks[0];
 
@@ -69,10 +74,11 @@ void FeatureFunction::ParseLine(const std::string &line)
 
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = TokenizeFirstOnly(toks[i], "=");
-    CHECK(args.size() == 2);
+    UTIL_THROW_IF2(args.size() != 2,
+    		"Incorrect format for feature function arg: " << toks[i]);
 
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
-    UTIL_THROW_IF(!ret.second, util::Exception, "Duplicate key in line " << line);
+    UTIL_THROW_IF2(!ret.second, "Duplicate key in line " << line);
 
     if (args[0] == "num-features") {
       m_numScoreComponents = Scan<size_t>(args[1]);

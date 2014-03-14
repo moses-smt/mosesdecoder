@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 
 #include "util/string_piece.hh"
+#include "util/exception.hh"
 
 namespace Moses
 {
@@ -154,7 +155,8 @@ public:
   }
 
   void RemoveWord(size_t pos) {
-    CHECK(pos < m_words.size());
+	UTIL_THROW_IF2(pos >= m_words.size(),
+			"Referencing position " << pos << " out of bound");
     m_words.erase(m_words.begin() + pos);
   }
 

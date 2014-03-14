@@ -55,8 +55,18 @@ truecase
 	template-if: input-truecaser IN.$input-extension OUT.$input-extension -model IN1.$input-extension
 	template-if: output-truecaser IN.$output-extension OUT.$output-extension -model IN1.$output-extension
 	parallelizable: yes
+
+source-label
+        in: truecased-stem
+        out: source-labelled
+        default-name: corpus/labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN.$input-extension OUT.$input-extension
+        template-if: cat IN.$output-extension OUT.$output-extension
+	parallelizable: yes
+
 lowercase
-	in: truecased-stem
+	in: source-labelled
 	out: lowercased-stem
 	default-name: corpus/lowercased
 	pass-unless: input-lowercaser output-lowercaser
@@ -226,9 +236,8 @@ tokenize-tuning
 factorize-tuning
 	in: tokenized-tuning
 	out: factorized-tuning
-	rerun-on-change: TRAINING:output-factors
 	default-name: lm/interpolate-tuning.factored
-	pass-unless: factors	
+	pass-unless: TRAINING:output-factors	
 	parallelizable: yes
 	error: can't open
 	error: incompatible number of words in factor
@@ -518,6 +527,13 @@ build-osm
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
 	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --srilm-dir $srilm-dir $operation-sequence-model-settings
 	default-name: model/OSM
+build-transliteration-model
+       in: corpus word-alignment 
+       out: transliteration-model
+       ignore-unless: transliteration-module
+       rerun-on-change: transliteration-module training-options script giza-settings
+       template: $moses-script-dir/Transliteration/train-transliteration-module.pl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --out-dir OUT --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --srilm-dir $srilm-dir --input-extension $input-extension --output-extension $output-extension --factor 0-0
+	default-name: model/Transliteration
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
@@ -586,7 +602,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-model generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
@@ -712,15 +728,32 @@ factorize-input-devtest
 	ignore-unless: use-mira
 	error: can't open
 	error: incompatible number of words in factor
+
+source-label-input
+        in: factorized-input
+        out: source-labelled-input
+        default-name: tuning/input.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+
+source-label-input-devtest
+        in: factorized-input-devtest
+        out: source-labelled-input-devtest
+        default-name: tuning/input.devtest.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+
 lowercase-input
-	in: factorized-input
+	in: source-labelled-input
 	out: truecased-input
 	default-name: tuning/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 lowercase-input-devtest
-	in: factorized-input-devtest
+	in: source-labelled-input-devtest
 	out: truecased-input-devtest
 	default-name: tuning/input.devtest.lc
 	pass-unless: input-lowercaser
@@ -728,14 +761,14 @@ lowercase-input-devtest
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
-	in: factorized-input TRUECASER:truecase-model
+	in: source-labelled-input TRUECASER:truecase-model
 	out: truecased-input
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.tc
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 truecase-input-devtest
-	in: factorized-input-devtest TRUECASER:truecase-model
+	in: source-labelled-input-devtest TRUECASER:truecase-model
 	out: truecased-input-devtest
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.devtest.tc
@@ -927,15 +960,24 @@ factorize-input
 	pass-unless: TRAINING:input-factors
 	error: can't open
 	error: incompatible number of words in factor
+
+source-label-input
+        in: factorized-input
+        out: source-labelled-input
+        default-name: evaluation/input.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+
 lowercase-input
-	in: factorized-input
+	in: source-labelled-input
 	out: truecased-input
 	default-name: evaluation/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
-	in: factorized-input TRUECASER:truecase-model
+	in: source-labelled-input TRUECASER:truecase-model
 	out: truecased-input
 	default-name: evaluation/input.tc
 	rerun-on-change: input-truecaser
@@ -985,15 +1027,21 @@ remove-markup
 	pass-if: TRAINING:hierarchical-rule-set
 	pass-unless: report-segmentation
 	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
+post-decoding-transliteration
+	in: cleaned-output system-output TRAINING:transliteration-model LM:binlm
+	out: transliterated-output
+	default-name: evaluation/transliterated
+	pass-unless: TRAINING:post-decoding-transliteration
+	template: $moses-script-dir/Transliteration/post-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN2 --input-extension $input-extension --output-extension $output-extension --language-model IN3 --output-file IN0 --oov-file IN1.oov
 recase-output
-	in: cleaned-output RECASING:recase-config
+	in: transliterated-output RECASING:recase-config
 	out: recased-output
 	default-name: evaluation/recased
 	pass-unless: recaser
 	ignore-if: output-truecaser
 	template: $recaser -moses $RECASING:decoder -in IN -model IN1 > OUT
 detruecase-output
-	in: cleaned-output
+	in: transliterated-output
 	out: recased-output
 	default-name: evaluation/truecased
 	ignore-unless: output-truecaser
@@ -1083,7 +1131,7 @@ bolt-bleu-c
 	rerun-on-change: bolt-bleu-c
 	template: $bolt-bleu-c IN > OUT
 multi-bleu
-	in: cleaned-output tokenized-reference
+	in: transliterated-output tokenized-reference
 	out: multi-bleu-score
 	default-name: evaluation/multi-bleu
 	ignore-unless: multi-bleu
@@ -1110,7 +1158,7 @@ wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
 meteor
-	in: cleaned-output reference
+	in: transliterated-output reference
 	out: meteor-score
 	default-name: evaluation/meteor
 	ignore-unless: meteor

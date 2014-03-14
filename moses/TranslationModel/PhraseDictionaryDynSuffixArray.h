@@ -24,7 +24,7 @@ public:
   const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
   void insertSnt(string&, string&, string&);
   void deleteSnt(unsigned, unsigned);
-  ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&);
+  ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, std::size_t);
   void SetParameter(const std::string& key, const std::string& value);
 private:
   BilingualDynSuffixArray *m_biSA;

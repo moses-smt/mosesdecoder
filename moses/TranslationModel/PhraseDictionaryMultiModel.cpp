@@ -37,10 +37,9 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
   }
 
   size_t numWeights = m_numScoreComponents;
-  if (m_mode == "interpolate") {
-    numWeights--;
-  }
-  CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*numWeights == m_multimodelweights.size());
+  UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &
+		  m_pdStr.size()*numWeights != m_multimodelweights.size(),
+		  "Number of scores and weights are not equal");
 }
 
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(int type, const std::string &line)
@@ -48,7 +47,9 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(int type, const std::stri
 {
   if (type == 1) {
 	// PhraseDictionaryMultiModelCounts
-    CHECK(m_pdStr.size() == m_multimodelweights.size() || m_pdStr.size()*4 == m_multimodelweights.size());
+    UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
+    		m_pdStr.size()*4 != m_multimodelweights.size(),
+  		  "Number of scores and weights are not equal");
   }
 }
 
@@ -78,7 +79,8 @@ void PhraseDictionaryMultiModel::Load()
     const string &ptName = m_pdStr[i];
 
     PhraseDictionary *pt = FindPhraseDictionary(ptName);
-    CHECK(pt);
+    UTIL_THROW_IF2(pt == NULL,
+    		"Could not find component phrase table " << ptName);
     m_pd.push_back(pt);
   }
 }
@@ -90,9 +92,7 @@ const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollect
   std::vector<std::vector<float> > multimodelweights;
 
   if (m_mode == "interpolate") {
-    //interpolation of phrase penalty is skipped, and fixed-value (2.718) is used instead. results will be screwed up if phrase penalty is not last feature
-    size_t numWeights = m_numScoreComponents-1;
-    multimodelweights = getWeights(numWeights, true);
+    multimodelweights = getWeights(m_numScoreComponents, true);
   }
 
   std::map<std::string,multiModelStatistics*>* allStats = new(std::map<std::string,multiModelStatistics*>);
@@ -176,12 +176,9 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
 
     Scores scoreVector(m_numScoreComponents);
 
-    for(size_t i = 0; i < m_numScoreComponents-1; ++i) {
+    for(size_t i = 0; i < m_numScoreComponents; ++i) {
       scoreVector[i] = TransformScore(std::inner_product(statistics->p[i].begin(), statistics->p[i].end(), multimodelweights[i].begin(), 0.0));
     }
-
-    //assuming that last value is phrase penalty
-    scoreVector[m_numScoreComponents-1] = 1.0;
 
     statistics->targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
 
@@ -260,7 +257,7 @@ std::vector<float> PhraseDictionaryMultiModel::normalizeWeights(std::vector<floa
 }
 
 
-ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
+ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, std::size_t)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
@@ -372,10 +369,6 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
   CleanUpAfterSentenceProcessing(sentence); // free memory used by compact phrase tables
 
   size_t numWeights = m_numScoreComponents;
-  if (m_mode == "interpolate") {
-    //interpolation of phrase penalty is skipped, and fixed-value (2.718) is used instead. results will be screwed up if phrase penalty is not last feature
-    numWeights = m_numScoreComponents-1;
-  }
 
   vector<float> ret (m_numModels*numWeights);
   for (size_t iFeature=0; iFeature < numWeights; iFeature++) {

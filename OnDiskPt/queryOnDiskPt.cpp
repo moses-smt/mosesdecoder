@@ -41,8 +41,7 @@ int main(int argc, char **argv)
     usage();
 
   OnDiskWrapper onDiskWrapper;
-  bool retDb = onDiskWrapper.BeginLoad(ttable);
-  CHECK(retDb);
+  onDiskWrapper.BeginLoad(ttable);
   OnDiskQuery onDiskQuery(onDiskWrapper);
 
   cerr << "Ready..." << endl;

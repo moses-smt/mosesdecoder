@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-DecodeStep::DecodeStep(const DecodeFeature *decodeFeature,
+DecodeStep::DecodeStep(DecodeFeature *decodeFeature,
                        const DecodeStep* prev,
                        const std::vector<FeatureFunction*> &features)
   : m_decodeFeature(decodeFeature)
@@ -56,8 +56,9 @@ DecodeStep::DecodeStep(const DecodeFeature *decodeFeature,
     } else {
       m_featuresRemaining.push_back(feature);
     }
-
   }
+
+  decodeFeature->SetContainer(this);
 }
 
 DecodeStep::~DecodeStep() {}

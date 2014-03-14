@@ -24,13 +24,12 @@
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
 #include "moses/TranslationModel/RuleTable/Trie.h"
-#include "util/check.hh"
 
 namespace Moses
 {
 class ChartParser;
 
-/** Implementation of a SCFG rule table in a trie.  Looking up a rule of
+/** Implementation of a in-memory rule table in a trie.  Looking up a rule of
  * length n symbols requires n look-ups to find the TargetPhraseCollection.
  */
 class PhraseDictionaryMemory : public RuleTableTrie
@@ -53,7 +52,8 @@ public:
   ChartRuleLookupManager*
   CreateRuleLookupManager(
     const ChartParser &,
-    const ChartCellCollectionBase &);
+    const ChartCellCollectionBase &,
+    std::size_t);
 
   // only used by multi-model phrase table, and other meta-features
   const TargetPhraseCollection *GetTargetPhraseCollectionLEGACY(const Phrase& src) const;

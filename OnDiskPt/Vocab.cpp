@@ -21,6 +21,7 @@
 #include <fstream>
 #include "OnDiskWrapper.h"
 #include "Vocab.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -35,7 +36,7 @@ bool Vocab::Load(OnDiskWrapper &onDiskWrapper)
   while(getline(file, line)) {
     vector<string> tokens;
     Moses::Tokenize(tokens, line);
-    CHECK(tokens.size() == 2);
+    UTIL_THROW_IF2(tokens.size() != 2, "Vocab file corrupted");
     const string &key = tokens[0];
     m_vocabColl[key] =  Moses::Scan<UINT64>(tokens[1]);
   }

@@ -9,6 +9,7 @@
 #include "FactorCollection.h"
 #include "FF/InputFeature.h"
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -21,8 +22,8 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
   , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
   : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
 {
-  const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
-  CHECK(inputFeature);
+  const InputFeature &inputFeature = InputFeature::Instance();
+  UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
 
   size_t inputSize = input.GetSize();
   m_inputPathMatrix.resize(inputSize);
@@ -79,7 +80,8 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 
         const Phrase &prevPhrase = prevPath.GetPhrase();
         const ScorePair *prevInputScore = prevPath.GetInputScore();
-        CHECK(prevInputScore);
+        UTIL_THROW_IF2(prevInputScore == NULL,
+        		"No input score for path: " << prevPath);
 
         // loop thru every word at this position
         const ConfusionNet::Column &col = input.GetColumn(endPos);
@@ -108,7 +110,9 @@ TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet
 InputPathList &TranslationOptionCollectionConfusionNet::GetInputPathList(size_t startPos, size_t endPos)
 {
   size_t offset = endPos - startPos;
-  CHECK(offset < m_inputPathMatrix[startPos].size());
+  UTIL_THROW_IF2(offset >= m_inputPathMatrix[startPos].size(),
+                 "Out of bound access: " << offset);
+
   return m_inputPathMatrix[startPos][offset];
 }
 
@@ -235,7 +239,7 @@ void TranslationOptionCollectionConfusionNet::CreateTranslationOptionsForRangeLE
                                    , this
                                    , adhereTableLimit);
         } else {
-          CHECK(genStep);
+          assert(genStep);
           genStep->Process(inputPartialTranslOpt
                            , *decodeStep
                            , *newPtoc

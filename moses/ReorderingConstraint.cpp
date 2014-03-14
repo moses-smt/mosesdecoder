@@ -110,7 +110,7 @@ bool ReorderingConstraint::Check( const WordsBitmap &bitmap, size_t startPos, si
   // nothing to be checked, we are done
   if (! IsActive() ) return true;
 
-  VERBOSE(3,"CHECK " << bitmap << " " << startPos << "-" << endPos);
+  VERBOSE(3,"Check " << bitmap << " " << startPos << "-" << endPos);
 
   // check walls
   size_t firstGapPos = bitmap.GetFirstGapPos();

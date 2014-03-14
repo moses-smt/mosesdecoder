@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <sys/stat.h>
 #include <string>
-#include "util/check.hh"
+#include "util/exception.hh"
 #include "fdstream.h"
 #include "utils.h"
 

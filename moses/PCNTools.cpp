@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "Util.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -127,7 +128,7 @@ CNAlt getCNAlt(const std::string& in, int &c)
   for (; ind < toks.size() - 1; ++ind) {
     const string &tok = toks[ind];
     vector<string> keyValue = Moses::Tokenize(tok, "=");
-    CHECK(keyValue.size() == 2);
+    UTIL_THROW_IF2(keyValue.size() != 2, "Format error: " << tok);
     float prob = Moses::Scan<float>(keyValue[1]);
     sparseFeatures[ keyValue[0] ] = prob;
   }

@@ -22,7 +22,6 @@
 #include "TargetPhraseCollection.h"
 #include "SourcePhrase.h"
 #include "moses/Util.h"
-#include "util/check.hh"
 #include "util/exception.hh"
 
 using namespace std;
@@ -56,7 +55,7 @@ PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
 
   std::fstream &file = onDiskWrapper.GetFileSource();
   file.seekg(filePos);
-  CHECK(filePos == (UINT64)file.tellg());
+  assert(filePos == (UINT64)file.tellg());
 
   file.read((char*) &m_numChildrenLoad, sizeof(UINT64));
 
@@ -65,11 +64,11 @@ PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
 
   // go to start of node again
   file.seekg(filePos);
-  CHECK(filePos == (UINT64)file.tellg());
+  assert(filePos == (UINT64)file.tellg());
 
   // read everything into memory
   file.read(m_memLoad, memAlloc);
-  CHECK(filePos + memAlloc == (UINT64)file.tellg());
+  assert(filePos + memAlloc == (UINT64)file.tellg());
 
   // get value
   m_value = ((UINT64*)m_memLoad)[1];
@@ -77,7 +76,7 @@ PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
   // get counts
   float *memFloat = (float*) (m_memLoad + sizeof(UINT64) * 2);
 
-  CHECK(countSize == 1);
+  assert(countSize == 1);
   m_counts[0] = memFloat[0];
 
   m_memLoadLast = m_memLoad + memAlloc;
@@ -86,7 +85,6 @@ PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
 PhraseNode::~PhraseNode()
 {
   free(m_memLoad);
-  //CHECK(m_saved);
 }
 
 float PhraseNode::GetCount(size_t ind) const
@@ -96,7 +94,7 @@ float PhraseNode::GetCount(size_t ind) const
 
 void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimit)
 {
-  CHECK(!m_saved);
+  UTIL_THROW_IF2(m_saved, "Already saved");
 
   // save this node
   m_targetPhraseColl.Sort(tableLimit);
@@ -117,7 +115,7 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
 
   // count info
   float *memFloat = (float*) (mem + memUsed);
-  CHECK(numCounts == 1);
+  UTIL_THROW_IF2(numCounts != 1, "Can only store 1 phrase count");
   memFloat[0] = (m_counts.size() == 0) ? DEFAULT_COUNT : m_counts[0]; // if count = 0, put in very large num to make sure its still used. HACK
   memUsed += sizeof(float) * numCounts;
 
@@ -143,7 +141,7 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
 
   // save this node
   //Moses::DebugMem(mem, memAlloc);
-  CHECK(memUsed == memAlloc);
+  assert(memUsed == memAlloc);
 
   std::fstream &file = onDiskWrapper.GetFileSource();
   m_filePos = file.tellp();
@@ -151,7 +149,7 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
   file.write(mem, memUsed);
 
   UINT64 endPos = file.tellp();
-  CHECK(m_filePos + memUsed == endPos);
+  assert(m_filePos + memUsed == endPos);
 
   free(mem);
 
@@ -236,7 +234,7 @@ void PhraseNode::GetChild(Word &wordFound, UINT64 &childFilePos, size_t ind, OnD
                   + childSize * ind;
 
   size_t memRead = ReadChild(wordFound, childFilePos, currMem);
-  CHECK(memRead == childSize);
+  assert(memRead == childSize);
 }
 
 size_t PhraseNode::ReadChild(Word &wordFound, UINT64 &childFilePos, const char *mem) const

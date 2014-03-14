@@ -4,6 +4,7 @@
 #include "moses/UserMessage.h"
 #include "moses/Hypothesis.h"
 #include "moses/FactorCollection.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -107,16 +108,13 @@ void BleuScoreFeature::SetParameter(const std::string& key, const std::string& v
 {
   if (key == "references") {
     vector<string> referenceFiles = Tokenize(value, ",");
-    CHECK(referenceFiles.size());
+    UTIL_THROW_IF2(referenceFiles.size() == 0, "No reference file");
     vector<vector<string> > references(referenceFiles.size());
 
     for (size_t i =0; i < referenceFiles.size(); ++i) {
       ifstream in(referenceFiles[i].c_str());
       if (!in) {
-        stringstream strme;
-        strme << "Unable to load references from " << referenceFiles[i];
-        UserMessage::Add(strme.str());
-        abort();
+        UTIL_THROW2("Unable to load references from " << referenceFiles[i]);
       }
       string line;
       while (getline(in,line)) {
@@ -130,8 +128,7 @@ void BleuScoreFeature::SetParameter(const std::string& key, const std::string& v
       }
       if (i > 0) {
         if (references[i].size() != references[i-1].size()) {
-          UserMessage::Add("Reference files are of different lengths");
-          abort();
+          UTIL_THROW2("Reference files are of different lengths");
         }
       }
       in.close();

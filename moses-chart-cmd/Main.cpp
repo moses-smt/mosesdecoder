@@ -63,6 +63,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FF/StatelessFeatureFunction.h"
 
 #include "util/usage.hh"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace Moses;
@@ -112,7 +113,7 @@ public:
     ChartManager manager(*m_source);
     manager.ProcessSentence();
 
-    CHECK(!staticData.UseMBR());
+    UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
@@ -159,7 +160,7 @@ public:
       std::ostringstream out;
       manager.GetSearchGraph(translationId, out);
       OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
-      CHECK(oc);
+      UTIL_THROW_IF2(oc == NULL, "File for search graph output not specified");
       oc->Write(translationId, out.str());
     }
 
@@ -214,7 +215,6 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
 static void ShowWeights()
 {
   fix(cout,6);
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 
@@ -223,11 +223,17 @@ static void ShowWeights()
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
     }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
+    }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
     }
   }
 }
@@ -260,7 +266,7 @@ int main(int argc, char* argv[])
       exit(0);
     }
 
-    CHECK(staticData.IsChart());
+    UTIL_THROW_IF2(!staticData.IsChart(), "Must be SCFG model");
 
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);
@@ -300,6 +306,7 @@ int main(int argc, char* argv[])
 #endif
 
     delete ioWrapper;
+    FeatureFunction::Destroy();
 
     IFVERBOSE(1)
     PrintUserTime("End.");
