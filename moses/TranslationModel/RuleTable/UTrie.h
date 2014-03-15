@@ -54,7 +54,7 @@ public:
   }
 
   ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &,
-      const ChartCellCollectionBase &);
+      const ChartCellCollectionBase &, std::size_t);
 
 private:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
