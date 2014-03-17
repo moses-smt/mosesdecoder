@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 
+#ifdef WITH_THREADS
 #include <boost/thread/mutex.hpp>
+#endif
 
 #include "Types.h"
 #include "StatisticsBasedScorer.h"
@@ -64,7 +66,9 @@ private:
   std::string meteor_w;
   ofdstream* m_to_meteor;
   ifdstream* m_from_meteor;
-  boost::mutex* mtx;
+#ifdef WITH_THREADS
+  mutable boost::mutex mtx;
+#endif // WITH_THREADS
 
   // data extracted from reference files
   std::vector<std::string> m_references;
