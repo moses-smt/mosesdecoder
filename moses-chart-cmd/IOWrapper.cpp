@@ -72,6 +72,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_detailedTranslationReportingStream(NULL)
   ,m_detailedTreeFragmentsTranslationReportingStream(NULL)
   ,m_alignmentInfoStream(NULL)
+  ,m_unknownsStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
   ,m_detailTreeFragmentsOutputCollector(NULL)
@@ -79,6 +80,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
   ,m_alignmentInfoCollector(NULL)
+  ,m_unknownsCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -132,6 +134,14 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     UTIL_THROW_IF2(!m_alignmentInfoStream->good(),
     		"File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
   }
+
+  if (!staticData.GetOutputUnknownsFile().empty()) {
+    m_unknownsStream = new std::ofstream(staticData.GetOutputUnknownsFile().c_str());
+    m_unknownsCollector = new Moses::OutputCollector(m_unknownsStream);
+    UTIL_THROW_IF2(!m_unknownsStream->good(),
+                   "File for unknowns words could not be opened: " <<
+                     staticData.GetOutputUnknownsFile());
+  }
 }
 
 IOWrapper::~IOWrapper()
@@ -143,11 +153,13 @@ IOWrapper::~IOWrapper()
   delete m_detailedTranslationReportingStream;
   delete m_detailedTreeFragmentsTranslationReportingStream;
   delete m_alignmentInfoStream;
+  delete m_unknownsStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
   delete m_alignmentInfoCollector;
+  delete m_unknownsCollector;
 }
 
 void IOWrapper::ResetTranslationId()
@@ -806,6 +818,17 @@ void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothe
   out << endl;
 
   m_alignmentInfoCollector->Write(translationId, out.str());
+}
+
+void IOWrapper::OutputUnknowns(const std::vector<Moses::Phrase*> &unknowns,
+                               long translationId)
+{
+  std::ostringstream out;
+  for (std::size_t i = 0; i < unknowns.size(); ++i) {
+    out << *(unknowns[i]);
+  }
+  out << std::endl;
+  m_unknownsCollector->Write(translationId, out.str());
 }
 
 size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget)

@@ -134,6 +134,10 @@ public:
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
     }
+    if (!staticData.GetOutputUnknownsFile().empty()) {
+      m_ioWrapper.OutputUnknowns(manager.GetParser().GetUnknownSources(),
+                                 translationId);
+    }
 
     //DIMw
     if (staticData.IsDetailedAllTranslationReportingEnabled()) {
