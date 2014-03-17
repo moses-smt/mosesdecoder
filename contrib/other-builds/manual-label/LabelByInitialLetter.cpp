@@ -11,7 +11,7 @@ void LabelByInitialLetter(const Phrase &source, std::ostream &out)
 	  const string &startWord = source[start][0];
 	  string startChar = startWord.substr(0,1);
 
-	  for (int end = start; end < source.size(); ++end) {
+	  for (int end = start + 1; end < source.size(); ++end) {
 		  const string &endWord = source[end][0];
 		  string endChar = endWord.substr(0,1);
 
