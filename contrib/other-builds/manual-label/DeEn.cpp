@@ -28,14 +28,14 @@ void LabelDeEn(const Phrase &source, ostream &out)
      if (IsA(source, start, -1, 1, "VAFIN")
           && IsA(source, end, +1, 1, "VVINF VVPP")
           && !Contains(source, start, end, 1, "VAFIN VVINF VVPP VVFIN")) {
-       Range range(start, end);
+       Range range(start, end, "reorder-label");
        ranges.push_back(range);
       }
       else if ((start == 0 || IsA(source, start, -1, 1, "$,"))
           && IsA(source, end, +1, 0, "zu")
           && IsA(source, end, +2, 1, "VVINF")
           && !Contains(source, start, end, 1, "$,")) {
-        Range range(start, end);
+        Range range(start, end, "reorder-label");
         ranges.push_back(range);
       }
     }

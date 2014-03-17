@@ -6,6 +6,7 @@
 #include "DeEn.h"
 #include "EnPhrasalVerb.h"
 #include "EnOpenNLPChunker.h"
+#include "LabelByInitialLetter.h"
 
 using namespace std;
 
@@ -101,7 +102,7 @@ int main(int argc, char** argv)
 	  string line;
 	  size_t lineNum = 1;
 
-	  while (getline(cin, line)) {
+	  while (getline(*inStrm, line)) {
 		//cerr << lineNum << ":" << line << endl;
 		if (lineNum % 1000 == 0) {
 		  cerr << lineNum << " ";
@@ -109,12 +110,15 @@ int main(int argc, char** argv)
 
 		Phrase source = Tokenize(line);
 
-		if (sourceLang == "de" && targetLang == "en") {
-			LabelDeEn(source, cout);
+		if (revision == 600 ) {
+			LabelByInitialLetter(source, *outStrm);
+		}
+		else if (sourceLang == "de" && targetLang == "en") {
+			LabelDeEn(source, *outStrm);
 		}
 		else if (sourceLang == "en") {
 			if (revision == 0 || revision == 1) {
-				EnPhrasalVerb(source, revision, cout);
+				EnPhrasalVerb(source, revision, *outStrm);
 			}
 			else if (revision == 2) {
 				  string openNLPPath = vm["opennlp-path"].as<string>();
@@ -171,8 +175,8 @@ void OutputWithLabels(const Phrase &source, const Ranges ranges, ostream &out)
 	// output beginning of label
 	for (Ranges::const_iterator iter = ranges.begin(); iter != ranges.end(); ++iter) {
 	  const Range &range = *iter;
-	  if (range.first == pos) {
-		out << "<tree label=\"reorder-label\"> ";
+	  if (range.range.first == pos) {
+		out << "<tree label=\"" + range.label + "\"> ";
 	  }
 	}
 
@@ -181,7 +185,7 @@ void OutputWithLabels(const Phrase &source, const Ranges ranges, ostream &out)
 
 	for (Ranges::const_iterator iter = ranges.begin(); iter != ranges.end(); ++iter) {
 	  const Range &range = *iter;
-	  if (range.second == pos) {
+	  if (range.range.second == pos) {
 		out << "</tree> ";
 	  }
 	}
