@@ -101,7 +101,7 @@ deleteSnt(unsigned /* idx */, unsigned /* num2Del */)
 
 ChartRuleLookupManager*
 PhraseDictionaryDynSuffixArray::
-CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
+CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, std::size_t)
 {
   UTIL_THROW(util::Exception, "SCFG decoding not supported with dynamic suffix array");
   return 0;

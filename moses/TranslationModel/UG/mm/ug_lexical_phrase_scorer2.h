@@ -5,7 +5,7 @@
 #ifndef __ug_lexical_phrase_scorer_h
 #define __ug_lexical_phrase_scorer_h
 
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include "tpt_tokenindex.h"
 #include <string>
 #include <boost/unordered_map.hpp>
@@ -19,9 +19,9 @@ namespace ugdiss
   class 
   LexicalPhraseScorer2
   {
+  public:
     typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> table_t;
     table_t COOC;
-  public:
     void open(string const& fname);
 
     template<typename someint>
@@ -96,8 +96,8 @@ namespace ugdiss
   {
     if (COOC.m1(s) == 0 || COOC.m2(t) == 0) return 1.0;
     // if (!COOC[s][t]) cout << s << " " << t << endl;
-    assert(COOC[s][t]);
-    return float(COOC[s][t])/COOC.m1(s);
+    // assert(COOC[s][t]);
+    return float(COOC[s][t]+1)/(COOC.m1(s)+1);
   }
 
   template<typename TKN>
@@ -106,8 +106,8 @@ namespace ugdiss
   plup_bwd(id_type const s, id_type const t) const
   {
     if (COOC.m1(s) == 0 || COOC.m2(t) == 0) return 1.0;
-    assert(COOC[s][t]);
-    return float(COOC[s][t])/COOC.m2(t);
+    // assert(COOC[s][t]);
+    return float(COOC[s][t]+1)/(COOC.m2(t)+1);
   }
 
   template<typename TKN>

@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 	  cerr << "lineTarget=" << lineTarget << endl;
 	  cerr << "lineSource=" << lineSource << endl;
 	  cerr << "lineAlignment=" << lineAlignment << endl;
-	 */
+	  */
 
 	  AlignedSentence *alignedSentence;
 

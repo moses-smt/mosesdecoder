@@ -76,7 +76,8 @@ public:
   // PhraseDictionary impl
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &parser,
-    const ChartCellCollectionBase &);
+    const ChartCellCollectionBase &,
+    std::size_t);
 
   virtual void InitializeForInput(InputType const& source);
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;

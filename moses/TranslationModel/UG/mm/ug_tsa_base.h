@@ -8,9 +8,10 @@
 #include <string>
 
 #include <boost/iostreams/device/mapped_file.hpp>
-
+#include <boost/shared_ptr.hpp>
 #include "tpt_tokenindex.h"
 #include "ug_ttrack_base.h"
+#include "ug_im_ttrack.h"
 #include "ug_corpus_token.h"
 #include "ug_tsa_tree_iterator.h"
 #include "ug_tsa_array_entry.h"
@@ -44,7 +45,6 @@ namespace ugdiss
   template<typename TKN> 
   class TSA 
   {
-
   public:
     virtual ~TSA() {};
     typedef TSA_tree_iterator<TKN>       tree_iterator; 
@@ -62,9 +62,9 @@ namespace ugdiss
     friend class TSA_tree_iterator<TKN>;
 
   protected:
-    Ttrack<TKN> const* corpus; // pointer to the underlying corpus
-    char const*    startArray; // beginning ...
-    char const*      endArray; // ... and end ...
+    shared_ptr<Ttrack<TKN> const> corpus; // pointer to the underlying corpus
+    char const*               startArray; // beginning ...
+    char const*                 endArray; // ... and end ...
     // of memory block storing the actual TSA
 
     size_t corpusSize; 
@@ -737,7 +737,7 @@ namespace ugdiss
   TSA<TKN>::
   getCorpus() const
   {
-    return corpus;
+    return corpus.get();
   }
 
   //---------------------------------------------------------------------------

@@ -41,16 +41,19 @@ INCLUDES    =
 BZLIB       =  
 BOOSTLIBTAG = 
 
-REQLIBS = m z pthread lzma ${BZLIB} \
+lzma = lzma
+#lzma = 
+REQLIBS = m z pthread dl ${lzma} ${BZLIB} \
 	boost_thread${BOOSTLIBTAG} \
-	boost_iostreams${BOOSTLIBTAG} \
 	boost_program_options${BOOSTLIBTAG} \
 	boost_system${BOOSTLIBTAG} \
-	boost_filesystem${BOOSTLIBTAG} 
+	boost_filesystem${BOOSTLIBTAG} \
+	boost_iostreams${BOOSTLIBTAG} z bz2
 
 # 	icuuc icuio icui18n \
 
-LIBS     = $(addprefix -l, ${REQLIBS} moses) 
+LIBS     = $(addprefix -l, moses ${REQLIBS}) 
+LIBS     = $(addprefix -l, ${REQLIBS}) 
 LIBDIRS   = -L${HOME}/code/mosesdecoder/lib
 LIBDIRS  += -L${HOME}/lib
 PREFIX ?= .
@@ -74,7 +77,7 @@ ${WDIR}/$(basename $(notdir $1)).o : $1 $(wildcard $(basename $1).h)
 
 endef
 
-testprogs = test-dynamic-im-tsa
+testprogs = test-dynamic-im-tsa try-align
 programs  = mtt-build mtt-dump symal2mam custom-pt mmlex-build ${testprogs}
 programs += mtt-count-words
 
@@ -87,17 +90,25 @@ custom-pt: ${BINDIR}/${BINPREF}custom-pt
 	echo $^
 
 INMOGEN = $(wildcard ${MOSES_ROOT}/moses/TranslationModel/UG/generic/*/*.cpp)
+#INMOMM  = $(wildcard ${MOSES_ROOT}/moses/TranslationModel/UG/mm/*.cc)
+#INMOMM += $(wildcard ${MOSES_ROOT}/moses/TranslationModel/UG/mm/*.cpp)
 OBJ     = $(patsubst %.cc,%.o,$(wildcard $(patsubst %.h,%.cc,$(wildcard *.h))))
 OBJ    += $(patsubst %.cpp,%.o,${INMOGEN})
+#OBJ    += $(patsubst %.cpp,%.o,${INMOMM})
+#OBJ    += $(patsubst %.cc,%.o,${INMOMM})
 EXE     = $(patsubst %.cc,%.o,$(filter-out $(patsubst %.h,%.cc,$(wildcard *.h)),$(wildcard *.cc)))
 
 $(foreach cpp,${INMOGEN},$(eval $(call compile,${cpp})))
 $(foreach cpp,$(wildcard *.cc),$(eval $(call compile,${cpp})))
 $(addprefix ${BINDIR}/${BINPREF}, $(programs)): $(addprefix ${WDIR}/,$(notdir ${OBJ}))
 $(addprefix ${BINDIR}/${BINPREF}, $(programs)): ${MOSES_ROOT}/lib/libmoses.a 
-${BINDIR}/${BINPREF}%: ${WDIR}/%.o  
-	echo PREREQS: $<
+${BINDIR}/${BINPREF}%: ${WDIR}/%.o ${WDIR}/mmsapt_align.o
+	@mkdir -p ${BINDIR}
+	echo PREREQS: $^
 	$(CXX) $(CXXFLAGS) -o $@ $^ ${LIBDIRS} ${LIBS} 
+
+#try-align: ${WDIR}/try-align.o ${WDIR}/tpt_tokenindex.o 
+#	$(CXX) $(CXXFLAGS) -o $@ $^ ${LIBDIRS}
 
 .SECONDARY: 
 

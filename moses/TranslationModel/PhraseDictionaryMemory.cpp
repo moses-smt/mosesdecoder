@@ -123,7 +123,8 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
 
 ChartRuleLookupManager *PhraseDictionaryMemory::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t /*maxChartSpan */)
 {
   return new ChartRuleLookupManagerMemory(parser, cellCollection, *this);
 }
