@@ -1302,16 +1302,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.h</locationURI>
 		</link>
 		<link>
-			<name>FF/SyntaxConstraintFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxConstraintFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SyntaxConstraintFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxConstraintFeature.h</locationURI>
-		</link>
-		<link>
 			<name>FF/TargetBigramFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetBigramFeature.cpp</locationURI>
