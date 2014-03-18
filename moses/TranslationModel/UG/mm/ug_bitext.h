@@ -192,8 +192,8 @@ namespace Moses {
       int index;
       int num_feats;
     public:
-      virtual 
  
+      virtual 
       void 
       operator()(Bitext<Token> const& pt, PhrasePair& pp, vector<float> * dest) 
 	const = 0;
@@ -212,6 +212,7 @@ namespace Moses {
     PScorePfwd : public PhraseScorer<Token>
     {
       float conf;
+      int denom;
     public:
       PScorePfwd() 
       {
@@ -219,9 +220,10 @@ namespace Moses {
       }
 
       int 
-      init(int const i, float const c) 
+      init(int const i, float const c, int d=1) 
       { 
-	conf = c; 
+	conf  = c; 
+	denom = d;
 	this->index = i;
 	return i + this->num_feats;
       }
@@ -234,10 +236,20 @@ namespace Moses {
 	if (!dest) dest = &pp.fvals;
 	if (pp.joint > pp.good1) 
 	  {
-	    cerr << bt.toString(pp.p1,0) << " ::: " << bt.toString(pp.p2,1) << endl;
-	    cerr << pp.joint << "/" << pp.good1 << "/" << pp.raw2 << endl;
+	    cerr<<bt.toString(pp.p1,0)<<" ::: "<<bt.toString(pp.p2,1)<<endl;
+	    cerr<<pp.joint<<"/"<<pp.good1<<"/"<<pp.raw2<<endl;
 	  }
-	(*dest)[this->index] = log(lbop(pp.good1, pp.joint, conf));
+	switch (denom)
+	  {
+	  case 0: 
+	    (*dest)[this->index] = log(lbop(pp.good1, pp.joint, conf)); 
+	    break;
+	  case 1: 
+	    (*dest)[this->index] = log(lbop(pp.sample1, pp.joint, conf)); 
+	    break;
+	  case 02:
+	    (*dest)[this->index] = log(lbop(pp.raw1, pp.joint, conf)); 
+	  }
       }
     };
 
@@ -1054,7 +1066,6 @@ namespace Moses {
       t1.open(base+L1+".mct");
       t2.open(base+L2+".mct");
       tx.open(base+L1+"-"+L2+".mam");
-      cerr << "DADA" << endl;
       this->V1->open(base+L1+".tdx"); this->V1->iniReverseIndex();
       this->V2->open(base+L2+".tdx"); this->V2->iniReverseIndex();
       mmTSA<TKN>& i1 = *reinterpret_cast<mmTSA<TKN>*>(this->I1.get());
@@ -1076,11 +1087,14 @@ namespace Moses {
      bool const flip) const
     {
       // if (core_alignment) cout << "HAVE CORE ALIGNMENT" << endl;
+
       // a word on the core_alignment:
-      // since fringe words ([s1,...,s2),[e1,..,e2) if s1 < s2, or e1 < e2, respectively)
-      // are be definition unaligned, we store only the core alignment in *core_alignment
-      // it is up to the calling function to shift alignment points over for start positions
-      // of extracted phrases that start with a fringe word
+      // 
+      // since fringe words ([s1,...,s2),[e1,..,e2) if s1 < s2, or e1
+      // < e2, respectively) are be definition unaligned, we store
+      // only the core alignment in *core_alignment it is up to the
+      // calling function to shift alignment points over for start
+      // positions of extracted phrases that start with a fringe word
       assert(T1);
       assert(T2);
       assert(Tx);
@@ -1106,12 +1120,15 @@ namespace Moses {
 	  if (flip) { p = binread(p,trg); assert(p<x); p = binread(p,src); }
 	  else      { p = binread(p,src); assert(p<x); p = binread(p,trg); }
 
+	  // cerr << sid << " " << src << "/" << slen1 << " " << trg << "/" 
+	  // << slen2 << endl;
 	  if (src >= slen1 || trg >= slen2)
 	    {
 	      ostringstream buf;
-	      buf << "Alignment range error at sentence " << sid << "!"; 
+	      buf << "Alignment range error at sentence " << sid << "!" << endl
+		  << src << "/" << slen1 << " " << trg << "/" << slen2 << endl;
 	      cerr << buf.str() << endl;
-	      throw(buf.str().c_str());
+	      UTIL_THROW(util::Exception, buf.str().c_str());
 	    }
 	      
 	  if (src < start || src >= stop) 
