@@ -90,12 +90,9 @@ namespace Moses
     while(getline(in2,line)) text2.push_back(line);
     while(getline(ina,line)) symal.push_back(line);
 
-    // cerr << "Read " << btdyn->T1->size() << " sentence pairs" << endl;
     lock_guard<mutex> guard(this->lock);
-    cerr << __FILE__ << ":" << __LINE__ << endl;
     btdyn = btdyn->add(text1,text2,symal);
     assert(btdyn);
-    cerr << __FILE__ << ":" << __LINE__ << endl;
     cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
   }
   
@@ -527,14 +524,5 @@ namespace Moses
   {
     throw "CreateRuleLookupManager is currently not supported in Mmsapt!";
   }
-
-  template<typename Token>
-  void 
-  fill_token_seq(TokenIndex& V, string const& line, vector<Token>& dest)
-  {
-    istringstream buf(line); string w;
-    while (buf>>w) dest.push_back(Token(V[w]));
-  }
-
 
 }
