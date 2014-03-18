@@ -164,5 +164,12 @@ namespace ugdiss
     write_tokenindex_to_disk(tok,ofile,unkToken);
   }
 
+  template<typename Token>
+  void 
+  fill_token_seq(TokenIndex& V, string const& line, vector<Token>& dest)
+  {
+    istringstream buf(line); string w;
+    while (buf>>w) dest.push_back(Token(V[w]));
+  }
 }
 #endif
