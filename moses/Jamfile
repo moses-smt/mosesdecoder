@@ -42,6 +42,17 @@ update-if-changed $(LM-LOG) $(current) ;
 
 obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm : <dependency>$(LM-LOG) ;
 
+if [ option.get "with-mm" : no : yes ] = yes
+{
+  alias mmlib : 
+  $(TOP)/moses/TranslationModel/UG//mmsapt
+  $(TOP)/moses/TranslationModel/UG/generic//generic
+  $(TOP)/moses/TranslationModel/UG/mm//mm
+  ;
+} else {
+  alias mmlib ;
+}
+
 lib moses :
 [ glob 
   *.cpp
@@ -62,7 +73,7 @@ lib moses :
 ]
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-$(TOP)//boost_iostreams TranslationModel/UG/generic//generic TranslationModel/UG/mm//mm
+$(TOP)//boost_iostreams mmlib
 :
 <threading>single:<source>../util//rt
 ;
