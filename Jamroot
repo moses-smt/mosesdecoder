@@ -150,6 +150,7 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG/mm//custom-pt 
   moses/TranslationModel/UG/mm//mmlex-build 
   moses/TranslationModel/UG/mm//mtt-count-words 
+  moses/TranslationModel/UG/mm//calc-coverage 
   moses/TranslationModel/UG//try-align 
   ;
 }
