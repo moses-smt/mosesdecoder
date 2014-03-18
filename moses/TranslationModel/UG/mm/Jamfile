@@ -73,6 +73,15 @@ $(TOP)/util//kenutil
 ; 
 
 
+exe calc-coverage : 
+calc-coverage.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
 install $(PREFIX)/bin : 
 mtt-build 
 mtt-dump 
@@ -82,6 +91,7 @@ mam2symal
 custom-pt 
 mmlex-build 
 mam_verify 
+calc-coverage
 ; 
 
 fakelib mm : [ glob ug_*.cc tpt_*.cc ] ;
