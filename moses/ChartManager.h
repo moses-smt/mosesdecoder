@@ -105,6 +105,8 @@ public:
   unsigned GetNextHypoId() {
     return m_hypothesisId++;
   }
+
+  const ChartParser &GetParser() const { return m_parser; }
 };
 
 }
