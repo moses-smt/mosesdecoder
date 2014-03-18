@@ -532,7 +532,7 @@ build-transliteration-model
        out: transliteration-model
        ignore-unless: transliteration-module
        rerun-on-change: transliteration-module training-options script giza-settings
-       template: $moses-script-dir/Transliteration/train-transliteration-module.pl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --out-dir OUT --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --srilm-dir $srilm-dir --input-extension $input-extension --output-extension $output-extension
+       template: $moses-script-dir/Transliteration/train-transliteration-module.pl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --out-dir OUT --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --srilm-dir $srilm-dir --input-extension $input-extension --output-extension $output-extension --factor 0-0
 	default-name: model/Transliteration
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
