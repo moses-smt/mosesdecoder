@@ -213,7 +213,7 @@ namespace Moses
     if (statsa && statsb)
       pp.init(pid1b, *statsa, *statsb, this->m_numScoreComponents);
     else if (statsa)
-      pp.init(pid1b, *statsa, this->m_numScoreComponents);
+      pp.init(pid1a, *statsa, this->m_numScoreComponents);
     else if (statsb)
       pp.init(pid1b, *statsb, this->m_numScoreComponents);
     else return false; // throw "no stats for pooling available!";
@@ -513,6 +513,11 @@ namespace Moses
     for (TargetPhraseCollection::iterator r = ret->begin(); r != ret->end(); ++r)
       {
 	cout << ++i << " " << **r << endl;
+	FVector fv = (*r)->GetScoreBreakdown().CreateFVector();
+	typedef pair<Moses::FName,float> item_t;
+	BOOST_FOREACH(item_t f, fv)
+	  cout << f.first << ":" << f.second << " ";
+	cout << endl;
       }
 #endif
     return ret;
@@ -525,4 +530,11 @@ namespace Moses
     throw "CreateRuleLookupManager is currently not supported in Mmsapt!";
   }
 
+  ChartRuleLookupManager*
+  Mmsapt::
+  CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &,
+			  size_t UnclearWhatThisVariableIsSupposedToAccomplishBecauseNobodyBotheredToDocumentItInPhraseTableDotHButIllTakeThisAsAnOpportunityToComplyWithTheMosesConventionOfRidiculouslyLongVariableAndClassNames)
+  {
+    throw "CreateRuleLookupManager is currently not supported in Mmsapt!";
+  }
 }
