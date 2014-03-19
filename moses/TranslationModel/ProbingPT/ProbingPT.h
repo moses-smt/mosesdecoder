@@ -37,7 +37,7 @@ public:
 protected:
   QueryEngine *m_engine;
 
-  typedef boost::bimap<const Factor *, uint64_t> VocabMap;
+  typedef boost::bimap<const Factor *, unsigned int> VocabMap;
   mutable VocabMap m_vocabMap;
 
   TargetPhraseCollection *CreateTargetPhrase(const Phrase &sourcePhrase) const;

@@ -33,13 +33,13 @@ void ProbingPT::Load()
 	m_unkId = 456456546456;
 
 	// vocab
-	const std::map<uint64_t, std::string> &probingVocab = m_engine->getVocab();
-	std::map<uint64_t, std::string>::const_iterator iter;
+	const std::map<unsigned int, std::string> &probingVocab = m_engine->getVocab();
+	std::map<unsigned int, std::string>::const_iterator iter;
 	for (iter = probingVocab.begin(); iter != probingVocab.end(); ++iter) {
 	  const string &wordStr = iter->second;
 	  const Factor *factor = FactorCollection::Instance().AddFactor(wordStr);
 
-	  uint64_t probingId = iter->first;
+	  unsigned int probingId = iter->first;
 
 	  VocabMap::value_type entry(factor, probingId);
 	  m_vocabMap.insert(entry);
@@ -136,7 +136,7 @@ TargetPhraseCollection *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase
 
 TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const
 {
-  const std::vector<uint64_t> &probingPhrase = probingTargetPhrase.target_phrase;
+  const std::vector<unsigned int> &probingPhrase = probingTargetPhrase.target_phrase;
   size_t size = probingPhrase.size();
 
   TargetPhrase *tp = new TargetPhrase();
@@ -152,24 +152,17 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
   }
 
   // score for this phrase table
-  vector<float> scores;
-
-  // convert double --> float --> log. TODO - tell nik to store as float
-  const vector<double> &prob = probingTargetPhrase.prob;
-  std::copy(prob.begin(), prob.end(), back_inserter(scores));
+    vector<float> scores = probingTargetPhrase.prob;
   std::transform(scores.begin(), scores.end(), scores.begin(),TransformScore);
-
   tp->GetScoreBreakdown().PlusEquals(this, scores);
 
   // alignment
   /*
-  const std::vector<int> &alignS = probingTargetPhrase.word_all1;
-  const std::vector<int> &alignT = probingTargetPhrase.word_all2;
-  assert(alignS.size() == alignT.size());
+  const std::vector<unsigned char> &alignments = probingTargetPhrase.word_all1;
 
   AlignmentInfo &aligns = tp->GetAlignTerm();
-  for (size_t i = 0; i < alignS.size(); ++i) {
-	  aligns.Add(alignS[i], alignT[i]);
+  for (size_t i = 0; i < alignS.size(); i += 2 ) {
+	  aligns.Add((size_t) alignments[i], (size_t) alignments[i+1]);
   }
   */
 
