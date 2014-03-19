@@ -34,12 +34,12 @@ void ProbingPT::Load()
 
 	// source vocab
 	const std::map<uint64_t, std::string> &sourceVocab = m_engine->getSourceVocab();
-	std::map<uint64_t, std::string>::const_iterator iter;
-	for (iter = sourceVocab.begin(); iter != sourceVocab.end(); ++iter) {
-	  const string &wordStr = iter->second;
+	std::map<uint64_t, std::string>::const_iterator iterSource;
+	for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end(); ++iterSource) {
+	  const string &wordStr = iterSource->second;
 	  const Factor *factor = FactorCollection::Instance().AddFactor(wordStr);
 
-	  uint64_t probingId = iter->first;
+	  uint64_t probingId = iterSource->first;
 
 	  SourceVocabMap::value_type entry(factor, probingId);
 	  m_sourceVocabMap.insert(entry);
@@ -90,13 +90,13 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
   }
 }
 
-std::vector<uint64_t> ProbingPT::ConvertToProbingPhrase(const Phrase &sourcePhrase, bool &ok) const
+std::vector<uint64_t> ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const
 {
   size_t size = sourcePhrase.GetSize();
   std::vector<uint64_t> ret(size);
   for (size_t i = 0; i < size; ++i) {
 	  const Factor *factor = sourcePhrase.GetFactor(i, m_input[0]);
-	  uint64_t probingId = GetProbingId(factor);
+	  uint64_t probingId = GetSourceProbingId(factor);
 	  if (probingId == m_unkId) {
 		  ok = false;
 		  return ret;
@@ -116,7 +116,7 @@ TargetPhraseCollection *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase
   assert(sourcePhrase.GetSize());
 
   bool ok;
-  vector<uint64_t> probingSource = ConvertToProbingPhrase(sourcePhrase, ok);
+  vector<uint64_t> probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok);
   if (!ok) {
 	  // source phrase contains a word unknown in the pt.
 	  // We know immediately there's no translation for it
@@ -158,7 +158,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
   // words
   for (size_t i = 0; i < size; ++i) {
 	  uint64_t probingId = probingPhrase[i];
-	  const Factor *factor = GetFactor(probingId);
+	  const Factor *factor = GetTargetFactor(probingId);
 	  assert(factor);
 
 	  Word &word = tp->AddWord();
@@ -185,7 +185,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
   return tp;
 }
 
-const Factor *ProbingPT::GetFactor(uint64_t probingId) const
+const Factor *ProbingPT::GetTargetFactor(uint64_t probingId) const
 {
 	TargetVocabMap::right_map::const_iterator iter;
 	iter = m_vocabMap.right.find(probingId);
@@ -198,11 +198,11 @@ const Factor *ProbingPT::GetFactor(uint64_t probingId) const
 	}
 }
 
-uint64_t ProbingPT::GetProbingId(const Factor *factor) const
+uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
 {
-	TargetVocabMap::left_map::const_iterator iter;
-	iter = m_vocabMap.left.find(factor);
-	if (iter != m_vocabMap.left.end()) {
+	SourceVocabMap::left_map::const_iterator iter;
+	iter = m_sourceVocabMap.left.find(factor);
+	if (iter != m_sourceVocabMap.left.end()) {
 		return iter->second;
 	}
 	else {

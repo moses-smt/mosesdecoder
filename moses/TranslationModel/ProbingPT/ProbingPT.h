@@ -45,10 +45,10 @@ protected:
 
   TargetPhraseCollection *CreateTargetPhrase(const Phrase &sourcePhrase) const;
   TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
-  const Factor *GetFactor(uint64_t probingId) const;
-  uint64_t GetProbingId(const Factor *factor) const;
+  const Factor *GetTargetFactor(uint64_t probingId) const;
+  uint64_t GetSourceProbingId(const Factor *factor) const;
 
-  std::vector<uint64_t> ConvertToProbingPhrase(const Phrase &sourcePhrase, bool &ok) const;
+  std::vector<uint64_t> ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const;
 
   uint64_t m_unkId;
 };
