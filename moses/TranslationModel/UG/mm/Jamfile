@@ -9,6 +9,15 @@ $(TOP)/moses/TranslationModel/UG/mm//mm
 $(TOP)/util//kenutil 
 ; 
 
+exe mmlex-lookup : 
+mmlex-lookup.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
 exe mtt-count-words : 
 mtt-count-words.cc 
 $(TOP)/moses/TranslationModel/UG/generic//generic 
@@ -90,6 +99,7 @@ symal2mam
 mam2symal 
 custom-pt 
 mmlex-build 
+mmlex-lookup
 mam_verify 
 calc-coverage
 ; 
