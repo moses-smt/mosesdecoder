@@ -32,7 +32,21 @@ void ProbingPT::Load()
 
 	m_unkId = 456456546456;
 
-	// vocab
+	// source vocab
+	const std::map<uint64_t, std::string> &sourceVocab = m_engine->getSourceVocab();
+	std::map<uint64_t, std::string>::const_iterator iter;
+	for (iter = sourceVocab.begin(); iter != sourceVocab.end(); ++iter) {
+	  const string &wordStr = iter->second;
+	  const Factor *factor = FactorCollection::Instance().AddFactor(wordStr);
+
+	  uint64_t probingId = iter->first;
+
+	  SourceVocabMap::value_type entry(factor, probingId);
+	  m_sourceVocabMap.insert(entry);
+
+	}
+
+	// target vocab
 	const std::map<unsigned int, std::string> &probingVocab = m_engine->getVocab();
 	std::map<unsigned int, std::string>::const_iterator iter;
 	for (iter = probingVocab.begin(); iter != probingVocab.end(); ++iter) {
@@ -41,7 +55,7 @@ void ProbingPT::Load()
 
 	  unsigned int probingId = iter->first;
 
-	  VocabMap::value_type entry(factor, probingId);
+	  TargetVocabMap::value_type entry(factor, probingId);
 	  m_vocabMap.insert(entry);
 
 	}
@@ -173,7 +187,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
 
 const Factor *ProbingPT::GetFactor(uint64_t probingId) const
 {
-	VocabMap::right_map::const_iterator iter;
+	TargetVocabMap::right_map::const_iterator iter;
 	iter = m_vocabMap.right.find(probingId);
 	if (iter != m_vocabMap.right.end()) {
 		return iter->second;
@@ -186,7 +200,7 @@ const Factor *ProbingPT::GetFactor(uint64_t probingId) const
 
 uint64_t ProbingPT::GetProbingId(const Factor *factor) const
 {
-	VocabMap::left_map::const_iterator iter;
+	TargetVocabMap::left_map::const_iterator iter;
 	iter = m_vocabMap.left.find(factor);
 	if (iter != m_vocabMap.left.end()) {
 		return iter->second;
