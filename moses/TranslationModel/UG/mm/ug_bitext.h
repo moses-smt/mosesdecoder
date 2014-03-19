@@ -220,7 +220,7 @@ namespace Moses {
       }
 
       int 
-      init(int const i, float const c, int d=1) 
+      init(int const i, float const c, int d=0) 
       { 
 	conf  = c; 
 	denom = d;
@@ -247,7 +247,7 @@ namespace Moses {
 	  case 1: 
 	    (*dest)[this->index] = log(lbop(pp.sample1, pp.joint, conf)); 
 	    break;
-	  case 02:
+	  case 2:
 	    (*dest)[this->index] = log(lbop(pp.raw1, pp.joint, conf)); 
 	  }
       }
@@ -306,6 +306,7 @@ namespace Moses {
 	parse_pid(pp.p2, sid2, off2, len2);
 
 #if 0
+	cout << len1 << " " << len2 << endl;
 	Token const* t1 = bt.T1->sntStart(sid1);
 	for (size_t i = off1; i < off1 + len1; ++i)
 	  cout << (*bt.V1)[t1[i].id()] << " "; 
@@ -319,6 +320,7 @@ namespace Moses {
 	BOOST_FOREACH (int a, pp.aln)
 	  cout << a << " " ;
 	cout << __FILE__ << ":" << __LINE__ << "\n" << endl;
+
 #endif
 	scorer.score(bt.T1->sntStart(sid1)+off1,0,len1,
 		     bt.T2->sntStart(sid2)+off2,0,len2,
