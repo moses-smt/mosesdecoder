@@ -33,7 +33,7 @@ public:
 
   bool sourceSyntax, targetSyntax;
 
-  int mixedSyntaxType;
+  int mixedSyntaxType, multiLabel;
   bool nonTermConsecSourceMixed;
 
 };

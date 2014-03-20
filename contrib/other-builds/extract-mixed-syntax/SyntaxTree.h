@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 
+class Parameter;
+
 class SyntaxTree
 {
 public:
@@ -11,7 +13,7 @@ public:
   typedef std::vector<std::string> Labels;
   typedef std::map<Range, Labels> Coll;
 
-  void Add(int startPos, int endPos, const std::string &label);
+  void Add(int startPos, int endPos, const std::string &label, const Parameter &params);
   void AddToAll(const std::string &label);
 
   const Labels &Find(int startPos, int endPos) const;
