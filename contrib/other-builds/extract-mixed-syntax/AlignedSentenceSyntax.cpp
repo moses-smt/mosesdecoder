@@ -32,7 +32,7 @@ void AlignedSentenceSyntax::Populate(bool isSyntax, int mixedSyntaxType, const P
 	// parse source and target string
 	if (isSyntax) {
 		line = "<xml><tree label=\"X\">" + line + "</tree></xml>";
-		XMLParse(phrase, tree, line);
+		XMLParse(phrase, tree, line, params);
 
 		if (mixedSyntaxType != 0) {
 			// mixed syntax. Always add [X] where there isn't 1
@@ -72,7 +72,10 @@ void Escape(string &text)
 
 }
 
-void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const pugi::xml_node &parentNode)
+void AlignedSentenceSyntax::XMLParse(Phrase &output,
+		SyntaxTree &tree,
+		const pugi::xml_node &parentNode,
+		const Parameter &params)
 {
 	int childNum = 0;
     for (pugi::xml_node childNode = parentNode.first_child(); childNode; childNode = childNode.next_sibling())
@@ -88,7 +91,7 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const pug
             label = attribute.as_string();
 
             // recursively call this function. For proper recursive trees
-			XMLParse(output, tree, childNode);
+			XMLParse(output, tree, childNode, params);
     	}
 
 
@@ -113,7 +116,8 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const pug
     	// fill syntax labels
         if (!label.empty()) {
         	label = "[" + label + "]";
-        	tree.Add(startPos, endPos, label);
+        	//cerr << "add " << label << " to " << "[" << startPos << "-" << endPos << "]" << endl;
+        	tree.Add(startPos, endPos, label, params);
         }
 
         ++childNum;
@@ -121,14 +125,17 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const pug
 
 }
 
-void AlignedSentenceSyntax::XMLParse(Phrase &output, SyntaxTree &tree, const std::string input)
+void AlignedSentenceSyntax::XMLParse(Phrase &output,
+		SyntaxTree &tree,
+		const std::string input,
+		const Parameter &params)
 {
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load(input.c_str(),
 			pugi::parse_default | pugi::parse_comments);
 
 	pugi::xml_node topNode = doc.child("xml");
-	XMLParse(output, tree, topNode);
+	XMLParse(output, tree, topNode, params);
 }
 
 void AlignedSentenceSyntax::CreateNonTerms()

@@ -24,6 +24,7 @@ Parameter::Parameter()
 ,targetSyntax(false)
 
 ,mixedSyntaxType(0)
+,multiLabel(0)
 ,nonTermConsecSourceMixed(true)
 {}
 

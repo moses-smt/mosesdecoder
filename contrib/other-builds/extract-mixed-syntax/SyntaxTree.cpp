@@ -1,10 +1,28 @@
+#include <cassert>
 #include "SyntaxTree.h"
+#include "Parameter.h"
 
-void SyntaxTree::Add(int startPos, int endPos, const std::string &label)
+void SyntaxTree::Add(int startPos, int endPos, const std::string &label, const Parameter &params)
 {
 	Range range(startPos, endPos);
 	Labels &labels = m_coll[range];
-	labels.push_back(label);
+
+	bool add = true;
+	if (labels.size()) {
+		if (params.multiLabel == 1) {
+			// delete the label in collection and add new
+			assert(labels.size() == 1);
+			labels.clear();
+		}
+		else if (params.multiLabel == 2) {
+			// ignore this label
+			add = false;
+		}
+	}
+
+	if (add) {
+		labels.push_back(label);
+	}
 }
 
 void SyntaxTree::AddToAll(const std::string &label)
