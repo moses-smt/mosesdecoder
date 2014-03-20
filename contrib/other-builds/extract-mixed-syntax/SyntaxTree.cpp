@@ -1,9 +1,14 @@
 #include <cassert>
+#include <iostream>
 #include "SyntaxTree.h"
 #include "Parameter.h"
 
+using namespace std;
+
 void SyntaxTree::Add(int startPos, int endPos, const std::string &label, const Parameter &params)
 {
+	//cerr << "add " << label << " to " << "[" << startPos << "-" << endPos << "]" << endl;
+
 	Range range(startPos, endPos);
 	Labels &labels = m_coll[range];
 
