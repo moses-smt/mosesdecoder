@@ -96,7 +96,9 @@ int main(int argc, char** argv)
   int lineNum = 1;
   string lineTarget, lineSource, lineAlignment;
   while (getline(strmTarget, lineTarget)) {
-	  cerr << lineNum << " ";
+	  if (lineNum % 10000 == 0) {
+		  cerr << lineNum << " ";
+	  }
 
 	  bool success;
 	  success = getline(strmSource, lineSource);

@@ -54,8 +54,6 @@ void AlignedSentence::PopulateAlignment(const std::string &line)
 		int sourcePos = alignPair[0];
 		int targetPos = alignPair[1];
 
-		cerr << "m_source=" << m_source.size() << endl;
-
 		assert(sourcePos < m_source.size());
 		assert(targetPos < m_target.size());
 		Word *sourceWord = m_source[sourcePos];

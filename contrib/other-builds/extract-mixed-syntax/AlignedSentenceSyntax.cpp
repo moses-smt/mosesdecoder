@@ -116,7 +116,7 @@ void AlignedSentenceSyntax::XMLParse(Phrase &output,
     	// fill syntax labels
         if (!label.empty()) {
         	label = "[" + label + "]";
-        	cerr << "add " << label << " to " << "[" << startPos << "-" << endPos << "]" << endl;
+        	//cerr << "add " << label << " to " << "[" << startPos << "-" << endPos << "]" << endl;
         	tree.Add(startPos, endPos, label, params);
         }
 
