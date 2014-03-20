@@ -2007,8 +2007,9 @@ sub create_ini {
             $weight_spec .= "LexicalReordering$i=";
             for(my $j=0;$j<$model->{"numfeatures"};$j++) { $weight_spec .= " 0.3"; }
             $weight_spec .= "\n";
-	}
+
         $i++;
+	}
       }
   }
 
