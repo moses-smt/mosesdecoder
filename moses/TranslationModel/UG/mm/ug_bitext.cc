@@ -365,8 +365,7 @@ namespace Moses
 	    }
 	  // important: DO NOT replace the two lines below this comment by 
 	  // char const* x = obuf.str().c_str(), as the memory x is pointing 
-	  // to is freed immediately upon return. There's probably a way to 
-	  // access the ostream's buffer directly. To be done.
+	  // to is freed immediately upon deconstruction of the string object.
 	  string foo = obuf.str(); 
 	  char const* x = foo.c_str();
 	  vector<char> v(x,x+foo.size());
