@@ -971,6 +971,9 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-ttable') {
 	    &define_training_build_ttable($i);
         }
+        elsif ($DO_STEP[$i] eq 'TRAINING:build-transliteration-model') {
+            &define_training_build_transliteration_model($i);
+        }
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-generation') {
             &define_training_build_generation($i);
         }
@@ -1978,6 +1981,36 @@ sub define_training_build_lex_trans {
     $cmd .= "-baseline-alignment $baseline_alignment " if defined($baseline_corpus) && defined($baseline_alignment);
 
     &create_step($step_id,$cmd);
+}
+
+sub define_training_build_transliteration_model {
+    my ($step_id) = @_;
+
+    my ($model, $corpus, $alignment) = &get_output_and_input($step_id);
+
+		my $moses_script_dir = &check_and_get("GENERAL:moses-script-dir");
+		my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+		my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+		my $sym_method = &check_and_get("TRAINING:alignment-symmetrization-method");
+		my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+		my $external_bin_dir = &check_and_get("GENERAL:external-bin-dir");
+		my $srilm_dir = &check_and_get("GENERAL:srilm-dir");
+
+    my $cmd = "$moses_script_dir/Transliteration/train-transliteration-module.pl";
+    $cmd .= " --corpus-f $corpus.$input_extension";
+    $cmd .= " --corpus-e $corpus.$output_extension";
+    $cmd .= " --alignment $alignment.$sym_method";
+    $cmd .= " --out-dir $model";
+    $cmd .= " --moses-src-dir $moses_src_dir";
+    $cmd .= " --external-bin-dir $external_bin_dir";
+    $cmd .= " --srilm-dir $srilm_dir";
+    $cmd .= " --input-extension $input_extension";
+    $cmd .= " --output-extension $output_extension";
+    $cmd .= " --factor 0-0";
+    $cmd .= " --source-syntax " if &get("GENERAL:input-parser");
+    $cmd .= " --target-syntax " if &get("GENERAL:output-parser");
+
+		&create_step($step_id, $cmd);
 }
 
 sub define_training_extract_phrases {
