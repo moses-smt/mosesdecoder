@@ -177,7 +177,7 @@ void ChartRuleLookupManagerMemory::GetNonTerminalExtension(
     const std::vector<bool> &sourceNonTermArray = inputPath.GetNonTerminalArray();
 
     // can this ever be true? Moses seems to pad the non-terminal set of the input with [X]
-    if (inputPath.GetNonTerminalSet.size() == 0) {
+    if (inputPath.GetNonTerminalSet().size() == 0) {
       return;
     }
 #endif
