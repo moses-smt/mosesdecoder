@@ -109,7 +109,7 @@ void Word::ConvertToMoses(
 
   for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
     UTIL_THROW_IF2(!tok, "Too few factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
-    overwrite.SetFactor(*t, factorColl.AddFactor(*tok));
+    overwrite.SetFactor(*t, factorColl.AddFactor(*tok, m_isNonTerminal));
   }
   UTIL_THROW_IF2(tok, "Too many factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
 }

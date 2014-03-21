@@ -616,11 +616,11 @@ void StaticData::LoadNonTerminals()
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_inputDefaultNonTerminal.SetIsNonTerminal(true);
-  const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals);
+  const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals, true);
   m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
 
   m_outputDefaultNonTerminal.SetIsNonTerminal(true);
-  const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals);
+  const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals, true);
   m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
 
   // for unknwon words
@@ -638,6 +638,7 @@ void StaticData::LoadNonTerminals()
     		  "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
+      const Factor *targetFactor = factorCollection.AddFactor(Output, 0, tokens[0], true);
     }
 
   }

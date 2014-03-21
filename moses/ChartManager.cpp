@@ -77,8 +77,8 @@ void ChartManager::ProcessSentence()
 
   // MAIN LOOP
   size_t size = m_source.GetSize();
-  for (size_t width = 1; width <= size; ++width) {
-    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+  for (int startPos = size-1; startPos >= 0; --startPos) {
+    for (size_t width = 1; width <= size-startPos; ++width) {
       size_t endPos = startPos + width - 1;
       WordsRange range(startPos, endPos);
 

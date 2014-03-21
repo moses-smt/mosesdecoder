@@ -363,7 +363,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               // lhs
               const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
               if (!lhsList.empty()) {
-                const Factor *factor = FactorCollection::Instance().AddFactor(lhsList[0].first);
+                const Factor *factor = FactorCollection::Instance().AddFactor(lhsList[0].first, true);
                 Word *targetLHS = new Word(true);
                 targetLHS->SetFactor(0, factor); // TODO - other factors too?
                 targetPhrase.SetTargetLHS(targetLHS);

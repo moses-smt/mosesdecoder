@@ -25,6 +25,9 @@ public:
   virtual void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range) = 0;
 
   virtual void Evaluate(const InputType &input, const InputPath &inputPath) = 0;
+
+  virtual float CalcEstimateOfBestScore(const TargetPhraseCollection &, const StackVec &) const = 0;
+
 };
 
 } // namespace Moses
