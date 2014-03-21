@@ -10,6 +10,9 @@
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
+#if PT_UG
+#include "moses/TranslationModel/UG/mmsapt.h"
+#endif
 #include "moses/TreeInput.h"
 #include "moses/LM/ORLM.h"
 
@@ -41,10 +44,15 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     const params_t params = paramList.getStruct(0);
     breakOutParams(params);
+#if PT_UG
+    Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(PhraseDictionary::GetColl()[0]);
+    pdsa->add(source_,target_,alignment_);
+#else
     const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
-    PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
+    PhraseDicgtionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
+#endif
     if(add2ORLM_) {
       //updateORLM();
     }
@@ -52,7 +60,9 @@ public:
     //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy);
     map<string, xmlrpc_c::value> retData;
     //*retvalP = xmlrpc_c::value_struct(retData);
+#ifndef PT_UG
     pdf = 0;
+#endif
     pdsa = 0;
     *retvalP = xmlrpc_c::value_string("Phrase table updated");
   }
