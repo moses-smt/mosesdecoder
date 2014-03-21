@@ -61,6 +61,15 @@ PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const W
   return &m_sourceTermMap[sourceTerm];
 }
 
+#if defined(UNLABELLED_SOURCE)
+PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateNonTerminalChild(const Word &targetNonTerm)
+{
+  UTIL_THROW_IF2(!targetNonTerm.IsNonTerminal(),
+                  "Not a non-terminal: " << targetNonTerm);
+
+  return &m_nonTermMap[targetNonTerm];
+}
+#else
 PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm)
 {
   UTIL_THROW_IF2(!sourceNonTerm.IsNonTerminal(),
@@ -71,6 +80,7 @@ PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const W
   NonTerminalMapKey key(sourceNonTerm, targetNonTerm);
   return &m_nonTermMap[NonTerminalMapKey(sourceNonTerm, targetNonTerm)];
 }
+#endif
 
 const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Word &sourceTerm) const
 {
@@ -81,6 +91,16 @@ const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Wor
   return (p == m_sourceTermMap.end()) ? NULL : &p->second;
 }
 
+#if defined(UNLABELLED_SOURCE)
+const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetNonTerminalChild(const Word &targetNonTerm) const
+{
+  UTIL_THROW_IF2(!targetNonTerm.IsNonTerminal(),
+                  "Not a non-terminal: " << targetNonTerm);
+
+  NonTerminalMap::const_iterator p = m_nonTermMap.find(targetNonTerm);
+  return (p == m_nonTermMap.end()) ? NULL : &p->second;
+}
+#else
 const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const
 {
   UTIL_THROW_IF2(!sourceNonTerm.IsNonTerminal(),
@@ -92,6 +112,7 @@ const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Wor
   NonTerminalMap::const_iterator p = m_nonTermMap.find(key);
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
+#endif
 
 void PhraseDictionaryNodeMemory::Remove()
 {

@@ -340,7 +340,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
 
+#if defined(UNLABELLED_SOURCE)
+      currNode = currNode->GetOrCreateNonTerminalChild(targetNonTerm);
+#else
       currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
+#endif
     } else {
       currNode = currNode->GetOrCreateChild(word);
     }
