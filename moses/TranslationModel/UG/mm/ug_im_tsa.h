@@ -236,9 +236,10 @@ namespace ugdiss
   imTSA<TOKEN>::
   getLowerBound(id_type id) const
   {
-    if (id >= this->index.size()) 
+    if (id >= this->index.size())
       return NULL;
-    return reinterpret_cast<char const*>(&(this->sufa[index[id]]));
+    assert(index[id] <= this->sufa.size());
+    return reinterpret_cast<char const*>(&(this->sufa.front()) + index[id]);
   }
 
   template<typename TOKEN>
@@ -246,9 +247,10 @@ namespace ugdiss
   imTSA<TOKEN>::
   getUpperBound(id_type id) const
   {
-    if (id+1 >= this->index.size()) 
+    if (++id >= this->index.size()) 
       return NULL;
-    return reinterpret_cast<char const*>(&(this->sufa[index[id+1]]));
+    assert(index[id] <= this->sufa.size());
+    return reinterpret_cast<char const*>(&(this->sufa.front()) + index[id]);
   }
 
   template<typename TOKEN>
@@ -256,6 +258,8 @@ namespace ugdiss
   imTSA<TOKEN>::
   readSid(char const* p, char const* q, id_type& sid) const
   {
+    assert(reinterpret_cast<cpos const*>(p) >= &(this->sufa.front()));
+    assert(reinterpret_cast<cpos const*>(p) <= &(this->sufa.back()));
     sid = reinterpret_cast<cpos const*>(p)->sid;
     return p;
   }
@@ -265,6 +269,8 @@ namespace ugdiss
   imTSA<TOKEN>::
   readSid(char const* p, char const* q, uint64_t& sid) const
   {
+    assert(reinterpret_cast<cpos const*>(p) >= &(this->sufa.front()));
+    assert(reinterpret_cast<cpos const*>(p) <= &(this->sufa.back()));
     sid = reinterpret_cast<cpos const*>(p)->sid;
     return p;
   }
@@ -274,6 +280,8 @@ namespace ugdiss
   imTSA<TOKEN>::
   readOffset(char const* p, char const* q, uint16_t& offset) const
   {
+    assert(reinterpret_cast<cpos const*>(p) >= &(this->sufa.front()));
+    assert(reinterpret_cast<cpos const*>(p) <= &(this->sufa.back()));
     offset = reinterpret_cast<cpos const*>(p)->offset;
     return p+sizeof(cpos);
   }
@@ -283,6 +291,8 @@ namespace ugdiss
   imTSA<TOKEN>::
   readOffset(char const* p, char const* q, uint64_t& offset) const
   {
+    assert(reinterpret_cast<cpos const*>(p) >= &(this->sufa.front()));
+    assert(reinterpret_cast<cpos const*>(p) <= &(this->sufa.back()));
     offset = reinterpret_cast<cpos const*>(p)->offset;
     return p+sizeof(cpos);
   }
@@ -364,6 +374,7 @@ namespace ugdiss
     size_t n = 0;
     BOOST_FOREACH(id_type sid, newsids) 
       {
+	assert(sid < crp->size());
   	for (size_t o = 0; o < (*crp)[sid].size(); ++o, ++n)
   	  { nidx[n].offset = o; nidx[n].sid  = sid; }
       }
@@ -380,20 +391,22 @@ namespace ugdiss
     
     size_t i = 0;
     typename vector<cpos>::iterator k = this->sufa.begin();
-    this->index[0] = 0;
+    // cerr << newToks << " new items at " 
+    // << __FILE__ << ":" << __LINE__ << endl;
     for (size_t n = 0; n < nidx.size();)
       {
   	id_type nid = crp->getToken(nidx[n])->id();
   	assert(nid >= i);
   	while (i < nid)
   	  {
+  	    this->index[i] = k - this->sufa.begin();
   	    if (++i < prior.index.size() && prior.index[i-1] < prior.index[i])
   	      {
   		k = copy(prior.sufa.begin() + prior.index[i-1], 
   			 prior.sufa.begin() + prior.index[i], k);
   	      }
-  	    this->index[i] = k - prior.sufa.begin();
   	  }
+	this->index[i] = k - this->sufa.begin();
   	if (++i < prior.index.size() && prior.index[i] > prior.index[i-1])
   	  {
   	    size_t j = prior.index[i-1];
@@ -419,6 +432,7 @@ namespace ugdiss
   	  }
   	this->index[i] = k - this->sufa.begin();
       }
+    this->index[i] = k - this->sufa.begin();
     while (++i < this->index.size())
       {
   	if (i < prior.index.size() && prior.index[i-1] < prior.index[i])
@@ -426,6 +440,25 @@ namespace ugdiss
   		   prior.sufa.begin() + prior.index[i], k);
   	this->index[i] = k - this->sufa.begin();
       }
+#if 0
+    // sanity checks
+    assert(this->sufa.size() == this->index.back());
+    BOOST_FOREACH(cpos const& x, this->sufa)
+      {
+	assert(x.sid < this->corpusSize);
+	assert(x.offset < this->corpus->sntLen(x.sid));
+      }
+    for (size_t i = 1; i < index.size(); ++i)
+      {
+	assert(index[i-1] <= index[i]);
+	assert(index[i] <= sufa.size());
+	for (size_t k = index[i-1]; k < index[i]; ++k)
+	  assert(this->corpus->getToken(sufa[k])->id() == i-1);
+      }
+    assert(index[0] == 0);
+    assert(this->startArray == reinterpret_cast<char const*>(&(*this->sufa.begin())));
+    assert(this->endArray == reinterpret_cast<char const*>(&(*this->sufa.end())));
+#endif
   }
 
 }
