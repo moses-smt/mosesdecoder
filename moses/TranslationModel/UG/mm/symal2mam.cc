@@ -21,8 +21,8 @@
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "headers-base/util/exception.hh"
-#include "headers-base/util/check.hh"
+#include "util/exception.hh"
+// #include "headers-base/util/check.hh"
 
 // NOTE TO SELF: 
 /* Program to filter out sentences that GIZA will skip or truncate,
