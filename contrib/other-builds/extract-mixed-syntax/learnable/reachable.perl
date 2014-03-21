@@ -9,6 +9,9 @@ my $iniPath = $ARGV[0];
 my $isHiero = $ARGV[1];
 my $decoderExec = $ARGV[2];
 my $extractExec = $ARGV[3];
+my $tmpName = $ARGV[4];
+my $startLine = $ARGV[5];
+my $endLine = $ARGV[6];
 
 print STDERR "iniPath=$iniPath \n isHiero=$isHiero \n decoderExec=$decoderExec \n extractExec=$extractExec \n";
 
@@ -57,9 +60,13 @@ for (my $lineNum = 0; $lineNum < $numLines; ++$lineNum) {
     my $target = <TARGET>; chomp($target);
     my  $alignment = <ALIGNMENT>; chomp($alignment);
   
+    if ($lineNum < $startLine || $lineNum >= $endLine) {
+	next;
+    }
+
     #print STDERR  "$source ||| $target ||| $alignment \n";
     # write out 1 line
-    my $tmpDir = "$WORK_DIR/tmp/work$lineNum";
+    my $tmpDir = "$WORK_DIR/$tmpName/work$lineNum";
     `mkdir -p $tmpDir`;
 
     Write1Line($source, $tmpDir, "source.1");
@@ -96,7 +103,7 @@ for (my $lineNum = 0; $lineNum < $numLines; ++$lineNum) {
     print STDERR "Executing: $cmd\n";
     `$cmd`;
 
-#  `rm -rf $tmpDir`;
+  `rm -rf $tmpDir`;
 }
 
 close(SOURCE);

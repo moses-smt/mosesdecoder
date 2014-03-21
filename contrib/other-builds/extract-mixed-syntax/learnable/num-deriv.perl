@@ -6,6 +6,7 @@ my $iniPath = $ARGV[0];
 my $isHiero = $ARGV[1];
 my $decoderExec = $ARGV[2];
 my $extractExec = $ARGV[3];
+my $tmpName = $ARGV[4];
 
 my $WORK_DIR = `pwd`;
 chomp($WORK_DIR);
@@ -55,7 +56,7 @@ while ($source = <SOURCE>) {
     #print STDERR  "$source ||| $target ||| $alignment \n";
   
   # write out 1 line
-    my $tmpDir = "$WORK_DIR/tmp/work$lineNum";
+    my $tmpDir = "$WORK_DIR/$tmpName/work$lineNum";
     `mkdir -p $tmpDir`;
                   
     open (SOURCE1, ">$tmpDir/source");
