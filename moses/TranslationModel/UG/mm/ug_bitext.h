@@ -752,7 +752,7 @@ namespace Moses {
     {
       static boost::posix_time::time_duration nodelay(0,0,0,0); 
       bool fwd = phrase.root == bt.I1.get();
-      sptr<job> j(new job(phrase, fwd ? bt.I2 : bt.I1, max_samples, fwd));
+      sptr<job> j(new job(phrase, fwd ? bt.I1 : bt.I2, max_samples, fwd));
       j->stats->register_worker();
       
       boost::unique_lock<boost::mutex> lk(this->lock);
