@@ -49,16 +49,13 @@ namespace Moses
 	uint32_t fwd_o, 
 	uint32_t bwd_o)
     {
-      this->lock.lock();
+      boost::lock_guard<boost::mutex> guard(this->lock);
       jstats& entry = this->trg[pid];
-      this->lock.unlock();
       entry.add(w,a,cnt2,fwd_o,bwd_o);
       if (this->good < entry.rcnt())
 	{
-	  this->lock.lock();
-	  return false;
-	  // UTIL_THROW(util::Exception, "more joint counts than good counts!" 
-	  // 	     << entry.rcnt() << "/" << this->good);
+	  UTIL_THROW(util::Exception, "more joint counts than good counts:" 
+		     << entry.rcnt() << "/" << this->good << "!");
 	}
       return true;
     }
@@ -402,6 +399,8 @@ namespace Moses
 	    }
 	}
 #endif
+      cache1.clear();
+      cache2.clear();
       return ret;
     }
 
