@@ -90,7 +90,7 @@
 		<link>
 			<name>extractor.cpp</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/extractor.cpp</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/extractor.cpp</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.8</name>
