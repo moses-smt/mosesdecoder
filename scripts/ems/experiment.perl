@@ -2029,9 +2029,13 @@ sub define_training_extract_phrases {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
 
-      if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
+      if (&get("GENERAL:output-parser") && (&get("TRAINING:use-unknown-word-labels") || &get("TRAINING:use-unknown-word-soft-matches"))) {
 	  my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
 	  $cmd .= "-unknown-word-label $unknown_word_label ";
+      }
+      if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-soft-matches")) {
+          my $unknown_word_soft_matches = &versionize(&long_file_name("unknown-word-soft-matches","model",""));
+          $cmd .= "-unknown-word-soft-matches $unknown_word_soft_matches ";
       }
 
       if (&get("TRAINING:use-ghkm")) {
@@ -2209,9 +2213,13 @@ sub get_config_tables {
     }
 
     # additional settings for syntax models
-    if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
+    if (&get("GENERAL:output-parser") && (&get("TRAINING:use-unknown-word-labels") || &get("TRAINING:use-unknown-word-soft-matches"))) {
 	my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version);
 	$cmd .= "-unknown-word-label $unknown_word_label ";
+    }
+    if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-soft-matches")) {
+        my $unknown_word_soft_matches = &versionize(&long_file_name("unknown-word-soft-matches","model",""),$extract_version);
+        $cmd .= "-unknown-word-soft-matches $unknown_word_soft_matches ";
     }
     # configuration due to domain features
     $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
