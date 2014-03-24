@@ -129,6 +129,16 @@ SetFeaturesToApply()
   }
 }
 
+  
+  // tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
+  void
+  PhraseDictionary::
+  release(TargetPhraseCollection const* tpc) const
+  {
+    // do nothing by default
+    return;
+  }
+
 void
 PhraseDictionary::
 GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const

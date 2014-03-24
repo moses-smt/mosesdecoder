@@ -85,6 +85,10 @@ public:
     return m_tableLimit;
   }
 
+  virtual
+  void
+  release(TargetPhraseCollection const* tpc) const;
+
   // LEGACY!
   // The preferred method is to override GetTargetPhraseCollectionBatch().
   // See class PhraseDictionaryMemory or PhraseDictionaryOnDisk for details
