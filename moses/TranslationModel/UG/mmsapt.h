@@ -3,7 +3,9 @@
 // Design and code by Ulrich Germann.
 #pragma once
 
+#include <time.h>
 #include <boost/thread.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "moses/TypeDef.h"
 #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
@@ -55,8 +57,13 @@ namespace Moses
     string bname,extra_data;
     string L1;
     string L2;
-    float  lbop_parameter;
-    size_t default_sample_size;
+    float  m_lbop_parameter;
+    size_t m_default_sample_size;
+    size_t m_workers;  // number of worker threads for sampling the bitexts
+    char m_pfwd_denom; // denominator for computation of fwd phrase score:
+    // 'r' - divide by raw count
+    // 's' - divide by sample count
+    // 'g' - devide by number of "good" (i.e. coherent) samples 
     // size_t num_features;
     size_t input_factor;
     size_t output_factor; // we can actually return entire Tokens!
@@ -70,6 +77,33 @@ namespace Moses
     bool poolCounts;
     vector<FactorType> ofactor;
 
+    
+  public:
+    // typedef boost::unordered_map<uint64_t, sptr<TargetPhraseCollection> > tpcoll_cache_t;
+    class TargetPhraseCollectionWrapper 
+      : public TargetPhraseCollection
+    {
+    public:
+      size_t   const revision; // time stamp from dynamic bitext
+      uint64_t const      key; // phrase key
+      uint32_t       refCount; // reference count
+      timespec         tstamp; // last use
+      int                 idx; // position in history heap
+      TargetPhraseCollectionWrapper(size_t r, uint64_t const k);
+      ~TargetPhraseCollectionWrapper();
+    };
+
+  private:
+
+    TargetPhraseCollectionWrapper*
+    encache(TargetPhraseCollectionWrapper* const ptr) const;
+
+    void
+    decache(TargetPhraseCollectionWrapper* ptr) const;
+
+    typedef map<uint64_t, TargetPhraseCollectionWrapper*> tpc_cache_t;
+    mutable tpc_cache_t m_cache;
+    mutable vector<TargetPhraseCollectionWrapper*> m_history;
     // phrase table feature weights for alignment:
     vector<float> feature_weights; 
 
@@ -121,6 +155,7 @@ namespace Moses
     void
     load_extra_data(string bname);
 
+    mutable size_t m_tpc_ctr;
   public:
     // Mmsapt(string const& description, string const& line);
     Mmsapt(string const& line);
@@ -147,7 +182,15 @@ namespace Moses
 
     void setWeights(vector<float> const& w);
 
+    void 
+    CleanUpAfterSentenceProcessing(const InputType& source);
 
+    void 
+    InitializeForInput(InputType const& source);
+
+    void 
+    release(TargetPhraseCollection const* tpc) const;
+    
   private:
   };
 } // end namespace
