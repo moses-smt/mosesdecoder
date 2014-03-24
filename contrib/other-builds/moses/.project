@@ -1334,12 +1334,12 @@
 		<link>
 			<name>FF/TreeStructureFeature.cpp</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/moses/FF/TreeStructureFeature.cpp</location>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TreeStructureFeature.cpp</locationURI>
 		</link>
 		<link>
 			<name>FF/TreeStructureFeature.h</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/moses/FF/TreeStructureFeature.h</location>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TreeStructureFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/UnknownWordPenaltyProducer.cpp</name>
