@@ -1867,6 +1867,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/CYKPlusParser/CompletedRuleCollection.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/CompletedRuleCollection.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/CompletedRuleCollection.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/CompletedRuleCollection.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/CYKPlusParser/DotChart.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/DotChart.h</locationURI>
