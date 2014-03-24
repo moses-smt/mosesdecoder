@@ -103,7 +103,7 @@ for (my $lineNum = 0; $lineNum < $numLines; ++$lineNum) {
     print STDERR "Executing: $cmd\n";
     `$cmd`;
 
-  #`rm -rf $tmpDir`;
+  `rm -rf $tmpDir`;
 }
 
 close(SOURCE);
