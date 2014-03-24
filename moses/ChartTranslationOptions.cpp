@@ -61,9 +61,13 @@ float ChartTranslationOptions::CalcEstimateOfBestScore(
        ++p) {
     const HypoList *stack = (*p)->GetStack().cube;
     assert(stack);
-    assert(!stack->empty());
-    const ChartHypothesis &bestHypo = **(stack->begin());
-    estimateOfBestScore += bestHypo.GetTotalScore();
+    if (stack->empty()) {
+      estimateOfBestScore = - std::numeric_limits<float>::infinity();
+    }
+    else {
+      const ChartHypothesis &bestHypo = **(stack->begin());
+      estimateOfBestScore += bestHypo.GetTotalScore();
+    }
   }
   return estimateOfBestScore;
 }
