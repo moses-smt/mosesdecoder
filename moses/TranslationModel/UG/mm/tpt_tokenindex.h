@@ -28,7 +28,7 @@ namespace ugdiss
   class TokenIndex
   {
     /** Reverse index: maps from ID to char const* */
-    vector<char const*> ridx;
+    mutable vector<char const*> ridx;
     /** Label for the UNK token */
     string unkLabel; 
     id_type unkId,numTokens;
