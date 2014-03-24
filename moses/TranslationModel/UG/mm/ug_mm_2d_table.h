@@ -9,6 +9,7 @@
 #include "tpt_typedefs.h"
 #include "tpt_pickler.h"
 #include "ug_typedefs.h"
+#include "util/exception.hh"
 namespace bio=boost::iostreams;
 namespace ugdiss
 {
