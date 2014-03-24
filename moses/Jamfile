@@ -40,7 +40,7 @@ current ?= "" ;
 path-constant LM-LOG : bin/lm.log ;
 update-if-changed $(LM-LOG) $(current) ;
 
-obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm : <dependency>$(LM-LOG) ;
+obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <dependency>$(LM-LOG) ;
 
 if [ option.get "with-mm" : no : yes ] = yes
 {
