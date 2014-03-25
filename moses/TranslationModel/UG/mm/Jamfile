@@ -74,6 +74,7 @@ $(TOP)/util//kenutil
 
 exe custom-pt : 
 custom-pt.cc 
+$(TOP)/moses//moses
 $(TOP)//boost_iostreams 
 $(TOP)//boost_program_options 
 $(TOP)/moses/TranslationModel/UG/mm//mm 
