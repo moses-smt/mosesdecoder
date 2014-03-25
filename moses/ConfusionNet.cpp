@@ -95,7 +95,7 @@ namespace Moses
   ConfusionNet::
   ReadF(std::istream& in, const std::vector<FactorType>& factorOrder, int format)
   {
-    VERBOSE(1, "read confusion net with format "<<format<<"\n");
+    VERBOSE(2, "read confusion net with format "<<format<<"\n");
     switch(format) {
     case 0:
       return ReadFormat0(in,factorOrder);
