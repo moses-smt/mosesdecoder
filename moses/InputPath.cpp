@@ -33,7 +33,7 @@ InputPath::~InputPath()
   typedef std::pair<const TargetPhraseCollection*, const void* > entry;
   std::map<const PhraseDictionary*, entry>::const_iterator iter;
   for (iter = m_targetPhrases.begin(); iter != m_targetPhrases.end(); ++iter)
-    iter->first->release(iter->second.first);
+    iter->first->Release(iter->second.first);
   
   delete m_inputScore;
 }

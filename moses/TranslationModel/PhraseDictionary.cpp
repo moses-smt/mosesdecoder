@@ -50,6 +50,13 @@ PhraseDictionary::PhraseDictionary(const std::string &line)
 	s_staticColl.push_back(this);
 }
 
+bool
+PhraseDictionary::
+ProvidesPrefixCheck() const
+{
+  return false;
+}
+
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
   const TargetPhraseCollection *ret;
@@ -133,10 +140,17 @@ SetFeaturesToApply()
   // tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
   void
   PhraseDictionary::
-  release(TargetPhraseCollection const* tpc) const
+  Release(TargetPhraseCollection const* tpc) const
   {
     // do nothing by default
     return;
+  }
+
+  bool
+  PhraseDictionary::
+  PrefixExists(Phrase const& phrase) const
+  {
+    return true;
   }
 
 void

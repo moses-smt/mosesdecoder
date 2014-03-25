@@ -71,6 +71,8 @@ public:
 class PhraseDictionary :  public DecodeFeature
 {
 public:
+  virtual bool ProvidesPrefixCheck() const;
+
   static const std::vector<PhraseDictionary*>& GetColl() {
 	return s_staticColl;
   }
@@ -87,7 +89,13 @@ public:
 
   virtual
   void
-  release(TargetPhraseCollection const* tpc) const;
+  Release(TargetPhraseCollection const* tpc) const;
+
+  /// return true if phrase table entries starting with /phrase/ 
+  //  exist in the table.
+  virtual
+  bool
+  PrefixExists(Phrase const& phrase) const;
 
   // LEGACY!
   // The preferred method is to override GetTargetPhraseCollectionBatch().

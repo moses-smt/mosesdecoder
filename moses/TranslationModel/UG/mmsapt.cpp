@@ -8,6 +8,19 @@ namespace Moses
   using namespace bitext;
   using namespace std;
   using namespace boost;
+  
+  void 
+  fillIdSeq(Phrase const& mophrase, size_t const ifactor,
+	    TokenIndex const& V, vector<id_type>& dest)
+  {
+    dest.resize(mophrase.GetSize());
+    for (size_t i = 0; i < mophrase.GetSize(); ++i)
+      {
+	Factor const* f = mophrase.GetFactor(i,ifactor);
+	dest[i] = V[f->ToString()];
+      }
+  }
+    
 
   void 
   parseLine(string const& line, map<string,string> & params)
@@ -71,7 +84,7 @@ namespace Moses
 
     m = param.find("cache-size");
     m_history.reserve(m != param.end() 
-		      ? atoi(m->second.c_str()) 
+		      ? max(1000,atoi(m->second.c_str()))
 		      : 10000);
     
     this->m_numScoreComponents = atoi(param["num-features"].c_str());
@@ -83,7 +96,7 @@ namespace Moses
     if (m != param.end()) 
       {
 	extra_data = m->second;
-	cerr << "have extra data" << endl;
+	// cerr << "have extra data" << endl;
       }
     // keeps track of the most frequently used target phrase collections
     // (to keep them cached even when not actively in use)
@@ -112,7 +125,7 @@ namespace Moses
     lock_guard<mutex> guard(this->lock);
     btdyn = btdyn->add(text1,text2,symal);
     assert(btdyn);
-    cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
+    // cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
   }
   
   void
@@ -485,24 +498,20 @@ namespace Moses
     assert(this->refCount == 0);
   }
 
+  
+
   // This is not the most efficient way of phrase lookup! 
   TargetPhraseCollection const* 
   Mmsapt::
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const
   {
     // map from Moses Phrase to internal id sequence
-    vector<id_type> sphrase(src.GetSize());
-    for (size_t i = 0; i < src.GetSize(); ++i)
-      {
-	Factor const* f = src.GetFactor(i,input_factor);
-	id_type wid = (*btfix.V1)[f->ToString()]; 
-	sphrase[i] = wid;
-      }
-
+    vector<id_type> sphrase; 
+    fillIdSeq(src,input_factor,*btfix.V1,sphrase);
+    if (sphrase.size() == 0) return NULL;
+    
     // lookup in static bitext 
-    TSA<Token>::tree_iterator mfix(btfix.I1.get());
-    for (size_t i = 0; mfix.size() == i && i < sphrase.size(); ++i)
-      mfix.extend(sphrase[i]);
+    TSA<Token>::tree_iterator mfix(btfix.I1.get(),&sphrase[0],sphrase.size());
 
     // lookup in dynamic bitext
     // Reserve a local copy of the dynamic bitext in its current form. /btdyn/
@@ -680,33 +689,66 @@ namespace Moses
     clock_gettime(CLOCK_MONOTONIC, &ptr->tstamp);
     
     // update history
-    vector<TargetPhraseCollectionWrapper*>& v = m_history;
-    if (ptr->idx >= 0) // ptr is already in history
-      { 
-	assert(ptr == v[ptr->idx]);
-	size_t k = 2 * (ptr->idx + 1);
-	if (k < v.size()) bubble_up(v,k--);
-	if (k < v.size()) bubble_up(v,k);
-      }
-    else if (v.size() < v.capacity())
+    if (m_history.capacity() > 1)
       {
-	size_t k = ptr->idx = v.size();
-	v.push_back(ptr);
-	bubble_up(v,k);
-      }
-    else 
-      {
-	v[0]->idx = -1;
-	decache(v[0]);
-	v[0] = ptr;
-	bubble_down(v,0);
+	vector<TargetPhraseCollectionWrapper*>& v = m_history;
+	if (ptr->idx >= 0) // ptr is already in history
+	  { 
+	    assert(ptr == v[ptr->idx]);
+	    size_t k = 2 * (ptr->idx + 1);
+	    if (k < v.size()) bubble_up(v,k--);
+	    if (k < v.size()) bubble_up(v,k);
+	  }
+	else if (v.size() < v.capacity())
+	  {
+	    size_t k = ptr->idx = v.size();
+	    v.push_back(ptr);
+	    bubble_up(v,k);
+	  }
+	else 
+	  {
+	    v[0]->idx = -1;
+	    decache(v[0]);
+	    v[0] = ptr;
+	    bubble_down(v,0);
+	  }
       }
     return ptr;
   }
 
+  bool
+  Mmsapt::
+  PrefixExists(Moses::Phrase const& phrase) const
+  {
+    if (phrase.GetSize() == 0) return false;
+    vector<id_type> myphrase; 
+    fillIdSeq(phrase,input_factor,*btfix.V1,myphrase);
+    
+    TSA<Token>::tree_iterator mfix(btfix.I1.get(),&myphrase[0],myphrase.size());
+    if (mfix.size() == myphrase.size()) 
+      {
+	// cerr << phrase << " " << mfix.approxOccurrenceCount() << endl;
+	return true;
+      }
+
+    sptr<imBitext<Token> > dyn;
+    { // braces are needed for scoping mutex lock guard!
+      boost::lock_guard<boost::mutex> guard(this->lock);
+      dyn = btdyn;
+    }
+    assert(dyn);
+    TSA<Token>::tree_iterator mdyn(dyn->I1.get());
+    if (dyn->I1.get())
+      {
+	for (size_t i = 0; mdyn.size() == i && i < myphrase.size(); ++i)
+	  mdyn.extend(myphrase[i]);
+      }
+    return mdyn.size() == myphrase.size();
+  }
+
   void
   Mmsapt::
-  release(TargetPhraseCollection const* tpc) const
+  Release(TargetPhraseCollection const* tpc) const
   {
     if (!tpc) return;
     boost::lock_guard<boost::mutex> guard(this->lock);
@@ -724,6 +766,11 @@ namespace Moses
 #endif
   }
 
-  
+  bool
+  Mmsapt::
+  ProvidesPrefixCheck() const
+  {
+    return true;
+  }
 
 }

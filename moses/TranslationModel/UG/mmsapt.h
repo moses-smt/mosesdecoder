@@ -189,8 +189,15 @@ namespace Moses
     InitializeForInput(InputType const& source);
 
     void 
-    release(TargetPhraseCollection const* tpc) const;
+    Release(TargetPhraseCollection const* tpc) const;
+
+    bool 
+    ProvidesPrefixCheck() const;
     
+    /// return true if prefix /phrase/ exists
+    bool
+    PrefixExists(Phrase const& phrase) const;
+
   private:
   };
 } // end namespace
