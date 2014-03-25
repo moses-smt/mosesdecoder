@@ -31,6 +31,7 @@
 #include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
 #include "moses/Util.h"
+#include "moses/StaticData.h"
 
 #include "util/exception.hh"
 // #include "util/check.hh"
@@ -44,6 +45,8 @@
 #include "ug_corpus_token.h"
 #include "tpt_pickler.h"
 #include "ug_lexical_phrase_scorer2.h"
+
+#define PSTATS_CACHE_THRESHOLD 50
 
 using namespace ugdiss;
 using namespace std;
@@ -123,6 +126,7 @@ namespace Moses {
     struct 
     pstats
     {
+      static ThreadSafeCounter active;
       boost::mutex lock;               // for parallel gathering of stats
       boost::condition_variable ready; // consumers can wait for this data structure to be ready.
       
@@ -137,7 +141,8 @@ namespace Moses {
       // typedef typename boost::unordered_map<uint64_t, jstats> trg_map_t;
       typedef typename std::map<uint64_t, jstats> trg_map_t;
       trg_map_t trg;
-      pstats(); 
+      pstats();
+      ~pstats();
       void release();
       void register_worker();
       size_t count_workers() { return in_progress; } 
@@ -391,6 +396,7 @@ namespace Moses {
       friend class Moses::Mmsapt;
     protected:
       mutable boost::mutex lock;
+      mutable boost::mutex cache_lock;
     public:
       typedef TKN Token;
       typedef typename TSA<Token>::tree_iterator iter;
@@ -515,7 +521,7 @@ namespace Moses {
     Bitext(size_t const max_sample, size_t const xnum_workers)
       : default_sample_size(max_sample)
       , num_workers(xnum_workers)
-      , m_pstats_cache_threshold(5)
+      , m_pstats_cache_threshold(PSTATS_CACHE_THRESHOLD)
     { }
 
     template<typename Token>
@@ -532,7 +538,7 @@ namespace Moses {
       : Tx(tx), T1(t1), T2(t2), V1(v1), V2(v2), I1(i1), I2(i2)
       , default_sample_size(max_sample)
       , num_workers(xnum_workers)
-      , m_pstats_cache_threshold(5)
+      , m_pstats_cache_threshold(PSTATS_CACHE_THRESHOLD)
     { }
 
     // agenda is a pool of jobs 
@@ -544,6 +550,7 @@ namespace Moses {
       boost::mutex lock; 
       class job 
       {
+	static ThreadSafeCounter active;
 	boost::mutex      lock; 
 	friend class agenda;
       public:
@@ -561,6 +568,7 @@ namespace Moses {
 	bool done() const;
 	job(typename TSA<Token>::tree_iterator const& m, 
 	    sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd);
+	~job();
       };
     public:      
       class 
@@ -750,6 +758,16 @@ namespace Moses {
     Bitext<Token>::
     agenda::
     job::
+    ~job()
+    {
+      if (stats) stats.reset();
+      --active;
+    }
+
+    template<typename Token>
+    Bitext<Token>::
+    agenda::
+    job::
     job(typename TSA<Token>::tree_iterator const& m, 
 	sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd)
       : workers(0)
@@ -763,6 +781,9 @@ namespace Moses {
     {
       stats.reset(new pstats());
       stats->raw_cnt = m.approxOccurrenceCount();
+      // if (++active%5 == 0) 
+      ++active;
+      // cerr << size_t(active) << " active jobs at " << __FILE__ << ":" << __LINE__ << endl;
     }
 
     template<typename Token>
@@ -772,12 +793,12 @@ namespace Moses {
     add_job(typename TSA<Token>::tree_iterator const& phrase, 
 	    size_t const max_samples)
     {
+      boost::unique_lock<boost::mutex> lk(this->lock);
       static boost::posix_time::time_duration nodelay(0,0,0,0); 
       bool fwd = phrase.root == bt.I1.get();
       sptr<job> j(new job(phrase, fwd ? bt.I1 : bt.I2, max_samples, fwd));
       j->stats->register_worker();
       
-      boost::unique_lock<boost::mutex> lk(this->lock);
       joblist.push_back(j);
       if (joblist.size() == 1)
 	{
@@ -1282,7 +1303,7 @@ namespace Moses {
     Bitext<Token>::
     prep2(iter const& phrase, size_t const max_sample) const
     {
-      // boost::lock_guard<boost::mutex>(this->lock);
+      boost::lock_guard<boost::mutex> guard(this->lock);
       if (!ag) 
 	{
 	  ag.reset(new agenda(*this));
@@ -1291,7 +1312,9 @@ namespace Moses {
 	}
       sptr<pstats> ret;
 #if 1
-      if (max_sample == this->default_sample_size && 
+      // use pcache only for plain sentence input
+      if (StaticData::Instance().GetInputType() == SentenceInput && 
+	  max_sample == this->default_sample_size && 
 	  phrase.approxOccurrenceCount() > m_pstats_cache_threshold)
       	{
 	  // need to test what a good caching threshold is
@@ -1301,15 +1324,23 @@ namespace Moses {
 	  pcache_t & cache(phrase.root == &(*this->I1) ? cache1 : cache2);
 	  pcache_t::value_type entry(pid,sptr<pstats>());
 	  pair<pcache_t::iterator,bool> foo;
-	  // foo = cache.emplace(entry);
-	  foo = cache.insert(entry);
-	  if (foo.second) foo.first->second = ag->add_job(phrase, max_sample);
+	  foo = cache.insert(entry); 
+	  if (foo.second) 
+	    {
+	      // cerr << "NEW FREQUENT PHRASE: "
+	      // << phrase.str(V1.get()) << " " << phrase.approxOccurrenceCount()  
+	      // << " at " << __FILE__ << ":" << __LINE__ << endl;
+	      foo.first->second = ag->add_job(phrase, max_sample);
+	      assert(foo.first->second);
+	    }
+	  assert(foo.first->second);
 	  ret = foo.first->second;
+	  assert(ret);
 	}
       else 
 #endif
 	ret = ag->add_job(phrase, max_sample);
-
+      assert(ret);
       return ret;
     }
 
@@ -1318,11 +1349,9 @@ namespace Moses {
     Bitext<Token>::
     lookup(iter const& phrase) const
     {
-      boost::lock_guard<boost::mutex>(this->lock);
-      sptr<pstats> ret;
-      ret = prep2(phrase, this->default_sample_size);
+      sptr<pstats> ret = prep2(phrase, this->default_sample_size);
       assert(ret);
-
+      boost::lock_guard<boost::mutex> guard(this->lock);
       if (this->num_workers <= 1)
 	typename agenda::worker(*this->ag)();
       else 
@@ -1339,8 +1368,8 @@ namespace Moses {
     Bitext<Token>::
     lookup(iter const& phrase, size_t const max_sample) const
     {
-      boost::lock_guard<boost::mutex>(this->lock);
       sptr<pstats> ret = prep2(phrase, max_sample);
+      boost::lock_guard<boost::mutex> guard(this->lock);
       if (this->num_workers <= 1)
 	typename agenda::worker(*this->ag)();
       else 
@@ -1380,6 +1409,12 @@ namespace Moses {
     { 
       return (max_samples && stats->good >= max_samples) || next == stop; 
     }
+
+    template<typename TKN>
+    ThreadSafeCounter 
+    Bitext<TKN>::
+    agenda::
+    job::active;
 
   } // end of namespace bitext
 } // end of namespace moses

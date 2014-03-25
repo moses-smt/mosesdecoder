@@ -10,6 +10,9 @@ namespace Moses
 {
   namespace bitext 
   {
+
+    ThreadSafeCounter pstats::active;
+    
     pstats::
     pstats()
       : raw_cnt     (0)
@@ -20,6 +23,14 @@ namespace Moses
     {
       ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = ofwd[5] = ofwd[6] = 0;
       obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = obwd[5] = obwd[6] = 0;
+      // if (++active%5 == 0) 
+      // cerr << size_t(active) << " active pstats at " << __FILE__ << ":" << __LINE__ << endl;
+    }
+
+    pstats::
+    ~pstats()
+    {
+      --active;
     }
 
     void
@@ -399,8 +410,6 @@ namespace Moses
 	    }
 	}
 #endif
-      cache1.clear();
-      cache2.clear();
       return ret;
     }
 
