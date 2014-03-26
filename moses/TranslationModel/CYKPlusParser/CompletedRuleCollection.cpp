@@ -41,7 +41,12 @@ void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
       return;
     }
 
-    const float score = outColl.CalcEstimateOfBestScore(tpc, stackVec);
+    const TargetPhrase &targetPhrase = **(tpc.begin());
+    float score = targetPhrase.GetFutureScore();
+    for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end(); ++p) {
+        float stackScore = (*p)->GetBestScore(&outColl);
+        score += stackScore;
+    }
 
     // If the rule limit has already been reached then don't add the option
     // unless it is better than at least one existing option.
