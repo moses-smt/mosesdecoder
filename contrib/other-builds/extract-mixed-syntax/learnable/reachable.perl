@@ -18,7 +18,7 @@ print STDERR "iniPath=$iniPath \n isHiero=$isHiero \n decoderExec=$decoderExec \
 my $WORK_DIR = `pwd`;
 chomp($WORK_DIR);
 
-my $MOSES_DIR = "~/workspace/github/mosesdecoder.hieu";
+my $MOSES_DIR = "~/workspace/github/mosesdecoder.hieu.gna";
 
 $decoderExec = "$MOSES_DIR/bin/$decoderExec";
 $extractExec = "$MOSES_DIR/bin/$extractExec";
