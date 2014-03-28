@@ -2,8 +2,8 @@
 
 my $iniPath = $ARGV[0];
 
-my $SPLIT_LINES = 50;
-my $lineCount = 1000;
+my $SPLIT_LINES = 100;
+my $lineCount = 5000;
 
 for (my $startLine = 0; $startLine < $lineCount; $startLine += $SPLIT_LINES) {
   my $endLine = $startLine + $SPLIT_LINES;
