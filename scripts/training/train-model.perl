@@ -33,7 +33,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
-   $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
+   $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2, $_UNKNOWN_WORD_SOFT_MATCHES_FILE,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
@@ -107,6 +107,7 @@ $_HELP = 1
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
+		       'unknown-word-soft-matches-file=s' => \$_UNKNOWN_WORD_SOFT_MATCHES_FILE, # give dummy label to unknown word, and allow soft matches to all other labels (with cost determined by sparse features)
 		       'ghkm' => \$_GHKM,
 		       'ghkm-tree-fragments' => \$_GHKM_TREE_FRAGMENTS,
 		       'pcfg' => \$_PCFG,
@@ -1415,6 +1416,7 @@ sub extract_phrase {
         $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file$suffix";
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
         $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
+        $cmd .= " --UnknownWordSoftMatches $_UNKNOWN_WORD_SOFT_MATCHES_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_SOFT_MATCHES_FILE);
         $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
@@ -2127,6 +2129,7 @@ sub create_ini {
   print INI "UnknownWordPenalty\n";
   print INI "WordPenalty\n";
   print INI "PhrasePenalty\n";
+  print INI "SoftMatchingFeature name=SM0 path=$_UNKNOWN_WORD_SOFT_MATCHES_FILE\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_SOFT_MATCHES_FILE);
   print INI $feature_spec;
 
   print INI "\n# dense weights for feature functions\n";

@@ -60,6 +60,10 @@ public:
     return m_size == 0;
   }
 
+  float CalcEstimateOfBestScore(const TargetPhraseCollection & tpc, const StackVec & stackVec) const {
+    return ChartTranslationOptions::CalcEstimateOfBestScore(tpc, stackVec);
+  }
+
   void Clear();
   void ApplyThreshold();
   void Evaluate(const InputType &input, const InputPath &inputPath);

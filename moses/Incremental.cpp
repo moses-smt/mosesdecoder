@@ -50,7 +50,10 @@ public:
 
   void FinishedSearch() {
     for (ChartCellLabelSet::iterator i(out_.mutable_begin()); i != out_.mutable_end(); ++i) {
-      ChartCellLabel::Stack &stack = i->second.MutableStack();
+      if ((*i) == NULL) {
+        continue;
+      }
+      ChartCellLabel::Stack &stack = (*i)->MutableStack();
       Gen *gen = static_cast<Gen*>(stack.incr_generator);
       gen->FinishedSearch();
       stack.incr = &gen->Generating();
@@ -79,6 +82,8 @@ public:
   void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
 
   void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
+
+  float CalcEstimateOfBestScore(const TargetPhraseCollection & tpc, const StackVec & stackVec) const;
 
   bool Empty() const {
     return edges_.Empty();
@@ -112,7 +117,7 @@ private:
   const search::Score oov_weight_;
 };
 
-template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &)
+template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &range)
 {
   std::vector<search::PartialVertex> vertices;
   vertices.reserve(nts.size());
@@ -173,6 +178,17 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   edges_.AddEdge(edge);
 }
 
+// for early pruning
+template <class Model> float Fill<Model>::CalcEstimateOfBestScore(const TargetPhraseCollection &targets, const StackVec &nts) const
+{
+  float below_score = 0.0;
+  for (StackVec::const_iterator i = nts.begin(); i != nts.end(); ++i) {
+    below_score += (*i)->GetStack().incr->RootAlternate().Bound();
+  }
+  const TargetPhrase &targetPhrase = **(targets.begin());
+  return targetPhrase.GetFutureScore() + below_score;
+}
+
 // TODO: factors (but chart doesn't seem to support factors anyway).
 template <class Model> lm::WordIndex Fill<Model>::Convert(const Word &word) const
 {
@@ -209,8 +225,12 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
   size_t size = source_.GetSize();
   boost::object_pool<search::Vertex> vertex_pool(std::max<size_t>(size * size / 2, 32));
 
-  for (size_t width = 1; width < size; ++width) {
-    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+  for (int startPos = size-1; startPos >= 0; --startPos) {
+    for (size_t width = 1; width <= size-startPos; ++width) {
+      // full range uses RootSearch
+      if (startPos == 0 && startPos + width == size) {
+        break;
+      }
       WordsRange range(startPos, startPos + width - 1);
       Fill<Model> filler(context, words, oov_weight);
       parser_.Create(range, filler);
