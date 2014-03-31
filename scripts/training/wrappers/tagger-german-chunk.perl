@@ -31,16 +31,19 @@ close(IN);
 # convert chunked file into Moses XML
 open(CHUNKED, "$chunkedPath");
 open(IN, "$inPath");
+binmode(CHUNKED, ":utf8");
+binmode(IN, ":utf8");
 
 my $sentence = <IN>;
 chomp($sentence);
 my @words = split(/ /, $sentence);
 my $numWords = scalar @words;
 my $prevTag = "";
-my $wordPos = 0;
+my $wordPos = -1;
 
 while(my $chunkLine = <CHUNKED>) {
   chomp($chunkLine);
+  print STDERR "chunkLine=$chunkLine \n";
   my @chunkToks = split(/\t/, $chunkLine);
 
   if (substr($chunkLine, 0, 1) eq "<") {
@@ -48,6 +51,17 @@ while(my $chunkLine = <CHUNKED>) {
       # end of tag
       print "</tree> ";
       $prevTag = "";
+
+  	  if ($wordPos == ($numWords - 1)) {
+	    # closing bracket of last word in sentence
+	    print "\n";
+        $sentence = <IN>;
+	    chomp($sentence);
+	    @words = split(/ /, $sentence);
+	    $numWords = scalar @words;
+	    $wordPos = 0;
+	    print STDERR "CLOSING BRACKET=$sentence \n";
+	  }
     }
     else {
       # beginning of tag
@@ -58,23 +72,31 @@ while(my $chunkLine = <CHUNKED>) {
   }
   else {
     # word
-    if (scalar(@chunkToks) != 3) {
-      print STDERR "chunk lines should be 3 toks\n";
-    }
-    if ($chunkToks[0] ne $words[$wordPos]) {
-      print STDERR "chunk word " .$chunkToks[0] ." not equal " .$words[$wordPos] ."\n";
-    }
-    print $chunkToks[0] . " ";
     ++$wordPos;
 
+    if (scalar(@chunkToks) != 3) {
+      # parse error
+      print STDERR "CHUNK LINES SHOULD BE 3 TOKS\n";
+    }
+
     if ($wordPos >= $numWords) {
+      # on new sentence now
       print "\n";
       $sentence = <IN>;
       chomp($sentence);
       @words = split(/ /, $sentence);
       $numWords = scalar @words;
       $wordPos = 0;
+      print STDERR "sentence=$sentence \n";
     }
+
+    if ($chunkToks[0] ne $words[$wordPos]) {
+      # word in chunk input and sentence should match
+      print STDERR "NOT EQUAL:" .$chunkToks[0] ." != " .$words[$wordPos] ."\n";
+    }
+
+    print $chunkToks[0] . " ";
+
   }
 
 }
