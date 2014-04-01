@@ -43,7 +43,6 @@ my $wordPos = -1;
 
 while(my $chunkLine = <CHUNKED>) {
   chomp($chunkLine);
-  print STDERR "chunkLine=$chunkLine \n";
   my @chunkToks = split(/\t/, $chunkLine);
 
   if (substr($chunkLine, 0, 1) eq "<") {
@@ -59,8 +58,7 @@ while(my $chunkLine = <CHUNKED>) {
 	    chomp($sentence);
 	    @words = split(/ /, $sentence);
 	    $numWords = scalar @words;
-	    $wordPos = 0;
-	    print STDERR "CLOSING BRACKET=$sentence \n";
+	    $wordPos = -1;
 	  }
     }
     else {
@@ -87,7 +85,6 @@ while(my $chunkLine = <CHUNKED>) {
       @words = split(/ /, $sentence);
       $numWords = scalar @words;
       $wordPos = 0;
-      print STDERR "sentence=$sentence \n";
     }
 
     if ($chunkToks[0] ne $words[$wordPos]) {
@@ -101,8 +98,10 @@ while(my $chunkLine = <CHUNKED>) {
 
 }
 
+print "\n";
+
 close(IN);
 close(CHUNKED);
 
-#`rm -rf $TMPDIR`;
+`rm -rf $TMPDIR`;
 
