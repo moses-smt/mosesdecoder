@@ -38,15 +38,12 @@ class DottedRuleMBOT : public DottedRule
   DottedRuleMBOT()
       : m_mbotCellLabel(NULL)
       , m_mbotPrev(NULL)
-      {//std::cout<<"new DottedRuleMBOT() " << this << std::endl;
-      }
+      {}
 
   DottedRuleMBOT(const ChartCellLabelMBOT &ccl, const DottedRuleMBOT &prev)
       : m_mbotCellLabel(&ccl)
       , m_mbotPrev(&prev)
-       {
-          //std::cout<<"new DottedRuleMBot(2) " << this << std::endl;
-          }
+       {}
 
   //accessors to source label
 

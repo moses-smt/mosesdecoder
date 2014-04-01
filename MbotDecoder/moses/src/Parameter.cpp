@@ -80,6 +80,7 @@ Parameter::Parameter()
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
+  AddParam("translation-all-details", "Tall", "for all hypotheses, report translation details to the given file");
   AddParam("ttable-file", "location and properties of the translation tables");
   AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
   AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");

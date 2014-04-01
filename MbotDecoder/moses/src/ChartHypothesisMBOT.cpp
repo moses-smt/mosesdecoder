@@ -101,7 +101,6 @@ void ChartHypothesisMBOT::CreateOutputPhrase(Phrase &outPhrase, ProcessedNonTerm
         //if several mbot phrases, look at status
          Phrase currentPhrase = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases()[currentlyProcessed];
          int position = 0;
-        //Phrase currentPhrase = targetPhrases.front();
             for (size_t pos = 0; pos < currentPhrase.GetSize(); ++pos) {
 
                 const Word &word = currentPhrase.GetWord(pos);
@@ -160,7 +159,6 @@ int ChartHypothesisMBOT::RecombineCompare(const ChartHypothesisMBOT &compare) co
 //do not overwrite, somehing nasty is going on in there
 void ChartHypothesisMBOT::CalcScoreMBOT()
 {
-  //std::cout << "CHART HYPOHTESIS : COMPUTING SCORE" << std::endl;
   // total scores from prev hypos
   std::vector<const ChartHypothesisMBOT*>::iterator iter;
   for (iter = m_mbotPrevHypos.begin(); iter != m_mbotPrevHypos.end(); ++iter) {
@@ -177,7 +175,6 @@ void ChartHypothesisMBOT::CalcScoreMBOT()
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
 
   for (unsigned i = 0; i < ffs.size(); ++i) {
-        //std::cout << "Evaluating MBOT" << std::endl;
 		m_ffStates[i] = ffs[i]->EvaluateMBOT(*this,i,&m_scoreBreakdown);
   }
 
@@ -205,9 +202,7 @@ void ChartHypothesisMBOT::AddArc(ChartHypothesisMBOT *loserHypo)
       // DO NOTHING
     }
   }
-  //std::cout << "Looser hypo pushed back" << std::endl;
   m_mbotArcList->push_back(loserHypo);
-  //std::cout << "Going out of method" << std::endl;
 }
 
 struct CompareChartChartHypothesisMBOTTotalScore {
@@ -226,7 +221,6 @@ void ChartHypothesisMBOT::CleanupArcList()
 
   if (!m_mbotArcList)
   {
-        //std::cout << "No mbot arc list" << std::endl;
         return;
   }
 
@@ -262,8 +256,6 @@ void ChartHypothesisMBOT::CleanupArcList()
     ChartHypothesisMBOT *arc = *iter;
     arc->SetWinningHypo(this);
   }
-
-  //cerr << m_arcList->size() << " ";
 }
 
 void ChartHypothesisMBOT::SetWinningHypo(const ChartHypothesisMBOT *hypo)
@@ -285,10 +277,6 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesisMBOT& hypo)
 	{
 		out << "->" << hypo.GetWinningHypothesisMBOT()->GetId();
 	}
-
-    //out << " " << hypo.GetCurrTargetPhraseMBOT();
-	//out << " " << hypo.GetTranslationOptionMBOT();
-      //<< " " << outPhrase
     out  << " " << hypo.GetCurrSourceRange();
 
   std::vector<const ChartHypothesisMBOT*>::const_iterator iter;
@@ -302,8 +290,6 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesisMBOT& hypo)
   out << " " << hypo.GetScoreBreakdown();
   StaticData::Instance().GetScoreIndexManager().PrintLabeledScores(out,hypo.GetScoreBreakdown());
   out << std::endl;
-
-  //out << "Processing Phrase : " << hypo.GetProcessingPhrase() << std::endl;
 
   return out;
 }

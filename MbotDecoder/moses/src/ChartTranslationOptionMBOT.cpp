@@ -35,82 +35,23 @@ void ChartTranslationOptionMBOT::CalcEstimateOfBestScoreMBOT(
         TargetPhrase * tp = *(GetTargetPhraseCollection().begin());
         //cast to target phrase MBOT
         TargetPhraseMBOT * mbotTp = static_cast<TargetPhraseMBOT*>(tp);
-        //std::cout << "TARGET PHRASE : " << std::endl;
-        //std::cout << (*mbotTp) << std::endl;
-        //std::cout << "CTOMBOT : Adress : " << &targetPhrase << *targetPhrase << std::endl;
 
   m_mbotEstimateOfBestScore = mbotTp->GetFutureScore();
-  //std::cout << "FIRST ESTIMATE SCORE FOR CHART TRANSLATION OPTION " << m_mbotEstimateOfBestScore << std::endl;
 
   const DottedRuleMBOT *rule = &m_mbotDottedRule;
-  //std::cout << "ASSOCIATED RULE : " << (*rule) << std::endl;
 
   // only deal with non-terminals
   while (!rule->IsRootMBOT()) {
     if (rule->IsNonTerminalMBOT()) {
       // add the score of the best underlying hypothesis
       const ChartCellLabelMBOT &cellLabel = rule->GetChartCellLabelMBOT();
-      //std::cout << "CHART CELL LABEL" << std::endl;
-      //std::cout << cellLabel.GetCoverageMBOT().front() << std::endl;
-      //std::cout << cellLabel.GetLabelMBOT().front() << std::endl;
       const ChartHypothesisCollectionMBOT *hypoColl = cellLabel.GetStackMBOT();
-      //std::cout << "ASSOCIATED HYPO COLL" << (*hypoColl) << std::endl;
       CHECK(hypoColl);
-      //std::cout << "SCORE OBTAINED FOR HYPO COLL" << hypoColl->GetBestScore() << std::endl;
       m_mbotEstimateOfBestScore += hypoColl->GetBestScore();
-      //std::cout << "ESTIMATED SCORE FOR CHART TRANSLATION OPTION " << m_mbotEstimateOfBestScore << std::endl;
     }
     rule = rule->GetPrevMBOT();
   }
 }
-
-/*void ChartTranslationOptionMBOT::ReEstimateBestScoreMatchLabels(const ChartCellCollection &)
-{
-	 //check if we have something that matches a source label
-	m_mbotEstimateOfBestScore = 0;
-
-	bool foundMatch = false;
-	int index = 0;
-
-	while(!foundMatch && index < GetTargetPhraseCollection().GetSize())
-	{
-			TargetPhrase * tp = *(GetTargetPhraseCollection().begin() + index);
-	        //cast to target phrase MBOT
-	        TargetPhraseMBOT * mbotTp = static_cast<TargetPhraseMBOT*>(tp);
-	        //std::cerr << "CHECKING PHRASE : " << mbotTp << std::endl;
-	        if(mbotTp->isMatchesSource())
-	        //std::cout << "TARGET PHRASE : " << std::endl;
-	        //std::cout << (*mbotTp) << std::endl;
-	        //std::cout << "CTOMBOT : Adress : " << &targetPhrase << *targetPhrase << std::endl;
-
-	        {
-	        	m_mbotEstimateOfBestScore = mbotTp->GetFutureScore();
-	        	foundMatch = true;
-	        }
-	        index++;
-	}
-
-	  const DottedRuleMBOT *rule = &m_mbotDottedRule;
-	  //std::cout << "ASSOCIATED RULE : " << (*rule) << std::endl;
-
-	  // only deal with non-terminals
-	  while (!rule->IsRootMBOT()) {
-	    if (rule->IsNonTerminalMBOT()) {
-	      // add the score of the best underlying hypothesis
-	      const ChartCellLabelMBOT &cellLabel = rule->GetChartCellLabelMBOT();
-	      //std::cout << "CHART CELL LABEL" << std::endl;
-	      //std::cout << cellLabel.GetCoverageMBOT().front() << std::endl;
-	      //std::cout << cellLabel.GetLabelMBOT().front() << std::endl;
-	      const ChartHypothesisCollectionMBOT *hypoColl = cellLabel.GetStackMBOT();
-	      //std::cout << "ASSOCIATED HYPO COLL" << (*hypoColl) << std::endl;
-	      CHECK(hypoColl);
-	      //std::cout << "SCORE OBTAINED FOR HYPO COLL" << hypoColl->GetBestScore() << std::endl;
-	      m_mbotEstimateOfBestScore += hypoColl->GetBestScore();
-	      //std::cout << "ESTIMATED SCORE FOR CHART TRANSLATION OPTION " << m_mbotEstimateOfBestScore << std::endl;
-	    }
-	    rule = rule->GetPrevMBOT();
-	  }
-}*/
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionMBOT &coll)
 {
@@ -124,7 +65,6 @@ std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionMBOT &co
         TargetPhraseMBOT * mbotTp = static_cast<TargetPhraseMBOT*>(tp);
         out << (*mbotTp) << std::endl;
     }
-    //out << "ESTIMATE OF BEST SCORE" << std::endl;*/
     out << coll.GetEstimateOfBestScoreMBOT() << std::endl;
     return out;
 }

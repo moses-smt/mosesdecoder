@@ -68,6 +68,20 @@ const HypoList &ChartCell::GetSortedHypotheses(const Word &constituentLabel) con
   return iter->second.GetSortedHypotheses();
 }
 
+/** Get all hypotheses */
+const HypoList* ChartCell::GetAllSortedHypotheses() const
+{
+  HypoList *ret = new HypoList();
+
+  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
+  for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
+    const ChartHypothesisCollection &coll = iter->second;
+    const HypoList &list = coll.GetSortedHypotheses();
+    std::copy(list.begin(), list.end(), std::inserter(*ret, ret->end()));
+  }
+  return ret;
+}
+
 /** Add the given hypothesis to the cell */
 bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 {

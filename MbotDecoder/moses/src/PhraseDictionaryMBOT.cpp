@@ -71,12 +71,7 @@ TargetPhraseCollection &PhraseDictionaryMBOT::GetOrCreateTargetPhraseCollection(
                                                                                 , const TargetPhraseMBOT &target
                                                                                 , const Word &sourceLHS)
 {
-  //new : inserted for testing
-  //std::cout << "CREATE TARGET PHRASE COLL IN PDMBOT " << std::endl;
-
-  //THAT WAS WRONG !!!
   PhraseDictionaryNodeMBOT &currNode = GetOrCreateNode(source, target, sourceLHS);
-  //std::cout << "NODE BEFORE CREATION" << &currNode << std::endl;
   return currNode.GetOrCreateTargetPhraseCollectionMBOT(sourceLHS);
 }
 
@@ -94,56 +89,31 @@ PhraseDictionaryNodeMBOT &PhraseDictionaryMBOT::GetOrCreateNode(const Phrase &so
                                                                 , const Word &sourceLHS)
 {
 
-    //std::cout << "PDMBOT : Creating Node... " << std::endl;
-
-  const size_t size = source.GetSize();
-
-    //std::cout << "Size of source " << size << std::endl;
-
-  //new : get alignments from target phrase MBOT
+   const size_t size = source.GetSize();
    const std::vector<const AlignmentInfoMBOT*> *alignmentsInfo = targetMBOT.GetMBOTAlignments();
    std::vector<const AlignmentInfoMBOT*> :: const_iterator itr_alignments;
 
-    //original : const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
+   PhraseDictionaryNodeMBOT *currNode = &m_mbotCollection;
+   for (size_t pos = 0 ; pos < size ; ++pos) {
 
-  //new : inserted for testing
-  //std::cout << "Alignment info : " << alignmentInfo << std::endl;
-
-  //TODO: REWRITE ITERATOR
-  //AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
-
-  PhraseDictionaryNodeMBOT *currNode = &m_mbotCollection;
-  //std::cout << "Getted node is AT : " << currNode << std::endl;
-
-  for (size_t pos = 0 ; pos < size ; ++pos) {
-
-      //std::cout << "POS TO FIND : " << pos << std::endl;
     const Word& word = source.GetWord(pos);
 
     if (word.IsNonTerminal()) {
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      //new : inserted for testing
-      //std::cout << "Source Non Terminal Word is "<< word << std::endl;
-
-      //new : check that it is aligned to at least one target non-terminal in the vector
       //1. Check that vector is not empty
       CHECK(alignmentsInfo->size() != 0);
       //2. Check that source word is in vector
       bool isInVector = 0;
       //3. We represent each target phrase by a vector where
       //the indices in the vector correspond to the position of the target phrase
-      //FB : BEWARE : TO MAKE BETTER : (make vector of vector) : two vectors (1) alignment in multiple target phrases (MBOT) (2) multiple alignments to same source
-      //Vector 1 : alignments in multiple target phrases
       std::vector<size_t> emptyVector;
       std::vector<std::vector <size_t> > targetIndices(alignmentsInfo->size(), emptyVector);
 
-      //std::cout << "Size of Target non term ind 1 :"<< targetIndices.size() << std::endl;
       int counter = 0;
       for(itr_alignments = alignmentsInfo->begin(); itr_alignments != alignmentsInfo->end(); itr_alignments++)
       {
-          //std::cout << "IN LOOP : " << counter << std::endl;
           std::vector<size_t> insideAlignments;
           //3. Check that no field in vector is empty
           bool isEmpty = 1;
@@ -151,9 +121,6 @@ PhraseDictionaryNodeMBOT &PhraseDictionaryMBOT::GetOrCreateNode(const Phrase &so
           AlignmentInfoMBOT :: const_iterator itr_align;
           for(itr_align = current->begin(); itr_align != current->end(); itr_align++)
           {
-              //std::cout << "FOUND POSITION : " << itr_align->first << std::endl;
-              //std::cout << "CURRENT POSITION : " << pos <<  std::endl;
-              //checks
                 if(itr_align->first == pos)
                 {
                     isInVector = 1;
@@ -170,28 +137,15 @@ PhraseDictionaryNodeMBOT &PhraseDictionaryMBOT::GetOrCreateNode(const Phrase &so
       }
       CHECK(isInVector == 1);
 
-      //new : inserted for testing
-      //std::cout << "PDSCFG Before getting word"<< std::endl;
-      //std::cout << "Size of Target non term ind 2 :"<< targetIndices.size() << std::endl;
-
-      //remove duplicates
-      //std::sort(vec.begin(), vec.end());
-      //vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
-
       std::vector<Word> targetNonTerm;
       targetMBOT.GetWordVector(targetIndices, targetNonTerm);
 
       currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
     } else {
-      //std::cout << "Creating Child for PDN... : " << std::endl;
       currNode = currNode->GetOrCreateChildMBOT(word);
     }
   CHECK(currNode != NULL);
-  }  // finally, the source LHS
-  //currNode = currNode->GetOrCreateChild(sourceLHS);
-  //CHECK(currNode != NULL);
-  //PhraseDictionaryNodeMBOT currNodeT = *currNode;
-  //std::cout << "Found node is At : " << currNode << "TPC" << currNodeT.GetTargetPhraseCollection() << std::endl;
+  }
   return *currNode;
 }
 

@@ -61,7 +61,6 @@ ChartManager::ChartManager(InputType const& source, const TranslationSystem* sys
     const PhraseDictionary *dict = pdf->GetDictionary();
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
 
-    //std::cout << "CREATING RULE LOOKUP MANAGER" << std::endl;
     m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, m_hypoStackColl));
   }
 }
@@ -81,14 +80,11 @@ ChartManager::~ChartManager()
 
 void ChartManager::ProcessSentence()
 {
-
-  //std::cout << "MANAGER : PROCESSING SENTENCE" << std::endl;
   VERBOSE(1,"Translating: " << m_source << endl);
 
   ResetSentenceStats(m_source);
 
   VERBOSE(2,"Decoding: " << endl);
-  //ChartHypothesis::ResetHypoCount();
 
   // MAIN LOOP
   size_t size = m_source.GetSize();
@@ -96,42 +92,17 @@ void ChartManager::ProcessSentence()
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       size_t endPos = startPos + width - 1;
       WordsRange range(startPos, endPos);
-      //TRACE_ERR(" " << range << "=");
 
-      // create trans opt
-      //new : inserted for testing
-      //std::cerr << "MANAGER : CREATING CHART TRANSLATION OPTIONS : " << "S" << startPos << "E" << endPos << endl;
-      //std::cout << "Translation Options before Creation: "<< m_transOptColl << endl;
       m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
-      //if (g_debug)
-      //std::cout << m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos)) << std::endl;
-      //std::cout << "S" << startPos << "E" << endPos << "TRANSLATION OPTIONS : "<< m_transOptColl << endl;
-      // decode
-      //std::cout << "Creating Chart Cell"<< std::endl;
 
       ChartCell &cell = m_hypoStackColl.Get(range);
 
-      //std::cout << "Processing Sentence"<< std::endl;
       cell.ProcessSentenceWithSourceLabels(m_transOptColl.GetTranslationOptionList(range)
                            ,m_hypoStackColl,m_source,startPos,endPos);
 
-      //cell.ProcessSentence(m_transOptColl.GetTranslationOptionList(range)
-      //                          ,m_hypoStackColl);
-
-      //std::cout << "Pruning"<< std::endl;
       cell.PruneToSize();
-
-      //std::cout << "Cleaning up arc list"<< std::endl;
       cell.CleanupArcList();
-
-       //std::cout << "Sorting Hypotheses"<< std::endl;
-       cell.SortHypotheses();
-
-       //std::cout << "End" << std::endl;
-
-      //cerr << cell.GetSize();
-      //cerr << cell << endl;
-      //cell.OutputSizes(cerr);
+      cell.SortHypotheses();
     }
   }
 
@@ -149,7 +120,6 @@ void ChartManager::ProcessSentence()
       for (size_t startPos = 0; startPos <= size-width; ++startPos) {
         WordsRange range(startPos, startPos+width-1);
         cerr.width(3);
-        //BEWARE : TAKES MBOT SIZE INSTEAD OF SCFG
         cerr << m_hypoStackColl.GetMBOT(range).GetSize() << " ";
       }
       cerr << endl;
@@ -159,7 +129,6 @@ void ChartManager::ProcessSentence()
 
 const ChartHypothesis *ChartManager::GetBestHypothesis() const
 {
-  //std::cout << "CHART MANAGER : GETTING BEST HYPOTHESIS" << std::endl;
   size_t size = m_source.GetSize();
 
   if (size == 0) // empty source
@@ -171,17 +140,15 @@ const ChartHypothesis *ChartManager::GetBestHypothesis() const
   }
 }
 
-//BEWARE : Added for getting best MBOT hypothesis
+//Added for getting best MBOT hypothesis
 const ChartHypothesisMBOT *ChartManager::GetBestHypothesisMBOT() const
 {
-  //std::cout << "CHART MANAGER : GETTING BEST HYPOTHESIS" << std::endl;
   size_t size = m_source.GetSize();
 
   if (size == 0) // empty source
     return NULL;
   else {
     WordsRange range(0, size-1);
-    //BEWARE : TAKES MBOT CELL INSTEAD OF SCFG
     const ChartCellMBOT &lastCell = m_hypoStackColl.GetMBOT(range);
     return lastCell.GetBestHypothesis();
   }
@@ -190,8 +157,6 @@ const ChartHypothesisMBOT *ChartManager::GetBestHypothesisMBOT() const
 
 void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct) const
 {
-
-  //std::cout << "CHART MANAGER : COMPUTING N-BEST" << std::endl;
 
   size_t size = m_source.GetSize();
   if (count == 0 || size == 0)
@@ -273,11 +238,9 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   }
 }
 
-//BEWARE : Added for getting best MBOT hypothesis
+//Added for getting best MBOT hypothesis
 void ChartManager::CalcNBestMBOT(size_t count, ChartTreillisPathListMBOT &ret, ProcessedNonTerminals * nt, bool onlyDistinct) const
 {
-
-  //std::cout << "CHART MANAGER : COMPUTING N-BEST for MBOT" << std::endl;
 
   size_t size = m_source.GetSize();
   if (count == 0 || size == 0)
@@ -449,7 +412,7 @@ void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::ma
 	}
 }
 
-//BEWARE : Added for getting reachable MBOT hypothesis
+//Added for getting reachable MBOT hypothesis
 void ChartManager::FindReachableHypothesesMBOT( const ChartHypothesisMBOT *hypo, std::map<unsigned,bool> &reachable ) const
 {
 	// do not recurse, if already visited

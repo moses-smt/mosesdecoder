@@ -38,29 +38,21 @@ RuleCubeQueueMBOT::~RuleCubeQueueMBOT()
 
 void RuleCubeQueueMBOT::Add(RuleCubeMBOT *ruleCube)
 {
-  //std::cout << "ADDING RULE CUBE TO QUEUE" << std::endl;
-  //std::cout << "SIZE BEFORE : " << m_mbotQueue.size() << std::endl;
   m_mbotQueue.push(ruleCube);
-  //std::cout << "SIZE AFTER : " << m_mbotQueue.size() << std::endl;
 }
 
 ChartHypothesisMBOT *RuleCubeQueueMBOT::PopMBOT()
 {
-  //std::cout << "QUEUE : POPPING RULE CUBE QUEUE MBOT" << std::endl;
   // pop the most promising rule cube
   RuleCubeMBOT *cube = m_mbotQueue.top();
-  //std::cout << "QUEUE : GETTING RULE CUBE" << std::endl;
   m_mbotQueue.pop();
-  //std::cout << "QUEUE : POPPING QUEUE" << std::endl;
 
   // pop the most promising item from the cube and get the corresponding
   // hypothesis
   RuleCubeItemMBOT *item = cube->PopMBOT(m_manager);
   if (StaticData::Instance().GetCubePruningLazyScoring()) {
-    //std::cout << "QUEUE : CREATING HYPOTHESIS" << std::endl;
     item->CreateHypothesis(cube->GetTranslationOptionMBOT(), m_manager);
   }
-  //std::cout << "QUEUE : RELEASING HYPOTHESIS" << std::endl;
   ChartHypothesisMBOT *hypo = item->ReleaseHypothesisMBOT();
 
   // if the cube contains more items then push it back onto the queue

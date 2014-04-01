@@ -43,27 +43,20 @@ public:
   HypothesisDimensionMBOT(std::size_t pos, const HypoListMBOT &orderedHypos)
     : m_pos(pos)
     , m_orderedHypos(&orderedHypos)
-  {
-    //std::cout << "new HypothesisDimensionMBOT() : " << m_pos << " : "<< m_orderedHypos->size() << std::endl;
-  }
+  {}
 
  ~HypothesisDimensionMBOT()
- {
-     //std::cout << "DESTROYED DIMENSION MBOT"<< std::endl;
- };
+ {};
 
   std::size_t IncrementPos() {
-  //std::cout << "HYDI : Icrementing position " << m_pos << std::endl;
         return m_pos++;
 }
 
   bool HasMoreHypo() const {
-      //std::cout << "Checking for more hypos..." << std::endl;
     return m_pos+1 < m_orderedHypos->size();
   }
 
   const ChartHypothesisMBOT *GetHypothesis() const {
-    //std::cout << "Getting Hypothesis at position : " << m_pos << std::endl;
     return (*m_orderedHypos)[m_pos];
   }
 
@@ -80,7 +73,7 @@ private:
   const HypoListMBOT *m_orderedHypos;
 };
 
-//new : rule cube item for MBOTS
+
 class RuleCubeItemMBOT : public RuleCubeItem
 {
  public:
@@ -105,7 +98,6 @@ class RuleCubeItemMBOT : public RuleCubeItem
   }
 
   const std::vector<HypothesisDimensionMBOT> &GetHypothesisDimensionsMBOT() const {
-    //std::cout << "GETTING HYPOTHESIS DIMENSION : " << std::endl;//<< m_mbotHypothesisDimensions.front().GetHypothesis() << std::endl;
     return m_mbotHypothesisDimensions;
   }
 
@@ -132,7 +124,6 @@ class RuleCubeItemMBOT : public RuleCubeItem
  private:
   RuleCubeItemMBOT(const RuleCubeItemMBOT &);  // Not implemented
   RuleCubeItemMBOT &operator=(const RuleCubeItemMBOT &);  // Not implemented
-  //BEWARE : CreateHypothesisDimensions private in base class
   void CreateHypothesisDimensionsMBOT(const DottedRuleMBOT &, const ChartCellCollection&);
 
  protected :

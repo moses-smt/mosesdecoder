@@ -78,112 +78,53 @@ Phrase ChartTreillisNodeMBOT::GetOutputPhrase(ProcessedNonTerminals * processedN
   // exactly like same fn in hypothesis, but use trellis nodes instead of prevHypos pointer
   Phrase ret(ARRAY_SIZE_INCR);
 
-  //const ChartTranslationOption &transOpt = m_mbotHypo.GetTranslationOption();
-
-  //VERBOSE(3, "Trans Opt:" << transOpt.GetDottedRule() << ": " << m_hypo.GetCurrTargetPhrase().GetTargetLHS() << "->" << m_hypo.GetCurrTargetPhrase() << std::endl);
-
 
    // add word as parameter
-   //std::cout << "AT BEGINNING OF METHOD : ADDED HYPOTHESIS : " << m_mbotHypo << " : " << m_mbotHypo.GetCurrTargetPhraseMBOT() << std::endl;
    processedNonTerminals->AddHypothesis(&m_mbotHypo);
    processedNonTerminals->AddStatus(m_mbotHypo.GetId(),1);
 
-   //std::cout << "NUMBER OF RECURSION " << processedNonTerminals->GetRecNumber() << std::endl;
    const ChartHypothesisMBOT * currentHypo = processedNonTerminals->GetHypothesis();
-   //std::cout << "CURRENT HYPOTHESIS : " << currentHypo << std::endl;
-   //const TargetPhraseMBOT currentTarget = currentHypo->GetCurrTargetPhraseMBOT();
-   //std::cout << "CREATING TARGET PHRASE : " << currentTarget << std::endl;
 
    //look at size : if there is only one m_mbot phrase, process as usual
    //if there are several mbot phrases : split hypotheses
 
    std::vector<Phrase> targetPhrases = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases();
    const std::vector<const AlignmentInfoMBOT*> *alignedTargets = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTAlignments();
-   //std::vector<Word> targetLHS = currentHypo->GetCurrTargetPhraseMBOT().GetTargetLHSMBOT();
 
-   //while(GetProcessingPhrase()->GetStatus() < targetPhrases.size())
-   //{
-        int currentlyProcessed = processedNonTerminals->GetStatus(currentHypo->GetId()) -1;
-       //std::cout << "CURRENTLY PROCESSED : " << currentlyProcessed << std::endl;
+   int currentlyProcessed = processedNonTerminals->GetStatus(currentHypo->GetId()) -1;
 
-        //GetProcessingPhrase()->IncrementStatus();
-        //std::cout << "CURENT STATUS : " << GetProcessingPhrase()->GetStatus() << std::endl;
+   CHECK(currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() > currentlyProcessed);
+   size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().size();
 
-        CHECK(currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() > currentlyProcessed);
-        size_t mbotSize = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().size();
-        //std::cout << "Getting current Phrase : " << GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() << std::endl;
+   //if several mbot phrases, look at status
+   Phrase currentPhrase = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases()[currentlyProcessed];
 
-        //if several mbot phrases, look at status
-         Phrase currentPhrase = currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases()[currentlyProcessed];
-         //std::cout << "Current MBOT Phrase : " << currentPhrase << std::endl;
-        //std::vector<Phrase>::iterator itr_mbot_phrases;
-
-        //if(targetPhrases.size() == 1)
-        //{
-
-         //if several mbot phrases, look at status
-        //if(mbotSize > 1)
-        //{
-           int position = 0;
-        //Phrase currentPhrase = targetPhrases.front();
-            //std::cout << "CURRENT PHRASE : " << currentPhrase << std::endl;
-            for (size_t pos = 0; pos < currentPhrase.GetSize(); ++pos) {
-
-                //std::cout << "POSITION : " << pos << std::endl;
-                const Word &word = currentPhrase.GetWord(pos);
-                //std::cout << "CURRENT WORD : " << word << std::endl;
-                if (word.IsNonTerminal()) {
-                    const AlignmentInfoMBOT::NonTermIndexMapPointer nonTermIndexMap =
-                    alignedTargets->at(currentlyProcessed)->GetNonTermIndexMap();
-
-                    int sizeOfMap = nonTermIndexMap->size();
-                    //std::cout << "MBOT current map : " << sizeOfMap << std::endl;
-                // non-term. fill out with prev hypo
-                //get hypo corresponding to mbot phrase
-                size_t nonTermInd = nonTermIndexMap->at(pos);
-                //std::cout << "NON TERM IND : " << nonTermInd << std::endl;
-                processedNonTerminals->IncrementRec();
-                //std::cout << "TAKING PREVIOUS HYPO of " << *currentHypo << std::endl;
-                const ChartTreillisNodeMBOT &childNode = GetChildMBOT(nonTermInd);
-                //MBOT CONDITION HERE ::::
-                Phrase childPhrase = childNode.GetOutputPhrase(processedNonTerminals);
-                ret.Append(childPhrase);
-                }
-                else {
-                //std::cout << "ADDED WORD :" << word << std::endl;
+   int position = 0;
+   	   for (size_t pos = 0; pos < currentPhrase.GetSize(); ++pos) {
+   		   const Word &word = currentPhrase.GetWord(pos);
+           if (word.IsNonTerminal()) {
+        	   const AlignmentInfoMBOT::NonTermIndexMapPointer nonTermIndexMap =
+               alignedTargets->at(currentlyProcessed)->GetNonTermIndexMap();
+        	   int sizeOfMap = nonTermIndexMap->size();
+               // non-term. fill out with prev hypo
+               //get hypo corresponding to mbot phrase
+               size_t nonTermInd = nonTermIndexMap->at(pos);
+               processedNonTerminals->IncrementRec();
+               const ChartTreillisNodeMBOT &childNode = GetChildMBOT(nonTermInd);
+               Phrase childPhrase = childNode.GetOutputPhrase(processedNonTerminals);
+               ret.Append(childPhrase);}
+               else {
                 ret.AddWord(word);
-                //std::cout << "MBOT SIZE : " << mbotSize << " : Status : " << processedNonTerminals->GetStatus(currentHypo->GetId()) << std::endl;
-                //std::cout << "CURRENT POSITION : " << pos << std::endl;
                 //Add processed leaves to processed span unless leaf is mbot target phrase
                 }
-                //std::cout << "MbotSize and status " << mbotSize << " : " << processedNonTerminals.GetStatus(currentHypo->GetId()) << std::endl;
-                 if(//(currentHypo->GetCurrSourceRange().GetStartPos() == currentHypo->GetCurrSourceRange().GetEndPos())
-                    //&& (
-                        mbotSize > (processedNonTerminals->GetStatus(currentHypo->GetId()))
-                          //)
-                        && (pos == currentPhrase.GetSize() - 1) )
-                        {
-                            processedNonTerminals->IncrementStatus(currentHypo->GetId());
-                            }
-                /*if(
-                   (pos == currentPhrase.GetSize() - 1)
-                   //(currentHypo->GetCurrSourceRange().GetStartPos() == currentHypo->GetCurrSourceRange().GetEndPos())
-                   && ( mbotSize == (currentHypo->GetProcessingPhrase()->GetStatus() ) || mbotSize == 1))
-                   //&& (currentHypo->GetCurrTargetPhraseMBOT().GetMBOTPhrases().size() == 1))
-                   processedNonTerminals.AddRangeMergeAll(currentHypo->GetCurrSourceRange());
-                }*/
+                if(mbotSize > (processedNonTerminals->GetStatus(currentHypo->GetId())) && (pos == currentPhrase.GetSize() - 1) )
+                {
+                	processedNonTerminals->IncrementStatus(currentHypo->GetId());
+                }
         }
-        //std::cout << "GOES OUT OF RECURSION" << std::endl;
-        //std::cout << "CURRENT HYPOTHESIS : " << (*currentHypo) << std::endl;
         //mark this hypothesis as done.
         processedNonTerminals->DecrementRec();
-        /*if(processedNonTerminals->GetRecNumber() < -1)
-        {
-            processedNonTerminals->IncrementRec();
-        }*/
         return ret;
-    //}
-//std::cout << "THIS HYPOTHESIS : " << *prevHypo << std::endl;
 }
 
 void ChartTreillisNodeMBOT::CreateChildrenMBOT()

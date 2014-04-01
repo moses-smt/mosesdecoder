@@ -46,6 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartHypothesis.h"
 #include "ChartHypothesisMBOT.h"
 #include "ProcessedNonTerminals.h"
+#include "ChartManager.h"
 
 namespace Moses
 {
@@ -64,10 +65,12 @@ protected:
   const Moses::FactorMask								&m_inputFactorUsed;
   std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
+  std::ostream                          *m_detailedAllTranslationReportingStream;
   std::string										m_inputFilePath;
   std::istream									*m_inputStream;
   bool													m_surpressSingleBestOutput;
   Moses::OutputCollector                *m_detailOutputCollector;
+  Moses::OutputCollector                *m_detailAllOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
@@ -84,20 +87,22 @@ public:
   Moses::InputType* GetInput(Moses::InputType *inputType);
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 
-  //BEWARE : Added for outputing MBOT best hypothesis
+  //Added for outputing MBOT best hypothesis
   void OutputBestHypoMBOT(std::string sourceSent, const Moses::ChartHypothesisMBOT *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartHypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
 
-  //BEWARE : Added for outputing MBOT n-best list
+  //Added for outputing MBOT n-best list
   void OutputNBestListMBOT(std::string sourceSentence, const Moses::ChartTreillisPathListMBOT &nBestList, const Moses::ChartHypothesisMBOT *bestHypo, const Moses::TranslationSystem* system, long translationId,
                            Moses::ProcessedNonTerminals * nt);
 
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, long translationId);
 
-  //BEWARE : Added for outputing detailed MBOT translation report
+  //Added for outputing detailed MBOT translation report
   void OutputDetailedTranslationReportMBOT(const Moses::ChartHypothesisMBOT *hypo, long translationId);
+
+  void OutputDetailedAllTranslationReportMBOT(const Moses::ChartManager &manager, long translationId);
 
   void Backtrack(const Moses::ChartHypothesis *hypo);
 

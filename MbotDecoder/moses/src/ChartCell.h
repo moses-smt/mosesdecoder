@@ -67,6 +67,7 @@ public:
                           ,const ChartCellCollection &allChartCells, const InputType &source, size_t startPos, size_t endPos);
 
   virtual const HypoList &GetSortedHypotheses(const Word &constituentLabel) const;
+  virtual const HypoList* GetAllSortedHypotheses() const;
   virtual bool AddHypothesis(ChartHypothesis *hypo);
 
   virtual void SortHypotheses();

@@ -68,8 +68,10 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_nBestStream(NULL)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
+  ,m_detailedAllTranslationReportingStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
+  ,m_detailAllOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
@@ -115,6 +117,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
+
+  if (staticData.IsDetailedAllTranslationReportingEnabled()) {
+      const std::string &path = staticData.GetDetailedAllTranslationReportingFilePath();
+      m_detailedAllTranslationReportingStream = new std::ofstream(path.c_str());
+      m_detailAllOutputCollector = new Moses::OutputCollector(m_detailedAllTranslationReportingStream);
+    }
 }
 
 IOWrapper::~IOWrapper()
@@ -129,6 +137,7 @@ IOWrapper::~IOWrapper()
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
   delete m_detailOutputCollector;
+  delete m_detailAllOutputCollector;
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
@@ -272,7 +281,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
-//new : output translation report for mbot rules
+//output translation report for mbot rules
 void IOWrapper::OutputDetailedTranslationReportMBOT(
   const ChartHypothesisMBOT *hypo,
   long translationId)
@@ -286,6 +295,37 @@ void IOWrapper::OutputDetailedTranslationReportMBOT(
  // VERBOSE(2,"TRACE REPORT : " << out.str() << endl);
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
+}
+
+void IOWrapper::OutputDetailedAllTranslationReportMBOT(
+  const ChartManager &manager,
+  long translationId)
+{
+	std::ostringstream out;
+
+  const ChartCellCollection& cells = manager.GetChartCellCollection();
+  size_t size = manager.GetSource().GetSize();
+  for (size_t width = 1; width <= size; ++width) {
+    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+      size_t endPos = startPos + width - 1;
+      WordsRange range(startPos, endPos);
+      const ChartCell& cell = cells.Get(range);
+      const HypoList* hyps = cell.GetAllSortedHypotheses();
+      out << "Chart Cell [" << startPos << ".." << endPos << "]" << endl;
+      HypoList::const_iterator iter;
+      size_t c = 1;
+      for (iter = hyps->begin(); iter != hyps->end(); ++iter) {
+	out << "----------------Item " << c++ << " ---------------------"
+	    << endl;
+		const ChartHypothesis *hypo_const = *iter;
+		ChartHypothesis *hypo = const_cast<ChartHypothesis*>(hypo_const);
+		ChartHypothesisMBOT * mbotHypo = static_cast<ChartHypothesisMBOT*>(hypo);
+		OutputTranslationOptionsMBOT(out, mbotHypo, translationId);
+      }
+    }
+  }
+  CHECK(m_detailAllOutputCollector);
+  m_detailAllOutputCollector->Write(translationId, out.str());
 }
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)

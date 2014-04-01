@@ -151,6 +151,7 @@ protected:
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
+  std::string m_detailedAllTranslationReportingFilePath;
   bool m_onlyDistinctNBest;
   bool m_UseAlignmentInfo;
   bool m_PrintAlignmentInfo;
@@ -393,7 +394,12 @@ public:
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
   }
-
+  bool IsDetailedAllTranslationReportingEnabled() const {
+    return !m_detailedAllTranslationReportingFilePath.empty();
+  }
+  const std::string &GetDetailedAllTranslationReportingFilePath() const {
+	return m_detailedAllTranslationReportingFilePath;
+  }
   const std::string &GetAlignmentOutputFile() const {
     return m_alignmentOutputFile;
   }

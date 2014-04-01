@@ -46,7 +46,6 @@ class RuleCubeOrdererMBOT : public RuleCubeOrderer
 };
 
 //! Add rule cube ordered for mbot rule cubes
-//TODO : Overwrite functions
 class RuleCubeQueueMBOT : public RuleCubeQueue
 {
  public:

@@ -56,16 +56,7 @@ class ChartTranslationOptionMBOT : public ChartTranslationOption
                          , m_mbotDottedRule(dottedRule)
 
 {
-    //std::cout << "new ChartTranslationOptionMBOT() " << std::endl;
-    //std::cout << "Adress of Target Phrase Collection " << &targetPhraseColl << std::endl;
 	 CalcEstimateOfBestScoreMBOT(allChartCells);
-
-    /*const TargetPhraseCollection tpc = GetTargetPhraseCollection();
-    std::cout << "CTOMBOT AFTER ESTIMATE : TARGET NOT EMPTY : " << std::endl;
-        TargetPhrase * tp = *(tpc.begin());
-        //cast to target phrase MBOT
-        TargetPhraseMBOT * targetPhrase = static_cast<TargetPhraseMBOT*>(tp);
-        std::cout << "CTOMBOT AFTER ESTIMATE : Adress : " << &targetPhrase << *targetPhrase << std::endl;*/
   }
 
   //! forbid access to non-mbot dotted rule

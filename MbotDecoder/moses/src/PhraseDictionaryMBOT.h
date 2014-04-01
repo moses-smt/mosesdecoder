@@ -59,7 +59,6 @@ ChartRuleLookupManagerMemoryMBOT *CreateRuleLookupManager(
 
   const PhraseDictionaryNodeMBOT &GetRootNodeMBOT() const
   {
-    //std::cout << "Getting root node from " << m_mbotCollection << std::endl;
     return m_mbotCollection;
   }
 
@@ -72,8 +71,6 @@ ChartRuleLookupManagerMemoryMBOT *CreateRuleLookupManager(
   PhraseDictionaryNodeMBOT &GetOrCreateNode(const Phrase &source
                                             , const TargetPhraseMBOT &target
                                             , const Word &sourceLHS);
-
- //void InitializeForInput(InputType const& source);
 
   PhraseDictionaryNodeMBOT m_mbotCollection;
   std::string m_filePath;

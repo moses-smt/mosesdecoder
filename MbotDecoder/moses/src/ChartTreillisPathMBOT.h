@@ -62,7 +62,7 @@ class ChartTreillisPathMBOT
   ChartTreillisPathMBOT(const ChartTreillisPathMBOT &);  // Not implemented
   ChartTreillisPathMBOT &operator=(const ChartTreillisPathMBOT &);  // Not implemented
 
-  //BEWARE ALSO CONTAINTS MBOT ChartTreillisNodes
+  //Also contains ChartTreillisNodes
   ChartTreillisNodeMBOT *m_mbotFinalNode;
   ChartTreillisNodeMBOT *m_mbotDeviationPoint;
 

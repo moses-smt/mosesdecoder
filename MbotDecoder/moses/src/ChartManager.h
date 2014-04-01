@@ -60,7 +60,7 @@ private:
                                  const ChartTrellisNode &,
                                  ChartTrellisDetourQueue &);
 
-  //BEWARE : same methods using MBOT structures
+  //same methods using MBOT structures
   static void CreateDeviantPathsMBOT(boost::shared_ptr<const ChartTreillisPathMBOT>,
                                  ChartTreillisDetourQueueMBOT &);
 
@@ -102,6 +102,12 @@ public:
   const InputType& GetSource() const {
     return m_source;
   }
+
+  //get chart cell collection for detailed output
+  const ChartCellCollection& GetChartCellCollection() const {
+    return m_hypoStackColl;
+  }
+
   const TranslationSystem* GetTranslationSystem() const {
     return m_system;
   }
@@ -119,6 +125,5 @@ public:
 
   unsigned GetNextHypoId() { return m_hypothesisId++; }
 };
-
 }
 

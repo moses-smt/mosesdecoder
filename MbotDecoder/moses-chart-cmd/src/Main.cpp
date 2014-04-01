@@ -128,6 +128,11 @@ public:
       m_ioWrapper.OutputDetailedTranslationReportMBOT(bestHypo, lineNumber);
       }
 
+      if (staticData.IsDetailedAllTranslationReportingEnabled()) {
+            const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+            m_ioWrapper.OutputDetailedAllTranslationReportMBOT(manager, lineNumber);
+          }
+
     // n-best
     //std::cout << "MAIN : GETTING N-BEST LIST NOT AVAILABLE FOR NOW" << std::endl;
 

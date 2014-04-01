@@ -43,7 +43,7 @@ protected:
 
 public:
 
-//FB : beware : deprotected for removing alignments
+//Fabienne Braune :  deprotected for removing alignments
 TargetPhraseMBOT *m_mbotTargetPhrase;
 
 #ifdef USE_HYPO_POOL
@@ -122,10 +122,6 @@ TargetPhraseMBOT *m_mbotTargetPhrase;
     return m_scoreBreakdown;
   }
 
-  //float GetTotalScore() const {
-    //return m_totalScore;
-  //}
-
   const std::vector<const ChartHypothesisMBOT*> &GetPrevHyposMBOT() const {
     return m_mbotPrevHypos;
   }
@@ -165,6 +161,7 @@ TargetPhraseMBOT *m_mbotTargetPhrase;
     }
     out << (Phrase) GetCurrTargetPhraseMBOT();
   }*/
+
   TO_STRING();
 
 }; // class ChartHypothesis

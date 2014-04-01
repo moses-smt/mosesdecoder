@@ -80,6 +80,7 @@ StaticData::StaticData()
   ,m_inputType(SentenceInput)
   ,m_numInputScores(0)
   ,m_detailedTranslationReportingFilePath()
+  ,m_detailedAllTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
@@ -294,6 +295,16 @@ bool StaticData::LoadData(Parameter *parameter)
       return false;
     }
   }
+
+  if (m_parameter->isParamSpecified("translation-all-details")) {
+      const vector<string> &args = m_parameter->GetParam("translation-all-details");
+      if (args.size() == 1) {
+        m_detailedAllTranslationReportingFilePath = args[0];
+      } else {
+        UserMessage::Add(string("the translation-all-details option requires exactly one filename argument"));
+        return false;
+      }
+    }
 
   // Mbot Decoder : Do the source syntactic labels have to match the parse tree at rule application (in cube pruning)
   // 1 : Yes

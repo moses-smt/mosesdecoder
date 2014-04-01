@@ -48,55 +48,26 @@ namespace Moses
 TargetPhraseMBOT::TargetPhraseMBOT(std::string out_string,Phrase sourcePhrase):TargetPhrase(out_string,sourcePhrase),
 m_alignments(&AlignmentInfoCollectionMBOT::Instance().GetEmptyAlignmentInfoVector())
 //initilize with for loop inside
-{
-
-   //std::cerr << "new TargetPhraseMBOT(1)" << std::endl;
-    //new : FB : inserted for testing
-   //std::cout << "Using constructor with string" << stdF::endl;
-   //create vector
-}
+{}
 
 TargetPhraseMBOT::TargetPhraseMBOT(Phrase sourcePhrase):TargetPhrase(sourcePhrase),
 m_alignments(&AlignmentInfoCollectionMBOT::Instance().GetEmptyAlignmentInfoVector())
-{
-     //std::cerr << "new TargetPhraseMBOT(2)" << std::endl;
-     //new : FB : inserted for testing
-    //std::cout << "Using constructor with nothing 1" << std::endl;
-}
+{}
 
 TargetPhraseMBOT::TargetPhraseMBOT(const Phrase &phrase,Phrase sourcePhrase):TargetPhrase(phrase, sourcePhrase),
 m_alignments(&AlignmentInfoCollectionMBOT::Instance().GetEmptyAlignmentInfoVector())
-{
-    //std::cerr << "new TargetPhraseMBOT(3)" << this << std::endl;
-     //new : FB : inserted for testing
-     //std::cout << "Using constructor with nothing 2" << std::endl;
-}
+{}
 
 //copy constructor for target phrase
 TargetPhraseMBOT::TargetPhraseMBOT(TargetPhrase * tp):TargetPhrase(tp),
 		m_targetPhrases(static_cast<TargetPhraseMBOT*> (tp)->GetMBOTPhrases()),
 		m_alignments(static_cast<TargetPhraseMBOT*> (tp)->GetMBOTAlignments()),
 		m_targetLhs(static_cast<TargetPhraseMBOT*> (tp)->GetTargetLHSMBOT())
-{
-	//std::cout << "Breakdown from previous target phrase : " << tp->GetScoreBreakdown() << std::endl;
-	//std::cout << "Copy constructor for target phrase MBOT : " << m_scoreBreakdown << std::endl;
-	//std::cerr << "Constructing new Target Phrase " << static_cast<TargetPhraseMBOT*> (tp)->GetTargetLHSMBOT().size() <<  std::endl;
-}
+{}
 
 
 TargetPhraseMBOT::~TargetPhraseMBOT()
-{
-
-	//RemoveAllInCollection(m_alignments);
-	 /*std::vector<AlignmentInfo*> ::iterator itr_info;
-	    for(itr_info = m_alignments.begin(); itr_info != m_alignments.end(); itr_info++)
-	    {
-	        AlignmentInfo thisInfo = **itr_info;
-	        //std::cout << thisInfo << std::endl;
-	        delete *itr_info;
-	    }*/
-
-}
+{}
 
 //overloaded
 //create
@@ -107,43 +78,19 @@ void TargetPhraseMBOT::CreateFromStringNewFormat(FactorDirection direction
                                        , std::vector<Word> &lhs)
 {
   // parse
-  //f+n : separate target phrases at ||
   vector<string> targetPhraseFields;
   vector<string>::iterator itr_tagetPhraseFields;
   TokenizeMultiCharSeparator(targetPhraseFields, phraseString, "||");
 
-   //new : inserted for testing
-  //std::cout << "Phrase string is "<< phraseString << std::endl;
-
   for(itr_tagetPhraseFields = targetPhraseFields.begin(); itr_tagetPhraseFields != targetPhraseFields.end(); itr_tagetPhraseFields++)
   {
-
-        //new 1: initialize vector of words for each field
-        //std::vector<Word*> wordsInPhrase;
         string field = *itr_tagetPhraseFields;
-        //new .: FB : inserted for testing
-        //std::cout << "Target field : " << field << std::endl;
         vector<string> annotatedWordVector;
-        //new .: FB : inserted for testing
         Tokenize(annotatedWordVector, field);
 
-        //std::cout << "Size of annotated field vector : " << annotatedWordVector.size() << std::endl;
-        //new : FB : beware : last field of annotated Words Vector contains LHS INFO !!!
         Phrase myPhrase = Phrase(annotatedWordVector.size() -1);
-
-        // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
-        //		to
-        // "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
-
-        //new : FB : BEWARE : modified annotatedWordVector.size() -1 to annotatedWordVector.size()
-        //new : FB : BEWARE : annotatedWordVector must leave one field which contains LHS INFO !!!
         for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -1; phrasePos++) {
         string &annotatedWord = annotatedWordVector[phrasePos];
-
-        //new : inserted for testing
-        //std::cout << "annotated Word before field " << annotatedWord << std::endl;
-        //std::cout << "first substring of word " << annotatedWord.substr(0, 1) << std::endl;
-        //std::cout << "second substring of word " << annotatedWord.substr(annotatedWord.size()-1, 1) << std::endl;
 
         bool isNonTerminal;
         if (annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]") {
@@ -151,21 +98,15 @@ void TargetPhraseMBOT::CreateFromStringNewFormat(FactorDirection direction
           isNonTerminal = true;
 
           size_t nextPos = annotatedWord.find("[", 1);
-          //f+n: inserted for testing
-          //std::cout << "nextPos " << nextPos << std::endl;
-          //std::cout << "npos " << string::npos << std::endl;
 
-          //f+n: start of our code
           if ( nextPos != string::npos) {
             if (direction == Input)
             {
                 annotatedWord = annotatedWord.substr(1, nextPos - 2);
-                //std::cout << "Annotated substring last: " << annotatedWord << std::endl;
             }
             else
             {
                 annotatedWord = annotatedWord.substr(nextPos + 1, annotatedWord.size() - nextPos - 2);
-                //std::cout << "Annotated substring last: " << annotatedWord << std::endl;
           }
         }
       }
@@ -179,7 +120,6 @@ void TargetPhraseMBOT::CreateFromStringNewFormat(FactorDirection direction
 
     // lhs
     string &annotatedWord = annotatedWordVector.back();
-    //std::cout << "ANNOTATED WORD : " << annotatedWord << std::endl;
     CHECK(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size() -1 , 1) == "]");
     annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
 
@@ -294,7 +234,6 @@ bool TargetPhraseMBOT::IsCompatible(const Phrase &inputPhrase, const std::vector
 }
 
 //Get size of target phrase
-//BEWARE : may be called for span width
 //Here we return the sum of the sizes of all (possibly discontinuous) phrase in target prhase mbot
 size_t TargetPhraseMBOT::GetSize() const {
     std::vector<Phrase> :: const_iterator itr_targetPhrases;
@@ -308,7 +247,6 @@ size_t TargetPhraseMBOT::GetSize() const {
   }
 
 //Get amount of terminals for computing score
-//BEWARE : called inSetScoreChart of Target Phrase
 //Here we return the sum of the terminals in all (possibly discontinuous target phrases)
 size_t TargetPhraseMBOT::GetNumTerminals() const
 {
@@ -346,7 +284,6 @@ void MosesShouldUseExceptions(bool value) {
 
 //For setting l-MBOT rule alignments, we have to also tokenize at || and create a vector of alignment infos to represent the alignment sequences.
 //More explanations in AlignmentInfoMBOT.h
-//TODO : handle alignments between terminals
 void TargetPhraseMBOT::SetAlignmentInfo(const StringPiece &alignString)
 {
     string alignStringConv;
@@ -435,8 +372,6 @@ void TargetPhraseMBOT::SetScoreChart(const ScoreProducer* translationScoreProduc
       fullScore = UntransformLMScore(fullScore);
       nGramScore = UntransformLMScore(nGramScore);
 
-      //std::cout << "nGram Score : " << totalNgramScore << std::endl;
-
       if (StaticData::Instance().GetLMEnableOOVFeature()) {
         vector<float> scores(2);
         scores[0] = nGramScore;
@@ -449,9 +384,7 @@ void TargetPhraseMBOT::SetScoreChart(const ScoreProducer* translationScoreProduc
 
       // total LM score so far
       totalNgramScore  += nGramScore * weightLM;
-      //std::cout << "Total n-gram score : " << totalNgramScore << std::endl;
       totalFullScore   += fullScore * weightLM;
-      //std::cout << "Full score : " << totalFullScore << std::endl;
     }
   }
 
@@ -472,20 +405,7 @@ void TargetPhraseMBOT::SetScoreChart(const ScoreProducer* translationScoreProduc
   }
 
   m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore + totalOOVScore;
-
- // std::cout << "SCORE COMPONENENT BREAKDOWN FOR THIS TARGET PHRASE : " << m_scoreBreakdown << std::endl;
-  //std::cout << "Set future score : " << m_fullScore << std::endl;
-  // std::cout << "TP : " << *this << std::endl;
 }
-
-//void TargetPhraseMBOT::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
-//{
-    //new : when setting alignment pushback one alignment into vector
-    //std::cout << "Setting alignment info" << std::endl;
-//    AlignmentInfo createdAlignInfo = *AlignmentInfoCollection::Instance().Add(alignmentInfo);
-//    std::cout << "Created alignment : "<< createdAlignInfo << std::endl;
-//    m_alignments.push_back(&createdAlignInfo);
-//}
 
 
 // friend
@@ -517,15 +437,10 @@ ostream& operator<<(ostream& out, const TargetPhraseMBOT& targetPhrase)
   int alignmentCounter = 0;
   for(itr_vector_align = mbotAlignments->begin(); itr_vector_align != mbotAlignments->end(); itr_vector_align++)
     {
-        //out << "In LOOP" << endl;
         const AlignmentInfoMBOT* infoToPrint = *itr_vector_align;
         if(infoToPrint != NULL)
         {
             out << *infoToPrint << "(" << ++alignmentCounter << ") ";
-            //out << "Alignment map : ";
-            //std::vector<size_t> :: const_iterator itr_map;
-            //for(itr_map = infoToPrint->GetNonTermIndexMap()->begin(); itr_map != infoToPrint->GetNonTermIndexMap()->end(); itr_map++)
-            //{ out << *itr_map << std::endl; }
         }
         else{out << "No alignment";}
     }

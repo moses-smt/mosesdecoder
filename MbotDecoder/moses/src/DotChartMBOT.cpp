@@ -23,20 +23,7 @@
 namespace Moses
 {
 
-/*std::ostream &operator<<(std::ostream &out, const DottedRuleMBOT &rule)
-{
-  if (!rule.IsRootMBOT()) {
-    out << rule.GetWordsRangeMBOT() << "=" << rule.GetSourceWordMBOT() << " " << std::endl;
-    out << "PARENT LABEL" << rule.GetWordsRangeMBOT() << "=" << rule.GetSourceLabel();
-    if (!rule.m_mbotPrev->IsRootMBOT()) {
-      out << " " << *rule.m_mbotPrev;
-    }
-  }
-  return out;
-}*/
-
 //Output for more detailed translation report
-
 std::ostream &operator<<(std::ostream &out, const DottedRuleMBOT &rule)
 {
   //
@@ -66,7 +53,6 @@ std::ostream &operator<<(std::ostream &out, const DottedRuleMBOT &rule)
         out << std::endl;
         }
 
-    //rule.GetSourceWordMBOT() << " ";
     if (!rule.GetPrevMBOT()->IsRootMBOT()) {
       out << " " << *rule.GetPrevMBOT() << std::endl;
     }
