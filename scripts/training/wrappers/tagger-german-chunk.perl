@@ -45,9 +45,6 @@ if (!defined($chunkedPath)) {
   my $cmd = "$treetaggerPath/cmd/tagger-chunker-german-utf8  < $inPath > $chunkedPath";
   `$cmd`;  
 }
-else {
-  print STDERR "hahaha \n";
-}
 
 # convert chunked file into Moses XML
 open(CHUNKED, "$chunkedPath");
@@ -134,5 +131,5 @@ print "\n";
 close(IN);
 close(CHUNKED);
 
-#`rm -rf $TMPDIR`;
+`rm -rf $TMPDIR`;
 
