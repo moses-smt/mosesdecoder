@@ -1,15 +1,20 @@
 #!/usr/bin/perl 
 
 use strict;
+use Getopt::Long "GetOptions";
 
 # split -a 5 -d  ../europarl.clean.5.de 
 # ls -1 x????? | ~/workspace/coreutils/parallel/src/parallel /home/s0565741/workspace/treetagger/cmd/run-tagger-chunker-german.sh 
 # cat x?????.out > ../out
 
+my $chunkedPath;
+my $treetaggerPath;
+
+GetOptions('chunked=s' => \$chunkedPath,
+          'tree-tagger=s' => \$treetaggerPath);
+
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
-
-my $chunkedPath = $ARGV[0];
 
 #my $TMPDIR= "/tmp/chunker.$$";
 my $TMPDIR= "chunker.$$";
@@ -27,6 +32,22 @@ while(my $line = <STDIN>) {
   print IN "$line\n";
 }
 close(IN);
+
+# call chunker
+if (!defined($chunkedPath)) {
+  if (!defined($treetaggerPath)) {
+    print STDERR "must defined -tree-tagger \n";
+    exit(1);
+  }
+  
+  $chunkedPath = "$TMPDIR/chunked";
+  print STDERR "chunkedPath not defined. Now $chunkedPath \n";
+  my $cmd = "$treetaggerPath/cmd/tagger-chunker-german-utf8  < $inPath > $chunkedPath";
+  `$cmd`;  
+}
+else {
+  print STDERR "hahaha \n";
+}
 
 # convert chunked file into Moses XML
 open(CHUNKED, "$chunkedPath");
@@ -113,5 +134,5 @@ print "\n";
 close(IN);
 close(CHUNKED);
 
-`rm -rf $TMPDIR`;
+#`rm -rf $TMPDIR`;
 
