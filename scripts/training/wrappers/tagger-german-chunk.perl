@@ -54,7 +54,7 @@ while(my $chunkLine = <CHUNKED>) {
   	  if ($wordPos == ($numWords - 1)) {
 	    # closing bracket of last word in sentence
 	    print "\n";
-        $sentence = <IN>;
+            $sentence = <IN>;
 	    chomp($sentence);
 	    @words = split(/ /, $sentence);
 	    $numWords = scalar @words;
@@ -63,6 +63,16 @@ while(my $chunkLine = <CHUNKED>) {
     }
     else {
       # beginning of tag
+      if ($wordPos == ($numWords - 1)) {
+        # closing bracket of last word in sentence                                                                                      
+        print "\n";
+        $sentence = <IN>;
+        chomp($sentence);
+        @words = split(/ /, $sentence);
+        $numWords = scalar @words;
+        $wordPos = -1;
+      }
+
       $prevTag = $chunkToks[0];
       $prevTag = substr($prevTag, 1, length($prevTag) - 2);
       print "<tree label=\"$prevTag\">";
