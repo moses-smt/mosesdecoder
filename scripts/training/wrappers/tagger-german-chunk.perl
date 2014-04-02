@@ -64,7 +64,7 @@ while(my $chunkLine = <CHUNKED>) {
     else {
       # beginning of tag
       $prevTag = $chunkToks[0];
-      $prevTag = substr($prevTag, 1, length($prevTag));
+      $prevTag = substr($prevTag, 1, length($prevTag) - 2);
       print "<tree label=\"$prevTag\">";
     }
   }
