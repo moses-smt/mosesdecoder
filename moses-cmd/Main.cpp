@@ -252,14 +252,17 @@ public:
         if ( appendSuffix ) {
           fileName << "." << compression;
         }
-        boost::iostreams::filtering_ostream *file = new boost::iostreams::filtering_ostream;
+        boost::iostreams::filtering_ostream *file 
+	  = new boost::iostreams::filtering_ostream;
 
         if ( compression == "gz" ) {
           file->push( boost::iostreams::gzip_compressor() );
         } else if ( compression == "bz2" ) {
           file->push( boost::iostreams::bzip2_compressor() );
         } else if ( compression != "txt" ) {
-          TRACE_ERR("Unrecognized hypergraph compression format (" << compression << ") - using uncompressed plain txt" << std::endl);
+          TRACE_ERR("Unrecognized hypergraph compression format (" 
+		    << compression 
+		    << ") - using uncompressed plain txt" << std::endl);
           compression = "txt";
         }
 
@@ -270,7 +273,10 @@ public:
           manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
           file -> flush();
         } else {
-          TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file " << fileName.str() << " is not open or not ready for writing" << std::endl);
+          TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber 
+		    << " because the output file " << fileName.str() 
+		    << " is not open or not ready for writing" 
+		    << std::endl);
         }
         file -> pop();
         delete file;
