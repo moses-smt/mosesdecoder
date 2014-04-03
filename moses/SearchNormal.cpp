@@ -57,6 +57,7 @@ void SearchNormal::ProcessSentence()
   m_hypoStackColl[0]->AddPrune(hypo);
 
   // go through each stack
+  size_t stackNo = 0;
   std::vector < HypothesisStack* >::iterator iterStack;
   for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
     // check if decoding ran out of time
@@ -90,9 +91,12 @@ void SearchNormal::ProcessSentence()
     IFVERBOSE(2) {
       OutputHypoStackSize();
     }
+    OutputHypoStack(stackNo);
 
     // this stack is fully expanded;
     actual_hypoStack = &sourceHypoColl;
+
+    ++stackNo;
   }
 }
 
@@ -379,6 +383,21 @@ void SearchNormal::OutputHypoStackSize()
     TRACE_ERR( ", " << (int)(*iterStack)->size());
   }
   TRACE_ERR( endl);
+}
+
+void SearchNormal::OutputHypoStack(int stack)
+{
+  if (stack >= 0) {
+    TRACE_ERR( "Stack " << stack << ": " << endl << m_hypoStackColl[stack] << endl);
+  } else {
+    // all stacks
+    int i = 0;
+    vector < HypothesisStack* >::iterator iterStack;
+    for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
+      HypothesisStackNormal &hypoColl = *static_cast<HypothesisStackNormal*>(*iterStack);
+      TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
+    }
+  }
 }
 
 }
