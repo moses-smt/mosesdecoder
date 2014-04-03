@@ -106,7 +106,6 @@ FFState* ConstrainedDecoding::Evaluate(
 
   ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
   const Phrase &outputPhrase = ret->GetPhrase();
-
   size_t searchPos = ref->Find(outputPhrase, m_maxUnknowns);
 
   float score;
