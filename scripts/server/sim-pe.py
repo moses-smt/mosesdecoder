@@ -1,24 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# based on contrib/server/client.py from the moses distribution
-# this script simulates post-editing of MT output and incrementally
-# updates the dynamic phrase tables in the moses server
+# Written by Ulrich Germann on the basis of contrib/server/client.py.
+# This script simulates post-editing of MT output and incrementally
+# updates the dynamic phrase tables in the moses server.
 
 import xmlrpclib,datetime,argparse,sys,os,time
 from subprocess import *
 
-# we some need custom argument processing, as moses parameter specifications 
-# do not comply with the standards used in standard argument parsing packages
-# a double dash separates script arguments from moses arguments
+# We must perform some custom argument processing, as moses parameter
+# specifications do not comply with the standards used in standard
+# argument parsing packages; an isolated double dash separates script
+# arguments from moses arguments
 
 MosesProcess = None 
 NBestFile    = None
+
 def shutdown():
     if MosesProcess:
         if args.debug:
             print >>sys.stderr,"shutting down moses server"
+            pass
         MosesProcess.terminate()
+        pass
+    return
 
 def find_free_port(p):
     """
@@ -57,13 +62,14 @@ def launch_moses(mo_args):
         devnull = open(os.devnull,"w")
         MosesProcess = Popen([args.servercmd] + mo_args, 
                              stderr=devnull, stdout=devnull)
-    # time.sleep(30)
     if MosesProcess.poll():
         print >>sys.stderr, "FATAL ERROR: Could not launch moses server!"
         sys.exit(1)
         pass
     if args.debug:
-        print >>sys.stderr,"MOSES port is %d; moses poll status is "%port, MosesProcess.poll()
+        print >>sys.stderr,"MOSES port is %d."%port 
+        print >>sys.stderr,"Moses poll status is", MosesProcess.poll()
+        pass
     return "http://localhost:%d"%port
 
 def split_args(all_args):
@@ -121,9 +127,6 @@ def split_args(all_args):
             my_args.extend(["-U"])
             mo_args[i:i+1] = []
 
-        elif mo_args[i] == "-show-weights":
-            my_args.append("--show-weights")
-            mo_args[i:i+1] = []
         else:
             i += 1
             pass
@@ -137,10 +140,10 @@ def interpret_args(my_args):
     aparser = argparse.ArgumentParser()
 
     # interfacing with moses
-    aparser.add_argument("-m","--moses-cmd",default="moses",dest="mosescmd",
-                         help="path to standard moses command")
-    aparser.add_argument("-s","--server-cmd",default="mosesserver",dest="servercmd",
-                         help="path to moses server command")
+    # aparser.add_argument("-m","--moses-cmd",default="moses",dest="mosescmd",
+    #                      help="path to standard moses command")
+    aparser.add_argument("-s","--server-cmd",default="mosesserver",
+                         dest="servercmd", help="path to moses server command")
     aparser.add_argument("-u","--url",help="URL of external moses server.")
     
     # input / output
@@ -231,8 +234,16 @@ def repack_result(id,result):
 
 if __name__ == "__main__":
     my_args, mo_args = split_args(sys.argv[1:])
+
     global args
     args = interpret_args(my_args)
+    if "-show-weights" in mo_args:
+        devnull = open(os.devnull,"w")
+        mo = Popen([args.servercmd] + mo_args,stdout=PIPE,stderr=devnull)
+        print mo.communicate()[0].strip()
+        sys.exit(0)
+        pass
+
     if args.nbest:
         if args.nbestFile:
             NBestFile = open(args.nbestFile,"w")

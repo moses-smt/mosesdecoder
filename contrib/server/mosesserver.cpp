@@ -15,6 +15,7 @@
 #endif
 #include "moses/TreeInput.h"
 #include "moses/LM/ORLM.h"
+#include "moses-cmd/IOWrapper.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -49,7 +50,8 @@ public:
     pdsa->add(source_,target_,alignment_);
 #else
     const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
-    PhraseDicgtionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
+    PhraseDicgtionaryDynSuffixArray* 
+      pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
 #endif
@@ -115,17 +117,20 @@ public:
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");
     if(si == params.end())
-      throw xmlrpc_c::fault("Missing source sentence", xmlrpc_c::fault::CODE_PARSE);
+      throw xmlrpc_c::fault("Missing source sentence", 
+			    xmlrpc_c::fault::CODE_PARSE);
     source_ = xmlrpc_c::value_string(si->second);
     cerr << "source = " << source_ << endl;
     si = params.find("target");
     if(si == params.end())
-      throw xmlrpc_c::fault("Missing target sentence", xmlrpc_c::fault::CODE_PARSE);
+      throw xmlrpc_c::fault("Missing target sentence", 
+			    xmlrpc_c::fault::CODE_PARSE);
     target_ = xmlrpc_c::value_string(si->second);
     cerr << "target = " << target_ << endl;
     si = params.find("alignment");
     if(si == params.end())
-      throw xmlrpc_c::fault("Missing alignment", xmlrpc_c::fault::CODE_PARSE);
+      throw xmlrpc_c::fault("Missing alignment", 
+			    xmlrpc_c::fault::CODE_PARSE);
     alignment_ = xmlrpc_c::value_string(si->second);
     cerr << "alignment = " << alignment_ << endl;
     si = params.find("bounded");
@@ -158,7 +163,8 @@ public:
         xmlrpc_c::fault::CODE_PARSE);
     }
     const string model_name = xmlrpc_c::value_string(si->second);
-    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+    PhraseDictionaryMultiModel* 
+      pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
 
     si = params.find("phrase_pairs");
     if (si == params.end()) {
@@ -169,10 +175,13 @@ public:
 
     vector<pair<string, string> > phrase_pairs;
 
-    xmlrpc_c::value_array phrase_pairs_array = xmlrpc_c::value_array(si->second);
-    vector<xmlrpc_c::value> phrasePairValueVector(phrase_pairs_array.vectorValueValue());
+    xmlrpc_c::value_array phrase_pairs_array 
+      = xmlrpc_c::value_array(si->second);
+    vector<xmlrpc_c::value> phrasePairValueVector
+      (phrase_pairs_array.vectorValueValue());
     for (size_t i=0;i < phrasePairValueVector.size();i++) {
-        xmlrpc_c::value_array phrasePairArray = xmlrpc_c::value_array(phrasePairValueVector[i]);
+        xmlrpc_c::value_array phrasePairArray 
+	  = xmlrpc_c::value_array(phrasePairValueVector[i]);
         vector<xmlrpc_c::value> phrasePair(phrasePairArray.vectorValueValue());
         string L1 = xmlrpc_c::value_string(phrasePair[0]);
         string L2 = xmlrpc_c::value_string(phrasePair[1]);
@@ -188,7 +197,8 @@ public:
     }
     *retvalP = xmlrpc_c::value_array(weight_vector_ret);
 #else
-    string errmsg = "Error: Perplexity minimization requires dlib (compilation option --with-dlib)";
+    string errmsg = "Error: Perplexity minimization requires dlib ";
+    errmsg       += "(compilation option --with-dlib)";
     cerr << errmsg << endl;
     *retvalP = xmlrpc_c::value_string(errmsg);
 #endif
@@ -219,8 +229,7 @@ public:
         "Missing source text",
         xmlrpc_c::fault::CODE_PARSE);
     }
-    const string source(
-      (xmlrpc_c::value_string(si->second)));
+    const string source((xmlrpc_c::value_string(si->second)));
 
     cerr << "Input: " << source << endl;
     si = params.find("align");
@@ -232,24 +241,32 @@ public:
     si = params.find("report-all-factors");
     bool reportAllFactors = (si != params.end());
     si = params.find("nbest");
-    int nbest_size = (si == params.end()) ? 0 : int(xmlrpc_c::value_int(si->second));
+    int nbest_size = ((si == params.end()) ? 0 
+		      : int(xmlrpc_c::value_int(si->second)));
     si = params.find("nbest-distinct");
     bool nbest_distinct = (si != params.end());
+
+    si = params.find("add-score-breakdown");
+    bool addScoreBreakdown = (si != params.end());
 
     vector<float> multiModelWeights;
     si = params.find("lambda");
     if (si != params.end()) {
-        xmlrpc_c::value_array multiModelArray = xmlrpc_c::value_array(si->second);
-        vector<xmlrpc_c::value> multiModelValueVector(multiModelArray.vectorValueValue());
+        xmlrpc_c::value_array multiModelArray 
+	  = xmlrpc_c::value_array(si->second);
+        vector<xmlrpc_c::value> multiModelValueVector
+	  (multiModelArray.vectorValueValue());
         for (size_t i=0;i < multiModelValueVector.size();i++) {
-            multiModelWeights.push_back(xmlrpc_c::value_double(multiModelValueVector[i]));
+            multiModelWeights.push_back
+	      (xmlrpc_c::value_double(multiModelValueVector[i]));
         }
     }
 
     si = params.find("model_name");
     if (si != params.end() && multiModelWeights.size() > 0) {
         const string model_name = xmlrpc_c::value_string(si->second);
-        PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+        PhraseDictionaryMultiModel* pdmm; 
+	pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
         pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
     }
 
@@ -264,8 +281,8 @@ public:
 
     if (staticData.IsChart()) {
        TreeInput tinput;
-        const vector<FactorType> &inputFactorOrder =
-          staticData.GetInputFactorOrder();
+        const vector<FactorType>& 
+	  inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
         ChartManager manager(tinput);
@@ -286,7 +303,8 @@ public:
         vector<xmlrpc_c::value> alignInfo;
         outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
         if (addAlignInfo) {
-          retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
+          retData.insert(pair<string, xmlrpc_c::value>
+			 ("align", xmlrpc_c::value_array(alignInfo)));
         }
 
         if(addGraphInfo) {
@@ -297,7 +315,8 @@ public:
           insertTranslationOptions(manager,retData);
         }
         if (nbest_size>0) {
-          outputNBest(manager, retData, nbest_size, nbest_distinct, reportAllFactors, addAlignInfo);
+          outputNBest(manager, retData, nbest_size, nbest_distinct, 
+		      reportAllFactors, addAlignInfo, addScoreBreakdown);
         }
     }
     pair<string, xmlrpc_c::value>
@@ -307,9 +326,12 @@ public:
     *retvalP = xmlrpc_c::value_struct(retData);
   }
 
-  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, bool reportAllFactors = false) {
+  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, 
+		  vector<xmlrpc_c::value>& alignInfo, 
+		  bool reportAllFactors = false) {
     if (hypo->GetPrevHypo() != NULL) {
-      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, reportAllFactors);
+      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, 
+		 reportAllFactors);
       Phrase p = hypo->GetCurrTargetPhrase();
       if(reportAllFactors) {
         out << p << " ";
@@ -322,13 +344,21 @@ public:
 
       if (addAlignmentInfo) {
         /**
-         * Add the alignment info to the array. This is in target order and consists of
-         *       (tgt-start, src-start, src-end) triples.
+         * Add the alignment info to the array. This is in target
+         * order and consists of (tgt-start, src-start, src-end)
+         * triples.
          **/
         map<string, xmlrpc_c::value> phraseAlignInfo;
-        phraseAlignInfo["tgt-start"] = xmlrpc_c::value_int(hypo->GetCurrTargetWordsRange().GetStartPos());
-        phraseAlignInfo["src-start"] = xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetStartPos());
-        phraseAlignInfo["src-end"] = xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetEndPos());
+
+        phraseAlignInfo["tgt-start"] 
+	= xmlrpc_c::value_int(hypo->GetCurrTargetWordsRange().GetStartPos());
+
+        phraseAlignInfo["src-start"] 
+	= xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetStartPos());
+
+        phraseAlignInfo["src-end"] 
+	= xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetEndPos());
+
         alignInfo.push_back(xmlrpc_c::value_struct(phraseAlignInfo));
       }
     }
@@ -388,7 +418,8 @@ public:
                    const int n=100,
                    const bool distinct=false,
                    const bool reportAllFactors=false,
-                   const bool addAlignmentInfo=false)
+                   const bool addAlignmentInfo=false,
+		   const bool addScoreBreakdown=false)
   {
     TrellisPathList nBestList;
     manager.CalcNBest(n, nBestList, distinct);
@@ -428,6 +459,14 @@ public:
       if (addAlignmentInfo)
         nBestXMLItem["align"] = xmlrpc_c::value_array(alignInfo);
 
+      if (addScoreBreakdown)
+	{
+	  // should the score breakdown be reported in a more structured manner?
+	  ostringstream buf;
+	  MosesCmd::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
+	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
+	}
+
       // weighted score
       nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetTotalScore());
       nBestXml.push_back(xmlrpc_c::value_struct(nBestXMLItem));
@@ -466,11 +505,55 @@ public:
     }
     retData.insert(pair<string, xmlrpc_c::value>("topt", xmlrpc_c::value_array(toptsXml)));
   }
-
-
-
 };
 
+static 
+void 
+PrintFeatureWeight(ostream& out, const FeatureFunction* ff)
+{
+  out << ff->GetScoreProducerDescription() << "=";
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+  for (size_t i = 0; i < numScoreComps; ++i) {
+    out << " " << values[i];
+  }
+  out << endl;
+}
+
+static 
+void 
+ShowWeights(ostream& out)
+{
+  // adapted from moses-cmd/Main.cpp
+  std::ios::fmtflags old_flags = out.setf(std::ios::fixed);
+  size_t         old_precision = out.precision(6);
+  const vector<const StatelessFeatureFunction*>& 
+    slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& 
+    sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+
+  for (size_t i = 0; i < sff.size(); ++i) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(out,ff);
+    }
+    else {
+      out << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
+  }
+  for (size_t i = 0; i < slf.size(); ++i) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(out,ff);
+    }
+    else {
+      out << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
+  }
+  if (! (old_flags & std::ios::fixed)) 
+    out.unsetf(std::ios::fixed);
+  out.precision(old_precision);
+}
 
 int main(int argc, char** argv)
 {
@@ -516,6 +599,11 @@ int main(int argc, char** argv)
   }
   if (!StaticData::LoadDataStatic(params, argv[0])) {
     exit(1);
+  }
+
+  if (params->isParamSpecified("show-weights")) {
+    ShowWeights(cout);
+    exit(0);
   }
 
   //512 MB data limit (512KB is not enough for optimization)
