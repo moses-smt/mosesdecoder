@@ -1332,16 +1332,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetWordInsertionFeature.h</locationURI>
 		</link>
 		<link>
-			<name>FF/TreeStructureFeature.cpp</name>
-			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/moses/FF/TreeStructureFeature.cpp</location>
-		</link>
-		<link>
-			<name>FF/TreeStructureFeature.h</name>
-			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/moses/FF/TreeStructureFeature.h</location>
-		</link>
-		<link>
 			<name>FF/UnknownWordPenaltyProducer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/UnknownWordPenaltyProducer.cpp</locationURI>
