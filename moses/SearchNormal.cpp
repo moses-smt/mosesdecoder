@@ -95,7 +95,7 @@ void SearchNormal::ProcessSentence()
     actual_hypoStack = &sourceHypoColl;
 
   }
-  OutputHypoStack();
+  //OutputHypoStack();
 }
 
 
