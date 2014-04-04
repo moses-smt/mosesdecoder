@@ -103,6 +103,7 @@ while(my $chunkLine = <CHUNKED>) {
     if (scalar(@chunkToks) != 3) {
       # parse error
       print STDERR "CHUNK LINES SHOULD BE 3 TOKS\n";
+      exit(1);
     }
 
     if ($wordPos >= $numWords) {
@@ -125,6 +126,7 @@ while(my $chunkLine = <CHUNKED>) {
     if ($chunkToks[0] ne $words[$wordPos]) {
       # word in chunk input and sentence should match
       print STDERR "NOT EQUAL:" .$chunkToks[0] ." != " .$words[$wordPos] ."\n";
+      exit(1);
     }
 
     print $chunkToks[0] . " ";
