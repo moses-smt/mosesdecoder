@@ -107,7 +107,14 @@ while(my $chunkLine = <CHUNKED>) {
 
     if ($wordPos >= $numWords) {
       # on new sentence now
+      if (length($prevTag) > 0) {
+        print "</tree>";
+      }
       print "\n";
+      if (length($prevTag) > 0) {
+	  print "<tree label=\"$prevTag\">";
+      }
+
       $sentence = <IN>;
       chomp($sentence);
       @words = split(/ /, $sentence);
