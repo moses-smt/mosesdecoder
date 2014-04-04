@@ -114,7 +114,7 @@ class Moses():
                 
                 if mode == 'counts' and not priority == 2: #priority 2 is MAP
                     try:
-                        counts = map(float,line[-1].split())
+                        counts = map(float,line[4].split())
                         try:
                             target_count,src_count,joint_count = counts
                             joint_count_e2f = joint_count
@@ -145,7 +145,7 @@ class Moses():
         if (store == 'all' or store == 'source') and not (filter_by_src and not src in filter_by_src):
             if mode == 'counts' and not priority == 2: #priority 2 is MAP
                 try:
-                    self.phrase_source[src][i] = float(line[-1].split()[1])
+                    self.phrase_source[src][i] = float(line[4].split()[1])
                 except:
                     sys.stderr.write(str(line)+'\n')
                     sys.stderr.write('ERROR: Counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts or word alignment?\n')
@@ -156,7 +156,7 @@ class Moses():
         if (store == 'all' or store == 'target') and not (filter_by_target and not target in filter_by_target):
             if mode == 'counts' and not priority == 2: #priority 2 is MAP
                 try:
-                    self.phrase_target[target][i] = float(line[-1].split()[0])
+                    self.phrase_target[target][i] = float(line[4].split()[0])
                 except:
                     sys.stderr.write(str(line)+'\n')
                     sys.stderr.write('ERROR: Counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts or word alignment?\n')
@@ -210,6 +210,9 @@ class Moses():
                 for line in model:
 
                     line = line.rstrip().split(b' ||| ')
+                    if line[-1].endswith(b' |||'):
+                      line[-1] = line[-1][:-4]
+                      line.append('')
                 
                     if increment != line[0]:
                         stack[i] = line
@@ -300,8 +303,9 @@ class Moses():
     def store_info(self,src,target,line):
         """store alignment info and comment section for re-use in output"""
         
-        if len(line) == 5:
-            self.phrase_pairs[src][target][1] = line[3:5]
+        if len(line) >= 5:
+            if not self.phrase_pairs[src][target][1]:
+                self.phrase_pairs[src][target][1] = line[3:]
         
         # assuming that alignment is empty
         elif len(line) == 4:
@@ -373,7 +377,8 @@ class Moses():
             return ''
         
         # information specific to Moses model: alignment info and comment section with target and source counts
-        alignment,comments = self.phrase_pairs[src][target][1]
+        additional_entries = self.phrase_pairs[src][target][1]
+        alignment = additional_entries[0]
         if alignment:
             extra_space = b' '
         else:
@@ -384,7 +389,7 @@ class Moses():
             i_f2e = flags['i_f2e']
             srccount =  dot_product(self.phrase_source[src],weights[i_f2e])
             targetcount = dot_product(self.phrase_target[target],weights[i_e2f])
-            comments = b"%s %s" %(targetcount,srccount)
+            additional_entries[1] = b"%s %s" %(targetcount,srccount)
             
         features = b' '.join([b'%.6g' %(f) for f in features])
         
@@ -397,7 +402,7 @@ class Moses():
           phrase_penalty = b' 2.718'
         else:
           phrase_penalty = b''
-        line = b"%s ||| %s ||| %s%s %s||| %s%s||| %s\n" %(src,target,features,origin_features,phrase_penalty,alignment,extra_space,comments)
+        line = b"%s ||| %s ||| %s%s %s||| %s%s||| %s\n" %(src,target,features,origin_features,phrase_penalty,alignment,extra_space,b' ||| '.join(additional_entries[1:]))
         return line
         
         
@@ -473,8 +478,15 @@ class Moses():
         for line,line2 in izip(pt_normal,pt_inverse):
             
             line = line.split(b' ||| ')
+            if line[-1].endswith(b' |||'):
+                line[-1] = line[-1][:-4]
+                line.append('')
+
             line2 = line2.split(b' ||| ')
-            
+            if line2[-1].endswith(b' |||'):
+                line2[-1] = line2[-1][:-4]
+                line2.append('')
+
             #scores
             mid = int(self.number_of_features/2)
             scores1 = line[2].split()
@@ -483,11 +495,11 @@ class Moses():
             
             # marginal counts
             if mode == 'counts':
-                src_count = line[-1].split()[1]
+                src_count = line[4].split()[1]
                 target_count = line2[-1].split()[0]
-                line[-1] = b' '.join([target_count,src_count]) + b'\n'
+                line[4] = b' '.join([target_count,src_count])
             
-            pt_out.write(b' ||| '.join(line))
+            pt_out.write(b' ||| '.join(line)+ b'\n')
             
         pt_normal.close()
         pt_inverse.close()
@@ -685,7 +697,10 @@ class Moses_Alignment():
         for line in fileobj:
             
             line = line.split(b' ||| ')
-            
+            if line[-1].endswith(b' |||'):
+                line[-1] = line[-1][:-4]
+                line.append('')
+
             src = line[0]
             target = line[1]
             
@@ -1528,6 +1543,9 @@ class Combine_TMs():
                         sys.stderr.write('...'+str(j))
                     j += 1
                     line = line.rstrip().split(b' ||| ')
+                    if line[-1].endswith(b' |||'):
+                        line[-1] = line[-1][:-4]
+                        line.append('')
                     self.model_interface.load_phrase_features(line,priority,i,store='all',mode=self.mode,filter_by=self.reference_interface.word_pairs,filter_by_src=self.reference_interface.word_source,filter_by_target=self.reference_interface.word_target,flags=self.flags)
                 sys.stderr.write(' done\n')
 
@@ -1553,6 +1571,9 @@ class Combine_TMs():
                         sys.stderr.write('...'+str(j))
                     j += 1
                     line = line.rstrip().split(b' ||| ')
+                    if line[-1].endswith(b' |||'):
+                        line[-1] = line[-1][:-4]
+                        line.append('')
                     self.model_interface.load_phrase_features(line,priority,i,mode=self.mode,store='target',flags=self.flags)
                 sys.stderr.write(' done\n')
 

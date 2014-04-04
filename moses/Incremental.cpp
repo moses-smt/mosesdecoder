@@ -83,7 +83,7 @@ public:
 
   void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
 
-  float CalcEstimateOfBestScore(const TargetPhraseCollection & tpc, const StackVec & stackVec) const;
+  float GetBestScore(const ChartCellLabel *chartCell) const;
 
   bool Empty() const {
     return edges_.Empty();
@@ -124,8 +124,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   float below_score = 0.0;
   for (StackVec::const_iterator i(nts.begin()); i != nts.end(); ++i) {
     vertices.push_back((*i)->GetStack().incr->RootAlternate());
-    if (vertices.back().Empty()) return;
-    below_score += vertices.back().Bound();
+    below_score += (*i)->GetBestScore(this);
   }
 
   std::vector<lm::WordIndex> words;
@@ -178,15 +177,12 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   edges_.AddEdge(edge);
 }
 
-// for early pruning
-template <class Model> float Fill<Model>::CalcEstimateOfBestScore(const TargetPhraseCollection &targets, const StackVec &nts) const
+// for pruning
+template <class Model> float Fill<Model>::GetBestScore(const ChartCellLabel *chartCell) const
 {
-  float below_score = 0.0;
-  for (StackVec::const_iterator i = nts.begin(); i != nts.end(); ++i) {
-    below_score += (*i)->GetStack().incr->RootAlternate().Bound();
-  }
-  const TargetPhrase &targetPhrase = **(targets.begin());
-  return targetPhrase.GetFutureScore() + below_score;
+    search::PartialVertex vertex = chartCell->GetStack().incr->RootAlternate();
+    UTIL_THROW_IF2(vertex.Empty(), "hypothesis with empty stack");
+    return vertex.Bound();
 }
 
 // TODO: factors (but chart doesn't seem to support factors anyway).
