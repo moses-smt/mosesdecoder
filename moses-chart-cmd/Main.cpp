@@ -102,6 +102,14 @@ public:
       const std::vector<search::Applied> &nbest = manager.ProcessSentence();
       if (!nbest.empty()) {
         m_ioWrapper.OutputBestHypo(nbest[0], translationId);
+        if (staticData.IsDetailedTranslationReportingEnabled()) {
+          const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+          m_ioWrapper.OutputDetailedTranslationReport(&nbest[0], sentence, translationId);
+        }
+        if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+          const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+          m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(&nbest[0], sentence, translationId);
+        }
       } else {
         m_ioWrapper.OutputBestNone(translationId);
       }
