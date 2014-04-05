@@ -152,12 +152,13 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     search::Note note;
     note.vp = &phrase;
     edge.SetNote(note);
+    edge.SetRange(range);
 
     edges_.AddEdge(edge);
   }
 }
 
-template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &)
+template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &range)
 {
   std::vector<lm::WordIndex> words;
   UTIL_THROW_IF2(phrase.GetSize() > 1,
@@ -173,6 +174,7 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   search::Note note;
   note.vp = &phrase;
   edge.SetNote(note);
+  edge.SetRange(range);
 
   edges_.AddEdge(edge);
 }
