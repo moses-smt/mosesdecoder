@@ -12,7 +12,10 @@
 
 #include <boost/thread/mutex.hpp>
 
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 #include "Fdstream.h"
+#endif
+
 #include "ScoreStats.h"
 #include "Util.h"
 

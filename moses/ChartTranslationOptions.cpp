@@ -51,27 +51,6 @@ ChartTranslationOptions::~ChartTranslationOptions()
 
 }
 
-float ChartTranslationOptions::CalcEstimateOfBestScore(
-  const TargetPhraseCollection &tpc,
-  const StackVec &stackVec)
-{
-  const TargetPhrase &targetPhrase = **(tpc.begin());
-  float estimateOfBestScore = targetPhrase.GetFutureScore();
-  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
-       ++p) {
-    const HypoList *stack = (*p)->GetStack().cube;
-    assert(stack);
-    if (stack->empty()) {
-      estimateOfBestScore = - std::numeric_limits<float>::infinity();
-    }
-    else {
-      const ChartHypothesis &bestHypo = **(stack->begin());
-      estimateOfBestScore += bestHypo.GetTotalScore();
-    }
-  }
-  return estimateOfBestScore;
-}
-
 void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   SetInputPath(&inputPath);
