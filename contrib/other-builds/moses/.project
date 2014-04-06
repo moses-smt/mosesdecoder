@@ -1242,6 +1242,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SetSourcePhrase.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SetSourcePhrase.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SkeletonStatefulFF.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.cpp</locationURI>
