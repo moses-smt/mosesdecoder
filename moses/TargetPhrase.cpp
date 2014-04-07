@@ -287,11 +287,6 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
     os << " sourcePhrase=" << *sourcePhrase << flush;
   }
 
-  const Phrase *sourcePhrase = tp.GetRuleSource();
-  if (sourcePhrase) {
-    os << " sourcePhrase=" << *sourcePhrase << flush;
-  }
-
   return os;
 }
 
