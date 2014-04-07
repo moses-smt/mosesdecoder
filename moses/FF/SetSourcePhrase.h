@@ -33,6 +33,9 @@ public:
                              ScoreComponentCollection* accumulator) const
   {}
 
+  std::vector<float> DefaultWeights() const
+  { return std::vector<float>(); }
+
 };
 
 }

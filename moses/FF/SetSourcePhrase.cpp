@@ -4,9 +4,10 @@
 namespace Moses
 {
 SetSourcePhrase::SetSourcePhrase(const std::string &line)
-:StatelessFeatureFunction(1, line)
+:StatelessFeatureFunction(0, line)
 {
-	ReadParameters();
+  m_tuneable = false;
+  ReadParameters();
 }
 
 void SetSourcePhrase::Evaluate(const Phrase &source
