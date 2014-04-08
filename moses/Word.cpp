@@ -98,19 +98,37 @@ StringPiece Word::GetString(FactorType factorType) const
 
 class StrayFactorException : public util::Exception {};
 
-void Word::CreateFromString(FactorDirection direction
-                            , const std::vector<FactorType> &factorOrder
-                            , const StringPiece &str
-                            , bool isNonTerminal)
+void 
+Word::
+CreateFromString(FactorDirection direction
+		 , const std::vector<FactorType> &factorOrder
+		 , const StringPiece &str
+		 , bool isNonTerminal)
 {
+  // Don't go through the whole factor business if there's 
+  // only one factor to begin with; this way Moses users
+  // doesn't have to set a nonsense factor delimiter if they 
+  // aren't using factors to begin with. 
   FactorCollection &factorCollection = FactorCollection::Instance();
-
-  util::TokenIter<util::MultiCharacter> fit(str, StaticData::Instance().GetFactorDelimiter());
-  for (size_t ind = 0; ind < factorOrder.size() && fit; ++ind, ++fit) {
-    m_factorArray[factorOrder[ind]] = factorCollection.AddFactor(*fit);
-  }
-  UTIL_THROW_IF(fit, StrayFactorException, "You have configured " << factorOrder.size() << " factors but the word " << str << " contains factor delimiter " << StaticData::Instance().GetFactorDelimiter() << " too many times.");
-
+  if (factorOrder.size() == 1 and factorOrder[0] == 0)
+    {
+      m_factorArray[0] = factorCollection.AddFactor(str);
+    }
+  else
+    {
+      util::TokenIter<util::MultiCharacter> 
+	fit(str, StaticData::Instance().GetFactorDelimiter());
+      for (size_t ind = 0; ind < factorOrder.size() && fit; ++ind, ++fit) {
+	m_factorArray[factorOrder[ind]] = factorCollection.AddFactor(*fit);
+      }
+      
+      UTIL_THROW_IF(fit, StrayFactorException, 
+		    "You have configured " << factorOrder.size() 
+		    << " factors but the word " << str 
+		    << " contains factor delimiter " 
+		    << StaticData::Instance().GetFactorDelimiter() 
+		    << " too many times.");
+    }
   // assume term/non-term same for all factors
   m_isNonTerminal = isNonTerminal;
 }
