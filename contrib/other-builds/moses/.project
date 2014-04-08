@@ -1067,6 +1067,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
 		</link>
 		<link>
+			<name>FF/CountNonTerms.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CountNonTerms.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.h</locationURI>
+		</link>
+		<link>
 			<name>FF/CoveredReferenceFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.cpp</locationURI>
