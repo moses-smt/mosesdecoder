@@ -30,26 +30,39 @@ Rules::~Rules() {
 void Rules::CreateRules(const ConsistentPhrase &cp,
 		const Parameter &params)
 {
-	const ConsistentPhrase::NonTerms &nonTerms = cp.GetNonTerms();
-	for (size_t i = 0; i < nonTerms.size(); ++i) {
-		const NonTerm &nonTerm = nonTerms[i];
-		Rule *rule = new Rule(nonTerm, m_alignedSentence);
-
-		rule->Prevalidate(params);
-		rule->CreateTarget(params);
-
-
-		if (rule->CanRecurse()) {
-			Extend(*rule, params);
-		}
-
-		if (rule->IsValid()) {
-			m_keepRules.insert(rule);
-		}
-		else {
-			delete rule;
+	if (params.hieroSourceLHS) {
+		const NonTerm &nonTerm = cp.GetHieroNonTerm();
+		CreateRule(nonTerm, params);
+	}
+	else {
+		const ConsistentPhrase::NonTerms &nonTerms = cp.GetNonTerms();
+		for (size_t i = 0; i < nonTerms.size(); ++i) {
+			const NonTerm &nonTerm = nonTerms[i];
+			CreateRule(nonTerm, params);
 		}
 	}
+}
+
+void Rules::CreateRule(const NonTerm &nonTerm,
+		const Parameter &params)
+{
+	Rule *rule = new Rule(nonTerm, m_alignedSentence);
+
+	rule->Prevalidate(params);
+	rule->CreateTarget(params);
+
+
+	if (rule->CanRecurse()) {
+		Extend(*rule, params);
+	}
+
+	if (rule->IsValid()) {
+		m_keepRules.insert(rule);
+	}
+	else {
+		delete rule;
+	}
+
 }
 
 void Rules::Extend(const Parameter &params)

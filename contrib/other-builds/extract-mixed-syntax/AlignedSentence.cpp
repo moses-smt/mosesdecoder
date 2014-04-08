@@ -171,7 +171,7 @@ void AlignedSentence::CreateConsistentPhrases(const Parameter &params)
 			endS++) {
 
 		  // take note that this is a valid phrase alignment
-		  m_consistentPhrases.Add(startS, endS, startT, endT);
+		  m_consistentPhrases.Add(startS, endS, startT, endT, params);
 		}
 	  }
 	}

@@ -22,7 +22,8 @@ public:
 
 	ConsistentPhrase(const ConsistentPhrase &copy); // do not implement
 	ConsistentPhrase(int sourceStart, int sourceEnd,
-			int targetStart, int targetEnd);
+			int targetStart, int targetEnd,
+			const Parameter &params);
 
 	virtual ~ConsistentPhrase();
 
@@ -34,6 +35,8 @@ public:
 						const std::string &target);
 	const NonTerms &GetNonTerms() const
 	{ return m_nonTerms;}
+	const NonTerm &GetHieroNonTerm() const
+	{ return m_hieroNonTerm;}
 
 	bool TargetOverlap(const ConsistentPhrase &other) const;
 
@@ -43,5 +46,6 @@ public:
 
 protected:
   NonTerms m_nonTerms;
+  NonTerm m_hieroNonTerm;
 };
 

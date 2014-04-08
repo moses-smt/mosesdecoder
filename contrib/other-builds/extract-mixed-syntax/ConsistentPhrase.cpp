@@ -8,13 +8,16 @@
 #include "ConsistentPhrase.h"
 #include "Word.h"
 #include "NonTerm.h"
+#include "Parameter.h"
 
 using namespace std;
 
 ConsistentPhrase::ConsistentPhrase(
 		int sourceStart, int sourceEnd,
-		int targetStart, int targetEnd)
+		int targetStart, int targetEnd,
+		const Parameter &params)
 :corners(4)
+,m_hieroNonTerm(*this, params.hieroNonTerm, params.hieroNonTerm)
 {
 	corners[0] = sourceStart;
 	corners[1] = sourceEnd;
