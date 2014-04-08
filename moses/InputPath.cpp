@@ -20,7 +20,13 @@ InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
   ,m_inputScore(inputScore)
   ,m_nextNode(1)
   ,m_sourceNonTerms(sourceNonTerms)
+  ,m_sourceNonTermArray(FactorCollection::Instance().GetNumNonTerminals(), false)
 {
+  for (NonTerminalSet::const_iterator iter = sourceNonTerms.begin(); iter != sourceNonTerms.end(); ++iter) {
+    size_t idx = (*iter)[0]->GetId();
+    m_sourceNonTermArray[idx] = true;
+  }
+
   //cerr << "phrase=" << phrase << " m_inputScore=" << *m_inputScore << endl;
 
 }

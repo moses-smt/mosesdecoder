@@ -32,6 +32,7 @@ class TargetPhraseCollection;
 class WordsRange;
 class InputType;
 class InputPath;
+class ChartCellLabel;
 
 //! a vector of translations options for a specific range, in a specific sentence
 class ChartTranslationOptionList : public ChartParserCallback
@@ -59,6 +60,8 @@ public:
   bool Empty() const {
     return m_size == 0;
   }
+
+  float GetBestScore(const ChartCellLabel *chartCell) const;
 
   void Clear();
   void ApplyThreshold();

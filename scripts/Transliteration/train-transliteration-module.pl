@@ -13,7 +13,7 @@ print STDERR "Training Transliteration Module - Start\n".`date`;
 my $ORDER = 5;
 my $OUT_DIR = "/tmp/Transliteration-Model.$$";
 my $___FACTOR_DELIMITER = "|";
-my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$EXTERNAL_BIN_DIR,$INPUT_EXTENSION, $OUTPUT_EXTENSION);
+my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$EXTERNAL_BIN_DIR,$INPUT_EXTENSION, $OUTPUT_EXTENSION, $SOURCE_SYNTAX, $TARGET_SYNTAX);
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -30,7 +30,9 @@ die("ERROR: wrong syntax when invoking train-transliteration-module.perl")
 		       'order=i' => \$ORDER,
 		       'factor=s' => \$FACTOR,
 		       'srilm-dir=s' => \$SRILM_DIR,
-		       'out-dir=s' => \$OUT_DIR);
+		       'out-dir=s' => \$OUT_DIR,
+               'source-syntax' => \$SOURCE_SYNTAX,
+               'target-syntax' => \$TARGET_SYNTAX);
 
 # check if the files are in place
 die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, --srilm-dir, --moses-src-dir --external-bin-dir, --input-extension and --output-extension")
@@ -49,9 +51,21 @@ die("ERROR: could not find output corpus file '$CORPUS_E'")
 die("ERROR: could not find algnment file '$ALIGNMENT'")
     unless -e $ALIGNMENT;
 
-# create factors
 `mkdir $OUT_DIR`;
 
+# strip XML, if present
+my $stripped_corpus_f = $CORPUS_F;
+if (defined($SOURCE_SYNTAX)) {
+    $stripped_corpus_f = "$OUT_DIR/stripped.$INPUT_EXTENSION";
+    &strip_xml($CORPUS_F, $stripped_corpus_f);
+}
+my $stripped_corpus_e = $CORPUS_E;
+if (defined($TARGET_SYNTAX)) {
+    $stripped_corpus_e = "$OUT_DIR/stripped.$OUTPUT_EXTENSION";
+    &strip_xml($CORPUS_E, $stripped_corpus_e);
+}
+
+# create factors
 if (defined($FACTOR)) {
   
    my @factor_values = split(',', $FACTOR);
@@ -60,12 +74,12 @@ if (defined($FACTOR)) {
 
   my ($factor_f,$factor_e) = split(/\-/,$factor_val);
     
-    $CORPUS_F =~ /^(.+)\.([^\.]+)/;
+    $stripped_corpus_f =~ /^(.+)\.([^\.]+)/;
     my ($corpus_stem_f,$ext_f) = ($1,$2);
-    $CORPUS_E =~ /^(.+)\.([^\.]+)/;
+    $stripped_corpus_e =~ /^(.+)\.([^\.]+)/;
     my ($corpus_stem_e,$ext_e) = ($1,$2);
-    &reduce_factors($CORPUS_F,"$corpus_stem_f.$factor_val.$ext_f",$factor_f);
-    &reduce_factors($CORPUS_E,"$corpus_stem_e.$factor_val.$ext_e",$factor_e);
+    &reduce_factors($stripped_corpus_f,"$corpus_stem_f.$factor_val.$ext_f",$factor_f);
+    &reduce_factors($stripped_corpus_e,"$corpus_stem_e.$factor_val.$ext_e",$factor_e);
 
     `ln -s $corpus_stem_f.$factor_val.$ext_f $OUT_DIR/f`;
     `ln -s $corpus_stem_e.$factor_val.$ext_e $OUT_DIR/e`;
@@ -75,8 +89,8 @@ if (defined($FACTOR)) {
   }
 }
 else {
-    `ln -s $CORPUS_F $OUT_DIR/f`;
-    `ln -s $CORPUS_E $OUT_DIR/e`;
+    `ln -s $stripped_corpus_f $OUT_DIR/f`;
+    `ln -s $stripped_corpus_e $OUT_DIR/e`;
     `ln -s $ALIGNMENT $OUT_DIR/a`; 	
 
      }
@@ -286,6 +300,12 @@ sub reduce_factors {
     close(OUT);
     close(IN);
     `rm -f $reduced.lock`;
+}
+
+sub strip_xml {
+  my ($source, $dest) = @_;
+  my $cmd = "$MOSES_SRC_DIR/scripts/generic/strip-xml.perl < '$source' > '$dest'";
+  safesystem($cmd);
 }
 
 sub open_or_zcat {

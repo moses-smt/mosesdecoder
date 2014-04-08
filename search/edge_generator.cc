@@ -80,6 +80,7 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
     alternate.SetScore(top.GetScore() + alternate_changed.Bound() - old_value.Bound());
 
     alternate.SetNote(top.GetNote());
+    alternate.SetRange(top.GetRange());
 
     PartialVertex *alternate_nt = alternate.NT();
     for (Arity i = 0; i < victim; ++i) alternate_nt[i] = top_nt[i];

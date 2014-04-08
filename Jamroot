@@ -64,6 +64,8 @@
 #
 # --max-factors                  maximum number of factors (default 4)
 #
+# --unlabelled-source            ignore source labels (redundant in hiero or string-to-tree system)
+#                                for better performance
 #CONTROLLING THE BUILD
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
@@ -110,6 +112,7 @@ requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
 requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
+requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
 if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
