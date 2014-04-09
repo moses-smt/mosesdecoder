@@ -32,6 +32,7 @@ class TargetPhraseCollection;
 class WordsRange;
 class InputType;
 class InputPath;
+class ChartCellLabel;
 
 //! a vector of translations options for a specific range, in a specific sentence
 class ChartTranslationOptionList : public ChartParserCallback
@@ -60,9 +61,7 @@ public:
     return m_size == 0;
   }
 
-  float CalcEstimateOfBestScore(const TargetPhraseCollection & tpc, const StackVec & stackVec) const {
-    return ChartTranslationOptions::CalcEstimateOfBestScore(tpc, stackVec);
-  }
+  float GetBestScore(const ChartCellLabel *chartCell) const;
 
   void Clear();
   void ApplyThreshold();

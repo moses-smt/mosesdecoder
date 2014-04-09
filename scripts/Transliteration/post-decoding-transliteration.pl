@@ -274,6 +274,9 @@ sub run_decoder
 
 	my $find = ".cleaned.";
 	my $replace = ".transliterated.";
+  if ($final_file !~ /$find/) {
+    $find = ".output.";
+  }
 	$final_file =~ s/$find/$replace/g;
 	
 	`mkdir $corpus_dir/evaluation`;

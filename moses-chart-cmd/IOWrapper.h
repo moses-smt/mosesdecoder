@@ -93,9 +93,15 @@ protected:
   size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
   void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
   void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void ReconstructApplicationContext(const Moses::ChartHypothesis &hypo,
+                                     const Moses::Sentence &sentence,
+                                     ApplicationContext &context);
+  void ReconstructApplicationContext(const search::Applied *applied,
                                      const Moses::Sentence &sentence,
                                      ApplicationContext &context);
   void WriteApplicationContext(std::ostream &out,
@@ -125,7 +131,9 @@ public:
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, long translationId);
   void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputDetailedTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputDetailedTreeFragmentsTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedAllTranslationReport(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 

@@ -46,6 +46,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.lib.debug.1721952013.195400614" name="MeteorScorer.cpp" rcbsApplicability="disable" resourcePath="MeteorScorer.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537.307282660">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537.307282660" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537"/>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="mert/PreProcessFilter.h|mert/PreProcessFilter.cpp|mert/UtilTest.cpp|mert/TimerTest.cpp|mert/SingletonTest.cpp|mert/PointTest.cpp|mert/OptimizerFactoryTest.cpp|mert/NgramTest.cpp|mert/FeatureDataTest.cpp|mert/DataTest.cpp|mert/ReferenceTest.cpp|mert/VocabularyTest.cpp|mert/extractor.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
