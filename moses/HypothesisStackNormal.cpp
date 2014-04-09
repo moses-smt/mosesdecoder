@@ -153,6 +153,7 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 
 void HypothesisStackNormal::PruneToSize(size_t newSize)
 {
+  if ( newSize == 0) return; // no limit
   if ( size() <= newSize ) return; // ok, if not over the limit
 
   // we need to store a temporary list of hypotheses
