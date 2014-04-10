@@ -1252,6 +1252,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ReferenceComparison.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ReferenceComparison.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SetSourcePhrase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.cpp</locationURI>

@@ -39,6 +39,7 @@
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/SetSourcePhrase.h"
 #include "CountNonTerms.h"
+#include "ReferenceComparison.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -181,6 +182,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(HyperParameterAsWeight);
   MOSES_FNAME(SetSourcePhrase);
   MOSES_FNAME(CountNonTerms);
+  MOSES_FNAME(ReferenceComparison);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
