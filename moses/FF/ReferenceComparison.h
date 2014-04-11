@@ -5,7 +5,8 @@
 namespace Moses
 {
 
-// the only thing this FF does is set TargetPhrase::m_ruleSource so that other FF can use it in Evaluate(Search).
+// Count how many hypotheses are in each stack, compare score with reference hypo
+// NOT threadsafe.
 class ReferenceComparison : public StatelessFeatureFunction
 {
 public:
@@ -38,6 +39,7 @@ public:
 	  std::vector<float> DefaultWeights() const
 	  { return std::vector<float>(); }
 
+protected:
 
 };
 
