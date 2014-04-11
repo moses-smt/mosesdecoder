@@ -103,35 +103,40 @@ Word::
 CreateFromString(FactorDirection direction
 		 , const std::vector<FactorType> &factorOrder
 		 , const StringPiece &str
-		 , bool isNonTerminal)
+		 , bool isNonTerminal
+		 , bool strict)
 {
-  // // Don't go through the whole factor business if there's 
-  // // only one factor to begin with; this way Moses users
-  // // doesn't have to set a nonsense factor delimiter if they 
-  // // aren't using factors to begin with. 
-
   FactorCollection &factorCollection = FactorCollection::Instance();
-
-  // if (factorOrder.size() == 1 and factorOrder[0] == 0)
-  //   {
-  //     m_factorArray[0] = factorCollection.AddFactor(str);
-  //   }
-  // else
-  //   {
-
+  vector<StringPiece> bits(MAX_NUM_FACTORS);
   util::TokenIter<util::MultiCharacter> 
     fit(str, StaticData::Instance().GetFactorDelimiter());
-  for (size_t ind = 0; ind < factorOrder.size() && fit; ++ind, ++fit) {
-    m_factorArray[factorOrder[ind]] = factorCollection.AddFactor(*fit);
-  }
-      
-  UTIL_THROW_IF(fit, StrayFactorException, 
-		"You have configured " << factorOrder.size() 
-		<< " factors but the word " << str 
-		<< " contains factor delimiter " 
-		<< StaticData::Instance().GetFactorDelimiter() 
-		<< " too many times.");
-  // }
+  size_t i = 0;
+  for (; i < MAX_NUM_FACTORS && fit; ++i,++fit)
+    bits[i] = *fit;
+  if (i == MAX_NUM_FACTORS)
+    UTIL_THROW_IF(fit, StrayFactorException, 
+		  "The hard limit for factors is " << MAX_NUM_FACTORS
+		  << ". The word " << str << " contains factor delimiter " 
+		  << StaticData::Instance().GetFactorDelimiter() 
+		  << " too many times.");
+  if (strict)
+    UTIL_THROW_IF(fit, StrayFactorException, 
+		  "You have configured " << factorOrder.size() 
+		  << " factors but the word " << str 
+		  << " contains factor delimiter " 
+		  << StaticData::Instance().GetFactorDelimiter() 
+		  << " too many times.");
+  
+  UTIL_THROW_IF(i < factorOrder.size(),util::Exception, 
+		"Too few factors in string '" << str << "'.");
+  
+  for (size_t k = 0; k < factorOrder.size(); ++k) 
+    {
+      UTIL_THROW_IF(factorOrder[k] >= MAX_NUM_FACTORS, util::Exception, 
+		    "Factor order out of bounds.");
+      m_factorArray[factorOrder[k]] = factorCollection.AddFactor(bits[k]);
+    }
+  
   // assume term/non-term same for all factors
   m_isNonTerminal = isNonTerminal;
 }

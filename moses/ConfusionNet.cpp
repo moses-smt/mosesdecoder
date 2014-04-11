@@ -159,7 +159,7 @@ namespace Moses
       while(is>>word) {
 	Word w;
 	// String2Word(word,w,factorOrder);
-	w.CreateFromString(Input,factorOrder,StringPiece(word),false);
+	w.CreateFromString(Input,factorOrder,StringPiece(word),false,false);
 	std::vector<float> probs(totalCount, 0.0);
 	for(size_t i=0; i < numInputScores; i++) {
 	  double prob;
@@ -222,7 +222,7 @@ namespace Moses
 	  }
 	  // String2Word(word,data[i][j].first,factorOrder);
 	  Word& w = data[i][j].first;
-	  w.CreateFromString(Input,factorOrder,StringPiece(word),false);
+	  w.CreateFromString(Input,factorOrder,StringPiece(word),false,false);
 	} else return 0;
     }
     return !data.empty();
