@@ -50,7 +50,7 @@ public:
     pdsa->add(source_,target_,alignment_);
 #else
     const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
-    PhraseDicgtionaryDynSuffixArray* 
+    PhraseDictionaryDynSuffixArray* 
       pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
