@@ -5,7 +5,7 @@
 namespace Moses
 {
 
-// the only thing this FF does is set TargetPhrase::m_ruleSource so that other FF can use it in Evaluate(Search).
+// similar to Scope, however, adjacent non-term count as 1 ammbiguity, rather than 2
 class RuleAmbiguity : public StatelessFeatureFunction
 {
 public:
