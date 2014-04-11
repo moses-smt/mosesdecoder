@@ -1,4 +1,4 @@
-#include "RuleScope.h"
+#include "RuleAmbiguity.h"
 #include "moses/StaticData.h"
 #include "moses/Word.h"
 
