@@ -130,6 +130,10 @@ namespace Moses
     //! Create a sentence-specific manager for SCFG rule lookup.
     ChartRuleLookupManager*
     CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &);
+
+    ChartRuleLookupManager*
+    CreateRuleLookupManager
+    (const ChartParser &, const ChartCellCollectionBase &, std::size_t);
 #endif
 
     void add(string const& s1, string const& s2, string const& a);

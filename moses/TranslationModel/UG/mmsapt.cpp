@@ -484,6 +484,14 @@ namespace Moses
     throw "CreateRuleLookupManager is currently not supported in Mmsapt!";
   }
 
+  ChartRuleLookupManager*
+  Mmsapt::
+  CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &,
+			  size_t UnclearWhatThisVariableIsSupposedToAccomplishBecauseNobodyBotheredToDocumentItInPhraseTableDotHButIllTakeThisAsAnOpportunityToComplyWithTheMosesConventionOfRidiculouslyLongVariableAndClassNames)
+  {
+    throw "CreateRuleLookupManager is currently not supported in Mmsapt!";
+  }
+
   template<typename Token>
   void 
   fill_token_seq(TokenIndex& V, string const& line, vector<Token>& dest)
