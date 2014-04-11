@@ -121,6 +121,14 @@ public:
     return m_words[GetSize() - 1];
   }
 
+  inline const Word &Front() const {
+    return m_words[0];
+  }
+
+  inline const Word &Back() const {
+    return m_words[GetSize() - 1];
+  }
+
   //! particular factor at a particular position
   inline const Factor *GetFactor(size_t pos, FactorType factorType) const {
     const Word &ptr = m_words[pos];
