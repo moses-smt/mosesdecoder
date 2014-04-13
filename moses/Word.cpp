@@ -134,7 +134,7 @@ CreateFromString(FactorDirection direction
     {
       UTIL_THROW_IF(factorOrder[k] >= MAX_NUM_FACTORS, util::Exception, 
 		    "Factor order out of bounds.");
-      m_factorArray[factorOrder[k]] = factorCollection.AddFactor(bits[k]);
+      m_factorArray[factorOrder[k]] = factorCollection.AddFactor(bits[k], isNonTerminal);
     }
   
   // assume term/non-term same for all factors
