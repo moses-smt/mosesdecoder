@@ -66,6 +66,22 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
   }
 }
 
+// Intended to be used by ChartKBestExtractor only.  This creates a mock
+// ChartHypothesis for use by the extractor's top-level target vertex.
+ChartHypothesis::ChartHypothesis(const ChartHypothesis &pred,
+                                 const ChartKBestExtractor & /*unused*/)
+  :m_currSourceWordsRange(pred.m_currSourceWordsRange)
+  ,m_scoreBreakdown(pred.m_scoreBreakdown)
+  ,m_totalScore(pred.m_totalScore)
+  ,m_arcList(NULL)
+  ,m_winningHypo(NULL)
+  ,m_manager(pred.m_manager)
+  ,m_id(pred.m_manager.GetNextHypoId())
+{
+  // One predecessor, which is an existing top-level ChartHypothesis.
+  m_prevHypos.push_back(&pred);
+}
+
 ChartHypothesis::~ChartHypothesis()
 {
   // delete feature function states
