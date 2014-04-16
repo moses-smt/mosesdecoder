@@ -16,7 +16,7 @@ my $___FACTOR_DELIMITER = "|";
 my $OUT_FILE = "/tmp/transliteration-phrase-table.$$";
 
 my ($MOSES_SRC_DIR,$TRANSLIT_MODEL,$OOV_FILE, $OOV_FILE_NAME, $EXTERNAL_BIN_DIR, $LM_FILE, $INPUT_EXTENSION, $OUTPUT_EXTENSION);
-die("ERROR: wrong syntax when invoking postDecodingTransliteration.perl")
+die("ERROR: wrong syntax when invoking in-decoding-transliteration.perl")
     unless &GetOptions('moses-src-dir=s' => \$MOSES_SRC_DIR,
 			'external-bin-dir=s' => \$EXTERNAL_BIN_DIR,
 			'transliteration-model-dir=s' => \$TRANSLIT_MODEL,
