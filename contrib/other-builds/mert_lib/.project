@@ -739,72 +739,72 @@
 		<link>
 			<name>example/NBEST</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/NBEST</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/NBEST</locationURI>
 		</link>
 		<link>
 			<name>example/README.oldmert</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/README.oldmert</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/README.oldmert</locationURI>
 		</link>
 		<link>
 			<name>example/REF</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/REF</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/REF</locationURI>
 		</link>
 		<link>
 			<name>example/REF.0</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/REF.0</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/REF.0</locationURI>
 		</link>
 		<link>
 			<name>example/REF.1</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/REF.1</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/REF.1</locationURI>
 		</link>
 		<link>
 			<name>example/REF.2</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/REF.2</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/REF.2</locationURI>
 		</link>
 		<link>
 			<name>example/gzipped_test.sh</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/gzipped_test.sh</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/gzipped_test.sh</locationURI>
 		</link>
 		<link>
 			<name>example/init.opt</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/init.opt</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/init.opt</locationURI>
 		</link>
 		<link>
 			<name>example/memcheck_extractor.sh</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/memcheck_extractor.sh</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/memcheck_extractor.sh</locationURI>
 		</link>
 		<link>
 			<name>example/memcheck_mert.sh</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/memcheck_mert.sh</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/memcheck_mert.sh</locationURI>
 		</link>
 		<link>
 			<name>example/normal_test.sh</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/normal_test.sh</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/normal_test.sh</locationURI>
 		</link>
 		<link>
 			<name>example/smoke_test.sh</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/example/smoke_test.sh</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/example/smoke_test.sh</locationURI>
 		</link>
 		<link>
 			<name>test_scorer_data/nbest.out</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/test_scorer_data/nbest.out</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/test_scorer_data/nbest.out</locationURI>
 		</link>
 		<link>
 			<name>test_scorer_data/reference.txt</name>
 			<type>1</type>
-			<location>/home/hieu/workspace/github/mosesdecoder/mert/test_scorer_data/reference.txt</location>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/test_scorer_data/reference.txt</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.8/release</name>

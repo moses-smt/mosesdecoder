@@ -300,6 +300,38 @@ void IOWrapper::ReconstructApplicationContext(const ChartHypothesis &hypo,
   }
 }
 
+
+// Given a hypothesis and sentence, reconstructs the 'application context' --
+// the source RHS symbols of the SCFG rule that was applied, plus their spans.
+void IOWrapper::ReconstructApplicationContext(const search::Applied *applied,
+    const Sentence &sentence,
+    ApplicationContext &context)
+{
+  context.clear();
+  const WordsRange &span = applied->GetRange();
+  const search::Applied *child = applied->Children();
+  size_t i = span.GetStartPos();
+  size_t j = 0;
+
+  while (i <= span.GetEndPos()) {
+    if (j == applied->GetArity() || i < child->GetRange().GetStartPos()) {
+      // Symbol is a terminal.
+      const Word &symbol = sentence.GetWord(i);
+      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
+      ++i;
+    } else {
+      // Symbol is a non-terminal.
+      const Word &symbol = static_cast<const TargetPhrase*>(child->GetNote().vp)->GetTargetLHS();
+      const WordsRange &range = child->GetRange();
+      context.push_back(std::make_pair(symbol, range));
+      i = range.GetEndPos()+1;
+      ++child;
+      ++j;
+    }
+  }
+}
+
+
 // Emulates the old operator<<(ostream &, const DottedRule &) function.  The
 // output format is a bit odd (reverse order and double spacing between symbols)
 // but there are scripts and tools that expect the output of -T to look like
@@ -330,6 +362,20 @@ void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &a
       << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
 }
 
+void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
+{
+  ReconstructApplicationContext(applied, sentence, applicationContext);
+  const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
+  out << "Trans Opt " << translationId
+      << " " << applied->GetRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << phrase.GetTargetLHS()
+      << "->" << phrase
+      << " " << applied->GetScore(); // << hypo->GetScoreBreakdown() TODO: missing in incremental search hypothesis
+}
+
+
 void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
   if (hypo != NULL) {
@@ -343,6 +389,21 @@ void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
     const ChartHypothesis *prevHypo = *iter;
     OutputTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
+
+void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
+{
+  if (applied != NULL) {
+    OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
+    out << std::endl;
+  }
+
+  // recursive
+  const search::Applied *child = applied->Children();
+  for (size_t i = 0; i < applied->GetArity(); i++) {
+      OutputTranslationOptions(out, applicationContext, child++, sentence, translationId);
   }
 }
 
@@ -375,6 +436,33 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
   }
 }
 
+void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
+{
+
+  if (applied != NULL) {
+    OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
+
+    const std::string key = "Tree";
+    std::string value;
+    bool hasProperty;
+    const TargetPhrase &currTarPhr = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
+    currTarPhr.GetProperty(key, value, hasProperty);
+
+    out << " ||| ";
+    if (hasProperty)
+      out << " " << value;
+    else
+      out << " " << "noTreeInfo";
+    out << std::endl;
+  }
+
+  // recursive
+  const search::Applied *child = applied->Children();
+  for (size_t i = 0; i < applied->GetArity(); i++) {
+      OutputTreeFragmentsTranslationOptions(out, applicationContext, child++, sentence, translationId);
+  }
+}
+
 void IOWrapper::OutputDetailedTranslationReport(
   const ChartHypothesis *hypo,
   const Sentence &sentence,
@@ -389,6 +477,23 @@ void IOWrapper::OutputDetailedTranslationReport(
   OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
   UTIL_THROW_IF2(m_detailOutputCollector == NULL,
 		  "No ouput file for detailed reports specified");
+  m_detailOutputCollector->Write(translationId, out.str());
+}
+
+void IOWrapper::OutputDetailedTranslationReport(
+  const search::Applied *applied,
+  const Sentence &sentence,
+  long translationId)
+{
+  if (applied == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTranslationOptions(out, applicationContext, applied, sentence, translationId);
+  UTIL_THROW_IF2(m_detailOutputCollector == NULL,
+                  "No ouput file for detailed reports specified");
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
@@ -419,6 +524,28 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
         }
     }
   }
+
+  m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
+
+}
+
+void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
+  const search::Applied *applied,
+  const Sentence &sentence,
+  long translationId)
+{
+  if (applied == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, applied, sentence, translationId);
+  UTIL_THROW_IF2(m_detailTreeFragmentsOutputCollector == NULL,
+                  "No output file for tree fragments specified");
+
+  //Tree of full sentence
+  //TODO: incremental search doesn't support stateful features
 
   m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
 

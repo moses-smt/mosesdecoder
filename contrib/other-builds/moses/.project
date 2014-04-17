@@ -167,6 +167,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartHypothesisCollection.h</locationURI>
 		</link>
 		<link>
+			<name>ChartKBestExtractor.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartKBestExtractor.cpp</locationURI>
+		</link>
+		<link>
+			<name>ChartKBestExtractor.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartKBestExtractor.h</locationURI>
+		</link>
+		<link>
 			<name>ChartManager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartManager.cpp</locationURI>
@@ -1067,6 +1077,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
 		</link>
 		<link>
+			<name>FF/CountNonTerms.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CountNonTerms.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.h</locationURI>
+		</link>
+		<link>
 			<name>FF/CoveredReferenceFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.cpp</locationURI>
@@ -1240,6 +1260,36 @@
 			<name>FF/PhrasePenalty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
+		</link>
+		<link>
+			<name>FF/ReferenceComparison.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ReferenceComparison.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.h</locationURI>
+		</link>
+		<link>
+			<name>FF/RuleAmbiguity.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleAmbiguity.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/RuleAmbiguity.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleAmbiguity.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SetSourcePhrase.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SetSourcePhrase.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SkeletonStatefulFF.cpp</name>

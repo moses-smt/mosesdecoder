@@ -159,7 +159,9 @@ public:
 
       BOOST_CHECK( oovCount == 0 );
       SLOPPY_CHECK_CLOSE( TransformLMScore(p_licenses + p_the_licenses), fullScore, 0.01);
-      SLOPPY_CHECK_CLOSE( TransformLMScore( 0.0 ), ngramScore, 0.01);
+      // Check ngramScore is 0.0
+      BOOST_CHECK_GT(0.0001, ngramScore);
+      BOOST_CHECK_LT(-0.0001, ngramScore);
     }
 
     // the licenses for

@@ -28,22 +28,22 @@
 		<link>
 			<name>DomainFeature.cpp</name>
 			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/phrase-extract/DomainFeature.cpp</location>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/DomainFeature.cpp</locationURI>
 		</link>
 		<link>
 			<name>DomainFeature.h</name>
 			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/phrase-extract/DomainFeature.h</location>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/DomainFeature.h</locationURI>
 		</link>
 		<link>
 			<name>ExtractionPhrasePair.cpp</name>
 			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/phrase-extract/ExtractionPhrasePair.cpp</location>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ExtractionPhrasePair.cpp</locationURI>
 		</link>
 		<link>
 			<name>ExtractionPhrasePair.h</name>
 			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/phrase-extract/ExtractionPhrasePair.h</location>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ExtractionPhrasePair.h</locationURI>
 		</link>
 		<link>
 			<name>InputFileStream.cpp</name>
@@ -86,26 +86,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ScoreFeature.h</locationURI>
 		</link>
 		<link>
-			<name>Timer.cpp</name>
-			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/moses/Timer.cpp</location>
-		</link>
-		<link>
-			<name>Timer.h</name>
-			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/moses/Timer.h</location>
-		</link>
-		<link>
-			<name>Util.cpp</name>
-			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/moses/Util.cpp</location>
-		</link>
-		<link>
-			<name>Util.h</name>
-			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/moses/Util.h</location>
-		</link>
-		<link>
 			<name>exception.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/util/exception.cc</locationURI>
@@ -129,16 +109,6 @@
 			<name>tables-core.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/tables-core.h</locationURI>
-		</link>
-		<link>
-			<name>usage.cc</name>
-			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/util/usage.cc</location>
-		</link>
-		<link>
-			<name>usage.hh</name>
-			<type>1</type>
-			<location>/disk4/hieu/workspace/github/mosesdecoder.hieu/util/usage.hh</location>
 		</link>
 	</linkedResources>
 </projectDescription>

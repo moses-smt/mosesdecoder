@@ -190,6 +190,8 @@ void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
  */
 void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 {
+  if (m_maxHypoStackSize == 0) return; // no limit
+
   if (GetSize() > m_maxHypoStackSize) { // ok, if not over the limit
     priority_queue<float> bestScores;
 

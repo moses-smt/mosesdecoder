@@ -512,7 +512,7 @@ int main(int argc, char** argv)
   xmlrpc_limit_set(XMLRPC_XML_SIZE_LIMIT_ID, 512*1024*1024);
 
   xmlrpc_c::registry myRegistry;
-
+  
   xmlrpc_c::methodPtr const translator(new Translator);
   xmlrpc_c::methodPtr const updater(new Updater);
   xmlrpc_c::methodPtr const optimizer(new Optimizer);
@@ -521,11 +521,20 @@ int main(int argc, char** argv)
   myRegistry.addMethod("updater", updater);
   myRegistry.addMethod("optimize", optimizer);
 
+   xmlrpc_c::serverAbyss myAbyssServer(
+					myRegistry,
+					port,              // TCP port on which to listen
+					logfile
+					);
+  /* doesn't work with xmlrpc-c v. 1.16.33 - ie very old lib on Ubuntu 12.04
   xmlrpc_c::serverAbyss myAbyssServer(
-    myRegistry,
-    port,              // TCP port on which to listen
-    logfile
+    xmlrpc_c::serverAbyss::constrOpt()
+    .registryPtr(&myRegistry)
+    .portNumber(port)              // TCP port on which to listen
+    .logFileName(logfile)
+    .allowOrigin("*")
   );
+  */
 
   cerr << "Listening on port " << port << endl;
   if (isSerial) {

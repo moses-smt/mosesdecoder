@@ -2233,10 +2233,14 @@ sub get_config_tables {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$translit_model,$generation_table,$sparse_lexical_features,$domains,$osm, @LM)
+    my ($config,$reordering_table,$phrase_translation_table,$transliteration_pt,$generation_table,$sparse_lexical_features,$domains,$osm, @LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
+
+    if($transliteration_pt){
+	 $cmd .= "-transliteration-phrase-table $transliteration_pt ";
+    }	
 
     if($osm){
       
@@ -2623,7 +2627,7 @@ sub define_tuningevaluation_filter {
     my $tuning_flag = !defined($set);
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains,$transliteration_table) = &get_output_and_input($step_id);
 
     my $binarizer;
     $binarizer = &backoff_and_get("EVALUATION:$set:ttable-binarizer") unless $tuning_flag;
@@ -2683,7 +2687,14 @@ sub define_tuningevaluation_filter {
       
       $cmd .= &get_config_tables($config,$reordering_table,$phrase_translation_table,undef,$domains);
 
+	if (&get("TRAINING:in-decoding-transliteration")) {
+
+		$cmd .= "-transliteration-phrase-table $dir/model/transliteration-phrase-table.$VERSION ";
+	}	
+
+
       $cmd .= "-lm 0:3:$config:8\n"; # dummy kenlm 3-gram model on factor 0
+
     }
 
     # filter command

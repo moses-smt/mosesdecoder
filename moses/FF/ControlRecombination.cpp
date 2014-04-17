@@ -16,7 +16,7 @@ ControlRecombinationState::ControlRecombinationState(const Hypothesis &hypo, con
   :m_ff(ff)
 {
   if (ff.GetType() == SameOutput) {
-    UTIL_THROW(util::Exception, "Implemented not yet completed for phrase-based model. Need to take into account the coverage");
+    //UTIL_THROW(util::Exception, "Implemented not yet completed for phrase-based model. Need to take into account the coverage");
     hypo.GetOutputPhrase(m_outputPhrase);
   } else {
     m_hypo = &hypo;
@@ -36,8 +36,9 @@ ControlRecombinationState::ControlRecombinationState(const ChartHypothesis &hypo
 int ControlRecombinationState::Compare(const FFState& other) const
 {
   const ControlRecombinationState &otherFF = static_cast<const ControlRecombinationState&>(other);
+
   if (m_ff.GetType() == SameOutput) {
-    bool ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
+    int ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
     return ret;
   } else {
     // compare hypo address. Won't be equal unless they're actually the same hypo
