@@ -167,6 +167,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartHypothesisCollection.h</locationURI>
 		</link>
 		<link>
+			<name>ChartKBestExtractor.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartKBestExtractor.cpp</locationURI>
+		</link>
+		<link>
+			<name>ChartKBestExtractor.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartKBestExtractor.h</locationURI>
+		</link>
+		<link>
 			<name>ChartManager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartManager.cpp</locationURI>

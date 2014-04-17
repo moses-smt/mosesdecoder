@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <cassert>
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
 

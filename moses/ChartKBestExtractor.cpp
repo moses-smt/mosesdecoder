@@ -73,7 +73,7 @@ void ChartKBestExtractor::Extract(
   for (KBestVec::const_iterator p = top->kBestList.begin();
        p != top->kBestList.end(); ++p) {
     const Derivation &d = **p;
-    assert(d.edge->tail.size() == 1);  // d should have exactly one predecessor.
+    assert(d.edge.tail.size() == 1);  // d should have exactly one predecessor.
     assert(d.backPointers.size() == 1);
     std::size_t i = d.backPointers[0];
     boost::shared_ptr<Derivation> pred = d.edge.tail[0]->kBestList[i];
