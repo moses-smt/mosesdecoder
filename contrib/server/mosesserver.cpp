@@ -521,6 +521,12 @@ int main(int argc, char** argv)
   myRegistry.addMethod("updater", updater);
   myRegistry.addMethod("optimize", optimizer);
 
+   xmlrpc_c::serverAbyss myAbyssServer(
+					myRegistry,
+					port,              // TCP port on which to listen
+					logfile
+					);
+  /* doesn't work with xmlrpc-c v. 1.16.33 - ie very old lib on Ubuntu 12.04
   xmlrpc_c::serverAbyss myAbyssServer(
     xmlrpc_c::serverAbyss::constrOpt()
     .registryPtr(&myRegistry)
@@ -528,6 +534,7 @@ int main(int argc, char** argv)
     .logFileName(logfile)
     .allowOrigin("*")
   );
+  */
 
   cerr << "Listening on port " << port << endl;
   if (isSerial) {
