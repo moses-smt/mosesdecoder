@@ -315,7 +315,9 @@ print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 # path of script for filtering phrase tables and running the decoder
 $filtercmd = File::Spec->catfile($SCRIPTS_ROOTDIR, "training", "filter-model-given-input.pl") if !defined $filtercmd;
 
-if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
+# WHY ... ! ___FILTER_PHRASE_TABLE ??? This doesn't make sense! [UG]
+# if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
+if ( ! -x $filtercmd && $___FILTER_PHRASE_TABLE) {
   warn "Filtering command not found: $filtercmd.";
   warn "Use --filtercmd=PATH to specify a valid one or --no-filter-phrase-table";
   exit 1;
@@ -409,7 +411,7 @@ if ($___ACTIVATE_FEATURES) {
 }
 
 my ($just_cmd_filtercmd, $x) = split(/ /, $filtercmd);
-die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
+die "Not executable: $just_cmd_filtercmd" if $___FILTER_PHRASE_TABLE && ! -x $just_cmd_filtercmd;
 die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_parallel_cmd;
 die "Not executable: $qsubwrapper"        if defined $___JOBS && ! -x $qsubwrapper;
 die "Not executable: $___DECODER"         if ! -x $___DECODER;

@@ -64,6 +64,8 @@
 #
 # --max-factors                  maximum number of factors (default 4)
 #
+# --unlabelled-source            ignore source labels (redundant in hiero or string-to-tree system)
+#                                for better performance
 #CONTROLLING THE BUILD
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
@@ -89,7 +91,7 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
     requirements += <library>tcmalloc_and_profiler <library>unwind <cflags>-fno-omit-frame-pointer <cxxflags>-fno-omit-frame-pointer ;
   } else {
     external-lib tcmalloc_minimal ;
-    requirements += <threading>multi:<library>$(tcmalloc_minimal) ;
+    requirements += <threading>multi:<library>tcmalloc_minimal ;
   }
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
@@ -108,6 +110,9 @@ if [ option.get "enable-mpi" : : "yes" ] {
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
+requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
+requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
+requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
 if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
@@ -137,6 +142,23 @@ project : requirements
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;
 
+if [ option.get "with-mm" : : "yes" ]
+{
+ alias mm :  
+  moses/TranslationModel/UG/mm//mtt-build 
+  moses/TranslationModel/UG/mm//mtt-dump 
+  moses/TranslationModel/UG/mm//symal2mam 
+  moses/TranslationModel/UG/mm//custom-pt 
+  moses/TranslationModel/UG/mm//mmlex-build 
+  moses/TranslationModel/UG/mm//mtt-count-words 
+  moses/TranslationModel/UG//try-align 
+  ;
+}
+else
+{
+ alias mm ; 
+}
+
 alias programs : 
 lm//programs 
 moses-chart-cmd//moses_chart 
@@ -154,11 +176,9 @@ phrase-extract//pcfg-score
 biconcor 
 mira//mira 
 contrib/server//mosesserver 
-#moses/mm//mtt-build 
-#moses/mm//mtt-dump 
-#moses/mm//symal2mam 
-#moses/mm//custom-pt 
+mm
 ;
+
 
 install-bin-libs programs ;
 install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;

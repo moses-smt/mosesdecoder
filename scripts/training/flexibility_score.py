@@ -124,14 +124,14 @@ class FlexScore:
         line = self.phrase_pairs[src][target]
         flexscore_l = b"{0:.6g}".format(self.flexprob_l[src][target])
         flexscore_r = b"{0:.6g}".format(self.flexprob_r[src][target])
-        line[2] += b' ' + flexscore_l + b' ' + flexscore_r
+        line[3] += b' ' + flexscore_l + b' ' + flexscore_r
 
         if self.hierarchical:
             try:
                 flexscore_d = b"{0:.6g}".format(self.flexprob_d[src][target])
             except KeyError:
                 flexscore_d = b"1"
-            line[2] += b' ' + flexscore_d
+            line[3] += b' ' + flexscore_d
 
         return b' ||| '.join(line) + b'\n'
 

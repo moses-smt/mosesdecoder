@@ -49,7 +49,8 @@ public:
 
   ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &parser,
-    const ChartCellCollectionBase &);
+    const ChartCellCollectionBase &,
+    std::size_t);
   void InitializeForInput(InputType const& inputSentence);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 

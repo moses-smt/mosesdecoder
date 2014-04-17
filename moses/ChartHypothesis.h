@@ -31,6 +31,7 @@
 namespace Moses
 {
 
+class ChartKBestExtractor;
 class ChartHypothesis;
 class ChartManager;
 class RuleCubeItem;
@@ -73,6 +74,9 @@ protected:
 
   //! not implemented
   ChartHypothesis(const ChartHypothesis &copy);
+
+  //! only used by ChartKBestExtractor
+  ChartHypothesis(const ChartHypothesis &, const ChartKBestExtractor &);
 
 public:
 #ifdef USE_HYPO_POOL

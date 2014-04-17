@@ -218,8 +218,12 @@ protected:
   std::string m_binPath;
 
   // soft NT lookup for chart models
-  std::map<Word, std::set<Word> > m_soft_matches_map;
-  std::map<Word, std::set<Word> > m_soft_matches_map_reverse;
+  std::vector<std::vector<Word> > m_softMatchesMap;
+
+  const StatefulFeatureFunction* m_treeStructure;
+
+  // number of nonterminal labels
+//   size_t m_nonTerminalSize;
 
 public:
 
@@ -738,24 +742,31 @@ public:
     return m_useLegacyPT;
   }
 
-  void Set_Soft_Matches(std::map<Word, std::set<Word> >& soft_matches_map) {
-    m_soft_matches_map = soft_matches_map;
+  void SetSoftMatches(std::vector<std::vector<Word> >& softMatchesMap) {
+    m_softMatchesMap = softMatchesMap;
   }
 
-  const std::map<Word, std::set<Word> >* Get_Soft_Matches() const {
-    return &m_soft_matches_map;
+  const std::vector< std::vector<Word> >& GetSoftMatches() const {
+    return m_softMatchesMap;
   }
 
-  void Set_Soft_Matches_Reverse(std::map<Word, std::set<Word> >& soft_matches_map) {
-    m_soft_matches_map_reverse = soft_matches_map;
-  }
-
-  const std::map<Word, std::set<Word> >* Get_Soft_Matches_Reverse() const {
-    return &m_soft_matches_map_reverse;
-  }
 
   bool AdjacentOnly() const
   { return m_adjacentOnly; }
+
+
+  void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
+
+
+  // need global access for output of tree structure
+  const StatefulFeatureFunction* GetTreeStructure() const {
+      return m_treeStructure;
+  }
+
+  void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
+      m_treeStructure = treeStructure;
+  }
+
 };
 
 }

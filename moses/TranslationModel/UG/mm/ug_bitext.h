@@ -26,13 +26,13 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 
-#include "moses/generic/sorting/VectorIndexSorter.h"
-#include "moses/generic/sampling/Sampling.h"
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
+#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include "moses/Util.h"
 
-#include "util/exception.hh"
-#include "util/check.hh"
+#include "headers-base/util/exception.hh"
+#include "headers-base/util/check.hh"
 
 #include "ug_typedefs.h"
 #include "ug_mm_ttrack.h"
@@ -53,6 +53,29 @@ namespace Moses {
     using namespace ugdiss;
 
     template<typename TKN> class Bitext;
+
+    enum PhraseOrientation 
+    {
+      po_first,
+      po_mono,
+      po_jfwd,
+      po_swap,
+      po_jbwd,
+      po_last,
+      po_other
+    };
+
+    PhraseOrientation 
+    find_po_fwd(vector<vector<ushort> >& a1,
+		vector<vector<ushort> >& a2,
+		size_t b1, size_t e1,
+		size_t b2, size_t e2);
+
+    PhraseOrientation 
+    find_po_bwd(vector<vector<ushort> >& a1,
+		vector<vector<ushort> >& a2,
+		size_t b1, size_t e1,
+		size_t b2, size_t e2);
 
     template<typename sid_t, typename off_t, typename len_t>
     void 
@@ -79,6 +102,7 @@ namespace Moses {
       float    my_wcnt; // weighted count 
       uint32_t my_cnt2;
       vector<pair<size_t, vector<uchar> > > my_aln; 
+      uint32_t ofwd[7], obwd[7];
     public:
       jstats();
       jstats(jstats const& other);
@@ -87,7 +111,12 @@ namespace Moses {
       float    wcnt() const;
       
       vector<pair<size_t, vector<uchar> > > const & aln() const;
-      void add(float w, vector<uchar> const& a, uint32_t const cnt2);
+      void add(float w, vector<uchar> const& a, uint32_t const cnt2,
+	       uint32_t fwd_orient, uint32_t bwd_orient);
+      void invalidate();
+      bool valid();
+      uint32_t dcnt_fwd(PhraseOrientation const idx) const;
+      uint32_t dcnt_bwd(PhraseOrientation const idx) const;
     };
 
     struct 
@@ -101,14 +130,21 @@ namespace Moses {
       size_t good;       // number of selected instances with valid word alignments
       size_t sum_pairs;
       size_t in_progress; // keeps track of how many threads are currently working on this
+
+      uint32_t ofwd[po_other+1], obwd[po_other+1];
+
       typename boost::unordered_map<uint64_t, jstats> trg;
       pstats(); 
       void release();
       void register_worker();
       size_t count_workers() { return in_progress; } 
 
-      void add(uint64_t const pid, float const w, 
-	       vector<uchar> const& a, uint32_t const cnt2);
+      bool 
+      add(uint64_t const pid, 
+	  float    const w, 
+	  vector<uchar> const& a, 
+	  uint32_t      const cnt2,
+	  uint32_t fwd_o, uint32_t bwd_o);
     };
     
     class 
@@ -117,19 +153,34 @@ namespace Moses {
     public:
       uint64_t p1, p2;
       uint32_t raw1,raw2,sample1,sample2,good1,good2,joint;
-      uint32_t mono,swap,left,right;
       vector<float> fvals;
+      float dfwd[po_other+1];
+      float dbwd[po_other+1];
       vector<uchar> aln;
       // float    avlex12,avlex21; // average lexical probs (Moses std)
       // float    znlex1,znlex2;   // zens-ney lexical smoothing
       // float    colex1,colex2;   // based on raw lexical occurrences
       float score;
       PhrasePair();
+      PhrasePair(PhrasePair const& o);
       bool operator<(PhrasePair const& other) const;
       bool operator>(PhrasePair const& other) const;
-      void init(uint64_t const pid1, pstats const& ps, 
+      bool operator<=(PhrasePair const& other) const;
+      bool operator>=(PhrasePair const& other) const;
+
+      void init(uint64_t const pid1, pstats const& ps,  size_t const numfeats);
+      void init(uint64_t const pid1, pstats const& ps1, pstats const& ps2, 
 		size_t const numfeats);
-      void update(uint64_t const pid2, jstats const& js);
+
+      PhrasePair const& 
+      update(uint64_t const pid2, jstats const& js);
+
+      PhrasePair const& 
+      update(uint64_t const pid2, jstats   const& js1, jstats   const& js2);
+
+      PhrasePair const& 
+      update(uint64_t const pid2, size_t const raw2extra, jstats const& js);
+
       float eval(vector<float> const& w);
     };
 
@@ -144,10 +195,16 @@ namespace Moses {
       virtual 
  
       void 
-      operator()(Bitext<Token> const& pt, PhrasePair& pp) const = 0;
+      operator()(Bitext<Token> const& pt, PhrasePair& pp, vector<float> * dest) 
+	const = 0;
 
       int 
-      fcnt() const { return num_feats; }
+      fcnt() const 
+      { return num_feats; }
+      
+      int 
+      getIndex() const 
+      { return index; }
     };
 
     template<typename Token>
@@ -170,14 +227,17 @@ namespace Moses {
       }
 
       void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp) const
+      operator()(Bitext<Token> const& bt, 
+		 PhrasePair & pp, 
+		 vector<float> * dest = NULL) const
       {
+	if (!dest) dest = &pp.fvals;
 	if (pp.joint > pp.good1) 
 	  {
 	    cerr << bt.toString(pp.p1,0) << " ::: " << bt.toString(pp.p2,1) << endl;
 	    cerr << pp.joint << "/" << pp.good1 << "/" << pp.raw2 << endl;
 	  }
-	pp.fvals[this->index] = log(lbop(pp.good1, pp.joint, conf));
+	(*dest)[this->index] = log(lbop(pp.good1, pp.joint, conf));
       }
     };
 
@@ -201,9 +261,10 @@ namespace Moses {
       }
 
       void 
-      operator()(Bitext<Token> const& pt, PhrasePair& pp) const
+      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
       {
-	pp.fvals[this->index] = log(lbop(max(pp.raw2,pp.joint), pp.joint, conf));
+	if (!dest) dest = &pp.fvals;
+	(*dest)[this->index] = log(lbop(max(pp.raw2,pp.joint), pp.joint, conf));
       }
     };
 
@@ -211,8 +272,8 @@ namespace Moses {
     class
     PScoreLex : public PhraseScorer<Token>
     {
-      LexicalPhraseScorer2<Token> scorer;
     public:
+      LexicalPhraseScorer2<Token> scorer;
 
       PScoreLex() { this->num_feats = 2; }
 
@@ -225,8 +286,9 @@ namespace Moses {
       }
 
       void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp) const
+      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
       {
+	if (!dest) dest = &pp.fvals;
 	uint32_t sid1=0,sid2=0,off1=0,off2=0,len1=0,len2=0;
 	parse_pid(pp.p1, sid1, off1, len1);
 	parse_pid(pp.p2, sid2, off2, len2);
@@ -248,8 +310,8 @@ namespace Moses {
 #endif
 	scorer.score(bt.T1->sntStart(sid1)+off1,0,len1,
 		     bt.T2->sntStart(sid2)+off2,0,len2,
-		     pp.aln, pp.fvals[this->index],
-		     pp.fvals[this->index+1]);
+		     pp.aln, (*dest)[this->index],
+		     (*dest)[this->index+1]);
       }
       
     };
@@ -271,11 +333,12 @@ namespace Moses {
       }
 
       void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp) const
+      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
       {
+	if (!dest) dest = &pp.fvals;
 	uint32_t sid2=0,off2=0,len2=0;
 	parse_pid(pp.p2, sid2, off2, len2);
-	pp.fvals[this->index] = len2;
+	(*dest)[this->index] = len2;
       }
       
     };
@@ -297,9 +360,10 @@ namespace Moses {
       }
 
       void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp) const
+      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
       {
-	pp.fvals[this->index] = 1;
+	if (!dest) dest = &pp.fvals;
+	(*dest)[this->index] = 1;
       }
       
     };
@@ -307,6 +371,7 @@ namespace Moses {
     template<typename TKN>
     class Bitext 
     {
+    protected:
       mutable boost::mutex lock;
     public:
       typedef TKN Token;
@@ -322,13 +387,13 @@ namespace Moses {
       // each other's way. 
       mutable sptr<agenda> ag; 
       
-      sptr<Ttrack<char> >  const Tx; // word alignments
-      sptr<Ttrack<Token> > const T1; // token track
-      sptr<Ttrack<Token> > const T2; // token track
-      sptr<TokenIndex>     const V1; // vocab
-      sptr<TokenIndex>     const V2; // vocab
-      sptr<TSA<Token> >    const I1; // indices
-      sptr<TSA<Token> >    const I2; // indices
+      sptr<Ttrack<char> >  Tx; // word alignments
+      sptr<Ttrack<Token> > T1; // token track
+      sptr<Ttrack<Token> > T2; // token track
+      sptr<TokenIndex>     V1; // vocab
+      sptr<TokenIndex>     V2; // vocab
+      sptr<TSA<Token> >    I1; // indices
+      sptr<TSA<Token> >    I2; // indices
       
       /// given the source phrase sid[start:stop]
       //  find the possible start (s1 .. s2) and end (e1 .. e2) 
@@ -339,14 +404,20 @@ namespace Moses {
       find_trg_phr_bounds
       (size_t const sid, size_t const start, size_t const stop, 
        size_t & s1, size_t & s2, size_t & e1, size_t & e2, 
-       vector<uchar> * core_alignment, bool const flip) const;
+       int& po_fwd, int& po_bwd,
+       vector<uchar> * core_alignment, 
+       bitvector* full_alignment,
+       bool const flip) const;
       
       mutable boost::unordered_map<uint64_t,sptr<pstats> > cache1,cache2;
-    private:
+    protected:
       size_t default_sample_size;
+    private:
       sptr<pstats> 
 	prep2(iter const& phrase, size_t const max_sample) const;
     public:
+      Bitext(size_t const max_sample=5000);
+
       Bitext(Ttrack<Token>* const t1, 
 	     Ttrack<Token>* const t2, 
 	     Ttrack<char>*  const tx,
@@ -358,6 +429,7 @@ namespace Moses {
 	     
       virtual void open(string const base, string const L1, string const L2) = 0;
       
+      // sptr<pstats> lookup(Phrase const& phrase, size_t factor) const;
       sptr<pstats> lookup(iter const& phrase) const;
       sptr<pstats> lookup(iter const& phrase, size_t const max_sample) const;
       void prep(iter const& phrase) const;
@@ -406,6 +478,12 @@ namespace Moses {
 	  default_sample_size = max_samples; 
 	}
     }
+
+    template<typename Token>
+    Bitext<Token>::
+    Bitext(size_t const max_sample)
+      : default_sample_size(max_sample)
+    { }
 
     template<typename Token>
     Bitext<Token>::
@@ -557,16 +635,27 @@ namespace Moses {
 	{
 	  j->stats->register_worker();
 	  vector<uchar> aln;
+	  bitvector full_alignment(100*100);
 	  while (j->step(sid,offset))
 	    {
 	      aln.clear();
-	      if (!ag.bt.find_trg_phr_bounds
-		  (sid, offset, offset + j->len, s1, s2, e1, e2, 
-		   j->fwd?&aln:NULL, !j->fwd)) 
+	      int po_fwd=5,po_bwd=5;
+	      if (j->fwd)
+		{
+		  if (!ag.bt.find_trg_phr_bounds
+		      (sid,offset,offset+j->len,s1,s2,e1,e2,po_fwd,po_bwd,
+		       &aln,&full_alignment,false))
+		    continue;
+		}
+	      else if (!ag.bt.find_trg_phr_bounds
+		       (sid,offset,offset+j->len,s1,s2,e1,e2,po_fwd,po_bwd,
+			NULL,NULL,true))
 		continue;
 	      j->stats->lock.lock(); 
 	      j->stats->good += 1; 
 	      j->stats->sum_pairs += (s2-s1+1)*(e2-e1+1);
+	      ++j->stats->ofwd[po_fwd];
+	      ++j->stats->obwd[po_bwd];
 	      j->stats->lock.unlock();
 	      for (size_t k = j->fwd ? 1 : 0; k < aln.size(); k += 2) 
 		aln[k] += s2 - s1;
@@ -580,8 +669,21 @@ namespace Moses {
 		  // assert(b);
 		  for (size_t i = e1; i <= e2; ++i)
 		    {
-		      
-		      j->stats->add(b->getPid(),sample_weight,aln,b->approxOccurrenceCount());
+		      if (!j->stats->add(b->getPid(),sample_weight,aln,
+					 b->approxOccurrenceCount(),
+					 po_fwd,po_bwd))
+			{
+			  for (size_t z = 0; z < j->len; ++z)
+			    {
+			      id_type tid = ag.bt.T1->sntStart(sid)[offset+z].id();
+			      cout << (*ag.bt.V1)[tid] << " "; 
+			    }
+			  cout << endl;
+			  for (size_t z = s; z <= i; ++z)
+			    cout << (*ag.bt.V2)[(o+z)->id()] << " "; 
+			  cout << endl;
+			  exit(1);
+			}
 		      if (i < e2)
 			{
 #ifndef NDEBUG
@@ -734,59 +836,239 @@ namespace Moses {
       this->V2->open(base+L2+".tdx"); this->V2->iniReverseIndex();
       mmTSA<TKN>& i1 = *reinterpret_cast<mmTSA<TKN>*>(this->I1.get());
       mmTSA<TKN>& i2 = *reinterpret_cast<mmTSA<TKN>*>(this->I2.get());
-      i1.open(base+L1+".sfa", this->T1.get());
-      i2.open(base+L2+".sfa", this->T2.get());
+      i1.open(base+L1+".sfa", this->T1);
+      i2.open(base+L2+".sfa", this->T2);
       assert(this->T1->size() == this->T2->size());
     }
     
     template<typename TKN>
     class imBitext : public Bitext<TKN>
     {
+      sptr<imTtrack<char> > myTx;
+      sptr<imTtrack<TKN> >  myT1;
+      sptr<imTtrack<TKN> >  myT2;
+      sptr<imTSA<TKN> >     myI1; 
+      sptr<imTSA<TKN> >     myI2;
     public:
       void open(string const base, string const L1, string L2);
-      imBitext();
+      imBitext(sptr<TokenIndex> const& V1,
+	       sptr<TokenIndex> const& V2,
+	       size_t max_sample = 5000);
+      imBitext(size_t max_sample = 5000);
+      imBitext(imBitext const& other);
+      
+      // sptr<imBitext<TKN> > 
+      // add(vector<TKN> const& s1, vector<TKN> const& s2, vector<ushort> & a);
+
+      sptr<imBitext<TKN> > 
+      add(vector<string> const& s1, 
+	  vector<string> const& s2, 
+	  vector<string> const& a) const;
+
     };
 
     template<typename TKN>
     imBitext<TKN>::
-    imBitext()
-      : Bitext<TKN>(new imTtrack<TKN>(),
-		    new imTtrack<TKN>(),
-		    new imTtrack<char>(),
-		    new TokenIndex(),
-		    new TokenIndex(),
-		    new imTSA<TKN>(),
-		    new imTSA<TKN>())
-      {}
+    imBitext(size_t max_sample)
+    { 
+      this->default_sample_size = max_sample;
+      this->V1.reset(new TokenIndex());
+      this->V2.reset(new TokenIndex());
+      this->V1->setDynamic(true);
+      this->V2->setDynamic(true);
+    }
+    
+    template<typename TKN>
+    imBitext<TKN>::
+    imBitext(sptr<TokenIndex> const& v1,
+	     sptr<TokenIndex> const& v2,
+	     size_t max_sample)
+    { 
+      this->default_sample_size = max_sample;
+      this->V1 = v1;
+      this->V2 = v2;
+      this->V1->setDynamic(true);
+      this->V2->setDynamic(true);
+    }
     
 
+    template<typename TKN>
+    imBitext<TKN>::
+    imBitext(imBitext<TKN> const& other)
+    { 
+      this->myTx = other.myTx;
+      this->myT1 = other.myT1;
+      this->myT2 = other.myT2;
+      this->myI1 = other.myI1;
+      this->myI2 = other.myI2;
+      this->Tx = this->myTx;
+      this->T1 = this->myT1;
+      this->T2 = this->myT2;
+      this->I1 = this->myI1;
+      this->I2 = this->myI2;
+      this->V1 = other.V1;
+      this->V2 = other.V2;
+      this->default_sample_size = other.default_sample_size;
+    }
+    
+    template<typename TKN> class snt_adder;
+    template<>             class snt_adder<L2R_Token<SimpleWordId> >;
+
+    template<>     
+    class snt_adder<L2R_Token<SimpleWordId> >
+    {
+      typedef L2R_Token<SimpleWordId> TKN;
+      vector<string> const & snt;
+      TokenIndex           & V;
+      sptr<imTtrack<TKN> > & track;
+      sptr<imTSA<TKN > >   & index;
+    public:
+      snt_adder(vector<string> const& s, TokenIndex& v, 
+    		sptr<imTtrack<TKN> >& t, sptr<imTSA<TKN> >& i);
+      
+      void operator()();
+    };
+
     // template<typename TKN>
-    // void
-    // imBitext<TKN>::
-    // open(string const base, string const L1, string L2)
+    // class snt_adder
     // {
-    //   mmTtrack<TKN>& t1 = *reinterpret_cast<mmTtracuk<TKN>*>(this->T1.get());
-    //   mmTtrack<TKN>& t2 = *reinterpret_cast<mmTtrack<TKN>*>(this->T2.get());
-    //   mmTtrack<char>& tx = *reinterpret_cast<mmTtrack<char>*>(this->Tx.get());
-    //   t1.open(base+L1+".mct");
-    //   t2.open(base+L2+".mct");
-    //   tx.open(base+L1+"-"+L2+".mam");
-    //   cerr << "DADA" << endl;
-    //   this->V1->open(base+L1+".tdx"); this->V1->iniReverseIndex();
-    //   this->V2->open(base+L2+".tdx"); this->V2->iniReverseIndex();
-    //   mmTSA<TKN>& i1 = *reinterpret_cast<mmTSA<TKN>*>(this->I1.get());
-    //   mmTSA<TKN>& i2 = *reinterpret_cast<mmTSA<TKN>*>(this->I2.get());
-    //   i1.open(base+L1+".sfa", this->T1.get());
-    //   i2.open(base+L2+".sfa", this->T2.get());
-    //   assert(this->T1->size() == this->T2->size());
+    //   vector<string> const & snt;
+    //   TokenIndex           & V;
+    //   sptr<imTtrack<TKN> > & track;
+    //   sptr<imTSA<TKN > >   & index;
+    // public:
+    //   snt_adder(vector<string> const& s, TokenIndex& v, 
+    //  		sptr<imTtrack<TKN> >& t, sptr<imTSA<TKN> >& i);
+
+    //   template<typename T>
+    //   void operator()();
+    // };
+
+    // // template<>
+    // void
+    // snt_adder<L2R_Token<SimpleWordId> >::
+    // operator()();
+
+    //  template<>
+    //  void
+    //  snt_adder<char>::
+    //  operator()()
+    //  {
+    // 	vector<id_type> sids;
+    // 	sids.reserve(snt.size());
+    // 	BOOST_FOREACH(string const& s, snt)
+    // 	  {
+    // 	    sids.push_back(track ? track->size() : 0);
+    // 	    istringstream buf(s);
+    // 	    string w;
+    // 	    vector<char> s;
+    // 	    s.reserve(100);
+    // 	    while (buf >> w) 
+    // 	      s.push_back(vector<char>(V[w]));
+    // 	    track = append(track,s);
+    // 	  }
+    // 	index.reset(new imTSA<char>(*index,track,sids,V.tsize()));
     // }
+    
+    // template<typename TKN>
+    // snt_adder<TKN>::
+    // snt_adder(vector<string> const& s, TokenIndex& v, 
+    //  	      sptr<imTtrack<TKN> >& t, sptr<imTSA<TKN> >& i)
+    //   : snt(s), V(v), track(t), index(i) 
+    // {
+    //   throw "Not implemented yet.";
+    // }
+
+    template<>
+    sptr<imBitext<L2R_Token<SimpleWordId> > > 
+    imBitext<L2R_Token<SimpleWordId> >::
+    add(vector<string> const& s1, 
+	vector<string> const& s2, 
+	vector<string> const& aln) const;
+
+    template<typename TKN>
+    sptr<imBitext<TKN> > 
+    imBitext<TKN>::
+    add(vector<string> const& s1, 
+	vector<string> const& s2, 
+	vector<string> const& aln) const
+    {
+      throw "Not yet implemented";
+    }
+    // template<typename TKN>
+    // sptr<imBitext<TKN> > 
+    // imBitext<TKN>::
+    // add(vector<TKN> const& s1, vector<TKN> const& s2, vector<ushort> & a)
+    // {
+    //   boost::lock_guard<boost::mutex> guard(this->lock);
+    //   sptr<imBitext<TKN> > ret(new imBitext<TKN>());
+    //   vector<id_type> sids(1,this->myT1.size()-1);
+    //   ret->myT1 = add(this->myT1,s1);
+    //   ret->myT2 = add(this->myT2,s2);
+    //   size_t v1size = this->V1.tsize();
+    //   size_t v2size = this->V2.tsize();
+    //   BOOST_FOREACH(TKN const& t, s1) { if (t->id() >= v1size) v1size = t->id() + 1; }
+    //   BOOST_FOREACH(TKN const& t, s2) { if (t->id() >= v2size) v2size = t->id() + 1; }
+    //   ret->myI1.reset(new imTSA<TKN>(*this->I1,ret->myT1,sids,v1size));
+    //   ret->myI2.reset(new imTSA<TKN>(*this->I2,ret->myT2,sids,v2size));
+    //   ostringstream abuf; 
+    //   BOOST_FOREACH(ushort x, a) binwrite(abuf,x);
+    //   vector<char> foo(abuf.str().begin(),abuf.str().end());
+    //   ret->myTx = add(this->myTx,foo);
+    //   ret->T1 = ret->myT1;
+    //   ret->T2 = ret->myT2;
+    //   ret->Tx = ret->myTx;
+    //   ret->I1 = ret->myI1;
+    //   ret->I2 = ret->myI2;
+    //   ret->V1 = this->V1;
+    //   ret->V2 = this->V2; 
+    //   return ret;
+    // }
+
+
+    // template<typename TKN>
+    // imBitext<TKN>::
+    // imBitext()
+    //   : Bitext<TKN>(new imTtrack<TKN>(),
+    // 		    new imTtrack<TKN>(),
+    // 		    new imTtrack<char>(),
+    // 		    new TokenIndex(),
+    // 		    new TokenIndex(),
+    // 		    new imTSA<TKN>(),
+    // 		    new imTSA<TKN>())
+    //   {}
+    
+
+    template<typename TKN>
+    void
+    imBitext<TKN>::
+    open(string const base, string const L1, string L2)
+    {
+      mmTtrack<TKN>& t1 = *reinterpret_cast<mmTtrack<TKN>*>(this->T1.get());
+      mmTtrack<TKN>& t2 = *reinterpret_cast<mmTtrack<TKN>*>(this->T2.get());
+      mmTtrack<char>& tx = *reinterpret_cast<mmTtrack<char>*>(this->Tx.get());
+      t1.open(base+L1+".mct");
+      t2.open(base+L2+".mct");
+      tx.open(base+L1+"-"+L2+".mam");
+      cerr << "DADA" << endl;
+      this->V1->open(base+L1+".tdx"); this->V1->iniReverseIndex();
+      this->V2->open(base+L2+".tdx"); this->V2->iniReverseIndex();
+      mmTSA<TKN>& i1 = *reinterpret_cast<mmTSA<TKN>*>(this->I1.get());
+      mmTSA<TKN>& i2 = *reinterpret_cast<mmTSA<TKN>*>(this->I2.get());
+      i1.open(base+L1+".sfa", this->T1);
+      i2.open(base+L2+".sfa", this->T2);
+      assert(this->T1->size() == this->T2->size());
+    }
 
     template<typename Token>
     bool
     Bitext<Token>::
     find_trg_phr_bounds(size_t const sid, size_t const start, size_t const stop,
 			size_t & s1, size_t & s2, size_t & e1, size_t & e2,
-			vector<uchar>* core_alignment, bool const flip) const
+			int & po_fwd, int & po_bwd,
+			vector<uchar>* core_alignment, 
+			bitvector* full_alignment, 
+			bool const flip) const
     {
       // if (core_alignment) cout << "HAVE CORE ALIGNMENT" << endl;
       // a word on the core_alignment:
@@ -795,10 +1077,18 @@ namespace Moses {
       // it is up to the calling function to shift alignment points over for start positions
       // of extracted phrases that start with a fringe word
       bitvector forbidden((flip ? T1 : T2)->sntLen(sid));
+      size_t slen1 = (*T1).sntLen(sid);
+      size_t slen2 = (*T2).sntLen(sid);
+      if (full_alignment)
+	{
+	  if (slen1*slen2 > full_alignment->size())
+	    full_alignment->resize(slen1*slen2*2);
+	  full_alignment->reset();
+	}
       size_t src,trg;
       size_t lft = forbidden.size();
       size_t rgt = 0;
-      vector<vector<ushort> > aln((*T1).sntLen(sid));
+      vector<vector<ushort> > aln1(slen1),aln2(slen2);
       char const* p = Tx->sntStart(sid);
       char const* x = Tx->sntEnd(sid);
 
@@ -814,11 +1104,24 @@ namespace Moses {
 	    {
 	      lft = min(lft,trg);
 	      rgt = max(rgt,trg);
-	      if (core_alignment) 
+	    }
+	  if (core_alignment) 
+	    {
+	      if (flip) 
 		{
-		  if (flip) aln[trg].push_back(src);
-		  else      aln[src].push_back(trg);
+		  aln1[trg].push_back(src);
+		  aln2[src].push_back(trg);
 		}
+	      else      
+		{
+		  aln1[src].push_back(trg);
+		  aln2[trg].push_back(src);
+		}
+	    }
+	  if (full_alignment)
+	    {
+	      if (flip) full_alignment->set(trg*slen2 + src);
+	      else      full_alignment->set(src*slen2 + trg);
 	    }
 	}
       
@@ -837,8 +1140,8 @@ namespace Moses {
 	    {
 	      for (size_t i = lft; i <= rgt; ++i)
 		{
-		  sort(aln[i].begin(),aln[i].end());
-		  BOOST_FOREACH(ushort x, aln[i])
+		  sort(aln1[i].begin(),aln1[i].end());
+		  BOOST_FOREACH(ushort x, aln1[i])
 		    {
 		      core_alignment->push_back(i-lft);
 		      core_alignment->push_back(x-start);
@@ -849,14 +1152,25 @@ namespace Moses {
 	    {
 	      for (size_t i = start; i < stop; ++i)
 		{
-		  BOOST_FOREACH(ushort x, aln[i])
+		  BOOST_FOREACH(ushort x, aln1[i])
 		    {
 		      core_alignment->push_back(i-start);
 		      core_alignment->push_back(x-lft);
 		    }
 		}
 	    }
-	  
+
+	  // now determine fwd and bwd phrase orientation
+	  if (flip) 
+	    {
+	      po_fwd = find_po_fwd(aln2,aln1,start,stop,s1,e2);
+	      po_bwd = find_po_bwd(aln2,aln1,start,stop,s1,e2);
+	    }
+	  else  	  
+	    {
+	      po_fwd = find_po_fwd(aln1,aln2,start,stop,s1,e2);
+	      po_bwd = find_po_bwd(aln1,aln2,start,stop,s1,e2);
+	    }
 #if 0
 	  // if (e1 - s1 > 3)
 	    {
@@ -898,17 +1212,14 @@ namespace Moses {
     template<typename Token>
     sptr<pstats> 
     Bitext<Token>::
-      prep2(iter const& phrase, size_t const max_sample) const
+    prep2(iter const& phrase, size_t const max_sample) const
     {
       // boost::lock_guard<boost::mutex>(this->lock);
       if (!ag) 
 	{
-	  // boost::lock_guard<boost::mutex>(this->lock);
-	  if (!ag) 
-	    {
-	      ag.reset(new agenda(*this));
-	      ag->add_workers(20);
-	    }
+	  ag.reset(new agenda(*this));
+	  // ag->add_workers(1);
+	  ag->add_workers(20);
 	}
       typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
       sptr<pstats> ret;
@@ -928,7 +1239,7 @@ namespace Moses {
       else ret = ag->add_job(phrase, max_sample);
       return ret;
     }
-    
+
     template<typename Token>
     sptr<pstats> 
     Bitext<Token>::

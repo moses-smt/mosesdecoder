@@ -66,6 +66,7 @@ public:
    */
   virtual void GetChartRuleCollection(
     const WordsRange &range,
+    size_t lastPos,  // last position to consider if using lookahead
     ChartParserCallback &outColl) = 0;
 
 private:

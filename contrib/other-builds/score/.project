@@ -26,6 +26,26 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>DomainFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/DomainFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>DomainFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/DomainFeature.h</locationURI>
+		</link>
+		<link>
+			<name>ExtractionPhrasePair.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ExtractionPhrasePair.cpp</locationURI>
+		</link>
+		<link>
+			<name>ExtractionPhrasePair.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ExtractionPhrasePair.h</locationURI>
+		</link>
+		<link>
 			<name>InputFileStream.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/InputFileStream.cpp</locationURI>
@@ -56,11 +76,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/OutputFileStream.h</locationURI>
 		</link>
 		<link>
-			<name>PhraseAlignment.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseAlignment.cpp</locationURI>
-		</link>
-		<link>
 			<name>ScoreFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ScoreFeature.cpp</locationURI>
@@ -69,16 +84,6 @@
 			<name>ScoreFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ScoreFeature.h</locationURI>
-		</link>
-		<link>
-			<name>domain.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/domain.cpp</locationURI>
-		</link>
-		<link>
-			<name>domain.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/domain.h</locationURI>
 		</link>
 		<link>
 			<name>exception.cc</name>

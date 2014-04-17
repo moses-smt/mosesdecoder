@@ -532,8 +532,14 @@ build-transliteration-model
        out: transliteration-model
        ignore-unless: transliteration-module
        rerun-on-change: transliteration-module training-options script giza-settings
-       template: $moses-script-dir/Transliteration/train-transliteration-module.pl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --out-dir OUT --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --srilm-dir $srilm-dir --input-extension $input-extension --output-extension $output-extension
 	default-name: model/Transliteration
+build-translit-table
+       in: transliteration-model
+       out: transliteration-table
+       ignore-unless: in-decoding-transliteration
+       rerun-on-change: in-decoding-transliteration transliteration-module
+	default-name: model/transliteration-phrase-table
+	template: $moses-script-dir/Transliteration/in-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN --input-extension $input-extension --output-extension $output-extension --transliteration-file $transliteration-file --out-file OUT
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
@@ -602,7 +608,7 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-model generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
@@ -864,7 +870,7 @@ split-reference-devtest
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
-	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains
+	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings ttable-binarizer
@@ -990,8 +996,8 @@ split-input
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
-	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains
-	out: filtered-dir
+	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
+	out: filtered-dir 
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage ttable-binarizer
 	pass-if: TRAINING:binarize-all
@@ -1028,11 +1034,11 @@ remove-markup
 	pass-unless: report-segmentation
 	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
 post-decoding-transliteration
-	in: cleaned-output system-output TRAINING:transliteration-model LM:binlm
+	in: cleaned-output system-output TRAINING:transliteration-model
 	out: transliterated-output
 	default-name: evaluation/transliterated
 	pass-unless: TRAINING:post-decoding-transliteration
-	template: $moses-script-dir/Transliteration/post-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN2 --input-extension $input-extension --output-extension $output-extension --language-model IN3 --output-file IN0 --oov-file IN1.oov
+	template: $moses-script-dir/Transliteration/post-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN2 --input-extension $input-extension --output-extension $output-extension --language-model $TRAINING:language-model-file --output-file IN0 --oov-file IN1.oov
 recase-output
 	in: transliterated-output RECASING:recase-config
 	out: recased-output
