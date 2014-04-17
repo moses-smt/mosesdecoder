@@ -75,9 +75,6 @@ protected:
   //! not implemented
   ChartHypothesis(const ChartHypothesis &copy);
 
-  //! only used by ChartKBestExtractor
-  ChartHypothesis(const ChartHypothesis &, const ChartKBestExtractor &);
-
 public:
 #ifdef USE_HYPO_POOL
   void *operator new(size_t /* num_bytes */) {
@@ -95,6 +92,9 @@ public:
     delete hypo;
   }
 #endif
+
+  //! only used by ChartKBestExtractor
+  ChartHypothesis(const ChartHypothesis &, const ChartKBestExtractor &);
 
   ChartHypothesis(const ChartTranslationOptions &, const RuleCubeItem &item,
                   ChartManager &manager);
