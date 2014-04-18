@@ -99,7 +99,7 @@ for (my $lineNum = 0; $lineNum < $numLines; ++$lineNum) {
     `$cmd`;
     
   # decode
-    $cmd = "$decoderExec -f $iniPath -feature-overwrite \"TranslationModel0 path=$tmpDir/pt\" -i $tmpDir/source.1 -feature-add \"ConstrainedDecoding path=$tmpDir/target.1\"";
+    $cmd = "$decoderExec -f $iniPath -feature-overwrite \"TranslationModel0 path=$tmpDir/pt\" -i $tmpDir/source.1 -feature-add \"ConstrainedDecoding path=$tmpDir/target.1\" -v 2";
     print STDERR "Executing: $cmd\n";
     `$cmd`;
 

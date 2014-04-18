@@ -425,6 +425,9 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   if (m_useConsensusDecoding) m_mbr=true;
 
+  SetBooleanParameter( &m_defaultNonTermOnlyForEmptyRange, "default-non-term-for-empty-range-only", false );
+
+
   // Compact phrase table and reordering model
   SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );
   SetBooleanParameter( &m_minlexrMemory, "minlexr-memory", false );

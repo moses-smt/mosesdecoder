@@ -2,16 +2,23 @@
 
 use strict;
 
+sub Write1Line;
+sub WriteCorpus1Holdout;
+
 my $iniPath = $ARGV[0];
 my $isHiero = $ARGV[1];
 my $decoderExec = $ARGV[2];
 my $extractExec = $ARGV[3];
 my $tmpName = $ARGV[4];
+my $startLine = $ARGV[5];
+my $endLine = $ARGV[6];
+
+print STDERR "iniPath=$iniPath \n isHiero=$isHiero \n decoderExec=$decoderExec \n extractExec=$extractExec \n";
 
 my $WORK_DIR = `pwd`;
 chomp($WORK_DIR);
 
-my $MOSES_DIR = "~/workspace/github/mosesdecoder.hieu";
+my $MOSES_DIR = "~/workspace/github/mosesdecoder.hieu.gna";
 
 $decoderExec = "$MOSES_DIR/bin/$decoderExec";
 $extractExec = "$MOSES_DIR/bin/$extractExec";
@@ -46,38 +53,37 @@ open (SOURCE, "source");
 open (TARGET, "target");
 open (ALIGNMENT, "alignment");
 
-my $lineNum = 0;
-my ($source, $target, $alignment);
-while ($source = <SOURCE>) {
-    chomp($source);
-    $target = <TARGET>; chomp($target);
-    $alignment = <ALIGNMENT>; chomp($alignment);
+my $numLines = `cat source | wc -l`;
+
+for (my $lineNum = 0; $lineNum < $numLines; ++$lineNum) {
+    my $source = <SOURCE>; chomp($source);
+    my $target = <TARGET>; chomp($target);
+    my  $alignment = <ALIGNMENT>; chomp($alignment);
   
+    if ($lineNum < $startLine || $lineNum >= $endLine) {
+	next;
+    }
+
     #print STDERR  "$source ||| $target ||| $alignment \n";
-  
-  # write out 1 line
+    # write out 1 line
     my $tmpDir = "$WORK_DIR/$tmpName/work$lineNum";
     `mkdir -p $tmpDir`;
-                  
-    open (SOURCE1, ">$tmpDir/source");
-    open (TARGET1, ">$tmpDir/target");
-    open (ALIGNMENT1, ">$tmpDir/alignment");
-  
-    print SOURCE1 "$source\n";
-    print TARGET1 "$target\n";
-    print ALIGNMENT1 "$alignment\n";
 
-    close (SOURCE1);
-    close (TARGET1);
-    close (ALIGNMENT1);
+    Write1Line($source, $tmpDir, "source.1");
+    Write1Line($target, $tmpDir, "target.1");
+    Write1Line($alignment, $tmpDir, "alignment.1");
+
+    WriteCorpus1Holdout($lineNum, "source", $tmpDir, "source.corpus");
+    WriteCorpus1Holdout($lineNum, "target", $tmpDir, "target.corpus");
+    WriteCorpus1Holdout($lineNum, "alignment", $tmpDir, "alignment.corpus");
 
   # train
     if ($isHiero == 1) {
-	$cmd = "$extractExec $tmpDir/target $tmpDir/source $tmpDir/alignment $tmpDir/extract --GZOutput";
+	$cmd = "$extractExec $tmpDir/target.corpus $tmpDir/source.corpus $tmpDir/alignment.corpus $tmpDir/extract --GZOutput";
     }
     else {
 	# pb
-	$cmd = "$extractExec $tmpDir/target $tmpDir/source $tmpDir/alignment $tmpDir/extract 7 --GZOutput";
+	$cmd = "$extractExec $tmpDir/target.corpus $tmpDir/source.corpus $tmpDir/alignment.corpus $tmpDir/extract 7 --GZOutput";
     }
     $cmd = "$MOSES_DIR/scripts/generic/extract-parallel.perl 1 $SPLIT_EXEC $SORT_EXEC $cmd";
     print STDERR "Executing: $cmd\n";
@@ -93,16 +99,53 @@ while ($source = <SOURCE>) {
     `$cmd`;
     
   # decode
-    $cmd = "$decoderExec -f $iniPath -feature-overwrite \"TranslationModel0 path=$tmpDir/pt\" -i $tmpDir/source -n-best-list $tmpDir/nbest 10000";
+    $cmd = "$decoderExec -f $iniPath -feature-overwrite \"TranslationModel0 path=$tmpDir/pt\" -i $tmpDir/source.1 -n-best-list $tmpDir/nbest 10000 distinct -v 2";
     print STDERR "Executing: $cmd\n";
     `$cmd`;
 
-#  `rm -rf $tmpDir`;
+    # count the number of translation in nbest list
+    $cmd = "wc -l $tmpDir/nbest >> out";
+    `$cmd`;
 
-    ++$lineNum;
+  `rm -rf $tmpDir`;
 }
 
 close(SOURCE);
 close(TARGET);
 close(ALIGNMENT);
+
+
+######################
+sub Write1Line
+{
+  my ($line, $tmpDir, $fileName) = @_;
+  
+  open (HANDLE, ">$tmpDir/$fileName");
+  print HANDLE "$line\n";
+  close (HANDLE);
+}
+
+sub WriteCorpus1Holdout
+{
+  my ($holdoutLineNum, $inFilePath, $tmpDir, $outFileName) = @_;
+
+  open (INFILE, "$inFilePath");
+  open (OUTFILE, ">$tmpDir/$outFileName");
+
+  my $lineNum = 0;
+  while (my $line = <INFILE>) {
+    chomp($line);
+
+    if ($lineNum != $holdoutLineNum) {
+      print OUTFILE "$line\n";
+    }
+
+    ++$lineNum;
+  }
+
+  close (OUTFILE);
+  close(INFILE);
+
+}
+
 

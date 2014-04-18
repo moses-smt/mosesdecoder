@@ -24,7 +24,8 @@ public:
 	void Initialize(size_t size);
 
 	void Add(int sourceStart, int sourceEnd,
-			int targetStart, int targetEnd);
+			int targetStart, int targetEnd,
+			const Parameter &params);
 
 	void AddHieroNonTerms(const Parameter &params);
 

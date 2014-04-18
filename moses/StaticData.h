@@ -197,6 +197,7 @@ protected:
 
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
+  bool m_defaultNonTermOnlyForEmptyRange;
 
   FeatureRegistry m_registry;
 
@@ -760,6 +761,9 @@ public:
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
       m_treeStructure = treeStructure;
   }
+
+  bool GetDefaultNonTermOnlyForEmptyRange() const
+  { return m_defaultNonTermOnlyForEmptyRange; }
 
 };
 

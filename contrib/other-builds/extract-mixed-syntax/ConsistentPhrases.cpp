@@ -39,13 +39,13 @@ void ConsistentPhrases::Initialize(size_t size)
 }
 
 void ConsistentPhrases::Add(int sourceStart, int sourceEnd,
-		int targetStart, int targetEnd)
+		int targetStart, int targetEnd,
+		const Parameter &params)
 {
   Coll &coll = m_coll[sourceStart][sourceEnd - sourceStart];
-  ConsistentPhrase *cp = new ConsistentPhrase(sourceStart,
-											sourceEnd,
-											targetStart,
-											targetEnd);
+  ConsistentPhrase *cp = new ConsistentPhrase(sourceStart, sourceEnd,
+											targetStart, targetEnd,
+											params);
 
   pair<Coll::iterator, bool> inserted = coll.insert(cp);
   assert(inserted.second);

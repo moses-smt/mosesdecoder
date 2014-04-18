@@ -62,6 +62,8 @@ protected:
 	// create original rules
 	void CreateRules(const ConsistentPhrase &cp,
 			const Parameter &params);
+	void CreateRule(const NonTerm &nonTerm,
+			const Parameter &params);
 
 	void MergeRules(const Parameter &params);
 	void CalcFractionalCount();

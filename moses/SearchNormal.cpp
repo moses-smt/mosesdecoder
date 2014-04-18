@@ -93,7 +93,9 @@ void SearchNormal::ProcessSentence()
 
     // this stack is fully expanded;
     actual_hypoStack = &sourceHypoColl;
+
   }
+  //OutputHypoStack();
 }
 
 
@@ -379,6 +381,17 @@ void SearchNormal::OutputHypoStackSize()
     TRACE_ERR( ", " << (int)(*iterStack)->size());
   }
   TRACE_ERR( endl);
+}
+
+void SearchNormal::OutputHypoStack()
+{
+    // all stacks
+    int i = 0;
+    vector < HypothesisStack* >::iterator iterStack;
+    for (iterStack = m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
+      HypothesisStackNormal &hypoColl = *static_cast<HypothesisStackNormal*>(*iterStack);
+      TRACE_ERR( "Stack " << i++ << ": " << endl << hypoColl << endl);
+    }
 }
 
 }
