@@ -5,6 +5,7 @@
 namespace Moses
 {
 
+// the only thing this FF does is set TargetPhrase::m_ruleSource so that other FF can use it in Evaluate(Search).
 class SetSourcePhrase : public StatelessFeatureFunction
 {
 public:

@@ -31,6 +31,7 @@
 namespace Moses
 {
 
+class ChartKBestExtractor;
 class ChartHypothesis;
 class ChartManager;
 class RuleCubeItem;
@@ -91,6 +92,9 @@ public:
     delete hypo;
   }
 #endif
+
+  //! only used by ChartKBestExtractor
+  ChartHypothesis(const ChartHypothesis &, const ChartKBestExtractor &);
 
   ChartHypothesis(const ChartTranslationOptions &, const RuleCubeItem &item,
                   ChartManager &manager);

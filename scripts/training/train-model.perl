@@ -31,7 +31,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT, $_TRANSLITERATION_PHRASE_TABLE,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2, $_UNKNOWN_WORD_SOFT_MATCHES_FILE,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
@@ -122,7 +122,8 @@ $_HELP = 1
 		       'config=s' => \$_CONFIG,
 		       'osm-model=s' => \$_OSM,
 			'osm-setting=s' => \$_OSM_FACTORS,
-			'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,		
+			'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,
+			'transliteration-phrase-table=s' => \$_TRANSLITERATION_PHRASE_TABLE,		
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
@@ -1879,6 +1880,8 @@ sub create_ini {
      $path++;
    }
    print INI "1 T 1\n" if $_GLUE_GRAMMAR;
+  
+   print INI "1 T 1\n" if $_TRANSLITERATION_PHRASE_TABLE;	
 
    if (defined($_DECODING_GRAPH_BACKOFF)) {
      $_DECODING_GRAPH_BACKOFF =~ s/\s+/ /g;
@@ -1961,6 +1964,13 @@ sub create_ini {
      print STDERR "WARNING: Your [mapping-steps] require translation steps up to id $stepsused{T} but you defined translation steps 0..$i\n";
      exit 1 if $i < $stepsused{"T"}; # fatal to define less
    }
+
+   if ($_TRANSLITERATION_PHRASE_TABLE){
+		
+     $feature_spec .= "PhraseDictionaryMemory name=TranslationModel$i table-limit=100 num-features=4 path=$_TRANSLITERATION_PHRASE_TABLE input-factor=0 output-factor=0\n";
+     $weight_spec .= "TranslationModel$i= 0.2 0.2 0.2 0.2\n";
+     $i++;	
+   }  	
 
    # glue grammar
    if ($_GLUE_GRAMMAR) {
@@ -2069,8 +2079,9 @@ sub create_ini {
 	
     my $lm_oov_prob = 0.1;
 	
-    if ($_POST_DECODING_TRANSLIT){
+    if ($_POST_DECODING_TRANSLIT || $_TRANSLITERATION_PHRASE_TABLE){
 	$lm_oov_prob = -100.0;
+	$_LMODEL_OOV_FEATURE = "yes";
     } 	   
  
     $feature_spec .= "$type_name name=LM$i factor=$f path=$fn order=$o\n";
