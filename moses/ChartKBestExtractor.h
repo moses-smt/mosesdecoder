@@ -24,6 +24,7 @@
 #include "ScoreComponentCollection.h"
 
 #include <boost/unordered_set.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include <queue>
 #include <vector>
@@ -53,16 +54,45 @@ public:
 
     UnweightedHyperarc edge;
     std::vector<std::size_t> backPointers;
+    std::vector<boost::shared_ptr<Derivation> > subderivations;
     ScoreComponentCollection scoreBreakdown;
     float score;
   };
 
   struct DerivationOrderer {
-    bool operator()(const boost::shared_ptr<Derivation> &d1,
-                    const boost::shared_ptr<Derivation> &d2) const {
-      return d1->score < d2->score;
+    bool operator()(const boost::weak_ptr<Derivation> &d1,
+                    const boost::weak_ptr<Derivation> &d2) const {
+      boost::shared_ptr<Derivation> s1(d1);
+      boost::shared_ptr<Derivation> s2(d2);
+      return s1->score < s2->score;
     }
   };
+
+  struct Vertex {
+    typedef std::priority_queue<boost::weak_ptr<Derivation>,
+                                std::vector<boost::weak_ptr<Derivation> >,
+                                DerivationOrderer> DerivationQueue;
+
+    Vertex(const ChartHypothesis &h) : hypothesis(h), visited(false) {}
+
+    const ChartHypothesis &hypothesis;
+    std::vector<boost::weak_ptr<Derivation> > kBestList;
+    DerivationQueue candidates;
+    bool visited;
+  };
+
+  typedef std::vector<boost::shared_ptr<Derivation> > KBestVec;
+
+  // Extract the k-best list from the search hypergraph given the full, sorted
+  // list of top-level vertices.
+  void Extract(const std::vector<const ChartHypothesis*> &topHypos,
+               std::size_t k, KBestVec &);
+
+  static Phrase GetOutputPhrase(const Derivation &);
+
+private:
+  typedef boost::unordered_map<const ChartHypothesis *,
+                               boost::shared_ptr<Vertex> > VertexMap;
 
   struct DerivationHasher {
     std::size_t operator()(const boost::shared_ptr<Derivation> &d) const {
@@ -83,36 +113,8 @@ public:
     }
   };
 
-  struct Vertex {
-    typedef std::priority_queue<boost::shared_ptr<Derivation>,
-                                std::vector<boost::shared_ptr<Derivation> >,
-                                DerivationOrderer> DerivationQueue;
-
-    typedef boost::unordered_set<boost::shared_ptr<Derivation>,
-                                 DerivationHasher,
-                                 DerivationEqualityPred> DerivationSet;
-
-    Vertex(const ChartHypothesis &h) : hypothesis(h), visited(false) {}
-
-    const ChartHypothesis &hypothesis;
-    std::vector<boost::shared_ptr<Derivation> > kBestList;
-    DerivationQueue candidates;
-    DerivationSet seen;
-    bool visited;
-  };
-
-  typedef std::vector<boost::shared_ptr<Derivation> > KBestVec;
-
-  // Extract the k-best list from the search hypergraph given the full, sorted
-  // list of top-level vertices.
-  void Extract(const std::vector<const ChartHypothesis*> &topHypos,
-               std::size_t k, KBestVec &);
-
-  static Phrase GetOutputPhrase(const Derivation &);
-
-private:
-  typedef boost::unordered_map<const ChartHypothesis *,
-                               boost::shared_ptr<Vertex> > VertexMap;
+  typedef boost::unordered_set<boost::shared_ptr<Derivation>, DerivationHasher,
+                               DerivationEqualityPred> DerivationSet;
 
   UnweightedHyperarc CreateEdge(const ChartHypothesis &);
   boost::shared_ptr<Vertex> FindOrCreateVertex(const ChartHypothesis &);
@@ -121,6 +123,7 @@ private:
   void LazyNext(Vertex &, const Derivation &, std::size_t);
 
   VertexMap m_vertexMap;
+  DerivationSet m_derivations;
 };
 
 }  // namespace Moses
