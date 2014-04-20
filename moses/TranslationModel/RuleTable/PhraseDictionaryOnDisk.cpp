@@ -53,7 +53,8 @@ void PhraseDictionaryOnDisk::Load()
 
 ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t /*maxChartSpan*/)
 {
   return new ChartRuleLookupManagerOnDisk(parser, cellCollection, *this,
                                           GetImplementation(),
@@ -167,7 +168,7 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
   CacheColl &cache = GetCache();
   size_t hash = (size_t) ptNode->GetFilePos();
 
-  std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
+  CacheColl::iterator iter;
 
   iter = cache.find(hash);
 

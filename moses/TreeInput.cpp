@@ -313,7 +313,7 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &labe
                               , const std::vector<FactorType>& factorOrder)
 {
   Word word(true);
-  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label); // TODO - no factors
+  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label, true); // TODO - no factors
   word.SetFactor(0, factor);
 
   AddChartLabel(startPos, endPos, word, factorOrder);

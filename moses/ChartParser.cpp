@@ -97,7 +97,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
-      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.GetTreeStructure() != NULL) {
         targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
       }
 
@@ -141,15 +141,13 @@ ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells
   CreateInputPaths(m_source);
 
   const std::vector<PhraseDictionary*> &dictionaries = PhraseDictionary::GetColl();
+  assert(dictionaries.size() == m_decodeGraphList.size());
   m_ruleLookupManagers.reserve(dictionaries.size());
-  for (std::vector<PhraseDictionary*>::const_iterator p = dictionaries.begin();
-       p != dictionaries.end(); ++p) {
-
-    const PhraseDictionary *dict = *p;
+  for (std::size_t i = 0; i < dictionaries.size(); ++i) {
+    const PhraseDictionary *dict = dictionaries[i];
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
-
-    ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells);
-
+    std::size_t maxChartSpan = m_decodeGraphList[i]->GetMaxChartSpan();
+    ChartRuleLookupManager *lookupMgr = nonConstDict->CreateRuleLookupManager(*this, cells, maxChartSpan);
     m_ruleLookupManagers.push_back(lookupMgr);
   }
 
@@ -183,8 +181,12 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
     assert(decodeGraph.GetSize() == 1);
     ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
     size_t maxSpan = decodeGraph.GetMaxChartSpan();
+    size_t last = m_source.GetSize()-1;
+    if (maxSpan != 0) {
+        last = min(last, wordsRange.GetStartPos()+maxSpan);
+    }
     if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, to);
+      ruleLookupManager.GetChartRuleCollection(wordsRange, last, to);
     }
   }
 

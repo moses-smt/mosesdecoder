@@ -78,6 +78,7 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const WordsRange &range,
+  size_t lastPos,
   ChartParserCallback &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
@@ -168,7 +169,10 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       // go through each TARGET lhs
       ChartCellLabelSet::const_iterator iterChartNonTerm;
       for (iterChartNonTerm = chartNonTermSet.begin(); iterChartNonTerm != chartNonTermSet.end(); ++iterChartNonTerm) {
-        const ChartCellLabel &cellLabel = iterChartNonTerm->second;
+        if (*iterChartNonTerm == NULL) {
+          continue;
+        }
+        const ChartCellLabel &cellLabel = **iterChartNonTerm;
 
         bool doSearch = true;
         if (m_dictionary.m_maxSpanDefault != NOT_FOUND) {

@@ -43,6 +43,7 @@ TER/tercalc.cpp
 TER/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
+MeteorScorer.cpp
 Vocabulary.cpp
 PreProcessFilter.cpp
 SentenceLevelScorer.cpp

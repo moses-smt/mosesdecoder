@@ -12,6 +12,7 @@ binmode(STDIN,  ':utf8');
 binmode(STDOUT, ':utf8');
 binmode(STDERR, ':utf8');
 
+my $___FACTOR_DELIMITER = "|";
 
 my ($MOSES_SRC_DIR,$TRANSLIT_MODEL,$EVAL_DIR,$OUTPUT_FILE,$OUTPUT_FILE_NAME,$OOV_FILE, $OOV_FILE_NAME, $EXTERNAL_BIN_DIR, $LM_FILE, $INPUT_EXTENSION, $OUTPUT_EXTENSION);
 die("ERROR: wrong syntax when invoking postDecodingTransliteration.perl")
@@ -69,6 +70,8 @@ sub prepare_for_transliteration
 	my %UNK;
 	my @words;
 	my $src;
+	my @tW;
+
 	open MYFILE,  "<:encoding(UTF-8)", $testFile or die "Can't open $testFile: $!\n";
 
 	while (<MYFILE>) 
@@ -77,9 +80,23 @@ sub prepare_for_transliteration
         #print "$_\n";
         @words = split(/ /, "$_");
 
-	  foreach (@words)
+	 foreach (@words)
          {
-         	$UNK{"$_"} = 1;
+		
+		@tW = split /\Q$___FACTOR_DELIMITER/;
+
+		if (defined $tW[0])
+		{
+		
+		  if (! ($tW[0] =~ /[0-9.,]/))
+		   {
+			$UNK{$tW[0]} = 1;
+		   }
+		   else
+		   {
+		   	print "Not transliterating $tW[0] \n";
+		   }
+		}    
          }
 	}
 	 close (MYFILE);
@@ -257,6 +274,9 @@ sub run_decoder
 
 	my $find = ".cleaned.";
 	my $replace = ".transliterated.";
+  if ($final_file !~ /$find/) {
+    $find = ".output.";
+  }
 	$final_file =~ s/$find/$replace/g;
 	
 	`mkdir $corpus_dir/evaluation`;

@@ -42,6 +42,7 @@ public:
 
   virtual void GetChartRuleCollection(
     const WordsRange &range,
+    size_t last,
     ChartParserCallback &outColl);
 
 private:
