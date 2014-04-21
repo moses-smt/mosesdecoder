@@ -312,7 +312,7 @@ void ChartManager::CalcNBest(
   // Copy derivations into nBestList, skipping ones with repeated translations.
   std::set<Phrase> distinct;
   for (ChartKBestExtractor::KBestVec::const_iterator p = bigList.begin();
-       p != bigList.end(); ++p) {
+       nBestList.size() < n && p != bigList.end(); ++p) {
     boost::shared_ptr<ChartKBestExtractor::Derivation> derivation = *p;
     Phrase translation = ChartKBestExtractor::GetOutputPhrase(*derivation);
     if (distinct.insert(translation).second) {
