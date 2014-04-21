@@ -200,21 +200,20 @@ void ChartKBestExtractor::LazyKthBest(Vertex &v, std::size_t k,
   // Add derivations to the k-best list until it contains k or there are none
   // left to add.
   while (v.kBestList.size() < k) {
-    if (!v.kBestList.empty()) {
-      // Update the priority queue by adding the successors of the last
-      // derivation (unless they've been seen before).
-      boost::shared_ptr<Derivation> d(v.kBestList.back());
-      LazyNext(v, *d, globalK);
-    }
+    assert(!v.kBestList.empty());
+    // Update the priority queue by adding the successors of the last
+    // derivation (unless they've been seen before).
+    boost::shared_ptr<Derivation> d(v.kBestList.back());
+    LazyNext(v, *d, globalK);
     // Check if there are any derivations left in the queue.
     if (v.candidates.empty()) {
       break;
     }
     // Get the next best derivation and delete it from the queue.
-    boost::weak_ptr<Derivation> d = v.candidates.top();
+    boost::weak_ptr<Derivation> next = v.candidates.top();
     v.candidates.pop();
     // Add it to the k-best list.
-    v.kBestList.push_back(d);
+    v.kBestList.push_back(next);
   }
 }
 
@@ -250,7 +249,7 @@ ChartKBestExtractor::Derivation::Derivation(const UnweightedHyperarc &e)
   subderivations.reserve(arity);
   for (std::size_t i = 0; i < arity; ++i) {
     const Vertex &pred = *edge.tail[i];
-    assert(pred.kBestList.size() == 1);
+    assert(pred.kBestList.size() >= 1);
     boost::shared_ptr<Derivation> sub(pred.kBestList[0]);
     subderivations.push_back(sub);
   }
