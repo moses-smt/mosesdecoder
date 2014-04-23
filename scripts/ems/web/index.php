@@ -22,7 +22,8 @@ function head($title) {
 <body><h2>'.$title."</h2>\n";
 }
 
-if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
+if (array_key_exists("setStepStatus",$_GET)) { set_step_status($_GET["setStepStatus"]); }
+else if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
   load_experiment_info();
   load_comment();
 
