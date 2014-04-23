@@ -683,7 +683,8 @@ function ngram_summary_diff() {
     $each_score = explode(" ; ",$experiment[$idx?$id2:$id]->result[$set]);
     for($i=0;$i<count($each_score);$i++) {
       if (preg_match('/([\d\(\)\.\s]+) (BLEU[\-c]*)/',$each_score[$i],$match) ||
-          preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match)) {
+          preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match) ||
+          preg_match('/([\d\(\)\.\s]+) (METEOR[\-c]*)/',$each_score[$i],$match)) {
 	  $score[$match[2]][$idx] = $match[1];
       }
     }

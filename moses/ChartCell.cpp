@@ -114,8 +114,11 @@ void ChartCell::SortHypotheses()
   MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
-    coll.SortHypotheses();
-    m_targetLabelSet.AddConstituent(iter->first, &coll.GetSortedHypotheses());
+
+    if (coll.GetSize()) {
+      coll.SortHypotheses();
+      m_targetLabelSet.AddConstituent(iter->first, &coll.GetSortedHypotheses());
+    }
   }
 }
 

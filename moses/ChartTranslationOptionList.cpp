@@ -164,8 +164,8 @@ float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) 
     const HypoList *stack = chartCell->GetStack().cube;
     assert(stack);
     assert(!stack->empty());
-    const ChartHypothesis &bestHypo = **(stack->begin());
-    return bestHypo.GetTotalScore();
+	const ChartHypothesis &bestHypo = **(stack->begin());
+	return bestHypo.GetTotalScore();
 }
 
 void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPath &inputPath)

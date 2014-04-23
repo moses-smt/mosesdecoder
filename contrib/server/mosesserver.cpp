@@ -12,6 +12,7 @@
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TreeInput.h"
 #include "moses/LM/ORLM.h"
+#include "moses-cmd/IOWrapper.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -22,6 +23,7 @@
 #include <xmlrpc-c/server_abyss.hpp>
 
 using namespace Moses;
+using namespace MosesCmd;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
@@ -215,6 +217,8 @@ public:
     cerr << "Input: " << source << endl;
     si = params.find("align");
     bool addAlignInfo = (si != params.end());
+    si = params.find("word-align");
+    bool addWordAlignInfo = (si != params.end());
     si = params.find("sg");
     bool addGraphInfo = (si != params.end());
     si = params.find("topt");
@@ -277,6 +281,20 @@ public:
         outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
         if (addAlignInfo) {
           retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
+        }
+        if (addWordAlignInfo) {
+          stringstream wordAlignment;
+          OutputAlignment(wordAlignment, hypo);
+          vector<xmlrpc_c::value> alignments;
+          string alignmentPair;
+          while (wordAlignment >> alignmentPair) {
+          	int pos = alignmentPair.find('-');
+          	map<string, xmlrpc_c::value> wordAlignInfo;
+          	wordAlignInfo["source-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(0, pos).c_str()));
+          	wordAlignInfo["target-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
+          	alignments.push_back(xmlrpc_c::value_struct(wordAlignInfo));
+          }
+          retData.insert(pair<string, xmlrpc_c::value_array>("word-align", alignments));
         }
 
         if(addGraphInfo) {
@@ -415,8 +433,24 @@ public:
       }
       nBestXMLItem["hyp"] = xmlrpc_c::value_string(out.str());
 
-      if (addAlignmentInfo)
+      if (addAlignmentInfo) {
         nBestXMLItem["align"] = xmlrpc_c::value_array(alignInfo);
+
+        if ((int)edges.size() > 0) {
+          stringstream wordAlignment;
+          OutputAlignment(wordAlignment, edges[0]);
+          vector<xmlrpc_c::value> alignments;
+          string alignmentPair;
+          while (wordAlignment >> alignmentPair) {
+          	int pos = alignmentPair.find('-');
+          	map<string, xmlrpc_c::value> wordAlignInfo;
+          	wordAlignInfo["source-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(0, pos).c_str()));
+          	wordAlignInfo["target-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
+          	alignments.push_back(xmlrpc_c::value_struct(wordAlignInfo));
+          }
+          nBestXMLItem["word-align"] = xmlrpc_c::value_array(alignments);
+        }
+      }
 
       // weighted score
       nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetTotalScore());
@@ -512,7 +546,7 @@ int main(int argc, char** argv)
   xmlrpc_limit_set(XMLRPC_XML_SIZE_LIMIT_ID, 512*1024*1024);
 
   xmlrpc_c::registry myRegistry;
-
+  
   xmlrpc_c::methodPtr const translator(new Translator);
   xmlrpc_c::methodPtr const updater(new Updater);
   xmlrpc_c::methodPtr const optimizer(new Optimizer);
@@ -521,11 +555,20 @@ int main(int argc, char** argv)
   myRegistry.addMethod("updater", updater);
   myRegistry.addMethod("optimize", optimizer);
 
+   xmlrpc_c::serverAbyss myAbyssServer(
+					myRegistry,
+					port,              // TCP port on which to listen
+					logfile
+					);
+  /* doesn't work with xmlrpc-c v. 1.16.33 - ie very old lib on Ubuntu 12.04
   xmlrpc_c::serverAbyss myAbyssServer(
-    myRegistry,
-    port,              // TCP port on which to listen
-    logfile
+    xmlrpc_c::serverAbyss::constrOpt()
+    .registryPtr(&myRegistry)
+    .portNumber(port)              // TCP port on which to listen
+    .logFileName(logfile)
+    .allowOrigin("*")
   );
+  */
 
   cerr << "Listening on port " << port << endl;
   if (isSerial) {
