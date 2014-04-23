@@ -30,6 +30,7 @@
 #include "SentenceStats.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartParser.h"
+#include "ChartKBestExtractor.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -71,6 +72,7 @@ public:
   void AddXmlChartOptions();
   const ChartHypothesis *GetBestHypothesis() const;
   void CalcNBest(size_t count, ChartTrellisPathList &ret, bool onlyDistinct=0) const;
+  void CalcNBest(size_t n, std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > &nBestList, bool onlyDistinct=false) const;
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
   void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */

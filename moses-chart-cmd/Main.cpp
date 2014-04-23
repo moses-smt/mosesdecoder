@@ -151,7 +151,7 @@ public:
     if (staticData.IsDetailedAllTranslationReportingEnabled()) {
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       size_t nBestSize = staticData.GetNBestSize();
-      ChartTrellisPathList nBestList;
+      std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
       manager.CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
       m_ioWrapper.OutputDetailedAllTranslationReport(nBestList, manager, sentence, translationId);
     }
@@ -160,7 +160,7 @@ public:
     size_t nBestSize = staticData.GetNBestSize();
     if (nBestSize > 0) {
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-      ChartTrellisPathList nBestList;
+      std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
       m_ioWrapper.OutputNBestList(nBestList, translationId);
       IFVERBOSE(2) {
