@@ -168,8 +168,8 @@ float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) 
     	return 0;
     }
     else {
-		const ChartHypothesis &bestHypo = **(stack->begin());
-		return bestHypo.GetTotalScore();
+   	const ChartHypothesis &bestHypo = **(stack->begin());
+	return bestHypo.GetTotalScore();
     }
 }
 
