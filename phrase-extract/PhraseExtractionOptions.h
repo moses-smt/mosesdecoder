@@ -33,7 +33,10 @@ class PhraseExtractionOptions
 {
 
 public:
-  const int maxPhraseLength;
+  int maxPhraseLength;
+  int minPhraseLength;
+  std::string separator;
+
 private:
   bool allModelsOutputFlag;
   bool wordModel;
@@ -56,6 +59,8 @@ public:
 
   PhraseExtractionOptions(const int initmaxPhraseLength):
     maxPhraseLength(initmaxPhraseLength),
+    minPhraseLength(3),
+    separator("|||"),
     allModelsOutputFlag(false),
     wordModel(false),
     wordType(REO_MSD),

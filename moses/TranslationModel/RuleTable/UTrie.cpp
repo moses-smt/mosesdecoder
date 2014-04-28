@@ -77,10 +77,9 @@ UTrieNode &RuleTableUTrie::GetOrCreateNode(const Phrase &source,
 
 ChartRuleLookupManager *RuleTableUTrie::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t maxChartSpan)
 {
-  // FIXME This should be a parameter to CreateRuleLookupManager
-  size_t maxChartSpan = 0;
   return new Scope3Parser(parser, cellCollection, *this, maxChartSpan);
 }
 

@@ -167,6 +167,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartHypothesisCollection.h</locationURI>
 		</link>
 		<link>
+			<name>ChartKBestExtractor.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartKBestExtractor.cpp</locationURI>
+		</link>
+		<link>
+			<name>ChartKBestExtractor.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartKBestExtractor.h</locationURI>
+		</link>
+		<link>
 			<name>ChartManager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartManager.cpp</locationURI>
@@ -1067,6 +1077,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
 		</link>
 		<link>
+			<name>FF/CountNonTerms.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CountNonTerms.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.h</locationURI>
+		</link>
+		<link>
 			<name>FF/CoveredReferenceFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.cpp</locationURI>
@@ -1157,6 +1177,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/GlobalLexicalModelUnlimited.h</locationURI>
 		</link>
 		<link>
+			<name>FF/HyperParameterAsWeight.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/HyperParameterAsWeight.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/HyperParameterAsWeight.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/HyperParameterAsWeight.h</locationURI>
+		</link>
+		<link>
 			<name>FF/InputFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.cpp</locationURI>
@@ -1232,6 +1262,36 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ReferenceComparison.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ReferenceComparison.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.h</locationURI>
+		</link>
+		<link>
+			<name>FF/RuleAmbiguity.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleAmbiguity.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/RuleAmbiguity.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleAmbiguity.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SetSourcePhrase.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SetSourcePhrase.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SkeletonStatefulFF.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.cpp</locationURI>
@@ -1250,6 +1310,16 @@
 			<name>FF/SkeletonStatelessFF.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SoftMatchingFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SoftMatchingFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
@@ -1310,6 +1380,16 @@
 			<name>FF/TargetWordInsertionFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetWordInsertionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/TreeStructureFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TreeStructureFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/TreeStructureFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TreeStructureFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/UnknownWordPenaltyProducer.cpp</name>
@@ -1835,6 +1915,16 @@
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/CompletedRuleCollection.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/CompletedRuleCollection.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/CompletedRuleCollection.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/CompletedRuleCollection.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/DotChart.h</name>

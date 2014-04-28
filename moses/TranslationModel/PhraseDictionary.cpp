@@ -58,8 +58,7 @@ const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(
 
     size_t hash = hash_value(src);
 
-    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
-
+    CacheColl::iterator iter;
     iter = cache.find(hash);
 
     if (iter == cache.end()) {
@@ -153,7 +152,7 @@ void PhraseDictionary::ReduceCache() const
 
   // find cutoff for last used time
   priority_queue< clock_t > lastUsedTimes;
-  std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iter;
+  CacheColl::iterator iter;
   iter = cache.begin();
   while( iter != cache.end() ) {
     lastUsedTimes.push( iter->second.second );
@@ -167,7 +166,7 @@ void PhraseDictionary::ReduceCache() const
   iter = cache.begin();
   while( iter != cache.end() ) {
     if (iter->second.second < cutoffLastUsedTime) {
-      std::map<size_t, std::pair<const TargetPhraseCollection*,clock_t> >::iterator iterRemove = iter++;
+      CacheColl::iterator iterRemove = iter++;
       delete iterRemove->second.first;
       cache.erase(iterRemove);
     } else iter++;

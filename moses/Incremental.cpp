@@ -50,7 +50,10 @@ public:
 
   void FinishedSearch() {
     for (ChartCellLabelSet::iterator i(out_.mutable_begin()); i != out_.mutable_end(); ++i) {
-      ChartCellLabel::Stack &stack = i->second.MutableStack();
+      if ((*i) == NULL) {
+        continue;
+      }
+      ChartCellLabel::Stack &stack = (*i)->MutableStack();
       Gen *gen = static_cast<Gen*>(stack.incr_generator);
       gen->FinishedSearch();
       stack.incr = &gen->Generating();
@@ -79,6 +82,8 @@ public:
   void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
 
   void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
+
+  float GetBestScore(const ChartCellLabel *chartCell) const;
 
   bool Empty() const {
     return edges_.Empty();
@@ -112,15 +117,14 @@ private:
   const search::Score oov_weight_;
 };
 
-template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &)
+template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &range)
 {
   std::vector<search::PartialVertex> vertices;
   vertices.reserve(nts.size());
   float below_score = 0.0;
   for (StackVec::const_iterator i(nts.begin()); i != nts.end(); ++i) {
     vertices.push_back((*i)->GetStack().incr->RootAlternate());
-    if (vertices.back().Empty()) return;
-    below_score += vertices.back().Bound();
+    below_score += (*i)->GetBestScore(this);
   }
 
   std::vector<lm::WordIndex> words;
@@ -148,12 +152,13 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     search::Note note;
     note.vp = &phrase;
     edge.SetNote(note);
+    edge.SetRange(range);
 
     edges_.AddEdge(edge);
   }
 }
 
-template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &)
+template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &range)
 {
   std::vector<lm::WordIndex> words;
   UTIL_THROW_IF2(phrase.GetSize() > 1,
@@ -169,8 +174,17 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   search::Note note;
   note.vp = &phrase;
   edge.SetNote(note);
+  edge.SetRange(range);
 
   edges_.AddEdge(edge);
+}
+
+// for pruning
+template <class Model> float Fill<Model>::GetBestScore(const ChartCellLabel *chartCell) const
+{
+    search::PartialVertex vertex = chartCell->GetStack().incr->RootAlternate();
+    UTIL_THROW_IF2(vertex.Empty(), "hypothesis with empty stack");
+    return vertex.Bound();
 }
 
 // TODO: factors (but chart doesn't seem to support factors anyway).
@@ -209,8 +223,12 @@ template <class Model, class Best> search::History Manager::PopulateBest(const M
   size_t size = source_.GetSize();
   boost::object_pool<search::Vertex> vertex_pool(std::max<size_t>(size * size / 2, 32));
 
-  for (size_t width = 1; width < size; ++width) {
-    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+  for (int startPos = size-1; startPos >= 0; --startPos) {
+    for (size_t width = 1; width <= size-startPos; ++width) {
+      // full range uses RootSearch
+      if (startPos == 0 && startPos + width == size) {
+        break;
+      }
       WordsRange range(startPos, startPos + width - 1);
       Fill<Model> filler(context, words, oov_weight);
       parser_.Create(range, filler);

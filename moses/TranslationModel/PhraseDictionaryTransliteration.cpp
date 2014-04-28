@@ -59,8 +59,8 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
 
   CacheColl &cache = GetCache();
 
-  std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
-  iter = cache.find(hash);
+    CacheColl::iterator iter;
+    iter = cache.find(hash);
 
   if (iter != cache.end()) {
     // already in cache
@@ -142,7 +142,8 @@ std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(
 }
 
 ChartRuleLookupManager* PhraseDictionaryTransliteration::CreateRuleLookupManager(const ChartParser &parser,
-    const ChartCellCollectionBase &cellCollection)
+    const ChartCellCollectionBase &cellCollection,
+    std::size_t /*maxChartSpan*/)
 {
   return NULL;
   //return new ChartRuleLookupManagerSkeleton(parser, cellCollection, *this);

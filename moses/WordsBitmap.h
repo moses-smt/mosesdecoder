@@ -132,6 +132,8 @@ public:
     return NOT_FOUND;
   }
 
+  bool IsAdjacent(size_t startPos, size_t endPos) const;
+
   //! whether a word has been translated at a particular position
   bool GetValue(size_t pos) const {
     return m_bitmap[pos];

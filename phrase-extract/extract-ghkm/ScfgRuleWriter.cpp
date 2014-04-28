@@ -165,11 +165,12 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
 
 void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g)
 {
-  Write(rule,false);
-  m_fwd << " Tree ";
-  g.PrintTree(m_fwd);
-  m_fwd << std::endl;
-  m_inv << std::endl;
+    Write(rule,false);
+    m_fwd << " {{Tree ";
+    g.PrintTree(m_fwd);
+    m_fwd << "}}";
+    m_fwd << std::endl;
+    m_inv << std::endl;
 }
 
 }  // namespace GHKM

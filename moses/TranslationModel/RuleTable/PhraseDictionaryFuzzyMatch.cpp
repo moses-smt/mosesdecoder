@@ -100,7 +100,8 @@ void PhraseDictionaryFuzzyMatch::Load()
 
 ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t /*maxChartSpan*/)
 {
   return new ChartRuleLookupManagerMemoryPerSentence(parser, cellCollection, *this);
 }
@@ -339,7 +340,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
 
+#if defined(UNLABELLED_SOURCE)
+      currNode = currNode->GetOrCreateNonTerminalChild(targetNonTerm);
+#else
       currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
+#endif
     } else {
       currNode = currNode->GetOrCreateChild(word);
     }

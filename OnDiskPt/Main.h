@@ -27,7 +27,7 @@ typedef std::vector<AlignPair> AlignType;
 
 OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
                            , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
-                           , OnDiskPt::OnDiskWrapper &onDiskWrapper);
+                           , OnDiskPt::OnDiskWrapper &onDiskWrapper, int retSourceTarget);
 OnDiskPt::PhrasePtr Tokenize(OnDiskPt::SourcePhrase &sourcePhrase, OnDiskPt::TargetPhrase &targetPhrase
                              , char *line, OnDiskPt::OnDiskWrapper &onDiskWrapper
                              , int numScores

@@ -105,8 +105,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
-
+#if defined(UNLABELLED_SOURCE)
+      currNode = currNode->GetOrCreateNonTerminalChild(targetNonTerm);
+#else
       currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
+#endif
     } else {
       currNode = currNode->GetOrCreateChild(word);
     }
@@ -123,7 +126,8 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
 
 ChartRuleLookupManager *PhraseDictionaryMemory::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t /*maxChartSpan */)
 {
   return new ChartRuleLookupManagerMemory(parser, cellCollection, *this);
 }
@@ -180,8 +184,13 @@ ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 
   const PhraseDictionaryNodeMemory &coll = phraseDict.m_collection;
   for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p) {
+#if defined(UNLABELLED_SOURCE)
+    const Word &targetNonTerm = p->first;
+    out << targetNonTerm;
+#else
     const Word &sourceNonTerm = p->first.first;
     out << sourceNonTerm;
+#endif
   }
   for (TermMap::const_iterator p = coll.m_sourceTermMap.begin(); p != coll.m_sourceTermMap.end(); ++p) {
     const Word &sourceTerm = p->first;

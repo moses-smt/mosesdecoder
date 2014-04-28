@@ -68,7 +68,8 @@ TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 }
 
 ChartRuleLookupManager* SkeletonPT::CreateRuleLookupManager(const ChartParser &parser,
-    const ChartCellCollectionBase &cellCollection)
+    const ChartCellCollectionBase &cellCollection,
+    std::size_t /*maxChartSpan*/)
 {
   return new ChartRuleLookupManagerSkeleton(parser, cellCollection, *this);
 }

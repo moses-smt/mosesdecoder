@@ -43,10 +43,10 @@ public:
       alpha_[i] = i * log10(0.4);
   }
   ~OnlineRLM() {
-    if(alpha_) delete[] alpha_;
+    delete[] alpha_;
     if(bAdapting_) delete vocab_;
     else vocab_ = NULL;
-    if(cache_) delete cache_;
+    delete cache_;
     delete bPrefix_;
     delete bHit_;
   }

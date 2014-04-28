@@ -53,6 +53,7 @@ ChartRuleLookupManagerSkeleton::~ChartRuleLookupManagerSkeleton()
 
 void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
   const WordsRange &range,
+  size_t last,
   ChartParserCallback &outColl)
 {
   //m_tpColl.push_back(TargetPhraseCollection());

@@ -380,6 +380,11 @@ void Phrase::InitStartEndWord()
 
 size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
 {
+  if (GetSize() < sought.GetSize()) {
+	// sought phrase too big
+    return NOT_FOUND;
+  }
+
   size_t maxStartPos = GetSize() - sought.GetSize();
   for (size_t startThisPos = 0; startThisPos <= maxStartPos; ++startThisPos) {
     size_t thisPos = startThisPos;

@@ -106,7 +106,7 @@ class Moses():
                 scores = line[2].split()
                 if len(scores) <self.number_of_features:
                     sys.stderr.write('Error: model only has {0} features. Expected {1}.\n'.format(len(scores),self.number_of_features))
-                    exit()
+                    exit(1)
                     
                 scores = scores[:self.number_of_features]
                 model_probabilities = map(float,scores)
@@ -114,7 +114,7 @@ class Moses():
                 
                 if mode == 'counts' and not priority == 2: #priority 2 is MAP
                     try:
-                        counts = map(float,line[-1].split())
+                        counts = map(float,line[4].split())
                         try:
                             target_count,src_count,joint_count = counts
                             joint_count_e2f = joint_count
@@ -145,7 +145,7 @@ class Moses():
         if (store == 'all' or store == 'source') and not (filter_by_src and not src in filter_by_src):
             if mode == 'counts' and not priority == 2: #priority 2 is MAP
                 try:
-                    self.phrase_source[src][i] = float(line[-1].split()[1])
+                    self.phrase_source[src][i] = float(line[4].split()[1])
                 except:
                     sys.stderr.write(str(line)+'\n')
                     sys.stderr.write('ERROR: Counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts or word alignment?\n')
@@ -156,7 +156,7 @@ class Moses():
         if (store == 'all' or store == 'target') and not (filter_by_target and not target in filter_by_target):
             if mode == 'counts' and not priority == 2: #priority 2 is MAP
                 try:
-                    self.phrase_target[target][i] = float(line[-1].split()[0])
+                    self.phrase_target[target][i] = float(line[4].split()[0])
                 except:
                     sys.stderr.write(str(line)+'\n')
                     sys.stderr.write('ERROR: Counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts or word alignment?\n')
@@ -179,7 +179,7 @@ class Moses():
                 reordering_probabilities[j][i] = p
         except IndexError:
             sys.stderr.write('\nIndexError: Did you correctly specify the number of reordering features? (--number_of_features N in command line)\n')
-            exit()
+            exit(1)
 
     def traverse_incrementally(self,table,models,load_lines,store_flag,mode='interpolate',inverted=False,lowmem=False,flags=None):
         """hack-ish way to find common phrase pairs in multiple models in one traversal without storing it all in memory
@@ -210,6 +210,9 @@ class Moses():
                 for line in model:
 
                     line = line.rstrip().split(b' ||| ')
+                    if line[-1].endswith(b' |||'):
+                      line[-1] = line[-1][:-4]
+                      line.append('')
                 
                     if increment != line[0]:
                         stack[i] = line
@@ -300,20 +303,21 @@ class Moses():
     def store_info(self,src,target,line):
         """store alignment info and comment section for re-use in output"""
         
-        if len(line) == 5:
-            self.phrase_pairs[src][target][1] = line[3:5]
+        if len(line) >= 5:
+            if not self.phrase_pairs[src][target][1]:
+                self.phrase_pairs[src][target][1] = line[3:]
         
         # assuming that alignment is empty
         elif len(line) == 4:
             if self.require_alignment:
                 sys.stderr.write('Error: unexpected phrase table format. Your current configuration requires alignment information. Make sure you trained your model with -phrase-word-alignment (default in newer Moses versions)\n')
-                exit()
+                exit(1)
             
             self.phrase_pairs[src][target][1] = [b'',line[3].lstrip(b'| ')]
    
         else:
             sys.stderr.write('Error: unexpected phrase table format. Are you using a very old/new version of Moses with different formatting?\n')
-            exit()
+            exit(1)
    
    
     def get_word_alignments(self,src,target,cache=False,mycache={}):
@@ -373,7 +377,8 @@ class Moses():
             return ''
         
         # information specific to Moses model: alignment info and comment section with target and source counts
-        alignment,comments = self.phrase_pairs[src][target][1]
+        additional_entries = self.phrase_pairs[src][target][1]
+        alignment = additional_entries[0]
         if alignment:
             extra_space = b' '
         else:
@@ -384,7 +389,7 @@ class Moses():
             i_f2e = flags['i_f2e']
             srccount =  dot_product(self.phrase_source[src],weights[i_f2e])
             targetcount = dot_product(self.phrase_target[target],weights[i_e2f])
-            comments = b"%s %s" %(targetcount,srccount)
+            additional_entries[1] = b"%s %s" %(targetcount,srccount)
             
         features = b' '.join([b'%.6g' %(f) for f in features])
         
@@ -397,7 +402,7 @@ class Moses():
           phrase_penalty = b' 2.718'
         else:
           phrase_penalty = b''
-        line = b"%s ||| %s ||| %s%s %s||| %s%s||| %s\n" %(src,target,features,origin_features,phrase_penalty,alignment,extra_space,comments)
+        line = b"%s ||| %s ||| %s%s %s||| %s%s||| %s\n" %(src,target,features,origin_features,phrase_penalty,alignment,extra_space,b' ||| '.join(additional_entries[1:]))
         return line
         
         
@@ -473,8 +478,15 @@ class Moses():
         for line,line2 in izip(pt_normal,pt_inverse):
             
             line = line.split(b' ||| ')
+            if line[-1].endswith(b' |||'):
+                line[-1] = line[-1][:-4]
+                line.append('')
+
             line2 = line2.split(b' ||| ')
-            
+            if line2[-1].endswith(b' |||'):
+                line2[-1] = line2[-1][:-4]
+                line2.append('')
+
             #scores
             mid = int(self.number_of_features/2)
             scores1 = line[2].split()
@@ -483,11 +495,11 @@ class Moses():
             
             # marginal counts
             if mode == 'counts':
-                src_count = line[-1].split()[1]
+                src_count = line[4].split()[1]
                 target_count = line2[-1].split()[0]
-                line[-1] = b' '.join([target_count,src_count]) + b'\n'
+                line[4] = b' '.join([target_count,src_count])
             
-            pt_out.write(b' ||| '.join(line))
+            pt_out.write(b' ||| '.join(line)+ b'\n')
             
         pt_normal.close()
         pt_inverse.close()
@@ -515,7 +527,7 @@ class TigerXML():
         
         if not src or not target:
             sys.stderr.write('Error: Source and/or target language not specified. Required for TigerXML extraction.\n')
-            exit()
+            exit(1)
         
         alignments = self._get_aligned_ids(src,target)
         self._textualize_alignments(src,target,alignments)
@@ -685,7 +697,10 @@ class Moses_Alignment():
         for line in fileobj:
             
             line = line.split(b' ||| ')
-            
+            if line[-1].endswith(b' |||'):
+                line[-1] = line[-1][:-4]
+                line.append('')
+
             src = line[0]
             target = line[1]
             
@@ -1261,7 +1276,7 @@ def handle_file(filename,action,fileobj=None,mode='r'):
                     sys.stderr.write('For a weighted counts combination, we need statistics that Moses doesn\'t write to disk by default.\n')
                     sys.stderr.write('Repeat step 4 of Moses training for all models with the option -write-lexical-counts.\n')
                 
-                exit()
+                exit(1)
 
         if filename.endswith('.gz'):
             fileobj = gzip.open(filename,mode)
@@ -1435,7 +1450,7 @@ class Combine_TMs():
 
         if mode not in ['interpolate','loglinear','counts']:
             sys.stderr.write('Error: mode must be either "interpolate", "loglinear" or "counts"\n')
-            sys.exit()
+            sys.exit(1)
 
         models,number_of_features,weights = self._sanity_checks(models,number_of_features,weights)
         
@@ -1528,6 +1543,9 @@ class Combine_TMs():
                         sys.stderr.write('...'+str(j))
                     j += 1
                     line = line.rstrip().split(b' ||| ')
+                    if line[-1].endswith(b' |||'):
+                        line[-1] = line[-1][:-4]
+                        line.append('')
                     self.model_interface.load_phrase_features(line,priority,i,store='all',mode=self.mode,filter_by=self.reference_interface.word_pairs,filter_by_src=self.reference_interface.word_source,filter_by_target=self.reference_interface.word_target,flags=self.flags)
                 sys.stderr.write(' done\n')
 
@@ -1553,6 +1571,9 @@ class Combine_TMs():
                         sys.stderr.write('...'+str(j))
                     j += 1
                     line = line.rstrip().split(b' ||| ')
+                    if line[-1].endswith(b' |||'):
+                        line[-1] = line[-1][:-4]
+                        line.append('')
                     self.model_interface.load_phrase_features(line,priority,i,mode=self.mode,store='target',flags=self.flags)
                 sys.stderr.write(' done\n')
 

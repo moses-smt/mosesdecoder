@@ -182,7 +182,9 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
 
 }
 
-InputType*IOWrapper::GetInput(InputType* inputType)
+InputType*
+IOWrapper::
+GetInput(InputType* inputType)
 {
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
     if (long x = inputType->GetTranslationId()) {
@@ -605,7 +607,7 @@ void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solu
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
 {
-  delete source;
+  if (source) delete source;
   switch(inputType) {
   case SentenceInput:
     source = ioWrapper.GetInput(new Sentence);
@@ -618,6 +620,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
     break;
   default:
     TRACE_ERR("Unknown input type: " << inputType << "\n");
+    source = NULL;
   }
   return (source ? true : false);
 }

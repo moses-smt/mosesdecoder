@@ -102,6 +102,14 @@ public:
       const std::vector<search::Applied> &nbest = manager.ProcessSentence();
       if (!nbest.empty()) {
         m_ioWrapper.OutputBestHypo(nbest[0], translationId);
+        if (staticData.IsDetailedTranslationReportingEnabled()) {
+          const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+          m_ioWrapper.OutputDetailedTranslationReport(&nbest[0], sentence, translationId);
+        }
+        if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+          const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+          m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(&nbest[0], sentence, translationId);
+        }
       } else {
         m_ioWrapper.OutputBestNone(translationId);
       }
@@ -134,12 +142,16 @@ public:
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
     }
+    if (!staticData.GetOutputUnknownsFile().empty()) {
+      m_ioWrapper.OutputUnknowns(manager.GetParser().GetUnknownSources(),
+                                 translationId);
+    }
 
     //DIMw
     if (staticData.IsDetailedAllTranslationReportingEnabled()) {
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       size_t nBestSize = staticData.GetNBestSize();
-      ChartTrellisPathList nBestList;
+      std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
       manager.CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
       m_ioWrapper.OutputDetailedAllTranslationReport(nBestList, manager, sentence, translationId);
     }
@@ -148,7 +160,7 @@ public:
     size_t nBestSize = staticData.GetNBestSize();
     if (nBestSize > 0) {
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-      ChartTrellisPathList nBestList;
+      std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
       m_ioWrapper.OutputNBestList(nBestList, translationId);
       IFVERBOSE(2) {
@@ -223,11 +235,17 @@ static void ShowWeights()
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
     }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
+    }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
     }
   }
 }

@@ -107,7 +107,7 @@ void Word::CreateFromString(FactorDirection direction
 
   util::TokenIter<util::MultiCharacter> fit(str, StaticData::Instance().GetFactorDelimiter());
   for (size_t ind = 0; ind < factorOrder.size() && fit; ++ind, ++fit) {
-    m_factorArray[factorOrder[ind]] = factorCollection.AddFactor(*fit);
+    m_factorArray[factorOrder[ind]] = factorCollection.AddFactor(*fit, isNonTerminal);
   }
   UTIL_THROW_IF(fit, StrayFactorException, "You have configured " << factorOrder.size() << " factors but the word " << str << " contains factor delimiter " << StaticData::Instance().GetFactorDelimiter() << " too many times.");
 
@@ -119,16 +119,18 @@ void Word::CreateUnknownWord(const Word &sourceWord)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 
+  m_isNonTerminal = sourceWord.IsNonTerminal();
+
   for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
     FactorType factorType = static_cast<FactorType>(currFactor);
 
     const Factor *sourceFactor = sourceWord[currFactor];
     if (sourceFactor == NULL)
-      SetFactor(factorType, factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR));
+      SetFactor(factorType, factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR, m_isNonTerminal));
     else
-      SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString()));
+      SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString(), m_isNonTerminal));
   }
-  m_isNonTerminal = sourceWord.IsNonTerminal();
+
   m_isOOV = true;
 }
 

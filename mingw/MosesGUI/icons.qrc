@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icon/moses.ico</file>
+  </qresource>
+</RCC>

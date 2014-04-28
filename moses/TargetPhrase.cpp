@@ -281,6 +281,11 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   os << ": c=" << tp.m_fullScore << flush;
   os << " " << tp.m_scoreBreakdown << flush;
 
+  const Phrase *sourcePhrase = tp.GetRuleSource();
+  if (sourcePhrase) {
+    os << " sourcePhrase=" << *sourcePhrase << flush;
+  }
+
   return os;
 }
 

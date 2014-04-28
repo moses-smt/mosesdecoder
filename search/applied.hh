@@ -24,9 +24,10 @@ template <class Below> class GenericApplied : public Header {
         *child_out = Below(part->End());
     }
     
-    GenericApplied(void *location, Score score, Arity arity, Note note) : Header(location, arity) {
+    GenericApplied(void *location, Score score, Arity arity, Note note, Moses::WordsRange range) : Header(location, arity) {
       SetScore(score);
       SetNote(note);
+      SetRange(range);
     }
 
     explicit GenericApplied(History from) : Header(from) {}

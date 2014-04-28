@@ -69,6 +69,7 @@ StaticData::StaticData()
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
+  ,m_treeStructure(NULL)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -391,6 +392,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
+  SetBooleanParameter( &m_adjacentOnly, "adjacent-only", false);
+
   // minimum Bayes risk decoding
   SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
   m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
@@ -550,6 +553,7 @@ std::cerr <<"After LoadFeatureFunctions" << std::endl;
 
   if (!LoadDecodeGraphs()) return false;
 
+
   if (!CheckWeights()) {
     return false;
   }
@@ -570,6 +574,9 @@ std::cerr <<"After LoadFeatureFunctions" << std::endl;
     }
     m_allWeights.PlusEquals(extraWeights);
   }
+
+  //Load sparse features from config (overrules weight file)
+  LoadSparseWeightsFromConfig();
 
   // alternate weight settings
   if (m_parameter->GetParam("alternate-weight-setting").size() > 0) {
@@ -625,11 +632,11 @@ void StaticData::LoadNonTerminals()
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_inputDefaultNonTerminal.SetIsNonTerminal(true);
-  const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals);
+  const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals, true);
   m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
 
   m_outputDefaultNonTerminal.SetIsNonTerminal(true);
-  const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals);
+  const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals, true);
   m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
 
   // for unknwon words
@@ -647,6 +654,7 @@ void StaticData::LoadNonTerminals()
                      "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
+      const Factor *targetFactor = factorCollection.AddFactor(Output, 0, tokens[0], true);
     }
 
   }
@@ -948,17 +956,34 @@ void StaticData::LoadFeatureFunctions()
 bool StaticData::CheckWeights() const
 {
   set<string> weightNames = m_parameter->GetWeightNames();
+  set<string> featureNames;
 
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     const string &descr = ff.GetScoreProducerDescription();
+    featureNames.insert(descr);
 
     set<string>::iterator iter = weightNames.find(descr);
     if (iter == weightNames.end()) {
       cerr << "Can't find weights for feature function " << descr << endl;
     } else {
       weightNames.erase(iter);
+    }
+  }
+
+  //sparse features
+  if (!weightNames.empty()) {
+    set<string>::iterator iter;
+    for (iter = weightNames.begin(); iter != weightNames.end(); ) {
+      string fname = (*iter).substr(0, (*iter).find("_"));
+      cerr << fname << "\n";
+      if (featureNames.find(fname) != featureNames.end()) {
+        weightNames.erase(iter++);
+      }
+      else {
+        ++iter;
+      }
     }
   }
 
@@ -973,6 +998,29 @@ bool StaticData::CheckWeights() const
 
   return true;
 }
+
+
+void StaticData::LoadSparseWeightsFromConfig() {
+  set<string> featureNames;
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction &ff = *ffs[i];
+    const string &descr = ff.GetScoreProducerDescription();
+    featureNames.insert(descr);
+  }
+
+  std::map<std::string, std::vector<float> > weights = m_parameter->GetAllWeights();
+  std::map<std::string, std::vector<float> >::iterator iter;
+  for (iter = weights.begin(); iter != weights.end(); ++iter) {
+    // this indicates that it is sparse feature
+    if (featureNames.find(iter->first) == featureNames.end()) {
+      UTIL_THROW_IF2(iter->second.size() != 1, "ERROR: only one weight per sparse feature allowed: " << iter->first);
+        m_allWeights.Assign(iter->first, iter->second[0]);
+    }
+  }
+
+}
+
 
 /**! Read in settings for alternative weights */
 bool StaticData::LoadAlternateWeightSettings()
@@ -1151,6 +1199,53 @@ void StaticData::CheckLEGACYPT()
   m_useLegacyPT = false;
 }
 
+
+void StaticData::ResetWeights(const std::string &denseWeights, const std::string &sparseFile)
+{
+  m_allWeights = ScoreComponentCollection();
+
+  // dense weights
+  string name("");
+  vector<float> weights;
+  vector<string> toks = Tokenize(denseWeights);
+  for (size_t i = 0; i < toks.size(); ++i) {
+	const string &tok = toks[i];
+
+	if (tok.substr(tok.size() - 1, 1) == "=") {
+	  // start of new feature
+
+	  if (name != "") {
+		// save previous ff
+		const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
+		m_allWeights.Assign(&ff, weights);
+		weights.clear();
+	  }
+
+	  name = tok.substr(0, tok.size() - 1);
+	} else {
+	  // a weight for curr ff
+	  float weight = Scan<float>(toks[i]);
+	  weights.push_back(weight);
+	}
+  }
+
+  const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
+  m_allWeights.Assign(&ff, weights);
+
+  // sparse weights
+  InputFileStream sparseStrme(sparseFile);
+  string line;
+  while (getline(sparseStrme, line)) {
+	  vector<string> toks = Tokenize(line);
+	  UTIL_THROW_IF2(toks.size() != 2, "Incorrect sparse weight format. Should be FFName_spareseName weight");
+
+	  vector<string> names = Tokenize(toks[0], "_");
+	  UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name. Should be FFName_spareseName");
+
+      const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
+	  m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
+  }
+}
 
 } // namespace
 

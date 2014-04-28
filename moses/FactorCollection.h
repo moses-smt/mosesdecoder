@@ -22,6 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_FactorCollection_h
 #define moses_FactorCollection_h
 
+// reserve space for non-terminal symbols (ensuring consecutive numbering, and allowing quick lookup by ID)
+#ifndef moses_MaxNumNonterminals
+#define moses_MaxNumNonterminals 10000
+#endif
+
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
 #endif
@@ -74,6 +79,7 @@ class FactorCollection
   };
   typedef boost::unordered_set<FactorFriend, HashFactor, EqualsFactor> Set;
   Set m_set;
+  Set m_setNonTerminal;
 
   util::Pool m_string_backing;
 
@@ -83,11 +89,13 @@ class FactorCollection
   mutable boost::shared_mutex m_accessLock;
 #endif
 
-  size_t m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */
+  size_t m_factorIdNonTerminal; /**< unique, contiguous ids, starting from 0, for each non-terminal factor */
+  size_t m_factorId; /**< unique, contiguous ids, starting from moses_MaxNumNonterminals, for each terminal factor */
 
   //! constructor. only the 1 static variable can be created
   FactorCollection()
-    :m_factorId(0) {
+    : m_factorIdNonTerminal(0)
+    , m_factorId(moses_MaxNumNonterminals) {
   }
 
 public:
@@ -100,11 +108,15 @@ public:
   /** returns a factor with the same direction, factorType and factorString.
   *	If a factor already exist in the collection, return the existing factor, if not create a new 1
   */
-  const Factor *AddFactor(const StringPiece &factorString);
+  const Factor *AddFactor(const StringPiece &factorString, bool isNonTerminal = false);
+
+  const size_t GetNumNonTerminals() {
+    return m_factorIdNonTerminal;
+  }
 
   // TODO: remove calls to this function, replacing them with the simpler AddFactor(factorString)
-  const Factor *AddFactor(FactorDirection /*direction*/, FactorType /*factorType*/, const StringPiece &factorString) {
-    return AddFactor(factorString);
+  const Factor *AddFactor(FactorDirection /*direction*/, FactorType /*factorType*/, const StringPiece &factorString, bool isNonTerminal = false) {
+    return AddFactor(factorString, isNonTerminal);
   }
 
   TO_STRING();

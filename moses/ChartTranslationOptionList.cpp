@@ -75,7 +75,11 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
     }
   }
 
-  float score = ChartTranslationOptions::CalcEstimateOfBestScore(tpc, stackVec);
+  const TargetPhrase &targetPhrase = **(tpc.begin());
+  float score = targetPhrase.GetFutureScore();
+  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end(); ++p) {
+    score += (*p)->GetBestScore(this);
+  }
 
   // If the rule limit has already been reached then don't add the option
   // unless it is better than at least one existing option.
@@ -153,6 +157,15 @@ void ChartTranslationOptionList::ApplyThreshold()
                              ScoreThresholdPred(scoreThreshold));
 
   m_size = std::distance(m_collection.begin(), bound);
+}
+
+float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) const
+{
+    const HypoList *stack = chartCell->GetStack().cube;
+    assert(stack);
+    assert(!stack->empty());
+	const ChartHypothesis &bestHypo = **(stack->begin());
+	return bestHypo.GetTotalScore();
 }
 
 void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPath &inputPath)

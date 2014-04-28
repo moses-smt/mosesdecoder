@@ -23,6 +23,7 @@
 #include "ChartManager.h"
 #include "ChartCell.h"
 #include "ChartHypothesis.h"
+#include "ChartKBestExtractor.h"
 #include "ChartTranslationOptions.h"
 #include "ChartTrellisDetourQueue.h"
 #include "ChartTrellisNode.h"
@@ -77,8 +78,8 @@ void ChartManager::ProcessSentence()
 
   // MAIN LOOP
   size_t size = m_source.GetSize();
-  for (size_t width = 1; width <= size; ++width) {
-    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+  for (int startPos = size-1; startPos >= 0; --startPos) {
+    for (size_t width = 1; width <= size-startPos; ++width) {
       size_t endPos = startPos + width - 1;
       WordsRange range(startPos, endPos);
 
@@ -257,6 +258,65 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
       if (distinctHyps.insert(tgtPhrase).second) {
         ret.Add(path);
       }
+    }
+  }
+}
+
+/** Calculate the n-best paths through the output hypergraph.
+ * Return the list of paths with the variable ret
+ * \param n how may paths to return
+ * \param ret return argument
+ * \param onlyDistinct whether to check for distinct output sentence or not (default - don't check, just return top n-paths)
+ */
+void ChartManager::CalcNBest(
+    std::size_t n,
+    std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > &nBestList,
+    bool onlyDistinct) const
+{
+  nBestList.clear();
+  if (n == 0 || m_source.GetSize() == 0) {
+    return;
+  }
+
+  // Get the list of top-level hypotheses, sorted by score.
+  WordsRange range(0, m_source.GetSize()-1);
+  const ChartCell &lastCell = m_hypoStackColl.Get(range);
+  boost::scoped_ptr<const std::vector<const ChartHypothesis*> > topLevelHypos(
+      lastCell.GetAllSortedHypotheses());
+  if (!topLevelHypos) {
+    return;
+  }
+
+  ChartKBestExtractor extractor;
+
+  if (!onlyDistinct) {
+    // Return the n-best list as is, including duplicate translations.
+    extractor.Extract(*topLevelHypos, n, nBestList);
+    return;
+  }
+
+  // Determine how many derivations to extract.  If the n-best list is
+  // restricted to distinct translations then this limit should be bigger
+  // than n.  The n-best factor determines how much bigger the limit should be,
+  // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
+  // too many translations are identical.
+  const StaticData &staticData = StaticData::Instance();
+  const std::size_t nBestFactor = staticData.GetNBestFactor();
+  std::size_t numDerivations = (nBestFactor == 0) ? n*1000 : n*nBestFactor;
+
+  // Extract the derivations.
+  ChartKBestExtractor::KBestVec bigList;
+  bigList.reserve(numDerivations);
+  extractor.Extract(*topLevelHypos, numDerivations, bigList);
+
+  // Copy derivations into nBestList, skipping ones with repeated translations.
+  std::set<Phrase> distinct;
+  for (ChartKBestExtractor::KBestVec::const_iterator p = bigList.begin();
+       nBestList.size() < n && p != bigList.end(); ++p) {
+    boost::shared_ptr<ChartKBestExtractor::Derivation> derivation = *p;
+    Phrase translation = ChartKBestExtractor::GetOutputPhrase(*derivation);
+    if (distinct.insert(translation).second) {
+      nBestList.push_back(derivation);
     }
   }
 }

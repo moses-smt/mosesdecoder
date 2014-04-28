@@ -64,6 +64,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   OutputFileStream invExtractStream;
   std::ofstream glueGrammarStream;
   std::ofstream unknownWordStream;
+  std::ofstream unknownWordSoftMatchesStream;
   std::string fwdFileName = options.extractFile;
   std::string invFileName = options.extractFile + std::string(".inv");
   if (options.gzOutput) {
@@ -77,6 +78,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
   }
   if (!options.unknownWordFile.empty()) {
     OpenOutputFileOrDie(options.unknownWordFile, unknownWordStream);
+  }
+  if (!options.unknownWordSoftMatchesFile.empty()) {
+    OpenOutputFileOrDie(options.unknownWordSoftMatchesFile, unknownWordSoftMatchesStream);
   }
 
   // Target label sets for producing glue grammar.
@@ -187,6 +191,10 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
   if (!options.unknownWordFile.empty()) {
     WriteUnknownWordLabel(wordCount, wordLabel, options, unknownWordStream);
+  }
+
+  if (!options.unknownWordSoftMatchesFile.empty()) {
+    WriteUnknownWordSoftMatches(labelSet, unknownWordSoftMatchesStream);
   }
 
   return 0;
@@ -307,6 +315,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    po::value(&options.unknownWordMinRelFreq)->default_value(
      options.unknownWordMinRelFreq),
    "set minimum relative frequency for unknown word labels")
+  ("UnknownWordSoftMatches",
+   po::value(&options.unknownWordSoftMatchesFile),
+   "write dummy value to unknown word label file, and mappings from dummy value to other labels to named file")
   ("UnknownWordUniform",
    "write uniform weights to unknown word label file")
   ("UnpairedExtractFormat",
@@ -401,6 +412,7 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   // Workaround for extract-parallel issue.
   if (options.sentenceOffset > 0) {
     options.unknownWordFile.clear();
+    options.unknownWordSoftMatchesFile.clear();
   }
 }
 
@@ -507,6 +519,11 @@ void ExtractGHKM::WriteUnknownWordLabel(
   const Options &options,
   std::ostream &out)
 {
+  if (!options.unknownWordSoftMatchesFile.empty()) {
+    out << "UNK 1" << std::endl;
+    return;
+  }
+
   std::map<std::string, int> labelCount;
   int total = 0;
   for (std::map<std::string, int>::const_iterator p = wordCount.begin();
@@ -527,6 +544,17 @@ void ExtractGHKM::WriteUnknownWordLabel(
       float weight = options.unknownWordUniform ? 1.0f : ratio;
       out << p->first << " " << weight << std::endl;
     }
+  }
+}
+
+void ExtractGHKM::WriteUnknownWordSoftMatches(
+  const std::set<std::string> &labelSet,
+  std::ostream &out)
+{
+  std::set<std::string>::const_iterator p = labelSet.begin();
+  for (p; p != labelSet.end(); ++p) {
+      std::string label = *p;
+      out << "UNK " << label << std::endl;
   }
 }
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 
 # $Id: experiment.perl 1095 2009-11-16 18:19:49Z philipp $
 
@@ -971,6 +971,9 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-ttable') {
 	    &define_training_build_ttable($i);
         }
+        elsif ($DO_STEP[$i] eq 'TRAINING:build-transliteration-model') {
+            &define_training_build_transliteration_model($i);
+        }
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-generation') {
             &define_training_build_generation($i);
         }
@@ -980,6 +983,9 @@ sub define_step {
         }
 	elsif ($DO_STEP[$i] eq 'TRAINING:create-config' || $DO_STEP[$i] eq 'TRAINING:create-config-interpolated-lm') {
 	    &define_training_create_config($i);
+	}
+	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:factorize-tuning') {
+	    &define_interpolated_lm_factorize_tuning($i);
 	}
 	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:interpolate') {
 	    &define_interpolated_lm_interpolate($i);
@@ -1512,6 +1518,21 @@ sub define_lm_factorize {
     &create_step($step_id,$cmd);
 }
 
+sub define_interpolated_lm_factorize_tuning {
+    my ($step_id) = @_;
+    my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
+
+    my ($output,$input) = &get_output_and_input($step_id);
+    my $factor = &check_backoff_and_get_array("TRAINING:output-factors");
+    
+    my $dir = &check_and_get("GENERAL:working-dir");
+    my $temp_dir = &check_and_get("INPUT-FACTOR:temp-dir") . ".$VERSION";
+    my $cmd = "mkdir -p $temp_dir\n"
+	. &factorize_one_language("OUTPUT-FACTOR",$input,$output,$factor,$step_id);
+    
+    &create_step($step_id,$cmd);
+}
+
 sub define_splitter_train {
     my ($step_id,$set) = @_;
 
@@ -1962,6 +1983,36 @@ sub define_training_build_lex_trans {
     &create_step($step_id,$cmd);
 }
 
+sub define_training_build_transliteration_model {
+    my ($step_id) = @_;
+
+    my ($model, $corpus, $alignment) = &get_output_and_input($step_id);
+
+		my $moses_script_dir = &check_and_get("GENERAL:moses-script-dir");
+		my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+		my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+		my $sym_method = &check_and_get("TRAINING:alignment-symmetrization-method");
+		my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+		my $external_bin_dir = &check_and_get("GENERAL:external-bin-dir");
+		my $srilm_dir = &check_and_get("GENERAL:srilm-dir");
+
+    my $cmd = "$moses_script_dir/Transliteration/train-transliteration-module.pl";
+    $cmd .= " --corpus-f $corpus.$input_extension";
+    $cmd .= " --corpus-e $corpus.$output_extension";
+    $cmd .= " --alignment $alignment.$sym_method";
+    $cmd .= " --out-dir $model";
+    $cmd .= " --moses-src-dir $moses_src_dir";
+    $cmd .= " --external-bin-dir $external_bin_dir";
+    $cmd .= " --srilm-dir $srilm_dir";
+    $cmd .= " --input-extension $input_extension";
+    $cmd .= " --output-extension $output_extension";
+    $cmd .= " --factor 0-0";
+    $cmd .= " --source-syntax " if &get("GENERAL:input-parser");
+    $cmd .= " --target-syntax " if &get("GENERAL:output-parser");
+
+		&create_step($step_id, $cmd);
+}
+
 sub define_training_extract_phrases {
     my ($step_id) = @_;
 
@@ -1978,13 +2029,21 @@ sub define_training_extract_phrases {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
 
-      if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
+      if (&get("GENERAL:output-parser") && (&get("TRAINING:use-unknown-word-labels") || &get("TRAINING:use-unknown-word-soft-matches"))) {
 	  my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
 	  $cmd .= "-unknown-word-label $unknown_word_label ";
+      }
+      if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-soft-matches")) {
+          my $unknown_word_soft_matches = &versionize(&long_file_name("unknown-word-soft-matches","model",""));
+          $cmd .= "-unknown-word-soft-matches $unknown_word_soft_matches ";
       }
 
       if (&get("TRAINING:use-ghkm")) {
         $cmd .= "-ghkm ";
+      }
+
+      if (&get("TRAINING:ghkm-tree-fragments")) {
+        $cmd .= "-ghkm-tree-fragments ";
       }
     }
 
@@ -2013,6 +2072,12 @@ sub define_training_build_ttable {
     $cmd .=  "-no-word-alignment " if  defined($word_alignment) && $word_alignment eq "no";
 
     $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
+
+    if (&get("TRAINING:hierarchical-rule-set")) {
+      if (&get("TRAINING:ghkm-tree-fragments")) {
+        $cmd .= "-ghkm-tree-fragments ";
+      }
+    }
     
     &create_step($step_id,$cmd);
 }
@@ -2121,10 +2186,12 @@ sub get_config_tables {
     }
 
     # additional settings for factored models
-    my $ptCmd = $phrase_translation_table;
-    $ptCmd .= ":$ptImpl" if $ptImpl>0;
-    $ptCmd .= ":$numFF" if defined($numFF);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $phrase_translation_table);
+    $cmd = trim($cmd);
+    $cmd .= ":$ptImpl" if $ptImpl>0;
+    $cmd .= ":$numFF" if defined($numFF);
+    $cmd .= " ";
+
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table) if $reordering_table;
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
@@ -2146,9 +2213,13 @@ sub get_config_tables {
     }
 
     # additional settings for syntax models
-    if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
+    if (&get("GENERAL:output-parser") && (&get("TRAINING:use-unknown-word-labels") || &get("TRAINING:use-unknown-word-soft-matches"))) {
 	my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version);
 	$cmd .= "-unknown-word-label $unknown_word_label ";
+    }
+    if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-soft-matches")) {
+        my $unknown_word_soft_matches = &versionize(&long_file_name("unknown-word-soft-matches","model",""),$extract_version);
+        $cmd .= "-unknown-word-soft-matches $unknown_word_soft_matches ";
     }
     # configuration due to domain features
     $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
@@ -2162,10 +2233,14 @@ sub get_config_tables {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$translit_model,$generation_table,$sparse_lexical_features,$domains,$osm, @LM)
+    my ($config,$reordering_table,$phrase_translation_table,$transliteration_pt,$generation_table,$sparse_lexical_features,$domains,$osm, @LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_config_tables($config,$reordering_table,$phrase_translation_table,$generation_table,$domains);
+
+    if($transliteration_pt){
+	 $cmd .= "-transliteration-phrase-table $transliteration_pt ";
+    }	
 
     if($osm){
       
@@ -2265,6 +2340,7 @@ sub define_interpolated_lm_interpolate {
 	$interpolation_script, $tuning, @LM) = &get_output_and_input($step_id);
     my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
     my $group = &get("INTERPOLATED-LM:group");
+    my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
 
     my $cmd = "";
 
@@ -2297,9 +2373,12 @@ sub define_interpolated_lm_interpolate {
           $group_string =~ s/ $//;
           $group_string .= " ";
           while($group_string =~ /^([^ ,]+)([ ,]+)(.*)$/) {
-            die("ERROR: unknown set $1 in INTERPOLATED-LM:group definition")
-          if ! defined($POSITION{$1});
-            $numbered_string .= $POSITION{$1}.$2;
+        #    die("ERROR: unknown set $1 in INTERPOLATED-LM:group definition")
+        #  if ! defined($POSITION{$1});
+# detect that elsewhere!
+            if (defined($POSITION{$1})) {
+              $numbered_string .= $POSITION{$1}.$2;
+            }
             $group_string = $3;
           }
           chop($numbered_string);
@@ -2311,7 +2390,12 @@ sub define_interpolated_lm_interpolate {
           $name .= ".$$FACTOR[$factor]" if defined($FACTOR);
           $name .= ".order$order";
         }
-        $cmd .= "$interpolation_script --tuning $tuning --name $name --srilm $srilm_dir --lm $lm_list";
+        my $factored_tuning = $tuning;
+        if (&backoff_and_get("TRAINING:output-factors")) {
+          $factored_tuning = "$tuning.factor$factor";
+          $cmd .= "$scripts/training/reduce-factors.perl --corpus $tuning --reduced $factored_tuning --factor $factor\n";
+        }
+        $cmd .= "$interpolation_script --tuning $factored_tuning --name $name --srilm $srilm_dir --lm $lm_list";
         $cmd .= " --group \"$numbered_string\"" if defined($group);
         $cmd .= "\n";
       }
@@ -2543,7 +2627,7 @@ sub define_tuningevaluation_filter {
     my $tuning_flag = !defined($set);
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains,$transliteration_table) = &get_output_and_input($step_id);
 
     my $binarizer;
     $binarizer = &backoff_and_get("EVALUATION:$set:ttable-binarizer") unless $tuning_flag;
@@ -2603,7 +2687,14 @@ sub define_tuningevaluation_filter {
       
       $cmd .= &get_config_tables($config,$reordering_table,$phrase_translation_table,undef,$domains);
 
+	if (&get("TRAINING:in-decoding-transliteration")) {
+
+		$cmd .= "-transliteration-phrase-table $dir/model/transliteration-phrase-table.$VERSION ";
+	}	
+
+
       $cmd .= "-lm 0:3:$config:8\n"; # dummy kenlm 3-gram model on factor 0
+
     }
 
     # filter command

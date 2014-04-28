@@ -11,11 +11,11 @@
 #include <iomanip>
 #include "ug_typedefs.h"
 #include "tpt_pickler.h"
-#include "moses/generic/sorting/VectorIndexSorter.h"
-#include "moses/generic/sampling/Sampling.h"
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
+#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 #include <algorithm>
-#include "moses/generic/program_options/ug_get_options.h"
+#include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
 
 using namespace std;
 using namespace ugdiss;

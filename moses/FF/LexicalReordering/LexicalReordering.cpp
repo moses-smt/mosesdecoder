@@ -52,8 +52,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
 
 LexicalReordering::~LexicalReordering()
 {
-  if(m_table)
-    delete m_table;
+  delete m_table;
   delete m_configuration;
 }
 

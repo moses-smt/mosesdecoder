@@ -35,9 +35,14 @@
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/CoveredReferenceFeature.h"
-#include "moses/FF/SyntaxConstraintFeature.h"
+#include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
 #include "moses/FF/DynamicCacheBasedLanguageModel.h"
+#include "moses/FF/HyperParameterAsWeight.h"
+#include "moses/FF/SetSourcePhrase.h"
+#include "CountNonTerms.h"
+#include "ReferenceComparison.h"
+#include "RuleAmbiguity.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -48,7 +53,7 @@
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
 #ifdef PT_UG
-#include "moses/TranslationModel/mmsapt.h"
+#include "moses/TranslationModel/UG/mmsapt.h"
 #endif
 
 #include "moses/LM/Ken.h"
@@ -110,7 +115,7 @@ template <class F> void FeatureFactory::DefaultSetup(F *feature)
     // if it's tuneable, ini file MUST have weights
     // even it it's not tuneable, people can still set the weights in the ini file
     static_data.SetWeights(feature, weights);
-  } else {
+  } else if (feature->GetNumScoreComponents() > 0) {
     std::vector<float> defaultWeights = feature->DefaultWeights();
     static_data.SetWeights(feature, defaultWeights);
   }
@@ -176,9 +181,14 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
-  MOSES_FNAME(SyntaxConstraintFeature);
+  MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(DynamicCacheBasedLanguageModel);
+  MOSES_FNAME(HyperParameterAsWeight);
+  MOSES_FNAME(SetSourcePhrase);
+  MOSES_FNAME(CountNonTerms);
+  MOSES_FNAME(ReferenceComparison);
+  MOSES_FNAME(RuleAmbiguity);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
@@ -244,9 +254,9 @@ void FeatureRegistry::PrintFF() const
 	Map::const_iterator iter;
 	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
 		const string &ffName = iter->first;
-		std::cerr << ffName << std::endl;
+		std::cerr << ffName << " ";
 	}
-
+	std::cerr << std::endl;
 }
 
 } // namespace Moses

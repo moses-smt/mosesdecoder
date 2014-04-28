@@ -315,7 +315,9 @@ print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 # path of script for filtering phrase tables and running the decoder
 $filtercmd = File::Spec->catfile($SCRIPTS_ROOTDIR, "training", "filter-model-given-input.pl") if !defined $filtercmd;
 
-if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
+# WHY ... ! ___FILTER_PHRASE_TABLE ??? This doesn't make sense! [UG]
+# if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
+if ( ! -x $filtercmd && $___FILTER_PHRASE_TABLE) {
   warn "Filtering command not found: $filtercmd.";
   warn "Use --filtercmd=PATH to specify a valid one or --no-filter-phrase-table";
   exit 1;
@@ -409,7 +411,7 @@ if ($___ACTIVATE_FEATURES) {
 }
 
 my ($just_cmd_filtercmd, $x) = split(/ /, $filtercmd);
-die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
+die "Not executable: $just_cmd_filtercmd" if $___FILTER_PHRASE_TABLE && ! -x $just_cmd_filtercmd;
 die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_parallel_cmd;
 die "Not executable: $qsubwrapper"        if defined $___JOBS && ! -x $qsubwrapper;
 die "Not executable: $___DECODER"         if ! -x $___DECODER;
@@ -1087,7 +1089,9 @@ if($___RETURN_BEST_DEV) {
   if(defined $sparse_weights_file) {
       $best_sparse_file = "run$bestit.sparse-weights";
   }
-  create_config($___CONFIG_ORIG, "./moses.ini", get_featlist_from_file("run$bestit.dense"),
+  my $best_featlist = get_featlist_from_file("run$bestit.dense");
+  $best_featlist->{"untuneables"} = $featlist->{"untuneables"};
+  create_config($___CONFIG_ORIG, "./moses.ini", $best_featlist,
                 $bestit, $bestbleu, $best_sparse_file);
 }
 else {
@@ -1278,6 +1282,7 @@ sub get_featlist_from_file {
   # read feature list
   my @names = ();
   my @startvalues = ();
+  my @untuneables = ();
   open my $fh, '<', $featlistfn or die "Can't read $featlistfn : $!";
   my $nr = 0;
   my @errs = ();
@@ -1296,6 +1301,10 @@ sub get_featlist_from_file {
 			  push @startvalues, $value;
       }
     }
+    elsif (/^(\S+) UNTUNEABLE$/) {
+      my ($longname) = ($1);
+      push @untuneables, $longname;
+    }
   }
   close $fh;
 
@@ -1303,7 +1312,7 @@ sub get_featlist_from_file {
     warn join("", @errs);
     exit 1;
   }
-  return {"names"=>\@names, "values"=>\@startvalues};
+  return {"names"=>\@names, "values"=>\@startvalues, "untuneables"=>\@untuneables};
 }
 
 
@@ -1352,6 +1361,8 @@ sub create_config {
   my $iteration           = shift;  # just for verbosity
   my $bleu_achieved       = shift; # just for verbosity
   my $sparse_weights_file = shift; # only defined when optimizing sparse features
+
+  my @keep_weights = ();
 
   for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
     my $name = $featlist->{"names"}->[$i];
@@ -1415,6 +1426,13 @@ sub create_config {
 			# leave weights 'til last. We're changing it
 			while ($line = <$ini_fh>) {
 			  last if $line =~ /^\[/;
+			  if ($line =~ /^([^_=\s]+)/) {
+			    for( @{$featlist->{"untuneables"}} ){
+			      if ($1 eq $_ ) {# if weight is untuneable, copy it into new config
+			        push @keep_weights, $line;
+			      }
+			    }
+			  }
 			}
 		}
 	  elsif (defined($P{$parameter})) {
@@ -1460,6 +1478,10 @@ sub create_config {
     }
   }
 	print $out "$outStr\n";
+
+  for (@keep_weights) {
+     print $out $_;
+  }
 
   close $ini_fh;
   close $out;

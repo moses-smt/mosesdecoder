@@ -53,17 +53,12 @@ protected:
   DALM::LM *m_lm;
   DALM::VocabId wid_start, wid_end;
 
-  typedef boost::bimap<const Factor *, DALM::VocabId> VocabMap;
-  mutable VocabMap m_vocabMap;
+  mutable std::vector<DALM::VocabId> m_vocabMap;
 
   void CreateVocabMapping(const std::string &wordstxt);
   DALM::VocabId GetVocabId(const Factor *factor) const;
 
 private:
-  LMResult GetValue(DALM::VocabId wid, DALM::State* finalState) const;
-  LMResult GetValue(const Word &word, DALM::State* finalState) const;
-  void updateChartScore(float *prefixScore, float *finalizedScore, float score, size_t wordPos) const;
-
   // Convert last words of hypothesis into vocab ids, returning an end pointer.
   DALM::VocabId *LastIDs(const Hypothesis &hypo, DALM::VocabId *indices) const {
     DALM::VocabId *index = indices;

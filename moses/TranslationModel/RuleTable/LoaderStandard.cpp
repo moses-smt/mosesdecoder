@@ -218,7 +218,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // parse source & find pt node
 
     // constituent labels
-    Word *sourceLHS;
+    Word *sourceLHS = NULL;
     Word *targetLHS;
 
     // create target phrase obj
@@ -250,6 +250,9 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);
+
+    // not implemented correctly in memory pt. just delete it for now
+    delete sourceLHS;
 
     count++;
   }

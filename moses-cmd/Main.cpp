@@ -180,6 +180,7 @@ public:
       } else {
         TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
       }
+      delete file;
     }
 
     // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
@@ -233,7 +234,7 @@ public:
 
         } else {
           stringstream hypergraphDirName;
-          hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
+          hypergraphDirName << boost::filesystem::current_path().string() << "/hypergraph";
           hypergraphDir = hypergraphDirName.str();
         }
       }
@@ -299,6 +300,9 @@ public:
       if (!staticData.UseMBR()) {
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
+          if (StaticData::Instance().GetOutputHypoScore()) {
+            out << bestHypo->GetTotalScore() << ' ';
+          }
           if (staticData.IsPathRecoveryEnabled()) {
             OutputInput(out, bestHypo);
             out << "||| ";
@@ -495,11 +499,17 @@ static void ShowWeights()
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
     }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
+    }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
     }
   }
 }
@@ -521,9 +531,7 @@ size_t OutputFeatureWeightsForHypergraph(size_t index, const FeatureFunction* ff
     }
     return index+numScoreComps;
   } else {
-    cerr << "Sparse features are not yet supported when outputting hypergraph format" << endl;
-    assert(false);
-    return 0;
+    UTIL_THROW2("Sparse features are not yet supported when outputting hypergraph format");
   }
 }
 
@@ -637,7 +645,7 @@ std::cerr <<"Before ShowWeights" << std::endl;
           boost::filesystem::path nbestPath(nbestFile);
           weightsFilename << nbestPath.parent_path().filename() << "/weights";
         } else {
-          weightsFilename << boost::filesystem::current_path() << "/hypergraph/weights";
+          weightsFilename << boost::filesystem::current_path().string() << "/hypergraph/weights";
         }
       }
       boost::filesystem::path weightsFilePath(weightsFilename.str());

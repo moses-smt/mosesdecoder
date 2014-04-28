@@ -5,6 +5,8 @@
 #include <boost/thread.hpp>
 #endif
 
+using namespace std;
+
 namespace Moses
 {
 void GenericCandidate::readBin(FILE* f)
@@ -62,6 +64,17 @@ void Candidates::readBin(FILE* f)
 
 const LabelId PrefixTreeMap::MagicWord = std::numeric_limits<LabelId>::max() - 1;
 
+//////////////////////////////////////////////////////////////////
+PrefixTreeMap::~PrefixTreeMap() {
+  if(m_FileSrc) {
+    fClose(m_FileSrc);
+  }
+  if(m_FileTgt) {
+    fClose(m_FileTgt);
+  }
+  FreeMemory();
+}
+
 
 void PrefixTreeMap::FreeMemory()
 {
@@ -75,20 +88,21 @@ void PrefixTreeMap::FreeMemory()
   m_PtrPool.reset();
 }
 
-static WordVoc* ReadVoc(const std::string& filename)
+WordVoc &ReadVoc(std::map<std::string,WordVoc> &vocs, const std::string& filename)
 {
-  static std::map<std::string,WordVoc*> vocs;
 #ifdef WITH_THREADS
   boost::mutex mutex;
   boost::mutex::scoped_lock lock(mutex);
 #endif
-  std::map<std::string,WordVoc*>::iterator vi = vocs.find(filename);
+  std::map<std::string,WordVoc>::iterator vi = vocs.find(filename);
   if (vi == vocs.end()) {
-    WordVoc* voc = new WordVoc();
-    voc->Read(filename);
-    vocs[filename] = voc;
+    WordVoc &voc = vocs[filename];
+    voc.Read(filename);
+    return voc;
   }
-  return vocs[filename];
+  else {
+    return vi->second;
+  }
 }
 
 int PrefixTreeMap::Read(const std::string& fileNameStem, int numVocs)
@@ -133,7 +147,7 @@ int PrefixTreeMap::Read(const std::string& fileNameStem, int numVocs)
     sprintf(num, "%d", i);
     //m_Voc[i] = new WordVoc();
     //m_Voc[i]->Read(ifv + num);
-    m_Voc[i] = ReadVoc(ifv + num);
+    m_Voc[i] = &ReadVoc(m_vocs, ifv + num);
   }
 
   TRACE_ERR("binary file loaded, default OFF_T: "<< PTF::getDefault()<<"\n");

@@ -21,10 +21,8 @@ public:
   }
 
   static void Delete() {
-    if (m_instance) {
-      delete m_instance;
-      m_instance = NULL;
-    }
+    delete m_instance;
+    m_instance = NULL;
   }
 
 private:
