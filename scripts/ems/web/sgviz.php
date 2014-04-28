@@ -3,7 +3,7 @@ function sgviz($sentence) {
   global $setup,$dir,$id,$set;
 ?><html><head><title>Search Graph Visualization, Sentence <?php $sentence ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script language="javascript" src="/javascripts/prototype.js"></script></head>
+<script language="javascript" src="javascripts/prototype.js"></script></head>
 <body><svg id="sg" height="500" width="900" xmlns="http://www.w3.org/2000/svg"><g id="chart"></g></svg>
 <script>
 var sg = document.getElementById("sg");
