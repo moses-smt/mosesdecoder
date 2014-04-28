@@ -40,6 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"
 #include "moses/FactorTypeSet.h"
+#include "moses/ChartKBestExtractor.h"
 #include "moses/ChartTrellisPathList.h"
 #include "moses/OutputCollector.h"
 #include "moses/ChartHypothesis.h"
@@ -90,6 +91,7 @@ protected:
 
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
   size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t startTarget);
+  std::size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartKBestExtractor::Derivation &derivation, std::size_t startTarget);
   size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
   void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
   void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
@@ -129,12 +131,13 @@ public:
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId);
   void OutputBestNone(long translationId);
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, long translationId);
+  void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
   void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTreeFragmentsTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
-  void OutputDetailedAllTranslationReport(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
+  void OutputDetailedAllTranslationReport(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 
   void ResetTranslationId();

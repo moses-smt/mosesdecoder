@@ -26,6 +26,7 @@
 #include <xmlrpc-c/server_abyss.hpp>
 
 using namespace Moses;
+using namespace MosesCmd;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
@@ -117,20 +118,17 @@ public:
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");
     if(si == params.end())
-      throw xmlrpc_c::fault("Missing source sentence", 
-			    xmlrpc_c::fault::CODE_PARSE);
+      throw xmlrpc_c::fault("Missing source sentence", xmlrpc_c::fault::CODE_PARSE);
     source_ = xmlrpc_c::value_string(si->second);
     cerr << "source = " << source_ << endl;
     si = params.find("target");
     if(si == params.end())
-      throw xmlrpc_c::fault("Missing target sentence", 
-			    xmlrpc_c::fault::CODE_PARSE);
+      throw xmlrpc_c::fault("Missing target sentence", xmlrpc_c::fault::CODE_PARSE);
     target_ = xmlrpc_c::value_string(si->second);
     cerr << "target = " << target_ << endl;
     si = params.find("alignment");
     if(si == params.end())
-      throw xmlrpc_c::fault("Missing alignment", 
-			    xmlrpc_c::fault::CODE_PARSE);
+      throw xmlrpc_c::fault("Missing alignment", xmlrpc_c::fault::CODE_PARSE);
     alignment_ = xmlrpc_c::value_string(si->second);
     cerr << "alignment = " << alignment_ << endl;
     si = params.find("bounded");
@@ -163,8 +161,7 @@ public:
         xmlrpc_c::fault::CODE_PARSE);
     }
     const string model_name = xmlrpc_c::value_string(si->second);
-    PhraseDictionaryMultiModel* 
-      pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
 
     si = params.find("phrase_pairs");
     if (si == params.end()) {
@@ -175,13 +172,10 @@ public:
 
     vector<pair<string, string> > phrase_pairs;
 
-    xmlrpc_c::value_array phrase_pairs_array 
-      = xmlrpc_c::value_array(si->second);
-    vector<xmlrpc_c::value> phrasePairValueVector
-      (phrase_pairs_array.vectorValueValue());
+    xmlrpc_c::value_array phrase_pairs_array = xmlrpc_c::value_array(si->second);
+    vector<xmlrpc_c::value> phrasePairValueVector(phrase_pairs_array.vectorValueValue());
     for (size_t i=0;i < phrasePairValueVector.size();i++) {
-        xmlrpc_c::value_array phrasePairArray 
-	  = xmlrpc_c::value_array(phrasePairValueVector[i]);
+        xmlrpc_c::value_array phrasePairArray = xmlrpc_c::value_array(phrasePairValueVector[i]);
         vector<xmlrpc_c::value> phrasePair(phrasePairArray.vectorValueValue());
         string L1 = xmlrpc_c::value_string(phrasePair[0]);
         string L2 = xmlrpc_c::value_string(phrasePair[1]);
@@ -197,8 +191,7 @@ public:
     }
     *retvalP = xmlrpc_c::value_array(weight_vector_ret);
 #else
-    string errmsg = "Error: Perplexity minimization requires dlib ";
-    errmsg       += "(compilation option --with-dlib)";
+    string errmsg = "Error: Perplexity minimization requires dlib (compilation option --with-dlib)";
     cerr << errmsg << endl;
     *retvalP = xmlrpc_c::value_string(errmsg);
 #endif
@@ -234,6 +227,8 @@ public:
     cerr << "Input: " << source << endl;
     si = params.find("align");
     bool addAlignInfo = (si != params.end());
+    si = params.find("word-align");
+    bool addWordAlignInfo = (si != params.end());
     si = params.find("sg");
     bool addGraphInfo = (si != params.end());
     si = params.find("topt");
@@ -241,8 +236,7 @@ public:
     si = params.find("report-all-factors");
     bool reportAllFactors = (si != params.end());
     si = params.find("nbest");
-    int nbest_size = ((si == params.end()) ? 0 
-		      : int(xmlrpc_c::value_int(si->second)));
+    int nbest_size = (si == params.end()) ? 0 : int(xmlrpc_c::value_int(si->second));
     si = params.find("nbest-distinct");
     bool nbest_distinct = (si != params.end());
 
@@ -252,21 +246,17 @@ public:
     vector<float> multiModelWeights;
     si = params.find("lambda");
     if (si != params.end()) {
-        xmlrpc_c::value_array multiModelArray 
-	  = xmlrpc_c::value_array(si->second);
-        vector<xmlrpc_c::value> multiModelValueVector
-	  (multiModelArray.vectorValueValue());
+        xmlrpc_c::value_array multiModelArray = xmlrpc_c::value_array(si->second);
+        vector<xmlrpc_c::value> multiModelValueVector(multiModelArray.vectorValueValue());
         for (size_t i=0;i < multiModelValueVector.size();i++) {
-            multiModelWeights.push_back
-	      (xmlrpc_c::value_double(multiModelValueVector[i]));
+            multiModelWeights.push_back(xmlrpc_c::value_double(multiModelValueVector[i]));
         }
     }
 
     si = params.find("model_name");
     if (si != params.end() && multiModelWeights.size() > 0) {
         const string model_name = xmlrpc_c::value_string(si->second);
-        PhraseDictionaryMultiModel* pdmm; 
-	pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
+        PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) FindPhraseDictionary(model_name);
         pdmm->SetTemporaryMultiModelWeightsVector(multiModelWeights);
     }
 
@@ -303,8 +293,21 @@ public:
         vector<xmlrpc_c::value> alignInfo;
         outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
         if (addAlignInfo) {
-          retData.insert(pair<string, xmlrpc_c::value>
-			 ("align", xmlrpc_c::value_array(alignInfo)));
+          retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
+        }
+        if (addWordAlignInfo) {
+          stringstream wordAlignment;
+          OutputAlignment(wordAlignment, hypo);
+          vector<xmlrpc_c::value> alignments;
+          string alignmentPair;
+          while (wordAlignment >> alignmentPair) {
+          	int pos = alignmentPair.find('-');
+          	map<string, xmlrpc_c::value> wordAlignInfo;
+          	wordAlignInfo["source-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(0, pos).c_str()));
+          	wordAlignInfo["target-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
+          	alignments.push_back(xmlrpc_c::value_struct(wordAlignInfo));
+          }
+          retData.insert(pair<string, xmlrpc_c::value_array>("word-align", alignments));
         }
 
         if(addGraphInfo) {
@@ -326,12 +329,9 @@ public:
     *retvalP = xmlrpc_c::value_struct(retData);
   }
 
-  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, 
-		  vector<xmlrpc_c::value>& alignInfo, 
-		  bool reportAllFactors = false) {
+  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, bool reportAllFactors = false) {
     if (hypo->GetPrevHypo() != NULL) {
-      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, 
-		 reportAllFactors);
+      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, reportAllFactors);
       Phrase p = hypo->GetCurrTargetPhrase();
       if(reportAllFactors) {
         out << p << " ";
@@ -349,16 +349,9 @@ public:
          * triples.
          **/
         map<string, xmlrpc_c::value> phraseAlignInfo;
-
-        phraseAlignInfo["tgt-start"] 
-	= xmlrpc_c::value_int(hypo->GetCurrTargetWordsRange().GetStartPos());
-
-        phraseAlignInfo["src-start"] 
-	= xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetStartPos());
-
-        phraseAlignInfo["src-end"] 
-	= xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetEndPos());
-
+        phraseAlignInfo["tgt-start"] = xmlrpc_c::value_int(hypo->GetCurrTargetWordsRange().GetStartPos());
+        phraseAlignInfo["src-start"] = xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetStartPos());
+        phraseAlignInfo["src-end"] = xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetEndPos());
         alignInfo.push_back(xmlrpc_c::value_struct(phraseAlignInfo));
       }
     }
@@ -456,8 +449,24 @@ public:
       }
       nBestXMLItem["hyp"] = xmlrpc_c::value_string(out.str());
 
-      if (addAlignmentInfo)
+      if (addAlignmentInfo) {
         nBestXMLItem["align"] = xmlrpc_c::value_array(alignInfo);
+
+        if ((int)edges.size() > 0) {
+          stringstream wordAlignment;
+          OutputAlignment(wordAlignment, edges[0]);
+          vector<xmlrpc_c::value> alignments;
+          string alignmentPair;
+          while (wordAlignment >> alignmentPair) {
+          	int pos = alignmentPair.find('-');
+          	map<string, xmlrpc_c::value> wordAlignInfo;
+          	wordAlignInfo["source-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(0, pos).c_str()));
+          	wordAlignInfo["target-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
+          	alignments.push_back(xmlrpc_c::value_struct(wordAlignInfo));
+          }
+          nBestXMLItem["word-align"] = xmlrpc_c::value_array(alignments);
+        }
+      }
 
       if (addScoreBreakdown)
 	{
@@ -619,11 +628,20 @@ int main(int argc, char** argv)
   myRegistry.addMethod("updater", updater);
   myRegistry.addMethod("optimize", optimizer);
 
+   xmlrpc_c::serverAbyss myAbyssServer(
+					myRegistry,
+					port,              // TCP port on which to listen
+					logfile
+					);
+  /* doesn't work with xmlrpc-c v. 1.16.33 - ie very old lib on Ubuntu 12.04
   xmlrpc_c::serverAbyss myAbyssServer(
-    myRegistry,
-    port,              // TCP port on which to listen
-    logfile
+    xmlrpc_c::serverAbyss::constrOpt()
+    .registryPtr(&myRegistry)
+    .portNumber(port)              // TCP port on which to listen
+    .logFileName(logfile)
+    .allowOrigin("*")
   );
+  */
 
   cerr << "Listening on port " << port << endl;
   if (isSerial) {

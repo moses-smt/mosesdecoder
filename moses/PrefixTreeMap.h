@@ -99,18 +99,11 @@ public:
   PrefixTreeMap() : m_FileSrc(0), m_FileTgt(0) {
     PTF::setDefault(InvalidOffT);
   }
-  ~PrefixTreeMap() {
-    if(m_FileSrc) {
-      fClose(m_FileSrc);
-    }
-    if(m_FileTgt) {
-      fClose(m_FileTgt);
-    }
-    FreeMemory();
-  }
+  ~PrefixTreeMap();
+
 public:
   static const LabelId MagicWord;
-public:
+
   void FreeMemory();
 
   int Read(const std::string& fileNameStem, int numVocs = -1);
@@ -135,6 +128,7 @@ private:
 
   std::vector<WordVoc*> m_Voc;
   ObjectPool<PPimp>     m_PtrPool;
+  std::map<std::string,WordVoc> m_vocs;
 };
 
 }
