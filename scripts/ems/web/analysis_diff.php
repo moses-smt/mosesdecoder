@@ -16,8 +16,8 @@ function diff_analysis() {
   }
   print "</h4>";
   
-?><script language="javascript" src="/javascripts/prototype.js"></script>
-<script language="javascript" src="/javascripts/scriptaculous.js"></script>
+?><script language="javascript" src="javascripts/prototype.js"></script>
+<script language="javascript" src="javascripts/scriptaculous.js"></script>
 <script>
 function diff(field,sort,count) {
   var url = '?analysis_diff=' + field + '_diff'
