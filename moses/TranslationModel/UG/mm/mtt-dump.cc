@@ -24,7 +24,7 @@ mmTtrack<SimpleWordId> MCT;
 bool sform;
 bool have_mtt, have_mct;
 bool with_sids;
-
+bool with_positions;
 void 
 interpret_args(int ac, char* av[])
 {
@@ -34,6 +34,7 @@ interpret_args(int ac, char* av[])
     ("help,h",    "print this message")
     ("numbers,n", po::bool_switch(&with_sids), "print sentence ids as first token")
     ("sform,s", po::bool_switch(&sform), "sform only")
+    ("with-positions,p", po::bool_switch(&with_positions), "show word positions")
     ;
   
   po::options_description h("Hidden Options");
@@ -68,10 +69,10 @@ printRangeMTT(size_t start, size_t stop)
   for (;start < stop; start++)
     { 
       size_t i = 0;
-      Token const* t = MTT.sntStart(start);
+      Token const* s = MTT.sntStart(start);
       Token const* e = MTT.sntEnd(start);
       if (with_sids) cout << start << " ";
-      for (;t < e; ++t)
+      for (Token const* t = s; t < e; ++t)
         {
 #if 0
           uchar const* x = reinterpret_cast<uchar const*>(t);
@@ -91,7 +92,11 @@ printRangeMTT(size_t start, size_t stop)
               cout << i+t->parent << " ";
               cout << DT[t->dtype] << endl;
             }
-          else cout << SF[t->id()] << " ";
+          else 
+	    {
+	      if (with_positions) cout << t-s << ":";
+	      cout << SF[t->id()] << " ";
+	    }
         }
       cout << endl;
     }
@@ -102,10 +107,15 @@ printRangeMCT(size_t start, size_t stop)
 {
   for (;start < stop; start++)
     { 
-      SimpleWordId const* t = MCT.sntStart(start);
+      SimpleWordId const* s = MCT.sntStart(start);
+      SimpleWordId const* t = s;
       SimpleWordId const* e = MCT.sntEnd(start);
       if (with_sids) cout << start << " ";
-      while (t < e) cout << SF[(t++)->id()] << " ";
+      while (t < e) 
+	{
+	  if (with_positions) cout << t-s << ":";
+	  cout << SF[(t++)->id()] << " ";
+	}
       cout << endl;
     }
 }

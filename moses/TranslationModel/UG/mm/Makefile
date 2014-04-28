@@ -76,7 +76,7 @@ endef
 
 testprogs = test-dynamic-im-tsa
 programs  = mtt-build mtt-dump symal2mam custom-pt mmlex-build ${testprogs}
-programs += mtt-count-words
+programs += mtt-count-words calc-coverage
 
 all: $(addprefix ${BINDIR}/${BINPREF}, $(programs))
 	@echo $^
