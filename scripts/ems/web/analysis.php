@@ -436,7 +436,8 @@ function ngram_summary() {
   $score_line = "";
   for($i=0;$i<count($each_score);$i++) {
     if (preg_match('/([\d\(\)\.\s]+) (BLEU[\-c]*)/',$each_score[$i],$match) ||
-        preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match)) {
+        preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match) ||
+        preg_match('/([\d\(\)\.\s]+) (METEOR[\-c]*)/',$each_score[$i],$match)) {
       $header .= "<td>$match[2]</td>";
       $score_line .= "<td>$match[1]</td>";
     }
