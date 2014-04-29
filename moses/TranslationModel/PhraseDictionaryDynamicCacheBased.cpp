@@ -147,7 +147,7 @@ const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhrase
   return ret;
 }
 
-ChartRuleLookupManager* PhraseDictionaryDynamicCacheBased::CreateRuleLookupManager(const ChartParser &parser, const ChartCellCollectionBase &cellCollection)
+ChartRuleLookupManager* PhraseDictionaryDynamicCacheBased::CreateRuleLookupManager(const ChartParser &parser, const ChartCellCollectionBase &cellCollection, std::size_t /*maxChartSpan*/)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }

@@ -44,6 +44,9 @@
 
 namespace Moses
 {
+class ChartParser;
+class ChartCellCollectionBase;
+class ChartRuleLookupManager;
 
 /** Implementation of a Cache-based phrase table.
  */
@@ -88,9 +91,10 @@ public:
   const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   // for phrase-based model
-//  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
+  //  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
-  ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase &);
+  // for syntax/hiero model (CKY+ decoding)
+  ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&, const ChartCellCollectionBase&, std::size_t);
 
   void SetParameter(const std::string& key, const std::string& value);
 
