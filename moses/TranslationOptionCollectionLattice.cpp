@@ -130,10 +130,11 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
 
   for (size_t i = 0; i < m_inputPathQueue.size(); ++i) {
     const InputPath &path = *m_inputPathQueue[i];
+
     const TargetPhraseCollection *tpColl = path.GetTargetPhrases(phraseDictionary);
     const WordsRange &range = path.GetWordsRange();
 
-    if (tpColl) {
+    if (tpColl && tpColl->GetSize()) {
     	TargetPhraseCollection::const_iterator iter;
     	for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
     		const TargetPhrase &tp = **iter;
