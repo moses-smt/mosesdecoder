@@ -80,6 +80,22 @@ const Word &InputPath::GetLastWord() const
   return ret;
 }
 
+size_t InputPath::GetTotalRuleSize() const
+{
+  size_t ret = 0;
+  std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
+  for (iter = obj.m_targetPhrases.begin(); iter != obj.m_targetPhrases.end(); ++iter) {
+	const PhraseDictionary *pt = iter->first;
+	const TargetPhraseCollection *tpColl = iter->second.first;
+
+	if (tpColl) {
+		ret += tpColl->GetSize();
+	}
+  }
+
+  return ret;
+}
+
 std::ostream& operator<<(std::ostream& out, const InputPath& obj)
 {
   out << &obj << " " << obj.GetWordsRange() << " " << obj.GetPrevPath() << " " << obj.GetPhrase();
@@ -88,7 +104,15 @@ std::ostream& operator<<(std::ostream& out, const InputPath& obj)
   std::map<const PhraseDictionary*, std::pair<const TargetPhraseCollection*, const void*> >::const_iterator iter;
   for (iter = obj.m_targetPhrases.begin(); iter != obj.m_targetPhrases.end(); ++iter) {
     const PhraseDictionary *pt = iter->first;
-    out << pt << " ";
+    const TargetPhraseCollection *tpColl = iter->second.first;
+
+    out << pt << "=";
+    if (tpColl) {
+    	cerr << tpColl->GetSize() << " ";
+    }
+    else {
+    	cerr << "NULL ";
+    }
   }
 
   return out;
