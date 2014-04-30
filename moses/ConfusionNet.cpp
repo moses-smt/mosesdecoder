@@ -95,7 +95,7 @@ namespace Moses
   ConfusionNet::
   ReadF(std::istream& in, const std::vector<FactorType>& factorOrder, int format)
   {
-    VERBOSE(1, "read confusion net with format "<<format<<"\n");
+    VERBOSE(2, "read confusion net with format "<<format<<"\n");
     switch(format) {
     case 0:
       return ReadFormat0(in,factorOrder);
@@ -120,7 +120,9 @@ namespace Moses
     return rv;
   }
 
-
+#if 0
+  // Deprecated due to code duplication; 
+  // use Word::CreateFromString() instead
   void 
   ConfusionNet::
   String2Word(const std::string& s,Word& w,
@@ -132,6 +134,7 @@ namespace Moses
 		  FactorCollection::Instance().AddFactor
 		  (Input,factorOrder[i], factorStrVector[i]));
   }
+#endif
 
   bool 
   ConfusionNet::
@@ -155,7 +158,8 @@ namespace Moses
       Column col;
       while(is>>word) {
 	Word w;
-	String2Word(word,w,factorOrder);
+	// String2Word(word,w,factorOrder);
+	w.CreateFromString(Input,factorOrder,StringPiece(word),false,false);
 	std::vector<float> probs(totalCount, 0.0);
 	for(size_t i=0; i < numInputScores; i++) {
 	  double prob;
@@ -216,7 +220,9 @@ namespace Moses
 	    VERBOSE(1, "WARN: neg costs: "<<data[i][j].second.denseScores[0]<<" -> set to 0\n");
 	    data[i][j].second.denseScores[0]=0.0;
 	  }
-	  String2Word(word,data[i][j].first,factorOrder);
+	  // String2Word(word,data[i][j].first,factorOrder);
+	  Word& w = data[i][j].first;
+	  w.CreateFromString(Input,factorOrder,StringPiece(word),false,false);
 	} else return 0;
     }
     return !data.empty();

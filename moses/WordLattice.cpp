@@ -49,7 +49,12 @@ void WordLattice::Print(std::ostream& out) const
   out<<"\n\n";
 }
 
-int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line)
+int 
+WordLattice::
+InitializeFromPCNDataType
+(const PCN::CN& cn, 
+ const std::vector<FactorType>& factorOrder, 
+ const std::string& debug_line)
 {
   const StaticData &staticData = StaticData::Instance();
   const InputFeature &inputFeature = InputFeature::Instance();
@@ -73,14 +78,20 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
 
       //check for correct number of link parameters
       if (alt.m_denseFeatures.size() != numInputScores) {
-        TRACE_ERR("ERROR: need " << numInputScores << " link parameters, found " << alt.m_denseFeatures.size() << " while reading column " << i << " from " << debug_line << "\n");
+        TRACE_ERR("ERROR: need " << numInputScores 
+		  << " link parameters, found " 
+		  << alt.m_denseFeatures.size() 
+		  << " while reading column " << i 
+		  << " from " << debug_line << "\n");
         return false;
       }
 
       //check each element for bounds
       std::vector<float>::const_iterator probsIterator;
       data[i][j].second = std::vector<float>(0);
-      for(probsIterator = alt.m_denseFeatures.begin(); probsIterator < alt.m_denseFeatures.end(); probsIterator++) {
+      for(probsIterator = alt.m_denseFeatures.begin(); 
+	  probsIterator < alt.m_denseFeatures.end(); 
+	  probsIterator++) {
         IFVERBOSE(1) {
           if (*probsIterator < 0.0f) {
             TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n");
@@ -102,7 +113,9 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
         float value = (alt.m_word=="" || alt.m_word==EPSILON) ? 0.0f : -1.0f;
         data[i][j].second.denseScores.push_back(value);
       }
-      String2Word(alt.m_word, data[i][j]. first, factorOrder);
+      Word& w = data[i][j].first;
+      w.CreateFromString(Input,factorOrder,StringPiece(alt.m_word),false);
+      // String2Word(alt.m_word, data[i][j]. first, factorOrder);
       next_nodes[i][j] = alt.m_next;
 
       if(next_nodes[i][j] > maxSizePhrase) {

@@ -182,7 +182,11 @@ void Manager::printDivergentHypothesis(long translationId, const Hypothesis* hyp
 }
 
 
-void Manager::printThisHypothesis(long translationId, const Hypothesis* hypo, const vector <const TargetPhrase*> & remainingPhrases, float remainingScore, ostream& outputStream) const
+void 
+Manager::
+printThisHypothesis(long translationId, const Hypothesis* hypo, 
+		    const vector <const TargetPhrase*> & remainingPhrases, 
+		    float remainingScore, ostream& outputStream) const
 {
 
   outputStream << translationId << " ||| ";

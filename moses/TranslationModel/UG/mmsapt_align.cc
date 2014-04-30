@@ -98,7 +98,7 @@ namespace Moses
     typedef pair<uint32_t, uint32_t>  span;
     typedef vector<vector<uint64_t> > pidmap_t; // span -> phrase ID
     typedef boost::unordered_map<uint64_t,vector<span> > pid2span_t;
-    typedef boost::unordered_map<uint64_t,jstats> jStatsTable;
+    typedef pstats::trg_map_t jStatsTable;
 
     Mmsapt const& PT;
     vector<id_type> s,t; 

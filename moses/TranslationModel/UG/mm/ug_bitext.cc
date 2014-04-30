@@ -10,6 +10,9 @@ namespace Moses
 {
   namespace bitext 
   {
+
+    ThreadSafeCounter pstats::active;
+    
     pstats::
     pstats()
       : raw_cnt     (0)
@@ -20,6 +23,14 @@ namespace Moses
     {
       ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = ofwd[5] = ofwd[6] = 0;
       obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = obwd[5] = obwd[6] = 0;
+      // if (++active%5 == 0) 
+      // cerr << size_t(active) << " active pstats at " << __FILE__ << ":" << __LINE__ << endl;
+    }
+
+    pstats::
+    ~pstats()
+    {
+      --active;
     }
 
     void
@@ -49,16 +60,13 @@ namespace Moses
 	uint32_t fwd_o, 
 	uint32_t bwd_o)
     {
-      this->lock.lock();
+      boost::lock_guard<boost::mutex> guard(this->lock);
       jstats& entry = this->trg[pid];
-      this->lock.unlock();
       entry.add(w,a,cnt2,fwd_o,bwd_o);
       if (this->good < entry.rcnt())
 	{
-	  this->lock.lock();
-	  return false;
-	  // UTIL_THROW(util::Exception, "more joint counts than good counts!" 
-	  // 	     << entry.rcnt() << "/" << this->good);
+	  UTIL_THROW(util::Exception, "more joint counts than good counts:" 
+		     << entry.rcnt() << "/" << this->good << "!");
 	}
       return true;
     }
@@ -338,6 +346,10 @@ namespace Moses
       typedef L2R_Token<SimpleWordId> TKN;
       assert(s1.size() == s2.size() && s1.size() == aln.size());
       
+#ifndef NDEBUG
+      size_t first_new_snt = this->T1 ? this->T1->size() : 0;
+#endif
+
       sptr<imBitext<TKN> > ret;
       {
 	lock_guard<mutex> guard(this->lock);
@@ -346,30 +358,58 @@ namespace Moses
       
       // we add the sentences in separate threads (so it's faster)
       boost::thread thread1(snt_adder<TKN>(s1,*ret->V1,ret->myT1,ret->myI1));
-      thread1.join(); // for debugging
+      // thread1.join(); // for debugging
       boost::thread thread2(snt_adder<TKN>(s2,*ret->V2,ret->myT2,ret->myI2));
       BOOST_FOREACH(string const& a, aln)
 	{
 	  istringstream ibuf(a);
 	  ostringstream obuf;
 	  uint32_t row,col; char c;
-	  while (ibuf>>row>>c>>col)
+	  while (ibuf >> row >> c >> col)
 	    {
 	      assert(c == '-');
 	      binwrite(obuf,row);
 	      binwrite(obuf,col);
 	    }
-	  char const* x = obuf.str().c_str();
-	  vector<char> v(x,x+obuf.str().size());
+	  // important: DO NOT replace the two lines below this comment by 
+	  // char const* x = obuf.str().c_str(), as the memory x is pointing 
+	  // to is freed immediately upon deconstruction of the string object.
+	  string foo = obuf.str(); 
+	  char const* x = foo.c_str();
+	  vector<char> v(x,x+foo.size());
 	  ret->myTx = append(ret->myTx, v);
 	}
+
       thread1.join();
       thread2.join();
+
       ret->Tx = ret->myTx;
       ret->T1 = ret->myT1;
       ret->T2 = ret->myT2;
       ret->I1 = ret->myI1;
       ret->I2 = ret->myI2;
+
+#ifndef NDEBUG
+      // sanity check
+      for (size_t i = first_new_snt; i < ret->T1->size(); ++i)
+	{
+	  size_t slen1  = ret->T1->sntLen(i);
+	  size_t slen2  = ret->T2->sntLen(i);
+	  char const* p = ret->Tx->sntStart(i);
+	  char const* q = ret->Tx->sntEnd(i);
+	  size_t k;
+	  while (p < q)
+	    {
+	      p = binread(p,k);
+	      assert(p);
+	      assert(p < q);
+	      assert(k < slen1);
+	      p = binread(p,k);
+	      assert(p);
+	      assert(k < slen2);
+	    }
+	}
+#endif
       return ret;
     }
 

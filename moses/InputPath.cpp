@@ -5,7 +5,7 @@
 #include "TypeDef.h"
 #include "AlignmentInfo.h"
 #include "util/exception.hh"
-
+#include "TranslationModel/PhraseDictionary.h"
 using namespace std;
 
 namespace Moses
@@ -18,9 +18,9 @@ InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
   ,m_phrase(phrase)
   ,m_range(range)
   ,m_inputScore(inputScore)
+  ,m_nextNode(1)
   ,m_sourceNonTerms(sourceNonTerms)
   ,m_sourceNonTermArray(FactorCollection::Instance().GetNumNonTerminals(), false)
-  ,m_nextNode(1)
 {
   for (NonTerminalSet::const_iterator iter = sourceNonTerms.begin(); iter != sourceNonTerms.end(); ++iter) {
     size_t idx = (*iter)[0]->GetId();
@@ -33,6 +33,14 @@ InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
 
 InputPath::~InputPath()
 {
+  // Since there is no way for the Phrase Dictionaries to tell in 
+  // which (sentence) context phrases were looked up, we tell them 
+  // now that the phrase isn't needed any more by this inputPath
+  typedef std::pair<const TargetPhraseCollection*, const void* > entry;
+  std::map<const PhraseDictionary*, entry>::const_iterator iter;
+  for (iter = m_targetPhrases.begin(); iter != m_targetPhrases.end(); ++iter)
+    iter->first->Release(iter->second.first);
+  
   delete m_inputScore;
 }
 

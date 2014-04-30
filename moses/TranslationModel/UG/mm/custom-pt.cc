@@ -53,7 +53,7 @@ nbest_phrasepairs(uint64_t const  pid1,
 		  pstats   const& ps, 
 		  vector<PhrasePair> & nbest)
 {
-  boost::unordered_map<uint64_t,jstats>::const_iterator m;
+  pstats::trg_map_t::const_iterator m;
   vector<size_t> idx(nbest.size());
   size_t i=0;
   for (m  = ps.trg.begin(); 
