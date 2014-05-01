@@ -14,11 +14,11 @@ InputFeature *InputFeature::s_instance = NULL;
 
 InputFeature::InputFeature(const std::string &line)
   : StatelessFeatureFunction(line)
-  , m_numInputScores(0)
   , m_numRealWordCount(0)
 {
+  m_numInputScores = this->m_numScoreComponents;
   ReadParameters();
-
+  
   UTIL_THROW_IF2(s_instance, "Can only have 1 input feature");
   s_instance = this;
 }

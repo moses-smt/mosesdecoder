@@ -9,6 +9,7 @@
 #include "tpt_typedefs.h"
 #include "tpt_pickler.h"
 #include "ug_typedefs.h"
+#include "util/exception.hh"
 namespace bio=boost::iostreams;
 namespace ugdiss
 {
@@ -113,16 +114,21 @@ namespace ugdiss
     // cout << "opening " << fname << " at " << __FILE__ << ":" << __LINE__ << endl;
     if (access(fname.c_str(),R_OK))
       {
-        cerr << "[" << __FILE__ << ":" << __LINE__ <<"] FATAL ERROR: "
-             << "file '" << fname << " is not accessible." << endl;
-        exit(1);
+	ostringstream msg;
+        msg << "[" << __FILE__ << ":" << __LINE__ <<"] FATAL ERROR: "
+	    << "file '" << fname << " is not accessible." << endl;
+	string foo = msg.str();
+	UTIL_THROW(util::Exception,foo.c_str());
       }
     file.reset(new bio::mapped_file());
     file->open(fname,ios::in|ios::out);
     if (!file->is_open())
       {
-	cerr << "Error opening file " << fname << endl;
-	assert(0);
+	ostringstream msg;
+        msg << "[" << __FILE__ << ":" << __LINE__ <<"] FATAL ERROR: "
+	    << "Opening file '" << fname << "' failed." << endl;
+	string foo = msg.str();
+	UTIL_THROW(util::Exception,foo.c_str());
       }
     char* p = file->data();
     filepos_type offset = *reinterpret_cast<filepos_type*>(p);

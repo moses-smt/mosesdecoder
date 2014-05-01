@@ -59,6 +59,7 @@ namespace ugdiss
 
     // TSA_tree_iterator(TSA_tree_iterator const& other);
     TSA_tree_iterator(TSA<Token> const* s);
+    TSA_tree_iterator(TSA<Token> const* r, id_type const* s, size_t const len);
     // TSA_tree_iterator(TSA<Token> const* s, Token const& t);
     TSA_tree_iterator(TSA<Token> const* s, 
 		      Token const* kstart, 
@@ -311,6 +312,17 @@ namespace ugdiss
   TSA_tree_iterator(TSA<Token> const* s)
     : root(s) 
   {};
+
+  template<typename Token>
+  TSA_tree_iterator<Token>::
+  TSA_tree_iterator
+  (TSA<Token> const* r,
+   id_type    const* s, 
+   size_t     const  len)
+    : root(r) 
+  {
+    for (id_type const* e = s + len; s < e && extend(*s); ++s);
+  };
 
   // ---------------------------------------------------------------------------
 

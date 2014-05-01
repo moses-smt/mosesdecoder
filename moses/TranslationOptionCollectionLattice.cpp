@@ -37,13 +37,16 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
 
     const std::vector<size_t> &nextNodes = input.GetNextNodes(startPos);
 
-    WordsRange range(startPos, startPos);
-    const NonTerminalSet &labels = input.GetLabelSet(startPos, startPos);
-
     const ConfusionNet::Column &col = input.GetColumn(startPos);
     for (size_t i = 0; i < col.size(); ++i) {
       const Word &word = col[i].first;
       UTIL_THROW_IF2(word.IsEpsilon(), "Epsilon not supported");
+
+      size_t nextNode = nextNodes[i];
+      size_t endPos = startPos + nextNode - 1;
+
+      WordsRange range(startPos, endPos);
+      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       Phrase subphrase;
       subphrase.AddWord(word);
@@ -53,9 +56,7 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
 
       InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
 
-      size_t nextNode = nextNodes[i];
       path->SetNextNode(nextNode);
-
       m_inputPathQueue.push_back(path);
     }
   }
@@ -130,11 +131,12 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
 
   for (size_t i = 0; i < m_inputPathQueue.size(); ++i) {
     const InputPath &path = *m_inputPathQueue[i];
+
     const TargetPhraseCollection *tpColl = path.GetTargetPhrases(phraseDictionary);
     const WordsRange &range = path.GetWordsRange();
 
-    if (tpColl) {
-    	TargetPhraseCollection::const_iterator iter;
+    if (tpColl && tpColl->GetSize()) {
+		TargetPhraseCollection::const_iterator iter;
     	for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
     		const TargetPhrase &tp = **iter;
     		TranslationOption *transOpt = new TranslationOption(range, tp);

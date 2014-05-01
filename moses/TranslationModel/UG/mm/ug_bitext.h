@@ -29,10 +29,12 @@
 #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
 #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
 #include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"
 #include "moses/Util.h"
+#include "moses/StaticData.h"
 
-#include "headers-base/util/exception.hh"
-#include "headers-base/util/check.hh"
+#include "util/exception.hh"
+// #include "util/check.hh"
 
 #include "ug_typedefs.h"
 #include "ug_mm_ttrack.h"
@@ -44,10 +46,12 @@
 #include "tpt_pickler.h"
 #include "ug_lexical_phrase_scorer2.h"
 
+#define PSTATS_CACHE_THRESHOLD 50
+
 using namespace ugdiss;
 using namespace std;
 namespace Moses {
-
+  class Mmsapt;
   namespace bitext
   {
     using namespace ugdiss;
@@ -122,6 +126,7 @@ namespace Moses {
     struct 
     pstats
     {
+      static ThreadSafeCounter active;
       boost::mutex lock;               // for parallel gathering of stats
       boost::condition_variable ready; // consumers can wait for this data structure to be ready.
       
@@ -133,8 +138,11 @@ namespace Moses {
 
       uint32_t ofwd[po_other+1], obwd[po_other+1];
 
-      typename boost::unordered_map<uint64_t, jstats> trg;
-      pstats(); 
+      // typedef typename boost::unordered_map<uint64_t, jstats> trg_map_t;
+      typedef typename std::map<uint64_t, jstats> trg_map_t;
+      trg_map_t trg;
+      pstats();
+      ~pstats();
       void release();
       void register_worker();
       size_t count_workers() { return in_progress; } 
@@ -192,8 +200,8 @@ namespace Moses {
       int index;
       int num_feats;
     public:
-      virtual 
  
+      virtual 
       void 
       operator()(Bitext<Token> const& pt, PhrasePair& pp, vector<float> * dest) 
 	const = 0;
@@ -212,6 +220,7 @@ namespace Moses {
     PScorePfwd : public PhraseScorer<Token>
     {
       float conf;
+      int denom;
     public:
       PScorePfwd() 
       {
@@ -219,9 +228,10 @@ namespace Moses {
       }
 
       int 
-      init(int const i, float const c) 
+      init(int const i, float const c, int d=0) 
       { 
-	conf = c; 
+	conf  = c; 
+	denom = d;
 	this->index = i;
 	return i + this->num_feats;
       }
@@ -234,10 +244,20 @@ namespace Moses {
 	if (!dest) dest = &pp.fvals;
 	if (pp.joint > pp.good1) 
 	  {
-	    cerr << bt.toString(pp.p1,0) << " ::: " << bt.toString(pp.p2,1) << endl;
-	    cerr << pp.joint << "/" << pp.good1 << "/" << pp.raw2 << endl;
+	    cerr<<bt.toString(pp.p1,0)<<" ::: "<<bt.toString(pp.p2,1)<<endl;
+	    cerr<<pp.joint<<"/"<<pp.good1<<"/"<<pp.raw2<<endl;
 	  }
-	(*dest)[this->index] = log(lbop(pp.good1, pp.joint, conf));
+	switch (denom)
+	  {
+	  case 0: 
+	    (*dest)[this->index] = log(lbop(pp.good1, pp.joint, conf)); 
+	    break;
+	  case 1: 
+	    (*dest)[this->index] = log(lbop(pp.sample1, pp.joint, conf)); 
+	    break;
+	  case 2:
+	    (*dest)[this->index] = log(lbop(pp.raw1, pp.joint, conf)); 
+	  }
       }
     };
 
@@ -294,6 +314,7 @@ namespace Moses {
 	parse_pid(pp.p2, sid2, off2, len2);
 
 #if 0
+	cout << len1 << " " << len2 << endl;
 	Token const* t1 = bt.T1->sntStart(sid1);
 	for (size_t i = off1; i < off1 + len1; ++i)
 	  cout << (*bt.V1)[t1[i].id()] << " "; 
@@ -307,6 +328,7 @@ namespace Moses {
 	BOOST_FOREACH (int a, pp.aln)
 	  cout << a << " " ;
 	cout << __FILE__ << ":" << __LINE__ << "\n" << endl;
+
 #endif
 	scorer.score(bt.T1->sntStart(sid1)+off1,0,len1,
 		     bt.T2->sntStart(sid2)+off2,0,len2,
@@ -371,8 +393,10 @@ namespace Moses {
     template<typename TKN>
     class Bitext 
     {
+      friend class Moses::Mmsapt;
     protected:
       mutable boost::mutex lock;
+      mutable boost::mutex cache_lock;
     public:
       typedef TKN Token;
       typedef typename TSA<Token>::tree_iterator iter;
@@ -409,14 +433,22 @@ namespace Moses {
        bitvector* full_alignment,
        bool const flip) const;
       
-      mutable boost::unordered_map<uint64_t,sptr<pstats> > cache1,cache2;
+#if 1
+      typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
+#else
+      typedef map<uint64_t,sptr<pstats> > pcache_t;
+#endif
+      mutable pcache_t cache1,cache2;
     protected:
       size_t default_sample_size;
+      size_t num_workers;
+      size_t m_pstats_cache_threshold;
     private:
       sptr<pstats> 
 	prep2(iter const& phrase, size_t const max_sample) const;
     public:
-      Bitext(size_t const max_sample=5000);
+      Bitext(size_t const max_sample =1000, 
+	     size_t const xnum_workers =16);
 
       Bitext(Ttrack<Token>* const t1, 
 	     Ttrack<Token>* const t2, 
@@ -425,7 +457,8 @@ namespace Moses {
 	     TokenIndex*    const v2,
 	     TSA<Token>* const i1, 
 	     TSA<Token>* const i2,
-	     size_t const max_sample=5000);
+	     size_t const max_sample=1000,
+	     size_t const xnum_workers=16);
 	     
       virtual void open(string const base, string const L1, string const L2) = 0;
       
@@ -433,10 +466,13 @@ namespace Moses {
       sptr<pstats> lookup(iter const& phrase) const;
       sptr<pstats> lookup(iter const& phrase, size_t const max_sample) const;
       void prep(iter const& phrase) const;
-      void setDefaultSampleSize(size_t const max_samples);
+
+      void   setDefaultSampleSize(size_t const max_samples);
       size_t getDefaultSampleSize() const;
-      
+
       string toString(uint64_t pid, int isL2) const;
+
+      virtual size_t revision() const { return 0; }
     };
 
     template<typename Token>
@@ -471,6 +507,7 @@ namespace Moses {
     Bitext<Token>::
     setDefaultSampleSize(size_t const max_samples)
     { 
+      boost::lock_guard<boost::mutex> guard(this->lock);
       if (max_samples != default_sample_size) 
 	{
 	  cache1.clear();
@@ -481,8 +518,10 @@ namespace Moses {
 
     template<typename Token>
     Bitext<Token>::
-    Bitext(size_t const max_sample)
+    Bitext(size_t const max_sample, size_t const xnum_workers)
       : default_sample_size(max_sample)
+      , num_workers(xnum_workers)
+      , m_pstats_cache_threshold(PSTATS_CACHE_THRESHOLD)
     { }
 
     template<typename Token>
@@ -494,9 +533,12 @@ namespace Moses {
 	   TokenIndex*    const v2,
 	   TSA<Token>* const i1, 
 	   TSA<Token>* const i2,
-	   size_t const max_sample)
+	   size_t const max_sample,
+	   size_t const xnum_workers)
       : Tx(tx), T1(t1), T2(t2), V1(v1), V2(v2), I1(i1), I2(i2)
       , default_sample_size(max_sample)
+      , num_workers(xnum_workers)
+      , m_pstats_cache_threshold(PSTATS_CACHE_THRESHOLD)
     { }
 
     // agenda is a pool of jobs 
@@ -508,6 +550,7 @@ namespace Moses {
       boost::mutex lock; 
       class job 
       {
+	static ThreadSafeCounter active;
 	boost::mutex      lock; 
 	friend class agenda;
       public:
@@ -525,8 +568,9 @@ namespace Moses {
 	bool done() const;
 	job(typename TSA<Token>::tree_iterator const& m, 
 	    sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd);
+	~job();
       };
-      
+    public:      
       class 
       worker
       {
@@ -535,7 +579,7 @@ namespace Moses {
 	worker(agenda& a) : ag(a) {}
 	void operator()();
       };
-      
+    private:
       list<sptr<job> > joblist;
       vector<sptr<boost::thread> > workers;
       bool shutdown;
@@ -639,7 +683,7 @@ namespace Moses {
 	  while (j->step(sid,offset))
 	    {
 	      aln.clear();
-	      int po_fwd=5,po_bwd=5;
+	      int po_fwd=po_other,po_bwd=po_other;
 	      if (j->fwd)
 		{
 		  if (!ag.bt.find_trg_phr_bounds
@@ -669,20 +713,25 @@ namespace Moses {
 		  // assert(b);
 		  for (size_t i = e1; i <= e2; ++i)
 		    {
-		      if (!j->stats->add(b->getPid(),sample_weight,aln,
-					 b->approxOccurrenceCount(),
-					 po_fwd,po_bwd))
+		      if (! j->stats->add(b->getPid(),sample_weight,aln,
+					  b->approxOccurrenceCount(),
+					  po_fwd,po_bwd))
 			{
+			  cerr << "FATAL ERROR AT " << __FILE__ 
+			       << ":" << __LINE__ << endl;
+			  assert(0);
+			  ostringstream msg;
 			  for (size_t z = 0; z < j->len; ++z)
 			    {
 			      id_type tid = ag.bt.T1->sntStart(sid)[offset+z].id();
-			      cout << (*ag.bt.V1)[tid] << " "; 
+			      cerr << (*ag.bt.V1)[tid] << " "; 
 			    }
-			  cout << endl;
+			  cerr << endl;
 			  for (size_t z = s; z <= i; ++z)
-			    cout << (*ag.bt.V2)[(o+z)->id()] << " "; 
-			  cout << endl;
-			  exit(1);
+			    cerr << (*ag.bt.V2)[(o+z)->id()] << " "; 
+			  cerr << endl;
+			  assert(0);
+			  UTIL_THROW(util::Exception,"Error in sampling.");
 			}
 		      if (i < e2)
 			{
@@ -709,6 +758,16 @@ namespace Moses {
     Bitext<Token>::
     agenda::
     job::
+    ~job()
+    {
+      if (stats) stats.reset();
+      --active;
+    }
+
+    template<typename Token>
+    Bitext<Token>::
+    agenda::
+    job::
     job(typename TSA<Token>::tree_iterator const& m, 
 	sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd)
       : workers(0)
@@ -722,6 +781,9 @@ namespace Moses {
     {
       stats.reset(new pstats());
       stats->raw_cnt = m.approxOccurrenceCount();
+      // if (++active%5 == 0) 
+      ++active;
+      // cerr << size_t(active) << " active jobs at " << __FILE__ << ":" << __LINE__ << endl;
     }
 
     template<typename Token>
@@ -731,12 +793,12 @@ namespace Moses {
     add_job(typename TSA<Token>::tree_iterator const& phrase, 
 	    size_t const max_samples)
     {
+      boost::unique_lock<boost::mutex> lk(this->lock);
       static boost::posix_time::time_duration nodelay(0,0,0,0); 
       bool fwd = phrase.root == bt.I1.get();
-      sptr<job> j(new job(phrase, fwd ? bt.I2 : bt.I1, max_samples, fwd));
+      sptr<job> j(new job(phrase, fwd ? bt.I1 : bt.I2, max_samples, fwd));
       j->stats->register_worker();
       
-      boost::unique_lock<boost::mutex> lk(this->lock);
       joblist.push_back(j);
       if (joblist.size() == 1)
 	{
@@ -770,7 +832,6 @@ namespace Moses {
       // cerr << workers.size() << " workers on record" << endl;
       sptr<job> ret;
       if (this->shutdown) return ret;
-      // add_workers(0);
       boost::unique_lock<boost::mutex> lock(this->lock);
       if (this->doomed) 
 	{
@@ -840,7 +901,8 @@ namespace Moses {
       i2.open(base+L2+".sfa", this->T2);
       assert(this->T1->size() == this->T2->size());
     }
-    
+
+   
     template<typename TKN>
     class imBitext : public Bitext<TKN>
     {
@@ -849,7 +911,9 @@ namespace Moses {
       sptr<imTtrack<TKN> >  myT2;
       sptr<imTSA<TKN> >     myI1; 
       sptr<imTSA<TKN> >     myI2;
+      static ThreadSafeCounter my_revision;
     public:
+      size_t revision() const { return my_revision; }
       void open(string const base, string const L1, string L2);
       imBitext(sptr<TokenIndex> const& V1,
 	       sptr<TokenIndex> const& V2,
@@ -868,6 +932,10 @@ namespace Moses {
     };
 
     template<typename TKN>
+    ThreadSafeCounter 
+    imBitext<TKN>::my_revision;
+
+    template<typename TKN>
     imBitext<TKN>::
     imBitext(size_t max_sample)
     { 
@@ -876,6 +944,7 @@ namespace Moses {
       this->V2.reset(new TokenIndex());
       this->V1->setDynamic(true);
       this->V2->setDynamic(true);
+      ++my_revision;
     }
     
     template<typename TKN>
@@ -889,6 +958,7 @@ namespace Moses {
       this->V2 = v2;
       this->V1->setDynamic(true);
       this->V2->setDynamic(true);
+      ++my_revision;
     }
     
 
@@ -909,6 +979,8 @@ namespace Moses {
       this->V1 = other.V1;
       this->V2 = other.V2;
       this->default_sample_size = other.default_sample_size;
+      this->num_workers = other.num_workers;
+      ++my_revision;
     }
     
     template<typename TKN> class snt_adder;
@@ -1050,7 +1122,6 @@ namespace Moses {
       t1.open(base+L1+".mct");
       t2.open(base+L2+".mct");
       tx.open(base+L1+"-"+L2+".mam");
-      cerr << "DADA" << endl;
       this->V1->open(base+L1+".tdx"); this->V1->iniReverseIndex();
       this->V2->open(base+L2+".tdx"); this->V2->iniReverseIndex();
       mmTSA<TKN>& i1 = *reinterpret_cast<mmTSA<TKN>*>(this->I1.get());
@@ -1063,19 +1134,27 @@ namespace Moses {
     template<typename Token>
     bool
     Bitext<Token>::
-    find_trg_phr_bounds(size_t const sid, size_t const start, size_t const stop,
-			size_t & s1, size_t & s2, size_t & e1, size_t & e2,
-			int & po_fwd, int & po_bwd,
-			vector<uchar>* core_alignment, 
-			bitvector* full_alignment, 
-			bool const flip) const
+    find_trg_phr_bounds
+    (size_t const sid, 
+     size_t const start, size_t const stop,
+     size_t & s1, size_t & s2, size_t & e1, size_t & e2,
+     int & po_fwd, int & po_bwd,
+     vector<uchar>* core_alignment, bitvector* full_alignment, 
+     bool const flip) const
     {
       // if (core_alignment) cout << "HAVE CORE ALIGNMENT" << endl;
+
       // a word on the core_alignment:
-      // since fringe words ([s1,...,s2),[e1,..,e2) if s1 < s2, or e1 < e2, respectively)
-      // are be definition unaligned, we store only the core alignment in *core_alignment
-      // it is up to the calling function to shift alignment points over for start positions
-      // of extracted phrases that start with a fringe word
+      // 
+      // since fringe words ([s1,...,s2),[e1,..,e2) if s1 < s2, or e1
+      // < e2, respectively) are be definition unaligned, we store
+      // only the core alignment in *core_alignment it is up to the
+      // calling function to shift alignment points over for start
+      // positions of extracted phrases that start with a fringe word
+      assert(T1);
+      assert(T2);
+      assert(Tx);
+
       bitvector forbidden((flip ? T1 : T2)->sntLen(sid));
       size_t slen1 = (*T1).sntLen(sid);
       size_t slen2 = (*T2).sntLen(sid);
@@ -1092,12 +1171,22 @@ namespace Moses {
       char const* p = Tx->sntStart(sid);
       char const* x = Tx->sntEnd(sid);
 
-      // cerr << "flip = " << flip << " " << __FILE__ << ":" << __LINE__ << endl;
-
       while (p < x)
 	{
 	  if (flip) { p = binread(p,trg); assert(p<x); p = binread(p,src); }
 	  else      { p = binread(p,src); assert(p<x); p = binread(p,trg); }
+
+	  // cerr << sid << " " << src << "/" << slen1 << " " << trg << "/" 
+	  // << slen2 << endl;
+	  if (src >= slen1 || trg >= slen2)
+	    {
+	      ostringstream buf;
+	      buf << "Alignment range error at sentence " << sid << "!" << endl
+		  << src << "/" << slen1 << " " << trg << "/" << slen2 << endl;
+	      cerr << buf.str() << endl;
+	      UTIL_THROW(util::Exception, buf.str().c_str());
+	    }
+	      
 	  if (src < start || src >= stop) 
 	    forbidden.set(trg);
 	  else
@@ -1214,29 +1303,44 @@ namespace Moses {
     Bitext<Token>::
     prep2(iter const& phrase, size_t const max_sample) const
     {
-      // boost::lock_guard<boost::mutex>(this->lock);
+      boost::lock_guard<boost::mutex> guard(this->lock);
       if (!ag) 
 	{
 	  ag.reset(new agenda(*this));
-	  // ag->add_workers(1);
-	  ag->add_workers(20);
+	  if (this->num_workers > 1)
+	    ag->add_workers(this->num_workers);
 	}
-      typedef boost::unordered_map<uint64_t,sptr<pstats> > pcache_t;
       sptr<pstats> ret;
-      if (max_sample == this->default_sample_size)
+#if 1
+      // use pcache only for plain sentence input
+      if (StaticData::Instance().GetInputType() == SentenceInput && 
+	  max_sample == this->default_sample_size && 
+	  phrase.approxOccurrenceCount() > m_pstats_cache_threshold)
       	{
-      	  uint64_t pid = phrase.getPid();
-      	  pcache_t & cache(phrase.root == &(*this->I1) ? cache1 : cache2);
-      	  pcache_t::value_type entry(pid,sptr<pstats>());
+	  // need to test what a good caching threshold is
+	  // is caching here the cause of the apparent memory leak in 
+	  // confusion network decoding ????
+	  uint64_t pid = phrase.getPid();
+	  pcache_t & cache(phrase.root == &(*this->I1) ? cache1 : cache2);
+	  pcache_t::value_type entry(pid,sptr<pstats>());
 	  pair<pcache_t::iterator,bool> foo;
-	  {
-	    // boost::lock_guard<boost::mutex>(this->lock);
-	    foo = cache.emplace(entry);
-	  }
-      	  if (foo.second) foo.first->second = ag->add_job(phrase, max_sample);
+	  foo = cache.insert(entry); 
+	  if (foo.second) 
+	    {
+	      // cerr << "NEW FREQUENT PHRASE: "
+	      // << phrase.str(V1.get()) << " " << phrase.approxOccurrenceCount()  
+	      // << " at " << __FILE__ << ":" << __LINE__ << endl;
+	      foo.first->second = ag->add_job(phrase, max_sample);
+	      assert(foo.first->second);
+	    }
+	  assert(foo.first->second);
 	  ret = foo.first->second;
-      	}
-      else ret = ag->add_job(phrase, max_sample);
+	  assert(ret);
+	}
+      else 
+#endif
+	ret = ag->add_job(phrase, max_sample);
+      assert(ret);
       return ret;
     }
 
@@ -1245,13 +1349,17 @@ namespace Moses {
     Bitext<Token>::
     lookup(iter const& phrase) const
     {
-      boost::lock_guard<boost::mutex>(this->lock);
-      sptr<pstats> ret;
-      ret = prep2(phrase, this->default_sample_size);
+      sptr<pstats> ret = prep2(phrase, this->default_sample_size);
       assert(ret);
-      boost::unique_lock<boost::mutex> lock(ret->lock);
-      while (ret->in_progress)
-	ret->ready.wait(lock);
+      boost::lock_guard<boost::mutex> guard(this->lock);
+      if (this->num_workers <= 1)
+	typename agenda::worker(*this->ag)();
+      else 
+	{
+	  boost::unique_lock<boost::mutex> lock(ret->lock);
+	  while (ret->in_progress)
+	    ret->ready.wait(lock);
+	}
       return ret;
     }
 
@@ -1260,11 +1368,16 @@ namespace Moses {
     Bitext<Token>::
     lookup(iter const& phrase, size_t const max_sample) const
     {
-      boost::lock_guard<boost::mutex>(this->lock);
       sptr<pstats> ret = prep2(phrase, max_sample);
-      boost::unique_lock<boost::mutex> lock(ret->lock);
-      while (ret->in_progress)
-	ret->ready.wait(lock);
+      boost::lock_guard<boost::mutex> guard(this->lock);
+      if (this->num_workers <= 1)
+	typename agenda::worker(*this->ag)();
+      else 
+	{
+	  boost::unique_lock<boost::mutex> lock(ret->lock);
+	  while (ret->in_progress)
+	    ret->ready.wait(lock);
+	}
       return ret;
     }
 
@@ -1296,6 +1409,12 @@ namespace Moses {
     { 
       return (max_samples && stats->good >= max_samples) || next == stop; 
     }
+
+    template<typename TKN>
+    ThreadSafeCounter 
+    Bitext<TKN>::
+    agenda::
+    job::active;
 
   } // end of namespace bitext
 } // end of namespace moses

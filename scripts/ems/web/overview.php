@@ -295,7 +295,8 @@ function output_score($id,$info) {
     $each_score = explode(" ; ",$score);
     for($i=0;$i<count($each_score);$i++) {
       if (preg_match('/([\d\(\)\.\s]+) (BLEU[\-c]*)/',$each_score[$i],$match) ||
-          preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match)) {
+          preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match) ||
+          preg_match('/([\d\(\)\.\s]+) (METEOR[\-c]*)/',$each_score[$i],$match)) {
         if ($i>0) { print "<BR>"; }
 	$opened_a_tag = 0;
         if ($set != "avg") { 

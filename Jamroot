@@ -55,7 +55,7 @@
 #                                information also known as -g
 # --notrace                      compiles without TRACE macros
 #
-# --enable-boost-pool            uses Boost pools for the memory SCFG table
+# --enable-boost-pool            uses Boost pools for the memory SCFG tabgle
 #
 # --enable-mpi                   switch on mpi
 # --without-libsegfault          does not link with libSegFault
@@ -148,9 +148,13 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG/mm//mtt-build 
   moses/TranslationModel/UG/mm//mtt-dump 
   moses/TranslationModel/UG/mm//symal2mam 
+  moses/TranslationModel/UG/mm//mam2symal 
+  moses/TranslationModel/UG/mm//mam_verify 
   moses/TranslationModel/UG/mm//custom-pt 
   moses/TranslationModel/UG/mm//mmlex-build 
+  moses/TranslationModel/UG/mm//mmlex-lookup 
   moses/TranslationModel/UG/mm//mtt-count-words 
+  moses/TranslationModel/UG/mm//calc-coverage 
   moses/TranslationModel/UG//try-align 
   ;
 }
