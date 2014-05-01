@@ -46,6 +46,11 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
       size_t endPos = startPos + nextNode - 1;
 
       WordsRange range(startPos, endPos);
+
+      if (range.GetNumWordsCovered() > maxPhraseLength) {
+    	  continue;
+      }
+
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       Phrase subphrase;
@@ -91,6 +96,12 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
       size_t endPos = nextPos + nextNode - 1;
 
       WordsRange range(startPos, endPos);
+
+      size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+      if (range.GetNumWordsCovered() > maxPhraseLength) {
+    	  continue;
+      }
+
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       Phrase subphrase(prevPhrase);

@@ -102,14 +102,6 @@ void Manager::ProcessSentence()
   }
   m_transOptColl->CreateTranslationOptions();
 
-  for (size_t i = 0; i < m_transOptColl->GetInputPaths().size(); ++i) {
-	  const InputPath &path = *m_transOptColl->GetInputPaths()[i];
-
-	  if (path.GetTotalRuleSize()) {
-  	    cerr << "path=" << path << endl;
-	  }
-  }
-
   // some reporting on how long this took
   IFVERBOSE(1) {
     GetSentenceStats().StopTimeCollectOpts();
