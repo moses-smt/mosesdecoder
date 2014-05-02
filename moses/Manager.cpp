@@ -924,7 +924,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
   long numArcs = searchGraph.size() + terminalNodes.size();
 
   //Header
-  outputSearchGraphStream << "# target ||| features ||| source-span" << endl;
+  outputSearchGraphStream << "# target ||| features ||| source-covered" << endl;
 
   // Print number of nodes and arcs
   outputSearchGraphStream << numNodes << " " << numArcs << endl;
@@ -969,7 +969,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
         const Hypothesis *prevHypo = thisHypo->GetPrevHypo();
         if (prevHypo==NULL) {
           //	VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " start of sentence" << std::endl)
-          outputSearchGraphStream << "<s> ||| \n";
+          outputSearchGraphStream << "<s> |||  ||| 0\n";
         } else {
           int startNode = mosesIDToHypergraphID[prevHypo->GetId()];
           //	  VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " has parent node " << startNode << std::endl)
@@ -988,7 +988,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
           }
           outputSearchGraphStream << " ||| ";
           OutputFeatureValuesForHypergraph(thisHypo, outputSearchGraphStream);
-          outputSearchGraphStream << " ||| " << thisHypo->GetCurrSourceWordsRange();
+          outputSearchGraphStream << " ||| " << thisHypo->GetWordsBitmap().GetNumWordsCovered();
           outputSearchGraphStream << "\n";
         }
       }
@@ -999,8 +999,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
   outputSearchGraphStream << "# node " << endNode << endl;
   outputSearchGraphStream << terminalNodes.size() << "\n";
   for (set<int>::iterator it=terminalNodes.begin(); it!=terminalNodes.end(); ++it) {
-    outputSearchGraphStream << "[" << (*it) << "] </s> |||  ||| " << 
-        WordsRange(0,GetSource().GetSize()-1) << "\n";
+    outputSearchGraphStream << "[" << (*it) << "] </s> |||  ||| " << GetSource().GetSize() << "\n";
   }
 
 }
