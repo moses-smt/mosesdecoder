@@ -610,6 +610,12 @@ void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t)
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
   const WordsRange &coverage = translationOption->GetSourceWordsRange();
+
+  if (coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size()) {
+	  cerr << "translationOption=" << *translationOption << endl;
+	  cerr << "coverage=" << coverage << endl;
+  }
+
   UTIL_THROW_IF2(coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size(),
 		  "Out of bound access: " << coverage);
   m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
