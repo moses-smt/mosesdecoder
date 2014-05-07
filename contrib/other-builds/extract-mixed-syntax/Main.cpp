@@ -36,7 +36,7 @@ int main(int argc, char** argv)
     ("MixedSyntaxType", po::value<int>()->default_value(params.mixedSyntaxType), "Hieu's Mixed syntax type. 0(default)=no mixed syntax, 1=add [X] only if no syntactic label. 2=add [X] everywhere")
     ("MultiLabel", po::value<int>()->default_value(params.multiLabel), "What to do with multiple labels on the same span. 0(default)=keep them all, 1=keep only top-most, 2=keep only bottom-most")
     ("HieroSourceLHS", "Always use Hiero source LHS? Default = 0")
-    ("MaxSpanFreeNonTermSource", "Max number of words covered by beginning/end NT. Default = 0 (no limit)");
+    ("MaxSpanFreeNonTermSource", po::value<int>()->default_value(params.maxSpanFreeNonTermSource), "Max number of words covered by beginning/end NT. Default = 0 (no limit)");
 
   po::variables_map vm;
   try
