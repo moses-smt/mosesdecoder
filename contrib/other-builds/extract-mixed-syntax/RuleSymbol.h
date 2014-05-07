@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 
+// base class - terminal or non-term
 class RuleSymbol {
 public:
 	RuleSymbol();

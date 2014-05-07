@@ -14,6 +14,7 @@
 
 class RuleSymbol;
 
+// a phrase of terms and non-terms for 1 side of a rule
 class RulePhrase
 {
 public:

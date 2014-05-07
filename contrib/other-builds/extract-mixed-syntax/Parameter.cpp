@@ -27,6 +27,7 @@ Parameter::Parameter()
 ,multiLabel(0)
 ,nonTermConsecSourceMixed(true)
 ,hieroSourceLHS(false)
+,maxSpanFreeNonTermSource(0)
 {}
 
 Parameter::~Parameter() {

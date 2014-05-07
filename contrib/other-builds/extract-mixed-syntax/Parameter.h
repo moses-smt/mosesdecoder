@@ -36,6 +36,7 @@ public:
   int mixedSyntaxType, multiLabel;
   bool nonTermConsecSourceMixed;
   bool hieroSourceLHS;
+  int maxSpanFreeNonTermSource;
 
 };
 

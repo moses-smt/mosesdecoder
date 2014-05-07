@@ -10,6 +10,7 @@
 #include <set>
 #include "RuleSymbol.h"
 
+// a terminal
 class Word : public RuleSymbol
 {
 public:

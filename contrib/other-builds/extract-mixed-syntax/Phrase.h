@@ -3,6 +3,7 @@
 #include <vector>
 #include "Word.h"
 
+// a vector of terminals
 class Phrase : public std::vector<Word*>
 {
 public:

@@ -35,7 +35,8 @@ int main(int argc, char** argv)
     ("TargetSyntax", "Target sentence is a parse tree")
     ("MixedSyntaxType", po::value<int>()->default_value(params.mixedSyntaxType), "Hieu's Mixed syntax type. 0(default)=no mixed syntax, 1=add [X] only if no syntactic label. 2=add [X] everywhere")
     ("MultiLabel", po::value<int>()->default_value(params.multiLabel), "What to do with multiple labels on the same span. 0(default)=keep them all, 1=keep only top-most, 2=keep only bottom-most")
-    ("HieroSourceLHS", "Always use Hiero source LHS? Default = 0");
+    ("HieroSourceLHS", "Always use Hiero source LHS? Default = 0")
+    ("MaxSpanFreeNonTermSource", "Max number of words covered by beginning/end NT. Default = 0 (no limit)");
 
   po::variables_map vm;
   try
@@ -74,6 +75,7 @@ int main(int argc, char** argv)
   if (vm.count("MixedSyntaxType")) params.mixedSyntaxType = vm["MixedSyntaxType"].as<int>();
   if (vm.count("MultiLabel")) params.multiLabel = vm["MultiLabel"].as<int>();
   if (vm.count("HieroSourceLHS")) params.hieroSourceLHS = true;
+  if (vm.count("MaxSpanFreeNonTermSource")) params.maxSpanFreeNonTermSource = vm["MaxSpanFreeNonTermSource"].as<int>();
 
   // input files;
   string pathTarget = argv[1];
