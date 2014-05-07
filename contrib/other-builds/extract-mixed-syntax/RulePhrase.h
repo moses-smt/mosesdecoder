@@ -33,6 +33,10 @@ public:
     return m_coll[index];
   }
 
+  const RuleSymbol* Back() const {
+    return m_coll.back();
+  }
+
   int Compare(const RulePhrase &other) const;
 
   void Output(std::ostream &out) const;

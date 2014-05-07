@@ -61,3 +61,5 @@ bool NonTerm::IsHiero(const Parameter &params) const
 {
  return IsHiero(Moses::Input, params) && IsHiero(Moses::Output, params);
 }
+int NonTerm::GetWidth(Moses::FactorDirection direction) const
+{ return GetConsistentPhrase().GetWidth(direction); }

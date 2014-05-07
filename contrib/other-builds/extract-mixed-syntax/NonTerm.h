@@ -24,6 +24,8 @@ public:
 	const ConsistentPhrase &GetConsistentPhrase() const
 	{ return *m_consistentPhrase; }
 
+	int GetWidth(Moses::FactorDirection direction) const;
+
 	virtual bool IsNonTerm() const
 	{ return true; }
 

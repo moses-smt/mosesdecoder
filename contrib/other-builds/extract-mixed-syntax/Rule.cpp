@@ -284,6 +284,28 @@ void Rule::Prevalidate(const Parameter &params)
 	  }
   }
 
+  if (params.maxSpanFreeNonTermSource) {
+	  const NonTerm *front = dynamic_cast<const NonTerm*>(m_source[0]);
+	  if (front) {
+		  int width = front->GetWidth(Moses::Input);
+		  if (width > params.maxSpanFreeNonTermSource) {
+			  m_isValid = false;
+			  m_canRecurse = false;
+			  return;
+		  }
+	  }
+
+	  const NonTerm *back = dynamic_cast<const NonTerm*>(m_source.Back());
+	  if (back) {
+		  int width = back->GetWidth(Moses::Input);
+		  if (width > params.maxSpanFreeNonTermSource) {
+			  m_isValid = false;
+			  m_canRecurse = false;
+			  return;
+		  }
+	  }
+
+  }
 }
 
 bool CompareTargetNonTerms(const NonTerm *a, const NonTerm *b)
