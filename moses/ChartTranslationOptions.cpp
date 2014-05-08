@@ -65,6 +65,22 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
     transOpt.Evaluate(input, inputPath, m_stackVec);
   }
 
+  // get rid of -inf trans opts
+  size_t numDiscard = 0;
+  for (size_t i = 0; i < m_collection.size(); ++i) {
+    ChartTranslationOption *transOpt = m_collection[i].get();
+
+    if (transOpt->GetScores().GetWeightedScore() == - std::numeric_limits<float>::infinity()) {
+    	++numDiscard;
+    }
+    else if (numDiscard) {
+    	m_collection[i - numDiscard] = boost::shared_ptr<ChartTranslationOption>(transOpt);
+    }
+  }
+
+  m_collection.resize(m_collection.size() - numDiscard);
+
+
 }
 
 void ChartTranslationOptions::SetInputPath(const InputPath *inputPath)
