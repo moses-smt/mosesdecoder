@@ -984,7 +984,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 
           outputSearchGraphStream << "[" << startNode << "] ";
           for (int targetWordIndex=0; targetWordIndex<targetWordCount; targetWordIndex+=1) {
-            outputSearchGraphStream << targetPhrase.GetWord(targetWordIndex);
+            outputSearchGraphStream << targetPhrase.GetWord(targetWordIndex)[0]->GetString() << " ";
           }
           outputSearchGraphStream << " ||| ";
           OutputFeatureValuesForHypergraph(thisHypo, outputSearchGraphStream);
