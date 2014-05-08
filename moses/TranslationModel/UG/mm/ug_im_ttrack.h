@@ -145,9 +145,9 @@ namespace ugdiss
   imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d)
   {
     myData  = d;
-    numTokens = 0;
-    BOOST_FOREACH(vector<Token> const& v, d)
-      numTokens += v.size();
+    numToks = 0;
+    BOOST_FOREACH(vector<Token> const& v, *d)
+      numToks += v.size();
   }
   
   template<typename Token>

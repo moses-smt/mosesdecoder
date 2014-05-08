@@ -37,13 +37,21 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
 
     const std::vector<size_t> &nextNodes = input.GetNextNodes(startPos);
 
-    WordsRange range(startPos, startPos);
-    const NonTerminalSet &labels = input.GetLabelSet(startPos, startPos);
-
     const ConfusionNet::Column &col = input.GetColumn(startPos);
     for (size_t i = 0; i < col.size(); ++i) {
       const Word &word = col[i].first;
       UTIL_THROW_IF2(word.IsEpsilon(), "Epsilon not supported");
+
+      size_t nextNode = nextNodes[i];
+      size_t endPos = startPos + nextNode - 1;
+
+      WordsRange range(startPos, endPos);
+
+      if (range.GetNumWordsCovered() > maxPhraseLength) {
+    	  continue;
+      }
+
+      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       Phrase subphrase;
       subphrase.AddWord(word);
@@ -53,67 +61,66 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
 
       InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
 
-      size_t nextNode = nextNodes[i];
       path->SetNextNode(nextNode);
-
       m_inputPathQueue.push_back(path);
+
+      // recursive
+      Extend(*path, input);
+
     }
   }
-
-  // iteratively extend all paths
-    for (size_t endPos = 1; endPos < size; ++endPos) {
-      const std::vector<size_t> &nextNodes = input.GetNextNodes(endPos);
-
-      // loop thru every previous paths
-      size_t numPrevPaths = m_inputPathQueue.size();
-
-      for (size_t i = 0; i < numPrevPaths; ++i) {
-        //for (size_t pathInd = 0; pathInd < prevPaths.size(); ++pathInd) {
-        const InputPath &prevPath = *m_inputPathQueue[i];
-
-        size_t nextNode = prevPath.GetNextNode();
-        if (prevPath.GetWordsRange().GetEndPos() + nextNode != endPos) {
-        	continue;
-        }
-
-        size_t startPos = prevPath.GetWordsRange().GetStartPos();
-
-        if (endPos - startPos + 1 > maxPhraseLength) {
-        	continue;
-        }
-
-        WordsRange range(startPos, endPos);
-        const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
-
-        const Phrase &prevPhrase = prevPath.GetPhrase();
-        const ScorePair *prevInputScore = prevPath.GetInputScore();
-        UTIL_THROW_IF2(prevInputScore == NULL,
-        		"Null previous score");
-
-        // loop thru every word at this position
-        const ConfusionNet::Column &col = input.GetColumn(endPos);
-
-        for (size_t i = 0; i < col.size(); ++i) {
-          const Word &word = col[i].first;
-          Phrase subphrase(prevPhrase);
-          subphrase.AddWord(word);
-
-          const ScorePair &scores = col[i].second;
-          ScorePair *inputScore = new ScorePair(*prevInputScore);
-          inputScore->PlusEquals(scores);
-
-          InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
-
-          size_t nextNode = nextNodes[i];
-          path->SetNextNode(nextNode);
-
-          m_inputPathQueue.push_back(path);
-        } // for (size_t i = 0; i < col.size(); ++i) {
-
-      } // for (size_t i = 0; i < numPrevPaths; ++i) {
-    }
 }
 
+void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const WordLattice &input)
+{
+	size_t nextPos = prevPath.GetWordsRange().GetEndPos() + 1;
+	if (nextPos >= input.GetSize()) {
+		return;
+	}
+
+	size_t startPos = prevPath.GetWordsRange().GetStartPos();
+    const Phrase &prevPhrase = prevPath.GetPhrase();
+    const ScorePair *prevInputScore = prevPath.GetInputScore();
+    UTIL_THROW_IF2(prevInputScore == NULL,
+    		"Null previous score");
+
+
+	const std::vector<size_t> &nextNodes = input.GetNextNodes(nextPos);
+
+    const ConfusionNet::Column &col = input.GetColumn(nextPos);
+    for (size_t i = 0; i < col.size(); ++i) {
+      const Word &word = col[i].first;
+      UTIL_THROW_IF2(word.IsEpsilon(), "Epsilon not supported");
+
+      size_t nextNode = nextNodes[i];
+      size_t endPos = nextPos + nextNode - 1;
+
+      WordsRange range(startPos, endPos);
+
+      size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+      if (range.GetNumWordsCovered() > maxPhraseLength) {
+    	  continue;
+      }
+
+      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
+
+      Phrase subphrase(prevPhrase);
+      subphrase.AddWord(word);
+
+      const ScorePair &scores = col[i].second;
+      ScorePair *inputScore = new ScorePair(*prevInputScore);
+      inputScore->PlusEquals(scores);
+
+      InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+
+      path->SetNextNode(nextNode);
+      m_inputPathQueue.push_back(path);
+
+      // recursive
+      Extend(*path, input);
+
+    }
+}
 
 void TranslationOptionCollectionLattice::CreateTranslationOptions()
 {
@@ -130,11 +137,12 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
 
   for (size_t i = 0; i < m_inputPathQueue.size(); ++i) {
     const InputPath &path = *m_inputPathQueue[i];
+
     const TargetPhraseCollection *tpColl = path.GetTargetPhrases(phraseDictionary);
     const WordsRange &range = path.GetWordsRange();
 
-    if (tpColl) {
-    	TargetPhraseCollection::const_iterator iter;
+    if (tpColl && tpColl->GetSize()) {
+		TargetPhraseCollection::const_iterator iter;
     	for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
     		const TargetPhrase &tp = **iter;
     		TranslationOption *transOpt = new TranslationOption(range, tp);
@@ -146,7 +154,7 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
     }
     else if (path.GetPhrase().GetSize() == 1) {
     	// unknown word processing
-    	ProcessOneUnknownWord(path, path.GetWordsRange().GetEndPos(), 1, path.GetInputScore());
+    	ProcessOneUnknownWord(path, path.GetWordsRange().GetStartPos(),  path.GetWordsRange().GetNumWordsCovered() , path.GetInputScore());
     }
   }
 

@@ -151,7 +151,8 @@ public:
   void CreateFromString(FactorDirection direction
                         , const std::vector<FactorType> &factorOrder
                         , const StringPiece &str
-                        , bool isNonTerminal);
+                        , bool isNonTerminal
+                        , bool strict = true); 
 
   void CreateUnknownWord(const Word &sourceWord);
 

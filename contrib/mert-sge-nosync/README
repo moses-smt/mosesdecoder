@@ -1,0 +1,29 @@
+MERT-sge-nosync
+Raymond Ng, University of Sheffield.
+Apr, 2014.
+
+The parallel MERT tuning scripts in moses cannot run in the SGE "no-sync" mode (where job submission is done in one go, after which user can go offline while leaving the SGE to manage the whole process). Scripts provided in this site are for parallel MERT in SGE no-sync mode. You will need to have SSH support in perl (Step 2), and set up public ssh-keys between the running hosts and the submission hosts (Step 3).
+ 
+1. Untar the scipts in ${MOSES}/scripts/
+
+2. Download and install OpenSSH packages for perl:
+Net-OpenSSH-Compat  (http://search.cpan.org/CPAN/authors/id/S/SA/SALVA/Net-OpenSSH-Compat-0.06.tar.gz)
+$ cd Net-OpenSSH-Compat-0.06
+$ perl Makefile.PL
+(You may have dependency issue and need to install IO-Tty and Net-OpenSSH in advance)
+IO-Tty-1.10       (http://search.cpan.org/CPAN/authors/id/T/TO/TODDR/IO-Tty-1.10.tar.gz)
+Net-OpenSSH-0.60  (http://search.cpan.org/CPAN/authors/id/S/SA/SALVA/Net-OpenSSH-0.60.tar.gz)
+
+3. Set up public ssh-keys for accessing the submithost (machine from which qsub is executed) from the running hosts (machines which actually runs the scripts)
+http://www.linuxproblem.org/art_9.html
+
+4. Run parallel MERT by
+nohup nice ${MOSES}/scripts/training/mert-moses-sge-nosync.pl ${TM_DEVTEXT_SOURCE} \
+--threads 20 --jobs 20 \
+--queue-flags='-q normal.q -P project' \
+--submithost='squeal' \
+${TM_DEVTEXT_TARGET} ${MOSES}/dist/bin/moses ${WORKINGDIR}/train/model/moses.ini \
+--mertdir ${MOSES}/dist/bin/ >& ${WORKINGDIR}/mert.out
+
+
+(tested on moses version Built Apr 2012 version)

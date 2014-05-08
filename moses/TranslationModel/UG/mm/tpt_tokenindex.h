@@ -28,7 +28,7 @@ namespace ugdiss
   class TokenIndex
   {
     /** Reverse index: maps from ID to char const* */
-    vector<char const*> ridx;
+    mutable vector<char const*> ridx;
     /** Label for the UNK token */
     string unkLabel; 
     id_type unkId,numTokens;
@@ -164,5 +164,12 @@ namespace ugdiss
     write_tokenindex_to_disk(tok,ofile,unkToken);
   }
 
+  template<typename Token>
+  void 
+  fill_token_seq(TokenIndex& V, string const& line, vector<Token>& dest)
+  {
+    istringstream buf(line); string w;
+    while (buf>>w) dest.push_back(Token(V[w]));
+  }
 }
 #endif
