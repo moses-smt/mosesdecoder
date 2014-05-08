@@ -1792,16 +1792,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/UnknownWordPenalty2.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UnknownWordPenalty2.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/UnknownWordPenalty2.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UnknownWordPenalty2.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/WordCoocTable.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/WordCoocTable.cpp</locationURI>
