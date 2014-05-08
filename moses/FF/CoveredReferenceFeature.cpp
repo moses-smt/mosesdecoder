@@ -49,6 +49,7 @@ void CoveredReferenceFeature::Evaluate(const Phrase &source
 void CoveredReferenceFeature::Evaluate(const InputType &input
                                   , const InputPath &inputPath
                                   , const TargetPhrase &targetPhrase
+                                  , const StackVec *stackVec
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {

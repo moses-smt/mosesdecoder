@@ -3,6 +3,10 @@
 #include "moses/StaticData.h"
 #include "moses/Word.h"
 #include "moses/InputPath.h"
+#include "moses/TargetPhrase.h"
+#include "moses/StackVec.h"
+#include "moses/WordsRange.h"
+#include "moses/ChartCellLabel.h"
 
 using namespace std;
 
@@ -21,19 +25,39 @@ void MaxSpanFreeNonTermSource::Evaluate(const Phrase &source
 						, ScoreComponentCollection &scoreBreakdown
 						, ScoreComponentCollection &estimatedFutureScore) const
 {
-  float score = 0;
-
-
-  scoreBreakdown.PlusEquals(this, score);
+  targetPhrase.SetRuleSource(source);
 }
 
 void MaxSpanFreeNonTermSource::Evaluate(const InputType &input
                        , const InputPath &inputPath
                        , const TargetPhrase &targetPhrase
+                       , const StackVec *stackVec
                        , ScoreComponentCollection &scoreBreakdown
                        , ScoreComponentCollection *estimatedFutureScore) const
 {
-  cerr << "inputPath=" << inputPath.GetPhrase() << endl;
+  const Phrase *source = targetPhrase.GetRuleSource();
+  assert(source);
+  cerr << "stackVec=" << stackVec->size() << " source="<< *source << endl;
+
+  float score = 0;
+
+  if (source->Front().IsNonTerminal()) {
+	  const ChartCellLabel &cell = *stackVec->front();
+	  if (cell.GetCoverage().GetNumWordsCovered() > m_maxSpan) {
+		  score = - std::numeric_limits<float>::infinity();
+	  }
+  }
+
+  if (source->Back().IsNonTerminal()) {
+	  const ChartCellLabel &cell = *stackVec->back();
+	  if (cell.GetCoverage().GetNumWordsCovered() > m_maxSpan) {
+		  score = - std::numeric_limits<float>::infinity();
+	  }
+  }
+
+
+  scoreBreakdown.PlusEquals(this, score);
+
 }
 
 
