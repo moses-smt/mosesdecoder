@@ -6,10 +6,10 @@ namespace Moses
 {
 
 // similar to Scope, however, adjacent non-term count as 1 ammbiguity, rather than 2
-class RuleAmbiguity : public StatelessFeatureFunction
+class MaxSpanFreeNonTermSource : public StatelessFeatureFunction
 {
 public:
-	RuleAmbiguity(const std::string &line);
+	MaxSpanFreeNonTermSource(const std::string &line);
 
 	  virtual bool IsUseable(const FactorMask &mask) const
 	  { return true; }
@@ -24,8 +24,7 @@ public:
 	                         , const TargetPhrase &targetPhrase
 	                         , const StackVec *stackVec
 	                         , ScoreComponentCollection &scoreBreakdown
-	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
-	  {}
+	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
 	  virtual void Evaluate(const Hypothesis& hypo,
 	                        ScoreComponentCollection* accumulator) const
@@ -36,9 +35,10 @@ public:
 	  {}
 
 	  void SetParameter(const std::string& key, const std::string& value);
+	  std::vector<float> DefaultWeights() const;
 
 protected:
-  bool m_sourceSyntax;
+  int m_maxSpan;
 };
 
 }

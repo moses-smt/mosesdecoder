@@ -41,6 +41,7 @@
 #include "CountNonTerms.h"
 #include "ReferenceComparison.h"
 #include "RuleAmbiguity.h"
+#include "MaxSpanFreeNonTermSource.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -185,6 +186,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(CountNonTerms);
   MOSES_FNAME(ReferenceComparison);
   MOSES_FNAME(RuleAmbiguity);
+  MOSES_FNAME(MaxSpanFreeNonTermSource);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
