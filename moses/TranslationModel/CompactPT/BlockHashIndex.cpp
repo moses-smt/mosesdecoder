@@ -31,12 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 #ifdef WITH_THREADS
-BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
+BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool checkSort,
                                size_t threadsNum)
   : m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
     m_fileHandle(0), m_fileHandleStart(0), m_size(0),
     m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0),
-    m_threadPool(threadsNum)
+    m_threadPool(threadsNum), m_checkSort(checkSort)
 {
 #ifndef HAVE_CMPH
   std::cerr << "minphr: CMPH support not compiled in." << std::endl;
@@ -44,10 +44,11 @@ BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
 #endif
 }
 #else
-BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits)
+BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool checkSort)
   : m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
     m_fileHandle(0), m_fileHandleStart(0), m_size(0),
-    m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0)
+    m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0),
+    m_checkSort(checkSort)
 {
 #ifndef HAVE_CMPH
   std::cerr << "minphr: CMPH support not compiled in." << std::endl;
@@ -364,12 +365,12 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
     std::string temp(key, keylen);
     source->dispose(source->data, key, keylen);
 
-    if(lastKey > temp) {
+    if(lastKey > temp && m_checkSort) {
       if(source->nkeys != 2 || temp != "###DUMMY_KEY###") {
-    	std::stringstream strme;
-    	strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
-    	strme << "1: " << lastKey << std::endl;
-    	strme << "2: " << temp << std::endl;
+        std::stringstream strme;
+        strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
+        strme << "1: " << lastKey << std::endl;
+        strme << "2: " << temp << std::endl;
         UTIL_THROW2(strme.str());
       }
     }

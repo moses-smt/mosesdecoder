@@ -64,14 +64,15 @@ int main(int argc, char **argv)
   std::string line;
   while(getline(std::cin, line)) {
     Phrase sourcePhrase;
-    sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||", NULL);
+    Word* lhs;
+    sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||", &lhs);
 
     TargetPhraseVectorPtr decodedPhraseColl
     = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
 
     if(decodedPhraseColl != NULL) {
       if(reportCounts)
-        std::cout << sourcePhrase << decodedPhraseColl->size() << std::endl;
+        std::cout << sourcePhrase << " " << *lhs << " " << decodedPhraseColl->size() << std::endl;
       else
         for(TargetPhraseVector::iterator it = decodedPhraseColl->begin(); it != decodedPhraseColl->end(); it++) {
           TargetPhrase &tp = *it;
@@ -87,7 +88,7 @@ int main(int argc, char **argv)
           std::cout << std::endl;
         }
     } else if(reportCounts)
-      std::cout << sourcePhrase << 0 << std::endl;
+      std::cout << sourcePhrase << " " << *lhs << " " << 0 << std::endl;
 
     std::cout.flush();
   }

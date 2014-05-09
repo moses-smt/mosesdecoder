@@ -94,15 +94,17 @@ private:
   };
 #endif
 
+  bool m_checkSort;
+
   size_t GetFprint(const char* key) const;
   size_t GetHash(size_t i, const char* key);
 
 public:
 #ifdef WITH_THREADS
-  BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
+  BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool checkSort = true,
                  size_t threadsNum = 2);
 #else
-  BlockHashIndex(size_t orderBits, size_t fingerPrintBits);
+  BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool checkSort = true);
 #endif
 
   ~BlockHashIndex();
@@ -171,6 +173,7 @@ public:
 #ifdef HAVE_CMPH
     void* source = vectorAdapter(keys);
     CalcHash(current, source);
+
 #endif
   }
 

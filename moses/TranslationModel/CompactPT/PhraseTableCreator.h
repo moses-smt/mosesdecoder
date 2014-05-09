@@ -199,6 +199,8 @@ private:
   size_t m_quantize;
   size_t m_maxRank;
 
+  bool m_hierarchical;
+  
   static std::string m_phraseStopSymbol;
   static std::string m_separator;
 
@@ -267,8 +269,10 @@ private:
   std::priority_queue<PackedItem> m_queue;
   long m_lastFlushedLine;
   long m_lastFlushedSourceNum;
+  long m_lastCounted;
   std::string m_lastFlushedSourcePhrase;
   std::vector<std::string> m_lastSourceRange;
+  std::set<std::string> m_lastSourceRangeSet;
   std::priority_queue<std::pair<float, size_t> > m_rankQueue;
   std::vector<std::string> m_lastCollection;
 
@@ -308,7 +312,7 @@ private:
   void EncodeAlignment(std::set<AlignPoint>& alignment, std::ostream& os);
 
   std::string MakeSourceKey(std::string&);
-  std::string MakeSourceTargetKey(std::string&, std::string&);
+  std::string MakeSourceTargetKey(std::string, std::string, std::string = "");
 
   void LoadLexicalTable(std::string filePath);
 
@@ -342,9 +346,10 @@ public:
                      bool multipleScoreTrees = true,
                      size_t quantize = 0,
                      size_t maxRank = 100,
+                     bool hierarchical = false,
                      bool warnMe = true
 #ifdef WITH_THREADS
-                                   , size_t threads = 2
+                    , size_t threads = 2
 #endif
                     );
 

@@ -17,6 +17,7 @@ void printHelp(char **argv)
             "  options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
+            "\t-hierarchical     -- use for hierarchical and syntax-based models\n"
             "\t-T string         -- path to temporary directory (uses /tmp by default)\n"
             "\t-nscores int      -- number of score components in phrase table\n"
             "\t-no-alignment-info   -- do not include alignment info in the binary phrase table\n"
@@ -66,6 +67,7 @@ int main(int argc, char **argv)
   size_t maxRank = 100;
   bool sortScoreIndexSet = false;
   size_t sortScoreIndex = 2;
+  bool hierarchical = false;
   bool warnMe = true;
   size_t threads = 1;
 
@@ -81,6 +83,8 @@ int main(int argc, char **argv)
     } else if("-out" == arg && i+1 < argc) {
       ++i;
       outFilePath = argv[i];
+    } else if("-hierarchical" == arg) {
+      hierarchical = true;
     } else if("-T" == arg && i+1 < argc) {
       ++i;
       tempfilePath = argv[i];
@@ -162,7 +166,7 @@ int main(int argc, char **argv)
                      numScoreComponent, sortScoreIndex,
                      coding, orderBits, fingerprintBits,
                      useAlignmentInfo, multipleScoreTrees,
-                     quantize, maxRank, warnMe
+                     quantize, maxRank, hierarchical, warnMe
 #ifdef WITH_THREADS
                      , threads
 #endif
