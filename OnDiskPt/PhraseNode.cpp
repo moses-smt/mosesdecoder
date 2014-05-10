@@ -23,6 +23,7 @@
 #include "SourcePhrase.h"
 #include "moses/Util.h"
 #include "util/exception.hh"
+#include <iostream>
 
 using namespace std;
 
@@ -197,7 +198,7 @@ void PhraseNode::AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
 const PhraseNode *PhraseNode::GetChild(const Word &wordSought, OnDiskWrapper &onDiskWrapper) const
 {
   const PhraseNode *ret = NULL;
-
+  
   int l = 0;
   int r = m_numChildrenLoad - 1;
   int x;

@@ -220,7 +220,7 @@ UINT64 OnDiskWrapper::GetMisc(const std::string &key) const
 
 Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &factorsVec
                                       , const Moses::Word &origWord) const
-{
+{  
   bool isNonTerminal = origWord.IsNonTerminal();
   Word *newWord = new Word(isNonTerminal);
   stringstream strme;
@@ -243,6 +243,8 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
   } // for (size_t factorType
 
   bool found;
+  std::cerr << strme.str() << std::endl; 
+  
   UINT64 vocabId = m_vocab.GetVocabId(strme.str(), found);
   if (!found) {
     // factor not in phrase table -> phrse definately not in. exit

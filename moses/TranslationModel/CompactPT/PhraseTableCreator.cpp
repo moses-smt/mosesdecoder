@@ -166,6 +166,8 @@ void PhraseTableCreator::PrintInfo()
   std::cerr << "Used options:" << std::endl;
   std::cerr << "\tText phrase table will be read from: " << m_inPath << std::endl;
   std::cerr << "\tOutput phrase table will be written to: " << m_outPath << std::endl;
+  if(m_hierarchical)
+    std::cerr << "\tCreating a phrase table for hierarchical rules" << std::endl;
   std::cerr << "\tStep size for source landmark phrases: 2^" << m_orderBits << "=" << (1ul << m_orderBits) << std::endl;
   std::cerr << "\tSource phrase fingerprint size: " << m_fingerPrintBits << " bits / P(fp)=" << (float(1)/(1ul << m_fingerPrintBits)) << std::endl;
   std::cerr << "\tSelected target phrase encoding: " << encodings[m_coding] << std::endl;
@@ -652,10 +654,13 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
     if(idx != m_rnkHash.GetSize())
       rank = m_ranks[idx];
 
+    // Do not count the LHS as part of the phrase length
+    size_t sourceSize = s.size() - (size_t)m_hierarchical;
+    
     if(rank >= 0 && (m_maxRank == 0 || unsigned(rank) < m_maxRank)) {
-      if(unsigned(p.m) != s.size() || unsigned(rank) < ownRank) {
+      if(unsigned(p.m) != sourceSize || unsigned(rank) < ownRank) {
         std::stringstream encodedSymbol;
-        encodedSymbols[p.j] = EncodePREncSymbol2(p.i-p.j, s.size()-(p.i+p.m), rank);
+        encodedSymbols[p.j] = EncodePREncSymbol2(p.i-p.j, sourceSize-(p.i+p.m), rank);
         encodedSymbolsLengths[p.j] = p.n;
 
         std::set<AlignPoint> tAlignment;
@@ -802,6 +807,7 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
   size_t currScore = 0;
   AlignPoint alignPoint;
 
+  size_t phrases = 0;
   while(encodedStream) {
     switch(state) {
     case ReadSymbol:
@@ -827,6 +833,7 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
       break;
 
     case EncodeSymbol:
+      phrases += symbol == phraseStopSymbolId;
       state = (symbol == phraseStopSymbolId) ? ReadScore : ReadSymbol;
       m_symbolTree->Put(bitStream, symbol);
       break;
@@ -845,6 +852,7 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
     }
   }
 
+  //std::cout << phrases << std::endl;
   return compressedEncodedCollection;
 }
 
@@ -889,12 +897,17 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
     }
 
     std::string key = pi.GetTrg();
-    if(m_lastSourceRangeSet.count(key) == 0) {
-      m_lastSourceRange.push_back(key);
-      m_lastSourceRangeSet.insert(key);
-      m_rankQueue.push(std::make_pair(pi.GetScore(), m_lastCounted));
-      m_lastCounted++;
+    size_t count = 0;
+    while(m_lastSourceRangeSet.count(key) > 0) {
+      key = pi.GetTrg() + boost::lexical_cast<std::string>(count);
+      count++;
     }
+    
+    m_lastSourceRange.push_back(key);
+    m_lastSourceRangeSet.insert(key);
+      
+    m_rankQueue.push(std::make_pair(pi.GetScore(), m_lastCounted));
+    m_lastCounted++;
     
     m_lastFlushedSourcePhrase = pi.GetSrc();
   }
