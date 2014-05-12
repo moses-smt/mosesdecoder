@@ -138,7 +138,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
   }
 
   // backoff
-  if (IsBackoff(inputPath)) {
+  if (!SatisfyBackoff(inputPath)) {
   	return;
   }
 
