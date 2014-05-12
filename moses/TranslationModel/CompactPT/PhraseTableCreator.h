@@ -272,6 +272,9 @@ private:
   long m_lastCounted;
   std::string m_lastFlushedSourcePhrase;
   std::vector<std::string> m_lastSourceRange;
+  std::vector<std::string> m_lastPrefixRange;
+  std::vector<std::string> m_lastPrefix;
+  
   std::set<std::string> m_lastSourceRangeSet;
   std::priority_queue<std::pair<float, size_t> > m_rankQueue;
   std::vector<std::string> m_lastCollection;
@@ -327,6 +330,7 @@ private:
   std::string EncodeLine(std::vector<std::string>& tokens, size_t ownRank);
   void AddEncodedLine(PackedItem& pi);
   void FlushEncodedQueue(bool force = false);
+  void ComputePrefixes(const std::string&);
 
   std::string CompressEncodedCollection(std::string encodedCollection);
   void AddCompressedCollection(PackedItem& pi);

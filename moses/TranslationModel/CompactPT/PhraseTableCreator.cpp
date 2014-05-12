@@ -942,6 +942,10 @@ void PhraseTableCreator::AddEncodedLine(PackedItem& pi)
   m_queue.push(pi);
 }
 
+void PhraseTableCreator::ComputePrefixes(const std::string& phrase) {
+  
+}
+
 void PhraseTableCreator::FlushEncodedQueue(bool force)
 {
   while(!m_queue.empty() && m_lastFlushedLine + 1 == m_queue.top().GetLine()) {
@@ -957,6 +961,9 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
           targetPhraseCollection << *it;
 
         m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));
+        if(m_hierarchical)
+          ComputePrefixes(m_lastFlushedSourcePhrase);
+        
         m_encodedTargetPhrases->push_back(targetPhraseCollection.str());
 
         m_lastFlushedSourceNum++;
@@ -970,10 +977,11 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
     }
 
     if(m_lastSourceRange.size() == (1ul << m_orderBits)) {
-      m_srcHash.AddRange(m_lastSourceRange);
+      m_srcHash.AddRange(m_lastSourceRange, m_lastPrefixRange);
       m_srcHash.SaveLastRange();
       m_srcHash.DropLastRange();
       m_lastSourceRange.clear();
+      m_lastPrefixRange.clear();
     }
 
     m_lastFlushedSourcePhrase = pi.GetSrc();
@@ -987,8 +995,11 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
   }
 
   if(force) {
-    if(!m_lastSourceRange.size() || m_lastSourceRange.back() != m_lastFlushedSourcePhrase)
+    if(!m_lastSourceRange.size() || m_lastSourceRange.back() != m_lastFlushedSourcePhrase) {
       m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));
+      if(m_hierarchical)
+        ComputePrefixes(m_lastFlushedSourcePhrase);
+    }
 
     if(m_lastCollection.size()) {
       std::stringstream targetPhraseCollection;
@@ -1000,8 +1011,9 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
       m_lastCollection.clear();
     }
 
-    m_srcHash.AddRange(m_lastSourceRange);
+    m_srcHash.AddRange(m_lastSourceRange, m_lastPrefixRange);
     m_lastSourceRange.clear();
+    m_lastPrefixRange.clear();
 
 #ifdef WITH_THREADS
     m_srcHash.WaitAll();

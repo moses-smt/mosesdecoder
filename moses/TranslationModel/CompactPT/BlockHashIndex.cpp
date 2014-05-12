@@ -80,13 +80,24 @@ size_t BlockHashIndex::GetHash(const char* key)
                                m_landmarks.end(), keyStr)) - 1;
 
   if(i == 0ul-1)
-    return GetSize();
+    return NotFoundValue();
 
-  size_t pos = GetHash(i, key);
-  if(pos != GetSize())
+  size_t hashPos = GetHash(i, key);
+  bool isLandmark = (keyStr == m_landmarks[i].str());
+  
+  size_t pos = hashPos;
+  if(hashPos == 0) {
+    // It's a prefix!
+    return PrefixValue();
+  }
+  
+  if(isLandmark && hashPos == 1)
+    pos = 0;
+  
+  if(pos != NotFoundValue())
     return (1ul << m_orderBits) * i + pos;
   else
-    return GetSize();
+    return NotFoundValue();
 }
 
 size_t BlockHashIndex::GetFprint(const char* key) const
@@ -117,7 +128,7 @@ size_t BlockHashIndex::GetHash(size_t i, const char* key)
   if(GetFprint(key) == orderPrint.second)
     return orderPrint.first;
   else
-    return GetSize();
+    return NotFoundValue();
 }
 
 size_t BlockHashIndex::GetHash(std::string key)
@@ -342,7 +353,7 @@ void BlockHashIndex::KeepNLastRanges(float ratio, float tolerance)
   }
 }
 
-void BlockHashIndex::CalcHash(size_t current, void* source_void)
+void BlockHashIndex::CalcHash(size_t current, void* source_void, size_t prefixCount)
 {
 #ifdef HAVE_CMPH
   cmph_io_adapter_t* source = (cmph_io_adapter_t*) source_void;
@@ -377,10 +388,16 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
     lastKey = temp;
 
     size_t fprint = GetFprint(temp.c_str());
-    size_t idx = cmph_search(hash, temp.c_str(),
-                             (cmph_uint32) temp.size());
+    size_t idx = cmph_search(hash, temp.c_str(), (cmph_uint32) temp.size());
 
-    pv->Set(idx, i, fprint, m_orderBits, m_fingerPrintBits);
+    size_t pos = i;
+    if(i == 0)
+      pos = 1;
+    
+    if(i >= source->nkeys - prefixCount)
+      pos = 0;
+      
+    pv->Set(idx, pos, fprint, m_orderBits, m_fingerPrintBits);
     i++;
   }
 
