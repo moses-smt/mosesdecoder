@@ -137,6 +137,11 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
     prevPtNode = &wrapper.GetRootSourceNode();
   }
 
+  // backoff
+  if (IsBackoff(inputPath)) {
+  	return;
+  }
+
   if (prevPtNode) {
     Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
     lastWord.OnlyTheseFactors(m_inputFactors);

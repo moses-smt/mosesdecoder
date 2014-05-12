@@ -133,6 +133,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  bool IsBackoff(const InputPath &path) const;
 
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding

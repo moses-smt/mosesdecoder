@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/DecodeGraph.h"
 #include "moses/InputPath.h"
 #include "util/exception.hh"
 
@@ -234,6 +235,17 @@ CacheColl &PhraseDictionary::GetCache() const
   }
   assert(cache);
   return *cache;
+}
+
+bool PhraseDictionary::IsBackoff(const InputPath &path) const
+{
+	const Phrase &phrase = path.GetPhrase();
+    const DecodeGraph &graph = GetDecodeGraph();
+    size_t backoff = graph.GetBackoff();
+    if (backoff && phrase.GetSize() <= backoff && path.GetTotalRuleSize()) {
+    	return true;
+    }
+    return false;
 }
 
 } // namespace
