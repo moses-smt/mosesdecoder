@@ -83,21 +83,10 @@ size_t BlockHashIndex::GetHash(const char* key)
     return NotFoundValue();
 
   size_t hashPos = GetHash(i, key);
-  bool isLandmark = (keyStr == m_landmarks[i].str());
-  
-  size_t pos = hashPos;
-  if(hashPos == 0) {
-    // It's a prefix!
-    return PrefixValue();
-  }
-  
-  if(isLandmark && hashPos == 1)
-    pos = 0;
-  
-  if(pos != NotFoundValue())
-    return (1ul << m_orderBits) * i + pos;
+  if(hashPos != NotFoundValue() && hashPos != PrefixValue())
+    return (1ul << m_orderBits) * i + hashPos;
   else
-    return NotFoundValue();
+    return hashPos;
 }
 
 size_t BlockHashIndex::GetFprint(const char* key) const
@@ -125,8 +114,16 @@ size_t BlockHashIndex::GetHash(size_t i, const char* key)
   std::pair<size_t, size_t> orderPrint = m_arrays[i]->Get(idx, m_orderBits, m_fingerPrintBits);
   m_clocks[i] = clock();
 
-  if(GetFprint(key) == orderPrint.second)
-    return orderPrint.first;
+  if(GetFprint(key) == orderPrint.second) {
+    size_t order = orderPrint.first;
+    size_t orderSize = 1ul << m_orderBits;
+    if(order == 0 && m_arrays[i]->Size() > orderSize)
+      return PrefixValue();
+    if(order == 1 && m_arrays[i]->Size() > orderSize && key == m_landmarks[i].str())
+      return 0;
+    
+    return order;
+  }
   else
     return NotFoundValue();
 }
@@ -391,7 +388,7 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void, size_t prefixCo
     size_t idx = cmph_search(hash, temp.c_str(), (cmph_uint32) temp.size());
 
     size_t pos = i;
-    if(i == 0)
+    if(i == 0 && prefixCount > 0)
       pos = 1;
     
     if(i >= source->nkeys - prefixCount)

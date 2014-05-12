@@ -86,8 +86,8 @@ private:
   private:
     int m_id;
     BlockHashIndex& m_hash;
-    Keys& m_keys;
-    Keys& m_prefixKeys;
+    Keys m_keys;
+    Keys m_prefixKeys;
   };
 #endif
 
@@ -146,7 +146,7 @@ public:
   void KeepNLastRanges(float ratio = 0.1, float tolerance = 0.1);
   
   template <typename Keys>
-  void AddRange(Keys &keys, Keys &prefixKeys) {
+  void AddRange(Keys& keys, Keys& prefixKeys) {
     size_t current = m_landmarks.size();
 
     if(m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
@@ -177,12 +177,6 @@ public:
   }
   
   template <typename Keys>
-  void AddRange(Keys &keys) {
-    Keys dummyPrefixes;
-    AddRange(keys, dummyPrefixes);
-  }
-
-  template <typename Keys>
   void CalcHash(size_t current, Keys &keys, Keys &prefixKeys) {
 #ifdef HAVE_CMPH
     void* source;
@@ -192,10 +186,10 @@ public:
       joinedKeys.insert(joinedKeys.end(), prefixKeys.begin(), prefixKeys.end());
       source = vectorAdapter(joinedKeys);
     }
-    else
+    else {
       source = vectorAdapter(keys);
+    }
     CalcHash(current, source, prefixKeys.size());
-
 #endif
   }
   

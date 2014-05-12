@@ -62,6 +62,7 @@ private:
   long m_lastFlushedSourceNum;
   std::string m_lastFlushedSourcePhrase;
   std::vector<std::string> m_lastRange;
+  std::vector<std::string> m_dummyRange;
 
 #ifdef WITH_THREADS
   size_t m_threads;

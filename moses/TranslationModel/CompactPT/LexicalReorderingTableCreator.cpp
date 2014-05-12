@@ -247,7 +247,7 @@ void LexicalReorderingTableCreator::FlushEncodedQueue(bool force)
         std::cerr << "[" << (pi.GetLine()+1) << "]" << std::endl;
 
       if(m_lastRange.size() == (1ul << m_orderBits)) {
-        m_hash.AddRange(m_lastRange);
+        m_hash.AddRange(m_lastRange, m_dummyRange);
         m_hash.SaveLastRange();
         m_hash.DropLastRange();
         m_lastRange.clear();
@@ -258,7 +258,8 @@ void LexicalReorderingTableCreator::FlushEncodedQueue(bool force)
   if(force) {
     m_lastFlushedLine = -1;
 
-    m_hash.AddRange(m_lastRange);
+    std::vector<std::string> empty;
+    m_hash.AddRange(m_lastRange, m_dummyRange);
     m_lastRange.clear();
 
 #ifdef WITH_THREADS

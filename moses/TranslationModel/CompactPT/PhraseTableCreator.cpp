@@ -619,7 +619,8 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
   std::vector<unsigned> encodedSymbols(t.size());
   std::vector<unsigned> encodedSymbolsLengths(t.size(), 0);
 
-  ConsistentPhrases cp(s.size() - 1, t.size() - 1, a);
+  ConsistentPhrases cp(s.size() - (size_t)m_hierarchical,
+                       t.size() - (size_t)m_hierarchical, a);
   while(!cp.Empty()) {
     ConsistentPhrases::Phrase p = cp.Pop();
 
@@ -627,6 +628,7 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
     key1 << s[p.i];
     for(int i = p.i+1; i < p.i+p.m; i++)
       key1 << " " << s[i];
+      
     if(m_hierarchical)
       key1 << " [X]";
       
@@ -651,14 +653,14 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
       rankKey = MakeSourceTargetKey(key1Str, key2Str);
     }
     size_t idx = m_rnkHash[rankKey];
-    if(idx != m_rnkHash.GetSize())
+    if(idx != m_rnkHash.NotFoundValue() && idx != m_rnkHash.PrefixValue())
       rank = m_ranks[idx];
 
     // Do not count the LHS as part of the phrase length
     size_t sourceSize = s.size() - (size_t)m_hierarchical;
     
     if(rank >= 0 && (m_maxRank == 0 || unsigned(rank) < m_maxRank)) {
-      if(unsigned(p.m) != sourceSize || unsigned(rank) < ownRank) {
+      if(unsigned(p.m) < sourceSize || unsigned(rank) < ownRank) {
         std::stringstream encodedSymbol;
         encodedSymbols[p.j] = EncodePREncSymbol2(p.i-p.j, sourceSize-(p.i+p.m), rank);
         encodedSymbolsLengths[p.j] = p.n;
@@ -872,7 +874,7 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
     m_queue.pop();
 
     if(m_lastSourceRange.size() == step) {
-      m_rnkHash.AddRange(m_lastSourceRange);
+      m_rnkHash.AddRange(m_lastSourceRange, m_lastPrefixRange);
       m_lastSourceRange.clear();
       m_lastSourceRangeSet.clear();
     }
@@ -887,7 +889,7 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
           std::cerr << "[" << m_lastFlushedSourceNum << "]" << std::endl;
         }
 
-        m_ranks.resize(m_lastCounted + 1);
+        m_ranks.resize(pi.GetLine() + 1);
         int r = 0;
         while(!m_rankQueue.empty()) {
           m_ranks[m_rankQueue.top().second] = r++;
@@ -906,14 +908,14 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
     m_lastSourceRange.push_back(key);
     m_lastSourceRangeSet.insert(key);
       
-    m_rankQueue.push(std::make_pair(pi.GetScore(), m_lastCounted));
-    m_lastCounted++;
+    m_rankQueue.push(std::make_pair(pi.GetScore(), pi.GetLine()));
+
     
     m_lastFlushedSourcePhrase = pi.GetSrc();
   }
 
   if(force) {
-    m_rnkHash.AddRange(m_lastSourceRange);
+    m_rnkHash.AddRange(m_lastSourceRange, m_lastPrefixRange);
     m_lastSourceRange.clear();
     m_lastSourceRangeSet.clear();
 
@@ -930,7 +932,6 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
 
     m_lastFlushedLine = -1;
     m_lastFlushedSourceNum = 0;
-    m_lastCounted = 0;
 
     std::cerr << std::endl << std::endl;
   }
