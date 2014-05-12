@@ -160,11 +160,16 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
-    InputPath &node = **iter;
+    InputPath &inputPath = **iter;
 
-    const Phrase &phrase = node.GetPhrase();
+    // backoff
+    if (!SatisfyBackoff(inputPath)) {
+    	continue;
+    }
+
+    const Phrase &phrase = inputPath.GetPhrase();
     const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollectionLEGACY(phrase);
-    node.SetTargetPhrases(*this, targetPhrases, NULL);
+    inputPath.SetTargetPhrases(*this, targetPhrases, NULL);
   }
 }
 
