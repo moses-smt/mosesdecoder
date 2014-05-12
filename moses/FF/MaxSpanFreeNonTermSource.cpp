@@ -14,7 +14,7 @@ namespace Moses
 {
 MaxSpanFreeNonTermSource::MaxSpanFreeNonTermSource(const std::string &line)
 :StatelessFeatureFunction(1, line)
-,m_maxSpan(true)
+,m_maxSpan(2)
 {
   m_tuneable = false;
   ReadParameters();
