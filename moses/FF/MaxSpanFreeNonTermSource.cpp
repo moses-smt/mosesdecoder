@@ -7,6 +7,7 @@
 #include "moses/StackVec.h"
 #include "moses/WordsRange.h"
 #include "moses/ChartCellLabel.h"
+#include "moses/FactorCollection.h"
 
 using namespace std;
 
@@ -15,9 +16,15 @@ namespace Moses
 MaxSpanFreeNonTermSource::MaxSpanFreeNonTermSource(const std::string &line)
 :StatelessFeatureFunction(1, line)
 ,m_maxSpan(2)
+,m_glueTargetLHSStr("S")
+,m_glueTargetLHS(true)
 {
   m_tuneable = false;
   ReadParameters();
+
+  FactorCollection &fc = FactorCollection::Instance();
+  const Factor *factor = fc.AddFactor(Output, 0, m_glueTargetLHSStr);
+  m_glueTargetLHS.SetFactor(0, factor);
 }
 
 void MaxSpanFreeNonTermSource::Evaluate(const Phrase &source
@@ -35,10 +42,14 @@ void MaxSpanFreeNonTermSource::Evaluate(const InputType &input
                        , ScoreComponentCollection &scoreBreakdown
                        , ScoreComponentCollection *estimatedFutureScore) const
 {
+  const Word &targetLHS = targetPhrase.GetTargetLHS();
+  if (m_glueTargetLHS == m_glueTargetLHS) {
+	  // don't delete glue rules
+	  return;
+  }
+
   const Phrase *source = targetPhrase.GetRuleSource();
   assert(source);
-  cerr << "stackVec=" << stackVec->size() << " source="<< *source << endl;
-
   float score = 0;
 
   if (source->Front().IsNonTerminal()) {
