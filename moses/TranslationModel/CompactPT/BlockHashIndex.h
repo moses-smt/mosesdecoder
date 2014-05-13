@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include <queue>
+#include <algorithm>
 #include <cstring>
 #include <cstdio>
 
@@ -183,13 +184,16 @@ public:
     Keys joinedKeys;
     if(!prefixKeys.empty()) {
       joinedKeys = keys;
-      joinedKeys.insert(joinedKeys.end(), prefixKeys.begin(), prefixKeys.end());
+      
+      std::set_difference(prefixKeys.begin(), prefixKeys.end(),
+                          keys.begin(), keys.end(), std::back_inserter(joinedKeys));
+      
       source = vectorAdapter(joinedKeys);
     }
     else {
       source = vectorAdapter(keys);
     }
-    CalcHash(current, source, prefixKeys.size());
+    CalcHash(current, source, joinedKeys.size() - keys.size());
 #endif
   }
   

@@ -273,6 +273,11 @@ private:
   std::string m_lastFlushedSourcePhrase;
   std::vector<std::string> m_lastSourceRange;
   std::vector<std::string> m_lastPrefixRange;
+  
+  std::priority_queue<std::string,
+                      std::vector<std::string>,
+                      std::greater<std::string> > m_prefixQueue;
+                      
   std::vector<std::string> m_lastPrefix;
   
   std::set<std::string> m_lastSourceRangeSet;

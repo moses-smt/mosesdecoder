@@ -891,7 +891,9 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
 
         m_ranks.resize(pi.GetLine() + 1);
         int r = 0;
+        std::cerr << m_lastFlushedSourcePhrase << " : " << std::endl;
         while(!m_rankQueue.empty()) {
+          std::cerr << m_rankQueue.top().second << " " << r << std::endl;
           m_ranks[m_rankQueue.top().second] = r++;
           m_rankQueue.pop();
         }
@@ -904,13 +906,13 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
       key = pi.GetTrg() + boost::lexical_cast<std::string>(count);
       count++;
     }
-    
+    std::cerr << key << " " << pi.GetScore() << " " << pi.GetLine() << std::endl;
+      
     m_lastSourceRange.push_back(key);
     m_lastSourceRangeSet.insert(key);
       
     m_rankQueue.push(std::make_pair(pi.GetScore(), pi.GetLine()));
 
-    
     m_lastFlushedSourcePhrase = pi.GetSrc();
   }
 
@@ -943,8 +945,40 @@ void PhraseTableCreator::AddEncodedLine(PackedItem& pi)
   m_queue.push(pi);
 }
 
-void PhraseTableCreator::ComputePrefixes(const std::string& phrase) {
+size_t commonPrefix(const std::vector<std::string>& s1,
+                    const std::vector<std::string>& s2) {
+  size_t i = 0;
+  while(i < s1.size() && i < s2.size() && s1[i] == s2[i])
+    i++;
+    
+  return i;
+}
+
+void PhraseTableCreator::ComputePrefixes(const std::string& key) {
+  std::vector<std::string> tokens = Tokenize(key);
   
+  size_t length = commonPrefix(m_lastPrefix, tokens);
+  for(size_t i = length; i < tokens.size() - 2; i++) {
+    std::stringstream ss;
+    for(size_t j = 0; j <= i; j++)
+      ss << tokens[j] << " ";
+    ss << "[X] ||| ";
+    
+    //std::cerr << ss.str() << " - is a prefix of - " << key << std::endl;  
+    m_prefixQueue.push(ss.str());
+  }
+  
+  while(!m_prefixQueue.empty() && m_prefixQueue.top() <= key) {
+    if(m_prefixQueue.top() != key) {
+      //std::cout << m_prefixQueue.top() << "p" << std::endl;
+      m_lastPrefixRange.push_back(m_prefixQueue.top());
+    }
+    m_prefixQueue.pop();
+  }
+  
+  //std::cout << key << std::endl;
+  
+  m_lastPrefix = tokens;
 }
 
 void PhraseTableCreator::FlushEncodedQueue(bool force)
@@ -961,9 +995,10 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
               m_lastCollection.begin(); it != m_lastCollection.end(); it++)
           targetPhraseCollection << *it;
 
-        m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));
+        std::string key = MakeSourceKey(m_lastFlushedSourcePhrase);
+        m_lastSourceRange.push_back(key);
         if(m_hierarchical)
-          ComputePrefixes(m_lastFlushedSourcePhrase);
+          ComputePrefixes(key);
         
         m_encodedTargetPhrases->push_back(targetPhraseCollection.str());
 

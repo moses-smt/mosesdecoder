@@ -83,6 +83,9 @@ size_t BlockHashIndex::GetHash(const char* key)
     return NotFoundValue();
 
   size_t hashPos = GetHash(i, key);
+  
+  //std::cerr << key << " " << hashPos << std::endl;
+  
   if(hashPos != NotFoundValue() && hashPos != PrefixValue())
     return (1ul << m_orderBits) * i + hashPos;
   else
@@ -373,7 +376,7 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void, size_t prefixCo
     std::string temp(key, keylen);
     source->dispose(source->data, key, keylen);
 
-    if(lastKey > temp && m_checkSort) {
+    if(i < source->nkeys - prefixCount && lastKey > temp && m_checkSort) {
       if(source->nkeys != 2 || temp != "###DUMMY_KEY###") {
         std::stringstream strme;
         strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
@@ -393,7 +396,8 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void, size_t prefixCo
     
     if(i >= source->nkeys - prefixCount)
       pos = 0;
-      
+    
+    std::cerr << "Hash: " << temp << " " << pos << " " << ((1ul << m_orderBits) * current + pos) << std::endl;
     pv->Set(idx, pos, fprint, m_orderBits, m_fingerPrintBits);
     i++;
   }

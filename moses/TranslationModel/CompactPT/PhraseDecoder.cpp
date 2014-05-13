@@ -222,6 +222,8 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(
   // Retrieve source phrase identifier
   size_t sourcePhraseId = m_phraseDictionary.m_hash[MakeSourceKey(sourcePhrase)];
 
+  std::cerr << sourcePhraseId << std::endl;
+  
   if(sourcePhraseId != m_phraseDictionary.m_hash.NotFoundValue() &&
      sourcePhraseId != m_phraseDictionary.m_hash.PrefixValue()) {
     // Retrieve compressed and encoded target phrase collection
@@ -347,44 +349,53 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             int srcStart = left + targetPhrase->GetSize();
             int srcEnd   = srcSize - right - 1;
             
-            // false positive consistency check
-            if(0 > srcStart || srcStart > srcEnd || unsigned(srcEnd) >= srcSize)
-              return TargetPhraseVectorPtr();
-              
-            // false positive consistency check
-            if(m_maxRank && rank > m_maxRank)
-              return TargetPhraseVectorPtr();
+            std::stringstream bla;
+            bla << "(" << srcStart << "," << srcEnd << "," << rank << ")";
             
-            // set subphrase by default to itself
-            TargetPhraseVectorPtr subTpv = tpv;
+            Word word;
+            word.CreateFromString(Output, *m_output,
+                                  bla.str(), false);
+            targetPhrase->AddWord(word);
             
-            // if range smaller than source phrase retrieve subphrase
-            if(unsigned(srcEnd - srcStart + 1) != srcSize) {
-              PhrasePiece subPhrase = sourcePhrase.GetSubPhrase(srcStart, srcEnd);
-              subTpv = CreateTargetPhraseCollection(subPhrase, false);
-            } else {
-              // false positive consistency check
-              if(rank >= tpv->size()-1)
-                return TargetPhraseVectorPtr();
-            }
             
-            // false positive consistency check
-            if(subTpv != NULL && rank < subTpv->size()) {
-              // insert the subphrase into the main target phrase
-              TargetPhrase& subTp = subTpv->at(rank);
-              if(m_phraseDictionary.m_useAlignmentInfo) {
-                // reconstruct the alignment data based on the alignment of the subphrase
-                for(AlignmentInfo::const_iterator it = subTp.GetAlignTerm().begin();
-                    it != subTp.GetAlignTerm().end(); it++) {
-                  alignment.insert(AlignPointSizeT(srcStart + it->first,
-                                                   targetPhrase->GetSize() + it->second));
-                }
-              }
-              for(size_t i = 0; i < subTp.GetSize() - (size_t)sourcePhrase.IsHierarchical(); ++i)
-                targetPhrase->AddWord(subTp.GetWord(i));
-                
-            } else
-              return TargetPhraseVectorPtr();
+            //// false positive consistency check
+            //if(0 > srcStart || srcStart > srcEnd || unsigned(srcEnd) >= srcSize)
+            //  return TargetPhraseVectorPtr();
+            //  
+            //// false positive consistency check
+            //if(m_maxRank && rank > m_maxRank)
+            //  return TargetPhraseVectorPtr();
+            //
+            //// set subphrase by default to itself
+            //TargetPhraseVectorPtr subTpv = tpv;
+            //
+            //// if range smaller than source phrase retrieve subphrase
+            //if(unsigned(srcEnd - srcStart + 1) != srcSize) {
+            //  PhrasePiece subPhrase = sourcePhrase.GetSubPhrase(srcStart, srcEnd);
+            //  subTpv = CreateTargetPhraseCollection(subPhrase, false);
+            //} else {
+            //  // false positive consistency check
+            //  if(rank >= tpv->size()-1)
+            //    return TargetPhraseVectorPtr();
+            //}
+            //
+            //// false positive consistency check
+            //if(subTpv != NULL && rank < subTpv->size()) {
+            //  // insert the subphrase into the main target phrase
+            //  TargetPhrase& subTp = subTpv->at(rank);
+            //  if(m_phraseDictionary.m_useAlignmentInfo) {
+            //    // reconstruct the alignment data based on the alignment of the subphrase
+            //    for(AlignmentInfo::const_iterator it = subTp.GetAlignTerm().begin();
+            //        it != subTp.GetAlignTerm().end(); it++) {
+            //      alignment.insert(AlignPointSizeT(srcStart + it->first,
+            //                                       targetPhrase->GetSize() + it->second));
+            //    }
+            //  }
+            //  for(size_t i = 0; i < subTp.GetSize() - (size_t)sourcePhrase.IsHierarchical(); ++i)
+            //    targetPhrase->AddWord(subTp.GetWord(i));
+            //    
+            //} else
+            //  return TargetPhraseVectorPtr();
           }
         } else {
           Word word;
