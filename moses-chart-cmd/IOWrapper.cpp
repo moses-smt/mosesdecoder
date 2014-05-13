@@ -42,9 +42,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/InputFileStream.h"
 #include "moses/Incremental.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
-#include "moses/ChartTrellisPathList.h"
-#include "moses/ChartTrellisPath.h"
-#include "moses/ChartTrellisNode.h"
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
@@ -705,94 +702,6 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   }
 }
 
-void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, long translationId)
-{
-  std::ostringstream out;
-
-  // Check if we're writing to std::cout.
-  if (m_nBestOutputCollector->OutputIsCout()) {
-    // Set precision only if we're writing the n-best list to cout.  This is to
-    // preserve existing behaviour, but should probably be done either way.
-    IOWrapper::FixPrecision(out);
-
-    // Used to check StaticData's GetOutputHypoScore(), but it makes no sense with nbest output.
-  }
-
-  //bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
-  bool includeWordAlignment = StaticData::Instance().PrintAlignmentInfoInNbest();
-
-  ChartTrellisPathList::const_iterator iter;
-  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
-    const ChartTrellisPath &path = **iter;
-    //cerr << path << endl << endl;
-
-    Moses::Phrase outputPhrase = path.GetOutputPhrase();
-
-    // delete 1st & last
-    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
-  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-
-    outputPhrase.RemoveWord(0);
-    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
-
-    // print the surface factor of the translation
-    out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
-    out << " ||| ";
-
-    // print the scores in a hardwired order
-    // before each model type, the corresponding command-line-like name must be emitted
-    // MERT script relies on this
-
-    OutputAllFeatureScores(path.GetScoreBreakdown(), out);
-
-    // total
-    out << " ||| " << path.GetTotalScore();
-
-    /*
-    if (includeAlignment) {
-    	*m_nBestStream << " |||";
-    	for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
-    	{
-    		const ChartHypothesis &edge = *edges[currEdge];
-    		WordsRange sourceRange = edge.GetCurrSourceWordsRange();
-    		WordsRange targetRange = edge.GetCurrTargetWordsRange();
-    		*m_nBestStream << " " << sourceRange.GetStartPos();
-    		if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
-    			*m_nBestStream << "-" << sourceRange.GetEndPos();
-    		}
-    		*m_nBestStream << "=" << targetRange.GetStartPos();
-    		if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
-    			*m_nBestStream << "-" << targetRange.GetEndPos();
-    		}
-    	}
-    }
-    */
-
-    if (includeWordAlignment) {
-      out << " ||| ";
-
-      Alignments retAlign;
-
-      const ChartTrellisNode &node = path.GetFinalNode();
-      OutputAlignmentNBest(retAlign, node, 0);
-
-      Alignments::const_iterator iter;
-      for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
-        const pair<size_t, size_t> &alignPoint = *iter;
-        out << alignPoint.first << "-" << alignPoint.second << " ";
-      }
-    }
-
-    out << endl;
-  }
-
-  out <<std::flush;
-
-  assert(m_nBestOutputCollector);
-  m_nBestOutputCollector->Write(translationId, out.str());
-}
-
 void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
                                 long translationId)
 {
@@ -902,81 +811,6 @@ size_t CalcSourceSize(const Moses::ChartHypothesis *hypo)
     ret -= (childSize - 1);
   }
   return ret;
-}
-
-size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t startTarget)
-{
-  const ChartHypothesis *hypo = &node.GetHypothesis();
-
-  size_t totalTargetSize = 0;
-  size_t startSource = hypo->GetCurrSourceRange().GetStartPos();
-
-  const TargetPhrase &tp = hypo->GetCurrTargetPhrase();
-
-  size_t thisSourceSize = CalcSourceSize(hypo);
-
-  // position of each terminal word in translation rule, irrespective of alignment
-  // if non-term, number is undefined
-  vector<size_t> sourceOffsets(thisSourceSize, 0);
-  vector<size_t> targetOffsets(tp.GetSize(), 0);
-
-  const ChartTrellisNode::NodeChildren &prevNodes = node.GetChildren();
-
-  const AlignmentInfo &aiNonTerm = hypo->GetCurrTargetPhrase().GetAlignNonTerm();
-  vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
-  const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
-
-  UTIL_THROW_IF2(sourceInd2pos.size() != prevNodes.size(), "Error");
-
-  size_t targetInd = 0;
-  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
-    if (tp.GetWord(targetPos).IsNonTerminal()) {
-      UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
-      size_t sourceInd = targetPos2SourceInd[targetPos];
-      size_t sourcePos = sourceInd2pos[sourceInd];
-
-      const ChartTrellisNode &prevNode = *prevNodes[sourceInd];
-
-      // calc source size
-      size_t sourceSize = prevNode.GetHypothesis().GetCurrSourceRange().GetNumWordsCovered();
-      sourceOffsets[sourcePos] = sourceSize;
-
-      // calc target size.
-      // Recursively look thru child hypos
-      size_t currStartTarget = startTarget + totalTargetSize;
-      size_t targetSize = OutputAlignmentNBest(retAlign, prevNode, currStartTarget);
-      targetOffsets[targetPos] = targetSize;
-
-      totalTargetSize += targetSize;
-      ++targetInd;
-    } else {
-      ++totalTargetSize;
-    }
-  }
-
-  // convert position within translation rule to absolute position within
-  // source sentence / output sentence
-  ShiftOffsets(sourceOffsets, startSource);
-  ShiftOffsets(targetOffsets, startTarget);
-
-  // get alignments from this hypo
-  const AlignmentInfo &aiTerm = hypo->GetCurrTargetPhrase().GetAlignTerm();
-
-  // add to output arg, offsetting by source & target
-  AlignmentInfo::const_iterator iter;
-  for (iter = aiTerm.begin(); iter != aiTerm.end(); ++iter) {
-    const std::pair<size_t,size_t> &align = *iter;
-    size_t relSource = align.first;
-    size_t relTarget = align.second;
-    size_t absSource = sourceOffsets[relSource];
-    size_t absTarget = targetOffsets[relTarget];
-
-    pair<size_t, size_t> alignPoint(absSource, absTarget);
-    pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-    UTIL_THROW_IF2(!ret.second, "Error");
-  }
-
-  return totalTargetSize;
 }
 
 size_t IOWrapper::OutputAlignmentNBest(

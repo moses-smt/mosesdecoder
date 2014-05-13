@@ -24,8 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/Phrase.h"
 #include "moses/TrellisPathList.h"
-#include "moses/ChartTrellisPathList.h"
-#include "moses/ChartTrellisPath.h"
+#include "moses/ChartKBestExtractor.h"
 
 using namespace std;
 using namespace Moses;
@@ -223,28 +222,28 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
   // run the decoder
   m_chartManager = new ChartManager(*m_sentence);
   m_chartManager->ProcessSentence();
-  ChartTrellisPathList nBestList;
+  ChartKBestExtractor::KBestVec nBestList;
   m_chartManager->CalcNBest(nBestSize, nBestList, distinct);
 
   // read off the feature values and bleu scores for each sentence in the nbest list
-  ChartTrellisPathList::const_iterator iter;
-  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
-    const Moses::ChartTrellisPath &path = **iter;
-    featureValues.push_back(path.GetScoreBreakdown());
+  for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
+       p != nBestList.end(); ++p) {
+    const ChartKBestExtractor::Derivation &derivation = **p;
+    featureValues.push_back(derivation.scoreBreakdown);
     float bleuScore, dynBleuScore, realBleuScore;
     dynBleuScore = getBleuScore(featureValues.back());
-    realBleuScore = m_bleuScoreFeature->CalculateBleu(path.GetOutputPhrase());
+    Phrase outputPhrase = ChartKBestExtractor::GetOutputPhrase(derivation);
+    realBleuScore = m_bleuScoreFeature->CalculateBleu(outputPhrase);
     bleuScore = realBleu ? realBleuScore : dynBleuScore;
     bleuScores.push_back(bleuScore);
 
-    //std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
-    float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
+    float scoreWithoutBleu = derivation.score - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
     modelScores.push_back(scoreWithoutBleu);
 
-    if (iter != nBestList.begin())
+    if (p != nBestList.begin())
       cerr << endl;
-    cerr << "Rank " << rank << ", epoch " << epoch << ", \"" << path.GetOutputPhrase() << "\", score: "
-         << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
+    cerr << "Rank " << rank << ", epoch " << epoch << ", \"" << outputPhrase << "\", score: "
+         << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << derivation.score;
     if (m_bleuScoreFeature->Enabled() && realBleu)
       cerr << " (d-bleu: " << dynBleuScore << ", r-bleu: " << realBleuScore << ") ";
 
@@ -254,9 +253,10 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
 
   // prepare translations to return
   vector< vector<const Word*> > translations;
-  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
-    const ChartTrellisPath &path = **iter;
-    Phrase phrase = path.GetOutputPhrase();
+  for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
+       p != nBestList.end(); ++p) {
+    const ChartKBestExtractor::Derivation &derivation = **p;
+    Phrase phrase = ChartKBestExtractor::GetOutputPhrase(derivation);
 
     vector<const Word*> translation;
     for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
