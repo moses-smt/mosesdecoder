@@ -78,9 +78,12 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
     }
   }
 
-  m_collection.resize(m_collection.size() - numDiscard);
+  size_t newSize = m_collection.size() - numDiscard;
 
-
+  if (numDiscard) {
+    cerr << "numDiscard=" << numDiscard << " newSize=" << newSize << endl;
+  }
+  m_collection.resize(newSize);
 }
 
 void ChartTranslationOptions::SetInputPath(const InputPath *inputPath)

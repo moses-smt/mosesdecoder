@@ -37,8 +37,6 @@ namespace mpi = boost::mpi;
 #include "Hildreth.h"
 #include "HypothesisQueue.h"
 #include "moses/StaticData.h"
-#include "moses/ChartTrellisPathList.h"
-#include "moses/ChartTrellisPath.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/ThreadPool.h"
 #include "mert/BleuScorer.h"

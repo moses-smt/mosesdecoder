@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 class DecodeStep;
+class DecodeGraph;
 
 /**
   * Baseclass for phrase-table or generation table feature function
@@ -82,6 +83,8 @@ public:
 
   void SetContainer(const DecodeStep *container)
   { m_container = container; }
+
+  const DecodeGraph &GetDecodeGraph() const;
 
 protected:
   std::vector<FactorType> m_input;

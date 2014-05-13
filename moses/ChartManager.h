@@ -38,23 +38,12 @@ namespace Moses
 {
 
 class ChartHypothesis;
-class ChartTrellisDetourQueue;
-class ChartTrellisNode;
-class ChartTrellisPath;
-class ChartTrellisPathList;
 
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
  */
 class ChartManager
 {
 private:
-  static void CreateDeviantPaths(boost::shared_ptr<const ChartTrellisPath>,
-                                 ChartTrellisDetourQueue &);
-
-  static void CreateDeviantPaths(boost::shared_ptr<const ChartTrellisPath>,
-                                 const ChartTrellisNode &,
-                                 ChartTrellisDetourQueue &);
-
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
   std::auto_ptr<SentenceStats> m_sentenceStats;
@@ -71,7 +60,6 @@ public:
   void ProcessSentence();
   void AddXmlChartOptions();
   const ChartHypothesis *GetBestHypothesis() const;
-  void CalcNBest(size_t count, ChartTrellisPathList &ret, bool onlyDistinct=0) const;
   void CalcNBest(size_t n, std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > &nBestList, bool onlyDistinct=false) const;
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;

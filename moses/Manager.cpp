@@ -833,6 +833,9 @@ size_t Manager::OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypoth
 
 size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
 {
+  if (!ff->IsTuneable()) {
+    return index;
+  }
   ScoreComponentCollection scoreCollection = hypo->GetScoreBreakdown();
   const Hypothesis *prevHypo = hypo->GetPrevHypo();
   if (prevHypo) {
