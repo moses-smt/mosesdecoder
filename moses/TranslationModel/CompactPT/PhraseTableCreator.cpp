@@ -79,7 +79,8 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
     m_maxPhraseLength(0),
     m_lastFlushedLine(-1), m_lastFlushedSourceNum(0),
     m_lastCounted(0),
-    m_lastFlushedSourcePhrase("")
+    m_lastFlushedSourcePhrase(""),
+    m_lastPrefixRange(0)
 {
   PrintInfo();
 
@@ -337,7 +338,7 @@ void PhraseTableCreator::CreateRankHash()
   FlushRankedQueue(true);
 }
 
-inline std::string PhraseTableCreator::MakeSourceKey(std::string &source)
+inline std::string PhraseTableCreator::MakeSourceKey(const std::string &source)
 {
   return source + " " + m_separator + " ";
 }
@@ -618,7 +619,12 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
 {
   std::vector<unsigned> encodedSymbols(t.size());
   std::vector<unsigned> encodedSymbolsLengths(t.size(), 0);
-
+  
+  for(int i = 0; i < s.size(); i++) {
+    std::cerr << s[i] << " ";
+  }
+  std::cerr << std::endl;
+  
   ConsistentPhrases cp(s.size() - (size_t)m_hierarchical,
                        t.size() - (size_t)m_hierarchical, a);
   while(!cp.Empty()) {
@@ -656,6 +662,8 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
     if(idx != m_rnkHash.NotFoundValue() && idx != m_rnkHash.PrefixValue())
       rank = m_ranks[idx];
 
+    //std::cerr << rankKey << " " << idx << " " << rank << std::endl;
+      
     // Do not count the LHS as part of the phrase length
     size_t sourceSize = s.size() - (size_t)m_hierarchical;
     
@@ -891,9 +899,9 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
 
         m_ranks.resize(pi.GetLine() + 1);
         int r = 0;
-        std::cerr << m_lastFlushedSourcePhrase << " : " << std::endl;
+        //std::cerr << m_lastFlushedSourcePhrase << " : " << std::endl;
         while(!m_rankQueue.empty()) {
-          std::cerr << m_rankQueue.top().second << " " << r << std::endl;
+          //std::cerr << m_rankQueue.top().second << " " << r << std::endl;
           m_ranks[m_rankQueue.top().second] = r++;
           m_rankQueue.pop();
         }
@@ -906,7 +914,7 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
       key = pi.GetTrg() + boost::lexical_cast<std::string>(count);
       count++;
     }
-    std::cerr << key << " " << pi.GetScore() << " " << pi.GetLine() << std::endl;
+    //std::cerr << key << " " << pi.GetScore() << " " << pi.GetLine() << std::endl;
       
     m_lastSourceRange.push_back(key);
     m_lastSourceRangeSet.insert(key);
@@ -987,7 +995,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
     PackedItem pi = m_queue.top();
     m_queue.pop();
     m_lastFlushedLine++;
-
+    
     if(m_lastFlushedSourcePhrase != pi.GetSrc()) {
       if(m_lastCollection.size()) {
         std::stringstream targetPhraseCollection;
@@ -997,8 +1005,10 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
 
         std::string key = MakeSourceKey(m_lastFlushedSourcePhrase);
         m_lastSourceRange.push_back(key);
-        if(m_hierarchical)
-          ComputePrefixes(key);
+        if(m_hierarchical) {
+          std::string nextKey = MakeSourceKey(pi.GetSrc());
+          ComputePrefixes(nextKey);
+        }
         
         m_encodedTargetPhrases->push_back(targetPhraseCollection.str());
 
@@ -1021,6 +1031,10 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
     }
 
     m_lastFlushedSourcePhrase = pi.GetSrc();
+    if(m_hierarchical && pi.GetLine() == 0)
+        ComputePrefixes(m_lastFlushedSourcePhrase);
+    
+    
     if(m_coding == PREnc) {
       if(m_lastCollection.size() <= pi.GetRank())
         m_lastCollection.resize(pi.GetRank() + 1);
@@ -1033,8 +1047,8 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
   if(force) {
     if(!m_lastSourceRange.size() || m_lastSourceRange.back() != m_lastFlushedSourcePhrase) {
       m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));
-      if(m_hierarchical)
-        ComputePrefixes(m_lastFlushedSourcePhrase);
+      //if(m_hierarchical)
+        //ComputePrefixes(m_lastFlushedSourcePhrase);
     }
 
     if(m_lastCollection.size()) {

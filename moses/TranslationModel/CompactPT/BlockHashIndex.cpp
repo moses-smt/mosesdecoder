@@ -120,8 +120,15 @@ size_t BlockHashIndex::GetHash(size_t i, const char* key)
   if(GetFprint(key) == orderPrint.second) {
     size_t order = orderPrint.first;
     size_t orderSize = 1ul << m_orderBits;
-    if(order == 0 && m_arrays[i]->Size() > orderSize)
+    
+    //std::cerr << key << " " << i << " " << idx << " " << order << " " << m_landmarks[i].str() << std::endl;
+    
+    if(order == 0 && m_arrays[i]->Size() > orderSize) {
       return PrefixValue();
+    }
+    
+    // For this to work, always put prefixes of the first
+    // key into the previous key range !
     if(order == 1 && m_arrays[i]->Size() > orderSize && key == m_landmarks[i].str())
       return 0;
     
@@ -397,7 +404,6 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void, size_t prefixCo
     if(i >= source->nkeys - prefixCount)
       pos = 0;
     
-    std::cerr << "Hash: " << temp << " " << pos << " " << ((1ul << m_orderBits) * current + pos) << std::endl;
     pv->Set(idx, pos, fprint, m_orderBits, m_fingerPrintBits);
     i++;
   }

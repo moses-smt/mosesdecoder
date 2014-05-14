@@ -158,10 +158,7 @@ public:
       UTIL_THROW2(strme.str());
     }
 
-    if(!prefixKeys.empty() && prefixKeys[0] < keys[0])
-      m_landmarks.push_back(prefixKeys[0]);
-    else 
-      m_landmarks.push_back(keys[0]);
+    m_landmarks.push_back(keys[0]);
     m_size += keys.size();
 
     if(keys.size() == 1) {
@@ -182,18 +179,20 @@ public:
 #ifdef HAVE_CMPH
     void* source;
     Keys joinedKeys;
+    size_t prefixCount = 0;
     if(!prefixKeys.empty()) {
       joinedKeys = keys;
       
       std::set_difference(prefixKeys.begin(), prefixKeys.end(),
                           keys.begin(), keys.end(), std::back_inserter(joinedKeys));
       
+      prefixCount = joinedKeys.size() - keys.size();
       source = vectorAdapter(joinedKeys);
     }
     else {
       source = vectorAdapter(keys);
     }
-    CalcHash(current, source, joinedKeys.size() - keys.size());
+    CalcHash(current, source, prefixCount);
 #endif
   }
   

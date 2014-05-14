@@ -319,7 +319,7 @@ private:
   void EncodeScores(std::vector<float>& scores, std::ostream& os);
   void EncodeAlignment(std::set<AlignPoint>& alignment, std::ostream& os);
 
-  std::string MakeSourceKey(std::string&);
+  std::string MakeSourceKey(const std::string&);
   std::string MakeSourceTargetKey(std::string, std::string, std::string = "");
 
   void LoadLexicalTable(std::string filePath);
