@@ -620,11 +620,6 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
   std::vector<unsigned> encodedSymbols(t.size());
   std::vector<unsigned> encodedSymbolsLengths(t.size(), 0);
   
-  for(int i = 0; i < s.size(); i++) {
-    std::cerr << s[i] << " ";
-  }
-  std::cerr << std::endl;
-  
   ConsistentPhrases cp(s.size() - (size_t)m_hierarchical,
                        t.size() - (size_t)m_hierarchical, a);
   while(!cp.Empty()) {
