@@ -296,6 +296,8 @@ size_t BlockHashIndex::LoadIndex(std::FILE* mphf)
 
   size_t end = std::ftell(mphf);
 
+  std::cerr << end - beginning << std::endl;
+  
   return end - beginning;
 }
 

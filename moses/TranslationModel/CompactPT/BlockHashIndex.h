@@ -150,7 +150,7 @@ public:
   void AddRange(Keys& keys, Keys& prefixKeys) {
     size_t current = m_landmarks.size();
 
-    if(m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
+    if(m_checkSort && m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
       std::stringstream strme;
       strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
       strme << "1: " << m_landmarks.back().str() << std::endl;
