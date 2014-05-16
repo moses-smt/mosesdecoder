@@ -79,10 +79,6 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
   }
 
   size_t newSize = m_collection.size() - numDiscard;
-
-  if (numDiscard) {
-    cerr << "numDiscard=" << numDiscard << " newSize=" << newSize << endl;
-  }
   m_collection.resize(newSize);
 }
 

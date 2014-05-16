@@ -6,7 +6,7 @@
 namespace Moses
 {
 
-// similar to Scope, however, adjacent non-term count as 1 ammbiguity, rather than 2
+// -inf if left-most or right-most non-term is over a set span
 class MaxSpanFreeNonTermSource : public StatelessFeatureFunction
 {
 public:

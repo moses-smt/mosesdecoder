@@ -1,10 +1,10 @@
-#include "RuleAmbiguity.h"
+#include "RuleScope.h"
 #include "moses/StaticData.h"
 #include "moses/Word.h"
 
 namespace Moses
 {
-RuleAmbiguity::RuleAmbiguity(const std::string &line)
+RuleScope::RuleScope(const std::string &line)
 :StatelessFeatureFunction(1, line)
 ,m_sourceSyntax(true)
 {
@@ -16,11 +16,12 @@ bool IsAmbiguous(const Word &word, bool sourceSyntax)
   return word.IsNonTerminal() && (!sourceSyntax || word == inputDefaultNonTerminal);
 }
 
-void RuleAmbiguity::Evaluate(const Phrase &source
+void RuleScope::Evaluate(const Phrase &source
 						, const TargetPhrase &targetPhrase
 						, ScoreComponentCollection &scoreBreakdown
 						, ScoreComponentCollection &estimatedFutureScore) const
 {
+  // adjacent non-term count as 1 ammbiguity, rather than 2 as in rule scope
   // source can't be empty, right?
   float score = 0;
 
@@ -48,7 +49,7 @@ void RuleAmbiguity::Evaluate(const Phrase &source
   scoreBreakdown.PlusEquals(this, score);
 }
 
-void RuleAmbiguity::SetParameter(const std::string& key, const std::string& value)
+void RuleScope::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "source-syntax") {
 	  m_sourceSyntax = Scan<bool>(value);
