@@ -41,7 +41,8 @@ LexicalReorderingTableCreator::LexicalReorderingTableCreator(
     m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
     m_numScoreComponent(0), m_multipleScoreTrees(multipleScoreTrees),
     m_quantize(quantize), m_separator(" ||| "),
-    m_hash(m_orderBits, m_fingerPrintBits), m_lastFlushedLine(-1)
+    m_hash(m_orderBits, m_fingerPrintBits), m_lastFlushedLine(-1),
+    m_dummyRange(0)
 #ifdef WITH_THREADS
     , m_threads(threads)
 #endif
