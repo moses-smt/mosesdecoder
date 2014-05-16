@@ -41,17 +41,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/Sentence.h"
 #include "moses/FactorTypeSet.h"
 #include "moses/ChartKBestExtractor.h"
-#include "moses/ChartTrellisPathList.h"
 #include "moses/OutputCollector.h"
 #include "moses/ChartHypothesis.h"
-#include "moses/ChartTrellisPath.h"
 #include "search/applied.hh"
 #include "moses/ChartManager.h"
 
 namespace Moses
 {
 class FactorCollection;
-class ChartTrellisPathList;
 class ScoreComponentCollection;
 }
 
@@ -90,7 +87,6 @@ protected:
   Moses::OutputCollector                *m_unknownsCollector;
 
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
-  size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t startTarget);
   std::size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartKBestExtractor::Derivation &derivation, std::size_t startTarget);
   size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
   void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
@@ -130,7 +126,6 @@ public:
   void OutputBestHypo(search::Applied applied, long translationId);
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId);
   void OutputBestNone(long translationId);
-  void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, long translationId);
   void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
   void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);

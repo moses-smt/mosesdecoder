@@ -242,51 +242,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTranslationOptions.h</locationURI>
 		</link>
 		<link>
-			<name>ChartTrellisDetour.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisDetour.cpp</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisDetour.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisDetour.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisDetourQueue.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisDetourQueue.cpp</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisDetourQueue.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisDetourQueue.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisNode.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisNode.cpp</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisNode.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisNode.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisPath.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisPath.cpp</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisPath.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisPath.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisPathList.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisPathList.h</locationURI>
-		</link>
-		<link>
 			<name>ConfusionNet.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ConfusionNet.cpp</locationURI>
