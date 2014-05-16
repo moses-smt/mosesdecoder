@@ -1237,14 +1237,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.h</locationURI>
 		</link>
 		<link>
-			<name>FF/RuleAmbiguity.cpp</name>
+			<name>FF/RuleScope.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleAmbiguity.cpp</locationURI>
+			<locationURI>PARENT-9-PROJECT_LOC/home/s0565741/workspace/github/mosesdecoder/moses/FF/RuleScope.cpp</locationURI>
 		</link>
 		<link>
-			<name>FF/RuleAmbiguity.h</name>
+			<name>FF/RuleScope.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleAmbiguity.h</locationURI>
+			<locationURI>PARENT-9-PROJECT_LOC/home/s0565741/workspace/github/mosesdecoder/moses/FF/RuleScope.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SetSourcePhrase.cpp</name>
