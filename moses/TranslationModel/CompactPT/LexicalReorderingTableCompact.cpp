@@ -69,7 +69,7 @@ std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase& f,
     }
 
   size_t index = m_hash[key];
-  if(m_hash.GetSize() != index) {
+  if(m_hash.NotfoundValue() != index && m_hash.PrefixValue() != index) {
     std::string scoresString;
     if(m_inMemory)
       scoresString = m_scoresMemory[index];
