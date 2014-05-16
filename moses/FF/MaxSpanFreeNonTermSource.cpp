@@ -23,7 +23,7 @@ MaxSpanFreeNonTermSource::MaxSpanFreeNonTermSource(const std::string &line)
   ReadParameters();
 
   FactorCollection &fc = FactorCollection::Instance();
-  const Factor *factor = fc.AddFactor(Output, 0, m_glueTargetLHSStr);
+  const Factor *factor = fc.AddFactor(m_glueTargetLHSStr, true);
   m_glueTargetLHS.SetFactor(0, factor);
 }
 
@@ -43,7 +43,8 @@ void MaxSpanFreeNonTermSource::Evaluate(const InputType &input
                        , ScoreComponentCollection *estimatedFutureScore) const
 {
   const Word &targetLHS = targetPhrase.GetTargetLHS();
-  if (m_glueTargetLHS == m_glueTargetLHS) {
+
+  if (targetLHS == m_glueTargetLHS) {
 	  // don't delete glue rules
 	  return;
   }
