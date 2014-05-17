@@ -108,17 +108,12 @@ void PhraseDictionaryDynamicCacheBased::InitializeForInput(InputType const& sour
 
 const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) const
 {
-  VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection" << std::endl);
-  VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection src:|" << source << "|" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
 #endif
   TargetPhraseCollection* tpc = NULL;
-  VERBOSE(3,"source:|" << source << "|" << std::endl);
   cacheMap::const_iterator it = m_cacheTM.find(source);
   if(it != m_cacheTM.end()) {
-    VERBOSE(3,"source:|" << source << "| FOUND" << std::endl);
-//    tpc = (it->second).first;
     tpc = new TargetPhraseCollection(*(it->second).first);
 
     std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
@@ -131,18 +126,12 @@ const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhrase
   if (tpc)  {
     tpc->NthElement(m_tableLimit); // sort the phrases for the decoder
   }
-
-  if (tpc){
-    VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY tpc->size():" << tpc->GetSize() << std::endl);
-  }else{
-    VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY tpc->size():" << 0 << std::endl);
-  }
-  return tpc;
+	
+	return tpc;
 }
 
 const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  VERBOSE(1,"PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY" << std::endl);
   const TargetPhraseCollection *ret = GetTargetPhraseCollection(src);
   return ret;
 }
@@ -223,7 +212,6 @@ float PhraseDictionaryDynamicCacheBased::decaying_score(const int age)
 
 void PhraseDictionaryDynamicCacheBased::SetPreComputedScores(const unsigned int numScoreComponent)
 {
-  VERBOSE(3,"m_maxAge:|" << m_maxAge << "|" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
@@ -247,12 +235,10 @@ void PhraseDictionaryDynamicCacheBased::SetPreComputedScores(const unsigned int 
     }
     precomputedScores.push_back(sc_vec);
   }
-  VERBOSE(3,"precomputedScores.size():|" << precomputedScores.size() << "|" << std::endl);
 }
 
 Scores PhraseDictionaryDynamicCacheBased::GetPreComputedScores(const unsigned int age)
 {
-  VERBOSE(3,"age:|" << age << "|" << std::endl);
   if (age < precomputedScores.size()) {
     return precomputedScores.at(age);
   } else {
@@ -406,9 +392,8 @@ void PhraseDictionaryDynamicCacheBased::ClearSource(std::vector<std::string> ent
 
 void PhraseDictionaryDynamicCacheBased::ClearSource(Phrase sp)
 {
-  VERBOSE(3,"sp:|" << sp << "|" << std::endl);
+  VERBOSE(3,"void PhraseDictionaryDynamicCacheBased::ClearSource(Phrase sp) sp:|" << sp << "|" << std::endl);
   cacheMap::const_iterator it = m_cacheTM.find(sp);
-  VERBOSE(3,"searching:|" << sp << "|" << std::endl);
   if (it != m_cacheTM.end()) {
     VERBOSE(3,"found:|" << sp << "|" << std::endl);
     //sp is found
@@ -462,13 +447,18 @@ void PhraseDictionaryDynamicCacheBased::Update(std::vector<std::string> entries,
     VERBOSE(3,"pp[0]:|" << pp[0] << "|" << std::endl);
     VERBOSE(3,"pp[1]:|" << pp[1] << "|" << std::endl);
 
-    Update(pp[0], pp[1], ageString);
+    if (pp.size() > 2){
+			VERBOSE(3,"pp[2]:|" << pp[2] << "|" << std::endl);
+			Update(pp[0], pp[1], ageString, pp[2]);
+		}else{
+			Update(pp[0], pp[1], ageString);
+		}
   }
 }
 
-void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString)
+void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString, std::string waString)
 {
-  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString)" << std::endl);
+  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString, std::string waString)" << std::endl);
   const StaticData &staticData = StaticData::Instance();
   const std::string& factorDelimiter = staticData.GetFactorDelimiter();
   Phrase sourcePhrase(0);
@@ -488,16 +478,19 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
   VERBOSE(3, "sourcePhraseString:|" << sourcePhraseString << "|" << std::endl);
   sourcePhrase.CreateFromString(Input, staticData.GetInputFactorOrder(), sourcePhraseString, factorDelimiter, NULL);
   VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
-  Update(sourcePhrase, targetPhrase, age);
+
+  if (!waString.empty()) VERBOSE(3, "waString:|" << waString << "|" << std::endl);
+	
+  Update(sourcePhrase, targetPhrase, age, waString);
 }
 
-void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
+void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age, std::string waString)
 {
-  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)" << std::endl);
+  VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age, std::string waString)" << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
-  VERBOSE(3, "PhraseDictionaryCache inserting sp:|" << sp << "| tp:|" << tp << "| age:|" << age << "|" << std::endl);
+  VERBOSE(3, "PhraseDictionaryCache inserting sp:|" << sp << "| tp:|" << tp << "| age:|" << age << "| word-alignment |" << waString << "|" << std::endl);
 
   cacheMap::const_iterator it = m_cacheTM.find(sp);
   VERBOSE(3,"sp:|" << sp << "|" << std::endl);
@@ -528,21 +521,20 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
       std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
 
       targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
+      if (!waString.empty()) targetPhrase->SetAlignmentInfo(waString);			
+
       tpc->Add(targetPhrase.release());
+
       tp_pos = tpc->GetSize()-1;
       ac->push_back(age);
       m_entries++;
-      VERBOSE(3,"tpc size:|" << tpc->GetSize() << "|" << std::endl);
-      VERBOSE(3,"ac size:|" << ac->size() << "|" << std::endl);
-      VERBOSE(3,"tp:|" << tp << "| INSERTED" << std::endl);
+      VERBOSE(3,"sp:|" << sp << "tp:|" << tp << "| INSERTED" << std::endl);
     }
     else{
-      VERBOSE(3,"tp:|" << tp << "| FOUND" << std::endl);
       tp_ptr->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
-      ac->at(tp_pos) = age;
-      VERBOSE(3,"tpc size:|" << tpc->GetSize() << "|" << std::endl);
-      VERBOSE(3,"ac size:|" << ac->size() << "|" << std::endl);
-      VERBOSE(3,"tp:|" << tp << "| UPDATED" << std::endl);	
+      if (!waString.empty()) tp_ptr->SetAlignmentInfo(waString);
+			ac->at(tp_pos) = age;
+      VERBOSE(3,"sp:|" << sp << "tp:|" << tp << "| UPDATED" << std::endl);	
     }
   } else {
     VERBOSE(3,"sp:|" << sp << "| NOT FOUND" << std::endl);
@@ -558,11 +550,11 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age)
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
 
     targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
+    if (!waString.empty()) targetPhrase->SetAlignmentInfo(waString);
+		
     tpc->Add(targetPhrase.release());
     ac->push_back(age);
     m_entries++;
-    VERBOSE(3,"tpc size:|" << tpc->GetSize() << "|" << std::endl);
-    VERBOSE(3,"ac size:|" << ac->size() << "|" << std::endl);
     VERBOSE(3,"sp:|" << sp << "| tp:|" << tp << "| INSERTED" << std::endl);
   }
 }
@@ -578,14 +570,13 @@ void PhraseDictionaryDynamicCacheBased::Decay()
   }
 }
 
-void PhraseDictionaryDynamicCacheBased::Decay(Phrase p)
+void PhraseDictionaryDynamicCacheBased::Decay(Phrase sp)
 {
-  VERBOSE(3,"p:|" << p << "|" << std::endl);
-  cacheMap::const_iterator it = m_cacheTM.find(p);
-  VERBOSE(3,"searching:|" << p << "|" << std::endl);
+  VERBOSE(3,"void PhraseDictionaryDynamicCacheBased::Decay(Phrase sp) sp:|" << sp << "|" << std::endl);
+  cacheMap::const_iterator it = m_cacheTM.find(sp);
   if (it != m_cacheTM.end()) {
-    VERBOSE(3,"found:|" << p << "|" << std::endl);
-    //p is found
+    VERBOSE(3,"found:|" << sp << "|" << std::endl);
+    //sp is found
 
     TargetCollectionAgePair TgtCollAgePair = it->second;
     TargetPhraseCollection* tpc = TgtCollAgePair.first;
@@ -593,14 +584,11 @@ void PhraseDictionaryDynamicCacheBased::Decay(Phrase p)
 
 //loop in inverted order to allow a correct deletion of std::vectors tpc and ac
     for (int tp_pos = tpc->GetSize() - 1 ; tp_pos >= 0; tp_pos--) {
-      VERBOSE(3,"p:|" << p << "|" << std::endl);
       unsigned int tp_age = ac->at(tp_pos); //increase the age by 1
       tp_age++; //increase the age by 1
-      VERBOSE(3,"p:|" << p << "| " << " new tp_age:|" << tp_age << "|" << std::endl);
+      VERBOSE(3,"sp:|" << sp << "| " << " new tp_age:|" << tp_age << "|" << std::endl);
 
       TargetPhrase* tp_ptr = (TargetPhrase*) tpc->GetTargetPhrase(tp_pos);
-      VERBOSE(3,"p:|" << p << "| " << "tp_age:|" << tp_age << "| " <<  "*tp_ptr:|" << *tp_ptr << "|" << std::endl);
-      VERBOSE(3,"precomputedScores.size():|" << precomputedScores.size() << "|" << std::endl);
 
       if (tp_age > m_maxAge) {
         VERBOSE(3,"tp_age:|" << tp_age << "| TOO BIG" << std::endl);
@@ -611,7 +599,6 @@ void PhraseDictionaryDynamicCacheBased::Decay(Phrase p)
         VERBOSE(3,"tp_age:|" << tp_age << "| STILL GOOD" << std::endl);
         tp_ptr->GetScoreBreakdown().Assign(this, GetPreComputedScores(tp_age));
         ac->at(tp_pos) = tp_age;
-        VERBOSE(3,"precomputedScores.size():|" << precomputedScores.size() << "|" << std::endl);
       }
     }
     if (tpc->GetSize() == 0) {
@@ -619,11 +606,11 @@ void PhraseDictionaryDynamicCacheBased::Decay(Phrase p)
       (((*it).second).second)->clear();
       delete ((*it).second).second;
       delete ((*it).second).first;
-      m_cacheTM.erase(p);
+      m_cacheTM.erase(sp);
     }
   } else {
     //do nothing
-    VERBOSE(3,"p:|" << p << "| NOT FOUND" << std::endl);
+    VERBOSE(3,"sp:|" << sp << "| NOT FOUND" << std::endl);
   }
 
   //put here the removal of entries with age greater than m_maxAge

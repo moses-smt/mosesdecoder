@@ -124,8 +124,8 @@ protected:
   void Decay();   // traverse through the cache and decay each entry
   void Decay(Phrase p);   // traverse through the cache and decay each entry for a given Phrase
   void Update(std::vector<std::string> entries, std::string ageString);
-  void Update(std::string sourceString, std::string targetString, std::string ageString);
-  void Update(Phrase p, Phrase tp, int age);
+  void Update(std::string sourceString, std::string targetString, std::string ageString, std::string waString="");
+  void Update(Phrase p, Phrase tp, int age, std::string waString="");
 
   void ClearEntries(std::vector<std::string> entries);
   void ClearEntries(std::string sourceString, std::string targetString);
