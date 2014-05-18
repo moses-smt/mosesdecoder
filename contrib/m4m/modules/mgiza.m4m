@@ -16,7 +16,6 @@ mkcls_args = -n10 -c50
 %/mgiza.cfg: m4=3
 %/mgiza.cfg: nodumps=0
 %/mgiza.cfg: onlyaldumps=0
-%/mgiza.cfg: model1dumpfrequency=0
 %/mgiza.cfg: model4smoothfactor=0.4
 %/mgiza.cfg: nsmooth=4
 %/mgiza.cfg: NCPUS=8
@@ -62,7 +61,7 @@ $(gizout)/${L1}-${L2}.symal.gz: | $(gizout)/${L1}-${L2}.A3.final.gz
 $(gizout)/${L1}-${L2}.symal.gz: | $(gizout)/${L2}-${L1}.A3.final.gz $(giza2bal.pl)
 	$(lock)
 	$(giza2bal.pl) -d 'gunzip -c ${A3fwd}' -i 'gunzip -c ${A3bwd}' \
-	| $(symal) $(symal_args) | gzip > $@_ && mv $@_ $@
+	| $(symal) $(symal_args) | perl -pe 's/^.*{##}\s+//' | gzip > $@_ && mv $@_ $@
 	$(unlock)
 
 # merge alignments produced by mgiza
@@ -93,8 +92,8 @@ mkcls_cmd = $(call stream,$(1),$(2)) | ${mkcls} $(mkcls_args) -p/dev/stdin -V$(3
 # mkcls: -p: input data 
 # mkcls: -V: word classes (output)
 
-$(giztmp)/%.vcb.classes: | $(gizaln.in)
 $(giztmp)/%.vcb.classes: ${mkcls}
+$(giztmp)/%.vcb.classes: | $(gizaln.in)
 	@echo CREATING $@
 	$(lock)
 	mkdir -p $(@D)
@@ -107,9 +106,12 @@ $(giztmp)/${L1}.vcb:       | $(giztmp)/${L1}-${L2}.snt
 $(giztmp)/${L1}.vcb:       | $(giztmp)/${L1}-${L2}.snt
 $(giztmp)/${L2}.vcb:       | $(giztmp)/${L1}-${L2}.snt
 $(giztmp)/${L2}-${L1}.snt: | $(giztmp)/${L1}-${L2}.snt
-$(giztmp)/${L1}-${L2}.snt: L1files = $(addprefix $(pll-clean), .${L1}.gz)
-$(giztmp)/${L1}-${L2}.snt: L2files = $(addprefix $(pll-clean), .${L2}.gz)
-$(giztmp)/${L1}-${L2}.snt: | $(giztmp) $(addprefix $(pll-clean), .${L1}.gz .${L2}.gz)
+#$(info $(addprefix $(pll-clean), .${L1}.gz))
+$(giztmp)/${L1}-${L2}.snt: L1files = $(addsuffix .${L1}.gz, $(pll-clean))
+$(giztmp)/${L1}-${L2}.snt: L2files = $(addsuffix .${L2}.gz, $(pll-clean))
+$(giztmp)/${L1}-${L2}.snt: | $(giztmp) 
+$(giztmp)/${L1}-${L2}.snt: | $(addsuffix .${L1}.gz, $(pll-clean))
+$(giztmp)/${L1}-${L2}.snt: | $(addsuffix .${L2}.gz, $(pll-clean))
 	$(lock)
 	$(plain2snt) \
 		<(ls $(L1files) | xargs zcat -f) \
@@ -167,8 +169,12 @@ $(giztmp)/${L2}-${L1}/mgiza.cfg: | \
 	@echo "mh   ${mh}"   >> $@
 	@echo "m3   ${m3}"   >> $@
 	@echo "m4   ${m4}"   >> $@
+	@echo "t1   ${m1}"   >> $@
+	@echo "t2   ${m2}"   >> $@
+	@echo "th   ${mh}"   >> $@
+	@echo "t3   ${m3}"   >> $@
+	@echo "t4   ${m4}"   >> $@
 	@echo "o    ${ODIR}" >> $@
-	@echo "model1dumpfrequency ${model1dumpfrequency}" >> $@
 	@echo "model4smoothfactor ${model4smoothfactor}"   >> $@
 	@echo "onlyaldumps ${onlyaldumps}"                 >> $@
 	@echo "nodumps ${nodumps}"                         >> $@
