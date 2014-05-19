@@ -113,7 +113,7 @@ def translate(proxy, args, line):
     if type(line) is unicode:
         param = { 'text' : line.strip().encode('utf8') }
     elif type(line) is str:
-        param = { 'text' : line.strip().encode('utf8') }
+        param = { 'text' : line.strip() }
     else:
         raise Exception("Can't handle input")
     if args.A: param['align'] = True
