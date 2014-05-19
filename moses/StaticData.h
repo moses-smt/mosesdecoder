@@ -760,8 +760,9 @@ public:
   }
 
 
-  bool AdjacentOnly() const
-  { return m_adjacentOnly; }
+  bool AdjacentOnly() const {
+    return m_adjacentOnly;
+  }
 
 
   void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
@@ -769,11 +770,11 @@ public:
 
   // need global access for output of tree structure
   const StatefulFeatureFunction* GetTreeStructure() const {
-      return m_treeStructure;
+    return m_treeStructure;
   }
 
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
-      m_treeStructure = treeStructure;
+    m_treeStructure = treeStructure;
   }
 
 };

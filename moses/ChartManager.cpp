@@ -269,9 +269,9 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
  * \param onlyDistinct whether to check for distinct output sentence or not (default - don't check, just return top n-paths)
  */
 void ChartManager::CalcNBest(
-    std::size_t n,
-    std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > &nBestList,
-    bool onlyDistinct) const
+  std::size_t n,
+  std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > &nBestList,
+  bool onlyDistinct) const
 {
   nBestList.clear();
   if (n == 0 || m_source.GetSize() == 0) {
@@ -282,7 +282,7 @@ void ChartManager::CalcNBest(
   WordsRange range(0, m_source.GetSize()-1);
   const ChartCell &lastCell = m_hypoStackColl.Get(range);
   boost::scoped_ptr<const std::vector<const ChartHypothesis*> > topLevelHypos(
-      lastCell.GetAllSortedHypotheses());
+    lastCell.GetAllSortedHypotheses());
   if (!topLevelHypos) {
     return;
   }

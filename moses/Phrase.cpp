@@ -381,7 +381,7 @@ void Phrase::InitStartEndWord()
 size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
 {
   if (GetSize() < sought.GetSize()) {
-	// sought phrase too big
+    // sought phrase too big
     return NOT_FOUND;
   }
 

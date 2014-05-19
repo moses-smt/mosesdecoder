@@ -140,23 +140,23 @@ public:
     std::pair<MapSrc2Tgt::iterator,bool> piter;
     if(useCache) {
       piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollectionWithSourcePhrase const*>(0)));
-      if(!piter.second){
-        if (piter.first->second){
-	  VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: piter.first->second->GetSize():" << (piter.first->second)->GetSize() << std::endl);
-	}else{
-	  VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: piter.first->second->GetSize():" << 0 << std::endl);
-	}
+      if(!piter.second) {
+        if (piter.first->second) {
+          VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: piter.first->second->GetSize():" << (piter.first->second)->GetSize() << std::endl);
+        } else {
+          VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: piter.first->second->GetSize():" << 0 << std::endl);
+        }
         return piter.first->second;
       }
     } else if (m_cache.size()) {
       MapSrc2Tgt::const_iterator i=m_cache.find(src);
-      if (i!=m_cache.end()){
-        if (i->second){
-	  VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << (void*) (i->second) << std::endl);
-        }else{
+      if (i!=m_cache.end()) {
+        if (i->second) {
+          VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << (void*) (i->second) << std::endl);
+        } else {
           VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << 0 << std::endl);
         }
-      }else{
+      } else {
         VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << 0 << std::endl);
       }
       return (i!=m_cache.end() ? i->second : 0);

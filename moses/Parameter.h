@@ -117,7 +117,7 @@ public:
 
   std::vector<float> GetWeights(const std::string &name);
   std::map<std::string, std::vector<float> > GetAllWeights() const {
-      return m_weights;
+    return m_weights;
   }
   std::set<std::string> GetWeightNames() const;
 

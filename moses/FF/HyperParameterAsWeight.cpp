@@ -7,7 +7,7 @@ namespace Moses
 {
 
 HyperParameterAsWeight::HyperParameterAsWeight(const std::string &line)
-:StatelessFeatureFunction(2, line)
+  :StatelessFeatureFunction(2, line)
 {
   ReadParameters();
 

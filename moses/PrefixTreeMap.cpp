@@ -65,7 +65,8 @@ void Candidates::readBin(FILE* f)
 const LabelId PrefixTreeMap::MagicWord = std::numeric_limits<LabelId>::max() - 1;
 
 //////////////////////////////////////////////////////////////////
-PrefixTreeMap::~PrefixTreeMap() {
+PrefixTreeMap::~PrefixTreeMap()
+{
   if(m_FileSrc) {
     fClose(m_FileSrc);
   }
@@ -99,8 +100,7 @@ WordVoc &ReadVoc(std::map<std::string,WordVoc> &vocs, const std::string& filenam
     WordVoc &voc = vocs[filename];
     voc.Read(filename);
     return voc;
-  }
-  else {
+  } else {
     return vi->second;
   }
 }

@@ -33,14 +33,14 @@ InputPath(const Phrase &phrase, const NonTerminalSet &sourceNonTerms,
 
 InputPath::~InputPath()
 {
-  // Since there is no way for the Phrase Dictionaries to tell in 
-  // which (sentence) context phrases were looked up, we tell them 
+  // Since there is no way for the Phrase Dictionaries to tell in
+  // which (sentence) context phrases were looked up, we tell them
   // now that the phrase isn't needed any more by this inputPath
   typedef std::pair<const TargetPhraseCollection*, const void* > entry;
   std::map<const PhraseDictionary*, entry>::const_iterator iter;
   for (iter = m_targetPhrases.begin(); iter != m_targetPhrases.end(); ++iter)
     iter->first->Release(iter->second.first);
-  
+
   delete m_inputScore;
 }
 

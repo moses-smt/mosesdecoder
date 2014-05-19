@@ -130,30 +130,30 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   std::vector< std::map<std::string, std::string> > dlt_meta = ProcessAndStripDLT(line);
 
-	PhraseDictionaryDynamicCacheBased* cbtm = NULL;
-	DynamicCacheBasedLanguageModel* cblm = NULL;
+  PhraseDictionaryDynamicCacheBased* cbtm = NULL;
+  DynamicCacheBasedLanguageModel* cblm = NULL;
   std::vector< std::map<std::string, std::string> >::iterator dlt_meta_it = dlt_meta.begin();
   for (dlt_meta_it = dlt_meta.begin(); dlt_meta_it != dlt_meta.end(); ++dlt_meta_it) {
-		
-		if ((*dlt_meta_it).find("type") != (*dlt_meta_it).end()) {
-			if ((*dlt_meta_it)["type"] == "cbtm") {
-				std::string id = "default";
-				if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
-					id = (*dlt_meta_it)["id"];
-				}
-				cbtm = &PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
-				if (cbtm) cbtm->ExecuteDlt(*dlt_meta_it);
-			}
-			if ((*dlt_meta_it)["type"] == "cblm") {
-				std::string id = "default";
-				if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
-					id = (*dlt_meta_it)["id"];
-				}
-				cblm = &DynamicCacheBasedLanguageModel::InstanceNonConst(id);
-				if (cblm) cblm->ExecuteDlt(*dlt_meta_it);
-			}
+
+    if ((*dlt_meta_it).find("type") != (*dlt_meta_it).end()) {
+      if ((*dlt_meta_it)["type"] == "cbtm") {
+        std::string id = "default";
+        if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
+          id = (*dlt_meta_it)["id"];
+        }
+        cbtm = &PhraseDictionaryDynamicCacheBased::InstanceNonConst(id);
+        if (cbtm) cbtm->ExecuteDlt(*dlt_meta_it);
+      }
+      if ((*dlt_meta_it)["type"] == "cblm") {
+        std::string id = "default";
+        if ((*dlt_meta_it).find("id") != (*dlt_meta_it).end()) {
+          id = (*dlt_meta_it)["id"];
+        }
+        cblm = &DynamicCacheBasedLanguageModel::InstanceNonConst(id);
+        if (cblm) cblm->ExecuteDlt(*dlt_meta_it);
+      }
     }
-	}
+  }
 
   // parse XML markup in translation line
   std::vector< size_t > xmlWalls;

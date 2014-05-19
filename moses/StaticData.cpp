@@ -537,21 +537,21 @@ bool StaticData::LoadData(Parameter *parameter)
   NoCache();
   OverrideFeatures();
 
-std::cerr <<"After StaticData::LoadDataStatic" << std::endl;
+  std::cerr <<"After StaticData::LoadDataStatic" << std::endl;
 
-/*
-std::cerr <<"Before ShowWeights" << std::endl;
-    // setting "-show-weights" -> just dump out weights and exit
-    if (m_parameter->isParamSpecified("show-weights")) {
-      MosesCmd::ShowWeights();
-      exit(0);
-    }
-std::cerr <<"After ShowWeights" << std::endl;
-*/
+  /*
+  std::cerr <<"Before ShowWeights" << std::endl;
+      // setting "-show-weights" -> just dump out weights and exit
+      if (m_parameter->isParamSpecified("show-weights")) {
+        MosesCmd::ShowWeights();
+        exit(0);
+      }
+  std::cerr <<"After ShowWeights" << std::endl;
+  */
 
-std::cerr <<"Before LoadFeatureFunctions" << std::endl;
+  std::cerr <<"Before LoadFeatureFunctions" << std::endl;
   LoadFeatureFunctions();
-std::cerr <<"After LoadFeatureFunctions" << std::endl;
+  std::cerr <<"After LoadFeatureFunctions" << std::endl;
 
   if (!LoadDecodeGraphs()) return false;
 
@@ -982,8 +982,7 @@ bool StaticData::CheckWeights() const
       cerr << fname << "\n";
       if (featureNames.find(fname) != featureNames.end()) {
         weightNames.erase(iter++);
-      }
-      else {
+      } else {
         ++iter;
       }
     }
@@ -1002,7 +1001,8 @@ bool StaticData::CheckWeights() const
 }
 
 
-void StaticData::LoadSparseWeightsFromConfig() {
+void StaticData::LoadSparseWeightsFromConfig()
+{
   set<string> featureNames;
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   for (size_t i = 0; i < ffs.size(); ++i) {
@@ -1017,7 +1017,7 @@ void StaticData::LoadSparseWeightsFromConfig() {
     // this indicates that it is sparse feature
     if (featureNames.find(iter->first) == featureNames.end()) {
       UTIL_THROW_IF2(iter->second.size() != 1, "ERROR: only one weight per sparse feature allowed: " << iter->first);
-        m_allWeights.Assign(iter->first, iter->second[0]);
+      m_allWeights.Assign(iter->first, iter->second[0]);
     }
   }
 
@@ -1211,24 +1211,24 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
   vector<float> weights;
   vector<string> toks = Tokenize(denseWeights);
   for (size_t i = 0; i < toks.size(); ++i) {
-	const string &tok = toks[i];
+    const string &tok = toks[i];
 
-	if (tok.substr(tok.size() - 1, 1) == "=") {
-	  // start of new feature
+    if (tok.substr(tok.size() - 1, 1) == "=") {
+      // start of new feature
 
-	  if (name != "") {
-		// save previous ff
-		const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
-		m_allWeights.Assign(&ff, weights);
-		weights.clear();
-	  }
+      if (name != "") {
+        // save previous ff
+        const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
+        m_allWeights.Assign(&ff, weights);
+        weights.clear();
+      }
 
-	  name = tok.substr(0, tok.size() - 1);
-	} else {
-	  // a weight for curr ff
-	  float weight = Scan<float>(toks[i]);
-	  weights.push_back(weight);
-	}
+      name = tok.substr(0, tok.size() - 1);
+    } else {
+      // a weight for curr ff
+      float weight = Scan<float>(toks[i]);
+      weights.push_back(weight);
+    }
   }
 
   const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
@@ -1238,14 +1238,14 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
   InputFileStream sparseStrme(sparseFile);
   string line;
   while (getline(sparseStrme, line)) {
-	  vector<string> toks = Tokenize(line);
-	  UTIL_THROW_IF2(toks.size() != 2, "Incorrect sparse weight format. Should be FFName_spareseName weight");
+    vector<string> toks = Tokenize(line);
+    UTIL_THROW_IF2(toks.size() != 2, "Incorrect sparse weight format. Should be FFName_spareseName weight");
 
-	  vector<string> names = Tokenize(toks[0], "_");
-	  UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name. Should be FFName_spareseName");
+    vector<string> names = Tokenize(toks[0], "_");
+    UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name. Should be FFName_spareseName");
 
-      const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
-	  m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
+    const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
+    m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
   }
 }
 

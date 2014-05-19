@@ -108,7 +108,9 @@ public:
     return m_hypothesisId++;
   }
 
-  const ChartParser &GetParser() const { return m_parser; }
+  const ChartParser &GetParser() const {
+    return m_parser;
+  }
 };
 
 }

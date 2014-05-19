@@ -182,9 +182,9 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
 // for pruning
 template <class Model> float Fill<Model>::GetBestScore(const ChartCellLabel *chartCell) const
 {
-    search::PartialVertex vertex = chartCell->GetStack().incr->RootAlternate();
-    UTIL_THROW_IF2(vertex.Empty(), "hypothesis with empty stack");
-    return vertex.Bound();
+  search::PartialVertex vertex = chartCell->GetStack().incr->RootAlternate();
+  UTIL_THROW_IF2(vertex.Empty(), "hypothesis with empty stack");
+  return vertex.Bound();
 }
 
 // TODO: factors (but chart doesn't seem to support factors anyway).

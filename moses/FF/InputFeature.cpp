@@ -18,14 +18,14 @@ InputFeature::InputFeature(const std::string &line)
 {
   m_numInputScores = this->m_numScoreComponents;
   ReadParameters();
-  
+
   UTIL_THROW_IF2(s_instance, "Can only have 1 input feature");
   s_instance = this;
 }
 
 void InputFeature::Load()
 {
-  
+
   const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];
   const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
 

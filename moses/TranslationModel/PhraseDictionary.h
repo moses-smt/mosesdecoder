@@ -91,7 +91,7 @@ public:
   void
   Release(TargetPhraseCollection const* tpc) const;
 
-  /// return true if phrase table entries starting with /phrase/ 
+  /// return true if phrase table entries starting with /phrase/
   //  exist in the table.
   virtual
   bool

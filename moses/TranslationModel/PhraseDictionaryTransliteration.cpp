@@ -59,8 +59,8 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
 
   CacheColl &cache = GetCache();
 
-    CacheColl::iterator iter;
-    iter = cache.find(hash);
+  CacheColl::iterator iter;
+  iter = cache.find(hash);
 
   if (iter != cache.end()) {
     // already in cache

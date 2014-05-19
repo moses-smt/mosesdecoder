@@ -48,7 +48,9 @@ public:
 
   void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
 
-  const std::vector<Phrase*> &GetUnknownSources() const { return m_unksrcs; }
+  const std::vector<Phrase*> &GetUnknownSources() const {
+    return m_unksrcs;
+  }
 
 private:
   std::vector<Phrase*> m_unksrcs;
@@ -69,7 +71,9 @@ public:
   size_t GetSize() const;
   const InputPath &GetInputPath(size_t startPos, size_t endPos) const;
   const InputPath &GetInputPath(WordsRange &range) const;
-  const std::vector<Phrase*> &GetUnknownSources() const { return m_unknown.GetUnknownSources(); }
+  const std::vector<Phrase*> &GetUnknownSources() const {
+    return m_unknown.GetUnknownSources();
+  }
 
 private:
   ChartParserUnknown m_unknown;

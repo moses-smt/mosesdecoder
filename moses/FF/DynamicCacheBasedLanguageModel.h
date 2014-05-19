@@ -43,7 +43,7 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
   size_t m_query_type; //way of querying the cache
   size_t m_score_type; //way of scoring entries of the cache
   std::string m_initfiles; // vector of files loaded in the initialization phase
-	std::string m_name; // internal name to identify this instance of the Cache-based pseudo LM
+  std::string m_name; // internal name to identify this instance of the Cache-based pseudo LM
   float m_lower_score; //lower_bound_score for no match
   std::vector<float> precomputedScores;
   unsigned int m_maxAge;
@@ -64,7 +64,7 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
   void Update(std::vector<std::string> words, int age);
 
   void ClearEntries(std::vector<std::string> entries);
-	
+
   void Execute(std::vector<std::string> commands);
   void Execute_Single_Command(std::string command);
 
@@ -80,24 +80,28 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
 
 protected:
   static DynamicCacheBasedLanguageModel *s_instance;
-	static std::map< const std::string, DynamicCacheBasedLanguageModel * > s_instance_map;
+  static std::map< const std::string, DynamicCacheBasedLanguageModel * > s_instance_map;
 
 public:
   DynamicCacheBasedLanguageModel(const std::string &line);
   ~DynamicCacheBasedLanguageModel();
-	
-	inline const std::string GetName() { return m_name; };
-	inline void SetName(const std::string name){ m_name = name; }
 
-	static const DynamicCacheBasedLanguageModel& Instance(const std::string name) {
-		UTIL_THROW_IF2(s_instance_map.find(name) == s_instance_map.end(), "The DynamicCacheBasedLanguageModel feature named " + name + " does not exist!");
-		return *(s_instance_map[name]);
-	}
-	
-	static DynamicCacheBasedLanguageModel& InstanceNonConst(const std::string name) {
-		UTIL_THROW_IF2(s_instance_map.find(name) == s_instance_map.end(), "The DynamicCacheBasedLanguageModel feature named " + name + " does not exist!");
-		return *(s_instance_map[name]);
-	}
+  inline const std::string GetName() {
+    return m_name;
+  };
+  inline void SetName(const std::string name) {
+    m_name = name;
+  }
+
+  static const DynamicCacheBasedLanguageModel& Instance(const std::string name) {
+    UTIL_THROW_IF2(s_instance_map.find(name) == s_instance_map.end(), "The DynamicCacheBasedLanguageModel feature named " + name + " does not exist!");
+    return *(s_instance_map[name]);
+  }
+
+  static DynamicCacheBasedLanguageModel& InstanceNonConst(const std::string name) {
+    UTIL_THROW_IF2(s_instance_map.find(name) == s_instance_map.end(), "The DynamicCacheBasedLanguageModel feature named " + name + " does not exist!");
+    return *(s_instance_map[name]);
+  }
   static const DynamicCacheBasedLanguageModel& Instance() {
     return *s_instance;
   }
@@ -113,7 +117,7 @@ public:
   void Load(const std::string file);
   void Execute(std::string command);
   void SetParameter(const std::string& key, const std::string& value);
-	void ExecuteDlt(std::map<std::string, std::string> dlt_meta);
+  void ExecuteDlt(std::map<std::string, std::string> dlt_meta);
 
   void ClearEntries(std::string &entries);
   void Insert(std::string &entries);

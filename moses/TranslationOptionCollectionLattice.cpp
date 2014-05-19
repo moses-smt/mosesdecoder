@@ -136,12 +136,12 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
     const WordsRange &range = path.GetWordsRange();
 
     if (tpColl && tpColl->GetSize()) {
-		TargetPhraseCollection::const_iterator iter;
-    	for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
-    		const TargetPhrase &tp = **iter;
-    		TranslationOption *transOpt = new TranslationOption(range, tp);
-    		transOpt->SetInputPath(path);
-    		transOpt->Evaluate(m_source);
+      TargetPhraseCollection::const_iterator iter;
+      for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
+        const TargetPhrase &tp = **iter;
+        TranslationOption *transOpt = new TranslationOption(range, tp);
+        transOpt->SetInputPath(path);
+        transOpt->Evaluate(m_source);
 
         Add(transOpt);
       }

@@ -136,22 +136,22 @@ SetFeaturesToApply()
   }
 }
 
-  
-  // tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
-  void
-  PhraseDictionary::
-  Release(TargetPhraseCollection const* tpc) const
-  {
-    // do nothing by default
-    return;
-  }
 
-  bool
-  PhraseDictionary::
-  PrefixExists(Phrase const& phrase) const
-  {
-    return true;
-  }
+// tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
+void
+PhraseDictionary::
+Release(TargetPhraseCollection const* tpc) const
+{
+  // do nothing by default
+  return;
+}
+
+bool
+PhraseDictionary::
+PrefixExists(Phrase const& phrase) const
+{
+  return true;
+}
 
 void
 PhraseDictionary::

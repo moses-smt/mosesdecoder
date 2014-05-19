@@ -254,8 +254,8 @@ void SearchNormal::ExpandAllHypotheses(const Hypothesis &hypothesis, size_t star
   }
 
   if (StaticData::Instance().AdjacentOnly() &&
-	  !hypothesis.GetWordsBitmap().IsAdjacent(startPos, endPos)) {
-	return;
+      !hypothesis.GetWordsBitmap().IsAdjacent(startPos, endPos)) {
+    return;
   }
 
   // loop through all translation options
