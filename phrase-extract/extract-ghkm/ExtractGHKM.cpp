@@ -553,8 +553,8 @@ void ExtractGHKM::WriteUnknownWordSoftMatches(
 {
   std::set<std::string>::const_iterator p = labelSet.begin();
   for (p; p != labelSet.end(); ++p) {
-      std::string label = *p;
-      out << "UNK " << label << std::endl;
+    std::string label = *p;
+    out << "UNK " << label << std::endl;
   }
 }
 

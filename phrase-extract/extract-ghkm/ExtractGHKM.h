@@ -61,7 +61,7 @@ private:
                              const Options &,
                              std::ostream &);
   void WriteUnknownWordSoftMatches(const std::set<std::string> &,
-                             std::ostream &);
+                                   std::ostream &);
   void WriteGlueGrammar(const std::set<std::string> &,
                         const std::map<std::string, int> &,
                         std::ostream &);
