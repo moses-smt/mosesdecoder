@@ -48,6 +48,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/FF/TreeStructureFeature.h"
+#include "moses/PP/TreeStructurePhraseProperty.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -410,17 +411,15 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
   if (hypo != NULL) {
     OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
 
-    const std::string key = "Tree";
-    std::string value;
-    bool hasProperty;
     const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
-    currTarPhr.GetProperty(key, value, hasProperty);
+    boost::shared_ptr<PhraseProperty> property;
 
     out << " ||| ";
-    if (hasProperty)
-      out << " " << value;
-    else
+    if (currTarPhr.GetProperty("Tree", property)) {
+      out << " " << property->GetValueString();
+    } else {
       out << " " << "noTreeInfo";
+    }
     out << std::endl;
   }
 
@@ -439,17 +438,15 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
   if (applied != NULL) {
     OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
 
-    const std::string key = "Tree";
-    std::string value;
-    bool hasProperty;
     const TargetPhrase &currTarPhr = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
-    currTarPhr.GetProperty(key, value, hasProperty);
+    boost::shared_ptr<PhraseProperty> property;
 
     out << " ||| ";
-    if (hasProperty)
-      out << " " << value;
-    else
+    if (currTarPhr.GetProperty("Tree", property)) {
+      out << " " << property->GetValueString();
+    } else {
       out << " " << "noTreeInfo";
+    }
     out << std::endl;
   }
 
