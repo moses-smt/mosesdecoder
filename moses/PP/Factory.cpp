@@ -45,7 +45,7 @@ public:
 
 PhrasePropertyFactory::PhrasePropertyFactory()
 {
-// Feature with same key as class
+// Property with same key as class
 #define MOSES_PNAME(name) Add(#name, new DefaultPhrasePropertyCreator< name >());
 // Properties with different key than class.
 #define MOSES_PNAME2(name, type) Add(name, new DefaultPhrasePropertyCreator< type >());
