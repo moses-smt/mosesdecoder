@@ -88,10 +88,7 @@ public:
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &,
-    const ChartCellCollectionBase &, std::size_t) {
-    assert(false);
-    return 0;
-  }
+    const ChartCellCollectionBase &, std::size_t);
 
   TO_STRING();
 

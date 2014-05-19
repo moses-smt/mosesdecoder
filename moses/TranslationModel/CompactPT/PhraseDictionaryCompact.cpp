@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
 #include "moses/ThreadPool.h"
+#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerCompactPT.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -197,6 +198,13 @@ void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &so
   temp.swap(ref);
 
   ReduceCache();
+}
+
+ChartRuleLookupManager *PhraseDictionaryCompact::CreateRuleLookupManager(
+  const ChartParser &parser,
+  const ChartCellCollectionBase &cellCollection, std::size_t)
+{
+	return new ChartRuleLookupManagerCompactPT(parser, cellCollection, *this);
 }
 
 }
