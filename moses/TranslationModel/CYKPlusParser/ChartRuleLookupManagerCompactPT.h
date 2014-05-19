@@ -31,6 +31,11 @@ class DottedRuleColl;
 class WordsRange;
 class PhraseDictionaryCompact;
 
+class CompactPTNode
+{
+  std::string source;
+}
+
 class ChartRuleLookupManagerCompactPT : public ChartRuleLookupManager
 {
 public:
@@ -46,11 +51,15 @@ public:
     ChartParserCallback &outColl);
 
 private:
-  TargetPhrase *CreateTargetPhrase(const Word &sourceWord) const;
-
   StackVec m_stackVec;
   std::vector<TargetPhraseCollection*> m_tpColl;
   const PhraseDictionaryCompact &m_pt;
+
+  size_t m_lastPos;
+  size_t m_unaryPos;
+  ChartParserCallback* m_outColl;
+
+  CompactPTNode m_root;
 };
 
 }  // namespace Moses

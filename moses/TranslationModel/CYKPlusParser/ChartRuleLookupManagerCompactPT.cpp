@@ -52,51 +52,21 @@ ChartRuleLookupManagerCompactPT::~ChartRuleLookupManagerCompactPT()
 
 void ChartRuleLookupManagerCompactPT::GetChartRuleCollection(
   const WordsRange &range,
-  size_t last,
+  size_t lastPos,
   ChartParserCallback &outColl)
 {
-  //m_tpColl.push_back(TargetPhraseCollection());
-  //TargetPhraseCollection &tpColl = m_tpColl.back();
-  TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-  m_tpColl.push_back(tpColl);
+  size_t startPos = range.GetStartPos();
+  size_t absEndPos = range.GetEndPos();
 
-  if (range.GetNumWordsCovered() == 1) {
-    const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
-    const Word &sourceWord = sourceWordLabel.GetLabel();
-    TargetPhrase *tp = CreateTargetPhrase(sourceWord);
-    tpColl->Add(tp);
-  }
+  m_lastPos = lastPos;
+  m_stackVec.clear();
+  m_outColl = &outColl;
+  m_unaryPos = absEndPos-1; // rules ending in this position are unary and should not be added to collection
 
-  outColl.Add(*tpColl, m_stackVec, range);
+  const CompactPTNode &rootNode = m_root;
+
+
+
 }
 
-TargetPhrase *ChartRuleLookupManagerCompactPT::CreateTargetPhrase(const Word &sourceWord) const
-{
-  // create a target phrase from the 1st word of the source, prefix with 'ChartManagerSkeleton:'
-  string str = sourceWord.GetFactor(0)->GetString().as_string();
-  str = "ChartManagerSkeleton:" + str;
-
-  TargetPhrase *tp = new TargetPhrase();
-  Word &word = tp->AddWord();
-  word.CreateFromString(Output, m_pt.GetOutput(), str, false);
-
-  // create hiero-style non-terminal for LHS
-  Word *targetLHS = new Word();
-  targetLHS->CreateFromString(Output, m_pt.GetOutput(), "X", true);
-  tp->SetTargetLHS(targetLHS);
-
-  // word alignement
-  tp->SetAlignmentInfo("0-0");
-
-  // score for this phrase table
-  vector<float> scores(m_pt.GetNumScoreComponents(), 1.3);
-  tp->GetScoreBreakdown().PlusEquals(&m_pt, scores);
-
-  // score of all other ff when this rule is being loaded
-  Phrase sourcePhrase;
-  sourcePhrase.AddWord(sourceWord);
-  //tp->Evaluate(sourcePhrase, m_pt.GetFeaturesToApply());
-
-  return tp;
-}
 }  // namespace Moses
