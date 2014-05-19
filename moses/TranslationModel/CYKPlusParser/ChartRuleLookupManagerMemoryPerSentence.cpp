@@ -71,8 +71,8 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
 
     // if we found a new rule -> directly add it to the out collection
     if (child != NULL) {
-        const TargetPhraseCollection &tpc = child->GetTargetPhraseCollection();
-        outColl.Add(tpc, m_stackVec, range);
+      const TargetPhraseCollection &tpc = child->GetTargetPhraseCollection();
+      outColl.Add(tpc, m_stackVec, range);
     }
   }
   // all rules starting with nonterminal
@@ -96,134 +96,137 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
 
 // if a (partial) rule matches, add it to list completed rules (if non-unary and non-empty), and try find expansions that have this partial rule as prefix.
 void ChartRuleLookupManagerMemoryPerSentence::AddAndExtend(
-    const PhraseDictionaryNodeMemory *node,
-    size_t endPos,
-    const ChartCellLabel *cellLabel) {
+  const PhraseDictionaryNodeMemory *node,
+  size_t endPos,
+  const ChartCellLabel *cellLabel)
+{
 
-    // add backpointer
-    if (cellLabel != NULL) {
-      m_stackVec.push_back(cellLabel);
+  // add backpointer
+  if (cellLabel != NULL) {
+    m_stackVec.push_back(cellLabel);
+  }
+
+  const TargetPhraseCollection &tpc = node->GetTargetPhraseCollection();
+  // add target phrase collection (except if rule is empty or unary)
+  if (!tpc.IsEmpty() && endPos != m_unaryPos) {
+    m_completedRules[endPos].Add(tpc, m_stackVec, *m_outColl);
+  }
+
+  // get all further extensions of rule (until reaching end of sentence or max-chart-span)
+  if (endPos < m_lastPos) {
+    if (!node->GetTerminalMap().empty()) {
+      GetTerminalExtension(node, endPos+1);
     }
-
-    const TargetPhraseCollection &tpc = node->GetTargetPhraseCollection();
-    // add target phrase collection (except if rule is empty or unary)
-    if (!tpc.IsEmpty() && endPos != m_unaryPos) {
-      m_completedRules[endPos].Add(tpc, m_stackVec, *m_outColl);
-    }
-
-    // get all further extensions of rule (until reaching end of sentence or max-chart-span)
-    if (endPos < m_lastPos) {
-      if (!node->GetTerminalMap().empty()) {
-        GetTerminalExtension(node, endPos+1);
+    if (!node->GetNonTerminalMap().empty()) {
+      for (size_t newEndPos = endPos+1; newEndPos <= m_lastPos; newEndPos++) {
+        GetNonTerminalExtension(node, endPos+1, newEndPos);
       }
-      if (!node->GetNonTerminalMap().empty()) {
-        for (size_t newEndPos = endPos+1; newEndPos <= m_lastPos; newEndPos++) {
-          GetNonTerminalExtension(node, endPos+1, newEndPos);
-        }
-      }
     }
+  }
 
-    // remove backpointer
-    if (cellLabel != NULL) {
-      m_stackVec.pop_back();
-    }
+  // remove backpointer
+  if (cellLabel != NULL) {
+    m_stackVec.pop_back();
+  }
 }
 
 // search all possible terminal extensions of a partial rule (pointed at by node) at a given position
 // recursively try to expand partial rules into full rules up to m_lastPos.
 void ChartRuleLookupManagerMemoryPerSentence::GetTerminalExtension(
-    const PhraseDictionaryNodeMemory *node,
-    size_t pos) {
+  const PhraseDictionaryNodeMemory *node,
+  size_t pos)
+{
 
-    const Word &sourceWord = GetSourceAt(pos).GetLabel();
-    const PhraseDictionaryNodeMemory::TerminalMap & terminals = node->GetTerminalMap();
+  const Word &sourceWord = GetSourceAt(pos).GetLabel();
+  const PhraseDictionaryNodeMemory::TerminalMap & terminals = node->GetTerminalMap();
 
-    // if node has small number of terminal edges, test word equality for each.
-    if (terminals.size() < 5) {
-      for (PhraseDictionaryNodeMemory::TerminalMap::const_iterator iter = terminals.begin(); iter != terminals.end(); ++iter) {
-        const Word & word = iter->first;
-        if (word == sourceWord) {
-          const PhraseDictionaryNodeMemory *child = & iter->second;
-          AddAndExtend(child, pos, NULL);
-        }
-      }
-    }
-    // else, do hash lookup
-    else {
-      const PhraseDictionaryNodeMemory *child = node->GetChild(sourceWord);
-      if (child != NULL) {
+  // if node has small number of terminal edges, test word equality for each.
+  if (terminals.size() < 5) {
+    for (PhraseDictionaryNodeMemory::TerminalMap::const_iterator iter = terminals.begin(); iter != terminals.end(); ++iter) {
+      const Word & word = iter->first;
+      if (word == sourceWord) {
+        const PhraseDictionaryNodeMemory *child = & iter->second;
         AddAndExtend(child, pos, NULL);
       }
     }
+  }
+  // else, do hash lookup
+  else {
+    const PhraseDictionaryNodeMemory *child = node->GetChild(sourceWord);
+    if (child != NULL) {
+      AddAndExtend(child, pos, NULL);
+    }
+  }
 }
 
 // search all nonterminal possible nonterminal extensions of a partial rule (pointed at by node) for a given span (StartPos, endPos).
 // recursively try to expand partial rules into full rules up to m_lastPos.
 void ChartRuleLookupManagerMemoryPerSentence::GetNonTerminalExtension(
-    const PhraseDictionaryNodeMemory *node,
-    size_t startPos,
-    size_t endPos) {
+  const PhraseDictionaryNodeMemory *node,
+  size_t startPos,
+  size_t endPos)
+{
 
-    // target non-terminal labels for the span
-    const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
+  // target non-terminal labels for the span
+  const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
 
-    if (targetNonTerms.GetSize() == 0) {
-      return;
-    }
+  if (targetNonTerms.GetSize() == 0) {
+    return;
+  }
 
 #if !defined(UNLABELLED_SOURCE)
-    // source non-terminal labels for the span
-    const InputPath &inputPath = GetParser().GetInputPath(startPos, endPos);
-    const std::vector<bool> &sourceNonTermArray = inputPath.GetNonTerminalArray();
+  // source non-terminal labels for the span
+  const InputPath &inputPath = GetParser().GetInputPath(startPos, endPos);
+  const std::vector<bool> &sourceNonTermArray = inputPath.GetNonTerminalArray();
 
-    // can this ever be true? Moses seems to pad the non-terminal set of the input with [X]
-    if (inputPath.GetNonTerminalSet().size() == 0) {
-      return;
-    }
+  // can this ever be true? Moses seems to pad the non-terminal set of the input with [X]
+  if (inputPath.GetNonTerminalSet().size() == 0) {
+    return;
+  }
 #endif
 
-    // non-terminal labels in phrase dictionary node
-    const PhraseDictionaryNodeMemory::NonTerminalMap & nonTermMap = node->GetNonTerminalMap();
+  // non-terminal labels in phrase dictionary node
+  const PhraseDictionaryNodeMemory::NonTerminalMap & nonTermMap = node->GetNonTerminalMap();
 
-    // loop over possible expansions of the rule
-    PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator p;
-    PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator end = nonTermMap.end();
-    for (p = nonTermMap.begin(); p != end; ++p) {
-      // does it match possible source and target non-terminals?
+  // loop over possible expansions of the rule
+  PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator p;
+  PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator end = nonTermMap.end();
+  for (p = nonTermMap.begin(); p != end; ++p) {
+    // does it match possible source and target non-terminals?
 #if defined(UNLABELLED_SOURCE)
-      const Word &targetNonTerm = p->first;
+    const Word &targetNonTerm = p->first;
 #else
-      const PhraseDictionaryNodeMemory::NonTerminalMapKey &key = p->first;
-      const Word &sourceNonTerm = key.first;
-      // check if source label matches
-      if (! sourceNonTermArray[sourceNonTerm[0]->GetId()]) {
-        continue;
-      }
-      const Word &targetNonTerm = key.second;
+    const PhraseDictionaryNodeMemory::NonTerminalMapKey &key = p->first;
+    const Word &sourceNonTerm = key.first;
+    // check if source label matches
+    if (! sourceNonTermArray[sourceNonTerm[0]->GetId()]) {
+      continue;
+    }
+    const Word &targetNonTerm = key.second;
 #endif
 
-      //soft matching of NTs
-      if (m_isSoftMatching && !m_softMatchingMap[targetNonTerm[0]->GetId()].empty()) {
-        const std::vector<Word>& softMatches = m_softMatchingMap[targetNonTerm[0]->GetId()];
-        for (std::vector<Word>::const_iterator softMatch = softMatches.begin(); softMatch != softMatches.end(); ++softMatch) {
-          const ChartCellLabel *cellLabel = targetNonTerms.Find(*softMatch);
-          if (cellLabel == NULL) {
-            continue;
-          }
-          // create new rule
-          const PhraseDictionaryNodeMemory &child = p->second;
-          AddAndExtend(&child, endPos, cellLabel);
+    //soft matching of NTs
+    if (m_isSoftMatching && !m_softMatchingMap[targetNonTerm[0]->GetId()].empty()) {
+      const std::vector<Word>& softMatches = m_softMatchingMap[targetNonTerm[0]->GetId()];
+      for (std::vector<Word>::const_iterator softMatch = softMatches.begin(); softMatch != softMatches.end(); ++softMatch) {
+        const ChartCellLabel *cellLabel = targetNonTerms.Find(*softMatch);
+        if (cellLabel == NULL) {
+          continue;
         }
-      } // end of soft matches lookup
-
-      const ChartCellLabel *cellLabel = targetNonTerms.Find(targetNonTerm);
-      if (cellLabel == NULL) {
-        continue;
+        // create new rule
+        const PhraseDictionaryNodeMemory &child = p->second;
+        AddAndExtend(&child, endPos, cellLabel);
       }
-      // create new rule
-      const PhraseDictionaryNodeMemory &child = p->second;
-      AddAndExtend(&child, endPos, cellLabel);
+    } // end of soft matches lookup
+
+    const ChartCellLabel *cellLabel = targetNonTerms.Find(targetNonTerm);
+    if (cellLabel == NULL) {
+      continue;
     }
+    // create new rule
+    const PhraseDictionaryNodeMemory &child = p->second;
+    AddAndExtend(&child, endPos, cellLabel);
+  }
 }
 
 

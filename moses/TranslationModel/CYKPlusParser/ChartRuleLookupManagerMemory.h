@@ -53,11 +53,11 @@ public:
 
 private:
 
-void GetTerminalExtension(
+  void GetTerminalExtension(
     const PhraseDictionaryNodeMemory *node,
     size_t pos);
 
-void GetNonTerminalExtension(
+  void GetNonTerminalExtension(
     const PhraseDictionaryNodeMemory *node,
     size_t startPos,
     size_t endPos);

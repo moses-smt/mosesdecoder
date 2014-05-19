@@ -29,33 +29,33 @@ namespace Moses
 
 CompletedRuleCollection::CompletedRuleCollection() : m_ruleLimit(StaticData::Instance().GetRuleLimit())
 {
-    m_scoreThreshold = numeric_limits<float>::infinity();
+  m_scoreThreshold = numeric_limits<float>::infinity();
 }
 
 // copies some functionality (pruning) from ChartTranslationOptionList::Add
 void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
-           const StackVec &stackVec,
-           const ChartParserCallback &outColl)
+                                  const StackVec &stackVec,
+                                  const ChartParserCallback &outColl)
 {
-    if (tpc.IsEmpty()) {
-      return;
-    }
+  if (tpc.IsEmpty()) {
+    return;
+  }
 
-    const TargetPhrase &targetPhrase = **(tpc.begin());
-    float score = targetPhrase.GetFutureScore();
-    for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end(); ++p) {
-        float stackScore = (*p)->GetBestScore(&outColl);
-        score += stackScore;
-    }
+  const TargetPhrase &targetPhrase = **(tpc.begin());
+  float score = targetPhrase.GetFutureScore();
+  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end(); ++p) {
+    float stackScore = (*p)->GetBestScore(&outColl);
+    score += stackScore;
+  }
 
-    // If the rule limit has already been reached then don't add the option
-    // unless it is better than at least one existing option.
-    if (m_collection.size() > m_ruleLimit && score < m_scoreThreshold) {
-      return;
-    }
+  // If the rule limit has already been reached then don't add the option
+  // unless it is better than at least one existing option.
+  if (m_collection.size() > m_ruleLimit && score < m_scoreThreshold) {
+    return;
+  }
 
-    CompletedRule *completedRule = new CompletedRule(tpc, stackVec, score);
-    m_collection.push_back(completedRule);
+  CompletedRule *completedRule = new CompletedRule(tpc, stackVec, score);
+  m_collection.push_back(completedRule);
 
   // If the rule limit hasn't been exceeded then update the threshold.
   if (m_collection.size() <= m_ruleLimit) {
@@ -64,10 +64,10 @@ void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
 
   // Prune if bursting
   if (m_collection.size() == m_ruleLimit * 2) {
-        NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin() + m_ruleLimit - 1,
-                     m_collection.end(),
-                     CompletedRuleOrdered());
+    NTH_ELEMENT4(m_collection.begin(),
+                 m_collection.begin() + m_ruleLimit - 1,
+                 m_collection.end(),
+                 CompletedRuleOrdered());
     m_scoreThreshold = m_collection[m_ruleLimit-1]->GetScoreEstimate();
     for (size_t i = 0 + m_ruleLimit; i < m_collection.size(); i++) {
       delete m_collection[i];

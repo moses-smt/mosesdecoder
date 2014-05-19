@@ -52,7 +52,8 @@ using namespace std;
 #if defined __MINGW32__ && !defined mkdtemp
 #include <windows.h>
 #include <errno.h>
-char *mkdtemp(char *tempbuf) {
+char *mkdtemp(char *tempbuf)
+{
   int rand_value = 0;
   char* tempbase = NULL;
   char tempbasebuf[MAX_PATH] = "";
@@ -124,7 +125,7 @@ SetParameter(const std::string& key, const std::string& value)
 int removedirectoryrecursively(const char *dirname)
 {
 #if defined __MINGW32__
-    //TODO(jie): replace this function with boost implementation
+  //TODO(jie): replace this function with boost implementation
 #else
   DIR *dir;
   struct dirent *entry;

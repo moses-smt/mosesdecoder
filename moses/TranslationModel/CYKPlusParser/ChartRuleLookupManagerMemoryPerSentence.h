@@ -41,8 +41,8 @@ class ChartRuleLookupManagerMemoryPerSentence : public ChartRuleLookupManagerCYK
 {
 public:
   ChartRuleLookupManagerMemoryPerSentence(const ChartParser &parser,
-                               const ChartCellCollectionBase &cellColl,
-                               const PhraseDictionaryFuzzyMatch &ruleTable);
+                                          const ChartCellCollectionBase &cellColl,
+                                          const PhraseDictionaryFuzzyMatch &ruleTable);
 
   ~ChartRuleLookupManagerMemoryPerSentence() {};
 
@@ -53,11 +53,11 @@ public:
 
 private:
 
-void GetTerminalExtension(
+  void GetTerminalExtension(
     const PhraseDictionaryNodeMemory *node,
     size_t pos);
 
-void GetNonTerminalExtension(
+  void GetNonTerminalExtension(
     const PhraseDictionaryNodeMemory *node,
     size_t startPos,
     size_t endPos);
