@@ -23,54 +23,52 @@ def split_args(all_args):
     """
     my_args = []
     mo_args = []
-    try:
-        i = all_args.index("--")
-        my_args = all_args[:i]
-        mo_args = all_args[i+1:]
-    except:
-        my_args = []
-        mo_args = all_args[:]
-        pass
-
+    arglist = mo_args
+    i = 0
     # IMPORTANT: the code below must be coordinated with 
     # - the evolution of moses command line arguments
     # - mert-moses.pl 
-    i = 0
-    while i < len(mo_args):
-        if mo_args[i] == "-i" or mo_args[i] == "-input-file":
-            my_args.extend(["-i",mo_args[i+1]])
-            mo_args[i:i+2] = []
-            
-        elif mo_args[i] == "-inputtype":
-            if mo_args[i+1] != "0":
+    while i < len(all_args):
+        # print i,"MY_ARGS", my_args
+        # print i,"MO_ARGS", mo_args
+        if all_args[i] == "--[":
+            arglist = my_args
+        elif all_args[i] == "--]":
+            arglist = mo_args
+        elif all_args[i] == "-i" or all_args[i] == "-input-file":
+            my_args.extend(["-i",all_args[i+1]])
+            i += 1
+        elif all_args[i] == "-inputtype":
+            if all_args[i+1] != "0":
                 # not yet supported! Therefore:
                 errmsg  = "FATAL ERROR: %s "%sys.argv[0]
                 errmsg += "only supports plain text input at this point."
                 raise Exception(errsmg)
-            my_args.extend(["--input-type",mo_args[i+1]])
-            mo_args[i:i+2] = []
-            
-        elif mo_args[i] == "-lattice-samples":
-            # my_args.extend(["--lattice-sample",mo_args[i+2]])
-            # my_args.extend(["--lattice-sample-file",mo_args[i+1]])
+            # my_args.extend(["--input-type",all_args[i+1]])
+            i += 1
+        elif all_args[i] == "-lattice-samples":
+            # my_args.extend(["--lattice-sample",all_args[i+2]])
+            # my_args.extend(["--lattice-sample-file",all_args[i+1]])
             # mo_args[i:i+3] = []
+            # i += 2
             # This is not yet supported! Therefore:
             errmsg  = "FATAL ERROR: %s "%sys.argv[0]
             errmsg += "does not yet support lattice sampling."
             raise Exception(errsmg)
         
-        elif mo_args[i] == "-n-best-list":
-            my_args.extend(["--nbest",mo_args[i+2]])
-            my_args.extend(["--nbest-file",mo_args[i+1]])
-            mo_args[i:i+3] = []
+        elif all_args[i] == "-n-best-list":
+            my_args.extend(["--nbest",all_args[i+2]])
+            my_args.extend(["--nbest-file",all_args[i+1]])
+            i += 2
 
-        elif mo_args[i] == "-n-best-distinct":
-            my_args.extend(["-U"])
-            mo_args[i:i+1] = []
+        elif all_args[i] == "-n-best-distinct":
+            my_args.extend(["-u"])
 
         else:
-            i += 1
+            arglist.append(all_args[i])
             pass
+
+        i += 1
         pass
     return my_args,mo_args
     
@@ -83,6 +81,8 @@ def interpret_args(my_args):
     aparser.add_argument("-s","--server-cmd",default="mosesserver",
                          dest="servercmd", help="path to moses server command")
     aparser.add_argument("--url",help="URL of external moses server.")
+    aparser.add_argument("-p","--port", type=int, default=7447,
+                         help="port number to be used for server")
     
     # input / output
     aparser.add_argument("-i","--input",help="source file",default="-")
@@ -152,12 +152,18 @@ def read_data(fname):
         pass
     return foo
 
-def repack_result(id,result):
+def repack_result(idx,result):
     global args
     if args.nbest:
         for h in result['nbest']:
-            fields = (id,h['hyp'],h['fvals'],h['totalScore'])
-            print >>NBestFile,"%d ||| %s ||| %s ||| %f"%fields
+            fields = [idx,h['hyp'],h['fvals'],h['totalScore']]
+            for i in xrange(len(fields)):
+                if type(fields[i]) is unicode:
+                    fields[i] = fields[i].encode('utf-8')
+                    pass
+                pass
+            # print fields
+            print >>NBestFile,"%d ||| %s ||| %s ||| %f"%tuple(fields)
             pass
         pass
     if 'align' in result:
@@ -180,6 +186,9 @@ def repack_result(id,result):
 
 if __name__ == "__main__":
     my_args, mo_args = split_args(sys.argv[1:])
+
+    # print "MY ARGS", my_args
+    # print "MO_ARGS", mo_args
 
     global args
     args = interpret_args(my_args)
@@ -204,7 +213,7 @@ if __name__ == "__main__":
     if args.url:
         mserver.connect(args.url)
     else:
-        mserver.start(args=mo_args,debug=args.debug)
+        mserver.start(args=mo_args,port=args.port,debug=args.debug)
         pass
 
     ref = None
@@ -214,19 +223,22 @@ if __name__ == "__main__":
 
     if (args.input == "-"):
         line = sys.stdin.readline()
-        id = 0
+        idx = 0
         while line:
             result = translate(mserver.proxy,args,line)
-            repack_result(id,result)
+            repack_result(idx,result)
             line = sys.stdin.readline()
-            id += 1
+            idx += 1
             pass
         pass
     else:
         src = read_data(args.input)
         for i in xrange(len(src)):
             result = translate(mserver.proxy,args,src[i])
-            repack_result(id,result)
+            repack_result(i,result)
+            if args.debug:
+                print >>sys.stderr, result['text'].encode('utf-8')
+                pass
             if  ref and aln:
                 result = mserver.proxy.updater({'source'    : src[i],
                                                 'target'    : ref[i],

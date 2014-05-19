@@ -166,13 +166,13 @@ class MosesServer(ProcessWrapper):
         self.cmd.extend(["-f",config])
         pass
       pass
-    self.port = find_free_port(port)
+    self.port = port # find_free_port(port)
     if not self.port:
       raise Excpetion("Cannot find free port for moses server!")
     self.cmd.extend(["--server-port", "%d"%self.port])
     if debug:
       print >>sys.stderr,self.cmd
-      self.process = Popen(self.cmd)
+      self.process = Popen(self.cmd,stderr = sys.stderr)
     else:
       devnull = open(os.devnull,"w")
       self.process = Popen(self.cmd, stderr=devnull, stdout=devnull)
