@@ -44,6 +44,7 @@ ChartRuleLookupManagerCompactPT::ChartRuleLookupManagerCompactPT(
   size_t sourceSize = parser.GetSize();
 
   m_completedRules.resize(sourceSize);
+  m_activeChart.resize(sourceSize);
 
 }
 
@@ -53,15 +54,35 @@ void ChartRuleLookupManagerCompactPT::GetChartRuleCollection(
   ChartParserCallback &outColl)
 {
   size_t startPos = range.GetStartPos();
-  size_t absEndPos = range.GetEndPos();
+  size_t endPos = range.GetEndPos();
+  size_t width = range.GetNumWordsCovered();
 
-  m_lastPos = lastPos;
-  m_stackVec.clear();
-  m_outColl = &outColl;
+  const CompactNodes &activeNodes = m_activeChart[startPos];
+  size_t numNodes = activeNodes.GetSize();
 
+  for (size_t i = 0; i < numNodes; ++i) {
+	  const CompactNode &node = activeNodes.Get(i);
+	  size_t nodeEndPos = node.m_endPos;
+	  assert(nodeEndPos < endPos);
+
+	  if (nodeEndPos + 1 == endPos) {
+		  // 1-width span. lookup terminal
+		  ExtendTerm(endPos);
+	  }
+	  ExtendNonTerm(nodeEndPos + 1, endPos);
+  }
+
+  ExtendNonTerm(startPos, endPos);
+}
+
+void ChartRuleLookupManagerCompactPT::ExtendTerm(size_t pos)
+{
 
 }
 
+void ChartRuleLookupManagerCompactPT::ExtendNonTerm(size_t startPos, size_t endPos)
+{
 
+}
 
 }  // namespace Moses

@@ -33,6 +33,32 @@ namespace Moses
 class ChartParserCallback;
 class WordsRange;
 
+class TargetPhraseCollections
+{
+  std::vector<TargetPhraseCollections*> m_coll;
+};
+
+class CompactNode
+{
+public:
+
+  std::string m_phrase;
+  size_t m_endPos;
+};
+
+class CompactNodes
+{
+public:
+	size_t GetSize() const
+	{ return m_coll.size(); }
+
+	const CompactNode &Get(size_t i) const
+	{ return *m_coll[i]; }
+
+	std::vector<CompactNode*> m_coll;
+
+};
+
 //! Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerCompactPT : public ChartRuleLookupManagerCYKPlus
 {
@@ -52,13 +78,11 @@ private:
   const PhraseDictionaryCompact &m_ruleTable;
 
   // temporary storage of completed rules (one collection per end position; all rules collected consecutively start from the same position)
-  std::vector<CompletedRuleCollection> m_completedRules;
+  std::vector<TargetPhraseCollections> m_completedRules;
+  std::vector<CompactNodes> m_activeChart;
 
-  size_t m_lastPos;
-  size_t m_unaryPos;
-
-  StackVec m_stackVec;
-  ChartParserCallback* m_outColl;
+  void ExtendTerm(size_t pos);
+  void ExtendNonTerm(size_t startPos, size_t endPos);
 
 };
 
