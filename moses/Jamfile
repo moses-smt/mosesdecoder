@@ -65,6 +65,7 @@ lib moses :
   FF/*.cpp
   FF/OSM-Feature/*.cpp
   FF/LexicalReordering/*.cpp
+  PP/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp

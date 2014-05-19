@@ -18,7 +18,7 @@ sub trim($)
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
-my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$FINAL,$VERBOSE,$IGNORE_TIME,$DELETE_CRASHED);
+my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$FINAL,$VERBOSE,$IGNORE_TIME,$DELETE_CRASHED,$DELETE_VERSION);
 my $SLEEP = 2;
 my $META = "$RealBin/experiment.meta";
 
@@ -36,6 +36,8 @@ die("experiment.perl -config config-file [-exec] [-no-graph]")
     unless  &GetOptions('config=s' => \$CONFIG_FILE,
 			'continue=i' => \$CONTINUE,
 			'delete-crashed=i' => \$DELETE_CRASHED,
+			'delete-run=i' => \$DELETE_VERSION,
+			'delete-version=i' => \$DELETE_VERSION,
 			'ignore-time' => \$IGNORE_TIME,
 			'exec' => \$EXECUTE,
 			'cluster' => \$CLUSTER,
@@ -51,9 +53,11 @@ if (! -e "steps") { `mkdir -p steps`; }
 die("error: could not find config file") 
     unless ($CONFIG_FILE && -e $CONFIG_FILE) ||
    	   ($CONTINUE && -e &steps_file("config.$CONTINUE",$CONTINUE)) ||
-   	   ($DELETE_CRASHED && -e &steps_file("config.$DELETE_CRASHED",$DELETE_CRASHED));
+   	   ($DELETE_CRASHED && -e &steps_file("config.$DELETE_CRASHED",$DELETE_CRASHED)) ||
+   	   ($DELETE_VERSION && -e &steps_file("config.$DELETE_VERSION",$DELETE_VERSION));
 $CONFIG_FILE = &steps_file("config.$CONTINUE",$CONTINUE) if $CONTINUE && !$CONFIG_FILE;
-$CONFIG_FILE = &steps_file("config.$DELETE_CRASHED",$DELETE_CRASHED) if $DELETE_CRASHED && !$CONFIG_FILE;
+$CONFIG_FILE = &steps_file("config.$DELETE_CRASHED",$DELETE_CRASHED) if $DELETE_CRASHED;
+$CONFIG_FILE = &steps_file("config.$DELETE_VERSION",$DELETE_VERSION) if $DELETE_VERSION;
 
 my (@MODULE,
     %MODULE_TYPE,
@@ -88,8 +92,9 @@ chdir(&check_and_get("GENERAL:working-dir"));
 my $VERSION = 0;     # experiment number
 $VERSION = $CONTINUE if $CONTINUE;
 $VERSION = $DELETE_CRASHED if $DELETE_CRASHED;
+$VERSION = $DELETE_VERSION if $DELETE_VERSION;
 
-&compute_version_number() if $EXECUTE && !$CONTINUE && !$DELETE_CRASHED;
+&compute_version_number() if $EXECUTE && !$CONTINUE && !$DELETE_CRASHED && !$DELETE_VERSION;
 `mkdir -p steps/$VERSION`;
 
 &log_config();
@@ -110,6 +115,11 @@ my @DEPENDENCY;
 
 if (defined($DELETE_CRASHED)) {
   &delete_crashed($DELETE_CRASHED);
+  exit;
+}
+
+if (defined($DELETE_VERSION)) {
+  &delete_version($DELETE_VERSION);
   exit;
 }
 
@@ -407,7 +417,7 @@ sub log_config {
     my $dir = &check_and_get("GENERAL:working-dir");
     `mkdir -p $dir/steps`;
     my $config_file = &steps_file("config.$VERSION",$VERSION);
-    `cp $CONFIG_FILE $config_file` unless $CONTINUE || $DELETE_CRASHED;
+    `cp $CONFIG_FILE $config_file` unless $CONTINUE || $DELETE_CRASHED || $DELETE_VERSION;
     open(PARAMETER,">".&steps_file("parameter.$VERSION",$VERSION)) or die "Cannot open: $!";
     foreach my $parameter (sort keys %CONFIG) {
 	print PARAMETER "$parameter =";
@@ -689,28 +699,94 @@ sub get_sets {
     return @SET;
 }
 
+# DELETION OF STEPS AND VERSIONS
 # delete step files for steps that have crashed
-sub delete_crashed() {
+sub delete_crashed {
   my $crashed = 0;
   for(my $i=0;$i<=$#DO_STEP;$i++) {
     my $step_file = &versionize(&step_file($i),$DELETE_CRASHED);
     next unless -e $step_file;
     next unless &check_if_crashed($i,$DELETE_CRASHED);
-
-    # step file
-    if ($EXECUTE) {
-      `rm $step_file $step_file.*`;
-      print "deleted crashed step $step_file\n";
-    }
-    print "crashed: $step_file\n";
-
-    # output
-    &delete_output(&get_default_file(&deconstruct_name($DO_STEP[$i])));
-    
+    &delete_step($DO_STEP[$i],$DELETE_CRASHED);
     $crashed++;
   }
   print "run with -exec to delete steps\n" if $crashed && !$EXECUTE;
   print "nothing to do\n" unless $crashed;
+}
+
+# delete all step and data files for a version
+sub delete_version {
+
+  # check which versions are already deleted
+  my %ALREADY_DELETED;
+  my $dir = &check_and_get("GENERAL:working-dir");    
+  open(VERSION,"ls $dir/steps/*/deleted.* 2>/dev/null|");
+  while(<VERSION>) {
+    /deleted\.(\d+)/;
+    $ALREADY_DELETED{$1}++;
+  }
+  close(VERSION);
+
+  # check if any of the steps are re-used by other versions
+  my (%USED_BY_OTHERS,%DELETABLE,%NOT_DELETABLE);
+  open(VERSION,"ls $dir/steps|");
+  while(my $version = <VERSION>) {
+    chop($version);
+    next if $version !~ /^\d+/ || $version == 0;
+    open(RE_USE,"steps/$version/re-use.$version");
+    while(<RE_USE>) {
+      next unless /^(.+) (\d+)$/;
+      my ($step,$re_use_version) = ($1,$2);
+
+      # a step in the current version that is used in other versions
+      $USED_BY_OTHERS{$step}++ if $re_use_version == $DELETE_VERSION && !defined($ALREADY_DELETED{$version});
+
+      # potentially deletable step in already deleted version that current version uses
+      push @{$DELETABLE{$re_use_version}}, $step if $version == $DELETE_VERSION && defined($ALREADY_DELETED{$re_use_version});
+
+      # not deletable step used by not-deleted version
+      $NOT_DELETABLE{$re_use_version}{$step}++ if $version != $DELETE_VERSION && !defined(ALREADY_DELETED{$version});
+    }
+    close(RE_USE);
+  }
+
+  # go through all steps for which step files where created
+  open(STEPS,"ls $dir/steps/$DELETE_VERSION/[A-Z]*.$DELETE_VERSION|");
+  while(my $step_file = <STEPS>) {
+    chomp($step_file);
+    my $step = &get_step_from_step_file($step_file);
+    next if $USED_BY_OTHERS{$step};
+    &delete_step($step,$DELETE_VERSION); 
+  }
+
+  # orphan killing: delete steps in deleted versions, if they were only preserved because this version needed them
+  foreach my $version (keys %DELETABLE) {
+    foreach my $step (@{$DELETABLE{$version}}) {
+      next if defined($NOT_DELETABLE{$version}) && defined($NOT_DELETABLE{$version}{$step});
+      &delete_step($step,$version);
+    }
+  }
+}
+
+sub get_step_from_step_file {
+  my ($step) = @_;
+  $step =~ s/^.+\///;
+  $step =~ s/\.\d+$//;
+  $step =~ s/_/:/g;
+  return $step;
+}
+ 
+sub delete_step {
+  my ($step_name,$version) = @_;
+  my ($module,$set,$step) = &deconstruct_name($step_name);
+
+  my $step_file = &versionize(&step_file2($module,$set,$step),$version); 
+  print "delete step $step_file\n";
+  `rm $step_file $step_file.*` if $EXECUTE;
+
+  my $out_file = $STEP_OUTNAME{"$module:$step"};
+  $out_file =~ s/^(.+\/)([^\/]+)$/$1$set.$2/g if $set;
+  &delete_output(&versionize(&long_file_name($out_file,$module,$set), $version));
 }
 
 sub delete_output {
@@ -732,7 +808,7 @@ sub delete_output {
   }
 }
 
-
+# RE-USE
 # look for completed step jobs from previous experiments
 sub find_re_use {
     my $dir = &check_and_get("GENERAL:working-dir");    
