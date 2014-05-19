@@ -366,6 +366,7 @@ namespace ugdiss
   TSA_tree_iterator(TSA<Token> const* s, Token const& t)
     : root(s) 
   {
+    if (!root) return;
     char const* up = root->getUpperBound(t.id());
     if (!up) return;
     lower.push_back(root->getLowerBound(t.id()));

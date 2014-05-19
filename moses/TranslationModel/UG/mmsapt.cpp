@@ -202,6 +202,8 @@ namespace Moses
       {
 	// cerr << (*bt.V2)[x[k].id()] << " at " << __FILE__ << ":" << __LINE__ << endl;
 	StringPiece wrd = (*bt.V2)[x[k].id()];
+	// if ((off+len) > bt.T2->sntLen(sid))
+	// cerr << off << ";" << len << " " << bt.T2->sntLen(sid) << endl;
 	assert(off+len <= bt.T2->sntLen(sid));
 	w.CreateFromString(Output,ofactor,wrd,false);
 	tp->AddWord(w);
@@ -383,18 +385,23 @@ namespace Moses
 	    calc_pbwd_fix(bta,ppfix);
 	    calc_lex(bta,ppfix);
 	    
-	    uint32_t sid,off,len;    
-	    parse_pid(a->first, sid, off, len);
-	    Token const* x = btb.T2->sntStart(sid) + off;
-	    TSA<Token>::tree_iterator m(btb.I2.get(),x,x+len);
-	    if (m.size())
-	      pool.update(a->first,m.approxOccurrenceCount(),a->second);
-	    else
-	      pool.update(a->first,a->second);
+	    if (btb.I2)
+	      {
+		uint32_t sid,off,len;    
+		parse_pid(a->first, sid, off, len);
+		Token const* x = bta.T2->sntStart(sid) + off;
+		TSA<Token>::tree_iterator m(btb.I2.get(),x,x+len);
+		if (m.size())
+		  pool.update(a->first,m.approxOccurrenceCount(),a->second);
+		else
+		  pool.update(a->first,a->second);
+	      }
+	    else pool.update(a->first,a->second);
 	    calc_pfwd_dyn(bta,pool,&ppfix.fvals);
 	    calc_pbwd_dyn(bta,pool,&ppfix.fvals);
 	  }
-	tpcoll->Add(createTargetPhrase(src,bta,ppfix));
+	if (ppfix.p2)
+	  tpcoll->Add(createTargetPhrase(src,bta,ppfix));
       }
     return (statsa || statsb);
   }
@@ -529,7 +536,13 @@ namespace Moses
 	for (size_t i = 0; mdyn.size() == i && i < sphrase.size(); ++i)
 	  mdyn.extend(sphrase[i]);
       }
-    
+
+#if 0
+    cerr << src << endl;
+    cerr << mfix.size() << ":" << mfix.getPid() << " "
+	 << mdyn.size() << " " << mdyn.getPid() << endl;
+#endif
+
     // phrase not found in either
     if (mdyn.size() != sphrase.size() && 
 	mfix.size() != sphrase.size()) 

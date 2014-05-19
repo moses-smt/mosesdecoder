@@ -225,6 +225,7 @@ namespace Moses
     init(uint64_t const pid1, pstats const& ps, size_t const numfeats)
     {
       p1      = pid1;
+      p2      = 0;
       raw1    = ps.raw_cnt;
       sample1 = ps.sample_cnt;
       sample2 = 0;
