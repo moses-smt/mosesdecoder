@@ -29,7 +29,8 @@
 using namespace std;
 
 
-namespace MosesTraining {
+namespace MosesTraining
+{
 
 
 extern Vocabulary vcbT;
@@ -38,23 +39,23 @@ extern Vocabulary vcbS;
 extern bool hierarchicalFlag;
 
 
-ExtractionPhrasePair::ExtractionPhrasePair( const PHRASE *phraseSource, 
-                                            const PHRASE *phraseTarget, 
-                                            ALIGNMENT *targetToSourceAlignment, 
-                                            float count, float pcfgSum ) :
-    m_phraseSource(phraseSource),
-    m_phraseTarget(phraseTarget),
-    m_count(count),
-    m_pcfgSum(pcfgSum)
+ExtractionPhrasePair::ExtractionPhrasePair( const PHRASE *phraseSource,
+    const PHRASE *phraseTarget,
+    ALIGNMENT *targetToSourceAlignment,
+    float count, float pcfgSum ) :
+  m_phraseSource(phraseSource),
+  m_phraseTarget(phraseTarget),
+  m_count(count),
+  m_pcfgSum(pcfgSum)
 {
   assert(phraseSource->empty());
   assert(phraseTarget->empty());
 
   m_count = count;
   m_pcfgSum = pcfgSum;
-  
+
   std::pair< std::map<ALIGNMENT*,float>::iterator, bool > insertedAlignment =
-      m_targetToSourceAlignments.insert( std::pair<ALIGNMENT*,float>(targetToSourceAlignment,count) );
+    m_targetToSourceAlignments.insert( std::pair<ALIGNMENT*,float>(targetToSourceAlignment,count) );
 
   m_lastTargetToSourceAlignment = insertedAlignment.first;
   m_lastCount = m_count;
@@ -64,29 +65,30 @@ ExtractionPhrasePair::ExtractionPhrasePair( const PHRASE *phraseSource,
 }
 
 
-ExtractionPhrasePair::~ExtractionPhrasePair( ) {
+ExtractionPhrasePair::~ExtractionPhrasePair( )
+{
   Clear();
 }
 
 
 // return value: true if the given alignment was seen for the first time and thus will be stored,
 //               false if it was present already (the pointer may thus be deleted(
-bool ExtractionPhrasePair::Add( ALIGNMENT *targetToSourceAlignment, 
-                                float count, float pcfgSum ) 
+bool ExtractionPhrasePair::Add( ALIGNMENT *targetToSourceAlignment,
+                                float count, float pcfgSum )
 {
   m_count += count;
   m_pcfgSum += pcfgSum;
 
   m_lastCount = count;
   m_lastPcfgSum = pcfgSum;
-  
+
   std::map<ALIGNMENT*,float>::iterator iter = m_lastTargetToSourceAlignment;
   if ( *(iter->first) == *targetToSourceAlignment ) {
     iter->second += count;
     return false;
   } else {
     std::pair< std::map<ALIGNMENT*,float>::iterator, bool > insertedAlignment =
-        m_targetToSourceAlignments.insert( std::pair<ALIGNMENT*,float>(targetToSourceAlignment,count) );
+      m_targetToSourceAlignments.insert( std::pair<ALIGNMENT*,float>(targetToSourceAlignment,count) );
     if ( !insertedAlignment.second ) {
       // the alignment already exists: increment count
       insertedAlignment.first->second += count;
@@ -105,7 +107,7 @@ void ExtractionPhrasePair::IncrementPrevious( float count, float pcfgSum )
   m_pcfgSum += pcfgSum;
   m_lastTargetToSourceAlignment->second += count;
   // properties
-  for ( std::map<std::string, std::pair< PROPERTY_VALUES*, LAST_PROPERTY_VALUE* > >::iterator iter=m_properties.begin(); 
+  for ( std::map<std::string, std::pair< PROPERTY_VALUES*, LAST_PROPERTY_VALUE* > >::iterator iter=m_properties.begin();
         iter !=m_properties.end(); ++iter ) {
     LAST_PROPERTY_VALUE *lastPropertyValue = (iter->second).second;
     (*lastPropertyValue)->second += count;
@@ -116,7 +118,7 @@ void ExtractionPhrasePair::IncrementPrevious( float count, float pcfgSum )
 }
 
 
-// Check for lexical match 
+// Check for lexical match
 // and in case of SCFG rules for equal non-terminal alignment.
 bool ExtractionPhrasePair::Matches( const PHRASE *otherPhraseSource,
                                     const PHRASE *otherPhraseTarget,
@@ -132,9 +134,9 @@ bool ExtractionPhrasePair::Matches( const PHRASE *otherPhraseSource,
   return MatchesAlignment( otherTargetToSourceAlignment );
 }
 
-// Check for lexical match 
+// Check for lexical match
 // and in case of SCFG rules for equal non-terminal alignment.
-// Set boolean indicators. 
+// Set boolean indicators.
 // (Note that we check in the order: target - source - alignment
 //  and do not touch the subsequent boolean indicators once a previous one has been set to false.)
 bool ExtractionPhrasePair::Matches( const PHRASE *otherPhraseSource,
@@ -194,7 +196,7 @@ bool ExtractionPhrasePair::MatchesAlignment( ALIGNMENT *otherTargetToSourceAlign
   return true;
 }
 
-void ExtractionPhrasePair::Clear() 
+void ExtractionPhrasePair::Clear()
 {
   delete m_phraseSource;
   delete m_phraseTarget;
@@ -218,7 +220,7 @@ void ExtractionPhrasePair::Clear()
   m_lastCount = 0.0f;
   m_lastPcfgSum = 0.0f;
   m_lastTargetToSourceAlignment = m_targetToSourceAlignments.begin();
-  
+
   m_isValid = false;
 }
 
@@ -252,7 +254,7 @@ const ALIGNMENT *ExtractionPhrasePair::FindBestAlignmentTargetToSource() const
 
   std::map<ALIGNMENT*,float>::const_iterator bestAlignment = m_targetToSourceAlignments.end();
 
-  for (std::map<ALIGNMENT*,float>::const_iterator iter=m_targetToSourceAlignments.begin(); 
+  for (std::map<ALIGNMENT*,float>::const_iterator iter=m_targetToSourceAlignments.begin();
        iter!=m_targetToSourceAlignments.end(); ++iter) {
     if ( (iter->second > bestAlignmentCount) ||
          ( (iter->second == bestAlignmentCount) &&
@@ -281,7 +283,7 @@ const std::string *ExtractionPhrasePair::FindBestPropertyValue(const std::string
 
   PROPERTY_VALUES::const_iterator bestPropertyValue = allPropertyValues->end();
 
-  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin(); 
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin();
        iter!=allPropertyValues->end(); ++iter) {
     if ( (iter->second > bestPropertyCount) ||
          ( (iter->second == bestPropertyCount) &&
@@ -308,7 +310,7 @@ std::string ExtractionPhrasePair::CollectAllPropertyValues(const std::string &ke
   }
 
   std::ostringstream oss;
-  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin(); 
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin();
        iter!=allPropertyValues->end(); ++iter) {
     if (iter!=allPropertyValues->begin()) {
       oss << " ";

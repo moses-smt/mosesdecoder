@@ -77,12 +77,12 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
       }
       sparseDomainAdded = true;
       m_includeSentenceId = true;
-    } else if(args[i] == "--TreeFeatureSparse"){
-    	//MARIA
-    	m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureSparse()));
-    } else if(args[i] == "--TreeFeatureDense"){
-    	//MARIA
-    	m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureDense()));
+    } else if(args[i] == "--TreeFeatureSparse") {
+      //MARIA
+      m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureSparse()));
+    } else if(args[i] == "--TreeFeatureDense") {
+      //MARIA
+      m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureDense()));
     } else {
       UTIL_THROW(ScoreFeatureArgumentException,"Unknown score argument " << args[i]);
     }
@@ -91,9 +91,9 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
 
 }
 
-void ScoreFeatureManager::addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
-                                                    float count, 
-                                                    int sentenceId) const
+void ScoreFeatureManager::addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+    float count,
+    int sentenceId) const
 {
   for (size_t i = 0; i < m_features.size(); ++i) {
     m_features[i]->addPropertiesToPhrasePair(phrasePair, count, sentenceId);

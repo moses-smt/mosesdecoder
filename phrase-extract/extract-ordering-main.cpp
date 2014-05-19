@@ -92,9 +92,9 @@ class ExtractTask
 public:
   ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFileOrientation)
     :m_sentence(sentence),
-    m_options(initoptions),
-    m_extractFileOrientation(extractFileOrientation)
-	{}
+     m_options(initoptions),
+     m_extractFileOrientation(extractFileOrientation)
+  {}
   void Run();
 private:
   void extract(SentenceAlignment &);
@@ -151,11 +151,11 @@ int main(int argc, char* argv[])
       }
       options.initInstanceWeightsFile(argv[++i]);
     } else if (strcmp(argv[i], "--Debug") == 0) {
-    	options.debug = true;
+      options.debug = true;
     } else if (strcmp(argv[i], "--MinPhraseLength") == 0) {
-    	options.minPhraseLength = atoi(argv[++i]);
+      options.minPhraseLength = atoi(argv[++i]);
     } else if (strcmp(argv[i], "--Separator") == 0) {
-    	options.separator = argv[++i];
+      options.separator = argv[++i];
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -605,16 +605,14 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
 
 int getClass(const std::string &str)
 {
-	size_t pos = str.find("swap");
-	if (pos == str.npos) {
-		return 0;
-	}
-	else if (pos == 0) {
-		return 1;
-	}
-	else {
-		return 2;
-	}
+  size_t pos = str.find("swap");
+  if (pos == str.npos) {
+    return 0;
+  } else if (pos == 0) {
+    return 1;
+  } else {
+    return 2;
+  }
 }
 
 void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
@@ -635,19 +633,19 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   // start
   m_extractFileOrientation << "<s> ";
   for(int fi=0; fi<startF; fi++) {
-	  m_extractFileOrientation << sentence.source[fi] << " ";
+    m_extractFileOrientation << sentence.source[fi] << " ";
   }
   m_extractFileOrientation << sep << " ";
 
   // middle
   for(int fi=startF; fi<=endF; fi++) {
-	  m_extractFileOrientation << sentence.source[fi] << " ";
+    m_extractFileOrientation << sentence.source[fi] << " ";
   }
   m_extractFileOrientation << sep << " ";
 
   // end
   for(int fi=endF+1; fi<sentence.source.size(); fi++) {
-	  m_extractFileOrientation << sentence.source[fi] << " ";
+    m_extractFileOrientation << sentence.source[fi] << " ";
   }
   m_extractFileOrientation << "</s> ";
 
@@ -655,7 +653,7 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   // target
   /*
   for(int ei=startE; ei<=endE; ei++) {
-	  m_extractFileOrientation << sentence.target[ei] << " ";
+    m_extractFileOrientation << sentence.target[ei] << " ";
   }
   */
   m_extractFileOrientation << endl;

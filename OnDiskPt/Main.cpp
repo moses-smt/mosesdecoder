@@ -221,7 +221,7 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
         phrase.AddWord(word);
 
         if (retSourceTarget == 1) {
-            out = word;
+          out = word;
         }
       }
 
@@ -232,7 +232,7 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
         phrase.AddWord(word);
 
         if (retSourceTarget == 2) {
-            out = word;
+          out = word;
         }
       }
 
