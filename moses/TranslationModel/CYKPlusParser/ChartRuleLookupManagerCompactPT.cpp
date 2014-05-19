@@ -19,16 +19,14 @@
 
 #include <iostream>
 #include "ChartRuleLookupManagerCompactPT.h"
-#include "DotChartInMemory.h"
 
-#include "moses/Util.h"
 #include "moses/ChartParser.h"
 #include "moses/InputType.h"
 #include "moses/ChartParserCallback.h"
 #include "moses/StaticData.h"
 #include "moses/NonTerminal.h"
 #include "moses/ChartCellCollection.h"
-#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
 using namespace std;
 
@@ -38,16 +36,15 @@ namespace Moses
 ChartRuleLookupManagerCompactPT::ChartRuleLookupManagerCompactPT(
   const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
-  const PhraseDictionaryCompact &pt)
-  : ChartRuleLookupManager(parser, cellColl)
-  , m_pt(pt)
+  const PhraseDictionaryCompact &ruleTable)
+  : ChartRuleLookupManagerCYKPlus(parser, cellColl)
+  , m_ruleTable(ruleTable)
 {
-  cerr << "starting ChartRuleLookupManagerCompactPT" << endl;
-}
 
-ChartRuleLookupManagerCompactPT::~ChartRuleLookupManagerCompactPT()
-{
-  RemoveAllInColl(m_tpColl);
+  size_t sourceSize = parser.GetSize();
+
+  m_completedRules.resize(sourceSize);
+
 }
 
 void ChartRuleLookupManagerCompactPT::GetChartRuleCollection(
@@ -61,12 +58,10 @@ void ChartRuleLookupManagerCompactPT::GetChartRuleCollection(
   m_lastPos = lastPos;
   m_stackVec.clear();
   m_outColl = &outColl;
-  m_unaryPos = absEndPos-1; // rules ending in this position are unary and should not be added to collection
-
-  const CompactPTNode &rootNode = m_root;
-
 
 
 }
+
+
 
 }  // namespace Moses

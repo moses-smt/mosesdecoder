@@ -20,46 +20,46 @@
 #pragma once
 
 #include <vector>
-#include "moses/ChartRuleLookupManager.h"
+
+#include "ChartRuleLookupManagerCYKPlus.h"
+#include "CompletedRuleCollection.h"
+#include "moses/NonTerminal.h"
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #include "moses/StackVec.h"
 
 namespace Moses
 {
-class TargetPhraseCollection;
+
 class ChartParserCallback;
-class DottedRuleColl;
 class WordsRange;
-class PhraseDictionaryCompact;
 
-class CompactPTNode
-{
-  std::string source;
-}
-
-class ChartRuleLookupManagerCompactPT : public ChartRuleLookupManager
+//! Implementation of ChartRuleLookupManager for in-memory rule tables.
+class ChartRuleLookupManagerCompactPT : public ChartRuleLookupManagerCYKPlus
 {
 public:
   ChartRuleLookupManagerCompactPT(const ChartParser &parser,
-                                 const ChartCellCollectionBase &cellColl,
-                                 const PhraseDictionaryCompact &pt);
+                               const ChartCellCollectionBase &cellColl,
+                               const PhraseDictionaryCompact &ruleTable);
 
-  ~ChartRuleLookupManagerCompactPT();
+  ~ChartRuleLookupManagerCompactPT() {};
 
   virtual void GetChartRuleCollection(
     const WordsRange &range,
-    size_t last,
+    size_t lastPos, // last position to consider if using lookahead
     ChartParserCallback &outColl);
 
 private:
-  StackVec m_stackVec;
-  std::vector<TargetPhraseCollection*> m_tpColl;
-  const PhraseDictionaryCompact &m_pt;
+  const PhraseDictionaryCompact &m_ruleTable;
+
+  // temporary storage of completed rules (one collection per end position; all rules collected consecutively start from the same position)
+  std::vector<CompletedRuleCollection> m_completedRules;
 
   size_t m_lastPos;
   size_t m_unaryPos;
+
+  StackVec m_stackVec;
   ChartParserCallback* m_outColl;
 
-  CompactPTNode m_root;
 };
 
 }  // namespace Moses
