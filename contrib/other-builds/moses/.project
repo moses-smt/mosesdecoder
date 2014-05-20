@@ -1072,6 +1072,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.h</locationURI>
 		</link>
 		<link>
+			<name>FF/DuplicateWord.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DuplicateWord.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/DuplicateWord.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DuplicateWord.h</locationURI>
+		</link>
+		<link>
 			<name>FF/ExternalFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExternalFeature.cpp</locationURI>
