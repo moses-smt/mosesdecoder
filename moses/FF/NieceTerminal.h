@@ -10,10 +10,10 @@ class WordsRange;
 class Word;
 
 // 1 of the non-term covers the same word as 1 of the terminals
-class DuplicateWord : public StatelessFeatureFunction
+class NieceTerminal : public StatelessFeatureFunction
 {
 public:
-  DuplicateWord(const std::string &line)
+  NieceTerminal(const std::string &line)
     :StatelessFeatureFunction(line)
   {}
 

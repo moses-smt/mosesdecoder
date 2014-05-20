@@ -1,6 +1,6 @@
 #include <vector>
 #include <set>
-#include "DuplicateWord.h"
+#include "NieceTerminal.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TargetPhrase.h"
 #include "moses/ChartCellLabel.h"
@@ -9,7 +9,7 @@ using namespace std;
 
 namespace Moses
 {
-void DuplicateWord::Evaluate(const Phrase &source
+void NieceTerminal::Evaluate(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const
@@ -17,7 +17,7 @@ void DuplicateWord::Evaluate(const Phrase &source
   targetPhrase.SetRuleSource(source);
 }
 
-void DuplicateWord::Evaluate(const InputType &input
+void NieceTerminal::Evaluate(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
                                    , const StackVec *stackVec
@@ -53,15 +53,15 @@ void DuplicateWord::Evaluate(const InputType &input
 
 }
 
-void DuplicateWord::Evaluate(const Hypothesis& hypo,
+void NieceTerminal::Evaluate(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 
-void DuplicateWord::EvaluateChart(const ChartHypothesis &hypo,
+void NieceTerminal::EvaluateChart(const ChartHypothesis &hypo,
                                         ScoreComponentCollection* accumulator) const
 {}
 
-bool DuplicateWord::ContainTerm(const WordsRange &ntRange, const std::set<Word> &terms) const
+bool NieceTerminal::ContainTerm(const WordsRange &ntRange, const std::set<Word> &terms) const
 {
 	std::set<Word>::const_iterator iter;
 
