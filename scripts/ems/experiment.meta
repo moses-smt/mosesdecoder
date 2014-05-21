@@ -55,7 +55,6 @@ truecase
 	template-if: input-truecaser IN.$input-extension OUT.$input-extension -model IN1.$input-extension
 	template-if: output-truecaser IN.$output-extension OUT.$output-extension -model IN1.$output-extension
 	parallelizable: yes
-
 source-label
         in: truecased-stem
         out: source-labelled
@@ -64,7 +63,6 @@ source-label
         template-if: source-labeller IN.$input-extension OUT.$input-extension
         template-if: cat IN.$output-extension OUT.$output-extension
 	parallelizable: yes
-
 lowercase
 	in: source-labelled
 	out: lowercased-stem
@@ -118,7 +116,7 @@ consolidate
 	default-name: truecaser/corpus
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 train
-  in: tokenized-stem
+	in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
 	default-name: truecaser/truecase-model
@@ -219,6 +217,7 @@ binarize
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
 	error: set KENLM_MAX_ORDER to at least this value
+	final-model: yes
 
 [INTERPOLATED-LM] single
 tuning-from-sgm
@@ -285,6 +284,7 @@ binarize
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
 	error: set kMaxOrder to at least this value
+	final-model: yes
 [MML] single
 tokenize-indomain-source
 	in: raw-indomain-source
@@ -395,6 +395,7 @@ build-domains
 	default-name: model/domains
 	ignore-unless: domain-features mml-filter-corpora
 	template: $moses-script-dir/ems/support/build-domain-file-from-subcorpora.perl $input-extension IN > OUT
+	final-model: yes
 mml-score
 	in: MML:model corpus domains
 	out: mml-scores
@@ -489,6 +490,7 @@ build-biconcor
 	default-name: model/biconcor
 	ignore-unless: biconcor
 	error: usage
+	final-model: yes
 build-suffix-array
 	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: phrase-translation-table
@@ -528,16 +530,17 @@ build-osm
 	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --srilm-dir $srilm-dir $operation-sequence-model-settings
 	default-name: model/OSM
 build-transliteration-model
-       in: corpus word-alignment 
-       out: transliteration-model
-       ignore-unless: transliteration-module
-       rerun-on-change: transliteration-module training-options script giza-settings
+	in: corpus word-alignment 
+	out: transliteration-model
+	ignore-unless: transliteration-module
+	rerun-on-change: transliteration-module training-options script giza-settings
 	default-name: model/Transliteration
+	final-model: yes
 build-translit-table
-       in: transliteration-model
-       out: transliteration-table
-       ignore-unless: in-decoding-transliteration
-       rerun-on-change: in-decoding-transliteration transliteration-module
+	in: transliteration-model
+	out: transliteration-table
+	ignore-unless: in-decoding-transliteration
+	rerun-on-change: in-decoding-transliteration transliteration-module
 	default-name: model/transliteration-phrase-table
 	template: $moses-script-dir/Transliteration/in-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN --input-extension $input-extension --output-extension $output-extension --transliteration-file $transliteration-file --out-file OUT
 extract-phrases
@@ -553,12 +556,14 @@ build-reordering
 	ignore-unless: lexicalized-reordering
 	rerun-on-change: lexicalized-reordering reordering-factors
 	default-name: model/reordering-table
+	final-model: yes
 build-ttable
 	in: extracted-phrases lexical-translation-table corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains
 	out: phrase-translation-table
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
 	ignore-if: suffix-array
+	final-model: yes
 sigtest-filter-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: sigtest-filter-suffix-array
@@ -574,19 +579,22 @@ sigtest-filter-suffix-array
 		mv IN.${output-extension}.sa_offset OUT.${output-extension}.sa_offset ; \
 		mv IN.${output-extension}.sa_suffix OUT.${output-extension}.sa_suffix
 	ignore-unless: sigtest-filter
+	final-model: yes
 sigtest-filter-ttable
 	in: phrase-translation-table sigtest-filter-suffix-array
 	out: sigtest-filter-phrase-translation-table
 	default-name: model/phrase-table-sigtest-filter
 	pass-unless: sigtest-filter
-  ignore-if: TRAINING:config
+	ignore-if: TRAINING:config
+	final-model: yes
 sigtest-filter-reordering
 	in: reordering-table sigtest-filter-suffix-array
 	out: sigtest-filter-reordering-table
 	default-name: model/reordering-table-sigtest-filter
 	pass-unless: sigtest-filter
-  ignore-if: TRAINING:config
+	ignore-if: TRAINING:config
 	ignore-unless: lexicalized-reordering
+	final-model: yes
 build-generation
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: generation-table
@@ -594,12 +602,14 @@ build-generation
 	ignore-unless: generation-factors
 	ignore-if: generation-corpus
 	default-name: model/generation-table
+	final-model: yes
 build-generation-custom
 	in: generation-corpus
 	out: generation-table
 	rerun-on-change: generation-factors generation-type training-options script generation-corpus
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
+	final-model: yes
 build-sparse
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
         out: sparse
@@ -614,6 +624,7 @@ create-config
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
 	default-name: model/moses.ini
 	error: Unknown option
+	final-model: yes
 binarize-config
 	in: config
 	out: bin-config
@@ -621,6 +632,7 @@ binarize-config
 	rerun-on-change: config
 	default-name: model/moses.bin.ini
 	template: $binarize-all IN OUT -Binarizer $ttable-binarizer 
+	final-model: yes
 hiero-compile-source-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: hiero-source-suffix-array
@@ -734,7 +746,6 @@ factorize-input-devtest
 	ignore-unless: use-mira
 	error: can't open
 	error: incompatible number of words in factor
-
 source-label-input
         in: factorized-input
         out: source-labelled-input
@@ -742,7 +753,6 @@ source-label-input
         pass-unless: source-labeller
         template-if: source-labeller IN OUT
 	parallelizable: yes
-
 source-label-input-devtest
         in: factorized-input-devtest
         out: source-labelled-input-devtest
@@ -750,7 +760,6 @@ source-label-input-devtest
         pass-unless: source-labeller
         template-if: source-labeller IN OUT
 	parallelizable: yes
-
 lowercase-input
 	in: source-labelled-input
 	out: truecased-input
@@ -903,6 +912,8 @@ tune
 	ignore-if: use-hiero
 	qsub-script: yes
 	default-name: tuning/moses.ini
+	tmp-name: tuning/tmp
+	final-model: yes
 	rerun-on-change: decoder-settings tuning-settings nbest lambda async
 	not-error: trans: No such file or directory
 apply-weights
@@ -1018,6 +1029,7 @@ decode
 	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph wade
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
+	final-model: yes
 hiero-decode
 	in: TUNING:hiero-config-with-reused-weights input
 	out: system-output
@@ -1058,6 +1070,7 @@ detokenize-output
 	default-name: evaluation/detokenized
 	pass-unless: detokenizer
 	template: $detokenizer < IN > OUT
+	final-model: yes
 wrap
 	in: detokenized-output
 	out: wrapped-output
@@ -1065,6 +1078,7 @@ wrap
 	rerun-on-change: wrapping-frame use-hiero
 	template: $wrapping-script $wrapping-frame < IN > OUT
 	error: Use of uninitialized value in pattern match
+	final-model: yes
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -1100,6 +1114,7 @@ nist-bleu
 	rerun-on-change: nist-bleu
 	error: Illegal division by zero
         template: $nist-bleu -s $input-sgm -r IN1 -t IN > OUT
+	final-model: yes
 nist-bleu-c
 	in: wrapped-output reference-sgm
 	out: nist-bleu-c-score
@@ -1108,6 +1123,7 @@ nist-bleu-c
 	rerun-on-change: nist-bleu-c
 	error: Illegal division by zero
         template: $nist-bleu-c -c -s $input-sgm -r IN1 -t IN > OUT
+	final-model: yes
 ibm-bleu
         in: wrapped-output reference-sgm
         out: ibm-bleu-score
@@ -1115,6 +1131,7 @@ ibm-bleu
         ignore-unless: ibm-bleu
         rerun-on-change: ibm-bleu
         template: $ibm-bleu -ci -s $input-sgm -r IN1 -t IN > OUT
+	final-model: yes
 ibm-bleu-c
         in: wrapped-output reference-sgm
         out: ibm-bleu-c-score
@@ -1122,6 +1139,7 @@ ibm-bleu-c
         ignore-unless: ibm-bleu-c
         rerun-on-change: ibm-bleu-c
         template: $ibm-bleu-c -s $input-sgm -r IN1 -t IN > OUT
+	final-model: yes
 bolt-bleu
 	in: detokenized-output
 	out: bolt-bleu-score
@@ -1129,6 +1147,7 @@ bolt-bleu
 	ignore-unless: bolt-bleu
 	rerun-on-change: bolt-bleu
 	template: $bolt-bleu IN > OUT
+	final-model: yes
 bolt-bleu-c
 	in: detokenized-output
 	out: bolt-bleu-c-score
@@ -1136,6 +1155,7 @@ bolt-bleu-c
 	ignore-unless: bolt-bleu-c
 	rerun-on-change: bolt-bleu-c
 	template: $bolt-bleu-c IN > OUT
+	final-model: yes
 multi-bleu
 	in: transliterated-output tokenized-reference
 	out: multi-bleu-score
@@ -1143,6 +1163,7 @@ multi-bleu
 	ignore-unless: multi-bleu
 	rerun-on-change: multi-bleu
 	template: $multi-bleu IN1 < IN > OUT
+	final-model: yes
 multi-bleu-c
 	in: recased-output tokenized-reference
 	out: multi-bleu-c-score
@@ -1150,12 +1171,14 @@ multi-bleu-c
 	ignore-unless: multi-bleu-c
 	rerun-on-change: multi-bleu-c
 	template: $multi-bleu-c IN1 < IN > OUT
+	final-model: yes
 ter
 	in: wrapped-output reference-sgm
 	out: ter-score
 	default-name: evaluation/detokenized.sgm.TER
 	ignore-unless: ter
 	rerun-on-change: ter
+	final-model: yes
 wer
 	in: recased-output reference
 	out: wer-score
@@ -1163,6 +1186,7 @@ wer
 	ignore-unless: wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
+	final-model: yes
 meteor
 	in: transliterated-output reference
 	out: meteor-score
@@ -1170,25 +1194,28 @@ meteor
 	ignore-unless: meteor
 	rerun-on-change: meteor
 	template: $meteor IN IN1 $meteor-params > OUT
+	final-model: yes
 analysis
 	in: recased-output reference input
 	out: analysis
 	default-name: evaluation/analysis
 	ignore-if: report-precision-by-coverage
 	ignore-unless: analysis
-  rerun-on-change: analyze-search-graph
+	rerun-on-change: analyze-search-graph
 analysis-coverage
 	in: input TRAINING:corpus-mml-postfilter=OR=TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table
 	out: analysis-coverage
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage
 	rerun-on-change: score-settings
+	final-model: yes
 analysis-precision
 	in: recased-output reference input TRAINING:corpus-mml-postfilter=OR=TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table analysis-coverage
 	out: analysis
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage report-precision-by-coverage
-  rerun-on-change: precision-by-coverage-base
+	rerun-on-change: precision-by-coverage-base
+	final-model: yes
 
 [REPORTING] single
 report
