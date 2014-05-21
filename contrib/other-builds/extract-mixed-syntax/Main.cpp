@@ -49,7 +49,7 @@ int main(int argc, char** argv)
      */
     if ( vm.count("help") || argc < 5 )
     {
-      std::cout << argv[0] << "target source alignment [options...]" << std::endl
+      std::cout << argv[0] << " target source alignment [options...]" << std::endl
                 << desc << std::endl;
       return EXIT_SUCCESS;
     }
