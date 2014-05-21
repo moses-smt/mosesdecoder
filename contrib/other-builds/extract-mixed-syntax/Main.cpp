@@ -36,7 +36,8 @@ int main(int argc, char** argv)
     ("MixedSyntaxType", po::value<int>()->default_value(params.mixedSyntaxType), "Hieu's Mixed syntax type. 0(default)=no mixed syntax, 1=add [X] only if no syntactic label. 2=add [X] everywhere")
     ("MultiLabel", po::value<int>()->default_value(params.multiLabel), "What to do with multiple labels on the same span. 0(default)=keep them all, 1=keep only top-most, 2=keep only bottom-most")
     ("HieroSourceLHS", "Always use Hiero source LHS? Default = 0")
-    ("MaxSpanFreeNonTermSource", po::value<int>()->default_value(params.maxSpanFreeNonTermSource), "Max number of words covered by beginning/end NT. Default = 0 (no limit)");
+    ("MaxSpanFreeNonTermSource", po::value<int>()->default_value(params.maxSpanFreeNonTermSource), "Max number of words covered by beginning/end NT. Default = 0 (no limit)")
+    ("NoNieceTerminal", "Don't extract rule if 1 of the non-term covers the same word as 1 of the terminals");
 
   po::variables_map vm;
   try
@@ -48,7 +49,7 @@ int main(int argc, char** argv)
      */
     if ( vm.count("help") || argc < 5 )
     {
-      std::cout << "Basic Command Line Parameter App" << std::endl
+      std::cout << argv[0] << "target source alignment [options...]" << std::endl
                 << desc << std::endl;
       return EXIT_SUCCESS;
     }
@@ -76,6 +77,7 @@ int main(int argc, char** argv)
   if (vm.count("MultiLabel")) params.multiLabel = vm["MultiLabel"].as<int>();
   if (vm.count("HieroSourceLHS")) params.hieroSourceLHS = true;
   if (vm.count("MaxSpanFreeNonTermSource")) params.maxSpanFreeNonTermSource = vm["MaxSpanFreeNonTermSource"].as<int>();
+  if (vm.count("NoNieceTerminal")) params.nieceTerminal = false;
 
   // input files;
   string pathTarget = argv[1];

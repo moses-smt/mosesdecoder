@@ -304,8 +304,65 @@ void Rule::Prevalidate(const Parameter &params)
 			  return;
 		  }
 	  }
-
   }
+
+  if (!params.nieceTerminal) {
+	  // collect terminal in a rule
+	  std::set<const Word*> terms;
+	  for (size_t i = 0; i < m_source.GetSize(); ++i) {
+		  const Word *word = dynamic_cast<const Word*>(m_source[i]);
+		  if (word) {
+			  terms.insert(word);
+		  }
+	  }
+
+	  // look in non-terms
+	  for (size_t i = 0; i < m_source.GetSize(); ++i) {
+		  const NonTerm *nonTerm = dynamic_cast<const NonTerm*>(m_source[i]);
+		  if (nonTerm) {
+			  const ConsistentPhrase &cp = nonTerm->GetConsistentPhrase();
+			  bool containTerm = ContainTerm(cp, terms);
+
+			  if (containTerm) {
+				  //cerr << "ruleSource=" << *ruleSource << " ";
+				  //cerr << "ntRange=" << ntRange << endl;
+
+				  // non-term contains 1 of the terms in the rule.
+				  m_isValid = false;
+				  m_canRecurse = false;
+				  return;
+			  }
+		  }
+	  }
+  }
+}
+
+template<typename T>
+bool Contains(const T *sought, const set<const T*> &coll)
+{
+	std::set<const Word*>::const_iterator iter;
+	for (iter = coll.begin(); iter != coll.end(); ++iter) {
+		const Word *found = *iter;
+		if (sought->CompareString(*found) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Rule::ContainTerm(const ConsistentPhrase &cp, const std::set<const Word*> &terms) const
+{
+	const Phrase &sourceSentence = m_alignedSentence.GetPhrase(Moses::Input);
+
+	for (int pos = cp.corners[0]; pos <= cp.corners[1]; ++pos) {
+		const Word *soughtWord = sourceSentence[pos];
+
+		// find same word in set
+		if (Contains(soughtWord, terms)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 bool CompareTargetNonTerms(const NonTerm *a, const NonTerm *b)
