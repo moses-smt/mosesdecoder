@@ -37,7 +37,9 @@ public:
                      ScoreComponentCollection* accumulator) const;
 
 protected:
-  bool ContainTerm(const WordsRange &ntRange, const std::set<Word> &terms) const;
+  bool ContainTerm(const InputType &input,
+		  	  	  const WordsRange &ntRange,
+		  	  	  const std::set<Word> &terms) const;
 };
 
 }
