@@ -832,8 +832,9 @@ while (1) {
   # print join(" ", @NAME)."\n";
 
   # make a backup copy labelled with this run number
-  safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
-
+    safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
+  
+  
   my $DIM = scalar(@CURR); # number of lambdas
 
   # run mert
@@ -997,7 +998,9 @@ while (1) {
   safesystem("\\cp -f $mert_outfile run$run.$mert_outfile") or die;
   safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem("touch $mert_logfile run$run.$mert_logfile") or die;
+
   safesystem("\\cp -f $weights_out_file run$run.$weights_out_file") or die; # this one is needed for restarts, too
+
   if ($__PROMIX_TRAINING) {
     safesystem("\\cp -f $interpolated_config run$run.$interpolated_config") or die;
   }
@@ -1126,7 +1129,9 @@ if (defined $allsorted) {
     safesystem ("\\rm -f $allsorted") or die;
 }
 
-safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
+  safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
+
+
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
 if($___RETURN_BEST_DEV) {

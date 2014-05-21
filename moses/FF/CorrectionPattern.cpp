@@ -163,7 +163,7 @@ std::string GeneralizePair(const std::string &s1, const std::string &s2) {
     if(type != 'm' && !match.empty()) {      
       if(match.size() >= 3) {
         sourceList.push_back("(\\w{3,})");
-        std::string temp = "1"
+        std::string temp = "1";
         sprintf((char*)temp.c_str(), "%d", count);
         targetList.push_back("\\" + temp);
         count++;

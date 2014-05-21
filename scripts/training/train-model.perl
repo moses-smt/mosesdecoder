@@ -728,7 +728,7 @@ sub reduce_factors {
     # }
     my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
 
-    print STDERR "(1.0.5) reducing factors to produce $reduced  @ ".`date`;
+    print STDERR "(1.0.5) reducing factors from $full to produce $reduced with factors $factors @ ".`date`;
     while(-e $reduced.".lock") {
 	sleep(10);
     }
@@ -752,7 +752,7 @@ sub reduce_factors {
         $firstline =~ s/^\s*//;
         $firstline =~ s/\s.*//;
         # count factors
-        my $maxfactorindex = $firstline =~ tr/$___FACTOR_DELIMITER/$___FACTOR_DELIMITER/;
+        my $maxfactorindex = eval "\$firstline =~ tr/$___FACTOR_DELIMITER/$___FACTOR_DELIMITER/";
         if (join(",", @INCLUDE) eq join(",", 0..$maxfactorindex)) {
           # create just symlink; preserving compression
           my $realfull = $full;

@@ -12,6 +12,8 @@
 #include "util/probing_hash_table.hh"
 
 #include <string>
+#include <set>
+#include <fstream>
 
 #include <string.h>
 
@@ -44,12 +46,23 @@ void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint
   if (!enumerate) return;
   enumerate->Add(0, "<unk>");
 
+  /*
+  std::set<std::string> allowed;
+  std::ifstream allowedStream("/data/smt/models/CoNLL/allowed.txt");
+  
+  std::string line;
+  while(std::getline(allowedStream, line))
+    allowed.insert(line);
+  std::cerr << "Size: " << allowed.size() << std::endl;
+  */
+
   // Read all the words after unk.
   const std::size_t kInitialRead = 16384;
   std::string buf;
   buf.reserve(kInitialRead + 100);
   buf.resize(kInitialRead);
   WordIndex index = 1; // Read <unk> already.
+  
   while (true) {
     std::size_t got = util::ReadOrEOF(fd, &buf[0], kInitialRead);
     if (got == 0) break;
@@ -62,9 +75,16 @@ void ReadWords(int fd, EnumerateVocab *enumerate, WordIndex expected_count, uint
     // Ok now we have null terminated strings.  
     for (const char *i = buf.data(); i != buf.data() + buf.size();) {
       std::size_t length = strlen(i);
-      enumerate->Add(index++, StringPiece(i, length));
+      //if(allowed.count(StringPiece(i, length).as_string()))
+        enumerate->Add(index++, StringPiece(i, length));
+      //else
+        //index++;
+      //if(index % 1000000 == 0)
+        //std::cerr << "[" << index << "]" << std::endl;
+      
       i += length + 1 /* null byte */;
     }
+    
   }
 
   UTIL_THROW_IF(expected_count != index, FormatLoadException, "The binary file has the wrong number of words at the end.  This could be caused by a truncated binary file.");
