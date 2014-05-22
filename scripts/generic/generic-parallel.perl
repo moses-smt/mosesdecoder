@@ -10,15 +10,16 @@ sub NumStr($);
 
 my $NUM_SPLIT_LINES = $ARGV[0];
 
+my $TMPDIR = $ARGV[1];
+$TMPDIR = "$TMPDIR/tmp.$$";
+mkdir $TMPDIR;
+print STDERR "TMPDIR=$TMPDIR \n";
+
 my $cmd = "";
-for (my $i = 1; $i < $#ARGV; ++$i)
+for (my $i = 2; $i < $#ARGV; ++$i)
 {
   $cmd .= $ARGV[$i] ." ";
 }
-
-my $TMPDIR = "/tmp/tmp.$$";
-mkdir $TMPDIR;
-print STDERR "TMPDIR=$TMPDIR \n";
 
 # split input file
 open (INPUT_ALL, "> $TMPDIR/input.all");
@@ -36,12 +37,12 @@ my $cmd2 = "split -l $NUM_SPLIT_LINES -a 5 -d  $TMPDIR/input.all $TMPDIR/x";
 open (EXEC, "> $TMPDIR/exec");
 
 # execute in parallel
+print STDERR "executing\n";
+
 my $i = 0;
 my $filePath = "$TMPDIR/x" .NumStr($i);
-print STDERR "filePath=$filePath \n";
 while (-f $filePath) 
 {
-  print STDERR "filePath=$filePath \n";
   print EXEC "$cmd < $filePath > $filePath.out\n";
 
   ++$i;
@@ -53,13 +54,13 @@ $cmd2 = "parallel < $TMPDIR/exec";
 `$cmd2`;
 
 # concatenate
+print STDERR "concatenating\n";
+
 $i = 1;
 my $firstPath = "$TMPDIR/x" .NumStr(0) .".out";
 $filePath = "$TMPDIR/x" .NumStr($i) .".out";
-print STDERR "filePath=$filePath \n";
 while (-f $filePath) 
 {
-  print STDERR "filePath=$filePath \n";
   $cmd = "cat $filePath >> $firstPath";
   `$cmd`;
 
@@ -74,6 +75,7 @@ while (my $line = <OUTPUT_ALL>)
   chomp($line);
   print "$line\n";
 }
+close(OUTPUT_ALL);
 
 $cmd = "rm -rf $TMPDIR/";
 `$cmd`;
