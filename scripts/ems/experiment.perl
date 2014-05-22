@@ -64,7 +64,9 @@ my (@MODULE,
     %MODULE_STEP,
     %STEP_IN,
     %STEP_OUT,
-    %STEP_OUTNAME,
+    %STEP_OUTNAME,    # output file name for step result
+    %STEP_TMPNAME,    # tmp directory to be used by step
+    %STEP_FINAL,      # output is part of the final model, not an intermediate step
     %STEP_PASS,       # config parameters that have to be set, otherwise pass
     %STEP_PASS_IF,    # config parameters that have to be not set, otherwise pass
     %STEP_IGNORE,     # config parameters that have to be set, otherwise ignore
@@ -97,7 +99,7 @@ $VERSION = $DELETE_VERSION if $DELETE_VERSION;
 &compute_version_number() if $EXECUTE && !$CONTINUE && !$DELETE_CRASHED && !$DELETE_VERSION;
 `mkdir -p steps/$VERSION`;
 
-&log_config();
+&log_config() unless $DELETE_CRASHED || $DELETE_VERSION;
 print "running experimenal run number $VERSION\n";
 
 print "\nESTABLISH WHICH STEPS NEED TO BE RUN\n";
@@ -240,6 +242,12 @@ sub read_meta {
 	    }
 	    elsif ($1 eq "default-name") {
 		$STEP_OUTNAME{"$module:$step"} = $2;
+	    }
+	    elsif ($1 eq "tmp-name") {
+		$STEP_TMPNAME{"$module:$step"} = $2;
+	    }
+	    elsif ($1 eq "final-model") {
+		$STEP_FINAL{"$module:$step"} = $2;
 	    }
 	    elsif ($1 eq "pass-unless") {
 		@{$STEP_PASS{"$module:$step"}} = split(/\s+/,$2);
@@ -417,7 +425,7 @@ sub log_config {
     my $dir = &check_and_get("GENERAL:working-dir");
     `mkdir -p $dir/steps`;
     my $config_file = &steps_file("config.$VERSION",$VERSION);
-    `cp $CONFIG_FILE $config_file` unless $CONTINUE || $DELETE_CRASHED || $DELETE_VERSION;
+    `cp $CONFIG_FILE $config_file` unless $CONTINUE;
     open(PARAMETER,">".&steps_file("parameter.$VERSION",$VERSION)) or die "Cannot open: $!";
     foreach my $parameter (sort keys %CONFIG) {
 	print PARAMETER "$parameter =";
@@ -745,7 +753,7 @@ sub delete_version {
       push @{$DELETABLE{$re_use_version}}, $step if $version == $DELETE_VERSION && defined($ALREADY_DELETED{$re_use_version});
 
       # not deletable step used by not-deleted version
-      $NOT_DELETABLE{$re_use_version}{$step}++ if $version != $DELETE_VERSION && !defined(ALREADY_DELETED{$version});
+      $NOT_DELETABLE{$re_use_version}{$step}++ if $version != $DELETE_VERSION && !defined($ALREADY_DELETED{$version});
     }
     close(RE_USE);
   }
@@ -787,6 +795,11 @@ sub delete_step {
   my $out_file = $STEP_OUTNAME{"$module:$step"};
   $out_file =~ s/^(.+\/)([^\/]+)$/$1$set.$2/g if $set;
   &delete_output(&versionize(&long_file_name($out_file,$module,$set), $version));
+
+  if (defined($STEP_TMPNAME{"$module:$step"})) {
+    my $tmp_file = &get_tmp_file($module,$set,$step,$version);
+    &delete_output($tmp_file);
+  }
 }
 
 sub delete_output {
@@ -801,7 +814,8 @@ sub delete_output {
   } 
   else {
     my @FILES = `ls $file.* 2>/dev/null`;
-    foreach (my @FILES) {
+    foreach (@FILES) {
+      chop;
       print "\tdelete file $_\n";
       `rm $_` if $EXECUTE;
     }
@@ -1775,10 +1789,12 @@ sub define_tuning_tune {
     my $tuning_script = &check_and_get("TUNING:tuning-script");
     my $use_mira = &backoff_and_get("TUNING:use-mira", 0);
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
+    my $tmp_dir = &get_tmp_file("TUNING","","tune");
     
     # the last 3 variables are only used for mira tuning 
     my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest, $filtered_config) = &get_output_and_input($step_id); 
     $config = $filtered_config if $filtered_config;
+
 
     my $cmd = "";
     if ($use_mira) {
@@ -1797,25 +1813,24 @@ sub define_tuning_tune {
 	    $input_devtest = $input_devtest_with_tags;
 	}
 
-	my $experiment_dir = "$dir/tuning/tmp.$VERSION";
-	system("mkdir -p $experiment_dir");
+	system("mkdir -p $tmp_dir");
 
-	my $mira_config = "$experiment_dir/mira-config.$VERSION.";
+	my $mira_config = "$tmp_dir/mira-config.$VERSION.";
 	my $mira_config_log = $mira_config."log";
 	$mira_config .= "cfg";
 	
-       	write_mira_config($mira_config,$experiment_dir,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest);
+       	write_mira_config($mira_config,$tmp_dir,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest);
 	#$cmd = "$tuning_script -config $mira_config -exec >& $mira_config_log";
 	# we want error messages in top-level log file
 	$cmd = "$tuning_script -config $mira_config -exec ";
 
 	# write script to select the best set of weights after training for the specified number of epochs --> 
 	# cp to tuning/tmp.?/moses.ini
-	my $script_filename = "$experiment_dir/selectBestWeights.";
+	my $script_filename = "$tmp_dir/selectBestWeights.";
 	my $script_filename_log = $script_filename."log";
 	$script_filename .= "perl";
-	my $weight_output_file = "$experiment_dir/moses.ini";
-	write_selectBestMiraWeights($experiment_dir, $script_filename, $weight_output_file);
+	my $weight_output_file = "$tmp_dir/moses.ini";
+	write_selectBestMiraWeights($tmp_dir, $script_filename, $weight_output_file);
 	$cmd .= "\n$script_filename >& $script_filename_log";
     }
     else {
@@ -1835,7 +1850,7 @@ sub define_tuning_tune {
 	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
 	$tuning_settings = "" unless $tuning_settings;
 
-	$cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
+	$cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $tmp_dir --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
 	$cmd .= " --lambdas \"$lambda\"" if $lambda;
 	$cmd .= " --continue" if $tune_continue;
 	$cmd .= " --skip-decoder" if $skip_decoder;
@@ -1849,7 +1864,7 @@ sub define_tuning_tune {
 	$cmd .= "\nmkdir -p $tuning_dir";
     }
     
-    $cmd .= "\ncp $dir/tuning/tmp.$VERSION/moses.ini $tuned_config";
+    $cmd .= "\ncp $tmp_dir/moses.ini $tuned_config";
 
     &create_step($step_id,$cmd);
 }
@@ -3371,6 +3386,17 @@ sub get_specified_or_default_file {
 	return &long_file_name($CONFIG{$specified}[0],$default_module,$default_set);
     }
     return &get_default_file($default_module,  $default_set,  $default_step);
+}
+
+sub get_tmp_file {
+    my ($module,$set,$step,$version) = @_;
+    $version = $VERSION unless $version;
+    my $tmp_file = $STEP_TMPNAME{"$module:$step"};
+    if ($set) {
+	$tmp_file =~ s/^(.+\/)([^\/]+)$/$1$set.$2/g;
+    }
+    $tmp_file = &versionize(&long_file_name($tmp_file,$module,$set), $version);
+    return $tmp_file;
 }
 
 sub get_default_file {
