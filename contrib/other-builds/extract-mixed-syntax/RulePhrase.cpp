@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <sstream>
 #include "RulePhrase.h"
 #include "RuleSymbol.h"
 
@@ -39,3 +40,11 @@ void RulePhrase::Output(std::ostream &out) const
 	  out << " ";
   }
 }
+
+std::string RulePhrase::Debug() const
+{
+	std::stringstream out;
+	Output(out);
+	return out.str();
+}
+

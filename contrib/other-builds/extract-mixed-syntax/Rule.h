@@ -78,5 +78,7 @@ protected:
 	void CreateAlignments(int sourcePos, const std::set<const Word *> &targetWords);
 	void CreateAlignments(int sourcePos, const RuleSymbol *targetSought);
 
+	bool ContainTerm(const ConsistentPhrase &cp, const std::set<const Word*> &terms) const;
+
 };
 

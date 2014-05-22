@@ -40,6 +40,7 @@ public:
   int Compare(const RulePhrase &other) const;
 
   void Output(std::ostream &out) const;
+  std::string Debug() const;
 };
 
 #endif /* RULEPHRASE_H_ */

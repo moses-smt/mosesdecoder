@@ -37,6 +37,8 @@ public:
 	void Output(std::ostream &out) const;
 	std::string Debug() const;
 
+	int CompareString(const Word &other) const;
+
 protected:
 	int m_pos; // original position in sentence, NOT in lattice
 	std::string m_str;

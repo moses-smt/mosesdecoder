@@ -37,6 +37,7 @@ public:
   bool nonTermConsecSourceMixed;
   bool hieroSourceLHS;
   int maxSpanFreeNonTermSource;
+  bool nieceTerminal;
 
 };
 

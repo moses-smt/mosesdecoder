@@ -49,3 +49,8 @@ std::string Word::Debug() const
 {
 	return m_str;
 }
+
+int Word::CompareString(const Word &other) const
+{
+  return m_str.compare(other.m_str);
+}
