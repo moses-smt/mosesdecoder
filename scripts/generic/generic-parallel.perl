@@ -23,6 +23,7 @@ for (my $i = 2; $i < $#ARGV; ++$i)
 
 # split input file
 open (INPUT_ALL, "> $TMPDIR/input.all");
+binmode INPUT_ALL, ":utf8";
 while (my $line = <STDIN>)
 { 
   chomp($line);
@@ -35,6 +36,7 @@ my $cmd2 = "split -l $NUM_SPLIT_LINES -a 5 -d  $TMPDIR/input.all $TMPDIR/x";
 
 # create exec file
 open (EXEC, "> $TMPDIR/exec");
+binmode EXEC, ":utf8";
 
 # execute in parallel
 print STDERR "executing\n";
@@ -70,6 +72,7 @@ while (-f $filePath)
 
 # output
 open (OUTPUT_ALL, "$firstPath");
+binmode OUTPUT_ALL, ":utf8";
 while (my $line = <OUTPUT_ALL>)
 { 
   chomp($line);
