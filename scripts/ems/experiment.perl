@@ -97,7 +97,7 @@ $VERSION = $DELETE_CRASHED if $DELETE_CRASHED;
 $VERSION = $DELETE_VERSION if $DELETE_VERSION;
 
 &compute_version_number() if $EXECUTE && !$CONTINUE && !$DELETE_CRASHED && !$DELETE_VERSION;
-`mkdir -p steps/$VERSION`;
+`mkdir -p steps/$VERSION` unless -d "steps/$VERSION";
 
 &log_config() unless $DELETE_CRASHED || $DELETE_VERSION;
 print "running experimenal run number $VERSION\n";
@@ -714,7 +714,7 @@ sub delete_crashed {
   for(my $i=0;$i<=$#DO_STEP;$i++) {
     my $step_file = &versionize(&step_file($i),$DELETE_CRASHED);
     next unless -e $step_file;
-    next unless &check_if_crashed($i,$DELETE_CRASHED);
+    next unless &check_if_crashed($i,$DELETE_CRASHED,"no wait");
     &delete_step($DO_STEP[$i],$DELETE_CRASHED);
     $crashed++;
   }
@@ -774,6 +774,8 @@ sub delete_version {
       &delete_step($step,$version);
     }
   }
+  my $deleted_flag_file = &steps_file("deleted.$DELETE_VERSION",$DELETE_VERSION);
+  `touch $deleted_flag_file` if $EXECUTE;
 }
 
 sub get_step_from_step_file {
@@ -802,23 +804,26 @@ sub delete_step {
   }
 }
 
+# delete output files that match a given prefix
 sub delete_output {
   my ($file) = @_;
+  # delete directory that matches exactly
   if (-d $file) {
     print "\tdelete directory $file\n";
     `rm -r $file` if $EXECUTE;
+    return;
   }
-  elsif (-e $file) {
+  # delete regular file that matches exactly
+  if (-e $file) {
     print "\tdelete file $file\n";
     `rm $file` if $EXECUTE;
   } 
-  else {
-    my @FILES = `ls $file.* 2>/dev/null`;
-    foreach (@FILES) {
-      chop;
-      print "\tdelete file $_\n";
-      `rm $_` if $EXECUTE;
-    }
+  # delete files that have additional extension
+  my @FILES = `ls $file.* 2>/dev/null`;
+  foreach (@FILES) {
+    chop;
+    print "\tdelete file $_\n";
+    `rm $_` if $EXECUTE;
   }
 }
 
@@ -1470,12 +1475,12 @@ sub get_parameters_relevant_for_re_use {
 }
 
 sub check_if_crashed {
-    my ($i,$version) = @_;
+    my ($i,$version,$no_wait) = @_;
     $version = $VERSION unless $version; # default: current version
     my $file = &versionize(&step_file($i),$version).".STDERR";
 
     # while running, sometimes the STDERR file is slow in appearing - wait a bit just in case
-    if ($version == $VERSION) {
+    if ($version == $VERSION && !$no_wait) {
       my $j = 0;
       while (! -e $file && $j < 100) {
         sleep(5);
@@ -1483,7 +1488,7 @@ sub check_if_crashed {
       }
     }
 
-    #print "checking if $DO_STEP[$i]($version) crashed...\n";
+    #print "checking if $DO_STEP[$i]($version) crashed -> $file...\n";
     return 1 if ! -e $file;
 
     # check digest file (if it exists)
