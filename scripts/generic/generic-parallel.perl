@@ -17,7 +17,7 @@ mkdir $TMPDIR;
 print STDERR "TMPDIR=$TMPDIR \n";
 
 my $cmd = "";
-for (my $i = 2; $i < $#ARGV; ++$i)
+for (my $i = 2; $i < scalar(@ARGV); ++$i)
 {
   $cmd .= $ARGV[$i] ." ";
 }
