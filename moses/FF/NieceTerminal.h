@@ -13,9 +13,7 @@ class Word;
 class NieceTerminal : public StatelessFeatureFunction
 {
 public:
-  NieceTerminal(const std::string &line)
-    :StatelessFeatureFunction(line)
-  {}
+  NieceTerminal(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

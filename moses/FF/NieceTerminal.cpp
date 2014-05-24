@@ -10,6 +10,12 @@ using namespace std;
 
 namespace Moses
 {
+NieceTerminal::NieceTerminal(const std::string &line)
+  :StatelessFeatureFunction(line)
+{
+  ReadParameters();
+}
+
 void NieceTerminal::Evaluate(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
