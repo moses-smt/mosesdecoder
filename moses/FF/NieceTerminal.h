@@ -34,7 +34,10 @@ public:
   void EvaluateChart(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const;
 
+  void SetParameter(const std::string& key, const std::string& value);
+
 protected:
+  bool m_hardConstraint;
   bool ContainTerm(const InputType &input,
 		  	  	  const WordsRange &ntRange,
 		  	  	  const std::set<Word> &terms) const;

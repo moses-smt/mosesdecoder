@@ -12,6 +12,7 @@ namespace Moses
 {
 NieceTerminal::NieceTerminal(const std::string &line)
   :StatelessFeatureFunction(line)
+  ,m_hardConstraint(false)
 {
   ReadParameters();
 }
@@ -31,6 +32,8 @@ void NieceTerminal::Evaluate(const InputType &input
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection *estimatedFutureScore) const
 {
+  assert(stackVec);
+
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
   assert(ruleSource);
 
@@ -42,23 +45,19 @@ void NieceTerminal::Evaluate(const InputType &input
 	  }
   }
 
-  size_t ntInd = 0;
-  for (size_t i = 0; i < ruleSource->GetSize(); ++i) {
-	  const Word &word = ruleSource->GetWord(i);
-	  if (word.IsNonTerminal()) {
-		  const ChartCellLabel &cell = *stackVec->at(ntInd);
-		  const WordsRange &ntRange = cell.GetCoverage();
-		  bool containTerm = ContainTerm(input, ntRange, terms);
+  for (size_t i = 0; i < stackVec->size(); ++i) {
+	  const ChartCellLabel &cell = *stackVec->at(i);
+	  const WordsRange &ntRange = cell.GetCoverage();
+	  bool containTerm = ContainTerm(input, ntRange, terms);
 
-		  if (containTerm) {
-			  //cerr << "ruleSource=" << *ruleSource << " ";
-			  //cerr << "ntRange=" << ntRange << endl;
+	  if (containTerm) {
+		  //cerr << "ruleSource=" << *ruleSource << " ";
+		  //cerr << "ntRange=" << ntRange << endl;
 
-			  // non-term contains 1 of the terms in the rule.
-			  scoreBreakdown.PlusEquals(this, 1);
-			  return;
-		  }
-		  ++ntInd;
+		  // non-term contains 1 of the terms in the rule.
+		  float score = m_hardConstraint ? 1 : - std::numeric_limits<float>::infinity();
+		  scoreBreakdown.PlusEquals(this, score);
+		  return;
 	  }
   }
 
@@ -88,6 +87,16 @@ bool NieceTerminal::ContainTerm(const InputType &input,
 	}
 	return false;
 }
+
+void NieceTerminal::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "hard-constraint") {
+	  m_hardConstraint = Scan<bool>(value);
+  } else {
+    StatelessFeatureFunction::SetParameter(key, value);
+  }
+}
+
 
 }
 
