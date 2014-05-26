@@ -53,6 +53,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Timer.h"
 #include "moses/ThreadPool.h"
 #include "moses/OutputCollector.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -64,7 +67,7 @@ using namespace MosesCmd;
 
 namespace MosesCmd
 {
-// output floats with three significant digits
+// output floats with five significant digits
 static const size_t PRECISION = 3;
 
 /** Enforce rounding */
@@ -106,24 +109,34 @@ public:
   /** Translate one sentence
    * gets called by main function implemented at end of this source file */
   void Run() {
+    // shorthand for "global data"
+    const StaticData &staticData = StaticData::Instance();
+
+    // input sentence
+    Sentence sentence;
+
+    // report wall time spent on translation
+    Timer translationTime;
+    translationTime.start();
 
     // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
     TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
 
-    Timer translationTime;
-    translationTime.start();
-    // shorthand for "global data"
-    const StaticData &staticData = StaticData::Instance();
-    // input sentence
-    Sentence sentence();
 
     // execute the translation
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
+    Timer initTime;
+    initTime.start();
     Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm());
+    VERBOSE(1, "Line " << m_lineNumber << ": Initialize search took " << initTime << " seconds total" << endl);
     manager.ProcessSentence();
+
+    // we are done with search, let's look what we got
+    Timer additionalReportingTime;
+    additionalReportingTime.start();
 
     // output word graph
     if (m_wordGraphCollector) {
@@ -167,6 +180,7 @@ public:
       } else {
         TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
       }
+      delete file;
     }
 
     // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
@@ -220,7 +234,7 @@ public:
 
         } else {
           stringstream hypergraphDirName;
-          hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
+          hypergraphDirName << boost::filesystem::current_path().string() << "/hypergraph";
           hypergraphDir = hypergraphDirName.str();
         }
       }
@@ -239,14 +253,17 @@ public:
         if ( appendSuffix ) {
           fileName << "." << compression;
         }
-        boost::iostreams::filtering_ostream *file = new boost::iostreams::filtering_ostream;
+        boost::iostreams::filtering_ostream *file 
+	  = new boost::iostreams::filtering_ostream;
 
         if ( compression == "gz" ) {
           file->push( boost::iostreams::gzip_compressor() );
         } else if ( compression == "bz2" ) {
           file->push( boost::iostreams::bzip2_compressor() );
         } else if ( compression != "txt" ) {
-          TRACE_ERR("Unrecognized hypergraph compression format (" << compression << ") - using uncompressed plain txt" << std::endl);
+          TRACE_ERR("Unrecognized hypergraph compression format (" 
+		    << compression 
+		    << ") - using uncompressed plain txt" << std::endl);
           compression = "txt";
         }
 
@@ -257,12 +274,16 @@ public:
           manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
           file -> flush();
         } else {
-          TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file " << fileName.str() << " is not open or not ready for writing" << std::endl);
+          TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber 
+		    << " because the output file " << fileName.str() 
+		    << " is not open or not ready for writing" 
+		    << std::endl);
         }
         file -> pop();
         delete file;
       }
     }
+    additionalReportingTime.stop();
 
     // apply decision rule and output best translation(s)
     if (m_outputCollector) {
@@ -272,14 +293,22 @@ public:
 
       // all derivations - send them to debug stream
       if (staticData.PrintAllDerivations()) {
+        additionalReportingTime.start();
         manager.PrintAllDerivations(m_lineNumber, debug);
+        additionalReportingTime.stop();
       }
+
+      Timer decisionRuleTime;
+      decisionRuleTime.start();
 
       // MAP decoding: best hypothesis
       const Hypothesis* bestHypo = NULL;
       if (!staticData.UseMBR()) {
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
+          if (StaticData::Instance().GetOutputHypoScore()) {
+            out << bestHypo->GetTotalScore() << ' ';
+          }
           if (staticData.IsPathRecoveryEnabled()) {
             OutputInput(out, bestHypo);
             out << "||| ";
@@ -288,6 +317,9 @@ public:
             out << m_source->GetTranslationId() << " ";
           }
 
+	  if (staticData.GetReportSegmentation() == 2) {
+	    manager.GetOutputLanguageModelOrder(out, bestHypo);
+	  }
           OutputBestSurface(
             out,
             bestHypo,
@@ -303,7 +335,10 @@ public:
           IFVERBOSE(1) {
             debug << "BEST TRANSLATION: " << *bestHypo << endl;
           }
+        } else {
+          VERBOSE(1, "NO BEST TRANSLATION" << endl);
         }
+
         out << endl;
       }
 
@@ -370,7 +405,12 @@ public:
 
       // report best translation to output collector
       m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
+
+      decisionRuleTime.stop();
+      VERBOSE(1, "Line " << m_lineNumber << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
     }
+
+    additionalReportingTime.start();
 
     // output n-best list
     if (m_nbestCollector && !staticData.UseLatticeMBR()) {
@@ -412,12 +452,12 @@ public:
     }
 
     // report additional statistics
+    manager.CalcDecoderStatistics();
+    VERBOSE(1, "Line " << m_lineNumber << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
+    VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
     IFVERBOSE(2) {
       PrintUserTime("Sentence Decoding Time:");
     }
-    manager.CalcDecoderStatistics();
-
-    VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
   }
 
   ~TranslationTask() {
@@ -457,7 +497,6 @@ static void ShowWeights()
 {
   //TODO: Find a way of ensuring this order is synced with the nbest
   fix(cout,6);
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 
@@ -466,11 +505,17 @@ static void ShowWeights()
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
     }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
+    }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
     }
   }
 }
@@ -492,9 +537,7 @@ size_t OutputFeatureWeightsForHypergraph(size_t index, const FeatureFunction* ff
     }
     return index+numScoreComps;
   } else {
-    cerr << "Sparse features are not yet supported when outputting hypergraph format" << endl;
-    assert(false);
-    return 0;
+    UTIL_THROW2("Sparse features are not yet supported when outputting hypergraph format");
   }
 }
 
@@ -503,7 +546,6 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
   outputSearchGraphStream.setf(std::ios::fixed);
   outputSearchGraphStream.precision(6);
 
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -521,11 +563,11 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
       featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
+  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, gds[i], outputSearchGraphStream);
   }
@@ -543,7 +585,7 @@ int main(int argc, char** argv)
 #ifdef HAVE_PROTOBUF
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
-
+    
     // echo command line, if verbose
     IFVERBOSE(1) {
       TRACE_ERR("command: ");
@@ -607,7 +649,7 @@ int main(int argc, char** argv)
           boost::filesystem::path nbestPath(nbestFile);
           weightsFilename << nbestPath.parent_path().filename() << "/weights";
         } else {
-          weightsFilename << boost::filesystem::current_path() << "/hypergraph/weights";
+          weightsFilename << boost::filesystem::current_path().string() << "/hypergraph/weights";
         }
       }
       boost::filesystem::path weightsFilePath(weightsFilename.str());
@@ -746,6 +788,7 @@ int main(int argc, char** argv)
 #endif
 
     delete ioWrapper;
+    FeatureFunction::Destroy();
 
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;

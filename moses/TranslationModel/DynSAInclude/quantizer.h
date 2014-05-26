@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <cmath>
-#include "util/check.hh"
 #include <algorithm>
 #include "types.h"
 
@@ -18,7 +17,7 @@ class LogQtizer
 {
 public:
   LogQtizer(float i): base_(pow(2, 1 / i)) {
-    CHECK(base_ > 1);
+	UTIL_THROW_IF2(base_ <= 1, "Can't calculate log base less than 1");
     max_code_ = 0;
     float value = 1; // code = 1 -> value = 1 for any base
     std::vector<float> code_to_value_vec;
@@ -41,12 +40,14 @@ public:
     std::cerr << "Initialized quantization (size = " << max_code_ + 1 << ")" << std::endl;
   }
   LogQtizer(FileHandler* fin) {
-    CHECK(fin != NULL);
+	UTIL_THROW_IF2(fin == NULL, "Null file handle");
     load(fin);
   }
   int code(float value) {
     // should just be: return log_b(value)
-    CHECK(!(value < min_value_ || value > max_value_));
+    UTIL_THROW_IF2(value < min_value_ || value > max_value_,
+    		"Value " << value << " out of bound");
+
     // but binary search removes errors due to floor operator above
     int code =  static_cast<int>(std::lower_bound(code_to_value_, code_to_value_+ max_code_,
                                  value) - code_to_value_);

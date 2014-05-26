@@ -18,14 +18,13 @@ public:
 
 
   lm::ngram::Model * OSM;
-
-  int lmOrder;
   float unkOpProb;
   int sFactor;	// Source Factor ...
   int tFactor;	// Target Factor ...
   int numFeatures;   // Number of features used ...
 
   OpSequenceModel(const std::string &line);
+  ~OpSequenceModel();
 
   void readLanguageModel(const char *);
   void Load();
@@ -41,8 +40,11 @@ public:
     ScoreComponentCollection* accumulator) const;
 
   void Evaluate(const InputType &input
-                            , const InputPath &inputPath
-                            , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   void  Evaluate(const Phrase &source
                  , const TargetPhrase &targetPhrase

@@ -20,8 +20,6 @@
 #pragma once
 
 #include <vector>
-#include "util/check.hh"
-
 #include "DotChart.h"
 
 namespace OnDiskPt
@@ -114,7 +112,7 @@ class SavedNodeOnDisk
 public:
   SavedNodeOnDisk(const DottedRuleOnDisk *dottedRule)
     :m_dottedRule(dottedRule) {
-    CHECK(m_dottedRule);
+    UTIL_THROW_IF2(m_dottedRule == NULL, "Dotted rule is null");
   }
 
   ~SavedNodeOnDisk() {
@@ -170,7 +168,7 @@ public:
   }
 
   void Add(size_t pos, const DottedRuleOnDisk *dottedRule) {
-    CHECK(dottedRule);
+    UTIL_THROW_IF2(dottedRule == NULL, "Dotted rule is null");
 
     m_coll[pos]->Add(dottedRule);
     m_savedNode.push_back(new SavedNodeOnDisk(dottedRule));

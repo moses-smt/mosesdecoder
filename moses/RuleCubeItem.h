@@ -53,16 +53,16 @@ public:
     return m_pos+1 < m_orderedTargetPhrases.size();
   }
 
-  const boost::shared_ptr<ChartTranslationOption> &GetTranslationOption() const {
+  const boost::shared_ptr<ChartTranslationOption> GetTranslationOption() const {
     return m_orderedTargetPhrases[m_pos];
   }
 
   bool operator<(const TranslationDimension &compare) const {
-    return GetTranslationOption()->GetPhrase() < compare.GetTranslationOption()->GetPhrase();
+    return GetTranslationOption().get() < compare.GetTranslationOption().get();
   }
 
   bool operator==(const TranslationDimension &compare) const {
-    return GetTranslationOption()->GetPhrase() == compare.GetTranslationOption()->GetPhrase();
+    return GetTranslationOption().get() == compare.GetTranslationOption().get();
   }
 
 private:

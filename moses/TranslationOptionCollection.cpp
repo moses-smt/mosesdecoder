@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 #include "moses/FF/InputFeature.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -78,7 +79,7 @@ TranslationOptionCollection::TranslationOptionCollection(
 /** destructor, clears out data structures */
 TranslationOptionCollection::~TranslationOptionCollection()
 {
-  RemoveAllInColl(m_phraseDictionaryQueue);
+  RemoveAllInColl(m_inputPathQueue);
 }
 
 void TranslationOptionCollection::Prune()
@@ -107,7 +108,7 @@ void TranslationOptionCollection::Prune()
       if (m_maxNoTransOptPerCoverage > 0 &&
           fullList.size() > m_maxNoTransOptPerCoverage) {
         // sort in vector
-        nth_element(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
+    	NTH_ELEMENT4(fullList.begin(), fullList.begin() + m_maxNoTransOptPerCoverage, fullList.end(), CompareTranslationOption);
         totalPruned += fullList.size() - m_maxNoTransOptPerCoverage;
 
         // delete the rest
@@ -202,12 +203,12 @@ void TranslationOptionCollection::ProcessUnknownWord()
 	* \param inputScores a set of scores associated with unknown word (input scores from latties/CNs)
  */
 void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPath,
-													size_t sourcePos,
-													size_t length,
-													const ScorePair *inputScores)
+    size_t sourcePos,
+    size_t length,
+    const ScorePair *inputScores)
 {
   const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+  const UnknownWordPenaltyProducer &unknownWordPenaltyProducer = UnknownWordPenaltyProducer::Instance();
   float unknownScore = FloorScore(TransformScore(0));
   const Word &sourceWord = inputPath.GetPhrase().GetWord(0);
 
@@ -258,7 +259,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
 
   }
 
-  targetPhrase.GetScoreBreakdown().Assign(unknownWordPenaltyProducer, unknownScore);
+  targetPhrase.GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
 
   // source phrase
   const Phrase &sourcePhrase = inputPath.GetPhrase();
@@ -370,7 +371,6 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // there may be multiple decoding graphs (factorizations of decoding)
   const vector <DecodeGraph*> &decodeGraphList = StaticData::Instance().GetDecodeGraphs();
-  const vector <size_t> &decodeGraphBackoff = StaticData::Instance().GetDecodeGraphBackoff();
 
   // length of the sentence
   const size_t size = m_source.GetSize();
@@ -382,6 +382,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
     }
 
     const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
+    size_t backoff = decodeGraph.GetBackoff();
     // generate phrases that start at startPos ...
     for (size_t startPos = 0 ; startPos < size; startPos++) {
       size_t maxSize = size - startPos; // don't go over end of sentence
@@ -391,8 +392,8 @@ void TranslationOptionCollection::CreateTranslationOptions()
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
         if (graphInd > 0 && // only skip subsequent graphs
-            decodeGraphBackoff[graphInd] != 0 && // use of backoff specified
-            (endPos-startPos+1 >= decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
+        	backoff != 0 && // use of backoff specified
+            (endPos-startPos+1 <= backoff || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options
@@ -405,7 +406,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
     }
   }
 
-  VERBOSE(2,"Translation Option Collection\n " << *this << endl);
+  VERBOSE(3,"Translation Option Collection\n " << *this << endl);
 
   ProcessUnknownWord();
 
@@ -522,14 +523,14 @@ void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, Part
     return;
   }
 
-  const InputFeature *inputFeature = StaticData::Instance().GetInputFeature();
+  const InputFeature &inputFeature = InputFeature::Instance();
 
   const std::vector<TranslationOption*> &transOpts = oldPtoc.GetList();
   for (size_t i = 0; i < transOpts.size(); ++i) {
     TranslationOption &transOpt = *transOpts[i];
 
     ScoreComponentCollection &scores = transOpt.GetScoreBreakdown();
-    scores.PlusEquals(inputFeature, *inputScore);
+    scores.PlusEquals(&inputFeature, *inputScore);
 
   }
 }
@@ -609,7 +610,14 @@ void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t)
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
   const WordsRange &coverage = translationOption->GetSourceWordsRange();
-  CHECK(coverage.GetEndPos() - coverage.GetStartPos() < m_collection[coverage.GetStartPos()].size());
+
+  if (coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size()) {
+	  cerr << "translationOption=" << *translationOption << endl;
+	  cerr << "coverage=" << coverage << endl;
+  }
+
+  UTIL_THROW_IF2(coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size(),
+		  "Out of bound access: " << coverage);
   m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
 }
 
@@ -617,7 +625,7 @@ TO_STRING_BODY(TranslationOptionCollection);
 
 std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
 {
-  size_t size = coll.GetSize();
+  size_t size = coll.m_source.GetSize();
   for (size_t startPos = 0 ; startPos < size ; ++startPos) {
     size_t maxSize = size - startPos;
     size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
@@ -681,7 +689,9 @@ TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(siz
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
   maxSize = std::min(maxSize, maxSizePhrase);
 
-  CHECK(maxSize < m_collection[startPos].size());
+  UTIL_THROW_IF2(maxSize >= m_collection[startPos].size(),
+		  "Out of bound access: " << maxSize);
+
   return m_collection[startPos][maxSize];
 }
 const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
@@ -690,7 +700,8 @@ const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionLi
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
   maxSize = std::min(maxSize, maxSizePhrase);
 
-  CHECK(maxSize < m_collection[startPos].size());
+  UTIL_THROW_IF2(maxSize >= m_collection[startPos].size(),
+		  "Out of bound access: " << maxSize);
   return m_collection[startPos][maxSize];
 }
 
@@ -706,7 +717,7 @@ void TranslationOptionCollection::GetTargetPhraseCollectionBatch()
       const DecodeStepTranslation *transStep = dynamic_cast<const DecodeStepTranslation *>(&decodeStep);
       if (transStep) {
         const PhraseDictionary &phraseDictionary = *transStep->GetPhraseDictionaryFeature();
-        phraseDictionary.GetTargetPhraseCollectionBatch(m_phraseDictionaryQueue);
+        phraseDictionary.GetTargetPhraseCollectionBatch(m_inputPathQueue);
       }
     }
   }

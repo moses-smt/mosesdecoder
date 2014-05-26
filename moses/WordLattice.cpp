@@ -4,11 +4,17 @@
 #include "PCNTools.h"
 #include "Util.h"
 #include "FloydWarshall.h"
+#include "TranslationOptionCollectionLattice.h"
+#include "TranslationOptionCollectionConfusionNet.h"
 #include "moses/FF/InputFeature.h"
 
 namespace Moses
 {
-WordLattice::WordLattice() {}
+WordLattice::WordLattice()
+{
+  UTIL_THROW_IF2(&InputFeature::Instance() == NULL,
+		  "Input feature must be specified");
+}
 
 size_t WordLattice::GetColumnIncrement(size_t i, size_t j) const
 {
@@ -43,12 +49,17 @@ void WordLattice::Print(std::ostream& out) const
   out<<"\n\n";
 }
 
-int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line)
+int 
+WordLattice::
+InitializeFromPCNDataType
+(const PCN::CN& cn, 
+ const std::vector<FactorType>& factorOrder, 
+ const std::string& debug_line)
 {
   const StaticData &staticData = StaticData::Instance();
-  const InputFeature *inputFeature = staticData.GetInputFeature();
-  size_t numInputScores = inputFeature->GetNumInputScores();
-  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
+  const InputFeature &inputFeature = InputFeature::Instance();
+  size_t numInputScores = inputFeature.GetNumInputScores();
+  size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();
 
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 
@@ -67,14 +78,20 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
 
       //check for correct number of link parameters
       if (alt.m_denseFeatures.size() != numInputScores) {
-        TRACE_ERR("ERROR: need " << numInputScores << " link parameters, found " << alt.m_denseFeatures.size() << " while reading column " << i << " from " << debug_line << "\n");
+        TRACE_ERR("ERROR: need " << numInputScores 
+		  << " link parameters, found " 
+		  << alt.m_denseFeatures.size() 
+		  << " while reading column " << i 
+		  << " from " << debug_line << "\n");
         return false;
       }
 
       //check each element for bounds
       std::vector<float>::const_iterator probsIterator;
       data[i][j].second = std::vector<float>(0);
-      for(probsIterator = alt.m_denseFeatures.begin(); probsIterator < alt.m_denseFeatures.end(); probsIterator++) {
+      for(probsIterator = alt.m_denseFeatures.begin(); 
+	  probsIterator < alt.m_denseFeatures.end(); 
+	  probsIterator++) {
         IFVERBOSE(1) {
           if (*probsIterator < 0.0f) {
             TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n");
@@ -96,7 +113,9 @@ int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<
         float value = (alt.m_word=="" || alt.m_word==EPSILON) ? 0.0f : -1.0f;
         data[i][j].second.denseScores.push_back(value);
       }
-      String2Word(alt.m_word, data[i][j]. first, factorOrder);
+      Word& w = data[i][j].first;
+      w.CreateFromString(Input,factorOrder,StringPiece(alt.m_word),false);
+      // String2Word(alt.m_word, data[i][j]. first, factorOrder);
       next_nodes[i][j] = alt.m_next;
 
       if(next_nodes[i][j] > maxSizePhrase) {
@@ -199,6 +218,50 @@ bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
   return distances[start][end] < 100000;
 }
 
+TranslationOptionCollection*
+WordLattice::CreateTranslationOptionCollection() const
+{
+  size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
+  float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
 
+  TranslationOptionCollection *rv = NULL;
+  //rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+
+  if (StaticData::Instance().GetUseLegacyPT()) {
+    rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  }
+  else {
+	rv = new TranslationOptionCollectionLattice(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  }
+
+  assert(rv);
+  return rv;
 }
+
+
+std::ostream& operator<<(std::ostream &out, const WordLattice &obj)
+{
+  out << "next_nodes=";
+  for (size_t i = 0; i < obj.next_nodes.size(); ++i) {
+    out << i << ":";
+
+    const std::vector<size_t> &inner = obj.next_nodes[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      out << inner[j] << " ";
+    }
+  }
+
+  out << "distances=";
+  for (size_t i = 0; i < obj.distances.size(); ++i) {
+    out << i << ":";
+
+    const std::vector<int> &inner = obj.distances[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      out << inner[j] << " ";
+    }
+  }
+  return out;
+}
+
+} // namespace
 

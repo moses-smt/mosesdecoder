@@ -17,16 +17,18 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <iostream>
 #include "ChartRuleLookupManagerMemoryPerSentence.h"
-#include "DotChartInMemory.h"
 
-#include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
+#include "moses/ChartParser.h"
 #include "moses/InputType.h"
 #include "moses/ChartParserCallback.h"
 #include "moses/StaticData.h"
 #include "moses/NonTerminal.h"
 #include "moses/ChartCellCollection.h"
-#include "moses/ChartParser.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
+
+using namespace std;
 
 namespace Moses
 {
@@ -37,235 +39,192 @@ ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence
   const PhraseDictionaryFuzzyMatch &ruleTable)
   : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_ruleTable(ruleTable)
+  , m_softMatchingMap(StaticData::Instance().GetSoftMatches())
 {
-  CHECK(m_dottedRuleColls.size() == 0);
 
   size_t sourceSize = parser.GetSize();
-  m_dottedRuleColls.resize(sourceSize);
 
-  const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode(parser.GetTranslationId());
+  m_completedRules.resize(sourceSize);
 
-  for (size_t ind = 0; ind < m_dottedRuleColls.size(); ++ind) {
-#ifdef USE_BOOST_POOL
-    DottedRuleInMemory *initDottedRule = m_dottedRulePool.malloc();
-    new (initDottedRule) DottedRuleInMemory(rootNode);
-#else
-    DottedRuleInMemory *initDottedRule = new DottedRuleInMemory(rootNode);
-#endif
-
-    DottedRuleColl *dottedRuleColl = new DottedRuleColl(sourceSize - ind + 1);
-    dottedRuleColl->Add(0, initDottedRule); // init rule. stores the top node in tree
-
-    m_dottedRuleColls[ind] = dottedRuleColl;
-  }
-}
-
-ChartRuleLookupManagerMemoryPerSentence::~ChartRuleLookupManagerMemoryPerSentence()
-{
-  RemoveAllInColl(m_dottedRuleColls);
+  m_isSoftMatching = !m_softMatchingMap.empty();
 }
 
 void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
   const WordsRange &range,
+  size_t lastPos,
   ChartParserCallback &outColl)
 {
-  size_t relEndPos = range.GetEndPos() - range.GetStartPos();
+  size_t startPos = range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
 
-  // MAIN LOOP. create list of nodes of target phrases
+  m_lastPos = lastPos;
+  m_stackVec.clear();
+  m_outColl = &outColl;
+  m_unaryPos = absEndPos-1; // rules ending in this position are unary and should not be added to collection
 
-  // get list of all rules that apply to spans at same starting position
-  DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
-  const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
+  const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode(GetParser().GetTranslationId());
 
-  // loop through the rules
-  // (note that expandableDottedRuleList can be expanded as the loop runs
-  //  through calls to ExtendPartialRuleApplication())
-  for (size_t ind = 0; ind < expandableDottedRuleList.size(); ++ind) {
-    // rule we are about to extend
-    const DottedRuleInMemory &prevDottedRule = *expandableDottedRuleList[ind];
-    // we will now try to extend it, starting after where it ended
-    size_t startPos = prevDottedRule.IsRoot()
-                      ? range.GetStartPos()
-                      : prevDottedRule.GetWordsRange().GetEndPos() + 1;
+  // size-1 terminal rules
+  if (startPos == absEndPos) {
+    const Word &sourceWord = GetSourceAt(absEndPos).GetLabel();
+    const PhraseDictionaryNodeMemory *child = rootNode.GetChild(sourceWord);
 
-    // search for terminal symbol
-    // (if only one more word position needs to be covered)
-    if (startPos == absEndPos) {
-
-      // look up in rule dictionary, if the current rule can be extended
-      // with the source word in the last position
-      const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
-      const Word &sourceWord = sourceWordLabel.GetLabel();
-      const PhraseDictionaryNodeMemory *node = prevDottedRule.GetLastNode().GetChild(sourceWord);
-
-      // if we found a new rule -> create it and add it to the list
-      if (node != NULL) {
-        // create the rule
-#ifdef USE_BOOST_POOL
-        DottedRuleInMemory *dottedRule = m_dottedRulePool.malloc();
-        new (dottedRule) DottedRuleInMemory(*node, sourceWordLabel,
-                                            prevDottedRule);
-#else
-        DottedRuleInMemory *dottedRule = new DottedRuleInMemory(*node,
-            sourceWordLabel,
-            prevDottedRule);
-#endif
-        dottedRuleCol.Add(relEndPos+1, dottedRule);
-      }
+    // if we found a new rule -> directly add it to the out collection
+    if (child != NULL) {
+        const TargetPhraseCollection &tpc = child->GetTargetPhraseCollection();
+        outColl.Add(tpc, m_stackVec, range);
     }
-
-    // search for non-terminals
-    size_t endPos, stackInd;
-
-    // span is already complete covered? nothing can be done
-    if (startPos > absEndPos)
-      continue;
-
-    else if (startPos == range.GetStartPos() && range.GetEndPos() > range.GetStartPos()) {
-      // We're at the root of the prefix tree so won't try to cover the full
-      // span (i.e. we don't allow non-lexical unary rules).  However, we need
-      // to match non-unary rules that begin with a non-terminal child, so we
-      // do that in two steps: during this iteration we search for non-terminals
-      // that cover all but the last source word in the span (there won't
-      // already be running nodes for these because that would have required a
-      // non-lexical unary rule match for an earlier span).  Any matches will
-      // result in running nodes being appended to the list and on subsequent
-      // iterations (for this same span), we'll extend them to cover the final
-      // word.
-      endPos = absEndPos - 1;
-      stackInd = relEndPos;
-    } else {
-      endPos = absEndPos;
-      stackInd = relEndPos + 1;
+  }
+  // all rules starting with nonterminal
+  else if (absEndPos > startPos) {
+    GetNonTerminalExtension(&rootNode, startPos, absEndPos-1);
+    // all (non-unary) rules starting with terminal
+    if (absEndPos == startPos+1) {
+      GetTerminalExtension(&rootNode, absEndPos-1);
     }
-
-
-    ExtendPartialRuleApplication(prevDottedRule, startPos, endPos, stackInd,
-                                 dottedRuleCol);
   }
 
-  // list of rules that that cover the entire span
-  DottedRuleList &rules = dottedRuleCol.Get(relEndPos + 1);
-
-  // look up target sides for the rules
-  DottedRuleList::const_iterator iterRule;
-  for (iterRule = rules.begin(); iterRule != rules.end(); ++iterRule) {
-    const DottedRuleInMemory &dottedRule = **iterRule;
-    const PhraseDictionaryNodeMemory &node = dottedRule.GetLastNode();
-
-    // look up target sides
-    const TargetPhraseCollection &tpc = node.GetTargetPhraseCollection();
-
-    // add the fully expanded rule (with lexical target side)
-    AddCompletedRule(dottedRule, tpc, range, outColl);
+  // copy temporarily stored rules to out collection
+  CompletedRuleCollection rules = m_completedRules[absEndPos];
+  for (vector<CompletedRule*>::const_iterator iter = rules.begin(); iter != rules.end(); ++iter) {
+    outColl.Add((*iter)->GetTPC(), (*iter)->GetStackVector(), range);
   }
 
-  dottedRuleCol.Clear(relEndPos+1);
+  m_completedRules[absEndPos].Clear();
+
 }
 
-// Given a partial rule application ending at startPos-1 and given the sets of
-// source and target non-terminals covering the span [startPos, endPos],
-// determines the full or partial rule applications that can be produced through
-// extending the current rule application by a single non-terminal.
-void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
-  const DottedRuleInMemory &prevDottedRule,
-  size_t startPos,
-  size_t endPos,
-  size_t stackInd,
-  DottedRuleColl & dottedRuleColl)
-{
-  // source non-terminal labels for the remainder
-  const NonTerminalSet &sourceNonTerms = GetParser().GetInputPath(startPos, endPos).GetNonTerminalSet();
+// if a (partial) rule matches, add it to list completed rules (if non-unary and non-empty), and try find expansions that have this partial rule as prefix.
+void ChartRuleLookupManagerMemoryPerSentence::AddAndExtend(
+    const PhraseDictionaryNodeMemory *node,
+    size_t endPos,
+    const ChartCellLabel *cellLabel) {
 
-  // target non-terminal labels for the remainder
-  const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
+    // add backpointer
+    if (cellLabel != NULL) {
+      m_stackVec.push_back(cellLabel);
+    }
 
-  // note where it was found in the prefix tree of the rule dictionary
-  const PhraseDictionaryNodeMemory &node = prevDottedRule.GetLastNode();
+    const TargetPhraseCollection &tpc = node->GetTargetPhraseCollection();
+    // add target phrase collection (except if rule is empty or unary)
+    if (!tpc.IsEmpty() && endPos != m_unaryPos) {
+      m_completedRules[endPos].Add(tpc, m_stackVec, *m_outColl);
+    }
 
-  const PhraseDictionaryNodeMemory::NonTerminalMap & nonTermMap =
-    node.GetNonTerminalMap();
-
-  const size_t numChildren = nonTermMap.size();
-  if (numChildren == 0) {
-    return;
-  }
-  const size_t numSourceNonTerms = sourceNonTerms.size();
-  const size_t numTargetNonTerms = targetNonTerms.GetSize();
-  const size_t numCombinations = numSourceNonTerms * numTargetNonTerms;
-
-  // We can search by either:
-  //   1. Enumerating all possible source-target NT pairs that are valid for
-  //      the span and then searching for matching children in the node,
-  // or
-  //   2. Iterating over all the NT children in the node, searching
-  //      for each source and target NT in the span's sets.
-  // We'll do whichever minimises the number of lookups:
-  if (numCombinations <= numChildren*2) {
-
-    // loop over possible source non-terminal labels (as found in input tree)
-    NonTerminalSet::const_iterator p = sourceNonTerms.begin();
-    NonTerminalSet::const_iterator sEnd = sourceNonTerms.end();
-    for (; p != sEnd; ++p) {
-      const Word & sourceNonTerm = *p;
-
-      // loop over possible target non-terminal labels (as found in chart)
-      ChartCellLabelSet::const_iterator q = targetNonTerms.begin();
-      ChartCellLabelSet::const_iterator tEnd = targetNonTerms.end();
-      for (; q != tEnd; ++q) {
-        const ChartCellLabel &cellLabel = q->second;
-
-        // try to match both source and target non-terminal
-        const PhraseDictionaryNodeMemory * child =
-          node.GetChild(sourceNonTerm, cellLabel.GetLabel());
-
-        // nothing found? then we are done
-        if (child == NULL) {
-          continue;
+    // get all further extensions of rule (until reaching end of sentence or max-chart-span)
+    if (endPos < m_lastPos) {
+      if (!node->GetTerminalMap().empty()) {
+        GetTerminalExtension(node, endPos+1);
+      }
+      if (!node->GetNonTerminalMap().empty()) {
+        for (size_t newEndPos = endPos+1; newEndPos <= m_lastPos; newEndPos++) {
+          GetNonTerminalExtension(node, endPos+1, newEndPos);
         }
-
-        // create new rule
-#ifdef USE_BOOST_POOL
-        DottedRuleInMemory *rule = m_dottedRulePool.malloc();
-        new (rule) DottedRuleInMemory(*child, cellLabel, prevDottedRule);
-#else
-        DottedRuleInMemory *rule = new DottedRuleInMemory(*child, cellLabel,
-            prevDottedRule);
-#endif
-        dottedRuleColl.Add(stackInd, rule);
       }
     }
-  } else {
+
+    // remove backpointer
+    if (cellLabel != NULL) {
+      m_stackVec.pop_back();
+    }
+}
+
+// search all possible terminal extensions of a partial rule (pointed at by node) at a given position
+// recursively try to expand partial rules into full rules up to m_lastPos.
+void ChartRuleLookupManagerMemoryPerSentence::GetTerminalExtension(
+    const PhraseDictionaryNodeMemory *node,
+    size_t pos) {
+
+    const Word &sourceWord = GetSourceAt(pos).GetLabel();
+    const PhraseDictionaryNodeMemory::TerminalMap & terminals = node->GetTerminalMap();
+
+    // if node has small number of terminal edges, test word equality for each.
+    if (terminals.size() < 5) {
+      for (PhraseDictionaryNodeMemory::TerminalMap::const_iterator iter = terminals.begin(); iter != terminals.end(); ++iter) {
+        const Word & word = iter->first;
+        if (word == sourceWord) {
+          const PhraseDictionaryNodeMemory *child = & iter->second;
+          AddAndExtend(child, pos, NULL);
+        }
+      }
+    }
+    // else, do hash lookup
+    else {
+      const PhraseDictionaryNodeMemory *child = node->GetChild(sourceWord);
+      if (child != NULL) {
+        AddAndExtend(child, pos, NULL);
+      }
+    }
+}
+
+// search all nonterminal possible nonterminal extensions of a partial rule (pointed at by node) for a given span (StartPos, endPos).
+// recursively try to expand partial rules into full rules up to m_lastPos.
+void ChartRuleLookupManagerMemoryPerSentence::GetNonTerminalExtension(
+    const PhraseDictionaryNodeMemory *node,
+    size_t startPos,
+    size_t endPos) {
+
+    // target non-terminal labels for the span
+    const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
+
+    if (targetNonTerms.GetSize() == 0) {
+      return;
+    }
+
+#if !defined(UNLABELLED_SOURCE)
+    // source non-terminal labels for the span
+    const InputPath &inputPath = GetParser().GetInputPath(startPos, endPos);
+    const std::vector<bool> &sourceNonTermArray = inputPath.GetNonTerminalArray();
+
+    // can this ever be true? Moses seems to pad the non-terminal set of the input with [X]
+    if (inputPath.GetNonTerminalSet().size() == 0) {
+      return;
+    }
+#endif
+
+    // non-terminal labels in phrase dictionary node
+    const PhraseDictionaryNodeMemory::NonTerminalMap & nonTermMap = node->GetNonTerminalMap();
+
     // loop over possible expansions of the rule
     PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator p;
-    PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator end =
-      nonTermMap.end();
+    PhraseDictionaryNodeMemory::NonTerminalMap::const_iterator end = nonTermMap.end();
     for (p = nonTermMap.begin(); p != end; ++p) {
       // does it match possible source and target non-terminals?
+#if defined(UNLABELLED_SOURCE)
+      const Word &targetNonTerm = p->first;
+#else
       const PhraseDictionaryNodeMemory::NonTerminalMapKey &key = p->first;
       const Word &sourceNonTerm = key.first;
-      if (sourceNonTerms.find(sourceNonTerm) == sourceNonTerms.end()) {
+      // check if source label matches
+      if (! sourceNonTermArray[sourceNonTerm[0]->GetId()]) {
         continue;
       }
       const Word &targetNonTerm = key.second;
+#endif
+
+      //soft matching of NTs
+      if (m_isSoftMatching && !m_softMatchingMap[targetNonTerm[0]->GetId()].empty()) {
+        const std::vector<Word>& softMatches = m_softMatchingMap[targetNonTerm[0]->GetId()];
+        for (std::vector<Word>::const_iterator softMatch = softMatches.begin(); softMatch != softMatches.end(); ++softMatch) {
+          const ChartCellLabel *cellLabel = targetNonTerms.Find(*softMatch);
+          if (cellLabel == NULL) {
+            continue;
+          }
+          // create new rule
+          const PhraseDictionaryNodeMemory &child = p->second;
+          AddAndExtend(&child, endPos, cellLabel);
+        }
+      } // end of soft matches lookup
+
       const ChartCellLabel *cellLabel = targetNonTerms.Find(targetNonTerm);
-      if (!cellLabel) {
+      if (cellLabel == NULL) {
         continue;
       }
-
       // create new rule
       const PhraseDictionaryNodeMemory &child = p->second;
-#ifdef USE_BOOST_POOL
-      DottedRuleInMemory *rule = m_dottedRulePool.malloc();
-      new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);
-#else
-      DottedRuleInMemory *rule = new DottedRuleInMemory(child, *cellLabel,
-          prevDottedRule);
-#endif
-      dottedRuleColl.Add(stackInd, rule);
+      AddAndExtend(&child, endPos, cellLabel);
     }
-  }
 }
+
 
 }  // namespace Moses

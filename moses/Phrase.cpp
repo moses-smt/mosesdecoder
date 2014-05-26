@@ -20,7 +20,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "util/check.hh"
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -58,7 +57,7 @@ Phrase::~Phrase()
 
 void Phrase::MergeFactors(const Phrase &copy)
 {
-  CHECK(GetSize() == copy.GetSize());
+  UTIL_THROW_IF2(GetSize() != copy.GetSize(), "Both phrases need to be the same size to merge");
   size_t size = GetSize();
   const size_t maxNumFactors = MAX_NUM_FACTORS;
   for (size_t currPos = 0 ; currPos < size ; currPos++) {
@@ -73,14 +72,14 @@ void Phrase::MergeFactors(const Phrase &copy)
 
 void Phrase::MergeFactors(const Phrase &copy, FactorType factorType)
 {
-  CHECK(GetSize() == copy.GetSize());
+  UTIL_THROW_IF2(GetSize() != copy.GetSize(), "Both phrases need to be the same size to merge");
   for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
     SetFactor(currPos, factorType, copy.GetFactor(currPos, factorType));
 }
 
 void Phrase::MergeFactors(const Phrase &copy, const std::vector<FactorType>& factorVec)
 {
-  CHECK(GetSize() == copy.GetSize());
+  UTIL_THROW_IF2(GetSize() != copy.GetSize(), "Both phrases need to be the same size to merge");
   for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
     for (std::vector<FactorType>::const_iterator i = factorVec.begin();
          i != factorVec.end(); ++i) {
@@ -116,8 +115,13 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType)
 
 std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
+  bool markUnknown = StaticData::Instance().GetMarkUnknown();
+
   stringstream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
+    if(markUnknown && GetWord(pos).IsOOV()) {
+      strme << "UNK";
+    }
     strme << GetWord(pos).GetString(factorsToPrint, (pos != GetSize()-1));
   }
 
@@ -189,7 +193,6 @@ void Phrase::CreateFromString(FactorDirection direction
     assert((*lhs)->IsNonTerminal());
   } else {
     numWords = annotatedWordVector.size();
-    //CHECK(lhs == NULL);
     if (lhs) {
       (*lhs) = NULL;
     }
@@ -206,7 +209,9 @@ void Phrase::CreateFromString(FactorDirection direction
       isNonTerminal = true;
 
       size_t nextPos = annotatedWord.find('[', 1);
-      CHECK(nextPos != string::npos);
+      UTIL_THROW_IF2(nextPos == string::npos,
+    		  "Incorrect formatting of non-terminal. Should have 2 non-terms, eg. [X][X]. "
+    		  << "Current string: " << annotatedWord);
 
       if (direction == Input)
         annotatedWord = annotatedWord.substr(1, nextPos - 2);
@@ -373,9 +378,39 @@ void Phrase::InitStartEndWord()
   AddWord(endWord);
 }
 
-bool Phrase::Contains(const Phrase &sought) const
+size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
 {
+  if (GetSize() < sought.GetSize()) {
+	// sought phrase too big
+    return NOT_FOUND;
+  }
 
+  size_t maxStartPos = GetSize() - sought.GetSize();
+  for (size_t startThisPos = 0; startThisPos <= maxStartPos; ++startThisPos) {
+    size_t thisPos = startThisPos;
+    int currUnknowns = 0;
+    size_t soughtPos;
+    for (soughtPos = 0; soughtPos < sought.GetSize(); ++soughtPos) {
+      const Word &soughtWord = sought.GetWord(soughtPos);
+      const Word &thisWord = GetWord(thisPos);
+
+      if (soughtWord == thisWord) {
+        ++thisPos;
+      } else if (soughtWord.IsOOV() && (maxUnknown < 0 || currUnknowns < maxUnknown)) {
+        // the output has an OOV word. Allow a certain number of OOVs
+        ++currUnknowns;
+        ++thisPos;
+      } else {
+        break;
+      }
+    }
+
+    if (soughtPos == sought.GetSize()) {
+      return startThisPos;
+    }
+  }
+
+  return NOT_FOUND;
 }
 
 TO_STRING_BODY(Phrase);

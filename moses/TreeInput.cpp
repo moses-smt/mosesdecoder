@@ -4,6 +4,7 @@
 #include "StaticData.h"
 #include "Util.h"
 #include "XmlOption.h"
+#include "FactorCollection.h"
 
 using namespace std;
 
@@ -182,7 +183,8 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             }
             Word *targetLHS = new Word(true);
             targetLHS->CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
-            CHECK(targetLHS->GetFactor(0) != NULL);
+            UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL,
+            		"Null factor left-hand-side");
             targetPhrase.SetTargetLHS(targetLHS);
 
             // not tested
@@ -201,7 +203,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             // set span and create XmlOption
             WordsRange range(startPos+1,endPos);
             XmlOption *option = new XmlOption(range,targetPhrase);
-            CHECK(option);
+            assert(option);
             xmlOptions.push_back(option);
 
             VERBOSE(2,"xml translation = [" << range << "] " << targetLHSstr << " -> " << altTexts[i] << " prob: " << probValue << endl);
@@ -286,7 +288,8 @@ TranslationOptionCollection* TreeInput::CreateTranslationOptionCollection() cons
 void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
                               , const std::vector<FactorType>& /* factorOrder */)
 {
-  CHECK(label.IsNonTerminal());
+  UTIL_THROW_IF2(!label.IsNonTerminal(),
+		  "Label must be a non-terminal");
 
   SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
   NonTerminalSet &list = GetLabelSet(startPos, endPos);
@@ -310,7 +313,7 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &labe
                               , const std::vector<FactorType>& factorOrder)
 {
   Word word(true);
-  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label); // TODO - no factors
+  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label, true); // TODO - no factors
   word.SetFactor(0, factor);
 
   AddChartLabel(startPos, endPos, word, factorOrder);
@@ -327,9 +330,10 @@ std::ostream& operator<<(std::ostream &out, const TreeInput &input)
       NonTerminalSet::const_iterator iter;
       for (iter = labelSet.begin(); iter != labelSet.end(); ++iter) {
         const Word &word = *iter;
+        UTIL_THROW_IF2(!word.IsNonTerminal(),
+      		  "Word must be a non-terminal");
         out << "[" << startPos <<"," << endPos << "]="
             << word << "(" << word.IsNonTerminal() << ") ";
-        CHECK(word.IsNonTerminal());
       }
     }
   }

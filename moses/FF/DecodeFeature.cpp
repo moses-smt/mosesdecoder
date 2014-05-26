@@ -23,33 +23,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 
 #include "DecodeFeature.h"
+#include "moses/DecodeStep.h"
 #include "moses/StaticData.h"
 
 using namespace std;
 
 namespace Moses
 {
-DecodeFeature::DecodeFeature(  const std::string& description
-                               , const std::string &line)
-  : StatelessFeatureFunction(description, line)
+DecodeFeature::DecodeFeature(const std::string &line)
+  : StatelessFeatureFunction(line)
+  , m_container(NULL)
 {
   VERBOSE(2,"DecodeFeature:" << std::endl);
 }
 
-DecodeFeature::DecodeFeature(  const std::string& description
-                               , size_t numScoreComponents
+DecodeFeature::DecodeFeature(size_t numScoreComponents
                                , const std::string &line)
-  : StatelessFeatureFunction(description,numScoreComponents, line)
+  : StatelessFeatureFunction(numScoreComponents, line)
+  , m_container(NULL)
 {
   VERBOSE(2,"DecodeFeature: no factors yet" << std::endl);
 }
 
-DecodeFeature::DecodeFeature(const std::string& description
-                             , size_t numScoreComponents
+DecodeFeature::DecodeFeature(size_t numScoreComponents
                              , const std::vector<FactorType> &input
                              , const std::vector<FactorType> &output
                              , const std::string &line)
-  : StatelessFeatureFunction(description,numScoreComponents, line)
+  : StatelessFeatureFunction(numScoreComponents, line)
+  , m_container(NULL)
   , m_input(input), m_output(output)
 {
   m_inputFactors = FactorMask(input);
@@ -101,7 +102,14 @@ bool DecodeFeature::IsUseable(const FactorMask &mask) const
     }
   }
   return true;
+}
 
+const DecodeGraph &DecodeFeature::GetDecodeGraph() const
+{
+  assert(m_container);
+  const DecodeGraph *graph = m_container->GetContainer();
+  assert(graph);
+  return *graph;
 }
 
 }

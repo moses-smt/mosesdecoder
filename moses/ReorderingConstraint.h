@@ -37,6 +37,7 @@ namespace Moses
 {
 
 class InputType;
+class WordsBitmap;
 
 #define NOT_A_ZONE 999999999
 /** A list of zones and walls to limit which reordering can occur

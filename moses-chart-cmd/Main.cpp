@@ -56,11 +56,12 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ThreadPool.h"
 #include "moses/ChartManager.h"
 #include "moses/ChartHypothesis.h"
-#include "moses/ChartTrellisPath.h"
-#include "moses/ChartTrellisPathList.h"
 #include "moses/Incremental.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
 
 #include "util/usage.hh"
+#include "util/exception.hh"
 
 using namespace std;
 using namespace Moses;
@@ -99,6 +100,14 @@ public:
       const std::vector<search::Applied> &nbest = manager.ProcessSentence();
       if (!nbest.empty()) {
         m_ioWrapper.OutputBestHypo(nbest[0], translationId);
+        if (staticData.IsDetailedTranslationReportingEnabled()) {
+          const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+          m_ioWrapper.OutputDetailedTranslationReport(&nbest[0], sentence, translationId);
+        }
+        if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+          const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+          m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(&nbest[0], sentence, translationId);
+        }
       } else {
         m_ioWrapper.OutputBestNone(translationId);
       }
@@ -110,7 +119,7 @@ public:
     ChartManager manager(*m_source);
     manager.ProcessSentence();
 
-    CHECK(!staticData.UseMBR());
+    UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
@@ -127,12 +136,29 @@ public:
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
     }
+    if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
+    }
+    if (!staticData.GetOutputUnknownsFile().empty()) {
+      m_ioWrapper.OutputUnknowns(manager.GetParser().GetUnknownSources(),
+                                 translationId);
+    }
+
+    //DIMw
+    if (staticData.IsDetailedAllTranslationReportingEnabled()) {
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      size_t nBestSize = staticData.GetNBestSize();
+      std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
+      manager.CalcNBest(nBestSize, nBestList, staticData.GetDistinctNBest());
+      m_ioWrapper.OutputDetailedAllTranslationReport(nBestList, manager, sentence, translationId);
+    }
 
     // n-best
     size_t nBestSize = staticData.GetNBestSize();
     if (nBestSize > 0) {
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-      ChartTrellisPathList nBestList;
+      std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
       m_ioWrapper.OutputNBestList(nBestList, translationId);
       IFVERBOSE(2) {
@@ -144,7 +170,7 @@ public:
       std::ostringstream out;
       manager.GetSearchGraph(translationId, out);
       OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
-      CHECK(oc);
+      UTIL_THROW_IF2(oc == NULL, "File for search graph output not specified");
       oc->Write(translationId, out.str());
     }
 
@@ -199,7 +225,6 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
 static void ShowWeights()
 {
   fix(cout,6);
-  const StaticData& staticData = StaticData::Instance();
   const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 
@@ -208,11 +233,17 @@ static void ShowWeights()
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
     }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
       PrintFeatureWeight(ff);
+    }
+    else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
     }
   }
 }
@@ -245,7 +276,7 @@ int main(int argc, char* argv[])
       exit(0);
     }
 
-    CHECK(staticData.IsChart());
+    UTIL_THROW_IF2(!staticData.IsChart(), "Must be SCFG model");
 
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);
@@ -285,6 +316,7 @@ int main(int argc, char* argv[])
 #endif
 
     delete ioWrapper;
+    FeatureFunction::Destroy();
 
     IFVERBOSE(1)
     PrintUserTime("End.");

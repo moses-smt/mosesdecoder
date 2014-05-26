@@ -48,7 +48,8 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_outputFactorsVec(outputFactorsVec)
   , m_filePath(filePath)
 {
-  CHECK(m_expandableDottedRuleListVec.size() == 0);
+  UTIL_THROW_IF2(m_expandableDottedRuleListVec.size() != 0,
+		  "Dotted rule collection not correctly initialized");
 
   size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
@@ -77,6 +78,7 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const WordsRange &range,
+  size_t lastPos,
   ChartParserCallback &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
@@ -167,7 +169,10 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       // go through each TARGET lhs
       ChartCellLabelSet::const_iterator iterChartNonTerm;
       for (iterChartNonTerm = chartNonTermSet.begin(); iterChartNonTerm != chartNonTermSet.end(); ++iterChartNonTerm) {
-        const ChartCellLabel &cellLabel = iterChartNonTerm->second;
+        if (*iterChartNonTerm == NULL) {
+          continue;
+        }
+        const ChartCellLabel &cellLabel = **iterChartNonTerm;
 
         //cerr << sourceLHS << " " << defaultSourceNonTerm << " " << chartNonTerm << " " << defaultTargetNonTerm << endl;
 
@@ -250,7 +255,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
             targetPhraseCollection = iterCache->second;
           }
 
-          CHECK(targetPhraseCollection);
+          UTIL_THROW_IF2(targetPhraseCollection == NULL, "Error");
           if (!targetPhraseCollection->IsEmpty()) {
             AddCompletedRule(prevDottedRule, *targetPhraseCollection,
                              range, outColl);

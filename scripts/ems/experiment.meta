@@ -20,7 +20,7 @@ clean
 	out: clean-stem
 	default-name: corpus/clean
 	rerun-on-change: max-sentence-length $moses-script-dir/training/clean-corpus-n.perl
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length $working-dir/corpus/clean.lines-retained.VERSION
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length OUT.lines-retained
 	error: there is a blank factor
 parse
 	in: clean-stem
@@ -35,7 +35,7 @@ post-parse-clean
 	out: clean-parsed-stem
 	default-name: corpus/parsed-clean
 	pass-unless: input-parser output-parser
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 $working-dir/corpus/parsed-clean.lines-retained.VERSION --ignore-xml
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 OUT.lines-retained --ignore-xml
 	error: there is a blank factor
 factorize
 	in: clean-parsed-stem
@@ -55,8 +55,16 @@ truecase
 	template-if: input-truecaser IN.$input-extension OUT.$input-extension -model IN1.$input-extension
 	template-if: output-truecaser IN.$output-extension OUT.$output-extension -model IN1.$output-extension
 	parallelizable: yes
+source-label
+        in: truecased-stem
+        out: source-labelled
+        default-name: corpus/labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN.$input-extension OUT.$input-extension
+        template-if: cat IN.$output-extension OUT.$output-extension
+	parallelizable: yes
 lowercase
-	in: truecased-stem
+	in: source-labelled
 	out: lowercased-stem
 	default-name: corpus/lowercased
 	pass-unless: input-lowercaser output-lowercaser
@@ -75,7 +83,7 @@ post-split-clean
 	default-name: corpus/split-clean
 	ignore-if: input-parser output-parser
 	pass-unless: input-splitter output-splitter
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length $working-dir/corpus/split-clean.lines-retained.VERSION
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length OUT.lines-retained
 	error: there is a blank factor
 post-split-clean-syntax
 	in: split-stem 
@@ -83,7 +91,7 @@ post-split-clean-syntax
 	default-name: corpus/split-clean
 	ignore-unless: input-parser output-parser
 	pass-unless: input-splitter output-splitter
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 $working-dir/corpus/parsed-clean.lines-retained.VERSION --ignore-xml
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 OUT.lines-retained --ignore-xml
 	error: there is a blank factor
 
 [RECASING] single
@@ -96,8 +104,9 @@ tokenize
 train
 	in: tokenized
 	out: recase-config
-	template: $moses-script-dir/recaser/train-recaser.perl -train-script $TRAINING:script -dir $working-dir/recasing/model.VERSION -corpus IN -scripts-root-dir $moses-script-dir -config OUT -ngram-count $lm-training
+	template: $moses-script-dir/recaser/train-recaser.perl -train-script $TRAINING:script -dir OUT.model -corpus IN -scripts-root-dir $moses-script-dir -config OUT -ngram-count $lm-training
 	default-name: recasing/moses.ini
+        tmp-name: recasing/model
 	ignore-unless: EVALUATION:recaser
 	error: cannot execute binary file
 
@@ -108,7 +117,7 @@ consolidate
 	default-name: truecaser/corpus
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 train
-  in: tokenized-stem
+	in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
 	default-name: truecaser/truecase-model
@@ -209,6 +218,7 @@ binarize
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
 	error: set KENLM_MAX_ORDER to at least this value
+	final-model: yes
 
 [INTERPOLATED-LM] single
 tuning-from-sgm
@@ -226,9 +236,8 @@ tokenize-tuning
 factorize-tuning
 	in: tokenized-tuning
 	out: factorized-tuning
-	rerun-on-change: TRAINING:output-factors
 	default-name: lm/interpolate-tuning.factored
-	pass-unless: factors	
+	pass-unless: TRAINING:output-factors	
 	parallelizable: yes
 	error: can't open
 	error: incompatible number of words in factor
@@ -276,6 +285,7 @@ binarize
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
 	error: set kMaxOrder to at least this value
+	final-model: yes
 [MML] single
 tokenize-indomain-source
 	in: raw-indomain-source
@@ -386,6 +396,7 @@ build-domains
 	default-name: model/domains
 	ignore-unless: domain-features mml-filter-corpora
 	template: $moses-script-dir/ems/support/build-domain-file-from-subcorpora.perl $input-extension IN > OUT
+	final-model: yes
 mml-score
 	in: MML:model corpus domains
 	out: mml-scores
@@ -480,6 +491,7 @@ build-biconcor
 	default-name: model/biconcor
 	ignore-unless: biconcor
 	error: usage
+	final-model: yes
 build-suffix-array
 	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: phrase-translation-table
@@ -518,6 +530,20 @@ build-osm
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
 	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --srilm-dir $srilm-dir $operation-sequence-model-settings
 	default-name: model/OSM
+build-transliteration-model
+	in: corpus word-alignment 
+	out: transliteration-model
+	ignore-unless: transliteration-module
+	rerun-on-change: transliteration-module training-options script giza-settings
+	default-name: model/Transliteration
+	final-model: yes
+build-translit-table
+	in: transliteration-model
+	out: transliteration-table
+	ignore-unless: in-decoding-transliteration
+	rerun-on-change: in-decoding-transliteration transliteration-module
+	default-name: model/transliteration-phrase-table
+	template: $moses-script-dir/Transliteration/in-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN --input-extension $input-extension --output-extension $output-extension --transliteration-file $transliteration-file --out-file OUT
 extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
@@ -531,12 +557,14 @@ build-reordering
 	ignore-unless: lexicalized-reordering
 	rerun-on-change: lexicalized-reordering reordering-factors
 	default-name: model/reordering-table
+	final-model: yes
 build-ttable
 	in: extracted-phrases lexical-translation-table corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains
 	out: phrase-translation-table
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
 	ignore-if: suffix-array
+	final-model: yes
 sigtest-filter-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: sigtest-filter-suffix-array
@@ -552,19 +580,22 @@ sigtest-filter-suffix-array
 		mv IN.${output-extension}.sa_offset OUT.${output-extension}.sa_offset ; \
 		mv IN.${output-extension}.sa_suffix OUT.${output-extension}.sa_suffix
 	ignore-unless: sigtest-filter
+	final-model: yes
 sigtest-filter-ttable
 	in: phrase-translation-table sigtest-filter-suffix-array
 	out: sigtest-filter-phrase-translation-table
 	default-name: model/phrase-table-sigtest-filter
 	pass-unless: sigtest-filter
-  ignore-if: TRAINING:config
+	ignore-if: TRAINING:config
+	final-model: yes
 sigtest-filter-reordering
 	in: reordering-table sigtest-filter-suffix-array
 	out: sigtest-filter-reordering-table
 	default-name: model/reordering-table-sigtest-filter
 	pass-unless: sigtest-filter
-  ignore-if: TRAINING:config
+	ignore-if: TRAINING:config
 	ignore-unless: lexicalized-reordering
+	final-model: yes
 build-generation
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: generation-table
@@ -572,12 +603,14 @@ build-generation
 	ignore-unless: generation-factors
 	ignore-if: generation-corpus
 	default-name: model/generation-table
+	final-model: yes
 build-generation-custom
 	in: generation-corpus
 	out: generation-table
 	rerun-on-change: generation-factors generation-type training-options script generation-corpus
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
+	final-model: yes
 build-sparse
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
         out: sparse
@@ -586,12 +619,13 @@ build-sparse
         default-name: model/sparse-features
 	template: $moses-script-dir/ems/support/build-sparse-features.perl IN $input-extension $output-extension OUT "$sparse-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
 	default-name: model/moses.ini
 	error: Unknown option
+	final-model: yes
 binarize-config
 	in: config
 	out: bin-config
@@ -599,6 +633,7 @@ binarize-config
 	rerun-on-change: config
 	default-name: model/moses.bin.ini
 	template: $binarize-all IN OUT -Binarizer $ttable-binarizer 
+	final-model: yes
 hiero-compile-source-suffix-array
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: hiero-source-suffix-array
@@ -712,15 +747,29 @@ factorize-input-devtest
 	ignore-unless: use-mira
 	error: can't open
 	error: incompatible number of words in factor
+source-label-input
+        in: factorized-input
+        out: source-labelled-input
+        default-name: tuning/input.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+source-label-input-devtest
+        in: factorized-input-devtest
+        out: source-labelled-input-devtest
+        default-name: tuning/input.devtest.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
 lowercase-input
-	in: factorized-input
+	in: source-labelled-input
 	out: truecased-input
 	default-name: tuning/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 lowercase-input-devtest
-	in: factorized-input-devtest
+	in: source-labelled-input-devtest
 	out: truecased-input-devtest
 	default-name: tuning/input.devtest.lc
 	pass-unless: input-lowercaser
@@ -728,14 +777,14 @@ lowercase-input-devtest
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
-	in: factorized-input TRUECASER:truecase-model
+	in: source-labelled-input TRUECASER:truecase-model
 	out: truecased-input
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.tc
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 truecase-input-devtest
-	in: factorized-input-devtest TRUECASER:truecase-model
+	in: source-labelled-input-devtest TRUECASER:truecase-model
 	out: truecased-input-devtest
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.devtest.tc
@@ -747,7 +796,7 @@ split-input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 split-input-devtest
 	in: truecased-input-devtest SPLITTER:splitter-model
 	out: input-devtest
@@ -755,7 +804,7 @@ split-input-devtest
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
 	ignore-unless: use-mira
-	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -831,7 +880,7 @@ split-reference-devtest
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
-	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains
+	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings ttable-binarizer
@@ -864,6 +913,8 @@ tune
 	ignore-if: use-hiero
 	qsub-script: yes
 	default-name: tuning/moses.ini
+	tmp-name: tuning/tmp
+	final-model: yes
 	rerun-on-change: decoder-settings tuning-settings nbest lambda async
 	not-error: trans: No such file or directory
 apply-weights
@@ -927,15 +978,24 @@ factorize-input
 	pass-unless: TRAINING:input-factors
 	error: can't open
 	error: incompatible number of words in factor
+
+source-label-input
+        in: factorized-input
+        out: source-labelled-input
+        default-name: evaluation/input.labelled
+        pass-unless: source-labeller
+        template-if: source-labeller IN OUT
+	parallelizable: yes
+
 lowercase-input
-	in: factorized-input
+	in: source-labelled-input
 	out: truecased-input
 	default-name: evaluation/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
-	in: factorized-input TRUECASER:truecase-model
+	in: source-labelled-input TRUECASER:truecase-model
 	out: truecased-input
 	default-name: evaluation/input.tc
 	rerun-on-change: input-truecaser
@@ -948,8 +1008,8 @@ split-input
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
-	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains
-	out: filtered-dir
+	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
+	out: filtered-dir 
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage ttable-binarizer
 	pass-if: TRAINING:binarize-all
@@ -967,9 +1027,10 @@ decode
 	default-name: evaluation/output
 	qsub-script: yes
 	ignore-if: use-hiero
-	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph
+	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph wade
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
+	final-model: yes
 hiero-decode
 	in: TUNING:hiero-config-with-reused-weights input
 	out: system-output
@@ -985,15 +1046,21 @@ remove-markup
 	pass-if: TRAINING:hierarchical-rule-set
 	pass-unless: report-segmentation
 	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
+post-decoding-transliteration
+	in: cleaned-output system-output TRAINING:transliteration-model
+	out: transliterated-output
+	default-name: evaluation/transliterated
+	pass-unless: TRAINING:post-decoding-transliteration
+	template: $moses-script-dir/Transliteration/post-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN2 --input-extension $input-extension --output-extension $output-extension --language-model $TRAINING:language-model-file --output-file IN0 --oov-file IN1.oov
 recase-output
-	in: cleaned-output RECASING:recase-config
+	in: transliterated-output RECASING:recase-config
 	out: recased-output
 	default-name: evaluation/recased
 	pass-unless: recaser
 	ignore-if: output-truecaser
 	template: $recaser -moses $RECASING:decoder -in IN -model IN1 > OUT
 detruecase-output
-	in: cleaned-output
+	in: transliterated-output
 	out: recased-output
 	default-name: evaluation/truecased
 	ignore-unless: output-truecaser
@@ -1004,6 +1071,7 @@ detokenize-output
 	default-name: evaluation/detokenized
 	pass-unless: detokenizer
 	template: $detokenizer < IN > OUT
+	final-model: yes
 wrap
 	in: detokenized-output
 	out: wrapped-output
@@ -1011,6 +1079,7 @@ wrap
 	rerun-on-change: wrapping-frame use-hiero
 	template: $wrapping-script $wrapping-frame < IN > OUT
 	error: Use of uninitialized value in pattern match
+	final-model: yes
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -1031,6 +1100,13 @@ lowercase-reference
   pass-if: recaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
+wade
+	in: filtered-dir truecased-input tokenized-reference alignment system-output
+	out: wade-analysis
+	default-name: evaluation/wade-analysis
+	ignore-unless: wade
+	rerun-on-change: wade
+	template: $moses-script-dir/ems/support/run-wade.perl $wade IN IN1 IN2 IN3 IN4 OUT
 nist-bleu
 	in: wrapped-output reference-sgm
 	out: nist-bleu-score
@@ -1039,6 +1115,7 @@ nist-bleu
 	rerun-on-change: nist-bleu
 	error: Illegal division by zero
         template: $nist-bleu -s $input-sgm -r IN1 -t IN > OUT
+	final-model: yes
 nist-bleu-c
 	in: wrapped-output reference-sgm
 	out: nist-bleu-c-score
@@ -1047,6 +1124,7 @@ nist-bleu-c
 	rerun-on-change: nist-bleu-c
 	error: Illegal division by zero
         template: $nist-bleu-c -c -s $input-sgm -r IN1 -t IN > OUT
+	final-model: yes
 ibm-bleu
         in: wrapped-output reference-sgm
         out: ibm-bleu-score
@@ -1054,6 +1132,7 @@ ibm-bleu
         ignore-unless: ibm-bleu
         rerun-on-change: ibm-bleu
         template: $ibm-bleu -ci -s $input-sgm -r IN1 -t IN > OUT
+	final-model: yes
 ibm-bleu-c
         in: wrapped-output reference-sgm
         out: ibm-bleu-c-score
@@ -1061,6 +1140,7 @@ ibm-bleu-c
         ignore-unless: ibm-bleu-c
         rerun-on-change: ibm-bleu-c
         template: $ibm-bleu-c -s $input-sgm -r IN1 -t IN > OUT
+	final-model: yes
 bolt-bleu
 	in: detokenized-output
 	out: bolt-bleu-score
@@ -1068,6 +1148,7 @@ bolt-bleu
 	ignore-unless: bolt-bleu
 	rerun-on-change: bolt-bleu
 	template: $bolt-bleu IN > OUT
+	final-model: yes
 bolt-bleu-c
 	in: detokenized-output
 	out: bolt-bleu-c-score
@@ -1075,13 +1156,15 @@ bolt-bleu-c
 	ignore-unless: bolt-bleu-c
 	rerun-on-change: bolt-bleu-c
 	template: $bolt-bleu-c IN > OUT
+	final-model: yes
 multi-bleu
-	in: cleaned-output tokenized-reference
+	in: transliterated-output tokenized-reference
 	out: multi-bleu-score
 	default-name: evaluation/multi-bleu
 	ignore-unless: multi-bleu
 	rerun-on-change: multi-bleu
 	template: $multi-bleu IN1 < IN > OUT
+	final-model: yes
 multi-bleu-c
 	in: recased-output tokenized-reference
 	out: multi-bleu-c-score
@@ -1089,12 +1172,14 @@ multi-bleu-c
 	ignore-unless: multi-bleu-c
 	rerun-on-change: multi-bleu-c
 	template: $multi-bleu-c IN1 < IN > OUT
+	final-model: yes
 ter
 	in: wrapped-output reference-sgm
 	out: ter-score
 	default-name: evaluation/detokenized.sgm.TER
 	ignore-unless: ter
 	rerun-on-change: ter
+	final-model: yes
 wer
 	in: recased-output reference
 	out: wer-score
@@ -1102,35 +1187,39 @@ wer
 	ignore-unless: wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
+	final-model: yes
 meteor
-	in: cleaned-output reference
+	in: transliterated-output reference
 	out: meteor-score
 	default-name: evaluation/meteor
 	ignore-unless: meteor
 	rerun-on-change: meteor
 	template: $meteor IN IN1 $meteor-params > OUT
+	final-model: yes
 analysis
 	in: recased-output reference input
 	out: analysis
 	default-name: evaluation/analysis
 	ignore-if: report-precision-by-coverage
 	ignore-unless: analysis
-  rerun-on-change: analyze-search-graph
+	rerun-on-change: analyze-search-graph
 analysis-coverage
 	in: input TRAINING:corpus-mml-postfilter=OR=TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table
 	out: analysis-coverage
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage
 	rerun-on-change: score-settings
+	final-model: yes
 analysis-precision
 	in: recased-output reference input TRAINING:corpus-mml-postfilter=OR=TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table analysis-coverage
 	out: analysis
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage report-precision-by-coverage
-  rerun-on-change: precision-by-coverage-base
+	rerun-on-change: precision-by-coverage-base
+	final-model: yes
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model 
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
 	out: report
 	default-name: evaluation/report

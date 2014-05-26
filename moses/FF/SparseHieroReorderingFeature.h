@@ -36,9 +36,12 @@ public:
 	                        , ScoreComponentCollection &scoreBreakdown
 	                        , ScoreComponentCollection &estimatedFutureScore) const
 	{}
-	void Evaluate(const InputType &input
-	                        , const InputPath &inputPath
-	                        , ScoreComponentCollection &scoreBreakdown) const
+  virtual void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , const StackVec *stackVec
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore = NULL)  const
 	{}
 
   virtual void Evaluate(const Hypothesis& hypo,

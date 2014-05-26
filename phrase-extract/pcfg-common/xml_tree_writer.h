@@ -119,7 +119,7 @@ std::string XmlTreeWriter<InputTree>::Escape(const std::string &s) const
     } else if (s[i] == ']') {
       t += "&#93;";
     } else if (s[i] == '|') {
-      t += "&bar;";
+      t += "&#124;";
     } else if (s[i] == '&') {
       t += "&amp;";
     } else if (s[i] == '\'') {

@@ -28,6 +28,8 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "TargetPhrase.h"
+#include "ReorderingConstraint.h"
+#include "FactorCollection.h"
 
 namespace Moses
 {
@@ -361,7 +363,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               // lhs
               const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
               if (!lhsList.empty()) {
-                const Factor *factor = FactorCollection::Instance().AddFactor(lhsList[0].first);
+                const Factor *factor = FactorCollection::Instance().AddFactor(lhsList[0].first, true);
                 Word *targetLHS = new Word(true);
                 targetLHS->SetFactor(0, factor); // TODO - other factors too?
                 targetPhrase.SetTargetLHS(targetLHS);
@@ -371,8 +373,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               targetPhrase.Evaluate(sourcePhrase);
 
               XmlOption *option = new XmlOption(range,targetPhrase);
-
-              CHECK(option);
+              assert(option);
 
               res.push_back(option);
             }

@@ -31,20 +31,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FactorCollection.h"
 #include "moses/Phrase.h"
 #include "moses/StaticData.h"
+#include "moses/FactorTypeSet.h"
 
 using namespace std;
 
 namespace Moses
 {
 
-LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string& description, const std::string &line)
-  :LanguageModelImplementation(description, line)
+LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string &line)
+  :LanguageModelImplementation(line)
+  ,m_factorType(0)
 {
   m_nullContextState = new PointerState(NULL);
   m_beginSentenceState = new PointerState(NULL);
 }
 
-LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
+LanguageModelSingleFactor::~LanguageModelSingleFactor()
+{
+	delete m_nullContextState;
+	delete m_beginSentenceState;
+}
 
 const FFState *LanguageModelSingleFactor::GetNullContextState() const
 {

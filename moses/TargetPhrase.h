@@ -28,8 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
-
+#include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
+
+#include <boost/shared_ptr.hpp>
 
 #ifdef HAVE_PROTOBUF
 #include "rule.pb.h"
@@ -53,8 +55,10 @@ private:
 
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
   const Word *m_lhsTarget;
+  mutable Phrase *m_ruleSource; // to be set by the feature function that needs it.
 
-  std::map<std::string, std::string> m_properties;
+  std::map<std::string, boost::shared_ptr<PhraseProperty> > m_properties;
+
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);
@@ -65,8 +69,8 @@ public:
   // 1st evaluate method. Called during loading of phrase table.
   void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
 
-  // as above, but used only for OOV processing. Doesn't have a phrase table connect with it
-  // so doesn't have a list of ffs
+  // as above, score with ALL FFs
+  // Used only for OOV processing. Doesn't have a phrase table connect with it
   void Evaluate(const Phrase &source);
 
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
@@ -123,13 +127,22 @@ public:
     return *m_alignNonTerm;
   }
 
-  void SetProperties(const StringPiece &str);
-  void SetProperty(const std::string &key, const std::string &value) {
-    m_properties[key] = value;
+  const Phrase *GetRuleSource() const {
+    return m_ruleSource;
   }
-  void GetProperty(const std::string &key, std::string &value, bool &found) const;
+
+  // To be set by the FF that needs it, by default the rule source = NULL
+  // make a copy of the source side of the rule
+  void SetRuleSource(const Phrase &ruleSource) const;
+
+  void SetProperties(const StringPiece &str);
+  void SetProperty(const std::string &key, const std::string &value);
+  bool GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &value) const;
 
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
+
+  bool operator< (const TargetPhrase &compare) const; // NOT IMPLEMENTED
+  bool operator== (const TargetPhrase &compare) const; // NOT IMPLEMENTED
 
   TO_STRING();
 };

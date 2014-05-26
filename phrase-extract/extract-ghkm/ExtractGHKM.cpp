@@ -64,6 +64,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   OutputFileStream invExtractStream;
   std::ofstream glueGrammarStream;
   std::ofstream unknownWordStream;
+  std::ofstream unknownWordSoftMatchesStream;
   std::string fwdFileName = options.extractFile;
   std::string invFileName = options.extractFile + std::string(".inv");
   if (options.gzOutput) {
@@ -78,6 +79,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
   if (!options.unknownWordFile.empty()) {
     OpenOutputFileOrDie(options.unknownWordFile, unknownWordStream);
   }
+  if (!options.unknownWordSoftMatchesFile.empty()) {
+    OpenOutputFileOrDie(options.unknownWordSoftMatchesFile, unknownWordSoftMatchesStream);
+  }
 
   // Target label sets for producing glue grammar.
   std::set<std::string> labelSet;
@@ -90,6 +94,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string targetLine;
   std::string sourceLine;
   std::string alignmentLine;
+  Alignment alignment;
   XmlTreeParser xmlTreeParser(labelSet, topLabelSet);
   ScfgRuleWriter writer(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
@@ -130,9 +135,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
     std::vector<std::string> sourceTokens(ReadTokens(sourceLine));
 
     // Read word alignments.
-    Alignment alignment;
     try {
-      alignment = ReadAlignment(alignmentLine);
+      ReadAlignment(alignmentLine, alignment);
     } catch (const Exception &e) {
       std::ostringstream s;
       s << "Failed to read alignment at line " << lineNum << ": ";
@@ -171,7 +175,11 @@ int ExtractGHKM::Main(int argc, char *argv[])
         ScfgRule r(**q);
         // TODO Can scope pruning be done earlier?
         if (r.Scope() <= options.maxScope) {
-          writer.Write(r);
+          if (!options.treeFragments) {
+            writer.Write(r);
+          } else {
+            writer.Write(r,**q);
+          }
         }
       }
     }
@@ -183,6 +191,10 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
   if (!options.unknownWordFile.empty()) {
     WriteUnknownWordLabel(wordCount, wordLabel, options, unknownWordStream);
+  }
+
+  if (!options.unknownWordSoftMatchesFile.empty()) {
+    WriteUnknownWordSoftMatches(labelSet, unknownWordSoftMatchesStream);
   }
 
   return 0;
@@ -291,6 +303,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "extract minimal rules only")
   ("PCFG",
    "include score based on PCFG scores in target corpus")
+  ("TreeFragments",
+   "output parse tree information")
   ("SentenceOffset",
    po::value(&options.sentenceOffset)->default_value(options.sentenceOffset),
    "set sentence number offset if processing split corpus")
@@ -301,6 +315,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    po::value(&options.unknownWordMinRelFreq)->default_value(
      options.unknownWordMinRelFreq),
    "set minimum relative frequency for unknown word labels")
+  ("UnknownWordSoftMatches",
+   po::value(&options.unknownWordSoftMatchesFile),
+   "write dummy value to unknown word label file, and mappings from dummy value to other labels to named file")
   ("UnknownWordUniform",
    "write uniform weights to unknown word label file")
   ("UnpairedExtractFormat",
@@ -382,6 +399,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("PCFG")) {
     options.pcfg = true;
   }
+  if (vm.count("TreeFragments")) {
+    options.treeFragments = true;
+  }
   if (vm.count("UnknownWordUniform")) {
     options.unknownWordUniform = true;
   }
@@ -392,6 +412,7 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   // Workaround for extract-parallel issue.
   if (options.sentenceOffset > 0) {
     options.unknownWordFile.clear();
+    options.unknownWordSoftMatchesFile.clear();
   }
 }
 
@@ -445,22 +466,22 @@ void ExtractGHKM::WriteGlueGrammar(
   }
 
   // basic rules
-  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1  ||| " << std::endl;
-  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 " << std::endl;
+  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| ||| ||| ||| {{Tree [" << topLabel << " <s>]}}" << std::endl;
+  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| ||| {{Tree [" << topLabel << " [" << topLabel << "] </s>]}}" << std::endl;
 
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1" << std::endl;
+    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1 ||| ||| ||| {{Tree [" << topLabel << " <s> [" << i->first << "] </s>]}}" << std::endl;
   }
 
   // glue rules
   for(std::set<std::string>::const_iterator i = labelSet.begin();
       i != labelSet.end(); i++ ) {
-    out << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1" << std::endl;
+    out << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| ||| {{Tree [" << topLabel << " ["<< topLabel << "] [" << *i << "]]}}" << std::endl;
   }
   // glue rule for unknown word...
-  out << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 |||  0-0 1-1 " << std::endl;
+  out << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1 ||| ||| ||| {{Tree [" << topLabel << " [" << topLabel << "] [X]]}}" << std::endl;
 }
 
 void ExtractGHKM::CollectWordLabelCounts(
@@ -498,6 +519,11 @@ void ExtractGHKM::WriteUnknownWordLabel(
   const Options &options,
   std::ostream &out)
 {
+  if (!options.unknownWordSoftMatchesFile.empty()) {
+    out << "UNK 1" << std::endl;
+    return;
+  }
+
   std::map<std::string, int> labelCount;
   int total = 0;
   for (std::map<std::string, int>::const_iterator p = wordCount.begin();
@@ -518,6 +544,17 @@ void ExtractGHKM::WriteUnknownWordLabel(
       float weight = options.unknownWordUniform ? 1.0f : ratio;
       out << p->first << " " << weight << std::endl;
     }
+  }
+}
+
+void ExtractGHKM::WriteUnknownWordSoftMatches(
+  const std::set<std::string> &labelSet,
+  std::ostream &out)
+{
+  std::set<std::string>::const_iterator p = labelSet.begin();
+  for (p; p != labelSet.end(); ++p) {
+      std::string label = *p;
+      out << "UNK " << label << std::endl;
   }
 }
 

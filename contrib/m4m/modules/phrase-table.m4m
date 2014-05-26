@@ -270,3 +270,20 @@ PTABLES        += $(strip $4) $(strip $5) $(strip $6)
 
 endef
 #################################################################################
+
+define add_mmsapt
+
+$(call mmap_bitext,$(strip $5),$(strip $4))
+ffname   := PT$(words ${PTABLE_ENTRIES})
+MY_ENTRY := Mmsapt
+MY_ENTRY += name=$$(ffname)
+MY_ETNRY += input-factor=$(strip $1)
+MY_ENTRY += output-factor=$(strip $2)
+MY_ENTRY += num-features=$(strip $3)
+MY_ENTRY += base=$(abspath $4)/ L1=${L1} L2=${L2}
+PTABLE_ENTRIES += $$(subst $$(space),;,$${MY_ENTRY})
+MOSES_INI_PREREQ += $(addprefix $(strip $4),${L1}.mct ${L1}.tdx ${L1}.sfa)
+MOSES_INI_PREREQ += $(addprefix $(strip $4),${L2}.mct ${L2}.tdx ${L2}.sfa)
+MOSES_INI_PREREQ += $(strip $4)${L1}-${L2}.mam
+
+endef

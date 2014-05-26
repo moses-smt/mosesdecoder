@@ -9,6 +9,9 @@
 #include "moses/StaticData.h"
 #include "moses/TranslationOption.h"
 #include "moses/DecodeStepTranslation.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/LM/Base.h"
 
 using namespace std;
 using namespace Moses;

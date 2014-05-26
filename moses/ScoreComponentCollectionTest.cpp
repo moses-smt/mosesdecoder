@@ -32,18 +32,21 @@ BOOST_AUTO_TEST_SUITE(scc)
 class MockStatelessFeatureFunction : public StatelessFeatureFunction
 {
 public:
-  MockStatelessFeatureFunction(const string& desc, size_t n, const string &line) :
-    StatelessFeatureFunction(desc,n, line) {}
+  MockStatelessFeatureFunction(size_t n, const string &line) :
+    StatelessFeatureFunction(n, line) {}
   void Evaluate(const Hypothesis&, ScoreComponentCollection*) const {}
   void EvaluateChart(const ChartHypothesis&, ScoreComponentCollection*) const {}
   void Evaluate(const InputType &input
-                          , const InputPath &inputPath
-                          , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore) const
   {}
   void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
 };
@@ -51,7 +54,7 @@ public:
 class MockSingleFeature : public MockStatelessFeatureFunction
 {
 public:
-  MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1, "MockSingle") {}
+  MockSingleFeature(): MockStatelessFeatureFunction(1, "MockSingle") {}
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -61,7 +64,7 @@ public:
 class MockMultiFeature : public MockStatelessFeatureFunction
 {
 public:
-  MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5, "MockMulti") {}
+  MockMultiFeature(): MockStatelessFeatureFunction(5, "MockMulti") {}
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -72,7 +75,7 @@ public:
 class MockSparseFeature : public MockStatelessFeatureFunction
 {
 public:
-  MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", 0, "MockSparse") {}
+  MockSparseFeature(): MockStatelessFeatureFunction(0, "MockSparse") {}
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Word.h"
 #include "moses/TargetPhraseCollection.h"
 #include "moses/Terminal.h"
+#include "moses/NonTerminal.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
@@ -38,6 +39,7 @@ namespace Moses
 {
 
 class PhraseDictionaryMemory;
+class PhraseDictionaryScope3;
 class PhraseDictionaryFuzzyMatch;
 
 //! @todo why?
@@ -101,17 +103,29 @@ public:
           TerminalHasher,
           TerminalEqualityPred> TerminalMap;
 
+#if defined(UNLABELLED_SOURCE)
+  typedef boost::unordered_map<Word,
+          PhraseDictionaryNodeMemory,
+          NonTerminalHasher,
+          NonTerminalEqualityPred> NonTerminalMap;
+#else
   typedef boost::unordered_map<NonTerminalMapKey,
           PhraseDictionaryNodeMemory,
           NonTerminalMapKeyHasher,
           NonTerminalMapKeyEqualityPred> NonTerminalMap;
+#endif
 #else
   typedef std::map<Word, PhraseDictionaryNodeMemory> TerminalMap;
+#if defined(UNLABELLED_SOURCE)
+  typedef std::map<Word, PhraseDictionaryNodeMemory> NonTerminalMap;
+#else
   typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeMemory> NonTerminalMap;
+#endif
 #endif
 
 private:
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryScope3&);
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryFuzzyMatch&);
 
   TerminalMap m_sourceTermMap;
@@ -129,15 +143,24 @@ public:
   void Prune(size_t tableLimit);
   void Sort(size_t tableLimit);
   PhraseDictionaryNodeMemory *GetOrCreateChild(const Word &sourceTerm);
-  PhraseDictionaryNodeMemory *GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm);
   const PhraseDictionaryNodeMemory *GetChild(const Word &sourceTerm) const;
+#if defined(UNLABELLED_SOURCE)
+  PhraseDictionaryNodeMemory *GetOrCreateNonTerminalChild(const Word &targetNonTerm);
+  const PhraseDictionaryNodeMemory *GetNonTerminalChild(const Word &targetNonTerm) const;
+#else
+  PhraseDictionaryNodeMemory *GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm);
   const PhraseDictionaryNodeMemory *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
+#endif
 
   const TargetPhraseCollection &GetTargetPhraseCollection() const {
     return m_targetPhraseCollection;
   }
   TargetPhraseCollection &GetTargetPhraseCollection() {
     return m_targetPhraseCollection;
+  }
+
+  const TerminalMap & GetTerminalMap() const {
+    return m_sourceTermMap;
   }
 
   const NonTerminalMap & GetNonTerminalMap() const {

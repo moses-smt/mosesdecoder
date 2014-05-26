@@ -91,7 +91,7 @@ size_t Word::ReadFromFile(std::fstream &file)
   file.read(mem, memAlloc);
 
   size_t memUsed = ReadFromMemory(mem);
-  CHECK(memAlloc == memUsed);
+  assert(memAlloc == memUsed);
 
   return memAlloc;
 }
@@ -108,10 +108,10 @@ void Word::ConvertToMoses(
   util::TokenIter<util::SingleCharacter> tok(vocab.GetString(m_vocabId), '|');
 
   for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
-    UTIL_THROW_IF(!tok, util::Exception, "Too few factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
-    overwrite.SetFactor(*t, factorColl.AddFactor(*tok));
+    UTIL_THROW_IF2(!tok, "Too few factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
+    overwrite.SetFactor(*t, factorColl.AddFactor(*tok, m_isNonTerminal));
   }
-  UTIL_THROW_IF(tok, util::Exception, "Too many factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
+  UTIL_THROW_IF2(tok, "Too many factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
 }
 
 int Word::Compare(const Word &compare) const

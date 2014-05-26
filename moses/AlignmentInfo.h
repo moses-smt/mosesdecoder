@@ -70,6 +70,7 @@ public:
   }
 
   std::set<size_t> GetAlignmentsForSource(size_t sourcePos) const;
+  std::set<size_t> GetAlignmentsForTarget(size_t targetPos) const;
 
   size_t GetSize() const {
     return m_collection.size();

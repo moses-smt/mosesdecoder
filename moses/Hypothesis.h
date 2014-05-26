@@ -99,7 +99,7 @@ public:
   ~Hypothesis();
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
-  static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Phrase* constraint);
+  static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
   static Hypothesis* Create(Manager& manager, const WordsBitmap &initialCoverage);
 
@@ -107,7 +107,7 @@ public:
   static Hypothesis* Create(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
-  Hypothesis* CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const;
+  Hypothesis* CreateNext(const TranslationOption &transOpt) const;
 
   void PrintHypothesis() const;
 
@@ -169,7 +169,7 @@ public:
     const Hypothesis *hypo = this;
     while (pos < hypo->GetCurrTargetWordsRange().GetStartPos()) {
       hypo = hypo->GetPrevHypo();
-      CHECK(hypo != NULL);
+      UTIL_THROW_IF2(hypo == NULL, "Previous hypothesis should not be NULL");
     }
     return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
   }

@@ -15,7 +15,7 @@ namespace Moses
 {
 
 SparseHieroReorderingFeature::SparseHieroReorderingFeature(const std::string &line)
-  :StatelessFeatureFunction("SparseHieroReorderingFeature",0, line),
+  :StatelessFeatureFunction(0, line),
   m_type(SourceCombined),
   m_sourceFactor(0),
   m_targetFactor(0),

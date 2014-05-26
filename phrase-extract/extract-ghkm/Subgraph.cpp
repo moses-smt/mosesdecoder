@@ -17,8 +17,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <iostream>
 #include "Subgraph.h"
-
 #include "Node.h"
 
 namespace Moses
@@ -117,6 +117,31 @@ float Subgraph::CalcPcfgScore() const
     }
   }
   return score;
+}
+
+void Subgraph::PrintTree(std::ostream &out) const 
+{
+  RecursivelyPrintTree(m_root,out);
+}
+
+void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const 
+{
+  NodeType nodeType = n->GetType();
+  if (nodeType == TREE) {
+    out << "[" << n->GetLabel();
+    if (m_leaves.find(n) == m_leaves.end()) {
+      const std::vector<Node *> &children = n->GetChildren();
+      for (std::vector<Node *>::const_iterator p(children.begin());
+           p != children.end(); ++p) {
+        Node *child = *p;
+        out << " ";
+        RecursivelyPrintTree(child,out);
+      }
+    }
+    out << "]";
+  } else if (nodeType == TARGET) {
+    out << n->GetLabel();
+  }
 }
 
 }  // namespace Moses

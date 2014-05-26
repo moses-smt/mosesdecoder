@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "domain.h"
+#include "DomainFeature.h"
 #include "ScoreFeature.h"
 #include "tables-core.h"
 
@@ -69,7 +69,9 @@ static void checkDomainConfigured(
   ScoreFeatureManager manager;
   manager.configure(args);
   const std::vector<ScoreFeaturePtr>& features  = manager.getFeatures();
-  BOOST_REQUIRE_EQUAL(features.size(), 1);
+  //BOOST_REQUIRE_EQUAL(features.size(), 2);
+  //if I add to features this check will fail?
+  BOOST_REQUIRE_EQUAL(features.size(), 1); //MARIA -> what is this check and why does it fail when I add my feature?
   Expected* feature = dynamic_cast<Expected*>(features[0].get());
   BOOST_REQUIRE(feature);
   BOOST_CHECK(manager.includeSentenceId());
@@ -91,18 +93,3 @@ BOOST_AUTO_TEST_CASE(manager_config_domain)
   (boost::assign::list_of("--SparseDomainSubset")("/dev/null"));
 }
 
-
-BOOST_AUTO_TEST_CASE(domain_equals)
-{
-  SubsetDomainFeature feature(DomainFileLocation());
-  PhraseAlignment a1,a2,a3;
-  char buf1[] = "a ||| b ||| 0-0 ||| 1";
-  char buf2[] = "a ||| b ||| 0-0 ||| 2";
-  char buf3[] = "a ||| b ||| 0-0 ||| 3";
-  a1.create(buf1, 0, true); //domain a
-  a2.create(buf2, 1, true); //domain c
-  a3.create(buf3, 2, true); //domain c
-  BOOST_CHECK(feature.equals(a2,a3));
-  BOOST_CHECK(!feature.equals(a1,a3));
-  BOOST_CHECK(!feature.equals(a1,a3));
-}

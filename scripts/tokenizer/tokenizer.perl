@@ -22,6 +22,8 @@ use Thread;
 my $mydir = "$RealBin/../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
+my @protected_patterns = ();
+my $protected_patterns_file = "";
 my $language = "en";
 my $QUIET = 0;
 my $HELP = 0;
@@ -31,7 +33,7 @@ my $TIMING = 0;
 my $NUM_THREADS = 1;
 my $NUM_SENTENCES_PER_THREAD = 2000;
 my $PENN = 0;
-
+my $NO_ESCAPING = 0;
 while (@ARGV) 
 {
 	$_ = shift;
@@ -42,9 +44,12 @@ while (@ARGV)
 	/^-x$/ && ($SKIP_XML = 1, next);
 	/^-a$/ && ($AGGRESSIVE = 1, next);
 	/^-time$/ && ($TIMING = 1, next);
+  # Option to add list of regexps to be protected
+  /^-protected/ && ($protected_patterns_file = shift, next);
 	/^-threads$/ && ($NUM_THREADS = int(shift), next);
 	/^-lines$/ && ($NUM_SENTENCES_PER_THREAD = int(shift), next);
 	/^-penn$/ && ($PENN = 1, next);
+	/^-no-escape/ && ($NO_ESCAPING = 1, next);
 }
 
 # for time calculation
@@ -64,6 +69,8 @@ if ($HELP)
         print "  -b     ... disable Perl buffering.\n";
         print "  -time  ... enable processing time calculation.\n";
         print "  -penn  ... use Penn treebank-like tokenization.\n";
+        print "  -protected FILE  ... specify file with patters to be protected in tokenisation.\n";
+	print "  -no-escape ... don't perform HTML escaping on apostrophy, quotes, etc.\n";
 	exit;
 }
 
@@ -80,6 +87,16 @@ load_prefixes($language,\%NONBREAKING_PREFIX);
 if (scalar(%NONBREAKING_PREFIX) eq 0)
 {
 	print STDERR "Warning: No known abbreviations for language '$language'\n";
+}
+
+# Load protected patterns
+if ($protected_patterns_file)
+{
+  open(PP,$protected_patterns_file) || die "Unable to open $protected_patterns_file";
+  while(<PP>) {
+    chomp;
+    push @protected_patterns, $_;
+  }
 }
 
 my @batch_sentences = ();
@@ -212,13 +229,26 @@ sub tokenize
     $text =~ s/\s+/ /g;
     $text =~ s/[\000-\037]//g;
 
+    # Find protected patterns
+    my @protected = ();
+    foreach my $protected_pattern (@protected_patterns) {
+      foreach ($text =~ /($protected_pattern)/) {
+        push @protected, $_;
+      }
+    }
+
+    for (my $i = 0; $i < scalar(@protected); ++$i) {
+      my $subst = sprintf("THISISPROTECTED%.3d", $i);
+      $text =~ s,\Q$protected[$i],$subst,g;
+    }
+
     # seperate out all "other" special characters
     $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
 
     # aggressive hyphen splitting
     if ($AGGRESSIVE) 
     {
-        $text =~ s/([\p{IsAlnum}])\-([\p{IsAlnum}])/$1 \@-\@ $2/g;
+        $text =~ s/([\p{IsAlnum}])\-(?=[\p{IsAlnum}])/$1 \@-\@ /g;
     }
 
     #multi-dots stay together
@@ -303,6 +333,12 @@ sub tokenize
     $text =~ s/^ //g;
     $text =~ s/ $//g;
 
+    # restore protected
+    for (my $i = 0; $i < scalar(@protected); ++$i) {
+      my $subst = sprintf("THISISPROTECTED%.3d", $i);
+      $text =~ s/$subst/$protected[$i]/g;
+    }
+
     #restore multi-dots
     while($text =~ /DOTDOTMULTI/) 
     {
@@ -311,14 +347,17 @@ sub tokenize
     $text =~ s/DOTMULTI/./g;
 
     #escape special chars
-    $text =~ s/\&/\&amp;/g;   # escape escape
-    $text =~ s/\|/\&#124;/g;  # factor separator
-    $text =~ s/\</\&lt;/g;    # xml
-    $text =~ s/\>/\&gt;/g;    # xml
-    $text =~ s/\'/\&apos;/g;  # xml
-    $text =~ s/\"/\&quot;/g;  # xml
-    $text =~ s/\[/\&#91;/g;   # syntax non-terminal
-    $text =~ s/\]/\&#93;/g;   # syntax non-terminal
+    if (!$NO_ESCAPING)
+      {
+	$text =~ s/\&/\&amp;/g;   # escape escape
+	$text =~ s/\|/\&#124;/g;  # factor separator
+	$text =~ s/\</\&lt;/g;    # xml
+	$text =~ s/\>/\&gt;/g;    # xml
+	$text =~ s/\'/\&apos;/g;  # xml
+	$text =~ s/\"/\&quot;/g;  # xml
+	$text =~ s/\[/\&#91;/g;   # syntax non-terminal
+	$text =~ s/\]/\&#93;/g;   # syntax non-terminal
+      }
 
     #ensure final line break
     $text .= "\n" unless $text =~ /\n$/;

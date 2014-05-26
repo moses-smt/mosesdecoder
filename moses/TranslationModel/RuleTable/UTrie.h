@@ -46,7 +46,7 @@ class RuleTableUTrie : public RuleTableTrie
 {
 public:
   RuleTableUTrie(const std::string &line)
-    : RuleTableTrie("RuleTableUTrie", line) {
+    : RuleTableTrie(line) {
   }
 
   const UTrieNode &GetRootNode() const {
@@ -54,7 +54,7 @@ public:
   }
 
   ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &,
-      const ChartCellCollectionBase &);
+      const ChartCellCollectionBase &, std::size_t);
 
 private:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(

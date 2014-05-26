@@ -30,12 +30,13 @@
 #include "ChartTranslationOptions.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartManager.h"
+#include "util/exception.hh"
 
 using namespace std;
 
 namespace Moses
 {
-extern bool g_debug;
+extern bool g_mosesDebug;
 
 ChartCellBase::ChartCellBase(size_t startPos, size_t endPos) :
   m_coverage(startPos, endPos),
@@ -108,12 +109,16 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 //! call SortHypotheses() in each hypo collection in this cell
 void ChartCell::SortHypotheses()
 {
-  CHECK(m_targetLabelSet.Empty());
+  UTIL_THROW_IF2(!m_targetLabelSet.Empty(), "Already sorted");
+
   MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
-    coll.SortHypotheses();
-    m_targetLabelSet.AddConstituent(iter->first, &coll.GetSortedHypotheses());
+
+    if (coll.GetSize()) {
+      coll.SortHypotheses();
+      m_targetLabelSet.AddConstituent(iter->first, &coll.GetSortedHypotheses());
+    }
   }
 }
 
@@ -126,13 +131,13 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
   MapType::const_iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     const HypoList &sortedList = iter->second.GetSortedHypotheses();
-    CHECK(sortedList.size() > 0);
-
-    const ChartHypothesis *hypo = sortedList[0];
-    if (hypo->GetTotalScore() > bestScore) {
-      bestScore = hypo->GetTotalScore();
-      ret = hypo;
-    };
+    if (sortedList.size() > 0) {
+      const ChartHypothesis *hypo = sortedList[0];
+      if (hypo->GetTotalScore() > bestScore) {
+        bestScore = hypo->GetTotalScore();
+        ret = hypo;
+      }
+    }
   }
 
   return ret;

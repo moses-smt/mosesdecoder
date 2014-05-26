@@ -61,6 +61,9 @@ public:
 class BleuScoreFeature : public StatefulFeatureFunction
 {
 public:
+  static const std::vector<BleuScoreFeature*>& GetColl() {
+	return s_staticColl;
+  }
 
   typedef boost::unordered_map<size_t, RefValue > RefCounts;
   typedef boost::unordered_map<size_t, NGrams> Matches;
@@ -119,13 +122,16 @@ public:
                          int featureID,
                          ScoreComponentCollection* accumulator) const;
   void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , ScoreComponentCollection &scoreBreakdown) const
+                , const InputPath &inputPath
+                , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
   bool Enabled() const {
@@ -149,6 +155,8 @@ public:
   }
 
 private:
+  static std::vector<BleuScoreFeature*> s_staticColl;
+
   bool m_enabled;
   bool m_sentence_bleu;
   bool m_simple_history_bleu;

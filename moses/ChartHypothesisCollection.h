@@ -45,12 +45,10 @@ class ChartHypothesisRecombinationOrderer
 public:
   bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
     // assert in same cell
-    const WordsRange &rangeA	= hypoA->GetCurrSourceRange()
-                                , &rangeB	= hypoB->GetCurrSourceRange();
-    CHECK(rangeA == rangeB);
+    assert(hypoA->GetCurrSourceRange() == hypoB->GetCurrSourceRange());
 
     // shouldn't be mixing hypos with different lhs
-    CHECK(hypoA->GetTargetLHS() == hypoB->GetTargetLHS());
+    assert(hypoA->GetTargetLHS() == hypoB->GetTargetLHS());
 
     int ret = hypoA->RecombineCompare(*hypoB);
     if (ret != 0)

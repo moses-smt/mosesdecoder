@@ -41,15 +41,9 @@ SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, 
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_start(clock())
   ,m_transOptColl(transOptColl)
 {
   const StaticData &staticData = StaticData::Instance();
-
-  /* constraint search not implemented in cube pruning
-  	long sentenceID = source.GetTranslationId();
-  	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-  */
 
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
@@ -108,8 +102,11 @@ void SearchCubePruning::ProcessSentence()
     const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
 
     for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
+      // build the first hypotheses
       bmIter->second->InitializeEdges();
+      m_manager.GetSentenceStats().StartTimeManageCubes();
       BCQueue.push(bmIter->second);
+      m_manager.GetSentenceStats().StopTimeManageCubes();
 
       // old algorithm
       // bmIter->second->EnsureMinStackHyps(PopLimit);
@@ -117,11 +114,21 @@ void SearchCubePruning::ProcessSentence()
 
     // main search loop, pop k best hyps
     for (size_t numpops = 1; numpops <= PopLimit && !BCQueue.empty(); numpops++) {
+      // get currently best hypothesis in queue
+      m_manager.GetSentenceStats().StartTimeManageCubes();
       BitmapContainer *bc = BCQueue.top();
       BCQueue.pop();
+      m_manager.GetSentenceStats().StopTimeManageCubes();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().AddPopped();
+      }
+      // push on stack and create successors
       bc->ProcessBestHypothesis();
+      // if there are any hypothesis left in this specific container, add back to queue
+      m_manager.GetSentenceStats().StartTimeManageCubes();
       if (!bc->Empty())
         BCQueue.push(bc);
+      m_manager.GetSentenceStats().StopTimeManageCubes();
     }
 
     // ensure diversity, a minimum number of inserted hyps for each bitmap container;
@@ -134,23 +141,26 @@ void SearchCubePruning::ProcessSentence()
 
     // the stack is pruned before processing (lazy pruning):
     VERBOSE(3,"processing hypothesis from next stack");
-    // VERBOSE("processing next stack at ");
+    IFVERBOSE(2) {
+      m_manager.GetSentenceStats().StartTimeStack();
+    }
     sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
     VERBOSE(3,std::endl);
     sourceHypoColl.CleanupArcList();
+    IFVERBOSE(2) {
+      m_manager.GetSentenceStats().StopTimeStack();
+    }
 
+    IFVERBOSE(2) {
+      m_manager.GetSentenceStats().StartTimeSetupCubes();
+    }
     CreateForwardTodos(sourceHypoColl);
+    IFVERBOSE(2) {
+      m_manager.GetSentenceStats().StopTimeSetupCubes();
+    }
 
     stackNo++;
   }
-
-  //PrintBitmapContainerGraph();
-
-  // some more logging
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().SetTimeTotal( clock()-m_start );
-  }
-  VERBOSE(2, m_manager.GetSentenceStats());
 }
 
 void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
@@ -238,6 +248,11 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
   // no limit of reordering: no problem
   if (maxDistortion < 0) {
     return true;
+  }
+
+  if (StaticData::Instance().AdjacentOnly() &&
+	  !hypoBitmap.IsAdjacent(range.GetStartPos(), range.GetEndPos())) {
+	return false;
   }
 
   bool leftMostEdge = (hypoFirstGapPos == startPos);

@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 
 
-#include "moses/ChartTrellisPathList.h"
 #include "moses/Hypothesis.h"
 #include "moses/Parameter.h"
 #include "moses/SearchNormal.h"
@@ -95,15 +94,6 @@ public:
       bool distinct,
       size_t rank,
       size_t epoch);
-  void outputNBestList(const std::string& source,
-                       size_t sentenceid,
-                       size_t nBestSize,
-                       float bleuObjectiveWeight,
-                       float bleuScoreWeight,
-                       bool distinctNbest,
-                       bool avgRefLength,
-                       std::string filename,
-                       std::ofstream& streamOut);
   void initialize(Moses::StaticData& staticData, const std::string& source, size_t sentenceid,
                   float bleuObjectiveWeight, float bleuScoreWeight, bool avgRefLength, bool chartDecoding);
   void updateHistory(const std::vector<const Moses::Word*>& words);

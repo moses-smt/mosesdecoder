@@ -35,7 +35,7 @@ class ScoreComponentCollection;
 class DecodeStepGeneration : public DecodeStep
 {
 public:
-  DecodeStepGeneration(const GenerationDictionary* dict,
+  DecodeStepGeneration(GenerationDictionary* dict,
                        const DecodeStep* prev,
                        const std::vector<FeatureFunction*> &features);
 

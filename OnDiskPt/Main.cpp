@@ -62,8 +62,7 @@ int main (int argc, char * const argv[])
   Moses::InputFileStream inStream(filePath);
 
   OnDiskWrapper onDiskWrapper;
-  bool retDb = onDiskWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
-  assert(retDb);
+  onDiskWrapper.BeginSave(destPath, numSourceFactors, numTargetFactors, numScores);
 
   PhraseNode &rootNode = onDiskWrapper.GetRootSourceNode();
   size_t lineNum = 0;
@@ -128,14 +127,14 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
     } else {
       switch (stage) {
       case 0: {
-        WordPtr w = Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
+        WordPtr w = Tokenize(sourcePhrase, tok, true, true, onDiskWrapper, 1);
         if (w != NULL)
           out->AddWord(w);
 
         break;
       }
       case 1: {
-        Tokenize(targetPhrase, tok, false, true, onDiskWrapper);
+        Tokenize(targetPhrase, tok, false, true, onDiskWrapper, 0);
         break;
       }
       case 2: {
@@ -190,8 +189,9 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
 
 OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
                            , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
-                           , OnDiskPt::OnDiskWrapper &onDiskWrapper)
+                           , OnDiskPt::OnDiskWrapper &onDiskWrapper, int retSourceTarget)
 {
+  // retSourceTarget: 0 = don't return anything. 1 = source, 2 = target
 
   bool nonTerm = false;
   size_t tokSize = token.size();
@@ -219,6 +219,10 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
         WordPtr word(new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
         phrase.AddWord(word);
+
+        if (retSourceTarget == 1) {
+            out = word;
+        }
       }
 
       wordStr = token.substr(splitPos, tokSize - splitPos);
@@ -226,7 +230,10 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
         WordPtr word(new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
         phrase.AddWord(word);
-        out = word;
+
+        if (retSourceTarget == 2) {
+            out = word;
+        }
       }
 
     }

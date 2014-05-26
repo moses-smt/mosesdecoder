@@ -119,14 +119,21 @@ sub exec_moses {
   my ($decoder, $conf, $input, $results) = @_;
   my $start_time = time;
   my ($o, $ec, $sig);
+  my $cmd;
   if ($NBEST > 0){
         print STDERR "Nbest output file is $results/run.nbest\n";
         print STDERR "Nbest size is $NBEST\n";
-	($o, $ec, $sig) = run_command("$decoder -f $conf -i $input -n-best-list $results/run.nbest $NBEST 1> $results/run.stdout 2> $results/run.stderr");
+	$cmd = "$decoder -f $conf -i $input -n-best-list $results/run.nbest $NBEST 1> $results/run.stdout 2> $results/run.stderr";
   }
   else{
-	($o, $ec, $sig) = run_command("$decoder -f $conf -i $input 1> $results/run.stdout 2> $results/run.stderr");
+      $cmd = "$decoder -f $conf -i $input 1> $results/run.stdout 2> $results/run.stderr";
   }
+
+  open  CMD, ">$results/cmd_line";
+  print CMD "$cmd\n";
+  close CMD;
+
+  ($o, $ec, $sig) = run_command($cmd);
   my $elapsed = time - $start_time;
   return ($o, $elapsed, $ec, $sig);
 }

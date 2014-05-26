@@ -35,7 +35,7 @@ namespace Moses
 namespace GHKM
 {
 
-void ScfgRuleWriter::Write(const ScfgRule &rule)
+void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
 {
   std::ostringstream sourceSS;
   std::ostringstream targetSS;
@@ -57,18 +57,19 @@ void ScfgRuleWriter::Write(const ScfgRule &rule)
     m_inv << " " << p->second << "-" << p->first;
   }
 
-  // Write a count of 1 and an empty NT length column to the forward extract
-  // file.
-  // TODO Add option to write NT length?
-  m_fwd << " ||| 1 ||| |||";
-  if (m_options.pcfg) {
-    // Write the PCFG score.
-    m_fwd << " " << std::exp(rule.GetPcfgScore());
-  }
-  m_fwd << std::endl;
+  // Write a count of 1.
+  m_fwd << " ||| 1";
+  m_inv << " ||| 1";
 
-  // Write a count of 1 to the inverse extract file.
-  m_inv << " ||| 1" << std::endl;
+  // Write the PCFG score (if requested).
+  if (m_options.pcfg) {
+    m_fwd << " ||| " << std::exp(rule.GetPcfgScore());
+  }
+
+  if (printEndl) {
+    m_fwd << std::endl;
+    m_inv << std::endl;
+  }
 }
 
 void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule,
@@ -160,6 +161,16 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
   } else {
     out << symbol.GetValue();
   }
+}
+
+void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g) 
+{
+    Write(rule,false);
+    m_fwd << " {{Tree ";
+    g.PrintTree(m_fwd);
+    m_fwd << "}}";
+    m_fwd << std::endl;
+    m_inv << std::endl;
 }
 
 }  // namespace GHKM

@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Factor.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
-#include "moses/FF/FeatureFunction.h"
 #include "moses/Word.h"
 #include "Base.h"
 
@@ -61,7 +60,7 @@ protected:
   Word m_sentenceStartWord, m_sentenceEndWord; //! Contains factors which represents the beging and end words for this LM.
   //! Usually <s> and </s>
 
-  LanguageModelImplementation(const std::string& description, const std::string &line);
+  LanguageModelImplementation(const std::string &line);
 
 public:
 

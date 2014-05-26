@@ -22,6 +22,7 @@
 #include "HypoList.h"
 #include "Word.h"
 #include "WordsRange.h"
+#include "ChartParserCallback.h"
 
 namespace search
 {
@@ -52,7 +53,8 @@ public:
                  Stack stack=Stack())
     : m_coverage(coverage)
     , m_label(label)
-    , m_stack(stack) {
+    , m_stack(stack)
+    , m_bestScore(0) {
   }
 
   const WordsRange &GetCoverage() const {
@@ -68,6 +70,14 @@ public:
     return m_stack;
   }
 
+  //caching of best score on stack
+  float GetBestScore(const ChartParserCallback *outColl) const {
+    if (m_bestScore == 0) {
+      m_bestScore = outColl->GetBestScore(this);
+    }
+    return m_bestScore;
+  }
+
   bool operator<(const ChartCellLabel &other) const {
     // m_coverage and m_label uniquely identify a ChartCellLabel, so don't
     // need to compare m_stack.
@@ -81,6 +91,7 @@ private:
   const WordsRange &m_coverage;
   const Word &m_label;
   Stack m_stack;
+  mutable float m_bestScore;
 };
 
 }

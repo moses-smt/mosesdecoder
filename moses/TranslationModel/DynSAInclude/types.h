@@ -8,7 +8,7 @@
 #include <typeinfo>
 #include <stdint.h>
 
-#ifdef WIN32
+#if defined WIN32 && !defined __MINGW32__
 #define iterate(c, i) for(decltype(c.begin()) i = c.begin(); i != c.end(); ++i)
 #define piterate(c, i) for(decltype(c->begin()) i = c->begin(); i != c->end(); ++i)
 #define riterate(c, i) for(decltype(c.rbegin()) i = c.rbegin(); i != c.rend(); ++i)

@@ -436,7 +436,8 @@ function ngram_summary() {
   $score_line = "";
   for($i=0;$i<count($each_score);$i++) {
     if (preg_match('/([\d\(\)\.\s]+) (BLEU[\-c]*)/',$each_score[$i],$match) ||
-        preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match)) {
+        preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match) ||
+        preg_match('/([\d\(\)\.\s]+) (METEOR[\-c]*)/',$each_score[$i],$match)) {
       $header .= "<td>$match[2]</td>";
       $score_line .= "<td>$match[1]</td>";
     }
@@ -1055,7 +1056,7 @@ function sentence_annotation($count,$filter) {
       list($sentence,$brackets,$nt,$words) = split("\t",$data[$i]);
       if ($sentence != $last_sentence) { $span = 0; }
       $last_sentence = $sentence;
-      if ($filter == "" || array_key_exists($sentence,$retained)) {
+      if (array_key_exists($sentence,$retained)) {      
 	$segmentation[$sentence][$span]["brackets"] = $brackets;
 #	  $segmentation[$sentence][$span]["nt"] = $nt;
 	$segmentation[$sentence][$span]["words"] = rtrim($words);
@@ -1082,7 +1083,7 @@ function sentence_annotation($count,$filter) {
       list($sentence,$brackets,$nt,$words) = split("\t",$data[$i]);
       if ($sentence != $last_sentence) { $span = 0; }
       $last_sentence = $sentence;
-      if ($filter == "" || array_key_exists($sentence,$retained)) {      
+      if (array_key_exists($sentence,$retained)) {      
 	$segmentation_out[$sentence][$span]["brackets"] = $brackets;
 	$segmentation_out[$sentence][$span]["nt"] = $nt;
 	$segmentation_out[$sentence][$span]["words"] = rtrim($words);
@@ -1108,7 +1109,7 @@ function sentence_annotation($count,$filter) {
       list($sentence,$depth,$start_div,$end_div,$start_div_in,$end_div_in,$children) = split(" ",$data[$i]);
       if ($sentence != $last_sentence) { $n = 0; }
       $last_sentence = $sentence;
-      if ($filter == "" || array_key_exists($sentence,$retained)) {
+      if (array_key_exists($sentence,$retained)) {      
 	$node[$sentence][$n]['depth'] = $depth;
 	$node[$sentence][$n]['start_div'] = $start_div;
 	$node[$sentence][$n]['end_div'] = $end_div;
@@ -1241,7 +1242,7 @@ function input_annotation($sentence,$input,$segmentation,$filter) {
   for($sep_end=1;$sep_end<=count($word);$sep_end++) {
     if ($separable[$sep_end] == 1) {
       # one table for each separable block
-      print "<table cellpadding=1 cellspacing=0 border=0 style=\"display: inline;\">";
+      print "<table cellpadding=1 cellspacing=0 border=0 style=\"display: inline-table;\">";
       for($level=$max_level;$level>=1;$level--) {
         # rows for phrase display
 	print "<tr style=\"height:5px;\">";
@@ -1448,8 +1449,8 @@ function biconcor($query) {
 <input type=submit onclick=\"show_biconcor($sentence,encodeBase64(document.getElementById('BiconcorQuery').value));\" value=\"look up\">
 </form>
 <div class=\"biconcor-content\">";
-    $cmd = "./biconcor -l $dir/model/biconcor.$biconcor -Q ".base64_encode($query)." 2>/dev/null";
-    #print $cmd."<p>";
+    $cmd = "./biconcor -html -l $dir/model/biconcor.$biconcor -Q ".base64_encode($query)." 2>/dev/null";
+    # print $cmd."<p>";
     system($cmd);
     # print "<p>done.";
     print "</div></center>";

@@ -25,6 +25,7 @@ if $(with-irstlm) {
 
 #SRILM
 local with-srilm = [ option.get "with-srilm" ] ;
+local with-maxent-srilm = [ option.get "with-maxent-srilm" ] ;
 if $(with-srilm) {
   if [ option.get "with-srilm-dynamic" : no : yes ] = yes {
     lib srilm ;
@@ -44,9 +45,18 @@ if $(with-srilm) {
 
   obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
   obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
-  alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
-  dependencies += sri ;
-  lmmacros += LM_SRI ;
+  if $(with-maxent-srilm) {
+  	lib lbfgs : : $(sri-lib) ;
+  	obj MaxEntSRI.o : MaxEntSRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/lm/src <include>$(with-srilm)/include/srilm <warnings>off ;
+  	alias sri : SRI.o MaxEntSRI.o ParallelBackoff.o lbfgs sri-libs : : : <define>LM_SRI <define>LM_MAXENT_SRI ;
+  	dependencies += sri ;
+  	lmmacros += LM_SRI ;
+  	lmmacros += LM_MAXENT_SRI ;  	
+  } else {
+  	alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
+  	dependencies += sri ;
+  	lmmacros += LM_SRI ;
+  }
 }
 
 #RandLM
@@ -70,12 +80,40 @@ if $(with-ldhtlm) {
   lmmacros += LM_LDHT ;
 }
 
+#NPLM
+local with-nplm = [ option.get "with-nplm" ] ;
+if $(with-nplm) {
+  lib neuralLM : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
+  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen-3.1.4 ;
+  alias nplm : NeuralLMWrapper.o neuralLM : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
+  dependencies += nplm ;
+  lmmacros += LM_NEURAL ;
+}
+
+#DALM
+local with-dalm = [ option.get "with-dalm" ] ;
+if $(with-dalm) {
+  lib dalm : : <search>$(with-dalm)/lib ;
+
+	if [ path.exists $(with-dalm)/lib/libMurmurHash3.a ] {
+  	lib MurmurHash3 : : <search>$(with-dalm)/lib ;
+		alias dalm-libs : dalm MurmurHash3 ;
+	} else {
+		alias dalm-libs : dalm ;
+	}
+
+  obj DALM.o : DALMWrapper.cpp dalm-libs ..//headers : <include>$(with-dalm)/include <include>$(with-dalm)/darts-clone ;
+  alias dalmALIAS : DALM.o dalm-libs : : : <define>LM_DALM ;
+  dependencies += dalmALIAS ;
+  lmmacros += LM_DALM ;
+}
+
 #ORLM is always compiled but needs special headers
 obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
 
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
-alias LM : Backward.cpp BackwardLMState.cpp Base.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
+alias LM : Backward.cpp BackwardLMState.cpp Base.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp ORLM.o
   ../../lm//kenlm ..//headers $(dependencies) ;
 
 alias macros : : : : <define>$(lmmacros) ;
@@ -83,3 +121,5 @@ alias macros : : : : <define>$(lmmacros) ;
 #Unit test for Backward LM
 import testing ;
 run BackwardTest.cpp ..//moses LM ../../lm//kenlm /top//boost_unit_test_framework : : backward.arpa ;
+
+

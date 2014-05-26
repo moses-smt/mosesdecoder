@@ -45,7 +45,7 @@ public:
     : m_parser(parser)
     , m_cellCollection(cellColl) {}
 
-  virtual ~ChartRuleLookupManager() {}
+  virtual ~ChartRuleLookupManager();
 
   const ChartCellLabelSet &GetTargetLabelSet(size_t begin, size_t end) const {
     return m_cellCollection.GetBase(WordsRange(begin, end)).GetTargetLabelSet();
@@ -66,6 +66,7 @@ public:
    */
   virtual void GetChartRuleCollection(
     const WordsRange &range,
+    size_t lastPos,  // last position to consider if using lookahead
     ChartParserCallback &outColl) = 0;
 
 private:

@@ -24,8 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/Phrase.h"
 #include "moses/TrellisPathList.h"
-#include "moses/ChartTrellisPathList.h"
-#include "moses/ChartTrellisPath.h"
+#include "moses/ChartKBestExtractor.h"
 
 using namespace std;
 using namespace Moses;
@@ -47,7 +46,7 @@ static char* strToChar(const string& s)
 MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vector<string> decoder_params)
   : m_manager(NULL)
 {
-  static int BASE_ARGC = 8;
+  static int BASE_ARGC = 6;
   Parameter* params = new Parameter();
   char ** mosesargv = new char*[BASE_ARGC + argc];
   mosesargv[0] = strToChar("-f");
@@ -56,10 +55,15 @@ MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vect
   stringstream dbgin;
   dbgin << debuglevel;
   mosesargv[3] = strToChar(dbgin.str());
+
+  mosesargv[4] = strToChar("-no-cache");
+  mosesargv[5] = strToChar("true");
+  /*
   mosesargv[4] = strToChar("-use-persistent-cache");
   mosesargv[5] = strToChar("0");
   mosesargv[6] = strToChar("-persistent-cache-size");
   mosesargv[7] = strToChar("0");
+  */
 
   for (int i = 0; i < argc; ++i) {
     char *cstr = &(decoder_params[i])[0];
@@ -76,8 +80,9 @@ MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vect
   }
   delete[] mosesargv;
 
-  //m_bleuScoreFeature = staticData.GetBleuScoreFeature(); TODO
-  assert(false);
+  const std::vector<BleuScoreFeature*> &bleuFFs = BleuScoreFeature::GetColl();
+  assert(bleuFFs.size() == 1);
+  m_bleuScoreFeature = bleuFFs[0];
 }
 
 void MosesDecoder::cleanup(bool chartDecoding)
@@ -217,28 +222,28 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
   // run the decoder
   m_chartManager = new ChartManager(*m_sentence);
   m_chartManager->ProcessSentence();
-  ChartTrellisPathList nBestList;
+  ChartKBestExtractor::KBestVec nBestList;
   m_chartManager->CalcNBest(nBestSize, nBestList, distinct);
 
   // read off the feature values and bleu scores for each sentence in the nbest list
-  ChartTrellisPathList::const_iterator iter;
-  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
-    const Moses::ChartTrellisPath &path = **iter;
-    featureValues.push_back(path.GetScoreBreakdown());
+  for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
+       p != nBestList.end(); ++p) {
+    const ChartKBestExtractor::Derivation &derivation = **p;
+    featureValues.push_back(derivation.scoreBreakdown);
     float bleuScore, dynBleuScore, realBleuScore;
     dynBleuScore = getBleuScore(featureValues.back());
-    realBleuScore = m_bleuScoreFeature->CalculateBleu(path.GetOutputPhrase());
+    Phrase outputPhrase = ChartKBestExtractor::GetOutputPhrase(derivation);
+    realBleuScore = m_bleuScoreFeature->CalculateBleu(outputPhrase);
     bleuScore = realBleu ? realBleuScore : dynBleuScore;
     bleuScores.push_back(bleuScore);
 
-    //std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
-    float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
+    float scoreWithoutBleu = derivation.score - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
     modelScores.push_back(scoreWithoutBleu);
 
-    if (iter != nBestList.begin())
+    if (p != nBestList.begin())
       cerr << endl;
-    cerr << "Rank " << rank << ", epoch " << epoch << ", \"" << path.GetOutputPhrase() << "\", score: "
-         << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
+    cerr << "Rank " << rank << ", epoch " << epoch << ", \"" << outputPhrase << "\", score: "
+         << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << derivation.score;
     if (m_bleuScoreFeature->Enabled() && realBleu)
       cerr << " (d-bleu: " << dynBleuScore << ", r-bleu: " << realBleuScore << ") ";
 
@@ -248,9 +253,10 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
 
   // prepare translations to return
   vector< vector<const Word*> > translations;
-  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
-    const ChartTrellisPath &path = **iter;
-    Phrase phrase = path.GetOutputPhrase();
+  for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
+       p != nBestList.end(); ++p) {
+    const ChartKBestExtractor::Derivation &derivation = **p;
+    Phrase phrase = ChartKBestExtractor::GetOutputPhrase(derivation);
 
     vector<const Word*> translation;
     for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
@@ -262,61 +268,6 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
   }
 
   return translations;
-}
-
-void MosesDecoder::outputNBestList(const std::string& source, size_t sentenceid,
-                                   size_t nBestSize, float bleuObjectiveWeight, float bleuScoreWeight,
-                                   bool distinctNbest, bool avgRefLength, string filename, ofstream& streamOut)
-{
-  StaticData &staticData = StaticData::InstanceNonConst();
-  bool chartDecoding = staticData.IsChart();
-  initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength, chartDecoding);
-
-  if (chartDecoding) {
-    m_chartManager = new ChartManager(*m_sentence);
-    m_chartManager->ProcessSentence();
-    ChartTrellisPathList nBestList;
-    m_chartManager->CalcNBest(nBestSize, nBestList, distinctNbest);
-
-    cerr << "generate nbest list " << filename << endl;
-    cerr << "not implemented.." << endl;
-    exit(1);
-    if (filename != "") {
-      ofstream out(filename.c_str());
-      if (!out) {
-        ostringstream msg;
-        msg << "Unable to open " << filename;
-        throw runtime_error(msg.str());
-      }
-      // TODO: handle sentence id (for now always 0)
-//    		OutputNBestList(const ChartTrellisPathList &nBestList, const ChartHypothesis *bestHypo, const TranslationSystem* system, long translationId, false)
-//    		OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
-      out.close();
-    } else {
-//    		OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid, false);
-    }
-  } else {
-    // run the decoder
-    m_manager = new Moses::Manager(0,*m_sentence, staticData.GetSearchAlgorithm());
-    m_manager->ProcessSentence();
-    TrellisPathList nBestList;
-    m_manager->CalcNBest(nBestSize, nBestList, distinctNbest);
-
-    if (filename != "") {
-      ofstream out(filename.c_str());
-      if (!out) {
-        ostringstream msg;
-        msg << "Unable to open " << filename;
-        throw runtime_error(msg.str());
-      }
-      // TODO: handle sentence id (for now always 0)
-      //OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
-      out.close();
-    } else {
-      //OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid, false);
-      streamOut.flush();
-    }
-  }
 }
 
 void MosesDecoder::initialize(StaticData& staticData, const std::string& source, size_t sentenceid,

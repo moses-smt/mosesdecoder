@@ -13,7 +13,7 @@ function setup() {
     print "<TR><TD><A HREF=\"?setup=$dir[0]\">$dir[0]</A></TD><TD>$dir[1]</TD><TD>$dir[2]</TD><TD>$dir[3]</TD></TR>\n";
   }
   print "</TABLE>\n";
-  print "<P>To add experiment, edit the file 'setup' in the web directory.";
+  print "<P>To add experiment, edit /fs/thor4/html/experiment/setup";
 }
 
 function overview() {
@@ -84,6 +84,17 @@ function overview() {
       print "<font size=-2>".$info->last_step;
       if ($info->last_step == "TUNING<BR>tune") {
         print "<BR>".tune_status($id);
+      }
+      else if ($info->last_step == "TRAINING<BR>run-giza" ||
+               $info->last_step == "TRAINING<BR>run-giza-inverse" ||
+	       preg_match('/EVALUATION.+decode/',$info->last_step,$dummy) ||
+               $info->last_step == "TRAINING<BR>extract-phrases") {
+	$module_step = explode("<BR>",$info->last_step);
+        $step_file = "$dir/steps/$id/$module_step[0]_$module_step[1].$id";
+	print "<BR><span id='$module_step[0]-$module_step[1]-$id'><img src=\"spinner.gif\" width=12 height=12></span>";
+?><script language="javascript" type="text/javascript">
+new Ajax.Updater("<?php print "$module_step[0]-$module_step[1]-$id"; ?>", '?setStepStatus=' + encodeURIComponent("<?php print $step_file; ?>"), { method: 'get', evalScripts: true });</script>
+<?php
       }
     }
     else if (property_exists($info,"result")) {
@@ -241,10 +252,6 @@ function lowlightAll() {
   }
 }
 
-function highlightScore() {
-    
-}
-
 highlightBest();
 //-->
 </script>
@@ -259,9 +266,12 @@ function mytime($timestamp,$running) {
     return strftime("%T",$timestamp);
   }
   if ($timestamp + 5*24*3600 > time()) {
-   return strftime("%a %H:%M",$timestamp);
+    return strftime("%a %H:%M",$timestamp);
   }
-  return strftime("%d %b",$timestamp);
+  if ($timestamp + 180*24*3600 > time()) {
+    return strftime("%d %b",$timestamp);
+  }
+  return strftime("%d %b %g",$timestamp);
 }
 
 function output_score($id,$info) {
@@ -285,7 +295,8 @@ function output_score($id,$info) {
     $each_score = explode(" ; ",$score);
     for($i=0;$i<count($each_score);$i++) {
       if (preg_match('/([\d\(\)\.\s]+) (BLEU[\-c]*)/',$each_score[$i],$match) ||
-          preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match)) {
+          preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match) ||
+          preg_match('/([\d\(\)\.\s]+) (METEOR[\-c]*)/',$each_score[$i],$match)) {
         if ($i>0) { print "<BR>"; }
 	$opened_a_tag = 0;
         if ($set != "avg") { 
@@ -384,4 +395,10 @@ function show() {
   }
   readfile($fullname);
   exit;
+}
+
+function set_step_status($fileName) {
+  $cmd = "./progress.perl $fileName 2>/dev/null";
+  #print $cmd."<p>";
+  system($cmd);
 }
