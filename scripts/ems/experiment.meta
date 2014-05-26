@@ -20,7 +20,7 @@ clean
 	out: clean-stem
 	default-name: corpus/clean
 	rerun-on-change: max-sentence-length $moses-script-dir/training/clean-corpus-n.perl
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length $working-dir/corpus/clean.lines-retained.VERSION
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length OUT.lines-retained
 	error: there is a blank factor
 parse
 	in: clean-stem
@@ -35,7 +35,7 @@ post-parse-clean
 	out: clean-parsed-stem
 	default-name: corpus/parsed-clean
 	pass-unless: input-parser output-parser
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 $working-dir/corpus/parsed-clean.lines-retained.VERSION --ignore-xml
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 OUT.lines-retained --ignore-xml
 	error: there is a blank factor
 factorize
 	in: clean-parsed-stem
@@ -83,7 +83,7 @@ post-split-clean
 	default-name: corpus/split-clean
 	ignore-if: input-parser output-parser
 	pass-unless: input-splitter output-splitter
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length $working-dir/corpus/split-clean.lines-retained.VERSION
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length OUT.lines-retained
 	error: there is a blank factor
 post-split-clean-syntax
 	in: split-stem 
@@ -91,7 +91,7 @@ post-split-clean-syntax
 	default-name: corpus/split-clean
 	ignore-unless: input-parser output-parser
 	pass-unless: input-splitter output-splitter
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 $working-dir/corpus/parsed-clean.lines-retained.VERSION --ignore-xml
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 OUT.lines-retained --ignore-xml
 	error: there is a blank factor
 
 [RECASING] single
@@ -104,8 +104,9 @@ tokenize
 train
 	in: tokenized
 	out: recase-config
-	template: $moses-script-dir/recaser/train-recaser.perl -train-script $TRAINING:script -dir $working-dir/recasing/model.VERSION -corpus IN -scripts-root-dir $moses-script-dir -config OUT -ngram-count $lm-training
+	template: $moses-script-dir/recaser/train-recaser.perl -train-script $TRAINING:script -dir OUT.model -corpus IN -scripts-root-dir $moses-script-dir -config OUT -ngram-count $lm-training
 	default-name: recasing/moses.ini
+        tmp-name: recasing/model
 	ignore-unless: EVALUATION:recaser
 	error: cannot execute binary file
 
