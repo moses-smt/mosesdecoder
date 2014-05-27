@@ -128,7 +128,8 @@ void LexicalReorderingState::CopyScores(Scores& scores, const TranslationOption 
   UTIL_THROW_IF2(m_direction != LexicalReorderingConfiguration::Backward && m_direction != LexicalReorderingConfiguration::Forward,
 		  "Unknown direction: " << m_direction);
   const Scores *cachedScores = (m_direction == LexicalReorderingConfiguration::Backward) ?
-                               topt.GetLexReorderingScores(m_configuration.GetScoreProducer()) : m_prevScore;
+                               topt.GetLexReorderingScores(m_configuration.GetScoreProducer()) :
+                               m_prevOption->GetLexReorderingScores(m_configuration.GetScoreProducer());
 
   // No scores available. TODO: Using a good prior distribution would be nicer.
   if(cachedScores == NULL)
@@ -151,23 +152,24 @@ void LexicalReorderingState::ClearScores(Scores& scores) const
     std::fill(scores.begin() + m_offset, scores.begin() + m_offset + m_configuration.GetNumberOfTypes(), 0);
 }
 
-int LexicalReorderingState::ComparePrevScores(const Scores *other) const
+int LexicalReorderingState::ComparePrevScores(const TranslationOption *other) const
 {
-  if(m_prevScore == other)
+  const Scores* myPrevScores = m_prevOption->GetLexReorderingScores(m_configuration.GetScoreProducer());
+  const Scores* otherPrevScores = other->GetLexReorderingScores(m_configuration.GetScoreProducer());
+
+  if(myPrevScores == otherPrevScores)
     return 0;
 
   // The pointers are NULL if a phrase pair isn't found in the reordering table.
-  if(other == NULL)
+  if(otherPrevScores == NULL)
     return -1;
-  if(m_prevScore == NULL)
+  if(myPrevScores == NULL)
     return 1;
 
-  const Scores &my = *m_prevScore;
-  const Scores &their = *other;
   for(size_t i = m_offset; i < m_offset + m_configuration.GetNumberOfTypes(); i++)
-    if(my[i] < their[i])
+    if((*myPrevScores)[i] < (*otherPrevScores)[i])
       return -1;
-    else if(my[i] > their[i])
+    else if((*myPrevScores)[i] > (*otherPrevScores)[i])
       return 1;
 
   return 0;
@@ -193,7 +195,7 @@ int PhraseBasedReorderingState::Compare(const FFState& o) const
   UTIL_THROW_IF2(other == NULL, "Wrong state type");
   if (m_prevRange == other->m_prevRange) {
     if (m_direction == LexicalReorderingConfiguration::Forward) {
-      return ComparePrevScores(other->m_prevScore);
+      return ComparePrevScores(other->m_prevOption);
     } else {
       return 0;
     }
@@ -411,7 +413,7 @@ int HierarchicalReorderingForwardState::Compare(const FFState& o) const
   UTIL_THROW_IF2(other == NULL, "Wrong state type");
 
   if (m_prevRange == other->m_prevRange) {
-    return ComparePrevScores(other->m_prevScore);
+    return ComparePrevScores(other->m_prevOption);
   } else if (m_prevRange < other->m_prevRange) {
     return -1;
   }

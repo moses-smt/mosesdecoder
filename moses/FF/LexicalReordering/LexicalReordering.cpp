@@ -14,6 +14,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
 {
   std::cerr << "Initializing LexicalReordering.." << std::endl;
 
+  map<string,string> sparseArgs;
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
@@ -27,6 +28,8 @@ LexicalReordering::LexicalReordering(const std::string &line)
       m_factorsE =Tokenize<FactorType>(args[1]);
     } else if (args[0] == "path") {
       m_filePath = args[1];
+    } else if (args[0].substr(0,7) == "sparse-") {
+      sparseArgs[args[0].substr(7)] = args[1];
     } else {
       throw "Unknown argument " + args[0];
     }
@@ -47,6 +50,10 @@ LexicalReordering::LexicalReordering(const std::string &line)
     break;
   default:
     throw "Unknown conditioning option!";
+  }
+
+  if (sparseArgs.size()) {
+    m_sparse.reset(new SparseReordering(sparseArgs));
   }
 }
 

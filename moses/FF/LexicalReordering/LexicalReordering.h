@@ -3,16 +3,19 @@
 
 #include <string>
 #include <vector>
+#include <boost/scoped_ptr.hpp>
 #include "moses/Factor.h"
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/WordsRange.h"
 
-#include "LexicalReorderingState.h"
-#include "LexicalReorderingTable.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "util/exception.hh"
+
+#include "LexicalReorderingState.h"
+#include "LexicalReorderingTable.h"
+#include "SparseReordering.h"
 
 
 namespace Moses
@@ -79,6 +82,7 @@ private:
   //bool m_oneScorePerDirection;
   std::vector<FactorType> m_factorsE, m_factorsF;
   std::string m_filePath;
+  boost::scoped_ptr<SparseReordering> m_sparse;
 };
 
 }
