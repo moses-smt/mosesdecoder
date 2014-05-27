@@ -8,10 +8,10 @@
 #include "LexicalReordering.h"
 #include "moses/WordsRange.h"
 #include "moses/WordsBitmap.h"
-#include "moses/ReorderingStack.h"
 #include "moses/TranslationOption.h"
 #include "moses/FF/FFState.h"
 
+#include "ReorderingStack.h"
 
 namespace Moses
 {
@@ -19,7 +19,6 @@ class LexicalReorderingState;
 class LexicalReordering;
 
 /** Factory class for lexical reordering states
- *  @todo There's a lot of classes for lexicalized reordering. Perhaps put them in a separate dir
  */
 class LexicalReorderingConfiguration
 {
@@ -99,7 +98,7 @@ protected:
   // The following is the true direction of the object, which can be Backward or Forward even if the Configuration has Bidirectional.
   LexicalReorderingConfiguration::Direction m_direction;
   size_t m_offset;
-  const Scores *m_prevScore;
+  const TranslationOption *m_prevOption;
 
   inline LexicalReorderingState(const LexicalReorderingState *prev, const TranslationOption &topt) :
     m_configuration(prev->m_configuration), m_direction(prev->m_direction), m_offset(prev->m_offset),

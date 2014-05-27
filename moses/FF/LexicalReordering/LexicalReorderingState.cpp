@@ -5,11 +5,11 @@
 #include "moses/FF/FFState.h"
 #include "moses/Hypothesis.h"
 #include "moses/WordsRange.h"
-#include "moses/ReorderingStack.h"
 #include "moses/TranslationOption.h"
 
 #include "LexicalReordering.h"
 #include "LexicalReorderingState.h"
+#include "ReorderingStack.h"
 
 namespace Moses
 {
