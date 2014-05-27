@@ -8,9 +8,24 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include "moses/ScoreComponentCollection.h"
 #include "LexicalReorderingState.h"
+
+/**
+ Configuration of sparse reordering:
+  
+  The sparse reordering feature is configured using sparse-* configs in the lexical reordering line.
+  sparse-words-<id>=<filename>  -- Features which fire for the words in the list
+  sparse-clusters-<id>=<filename> -- Features which fire for clusters in the list. Format
+                                     of cluster file TBD
+  sparse-phrase                    -- Add features which depend on the current phrase
+  sparse-stack                     -- Add features which depend on the previous phrase, or
+                                      top of stack.
+  sparse-between                   -- Add features which depend on words between previous phrase
+                                      (or top of stack) and current phrase.
+**/
 
 namespace Moses
 {
@@ -23,6 +38,9 @@ public:
                  LexicalReorderingState::ReorderingType reoType,
                  LexicalReorderingConfiguration::Direction direction,
                  ScoreComponentCollection* scores) const ;
+
+private:
+
 
 };
 
