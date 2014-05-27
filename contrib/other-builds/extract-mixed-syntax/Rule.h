@@ -79,6 +79,7 @@ protected:
 	void CreateAlignments(int sourcePos, const RuleSymbol *targetSought);
 
 	bool ContainTerm(const ConsistentPhrase &cp, const std::set<const Word*> &terms) const;
+	int CalcScope() const; // not yet correctly calculated
 
 };
 
