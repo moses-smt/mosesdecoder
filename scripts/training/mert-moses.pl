@@ -930,7 +930,7 @@ while (1) {
     $mira_settings .= " --type hypergraph ";
     $mira_settings .= join(" ", map {"--reference $_"} @references);
     $mira_settings .= " --hgdir $hypergraph_dir ";
-    $mira_settings .= "--verbose "; #TODO: temporary
+    #$mira_settings .= "--verbose "; 
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
   } elsif ($__PROMIX_TRAINING) {
