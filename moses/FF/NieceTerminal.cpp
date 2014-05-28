@@ -95,12 +95,6 @@ void NieceTerminal::SetParameter(const std::string& key, const std::string& valu
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
-<<<<<<< HEAD
-}
-
-
-=======
->>>>>>> e9d30527907ee919727d117764c03588ef22d9e3
 }
 
 
