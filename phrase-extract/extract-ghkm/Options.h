@@ -67,6 +67,7 @@ public:
   int sentenceOffset;
   bool unpairedExtractFormat;
   std::string unknownWordFile;
+  std::string unknownWordSoftMatchesFile;
   float unknownWordMinRelFreq;
   bool unknownWordUniform;
 };

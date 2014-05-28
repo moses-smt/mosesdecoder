@@ -14,16 +14,19 @@ binmode(STDERR, ':utf8');
 
 my $___FACTOR_DELIMITER = "|";
 
-my ($MOSES_SRC_DIR,$TRANSLIT_MODEL,$EVAL_DIR,$OUTPUT_FILE,$OUTPUT_FILE_NAME,$OOV_FILE, $OOV_FILE_NAME, $EXTERNAL_BIN_DIR, $LM_FILE, $INPUT_EXTENSION, $OUTPUT_EXTENSION);
+my ($MOSES_SRC_DIR,$TRANSLIT_MODEL,$EVAL_DIR,$OUTPUT_FILE,$OUTPUT_FILE_NAME,$OOV_FILE, $OOV_FILE_NAME, $EXTERNAL_BIN_DIR, $LM_FILE, $INPUT_EXTENSION, $OUTPUT_EXTENSION, $INPUT_FILE,$VERBOSE,$DECODER);
 die("ERROR: wrong syntax when invoking postDecodingTransliteration.perl")
     unless &GetOptions('moses-src-dir=s' => \$MOSES_SRC_DIR,
 			'external-bin-dir=s' => \$EXTERNAL_BIN_DIR,
 			'transliteration-model-dir=s' => \$TRANSLIT_MODEL,
 			'input-extension=s' => \$INPUT_EXTENSION,
 			'output-extension=s' => \$OUTPUT_EXTENSION,
+      'decoder=s' => \$DECODER,
 			'oov-file=s' => \$OOV_FILE,
+			'input-file=s' => \$INPUT_FILE,
 			'output-file=s' => \$OUTPUT_FILE,
-		       'language-model=s' => \$LM_FILE);
+			'verbose' => \$VERBOSE,
+      'language-model=s' => \$LM_FILE);
 
 # check if the files are in place
 die("ERROR: you need to define --moses-src-dir --external-bin-dir, --transliteration-model-dir, --oov-file, --output-file --input-extension, --output-extension, and --language-model")
@@ -32,7 +35,7 @@ die("ERROR: you need to define --moses-src-dir --external-bin-dir, --translitera
             defined($OOV_FILE) &&
 	     defined($INPUT_EXTENSION)&&	
 	     defined($OUTPUT_EXTENSION)&&	
-	     defined($OUTPUT_FILE)&&
+	     defined($INPUT_FILE)&&
 	     defined($EXTERNAL_BIN_DIR)&&	
             defined($LM_FILE));
 die("ERROR: could not find Language Model '$LM_FILE'")
@@ -41,10 +44,10 @@ die("ERROR: could not find Transliteration Model '$TRANSLIT_MODEL'")
     unless -e $TRANSLIT_MODEL;
 die("ERROR: could not find OOV file $OOV_FILE'")
     unless -e $OOV_FILE;
-die("ERROR: could not find Output file $OUTPUT_FILE'")
-    unless -e $OUTPUT_FILE;
+die("ERROR: could not find Input file $INPUT_FILE'")
+    unless -e $INPUT_FILE;
 
-$EVAL_DIR = dirname($OUTPUT_FILE);
+$EVAL_DIR = dirname($INPUT_FILE);
 $OUTPUT_FILE_NAME = basename ($OUTPUT_FILE);
 $OOV_FILE_NAME = basename ($OOV_FILE);
 
@@ -135,7 +138,8 @@ sub run_transliteration
 
 	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables-and-weights.perl $TRANSLIT_MODEL/evaluation/$eval_file.filtered/moses.ini $TRANSLIT_MODEL/model/moses.ini $TRANSLIT_MODEL/tuning/moses.tuned.ini $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini`;
 
-	`$MOSES_SRC/bin/moses -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -drop-unknown -distortion-limit 0 -n-best-list $TRANSLIT_MODEL/evaluation/$eval_file.op.nBest 1000 distinct -f $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini < $TRANSLIT_MODEL/evaluation/$eval_file > $TRANSLIT_MODEL/evaluation/$eval_file.op`;
+  my $drop_stderr = $VERBOSE ? "" : " 2>/dev/null";
+	`$DECODER -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -drop-unknown -distortion-limit 0 -n-best-list $TRANSLIT_MODEL/evaluation/$eval_file.op.nBest 1000 distinct -f $TRANSLIT_MODEL/evaluation/$eval_file.filtered.ini < $TRANSLIT_MODEL/evaluation/$eval_file > $TRANSLIT_MODEL/evaluation/$eval_file.op $drop_stderr`;
 
 }
 
@@ -232,7 +236,7 @@ sub form_corpus
  	close (MYFILE);
 	
 
-	open MYFILE,  "<:encoding(UTF-8)", $OUTPUT_FILE or die "Can't open $OUTPUT_FILE: $!\n";
+	open MYFILE,  "<:encoding(UTF-8)", $INPUT_FILE or die "Can't open $INPUT_FILE: $!\n";
 	
 	my %dd;
 
@@ -274,6 +278,9 @@ sub run_decoder
 
 	my $find = ".cleaned.";
 	my $replace = ".transliterated.";
+  if ($final_file !~ /$find/) {
+    $find = ".output.";
+  }
 	$final_file =~ s/$find/$replace/g;
 	
 	`mkdir $corpus_dir/evaluation`;
@@ -284,15 +291,16 @@ sub run_decoder
 
 	`$MOSES_SRC/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -lmodel-oov-feature "yes" -post-decoding-translit "yes" -phrase-translation-table $corpus_dir/model/phrase-table -config $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini -lm 0:3:$corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini:8`;
 
-	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $corpus_dir/evaluation/filtered $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini $OUTPUT_FILE  -Binarizer "$MOSES_SRC/bin/processPhraseTable"`;
+	`$MOSES_SRC/scripts/training/filter-model-given-input.pl $corpus_dir/evaluation/filtered $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini $INPUT_FILE  -Binarizer "$MOSES_SRC/bin/processPhraseTable"`;
 
 	`rm $corpus_dir/evaluation/$OUTPUT_FILE_NAME.moses.table.ini`;
 
 	`$MOSES_SRC/scripts/ems/support/substitute-filtered-tables.perl $corpus_dir/evaluation/filtered/moses.ini < $corpus_dir/model/moses.ini > $corpus_dir/evaluation/moses.filtered.ini`;
 	
-	`$MOSES_SRC/bin/moses -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -feature-overwrite 'TranslationModel0 table-limit=100' -max-trans-opt-per-coverage 100 -f $corpus_dir/evaluation/moses.filtered.ini -distortion-limit 0 < $OUTPUT_FILE > $final_file`;
+  my $drop_stderr = $VERBOSE ? "" : " 2>/dev/null";
+	`$DECODER -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -feature-overwrite 'TranslationModel0 table-limit=100' -max-trans-opt-per-coverage 100 -f $corpus_dir/evaluation/moses.filtered.ini -distortion-limit 0 < $INPUT_FILE > $OUTPUT_FILE $drop_stderr`;
 	
-	print "$MOSES_SRC/bin/moses -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -feature-overwrite 'TranslationModel0 table-limit=100' -max-trans-opt-per-coverage 100 -f $corpus_dir/evaluation/moses.filtered.ini -distortion-limit 0 < $OUTPUT_FILE > $final_file\n";
+	print "$DECODER -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -threads 16 -feature-overwrite 'TranslationModel0 table-limit=100' -max-trans-opt-per-coverage 100 -f $corpus_dir/evaluation/moses.filtered.ini -distortion-limit 0 < $INPUT_FILE > $OUTPUT_FILE $drop_stderr\n";
 }
 
 

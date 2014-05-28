@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/DecodeGraph.h"
 #include "moses/InputPath.h"
 #include "util/exception.hh"
 
@@ -48,6 +49,13 @@ PhraseDictionary::PhraseDictionary(const std::string &line)
   ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
 	s_staticColl.push_back(this);
+}
+
+bool
+PhraseDictionary::
+ProvidesPrefixCheck() const
+{
+  return false;
 }
 
 const TargetPhraseCollection *PhraseDictionary::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
@@ -129,17 +137,39 @@ SetFeaturesToApply()
   }
 }
 
+  
+  // tell the Phrase Dictionary that the TargetPhraseCollection is not needed any more
+  void
+  PhraseDictionary::
+  Release(TargetPhraseCollection const* tpc) const
+  {
+    // do nothing by default
+    return;
+  }
+
+  bool
+  PhraseDictionary::
+  PrefixExists(Phrase const& phrase) const
+  {
+    return true;
+  }
+
 void
 PhraseDictionary::
 GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
-    InputPath &node = **iter;
+    InputPath &inputPath = **iter;
 
-    const Phrase &phrase = node.GetPhrase();
+    // backoff
+    if (!SatisfyBackoff(inputPath)) {
+    	continue;
+    }
+
+    const Phrase &phrase = inputPath.GetPhrase();
     const TargetPhraseCollection *targetPhrases = this->GetTargetPhraseCollectionLEGACY(phrase);
-    node.SetTargetPhrases(*this, targetPhrases, NULL);
+    inputPath.SetTargetPhrases(*this, targetPhrases, NULL);
   }
 }
 
@@ -210,6 +240,39 @@ CacheColl &PhraseDictionary::GetCache() const
   }
   assert(cache);
   return *cache;
+}
+
+bool PhraseDictionary::SatisfyBackoff(const InputPath &inputPath) const
+{
+  const Phrase &sourcePhrase = inputPath.GetPhrase();
+
+  assert(m_container);
+  const DecodeGraph &decodeGraph = GetDecodeGraph();
+  size_t backoff = decodeGraph.GetBackoff();
+
+  if (backoff == 0) {
+	  // ie. don't backoff. Collect ALL translations
+	  return true;
+  }
+
+  if (sourcePhrase.GetSize() > backoff) {
+	  // source phrase too big
+	  return false;
+  }
+
+  // lookup translation only if no other translations
+  InputPath::TargetPhrases::const_iterator iter;
+  for (iter = inputPath.GetTargetPhrases().begin(); iter != inputPath.GetTargetPhrases().end(); ++iter) {
+  	const std::pair<const TargetPhraseCollection*, const void*> &temp = iter->second;
+  	const TargetPhraseCollection *tpCollPrev = temp.first;
+
+  	if (tpCollPrev && tpCollPrev->GetSize()) {
+  		// already have translation from another pt. Don't create translations
+  		return false;
+  	}
+  }
+
+  return true;
 }
 
 } // namespace

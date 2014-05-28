@@ -181,8 +181,12 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to)
     assert(decodeGraph.GetSize() == 1);
     ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
     size_t maxSpan = decodeGraph.GetMaxChartSpan();
+    size_t last = m_source.GetSize()-1;
+    if (maxSpan != 0) {
+        last = min(last, wordsRange.GetStartPos()+maxSpan);
+    }
     if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, to);
+      ruleLookupManager.GetChartRuleCollection(wordsRange, last, to);
     }
   }
 

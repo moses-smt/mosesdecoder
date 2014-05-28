@@ -153,6 +153,8 @@ void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
 
 void HypothesisStackCubePruning::PruneToSize(size_t newSize)
 {
+  if ( newSize == 0) return; // no limit
+
   if (m_hypos.size() > newSize) { // ok, if not over the limit
     priority_queue<float> bestScores;
 

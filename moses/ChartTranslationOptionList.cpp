@@ -75,7 +75,11 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
     }
   }
 
-  float score = ChartTranslationOptions::CalcEstimateOfBestScore(tpc, stackVec);
+  const TargetPhrase &targetPhrase = **(tpc.begin());
+  float score = targetPhrase.GetFutureScore();
+  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end(); ++p) {
+    score += (*p)->GetBestScore(this);
+  }
 
   // If the rule limit has already been reached then don't add the option
   // unless it is better than at least one existing option.
@@ -155,6 +159,15 @@ void ChartTranslationOptionList::ApplyThreshold()
   m_size = std::distance(m_collection.begin(), bound);
 }
 
+float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) const
+{
+    const HypoList *stack = chartCell->GetStack().cube;
+    assert(stack);
+    assert(!stack->empty());
+	const ChartHypothesis &bestHypo = **(stack->begin());
+	return bestHypo.GetTotalScore();
+}
+
 void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPath &inputPath)
 {
   // NEVER iterate over ALL of the collection. Just over the first m_size
@@ -163,6 +176,31 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
     ChartTranslationOptions &transOpts = **iter;
     transOpts.Evaluate(input, inputPath);
   }
+
+  // get rid of empty trans opts
+  size_t numDiscard = 0;
+  for (size_t i = 0; i < m_size; ++i) {
+    ChartTranslationOptions *transOpts = m_collection[i];
+    if (transOpts->GetSize() == 0) {
+    	//delete transOpts;
+      	++numDiscard;
+    }
+    else if (numDiscard) {
+    	SwapTranslationOptions(i - numDiscard, i);
+    	//m_collection[] = transOpts;
+    }
+  }
+
+  size_t newSize = m_size - numDiscard;
+  m_size = newSize;
+}
+
+void ChartTranslationOptionList::SwapTranslationOptions(size_t a, size_t b)
+{
+  ChartTranslationOptions *transOptsA = m_collection[a];
+  ChartTranslationOptions *transOptsB = m_collection[b];
+  m_collection[a] = transOptsB;
+  m_collection[b] = transOptsA;
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionList &obj)

@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 
 
-#include "moses/ChartTrellisPathList.h"
 #include "moses/Hypothesis.h"
 #include "moses/Parameter.h"
 #include "moses/SearchNormal.h"

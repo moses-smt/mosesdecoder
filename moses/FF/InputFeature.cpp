@@ -14,11 +14,11 @@ InputFeature *InputFeature::s_instance = NULL;
 
 InputFeature::InputFeature(const std::string &line)
   : StatelessFeatureFunction(line)
-  , m_numInputScores(0)
   , m_numRealWordCount(0)
 {
+  m_numInputScores = this->m_numScoreComponents;
   ReadParameters();
-
+  
   UTIL_THROW_IF2(s_instance, "Can only have 1 input feature");
   s_instance = this;
 }
@@ -47,6 +47,7 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 void InputFeature::Evaluate(const InputType &input
                             , const InputPath &inputPath
                             , const TargetPhrase &targetPhrase
+                            , const StackVec *stackVec
                             , ScoreComponentCollection &scoreBreakdown
                             , ScoreComponentCollection *estimatedFutureScore) const
 {

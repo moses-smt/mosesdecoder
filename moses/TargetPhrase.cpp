@@ -146,7 +146,7 @@ void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     if (! staticData.IsFeatureFunctionIgnored( ff )) {
-      ff.Evaluate(input, inputPath, *this, m_scoreBreakdown, &futureScoreBreakdown);
+      ff.Evaluate(input, inputPath, *this, NULL, m_scoreBreakdown, &futureScoreBreakdown);
     }
   }
   float weightedScore = m_scoreBreakdown.GetWeightedScore();
@@ -156,7 +156,6 @@ void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 
 void TargetPhrase::SetXMLScore(float score)
 {
-  const StaticData &staticData = StaticData::Instance();
   const FeatureFunction* prod = PhraseDictionary::GetColl()[0];
   size_t numScores = prod->GetNumScoreComponents();
   vector <float> scoreVector(numScores,score/numScores);
@@ -240,16 +239,22 @@ void TargetPhrase::SetProperties(const StringPiece &str)
   }
 }
 
-void TargetPhrase::GetProperty(const std::string &key, std::string &value, bool &found) const
+void TargetPhrase::SetProperty(const std::string &key, const std::string &value) 
 {
-  std::map<std::string, std::string>::const_iterator iter;
+  const StaticData &staticData = StaticData::Instance();
+  const PhrasePropertyFactory& phrasePropertyFactory = staticData.GetPhrasePropertyFactory();
+  m_properties[key] = phrasePropertyFactory.ProduceProperty(key,value);
+}
+
+bool TargetPhrase::GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &value) const
+{
+  std::map<std::string, boost::shared_ptr<PhraseProperty> >::const_iterator iter;
   iter = m_properties.find(key);
-  if (iter == m_properties.end()) {
-    found = false;
-  } else {
-    found = true;
+  if (iter != m_properties.end()) {
     value = iter->second;
+    return true;
   }
+  return false;
 }
 
 void TargetPhrase::SetRuleSource(const Phrase &ruleSource) const
@@ -281,6 +286,11 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   os << tp.GetAlignNonTerm() << flush;
   os << ": c=" << tp.m_fullScore << flush;
   os << " " << tp.m_scoreBreakdown << flush;
+
+  const Phrase *sourcePhrase = tp.GetRuleSource();
+  if (sourcePhrase) {
+    os << " sourcePhrase=" << *sourcePhrase << flush;
+  }
 
   return os;
 }

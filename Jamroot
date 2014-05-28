@@ -55,7 +55,7 @@
 #                                information also known as -g
 # --notrace                      compiles without TRACE macros
 #
-# --enable-boost-pool            uses Boost pools for the memory SCFG table
+# --enable-boost-pool            uses Boost pools for the memory SCFG tabgle
 #
 # --enable-mpi                   switch on mpi
 # --without-libsegfault          does not link with libSegFault
@@ -64,6 +64,8 @@
 #
 # --max-factors                  maximum number of factors (default 4)
 #
+# --unlabelled-source            ignore source labels (redundant in hiero or string-to-tree system)
+#                                for better performance
 #CONTROLLING THE BUILD
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
@@ -110,6 +112,7 @@ requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
 requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
+requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
 if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
@@ -145,9 +148,13 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG/mm//mtt-build 
   moses/TranslationModel/UG/mm//mtt-dump 
   moses/TranslationModel/UG/mm//symal2mam 
+  moses/TranslationModel/UG/mm//mam2symal 
+  moses/TranslationModel/UG/mm//mam_verify 
   moses/TranslationModel/UG/mm//custom-pt 
   moses/TranslationModel/UG/mm//mmlex-build 
+  moses/TranslationModel/UG/mm//mmlex-lookup 
   moses/TranslationModel/UG/mm//mtt-count-words 
+  moses/TranslationModel/UG/mm//calc-coverage 
   moses/TranslationModel/UG//try-align 
   ;
 }

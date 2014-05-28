@@ -71,6 +71,8 @@ public:
 class PhraseDictionary :  public DecodeFeature
 {
 public:
+  virtual bool ProvidesPrefixCheck() const;
+
   static const std::vector<PhraseDictionary*>& GetColl() {
 	return s_staticColl;
   }
@@ -84,6 +86,16 @@ public:
   size_t GetTableLimit() const {
     return m_tableLimit;
   }
+
+  virtual
+  void
+  Release(TargetPhraseCollection const* tpc) const;
+
+  /// return true if phrase table entries starting with /phrase/ 
+  //  exist in the table.
+  virtual
+  bool
+  PrefixExists(Phrase const& phrase) const;
 
   // LEGACY!
   // The preferred method is to override GetTargetPhraseCollectionBatch().
@@ -121,7 +133,6 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
   virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
@@ -138,6 +149,8 @@ protected:
 
   // MUST be called at the start of Load()
   void SetFeaturesToApply();
+
+  bool SatisfyBackoff(const InputPath &inputPath) const;
 
   // cache
   size_t m_maxCacheSize; // 0 = no caching

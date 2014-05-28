@@ -105,8 +105,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryMemory::GetOrCreateNode(const Phrase
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
-
+#if defined(UNLABELLED_SOURCE)
+      currNode = currNode->GetOrCreateNonTerminalChild(targetNonTerm);
+#else
       currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
+#endif
     } else {
       currNode = currNode->GetOrCreateChild(word);
     }
@@ -142,9 +145,9 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
-    InputPath &node = **iter;
-    const Phrase &phrase = node.GetPhrase();
-    const InputPath *prevPath = node.GetPrevPath();
+    InputPath &inputPath = **iter;
+    const Phrase &phrase = inputPath.GetPhrase();
+    const InputPath *prevPath = inputPath.GetPrevPath();
 
     const PhraseDictionaryNodeMemory *prevPtNode = NULL;
 
@@ -156,6 +159,11 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
       prevPtNode = &GetRootNode();
     }
 
+    // backoff
+    if (!SatisfyBackoff(inputPath)) {
+    	continue;
+    }
+
     if (prevPtNode) {
       Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
       lastWord.OnlyTheseFactors(m_inputFactors);
@@ -163,9 +171,9 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
       const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
       if (ptNode) {
         const TargetPhraseCollection &targetPhrases = ptNode->GetTargetPhraseCollection();
-        node.SetTargetPhrases(*this, &targetPhrases, ptNode);
+        inputPath.SetTargetPhrases(*this, &targetPhrases, ptNode);
       } else {
-        node.SetTargetPhrases(*this, NULL, NULL);
+    	  inputPath.SetTargetPhrases(*this, NULL, NULL);
       }
     }
   }
@@ -181,8 +189,13 @@ ostream& operator<<(ostream& out, const PhraseDictionaryMemory& phraseDict)
 
   const PhraseDictionaryNodeMemory &coll = phraseDict.m_collection;
   for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p) {
+#if defined(UNLABELLED_SOURCE)
+    const Word &targetNonTerm = p->first;
+    out << targetNonTerm;
+#else
     const Word &sourceNonTerm = p->first.first;
     out << sourceNonTerm;
+#endif
   }
   for (TermMap::const_iterator p = coll.m_sourceTermMap.begin(); p != coll.m_sourceTermMap.end(); ++p) {
     const Word &sourceTerm = p->first;

@@ -35,6 +35,7 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}

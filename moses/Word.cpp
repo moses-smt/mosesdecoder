@@ -98,19 +98,45 @@ StringPiece Word::GetString(FactorType factorType) const
 
 class StrayFactorException : public util::Exception {};
 
-void Word::CreateFromString(FactorDirection direction
-                            , const std::vector<FactorType> &factorOrder
-                            , const StringPiece &str
-                            , bool isNonTerminal)
+void 
+Word::
+CreateFromString(FactorDirection direction
+		 , const std::vector<FactorType> &factorOrder
+		 , const StringPiece &str
+		 , bool isNonTerminal
+		 , bool strict)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
-
-  util::TokenIter<util::MultiCharacter> fit(str, StaticData::Instance().GetFactorDelimiter());
-  for (size_t ind = 0; ind < factorOrder.size() && fit; ++ind, ++fit) {
-    m_factorArray[factorOrder[ind]] = factorCollection.AddFactor(*fit);
-  }
-  UTIL_THROW_IF(fit, StrayFactorException, "You have configured " << factorOrder.size() << " factors but the word " << str << " contains factor delimiter " << StaticData::Instance().GetFactorDelimiter() << " too many times.");
-
+  vector<StringPiece> bits(MAX_NUM_FACTORS);
+  util::TokenIter<util::MultiCharacter> 
+    fit(str, StaticData::Instance().GetFactorDelimiter());
+  size_t i = 0;
+  for (; i < MAX_NUM_FACTORS && fit; ++i,++fit)
+    bits[i] = *fit;
+  if (i == MAX_NUM_FACTORS)
+    UTIL_THROW_IF(fit, StrayFactorException, 
+		  "The hard limit for factors is " << MAX_NUM_FACTORS
+		  << ". The word " << str << " contains factor delimiter " 
+		  << StaticData::Instance().GetFactorDelimiter() 
+		  << " too many times.");
+  if (strict)
+    UTIL_THROW_IF(fit, StrayFactorException, 
+		  "You have configured " << factorOrder.size() 
+		  << " factors but the word " << str 
+		  << " contains factor delimiter " 
+		  << StaticData::Instance().GetFactorDelimiter() 
+		  << " too many times.");
+  
+  UTIL_THROW_IF(i < factorOrder.size(),util::Exception, 
+		"Too few factors in string '" << str << "'.");
+  
+  for (size_t k = 0; k < factorOrder.size(); ++k) 
+    {
+      UTIL_THROW_IF(factorOrder[k] >= MAX_NUM_FACTORS, util::Exception, 
+		    "Factor order out of bounds.");
+      m_factorArray[factorOrder[k]] = factorCollection.AddFactor(bits[k], isNonTerminal);
+    }
+  
   // assume term/non-term same for all factors
   m_isNonTerminal = isNonTerminal;
 }
@@ -119,16 +145,18 @@ void Word::CreateUnknownWord(const Word &sourceWord)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 
+  m_isNonTerminal = sourceWord.IsNonTerminal();
+
   for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
     FactorType factorType = static_cast<FactorType>(currFactor);
 
     const Factor *sourceFactor = sourceWord[currFactor];
     if (sourceFactor == NULL)
-      SetFactor(factorType, factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR));
+      SetFactor(factorType, factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR, m_isNonTerminal));
     else
-      SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString()));
+      SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString(), m_isNonTerminal));
   }
-  m_isNonTerminal = sourceWord.IsNonTerminal();
+
   m_isOOV = true;
 }
 

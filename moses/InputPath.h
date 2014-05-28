@@ -6,6 +6,7 @@
 #include "Phrase.h"
 #include "WordsRange.h"
 #include "NonTerminal.h"
+#include "moses/FactorCollection.h"
 
 namespace Moses
 {
@@ -45,6 +46,7 @@ protected:
   // for syntax model only
   mutable std::vector<std::vector<const Word*> > m_ruleSourceFromInputPath;
   const NonTerminalSet m_sourceNonTerms;
+  std::vector<bool> m_sourceNonTermArray;
 
 
 public:
@@ -64,6 +66,9 @@ public:
   }
   const NonTerminalSet &GetNonTerminalSet() const {
     return m_sourceNonTerms;
+  }
+  const std::vector<bool> &GetNonTerminalArray() const {
+    return m_sourceNonTermArray;
   }
   const WordsRange &GetWordsRange() const {
     return m_range;
@@ -95,6 +100,8 @@ public:
   const ScorePair *GetInputScore() const {
     return m_inputScore;
   }
+
+  size_t GetTotalRuleSize() const;
 
   std::vector<const Word*> &AddRuleSourceFromInputPath() const {
     m_ruleSourceFromInputPath.push_back(std::vector<const Word*>());

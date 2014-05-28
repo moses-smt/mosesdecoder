@@ -12,7 +12,10 @@
 
 #include <boost/thread/mutex.hpp>
 
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 #include "Fdstream.h"
+#endif
+
 #include "ScoreStats.h"
 #include "Util.h"
 
@@ -83,14 +86,12 @@ MeteorScorer::MeteorScorer(const string& config)
   close(CHILD_STDOUT_WRITE);
   m_to_meteor = new ofdstream(CHILD_STDIN_WRITE);
   m_from_meteor = new ifdstream(CHILD_STDOUT_READ);
-  mtx = new boost::mutex;
 }
 
 MeteorScorer::~MeteorScorer() {
   // Cleanup IO
   delete m_to_meteor;
   delete m_from_meteor;
-  delete mtx;
 }
 
 void MeteorScorer::setReferenceFiles(const vector<string>& referenceFiles)
@@ -130,12 +131,16 @@ void MeteorScorer::prepareStats(size_t sid, const string& text, ScoreStats& entr
   }
   input << " ||| " << text << "\n";
   // Threadsafe IO
-  mtx->lock();
+#ifdef WITH_THREADS
+  mtx.lock();
+#endif
   //TRACE_ERR ( "in: " + input.str() );
   *m_to_meteor << input.str();
   m_from_meteor->getline(stats_str);
   //TRACE_ERR ( "out: " + stats_str + "\n" );
-  mtx->unlock();
+#ifdef WITH_THREADS
+  mtx.unlock();
+#endif
   entry.set(stats_str);
 }
 
@@ -148,12 +153,16 @@ float MeteorScorer::calculateScore(const vector<int>& comps) const
   copy(comps.begin(), comps.end(), ostream_iterator<int>(input, " "));
   input << "\n";
   // Threadsafe IO
-  mtx->lock();
+#ifdef WITH_THREADS
+  mtx.lock();
+#endif
   //TRACE_ERR ( "in: " + input.str() );
   *m_to_meteor << input.str();
   m_from_meteor->getline(score);
   //TRACE_ERR ( "out: " + score + "\n" );
-  mtx->unlock();
+#ifdef WITH_THREADS
+  mtx.unlock();
+#endif
   return atof(score.c_str());
 }
 

@@ -40,7 +40,18 @@ current ?= "" ;
 path-constant LM-LOG : bin/lm.log ;
 update-if-changed $(LM-LOG) $(current) ;
 
-obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm : <dependency>$(LM-LOG) ;
+obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <dependency>$(LM-LOG) ;
+
+if [ option.get "with-mm" : no : yes ] = yes
+{
+  alias mmlib : 
+  $(TOP)/moses/TranslationModel/UG//mmsapt
+  $(TOP)/moses/TranslationModel/UG/generic//generic
+  $(TOP)/moses/TranslationModel/UG/mm//mm
+  ;
+} else {
+  alias mmlib ;
+}
 
 lib moses :
 [ glob 
@@ -54,6 +65,7 @@ lib moses :
   FF/*.cpp
   FF/OSM-Feature/*.cpp
   FF/LexicalReordering/*.cpp
+  PP/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
@@ -62,12 +74,11 @@ lib moses :
 ]
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-$(TOP)//boost_iostreams 
+$(TOP)//boost_iostreams mmlib
 :
 <threading>single:<source>../util//rt
 ;
 
-#generic//generic mm//mm
 
 alias headers-to-install : [ glob-tree *.h ] ;
 
