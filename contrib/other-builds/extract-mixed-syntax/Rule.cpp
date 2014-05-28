@@ -335,6 +335,32 @@ void Rule::Prevalidate(const Parameter &params)
 		  }
 	  }
   }
+
+  if (params.maxScope != UNDEFINED) {
+	  int scope = CalcScope();
+	  if (scope > params.maxScope) {
+		  m_isValid = false;
+		  m_canRecurse = false;
+		  return;
+	  }
+  }
+}
+
+int Rule::CalcScope() const
+{
+  int scope = 0;
+  if (m_source.GetSize() > 1) {
+	  const RuleSymbol &front = *m_source.Front();
+	  if (front.IsNonTerm()) {
+		  ++scope;
+	  }
+
+	  const RuleSymbol &back = *m_source.Back();
+	  if (back.IsNonTerm()) {
+		  ++scope;
+	  }
+  }
+  return scope;
 }
 
 template<typename T>

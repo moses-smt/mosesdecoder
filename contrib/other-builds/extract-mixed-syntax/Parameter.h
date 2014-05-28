@@ -7,6 +7,9 @@
 #pragma once
 
 #include <string>
+#include <limits>
+
+#define UNDEFINED	std::numeric_limits<int>::max()
 
 class Parameter
 {
@@ -38,6 +41,7 @@ public:
   bool hieroSourceLHS;
   int maxSpanFreeNonTermSource;
   bool nieceTerminal;
+  int maxScope;
 
 };
 
