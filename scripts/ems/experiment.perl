@@ -18,7 +18,7 @@ sub trim($)
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
-my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$FINAL,$VERBOSE,$IGNORE_TIME,$DELETE_CRASHED,$DELETE_VERSION);
+my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$FINAL_STEP,$FINAL_OUT,$VERBOSE,$IGNORE_TIME,$DELETE_CRASHED,$DELETE_VERSION);
 my $SLEEP = 2;
 my $META = "$RealBin/experiment.meta";
 
@@ -42,7 +42,8 @@ die("experiment.perl -config config-file [-exec] [-no-graph]")
 			'exec' => \$EXECUTE,
 			'cluster' => \$CLUSTER,
 			'multicore' => \$MULTICORE,
-		   	'final=s' => \$FINAL,
+		   	'final-step=s' => \$FINAL_STEP,
+		   	'final-out=s' => \$FINAL_OUT,
 		   	'meta=s' => \$META,
 			'verbose' => \$VERBOSE,
 			'sleep=i' => \$SLEEP,
@@ -441,10 +442,10 @@ sub log_config {
 
 sub find_steps {
     # find final output to be produced by the experiment
-    if (defined($FINAL)) {
-      push @{$NEEDED{$FINAL}}, "final";
+    if (defined($FINAL_OUT)) {
+      push @{$NEEDED{$FINAL_OUT}}, "final";
     }
-    else {
+    elsif (!defined($FINAL_STEP)) {
       push @{$NEEDED{"REPORTING:report"}}, "final";
     }
 
@@ -493,7 +494,7 @@ sub find_steps_for_module {
 	# only add this step, if its output is needed by another step
 	my $out = &construct_name($module,$set,$STEP_OUT{$defined_step});
 	print "\t\tproduces $out\n" if $VERBOSE;
-	next unless defined($NEEDED{$out});
+	next unless defined($NEEDED{$out}) || (defined($FINAL_STEP) && $FINAL_STEP eq $step);
 	print "\t\tneeded\n" if $VERBOSE;
 	
         # if output of a step is specified, you do not have 
