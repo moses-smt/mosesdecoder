@@ -371,24 +371,19 @@ alignment-symmetrization-method = grow-diag-final-and
 #
 #biconcor = $moses-bin-dir/biconcor
 
-############################################################
-
-### use of Operation Sequence Model 
-### Durrani, Schmid and Fraser. (2011): "A Joint Sequence Translation Model with Integrated Reordering"
-
+## Operation Sequence Model  (OSM)
+# Durrani, Schmid and Fraser. (2011): 
+# "A Joint Sequence Translation Model with Integrated Reordering"
+# compile Moses with --max-kenlm-order=9 if higher order is required
+# 
 #operation-sequence-model = "yes"
 #operation-sequence-model-order = 5
 #operation-sequence-model-settings = ""
-
-### compile Moses with --max-kenlm-order=9 if higher order is required
 
 ### if OSM training should be skipped,
 # point to OSM Model 
 #
 # osm-model =
-
-############################################################
-
 
 ### lexicalized reordering: specify orientation type
 # (default: only distance-based reordering model)
@@ -597,7 +592,8 @@ wrapping-script = "$moses-script-dir/ems/support/wrap-xml.perl $output-extension
 #
 nist-bleu = $moses-script-dir/generic/mteval-v13a.pl
 nist-bleu-c = "$moses-script-dir/generic/mteval-v13a.pl -c"
-#multi-bleu = $moses-script-dir/generic/multi-bleu.perl
+#multi-bleu = "$moses-script-dir/generic/multi-bleu.perl -lc"
+#multi-bleu-c = $moses-script-dir/generic/multi-bleu.perl
 #ibm-bleu =
 
 ### TER: translation error rate (BBN metric) based on edit distance

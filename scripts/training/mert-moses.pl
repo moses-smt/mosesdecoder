@@ -930,7 +930,7 @@ while (1) {
     $mira_settings .= " --type hypergraph ";
     $mira_settings .= join(" ", map {"--reference $_"} @references);
     $mira_settings .= " --hgdir $hypergraph_dir ";
-    $mira_settings .= "--verbose "; #TODO: temporary
+    #$mira_settings .= "--verbose "; 
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
   } elsif ($__PROMIX_TRAINING) {
@@ -967,7 +967,9 @@ while (1) {
 
   ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights,\@promix_weights);
   my $merge_weight = 0;
-  print "New mixture weights: " . join(" ", @promix_weights) . "\n";
+  if ($__PROMIX_TRAINING) {
+    print "New mixture weights: " . join(" ", @promix_weights) . "\n";
+  }
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -1133,7 +1135,7 @@ sub get_weights_from_mert {
   my ($outfile, $logfile, $weight_count, $sparse_weights, $mix_weights) = @_;
   my ($bestpoint, $devbleu);
   if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)
-          || $___BATCH_MIRA || $__PROMIX_TRAINING) {
+          || $___BATCH_MIRA || $__PROMIX_TRAINING || $___HG_MIRA) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
     my @WEIGHT;
     @$mix_weights = ();
@@ -1157,7 +1159,7 @@ sub get_weights_from_mert {
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
     $bestpoint = join(" ", @WEIGHT);
 
-    if($___BATCH_MIRA) {
+    if($___BATCH_MIRA || $___HG_MIRA) {
       open my $fh2, '<', $logfile or die "Can't open $logfile: $!";
       while(<$fh2>) {
         if(/Best BLEU = ([\-\d\.]+)/) {
