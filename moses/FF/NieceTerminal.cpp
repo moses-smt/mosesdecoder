@@ -55,7 +55,7 @@ void NieceTerminal::Evaluate(const InputType &input
 		  //cerr << "ntRange=" << ntRange << endl;
 
 		  // non-term contains 1 of the terms in the rule.
-		  float score = m_hardConstraint ? 1 : - std::numeric_limits<float>::infinity();
+		  float score = m_hardConstraint ? - std::numeric_limits<float>::infinity() : 1;
 		  scoreBreakdown.PlusEquals(this, score);
 		  return;
 	  }
@@ -95,8 +95,15 @@ void NieceTerminal::SetParameter(const std::string& key, const std::string& valu
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
+<<<<<<< HEAD
+}
+
+
+=======
+>>>>>>> e9d30527907ee919727d117764c03588ef22d9e3
 }
 
 
 }
+
 
