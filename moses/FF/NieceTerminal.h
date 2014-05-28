@@ -1,16 +1,20 @@
 #pragma once
 
+#include <set>
 #include <string>
 #include "StatelessFeatureFunction.h"
 
 namespace Moses
 {
+class WordsRange;
+class Word;
 
-class SkeletonStatelessFF : public StatelessFeatureFunction
+// 1 of the non-term covers the same word as 1 of the terminals
+class NieceTerminal : public StatelessFeatureFunction
 {
 public:
-  SkeletonStatelessFF(const std::string &line)
-    :StatelessFeatureFunction(2, line)
+  NieceTerminal(const std::string &line)
+    :StatelessFeatureFunction(line)
   {}
 
   bool IsUseable(const FactorMask &mask) const {
@@ -32,6 +36,10 @@ public:
   void EvaluateChart(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const;
 
+protected:
+  bool ContainTerm(const InputType &input,
+		  	  	  const WordsRange &ntRange,
+		  	  	  const std::set<Word> &terms) const;
 };
 
 }

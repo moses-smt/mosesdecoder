@@ -140,6 +140,8 @@ public:
   }
 
   size_t GetNumTerminals() const;
+  size_t GetNumNonTerminals() const
+  { return GetSize() - GetNumTerminals(); }
 
   //! whether the 2D vector is a substring of this phrase
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector

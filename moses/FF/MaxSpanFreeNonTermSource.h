@@ -1,16 +1,16 @@
 #pragma once
 #include <string>
 #include "StatelessFeatureFunction.h"
+#include "moses/Word.h"
 
 namespace Moses
 {
 
-// Count how many hypotheses are in each stack, compare score with reference hypo
-// NOT threadsafe.
-class ReferenceComparison : public StatelessFeatureFunction
+// -inf if left-most or right-most non-term is over a set span
+class MaxSpanFreeNonTermSource : public StatelessFeatureFunction
 {
 public:
-	ReferenceComparison(const std::string &line);
+	MaxSpanFreeNonTermSource(const std::string &line);
 
 	  virtual bool IsUseable(const FactorMask &mask) const
 	  { return true; }
@@ -18,16 +18,14 @@ public:
 	  virtual void Evaluate(const Phrase &source
 							, const TargetPhrase &targetPhrase
 							, ScoreComponentCollection &scoreBreakdown
-							, ScoreComponentCollection &estimatedFutureScore) const
-	  {}
+							, ScoreComponentCollection &estimatedFutureScore) const;
 
 	  virtual void Evaluate(const InputType &input
 	                         , const InputPath &inputPath
 	                         , const TargetPhrase &targetPhrase
 	                         , const StackVec *stackVec
 	                         , ScoreComponentCollection &scoreBreakdown
-	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
-	  {}
+	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
 	  virtual void Evaluate(const Hypothesis& hypo,
 	                        ScoreComponentCollection* accumulator) const
@@ -37,11 +35,13 @@ public:
 	                             ScoreComponentCollection* accumulator) const
 	  {}
 
-	  std::vector<float> DefaultWeights() const
-	  { return std::vector<float>(); }
+	  void SetParameter(const std::string& key, const std::string& value);
+	  std::vector<float> DefaultWeights() const;
 
 protected:
-
+  int m_maxSpan;
+  std::string m_glueTargetLHSStr;
+  Word m_glueTargetLHS;
 };
 
 }

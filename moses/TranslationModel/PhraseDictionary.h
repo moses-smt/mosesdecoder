@@ -133,7 +133,6 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
   virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
@@ -150,6 +149,8 @@ protected:
 
   // MUST be called at the start of Load()
   void SetFeaturesToApply();
+
+  bool SatisfyBackoff(const InputPath &inputPath) const;
 
   // cache
   size_t m_maxCacheSize; // 0 = no caching

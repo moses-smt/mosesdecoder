@@ -176,6 +176,31 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
     ChartTranslationOptions &transOpts = **iter;
     transOpts.Evaluate(input, inputPath);
   }
+
+  // get rid of empty trans opts
+  size_t numDiscard = 0;
+  for (size_t i = 0; i < m_size; ++i) {
+    ChartTranslationOptions *transOpts = m_collection[i];
+    if (transOpts->GetSize() == 0) {
+    	//delete transOpts;
+      	++numDiscard;
+    }
+    else if (numDiscard) {
+    	SwapTranslationOptions(i - numDiscard, i);
+    	//m_collection[] = transOpts;
+    }
+  }
+
+  size_t newSize = m_size - numDiscard;
+  m_size = newSize;
+}
+
+void ChartTranslationOptionList::SwapTranslationOptions(size_t a, size_t b)
+{
+  ChartTranslationOptions *transOptsA = m_collection[a];
+  ChartTranslationOptions *transOptsB = m_collection[b];
+  m_collection[a] = transOptsB;
+  m_collection[b] = transOptsA;
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionList &obj)

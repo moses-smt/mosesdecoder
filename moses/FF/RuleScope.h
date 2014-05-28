@@ -5,11 +5,11 @@
 namespace Moses
 {
 
-// similar to Scope, however, adjacent non-term count as 1 ammbiguity, rather than 2
-class RuleAmbiguity : public StatelessFeatureFunction
+// Rule Scope - not quite completely implemented yet
+class RuleScope : public StatelessFeatureFunction
 {
 public:
-	RuleAmbiguity(const std::string &line);
+	RuleScope(const std::string &line);
 
 	  virtual bool IsUseable(const FactorMask &mask) const
 	  { return true; }
@@ -22,6 +22,7 @@ public:
 	  virtual void Evaluate(const InputType &input
 	                         , const InputPath &inputPath
 	                         , const TargetPhrase &targetPhrase
+	                         , const StackVec *stackVec
 	                         , ScoreComponentCollection &scoreBreakdown
 	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
 	  {}
