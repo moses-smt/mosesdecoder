@@ -131,8 +131,8 @@ public:
   TargetPhraseCollectionWithSourcePhrase const*
   GetTargetPhraseCollection(Phrase const &src) const {
 
-    VERBOSE(1,"PDTAimp::GetTargetPhraseCollection" << std::endl);
-    VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: src:|" << src << "|" << std::endl);
+    VERBOSE(2,"PDTAimp::GetTargetPhraseCollection" << std::endl);
+    VERBOSE(3,"PDTAimp::GetTargetPhraseCollection: src:|" << src << "|" << std::endl);
 
     assert(m_dict);
     if(src.GetSize()==0) return 0;
@@ -142,9 +142,9 @@ public:
       piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollectionWithSourcePhrase const*>(0)));
       if(!piter.second) {
         if (piter.first->second) {
-          VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: piter.first->second->GetSize():" << (piter.first->second)->GetSize() << std::endl);
+          VERBOSE(3,"PDTAimp::GetTargetPhraseCollection: piter.first->second->GetSize():" << (piter.first->second)->GetSize() << std::endl);
         } else {
-          VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: piter.first->second->GetSize():" << 0 << std::endl);
+          VERBOSE(3,"PDTAimp::GetTargetPhraseCollection: piter.first->second->GetSize():" << 0 << std::endl);
         }
         return piter.first->second;
       }
@@ -152,12 +152,12 @@ public:
       MapSrc2Tgt::const_iterator i=m_cache.find(src);
       if (i!=m_cache.end()) {
         if (i->second) {
-          VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << (void*) (i->second) << std::endl);
+          VERBOSE(3,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << (void*) (i->second) << std::endl);
         } else {
-          VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << 0 << std::endl);
+          VERBOSE(3,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << 0 << std::endl);
         }
       } else {
-        VERBOSE(1,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << 0 << std::endl);
+        VERBOSE(3,"PDTAimp::GetTargetPhraseCollection: i->second->GetSize():" << 0 << std::endl);
       }
       return (i!=m_cache.end() ? i->second : 0);
     }
@@ -173,7 +173,7 @@ public:
     std::vector<std::string> wacands;
     m_dict->GetTargetCandidates(srcString,cands,wacands);
     if(cands.empty()) {
-      VERBOSE(1,"PDTAimp::GetTargetPhraseCollection ret->GetSize():" << 0 << std::endl);
+      VERBOSE(3,"PDTAimp::GetTargetPhraseCollection ret->GetSize():" << 0 << std::endl);
       return 0;
     }
 
@@ -222,11 +222,11 @@ public:
     rv=PruneTargetCandidates(tCands,costs, sourcePhrases);
     if(rv->IsEmpty()) {
       delete rv;
-      VERBOSE(1,"PDTAimp::GetTargetPhraseCollection rv->GetSize():" << 0 << std::endl);
+      VERBOSE(3,"PDTAimp::GetTargetPhraseCollection rv->GetSize():" << 0 << std::endl);
       return 0;
     } else {
       if(useCache) piter.first->second=rv;
-      VERBOSE(1,"PDTAimp::GetTargetPhraseCollection rv->GetSize():" << rv->GetSize() << std::endl);
+      VERBOSE(3,"PDTAimp::GetTargetPhraseCollection rv->GetSize():" << rv->GetSize() << std::endl);
       m_tgtColls.push_back(rv);
       return rv;
     }
