@@ -75,6 +75,7 @@ protected:
   std::map<long,Phrase> m_constraints;
   int m_maxUnknowns;
   bool m_negate; // only keep translations which DON'T match the reference
+  bool m_soft;
 
 };
 
