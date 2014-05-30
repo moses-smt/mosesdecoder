@@ -279,6 +279,12 @@ public:
         manager.ProcessSentence();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
+        if (addGraphInfo) {
+          const size_t translationId = tinput.GetTranslationId();
+          std::ostringstream sgstream;
+          manager.GetSearchGraph(translationId,sgstream);
+          retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
+        }
     } else {
         Sentence sentence;
         const vector<FactorType> &inputFactorOrder =
@@ -310,7 +316,7 @@ public:
           retData.insert(pair<string, xmlrpc_c::value_array>("word-align", alignments));
         }
 
-        if(addGraphInfo) {
+        if (addGraphInfo) {
           insertGraphInfo(manager,retData);
             (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
         }
