@@ -153,7 +153,7 @@ if __name__ == "__main__":
             (100*bleu.actual,
              os.path.basename(Rx.fname),
              100*bleu.bootstrap[int((args.alpha/2)*args.bootstrap)],
-             100*bleu.bootstrap[int((1-(args.alpha/2)*args.bootstrap)],
+             100*bleu.bootstrap[int((1-(args.alpha/2))*args.bootstrap)],
              100*bleu.bootstrap[int(.5*args.bootstrap)],
              c.fname) # os.path.basename(c.fname))
 
