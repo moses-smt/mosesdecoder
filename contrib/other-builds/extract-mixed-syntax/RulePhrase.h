@@ -33,6 +33,9 @@ public:
     return m_coll[index];
   }
 
+  const RuleSymbol* Front() const {
+    return m_coll.front();
+  }
   const RuleSymbol* Back() const {
     return m_coll.back();
   }
