@@ -172,7 +172,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   //precision on each ngram type
   for (NgramCounts::const_iterator testcounts_it = testcounts.begin();
        testcounts_it != testcounts.end(); ++testcounts_it) {
-    const NgramCounts::Value guess = testcounts_it->second;    
+    const NgramCounts::Value guess = testcounts_it->second;
     const size_t len = testcounts_it->first.size();
     NgramCounts::Value correct = 0;
 
@@ -190,21 +190,21 @@ statscore_t BleuScorer::calculateScore(const vector<int>& comps) const
 {
   UTIL_THROW_IF(comps.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
-  float beta = 0.5;
-  float logfscore = 0.0;
-  for (int j = 0; j < kBleuNgramOrder; j++) {
-    float c = comps[2 * j];
-    float p = comps[2 * j + 1];
-    float g = comps[kBleuNgramOrder * 2] - j;
-    if(g < 0.0) 
-      g = 0.0;
-    if(c == 0 && g != 0)
+  float logbleu = 0.0;
+  for (int i = 0; i < kBleuNgramOrder; ++i) {
+    if (comps[2*i] == 0) {
       return 0.0;
-    else if(c != 0)
-      logfscore += log(beta * beta * c + c) - log(beta * beta * g + p); 
+    }
+    logbleu += log(comps[2*i]) - log(comps[2*i+1]);
+
   }
-  logfscore /= kBleuNgramOrder;
-  return exp(logfscore);
+  logbleu /= kBleuNgramOrder;
+  // reflength divided by test length
+  const float brevity = 1.0 - static_cast<float>(comps[kBleuNgramOrder * 2]) / comps[1];
+  if (brevity < 0.0) {
+    logbleu += brevity;
+  }
+  return exp(logbleu);
 }
 
 int BleuScorer::CalcReferenceLength(size_t sentence_id, size_t length)
@@ -293,25 +293,6 @@ float unsmoothedBleu(const std::vector<float>& stats)
 {
   UTIL_THROW_IF(stats.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
-  float beta = 0.5;
-  float logfscore = 0.0;
-  for (int j = 0; j < kBleuNgramOrder; j++) {
-    float c = stats[2 * j];
-    float p = stats[2 * j + 1];
-    float g = stats[kBleuNgramOrder * 2] - j;
-    if(g < 0) 
-       g = 0;
-    logfscore += log(beta * beta * c + 1) - log(beta * beta * g + p); 
-  }
-  logfscore /= kBleuNgramOrder;
-  return exp(logfscore);
-}
-
-/*
-float unsmoothedBleu(const std::vector<float>& stats)
-{
-  UTIL_THROW_IF(stats.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
-
   float logbleu = 0.0;
   for (int j = 0; j < kBleuNgramOrder; j++) {
     logbleu += log(stats[2 * j]) - log(stats[2 * j + 1]);
@@ -324,7 +305,6 @@ float unsmoothedBleu(const std::vector<float>& stats)
   }
   return exp(logbleu);
 }
-*/
 
 vector<float> BleuScorer::ScoreNbestList(const string& scoreFile, const string& featureFile)
 {
