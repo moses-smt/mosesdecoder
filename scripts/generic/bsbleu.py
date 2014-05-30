@@ -139,6 +139,7 @@ if __name__ == "__main__":
                            help="compute BLEU scores for individual references")
     argparser.add_argument("-b","--bootstrap",type=int,default=1000, 
                            help="sample size for bootstrap resampling")
+    argparser.add_argument("-a","--alpha",help="1-alpha = confidence interval",type=float,default=.05)
     args = argparser.parse_args(sys.argv[1:])
     R = [ Document(fname) for fname in args.ref]
     C = [ Document(fname) for fname in args.cand]
@@ -151,8 +152,8 @@ if __name__ == "__main__":
         print "%5.2f %s [%5.2f-%5.2f; %5.2f] %s"%\
             (100*bleu.actual,
              os.path.basename(Rx.fname),
-             100*bleu.bootstrap[int(.025*args.bootstrap)],
-             100*bleu.bootstrap[int(.975*args.bootstrap)],
+             100*bleu.bootstrap[int((args.alpha/2)*args.bootstrap)],
+             100*bleu.bootstrap[int((1-(args.alpha/2)*args.bootstrap)],
              100*bleu.bootstrap[int(.5*args.bootstrap)],
              c.fname) # os.path.basename(c.fname))
 
