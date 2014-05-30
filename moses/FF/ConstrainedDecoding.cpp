@@ -34,6 +34,7 @@ ConstrainedDecoding::ConstrainedDecoding(const std::string &line)
   :StatefulFeatureFunction(1, line)
   ,m_maxUnknowns(0)
   ,m_negate(false)
+  ,m_soft(false)
 {
   m_tuneable = false;
   ReadParameters();
