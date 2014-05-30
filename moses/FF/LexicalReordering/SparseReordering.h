@@ -17,8 +17,8 @@
  Configuration of sparse reordering:
   
   The sparse reordering feature is configured using sparse-* configs in the lexical reordering line.
-  sparse-words-<id>=<filename>  -- Features which fire for the words in the list
-  sparse-clusters-<id>=<filename> -- Features which fire for clusters in the list. Format
+  sparse-words-(source|target)-<id>=<filename>  -- Features which fire for the words in the list
+  sparse-clusters-(source|target)-<id>=<filename> -- Features which fire for clusters in the list. Format
                                      of cluster file TBD
   sparse-phrase                    -- Add features which depend on the current phrase
   sparse-stack                     -- Add features which depend on the previous phrase, or
@@ -40,7 +40,14 @@ public:
                  ScoreComponentCollection* scores) const ;
 
 private:
+  typedef std::pair<std::string, std::set<std::string> > WordList; //id and list
+  std::vector<WordList> m_sourceWordLists;
+  std::vector<WordList> m_targetWordLists;
+  bool m_usePhrase;
+  bool m_useBetween;
+  bool m_useStack;
 
+  void ReadWordList(const std::string& filename, const std::string& id, std::vector<WordList>* pWordLists);
 
 };
 
