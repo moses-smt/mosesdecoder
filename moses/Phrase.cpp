@@ -220,8 +220,6 @@ void Phrase::CreateFromString(FactorDirection direction
     } else {
       isNonTerminal = false;
     }
-	
-	std::cerr << annotatedWord << std::endl;
 
     Word &word = AddWord();
     word.CreateFromString(direction, factorOrder, annotatedWord, isNonTerminal);
