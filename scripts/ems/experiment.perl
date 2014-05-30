@@ -633,6 +633,7 @@ sub check_producability {
 	return 1 if defined($CONFIG{$out});
 
 	# find defined step that produces this
+	$out =~ s/:.+:/:/g;
 	my $defined_step;
 	foreach my $ds (keys %STEP_OUT) {
 	    my ($ds_module) = &deconstruct_name($ds);
@@ -640,10 +641,8 @@ sub check_producability {
 	    print "checking $ds -> $ds_out\n" if $VERBOSE;
 	    $defined_step = $ds if $out eq $ds_out;
 	}
-	print STDERR "WARNING: cannot possibly produce output $out"
+	die("ERROR: cannot possibly produce output $out")
 	    unless $defined_step;
-#	die("ERROR: cannot possibly produce output $out")
-#	    unless $defined_step;
 
 	# producable, if cannot be ignored
 	return 1 unless defined($STEP_IGNORE{$defined_step});
