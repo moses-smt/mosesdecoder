@@ -139,15 +139,15 @@ namespace Moses
     size_t num_feats;
     // TO DO: should we use different lbop parameters 
     //        for the relative-frequency based features?
-    num_feats  = calc_pfwd_fix.init(0,m_lbop_parameter);
+    num_feats  = calc_pfwd_fix.init(0,m_lbop_parameter,m_pfwd_denom);
     num_feats  = calc_pbwd_fix.init(num_feats,m_lbop_parameter);
     num_feats  = calc_lex.init(num_feats, bname + L1 + "-" + L2 + ".lex");
     num_feats  = apply_pp.init(num_feats);
     if (num_feats < this->m_numScoreComponents)
       {
 	poolCounts = false;
-	num_feats  = calc_pfwd_dyn.init(num_feats,m_lbop_parameter);
-	num_feats  = calc_pbwd_dyn.init(num_feats,m_lbop_parameter);
+	num_feats = calc_pfwd_dyn.init(num_feats,m_lbop_parameter,m_pfwd_denom);
+	num_feats = calc_pbwd_dyn.init(num_feats,m_lbop_parameter);
       }
 
     if (num_feats != this->m_numScoreComponents)

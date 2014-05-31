@@ -1,4 +1,4 @@
-//-*- c++-mode -*-
+//-*- c++ -*-
 
 #include "ug_bitext.h"
 #include <algorithm>
