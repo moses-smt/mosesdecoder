@@ -38,8 +38,8 @@ int main(int argc, char** argv)
     ("HieroSourceLHS", "Always use Hiero source LHS? Default = 0")
     ("MaxSpanFreeNonTermSource", po::value<int>()->default_value(params.maxSpanFreeNonTermSource), "Max number of words covered by beginning/end NT. Default = 0 (no limit)")
     ("NoNieceTerminal", "Don't extract rule if 1 of the non-term covers the same word as 1 of the terminals")
-    ("MaxScope", po::value<int>()->default_value(params.maxScope), "maximum scope (see Hopkins and Langmead (2010)). Default is HIGH");
-
+    ("MaxScope", po::value<int>()->default_value(params.maxScope), "maximum scope (see Hopkins and Langmead (2010)). Default is HIGH")
+    ("SpanLength", po::value<bool>()->default_value(params.spanLength), "Output span length of RHS each non-term");
 
   po::variables_map vm;
   try
@@ -80,6 +80,7 @@ int main(int argc, char** argv)
   if (vm.count("HieroSourceLHS")) params.hieroSourceLHS = true;
   if (vm.count("MaxSpanFreeNonTermSource")) params.maxSpanFreeNonTermSource = vm["MaxSpanFreeNonTermSource"].as<int>();
   if (vm.count("NoNieceTerminal")) params.nieceTerminal = false;
+  if (vm.count("SpanLength")) params.spanLength = true;
   if (vm.count("MaxScope")) params.maxScope = vm["MaxScope"].as<int>();
 
   // input files;
@@ -142,8 +143,8 @@ int main(int argc, char** argv)
 	  rules.Consolidate(params);
 	  //cerr << rules.Debug();
 
-	  rules.Output(extractFile, true);
-	  rules.Output(extractInvFile, false);
+	  rules.Output(extractFile, true, params);
+	  rules.Output(extractInvFile, false, params);
 
 	  delete alignedSentence;
 
