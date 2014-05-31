@@ -81,7 +81,7 @@ public:
   void CreateFromString(FactorDirection direction
                         , const std::vector<FactorType> &factorOrder
                         , const StringPiece &phraseString
-                        , const StringPiece &factorDelimiter
+                        // , const StringPiece &factorDelimiter // never used [UG]
                         , Word **lhs);
 
   /**	copy factors from the other phrase to this phrase.

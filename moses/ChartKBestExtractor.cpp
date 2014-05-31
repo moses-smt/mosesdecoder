@@ -159,7 +159,9 @@ ChartKBestExtractor::FindOrCreateVertex(const ChartHypothesis &h)
     bestEdge.tail[i] = FindOrCreateVertex(*prevHypo);
   }
   boost::shared_ptr<Derivation> bestDerivation(new Derivation(bestEdge));
-  std::pair<DerivationSet::iterator, bool> q =
+#ifndef NDEBUG
+  std::pair<DerivationSet::iterator, bool> q = 
+#endif
     m_derivations.insert(bestDerivation);
   assert(q.second);
   sp->kBestList.push_back(bestDerivation);
