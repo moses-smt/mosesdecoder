@@ -14,7 +14,8 @@
 class AlignedSentenceSyntax : public AlignedSentence
 {
 public:
-	AlignedSentenceSyntax(const std::string &source,
+	AlignedSentenceSyntax(int lineNum,
+			const std::string &source,
 			const std::string &target,
 			const std::string &alignment);
 	virtual ~AlignedSentenceSyntax();

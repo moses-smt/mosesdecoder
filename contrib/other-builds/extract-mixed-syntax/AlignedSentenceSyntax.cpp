@@ -12,10 +12,11 @@
 
 using namespace std;
 
-AlignedSentenceSyntax::AlignedSentenceSyntax(const std::string &source,
+AlignedSentenceSyntax::AlignedSentenceSyntax(int lineNum,
+		const std::string &source,
 		const std::string &target,
 		const std::string &alignment)
-:AlignedSentence()
+:AlignedSentence(lineNum)
 ,m_sourceStr(source)
 ,m_targetStr(target)
 ,m_alignmentStr(alignment)

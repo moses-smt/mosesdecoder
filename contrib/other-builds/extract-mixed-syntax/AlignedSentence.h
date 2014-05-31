@@ -16,10 +16,12 @@ class Parameter;
 
 class AlignedSentence {
 public:
-	AlignedSentence()
+	AlignedSentence(int lineNum)
+	:m_lineNum(lineNum)
 	{}
 
-	AlignedSentence(const std::string &source,
+	AlignedSentence(int lineNum,
+			const std::string &source,
 			const std::string &target,
 			const std::string &alignment);
 	virtual ~AlignedSentence();
@@ -33,6 +35,7 @@ public:
 
 	virtual std::string Debug() const;
 
+	int m_lineNum;
 protected:
   Phrase m_source, m_target;
   ConsistentPhrases m_consistentPhrases;

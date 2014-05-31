@@ -129,10 +129,10 @@ int main(int argc, char** argv)
 	  AlignedSentence *alignedSentence;
 
 	  if (params.sourceSyntax || params.targetSyntax) {
-		  alignedSentence = new AlignedSentenceSyntax(lineSource, lineTarget, lineAlignment);
+		  alignedSentence = new AlignedSentenceSyntax(lineNum, lineSource, lineTarget, lineAlignment);
 	  }
 	  else {
-		  alignedSentence = new AlignedSentence(lineSource, lineTarget, lineAlignment);
+		  alignedSentence = new AlignedSentence(lineNum, lineSource, lineTarget, lineAlignment);
 	  }
 
 	  alignedSentence->Create(params);

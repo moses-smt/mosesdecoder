@@ -14,9 +14,11 @@ using namespace std;
 
 
 /////////////////////////////////////////////////////////////////////////////////
-AlignedSentence::AlignedSentence(const std::string &source,
+AlignedSentence::AlignedSentence(int lineNum,
+			const std::string &source,
 			const std::string &target,
 			const std::string &alignment)
+:m_lineNum(lineNum)
 {
 	PopulateWordVec(m_source, source);
 	PopulateWordVec(m_target, target);
@@ -54,6 +56,11 @@ void AlignedSentence::PopulateAlignment(const std::string &line)
 		int sourcePos = alignPair[0];
 		int targetPos = alignPair[1];
 
+		if (sourcePos >= m_source.size()) {
+		  cerr << "ERROR1:AlignedSentence=" << Debug() << endl;
+		  cerr << "m_source=" << m_source.size() << endl;
+		  abort();
+		}
 		assert(sourcePos < m_source.size());
 		assert(targetPos < m_target.size());
 		Word *sourceWord = m_source[sourcePos];
@@ -67,6 +74,9 @@ void AlignedSentence::PopulateAlignment(const std::string &line)
 std::string AlignedSentence::Debug() const
 {
   stringstream out;
+	out << "m_lineNum:";
+	out << m_lineNum;
+	out << endl;
 
 	out << "m_source:";
 	out << m_source.Debug();
