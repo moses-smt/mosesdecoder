@@ -40,7 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
 
-#include "PhrasePiece.h"
 #include "PhraseDictionaryCompact.h"
 #include "StringVector.h"
 #include "CanonicalHuffman.h"
@@ -95,7 +94,7 @@ protected:
 
   // ***********************************************
 
-  unsigned GetSourceSymbolId(const StringPiece& s);
+  unsigned GetSourceSymbolId(std::string& s);
   std::string GetTargetSymbol(unsigned id) const;
 
   size_t GetREncType(unsigned encodedSymbol);
@@ -115,7 +114,7 @@ protected:
   int DecodePREncSymbol2Right(unsigned encodedSymbol);
   unsigned DecodePREncSymbol2Rank(unsigned encodedSymbol);
 
-  std::string MakeSourceKey(const PhrasePiece&);
+  std::string MakeSourceKey(std::string &);
 
 public:
 
@@ -131,12 +130,12 @@ public:
 
   size_t Load(std::FILE* in);
 
-  TargetPhraseVectorPtr CreateTargetPhraseCollection(const PhrasePiece &sourcePhrase,
+  TargetPhraseVectorPtr CreateTargetPhraseCollection(const Phrase &sourcePhrase,
       bool topLevel = false, bool eval = true);
 
   TargetPhraseVectorPtr DecodeCollection(TargetPhraseVectorPtr tpv,
                                          BitWrapper<> &encodedBitStream,
-                                         const PhrasePiece &sourcePhrase,
+                                         const Phrase &sourcePhrase,
                                          bool topLevel,
                                          bool eval);
 

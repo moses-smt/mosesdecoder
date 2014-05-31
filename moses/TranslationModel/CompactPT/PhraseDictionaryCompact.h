@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/ThreadPool.h"
 
-#include "PhrasePiece.h"
 #include "BlockHashIndex.h"
 #include "StringVector.h"
 #include "PhraseDecoder.h"
@@ -75,11 +74,8 @@ public:
 
   void Load();
 
-  const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(
-    const Phrase &source) const;
-  
-  TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(
-    const PhrasePiece &source, bool top = true, bool eval = false) const;
+  const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const;
+  TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
 
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 

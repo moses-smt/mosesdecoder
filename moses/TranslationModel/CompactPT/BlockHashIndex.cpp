@@ -31,12 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 #ifdef WITH_THREADS
-BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool checkSort,
+BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
                                size_t threadsNum)
   : m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
     m_fileHandle(0), m_fileHandleStart(0), m_size(0),
     m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0),
-    m_threadPool(threadsNum), m_checkSort(checkSort)
+    m_threadPool(threadsNum)
 {
 #ifndef HAVE_CMPH
   std::cerr << "minphr: CMPH support not compiled in." << std::endl;
@@ -44,11 +44,10 @@ BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool ch
 #endif
 }
 #else
-BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool checkSort)
+BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits)
   : m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
     m_fileHandle(0), m_fileHandleStart(0), m_size(0),
-    m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0),
-    m_checkSort(checkSort)
+    m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0)
 {
 #ifndef HAVE_CMPH
   std::cerr << "minphr: CMPH support not compiled in." << std::endl;
@@ -80,24 +79,13 @@ size_t BlockHashIndex::GetHash(const char* key)
                                m_landmarks.end(), keyStr)) - 1;
 
   if(i == 0ul-1)
-    return NotFoundValue();
+    return GetSize();
 
-  size_t hashPos = GetHash(i, key);
-  bool isLandmark = (keyStr == m_landmarks[i].str());
-  
-  size_t pos = hashPos;
-  if(hashPos == 0) {
-    // It's a prefix!
-    return PrefixValue();
-  }
-  
-  if(isLandmark && hashPos == 1)
-    pos = 0;
-  
-  if(pos != NotFoundValue())
+  size_t pos = GetHash(i, key);
+  if(pos != GetSize())
     return (1ul << m_orderBits) * i + pos;
   else
-    return NotFoundValue();
+    return GetSize();
 }
 
 size_t BlockHashIndex::GetFprint(const char* key) const
@@ -128,7 +116,7 @@ size_t BlockHashIndex::GetHash(size_t i, const char* key)
   if(GetFprint(key) == orderPrint.second)
     return orderPrint.first;
   else
-    return NotFoundValue();
+    return GetSize();
 }
 
 size_t BlockHashIndex::GetHash(std::string key)
@@ -353,7 +341,7 @@ void BlockHashIndex::KeepNLastRanges(float ratio, float tolerance)
   }
 }
 
-void BlockHashIndex::CalcHash(size_t current, void* source_void, size_t prefixCount)
+void BlockHashIndex::CalcHash(size_t current, void* source_void)
 {
 #ifdef HAVE_CMPH
   cmph_io_adapter_t* source = (cmph_io_adapter_t*) source_void;
@@ -376,28 +364,22 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void, size_t prefixCo
     std::string temp(key, keylen);
     source->dispose(source->data, key, keylen);
 
-    if(lastKey > temp && m_checkSort) {
+    if(lastKey > temp) {
       if(source->nkeys != 2 || temp != "###DUMMY_KEY###") {
-        std::stringstream strme;
-        strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
-        strme << "1: " << lastKey << std::endl;
-        strme << "2: " << temp << std::endl;
+    	std::stringstream strme;
+    	strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
+    	strme << "1: " << lastKey << std::endl;
+    	strme << "2: " << temp << std::endl;
         UTIL_THROW2(strme.str());
       }
     }
     lastKey = temp;
 
     size_t fprint = GetFprint(temp.c_str());
-    size_t idx = cmph_search(hash, temp.c_str(), (cmph_uint32) temp.size());
+    size_t idx = cmph_search(hash, temp.c_str(),
+                             (cmph_uint32) temp.size());
 
-    size_t pos = i;
-    if(i == 0)
-      pos = 1;
-    
-    if(i >= source->nkeys - prefixCount)
-      pos = 0;
-      
-    pv->Set(idx, pos, fprint, m_orderBits, m_fingerPrintBits);
+    pv->Set(idx, i, fprint, m_orderBits, m_fingerPrintBits);
     i++;
   }
 

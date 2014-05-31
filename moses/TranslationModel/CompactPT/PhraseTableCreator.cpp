@@ -20,8 +20,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <cstdio>
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "PhraseTableCreator.h"
 #include "ConsistentPhrases.h"
@@ -54,7 +52,6 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
                                        bool multipleScoreTrees,
                                        size_t quantize,
                                        size_t maxRank,
-                                       bool hierarchical,
                                        bool warnMe
 #ifdef WITH_THREADS
                                        , size_t threads
@@ -67,18 +64,16 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
     m_useAlignmentInfo(useAlignmentInfo),
     m_multipleScoreTrees(multipleScoreTrees),
     m_quantize(quantize), m_maxRank(maxRank),
-    m_hierarchical(hierarchical),
 #ifdef WITH_THREADS
     m_threads(threads),
-    m_srcHash(m_orderBits, m_fingerPrintBits, true, 1),
-    m_rnkHash(10, 24, false, m_threads),
+    m_srcHash(m_orderBits, m_fingerPrintBits, 1),
+    m_rnkHash(10, 24, m_threads),
 #else
-    m_srcHash(m_orderBits, m_fingerPrintBits, true),
-    m_rnkHash(m_orderBits, m_fingerPrintBits, false),
+    m_srcHash(m_orderBits, m_fingerPrintBits),
+    m_rnkHash(m_orderBits, m_fingerPrintBits),
 #endif
     m_maxPhraseLength(0),
     m_lastFlushedLine(-1), m_lastFlushedSourceNum(0),
-    m_lastCounted(0),
     m_lastFlushedSourcePhrase("")
 {
   PrintInfo();
@@ -166,8 +161,6 @@ void PhraseTableCreator::PrintInfo()
   std::cerr << "Used options:" << std::endl;
   std::cerr << "\tText phrase table will be read from: " << m_inPath << std::endl;
   std::cerr << "\tOutput phrase table will be written to: " << m_outPath << std::endl;
-  if(m_hierarchical)
-    std::cerr << "\tCreating a phrase table for hierarchical rules" << std::endl;
   std::cerr << "\tStep size for source landmark phrases: 2^" << m_orderBits << "=" << (1ul << m_orderBits) << std::endl;
   std::cerr << "\tSource phrase fingerprint size: " << m_fingerPrintBits << " bits / P(fp)=" << (float(1)/(1ul << m_fingerPrintBits)) << std::endl;
   std::cerr << "\tSelected target phrase encoding: " << encodings[m_coding] << std::endl;
@@ -342,16 +335,9 @@ inline std::string PhraseTableCreator::MakeSourceKey(std::string &source)
   return source + " " + m_separator + " ";
 }
 
-inline std::string PhraseTableCreator::MakeSourceTargetKey(std::string source, std::string target, std::string alignment)
+inline std::string PhraseTableCreator::MakeSourceTargetKey(std::string &source, std::string &target)
 {
-  std::string key = source + " " + m_separator + " " + target + " " + m_separator + " ";
-  if(alignment.size())
-    key += alignment + " " + m_separator + " ";
-  return key;
-}
-
-inline std::string StripLHS(const std::string& rule) {
-  return rule.substr(0, rule.find_last_of(" "));
+  return source + " " + m_separator + " " + target + " " + m_separator + " ";
 }
 
 void PhraseTableCreator::EncodeTargetPhrases()
@@ -619,7 +605,7 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
   std::vector<unsigned> encodedSymbols(t.size());
   std::vector<unsigned> encodedSymbolsLengths(t.size(), 0);
 
-  ConsistentPhrases cp(s.size() - 1, t.size() - 1, a);
+  ConsistentPhrases cp(s.size(), t.size(), a);
   while(!cp.Empty()) {
     ConsistentPhrases::Phrase p = cp.Pop();
 
@@ -627,9 +613,7 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
     key1 << s[p.i];
     for(int i = p.i+1; i < p.i+p.m; i++)
       key1 << " " << s[i];
-    if(m_hierarchical)
-      key1 << " [X]";
-      
+
     std::stringstream key2;
     key2 << t[p.j];
     for(int i = p.j+1; i < p.j+p.n; i++)
@@ -637,30 +621,14 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
 
     int rank = -1;
     std::string key1Str = key1.str(), key2Str = key2.str();
-    std::string rankKey;
-    if(m_hierarchical) {
-      std::stringstream alignment;
-      BOOST_FOREACH(AlignPoint ap, a)
-        if(p.i <= ap.first && ap.first < p.i+p.m && p.j <= ap.second &&
-           ap.second < p.j+p.n)
-           alignment << ((size_t)ap.first - p.i) << "-" << ((size_t)ap.second - p.j) << " ";
-      std::string alignmentKey = Moses::Trim(alignment.str());
-      rankKey = MakeSourceTargetKey(key1Str, key2Str, alignmentKey);
-    }
-    else {
-      rankKey = MakeSourceTargetKey(key1Str, key2Str);
-    }
-    size_t idx = m_rnkHash[rankKey];
+    size_t idx = m_rnkHash[MakeSourceTargetKey(key1Str, key2Str)];
     if(idx != m_rnkHash.GetSize())
       rank = m_ranks[idx];
 
-    // Do not count the LHS as part of the phrase length
-    size_t sourceSize = s.size() - (size_t)m_hierarchical;
-    
     if(rank >= 0 && (m_maxRank == 0 || unsigned(rank) < m_maxRank)) {
-      if(unsigned(p.m) != sourceSize || unsigned(rank) < ownRank) {
+      if(unsigned(p.m) != s.size() || unsigned(rank) < ownRank) {
         std::stringstream encodedSymbol;
-        encodedSymbols[p.j] = EncodePREncSymbol2(p.i-p.j, sourceSize-(p.i+p.m), rank);
+        encodedSymbols[p.j] = EncodePREncSymbol2(p.i-p.j, s.size()-(p.i+p.m), rank);
         encodedSymbolsLengths[p.j] = p.n;
 
         std::set<AlignPoint> tAlignment;
@@ -746,10 +714,10 @@ std::string PhraseTableCreator::EncodeLine(std::vector<std::string>& tokens, siz
   std::vector<float> scores = Tokenize<float>(scoresStr);
 
   if(scores.size() != m_numScoreComponent) {
-    std::stringstream strme;
-    strme << "Error: Wrong number of scores detected ("
+	std::stringstream strme;
+	strme << "Error: Wrong number of scores detected ("
               << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
-    strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[3] << " ..." << std::endl;
+	strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[3] << " ..." << std::endl;
     UTIL_THROW2(strme.str());
   }
 
@@ -807,7 +775,6 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
   size_t currScore = 0;
   AlignPoint alignPoint;
 
-  size_t phrases = 0;
   while(encodedStream) {
     switch(state) {
     case ReadSymbol:
@@ -833,7 +800,6 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
       break;
 
     case EncodeSymbol:
-      phrases += symbol == phraseStopSymbolId;
       state = (symbol == phraseStopSymbolId) ? ReadScore : ReadSymbol;
       m_symbolTree->Put(bitStream, symbol);
       break;
@@ -852,7 +818,6 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
     }
   }
 
-  //std::cout << phrases << std::endl;
   return compressedEncodedCollection;
 }
 
@@ -874,7 +839,6 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
     if(m_lastSourceRange.size() == step) {
       m_rnkHash.AddRange(m_lastSourceRange);
       m_lastSourceRange.clear();
-      m_lastSourceRangeSet.clear();
     }
 
     if(m_lastFlushedSourcePhrase != pi.GetSrc()) {
@@ -887,7 +851,7 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
           std::cerr << "[" << m_lastFlushedSourceNum << "]" << std::endl;
         }
 
-        m_ranks.resize(m_lastCounted + 1);
+        m_ranks.resize(m_lastFlushedLine + 1);
         int r = 0;
         while(!m_rankQueue.empty()) {
           m_ranks[m_rankQueue.top().second] = r++;
@@ -896,26 +860,15 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
       }
     }
 
-    std::string key = pi.GetTrg();
-    size_t count = 0;
-    while(m_lastSourceRangeSet.count(key) > 0) {
-      key = pi.GetTrg() + boost::lexical_cast<std::string>(count);
-      count++;
-    }
-    
-    m_lastSourceRange.push_back(key);
-    m_lastSourceRangeSet.insert(key);
-      
-    m_rankQueue.push(std::make_pair(pi.GetScore(), m_lastCounted));
-    m_lastCounted++;
-    
+    m_lastSourceRange.push_back(pi.GetTrg());
+
+    m_rankQueue.push(std::make_pair(pi.GetScore(), pi.GetLine()));
     m_lastFlushedSourcePhrase = pi.GetSrc();
   }
 
   if(force) {
     m_rnkHash.AddRange(m_lastSourceRange);
     m_lastSourceRange.clear();
-    m_lastSourceRangeSet.clear();
 
 #ifdef WITH_THREADS
     m_rnkHash.WaitAll();
@@ -930,7 +883,6 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
 
     m_lastFlushedLine = -1;
     m_lastFlushedSourceNum = 0;
-    m_lastCounted = 0;
 
     std::cerr << std::endl << std::endl;
   }
@@ -940,10 +892,6 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
 void PhraseTableCreator::AddEncodedLine(PackedItem& pi)
 {
   m_queue.push(pi);
-}
-
-void PhraseTableCreator::ComputePrefixes(const std::string& phrase) {
-  
 }
 
 void PhraseTableCreator::FlushEncodedQueue(bool force)
@@ -961,9 +909,6 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
           targetPhraseCollection << *it;
 
         m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));
-        if(m_hierarchical)
-          ComputePrefixes(m_lastFlushedSourcePhrase);
-        
         m_encodedTargetPhrases->push_back(targetPhraseCollection.str());
 
         m_lastFlushedSourceNum++;
@@ -977,11 +922,10 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
     }
 
     if(m_lastSourceRange.size() == (1ul << m_orderBits)) {
-      m_srcHash.AddRange(m_lastSourceRange, m_lastPrefixRange);
+      m_srcHash.AddRange(m_lastSourceRange);
       m_srcHash.SaveLastRange();
       m_srcHash.DropLastRange();
       m_lastSourceRange.clear();
-      m_lastPrefixRange.clear();
     }
 
     m_lastFlushedSourcePhrase = pi.GetSrc();
@@ -995,11 +939,8 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
   }
 
   if(force) {
-    if(!m_lastSourceRange.size() || m_lastSourceRange.back() != m_lastFlushedSourcePhrase) {
+    if(!m_lastSourceRange.size() || m_lastSourceRange.back() != m_lastFlushedSourcePhrase)
       m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));
-      if(m_hierarchical)
-        ComputePrefixes(m_lastFlushedSourcePhrase);
-    }
 
     if(m_lastCollection.size()) {
       std::stringstream targetPhraseCollection;
@@ -1011,9 +952,8 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
       m_lastCollection.clear();
     }
 
-    m_srcHash.AddRange(m_lastSourceRange, m_lastPrefixRange);
+    m_srcHash.AddRange(m_lastSourceRange);
     m_lastSourceRange.clear();
-    m_lastPrefixRange.clear();
 
 #ifdef WITH_THREADS
     m_srcHash.WaitAll();
@@ -1100,42 +1040,37 @@ void RankingTask::operator()()
         *it = Moses::Trim(*it);
 
       if(tokens.size() < 4) {
-        std::stringstream strme;
-        strme << "Error: It seems the following line has a wrong format:" << std::endl;
-        strme << "Line " << i << ": " << lines[i] << std::endl;
+    	std::stringstream strme;
+    	strme << "Error: It seems the following line has a wrong format:" << std::endl;
+    	strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
       if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
-        std::stringstream strme;
-        strme << "Error: It seems the following line contains no alignment information, " << std::endl;
-        strme << "but you are using ";
-        strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
-        strme << " encoding which makes use of alignment data. " << std::endl;
-        strme << "Use -encoding None" << std::endl;
-        strme << "Line " << i << ": " << lines[i] << std::endl;
+    	std::stringstream strme;
+    	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
+    	strme << "but you are using ";
+    	strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+    	strme << " encoding which makes use of alignment data. " << std::endl;
+    	strme << "Use -encoding None" << std::endl;
+    	strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
       std::vector<float> scores = Tokenize<float>(tokens[2]);
       if(scores.size() != m_creator.m_numScoreComponent) {
-        std::stringstream strme;
-        strme << "Error: It seems the following line has a wrong number of scores ("
+      	std::stringstream strme;
+      	strme << "Error: It seems the following line has a wrong number of scores ("
                   << scores.size() << " != " << m_creator.m_numScoreComponent << ") :" << std::endl;
-        strme << "Line " << i << ": " << lines[i] << std::endl;
-        UTIL_THROW2(strme.str());
+      	strme << "Line " << i << ": " << lines[i] << std::endl;
+      	UTIL_THROW2(strme.str());
       }
 
       float sortScore = scores[m_creator.m_sortScoreIndex];
 
       std::string key1 = m_creator.MakeSourceKey(tokens[0]);
-      std::string key2;
-      if(m_creator.m_hierarchical) {
-        key2 = m_creator.MakeSourceTargetKey(tokens[0], StripLHS(tokens[1]), tokens[3]);
-      }
-      else
-        key2 = m_creator.MakeSourceTargetKey(tokens[0], tokens[1]);
-      
+      std::string key2 = m_creator.MakeSourceTargetKey(tokens[0], tokens[1]);
+
       PackedItem packedItem(lineNum + i, key1, key2, 0, sortScore);
       result.push_back(packedItem);
     }
@@ -1205,20 +1140,20 @@ void EncodingTask::operator()()
         *it = Moses::Trim(*it);
 
       if(tokens.size() < 3) {
-        std::stringstream strme;
-        strme << "Error: It seems the following line has a wrong format:" << std::endl;
-        strme << "Line " << i << ": " << lines[i] << std::endl;
+    	std::stringstream strme;
+    	strme << "Error: It seems the following line has a wrong format:" << std::endl;
+    	strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 
       if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
-        std::stringstream strme;
-        strme << "Error: It seems the following line contains no alignment information, " << std::endl;
-        strme << "but you are using ";
-        strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
-        strme << " encoding which makes use of alignment data. " << std::endl;
-        strme << "Use -encoding None" << std::endl;
-        strme << "Line " << i << ": " << lines[i] << std::endl;
+    	std::stringstream strme;
+      	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
+      	strme << "but you are using ";
+      	strme << (m_creator.m_coding == PhraseTableCreator::PREnc ? "PREnc" : "REnc");
+      	strme << " encoding which makes use of alignment data. " << std::endl;
+      	strme << "Use -encoding None" << std::endl;
+      	strme << "Line " << i << ": " << lines[i] << std::endl;
         UTIL_THROW2(strme.str());
       }
 

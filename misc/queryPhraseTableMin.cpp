@@ -5,10 +5,8 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
-#include "moses/TranslationModel/CompactPT/PhrasePiece.h"
 #include "moses/Util.h"
 #include "moses/Phrase.h"
 
@@ -17,11 +15,6 @@ void usage();
 typedef unsigned int uint;
 
 using namespace Moses;
-
-std::ostream& operator<<(std::ostream &os, const PhrasePiece &p) {
-    os << p.GetString();
-    return os;
-}
 
 int main(int argc, char **argv)
 {
@@ -70,17 +63,19 @@ int main(int argc, char **argv)
 
   std::string line;
   while(getline(std::cin, line)) {
-    PhrasePiece source(line);
+    Phrase sourcePhrase;
+    sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||", NULL);
+
     TargetPhraseVectorPtr decodedPhraseColl
-    = pdc.GetTargetPhraseCollectionRaw(source);
+    = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
 
     if(decodedPhraseColl != NULL) {
       if(reportCounts)
-        std::cout << source << " " << decodedPhraseColl->size() << std::endl;
+        std::cout << sourcePhrase << decodedPhraseColl->size() << std::endl;
       else
         for(TargetPhraseVector::iterator it = decodedPhraseColl->begin(); it != decodedPhraseColl->end(); it++) {
           TargetPhrase &tp = *it;
-          std::cout << source << " ||| ";
+          std::cout << sourcePhrase << "||| ";
           std::cout << static_cast<const Phrase&>(tp) << "|||";
 
           if(useAlignments)
@@ -92,7 +87,7 @@ int main(int argc, char **argv)
           std::cout << std::endl;
         }
     } else if(reportCounts)
-      std::cout << source << " " << 0 << std::endl;
+      std::cout << sourcePhrase << 0 << std::endl;
 
     std::cout.flush();
   }

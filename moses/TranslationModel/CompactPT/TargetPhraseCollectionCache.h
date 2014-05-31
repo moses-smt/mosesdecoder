@@ -37,8 +37,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Phrase.h"
 #include "moses/TargetPhraseCollection.h"
 
-#include "PhrasePiece.h"
-
 namespace Moses
 {
 
@@ -64,7 +62,7 @@ private:
       : m_clock(clock), m_tpv(tpv), m_bitsLeft(bitsLeft) {}
   };
 
-  typedef std::map<PhrasePiece, LastUsed> CacheMap;
+  typedef std::map<Phrase, LastUsed> CacheMap;
 
   CacheMap m_phraseCache;
 
@@ -98,7 +96,7 @@ public:
   }
 
   /** retrieve translations for source phrase from persistent cache **/
-  void Cache(const PhrasePiece &sourcePhrase, TargetPhraseVectorPtr tpv,
+  void Cache(const Phrase &sourcePhrase, TargetPhraseVectorPtr tpv,
              size_t bitsLeft = 0, size_t maxRank = 0) {
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);
@@ -121,7 +119,7 @@ public:
     }
   }
 
-  std::pair<TargetPhraseVectorPtr, size_t> Retrieve(const PhrasePiece &sourcePhrase) {
+  std::pair<TargetPhraseVectorPtr, size_t> Retrieve(const Phrase &sourcePhrase) {
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);
 #endif
@@ -142,7 +140,7 @@ public:
 #endif
 
     if(m_phraseCache.size() > m_max * (1 + m_tolerance)) {
-      typedef std::set<std::pair<clock_t, PhrasePiece> > Cands;
+      typedef std::set<std::pair<clock_t, Phrase> > Cands;
       Cands cands;
       for(CacheMap::iterator it = m_phraseCache.begin();
           it != m_phraseCache.end(); it++) {
@@ -151,7 +149,7 @@ public:
       }
 
       for(Cands::iterator it = cands.begin(); it != cands.end(); it++) {
-        const PhrasePiece& p = it->second;
+        const Phrase& p = it->second;
         m_phraseCache.erase(p);
 
         if(m_phraseCache.size() < (m_max * (1 - m_tolerance)))

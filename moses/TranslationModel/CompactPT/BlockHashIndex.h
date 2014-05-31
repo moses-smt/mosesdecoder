@@ -76,32 +76,33 @@ private:
   class HashTask : public Task
   {
   public:
-    HashTask(int id, BlockHashIndex& hash, Keys& keys, Keys& prefixKeys)
-      : m_id(id), m_hash(hash), m_keys(keys), m_prefixKeys(prefixKeys) {}
+    HashTask(int id, BlockHashIndex& hash, Keys& keys)
+      : m_id(id), m_hash(hash), m_keys(new Keys(keys)) {}
 
     virtual void Run() {
-      m_hash.CalcHash(m_id, m_keys, m_prefixKeys);
+      m_hash.CalcHash(m_id, *m_keys);
+    }
+
+    virtual ~HashTask() {
+      delete m_keys;
     }
 
   private:
     int m_id;
     BlockHashIndex& m_hash;
-    Keys& m_keys;
-    Keys& m_prefixKeys;
+    Keys* m_keys;
   };
 #endif
-
-  bool m_checkSort;
 
   size_t GetFprint(const char* key) const;
   size_t GetHash(size_t i, const char* key);
 
 public:
 #ifdef WITH_THREADS
-  BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool checkSort = true,
+  BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
                  size_t threadsNum = 2);
 #else
-  BlockHashIndex(size_t orderBits, size_t fingerPrintBits, bool checkSort = true);
+  BlockHashIndex(size_t orderBits, size_t fingerPrintBits);
 #endif
 
   ~BlockHashIndex();
@@ -112,14 +113,6 @@ public:
   size_t operator[](std::string key);
   size_t operator[](char* key);
 
-  size_t NotFoundValue() {
-    return 0ul - 1;
-  }
-  
-  size_t PrefixValue() {
-    return 0ul - 2;
-  }
-  
   void BeginSave(std::FILE* mphf);
   void SaveRange(size_t i);
   void SaveLastRange();
@@ -144,9 +137,9 @@ public:
   size_t GetSize() const;
 
   void KeepNLastRanges(float ratio = 0.1, float tolerance = 0.1);
-  
+
   template <typename Keys>
-  void AddRange(Keys &keys, Keys &prefixKeys) {
+  void AddRange(Keys &keys) {
     size_t current = m_landmarks.size();
 
     if(m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
@@ -157,10 +150,7 @@ public:
       UTIL_THROW2(strme.str());
     }
 
-    if(!prefixKeys.empty() && prefixKeys[0] < keys[0])
-      m_landmarks.push_back(prefixKeys[0]);
-    else 
-      m_landmarks.push_back(keys[0]);
+    m_landmarks.push_back(keys[0]);
     m_size += keys.size();
 
     if(keys.size() == 1) {
@@ -169,37 +159,22 @@ public:
     }
 
 #ifdef WITH_THREADS
-    HashTask<Keys>* ht = new HashTask<Keys>(current, *this, keys, prefixKeys);
+    HashTask<Keys>* ht = new HashTask<Keys>(current, *this, keys);
     m_threadPool.Submit(ht);
 #else
-    CalcHash(current, keys, prefixKeys);
+    CalcHash(current, keys);
 #endif
-  }
-  
-  template <typename Keys>
-  void AddRange(Keys &keys) {
-    Keys dummyPrefixes;
-    AddRange(keys, dummyPrefixes);
   }
 
   template <typename Keys>
-  void CalcHash(size_t current, Keys &keys, Keys &prefixKeys) {
+  void CalcHash(size_t current, Keys &keys) {
 #ifdef HAVE_CMPH
-    void* source;
-    Keys joinedKeys;
-    if(!prefixKeys.empty()) {
-      joinedKeys = keys;
-      joinedKeys.insert(joinedKeys.end(), prefixKeys.begin(), prefixKeys.end());
-      source = vectorAdapter(joinedKeys);
-    }
-    else
-      source = vectorAdapter(keys);
-    CalcHash(current, source, prefixKeys.size());
-
+    void* source = vectorAdapter(keys);
+    CalcHash(current, source);
 #endif
   }
-  
-  void CalcHash(size_t current, void* source, size_t prefixCount);
+
+  void CalcHash(size_t current, void* source);
 
 #ifdef HAVE_CMPH
   void* vectorAdapter(std::vector<std::string>& v);

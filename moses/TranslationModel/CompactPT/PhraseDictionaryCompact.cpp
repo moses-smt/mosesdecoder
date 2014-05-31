@@ -99,7 +99,7 @@ void PhraseDictionaryCompact::Load()
     phraseSize = m_targetPhrasesMapped.load(pFile, true);
 
   UTIL_THROW_IF2(indexSize == 0 || coderSize == 0 || phraseSize == 0,
-          "Not successfully loaded");
+		  "Not successfully loaded");
 }
 
 // now properly declared in TargetPhraseCollection.h
@@ -113,11 +113,15 @@ void PhraseDictionaryCompact::Load()
 const TargetPhraseCollection*
 PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
 {
-  PhrasePiece source(sourcePhrase, m_input);
-  
+
+  // There is no souch source phrase if source phrase is longer than longest
+  // observed source phrase during compilation
+  if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())
+    return NULL;
+
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
-    = GetTargetPhraseCollectionRaw(source, true, true);
+  = m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, true);
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));
@@ -142,16 +146,16 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
 }
 
 TargetPhraseVectorPtr
-PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(
-    const PhrasePiece &sourcePhrase, bool top, bool eval) const
+PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase) const
 {
+
   // There is no such source phrase if source phrase is longer than longest
   // observed source phrase during compilation
   if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())
     return TargetPhraseVectorPtr();
 
   // Retrieve target phrase collection from phrase table
-  return m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, top, eval);
+  return m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, false);
 }
 
 PhraseDictionaryCompact::~PhraseDictionaryCompact()

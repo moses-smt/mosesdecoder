@@ -24,8 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDecoder.h"
 #include "moses/StaticData.h"
 
-#include "boost/lexical_cast.hpp"
-
 using namespace std;
 
 namespace Moses
@@ -60,15 +58,15 @@ PhraseDecoder::~PhraseDecoder()
     delete m_alignTree;
 }
 
-inline unsigned PhraseDecoder::GetSourceSymbolId(const StringPiece& symbol)
+inline unsigned PhraseDecoder::GetSourceSymbolId(std::string& symbol)
 {
   boost::unordered_map<std::string, unsigned>::iterator it
-  = m_sourceSymbolsMap.find(symbol.data());
+  = m_sourceSymbolsMap.find(symbol);
   if(it != m_sourceSymbolsMap.end())
     return it->second;
 
-  size_t idx = m_sourceSymbols.find(symbol.data());
-  m_sourceSymbolsMap[symbol.data()] = idx;
+  size_t idx = m_sourceSymbols.find(symbol);
+  m_sourceSymbolsMap[symbol] = idx;
   return idx;
 }
 
@@ -187,13 +185,12 @@ size_t PhraseDecoder::Load(std::FILE* in)
   return end - start;
 }
 
-std::string PhraseDecoder::MakeSourceKey(const PhrasePiece &source)
+std::string PhraseDecoder::MakeSourceKey(std::string &source)
 {
-  return std::string(source.GetString()) + m_separator;
+  return source + m_separator;
 }
 
-TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(
-    const PhrasePiece &sourcePhrase, bool topLevel, bool eval)
+TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(const Phrase &sourcePhrase, bool topLevel, bool eval)
 {
 
   // Not using TargetPhraseCollection avoiding "new" operator
@@ -220,10 +217,10 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(
   }
 
   // Retrieve source phrase identifier
-  size_t sourcePhraseId = m_phraseDictionary.m_hash[MakeSourceKey(sourcePhrase)];
+  std::string sourcePhraseString = sourcePhrase.GetStringRep(*m_input);
+  size_t sourcePhraseId = m_phraseDictionary.m_hash[MakeSourceKey(sourcePhraseString)];
 
-  if(sourcePhraseId != m_phraseDictionary.m_hash.NotFoundValue() &&
-     sourcePhraseId != m_phraseDictionary.m_hash.PrefixValue()) {
+  if(sourcePhraseId != m_phraseDictionary.m_hash.GetSize()) {
     // Retrieve compressed and encoded target phrase collection
     std::string encodedPhraseCollection;
     if(m_phraseDictionary.m_inMemory)
@@ -246,7 +243,7 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(
 
 TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
   TargetPhraseVectorPtr tpv, BitWrapper<> &encodedBitStream,
-  const PhrasePiece &sourcePhrase, bool topLevel, bool eval)
+  const Phrase &sourcePhrase, bool topLevel, bool eval)
 {
 
   bool extending = tpv->size();
@@ -257,7 +254,8 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
   std::vector<int> sourceWords;
   if(m_coding == REnc) {
     for(size_t i = 0; i < sourcePhrase.GetSize(); i++) {
-      StringPiece sourceWord = sourcePhrase.GetWord(i);
+      std::string sourceWord
+      = sourcePhrase.GetWord(i).GetString(*m_input, false);
       unsigned idx = GetSourceSymbolId(sourceWord);
       sourceWords.push_back(idx);
     }
@@ -343,31 +341,31 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             int left = DecodePREncSymbol2Left(symbol);
             int right = DecodePREncSymbol2Right(symbol);
             unsigned rank = DecodePREncSymbol2Rank(symbol);
-            
+
             int srcStart = left + targetPhrase->GetSize();
             int srcEnd   = srcSize - right - 1;
-            
+
             // false positive consistency check
             if(0 > srcStart || srcStart > srcEnd || unsigned(srcEnd) >= srcSize)
               return TargetPhraseVectorPtr();
-              
+
             // false positive consistency check
             if(m_maxRank && rank > m_maxRank)
               return TargetPhraseVectorPtr();
-            
+
             // set subphrase by default to itself
             TargetPhraseVectorPtr subTpv = tpv;
-            
+
             // if range smaller than source phrase retrieve subphrase
             if(unsigned(srcEnd - srcStart + 1) != srcSize) {
-              PhrasePiece subPhrase = sourcePhrase.GetSubPhrase(srcStart, srcEnd);
+              Phrase subPhrase = sourcePhrase.GetSubString(WordsRange(srcStart, srcEnd));
               subTpv = CreateTargetPhraseCollection(subPhrase, false);
             } else {
               // false positive consistency check
               if(rank >= tpv->size()-1)
                 return TargetPhraseVectorPtr();
             }
-            
+
             // false positive consistency check
             if(subTpv != NULL && rank < subTpv->size()) {
               // insert the subphrase into the main target phrase
@@ -380,9 +378,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
                                                    targetPhrase->GetSize() + it->second));
                 }
               }
-              for(size_t i = 0; i < subTp.GetSize() - (size_t)sourcePhrase.IsHierarchical(); ++i)
-                targetPhrase->AddWord(subTp.GetWord(i));
-                
+              targetPhrase->Append(subTp);
             } else
               return TargetPhraseVectorPtr();
           }
@@ -422,7 +418,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       }
 
       if(eval) {
-        targetPhrase->Evaluate(sourcePhrase.GetMosesPhrase());
+        targetPhrase->Evaluate(sourcePhrase);
       }
 
       if(m_coding == PREnc) {
