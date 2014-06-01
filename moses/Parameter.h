@@ -76,6 +76,7 @@ protected:
   void ConvertWeightArgsWordPenalty();
   void ConvertPhrasePenalty();
   void CreateWeightsMap();
+  void CreateWeightsMap(const PARAM_VEC &vec);
   void WeightOverwrite();
   void AddFeature(const std::string &line);
   void AddFeaturesCmd();
