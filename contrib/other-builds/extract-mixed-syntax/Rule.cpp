@@ -121,7 +121,7 @@ std::string Rule::Debug() const
   return out.str();
 }
 
-void Rule::Output(std::ostream &out, bool forward) const
+void Rule::Output(std::ostream &out, bool forward, const Parameter &params) const
 {
   if (forward) {
 	  // source
@@ -167,6 +167,18 @@ void Rule::Output(std::ostream &out, bool forward) const
   out << m_count;
 
   out << " ||| ";
+
+  // span length
+  if (params.spanLength) {
+	  out << "{{SpanLength ";
+
+	  for (size_t i = 0; i < m_nonterms.size(); ++i) {
+		  const NonTerm &nonTerm = *m_nonterms[i];
+		  const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
+		  out << i << "," << cp.GetWidth(Moses::Input) << "," << cp.GetWidth(Moses::Output) << " ";
+	  }
+	  out << "}} ";
+  }
 }
 
 void Rule::Prevalidate(const Parameter &params)
