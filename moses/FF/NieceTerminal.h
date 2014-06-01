@@ -35,6 +35,7 @@ public:
                      ScoreComponentCollection* accumulator) const;
 
   void SetParameter(const std::string& key, const std::string& value);
+  std::vector<float> DefaultWeights() const;
 
 protected:
   bool m_hardConstraint;
