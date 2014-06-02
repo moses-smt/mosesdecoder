@@ -91,7 +91,7 @@ protected:
   Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
 public:
-  ScoreComponentCollection getscorebreakdown() { return m_scoreBreakdown; }
+  ScoreComponentCollection getscorebreakdown() const { return m_scoreBreakdown; }
   static ObjectPool<Hypothesis> &GetObjectPool() {
     return s_objectPool;
   }
