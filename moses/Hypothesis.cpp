@@ -318,8 +318,8 @@ void Hypothesis::PrintHypothesis() const
   TRACE_ERR(  "\tunweighted feature scores: " << m_scoreBreakdown << endl);
   ScoreComponentCollection parentscorebreakdown = m_prevHypo->getscorebreakdown();
   TRACE_ERR(  "\tparent feature scores: " << parentscorebreakdown << endl);
-  //ScoreComponentCollection scorediff = m_scoreBreakdown - parentscorebreakdown;
-  //TRACE_ERR(  "\tdiff feature scores: " << scorediff << endl);
+  ScoreComponentCollection scorediff = m_scoreBreakdown - parentscorebreakdown;
+  TRACE_ERR(  "\tdiff feature scores: " << scorediff << endl);
   //PrintLMScores();
 }
 
