@@ -323,11 +323,10 @@ void TranslationOptionCollection::CalcFutureScore()
       for(size_t joinAt = startPos; joinAt < endPos ; joinAt++)  {
         float joinedScore = m_futureScore.GetScore(startPos, joinAt)
                             + m_futureScore.GetScore(joinAt+1, endPos);
-         // uncomment to see the cell filling scheme
+        /* // uncomment to see the cell filling scheme
         TRACE_ERR( "[" <<startPos<<","<<endPos<<"] <-? ["<<startPos<<","<<joinAt<<"]+["<<joinAt+1<<","<<endPos
           << "] (colstart: "<<colstart<<", diagshift: "<<diagshift<<")"<<endl);
-	TRACE_ERR (" " << joinedScore <<  " > " << m_futureScore.GetScore(startPos, endPos) << " ? " << endl);
-
+        */
         if (joinedScore > m_futureScore.GetScore(startPos, endPos))
           m_futureScore.SetScore(startPos, endPos, joinedScore);
       }
