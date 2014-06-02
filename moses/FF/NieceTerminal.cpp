@@ -17,6 +17,14 @@ NieceTerminal::NieceTerminal(const std::string &line)
   ReadParameters();
 }
 
+std::vector<float> NieceTerminal::DefaultWeights() const
+{
+  UTIL_THROW_IF2(m_numScoreComponents != 1,
+          "NieceTerminal must only have 1 score");
+  vector<float> ret(1, 1);
+  return ret;
+}
+
 void NieceTerminal::Evaluate(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
