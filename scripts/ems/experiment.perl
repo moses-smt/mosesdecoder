@@ -633,6 +633,7 @@ sub check_producability {
 	return 1 if defined($CONFIG{$out});
 
 	# find defined step that produces this
+	$out =~ s/:.+:/:/g;
 	my $defined_step;
 	foreach my $ds (keys %STEP_OUT) {
 	    my ($ds_module) = &deconstruct_name($ds);
