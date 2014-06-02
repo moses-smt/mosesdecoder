@@ -89,8 +89,7 @@ for line in sys.stdin:
 
 If you want to add your changes you are going to have to recompile the cython code.
 
-1.  Compile the cython code using Cython 0.17.1 or above
-
+1.  Compile the cython code:
 
         python setup.py build_ext -i --cython
  
