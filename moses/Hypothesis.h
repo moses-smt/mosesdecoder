@@ -62,6 +62,7 @@ typedef std::vector<Hypothesis*> ArcList;
 class Hypothesis
 {
   friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
+
 protected:
   static ObjectPool<Hypothesis> s_objectPool;
 
@@ -91,7 +92,6 @@ protected:
   Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
 public:
-  ScoreComponentCollection getscorebreakdown() { return m_scoreBreakdown; }
   static ObjectPool<Hypothesis> &GetObjectPool() {
     return s_objectPool;
   }
