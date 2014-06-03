@@ -196,8 +196,8 @@ namespace Moses
     // currently always active by default; may (should) change later
     num_feats  = calc_lex.init(num_feats, bname + L1 + "-" + L2 + ".lex");
 
-    if (this->m_numScoreComponents%2) // a bit of a hack, for backwards compatibility
-      num_feats  = apply_pp.init(num_feats);
+    // if (this->m_numScoreComponents%2) // a bit of a hack, for backwards compatibility
+    // num_feats  = apply_pp.init(num_feats);
 
     if (num_feats < this->m_numScoreComponents)
       {
@@ -283,8 +283,8 @@ namespace Moses
   {
     PhrasePair pp;   
     pp.init(pid1, stats, this->m_numScoreComponents);
-    if (this->m_numScoreComponents%2)
-      apply_pp(bt,pp);
+    // if (this->m_numScoreComponents%2)
+    // apply_pp(bt,pp);
     pstats::trg_map_t::const_iterator t;
     for (t = stats.trg.begin(); t != stats.trg.end(); ++t)
       {
@@ -318,8 +318,8 @@ namespace Moses
       pp.init(pid1b, *statsb, this->m_numScoreComponents);
     else return false; // throw "no stats for pooling available!";
 
-    if (this->m_numScoreComponents%2)
-      apply_pp(bta,pp);
+    // if (this->m_numScoreComponents%2)
+    // apply_pp(bta,pp);
     pstats::trg_map_t::const_iterator b;
     pstats::trg_map_t::iterator a;
     if (statsb)
@@ -415,8 +415,8 @@ namespace Moses
     if (statsb)
       {
 	pool.init(pid1b,*statsb,0);
-	if (this->m_numScoreComponents%2)
-	  apply_pp(btb,ppdyn);
+	// if (this->m_numScoreComponents%2)
+	// apply_pp(btb,ppdyn);
 	for (b = statsb->trg.begin(); b != statsb->trg.end(); ++b)
 	  {
 	    ppdyn.update(b->first,b->second);
@@ -456,8 +456,8 @@ namespace Moses
     if (statsa)
       {
 	pool.init(pid1a,*statsa,0);
-	if (this->m_numScoreComponents%2)
-	  apply_pp(bta,ppfix);
+	// if (this->m_numScoreComponents%2)
+	// apply_pp(bta,ppfix);
 	for (a = statsa->trg.begin(); a != statsa->trg.end(); ++a)
 	  {
 	    if (!a->second.valid()) continue; // done above

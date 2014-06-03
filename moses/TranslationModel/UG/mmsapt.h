@@ -71,7 +71,7 @@ namespace Moses
     PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
     PScorePbwd<Token> calc_pbwd_fix, calc_pbwd_dyn;
     PScoreLex<Token>  calc_lex; // this one I'd like to see as an external ff eventually
-    PScorePP<Token>   apply_pp; // apply phrase penalty 
+    // PScorePP<Token>   apply_pp; // apply phrase penalty 
     PScoreLogCounts<Token>   add_logcounts_fix;
     PScoreLogCounts<Token>   add_logcounts_dyn;
     void init(string const& line);
