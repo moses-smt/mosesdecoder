@@ -117,7 +117,8 @@ namespace Moses
       boost::lock_guard<boost::mutex> lk(this->lock);
       my_rcnt += 1;
       my_wcnt += w;
-      my_cnt2 += cnt2;
+      // my_cnt2 += cnt2; // could I really be that stupid? [UG]
+      my_cnt2 = cnt2;
       if (a.size())
 	{
 	  size_t i = 0;
@@ -231,6 +232,7 @@ namespace Moses
       sample2 = 0;
       good1   = ps.good;
       good2   = 0;
+      raw2    = 0;
       fvals.resize(numfeats);
     }
 
