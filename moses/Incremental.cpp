@@ -42,7 +42,7 @@ public:
     ChartCellLabel::Stack &stack = out_.FindOrInsert(static_cast<const TargetPhrase *>(partial.GetNote().vp)->GetTargetLHS());
     Gen *entry = static_cast<Gen*>(stack.incr_generator);
     if (!entry) {
-      entry = generator_pool_.construct(context_, *vertex_pool_.construct(), best_);
+      entry = generator_pool_.construct(boost::ref(context_), boost::ref(*vertex_pool_.construct()), boost::ref(best_));
       stack.incr_generator = entry;
     }
     entry->NewHypothesis(partial);
