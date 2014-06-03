@@ -1,5 +1,5 @@
-#ifndef LM_BUILDER_NGRAM__
-#define LM_BUILDER_NGRAM__
+#ifndef LM_BUILDER_NGRAM_H
+#define LM_BUILDER_NGRAM_H
 
 #include "lm/weights.hh"
 #include "lm/word_index.hh"
@@ -26,7 +26,7 @@ union Payload {
 
 class NGram {
   public:
-    NGram(void *begin, std::size_t order) 
+    NGram(void *begin, std::size_t order)
       : begin_(static_cast<WordIndex*>(begin)), end_(begin_ + order) {}
 
     const uint8_t *Base() const { return reinterpret_cast<const uint8_t*>(begin_); }
@@ -38,12 +38,12 @@ class NGram {
       end_ = begin_ + difference;
     }
 
-    // Would do operator++ but that can get confusing for a stream.  
+    // Would do operator++ but that can get confusing for a stream.
     void NextInMemory() {
       ReBase(&Value() + 1);
     }
 
-    // Lower-case in deference to STL.  
+    // Lower-case in deference to STL.
     const WordIndex *begin() const { return begin_; }
     WordIndex *begin() { return begin_; }
     const WordIndex *end() const { return end_; }
@@ -61,7 +61,7 @@ class NGram {
       return order * sizeof(WordIndex) + sizeof(Payload);
     }
     std::size_t TotalSize() const {
-      // Compiler should optimize this.  
+      // Compiler should optimize this.
       return TotalSize(Order());
     }
     static std::size_t OrderFromSize(std::size_t size) {
@@ -69,6 +69,31 @@ class NGram {
       assert(size == TotalSize(ret));
       return ret;
     }
+    
+    // manipulate msb to signal that ngram can be pruned
+    /*mjd**********************************************************************/
+
+    bool IsMarked() const {
+      return Value().count >> (sizeof(Value().count) * 8 - 1);
+    }
+    
+    void Mark() {
+      Value().count |= (1ul << (sizeof(Value().count) * 8 - 1));
+    }
+    
+    void Unmark() {
+      Value().count &= ~(1ul << (sizeof(Value().count) * 8 - 1));
+    }
+    
+    uint64_t UnmarkedCount() const {
+      return Value().count & ~(1ul << (sizeof(Value().count) * 8 - 1));
+    }
+    
+    uint64_t CutoffCount() const {
+      return IsMarked() ? 0 : UnmarkedCount();
+    }
+
+    /*mjd**********************************************************************/
 
   private:
     WordIndex *begin_, *end_;
@@ -81,4 +106,4 @@ const WordIndex kEOS = 2;
 } // namespace builder
 } // namespace lm
 
-#endif // LM_BUILDER_NGRAM__
+#endif // LM_BUILDER_NGRAM_H

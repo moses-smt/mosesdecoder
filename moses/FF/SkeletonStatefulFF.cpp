@@ -45,7 +45,7 @@ FFState* SkeletonStatefulFF::Evaluate(
   // sparse scores
   accumulator->PlusEquals(this, "sparse-name", 2.4);
 
-  int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize();
+  // int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize(); // ??? [UG]
   return new SkeletonState(0);
 }
 
