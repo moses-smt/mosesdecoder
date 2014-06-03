@@ -50,24 +50,56 @@ namespace Moses
   Mmsapt::
   Mmsapt(string const& line)
     // : PhraseDictionary("Mmsapt",line), ofactor(1,0)
-    : PhraseDictionary(line), ofactor(1,0), m_tpc_ctr(0)
+    : PhraseDictionary(line)
+    , withLogCountFeatures(false)
+    , withPfwd(true), withPbwd(true) 
+    , ofactor(1,0)
+    , m_tpc_ctr(0)
+      // default values chosen for bwd probability
   {
     this->init(line);
+  }
+
+  void 
+  Mmsapt::
+  read_config_file(string fname,map<string,string>& param)
+  {
+    string line;
+    ifstream config(fname.c_str());
+    while (getline(config,line))
+      {
+	if (line[0] == '#') continue;
+	char_separator<char> sep(" \t");
+	tokenizer<char_separator<char> > tokens(line,sep);
+	tokenizer<char_separator<char> >::const_iterator t = tokens.begin();
+	if (t == tokens.end()) continue;
+	string& foo = param[*t++];
+	if (t == tokens.end() || foo.size()) continue; 
+	// second condition: do not overwrite settings from the line in moses.ini
+	UTIL_THROW_IF2(*t++ != "=" || t == tokens.end(), 
+		       "Syntax error in Mmsapt config file '" << fname << "'.");
+	for (foo = *t++; t != tokens.end(); foo += " " + *t++);
+      }
   }
 
   void
   Mmsapt::
   init(string const& line)
   {
+    map<string,string>::const_iterator m;
     map<string,string> param;
     parseLine(line,param);
+    
+    m = param.find("config");
+    if (m != param.end())
+      read_config_file(m->second,param);
+    
     bname = param["base"];
     L1    = param["L1"];
     L2    = param["L2"];
     assert(bname.size());
     assert(L1.size());
     assert(L2.size());
-    map<string,string>::const_iterator m;
 
     m = param.find("pfwd_denom");
     m_pfwd_denom = m != param.end() ? m->second[0] : 's';
@@ -76,6 +108,20 @@ namespace Moses
     m_lbop_parameter = m != param.end() ? atof(m->second.c_str()) : .05;
 
     m = param.find("max-samples");
+    m_default_sample_size = m != param.end() ? atoi(m->second.c_str()) : 1000;
+
+    m = param.find("logcnt-features");
+    if (m != param.end())
+      withLogCountFeatures = m->second != "0";
+
+    m = param.find("pfwd");
+    if (m != param.end())
+      withPfwd = m->second != "0";
+
+    m = param.find("pbwd");
+    if (m != param.end())
+      withPbwd = m->second != "0";
+      
     m_default_sample_size = m != param.end() ? atoi(m->second.c_str()) : 1000;
 
     m = param.find("workers");
@@ -88,6 +134,7 @@ namespace Moses
 		      : 10000);
     
     this->m_numScoreComponents = atoi(param["num-features"].c_str());
+
     // num_features = 0;
     m = param.find("ifactor");
     input_factor = m != param.end() ? atoi(m->second.c_str()) : 0;
@@ -127,7 +174,7 @@ namespace Moses
     assert(btdyn);
     // cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
   }
-  
+
   void
   Mmsapt::
   Load()
@@ -136,21 +183,30 @@ namespace Moses
     btfix.open(bname, L1, L2);
     btfix.setDefaultSampleSize(m_default_sample_size);
     
-    size_t num_feats;
+    size_t num_feats = 0;
     // TO DO: should we use different lbop parameters 
     //        for the relative-frequency based features?
-    num_feats  = calc_pfwd_fix.init(0,m_lbop_parameter,m_pfwd_denom);
-    num_feats  = calc_pbwd_fix.init(num_feats,m_lbop_parameter);
+    
+    if (withLogCountFeatures) num_feats = add_logcounts_fix.init(num_feats);
+
+    float const lbop = m_lbop_parameter; // just for code readability below
+    if (withPfwd) num_feats = calc_pfwd_fix.init(num_feats,lbop,m_pfwd_denom);
+    if (withPbwd) num_feats = calc_pbwd_fix.init(num_feats,lbop);
+    
+    // currently always active by default; may (should) change later
     num_feats  = calc_lex.init(num_feats, bname + L1 + "-" + L2 + ".lex");
-    if (this->m_numScoreComponents%2)
+
+    if (this->m_numScoreComponents%2) // a bit of a hack, for backwards compatibility
       num_feats  = apply_pp.init(num_feats);
+
     if (num_feats < this->m_numScoreComponents)
       {
 	poolCounts = false;
-	num_feats = calc_pfwd_dyn.init(num_feats,m_lbop_parameter,m_pfwd_denom);
-	num_feats = calc_pbwd_dyn.init(num_feats,m_lbop_parameter);
+	if (withLogCountFeatures) num_feats = add_logcounts_dyn.init(num_feats);
+	if (withPfwd) num_feats = calc_pfwd_dyn.init(num_feats,lbop,m_pfwd_denom);
+	if (withPbwd) num_feats = calc_pbwd_dyn.init(num_feats,lbop);
       }
-
+    
     if (num_feats != this->m_numScoreComponents)
       {
 	ostringstream buf;
@@ -234,8 +290,9 @@ namespace Moses
       {
    	pp.update(t->first,t->second);
 	calc_lex(bt,pp);
-	calc_pfwd_fix(bt,pp);
-	calc_pbwd_fix(bt,pp);
+	if (withPfwd) calc_pfwd_fix(bt,pp);
+	if (withPbwd) calc_pbwd_fix(bt,pp);
+	if (withLogCountFeatures) add_logcounts_fix(bt,pp);
 	tpcoll->Add(createTargetPhrase(src,bt,pp));
       }
   }
@@ -288,8 +345,9 @@ namespace Moses
 	      }
 	    else pp.update(b->first,b->second);
 	    calc_lex(btb,pp);
-	    calc_pfwd_fix(btb,pp);
-	    calc_pbwd_fix(btb,pp);
+	    if (withPfwd) calc_pfwd_fix(btb,pp);
+	    if (withPbwd) calc_pbwd_fix(btb,pp);
+	    if (withLogCountFeatures) add_logcounts_fix(btb,pp);
 	    tpcoll->Add(createTargetPhrase(src,btb,pp));
 	  }
       }
@@ -310,9 +368,24 @@ namespace Moses
 	  }
 	else 
 	  pp.update(a->first,a->second);
+
+	UTIL_THROW_IF2(pp.raw2 == 0, 
+		       "OOPS" 
+		       << bta.T1->pid2str(bta.V1.get(),pp.p1) << " ::: " 
+		       << bta.T2->pid2str(bta.V2.get(),pp.p2) << ": "
+		       << pp.raw1 << " " << pp.sample1 << " " 
+		       << pp.good1 << " " << pp.joint << " " 
+		       << pp.raw2);
+#if 0
+	jstats const& j = a->second;
+	cerr << bta.T1->pid2str(bta.V1.get(),pp.p1) << " ::: " 
+	     << bta.T2->pid2str(bta.V2.get(),pp.p2) << endl;
+	cerr << j.rcnt() << " " << j.cnt2() << " " << j.wcnt() << endl;
+#endif
 	calc_lex(bta,pp);
-	calc_pfwd_fix(bta,pp);
-	calc_pbwd_fix(bta,pp);
+	if (withPfwd) calc_pfwd_fix(bta,pp);
+	if (withPbwd) calc_pbwd_fix(bta,pp);
+	if (withLogCountFeatures) add_logcounts_fix(bta,pp);
 	tpcoll->Add(createTargetPhrase(src,bta,pp));
       }
     return true;
@@ -347,8 +420,9 @@ namespace Moses
 	for (b = statsb->trg.begin(); b != statsb->trg.end(); ++b)
 	  {
 	    ppdyn.update(b->first,b->second);
-	    calc_pfwd_dyn(btb,ppdyn);
-	    calc_pbwd_dyn(btb,ppdyn);
+	    if (withPfwd) calc_pfwd_dyn(btb,ppdyn);
+	    if (withPbwd) calc_pbwd_dyn(btb,ppdyn);
+	    if (withLogCountFeatures) add_logcounts_dyn(btb,ppdyn);
 	    calc_lex(btb,ppdyn);
 	    
 	    uint32_t sid,off,len;    
@@ -360,8 +434,9 @@ namespace Moses
 		 != statsa->trg.end()))
 	      {
 		ppfix.update(a->first,a->second);
-		calc_pfwd_fix(bta,ppfix,&ppdyn.fvals);
-		calc_pbwd_fix(btb,ppfix,&ppdyn.fvals);
+		if (withPfwd) calc_pfwd_fix(bta,ppfix,&ppdyn.fvals);
+		if (withPbwd) calc_pbwd_fix(bta,ppfix,&ppdyn.fvals);
+		if (withLogCountFeatures) add_logcounts_fix(bta,ppfix,&ppdyn.fvals);
 		a->second.invalidate();
 	      }
 	    else 
@@ -371,8 +446,9 @@ namespace Moses
 			      b->second);
 		else
 		  pool.update(b->first,b->second);
-		calc_pfwd_fix(btb,pool,&ppdyn.fvals);
-		calc_pbwd_fix(btb,pool,&ppdyn.fvals);
+		if (withPfwd) calc_pfwd_fix(btb,pool,&ppdyn.fvals);
+		if (withPbwd) calc_pbwd_fix(btb,pool,&ppdyn.fvals);
+		if (withLogCountFeatures) add_logcounts_fix(btb,pool,&ppdyn.fvals);
 	      }
 	    tpcoll->Add(createTargetPhrase(src,btb,ppdyn));
 	  }
@@ -386,8 +462,9 @@ namespace Moses
 	  {
 	    if (!a->second.valid()) continue; // done above
 	    ppfix.update(a->first,a->second);
-	    calc_pfwd_fix(bta,ppfix);
-	    calc_pbwd_fix(bta,ppfix);
+	    if (withPfwd) calc_pfwd_fix(bta,ppfix);
+	    if (withPbwd) calc_pbwd_fix(bta,ppfix);
+	    if (withLogCountFeatures) add_logcounts_fix(bta,ppfix);
 	    calc_lex(bta,ppfix);
 	    
 	    if (btb.I2)
@@ -402,8 +479,9 @@ namespace Moses
 		  pool.update(a->first,a->second);
 	      }
 	    else pool.update(a->first,a->second);
-	    calc_pfwd_dyn(bta,pool,&ppfix.fvals);
-	    calc_pbwd_dyn(bta,pool,&ppfix.fvals);
+	    if (withPfwd) calc_pfwd_dyn(bta,pool,&ppfix.fvals);
+	    if (withPbwd) calc_pbwd_dyn(bta,pool,&ppfix.fvals);
+	    if (withLogCountFeatures) add_logcounts_dyn(bta,pool,&ppfix.fvals);
 	  }
 	if (ppfix.p2)
 	  tpcoll->Add(createTargetPhrase(src,bta,ppfix));
