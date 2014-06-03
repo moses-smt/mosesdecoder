@@ -36,12 +36,12 @@ void PRead::Run(const ChainPosition &position) {
   Link link(position);
   uint64_t offset = 0;
   for (; offset + block_size64 < size; offset += block_size64, ++link) {
-    PReadOrThrow(file_, link->Get(), block_size, offset);
+    ErsatzPRead(file_, link->Get(), block_size, offset);
     link->SetValidSize(block_size);
   }
   // size - offset is <= block_size, so it casts to 32-bit fine.
   if (size - offset) {
-    PReadOrThrow(file_, link->Get(), size - offset, offset);
+    ErsatzPRead(file_, link->Get(), size - offset, offset);
     link->SetValidSize(size - offset);
     ++link;
   }
@@ -58,6 +58,16 @@ void WriteAndRecycle::Run(const ChainPosition &position) {
   const std::size_t block_size = position.GetChain().BlockSize();
   for (Link link(position); link; ++link) {
     WriteOrThrow(file_, link->Get(), link->ValidSize());
+    link->SetValidSize(block_size);
+  }
+}
+
+void PWriteAndRecycle::Run(const ChainPosition &position) {
+  const std::size_t block_size = position.GetChain().BlockSize();
+  uint64_t offset = 0;
+  for (Link link(position); link; ++link) {
+    ErsatzPWrite(file_, link->Get(), link->ValidSize(), offset);
+    offset += link->ValidSize();
     link->SetValidSize(block_size);
   }
 }

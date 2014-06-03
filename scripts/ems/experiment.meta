@@ -192,6 +192,7 @@ train
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
+	error: unrecognised option
 randomize
 	in: lm
 	out: rlm
