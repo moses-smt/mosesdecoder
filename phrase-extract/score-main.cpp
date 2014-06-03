@@ -666,7 +666,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   }
 
   if (spanLength && !inverseFlag) {
-	  phraseTableFile << " {{SpanLength " << "asasa" << "}}";
+	  phraseTableFile << " {{SpanLength " << phrasePair.CollectAllPropertyValues("SpanLength") << "}}";
   }
 
   phraseTableFile << std::endl;
