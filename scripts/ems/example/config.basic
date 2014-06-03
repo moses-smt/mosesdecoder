@@ -135,9 +135,13 @@ raw-stem = $wmt12-data/training/undoc.2000.$pair-extension
 [LM]
 
 ### tool to be used for language model training
+# kenlm training
+lm-training = "$moses-script-dir/ems/support/lmplz-wrapper.perl -bin $moses-bin-dir/lmplz"
+settings = "--prune '0 0 1' -T $working-dir/lm/tmp -S 50%"
+
 # srilm 
-lm-training = $srilm-dir/ngram-count
-settings = "-interpolate -kndiscount -unk"
+#lm-training = $srilm-dir/ngram-count
+#settings = "-interpolate -kndiscount -unk"
 
 # irstlm training
 # msb = modified kneser ney; p=0 no singleton pruning
