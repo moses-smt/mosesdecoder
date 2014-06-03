@@ -294,7 +294,7 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
       TargetPhrase *targetPhrase = new TargetPhrase(xmlOption.targetPhrase);
 
       WordsRange *range = new WordsRange(xmlOption.range);
-      const StackVec emptyStackVec; // hmmm... maybe dangerous, but it is never consulted
+      StackVec emptyStackVec; // hmmm... maybe dangerous, but it is never consulted
 
       TargetPhraseCollection *tpc = new TargetPhraseCollection;
       tpc->Add(targetPhrase);

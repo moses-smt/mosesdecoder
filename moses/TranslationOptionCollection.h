@@ -154,6 +154,10 @@ public:
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 
+  const InputPathList &GetInputPaths() const
+  { return m_inputPathQueue; }
+
+
   TO_STRING();
 };
 

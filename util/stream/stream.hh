@@ -1,5 +1,5 @@
-#ifndef UTIL_STREAM_STREAM__
-#define UTIL_STREAM_STREAM__
+#ifndef UTIL_STREAM_STREAM_H
+#define UTIL_STREAM_STREAM_H
 
 #include "util/stream/chain.hh"
 
@@ -56,6 +56,9 @@ class Stream : boost::noncopyable {
       end_ = current_ + block_it_->ValidSize();
     }
 
+    // The following are pointers to raw memory
+    // current_ is the current record
+    // end_ is the end of the block (so we know when to move to the next block)
     uint8_t *current_, *end_;
 
     std::size_t entry_size_;
@@ -71,4 +74,4 @@ inline Chain &operator>>(Chain &chain, Stream &stream) {
 
 } // namespace stream
 } // namespace util
-#endif // UTIL_STREAM_STREAM__
+#endif // UTIL_STREAM_STREAM_H

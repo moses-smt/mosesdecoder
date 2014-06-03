@@ -27,6 +27,8 @@
 
 #include <vector>
 
+using namespace std;
+
 namespace Moses
 {
 
@@ -52,7 +54,7 @@ void ChartKBestExtractor::Extract(
   // recombined.
   for (++p; p != topLevelHypos.end(); ++p) {
     // Check that the first item in topLevelHypos really was the best.
-    UTIL_THROW_IF2((*p)->GetTotalScore() <= bestTopLevelHypo.GetTotalScore(),
+    UTIL_THROW_IF2((*p)->GetTotalScore() > bestTopLevelHypo.GetTotalScore(),
                    "top-level hypotheses are not correctly sorted");
     // Note: there's no need for a smart pointer here: supremeHypo will take
     // ownership of altHypo.

@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "ScoreComponentCollection.h"
 #include "moses/FF/Factory.h"
+#include "moses/PP/Factory.h"
 
 namespace Moses
 {
@@ -200,6 +201,7 @@ protected:
   bool m_adjacentOnly;
 
   FeatureRegistry m_registry;
+  PhrasePropertyFactory m_phrasePropertyFactory;
 
   StaticData();
 
@@ -733,6 +735,9 @@ public:
 
   const FeatureRegistry &GetFeatureRegistry() const
   { return m_registry; }
+
+  const PhrasePropertyFactory &GetPhrasePropertyFactory() const
+  { return m_phrasePropertyFactory; }
 
   /** check whether we should be using the old code to support binary phrase-table.
   ** eventually, we'll stop support the binary phrase-table and delete this legacy code

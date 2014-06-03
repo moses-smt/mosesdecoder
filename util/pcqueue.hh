@@ -1,5 +1,5 @@
-#ifndef UTIL_PCQUEUE__
-#define UTIL_PCQUEUE__
+#ifndef UTIL_PCQUEUE_H
+#define UTIL_PCQUEUE_H
 
 #include "util/exception.hh"
 
@@ -72,7 +72,8 @@ inline void WaitSemaphore (Semaphore &on) {
 
 #endif // __APPLE__
 
-/* Producer consumer queue safe for multiple producers and multiple consumers.
+/**
+ * Producer consumer queue safe for multiple producers and multiple consumers.
  * T must be default constructable and have operator=.  
  * The value is copied twice for Consume(T &out) or three times for Consume(),
  * so larger objects should be passed via pointer.
@@ -152,4 +153,4 @@ template <class T> class PCQueue : boost::noncopyable {
 
 } // namespace util
 
-#endif // UTIL_PCQUEUE__
+#endif // UTIL_PCQUEUE_H
