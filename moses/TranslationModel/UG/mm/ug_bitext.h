@@ -292,6 +292,41 @@ namespace Moses {
 
     template<typename Token>
     class
+    PScoreLogCounts : public PhraseScorer<Token>
+    {
+      float conf;
+    public:
+      PScoreLogCounts() 
+      {
+	this->num_feats = 4;
+      }
+
+      int 
+      init(int const i) 
+      { 
+	this->index = i;
+	return i + this->num_feats;
+      }
+
+      void 
+      operator()(Bitext<Token> const& bt, PhrasePair& pp, 
+		 vector<float> * dest = NULL) const
+      {
+	if (!dest) dest = &pp.fvals;
+	size_t i = this->index;
+	assert(pp.raw1);
+	assert(pp.sample1);
+	assert(pp.joint);
+	assert(pp.raw2);
+	(*dest)[i] = log(pp.raw1);
+	(*dest)[++i] = log(pp.sample1);
+	(*dest)[++i] = log(pp.joint);
+	(*dest)[++i] = log(pp.raw2);
+      }
+    };
+
+    template<typename Token>
+    class
     PScoreLex : public PhraseScorer<Token>
     {
     public:
