@@ -1182,7 +1182,7 @@ sub run_single_giza {
 	if (defined $_MGIZA and (!defined $___FINAL_ALIGNMENT_MODEL or $___FINAL_ALIGNMENT_MODEL ne '2')){
 		print STDERR "Merging $___GIZA_EXTENSION.part\* tables\n";
 		safesystem("$MGIZA_MERGE_ALIGN  $dir/$f-$e.$___GIZA_EXTENSION.part*>$dir/$f-$e.$___GIZA_EXTENSION");
-		#system("rm -f $dir/$f-$e/*.part*");
+		system("rm -f $dir/$f-$e/*.part*");
 	}
 
 

@@ -675,7 +675,13 @@ if ($continue) {
       "gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
 
     # update my cache of lambda values
-    $featlist->{"values"} = \@newweights;
+    if ($___PRO_STARTING_POINT or $___KBMIRA_STARTING_POINT) {
+      # skip merge weight
+      $featlist->{"values"} = [ @newweights[0 .. @newweights -2] ];
+    }
+    else {
+      $featlist->{"values"} = \@newweights;
+    }
   } else {
     print STDERR "No previous data are needed\n";
   }

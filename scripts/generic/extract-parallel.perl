@@ -222,7 +222,7 @@ if (defined($glueFile)) {
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;
-#`$cmd`;
+`$cmd`;
 
 print STDERR "Finished ".localtime() ."\n";
 
