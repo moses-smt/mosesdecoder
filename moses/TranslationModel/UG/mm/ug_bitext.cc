@@ -1,4 +1,4 @@
-//-*- c++-mode -*-
+//-*- c++ -*-
 
 #include "ug_bitext.h"
 #include <algorithm>
@@ -117,7 +117,8 @@ namespace Moses
       boost::lock_guard<boost::mutex> lk(this->lock);
       my_rcnt += 1;
       my_wcnt += w;
-      my_cnt2 += cnt2;
+      // my_cnt2 += cnt2; // could I really be that stupid? [UG]
+      my_cnt2 = cnt2;
       if (a.size())
 	{
 	  size_t i = 0;
@@ -225,11 +226,13 @@ namespace Moses
     init(uint64_t const pid1, pstats const& ps, size_t const numfeats)
     {
       p1      = pid1;
+      p2      = 0;
       raw1    = ps.raw_cnt;
       sample1 = ps.sample_cnt;
       sample2 = 0;
       good1   = ps.good;
       good2   = 0;
+      raw2    = 0;
       fvals.resize(numfeats);
     }
 

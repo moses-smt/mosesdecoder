@@ -50,7 +50,9 @@ TargetPhrase::TargetPhrase( std::string out_string)
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter(), NULL);
+  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, 
+		   // staticData.GetFactorDelimiter(), // eliminated [UG]
+		   NULL);
 }
 
 TargetPhrase::TargetPhrase()

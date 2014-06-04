@@ -3,7 +3,7 @@
 # default parameters
 
 kenlm.order  ?= 5
-kenlm.memory ?= 30%
+kenlm.memory ?= 10%
 kenlm.type   ?= probing
 kenlm.lazy   ?= 1 
 kenlm.factor ?= 0

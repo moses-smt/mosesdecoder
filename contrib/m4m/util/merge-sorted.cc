@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-#include "../../../moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 using namespace std;
 using namespace ugdiss;
 using namespace boost::iostreams;

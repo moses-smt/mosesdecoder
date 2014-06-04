@@ -55,10 +55,12 @@ void ConstrainedDecoding::Load()
       Phrase phrase(0);
       if (vecStr.size() == 1) {
         sentenceID++;
-        phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[0], staticData.GetFactorDelimiter(), NULL);
+        // phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[0], staticData.GetFactorDelimiter(), NULL);
+        phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[0], NULL);
       } else if (vecStr.size() == 2) {
         sentenceID = Scan<long>(vecStr[0]);
-        phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[1], staticData.GetFactorDelimiter(), NULL);
+        // phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[1], staticData.GetFactorDelimiter(), NULL);
+        phrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), vecStr[1], NULL);
       } else {
         UTIL_THROW(util::Exception, "Reference file not loaded");
       }
