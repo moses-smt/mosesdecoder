@@ -192,6 +192,7 @@ train
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
 	error: cannot execute binary file
+	error: unrecognised option
 randomize
 	in: lm
 	out: rlm
@@ -1047,11 +1048,11 @@ remove-markup
 	pass-unless: report-segmentation
 	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
 post-decoding-transliteration
-	in: cleaned-output system-output TRAINING:transliteration-model
+	in: cleaned-output system-output TRAINING:transliteration-model INTERPOLATED-LM:binlm=OR=LM:binlm
 	out: transliterated-output
 	default-name: evaluation/transliterated
 	pass-unless: TRAINING:post-decoding-transliteration
-	template: $moses-script-dir/Transliteration/post-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN2 --input-extension $input-extension --output-extension $output-extension --language-model $TRAINING:language-model-file --output-file IN0 --oov-file IN1.oov
+	template: $moses-script-dir/Transliteration/post-decoding-transliteration.pl --moses-src-dir $moses-src-dir --external-bin-dir $external-bin-dir --transliteration-model-dir IN2 --input-extension $input-extension --output-extension $output-extension --language-model IN3 --input-file IN0 --output-file OUT --oov-file IN1.oov --decoder $decoder
 recase-output
 	in: transliterated-output RECASING:recase-config
 	out: recased-output

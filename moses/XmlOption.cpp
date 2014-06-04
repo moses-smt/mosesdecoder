@@ -179,7 +179,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
   size_t wordPos = 0; // position in sentence (in terms of number of words)
 
   const vector<FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
-  const string &factorDelimiter = staticData.GetFactorDelimiter();
+  // const string &factorDelimiter = staticData.GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -358,7 +358,8 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 
               WordsRange range(startPos + offset,endPos-1 + offset); // span covered by phrase
               TargetPhrase targetPhrase;
-              targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+              // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+              targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 
               // lhs
               const UnknownLHSList &lhsList = staticData.GetUnknownLHS();

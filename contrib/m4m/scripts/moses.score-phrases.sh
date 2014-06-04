@@ -25,7 +25,7 @@ trap 'cleanup' 0
 
 export LC_ALL=C
 if [[ "$inv" == "--Inverse" ]] ; then
-    parallel < $obase.$$ -j10 --pipe --blocksize 250M "sort -S 10G | gzip > $obase.{#}.gz" &
+    parallel --gnu < $obase.$$ -j10 --pipe --blocksize 250M "sort -S 10G | gzip > $obase.{#}.gz" &
 else
     gzip < $obase.$$ > $obase.scored.gz_ &
 fi
