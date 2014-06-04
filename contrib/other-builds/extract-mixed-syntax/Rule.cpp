@@ -169,7 +169,7 @@ void Rule::Output(std::ostream &out, bool forward, const Parameter &params) cons
   out << " ||| ";
 
   // span length
-  if (forward && params.spanLength) {
+  if (forward && params.spanLength && m_nonterms.size()) {
 	  out << "{{SpanLength ";
 
 	  for (size_t i = 0; i < m_nonterms.size(); ++i) {
