@@ -64,6 +64,6 @@ LMODELS :=
 LMODEL_ENTRIES :=
 
 endef
-clear-locks:
-	@rm -rf `find -L -type d -name '*.lock'`
+clear-locks: | $(shell find -L -type d -name '*.lock')
+	rm -rf $|
 

@@ -97,8 +97,7 @@ public:
   TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
   void CreateFromString(const std::vector<FactorType> &factorOrder
-                        , const std::string &phraseString
-                        , const std::string &factorDelimiter);
+                        , const std::string &phraseString);  // , const std::string &factorDelimiter);
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
     return m_defaultLabelSet;

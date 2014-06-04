@@ -223,11 +223,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
-
+    // targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
+    targetPhrase->CreateFromString(Output, output, targetPhraseString, &targetLHS);
     // source
     Phrase sourcePhrase;
-    sourcePhrase.CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    // sourcePhrase.CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    sourcePhrase.CreateFromString(Input, input, sourcePhraseString, &sourceLHS);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
