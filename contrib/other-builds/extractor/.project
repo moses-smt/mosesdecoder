@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>mert_lib</project>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
