@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "moses/PP/TreeStructurePhraseProperty.h"
+#include "moses/PP/SpanLengthPhraseProperty.h"
 
 namespace Moses
 {
@@ -51,6 +52,7 @@ PhrasePropertyFactory::PhrasePropertyFactory()
 #define MOSES_PNAME2(name, type) Add(name, new DefaultPhrasePropertyCreator< type >());
 
   MOSES_PNAME2("Tree",TreeStructurePhraseProperty);
+  MOSES_PNAME2("SpanLength", SpanLengthPhraseProperty);
 
 }
 
