@@ -494,7 +494,8 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     m_xmlBrackets.first= brackets[0];
     m_xmlBrackets.second=brackets[1];
-    cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
+    VERBOSE(1,"XML tags opening and closing brackets for XML input are: " 
+	    << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
   }
 
   if (m_parameter->GetParam("placeholder-factor").size() > 0) {
@@ -511,7 +512,7 @@ bool StaticData::LoadData(Parameter *parameter)
   const vector<string> &features = m_parameter->GetParam("feature");
   for (size_t i = 0; i < features.size(); ++i) {
     const string &line = Trim(features[i]);
-    cerr << "line=" << line << endl;
+    VERBOSE(1,"line=" << line << endl);
     if (line.empty())
       continue;
 
@@ -640,7 +641,8 @@ void StaticData::LoadNonTerminals()
     		  "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
-      const Factor *targetFactor = factorCollection.AddFactor(Output, 0, tokens[0], true);
+      // const Factor *targetFactor = 
+      factorCollection.AddFactor(Output, 0, tokens[0], true);
     }
 
   }
@@ -734,7 +736,7 @@ bool StaticData::LoadDecodeGraphs()
       DecodeGraph *decodeGraph;
       if (IsChart()) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
-        cerr << "max-chart-span: " << maxChartSpans[decodeGraphInd] << endl;
+        VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
       } else {
         decodeGraph = new DecodeGraph(m_decodeGraphs.size());
@@ -866,7 +868,7 @@ void StaticData::SetExecPath(const std::string &path)
   if (pos !=  string::npos) {
     m_binPath = path.substr(0, pos);
   }
-  cerr << m_binPath << endl;
+  VERBOSE(1,m_binPath << endl);
 }
 
 const string &StaticData::GetBinDirectory() const
@@ -920,7 +922,8 @@ void StaticData::LoadFeatureFunctions()
     FeatureFunction *ff = *iter;
     bool doLoad = true;
 
-    if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+    // if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+    if (dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
     }
 
@@ -964,7 +967,7 @@ bool StaticData::CheckWeights() const
     set<string>::iterator iter;
     for (iter = weightNames.begin(); iter != weightNames.end(); ) {
       string fname = (*iter).substr(0, (*iter).find("_"));
-      cerr << fname << "\n";
+      VERBOSE(1,fname << "\n");
       if (featureNames.find(fname) != featureNames.end()) {
         weightNames.erase(iter++);
       }
@@ -1039,7 +1042,7 @@ bool StaticData::LoadAlternateWeightSettings()
       vector<string> tokens = Tokenize(weightSpecification[i]);
       vector<string> args = Tokenize(tokens[0], "=");
       currentId = args[1];
-      cerr << "alternate weight setting " << currentId << endl;
+      VERBOSE(1,"alternate weight setting " << currentId << endl);
       UTIL_THROW_IF2(m_weightSetting.find(currentId) != m_weightSetting.end(),
     		  "Duplicate alternate weight id: " << currentId);
       m_weightSetting[ currentId ] = new ScoreComponentCollection;
