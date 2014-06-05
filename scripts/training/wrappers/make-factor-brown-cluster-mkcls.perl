@@ -6,8 +6,10 @@ my ($cluster_file,$in,$out,$tmp) = @ARGV;
 
 my $CLUSTER = &read_cluster_from_mkcls($cluster_file);
 
-open(IN,$in);
+open(IN,$in) || die("ERROR: could not open input");
+binmode(IN, ":utf8");
 open(OUT,">$out");
+binmode(OUT, ":utf8");
 while(<IN>) {
   chop;
   s/\s+/ /g;
@@ -28,7 +30,7 @@ close(IN);
 sub read_cluster_from_mkcls {
   my ($file) = @_;
   my %CLUSTER;
-  open(CLUSTER_FILE,$file);
+  open(CLUSTER_FILE,$file) || die("ERROR: could not open cluster file '$file'");
   while(<CLUSTER_FILE>) {
     chop;
     my ($word,$cluster) = split;
