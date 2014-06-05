@@ -36,7 +36,7 @@ void SpanLength::Evaluate(const InputType &input
   assert(stackVec);
 
   boost::shared_ptr<PhraseProperty> property;
-  bool hasProperty = targetPhrase.GetProperty("SpanLength", &property);
+  bool hasProperty = targetPhrase.GetProperty("SpanLength", property);
 
 
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
