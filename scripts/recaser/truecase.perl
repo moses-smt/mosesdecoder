@@ -35,7 +35,7 @@ while(<STDIN>) {
   my ($WORD,$MARKUP) = split_xml($_);
   my $sentence_start = 1;
   for(my $i=0;$i<=$#$WORD;$i++) {
-    print " " if $i;
+    print " " if $i && $$MARKUP[$i] eq '';
     print $$MARKUP[$i];
 
     my ($word,$otherfactors);
@@ -67,7 +67,7 @@ while(<STDIN>) {
     if    ( defined($SENTENCE_END{ $word }))           { $sentence_start = 1; }
     elsif (!defined($DELAYED_SENTENCE_START{ $word })) { $sentence_start = 0; }
   }
-  print " ".$$MARKUP[$#$MARKUP];
+  print $$MARKUP[$#$MARKUP];
   print "\n";
 }
 
