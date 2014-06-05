@@ -38,6 +38,9 @@ void SpanLength::Evaluate(const InputType &input
   boost::shared_ptr<PhraseProperty> property;
   bool hasProperty = targetPhrase.GetProperty("SpanLength", property);
 
+  if (!hasProperty) {
+	  return;
+  }
 
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
   assert(ruleSource);
