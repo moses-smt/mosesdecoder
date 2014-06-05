@@ -42,6 +42,9 @@ void SpanLength::Evaluate(const InputType &input
 	  return;
   }
 
+  string str = property.get()->GetValueString();
+  cerr << "str=" << str << endl;
+
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
   assert(ruleSource);
   cerr << *ruleSource << endl;

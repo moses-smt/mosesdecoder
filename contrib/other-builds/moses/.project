@@ -1632,6 +1632,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.h</locationURI>
 		</link>
 		<link>
+			<name>PP/SpanLengthPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SpanLengthPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
 			<name>PP/SpanLengthPhraseProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/github/mosesdecoder.hieu/moses/PP/SpanLengthPhraseProperty.h</locationURI>
