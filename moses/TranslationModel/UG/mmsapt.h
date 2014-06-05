@@ -168,6 +168,9 @@ namespace Moses
     void
     Load();
     
+    // returns the prior table limit
+    size_t SetTableLimit(size_t limit);
+
 #ifndef NO_MOSES
     TargetPhraseCollection const* 
     GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
