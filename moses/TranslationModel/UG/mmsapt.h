@@ -72,9 +72,13 @@ namespace Moses
     PScorePbwd<Token> calc_pbwd_fix, calc_pbwd_dyn;
     PScoreLex<Token>  calc_lex; // this one I'd like to see as an external ff eventually
     PScorePP<Token>   apply_pp; // apply phrase penalty 
+    PScoreLogCounts<Token>   add_logcounts_fix;
+    PScoreLogCounts<Token>   add_logcounts_dyn;
     void init(string const& line);
     mutable boost::mutex lock;
     bool poolCounts;
+    bool withLogCountFeatures; // add logs of counts as features?
+    bool withPfwd,withPbwd;
     vector<FactorType> ofactor;
 
     
@@ -94,6 +98,8 @@ namespace Moses
     };
 
   private:
+
+    void read_config_file(string fname, map<string,string>& param);
 
     TargetPhraseCollectionWrapper*
     encache(TargetPhraseCollectionWrapper* const ptr) const;

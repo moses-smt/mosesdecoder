@@ -7,6 +7,7 @@
 #include "ug_typedefs.h"
 #include "tpt_tokenindex.h"
 #include <iostream>
+//#include <cassert>
 
 // #include "ug_bv_iter.h"
 
@@ -148,7 +149,11 @@ namespace ugdiss
 
     double approxOccurrenceCount(int p=-1) const
     {
-      return arrayByteSpanSize(p)/root->aveIndexEntrySize();
+      assert(root);
+      double ret = arrayByteSpanSize(p)/root->aveIndexEntrySize();
+      assert(ret < root->corpus->numTokens());
+      if (ret < 25) ret = rawCnt(p);
+      return ret;
     }
 
     size_t grow(Token const* t, Token const* stop)
@@ -366,6 +371,7 @@ namespace ugdiss
   TSA_tree_iterator(TSA<Token> const* s, Token const& t)
     : root(s) 
   {
+    if (!root) return;
     char const* up = root->getUpperBound(t.id());
     if (!up) return;
     lower.push_back(root->getLowerBound(t.id()));

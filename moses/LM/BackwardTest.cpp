@@ -120,7 +120,7 @@ public:
         Input,
         outputFactorOrder,
         "the",
-        StaticData::Instance().GetFactorDelimiter(),
+        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
@@ -147,7 +147,7 @@ public:
         Input,
         outputFactorOrder,
         "the licenses",
-        StaticData::Instance().GetFactorDelimiter(),
+        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 2 );
@@ -176,7 +176,7 @@ public:
         Input,
         outputFactorOrder,
         "the licenses for",
-        StaticData::Instance().GetFactorDelimiter(),
+        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 3 );
@@ -203,7 +203,7 @@ public:
         Input,
         outputFactorOrder,
         "the licenses for most",
-        StaticData::Instance().GetFactorDelimiter(),
+        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 4 );
@@ -249,7 +249,7 @@ public:
         Input,
         outputFactorOrder,
         "the",
-        StaticData::Instance().GetFactorDelimiter(),
+        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
@@ -277,7 +277,7 @@ public:
         Input,
         outputFactorOrder,
         "licenses",
-        StaticData::Instance().GetFactorDelimiter(),
+        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
@@ -305,7 +305,7 @@ public:
         Input,
         outputFactorOrder,
         "for",
-        StaticData::Instance().GetFactorDelimiter(),
+        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
@@ -333,7 +333,7 @@ public:
         Input,
         outputFactorOrder,
         "most",
-        StaticData::Instance().GetFactorDelimiter(),
+        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );

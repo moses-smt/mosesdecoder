@@ -2,7 +2,6 @@
 #pragma once
 
 #include <vector>
-#include <boost/bimap.hpp>
 #include "Implementation.h"
 #include "moses/Hypothesis.h"
 
@@ -12,6 +11,8 @@ class Logger;
 class Vocabulary;
 class State;
 class LM;
+union Fragment;
+class Gap;
 
 typedef unsigned int VocabId;
 }
@@ -19,6 +20,7 @@ typedef unsigned int VocabId;
 namespace Moses
 {
 class Factor;
+class DALMChartState;
 
 class LanguageModelDALM : public LanguageModel
 {
@@ -47,6 +49,7 @@ protected:
 
   std::string	m_filePath;
   size_t			m_nGramOrder; //! max n-gram length contained in this LM
+	size_t			m_ContextSize;
 
 	DALM::Logger *m_logger;
 	DALM::Vocabulary *m_vocab;
@@ -73,6 +76,27 @@ private:
       *index = GetVocabId(hypo.GetWord(position).GetFactor(m_factorType));
     }
   }
+
+	void EvaluateTerminal(
+	  const Word &word,
+	  float &hypoScore,
+  	DALMChartState *newState,
+	  DALM::State &state,
+  	DALM::Fragment *prefixFragments,
+	  unsigned char &prefixLength
+		) const;
+
+	void EvaluateNonTerminal(
+	  const Word &word,
+	  float &hypoScore,
+  	DALMChartState *newState,
+	  DALM::State &state,
+  	DALM::Fragment *prefixFragments,
+	  unsigned char &prefixLength,
+	  const DALMChartState *prevState,
+	  size_t prevTargetPhraseLength,
+	  float prevHypoScore
+		) const;
 };
 
 }
