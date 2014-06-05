@@ -167,6 +167,9 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
+  SetBooleanParameter( &m_PrintPassthroughInformation, "print-passthrough", false );
+  SetBooleanParameter( &m_PrintPassthroughInformationInNBest, "print-passthrough-in-n-best", false );
+
   // n-best
   if (m_parameter->GetParam("n-best-list").size() >= 2) {
     m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];

@@ -294,6 +294,12 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
   }
 }
 
+void OutputPassthroughInformation(std::ostream &out, const Hypothesis *hypo)
+{
+  std::string passthrough = hypo->GetManager().GetSource().GetPassthroughInformation();
+  out << passthrough;
+}
+
 void OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
                        char reportSegmentation, bool reportAllFactors)
 {
@@ -431,6 +437,10 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
   if (hypo != NULL) {
     VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
     VERBOSE(3,"Best path: ");
+    if (StaticData::Instance().IsPassthroughEnabled())
+    {
+      OutputPassthroughInformation(cout, hypo);
+    }
     Backtrack(hypo);
     VERBOSE(3,"0" << std::endl);
     if (!m_surpressSingleBestOutput) {
@@ -471,6 +481,10 @@ void OutputNBest(std::ostream& out
 
     // print the surface factor of the translation
     out << translationId << " ||| ";
+    if (staticData.IsPassthroughInNBestEnabled())
+    {
+      OutputPassthroughInformation(out, edges[edges.size() - 1]);
+    }
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
       OutputSurface(out, edge, outputFactorOrder, reportSegmentation, reportAllFactors);

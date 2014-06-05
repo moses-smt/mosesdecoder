@@ -155,6 +155,13 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     }
   }
 
+  // if sentences is specified as "<passthrough tag1=""/>"
+  if (staticData.IsPassthroughEnabled() || staticData.IsPassthroughInNBestEnabled()) {
+    std::string passthrough = PassthroughSGML(line,"passthrough");
+    this->SetPassthroughInformation(passthrough);  
+  }
+
+
   // parse XML markup in translation line
   std::vector< size_t > xmlWalls;
   std::vector< std::pair<size_t, std::string> > placeholders;

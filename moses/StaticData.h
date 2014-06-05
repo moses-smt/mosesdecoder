@@ -133,6 +133,9 @@ protected:
   bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
 
+  bool m_PrintPassthroughInformation;
+  bool m_PrintPassthroughInformationInNBest;
+
   std::string m_alignmentOutputFile;
 
   std::string m_factorDelimiter; //! by default, |, but it can be changed
@@ -315,6 +318,12 @@ public:
   }
   size_t IsPathRecoveryEnabled() const {
     return m_recoverPath;
+  }
+  bool IsPassthroughEnabled() const {
+    return m_PrintPassthroughInformation;
+  }
+  bool IsPassthroughInNBestEnabled() const {
+    return m_PrintPassthroughInformationInNBest;
   }
   int GetMaxDistortion() const {
     return m_maxDistortion;
