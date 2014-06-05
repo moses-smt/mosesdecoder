@@ -53,7 +53,7 @@ Sentence::~Sentence()
 
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
-  const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+  // const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   std::string line;
   std::map<std::string, std::string> meta;
 
@@ -147,7 +147,8 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     }
   }
 
-  Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter, NULL);
+  // Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter, NULL);
+  Phrase::CreateFromString(Input, factorOrder, line, NULL);
 
   // placeholders
   ProcessPlaceholders(placeholders);
@@ -311,11 +312,14 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
   return ret;
 }
 
-void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder
-                                , const std::string &phraseString
-                                , const std::string &factorDelimiter)
+void 
+Sentence::
+CreateFromString(const std::vector<FactorType> &factorOrder, 
+		 const std::string &phraseString)
+// , const std::string &factorDelimiter)
 {
-  Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter, NULL);
+  // Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter, NULL);
+  Phrase::CreateFromString(Input, factorOrder, phraseString, NULL);
 }
 
 

@@ -25,6 +25,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
+#include <boost/random.hpp>
 
 #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
 #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
@@ -220,7 +221,7 @@ namespace Moses {
     PScorePfwd : public PhraseScorer<Token>
     {
       float conf;
-      int denom;
+      char denom;
     public:
       PScorePfwd() 
       {
@@ -228,7 +229,7 @@ namespace Moses {
       }
 
       int 
-      init(int const i, float const c, int d=0) 
+      init(int const i, float const c, char d=0) 
       { 
 	conf  = c; 
 	denom = d;
@@ -249,13 +250,13 @@ namespace Moses {
 	  }
 	switch (denom)
 	  {
-	  case 0: 
+	  case 'g': 
 	    (*dest)[this->index] = log(lbop(pp.good1, pp.joint, conf)); 
 	    break;
-	  case 1: 
+	  case 's': 
 	    (*dest)[this->index] = log(lbop(pp.sample1, pp.joint, conf)); 
 	    break;
-	  case 2:
+	  case 'r':
 	    (*dest)[this->index] = log(lbop(pp.raw1, pp.joint, conf)); 
 	  }
       }
@@ -281,10 +282,46 @@ namespace Moses {
       }
 
       void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
+      operator()(Bitext<Token> const& bt, PhrasePair& pp, 
+		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
-	(*dest)[this->index] = log(lbop(max(pp.raw2,pp.joint), pp.joint, conf));
+	(*dest)[this->index] = log(lbop(max(pp.raw2,pp.joint),pp.joint,conf));
+      }
+    };
+
+    template<typename Token>
+    class
+    PScoreLogCounts : public PhraseScorer<Token>
+    {
+      float conf;
+    public:
+      PScoreLogCounts() 
+      {
+	this->num_feats = 4;
+      }
+
+      int 
+      init(int const i) 
+      { 
+	this->index = i;
+	return i + this->num_feats;
+      }
+
+      void 
+      operator()(Bitext<Token> const& bt, PhrasePair& pp, 
+		 vector<float> * dest = NULL) const
+      {
+	if (!dest) dest = &pp.fvals;
+	size_t i = this->index;
+	assert(pp.raw1);
+	assert(pp.sample1);
+	assert(pp.joint);
+	assert(pp.raw2);
+	(*dest)[i] = log(pp.raw1);
+	(*dest)[++i] = log(pp.sample1);
+	(*dest)[++i] = log(pp.joint);
+	(*dest)[++i] = log(pp.raw2);
       }
     };
 
@@ -551,8 +588,10 @@ namespace Moses {
       class job 
       {
 	static ThreadSafeCounter active;
-	boost::mutex      lock; 
+	boost::mutex lock; 
 	friend class agenda;
+	boost::taus88 rnd; // every job has its own pseudo random generator 
+	double rnddenom;   // denominator for scaling random sampling
       public:
 	size_t         workers; // how many workers are working on this job?
 	sptr<TSA<Token> const> root; // root of the underlying suffix array
@@ -560,7 +599,8 @@ namespace Moses {
 	char const*       stop; // end of index range
 	size_t     max_samples; // how many samples to extract at most
 	size_t             ctr; /* # of phrase occurrences considered so far
-				 * # of samples chosen is stored in stats->good */
+				 * # of samples chosen is stored in stats->good 
+				 */
 	size_t             len; // phrase length
 	bool               fwd; // if true, source phrase is L1 
 	sptr<pstats>     stats; // stores statistics collected during sampling
@@ -622,7 +662,7 @@ namespace Moses {
 	      {
 		boost::lock_guard<boost::mutex> sguard(stats->lock);
 		if (stats->raw_cnt == ctr) ++stats->raw_cnt;
-		size_t rnum = randInt(stats->raw_cnt - ctr++);
+		size_t rnum = (stats->raw_cnt - ctr++)*(rnd()/(rnd.max()+1.));
 		if (rnum < max_samples - stats->good)
 		  {
 		    stats->sample_cnt++;
@@ -770,7 +810,9 @@ namespace Moses {
     job::
     job(typename TSA<Token>::tree_iterator const& m, 
 	sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd)
-      : workers(0)
+      : rnd(0)
+      , rnddenom(rnd.max() + 1.)
+      , workers(0)
       , root(r)
       , next(m.lower_bound(-1))
       , stop(m.upper_bound(-1))

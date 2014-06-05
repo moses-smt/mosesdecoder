@@ -23,37 +23,15 @@ ${moses.extract-phrases} ${moses.extract} $(1:.aln.gz=) ${L1} ${L2} \
 endef
 
 #################################################################################
-# create_phrase_table: add rules to create a standard phrase table
-# ADD RULES TO CREATE A STANDARD PHRASE TABLE FROM 
-# $(pll.txt1),$(pll.txt2),$(pll.aln) that are specified as target-specific
-# variables like this:
-# $1.txt.gz: pll.txt1 = ...
-# $1.txt.gz: pll.txt2 = ...
-# $1.txt.gz: pll.aln  = ...
-# This function is normally called indirectly via $(eval $(call add_bin_pt,...))
-#
-# Note: this section should be improved:
-# - split into shards
-# - create bash file with jobs
-# - run batch file in parallel 
-#--------------------------------------------------------------------------------
-define create_phrase_table
+# $1: stem of phrase extractions
+# $2: L1 text
+# $3: L2 text
+# $4: symal file
+# normally, $2 ... $4 are default values ${pll.txt1} ${pll.txt2} ${pll.aln}
+
+define extract_phrases
 
 SHARDS = $$(foreach x, $${L1} $${L2} aln, $1.shards/$$x-DONE)
-.SECONDARY:    $1.txt.gz
-.SECONDARY:    $1.${L2}-given-${L1}.lex.gz 
-.SECONDARY:    $1.${L1}-given-${L2}.lex.gz
-.INTERMEDIATE: $1.txt.gz
-.INTERMEDIATE: $$(SHARDS)
-.INTERMEDIATE: $1.tmp/fwd.scored.gz
-.INTERMEDIATE: $1.tmp/bwd/scoring.done
-.INTERMEDIATE: $1.${L2}-given-${L1}.lex.gz 
-.INTERMEDIATE: $1.${L1}-given-${L2}.lex.gz
-.INTERMEDIATE: $1.shards/${L1}-DONE
-.INTERMEDIATE: $1.shards/${L2}-DONE
-.INTERMEDIATE: $1.shards/aln-DONE
-.INTERMEDIATE: $1.shards/extract.batch
-.INTERMEDIATE: $1.shards/extract.done
 
 $1.shards/${L1}-DONE: $(if $2,$2,$$(pll.txt1))
 	$$(lock)
@@ -87,9 +65,31 @@ $1.shards/extract.batch: $$(SHARDS)
 
 $1.shards/extract.done: $1.shards/extract.batch
 	$$(lock)
-	${parallel} -j$(shell echo $$((${NUMCORES}/1))) < $1.shards/extract.batch
+	${parallel} -j$(shell echo $$((${NUMCORES}/4))) < $1.shards/extract.batch
 	touch $$@
 	$$(unlock)
+
+endef
+
+
+#################################################################################
+# create_phrase_table: add rules to create a standard phrase table
+# ADD RULES TO CREATE A STANDARD PHRASE TABLE FROM 
+# $(pll.txt1),$(pll.txt2),$(pll.aln) that are specified as target-specific
+# variables like this:
+# $1.txt.gz: pll.txt1 = ...
+# $1.txt.gz: pll.txt2 = ...
+# $1.txt.gz: pll.aln  = ...
+# This function is normally called indirectly via $(eval $(call add_bin_pt,...))
+#
+# Note: this section should be improved:
+# - split into shards
+# - create bash file with jobs
+# - run batch file in parallel 
+#--------------------------------------------------------------------------------
+define create_phrase_table
+
+$(call extract_phrases,$1,$${pll.txt1},$${pll.txt2},$${pll.aln})
 
 ptable: $1.txt.gz
 $1.txt.gz: | ${merge-sorted}
@@ -99,10 +99,10 @@ $1.txt.gz: | $1.tmp/bwd/scoring.done
 	$$(lock)
 	${MOSES_BIN}/consolidate \
 	<(zcat -f $1.tmp/fwd.scored.gz) \
-	<(${merge-sorted} $1.tmp/bwd/scored.*.gz) \
-	/dev/stdout \
+	<(${merge-sorted} $1.tmp/bwd/scored.*.gz) /dev/stdout \
 	$(if $(ptable.smoothing), $(ptable.smoothing) $1.tmp/fwd.coc) \
-	| gzip > $$@_ && mv $$@_ $$@
+	| gzip > $$@_ 
+	mv $$@_ $$@
 	$$(unlock)
 
 $1.tmp/fwd.scored.gz: | $(merge-sorted)
@@ -119,7 +119,7 @@ $1.tmp/bwd/scoring.done: | $1.${L2}-given-${L1}.lex.gz
 	$$(lock)
 	$(merge-sorted) $1.shards/*.bwd.gz \
 	| ${moses.score-phrases} ${MOSES_BIN}/score - $1.${L2}-given-${L1}.lex.gz \
-	$${@D}/scored "$(ptable.smoothing)" --Inverse && touch $$@
+	$${@D}/scored $(ptable.smoothing) --Inverse && touch $$@
 	$$(unlock)
 
 # reminder: $2,$3,$4 = L1text, L2text, alignment
@@ -206,7 +206,6 @@ endef
 define create_lexical_reordering_table
 
 mystem := $(strip $1).$(strip $2)
-.INTERMEDIATE: $${mystem}.gz
 $${mystem}.gz: dmshards = $$(shell ls $3.shards/*.dst.gz 2>/dev/null)
 $${mystem}.gz: dm.type=$(word 1,$(subst -, ,$2))
 $${mystem}.gz: dm.orient=$(word 2,$(subst -, ,$2))
@@ -271,6 +270,12 @@ PTABLES        += $(strip $4) $(strip $5) $(strip $6)
 endef
 #################################################################################
 
+# $1: input factor
+# $2: output factor
+# $3: num-features
+# $4: path to mmapped data
+# $5: path to text data
+# $6: path and basename of dynamic data
 define add_mmsapt
 
 $(call mmap_bitext,$(strip $5),$(strip $4))
@@ -282,8 +287,10 @@ MY_ENTRY += output-factor=$(strip $2)
 MY_ENTRY += num-features=$(strip $3)
 MY_ENTRY += base=$(abspath $4)/ L1=${L1} L2=${L2}
 PTABLE_ENTRIES += $$(subst $$(space),;,$${MY_ENTRY})
-MOSES_INI_PREREQ += $(addprefix $(strip $4),${L1}.mct ${L1}.tdx ${L1}.sfa)
-MOSES_INI_PREREQ += $(addprefix $(strip $4),${L2}.mct ${L2}.tdx ${L2}.sfa)
-MOSES_INI_PREREQ += $(strip $4)${L1}-${L2}.mam
+
+MOSES_INI_PREREQ += $(addprefix $(strip $4)/${L1},.mct .tdx .sfa)
+MOSES_INI_PREREQ += $(addprefix $(strip $4)/${L2},.mct .tdx .sfa)
+MOSES_INI_PREREQ += $(strip $4)/${L1}-${L2}.mam
+MOSES_INI_PREREQ += $(strip $4)/${L1}-${L2}.lex
 
 endef
