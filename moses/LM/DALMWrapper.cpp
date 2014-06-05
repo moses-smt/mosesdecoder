@@ -540,7 +540,6 @@ void LanguageModelDALM::EvaluateNonTerminal(
 		state = prevState->GetRightContext();
 		return;
 	}
-
 	DALM::Gap gap(state);
 
   // score its prefix
@@ -553,7 +552,7 @@ void LanguageModelDALM::EvaluateNonTerminal(
 			if(!gap.is_extended()){
 				state = prevState->GetRightContext();
 				return;
-			}else if(gap.get_count() <= prefixPos+1){
+			}else if(state.get_count() <= prefixPos+1){
 				state = prevState->GetRightContext();
 				return;
 			}
@@ -566,7 +565,7 @@ void LanguageModelDALM::EvaluateNonTerminal(
 				newState->SetAsLarge();
 				state = prevState->GetRightContext();
 				return;
-			}else if(gap.get_count() <= prefixPos+1){
+			}else if(state.get_count() <= prefixPos+1){
 				if(!gap.is_finalized()) prefixLength++;
 				newState->SetAsLarge();
 				state = prevState->GetRightContext();
@@ -585,7 +584,7 @@ void LanguageModelDALM::EvaluateNonTerminal(
   if (prevState->LargeEnough()) {
     newState->SetAsLarge();
 		if(prevPrefixLength < prevState->GetHypoSize()){
- 			hypoScore += state.sum_bows(prevPrefixLength, gap.get_count());
+ 			hypoScore += state.sum_bows(prevPrefixLength, state.get_count());
   	}
    	// copy language model state
 		state = prevState->GetRightContext();
