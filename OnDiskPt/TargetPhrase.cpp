@@ -316,21 +316,31 @@ UINT64 TargetPhrase::ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPC
   assert((memUsed + filePos) == (UINT64)fileTPColl.tellg());
 
   // properties
+  memUsed += ReadStringFromFile(fileTPColl, m_property);
+
+  return memUsed;
+}
+
+UINT64 TargetPhrase::ReadStringFromFile(std::fstream &fileTPColl, std::string &outStr)
+{
+  UINT64 bytesRead = 0;
+
   UINT64 propSize;
   fileTPColl.read((char*) &propSize, sizeof(UINT64));
-  memUsed += sizeof(UINT64);
+  bytesRead += sizeof(UINT64);
 
   if (propSize) {
 	  char *mem = (char*) malloc(propSize + 1);
 	  mem[propSize] = '\0';
 	  fileTPColl.read(mem, propSize);
-	  m_property = string(mem);
+	  outStr = string(mem);
 	  free(mem);
+	  cerr << "outStr=" << outStr << endl;
 
-	  memUsed += propSize;
+	  bytesRead += propSize;
   }
 
-  return memUsed;
+  return bytesRead;
 }
 
 UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP)

@@ -60,6 +60,7 @@ protected:
 
   UINT64 ReadAlignFromFile(std::fstream &fileTPColl);
   UINT64 ReadScoresFromFile(std::fstream &fileTPColl);
+  UINT64 ReadStringFromFile(std::fstream &fileTPColl, std::string &outStr);
 
 public:
   TargetPhrase() {
