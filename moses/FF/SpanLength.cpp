@@ -7,6 +7,7 @@
 #include "moses/StackVec.h"
 #include "moses/TargetPhrase.h"
 #include "moses/PP/PhraseProperty.h"
+#include "moses/PP/SpanLengthPhraseProperty.h"
 
 using namespace std;
 
@@ -15,7 +16,9 @@ namespace Moses
 SpanLength::SpanLength(const std::string &line)
 :StatelessFeatureFunction(1, line)
 ,m_smoothingMethod(None)
+,m_const(0)
 {
+  ReadParameters();
 }
 
 void SpanLength::Evaluate(const Phrase &source
@@ -42,19 +45,26 @@ void SpanLength::Evaluate(const InputType &input
 	  return;
   }
 
-  string str = property.get()->GetValueString();
+  PhraseProperty *prop = property.get();
+  SpanLengthPhraseProperty *slProp = static_cast<SpanLengthPhraseProperty*>(prop);
+  assert(slProp);
+
+  string str = slProp->GetValueString();
   cerr << "str=" << str << endl;
 
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
   assert(ruleSource);
   cerr << *ruleSource << endl;
 
+  float score = 0;
   for (size_t i = 0; i < stackVec->size(); ++i) {
 	  const ChartCellLabel &cell = *stackVec->at(i);
 	  const WordsRange &ntRange = cell.GetCoverage();
-
-
+	  size_t sourceWidth = ntRange.GetNumWordsCovered();
+	  float prob = slProp->GetProb(i, sourceWidth, m_const);
+	  score += TransformScore(prob);
   }
+  scoreBreakdown.PlusEquals(this, score);
 
 }
 
