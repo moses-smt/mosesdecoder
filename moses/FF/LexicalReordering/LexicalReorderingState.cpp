@@ -38,6 +38,13 @@ size_t LexicalReorderingConfiguration::GetNumScoreComponents() const
   }
 }
 
+void LexicalReorderingConfiguration::ConfigureSparse(const std::map<std::string,std::string>& sparseArgs) 
+{
+  if (sparseArgs.size()) {
+    m_sparse.reset(new SparseReordering(sparseArgs));
+  }
+}
+
 void LexicalReorderingConfiguration::SetAdditionalScoreComponents(size_t number)
 {
   m_additionalScoreComponents = number;

@@ -72,17 +72,16 @@ private:
   bool DecodeDirection(std::string s);
   bool DecodeNumFeatureFunctions(std::string s);
 
-  LexicalReorderingConfiguration *m_configuration;
+  boost::scoped_ptr<LexicalReorderingConfiguration> m_configuration;
   std::string m_modelTypeString;
   std::vector<std::string> m_modelType;
-  LexicalReorderingTable* m_table;
+  boost::scoped_ptr<LexicalReorderingTable> m_table;
   //std::vector<Direction> m_direction;
   std::vector<LexicalReorderingConfiguration::Condition> m_condition;
   //std::vector<size_t> m_scoreOffset;
   //bool m_oneScorePerDirection;
   std::vector<FactorType> m_factorsE, m_factorsF;
   std::string m_filePath;
-  boost::scoped_ptr<SparseReordering> m_sparse;
 };
 
 }

@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 
+#include <boost/scoped_ptr.hpp>
 
 #include "moses/Hypothesis.h"
 //#include "LexicalReordering.h"
@@ -18,6 +19,7 @@ namespace Moses
 {
 class LexicalReorderingState;
 class LexicalReordering;
+class SparseReordering;
 
 /** Factory class for lexical reordering states
  */
@@ -30,6 +32,8 @@ public:
   enum Condition {F, E, FE};
 
   LexicalReorderingConfiguration(const std::string &modelType);
+
+  void ConfigureSparse(const std::map<std::string,std::string>& sparseArgs);
 
   LexicalReorderingState *CreateLexicalReorderingState(const InputType &input) const;
 
@@ -79,6 +83,7 @@ private:
   Direction m_direction;
   Condition m_condition;
   size_t m_additionalScoreComponents;
+  boost::scoped_ptr<SparseReordering> m_sparse;
 };
 
 //! Abstract class for lexical reordering model states

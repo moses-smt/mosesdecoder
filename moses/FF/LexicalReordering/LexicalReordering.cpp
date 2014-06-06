@@ -19,7 +19,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
     const vector<string> &args = m_args[i];
 
     if (args[0] == "type") {
-      m_configuration = new LexicalReorderingConfiguration(args[1]);
+      m_configuration.reset(new LexicalReorderingConfiguration(args[1]));
       m_configuration->SetScoreProducer(this);
       m_modelTypeString = m_configuration->GetModelString();
     } else if (args[0] == "input-factor") {
@@ -52,20 +52,16 @@ LexicalReordering::LexicalReordering(const std::string &line)
     throw "Unknown conditioning option!";
   }
 
-  if (sparseArgs.size()) {
-    m_sparse.reset(new SparseReordering(sparseArgs));
-  }
+  m_configuration->ConfigureSparse(sparseArgs);
 }
 
 LexicalReordering::~LexicalReordering()
 {
-  delete m_table;
-  delete m_configuration;
 }
 
 void LexicalReordering::Load()
 {
-  m_table = LexicalReorderingTable::LoadAvailable(m_filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
+  m_table.reset(LexicalReorderingTable::LoadAvailable(m_filePath, m_factorsF, m_factorsE, std::vector<FactorType>()));
 }
 
 Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
