@@ -25,7 +25,7 @@ while (my $line = <STDIN>) {
     elsif ($inXML == 0) {
       if ($c eq " ") {
         $prevSpace = 1;
-	$prevBar = 0;
+        $prevBar = 0;
       }
       elsif ($c eq "|") {
         $prevSpace = 0;
@@ -33,7 +33,7 @@ while (my $line = <STDIN>) {
       }
       else {
         $prevSpace = 0;
-	$prevBar = 0;
+        $prevBar = 0;
       }
       print $c;
     }
