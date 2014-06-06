@@ -11,11 +11,11 @@ namespace Moses
 {
 
 OpSequenceModel::OpSequenceModel(const std::string &line)
-  :StatefulFeatureFunction(5, line )
+  :StatefulFeatureFunction(1, line )
 {
   sFactor = 0;
   tFactor = 0;
-  numFeatures = 5;
+  numFeatures = 1;
   ReadParameters();
 }
 
@@ -239,10 +239,13 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
   if (key == "path") {
     m_lmPath = value;
   } else if (key == "support-features") {
-    if(value == "no")
+    if(value == "no") {
       numFeatures = 1;
-    else
-      numFeatures = 5;
+      m_numScoreComponents = 1;
+    }
+    else {
+      numFeatures = 1;
+    }
   } else if (key == "input-factor") {
     sFactor = Scan<int>(value);
   } else if (key == "output-factor") {

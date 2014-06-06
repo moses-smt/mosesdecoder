@@ -161,6 +161,8 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # and so on
 my $maximum_iterations = 25;
 
+my $___DISTINCT_N_BEST = 0;
+
 use Getopt::Long;
 GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
@@ -170,6 +172,7 @@ GetOptions(
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
   "nbest=i" => \$___N_BEST_LIST_SIZE,
+  "distinct" => \$___DISTINCT_N_BEST,
   "lattice-samples=i" => \$___LATTICE_SAMPLES,
   "queue-flags=s" => \$queue_flags,
   "jobs=i" => \$___JOBS,
@@ -1272,10 +1275,15 @@ sub run_decoder {
       $lsamp_cmd = " -lattice-samples $lsamp_filename $___LATTICE_SAMPLES ";
     }
 
+    my $DISTINCT = "";
+    if($___DISTINCT_N_BEST) {
+      $DISTINCT = "distinct";
+    }
+    
     if (defined $___JOBS && $___JOBS > 0) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE $DISTINCT\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $filename $___N_BEST_LIST_SIZE $DISTINCT -input-file $___DEV_F > run$run.out";
     }
 
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
