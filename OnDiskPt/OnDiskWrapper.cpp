@@ -31,7 +31,7 @@ using namespace std;
 namespace OnDiskPt
 {
 
-int OnDiskWrapper::VERSION_NUM = 6;
+int OnDiskWrapper::VERSION_NUM = 7;
 
 OnDiskWrapper::OnDiskWrapper()
 {

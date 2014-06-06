@@ -160,11 +160,11 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
       case 5: {
       	// sparse features
       	sparseFeatures << tok << " ";
-          break;
+        break;
       }
       case 6: {
-    	  property << tok << " ";
-    	  break;
+	    property << tok << " ";
+	    break;
       }
       default:
         cerr << "ERROR in line " << line << endl;

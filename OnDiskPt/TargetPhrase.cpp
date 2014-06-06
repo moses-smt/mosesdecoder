@@ -305,13 +305,14 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 
   // scores
   ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);
-  ret->Evaluate(mosesSP, phraseDict.GetFeaturesToApply());
 
   // sparse features
-  ret->???(m_sparseFeatures);
+  ret->GetScoreBreakdown().Assign(&phraseDict, m_sparseFeatures);
 
   // property
   ret->SetProperties(m_property);
+
+  ret->Evaluate(mosesSP, phraseDict.GetFeaturesToApply());
 
   return ret;
 }
@@ -354,7 +355,6 @@ UINT64 TargetPhrase::ReadStringFromFile(std::fstream &fileTPColl, std::string &o
 	  fileTPColl.read(mem, strSize);
 	  outStr = string(mem);
 	  free(mem);
-	  cerr << "outStr=" << outStr << endl;
 
 	  bytesRead += strSize;
   }
