@@ -109,7 +109,7 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
 
 OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
 {
-  stringstream property;
+  stringstream sparseFeatures, property;
 
   size_t scoreInd = 0;
 
@@ -152,13 +152,15 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
         break;
       }
       case 4: {
-        break;
+      	// store only the 3rd one (rule count)
+      	float val = Moses::Scan<float>(tok);
+      	misc[0] = val;
+          break;
       }
       case 5: {
-    	// store only the 3rd one (rule count)
-    	float val = Moses::Scan<float>(tok);
-    	misc[0] = val;
-        break;
+      	// sparse features
+      	sparseFeatures << tok << " ";
+          break;
       }
       case 6: {
     	  property << tok << " ";
@@ -175,6 +177,7 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
   } // while (tok != NULL)
 
   assert(scoreInd == numScores);
+  targetPhrase.SetSparseFeatures(Moses::Trim(sparseFeatures.str()));
   targetPhrase.SetProperty(Moses::Trim(property.str()));
   targetPhrase.SortAlign();
   return out;

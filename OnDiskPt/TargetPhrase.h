@@ -50,7 +50,7 @@ class TargetPhrase: public Phrase
 protected:
   AlignType m_align;
   PhrasePtr m_sourcePhrase;
-  std::string m_property;
+  std::string m_property, m_sparseFeatures;
 
   std::vector<float> m_scores;
   UINT64 m_filePos;
@@ -111,9 +111,14 @@ public:
 
   virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
-  void SetProperty(const std::string prop)
+  void SetProperty(const std::string &value)
   {
-	  m_property = prop;
+	  m_property = value;
+  }
+
+  void SetSparseFeatures(const std::string &value)
+  {
+	  m_sparseFeatures = value;
   }
 };
 
