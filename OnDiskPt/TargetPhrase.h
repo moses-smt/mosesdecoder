@@ -50,6 +50,7 @@ class TargetPhrase: public Phrase
 protected:
   AlignType m_align;
   PhrasePtr m_sourcePhrase;
+  std::string m_property;
 
   std::vector<float> m_scores;
   UINT64 m_filePos;
@@ -110,6 +111,10 @@ public:
 
   virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
+  void SetProperty(const std::string prop)
+  {
+	  m_property = prop;
+  }
 };
 
 }
