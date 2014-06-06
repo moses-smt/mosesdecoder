@@ -10,8 +10,9 @@ binmode(STDOUT, ":utf8");
 
 # apply switches
 my ($DIR,$CORPUS,$SCRIPTS_ROOT_DIR,$CONFIG,$HELP,$ERROR);
-my $LM = "SRILM"; # SRILM is default.
+my $LM = "KENLM"; # KENLM is default.
 my $BUILD_LM = "build-lm.sh";
+my $BUILD_KENLM = "$Bin/../../bin/lmplz";
 my $NGRAM_COUNT = "ngram-count";
 my $TRAIN_SCRIPT = "train-factored-phrase-model.perl";
 my $MAX_LEN = 1;
@@ -25,6 +26,7 @@ $ERROR = "training Aborted."
                        'dir=s' => \$DIR,
                        'ngram-count=s' => \$NGRAM_COUNT,
                        'build-lm=s' => \$BUILD_LM,
+                       'build-kenlm=s' => \$BUILD_KENLM,
                        'lm=s' => \$LM,
                        'train-script=s' => \$TRAIN_SCRIPT,
                        'scripts-root-dir=s' => \$SCRIPTS_ROOT_DIR,
@@ -55,7 +57,7 @@ if ($HELP || $ERROR) {
   --max-len=int             ... max phrase length (default: 1).
 
   = Language Model Training configuration =
-  --lm=[IRSTLM,SRILM]       ... language model (default: SRILM).
+  --lm=[IRSTLM,SRILM,KENLM] ... language model (default: KENLM).
   --build-lm=file           ... path to build-lm.sh if not in \$PATH (used only with --lm=IRSTLM).
   --ngram-count=file        ... path to ngram-count.sh if not in \$PATH (used only with --lm=SRILM).
 
@@ -110,9 +112,13 @@ sub train_lm {
     if (uc $LM eq "IRSTLM") {
         $cmd = "$BUILD_LM -t /tmp -i $CORPUS -n 3 -o $DIR/cased.irstlm.gz";
     }
-    else {
+    elsif (uc $LM eq "SRILM") {
         $LM = "SRILM";
         $cmd = "$NGRAM_COUNT -text $CORPUS -lm $DIR/cased.srilm.gz -interpolate -kndiscount";
+    }
+    else {
+        $LM = "KENLM";
+        $cmd = "$BUILD_KENLM --prune 0 0 1 -S 50% -T $DIR/lmtmp --order 3 --text $CORPUS --arpa $DIR/cased.kenlm.gz";
     }
     print STDERR "** Using $LM **" . "\n";
     print STDERR $cmd."\n";
@@ -160,8 +166,11 @@ sub train_recase_model {
     if (uc $LM eq "IRSTLM") {
         $cmd .= " --lm 0:3:$DIR/cased.irstlm.gz:1";
     }
-    else {
+    elsif (uc $LM eq "SRILM") {
         $cmd .= " --lm 0:3:$DIR/cased.srilm.gz:8";
+    }
+    else {
+        $cmd .= " --lm 0:3:$DIR/cased.kenlm.gz:8";
     }
     $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";
