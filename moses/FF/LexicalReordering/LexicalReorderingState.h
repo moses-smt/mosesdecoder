@@ -67,6 +67,10 @@ public:
     return m_collapseScores;
   }
 
+  const SparseReordering* GetSparseReordering() const {
+    return m_sparse.get();
+  }
+
 private:
   void SetScoreProducer(LexicalReordering* scoreProducer) {
     m_scoreProducer = scoreProducer;

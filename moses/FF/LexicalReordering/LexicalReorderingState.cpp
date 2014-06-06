@@ -134,24 +134,26 @@ void LexicalReorderingState::CopyScores(ScoreComponentCollection*  accum, const 
   // don't call this on a bidirectional object
   UTIL_THROW_IF2(m_direction != LexicalReorderingConfiguration::Backward && m_direction != LexicalReorderingConfiguration::Forward,
 		  "Unknown direction: " << m_direction);
-  const Scores *cachedScores = (m_direction == LexicalReorderingConfiguration::Backward) ?
-                               topt.GetLexReorderingScores(m_configuration.GetScoreProducer()) :
-                               m_prevOption->GetLexReorderingScores(m_configuration.GetScoreProducer());
+  const TranslationOption* relevantOpt = &topt;
+  if (m_direction != LexicalReorderingConfiguration::Backward) relevantOpt = m_prevOption;
+  const Scores *cachedScores = relevantOpt->GetLexReorderingScores(m_configuration.GetScoreProducer());
 
-  // No scores available. TODO: Using a good prior distribution would be nicer.
-  if(cachedScores == NULL)
-    return;
+  if(cachedScores) {
+    Scores scores(m_configuration.GetScoreProducer()->GetNumScoreComponents(),0);
 
-  Scores scores(m_configuration.GetScoreProducer()->GetNumScoreComponents(),0);
-
-  const Scores &scoreSet = *cachedScores;
-  if(m_configuration.CollapseScores())
-    scores[m_offset] = scoreSet[m_offset + reoType];
-  else {
-    std::fill(scores.begin() + m_offset, scores.begin() + m_offset + m_configuration.GetNumberOfTypes(), 0);
-    scores[m_offset + reoType] = scoreSet[m_offset + reoType];
+    const Scores &scoreSet = *cachedScores;
+    if(m_configuration.CollapseScores())
+      scores[m_offset] = scoreSet[m_offset + reoType];
+    else {
+      std::fill(scores.begin() + m_offset, scores.begin() + m_offset + m_configuration.GetNumberOfTypes(), 0);
+      scores[m_offset + reoType] = scoreSet[m_offset + reoType];
+    }
+    accum->PlusEquals(m_configuration.GetScoreProducer(), scores);
   }
-  accum->PlusEquals(m_configuration.GetScoreProducer(), scores);
+
+  const SparseReordering* sparse = m_configuration.GetSparseReordering();
+  if (sparse) sparse->CopyScores(*relevantOpt, reoType, m_direction, accum);
+
 }
 
 

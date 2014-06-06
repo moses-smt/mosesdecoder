@@ -20,9 +20,9 @@
   sparse-words-(source|target)-<id>=<filename>  -- Features which fire for the words in the list
   sparse-clusters-(source|target)-<id>=<filename> -- Features which fire for clusters in the list. Format
                                      of cluster file TBD
-  sparse-phrase                    -- Add features which depend on the current phrase
+  sparse-phrase                    -- Add features which depend on the current phrase (backward)
   sparse-stack                     -- Add features which depend on the previous phrase, or
-                                      top of stack.
+                                      top of stack. (forward)
   sparse-between                   -- Add features which depend on words between previous phrase
                                       (or top of stack) and current phrase.
 **/
@@ -34,7 +34,8 @@ class SparseReordering
 public:
   SparseReordering(const std::map<std::string,std::string>& config);
   
-  void AddScores(const TranslationOption& topt,
+  //If direction is backward topt is the current option, otherwise the previous
+  void CopyScores(const TranslationOption& topt,
                  LexicalReorderingState::ReorderingType reoType,
                  LexicalReorderingConfiguration::Direction direction,
                  ScoreComponentCollection* scores) const ;

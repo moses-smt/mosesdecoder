@@ -50,12 +50,13 @@ void SparseReordering::ReadWordList(const string& filename, const string& id, ve
   }
 }
 
-void SparseReordering::AddScores(
-              const TranslationOption& topt,
+void SparseReordering::CopyScores(
+               const TranslationOption& topt,
                LexicalReorderingState::ReorderingType reoType,
                LexicalReorderingConfiguration::Direction direction,
                ScoreComponentCollection* scores) const 
 {
+  //std::cerr << "SR " << topt << " " << reoType << " " << direction << std::endl;
 }
 
 } //namespace
