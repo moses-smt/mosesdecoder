@@ -47,7 +47,9 @@ sub reduce_factors {
     $firstline =~ s/^\s*//;
     $firstline =~ s/\s.*//;
     # count factors
-    my $maxfactorindex = $firstline =~ tr/|/|/;
+    my @WORD = split(/ /,$firstline);
+    my @FACTOR = split(/$___FACTOR_DELIMITER/,$WORD[0]);
+    my $maxfactorindex = scalar(@FACTOR)-1;
     if (join(",", @INCLUDE) eq join(",", 0..$maxfactorindex)) {
 	# create just symlink; preserving compression
 	my $realfull = $full;
