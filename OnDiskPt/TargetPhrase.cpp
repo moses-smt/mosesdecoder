@@ -162,13 +162,14 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
   // allocate mem
   size_t numScores = onDiskWrapper.GetNumScores()
                      ,numAlign = GetAlign().size();
+  size_t sparseFeatureSize = m_sparseFeatures.size();
   size_t propSize = m_property.size();
 
   size_t memNeeded = sizeof(UINT64) // file pos (phrase id)
   	  	  	  	  + sizeof(UINT64) + 2 * sizeof(UINT64) * numAlign // align
   	  	  	  	  + sizeof(float) * numScores // scores
-  	  	  	  	  + sizeof(UINT64)					// size of property string
-  	  	  	  	  + propSize;  // actual property string
+  	  	  	  	  + sizeof(UINT64) + sparseFeatureSize // sparse features string
+  	  	  	  	  + sizeof(UINT64) + propSize; // property string
 
   char *mem = (char*) malloc(memNeeded);
   //memset(mem, 0, memNeeded);
@@ -186,19 +187,31 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
   // scores
   memUsed += WriteScoresToMemory(mem + memUsed);
 
-  // property string
-  char *currPtr = (char*)mem + memUsed;
-  UINT64 *memTmp = (UINT64*) currPtr;
-  memTmp[0] = propSize;
-  memUsed += sizeof(UINT64);
+  // sparse features
+  memUsed += WriteStringToMemory(mem + memUsed, m_sparseFeatures);
 
-  const char *propChar = m_property.c_str();
-  memcpy(mem + memUsed, propChar, propSize);
-  memUsed += propSize;
+  // property string
+  memUsed += WriteStringToMemory(mem + memUsed, m_property);
 
   //DebugMem(mem, memNeeded);
   assert(memNeeded == memUsed);
   return mem;
+}
+
+size_t TargetPhrase::WriteStringToMemory(char *mem, const std::string &str) const
+{
+  size_t memUsed = 0;
+  UINT64 *memTmp = (UINT64*) mem;
+
+  size_t strSize = str.size();
+  memTmp[0] = strSize;
+  memUsed += sizeof(UINT64);
+
+  const char *charStr = str.c_str();
+  memcpy(mem + memUsed, charStr, strSize);
+  memUsed += strSize;
+
+  return memUsed;
 }
 
 size_t TargetPhrase::WriteAlignToMemory(char *mem) const
@@ -294,6 +307,9 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);
   ret->Evaluate(mosesSP, phraseDict.GetFeaturesToApply());
 
+  // sparse features
+  ret->???(m_sparseFeatures);
+
   // property
   ret->SetProperties(m_property);
 
@@ -315,6 +331,9 @@ UINT64 TargetPhrase::ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPC
   memUsed += ReadScoresFromFile(fileTPColl);
   assert((memUsed + filePos) == (UINT64)fileTPColl.tellg());
 
+  // sparse features
+  memUsed += ReadStringFromFile(fileTPColl, m_sparseFeatures);
+
   // properties
   memUsed += ReadStringFromFile(fileTPColl, m_property);
 
@@ -325,19 +344,19 @@ UINT64 TargetPhrase::ReadStringFromFile(std::fstream &fileTPColl, std::string &o
 {
   UINT64 bytesRead = 0;
 
-  UINT64 propSize;
-  fileTPColl.read((char*) &propSize, sizeof(UINT64));
+  UINT64 strSize;
+  fileTPColl.read((char*) &strSize, sizeof(UINT64));
   bytesRead += sizeof(UINT64);
 
-  if (propSize) {
-	  char *mem = (char*) malloc(propSize + 1);
-	  mem[propSize] = '\0';
-	  fileTPColl.read(mem, propSize);
+  if (strSize) {
+	  char *mem = (char*) malloc(strSize + 1);
+	  mem[strSize] = '\0';
+	  fileTPColl.read(mem, strSize);
 	  outStr = string(mem);
 	  free(mem);
 	  cerr << "outStr=" << outStr << endl;
 
-	  bytesRead += propSize;
+	  bytesRead += strSize;
   }
 
   return bytesRead;
