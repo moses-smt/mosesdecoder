@@ -378,6 +378,7 @@ FFState *LanguageModelDALM::EvaluateChart(const ChartHypothesis& hypo, int featu
 
 			// copy chart state
 			(*newState) = (*prevState);
+			hypoSizeAll = hypoSize+prevState->GetHypoSize()-1;
 
       // get hypoScore
 			hypoScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
@@ -496,6 +497,7 @@ void LanguageModelDALM::EvaluateTerminal(
 		hypoScore += score;
 	}else{
 		float score = m_lm->query(wid, state, prefixFragments[prefixLength]);
+
 		if(score > 0){
 			hypoScore -= score;
 			newState->SetAsLarge();
@@ -538,9 +540,8 @@ void LanguageModelDALM::EvaluateNonTerminal(
 		state = prevState->GetRightContext();
 		return;
 	}
-
 	DALM::Gap gap(state);
-	
+
   // score its prefix
   for(size_t prefixPos = 0; prefixPos < prevPrefixLength; prefixPos++) {
 		const DALM::Fragment &f = prevPrefixFragments[prefixPos];
@@ -551,7 +552,7 @@ void LanguageModelDALM::EvaluateNonTerminal(
 			if(!gap.is_extended()){
 				state = prevState->GetRightContext();
 				return;
-			}else if(gap.get_count() <= prefixPos+1){
+			}else if(state.get_count() <= prefixPos+1){
 				state = prevState->GetRightContext();
 				return;
 			}
@@ -559,11 +560,12 @@ void LanguageModelDALM::EvaluateNonTerminal(
 			DALM::Fragment &fnew = prefixFragments[prefixLength];
 			float score = m_lm->query(f, state, gap, fnew);
 			hypoScore += score;
+
 			if(!gap.is_extended()){
 				newState->SetAsLarge();
 				state = prevState->GetRightContext();
 				return;
-			}else if(gap.get_count() <= prefixPos+1){
+			}else if(state.get_count() <= prefixPos+1){
 				if(!gap.is_finalized()) prefixLength++;
 				newState->SetAsLarge();
 				state = prevState->GetRightContext();
@@ -582,7 +584,7 @@ void LanguageModelDALM::EvaluateNonTerminal(
   if (prevState->LargeEnough()) {
     newState->SetAsLarge();
 		if(prevPrefixLength < prevState->GetHypoSize()){
- 			hypoScore += state.sum_bows(prevPrefixLength, gap.get_count());
+ 			hypoScore += state.sum_bows(prevPrefixLength, state.get_count());
   	}
    	// copy language model state
 		state = prevState->GetRightContext();
