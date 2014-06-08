@@ -12,7 +12,6 @@
 #include <time.h>
 
 #include "AlignmentPhrase.h"
-#include "SafeGetline.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
 

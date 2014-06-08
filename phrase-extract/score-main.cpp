@@ -29,7 +29,6 @@
 #include <vector>
 #include <algorithm>
 
-#include "SafeGetline.h"
 #include "ScoreFeature.h"
 #include "tables-core.h"
 #include "ExtractionPhrasePair.h"

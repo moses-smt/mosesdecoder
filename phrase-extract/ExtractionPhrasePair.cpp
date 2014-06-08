@@ -19,7 +19,6 @@
 
 #include <sstream>
 #include "ExtractionPhrasePair.h"
-#include "SafeGetline.h"
 #include "tables-core.h"
 #include "score.h"
 #include "moses/Util.h"

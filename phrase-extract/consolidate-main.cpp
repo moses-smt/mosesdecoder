@@ -26,7 +26,6 @@
 #include <cstring>
 
 #include "tables-core.h"
-#include "SafeGetline.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 

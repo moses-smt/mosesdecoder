@@ -19,7 +19,6 @@
 #include <set>
 #include <vector>
 
-#include "SafeGetline.h"
 #include "SentenceAlignment.h"
 #include "tables-core.h"
 #include "InputFileStream.h"

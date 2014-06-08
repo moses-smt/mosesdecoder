@@ -2,7 +2,6 @@
 #include "ExtractionPhrasePair.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
-#include "SafeGetline.h"
 
 using namespace std;
 

@@ -39,7 +39,6 @@
 #include "Hole.h"
 #include "HoleCollection.h"
 #include "RuleExist.h"
-#include "SafeGetline.h"
 #include "SentenceAlignmentWithSyntax.h"
 #include "SyntaxTree.h"
 #include "tables-core.h"
