@@ -30,8 +30,6 @@
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 
-#define LINE_MAX_LENGTH 10000
-
 using namespace std;
 
 bool hierarchicalFlag = false;
@@ -46,12 +44,11 @@ inline float maybeLogProb( float a )
   return logProbFlag ? log(a) : a;
 }
 
-char line[LINE_MAX_LENGTH];
 void processFiles( char*, char*, char*, char* );
 void loadCountOfCounts( char* );
 void breakdownCoreAndSparse( string combined, string &core, string &sparse );
 bool getLine( istream &fileP, vector< string > &item );
-vector< string > splitLine();
+vector< string > splitLine(const char *line);
 vector< int > countBin;
 bool sparseCountBinFeatureFlag = false;
 
@@ -140,14 +137,13 @@ void loadCountOfCounts( char* fileNameCountOfCounts )
   istream &fileP = fileCountOfCounts;
 
   countOfCounts.push_back(0.0);
-  while(1) {
-    if (fileP.eof()) break;
-    SAFE_GETLINE((fileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (fileP.eof()) break;
+
+  string line;
+  while (getline(fileP, line)) {
     if (totalCount < 0)
-      totalCount = atof(line); // total number of distinct phrase pairs
+      totalCount = atof(line.c_str()); // total number of distinct phrase pairs
     else
-      countOfCounts.push_back( atof(line) );
+      countOfCounts.push_back( atof(line.c_str()) );
   }
   fileCountOfCounts.Close();
 
@@ -370,16 +366,16 @@ bool getLine( istream &fileP, vector< string > &item )
   if (fileP.eof())
     return false;
 
-  SAFE_GETLINE((fileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-  if (fileP.eof())
+  string line;
+  if (!getline(fileP, line))
     return false;
 
-  item = splitLine();
+  item = splitLine(line.c_str());
 
   return true;
 }
 
-vector< string > splitLine()
+vector< string > splitLine(const char *line)
 {
   vector< string > item;
   int start=0;
