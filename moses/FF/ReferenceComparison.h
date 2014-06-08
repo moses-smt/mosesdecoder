@@ -22,22 +22,13 @@ public:
                         , ScoreComponentCollection &estimatedFutureScore) const
   {}
 
-  <<<<<<< HEAD
   virtual void Evaluate(const InputType &input
                         , const InputPath &inputPath
                         , const TargetPhrase &targetPhrase
+                        , const StackVec *stackVec
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
-  =======
-    virtual void Evaluate(const InputType &input
-                          , const InputPath &inputPath
-                          , const TargetPhrase &targetPhrase
-                          , const StackVec *stackVec
-                          , ScoreComponentCollection &scoreBreakdown
-                          , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  >>>>>>> master
 
   virtual void Evaluate(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const

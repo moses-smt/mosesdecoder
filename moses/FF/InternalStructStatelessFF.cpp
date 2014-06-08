@@ -16,35 +16,27 @@ void InternalStructStatelessFF::Evaluate(const Phrase &source
 }
 
 void InternalStructStatelessFF::Evaluate(const InputType &input
-    <<<<<<< HEAD
-    , const InputPath &inputPath
-    , const TargetPhrase &targetPhrase
-    , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
-{
-  =======
     , const InputPath &inputPath
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const {
-    >>>>>>> master
+    , ScoreComponentCollection *estimatedFutureScore) const
+{
 
-    cerr  << "HHHHH" << scoreBreakdown << endl;
-    scoreBreakdown.PlusEquals(this, 66);
-    /*	FactorList f_mask;
-    	f_mask.push_back(0);
-    		//if(inputPath.GetPhrase().GetStringRep(f_mask).)
-    	int score =50;
-    	for(size_t i=0;i<inputPath.GetPhrase().GetSize();i++){
-    		if(inputPath.GetPhrase(). GetFactor(i,0)->GetString().as_string()=="ist"){
-    			//cout<<inputPath.GetPhrase().GetStringRep(f_mask);
-    			score+=1;
-    		}
-    	}
-    	scoreBreakdown.PlusEquals(this, score);
-    */
-  }
+  scoreBreakdown.PlusEquals(this, 66);
+  /*	FactorList f_mask;
+  	f_mask.push_back(0);
+  		//if(inputPath.GetPhrase().GetStringRep(f_mask).)
+  	int score =50;
+  	for(size_t i=0;i<inputPath.GetPhrase().GetSize();i++){
+  		if(inputPath.GetPhrase(). GetFactor(i,0)->GetString().as_string()=="ist"){
+  			//cout<<inputPath.GetPhrase().GetStringRep(f_mask);
+  			score+=1;
+  		}
+  	}
+  	scoreBreakdown.PlusEquals(this, score);
+  */
+}
 
 }
 

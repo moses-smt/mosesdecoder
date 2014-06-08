@@ -76,11 +76,7 @@ void ConstrainedDecoding::Load()
 std::vector<float> ConstrainedDecoding::DefaultWeights() const
 {
   UTIL_THROW_IF2(m_numScoreComponents != 1,
-                 <<<<<<< HEAD
                  "ConstrainedDecoding must only have 1 score");
-  =======
-    "ConstrainedDecoding must only have 1 score");
-  >>>>>>> master
   vector<float> ret(1, 1);
   return ret;
 }
@@ -127,110 +123,84 @@ FFState* ConstrainedDecoding::Evaluate(
   float score;
   if (hypo.IsSourceCompleted()) {
     // translated entire sentence.
-    <<<<<<< HEAD
-    bool match = (searchPos == 0) && (ref->GetSize() == outputPhrase.GetSize());
+    bool match = (searchPos == 0) && (size == outputPhrase.GetSize());
     if (!m_negate) {
-      score = match ? 0 : - std::numeric_limits<float>::infinity();
+      score = match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
     } else {
-      score = !match ? 0 : - std::numeric_limits<float>::infinity();
-      =======
-        bool match = (searchPos == 0) && (size == outputPhrase.GetSize());
-      if (!m_negate) {
-        score = match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
-      } else {
-        score = !match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
-        >>>>>>> master
-      }
+      score = !match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
     }
-    else if (m_negate) {
-      // keep all derivations
-      score = 0;
-      <<<<<<< HEAD
-    } else {
-      score = (searchPos != NOT_FOUND) ? 0 : - std::numeric_limits<float>::infinity();
-      =======
-    }
-    else {
-      score = (searchPos != NOT_FOUND) ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
-      >>>>>>> master
-    }
-
-    accumulator->PlusEquals(this, score);
-
-    return ret;
+  } else if (m_negate) {
+    // keep all derivations
+    score = 0;
+  } else {
+    score = (searchPos != NOT_FOUND) ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
   }
 
-  FFState* ConstrainedDecoding::EvaluateChart(
-    const ChartHypothesis &hypo,
-    int /* featureID - used to index the state in the previous hypotheses */,
-    ScoreComponentCollection* accumulator) const {
-    const std::vector<Phrase> *ref = GetConstraint<ChartHypothesis, ChartManager>(m_constraints, hypo);
-    assert(ref);
+  accumulator->PlusEquals(this, score);
 
-    const ChartManager &mgr = hypo.GetManager();
-    const Sentence &source = static_cast<const Sentence&>(mgr.GetSource());
+  return ret;
+}
 
-    ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
-    const Phrase &outputPhrase = ret->GetPhrase();
+FFState* ConstrainedDecoding::EvaluateChart(
+  const ChartHypothesis &hypo,
+  int /* featureID - used to index the state in the previous hypotheses */,
+  ScoreComponentCollection* accumulator) const
+{
+  const std::vector<Phrase> *ref = GetConstraint<ChartHypothesis, ChartManager>(m_constraints, hypo);
+  assert(ref);
 
-    size_t searchPos = NOT_FOUND;
-    size_t i = 0;
-    size_t size = 0;
-    while(searchPos == NOT_FOUND && i < ref->size()) {
-      searchPos = (*ref)[i].Find(outputPhrase, m_maxUnknowns);
-      size = (*ref)[i].GetSize();
-      i++;
-    }
+  const ChartManager &mgr = hypo.GetManager();
+  const Sentence &source = static_cast<const Sentence&>(mgr.GetSource());
 
-    float score;
-    if (hypo.GetCurrSourceRange().GetStartPos() == 0 &&
-        hypo.GetCurrSourceRange().GetEndPos() == source.GetSize() - 1) {
-      // translated entire sentence.
-      <<<<<<< HEAD
-      bool match = (searchPos == 0) && (ref->GetSize() == outputPhrase.GetSize());
+  ConstrainedDecodingState *ret = new ConstrainedDecodingState(hypo);
+  const Phrase &outputPhrase = ret->GetPhrase();
 
-      if (!m_negate) {
-        score = match ? 0 : - std::numeric_limits<float>::infinity();
-      } else {
-        score = !match ? 0 : - std::numeric_limits<float>::infinity();
-        =======
-          bool match = (searchPos == 0) && (size == outputPhrase.GetSize());
-
-        if (!m_negate) {
-          score = match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
-        } else {
-          score = !match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
-          >>>>>>> master
-        }
-      }
-      else if (m_negate) {
-        // keep all derivations
-        score = 0;
-      } else {
-        score = (searchPos != NOT_FOUND) ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
-      }
-
-      accumulator->PlusEquals(this, score);
-
-      return ret;
-    }
-
-    void ConstrainedDecoding::SetParameter(const std::string& key, const std::string& value) {
-      if (key == "path") {
-        m_paths = Tokenize(value, ",");
-      } else if (key == "max-unknowns") {
-        m_maxUnknowns = Scan<int>(value);
-      } else if (key == "negate") {
-        m_negate = Scan<bool>(value);
-        <<<<<<< HEAD
-        =======
-      } else if (key == "soft") {
-        m_soft = Scan<bool>(value);
-        >>>>>>> master
-      } else {
-        StatefulFeatureFunction::SetParameter(key, value);
-      }
-    }
-
+  size_t searchPos = NOT_FOUND;
+  size_t i = 0;
+  size_t size = 0;
+  while(searchPos == NOT_FOUND && i < ref->size()) {
+    searchPos = (*ref)[i].Find(outputPhrase, m_maxUnknowns);
+    size = (*ref)[i].GetSize();
+    i++;
   }
+
+  float score;
+  if (hypo.GetCurrSourceRange().GetStartPos() == 0 &&
+      hypo.GetCurrSourceRange().GetEndPos() == source.GetSize() - 1) {
+    // translated entire sentence.
+    bool match = (searchPos == 0) && (size == outputPhrase.GetSize());
+
+    if (!m_negate) {
+      score = match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
+    } else {
+      score = !match ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
+    }
+  } else if (m_negate) {
+    // keep all derivations
+    score = 0;
+  } else {
+    score = (searchPos != NOT_FOUND) ? 0 : - ( m_soft ? 1 : std::numeric_limits<float>::infinity());
+  }
+
+  accumulator->PlusEquals(this, score);
+
+  return ret;
+}
+
+void ConstrainedDecoding::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "path") {
+    m_paths = Tokenize(value, ",");
+  } else if (key == "max-unknowns") {
+    m_maxUnknowns = Scan<int>(value);
+  } else if (key == "negate") {
+    m_negate = Scan<bool>(value);
+  } else if (key == "soft") {
+    m_soft = Scan<bool>(value);
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
+}
+
+}
 
