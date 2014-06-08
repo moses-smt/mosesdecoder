@@ -19,7 +19,6 @@
 #include <set>
 #include <vector>
 
-#include "SafeGetline.h"
 #include "SentenceAlignment.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
@@ -31,10 +30,6 @@ using namespace MosesTraining;
 
 namespace MosesTraining
 {
-
-
-const long int LINE_MAX_LENGTH = 500000 ;
-
 
 // HPhraseVertex represents a point in the alignment matrix
 typedef pair <int, int> HPhraseVertex;
@@ -277,20 +272,18 @@ int main(int argc, char* argv[])
 
   int i = sentenceOffset;
 
-  while(true) {
+  string englishString, foreignString, alignmentString, weightString;
+
+  while(getline(*eFileP, englishString)) {
     i++;
     if (i%10000 == 0) cerr << "." << flush;
-    char englishString[LINE_MAX_LENGTH];
-    char foreignString[LINE_MAX_LENGTH];
-    char alignmentString[LINE_MAX_LENGTH];
-    char weightString[LINE_MAX_LENGTH];
-    SAFE_GETLINE((*eFileP), englishString, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (eFileP->eof()) break;
-    SAFE_GETLINE((*fFileP), foreignString, LINE_MAX_LENGTH, '\n', __FILE__);
-    SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n', __FILE__);
+
+    getline(*fFileP, foreignString);
+    getline(*aFileP, alignmentString);
     if (iwFileP) {
-      SAFE_GETLINE((*iwFileP), weightString, LINE_MAX_LENGTH, '\n', __FILE__);
+      getline(*iwFileP, weightString);
     }
+
     SentenceAlignment sentence;
     // cout << "read in: " << englishString << " & " << foreignString << " & " << alignmentString << endl;
     //az: output src, tgt, and alingment line
@@ -300,7 +293,11 @@ int main(int argc, char* argv[])
       cout << "LOG: ALT: " << alignmentString << endl;
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
-    if (sentence.create( englishString, foreignString, alignmentString, weightString, i, false)) {
+    if (sentence.create( englishString.c_str(),
+    					foreignString.c_str(),
+    					alignmentString.c_str(),
+    					weightString.c_str(),
+    					i, false)) {
       if (options.placeholders.size()) {
         sentence.invertAlignment();
       }
