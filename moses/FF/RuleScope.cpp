@@ -5,8 +5,8 @@
 namespace Moses
 {
 RuleScope::RuleScope(const std::string &line)
-:StatelessFeatureFunction(1, line)
-,m_sourceSyntax(true)
+  :StatelessFeatureFunction(1, line)
+  ,m_sourceSyntax(true)
 {
 }
 
@@ -17,9 +17,9 @@ bool IsAmbiguous(const Word &word, bool sourceSyntax)
 }
 
 void RuleScope::Evaluate(const Phrase &source
-						, const TargetPhrase &targetPhrase
-						, ScoreComponentCollection &scoreBreakdown
-						, ScoreComponentCollection &estimatedFutureScore) const
+                         , const TargetPhrase &targetPhrase
+                         , ScoreComponentCollection &scoreBreakdown
+                         , ScoreComponentCollection &estimatedFutureScore) const
 {
   // adjacent non-term count as 1 ammbiguity, rather than 2 as in rule scope
   // source can't be empty, right?

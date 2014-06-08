@@ -71,10 +71,9 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
     ChartTranslationOption *transOpt = m_collection[i].get();
 
     if (transOpt->GetScores().GetWeightedScore() == - std::numeric_limits<float>::infinity()) {
-    	++numDiscard;
-    }
-    else if (numDiscard) {
-    	m_collection[i - numDiscard] = boost::shared_ptr<ChartTranslationOption>(transOpt);
+      ++numDiscard;
+    } else if (numDiscard) {
+      m_collection[i - numDiscard] = boost::shared_ptr<ChartTranslationOption>(transOpt);
     }
   }
 

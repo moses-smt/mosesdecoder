@@ -106,10 +106,10 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
 
   // Prune if bursting
   if (m_ruleLimit && m_size == m_ruleLimit * 2) {
-	NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin() + m_ruleLimit - 1,
-                     m_collection.begin() + m_size,
-                     ChartTranslationOptionOrderer());
+    NTH_ELEMENT4(m_collection.begin(),
+                 m_collection.begin() + m_ruleLimit - 1,
+                 m_collection.begin() + m_size,
+                 ChartTranslationOptionOrderer());
     m_scoreThreshold = m_collection[m_ruleLimit-1]->GetEstimateOfBestScore();
     m_size = m_ruleLimit;
   }
@@ -182,12 +182,11 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
   for (size_t i = 0; i < m_size; ++i) {
     ChartTranslationOptions *transOpts = m_collection[i];
     if (transOpts->GetSize() == 0) {
-    	//delete transOpts;
-      	++numDiscard;
-    }
-    else if (numDiscard) {
-    	SwapTranslationOptions(i - numDiscard, i);
-    	//m_collection[] = transOpts;
+      //delete transOpts;
+      ++numDiscard;
+    } else if (numDiscard) {
+      SwapTranslationOptions(i - numDiscard, i);
+      //m_collection[] = transOpts;
     }
   }
 

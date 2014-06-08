@@ -46,15 +46,15 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
-  
-    void Evaluate(const InputType &input
+
+  void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
-  
+
   FFState* Evaluate(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,

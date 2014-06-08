@@ -161,7 +161,7 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 
     // backoff
     if (!SatisfyBackoff(inputPath)) {
-    	continue;
+      continue;
     }
 
     if (prevPtNode) {
@@ -173,7 +173,7 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
         const TargetPhraseCollection &targetPhrases = ptNode->GetTargetPhraseCollection();
         inputPath.SetTargetPhrases(*this, &targetPhrases, ptNode);
       } else {
-    	  inputPath.SetTargetPhrases(*this, NULL, NULL);
+        inputPath.SetTargetPhrases(*this, NULL, NULL);
       }
     }
   }

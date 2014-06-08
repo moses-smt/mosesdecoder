@@ -48,7 +48,7 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
       WordsRange range(startPos, endPos);
 
       if (range.GetNumWordsCovered() > maxPhraseLength) {
-    	  continue;
+        continue;
       }
 
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
@@ -73,53 +73,53 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
 
 void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const WordLattice &input)
 {
-	size_t nextPos = prevPath.GetWordsRange().GetEndPos() + 1;
-	if (nextPos >= input.GetSize()) {
-		return;
-	}
+  size_t nextPos = prevPath.GetWordsRange().GetEndPos() + 1;
+  if (nextPos >= input.GetSize()) {
+    return;
+  }
 
-	size_t startPos = prevPath.GetWordsRange().GetStartPos();
-    const Phrase &prevPhrase = prevPath.GetPhrase();
-    const ScorePair *prevInputScore = prevPath.GetInputScore();
-    UTIL_THROW_IF2(prevInputScore == NULL,
-    		"Null previous score");
+  size_t startPos = prevPath.GetWordsRange().GetStartPos();
+  const Phrase &prevPhrase = prevPath.GetPhrase();
+  const ScorePair *prevInputScore = prevPath.GetInputScore();
+  UTIL_THROW_IF2(prevInputScore == NULL,
+                 "Null previous score");
 
 
-	const std::vector<size_t> &nextNodes = input.GetNextNodes(nextPos);
+  const std::vector<size_t> &nextNodes = input.GetNextNodes(nextPos);
 
-    const ConfusionNet::Column &col = input.GetColumn(nextPos);
-    for (size_t i = 0; i < col.size(); ++i) {
-      const Word &word = col[i].first;
-      UTIL_THROW_IF2(word.IsEpsilon(), "Epsilon not supported");
+  const ConfusionNet::Column &col = input.GetColumn(nextPos);
+  for (size_t i = 0; i < col.size(); ++i) {
+    const Word &word = col[i].first;
+    UTIL_THROW_IF2(word.IsEpsilon(), "Epsilon not supported");
 
-      size_t nextNode = nextNodes[i];
-      size_t endPos = nextPos + nextNode - 1;
+    size_t nextNode = nextNodes[i];
+    size_t endPos = nextPos + nextNode - 1;
 
-      WordsRange range(startPos, endPos);
+    WordsRange range(startPos, endPos);
 
-      size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
-      if (range.GetNumWordsCovered() > maxPhraseLength) {
-    	  continue;
-      }
-
-      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
-
-      Phrase subphrase(prevPhrase);
-      subphrase.AddWord(word);
-
-      const ScorePair &scores = col[i].second;
-      ScorePair *inputScore = new ScorePair(*prevInputScore);
-      inputScore->PlusEquals(scores);
-
-      InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
-
-      path->SetNextNode(nextNode);
-      m_inputPathQueue.push_back(path);
-
-      // recursive
-      Extend(*path, input);
-
+    size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+    if (range.GetNumWordsCovered() > maxPhraseLength) {
+      continue;
     }
+
+    const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
+
+    Phrase subphrase(prevPhrase);
+    subphrase.AddWord(word);
+
+    const ScorePair &scores = col[i].second;
+    ScorePair *inputScore = new ScorePair(*prevInputScore);
+    inputScore->PlusEquals(scores);
+
+    InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
+
+    path->SetNextNode(nextNode);
+    m_inputPathQueue.push_back(path);
+
+    // recursive
+    Extend(*path, input);
+
+  }
 }
 
 void TranslationOptionCollectionLattice::CreateTranslationOptions()
@@ -154,10 +154,9 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
     } else if (path.GetPhrase().GetSize() == 1) {
       // unknown word processing
       ProcessOneUnknownWord(path, path.GetWordsRange().GetEndPos(), 1, path.GetInputScore());
-    }
-    else if (path.GetPhrase().GetSize() == 1) {
-    	// unknown word processing
-    	ProcessOneUnknownWord(path, path.GetWordsRange().GetStartPos(),  path.GetWordsRange().GetNumWordsCovered() , path.GetInputScore());
+    } else if (path.GetPhrase().GetSize() == 1) {
+      // unknown word processing
+      ProcessOneUnknownWord(path, path.GetWordsRange().GetStartPos(),  path.GetWordsRange().GetNumWordsCovered() , path.GetInputScore());
     }
   }
 

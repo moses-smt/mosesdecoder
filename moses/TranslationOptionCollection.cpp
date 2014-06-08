@@ -395,7 +395,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
 //        VERBOSE(1,"TranslationOptionCollection::CreateTranslationOptions() endPos:" << endPos << endl);
         if (graphInd > 0 && // only skip subsequent graphs
-        	backoff != 0 && // use of backoff specified
+            backoff != 0 && // use of backoff specified
             (endPos-startPos+1 <= backoff || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
@@ -623,8 +623,8 @@ void TranslationOptionCollection::Add(TranslationOption *translationOption)
   const WordsRange &coverage = translationOption->GetSourceWordsRange();
 
   if (coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size()) {
-	  cerr << "translationOption=" << *translationOption << endl;
-	  cerr << "coverage=" << coverage << endl;
+    cerr << "translationOption=" << *translationOption << endl;
+    cerr << "coverage=" << coverage << endl;
   }
 
   UTIL_THROW_IF2(coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size(),

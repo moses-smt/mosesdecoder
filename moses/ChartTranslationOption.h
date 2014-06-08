@@ -45,8 +45,8 @@ public:
   }
 
   void Evaluate(const InputType &input,
-		  const InputPath &inputPath,
-		  const StackVec &stackVec);
+                const InputPath &inputPath,
+                const StackVec &stackVec);
 };
 
 }

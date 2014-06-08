@@ -139,7 +139,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
 
   // backoff
   if (!SatisfyBackoff(inputPath)) {
-  	return;
+    return;
   }
 
   if (prevPtNode) {

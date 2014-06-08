@@ -15,11 +15,13 @@ public:
 
   virtual void ProcessValue() {};
 
-  const std::string &GetValueString() { return m_value; };
+  const std::string &GetValueString() {
+    return m_value;
+  };
 
 protected:
 
-  const std::string m_value;  
+  const std::string m_value;
 
 };
 

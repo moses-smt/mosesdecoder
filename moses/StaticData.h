@@ -758,8 +758,9 @@ public:
     return m_registry;
   }
 
-  const PhrasePropertyFactory &GetPhrasePropertyFactory() const
-  { return m_phrasePropertyFactory; }
+  const PhrasePropertyFactory &GetPhrasePropertyFactory() const {
+    return m_phrasePropertyFactory;
+  }
 
   /** check whether we should be using the old code to support binary phrase-table.
   ** eventually, we'll stop support the binary phrase-table and delete this legacy code

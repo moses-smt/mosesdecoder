@@ -21,11 +21,11 @@ public:
                         , ScoreComponentCollection &estimatedFutureScore) const;
 
   virtual void Evaluate(const InputType &input
-                         , const InputPath &inputPath
-                         , const TargetPhrase &targetPhrase
-                         , const StackVec *stackVec
-                         , ScoreComponentCollection &scoreBreakdown
-                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , const StackVec *stackVec
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
   virtual void Evaluate(const Hypothesis& hypo,

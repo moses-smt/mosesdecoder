@@ -437,8 +437,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
   if (hypo != NULL) {
     VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
     VERBOSE(3,"Best path: ");
-    if (StaticData::Instance().IsPassthroughEnabled())
-    {
+    if (StaticData::Instance().IsPassthroughEnabled()) {
       OutputPassthroughInformation(cout, hypo);
     }
     Backtrack(hypo);
@@ -481,8 +480,7 @@ void OutputNBest(std::ostream& out
 
     // print the surface factor of the translation
     out << translationId << " ||| ";
-    if (staticData.IsPassthroughInNBestEnabled())
-    {
+    if (staticData.IsPassthroughInNBestEnabled()) {
       OutputPassthroughInformation(out, edges[edges.size() - 1]);
     }
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {

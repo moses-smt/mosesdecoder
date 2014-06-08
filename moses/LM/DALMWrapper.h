@@ -49,7 +49,7 @@ protected:
 
   std::string	m_filePath;
   size_t			m_nGramOrder; //! max n-gram length contained in this LM
-	size_t			m_ContextSize;
+  size_t			m_ContextSize;
 
   DALM::Logger *m_logger;
   DALM::Vocabulary *m_vocab;
@@ -77,26 +77,26 @@ private:
     }
   }
 
-	void EvaluateTerminal(
-	  const Word &word,
-	  float &hypoScore,
-  	DALMChartState *newState,
-	  DALM::State &state,
-  	DALM::Fragment *prefixFragments,
-	  unsigned char &prefixLength
-		) const;
+  void EvaluateTerminal(
+    const Word &word,
+    float &hypoScore,
+    DALMChartState *newState,
+    DALM::State &state,
+    DALM::Fragment *prefixFragments,
+    unsigned char &prefixLength
+  ) const;
 
-	void EvaluateNonTerminal(
-	  const Word &word,
-	  float &hypoScore,
-  	DALMChartState *newState,
-	  DALM::State &state,
-  	DALM::Fragment *prefixFragments,
-	  unsigned char &prefixLength,
-	  const DALMChartState *prevState,
-	  size_t prevTargetPhraseLength,
-	  float prevHypoScore
-		) const;
+  void EvaluateNonTerminal(
+    const Word &word,
+    float &hypoScore,
+    DALMChartState *newState,
+    DALM::State &state,
+    DALM::Fragment *prefixFragments,
+    unsigned char &prefixLength,
+    const DALMChartState *prevState,
+    size_t prevTargetPhraseLength,
+    float prevHypoScore
+  ) const;
 };
 
 }

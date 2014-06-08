@@ -11,8 +11,8 @@ ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
 }
 
 void ChartTranslationOption::Evaluate(const InputType &input,
-		const InputPath &inputPath,
-		const StackVec &stackVec)
+                                      const InputPath &inputPath,
+                                      const StackVec &stackVec)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 

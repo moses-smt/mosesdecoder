@@ -22,7 +22,7 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const;
 
-<<<<<<< HEAD
+  <<<<<<< HEAD
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
@@ -34,20 +34,20 @@ public:
   void EvaluateChart(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
-=======
-	void Evaluate(const InputType &input
-	                        , const InputPath &inputPath
-	                        , const TargetPhrase &targetPhrase
-	                        , const StackVec *stackVec
-	                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection *estimatedFutureScore = NULL) const;
-	  virtual void Evaluate(const Hypothesis& hypo,
-	                        ScoreComponentCollection* accumulator) const
-	  {}
-	  void EvaluateChart(const ChartHypothesis &hypo,
-	                             ScoreComponentCollection* accumulator) const
-	  {}
->>>>>>> master
+  =======
+    void Evaluate(const InputType &input
+                  , const InputPath &inputPath
+                  , const TargetPhrase &targetPhrase
+                  , const StackVec *stackVec
+                  , ScoreComponentCollection &scoreBreakdown
+                  , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+  virtual void Evaluate(const Hypothesis& hypo,
+                        ScoreComponentCollection* accumulator) const
+  {}
+  void EvaluateChart(const ChartHypothesis &hypo,
+                     ScoreComponentCollection* accumulator) const
+  {}
+  >>>>>>> master
 
 };
 

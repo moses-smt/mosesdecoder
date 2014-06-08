@@ -34,15 +34,15 @@ using namespace std;
 
 namespace Moses
 {
-  
-  // utility function for factorless decoding
-  size_t
-  max_fax()
-  {
-    if (StaticData::Instance().GetFactorDelimiter().size())
-      return MAX_NUM_FACTORS;
-    return 1;
-  }
+
+// utility function for factorless decoding
+size_t
+max_fax()
+{
+  if (StaticData::Instance().GetFactorDelimiter().size())
+    return MAX_NUM_FACTORS;
+  return 1;
+}
 
 // static
 int Word::Compare(const Word &targetWord, const Word &sourceWord)
@@ -85,8 +85,8 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
   unsigned int stop = min(max_fax(),factorType.size());
   for (unsigned int i = 0 ; i < stop ; i++) {
     UTIL_THROW_IF2(factorType[i] >= MAX_NUM_FACTORS,
-		   "Trying to reference factor " << factorType[i] 
-		   << ". Max factor is " << MAX_NUM_FACTORS);
+                   "Trying to reference factor " << factorType[i]
+                   << ". Max factor is " << MAX_NUM_FACTORS);
 
     const Factor *factor = m_factorArray[factorType[i]];
     if (factor != NULL) {
@@ -120,39 +120,35 @@ CreateFromString(FactorDirection direction
   FactorCollection &factorCollection = FactorCollection::Instance();
   vector<StringPiece> bits(MAX_NUM_FACTORS);
   string factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-  if (factorDelimiter.size())
-    {
-      util::TokenIter<util::MultiCharacter> fit(str, factorDelimiter);
-      size_t i = 0;
-      for (; i < MAX_NUM_FACTORS && fit; ++i,++fit)
-	bits[i] = *fit;
-      if (i == MAX_NUM_FACTORS)
-	UTIL_THROW_IF(fit, StrayFactorException, 
-		      "The hard limit for factors is " << MAX_NUM_FACTORS
-		      << ". The word " << str << " contains factor delimiter " 
-		      << StaticData::Instance().GetFactorDelimiter() 
-		      << " too many times.");
-      if (strict)
-	UTIL_THROW_IF(fit, StrayFactorException, 
-		      "You have configured " << factorOrder.size() 
-		      << " factors but the word " << str 
-		      << " contains factor delimiter " 
-		      << StaticData::Instance().GetFactorDelimiter() 
-		      << " too many times.");
-      
-      UTIL_THROW_IF(i < factorOrder.size(),util::Exception, 
-		    "Too few factors in string '" << str << "'.");
-    }
-  else
-    {
-      bits[0] = str;
-    }
-  for (size_t k = 0; k < factorOrder.size(); ++k) 
-    {
-      UTIL_THROW_IF(factorOrder[k] >= MAX_NUM_FACTORS, util::Exception, 
-		    "Factor order out of bounds.");
-      m_factorArray[factorOrder[k]] = factorCollection.AddFactor(bits[k], isNonTerminal);
-    }
+  if (factorDelimiter.size()) {
+    util::TokenIter<util::MultiCharacter> fit(str, factorDelimiter);
+    size_t i = 0;
+    for (; i < MAX_NUM_FACTORS && fit; ++i,++fit)
+      bits[i] = *fit;
+    if (i == MAX_NUM_FACTORS)
+      UTIL_THROW_IF(fit, StrayFactorException,
+                    "The hard limit for factors is " << MAX_NUM_FACTORS
+                    << ". The word " << str << " contains factor delimiter "
+                    << StaticData::Instance().GetFactorDelimiter()
+                    << " too many times.");
+    if (strict)
+      UTIL_THROW_IF(fit, StrayFactorException,
+                    "You have configured " << factorOrder.size()
+                    << " factors but the word " << str
+                    << " contains factor delimiter "
+                    << StaticData::Instance().GetFactorDelimiter()
+                    << " too many times.");
+
+    UTIL_THROW_IF(i < factorOrder.size(),util::Exception,
+                  "Too few factors in string '" << str << "'.");
+  } else {
+    bits[0] = str;
+  }
+  for (size_t k = 0; k < factorOrder.size(); ++k) {
+    UTIL_THROW_IF(factorOrder[k] >= MAX_NUM_FACTORS, util::Exception,
+                  "Factor order out of bounds.");
+    m_factorArray[factorOrder[k]] = factorCollection.AddFactor(bits[k], isNonTerminal);
+  }
   // assume term/non-term same for all factors
   m_isNonTerminal = isNonTerminal;
 }

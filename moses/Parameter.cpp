@@ -920,20 +920,20 @@ void Parameter::CreateWeightsMap()
 void Parameter::CreateWeightsMap(const PARAM_VEC &vec)
 {
   for (size_t i = 0; i < vec.size(); ++i) {
-	const string &line = vec[i];
-	vector<string> toks = Tokenize(line);
-	UTIL_THROW_IF2(toks.size() < 2,
-			"Error in format of weights: " << line);
+    const string &line = vec[i];
+    vector<string> toks = Tokenize(line);
+    UTIL_THROW_IF2(toks.size() < 2,
+                   "Error in format of weights: " << line);
 
-	string name = toks[0];
-	name = name.substr(0, name.size() - 1);
+    string name = toks[0];
+    name = name.substr(0, name.size() - 1);
 
-	vector<float> weights(toks.size() - 1);
-	for (size_t i = 1; i < toks.size(); ++i) {
-	  float weight = Scan<float>(toks[i]);
-	  weights[i - 1] = weight;
-	}
-	m_weights[name] = weights;
+    vector<float> weights(toks.size() - 1);
+    for (size_t i = 1; i < toks.size(); ++i) {
+      float weight = Scan<float>(toks[i]);
+      weights[i - 1] = weight;
+    }
+    m_weights[name] = weights;
   }
 }
 

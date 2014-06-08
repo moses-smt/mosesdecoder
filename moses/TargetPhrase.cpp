@@ -50,9 +50,9 @@ TargetPhrase::TargetPhrase( std::string out_string)
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, 
-		   // staticData.GetFactorDelimiter(), // eliminated [UG]
-		   NULL);
+  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
+                   // staticData.GetFactorDelimiter(), // eliminated [UG]
+                   NULL);
 }
 
 TargetPhrase::TargetPhrase()
@@ -239,7 +239,7 @@ void TargetPhrase::SetProperties(const StringPiece &str)
   }
 }
 
-void TargetPhrase::SetProperty(const std::string &key, const std::string &value) 
+void TargetPhrase::SetProperty(const std::string &key, const std::string &value)
 {
   const StaticData &staticData = StaticData::Instance();
   const PhrasePropertyFactory& phrasePropertyFactory = staticData.GetPhrasePropertyFactory();

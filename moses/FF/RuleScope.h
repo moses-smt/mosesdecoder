@@ -9,7 +9,7 @@ namespace Moses
 class RuleScope : public StatelessFeatureFunction
 {
 public:
-	RuleScope(const std::string &line);
+  RuleScope(const std::string &line);
 
   virtual bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -20,13 +20,13 @@ public:
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;
 
-	  virtual void Evaluate(const InputType &input
-	                         , const InputPath &inputPath
-	                         , const TargetPhrase &targetPhrase
-	                         , const StackVec *stackVec
-	                         , ScoreComponentCollection &scoreBreakdown
-	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
-	  {}
+  virtual void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , const StackVec *stackVec
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  {}
 
   virtual void Evaluate(const Hypothesis& hypo,
                         ScoreComponentCollection* accumulator) const

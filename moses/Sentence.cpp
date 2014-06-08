@@ -158,7 +158,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // if sentences is specified as "<passthrough tag1=""/>"
   if (staticData.IsPassthroughEnabled() || staticData.IsPassthroughInNBestEnabled()) {
     std::string passthrough = PassthroughSGML(line,"passthrough");
-    this->SetPassthroughInformation(passthrough);  
+    this->SetPassthroughInformation(passthrough);
   }
 
 
@@ -347,10 +347,10 @@ std::vector <ChartTranslationOptions*> Sentence::GetXmlChartTranslationOptions()
   return ret;
 }
 
-void 
+void
 Sentence::
-CreateFromString(const std::vector<FactorType> &factorOrder, 
-		 const std::string &phraseString)
+CreateFromString(const std::vector<FactorType> &factorOrder,
+                 const std::string &phraseString)
 // , const std::string &factorDelimiter)
 {
   // Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter, NULL);
