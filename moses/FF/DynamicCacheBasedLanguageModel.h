@@ -135,6 +135,14 @@ public:
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
+  virtual void Evaluate(const InputType &input
+                        , const InputPath &inputPath
+                        , const TargetPhrase &targetPhrase
+                        , const StackVec *stackVec
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore = NULL) const
+  {}
+
   void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
