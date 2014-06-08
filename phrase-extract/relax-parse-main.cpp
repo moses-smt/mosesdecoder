@@ -20,8 +20,6 @@
  ***********************************************************************/
 
 #include "relax-parse.h"
-
-#include "SafeGetline.h"
 #include "tables-core.h"
 
 using namespace std;
