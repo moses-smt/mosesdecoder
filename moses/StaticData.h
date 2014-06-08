@@ -133,6 +133,7 @@ protected:
   bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
 
+  bool m_PrintID;
   bool m_PrintPassthroughInformation;
   bool m_PrintPassthroughInformationInNBest;
 
@@ -318,6 +319,9 @@ public:
   }
   size_t IsPathRecoveryEnabled() const {
     return m_recoverPath;
+  }
+  bool IsIDEnabled() const {
+    return m_PrintID;
   }
   bool IsPassthroughEnabled() const {
     return m_PrintPassthroughInformation;
