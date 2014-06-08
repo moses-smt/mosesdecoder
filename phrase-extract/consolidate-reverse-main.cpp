@@ -30,20 +30,17 @@
 #include "SafeGetline.h"
 #include "InputFileStream.h"
 
-#define LINE_MAX_LENGTH 10000
-
 using namespace std;
 
 bool hierarchicalFlag = false;
 bool onlyDirectFlag = false;
 bool phraseCountFlag = true;
 bool logProbFlag = false;
-char line[LINE_MAX_LENGTH];
 
 void processFiles( char*, char*, char* );
 bool getLine( istream &fileP, vector< string > &item );
 string reverseAlignment(const string &alignments);
-vector< string > splitLine();
+vector< string > splitLine(const char *lin);
 
 inline void Tokenize(std::vector<std::string> &output
                      , const std::string& str
@@ -190,17 +187,18 @@ bool getLine( istream &fileP, vector< string > &item )
 {
   if (fileP.eof())
     return false;
-
-  SAFE_GETLINE((fileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-  if (fileP.eof())
+  
+  string line;
+  if (getline(fileP, line)) {
+    item = splitLine(line.c_str());
     return false;
-
-  item = splitLine();
-
-  return true;
+  }
+  else {
+    return false;
+  }
 }
 
-vector< string > splitLine()
+vector< string > splitLine(const char *line)
 {
   vector< string > item;
   bool betweenWords = true;

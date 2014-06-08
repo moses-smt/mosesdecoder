@@ -4,8 +4,6 @@
 #include "InputFileStream.h"
 #include "SafeGetline.h"
 
-#define TABLE_LINE_MAX_LENGTH 1000
-
 using namespace std;
 
 namespace MosesTraining
@@ -16,12 +14,11 @@ void Domain::load( const std::string &domainFileName )
 {
   Moses::InputFileStream fileS( domainFileName );
   istream *fileP = &fileS;
-  while(true) {
-    char line[TABLE_LINE_MAX_LENGTH];
-    SAFE_GETLINE((*fileP), line, TABLE_LINE_MAX_LENGTH, '\n', __FILE__);
-    if (fileP->eof()) break;
+
+	string line;
+  while(getline(*fileP, line)) {
     // read
-    vector< string > domainSpecLine = tokenize( line );
+    vector< string > domainSpecLine = tokenize( line.c_str() );
     int lineNumber;
     if (domainSpecLine.size() != 2 ||
         ! sscanf(domainSpecLine[0].c_str(), "%d", &lineNumber)) {

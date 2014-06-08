@@ -19,8 +19,6 @@
 using namespace std;
 using namespace MosesTraining;
 
-#define LINE_MAX_LENGTH 10000
-
 namespace MosesTraining
 {
 
@@ -31,7 +29,7 @@ public:
   vector< vector<size_t> > alignedToE;
   vector< vector<size_t> > alignedToF;
 
-  bool create( char*, int );
+  bool create( const char*, int );
   void clear();
   bool equals( const PhraseAlignment& );
 };
@@ -106,16 +104,14 @@ int main(int argc, char* argv[])
   vector< PhraseAlignment > phrasePairsWithSameF;
   int i=0;
   int fileCount = 0;
-  while(true) {
+
+  string line;
+  while(getline(extractFileP, line)) {
     if (extractFileP.eof()) break;
     if (++i % 100000 == 0) cerr << "." << flush;
-    char line[LINE_MAX_LENGTH];
-    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    //    if (fileCount>0)
-    if (extractFileP.eof())
-      break;
+
     PhraseAlignment phrasePair;
-    bool isPhrasePair = phrasePair.create( line, i );
+    bool isPhrasePair = phrasePair.create( line.c_str(), i );
     if (lastForeign >= 0 && lastForeign != phrasePair.foreign) {
       processPhrasePairs( phrasePairsWithSameF );
       for(size_t j=0; j<phrasePairsWithSameF.size(); j++)
@@ -124,7 +120,7 @@ int main(int argc, char* argv[])
       phraseTableE.clear();
       phraseTableF.clear();
       phrasePair.clear(); // process line again, since phrase tables flushed
-      phrasePair.create( line, i );
+      phrasePair.create( line.c_str(), i );
       phrasePairBase = 0;
     }
     lastForeign = phrasePair.foreign;
@@ -242,7 +238,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair )
   }
 }
 
-bool PhraseAlignment::create( char line[], int lineID )
+bool PhraseAlignment::create(const char line[], int lineID )
 {
   vector< string > token = tokenize( line );
   int item = 1;
@@ -321,16 +317,14 @@ void LexicalTable::load( const string &filePath )
   }
   istream *inFileP = &inFile;
 
-  char line[LINE_MAX_LENGTH];
+  string line;
 
   int i=0;
-  while(true) {
+  while(getline(*inFileP, line)) {
     i++;
     if (i%100000 == 0) cerr << "." << flush;
-    SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (inFileP->eof()) break;
 
-    vector<string> token = tokenize( line );
+    vector<string> token = tokenize( line.c_str() );
     if (token.size() != 3) {
       cerr << "line " << i << " in " << filePath << " has wrong number of tokens, skipping:\n" <<
            token.size() << " " << token[0] << " " << line << endl;
