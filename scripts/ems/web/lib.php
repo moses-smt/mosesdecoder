@@ -21,7 +21,9 @@ function load_experiment_info() {
       file_exists($dir."/steps/1")) {
     $topd = dir($dir."/steps");
     while (false !== ($run = $topd->read())) {
-      if (preg_match('/^([0-9]+)$/',$run,$match) && $run>0) {
+      if (preg_match('/^([0-9]+)$/',$run,$match) 
+          && $run>0
+          && !file_exists("$dir/steps/$run/deleted.$run")) {
         $d = dir($dir."/steps/$run");
         while (false !== ($entry = $d->read())) {
           process_file_entry("$dir/steps/$run/",$entry);

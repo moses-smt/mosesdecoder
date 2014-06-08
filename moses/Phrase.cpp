@@ -158,7 +158,7 @@ void Phrase::PrependWord(const Word &newWord)
 void Phrase::CreateFromString(FactorDirection direction
                               ,const std::vector<FactorType> &factorOrder
                               ,const StringPiece &phraseString
-                              ,const StringPiece &factorDelimiter
+                              // ,const StringPiece &factorDelimiter // eliminated [UG]
                               ,Word **lhs)
 {
   // parse

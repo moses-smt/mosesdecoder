@@ -83,7 +83,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
 
   // If the rule limit has already been reached then don't add the option
   // unless it is better than at least one existing option.
-  if (m_size > m_ruleLimit && score < m_scoreThreshold) {
+  if (m_ruleLimit && m_size > m_ruleLimit && score < m_scoreThreshold) {
     return;
   }
 
@@ -100,16 +100,16 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   ++m_size;
 
   // If the rule limit hasn't been exceeded then update the threshold.
-  if (m_size <= m_ruleLimit) {
+  if (!m_ruleLimit || m_size <= m_ruleLimit) {
     m_scoreThreshold = (score < m_scoreThreshold) ? score : m_scoreThreshold;
   }
 
   // Prune if bursting
-  if (m_size == m_ruleLimit * 2) {
-    NTH_ELEMENT4(m_collection.begin(),
-                 m_collection.begin() + m_ruleLimit - 1,
-                 m_collection.begin() + m_size,
-                 ChartTranslationOptionOrderer());
+  if (m_ruleLimit && m_size == m_ruleLimit * 2) {
+	NTH_ELEMENT4(m_collection.begin(),
+                     m_collection.begin() + m_ruleLimit - 1,
+                     m_collection.begin() + m_size,
+                     ChartTranslationOptionOrderer());
     m_scoreThreshold = m_collection[m_ruleLimit-1]->GetEstimateOfBestScore();
     m_size = m_ruleLimit;
   }
@@ -126,7 +126,7 @@ void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<Ta
 
 void ChartTranslationOptionList::ApplyThreshold()
 {
-  if (m_size > m_ruleLimit) {
+  if (m_ruleLimit && m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2
     // without being pruned.
     assert(m_size < m_ruleLimit * 2);
@@ -176,6 +176,31 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
     ChartTranslationOptions &transOpts = **iter;
     transOpts.Evaluate(input, inputPath);
   }
+
+  // get rid of empty trans opts
+  size_t numDiscard = 0;
+  for (size_t i = 0; i < m_size; ++i) {
+    ChartTranslationOptions *transOpts = m_collection[i];
+    if (transOpts->GetSize() == 0) {
+    	//delete transOpts;
+      	++numDiscard;
+    }
+    else if (numDiscard) {
+    	SwapTranslationOptions(i - numDiscard, i);
+    	//m_collection[] = transOpts;
+    }
+  }
+
+  size_t newSize = m_size - numDiscard;
+  m_size = newSize;
+}
+
+void ChartTranslationOptionList::SwapTranslationOptions(size_t a, size_t b)
+{
+  ChartTranslationOptions *transOptsA = m_collection[a];
+  ChartTranslationOptions *transOptsB = m_collection[b];
+  m_collection[a] = transOptsB;
+  m_collection[b] = transOptsA;
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionList &obj)

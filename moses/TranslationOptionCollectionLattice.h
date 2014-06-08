@@ -33,6 +33,7 @@ public:
                                         , size_t graphInd); // do not implement
 
 protected:
+  void Extend(const InputPath &prevPath, const WordLattice &input);
 
 };
 

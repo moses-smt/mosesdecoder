@@ -474,14 +474,10 @@ public:
             stack.back().src=newSrc;
           }
 
-          std::cerr << "newSrc=" << newSrc << std::endl;
-
           std::vector<StringTgtCand> tcands;
           // now, look up the target candidates (aprx. TargetPhraseCollection) for
           // the current path through the CN
           m_dict->GetTargetCandidates(nextP,tcands);
-
-          std::cerr << "tcands=" << tcands.size() << std::endl;
 
           if(newRange.second>=exploredPaths.size()+newRange.first)
             exploredPaths.resize(newRange.second-newRange.first+1,0);

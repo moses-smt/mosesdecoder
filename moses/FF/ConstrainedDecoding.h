@@ -46,12 +46,15 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
-  void Evaluate(const InputType &input
+  
+    void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
+  
   FFState* Evaluate(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
@@ -71,10 +74,11 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
 
 protected:
-  std::string m_path;
-  std::map<long,Phrase> m_constraints;
+  std::vector<std::string> m_paths;
+  std::map<long, std::vector<Phrase> > m_constraints;
   int m_maxUnknowns;
   bool m_negate; // only keep translations which DON'T match the reference
+  bool m_soft;
 
 };
 

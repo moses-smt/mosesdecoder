@@ -50,7 +50,7 @@ void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
 
   // If the rule limit has already been reached then don't add the option
   // unless it is better than at least one existing option.
-  if (m_collection.size() > m_ruleLimit && score < m_scoreThreshold) {
+  if (m_ruleLimit && m_collection.size() > m_ruleLimit && score < m_scoreThreshold) {
     return;
   }
 
@@ -58,16 +58,16 @@ void CompletedRuleCollection::Add(const TargetPhraseCollection &tpc,
   m_collection.push_back(completedRule);
 
   // If the rule limit hasn't been exceeded then update the threshold.
-  if (m_collection.size() <= m_ruleLimit) {
+  if (!m_ruleLimit || m_collection.size() <= m_ruleLimit) {
     m_scoreThreshold = (score < m_scoreThreshold) ? score : m_scoreThreshold;
   }
 
   // Prune if bursting
-  if (m_collection.size() == m_ruleLimit * 2) {
-    NTH_ELEMENT4(m_collection.begin(),
-                 m_collection.begin() + m_ruleLimit - 1,
-                 m_collection.end(),
-                 CompletedRuleOrdered());
+  if (m_ruleLimit && m_collection.size() == m_ruleLimit * 2) {
+        NTH_ELEMENT4(m_collection.begin(),
+                     m_collection.begin() + m_ruleLimit - 1,
+                     m_collection.end(),
+                     CompletedRuleOrdered());
     m_scoreThreshold = m_collection[m_ruleLimit-1]->GetScoreEstimate();
     for (size_t i = 0 + m_ruleLimit; i < m_collection.size(); i++) {
       delete m_collection[i];

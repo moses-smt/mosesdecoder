@@ -78,6 +78,8 @@ private:
     float m_thresholdScore;
   };
 
+  void SwapTranslationOptions(size_t a, size_t b);
+
   CollType m_collection;
   size_t m_size;
   float m_scoreThreshold;

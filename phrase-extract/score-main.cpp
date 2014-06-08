@@ -653,6 +653,8 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     phraseTableFile << " |||";
   }
 
+  phraseTableFile << " |||";
+
   // tree fragments
   if (treeFragmentsFlag && !inverseFlag) {
     const std::string *bestTreeFragment = phrasePair.FindBestPropertyValue("Tree");

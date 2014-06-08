@@ -2,7 +2,7 @@
 
 moses.threads ?= 4
 moses.flags += -threads ${moses.threads}
-moses.flags += -v 0 -t -text-type "test"
+moses.flags += -v 0 -t -text-type "test" -fd '${FACTORSEP}'
 
 %.multi-bleu: | %.cleaned 
 	$(lock)
@@ -35,19 +35,16 @@ moses.ini ?=
 # $1: output base name
 # $2: system to be evaluated
 # $3: evaluation input
-# $4: evaluation input type
-# $5: evaluation reference
 
 define bleu_eval
 
 EVALUATIONS += $1
-.INTERMEDIATE: $3 $5
 $1: moses.ini       := $2
 $1: moses.input     := $3
-$1: moses.inputtype := $4
-$1: bleu.ref        := $5
+$1: moses.inputtype := $(call guess-inputtype,$3)
+$1: bleu.ref        := $$(shell echo $(patsubst %.${L1},%.${L2},$3) | perl -pe 's?/cfn[^/]+/?/cased/?')
 $1.moses-out:  | $2 $3
-$1.multi-bleu: | $5
+$1.multi-bleu: | $(call reffiles,$3,$(dir $(patsubst %/,%,$(dir $3))))
 $1: | $1.multi-bleu 
 
 endef
@@ -63,7 +60,8 @@ $(foreach system,${SYSTEMS},\
 $(foreach tuneset,${tune.sets},\
 $(foreach evalset,${eval.sets},\
 $(foreach run,$(shell seq ${tune.runs}),\
-$(eval $(call bleu_eval,${system}/eval/$(notdir ${tuneset})/${run}/$(notdir ${evalset}),\
+$(eval $(call bleu_eval,\
+${system}/eval/$(notdir ${tuneset})/${run}/$(notdir ${evalset}),\
 ${system}/tuned/$(notdir ${tuneset})/${run}/moses.ini,\
 ${evalset}.${L1},${moses.inputtype.plaintext},${evalset}.${L2}))))))
 

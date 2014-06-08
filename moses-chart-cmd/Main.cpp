@@ -56,8 +56,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ThreadPool.h"
 #include "moses/ChartManager.h"
 #include "moses/ChartHypothesis.h"
-#include "moses/ChartTrellisPath.h"
-#include "moses/ChartTrellisPathList.h"
 #include "moses/Incremental.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"

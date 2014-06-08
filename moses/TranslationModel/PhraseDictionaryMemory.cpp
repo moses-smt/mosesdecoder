@@ -145,9 +145,9 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
-    InputPath &node = **iter;
-    const Phrase &phrase = node.GetPhrase();
-    const InputPath *prevPath = node.GetPrevPath();
+    InputPath &inputPath = **iter;
+    const Phrase &phrase = inputPath.GetPhrase();
+    const InputPath *prevPath = inputPath.GetPrevPath();
 
     const PhraseDictionaryNodeMemory *prevPtNode = NULL;
 
@@ -159,6 +159,11 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
       prevPtNode = &GetRootNode();
     }
 
+    // backoff
+    if (!SatisfyBackoff(inputPath)) {
+    	continue;
+    }
+
     if (prevPtNode) {
       Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
       lastWord.OnlyTheseFactors(m_inputFactors);
@@ -166,9 +171,9 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
       const PhraseDictionaryNodeMemory *ptNode = prevPtNode->GetChild(lastWord);
       if (ptNode) {
         const TargetPhraseCollection &targetPhrases = ptNode->GetTargetPhraseCollection();
-        node.SetTargetPhrases(*this, &targetPhrases, ptNode);
+        inputPath.SetTargetPhrases(*this, &targetPhrases, ptNode);
       } else {
-        node.SetTargetPhrases(*this, NULL, NULL);
+    	  inputPath.SetTargetPhrases(*this, NULL, NULL);
       }
     }
   }

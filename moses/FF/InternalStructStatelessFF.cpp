@@ -16,11 +16,20 @@ void InternalStructStatelessFF::Evaluate(const Phrase &source
 }
 
 void InternalStructStatelessFF::Evaluate(const InputType &input
+<<<<<<< HEAD
     , const InputPath &inputPath
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection *estimatedFutureScore) const
 {
+=======
+	                        , const InputPath &inputPath
+	                        , const TargetPhrase &targetPhrase
+	                        , const StackVec *stackVec
+	                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection *estimatedFutureScore) const
+	{
+>>>>>>> master
 
   cerr  << "HHHHH" << scoreBreakdown << endl;
   scoreBreakdown.PlusEquals(this, 66);

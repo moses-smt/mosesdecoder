@@ -47,10 +47,18 @@ void CoveredReferenceFeature::Evaluate(const Phrase &source
 {}
 
 void CoveredReferenceFeature::Evaluate(const InputType &input
+<<<<<<< HEAD
                                        , const InputPath &inputPath
                                        , const TargetPhrase &targetPhrase
                                        , ScoreComponentCollection &scoreBreakdown
                                        , ScoreComponentCollection *estimatedFutureScore) const
+=======
+                                  , const InputPath &inputPath
+                                  , const TargetPhrase &targetPhrase
+                                  , const StackVec *stackVec
+                                  , ScoreComponentCollection &scoreBreakdown
+                                  , ScoreComponentCollection *estimatedFutureScore) const
+>>>>>>> master
 {
   long id = input.GetTranslationId();
   boost::unordered_map<long, std::multiset<string> >::const_iterator refIt = m_refs.find(id);

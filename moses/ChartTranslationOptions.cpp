@@ -62,9 +62,24 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
     ChartTranslationOption &transOpt = **iter;
     transOpt.SetInputPath(&inputPath);
-    transOpt.Evaluate(input, inputPath);
+    transOpt.Evaluate(input, inputPath, m_stackVec);
   }
 
+  // get rid of -inf trans opts
+  size_t numDiscard = 0;
+  for (size_t i = 0; i < m_collection.size(); ++i) {
+    ChartTranslationOption *transOpt = m_collection[i].get();
+
+    if (transOpt->GetScores().GetWeightedScore() == - std::numeric_limits<float>::infinity()) {
+    	++numDiscard;
+    }
+    else if (numDiscard) {
+    	m_collection[i - numDiscard] = boost::shared_ptr<ChartTranslationOption>(transOpt);
+    }
+  }
+
+  size_t newSize = m_collection.size() - numDiscard;
+  m_collection.resize(newSize);
 }
 
 void ChartTranslationOptions::SetInputPath(const InputPath *inputPath)

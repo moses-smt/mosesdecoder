@@ -252,11 +252,13 @@ void osmHypothesis :: generateOperations(int & startIndex , int j1 , int contFla
   openGapCount += getOpenGaps();
 
   //if (coverageVector[j] == 0 && targetNullWords.find(j) != targetNullWords.end())
-  if (coverageVector.GetValue(j) == 0 && targetNullWords.find(j) != targetNullWords.end()) {
-    j1 = j;
-    german = currF[j1-startIndex];
-    english = "_INS_";
-    generateOperations(startIndex, j1, 2 , coverageVector , english , german , targetNullWords , currF);
+  if (j < coverageVector.GetSize()) {
+    if (coverageVector.GetValue(j) == 0 && targetNullWords.find(j) != targetNullWords.end()) {
+      j1 = j;
+      german = currF[j1-startIndex];
+      english = "_INS_";
+      generateOperations(startIndex, j1, 2 , coverageVector , english , german , targetNullWords , currF);
+    }
   }
 
 }

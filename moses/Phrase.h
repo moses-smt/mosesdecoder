@@ -81,7 +81,7 @@ public:
   void CreateFromString(FactorDirection direction
                         , const std::vector<FactorType> &factorOrder
                         , const StringPiece &phraseString
-                        , const StringPiece &factorDelimiter
+                        // , const StringPiece &factorDelimiter // never used [UG]
                         , Word **lhs);
 
   /**	copy factors from the other phrase to this phrase.
@@ -140,6 +140,8 @@ public:
   }
 
   size_t GetNumTerminals() const;
+  size_t GetNumNonTerminals() const
+  { return GetSize() - GetNumTerminals(); }
 
   //! whether the 2D vector is a substring of this phrase
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector

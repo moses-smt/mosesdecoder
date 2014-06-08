@@ -28,8 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
-
+#include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
+
+#include <boost/shared_ptr.hpp>
 
 #ifdef HAVE_PROTOBUF
 #include "rule.pb.h"
@@ -55,7 +57,8 @@ private:
   const Word *m_lhsTarget;
   mutable Phrase *m_ruleSource; // to be set by the feature function that needs it.
 
-  std::map<std::string, std::string> m_properties;
+  std::map<std::string, boost::shared_ptr<PhraseProperty> > m_properties;
+
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);
@@ -142,10 +145,8 @@ public:
   void SetRuleSource(const Phrase &ruleSource) const;
 
   void SetProperties(const StringPiece &str);
-  void SetProperty(const std::string &key, const std::string &value) {
-    m_properties[key] = value;
-  }
-  void GetProperty(const std::string &key, std::string &value, bool &found) const;
+  void SetProperty(const std::string &key, const std::string &value);
+  bool GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &value) const;
 
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 

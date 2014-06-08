@@ -81,8 +81,8 @@ namespace Moses
 
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
   :PhraseDictionary(line)
-  ,m_FuzzyMatchWrapper(NULL)
   ,m_config(3)
+  ,m_FuzzyMatchWrapper(NULL)
 {
   ReadParameters();
 }
@@ -267,11 +267,13 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
 
     // source
     Phrase sourcePhrase( 0);
-    sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    // sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, &sourceLHS);
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromString(Output, m_output, targetPhraseString, factorDelimiter, &targetLHS);
+    // targetPhrase->CreateFromString(Output, m_output, targetPhraseString, factorDelimiter, &targetLHS);
+    targetPhrase->CreateFromString(Output, m_output, targetPhraseString, &targetLHS);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);

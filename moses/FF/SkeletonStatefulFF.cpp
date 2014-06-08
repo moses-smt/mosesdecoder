@@ -25,6 +25,7 @@ void SkeletonStatefulFF::Evaluate(const Phrase &source
 void SkeletonStatefulFF::Evaluate(const InputType &input
                                   , const InputPath &inputPath
                                   , const TargetPhrase &targetPhrase
+                                  , const StackVec *stackVec
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {}
@@ -44,7 +45,7 @@ FFState* SkeletonStatefulFF::Evaluate(
   // sparse scores
   accumulator->PlusEquals(this, "sparse-name", 2.4);
 
-  int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize();
+  // int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize(); // ??? [UG]
   return new SkeletonState(0);
 }
 

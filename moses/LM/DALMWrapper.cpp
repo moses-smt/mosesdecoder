@@ -1,5 +1,6 @@
 
-#include <boost/functional/hash.hpp>
+//#include <boost/functional/hash.hpp>
+#include <algorithm>
 #include "moses/FF/FFState.h"
 #include "DALMWrapper.h"
 #include "logger.h"
@@ -35,7 +36,6 @@ void read_ini(const char *inifile, string &model, string &words, string &wordstx
     getline(ifs, line);
   }
 }
-
 /////////////////////////
 
 namespace Moses
@@ -44,122 +44,140 @@ namespace Moses
 class DALMState : public FFState
 {
 private:
-  DALM::State *state;
+	DALM::State state;
 
 public:
-  DALMState(unsigned short order) {
-    state = new DALM::State(order);
-  }
+	DALMState(){
+	}
 
-  DALMState(const DALMState &from) {
-    state = new DALM::State(*from.state);
-  }
+	DALMState(const DALMState &from){
+		state = from.state;
+	}
 
-  virtual ~DALMState() {
-    delete state;
-  }
+  virtual ~DALMState(){
+	}
 
-  void reset(const DALMState &from) {
-    delete state;
-    state = new DALM::State(*from.state);
-  }
+	void reset(const DALMState &from){
+		state = from.state;
+	}
 
-  void reset(DALM::State *s) {
-    delete state;
-    state = s;
-  }
+  virtual int Compare(const FFState& other) const{
+		const DALMState &o = static_cast<const DALMState &>(other);
+		if(state.get_count() < o.state.get_count()) return -1;
+		else if(state.get_count() > o.state.get_count()) return 1;
+		else return state.compare(o.state);
+	}
 
-  virtual int Compare(const FFState& other) const {
-    const DALMState &o = static_cast<const DALMState &>(other);
-    if(state->get_count() < o.state->get_count()) return -1;
-    else if(state->get_count() > o.state->get_count()) return 1;
-    else return state->compare(o.state);
-  }
-
-  DALM::State *get_state() const {
-    return state;
-  }
-
-  void refresh() {
-    state->refresh();
-  }
+	DALM::State &get_state(){
+		return state;
+	}
+	
+	void refresh(){
+		state.refresh();
+	}
 };
 
 class DALMChartState : public FFState
 {
 private:
-  const ChartHypothesis &hypo;
-  DALM::Fragment *prefixFragments;
-  unsigned short prefixLength;
-  float prefixScore;
-  DALMState *rightContext;
-  bool isLarge;
+	DALM::Fragment prefixFragments[DALM_MAX_ORDER-1];
+	unsigned char prefixLength;
+	DALM::State rightContext;
+	bool isLarge;
+	size_t hypoSize;
 
 public:
-  DALMChartState(
-    const ChartHypothesis &hypo,
-    DALM::Fragment *prefixFragments,
-    unsigned short prefixLength,
-    float prefixScore,
-    DALMState *rightContext,
-    bool isLarge)
-    : hypo(hypo),
-      prefixFragments(prefixFragments),
-      prefixLength(prefixLength),
-      prefixScore(prefixScore),
-      rightContext(rightContext),
-      isLarge(isLarge)
-  {}
+	DALMChartState()
+		: prefixLength(0),
+		  isLarge(false)
+	{}
 
-  virtual ~DALMChartState() {
-    delete [] prefixFragments;
-    delete rightContext;
-  }
+	/*
+	DALMChartState(const DALMChartState &other)
+		: prefixLength(other.prefixLength),
+			rightContext(other.rightContext),
+			isLarge(other.isLarge)
+	{
+		std::copy(
+			other.prefixFragments, 
+			other.prefixFragments+other.prefixLength,
+			prefixFragments
+			);
+	}
+	*/
 
-  unsigned short GetPrefixLength() const {
-    return prefixLength;
-  }
+	virtual ~DALMChartState(){
+	}
 
-  const DALM::Fragment *GetPrefixFragments() const {
-    return prefixFragments;
-  }
+	/*
+	DALMChartState &operator=(const DALMChartState &other){
+		prefixLength = other.prefixLength;
+		std::copy(
+			other.prefixFragments, 
+			other.prefixFragments+other.prefixLength,
+			prefixFragments
+			);
+		rightContext = other.rightContext;
+		isLarge=other.isLarge;
 
-  float GetPrefixScore() const {
-    return prefixScore;
-  }
+		return *this;
+	}
+	*/
 
-  const DALMState *GetRightContext() const {
-    return rightContext;
-  }
+	inline unsigned char GetPrefixLength() const{
+		return prefixLength;
+	}
 
-  bool LargeEnough() const {
-    return isLarge;
-  }
+	inline unsigned char &GetPrefixLength(){
+		return prefixLength;
+	}
 
-  virtual int Compare(const FFState& other) const {
-    const DALMChartState &o = static_cast<const DALMChartState &>(other);
-    // prefix
-    if (hypo.GetCurrSourceRange().GetStartPos() > 0) { // not for "<s> ..."
-      if (prefixLength != o.prefixLength) {
-        return (prefixLength < o.prefixLength)?-1:1;
-      } else {
-        if(prefixLength > 0) {
-          DALM::Fragment &f = prefixFragments[prefixLength-1];
-          DALM::Fragment &of = o.prefixFragments[prefixLength-1];
-          int ret = DALM::compare_fragments(f, of);
-          if(ret != 0) return ret;
-        }
-      }
-    }
+	inline const DALM::Fragment *GetPrefixFragments() const{
+		return prefixFragments;
+	}
 
-    // suffix
-    size_t inputSize = hypo.GetManager().GetSource().GetSize();
-    if (hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1) { // not for "... </s>"
-      int ret = o.rightContext->Compare(*rightContext);
-      if (ret != 0) return ret;
-    }
-    return 0;
-  }
+	inline DALM::Fragment *GetPrefixFragments(){
+		return prefixFragments;
+	}
+
+	inline const DALM::State &GetRightContext() const{
+		return rightContext;
+	}
+
+	inline DALM::State &GetRightContext() {
+		return rightContext;
+	}
+
+	inline bool LargeEnough() const{
+		return isLarge;
+	}
+
+	inline void SetAsLarge() {
+		isLarge=true;
+	}
+	
+	inline size_t &GetHypoSize() {
+		return hypoSize;
+	}
+	inline size_t GetHypoSize() const {
+		return hypoSize;
+	}
+
+  virtual int Compare(const FFState& other) const{
+		const DALMChartState &o = static_cast<const DALMChartState &>(other);
+		if(prefixLength < o.prefixLength) return -1;
+		if(prefixLength > o.prefixLength) return 1;
+		if(prefixLength!=0){
+			const DALM::Fragment &f = prefixFragments[prefixLength-1];
+			const DALM::Fragment &of = o.prefixFragments[prefixLength-1];
+			int ret = DALM::compare_fragments(f,of);
+			if(ret != 0) return ret;
+		}
+		if(isLarge != o.isLarge) return (int)isLarge - (int)o.isLarge;
+		if(rightContext.get_count() < o.rightContext.get_count()) return -1;
+		if(rightContext.get_count() > o.rightContext.get_count()) return 1;
+		return rightContext.compare(o.rightContext);
+	}
 };
 
 LanguageModelDALM::LanguageModelDALM(const std::string &line)
@@ -207,18 +225,20 @@ void LanguageModelDALM::Load()
   wid_start = m_vocab->lookup(BOS_);
   wid_end = m_vocab->lookup(EOS_);
 
-  // vocab mapping
-  CreateVocabMapping(wordstxt);
+	// Load the language model.
+	m_lm = new DALM::LM(model, *m_vocab, m_nGramOrder, *m_logger);
+	
+	wid_start = m_vocab->lookup(BOS_);
+	wid_end = m_vocab->lookup(EOS_);
 
   FactorCollection &collection = FactorCollection::Instance();
   m_beginSentenceFactor = collection.AddFactor(BOS_);
 }
 
-const FFState *LanguageModelDALM::EmptyHypothesisState(const InputType &/*input*/) const
-{
-  DALMState *s = new DALMState(m_nGramOrder);
-  m_lm->init_state(*s->get_state());
-  return s;
+const FFState *LanguageModelDALM::EmptyHypothesisState(const InputType &/*input*/) const{
+	DALMState *s = new DALMState();
+	m_lm->init_state(s->get_state());
+	return s;
 }
 
 void LanguageModelDALM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
@@ -232,26 +252,26 @@ void LanguageModelDALM::CalcScore(const Phrase &phrase, float &fullScore, float 
   if (!phraseSize) return;
   size_t currPos = 0;
   size_t hist_count = 0;
-  DALMState *dalm_state = new DALMState(m_nGramOrder);
-  DALM::State *state = dalm_state->get_state();
+	DALM::State state;
 
-  if(phrase.GetWord(0).GetFactor(m_factorType) == m_beginSentenceFactor) {
-    m_lm->init_state(*state);
-    currPos++;
-    hist_count++;
-  }
-
+	if(phrase.GetWord(0).GetFactor(m_factorType) == m_beginSentenceFactor){
+		m_lm->init_state(state);
+		currPos++;
+		hist_count++;
+	}
+  
+	float score;
   while (currPos < phraseSize) {
     const Word &word = phrase.GetWord(currPos);
     hist_count++;
 
     if (word.IsNonTerminal()) {
-      state->refresh();
+      state.refresh();
       hist_count = 0;
     } else {
-      DALM::VocabId wid = GetVocabId(word.GetFactor(m_factorType));
-      float score = m_lm->query(wid, *state);
-      fullScore += score;
+			DALM::VocabId wid = GetVocabId(word.GetFactor(m_factorType));
+			score = m_lm->query(wid, state);
+  		fullScore += score;
       if (hist_count >= m_nGramOrder) ngramScore += score;
       if (wid==m_vocab->unk()) ++oovCount;
     }
@@ -259,9 +279,8 @@ void LanguageModelDALM::CalcScore(const Phrase &phrase, float &fullScore, float 
     currPos++;
   }
 
-  fullScore = TransformLMScore(fullScore);
-  ngramScore = TransformLMScore(ngramScore);
-  delete dalm_state;
+	fullScore = TransformLMScore(fullScore);
+	ngramScore = TransformLMScore(ngramScore);
 }
 
 FFState *LanguageModelDALM::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
@@ -283,25 +302,24 @@ FFState *LanguageModelDALM::Evaluate(const Hypothesis &hypo, const FFState *ps, 
   const std::size_t adjust_end = std::min(end, begin + m_nGramOrder - 1);
 
   DALMState *dalm_state = new DALMState(*dalm_ps);
-  DALM::State *state = dalm_state->get_state();
-
+	DALM::State &state = dalm_state->get_state();
   float score = 0.0;
-  for(std::size_t position=begin; position < adjust_end; position++) {
-    score += m_lm->query(GetVocabId(hypo.GetWord(position).GetFactor(m_factorType)), *state);
+  for(std::size_t position=begin; position < adjust_end; position++){
+  	score += m_lm->query(GetVocabId(hypo.GetWord(position).GetFactor(m_factorType)), state);
   }
 
   if (hypo.IsSourceCompleted()) {
     // Score end of sentence.
     std::vector<DALM::VocabId> indices(m_nGramOrder-1);
     const DALM::VocabId *last = LastIDs(hypo, &indices.front());
-    m_lm->set_state(&indices.front(), (last-&indices.front()), *state);
-
-    score += m_lm->query(wid_end, *state);
+    m_lm->set_state(&indices.front(), (last-&indices.front()), state);
+    
+  	score += m_lm->query(wid_end, state);
   } else if (adjust_end < end) {
     // Get state after adding a long phrase.
     std::vector<DALM::VocabId> indices(m_nGramOrder-1);
     const DALM::VocabId *last = LastIDs(hypo, &indices.front());
-    m_lm->set_state(&indices.front(), (last-&indices.front()), *state);
+    m_lm->set_state(&indices.front(), (last-&indices.front()), state);
   }
 
   score = TransformLMScore(score);
@@ -320,142 +338,91 @@ FFState *LanguageModelDALM::Evaluate(const Hypothesis &hypo, const FFState *ps, 
 FFState *LanguageModelDALM::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const
 {
   // initialize language model context state
-  DALMState *dalm_state = new DALMState(m_nGramOrder);
-  DALM::State *state = dalm_state->get_state();
+ 	DALMChartState *newState = new DALMChartState();
+	DALM::State &state = newState->GetRightContext();
 
-  size_t contextSize = m_nGramOrder-1;
-  DALM::Fragment *prefixFragments = new DALM::Fragment[contextSize];
-  unsigned short prefixLength = 0;
-  bool isLarge = false;
+	DALM::Fragment *prefixFragments = newState->GetPrefixFragments();
+	unsigned char &prefixLength = newState->GetPrefixLength();
+	size_t &hypoSizeAll = newState->GetHypoSize();
 
   // initial language model scores
-  float prefixScore = 0.0;    // not yet final for initial words (lack context)
   float hypoScore = 0.0;      // total hypothesis score.
 
-  const TargetPhrase &targetPhrase = hypo.GetCurrTargetPhrase();
-  size_t hypoSize = targetPhrase.GetSize();
+	const TargetPhrase &targetPhrase = hypo.GetCurrTargetPhrase();
+	size_t hypoSize = targetPhrase.GetSize();
+	hypoSizeAll = hypoSize;
 
   // get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     targetPhrase.GetAlignNonTerm().GetNonTermIndexMap();
 
-  size_t phrasePos = 0;
+	size_t phrasePos = 0;
 
-  // begginig of sentence.
-  if(hypoSize > 0) {
-    const Word &word = targetPhrase.GetWord(0);
-    if(!word.IsNonTerminal()) {
-      DALM::VocabId wid = GetVocabId(word.GetFactor(m_factorType));
-      if(word.GetFactor(m_factorType) == m_beginSentenceFactor) {
-        m_lm->init_state(*state);
-        // state is finalized.
-        isLarge = true;
-      } else {
-        if(isLarge) {
-          float score = m_lm->query(wid, *state);
-          hypoScore += score;
-        } else {
-          float score = m_lm->query(wid, *state, prefixFragments[prefixLength]);
-
-          prefixScore += score;
-          hypoScore += score;
-          prefixLength++;
-          if(prefixLength >= contextSize) isLarge = true;
-        }
-      }
-    } else {
+	// begginig of sentence.
+	if(hypoSize > 0){
+		const Word &word = targetPhrase.GetWord(0);
+		if(word.GetFactor(m_factorType) == m_beginSentenceFactor){
+			m_lm->init_state(state);
+			// state is finalized.
+			newState->SetAsLarge();
+			phrasePos++;
+		}else if(word.IsNonTerminal()){
       // special case: rule starts with non-terminal -> copy everything
-      size_t nonTermIndex = nonTermIndexMap[0];
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
 
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[0]);
       const DALMChartState* prevState =
         static_cast<const DALMChartState*>(prevHypo->GetFFState(featureID));
 
-      // get prefixScore and hypoScore
-      prefixScore = prevState->GetPrefixScore();
-      hypoScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+			// copy chart state
+			(*newState) = (*prevState);
+			hypoSizeAll = hypoSize+prevState->GetHypoSize()-1;
 
-      // get language model state
-      dalm_state->reset(*prevState->GetRightContext());
-      state = dalm_state->get_state();
+      // get hypoScore
+			hypoScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
 
-      prefixLength = prevState->GetPrefixLength();
-      const DALM::Fragment *prevPrefixFragments = prevState->GetPrefixFragments();
-      std::memcpy(prefixFragments, prevPrefixFragments, sizeof(DALM::Fragment)*prefixLength);
-      isLarge = prevState->LargeEnough();
-    }
-    phrasePos++;
+			phrasePos++;
+		}
   }
 
   // loop over rule
   for (; phrasePos < hypoSize; phrasePos++) {
+
     // consult rule for either word or non-terminal
     const Word &word = targetPhrase.GetWord(phrasePos);
 
     // regular word
     if (!word.IsNonTerminal()) {
-      DALM::VocabId wid = GetVocabId(word.GetFactor(m_factorType));
-      if (isLarge) {
-        hypoScore += m_lm->query(wid, *state);
-      } else {
-        float score = m_lm->query(wid, *state, prefixFragments[prefixLength]);
-        prefixScore += score;
-        hypoScore += score;
-        prefixLength++;
-        if(prefixLength >= contextSize) isLarge = true;
-      }
+			EvaluateTerminal(
+					word, hypoScore, 
+					newState, state, 
+					prefixFragments, prefixLength
+					);
     }
 
     // non-terminal, add phrase from underlying hypothesis
     // internal non-terminal
     else {
       // look up underlying hypothesis
-      size_t nonTermIndex = nonTermIndexMap[phrasePos];
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
+  		const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+  		const DALMChartState* prevState =
+    		static_cast<const DALMChartState*>(prevHypo->GetFFState(featureID));
+			size_t prevTargetPhraseLength = prevHypo->GetCurrTargetPhrase().GetSize();
+			float prevHypoScore = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+			hypoSizeAll += prevState->GetHypoSize()-1;
 
-      const DALMChartState* prevState =
-        static_cast<const DALMChartState*>(prevHypo->GetFFState(featureID));
-
-      size_t prevPrefixLength = prevState->GetPrefixLength();
-      const DALM::Fragment *prevPrefixFragments = prevState->GetPrefixFragments();
-      DALM::Gap gap(*state);
-      // score its prefix
-      for(size_t prefixPos = 0; prefixPos < prevPrefixLength; prefixPos++) {
-        const DALM::Fragment &f = prevPrefixFragments[prefixPos];
-
-        if (isLarge) {
-          hypoScore += m_lm->query(f, *state, gap);
-        } else {
-          float score = m_lm->query(f, *state, gap, prefixFragments[prefixLength]);
-          prefixScore += score;
-          hypoScore += score;
-          prefixLength++;
-          if(prefixLength >= contextSize) isLarge = true;
-        }
-        gap.succ();
-      }
-
-      // check if we are dealing with a large sub-phrase
-      if (prevState->LargeEnough()) {
-        // add its language model score
-        hypoScore += UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
-        hypoScore -= prevState->GetPrefixScore(); // remove overwrapped score.
-        // copy language model state
-        dalm_state->reset(*prevState->GetRightContext());
-        state = dalm_state->get_state();
-      } else {
-        DALM::State *state_new = new DALM::State(*prevState->GetRightContext()->get_state());
-        m_lm->set_state(*state_new, *state, gap);
-        dalm_state->reset(state_new);
-        state = dalm_state->get_state();
-      }
+			EvaluateNonTerminal(
+				word, hypoScore, 
+				newState, state, 
+				prefixFragments, prefixLength, 
+				prevState, prevTargetPhraseLength, prevHypoScore
+				);
     }
   }
 
   // assign combined score to score breakdown
   out->Assign(this, TransformLMScore(hypoScore));
 
-  return new DALMChartState(hypo, prefixFragments, prefixLength, prefixScore, dalm_state, isLarge);
+  return newState;
 }
 
 bool LanguageModelDALM::IsUseable(const FactorMask &mask) const
@@ -509,6 +476,117 @@ void LanguageModelDALM::SetParameter(const std::string& key, const std::string& 
     m_filePath = value;
   } else {
     LanguageModel::SetParameter(key, value);
+  }
+	m_ContextSize = m_nGramOrder-1;
+}
+
+void LanguageModelDALM::EvaluateTerminal(
+	const Word &word, 
+	float &hypoScore,
+	DALMChartState *newState, 
+	DALM::State &state, 
+	DALM::Fragment *prefixFragments,
+	unsigned char &prefixLength) const{
+
+	DALM::VocabId wid = GetVocabId(word.GetFactor(m_factorType));
+	if (newState->LargeEnough()) {
+		float score = m_lm->query(wid, state);
+		hypoScore += score;
+	}else{
+		float score = m_lm->query(wid, state, prefixFragments[prefixLength]);
+
+		if(score > 0){
+			hypoScore -= score;
+			newState->SetAsLarge();
+		}else if(state.get_count()<=prefixLength){
+			hypoScore += score;
+			prefixLength++;
+			newState->SetAsLarge();
+		}else{
+			hypoScore += score;
+			prefixLength++;
+			if(prefixLength >= m_ContextSize) newState->SetAsLarge();
+		}
+	}
+}
+
+void LanguageModelDALM::EvaluateNonTerminal(
+  const Word &word,
+  float &hypoScore,
+  DALMChartState *newState,
+  DALM::State &state,
+  DALM::Fragment *prefixFragments,
+  unsigned char &prefixLength,
+	const DALMChartState *prevState,
+	size_t prevTargetPhraseLength,
+	float prevHypoScore
+	) const{
+
+  const unsigned char prevPrefixLength = prevState->GetPrefixLength();
+	const DALM::Fragment *prevPrefixFragments = prevState->GetPrefixFragments();
+	hypoScore += prevHypoScore;
+
+	if(prevPrefixLength == 0){
+		newState->SetAsLarge();
+		hypoScore += state.sum_bows(0, state.get_count());
+		state = prevState->GetRightContext();
+		return;
+	}
+	if(!state.has_context()){
+		newState->SetAsLarge();
+		state = prevState->GetRightContext();
+		return;
+	}
+	DALM::Gap gap(state);
+
+  // score its prefix
+  for(size_t prefixPos = 0; prefixPos < prevPrefixLength; prefixPos++) {
+		const DALM::Fragment &f = prevPrefixFragments[prefixPos];
+		if (newState->LargeEnough()) {
+			float score = m_lm->query(f, state, gap);
+			hypoScore += score;
+
+			if(!gap.is_extended()){
+				state = prevState->GetRightContext();
+				return;
+			}else if(state.get_count() <= prefixPos+1){
+				state = prevState->GetRightContext();
+				return;
+			}
+		} else {
+			DALM::Fragment &fnew = prefixFragments[prefixLength];
+			float score = m_lm->query(f, state, gap, fnew);
+			hypoScore += score;
+
+			if(!gap.is_extended()){
+				newState->SetAsLarge();
+				state = prevState->GetRightContext();
+				return;
+			}else if(state.get_count() <= prefixPos+1){
+				if(!gap.is_finalized()) prefixLength++;
+				newState->SetAsLarge();
+				state = prevState->GetRightContext();
+				return;
+			}else if(gap.is_finalized()){
+				newState->SetAsLarge();
+			}else{
+				prefixLength++;
+				if(prefixLength >= m_ContextSize) newState->SetAsLarge();
+			}
+		}
+		gap.succ();
+  }
+
+  // check if we are dealing with a large sub-phrase
+  if (prevState->LargeEnough()) {
+    newState->SetAsLarge();
+		if(prevPrefixLength < prevState->GetHypoSize()){
+ 			hypoScore += state.sum_bows(prevPrefixLength, state.get_count());
+  	}
+   	// copy language model state
+		state = prevState->GetRightContext();
+  } else {
+    m_lm->set_state(state, prevState->GetRightContext(), prevPrefixFragments, gap);
   }
 }
 

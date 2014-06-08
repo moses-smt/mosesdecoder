@@ -192,6 +192,7 @@ Parameter::Parameter()
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
   AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
+  AddParam("weight-add", "Add weight for FF if it doesn't exist, i.e weights here are added 1st, and can be override by the ini file or on the command line. Used to specify initial weights for FF that was also specified on the copmmand line");
   AddParam("feature-add", "Add a feature function on the command line. Used by mira to add BLEU feature");
   AddParam("feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
@@ -912,24 +913,28 @@ void Parameter::ConvertWeightArgs()
 
 void Parameter::CreateWeightsMap()
 {
-  PARAM_VEC &vec = m_setting["weight"];
+  CreateWeightsMap(m_setting["weight-add"]);
+  CreateWeightsMap(m_setting["weight"]);
+}
+
+void Parameter::CreateWeightsMap(const PARAM_VEC &vec)
+{
   for (size_t i = 0; i < vec.size(); ++i) {
-    const string &line = vec[i];
-    vector<string> toks = Tokenize(line);
-    UTIL_THROW_IF2(toks.size() < 2,
-                   "Error in format of weights: " << line);
+	const string &line = vec[i];
+	vector<string> toks = Tokenize(line);
+	UTIL_THROW_IF2(toks.size() < 2,
+			"Error in format of weights: " << line);
 
-    string name = toks[0];
-    name = name.substr(0, name.size() - 1);
+	string name = toks[0];
+	name = name.substr(0, name.size() - 1);
 
-    vector<float> weights(toks.size() - 1);
-    for (size_t i = 1; i < toks.size(); ++i) {
-      float weight = Scan<float>(toks[i]);
-      weights[i - 1] = weight;
-    }
-    m_weights[name] = weights;
+	vector<float> weights(toks.size() - 1);
+	for (size_t i = 1; i < toks.size(); ++i) {
+	  float weight = Scan<float>(toks[i]);
+	  weights[i - 1] = weight;
+	}
+	m_weights[name] = weights;
   }
-
 }
 
 void Parameter::WeightOverwrite()
