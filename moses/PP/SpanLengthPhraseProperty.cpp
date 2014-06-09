@@ -1,4 +1,3 @@
-#include <vector>
 #include "SpanLengthPhraseProperty.h"
 #include "moses/Util.h"
 #include "util/exception.hh"
@@ -13,10 +12,25 @@ SpanLengthPhraseProperty::SpanLengthPhraseProperty(const std::string &value)
   vector<string> toks;
   Tokenize(toks, value);
 
-  for (size_t i = 0; i < toks.size(); i = i + 2) {
+  set< vector<string> > indices;
+
+  for (size_t i = 0; i < toks.size(); ++i) {
 	  const string &span = toks[i];
-	  float count = Scan<float>(toks[i + 1]);
-	  Populate(span, count);
+
+	  // is it a ntIndex,sourceSpan,targetSpan  or count ?
+	  vector<string> toks;
+	  Tokenize<string>(toks, span, ",");
+	  UTIL_THROW_IF2(toks.size() != 1 && toks.size() != 3, "Incorrect format for SpanLength: " << span);
+
+	  if (toks.size() == 1) {
+		float count = Scan<float>(toks[0]);
+  	    Populate(indices, count);
+
+  	    indices.clear();
+	  }
+	  else {
+		indices.insert(toks);
+	  }
   }
 
   // totals
@@ -24,12 +38,16 @@ SpanLengthPhraseProperty::SpanLengthPhraseProperty(const std::string &value)
   CalcTotals(m_target);
 }
 
-void SpanLengthPhraseProperty::Populate(const string &span, float count)
+void SpanLengthPhraseProperty::Populate(const set< vector<string> > &indices, float count)
 {
-  vector<size_t> toks;
-  Tokenize<size_t>(toks, span, ",");
-  UTIL_THROW_IF2(toks.size() != 3, "Incorrect format for SpanLength: " << span);
-  Populate(toks, count);
+  set< vector<string> >::const_iterator iter;
+  for (iter = indices.begin(); iter != indices.end(); ++iter) {
+	  const vector<string> &toksStr = *iter;
+	  vector<size_t> toks = Scan<size_t>(toksStr);
+	  UTIL_THROW_IF2(toks.size() != 3, "Incorrect format for SpanLength. Size is " << toks.size());
+
+	  Populate(toks, count);
+  }
 }
 
 void SpanLengthPhraseProperty::Populate(const std::vector<size_t> &toks, float count)
@@ -41,9 +59,24 @@ void SpanLengthPhraseProperty::Populate(const std::vector<size_t> &toks, float c
 	  m_source.resize(ntInd + 1);
 	  m_target.resize(ntInd + 1);
   }
-  m_source[ntInd].first[sourceLength] = count;
-  m_target[ntInd].first[targetLength] = count;
 
+  Map &sourceMap = m_source[ntInd].first;
+  Map &targetMap = m_target[ntInd].first;
+  Populate(sourceMap, sourceLength, count);
+  Populate(targetMap, targetLength, count);
+}
+
+void SpanLengthPhraseProperty::Populate(Map &map, size_t span, float count)
+{
+  Map::iterator iter;
+  iter = map.find(span);
+  if (iter != map.end()) {
+	  float &value = iter->second;
+	  value += count;
+  }
+  else {
+	  map[span] = count;
+  }
 }
 
 void SpanLengthPhraseProperty::CalcTotals(Vec &vec)
@@ -77,7 +110,8 @@ float SpanLengthPhraseProperty::GetProb(size_t ntInd, size_t sourceWidth, float 
 	}
 	count += smoothing;
 
-	float ret = count / (data.second + smoothing * map.size());
+	float total = data.second + smoothing * map.size();
+	float ret = count / total;
 	return ret;
 }
 
