@@ -38,10 +38,11 @@ size_t LexicalReorderingConfiguration::GetNumScoreComponents() const
   }
 }
 
-void LexicalReorderingConfiguration::ConfigureSparse(const std::map<std::string,std::string>& sparseArgs) 
+void LexicalReorderingConfiguration::ConfigureSparse
+  (const std::map<std::string,std::string>& sparseArgs, const LexicalReordering* producer) 
 {
   if (sparseArgs.size()) {
-    m_sparse.reset(new SparseReordering(sparseArgs));
+    m_sparse.reset(new SparseReordering(sparseArgs, producer));
   }
 }
 

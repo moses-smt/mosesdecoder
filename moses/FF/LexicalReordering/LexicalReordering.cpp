@@ -52,7 +52,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
     throw "Unknown conditioning option!";
   }
 
-  m_configuration->ConfigureSparse(sparseArgs);
+  m_configuration->ConfigureSparse(sparseArgs, this);
 }
 
 LexicalReordering::~LexicalReordering()

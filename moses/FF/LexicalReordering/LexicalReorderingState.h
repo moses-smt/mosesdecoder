@@ -34,7 +34,7 @@ public:
 
   LexicalReorderingConfiguration(const std::string &modelType);
 
-  void ConfigureSparse(const std::map<std::string,std::string>& sparseArgs);
+  void ConfigureSparse(const std::map<std::string,std::string>& sparseArgs, const LexicalReordering* producer);
 
   LexicalReorderingState *CreateLexicalReorderingState(const InputType &input) const;
 

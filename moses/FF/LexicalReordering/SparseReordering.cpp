@@ -1,8 +1,11 @@
 #include <fstream>
 
+#include "moses/FactorCollection.h"
+#include "moses/InputPath.h"
 #include "moses/Util.h"
 #include "util/exception.hh"
 
+#include "LexicalReordering.h"
 #include "SparseReordering.h"
 
 
@@ -11,7 +14,8 @@ using namespace std;
 namespace Moses 
 {
 
-SparseReordering::SparseReordering(const map<string,string>& config) 
+SparseReordering::SparseReordering(const map<string,string>& config, const LexicalReordering* producer)
+  : m_producer(producer) 
 {
   static const string kSource= "source";
   static const string kTarget = "target";
@@ -42,12 +46,30 @@ SparseReordering::SparseReordering(const map<string,string>& config)
 
 void SparseReordering::ReadWordList(const string& filename, const string& id, vector<WordList>* pWordLists) {
   ifstream fh(filename.c_str());
+  UTIL_THROW_IF(!fh, util::Exception, "Unable to open: " << filename);
   string line;
   pWordLists->push_back(WordList());
   pWordLists->back().first = id;
   while (getline(fh,line)) {
-    pWordLists->back().second.insert(line);
+    //TODO: StringPiece
+    const Factor* factor = FactorCollection::Instance().AddFactor(line);
+    pWordLists->back().second.insert(factor);
   }
+}
+
+void SparseReordering::AddFeatures(
+    const string& type, const Word& word, const string& position,  const WordList& words,
+    LexicalReorderingState::ReorderingType reoType,
+    ScoreComponentCollection* scores) const {
+
+  //TODO: Precalculate all feature names
+  static string kSep = "-";
+  const Factor*  wordFactor = word.GetFactor(0);
+  if (words.second.find(wordFactor) == words.second.end()) return;
+  ostringstream buf;
+  buf  << type << kSep << position << kSep << words.first << kSep << wordFactor->GetString() << kSep << reoType;
+  scores->PlusEquals(m_producer, buf.str(), 1.0);
+
 }
 
 void SparseReordering::CopyScores(
@@ -57,6 +79,29 @@ void SparseReordering::CopyScores(
                ScoreComponentCollection* scores) const 
 {
   //std::cerr << "SR " << topt << " " << reoType << " " << direction << std::endl;
+  const string kPhrase = "phr"; //phrase (backward)
+  const string kStack = "stk"; //stack (forward)
+
+  const string* type = &kPhrase;
+  //TODO: bidirectional?
+  if (direction == LexicalReorderingConfiguration::Forward) {
+    if (!m_useStack) return;
+    type = &kStack;
+  } else if (direction == LexicalReorderingConfiguration::Backward && !m_usePhrase) {
+    return;
+  }
+  for (vector<WordList>::const_iterator i = m_sourceWordLists.begin(); i != m_sourceWordLists.end(); ++i) {
+    const Phrase& sourcePhrase = topt.GetInputPath().GetPhrase();
+    AddFeatures(*type, sourcePhrase.GetWord(0), "src.first", *i, reoType, scores);
+    AddFeatures(*type, sourcePhrase.GetWord(sourcePhrase.GetSize()-1), "src.last", *i, reoType, scores);
+  }
+  for (vector<WordList>::const_iterator i = m_targetWordLists.begin(); i != m_targetWordLists.end(); ++i) {
+    const Phrase& targetPhrase = topt.GetTargetPhrase();   
+    AddFeatures(*type, targetPhrase.GetWord(0), "tgt.first", *i, reoType, scores);
+    AddFeatures(*type, targetPhrase.GetWord(targetPhrase.GetSize()-1), "tgt.last", *i, reoType, scores);
+  }
+
+
 }
 
 } //namespace

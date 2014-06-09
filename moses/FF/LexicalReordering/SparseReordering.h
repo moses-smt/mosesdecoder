@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/unordered_set.hpp>
+
 #include "moses/ScoreComponentCollection.h"
 #include "LexicalReorderingState.h"
 
@@ -32,7 +34,7 @@ namespace Moses
 class SparseReordering
 {
 public:
-  SparseReordering(const std::map<std::string,std::string>& config);
+  SparseReordering(const std::map<std::string,std::string>& config, const LexicalReordering* producer);
   
   //If direction is backward topt is the current option, otherwise the previous
   void CopyScores(const TranslationOption& topt,
@@ -41,7 +43,8 @@ public:
                  ScoreComponentCollection* scores) const ;
 
 private:
-  typedef std::pair<std::string, std::set<std::string> > WordList; //id and list
+  const LexicalReordering* m_producer;
+  typedef std::pair<std::string, boost::unordered_set<const Factor*> > WordList; //id and list
   std::vector<WordList> m_sourceWordLists;
   std::vector<WordList> m_targetWordLists;
   bool m_usePhrase;
@@ -49,6 +52,10 @@ private:
   bool m_useStack;
 
   void ReadWordList(const std::string& filename, const std::string& id, std::vector<WordList>* pWordLists);
+  void AddFeatures(
+    const std::string& type, const Word& word, const std::string& position, const WordList& words,
+    LexicalReorderingState::ReorderingType reoType,
+    ScoreComponentCollection* scores) const;
 
 };
 
