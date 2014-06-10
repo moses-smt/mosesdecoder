@@ -535,7 +535,9 @@ bool StaticData::LoadData(Parameter *parameter)
   NoCache();
   OverrideFeatures();
 
-  LoadFeatureFunctions();
+  if (!m_parameter->isParamSpecified("show-weights")) {
+    LoadFeatureFunctions();
+  }
 
   if (!LoadDecodeGraphs()) return false;
 
