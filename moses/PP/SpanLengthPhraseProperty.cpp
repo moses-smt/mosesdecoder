@@ -104,7 +104,7 @@ float SpanLengthPhraseProperty::GetProb(size_t ntInd, size_t sourceWidth, float 
 
 	if (map.size() == 0) {
 	  // should this ever be reached? there shouldn't be any span length proprty so FF shouldn't call this
-	  return 1;
+	  return 1.0f;
 	}
 
 	Map::const_iterator iter = map.find(sourceWidth);
@@ -116,7 +116,7 @@ float SpanLengthPhraseProperty::GetProb(size_t ntInd, size_t sourceWidth, float 
 	}
 	count += smoothing;
 
-	float total = data.second + smoothing * map.size();
+	float total = data.second + smoothing * (float) map.size();
 	float ret = count / total;
 	return ret;
 }
