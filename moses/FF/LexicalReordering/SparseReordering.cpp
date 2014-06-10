@@ -82,13 +82,16 @@ void SparseReordering::CopyScores(
   const string kPhrase = "phr"; //phrase (backward)
   const string kStack = "stk"; //stack (forward)
 
-  const string* type = &kPhrase;
-  //TODO: bidirectional?
+  const string* type = NULL;// &kPhrase;
   if (direction == LexicalReorderingConfiguration::Forward) {
     if (!m_useStack) return;
     type = &kStack;
-  } else if (direction == LexicalReorderingConfiguration::Backward && !m_usePhrase) {
-    return;
+  } else if (direction == LexicalReorderingConfiguration::Backward) {
+    if (!m_usePhrase) return;
+    type = &kPhrase;
+  } else {
+    //Shouldn't be called for bidirectional
+    assert(!"Shouldn't call CopyScores() with bidirectional direction");
   }
   for (vector<WordList>::const_iterator i = m_sourceWordLists.begin(); i != m_sourceWordLists.end(); ++i) {
     const Phrase& sourcePhrase = topt.GetInputPath().GetPhrase();
