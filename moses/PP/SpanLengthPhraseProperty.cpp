@@ -81,7 +81,7 @@ void SpanLengthPhraseProperty::Populate(Map &map, size_t span, float count)
 
 void SpanLengthPhraseProperty::CalcTotals(Vec &vec)
 {
-	for (size_t i = 0; i < vec.size(); i = i + 2) {
+	for (size_t i = 0; i < vec.size(); ++i) {
 		float total = 0;
 
 		const Map &map = vec[i].first;

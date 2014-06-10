@@ -62,6 +62,7 @@ void SpanLength::Evaluate(const InputType &input
 	  float prob = slProp->GetProb(i, sourceWidth, m_const);
 	  score += TransformScore(prob);
   }
+
   scoreBreakdown.PlusEquals(this, score);
 
 }
