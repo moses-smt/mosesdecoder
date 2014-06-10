@@ -17,11 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include "util/exception.hh"
-
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
-
-#define LINE_MAX_LENGTH 100000
-#include "phrase-extract/SafeGetline.h" // for SAFE_GETLINE()
 
 using namespace std;
 
@@ -461,16 +457,14 @@ void PhraseDictionaryMultiModelCounts::LoadLexicalTable( string &fileName, lexic
   }
   istream *inFileP = &inFile;
 
-  char line[LINE_MAX_LENGTH];
-
   int i=0;
-  while(true) {
+  string line;
+
+  while(getline(*inFileP, line)) {
     i++;
     if (i%100000 == 0) cerr << "." << flush;
-    SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (inFileP->eof()) break;
 
-    vector<string> token = tokenize( line );
+    vector<string> token = tokenize( line.c_str() );
     if (token.size() != 4) {
       cerr << "line " << i << " in " << fileName
            << " has wrong number of tokens, skipping:\n"

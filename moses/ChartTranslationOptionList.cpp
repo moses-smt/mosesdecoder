@@ -83,7 +83,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
 
   // If the rule limit has already been reached then don't add the option
   // unless it is better than at least one existing option.
-  if (m_size > m_ruleLimit && score < m_scoreThreshold) {
+  if (m_ruleLimit && m_size > m_ruleLimit && score < m_scoreThreshold) {
     return;
   }
 
@@ -100,12 +100,12 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   ++m_size;
 
   // If the rule limit hasn't been exceeded then update the threshold.
-  if (m_size <= m_ruleLimit) {
+  if (!m_ruleLimit || m_size <= m_ruleLimit) {
     m_scoreThreshold = (score < m_scoreThreshold) ? score : m_scoreThreshold;
   }
 
   // Prune if bursting
-  if (m_size == m_ruleLimit * 2) {
+  if (m_ruleLimit && m_size == m_ruleLimit * 2) {
 	NTH_ELEMENT4(m_collection.begin(),
                      m_collection.begin() + m_ruleLimit - 1,
                      m_collection.begin() + m_size,
@@ -126,7 +126,7 @@ void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<Ta
 
 void ChartTranslationOptionList::ApplyThreshold()
 {
-  if (m_size > m_ruleLimit) {
+  if (m_ruleLimit && m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2
     // without being pruned.
     assert(m_size < m_ruleLimit * 2);
