@@ -318,10 +318,10 @@ namespace Moses {
 	assert(pp.sample1);
 	assert(pp.joint);
 	assert(pp.raw2);
-	(*dest)[i] = log(pp.raw1);
-	(*dest)[++i] = log(pp.sample1);
-	(*dest)[++i] = log(pp.joint);
-	(*dest)[++i] = log(pp.raw2);
+	(*dest)[i]   = -log(pp.raw1);
+	(*dest)[++i] = -log(pp.sample1);
+	(*dest)[++i] = +log(pp.joint);
+	(*dest)[++i] = -log(pp.raw2);
       }
     };
 
@@ -590,8 +590,9 @@ namespace Moses {
 	static ThreadSafeCounter active;
 	boost::mutex lock; 
 	friend class agenda;
-	boost::taus88 rnd; // every job has its own pseudo random generator 
-	double rnddenom;   // denominator for scaling random sampling
+	boost::taus88 rnd;  // every job has its own pseudo random generator 
+	double rnddenom;    // denominator for scaling random sampling
+	size_t min_diverse; // minimum number of distinct translations
       public:
 	size_t         workers; // how many workers are working on this job?
 	sptr<TSA<Token> const> root; // root of the underlying suffix array
@@ -644,34 +645,47 @@ namespace Moses {
     step(uint64_t & sid, uint64_t & offset)
     {
       boost::lock_guard<boost::mutex> jguard(lock);
-      if ((max_samples == 0) && (next < stop))
+      bool ret = (max_samples == 0) && (next < stop);
+      if (ret)
 	{
 	  next = root->readSid(next,stop,sid);
 	  next = root->readOffset(next,stop,offset);
 	  boost::lock_guard<boost::mutex> sguard(stats->lock);
 	  if (stats->raw_cnt == ctr) ++stats->raw_cnt;
 	  stats->sample_cnt++;
-	  return true;
 	}
       else 
 	{
-	  while (next < stop && stats->good < max_samples)
+	  while (next < stop && (stats->good < max_samples || 
+				 stats->trg.size() < min_diverse))
 	    {
 	      next = root->readSid(next,stop,sid);
 	      next = root->readOffset(next,stop,offset);
-	      {
-		boost::lock_guard<boost::mutex> sguard(stats->lock);
+	      { // brackets required for lock scoping; see sguard immediately below
+		boost::lock_guard<boost::mutex> sguard(stats->lock); 
 		if (stats->raw_cnt == ctr) ++stats->raw_cnt;
-		size_t rnum = (stats->raw_cnt - ctr++)*(rnd()/(rnd.max()+1.));
+		size_t scalefac = (stats->raw_cnt - ctr++);
+		size_t rnum = scalefac*(rnd()/(rnd.max()+1.));
+#if 0
+		cerr << rnum << "/" << scalefac << " vs. " 
+		     << max_samples - stats->good << " ("
+		     << max_samples << " - " << stats->good << ")" 
+		     << endl;
+#endif
 		if (rnum < max_samples - stats->good)
 		  {
 		    stats->sample_cnt++;
-		    return true;
+		    ret = true;
+		    break;
 		  }
 	      }
 	    }
-	  return false;
 	}
+      
+      // boost::lock_guard<boost::mutex> sguard(stats->lock); 
+      // abuse of lock for clean output to cerr
+      // cerr << stats->sample_cnt++;
+      return ret;
     }
 
     template<typename Token>
@@ -713,6 +727,13 @@ namespace Moses {
     worker::
     operator()()
     {
+      // things to do:
+      // - have each worker maintain their own pstats object and merge results at the end;
+      // - ensure the minimum size of samples considered by a non-locked counter that is only 
+      //   ever incremented -- who cares if we look at more samples than required, as long
+      //   as we look at at least the minimum required
+      // This way, we can reduce the number of lock / unlock operations we need to do during 
+      // sampling. 
       size_t s1=0, s2=0, e1=0, e2=0;
       uint64_t sid=0, offset=0; // of the source phrase
       while(sptr<job> j = ag.get_job())
@@ -812,6 +833,7 @@ namespace Moses {
 	sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd)
       : rnd(0)
       , rnddenom(rnd.max() + 1.)
+      , min_diverse(10)
       , workers(0)
       , root(r)
       , next(m.lower_bound(-1))
