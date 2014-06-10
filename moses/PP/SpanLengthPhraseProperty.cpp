@@ -101,6 +101,12 @@ float SpanLengthPhraseProperty::GetProb(size_t ntInd, size_t sourceWidth, float 
 
 	const std::pair<Map, float> &data = m_source[ntInd];
 	const Map &map = data.first;
+
+	if (map.size() == 0) {
+	  // should this ever be reached? there shouldn't be any span length proprty so FF shouldn't call this
+	  return 1;
+	}
+
 	Map::const_iterator iter = map.find(sourceWidth);
 	if (iter == map.end()) {
 	  count = 0;
