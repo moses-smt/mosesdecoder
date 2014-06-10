@@ -15,7 +15,7 @@ public:
 
   virtual void ProcessValue() {};
 
-  const std::string &GetValueString() { return m_value; };
+  const std::string &GetValueString() const { return m_value; };
 
 protected:
 
