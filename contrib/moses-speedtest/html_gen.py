@@ -135,8 +135,8 @@ def produce_html(path, global_config):
         res1 = Result(logLine1.testname, logLine1.real, logLine2.real,\
             logLine2.revision, logLine2.branch, logLine1.revision, logLine1.branch)
         html = html + '<tr><td>' + logLine2.date + '</td><td>' + logLine2.time + '</td><td>' +\
-        res1.testname + '</td><td>' + res1.revision + '</td><td>' + res1.branch + '</td><td>' +\
-        str(res1.current) + '</td><td>' + str(res1.previous) + '</td><td>' + res1.prevrev + '</td>'
+        res1.testname + '</td><td>' + res1.revision[:10] + '</td><td>' + res1.branch + '</td><td>' +\
+        str(res1.current) + '</td><td>' + str(res1.previous) + '</td><td>' + res1.prevrev[:10] + '</td>'
 
         #Add fancy colours depending on the change
         if res1.percentage > 0.05: #If we have improvement of more than 5%
