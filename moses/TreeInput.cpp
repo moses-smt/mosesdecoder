@@ -44,7 +44,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
   // keep this handy for later
   const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-  const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+  // const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -170,7 +170,8 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
             TargetPhrase targetPhrase;
-            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+            // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 
             // set constituent label
             string targetLHSstr;
@@ -313,7 +314,7 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &labe
                               , const std::vector<FactorType>& factorOrder)
 {
   Word word(true);
-  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label); // TODO - no factors
+  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label, true); // TODO - no factors
   word.SetFactor(0, factor);
 
   AddChartLabel(startPos, endPos, word, factorOrder);

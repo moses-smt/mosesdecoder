@@ -23,14 +23,6 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
-local have-clock = [ SHELL "bash -c \"g++ -dM -x c++ -E /dev/null -include time.h 2>/dev/null |grep CLOCK_MONOTONIC\"" : exit-status ] ;
-if $(have-clock[2]) = 0 {
-  #required for clock_gettime.  Threads already have rt.  
-  lib rt : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
-} else {
-  alias rt ;
-}
-
 #This is a kludge to force rebuilding if different --with options are passed. 
 #Could have used features like <srilm>on but getting these to apply only to
 #linking was ugly and it still didn't trigger an install (since the install
@@ -48,7 +40,18 @@ current ?= "" ;
 path-constant LM-LOG : bin/lm.log ;
 update-if-changed $(LM-LOG) $(current) ;
 
-obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm : <dependency>$(LM-LOG) ;
+obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <dependency>$(LM-LOG) ;
+
+if [ option.get "with-mm" : no : yes ] = yes
+{
+  alias mmlib : 
+  $(TOP)/moses/TranslationModel/UG//mmsapt
+  $(TOP)/moses/TranslationModel/UG/generic//generic
+  $(TOP)/moses/TranslationModel/UG/mm//mm
+  ;
+} else {
+  alias mmlib ;
+}
 
 lib moses :
 [ glob 
@@ -62,17 +65,21 @@ lib moses :
   FF/*.cpp
   FF/OSM-Feature/*.cpp
   FF/LexicalReordering/*.cpp
+  PP/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp
   FF/Factory.cpp
 ]
-headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool rt 
-..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
-$(TOP)//boost_iostreams ;
+headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
 
-#generic//generic mm//mm
+..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
+$(TOP)//boost_iostreams mmlib
+:
+<threading>single:<source>../util//rt
+;
+
 
 alias headers-to-install : [ glob-tree *.h ] ;
 

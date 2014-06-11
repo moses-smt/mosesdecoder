@@ -1,10 +1,7 @@
 #pragma once
 
-#include <stdexcept>
-#include "moses/Util.h"
 #include "moses/Word.h"
 #include "StatelessFeatureFunction.h"
-#include "moses/TranslationModel/PhraseDictionaryNodeMemory.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
@@ -32,6 +29,7 @@ public:
   void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {};
   void Evaluate(const Hypothesis& hypo,
@@ -39,33 +37,19 @@ public:
 
   bool Load(const std::string &filePath);
 
-  std::map<Word, std::set<Word> >& Get_Soft_Matches() {
-    return m_soft_matches;
+  std::vector<std::vector<Word> >& GetSoftMatches() {
+    return m_softMatches;
   }
 
-  std::map<Word, std::set<Word> >& Get_Soft_Matches_Reverse() {
-    return m_soft_matches_reverse;
-  }
+  void ResizeCache() const;
 
-  const std::string& GetFeatureName(const Word& LHS, const Word& RHS) const;
+  const std::string& GetOrSetFeatureName(const Word& RHS, const Word& LHS) const;
   void SetParameter(const std::string& key, const std::string& value);
 
+
 private:
-  std::map<Word, std::set<Word> > m_soft_matches; // map LHS of old rule to RHS of new rle
-  std::map<Word, std::set<Word> > m_soft_matches_reverse; // map RHS of new rule to LHS of old rule
-
-  typedef std::pair<Word, Word> NonTerminalMapKey;
-
-#if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
-  typedef boost::unordered_map<NonTerminalMapKey,
-          std::string,
-          NonTerminalMapKeyHasher,
-          NonTerminalMapKeyEqualityPred> NonTerminalSoftMatchingMap;
-#else
-  typedef std::map<NonTerminalMapKey, std::string> NonTerminalSoftMatchingMap;
-#endif
-
-  mutable NonTerminalSoftMatchingMap m_soft_matching_cache;
+  mutable std::vector<std::vector<Word> > m_softMatches; // map RHS of new rule to list of possible LHS of old rule (subtree)
+  mutable std::vector<std::vector<std::string> > m_nameCache;
 
 #ifdef WITH_THREADS
   //reader-writer lock

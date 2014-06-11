@@ -44,15 +44,13 @@ namespace ugdiss
     file.open(fname);
     if (!file.is_open())
       {
-	cerr << "Error opening file " << fname << endl;
-	assert(0);
+        ostringstream msg;
+        msg << "TokenIndex::open: Error opening file '" << fname << "'.";
+        throw std::runtime_error(msg.str().c_str());
       }
-    // cout << "file is open" << endl;
 
     this->numTokens = *(reinterpret_cast<uint32_t const*>(file.data()));
     unkId = *(reinterpret_cast<id_type const*>(file.data()+4));
-
-    // cout << "tokenindex.open: unkId=" << unkId << endl;
 
     startIdx = reinterpret_cast<Entry const*>(file.data()+4+sizeof(id_type));
     endIdx   = startIdx + numTokens;
@@ -143,13 +141,10 @@ namespace ugdiss
   TokenIndex::
   operator[](id_type id) const
   {
-    if (!ridx.size())
+    if (!ridx.size()) 
       {
-        cerr << "FATAL ERROR: You need to call iniReverseIndex() "
-             << "on the TokenIndex class before using operator[](id_type id)."
-             << endl;
-        assert(0);
-        exit(1);
+	boost::lock_guard<boost::mutex> lk(*this->lock);
+	if (!ridx.size()) ridx = reverseIndex();
       }
     if (id < ridx.size())  
       return ridx[id];
@@ -163,7 +158,11 @@ namespace ugdiss
   TokenIndex::
   iniReverseIndex() 
   {
-    if (!ridx.size()) ridx = reverseIndex();
+    if (!ridx.size()) 
+      {
+	boost::lock_guard<boost::mutex> lk(*this->lock);
+	if (!ridx.size()) ridx = reverseIndex();
+      }
   }
 
   
@@ -171,7 +170,11 @@ namespace ugdiss
   TokenIndex::
   operator[](id_type id) 
   {
-    if (!ridx.size()) ridx = reverseIndex();
+    if (!ridx.size()) 
+      {
+	boost::lock_guard<boost::mutex> lk(*this->lock);
+	if (!ridx.size()) ridx = reverseIndex();
+      }
     if (id < ridx.size())  
       return ridx[id];
     boost::lock_guard<boost::mutex> lk(*this->lock);
@@ -184,7 +187,11 @@ namespace ugdiss
   TokenIndex::
   toString(vector<id_type> const& v) 
   {
-    if (!ridx.size()) ridx = reverseIndex();
+    if (!ridx.size()) 
+      {
+	boost::lock_guard<boost::mutex> lk(*this->lock);
+	if (!ridx.size()) ridx = reverseIndex();
+      }
     ostringstream buf;
     for (size_t i = 0; i < v.size(); i++)
       buf << (i ? " " : "") << (*this)[v[i]];
@@ -195,7 +202,11 @@ namespace ugdiss
   TokenIndex::
   toString(vector<id_type> const& v) const
   {
-    assert (ridx.size());
+    if (!ridx.size()) 
+      {
+	boost::lock_guard<boost::mutex> lk(*this->lock);
+	if (!ridx.size()) ridx = reverseIndex();
+      }
     ostringstream buf;
     for (size_t i = 0; i < v.size(); i++)
       buf << (i ? " " : "") << (*this)[v[i]];
@@ -206,7 +217,11 @@ namespace ugdiss
   TokenIndex::
   toString(id_type const* start, id_type const* const stop) 
   {
-    if (!ridx.size()) ridx = reverseIndex();
+    if (!ridx.size()) 
+      {
+	boost::lock_guard<boost::mutex> lk(*this->lock);
+	if (!ridx.size()) ridx = reverseIndex();
+      }
     ostringstream buf;
     if (start < stop)
       buf << (*this)[*start];
@@ -219,7 +234,11 @@ namespace ugdiss
   TokenIndex::
   toString(id_type const* start, id_type const* const stop) const
   {
-    assert (ridx.size());
+    if (!ridx.size()) 
+      {
+	boost::lock_guard<boost::mutex> lk(*this->lock);
+	if (!ridx.size()) ridx = reverseIndex();
+      }
     ostringstream buf;
     if (start < stop)
       buf << (*this)[*start];

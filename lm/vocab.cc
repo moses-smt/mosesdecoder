@@ -170,11 +170,15 @@ struct ProbingVocabularyHeader {
 
 ProbingVocabulary::ProbingVocabulary() : enumerate_(NULL) {}
 
-uint64_t ProbingVocabulary::Size(uint64_t entries, const Config &config) {
-  return ALIGN8(sizeof(detail::ProbingVocabularyHeader)) + Lookup::Size(entries, config.probing_multiplier);
+uint64_t ProbingVocabulary::Size(uint64_t entries, float probing_multiplier) {
+  return ALIGN8(sizeof(detail::ProbingVocabularyHeader)) + Lookup::Size(entries, probing_multiplier);
 }
 
-void ProbingVocabulary::SetupMemory(void *start, std::size_t allocated, std::size_t /*entries*/, const Config &/*config*/) {
+uint64_t ProbingVocabulary::Size(uint64_t entries, const Config &config) {
+  return Size(entries, config.probing_multiplier);
+}
+
+void ProbingVocabulary::SetupMemory(void *start, std::size_t allocated) {
   header_ = static_cast<detail::ProbingVocabularyHeader*>(start);
   lookup_ = Lookup(static_cast<uint8_t*>(start) + ALIGN8(sizeof(detail::ProbingVocabularyHeader)), allocated);
   bound_ = 1;
@@ -201,12 +205,12 @@ WordIndex ProbingVocabulary::Insert(const StringPiece &str) {
     return 0;
   } else {
     if (enumerate_) enumerate_->Add(bound_, str);
-    lookup_.Insert(ProbingVocabuaryEntry::Make(hashed, bound_));
+    lookup_.Insert(ProbingVocabularyEntry::Make(hashed, bound_));
     return bound_++;
   }
 }
 
-void ProbingVocabulary::InternalFinishedLoading() {
+void ProbingVocabulary::FinishedLoading() {
   lookup_.FinishedInserting();
   header_->bound = bound_;
   header_->version = kProbingVocabularyVersion;

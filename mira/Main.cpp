@@ -37,8 +37,6 @@ namespace mpi = boost::mpi;
 #include "Hildreth.h"
 #include "HypothesisQueue.h"
 #include "moses/StaticData.h"
-#include "moses/ChartTrellisPathList.h"
-#include "moses/ChartTrellisPath.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/ThreadPool.h"
 #include "mert/BleuScorer.h"
@@ -521,7 +519,7 @@ int main(int argc, char** argv)
   }
 
   // get reference to feature functions
-  const vector<FeatureFunction*> &featureFunctions = FeatureFunction::GetFeatureFunctions();
+  // const vector<FeatureFunction*> &featureFunctions = FeatureFunction::GetFeatureFunctions();
   ScoreComponentCollection initialWeights = decoder->getWeights();
 
   if (add2lm != 0) {
@@ -667,7 +665,7 @@ int main(int argc, char** argv)
     }
 
     // number of weight dumps this epoch
-    size_t weightMixingThisEpoch = 0;
+    // size_t weightMixingThisEpoch = 0;
     size_t weightEpochDump = 0;
 
     size_t shardPosition = 0;

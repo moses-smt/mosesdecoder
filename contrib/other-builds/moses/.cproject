@@ -52,6 +52,7 @@
 									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 									<listOptionValue builtIn="false" value="LM_IRST"/>
+									<listOptionValue builtIn="false" value="LM_DALM"/>
 									<listOptionValue builtIn="false" value="LM_RAND"/>
 									<listOptionValue builtIn="false" value="LM_NPLM"/>
 									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
@@ -79,8 +80,11 @@
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.511477442" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1274165733" name="DALMWrapper.cpp" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327.721600862">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327.721600862" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="LM/DALMWrapper.h|LM/DALMWrapper.cpp|TranslationModel/fuzzy-match/FuzzyMatchWrapper.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="TranslationModel/fuzzy-match/FuzzyMatchWrapper.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

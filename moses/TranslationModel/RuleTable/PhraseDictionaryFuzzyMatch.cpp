@@ -80,8 +80,8 @@ namespace Moses
 
 PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
   :PhraseDictionary(line)
-  ,m_FuzzyMatchWrapper(NULL)
   ,m_config(3)
+  ,m_FuzzyMatchWrapper(NULL)
 {
   ReadParameters();
 }
@@ -100,7 +100,8 @@ void PhraseDictionaryFuzzyMatch::Load()
 
 ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t /*maxChartSpan*/)
 {
   return new ChartRuleLookupManagerMemoryPerSentence(parser, cellCollection, *this);
 }
@@ -265,11 +266,13 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
 
     // source
     Phrase sourcePhrase( 0);
-    sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    // sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, &sourceLHS);
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromString(Output, m_output, targetPhraseString, factorDelimiter, &targetLHS);
+    // targetPhrase->CreateFromString(Output, m_output, targetPhraseString, factorDelimiter, &targetLHS);
+    targetPhrase->CreateFromString(Output, m_output, targetPhraseString, &targetLHS);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
@@ -339,7 +342,11 @@ PhraseDictionaryNodeMemory &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDi
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
 
+#if defined(UNLABELLED_SOURCE)
+      currNode = currNode->GetOrCreateNonTerminalChild(targetNonTerm);
+#else
       currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
+#endif
     } else {
       currNode = currNode->GetOrCreateChild(word);
     }

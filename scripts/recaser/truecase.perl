@@ -35,12 +35,20 @@ while(<STDIN>) {
   my ($WORD,$MARKUP) = split_xml($_);
   my $sentence_start = 1;
   for(my $i=0;$i<=$#$WORD;$i++) {
-    print " " if $i;
+    print " " if $i && $$MARKUP[$i] eq '';
     print $$MARKUP[$i];
 
-    $$WORD[$i] =~ /^([^\|]+)(.*)/;
-    my $word = $1;
-    my $otherfactors = $2;
+    my ($word,$otherfactors);
+    if ($$WORD[$i] =~ /^([^\|]+)(.*)/)
+    {
+	$word = $1;
+	$otherfactors = $2;
+    }
+    else
+    {
+	$word = $$WORD[$i];
+	$otherfactors = "";
+    }
 
     if ($sentence_start && defined($BEST{lc($word)})) {
       print $BEST{lc($word)}; # truecase sentence start
@@ -59,7 +67,7 @@ while(<STDIN>) {
     if    ( defined($SENTENCE_END{ $word }))           { $sentence_start = 1; }
     elsif (!defined($DELAYED_SENTENCE_START{ $word })) { $sentence_start = 0; }
   }
-  print " ".$$MARKUP[$#$MARKUP];
+  print $$MARKUP[$#$MARKUP];
   print "\n";
 }
 
@@ -70,15 +78,23 @@ sub split_xml {
   my $i = 0;
   $MARKUP[0] = "";
   while($line =~ /\S/) {
+    # XML tag
     if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
       $MARKUP[$i] .= $1." ";
       $line = $2;
     }
+    # non-XML text
     elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {
       $WORD[$i++] = $1;
       $MARKUP[$i] = "";
       $line = $2;
     }
+    # '<' or '>' occurs in word, but it's not an XML tag
+    elsif ($line =~ /^\s*(\S+)(.*)$/) {
+      $WORD[$i++] = $1;
+      $MARKUP[$i] = "";
+      $line = $2;
+      }
     else {
       die("ERROR: huh? $line\n");
     }

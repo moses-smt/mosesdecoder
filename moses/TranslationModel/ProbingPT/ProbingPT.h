@@ -29,7 +29,10 @@ public:
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   // for syntax/hiero model (CKY+ decoding)
-  ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&, const ChartCellCollectionBase&);
+  virtual ChartRuleLookupManager *CreateRuleLookupManager(
+    const ChartParser &,
+    const ChartCellCollectionBase &,
+    std::size_t);
 
   TO_STRING();
 

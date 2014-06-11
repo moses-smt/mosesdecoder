@@ -167,6 +167,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartHypothesisCollection.h</locationURI>
 		</link>
 		<link>
+			<name>ChartKBestExtractor.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartKBestExtractor.cpp</locationURI>
+		</link>
+		<link>
+			<name>ChartKBestExtractor.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartKBestExtractor.h</locationURI>
+		</link>
+		<link>
 			<name>ChartManager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartManager.cpp</locationURI>
@@ -230,51 +240,6 @@
 			<name>ChartTranslationOptions.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTranslationOptions.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisDetour.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisDetour.cpp</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisDetour.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisDetour.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisDetourQueue.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisDetourQueue.cpp</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisDetourQueue.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisDetourQueue.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisNode.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisNode.cpp</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisNode.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisNode.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisPath.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisPath.cpp</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisPath.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisPath.h</locationURI>
-		</link>
-		<link>
-			<name>ChartTrellisPathList.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisPathList.h</locationURI>
 		</link>
 		<link>
 			<name>ConfusionNet.cpp</name>
@@ -575,6 +540,11 @@
 			<name>PDTAimp.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PDTAimp.h</locationURI>
+		</link>
+		<link>
+			<name>PP</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>Parameter.cpp</name>
@@ -1067,6 +1037,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
 		</link>
 		<link>
+			<name>FF/CountNonTerms.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CountNonTerms.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.h</locationURI>
+		</link>
+		<link>
 			<name>FF/CoveredReferenceFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.cpp</locationURI>
@@ -1192,6 +1172,26 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>FF/MaxSpanFreeNonTermSource.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/MaxSpanFreeNonTermSource.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/MaxSpanFreeNonTermSource.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/MaxSpanFreeNonTermSource.h</locationURI>
+		</link>
+		<link>
+			<name>FF/NieceTerminal.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/NieceTerminal.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/NieceTerminal.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/NieceTerminal.h</locationURI>
+		</link>
+		<link>
 			<name>FF/OSM-Feature</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1240,6 +1240,36 @@
 			<name>FF/PhrasePenalty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhrasePenalty.h</locationURI>
+		</link>
+		<link>
+			<name>FF/ReferenceComparison.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ReferenceComparison.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ReferenceComparison.h</locationURI>
+		</link>
+		<link>
+			<name>FF/RuleScope.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleScope.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/RuleScope.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/RuleScope.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SetSourcePhrase.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SetSourcePhrase.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SkeletonStatefulFF.cpp</name>
@@ -1302,16 +1332,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.h</locationURI>
 		</link>
 		<link>
-			<name>FF/SyntaxConstraintFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxConstraintFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SyntaxConstraintFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxConstraintFeature.h</locationURI>
-		</link>
-		<link>
 			<name>FF/TargetBigramFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetBigramFeature.cpp</locationURI>
@@ -1340,6 +1360,16 @@
 			<name>FF/TargetWordInsertionFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetWordInsertionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/TreeStructureFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TreeStructureFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/TreeStructureFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TreeStructureFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/UnknownWordPenaltyProducer.cpp</name>
@@ -1575,6 +1605,26 @@
 			<name>LM/backward.arpa</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
+		</link>
+		<link>
+			<name>PP/Factory.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/Factory.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.h</locationURI>
+		</link>
+		<link>
+			<name>PP/PhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/TreeStructurePhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/TreeStructurePhraseProperty.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/BilingualDynSuffixArray.cpp</name>
@@ -1870,6 +1920,16 @@
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/CompletedRuleCollection.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/CompletedRuleCollection.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/CompletedRuleCollection.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/CompletedRuleCollection.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/DotChart.h</name>

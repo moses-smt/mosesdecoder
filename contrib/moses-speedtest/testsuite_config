@@ -1,0 +1,5 @@
+MOSES_REPO_PATH: /home/moses-speedtest/moses-standard/mosesdecoder
+DROP_CACHES_COMM: sys_drop_caches 3
+TEST_DIR: /home/moses-speedtest/phrase_tables/tests
+TEST_LOG_DIR: /home/moses-speedtest/phrase_tables/testlogs
+BASEBRANCH: RELEASE-2.1.1

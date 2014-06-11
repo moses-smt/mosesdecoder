@@ -20,9 +20,9 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 
-#include "moses/generic/sorting/VectorIndexSorter.h"
-#include "moses/generic/sampling/Sampling.h"
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
+#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 
 #include "ug_typedefs.h"
 #include "ug_mm_ttrack.h"

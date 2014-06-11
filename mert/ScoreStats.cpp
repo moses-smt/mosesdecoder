@@ -35,10 +35,8 @@ ScoreStats::ScoreStats(const size_t size)
 
 ScoreStats::~ScoreStats()
 {
-  if (m_array) {
-    delete [] m_array;
-    m_array = NULL;
-  }
+  delete [] m_array;
+  m_array = NULL;
 }
 
 void ScoreStats::Copy(const ScoreStats &stats)

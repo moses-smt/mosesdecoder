@@ -59,7 +59,7 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
 
     CacheColl &cache = GetCache();
 
-    std::map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >::iterator iter;
+    CacheColl::iterator iter;
     iter = cache.find(hash);
 
     if (iter != cache.end()) {
@@ -143,7 +143,8 @@ std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(
 }
 
 ChartRuleLookupManager* PhraseDictionaryTransliteration::CreateRuleLookupManager(const ChartParser &parser,
-    const ChartCellCollectionBase &cellCollection)
+    const ChartCellCollectionBase &cellCollection,
+    std::size_t /*maxChartSpan*/)
 {
 	return NULL;
   //return new ChartRuleLookupManagerSkeleton(parser, cellCollection, *this);
@@ -166,39 +167,6 @@ SetParameter(const std::string& key, const std::string& value)
   } else {
 	  PhraseDictionary::SetParameter(key, value);
   }
-}
-
-bool PhraseDictionaryTransliteration::SatisfyBackoff(const InputPath &inputPath) const
-{
-  const Phrase &sourcePhrase = inputPath.GetPhrase();
-
-  assert(m_container);
-  const DecodeGraph *decodeGraph = m_container->GetContainer();
-  size_t backoff = decodeGraph->GetBackoff();
-
-  if (backoff == 0) {
-	  // ie. don't backoff. Collect ALL translations
-	  return true;
-  }
-
-  if (sourcePhrase.GetSize() > backoff) {
-	  // source phrase too big
-	  return false;
-  }
-
-  // lookup translation only if no other translations
-  InputPath::TargetPhrases::const_iterator iter;
-  for (iter = inputPath.GetTargetPhrases().begin(); iter != inputPath.GetTargetPhrases().end(); ++iter) {
-  	const std::pair<const TargetPhraseCollection*, const void*> &temp = iter->second;
-  	const TargetPhraseCollection *tpCollPrev = temp.first;
-
-  	if (tpCollPrev && tpCollPrev->GetSize()) {
-  		// already have translation from another pt. Don't create translations
-  		return false;
-  	}
-  }
-
-  return true;
 }
 
 TO_STRING_BODY(PhraseDictionaryTransliteration);

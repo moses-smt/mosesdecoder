@@ -211,8 +211,10 @@ uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
 	}
 }
 
-ChartRuleLookupManager* ProbingPT::CreateRuleLookupManager(const ChartParser &parser,
-    const ChartCellCollectionBase &cellCollection)
+ChartRuleLookupManager *ProbingPT::CreateRuleLookupManager(
+  const ChartParser &,
+  const ChartCellCollectionBase &,
+  std::size_t)
 {
   abort();
   return NULL;

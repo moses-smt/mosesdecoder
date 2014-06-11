@@ -29,7 +29,6 @@
 #include <vector>
 #include <algorithm>
 
-#include "SafeGetline.h"
 #include "ScoreFeature.h"
 #include "tables-core.h"
 #include "ExtractionPhrasePair.h"
@@ -39,8 +38,6 @@
 
 using namespace std;
 using namespace MosesTraining;
-
-#define LINE_MAX_LENGTH 100000
 
 namespace MosesTraining
 {
@@ -232,7 +229,7 @@ int main(int argc, char* argv[])
   }
 
   // loop through all extracted phrase translations
-  char line[LINE_MAX_LENGTH], lastLine[LINE_MAX_LENGTH];
+  string line, lastLine;
   lastLine[0] = '\0';
   ExtractionPhrasePair *phrasePair = NULL;
   std::vector< ExtractionPhrasePair* > phrasePairsWithSameSource;
@@ -245,8 +242,8 @@ int main(int argc, char* argv[])
   float tmpCount=0.0f, tmpPcfgSum=0.0f;
 
   int i=0;
-  SAFE_GETLINE( (extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__ );
-  if ( !extractFileP.eof() ) {
+  // TODO why read only the 1st line?
+  if ( getline(extractFileP, line)) {
     ++i;
     tmpPhraseSource = new PHRASE();
     tmpPhraseTarget = new PHRASE();
@@ -265,23 +262,21 @@ int main(int argc, char* argv[])
     if ( hierarchicalFlag ) {
       phrasePairsWithSameSourceAndTarget.push_back( phrasePair );
     }
-    strcpy( lastLine, line );
-    SAFE_GETLINE( (extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__ );
+    lastLine = line;
   }
 
-  while ( !extractFileP.eof() ) {
+  while ( getline(extractFileP, line) ) {
 
     if ( ++i % 100000 == 0 ) {
       std::cerr << "." << std::flush;
     }
 
     // identical to last line? just add count
-    if (strcmp(line,lastLine) == 0) {
+    if (line == lastLine) {
       phrasePair->IncrementPrevious(tmpCount,tmpPcfgSum);
-      SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
       continue;
     } else {
-      strcpy( lastLine, line );
+      lastLine = line;
     }
 
     tmpPhraseSource = new PHRASE();
@@ -358,8 +353,6 @@ int main(int argc, char* argv[])
         phrasePairsWithSameSourceAndTarget.push_back(phrasePair);
       }
     }
-
-    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
 
   }
 
@@ -506,7 +499,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
                       const ScoreFeatureManager& featureManager,
                       const MaybeLog& maybeLogProb )
 {
-  assert(phrasePair.isValid());
+  assert(phrasePair.IsValid());
 
   const ALIGNMENT *bestAlignmentT2S = phrasePair.FindBestAlignmentTargetToSource();
   float count = phrasePair.GetCount();
@@ -555,6 +548,51 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     phraseTableFile << " ||| ";
   }
 
+  // alignment
+  if ( hierarchicalFlag ) {
+      // always output alignment if hiero style
+      assert(phraseTarget->size() == bestAlignmentT2S->size()+1);
+      std::vector<std::string> alignment;
+      for ( size_t j = 0; j < phraseTarget->size() - 1; ++j ) {
+        if ( isNonTerminal(vcbT.getWord( phraseTarget->at(j) ))) {
+          if ( bestAlignmentT2S->at(j).size() != 1 ) {
+            std::cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << std::endl;
+            phraseTableFile.flush();
+            assert(bestAlignmentT2S->at(j).size() == 1);
+          }
+          size_t sourcePos = *(bestAlignmentT2S->at(j).begin());
+          //phraseTableFile << sourcePos << "-" << j << " ";
+          std::stringstream point;
+          point << sourcePos << "-" << j;
+          alignment.push_back(point.str());
+        } else {
+          for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin();
+                setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
+            size_t sourcePos = *setIter;
+            std::stringstream point;
+            point << sourcePos << "-" << j;
+            alignment.push_back(point.str());
+          }
+        }
+      }
+      // now print all alignments, sorted by source index
+      sort(alignment.begin(), alignment.end());
+      for (size_t i = 0; i < alignment.size(); ++i) {
+        phraseTableFile << alignment[i] << " ";
+      }
+  } else if ( !inverseFlag && wordAlignmentFlag) {
+      // alignment info in pb model
+      for (size_t j = 0; j < bestAlignmentT2S->size(); ++j) {
+        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin();
+              setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
+          size_t sourcePos = *setIter;
+          phraseTableFile << sourcePos << "-" << j << " ";
+        }
+      }
+  }
+
+  phraseTableFile << " ||| ";
+
   // lexical translation probability
   if (lexFlag) {
     double lexScore = computeLexicalTranslation( phraseSource, phraseTarget, bestAlignmentT2S );
@@ -596,53 +634,6 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     phraseTableFile << " " << i->first << " " << i->second;
   }
 
-  phraseTableFile << " ||| ";
-
-  // output alignment info
-  if ( !inverseFlag ) {
-    if ( hierarchicalFlag ) {
-      // always output alignment if hiero style
-      assert(phraseTarget->size() == bestAlignmentT2S->size()+1);
-      std::vector<std::string> alignment;
-      for ( size_t j = 0; j < phraseTarget->size() - 1; ++j ) {
-        if ( isNonTerminal(vcbT.getWord( phraseTarget->at(j) ))) {
-          if ( bestAlignmentT2S->at(j).size() != 1 ) {
-            std::cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << std::endl;
-            phraseTableFile.flush();
-            assert(bestAlignmentT2S->at(j).size() == 1);
-          }
-          size_t sourcePos = *(bestAlignmentT2S->at(j).begin());
-          //phraseTableFile << sourcePos << "-" << j << " ";
-          std::stringstream point;
-          point << sourcePos << "-" << j;
-          alignment.push_back(point.str());
-        } else {
-          for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
-                setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
-            size_t sourcePos = *setIter;
-            std::stringstream point;
-            point << sourcePos << "-" << j;
-            alignment.push_back(point.str());
-          }
-        }
-      }
-      // now print all alignments, sorted by source index
-      sort(alignment.begin(), alignment.end());
-      for (size_t i = 0; i < alignment.size(); ++i) {
-        phraseTableFile << alignment[i] << " ";
-      }
-    } else if (wordAlignmentFlag) {
-      // alignment info in pb model
-      for (size_t j = 0; j < bestAlignmentT2S->size(); ++j) {
-        for ( std::set<size_t>::iterator setIter = (bestAlignmentT2S->at(j)).begin(); 
-              setIter != (bestAlignmentT2S->at(j)).end(); ++setIter ) {
-          size_t sourcePos = *setIter;
-          phraseTableFile << sourcePos << "-" << j << " ";
-        }
-      }
-    }
-  }
-
   // counts
   phraseTableFile << " ||| " << totalCount << " " << count;
   if (kneserNeyFlag)
@@ -652,6 +643,8 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
       !inverseFlag) {
     phraseTableFile << " |||";
   }
+
+  phraseTableFile << " |||";
 
   // tree fragments
   if (treeFragmentsFlag && !inverseFlag) {
@@ -750,11 +743,9 @@ void loadFunctionWords( const string &fileName )
   }
   istream *inFileP = &inFile;
 
-  char line[LINE_MAX_LENGTH];
-  while(true) {
-    SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (inFileP->eof()) break;
-    std::vector<string> token = tokenize( line );
+  string line;
+  while(getline(*inFileP, line)) {
+    std::vector<string> token = tokenize( line.c_str() );
     if (token.size() > 0)
       functionWordList.insert( token[0] );
   }
@@ -799,16 +790,13 @@ void LexicalTable::load( const string &fileName )
   }
   istream *inFileP = &inFile;
 
-  char line[LINE_MAX_LENGTH];
-
+  string line;
   int i=0;
-  while(true) {
+  while(getline(*inFileP, line)) {
     i++;
     if (i%100000 == 0) std::cerr << "." << flush;
-    SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (inFileP->eof()) break;
 
-    std::vector<string> token = tokenize( line );
+    std::vector<string> token = tokenize( line.c_str() );
     if (token.size() != 3) {
         std::cerr << "line " << i << " in " << fileName
            << " has wrong number of tokens, skipping:" << std::endl
@@ -906,4 +894,3 @@ void invertAlignment(const PHRASE *phraseSource, const PHRASE *phraseTarget,
     }
   }
 }
-

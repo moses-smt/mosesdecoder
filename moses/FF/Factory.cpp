@@ -34,9 +34,15 @@
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/CoveredReferenceFeature.h"
-#include "moses/FF/SyntaxConstraintFeature.h"
+#include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
+#include "moses/FF/SetSourcePhrase.h"
+#include "CountNonTerms.h"
+#include "ReferenceComparison.h"
+#include "RuleScope.h"
+#include "MaxSpanFreeNonTermSource.h"
+#include "NieceTerminal.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -47,7 +53,7 @@
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
 #ifdef PT_UG
-#include "moses/TranslationModel/mmsapt.h"
+#include "moses/TranslationModel/UG/mmsapt.h"
 #endif
 #ifdef HAVE_PROBINGPT
 #include "moses/TranslationModel/ProbingPT/ProbingPT.h"
@@ -177,9 +183,15 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
-  MOSES_FNAME(SyntaxConstraintFeature);
+  MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(HyperParameterAsWeight);
+  MOSES_FNAME(SetSourcePhrase);
+  MOSES_FNAME(CountNonTerms);
+  MOSES_FNAME(ReferenceComparison);
+  MOSES_FNAME(RuleScope);
+  MOSES_FNAME(MaxSpanFreeNonTermSource);
+  MOSES_FNAME(NieceTerminal);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);

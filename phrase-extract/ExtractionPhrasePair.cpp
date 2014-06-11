@@ -19,7 +19,6 @@
 
 #include <sstream>
 #include "ExtractionPhrasePair.h"
-#include "SafeGetline.h"
 #include "tables-core.h"
 #include "score.h"
 #include "moses/Util.h"
@@ -47,8 +46,7 @@ ExtractionPhrasePair::ExtractionPhrasePair( const PHRASE *phraseSource,
     m_count(count),
     m_pcfgSum(pcfgSum)
 {
-  assert(phraseSource.empty());
-  assert(phraseTarget.empty());
+  assert(!phraseSource->empty());
 
   m_count = count;
   m_pcfgSum = pcfgSum;

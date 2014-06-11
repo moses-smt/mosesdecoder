@@ -47,8 +47,8 @@ class WordsRange;
 class Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const Phrase&);
-private:
-
+  // private:
+protected:
   std::vector<Word>			m_words;
 
 public:
@@ -81,7 +81,7 @@ public:
   void CreateFromString(FactorDirection direction
                         , const std::vector<FactorType> &factorOrder
                         , const StringPiece &phraseString
-                        , const StringPiece &factorDelimiter
+                        // , const StringPiece &factorDelimiter // never used [UG]
                         , Word **lhs);
 
   /**	copy factors from the other phrase to this phrase.
@@ -121,6 +121,14 @@ public:
     return m_words[GetSize() - 1];
   }
 
+  inline const Word &Front() const {
+    return m_words[0];
+  }
+
+  inline const Word &Back() const {
+    return m_words[GetSize() - 1];
+  }
+
   //! particular factor at a particular position
   inline const Factor *GetFactor(size_t pos, FactorType factorType) const {
     const Word &ptr = m_words[pos];
@@ -132,6 +140,8 @@ public:
   }
 
   size_t GetNumTerminals() const;
+  size_t GetNumNonTerminals() const
+  { return GetSize() - GetNumTerminals(); }
 
   //! whether the 2D vector is a substring of this phrase
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector

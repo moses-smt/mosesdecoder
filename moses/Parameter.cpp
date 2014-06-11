@@ -63,7 +63,7 @@ Parameter::Parameter()
   AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
   AddParam("report-all-factors", "report all factors in output, not just first");
   AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
-  AddParam("stack", "s", "maximum stack size for histogram pruning");
+  AddParam("stack", "s", "maximum stack size for histogram pruning. 0 = unlimited stack size");
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
   AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
@@ -102,8 +102,8 @@ Parameter::Parameter()
   AddParam("output-search-graph", "osg", "Output connected hypotheses of search into specified filename");
   AddParam("output-search-graph-extended", "osgx", "Output connected hypotheses of search into specified filename, in extended format");
   AddParam("unpruned-search-graph", "usg", "When outputting chart search graph, do not exclude dead ends. Note: stack pruning may have eliminated some hypotheses");
-  AddParam("output-search-graph-slf", "slf", "Output connected hypotheses of search into specified directory, one file per sentence, in HTK standard lattice format (SLF)");
-  AddParam("output-search-graph-hypergraph", "Output connected hypotheses of search into specified directory, one file per sentence, in a hypergraph format (see Kenneth Heafield's lazy hypergraph decoder)");
+  AddParam("output-search-graph-slf", "slf", "Output connected hypotheses of search into specified directory, one file per sentence, in HTK standard lattice format (SLF) - the flag should be followed byy a directory name, which must exist");
+  AddParam("output-search-graph-hypergraph", "Output connected hypotheses of search into specified directory, one file per sentence, in a hypergraph format (see Kenneth Heafield's lazy hypergraph decoder). This flag is followed by 3 values: 'true (gz|txt|bz) directory-name'");
   AddParam("include-lhs-in-search-graph", "lhssg", "When outputting chart search graph, include the label of the LHS of the rule (useful when using syntax)");
 #ifdef HAVE_PROTOBUF
   AddParam("output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
@@ -191,6 +191,7 @@ Parameter::Parameter()
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
   AddParam("feature-overwrite", "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
+  AddParam("weight-add", "Add weight for FF if it doesn't exist, i.e weights here are added 1st, and can be override by the ini file or on the command line. Used to specify initial weights for FF that was also specified on the copmmand line");
   AddParam("feature-add", "Add a feature function on the command line. Used by mira to add BLEU feature");
   AddParam("feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
@@ -903,24 +904,28 @@ void Parameter::ConvertWeightArgs()
 
 void Parameter::CreateWeightsMap()
 {
-  PARAM_VEC &vec = m_setting["weight"];
+  CreateWeightsMap(m_setting["weight-add"]);
+  CreateWeightsMap(m_setting["weight"]);
+}
+
+void Parameter::CreateWeightsMap(const PARAM_VEC &vec)
+{
   for (size_t i = 0; i < vec.size(); ++i) {
-    const string &line = vec[i];
-    vector<string> toks = Tokenize(line);
-    UTIL_THROW_IF2(toks.size() < 2,
-    		"Error in format of weights: " << line);
+	const string &line = vec[i];
+	vector<string> toks = Tokenize(line);
+	UTIL_THROW_IF2(toks.size() < 2,
+			"Error in format of weights: " << line);
 
-    string name = toks[0];
-    name = name.substr(0, name.size() - 1);
+	string name = toks[0];
+	name = name.substr(0, name.size() - 1);
 
-    vector<float> weights(toks.size() - 1);
-    for (size_t i = 1; i < toks.size(); ++i) {
-      float weight = Scan<float>(toks[i]);
-      weights[i - 1] = weight;
-    }
-    m_weights[name] = weights;
+	vector<float> weights(toks.size() - 1);
+	for (size_t i = 1; i < toks.size(); ++i) {
+	  float weight = Scan<float>(toks[i]);
+	  weights[i - 1] = weight;
+	}
+	m_weights[name] = weights;
   }
-
 }
 
 void Parameter::WeightOverwrite()
