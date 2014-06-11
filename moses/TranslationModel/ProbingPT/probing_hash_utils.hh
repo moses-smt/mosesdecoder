@@ -1,6 +1,6 @@
 #pragma once
 
-#include "probing_hash_table.hh"
+#include "util/probing_hash_table.hh"
 
 #include <sys/mman.h>
 #include <boost/functional/hash.hpp>

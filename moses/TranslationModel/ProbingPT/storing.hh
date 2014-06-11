@@ -4,9 +4,9 @@
 #include <fstream>
 #include <iostream>  
 
-#include "helpers/hash.hh" //Includes line_splitter
-#include "helpers/probing_hash_utils.hh"
-#include "helpers/huffmanish.hh"
+#include "hash.hh" //Includes line_splitter
+#include "probing_hash_utils.hh"
+#include "huffmanish.hh"
 #include <sys/stat.h> //mkdir
 
 #include "util/file_piece.hh"
