@@ -122,16 +122,16 @@ namespace Moses
     if (m != param.end())
       withPbwd = m->second != "0";
       
-    m_default_sample_size = m != param.end() ? atoi(m->second.c_str()) : 1000;
-
     m = param.find("workers");
     m_workers = m != param.end() ? atoi(m->second.c_str()) : 8;
     m_workers = min(m_workers,24UL);
 
+    m = param.find("limit");
+    if (m != param.end()) m_tableLimit = atoi(m->second.c_str());
+
     m = param.find("cache-size");
-    m_history.reserve(m != param.end() 
-		      ? max(1000,atoi(m->second.c_str()))
-		      : 10000);
+    m_history.reserve(m != param.end()?max(1000,atoi(m->second.c_str())):10000);
+    // in plain language: cache size is at least 1000, and 10,000 by default
     
     this->m_numScoreComponents = atoi(param["num-features"].c_str());
 
@@ -196,8 +196,8 @@ namespace Moses
     // currently always active by default; may (should) change later
     num_feats  = calc_lex.init(num_feats, bname + L1 + "-" + L2 + ".lex");
 
-    if (this->m_numScoreComponents%2) // a bit of a hack, for backwards compatibility
-      num_feats  = apply_pp.init(num_feats);
+    // if (this->m_numScoreComponents%2) // a bit of a hack, for backwards compatibility
+    // num_feats  = apply_pp.init(num_feats);
 
     if (num_feats < this->m_numScoreComponents)
       {
@@ -283,8 +283,8 @@ namespace Moses
   {
     PhrasePair pp;   
     pp.init(pid1, stats, this->m_numScoreComponents);
-    if (this->m_numScoreComponents%2)
-      apply_pp(bt,pp);
+    // if (this->m_numScoreComponents%2)
+    // apply_pp(bt,pp);
     pstats::trg_map_t::const_iterator t;
     for (t = stats.trg.begin(); t != stats.trg.end(); ++t)
       {
@@ -318,8 +318,8 @@ namespace Moses
       pp.init(pid1b, *statsb, this->m_numScoreComponents);
     else return false; // throw "no stats for pooling available!";
 
-    if (this->m_numScoreComponents%2)
-      apply_pp(bta,pp);
+    // if (this->m_numScoreComponents%2)
+    // apply_pp(bta,pp);
     pstats::trg_map_t::const_iterator b;
     pstats::trg_map_t::iterator a;
     if (statsb)
@@ -368,6 +368,13 @@ namespace Moses
 	  }
 	else 
 	  pp.update(a->first,a->second);
+#if 0
+	// jstats const& j = a->second;
+	cerr << bta.T1->pid2str(bta.V1.get(),pp.p1) << " ::: " 
+	     << bta.T2->pid2str(bta.V2.get(),pp.p2) << endl;
+	cerr << pp.raw1 << " " << pp.sample1 << " " << pp.good1 << " " 
+	     << pp.joint << " " << pp.raw2 << endl;
+#endif
 
 	UTIL_THROW_IF2(pp.raw2 == 0, 
 		       "OOPS" 
@@ -376,12 +383,6 @@ namespace Moses
 		       << pp.raw1 << " " << pp.sample1 << " " 
 		       << pp.good1 << " " << pp.joint << " " 
 		       << pp.raw2);
-#if 0
-	jstats const& j = a->second;
-	cerr << bta.T1->pid2str(bta.V1.get(),pp.p1) << " ::: " 
-	     << bta.T2->pid2str(bta.V2.get(),pp.p2) << endl;
-	cerr << j.rcnt() << " " << j.cnt2() << " " << j.wcnt() << endl;
-#endif
 	calc_lex(bta,pp);
 	if (withPfwd) calc_pfwd_fix(bta,pp);
 	if (withPbwd) calc_pbwd_fix(bta,pp);
@@ -415,8 +416,8 @@ namespace Moses
     if (statsb)
       {
 	pool.init(pid1b,*statsb,0);
-	if (this->m_numScoreComponents%2)
-	  apply_pp(btb,ppdyn);
+	// if (this->m_numScoreComponents%2)
+	// apply_pp(btb,ppdyn);
 	for (b = statsb->trg.begin(); b != statsb->trg.end(); ++b)
 	  {
 	    ppdyn.update(b->first,b->second);
@@ -456,8 +457,8 @@ namespace Moses
     if (statsa)
       {
 	pool.init(pid1a,*statsa,0);
-	if (this->m_numScoreComponents%2)
-	  apply_pp(bta,ppfix);
+	// if (this->m_numScoreComponents%2)
+	// apply_pp(bta,ppfix);
 	for (a = statsa->trg.begin(); a != statsa->trg.end(); ++a)
 	  {
 	    if (!a->second.valid()) continue; // done above
@@ -662,7 +663,7 @@ namespace Moses
 	|| combine_pstats(src, mfix.getPid(),sfix.get(),btfix, 
 			  mdyn.getPid(),sdyn.get(),*dyn,ret))
       {
-	ret->NthElement(m_tableLimit);
+	if (m_tableLimit) ret->Prune(true,m_tableLimit);
 #if 0
 	sort(ret->begin(), ret->end(), CompareTargetPhrase());
 	cout << "SOURCE PHRASE: " << src << endl;
@@ -681,6 +682,14 @@ namespace Moses
     boost::lock_guard<boost::mutex> guard(this->lock);
     m_cache[phrasekey] = ret;
     return encache(ret);
+  }
+
+  size_t 
+  Mmsapt::
+  SetTableLimit(size_t limit)
+  {
+    std::swap(m_tableLimit,limit);
+    return limit;
   }
 
   void
