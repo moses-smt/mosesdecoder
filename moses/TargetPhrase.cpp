@@ -294,6 +294,19 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
     os << " sourcePhrase=" << *sourcePhrase << flush;
   }
 
+  if (tp.m_properties.size()) {
+	os << " properties: " << flush;
+
+	TargetPhrase::Properties::const_iterator iter;
+	for (iter = tp.m_properties.begin(); iter != tp.m_properties.end(); ++iter) {
+		const string &key = iter->first;
+		const PhraseProperty *prop = iter->second.get();
+		assert(prop);
+
+		os << key << "=" << prop->GetValueString() << " ";
+	}
+  }
+
   return os;
 }
 

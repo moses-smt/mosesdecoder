@@ -50,11 +50,9 @@ void SpanLength::Evaluate(const InputType &input
   assert(slProp);
 
   string str = slProp->GetValueString();
-  cerr << "str=" << str << endl;
 
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
   assert(ruleSource);
-  cerr << *ruleSource << endl;
 
   float score = 0;
   for (size_t i = 0; i < stackVec->size(); ++i) {
@@ -64,6 +62,7 @@ void SpanLength::Evaluate(const InputType &input
 	  float prob = slProp->GetProb(i, sourceWidth, m_const);
 	  score += TransformScore(prob);
   }
+
   scoreBreakdown.PlusEquals(this, score);
 
 }
