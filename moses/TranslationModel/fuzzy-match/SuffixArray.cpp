@@ -14,17 +14,16 @@ SuffixArray::SuffixArray( string fileName )
   m_endOfSentence = m_vcb.StoreIfNew( "<s>" );
 
   ifstream extractFile;
-  char line[LINE_MAX_LENGTH];
 
   // count the number of words first;
   extractFile.open(fileName.c_str());
   istream *fileP = &extractFile;
   m_size = 0;
   size_t sentenceCount = 0;
-  while(!fileP->eof()) {
-    SAFE_GETLINE((*fileP), line, LINE_MAX_LENGTH, '\n');
-    if (fileP->eof()) break;
-    vector< WORD_ID > words = m_vcb.Tokenize( line );
+  string line;
+  while(getline(*fileP, line)) {
+
+    vector< WORD_ID > words = m_vcb.Tokenize( line.c_str() );
     m_size += words.size() + 1;
     sentenceCount++;
   }
@@ -43,10 +42,8 @@ SuffixArray::SuffixArray( string fileName )
   int sentenceId = 0;
   extractFile.open(fileName.c_str());
   fileP = &extractFile;
-  while(!fileP->eof()) {
-    SAFE_GETLINE((*fileP), line, LINE_MAX_LENGTH, '\n');
-    if (fileP->eof()) break;
-    vector< WORD_ID > words = m_vcb.Tokenize( line );
+  while(getline(*fileP, line)) {
+    vector< WORD_ID > words = m_vcb.Tokenize( line.c_str() );
 
     // add to corpus vector
     corpus.push_back(words);
