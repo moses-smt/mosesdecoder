@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 
+#include "moses/PP/CountsPhraseProperty.h"
 #include "moses/PP/TreeStructurePhraseProperty.h"
 
 namespace Moses
@@ -50,6 +51,7 @@ PhrasePropertyFactory::PhrasePropertyFactory()
 // Properties with different key than class.
 #define MOSES_PNAME2(name, type) Add(name, new DefaultPhrasePropertyCreator< type >());
 
+  MOSES_PNAME2("Counts", CountsPhraseProperty);
   MOSES_PNAME2("Tree",TreeStructurePhraseProperty);
 
 }
