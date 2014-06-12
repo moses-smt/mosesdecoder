@@ -1,14 +1,10 @@
 local current = "" ;
 local includes = ;
-local with-probingPT = [ option.get "with-probing-pt" ] ;
-if $(with-probingPT) {
-  lib probingPT : : <search>$(with-probingPT)/helpers ;
-  includes += <include>$(with-probingPT)/helpers ;
-  current = "--with-probing-pt=$(with-probingPT)" ;
-  fakelib ProbingPT : [ glob *.cpp ] ../..//headers probingPT : $(includes) <dependency>$(PT-LOG) : : $(includes) ;
+local with-probing-pt = [ option.get "with-probing-pt" ] ;
+if $(with-probing-pt) {
+  fakelib ProbingPT : [ glob *.cpp ] ../..//headers : $(includes) <dependency>$(PT-LOG) : : $(includes) ;
 }
 else {
-  alias probingPT ;
   fakelib ProbingPT ;
 }
 
