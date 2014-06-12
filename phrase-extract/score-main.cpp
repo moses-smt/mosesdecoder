@@ -28,6 +28,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include <boost/unordered_map.hpp>
 
 #include "ScoreFeature.h"
 #include "tables-core.h"
@@ -46,6 +47,10 @@ bool inverseFlag = false;
 bool hierarchicalFlag = false;
 bool pcfgFlag = false;
 bool treeFragmentsFlag = false;
+bool sourceSyntaxLabelsFlag = false;
+bool sourceSyntaxLabelSetFlag = false;
+bool sourceSyntaxLabelCountsLHSFlag = false;
+bool targetPreferenceLabelsFlag = false;
 bool unpairedExtractFormatFlag = false;
 bool conditionOnTargetLhsFlag = false;
 bool wordAlignmentFlag = true;
@@ -58,15 +63,22 @@ bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
 bool crossedNonTerm = false;
+bool spanLength = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
-std::map<std::string,float> sourceLHSCounts;
-std::map<std::string, std::map<std::string,float>* > targetLHSAndSourceLHSJointCounts;
 
+boost::unordered_map<std::string,float> sourceLHSCounts;
+boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > targetLHSAndSourceLHSJointCounts;
 std::set<std::string> sourceLabelSet;
 std::map<std::string,size_t> sourceLabels; 
 std::vector<std::string> sourceLabelsByIndex;
+
+boost::unordered_map<std::string,float> targetPreferenceLHSCounts;
+boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > ruleTargetLHSAndTargetPreferenceLHSJointCounts;
+std::set<std::string> targetPreferenceLabelSet;
+std::map<std::string,size_t> targetPreferenceLabels; 
+std::vector<std::string> targetPreferenceLabelsByIndex;
 
 Vocabulary vcbT;
 Vocabulary vcbS;
@@ -81,6 +93,11 @@ void processLine( std::string line,
                   std::string &additionalPropertiesString,
                   float &count, float &pcfgSum );
 void writeCountOfCounts( const std::string &fileNameCountOfCounts );
+void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float> &countsLabelLHS,
+                                   const boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > &jointCountsLabelLHS,
+                                   const std::string &fileNameLeftHandSideSourceLabelCounts, 
+                                   const std::string &fileNameLeftHandSideTargetSourceLabelCounts );
+void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fileName );
 void processPhrasePairs( std::vector< ExtractionPhrasePair* > &phrasePairsWithSameSource, ostream &phraseTableFile, 
                          const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb );
 void outputPhrasePair(const ExtractionPhrasePair &phrasePair, float, int, ostream &phraseTableFile, const ScoreFeatureManager &featureManager, const MaybeLog &maybeLog );
@@ -102,15 +119,21 @@ int main(int argc, char* argv[])
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
+    std::cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--PCFG] [--TreeFragments] [--SourceLabels] [--SourceLabelSet] [--SourceLabelCountsLHS] [--TargetPreferenceLabels] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--CrossedNonTerm]" << std::endl;
     std::cerr << featureManager.usage() << std::endl;
     exit(1);
   }
   std::string fileNameExtract = argv[1];
   std::string fileNameLex = argv[2];
   std::string fileNamePhraseTable = argv[3];
+  std::string fileNameSourceLabelSet;
   std::string fileNameCountOfCounts;
   std::string fileNameFunctionWords;
+  std::string fileNameLeftHandSideSourceLabelCounts;
+  std::string fileNameLeftHandSideTargetSourceLabelCounts;
+  std::string fileNameTargetPreferenceLabelSet;
+  std::string fileNameLeftHandSideTargetPreferenceLabelCounts;
+  std::string fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts;
   std::vector<std::string> featureArgs; // all unknown args passed to feature manager
 
   for(int i=4; i<argc; i++) {
@@ -126,6 +149,26 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--TreeFragments") == 0) {
       treeFragmentsFlag = true;
       std::cerr << "including tree fragment information from syntactic parse\n";
+    } else if (strcmp(argv[i],"--SourceLabels") == 0) {
+      sourceSyntaxLabelsFlag = true;
+      std::cerr << "including source label information" << std::endl;
+    } else if (strcmp(argv[i],"--SourceLabelSet") == 0) {
+      sourceSyntaxLabelSetFlag = true;
+      fileNameSourceLabelSet = std::string(fileNamePhraseTable) + ".syntaxLabels.src";
+      std::cerr << "writing source syntax label set to file " << fileNameSourceLabelSet << std::endl;
+    } else if (strcmp(argv[i],"--SourceLabelCountsLHS") == 0) {
+      sourceSyntaxLabelCountsLHSFlag = true;
+      fileNameLeftHandSideSourceLabelCounts = std::string(fileNamePhraseTable) + ".src.lhs";
+      fileNameLeftHandSideTargetSourceLabelCounts = std::string(fileNamePhraseTable) + ".tgt-src.lhs";
+      std::cerr << "counting left-hand side source labels and writing them to files " << fileNameLeftHandSideSourceLabelCounts << " and " << fileNameLeftHandSideTargetSourceLabelCounts << std::endl;
+    } else if (strcmp(argv[i],"--TargetPreferenceLabels") == 0) {
+      targetPreferenceLabelsFlag = true;
+      std::cerr << "including target preference label information" << std::endl;
+      fileNameTargetPreferenceLabelSet = std::string(fileNamePhraseTable) + ".syntaxLabels.tgtpref";
+      std::cerr << "writing target preference label set to file " << fileNameTargetPreferenceLabelSet << std::endl;
+      fileNameLeftHandSideTargetPreferenceLabelCounts = std::string(fileNamePhraseTable) + ".tgtpref.lhs";
+      fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts = std::string(fileNamePhraseTable) + ".tgt-tgtpref.lhs";
+      std::cerr << "counting left-hand side target preference labels and writing them to files " << fileNameLeftHandSideTargetPreferenceLabelCounts << " and " << fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts << std::endl;
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       unpairedExtractFormatFlag = true;
       std::cerr << "processing unpaired extract format" << std::endl;
@@ -171,6 +214,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
       crossedNonTerm = true;
       std::cerr << "crossed non-term reordering feature" << std::endl;
+    } else if (strcmp(argv[i],"--SpanLength") == 0) {
+      spanLength = true;
+      std::cerr << "span length feature" << std::endl;
     } else {
       featureArgs.push_back(argv[i]);
       ++i;
@@ -243,7 +289,7 @@ int main(int argc, char* argv[])
 
   int i=0;
   // TODO why read only the 1st line?
-  if ( getline(extractFileP, line)) {
+  if ( getline(extractFileP, line) ) {
     ++i;
     tmpPhraseSource = new PHRASE();
     tmpPhraseTarget = new PHRASE();
@@ -373,6 +419,26 @@ int main(int argc, char* argv[])
   if (goodTuringFlag || kneserNeyFlag) {
     writeCountOfCounts( fileNameCountOfCounts );
   }
+
+  // source syntax labels
+  if (sourceSyntaxLabelsFlag && sourceSyntaxLabelSetFlag && !inverseFlag) {
+    writeLabelSet( sourceLabelSet, fileNameSourceLabelSet );
+  }
+  if (sourceSyntaxLabelsFlag && sourceSyntaxLabelCountsLHSFlag && !inverseFlag) {
+    writeLeftHandSideLabelCounts( sourceLHSCounts,
+                                  targetLHSAndSourceLHSJointCounts,
+                                  fileNameLeftHandSideSourceLabelCounts, 
+                                  fileNameLeftHandSideTargetSourceLabelCounts );
+  }
+
+  // target preference labels
+  if (targetPreferenceLabelsFlag && !inverseFlag) {
+    writeLabelSet( targetPreferenceLabelSet, fileNameTargetPreferenceLabelSet );
+    writeLeftHandSideLabelCounts( targetPreferenceLHSCounts,
+                                  ruleTargetLHSAndTargetPreferenceLHSJointCounts,
+                                  fileNameLeftHandSideTargetPreferenceLabelCounts, 
+                                  fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts );
+  }
 }
 
 
@@ -464,6 +530,70 @@ void writeCountOfCounts( const string &fileNameCountOfCounts )
     countOfCountsFile << countOfCounts[ i ] << std::endl;
   }
   countOfCountsFile.Close();
+}
+
+
+void writeLeftHandSideLabelCounts( const boost::unordered_map<std::string,float> &countsLabelLHS,
+                                   const boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > &jointCountsLabelLHS,
+                                   const std::string &fileNameLeftHandSideSourceLabelCounts,
+                                   const std::string &fileNameLeftHandSideTargetSourceLabelCounts )
+{
+  // open file
+  Moses::OutputFileStream leftHandSideSourceLabelCounts;
+  bool success = leftHandSideSourceLabelCounts.Open(fileNameLeftHandSideSourceLabelCounts.c_str());
+  if (!success) {
+    std::cerr << "ERROR: could not open left-hand side label counts file "
+              << fileNameLeftHandSideSourceLabelCounts << std::endl;
+    return;
+  }
+
+  // write source left-hand side counts
+  for (boost::unordered_map<std::string,float>::const_iterator iter=sourceLHSCounts.begin();
+       iter!=sourceLHSCounts.end(); ++iter) {
+    leftHandSideSourceLabelCounts << iter->first << " " << iter->second << std::endl;
+  }
+
+  leftHandSideSourceLabelCounts.Close();
+
+  // open file
+  Moses::OutputFileStream leftHandSideTargetSourceLabelCounts;
+  success = leftHandSideTargetSourceLabelCounts.Open(fileNameLeftHandSideTargetSourceLabelCounts.c_str());
+  if (!success) {
+    std::cerr << "ERROR: could not open left-hand side label joint counts file "
+              << fileNameLeftHandSideTargetSourceLabelCounts << std::endl;
+    return;
+  }
+
+  // write source left-hand side / target left-hand side joint counts
+  for (boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::const_iterator iter=targetLHSAndSourceLHSJointCounts.begin();
+       iter!=targetLHSAndSourceLHSJointCounts.end(); ++iter) {
+    for (boost::unordered_map<std::string,float>::const_iterator iter2=(iter->second)->begin();
+         iter2!=(iter->second)->end(); ++iter2) {
+      leftHandSideTargetSourceLabelCounts << iter->first << " "<< iter2->first << " " << iter2->second << std::endl;
+    }
+  }
+
+  leftHandSideTargetSourceLabelCounts.Close();
+}
+
+
+void writeLabelSet( const std::set<std::string> &labelSet, const std::string &fileName )
+{
+  // open file
+  Moses::OutputFileStream out;
+  bool success = out.Open(fileName.c_str());
+  if (!success) {
+    std::cerr << "ERROR: could not open label set file "
+              << fileName << std::endl;
+    return;
+  }
+
+  for (std::set<std::string>::const_iterator iter=labelSet.begin();
+       iter!=labelSet.end(); ++iter) {
+    out << *iter << std::endl;
+  }
+
+  out.Close();
 }
 
 
@@ -639,7 +769,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   if (kneserNeyFlag)
     phraseTableFile << " " << distinctCount;
 
-  if ((treeFragmentsFlag) && 
+  if ((treeFragmentsFlag || sourceSyntaxLabelsFlag || targetPreferenceLabelsFlag) && 
       !inverseFlag) {
     phraseTableFile << " |||";
   }
@@ -652,6 +782,56 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     if (bestTreeFragment) {
       phraseTableFile << " {{Tree " << *bestTreeFragment << "}}";
     }
+  }
+
+  // syntax labels
+  if ((sourceSyntaxLabelsFlag || targetPreferenceLabelsFlag) && !inverseFlag) {
+    unsigned nNTs = 1;
+    for(size_t j=0; j<phraseSource->size()-1; ++j) {
+      if (isNonTerminal(vcbS.getWord( phraseSource->at(j) )))
+        ++nNTs;
+    }
+    // source syntax labels
+    if (sourceSyntaxLabelsFlag) {
+      std::string sourceLabelCounts;
+      sourceLabelCounts = phrasePair.CollectAllLabelsSeparateLHSAndRHS("SourceLabels",
+                                                                       sourceLabelSet, 
+                                                                       sourceLHSCounts, 
+                                                                       targetLHSAndSourceLHSJointCounts, 
+                                                                       vcbT);
+      if ( !sourceLabelCounts.empty() ) {
+        phraseTableFile << " {{SourceLabels "
+                        << nNTs // for convenience: number of non-terminal symbols in this rule (incl. left hand side NT)
+                        << " "
+                        << count // rule count
+                        << sourceLabelCounts
+                        << "}}";
+      }
+    }
+    // target preference labels
+    if (targetPreferenceLabelsFlag) {
+      std::string targetPreferenceLabelCounts;
+      targetPreferenceLabelCounts = phrasePair.CollectAllLabelsSeparateLHSAndRHS("TargetPreferences",
+                                                                                 targetPreferenceLabelSet, 
+                                                                                 targetPreferenceLHSCounts, 
+                                                                                 ruleTargetLHSAndTargetPreferenceLHSJointCounts, 
+                                                                                 vcbT);
+      if ( !targetPreferenceLabelCounts.empty() ) {
+        phraseTableFile << " {{TargetPreferences "
+                        << nNTs // for convenience: number of non-terminal symbols in this rule (incl. left hand side NT)
+                        << " "
+                        << count // rule count
+                        << targetPreferenceLabelCounts
+                        << "}}";
+      }
+    }
+  }
+
+  if (spanLength && !inverseFlag) {
+	  string propValue = phrasePair.CollectAllPropertyValues("SpanLength");
+	  if (!propValue.empty()) {
+  	    phraseTableFile << " {{SpanLength " << propValue << "}}";
+	  }
   }
 
   phraseTableFile << std::endl;
@@ -894,3 +1074,4 @@ void invertAlignment(const PHRASE *phraseSource, const PHRASE *phraseTarget,
     }
   }
 }
+

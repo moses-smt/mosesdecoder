@@ -41,6 +41,7 @@ public:
     , minimal(false)
     , pcfg(false)
     , treeFragments(false)
+    , sourceLabels(false)
     , sentenceOffset(0)
     , unpairedExtractFormat(false)
     , unknownWordMinRelFreq(0.03f)
@@ -64,9 +65,12 @@ public:
   bool minimal;
   bool pcfg;
   bool treeFragments;
+  bool sourceLabels;
+  std::string sourceLabelSetFile;
   int sentenceOffset;
   bool unpairedExtractFormat;
-  std::string unknownWordFile;
+  std::string targetUnknownWordFile;
+  std::string sourceUnknownWordFile;
   std::string unknownWordSoftMatchesFile;
   float unknownWordMinRelFreq;
   bool unknownWordUniform;
