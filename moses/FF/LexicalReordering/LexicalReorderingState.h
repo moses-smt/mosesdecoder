@@ -132,6 +132,8 @@ protected:
   static const ReorderingType DR = 3; // discontinuous, right
   static const ReorderingType R = 0;  // right
   static const ReorderingType L = 1;  // left
+  public:
+  static const ReorderingType MAX = 3; //largest possible
 };
 
 //! @todo what is this?
