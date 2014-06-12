@@ -1607,6 +1607,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
 		</link>
 		<link>
+			<name>PP/CountsPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/CountsPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/CountsPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/CountsPhraseProperty.h</locationURI>
+		</link>
+		<link>
 			<name>PP/Factory.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.cpp</locationURI>
@@ -1620,6 +1630,16 @@
 			<name>PP/PhraseProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/SourceLabelsPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SourceLabelsPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/SourceLabelsPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SourceLabelsPhraseProperty.h</locationURI>
 		</link>
 		<link>
 			<name>PP/TreeStructurePhraseProperty.h</name>
