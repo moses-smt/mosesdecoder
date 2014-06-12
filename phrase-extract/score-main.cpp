@@ -63,6 +63,7 @@ bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
 bool crossedNonTerm = false;
+bool spanLength = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
@@ -213,6 +214,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
       crossedNonTerm = true;
       std::cerr << "crossed non-term reordering feature" << std::endl;
+    } else if (strcmp(argv[i],"--SpanLength") == 0) {
+      spanLength = true;
+      std::cerr << "span length feature" << std::endl;
     } else {
       featureArgs.push_back(argv[i]);
       ++i;
@@ -821,6 +825,13 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
                         << "}}";
       }
     }
+  }
+
+  if (spanLength && !inverseFlag) {
+	  string propValue = phrasePair.CollectAllPropertyValues("SpanLength");
+	  if (!propValue.empty()) {
+  	    phraseTableFile << " {{SpanLength " << propValue << "}}";
+	  }
   }
 
   phraseTableFile << std::endl;
