@@ -23,6 +23,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <boost/unordered_map.hpp>
 
 namespace MosesTraining {
 
@@ -123,6 +124,12 @@ public:
   const std::string *FindBestPropertyValue(const std::string &key) const;
 
   std::string CollectAllPropertyValues(const std::string &key) const;
+
+  std::string CollectAllLabelsSeparateLHSAndRHS(const std::string& propertyKey,
+                                                std::set<std::string>& sourceLabelSet,
+                                                boost::unordered_map<std::string,float>& sourceLHSCounts,
+                                                boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& sourceRHSAndLHSJointCounts, 
+                                                Vocabulary &vcbT) const;
 
   void AddProperties( const std::string &str, float count );
 
