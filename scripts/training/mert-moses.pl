@@ -93,7 +93,7 @@ my $___PRO_STARTING_POINT = 0; # get a starting point from pairwise ranked optim
 my $___HISTORIC_INTERPOLATION = 0; # interpolate optimize weights with previous iteration's weights [Hopkins&May,2011,5.4.3]
 # MegaM's options for PRO optimization.
 # TODO: Should we also add these values to options of this script?
-my $megam_default_options = "-fvals -maxi 30 -nobias binary";
+my $megam_default_options = "-fvals -maxi 100 -nobias binary";
 
 # Flags related to Batch MIRA (Cherry & Foster, 2012)
 my $___BATCH_MIRA = 0; # flg to enable batch MIRA

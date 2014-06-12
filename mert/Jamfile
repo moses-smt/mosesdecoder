@@ -48,6 +48,7 @@ TER/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
 M2Scorer.cpp
+M2ScorerMER.cpp
 Vocabulary.cpp
 PreProcessFilter.cpp
 SentenceLevelScorer.cpp

@@ -22,6 +22,7 @@ private:
   FactorType m_factorType;
   bool m_unrestricted;
   std::string m_filename;
+  size_t m_top;
 
 public:
   CorrectionPattern(const std::string &line);

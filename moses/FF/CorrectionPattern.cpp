@@ -276,7 +276,7 @@ std::vector<std::string> CorrectionPattern::CreatePattern(const Tokens &s1, cons
 
 CorrectionPattern::CorrectionPattern(const std::string &line)
   :StatelessFeatureFunction(0, line),
-   m_unrestricted(true)
+   m_unrestricted(true), m_top(0)
 {
   std::cerr << "Initializing correction pattern feature.." << std::endl;
   ReadParameters();
@@ -288,6 +288,8 @@ void CorrectionPattern::SetParameter(const std::string& key, const std::string& 
     m_factorType = Scan<FactorType>(value);
   } else if (key == "path") {
     m_filename = value;
+  } else if (key == "top") {
+    m_top = Scan<size_t>(value);
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
@@ -305,6 +307,8 @@ void CorrectionPattern::Load()
   std::string line;
   while (getline(inFile, line)) {
     m_vocab.insert(line);
+    if(m_top && m_vocab.size() >= m_top)
+      break;
   }
 
   inFile.close();
