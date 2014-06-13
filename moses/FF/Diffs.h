@@ -91,13 +91,13 @@ void addStats(const Sequence& s1, const Sequence& s2, Stats& stats) {
   size_t m = 0, d = 0, i = 0, s = 0;
   Diffs diff = CreateDiff(s1, s2);  
   
-  for(size_t j = 0; j < diff.size(); ++j) {
+  for(int j = 0; j < diff.size(); ++j) {
     if(diff[j] == 'm')
       m++;
     else if(diff[j] == 'd') {
       d++;
       
-      size_t k = 0;
+      int k = 0;
       while(j - k >= 0 && j + 1 + k < diff.size() &&
             diff[j - k] == 'd' && diff[j + 1 + k] == 'i') {
         d--;
@@ -114,7 +114,15 @@ void addStats(const Sequence& s1, const Sequence& s2, Stats& stats) {
   stats[1] += d;
   stats[2] += i;
   stats[3] += s;
-  stats[4] += log(1.0 - (float)(d + i + s)/(float)(d + i + s + m));
+  
+  float macc = 1;
+  if (d + i + s + m)
+    macc = 1.0 - (float)(d + i + s)/(float)(d + i + s + m);
+    
+  if(macc > 0)
+    stats[4] += log(macc);
+  else
+    stats[4] += log(1.0/(float)(d + i + s + m + 1));
 }
 
 }
