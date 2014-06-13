@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/tss.hpp>
 #endif
 
 #include "Parameter.h"
@@ -66,14 +67,45 @@ private:
   static StaticData									s_instance;
   
   ScoreComponentCollection& AccessAllWeights() const {
+		#ifdef WITH_THREADS
+    return *(m_allWeights.get());
+    #else
     return m_allWeights;
+    #endif
+  }
+  
+  std::string& AccessCurrentWeightSetting() const {
+  	#ifdef WITH_THREADS
+  	std::string * pointer = m_currentWeightSetting.get();
+  	if (pointer == NULL) {
+  		SetCurrentWeightSetting("default");
+  		return *(m_currentWeightSetting.get());
+		} else {
+			return *pointer;
+		}
+    #else
+    return m_currentWeightSetting;
+    #endif
+  }
+  
+  void SetCurrentWeightSetting(std::string weightSetting) const {
+    #ifdef WITH_THREADS
+    m_currentWeightSetting.reset(new std::string(weightSetting));
+    #else
+    m_currentWeightSetting = weightSetting;
+    #endif
   }
   
 protected:
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
-  mutable ScoreComponentCollection m_allWeights;
-
+  
+  #ifdef WITH_THREADS
+  mutable boost::thread_specific_ptr< ScoreComponentCollection > m_allWeights;
+	#else
+	mutable ScoreComponentCollection m_allWeights;
+	#endif
+	
   std::vector<DecodeGraph*> m_decodeGraphs;
 
   // Initial	= 0 = can be used when creating poss trans
@@ -196,7 +228,11 @@ protected:
   long m_startTranslationId;
 
   // alternate weight settings
+  #ifdef WITH_THREADS
+  mutable boost::thread_specific_ptr< std::string > m_currentWeightSetting;
+  #else
   mutable std::string m_currentWeightSetting;
+  #endif
   std::map< std::string, ScoreComponentCollection* > m_weightSetting; // core weights
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
@@ -436,7 +472,11 @@ public:
   }
 
   void SetAllWeights(const ScoreComponentCollection& weights) {
-    AccessAllWeights() = weights;
+  	#ifdef WITH_THREADS
+    m_allWeights.reset(new ScoreComponentCollection(weights));
+    #else
+    m_allWeights = weights;
+    #endif
   }
 
   //Weight for a single-valued feature
@@ -654,7 +694,7 @@ public:
       return false;
     }
     std::map< std::string, std::set< std::string > >::const_iterator lookupIgnoreFF
-    =  m_weightSettingIgnoreFF.find( m_currentWeightSetting );
+    =  m_weightSettingIgnoreFF.find( AccessCurrentWeightSetting() );
     if (lookupIgnoreFF == m_weightSettingIgnoreFF.end()) {
       return false;
     }
@@ -672,7 +712,7 @@ public:
       return false;
     }
     std::map< std::string, std::set< size_t > >::const_iterator lookupIgnoreDP
-    =  m_weightSettingIgnoreDP.find( m_currentWeightSetting );
+    =  m_weightSettingIgnoreDP.find( AccessCurrentWeightSetting() );
     if (lookupIgnoreDP == m_weightSettingIgnoreDP.end()) {
       return false;
     }
@@ -685,7 +725,7 @@ public:
   void SetWeightSetting(const std::string &settingName) const {
 
     // if no change in weight setting, do nothing
-    if (m_currentWeightSetting == settingName) {
+    if (AccessCurrentWeightSetting() == settingName) {
       return;
     }
 
@@ -696,7 +736,7 @@ public:
     }
 
     // find the setting
-    m_currentWeightSetting = settingName;
+    SetCurrentWeightSetting(settingName);
     std::map< std::string, ScoreComponentCollection* >::const_iterator i =
       m_weightSetting.find( settingName );
 
@@ -707,7 +747,7 @@ public:
             << " does not exist in model, using default weight setting instead";
       UserMessage::Add(strme.str());
       i = m_weightSetting.find( "default" );
-      m_currentWeightSetting = "default";
+      SetCurrentWeightSetting("default");
     }
 
     // set weights
