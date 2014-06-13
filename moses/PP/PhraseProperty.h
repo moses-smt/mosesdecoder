@@ -11,7 +11,8 @@ namespace Moses
 class PhraseProperty
 {
 public:
-  PhraseProperty() {};
+  PhraseProperty() : m_value(NULL) {};
+  ~PhraseProperty() { if ( m_value != NULL ) delete m_value; };
 
   virtual void ProcessValue(const std::string &value) { m_value = new std::string(value); };
 
