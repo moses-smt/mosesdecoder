@@ -44,7 +44,6 @@ void SpanLength::Evaluate(const InputType &input
   }
 
   const SpanLengthPhraseProperty *slProp = static_cast<const SpanLengthPhraseProperty*>(property);
-  string str = slProp->GetValueString();
 
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
   assert(ruleSource);

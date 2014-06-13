@@ -6,8 +6,11 @@ using namespace std;
 
 namespace Moses
 {
-SpanLengthPhraseProperty::SpanLengthPhraseProperty(const std::string &value)
-: PhraseProperty(value)
+SpanLengthPhraseProperty::SpanLengthPhraseProperty()
+{
+}
+
+void SpanLengthPhraseProperty::ProcessValue(const std::string &value)
 {
   vector<string> toks;
   Tokenize(toks, value);
@@ -24,9 +27,9 @@ SpanLengthPhraseProperty::SpanLengthPhraseProperty(const std::string &value)
 
 	  if (toks.size() == 1) {
 		float count = Scan<float>(toks[0]);
-  	    Populate(indices, count);
+		Populate(indices, count);
 
-  	    indices.clear();
+		indices.clear();
 	  }
 	  else {
 		indices.insert(toks);

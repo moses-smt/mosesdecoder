@@ -13,7 +13,9 @@ namespace Moses
 class SpanLengthPhraseProperty : public PhraseProperty
 {
 public:
-	SpanLengthPhraseProperty(const std::string &value);
+	SpanLengthPhraseProperty();
+
+    void ProcessValue(const std::string &value);
 
 	float GetProb(size_t ntInd, size_t sourceWidth, float smoothing) const;
 protected:
