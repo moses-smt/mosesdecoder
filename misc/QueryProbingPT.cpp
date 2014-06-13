@@ -8,7 +8,7 @@
 #include "util/probing_hash_table.hh"
 #include "util/usage.hh"
 
-#include "quering.hh"
+#include "moses/TranslationModel/ProbingPT/quering.hh"
 
 #include <stdio.h>
 #include <sys/types.h>

@@ -1,7 +1,7 @@
 local current = "" ;
 local includes = ;
-local with-probing-pt = [ option.get "with-probing-pt" ] ;
-if $(with-probing-pt) {
+if [ option.get "with-probing-pt" : : "yes" ]
+{
   fakelib ProbingPT : [ glob *.cpp ] ../..//headers : $(includes) <dependency>$(PT-LOG) : : $(includes) ;
 }
 else {

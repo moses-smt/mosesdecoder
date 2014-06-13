@@ -25,4 +25,16 @@ else {
     alias programsMin ;
 }
 
-alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin ;
+if [ option.get "with-probing-pt" : : "yes" ]
+{
+    exe CreateProbingPT : CreateProbingPT.cpp ../moses//moses ;
+    exe QueryProbingPT : QueryProbingPT.cpp ../moses//moses ;
+
+    #alias programsProbing : CreateProbingPT QueryProbingPT ;
+    alias programsProbing : CreateProbingPT ;
+}
+else {
+    alias programsProbing ;
+}
+
+alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin programsProbing ;
