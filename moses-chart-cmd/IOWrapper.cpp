@@ -150,6 +150,7 @@ IOWrapper::~IOWrapper()
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
   delete m_detailedTreeFragmentsTranslationReportingStream;
+  delete m_detailTreeFragmentsOutputCollector;
   delete m_alignmentInfoStream;
   delete m_unknownsStream;
   delete m_detailOutputCollector;
