@@ -189,8 +189,7 @@ int PhraseBasedReorderingState::Compare(const FFState& o) const
   if (&o == this)
     return 0;
 
-  const PhraseBasedReorderingState* other = dynamic_cast<const PhraseBasedReorderingState*>(&o);
-  UTIL_THROW_IF2(other == NULL, "Wrong state type");
+  const PhraseBasedReorderingState* other = static_cast<const PhraseBasedReorderingState*>(&o);
   if (m_prevRange == other->m_prevRange) {
     if (m_direction == LexicalReorderingConfiguration::Forward) {
       return ComparePrevScores(other->m_prevScore);
