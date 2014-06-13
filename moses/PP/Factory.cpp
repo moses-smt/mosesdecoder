@@ -37,8 +37,8 @@ template <class P> class DefaultPhrasePropertyCreator : public PhrasePropertyCre
 {
 public:
   boost::shared_ptr<PhraseProperty> CreateProperty(const std::string &value) {
-    P* property = new P(value);
-    property->ProcessValue();
+    P* property = new P();
+    property->ProcessValue(value);
     return Create(property);
   }
 };
@@ -57,7 +57,6 @@ PhrasePropertyFactory::PhrasePropertyFactory()
   MOSES_PNAME2("SourceLabels", SourceLabelsPhraseProperty);
   MOSES_PNAME2("Tree",TreeStructurePhraseProperty);
   MOSES_PNAME2("SpanLength", SpanLengthPhraseProperty);
-
 }
 
 PhrasePropertyFactory::~PhrasePropertyFactory()

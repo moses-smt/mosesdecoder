@@ -4,7 +4,6 @@
 #include "moses/Hypothesis.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/TargetPhrase.h"
-#include <boost/shared_ptr.hpp>
 #include <vector>
 #include "moses/PP/TreeStructurePhraseProperty.h"
 
@@ -272,8 +271,8 @@ FFState* TreeStructureFeature::EvaluateChart(const ChartHypothesis& cur_hypo
                                    , ScoreComponentCollection* accumulator) const
 {
   if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
-    const std::string &tree = property->GetValueString();
-    TreePointer mytree (new InternalTree(tree));
+    const std::string *tree = property->GetValueString();
+    TreePointer mytree (new InternalTree(*tree));
 
     if (m_labelset) {
         AddNTLabels(mytree);

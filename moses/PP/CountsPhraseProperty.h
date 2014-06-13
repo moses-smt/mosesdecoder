@@ -2,6 +2,7 @@
 #pragma once
 
 #include "moses/PP/PhraseProperty.h"
+#include "util/exception.hh"
 #include <string>
 #include <list>
 
@@ -28,9 +29,9 @@ class CountsPhraseProperty : public PhraseProperty
 {
 public:
 
-  CountsPhraseProperty(const std::string &value) :  PhraseProperty(value) {};
+  CountsPhraseProperty() {};
 
-  virtual void ProcessValue();
+  virtual void ProcessValue(const std::string &value);
 
   size_t GetSourceMarginal() const {
     return m_sourceMarginal;
@@ -43,6 +44,11 @@ public:
   float GetJointCount() const {
     return m_jointCount;
   }
+
+  virtual const std::string *GetValueString() const { 
+    UTIL_THROW2("CountsPhraseProperty: value string not available in this phrase property");
+    return NULL; 
+  };
 
 protected:
 
