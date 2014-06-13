@@ -7,14 +7,13 @@
 #include <queue>
 #include <assert.h>
 #include <limits>
-#include "util/exception.hh"
 
 namespace Moses
 {
 
-void SourceLabelsPhraseProperty::ProcessValue()
+void SourceLabelsPhraseProperty::ProcessValue(const std::string &value)
 {
-  std::istringstream tokenizer(m_value);
+  std::istringstream tokenizer(value);
 
   if (! (tokenizer >> m_nNTs)) { // first token: number of non-terminals (incl. left-hand side)
     UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read number of non-terminals. Flawed property?");

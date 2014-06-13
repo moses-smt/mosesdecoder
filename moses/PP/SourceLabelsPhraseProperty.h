@@ -2,6 +2,7 @@
 #pragma once
 
 #include "moses/PP/PhraseProperty.h"
+#include "util/exception.hh"
 #include <string>
 #include <list>
 
@@ -43,9 +44,9 @@ private:
 class SourceLabelsPhraseProperty : public PhraseProperty
 {
 public:
-  SourceLabelsPhraseProperty(const std::string &value) :  PhraseProperty(value) {};
+  SourceLabelsPhraseProperty() {};
 
-  virtual void ProcessValue();
+  virtual void ProcessValue(const std::string &value);
 
   size_t GetNumberOfNonTerminals() const {
     return m_nNTs;
@@ -57,6 +58,11 @@ public:
 
   const std::list<SourceLabelsPhrasePropertyItem> &GetSourceLabelItems() const {
     return m_sourceLabelItems;
+  };
+
+  virtual const std::string *GetValueString() const { 
+    UTIL_THROW2("SourceLabelsPhraseProperty: value string not available in this phrase property");
+    return NULL; 
   };
 
 protected:

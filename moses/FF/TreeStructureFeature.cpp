@@ -271,9 +271,10 @@ FFState* TreeStructureFeature::EvaluateChart(const ChartHypothesis& cur_hypo
                                    , int featureID /* used to index the state in the previous hypotheses */
                                    , ScoreComponentCollection* accumulator) const
 {
-  if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
-    const std::string &tree = property->GetValueString();
-    TreePointer mytree (new InternalTree(tree));
+  boost::shared_ptr<PhraseProperty> property;
+  if (cur_hypo.GetCurrTargetPhrase().GetProperty("Tree", property)) {
+    const std::string *tree = property->GetValueString();
+    TreePointer mytree (new InternalTree(*tree));
 
     if (m_labelset) {
         AddNTLabels(mytree);

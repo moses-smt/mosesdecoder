@@ -137,7 +137,7 @@ public:
 
   void SetProperties(const StringPiece &str);
   void SetProperty(const std::string &key, const std::string &value);
-  const PhraseProperty *GetProperty(const std::string &key) const;
+  bool GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &pp) const;
 
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 

@@ -248,15 +248,15 @@ void TargetPhrase::SetProperty(const std::string &key, const std::string &value)
   m_properties[key] = phrasePropertyFactory.ProduceProperty(key,value);
 }
 
-const PhraseProperty *TargetPhrase::GetProperty(const std::string &key) const
+bool TargetPhrase::GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &pp) const
 {
   std::map<std::string, boost::shared_ptr<PhraseProperty> >::const_iterator iter;
   iter = m_properties.find(key);
   if (iter != m_properties.end()) {
-	const boost::shared_ptr<PhraseProperty> &value = iter->second;
-    return value.get();
+    pp = iter->second;
+    return true;
   }
-  return NULL;
+  return false;
 }
 
 void TargetPhrase::SetRuleSource(const Phrase &ruleSource) const

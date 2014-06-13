@@ -412,9 +412,10 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
     OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
 
     const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
+    boost::shared_ptr<PhraseProperty> property;
 
     out << " ||| ";
-    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
+    if (currTarPhr.GetProperty("Tree", property)) {
       out << " " << property->GetValueString();
     } else {
       out << " " << "noTreeInfo";
@@ -438,9 +439,10 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
     OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
 
     const TargetPhrase &currTarPhr = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
+    boost::shared_ptr<PhraseProperty> property;
 
     out << " ||| ";
-    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
+    if (currTarPhr.GetProperty("Tree", property)) {
       out << " " << property->GetValueString();
     } else {
       out << " " << "noTreeInfo";

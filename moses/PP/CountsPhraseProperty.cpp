@@ -1,14 +1,13 @@
 #include "moses/PP/CountsPhraseProperty.h"
 #include <sstream>
 #include <assert.h>
-#include "util/exception.hh"
 
 namespace Moses
 {
 
-void CountsPhraseProperty::ProcessValue()
+void CountsPhraseProperty::ProcessValue(const std::string &value)
 {
-  std::istringstream tokenizer(m_value);
+  std::istringstream tokenizer(value);
 
   if (! (tokenizer >> m_targetMarginal)) { // first token: countE
     UTIL_THROW2("CountsPhraseProperty: Not able to read target marginal. Flawed property?");
@@ -24,7 +23,6 @@ void CountsPhraseProperty::ProcessValue()
     UTIL_THROW2("CountsPhraseProperty: Not able to read joint count. Flawed property?");
   }
   assert( m_jointCount > 0 );
-
 };
 
 } // namespace Moses
