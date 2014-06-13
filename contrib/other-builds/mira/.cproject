@@ -56,6 +56,7 @@
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
 									<listOptionValue builtIn="false" value="boost_iostreams-mt"/>
+									<listOptionValue builtIn="false" value="boost_serialization"/>
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 									<listOptionValue builtIn="false" value="boost_filesystem-mt"/>
