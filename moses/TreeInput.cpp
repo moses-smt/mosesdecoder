@@ -145,8 +145,12 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
         VERBOSE(3,"XML TAG " << tagName << " (" << tagContent << ") spanning " << startPos << " to " << (endPos-1) << " complete, commence processing" << endl);
 
-        if (startPos >= endPos) {
-          TRACE_ERR("ERROR: tag " << tagName << " must span at least one word: " << line << endl);
+        if (startPos == endPos) {
+          TRACE_ERR("WARNING: tag " << tagName << " span is empty. Ignoring: " << line << endl);
+          continue;
+        }
+        else if (startPos > endPos) {
+          TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
           return false;
         }
 
