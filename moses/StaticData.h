@@ -64,6 +64,11 @@ class StaticData
 
 private:
   static StaticData									s_instance;
+  
+  ScoreComponentCollection& AccessAllWeights() const {
+    return m_allWeights;
+  }
+  
 protected:
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
@@ -427,16 +432,16 @@ public:
   }
 
   const ScoreComponentCollection& GetAllWeights() const {
-    return m_allWeights;
+    return AccessAllWeights();
   }
 
   void SetAllWeights(const ScoreComponentCollection& weights) {
-    m_allWeights = weights;
+    AccessAllWeights() = weights;
   }
 
   //Weight for a single-valued feature
   float GetWeight(const FeatureFunction* sp) const {
-    return m_allWeights.GetScoreForProducer(sp);
+    return AccessAllWeights().GetScoreForProducer(sp);
   }
 
   //Weight for a single-valued feature
@@ -445,11 +450,11 @@ public:
 
   //Weights for feature with fixed number of values
   std::vector<float> GetWeights(const FeatureFunction* sp) const {
-    return m_allWeights.GetScoresForProducer(sp);
+    return AccessAllWeights().GetScoresForProducer(sp);
   }
 
   float GetSparseWeight(const FName& featureName) const {
-    return m_allWeights.GetSparseWeight(featureName);
+    return AccessAllWeights().GetSparseWeight(featureName);
   }
 
   //Weights for feature with fixed number of values
@@ -706,7 +711,7 @@ public:
     }
 
     // set weights
-    m_allWeights = *(i->second);
+    AccessAllWeights() = *(i->second);
   }
 
   float GetWeightWordPenalty() const;
