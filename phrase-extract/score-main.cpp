@@ -64,6 +64,8 @@ bool unalignedFlag = false;
 bool unalignedFWFlag = false;
 bool crossedNonTerm = false;
 bool spanLength = false;
+bool nonTermContext = false;
+
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
@@ -217,6 +219,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--SpanLength") == 0) {
       spanLength = true;
       std::cerr << "span length feature" << std::endl;
+    } else if (strcmp(argv[i],"--NonTermContext") == 0) {
+      nonTermContext = true;
+      std::cerr << "non-term context" << std::endl;
     } else {
       featureArgs.push_back(argv[i]);
       ++i;
@@ -831,6 +836,13 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
 	  string propValue = phrasePair.CollectAllPropertyValues("SpanLength");
 	  if (!propValue.empty()) {
   	    phraseTableFile << " {{SpanLength " << propValue << "}}";
+	  }
+  }
+
+  if (nonTermContext && !inverseFlag) {
+	  string propValue = phrasePair.CollectAllPropertyValues("NonTermContext");
+	  if (!propValue.empty()) {
+  	    phraseTableFile << " {{NonTermContext " << propValue << "}}";
 	  }
   }
 
