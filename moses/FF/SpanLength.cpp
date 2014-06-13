@@ -38,17 +38,12 @@ void SpanLength::Evaluate(const InputType &input
 {
   assert(stackVec);
 
-  boost::shared_ptr<PhraseProperty> property;
-  bool hasProperty = targetPhrase.GetProperty("SpanLength", property);
-
-  if (!hasProperty) {
+  const PhraseProperty *property = targetPhrase.GetProperty("SpanLength");
+  if (property == NULL) {
 	  return;
   }
 
-  PhraseProperty *prop = property.get();
-  SpanLengthPhraseProperty *slProp = static_cast<SpanLengthPhraseProperty*>(prop);
-  assert(slProp);
-
+  const SpanLengthPhraseProperty *slProp = static_cast<const SpanLengthPhraseProperty*>(property);
   string str = slProp->GetValueString();
 
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
