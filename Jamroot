@@ -118,7 +118,8 @@ if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
 }
 
-if [ option.get "with-probing-pt" ] {
+if [ option.get "with-probing-pt" : : "yes" ]
+{
   external-lib boost_serialization ;
   requirements += <define>HAVE_PROBINGPT ;
   requirements += <library>boost_serialization ;
