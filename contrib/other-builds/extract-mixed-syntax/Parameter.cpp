@@ -29,8 +29,10 @@ Parameter::Parameter()
 ,hieroSourceLHS(false)
 ,maxSpanFreeNonTermSource(0)
 ,nieceTerminal(true)
-,spanLength(false)
 ,maxScope(UNDEFINED)
+
+,spanLength(false)
+,nonTermContext(false)
 {}
 
 Parameter::~Parameter() {

@@ -41,8 +41,11 @@ public:
   bool hieroSourceLHS;
   int maxSpanFreeNonTermSource;
   bool nieceTerminal;
-  bool spanLength;
   int maxScope;
+
+  // prperties
+  bool spanLength;
+  bool nonTermContext;
 
 };
 

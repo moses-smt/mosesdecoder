@@ -168,6 +168,8 @@ void Rule::Output(std::ostream &out, bool forward, const Parameter &params) cons
 
   out << " ||| ";
 
+  // properties
+
   // span length
   if (forward && params.spanLength && m_nonterms.size()) {
 	  out << "{{SpanLength ";
@@ -179,6 +181,45 @@ void Rule::Output(std::ostream &out, bool forward, const Parameter &params) cons
 	  }
 	  out << "}} ";
   }
+
+  // non-term context
+  if (forward && params.nonTermContext && m_nonterms.size()) {
+	  out << "{{NonTermContext ";
+
+	  for (size_t i = 0; i < m_nonterms.size(); ++i) {
+		  const NonTerm &nonTerm = *m_nonterms[i];
+		  const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
+		  NonTermContext(i, cp, out);
+	  }
+	  out << "}} ";
+  }
+}
+
+void Rule::NonTermContext(size_t ntInd, const ConsistentPhrase &cp, std::ostream &out) const
+{
+  int startPos = cp.corners[0];
+  int endPos = cp.corners[1];
+
+  const Phrase &source = m_alignedSentence.GetPhrase(Moses::Input);
+
+  if (startPos == 0) {
+    out << "<s> ";
+  }
+  else {
+	out << source[startPos - 1]->GetString() << " ";
+  }
+
+  out << source[startPos]->GetString() << " ";
+  out << source[endPos]->GetString() << " ";
+
+  if (endPos == source.size() - 1) {
+    out << "</s> ";
+  }
+  else {
+	out << source[endPos + 1]->GetString() << " ";
+  }
+
+
 }
 
 void Rule::Prevalidate(const Parameter &params)
