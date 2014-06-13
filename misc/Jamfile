@@ -30,8 +30,7 @@ if [ option.get "with-probing-pt" : : "yes" ]
     exe CreateProbingPT : CreateProbingPT.cpp ../moses//moses ;
     exe QueryProbingPT : QueryProbingPT.cpp ../moses//moses ;
 
-    #alias programsProbing : CreateProbingPT QueryProbingPT ;
-    alias programsProbing : CreateProbingPT ;
+    alias programsProbing : CreateProbingPT QueryProbingPT ;
 }
 else {
     alias programsProbing ;

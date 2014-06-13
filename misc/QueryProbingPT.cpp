@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
             break;
         }else{
             //Actual lookup
+            std::pair<bool, std::vector<target_text> > query_result;
             query_result = queries.query(StringPiece(cinstr));
 
             if (query_result.first) {
