@@ -73,7 +73,7 @@ def gather_necessary_lines(logfile, date):
 
 def append_date_to_table(resline):
     """Appends past dates to the html"""
-    cur_html = '<td>' + resline.current + '</td>'
+    cur_html = '<td>' + str(resline.current) + '</td>'
 
     if resline.percentage > 0.05: #If we have improvement of more than 5%
         cur_html = cur_html +  '<td class="better">' + str(resline.percentage) + '</td>'
@@ -135,8 +135,8 @@ def produce_html(path, global_config):
         res1 = Result(logLine1.testname, logLine1.real, logLine2.real,\
             logLine2.revision, logLine2.branch, logLine1.revision, logLine1.branch)
         html = html + '<tr><td>' + logLine2.date + '</td><td>' + logLine2.time + '</td><td>' +\
-        res1.testname + '</td><td>' + res1.revision + '</td><td>' + res1.branch + '</td><td>' +\
-        str(res1.current) + '</td><td>' + str(res1.previous) + '</td><td>' + res1.prevrev + '</td>'
+        res1.testname + '</td><td>' + res1.revision[:10] + '</td><td>' + res1.branch + '</td><td>' +\
+        str(res1.current) + '</td><td>' + str(res1.previous) + '</td><td>' + res1.prevrev[:10] + '</td>'
 
         #Add fancy colours depending on the change
         if res1.percentage > 0.05: #If we have improvement of more than 5%
@@ -168,7 +168,7 @@ def produce_html(path, global_config):
         for days in past_dates:
             act_date = get_prev_days(logLine2.date, days)
             if linesdict[act_date][1] is not None:
-                logline_date = linesdict[act_date][0]
+                logline_date = linesdict[act_date][1]
                 restemp = Result(logline_date.testname, logline_date.real, logLine2.real,\
                 logLine2.revision, logLine2.branch, logline_date.revision, logline_date.branch)
                 html = html + append_date_to_table(restemp)
