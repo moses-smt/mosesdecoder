@@ -253,8 +253,8 @@ const PhraseProperty *TargetPhrase::GetProperty(const std::string &key) const
   std::map<std::string, boost::shared_ptr<PhraseProperty> >::const_iterator iter;
   iter = m_properties.find(key);
   if (iter != m_properties.end()) {
-	const boost::shared_ptr<PhraseProperty> &value = iter->second;
-    return value.get();
+    const boost::shared_ptr<PhraseProperty> &pp = iter->second;
+    return pp.get();
   }
   return NULL;
 }
