@@ -39,8 +39,8 @@ std::string ParseScores(const std::string &line, const std::string& defaultScore
 }
 
 EditOps::EditOps(const std::string &line)
-  : StatelessFeatureFunction(ParseScores(line, "mdis").size(), line),
-    m_factorType(0), m_chars(false), m_scores(ParseScores(line, "mdis"))
+  : StatelessFeatureFunction(ParseScores(line, "dis").size(), line),
+    m_factorType(0), m_chars(false), m_scores(ParseScores(line, "dis"))
 {
   std::cerr << "Initializing EditOps feature.." << std::endl;
   ReadParameters();
