@@ -1,6 +1,7 @@
+#include <vector>
 #include "SkeletonStatelessFF.h"
 #include "moses/ScoreComponentCollection.h"
-#include <vector>
+#include "moses/TargetPhrase.h"
 
 using namespace std;
 
@@ -28,7 +29,14 @@ void SkeletonStatelessFF::Evaluate(const InputType &input
                                    , const StackVec *stackVec
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection *estimatedFutureScore) const
-{}
+{
+	if (targetPhrase.GetNumNonTerminals()) {
+		  vector<float> newScores(m_numScoreComponents);
+		  newScores[0] = - std::numeric_limits<float>::infinity();
+		  scoreBreakdown.PlusEquals(this, newScores);
+	}
+
+}
 
 void SkeletonStatelessFF::Evaluate(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const

@@ -57,6 +57,13 @@ void SpanLength::Evaluate(const InputType &input
 	  score += TransformScore(prob);
   }
 
+  if (score < -100.0f) {
+    float weight = StaticData::Instance().GetWeight(this);
+    if (weight < 0) {
+    	score = 0;
+    }
+  }
+
   scoreBreakdown.PlusEquals(this, score);
 
 }
