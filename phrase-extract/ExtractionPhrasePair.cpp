@@ -321,5 +321,148 @@ std::string ExtractionPhrasePair::CollectAllPropertyValues(const std::string &ke
 }
 
 
+std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::string& propertyKey,
+                                                                    std::set<std::string>& labelSet,
+                                                                    boost::unordered_map<std::string,float>& countsLabelsLHS, 
+                                                                    boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& jointCountsRulesTargetLHSAndLabelsLHS, 
+                                                                    Vocabulary &vcbT) const
+{
+  const PROPERTY_VALUES *allPropertyValues = GetProperty( propertyKey );
+
+  if ( allPropertyValues == NULL ) {
+    return "";
+  }
+
+  std::string lhs="", rhs="", currentRhs="";
+  float currentRhsCount = 0.0;
+  std::list< std::pair<std::string,float> > lhsGivenCurrentRhsCounts;
+
+  std::ostringstream oss;
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin(); 
+       iter!=allPropertyValues->end(); ++iter) {
+
+    size_t space = (iter->first).find_last_of(' ');
+    if ( space == string::npos ) {
+      lhs = iter->first;
+      rhs.clear();
+    } else {
+      lhs = (iter->first).substr(space+1);
+      rhs = (iter->first).substr(0,space);
+    }
+
+    labelSet.insert(lhs);
+
+    if ( rhs.compare(currentRhs) ) {
+
+      if ( iter!=allPropertyValues->begin() ) {
+        if ( !currentRhs.empty() ) {
+          istringstream tokenizer(currentRhs);
+          std::string rhsLabel;
+          while ( tokenizer.peek() != EOF ) {
+            tokenizer >> rhsLabel;
+            labelSet.insert(rhsLabel);
+          }
+          oss << " " << currentRhs << " " << currentRhsCount;
+        }
+        if ( lhsGivenCurrentRhsCounts.size() > 0 ) {
+          if ( !currentRhs.empty() ) {
+            oss << " " << lhsGivenCurrentRhsCounts.size();
+          }
+          for ( std::list< std::pair<std::string,float> >::const_iterator iter2=lhsGivenCurrentRhsCounts.begin();
+                iter2!=lhsGivenCurrentRhsCounts.end(); ++iter2 ) {
+            oss << " " << iter2->first << " " << iter2->second;
+
+            // update countsLabelsLHS and jointCountsRulesTargetLHSAndLabelsLHS
+            std::string ruleTargetLhs = vcbT.getWord(m_phraseTarget->back());
+            ruleTargetLhs.erase(ruleTargetLhs.begin());  // strip square brackets
+            ruleTargetLhs.erase(ruleTargetLhs.size()-1);
+
+            std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedCountsLabelsLHS = 
+                countsLabelsLHS.insert(std::pair<std::string,float>(iter2->first,iter2->second));
+            if (!insertedCountsLabelsLHS.second) {
+              (insertedCountsLabelsLHS.first)->second += iter2->second;
+            }
+
+            boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::iterator jointCountsRulesTargetLHSAndLabelsLHSIter = 
+                jointCountsRulesTargetLHSAndLabelsLHS.find(ruleTargetLhs);
+            if ( jointCountsRulesTargetLHSAndLabelsLHSIter == jointCountsRulesTargetLHSAndLabelsLHS.end() ) {
+              boost::unordered_map<std::string,float>* jointCounts = new boost::unordered_map<std::string,float>;
+              jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+              jointCountsRulesTargetLHSAndLabelsLHS.insert(std::pair<std::string,boost::unordered_map<std::string,float>* >(ruleTargetLhs,jointCounts));
+            } else {
+              boost::unordered_map<std::string,float>* jointCounts = jointCountsRulesTargetLHSAndLabelsLHSIter->second;
+              std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedJointCounts = 
+                  jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+              if (!insertedJointCounts.second) {
+                (insertedJointCounts.first)->second += iter2->second;
+              }
+            }
+
+          } 
+        }
+
+        lhsGivenCurrentRhsCounts.clear();
+      }
+
+      currentRhsCount = 0.0;
+      currentRhs = rhs;
+    }
+
+    currentRhsCount += iter->second; 
+    lhsGivenCurrentRhsCounts.push_back( std::pair<std::string,float>(lhs,iter->second) );
+  }
+
+  if ( !currentRhs.empty() ) {
+    istringstream tokenizer(currentRhs);
+    std::string rhsLabel;
+    while ( tokenizer.peek() != EOF ) {
+      tokenizer >> rhsLabel;
+      labelSet.insert(rhsLabel);
+    }
+    oss << " " << currentRhs << " " << currentRhsCount;
+  }
+  if ( lhsGivenCurrentRhsCounts.size() > 0 ) {
+    if ( !currentRhs.empty() ) {
+      oss << " " << lhsGivenCurrentRhsCounts.size();
+    }
+    for ( std::list< std::pair<std::string,float> >::const_iterator iter2=lhsGivenCurrentRhsCounts.begin();
+          iter2!=lhsGivenCurrentRhsCounts.end(); ++iter2 ) {
+      oss << " " << iter2->first << " " << iter2->second;
+
+      // update countsLabelsLHS and jointCountsRulesTargetLHSAndLabelsLHS
+      std::string ruleTargetLhs = vcbT.getWord(m_phraseTarget->back());
+      ruleTargetLhs.erase(ruleTargetLhs.begin());  // strip square brackets
+      ruleTargetLhs.erase(ruleTargetLhs.size()-1);
+
+      std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedCountsLabelsLHS = 
+          countsLabelsLHS.insert(std::pair<std::string,float>(iter2->first,iter2->second));
+      if (!insertedCountsLabelsLHS.second) {
+        (insertedCountsLabelsLHS.first)->second += iter2->second;
+      }
+
+      boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >::iterator jointCountsRulesTargetLHSAndLabelsLHSIter = 
+          jointCountsRulesTargetLHSAndLabelsLHS.find(ruleTargetLhs);
+      if ( jointCountsRulesTargetLHSAndLabelsLHSIter == jointCountsRulesTargetLHSAndLabelsLHS.end() ) {
+        boost::unordered_map<std::string,float>* jointCounts = new boost::unordered_map<std::string,float>;
+        jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+        jointCountsRulesTargetLHSAndLabelsLHS.insert(std::pair<std::string,boost::unordered_map<std::string,float>* >(ruleTargetLhs,jointCounts));
+      } else {
+        boost::unordered_map<std::string,float>* jointCounts = jointCountsRulesTargetLHSAndLabelsLHSIter->second;
+        std::pair< boost::unordered_map<std::string,float>::iterator, bool > insertedJointCounts = 
+            jointCounts->insert(std::pair<std::string,float>(iter2->first,iter2->second));
+        if (!insertedJointCounts.second) {
+          (insertedJointCounts.first)->second += iter2->second;
+        }
+      }
+
+    } 
+  }
+
+  std::string allPropertyValuesString(oss.str());
+  return allPropertyValuesString;
+}
+
+
+
 }
 

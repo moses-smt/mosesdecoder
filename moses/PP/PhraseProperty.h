@@ -11,15 +11,16 @@ namespace Moses
 class PhraseProperty
 {
 public:
-  PhraseProperty(const std::string &value) : m_value(value) {};
+  PhraseProperty() : m_value(NULL) {};
+  ~PhraseProperty() { if ( m_value != NULL ) delete m_value; };
 
-  virtual void ProcessValue() {};
+  virtual void ProcessValue(const std::string &value) { m_value = new std::string(value); };
 
-  const std::string &GetValueString() const { return m_value; };
+  virtual const std::string *GetValueString() const { return m_value; };
 
 protected:
 
-  const std::string m_value;  
+  std::string *m_value;  
 
 };
 
