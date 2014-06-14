@@ -56,12 +56,15 @@ void M2ScorerMER::addMERStats(std::string sentence, size_t sid, std::vector<int>
   std::vector<std::string> source_tokens;
   Tokenize(sentence.c_str(), ' ', &source_tokens);
   
-  std::string scores("mdis");
+  std::vector<size_t> merScores(4, 0);
+  std::string scoreDesc("mdis");
   for(size_t k = 0; k < references_.size(); ++k) {
     std::vector<std::string> reference_tokens;
     Tokenize(references_[k][sid].c_str(), ' ', &reference_tokens);
-    AddStats(source_tokens, reference_tokens, scores, stats);
+    AddStats(source_tokens, reference_tokens, scoreDesc, merScores);
   }
+  
+  stats.insert(stats.end(), merScores.begin(), merScores.end());
 }
 
 void M2ScorerMER::prepareStats(size_t sid, const string& text, ScoreStats& entry)
