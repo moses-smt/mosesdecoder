@@ -88,16 +88,18 @@ Diffs CreateDiff(const Sequence& s1, const Sequence& s2) {
 
 template <class Sequence, class Sig, class Stats>
 void addStats(const Sequence& s1, const Sequence& s2, const Sig& sig, Stats& stats) {
+  if(sig.size() != stats.size())
+    throw "Signature size differs from score array size."
+  
   size_t m = 0, d = 0, i = 0, s = 0;
   Diffs diff = CreateDiff(s1, s2);  
   
-  for(size_t j = 0; j < diff.size(); ++j) {
+  for(int j = 0; j < diff.size(); ++j) {
     if(diff[j] == 'm')
       m++;
     else if(diff[j] == 'd') {
       d++;
-      
-      size_t k = 0;
+      int k = 0;
       while(j - k >= 0 && j + 1 + k < diff.size() &&
             diff[j - k] == 'd' && diff[j + 1 + k] == 'i') {
         d--;
@@ -118,8 +120,13 @@ void addStats(const Sequence& s1, const Sequence& s2, const Sig& sig, Stats& sta
       case 'i': stats[j] += i; break;
       case 's': stats[j] += s; break;
       case 'r':
-        float macc = log(1.0 - (float)(d + i + s)/(float)(d + i + s + m)); 
-        stats[j] += macc;
+        float macc = 1;
+        if (d + i + s + m)
+          macc = 1.0 - (float)(d + i + s)/(float)(d + i + s + m);
+        if(macc > 0)
+          stats[j] += log(macc);
+        else
+          stats[j] += log(1.0/(float)(d + i + s + m + 1));
         break;
     }
   }

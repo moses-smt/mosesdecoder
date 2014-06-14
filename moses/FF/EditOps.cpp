@@ -23,8 +23,8 @@ namespace Moses
 using namespace std;
 
 EditOps::EditOps(const std::string &line)
-  : StatelessFeatureFunction(5, line),
-    m_factorType(0), m_chars(false), m_scores("mdisr")
+  : StatelessFeatureFunction(4, line),
+    m_factorType(0), m_chars(false), m_scores("mdis")
 {
   std::cerr << "Initializing EditOps feature.." << std::endl;
   ReadParameters();
@@ -59,7 +59,7 @@ void EditOps::ComputeFeatures(
     const TargetPhrase& target,
     ScoreComponentCollection* accumulator) const
 {
-  std::vector<float> ops(m_scores.size(), 0);
+  std::vector<float> ops(GetNumScoreComponents(), 0);
   
   if(m_chars) {
     std::vector<FactorType> factors;
