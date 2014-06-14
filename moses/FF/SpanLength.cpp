@@ -60,7 +60,7 @@ void SpanLength::Evaluate(const InputType &input
   if (score < -100.0f) {
     float weight = StaticData::Instance().GetWeight(this);
     if (weight < 0) {
-    	score = 0;
+    	score = -100;
     }
   }
 
