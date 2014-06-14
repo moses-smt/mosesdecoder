@@ -22,9 +22,25 @@ namespace Moses
 
 using namespace std;
 
+std::string ParseScores(const std::string &line, const std::string& defaultScores) {
+  vector<string> toks = Tokenize(line);
+  UTIL_THROW_IF2(toks.empty(), "Empty line");
+
+  for (size_t i = 1; i < toks.size(); ++i) {
+    std::vector<std::string> args = TokenizeFirstOnly(toks[i], "=");
+    UTIL_THROW_IF2(args.size() != 2,
+      "Incorrect format for feature function arg: " << toks[i]);
+
+    if (args[0] == "scores") {
+      return args[1];
+    }
+  }
+  return defaultScores;
+}
+
 EditOps::EditOps(const std::string &line)
-  : StatelessFeatureFunction(4, line),
-    m_factorType(0), m_chars(false), m_scores("mdis")
+  : StatelessFeatureFunction(ParseScores(line, "mdis").size(), line),
+    m_factorType(0), m_chars(false), m_scores(ParseScores(line, "mdis"))
 {
   std::cerr << "Initializing EditOps feature.." << std::endl;
   ReadParameters();
