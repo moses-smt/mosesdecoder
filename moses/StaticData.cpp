@@ -65,6 +65,7 @@ StaticData::StaticData()
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
+  ,m_currentWeightSetting("default")
   ,m_treeStructure(NULL)
 {
   m_xmlBrackets.first="<";
@@ -560,7 +561,7 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
       return false;
     }
-    AccessAllWeights().PlusEquals(extraWeights);
+    m_allWeights.PlusEquals(extraWeights);
   }
 
   //Load sparse features from config (overrules weight file)
@@ -596,14 +597,14 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
 
 void StaticData::SetWeight(const FeatureFunction* sp, float weight)
 {
-  AccessAllWeights().Resize();
-  AccessAllWeights().Assign(sp,weight);
+  m_allWeights.Resize();
+  m_allWeights.Assign(sp,weight);
 }
 
 void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>& weights)
 {
-  AccessAllWeights().Resize();
-  AccessAllWeights().Assign(sp,weights);
+  m_allWeights.Resize();
+  m_allWeights.Assign(sp,weights);
 }
 
 void StaticData::LoadNonTerminals()
@@ -1006,7 +1007,7 @@ void StaticData::LoadSparseWeightsFromConfig() {
     // this indicates that it is sparse feature
     if (featureNames.find(iter->first) == featureNames.end()) {
       UTIL_THROW_IF2(iter->second.size() != 1, "ERROR: only one weight per sparse feature allowed: " << iter->first);
-        AccessAllWeights().Assign(iter->first, iter->second[0]);
+        m_allWeights.Assign(iter->first, iter->second[0]);
     }
   }
 
@@ -1031,7 +1032,7 @@ bool StaticData::LoadAlternateWeightSettings()
   }
 
   // copy main weight setting as default
-  m_weightSetting["default"] = new ScoreComponentCollection( AccessAllWeights() );
+  m_weightSetting["default"] = new ScoreComponentCollection( m_allWeights );
 
   // go through specification in config file
   string currentId = "";
@@ -1194,7 +1195,7 @@ void StaticData::CheckLEGACYPT()
 
 void StaticData::ResetWeights(const std::string &denseWeights, const std::string &sparseFile)
 {
-  SetAllWeights(ScoreComponentCollection());
+  m_allWeights = ScoreComponentCollection();
 
   // dense weights
   string name("");
@@ -1209,7 +1210,7 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
 	  if (name != "") {
 		// save previous ff
 		const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
-		AccessAllWeights().Assign(&ff, weights);
+		m_allWeights.Assign(&ff, weights);
 		weights.clear();
 	  }
 
@@ -1222,7 +1223,7 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
   }
 
   const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
-  AccessAllWeights().Assign(&ff, weights);
+  m_allWeights.Assign(&ff, weights);
 
   // sparse weights
   InputFileStream sparseStrme(sparseFile);
@@ -1235,7 +1236,7 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
 	  UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name. Should be FFName_spareseName");
 
       const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
-	  AccessAllWeights().Assign(&ff, names[1], Scan<float>(toks[1]));
+	  m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
   }
 }
 
