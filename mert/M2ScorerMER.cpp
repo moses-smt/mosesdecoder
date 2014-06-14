@@ -7,9 +7,11 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "../moses/FF/Diffs.h"
 
 using namespace std;
 using namespace boost::python;
+using namespace Moses;
 
 namespace MosesTuning
 {
@@ -54,34 +56,12 @@ void M2ScorerMER::addMERStats(std::string sentence, size_t sid, std::vector<int>
   std::vector<std::string> source_tokens;
   Tokenize(sentence.c_str(), ' ', &source_tokens);
   
-  int h = 0, d = 0, i = 0, s = 0;
+  std::string scores("mdis");
   for(size_t k = 0; k < references_.size(); ++k) {
     std::vector<std::string> reference_tokens;
     Tokenize(references_[k][sid].c_str(), ' ', &reference_tokens);
-    
-    Diffs diff = CreateDiff(source_tokens, reference_tokens);
-    
-    for(size_t j = 0; j < diff.size(); ++j) {
-      if(diff[j] == 'm')
-        h++;
-      if(diff[j] == 'd') {
-        if(j + 1 < diff.size() && diff[j + 1] == 'i') {
-          s++;
-          j++;
-        }
-        else {
-          d++;
-        }
-      }
-      if(diff[j] == 'i')
-        i++;
-    }
+    AddStats(source_tokens, reference_tokens, scores, stats);
   }
-  
-  stats.push_back(h);
-  stats.push_back(d);
-  stats.push_back(i);
-  stats.push_back(s);
 }
 
 void M2ScorerMER::prepareStats(size_t sid, const string& text, ScoreStats& entry)

@@ -13,7 +13,9 @@ namespace Moses
 
 typedef std::vector<std::string> Tokens;
 
-/** Sets the features for length of source phrase, target phrase, both.
+/** Calculates string edit operations that transform source phrase into target
+ * phrase using the LCS algorithm. Potentially usefule for monolingual tasks
+ * like paraphrasing, summarization, correction.
  */
 class EditOps : public StatelessFeatureFunction
 {

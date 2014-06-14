@@ -23,7 +23,7 @@ namespace Moses
 using namespace std;
 
 std::string ParseScores(const std::string &line, const std::string& defaultScores) {
-  vector<string> toks = Tokenize(line);
+  std::vector<std::string> toks = Tokenize(line);
   UTIL_THROW_IF2(toks.empty(), "Empty line");
 
   for (size_t i = 1; i < toks.size(); ++i) {
@@ -39,8 +39,8 @@ std::string ParseScores(const std::string &line, const std::string& defaultScore
 }
 
 EditOps::EditOps(const std::string &line)
-  : StatelessFeatureFunction(ParseScores(line, "dis").size(), line),
-    m_factorType(0), m_chars(false), m_scores(ParseScores(line, "dis"))
+  : StatelessFeatureFunction(ParseScores(line, "dis").size(), line)
+  , m_factorType(0), m_chars(false), m_scores(ParseScores(line, "dis"))
 {
   std::cerr << "Initializing EditOps feature.." << std::endl;
   ReadParameters();
@@ -84,7 +84,7 @@ void EditOps::ComputeFeatures(
     std::string sourceStr = source.GetStringRep(factors);
     std::string targetStr = target.GetStringRep(factors);
     
-    addStats(sourceStr, targetStr, m_scores, ops);
+    AddStats(sourceStr, targetStr, m_scores, ops);
   }
   else {
     std::vector<std::string> sourceTokens;
@@ -95,7 +95,7 @@ void EditOps::ComputeFeatures(
     for(size_t i = 0; i < target.GetSize(); ++i) 
       targetTokens.push_back(target.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
     
-    addStats(sourceTokens, targetTokens, m_scores, ops);
+    AddStats(sourceTokens, targetTokens, m_scores, ops);
   }
   
   accumulator->PlusEquals(this, ops);
