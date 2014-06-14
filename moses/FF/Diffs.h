@@ -86,8 +86,8 @@ Diffs CreateDiff(const Sequence& s1, const Sequence& s2) {
   return CreateDiff(s1, s2, std::equal_to<typename Sequence::value_type>());
 }
 
-template <class Sequence, class Stats>
-void addStats(const Sequence& s1, const Sequence& s2, Stats& stats) {
+template <class Sequence, class Sig, class Stats>
+void addStats(const Sequence& s1, const Sequence& s2, const Sig& sig, Stats& stats) {
   size_t m = 0, d = 0, i = 0, s = 0;
   Diffs diff = CreateDiff(s1, s2);  
   
@@ -110,11 +110,19 @@ void addStats(const Sequence& s1, const Sequence& s2, Stats& stats) {
       i++;
   }
   
-  stats[0] += m;
-  stats[1] += d;
-  stats[2] += i;
-  stats[3] += s;
-  stats[4] += log(1.0 - (float)(d + i + s)/(float)(d + i + s + m));
+  for(size_t j = 0; j < sig.size(); ++j) {
+    switch (sig[j]) {
+      case 'm': stats[j] += m; break;
+      case 'l': stats[j] += d + i + s; break;
+      case 'd': stats[j] += d; break;
+      case 'i': stats[j] += i; break;
+      case 's': stats[j] += s; break;
+      case 'r':
+        float macc = log(1.0 - (float)(d + i + s)/(float)(d + i + s + m)); 
+        stats[j] += macc;
+        break;
+    }
+  }
 }
 
 }

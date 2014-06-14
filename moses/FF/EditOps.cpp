@@ -24,7 +24,7 @@ using namespace std;
 
 EditOps::EditOps(const std::string &line)
   : StatelessFeatureFunction(5, line),
-    m_factorType(0), m_chars(false)
+    m_factorType(0), m_chars(false), m_scores("mdisr")
 {
   std::cerr << "Initializing EditOps feature.." << std::endl;
   ReadParameters();
@@ -34,8 +34,10 @@ void EditOps::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
-  }  if (key == "chars") {
+  } else if (key == "chars") {
     m_chars = Scan<bool>(value);
+  } else if (key == "scores") {
+    m_scores = value;
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
@@ -57,7 +59,7 @@ void EditOps::ComputeFeatures(
     const TargetPhrase& target,
     ScoreComponentCollection* accumulator) const
 {
-  std::vector<float> ops(5, 0);
+  std::vector<float> ops(m_scores.size(), 0);
   
   if(m_chars) {
     std::vector<FactorType> factors;
@@ -66,7 +68,7 @@ void EditOps::ComputeFeatures(
     std::string sourceStr = source.GetStringRep(factors);
     std::string targetStr = target.GetStringRep(factors);
     
-    addStats(sourceStr, targetStr, ops);
+    addStats(sourceStr, targetStr, m_scores, ops);
   }
   else {
     std::vector<std::string> sourceTokens;
@@ -77,7 +79,7 @@ void EditOps::ComputeFeatures(
     for(size_t i = 0; i < target.GetSize(); ++i) 
       targetTokens.push_back(target.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
     
-    addStats(sourceTokens, targetTokens, ops);
+    addStats(sourceTokens, targetTokens, m_scores, ops);
   }
   
   accumulator->PlusEquals(this, ops);

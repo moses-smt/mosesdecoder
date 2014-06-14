@@ -20,6 +20,7 @@ class EditOps : public StatelessFeatureFunction
 private:
   FactorType m_factorType;
   bool m_chars;
+  std::string scores;
 
 public:
   EditOps(const std::string &line);
