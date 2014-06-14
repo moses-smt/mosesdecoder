@@ -66,10 +66,14 @@ void AlignedSentenceSyntax::Create(const Parameter &params)
 
 void Escape(string &text)
 {
+	text = Moses::Replace(text, "&", "&amp;");
+	text = Moses::Replace(text, "|", "&#124;");
 	text = Moses::Replace(text, "<", "&lt;");
 	text = Moses::Replace(text, ">", "&gt;");
 	text = Moses::Replace(text, "'", "&apos;");
 	text = Moses::Replace(text, "\"", "&quot;");
+	text = Moses::Replace(text, "[", "&#91;");
+	text = Moses::Replace(text, "]", "&#93;");
 
 }
 
