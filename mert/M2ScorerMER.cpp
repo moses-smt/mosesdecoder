@@ -129,7 +129,7 @@ float M2ScorerMER::calculateScore(const vector<int>& comps) const
   if(h + d + i + s)
     mer = 1 - (d + i + s)/(h + d + i + s);
   
-  std::cerr << f << " " << mer << std::endl;
+  //std::cerr << f << " " << mer << std::endl;
   
   float score = alpha_ * f + (1 - alpha_) * mer;
   return score;
