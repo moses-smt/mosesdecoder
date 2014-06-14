@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -93,10 +94,13 @@ class ScoreComponentCollection
 private:
   FVector m_scores;
 
+public:
   typedef std::pair<size_t,size_t> IndexPair;
+private:
   typedef std::map<const FeatureFunction*,IndexPair> ScoreIndexMap;
   static  ScoreIndexMap s_scoreIndexes;
   static size_t s_denseVectorSize;
+public:
   static IndexPair GetIndexes(const FeatureFunction* sp) {
     ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
     if (indexIter == s_scoreIndexes.end()) {

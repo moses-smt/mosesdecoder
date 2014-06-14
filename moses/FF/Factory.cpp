@@ -55,6 +55,9 @@
 #ifdef PT_UG
 #include "moses/TranslationModel/UG/mmsapt.h"
 #endif
+#ifdef HAVE_PROBINGPT
+#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
+#endif
 
 #include "moses/LM/Ken.h"
 #ifdef LM_IRST
@@ -201,6 +204,10 @@ FeatureRegistry::FeatureRegistry()
 #ifdef PT_UG
   MOSES_FNAME(Mmsapt);
 #endif
+#ifdef HAVE_PROBINGPT
+  MOSES_FNAME(ProbingPT);
+#endif
+
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
 #endif

@@ -150,8 +150,14 @@ tokenize
 	pass-unless: output-tokenizer
 	template: $output-tokenizer < IN > OUT
 	parallelizable: yes
-factorize
+mock-parse
 	in: tokenized-corpus
+	out: mock-parsed-corpus
+	default-name: lm/mock-parsed
+	pass-unless: mock-output-parser-lm
+	template: $mock-output-parser-lm < IN > OUT
+factorize
+	in: mock-parsed-corpus
 	out: factorized-corpus
 	rerun-on-change: TRAINING:output-factors
 	default-name: lm/factored
@@ -234,8 +240,14 @@ tokenize-tuning
 	pass-unless: output-tokenizer
 	template: $output-tokenizer < IN > OUT
 	parallelizable: yes
-factorize-tuning
+mock-parse-tuning
 	in: tokenized-tuning
+	out: mock-parsed-tuning
+	default-name: lm/interpolate-tuning.mock-parsed
+	pass-unless: mock-output-parser-lm
+	template: $mock-output-parser-lm < IN > OUT
+factorize-tuning
+	in: mock-parsed-tuning
 	out: factorized-tuning
 	default-name: lm/interpolate-tuning.factored
 	pass-unless: TRAINING:output-factors	
@@ -705,17 +717,32 @@ tokenize-input-devtest
 	pass-unless: input-tokenizer
 	ignore-unless: use-mira
 	template: $input-tokenizer < IN > OUT
-parse-input
+mock-parse-input
 	in: tokenized-input
+	out: mock-parsed-input
+	default-name: tuning/input.mock-parsed
+	pass-unless: mock-input-parser-devtesteval
+	template: $mock-input-parser-devtesteval < IN > OUT
+mock-parse-input-devtest
+	in: tokenized-input-devtest
+	out: mock-parsed-input-devtest
+	default-name: tuning/input.devtest.mock-parsed
+	pass-unless: mock-input-parser-devtesteval
+	ignore-unless: use-mira	
+	template: $mock-input-parser-devtesteval < IN > OUT
+parse-input
+	in: mock-parsed-input
 	out: parsed-input
 	default-name: tuning/input.parsed
 	pass-unless: input-parser
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	template: $input-parser < IN > OUT
 parse-input-devtest
-	in: tokenized-input-devtest
+	in: mock-parsed-input-devtesteval
 	out: parsed-input-devtest
 	default-name: tuning/input.devtest.parsed
 	pass-unless: input-parser
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira	
 	template: $input-parser < IN > OUT
 parse-relax-input
@@ -723,14 +750,16 @@ parse-relax-input
 	out: parse-relaxed-input
 	default-name: tuning/input.parse-relaxed
 	pass-unless: input-parse-relaxer
-        template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+    template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
 parse-relax-input-devtest
 	in: parsed-input-devtest
 	out: parse-relaxed-input-devtest
 	default-name: tuning/input.devtest.parse-relaxed
 	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira
-        template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
+    template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
 factorize-input
 	in: parse-relaxed-input
 	out: factorized-input
@@ -832,8 +861,20 @@ tokenize-reference-devtest
 	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-tokenizer < IN > OUT
-lowercase-reference
+mock-parse-reference
 	in: tokenized-reference
+	out: mock-parsed-reference
+	default-name: tuning/reference.mock-parsed
+	pass-unless: mock-output-parser-references
+	template: $mock-output-parser-references < IN > OUT
+mock-parse-reference-devtest
+	in: tokenized-input-devtest
+	out: mock-parsed-reference-devtest
+	default-name: tuning/reference.devtest.mock-parsed
+	pass-unless: mock-output-parser-references
+	template: $mock-output-parser-references < IN > OUT
+lowercase-reference
+	in: mock-parsed-reference
 	out: truecased-reference
 	default-name: tuning/reference.lc
 	pass-unless: output-lowercaser
@@ -841,7 +882,7 @@ lowercase-reference
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
 lowercase-reference-devtest
-	in: tokenized-reference-devtest
+	in: mock-parsed-reference-devtest
 	out: truecased-reference-devtest
 	default-name: tuning/reference.devtest.lc
 	pass-unless: output-lowercaser
@@ -850,7 +891,7 @@ lowercase-reference-devtest
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
 truecase-reference
-	in: tokenized-reference TRUECASER:truecase-model
+	in: mock-parsed-reference TRUECASER:truecase-model
 	out: truecased-reference
 	rerun-on-change: output-truecaser
 	default-name: tuning/reference.tc
@@ -858,7 +899,7 @@ truecase-reference
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
 truecase-reference-devtest
-	in: tokenized-reference-devtest TRUECASER:truecase-model
+	in: mock-parsed-reference-devtest TRUECASER:truecase-model
 	out: truecased-reference-devtest
 	rerun-on-change: output-truecaser
 	default-name: tuning/reference.devtest.tc
@@ -959,18 +1000,26 @@ tokenize-input
 	default-name: evaluation/input.tok
 	pass-unless: input-tokenizer
 	template: $input-tokenizer < IN > OUT
-parse-input
+mock-parse-input
 	in: tokenized-input
+	out: mock-parsed-input
+	default-name: evaluation/input.mock-parsed
+	pass-unless: mock-input-parser-devtesteval
+	template: $mock-input-parser-devtesteval < IN > OUT
+parse-input
+	in: mock-parsed-input
 	out: parsed-input
 	default-name: evaluation/input.parsed
 	pass-unless: input-parser
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	template: $input-parser < IN > OUT
 parse-relax-input
 	in: parsed-input
 	out: parse-relaxed-input
 	default-name: tuning/input.parse-relaxed
 	pass-unless: input-parse-relaxer
-        template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+    template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
 factorize-input
 	in: parse-relaxed-input
 	out: factorized-input
@@ -1093,8 +1142,14 @@ tokenize-reference
 	pass-unless: output-tokenizer
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-tokenizer < IN > OUT
-lowercase-reference
+mock-parse-reference
 	in: tokenized-reference
+	out: mock-parsed-reference
+	default-name: evaluation/reference.mock-parsed
+	pass-unless: mock-output-parser-references
+	template: $mock-output-parser-references < IN > OUT
+lowercase-reference
+	in: mock-parsed-reference
 	out: reference
 	default-name: evaluation/reference
 	pass-unless: output-lowercaser

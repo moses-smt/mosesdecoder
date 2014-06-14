@@ -31,7 +31,7 @@ class ProcessWrapper:
   def start(self, stdin=PIPE, stdout=PIPE):
     if self.process:
       raise Exception("Process is already running")
-    self.process = Popen(cmd, stdin = stdin, stdout = stdout)
+    self.process = Popen(self.cmd, stdin = stdin, stdout = stdout)
     return
 
   def __del__(self):
@@ -57,6 +57,7 @@ class SentenceSplitter(ProcessWrapper):
   def __init__(self,lang):
     ssplit_cmd = moses_root+"/scripts/ems/support/split-sentences.perl"
     self.cmd = [ssplit_cmd, "-b", "-q", "-l",lang]
+    self.process = None
     return
 
   def __call__(self,input):
@@ -91,15 +92,17 @@ class Tokenizer(LineProcessor):
   def __init__(self,lang,args=["-a","-no-escape"]):
     tok_cmd = moses_root+"/scripts/tokenizer/tokenizer.perl"
     self.cmd = [tok_cmd,"-b", "-q", "-l", lang] + args
+    self.process = None
     return
    
-class TrueCaser(LineProcessor):
+class Truecaser(LineProcessor):
   """
   Truecaser wrapper.
   """
   def __init__(self,model):
-    trucase_cmd = moses_root+"/scripts/recaser/truecase.perl"
+    truecase_cmd = moses_root+"/scripts/recaser/truecase.perl"
     self.cmd = [truecase_cmd,"-b", "--model",model]
+    self.process = None
     return
   pass
 

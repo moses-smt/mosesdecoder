@@ -29,6 +29,7 @@
 #include <map>
 
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "mmsapt_phrase_scorers.h"
 
 // TO DO:
 // - make lexical phrase scorer take addition to the "dynamic overlay" into account
@@ -51,6 +52,7 @@ namespace Moses
     typedef mmBitext<Token> mmbitext;
     typedef imBitext<Token> imbitext;
     typedef TSA<Token>           tsa;
+    typedef PhraseScorer<Token> pscorer;
   private:
     mmbitext btfix; 
     sptr<imbitext> btdyn;
@@ -58,30 +60,48 @@ namespace Moses
     string L1;
     string L2;
     float  m_lbop_parameter;
+    float  m_lex_alpha; 
+    // alpha parameter for lexical smoothing (joint+alpha)/(marg + alpha)
+    // must be > 0 if dynamic 
     size_t m_default_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
+
+    // deprecated!
     char m_pfwd_denom; // denominator for computation of fwd phrase score:
     // 'r' - divide by raw count
     // 's' - divide by sample count
     // 'g' - devide by number of "good" (i.e. coherent) samples 
     // size_t num_features;
+
     size_t input_factor;
     size_t output_factor; // we can actually return entire Tokens!
+
+    bool withLogCountFeatures; // add logs of counts as features?
+    bool withCoherence; 
+    string m_pfwd_features; // which pfwd functions to use
+    vector<string> m_feature_names; // names of features activated
+    vector<sptr<pscorer > > m_active_ff_fix; // activated feature functions (fix)
+    vector<sptr<pscorer > > m_active_ff_dyn; // activated feature functions (dyn)
+    vector<sptr<pscorer > > m_active_ff_common; // activated feature functions (dyn)
+
+    size_t
+    add_corpus_specific_features
+    (vector<sptr<pscorer > >& ffvec, size_t num_feats);
+    
     // built-in feature functions
-    PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
-    PScorePbwd<Token> calc_pbwd_fix, calc_pbwd_dyn;
-    PScoreLex<Token>  calc_lex; // this one I'd like to see as an external ff eventually
+    // PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
+    // PScorePbwd<Token> calc_pbwd_fix, calc_pbwd_dyn;
+    // PScoreLex<Token>  calc_lex; // this one I'd like to see as an external ff eventually
     // PScorePP<Token>   apply_pp; // apply phrase penalty 
-    PScoreLogCounts<Token>   add_logcounts_fix;
-    PScoreLogCounts<Token>   add_logcounts_dyn;
+    // PScoreLogCounts<Token>   add_logcounts_fix;
+    // PScoreLogCounts<Token>   add_logcounts_dyn;
     void init(string const& line);
     mutable boost::mutex lock;
+    bool withPbwd;
     bool poolCounts;
-    bool withLogCountFeatures; // add logs of counts as features?
-    bool withPfwd,withPbwd;
     vector<FactorType> ofactor;
 
-    
+
   public:
     // typedef boost::unordered_map<uint64_t, sptr<TargetPhraseCollection> > tpcoll_cache_t;
     class TargetPhraseCollectionWrapper 
@@ -206,6 +226,12 @@ namespace Moses
     /// return true if prefix /phrase/ exists
     bool
     PrefixExists(Phrase const& phrase) const;
+
+    vector<string> const&
+    GetFeatureNames() const;
+    
+    void
+    ScorePPfix(bitext::PhrasePair& pp) const;
 
   private:
   };

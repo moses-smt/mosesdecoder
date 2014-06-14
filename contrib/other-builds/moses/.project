@@ -1607,6 +1607,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
 		</link>
 		<link>
+			<name>PP/CountsPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/CountsPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/CountsPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/CountsPhraseProperty.h</locationURI>
+		</link>
+		<link>
 			<name>PP/Factory.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.cpp</locationURI>
@@ -1620,6 +1630,16 @@
 			<name>PP/PhraseProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/SourceLabelsPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SourceLabelsPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/SourceLabelsPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SourceLabelsPhraseProperty.h</locationURI>
 		</link>
 		<link>
 			<name>PP/TreeStructurePhraseProperty.h</name>
@@ -1760,6 +1780,11 @@
 			<name>TranslationModel/PhraseDictionaryTreeAdaptor.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTreeAdaptor.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/RuleTable</name>
@@ -2170,6 +2195,91 @@
 			<name>TranslationModel/DynSAInclude/vocab.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/vocab.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/Jamfile</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/Jamfile</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/ProbingPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/ProbingPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/hash.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/hash.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/hash.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/hash.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/huffmanish.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/huffmanish.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/huffmanish.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/huffmanish.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/line_splitter.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/line_splitter.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/line_splitter.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/line_splitter.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/probing_hash_utils.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/probing_hash_utils.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/probing_hash_utils.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/probing_hash_utils.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/quering.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/quering.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/quering.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/quering.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/storing.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/storing.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/storing.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/storing.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/vocabid.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/vocabid.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/vocabid.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/vocabid.hh</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/RuleTable/Loader.h</name>

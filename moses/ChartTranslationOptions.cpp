@@ -74,7 +74,7 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
     	++numDiscard;
     }
     else if (numDiscard) {
-    	m_collection[i - numDiscard] = boost::shared_ptr<ChartTranslationOption>(transOpt);
+    	m_collection[i - numDiscard] = m_collection[i];
     }
   }
 

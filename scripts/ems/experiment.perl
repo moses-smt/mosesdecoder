@@ -2406,24 +2406,16 @@ sub define_training_create_config {
 	 $cmd .= "-transliteration-phrase-table $transliteration_pt ";
     }	
 
-    if($osm){
-      
+    if ($osm) {
       my $osm_settings = &get("TRAINING:operation-sequence-model-settings"); 
-     
-
-	if($osm_settings =~ /factor/){
-	
-		$cmd .= "-osm-model $osm/ ";
-		my $find = "--factor";
-		my $replace = "-osm-setting";
-		$osm_settings =~ s/$find/$replace/g;
-      		$cmd .= "$osm_settings ";       
-       }
-	else{
-	 $cmd .= "-osm-model $osm/operationLM.bin ";
-	}
+      if ($osm_settings =~ /-factor *(\S+)/){
+        $cmd .= "-osm-model $osm/ -osm-setting $1 ";
+      }
+      else {
+        $cmd .= "-osm-model $osm/operationLM.bin ";
+      }
     }
-	
+
     # sparse lexical features provide additional content for config file
     $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
 

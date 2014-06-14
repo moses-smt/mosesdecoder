@@ -72,7 +72,8 @@ lib moses :
   *Test.cpp Mock*.cpp
   FF/Factory.cpp
 ]
-headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool
+headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
+
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
 $(TOP)//boost_iostreams mmlib
 :
