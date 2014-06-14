@@ -89,7 +89,7 @@ Diffs CreateDiff(const Sequence& s1, const Sequence& s2) {
 template <class Sequence, class Sig, class Stats>
 void addStats(const Sequence& s1, const Sequence& s2, const Sig& sig, Stats& stats) {
   if(sig.size() != stats.size())
-    throw "Signature size differs from score array size."
+    throw "Signature size differs from score array size.";
   
   size_t m = 0, d = 0, i = 0, s = 0;
   Diffs diff = CreateDiff(s1, s2);  
