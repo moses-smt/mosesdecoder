@@ -1342,6 +1342,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SyntaxRHS.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxRHS.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SyntaxRHS.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxRHS.h</locationURI>
+		</link>
+		<link>
 			<name>FF/TargetBigramFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetBigramFeature.cpp</locationURI>
