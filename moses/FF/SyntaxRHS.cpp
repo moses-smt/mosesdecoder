@@ -8,6 +8,12 @@ using namespace std;
 
 namespace Moses
 {
+SyntaxRHS::SyntaxRHS(const std::string &line)
+:StatelessFeatureFunction(1, line)
+{
+  ReadParameters();
+}
+
 void SyntaxRHS::Evaluate(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown

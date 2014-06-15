@@ -9,9 +9,7 @@ namespace Moses
 class SyntaxRHS : public StatelessFeatureFunction
 {
 public:
-	SyntaxRHS(const std::string &line)
-    :StatelessFeatureFunction(2, line)
-  {}
+  SyntaxRHS(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

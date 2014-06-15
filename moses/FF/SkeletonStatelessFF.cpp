@@ -7,6 +7,12 @@ using namespace std;
 
 namespace Moses
 {
+SkeletonStatelessFF::SkeletonStatelessFF(const std::string &line)
+  :StatelessFeatureFunction(2, line)
+{
+  ReadParameters();
+}
+
 void SkeletonStatelessFF::Evaluate(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
