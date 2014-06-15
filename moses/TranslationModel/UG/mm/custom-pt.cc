@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 
   size_t i;
   i = calc_pfwd.init(0,.05,'g');
-  i = calc_pbwd.init(i,.05);
+  i = calc_pbwd.init(i,.05,'g');
   i = calc_lex.init(i,base+L1+"-"+L2+".lex");
   i = apply_wp.init(i);
 

@@ -79,6 +79,7 @@ namespace Moses
     bool withLogCountFeatures; // add logs of counts as features?
     bool withCoherence; 
     string m_pfwd_features; // which pfwd functions to use
+    string m_pbwd_features; // which pbwd functions to use
     vector<string> m_feature_names; // names of features activated
     vector<sptr<pscorer > > m_active_ff_fix; // activated feature functions (fix)
     vector<sptr<pscorer > > m_active_ff_dyn; // activated feature functions (dyn)

@@ -101,6 +101,7 @@ namespace Moses {
     PScorePbwd : public PhraseScorer<Token>
     {
       float conf;
+      char denom;
     public:
       PScorePbwd() 
       {
@@ -108,12 +109,13 @@ namespace Moses {
       }
 
       int 
-      init(int const i, float const c) 
+      init(int const i, float const c, char d) 
       { 
 	conf = c; 
+	denom = d;
 	this->m_index = i;
 	ostringstream buf;
-	buf << format("pbwd%.3f") % c;
+	buf << format("pbwd-%c%.3f") % denom % c;
 	this->m_feature_names.push_back(buf.str());
 	return i + this->m_num_feats;
       }
@@ -123,7 +125,12 @@ namespace Moses {
 		 vector<float> * dest = NULL) const
       {
 	if (!dest) dest = &pp.fvals;
-	(*dest)[this->m_index] = log(lbop(max(pp.raw2,pp.joint),pp.joint,conf));
+	// we use the denominator specification to scale the raw counts on the 
+	// target side; the clean way would be to counter-sample
+	uint32_t r2 = pp.raw2;
+	if      (denom == 'g') r2 = round(r2 * float(pp.good1)   / pp.raw1);
+	else if (denom == 's') r2 = round(r2 * float(pp.sample1) / pp.raw1);
+	(*dest)[this->m_index] = log(lbop(max(r2, pp.joint),pp.joint,conf));
       }
     };
   
