@@ -31,16 +31,18 @@ public:
 
   void Load();
 
-  virtual void Evaluate(const Phrase &source
+  void Evaluate(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const;
-  void Evaluate(const InputType &input
+                        , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+  
+  virtual void Evaluate(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+  
   void Evaluate(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
@@ -48,13 +50,19 @@ public:
                      ScoreComponentCollection* accumulator) const
   {}
 
-  void ComputeFeatures(const Phrase &source,
+  void ComputeFeatures(const InputType &input,
+                       const InputPath &inputPath,
                        const TargetPhrase& targetPhrase,
                        ScoreComponentCollection* accumulator) const;
+  
   void SetParameter(const std::string& key, const std::string& value);
   
+  std::vector<std::string> CreatePattern(const Tokens &s1,
+                                         const Tokens &s2,
+                                         const InputType &input,
+                                         const InputPath &inputPath) const;
+  
   std::string CreateSinglePattern(const Tokens &s1, const Tokens &s2) const;
-  std::vector<std::string> CreatePattern(const Tokens &s1, const Tokens &s2) const;
 
 };
 

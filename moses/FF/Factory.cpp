@@ -37,8 +37,8 @@
 #include "moses/FF/SyntaxConstraintFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
-#include "moses/FF/CorrectionPattern.h";
-#include "moses/FF/EditOps.h";
+#include "moses/FF/CorrectionPattern.h"
+#include "moses/FF/EditOps.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"

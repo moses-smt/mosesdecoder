@@ -2,6 +2,7 @@
 #include "CorrectionPattern.h"
 #include "moses/Phrase.h"
 #include "moses/TargetPhrase.h"
+#include "moses/InputPath.h"
 #include "moses/Hypothesis.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ScoreComponentCollection.h"
@@ -156,18 +157,62 @@ std::string CorrectionPattern::CreateSinglePattern(const Tokens &s1, const Token
   }
 }
 
-std::vector<std::string> CorrectionPattern::CreatePattern(const Tokens &s1, const Tokens &s2) const {
+std::string GetContext(size_t pos,
+                       size_t len,
+                       size_t window,
+                       const InputType &input,
+                       const InputPath &inputPath,
+                       FactorType factorType,
+                       bool isRight) {
+
+  const Sentence& sentence = static_cast<const Sentence&>(input);
+  const WordsRange& range = inputPath.GetWordsRange(); 
+  
+  int leftPos  = range.GetStartPos() + pos - len - 1; 
+  int rightPos = range.GetStartPos() + pos; 
+  
+  std::string context = isRight ? "_right(«</s>»)" : "left(«<s>»)_";
+  
+  if(!isRight && leftPos >= 0)
+    context =
+      "left(«"
+      + sentence.GetWord(leftPos).GetFactor(factorType)->GetString().as_string()
+      + "»)_";
+    
+  if(isRight && rightPos < sentence.GetSize())
+    context =
+      "_right(«"
+      + sentence.GetWord(rightPos).GetFactor(factorType)->GetString().as_string()
+      + "»)";
+  
+  return context;
+}
+
+std::vector<std::string>
+CorrectionPattern::CreatePattern(const Tokens &s1,
+                                 const Tokens &s2,
+                                 const InputType &input,
+                                 const InputPath &inputPath) const {
+    
   Diffs diffs = CreateDiff(s1, s2);
   size_t i = 0, j = 0;
   char lastType = 'm';
-  
   std::vector<std::string> patternList;
-  
   Tokens source, target;
   BOOST_FOREACH(Diff type, diffs) {
     if(type == 'm') {
-      if(lastType != 'm')
-        patternList.push_back(CreateSinglePattern(source, target));
+      if(lastType != 'm') {
+        std::string leftContext =  GetContext(i, source.size(), 1, input, inputPath, m_factorType, false);
+        std::string rightContext = GetContext(i, source.size(), 1, input, inputPath, m_factorType, true);
+        
+        std::string pattern = CreateSinglePattern(source, target);
+        //pattern = leftContext + pattern + rightContext; 
+        
+        patternList.push_back(pattern);
+        patternList.push_back(pattern + rightContext);
+        patternList.push_back(leftContext + pattern);
+        patternList.push_back(leftContext + pattern + rightContext);
+      }
       source.clear();
       target.clear();
       if(s1[i] != s2[j]) {
@@ -187,9 +232,19 @@ std::vector<std::string> CorrectionPattern::CreatePattern(const Tokens &s1, cons
     }
     lastType = type;
   }
-  if(lastType != 'm')
-    patternList.push_back(CreateSinglePattern(source, target));
+  if(lastType != 'm') {
+    std::string leftContext =  GetContext(i, source.size(), 1, input, inputPath, m_factorType, false);
+    std::string rightContext = GetContext(i, source.size(), 1, input, inputPath, m_factorType, true);
     
+    std::string pattern = CreateSinglePattern(source, target);
+    //pattern = leftContext + pattern + rightContext; 
+    
+    patternList.push_back(pattern);
+    patternList.push_back(pattern + rightContext);
+    patternList.push_back(leftContext + pattern);
+    patternList.push_back(leftContext + pattern + rightContext);
+  }
+  
   return patternList;
 }
 
@@ -235,19 +290,23 @@ void CorrectionPattern::Load()
   m_unrestricted = false;
 }
 
-void CorrectionPattern::Evaluate(const Phrase &source
-    , const TargetPhrase &target
-    , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+void CorrectionPattern::Evaluate(const InputType &input
+              , const InputPath &inputPath
+              , const TargetPhrase &targetPhrase
+              , ScoreComponentCollection &scoreBreakdown
+              , ScoreComponentCollection *estimatedFutureScore) const
 {
-  ComputeFeatures(source, target, &scoreBreakdown);
+  ComputeFeatures(input, inputPath, targetPhrase, &scoreBreakdown);
 }
 
 void CorrectionPattern::ComputeFeatures(
-    const Phrase &source,
+    const InputType &input,
+    const InputPath &inputPath,
     const TargetPhrase& target,
     ScoreComponentCollection* accumulator) const
 {
+  const Phrase &source = inputPath.GetPhrase();
+
   std::vector<std::string> sourceTokens;
   for(size_t i = 0; i < source.GetSize(); ++i)
     sourceTokens.push_back(source.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
@@ -256,7 +315,7 @@ void CorrectionPattern::ComputeFeatures(
   for(size_t i = 0; i < target.GetSize(); ++i)
     targetTokens.push_back(target.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
   
-  std::vector<std::string> patternList = CreatePattern(sourceTokens, targetTokens);
+  std::vector<std::string> patternList = CreatePattern(sourceTokens, targetTokens, input, inputPath);
   for(size_t i = 0; i < patternList.size(); ++i)
     accumulator->PlusEquals(this, patternList[i], 1);
   
