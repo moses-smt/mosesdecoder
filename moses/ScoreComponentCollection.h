@@ -291,7 +291,7 @@ public:
 
 
   //Read sparse features from string
-  void Assign(const FeatureFunction* sp, const std::string line);
+  void Assign(const FeatureFunction* sp, const std::string &line);
 
   // shortcut: setting the value directly using the feature name
   void Assign(const std::string name, float score) {

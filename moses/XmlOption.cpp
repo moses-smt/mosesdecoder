@@ -308,9 +308,13 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 
         // default: opening tag that specifies translation options
         else {
-          if (startPos >= endPos) {
-            TRACE_ERR("ERROR: tag " << tagName << " must span at least one word: " << line << endl);
+          if (startPos > endPos) {
+            TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
             return false;
+          }
+          else if (startPos == endPos) {
+            TRACE_ERR("WARNING: tag " << tagName << " 0 span: " << line << endl);
+            continue;
           }
 
           // specified translations -> vector of phrases

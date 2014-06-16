@@ -1,594 +1,540 @@
 /*
- *  Rule.cpp
- *  extract
+ * Rule.cpp
  *
- *  Created by Hieu Hoang on 19/07/2010.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
- *
+ *  Created on: 20 Feb 2014
+ *      Author: hieu
  */
-#include <algorithm>
+
 #include <sstream>
+#include <algorithm>
 #include "Rule.h"
-#include "Global.h"
-#include "LatticeNode.h"
-#include "Lattice.h"
-#include "SentenceAlignment.h"
-#include "Tunnel.h"
-#include "TunnelCollection.h"
-#include "RuleCollection.h"
+#include "AlignedSentence.h"
+#include "ConsistentPhrase.h"
+#include "NonTerm.h"
+#include "Parameter.h"
 
 using namespace std;
 
-RuleElement::RuleElement(const RuleElement &copy)
-:m_latticeNode(copy.m_latticeNode)
-,m_alignmentPos(copy.m_alignmentPos)
+Rule::Rule(const NonTerm &lhsNonTerm, const AlignedSentence &alignedSentence)
+:m_lhs(lhsNonTerm)
+,m_alignedSentence(alignedSentence)
+,m_isValid(true)
+,m_canRecurse(true)
 {
+	CreateSource();
 }
 
-
-Rule::Rule(const LatticeNode *latticeNode)
-:m_lhs(NULL)
+Rule::Rule(const Rule &copy, const NonTerm &nonTerm)
+:m_lhs(copy.m_lhs)
+,m_alignedSentence(copy.m_alignedSentence)
+,m_isValid(true)
+,m_canRecurse(true)
+,m_nonterms(copy.m_nonterms)
 {
-	RuleElement element(*latticeNode);
-	
-	m_coll.push_back(element);
+	m_nonterms.push_back(&nonTerm);
+	CreateSource();
+
 }
 
-Rule::Rule(const Rule &prevRule, const LatticeNode *latticeNode)
-:m_coll(prevRule.m_coll)
-,m_lhs(NULL)
-{	
-	RuleElement element(*latticeNode);
-	m_coll.push_back(element);
+Rule::~Rule() {
+	// TODO Auto-generated destructor stub
 }
 
-Rule::Rule(const Global &global, bool &isValid, const Rule &copy, const LatticeNode *lhs, const SentenceAlignment &sentence)
-:m_coll(copy.m_coll)
-,m_source(copy.m_source)
-,m_target(copy.m_target)
-,m_lhs(lhs)
-{	
-	CreateSymbols(global, isValid, sentence);
+const ConsistentPhrase &Rule::GetConsistentPhrase() const
+{ return m_lhs.GetConsistentPhrase(); }
+
+void Rule::CreateSource()
+{
+  const NonTerm *cp = NULL;
+  size_t nonTermInd = 0;
+  if (nonTermInd < m_nonterms.size()) {
+	  cp = m_nonterms[nonTermInd];
+  }
+
+  for (int sourcePos = m_lhs.GetConsistentPhrase().corners[0];
+		  sourcePos <= m_lhs.GetConsistentPhrase().corners[1];
+		  ++sourcePos) {
+
+	  const RuleSymbol *ruleSymbol;
+	  if (cp && cp->GetConsistentPhrase().corners[0] <= sourcePos && sourcePos <= cp->GetConsistentPhrase().corners[1]) {
+		  // replace words with non-term
+		  ruleSymbol = cp;
+		  sourcePos = cp->GetConsistentPhrase().corners[1];
+		  if (m_nonterms.size()) {
+			  cp = m_nonterms[nonTermInd];
+		  }
+
+		  // move to next non-term
+		  ++nonTermInd;
+		  cp = (nonTermInd < m_nonterms.size()) ? m_nonterms[nonTermInd] : NULL;
+	  }
+	  else {
+		  // terminal
+		  ruleSymbol = m_alignedSentence.GetPhrase(Moses::Input)[sourcePos];
+	  }
+
+	  m_source.Add(ruleSymbol);
+  }
 }
 
-Rule::~Rule()
+int Rule::GetNextSourcePosForNonTerm() const
 {
+	if (m_nonterms.empty()) {
+		// no non-terms so far. Can start next non-term on left corner
+		return m_lhs.GetConsistentPhrase().corners[0];
+	}
+	else {
+		// next non-term can start just left of previous
+		const ConsistentPhrase &cp = m_nonterms.back()->GetConsistentPhrase();
+		int nextPos = cp.corners[1] + 1;
+		return nextPos;
+	}
 }
 
-// helper for sort
-struct CompareLatticeNodeTarget
+std::string Rule::Debug() const
 {
- 	bool operator() (const RuleElement *a, const RuleElement *b)
-  {
-		 const Range	 &rangeA = a->GetLatticeNode().GetTunnel().GetRange(1)
-									,&rangeB = b->GetLatticeNode().GetTunnel().GetRange(1);
-		 return rangeA.GetEndPos() < rangeB.GetEndPos();
-	}
-};
+  stringstream out;
 
-void Rule::CreateSymbols(const Global &global, bool &isValid, const SentenceAlignment &sentence)
-{
-	vector<RuleElement*> nonTerms;
-		
-	// source
-	for (size_t ind = 0; ind < m_coll.size(); ++ind)
-	{
-		RuleElement &element = m_coll[ind];
-		const LatticeNode &node = element.GetLatticeNode();
-		if (node.IsTerminal())
-		{
-			size_t sourcePos = node.GetSourceRange().GetStartPos();
-			const string &word = sentence.source[sourcePos];
-			Symbol symbol(word, sourcePos);
-			m_source.Add(symbol);			
-		}
-		else 
-		{	// non-term
-			const string &sourceWord = node.GetSyntaxNode(0).GetLabel();
-			const string &targetWord = node.GetSyntaxNode(1).GetLabel();
-			Symbol symbol(sourceWord, targetWord
-										, node.GetTunnel().GetRange(0).GetStartPos(), node.GetTunnel().GetRange(0).GetEndPos()
-										, node.GetTunnel().GetRange(1).GetStartPos(), node.GetTunnel().GetRange(1).GetEndPos()
-										, node.GetSyntaxNode(0).IsSyntax(), node.GetSyntaxNode(1).IsSyntax());
-			m_source.Add(symbol);		
+  // source
+  for (size_t i =  0; i < m_source.GetSize(); ++i) {
+	  const RuleSymbol &symbol = *m_source[i];
+	  out << symbol.Debug() << " ";
+  }
 
-			// store current pos within phrase
-			element.m_alignmentPos.first = ind;
+  // target
+  out << "||| ";
+  for (size_t i =  0; i < m_target.GetSize(); ++i) {
+	  const RuleSymbol &symbol = *m_target[i];
+	  out << symbol.Debug() << " ";
+  }
 
-			// for target symbols
-			nonTerms.push_back(&element);			
-		}
-		
-	}
-	
-	// target
-	isValid = true;
-	
-	const Range &lhsTargetRange = m_lhs->GetTunnel().GetRange(1);
+  out << "||| ";
+  Alignments::const_iterator iterAlign;
+  for (iterAlign =  m_alignments.begin(); iterAlign != m_alignments.end(); ++iterAlign) {
+	  const std::pair<int,int> &alignPair = *iterAlign;
+	  out << alignPair.first << "-" << alignPair.second << " ";
+  }
 
-	// check spans of target non-terms
-	if (nonTerms.size())
-	{
-		// sort non-term rules elements by target range
-		std::sort(nonTerms.begin(), nonTerms.end(), CompareLatticeNodeTarget());
+  // overall range
+  out << "||| LHS=" << m_lhs.Debug();
 
-		const Range &first = nonTerms.front()->GetLatticeNode().GetTunnel().GetRange(1);
-		const Range &last = nonTerms.back()->GetLatticeNode().GetTunnel().GetRange(1);
-
-		if (first.GetStartPos() < lhsTargetRange.GetStartPos()
-				|| last.GetEndPos() > lhsTargetRange.GetEndPos())
-		{			
-			isValid = false;
-		}
-	}
-	
-	if (isValid)
-	{
-		size_t indNonTerm = 0;
-		RuleElement *currNonTermElement = indNonTerm < nonTerms.size() ? nonTerms[indNonTerm] : NULL;
-		for (size_t targetPos = lhsTargetRange.GetStartPos(); targetPos <= lhsTargetRange.GetEndPos(); ++targetPos)
-		{		
-			if (currNonTermElement && targetPos == currNonTermElement->GetLatticeNode().GetTunnel().GetRange(1).GetStartPos())
-			{ // start of a non-term. print out non-terms & skip to the end
-				
-				const LatticeNode &node = currNonTermElement->GetLatticeNode();
-
-				const string &sourceWord = node.GetSyntaxNode(0).GetLabel();
-				const string &targetWord = node.GetSyntaxNode(1).GetLabel();
-				Symbol symbol(sourceWord, targetWord
-											, node.GetTunnel().GetRange(0).GetStartPos(), node.GetTunnel().GetRange(0).GetEndPos()
-											, node.GetTunnel().GetRange(1).GetStartPos(), node.GetTunnel().GetRange(1).GetEndPos()
-											, node.GetSyntaxNode(0).IsSyntax(), node.GetSyntaxNode(1).IsSyntax());
-				m_target.Add(symbol);			
-				
-				// store current pos within phrase
-				currNonTermElement->m_alignmentPos.second = m_target.GetSize() - 1;
-				
-				assert(currNonTermElement->m_alignmentPos.first != NOT_FOUND);
-
-				targetPos = node.GetTunnel().GetRange(1).GetEndPos();
-				indNonTerm++;
-				currNonTermElement = indNonTerm < nonTerms.size() ? nonTerms[indNonTerm] : NULL;			
-			}
-			else 
-			{ // term
-				const string &word = sentence.target[targetPos];
-
-				Symbol symbol(word, targetPos);
-				m_target.Add(symbol);
-
-			}
-		}
-				
-		assert(indNonTerm == nonTerms.size());
-
-		if (m_target.GetSize() > global.maxSymbols) {
-		  isValid = false;
-	    //cerr << "m_source=" << m_source.GetSize() << ":" << m_source << endl;
-	    //cerr << "m_target=" << m_target.GetSize() << ":" << m_target << endl;
-		}
-	}	
+  return out.str();
 }
 
-bool Rule::MoreDefaultNonTermThanTerm() const
+void Rule::Output(std::ostream &out, bool forward, const Parameter &params) const
 {
-	size_t numTerm = 0, numDefaultNonTerm = 0;
-	
-	CollType::const_iterator iter;
-	for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
-	{
-		const RuleElement &element = *iter;
-		const LatticeNode &node = element.GetLatticeNode();
-		if (node.IsTerminal())
-		{
-			++numTerm;
-		}
-		else if (!node.IsSyntax())
-		{
-			++numDefaultNonTerm;
-		}
-	}
-	
-	bool ret = numDefaultNonTerm > numTerm;
-	return ret;
+  if (forward) {
+	  // source
+	  m_source.Output(out);
+	  m_lhs.Output(out, Moses::Input);
+
+	  out << " ||| ";
+
+	  // target
+	  m_target.Output(out);
+	  m_lhs.Output(out, Moses::Output);
+  }
+  else {
+	  // target
+	  m_target.Output(out);
+	  m_lhs.Output(out, Moses::Output);
+
+	  out << " ||| ";
+
+	  // source
+	  m_source.Output(out);
+	  m_lhs.Output(out, Moses::Input);
+  }
+
+  out << " ||| ";
+
+  // alignment
+  Alignments::const_iterator iterAlign;
+  for (iterAlign =  m_alignments.begin(); iterAlign != m_alignments.end(); ++iterAlign) {
+	  const std::pair<int,int> &alignPair = *iterAlign;
+
+	  if (forward) {
+		  out << alignPair.first << "-" << alignPair.second << " ";
+	  }
+	  else {
+		  out << alignPair.second << "-" << alignPair.first << " ";
+	  }
+  }
+
+  out << "||| ";
+
+  // count
+  out << m_count;
+
+  out << " ||| ";
+
+  // properties
+
+  // span length
+  if (forward && params.spanLength && m_nonterms.size()) {
+	  out << "{{SpanLength ";
+
+	  for (size_t i = 0; i < m_nonterms.size(); ++i) {
+		  const NonTerm &nonTerm = *m_nonterms[i];
+		  const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
+		  out << i << "," << cp.GetWidth(Moses::Input) << "," << cp.GetWidth(Moses::Output) << " ";
+	  }
+	  out << "}} ";
+  }
+
+  // non-term context
+  if (forward && params.nonTermContext && m_nonterms.size()) {
+	  out << "{{NonTermContext ";
+
+	  for (size_t i = 0; i < m_nonterms.size(); ++i) {
+		  const NonTerm &nonTerm = *m_nonterms[i];
+		  const ConsistentPhrase &cp = nonTerm.GetConsistentPhrase();
+		  NonTermContext(i, cp, out);
+	  }
+	  out << "}} ";
+  }
 }
 
-bool Rule::SourceHasEdgeDefaultNonTerm() const
+void Rule::NonTermContext(size_t ntInd, const ConsistentPhrase &cp, std::ostream &out) const
 {
-	assert(m_coll.size());
-	const LatticeNode &first = m_coll.front().GetLatticeNode();
-	const LatticeNode &last = m_coll.back().GetLatticeNode();
+  int startPos = cp.corners[0];
+  int endPos = cp.corners[1];
 
-	// 1st
-	if (!first.IsTerminal() && !first.IsSyntax())
-	{
-		return true;
-	}
-	if (!last.IsTerminal() && !last.IsSyntax())
-	{
-		return true;
-	}
-	
-	return false;	
+  const Phrase &source = m_alignedSentence.GetPhrase(Moses::Input);
+
+  if (startPos == 0) {
+    out << "<s> ";
+  }
+  else {
+	out << source[startPos - 1]->GetString() << " ";
+  }
+
+  out << source[startPos]->GetString() << " ";
+  out << source[endPos]->GetString() << " ";
+
+  if (endPos == source.size() - 1) {
+    out << "</s> ";
+  }
+  else {
+	out << source[endPos + 1]->GetString() << " ";
+  }
+
+
 }
 
-bool Rule::IsValid(const Global &global, const TunnelCollection &tunnelColl) const
+void Rule::Prevalidate(const Parameter &params)
 {
-	if (m_coll.size() == 1 && !m_coll[0].GetLatticeNode().IsTerminal()) // can't be only 1 terminal
-	{
-		return false;
-	}
+  const ConsistentPhrase &cp = m_lhs.GetConsistentPhrase();
 
-	if (MoreDefaultNonTermThanTerm()) 
-	{ // must have at least as many terms as non-syntax non-terms
-		return false;
-	}
+  // check number of source symbols in rule
+  if (m_source.GetSize() > params.maxSymbolsSource) {
+	  m_isValid = false;
+  }
 
-	if (!global.allowDefaultNonTermEdge && SourceHasEdgeDefaultNonTerm())
-	{
-		return false;
-	}
-	
-	if (GetNumSymbols() > global.maxSymbols)
-	{
-		return false;
-	}
-	
-	if (AdjacentDefaultNonTerms())
-	{
-		return false;
-	}
-	
-	if (!IsHole(tunnelColl))
-	{
-		return false;
-	}
+  // check that last non-term added isn't too small
+  if (m_nonterms.size()) {
+	  const NonTerm &lastNonTerm = *m_nonterms.back();
+	  const ConsistentPhrase &cp = lastNonTerm.GetConsistentPhrase();
 
-	if (NonTermOverlap())
-	{
-		return false;
-	}
-	
-	/*
-	std::pair<size_t, size_t> spanS	= GetSpan(0)
-														,spanT= GetSpan(1);
+	  int sourceWidth = cp.corners[1]  - cp.corners[0] + 1;
+	  if (sourceWidth < params.minHoleSource) {
+		  m_isValid = false;
+		  m_canRecurse = false;
+		  return;
+	  }
+  }
 
-	if (tunnelColl.NumUnalignedWord(0, spanS.first, spanS.second) >= global.maxUnaligned)
-		return false;
-	if (tunnelColl.NumUnalignedWord(1, spanT.first, spanT.second) >= global.maxUnaligned)
-		return false;
-	*/
-	
-	return true;
+  // check number of non-terms
+  int numNonTerms = 0;
+  int numHieroNonTerms = 0;
+  for (size_t i = 0; i < m_source.GetSize(); ++i) {
+	  const RuleSymbol *arc = m_source[i];
+	  if (arc->IsNonTerm()) {
+		  ++numNonTerms;
+		  const NonTerm &nonTerm = *static_cast<const NonTerm*>(arc);
+		  bool isHiero = nonTerm.IsHiero(params);
+		  if (isHiero) {
+			  ++numHieroNonTerms;
+		  }
+	  }
+  }
+
+  if (numNonTerms >= params.maxNonTerm) {
+	  m_canRecurse = false;
+	  if (numNonTerms > params.maxNonTerm) {
+		  m_isValid = false;
+		  return;
+	  }
+  }
+
+  if (numHieroNonTerms >= params.maxHieroNonTerm) {
+	  m_canRecurse = false;
+	  if (numHieroNonTerms > params.maxHieroNonTerm) {
+		  m_isValid = false;
+		  return;
+	  }
+  }
+
+  // check if 2 consecutive non-terms in source
+  if (!params.nonTermConsecSource && m_nonterms.size() >= 2) {
+	  const NonTerm &lastNonTerm = *m_nonterms.back();
+	  const NonTerm &secondLastNonTerm = *m_nonterms[m_nonterms.size() - 2];
+	  if (secondLastNonTerm.GetConsistentPhrase().corners[1] + 1 ==
+			  lastNonTerm.GetConsistentPhrase().corners[0]) {
+		  if (params.mixedSyntaxType == 0) {
+			  // ordinary hiero or syntax model
+			  m_isValid = false;
+			  m_canRecurse = false;
+			  return;
+		  }
+		  else {
+			  // Hieu's mixed syntax
+			  if (lastNonTerm.IsHiero(Moses::Input, params)
+				  && secondLastNonTerm.IsHiero(Moses::Input, params)) {
+				  m_isValid = false;
+				  m_canRecurse = false;
+				  return;
+			  }
+		  }
+
+	  }
+  }
+
+  //check to see if it overlaps with any other non-terms
+  if (m_nonterms.size() >= 2) {
+	  const NonTerm &lastNonTerm = *m_nonterms.back();
+
+	  for (size_t i = 0; i < m_nonterms.size() - 1; ++i) {
+		  const NonTerm &otherNonTerm = *m_nonterms[i];
+		  bool overlap = lastNonTerm.GetConsistentPhrase().TargetOverlap(otherNonTerm.GetConsistentPhrase());
+
+		  if (overlap) {
+			  m_isValid = false;
+			  m_canRecurse = false;
+			  return;
+		  }
+	  }
+  }
+
+  // check that at least 1 word is aligned
+  if (params.requireAlignedWord) {
+	  bool ok = false;
+	  for (size_t i = 0; i < m_source.GetSize(); ++i) {
+		  const RuleSymbol &symbol = *m_source[i];
+		  if (!symbol.IsNonTerm()) {
+			  const Word &word = static_cast<const Word&>(symbol);
+			  if (word.GetAlignment().size()) {
+				  ok = true;
+				  break;
+			  }
+		  }
+	  }
+
+	  if (!ok) {
+		  m_isValid = false;
+		  m_canRecurse = false;
+		  return;
+	  }
+  }
+
+  if (params.maxSpanFreeNonTermSource) {
+	  const NonTerm *front = dynamic_cast<const NonTerm*>(m_source[0]);
+	  if (front) {
+		  int width = front->GetWidth(Moses::Input);
+		  if (width > params.maxSpanFreeNonTermSource) {
+			  m_isValid = false;
+			  m_canRecurse = false;
+			  return;
+		  }
+	  }
+
+	  const NonTerm *back = dynamic_cast<const NonTerm*>(m_source.Back());
+	  if (back) {
+		  int width = back->GetWidth(Moses::Input);
+		  if (width > params.maxSpanFreeNonTermSource) {
+			  m_isValid = false;
+			  m_canRecurse = false;
+			  return;
+		  }
+	  }
+  }
+
+  if (!params.nieceTerminal) {
+	  // collect terminal in a rule
+	  std::set<const Word*> terms;
+	  for (size_t i = 0; i < m_source.GetSize(); ++i) {
+		  const Word *word = dynamic_cast<const Word*>(m_source[i]);
+		  if (word) {
+			  terms.insert(word);
+		  }
+	  }
+
+	  // look in non-terms
+	  for (size_t i = 0; i < m_source.GetSize(); ++i) {
+		  const NonTerm *nonTerm = dynamic_cast<const NonTerm*>(m_source[i]);
+		  if (nonTerm) {
+			  const ConsistentPhrase &cp = nonTerm->GetConsistentPhrase();
+			  bool containTerm = ContainTerm(cp, terms);
+
+			  if (containTerm) {
+				  //cerr << "ruleSource=" << *ruleSource << " ";
+				  //cerr << "ntRange=" << ntRange << endl;
+
+				  // non-term contains 1 of the terms in the rule.
+				  m_isValid = false;
+				  m_canRecurse = false;
+				  return;
+			  }
+		  }
+	  }
+  }
+
+  if (params.maxScope != UNDEFINED) {
+	  int scope = CalcScope();
+	  if (scope > params.maxScope) {
+		  m_isValid = false;
+		  m_canRecurse = false;
+		  return;
+	  }
+  }
 }
 
-bool Rule::NonTermOverlap() const
+int Rule::CalcScope() const
 {
-	vector<Range> ranges;
-	
-	CollType::const_iterator iter;
-	for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
-	{
-		const RuleElement &element = *iter;
-		if (!element.GetLatticeNode().IsTerminal())
-		{
-			const Range &range = element.GetLatticeNode().GetTunnel().GetRange(1);
-			ranges.push_back(range);
-		}
-	}
-	
-	vector<Range>::const_iterator outerIter;
-	for (outerIter = ranges.begin(); outerIter != ranges.end(); ++outerIter)
-	{
-		const Range &outer = *outerIter;
-		vector<Range>::const_iterator innerIter;
-		for (innerIter = outerIter + 1; innerIter != ranges.end(); ++innerIter)
-		{
-			const Range &inner = *innerIter;
-			if (outer.Overlap(inner))
-				return true;
-		}
-	}
-	
-	return false;
+  int scope = 0;
+  if (m_source.GetSize() > 1) {
+	  const RuleSymbol &front = *m_source.Front();
+	  if (front.IsNonTerm()) {
+		  ++scope;
+	  }
+
+	  const RuleSymbol &back = *m_source.Back();
+	  if (back.IsNonTerm()) {
+		  ++scope;
+	  }
+  }
+  return scope;
 }
 
-Range Rule::GetSourceRange() const
+template<typename T>
+bool Contains(const T *sought, const set<const T*> &coll)
 {
-	assert(m_coll.size());
-	const Range &first = m_coll.front().GetLatticeNode().GetSourceRange();
-	const Range &last = m_coll.back().GetLatticeNode().GetSourceRange();
-	
-	Range ret(first.GetStartPos(), last.GetEndPos());
-	return ret;
-}
-
-
-bool Rule::IsHole(const TunnelCollection &tunnelColl) const
-{
-	const Range &spanS	= GetSourceRange();
-	const TunnelList &tunnels = tunnelColl.GetTunnels(spanS.GetStartPos(), spanS.GetEndPos());
-
-	bool ret = tunnels.size() > 0;
-	return ret;
-}
-
-
-bool Rule::CanRecurse(const Global &global, const TunnelCollection &tunnelColl) const
-{
-	if (GetNumSymbols() >= global.maxSymbols)
-		return false;
-	if (AdjacentDefaultNonTerms())
-		return false;
-	if (MaxNonTerm(global))
-		return false;
-	if (NonTermOverlap())
-	{
-		return false;
-	}
-	
-	const Range spanS	= GetSourceRange();
-
-	if (tunnelColl.NumUnalignedWord(0, spanS.GetStartPos(), spanS.GetEndPos()) >= global.maxUnaligned)
-		return false;
-//	if (tunnelColl.NumUnalignedWord(1, spanT.first, spanT.second) >= global.maxUnaligned)
-//		return false;
-	
-	
-	return true;
-}
-
-bool Rule::MaxNonTerm(const Global &global) const
-{
-	//cerr << *this << endl;
-	size_t numNonTerm = 0, numNonTermDefault = 0;
-	
-	CollType::const_iterator iter;
-	for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
-	{
-		const LatticeNode *node = &(*iter).GetLatticeNode();
-		if (!node->IsTerminal()  )
-		{
-			numNonTerm++;
-			if (!node->IsSyntax())
-			{
-				numNonTermDefault++;
-			}
-			if (numNonTerm >= global.maxNonTerm || numNonTermDefault >= global.maxNonTermDefault)
-				return true;
-		}
-	}
-	
-	return false;
-}
-
-
-bool Rule::AdjacentDefaultNonTerms() const
-{
-	assert(m_coll.size() > 0);
-	
-	const LatticeNode *prevNode = &m_coll.front().GetLatticeNode();
-	CollType::const_iterator iter;
-	for (iter = m_coll.begin() + 1; iter != m_coll.end(); ++iter)
-	{
-		const LatticeNode *node = &(*iter).GetLatticeNode();
-		if (!prevNode->IsTerminal() && !node->IsTerminal() && !prevNode->IsSyntax() && !node->IsSyntax() )
-		{
+	std::set<const Word*>::const_iterator iter;
+	for (iter = coll.begin(); iter != coll.end(); ++iter) {
+		const Word *found = *iter;
+		if (sought->CompareString(*found) == 0) {
 			return true;
 		}
-		prevNode = node;
 	}
-	
 	return false;
 }
 
-
-
-size_t Rule::GetNumSymbols() const
+bool Rule::ContainTerm(const ConsistentPhrase &cp, const std::set<const Word*> &terms) const
 {
-	size_t ret = m_coll.size();	
-	return ret;
-}
+	const Phrase &sourceSentence = m_alignedSentence.GetPhrase(Moses::Input);
 
-void Rule::CreateRules(RuleCollection &rules
-											 , const Lattice &lattice
-											 , const SentenceAlignment &sentence
-											 , const Global &global)
-{
-	assert(m_coll.size() > 0);
-	const LatticeNode *latticeNode = &m_coll.back().GetLatticeNode();
-	size_t endPos = latticeNode->GetSourceRange().GetEndPos() + 1;
-	
-	const Stack &stack = lattice.GetStack(endPos);
-	
-	Stack::const_iterator iter;
-	for (iter = stack.begin(); iter != stack.end(); ++iter)
-	{
-		const LatticeNode *newLatticeNode = *iter;
-		Rule *newRule = new Rule(*this, newLatticeNode);
-		//cerr << *newRule << endl;
-		
-		if (newRule->CanRecurse(global, sentence.GetTunnelCollection()))
-		{ // may or maynot be valid, but can continue to build on this rule
-			newRule->CreateRules(rules, lattice, sentence, global);
+	for (int pos = cp.corners[0]; pos <= cp.corners[1]; ++pos) {
+		const Word *soughtWord = sourceSentence[pos];
+
+		// find same word in set
+		if (Contains(soughtWord, terms)) {
+			return true;
 		}
-		
-		if (newRule->IsValid(global, sentence.GetTunnelCollection()))
-		{ // add to rule collection
-			rules.Add(global, newRule, sentence);
-		}	
-		else 
-		{
-			delete newRule;
+	}
+	return false;
+}
+
+bool CompareTargetNonTerms(const NonTerm *a, const NonTerm *b)
+{
+	// compare just start target pos
+	return a->GetConsistentPhrase().corners[2] < b->GetConsistentPhrase().corners[2];
+}
+
+void Rule::CreateTarget(const Parameter &params)
+{
+  if (!m_isValid) {
+	  return;
+  }
+
+  vector<const NonTerm*> targetNonTerm(m_nonterms);
+  std::sort(targetNonTerm.begin(), targetNonTerm.end(), CompareTargetNonTerms);
+
+  const NonTerm *cp = NULL;
+  size_t nonTermInd = 0;
+  if (nonTermInd < targetNonTerm.size()) {
+	  cp = targetNonTerm[nonTermInd];
+  }
+
+  for (int targetPos = m_lhs.GetConsistentPhrase().corners[2];
+		  targetPos <= m_lhs.GetConsistentPhrase().corners[3];
+		  ++targetPos) {
+
+	  const RuleSymbol *ruleSymbol;
+	  if (cp && cp->GetConsistentPhrase().corners[2] <= targetPos && targetPos <= cp->GetConsistentPhrase().corners[3]) {
+		  // replace words with non-term
+		  ruleSymbol = cp;
+		  targetPos = cp->GetConsistentPhrase().corners[3];
+		  if (targetNonTerm.size()) {
+			  cp = targetNonTerm[nonTermInd];
+		  }
+
+		  // move to next non-term
+		  ++nonTermInd;
+		  cp = (nonTermInd < targetNonTerm.size()) ? targetNonTerm[nonTermInd] : NULL;
+	  }
+	  else {
+		  // terminal
+		  ruleSymbol = m_alignedSentence.GetPhrase(Moses::Output)[targetPos];
+	  }
+
+	  m_target.Add(ruleSymbol);
+  }
+
+  CreateAlignments();
+}
+
+
+void Rule::CreateAlignments()
+{
+	int sourceStart = GetConsistentPhrase().corners[0];
+	int targetStart = GetConsistentPhrase().corners[2];
+
+  for (size_t sourcePos = 0; sourcePos < m_source.GetSize(); ++sourcePos) {
+	  const RuleSymbol *symbol = m_source[sourcePos];
+	  if (!symbol->IsNonTerm()) {
+		  // terminals
+		  const Word &sourceWord = static_cast<const Word&>(*symbol);
+		  const std::set<const Word *> &targetWords = sourceWord.GetAlignment();
+		  CreateAlignments(sourcePos, targetWords);
+	  }
+	  else {
+		  // non-terms. same object in both source & target
+		  CreateAlignments(sourcePos, symbol);
+	  }
+  }
+}
+
+void Rule::CreateAlignments(int sourcePos, const std::set<const Word *> &targetWords)
+{
+	std::set<const Word *>::const_iterator iterTarget;
+	for (iterTarget = targetWords.begin(); iterTarget != targetWords.end(); ++iterTarget) {
+		const Word *targetWord = *iterTarget;
+		CreateAlignments(sourcePos, targetWord);
+	}
+}
+
+void Rule::CreateAlignments(int sourcePos, const RuleSymbol *targetSought)
+{
+	// should be in target phrase
+	for (size_t targetPos = 0; targetPos < m_target.GetSize(); ++targetPos) {
+		const RuleSymbol *foundSymbol = m_target[targetPos];
+		if (targetSought == foundSymbol) {
+			pair<int, int> alignPoint(sourcePos, targetPos);
+			m_alignments.insert(alignPoint);
+			return;
 		}
-
-	}
-}
-
-bool Rule::operator<(const Rule &compare) const
-{	
-	/*
-	if (g_debug)
-	{
-		cerr << *this << endl << compare;
-		cerr << endl;
-	}
-	*/
-	
-	bool ret = Compare(compare) < 0;
-	
-	/*
-	if (g_debug)
-	{
-		cerr << *this << endl << compare << endl << ret << endl << endl;
-	}
-	*/
-	
-	return ret;
-}
-
-int Rule::Compare(const Rule &compare) const
-{ 	
-	//cerr << *this << endl << compare << endl;
-	assert(m_coll.size() > 0);
-	assert(m_source.GetSize() > 0);
-	assert(m_target.GetSize() > 0);
-	
-	int ret = 0;
-	
-	// compare each fragment
-	ret = m_source.Compare(compare.m_source);
-	if (ret != 0)
-	{
-		return ret;
 	}
 
-	ret = m_target.Compare(compare.m_target);
-	if (ret != 0)
-	{
-		return ret;
-	}
-	
-	// compare lhs
-	const string &thisSourceLabel		= m_lhs->GetSyntaxNode(0).GetLabel();
-	const string &otherSourceLabel	= compare.m_lhs->GetSyntaxNode(0).GetLabel();
-	if (thisSourceLabel != otherSourceLabel)
-	{
-		ret = (thisSourceLabel < otherSourceLabel) ? -1 : +1;
-		return ret;
-	}
-
-	const string &thisTargetLabel		= m_lhs->GetSyntaxNode(1).GetLabel();
-	const string &otherTargetLabel	= compare.m_lhs->GetSyntaxNode(1).GetLabel();
-	if (thisTargetLabel != otherTargetLabel)
-	{
-		ret = (thisTargetLabel < otherTargetLabel) ? -1 : +1;
-		return ret;
-	}
-	
-	assert(ret == 0);
-	return ret;
+	throw "not found";
 }
-
-
-const LatticeNode &Rule::GetLatticeNode(size_t ind) const
-{
-	assert(ind < m_coll.size());
-	return m_coll[ind].GetLatticeNode();
-}
-
-void Rule::DebugOutput() const
-{
-	Output(cerr);
-}
-
-void Rule::Output(std::ostream &out) const
-{
-
-  stringstream strmeS, strmeT;
-
-  std::vector<Symbol>::const_iterator iterSymbol;
-  for (iterSymbol = m_source.begin(); iterSymbol != m_source.end(); ++iterSymbol)
-  {
-    const Symbol &symbol = *iterSymbol;
-    strmeS << symbol << " ";
-  }
-
-  for (iterSymbol = m_target.begin(); iterSymbol != m_target.end(); ++iterSymbol)
-  {
-    const Symbol &symbol = *iterSymbol;
-    strmeT << symbol << " ";
-  }
-
-  // lhs
-  if (m_lhs)
-  {
-    strmeS << m_lhs->GetSyntaxNode(0).GetLabel();
-    strmeT << m_lhs->GetSyntaxNode(1).GetLabel();
-  }
-
-  out << strmeS.str() << " ||| " << strmeT.str() << " ||| ";
-
-  // alignment
-  Rule::CollType::const_iterator iter;
-  for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
-  {
-    const RuleElement &element = *iter;
-    const LatticeNode &node = element.GetLatticeNode();
-    bool isTerminal = node.IsTerminal();
-
-    if (!isTerminal)
-    {
-      out << element.m_alignmentPos.first << "-" << element.m_alignmentPos.second << " ";
-    }
-  }
-
-  out << "||| 1";
-
-}
-
-void Rule::OutputInv(std::ostream &out) const
-{
-  stringstream strmeS, strmeT;
-
-  std::vector<Symbol>::const_iterator iterSymbol;
-  for (iterSymbol = m_source.begin(); iterSymbol != m_source.end(); ++iterSymbol)
-  {
-    const Symbol &symbol = *iterSymbol;
-    strmeS << symbol << " ";
-  }
-
-  for (iterSymbol = m_target.begin(); iterSymbol != m_target.end(); ++iterSymbol)
-  {
-    const Symbol &symbol = *iterSymbol;
-    strmeT << symbol << " ";
-  }
-
-  // lhs
-  if (m_lhs)
-  {
-    strmeS << m_lhs->GetSyntaxNode(0).GetLabel();
-    strmeT << m_lhs->GetSyntaxNode(1).GetLabel();
-  }
-
-  out << strmeT.str() << " ||| " << strmeS.str() << " ||| ";
-
-  // alignment
-  Rule::CollType::const_iterator iter;
-  for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
-  {
-    const RuleElement &element = *iter;
-    const LatticeNode &node = element.GetLatticeNode();
-    bool isTerminal = node.IsTerminal();
-
-    if (!isTerminal)
-    {
-      out << element.m_alignmentPos.second << "-" << element.m_alignmentPos.first << " ";
-    }
-  }
-
-  out << "||| 1";
-
-}
-
 
