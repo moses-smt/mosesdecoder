@@ -36,6 +36,8 @@ namespace Moses
 {
 PhraseDictionaryOnDisk::PhraseDictionaryOnDisk(const std::string &line)
   : MyBase(line)
+  , m_maxSpanDefault(NOT_FOUND)
+  , m_maxSpanLabelled(NOT_FOUND)
 {
   ReadParameters();
 }
@@ -207,6 +209,20 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionN
 
   return targetPhrases;
 }
+
+void PhraseDictionaryOnDisk::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "max-span-default") {
+    m_maxSpanDefault = Scan<size_t>(value);
+  }
+  else if (key == "max-span-labelled") {
+    m_maxSpanLabelled = Scan<size_t>(value);
+  }
+  else {
+    PhraseDictionary::SetParameter(key, value);
+  }
+}
+
 
 } // namespace
 

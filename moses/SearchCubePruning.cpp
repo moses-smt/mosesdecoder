@@ -250,11 +250,6 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
     return true;
   }
 
-  if (StaticData::Instance().AdjacentOnly() &&
-	  !hypoBitmap.IsAdjacent(range.GetStartPos(), range.GetEndPos())) {
-	return false;
-  }
-
   bool leftMostEdge = (hypoFirstGapPos == startPos);
   // any length extension is okay if starting at left-most edge
   if (leftMostEdge) {
