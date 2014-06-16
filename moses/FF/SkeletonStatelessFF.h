@@ -9,9 +9,7 @@ namespace Moses
 class SkeletonStatelessFF : public StatelessFeatureFunction
 {
 public:
-  SkeletonStatelessFF(const std::string &line)
-    :StatelessFeatureFunction(2, line)
-  {}
+  SkeletonStatelessFF(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

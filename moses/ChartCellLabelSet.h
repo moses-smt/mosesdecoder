@@ -72,6 +72,8 @@ public:
     size_t idx = w[0]->GetId();
     if (! ChartCellExists(idx)) {
       m_size++;
+
+
       m_map[idx] = new ChartCellLabel(m_coverage, w);
     }
   }

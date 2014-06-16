@@ -4,10 +4,11 @@ clean:
 	rm -f *.o manual-label
 
 .cpp.o:
-	g++ -I../../../ -O6 -g -c $<
+	g++ -I../../../boost/include -I../../../ -O3 -g -c $<
 
-manual-label: DeEn.o manual-label.o
+OBJECTS = DeEn.o EnOpenNLPChunker.o EnPhrasalVerb.o Main.o LabelByInitialLetter.o
 
-	g++ DeEn.o manual-label.o -lz -lboost_program_options-mt -o manual-label
+manual-label: $(OBJECTS)
+	g++ $(OBJECTS)  -L../../../boost/lib64  -lz -lboost_program_options-mt -o manual-label
 
 

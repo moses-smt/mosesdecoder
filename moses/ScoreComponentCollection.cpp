@@ -214,7 +214,7 @@ void ScoreComponentCollection::Save(const string& filename) const
 
 void
 ScoreComponentCollection::
-Assign(const FeatureFunction* sp, const string line)
+Assign(const FeatureFunction* sp, const string &line)
 {
   istringstream istr(line);
   while(istr) {

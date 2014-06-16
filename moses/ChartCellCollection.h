@@ -20,11 +20,11 @@
  ***********************************************************************/
 #pragma once
 
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "InputType.h"
 #include "ChartCell.h"
 #include "WordsRange.h"
-
-#include <boost/ptr_container/ptr_vector.hpp>
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -36,6 +36,9 @@ class ChartCellCollectionBase
 public:
   template <class Factory> ChartCellCollectionBase(const InputType &input, const Factory &factory) :
     m_cells(input.GetSize()) {
+
+	CreateInputPaths(input);
+
     size_t size = input.GetSize();
     for (size_t startPos = 0; startPos < size; ++startPos) {
       std::vector<ChartCellBase*> &inner = m_cells[startPos];
@@ -47,11 +50,43 @@ public:
        * gets it from there :-(.  The span is actually stored as a reference,
        * which needs to point somewhere, so I have it refer to the ChartCell.
        */
-      m_source.push_back(new ChartCellLabel(inner[0]->GetCoverage(), input.GetWord(startPos)));
+      const WordsRange &range = inner[0]->GetCoverage();
+      InputPath &path = GetInputPath(range.GetStartPos(), range.GetEndPos());
+
+      m_source.push_back(new ChartCellLabel(range, input.GetWord(startPos)));
     }
   }
 
   virtual ~ChartCellCollectionBase();
+
+  void CreateInputPaths(const InputType &input)
+  {
+	  size_t size = input.GetSize();
+	  m_inputPathMatrix.resize(size);
+	  for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
+	    for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
+	      size_t endPos = startPos + phaseSize -1;
+	      std::vector<InputPath*> &vec = m_inputPathMatrix[startPos];
+
+	      WordsRange range(startPos, endPos);
+	      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+	      const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
+
+	      InputPath *path;
+	      if (range.GetNumWordsCovered() == 1) {
+	        path = new InputPath(subphrase, labels, range, NULL, NULL);
+	        vec.push_back(path);
+	      } else {
+	        const InputPath &prevPath = GetInputPath(startPos, endPos - 1);
+	        path = new InputPath(subphrase, labels, range, &prevPath, NULL);
+	        vec.push_back(path);
+	      }
+
+	      m_inputPathQueue.push_back(path);
+	    }
+	  }
+
+  }
 
   const ChartCellBase &GetBase(const WordsRange &coverage) const {
     return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
@@ -70,6 +105,19 @@ private:
   std::vector<std::vector<ChartCellBase*> > m_cells;
 
   boost::ptr_vector<ChartCellLabel> m_source;
+
+  typedef std::vector< std::vector<InputPath*> > InputPathMatrix;
+  InputPathMatrix	m_inputPathMatrix; /*< contains translation options */
+
+  InputPathList m_inputPathQueue;
+
+  InputPath &GetInputPath(size_t startPos, size_t endPos)
+  {
+    size_t offset = endPos - startPos;
+    assert(offset < m_inputPathMatrix[startPos].size());
+    return *m_inputPathMatrix[startPos][offset];
+  }
+
 };
 
 /** Hold all the chart cells for 1 input sentence. A variable of this type is held by the ChartManager
