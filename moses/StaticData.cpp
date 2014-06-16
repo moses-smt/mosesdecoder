@@ -388,8 +388,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
   SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
-  SetBooleanParameter( &m_adjacentOnly, "adjacent-only", false);
-
   // minimum Bayes risk decoding
   SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
   m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
@@ -428,6 +426,9 @@ bool StaticData::LoadData(Parameter *parameter)
     exit(1);
   }
   if (m_useConsensusDecoding) m_mbr=true;
+
+  SetBooleanParameter( &m_defaultNonTermOnlyForEmptyRange, "default-non-term-for-empty-range-only", false );
+
 
   // Compact phrase table and reordering model
   SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );

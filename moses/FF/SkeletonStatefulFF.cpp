@@ -16,6 +16,13 @@ int SkeletonState::Compare(const FFState& other) const
   return (m_targetLen < otherState.m_targetLen) ? -1 : +1;
 }
 
+////////////////////////////////////////////////////////////////
+SkeletonStatefulFF::SkeletonStatefulFF(const std::string &line)
+  :StatefulFeatureFunction(3, line)
+{
+  ReadParameters();
+}
+
 void SkeletonStatefulFF::Evaluate(const Phrase &source
                                   , const TargetPhrase &targetPhrase
                                   , ScoreComponentCollection &scoreBreakdown

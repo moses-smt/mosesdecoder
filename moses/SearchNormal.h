@@ -39,7 +39,7 @@ public:
   void ProcessSentence();
 
   void OutputHypoStackSize();
-  void OutputHypoStack(int stack);
+  void OutputHypoStack();
 
   virtual const std::vector < HypothesisStack* >& GetHypothesisStacks() const;
   virtual const Hypothesis *GetBestHypothesis() const;

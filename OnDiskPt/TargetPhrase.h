@@ -50,15 +50,18 @@ class TargetPhrase: public Phrase
 protected:
   AlignType m_align;
   PhrasePtr m_sourcePhrase;
+  std::string m_sparseFeatures, m_property;
 
   std::vector<float> m_scores;
   UINT64 m_filePos;
 
   size_t WriteAlignToMemory(char *mem) const;
   size_t WriteScoresToMemory(char *mem) const;
+  size_t WriteStringToMemory(char *mem, const std::string &str) const;
 
   UINT64 ReadAlignFromFile(std::fstream &fileTPColl);
   UINT64 ReadScoresFromFile(std::fstream &fileTPColl);
+  UINT64 ReadStringFromFile(std::fstream &fileTPColl, std::string &outStr);
 
 public:
   TargetPhrase() {
@@ -110,6 +113,15 @@ public:
 
   virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
+  void SetProperty(const std::string &value)
+  {
+	  m_property = value;
+  }
+
+  void SetSparseFeatures(const std::string &value)
+  {
+	  m_sparseFeatures = value;
+  }
 };
 
 }
