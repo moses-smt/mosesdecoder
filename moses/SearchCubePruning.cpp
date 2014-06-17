@@ -86,7 +86,7 @@ void SearchCubePruning::ProcessSentence()
   // go through each stack
   size_t stackNo = 1;
   std::vector < HypothesisStack* >::iterator iterStack;
-  for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
+  for (iterStack = m_hypoStackColl.begin() + 1 ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
     // check if decoding ran out of time
     double _elapsed_time = GetUserTime();
     if (_elapsed_time > staticData.GetTimeoutThreshold()) {
