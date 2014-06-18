@@ -64,6 +64,14 @@ FFState* SkeletonStatefulFF::EvaluateChart(
   return new SkeletonState(0);
 }
 
+void SkeletonStatefulFF::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "arg") {
+    // set value here
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
+}
 
 }
 

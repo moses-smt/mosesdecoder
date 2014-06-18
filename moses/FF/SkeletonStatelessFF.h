@@ -30,6 +30,8 @@ public:
   void EvaluateChart(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const;
 
+  void SetParameter(const std::string& key, const std::string& value);
+
 };
 
 }

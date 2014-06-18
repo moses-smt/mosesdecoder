@@ -52,5 +52,14 @@ void SkeletonStatelessFF::EvaluateChart(const ChartHypothesis &hypo,
                                         ScoreComponentCollection* accumulator) const
 {}
 
+void SkeletonStatelessFF::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "arg") {
+    // set value here
+  } else {
+    StatelessFeatureFunction::SetParameter(key, value);
+  }
+}
+
 }
 
