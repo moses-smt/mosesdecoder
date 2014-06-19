@@ -1647,6 +1647,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.h</locationURI>
 		</link>
 		<link>
+			<name>PP/PhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.cpp</locationURI>
+		</link>
+		<link>
 			<name>PP/PhraseProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.h</locationURI>

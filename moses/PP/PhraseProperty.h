@@ -10,6 +10,8 @@ namespace Moses
  */
 class PhraseProperty
 {
+  friend std::ostream& operator<<(std::ostream &, const PhraseProperty &);
+
 public:
   PhraseProperty() : m_value(NULL) {};
   ~PhraseProperty() { if ( m_value != NULL ) delete m_value; };

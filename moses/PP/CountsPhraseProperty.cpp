@@ -25,5 +25,14 @@ void CountsPhraseProperty::ProcessValue(const std::string &value)
   assert( m_jointCount > 0 );
 };
 
+std::ostream& operator<<(std::ostream &out, const CountsPhraseProperty &obj)
+{
+	out << "Count property="
+			<< obj.GetTargetMarginal() << " "
+			<< obj.GetSourceMarginal() << " "
+			<< obj.GetJointCount();
+	return out;
+}
+
 } // namespace Moses
 

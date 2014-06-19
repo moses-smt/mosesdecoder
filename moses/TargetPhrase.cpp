@@ -303,7 +303,7 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 		const PhraseProperty *prop = iter->second.get();
 		assert(prop);
 
-		os << key << "=" << prop->GetValueString() << " ";
+		os << key << "=" << *prop << " ";
 	}
   }
 
