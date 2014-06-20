@@ -1,15 +1,6 @@
 #pragma once
 
-#include <string>
-#include <map>
 #include "StatelessFeatureFunction.h"
-#include "FFState.h"
-#include "moses/Factor.h"
-#include "moses/TreeInput.h"
-
-#ifdef WITH_THREADS
-#include <boost/thread/shared_mutex.hpp>
-#endif
 
 namespace Moses
 {

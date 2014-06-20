@@ -10,6 +10,7 @@
 #include "moses/Factor.h"
 #include "moses/FactorCollection.h"
 #include "moses/InputPath.h"
+#include "moses/TreeInput.h"
 
 
 using namespace std;
