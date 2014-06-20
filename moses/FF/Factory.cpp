@@ -36,6 +36,7 @@
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
+#include "moses/FF/SourceGHKMTreeInputMatchFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/SetSourcePhrase.h"
 #include "CountNonTerms.h"
@@ -185,6 +186,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
+  MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
   MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(HyperParameterAsWeight);
