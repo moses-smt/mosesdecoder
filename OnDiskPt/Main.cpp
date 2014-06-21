@@ -73,7 +73,7 @@ int main (int argc, char * const argv[])
     if (lineNum%1000 == 0) cerr << "." << flush;
     if (lineNum%10000 == 0) cerr << ":" << flush;
     if (lineNum%100000 == 0) cerr << lineNum << flush;
-    cerr << lineNum << " " << line << endl;
+    //cerr << lineNum << " " << line << endl;
 
     std::vector<float> misc(1);
     SourcePhrase sourcePhrase;
