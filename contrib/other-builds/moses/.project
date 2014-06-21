@@ -1302,6 +1302,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SourceGHKMTreeInputMatchFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceGHKMTreeInputMatchFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SourceGHKMTreeInputMatchFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceGHKMTreeInputMatchFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.cpp</locationURI>
