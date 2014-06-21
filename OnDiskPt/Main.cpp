@@ -66,15 +66,17 @@ int main (int argc, char * const argv[])
 
   PhraseNode &rootNode = onDiskWrapper.GetRootSourceNode();
   size_t lineNum = 0;
-  char line[100000];
+
+  const int MAX_CHAR = 1000000;
+  char line[MAX_CHAR];
 
   //while(getline(inStream, line))
-  while(inStream.getline(line, 100000)) {
+  while(inStream.getline(line, MAX_CHAR)) {
     lineNum++;
     if (lineNum%1000 == 0) cerr << "." << flush;
     if (lineNum%10000 == 0) cerr << ":" << flush;
     if (lineNum%100000 == 0) cerr << lineNum << flush;
-    //cerr << lineNum << " " << line << endl;
+    cerr << lineNum << " " << line << endl;
 
     std::vector<float> misc(1);
     SourcePhrase sourcePhrase;
