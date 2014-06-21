@@ -66,12 +66,9 @@ int main (int argc, char * const argv[])
 
   PhraseNode &rootNode = onDiskWrapper.GetRootSourceNode();
   size_t lineNum = 0;
+  string line;
 
-  const int MAX_CHAR = 1000000;
-  char line[MAX_CHAR];
-
-  //while(getline(inStream, line))
-  while(inStream.getline(line, MAX_CHAR)) {
+  while(getline(inStream, line)) {
     lineNum++;
     if (lineNum%1000 == 0) cerr << "." << flush;
     if (lineNum%10000 == 0) cerr << ":" << flush;
@@ -109,8 +106,11 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
   return ret;
 }
 
-OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
+OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, const std::string &lineStr, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
 {
+  char line[lineStr.size() + 1];
+  strcpy(line, lineStr.c_str());
+
   stringstream sparseFeatures, property;
 
   size_t scoreInd = 0;
