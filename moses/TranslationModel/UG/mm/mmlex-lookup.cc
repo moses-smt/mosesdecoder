@@ -131,7 +131,7 @@ interpret_args(int ac, char* av[])
   o.add_options()
     ("help,h",    "print this message")
     ("source,s",po::value<string>(&swrd),"source word")
-    ("target,t",po::value<string>(&swrd),"target word")
+    ("target,t",po::value<string>(&twrd),"target word")
     ;
   
   h.add_options()

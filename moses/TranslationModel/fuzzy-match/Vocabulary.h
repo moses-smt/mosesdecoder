@@ -17,20 +17,6 @@
 
 namespace tmmt
 {
-
-#define MAX_LENGTH 10000
-
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
-                _IS.getline(_LINE, _SIZE, _DELIM); \
-                if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear(); \
-                if (_IS.gcount() == _SIZE-1) { \
-                  cerr << "Line too long! Buffer overflow. Delete lines >=" \
-                    << _SIZE << " chars or raise MAX_LENGTH in phrase-extract/tables-core.cpp" \
-                    << endl; \
-                    exit(1); \
-                } \
-              }
-
 typedef std::string WORD;
 typedef unsigned int WORD_ID;
 

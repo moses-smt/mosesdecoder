@@ -4,7 +4,10 @@
 #include <iostream>
 #include <vector>
 
+#include "moses/PP/CountsPhraseProperty.h"
+#include "moses/PP/SourceLabelsPhraseProperty.h"
 #include "moses/PP/TreeStructurePhraseProperty.h"
+#include "moses/PP/SpanLengthPhraseProperty.h"
 
 namespace Moses
 {
@@ -34,8 +37,8 @@ template <class P> class DefaultPhrasePropertyCreator : public PhrasePropertyCre
 {
 public:
   boost::shared_ptr<PhraseProperty> CreateProperty(const std::string &value) {
-    P* property = new P(value);
-    property->ProcessValue();
+    P* property = new P();
+    property->ProcessValue(value);
     return Create(property);
   }
 };
@@ -50,8 +53,10 @@ PhrasePropertyFactory::PhrasePropertyFactory()
 // Properties with different key than class.
 #define MOSES_PNAME2(name, type) Add(name, new DefaultPhrasePropertyCreator< type >());
 
+  MOSES_PNAME2("Counts", CountsPhraseProperty);
+  MOSES_PNAME2("SourceLabels", SourceLabelsPhraseProperty);
   MOSES_PNAME2("Tree",TreeStructurePhraseProperty);
-
+  MOSES_PNAME2("SpanLength", SpanLengthPhraseProperty);
 }
 
 PhrasePropertyFactory::~PhrasePropertyFactory()

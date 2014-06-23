@@ -57,7 +57,8 @@ private:
   const Word *m_lhsTarget;
   mutable Phrase *m_ruleSource; // to be set by the feature function that needs it.
 
-  std::map<std::string, boost::shared_ptr<PhraseProperty> > m_properties;
+  typedef std::map<std::string, boost::shared_ptr<PhraseProperty> > Properties;
+  Properties m_properties;
 
 public:
   TargetPhrase();
@@ -137,7 +138,7 @@ public:
 
   void SetProperties(const StringPiece &str);
   void SetProperty(const std::string &key, const std::string &value);
-  bool GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &value) const;
+  const PhraseProperty *GetProperty(const std::string &key) const;
 
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 

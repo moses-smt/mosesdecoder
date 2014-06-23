@@ -21,9 +21,7 @@ public:
 class SkeletonStatefulFF : public StatefulFeatureFunction
 {
 public:
-  SkeletonStatefulFF(const std::string &line)
-    :StatefulFeatureFunction(3, line)
-  {}
+  SkeletonStatefulFF(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -50,6 +48,8 @@ public:
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;
+
+  void SetParameter(const std::string& key, const std::string& value);
 
 };
 

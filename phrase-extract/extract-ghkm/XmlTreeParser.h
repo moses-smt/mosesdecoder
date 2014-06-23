@@ -45,9 +45,11 @@ class XmlTreeParser
 public:
   XmlTreeParser(std::set<std::string> &, std::map<std::string, int> &);
   std::auto_ptr<ParseTree> Parse(const std::string &);
+
+  static std::auto_ptr<ParseTree> ConvertTree(const MosesTraining::SyntaxNode &,
+                                              const std::vector<std::string> &);
+
 private:
-  std::auto_ptr<ParseTree> ConvertTree(const MosesTraining::SyntaxNode &,
-                                       const std::vector<std::string> &);
 
   std::set<std::string> &m_labelSet;
   std::map<std::string, int> &m_topLabelSet;

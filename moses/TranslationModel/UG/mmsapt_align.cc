@@ -127,6 +127,7 @@ namespace Moses
   Alignment::
   show(ostream& out, PhraseAlnHyp const& ah)
   {
+#if 0
     LexicalPhraseScorer2<Token>::table_t const& 
       COOCjnt = PT.calc_lex.scorer.COOC;
 
@@ -164,6 +165,7 @@ namespace Moses
     // 	 <<     " jbwd: " << obwdj[po_jbwd]<<"/"<<obwdm[po_jbwd]
     // 	 <<     " other: " << obwdj[po_other]<<"/"<<obwdm[po_other]
     // 	 << "]" << endl;
+#endif
   }
   
   void
@@ -283,9 +285,7 @@ namespace Moses
 	    psiter R = tpid2span.find(y->first);
 	    if (R == tpid2span.end()) continue;
 	    pp.update(y->first, y->second);
-	    PT.calc_lex(PT.btfix,pp);
-	    PT.calc_pfwd_fix(PT.btfix,pp);
-	    PT.calc_pbwd_fix(PT.btfix,pp);
+	    PT.ScorePPfix(pp);
 	    pp.eval(PT.feature_weights);
 	    PP.push_back(pp);
 	    BOOST_FOREACH(span const& sspan, L->second)
@@ -329,6 +329,7 @@ namespace Moses
     BOOST_FOREACH(int i, o) A.show(cout,A.PAH[i]);
     sptr<vector<int> > aln;
     return aln;
-  }
 }
+}
+
 

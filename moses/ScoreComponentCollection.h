@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -93,10 +94,13 @@ class ScoreComponentCollection
 private:
   FVector m_scores;
 
+public:
   typedef std::pair<size_t,size_t> IndexPair;
+private:
   typedef std::map<const FeatureFunction*,IndexPair> ScoreIndexMap;
   static  ScoreIndexMap s_scoreIndexes;
   static size_t s_denseVectorSize;
+public:
   static IndexPair GetIndexes(const FeatureFunction* sp) {
     ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
     if (indexIter == s_scoreIndexes.end()) {
@@ -287,7 +291,7 @@ public:
 
 
   //Read sparse features from string
-  void Assign(const FeatureFunction* sp, const std::string line);
+  void Assign(const FeatureFunction* sp, const std::string &line);
 
   // shortcut: setting the value directly using the feature name
   void Assign(const std::string name, float score) {

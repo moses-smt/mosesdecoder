@@ -37,6 +37,7 @@
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
+#include "moses/FF/SourceGHKMTreeInputMatchFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/SetSourcePhrase.h"
 #include "CountNonTerms.h"
@@ -44,6 +45,8 @@
 #include "RuleScope.h"
 #include "MaxSpanFreeNonTermSource.h"
 #include "NieceTerminal.h"
+#include "SpanLength.h"
+#include "SyntaxRHS.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -55,6 +58,9 @@
 #endif
 #ifdef PT_UG
 #include "moses/TranslationModel/UG/mmsapt.h"
+#endif
+#ifdef HAVE_PROBINGPT
+#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
 #endif
 
 #include "moses/LM/Ken.h"
@@ -181,6 +187,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
+  MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
   MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(HyperParameterAsWeight);
@@ -191,6 +198,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(MaxSpanFreeNonTermSource);
   MOSES_FNAME(NieceTerminal);
   MOSES_FNAME(SparseHieroReorderingFeature);
+  MOSES_FNAME(SpanLength);
+  MOSES_FNAME(SyntaxRHS);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
@@ -203,6 +212,10 @@ FeatureRegistry::FeatureRegistry()
 #ifdef PT_UG
   MOSES_FNAME(Mmsapt);
 #endif
+#ifdef HAVE_PROBINGPT
+  MOSES_FNAME(ProbingPT);
+#endif
+
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
 #endif

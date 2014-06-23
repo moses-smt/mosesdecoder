@@ -9,7 +9,7 @@ print STDERR "Training OSM - Start\n".`date`;
 my $ORDER = 5;
 my $OUT_DIR = "/tmp/osm.$$";
 my $___FACTOR_DELIMITER = "|";
-my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR);
+my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$LMPLZ);
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -23,15 +23,16 @@ die("ERROR: wrong syntax when invoking OSM-Train.perl")
 		       'order=i' => \$ORDER,
 		       'factor=s' => \$FACTOR,
 		       'srilm-dir=s' => \$SRILM_DIR,
+		       'lmplz=s' => \$LMPLZ,
 		       'out-dir=s' => \$OUT_DIR);
 
 # check if the files are in place
-die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, --srilm-dir, and --moses-src-dir") 
+die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, --srilm-dir or --lmplz, and --moses-src-dir") 
     unless (defined($MOSES_SRC_DIR) && 
 	    defined($CORPUS_F) && 
 	    defined($CORPUS_E) && 
 	    defined($ALIGNMENT)&& 
-	    defined($SRILM_DIR));
+	    (defined($SRILM_DIR) || defined($LMPLZ)));
 die("ERROR: could not find input corpus file '$CORPUS_F'") 
     unless -e $CORPUS_F;
 die("ERROR: could not find output corpus file '$CORPUS_E'") 
@@ -87,7 +88,12 @@ print "Converting Bilingual Sentence Pair into Operation Corpus\n";
 `$MOSES_SRC_DIR/bin/generateSequences $OUT_DIR/$factor_val/e $OUT_DIR/$factor_val/f $OUT_DIR/align $OUT_DIR/$factor_val/Singletons > $OUT_DIR/$factor_val/opCorpus`;
 
 print "Learning Operation Sequence Translation Model\n";
-`$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM`;
+if (defined($LMPLZ)) {
+  `$LMPLZ --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1`;
+}
+else {
+  `$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM`;
+}
 
 print "Binarizing\n";
 `$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM $OUT_DIR/$factor_val/operationLM.bin`;

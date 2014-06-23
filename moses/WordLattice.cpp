@@ -56,7 +56,7 @@ InitializeFromPCNDataType
  const std::vector<FactorType>& factorOrder, 
  const std::string& debug_line)
 {
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
   const InputFeature &inputFeature = InputFeature::Instance();
   size_t numInputScores = inputFeature.GetNumInputScores();
   size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();

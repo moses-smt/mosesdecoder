@@ -1,96 +1,87 @@
-#pragma once
 /*
- *  Rule.h
- *  extract
+ * Rule.h
  *
- *  Created by Hieu Hoang on 19/07/2010.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
- *
+ *  Created on: 20 Feb 2014
+ *      Author: hieu
  */
+#pragma once
 #include <vector>
-#include <iostream>
-#include "LatticeNode.h"
-#include "SymbolSequence.h"
-#include "Global.h"
+#include "Phrase.h"
+#include "RulePhrase.h"
+#include "moses/TypeDef.h"
 
-class Lattice;
-class SentenceAlignment;
-class Global;
-class RuleCollection;
-class SyntaxNode;
-class TunnelCollection;
-class Range;
+class ConsistentPhrase;
+class AlignedSentence;
+class NonTerm;
+class Parameter;
 
-class RuleElement
-{
-protected:
-	const LatticeNode *m_latticeNode;
+
+class Rule {
 public:
-	std::pair<size_t, size_t> m_alignmentPos;
-	
-	RuleElement(const RuleElement &copy);
-	RuleElement(const LatticeNode &latticeNode)
-	:m_latticeNode(&latticeNode)
-	,m_alignmentPos(NOT_FOUND, NOT_FOUND)
-	{}
+	typedef std::set<std::pair<int,int> > Alignments;
 
-	const LatticeNode &GetLatticeNode() const
-	{ return *m_latticeNode; }
+	Rule(const Rule &copy); // do not implement
 
-};
+	// original rule with no non-term
+	Rule(const NonTerm &lhsNonTerm, const AlignedSentence &alignedSentence);
 
-class Rule
-{
-protected:
-	typedef std::vector<RuleElement> CollType;
-	CollType m_coll;
-
-	const LatticeNode *m_lhs;
-	SymbolSequence m_source, m_target;
-	
-	bool IsHole(const TunnelCollection &tunnelColl) const;
-	bool NonTermOverlap() const;
-
-	const LatticeNode &GetLatticeNode(size_t ind) const;
-	void CreateSymbols(const Global &global, bool &isValid, const SentenceAlignment &sentence);
-
-public:
-	// init
-	Rule(const LatticeNode *latticeNode);
-
-	// create new rule by appending node to prev rule
-	Rule(const Rule &prevRule, const LatticeNode *latticeNode);
-
-	// create copy with lhs
-	Rule(const Global &global, bool &isValid, const Rule &copy, const LatticeNode *lhs, const SentenceAlignment &sentence);
-
-	// can continue to add to this rule
-	bool CanRecurse(const Global &global, const TunnelCollection &tunnelColl) const;
+	// extend a rule, adding 1 new non-term
+	Rule(const Rule &copy, const NonTerm &nonTerm);
 
 	virtual ~Rule();
 
-	// can add this to the set of rules
-	bool IsValid(const Global &global, const TunnelCollection &tunnelColl) const;
+	bool IsValid() const
+	{ return m_isValid; }
 
-	size_t GetNumSymbols() const;
-	bool AdjacentDefaultNonTerms() const;
-	bool MaxNonTerm(const Global &global) const;
-	bool MoreDefaultNonTermThanTerm() const;
-	bool SourceHasEdgeDefaultNonTerm() const;
+	bool CanRecurse() const
+	{ return m_canRecurse; }
 
-	void CreateRules(RuleCollection &rules
-									 , const Lattice &lattice
-									 , const SentenceAlignment &sentence
-									 , const Global &global);
-	
-	int Compare(const Rule &compare) const;
-	bool operator<(const Rule &compare) const;
-			
-	Range GetSourceRange() const;
-	
-	DEBUG_OUTPUT();
+	const NonTerm &GetLHS() const
+	{ return m_lhs; }
 
-  void Output(std::ostream &out) const;
-  void OutputInv(std::ostream &out) const;
+	const ConsistentPhrase &GetConsistentPhrase() const;
+
+	int GetNextSourcePosForNonTerm() const;
+
+	void SetCount(float count)
+	{ m_count = count; }
+	float GetCount() const
+	{ return m_count; }
+
+	const Alignments &GetAlignments() const
+	{ return m_alignments; }
+
+	std::string Debug() const;
+	void Output(std::ostream &out, bool forward, const Parameter &params) const;
+
+	void Prevalidate(const Parameter &params);
+	void CreateTarget(const Parameter &params);
+
+	const RulePhrase &GetPhrase(Moses::FactorDirection direction) const
+	{ return (direction == Moses::Input) ? m_source : m_target; }
+
+protected:
+	const NonTerm &m_lhs;
+	const AlignedSentence &m_alignedSentence;
+	RulePhrase m_source, m_target;
+	float m_count;
+
+	Alignments m_alignments;
+
+	// in source order
+	std::vector<const NonTerm*> m_nonterms;
+
+	bool m_isValid, m_canRecurse;
+
+	void CreateSource();
+	void CreateAlignments();
+	void CreateAlignments(int sourcePos, const std::set<const Word *> &targetWords);
+	void CreateAlignments(int sourcePos, const RuleSymbol *targetSought);
+
+	bool ContainTerm(const ConsistentPhrase &cp, const std::set<const Word*> &terms) const;
+	int CalcScope() const; // not yet correctly calculated
+
+	void NonTermContext(size_t ntInd, const ConsistentPhrase &cp, std::ostream &out) const;
 
 };
+

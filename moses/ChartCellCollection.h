@@ -20,11 +20,11 @@
  ***********************************************************************/
 #pragma once
 
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "InputType.h"
 #include "ChartCell.h"
 #include "WordsRange.h"
-
-#include <boost/ptr_container/ptr_vector.hpp>
+#include "InputPath.h"
 
 namespace Moses
 {
@@ -36,6 +36,7 @@ class ChartCellCollectionBase
 public:
   template <class Factory> ChartCellCollectionBase(const InputType &input, const Factory &factory) :
     m_cells(input.GetSize()) {
+
     size_t size = input.GetSize();
     for (size_t startPos = 0; startPos < size; ++startPos) {
       std::vector<ChartCellBase*> &inner = m_cells[startPos];
@@ -47,11 +48,14 @@ public:
        * gets it from there :-(.  The span is actually stored as a reference,
        * which needs to point somewhere, so I have it refer to the ChartCell.
        */
-      m_source.push_back(new ChartCellLabel(inner[0]->GetCoverage(), input.GetWord(startPos)));
+      const WordsRange &range = inner[0]->GetCoverage();
+
+      m_source.push_back(new ChartCellLabel(range, input.GetWord(startPos)));
     }
   }
 
   virtual ~ChartCellCollectionBase();
+
 
   const ChartCellBase &GetBase(const WordsRange &coverage) const {
     return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
@@ -70,6 +74,7 @@ private:
   std::vector<std::vector<ChartCellBase*> > m_cells;
 
   boost::ptr_vector<ChartCellLabel> m_source;
+
 };
 
 /** Hold all the chart cells for 1 input sentence. A variable of this type is held by the ChartManager

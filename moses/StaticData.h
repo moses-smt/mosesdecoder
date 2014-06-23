@@ -198,7 +198,7 @@ protected:
 
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
-  bool m_adjacentOnly;
+  bool m_defaultNonTermOnlyForEmptyRange;
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
@@ -756,12 +756,7 @@ public:
   }
 
 
-  bool AdjacentOnly() const
-  { return m_adjacentOnly; }
-
-
   void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
-
 
   // need global access for output of tree structure
   const StatefulFeatureFunction* GetTreeStructure() const {
@@ -771,6 +766,9 @@ public:
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
       m_treeStructure = treeStructure;
   }
+
+  bool GetDefaultNonTermOnlyForEmptyRange() const
+  { return m_defaultNonTermOnlyForEmptyRange; }
 
 };
 
