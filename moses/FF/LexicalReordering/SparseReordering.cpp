@@ -94,7 +94,7 @@ void SparseReordering::ReadWordList(const string& filename, const string& id, Sp
                        type <= SparseReorderingFeatureKey::Between; ++type) {
       for (size_t position = SparseReorderingFeatureKey::First;
                        position <= SparseReorderingFeatureKey::Last; ++position) {
-        for (int reoType = 0; reoType < LexicalReorderingState::MAX; ++reoType) {
+        for (int reoType = 0; reoType <= LexicalReorderingState::MAX; ++reoType) {
           SparseReorderingFeatureKey key(
             pWordLists->size()-1, static_cast<SparseReorderingFeatureKey::Type>(type),
             factor, static_cast<SparseReorderingFeatureKey::Position>(position), side, reoType);
@@ -112,7 +112,6 @@ void SparseReordering::AddFeatures(size_t id,
     const WordList& words, LexicalReorderingState::ReorderingType reoType,
     ScoreComponentCollection* scores) const {
 
-  //TODO: Precalculate all feature names
   static string kSep = "-";
   const Factor*  wordFactor = word.GetFactor(0);
   if (words.second.find(wordFactor) == words.second.end()) return;
