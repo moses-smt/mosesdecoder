@@ -112,7 +112,6 @@ void SparseReordering::AddFeatures(size_t id,
     const WordList& words, LexicalReorderingState::ReorderingType reoType,
     ScoreComponentCollection* scores) const {
 
-  static string kSep = "-";
   const Factor*  wordFactor = word.GetFactor(0);
   if (words.second.find(wordFactor) == words.second.end()) return;
   SparseReorderingFeatureKey key(id, type, wordFactor, position, side, reoType);
@@ -151,7 +150,7 @@ void SparseReordering::CopyScores(
     AddFeatures(i, type, SparseReorderingFeatureKey::Source, sourcePhrase.GetWord(sourcePhrase.GetSize()-1),
       SparseReorderingFeatureKey::Last, m_sourceWordLists[i], reoType, scores);
   }
-  for (size_t i = 0; i < m_sourceWordLists.size(); ++i) {
+  for (size_t i = 0; i < m_targetWordLists.size(); ++i) {
     const Phrase& targetPhrase = topt.GetTargetPhrase();   
     AddFeatures(i, type, SparseReorderingFeatureKey::Target, targetPhrase.GetWord(0),
       SparseReorderingFeatureKey::First, m_targetWordLists[i], reoType, scores);
