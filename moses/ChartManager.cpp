@@ -125,7 +125,7 @@ void ChartManager::ProcessSentence()
  */
 void ChartManager::AddXmlChartOptions()
 {
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) {

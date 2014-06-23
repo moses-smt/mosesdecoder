@@ -248,15 +248,15 @@ void TargetPhrase::SetProperty(const std::string &key, const std::string &value)
   m_properties[key] = phrasePropertyFactory.ProduceProperty(key,value);
 }
 
-bool TargetPhrase::GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &value) const
+const PhraseProperty *TargetPhrase::GetProperty(const std::string &key) const
 {
   std::map<std::string, boost::shared_ptr<PhraseProperty> >::const_iterator iter;
   iter = m_properties.find(key);
   if (iter != m_properties.end()) {
-    value = iter->second;
-    return true;
+    const boost::shared_ptr<PhraseProperty> &pp = iter->second;
+    return pp.get();
   }
-  return false;
+  return NULL;
 }
 
 void TargetPhrase::SetRuleSource(const Phrase &ruleSource) const
@@ -288,10 +288,23 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   os << tp.GetAlignNonTerm() << flush;
   os << ": c=" << tp.m_fullScore << flush;
   os << " " << tp.m_scoreBreakdown << flush;
-
+  
   const Phrase *sourcePhrase = tp.GetRuleSource();
   if (sourcePhrase) {
     os << " sourcePhrase=" << *sourcePhrase << flush;
+  }
+
+  if (tp.m_properties.size()) {
+	os << " properties: " << flush;
+
+	TargetPhrase::Properties::const_iterator iter;
+	for (iter = tp.m_properties.begin(); iter != tp.m_properties.end(); ++iter) {
+		const string &key = iter->first;
+		const PhraseProperty *prop = iter->second.get();
+		assert(prop);
+
+		os << key << "=" << *prop << " ";
+	}
   }
 
   return os;

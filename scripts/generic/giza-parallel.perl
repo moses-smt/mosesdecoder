@@ -102,23 +102,29 @@ print $cmd;
 
 sub NumStr($)
 {
-	my $i = shift;
-  my $numStr;
-  if ($i < 10) {
-    $numStr = "0000$i";
-  }
-  elsif ($i < 100) {
-    $numStr = "000$i";
-  }
-  elsif ($i < 1000) {
-     $numStr = "00$i";
-  }
-  elsif ($i < 10000) {
-    $numStr = "0$i";
-  }
-  else {
-    $numStr = $i;
-  }
-  return $numStr;
+    my $i = shift;
+    my $numStr;
+    if ($i < 10) {
+	$numStr = "000000$i";
+    }
+    elsif ($i < 100) {
+	$numStr = "00000$i";
+    }
+    elsif ($i < 1000) {
+	$numStr = "0000$i";
+    }
+    elsif ($i < 10000) {
+	$numStr = "000$i";
+    }
+    elsif ($i < 100000) {
+	$numStr = "00$i";
+    }
+    elsif ($i < 1000000) {
+	$numStr = "0$i";
+    }
+    else {
+	$numStr = $i;
+    }
+    return $numStr;
 }
 

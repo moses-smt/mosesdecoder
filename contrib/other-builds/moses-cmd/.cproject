@@ -47,6 +47,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1546774818" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.523170942" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../irstlm/lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../probingPT/helpers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../DALM/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../nplm/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../randlm/lib&quot;"/>
@@ -77,6 +78,7 @@
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
 									<listOptionValue builtIn="false" value="boost_iostreams-mt"/>
+									<listOptionValue builtIn="false" value="boost_serialization"/>
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 									<listOptionValue builtIn="false" value="boost_filesystem-mt"/>
@@ -179,4 +181,5 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

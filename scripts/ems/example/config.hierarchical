@@ -382,7 +382,7 @@ alignment-symmetrization-method = grow-diag-final-and
 # 
 #operation-sequence-model = "yes"
 #operation-sequence-model-order = 5
-#operation-sequence-model-settings = ""
+#operation-sequence-model-settings = "-lmplz '$moses-src-dir/bin/lmplz -S 40% -T $working-dir/model/tmp'"
 
 ### if OSM training should be skipped,
 # point to OSM Model 

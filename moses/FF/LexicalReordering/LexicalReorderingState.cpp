@@ -197,8 +197,7 @@ int PhraseBasedReorderingState::Compare(const FFState& o) const
   if (&o == this)
     return 0;
 
-  const PhraseBasedReorderingState* other = dynamic_cast<const PhraseBasedReorderingState*>(&o);
-  UTIL_THROW_IF2(other == NULL, "Wrong state type");
+  const PhraseBasedReorderingState* other = static_cast<const PhraseBasedReorderingState*>(&o);
   if (m_prevRange == other->m_prevRange) {
     if (m_direction == LexicalReorderingConfiguration::Forward) {
       return ComparePrevScores(other->m_prevOption);
@@ -296,7 +295,7 @@ int BidirectionalReorderingState::Compare(const FFState& o) const
   if (&o == this)
     return 0;
 
-  const BidirectionalReorderingState &other = dynamic_cast<const BidirectionalReorderingState &>(o);
+  const BidirectionalReorderingState &other = static_cast<const BidirectionalReorderingState &>(o);
   if(m_backward->Compare(*other.m_backward) < 0)
     return -1;
   else if(m_backward->Compare(*other.m_backward) > 0)
@@ -325,7 +324,7 @@ HierarchicalReorderingBackwardState::HierarchicalReorderingBackwardState(const L
 
 int HierarchicalReorderingBackwardState::Compare(const FFState& o) const
 {
-  const HierarchicalReorderingBackwardState& other = dynamic_cast<const HierarchicalReorderingBackwardState&>(o);
+  const HierarchicalReorderingBackwardState& other = static_cast<const HierarchicalReorderingBackwardState&>(o);
   return m_reoStack.Compare(other.m_reoStack);
 }
 
@@ -411,8 +410,7 @@ int HierarchicalReorderingForwardState::Compare(const FFState& o) const
   if (&o == this)
     return 0;
 
-  const HierarchicalReorderingForwardState* other = dynamic_cast<const HierarchicalReorderingForwardState*>(&o);
-  UTIL_THROW_IF2(other == NULL, "Wrong state type");
+  const HierarchicalReorderingForwardState* other = static_cast<const HierarchicalReorderingForwardState*>(&o);
 
   if (m_prevRange == other->m_prevRange) {
     return ComparePrevScores(other->m_prevOption);

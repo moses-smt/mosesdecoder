@@ -1,13 +1,17 @@
-all: extract 
+all: extract-mixed-syntax 
 
 clean: 
 	rm -f *.o extract-mixed-syntax
 
 .cpp.o:
-	g++ -O6 -g -c $<
+	g++ -O4 -g -c -I../../../boost/include -I../../../ $<
 
-extract: tables-core.o extract.o SyntaxTree.o XmlTree.o Tunnel.o Lattice.o LatticeNode.o SentenceAlignment.o Global.o InputFileStream.o TunnelCollection.o RuleCollection.o Rule.o Symbol.o SymbolSequence.o Range.o OutputFileStream.o
+OBJECTS = AlignedSentence.o ConsistentPhrase.o ConsistentPhrases.o InputFileStream.o \
+	Main.o OutputFileStream.o Parameter.o Phrase.o Rule.o Rules.o RuleSymbol.o \
+	SyntaxTree.o Word.o NonTerm.o RulePhrase.o AlignedSentenceSyntax.o pugixml.o
 
-	g++ tables-core.o extract.o SyntaxTree.o XmlTree.o Tunnel.o Lattice.o LatticeNode.o SentenceAlignment.o Global.o InputFileStream.o TunnelCollection.o RuleCollection.o Rule.o Symbol.o SymbolSequence.o Range.o OutputFileStream.o -lz -lboost_iostreams-mt -o extract-mixed-syntax
+extract-mixed-syntax: $(OBJECTS) 
+
+	g++ $(OBJECTS)   -L../../../boost/lib64 -lz -lboost_iostreams-mt -lboost_program_options-mt -o extract-mixed-syntax
 
 
