@@ -64,20 +64,20 @@ my $pid;
 
 if ($numParallel > 1)
 {
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $target $TMPDIR/target.";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $target $TMPDIR/target.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 	
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $source $TMPDIR/source.";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $source $TMPDIR/source.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $align $TMPDIR/align.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
   if ($weights) {
-    $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $weights $TMPDIR/weights.";
+    $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
     $pid = RunFork($cmd);
     push(@children, $pid);
   }
@@ -259,15 +259,21 @@ sub NumStr($)
     my $i = shift;
     my $numStr;
     if ($i < 10) {
-	$numStr = "0000$i";
+	$numStr = "000000$i";
     }
     elsif ($i < 100) {
-	$numStr = "000$i";
+	$numStr = "00000$i";
     }
     elsif ($i < 1000) {
-	$numStr = "00$i";
+	$numStr = "0000$i";
     }
     elsif ($i < 10000) {
+	$numStr = "000$i";
+    }
+    elsif ($i < 100000) {
+	$numStr = "00$i";
+    }
+    elsif ($i < 1000000) {
 	$numStr = "0$i";
     }
     else {
