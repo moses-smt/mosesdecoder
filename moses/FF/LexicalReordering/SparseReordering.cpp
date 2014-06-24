@@ -122,11 +122,42 @@ void SparseReordering::AddFeatures(size_t id,
 }
 
 void SparseReordering::CopyScores(
-               const TranslationOption& topt,
+               const TranslationOption& currentOpt,
+               const TranslationOption* previousOpt,
+               const InputType& input,
                LexicalReorderingState::ReorderingType reoType,
                LexicalReorderingConfiguration::Direction direction,
                ScoreComponentCollection* scores) const 
 {
+  if (m_useBetween && direction == LexicalReorderingConfiguration::Backward &&
+      (reoType == LexicalReorderingState::D || reoType == LexicalReorderingState::DL ||
+        reoType == LexicalReorderingState::DR)) {
+    size_t gapStart, gapEnd;
+    const Sentence& sentence = dynamic_cast<const Sentence&>(input);
+    const WordsRange& currentRange = currentOpt.GetSourceWordsRange();
+    if (previousOpt) {
+      const WordsRange& previousRange = previousOpt->GetSourceWordsRange();
+      if (previousRange < currentRange) {
+        gapStart = previousRange.GetEndPos() + 1;
+        gapEnd = currentRange.GetStartPos();
+      } else {
+        gapStart = currentRange.GetEndPos() + 1;
+        gapEnd = previousRange.GetStartPos();
+      }
+    } else {
+      //start of sentence
+      gapStart = 0;
+      gapEnd  = currentRange.GetStartPos();
+    }
+    assert(gapStart < gapEnd);
+    for (size_t i = gapStart; i < gapEnd; ++i) {
+      for (size_t j = 0; j < m_sourceWordLists.size(); ++j) {
+        AddFeatures(j, SparseReorderingFeatureKey::Between,
+           SparseReorderingFeatureKey::Source, sentence.GetWord(i),
+          SparseReorderingFeatureKey::First, m_sourceWordLists[j], reoType, scores);
+      }
+    }
+  }
   //std::cerr << "SR " << topt << " " << reoType << " " << direction << std::endl;
   //phrase (backward)
   //stack (forward)
@@ -144,14 +175,14 @@ void SparseReordering::CopyScores(
     assert(!"Shouldn't call CopyScores() with bidirectional direction");
   }
   for (size_t i = 0; i < m_sourceWordLists.size(); ++i) {
-    const Phrase& sourcePhrase = topt.GetInputPath().GetPhrase();
+    const Phrase& sourcePhrase = currentOpt.GetInputPath().GetPhrase();
     AddFeatures(i, type, SparseReorderingFeatureKey::Source, sourcePhrase.GetWord(0),
       SparseReorderingFeatureKey::First, m_sourceWordLists[i], reoType, scores);
     AddFeatures(i, type, SparseReorderingFeatureKey::Source, sourcePhrase.GetWord(sourcePhrase.GetSize()-1),
       SparseReorderingFeatureKey::Last, m_sourceWordLists[i], reoType, scores);
   }
   for (size_t i = 0; i < m_targetWordLists.size(); ++i) {
-    const Phrase& targetPhrase = topt.GetTargetPhrase();   
+    const Phrase& targetPhrase = currentOpt.GetTargetPhrase();   
     AddFeatures(i, type, SparseReorderingFeatureKey::Target, targetPhrase.GetWord(0),
       SparseReorderingFeatureKey::First, m_targetWordLists[i], reoType, scores);
     AddFeatures(i, type, SparseReorderingFeatureKey::Target, targetPhrase.GetWord(targetPhrase.GetSize()-1),

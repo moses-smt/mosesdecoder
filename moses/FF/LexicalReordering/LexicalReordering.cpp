@@ -75,7 +75,7 @@ FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
 {
   Scores score(GetNumScoreComponents(), 0);
   const LexicalReorderingState *prev = dynamic_cast<const LexicalReorderingState *>(prev_state);
-  LexicalReorderingState *next_state = prev->Expand(hypo.GetTranslationOption(), out);
+  LexicalReorderingState *next_state = prev->Expand(hypo.GetTranslationOption(), hypo.GetInput(), out);
 
   out->PlusEquals(this, score);
 

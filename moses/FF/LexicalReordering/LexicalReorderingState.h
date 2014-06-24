@@ -96,7 +96,7 @@ class LexicalReorderingState : public FFState
 {
 public:
   virtual int Compare(const FFState& o) const = 0;
-  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, ScoreComponentCollection* scores) const = 0;
+  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, const InputType& input, ScoreComponentCollection* scores) const = 0;
 
   static LexicalReorderingState* CreateLexicalReorderingState(const std::vector<std::string>& config,
       LexicalReorderingConfiguration::Direction dir, const InputType &input);
@@ -120,10 +120,11 @@ protected:
     : m_configuration(config), m_direction(dir), m_offset(offset), m_prevOption(NULL) {}
 
   // copy the right scores in the right places, taking into account forward/backward, offset, collapse
-  void CopyScores(ScoreComponentCollection* scores, const TranslationOption& topt, ReorderingType reoType) const;
+  void CopyScores(ScoreComponentCollection* scores, const TranslationOption& topt, const InputType& input, ReorderingType reoType) const;
   int ComparePrevScores(const TranslationOption *other) const;
 
   //constants for the different type of reorderings (corresponding to indexes in the table file)
+  public:
   static const ReorderingType M = 0;  // monotonic
   static const ReorderingType NM = 1; // non-monotonic
   static const ReorderingType S = 1;  // swap
@@ -132,7 +133,6 @@ protected:
   static const ReorderingType DR = 3; // discontinuous, right
   static const ReorderingType R = 0;  // right
   static const ReorderingType L = 1;  // left
-  public:
   static const ReorderingType MAX = 3; //largest possible
 };
 
@@ -152,7 +152,7 @@ public:
   }
 
   virtual int Compare(const FFState& o) const;
-  virtual LexicalReorderingState* Expand(const TranslationOption& topt, ScoreComponentCollection*  scores) const;
+  virtual LexicalReorderingState* Expand(const TranslationOption& topt, const InputType& input, ScoreComponentCollection*  scores) const;
 };
 
 //! State for the standard Moses implementation of lexical reordering models
@@ -168,7 +168,7 @@ public:
   PhraseBasedReorderingState(const PhraseBasedReorderingState *prev, const TranslationOption &topt);
 
   virtual int Compare(const FFState& o) const;
-  virtual LexicalReorderingState* Expand(const TranslationOption& topt, ScoreComponentCollection*  scores) const;
+  virtual LexicalReorderingState* Expand(const TranslationOption& topt,const InputType& input, ScoreComponentCollection*  scores) const;
 
   ReorderingType GetOrientationTypeMSD(WordsRange currRange) const;
   ReorderingType GetOrientationTypeMSLR(WordsRange currRange) const;
@@ -189,7 +189,7 @@ public:
                                       const TranslationOption &topt, ReorderingStack reoStack);
 
   virtual int Compare(const FFState& o) const;
-  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, ScoreComponentCollection*  scores) const;
+  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, const InputType& input,  ScoreComponentCollection*  scores) const;
 
 private:
   ReorderingType GetOrientationTypeMSD(int reoDistance) const;
@@ -212,7 +212,7 @@ public:
   HierarchicalReorderingForwardState(const HierarchicalReorderingForwardState *prev, const TranslationOption &topt);
 
   virtual int Compare(const FFState& o) const;
-  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, ScoreComponentCollection* scores) const;
+  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, const InputType& input, ScoreComponentCollection* scores) const;
 
 private:
   ReorderingType GetOrientationTypeMSD(WordsRange currRange, WordsBitmap coverage) const;

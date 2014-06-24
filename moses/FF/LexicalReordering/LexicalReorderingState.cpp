@@ -130,7 +130,7 @@ LexicalReorderingState *LexicalReorderingConfiguration::CreateLexicalReorderingS
   return new BidirectionalReorderingState(*this, bwd, fwd, 0);
 }
 
-void LexicalReorderingState::CopyScores(ScoreComponentCollection*  accum, const TranslationOption &topt, ReorderingType reoType) const
+void LexicalReorderingState::CopyScores(ScoreComponentCollection*  accum, const TranslationOption &topt, const InputType& input,  ReorderingType reoType) const
 {
   // don't call this on a bidirectional object
   UTIL_THROW_IF2(m_direction != LexicalReorderingConfiguration::Backward && m_direction != LexicalReorderingConfiguration::Forward,
@@ -153,7 +153,7 @@ void LexicalReorderingState::CopyScores(ScoreComponentCollection*  accum, const 
   }
 
   const SparseReordering* sparse = m_configuration.GetSparseReordering();
-  if (sparse) sparse->CopyScores(*relevantOpt, reoType, m_direction, accum);
+  if (sparse) sparse->CopyScores(*relevantOpt, m_prevOption, input, reoType, m_direction, accum);
 
 }
 
@@ -210,7 +210,7 @@ int PhraseBasedReorderingState::Compare(const FFState& o) const
   return 1;
 }
 
-LexicalReorderingState* PhraseBasedReorderingState::Expand(const TranslationOption& topt, ScoreComponentCollection* scores) const
+LexicalReorderingState* PhraseBasedReorderingState::Expand(const TranslationOption& topt, const InputType& input,ScoreComponentCollection* scores) const
 {
   ReorderingType reoType;
   const WordsRange currWordsRange = topt.GetSourceWordsRange();
@@ -226,7 +226,7 @@ LexicalReorderingState* PhraseBasedReorderingState::Expand(const TranslationOpti
     } else {
       reoType = GetOrientationTypeLeftRight(currWordsRange);
     }
-    CopyScores(scores, topt, reoType);
+    CopyScores(scores, topt, input, reoType);
   }
 
   return new PhraseBasedReorderingState(this, topt);
@@ -304,10 +304,10 @@ int BidirectionalReorderingState::Compare(const FFState& o) const
     return m_forward->Compare(*other.m_forward);
 }
 
-LexicalReorderingState* BidirectionalReorderingState::Expand(const TranslationOption& topt,  ScoreComponentCollection* scores) const
+LexicalReorderingState* BidirectionalReorderingState::Expand(const TranslationOption& topt, const InputType& input, ScoreComponentCollection* scores) const
 {
-  LexicalReorderingState *newbwd = m_backward->Expand(topt, scores);
-  LexicalReorderingState *newfwd = m_forward->Expand(topt, scores);
+  LexicalReorderingState *newbwd = m_backward->Expand(topt,input, scores);
+  LexicalReorderingState *newfwd = m_forward->Expand(topt, input, scores);
   return new BidirectionalReorderingState(m_configuration, newbwd, newfwd, m_offset);
 }
 
@@ -328,7 +328,7 @@ int HierarchicalReorderingBackwardState::Compare(const FFState& o) const
   return m_reoStack.Compare(other.m_reoStack);
 }
 
-LexicalReorderingState* HierarchicalReorderingBackwardState::Expand(const TranslationOption& topt, ScoreComponentCollection*  scores) const
+LexicalReorderingState* HierarchicalReorderingBackwardState::Expand(const TranslationOption& topt, const InputType& input,ScoreComponentCollection*  scores) const
 {
 
   HierarchicalReorderingBackwardState* nextState = new HierarchicalReorderingBackwardState(this, topt, m_reoStack);
@@ -347,7 +347,7 @@ LexicalReorderingState* HierarchicalReorderingBackwardState::Expand(const Transl
     reoType = GetOrientationTypeMonotonic(reoDistance);
   }
 
-  CopyScores(scores, topt, reoType);
+  CopyScores(scores, topt, input, reoType);
   return nextState;
 }
 
@@ -431,7 +431,7 @@ int HierarchicalReorderingForwardState::Compare(const FFState& o) const
 //  dright: if the next phrase follows the conditioning phrase and other stuff comes in between
 //  dleft:  if the next phrase precedes the conditioning phrase and other stuff comes in between
 
-LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const TranslationOption& topt, ScoreComponentCollection* scores) const
+LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const TranslationOption& topt, const InputType& input,ScoreComponentCollection* scores) const
 {
   const LexicalReorderingConfiguration::ModelType modelType = m_configuration.GetModelType();
   const WordsRange currWordsRange = topt.GetSourceWordsRange();
@@ -454,7 +454,7 @@ LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const Transla
       reoType = GetOrientationTypeLeftRight(currWordsRange, coverage);
     }
 
-    CopyScores(scores, topt, reoType);
+    CopyScores(scores, topt, input, reoType);
   }
 
   return new HierarchicalReorderingForwardState(this, topt);

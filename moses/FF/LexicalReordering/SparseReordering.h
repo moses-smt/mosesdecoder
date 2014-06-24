@@ -86,8 +86,10 @@ class SparseReordering
 public:
   SparseReordering(const std::map<std::string,std::string>& config, const LexicalReordering* producer);
   
-  //If direction is backward topt is the current option, otherwise the previous
-  void CopyScores(const TranslationOption& topt,
+  //If direction is backward the options will be different, for forward they will be the same
+  void CopyScores(const TranslationOption& currentOpt,
+                  const TranslationOption* previousOpt,
+                  const InputType& input,
                  LexicalReorderingState::ReorderingType reoType,
                  LexicalReorderingConfiguration::Direction direction,
                  ScoreComponentCollection* scores) const ;
