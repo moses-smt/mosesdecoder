@@ -44,13 +44,15 @@ struct SparseReorderingFeatureKey {
   size_t id;
   enum Type {Stack, Phrase, Between} type;
   const Factor* word;
+  bool isCluster;
   enum Position {First, Last} position;
   enum Side {Source, Target} side;
   LexicalReorderingState::ReorderingType reoType;
 
-  SparseReorderingFeatureKey(size_t id_, Type type_, const Factor* word_, Position position_, 
-        Side side_, LexicalReorderingState::ReorderingType reoType_) 
-    : id(id_), type(type_), word(word_), position(position_), side(side_), reoType(reoType_)     
+  SparseReorderingFeatureKey(size_t id_, Type type_, const Factor* word_, bool isCluster_,
+   Position position_, Side side_, LexicalReorderingState::ReorderingType reoType_) 
+    : id(id_), type(type_), word(word_), isCluster(isCluster_),
+       position(position_), side(side_), reoType(reoType_)     
   {}
 
   const std::string& Name(const std::string& wordListId) ; 
@@ -64,6 +66,7 @@ struct HashSparseReorderingFeatureKey : public std::unary_function<SparseReorder
     seed = util::MurmurHashNative(&key.id, sizeof(key.id), seed);
     seed = util::MurmurHashNative(&key.type, sizeof(key.type), seed);
     seed = util::MurmurHashNative(&key.word, sizeof(key.word), seed);
+    seed = util::MurmurHashNative(&key.isCluster, sizeof(key.isCluster), seed);
     seed = util::MurmurHashNative(&key.position, sizeof(key.position), seed);
     seed = util::MurmurHashNative(&key.side, sizeof(key.side), seed);
     seed = util::MurmurHashNative(&key.reoType, sizeof(key.reoType), seed);
@@ -99,6 +102,9 @@ private:
   typedef std::pair<std::string, boost::unordered_set<const Factor*> > WordList; //id and list
   std::vector<WordList> m_sourceWordLists;
   std::vector<WordList> m_targetWordLists;
+  typedef std::pair<std::string, boost::unordered_map<const Factor*, const Factor*> > ClusterMap; //id and map
+  std::vector<ClusterMap> m_sourceClusterMaps;
+  std::vector<ClusterMap> m_targetClusterMaps;
   bool m_usePhrase;
   bool m_useBetween;
   bool m_useStack;
@@ -107,10 +113,13 @@ private:
 
   void ReadWordList(const std::string& filename, const std::string& id,
        SparseReorderingFeatureKey::Side side, std::vector<WordList>* pWordLists);
-  void AddFeatures(size_t id,
+  void ReadClusterMap(const std::string& filename, const std::string& id, SparseReorderingFeatureKey::Side side, std::vector<ClusterMap>* pClusterMaps);
+  void PreCalculateFeatureNames(size_t index, const std::string& id, SparseReorderingFeatureKey::Side side, const Factor* factor, bool isCluster);
+
+  void AddFeatures(
     SparseReorderingFeatureKey::Type type, SparseReorderingFeatureKey::Side side,
      const Word& word, SparseReorderingFeatureKey::Position position,
-     const WordList& words, LexicalReorderingState::ReorderingType reoType,
+     LexicalReorderingState::ReorderingType reoType,
     ScoreComponentCollection* scores) const;
 
 };

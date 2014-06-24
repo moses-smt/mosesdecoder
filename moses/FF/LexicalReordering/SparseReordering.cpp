@@ -3,7 +3,12 @@
 #include "moses/FactorCollection.h"
 #include "moses/InputPath.h"
 #include "moses/Util.h"
+
 #include "util/exception.hh"
+
+#include "util/file_piece.hh"
+#include "util/string_piece.hh"
+#include "util/tokenize_piece.hh"
 
 #include "LexicalReordering.h"
 #include "SparseReordering.h"
@@ -41,6 +46,7 @@ const std::string& SparseReorderingFeatureKey::Name(const string& wordListId) {
   buf << kSep;
   buf << wordListId;
   buf << kSep;
+  if (isCluster) buf << "cluster_";
   buf << word->GetString();
   buf << kSep;
   buf << reoType;
@@ -65,7 +71,15 @@ SparseReordering::SparseReordering(const map<string,string>& config, const Lexic
         UTIL_THROW(util::Exception, "Sparse reordering requires source or target, not " << fields[1]);
       }
     } else if (fields[0] == "clusters") {
-      UTIL_THROW(util::Exception, "Sparse reordering does not yet support clusters" << i->first);
+      UTIL_THROW_IF(!(fields.size() == 3), util::Exception, "Sparse reordering cluster name should be sparse-clusters-(source|target)-<id>");
+      if (fields[1] == kSource) {
+        ReadClusterMap(i->second,fields[2], SparseReorderingFeatureKey::Source, &m_sourceClusterMaps);
+      } else if (fields[1] == kTarget) {
+        ReadClusterMap(i->second,fields[2],SparseReorderingFeatureKey::Target, &m_targetClusterMaps);
+      } else {
+        UTIL_THROW(util::Exception, "Sparse reordering requires source or target, not " << fields[1]);
+      }
+
     } else if (fields[0] == "phrase") {
       m_usePhrase = true;
     } else if (fields[0] == "stack") {
@@ -79,6 +93,21 @@ SparseReordering::SparseReordering(const map<string,string>& config, const Lexic
 
 }
 
+void SparseReordering::PreCalculateFeatureNames(size_t index, const string& id, SparseReorderingFeatureKey::Side side, const Factor* factor, bool isCluster) {
+  for (size_t type = SparseReorderingFeatureKey::Stack;
+                     type <= SparseReorderingFeatureKey::Between; ++type) {
+    for (size_t position = SparseReorderingFeatureKey::First;
+                     position <= SparseReorderingFeatureKey::Last; ++position) {
+      for (int reoType = 0; reoType <= LexicalReorderingState::MAX; ++reoType) {
+        SparseReorderingFeatureKey key(
+          index, static_cast<SparseReorderingFeatureKey::Type>(type), factor, isCluster,
+           static_cast<SparseReorderingFeatureKey::Position>(position), side, reoType);
+        m_featureMap[key] = key.Name(id);
+      }
+    }
+  }
+}
+
 void SparseReordering::ReadWordList(const string& filename, const string& id, SparseReorderingFeatureKey::Side side, vector<WordList>* pWordLists) {
   ifstream fh(filename.c_str());
   UTIL_THROW_IF(!fh, util::Exception, "Unable to open: " << filename);
@@ -89,35 +118,68 @@ void SparseReordering::ReadWordList(const string& filename, const string& id, Sp
     //TODO: StringPiece
     const Factor* factor = FactorCollection::Instance().AddFactor(line);
     pWordLists->back().second.insert(factor);
-    //Pre-calculate feature names.
-    for (size_t type = SparseReorderingFeatureKey::Stack;
-                       type <= SparseReorderingFeatureKey::Between; ++type) {
-      for (size_t position = SparseReorderingFeatureKey::First;
-                       position <= SparseReorderingFeatureKey::Last; ++position) {
-        for (int reoType = 0; reoType <= LexicalReorderingState::MAX; ++reoType) {
-          SparseReorderingFeatureKey key(
-            pWordLists->size()-1, static_cast<SparseReorderingFeatureKey::Type>(type),
-            factor, static_cast<SparseReorderingFeatureKey::Position>(position), side, reoType);
-          m_featureMap[key] = key.Name(id);
-        }
-      }
-    }
+    PreCalculateFeatureNames(pWordLists->size()-1, id, side, factor, false); 
 
   }
 }
 
-void SparseReordering::AddFeatures(size_t id,
+void SparseReordering::ReadClusterMap(const string& filename, const string& id, SparseReorderingFeatureKey::Side side, vector<ClusterMap>* pClusterMaps) {
+  pClusterMaps->push_back(ClusterMap());
+  pClusterMaps->back().first = id;
+  util::FilePiece file(filename.c_str());
+  StringPiece line;
+  while (true) {
+    try {
+      line = file.ReadLine();
+    } catch (const util::EndOfFileException &e) {
+      break;
+    }
+    util::TokenIter<util::SingleCharacter, true> lineIter(line,util::SingleCharacter('\t'));
+    const Factor* wordFactor = FactorCollection::Instance().AddFactor(*lineIter);
+    ++lineIter;
+    const Factor* idFactor = FactorCollection::Instance().AddFactor(*lineIter);
+    pClusterMaps->back().second[wordFactor] = idFactor;
+    PreCalculateFeatureNames(pClusterMaps->size()-1, id, side, idFactor, true); 
+  }
+}
+
+void SparseReordering::AddFeatures(
     SparseReorderingFeatureKey::Type type, SparseReorderingFeatureKey::Side side,
     const Word& word, SparseReorderingFeatureKey::Position position,
-    const WordList& words, LexicalReorderingState::ReorderingType reoType,
+    LexicalReorderingState::ReorderingType reoType,
     ScoreComponentCollection* scores) const {
 
   const Factor*  wordFactor = word.GetFactor(0);
-  if (words.second.find(wordFactor) == words.second.end()) return;
-  SparseReorderingFeatureKey key(id, type, wordFactor, position, side, reoType);
-  FeatureMap::const_iterator fmi = m_featureMap.find(key);
-  assert(fmi != m_featureMap.end());
-  scores->PlusEquals(m_producer, fmi->second, 1.0);
+
+  const vector<WordList>* wordLists;
+  const vector<ClusterMap>* clusterMaps;
+  if (side == SparseReorderingFeatureKey::Source) {
+    wordLists = &m_sourceWordLists;
+    clusterMaps = &m_sourceClusterMaps;
+  } else {
+    wordLists = &m_targetWordLists;
+    clusterMaps = &m_targetClusterMaps;
+  }
+
+  for (size_t id = 0; id < wordLists->size(); ++id) {
+    if ((*wordLists)[id].second.find(wordFactor) == (*wordLists)[id].second.end()) continue;
+    SparseReorderingFeatureKey key(id, type, wordFactor, false, position, side, reoType);
+    FeatureMap::const_iterator fmi = m_featureMap.find(key);
+    assert(fmi != m_featureMap.end());
+    scores->PlusEquals(m_producer, fmi->second, 1.0);
+  }
+
+  for (size_t id = 0; id < clusterMaps->size(); ++id) {
+    const ClusterMap& clusterMap = (*clusterMaps)[id];
+    boost::unordered_map<const Factor*, const Factor*>::const_iterator clusterIter
+      = clusterMap.second.find(wordFactor);
+    if (clusterIter != clusterMap.second.end()) {
+      SparseReorderingFeatureKey key(id, type, clusterIter->second, true, position, side, reoType);
+      FeatureMap::const_iterator fmi = m_featureMap.find(key);
+      assert(fmi != m_featureMap.end());
+      scores->PlusEquals(m_producer, fmi->second, 1.0);
+    }
+  }
 
 }
 
@@ -151,11 +213,9 @@ void SparseReordering::CopyScores(
     }
     assert(gapStart < gapEnd);
     for (size_t i = gapStart; i < gapEnd; ++i) {
-      for (size_t j = 0; j < m_sourceWordLists.size(); ++j) {
-        AddFeatures(j, SparseReorderingFeatureKey::Between,
+        AddFeatures(SparseReorderingFeatureKey::Between,
            SparseReorderingFeatureKey::Source, sentence.GetWord(i),
-          SparseReorderingFeatureKey::First, m_sourceWordLists[j], reoType, scores);
-      }
+          SparseReorderingFeatureKey::First, reoType, scores);
     }
   }
   //std::cerr << "SR " << topt << " " << reoType << " " << direction << std::endl;
@@ -174,20 +234,14 @@ void SparseReordering::CopyScores(
     type = SparseReorderingFeatureKey::Phrase;
     assert(!"Shouldn't call CopyScores() with bidirectional direction");
   }
-  for (size_t i = 0; i < m_sourceWordLists.size(); ++i) {
-    const Phrase& sourcePhrase = currentOpt.GetInputPath().GetPhrase();
-    AddFeatures(i, type, SparseReorderingFeatureKey::Source, sourcePhrase.GetWord(0),
-      SparseReorderingFeatureKey::First, m_sourceWordLists[i], reoType, scores);
-    AddFeatures(i, type, SparseReorderingFeatureKey::Source, sourcePhrase.GetWord(sourcePhrase.GetSize()-1),
-      SparseReorderingFeatureKey::Last, m_sourceWordLists[i], reoType, scores);
-  }
-  for (size_t i = 0; i < m_targetWordLists.size(); ++i) {
-    const Phrase& targetPhrase = currentOpt.GetTargetPhrase();   
-    AddFeatures(i, type, SparseReorderingFeatureKey::Target, targetPhrase.GetWord(0),
-      SparseReorderingFeatureKey::First, m_targetWordLists[i], reoType, scores);
-    AddFeatures(i, type, SparseReorderingFeatureKey::Target, targetPhrase.GetWord(targetPhrase.GetSize()-1),
-      SparseReorderingFeatureKey::Last, m_targetWordLists[i], reoType, scores);
-  }
+  const Phrase& sourcePhrase = currentOpt.GetInputPath().GetPhrase();
+  AddFeatures(type, SparseReorderingFeatureKey::Source, sourcePhrase.GetWord(0),
+    SparseReorderingFeatureKey::First, reoType, scores);
+  AddFeatures(type, SparseReorderingFeatureKey::Source, sourcePhrase.GetWord(sourcePhrase.GetSize()-1), SparseReorderingFeatureKey::Last, reoType, scores);
+  const Phrase& targetPhrase = currentOpt.GetTargetPhrase();   
+  AddFeatures(type, SparseReorderingFeatureKey::Target, targetPhrase.GetWord(0),
+    SparseReorderingFeatureKey::First, reoType, scores);
+  AddFeatures(type, SparseReorderingFeatureKey::Target, targetPhrase.GetWord(targetPhrase.GetSize()-1), SparseReorderingFeatureKey::Last, reoType, scores);
 
 
 }
