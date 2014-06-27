@@ -233,7 +233,7 @@ public:
       //InputFileStream in(filePath);
       //m_dict->Create(in,filePath);
     }
-    TRACE_ERR( "reading bin ttable\n");
+    VERBOSE(1,"reading bin ttable\n");
 //		m_dict->Read(filePath);
     bool res=m_dict->Read(filePath);
     if (!res) {
