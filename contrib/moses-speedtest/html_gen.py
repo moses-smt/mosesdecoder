@@ -73,7 +73,7 @@ def gather_necessary_lines(logfile, date):
 
 def append_date_to_table(resline):
     """Appends past dates to the html"""
-    cur_html = '<td>' + str(resline.current) + '</td>'
+    cur_html = '<td>' + str(resline.previous) + '</td>'
 
     if resline.percentage > 0.05: #If we have improvement of more than 5%
         cur_html = cur_html +  '<td class="better">' + str(resline.percentage) + '</td>'
@@ -129,7 +129,7 @@ def produce_html(path, global_config):
         #Get the lines from the config file
         (ll1, ll2) = getLastTwoLines(filenam, global_config.testlogs)
         logLine1 = processLogLine(ll1)
-        logLine2 = processLogLine(ll2)
+        logLine2 = processLogLine(ll2) #This is the life from the latest revision
 
         #Generate html
         res1 = Result(logLine1.testname, logLine1.real, logLine2.real,\

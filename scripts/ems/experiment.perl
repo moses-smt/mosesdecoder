@@ -101,7 +101,7 @@ $VERSION = $DELETE_VERSION if $DELETE_VERSION;
 `mkdir -p steps/$VERSION` unless -d "steps/$VERSION";
 
 &log_config() unless $DELETE_CRASHED || $DELETE_VERSION;
-print "running experimenal run number $VERSION\n";
+print "running experimental run number $VERSION\n";
 
 print "\nESTABLISH WHICH STEPS NEED TO BE RUN\n";
 my (%NEEDED,     # mapping of input files to step numbers

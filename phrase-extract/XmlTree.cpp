@@ -248,7 +248,6 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
 
   string cleanLine; // return string (text without xml)
   size_t wordPos = 0; // position in sentence (in terms of number of words)
-  bool isLinked = false;
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -354,9 +353,13 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
 
         // cerr << "XML TAG " << tagName << " (" << tagContent << ") spanning " << startPos << " to " << (endPos-1) << " complete, commence processing" << endl;
 
-        if (startPos >= endPos) {
-          cerr << "ERROR: tag " << tagName << " must span at least one word (" << startPos << "-" << endPos << "): " << line << endl;
+        if (startPos > endPos) {
+          cerr << "ERROR: tag " << tagName << " startPos is bigger than endPos (" << startPos << "-" << endPos << "): " << line << endl;
           return false;
+        }
+        else if (startPos == endPos) {
+          cerr << "WARNING: tag " << tagName << ". Ignoring 0 span (" << startPos << "-" << endPos << "): " << line << endl;
+          continue;
         }
 
         string label = ParseXmlTagAttribute(tagContent,"label");

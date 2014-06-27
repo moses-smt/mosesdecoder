@@ -1302,6 +1302,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SourceGHKMTreeInputMatchFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceGHKMTreeInputMatchFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SourceGHKMTreeInputMatchFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceGHKMTreeInputMatchFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.cpp</locationURI>
@@ -1310,6 +1320,16 @@
 			<name>FF/SourceWordDeletionFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SpanLength.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanLength.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SpanLength.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanLength.h</locationURI>
 		</link>
 		<link>
 			<name>FF/StatefulFeatureFunction.cpp</name>
@@ -1330,6 +1350,16 @@
 			<name>FF/StatelessFeatureFunction.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SyntaxRHS.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxRHS.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SyntaxRHS.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxRHS.h</locationURI>
 		</link>
 		<link>
 			<name>FF/TargetBigramFeature.cpp</name>
@@ -1627,6 +1657,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.h</locationURI>
 		</link>
 		<link>
+			<name>PP/PhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.cpp</locationURI>
+		</link>
+		<link>
 			<name>PP/PhraseProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.h</locationURI>
@@ -1640,6 +1675,16 @@
 			<name>PP/SourceLabelsPhraseProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SourceLabelsPhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/SpanLengthPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SpanLengthPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/SpanLengthPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SpanLengthPhraseProperty.h</locationURI>
 		</link>
 		<link>
 			<name>PP/TreeStructurePhraseProperty.h</name>

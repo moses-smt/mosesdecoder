@@ -10,6 +10,7 @@
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryScope3.h"
 #include "moses/TranslationModel/PhraseDictionaryTransliteration.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -36,6 +37,7 @@
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
+#include "moses/FF/SourceGHKMTreeInputMatchFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/SetSourcePhrase.h"
 #include "CountNonTerms.h"
@@ -43,6 +45,8 @@
 #include "RuleScope.h"
 #include "MaxSpanFreeNonTermSource.h"
 #include "NieceTerminal.h"
+#include "SpanLength.h"
+#include "SyntaxRHS.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -151,6 +155,18 @@ FeatureRegistry::FeatureRegistry()
 #define MOSES_FNAME(name) Add(#name, new DefaultFeatureFactory< name >());
 // Feature with different name than class.
 #define MOSES_FNAME2(name, type) Add(name, new DefaultFeatureFactory< type >());
+
+  MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
+  MOSES_FNAME(PhraseDictionaryOnDisk);
+  MOSES_FNAME(PhraseDictionaryMemory);
+  MOSES_FNAME(PhraseDictionaryScope3);
+  MOSES_FNAME(PhraseDictionaryMultiModel);
+  MOSES_FNAME(PhraseDictionaryMultiModelCounts);
+  MOSES_FNAME(PhraseDictionaryALSuffixArray);
+  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
+  MOSES_FNAME(PhraseDictionaryTransliteration);
+  MOSES_FNAME(PhraseDictionaryFuzzyMatch);
+
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
   MOSES_FNAME(SourceWordDeletionFeature);
@@ -167,15 +183,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("Distortion", DistortionScoreProducer);
   MOSES_FNAME2("WordPenalty", WordPenaltyProducer);
   MOSES_FNAME(InputFeature);
-  MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
-  MOSES_FNAME(PhraseDictionaryOnDisk);
-  MOSES_FNAME(PhraseDictionaryMemory);
-  MOSES_FNAME(PhraseDictionaryScope3);
-  MOSES_FNAME(PhraseDictionaryMultiModel);
-  MOSES_FNAME(PhraseDictionaryMultiModelCounts);
-  MOSES_FNAME(PhraseDictionaryALSuffixArray);
-  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
-  MOSES_FNAME(PhraseDictionaryTransliteration);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
@@ -183,6 +190,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
+  MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
   MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(HyperParameterAsWeight);
@@ -192,6 +200,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(RuleScope);
   MOSES_FNAME(MaxSpanFreeNonTermSource);
   MOSES_FNAME(NieceTerminal);
+  MOSES_FNAME(SpanLength);
+  MOSES_FNAME(SyntaxRHS);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);

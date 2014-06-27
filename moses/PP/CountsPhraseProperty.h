@@ -27,6 +27,8 @@ namespace Moses
 
 class CountsPhraseProperty : public PhraseProperty
 {
+  friend std::ostream& operator<<(std::ostream &, const CountsPhraseProperty &);
+
 public:
 
   CountsPhraseProperty() {};

@@ -7,6 +7,7 @@
 #include "moses/PP/CountsPhraseProperty.h"
 #include "moses/PP/SourceLabelsPhraseProperty.h"
 #include "moses/PP/TreeStructurePhraseProperty.h"
+#include "moses/PP/SpanLengthPhraseProperty.h"
 
 namespace Moses
 {
@@ -54,8 +55,8 @@ PhrasePropertyFactory::PhrasePropertyFactory()
 
   MOSES_PNAME2("Counts", CountsPhraseProperty);
   MOSES_PNAME2("SourceLabels", SourceLabelsPhraseProperty);
-  MOSES_PNAME2("Tree", TreeStructurePhraseProperty);
-
+  MOSES_PNAME2("Tree",TreeStructurePhraseProperty);
+  MOSES_PNAME2("SpanLength", SpanLengthPhraseProperty);
 }
 
 PhrasePropertyFactory::~PhrasePropertyFactory()

@@ -90,19 +90,25 @@ sub NumStr($)
     my $i = shift;
     my $numStr;
     if ($i < 10) {
-        $numStr = "0000$i";
+	$numStr = "000000$i";
     }
     elsif ($i < 100) {
-        $numStr = "000$i";
+	$numStr = "00000$i";
     }
     elsif ($i < 1000) {
-        $numStr = "00$i";
+	$numStr = "0000$i";
     }
     elsif ($i < 10000) {
-        $numStr = "0$i";
+	$numStr = "000$i";
+    }
+    elsif ($i < 100000) {
+	$numStr = "00$i";
+    }
+    elsif ($i < 1000000) {
+	$numStr = "0$i";
     }
     else {
-        $numStr = $i;
+	$numStr = $i;
     }
     return $numStr;
 }
