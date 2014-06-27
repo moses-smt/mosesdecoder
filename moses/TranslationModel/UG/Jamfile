@@ -9,8 +9,8 @@ $(TOP)/moses/TranslationModel/UG//mmsapt
 $(TOP)/util//kenutil 
 ; 
 
-exe lookup_mmsapt : 
-lookup_mmsapt.cc 
+exe ptable-lookup : 
+ptable-lookup.cc 
 $(TOP)/moses//moses
 $(TOP)/moses/TranslationModel/UG/generic//generic 
 $(TOP)//boost_iostreams 
