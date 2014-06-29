@@ -576,9 +576,9 @@ namespace Moses
 	    else pool.update(a->first,a->second);
 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_dyn)
 	      (*ff)(btb,pool,&ppfix.fvals);
+	    if (ppfix.p2)
+	      tpcoll->Add(createTargetPhrase(src,bta,ppfix));
 	  }
-	if (ppfix.p2)
-	  tpcoll->Add(createTargetPhrase(src,bta,ppfix));
       }
     return (statsa || statsb);
   }
