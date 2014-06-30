@@ -10,6 +10,7 @@
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryScope3.h"
 #include "moses/TranslationModel/PhraseDictionaryTransliteration.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -155,6 +156,18 @@ FeatureRegistry::FeatureRegistry()
 #define MOSES_FNAME(name) Add(#name, new DefaultFeatureFactory< name >());
 // Feature with different name than class.
 #define MOSES_FNAME2(name, type) Add(name, new DefaultFeatureFactory< type >());
+
+  MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
+  MOSES_FNAME(PhraseDictionaryOnDisk);
+  MOSES_FNAME(PhraseDictionaryMemory);
+  MOSES_FNAME(PhraseDictionaryScope3);
+  MOSES_FNAME(PhraseDictionaryMultiModel);
+  MOSES_FNAME(PhraseDictionaryMultiModelCounts);
+  MOSES_FNAME(PhraseDictionaryALSuffixArray);
+  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
+  MOSES_FNAME(PhraseDictionaryTransliteration);
+  MOSES_FNAME(PhraseDictionaryFuzzyMatch);
+
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
   MOSES_FNAME(SourceWordDeletionFeature);
@@ -171,15 +184,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("Distortion", DistortionScoreProducer);
   MOSES_FNAME2("WordPenalty", WordPenaltyProducer);
   MOSES_FNAME(InputFeature);
-  MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
-  MOSES_FNAME(PhraseDictionaryOnDisk);
-  MOSES_FNAME(PhraseDictionaryMemory);
-  MOSES_FNAME(PhraseDictionaryScope3);
-  MOSES_FNAME(PhraseDictionaryMultiModel);
-  MOSES_FNAME(PhraseDictionaryMultiModelCounts);
-  MOSES_FNAME(PhraseDictionaryALSuffixArray);
-  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
-  MOSES_FNAME(PhraseDictionaryTransliteration);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);

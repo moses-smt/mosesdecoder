@@ -60,7 +60,10 @@ namespace Moses
     , m_lex_alpha(1.0)
     , withLogCountFeatures(false)
     , withCoherence(true)
-    , m_pfwd_features("g"), withPbwd(true), poolCounts(true)
+    , m_pfwd_features("g")
+    , m_pbwd_features("g")
+    , withPbwd(true)
+    , poolCounts(true)
     , ofactor(1,0)
     , m_tpc_ctr(0)
   {
@@ -125,13 +128,16 @@ namespace Moses
     
     if ((m = param.find("pfwd")) != param.end())
       m_pfwd_features = (m->second == "0" ? "" : m->second);
-    
-    if (m_pfwd_features == "1") 
+
+    if (m_pfwd_features == "1") // legacy; deprecated
       m_pfwd_features[0] = m_pfwd_denom;
     
     if ((m = param.find("pbwd")) != param.end())
-      withPbwd = m->second != "0";
-      
+      m_pbwd_features = (m->second == "0" ? "" : m->second);
+
+    if (m_pbwd_features == "1") 
+      m_pbwd_features = "r"; // lecagy; deprecated
+
     if ((m = param.find("lexalpha")) != param.end())
       m_lex_alpha = atof(m->second.c_str());
 
@@ -208,14 +214,28 @@ namespace Moses
 	ffvec.push_back(ff);
       }
     
-    if (withPbwd) 
-      {
+    for (size_t i = 0; i < m_pbwd_features.size(); ++i) 
+      {	
+	UTIL_THROW_IF2(m_pbwd_features[i] != 'g' &&
+		       m_pbwd_features[i] != 'r' &&
+		       m_pbwd_features[i] != 's',
+		       "Can't handle pbwd feature type '" 
+		       << m_pbwd_features[i] << "'.");
 	sptr<PScorePbwd<Token> > ff(new PScorePbwd<Token>());
 	size_t k = num_feats;
-	num_feats = ff->init(num_feats,lbop);
-	for (; k < num_feats; ++k) m_feature_names.push_back(ff->fname(k));
+	num_feats = ff->init(num_feats,lbop,m_pbwd_features[i]);
+	for (;k < num_feats; ++k) m_feature_names.push_back(ff->fname(k));
 	ffvec.push_back(ff);
       }
+
+    // if (withPbwd) 
+    //   {
+    // 	sptr<PScorePbwd<Token> > ff(new PScorePbwd<Token>());
+    // 	size_t k = num_feats;
+    // 	num_feats = ff->init(num_feats,lbop);
+    // 	for (; k < num_feats; ++k) m_feature_names.push_back(ff->fname(k));
+    // 	ffvec.push_back(ff);
+    //   }
     
     if (withLogCountFeatures) 
       {
@@ -556,9 +576,9 @@ namespace Moses
 	    else pool.update(a->first,a->second);
 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_dyn)
 	      (*ff)(btb,pool,&ppfix.fvals);
+	    if (ppfix.p2)
+	      tpcoll->Add(createTargetPhrase(src,bta,ppfix));
 	  }
-	if (ppfix.p2)
-	  tpcoll->Add(createTargetPhrase(src,bta,ppfix));
       }
     return (statsa || statsb);
   }

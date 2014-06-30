@@ -255,9 +255,10 @@ namespace Moses
     float 
     lbop(size_t const tries, size_t const succ, float const confidence)
     {
-      return 
-	boost::math::binomial_distribution<>::
-	find_lower_bound_on_p(tries, succ, confidence);
+      return (confidence == 0 
+	      ? float(succ)/tries 
+	      : (boost::math::binomial_distribution<>::
+		 find_lower_bound_on_p(tries, succ, confidence)));
     }
     
     PhrasePair const&
