@@ -135,8 +135,10 @@ void SparseReordering::ReadClusterMap(const string& filename, const string& id, 
       break;
     }
     util::TokenIter<util::SingleCharacter, true> lineIter(line,util::SingleCharacter('\t'));
+    if (!lineIter) UTIL_THROW(util::Exception, "Malformed cluster line (missing word): '" << line << "'");
     const Factor* wordFactor = FactorCollection::Instance().AddFactor(*lineIter);
     ++lineIter;
+    if (!lineIter) UTIL_THROW(util::Exception, "Malformed cluster line (missing cluster id): '" << line << "'");
     const Factor* idFactor = FactorCollection::Instance().AddFactor(*lineIter);
     pClusterMaps->back().second[wordFactor] = idFactor;
     PreCalculateFeatureNames(pClusterMaps->size()-1, id, side, idFactor, true); 

@@ -31,7 +31,7 @@ LexicalReordering::LexicalReordering(const std::string &line)
     } else if (args[0].substr(0,7) == "sparse-") {
       sparseArgs[args[0].substr(7)] = args[1];
     } else {
-      throw "Unknown argument " + args[0];
+      UTIL_THROW(util::Exception,"Unknown argument " + args[0]);
     }
   }
 
@@ -39,17 +39,17 @@ LexicalReordering::LexicalReordering(const std::string &line)
   case LexicalReorderingConfiguration::FE:
   case LexicalReorderingConfiguration::E:
     if(m_factorsE.empty()) {
-      throw "TL factor mask for lexical reordering is unexpectedly empty";
+      UTIL_THROW(util::Exception,"TL factor mask for lexical reordering is unexpectedly empty");
     }
     if(m_configuration->GetCondition() == LexicalReorderingConfiguration::E)
       break; // else fall through
   case LexicalReorderingConfiguration::F:
     if(m_factorsF.empty()) {
-      throw "SL factor mask for lexical reordering is unexpectedly empty";
+      UTIL_THROW(util::Exception,"SL factor mask for lexical reordering is unexpectedly empty");
     }
     break;
   default:
-    throw "Unknown conditioning option!";
+    UTIL_THROW(util::Exception,"Unknown conditioning option!");
   }
 
   m_configuration->ConfigureSparse(sparseArgs, this);
