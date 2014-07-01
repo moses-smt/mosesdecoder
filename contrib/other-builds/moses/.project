@@ -602,16 +602,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingConstraint.h</locationURI>
 		</link>
 		<link>
-			<name>ReorderingStack.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingStack.cpp</locationURI>
-		</link>
-		<link>
-			<name>ReorderingStack.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingStack.h</locationURI>
-		</link>
-		<link>
 			<name>RuleCube.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleCube.cpp</locationURI>
@@ -1332,6 +1322,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanLength.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SparseHieroReorderingFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparseHieroReorderingFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SparseHieroReorderingFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparseHieroReorderingFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/StatefulFeatureFunction.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatefulFeatureFunction.cpp</locationURI>
@@ -1915,6 +1915,26 @@
 			<name>FF/LexicalReordering/LexicalReorderingTable.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingTable.h</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/ReorderingStack.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/ReorderingStack.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/ReorderingStack.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/ReorderingStack.h</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/SparseReordering.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/SparseReordering.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/SparseReordering.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/SparseReordering.h</locationURI>
 		</link>
 		<link>
 			<name>FF/OSM-Feature/OpSequenceModel.cpp</name>
