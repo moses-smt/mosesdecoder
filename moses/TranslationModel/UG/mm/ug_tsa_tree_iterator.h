@@ -7,6 +7,8 @@
 #include "ug_typedefs.h"
 #include "tpt_tokenindex.h"
 #include <iostream>
+#include "util/exception.hh"
+#include "moses/Util.h"
 //#include <cassert>
 
 // #include "ug_bv_iter.h"
@@ -60,8 +62,13 @@ namespace ugdiss
 
     // TSA_tree_iterator(TSA_tree_iterator const& other);
     TSA_tree_iterator(TSA<Token> const* s);
+    TSA_tree_iterator(TSA<Token> const* s, TSA_tree_iterator<Token> const& other);
     TSA_tree_iterator(TSA<Token> const* r, id_type const* s, size_t const len);
     // TSA_tree_iterator(TSA<Token> const* s, Token const& t);
+    TSA_tree_iterator(TSA<Token> const* s, 
+		      Token const* kstart, 
+		      size_t const len, 
+		      bool full_match_only=true);
     TSA_tree_iterator(TSA<Token> const* s, 
 		      Token const* kstart, 
 		      Token const* kend, 
@@ -150,9 +157,12 @@ namespace ugdiss
     double approxOccurrenceCount(int p=-1) const
     {
       assert(root);
+      if (p < 0) p += lower.size();
       double ret = arrayByteSpanSize(p)/root->aveIndexEntrySize();
-      assert(ret < root->corpus->numTokens());
       if (ret < 25) ret = rawCnt(p);
+      UTIL_THROW_IF2(ret > root->corpus->numTokens(), "[" << HERE << "] "
+		     << "Word count mismatch.");
+      assert(ret <= root->corpus->numTokens());
       return ret;
     }
 
@@ -320,6 +330,18 @@ namespace ugdiss
 
   template<typename Token>
   TSA_tree_iterator<Token>::
+  TSA_tree_iterator(TSA<Token> const* s, TSA_tree_iterator<Token> const& other)
+    : root(s) 
+  {
+    Token const* x = other.getToken(0);
+    for (size_t i = 0; i < other.size() && this->extend(x->id()); ++i)
+      x = x->next(); 
+  };
+
+
+
+  template<typename Token>
+  TSA_tree_iterator<Token>::
   TSA_tree_iterator
   (TSA<Token> const* r,
    id_type    const* s, 
@@ -382,6 +404,25 @@ namespace ugdiss
 
 #endif
 
+  template<typename Token>
+  TSA_tree_iterator<Token>::
+  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, 
+		    size_t const len, bool full_match_only)
+    : root(s) 
+  {
+    if (!root) return;
+    size_t i = 0;
+    for (; i < len && kstart && extend(*kstart); ++i)
+      kstart = kstart->next();
+    if (full_match_only && i != len) 
+      {
+        lower.clear();
+        upper.clear();
+      }
+  };
+
+  // DEPRECATED: DO NOT USE. Use the one that takes the length 
+  // instead of kend.
   template<typename Token>
   TSA_tree_iterator<Token>::
   TSA_tree_iterator(TSA<Token> const* s, Token const* kstart, 
@@ -561,8 +602,7 @@ namespace ugdiss
   TSA_tree_iterator<Token>::
   rawCnt(int p) const
   {
-    if (p < 0)
-      p = lower.size()+p;
+    if (p < 0) p += lower.size();
     assert(p>=0);
     if (lower.size() == 0) return root->getCorpusSize();
     return root->rawCnt(lower[p],upper[p]);

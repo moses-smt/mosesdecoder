@@ -3,4 +3,11 @@ alias deps : IOWrapper.cpp mbr.cpp LatticeMBR.cpp TranslationAnalysis.cpp ..//z 
 exe moses : Main.cpp deps ;
 exe lmbrgrid : LatticeMBRGrid.cpp deps ;
 
-alias programs : moses lmbrgrid ;
+exe simulate-pe : 
+simulate-pe.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_program_options 
+deps 
+;
+
+alias programs : moses lmbrgrid simulate-pe ;

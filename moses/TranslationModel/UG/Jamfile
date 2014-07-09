@@ -20,6 +20,39 @@ $(TOP)/moses/TranslationModel/UG//mmsapt
 $(TOP)/util//kenutil 
 ; 
 
+exe sim-pe : 
+sim-pe.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe spe-check-coverage : 
+spe-check-coverage.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe spe-check-coverage2 : 
+spe-check-coverage2.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
 install $(PREFIX)/bin : try-align ; 
 
-fakelib mmsapt : [ glob *.cpp mmsapt*.cc ] ;
+fakelib mmsapt : [ glob *.cpp mmsapt*.cc sapt*.cc ] ;

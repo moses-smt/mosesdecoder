@@ -1,6 +1,6 @@
 // build a phrase table for the given input
 // #include "ug_lexical_phrase_scorer2.h"
-
+#if 0
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -25,7 +25,7 @@
 #include "ug_bitext.h"
 #include "../mmsapt_phrase_scorers.h"
 #include "ug_lexical_phrase_scorer2.h"
-
+#include "../sapt_phrase_scorers.h"
 using namespace std;
 using namespace ugdiss;
 using namespace Moses;
@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
 {
   // assert(argc == 4);
 #if 0
+#if 0
   string base = argv[1];
   string L1   = argv[2];
   string L2   = argv[3];
@@ -182,7 +183,7 @@ int main(int argc, char* argv[])
       	    }
       	}
     }
-  
+#endif  
     exit(0);
 }
-
+#endif

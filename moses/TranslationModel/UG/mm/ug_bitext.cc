@@ -158,99 +158,25 @@ namespace Moses
     jstats::
     invalidate()
     {
-      my_rcnt = 0;
+      if (my_wcnt > 0) 
+	my_wcnt *= -1;
+    }
+
+    void 
+    jstats::
+    validate()
+    {
+      if (my_wcnt < 0) 
+	my_wcnt *= -1;
     }
 
     bool
     jstats::
     valid()
     {
-      return my_rcnt != 0;
+      return my_wcnt >= 0;
     }
 
-    bool
-    PhrasePair::
-    operator<=(PhrasePair const& other) const
-    {
-      return this->score <= other.score;
-    }
-
-    bool
-    PhrasePair::
-    operator>=(PhrasePair const& other) const
-    {
-      return this->score >= other.score;
-    }
-
-    bool
-    PhrasePair::
-    operator<(PhrasePair const& other) const
-    {
-      return this->score < other.score;
-    }
-    
-    bool
-    PhrasePair::
-    operator>(PhrasePair const& other) const
-    {
-      return this->score > other.score;
-    }
-    
-    PhrasePair::
-    PhrasePair() {}
-
-    PhrasePair::
-    PhrasePair(PhrasePair const& o) 
-      : p1(o.p1), 
-	p2(o.p2),
-	raw1(o.raw1), 
-	raw2(o.raw2), 
-	sample1(o.sample1),
-	sample2(o.sample2),
-	good1(o.good1),
-	good2(o.good2),
-	joint(o.joint),
-	fvals(o.fvals),
-	aln(o.aln),
-	score(o.score)
-    {
-      for (size_t i = 0; i <= po_other; ++i)
-	{
-	  dfwd[i] = o.dfwd[i];
-	  dbwd[i] = o.dbwd[i];
-	}
-    }
-    
-    void
-    PhrasePair::
-    init(uint64_t const pid1, pstats const& ps, size_t const numfeats)
-    {
-      p1      = pid1;
-      p2      = 0;
-      raw1    = ps.raw_cnt;
-      sample1 = ps.sample_cnt;
-      sample2 = 0;
-      good1   = ps.good;
-      good2   = 0;
-      raw2    = 0;
-      fvals.resize(numfeats);
-    }
-
-    void
-    PhrasePair::
-    init(uint64_t const pid1, 
-	 pstats const& ps1, 
-	 pstats const& ps2, 
-	 size_t const numfeats)
-    {
-      p1      = pid1;
-      raw1    = ps1.raw_cnt    + ps2.raw_cnt;
-      sample1 = ps1.sample_cnt + ps2.sample_cnt;
-      sample2 = 0;
-      good1   = ps1.good       + ps2.good;
-      good2   = 0;
-      fvals.resize(numfeats);
-    }
     
     float 
     lbop(size_t const tries, size_t const succ, float const confidence)
@@ -261,85 +187,6 @@ namespace Moses
 		 find_lower_bound_on_p(tries, succ, confidence)));
     }
     
-    PhrasePair const&
-    PhrasePair::
-    update(uint64_t const pid2, jstats const& js)   
-    {
-      p2    = pid2;
-      raw2  = js.cnt2();
-      joint = js.rcnt();
-      assert(js.aln().size());
-      if (js.aln().size()) 
-	aln = js.aln()[0].second;
-      float total_fwd = 0, total_bwd = 0;
-      for (int i = po_first; i <= po_other; i++)
-	{
-	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
-	  total_fwd += js.dcnt_fwd(po)+1;
-	  total_bwd += js.dcnt_bwd(po)+1;
-	}
-      for (int i = po_first; i <= po_other; i++)
-	{
-	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
-	  dfwd[i] = float(js.dcnt_fwd(po)+1)/total_fwd;
-	  dbwd[i] = float(js.dcnt_bwd(po)+1)/total_bwd;
-	}
-      return *this;
-    }
-
-    PhrasePair const&
-    PhrasePair::
-    update(uint64_t const pid2, jstats const& js1, jstats const& js2)   
-    {
-      p2    = pid2;
-      raw2  = js1.cnt2() + js2.cnt2();
-      joint = js1.rcnt() + js2.rcnt();
-      assert(js1.aln().size() || js2.aln().size());
-      if (js1.aln().size()) 
-	aln = js1.aln()[0].second;
-      else if (js2.aln().size()) 
-	aln = js2.aln()[0].second;
-      for (int i = po_first; i < po_other; i++)
-	{
-	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
-	  dfwd[i] = float(js1.dcnt_fwd(po) + js2.dcnt_fwd(po) + 1)/(sample1+po_other);
-	  dbwd[i] = float(js1.dcnt_bwd(po) + js2.dcnt_bwd(po) + 1)/(sample1+po_other);
-	}
-      return *this;
-    }
-
-    PhrasePair const&
-    PhrasePair::
-    update(uint64_t const pid2, 
-	   size_t   const raw2extra,
-	   jstats   const& js)   
-    {
-      p2    = pid2;
-      raw2  = js.cnt2() + raw2extra;
-      joint = js.rcnt();
-      assert(js.aln().size());
-      if (js.aln().size()) 
-	aln = js.aln()[0].second;
-      for (int i = po_first; i <= po_other; i++)
-	{
-	  PhraseOrientation po = static_cast<PhraseOrientation>(i);
-	  dfwd[i] = float(js.dcnt_fwd(po)+1)/(sample1+po_other);
-	  dbwd[i] = float(js.dcnt_bwd(po)+1)/(sample1+po_other);
-	}
-      return *this;
-    }
-
-    float
-    PhrasePair::
-    eval(vector<float> const& w)
-    {
-      assert(w.size() == this->fvals.size());
-      this->score = 0;
-      for (size_t i = 0; i < w.size(); ++i)
-	this->score += w[i] * this->fvals[i];
-      return this->score;
-    }
-  
     template<>
     sptr<imBitext<L2R_Token<SimpleWordId> > > 
     imBitext<L2R_Token<SimpleWordId> >::
@@ -371,7 +218,8 @@ namespace Moses
 	  uint32_t row,col; char c;
 	  while (ibuf >> row >> c >> col)
 	    {
-	      assert(c == '-');
+	      UTIL_THROW_IF2(c != '-', "[" << HERE << "] "
+			     << "Error in alignment information:\n" << a);
 	      binwrite(obuf,row);
 	      binwrite(obuf,col);
 	    }
@@ -639,7 +487,6 @@ namespace Moses
       cout  << string(90,'-') << endl;
     }
 
-
     PhraseOrientation 
     find_po_fwd(vector<vector<ushort> >& a1,
 		vector<vector<ushort> >& a2,
@@ -654,13 +501,13 @@ namespace Moses
       
       ushort ns1,ne1,ne2;
       if (!expand_phrase_pair(a1,a2,n2,b1,e1,ns1,ne1,ne2))
-	{
-	  return po_other;
-	}
+	return po_other;
+
       if (ns1 >= e1)
 	{
 	  for (ushort j = e1; j < ns1; ++j)
-	    if (a1[j].size()) return po_jfwd;
+	    if (a1[j].size()) 
+	      return po_jfwd;
 	  return po_mono;
 	}
       else

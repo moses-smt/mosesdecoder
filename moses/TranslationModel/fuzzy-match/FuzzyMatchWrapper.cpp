@@ -345,10 +345,10 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
     // find the best matches according to letter sed
     string best_path = "";
     int best_match = -1;
-    int best_letter_cost;
+    unsigned int best_letter_cost;
     if (lsed_flag) {
       best_letter_cost = compute_length( input[sentenceInd] ) * min_match / 100 + 1;
-      for(int si=0; si<best_tm.size(); si++) {
+      for(size_t si=0; si<best_tm.size(); si++) {
         int s = best_tm[si];
         string path;
         unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );

@@ -72,15 +72,15 @@ $(TOP)/moses/TranslationModel/UG/mm//mm
 $(TOP)/util//kenutil 
 ; 
 
-exe custom-pt : 
-custom-pt.cc 
-$(TOP)/moses//moses
-$(TOP)//boost_iostreams 
-$(TOP)//boost_program_options 
-$(TOP)/moses/TranslationModel/UG/mm//mm 
-$(TOP)/moses/TranslationModel/UG/generic//generic 
-$(TOP)/util//kenutil 
-; 
+# exe custom-pt : 
+# custom-pt.cc 
+# $(TOP)/moses//moses
+# $(TOP)//boost_iostreams 
+# $(TOP)//boost_program_options 
+# $(TOP)/moses/TranslationModel/UG/mm//mm 
+# $(TOP)/moses/TranslationModel/UG/generic//generic 
+# $(TOP)/util//kenutil 
+# ; 
 
 
 exe calc-coverage : 
@@ -98,7 +98,6 @@ mtt-dump
 mtt-count-words 
 symal2mam 
 mam2symal 
-custom-pt 
 mmlex-build 
 mmlex-lookup
 mam_verify 

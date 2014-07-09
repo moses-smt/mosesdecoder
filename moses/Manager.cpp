@@ -105,7 +105,9 @@ void Manager::ProcessSentence()
   // some reporting on how long this took
   IFVERBOSE(1) {
     GetSentenceStats().StopTimeCollectOpts();
-    TRACE_ERR("Line "<< m_lineNumber << ": Collecting options took " << GetSentenceStats().GetTimeCollectOpts() << " seconds" << endl);
+    TRACE_ERR("Line "<< m_lineNumber << ": Collecting options took " 
+	      << GetSentenceStats().GetTimeCollectOpts() << " seconds at " 
+	      << __FILE__ << ":" << __LINE__ << endl);
   }
 
   // search for best translation with the specified algorithm
