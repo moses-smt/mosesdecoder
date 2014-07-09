@@ -42,7 +42,7 @@ void OpSequenceModel::Load()
 
 
 
-void OpSequenceModel:: Evaluate(const Phrase &source
+void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
                                 , const TargetPhrase &targetPhrase
                                 , ScoreComponentCollection &scoreBreakdown
                                 , ScoreComponentCollection &estimatedFutureScore) const

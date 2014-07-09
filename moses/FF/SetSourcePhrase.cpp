@@ -10,7 +10,7 @@ SetSourcePhrase::SetSourcePhrase(const std::string &line)
   ReadParameters();
 }
 
-void SetSourcePhrase::Evaluate(const Phrase &source
+void SetSourcePhrase::EvaluateInIsolation(const Phrase &source
 						, const TargetPhrase &targetPhrase
 						, ScoreComponentCollection &scoreBreakdown
 						, ScoreComponentCollection &estimatedFutureScore) const

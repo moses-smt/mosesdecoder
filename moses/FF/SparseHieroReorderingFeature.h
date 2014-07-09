@@ -31,7 +31,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-	void Evaluate(const Phrase &source
+	void EvaluateInIsolation(const Phrase &source
 	                        , const TargetPhrase &targetPhrase
 	                        , ScoreComponentCollection &scoreBreakdown
 	                        , ScoreComponentCollection &estimatedFutureScore) const

@@ -25,7 +25,7 @@ std::vector<float> NieceTerminal::DefaultWeights() const
   return ret;
 }
 
-void NieceTerminal::Evaluate(const Phrase &source
+void NieceTerminal::EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const

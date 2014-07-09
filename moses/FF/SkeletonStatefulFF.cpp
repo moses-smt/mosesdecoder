@@ -23,7 +23,7 @@ SkeletonStatefulFF::SkeletonStatefulFF(const std::string &line)
   ReadParameters();
 }
 
-void SkeletonStatefulFF::Evaluate(const Phrase &source
+void SkeletonStatefulFF::EvaluateInIsolation(const Phrase &source
                                   , const TargetPhrase &targetPhrase
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection &estimatedFutureScore) const

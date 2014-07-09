@@ -40,7 +40,7 @@ int CoveredReferenceState::Compare(const FFState& other) const
 //  return (m_coveredRef.size() < otherState.m_coveredRef.size()) ? -1 : +1;
 }
 
-void CoveredReferenceFeature::Evaluate(const Phrase &source
+void CoveredReferenceFeature::EvaluateInIsolation(const Phrase &source
                                   , const TargetPhrase &targetPhrase
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection &estimatedFutureScore) const

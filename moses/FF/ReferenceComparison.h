@@ -15,7 +15,7 @@ public:
 	  virtual bool IsUseable(const FactorMask &mask) const
 	  { return true; }
 
-	  virtual void Evaluate(const Phrase &source
+	  virtual void EvaluateInIsolation(const Phrase &source
 							, const TargetPhrase &targetPhrase
 							, ScoreComponentCollection &scoreBreakdown
 							, ScoreComponentCollection &estimatedFutureScore) const

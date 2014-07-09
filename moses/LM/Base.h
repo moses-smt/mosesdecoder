@@ -87,7 +87,7 @@ public:
   virtual void IncrementalCallback(Incremental::Manager &manager) const;
   virtual void ReportHistoryOrder(std::ostream &out,const Phrase &phrase) const;
 
-  virtual void Evaluate(const Phrase &source
+  virtual void EvaluateInIsolation(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const;

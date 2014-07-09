@@ -22,7 +22,7 @@ public:
   virtual void EvaluateChart(const ChartHypothesis& hypo,
                              ScoreComponentCollection* accumulator) const;
 
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const {};

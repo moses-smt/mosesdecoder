@@ -13,7 +13,7 @@ SkeletonStatelessFF::SkeletonStatelessFF(const std::string &line)
   ReadParameters();
 }
 
-void SkeletonStatelessFF::Evaluate(const Phrase &source
+void SkeletonStatelessFF::EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const

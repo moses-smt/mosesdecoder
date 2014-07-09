@@ -5,7 +5,7 @@ using namespace std;
 
 namespace Moses
 {
-void InternalStructStatelessFF::Evaluate(const Phrase &source
+void InternalStructStatelessFF::EvaluateInIsolation(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const

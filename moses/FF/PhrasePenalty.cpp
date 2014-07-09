@@ -10,7 +10,7 @@ PhrasePenalty::PhrasePenalty(const std::string &line)
   ReadParameters();
 }
 
-void PhrasePenalty::Evaluate(const Phrase &source
+void PhrasePenalty::EvaluateInIsolation(const Phrase &source
                              , const TargetPhrase &targetPhrase
                              , ScoreComponentCollection &scoreBreakdown
                              , ScoreComponentCollection &estimatedFutureScore) const

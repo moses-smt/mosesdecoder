@@ -21,7 +21,7 @@ SpanLength::SpanLength(const std::string &line)
   ReadParameters();
 }
 
-void SpanLength::Evaluate(const Phrase &source
+void SpanLength::EvaluateInIsolation(const Phrase &source
 						, const TargetPhrase &targetPhrase
 						, ScoreComponentCollection &scoreBreakdown
 						, ScoreComponentCollection &estimatedFutureScore) const

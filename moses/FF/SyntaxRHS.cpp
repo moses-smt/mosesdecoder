@@ -14,7 +14,7 @@ SyntaxRHS::SyntaxRHS(const std::string &line)
   ReadParameters();
 }
 
-void SyntaxRHS::Evaluate(const Phrase &source
+void SyntaxRHS::EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const
