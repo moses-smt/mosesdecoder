@@ -24,7 +24,7 @@ public:
     return true;
   }
 
-  void Evaluate(const Hypothesis& hypo,
+  void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
 

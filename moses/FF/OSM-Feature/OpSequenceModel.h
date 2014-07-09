@@ -29,7 +29,7 @@ public:
   void readLanguageModel(const char *);
   void Load();
 
-  FFState* Evaluate(
+  FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;

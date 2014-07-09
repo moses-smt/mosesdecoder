@@ -51,7 +51,7 @@ void ExternalFeature::SetParameter(const std::string& key, const std::string& va
   }
 }
 
-FFState* ExternalFeature::Evaluate(
+FFState* ExternalFeature::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const

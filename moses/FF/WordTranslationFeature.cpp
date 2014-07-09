@@ -137,7 +137,7 @@ void WordTranslationFeature::Load()
   }
 }
 
-void WordTranslationFeature::Evaluate
+void WordTranslationFeature::EvaluateWhenApplied
 (const Hypothesis& hypo,
  ScoreComponentCollection* accumulator) const
 {

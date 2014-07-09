@@ -29,7 +29,7 @@ public:
    * hypothesis, you should store it in an FFState object which will be passed
    * in as prev_state.  If you don't do this, you will get in trouble.
    */
-  virtual FFState* Evaluate(
+  virtual FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const = 0;

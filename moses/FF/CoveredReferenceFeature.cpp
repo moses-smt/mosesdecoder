@@ -90,7 +90,7 @@ void CoveredReferenceFeature::SetParameter(const std::string& key, const std::st
   }
 }
 
-FFState* CoveredReferenceFeature::Evaluate(
+FFState* CoveredReferenceFeature::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const

@@ -62,7 +62,7 @@ public:
   bool IsUseable(const FactorMask &mask) const;
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Evaluate(const Hypothesis& hypo,
+  void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
   void EvaluateChart(const ChartHypothesis &hypo,

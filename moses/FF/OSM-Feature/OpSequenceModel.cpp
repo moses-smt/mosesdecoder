@@ -87,7 +87,7 @@ void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
 }
 
 
-FFState* OpSequenceModel::Evaluate(
+FFState* OpSequenceModel::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const

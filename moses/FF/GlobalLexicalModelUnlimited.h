@@ -81,7 +81,7 @@ public:
 
   //TODO: This implements the old interface, but cannot be updated because
   //it appears to be stateful
-  void Evaluate(const Hypothesis& cur_hypo,
+  void EvaluateWhenApplied(const Hypothesis& cur_hypo,
                 ScoreComponentCollection* accumulator) const;
 
   void EvaluateChart(const ChartHypothesis& /* cur_hypo */,

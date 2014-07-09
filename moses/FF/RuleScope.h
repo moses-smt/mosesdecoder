@@ -27,7 +27,7 @@ public:
 	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
 	  {}
 
-	  virtual void Evaluate(const Hypothesis& hypo,
+	  virtual void EvaluateWhenApplied(const Hypothesis& hypo,
 	                        ScoreComponentCollection* accumulator) const
 	  {}
 

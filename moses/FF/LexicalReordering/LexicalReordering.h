@@ -45,7 +45,7 @@ public:
 
   Scores GetProb(const Phrase& f, const Phrase& e) const;
 
-  virtual FFState* Evaluate(const Hypothesis& cur_hypo,
+  virtual FFState* EvaluateWhenApplied(const Hypothesis& cur_hypo,
                             const FFState* prev_state,
                             ScoreComponentCollection* accumulator) const;
 

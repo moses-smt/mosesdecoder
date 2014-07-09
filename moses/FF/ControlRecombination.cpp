@@ -56,7 +56,7 @@ std::vector<float> ControlRecombination::DefaultWeights() const
   return ret;
 }
 
-FFState* ControlRecombination::Evaluate(
+FFState* ControlRecombination::EvaluateWhenApplied(
   const Hypothesis& hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const

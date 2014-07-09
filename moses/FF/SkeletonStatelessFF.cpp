@@ -44,7 +44,7 @@ void SkeletonStatelessFF::EvaluateWithSourceContext(const InputType &input
 
 }
 
-void SkeletonStatelessFF::Evaluate(const Hypothesis& hypo,
+void SkeletonStatelessFF::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 

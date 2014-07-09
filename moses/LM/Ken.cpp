@@ -229,7 +229,7 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
   fullScore = TransformLMScore(fullScore);
 }
 
-template <class Model> FFState *LanguageModelKen<Model>::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
 

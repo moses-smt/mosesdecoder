@@ -71,7 +71,7 @@ void NieceTerminal::EvaluateWithSourceContext(const InputType &input
 
 }
 
-void NieceTerminal::Evaluate(const Hypothesis& hypo,
+void NieceTerminal::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 

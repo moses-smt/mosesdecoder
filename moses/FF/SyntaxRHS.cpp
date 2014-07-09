@@ -42,7 +42,7 @@ void SyntaxRHS::EvaluateWithSourceContext(const InputType &input
 
 }
 
-void SyntaxRHS::Evaluate(const Hypothesis& hypo,
+void SyntaxRHS::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 

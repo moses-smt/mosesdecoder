@@ -100,7 +100,7 @@ const std::vector<Phrase> *GetConstraint(const std::map<long,std::vector<Phrase>
   }
 }
 
-FFState* ConstrainedDecoding::Evaluate(
+FFState* ConstrainedDecoding::EvaluateWhenApplied(
   const Hypothesis& hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const

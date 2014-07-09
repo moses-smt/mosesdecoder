@@ -69,7 +69,7 @@ Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
   return m_table->GetScore(f, e, Phrase(ARRAY_SIZE_INCR));
 }
 
-FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
+FFState* LexicalReordering::EvaluateWhenApplied(const Hypothesis& hypo,
                                      const FFState* prev_state,
                                      ScoreComponentCollection* out) const
 {

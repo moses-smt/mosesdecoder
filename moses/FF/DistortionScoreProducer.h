@@ -28,7 +28,7 @@ public:
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
-  virtual FFState* Evaluate(
+  virtual FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;

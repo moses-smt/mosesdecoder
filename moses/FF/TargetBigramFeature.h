@@ -39,7 +39,7 @@ public:
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
-  virtual FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
+  virtual FFState* EvaluateWhenApplied(const Hypothesis& cur_hypo, const FFState* prev_state,
                             ScoreComponentCollection* accumulator) const;
 
   virtual FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */,

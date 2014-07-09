@@ -37,7 +37,7 @@ void SkeletonStatefulFF::EvaluateWithSourceContext(const InputType &input
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {}
 
-FFState* SkeletonStatefulFF::Evaluate(
+FFState* SkeletonStatefulFF::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
