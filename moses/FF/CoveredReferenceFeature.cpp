@@ -46,7 +46,7 @@ void CoveredReferenceFeature::EvaluateInIsolation(const Phrase &source
                                   , ScoreComponentCollection &estimatedFutureScore) const
 {}
 
-void CoveredReferenceFeature::Evaluate(const InputType &input
+void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
                                   , const InputPath &inputPath
                                   , const TargetPhrase &targetPhrase
                                   , const StackVec *stackVec

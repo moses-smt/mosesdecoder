@@ -40,7 +40,7 @@ public:
     throw std::logic_error("DistortionScoreProducer not supported in chart decoder, yet");
   }
 
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec

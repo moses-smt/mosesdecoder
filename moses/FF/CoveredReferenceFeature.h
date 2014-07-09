@@ -56,7 +56,7 @@ public:
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const;
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec

@@ -35,7 +35,7 @@ void MaxSpanFreeNonTermSource::EvaluateInIsolation(const Phrase &source
   targetPhrase.SetRuleSource(source);
 }
 
-void MaxSpanFreeNonTermSource::Evaluate(const InputType &input
+void MaxSpanFreeNonTermSource::EvaluateWithSourceContext(const InputType &input
                        , const InputPath &inputPath
                        , const TargetPhrase &targetPhrase
                        , const StackVec *stackVec

@@ -110,7 +110,7 @@ public:
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
   // No FF should set estimatedFutureScore in both overloads!
-  virtual void Evaluate(const InputType &input
+  virtual void EvaluateWithSourceContext(const InputType &input
                         , const InputPath &inputPath
                         , const TargetPhrase &targetPhrase
                         , const StackVec *stackVec

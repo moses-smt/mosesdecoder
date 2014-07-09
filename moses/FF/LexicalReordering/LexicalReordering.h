@@ -54,7 +54,7 @@ public:
                                  ScoreComponentCollection*) const {
     UTIL_THROW(util::Exception, "LexicalReordering is not valid for chart decoder");
   }
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec

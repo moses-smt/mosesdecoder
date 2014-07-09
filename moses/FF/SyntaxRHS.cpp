@@ -21,7 +21,7 @@ void SyntaxRHS::EvaluateInIsolation(const Phrase &source
 {
 }
 
-void SyntaxRHS::Evaluate(const InputType &input
+void SyntaxRHS::EvaluateWithSourceContext(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
                                    , const StackVec *stackVec

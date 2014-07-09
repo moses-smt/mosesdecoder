@@ -45,7 +45,7 @@ public:
     throw std::logic_error("PhrasePairFeature not valid in chart decoder");
   }
 
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec

@@ -15,7 +15,7 @@ void InternalStructStatelessFF::EvaluateInIsolation(const Phrase &source
 
 }
 
-void InternalStructStatelessFF::Evaluate(const InputType &input
+void InternalStructStatelessFF::EvaluateWithSourceContext(const InputType &input
 	                        , const InputPath &inputPath
 	                        , const TargetPhrase &targetPhrase
 	                        , const StackVec *stackVec

@@ -29,7 +29,7 @@ void SkeletonStatelessFF::EvaluateInIsolation(const Phrase &source
 
 }
 
-void SkeletonStatelessFF::Evaluate(const InputType &input
+void SkeletonStatelessFF::EvaluateWithSourceContext(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
                                    , const StackVec *stackVec

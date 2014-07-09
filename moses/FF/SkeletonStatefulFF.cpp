@@ -29,7 +29,7 @@ void SkeletonStatefulFF::EvaluateInIsolation(const Phrase &source
                                   , ScoreComponentCollection &estimatedFutureScore) const
 {}
 
-void SkeletonStatefulFF::Evaluate(const InputType &input
+void SkeletonStatefulFF::EvaluateWithSourceContext(const InputType &input
                                   , const InputPath &inputPath
                                   , const TargetPhrase &targetPhrase
                                   , const StackVec *stackVec

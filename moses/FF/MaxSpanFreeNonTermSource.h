@@ -20,7 +20,7 @@ public:
 							, ScoreComponentCollection &scoreBreakdown
 							, ScoreComponentCollection &estimatedFutureScore) const;
 
-	  virtual void Evaluate(const InputType &input
+	  virtual void EvaluateWithSourceContext(const InputType &input
 	                         , const InputPath &inputPath
 	                         , const TargetPhrase &targetPhrase
 	                         , const StackVec *stackVec

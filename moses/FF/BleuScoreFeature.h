@@ -121,7 +121,7 @@ public:
   FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
                          int featureID,
                          ScoreComponentCollection* accumulator) const;
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec

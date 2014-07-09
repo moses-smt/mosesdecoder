@@ -29,7 +29,7 @@ void SpanLength::EvaluateInIsolation(const Phrase &source
   targetPhrase.SetRuleSource(source);
 }
 
-void SpanLength::Evaluate(const InputType &input
+void SpanLength::EvaluateWithSourceContext(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
                                    , const StackVec *stackVec

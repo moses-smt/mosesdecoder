@@ -33,7 +33,7 @@ void NieceTerminal::EvaluateInIsolation(const Phrase &source
   targetPhrase.SetRuleSource(source);
 }
 
-void NieceTerminal::Evaluate(const InputType &input
+void NieceTerminal::EvaluateWithSourceContext(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
                                    , const StackVec *stackVec

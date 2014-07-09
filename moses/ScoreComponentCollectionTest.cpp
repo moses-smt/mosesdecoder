@@ -36,7 +36,7 @@ public:
     StatelessFeatureFunction(n, line) {}
   void Evaluate(const Hypothesis&, ScoreComponentCollection*) const {}
   void EvaluateChart(const ChartHypothesis&, ScoreComponentCollection*) const {}
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec

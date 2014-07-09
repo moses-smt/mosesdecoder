@@ -68,7 +68,7 @@ public:
   void EvaluateChart(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
