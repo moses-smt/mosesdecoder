@@ -143,7 +143,7 @@ FFState* ConstrainedDecoding::EvaluateWhenApplied(
   return ret;
 }
 
-FFState* ConstrainedDecoding::EvaluateChart(
+FFState* ConstrainedDecoding::EvaluateWhenApplied(
   const ChartHypothesis &hypo,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

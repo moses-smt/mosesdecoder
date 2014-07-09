@@ -81,7 +81,7 @@ const Factor* SparseHieroReorderingFeature::GetFactor(const Word& word, const Vo
   return factor;
 }
 
-void SparseHieroReorderingFeature::EvaluateChart(
+void SparseHieroReorderingFeature::EvaluateWhenApplied(
   const ChartHypothesis&  cur_hypo ,
   ScoreComponentCollection* accumulator) const
 {

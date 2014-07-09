@@ -339,7 +339,7 @@ FFState *LanguageModelDALM::EvaluateWhenApplied(const Hypothesis &hypo, const FF
   return dalm_state;
 }
 
-FFState *LanguageModelDALM::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const{
+FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const{
   // initialize language model context state
  	DALMChartState *newState = new DALMChartState();
 	DALM::State &state = newState->GetRightContext();

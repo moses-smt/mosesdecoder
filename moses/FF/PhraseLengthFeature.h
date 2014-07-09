@@ -28,7 +28,7 @@ public:
                 ScoreComponentCollection* accumulator) const
   {}
 
-  void EvaluateChart(const ChartHypothesis& hypo,
+  void EvaluateWhenApplied(const ChartHypothesis& hypo,
                      ScoreComponentCollection*) const {
     throw std::logic_error("PhraseLengthFeature not valid in chart decoder");
   }

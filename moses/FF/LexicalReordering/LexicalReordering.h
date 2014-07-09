@@ -49,7 +49,7 @@ public:
                             const FFState* prev_state,
                             ScoreComponentCollection* accumulator) const;
 
-  virtual FFState* EvaluateChart(const ChartHypothesis&,
+  virtual FFState* EvaluateWhenApplied(const ChartHypothesis&,
                                  int /* featureID */,
                                  ScoreComponentCollection*) const {
     UTIL_THROW(util::Exception, "LexicalReordering is not valid for chart decoder");

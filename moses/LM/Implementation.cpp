@@ -222,7 +222,7 @@ FFState *LanguageModelImplementation::EvaluateWhenApplied(const Hypothesis &hypo
   return res;
 }
 
-FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out) const
+FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out) const
 {
   LanguageModelChartState *ret = new LanguageModelChartState(hypo, featureID, GetNGramOrder());
   // data structure for factored context phrase (history and predicted word)

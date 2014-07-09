@@ -42,7 +42,7 @@ public:
   virtual FFState* EvaluateWhenApplied(const Hypothesis& cur_hypo, const FFState* prev_state,
                             ScoreComponentCollection* accumulator) const;
 
-  virtual FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */,
+  virtual FFState* EvaluateWhenApplied( const ChartHypothesis& /* cur_hypo */,
                                   int /* featureID */,
                                   ScoreComponentCollection* ) const {
     throw std::logic_error("TargetBigramFeature not valid in chart decoder");

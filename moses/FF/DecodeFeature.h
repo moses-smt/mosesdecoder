@@ -65,7 +65,7 @@ public:
   void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
-  void EvaluateChart(const ChartHypothesis &hypo,
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
   void EvaluateWithSourceContext(const InputType &input

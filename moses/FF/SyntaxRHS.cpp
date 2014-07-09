@@ -46,7 +46,7 @@ void SyntaxRHS::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 
-void SyntaxRHS::EvaluateChart(const ChartHypothesis &hypo,
+void SyntaxRHS::EvaluateWhenApplied(const ChartHypothesis &hypo,
                                         ScoreComponentCollection* accumulator) const
 {}
 

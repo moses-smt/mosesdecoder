@@ -64,7 +64,7 @@ FFState* ControlRecombination::EvaluateWhenApplied(
   return new ControlRecombinationState(hypo, *this);
 }
 
-FFState* ControlRecombination::EvaluateChart(
+FFState* ControlRecombination::EvaluateWhenApplied(
   const ChartHypothesis &hypo,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

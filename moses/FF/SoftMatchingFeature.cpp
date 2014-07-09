@@ -61,7 +61,7 @@ bool SoftMatchingFeature::Load(const std::string& filePath)
    return true;
 }
 
-void SoftMatchingFeature::EvaluateChart(const ChartHypothesis& hypo,
+void SoftMatchingFeature::EvaluateWhenApplied(const ChartHypothesis& hypo,
                              ScoreComponentCollection* accumulator) const
 {
 

@@ -48,7 +48,7 @@ void SkeletonStatelessFF::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 
-void SkeletonStatelessFF::EvaluateChart(const ChartHypothesis &hypo,
+void SkeletonStatelessFF::EvaluateWhenApplied(const ChartHypothesis &hypo,
                                         ScoreComponentCollection* accumulator) const
 {}
 

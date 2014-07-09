@@ -31,7 +31,7 @@ public:
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
   void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const;
-  void EvaluateChart(const ChartHypothesis &hypo,
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const;
 
   void SetParameter(const std::string& key, const std::string& value);

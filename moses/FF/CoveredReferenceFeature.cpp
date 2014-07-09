@@ -131,7 +131,7 @@ FFState* CoveredReferenceFeature::EvaluateWhenApplied(
   return ret;
 }
 
-FFState* CoveredReferenceFeature::EvaluateChart(
+FFState* CoveredReferenceFeature::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

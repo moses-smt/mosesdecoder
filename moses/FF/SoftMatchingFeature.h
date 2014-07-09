@@ -19,7 +19,7 @@ public:
     return true;
   }
 
-  virtual void EvaluateChart(const ChartHypothesis& hypo,
+  virtual void EvaluateWhenApplied(const ChartHypothesis& hypo,
                              ScoreComponentCollection* accumulator) const;
 
   void EvaluateInIsolation(const Phrase &source

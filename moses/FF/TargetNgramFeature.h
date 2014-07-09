@@ -189,7 +189,7 @@ public:
   virtual FFState* EvaluateWhenApplied(const Hypothesis& cur_hypo, const FFState* prev_state,
                             ScoreComponentCollection* accumulator) const;
 
-  virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
+  virtual FFState* EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureId,
                                  ScoreComponentCollection* accumulator) const;
 
   void EvaluateWithSourceContext(const InputType &input

@@ -56,7 +56,7 @@ FFState* SkeletonStatefulFF::EvaluateWhenApplied(
   return new SkeletonState(0);
 }
 
-FFState* SkeletonStatefulFF::EvaluateChart(
+FFState* SkeletonStatefulFF::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

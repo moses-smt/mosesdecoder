@@ -207,7 +207,7 @@ void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream 
   }
 }
 
-FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId, ScoreComponentCollection* accumulator) const
+FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureId, ScoreComponentCollection* accumulator) const
 {
   vector<const Word*> contextFactor;
   contextFactor.reserve(m_n);

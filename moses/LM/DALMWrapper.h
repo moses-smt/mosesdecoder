@@ -36,7 +36,7 @@ public:
 
   virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
-  virtual FFState *EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const;
+  virtual FFState *EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const;
 
   virtual bool IsUseable(const FactorMask &mask) const;
 

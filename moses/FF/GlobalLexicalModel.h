@@ -74,7 +74,7 @@ public:
                 ScoreComponentCollection* accumulator) const;
 
 
-  void EvaluateChart(
+  void EvaluateWhenApplied(
     const ChartHypothesis& hypo,
     ScoreComponentCollection* accumulator) const {
     throw std::logic_error("GlobalLexicalModel not supported in chart decoder, yet");

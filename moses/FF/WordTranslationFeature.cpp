@@ -349,7 +349,7 @@ void WordTranslationFeature::EvaluateWhenApplied
   }
 }
 
-void WordTranslationFeature::EvaluateChart(
+void WordTranslationFeature::EvaluateWhenApplied(
   const ChartHypothesis &hypo,
   ScoreComponentCollection* accumulator) const
 {

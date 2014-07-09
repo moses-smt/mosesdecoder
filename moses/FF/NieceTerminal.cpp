@@ -75,7 +75,7 @@ void NieceTerminal::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 
-void NieceTerminal::EvaluateChart(const ChartHypothesis &hypo,
+void NieceTerminal::EvaluateWhenApplied(const ChartHypothesis &hypo,
                                         ScoreComponentCollection* accumulator) const
 {}
 

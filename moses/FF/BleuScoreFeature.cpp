@@ -563,7 +563,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
   return new_state;
 }
 
-FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
+FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID,
     ScoreComponentCollection* accumulator ) const
 {
   if (!m_enabled) return new BleuScoreState();

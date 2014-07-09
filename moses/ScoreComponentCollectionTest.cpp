@@ -35,7 +35,7 @@ public:
   MockStatelessFeatureFunction(size_t n, const string &line) :
     StatelessFeatureFunction(n, line) {}
   void EvaluateWhenApplied(const Hypothesis&, ScoreComponentCollection*) const {}
-  void EvaluateChart(const ChartHypothesis&, ScoreComponentCollection*) const {}
+  void EvaluateWhenApplied(const ChartHypothesis&, ScoreComponentCollection*) const {}
   void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase

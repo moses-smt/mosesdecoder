@@ -29,7 +29,7 @@ public:
                 ScoreComponentCollection* accumulator) const
   {}
 
-  void EvaluateChart(
+  void EvaluateWhenApplied(
     const ChartHypothesis& hypo,
     ScoreComponentCollection* accumulator) const
   {}

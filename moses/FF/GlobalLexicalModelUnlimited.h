@@ -84,7 +84,7 @@ public:
   void EvaluateWhenApplied(const Hypothesis& cur_hypo,
                 ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartHypothesis& /* cur_hypo */,
+  void EvaluateWhenApplied(const ChartHypothesis& /* cur_hypo */,
                      int /* featureID */,
                      ScoreComponentCollection* ) const {
     throw std::logic_error("GlobalLexicalModelUnlimited not supported in chart decoder, yet");

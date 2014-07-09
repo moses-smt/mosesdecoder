@@ -31,7 +31,7 @@ public:
                         ScoreComponentCollection* accumulator) const
   {}
 
-  virtual void EvaluateChart(const ChartHypothesis &hypo,
+  virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
                              ScoreComponentCollection* accumulator) const
   {}
 

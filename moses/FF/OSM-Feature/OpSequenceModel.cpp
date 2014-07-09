@@ -194,7 +194,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
 // return NULL;
 }
 
-FFState* OpSequenceModel::EvaluateChart(
+FFState* OpSequenceModel::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

@@ -59,7 +59,7 @@ FFState* ExternalFeature::EvaluateWhenApplied(
   return new ExternalFeatureState(m_stateSize);
 }
 
-FFState* ExternalFeature::EvaluateChart(
+FFState* ExternalFeature::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

@@ -79,7 +79,7 @@ struct KenLMState : public FFState {
 //
 //  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 //
-//  FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+//  FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
 //
 //  void IncrementalCallback(Incremental::Manager &manager) const {
 //    manager.LMCallback(*m_ngram, m_lmIdLookup);
@@ -307,7 +307,7 @@ private:
   lm::ngram::ChartState m_state;
 };
 
-template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const
 {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());

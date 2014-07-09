@@ -166,7 +166,7 @@ public:
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const {UTIL_THROW(util::Exception, "Not implemented");};
-  FFState* EvaluateChart(
+  FFState* EvaluateWhenApplied(
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;
