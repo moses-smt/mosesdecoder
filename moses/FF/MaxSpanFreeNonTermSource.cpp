@@ -27,7 +27,7 @@ MaxSpanFreeNonTermSource::MaxSpanFreeNonTermSource(const std::string &line)
   m_glueTargetLHS.SetFactor(0, factor);
 }
 
-void MaxSpanFreeNonTermSource::Evaluate(const Phrase &source
+void MaxSpanFreeNonTermSource::EvaluateInIsolation(const Phrase &source
 						, const TargetPhrase &targetPhrase
 						, ScoreComponentCollection &scoreBreakdown
 						, ScoreComponentCollection &estimatedFutureScore) const
@@ -35,7 +35,7 @@ void MaxSpanFreeNonTermSource::Evaluate(const Phrase &source
   targetPhrase.SetRuleSource(source);
 }
 
-void MaxSpanFreeNonTermSource::Evaluate(const InputType &input
+void MaxSpanFreeNonTermSource::EvaluateWithSourceContext(const InputType &input
                        , const InputPath &inputPath
                        , const TargetPhrase &targetPhrase
                        , const StackVec *stackVec

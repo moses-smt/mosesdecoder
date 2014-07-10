@@ -4,22 +4,25 @@
 #include <vector>
 #include <string>
 
+#include <boost/scoped_ptr.hpp>
+
 #include "moses/Hypothesis.h"
-#include "LexicalReordering.h"
+//#include "LexicalReordering.h"
+#include "moses/ScoreComponentCollection.h"
 #include "moses/WordsRange.h"
 #include "moses/WordsBitmap.h"
-#include "moses/ReorderingStack.h"
 #include "moses/TranslationOption.h"
 #include "moses/FF/FFState.h"
 
+#include "ReorderingStack.h"
 
 namespace Moses
 {
 class LexicalReorderingState;
 class LexicalReordering;
+class SparseReordering;
 
 /** Factory class for lexical reordering states
- *  @todo There's a lot of classes for lexicalized reordering. Perhaps put them in a separate dir
  */
 class LexicalReorderingConfiguration
 {
@@ -30,6 +33,8 @@ public:
   enum Condition {F, E, FE};
 
   LexicalReorderingConfiguration(const std::string &modelType);
+
+  void ConfigureSparse(const std::map<std::string,std::string>& sparseArgs, const LexicalReordering* producer);
 
   LexicalReorderingState *CreateLexicalReorderingState(const InputType &input) const;
 
@@ -62,6 +67,10 @@ public:
     return m_collapseScores;
   }
 
+  const SparseReordering* GetSparseReordering() const {
+    return m_sparse.get();
+  }
+
 private:
   void SetScoreProducer(LexicalReordering* scoreProducer) {
     m_scoreProducer = scoreProducer;
@@ -79,6 +88,7 @@ private:
   Direction m_direction;
   Condition m_condition;
   size_t m_additionalScoreComponents;
+  boost::scoped_ptr<SparseReordering> m_sparse;
 };
 
 //! Abstract class for lexical reordering model states
@@ -86,34 +96,35 @@ class LexicalReorderingState : public FFState
 {
 public:
   virtual int Compare(const FFState& o) const = 0;
-  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, Scores& scores) const = 0;
+  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, const InputType& input, ScoreComponentCollection* scores) const = 0;
 
   static LexicalReorderingState* CreateLexicalReorderingState(const std::vector<std::string>& config,
       LexicalReorderingConfiguration::Direction dir, const InputType &input);
+  typedef int ReorderingType;
 
 protected:
-  typedef int ReorderingType;
 
 
   const LexicalReorderingConfiguration &m_configuration;
   // The following is the true direction of the object, which can be Backward or Forward even if the Configuration has Bidirectional.
   LexicalReorderingConfiguration::Direction m_direction;
   size_t m_offset;
-  const Scores *m_prevScore;
+  //forward scores are conditioned on prev option, so need to remember it
+  const TranslationOption *m_prevOption;
 
   inline LexicalReorderingState(const LexicalReorderingState *prev, const TranslationOption &topt) :
     m_configuration(prev->m_configuration), m_direction(prev->m_direction), m_offset(prev->m_offset),
-    m_prevScore(topt.GetLexReorderingScores(m_configuration.GetScoreProducer())) {}
+    m_prevOption(&topt) {}
 
   inline LexicalReorderingState(const LexicalReorderingConfiguration &config, LexicalReorderingConfiguration::Direction dir, size_t offset)
-    : m_configuration(config), m_direction(dir), m_offset(offset), m_prevScore(NULL) {}
+    : m_configuration(config), m_direction(dir), m_offset(offset), m_prevOption(NULL) {}
 
   // copy the right scores in the right places, taking into account forward/backward, offset, collapse
-  void CopyScores(Scores& scores, const TranslationOption& topt, ReorderingType reoType) const;
-  void ClearScores(Scores& scores) const;
-  int ComparePrevScores(const Scores *other) const;
+  void CopyScores(ScoreComponentCollection* scores, const TranslationOption& topt, const InputType& input, ReorderingType reoType) const;
+  int ComparePrevScores(const TranslationOption *other) const;
 
   //constants for the different type of reorderings (corresponding to indexes in the table file)
+  public:
   static const ReorderingType M = 0;  // monotonic
   static const ReorderingType NM = 1; // non-monotonic
   static const ReorderingType S = 1;  // swap
@@ -122,6 +133,7 @@ protected:
   static const ReorderingType DR = 3; // discontinuous, right
   static const ReorderingType R = 0;  // right
   static const ReorderingType L = 1;  // left
+  static const ReorderingType MAX = 3; //largest possible
 };
 
 //! @todo what is this?
@@ -140,7 +152,7 @@ public:
   }
 
   virtual int Compare(const FFState& o) const;
-  virtual LexicalReorderingState* Expand(const TranslationOption& topt, Scores& scores) const;
+  virtual LexicalReorderingState* Expand(const TranslationOption& topt, const InputType& input, ScoreComponentCollection*  scores) const;
 };
 
 //! State for the standard Moses implementation of lexical reordering models
@@ -156,7 +168,7 @@ public:
   PhraseBasedReorderingState(const PhraseBasedReorderingState *prev, const TranslationOption &topt);
 
   virtual int Compare(const FFState& o) const;
-  virtual LexicalReorderingState* Expand(const TranslationOption& topt, Scores& scores) const;
+  virtual LexicalReorderingState* Expand(const TranslationOption& topt,const InputType& input, ScoreComponentCollection*  scores) const;
 
   ReorderingType GetOrientationTypeMSD(WordsRange currRange) const;
   ReorderingType GetOrientationTypeMSLR(WordsRange currRange) const;
@@ -177,7 +189,7 @@ public:
                                       const TranslationOption &topt, ReorderingStack reoStack);
 
   virtual int Compare(const FFState& o) const;
-  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, Scores& scores) const;
+  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, const InputType& input,  ScoreComponentCollection*  scores) const;
 
 private:
   ReorderingType GetOrientationTypeMSD(int reoDistance) const;
@@ -200,7 +212,7 @@ public:
   HierarchicalReorderingForwardState(const HierarchicalReorderingForwardState *prev, const TranslationOption &topt);
 
   virtual int Compare(const FFState& o) const;
-  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, Scores& scores) const;
+  virtual LexicalReorderingState* Expand(const TranslationOption& hypo, const InputType& input, ScoreComponentCollection* scores) const;
 
 private:
   ReorderingType GetOrientationTypeMSD(WordsRange currRange, WordsBitmap coverage) const;

@@ -27,6 +27,7 @@
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
+#include "moses/FF/SparseHieroReorderingFeature.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/PhrasePenalty.h"
@@ -200,6 +201,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(RuleScope);
   MOSES_FNAME(MaxSpanFreeNonTermSource);
   MOSES_FNAME(NieceTerminal);
+  MOSES_FNAME(SparseHieroReorderingFeature);
   MOSES_FNAME(SpanLength);
   MOSES_FNAME(SyntaxRHS);
 

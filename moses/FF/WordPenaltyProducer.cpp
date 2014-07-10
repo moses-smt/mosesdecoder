@@ -17,7 +17,7 @@ WordPenaltyProducer::WordPenaltyProducer(const std::string &line)
   s_instance = this;
 }
 
-void WordPenaltyProducer::Evaluate(const Phrase &source
+void WordPenaltyProducer::EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const

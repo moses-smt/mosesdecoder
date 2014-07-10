@@ -69,7 +69,7 @@ lib moses :
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
-  *Test.cpp Mock*.cpp
+  *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
 ]
 headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
@@ -85,5 +85,5 @@ alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
 
