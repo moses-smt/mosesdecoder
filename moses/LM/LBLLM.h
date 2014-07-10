@@ -16,6 +16,8 @@
 #include "lbl/cdec_rule_converter.h"
 #include "lbl/cdec_state_converter.h"
 
+#include "oxlm/Mapper.h"
+
 namespace Moses
 {
 
@@ -34,7 +36,7 @@ class LBLLM : public StatefulFeatureFunction
 {
 public:
 	LBLLM(const std::string &line)
-	:StatefulFeatureFunction(3, line)
+	:StatefulFeatureFunction(2, line)
 	{
 	  ReadParameters();
 	}
@@ -43,7 +45,23 @@ public:
   {
     model.load(m_path);
 
+    config = model.getConfig();
+    int context_width = config->ngram_order - 1;
+    // For each state, we store at most context_width word ids to the left and
+    // to the right and a kSTAR separator. The last bit represents the actual
+    // size of the state.
+    //int max_state_size = (2 * context_width + 1) * sizeof(int) + 1;
+    //FeatureFunction::SetStateSize(max_state_size);
 
+    dict = model.getDict();
+    mapper = boost::make_shared<OXLMMapper>(dict);
+    //stateConverter = boost::make_shared<CdecStateConverter>(max_state_size - 1);
+    //ruleConverter = boost::make_shared<CdecRuleConverter>(mapper, stateConverter);
+
+    kSTART = dict.Convert("<s>");
+    kSTOP = dict.Convert("</s>");
+    kUNKNOWN = dict.Convert("<unk>");
+    kSTAR = dict.Convert("<{STAR}>");
   }
 
   bool IsUseable(const FactorMask &mask) const {
@@ -80,8 +98,8 @@ public:
   }
 
   FFState* EvaluateWhenApplied(
-    const ChartHypothesis& /* cur_hypo */,
-    int /* featureID - used to index the state in the previous hypotheses */,
+    const ChartHypothesis &cur_hypo,
+    int featureID,
     ScoreComponentCollection* accumulator) const
   {
 
@@ -106,9 +124,17 @@ protected:
   oxlm::Dict dict;
   boost::shared_ptr<oxlm::ModelData> config;
   Model model;
-  boost::shared_ptr<oxlm::CdecLBLMapper> mapper;
+
+  boost::shared_ptr<OXLMMapper> mapper;
+  /*
   boost::shared_ptr<oxlm::CdecRuleConverter> ruleConverter;
   boost::shared_ptr<oxlm::CdecStateConverter> stateConverter;
+  */
+
+  int kSTART;
+  int kSTOP;
+  int kUNKNOWN;
+  int kSTAR;
 
 };
 
