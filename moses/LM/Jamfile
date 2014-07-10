@@ -90,6 +90,16 @@ if $(with-nplm) {
   lmmacros += LM_NEURAL ;
 }
 
+#LBLLM
+local with-lbllm = [ option.get "with-lbllm" ] ;
+if $(with-lbllm) {
+  lib lblLM : : <search>$(with-lbllm)/lib <search>$(with-lbllm)/lib64 ;
+  obj LBLLM.o : LBLLM.cpp neuralLM ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
+  alias lbllm : LBLLM.o lblLM : : : <cxxflags>-std=c++0x <linkflags>-std=c++0x <define>LM_LBL ;
+  dependencies += lbllm ;
+  lmmacros += LM_LBL ;
+}
+
 #DALM
 local with-dalm = [ option.get "with-dalm" ] ;
 if $(with-dalm) {

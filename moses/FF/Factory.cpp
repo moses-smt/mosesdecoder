@@ -93,8 +93,16 @@
 #include "moses/LM/DALMWrapper.h"
 #endif
 
-#ifdef LM_LBLLM
+#ifdef LM_LBL
 #include "moses/LM/LBLLM.h"
+#include "corpus/corpus.h"
+#include "lbl/cdec_lbl_mapper.h"
+#include "lbl/cdec_rule_converter.h"
+#include "lbl/cdec_state_converter.h"
+#include "lbl/lbl_features.h"
+#include "lbl/model.h"
+#include "lbl/process_identifier.h"
+#include "lbl/query_cache.h"
 #endif
 
 #include "util/exception.hh"
@@ -245,8 +253,10 @@ FeatureRegistry::FeatureRegistry()
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
 #endif
-#ifdef LM_LBLLM
-  MOSES_FNAME(LBLLM);
+#ifdef LM_LBL
+  MOSES_FNAME2("LBLLM-LM", LBLLM<oxlm::LM>);
+  MOSES_FNAME2("LBLLM-FactoredLM", LBLLM<oxlm::FactoredLM>);
+  MOSES_FNAME2("LBLLM-FactoredMaxentLM", LBLLM<oxlm::FactoredMaxentLM>);
 #endif
 
   Add("KENLM", new KenFactory());
