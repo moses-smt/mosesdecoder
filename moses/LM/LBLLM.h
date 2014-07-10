@@ -1,8 +1,11 @@
 #pragma once
 
 #include <string>
-#include "StatefulFeatureFunction.h"
-#include "FFState.h"
+#include "moses/FF/StatefulFeatureFunction.h"
+#include "moses/FF/FFState.h"
+
+// pyp stuff
+#include "corpus/corpus.h"
 #include "lbl/nlm.h"
 
 namespace Moses

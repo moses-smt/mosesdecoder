@@ -48,7 +48,6 @@
 #include "NieceTerminal.h"
 #include "SpanLength.h"
 #include "SyntaxRHS.h"
-#include "LBLLM.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -92,6 +91,10 @@
 
 #ifdef LM_DALM
 #include "moses/LM/DALMWrapper.h"
+#endif
+
+#ifdef LM_LBLLM
+#include "moses/LM/LBLLM.h"
 #endif
 
 #include "util/exception.hh"
@@ -205,7 +208,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SparseHieroReorderingFeature);
   MOSES_FNAME(SpanLength);
   MOSES_FNAME(SyntaxRHS);
-  MOSES_FNAME(LBLLM);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
@@ -242,6 +244,9 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
+#endif
+#ifdef LM_LBLLM
+  MOSES_FNAME(LBLLM);
 #endif
 
   Add("KENLM", new KenFactory());

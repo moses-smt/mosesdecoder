@@ -19,7 +19,8 @@ int LBLLMState::Compare(const FFState& other) const
 
 ////////////////////////////////////////////////////////////////
 LBLLM::LBLLM(const std::string &line)
-  :StatefulFeatureFunction(3, line)
+:StatefulFeatureFunction(3, line)
+,lm(ModelData(), oxlm::Dict(), true)
 {
   ReadParameters();
 }
@@ -38,38 +39,6 @@ void LBLLM::Load()
 	  ia >> lm;
 	  dict = lm.label_set();
 	}
-    /*
-    {
-      ifstream z_ifile((lm_file+".z").c_str(), ios::in);
-      if (!z_ifile.good()) {
-        cerr << "Failed to open " << (lm_file+".z") << " for reading\n";
-        abort();
-      }
-      cerr << "Reading LM Z from " << lm_file+".z" << " ...\n";
-      boost::archive::text_iarchive ia(z_ifile);
-      ia >> z_approx;
-    }
-    */
-
-    cerr << "Initializing map contents (map size=" << dict.max() << ")\n";
-    for (int i = 1; i < dict.max(); ++i)
-      AddToWordMap(i);
-    cerr << "Done.\n";
-    ss_off = OrderToStateSize(kORDER)-1;  // offset of "state size" member
-    FeatureFunction::SetStateSize(OrderToStateSize(kORDER));
-    kSTART = dict.Convert("<s>");
-    kSTOP = dict.Convert("</s>");
-    kUNKNOWN = dict.Convert("_UNK_");
-    kNONE = -1;
-    kSTAR = dict.Convert("<{STAR}>");
-    last_id = 0;
-
-    // optional online "adaptation" by training on previous references
-    if (reffile.size()) {
-      cerr << "Reference file: " << reffile << endl;
-      set<WordID> rv;
-      oxlm::ReadFromFile(reffile, &dict, &ref_sents, &rv);
-    }
 
 }
 

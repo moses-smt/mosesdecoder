@@ -1157,16 +1157,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.h</locationURI>
 		</link>
 		<link>
-			<name>FF/LBLLM.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LBLLM.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/LBLLM.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LBLLM.h</locationURI>
-		</link>
-		<link>
 			<name>FF/LexicalReordering</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1535,6 +1525,16 @@
 			<name>LM/Ken.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Ken.h</locationURI>
+		</link>
+		<link>
+			<name>LM/LBLLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/LBLLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/LBLLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/LBLLM.h</locationURI>
 		</link>
 		<link>
 			<name>LM/LDHT.cpp</name>
