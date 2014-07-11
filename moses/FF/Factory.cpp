@@ -95,14 +95,6 @@
 
 #ifdef LM_LBL
 #include "moses/LM/LBLLM.h"
-#include "corpus/corpus.h"
-#include "lbl/cdec_lbl_mapper.h"
-#include "lbl/cdec_rule_converter.h"
-#include "lbl/cdec_state_converter.h"
-#include "lbl/lbl_features.h"
-#include "lbl/model.h"
-#include "lbl/process_identifier.h"
-#include "lbl/query_cache.h"
 #endif
 
 #include "util/exception.hh"

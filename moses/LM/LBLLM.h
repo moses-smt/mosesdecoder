@@ -27,7 +27,12 @@ class LBLLMState : public FFState
 {
   std::vector<int> m_left, m_right;
 public:
-  LBLLMState(int targetLen)
+  LBLLMState()
+  {}
+
+  LBLLMState(const std::vector<int> &left, const std::vector<int> &right)
+  :m_left(left)
+  ,m_right(right)
   {}
 
   int Compare(const FFState& other) const;
@@ -89,7 +94,7 @@ public:
     return true;
   }
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
-    return new LBLLMState(0);
+    return new LBLLMState();
   }
 
   void EvaluateInIsolation(const Phrase &source
@@ -139,6 +144,9 @@ public:
 	  scores[1] = leftScores.OOVScore + rightScores.OOVScore;
 
 	  accumulator->PlusEquals(this, scores);
+
+	  LBLLMState *state = new LBLLMState(leftIds, rightIds);
+	  return state;
   }
 
   void SetParameter(const std::string& key, const std::string& value)
