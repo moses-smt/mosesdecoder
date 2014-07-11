@@ -32,6 +32,18 @@ int OXLMMapper::convert(const Moses::Factor *factor) const
 	}
 }
 
+std::vector<int> OXLMMapper::convert(const Phrase &phrase) const
+{
+	size_t size = phrase.GetSize();
+	vector<int> ret(size);
+
+	for (size_t i = 0; i < size; ++i) {
+		const Moses::Factor *factor = phrase.GetFactor(i, 0);
+		int id = convert(factor);
+		ret[i] = id;
+	}
+	return ret;
+}
 
 } // namespace
 

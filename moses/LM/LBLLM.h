@@ -4,6 +4,8 @@
 #include <boost/shared_ptr.hpp>
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/FFState.h"
+#include "moses/Util.h"
+#include "moses/ChartHypothesis.h"
 
 // lbl stuff
 #include "corpus/corpus.h"
@@ -23,7 +25,7 @@ namespace Moses
 
 class LBLLMState : public FFState
 {
-  int m_targetLen;
+  std::vector<int> m_left, m_right;
 public:
   LBLLMState(int targetLen)
   {}
@@ -31,12 +33,31 @@ public:
   int Compare(const FFState& other) const;
 };
 
+/**
+ * Wraps the feature values computed from the LBL language model.
+ */
+struct LBLFeatures {
+  LBLFeatures() : LMScore(0), OOVScore(0) {}
+  LBLFeatures(double lm_score, double oov_score)
+      : LMScore(lm_score), OOVScore(oov_score) {}
+  LBLFeatures& operator+=(const LBLFeatures& other) {
+    LMScore += other.LMScore;
+    OOVScore += other.OOVScore;
+    return *this;
+  }
+
+  double LMScore;
+  double OOVScore;
+};
+
+// FF class
 template<class Model>
 class LBLLM : public StatefulFeatureFunction
 {
 public:
 	LBLLM(const std::string &line)
 	:StatefulFeatureFunction(2, line)
+	,m_order(5)
 	{
 	  ReadParameters();
 	}
@@ -98,17 +119,35 @@ public:
   }
 
   FFState* EvaluateWhenApplied(
-    const ChartHypothesis &cur_hypo,
+    const ChartHypothesis &hypo,
     int featureID,
     ScoreComponentCollection* accumulator) const
   {
+	  std::vector<int> leftIds, rightIds;
+	  Phrase leftPhrase, rightPhrase;
+	  hypo.GetOutputPhrase(1, m_order, leftPhrase);
+	  hypo.GetOutputPhrase(2, m_order, rightPhrase);
 
+	  leftIds = mapper->convert(leftPhrase);
+	  rightIds = mapper->convert(rightPhrase);
+
+	  LBLFeatures leftScores = scoreFullContexts(leftIds);
+	  LBLFeatures rightScores = scoreFullContexts(rightIds);
+
+	  std::vector<float> scores(2);
+	  scores[0] = leftScores.LMScore + rightScores.LMScore;
+	  scores[1] = leftScores.OOVScore + rightScores.OOVScore;
+
+	  accumulator->PlusEquals(this, scores);
   }
 
   void SetParameter(const std::string& key, const std::string& value)
   {
     if (key == "path") {
   	  m_path = value;
+    }
+    else if (key == "order") {
+      m_order = Scan<int>(value);
     }
     else {
       StatefulFeatureFunction::SetParameter(key, value);
@@ -118,6 +157,7 @@ public:
 
 protected:
   std::string m_path;
+  int m_order;
 
   int fid;
   int fidOOV;
@@ -135,6 +175,42 @@ protected:
   int kSTOP;
   int kUNKNOWN;
   int kSTAR;
+
+  ////////////////////////////////////
+  LBLFeatures scoreFullContexts(const vector<int>& symbols) const {
+    LBLFeatures ret;
+    int last_star = -1;
+    int context_width = config->ngram_order - 1;
+    for (size_t i = 0; i < symbols.size(); ++i) {
+      if (symbols[i] == kSTAR) {
+        last_star = i;
+      } else if (i - last_star > context_width) {
+        ret += scoreContext(symbols, i);
+      }
+    }
+
+    return ret;
+  }
+
+  LBLFeatures scoreContext(const vector<int>& symbols, int position) const {
+    int word = symbols[position];
+    int context_width = config->ngram_order - 1;
+    vector<int> context;
+    for (int i = 1; i <= context_width && position - i >= 0; ++i) {
+      assert(symbols[position - i] != kSTAR);
+      context.push_back(symbols[position - i]);
+    }
+
+    if (!context.empty() && context.back() == kSTART) {
+      context.resize(context_width, kSTART);
+    } else {
+      context.resize(context_width, kUNKNOWN);
+    }
+
+    double score;
+    score = model.predict(word, context);
+    return LBLFeatures(score, word == kUNKNOWN);
+  }
 
 };
 

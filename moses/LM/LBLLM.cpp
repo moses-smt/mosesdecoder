@@ -12,9 +12,13 @@ int LBLLMState::Compare(const FFState& other) const
 {
   const LBLLMState &otherState = static_cast<const LBLLMState&>(other);
 
-  if (m_targetLen == otherState.m_targetLen)
-    return 0;
-  return (m_targetLen < otherState.m_targetLen) ? -1 : +1;
+  if (m_left != otherState.m_left) {
+	  return (m_left < otherState.m_left) ? -1 : +1;
+  }
+  else if (m_right != otherState.m_right) {
+	  return (m_right < otherState.m_right) ? -1 : +1;
+  }
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////////
