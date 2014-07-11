@@ -151,24 +151,26 @@ Phrase ChartHypothesis::GetOutputPhrase() const
 
 void ChartHypothesis::GetOutputPhrase(int leftRightMost, int numWords, Phrase &outPhrase) const
 {
-  int targetSize = GetCurrTargetPhrase().GetSize();
+  const TargetPhrase &tp = GetCurrTargetPhrase();
+
+  int targetSize = tp.GetSize();
   for (int i = 0; i < targetSize; ++i) {
 	int pos;
 	if (leftRightMost == 1) {
 	  pos = i;
 	}
 	else if (leftRightMost == 2) {
-	  pos = targetSize - i;
+	  pos = targetSize - i - 1;
 	}
 	else {
 		abort();
 	}
 
-	const Word &word = GetCurrTargetPhrase().GetWord(pos);
+	const Word &word = tp.GetWord(pos);
 
 	if (word.IsNonTerminal()) {
 	  // non-term. fill out with prev hypo
-	  size_t nonTermInd = GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
+	  size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
 	  const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
 	  prevHypo->GetOutputPhrase(outPhrase);
 	} else {

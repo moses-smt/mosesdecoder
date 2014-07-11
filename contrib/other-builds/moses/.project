@@ -1672,6 +1672,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.h</locationURI>
 		</link>
 		<link>
+			<name>PP/NonTermContextProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/NonTermContextProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/NonTermContextProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/NonTermContextProperty.h</locationURI>
+		</link>
+		<link>
 			<name>PP/PhraseProperty.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.cpp</locationURI>

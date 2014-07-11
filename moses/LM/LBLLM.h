@@ -128,6 +128,7 @@ public:
     int featureID,
     ScoreComponentCollection* accumulator) const
   {
+	  /*
 	  std::vector<int> leftIds, rightIds;
 	  Phrase leftPhrase, rightPhrase;
 	  hypo.GetOutputPhrase(1, m_order, leftPhrase);
@@ -147,6 +148,26 @@ public:
 
 	  LBLLMState *state = new LBLLMState(leftIds, rightIds);
 	  return state;
+	*/
+
+	  // baseline non-optimized scoring
+	  Phrase phrase;
+	  hypo.GetOutputPhrase(phrase);
+	  std::cerr << "phrase=" << phrase << std::endl;
+
+	  std::vector<int> ids;
+	  ids = mapper->convert(phrase);
+
+	  LBLFeatures leftScores = scoreFullContexts(ids);
+	  std::vector<float> scores(2);
+	  scores[0] = leftScores.LMScore;
+	  scores[1] = leftScores.OOVScore;
+
+	  accumulator->Assign(this, scores);
+
+	  LBLLMState *state = new LBLLMState();
+	  return state;
+
   }
 
   void SetParameter(const std::string& key, const std::string& value)
