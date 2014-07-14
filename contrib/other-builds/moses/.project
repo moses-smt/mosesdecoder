@@ -1982,6 +1982,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.h</locationURI>
 		</link>
 		<link>
+			<name>LM/oxlm/LBLLM2.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/LBLLM2.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/LBLLM2.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/LBLLM2.h</locationURI>
+		</link>
+		<link>
 			<name>LM/oxlm/Mapper.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/Mapper.cpp</locationURI>
