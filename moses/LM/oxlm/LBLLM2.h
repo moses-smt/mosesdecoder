@@ -5,6 +5,19 @@
 #include "moses/LM/SingleFactor.h"
 #include "moses/FactorCollection.h"
 
+// lbl stuff
+#include "corpus/corpus.h"
+#include "lbl/lbl_features.h"
+#include "lbl/model.h"
+#include "lbl/process_identifier.h"
+#include "lbl/query_cache.h"
+
+#include "lbl/cdec_lbl_mapper.h"
+#include "lbl/cdec_rule_converter.h"
+#include "lbl/cdec_state_converter.h"
+
+#include "Mapper.h"
+
 namespace Moses
 {
 
@@ -32,6 +45,30 @@ public:
   ~LBLLM2()
   {}
 
+  void Load()
+  {
+    model.load(m_path);
+
+    config = model.getConfig();
+    int context_width = config->ngram_order - 1;
+    // For each state, we store at most context_width word ids to the left and
+    // to the right and a kSTAR separator. The last bit represents the actual
+    // size of the state.
+    //int max_state_size = (2 * context_width + 1) * sizeof(int) + 1;
+    //FeatureFunction::SetStateSize(max_state_size);
+
+    dict = model.getDict();
+    mapper = boost::make_shared<OXLMMapper>(dict);
+    //stateConverter = boost::make_shared<CdecStateConverter>(max_state_size - 1);
+    //ruleConverter = boost::make_shared<CdecRuleConverter>(mapper, stateConverter);
+
+    kSTART = dict.Convert("<s>");
+    kSTOP = dict.Convert("</s>");
+    kUNKNOWN = dict.Convert("<unk>");
+    kSTAR = dict.Convert("<{STAR}>");
+  }
+
+
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const
   {
     LMResult ret;
@@ -51,6 +88,16 @@ public:
 
     return ret;
   }
+
+protected:
+  oxlm::Dict dict;
+  boost::shared_ptr<oxlm::ModelData> config;
+  Model model;
+
+  int kSTART;
+  int kSTOP;
+  int kUNKNOWN;
+  int kSTAR;
 
 };
 
