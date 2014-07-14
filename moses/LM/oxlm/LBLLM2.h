@@ -12,10 +12,6 @@
 #include "lbl/process_identifier.h"
 #include "lbl/query_cache.h"
 
-#include "lbl/cdec_lbl_mapper.h"
-#include "lbl/cdec_rule_converter.h"
-#include "lbl/cdec_state_converter.h"
-
 #include "Mapper.h"
 
 namespace Moses
@@ -75,6 +71,9 @@ public:
     std::vector<int> ids;
     ids = mapper->convert(contextFactor);
     int word = ids.back();
+
+    size_t context_width = m_nGramOrder - 1;
+    ids.resize(context_width, kUNKNOWN);
 
     double score;
     score = model.predict(word, ids);
