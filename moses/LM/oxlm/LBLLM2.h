@@ -21,6 +21,7 @@
 namespace Moses
 {
 
+
 template<class Model>
 class LBLLM2 : public LanguageModelSingleFactor
 {
@@ -47,7 +48,7 @@ public:
 
   void Load()
   {
-    model.load(m_path);
+    model.load(m_filePath);
 
     config = model.getConfig();
     int context_width = config->ngram_order - 1;
@@ -71,21 +72,18 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const
   {
+    std::vector<int> ids;
+    ids = mapper->convert(contextFactor);
+    int word = ids.back();
+
+    double score;
+    score = model.predict(word, ids);
+
     LMResult ret;
-    ret.score = contextFactor.size();
-    ret.unknown = false;
+    ret.score = score;
+    ret.unknown = (word == kUNKNOWN);
 
-    // use last word as state info
-    const Factor *factor;
-    size_t hash_value(const Factor &f);
-    if (contextFactor.size()) {
-      factor = contextFactor.back()->GetFactor(m_factorType);
-    } else {
-      factor = NULL;
-    }
-
-    (*finalState) = (State*) factor;
-
+    (*finalState) = (State*) 0;
     return ret;
   }
 
@@ -98,6 +96,44 @@ protected:
   int kSTOP;
   int kUNKNOWN;
   int kSTAR;
+
+  boost::shared_ptr<OXLMMapper> mapper;
+
+  ////////////////////////////////////
+  LBLFeatures scoreFullContexts(const vector<int>& symbols) const {
+    LBLFeatures ret;
+    int last_star = -1;
+    int context_width = config->ngram_order - 1;
+    for (size_t i = 0; i < symbols.size(); ++i) {
+      if (symbols[i] == kSTAR) {
+        last_star = i;
+      } else if (i - last_star > context_width) {
+        ret += scoreContext(symbols, i);
+      }
+    }
+
+    return ret;
+  }
+
+  LBLFeatures scoreContext(const vector<int>& symbols, int position) const {
+    int word = symbols[position];
+    int context_width = config->ngram_order - 1;
+    vector<int> context;
+    for (int i = 1; i <= context_width && position - i >= 0; ++i) {
+      assert(symbols[position - i] != kSTAR);
+      context.push_back(symbols[position - i]);
+    }
+
+    if (!context.empty() && context.back() == kSTART) {
+      context.resize(context_width, kSTART);
+    } else {
+      context.resize(context_width, kUNKNOWN);
+    }
+
+    double score;
+    score = model.predict(word, context);
+    return LBLFeatures(score, word == kUNKNOWN);
+  }
 
 };
 

@@ -45,5 +45,19 @@ std::vector<int> OXLMMapper::convert(const Phrase &phrase) const
 	return ret;
 }
 
+std::vector<int> OXLMMapper::convert(const std::vector<const Word*> &contextFactor) const
+{
+	size_t size = contextFactor.size();
+	vector<int> ret(size);
+
+	for (size_t i = 0; i < size; ++i) {
+		const Moses::Factor *factor = contextFactor[i]->GetFactor(0);
+		int id = convert(factor);
+		ret[i] = id;
+	}
+	return ret;
+
+}
+
 } // namespace
 

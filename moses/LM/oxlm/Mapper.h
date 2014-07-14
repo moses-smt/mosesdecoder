@@ -14,6 +14,7 @@ public:
 
  int convert(const Moses::Factor *factor) const;
  std::vector<int> convert(const Phrase &phrase) const;
+ std::vector<int> convert(const std::vector<const Word*> &contextFactor) const;
 
 private:
  void add(int lbl_id, int cdec_id);
@@ -23,6 +24,23 @@ private:
  Coll moses2lbl;
  int kUNKNOWN;
 
+};
+
+/**
+ * Wraps the feature values computed from the LBL language model.
+ */
+struct LBLFeatures {
+  LBLFeatures() : LMScore(0), OOVScore(0) {}
+  LBLFeatures(double lm_score, double oov_score)
+      : LMScore(lm_score), OOVScore(oov_score) {}
+  LBLFeatures& operator+=(const LBLFeatures& other) {
+    LMScore += other.LMScore;
+    OOVScore += other.OOVScore;
+    return *this;
+  }
+
+  double LMScore;
+  double OOVScore;
 };
 
 }
