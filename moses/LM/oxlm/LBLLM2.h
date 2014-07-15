@@ -63,7 +63,6 @@ public:
     kSTART = dict.Convert("<s>");
     kSTOP = dict.Convert("</s>");
     kUNKNOWN = dict.Convert("<unk>");
-    kSTAR = dict.Convert("<{STAR}>");
   }
 
 
@@ -85,8 +84,10 @@ public:
     double score;
     score = model.predict(word, context);
 
+    /*
 	std::string str = DebugContextFactor(contextFactor);
     std::cerr << "contextFactor=" << str << " " << score << std::endl;
+	*/
 
     LMResult ret;
     ret.score = score;
@@ -112,7 +113,6 @@ protected:
   int kSTART;
   int kSTOP;
   int kUNKNOWN;
-  int kSTAR;
 
   boost::shared_ptr<OXLMMapper> mapper;
 

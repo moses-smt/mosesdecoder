@@ -1527,16 +1527,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Ken.h</locationURI>
 		</link>
 		<link>
-			<name>LM/LBLLM.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/LBLLM.cpp</locationURI>
-		</link>
-		<link>
-			<name>LM/LBLLM.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/LBLLM.h</locationURI>
-		</link>
-		<link>
 			<name>LM/LDHT.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/LDHT.cpp</locationURI>
