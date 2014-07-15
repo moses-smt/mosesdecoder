@@ -68,21 +68,24 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const
   {
-	std::string str = DebugContextFactor(contextFactor);
-	if (str == "unterstützende ") {
-		std::cerr << str << std::endl;
-	}
-
-    std::vector<int> ids;
-    ids = mapper->convert(contextFactor);
-    int word = ids.back();
+    std::vector<int> context;
+    int word;
+    mapper->convert(contextFactor, context, word);
 
     size_t context_width = m_nGramOrder - 1;
-    ids.resize(context_width, kUNKNOWN);
+
+    if (!context.empty() && context.back() == kSTART) {
+      context.resize(context_width, kSTART);
+    } else {
+      context.resize(context_width, kUNKNOWN);
+    }
+
 
     double score;
-    score = model.predict(word, ids);
-	std::cerr << "contextFactor=" << str << " " << score << std::endl;
+    score = model.predict(word, context);
+
+	std::string str = DebugContextFactor(contextFactor);
+    std::cerr << "contextFactor=" << str << " " << score << std::endl;
 
     LMResult ret;
     ret.score = score;
@@ -103,42 +106,6 @@ protected:
   int kSTAR;
 
   boost::shared_ptr<OXLMMapper> mapper;
-
-  ////////////////////////////////////
-  LBLFeatures scoreFullContexts(const vector<int>& symbols) const {
-    LBLFeatures ret;
-    int last_star = -1;
-    int context_width = config->ngram_order - 1;
-    for (size_t i = 0; i < symbols.size(); ++i) {
-      if (symbols[i] == kSTAR) {
-        last_star = i;
-      } else if (i - last_star > context_width) {
-        ret += scoreContext(symbols, i);
-      }
-    }
-
-    return ret;
-  }
-
-  LBLFeatures scoreContext(const vector<int>& symbols, int position) const {
-    int word = symbols[position];
-    int context_width = config->ngram_order - 1;
-    vector<int> context;
-    for (int i = 1; i <= context_width && position - i >= 0; ++i) {
-      assert(symbols[position - i] != kSTAR);
-      context.push_back(symbols[position - i]);
-    }
-
-    if (!context.empty() && context.back() == kSTART) {
-      context.resize(context_width, kSTART);
-    } else {
-      context.resize(context_width, kUNKNOWN);
-    }
-
-    double score;
-    score = model.predict(word, context);
-    return LBLFeatures(score, word == kUNKNOWN);
-  }
 
 };
 
