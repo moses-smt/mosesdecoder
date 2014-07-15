@@ -2,6 +2,7 @@
 #pragma once
 
 #include <vector>
+#include <boost/functional/hash.hpp>
 #include "moses/LM/SingleFactor.h"
 #include "moses/FactorCollection.h"
 
@@ -91,7 +92,15 @@ public:
     ret.score = score;
     ret.unknown = (word == kUNKNOWN);
 
-    (*finalState) = (State*) 0;
+    // calc state from hash of last n-1 words
+    size_t seed = 0;
+    boost::hash_combine(seed, word);
+    for (size_t i = 0; i < context.size() && i < context_width - 1; ++i) {
+    	int id = context[i];
+    	boost::hash_combine(seed, id);
+    }
+
+    (*finalState) = (State*) seed;
     return ret;
   }
 
