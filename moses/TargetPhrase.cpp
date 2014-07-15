@@ -50,7 +50,9 @@ TargetPhrase::TargetPhrase( std::string out_string)
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter(), NULL);
+  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, 
+		   // staticData.GetFactorDelimiter(), // eliminated [UG]
+		   NULL);
 }
 
 TargetPhrase::TargetPhrase()
@@ -156,7 +158,6 @@ void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
 
 void TargetPhrase::SetXMLScore(float score)
 {
-  const StaticData &staticData = StaticData::Instance();
   const FeatureFunction* prod = PhraseDictionary::GetColl()[0];
   size_t numScores = prod->GetNumScoreComponents();
   vector <float> scoreVector(numScores,score/numScores);
@@ -240,16 +241,22 @@ void TargetPhrase::SetProperties(const StringPiece &str)
   }
 }
 
-void TargetPhrase::GetProperty(const std::string &key, std::string &value, bool &found) const
+void TargetPhrase::SetProperty(const std::string &key, const std::string &value) 
 {
-  std::map<std::string, std::string>::const_iterator iter;
+  const StaticData &staticData = StaticData::Instance();
+  const PhrasePropertyFactory& phrasePropertyFactory = staticData.GetPhrasePropertyFactory();
+  m_properties[key] = phrasePropertyFactory.ProduceProperty(key,value);
+}
+
+bool TargetPhrase::GetProperty(const std::string &key, boost::shared_ptr<PhraseProperty> &value) const
+{
+  std::map<std::string, boost::shared_ptr<PhraseProperty> >::const_iterator iter;
   iter = m_properties.find(key);
-  if (iter == m_properties.end()) {
-    found = false;
-  } else {
-    found = true;
+  if (iter != m_properties.end()) {
     value = iter->second;
+    return true;
   }
+  return false;
 }
 
 void TargetPhrase::SetRuleSource(const Phrase &ruleSource) const

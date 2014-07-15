@@ -54,7 +54,7 @@ sub score {
   my $fd = shift;
   my $line = <$fd>;
   #print "$line";
-  return 1 if !defined($line);
+  return 1 if !defined($line) || $line =~ /^Perplexity /;
   $line =~ /Total: ([\.\-0-9]+) /;
   return $1;
 }

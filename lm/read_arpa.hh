@@ -1,5 +1,5 @@
-#ifndef LM_READ_ARPA__
-#define LM_READ_ARPA__
+#ifndef LM_READ_ARPA_H
+#define LM_READ_ARPA_H
 
 #include "lm/lm_exception.hh"
 #include "lm/word_index.hh"
@@ -28,7 +28,7 @@ void ReadEnd(util::FilePiece &in);
 
 extern const bool kARPASpaces[256];
 
-// Positive log probability warning.  
+// Positive log probability warning.
 class PositiveProbWarn {
   public:
     PositiveProbWarn() : action_(THROW_UP) {}
@@ -41,24 +41,29 @@ class PositiveProbWarn {
     WarningAction action_;
 };
 
-template <class Voc, class Weights> void Read1Gram(util::FilePiece &f, Voc &vocab, Weights *unigrams, PositiveProbWarn &warn) {
+template <class Weights> StringPiece Read1Gram(util::FilePiece &f, Weights &weights, PositiveProbWarn &warn) {
   try {
-    float prob = f.ReadFloat();
-    if (prob > 0.0) {
-      warn.Warn(prob);
-      prob = 0.0;
+    weights.prob = f.ReadFloat();
+    if (weights.prob > 0.0) {
+      warn.Warn(weights.prob);
+      weights.prob = 0.0;
     }
-    if (f.get() != '\t') UTIL_THROW(FormatLoadException, "Expected tab after probability");
-    Weights &value = unigrams[vocab.Insert(f.ReadDelimited(kARPASpaces))];
-    value.prob = prob;
-    ReadBackoff(f, value);
+    UTIL_THROW_IF(f.get() != '\t', FormatLoadException, "Expected tab after probability");
+    StringPiece ret(f.ReadDelimited(kARPASpaces));
+    ReadBackoff(f, weights);
+    return ret;
   } catch(util::Exception &e) {
     e << " in the 1-gram at byte " << f.Offset();
     throw;
   }
 }
 
-// Return true if a positive log probability came out.
+template <class Voc, class Weights> void Read1Gram(util::FilePiece &f, Voc &vocab, Weights *unigrams, PositiveProbWarn &warn) {
+  Weights temp;
+  WordIndex word = vocab.Insert(Read1Gram(f, temp, warn));
+  unigrams[word] = temp;
+}
+
 template <class Voc, class Weights> void Read1Grams(util::FilePiece &f, std::size_t count, Voc &vocab, Weights *unigrams, PositiveProbWarn &warn) {
   ReadNGramHeader(f, 1);
   for (std::size_t i = 0; i < count; ++i) {
@@ -67,16 +72,16 @@ template <class Voc, class Weights> void Read1Grams(util::FilePiece &f, std::siz
   vocab.FinishedLoading(unigrams);
 }
 
-// Return true if a positive log probability came out.
-template <class Voc, class Weights> void ReadNGram(util::FilePiece &f, const unsigned char n, const Voc &vocab, WordIndex *const reverse_indices, Weights &weights, PositiveProbWarn &warn) {
+// Read ngram, write vocab ids to indices_out.
+template <class Voc, class Weights, class Iterator> void ReadNGram(util::FilePiece &f, const unsigned char n, const Voc &vocab, Iterator indices_out, Weights &weights, PositiveProbWarn &warn) {
   try {
     weights.prob = f.ReadFloat();
     if (weights.prob > 0.0) {
       warn.Warn(weights.prob);
       weights.prob = 0.0;
     }
-    for (WordIndex *vocab_out = reverse_indices + n - 1; vocab_out >= reverse_indices; --vocab_out) {
-      *vocab_out = vocab.Index(f.ReadDelimited(kARPASpaces));
+    for (unsigned char i = 0; i < n; ++i, ++indices_out) {
+      *indices_out = vocab.Index(f.ReadDelimited(kARPASpaces));
     }
     ReadBackoff(f, weights);
   } catch(util::Exception &e) {
@@ -87,4 +92,4 @@ template <class Voc, class Weights> void ReadNGram(util::FilePiece &f, const uns
 
 } // namespace lm
 
-#endif // LM_READ_ARPA__
+#endif // LM_READ_ARPA_H

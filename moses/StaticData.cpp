@@ -138,6 +138,8 @@ bool StaticData::LoadData(Parameter *parameter)
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
+    if (m_factorDelimiter == "none")
+      m_factorDelimiter = "";
   }
 
   SetBooleanParameter( &m_continuePartialTranslation, "continue-partial-translation", false );

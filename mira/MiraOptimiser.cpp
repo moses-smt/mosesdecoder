@@ -183,9 +183,9 @@ size_t MiraOptimiser::updateWeightsHopeFear(
   // iterate over input sentences (1 (online) or more (batch))
   for (size_t i = 0; i < featureValuesHope.size(); ++i) {
     if (updatePosition != -1) {
-      if (i < updatePosition)
+      if (int(i) < updatePosition)
         continue;
-      else if (i > updatePosition)
+      else if (int(i) > updatePosition)
         break;
     }
 

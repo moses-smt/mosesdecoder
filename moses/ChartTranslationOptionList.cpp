@@ -192,12 +192,7 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
   }
 
   size_t newSize = m_size - numDiscard;
-
-  if (numDiscard) {
-    cerr << "LIST numDiscard=" << numDiscard << " newSize=" << newSize << endl;
-  }
   m_size = newSize;
-
 }
 
 void ChartTranslationOptionList::SwapTranslationOptions(size_t a, size_t b)

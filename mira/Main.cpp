@@ -519,7 +519,7 @@ int main(int argc, char** argv)
   }
 
   // get reference to feature functions
-  const vector<FeatureFunction*> &featureFunctions = FeatureFunction::GetFeatureFunctions();
+  // const vector<FeatureFunction*> &featureFunctions = FeatureFunction::GetFeatureFunctions();
   ScoreComponentCollection initialWeights = decoder->getWeights();
 
   if (add2lm != 0) {
@@ -665,7 +665,7 @@ int main(int argc, char** argv)
     }
 
     // number of weight dumps this epoch
-    size_t weightMixingThisEpoch = 0;
+    // size_t weightMixingThisEpoch = 0;
     size_t weightEpochDump = 0;
 
     size_t shardPosition = 0;
