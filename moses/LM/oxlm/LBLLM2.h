@@ -68,6 +68,11 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const
   {
+	std::string str = DebugContextFactor(contextFactor);
+	if (str == "unterstützende ") {
+		std::cerr << str << std::endl;
+	}
+
     std::vector<int> ids;
     ids = mapper->convert(contextFactor);
     int word = ids.back();
@@ -77,6 +82,7 @@ public:
 
     double score;
     score = model.predict(word, ids);
+	std::cerr << "contextFactor=" << str << " " << score << std::endl;
 
     LMResult ret;
     ret.score = score;
