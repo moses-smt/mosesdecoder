@@ -42,9 +42,6 @@
 								<option id="gnu.cpp.link.option.libs.1325292383" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="OnDiskPt"/>
 									<listOptionValue builtIn="false" value="moses"/>
-									<listOptionValue builtIn="false" value="lbl"/>
-									<listOptionValue builtIn="false" value="murmurhash"/>
-									<listOptionValue builtIn="false" value="gomp"/>
 									<listOptionValue builtIn="false" value="irstlm"/>
 									<listOptionValue builtIn="false" value="dstruct"/>
 									<listOptionValue builtIn="false" value="flm"/>
@@ -67,7 +64,6 @@
 								</option>
 								<option id="gnu.cpp.link.option.paths.815001500" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib64&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../oxlm/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/search/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../DALM/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../srilm/lib/i686-m64&quot;"/>
