@@ -20,12 +20,12 @@ namespace Moses
 
 
 template<class Model>
-class LBLLM2 : public LanguageModelSingleFactor
+class LBLLM : public LanguageModelSingleFactor
 {
 protected:
 
 public:
-	LBLLM2(const std::string &line)
+	LBLLM(const std::string &line)
 	:LanguageModelSingleFactor(line)
 	{
 		ReadParameters();
@@ -40,7 +40,7 @@ public:
 		m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 	}
 
-  ~LBLLM2()
+  ~LBLLM()
   {}
 
   void Load()

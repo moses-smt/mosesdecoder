@@ -94,9 +94,9 @@ if $(with-nplm) {
 local with-lbllm = [ option.get "with-lbllm" ] ;
 if $(with-lbllm) {
   lib lbl : : <search>$(with-lbllm)/lib <search>$(with-lbllm)/lib64 ;
-  obj LBLLM2.o : oxlm/LBLLM2.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
+  obj LBLLM.o : oxlm/LBLLM.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
   obj Mapper.o : oxlm/Mapper.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
-  alias lbllm : LBLLM2.o Mapper.o lbl : : : <cxxflags>-std=c++0x <define>LM_LBL ;
+  alias lbllm : LBLLM.o Mapper.o lbl : : : <cxxflags>-std=c++0x <define>LM_LBL ;
   dependencies += lbllm ;
   lmmacros += LM_LBL ;
 }
