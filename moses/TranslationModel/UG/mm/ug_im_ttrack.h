@@ -190,13 +190,13 @@ namespace ugdiss
 
   /// add a sentence to the database
   template<typename TOKEN>
-  shared_ptr<imTtrack<TOKEN> > 
-  append(shared_ptr<imTtrack<TOKEN> > const& crp, vector<TOKEN> const & snt)
+  boost::shared_ptr<imTtrack<TOKEN> > 
+  append(boost::shared_ptr<imTtrack<TOKEN> > const& crp, vector<TOKEN> const & snt)
   {
 #if 1
     if (crp) crp->m_check_token_count();
 #endif
-    shared_ptr<imTtrack<TOKEN> > ret;
+    boost::shared_ptr<imTtrack<TOKEN> > ret;
     if (crp == NULL)
       {
   	ret.reset(new imTtrack<TOKEN>());

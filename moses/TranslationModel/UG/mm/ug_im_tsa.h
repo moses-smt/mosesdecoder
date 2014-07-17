@@ -52,12 +52,12 @@ namespace ugdiss
     
   public:
     imTSA();
-    imTSA(shared_ptr<Ttrack<TOKEN> const> c, 
+    imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, 
 	  bdBitset const* filt, 
 	  ostream* log = NULL);
 
     imTSA(imTSA<TOKEN> const& prior, 
-	  shared_ptr<imTtrack<TOKEN> const> const&   crp,
+	  boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
 	  vector<id_type> const& newsids, size_t const vsize);
 
     count_type 
@@ -140,7 +140,7 @@ namespace ugdiss
   // specified in filter
   template<typename TOKEN>
   imTSA<TOKEN>::
-  imTSA(shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filter, ostream* log)
+  imTSA(boost::shared_ptr<Ttrack<TOKEN> const> c, bdBitset const* filter, ostream* log)
   {
     assert(c);
     this->corpus = c;
@@ -359,7 +359,7 @@ namespace ugdiss
   template<typename TOKEN>
   imTSA<TOKEN>::
   imTSA(imTSA<TOKEN> const& prior, 
-  	shared_ptr<imTtrack<TOKEN> const> const&   crp,
+  	boost::shared_ptr<imTtrack<TOKEN> const> const&   crp,
   	vector<id_type> const& newsids, size_t const vsize)
   {
     typename ttrack::Position::LESS<Ttrack<TOKEN> > sorter(crp.get());

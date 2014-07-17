@@ -53,7 +53,7 @@ namespace ugdiss
     /* an entry in the array, for iteration over all occurrences of a
      * particular sequence */
     // typedef boost::dynamic_bitset<uint64_t>           bitset; 
-    typedef shared_ptr<bitvector>         bitset_pointer;
+    typedef boost::shared_ptr<bitvector>         bitset_pointer;
     typedef TKN                                        Token;
     typedef BitSetCache<TSA<TKN> >                     BSC_t; 
     /* to allow caching of bit vectors that are expensive to create on
@@ -62,7 +62,7 @@ namespace ugdiss
     friend class TSA_tree_iterator<TKN>;
 
   protected:
-    shared_ptr<Ttrack<TKN> const> corpus; // pointer to the underlying corpus
+    boost::shared_ptr<Ttrack<TKN> const> corpus; // pointer to the underlying corpus
     char const*               startArray; // beginning ...
     char const*                 endArray; // ... and end ...
     // of memory block storing the actual TSA
@@ -139,7 +139,7 @@ namespace ugdiss
     getUpperBound(id_type id) const = 0;
 
   public:
-    shared_ptr<BSC_t> bsc;
+    boost::shared_ptr<BSC_t> bsc;
     
     char const* arrayStart() const { return startArray; }
     char const* arrayEnd()   const { return endArray;   }
@@ -298,7 +298,7 @@ namespace ugdiss
     bitset_pointer
     getBitSet(TKN const* startKey, size_t keyLen) const;
     
-    shared_ptr<bitvector>
+    boost::shared_ptr<bitvector>
     findTree(TKN const* treeStart, TKN const* treeEnd, 
              bitvector const* filter) const;
     
