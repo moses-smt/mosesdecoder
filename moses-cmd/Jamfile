@@ -10,4 +10,9 @@ $(TOP)//boost_program_options
 deps 
 ;
 
+
+if [ option.get "with-mm" : no : yes ] = yes {
 alias programs : moses lmbrgrid simulate-pe ;
+} else { 
+alias programs : moses lmbrgrid ;
+}
