@@ -10,7 +10,14 @@ if $(with-dlib) {
   dlib = ;
 }
 
-alias headers : ../util//kenutil : : : $(max-factors) $(dlib) ; 
+with-lbllm = [ option.get "with-lbllm" ] ;
+if $(with-lbllm) {
+  lbllm2 = <cxxflags>-std=c++0x <define>LM_LBL <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
+} else {
+  lbllm2 = ;
+}
+
+alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(lbllm2) ; 
 alias ThreadPool : ThreadPool.cpp ;
 alias Util : Util.cpp Timer.cpp ;
 
