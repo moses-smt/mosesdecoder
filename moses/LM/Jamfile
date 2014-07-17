@@ -84,7 +84,7 @@ if $(with-ldhtlm) {
 local with-nplm = [ option.get "with-nplm" ] ;
 if $(with-nplm) {
   lib neuralLM : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
-  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen-3.1.4 ;
+  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
   alias nplm : NeuralLMWrapper.o neuralLM : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
   dependencies += nplm ;
   lmmacros += LM_NEURAL ;
