@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <BaseTsd.h>
 #else
 #include <stdint.h>
+
 typedef uint32_t UINT32;
 typedef uint64_t UINT64;
 #endif
@@ -60,7 +61,8 @@ const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 5000;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 #ifdef PT_UG
-  const size_t DEFAULT_MAX_PHRASE_LENGTH = -1;
+// setting to std::numeric_limits<size_t>::max() makes the regression test for (deprecated) PhraseDictionaryDynamicSuffixArray fail. 
+ const size_t DEFAULT_MAX_PHRASE_LENGTH = 100000;
 #else
  const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
 #endif
