@@ -69,10 +69,6 @@ public:
   ~PhraseDictionaryOnDisk();
   void Load();
 
-  PhraseTableImplementation GetPhraseTableImplementation() const {
-    return OnDisk;
-  }
-
   // PhraseDictionary impl
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &parser,

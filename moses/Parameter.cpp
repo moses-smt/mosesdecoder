@@ -36,6 +36,7 @@ using namespace std;
 
 namespace Moses
 {
+
 /** define allowed parameters */
 Parameter::Parameter()
 {
@@ -513,29 +514,29 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       }
       UTIL_THROW_IF2(token.size() < 5, "Phrase table must have at least 5 scores");
 
-      PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
+      int implementation = Scan<int>(token[0]);
 
       string ptType;
       switch (implementation) {
-      case Memory:
+      case 0: // Memory
         ptType = "PhraseDictionaryMemory";
         break;
-      case Binary:
+      case 1: // Binary
         ptType = "PhraseDictionaryBinary";
         break;
-      case OnDisk:
+      case 2: // OnDisk
         ptType = "PhraseDictionaryOnDisk";
         break;
-      case SCFG:
+      case 6: // SCFG
         ptType = "PhraseDictionaryMemory";
         break;
-      case Compact:
+      case 12: // Compact
         ptType = "PhraseDictionaryCompact";
         break;
-      case SuffixArray:
+      case 8: // SuffixArray
         ptType = "PhraseDictionarySuffixArray";
         break;
-      case DSuffixArray:
+      case 14: // DSuffixArray
         ptType = "PhraseDictionaryDynSuffixArray";
         break;
       default:
@@ -591,7 +592,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       ptLine << "num-features=" << numScoreComponent << " ";
       ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
 
-      if (implementation == SuffixArray || implementation == DSuffixArray) {
+      if (implementation == 8 || implementation == 14) {
         ptLine << "target-path=" << token[5] << " ";
         ptLine << "alignment-path=" << token[6] << " ";
       }
