@@ -4,9 +4,10 @@ fakelib builder : [ glob *.cc : *test.cc *main.cc ]
 
 exe lmplz : lmplz_main.cc builder /top//boost_program_options ;
 
-exe dump_counts : dump_counts_main.cc builder ;
+#exe dump_counts : dump_counts_main.cc builder ;
 
-alias programs : lmplz dump_counts ;
+#alias programs : lmplz dump_counts ;
+alias programs : lmplz ;
 
 import testing ;
 unit-test corpus_count_test : corpus_count_test.cc builder /top//boost_unit_test_framework ;
