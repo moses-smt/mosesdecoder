@@ -4,7 +4,6 @@
 #include <boost/functional/hash.hpp>
 #include "NeuralLMWrapper.h"
 #include "neuralLM.h"
-#include <model.h>
 
 using namespace std;
 
@@ -34,7 +33,6 @@ void NeuralLMWrapper::Load()
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
   m_neuralLM_shared = new nplm::neuralLM(m_filePath, true);
-  m_neuralLM_shared->set_log_base(10);
   //TODO: config option?
   m_neuralLM_shared->set_cache(1000000);
 
@@ -56,7 +54,7 @@ LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, Sta
   for (size_t i=0, n=contextFactor.size(); i<n; i++) {
     const Word* word = contextFactor[i];
     const Factor* factor = word->GetFactor(m_factorType);
-    const std::string string= factor->GetString().as_string();
+    const std::string string = factor->GetString().as_string();
     int neuralLM_wordID = m_neuralLM->lookup_word(string);
     words[i] = neuralLM_wordID;
     boost::hash_combine(hashCode, neuralLM_wordID);
@@ -66,7 +64,7 @@ LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, Sta
 
   // Create a new struct to hold the result
   LMResult ret;
-  ret.score = value;
+  ret.score = FloorScore(value);
   ret.unknown = false;
 
   (*finalState) = (State*) hashCode;
