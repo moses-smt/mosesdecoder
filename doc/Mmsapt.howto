@@ -1,0 +1,31 @@
+How to use memory-mapped suffix array phrase tables in the moses decoder 
+(phrase-based decoding only)
+
+1. Compile with the bjam switch --with-mm
+
+2. You need 
+   - sentences aligned text files
+   - the word alignment between these files in symal output format
+
+3. Build binary files
+
+   Let 
+   ${L1} be the extension of the language that you are translating from,
+   ${L2} the extension of the language that you want to translate into, and 
+   ${CORPUS} the name of the word-aligned training corpus
+
+   % zcat ${CORPUS}.${L1}.gz  | mtt-build -i -o /some/path/${CORPUS}.${L1}
+   % zcat ${CORPUS}.${L2}.gz  | mtt-build -i -o /some/path/${CORPUS}.${L2}
+   % zcat ${CORPUS}.${L1}-${L2}.symal.gz | symal2mam /some/path/${CORPUS}.${L1}-${L2}.mam
+   % mmlex-build /some/path/${CORPUS} ${L1} ${L2} -o /some/path/${CORPUS}.${L1}-${L2}.lex -c /some/path/${CORPUS}.${L1}-${L2}.coc
+
+4. Define line in moses.ini
+
+   The best configuration of phrase table features is still under investigation. 
+   For the time being, try this:
+
+   Mmsapt name=PT0 output-factor=0 num-features=9 base=/some/path/${CORPUS} L1=${L1} L2=${L2} pfwd=g pbwd=g smooth=0 sample=1000 workers=1 
+
+   You can increase the number of workers for sampling (a bit faster), 
+   but you'll lose replicability of the translation output. 
+
