@@ -90,6 +90,7 @@ public:
 private:
   const WordsRange &m_coverage;
   const Word &m_label;
+  //const InputPath &m_inputPath;
   Stack m_stack;
   mutable float m_bestScore;
 };

@@ -41,13 +41,13 @@ public:
     return true;
   }
 
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
   
-    void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
@@ -55,12 +55,12 @@ public:
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
   
-  FFState* Evaluate(
+  FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
-  FFState* EvaluateChart(
+  FFState* EvaluateWhenApplied(
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;

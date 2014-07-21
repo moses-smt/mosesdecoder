@@ -66,10 +66,9 @@ int main (int argc, char * const argv[])
 
   PhraseNode &rootNode = onDiskWrapper.GetRootSourceNode();
   size_t lineNum = 0;
-  char line[100000];
+  string line;
 
-  //while(getline(inStream, line))
-  while(inStream.getline(line, 100000)) {
+  while(getline(inStream, line)) {
     lineNum++;
     if (lineNum%1000 == 0) cerr << "." << flush;
     if (lineNum%10000 == 0) cerr << ":" << flush;
@@ -107,8 +106,13 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
   return ret;
 }
 
-OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
+OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, const std::string &lineStr, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
 {
+  char line[lineStr.size() + 1];
+  strcpy(line, lineStr.c_str());
+
+  stringstream sparseFeatures, property;
+
   size_t scoreInd = 0;
 
   // MAIN LOOP
@@ -118,6 +122,7 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
    2 = scores
    3 = align
    4 = count
+   7 = properties
    */
   char *tok = strtok (line," ");
   OnDiskPt::PhrasePtr out(new Phrase());
@@ -148,29 +153,20 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
         targetPhrase.CreateAlignFromString(tok);
         break;
       }
-      case 4:
-        ++stage;
-        break;
-        /*      case 5: {
-              // count info. Only store the 2nd one
-              float val = Moses::Scan<float>(tok);
-              misc[0] = val;
-              ++stage;
-              break;
-        }*/
+      case 4: {
+      	// store only the 3rd one (rule count)
+      	float val = Moses::Scan<float>(tok);
+      	misc[0] = val;
+          break;
+      }
       case 5: {
-        // count info. Only store the 2nd one
-        //float val = Moses::Scan<float>(tok);
-        //misc[0] = val;
-        ++stage;
+      	// sparse features
+      	sparseFeatures << tok << " ";
         break;
       }
       case 6: {
-        // store only the 3rd one (rule count)
-        float val = Moses::Scan<float>(tok);
-        misc[0] = val;
-        ++stage;
-        break;
+	    property << tok << " ";
+	    break;
       }
       default:
         cerr << "ERROR in line " << line << endl;
@@ -183,6 +179,8 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
   } // while (tok != NULL)
 
   assert(scoreInd == numScores);
+  targetPhrase.SetSparseFeatures(Moses::Trim(sparseFeatures.str()));
+  targetPhrase.SetProperty(Moses::Trim(property.str()));
   targetPhrase.SortAlign();
   return out;
 } // Tokenize()

@@ -139,8 +139,7 @@ CreateFromString(FactorDirection direction
 		      << " contains factor delimiter " 
 		      << StaticData::Instance().GetFactorDelimiter() 
 		      << " too many times.");
-      
-      UTIL_THROW_IF(i < factorOrder.size(),util::Exception, 
+      UTIL_THROW_IF(!isNonTerminal && i < factorOrder.size(),util::Exception,
 		    "Too few factors in string '" << str << "'.");
     }
   else

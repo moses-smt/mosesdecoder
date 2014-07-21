@@ -17,7 +17,15 @@ NieceTerminal::NieceTerminal(const std::string &line)
   ReadParameters();
 }
 
-void NieceTerminal::Evaluate(const Phrase &source
+std::vector<float> NieceTerminal::DefaultWeights() const
+{
+  UTIL_THROW_IF2(m_numScoreComponents != 1,
+          "NieceTerminal must only have 1 score");
+  vector<float> ret(1, 1);
+  return ret;
+}
+
+void NieceTerminal::EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const
@@ -25,7 +33,7 @@ void NieceTerminal::Evaluate(const Phrase &source
   targetPhrase.SetRuleSource(source);
 }
 
-void NieceTerminal::Evaluate(const InputType &input
+void NieceTerminal::EvaluateWithSourceContext(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
                                    , const StackVec *stackVec
@@ -63,11 +71,11 @@ void NieceTerminal::Evaluate(const InputType &input
 
 }
 
-void NieceTerminal::Evaluate(const Hypothesis& hypo,
+void NieceTerminal::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 
-void NieceTerminal::EvaluateChart(const ChartHypothesis &hypo,
+void NieceTerminal::EvaluateWhenApplied(const ChartHypothesis &hypo,
                                         ScoreComponentCollection* accumulator) const
 {}
 

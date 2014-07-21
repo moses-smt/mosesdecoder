@@ -10,7 +10,14 @@ if $(with-dlib) {
   dlib = ;
 }
 
-alias headers : ../util//kenutil : : : $(max-factors) $(dlib) ; 
+with-lbllm = [ option.get "with-lbllm" ] ;
+if $(with-lbllm) {
+  lbllm2 = <cxxflags>-std=c++0x <define>LM_LBL <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
+} else {
+  lbllm2 = ;
+}
+
+alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(lbllm2) ; 
 alias ThreadPool : ThreadPool.cpp ;
 alias Util : Util.cpp Timer.cpp ;
 
@@ -69,10 +76,11 @@ lib moses :
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
-  *Test.cpp Mock*.cpp
+  *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
 ]
-headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool
+headers FF_Factory.o LM//LM TranslationModel/CompactPT//CompactPT TranslationModel/ProbingPT//ProbingPT synlm ThreadPool
+
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt 
 $(TOP)//boost_iostreams mmlib
 :
@@ -84,5 +92,5 @@ alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
 

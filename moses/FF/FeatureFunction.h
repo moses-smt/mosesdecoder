@@ -98,7 +98,7 @@ public:
   // source phrase is the substring that the phrase table uses to look up the target phrase,
   // may have more factors than actually need, but not guaranteed.
   // For SCFG decoding, the source contains non-terminals, NOT the raw source from the input sentence
-  virtual void Evaluate(const Phrase &source
+  virtual void EvaluateInIsolation(const Phrase &source
                         , const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
                         , ScoreComponentCollection &estimatedFutureScore) const = 0;
@@ -110,7 +110,7 @@ public:
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
   // No FF should set estimatedFutureScore in both overloads!
-  virtual void Evaluate(const InputType &input
+  virtual void EvaluateWithSourceContext(const InputType &input
                         , const InputPath &inputPath
                         , const TargetPhrase &targetPhrase
                         , const StackVec *stackVec

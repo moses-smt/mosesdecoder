@@ -42,7 +42,7 @@ void OpSequenceModel::Load()
 
 
 
-void OpSequenceModel:: Evaluate(const Phrase &source
+void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
                                 , const TargetPhrase &targetPhrase
                                 , ScoreComponentCollection &scoreBreakdown
                                 , ScoreComponentCollection &estimatedFutureScore) const
@@ -87,7 +87,7 @@ void OpSequenceModel:: Evaluate(const Phrase &source
 }
 
 
-FFState* OpSequenceModel::Evaluate(
+FFState* OpSequenceModel::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
@@ -194,7 +194,7 @@ FFState* OpSequenceModel::Evaluate(
 // return NULL;
 }
 
-FFState* OpSequenceModel::EvaluateChart(
+FFState* OpSequenceModel::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

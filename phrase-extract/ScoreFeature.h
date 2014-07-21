@@ -90,7 +90,7 @@ public:
                                          float count, 
                                          int sentenceId) const {};
 
-  /** Add the values for this feature function. */
+  /** Add the values for this score feature. */
   virtual void add(const ScoreFeatureContext& context,
                    std::vector<float>& denseValues,
                    std::map<std::string,float>& sparseValues) const = 0;

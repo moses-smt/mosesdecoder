@@ -323,9 +323,6 @@ void PhraseDictionaryMultiModel::SetTemporaryMultiModelWeightsVector(std::vector
 vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string, string> > &phrase_pair_vector)
 {
 
-  const StaticData &staticData = StaticData::Instance();
-  const string& factorDelimiter = staticData.GetFactorDelimiter();
-
   map<pair<string, string>, size_t> phrase_pair_map;
 
   for ( vector<pair<string, string> >::const_iterator iter = phrase_pair_vector.begin(); iter != phrase_pair_vector.end(); ++iter ) {
@@ -344,7 +341,7 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
     map<string,multiModelStatistics*>* allStats = new(map<string,multiModelStatistics*>);
 
     Phrase sourcePhrase(0);
-    sourcePhrase.CreateFromString(Input, m_input, source_string, factorDelimiter, NULL);
+    sourcePhrase.CreateFromString(Input, m_input, source_string, NULL);
 
     CollectSufficientStatistics(sourcePhrase, allStats); //optimization potential: only call this once per source phrase
 

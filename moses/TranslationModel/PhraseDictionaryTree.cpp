@@ -3,6 +3,7 @@
 #include "moses/FeatureVector.h"
 #include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include "util/exception.hh"
+#include "moses/StaticData.h"
 
 #include <map>
 #include <sstream>
@@ -233,7 +234,8 @@ public:
   typedef PhraseDictionaryTree::PrefixPtr PPtr;
 
   void GetTargetCandidates(PPtr p,TgtCands& tgtCands) {
-    UTIL_THROW_IF2(p == NULL, "Error");
+    UTIL_THROW_IF2(p == 0L, "Error"); 
+    // UTIL_THROW_IF2(p == NULL, "Error");
 
     if(p.imp->isRoot()) return;
     OFF_T tCandOffset=p.imp->ptr()->getData(p.imp->idx);
@@ -278,7 +280,8 @@ public:
   }
 
   PPtr Extend(PPtr p,const std::string& w) {
-	UTIL_THROW_IF2(p == NULL, "Error");
+	UTIL_THROW_IF2(p == 0L, "Error");
+	// UTIL_THROW_IF2(p == NULL, "Error");
 
     if(w.empty() || w==EPSILON) return p;
 
@@ -349,8 +352,8 @@ int PDTimp::Read(const std::string& fn)
   sv.Read(ifsv);
   tv.Read(iftv);
 
-  TRACE_ERR("binary phrasefile loaded, default OFF_T: "<<PTF::getDefault()
-            <<"\n");
+  VERBOSE(1,"binary phrasefile loaded, default OFF_T: "
+	  <<PTF::getDefault() <<"\n");
   return 1;
 }
 
@@ -660,7 +663,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
 int PhraseDictionaryTree::Read(const std::string& fn)
 {
-  TRACE_ERR("size of OFF_T "<<sizeof(OFF_T)<<"\n");
+  VERBOSE(1,"size of OFF_T "<<sizeof(OFF_T)<<"\n");
   return imp->Read(fn);
 }
 

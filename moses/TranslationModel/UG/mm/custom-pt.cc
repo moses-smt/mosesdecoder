@@ -23,6 +23,7 @@
 #include "ug_typedefs.h"
 #include "tpt_pickler.h"
 #include "ug_bitext.h"
+#include "../mmsapt_phrase_scorers.h"
 #include "ug_lexical_phrase_scorer2.h"
 
 using namespace std;
@@ -44,7 +45,7 @@ float lbsmooth = .005;
 
 PScorePfwd<Token> calc_pfwd;
 PScorePbwd<Token> calc_pbwd;
-PScoreLex<Token>  calc_lex;
+PScoreLex<Token>  calc_lex(1.0);
 PScoreWP<Token>   apply_wp;
 vector<float> fweights;
 
@@ -129,8 +130,8 @@ int main(int argc, char* argv[])
   bt.setDefaultSampleSize(max_samples);
 
   size_t i;
-  i = calc_pfwd.init(0,.05);
-  i = calc_pbwd.init(i,.05);
+  i = calc_pfwd.init(0,.05,'g');
+  i = calc_pbwd.init(i,.05,'g');
   i = calc_lex.init(i,base+L1+"-"+L2+".lex");
   i = apply_wp.init(i);
 

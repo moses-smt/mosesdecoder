@@ -288,7 +288,7 @@ void LanguageModelDALM::CalcScore(const Phrase &phrase, float &fullScore, float 
 	ngramScore = TransformLMScore(ngramScore);
 }
 
-FFState *LanguageModelDALM::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const{
+FFState *LanguageModelDALM::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const{
   // In this function, we only compute the LM scores of n-grams that overlap a
   // phrase boundary. Phrase-internal scores are taken directly from the
   // translation option.
@@ -339,7 +339,7 @@ FFState *LanguageModelDALM::Evaluate(const Hypothesis &hypo, const FFState *ps, 
   return dalm_state;
 }
 
-FFState *LanguageModelDALM::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const{
+FFState *LanguageModelDALM::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *out) const{
   // initialize language model context state
  	DALMChartState *newState = new DALMChartState();
 	DALM::State &state = newState->GetRightContext();

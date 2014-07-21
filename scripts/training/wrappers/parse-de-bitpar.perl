@@ -15,6 +15,7 @@ my $DEESCAPE = "$SCRIPTS_ROOT_DIR/tokenizer/deescape-special-chars.perl";
 my $DEBUG = 0;
 my $BASIC = 0;
 my $OLD_BITPAR = 0;
+my $UNPARSEABLE = 0;
 
 my $RAW = "";
 
@@ -22,7 +23,8 @@ GetOptions(
     "basic" => \$BASIC,
     "bitpar=s" => \$BITPAR,
     "old-bitpar" => \$OLD_BITPAR,
-    "raw=s" => \$RAW
+    "raw=s" => \$RAW,
+    "unparseable" => \$UNPARSEABLE
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
@@ -71,6 +73,12 @@ if ($OLD_BITPAR)
 open(PARSER,$pipeline);
 while(my $line = <PARSER>) {
     if ($line =~ /^No parse for/) {
+        if ($UNPARSEABLE) {
+          my $len = length($line);
+          $line = substr($line, 15, $len - 17); 
+          $line = escape($line);
+          print $line;
+        }
         print "\n";
         next;
     }

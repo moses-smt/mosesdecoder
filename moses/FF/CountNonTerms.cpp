@@ -16,7 +16,7 @@ CountNonTerms::CountNonTerms(const std::string &line)
   ReadParameters();
 }
 
-void CountNonTerms::Evaluate(const Phrase &sourcePhrase
+void CountNonTerms::EvaluateInIsolation(const Phrase &sourcePhrase
               , const TargetPhrase &targetPhrase
               , ScoreComponentCollection &scoreBreakdown
               , ScoreComponentCollection &estimatedFutureScore) const

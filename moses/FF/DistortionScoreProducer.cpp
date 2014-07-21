@@ -87,7 +87,7 @@ float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
 }
 
 
-FFState* DistortionScoreProducer::Evaluate(
+FFState* DistortionScoreProducer::EvaluateWhenApplied(
   const Hypothesis& hypo,
   const FFState* prev_state,
   ScoreComponentCollection* out) const

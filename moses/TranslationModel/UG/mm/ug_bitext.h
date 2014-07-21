@@ -26,6 +26,7 @@
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 #include <boost/random.hpp>
+#include <boost/format.hpp>
 
 #include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
 #include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
@@ -193,239 +194,6 @@ namespace Moses {
       float eval(vector<float> const& w);
     };
 
-    template<typename Token>
-    class
-    PhraseScorer
-    {
-    protected:
-      int index;
-      int num_feats;
-    public:
- 
-      virtual 
-      void 
-      operator()(Bitext<Token> const& pt, PhrasePair& pp, vector<float> * dest) 
-	const = 0;
-
-      int 
-      fcnt() const 
-      { return num_feats; }
-      
-      int 
-      getIndex() const 
-      { return index; }
-    };
-
-    template<typename Token>
-    class
-    PScorePfwd : public PhraseScorer<Token>
-    {
-      float conf;
-      char denom;
-    public:
-      PScorePfwd() 
-      {
-	this->num_feats = 1;
-      }
-
-      int 
-      init(int const i, float const c, char d=0) 
-      { 
-	conf  = c; 
-	denom = d;
-	this->index = i;
-	return i + this->num_feats;
-      }
-
-      void 
-      operator()(Bitext<Token> const& bt, 
-		 PhrasePair & pp, 
-		 vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	if (pp.joint > pp.good1) 
-	  {
-	    cerr<<bt.toString(pp.p1,0)<<" ::: "<<bt.toString(pp.p2,1)<<endl;
-	    cerr<<pp.joint<<"/"<<pp.good1<<"/"<<pp.raw2<<endl;
-	  }
-	switch (denom)
-	  {
-	  case 'g': 
-	    (*dest)[this->index] = log(lbop(pp.good1, pp.joint, conf)); 
-	    break;
-	  case 's': 
-	    (*dest)[this->index] = log(lbop(pp.sample1, pp.joint, conf)); 
-	    break;
-	  case 'r':
-	    (*dest)[this->index] = log(lbop(pp.raw1, pp.joint, conf)); 
-	  }
-      }
-    };
-
-    template<typename Token>
-    class
-    PScorePbwd : public PhraseScorer<Token>
-    {
-      float conf;
-    public:
-      PScorePbwd() 
-      {
-	this->num_feats = 1;
-      }
-
-      int 
-      init(int const i, float const c) 
-      { 
-	conf = c; 
-	this->index = i;
-	return i + this->num_feats;
-      }
-
-      void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp, 
-		 vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	(*dest)[this->index] = log(lbop(max(pp.raw2,pp.joint),pp.joint,conf));
-      }
-    };
-
-    template<typename Token>
-    class
-    PScoreLogCounts : public PhraseScorer<Token>
-    {
-      float conf;
-    public:
-      PScoreLogCounts() 
-      {
-	this->num_feats = 4;
-      }
-
-      int 
-      init(int const i) 
-      { 
-	this->index = i;
-	return i + this->num_feats;
-      }
-
-      void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp, 
-		 vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	size_t i = this->index;
-	assert(pp.raw1);
-	assert(pp.sample1);
-	assert(pp.joint);
-	assert(pp.raw2);
-	(*dest)[i] = log(pp.raw1);
-	(*dest)[++i] = log(pp.sample1);
-	(*dest)[++i] = log(pp.joint);
-	(*dest)[++i] = log(pp.raw2);
-      }
-    };
-
-    template<typename Token>
-    class
-    PScoreLex : public PhraseScorer<Token>
-    {
-    public:
-      LexicalPhraseScorer2<Token> scorer;
-
-      PScoreLex() { this->num_feats = 2; }
-
-      int 
-      init(int const i, string const& fname) 
-      { 
-	scorer.open(fname); 
-	this->index = i;
-	return i + this->num_feats;
-      }
-
-      void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	uint32_t sid1=0,sid2=0,off1=0,off2=0,len1=0,len2=0;
-	parse_pid(pp.p1, sid1, off1, len1);
-	parse_pid(pp.p2, sid2, off2, len2);
-
-#if 0
-	cout << len1 << " " << len2 << endl;
-	Token const* t1 = bt.T1->sntStart(sid1);
-	for (size_t i = off1; i < off1 + len1; ++i)
-	  cout << (*bt.V1)[t1[i].id()] << " "; 
-	cout << __FILE__ << ":" << __LINE__ << endl;
-
-	Token const* t2 = bt.T2->sntStart(sid2);
-	for (size_t i = off2; i < off2 + len2; ++i)
-	  cout << (*bt.V2)[t2[i].id()] << " "; 
-	cout << __FILE__ << ":" << __LINE__ << endl;
-
-	BOOST_FOREACH (int a, pp.aln)
-	  cout << a << " " ;
-	cout << __FILE__ << ":" << __LINE__ << "\n" << endl;
-
-#endif
-	scorer.score(bt.T1->sntStart(sid1)+off1,0,len1,
-		     bt.T2->sntStart(sid2)+off2,0,len2,
-		     pp.aln, (*dest)[this->index],
-		     (*dest)[this->index+1]);
-      }
-      
-    };
-
-    /// Word penalty
-    template<typename Token>
-    class
-    PScoreWP : public PhraseScorer<Token>
-    {
-    public:
-
-      PScoreWP() { this->num_feats = 1; }
-
-      int 
-      init(int const i) 
-      {
-	this->index = i;
-	return i + this->num_feats;
-      }
-
-      void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	uint32_t sid2=0,off2=0,len2=0;
-	parse_pid(pp.p2, sid2, off2, len2);
-	(*dest)[this->index] = len2;
-      }
-      
-    };
-
-    /// Phrase penalty
-    template<typename Token>
-    class
-    PScorePP : public PhraseScorer<Token>
-    {
-    public:
-
-      PScorePP() { this->num_feats = 1; }
-
-      int 
-      init(int const i) 
-      {
-	this->index = i;
-	return i + this->num_feats;
-      }
-
-      void 
-      operator()(Bitext<Token> const& bt, PhrasePair& pp, vector<float> * dest = NULL) const
-      {
-	if (!dest) dest = &pp.fvals;
-	(*dest)[this->index] = 1;
-      }
-      
-    };
 
     template<typename TKN>
     class Bitext 
@@ -590,8 +358,9 @@ namespace Moses {
 	static ThreadSafeCounter active;
 	boost::mutex lock; 
 	friend class agenda;
-	boost::taus88 rnd; // every job has its own pseudo random generator 
-	double rnddenom;   // denominator for scaling random sampling
+	boost::taus88 rnd;  // every job has its own pseudo random generator 
+	double rnddenom;    // denominator for scaling random sampling
+	size_t min_diverse; // minimum number of distinct translations
       public:
 	size_t         workers; // how many workers are working on this job?
 	sptr<TSA<Token> const> root; // root of the underlying suffix array
@@ -644,34 +413,47 @@ namespace Moses {
     step(uint64_t & sid, uint64_t & offset)
     {
       boost::lock_guard<boost::mutex> jguard(lock);
-      if ((max_samples == 0) && (next < stop))
+      bool ret = (max_samples == 0) && (next < stop);
+      if (ret)
 	{
 	  next = root->readSid(next,stop,sid);
 	  next = root->readOffset(next,stop,offset);
 	  boost::lock_guard<boost::mutex> sguard(stats->lock);
 	  if (stats->raw_cnt == ctr) ++stats->raw_cnt;
 	  stats->sample_cnt++;
-	  return true;
 	}
       else 
 	{
-	  while (next < stop && stats->good < max_samples)
+	  while (next < stop && (stats->good < max_samples || 
+				 stats->trg.size() < min_diverse))
 	    {
 	      next = root->readSid(next,stop,sid);
 	      next = root->readOffset(next,stop,offset);
-	      {
-		boost::lock_guard<boost::mutex> sguard(stats->lock);
+	      { // brackets required for lock scoping; see sguard immediately below
+		boost::lock_guard<boost::mutex> sguard(stats->lock); 
 		if (stats->raw_cnt == ctr) ++stats->raw_cnt;
-		size_t rnum = (stats->raw_cnt - ctr++)*(rnd()/(rnd.max()+1.));
+		size_t scalefac = (stats->raw_cnt - ctr++);
+		size_t rnum = scalefac*(rnd()/(rnd.max()+1.));
+#if 0
+		cerr << rnum << "/" << scalefac << " vs. " 
+		     << max_samples - stats->good << " ("
+		     << max_samples << " - " << stats->good << ")" 
+		     << endl;
+#endif
 		if (rnum < max_samples - stats->good)
 		  {
 		    stats->sample_cnt++;
-		    return true;
+		    ret = true;
+		    break;
 		  }
 	      }
 	    }
-	  return false;
 	}
+      
+      // boost::lock_guard<boost::mutex> sguard(stats->lock); 
+      // abuse of lock for clean output to cerr
+      // cerr << stats->sample_cnt++;
+      return ret;
     }
 
     template<typename Token>
@@ -713,6 +495,13 @@ namespace Moses {
     worker::
     operator()()
     {
+      // things to do:
+      // - have each worker maintain their own pstats object and merge results at the end;
+      // - ensure the minimum size of samples considered by a non-locked counter that is only 
+      //   ever incremented -- who cares if we look at more samples than required, as long
+      //   as we look at at least the minimum required
+      // This way, we can reduce the number of lock / unlock operations we need to do during 
+      // sampling. 
       size_t s1=0, s2=0, e1=0, e2=0;
       uint64_t sid=0, offset=0; // of the source phrase
       while(sptr<job> j = ag.get_job())
@@ -812,6 +601,7 @@ namespace Moses {
 	sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd)
       : rnd(0)
       , rnddenom(rnd.max() + 1.)
+      , min_diverse(10)
       , workers(0)
       , root(r)
       , next(m.lower_bound(-1))

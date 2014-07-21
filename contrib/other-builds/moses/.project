@@ -602,16 +602,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingConstraint.h</locationURI>
 		</link>
 		<link>
-			<name>ReorderingStack.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingStack.cpp</locationURI>
-		</link>
-		<link>
-			<name>ReorderingStack.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingStack.h</locationURI>
-		</link>
-		<link>
 			<name>RuleCube.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleCube.cpp</locationURI>
@@ -1302,6 +1292,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SourceGHKMTreeInputMatchFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceGHKMTreeInputMatchFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SourceGHKMTreeInputMatchFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceGHKMTreeInputMatchFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SourceWordDeletionFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.cpp</locationURI>
@@ -1310,6 +1310,26 @@
 			<name>FF/SourceWordDeletionFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceWordDeletionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SpanLength.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanLength.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SpanLength.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanLength.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SparseHieroReorderingFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparseHieroReorderingFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SparseHieroReorderingFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparseHieroReorderingFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/StatefulFeatureFunction.cpp</name>
@@ -1330,6 +1350,16 @@
 			<name>FF/StatelessFeatureFunction.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatelessFeatureFunction.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SyntaxRHS.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxRHS.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SyntaxRHS.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SyntaxRHS.h</locationURI>
 		</link>
 		<link>
 			<name>FF/TargetBigramFeature.cpp</name>
@@ -1607,6 +1637,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
 		</link>
 		<link>
+			<name>LM/oxlm</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>PP/CountsPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/CountsPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/CountsPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/CountsPhraseProperty.h</locationURI>
+		</link>
+		<link>
 			<name>PP/Factory.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.cpp</locationURI>
@@ -1617,9 +1662,44 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.h</locationURI>
 		</link>
 		<link>
+			<name>PP/NonTermContextProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/NonTermContextProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/NonTermContextProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/NonTermContextProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/PhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.cpp</locationURI>
+		</link>
+		<link>
 			<name>PP/PhraseProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/SourceLabelsPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SourceLabelsPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/SourceLabelsPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SourceLabelsPhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/SpanLengthPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SpanLengthPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/SpanLengthPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SpanLengthPhraseProperty.h</locationURI>
 		</link>
 		<link>
 			<name>PP/TreeStructurePhraseProperty.h</name>
@@ -1762,6 +1842,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTreeAdaptor.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/ProbingPT</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/RuleTable</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1847,6 +1932,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingTable.h</locationURI>
 		</link>
 		<link>
+			<name>FF/LexicalReordering/ReorderingStack.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/ReorderingStack.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/ReorderingStack.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/ReorderingStack.h</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/SparseReordering.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/SparseReordering.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/SparseReordering.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/SparseReordering.h</locationURI>
+		</link>
+		<link>
 			<name>FF/OSM-Feature/OpSequenceModel.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/OpSequenceModel.cpp</locationURI>
@@ -1865,6 +1970,26 @@
 			<name>FF/OSM-Feature/osmHyp.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.h</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/LBLLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/LBLLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/LBLLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/LBLLM.h</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/Mapper.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/Mapper.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/Mapper.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/Mapper.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>
@@ -2180,6 +2305,91 @@
 			<name>TranslationModel/DynSAInclude/vocab.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/vocab.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/Jamfile</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/Jamfile</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/ProbingPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/ProbingPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/hash.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/hash.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/hash.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/hash.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/huffmanish.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/huffmanish.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/huffmanish.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/huffmanish.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/line_splitter.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/line_splitter.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/line_splitter.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/line_splitter.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/probing_hash_utils.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/probing_hash_utils.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/probing_hash_utils.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/probing_hash_utils.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/quering.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/quering.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/quering.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/quering.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/storing.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/storing.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/storing.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/storing.hh</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/vocabid.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/vocabid.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/vocabid.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/vocabid.hh</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/RuleTable/Loader.h</name>

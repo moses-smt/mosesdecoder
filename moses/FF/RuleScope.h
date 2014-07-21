@@ -14,12 +14,12 @@ public:
 	  virtual bool IsUseable(const FactorMask &mask) const
 	  { return true; }
 
-	  virtual void Evaluate(const Phrase &source
+	  virtual void EvaluateInIsolation(const Phrase &source
 							, const TargetPhrase &targetPhrase
 							, ScoreComponentCollection &scoreBreakdown
 							, ScoreComponentCollection &estimatedFutureScore) const;
 
-	  virtual void Evaluate(const InputType &input
+	  virtual void EvaluateWithSourceContext(const InputType &input
 	                         , const InputPath &inputPath
 	                         , const TargetPhrase &targetPhrase
 	                         , const StackVec *stackVec
@@ -27,11 +27,11 @@ public:
 	                         , ScoreComponentCollection *estimatedFutureScore = NULL) const
 	  {}
 
-	  virtual void Evaluate(const Hypothesis& hypo,
+	  virtual void EvaluateWhenApplied(const Hypothesis& hypo,
 	                        ScoreComponentCollection* accumulator) const
 	  {}
 
-	  virtual void EvaluateChart(const ChartHypothesis &hypo,
+	  virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
 	                             ScoreComponentCollection* accumulator) const
 	  {}
 

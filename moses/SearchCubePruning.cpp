@@ -86,7 +86,7 @@ void SearchCubePruning::ProcessSentence()
   // go through each stack
   size_t stackNo = 1;
   std::vector < HypothesisStack* >::iterator iterStack;
-  for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
+  for (iterStack = m_hypoStackColl.begin() + 1 ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
     // check if decoding ran out of time
     double _elapsed_time = GetUserTime();
     if (_elapsed_time > staticData.GetTimeoutThreshold()) {
@@ -248,11 +248,6 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
   // no limit of reordering: no problem
   if (maxDistortion < 0) {
     return true;
-  }
-
-  if (StaticData::Instance().AdjacentOnly() &&
-	  !hypoBitmap.IsAdjacent(range.GetStartPos(), range.GetEndPos())) {
-	return false;
   }
 
   bool leftMostEdge = (hypoFirstGapPos == startPos);
