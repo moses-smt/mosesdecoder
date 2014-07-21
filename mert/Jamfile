@@ -15,6 +15,9 @@ FeatureStats.cpp
 FeatureArray.cpp
 FeatureData.cpp
 FeatureDataIterator.cpp
+ForestRescore.cpp
+HopeFearDecoder.cpp
+Hypergraph.cpp
 MiraFeatureVector.cpp
 MiraWeightVector.cpp
 HypPackEnumerator.cpp
@@ -62,13 +65,15 @@ exe sentence-bleu : sentence-bleu.cpp mert_lib ;
 
 exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
-exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ;
+exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ..//boost_filesystem ;
 
 alias programs : mert extractor evaluator pro kbmira sentence-bleu ;
 
 unit-test bleu_scorer_test : BleuScorerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test forest_rescore_test : ForestRescoreTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test hypergraph_test : HypergraphTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test ngram_test : NgramTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test optimizer_factory_test : OptimizerFactoryTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test point_test : PointTest.cpp mert_lib ..//boost_unit_test_framework ;

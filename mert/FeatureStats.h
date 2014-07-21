@@ -14,6 +14,11 @@
 #include <map>
 #include <string>
 #include <vector>
+
+#include <boost/unordered_map.hpp>
+
+#include <util/string_piece.hh>
+
 #include "Types.h"
 
 namespace MosesTuning
@@ -31,6 +36,7 @@ public:
   FeatureStatsType get(const std::string& name) const;
   FeatureStatsType get(std::size_t id) const;
   void set(const std::string& name, FeatureStatsType value);
+  void set(size_t id, FeatureStatsType value);
   void clear();
   void load(const std::string& file);
   std::size_t size() const {
@@ -40,6 +46,7 @@ public:
   void write(std::ostream& out, const std::string& sep = " ") const;
 
   SparseVector& operator-=(const SparseVector& rhs);
+  SparseVector& operator+=(const SparseVector& rhs);
   FeatureStatsType inner_product(const SparseVector& rhs) const;
 
   // Added by cherryc

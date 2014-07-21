@@ -14,6 +14,8 @@
 
 #include <boost/functional/hash.hpp>
 
+#include "util/murmur_hash.hh"
+
 #include "Util.h"
 
 using namespace std;
@@ -59,6 +61,11 @@ void SparseVector::set(const string& name, FeatureStatsType value)
   m_fvector[id] = value;
 }
 
+void SparseVector::set(size_t id, FeatureStatsType value) {
+  assert(m_id_to_name.size() > id);
+  m_fvector[id] = value;
+}
+
 void SparseVector::write(ostream& out, const string& sep) const
 {
   for (fvector_t::const_iterator i = m_fvector.begin(); i != m_fvector.end(); ++i) {
@@ -89,6 +96,16 @@ void SparseVector::load(const string& file)
     linestream >> value;
     set(name,value);
   }
+}
+
+SparseVector& SparseVector::operator+=(const SparseVector& rhs)
+{
+
+  for (fvector_t::const_iterator i = rhs.m_fvector.begin();
+       i != rhs.m_fvector.end(); ++i) {
+    m_fvector[i->first] =  get(i->first) + (i->second);
+  }
+  return *this;
 }
 
 SparseVector& SparseVector::operator-=(const SparseVector& rhs)
@@ -162,11 +179,17 @@ bool operator==(SparseVector const& item1, SparseVector const& item2)
   return item1.m_fvector==item2.m_fvector;
 }
 
+
 std::size_t hash_value(SparseVector const& item)
 {
-  boost::hash<SparseVector::fvector_t> hasher;
-  return hasher(item.m_fvector);
+  size_t seed = 0;
+  for (SparseVector::fvector_t::const_iterator i = item.m_fvector.begin(); i != item.m_fvector.end(); ++i) {
+    seed = util::MurmurHashNative(&(i->first), sizeof(i->first), seed);
+    seed = util::MurmurHashNative(&(i->second), sizeof(i->second), seed);
+  }
+  return seed;
 }
+
 
 FeatureStats::FeatureStats()
   : m_available_size(kAvailableSize), m_entries(0),
@@ -181,8 +204,7 @@ FeatureStats::FeatureStats(const size_t size)
 
 FeatureStats::~FeatureStats()
 {
-  delete [] m_array;
-  m_array = NULL;
+   delete [] m_array;
 }
 
 void FeatureStats::Copy(const FeatureStats &stats)
