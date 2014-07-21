@@ -112,24 +112,6 @@ enum DistortionOrientationOptions {
 };
 }
 
-enum PhraseTableImplementation {
-  Memory				= 0
-  ,Binary				= 1
-  ,OnDisk				= 2
-  //,GlueRule		= 3
-  //,Joshua			= 4
-  //,MemorySourceLabel	= 5
-  ,SCFG					= 6
-  //,BerkeleyDb	= 7
-  ,SuffixArray	= 8
-  ,Hiero        = 9
-  ,ALSuffixArray = 10
-  ,FuzzyMatch    = 11
-  ,Compact      = 12
-  ,Interpolated = 13
-  ,DSuffixArray = 14
-  ,MemMappedSA = 15
-};
 
 enum InputTypeEnum {
   SentenceInput						= 0
