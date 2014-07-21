@@ -176,7 +176,10 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
     if (di->path().filename() == kWeights) continue;
     Graph graph(vocab_);
     size_t id = boost::lexical_cast<size_t>(di->path().stem().string());
-    util::FilePiece file(di->path().string().c_str());
+    //need to manage the fd, as FilePiece doesn't necessarily close it.
+    util::scoped_fd fd(util::OpenReadOrThrow(di->path().string().c_str()));
+    //util::FilePiece file(di->path().string().c_str());
+    util::FilePiece file(fd.get()); 
     ReadGraph(file,graph);
 
     //cerr << "ref length " << references_.Length(id) << endl;
