@@ -47,6 +47,7 @@ PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::
   m_maxAge = 1000;
   m_entries = 0;
   m_name = "default";
+  m_constant = false;
   ReadParameters();
 
   UTIL_THROW_IF2(s_instance_map.find(m_name) != s_instance_map.end(), "Only 1 PhraseDictionaryDynamicCacheBased feature named " + m_name + " is allowed");
@@ -111,7 +112,6 @@ void PhraseDictionaryDynamicCacheBased::Load_Single_File(const std::string file)
   InputFileStream cacheFile(file);
 
   std::string line;
-  int age;
   std::vector<std::string> words;
 
   while (getline(cacheFile, line)) {
@@ -138,9 +138,10 @@ void PhraseDictionaryDynamicCacheBased::SetParameter(const std::string& key, con
     SetMaxAge(Scan<unsigned int>(value));
   } else if (key == "cbtm-file") {
     m_initfiles = Scan<std::string>(value);
-//    Load(m_initfiles);
   } else if (key == "cbtm-name") {
     m_name = Scan<std::string>(value);
+  } else if (key == "cbtm-constant") {
+    m_constant = Scan<bool>(value);
   } else {
     PhraseDictionary::SetParameter(key, value);
   }
@@ -281,6 +282,8 @@ void PhraseDictionaryDynamicCacheBased::SetPreComputedScores(const unsigned int 
     }
     precomputedScores.push_back(sc_vec);
   }
+  m_lower_score = precomputedScores[m_maxAge].at(0);
+  VERBOSE(3, "SetPreComputedScores(const unsigned int): lower_age:|" << m_maxAge << "| lower_score:|" << m_lower_score << "|" << std::endl);
 }
 
 Scores PhraseDictionaryDynamicCacheBased::GetPreComputedScores(const unsigned int age)
@@ -472,9 +475,11 @@ void PhraseDictionaryDynamicCacheBased::Insert(std::string &entries)
 void PhraseDictionaryDynamicCacheBased::Insert(std::vector<std::string> entries)
 {
   VERBOSE(3,"entries.size():|" << entries.size() << "|" << std::endl);
-  Decay();
+  if (m_constant == false){
+    Decay();
+  }
   Update(entries, "1");
-  IFVERBOSE(2) Print();
+  IFVERBOSE(3) Print();
 }
 
 

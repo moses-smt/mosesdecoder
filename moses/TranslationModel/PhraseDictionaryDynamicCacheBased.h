@@ -63,6 +63,7 @@ class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
   size_t m_score_type; //scoring type of the match
   size_t m_entries; //total number of entries in the cache
   float m_lower_score; //lower_bound_score for no match
+  bool m_constant; //flag for setting a non-decaying cache
   std::string m_initfiles; // vector of files loaded in the initialization phase
   std::string m_name; // internal name to identify this instance of the Cache-based phrase table
 

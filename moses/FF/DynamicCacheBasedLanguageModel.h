@@ -45,6 +45,7 @@ class DynamicCacheBasedLanguageModel : public StatelessFeatureFunction
   std::string m_initfiles; // vector of files loaded in the initialization phase
   std::string m_name; // internal name to identify this instance of the Cache-based pseudo LM
   float m_lower_score; //lower_bound_score for no match
+  bool m_constant; //flag for setting a non-decaying cache
   std::vector<float> precomputedScores;
   unsigned int m_maxAge;
 

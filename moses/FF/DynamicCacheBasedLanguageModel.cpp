@@ -18,6 +18,7 @@ DynamicCacheBasedLanguageModel::DynamicCacheBasedLanguageModel(const std::string
   m_score_type = CBLM_SCORE_TYPE_HYPERBOLA;
   m_maxAge = 1000;
   m_name = "default";
+  m_constant = false;
 
   ReadParameters();
   UTIL_THROW_IF2(s_instance_map.find(m_name) != s_instance_map.end(), "Only 1 DynamicCacheBasedLanguageModel feature named " + m_name + " is allowed");
@@ -48,8 +49,7 @@ void DynamicCacheBasedLanguageModel::SetPreComputedScores()
     precomputedScores.push_back(0.0);
   }
   m_lower_score = precomputedScores[m_maxAge];
-  std::cerr << "SetPreComputedScores(): lower_age:" << m_maxAge << std::endl;
-  std::cerr << "SetPreComputedScores(): lower_score:" << m_lower_score << std::endl;
+  VERBOSE(3, "SetPreComputedScores(): lower_age:|" << m_maxAge << "| lower_score:|" << m_lower_score << "|" << std::endl);
 }
 
 float DynamicCacheBasedLanguageModel::GetPreComputedScores(const unsigned int age)
@@ -78,6 +78,8 @@ void DynamicCacheBasedLanguageModel::SetParameter(const std::string& key, const 
     m_initfiles = Scan<std::string>(value);
   } else if (key == "cblm-name") {
     m_name = Scan<std::string>(value);
+  } else if (key == "cblm-constant") {
+    m_constant = Scan<bool>(value);
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
@@ -254,10 +256,11 @@ void DynamicCacheBasedLanguageModel::Insert(std::string &entries)
 void DynamicCacheBasedLanguageModel::Insert(std::vector<std::string> ngrams)
 {
   VERBOSE(3,"DynamicCacheBasedLanguageModel Insert ngrams.size():|" << ngrams.size() << "|" << std::endl);
-  Decay();
+  if (m_constant == false){
+    Decay();
+  }
   Update(ngrams,1);
-  //  Print();
-  IFVERBOSE(2) Print();
+  IFVERBOSE(3) Print();
 }
 
 void DynamicCacheBasedLanguageModel::ExecuteDlt(std::map<std::string, std::string> dlt_meta)
