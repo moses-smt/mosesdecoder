@@ -367,7 +367,17 @@ void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, 
         FeatureStatsType totalScore = incomingScore;
         if (bleuWeight) { 
           FeatureStatsType bleuScore = bleuScorer.Score(*(incoming[ei]), vertex, bleuStats);
-          UTIL_THROW_IF(isnan(bleuScore), util::Exception, "Bleu score undefined, smoothing problem?");
+          if (isnan(bleuScore)) {
+            cerr << "WARN: bleu score undefined" << endl;
+            cerr << "\tVertex id : " << vi << endl;
+            cerr << "\tBleu stats : ";
+            for (size_t i = 0; i < bleuStats.size(); ++i) {
+              cerr << bleuStats[i] << ",";
+            }
+            cerr << endl;
+            bleuScore = 0;
+          }
+          //UTIL_THROW_IF(isnan(bleuScore), util::Exception, "Bleu score undefined, smoothing problem?");
           totalScore += bleuWeight * bleuScore;
         //  cerr << bleuScore << " Total: " << incomingScore << endl << endl;
           //cerr << "is " << incomingScore << " bs " << bleuScore << endl;
