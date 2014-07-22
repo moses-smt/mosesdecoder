@@ -23,6 +23,8 @@ DynamicCacheBasedLanguageModel::DynamicCacheBasedLanguageModel(const std::string
   UTIL_THROW_IF2(s_instance_map.find(m_name) != s_instance_map.end(), "Only 1 DynamicCacheBasedLanguageModel feature named " + m_name + " is allowed");
   s_instance_map[m_name] = this;
   s_instance = this; //for back compatibility
+
+  SetPreComputedScores();
 }
 
 DynamicCacheBasedLanguageModel::~DynamicCacheBasedLanguageModel() {};
@@ -46,14 +48,19 @@ void DynamicCacheBasedLanguageModel::SetPreComputedScores()
     precomputedScores.push_back(0.0);
   }
   m_lower_score = precomputedScores[m_maxAge];
+  std::cerr << "SetPreComputedScores(): lower_age:" << m_maxAge << std::endl;
   std::cerr << "SetPreComputedScores(): lower_score:" << m_lower_score << std::endl;
 }
 
 float DynamicCacheBasedLanguageModel::GetPreComputedScores(const unsigned int age)
 {
-  if (age < precomputedScores.size()) {
+  VERBOSE(2, "float DynamicCacheBasedLanguageModel::GetPreComputedScores" << std::endl);
+  VERBOSE(2, "age:|"<< age << "|" << std::endl);
+
+  if (age < m_maxAge) {
     return precomputedScores.at(age);
   } else {
+    VERBOSE(2, "is to big reduced to m)_maxAge:|"<< m_maxAge << "|" << std::endl);
     return precomputedScores.at(m_maxAge);
   }
 }
@@ -185,7 +192,8 @@ void DynamicCacheBasedLanguageModel::Decay()
       m_cache.erase(it);
       it--;
     } else {
-      score = decaying_score(age);
+      score = GetPreComputedScores(age);
+//      score = decaying_score(age);
       decaying_cache_value_t p (age, score);
       (*it).second = p;
     }
@@ -200,8 +208,10 @@ void DynamicCacheBasedLanguageModel::Update(std::vector<std::string> words, int 
   VERBOSE(3,"words.size():|" << words.size() << "|" << std::endl);
   for (size_t j=0; j<words.size(); j++) {
     words[j] = Trim(words[j]);
-    VERBOSE(3,"CacheBasedLanguageModel::Update   word[" << j << "]:"<< words[j] << " age:" << age << " decaying_score(age):" << decaying_score(age) << std::endl);
-    decaying_cache_value_t p (age,decaying_score(age));
+//    VERBOSE(3,"CacheBasedLanguageModel::Update   word[" << j << "]:"<< words[j] << " age:" << age << " decaying_score(age):" << decaying_score(age) << std::endl);
+//    decaying_cache_value_t p (age,decaying_score(age));
+    VERBOSE(3,"CacheBasedLanguageModel::Update   word[" << j << "]:"<< words[j] << " age:" << age << " GetPreComputedScores(age):" << GetPreComputedScores(age) << std::endl);
+    decaying_cache_value_t p (age,GetPreComputedScores(age));
     std::pair<std::string, decaying_cache_value_t> e (words[j],p);
     m_cache.erase(words[j]); //always erase the element (do nothing if the entry does not exist)
     m_cache.insert(e); //insert the entry
@@ -312,15 +322,16 @@ void DynamicCacheBasedLanguageModel::Clear()
 
 void DynamicCacheBasedLanguageModel::Load()
 {
-  SetPreComputedScores();
+//  SetPreComputedScores();
   VERBOSE(2,"DynamicCacheBasedLanguageModel::Load()" << std::endl);
   Load(m_initfiles);
 }
 
-void DynamicCacheBasedLanguageModel::Load(const std::string file)
+void DynamicCacheBasedLanguageModel::Load(const std::string filestr)
 {
-  VERBOSE(2,"DynamicCacheBasedLanguageModel::Load(const std::string file)" << std::endl);
-  std::vector<std::string> files = Tokenize(m_initfiles, "||");
+  VERBOSE(2,"DynamicCacheBasedLanguageModel::Load(const std::string filestr)" << std::endl);
+//  std::vector<std::string> files = Tokenize(m_initfiles, "||");
+  std::vector<std::string> files = Tokenize(filestr, "||");
   Load_Multiple_Files(files);
 }
 

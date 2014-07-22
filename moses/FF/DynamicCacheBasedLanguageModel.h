@@ -114,7 +114,7 @@ public:
   }
 
   void Load();
-  void Load(const std::string file);
+  void Load(const std::string filestr);
   void Execute(std::string command);
   void SetParameter(const std::string& key, const std::string& value);
   void ExecuteDlt(std::map<std::string, std::string> dlt_meta);

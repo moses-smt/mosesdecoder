@@ -103,7 +103,7 @@ public:
   }
 
   void Load();
-  void Load(const std::string file);
+  void Load(const std::string files);
 
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &src) const;
   const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;

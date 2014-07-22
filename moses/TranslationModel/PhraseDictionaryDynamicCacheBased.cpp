@@ -52,6 +52,10 @@ PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::
   UTIL_THROW_IF2(s_instance_map.find(m_name) != s_instance_map.end(), "Only 1 PhraseDictionaryDynamicCacheBased feature named " + m_name + " is allowed");
   s_instance_map[m_name] = this;
   s_instance = this; //for back compatibility
+
+  SetFeaturesToApply();
+  vector<float> weight = StaticData::Instance().GetWeights(this);
+  SetPreComputedScores(weight.size());
 }
 
 PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()
@@ -61,18 +65,18 @@ PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()
 
 void PhraseDictionaryDynamicCacheBased::Load()
 {
-  std::cerr << "PhraseDictionaryDynamicCacheBased::Load()" << std::endl;
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load()" << std::endl);
-  SetFeaturesToApply();
-  vector<float> weight = StaticData::Instance().GetWeights(this);
-  SetPreComputedScores(weight.size());
+//  SetFeaturesToApply();
+//  vector<float> weight = StaticData::Instance().GetWeights(this);
+//  SetPreComputedScores(weight.size());
   Load(m_initfiles);
 }
 
-void PhraseDictionaryDynamicCacheBased::Load(const std::string file)
+void PhraseDictionaryDynamicCacheBased::Load(const std::string filestr)
 {
-  VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load(const std::string file)" << std::endl);
-  std::vector<std::string> files = Tokenize(m_initfiles, "||");
+  VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load(const std::string filestr)" << std::endl);
+//  std::vector<std::string> files = Tokenize(m_initfiles, "||");
+  std::vector<std::string> files = Tokenize(filestr, "||");
   Load_Multiple_Files(files);
 }
 
@@ -87,7 +91,42 @@ void PhraseDictionaryDynamicCacheBased::Load_Multiple_Files(std::vector<std::str
 void PhraseDictionaryDynamicCacheBased::Load_Single_File(const std::string file)
 {
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load_Single_File(const std::string file)" << std::endl);
+  //file format
+  //age |||| src_phr ||| trg_phr
+  //age |||| src_phr2 ||| trg_phr2 |||| src_phr3 ||| trg_phr3 |||| src_phr4 ||| trg_ph4
+  //....
+  //or
+  //age |||| src_phr ||| trg_phr ||| wa_align
+  //age |||| src_phr2 ||| trg_phr2 ||| wa_align2 |||| src_phr3 ||| trg_phr3 ||| wa_align3 |||| src_phr4 ||| trg_phr4 ||| wa_align4
+  //....
+  //each src_phr ad trg_phr are sequences of src and trg words, respectively, of any length
+  //if provided, wa_align is the alignment between src_phr and trg_phr
+  //
+  //there is no limit on the size of n
+  //
+  //entries can be repeated, but the last entry overwrites the previous
+
+
+  VERBOSE(2,"Loading data from the cache file " << file << std::endl);
+  InputFileStream cacheFile(file);
+
+  std::string line;
+  int age;
+  std::vector<std::string> words;
+
+  while (getline(cacheFile, line)) {
+    std::vector<std::string> vecStr = TokenizeMultiCharSeparator( line , "||||" );
+    if (vecStr.size() >= 2) {
+      std::string ageString = vecStr[0];
+      vecStr.erase(vecStr.begin());
+      Update(vecStr,ageString);
+    } else {
+      UTIL_THROW_IF2(false, "The format of the loaded file is wrong: " << line);
+    }
+  }
+  IFVERBOSE(2) Print();
 }
+
 
 void PhraseDictionaryDynamicCacheBased::SetParameter(const std::string& key, const std::string& value)
 {
@@ -99,7 +138,7 @@ void PhraseDictionaryDynamicCacheBased::SetParameter(const std::string& key, con
     SetMaxAge(Scan<unsigned int>(value));
   } else if (key == "cbtm-file") {
     m_initfiles = Scan<std::string>(value);
-    Load(m_initfiles);
+//    Load(m_initfiles);
   } else if (key == "cbtm-name") {
     m_name = Scan<std::string>(value);
   } else {
@@ -218,6 +257,7 @@ float PhraseDictionaryDynamicCacheBased::decaying_score(const int age)
 
 void PhraseDictionaryDynamicCacheBased::SetPreComputedScores(const unsigned int numScoreComponent)
 {
+  VERBOSE(2, "PhraseDictionaryDynamicCacheBased SetPreComputedScores:  " << m_maxAge << std::endl);
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
@@ -245,7 +285,7 @@ void PhraseDictionaryDynamicCacheBased::SetPreComputedScores(const unsigned int 
 
 Scores PhraseDictionaryDynamicCacheBased::GetPreComputedScores(const unsigned int age)
 {
-  if (age < precomputedScores.size()) {
+  if (age < m_maxAge) {
     return precomputedScores.at(age);
   } else {
     return precomputedScores.at(m_maxAge);
@@ -443,6 +483,7 @@ void PhraseDictionaryDynamicCacheBased::Update(std::vector<std::string> entries,
   VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(std::vector<std::string> entries, std::string ageString)" << std::endl);
   std::vector<std::string> pp;
 
+  VERBOSE(3,"ageString:|" << ageString << "|" << std::endl);
   std::vector<std::string>::iterator it;
   for(it = entries.begin(); it!=entries.end(); it++) {
     pp.clear();
@@ -467,13 +508,17 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
   Phrase sourcePhrase(0);
   Phrase targetPhrase(0);
 
+  VERBOSE(3, "ageString:|" << ageString << "|" << std::endl);
   char *err_ind_temp;
+  ageString = Trim(ageString);
   int age = strtod(ageString.c_str(), &err_ind_temp);
+  VERBOSE(3, "age:|" << age << "|" << std::endl);
+
   //target
   targetPhrase.Clear();
   VERBOSE(3, "targetPhraseString:|" << targetPhraseString << "|" << std::endl);
   targetPhrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetPhraseString, /*factorDelimiter,*/ NULL);
-  VERBOSE(2, "targetPhrase:|" << targetPhrase << "|" << std::endl);
+  VERBOSE(3, "targetPhrase:|" << targetPhrase << "|" << std::endl);
 
   //TODO: Would be better to reuse source phrases, but ownership has to be
   //consistent across phrase table implementations
@@ -550,7 +595,6 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, Phrase tp, int age, st
 
     //tp is not found
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
-
     targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
     if (!waString.empty()) targetPhrase->SetAlignmentInfo(waString);
 
