@@ -26,6 +26,21 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Hole.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/Hole.h</locationURI>
+		</link>
+		<link>
+			<name>HoleCollection.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/HoleCollection.cpp</locationURI>
+		</link>
+		<link>
+			<name>HoleCollection.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/HoleCollection.h</locationURI>
+		</link>
+		<link>
 			<name>InputFileStream.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/InputFileStream.cpp</locationURI>
@@ -86,9 +101,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/XmlTree.h</locationURI>
 		</link>
 		<link>
-			<name>extract-main.cpp</name>
+			<name>extract-rules-main.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-main.cpp</locationURI>
+			<locationURI>PARENT-1-ECLIPSE_HOME/github/mosesdecoder/phrase-extract/extract-rules-main.cpp</locationURI>
 		</link>
 		<link>
 			<name>tables-core.cpp</name>
