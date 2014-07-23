@@ -371,6 +371,11 @@ alignment-symmetrization-method = grow-diag-final-and
 #mml-before-wa = "-proportion 0.9"
 #mml-after-wa = "-proportion 0.9"
 
+### build memory mapped suffix array phrase table
+# (binarizing the reordering table is a good idea, since filtering makes little sense)
+#mmsapt = "num-features=9 pfwd=g+ pbwd=g+ smooth=0 sample=1000 workers=1"
+#binarize-all = $moses-script-dir/training/binarize-model.perl
+
 ### create a bilingual concordancer for the model
 #
 #biconcor = $moses-bin-dir/biconcor

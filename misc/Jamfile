@@ -36,4 +36,12 @@ else {
     alias programsProbing ;
 }
 
-alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin programsProbing ;
+exe merge-sorted : 
+merge-sorted.cc 
+../moses//moses
+../moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+; 
+
+alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin programsProbing merge-sorted ;
