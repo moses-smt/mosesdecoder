@@ -21,12 +21,12 @@ die("ERROR: wrong syntax when invoking postDecodingTransliteration.perl")
 			'transliteration-model-dir=s' => \$TRANSLIT_MODEL,
 			'input-extension=s' => \$INPUT_EXTENSION,
 			'output-extension=s' => \$OUTPUT_EXTENSION,
-      'decoder=s' => \$DECODER,
+			'decoder=s' => \$DECODER,
 			'oov-file=s' => \$OOV_FILE,
 			'input-file=s' => \$INPUT_FILE,
 			'output-file=s' => \$OUTPUT_FILE,
 			'verbose' => \$VERBOSE,
-      'language-model=s' => \$LM_FILE);
+			'language-model=s' => \$LM_FILE);
 
 # check if the files are in place
 die("ERROR: you need to define --moses-src-dir --external-bin-dir, --transliteration-model-dir, --oov-file, --output-file --input-extension, --output-extension, and --language-model")
@@ -38,6 +38,11 @@ die("ERROR: you need to define --moses-src-dir --external-bin-dir, --translitera
 	     defined($INPUT_FILE)&&
 	     defined($EXTERNAL_BIN_DIR)&&	
             defined($LM_FILE));
+if (! -e $LM_FILE) {
+  my $LM_FILE_WORD = `ls $LM_FILE*word*`;
+  chop($LM_FILE_WORD);
+  $LM_FILE = $LM_FILE_WORD if $LM_FILE_WORD ne "";
+}
 die("ERROR: could not find Language Model '$LM_FILE'")
     unless -e $LM_FILE;
 die("ERROR: could not find Transliteration Model '$TRANSLIT_MODEL'")

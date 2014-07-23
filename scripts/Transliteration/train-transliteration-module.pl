@@ -13,7 +13,7 @@ print STDERR "Training Transliteration Module - Start\n".`date`;
 my $ORDER = 5;
 my $OUT_DIR = "/tmp/Transliteration-Model.$$";
 my $___FACTOR_DELIMITER = "|";
-my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$EXTERNAL_BIN_DIR,$INPUT_EXTENSION, $OUTPUT_EXTENSION, $SOURCE_SYNTAX, $TARGET_SYNTAX);
+my ($MOSES_SRC_DIR,$CORPUS_F,$CORPUS_E,$ALIGNMENT,$SRILM_DIR,$FACTOR,$EXTERNAL_BIN_DIR,$INPUT_EXTENSION, $OUTPUT_EXTENSION, $SOURCE_SYNTAX, $TARGET_SYNTAX,$DECODER);
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -31,8 +31,9 @@ die("ERROR: wrong syntax when invoking train-transliteration-module.perl")
 		       'factor=s' => \$FACTOR,
 		       'srilm-dir=s' => \$SRILM_DIR,
 		       'out-dir=s' => \$OUT_DIR,
-               'source-syntax' => \$SOURCE_SYNTAX,
-               'target-syntax' => \$TARGET_SYNTAX);
+		       'decoder=s' => \$DECODER,
+		       'source-syntax' => \$SOURCE_SYNTAX,
+		       'target-syntax' => \$TARGET_SYNTAX);
 
 # check if the files are in place
 die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, --srilm-dir, --moses-src-dir --external-bin-dir, --input-extension and --output-extension")
@@ -48,8 +49,9 @@ die("ERROR: could not find input corpus file '$CORPUS_F'")
     unless -e $CORPUS_F;
 die("ERROR: could not find output corpus file '$CORPUS_E'")
     unless -e $CORPUS_E;
-die("ERROR: could not find algnment file '$ALIGNMENT'")
+die("ERROR: could not find alignment file '$ALIGNMENT'")
     unless -e $ALIGNMENT;
+$DECODER = "$MOSES_SRC_DIR/bin/moses" unless defined($DECODER);
 
 `mkdir $OUT_DIR`;
 
@@ -184,7 +186,7 @@ sub train_transliteration_module{
 
     `$MOSES_SRC_DIR/scripts/ems/support/substitute-filtered-tables.perl $OUT_DIR/tuning/filtered/moses.ini < $OUT_DIR/model/moses.ini > $OUT_DIR/tuning/moses.filtered.ini`;
 
-    `$MOSES_SRC_DIR/scripts/training/mert-moses.pl $OUT_DIR/tuning/input $OUT_DIR/tuning/reference $MOSES_SRC_DIR/bin/moses $OUT_DIR/tuning/moses.filtered.ini --nbest 100 --working-dir $OUT_DIR/tuning/tmp  --decoder-flags "-threads 16 -drop-unknown -v 0 -distortion-limit 0" --rootdir $MOSES_SRC_DIR/scripts -mertdir $MOSES_SRC_DIR/mert -threads=16 --no-filter-phrase-table`;
+    `$MOSES_SRC_DIR/scripts/training/mert-moses.pl $OUT_DIR/tuning/input $OUT_DIR/tuning/reference $DECODER $OUT_DIR/tuning/moses.filtered.ini --nbest 100 --working-dir $OUT_DIR/tuning/tmp  --decoder-flags "-threads 16 -drop-unknown -v 0 -distortion-limit 0" --rootdir $MOSES_SRC_DIR/scripts -mertdir $MOSES_SRC_DIR/mert -threads=16 --no-filter-phrase-table`;
 
     `cp $OUT_DIR/tuning/tmp/moses.ini $OUT_DIR/tuning/moses.ini`;
 
