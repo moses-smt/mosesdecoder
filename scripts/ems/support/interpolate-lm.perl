@@ -12,7 +12,7 @@ binmode(STDERR, ":utf8");
 
 my $SRILM = "/home/pkoehn/moses/srilm/bin/i686-m64";
 my $TEMPDIR = "/tmp";
-my ($TUNING,$LM,$NAME,$GROUP,$CONTINUE);
+my ($TUNING,$LM,$NAME,$GROUP,$WEIGHTS,$CONTINUE);
 
 die("interpolate-lm.perl --tuning set --name out-lm --lm lm0,lm1,lm2,lm3 [--srilm srilm-dir --tempdir tempdir --group \"0,1 2,3\"]")
     unless &GetOptions('tuning=s' => => \$TUNING,
@@ -21,6 +21,7 @@ die("interpolate-lm.perl --tuning set --name out-lm --lm lm0,lm1,lm2,lm3 [--sril
 		       'tempdir=s' => \$TEMPDIR,
            'continue' => \$CONTINUE,
            'group=s' => \$GROUP,
+           'weights=s' => \$WEIGHTS,
 		       'lm=s' => \$LM);
 
 # check and set default to unset parameters
@@ -32,6 +33,10 @@ die("ERROR: did not find srilm dir") unless -e $SRILM;
 die("ERROR: cannot run ngram") unless -x $SRILM."/ngram";
 
 my @LM = split(/,/,$LM);
+my @WEIGHT;
+@WEIGHT = split(/,/,$WEIGHTS) if defined($WEIGHTS);
+die("ERROR: different number of weights and language models: ".scalar(@WEIGHT)." vs. ".scalar(@LM))
+  if defined($WEIGHTS) && scalar(@WEIGHT) != scalar(@LM);
 
 # establish order
 my $order = 0;
@@ -75,7 +80,7 @@ if (!defined($GROUP) && scalar(@LM) > 10) {
 
 # normal interpolation
 if (!defined($GROUP)) {
-  &interpolate($NAME,@LM);
+  &interpolate($NAME,\@WEIGHT,@LM);
   exit;
 }
 
@@ -98,50 +103,59 @@ foreach my $subgroup (split(/ /,$GROUP)) {
   my $name = $NAME.".group-".chr(97+($g++));
   push @SUB_NAME,$name;
   print STDERR "\n=== BUILDING SUB LM $name from\n\t".join("\n\t",@SUB_LM)."\n===\n\n";
-  &interpolate($name, @SUB_LM) unless $CONTINUE && -e $name;
+  &interpolate($name, undef, @SUB_LM) unless $CONTINUE && -e $name;
 }
 for(my $lm_i=0; $lm_i < scalar(@LM); $lm_i++) {
   next if defined($ALREADY{$lm_i});
   push @SUB_NAME, $LM[$lm_i];
 }
 print STDERR "\n=== BUILDING FINAL LM ===\n\n";
-&interpolate($NAME, @SUB_NAME);
+&interpolate($NAME, undef, @SUB_NAME);
 
 # main interpolation function
 sub interpolate {
-  my ($name,@LM) = @_;
+  my ($name,$WEIGHT,@LM) = @_;
 
   die("cannot interpolate more than 10 language models at once: ",join(",",@LM))
     if scalar(@LM) > 10;
 
   my $tmp = tempdir(DIR=>$TEMPDIR);
+  my @LAMBDA;
 
-  # compute perplexity
-  my $i = 0;
-  foreach my $lm (@LM) {
-    print STDERR "compute perplexity for $lm\n";
-    safesystem("$SRILM/ngram -unk -order $order -lm $lm -ppl $TUNING -debug 2 > $tmp/iplm.$$.$i") or die "Failed to compute perplexity for $lm\n";
-    print STDERR `tail -n 2 $tmp/iplm.$$.$i`;
-    $i++;
+  # if weights are specified, use them
+  if (defined($WEIGHT) && scalar(@$WEIGHT) == scalar(@LM)) {
+    @LAMBDA = @$WEIGHT;
   }
+  # no specified weights -> compute them
+  else {
 
-  # compute lambdas
-  print STDERR "computing lambdas...\n";
-  my $cmd = "$SRILM/compute-best-mix";
-  for(my $i=0;$i<scalar(@LM);$i++) {
-    $cmd .= " $tmp/iplm.$$.$i";
+    # compute perplexity
+    my $i = 0;
+    foreach my $lm (@LM) {
+      print STDERR "compute perplexity for $lm\n";
+      safesystem("$SRILM/ngram -unk -order $order -lm $lm -ppl $TUNING -debug 2 > $tmp/iplm.$$.$i") or die "Failed to compute perplexity for $lm\n";
+      print STDERR `tail -n 2 $tmp/iplm.$$.$i`;
+      $i++;
+    }
+
+    # compute lambdas
+    print STDERR "computing lambdas...\n";
+    my $cmd = "$SRILM/compute-best-mix";
+    for(my $i=0;$i<scalar(@LM);$i++) {
+      $cmd .= " $tmp/iplm.$$.$i";
+    }
+    my ($mixout, $mixerr, $mixexitcode) = saferun3($cmd);
+    die "Failed to mix models: $mixerr" if $mixexitcode != 0;
+    my $mix = $mixout;
+    `rm $tmp/iplm.$$.*`;
+    $mix =~ /best lambda \(([\d\. e-]+)\)/ || die("ERROR: computing lambdas failed: $mix");
+    @LAMBDA = split(/ /,$1);
   }
-  my ($mixout, $mixerr, $mixexitcode) = saferun3($cmd);
-  die "Failed to mix models: $mixerr" if $mixexitcode != 0;
-  my $mix = $mixout;
-  `rm $tmp/iplm.$$.*`;
-  $mix =~ /best lambda \(([\d\. e-]+)\)/ || die("ERROR: computing lambdas failed: $mix");
-  my @LAMBDA = split(/ /,$1);
-
+ 
   # create new language model
   print STDERR "creating new language model...\n";
-  $i = 0;
-  $cmd = "$SRILM/ngram -unk -order $order -write-lm $name";
+  my $i = 0;
+  my $cmd = "$SRILM/ngram -unk -order $order -write-lm $name";
   foreach my $lm (@LM) {
     $cmd .= " -lm " if $i==0;
     $cmd .= " -mix-lm " if $i==1;

@@ -22,6 +22,7 @@ clean
 	rerun-on-change: max-sentence-length $moses-script-dir/training/clean-corpus-n.perl
 	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length OUT.lines-retained
 	error: there is a blank factor
+	error: is too long! at
 parse
 	in: clean-stem
 	out: parsed-stem
@@ -104,7 +105,7 @@ tokenize
 train
 	in: tokenized
 	out: recase-config
-	template: $moses-script-dir/recaser/train-recaser.perl -train-script $TRAINING:script -dir OUT.model -corpus IN -scripts-root-dir $moses-script-dir -config OUT -ngram-count $lm-training
+	template: $moses-script-dir/recaser/train-recaser.perl -train-script $TRAINING:script -dir OUT.model -corpus IN -scripts-root-dir $moses-script-dir -config OUT $recasing-settings
 	default-name: recasing/moses.ini
         tmp-name: recasing/model
 	ignore-unless: EVALUATION:recaser
@@ -116,6 +117,7 @@ consolidate
 	out: tokenized-stem
 	default-name: truecaser/corpus
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
+	error: number of lines don't match
 train
 	in: tokenized-stem
 	out: truecase-model
@@ -159,7 +161,6 @@ mock-parse
 factorize
 	in: mock-parsed-corpus
 	out: factorized-corpus
-	rerun-on-change: TRAINING:output-factors
 	default-name: lm/factored
 	pass-unless: factors	
 	parallelizable: yes
@@ -277,7 +278,7 @@ split-tuning
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 interpolate
 	in: script split-tuning LM:lm
-	rerun-on-change: srilm-dir group
+	rerun-on-change: srilm-dir group weights
 	out: lm
 	default-name: lm/interpolated-lm
 randomize
@@ -1077,7 +1078,7 @@ decode
 	default-name: evaluation/output
 	qsub-script: yes
 	ignore-if: use-hiero
-	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph wade
+	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph wade TRAINING:post-decoding-transliteration
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
 	final-model: yes

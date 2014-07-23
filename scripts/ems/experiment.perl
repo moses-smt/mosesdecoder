@@ -1535,7 +1535,6 @@ sub check_if_crashed {
 
     # check if output file empty
     my $output = &get_default_file(&deconstruct_name($DO_STEP[$i]));
-    print STDERR "".$DO_STEP[$i]." -> $output\n";
     # currently only works for single output file
     if (-e $output && -z $output) {
       push @DIGEST,"output file $output is empty";
@@ -2152,13 +2151,14 @@ sub define_training_build_transliteration_model {
 
     my ($model, $corpus, $alignment) = &get_output_and_input($step_id);
 
-		my $moses_script_dir = &check_and_get("GENERAL:moses-script-dir");
-		my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
-		my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
-		my $sym_method = &check_and_get("TRAINING:alignment-symmetrization-method");
-		my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
-		my $external_bin_dir = &check_and_get("GENERAL:external-bin-dir");
-		my $srilm_dir = &check_and_get("GENERAL:srilm-dir");
+    my $moses_script_dir = &check_and_get("GENERAL:moses-script-dir");
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+    my $sym_method = &check_and_get("TRAINING:alignment-symmetrization-method");
+    my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+    my $external_bin_dir = &check_and_get("GENERAL:external-bin-dir");
+    my $srilm_dir = &check_and_get("TRAINING:srilm-dir");
+    my $decoder = &get("TRAINING:transliteration-decoder");
 
     my $cmd = "$moses_script_dir/Transliteration/train-transliteration-module.pl";
     $cmd .= " --corpus-f $corpus.$input_extension";
@@ -2166,6 +2166,7 @@ sub define_training_build_transliteration_model {
     $cmd .= " --alignment $alignment.$sym_method";
     $cmd .= " --out-dir $model";
     $cmd .= " --moses-src-dir $moses_src_dir";
+    $cmd .= " --decoder $decoder" if defined($decoder);
     $cmd .= " --external-bin-dir $external_bin_dir";
     $cmd .= " --srilm-dir $srilm_dir";
     $cmd .= " --input-extension $input_extension";
@@ -2174,7 +2175,7 @@ sub define_training_build_transliteration_model {
     $cmd .= " --source-syntax " if &get("GENERAL:input-parser");
     $cmd .= " --target-syntax " if &get("GENERAL:output-parser");
 
-		&create_step($step_id, $cmd);
+    &create_step($step_id, $cmd);
 }
 
 sub define_training_extract_phrases {
@@ -2496,9 +2497,18 @@ sub define_interpolated_lm_interpolate {
 	$interpolation_script, $tuning, @LM) = &get_output_and_input($step_id);
     my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
     my $group = &get("INTERPOLATED-LM:group");
+    my $weights = &get("INTERPOLATED-LM:weights");
     my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
 
     my $cmd = "";
+
+    my %WEIGHT;
+    if (defined($weights)) {
+      foreach (split(/ *, */,$weights)) {
+        /^ *(\S+) *= *(\S+)/ || die("ERROR: wrong interpolation weight specification $_ ($weights)");
+        $WEIGHT{$1} = $2;
+      }
+    }
 
     # go through language models by factor and order 
     my ($icount,$ILM_SETS) = &get_interpolated_lm_sets();
@@ -2508,11 +2518,18 @@ sub define_interpolated_lm_interpolate {
 
         # get list of language model files
         my $lm_list = "";
+        my $weight_list = "";
         foreach my $id_set (@{$$ILM_SETS{$factor}{$order}}) {
           my ($id,$set) = split(/ /,$id_set,2);
           $lm_list .= $LM[$id].",";
+          if (defined($weights)) { 
+            die("ERROR: no interpolation weight set for $factor:$order:$set (factor:order:set)") 
+              unless defined($WEIGHT{"$factor:$order:$set"});
+            $weight_list .= $WEIGHT{"$factor:$order:$set"}.",";
+          }
         }
         chop($lm_list);
+        chop($weight_list);
 
         # if grouping, identify position in list
         my $numbered_string = "";
@@ -2553,6 +2570,7 @@ sub define_interpolated_lm_interpolate {
         }
         $cmd .= "$interpolation_script --tuning $factored_tuning --name $name --srilm $srilm_dir --lm $lm_list";
         $cmd .= " --group \"$numbered_string\"" if defined($group);
+        $cmd .= " --weights \"$weight_list\"" if defined($weights);
         $cmd .= "\n";
       }
     }
@@ -3418,10 +3436,11 @@ sub get_default_file {
 	    my $name = &construct_name($module,$set,$out);
 	    return &check_backoff_and_get($name);
 	}
-#	print "\t\tpassing $step -> ";
+#	print "\t\tpassing $step\n";
 	$i = $DEPENDENCY[$i][0];
 	$step = $DO_STEP[$i];
 #	print "\t\tbacking off to $step\n";
+        ($default_module,$default_set,$default_step) = &deconstruct_name($step);
     }
 
     # get file name
