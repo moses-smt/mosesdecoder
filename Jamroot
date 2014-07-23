@@ -77,7 +77,7 @@ import path ;
 path-constant TOP : . ;
 include $(TOP)/jam-files/sanity.jam ;
 
-boost 103600 ;
+boost 104400 ;
 external-lib z ;
 
 lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
