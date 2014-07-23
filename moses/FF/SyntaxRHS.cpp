@@ -14,14 +14,14 @@ SyntaxRHS::SyntaxRHS(const std::string &line)
   ReadParameters();
 }
 
-void SyntaxRHS::Evaluate(const Phrase &source
+void SyntaxRHS::EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const
 {
 }
 
-void SyntaxRHS::Evaluate(const InputType &input
+void SyntaxRHS::EvaluateWithSourceContext(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
                                    , const StackVec *stackVec
@@ -42,11 +42,11 @@ void SyntaxRHS::Evaluate(const InputType &input
 
 }
 
-void SyntaxRHS::Evaluate(const Hypothesis& hypo,
+void SyntaxRHS::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 
-void SyntaxRHS::EvaluateChart(const ChartHypothesis &hypo,
+void SyntaxRHS::EvaluateWhenApplied(const ChartHypothesis &hypo,
                                         ScoreComponentCollection* accumulator) const
 {}
 

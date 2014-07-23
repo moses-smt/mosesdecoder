@@ -114,6 +114,13 @@ requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
 requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
+if [ option.get "with-lbllm" ] {
+  external-lib boost_serialization ;
+  external-lib gomp ;
+  requirements += <library>boost_serialization ;
+  requirements += <library>gomp ;
+}
+
 if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
 }
@@ -152,13 +159,15 @@ build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses
 if [ option.get "with-mm" : : "yes" ]
 {
  alias mm :  
+  moses/TranslationModel/UG//spe-check-coverage2
   moses/TranslationModel/UG//ptable-lookup 
+  moses/TranslationModel/UG//sim-pe 
+  moses/TranslationModel/UG//spe-check-coverage 
   moses/TranslationModel/UG/mm//mtt-build 
   moses/TranslationModel/UG/mm//mtt-dump 
   moses/TranslationModel/UG/mm//symal2mam 
   moses/TranslationModel/UG/mm//mam2symal 
   moses/TranslationModel/UG/mm//mam_verify 
-  moses/TranslationModel/UG/mm//custom-pt 
   moses/TranslationModel/UG/mm//mmlex-build 
   moses/TranslationModel/UG/mm//mmlex-lookup 
   moses/TranslationModel/UG/mm//mtt-count-words 

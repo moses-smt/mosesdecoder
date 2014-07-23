@@ -56,6 +56,7 @@ namespace Moses {
   class Mmsapt;
   namespace bitext
   {
+    template<typename TKN> class Bitext;
     using namespace ugdiss;
 
     template<typename TKN> class Bitext;
@@ -120,6 +121,7 @@ namespace Moses {
       void add(float w, vector<uchar> const& a, uint32_t const cnt2,
 	       uint32_t fwd_orient, uint32_t bwd_orient);
       void invalidate();
+      void validate();
       bool valid();
       uint32_t dcnt_fwd(PhraseOrientation const idx) const;
       uint32_t dcnt_bwd(PhraseOrientation const idx) const;
@@ -157,43 +159,6 @@ namespace Moses {
 	  uint32_t fwd_o, uint32_t bwd_o);
     };
     
-    class 
-    PhrasePair
-    {
-    public:
-      uint64_t p1, p2;
-      uint32_t raw1,raw2,sample1,sample2,good1,good2,joint;
-      vector<float> fvals;
-      float dfwd[po_other+1];
-      float dbwd[po_other+1];
-      vector<uchar> aln;
-      // float    avlex12,avlex21; // average lexical probs (Moses std)
-      // float    znlex1,znlex2;   // zens-ney lexical smoothing
-      // float    colex1,colex2;   // based on raw lexical occurrences
-      float score;
-      PhrasePair();
-      PhrasePair(PhrasePair const& o);
-      bool operator<(PhrasePair const& other) const;
-      bool operator>(PhrasePair const& other) const;
-      bool operator<=(PhrasePair const& other) const;
-      bool operator>=(PhrasePair const& other) const;
-
-      void init(uint64_t const pid1, pstats const& ps,  size_t const numfeats);
-      void init(uint64_t const pid1, pstats const& ps1, pstats const& ps2, 
-		size_t const numfeats);
-
-      PhrasePair const& 
-      update(uint64_t const pid2, jstats const& js);
-
-      PhrasePair const& 
-      update(uint64_t const pid2, jstats   const& js1, jstats   const& js2);
-
-      PhrasePair const& 
-      update(uint64_t const pid2, size_t const raw2extra, jstats const& js);
-
-      float eval(vector<float> const& w);
-    };
-
 
     template<typename TKN>
     class Bitext 

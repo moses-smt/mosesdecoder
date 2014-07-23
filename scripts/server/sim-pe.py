@@ -127,13 +127,40 @@ def translate(proxy, args, line):
         param['nbest-distinct'] = True
         pass
     attempts = 0
-    while attempts < 120:
+    while attempts < 20:
+        t1 = time.time()
         try:
-            return proxy.translate(param)
-        except:
-            print >>sys.stderr, "Waiting", proxy
-            attempts += 1
+            return proxy.translate(param) 
+
+        # except xmlrpclib.Fault as e:
+        # except xmlrpclib.ProtocolError as e:
+        # except xmlrpclib.ResponseError as e:
+        except xmlrpclib.Error as e:
+            time.sleep(2) # give all the stderr stuff a chance to be flushed
+            print >>sys.stderr," XMLRPC error:",e
+            print >>sys.stderr, "Input was"
+            print >>sys.stderr, param
+            sys.exit(1)
+
+        except IOError as e:
+            print >>sys.stderr,"I/O error({0}): {1}".format(e.errno, e.strerror)
             time.sleep(5)
+
+        except:
+            serverstatus = mserver.process.poll()
+            if serverstatus == None:
+                print >>sys.stderr, "Connection failed after %f seconds"%(time.time()-t1)
+                attempts += 1
+                if attempts > 10:
+                    time.sleep(10)
+                else:
+                    time.sleep(5)
+                    pass
+            else:
+                
+                print >>sys.stderr, "Oopsidaisy, server exited with code %d (signal %d)"\
+                    %(serverstatus/256,serverstatus%256)
+                pass
             pass
         pass
     raise Exception("Exception: could not reach translation server.")
@@ -210,16 +237,24 @@ if __name__ == "__main__":
             pass
         pass
 
-    if args.url:
-        mserver.connect(args.url)
-    else:
-        mserver.start(args=mo_args,port=args.port,debug=args.debug)
-        pass
-
     ref = None
     aln = None
     if args.ref: ref = read_data(args.ref)
     if args.aln: aln = read_data(args.aln)
+
+    if ref and aln:
+        try:
+            mo_args.index("--serial")
+        except:
+            mo_args.append("--serial")
+            pass
+        pass
+
+    if args.url:
+        mserver.connect(args.url)
+    else:
+        mserver.start(args=mo_args, port=args.port, debug=args.debug)
+        pass
 
     if (args.input == "-"):
         line = sys.stdin.readline()

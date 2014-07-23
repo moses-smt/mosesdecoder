@@ -21,7 +21,7 @@ SpanLength::SpanLength(const std::string &line)
   ReadParameters();
 }
 
-void SpanLength::Evaluate(const Phrase &source
+void SpanLength::EvaluateInIsolation(const Phrase &source
 						, const TargetPhrase &targetPhrase
 						, ScoreComponentCollection &scoreBreakdown
 						, ScoreComponentCollection &estimatedFutureScore) const
@@ -29,7 +29,7 @@ void SpanLength::Evaluate(const Phrase &source
   targetPhrase.SetRuleSource(source);
 }
 
-void SpanLength::Evaluate(const InputType &input
+void SpanLength::EvaluateWithSourceContext(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
                                    , const StackVec *stackVec

@@ -266,7 +266,7 @@ void TreeStructureFeature::AddNTLabels(TreePointer root) const {
       }
 }
 
-FFState* TreeStructureFeature::EvaluateChart(const ChartHypothesis& cur_hypo
+FFState* TreeStructureFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo
                                    , int featureID /* used to index the state in the previous hypotheses */
                                    , ScoreComponentCollection* accumulator) const
 {

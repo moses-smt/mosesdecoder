@@ -129,7 +129,7 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
     for (size_t i = 0; i < ffs.size(); ++i) {
       const FeatureFunction &ff = *ffs[i];
       if (! staticData.IsFeatureFunctionIgnored( ff )) {
-        ff.Evaluate(source, *this, m_scoreBreakdown, futureScoreBreakdown);
+        ff.EvaluateInIsolation(source, *this, m_scoreBreakdown, futureScoreBreakdown);
       }
     }
 
@@ -148,7 +148,7 @@ void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     if (! staticData.IsFeatureFunctionIgnored( ff )) {
-      ff.Evaluate(input, inputPath, *this, NULL, m_scoreBreakdown, &futureScoreBreakdown);
+      ff.EvaluateWithSourceContext(input, inputPath, *this, NULL, m_scoreBreakdown, &futureScoreBreakdown);
     }
   }
   float weightedScore = m_scoreBreakdown.GetWeightedScore();

@@ -27,7 +27,6 @@ namespace ugdiss
     typedef mm2dTable<id_type,id_type,uint32_t,uint32_t> table_t;
     table_t COOC;
     void open(string const& fname);
-
     template<typename someint>
     void 
     score(TKN const* snt1, size_t const s1, size_t const e1,
@@ -104,7 +103,19 @@ namespace ugdiss
     if (COOC.m1(s) == 0 || COOC.m2(t) == 0) return 1.0;
     UTIL_THROW_IF2(alpha < 0,"At " << __FILE__ << ":" << __LINE__
 		   << ": alpha parameter must be >= 0");
-    return float(COOC[s][t]+alpha)/(COOC.m1(s)+alpha);
+    float ret = COOC[s][t]+alpha;
+    ret =  (ret?ret:1.)/(COOC.m1(s)+alpha);
+    UTIL_THROW_IF2(ret <= 0 || ret > 1, "At " << __FILE__ << ":" << __LINE__ 
+		   << ": result not > 0 and <= 1. alpha = " << alpha << "; "
+		   << COOC[s][t] << "/" << COOC.m1(s));
+
+#if 0
+    cerr << "[" << s << "," << t << "] " 
+	 << COOC.m1(s) << "/" 
+	 << COOC[s][t] << "/" 
+	 << COOC.m2(t) << endl;
+#endif
+    return ret;
   }
   
   template<typename TKN>
@@ -115,7 +126,11 @@ namespace ugdiss
     if (COOC.m1(s) == 0 || COOC.m2(t) == 0) return 1.0;
     UTIL_THROW_IF2(alpha < 0,"At " << __FILE__ << ":" << __LINE__
 		   << ": alpha parameter must be >= 0");
-    return float(COOC[s][t]+alpha)/(COOC.m2(t)+alpha);
+    float ret = float(COOC[s][t]+alpha);
+    ret = (ret?ret:1.)/(COOC.m2(t)+alpha);
+    UTIL_THROW_IF2(ret <= 0 || ret > 1, "At " << __FILE__ << ":" << __LINE__ 
+		   << ": result not > 0 and <= 1.");
+    return ret;
   }
   
   template<typename TKN>

@@ -602,16 +602,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingConstraint.h</locationURI>
 		</link>
 		<link>
-			<name>ReorderingStack.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingStack.cpp</locationURI>
-		</link>
-		<link>
-			<name>ReorderingStack.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingStack.h</locationURI>
-		</link>
-		<link>
 			<name>RuleCube.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleCube.cpp</locationURI>
@@ -1332,6 +1322,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanLength.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SparseHieroReorderingFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparseHieroReorderingFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SparseHieroReorderingFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparseHieroReorderingFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/StatefulFeatureFunction.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/StatefulFeatureFunction.cpp</locationURI>
@@ -1637,6 +1637,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/backward.arpa</locationURI>
 		</link>
 		<link>
+			<name>LM/oxlm</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>PP/CountsPhraseProperty.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/CountsPhraseProperty.cpp</locationURI>
@@ -1655,6 +1660,16 @@
 			<name>PP/Factory.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/Factory.h</locationURI>
+		</link>
+		<link>
+			<name>PP/NonTermContextProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/NonTermContextProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/NonTermContextProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/NonTermContextProperty.h</locationURI>
 		</link>
 		<link>
 			<name>PP/PhraseProperty.cpp</name>
@@ -1917,6 +1932,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingTable.h</locationURI>
 		</link>
 		<link>
+			<name>FF/LexicalReordering/ReorderingStack.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/ReorderingStack.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/ReorderingStack.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/ReorderingStack.h</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/SparseReordering.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/SparseReordering.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/SparseReordering.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/SparseReordering.h</locationURI>
+		</link>
+		<link>
 			<name>FF/OSM-Feature/OpSequenceModel.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/OpSequenceModel.cpp</locationURI>
@@ -1935,6 +1970,26 @@
 			<name>FF/OSM-Feature/osmHyp.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.h</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/LBLLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/LBLLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/LBLLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/LBLLM.h</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/Mapper.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/Mapper.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/Mapper.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/Mapper.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>

@@ -863,8 +863,8 @@ while (1) {
     $mira_settings .= "$batch_mira_args ";
   }
 
-  $mira_settings .= " --dense-init run$run.$weights_in_file";
-  #$mira_settings .= " --dense-init run$run.dense";
+  #$mira_settings .= " --dense-init run$run.$weights_in_file";
+  $mira_settings .= " --dense-init run$run.dense";
   if (-e "run$run.sparse-weights") {
     $mira_settings .= " --sparse-init run$run.sparse-weights";
   }

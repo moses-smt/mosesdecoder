@@ -13,7 +13,7 @@
 namespace MosesTuning
 {
 
-const int kBleuNgramOrder = 4;
+const size_t kBleuNgramOrder = 4;
 
 class NgramCounts;
 class Reference;

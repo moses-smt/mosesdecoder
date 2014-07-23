@@ -327,7 +327,7 @@ void PhraseAndFeatures(const search::Applied final, Phrase &phrase, ScoreCompone
 
   const LanguageModel &model = LanguageModel::GetFirstLM();
   model.CalcScore(phrase, full, ignored_ngram, ignored_oov);
-  // CalcScore transforms, but EvaluateChart doesn't.
+  // CalcScore transforms, but EvaluateWhenApplied doesn't.
   features.Assign(&model, full);
 }
 

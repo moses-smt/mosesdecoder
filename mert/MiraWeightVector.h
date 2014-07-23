@@ -63,6 +63,11 @@ public:
    */
   AvgWeightVector avg();
 
+  /**
+    * Convert to sparse vector, interpreting all features as sparse.
+   **/
+  void ToSparse(SparseVector* sparse) const;
+
   friend class AvgWeightVector;
 
   friend std::ostream& operator<<(std::ostream& o, const MiraWeightVector& e);
@@ -99,12 +104,12 @@ public:
   ValType score(const MiraFeatureVector& fv) const;
   ValType weight(std::size_t index) const;
   std::size_t size() const;
+  void ToSparse(SparseVector* sparse) const;
 private:
   const MiraWeightVector& m_wv;
 };
 
 
-#endif // MERT_WEIGHT_VECTOR_H
 
 // --Emacs trickery--
 // Local Variables:
@@ -113,3 +118,4 @@ private:
 // End:
 
 }
+#endif // MERT_WEIGHT_VECTOR_H

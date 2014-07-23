@@ -84,11 +84,23 @@ if $(with-ldhtlm) {
 local with-nplm = [ option.get "with-nplm" ] ;
 if $(with-nplm) {
   lib neuralLM : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
-  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen-3.1.4 ;
+  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
   alias nplm : NeuralLMWrapper.o neuralLM : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
   dependencies += nplm ;
   lmmacros += LM_NEURAL ;
 }
+
+#LBLLM
+local with-lbllm = [ option.get "with-lbllm" ] ;
+if $(with-lbllm) {
+  lib lbl : : <search>$(with-lbllm)/lib <search>$(with-lbllm)/lib64 ;
+  obj LBLLM.o : oxlm/LBLLM.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
+  obj Mapper.o : oxlm/Mapper.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
+  alias lbllm : LBLLM.o Mapper.o lbl : : : <cxxflags>-std=c++0x <define>LM_LBL ;
+  dependencies += lbllm ;
+  lmmacros += LM_LBL ;
+}
+
 
 #DALM
 local with-dalm = [ option.get "with-dalm" ] ;

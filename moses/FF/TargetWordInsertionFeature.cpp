@@ -53,7 +53,7 @@ void TargetWordInsertionFeature::Load()
   m_unrestricted = false;
 }
 
-void TargetWordInsertionFeature::Evaluate(const Phrase &source
+void TargetWordInsertionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const

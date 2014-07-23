@@ -69,7 +69,7 @@ void LanguageModel::ReportHistoryOrder(std::ostream &out,const Phrase &phrase) c
   // out << "ReportHistoryOrder not implemented";
 }
 
-void LanguageModel::Evaluate(const Phrase &source
+void LanguageModel::EvaluateInIsolation(const Phrase &source
                              , const TargetPhrase &targetPhrase
                              , ScoreComponentCollection &scoreBreakdown
                              , ScoreComponentCollection &estimatedFutureScore) const

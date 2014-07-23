@@ -1,9 +1,9 @@
 
 #include "moses/StaticData.h"
 #include "moses/FactorCollection.h"
+#include <boost/functional/hash.hpp>
 #include "NeuralLMWrapper.h"
 #include "neuralLM.h"
-#include <model.h>
 
 using namespace std;
 
@@ -12,20 +12,18 @@ namespace Moses
 NeuralLMWrapper::NeuralLMWrapper(const std::string &line)
 :LanguageModelSingleFactor(line)
 {
-  // This space intentionally left blank
+  ReadParameters();
 }
 
 
 NeuralLMWrapper::~NeuralLMWrapper()
 {
-  delete m_neuralLM;
+  delete m_neuralLM_shared;
 }
 
 
 void NeuralLMWrapper::Load()
 {
-
-  TRACE_ERR("Loading NeuralLM " << m_filePath << endl);
 
   // Set parameters required by ancestor classes
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -34,58 +32,40 @@ void NeuralLMWrapper::Load()
   m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
-  m_neuralLM = new nplm::neuralLM();
-  m_neuralLM->read(m_filePath);
-  m_neuralLM->set_log_base(10);
+  m_neuralLM_shared = new nplm::neuralLM(m_filePath, true);
+  //TODO: config option?
+  m_neuralLM_shared->set_cache(1000000);
 
-  //TODO: Implement this
+  UTIL_THROW_IF2(m_nGramOrder != m_neuralLM_shared->get_order(),
+                 "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
+
 }
 
 
 LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
 
-  unsigned int hashCode = 0;
+  if (!m_neuralLM.get()) {
+    m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
+  }
+  size_t hashCode = 0;
+
   vector<int> words(contextFactor.size());
-//  TRACE_ERR("NeuralLM words:");
-  for (size_t i=0, n=contextFactor.size(); i<n; i+=1) {
+  for (size_t i=0, n=contextFactor.size(); i<n; i++) {
     const Word* word = contextFactor[i];
     const Factor* factor = word->GetFactor(m_factorType);
-    const std::string string= factor->GetString().as_string();
+    const std::string string = factor->GetString().as_string();
     int neuralLM_wordID = m_neuralLM->lookup_word(string);
     words[i] = neuralLM_wordID;
-    hashCode += neuralLM_wordID;
-//    TRACE_ERR(" " << string << "(" << neuralLM_wordID << ")" );
+    boost::hash_combine(hashCode, neuralLM_wordID);
   }
 
   double value = m_neuralLM->lookup_ngram(words);
-//  TRACE_ERR("\t=\t" << value);
-//  TRACE_ERR(endl);
 
   // Create a new struct to hold the result
   LMResult ret;
-  ret.score = value;
+  ret.score = FloorScore(value);
   ret.unknown = false;
-
-
-  // State* finalState is a void pointer
-  //
-  // Construct a hash value from the vector of words (contextFactor)
-  //
-  // The hash value must be the same size as sizeof(void*)
-  //
-  // TODO Set finalState to the above hash value
-
-  // use last word as state info
-//  const Factor *factor;
-//  size_t hash_value(const Factor &f);
-//  if (contextFactor.size()) {
-//    factor = contextFactor.back()->GetFactor(m_factorType);
-//  } else {
-//    factor = NULL;
-//  }
-//
-//  (*finalState) = (State*) factor;
 
   (*finalState) = (State*) hashCode;
 

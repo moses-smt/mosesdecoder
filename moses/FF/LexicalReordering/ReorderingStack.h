@@ -12,7 +12,7 @@
 //#include "Phrase.h"
 //#include "TypeDef.h"
 //#include "Util.h"
-#include "WordsRange.h"
+#include "moses/WordsRange.h"
 
 namespace Moses
 {

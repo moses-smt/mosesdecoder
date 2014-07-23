@@ -149,6 +149,40 @@ Phrase ChartHypothesis::GetOutputPhrase() const
   return outPhrase;
 }
 
+void ChartHypothesis::GetOutputPhrase(int leftRightMost, int numWords, Phrase &outPhrase) const
+{
+  const TargetPhrase &tp = GetCurrTargetPhrase();
+
+  int targetSize = tp.GetSize();
+  for (int i = 0; i < targetSize; ++i) {
+	int pos;
+	if (leftRightMost == 1) {
+	  pos = i;
+	}
+	else if (leftRightMost == 2) {
+	  pos = targetSize - i - 1;
+	}
+	else {
+		abort();
+	}
+
+	const Word &word = tp.GetWord(pos);
+
+	if (word.IsNonTerminal()) {
+	  // non-term. fill out with prev hypo
+	  size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+	  const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
+	  prevHypo->GetOutputPhrase(outPhrase);
+	} else {
+	  outPhrase.AddWord(word);
+	}
+
+	if (outPhrase.GetSize() >= numWords) {
+		return;
+	}
+  }
+}
+
 /** check, if two hypothesis can be recombined.
     this is actually a sorting function that allows us to
     keep an ordered list of hypotheses. This makes recombination
@@ -200,7 +234,7 @@ void ChartHypothesis::Evaluate()
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) {
-      sfs[i]->EvaluateChart(*this,&m_scoreBreakdown);
+      sfs[i]->EvaluateWhenApplied(*this,&m_scoreBreakdown);
     }
   }
 
@@ -208,7 +242,7 @@ void ChartHypothesis::Evaluate()
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     if (! staticData.IsFeatureFunctionIgnored( *ffs[i] )) {
-      m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+      m_ffStates[i] = ffs[i]->EvaluateWhenApplied(*this,i,&m_scoreBreakdown);
     }
   }
 

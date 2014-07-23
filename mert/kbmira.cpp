@@ -39,8 +39,10 @@ de recherches du Canada
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include "util/exception.hh"
+
 #include "BleuScorer.h"
-#include "HypPackEnumerator.h"
+#include "HopeFearDecoder.h"
 #include "MiraFeatureVector.h"
 #include "MiraWeightVector.h"
 
@@ -49,38 +51,16 @@ using namespace MosesTuning;
 
 namespace po = boost::program_options;
 
-ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv)
-{
-  vector<ValType> stats(kBleuNgramOrder*2+1,0);
-  for(train->reset(); !train->finished(); train->next()) {
-    // Find max model
-    size_t max_index=0;
-    ValType max_score=0;
-    for(size_t i=0; i<train->cur_size(); i++) {
-      MiraFeatureVector vec(train->featuresAt(i));
-      ValType score = wv.score(vec);
-      if(i==0 || score > max_score) {
-        max_index = i;
-        max_score = score;
-      }
-    }
-    // Update stats
-    const vector<float>& sent = train->scoresAt(max_index);
-    for(size_t i=0; i<sent.size(); i++) {
-      stats[i]+=sent[i];
-    }
-  }
-  return unsmoothedBleu(stats);
-}
-
 int main(int argc, char** argv)
 {
-  const ValType BLEU_RATIO = 5;
   bool help;
   string denseInitFile;
   string sparseInitFile;
+  string type = "nbest";
   vector<string> scoreFiles;
   vector<string> featureFiles;
+  vector<string> referenceFiles; //for hg mira
+  string hgDir;
   int seed;
   string outputFile;
   float c = 0.01;      // Step-size cap C
@@ -91,25 +71,30 @@ int main(int argc, char** argv)
   bool model_bg = false; // Use model for background corpus
   bool verbose = false; // Verbose updates
   bool safe_hope = false; // Model score cannot have more than BLEU_RATIO times more influence than BLEU
+  size_t hgPruning = 50; //prune hypergraphs to have this many edges per reference word 
 
   // Command-line processing follows pro.cpp
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
+  ("type,t", po::value<string>(&type), "Either nbest or hypergraph")
   ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
   ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
+  ("hgdir,H", po::value<string> (&hgDir), "Directory containing hypergraphs")
+  ("reference,R", po::value<vector<string> > (&referenceFiles), "Reference files, only required for hypergraph mira")
   ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
   ("output-file,o", po::value<string>(&outputFile), "Output file")
   ("cparam,C", po::value<float>(&c), "MIRA C-parameter, lower for more regularization (default 0.01)")
   ("decay,D", po::value<float>(&decay), "BLEU background corpus decay rate (default 0.999)")
   ("iters,J", po::value<int>(&n_iters), "Number of MIRA iterations to run (default 60)")
-  ("dense-init,d", po::value<string>(&denseInitFile), "Weight file for dense features")
+  ("dense-init,d", po::value<string>(&denseInitFile), "Weight file for dense features. This should have 'name= value' on each line, or (legacy) should be the Moses mert 'init.opt' format.")
   ("sparse-init,s", po::value<string>(&sparseInitFile), "Weight file for sparse features")
   ("streaming", po::value(&streaming)->zero_tokens()->default_value(false), "Stream n-best lists to save memory, implies --no-shuffle")
   ("no-shuffle", po::value(&no_shuffle)->zero_tokens()->default_value(false), "Don't shuffle hypotheses before each epoch")
   ("model-bg", po::value(&model_bg)->zero_tokens()->default_value(false), "Use model instead of hope for BLEU background")
   ("verbose", po::value(&verbose)->zero_tokens()->default_value(false), "Verbose updates")
   ("safe-hope", po::value(&safe_hope)->zero_tokens()->default_value(false), "Mode score's influence on hope decoding is limited")
+  ("hg-prune", po::value<size_t>(&hgPruning), "Prune hypergraphs to have this many edges per reference word")
   ;
 
   po::options_description cmdline_options;
@@ -145,12 +130,56 @@ int main(int argc, char** argv)
       cerr << "could not open dense initfile: " << denseInitFile << endl;
       exit(3);
     }
+    if (verbose) cerr << "Reading dense features:" << endl;
     parameter_t val;
     getline(opt,buffer);
-    istringstream strstrm(buffer);
-    while(strstrm >> val) {
-      initParams.push_back(val);
+    if (buffer.find_first_of("=") == buffer.npos) {
+      UTIL_THROW_IF(type == "hypergraph", util::Exception, "For hypergraph version, require dense features in 'name= value' format");
+      cerr << "WARN: dense features in deprecated Moses mert format. Prefer 'name= value' format." << endl;
+      istringstream strstrm(buffer);
+      while(strstrm >> val) {
+        initParams.push_back(val);
+        if(verbose) cerr << val << endl;
+      }
+    } else {
+      vector<string> names;
+      string last_name = "";
+      size_t feature_ctr = 0;
+      do {
+        size_t equals = buffer.find_last_of("=");
+        UTIL_THROW_IF(equals == buffer.npos, util::Exception, "Incorrect format in dense feature file: '"
+          << buffer << "'");
+        string name = buffer.substr(0,equals);
+        names.push_back(name);
+        initParams.push_back(boost::lexical_cast<ValType>(buffer.substr(equals+2)));
+
+        //Names for features with several values need to have their id added
+        if (name != last_name) feature_ctr = 0;
+        last_name = name;
+        if (feature_ctr) {
+          stringstream namestr;
+          namestr << names.back() << feature_ctr;
+          names[names.size()-1] = namestr.str();
+          if (feature_ctr == 1) {
+            stringstream namestr;
+            namestr << names[names.size()-2] << (feature_ctr-1);
+            names[names.size()-2] = namestr.str();
+          }
+        }
+        ++feature_ctr;
+
+      } while(getline(opt,buffer));
+
+
+      //Make sure that SparseVector encodes dense feature names as 0..n-1.
+      for (size_t i = 0; i < names.size(); ++i) {
+        size_t id = SparseVector::encode(names[i]);
+        assert(id == i);     
+        if (verbose) cerr << names[i] << " " << initParams[i] << endl;
+      }
+
     }
+
     opt.close();
   }
   size_t initDenseSize = initParams.size();
@@ -188,82 +217,45 @@ int main(int argc, char** argv)
   }
   bg.push_back(kBleuNgramOrder);
 
+  boost::scoped_ptr<HopeFearDecoder> decoder;
+  if (type == "nbest") {
+    decoder.reset(new NbestHopeFearDecoder(featureFiles, scoreFiles, streaming, no_shuffle, safe_hope));
+  } else if (type == "hypergraph") {
+    decoder.reset(new HypergraphHopeFearDecoder(hgDir, referenceFiles, initDenseSize, streaming, no_shuffle, safe_hope, hgPruning, wv));
+  } else {
+    UTIL_THROW(util::Exception, "Unknown batch mira type: '" << type << "'");
+  }
+
   // Training loop
-  boost::scoped_ptr<HypPackEnumerator> train;
-  if(streaming)
-    train.reset(new StreamingHypPackEnumerator(featureFiles, scoreFiles));
-  else
-    train.reset(new RandomAccessHypPackEnumerator(featureFiles, scoreFiles, no_shuffle));
-  cerr << "Initial BLEU = " << evaluate(train.get(), wv.avg()) << endl;
+  cerr << "Initial BLEU = " << decoder->Evaluate(wv.avg()) << endl;
   ValType bestBleu = 0;
   for(int j=0; j<n_iters; j++) {
     // MIRA train for one epoch
-    int iNumHyps = 0;
     int iNumExamples = 0;
     int iNumUpdates = 0;
     ValType totalLoss = 0.0;
-    for(train->reset(); !train->finished(); train->next()) {
-      // Hope / fear decode
-      ValType hope_scale = 1.0;
-      size_t hope_index=0, fear_index=0, model_index=0;
-      ValType hope_score=0, fear_score=0, model_score=0;
-      int iNumHypsBackup = iNumHyps;
-      for(size_t safe_loop=0; safe_loop<2; safe_loop++) {
-        iNumHyps = iNumHypsBackup;
-        ValType hope_bleu, hope_model;
-        for(size_t i=0; i< train->cur_size(); i++) {
-          const MiraFeatureVector& vec=train->featuresAt(i);
-          ValType score = wv.score(vec);
-          ValType bleu = sentenceLevelBackgroundBleu(train->scoresAt(i),bg);
-          // Hope
-          if(i==0 || (hope_scale*score + bleu) > hope_score) {
-            hope_score = hope_scale*score + bleu;
-            hope_index = i;
-            hope_bleu = bleu;
-            hope_model = score;
-          }
-          // Fear
-          if(i==0 || (score - bleu) > fear_score) {
-            fear_score = score - bleu;
-            fear_index = i;
-          }
-          // Model
-          if(i==0 || score > model_score) {
-            model_score = score;
-            model_index = i;
-          }
-          iNumHyps++;
-        }
-        // Outer loop rescales the contribution of model score to 'hope' in antagonistic cases
-        // where model score is having far more influence than BLEU
-        hope_bleu *= BLEU_RATIO; // We only care about cases where model has MUCH more influence than BLEU
-        if(safe_hope && safe_loop==0 && abs(hope_model)>1e-8 && abs(hope_bleu)/abs(hope_model)<hope_scale)
-          hope_scale = abs(hope_bleu) / abs(hope_model);
-        else break;
-      }
+    size_t sentenceIndex = 0;
+    for(decoder->reset();!decoder->finished(); decoder->next()) {
+      HopeFearData hfd;
+      decoder->HopeFear(bg,wv,&hfd);
+    
       // Update weights
-      if(hope_index!=fear_index) {
+      if (!hfd.hopeFearEqual && hfd.hopeBleu  > hfd.fearBleu) { 
         // Vector difference
-        const MiraFeatureVector& hope=train->featuresAt(hope_index);
-        const MiraFeatureVector& fear=train->featuresAt(fear_index);
-        MiraFeatureVector diff = hope - fear;
+        MiraFeatureVector diff = hfd.hopeFeatures - hfd.fearFeatures;
         // Bleu difference
-        const vector<float>& hope_stats = train->scoresAt(hope_index);
-        ValType hopeBleu = sentenceLevelBackgroundBleu(hope_stats, bg);
-        const vector<float>& fear_stats = train->scoresAt(fear_index);
-        ValType fearBleu = sentenceLevelBackgroundBleu(fear_stats, bg);
-        assert(hopeBleu + 1e-8 >= fearBleu);
-        ValType delta = hopeBleu - fearBleu;
+        //assert(hfd.hopeBleu + 1e-8 >= hfd.fearBleu);
+        ValType delta = hfd.hopeBleu - hfd.fearBleu;
         // Loss and update
         ValType diff_score = wv.score(diff);
         ValType loss = delta - diff_score;
         if(verbose) {
-          cerr << "Updating sent " << train->cur_id() << endl;
+          cerr << "Updating sent " << sentenceIndex << endl;
           cerr << "Wght: " << wv << endl;
-          cerr << "Hope: " << hope << " BLEU:" << hopeBleu << " Score:" << wv.score(hope) << endl;
-          cerr << "Fear: " << fear << " BLEU:" << fearBleu << " Score:" << wv.score(fear) << endl;
+          cerr << "Hope: " << hfd.hopeFeatures << " BLEU:" << hfd.hopeBleu << " Score:" << wv.score(hfd.hopeFeatures) << endl;
+          cerr << "Fear: " << hfd.fearFeatures << " BLEU:" << hfd.fearBleu << " Score:" << wv.score(hfd.fearFeatures) << endl;
           cerr << "Diff: " << diff << " BLEU:" << delta << " Score:" << diff_score << endl;
-          cerr << "Loss: " << loss << " Scale: " << hope_scale << endl;
+          cerr << "Loss: " << loss <<  " Scale: " << 1 << endl;
           cerr << endl;
         }
         if(loss > 0) {
@@ -273,16 +265,16 @@ int main(int argc, char** argv)
           iNumUpdates++;
         }
         // Update BLEU statistics
-        const vector<float>& model_stats = train->scoresAt(model_index);
         for(size_t k=0; k<bg.size(); k++) {
           bg[k]*=decay;
           if(model_bg)
-            bg[k]+=model_stats[k];
+            bg[k]+=hfd.modelStats[k];
           else
-            bg[k]+=hope_stats[k];
+            bg[k]+=hfd.hopeStats[k];
         }
       }
       iNumExamples++;
+      ++sentenceIndex;
     }
     // Training Epoch summary
     cerr << iNumUpdates << "/" << iNumExamples << " updates"
@@ -291,15 +283,16 @@ int main(int argc, char** argv)
 
     // Evaluate current average weights
     AvgWeightVector avg = wv.avg();
-    ValType bleu = evaluate(train.get(), avg);
+    ValType bleu = decoder->Evaluate(avg);
     cerr << ", BLEU = " << bleu << endl;
     if(bleu > bestBleu) {
+      /*
       size_t num_dense = train->num_dense();
       if(initDenseSize>0 && initDenseSize!=num_dense) {
         cerr << "Error: Initial dense feature count and dense feature count from n-best do not match: "
              << initDenseSize << "!=" << num_dense << endl;
         exit(1);
-      }
+      }*/
       // Write to a file
       ostream* out;
       ofstream outFile;
@@ -314,11 +307,11 @@ int main(int argc, char** argv)
         out = &cout;
       }
       for(size_t i=0; i<avg.size(); i++) {
-        if(i<num_dense)
+        if(i<initDenseSize)
           *out << "F" << i << " " << avg.weight(i) << endl;
         else {
           if(abs(avg.weight(i))>1e-8)
-            *out << SparseVector::decode(i-num_dense) << " " << avg.weight(i) << endl;
+            *out << SparseVector::decode(i-initDenseSize) << " " << avg.weight(i) << endl;
         }
       }
       outFile.close();

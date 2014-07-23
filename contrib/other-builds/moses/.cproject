@@ -36,7 +36,6 @@
 									<listOptionValue builtIn="false" value="/opt/local/include/"/>
 									<listOptionValue builtIn="false" value="${workspace_loc}/../../irstlm/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../nplm/src&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../eigen&quot;"/>
 									<listOptionValue builtIn="false" value="${workspace_loc}/../../srilm/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../DALM/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../DALM/darts-clone&quot;"/>
@@ -53,11 +52,11 @@
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 									<listOptionValue builtIn="false" value="LM_IRST"/>
 									<listOptionValue builtIn="false" value="LM_DALM"/>
-									<listOptionValue builtIn="false" value="LM_RAND"/>
 									<listOptionValue builtIn="false" value="LM_NPLM"/>
 									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
 									<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.dialect.std.1734198568" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1905116220" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.2126314903" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -80,8 +79,18 @@
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.511477442" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.2147044266" name="/" resourcePath="LM/oxlm">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.369597529" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1919082719" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1976472988"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.451148054" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1343615699" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.2126314903"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1929750597" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1168585173"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1235749054" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.2074660557"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.8387388" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.933467113"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="TranslationModel/fuzzy-match/FuzzyMatchWrapper.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -133,6 +142,95 @@
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380" moduleId="org.eclipse.cdt.core.settings" name="Debug with oxlm">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/moses"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/moses/Debug with oxlm"/>
+						<entry flags="RESOLVED" kind="libraryFile" name="moses" srcPrefixMapping="" srcRootPath=""/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactExtension="a" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.staticLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.staticLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380" name="Debug with oxlm" parent="cdt.managedbuild.config.gnu.exe.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.58016517" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.gnu.platform.exe.debug.1519676809" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
+							<builder buildPath="${workspace_loc:/moses/Debug}" id="cdt.managedbuild.target.gnu.builder.exe.debug.210713286" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.352461864" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1930334119" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
+								<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.287782778" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1878892542" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.include.paths.1954109101" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../probingPT/helpers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../cmph/include&quot;"/>
+									<listOptionValue builtIn="false" value="/opt/local/include/"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../irstlm/include"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../nplm/src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../eigen&quot;"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../srilm/include"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../DALM/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../DALM/darts-clone&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../randlm/include/RandLM&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../eigen-3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../oxlm/src&quot;"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.274233516" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="IS_ECLIPSE"/>
+									<listOptionValue builtIn="false" value="HAVE_PROBINGPT"/>
+									<listOptionValue builtIn="false" value="HAVE_BOOST"/>
+									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
+									<listOptionValue builtIn="false" value="WITH_THREADS"/>
+									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
+									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+									<listOptionValue builtIn="false" value="LM_IRST"/>
+									<listOptionValue builtIn="false" value="LM_DALM"/>
+									<listOptionValue builtIn="false" value="LM_NPLM"/>
+									<listOptionValue builtIn="false" value="LM_LBL"/>
+									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
+									<listOptionValue builtIn="false" value="_LARGE_FILES"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.dialect.std.1353163586" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1413141770" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1040012873" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.260276259" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.exe.debug.option.debugging.level.744208673" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.699852884" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1114065632" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.373508964" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1873470979" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1046426871" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1482215763" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/Rand.h" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/IRST.h" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/DALMWrapper.h" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
+					<sourceEntries>
+						<entry excluding="LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="moses.cdt.managedbuild.target.gnu.exe.1375079569" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
@@ -169,6 +267,9 @@
 			<resource resourceType="PROJECT" workspacePath="/moses"/>
 		</configuration>
 		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/moses"/>
+		</configuration>
+		<configuration configurationName="Debug with oxlm">
 			<resource resourceType="PROJECT" workspacePath="/moses"/>
 		</configuration>
 	</storageModule>

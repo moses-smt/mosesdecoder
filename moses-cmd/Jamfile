@@ -3,4 +3,16 @@ alias deps : IOWrapper.cpp mbr.cpp LatticeMBR.cpp TranslationAnalysis.cpp ..//z 
 exe moses : Main.cpp deps ;
 exe lmbrgrid : LatticeMBRGrid.cpp deps ;
 
+if [ option.get "with-mm" : : "yes" ] {
+
+exe simulate-pe : 
+simulate-pe.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_program_options 
+deps 
+;
+
+alias programs : moses lmbrgrid simulate-pe ;
+} else { 
 alias programs : moses lmbrgrid ;
+}

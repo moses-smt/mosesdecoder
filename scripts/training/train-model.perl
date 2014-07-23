@@ -37,7 +37,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
-   @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
+   @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,$_MMSAPT,
    @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
    $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE, $_EXTRACT_COMMAND);
 my $_BASELINE_CORPUS = "";
@@ -121,9 +121,10 @@ $_HELP = 1
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
 		       'osm-model=s' => \$_OSM,
-			'osm-setting=s' => \$_OSM_FACTORS,
-			'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,
-			'transliteration-phrase-table=s' => \$_TRANSLITERATION_PHRASE_TABLE,		
+		       'osm-setting=s' => \$_OSM_FACTORS,
+		       'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,
+		       'transliteration-phrase-table=s' => \$_TRANSLITERATION_PHRASE_TABLE,		
+		       'mmsapt=s' => \$_MMSAPT,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
@@ -1950,14 +1951,20 @@ sub create_ini {
      $phrase_table_impl_name = "PhraseDictionaryOnDisk" if $phrase_table_impl==2;
      $phrase_table_impl_name = "PhraseDictionaryMemory" if $phrase_table_impl==6;
      $phrase_table_impl_name = "PhraseDictionaryALSuffixArray" if $phrase_table_impl==10;
+     $phrase_table_impl_name = "Mmsapt" if $phrase_table_impl==11;
+     $file .= "/" if $phrase_table_impl==11 && $file !~ /\/$/;
 
-     #table limit
+     # table limit (maximum number of translation options per input phrase)
      my $table_limit = 0;
      if ($i == 0) {
        $table_limit = 20;
      }
+
      # sum up...
-     $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i table-limit=$table_limit num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor\n";
+     $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i num-features=$basic_weight_count ".($phrase_table_impl==11?"base":"path")."=$file input-factor=$input_factor output-factor=$output_factor";
+     $feature_spec .= " L1=$___F L2=$___E ".$_MMSAPT if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
+     $feature_spec .= " table-limit=$table_limit" unless defined($_MMSAPT);
+     $feature_spec .= "\n";
      $weight_spec .= "TranslationModel$i=";
      for(my $j=0;$j<$basic_weight_count;$j++) { $weight_spec .= " 0.2"; }
      $weight_spec .= "\n";
@@ -1970,8 +1977,7 @@ sub create_ini {
      exit 1 if $i < $stepsused{"T"}; # fatal to define less
    }
 
-   if ($_TRANSLITERATION_PHRASE_TABLE){
-		
+   if ($_TRANSLITERATION_PHRASE_TABLE) {
      $feature_spec .= "PhraseDictionaryMemory name=TranslationModel$i table-limit=100 num-features=4 path=$_TRANSLITERATION_PHRASE_TABLE input-factor=0 output-factor=0\n";
      $weight_spec .= "TranslationModel$i= 0.2 0.2 0.2 0.2\n";
      $i++;	

@@ -4,6 +4,7 @@
 #include <algorithm>
 
 
+#include "moses/Util.h"
 #include "moses/ChartManager.h"
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
@@ -59,7 +60,7 @@ public:
     if(add2ORLM_) {
       //updateORLM();
     }
-    cerr << "Done inserting\n";
+    XVERBOSE(1,"Done inserting\n");
     //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy);
     map<string, xmlrpc_c::value> retData;
     //*retvalP = xmlrpc_c::value_struct(retData);
@@ -120,17 +121,17 @@ public:
     if(si == params.end())
       throw xmlrpc_c::fault("Missing source sentence", xmlrpc_c::fault::CODE_PARSE);
     source_ = xmlrpc_c::value_string(si->second);
-    cerr << "source = " << source_ << endl;
+    XVERBOSE(1,"source = " << source_ << endl);
     si = params.find("target");
     if(si == params.end())
       throw xmlrpc_c::fault("Missing target sentence", xmlrpc_c::fault::CODE_PARSE);
     target_ = xmlrpc_c::value_string(si->second);
-    cerr << "target = " << target_ << endl;
+    XVERBOSE(1,"target = " << target_ << endl);
     si = params.find("alignment");
     if(si == params.end())
       throw xmlrpc_c::fault("Missing alignment", xmlrpc_c::fault::CODE_PARSE);
     alignment_ = xmlrpc_c::value_string(si->second);
-    cerr << "alignment = " << alignment_ << endl;
+    XVERBOSE(1,"alignment = " << alignment_ << endl);
     si = params.find("bounded");
     bounded_ = (si != params.end());
     si = params.find("updateORLM");
@@ -224,7 +225,7 @@ public:
     }
     const string source((xmlrpc_c::value_string(si->second)));
 
-    cerr << "Input: " << source << endl;
+    XVERBOSE(1,"Input: " << source << endl);
     si = params.find("align");
     bool addAlignInfo = (si != params.end());
     si = params.find("word-align");
@@ -287,13 +288,13 @@ public:
         }
     } else {
         Sentence sentence;
-        const vector<FactorType> &inputFactorOrder =
-          staticData.GetInputFactorOrder();
+        const vector<FactorType> &
+	  inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
 	size_t lineNumber = 0; // TODO: Include sentence request number here?
         Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm());
-        manager.ProcessSentence();
+	manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
         vector<xmlrpc_c::value> alignInfo;
@@ -331,7 +332,7 @@ public:
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
     retData.insert(text);
-    cerr << "Output: " << out.str() << endl;
+    XVERBOSE(1,"Output: " << out.str() << endl);
     *retvalP = xmlrpc_c::value_struct(retData);
   }
 
@@ -574,7 +575,7 @@ int main(int argc, char** argv)
 {
 
   //Extract port and log, send other args to moses
-  char** mosesargv = new char*[argc+2];
+  char** mosesargv = new char*[argc+2]; // why "+2" [UG]
   int mosesargc = 0;
   int port = 8080;
   const char* logfile = "/dev/null";
@@ -634,11 +635,11 @@ int main(int argc, char** argv)
   myRegistry.addMethod("updater", updater);
   myRegistry.addMethod("optimize", optimizer);
 
-   xmlrpc_c::serverAbyss myAbyssServer(
-					myRegistry,
-					port,              // TCP port on which to listen
-					logfile
-					);
+  xmlrpc_c::serverAbyss myAbyssServer(
+				      myRegistry,
+				      port,              // TCP port on which to listen
+				      logfile
+				      );
   /* doesn't work with xmlrpc-c v. 1.16.33 - ie very old lib on Ubuntu 12.04
   xmlrpc_c::serverAbyss myAbyssServer(
     xmlrpc_c::serverAbyss::constrOpt()
@@ -648,12 +649,10 @@ int main(int argc, char** argv)
     .allowOrigin("*")
   );
   */
-
-  cerr << "Listening on port " << port << endl;
+  
+  XVERBOSE(1,"Listening on port " << port << endl);
   if (isSerial) {
-    while(1) {
-      myAbyssServer.runOnce();
-    }
+    while(1) myAbyssServer.runOnce();
   } else {
     myAbyssServer.run();
   }

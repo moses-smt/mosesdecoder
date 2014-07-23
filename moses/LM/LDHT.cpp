@@ -97,7 +97,7 @@ public:
   FFState* Evaluate(const Hypothesis& hypo,
                     const FFState* input_state,
                     ScoreComponentCollection* score_output) const;
-  FFState* EvaluateChart(const ChartHypothesis& hypo,
+  FFState* EvaluateWhenApplied(const ChartHypothesis& hypo,
                          int featureID,
                          ScoreComponentCollection* accumulator) const;
 
@@ -392,7 +392,7 @@ FFState* LanguageModelLDHT::Evaluate(
   return state;
 }
 
-FFState* LanguageModelLDHT::EvaluateChart(
+FFState* LanguageModelLDHT::EvaluateWhenApplied(
   const ChartHypothesis& hypo,
   int featureID,
   ScoreComponentCollection* accumulator) const

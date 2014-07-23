@@ -1513,9 +1513,9 @@ sub check_if_crashed {
 			     'error','killed','core dumped','can\'t read',
 			     'no such file or directory','unknown option',
 			     'died at','exit code','permission denied',
-           'segmentation fault','abort',
-           'no space left on device',
-           'can\'t locate', 'unrecognized option', 'Exception') {
+			     'segmentation fault','abort',
+			     'no space left on device', ': not found',
+			     'can\'t locate', 'unrecognized option', 'Exception') {
 	    if (/$pattern/i) {
 		my $not_error = 0;
 		if (defined($NOT_ERROR{&defined_step_id($i)})) {
@@ -2348,6 +2348,15 @@ sub get_config_tables {
       else {
         $ptImpl = 6; # in-mem SCFG
       }
+    }
+
+    # memory mapped suffix array phrase table
+    my $mmsapt = &get("TRAINING:mmsapt");
+    if (defined($mmsapt)) {
+      $ptImpl = 11; # mmsapt
+      $mmsapt =~ s/num-features=(\d+) // || die("ERROR: mmsapt setting needs to set num-features");
+      $numFF = $1;
+      $cmd .= "-mmsapt '$mmsapt' ";
     }
 
     # additional settings for factored models

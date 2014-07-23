@@ -161,13 +161,17 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   if (m_translations.size() > 1) {
-	UTIL_THROW_IF2(m_translations.Get(0)->GetFutureScore() < m_translations.Get(1)->GetFutureScore(),
-			"Non-monotonic future score");
+    UTIL_THROW_IF2(m_translations.Get(0)->GetFutureScore() < m_translations.Get(1)->GetFutureScore(),
+		   "Non-monotonic future score: " 
+		   << m_translations.Get(0)->GetFutureScore() << " vs. " 
+		   << m_translations.Get(1)->GetFutureScore());
   }
 
   if (m_hypotheses.size() > 1) {
     UTIL_THROW_IF2(m_hypotheses[0]->GetTotalScore() < m_hypotheses[1]->GetTotalScore(),
-			  "Non-monotonic total score");
+		   "Non-monotonic total score" 
+		   << m_hypotheses[0]->GetTotalScore() << " vs. "
+		   << m_hypotheses[1]->GetTotalScore());
   }
 
   HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
@@ -442,7 +446,9 @@ BitmapContainer::ProcessBestHypothesis()
   if (!Empty()) {
     HypothesisQueueItem *check = Dequeue(true);
     UTIL_THROW_IF2(item->GetHypothesis()->GetTotalScore() < check->GetHypothesis()->GetTotalScore(),
-    		"Non-monotonic total score");
+		   "Non-monotonic total score: "
+		   << item->GetHypothesis()->GetTotalScore() << " vs. "
+		   << check->GetHypothesis()->GetTotalScore());
   }
 
   // Logging for the criminally insane

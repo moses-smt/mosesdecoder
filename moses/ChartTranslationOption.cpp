@@ -18,7 +18,7 @@ void ChartTranslationOption::Evaluate(const InputType &input,
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    ff.Evaluate(input, inputPath, m_targetPhrase, &stackVec, m_scoreBreakdown);
+    ff.EvaluateWithSourceContext(input, inputPath, m_targetPhrase, &stackVec, m_scoreBreakdown);
   }
 }
 

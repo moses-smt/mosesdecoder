@@ -14,11 +14,12 @@ LexicalReordering::LexicalReordering(const std::string &line)
 {
   std::cerr << "Initializing LexicalReordering.." << std::endl;
 
+  map<string,string> sparseArgs;
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
     if (args[0] == "type") {
-      m_configuration = new LexicalReorderingConfiguration(args[1]);
+      m_configuration.reset(new LexicalReorderingConfiguration(args[1]));
       m_configuration->SetScoreProducer(this);
       m_modelTypeString = m_configuration->GetModelString();
     } else if (args[0] == "input-factor") {
@@ -27,8 +28,10 @@ LexicalReordering::LexicalReordering(const std::string &line)
       m_factorsE =Tokenize<FactorType>(args[1]);
     } else if (args[0] == "path") {
       m_filePath = args[1];
+    } else if (args[0].substr(0,7) == "sparse-") {
+      sparseArgs[args[0].substr(7)] = args[1];
     } else {
-      throw "Unknown argument " + args[0];
+      UTIL_THROW(util::Exception,"Unknown argument " + args[0]);
     }
   }
 
@@ -36,29 +39,29 @@ LexicalReordering::LexicalReordering(const std::string &line)
   case LexicalReorderingConfiguration::FE:
   case LexicalReorderingConfiguration::E:
     if(m_factorsE.empty()) {
-      throw "TL factor mask for lexical reordering is unexpectedly empty";
+      UTIL_THROW(util::Exception,"TL factor mask for lexical reordering is unexpectedly empty");
     }
     if(m_configuration->GetCondition() == LexicalReorderingConfiguration::E)
       break; // else fall through
   case LexicalReorderingConfiguration::F:
     if(m_factorsF.empty()) {
-      throw "SL factor mask for lexical reordering is unexpectedly empty";
+      UTIL_THROW(util::Exception,"SL factor mask for lexical reordering is unexpectedly empty");
     }
     break;
   default:
-    throw "Unknown conditioning option!";
+    UTIL_THROW(util::Exception,"Unknown conditioning option!");
   }
+
+  m_configuration->ConfigureSparse(sparseArgs, this);
 }
 
 LexicalReordering::~LexicalReordering()
 {
-  delete m_table;
-  delete m_configuration;
 }
 
 void LexicalReordering::Load()
 {
-  m_table = LexicalReorderingTable::LoadAvailable(m_filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
+  m_table.reset(LexicalReorderingTable::LoadAvailable(m_filePath, m_factorsF, m_factorsE, std::vector<FactorType>()));
 }
 
 Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
@@ -66,13 +69,13 @@ Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
   return m_table->GetScore(f, e, Phrase(ARRAY_SIZE_INCR));
 }
 
-FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
+FFState* LexicalReordering::EvaluateWhenApplied(const Hypothesis& hypo,
                                      const FFState* prev_state,
                                      ScoreComponentCollection* out) const
 {
   Scores score(GetNumScoreComponents(), 0);
-  const LexicalReorderingState *prev = static_cast<const LexicalReorderingState *>(prev_state);
-  LexicalReorderingState *next_state = prev->Expand(hypo.GetTranslationOption(), score);
+  const LexicalReorderingState *prev = dynamic_cast<const LexicalReorderingState *>(prev_state);
+  LexicalReorderingState *next_state = prev->Expand(hypo.GetTranslationOption(), hypo.GetInput(), out);
 
   out->PlusEquals(this, score);
 

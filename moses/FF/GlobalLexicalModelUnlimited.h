@@ -81,23 +81,23 @@ public:
 
   //TODO: This implements the old interface, but cannot be updated because
   //it appears to be stateful
-  void Evaluate(const Hypothesis& cur_hypo,
+  void EvaluateWhenApplied(const Hypothesis& cur_hypo,
                 ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartHypothesis& /* cur_hypo */,
+  void EvaluateWhenApplied(const ChartHypothesis& /* cur_hypo */,
                      int /* featureID */,
                      ScoreComponentCollection* ) const {
     throw std::logic_error("GlobalLexicalModelUnlimited not supported in chart decoder, yet");
   }
 
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const

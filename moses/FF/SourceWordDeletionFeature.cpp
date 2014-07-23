@@ -63,7 +63,7 @@ bool SourceWordDeletionFeature::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-void SourceWordDeletionFeature::Evaluate(const Phrase &source
+void SourceWordDeletionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const

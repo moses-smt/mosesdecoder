@@ -106,15 +106,11 @@ int main(int argc, char* argv[])
       	  cout << "   ";
       	  for (size_t k = idx.first; k < idx.second; ++k)
       	    {
-      	      if (mmsapt && fname[k-idx.first].substr(0,3) == "log")
-      		{
-      		  if(scores[k] < 0)
-      		    cout << " " << format("%10d") % round(exp(-scores[k]));
-      		  else
-      		    cout << " " << format("%10d") % round(exp(scores[k]));
-      		}
-      	      else
-      		cout << " " << format("%10.8f") % exp(scores[k]);
+	      size_t j = k-idx.first;
+	      float f = (mmsapt ? mmsapt->isLogVal(j) ? exp(scores[k]) : scores[k]
+			 : scores[k] < 0 ? exp(scores[k]) : scores[k]);
+	      string fmt = (mmsapt && mmsapt->isInteger(j)) ? "%10d" : "%10.8f";
+	      cout << " " << format(fmt) % f;
       	    }
       	  cout << endl;
       	}

@@ -16,6 +16,9 @@
 #include "tpt_tokenindex.h"
 #include "ug_ttrack_base.h"
 #include "tpt_tokenindex.h"
+#include "util/exception.hh"
+#include "moses/Util.h"
+
 // #include "ug_vocab.h"
 
 // define the corpus buffer size (in sentences) and the
@@ -49,6 +52,8 @@ namespace ugdiss
     typename boost::shared_ptr<imTtrack<Token> > 
     append<Token>(typename boost::shared_ptr<imTtrack<Token> > const & crp, vector<Token> const & snt);
 
+    void m_check_token_count(); // debugging function
+
   public:
 
     imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d);
@@ -68,6 +73,22 @@ namespace ugdiss
     id_type findSid(Token const* t) const;
 
   };
+
+  template<typename Token>
+  void
+  imTtrack<Token>::
+  m_check_token_count()
+  { // sanity check
+    size_t check = 0;
+    BOOST_FOREACH(vector<Token> const& s, *myData)
+      check += s.size();
+    UTIL_THROW_IF2(check != this->numToks, "[" << HERE << "]" 
+		   << " Wrong token count after appending sentence!"
+		   << " Counted " << check << " but expected " 
+		   << this->numToks << " in a total of " << myData->size() 
+		   << " sentences.");
+    
+  }
 
   template<typename Token>
   Token const* 
@@ -111,9 +132,9 @@ namespace ugdiss
   template<typename Token>
   imTtrack<Token>::
   imTtrack(istream& in, TokenIndex const& V, ostream* log = NULL)
+    : numToks(0)
   {
     myData.reset(new vector<vector<Token> >());
-    numToks = 0;
     string line,w;
     size_t linectr=0;
     boost::unordered_map<string,id_type> H;
@@ -135,6 +156,7 @@ namespace ugdiss
   template<typename Token>
   imTtrack<Token>::
   imTtrack(size_t reserve)
+    : numToks(0)
   {
     myData.reset(new vector<vector<Token> >());
     if (reserve) myData->reserve(reserve);
@@ -143,9 +165,9 @@ namespace ugdiss
   template<typename Token>
   imTtrack<Token>::
   imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d)
+    : numToks(0)
   {
     myData  = d;
-    numToks = 0;
     BOOST_FOREACH(vector<Token> const& v, *d)
       numToks += v.size();
   }
@@ -168,10 +190,13 @@ namespace ugdiss
 
   /// add a sentence to the database
   template<typename TOKEN>
-  shared_ptr<imTtrack<TOKEN> > 
-  append(shared_ptr<imTtrack<TOKEN> > const& crp, vector<TOKEN> const & snt)
+  boost::shared_ptr<imTtrack<TOKEN> > 
+  append(boost::shared_ptr<imTtrack<TOKEN> > const& crp, vector<TOKEN> const & snt)
   {
-    shared_ptr<imTtrack<TOKEN> > ret;
+#if 1
+    if (crp) crp->m_check_token_count();
+#endif
+    boost::shared_ptr<imTtrack<TOKEN> > ret;
     if (crp == NULL)
       {
   	ret.reset(new imTtrack<TOKEN>());
@@ -185,6 +210,11 @@ namespace ugdiss
       }
     else ret = crp;
     ret->myData->push_back(snt);
+    ret->numToks += snt.size();
+
+#if 1
+    ret->m_check_token_count();
+#endif
     return ret;
   }
 

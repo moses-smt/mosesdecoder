@@ -16,7 +16,7 @@ bool IsAmbiguous(const Word &word, bool sourceSyntax)
   return word.IsNonTerminal() && (!sourceSyntax || word == inputDefaultNonTerminal);
 }
 
-void RuleScope::Evaluate(const Phrase &source
+void RuleScope::EvaluateInIsolation(const Phrase &source
 						, const TargetPhrase &targetPhrase
 						, ScoreComponentCollection &scoreBreakdown
 						, ScoreComponentCollection &estimatedFutureScore) const
