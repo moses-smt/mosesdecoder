@@ -197,7 +197,9 @@ void SparseReordering::CopyScores(
       (reoType == LexicalReorderingState::D || reoType == LexicalReorderingState::DL ||
         reoType == LexicalReorderingState::DR)) {
     size_t gapStart, gapEnd;
-    const Sentence& sentence = dynamic_cast<const Sentence&>(input);
+    //NB: Using a static cast for speed, but could be nasty if 
+    //using non-sentence input
+    const Sentence& sentence = static_cast<const Sentence&>(input);
     const WordsRange& currentRange = currentOpt.GetSourceWordsRange();
     if (previousOpt) {
       const WordsRange& previousRange = previousOpt->GetSourceWordsRange();

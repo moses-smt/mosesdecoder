@@ -53,14 +53,30 @@ class HypothesisScoreOrdererWithDistortion
 {
 public:
   HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange) :
-    m_transOptRange(transOptRange) {}
+    m_transOptRange(transOptRange) {
+    m_totalWeightDistortion = 0;
+    const StaticData &staticData = StaticData::Instance();
+    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+    std::vector<FeatureFunction*>::const_iterator iter;
+    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+      const FeatureFunction *ff = *iter;
+
+      const DistortionScoreProducer *model = dynamic_cast<const DistortionScoreProducer*>(ff);
+      if (model) {
+        float weight =staticData.GetAllWeights().GetScoreForProducer(model);
+        m_totalWeightDistortion += weight;
+      }
+    }
+  
+      
+  }
 
   const WordsRange* m_transOptRange;
+  float m_totalWeightDistortion;
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
     UTIL_THROW_IF2(m_transOptRange == NULL, "Words range not set");
 
-    const StaticData &staticData = StaticData::Instance();
 
     const float distortionScoreA = DistortionScoreProducer::CalculateDistortionScore(
                                      *hypoA,
@@ -76,20 +92,8 @@ public:
                                    );
 
 
-    float totalWeightDistortion = 0;
-    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-    std::vector<FeatureFunction*>::const_iterator iter;
-    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-      const FeatureFunction *ff = *iter;
-
-      const DistortionScoreProducer *model = dynamic_cast<const DistortionScoreProducer*>(ff);
-      if (model) {
-        float weight =staticData.GetAllWeights().GetScoreForProducer(model);
-        totalWeightDistortion += weight;
-      }
-    }
-    const float scoreA = hypoA->GetScore() + distortionScoreA * totalWeightDistortion;
-    const float scoreB = hypoB->GetScore() + distortionScoreB * totalWeightDistortion;
+    const float scoreA = hypoA->GetScore() + distortionScoreA * m_totalWeightDistortion;
+    const float scoreB = hypoB->GetScore() + distortionScoreB * m_totalWeightDistortion;
 
 
     if (scoreA > scoreB) {
