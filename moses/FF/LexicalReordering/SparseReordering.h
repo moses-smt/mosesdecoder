@@ -17,6 +17,7 @@
 #include "util/pool.hh"
 #include "util/string_piece.hh"
 
+#include "moses/FeatureVector.h"
 #include "moses/ScoreComponentCollection.h"
 #include "LexicalReorderingState.h"
 
@@ -108,7 +109,7 @@ private:
   bool m_usePhrase;
   bool m_useBetween;
   bool m_useStack;
-  typedef boost::unordered_map<SparseReorderingFeatureKey, std::string, HashSparseReorderingFeatureKey, EqualsSparseReorderingFeatureKey> FeatureMap;
+  typedef boost::unordered_map<SparseReorderingFeatureKey, FName, HashSparseReorderingFeatureKey, EqualsSparseReorderingFeatureKey> FeatureMap;
   FeatureMap m_featureMap;
 
   void ReadWordList(const std::string& filename, const std::string& id,

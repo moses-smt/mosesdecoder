@@ -267,6 +267,10 @@ public:
     m_scores[fname] += score;
   }
 
+  void SparsePlusEquals(const FName& fname, float score) {
+    m_scores[fname] += score;
+  }
+
   void Assign(const FeatureFunction* sp, const std::vector<float>& scores);
 
   //! Special version Assign(ScoreProducer, vector<float>)

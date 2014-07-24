@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <string>
+#include "moses/FeatureVector.h"
 #include "moses/TypeDef.h"
 
 namespace Moses
@@ -70,6 +71,11 @@ public:
   const std::string& GetScoreProducerDescription() const {
     return m_description;
   }
+
+  FName GetFeatureName(const std::string& name) const {
+    return FName(GetScoreProducerDescription(), name);
+  }
+
 
   //! if false, then this feature is not displayed in the n-best list.
   // use with care

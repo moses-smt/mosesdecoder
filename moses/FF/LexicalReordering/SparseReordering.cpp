@@ -19,7 +19,7 @@ using namespace std;
 namespace Moses 
 {
 
-const std::string& SparseReorderingFeatureKey::Name(const string& wordListId) {
+const std::string& SparseReorderingFeatureKey::Name (const string& wordListId) {
   static string kSep = "-";
   static string name;
   ostringstream buf;
@@ -102,7 +102,7 @@ void SparseReordering::PreCalculateFeatureNames(size_t index, const string& id, 
         SparseReorderingFeatureKey key(
           index, static_cast<SparseReorderingFeatureKey::Type>(type), factor, isCluster,
            static_cast<SparseReorderingFeatureKey::Position>(position), side, reoType);
-        m_featureMap[key] = key.Name(id);
+        m_featureMap.insert(pair<SparseReorderingFeatureKey, FName>(key,m_producer->GetFeatureName(key.Name(id))));
       }
     }
   }
@@ -168,7 +168,7 @@ void SparseReordering::AddFeatures(
     SparseReorderingFeatureKey key(id, type, wordFactor, false, position, side, reoType);
     FeatureMap::const_iterator fmi = m_featureMap.find(key);
     assert(fmi != m_featureMap.end());
-    scores->PlusEquals(m_producer, fmi->second, 1.0);
+    scores->SparsePlusEquals(fmi->second, 1.0);
   }
 
   for (size_t id = 0; id < clusterMaps->size(); ++id) {
@@ -179,7 +179,7 @@ void SparseReordering::AddFeatures(
       SparseReorderingFeatureKey key(id, type, clusterIter->second, true, position, side, reoType);
       FeatureMap::const_iterator fmi = m_featureMap.find(key);
       assert(fmi != m_featureMap.end());
-      scores->PlusEquals(m_producer, fmi->second, 1.0);
+      scores->SparsePlusEquals(fmi->second, 1.0);
     }
   }
 
