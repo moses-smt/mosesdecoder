@@ -25,6 +25,10 @@ class Callback {
 
     ~Callback() {
       for (std::size_t i = 0; i < backoffs_.size(); ++i) {
+        if(prune_thresholds_[i + 1] > 0)
+          while(backoffs_[i])
+            ++backoffs_[i];
+
         if (backoffs_[i]) {
           std::cerr << "Backoffs do not match for order " << (i + 1) << std::endl;
           abort();
@@ -51,8 +55,8 @@ class Callback {
           
           const HashGamma *hashed_backoff = static_cast<const HashGamma*>(backoffs_[order_minus_1].Get());
           while(backoffs_[order_minus_1] && current_hash != hashed_backoff->hash_value) {
-            hashed_backoff = static_cast<const HashGamma*>(backoffs_[order_minus_1].Get());
             ++backoffs_[order_minus_1];
+            hashed_backoff = static_cast<const HashGamma*>(backoffs_[order_minus_1].Get());
           }
           
           if(current_hash == hashed_backoff->hash_value) {
