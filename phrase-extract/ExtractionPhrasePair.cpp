@@ -463,6 +463,96 @@ std::string ExtractionPhrasePair::CollectAllLabelsSeparateLHSAndRHS(const std::s
 }
 
 
+void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key, 
+                                                        const std::vector<float> &orientationClassPriorsL2R, 
+                                                        const std::vector<float> &orientationClassPriorsR2L,
+                                                        double smoothingFactor, 
+                                                        std::ostream &out) const
+{
+  assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dright dleft
+
+  const PROPERTY_VALUES *allPropertyValues = GetProperty( key );
+
+  if ( allPropertyValues == NULL ) {
+    return;
+  }
+
+  // bidirectional MSLR phrase orientation with 2x4 orientation classes: 
+  // mono swap dright dleft
+  std::vector<float> orientationClassCountSumL2R(4,0);
+  std::vector<float> orientationClassCountSumR2L(4,0);
+
+  for (PROPERTY_VALUES::const_iterator iter=allPropertyValues->begin(); 
+       iter!=allPropertyValues->end(); ++iter) {
+    std::string l2rOrientationClass, r2lOrientationClass;
+    try {
+      istringstream tokenizer(iter->first);
+      tokenizer >> l2rOrientationClass;
+      tokenizer >> r2lOrientationClass;
+      if ( tokenizer.peek() != EOF ) {
+        UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+                   << ": Collecting phrase orientations failed. "
+                   << "Too many tokens?");
+      }
+    } catch (const std::exception &e) {
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+                 << ": Collecting phrase orientations failed. "
+                 << "Flawed property value in extract file?");
+    }
+
+    int l2rOrientationClassId = -1;
+    if (!l2rOrientationClass.compare("mono")) {
+      l2rOrientationClassId = 0;
+    }
+    if (!l2rOrientationClass.compare("swap")) {
+      l2rOrientationClassId = 1;
+    }
+    if (!l2rOrientationClass.compare("dright")) {
+      l2rOrientationClassId = 2;
+    }
+    if (!l2rOrientationClass.compare("dleft")) {
+      l2rOrientationClassId = 3;
+    }
+    if (l2rOrientationClassId == -1) {
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+                 << ": Collecting phrase orientations failed. "
+                 << "Unknown orientation class \"" << l2rOrientationClass << "\"." );
+    }
+    int r2lOrientationClassId = -1;
+    if (!r2lOrientationClass.compare("mono")) {
+      r2lOrientationClassId = 0;
+    }
+    if (!r2lOrientationClass.compare("swap")) {
+      r2lOrientationClassId = 1;
+    }
+    if (!r2lOrientationClass.compare("dright")) {
+      r2lOrientationClassId = 2;
+    }
+    if (!r2lOrientationClass.compare("dleft")) {
+      r2lOrientationClassId = 3;
+    }
+    if (r2lOrientationClassId == -1) {
+      UTIL_THROW(util::Exception, "ExtractionPhrasePair" 
+                 << ": Collecting phrase orientations failed. "
+                 << "Unknown orientation class \"" << r2lOrientationClass << "\"." );
+    }
+
+    orientationClassCountSumL2R[l2rOrientationClassId] += iter->second;
+    orientationClassCountSumR2L[r2lOrientationClassId] += iter->second;
+  }
+
+  for (size_t i=0; i<4; ++i) {
+    if (i>0) {
+      out << " ";
+    }
+    out << (float)( (smoothingFactor*orientationClassPriorsL2R[i] + orientationClassCountSumL2R[i]) / (smoothingFactor + m_count) );
+  }
+  for (size_t i=0; i<4; ++i) {
+    out << " " << (float)( (smoothingFactor*orientationClassPriorsR2L[i] + orientationClassCountSumR2L[i]) / (smoothingFactor + m_count) );
+  }
+}
+
+
 
 }
 

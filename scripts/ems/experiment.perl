@@ -2195,9 +2195,10 @@ sub define_training_extract_phrases {
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
 
       if (&get("GENERAL:output-parser") && (&get("TRAINING:use-unknown-word-labels") || &get("TRAINING:use-unknown-word-soft-matches"))) {
-	  my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
-	  $cmd .= "-unknown-word-label $unknown_word_label ";
+        my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
+        $cmd .= "-unknown-word-label $unknown_word_label ";
       }
+
       if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-soft-matches")) {
           my $unknown_word_soft_matches = &versionize(&long_file_name("unknown-word-soft-matches","model",""));
           $cmd .= "-unknown-word-soft-matches $unknown_word_soft_matches ";
@@ -2209,6 +2210,12 @@ sub define_training_extract_phrases {
 
       if (&get("TRAINING:ghkm-tree-fragments")) {
         $cmd .= "-ghkm-tree-fragments ";
+      }
+
+      if (&get("TRAINING:ghkm-phrase-orientation")) {
+        $cmd .= "-ghkm-phrase-orientation ";
+        my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
+        $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
       }
     }
 
@@ -2241,6 +2248,11 @@ sub define_training_build_ttable {
     if (&get("TRAINING:hierarchical-rule-set")) {
       if (&get("TRAINING:ghkm-tree-fragments")) {
         $cmd .= "-ghkm-tree-fragments ";
+      }
+      if (&get("TRAINING:ghkm-phrase-orientation")) {
+        $cmd .= "-ghkm-phrase-orientation ";
+        my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
+        $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
       }
     }
     

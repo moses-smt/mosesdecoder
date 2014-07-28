@@ -363,8 +363,6 @@ void ExtractTask::extract(SentenceAlignment &sentence)
   HSentenceVertices outBottomLeft;
   HSentenceVertices outBottomRight;
 
-  HSentenceVertices::const_iterator it;
-
   bool relaxLimit = m_options.isHierModel();
   bool buildExtraStructure = m_options.isPhraseModel() || m_options.isHierModel();
 
