@@ -20,6 +20,7 @@
 #include "PhraseOrientation.h"
 
 #include <iostream>
+#include <limits>
 
 #include <boost/assign/list_of.hpp>
 
@@ -63,7 +64,7 @@ PhraseOrientation::PhraseOrientation(const std::vector<std::string> &source,
   for (int startF=0; startF<countF; ++startF) {
     for (int endF=startF; endF<countF; ++endF) {
 
-      int minE = 9999;
+      int minE = std::numeric_limits<int>::max();
       int maxE = -1;
       for (int fi=startF; fi<=endF; ++fi) {
         for (size_t i=0; i<alignedToS[fi].size(); ++i) {
@@ -86,7 +87,7 @@ PhraseOrientation::PhraseOrientation(const std::vector<std::string> &source,
   for (int startE=0; startE<countE; ++startE) {
     for (int endE=startE; endE<countE; ++endE) {
 
-      int minF = 9999;
+      int minF = std::numeric_limits<int>::max();
       int maxF = -1;
       std::vector< int > usedF = alignedCountS;
       for (int ei=startE; ei<=endE; ++ei) {

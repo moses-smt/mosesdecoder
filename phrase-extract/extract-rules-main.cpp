@@ -29,6 +29,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <limits>
 
 #ifdef WIN32
 // Include Visual Leak Detector
@@ -407,7 +408,7 @@ void ExtractTask::extractRules()
 
       // find find aligned source words
       // first: find minimum and maximum source word
-      int minS = 9999;
+      int minS = std::numeric_limits<int>::max();
       int maxS = -1;
       vector< int > usedS = m_sentence.alignedCountS;
       for(int ti=startT; ti<=endT; ti++) {
