@@ -157,10 +157,20 @@ namespace Moses
     if (m != param.end())
       read_config_file(m->second,param);
 
-    bname = param["base"]; 
+    m = param.find("base");
+    if (m != param.end())
+      {
+	bname = m->second; 
+	m = param.find("path");
+	UTIL_THROW_IF2((m != param.end() && m->second != bname),
+	 	       "Conflicting aliases for path:\n" 
+		       << "path=" << string(m->second) << "\n"
+		       << "base=" << bname.c_str() );
+      }
+    else bname = param["path"];
     L1    = param["L1"];
     L2    = param["L2"];
-
+    
     UTIL_THROW_IF2(bname.size() == 0, "Missing corpus base name at " << HERE);
     UTIL_THROW_IF2(L1.size() == 0, "Missing L1 tag at " << HERE);
     UTIL_THROW_IF2(L2.size() == 0, "Missing L2 tag at " << HERE);
@@ -183,7 +193,8 @@ namespace Moses
     m_workers = atoi(param.insert(dflt).first->second.c_str());
     m_workers = min(m_workers,24UL);
 
-    dflt = pair<string,string>("limit","20");
+    
+    dflt = pair<string,string>("table-limit","20");
     m_tableLimit = atoi(param.insert(dflt).first->second.c_str());
 
     dflt = pair<string,string>("cache","10000");
@@ -211,24 +222,26 @@ namespace Moses
     known_parameters.push_back("L1");
     known_parameters.push_back("L2");
     known_parameters.push_back("Mmsapt");
-    known_parameters.push_back("base");
+    known_parameters.push_back("base"); // alias for path
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
     known_parameters.push_back("extra");
     known_parameters.push_back("input-factor");
     known_parameters.push_back("lexalpha");
-    known_parameters.push_back("limit");
+    // known_parameters.push_back("limit"); // replaced by "table-limit"
     known_parameters.push_back("logcnt");
     known_parameters.push_back("name");
     known_parameters.push_back("num-features");
     known_parameters.push_back("output-factor");
+    known_parameters.push_back("path"); 
     known_parameters.push_back("pbwd");
     known_parameters.push_back("pfwd");
     known_parameters.push_back("prov");
     known_parameters.push_back("rare");
     known_parameters.push_back("sample");
     known_parameters.push_back("smooth");
+    known_parameters.push_back("table-limit");
     known_parameters.push_back("unal");
     known_parameters.push_back("workers");
     for (map<string,string>::iterator m = param.begin(); m != param.end(); ++m)
