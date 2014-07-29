@@ -219,6 +219,7 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef PT_UG
   MOSES_FNAME(Mmsapt);
+  MOSES_FNAME2("PhraseDictionaryBitextSampling",Mmsapt); // that's an alias for Mmsapt!
 #endif
 #ifdef HAVE_PROBINGPT
   MOSES_FNAME(ProbingPT);

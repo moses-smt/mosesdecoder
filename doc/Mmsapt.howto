@@ -24,7 +24,7 @@ How to use memory-mapped suffix array phrase tables in the moses decoder
    The best configuration of phrase table features is still under investigation. 
    For the time being, try this:
 
-   Mmsapt name=PT0 output-factor=0 num-features=9 base=/some/path/${CORPUS} L1=${L1} L2=${L2} pfwd=g pbwd=g smooth=0 sample=1000 workers=1 
+   PhraseDictionaryBitextSampling name=PT0 output-factor=0 num-features=9 path=/some/path/${CORPUS} L1=${L1} L2=${L2} pfwd=g pbwd=g smooth=0 sample=1000 workers=1 
 
    You can increase the number of workers for sampling (a bit faster), 
    but you'll lose replicability of the translation output. 
