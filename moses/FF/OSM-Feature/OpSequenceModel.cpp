@@ -19,6 +19,10 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
   ReadParameters();
 }
 
+OpSequenceModel::~OpSequenceModel() {
+  delete OSM;    
+}
+
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
 
