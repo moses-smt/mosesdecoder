@@ -49,6 +49,8 @@ public:
   static std::auto_ptr<ParseTree> ConvertTree(const MosesTraining::SyntaxNode &,
                                               const std::vector<std::string> &);
 
+  const std::vector<std::string>& GetWords() { return m_words; };
+
 private:
 
   std::set<std::string> &m_labelSet;

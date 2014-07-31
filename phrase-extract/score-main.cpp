@@ -46,6 +46,7 @@ LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
 bool pcfgFlag = false;
+bool phraseOrientationFlag = false;
 bool treeFragmentsFlag = false;
 bool sourceSyntaxLabelsFlag = false;
 bool sourceSyntaxLabelSetFlag = false;
@@ -69,6 +70,7 @@ bool nonTermContext = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
+bool phraseOrientationPriorsFlag = false;
 
 boost::unordered_map<std::string,float> sourceLHSCounts;
 boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > targetLHSAndSourceLHSJointCounts;
@@ -81,6 +83,9 @@ boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > rul
 std::set<std::string> targetPreferenceLabelSet;
 std::map<std::string,size_t> targetPreferenceLabels; 
 std::vector<std::string> targetPreferenceLabelsByIndex;
+
+std::vector<float> orientationClassPriorsL2R(4,0); // mono swap dright dleft
+std::vector<float> orientationClassPriorsR2L(4,0); // mono swap dright dleft
 
 Vocabulary vcbT;
 Vocabulary vcbS;
@@ -106,6 +111,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair, float, int, ostrea
 double computeLexicalTranslation( const PHRASE *phraseSource, const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
 double computeUnalignedPenalty( const ALIGNMENT *alignmentTargetToSource );
 set<std::string> functionWordList;
+void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors, std::vector<float> &orientationClassPriorsL2R, std::vector<float> &orientationClassPriorsR2L);
 void loadFunctionWords( const string &fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
 int calcCrossedNonTerm( const PHRASE *phraseTarget, const ALIGNMENT *alignmentTargetToSource );
@@ -136,6 +142,7 @@ int main(int argc, char* argv[])
   std::string fileNameTargetPreferenceLabelSet;
   std::string fileNameLeftHandSideTargetPreferenceLabelCounts;
   std::string fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts;
+  std::string fileNamePhraseOrientationPriors;
   std::vector<std::string> featureArgs; // all unknown args passed to feature manager
 
   for(int i=4; i<argc; i++) {
@@ -148,9 +155,12 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--PCFG") == 0) {
       pcfgFlag = true;
       std::cerr << "including PCFG scores" << std::endl;
+    } else if (strcmp(argv[i],"--PhraseOrientation") == 0) {
+      phraseOrientationFlag = true;
+      std::cerr << "including phrase orientation information" << std::endl;
     } else if (strcmp(argv[i],"--TreeFragments") == 0) {
       treeFragmentsFlag = true;
-      std::cerr << "including tree fragment information from syntactic parse\n";
+      std::cerr << "including tree fragment information from syntactic parse" << std::endl;
     } else if (strcmp(argv[i],"--SourceLabels") == 0) {
       sourceSyntaxLabelsFlag = true;
       std::cerr << "including source label information" << std::endl;
@@ -216,6 +226,14 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
       crossedNonTerm = true;
       std::cerr << "crossed non-term reordering feature" << std::endl;
+    } else if (strcmp(argv[i],"--PhraseOrientationPriors") == 0) {
+      phraseOrientationPriorsFlag = true;
+      if (i+1==argc) {
+          std::cerr << "ERROR: specify priors file for phrase orientation!" << std::endl;
+        exit(1);
+      }
+      fileNamePhraseOrientationPriors = argv[++i];
+      std::cerr << "smoothing phrase orientation with priors from " << fileNamePhraseOrientationPriors << std::endl;
     } else if (strcmp(argv[i],"--SpanLength") == 0) {
       spanLength = true;
       std::cerr << "span length feature" << std::endl;
@@ -252,6 +270,10 @@ int main(int argc, char* argv[])
   // compute count of counts for Good Turing discounting
   if (goodTuringFlag || kneserNeyFlag) {
     for(int i=1; i<=COC_MAX; i++) countOfCounts[i] = 0;
+  }
+
+  if (phraseOrientationPriorsFlag) {
+    loadOrientationPriors(fileNamePhraseOrientationPriors,orientationClassPriorsL2R,orientationClassPriorsR2L);
   }
 
   // sorted phrase extraction file
@@ -774,11 +796,6 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   if (kneserNeyFlag)
     phraseTableFile << " " << distinctCount;
 
-  if ((treeFragmentsFlag || sourceSyntaxLabelsFlag || targetPreferenceLabelsFlag) && 
-      !inverseFlag) {
-    phraseTableFile << " |||";
-  }
-
   phraseTableFile << " |||";
 
   // tree fragments
@@ -832,6 +849,13 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     }
   }
 
+  // phrase orientation
+  if (phraseOrientationFlag && !inverseFlag) {
+    phraseTableFile << " {{Orientation ";
+    phrasePair.CollectAllPhraseOrientations("Orientation",orientationClassPriorsL2R,orientationClassPriorsR2L,0.5,phraseTableFile);
+    phraseTableFile << "}}";
+  }
+
   if (spanLength && !inverseFlag) {
 	  string propValue = phrasePair.CollectAllPropertyValues("SpanLength");
 	  if (!propValue.empty()) {
@@ -847,6 +871,94 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   }
 
   phraseTableFile << std::endl;
+}
+
+
+
+void loadOrientationPriors(const std::string &fileNamePhraseOrientationPriors, 
+                           std::vector<float> &orientationClassPriorsL2R, 
+                           std::vector<float> &orientationClassPriorsR2L)
+{
+  assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dright dleft
+  
+  std::cerr << "Loading phrase orientation priors from " << fileNamePhraseOrientationPriors;
+  ifstream inFile;
+  inFile.open(fileNamePhraseOrientationPriors.c_str());
+  if (inFile.fail()) {
+    std::cerr << " - ERROR: could not open file" << std::endl;
+    exit(1);
+  }
+
+  std::string line;
+  size_t linesRead = 0;
+  float l2rSum = 0;
+  float r2lSum = 0;
+  while (getline(inFile, line)) {
+    istringstream tokenizer(line);
+    std::string key;
+    tokenizer >> key;
+
+    bool l2rFlag = false;
+    bool r2lFlag = false;
+    if (!key.substr(0,4).compare("L2R_")) {
+      l2rFlag = true;
+    }
+    if (!key.substr(0,4).compare("R2L_")) {
+      r2lFlag = true;
+    }
+    if (!l2rFlag && !r2lFlag) {
+       std::cerr << " - ERROR: malformed line in orientation priors file" << std::endl;
+    }
+    key.erase(0,4);
+
+    int orientationClassId = -1;
+    if (!key.compare("mono")) {
+      orientationClassId = 0;
+    }
+    if (!key.compare("swap")) {
+      orientationClassId = 1;
+    }
+    if (!key.compare("dright")) {
+      orientationClassId = 2;
+    }
+    if (!key.compare("dleft")) {
+      orientationClassId = 3;
+    }
+    if (orientationClassId == -1) {
+       std::cerr << " - ERROR: malformed line in orientation priors file" << std::endl;
+    }
+
+    float count;
+    tokenizer >> count;
+
+    if (l2rFlag) {
+      orientationClassPriorsL2R[orientationClassId] += count;
+      l2rSum += count;
+    }
+    if (r2lFlag) {
+      orientationClassPriorsR2L[orientationClassId] += count;
+      r2lSum += count;
+    }
+
+    ++linesRead;
+  }
+
+  // normalization: return prior probabilities, not counts
+  if (l2rSum != 0) {
+    for (std::vector<float>::iterator orientationClassPriorsL2RIt = orientationClassPriorsL2R.begin();
+         orientationClassPriorsL2RIt != orientationClassPriorsL2R.end(); ++orientationClassPriorsL2RIt) {
+      *orientationClassPriorsL2RIt /= l2rSum;
+    }
+  }
+  if (r2lSum != 0) {
+    for (std::vector<float>::iterator orientationClassPriorsR2LIt = orientationClassPriorsR2L.begin();
+         orientationClassPriorsR2LIt != orientationClassPriorsR2L.end(); ++orientationClassPriorsR2LIt) {
+      *orientationClassPriorsR2LIt /= r2lSum;
+    }
+  }
+
+  std::cerr << " - read " << linesRead << " lines from orientation priors file" << std::endl;
+  inFile.close();
 }
 
 

@@ -103,7 +103,7 @@
 		<link>
 			<name>extract-rules-main.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-1-ECLIPSE_HOME/github/mosesdecoder/phrase-extract/extract-rules-main.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-rules-main.cpp</locationURI>
 		</link>
 		<link>
 			<name>tables-core.cpp</name>

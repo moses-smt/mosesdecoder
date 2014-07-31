@@ -143,7 +143,7 @@ namespace Moses {
       uint32_t ofwd[po_other+1], obwd[po_other+1];
 
       // typedef typename boost::unordered_map<uint64_t, jstats> trg_map_t;
-      typedef typename std::map<uint64_t, jstats> trg_map_t;
+      typedef std::map<uint64_t, jstats> trg_map_t;
       trg_map_t trg;
       pstats();
       ~pstats();

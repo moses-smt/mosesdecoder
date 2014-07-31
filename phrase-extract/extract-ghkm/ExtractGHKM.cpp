@@ -27,6 +27,7 @@
 #include "OutputFileStream.h"
 #include "Options.h"
 #include "ParseTree.h"
+#include "PhraseOrientation.h"
 #include "ScfgRule.h"
 #include "ScfgRuleWriter.h"
 #include "Span.h"
@@ -66,11 +67,12 @@ int ExtractGHKM::Main(int argc, char *argv[])
   // Open output files.
   OutputFileStream fwdExtractStream;
   OutputFileStream invExtractStream;
-  std::ofstream glueGrammarStream;
-  std::ofstream targetUnknownWordStream;
-  std::ofstream sourceUnknownWordStream;
-  std::ofstream sourceLabelSetStream;
-  std::ofstream unknownWordSoftMatchesStream;
+  OutputFileStream glueGrammarStream;
+  OutputFileStream targetUnknownWordStream;
+  OutputFileStream sourceUnknownWordStream;
+  OutputFileStream sourceLabelSetStream;
+  OutputFileStream unknownWordSoftMatchesStream;
+
   std::string fwdFileName = options.extractFile;
   std::string invFileName = options.extractFile + std::string(".inv");
   if (options.gzOutput) {
@@ -79,6 +81,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   }
   OpenOutputFileOrDie(fwdFileName, fwdExtractStream);
   OpenOutputFileOrDie(invFileName, invExtractStream);
+
   if (!options.glueGrammarFile.empty()) {
     OpenOutputFileOrDie(options.glueGrammarFile, glueGrammarStream);
   }
@@ -118,7 +121,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string sourceLine;
   std::string alignmentLine;
   Alignment alignment;
-  XmlTreeParser xmlTreeParser(targetLabelSet, targetTopLabelSet);
+  XmlTreeParser targetXmlTreeParser(targetLabelSet, targetTopLabelSet);
 //  XmlTreeParser sourceXmlTreeParser(sourceLabelSet, sourceTopLabelSet);
   ScfgRuleWriter writer(fwdExtractStream, invExtractStream, options);
   size_t lineNum = options.sentenceOffset;
@@ -144,7 +147,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     }
     std::auto_ptr<ParseTree> targetParseTree;
     try {
-      targetParseTree = xmlTreeParser.Parse(targetLine);
+      targetParseTree = targetXmlTreeParser.Parse(targetLine);
       assert(targetParseTree.get());
     } catch (const Exception &e) {
       std::ostringstream oss;
@@ -181,7 +184,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     // Read source tokens.
     std::vector<std::string> sourceTokens(ReadTokens(sourceLine));
 
-    // Construct a source ParseTree object object from the SyntaxTree object.
+    // Construct a source ParseTree object from the SyntaxTree object.
     std::auto_ptr<ParseTree> sourceParseTree;
 
     if (options.sourceLabels) {
@@ -235,11 +238,26 @@ int ExtractGHKM::Main(int argc, char *argv[])
       graph.ExtractComposedRules(options);
     }
 
+    // Initialize phrase orientation scoring object
+    PhraseOrientation phraseOrientation( sourceTokens, targetXmlTreeParser.GetWords(), alignment);
+
     // Write the rules, subject to scope pruning.
     const std::vector<Node *> &targetNodes = graph.GetTargetNodes();
     for (std::vector<Node *>::const_iterator p = targetNodes.begin();
          p != targetNodes.end(); ++p) {
+
       const std::vector<const Subgraph *> &rules = (*p)->GetRules();
+
+      REO_POS l2rOrientation, r2lOrientation;
+      if (options.phraseOrientation && !rules.empty()) {
+        int sourceSpanBegin = *((*p)->GetSpan().begin());
+        int sourceSpanEnd   = *((*p)->GetSpan().rbegin());
+        l2rOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,L2R);
+        r2lOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,R2L);
+        // std::cerr << "span " << sourceSpanBegin << " " << sourceSpanEnd << std::endl;
+        // std::cerr << "phraseOrientation " << phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd) << std::endl;
+      }
+
       for (std::vector<const Subgraph *>::const_iterator q = rules.begin();
            q != rules.end(); ++q) {
         ScfgRule *r = 0;
@@ -251,14 +269,32 @@ int ExtractGHKM::Main(int argc, char *argv[])
         // TODO Can scope pruning be done earlier?
         if (r->Scope() <= options.maxScope) {
           if (!options.treeFragments) {
-            writer.Write(*r);
+            writer.Write(*r,false);
           } else {
-            writer.Write(*r,**q);
+            writer.Write(*r,**q,false);
           }
+          if (options.phraseOrientation) {
+            fwdExtractStream << " {{Orientation ";
+            phraseOrientation.WriteOrientation(fwdExtractStream,l2rOrientation);
+            fwdExtractStream << " ";
+            phraseOrientation.WriteOrientation(fwdExtractStream,r2lOrientation);
+            fwdExtractStream << "}}";
+            phraseOrientation.IncrementPriorCount(L2R,l2rOrientation,1);
+            phraseOrientation.IncrementPriorCount(R2L,r2lOrientation,1);
+          }
+          fwdExtractStream << std::endl;
+          invExtractStream << std::endl;
         }
         delete r;
       }
     }
+  }
+
+  if (options.phraseOrientation) {
+    std::string phraseOrientationPriorsFileName = options.extractFile + std::string(".phraseOrientationPriors");
+    OutputFileStream phraseOrientationPriorsStream;
+    OpenOutputFileOrDie(phraseOrientationPriorsFileName, phraseOrientationPriorsStream);
+    PhraseOrientation::WritePriorCounts(phraseOrientationPriorsStream);
   }
 
   std::map<std::string,size_t> sourceLabels;
@@ -398,6 +434,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "extract minimal rules only")
   ("PCFG",
    "include score based on PCFG scores in target corpus")
+  ("PhraseOrientation",
+   "output phrase orientation information")
   ("TreeFragments",
    "output parse tree information")
   ("SourceLabels",
@@ -501,6 +539,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   }
   if (vm.count("PCFG")) {
     options.pcfg = true;
+  }
+  if (vm.count("PhraseOrientation")) {
+    options.phraseOrientation = true;
   }
   if (vm.count("TreeFragments")) {
     options.treeFragments = true;
@@ -736,8 +777,7 @@ void ExtractGHKM::WriteUnknownWordSoftMatches(
   const std::set<std::string> &labelSet,
   std::ostream &out)
 {
-  std::set<std::string>::const_iterator p = labelSet.begin();
-  for (p; p != labelSet.end(); ++p) {
+  for (std::set<std::string>::const_iterator p = labelSet.begin(); p != labelSet.end(); ++p) {
       std::string label = *p;
       out << "UNK " << label << std::endl;
   }
