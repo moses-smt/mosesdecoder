@@ -6,8 +6,7 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/Manager.h"
 #include "moses/FF/OSM-Feature/osmHyp.h"
-#include "lm/model.hh"
-
+#include "KenOSM.h"
 
 namespace Moses
 {
@@ -16,15 +15,13 @@ class OpSequenceModel : public StatefulFeatureFunction
 {
 public:
 
-
-  lm::ngram::Model * OSM;
+  OSMLM* OSM;
   float unkOpProb;
   int sFactor;	// Source Factor ...
   int tFactor;	// Target Factor ...
   int numFeatures;   // Number of features used ...
 
   OpSequenceModel(const std::string &line);
-  ~OpSequenceModel();
 
   void readLanguageModel(const char *);
   void Load();
