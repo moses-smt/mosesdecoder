@@ -40,6 +40,7 @@ public:
     , maxScope(3)
     , minimal(false)
     , pcfg(false)
+    , phraseOrientation(false)
     , treeFragments(false)
     , sourceLabels(false)
     , sentenceOffset(0)
@@ -64,6 +65,7 @@ public:
   int maxScope;
   bool minimal;
   bool pcfg;
+  bool phraseOrientation;
   bool treeFragments;
   bool sourceLabels;
   std::string sourceLabelSetFile;

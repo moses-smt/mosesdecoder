@@ -18,6 +18,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <limits>
 
 #include "SentenceAlignment.h"
 #include "tables-core.h"
@@ -363,8 +364,6 @@ void ExtractTask::extract(SentenceAlignment &sentence)
   HSentenceVertices outBottomLeft;
   HSentenceVertices outBottomRight;
 
-  HSentenceVertices::const_iterator it;
-
   bool relaxLimit = m_options.isHierModel();
   bool buildExtraStructure = m_options.isPhraseModel() || m_options.isHierModel();
 
@@ -375,7 +374,7 @@ void ExtractTask::extract(SentenceAlignment &sentence)
         (endE<countE && (relaxLimit || endE<startE+m_options.maxPhraseLength));
         endE++) {
 
-      int minF = 9999;
+      int minF = std::numeric_limits<int>::max();
       int maxF = -1;
       vector< int > usedF = sentence.alignedCountS;
       for(int ei=startE; ei<=endE; ei++) {

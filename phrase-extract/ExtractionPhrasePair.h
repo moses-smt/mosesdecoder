@@ -131,6 +131,12 @@ public:
                                                 boost::unordered_map<std::string, boost::unordered_map<std::string,float>* >& sourceRHSAndLHSJointCounts, 
                                                 Vocabulary &vcbT) const;
 
+  void CollectAllPhraseOrientations(const std::string &key, 
+                                    const std::vector<float> &orientationClassPriorsL2R, 
+                                    const std::vector<float> &orientationClassPriorsR2L, 
+                                    double smoothingFactor, 
+                                    std::ostream &out) const;
+
   void AddProperties( const std::string &str, float count );
 
   void AddProperty( const std::string &key, const std::string &value, float count ) 
