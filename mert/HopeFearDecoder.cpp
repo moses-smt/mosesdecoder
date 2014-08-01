@@ -17,6 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <algorithm>
 #include <cmath>
 #include <iterator>
 
@@ -172,12 +173,21 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
   static const string kWeights = "weights";
   fs::directory_iterator dend;
   size_t fileCount = 0;
-  cerr << "Reading hypergraphs" << endl;
+  vector<fs::path> hypergraphFiles;
   for (fs::directory_iterator di(hypergraphDir); di != dend; ++di) {
     if (di->path().filename() == kWeights) continue;
+    hypergraphFiles.push_back(di->path());
+  }
+
+  if (!no_shuffle) {
+    random_shuffle(hypergraphFiles.begin(), hypergraphFiles.end());
+  }
+  
+  cerr << "Reading " << hypergraphFiles.size() << " hypergraphs" << endl;
+  for (vector<fs::path>::const_iterator di = hypergraphFiles.begin(); di != hypergraphFiles.end(); ++di) {
     Graph graph(vocab_);
-    size_t id = boost::lexical_cast<size_t>(di->path().stem().string());
-    util::scoped_fd fd(util::OpenReadOrThrow(di->path().string().c_str()));
+    size_t id = boost::lexical_cast<size_t>(di->stem().string());
+    util::scoped_fd fd(util::OpenReadOrThrow(di->string().c_str()));
     //util::FilePiece file(di->path().string().c_str());
     util::FilePiece file(fd.release()); 
     ReadGraph(file,graph);
