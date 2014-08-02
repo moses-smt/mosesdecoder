@@ -152,7 +152,7 @@ public:
   size_t loadVector(std::vector<ValueT, std::allocator<ValueT> >& v,
                     std::FILE* in, bool map = false) {
     // Can only be read into memory. Mapping not possible with std:allocator.
-    assert(map == false);
+    //assert(map == false);
 
     size_t byteSize = 0;
 
