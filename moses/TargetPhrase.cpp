@@ -46,6 +46,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_decodeGraphId(NOT_FOUND)
 {
 
   //ACAT
@@ -63,6 +64,7 @@ TargetPhrase::TargetPhrase()
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_decodeGraphId(NOT_FOUND)
 {
 }
 
@@ -74,6 +76,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_decodeGraphId(NOT_FOUND)
 {
 }
 
@@ -84,6 +87,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
+  , m_decodeGraphId(copy.m_decodeGraphId)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(*copy.m_lhsTarget);
