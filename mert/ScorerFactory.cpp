@@ -12,6 +12,7 @@
 #include "PermutationScorer.h"
 #include "MeteorScorer.h"
 #include "Reference.h"
+#include "WipoBleuScorer.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ vector<string> ScorerFactory::getTypes()
   types.push_back(string("SEMPOS"));
   types.push_back(string("LRSCORE"));
   types.push_back(string("METEOR"));
+  types.push_back(string("WIPOBLEU"));
   return types;
 }
 
@@ -56,6 +58,8 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config)
     return (PermutationScorer*) new PermutationScorer(type, config);
   } else if (type == "METEOR") {
     return new MeteorScorer(config);
+  } else if (type == "WIPOBLEU") {
+    return new WipoBleuScorer(config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);
