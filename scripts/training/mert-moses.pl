@@ -1097,8 +1097,9 @@ if($___RETURN_BEST_DEV) {
   my $bestit=1;
   my $bestbleu=0;
   my $evalout = "eval.out";
+  
   for (my $i = 1; $i < $run; $i++) {
-    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " -s BLEU --candidate run$i.out";
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " $mertargs --candidate run$i.out";
     $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
     safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
