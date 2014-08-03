@@ -231,7 +231,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
     // modify the starting bitmap
   }
 
-  TargetPhrase targetPhrase;
+  TargetPhrase targetPhrase(NULL);
 
   if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
     // add to dictionary

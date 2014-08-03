@@ -222,7 +222,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Word *targetLHS;
 
     // create target phrase obj
-    TargetPhrase *targetPhrase = new TargetPhrase();
+    TargetPhrase *targetPhrase = new TargetPhrase(&ruleTable);
     // targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
     targetPhrase->CreateFromString(Output, output, targetPhraseString, &targetLHS);
     // source

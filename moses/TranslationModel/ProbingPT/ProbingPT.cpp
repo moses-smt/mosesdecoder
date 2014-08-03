@@ -153,7 +153,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
   const std::vector<unsigned int> &probingPhrase = probingTargetPhrase.target_phrase;
   size_t size = probingPhrase.size();
 
-  TargetPhrase *tp = new TargetPhrase();
+  TargetPhrase *tp = new TargetPhrase(this);
 
   // words
   for (size_t i = 0; i < size; ++i) {

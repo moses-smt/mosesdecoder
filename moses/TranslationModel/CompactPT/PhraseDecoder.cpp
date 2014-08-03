@@ -418,7 +418,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       }
 
       if(eval) {
-        targetPhrase->Evaluate(sourcePhrase);
+        targetPhrase->Evaluate(sourcePhrase, m_phraseDictionary.GetFeaturesToApply());
       }
 
       if(m_coding == PREnc) {

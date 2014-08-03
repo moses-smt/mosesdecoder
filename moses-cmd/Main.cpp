@@ -758,6 +758,9 @@ int main(int argc, char** argv)
       IFVERBOSE(1) {
         ResetUserTime();
       }
+
+      FeatureFunction::CallChangeSource(source);
+
       // set up task of translating one sentence
       TranslationTask* task =
         new TranslationTask(lineCount,source, outputCollector.get(),
