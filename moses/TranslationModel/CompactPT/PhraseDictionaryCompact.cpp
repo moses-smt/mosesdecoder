@@ -57,6 +57,8 @@ void PhraseDictionaryCompact::Load()
 {
   const StaticData &staticData = StaticData::Instance();
 
+  SetFeaturesToApply();
+
   m_weight = staticData.GetWeights(this);
 
   std::string tFilePath = m_filePath;
