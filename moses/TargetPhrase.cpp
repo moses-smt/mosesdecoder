@@ -50,7 +50,7 @@ TargetPhrase::TargetPhrase()
 {
 }
 
-TargetPhrase::TargetPhrase(const Phrase &phrase)
+TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
   : Phrase(phrase)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -58,7 +58,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_container(NULL)
+  , m_container(pt)
 {
 }
 

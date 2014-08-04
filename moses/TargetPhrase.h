@@ -67,7 +67,7 @@ private:
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);
-  explicit TargetPhrase(const Phrase &targetPhrase);
+  explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
   ~TargetPhrase();
 
   // 1st evaluate method. Called during loading of phrase table.
