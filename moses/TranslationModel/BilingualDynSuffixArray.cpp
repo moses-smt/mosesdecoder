@@ -379,7 +379,7 @@ TargetPhrase*
 BilingualDynSuffixArray::
 GetMosesFactorIDs(const SAPhrase& phrase, const Phrase& sourcePhrase) const
 {
-  TargetPhrase* targetPhrase = new TargetPhrase();
+  TargetPhrase* targetPhrase = new TargetPhrase(NULL);
   for(size_t i=0; i < phrase.words.size(); ++i) { // look up trg words
     Word& word = m_trgVocab->GetWord( phrase.words[i]);
     UTIL_THROW_IF2(word == m_trgVocab->GetkOOVWord(),

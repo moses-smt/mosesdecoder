@@ -79,8 +79,18 @@
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.511477442" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1783697903" name="/" resourcePath="TranslationModel/UG">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.592606983" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1088985490" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1976472988"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1662972728" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1970700220" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.2126314903"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1604609677" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1168585173"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1002997408" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.2074660557"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1785961519" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.933467113"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="TranslationModel/UG|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

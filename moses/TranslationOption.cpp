@@ -32,7 +32,7 @@ namespace Moses
 {
 
 TranslationOption::TranslationOption()
-  :m_targetPhrase()
+  :m_targetPhrase(NULL)
   ,m_inputPath(NULL)
   ,m_sourceWordsRange(NOT_FOUND, NOT_FOUND)
 {

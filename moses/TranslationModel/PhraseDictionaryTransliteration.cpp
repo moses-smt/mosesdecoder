@@ -124,7 +124,7 @@ std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(
 		Tokenize(toks, line, "\t");
 		UTIL_THROW_IF2(toks.size() != 2, "Error in transliteration output file. Expecting word\tscore");
 
-	  TargetPhrase *tp = new TargetPhrase();
+	  TargetPhrase *tp = new TargetPhrase(this);
 	  Word &word = tp->AddWord();
 	  word.CreateFromString(Output, m_output, toks[0], false);
 

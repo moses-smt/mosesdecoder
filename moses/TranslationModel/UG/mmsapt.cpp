@@ -466,7 +466,7 @@ namespace Moses
  	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
 	  (*ff)(*dynbt, pool, &fvals);
       }
-    TargetPhrase* tp = new TargetPhrase();
+    TargetPhrase* tp = new TargetPhrase(this);
     Token const* x = fix ? fix->start2 : dyn->start2;
     uint32_t len = fix ? fix->len2 : dyn->len2;
     for (uint32_t k = 0; k < len; ++k, x = x->next())

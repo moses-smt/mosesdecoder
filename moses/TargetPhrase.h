@@ -65,7 +65,7 @@ private:
   const PhraseDictionary *m_container;
 
 public:
-  TargetPhrase();
+  TargetPhrase(const PhraseDictionary *pt);
   TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
   ~TargetPhrase();

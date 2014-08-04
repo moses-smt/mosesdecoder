@@ -112,7 +112,7 @@ PDTAimp::GetTargetPhraseCollection(Phrase const &src) const {
 
   // convert into TargetPhrases
   for(size_t i=0; i<cands.size(); ++i) {
-    TargetPhrase targetPhrase;
+    TargetPhrase targetPhrase(m_obj);
 
     StringTgtCand::Tokens const& factorStrings=cands[i].tokens;
     Scores const& probVector=cands[i].scores;
@@ -369,7 +369,7 @@ void PDTAimp::CacheSource(ConfusionNet const& src) {
 
     for(E2Costs::const_iterator j=i->second.begin(); j!=i->second.end(); ++j) {
       TScores const & scores=j->second;
-      TargetPhrase targetPhrase;
+      TargetPhrase targetPhrase(m_obj);
       CreateTargetPhrase(targetPhrase
                          , j ->first
                          , scores.transScore

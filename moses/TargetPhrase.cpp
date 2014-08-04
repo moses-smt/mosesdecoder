@@ -38,7 +38,7 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase()
+TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
   :Phrase()
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -46,7 +46,7 @@ TargetPhrase::TargetPhrase()
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_container(NULL)
+  , m_container(pt)
 {
 }
 
