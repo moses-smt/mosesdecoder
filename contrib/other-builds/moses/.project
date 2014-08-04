@@ -537,6 +537,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PCNTools.h</locationURI>
 		</link>
 		<link>
+			<name>PDTAimp.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PDTAimp.cpp</locationURI>
+		</link>
+		<link>
 			<name>PDTAimp.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PDTAimp.h</locationURI>
