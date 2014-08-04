@@ -19,6 +19,7 @@
 
 #include "PhraseOrientation.h"
 
+#include <sstream>
 #include <iostream>
 #include <limits>
 
