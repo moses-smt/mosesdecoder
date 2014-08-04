@@ -89,14 +89,14 @@ print "Converting Bilingual Sentence Pair into Operation Corpus\n";
 
 print "Learning Operation Sequence Translation Model\n";
 if (defined($LMPLZ)) {
-  `$LMPLZ --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --arpa $OUT_DIR/$factor_val/operationLM --prune 0 0 1`;
+  `$LMPLZ --order $ORDER --text $OUT_DIR/$factor_val/opCorpus --prune 0 0 1 | gzip > $OUT_DIR/$factor_val/operationLM.gz`;
 }
 else {
-  `$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm $OUT_DIR/$factor_val/operationLM`;
+  `$SRILM_DIR/ngram-count -kndiscount -order $ORDER -unk -text $OUT_DIR/$factor_val/opCorpus -lm /dev/stdout | gzip > $OUT_DIR/$factor_val/operationLM.gz`;
 }
 
 print "Binarizing\n";
-`$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM $OUT_DIR/$factor_val/operationLM.bin`;
+`$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/$factor_val/operationLM.gz $OUT_DIR/$factor_val/operationLM.bin`;
 
 
 }
