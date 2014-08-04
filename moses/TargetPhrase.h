@@ -66,7 +66,7 @@ private:
 
 public:
   TargetPhrase();
-  TargetPhrase(const TargetPhrase &copy);
+  TargetPhrase(const TargetPhrase &copy, const PhraseDictionary &pt);
   explicit TargetPhrase(const Phrase &targetPhrase);
   ~TargetPhrase();
 
