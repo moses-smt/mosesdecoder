@@ -273,8 +273,8 @@ namespace Moses
     while(getline(in2,line)) text2.push_back(line);
     while(getline(ina,line)) symal.push_back(line);
 
-    boost::scoped_ptr<lock_guard<mutex> > guard;
-    if (locking) guard.reset(new lock_guard<mutex>(this->lock));
+    boost::scoped_ptr<boost::lock_guard<boost::mutex> > guard;
+    if (locking) guard.reset(new boost::lock_guard<boost::mutex>(this->lock));
     btdyn = btdyn->add(text1,text2,symal);
     assert(btdyn);
     // cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
@@ -344,7 +344,7 @@ namespace Moses
   Mmsapt::
   Load()
   {
-    lock_guard<mutex> guard(this->lock);
+    boost::lock_guard<boost::mutex> guard(this->lock);
 
     // can load only once
     // UTIL_THROW_IF2(shards.size(),"Mmsapt is already loaded at " << HERE);
