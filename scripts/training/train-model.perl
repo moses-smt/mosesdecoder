@@ -196,6 +196,7 @@ chop($_SCORE_OPTIONS) if $_SCORE_OPTIONS;
 my $_EXTRACT_OPTIONS; # allow multiple switches
 foreach (@_EXTRACT_OPTIONS) { $_EXTRACT_OPTIONS .= $_." "; }
 chop($_EXTRACT_OPTIONS) if $_EXTRACT_OPTIONS;
+
 my $_ADDITIONAL_INI; # allow multiple switches
 foreach (@_ADDITIONAL_INI) { $_ADDITIONAL_INI .= $_." "; }
 chop($_ADDITIONAL_INI) if $_ADDITIONAL_INI;
@@ -1524,7 +1525,7 @@ sub score_phrase_phrase_extract {
 
     # distinguish between score and consolidation options
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
-    my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
+    my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS =~ /PhraseCount/);
     my $LOW_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/);
     my ($SPARSE_COUNT_BIN,$COUNT_BIN,$DOMAIN) = ("","","");
     $SPARSE_COUNT_BIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SparseCountBinFeature ([\s\d]*\d)/;
@@ -1653,7 +1654,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
     $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
-    $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
+    $cmd .= " --PhraseCount" if $PHRASE_COUNT;
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
     $cmd .= " --CountBinFeature $COUNT_BIN" if $COUNT_BIN;
     $cmd .= " --SparseCountBinFeature $SPARSE_COUNT_BIN" if $SPARSE_COUNT_BIN;
