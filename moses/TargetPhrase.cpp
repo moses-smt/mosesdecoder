@@ -38,24 +38,6 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase( std::string out_string)
-  :Phrase(0)
-  , m_fullScore(0.0)
-  , m_futureScore(0.0)
-  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-  , m_lhsTarget(NULL)
-  , m_ruleSource(NULL)
-  , m_decodeGraphId(NOT_FOUND)
-{
-
-  //ACAT
-  const StaticData &staticData = StaticData::Instance();
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, 
-		   // staticData.GetFactorDelimiter(), // eliminated [UG]
-		   NULL);
-}
-
 TargetPhrase::TargetPhrase()
   :Phrase()
   , m_fullScore(0.0)
@@ -64,7 +46,7 @@ TargetPhrase::TargetPhrase()
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_decodeGraphId(NOT_FOUND)
+  , m_container(NULL)
 {
 }
 
@@ -76,7 +58,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
-  , m_decodeGraphId(NOT_FOUND)
+  , m_container(NULL)
 {
 }
 
@@ -87,7 +69,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
-  , m_decodeGraphId(copy.m_decodeGraphId)
+  , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(*copy.m_lhsTarget);

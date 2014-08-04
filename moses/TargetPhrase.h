@@ -41,6 +41,8 @@ namespace Moses
 {
 class FeatureFunction;
 class InputPath;
+class InputPath;
+class PhraseDictionary;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
@@ -60,12 +62,11 @@ private:
   typedef std::map<std::string, boost::shared_ptr<PhraseProperty> > Properties;
   Properties m_properties;
 
-  size_t m_decodeGraphId;
+  const PhraseDictionary *m_container;
 
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);
-  explicit TargetPhrase(std::string out_string);
   explicit TargetPhrase(const Phrase &targetPhrase);
   ~TargetPhrase();
 
