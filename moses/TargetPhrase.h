@@ -60,6 +60,8 @@ private:
   typedef std::map<std::string, boost::shared_ptr<PhraseProperty> > Properties;
   Properties m_properties;
 
+  size_t m_decodeGraphId;
+
 public:
   TargetPhrase();
   TargetPhrase(const TargetPhrase &copy);

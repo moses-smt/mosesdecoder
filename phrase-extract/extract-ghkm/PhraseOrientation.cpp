@@ -21,6 +21,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <sstream>
 #include <limits>
 
 #include <boost/assign/list_of.hpp>

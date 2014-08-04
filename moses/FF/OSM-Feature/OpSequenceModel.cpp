@@ -19,19 +19,18 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
   ReadParameters();
 }
 
-OpSequenceModel::~OpSequenceModel()
-{
-	delete OSM;
+OpSequenceModel::~OpSequenceModel() {
+  delete OSM;    
 }
 
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
-
   string unkOp = "_TRANS_SLF_";
-  OSM = new Model(m_lmPath.c_str());
+  OSM = ConstructOSMLM(m_lmPath);
+  
   State startState = OSM->NullContextState();
   State endState;
-  unkOpProb = OSM->Score(startState,OSM->GetVocabulary().Index(unkOp),endState);
+  unkOpProb = OSM->Score(startState,unkOp,endState);
 }
 
 

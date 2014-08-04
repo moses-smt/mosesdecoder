@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/DecodeStep.h"
 #include "moses/DecodeGraph.h"
 #include "moses/InputPath.h"
 #include "util/exception.hh"
@@ -273,6 +274,14 @@ bool PhraseDictionary::SatisfyBackoff(const InputPath &inputPath) const
   }
 
   return true;
+}
+
+size_t PhraseDictionary::GetDecodeGraphId() const
+{
+	assert(m_container);
+	const DecodeGraph *graph = m_container->GetContainer();
+	assert(graph);
+	return graph->GetId();
 }
 
 } // namespace

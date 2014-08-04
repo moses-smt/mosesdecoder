@@ -301,6 +301,9 @@ int main(int argc, char* argv[])
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
       IFVERBOSE(1)
       ResetUserTime();
+
+      FeatureFunction::CallChangeSource(source);
+
       TranslationTask *task = new TranslationTask(source, *ioWrapper);
       source = NULL;  // task will delete source
 #ifdef WITH_THREADS

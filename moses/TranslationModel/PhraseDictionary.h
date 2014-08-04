@@ -152,6 +152,8 @@ protected:
 
   bool SatisfyBackoff(const InputPath &inputPath) const;
 
+  virtual size_t GetDecodeGraphId() const;
+
   // cache
   size_t m_maxCacheSize; // 0 = no caching
 
