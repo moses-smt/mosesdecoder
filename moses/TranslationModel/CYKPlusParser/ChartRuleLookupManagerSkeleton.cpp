@@ -77,7 +77,7 @@ TargetPhrase *ChartRuleLookupManagerSkeleton::CreateTargetPhrase(const Word &sou
   string str = sourceWord.GetFactor(0)->GetString().as_string();
   str = "ChartManagerSkeleton:" + str;
 
-  TargetPhrase *tp = new TargetPhrase();
+  TargetPhrase *tp = new TargetPhrase(&m_skeletonPT);
   Word &word = tp->AddWord();
   word.CreateFromString(Output, m_skeletonPT.GetOutput(), str, false);
 

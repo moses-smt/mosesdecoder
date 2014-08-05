@@ -85,7 +85,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       // add to dictionary
-      TargetPhrase *targetPhrase = new TargetPhrase();
+      TargetPhrase *targetPhrase = new TargetPhrase(NULL);
       Word &targetWord = targetPhrase->AddWord();
       targetWord.CreateUnknownWord(sourceWord);
 
@@ -108,7 +108,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
     // drop source word. create blank trans opt
     float unknownScore = FloorScore(-numeric_limits<float>::infinity());
 
-    TargetPhrase *targetPhrase = new TargetPhrase();
+    TargetPhrase *targetPhrase = new TargetPhrase(NULL);
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
     UnknownLHSList::const_iterator iterLHS;

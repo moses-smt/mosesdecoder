@@ -85,14 +85,13 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   , m_wordDeleted(false)
   , m_totalScore(0.0f)
   , m_futureScore(0.0f)
-  , m_scoreBreakdown(prevHypo.GetScoreBreakdown())
   , m_ffStates(prevHypo.m_ffStates.size())
   , m_arcList(NULL)
   , m_transOpt(transOpt)
   , m_manager(prevHypo.GetManager())
   , m_id(m_manager.GetNextHypoId())
 {
-  m_scoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
+  m_currScoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
 
   // assert that we are not extending our hypothesis by retranslating something
   // that this hypothesis has already translated!
@@ -214,7 +213,7 @@ void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
     m_ffStates[state_idx] = sfff.EvaluateWhenApplied(
                               *this,
                               m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-                              &m_scoreBreakdown);
+                              &m_currScoreBreakdown);
   }
 }
 
@@ -222,7 +221,7 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( slff )) {
-    slff.EvaluateWhenApplied(*this, &m_scoreBreakdown);
+    slff.EvaluateWhenApplied(*this, &m_currScoreBreakdown);
   }
 }
 
@@ -256,7 +255,7 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
     if (! staticData.IsFeatureFunctionIgnored(ff)) {
       m_ffStates[i] = ff.EvaluateWhenApplied(*this,
                                   m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                                  &m_scoreBreakdown);
+                                  &m_currScoreBreakdown);
     }
   }
 
@@ -269,7 +268,8 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
   m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
   // TOTAL
-  m_totalScore = m_scoreBreakdown.GetWeightedScore() + m_futureScore;
+  m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
+  if (m_prevHypo) m_totalScore += m_prevHypo->GetScore();
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StopTimeEstimateScore();
@@ -315,7 +315,7 @@ void Hypothesis::PrintHypothesis() const
   //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
   //	TRACE_ERR( "\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
   TRACE_ERR( "\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
-  TRACE_ERR(  "\tunweighted feature scores: " << m_scoreBreakdown << endl);
+  TRACE_ERR(  "\tunweighted feature scores: " << m_currScoreBreakdown << endl);
   //PrintLMScores();
 }
 

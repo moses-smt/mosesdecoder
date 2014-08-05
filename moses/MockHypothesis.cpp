@@ -62,7 +62,7 @@ MockHypothesisGuard::MockHypothesisGuard(
   for (; ti != targetSegments.end() && ai != alignments.end(); ++ti,++ai) {
     Hypothesis* prevHypo = m_hypothesis;
     WordsRange wordsRange(ai->first,ai->second);
-    m_targetPhrases.push_back(TargetPhrase());
+    m_targetPhrases.push_back(TargetPhrase(NULL));
     // m_targetPhrases.back().CreateFromString(Input, factors, *ti, "|", NULL);
     m_targetPhrases.back().CreateFromString(Input, factors, *ti, NULL);
     m_toptions.push_back(new TranslationOption
