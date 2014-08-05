@@ -944,6 +944,7 @@ namespace Moses
     // assert(0);
   }
 
+#if defined(timespec)
   bool operator<(timespec const& a, timespec const& b)
   {
     if (a.tv_sec != b.tv_sec) return a.tv_sec < b.tv_sec;
@@ -954,6 +955,19 @@ namespace Moses
   {
     if (a.tv_sec != b.tv_sec) return a.tv_sec > b.tv_sec;
     return (a.tv_nsec >= b.tv_nsec);
+  }
+#endif 
+
+  bool operator<(timeval const& a, timeval const& b)
+  {
+    if (a.tv_sec != b.tv_sec) return a.tv_sec < b.tv_sec;
+    return (a.tv_usec < b.tv_usec);
+  }
+
+  bool operator>=(timeval const& a, timeval const& b)
+  {
+    if (a.tv_sec != b.tv_sec) return a.tv_sec > b.tv_sec;
+    return (a.tv_usec >= b.tv_usec);
   }
 
   void 
@@ -985,12 +999,10 @@ namespace Moses
   decache(TargetPhraseCollectionWrapper* ptr) const
   {
     if (ptr->refCount || ptr->idx >= 0) return;
-    
-    timespec t; clock_gettime(CLOCK_MONOTONIC,&t);
-    timespec r; clock_getres(CLOCK_MONOTONIC,&r);
-
     // if (t.tv_nsec < v[0]->tstamp.tv_nsec)
 #if 0
+    timespec t; clock_gettime(CLOCK_MONOTONIC,&t);
+    timespec r; clock_getres(CLOCK_MONOTONIC,&r);
     float delta = t.tv_sec - ptr->tstamp.tv_sec;
     cerr << "deleting old cache entry after "
 	 << delta << " seconds."
@@ -1015,8 +1027,11 @@ namespace Moses
     if (!ptr) return NULL;
     ++ptr->refCount;
     ++m_tpc_ctr;
+#if defined(timespec)
     clock_gettime(CLOCK_MONOTONIC, &ptr->tstamp);
-    
+#else
+    gettimeofday(&ptr->tstamp, NULL);
+#endif
     // update history
     if (m_history.capacity() > 1)
       {

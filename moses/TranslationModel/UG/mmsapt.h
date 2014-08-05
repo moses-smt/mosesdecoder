@@ -27,6 +27,7 @@
 #include "moses/TargetPhrase.h"
 #include <boost/dynamic_bitset.hpp>
 #include "moses/TargetPhraseCollection.h"
+#include "util/usage.hh"
 #include <map>
 
 #include "moses/TranslationModel/PhraseDictionary.h"
@@ -57,7 +58,6 @@ namespace Moses
     typedef Bitext<Token>     bitext;
     typedef TSA<Token>           tsa;
     typedef PhraseScorer<Token> pscorer;
-
   private:
     // vector<sptr<bitext> > shards;
     mmbitext btfix; 
@@ -135,7 +135,11 @@ namespace Moses
       size_t   const revision; // time stamp from dynamic bitext
       uint64_t const      key; // phrase key
       uint32_t       refCount; // reference count
+#if defined(timespec)
       timespec         tstamp; // last use
+#else
+      timeval          tstamp; // last use
+#endif
       int                 idx; // position in history heap
       TargetPhraseCollectionWrapper(size_t r, uint64_t const k);
       ~TargetPhraseCollectionWrapper();
