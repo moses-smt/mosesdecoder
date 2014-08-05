@@ -222,6 +222,7 @@ namespace Moses
     known_parameters.push_back("L1");
     known_parameters.push_back("L2");
     known_parameters.push_back("Mmsapt");
+    known_parameters.push_back("PhraseDictionaryBitextSampling"); // alias for Mmsapt
     known_parameters.push_back("base"); // alias for path
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
