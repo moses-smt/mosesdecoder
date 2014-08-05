@@ -3,11 +3,14 @@
 # Written by Michael Denkowski
 
 # This script parallelizes decoding with simulated post-editing via moses XML
-# input.  Memory mapped dynamic phrase tables (Ulrich Germann, doc/Mmsapt.howto)
-# and language models (Kenneth Heafield, lm) allow separate moses processes to
-# share resources, facilitating memory efficient parallel decoding.  Input is
-# divided into batches, each of which is decoded sequentially.  Each batch pre
-# loads the data from previous batches.
+# input (XML entities need to be escaped in tokenization).  Memory mapped
+# dynamic phrase tables (Ulrich Germann,
+# www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc40) and language models
+# (Kenneth Heafield,
+# http://www.statmt.org/moses/?n=FactoredTraining.BuildingLanguageModel#ntoc19)
+# facilitate memory efficient multi process decoding.  Input is divided into
+# batches, each of which is decoded sequentially.  Each batch pre-loads the data
+# from previous batches.
 
 # To use in tuning, run mert-moses.pl with --sim-pe=SYMAL where SYMAL is the
 # alignment from input to references.  Specify the number of jobs with
@@ -22,9 +25,6 @@ import subprocess
 import sys
 import tempfile
 import threading
-
-# Example call from mert-moses.pl
-# moses [decoder flags] -config moses.ini -inputtype 0 -weight-overwrite '[text with spaces]' -n-best-list run1.best100.out 100 -input-file tune.src > run1.out
 
 HELP = '''Moses with simulated post-editing
 
