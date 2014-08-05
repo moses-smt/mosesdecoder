@@ -128,7 +128,7 @@ public:
   GatherCands(Phrase const& src, map<SAPhrase, vector<float> >& pstats) const;
 
   TargetPhrase*
-  GetMosesFactorIDs(const SAPhrase&, const Phrase& sourcePhrase) const;
+  GetMosesFactorIDs(const SAPhrase&, const Phrase& sourcePhrase, const PhraseDictionary *pt) const;
 
 private:
 

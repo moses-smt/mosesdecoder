@@ -25,7 +25,6 @@ OpSequenceModel::~OpSequenceModel() {
 
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
-
   string unkOp = "_TRANS_SLF_";
   OSM = ConstructOSMLM(m_lmPath);
   

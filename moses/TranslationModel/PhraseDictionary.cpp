@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputType.h"
 #include "moses/TranslationOption.h"
 #include "moses/UserMessage.h"
+#include "moses/DecodeStep.h"
 #include "moses/DecodeGraph.h"
 #include "moses/InputPath.h"
 #include "util/exception.hh"
@@ -48,6 +49,7 @@ PhraseDictionary::PhraseDictionary(const std::string &line)
   ,m_tableLimit(20) // default
   ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
+	m_id = s_staticColl.size();
 	s_staticColl.push_back(this);
 }
 

@@ -38,24 +38,7 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase( std::string out_string)
-  :Phrase(0)
-  , m_fullScore(0.0)
-  , m_futureScore(0.0)
-  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-  , m_lhsTarget(NULL)
-  , m_ruleSource(NULL)
-{
-
-  //ACAT
-  const StaticData &staticData = StaticData::Instance();
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, 
-		   // staticData.GetFactorDelimiter(), // eliminated [UG]
-		   NULL);
-}
-
-TargetPhrase::TargetPhrase()
+TargetPhrase::TargetPhrase(const PhraseDictionary *pt)
   :Phrase()
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -63,10 +46,11 @@ TargetPhrase::TargetPhrase()
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_container(pt)
 {
 }
 
-TargetPhrase::TargetPhrase(const Phrase &phrase)
+TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
   : Phrase(phrase)
   , m_fullScore(0.0)
   , m_futureScore(0.0)
@@ -74,6 +58,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   , m_lhsTarget(NULL)
   , m_ruleSource(NULL)
+  , m_container(pt)
 {
 }
 
@@ -84,6 +69,7 @@ TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
+  , m_container(copy.m_container)
 {
   if (copy.m_lhsTarget) {
     m_lhsTarget = new Word(*copy.m_lhsTarget);

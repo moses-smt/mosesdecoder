@@ -53,7 +53,7 @@ TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
   string str = sourcePhrase.GetWord(0).GetFactor(0)->GetString().as_string();
   str = "SkeletonPT:" + str;
 
-  TargetPhrase *tp = new TargetPhrase();
+  TargetPhrase *tp = new TargetPhrase(this);
   Word &word = tp->AddWord();
   word.CreateFromString(Output, m_output, str, false);
 

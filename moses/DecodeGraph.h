@@ -38,7 +38,7 @@ class DecodeGraph
 {
 protected:
   std::list<const DecodeStep*> m_steps;
-  size_t m_position;
+  size_t m_id; // contiguous unique id, starting from 0
   size_t m_maxChartSpan;
   size_t m_backoff;
 
@@ -46,15 +46,15 @@ public:
   /**
     * position: The position of this graph within the decode sequence.
     **/
-  DecodeGraph(size_t position)
-    : m_position(position)
+  DecodeGraph(size_t id)
+    : m_id(id)
     , m_maxChartSpan(NOT_FOUND)
 	, m_backoff(0)
 	{}
 
   // for chart decoding
-  DecodeGraph(size_t position, size_t maxChartSpan)
-    : m_position(position)
+  DecodeGraph(size_t id, size_t maxChartSpan)
+    : m_id(id)
     , m_maxChartSpan(maxChartSpan) {
   }
 
@@ -90,8 +90,8 @@ public:
     m_backoff = backoff;
   }
 
-  size_t GetPosition() const {
-    return m_position;
+  size_t GetId() const {
+    return m_id;
   }
 
 };
