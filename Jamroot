@@ -121,7 +121,7 @@ if [ option.get "with-lbllm" ] {
   requirements += <library>gomp ;
 }
 
-if [ option.get "with-cmph" ] {
+if [ option.get "with-cmph" : : "yes" ] {
   requirements += <define>HAVE_CMPH ;
 }
 
