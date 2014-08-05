@@ -65,7 +65,7 @@ private:
   const PhraseDictionary *m_container;
 
 public:
-  TargetPhrase(const PhraseDictionary *pt);
+  TargetPhrase(const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
   explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
   ~TargetPhrase();
@@ -134,6 +134,9 @@ public:
   const Phrase *GetRuleSource() const {
     return m_ruleSource;
   }
+
+  const PhraseDictionary *GetContainer() const
+  { return m_container; }
 
   // To be set by the FF that needs it, by default the rule source = NULL
   // make a copy of the source side of the rule
