@@ -25,6 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <iostream>
 #include <memory>
+
+#include <boost/scoped_ptr.hpp>
+
 #include <vector>
 #include "Phrase.h"
 #include "TypeDef.h"
@@ -77,7 +80,9 @@ protected:
   bool							m_wordDeleted;
   float							m_totalScore;  /*! score so far */
   float							m_futureScore; /*! estimated future cost to translate rest of sentence */
-  ScoreComponentCollection m_scoreBreakdown; /*! scores for this hypothesis */
+  /*! sum of scores of this hypothesis, and previous hypotheses. Lazily initialised.  */
+  mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown; 
+  ScoreComponentCollection m_currScoreBreakdown; /*! scores for this hypothesis only */
   std::vector<const FFState*> m_ffStates;
   const Hypothesis 	*m_winningHypo;
   ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
@@ -228,7 +233,14 @@ public:
     return m_arcList;
   }
   const ScoreComponentCollection& GetScoreBreakdown() const {
-    return m_scoreBreakdown;
+    if (!m_scoreBreakdown.get()) {
+      m_scoreBreakdown.reset(new ScoreComponentCollection());
+      m_scoreBreakdown->PlusEquals(m_currScoreBreakdown);
+      if (m_prevHypo) {
+        m_scoreBreakdown->PlusEquals(m_prevHypo->GetScoreBreakdown());
+      }
+    }
+    return *(m_scoreBreakdown.get());
   }
   float GetTotalScore() const {
     return m_totalScore;
