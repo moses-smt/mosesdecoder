@@ -332,7 +332,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
                 return false;
             }
             // update model
-            VERBOSE(1,"Updating " << pdName << " ||| " << source << " ||| " << target << " ||| " << alignment << endl);
+            VERBOSE(3,"Updating " << pdName << " ||| " << source << " ||| " << target << " ||| " << alignment << endl);
             Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(pd);
             pdsa->add(source, target, alignment);
 #else
@@ -396,7 +396,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               float scoreValue = FloorScore(TransformScore(probValue));
 
               WordsRange range(startPos + offset,endPos-1 + offset); // span covered by phrase
-              TargetPhrase targetPhrase;
+              TargetPhrase targetPhrase(NULL);
               // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 
