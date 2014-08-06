@@ -828,10 +828,10 @@ size_t Manager::OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypoth
 }
 
 /**! Output search graph in hypergraph format of Kenneth Heafield's lazy hypergraph decoder */
-void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &outputSearchGraphStream) const
+void Manager::OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const
 {
 
-  VERBOSE(2,"Getting search graph to output as hypergraph for sentence " << translationId << std::endl)
+  VERBOSE(2,"Getting search graph to output as hypergraph for sentence " << m_lineNumber << std::endl)
 
   vector<SearchGraphNode> searchGraph;
   GetSearchGraph(searchGraph);
@@ -842,7 +842,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
   set<int> terminalNodes;
   multimap<int,int> hypergraphIDToArcs;
 
-  VERBOSE(2,"Gathering information about search graph to output as hypergraph for sentence " << translationId << std::endl)
+  VERBOSE(2,"Gathering information about search graph to output as hypergraph for sentence " << m_lineNumber << std::endl)
 
   long numNodes = 0;
   long endNode = 0;
@@ -904,15 +904,15 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
   // Print number of nodes and arcs
   outputSearchGraphStream << numNodes << " " << numArcs << endl;
 
-  VERBOSE(2,"Search graph to output as hypergraph for sentence " << translationId
+  VERBOSE(2,"Search graph to output as hypergraph for sentence " << m_lineNumber
           << " contains " << numArcs << " arcs and " << numNodes << " nodes" << std::endl)
 
-  VERBOSE(2,"Outputting search graph to output as hypergraph for sentence " << translationId << std::endl)
+  VERBOSE(2,"Outputting search graph to output as hypergraph for sentence " << m_lineNumber << std::endl)
 
 
   for (int hypergraphHypothesisID=0; hypergraphHypothesisID < endNode; hypergraphHypothesisID+=1) {
     if (hypergraphHypothesisID % 100000 == 0) {
-      VERBOSE(2,"Processed " << hypergraphHypothesisID << " of " << numNodes << " hypergraph nodes for sentence " << translationId << std::endl);
+      VERBOSE(2,"Processed " << hypergraphHypothesisID << " of " << numNodes << " hypergraph nodes for sentence " << m_lineNumber << std::endl);
     }
     //    int mosesID = hypergraphIDToMosesID[hypergraphHypothesisID];
     size_t count = hypergraphIDToArcs.count(hypergraphHypothesisID);
@@ -935,7 +935,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
         //	int actualHypergraphHypothesisID = mosesIDToHypergraphID[mosesHypothesisID];
         UTIL_THROW_IF2(
           (hypergraphHypothesisID != mosesIDToHypergraphID[mosesHypothesisID]),
-          "Error while writing search lattice as hypergraph for sentence " << translationId << ". " <<
+          "Error while writing search lattice as hypergraph for sentence " << m_lineNumber << ". " <<
           "Moses node " << mosesHypothesisID << " was expected to have hypergraph id " << hypergraphHypothesisID <<
           ", but actually had hypergraph id " << mosesIDToHypergraphID[mosesHypothesisID] <<
           ". There are " << numNodes << " nodes in the search lattice."
@@ -950,7 +950,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
           //	  VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " has parent node " << startNode << std::endl)
           UTIL_THROW_IF2(
             (startNode >= hypergraphHypothesisID),
-            "Error while writing search lattice as hypergraph for sentence" << translationId << ". " <<
+            "Error while writing search lattice as hypergraph for sentence" << m_lineNumber << ". " <<
             "The nodes must be output in topological order. The code attempted to violate this restriction."
           );
 
