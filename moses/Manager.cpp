@@ -757,18 +757,7 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
 {
   outputSearchGraphStream.setf(std::ios::fixed);
   outputSearchGraphStream.precision(6);
-
-  const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  size_t featureIndex = 1;
-  for (size_t i = 0; i < sff.size(); ++i) {
-    featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, sff[i], outputSearchGraphStream);
-  }
-  for (size_t i = 0; i < slf.size(); ++i) {
-    {
-      featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, slf[i], outputSearchGraphStream);
-    }
-  }
+  hypo->GetScoreBreakdown().Save(outputSearchGraphStream, false);
 }
 
 
@@ -831,30 +820,6 @@ size_t Manager::OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypoth
   //   assert(false);
   //   return 0;
   // }
-}
-
-size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
-{
-  if (!ff->IsTuneable()) {
-    return index;
-  }
-  ScoreComponentCollection scoreCollection = hypo->GetScoreBreakdown();
-  const Hypothesis *prevHypo = hypo->GetPrevHypo();
-  if (prevHypo) {
-    scoreCollection.MinusEquals( prevHypo->GetScoreBreakdown() );
-  }
-  vector<float> featureValues = scoreCollection.GetScoresForProducer(ff);
-  size_t numScoreComps = featureValues.size();
-
-  if (numScoreComps > 1) {
-    for (size_t i = 0; i < numScoreComps; ++i) {
-      outputSearchGraphStream << ff->GetScoreProducerDescription()  << i << "=" << featureValues[i] << " ";
-    }
-  } else {
-    outputSearchGraphStream << ff->GetScoreProducerDescription()  << "=" << featureValues[0] << " ";
-  }
-
-  return index+numScoreComps;
 }
 
 /**! Output search graph in hypergraph format of Kenneth Heafield's lazy hypergraph decoder */

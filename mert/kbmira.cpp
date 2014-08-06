@@ -144,7 +144,7 @@ int main(int argc, char** argv)
     } else {
       vector<string> names;
       string last_name = "";
-      size_t feature_ctr = 0;
+      size_t feature_ctr = 1;
       do {
         size_t equals = buffer.find_last_of("=");
         UTIL_THROW_IF(equals == buffer.npos, util::Exception, "Incorrect format in dense feature file: '"
@@ -154,15 +154,15 @@ int main(int argc, char** argv)
         initParams.push_back(boost::lexical_cast<ValType>(buffer.substr(equals+2)));
 
         //Names for features with several values need to have their id added
-        if (name != last_name) feature_ctr = 0;
+        if (name != last_name) feature_ctr = 1;
         last_name = name;
-        if (feature_ctr) {
+        if (feature_ctr>1) {
           stringstream namestr;
-          namestr << names.back() << feature_ctr;
+          namestr << names.back() << "_" << feature_ctr;
           names[names.size()-1] = namestr.str();
-          if (feature_ctr == 1) {
+          if (feature_ctr == 2) {
             stringstream namestr;
-            namestr << names[names.size()-2] << (feature_ctr-1);
+            namestr << names[names.size()-2] << "_" << (feature_ctr-1);
             names[names.size()-2] = namestr.str();
           }
         }
