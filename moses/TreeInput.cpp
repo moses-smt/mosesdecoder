@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "XmlOption.h"
 #include "FactorCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 
@@ -28,6 +29,12 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
   // no xml tag? we're done.
   if (line.find_first_of('<') == string::npos) {
     return true;
+  }
+
+  // hack. What pt should XML trans opt be assigned to?
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
   }
 
   // break up input into a vector of xml tags and text
@@ -173,7 +180,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           //TRACE_ERR("number of translations: " << altTexts.size() << endl);
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
-            TargetPhrase targetPhrase(NULL);
+            TargetPhrase targetPhrase(firstPt);
             // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
             targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 

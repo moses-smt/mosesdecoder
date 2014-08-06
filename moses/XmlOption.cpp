@@ -30,6 +30,7 @@
 #include "TargetPhrase.h"
 #include "ReorderingConstraint.h"
 #include "FactorCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 namespace Moses
 {
@@ -159,6 +160,12 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
   //parse XML markup in translation line
 
   const StaticData &staticData = StaticData::Instance();
+
+  // hack. What pt should XML trans opt be assigned to?
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
+  }
 
   // no xml tag? we're done.
 //if (line.find_first_of('<') == string::npos) {
@@ -361,7 +368,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               float scoreValue = FloorScore(TransformScore(probValue));
 
               WordsRange range(startPos + offset,endPos-1 + offset); // span covered by phrase
-              TargetPhrase targetPhrase(NULL);
+              TargetPhrase targetPhrase(firstPt);
               // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 
