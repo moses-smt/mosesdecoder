@@ -88,7 +88,7 @@ public:
                   OutputCollector* alignmentInfoCollector,
                   OutputCollector* unknownsCollector,
                   bool outputSearchGraphSLF,
-                  boost::shared_ptr<HypergraphOutput> hypergraphOutput) :
+                  boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
     m_source(source), m_lineNumber(lineNumber),
     m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
     m_latticeSamplesCollector(latticeSamplesCollector),
@@ -374,7 +374,7 @@ private:
   OutputCollector* m_alignmentInfoCollector;
   OutputCollector* m_unknownsCollector;
   bool m_outputSearchGraphSLF;
-  boost::shared_ptr<HypergraphOutput> m_hypergraphOutput;
+  boost::shared_ptr<HypergraphOutput<Manager> > m_hypergraphOutput;
   std::ofstream *m_alignmentStream;
 
 
@@ -489,9 +489,9 @@ int main(int argc, char** argv)
       TRACE_ERR(weights);
       TRACE_ERR("\n");
     }
-    boost::shared_ptr<HypergraphOutput> hypergraphOutput; 
+    boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput; 
     if (staticData.GetOutputSearchGraphHypergraph()) {
-      hypergraphOutput.reset(new HypergraphOutput(PRECISION));
+      hypergraphOutput.reset(new HypergraphOutput<Manager>(PRECISION));
     }
 
 

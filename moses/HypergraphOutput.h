@@ -31,6 +31,7 @@ namespace Moses {
 
 class Manager;
 
+template<class M>
 class HypergraphOutput {
 
 public:
@@ -38,7 +39,7 @@ public:
   HypergraphOutput(size_t precision);
 
   /** Write this hypergraph to file */
-  void Write(const Manager& manager) const;
+  void Write(const M& manager) const;
 
 private:
   size_t m_precision;

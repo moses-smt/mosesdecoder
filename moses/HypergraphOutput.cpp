@@ -41,7 +41,8 @@ using namespace std;
 
 namespace Moses {
 
-HypergraphOutput::HypergraphOutput(size_t precision) :
+template<class M>
+HypergraphOutput<M>::HypergraphOutput(size_t precision) :
   m_precision(precision) {
   const StaticData& staticData = StaticData::Instance();
   vector<string> hypergraphParameters = staticData.GetParam("output-search-graph-hypergraph");
@@ -117,7 +118,8 @@ HypergraphOutput::HypergraphOutput(size_t precision) :
   weightsOut.close();
 }
 
-void HypergraphOutput::Write(const Manager& manager) const {
+template<class M>
+void HypergraphOutput<M>::Write(const M& manager) const {
 
   stringstream fileName;
   fileName << m_hypergraphDir << "/" << manager.GetLineNumber();
@@ -148,6 +150,7 @@ void HypergraphOutput::Write(const Manager& manager) const {
   file.pop();
 }
 
+template class HypergraphOutput<Manager>;
 
 }
 
