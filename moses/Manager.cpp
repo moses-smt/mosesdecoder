@@ -757,7 +757,12 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
 {
   outputSearchGraphStream.setf(std::ios::fixed);
   outputSearchGraphStream.precision(6);
-  hypo->GetScoreBreakdown().Save(outputSearchGraphStream, false);
+  ScoreComponentCollection scores = hypo->GetScoreBreakdown();
+  const Hypothesis *prevHypo = hypo->GetPrevHypo();
+  if (prevHypo) {
+    scores.MinusEquals(prevHypo->GetScoreBreakdown());
+  }
+  scores.Save(outputSearchGraphStream, false);
 }
 
 
