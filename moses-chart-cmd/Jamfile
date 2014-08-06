@@ -1,2 +1,2 @@
-exe moses_chart : Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp ../moses//moses $(TOP)//boost_iostreams ;
+exe moses_chart : Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp ../moses//moses $(TOP)//boost_iostreams ..//boost_filesystem ..//z ;
 

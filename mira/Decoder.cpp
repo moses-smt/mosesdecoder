@@ -220,7 +220,7 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
     size_t epoch)
 {
   // run the decoder
-  m_chartManager = new ChartManager(*m_sentence);
+  m_chartManager = new ChartManager(0,*m_sentence);
   m_chartManager->ProcessSentence();
   ChartKBestExtractor::KBestVec nBestList;
   m_chartManager->CalcNBest(nBestSize, nBestList, distinct);

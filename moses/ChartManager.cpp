@@ -41,11 +41,12 @@ extern bool g_mosesDebug;
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.
  */
-ChartManager::ChartManager(InputType const& source)
+ChartManager::ChartManager(size_t lineNumber,InputType const& source)
   :m_source(source)
   ,m_hypoStackColl(source, *this)
   ,m_start(clock())
   ,m_hypothesisId(0)
+  ,m_lineNumber(lineNumber)
   ,m_parser(source, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit(), source)
 {
@@ -273,6 +274,11 @@ void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::ma
       FindReachableHypotheses( &arc, reachable );
     }
   }
+}
+
+void ChartManager::OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const {
+  //TODO
+
 }
 
 } // namespace Moses

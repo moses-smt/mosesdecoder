@@ -276,7 +276,7 @@ public:
 	  inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
-        ChartManager manager(tinput);
+        ChartManager manager(0,tinput);
         manager.ProcessSentence();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);

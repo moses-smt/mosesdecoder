@@ -293,7 +293,7 @@ void ChartHypothesis::CleanupArcList()
    */
   const StaticData &staticData = StaticData::Instance();
   size_t nBestSize = staticData.GetNBestSize();
-  bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph();
+  bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph() || staticData.GetOutputSearchGraphHypergraph();
 
   if (!distinctNBest && m_arcList->size() > nBestSize) {
     // prune arc list only if there too many arcs

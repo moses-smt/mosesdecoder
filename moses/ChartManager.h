@@ -49,13 +49,14 @@ private:
   std::auto_ptr<SentenceStats> m_sentenceStats;
   clock_t m_start; /**< starting time, used for logging */
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
+  size_t m_lineNumber;
 
   ChartParser m_parser;
 
   ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
 
 public:
-  ChartManager(InputType const& source);
+  ChartManager(size_t lineNumber, InputType const& source);
   ~ChartManager();
   void ProcessSentence();
   void AddXmlChartOptions();
@@ -64,6 +65,8 @@ public:
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
   void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
+  /** Output in (modified) Kenneth hypergraph format */
+  void OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const;
 
   //! the input sentence being decoded
   const InputType& GetSource() const {
@@ -97,6 +100,10 @@ public:
   }
 
   const ChartParser &GetParser() const { return m_parser; }
+
+  size_t GetLineNumber() const {
+    return m_lineNumber;
+  }
 };
 
 }

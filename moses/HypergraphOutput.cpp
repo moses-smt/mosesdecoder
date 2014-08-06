@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <util/exception.hh>
 
+#include "ChartManager.h"
 #include "HypergraphOutput.h"
 #include "Manager.h"
 
@@ -151,6 +152,7 @@ void HypergraphOutput<M>::Write(const M& manager) const {
 }
 
 template class HypergraphOutput<Manager>;
+template class HypergraphOutput<ChartManager>;
 
 }
 
