@@ -59,7 +59,7 @@ ChartCell::~ChartCell() {}
 
 /** Add the given hypothesis to the cell.
  *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
- *  This function just calls the correspondind AddHypothesis() in ChartHypothesisCollection
+ *  This function just calls the corresponding AddHypothesis() in ChartHypothesisCollection
  *  \param hypo Hypothesis to be added
  */
 bool ChartCell::AddHypothesis(ChartHypothesis *hypo)

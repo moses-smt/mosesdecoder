@@ -125,6 +125,9 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_inputType == 2) {
     s_it = "word lattice";
   }
+  if (m_inputType == 3) {
+    s_it = "tree";
+  }
   VERBOSE(2,"input type is: "<<s_it<<"\n");
 
   if(m_parameter->GetParam("recover-input-path").size()) {
