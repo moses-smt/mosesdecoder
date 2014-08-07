@@ -68,6 +68,12 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 
   m_unksrcs.push_back(unksrc);
 
+  // hack. Once the OOV FF is a phrase table, get rid of this
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
+  }
+
   //TranslationOption *transOpt;
   if (! staticData.GetDropUnknown() || isDigit) {
     // loop
@@ -85,7 +91,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       // add to dictionary
-      TargetPhrase *targetPhrase = new TargetPhrase(NULL);
+      TargetPhrase *targetPhrase = new TargetPhrase(firstPt);
       Word &targetWord = targetPhrase->AddWord();
       targetWord.CreateUnknownWord(sourceWord);
 
@@ -108,7 +114,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
     // drop source word. create blank trans opt
     float unknownScore = FloorScore(-numeric_limits<float>::infinity());
 
-    TargetPhrase *targetPhrase = new TargetPhrase(NULL);
+    TargetPhrase *targetPhrase = new TargetPhrase(firstPt);
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
     UnknownLHSList::const_iterator iterLHS;

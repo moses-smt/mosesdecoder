@@ -212,6 +212,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
   float unknownScore = FloorScore(TransformScore(0));
   const Word &sourceWord = inputPath.GetPhrase().GetWord(0);
 
+  // hack. Once the OOV FF is a phrase table, get rid of this
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
+  }
+
   // unknown word, add as trans opt
   FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -231,7 +237,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
     // modify the starting bitmap
   }
 
-  TargetPhrase targetPhrase(NULL);
+  TargetPhrase targetPhrase(firstPt);
 
   if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
     // add to dictionary
