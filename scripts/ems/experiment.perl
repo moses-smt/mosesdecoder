@@ -1860,7 +1860,7 @@ sub define_tuning_tune {
 	$cmd .= " --lambdas \"$lambda\"" if $lambda;
 	$cmd .= " --continue" if $tune_continue;
 	$cmd .= " --skip-decoder" if $skip_decoder;
-	$cmd .= " --inputtype $tune_inputtype" if $tune_inputtype;
+	$cmd .= " --inputtype $tune_inputtype" if defined($tune_inputtype);
     
 	my $qsub_args = &get_qsub_args("TUNING");
 	$cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
@@ -2217,6 +2217,10 @@ sub define_training_extract_phrases {
         my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
         $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
       }
+
+      if (&get("TRAINING:ghkm-source-labels")) {
+        $cmd .= "-ghkm-source-labels ";
+      }
     }
 
     my $extract_settings = &get("TRAINING:extract-settings");
@@ -2253,6 +2257,11 @@ sub define_training_build_ttable {
         $cmd .= "-ghkm-phrase-orientation ";
         my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
         $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
+      }
+      if (&get("TRAINING:ghkm-source-labels")) {
+        $cmd .= "-ghkm-source-labels ";
+        my $source_labels_file = &versionize(&long_file_name("source-labels","model",""));
+        $cmd .= "-ghkm-source-labels-file $source_labels_file ";
       }
     }
     
@@ -2436,6 +2445,12 @@ sub define_training_create_config {
       else {
         $cmd .= "-osm-model $osm/operationLM.bin ";
       }
+    }
+
+    if (&get("TRAINING:ghkm-source-labels")) {
+      $cmd .= "-ghkm-source-labels ";
+      my $source_labels_file = &versionize(&long_file_name("source-labels","model",""));
+      $cmd .= "-ghkm-source-labels-file $source_labels_file ";
     }
 
     # sparse lexical features provide additional content for config file
@@ -3412,7 +3427,7 @@ sub check_backoff_and_get_array {
 # the following two functions deal with getting information about
 # files that are passed between steps. this are either specified
 # in the meta file (default) or in the configuration file (here called
-# 'specified', in the step management refered to as 'given').
+# 'specified', in the step management referred to as 'given').
 
 sub get_specified_or_default_file {
     my ($specified_module,$specified_set,$specified_parameter,
