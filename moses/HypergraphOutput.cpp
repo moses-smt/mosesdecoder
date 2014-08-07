@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <util/exception.hh>
 
+#include "ChartHypothesisCollection.h"
 #include "ChartManager.h"
 #include "HypergraphOutput.h"
 #include "Manager.h"
@@ -154,5 +155,94 @@ void HypergraphOutput<M>::Write(const M& manager) const {
 template class HypergraphOutput<Manager>;
 template class HypergraphOutput<ChartManager>;
 
+
+void ChartSearchGraphWriterMoses::WriteHypos
+  (const ChartHypothesisCollection& hypos, const map<unsigned, bool> &reachable) const {
+
+  ChartHypothesisCollection::const_iterator iter;
+  for (iter = hypos.begin() ; iter != hypos.end() ; ++iter) {
+    ChartHypothesis &mainHypo = **iter;
+    if (StaticData::Instance().GetUnprunedSearchGraph() ||
+        reachable.find(mainHypo.GetId()) != reachable.end()) {
+      (*m_out) << m_lineNumber << " " << mainHypo << endl;
+    }
+
+    const ChartArcList *arcList = mainHypo.GetArcList();
+    if (arcList) {
+      ChartArcList::const_iterator iterArc;
+      for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
+        const ChartHypothesis &arc = **iterArc;
+        if (reachable.find(arc.GetId()) != reachable.end()) {
+          (*m_out) << m_lineNumber << " " << arc << endl;
+        }
+      }
+    }
+  }
+
 }
+void ChartSearchGraphWriterHypergraph::WriteHeader(size_t winners, size_t losers) const {
+
+  (*m_out) << "# target ||| features ||| source-covered" << endl;
+  (*m_out) << winners <<  " " << (winners+losers) << endl;
+
+}
+
+void ChartSearchGraphWriterHypergraph::WriteHypos(const ChartHypothesisCollection& hypos,
+       const map<unsigned, bool> &reachable) const {
+  
+  ChartHypothesisCollection::const_iterator iter;
+  for (iter = hypos.begin() ; iter != hypos.end() ; ++iter) {
+    const ChartHypothesis* mainHypo = *iter;
+    if (!StaticData::Instance().GetUnprunedSearchGraph() && 
+      reachable.find(mainHypo->GetId()) == reachable.end()) {
+      //Ignore non reachable nodes
+      continue;
+    }
+    (*m_out) << "# node " << m_nodeId << endl;
+    m_hypoIdToNodeId[mainHypo->GetId()] = m_nodeId;
+    ++m_nodeId;
+    vector<const ChartHypothesis*> edges;
+    edges.push_back(mainHypo);
+    const ChartArcList *arcList = (*iter)->GetArcList();
+    if (arcList) {
+      ChartArcList::const_iterator iterArc;
+      for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
+        const ChartHypothesis* arc = *iterArc;
+        if (reachable.find(arc->GetId()) != reachable.end()) {
+          edges.push_back(arc);
+        }
+      }
+    }
+    (*m_out) << edges.size() << endl;
+    for (vector<const ChartHypothesis*>::const_iterator ei = edges.begin(); ei != edges.end(); ++ei) {
+      const ChartHypothesis* hypo = *ei;
+      const TargetPhrase& target = hypo->GetCurrTargetPhrase();
+      size_t ntIndex = 0;
+      for (size_t i = 0; i < target.GetSize(); ++i) {
+        const Word& word = target.GetWord(i);
+        if (word.IsNonTerminal()) {
+          size_t hypoId = hypo->GetPrevHypos()[ntIndex++]->GetId();
+          (*m_out) << "[" << m_hypoIdToNodeId[hypoId] << "]";
+        } else {
+          (*m_out) << word.GetFactor(0)->GetString();
+        }
+        (*m_out) << " ";
+      }
+      (*m_out) << " ||| ";
+      ScoreComponentCollection scores = hypo->GetScoreBreakdown();
+      HypoList::const_iterator hi;
+      for (hi = hypo->GetPrevHypos().begin(); hi != hypo->GetPrevHypos().end(); ++hi) {
+        scores.MinusEquals((*hi)->GetScoreBreakdown());
+      }
+      scores.Save(*m_out, false);
+      (*m_out) << " ||| ";
+      (*m_out) << hypo->GetCurrSourceRange().GetNumWordsCovered();
+      (*m_out) << endl;
+
+    }
+  }
+}
+ 
+
+} //namespace Moses
 

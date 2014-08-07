@@ -24,6 +24,7 @@
 #include "ChartHypothesisCollection.h"
 #include "ChartHypothesis.h"
 #include "ChartManager.h"
+#include "HypergraphOutput.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -293,27 +294,9 @@ void ChartHypothesisCollection::CleanupArcList()
  * \param outputSearchGraphStream stream to output the info to
  * \param reachable @todo don't know
  */
-void ChartHypothesisCollection::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned, bool> &reachable) const
+void ChartHypothesisCollection::WriteSearchGraph(const ChartSearchGraphWriter& writer, const std::map<unsigned, bool> &reachable) const
 {
-  HCType::const_iterator iter;
-  for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
-    ChartHypothesis &mainHypo = **iter;
-    if (StaticData::Instance().GetUnprunedSearchGraph() ||
-        reachable.find(mainHypo.GetId()) != reachable.end()) {
-      outputSearchGraphStream << translationId << " " << mainHypo << endl;
-    }
-
-    const ChartArcList *arcList = mainHypo.GetArcList();
-    if (arcList) {
-      ChartArcList::const_iterator iterArc;
-      for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
-        const ChartHypothesis &arc = **iterArc;
-        if (reachable.find(arc.GetId()) != reachable.end()) {
-          outputSearchGraphStream << translationId << " " << arc << endl;
-        }
-      }
-    }
-  }
+  writer.WriteHypos(*this,reachable);
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartHypothesisCollection &coll)

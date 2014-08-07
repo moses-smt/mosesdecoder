@@ -177,7 +177,7 @@ public:
 
     if (staticData.GetOutputSearchGraph()) {
       std::ostringstream out;
-      manager.GetSearchGraph(translationId, out);
+      manager.OutputSearchGraphMoses( out);
       OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
       UTIL_THROW_IF2(oc == NULL, "File for search graph output not specified");
       oc->Write(translationId, out.str());
