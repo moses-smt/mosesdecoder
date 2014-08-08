@@ -203,7 +203,7 @@ void ScoreComponentCollection::Save(ostream& out, bool multiline) const
   }
 
   // write sparse features
-  m_scores.write(out,sep);
+  m_scores.write(out,sep,linesep);
 }
 
 void ScoreComponentCollection::Save(const string& filename) const
