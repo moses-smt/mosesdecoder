@@ -312,7 +312,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   // property
   ret->SetProperties(m_property);
 
-  ret->Evaluate(mosesSP, phraseDict.GetFeaturesToApply());
+  ret->EvaluateInIsolation(mosesSP, phraseDict.GetFeaturesToApply());
 
   return ret;
 }

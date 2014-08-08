@@ -168,7 +168,7 @@ float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) 
 	return bestHypo.GetTotalScore();
 }
 
-void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPath &inputPath)
+void ChartTranslationOptionList::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
   // NEVER iterate over ALL of the collection. Just over the first m_size
   CollType::iterator iter;

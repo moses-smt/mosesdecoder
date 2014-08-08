@@ -85,7 +85,7 @@ void ChartManager::ProcessSentence()
       m_translationOptionList.ApplyThreshold();
 
       const InputPath &inputPath = m_parser.GetInputPath(range);
-      m_translationOptionList.Evaluate(m_source, inputPath);
+      m_translationOptionList.EvaluateWithSourceContext(m_source, inputPath);
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
