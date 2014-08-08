@@ -174,7 +174,7 @@ void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPat
   CollType::iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.begin() + m_size; ++iter) {
     ChartTranslationOptions &transOpts = **iter;
-    transOpts.Evaluate(input, inputPath);
+    transOpts.EvaluateWithSourceContext(input, inputPath);
   }
 
   // get rid of empty trans opts
