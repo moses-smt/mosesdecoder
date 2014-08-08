@@ -59,11 +59,11 @@ private:
   std::string m_unknownLeftHandSideFile;
   size_t m_featureVariant;
 
-  mutable boost::unordered_map<std::string,size_t> m_sourceLabels;
-  mutable std::vector<std::string> m_sourceLabelsByIndex;
-  mutable boost::unordered_set<size_t> m_coreSourceLabels;
-  mutable boost::unordered_map<const Factor*,size_t> m_sourceLabelIndexesByFactor;
-  mutable size_t m_GlueTopLabel;
+  boost::unordered_map<std::string,size_t> m_sourceLabels;
+  std::vector<std::string> m_sourceLabelsByIndex;
+  boost::unordered_set<size_t> m_coreSourceLabels;
+  boost::unordered_map<const Factor*,size_t> m_sourceLabelIndexesByFactor;
+  size_t m_GlueTopLabel;
 //  mutable size_t m_XRHSLabel;
 //  mutable size_t m_XLHSLabel;
 
@@ -71,9 +71,6 @@ private:
   boost::unordered_map<size_t,float> m_unknownLHSProbabilities;
   float m_smoothingWeight;
   float m_unseenLHSSmoothingFactorForUnknowns;
-
-  mutable std::vector< std::string > m_sparseFeatureKeyCache;
-  mutable std::vector< bool > m_sparseFeatureKeyCacheIsValid;
 
   void Load();
   void LoadSourceLabelSet();

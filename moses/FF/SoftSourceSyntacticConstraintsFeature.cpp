@@ -55,8 +55,6 @@ void SoftSourceSyntacticConstraintsFeature::Load()
   if (!m_targetSourceLHSJointCountFile.empty()) {
     LoadTargetSourceLeftHandSideJointCountFile();
   }
-  m_sparseFeatureKeyCache.resize(m_sourceLabelsByIndex.size()*m_sourceLabelsByIndex.size());
-  m_sparseFeatureKeyCacheIsValid.resize(m_sourceLabelsByIndex.size()*m_sourceLabelsByIndex.size(), false);
 }
 
 void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
