@@ -205,7 +205,7 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
   return 0;
 }
 
-void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
+void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff,
                               int state_idx)
 {
   const StaticData &staticData = StaticData::Instance();
@@ -217,7 +217,7 @@ void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
   }
 }
 
-void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
+void Hypothesis::EvaluateWhenApplied(const StatelessFeatureFunction& slff)
 {
   const StaticData &staticData = StaticData::Instance();
   if (! staticData.IsFeatureFunctionIgnored( slff )) {
@@ -228,7 +228,7 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff)
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::Evaluate(const SquareMatrix &futureScore)
+void Hypothesis::EvaluateWhenApplied(const SquareMatrix &futureScore)
 {
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().StartTimeOtherScore();
@@ -244,7 +244,7 @@ void Hypothesis::Evaluate(const SquareMatrix &futureScore)
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     const StatelessFeatureFunction &ff = *sfs[i];
-    EvaluateWith(ff);
+    EvaluateWhenApplied(ff);
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =

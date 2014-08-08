@@ -141,7 +141,7 @@ void ChartManager::AddXmlChartOptions()
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
-    hypo->Evaluate();
+    hypo->EvaluateWhenApplied();
 
 
     ChartCell &cell = m_hypoStackColl.Get(range);

@@ -212,7 +212,7 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 /** calculate total score
   * @todo this should be in ScoreBreakdown
  */
-void ChartHypothesis::Evaluate()
+void ChartHypothesis::EvaluateWhenApplied()
 {
   const StaticData &staticData = StaticData::Instance();
   // total scores from prev hypos
