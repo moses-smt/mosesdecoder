@@ -476,7 +476,7 @@ namespace Moses
 	tp->AddWord(w);
       }
     tp->GetScoreBreakdown().Assign(this, fvals);
-    tp->Evaluate(src);
+    tp->EvaluateInIsolation(src);
     return tp;
   }
 

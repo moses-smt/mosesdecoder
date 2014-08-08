@@ -422,7 +422,7 @@ void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
   }
 
   targetPhrase.GetScoreBreakdown().Assign(m_obj, transVector);
-  targetPhrase.Evaluate(*srcPtr, m_obj->GetFeaturesToApply());
+  targetPhrase.EvaluateInIsolation(*srcPtr, m_obj->GetFeaturesToApply());
 }
 
 TargetPhraseCollectionWithSourcePhrase* PDTAimp::PruneTargetCandidates

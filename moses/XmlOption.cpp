@@ -382,7 +382,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               }
 
               targetPhrase.SetXMLScore(scoreValue);
-              targetPhrase.Evaluate(sourcePhrase);
+              targetPhrase.EvaluateInIsolation(sourcePhrase);
 
               XmlOption *option = new XmlOption(range,targetPhrase);
               assert(option);

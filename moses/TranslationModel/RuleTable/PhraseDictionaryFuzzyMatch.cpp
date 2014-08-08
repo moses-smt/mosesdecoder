@@ -284,7 +284,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 
     targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-    targetPhrase->Evaluate(sourcePhrase, GetFeaturesToApply());
+    targetPhrase->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

@@ -272,7 +272,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
   m_unksrcs.push_back(&sourcePhrase);
   WordsRange range(sourcePos, sourcePos + length - 1);
 
-  targetPhrase.Evaluate(sourcePhrase);
+  targetPhrase.EvaluateInIsolation(sourcePhrase);
 
   TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
   transOpt->SetInputPath(inputPath);

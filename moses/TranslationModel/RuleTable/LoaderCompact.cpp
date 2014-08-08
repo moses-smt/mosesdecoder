@@ -226,7 +226,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
 
-    targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
+    targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
