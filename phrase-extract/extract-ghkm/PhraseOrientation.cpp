@@ -19,11 +19,9 @@
 
 #include "PhraseOrientation.h"
 
-#include <sstream>
 #include <iostream>
 #include <sstream>
 #include <limits>
-#include <sstream>
 
 #include <boost/assign/list_of.hpp>
 
@@ -189,7 +187,7 @@ const std::string PhraseOrientation::GetOrientationInfoString(int startF, int en
 
 const std::string PhraseOrientation::GetOrientationInfoString(int startF, int startE, int endF, int endE, REO_DIR direction) const
 {
-  REO_POS hierPrevOrient, hierNextOrient;
+  REO_POS hierPrevOrient=UNKNOWN, hierNextOrient=UNKNOWN;
 
   bool connectedLeftTopP  = IsAligned( startF-1, startE-1 );
   bool connectedRightTopP = IsAligned( endF+1,   startE-1 );
