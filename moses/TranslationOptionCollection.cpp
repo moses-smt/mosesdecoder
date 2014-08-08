@@ -416,7 +416,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   ProcessUnknownWord();
 
-  EvaluateWithSource();
+  EvaluateWithSourceContext();
 
   // Prune
   Prune();
@@ -541,7 +541,7 @@ void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, Part
   }
 }
 
-void TranslationOptionCollection::EvaluateWithSource()
+void TranslationOptionCollection::EvaluateWithSourceContext()
 {
   const size_t size = m_source.GetSize();
   for (size_t startPos = 0 ; startPos < size ; ++startPos) {
@@ -555,7 +555,7 @@ void TranslationOptionCollection::EvaluateWithSource()
       TranslationOptionList::const_iterator iterTransOpt;
       for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) {
         TranslationOption &transOpt = **iterTransOpt;
-        transOpt.Evaluate(m_source);
+        transOpt.EvaluateWithSourceContext(m_source);
       }
     }
   }

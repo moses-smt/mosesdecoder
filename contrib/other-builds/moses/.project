@@ -1687,6 +1687,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/NonTermContextProperty.h</locationURI>
 		</link>
 		<link>
+			<name>PP/OrientationPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/OrientationPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/OrientationPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/OrientationPhraseProperty.h</locationURI>
+		</link>
+		<link>
 			<name>PP/PhraseProperty.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/PhraseProperty.cpp</locationURI>

@@ -78,7 +78,7 @@ public:
   void Evaluate(const Phrase &source);
 
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
-  void Evaluate(const InputType &input, const InputPath &inputPath);
+  void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
