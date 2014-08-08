@@ -329,7 +329,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
          sourceLabelItem != sourceLabelItems.end() && !hasCompleteTreeInputMatch; ++sourceLabelItem) {
 
       const std::list<size_t> &sourceLabelsRHS = sourceLabelItem->GetSourceLabelsRHS();
-      float sourceLabelsRHSCount = sourceLabelItem->GetSourceLabelsRHSCount();
+      // float sourceLabelsRHSCount = sourceLabelItem->GetSourceLabelsRHSCount();
       const std::list< std::pair<size_t,float> > &sourceLabelsLHSList = sourceLabelItem->GetSourceLabelsLHSList();
 
       assert(sourceLabelsRHS.size() == nNTs-1);
@@ -366,7 +366,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWhenApplied(
 
       // LHS source non-terminal labels seen with this RHS
       bool currentSourceLabelItemHasLHSTreeInputMatch = false;
-      float ruleLabelledCount = 0;
+      //float ruleLabelledCount = 0;
       std::list< std::pair<size_t,float> >::const_iterator sourceLabelsLHSIt;
 
       for (sourceLabelsLHSIt = sourceLabelsLHSList.begin(); sourceLabelsLHSIt != sourceLabelsLHSList.end(); ++sourceLabelsLHSIt) {
