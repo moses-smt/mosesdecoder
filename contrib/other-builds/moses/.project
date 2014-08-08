@@ -1307,6 +1307,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SoftSourceSyntacticConstraintsFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftSourceSyntacticConstraintsFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SoftSourceSyntacticConstraintsFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftSourceSyntacticConstraintsFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SourceGHKMTreeInputMatchFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SourceGHKMTreeInputMatchFeature.cpp</locationURI>
