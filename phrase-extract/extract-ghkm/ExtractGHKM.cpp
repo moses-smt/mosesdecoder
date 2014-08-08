@@ -248,7 +248,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
       const std::vector<const Subgraph *> &rules = (*p)->GetRules();
 
-      REO_POS l2rOrientation, r2lOrientation;
+      REO_POS l2rOrientation=UNKNOWN, r2lOrientation=UNKNOWN;
       if (options.phraseOrientation && !rules.empty()) {
         int sourceSpanBegin = *((*p)->GetSpan().begin());
         int sourceSpanEnd   = *((*p)->GetSpan().rbegin());
