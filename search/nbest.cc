@@ -70,7 +70,7 @@ void NBestList::MoveTop(util::Pool &pool) {
     Score change = child->in_->Visit(pool, child->index_);
     if (change != -INFINITY) {
       assert(change < 0.001);
-      QueueEntry new_entry(pool.Allocate(QueueEntry::Size(entry.GetArity())), basis + change, entry.GetArity(), entry.GetNote());
+      QueueEntry new_entry(pool.Allocate(QueueEntry::Size(entry.GetArity())), basis + change, entry.GetArity(), entry.GetNote(), entry.GetRange());
       std::copy(children_begin, child, new_entry.Children());
       RevealedRef *update = new_entry.Children() + (child - children_begin);
       update->in_ = child->in_;

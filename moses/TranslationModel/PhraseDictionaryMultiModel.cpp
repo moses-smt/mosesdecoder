@@ -147,7 +147,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           vector<FeatureFunction*> pd_feature;
           pd_feature.push_back(m_pd[i]);
           const vector<FeatureFunction*> pd_feature_const(pd_feature);
-          statistics->targetPhrase->Evaluate(src, pd_feature_const);
+          statistics->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
           // zero out scores from original phrase table
           statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
 
@@ -186,7 +186,7 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
     vector<FeatureFunction*> pd_feature;
     pd_feature.push_back(const_cast<PhraseDictionaryMultiModel*>(this));
     const vector<FeatureFunction*> pd_feature_const(pd_feature);
-    statistics->targetPhrase->Evaluate(src, pd_feature_const);
+    statistics->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
 
     ret->Add(new TargetPhrase(*statistics->targetPhrase));
   }
@@ -257,7 +257,7 @@ std::vector<float> PhraseDictionaryMultiModel::normalizeWeights(std::vector<floa
 }
 
 
-ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&)
+ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, std::size_t)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
@@ -323,9 +323,6 @@ void PhraseDictionaryMultiModel::SetTemporaryMultiModelWeightsVector(std::vector
 vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string, string> > &phrase_pair_vector)
 {
 
-  const StaticData &staticData = StaticData::Instance();
-  const string& factorDelimiter = staticData.GetFactorDelimiter();
-
   map<pair<string, string>, size_t> phrase_pair_map;
 
   for ( vector<pair<string, string> >::const_iterator iter = phrase_pair_vector.begin(); iter != phrase_pair_vector.end(); ++iter ) {
@@ -344,7 +341,7 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
     map<string,multiModelStatistics*>* allStats = new(map<string,multiModelStatistics*>);
 
     Phrase sourcePhrase(0);
-    sourcePhrase.CreateFromString(Input, m_input, source_string, factorDelimiter, NULL);
+    sourcePhrase.CreateFromString(Input, m_input, source_string, NULL);
 
     CollectSufficientStatistics(sourcePhrase, allStats); //optimization potential: only call this once per source phrase
 

@@ -1,5 +1,5 @@
-#ifndef UTIL_READ_COMPRESSED__
-#define UTIL_READ_COMPRESSED__
+#ifndef UTIL_READ_COMPRESSED_H
+#define UTIL_READ_COMPRESSED_H
 
 #include "util/exception.hh"
 #include "util/scoped.hh"
@@ -62,6 +62,10 @@ class ReadCompressed {
 
     std::size_t Read(void *to, std::size_t amount);
 
+    // Repeatedly call read to fill a buffer unless EOF is hit.
+    // Return number of bytes read.
+    std::size_t ReadOrEOF(void *const to, std::size_t amount);
+
     uint64_t RawAmount() const { return raw_amount_; }
 
   private:
@@ -78,4 +82,4 @@ class ReadCompressed {
 
 } // namespace util
 
-#endif // UTIL_READ_COMPRESSED__
+#endif // UTIL_READ_COMPRESSED_H

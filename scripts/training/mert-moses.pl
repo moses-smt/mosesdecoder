@@ -99,6 +99,9 @@ my $megam_default_options = "-fvals -maxi 50 -nobias binary";
 my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 my $___KBMIRA_STARTING_POINT = 0;
 
+# Hypergraph mira 
+my $___HG_MIRA = 0;
+
 # Train phrase model mixture weights with PRO (Haddow, NAACL 2012)
 my $__PROMIX_TRAINING = undef; # Location of main script (contrib/promix/main.py)
 # The phrase tables. These should be gzip text format.
@@ -125,8 +128,8 @@ my $___NOCASE = 0;
 # Use "--nonorm" to non normalize translation before computing scores
 my $___NONORM = 0;
 
-# set 0 if input type is text, set 1 if input type is confusion network
-my $___INPUTTYPE = 0;
+# set 0 if input type is text, set 1 if input type is confusion network, set 3 if input type is parse tree
+my $___INPUTTYPE;
 
 
 my $mertdir = undef; # path to new mert directory
@@ -215,6 +218,7 @@ GetOptions(
   "kbmira-starting-point" => \$___KBMIRA_STARTING_POINT,
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
   "batch-mira" => \$___BATCH_MIRA,
+  "hg-mira" => \$___HG_MIRA,
   "batch-mira-args=s" => \$batch_mira_args,
   "promix-training=s" => \$__PROMIX_TRAINING,
   "promix-table=s" => \@__PROMIX_TABLES,
@@ -304,7 +308,8 @@ Options:
   --pairwise-ranked         ... Use PRO for optimisation (Hopkins and May, emnlp 2011)
   --pro-starting-point      ... Use PRO to get a starting point for MERT
   --batch-mira              ... Use Batch MIRA for optimisation (Cherry and Foster, NAACL 2012)
-  --batch-mira-args=STRING  ... args to pass through to batch MIRA. This flag is useful to
+  --hg-mira                 ... Use hypergraph MIRA, ie batch mira with hypergraphs instead of kbests.
+  --batch-mira-args=STRING  ... args to pass through to batch/hg MIRA. This flag is useful to
                                 change MIRA's hyperparameters such as regularization parameter C,
                                 BLEU decay factor, and the number of iterations of MIRA.
   --promix-training=STRING  ... PRO-based mixture model training (Haddow, NAACL 2013)
@@ -324,7 +329,9 @@ print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 # path of script for filtering phrase tables and running the decoder
 $filtercmd = File::Spec->catfile($SCRIPTS_ROOTDIR, "training", "filter-model-given-input.pl") if !defined $filtercmd;
 
-if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
+# WHY ... ! ___FILTER_PHRASE_TABLE ??? This doesn't make sense! [UG]
+# if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
+if ( ! -x $filtercmd && $___FILTER_PHRASE_TABLE) {
   warn "Filtering command not found: $filtercmd.";
   warn "Use --filtercmd=PATH to specify a valid one or --no-filter-phrase-table";
   exit 1;
@@ -418,7 +425,7 @@ if ($___ACTIVATE_FEATURES) {
 }
 
 my ($just_cmd_filtercmd, $x) = split(/ /, $filtercmd);
-die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
+die "Not executable: $just_cmd_filtercmd" if $___FILTER_PHRASE_TABLE && ! -x $just_cmd_filtercmd;
 die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_parallel_cmd;
 die "Not executable: $qsubwrapper"        if defined $___JOBS && ! -x $qsubwrapper;
 die "Not executable: $___DECODER"         if ! -x $___DECODER;
@@ -674,8 +681,12 @@ if ($continue) {
     my @newweights = split /\s+/, $bestpoint;
 
     # Sanity check: order of lambdas must match
-    sanity_check_order_of_lambdas($featlist,
-      "gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
+    if (!$___HG_MIRA) {
+      sanity_check_order_of_lambdas($featlist,
+        "gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
+    } else {
+      print STDERR "WARN: No sanity check of order of features in hypergraph mira\n";
+    }
 
     # update my cache of lambda values
     if ($___PRO_STARTING_POINT or $___KBMIRA_STARTING_POINT) {
@@ -699,6 +710,7 @@ my $oldallsorted    = undef;
 my $allsorted       = undef;
 my $nbest_file      = undef;
 my $lsamp_file      = undef; # Lattice samples
+my $hypergraph_dir  = undef;
 my $orig_nbest_file = undef; # replaced if lattice sampling
 # For mixture modelling
 my @promix_weights;
@@ -782,7 +794,7 @@ while (1) {
   # skip running the decoder if the user wanted
   if (! $skip_decoder) {
     print "($run) run decoder to produce n-best lists\n";
-    ($nbest_file, $lsamp_file) = run_decoder($featlist, $run, $need_to_normalize);
+    ($nbest_file, $lsamp_file, $hypergraph_dir) = run_decoder($featlist, $run, $need_to_normalize);
     $need_to_normalize = 0;
     if ($___LATTICE_SAMPLES) {
       my $combined_file = "$nbest_file.comb";
@@ -796,7 +808,7 @@ while (1) {
       $lsamp_file      = "$lsamp_file.gz";
       $nbest_file      = "$combined_file";
     }
-    safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out";
+    safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out" unless $___HG_MIRA;
     $nbest_file = $nbest_file.".gz";
   } else {
     $nbest_file = "run$run.best$___N_BEST_LIST_SIZE.out.gz";
@@ -805,8 +817,8 @@ while (1) {
     $need_to_normalize = 0;
   }
 
-  # extract score statistics and features from the nbest lists
-  print STDERR "Scoring the nbestlist.\n";
+    # extract score statistics and features from the nbest lists
+    print STDERR "Scoring the nbestlist.\n";
 
   my $base_feature_file = "features.dat";
   my $base_score_file   = "scores.dat";
@@ -885,11 +897,12 @@ while (1) {
   }
 
   my $mira_settings = "";
-  if ($___BATCH_MIRA && $batch_mira_args) {
+  if (($___BATCH_MIRA || $___HG_MIRA) && $batch_mira_args) {
     $mira_settings .= "$batch_mira_args ";
   }
 
-  $mira_settings .= " --dense-init run$run.$weights_in_file";
+  #$mira_settings .= " --dense-init run$run.$weights_in_file";
+  $mira_settings .= " --dense-init run$run.dense";
   if (-e "run$run.sparse-weights") {
     $mira_settings .= " --sparse-init run$run.sparse-weights";
   }
@@ -984,6 +997,14 @@ while (1) {
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
+  } elsif ($___HG_MIRA) {
+    safesystem("echo 'not used' > $weights_out_file") or die;
+    $mira_settings .= " --type hypergraph ";
+    $mira_settings .= join(" ", map {"--reference $_"} @references);
+    $mira_settings .= " --hgdir $hypergraph_dir ";
+    #$mira_settings .= "--verbose "; 
+    $cmd = "$mert_mira_cmd $mira_settings $seed_settings -o $mert_outfile";
+    &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
   } elsif ($__PROMIX_TRAINING) {
     # PRO trained  mixture model
     safesystem("echo 'not used' > $weights_out_file") or die;
@@ -1002,8 +1023,10 @@ while (1) {
     if ! -s $weights_out_file;
 
   # backup copies
-  safesystem("\\cp -f extract.err run$run.extract.err") or die;
-  safesystem("\\cp -f extract.out run$run.extract.out") or die;
+  if (! $___HG_MIRA) {
+    safesystem("\\cp -f extract.err run$run.extract.err") or die;
+    safesystem("\\cp -f extract.out run$run.extract.out") or die;
+  }
   safesystem("\\cp -f $mert_outfile run$run.$mert_outfile") or die;
   safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem("touch $mert_logfile run$run.$mert_logfile") or die;
@@ -1018,7 +1041,9 @@ while (1) {
 
   ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights,\@promix_weights);
   my $merge_weight = 0;
-  print "New mixture weights: " . join(" ", @promix_weights) . "\n";
+  if ($__PROMIX_TRAINING) {
+    print "New mixture weights: " . join(" ", @promix_weights) . "\n";
+  }
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -1210,7 +1235,7 @@ sub get_weights_from_mert {
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
     $bestpoint = join(" ", @WEIGHT);
 
-    if($___BATCH_MIRA) {
+    if($___BATCH_MIRA || $___HG_MIRA) {
       open my $fh2, '<', $logfile or die "Can't open $logfile: $!";
       while(<$fh2>) {
         if(/Best (BLEU|M2) = ([\-\d\.]+)/) {
@@ -1237,6 +1262,7 @@ sub run_decoder {
     my ($featlist, $run, $need_to_normalize) = @_;
     my $filename_template = "run%d.best$___N_BEST_LIST_SIZE.out";
     my $filename = sprintf($filename_template, $run);
+    my $hypergraph_dir = "hypergraph";
     my $lsamp_filename = undef;
     if ($___LATTICE_SAMPLES) {
       my $lsamp_filename_template = "run%d.lsamp$___LATTICE_SAMPLES.out";
@@ -1286,10 +1312,15 @@ sub run_decoder {
       $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $filename $___N_BEST_LIST_SIZE $DISTINCT -input-file $___DEV_F > run$run.out";
     }
 
+    print STDERR "Executing: $decoder_cmd \n";
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
 
-    sanity_check_order_of_lambdas($featlist, $filename);
-    return ($filename, $lsamp_filename);
+    if (!$___HG_MIRA) {
+      sanity_check_order_of_lambdas($featlist,$filename);
+    } else {
+      print STDERR "WARN: No sanity check of order of features in hypergraph mira\n";
+    }
+    return ($filename, $lsamp_filename, $hypergraph_dir);
 }
 
 
@@ -1352,7 +1383,10 @@ sub get_featlist_from_moses {
     print STDERR "Using cached features list: $featlistfn\n";
   } else {
     print STDERR "Asking moses for feature names and values from $___CONFIG\n";
-    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
+    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn";
+    $cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
+    $cmd .= " -show-weights > $featlistfn";
+    print STDERR "Executing: $cmd\n";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }
   return get_featlist_from_file($featlistfn);

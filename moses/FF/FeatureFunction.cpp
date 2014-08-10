@@ -34,6 +34,14 @@ void FeatureFunction::Destroy()
   RemoveAllInColl(s_staticColl);
 }
 
+void FeatureFunction::CallChangeSource(InputType *&input)
+{
+  for (size_t i = 0; i < s_staticColl.size(); ++i) {
+	  const FeatureFunction &ff = *s_staticColl[i];
+	  ff.ChangeSource(input);
+  }
+}
+
 FeatureFunction::
 FeatureFunction(const std::string& line)
   : m_tuneable(true)

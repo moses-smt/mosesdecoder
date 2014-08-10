@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "XmlOption.h"
 #include "FactorCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 
@@ -30,6 +31,12 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
     return true;
   }
 
+  // hack. What pt should XML trans opt be assigned to?
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
+  }
+
   // break up input into a vector of xml tags and text
   // example: (this), (<b>), (is a), (</b>), (test .)
   vector<string> xmlTokens = TokenizeXml(line);
@@ -44,7 +51,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
   // keep this handy for later
   const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-  const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+  // const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -145,8 +152,12 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
         VERBOSE(3,"XML TAG " << tagName << " (" << tagContent << ") spanning " << startPos << " to " << (endPos-1) << " complete, commence processing" << endl);
 
-        if (startPos >= endPos) {
-          TRACE_ERR("ERROR: tag " << tagName << " must span at least one word: " << line << endl);
+        if (startPos == endPos) {
+          TRACE_ERR("WARNING: tag " << tagName << " span is empty. Ignoring: " << line << endl);
+          continue;
+        }
+        else if (startPos > endPos) {
+          TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
           return false;
         }
 
@@ -169,8 +180,9 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           //TRACE_ERR("number of translations: " << altTexts.size() << endl);
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
-            TargetPhrase targetPhrase;
-            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+            TargetPhrase targetPhrase(firstPt);
+            // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 
             // set constituent label
             string targetLHSstr;
@@ -198,7 +210,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             // convert from prob to log-prob
             float scoreValue = FloorScore(TransformScore(probValue));
             targetPhrase.SetXMLScore(scoreValue);
-            targetPhrase.Evaluate(sourcePhrase);
+            targetPhrase.EvaluateInIsolation(sourcePhrase);
 
             // set span and create XmlOption
             WordsRange range(startPos+1,endPos);
@@ -265,7 +277,10 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // default label
   for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
-      AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
+      NonTerminalSet &list = GetLabelSet(startPos, endPos);
+      if (list.size() == 0 || !staticData.GetDefaultNonTermOnlyForEmptyRange()) {
+        AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
+      }
     }
   }
 
@@ -313,7 +328,7 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &labe
                               , const std::vector<FactorType>& factorOrder)
 {
   Word word(true);
-  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label); // TODO - no factors
+  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label, true); // TODO - no factors
   word.SetFactor(0, factor);
 
   AddChartLabel(startPos, endPos, word, factorOrder);

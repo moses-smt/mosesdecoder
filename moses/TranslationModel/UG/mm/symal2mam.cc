@@ -11,8 +11,8 @@
 #include "ug_deptree.h"
 #include "tpt_tokenindex.h"
 #include "tpt_pickler.h"
-#include "moses/generic/program_options/ug_get_options.h"
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/program_options/ug_get_options.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 
 #include <iostream>
 #include <string>
@@ -22,7 +22,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "util/exception.hh"
-#include "util/check.hh"
+// #include "headers-base/util/check.hh"
 
 // NOTE TO SELF: 
 /* Program to filter out sentences that GIZA will skip or truncate,

@@ -8,9 +8,10 @@
 #include <string>
 
 #include <boost/iostreams/device/mapped_file.hpp>
-
+#include <boost/shared_ptr.hpp>
 #include "tpt_tokenindex.h"
 #include "ug_ttrack_base.h"
+#include "ug_im_ttrack.h"
 #include "ug_corpus_token.h"
 #include "ug_tsa_tree_iterator.h"
 #include "ug_tsa_array_entry.h"
@@ -44,7 +45,6 @@ namespace ugdiss
   template<typename TKN> 
   class TSA 
   {
-
   public:
     virtual ~TSA() {};
     typedef TSA_tree_iterator<TKN>       tree_iterator; 
@@ -53,7 +53,7 @@ namespace ugdiss
     /* an entry in the array, for iteration over all occurrences of a
      * particular sequence */
     // typedef boost::dynamic_bitset<uint64_t>           bitset; 
-    typedef shared_ptr<bitvector>         bitset_pointer;
+    typedef boost::shared_ptr<bitvector>         bitset_pointer;
     typedef TKN                                        Token;
     typedef BitSetCache<TSA<TKN> >                     BSC_t; 
     /* to allow caching of bit vectors that are expensive to create on
@@ -62,9 +62,9 @@ namespace ugdiss
     friend class TSA_tree_iterator<TKN>;
 
   protected:
-    Ttrack<TKN> const* corpus; // pointer to the underlying corpus
-    char const*    startArray; // beginning ...
-    char const*      endArray; // ... and end ...
+    boost::shared_ptr<Ttrack<TKN> const> corpus; // pointer to the underlying corpus
+    char const*               startArray; // beginning ...
+    char const*                 endArray; // ... and end ...
     // of memory block storing the actual TSA
 
     size_t corpusSize; 
@@ -139,7 +139,7 @@ namespace ugdiss
     getUpperBound(id_type id) const = 0;
 
   public:
-    shared_ptr<BSC_t> bsc;
+    boost::shared_ptr<BSC_t> bsc;
     
     char const* arrayStart() const { return startArray; }
     char const* arrayEnd()   const { return endArray;   }
@@ -298,7 +298,7 @@ namespace ugdiss
     bitset_pointer
     getBitSet(TKN const* startKey, size_t keyLen) const;
     
-    shared_ptr<bitvector>
+    boost::shared_ptr<bitvector>
     findTree(TKN const* treeStart, TKN const* treeEnd, 
              bitvector const* filter) const;
     
@@ -737,7 +737,7 @@ namespace ugdiss
   TSA<TKN>::
   getCorpus() const
   {
-    return corpus;
+    return corpus.get();
   }
 
   //---------------------------------------------------------------------------

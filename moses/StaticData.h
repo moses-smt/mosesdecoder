@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "ScoreComponentCollection.h"
 #include "moses/FF/Factory.h"
+#include "moses/PP/Factory.h"
 
 namespace Moses
 {
@@ -197,9 +198,10 @@ protected:
 
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
-  bool m_adjacentOnly;
+  bool m_defaultNonTermOnlyForEmptyRange;
 
   FeatureRegistry m_registry;
+  PhrasePropertyFactory m_phrasePropertyFactory;
 
   StaticData();
 
@@ -218,8 +220,12 @@ protected:
   std::string m_binPath;
 
   // soft NT lookup for chart models
-  std::map<Word, std::set<Word> > m_soft_matches_map;
-  std::map<Word, std::set<Word> > m_soft_matches_map_reverse;
+  std::vector<std::vector<Word> > m_softMatchesMap;
+
+  const StatefulFeatureFunction* m_treeStructure;
+
+  // number of nonterminal labels
+//   size_t m_nonTerminalSize;
 
 public:
 
@@ -440,10 +446,6 @@ public:
   //Weights for feature with fixed number of values
   std::vector<float> GetWeights(const FeatureFunction* sp) const {
     return m_allWeights.GetScoresForProducer(sp);
-  }
-
-  float GetSparseWeight(const FName& featureName) const {
-    return m_allWeights.GetSparseWeight(featureName);
   }
 
   //Weights for feature with fixed number of values
@@ -730,6 +732,9 @@ public:
   const FeatureRegistry &GetFeatureRegistry() const
   { return m_registry; }
 
+  const PhrasePropertyFactory &GetPhrasePropertyFactory() const
+  { return m_phrasePropertyFactory; }
+
   /** check whether we should be using the old code to support binary phrase-table.
   ** eventually, we'll stop support the binary phrase-table and delete this legacy code
   **/
@@ -738,27 +743,29 @@ public:
     return m_useLegacyPT;
   }
 
-  void Set_Soft_Matches(std::map<Word, std::set<Word> >& soft_matches_map) {
-    m_soft_matches_map = soft_matches_map;
+  void SetSoftMatches(std::vector<std::vector<Word> >& softMatchesMap) {
+    m_softMatchesMap = softMatchesMap;
   }
 
-  const std::map<Word, std::set<Word> >* Get_Soft_Matches() const {
-    return &m_soft_matches_map;
+  const std::vector< std::vector<Word> >& GetSoftMatches() const {
+    return m_softMatchesMap;
   }
-
-  void Set_Soft_Matches_Reverse(std::map<Word, std::set<Word> >& soft_matches_map) {
-    m_soft_matches_map_reverse = soft_matches_map;
-  }
-
-  const std::map<Word, std::set<Word> >* Get_Soft_Matches_Reverse() const {
-    return &m_soft_matches_map_reverse;
-  }
-
-  bool AdjacentOnly() const
-  { return m_adjacentOnly; }
 
 
   void ResetWeights(const std::string &denseWeights, const std::string &sparseFile);
+
+  // need global access for output of tree structure
+  const StatefulFeatureFunction* GetTreeStructure() const {
+      return m_treeStructure;
+  }
+
+  void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
+      m_treeStructure = treeStructure;
+  }
+
+  bool GetDefaultNonTermOnlyForEmptyRange() const
+  { return m_defaultNonTermOnlyForEmptyRange; }
+
 };
 
 }

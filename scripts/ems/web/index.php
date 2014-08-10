@@ -11,8 +11,8 @@ function head($title) {
   print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html><head><title>'.$title.'</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script language="javascript" src="/javascripts/prototype.js"></script>
-<script language="javascript" src="/javascripts/scriptaculous.js"></script>
+<script language="javascript" src="javascripts/prototype.js"></script>
+<script language="javascript" src="javascripts/scriptaculous.js"></script>
 <script language="javascript" src="hierarchical-segmentation.js"></script>
 <script language="javascript" src="base64.js"></script>
 <link href="general.css" rel="stylesheet" type="text/css">
@@ -22,7 +22,8 @@ function head($title) {
 <body><h2>'.$title."</h2>\n";
 }
 
-if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
+if (array_key_exists("setStepStatus",$_GET)) { set_step_status($_GET["setStepStatus"]); }
+else if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
   load_experiment_info();
   load_comment();
 

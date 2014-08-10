@@ -28,8 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
-
+#include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
+
+#include <boost/shared_ptr.hpp>
 
 #ifdef HAVE_PROTOBUF
 #include "rule.pb.h"
@@ -39,6 +41,8 @@ namespace Moses
 {
 class FeatureFunction;
 class InputPath;
+class InputPath;
+class PhraseDictionary;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
@@ -55,23 +59,26 @@ private:
   const Word *m_lhsTarget;
   mutable Phrase *m_ruleSource; // to be set by the feature function that needs it.
 
-  std::map<std::string, std::string> m_properties;
+  typedef std::map<std::string, boost::shared_ptr<PhraseProperty> > Properties;
+  Properties m_properties;
+
+  const PhraseDictionary *m_container;
+
 public:
-  TargetPhrase();
+  TargetPhrase(const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
-  explicit TargetPhrase(std::string out_string);
-  explicit TargetPhrase(const Phrase &targetPhrase);
+  explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
   ~TargetPhrase();
 
   // 1st evaluate method. Called during loading of phrase table.
-  void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
+  void EvaluateInIsolation(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
 
   // as above, score with ALL FFs
   // Used only for OOV processing. Doesn't have a phrase table connect with it
-  void Evaluate(const Phrase &source);
+  void EvaluateInIsolation(const Phrase &source);
 
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
-  void Evaluate(const InputType &input, const InputPath &inputPath);
+  void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
@@ -128,15 +135,16 @@ public:
     return m_ruleSource;
   }
 
+  const PhraseDictionary *GetContainer() const
+  { return m_container; }
+
   // To be set by the FF that needs it, by default the rule source = NULL
   // make a copy of the source side of the rule
   void SetRuleSource(const Phrase &ruleSource) const;
 
   void SetProperties(const StringPiece &str);
-  void SetProperty(const std::string &key, const std::string &value) {
-    m_properties[key] = value;
-  }
-  void GetProperty(const std::string &key, std::string &value, bool &found) const;
+  void SetProperty(const std::string &key, const std::string &value);
+  const PhraseProperty *GetProperty(const std::string &key) const;
 
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 

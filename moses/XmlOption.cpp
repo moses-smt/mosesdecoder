@@ -30,6 +30,7 @@
 #include "TargetPhrase.h"
 #include "ReorderingConstraint.h"
 #include "FactorCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 namespace Moses
 {
@@ -160,6 +161,12 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 
   const StaticData &staticData = StaticData::Instance();
 
+  // hack. What pt should XML trans opt be assigned to?
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
+  }
+
   // no xml tag? we're done.
 //if (line.find_first_of('<') == string::npos) {
   if (line.find(lbrackStr) == string::npos) {
@@ -179,7 +186,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
   size_t wordPos = 0; // position in sentence (in terms of number of words)
 
   const vector<FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
-  const string &factorDelimiter = staticData.GetFactorDelimiter();
+  // const string &factorDelimiter = staticData.GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -308,9 +315,13 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 
         // default: opening tag that specifies translation options
         else {
-          if (startPos >= endPos) {
-            TRACE_ERR("ERROR: tag " << tagName << " must span at least one word: " << line << endl);
+          if (startPos > endPos) {
+            TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
             return false;
+          }
+          else if (startPos == endPos) {
+            TRACE_ERR("WARNING: tag " << tagName << " 0 span: " << line << endl);
+            continue;
           }
 
           // specified translations -> vector of phrases
@@ -357,20 +368,21 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               float scoreValue = FloorScore(TransformScore(probValue));
 
               WordsRange range(startPos + offset,endPos-1 + offset); // span covered by phrase
-              TargetPhrase targetPhrase;
-              targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+              TargetPhrase targetPhrase(firstPt);
+              // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+              targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 
               // lhs
               const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
               if (!lhsList.empty()) {
-                const Factor *factor = FactorCollection::Instance().AddFactor(lhsList[0].first);
+                const Factor *factor = FactorCollection::Instance().AddFactor(lhsList[0].first, true);
                 Word *targetLHS = new Word(true);
                 targetLHS->SetFactor(0, factor); // TODO - other factors too?
                 targetPhrase.SetTargetLHS(targetLHS);
               }
 
               targetPhrase.SetXMLScore(scoreValue);
-              targetPhrase.Evaluate(sourcePhrase);
+              targetPhrase.EvaluateInIsolation(sourcePhrase);
 
               XmlOption *option = new XmlOption(range,targetPhrase);
               assert(option);

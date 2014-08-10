@@ -66,6 +66,22 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
   }
 }
 
+// Intended to be used by ChartKBestExtractor only.  This creates a mock
+// ChartHypothesis for use by the extractor's top-level target vertex.
+ChartHypothesis::ChartHypothesis(const ChartHypothesis &pred,
+                                 const ChartKBestExtractor & /*unused*/)
+  :m_currSourceWordsRange(pred.m_currSourceWordsRange)
+  ,m_scoreBreakdown(pred.m_scoreBreakdown)
+  ,m_totalScore(pred.m_totalScore)
+  ,m_arcList(NULL)
+  ,m_winningHypo(NULL)
+  ,m_manager(pred.m_manager)
+  ,m_id(pred.m_manager.GetNextHypoId())
+{
+  // One predecessor, which is an existing top-level ChartHypothesis.
+  m_prevHypos.push_back(&pred);
+}
+
 ChartHypothesis::~ChartHypothesis()
 {
   // delete feature function states
@@ -133,6 +149,40 @@ Phrase ChartHypothesis::GetOutputPhrase() const
   return outPhrase;
 }
 
+void ChartHypothesis::GetOutputPhrase(int leftRightMost, int numWords, Phrase &outPhrase) const
+{
+  const TargetPhrase &tp = GetCurrTargetPhrase();
+
+  int targetSize = tp.GetSize();
+  for (int i = 0; i < targetSize; ++i) {
+	int pos;
+	if (leftRightMost == 1) {
+	  pos = i;
+	}
+	else if (leftRightMost == 2) {
+	  pos = targetSize - i - 1;
+	}
+	else {
+		abort();
+	}
+
+	const Word &word = tp.GetWord(pos);
+
+	if (word.IsNonTerminal()) {
+	  // non-term. fill out with prev hypo
+	  size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+	  const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
+	  prevHypo->GetOutputPhrase(outPhrase);
+	} else {
+	  outPhrase.AddWord(word);
+	}
+
+	if (outPhrase.GetSize() >= numWords) {
+		return;
+	}
+  }
+}
+
 /** check, if two hypothesis can be recombined.
     this is actually a sorting function that allows us to
     keep an ordered list of hypotheses. This makes recombination
@@ -162,7 +212,7 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 /** calculate total score
   * @todo this should be in ScoreBreakdown
  */
-void ChartHypothesis::Evaluate()
+void ChartHypothesis::EvaluateWhenApplied()
 {
   const StaticData &staticData = StaticData::Instance();
   // total scores from prev hypos
@@ -184,7 +234,7 @@ void ChartHypothesis::Evaluate()
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (! staticData.IsFeatureFunctionIgnored( *sfs[i] )) {
-      sfs[i]->EvaluateChart(*this,&m_scoreBreakdown);
+      sfs[i]->EvaluateWhenApplied(*this,&m_scoreBreakdown);
     }
   }
 
@@ -192,7 +242,7 @@ void ChartHypothesis::Evaluate()
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     if (! staticData.IsFeatureFunctionIgnored( *ffs[i] )) {
-      m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+      m_ffStates[i] = ffs[i]->EvaluateWhenApplied(*this,i,&m_scoreBreakdown);
     }
   }
 

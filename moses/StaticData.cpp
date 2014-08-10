@@ -66,6 +66,7 @@ StaticData::StaticData()
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
+  ,m_treeStructure(NULL)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -124,6 +125,9 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_inputType == 2) {
     s_it = "word lattice";
   }
+  if (m_inputType == 3) {
+    s_it = "tree";
+  }
   VERBOSE(2,"input type is: "<<s_it<<"\n");
 
   if(m_parameter->GetParam("recover-input-path").size()) {
@@ -137,6 +141,8 @@ bool StaticData::LoadData(Parameter *parameter)
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
+    if (m_factorDelimiter == "none")
+      m_factorDelimiter = "";
   }
 
   SetBooleanParameter( &m_continuePartialTranslation, "continue-partial-translation", false );
@@ -385,8 +391,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
   SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
-  SetBooleanParameter( &m_adjacentOnly, "adjacent-only", false);
-
   // minimum Bayes risk decoding
   SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
   m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
@@ -425,6 +429,9 @@ bool StaticData::LoadData(Parameter *parameter)
     exit(1);
   }
   if (m_useConsensusDecoding) m_mbr=true;
+
+  SetBooleanParameter( &m_defaultNonTermOnlyForEmptyRange, "default-non-term-for-empty-range-only", false );
+
 
   // Compact phrase table and reordering model
   SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );
@@ -491,7 +498,8 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     m_xmlBrackets.first= brackets[0];
     m_xmlBrackets.second=brackets[1];
-    cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
+    VERBOSE(1,"XML tags opening and closing brackets for XML input are: " 
+	    << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
   }
 
   if (m_parameter->GetParam("placeholder-factor").size() > 0) {
@@ -508,7 +516,7 @@ bool StaticData::LoadData(Parameter *parameter)
   const vector<string> &features = m_parameter->GetParam("feature");
   for (size_t i = 0; i < features.size(); ++i) {
     const string &line = Trim(features[i]);
-    cerr << "line=" << line << endl;
+    VERBOSE(1,"line=" << line << endl);
     if (line.empty())
       continue;
 
@@ -532,7 +540,9 @@ bool StaticData::LoadData(Parameter *parameter)
   NoCache();
   OverrideFeatures();
 
-  LoadFeatureFunctions();
+  if (!m_parameter->isParamSpecified("show-weights")) {
+    LoadFeatureFunctions();
+  }
 
   if (!LoadDecodeGraphs()) return false;
 
@@ -615,11 +625,11 @@ void StaticData::LoadNonTerminals()
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_inputDefaultNonTerminal.SetIsNonTerminal(true);
-  const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals);
+  const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals, true);
   m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
 
   m_outputDefaultNonTerminal.SetIsNonTerminal(true);
-  const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals);
+  const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals, true);
   m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
 
   // for unknwon words
@@ -637,6 +647,8 @@ void StaticData::LoadNonTerminals()
     		  "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
+      // const Factor *targetFactor = 
+      factorCollection.AddFactor(Output, 0, tokens[0], true);
     }
 
   }
@@ -730,7 +742,7 @@ bool StaticData::LoadDecodeGraphs()
       DecodeGraph *decodeGraph;
       if (IsChart()) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
-        cerr << "max-chart-span: " << maxChartSpans[decodeGraphInd] << endl;
+        VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
       } else {
         decodeGraph = new DecodeGraph(m_decodeGraphs.size());
@@ -862,7 +874,7 @@ void StaticData::SetExecPath(const std::string &path)
   if (pos !=  string::npos) {
     m_binPath = path.substr(0, pos);
   }
-  cerr << m_binPath << endl;
+  VERBOSE(1,m_binPath << endl);
 }
 
 const string &StaticData::GetBinDirectory() const
@@ -916,7 +928,8 @@ void StaticData::LoadFeatureFunctions()
     FeatureFunction *ff = *iter;
     bool doLoad = true;
 
-    if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+    // if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+    if (dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
     }
 
@@ -960,7 +973,7 @@ bool StaticData::CheckWeights() const
     set<string>::iterator iter;
     for (iter = weightNames.begin(); iter != weightNames.end(); ) {
       string fname = (*iter).substr(0, (*iter).find("_"));
-      cerr << fname << "\n";
+      VERBOSE(1,fname << "\n");
       if (featureNames.find(fname) != featureNames.end()) {
         weightNames.erase(iter++);
       }
@@ -1035,7 +1048,7 @@ bool StaticData::LoadAlternateWeightSettings()
       vector<string> tokens = Tokenize(weightSpecification[i]);
       vector<string> args = Tokenize(tokens[0], "=");
       currentId = args[1];
-      cerr << "alternate weight setting " << currentId << endl;
+      VERBOSE(1,"alternate weight setting " << currentId << endl);
       UTIL_THROW_IF2(m_weightSetting.find(currentId) != m_weightSetting.end(),
     		  "Duplicate alternate weight id: " << currentId);
       m_weightSetting[ currentId ] = new ScoreComponentCollection;

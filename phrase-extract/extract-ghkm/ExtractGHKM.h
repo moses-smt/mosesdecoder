@@ -59,11 +59,19 @@ private:
   void WriteUnknownWordLabel(const std::map<std::string, int> &,
                              const std::map<std::string, std::string> &,
                              const Options &,
+                             std::ostream &,
+                             bool writeCounts=false);
+  void WriteUnknownWordSoftMatches(const std::set<std::string> &,
                              std::ostream &);
   void WriteGlueGrammar(const std::set<std::string> &,
                         const std::map<std::string, int> &,
+                        const std::map<std::string,size_t> &,
+                        const Options &,
                         std::ostream &);
-  std::vector<std::string> ReadTokens(const std::string &);
+  void WriteSourceLabelSet(const std::map<std::string,size_t> &,
+                           std::ostream &);
+  std::vector<std::string> ReadTokens(const std::string &) const;
+  std::vector<std::string> ReadTokens(const ParseTree &root) const;
 
   void ProcessOptions(int, char *[], Options &) const;
 

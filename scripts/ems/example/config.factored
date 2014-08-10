@@ -135,9 +135,13 @@ raw-stem = $wmt12-data/training/undoc.2000.$pair-extension
 [LM]
 
 ### tool to be used for language model training
+# kenlm training
+lm-training = "$moses-script-dir/ems/support/lmplz-wrapper.perl -bin $moses-bin-dir/lmplz"
+settings = "--prune '0 0 1' -T $working-dir/lm -S 20%"
+
 # srilm 
-lm-training = $srilm-dir/ngram-count
-settings = "-interpolate -kndiscount -unk"
+#lm-training = $srilm-dir/ngram-count
+#settings = "-interpolate -kndiscount -unk"
 
 # irstlm training
 # msb = modified kneser ney; p=0 no singleton pruning
@@ -315,6 +319,7 @@ script = $moses-script-dir/training/train-model.perl
 # * "-mgiza -mgiza-cpus 8" to use mgiza instead of giza
 # * "-sort-buffer-size 8G -sort-compress gzip" to reduce on-disk sorting
 # * "-sort-parallel 8 -cores 8" to speed up phrase table building
+# * "-parallel" for parallel execution of mkcls and giza
 #
 #training-options = ""
 
@@ -387,9 +392,34 @@ alignment-symmetrization-method = grow-diag-final-and
 #mml-before-wa = "-proportion 0.9"
 #mml-after-wa = "-proportion 0.9"
 
+### build memory mapped suffix array phrase table
+# (binarizing the reordering table is a good idea, since filtering makes little sense)
+#mmsapt = "num-features=9 pfwd=g+ pbwd=g+ smooth=0 sample=1000 workers=1"
+#binarize-all = $moses-script-dir/training/binarize-model.perl
+
 ### create a bilingual concordancer for the model
 #
 #biconcor = $moses-bin-dir/biconcor
+
+## Operation Sequence Model  (OSM)
+# Durrani, Schmid and Fraser. (2011): 
+# "A Joint Sequence Translation Model with Integrated Reordering"
+# compile Moses with --max-kenlm-order=9 if higher order is required
+# 
+#operation-sequence-model = "yes"
+#operation-sequence-model-order = 5
+#operation-sequence-model-settings = "-lmplz '$moses-src-dir/bin/lmplz -S 40% -T $working-dir/model/tmp'"
+#
+# if OSM training should be skipped, point to OSM Model 
+#osm-model =
+
+### unsupervised transliteration module
+# Durrani, Sajjad, Hoang and Koehn (EACL, 2014).
+# "Integrating an Unsupervised Transliteration Model 
+# into Statistical Machine Translation."
+#
+#transliteration-module = "yes"
+#post-decoding-transliteration = "yes"
 
 ### lexicalized reordering: specify orientation type
 # (default: only distance-based reordering model)
@@ -597,7 +627,8 @@ wrapping-script = "$moses-script-dir/ems/support/wrap-xml.perl $output-extension
 #
 nist-bleu = $moses-script-dir/generic/mteval-v13a.pl
 nist-bleu-c = "$moses-script-dir/generic/mteval-v13a.pl -c"
-#multi-bleu = $moses-script-dir/generic/multi-bleu.perl
+#multi-bleu = "$moses-script-dir/generic/multi-bleu.perl -lc"
+#multi-bleu-c = $moses-script-dir/generic/multi-bleu.perl
 #ibm-bleu =
 
 ### TER: translation error rate (BBN metric) based on edit distance

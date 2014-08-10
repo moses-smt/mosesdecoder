@@ -121,7 +121,7 @@ void osmHypothesis :: removeReorderingOperations()
   operations = tupleSequence;
 }
 
-void osmHypothesis :: calculateOSMProb(Model & ptrOp)
+void osmHypothesis :: calculateOSMProb(OSMLM& ptrOp)
 {
 
   opProb = 0;
@@ -130,7 +130,7 @@ void osmHypothesis :: calculateOSMProb(Model & ptrOp)
 
   for (int i = 0; i<operations.size(); i++) {
     temp = currState;
-    opProb += ptrOp.Score(temp,ptrOp.GetVocabulary().Index(operations[i]),currState);
+    opProb += ptrOp.Score(temp,operations[i],currState);
   }
 
   lmState = currState;

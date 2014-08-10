@@ -502,7 +502,7 @@ void BleuScoreFeature::GetClippedNgramMatchesAndCounts(Phrase& phrase,
  * Given a previous state, compute Bleu score for the updated state with an additional target
  * phrase translated.
  */
-FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
+FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
                                     const FFState* prev_state,
                                     ScoreComponentCollection* accumulator) const
 {
@@ -563,7 +563,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
   return new_state;
 }
 
-FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
+FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID,
     ScoreComponentCollection* accumulator ) const
 {
   if (!m_enabled) return new BleuScoreState();

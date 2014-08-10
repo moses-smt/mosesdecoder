@@ -35,30 +35,54 @@ namespace Moses
 {
 FactorCollection FactorCollection::s_instance;
 
-const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
+const Factor *FactorCollection::AddFactor(const StringPiece &factorString, bool isNonTerminal)
 {
   FactorFriend to_ins;
   to_ins.in.m_string = factorString;
-  to_ins.in.m_id = m_factorId;
+  to_ins.in.m_id = (isNonTerminal) ? m_factorIdNonTerminal : m_factorId;
+  Set & set = (isNonTerminal) ? m_set : m_setNonTerminal;
   // If we're threaded, hope a read-only lock is sufficient.
 #ifdef WITH_THREADS
   {
     // read=lock scope
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-    Set::const_iterator i = m_set.find(to_ins);
-    if (i != m_set.end()) return &i->in;
+    Set::const_iterator i = set.find(to_ins);
+    if (i != set.end()) return &i->in;
   }
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif // WITH_THREADS
-  std::pair<Set::iterator, bool> ret(m_set.insert(to_ins));
+  std::pair<Set::iterator, bool> ret(set.insert(to_ins));
   if (ret.second) {
     ret.first->in.m_string.set(
       memcpy(m_string_backing.Allocate(factorString.size()), factorString.data(), factorString.size()),
       factorString.size());
-    m_factorId++;
+    if (isNonTerminal) {
+      m_factorIdNonTerminal++;
+      UTIL_THROW_IF2(m_factorIdNonTerminal >= moses_MaxNumNonterminals, "Number of non-terminals exceeds maximum size reserved. Adjust parameter moses_MaxNumNonterminals, then recompile");
+    }
+    else {
+      m_factorId++;
+    }
   }
   return &ret.first->in;
 }
+
+const Factor *FactorCollection::GetFactor(const StringPiece &factorString, bool isNonTerminal)
+{
+  FactorFriend to_find;
+  to_find.in.m_string = factorString;
+  to_find.in.m_id = (isNonTerminal) ? m_factorIdNonTerminal : m_factorId;
+  Set & set = (isNonTerminal) ? m_set : m_setNonTerminal;
+  { // read=lock scope
+#ifdef WITH_THREADS
+    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+#endif // WITH_THREADS
+    Set::const_iterator i = set.find(to_find);
+    if (i != set.end()) return &i->in;
+  }
+  return NULL;
+}
+
 
 FactorCollection::~FactorCollection() {}
 

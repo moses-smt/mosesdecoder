@@ -10,13 +10,15 @@ ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
 {
 }
 
-void ChartTranslationOption::Evaluate(const InputType &input, const InputPath &inputPath)
+void ChartTranslationOption::EvaluateWithSourceContext(const InputType &input,
+		const InputPath &inputPath,
+		const StackVec &stackVec)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    ff.Evaluate(input, inputPath, m_targetPhrase, m_scoreBreakdown);
+    ff.EvaluateWithSourceContext(input, inputPath, m_targetPhrase, &stackVec, m_scoreBreakdown);
   }
 }
 

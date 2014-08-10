@@ -64,7 +64,7 @@ const FFState* TargetBigramFeature::EmptyHypothesisState(const InputType &/*inpu
   return new TargetBigramState(m_bos);
 }
 
-FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
+FFState* TargetBigramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
                                        const FFState* prev_state,
                                        ScoreComponentCollection* accumulator) const
 {

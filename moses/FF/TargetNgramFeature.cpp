@@ -82,6 +82,7 @@ void TargetNgramFeature::Load()
   m_vocab.insert(EOS_);
   while (getline(inFile, line)) {
     m_vocab.insert(line);
+    cerr << "ADD TO VOCAB: '" << line << "'" << endl;
   }
 
   inFile.close();
@@ -94,7 +95,7 @@ const FFState* TargetNgramFeature::EmptyHypothesisState(const InputType &/*input
   return new TargetNgramState(bos);
 }
 
-FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
+FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
                                       const FFState* prev_state,
                                       ScoreComponentCollection* accumulator) const
 {
@@ -119,7 +120,9 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 //  		const string& curr_w = targetPhrase.GetWord(i).GetFactor(m_factorType)->GetString();
       const StringPiece curr_w = targetPhrase.GetWord(i).GetString(m_factorType);
 
+      //cerr << "CHECK WORD '" << curr_w << "'" << endl;
       if (m_vocab.size() && (FindStringPiece(m_vocab, curr_w) == m_vocab.end())) continue; // skip ngrams
+      //cerr << "ALLOWED WORD '" << curr_w << "'" << endl;
 
       if (n > 1) {
         // can we build an ngram at this position? ("<s> this" --> cannot build 3gram at this position)
@@ -154,6 +157,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 
       if (!skip) {
         curr_ngram << curr_w;
+        //cerr << "SCORE '" << curr_ngram.str() << "'" << endl;
         accumulator->PlusEquals(this,curr_ngram.str(),1);
       }
       curr_ngram.str("");
@@ -203,7 +207,7 @@ void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream 
   }
 }
 
-FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId, ScoreComponentCollection* accumulator) const
+FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureId, ScoreComponentCollection* accumulator) const
 {
   vector<const Word*> contextFactor;
   contextFactor.reserve(m_n);

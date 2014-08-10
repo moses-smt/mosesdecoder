@@ -55,7 +55,7 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
 /** public function to add hypothesis to this collection.
  * Returns false if equiv hypo exists in collection, otherwise returns true.
  * Takes care of update arc list for n-best list creation.
- * Will delete hypo is it exist - once this function is call don't delete hypothesis.
+ * Will delete hypo if it exists - once this function is call don't delete hypothesis.
  * \param hypo hypothesis to add
  * \param manager pointer back to manager
  */
@@ -190,6 +190,8 @@ void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
  */
 void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 {
+  if (m_maxHypoStackSize == 0) return; // no limit
+
   if (GetSize() > m_maxHypoStackSize) { // ok, if not over the limit
     priority_queue<float> bestScores;
 

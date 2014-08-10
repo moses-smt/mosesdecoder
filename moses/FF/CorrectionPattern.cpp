@@ -290,9 +290,10 @@ void CorrectionPattern::Load()
   m_unrestricted = false;
 }
 
-void CorrectionPattern::Evaluate(const InputType &input
+void CorrectionPattern::EvaluateWithSourceContext(const InputType &input
               , const InputPath &inputPath
               , const TargetPhrase &targetPhrase
+              , const StackVec *stackVec
               , ScoreComponentCollection &scoreBreakdown
               , ScoreComponentCollection *estimatedFutureScore) const
 {

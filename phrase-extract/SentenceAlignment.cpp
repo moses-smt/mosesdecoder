@@ -54,7 +54,11 @@ bool SentenceAlignment::processSourceSentence(const char * sourceString, int, bo
   return true;
 }
 
-bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], char weightString[], int sentenceID, bool boundaryRules)
+bool SentenceAlignment::create(const char targetString[],
+							const char sourceString[],
+							const char alignmentString[],
+							const char weightString[],
+							int sentenceID, bool boundaryRules)
 {
   using namespace std;
   this->sentenceID = sentenceID;

@@ -21,6 +21,7 @@
 
 #include "ChartCellLabel.h"
 #include "NonTerminal.h"
+#include "moses/FactorCollection.h"
 
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
@@ -36,20 +37,23 @@ class ChartHypothesisCollection;
 class ChartCellLabelSet
 {
 private:
-#if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
-  typedef boost::unordered_map<Word, ChartCellLabel,
-          NonTerminalHasher, NonTerminalEqualityPred
-          > MapType;
-#else
-  typedef std::map<Word, ChartCellLabel> MapType;
-#endif
+
+  typedef std::vector<ChartCellLabel*> MapType;
 
 public:
   typedef MapType::const_iterator const_iterator;
   typedef MapType::iterator iterator;
 
-  ChartCellLabelSet(const WordsRange &coverage) : m_coverage(coverage) {}
+  ChartCellLabelSet(const WordsRange &coverage)
+  : m_coverage(coverage)
+  , m_map(FactorCollection::Instance().GetNumNonTerminals(), NULL)
+  , m_size(0) { }
 
+  ~ChartCellLabelSet() {
+    RemoveAllInColl(m_map);
+  }
+
+  // TODO: skip empty elements when iterating, or deprecate this
   const_iterator begin() const {
     return m_map.begin();
   }
@@ -65,36 +69,74 @@ public:
   }
 
   void AddWord(const Word &w) {
-    m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w)));
+    size_t idx = w[0]->GetId();
+    if (! ChartCellExists(idx)) {
+      m_size++;
+
+
+      m_map[idx] = new ChartCellLabel(m_coverage, w);
+    }
   }
 
   // Stack is a HypoList or whatever the search algorithm uses.
   void AddConstituent(const Word &w, const HypoList *stack) {
-    ChartCellLabel::Stack s;
-    s.cube = stack;
-    m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w, s)));
+    size_t idx = w[0]->GetId();
+    if (ChartCellExists(idx)) {
+      ChartCellLabel::Stack & s = m_map[idx]->MutableStack();
+      s.cube = stack;
+    }
+    else {
+      ChartCellLabel::Stack s;
+      s.cube = stack;
+      m_size++;
+      m_map[idx] = new ChartCellLabel(m_coverage, w, s);
+    }
+  }
+
+  // grow vector if necessary
+  bool ChartCellExists(size_t idx) {
+    try {
+      if (m_map.at(idx) != NULL) {
+        return true;
+      }
+    }
+    catch (const std::out_of_range& oor) {
+      m_map.resize(FactorCollection::Instance().GetNumNonTerminals(), NULL);
+    }
+    return false;
   }
 
   bool Empty() const {
-    return m_map.empty();
+    return m_size == 0;
   }
 
   size_t GetSize() const {
-    return m_map.size();
+    return m_size;
   }
 
   const ChartCellLabel *Find(const Word &w) const {
-    MapType::const_iterator p = m_map.find(w);
-    return p == m_map.end() ? 0 : &(p->second);
+    size_t idx = w[0]->GetId();
+    try {
+      return m_map.at(idx);
+    }
+    catch (const std::out_of_range& oor) {
+      return NULL;
+    }
   }
 
   ChartCellLabel::Stack &FindOrInsert(const Word &w) {
-    return m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w))).first->second.MutableStack();
+    size_t idx = w[0]->GetId();
+    if (! ChartCellExists(idx)) {
+      m_size++;
+      m_map[idx] = new ChartCellLabel(m_coverage, w);
+    }
+    return m_map[idx]->MutableStack();
   }
 
 private:
   const WordsRange &m_coverage;
   MapType m_map;
+  size_t m_size;
 };
 
 }

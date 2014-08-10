@@ -71,6 +71,8 @@ public:
 class PhraseDictionary :  public DecodeFeature
 {
 public:
+  virtual bool ProvidesPrefixCheck() const;
+
   static const std::vector<PhraseDictionary*>& GetColl() {
 	return s_staticColl;
   }
@@ -84,6 +86,20 @@ public:
   size_t GetTableLimit() const {
     return m_tableLimit;
   }
+
+  //! continguous id for each pt, starting from 0
+  size_t GetId() const
+  { return m_id; }
+
+  virtual
+  void
+  Release(TargetPhraseCollection const* tpc) const;
+
+  /// return true if phrase table entries starting with /phrase/ 
+  //  exist in the table.
+  virtual
+  bool
+  PrefixExists(Phrase const& phrase) const;
 
   // LEGACY!
   // The preferred method is to override GetTargetPhraseCollectionBatch().
@@ -108,7 +124,8 @@ public:
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &,
-    const ChartCellCollectionBase &) = 0;
+    const ChartCellCollectionBase &,
+    std::size_t) = 0;
 
   const std::string &GetFilePath() const {
     return m_filePath;
@@ -119,7 +136,6 @@ public:
   }
 
   void SetParameter(const std::string& key, const std::string& value);
-
 
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
@@ -138,6 +154,8 @@ protected:
   // MUST be called at the start of Load()
   void SetFeaturesToApply();
 
+  bool SatisfyBackoff(const InputPath &inputPath) const;
+
   // cache
   size_t m_maxCacheSize; // 0 = no caching
 
@@ -153,6 +171,7 @@ protected:
 
 protected:
   CacheColl &GetCache() const;
+  size_t m_id;
 
 };
 

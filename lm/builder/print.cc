@@ -42,22 +42,22 @@ PrintARPA::PrintARPA(const VocabReconstitute &vocab, const std::vector<uint64_t>
   util::WriteOrThrow(out_fd, as_string.data(), as_string.size());
 }
 
-void PrintARPA::Run(const ChainPositions &positions) {
+void PrintARPA::Run(const util::stream::ChainPositions &positions) {
   util::scoped_fd closer(out_fd_);
   UTIL_TIMER("(%w s) Wrote ARPA file\n");
   util::FakeOFStream out(out_fd_);
   for (unsigned order = 1; order <= positions.size(); ++order) {
     out << "\\" << order << "-grams:" << '\n';
     for (NGramStream stream(positions[order - 1]); stream; ++stream) {
-      // Correcting for numerical precision issues.  Take that IRST.  
+      // Correcting for numerical precision issues.  Take that IRST.
       out << std::min(0.0f, stream->Value().complete.prob) << '\t' << vocab_.Lookup(*stream->begin());
       for (const WordIndex *i = stream->begin() + 1; i != stream->end(); ++i) {
         out << ' ' << vocab_.Lookup(*i);
       }
-      float backoff = stream->Value().complete.backoff;
-      if (backoff != 0.0)
-        out << '\t' << backoff;
+      if (order != positions.size())
+        out << '\t' << stream->Value().complete.backoff;
       out << '\n';
+    
     }
     out << '\n';
   }

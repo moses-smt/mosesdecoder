@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -93,10 +94,13 @@ class ScoreComponentCollection
 private:
   FVector m_scores;
 
+public:
   typedef std::pair<size_t,size_t> IndexPair;
+private:
   typedef std::map<const FeatureFunction*,IndexPair> ScoreIndexMap;
   static  ScoreIndexMap s_scoreIndexes;
   static size_t s_denseVectorSize;
+public:
   static IndexPair GetIndexes(const FeatureFunction* sp) {
     ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
     if (indexIter == s_scoreIndexes.end()) {
@@ -257,9 +261,18 @@ public:
 
   void PlusEquals(const FeatureFunction* sp, const ScorePair &scorePair);
 
+  // Add score by index
+  void PlusEquals(size_t index, float score) {
+    m_scores[index] += score;
+  }
+
   //For features which have an unbounded number of components
   void SparsePlusEquals(const std::string& full_name, float score) {
     FName fname(full_name);
+    m_scores[fname] += score;
+  }
+
+  void SparsePlusEquals(const FName& fname, float score) {
     m_scores[fname] += score;
   }
 
@@ -275,7 +288,7 @@ public:
     m_scores[indexes.first] = score;
   }
 
-  // Assign core weight by index
+  // Assign score by index
   void Assign(size_t index, float score) {
     m_scores[index] = score;
   }
@@ -287,7 +300,7 @@ public:
 
 
   //Read sparse features from string
-  void Assign(const FeatureFunction* sp, const std::string line);
+  void Assign(const FeatureFunction* sp, const std::string &line);
 
   // shortcut: setting the value directly using the feature name
   void Assign(const std::string name, float score) {
@@ -344,6 +357,11 @@ public:
   void CapMin(float minValue) {
     // cap all sparse features to minValue
     m_scores.capMin(minValue);
+  }
+
+  std::pair<size_t,size_t> GetIndexesForProducer(const FeatureFunction* sp) const {
+    IndexPair indexPair = GetIndexes(sp);
+    return indexPair;
   }
 
   //! if a FeatureFunction produces a single score (for example, a language model score)

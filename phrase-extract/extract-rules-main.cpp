@@ -29,6 +29,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <limits>
 
 #ifdef WIN32
 // Include Visual Leak Detector
@@ -39,15 +40,12 @@
 #include "Hole.h"
 #include "HoleCollection.h"
 #include "RuleExist.h"
-#include "SafeGetline.h"
 #include "SentenceAlignmentWithSyntax.h"
 #include "SyntaxTree.h"
 #include "tables-core.h"
 #include "XmlTree.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
-
-#define LINE_MAX_LENGTH 500000
 
 using namespace std;
 using namespace MosesTraining;
@@ -326,17 +324,15 @@ int main(int argc, char* argv[])
 
   // loop through all sentence pairs
   size_t i=sentenceOffset;
-  while(true) {
-    i++;
-    if (i%1000 == 0) cerr << i << " " << flush;
+  string targetString, sourceString, alignmentString;
 
-    char targetString[LINE_MAX_LENGTH];
-    char sourceString[LINE_MAX_LENGTH];
-    char alignmentString[LINE_MAX_LENGTH];
-    SAFE_GETLINE((*tFileP), targetString, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (tFileP->eof()) break;
-    SAFE_GETLINE((*sFileP), sourceString, LINE_MAX_LENGTH, '\n', __FILE__);
-    SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n', __FILE__);
+  while(getline(*tFileP, targetString)) {
+    i++;
+
+    getline(*sFileP, sourceString);
+    getline(*aFileP, alignmentString);
+
+    if (i%1000 == 0) cerr << i << " " << flush;
 
     SentenceAlignmentWithSyntax sentence
     (targetLabelCollection, sourceLabelCollection,
@@ -349,7 +345,7 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
 
-    if (sentence.create(targetString, sourceString, alignmentString,"", i, options.boundaryRules)) {
+    if (sentence.create(targetString.c_str(), sourceString.c_str(), alignmentString.c_str(),"", i, options.boundaryRules)) {
       if (options.unknownWordLabelFlag) {
         collectWordLabelCounts(sentence);
       }
@@ -412,7 +408,7 @@ void ExtractTask::extractRules()
 
       // find find aligned source words
       // first: find minimum and maximum source word
-      int minS = 9999;
+      int minS = std::numeric_limits<int>::max();
       int maxS = -1;
       vector< int > usedS = m_sentence.alignedCountS;
       for(int ti=startT; ti<=endT; ti++) {

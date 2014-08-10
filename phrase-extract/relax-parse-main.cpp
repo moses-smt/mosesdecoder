@@ -20,8 +20,6 @@
  ***********************************************************************/
 
 #include "relax-parse.h"
-
-#include "SafeGetline.h"
 #include "tables-core.h"
 
 using namespace std;
@@ -33,19 +31,15 @@ int main(int argc, char* argv[])
 
   // loop through all sentences
   int i=0;
-  char inBuffer[LINE_MAX_LENGTH];
-  while(true) {
+  string inBufferString;
+  while(cin.peek() != EOF) {
+    getline(cin,inBufferString);
     i++;
     if (i%1000 == 0) cerr << "." << flush;
     if (i%10000 == 0) cerr << ":" << flush;
     if (i%100000 == 0) cerr << "!" << flush;
 
-    // get line from stdin
-    SAFE_GETLINE( cin, inBuffer, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (cin.eof()) break;
-
     // process into syntax tree representation
-    string inBufferString = string( inBuffer );
     set< string > labelCollection;         // set of labels, not used
     map< string, int > topLabelCollection; // count of top labels, not used
     SyntaxTree tree;

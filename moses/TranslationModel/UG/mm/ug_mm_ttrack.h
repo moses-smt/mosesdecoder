@@ -34,6 +34,8 @@ namespace ugdiss
     typedef TKN Token;
 
   private:
+    id_type numSent;
+    id_type numWords;
     bio::mapped_file_source file;
     Token   const* data;  // pointer to first word of first sentence
     id_type const* index; /* pointer to index (change data type for corpora 

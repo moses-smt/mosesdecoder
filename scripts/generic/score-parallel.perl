@@ -27,10 +27,22 @@ my $scoreCmd		= $ARGV[2];
 my $extractFile = $ARGV[3]; # 1st arg of extract argument
 my $lexFile 		= $ARGV[4]; 
 my $ptHalf 			= $ARGV[5]; # output
+my $inverse = 0;
+my $sourceLabelsFile;
 
 my $otherExtractArgs= "";
 for (my $i = 6; $i < $#ARGV; ++$i)
 {
+  if ($ARGV[$i] eq '--SourceLabels') {
+    $sourceLabelsFile = $ARGV[++$i];
+    $otherExtractArgs .= "--SourceLabels --SourceLabelCountsLHS --SourceLabelSet ";
+    next;
+  }
+  if ($ARGV[$i] eq '--Inverse') {
+    $inverse = 1;
+    $otherExtractArgs .= $ARGV[$i] ." ";
+    next;
+  }
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 #$scoreCmd $extractFile $lexFile $ptHalf $otherExtractArgs
@@ -258,6 +270,14 @@ if (-e $cocPath)
   close(FHCOC);
 }
 
+# merge source label files
+if (!$inverse && defined($sourceLabelsFile)) 
+{
+  my $cmd = "(echo \"GlueTop 0\"; echo \"GlueX 1\"; cat $TMPDIR/phrase-table.half.*.gz.syntaxLabels.src | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+1]}/\") > $sourceLabelsFile";
+  print STDERR "Merging source label files: $cmd \n";
+  `$cmd`;
+}
+
 $cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;
 systemCheck($cmd);
@@ -305,15 +325,21 @@ sub NumStr($)
     my $i = shift;
     my $numStr;
     if ($i < 10) {
-	$numStr = "0000$i";
+	$numStr = "000000$i";
     }
     elsif ($i < 100) {
-	$numStr = "000$i";
+	$numStr = "00000$i";
     }
     elsif ($i < 1000) {
-	$numStr = "00$i";
+	$numStr = "0000$i";
     }
     elsif ($i < 10000) {
+	$numStr = "000$i";
+    }
+    elsif ($i < 100000) {
+	$numStr = "00$i";
+    }
+    elsif ($i < 1000000) {
 	$numStr = "0$i";
     }
     else {

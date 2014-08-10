@@ -1,7 +1,8 @@
-#ifndef UTIL_FILE__
-#define UTIL_FILE__
+#ifndef UTIL_FILE_H
+#define UTIL_FILE_H
 
 #include "util/exception.hh"
+#include "util/string_piece.hh"
 
 #include <cstddef>
 #include <cstdio>
@@ -106,11 +107,19 @@ void ResizeOrThrow(int fd, uint64_t to);
 std::size_t PartialRead(int fd, void *to, std::size_t size);
 void ReadOrThrow(int fd, void *to, std::size_t size);
 std::size_t ReadOrEOF(int fd, void *to_void, std::size_t size);
-// Positioned: unix only for now.  
-void PReadOrThrow(int fd, void *to, std::size_t size, uint64_t off);
 
 void WriteOrThrow(int fd, const void *data_void, std::size_t size);
 void WriteOrThrow(FILE *to, const void *data, std::size_t size);
+
+/* These call pread/pwrite in a loop.  However, on Windows they call ReadFile/
+ * WriteFile which changes the file pointer.  So it's safe to call ErsatzPRead
+ * and ErsatzPWrite concurrently (or any combination thereof).  But it changes
+ * the file pointer on windows, so it's not safe to call concurrently with
+ * anything that uses the implicit file pointer e.g. the Read/Write functions
+ * above.
+ */
+void ErsatzPRead(int fd, void *to, std::size_t size, uint64_t off);
+void ErsatzPWrite(int fd, const void *data_void, std::size_t size, uint64_t off);
 
 void FSyncOrThrow(int fd);
 
@@ -125,8 +134,8 @@ std::FILE *FDOpenReadOrThrow(scoped_fd &file);
 // Temporary files
 // Append a / if base is a directory.
 void NormalizeTempPrefix(std::string &base);
-int MakeTemp(const std::string &prefix);
-std::FILE *FMakeTemp(const std::string &prefix);
+int MakeTemp(const StringPiece &prefix);
+std::FILE *FMakeTemp(const StringPiece &prefix);
 
 // dup an fd.
 int DupOrThrow(int fd);
@@ -139,4 +148,4 @@ std::string NameFromFD(int fd);
 
 } // namespace util
 
-#endif // UTIL_FILE__
+#endif // UTIL_FILE_H

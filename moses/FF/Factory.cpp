@@ -10,6 +10,7 @@
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryScope3.h"
 #include "moses/TranslationModel/PhraseDictionaryTransliteration.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -26,6 +27,7 @@
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/PhraseLengthFeature.h"
 #include "moses/FF/DistortionScoreProducer.h"
+#include "moses/FF/SparseHieroReorderingFeature.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/PhrasePenalty.h"
@@ -33,23 +35,37 @@
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
+#include "moses/FF/SoftSourceSyntacticConstraintsFeature.h"
 #include "moses/FF/CoveredReferenceFeature.h"
-#include "moses/FF/SyntaxConstraintFeature.h"
+#include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
+#include "moses/FF/SourceGHKMTreeInputMatchFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/CorrectionPattern.h"
 #include "moses/FF/EditOps.h"
+#include "moses/FF/SetSourcePhrase.h"
+#include "CountNonTerms.h"
+#include "ReferenceComparison.h"
+#include "RuleScope.h"
+#include "MaxSpanFreeNonTermSource.h"
+#include "NieceTerminal.h"
+#include "SpanLength.h"
+#include "SyntaxRHS.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
+#include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
 
 #ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
 #ifdef PT_UG
-#include "moses/TranslationModel/mmsapt.h"
+#include "moses/TranslationModel/UG/mmsapt.h"
+#endif
+#ifdef HAVE_PROBINGPT
+#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
 #endif
 
 #include "moses/LM/Ken.h"
@@ -79,6 +95,10 @@
 
 #ifdef LM_DALM
 #include "moses/LM/DALMWrapper.h"
+#endif
+
+#ifdef LM_LBL
+#include "moses/LM/oxlm/LBLLM.h"
 #endif
 
 #include "util/exception.hh"
@@ -144,6 +164,18 @@ FeatureRegistry::FeatureRegistry()
 #define MOSES_FNAME(name) Add(#name, new DefaultFeatureFactory< name >());
 // Feature with different name than class.
 #define MOSES_FNAME2(name, type) Add(name, new DefaultFeatureFactory< type >());
+
+  MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
+  MOSES_FNAME(PhraseDictionaryOnDisk);
+  MOSES_FNAME(PhraseDictionaryMemory);
+  MOSES_FNAME(PhraseDictionaryScope3);
+  MOSES_FNAME(PhraseDictionaryMultiModel);
+  MOSES_FNAME(PhraseDictionaryMultiModelCounts);
+  MOSES_FNAME(PhraseDictionaryALSuffixArray);
+  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
+  MOSES_FNAME(PhraseDictionaryTransliteration);
+  MOSES_FNAME(PhraseDictionaryFuzzyMatch);
+
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
   MOSES_FNAME(SourceWordDeletionFeature);
@@ -160,15 +192,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("Distortion", DistortionScoreProducer);
   MOSES_FNAME2("WordPenalty", WordPenaltyProducer);
   MOSES_FNAME(InputFeature);
-  MOSES_FNAME2("PhraseDictionaryBinary", PhraseDictionaryTreeAdaptor);
-  MOSES_FNAME(PhraseDictionaryOnDisk);
-  MOSES_FNAME(PhraseDictionaryMemory);
-  MOSES_FNAME(PhraseDictionaryScope3);
-  MOSES_FNAME(PhraseDictionaryMultiModel);
-  MOSES_FNAME(PhraseDictionaryMultiModelCounts);
-  MOSES_FNAME(PhraseDictionaryALSuffixArray);
-  MOSES_FNAME(PhraseDictionaryDynSuffixArray);
-  MOSES_FNAME(PhraseDictionaryTransliteration);
   MOSES_FNAME(OpSequenceModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
@@ -176,13 +199,25 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ConstrainedDecoding);
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
-  MOSES_FNAME(SyntaxConstraintFeature);
+  MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
+  MOSES_FNAME(SoftSourceSyntacticConstraintsFeature);
+  MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(HyperParameterAsWeight);
+  MOSES_FNAME(SetSourcePhrase);
+  MOSES_FNAME(CountNonTerms);
+  MOSES_FNAME(ReferenceComparison);
+  MOSES_FNAME(RuleScope);
+  MOSES_FNAME(MaxSpanFreeNonTermSource);
+  MOSES_FNAME(NieceTerminal);
+  MOSES_FNAME(SparseHieroReorderingFeature);
+  MOSES_FNAME(SpanLength);
+  MOSES_FNAME(SyntaxRHS);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonLM);
+  MOSES_FNAME(SkeletonChangeInput);
   MOSES_FNAME(SkeletonPT);
 
   MOSES_FNAME(CorrectionPattern);
@@ -193,7 +228,12 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef PT_UG
   MOSES_FNAME(Mmsapt);
+  MOSES_FNAME2("PhraseDictionaryBitextSampling",Mmsapt); // that's an alias for Mmsapt!
 #endif
+#ifdef HAVE_PROBINGPT
+  MOSES_FNAME(ProbingPT);
+#endif
+
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
 #endif
@@ -214,6 +254,11 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
+#endif
+#ifdef LM_LBL
+  MOSES_FNAME2("LBLLM-LM", LBLLM<oxlm::LM>);
+  MOSES_FNAME2("LBLLM-FactoredLM", LBLLM<oxlm::FactoredLM>);
+  MOSES_FNAME2("LBLLM-FactoredMaxentLM", LBLLM<oxlm::FactoredMaxentLM>);
 #endif
 
   Add("KENLM", new KenFactory());
@@ -243,12 +288,21 @@ void FeatureRegistry::Construct(const std::string &name, const std::string &line
 
 void FeatureRegistry::PrintFF() const
 {
+	vector<string> ffs;
 	std::cerr << "Available feature functions:" << std::endl;
 	Map::const_iterator iter;
 	for (iter = registry_.begin(); iter != registry_.end(); ++iter) {
 		const string &ffName = iter->first;
+		ffs.push_back(ffName);
+	}
+
+	vector<string>::const_iterator iterVec;
+	std::sort(ffs.begin(), ffs.end());
+	for (iterVec = ffs.begin(); iterVec != ffs.end(); ++iterVec) {
+		const string &ffName = *iterVec;
 		std::cerr << ffName << " ";
 	}
+
 	std::cerr << std::endl;
 }
 

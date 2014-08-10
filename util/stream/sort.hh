@@ -15,8 +15,8 @@
  * sort.  Use a hash table for that.  
  */
 
-#ifndef UTIL_STREAM_SORT__
-#define UTIL_STREAM_SORT__
+#ifndef UTIL_STREAM_SORT_H
+#define UTIL_STREAM_SORT_H
 
 #include "util/stream/chain.hh"
 #include "util/stream/config.hh"
@@ -182,7 +182,7 @@ template <class Compare> class MergeQueue {
             amount = remaining_;
             buffer_end_ = current_ + remaining_;
           }
-          PReadOrThrow(fd, current_, amount, offset_);
+          ErsatzPRead(fd, current_, amount, offset_);
           offset_ += amount;
           assert(current_ <= buffer_end_);
           remaining_ -= amount;
@@ -307,10 +307,10 @@ template <class Compare, class Combine> class MergingReader {
       const uint64_t block_size = position.GetChain().BlockSize();
       Link l(position);
       for (; offset + block_size < end; ++l, offset += block_size) {
-        PReadOrThrow(in_, l->Get(), block_size, offset);
+        ErsatzPRead(in_, l->Get(), block_size, offset);
         l->SetValidSize(block_size);
       }
-      PReadOrThrow(in_, l->Get(), end - offset, offset);
+      ErsatzPRead(in_, l->Get(), end - offset, offset);
       l->SetValidSize(end - offset);
       (++l).Poison();
       return;
@@ -388,8 +388,10 @@ class BadSortConfig : public Exception {
     ~BadSortConfig() throw() {}
 };
 
+/** Sort */
 template <class Compare, class Combine = NeverCombine> class Sort {
   public:
+    /** Constructs an object capable of sorting */
     Sort(Chain &in, const SortConfig &config, const Compare &compare = Compare(), const Combine &combine = Combine())
       : config_(config),
         data_(MakeTemp(config.temp_prefix)),
@@ -545,4 +547,4 @@ template <class Compare, class Combine> uint64_t BlockingSort(Chain &chain, cons
 } // namespace stream
 } // namespace util
 
-#endif // UTIL_STREAM_SORT__
+#endif // UTIL_STREAM_SORT_H

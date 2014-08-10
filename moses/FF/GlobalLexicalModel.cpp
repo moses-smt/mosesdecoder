@@ -165,7 +165,7 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
   return score;
 }
 
-void GlobalLexicalModel::Evaluate
+void GlobalLexicalModel::EvaluateWhenApplied
 (const Hypothesis& hypo,
  ScoreComponentCollection* accumulator) const
 {

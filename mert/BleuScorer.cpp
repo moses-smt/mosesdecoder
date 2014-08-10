@@ -266,12 +266,12 @@ float smoothedSentenceBleu
 float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg)
 {
   // Sum sent and background
-  std::vector<float> stats;
   UTIL_THROW_IF(sent.size()!=bg.size(), util::Exception, "Error");
   UTIL_THROW_IF(sent.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
+  std::vector<float> stats(sent.size());
 
   for(size_t i=0; i<sent.size(); i++)
-    stats.push_back(sent[i]+bg[i]);
+    stats[i] = sent[i]+bg[i];
 
   // Calculate BLEU
   float logbleu = 0.0;

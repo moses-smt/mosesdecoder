@@ -4,12 +4,15 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
+#include "moses/FactorCollection.h"
+#include "moses/Util.h"
 
 namespace Moses
 {
 
 SoftMatchingFeature::SoftMatchingFeature(const std::string &line)
   : StatelessFeatureFunction(0, line)
+  , m_softMatches(moses_MaxNumNonterminals)
 {
   ReadParameters();
 }
@@ -49,17 +52,16 @@ bool SoftMatchingFeature::Load(const std::string& filePath)
       LHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), tokens[0], true);
       RHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), tokens[1], true);
 
-      m_soft_matches[LHS].insert(RHS);
-      m_soft_matches_reverse[RHS].insert(LHS);
+      m_softMatches[RHS[0]->GetId()].push_back(LHS);
+      GetOrSetFeatureName(RHS, LHS);
     }
 
-    staticData.Set_Soft_Matches(Get_Soft_Matches());
-    staticData.Set_Soft_Matches_Reverse(Get_Soft_Matches_Reverse());
+    staticData.SetSoftMatches(m_softMatches);
 
    return true;
 }
 
-void SoftMatchingFeature::EvaluateChart(const ChartHypothesis& hypo,
+void SoftMatchingFeature::EvaluateWhenApplied(const ChartHypothesis& hypo,
                              ScoreComponentCollection* accumulator) const
 {
 
@@ -78,37 +80,50 @@ void SoftMatchingFeature::EvaluateChart(const ChartHypothesis& hypo,
       const ChartHypothesis* prevHypo = hypo.GetPrevHypo(nonTermInd);
       const Word& prevLHS = prevHypo->GetTargetLHS();
 
-      const std::string name = GetFeatureName(prevLHS, word);
+      const std::string &name = GetOrSetFeatureName(word, prevLHS);
       accumulator->PlusEquals(this,name,1);
     }
   }
 }
 
-//caching feature names because string conversion is slow
-const std::string& SoftMatchingFeature::GetFeatureName(const Word& LHS, const Word& RHS) const
-{
+// when loading, or when we notice that non-terminals have been added after loading, we resize vectors
+void SoftMatchingFeature::ResizeCache() const {
+  FactorCollection& fc = FactorCollection::Instance();
+  size_t numNonTerminals = fc.GetNumNonTerminals();
 
-  const NonTerminalMapKey key(LHS, RHS);
-  {
+  m_nameCache.resize(numNonTerminals);
+  for (size_t i = 0; i < numNonTerminals; i++) {
+    m_nameCache[i].resize(numNonTerminals);
+  }
+}
+
+
+const std::string& SoftMatchingFeature::GetOrSetFeatureName(const Word& RHS, const Word& LHS) const {
+  try {
 #ifdef WITH_THREADS //try read-only lock
-  boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-#endif // WITH_THREADS
-  NonTerminalSoftMatchingMap::const_iterator i = m_soft_matching_cache.find(key);
-  if (i != m_soft_matching_cache.end()) return i->second;
+    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+#endif
+    const std::string &name = m_nameCache.at(RHS[0]->GetId()).at(LHS[0]->GetId());
+    if (!name.empty()) {
+      return name;
+    }
+  }
+  catch (const std::out_of_range& oor) {
+#ifdef WITH_THREADS //need to resize cache; write lock
+    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+#endif
+    ResizeCache();
   }
 #ifdef WITH_THREADS //need to update cache; write lock
-  boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-#endif // WITH_THREADS
-  const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-
-  std::string LHS_string = LHS.GetString(outputFactorOrder, false);
-  std::string RHS_string = RHS.GetString(outputFactorOrder, false);
-
-  const std::string name = LHS_string + "->" + RHS_string;
-
-  m_soft_matching_cache[key] = name;
-  return m_soft_matching_cache.find(key)->second;
-}
+    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+#endif
+    std::string &name = m_nameCache[RHS[0]->GetId()][LHS[0]->GetId()];
+    const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+    std::string LHS_string = LHS.GetString(outputFactorOrder, false);
+    std::string RHS_string = RHS.GetString(outputFactorOrder, false);
+    name = LHS_string + "->" + RHS_string;
+    return name;
+  }
 
 }
 

@@ -4,14 +4,19 @@
 #include <algorithm>
 
 
+#include "moses/Util.h"
 #include "moses/ChartManager.h"
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
+#if PT_UG
+#include "moses/TranslationModel/UG/mmsapt.h"
+#endif
 #include "moses/TreeInput.h"
 #include "moses/LM/ORLM.h"
+#include "moses-cmd/IOWrapper.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -22,6 +27,7 @@
 #include <xmlrpc-c/server_abyss.hpp>
 
 using namespace Moses;
+using namespace MosesCmd;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
@@ -41,18 +47,26 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     const params_t params = paramList.getStruct(0);
     breakOutParams(params);
+#if PT_UG
+    Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(PhraseDictionary::GetColl()[0]);
+    pdsa->add(source_,target_,alignment_);
+#else
     const PhraseDictionary* pdf = PhraseDictionary::GetColl()[0];
-    PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
+    PhraseDictionaryDynSuffixArray* 
+      pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
+#endif
     if(add2ORLM_) {
       //updateORLM();
     }
-    cerr << "Done inserting\n";
+    XVERBOSE(1,"Done inserting\n");
     //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy);
     map<string, xmlrpc_c::value> retData;
     //*retvalP = xmlrpc_c::value_struct(retData);
+#ifndef PT_UG
     pdf = 0;
+#endif
     pdsa = 0;
     *retvalP = xmlrpc_c::value_string("Phrase table updated");
   }
@@ -107,17 +121,17 @@ public:
     if(si == params.end())
       throw xmlrpc_c::fault("Missing source sentence", xmlrpc_c::fault::CODE_PARSE);
     source_ = xmlrpc_c::value_string(si->second);
-    cerr << "source = " << source_ << endl;
+    XVERBOSE(1,"source = " << source_ << endl);
     si = params.find("target");
     if(si == params.end())
       throw xmlrpc_c::fault("Missing target sentence", xmlrpc_c::fault::CODE_PARSE);
     target_ = xmlrpc_c::value_string(si->second);
-    cerr << "target = " << target_ << endl;
+    XVERBOSE(1,"target = " << target_ << endl);
     si = params.find("alignment");
     if(si == params.end())
       throw xmlrpc_c::fault("Missing alignment", xmlrpc_c::fault::CODE_PARSE);
     alignment_ = xmlrpc_c::value_string(si->second);
-    cerr << "alignment = " << alignment_ << endl;
+    XVERBOSE(1,"alignment = " << alignment_ << endl);
     si = params.find("bounded");
     bounded_ = (si != params.end());
     si = params.find("updateORLM");
@@ -209,12 +223,13 @@ public:
         "Missing source text",
         xmlrpc_c::fault::CODE_PARSE);
     }
-    const string source(
-      (xmlrpc_c::value_string(si->second)));
+    const string source((xmlrpc_c::value_string(si->second)));
 
-    cerr << "Input: " << source << endl;
+    XVERBOSE(1,"Input: " << source << endl);
     si = params.find("align");
     bool addAlignInfo = (si != params.end());
+    si = params.find("word-align");
+    bool addWordAlignInfo = (si != params.end());
     si = params.find("sg");
     bool addGraphInfo = (si != params.end());
     si = params.find("topt");
@@ -225,6 +240,9 @@ public:
     int nbest_size = (si == params.end()) ? 0 : int(xmlrpc_c::value_int(si->second));
     si = params.find("nbest-distinct");
     bool nbest_distinct = (si != params.end());
+
+    si = params.find("add-score-breakdown");
+    bool addScoreBreakdown = (si != params.end());
 
     vector<float> multiModelWeights;
     si = params.find("lambda");
@@ -254,23 +272,29 @@ public:
 
     if (staticData.IsChart()) {
        TreeInput tinput;
-        const vector<FactorType> &inputFactorOrder =
-          staticData.GetInputFactorOrder();
+        const vector<FactorType>& 
+	  inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
         ChartManager manager(tinput);
         manager.ProcessSentence();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
+        if (addGraphInfo) {
+          const size_t translationId = tinput.GetTranslationId();
+          std::ostringstream sgstream;
+          manager.GetSearchGraph(translationId,sgstream);
+          retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
+        }
     } else {
         Sentence sentence;
-        const vector<FactorType> &inputFactorOrder =
-          staticData.GetInputFactorOrder();
+        const vector<FactorType> &
+	  inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
 	size_t lineNumber = 0; // TODO: Include sentence request number here?
         Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm());
-        manager.ProcessSentence();
+	manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
         vector<xmlrpc_c::value> alignInfo;
@@ -278,8 +302,22 @@ public:
         if (addAlignInfo) {
           retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
         }
+        if (addWordAlignInfo) {
+          stringstream wordAlignment;
+          OutputAlignment(wordAlignment, hypo);
+          vector<xmlrpc_c::value> alignments;
+          string alignmentPair;
+          while (wordAlignment >> alignmentPair) {
+          	int pos = alignmentPair.find('-');
+          	map<string, xmlrpc_c::value> wordAlignInfo;
+          	wordAlignInfo["source-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(0, pos).c_str()));
+          	wordAlignInfo["target-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
+          	alignments.push_back(xmlrpc_c::value_struct(wordAlignInfo));
+          }
+          retData.insert(pair<string, xmlrpc_c::value_array>("word-align", alignments));
+        }
 
-        if(addGraphInfo) {
+        if (addGraphInfo) {
           insertGraphInfo(manager,retData);
             (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
         }
@@ -287,13 +325,14 @@ public:
           insertTranslationOptions(manager,retData);
         }
         if (nbest_size>0) {
-          outputNBest(manager, retData, nbest_size, nbest_distinct, reportAllFactors, addAlignInfo);
+          outputNBest(manager, retData, nbest_size, nbest_distinct, 
+		      reportAllFactors, addAlignInfo, addScoreBreakdown);
         }
     }
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
     retData.insert(text);
-    cerr << "Output: " << out.str() << endl;
+    XVERBOSE(1,"Output: " << out.str() << endl);
     *retvalP = xmlrpc_c::value_struct(retData);
   }
 
@@ -312,8 +351,9 @@ public:
 
       if (addAlignmentInfo) {
         /**
-         * Add the alignment info to the array. This is in target order and consists of
-         *       (tgt-start, src-start, src-end) triples.
+         * Add the alignment info to the array. This is in target
+         * order and consists of (tgt-start, src-start, src-end)
+         * triples.
          **/
         map<string, xmlrpc_c::value> phraseAlignInfo;
         phraseAlignInfo["tgt-start"] = xmlrpc_c::value_int(hypo->GetCurrTargetWordsRange().GetStartPos());
@@ -378,7 +418,8 @@ public:
                    const int n=100,
                    const bool distinct=false,
                    const bool reportAllFactors=false,
-                   const bool addAlignmentInfo=false)
+                   const bool addAlignmentInfo=false,
+		   const bool addScoreBreakdown=false)
   {
     TrellisPathList nBestList;
     manager.CalcNBest(n, nBestList, distinct);
@@ -415,8 +456,32 @@ public:
       }
       nBestXMLItem["hyp"] = xmlrpc_c::value_string(out.str());
 
-      if (addAlignmentInfo)
+      if (addAlignmentInfo) {
         nBestXMLItem["align"] = xmlrpc_c::value_array(alignInfo);
+
+        if ((int)edges.size() > 0) {
+          stringstream wordAlignment;
+          OutputAlignment(wordAlignment, edges[0]);
+          vector<xmlrpc_c::value> alignments;
+          string alignmentPair;
+          while (wordAlignment >> alignmentPair) {
+          	int pos = alignmentPair.find('-');
+          	map<string, xmlrpc_c::value> wordAlignInfo;
+          	wordAlignInfo["source-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(0, pos).c_str()));
+          	wordAlignInfo["target-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
+          	alignments.push_back(xmlrpc_c::value_struct(wordAlignInfo));
+          }
+          nBestXMLItem["word-align"] = xmlrpc_c::value_array(alignments);
+        }
+      }
+
+      if (addScoreBreakdown)
+	{
+	  // should the score breakdown be reported in a more structured manner?
+	  ostringstream buf;
+	  MosesCmd::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
+	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
+	}
 
       // weighted score
       nBestXMLItem["totalScore"] = xmlrpc_c::value_double(path.GetTotalScore());
@@ -456,17 +521,61 @@ public:
     }
     retData.insert(pair<string, xmlrpc_c::value>("topt", xmlrpc_c::value_array(toptsXml)));
   }
-
-
-
 };
 
+static 
+void 
+PrintFeatureWeight(ostream& out, const FeatureFunction* ff)
+{
+  out << ff->GetScoreProducerDescription() << "=";
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+  for (size_t i = 0; i < numScoreComps; ++i) {
+    out << " " << values[i];
+  }
+  out << endl;
+}
+
+static 
+void 
+ShowWeights(ostream& out)
+{
+  // adapted from moses-cmd/Main.cpp
+  std::ios::fmtflags old_flags = out.setf(std::ios::fixed);
+  size_t         old_precision = out.precision(6);
+  const vector<const StatelessFeatureFunction*>& 
+    slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& 
+    sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+
+  for (size_t i = 0; i < sff.size(); ++i) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(out,ff);
+    }
+    else {
+      out << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
+  }
+  for (size_t i = 0; i < slf.size(); ++i) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(out,ff);
+    }
+    else {
+      out << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
+  }
+  if (! (old_flags & std::ios::fixed)) 
+    out.unsetf(std::ios::fixed);
+  out.precision(old_precision);
+}
 
 int main(int argc, char** argv)
 {
 
   //Extract port and log, send other args to moses
-  char** mosesargv = new char*[argc+2];
+  char** mosesargv = new char*[argc+2]; // why "+2" [UG]
   int mosesargc = 0;
   int port = 8080;
   const char* logfile = "/dev/null";
@@ -508,6 +617,11 @@ int main(int argc, char** argv)
     exit(1);
   }
 
+  if (params->isParamSpecified("show-weights")) {
+    ShowWeights(cout);
+    exit(0);
+  }
+
   //512 MB data limit (512KB is not enough for optimization)
   xmlrpc_limit_set(XMLRPC_XML_SIZE_LIMIT_ID, 512*1024*1024);
 
@@ -522,16 +636,23 @@ int main(int argc, char** argv)
   myRegistry.addMethod("optimize", optimizer);
 
   xmlrpc_c::serverAbyss myAbyssServer(
-    myRegistry,
-    port,              // TCP port on which to listen
-    logfile
+				      myRegistry,
+				      port,              // TCP port on which to listen
+				      logfile
+				      );
+  /* doesn't work with xmlrpc-c v. 1.16.33 - ie very old lib on Ubuntu 12.04
+  xmlrpc_c::serverAbyss myAbyssServer(
+    xmlrpc_c::serverAbyss::constrOpt()
+    .registryPtr(&myRegistry)
+    .portNumber(port)              // TCP port on which to listen
+    .logFileName(logfile)
+    .allowOrigin("*")
   );
-
-  cerr << "Listening on port " << port << endl;
+  */
+  
+  XVERBOSE(1,"Listening on port " << port << endl);
   if (isSerial) {
-    while(1) {
-      myAbyssServer.runOnce();
-    }
+    while(1) myAbyssServer.runOnce();
   } else {
     myAbyssServer.run();
   }

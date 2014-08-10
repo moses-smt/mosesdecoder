@@ -40,7 +40,9 @@ public:
     , maxScope(3)
     , minimal(false)
     , pcfg(false)
+    , phraseOrientation(false)
     , treeFragments(false)
+    , sourceLabels(false)
     , sentenceOffset(0)
     , unpairedExtractFormat(false)
     , unknownWordMinRelFreq(0.03f)
@@ -63,10 +65,15 @@ public:
   int maxScope;
   bool minimal;
   bool pcfg;
+  bool phraseOrientation;
   bool treeFragments;
+  bool sourceLabels;
+  std::string sourceLabelSetFile;
   int sentenceOffset;
   bool unpairedExtractFormat;
-  std::string unknownWordFile;
+  std::string targetUnknownWordFile;
+  std::string sourceUnknownWordFile;
+  std::string unknownWordSoftMatchesFile;
   float unknownWordMinRelFreq;
   bool unknownWordUniform;
 };

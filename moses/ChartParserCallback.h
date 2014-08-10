@@ -12,6 +12,7 @@ class WordsRange;
 class TargetPhrase;
 class InputPath;
 class InputType;
+class ChartCellLabel;
 
 class ChartParserCallback
 {
@@ -24,7 +25,10 @@ public:
 
   virtual void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range) = 0;
 
-  virtual void Evaluate(const InputType &input, const InputPath &inputPath) = 0;
+  virtual void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath) = 0;
+
+  virtual float GetBestScore(const ChartCellLabel *chartCell) const = 0;
+
 };
 
 } // namespace Moses

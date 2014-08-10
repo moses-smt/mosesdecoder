@@ -1,12 +1,19 @@
+#include <vector>
 #include "SkeletonStatelessFF.h"
 #include "moses/ScoreComponentCollection.h"
-#include <vector>
+#include "moses/TargetPhrase.h"
 
 using namespace std;
 
 namespace Moses
 {
-void SkeletonStatelessFF::Evaluate(const Phrase &source
+SkeletonStatelessFF::SkeletonStatelessFF(const std::string &line)
+  :StatelessFeatureFunction(2, line)
+{
+  ReadParameters();
+}
+
+void SkeletonStatelessFF::EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const
@@ -22,20 +29,37 @@ void SkeletonStatelessFF::Evaluate(const Phrase &source
 
 }
 
-void SkeletonStatelessFF::Evaluate(const InputType &input
+void SkeletonStatelessFF::EvaluateWithSourceContext(const InputType &input
                                    , const InputPath &inputPath
                                    , const TargetPhrase &targetPhrase
+                                   , const StackVec *stackVec
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection *estimatedFutureScore) const
-{}
+{
+	if (targetPhrase.GetNumNonTerminals()) {
+		  vector<float> newScores(m_numScoreComponents);
+		  newScores[0] = - std::numeric_limits<float>::infinity();
+		  scoreBreakdown.PlusEquals(this, newScores);
+	}
 
-void SkeletonStatelessFF::Evaluate(const Hypothesis& hypo,
+}
+
+void SkeletonStatelessFF::EvaluateWhenApplied(const Hypothesis& hypo,
                                    ScoreComponentCollection* accumulator) const
 {}
 
-void SkeletonStatelessFF::EvaluateChart(const ChartHypothesis &hypo,
+void SkeletonStatelessFF::EvaluateWhenApplied(const ChartHypothesis &hypo,
                                         ScoreComponentCollection* accumulator) const
 {}
+
+void SkeletonStatelessFF::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "arg") {
+    // set value here
+  } else {
+    StatelessFeatureFunction::SetParameter(key, value);
+  }
+}
 
 }
 

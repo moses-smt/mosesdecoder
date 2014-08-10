@@ -51,24 +51,7 @@ ChartTranslationOptions::~ChartTranslationOptions()
 
 }
 
-float ChartTranslationOptions::CalcEstimateOfBestScore(
-  const TargetPhraseCollection &tpc,
-  const StackVec &stackVec)
-{
-  const TargetPhrase &targetPhrase = **(tpc.begin());
-  float estimateOfBestScore = targetPhrase.GetFutureScore();
-  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
-       ++p) {
-    const HypoList *stack = (*p)->GetStack().cube;
-    assert(stack);
-    assert(!stack->empty());
-    const ChartHypothesis &bestHypo = **(stack->begin());
-    estimateOfBestScore += bestHypo.GetTotalScore();
-  }
-  return estimateOfBestScore;
-}
-
-void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &inputPath)
+void ChartTranslationOptions::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
   SetInputPath(&inputPath);
   if (StaticData::Instance().GetPlaceholderFactor() != NOT_FOUND) {
@@ -79,9 +62,24 @@ void ChartTranslationOptions::Evaluate(const InputType &input, const InputPath &
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
     ChartTranslationOption &transOpt = **iter;
     transOpt.SetInputPath(&inputPath);
-    transOpt.Evaluate(input, inputPath);
+    transOpt.EvaluateWithSourceContext(input, inputPath, m_stackVec);
   }
 
+  // get rid of -inf trans opts
+  size_t numDiscard = 0;
+  for (size_t i = 0; i < m_collection.size(); ++i) {
+    ChartTranslationOption *transOpt = m_collection[i].get();
+
+    if (transOpt->GetScores().GetWeightedScore() == - std::numeric_limits<float>::infinity()) {
+    	++numDiscard;
+    }
+    else if (numDiscard) {
+    	m_collection[i - numDiscard] = m_collection[i];
+    }
+  }
+
+  size_t newSize = m_collection.size() - numDiscard;
+  m_collection.resize(newSize);
 }
 
 void ChartTranslationOptions::SetInputPath(const InputPath *inputPath)

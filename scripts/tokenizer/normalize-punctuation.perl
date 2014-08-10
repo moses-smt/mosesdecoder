@@ -2,7 +2,13 @@
 
 use strict;
 
-my ($language) = @ARGV;
+my $language = "en";
+while (@ARGV) {
+    $_ = shift;
+    /^-b$/ && ($| = 1, next); # not buffered (flush each line)
+    /^-l$/ && ($language = shift, next);
+    /^[^\-]/ && ($language = $_, next);
+}
 
 while(<STDIN>) {
     s/\r//g;

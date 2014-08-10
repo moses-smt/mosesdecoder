@@ -2,11 +2,12 @@
 
 # include "moses/FF/FFState.h"
 # include "moses/Manager.h"
-#include "lm/model.hh"
 # include <set>
 # include <map>
 # include <string>
 # include <vector>
+
+#include "KenOSM.h"
 
 namespace Moses
 {
@@ -79,7 +80,7 @@ public:
   ~osmHypothesis() {};
   void generateOperations(int & startIndex, int j1 , int contFlag , WordsBitmap & coverageVector , std::string english , std::string german , std::set <int> & targetNullWords , std::vector <std::string> & currF);
   void generateDeleteOperations(std::string english, int currTargetIndex, std::set <int> doneTargetIndexes);
-  void calculateOSMProb(lm::ngram::Model & ptrOp);
+  void calculateOSMProb(OSMLM& ptrOp);
   void computeOSMFeature(int startIndex , WordsBitmap & coverageVector);
   void constructCepts(std::vector <int> & align , int startIndex , int endIndex, int targetPhraseLength);
   void setPhrases(std::vector <std::string> & val1 , std::vector <std::string> & val2) {

@@ -158,7 +158,7 @@ void Phrase::PrependWord(const Word &newWord)
 void Phrase::CreateFromString(FactorDirection direction
                               ,const std::vector<FactorType> &factorOrder
                               ,const StringPiece &phraseString
-                              ,const StringPiece &factorDelimiter
+                              // ,const StringPiece &factorDelimiter // eliminated [UG]
                               ,Word **lhs)
 {
   // parse
@@ -380,6 +380,11 @@ void Phrase::InitStartEndWord()
 
 size_t Phrase::Find(const Phrase &sought, int maxUnknown) const
 {
+  if (GetSize() < sought.GetSize()) {
+	// sought phrase too big
+    return NOT_FOUND;
+  }
+
   size_t maxStartPos = GetSize() - sought.GetSize();
   for (size_t startThisPos = 0; startThisPos <= maxStartPos; ++startThisPos) {
     size_t thisPos = startThisPos;

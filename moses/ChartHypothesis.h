@@ -31,6 +31,7 @@
 namespace Moses
 {
 
+class ChartKBestExtractor;
 class ChartHypothesis;
 class ChartManager;
 class RuleCubeItem;
@@ -44,6 +45,7 @@ typedef std::vector<ChartHypothesis*> ChartArcList;
 class ChartHypothesis
 {
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesis&);
+  friend class ChartKBestExtractor;
 
 protected:
 #ifdef USE_HYPO_POOL
@@ -73,6 +75,9 @@ protected:
 
   //! not implemented
   ChartHypothesis(const ChartHypothesis &copy);
+
+  //! only used by ChartKBestExtractor
+  ChartHypothesis(const ChartHypothesis &, const ChartKBestExtractor &);
 
 public:
 #ifdef USE_HYPO_POOL
@@ -133,9 +138,13 @@ public:
   void GetOutputPhrase(Phrase &outPhrase) const;
   Phrase GetOutputPhrase() const;
 
+  // get leftmost/rightmost words only
+  // leftRightMost: 1=left, 2=right
+  void GetOutputPhrase(int leftRightMost, int numWords, Phrase &outPhrase) const;
+
   int RecombineCompare(const ChartHypothesis &compare) const;
 
-  void Evaluate();
+  void EvaluateWhenApplied();
 
   void AddArc(ChartHypothesis *loserHypo);
   void CleanupArcList();

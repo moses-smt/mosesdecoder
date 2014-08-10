@@ -105,7 +105,9 @@ void Manager::ProcessSentence()
   // some reporting on how long this took
   IFVERBOSE(1) {
     GetSentenceStats().StopTimeCollectOpts();
-    TRACE_ERR("Line "<< m_lineNumber << ": Collecting options took " << GetSentenceStats().GetTimeCollectOpts() << " seconds" << endl);
+    TRACE_ERR("Line "<< m_lineNumber << ": Collecting options took " 
+	      << GetSentenceStats().GetTimeCollectOpts() << " seconds at " 
+	      << __FILE__ << ":" << __LINE__ << endl);
   }
 
   // search for best translation with the specified algorithm
@@ -182,7 +184,11 @@ void Manager::printDivergentHypothesis(long translationId, const Hypothesis* hyp
 }
 
 
-void Manager::printThisHypothesis(long translationId, const Hypothesis* hypo, const vector <const TargetPhrase*> & remainingPhrases, float remainingScore, ostream& outputStream) const
+void 
+Manager::
+printThisHypothesis(long translationId, const Hypothesis* hypo, 
+		    const vector <const TargetPhrase*> & remainingPhrases, 
+		    float remainingScore, ostream& outputStream) const
 {
 
   outputStream << translationId << " ||| ";
@@ -759,25 +765,10 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, sff[i], outputSearchGraphStream);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-    /*
-    if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
-          slf[i]->GetScoreProducerWeightShortName() != "tm" &&
-          slf[i]->GetScoreProducerWeightShortName() != "I" &&
-          slf[i]->GetScoreProducerWeightShortName() != "g")
-    */
     {
       featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionary*>& pds = PhraseDictionary::GetColl();
-  for( size_t i=0; i<pds.size(); i++ ) {
-    featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, pds[i], outputSearchGraphStream);
-  }
-  const vector<GenerationDictionary*>& gds = GenerationDictionary::GetColl();
-  for( size_t i=0; i<gds.size(); i++ ) {
-    featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, gds[i], outputSearchGraphStream);
-  }
-
 }
 
 
@@ -844,6 +835,9 @@ size_t Manager::OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypoth
 
 size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
 {
+  if (!ff->IsTuneable()) {
+    return index;
+  }
   ScoreComponentCollection scoreCollection = hypo->GetScoreBreakdown();
   const Hypothesis *prevHypo = hypo->GetPrevHypo();
   if (prevHypo) {
@@ -934,6 +928,9 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 
   long numArcs = searchGraph.size() + terminalNodes.size();
 
+  //Header
+  outputSearchGraphStream << "# target ||| features ||| source-covered" << endl;
+
   // Print number of nodes and arcs
   outputSearchGraphStream << numNodes << " " << numArcs << endl;
 
@@ -951,6 +948,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
     size_t count = hypergraphIDToArcs.count(hypergraphHypothesisID);
     //    VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " has " << count << " incoming arcs" << std::endl)
     if (count > 0) {
+      outputSearchGraphStream << "# node " << hypergraphHypothesisID << endl;
       outputSearchGraphStream << count << "\n";
 
       pair<multimap<int,int>::iterator, multimap<int,int>::iterator> range =
@@ -976,7 +974,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
         const Hypothesis *prevHypo = thisHypo->GetPrevHypo();
         if (prevHypo==NULL) {
           //	VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " start of sentence" << std::endl)
-          outputSearchGraphStream << "<s> ||| \n";
+          outputSearchGraphStream << "<s> |||  ||| 0\n";
         } else {
           int startNode = mosesIDToHypergraphID[prevHypo->GetId()];
           //	  VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " has parent node " << startNode << std::endl)
@@ -989,12 +987,13 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
           const TargetPhrase &targetPhrase = thisHypo->GetCurrTargetPhrase();
           int targetWordCount = targetPhrase.GetSize();
 
-          outputSearchGraphStream << "[" << startNode << "]";
+          outputSearchGraphStream << "[" << startNode << "] ";
           for (int targetWordIndex=0; targetWordIndex<targetWordCount; targetWordIndex+=1) {
-            outputSearchGraphStream << " " << targetPhrase.GetWord(targetWordIndex);
+            outputSearchGraphStream << targetPhrase.GetWord(targetWordIndex)[0]->GetString() << " ";
           }
           outputSearchGraphStream << " ||| ";
           OutputFeatureValuesForHypergraph(thisHypo, outputSearchGraphStream);
+          outputSearchGraphStream << " ||| " << thisHypo->GetWordsBitmap().GetNumWordsCovered();
           outputSearchGraphStream << "\n";
         }
       }
@@ -1002,9 +1001,10 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
   }
 
   // Print node and arc(s) for end of sentence </s>
+  outputSearchGraphStream << "# node " << endNode << endl;
   outputSearchGraphStream << terminalNodes.size() << "\n";
   for (set<int>::iterator it=terminalNodes.begin(); it!=terminalNodes.end(); ++it) {
-    outputSearchGraphStream << "[" << (*it) << "] </s> ||| \n";
+    outputSearchGraphStream << "[" << (*it) << "] </s> |||  ||| " << GetSource().GetSize() << "\n";
   }
 
 }

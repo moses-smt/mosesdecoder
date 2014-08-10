@@ -30,6 +30,8 @@ typedef struct
   DWORDLONG ullAvailVirtual;
   DWORDLONG ullAvailExtendedVirtual;
 } lMEMORYSTATUSEX;
+// Is this really supposed to be defined like this?
+typedef int WINBOOL;
 typedef WINBOOL (WINAPI *PFN_MS_EX) (lMEMORYSTATUSEX*);
 #else
 #include <sys/resource.h>
@@ -196,7 +198,7 @@ uint64_t GuessPhysicalMemory() {
 #if defined(_WIN32) || defined(_WIN64)
   { /* this works on windows */
     PFN_MS_EX pfnex;
-    HMODULE h = GetModuleHandle ("kernel32.dll");
+    HMODULE h = GetModuleHandle (TEXT("kernel32.dll"));
 
     if (!h)
       return 0;

@@ -56,8 +56,12 @@ namespace Moses
 
 /** verbose macros
  * */
+
 #define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
+#define XVERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR("[" << __FILE__ << ":" << __LINE__ << "] ");TRACE_ERR(str); } }
+#define HERE __FILE__ << ":" << __LINE__
+
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)
 // gcc nth_element() bug

@@ -374,7 +374,6 @@ ReadBase *ReadFactory(int fd, uint64_t &raw_amount, const void *already_data, co
     header.resize(original + got);
   }
   if (header.empty()) {
-    hold.release();
     return new Complete();
   }
   switch (DetectMagic(&header[0], header.size())) {
@@ -433,6 +432,17 @@ void ReadCompressed::Reset(std::istream &in) {
 
 std::size_t ReadCompressed::Read(void *to, std::size_t amount) {
   return internal_->Read(to, amount, *this);
+}
+
+std::size_t ReadCompressed::ReadOrEOF(void *const to_in, std::size_t amount) {
+  uint8_t *to = reinterpret_cast<uint8_t*>(to_in);
+  while (amount) {
+    std::size_t got = Read(to, amount);
+    if (!got) break;
+    to += got;
+    amount -= got;
+  }
+  return to - reinterpret_cast<uint8_t*>(to_in);
 }
 
 } // namespace util

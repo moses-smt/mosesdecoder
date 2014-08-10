@@ -36,6 +36,8 @@ namespace Moses
 {
 PhraseDictionaryOnDisk::PhraseDictionaryOnDisk(const std::string &line)
   : MyBase(line)
+  , m_maxSpanDefault(NOT_FOUND)
+  , m_maxSpanLabelled(NOT_FOUND)
 {
   ReadParameters();
 }
@@ -51,7 +53,8 @@ void PhraseDictionaryOnDisk::Load()
 
 ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const ChartParser &parser,
-  const ChartCellCollectionBase &cellCollection)
+  const ChartCellCollectionBase &cellCollection,
+  std::size_t /*maxChartSpan*/)
 {
         std::cerr << "BEEP1" << std::endl;
   return new ChartRuleLookupManagerOnDisk(parser, cellCollection, *this,
@@ -140,6 +143,11 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
     prevPtNode = &wrapper.GetRootSourceNode();
   }
 
+  // backoff
+  if (!SatisfyBackoff(inputPath)) {
+  	return;
+  }
+
   if (prevPtNode) {
     Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
     lastWord.OnlyTheseFactors(m_inputFactors);
@@ -207,6 +215,20 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionN
 
   return targetPhrases;
 }
+
+void PhraseDictionaryOnDisk::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "max-span-default") {
+    m_maxSpanDefault = Scan<size_t>(value);
+  }
+  else if (key == "max-span-labelled") {
+    m_maxSpanLabelled = Scan<size_t>(value);
+  }
+  else {
+    PhraseDictionary::SetParameter(key, value);
+  }
+}
+
 
 } // namespace
 

@@ -9,18 +9,17 @@ namespace MosesTuning
 {
 
 
-MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
-  : m_dense(vec.dense)
-{
-  vector<size_t> sparseFeats = vec.sparse.feats();
+void MiraFeatureVector::InitSparse(const SparseVector& sparse, size_t ignoreLimit) {
+  vector<size_t> sparseFeats = sparse.feats();
   bool bFirst = true;
   size_t lastFeat = 0;
   m_sparseFeats.reserve(sparseFeats.size());
   m_sparseVals.reserve(sparseFeats.size());
   for(size_t i=0; i<sparseFeats.size(); i++) {
+    if (sparseFeats[i] < ignoreLimit) continue;
     size_t feat = m_dense.size() + sparseFeats[i];
     m_sparseFeats.push_back(feat);
-    m_sparseVals.push_back(vec.sparse.get(sparseFeats[i]));
+    m_sparseVals.push_back(sparse.get(sparseFeats[i]));
 
     // Check ordered property
     if(bFirst) {
@@ -33,6 +32,21 @@ MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
     }
     lastFeat = feat;
   }
+}
+
+MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
+  : m_dense(vec.dense)
+{
+  InitSparse(vec.sparse);
+}
+
+MiraFeatureVector::MiraFeatureVector(const SparseVector& sparse, size_t num_dense) {
+  m_dense.resize(num_dense);
+  //Assume that features with id [0,num_dense) are the dense features
+  for (size_t id = 0; id < num_dense; ++id) {
+    m_dense[id] = sparse.get(id);
+  }
+  InitSparse(sparse,num_dense);
 }
 
 MiraFeatureVector::MiraFeatureVector(const MiraFeatureVector& other)
@@ -146,6 +160,22 @@ MiraFeatureVector operator-(const MiraFeatureVector& a, const MiraFeatureVector&
 
   // Create and return vector
   return MiraFeatureVector(dense,sparseFeats,sparseVals);
+}
+
+bool operator==(const MiraFeatureVector& a,const MiraFeatureVector& b) {
+  ValType eps = 1e-8;
+  //dense features
+  if (a.m_dense.size() != b.m_dense.size()) return false;
+  for (size_t i = 0; i < a.m_dense.size(); ++i) {
+    if (fabs(a.m_dense[i]-b.m_dense[i]) < eps) return false;
+  }
+  if (a.m_sparseFeats.size() != b.m_sparseFeats.size()) return false;
+  for (size_t i = 0; i < a.m_sparseFeats.size(); ++i) {
+    if (a.m_sparseFeats[i] != b.m_sparseFeats[i]) return false;
+    if (fabs(a.m_sparseVals[i] != b.m_sparseVals[i])) return false;
+  }
+  return true;
+
 }
 
 ostream& operator<<(ostream& o, const MiraFeatureVector& e)

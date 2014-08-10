@@ -21,11 +21,14 @@ while (@ARGV) {
 	/^-l$/ && ($language = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
+	/^-b$/ && ($|++, next); # no output buffering
 }
 
 if ($HELP) {
-    print "Usage ./split-sentences.perl (-l [en|de|...]) < textfile > splitfile\n";
-	exit;
+    print "Usage ./split-sentences.perl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
+    print "-q: quiet mode\n";
+    print "-b: no output buffering (for use in bidirectional pipes)\n";
+    exit;
 }
 if (!$QUIET) {
 	print STDERR "Sentence Splitter v3\n";

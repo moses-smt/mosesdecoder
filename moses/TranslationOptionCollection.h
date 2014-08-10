@@ -96,7 +96,7 @@ protected:
   //! implemented by inherited class, called by this class
   virtual void ProcessUnknownWord(size_t sourcePos)=0;
 
-  void EvaluateWithSource();
+  void EvaluateWithSourceContext();
 
   void CacheLexReordering();
 
@@ -153,6 +153,10 @@ public:
   const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
+
+  const InputPathList &GetInputPaths() const
+  { return m_inputPathQueue; }
+
 
   TO_STRING();
 };

@@ -62,7 +62,7 @@ void EditOps::SetParameter(const std::string& key, const std::string& value)
 void EditOps::Load()
 { }
 
-void EditOps::Evaluate(const Phrase &source
+void EditOps::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &target
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedFutureScore) const

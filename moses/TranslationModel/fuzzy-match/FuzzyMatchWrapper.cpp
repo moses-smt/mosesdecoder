@@ -345,10 +345,10 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
     // find the best matches according to letter sed
     string best_path = "";
     int best_match = -1;
-    int best_letter_cost;
+    unsigned int best_letter_cost;
     if (lsed_flag) {
       best_letter_cost = compute_length( input[sentenceInd] ) * min_match / 100 + 1;
-      for(int si=0; si<best_tm.size(); si++) {
+      for(size_t si=0; si<best_tm.size(); si++) {
         int s = best_tm[si];
         string path;
         unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );
@@ -413,11 +413,9 @@ void FuzzyMatchWrapper::load_corpus( const std::string &fileName, vector< vector
 
   istream *fileStreamP = &fileStream;
 
-  char line[LINE_MAX_LENGTH];
-  while(true) {
-    SAFE_GETLINE((*fileStreamP), line, LINE_MAX_LENGTH, '\n');
-    if (fileStreamP->eof()) break;
-    corpus.push_back( GetVocabulary().Tokenize( line ) );
+  string line;
+  while(getline(*fileStreamP, line)) {
+    corpus.push_back( GetVocabulary().Tokenize( line.c_str() ) );
   }
 }
 
@@ -436,12 +434,9 @@ void FuzzyMatchWrapper::load_target(const std::string &fileName, vector< vector<
   WORD_ID delimiter = GetVocabulary().StoreIfNew("|||");
 
   int lineNum = 0;
-  char line[LINE_MAX_LENGTH];
-  while(true) {
-    SAFE_GETLINE((*fileStreamP), line, LINE_MAX_LENGTH, '\n');
-    if (fileStreamP->eof()) break;
-
-    vector<WORD_ID> toks = GetVocabulary().Tokenize( line );
+  string line;
+  while(getline(*fileStreamP, line)) {
+    vector<WORD_ID> toks = GetVocabulary().Tokenize( line.c_str() );
 
     corpus.push_back(vector< SentenceAlignment >());
     vector< SentenceAlignment > &vec = corpus.back();
@@ -493,11 +488,8 @@ void FuzzyMatchWrapper::load_alignment(const std::string &fileName, vector< vect
   string delimiter = "|||";
 
   int lineNum = 0;
-  char line[LINE_MAX_LENGTH];
-  while(true) {
-    SAFE_GETLINE((*fileStreamP), line, LINE_MAX_LENGTH, '\n');
-    if (fileStreamP->eof()) break;
-
+  string line;
+  while(getline(*fileStreamP, line)) {
     vector< SentenceAlignment > &vec = corpus[lineNum];
     size_t targetInd = 0;
     SentenceAlignment *sentence = &vec[targetInd];

@@ -66,6 +66,12 @@ void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
     m_fwd << " ||| " << std::exp(rule.GetPcfgScore());
   }
 
+  if (m_options.sourceLabels && rule.HasSourceLabels()) {
+    m_fwd << " {{SourceLabels";
+    rule.PrintSourceLabels(m_fwd);
+    m_fwd << "}}";
+  }
+
   if (printEndl) {
     m_fwd << std::endl;
     m_inv << std::endl;
@@ -163,14 +169,17 @@ void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
   }
 }
 
-void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g) 
+void ScfgRuleWriter::Write(const ScfgRule &rule, const Subgraph &g, bool printEndl) 
 {
-    Write(rule,false);
-    m_fwd << " {{Tree ";
-    g.PrintTree(m_fwd);
-    m_fwd << "}}";
+  Write(rule,false);
+  m_fwd << " {{Tree ";
+  g.PrintTree(m_fwd);
+  m_fwd << "}}";
+
+  if (printEndl) {
     m_fwd << std::endl;
     m_inv << std::endl;
+  }
 }
 
 }  // namespace GHKM

@@ -16,7 +16,7 @@ ControlRecombinationState::ControlRecombinationState(const Hypothesis &hypo, con
   :m_ff(ff)
 {
   if (ff.GetType() == SameOutput) {
-    UTIL_THROW(util::Exception, "Implemented not yet completed for phrase-based model. Need to take into account the coverage");
+    //UTIL_THROW(util::Exception, "Implemented not yet completed for phrase-based model. Need to take into account the coverage");
     hypo.GetOutputPhrase(m_outputPhrase);
   } else {
     m_hypo = &hypo;
@@ -36,8 +36,9 @@ ControlRecombinationState::ControlRecombinationState(const ChartHypothesis &hypo
 int ControlRecombinationState::Compare(const FFState& other) const
 {
   const ControlRecombinationState &otherFF = static_cast<const ControlRecombinationState&>(other);
+
   if (m_ff.GetType() == SameOutput) {
-    bool ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
+    int ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
     return ret;
   } else {
     // compare hypo address. Won't be equal unless they're actually the same hypo
@@ -55,7 +56,7 @@ std::vector<float> ControlRecombination::DefaultWeights() const
   return ret;
 }
 
-FFState* ControlRecombination::Evaluate(
+FFState* ControlRecombination::EvaluateWhenApplied(
   const Hypothesis& hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
@@ -63,7 +64,7 @@ FFState* ControlRecombination::Evaluate(
   return new ControlRecombinationState(hypo, *this);
 }
 
-FFState* ControlRecombination::EvaluateChart(
+FFState* ControlRecombination::EvaluateWhenApplied(
   const ChartHypothesis &hypo,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

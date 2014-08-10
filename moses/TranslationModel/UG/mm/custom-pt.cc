@@ -1,6 +1,6 @@
 // build a phrase table for the given input
 // #include "ug_lexical_phrase_scorer2.h"
-
+#if 0
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -8,9 +8,9 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "moses/generic/sorting/VectorIndexSorter.h"
-#include "moses/generic/sampling/Sampling.h"
-#include "moses/generic/file_io/ug_stream.h"
+#include "moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"
+#include "moses/TranslationModel/UG/generic/sampling/Sampling.h"
+#include "moses/TranslationModel/UG/generic/file_io/ug_stream.h"
 
 #include <boost/math/distributions/binomial.hpp>
 #include <boost/unordered_map.hpp>
@@ -23,8 +23,9 @@
 #include "ug_typedefs.h"
 #include "tpt_pickler.h"
 #include "ug_bitext.h"
+#include "../mmsapt_phrase_scorers.h"
 #include "ug_lexical_phrase_scorer2.h"
-
+#include "../sapt_phrase_scorers.h"
 using namespace std;
 using namespace ugdiss;
 using namespace Moses;
@@ -44,7 +45,7 @@ float lbsmooth = .005;
 
 PScorePfwd<Token> calc_pfwd;
 PScorePbwd<Token> calc_pbwd;
-PScoreLex<Token>  calc_lex;
+PScoreLex<Token>  calc_lex(1.0);
 PScoreWP<Token>   apply_wp;
 vector<float> fweights;
 
@@ -53,7 +54,7 @@ nbest_phrasepairs(uint64_t const  pid1,
 		  pstats   const& ps, 
 		  vector<PhrasePair> & nbest)
 {
-  boost::unordered_map<uint64_t,jstats>::const_iterator m;
+  pstats::trg_map_t::const_iterator m;
   vector<size_t> idx(nbest.size());
   size_t i=0;
   for (m  = ps.trg.begin(); 
@@ -109,6 +110,7 @@ int main(int argc, char* argv[])
 {
   // assert(argc == 4);
 #if 0
+#if 0
   string base = argv[1];
   string L1   = argv[2];
   string L2   = argv[3];
@@ -129,8 +131,8 @@ int main(int argc, char* argv[])
   bt.setDefaultSampleSize(max_samples);
 
   size_t i;
-  i = calc_pfwd.init(0,.05);
-  i = calc_pbwd.init(i,.05);
+  i = calc_pfwd.init(0,.05,'g');
+  i = calc_pbwd.init(i,.05,'g');
   i = calc_lex.init(i,base+L1+"-"+L2+".lex");
   i = apply_wp.init(i);
 
@@ -181,7 +183,7 @@ int main(int argc, char* argv[])
       	    }
       	}
     }
-  
+#endif  
     exit(0);
 }
-
+#endif

@@ -180,6 +180,7 @@ public:
       } else {
         TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
       }
+      delete file;
     }
 
     // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
@@ -233,7 +234,7 @@ public:
 
         } else {
           stringstream hypergraphDirName;
-          hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
+          hypergraphDirName << boost::filesystem::current_path().string() << "/hypergraph";
           hypergraphDir = hypergraphDirName.str();
         }
       }
@@ -252,14 +253,17 @@ public:
         if ( appendSuffix ) {
           fileName << "." << compression;
         }
-        boost::iostreams::filtering_ostream *file = new boost::iostreams::filtering_ostream;
+        boost::iostreams::filtering_ostream *file 
+	  = new boost::iostreams::filtering_ostream;
 
         if ( compression == "gz" ) {
           file->push( boost::iostreams::gzip_compressor() );
         } else if ( compression == "bz2" ) {
           file->push( boost::iostreams::bzip2_compressor() );
         } else if ( compression != "txt" ) {
-          TRACE_ERR("Unrecognized hypergraph compression format (" << compression << ") - using uncompressed plain txt" << std::endl);
+          TRACE_ERR("Unrecognized hypergraph compression format (" 
+		    << compression 
+		    << ") - using uncompressed plain txt" << std::endl);
           compression = "txt";
         }
 
@@ -270,7 +274,10 @@ public:
           manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
           file -> flush();
         } else {
-          TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file " << fileName.str() << " is not open or not ready for writing" << std::endl);
+          TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber 
+		    << " because the output file " << fileName.str() 
+		    << " is not open or not ready for writing" 
+		    << std::endl);
         }
         file -> pop();
         delete file;
@@ -299,6 +306,9 @@ public:
       if (!staticData.UseMBR()) {
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
+          if (StaticData::Instance().GetOutputHypoScore()) {
+            out << bestHypo->GetTotalScore() << ' ';
+          }
           if (staticData.IsPathRecoveryEnabled()) {
             OutputInput(out, bestHypo);
             out << "||| ";
@@ -527,9 +537,7 @@ size_t OutputFeatureWeightsForHypergraph(size_t index, const FeatureFunction* ff
     }
     return index+numScoreComps;
   } else {
-    cerr << "Sparse features are not yet supported when outputting hypergraph format" << endl;
-    assert(false);
-    return 0;
+    UTIL_THROW2("Sparse features are not yet supported when outputting hypergraph format");
   }
 }
 
@@ -641,7 +649,7 @@ int main(int argc, char** argv)
           boost::filesystem::path nbestPath(nbestFile);
           weightsFilename << nbestPath.parent_path().filename() << "/weights";
         } else {
-          weightsFilename << boost::filesystem::current_path() << "/hypergraph/weights";
+          weightsFilename << boost::filesystem::current_path().string() << "/hypergraph/weights";
         }
       }
       boost::filesystem::path weightsFilePath(weightsFilename.str());
@@ -750,6 +758,9 @@ int main(int argc, char** argv)
       IFVERBOSE(1) {
         ResetUserTime();
       }
+
+      FeatureFunction::CallChangeSource(source);
+
       // set up task of translating one sentence
       TranslationTask* task =
         new TranslationTask(lineCount,source, outputCollector.get(),

@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 class DecodeStep;
+class DecodeGraph;
 
 /**
   * Baseclass for phrase-table or generation table feature function
@@ -61,19 +62,20 @@ public:
   bool IsUseable(const FactorMask &mask) const;
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Evaluate(const Hypothesis& hypo,
+  void EvaluateWhenApplied(const Hypothesis& hypo,
                 ScoreComponentCollection* accumulator) const
   {}
-  void EvaluateChart(const ChartHypothesis &hypo,
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
-  void Evaluate(const InputType &input
+  void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
+                , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
-  void Evaluate(const Phrase &source
+  void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
@@ -81,6 +83,8 @@ public:
 
   void SetContainer(const DecodeStep *container)
   { m_container = container; }
+
+  const DecodeGraph &GetDecodeGraph() const;
 
 protected:
   std::vector<FactorType> m_input;

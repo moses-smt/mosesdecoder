@@ -35,12 +35,20 @@ while(<STDIN>) {
   my ($WORD,$MARKUP) = split_xml($_);
   my $sentence_start = 1;
   for(my $i=0;$i<=$#$WORD;$i++) {
-    print " " if $i;
+    print " " if $i && $$MARKUP[$i] eq '';
     print $$MARKUP[$i];
 
-    $$WORD[$i] =~ /^([^\|]+)(.*)/;
-    my $word = $1;
-    my $otherfactors = $2;
+    my ($word,$otherfactors);
+    if ($$WORD[$i] =~ /^([^\|]+)(.*)/)
+    {
+	$word = $1;
+	$otherfactors = $2;
+    }
+    else
+    {
+	$word = $$WORD[$i];
+	$otherfactors = "";
+    }
 
     if ($sentence_start && defined($BEST{lc($word)})) {
       print $BEST{lc($word)}; # truecase sentence start
@@ -59,7 +67,7 @@ while(<STDIN>) {
     if    ( defined($SENTENCE_END{ $word }))           { $sentence_start = 1; }
     elsif (!defined($DELAYED_SENTENCE_START{ $word })) { $sentence_start = 0; }
   }
-  print " ".$$MARKUP[$#$MARKUP];
+  print $$MARKUP[$#$MARKUP];
   print "\n";
 }
 

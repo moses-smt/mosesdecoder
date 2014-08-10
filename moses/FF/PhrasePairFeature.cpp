@@ -106,7 +106,7 @@ void PhrasePairFeature::Load()
   }
 }
 
-void PhrasePairFeature::Evaluate(
+void PhrasePairFeature::EvaluateWhenApplied(
   const Hypothesis& hypo,
   ScoreComponentCollection* accumulator) const
 {

@@ -15,7 +15,7 @@ PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
   ReadParameters();
 }
 
-void PhraseLengthFeature::Evaluate(const Phrase &source
+void PhraseLengthFeature::EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedFutureScore) const

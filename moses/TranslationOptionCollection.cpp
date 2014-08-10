@@ -212,6 +212,12 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
   float unknownScore = FloorScore(TransformScore(0));
   const Word &sourceWord = inputPath.GetPhrase().GetWord(0);
 
+  // hack. Once the OOV FF is a phrase table, get rid of this
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
+  }
+
   // unknown word, add as trans opt
   FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -231,7 +237,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
     // modify the starting bitmap
   }
 
-  TargetPhrase targetPhrase;
+  TargetPhrase targetPhrase(firstPt);
 
   if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
     // add to dictionary
@@ -266,7 +272,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const InputPath &inputPa
   m_unksrcs.push_back(&sourcePhrase);
   WordsRange range(sourcePos, sourcePos + length - 1);
 
-  targetPhrase.Evaluate(sourcePhrase);
+  targetPhrase.EvaluateInIsolation(sourcePhrase);
 
   TranslationOption *transOpt = new TranslationOption(range, targetPhrase);
   transOpt->SetInputPath(inputPath);
@@ -393,7 +399,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
         if (graphInd > 0 && // only skip subsequent graphs
         	backoff != 0 && // use of backoff specified
-            (endPos-startPos+1 >= backoff || // size exceeds backoff limit or ...
+            (endPos-startPos+1 <= backoff || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options
@@ -410,7 +416,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   ProcessUnknownWord();
 
-  EvaluateWithSource();
+  EvaluateWithSourceContext();
 
   // Prune
   Prune();
@@ -535,7 +541,7 @@ void TranslationOptionCollection::SetInputScore(const InputPath &inputPath, Part
   }
 }
 
-void TranslationOptionCollection::EvaluateWithSource()
+void TranslationOptionCollection::EvaluateWithSourceContext()
 {
   const size_t size = m_source.GetSize();
   for (size_t startPos = 0 ; startPos < size ; ++startPos) {
@@ -549,7 +555,7 @@ void TranslationOptionCollection::EvaluateWithSource()
       TranslationOptionList::const_iterator iterTransOpt;
       for(iterTransOpt = transOptList.begin() ; iterTransOpt != transOptList.end() ; ++iterTransOpt) {
         TranslationOption &transOpt = **iterTransOpt;
-        transOpt.Evaluate(m_source);
+        transOpt.EvaluateWithSourceContext(m_source);
       }
     }
   }
@@ -610,6 +616,12 @@ void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t)
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
   const WordsRange &coverage = translationOption->GetSourceWordsRange();
+
+  if (coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size()) {
+	  cerr << "translationOption=" << *translationOption << endl;
+	  cerr << "coverage=" << coverage << endl;
+  }
+
   UTIL_THROW_IF2(coverage.GetEndPos() - coverage.GetStartPos() >= m_collection[coverage.GetStartPos()].size(),
 		  "Out of bound access: " << coverage);
   m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);

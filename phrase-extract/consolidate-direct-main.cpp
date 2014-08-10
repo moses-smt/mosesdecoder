@@ -26,16 +26,9 @@
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 
-#include "SafeGetline.h"
-
-#define LINE_MAX_LENGTH 10000
-
 using namespace std;
 
-char line[LINE_MAX_LENGTH];
-
-
-vector< string > splitLine()
+vector< string > splitLine(const char *line)
 {
   vector< string > item;
   int start=0;
@@ -61,14 +54,15 @@ bool getLine( istream &fileP, vector< string > &item )
 {
   if (fileP.eof())
     return false;
-
-  SAFE_GETLINE((fileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-  if (fileP.eof())
+  
+  string line;
+  if (getline(fileP, line)) {
+    item = splitLine(line.c_str());
     return false;
-
-  item = splitLine();
-
-  return true;
+  }
+  else {
+    return false;
+  }
 }
 
 
