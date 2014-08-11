@@ -215,7 +215,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
-  newHypo->Evaluate(m_futurescore);
+  newHypo->EvaluateWhenApplied(m_futurescore);
 
   return newHypo;
 }

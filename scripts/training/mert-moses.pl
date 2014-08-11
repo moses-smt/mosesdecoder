@@ -127,8 +127,8 @@ my $___NOCASE = 0;
 # Use "--nonorm" to non normalize translation before computing scores
 my $___NONORM = 0;
 
-# set 0 if input type is text, set 1 if input type is confusion network
-my $___INPUTTYPE = 0;
+# set 0 if input type is text, set 1 if input type is confusion network, set 3 if input type is parse tree
+my $___INPUTTYPE;
 
 
 my $mertdir = undef; # path to new mert directory
@@ -1228,14 +1228,18 @@ sub run_decoder {
 
     if (defined $___JOBS && $___JOBS > 0) {
       die "Hypergraph mira not supported by moses-parallel" if $___HG_MIRA;
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG";
+      $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE); 
+      $decoder_cmd .= " -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE distinct\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      my $nbest_list_cmd = "-n-best-list $filename $___N_BEST_LIST_SIZE";
+      my $nbest_list_cmd = "-n-best-list $filename $___N_BEST_LIST_SIZE distinct";
       if ($___HG_MIRA) {
         safesystem("rm -rf $hypergraph_dir");
         $nbest_list_cmd = "-output-search-graph-hypergraph true gz";
       }
-      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG";
+      $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
+      $decoder_cmd .= " $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
     }
 
     print STDERR "Executing: $decoder_cmd \n";
@@ -1309,7 +1313,9 @@ sub get_featlist_from_moses {
     print STDERR "Using cached features list: $featlistfn\n";
   } else {
     print STDERR "Asking moses for feature names and values from $___CONFIG\n";
-    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
+    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn";
+    $cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
+    $cmd .= " -show-weights > $featlistfn";
     print STDERR "Executing: $cmd\n";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }

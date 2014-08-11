@@ -94,9 +94,10 @@ if $(with-nplm) {
 local with-lbllm = [ option.get "with-lbllm" ] ;
 if $(with-lbllm) {
   lib lbl : : <search>$(with-lbllm)/lib <search>$(with-lbllm)/lib64 ;
-  obj LBLLM.o : oxlm/LBLLM.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
-  obj Mapper.o : oxlm/Mapper.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
-  alias lbllm : LBLLM.o Mapper.o lbl : : : <cxxflags>-std=c++0x <define>LM_LBL ;
+  lib murmurhash : : <search>$(with-lbllm)/lib <search>$(with-lbllm)/lib64 ;
+  obj LBLLM.o : oxlm/LBLLM.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/third_party/eigen ;
+  obj Mapper.o : oxlm/Mapper.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/third_party/eigen ;
+  alias lbllm : LBLLM.o Mapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_LBL ;
   dependencies += lbllm ;
   lmmacros += LM_LBL ;
 }

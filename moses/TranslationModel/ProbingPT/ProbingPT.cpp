@@ -181,7 +181,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const ta
   */
 
   // score of all other ff when this rule is being loaded
-  tp->Evaluate(sourcePhrase, GetFeaturesToApply());
+  tp->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
   return tp;
 }
 

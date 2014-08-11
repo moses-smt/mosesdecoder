@@ -101,13 +101,13 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
-void TargetPhrase::Evaluate(const Phrase &source)
+void TargetPhrase::EvaluateInIsolation(const Phrase &source)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
-  Evaluate(source, ffs);
+  EvaluateInIsolation(source, ffs);
 }
 
-void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
+void TargetPhrase::EvaluateInIsolation(const Phrase &source, const std::vector<FeatureFunction*> &ffs)
 {
   if (ffs.size()) {
     const StaticData &staticData = StaticData::Instance();
@@ -126,7 +126,7 @@ void TargetPhrase::Evaluate(const Phrase &source, const std::vector<FeatureFunct
   }
 }
 
-void TargetPhrase::Evaluate(const InputType &input, const InputPath &inputPath)
+void TargetPhrase::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   const StaticData &staticData = StaticData::Instance();

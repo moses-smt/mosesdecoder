@@ -87,7 +87,7 @@ void ChartManager::ProcessSentence()
       m_translationOptionList.ApplyThreshold();
 
       const InputPath &inputPath = m_parser.GetInputPath(range);
-      m_translationOptionList.Evaluate(m_source, inputPath);
+      m_translationOptionList.EvaluateWithSourceContext(m_source, inputPath);
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
@@ -143,7 +143,7 @@ void ChartManager::AddXmlChartOptions()
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
-    hypo->Evaluate();
+    hypo->EvaluateWhenApplied();
 
 
     ChartCell &cell = m_hypoStackColl.Get(range);

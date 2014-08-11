@@ -147,7 +147,7 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
     		const TargetPhrase &tp = **iter;
     		TranslationOption *transOpt = new TranslationOption(range, tp);
     		transOpt->SetInputPath(path);
-    		transOpt->Evaluate(m_source);
+    		transOpt->EvaluateWithSourceContext(m_source);
 
     		Add(transOpt);
     	}

@@ -499,6 +499,16 @@ namespace Moses {
 		aln[k] += s2 - s1;
 	      Token const* o = (j->fwd ? ag.bt.T2 : ag.bt.T1)->sntStart(sid);
 	      float sample_weight = 1./((s2-s1+1)*(e2-e1+1));
+
+	      vector<uint64_t> seen; 
+	      seen.reserve(100);
+	      // It is possible that the phrase extraction extracts the same
+	      // phrase twice, e.g., when word a co-occurs with sequence b b b
+	      // but is aligned only to the middle word. We can only count
+	      // each phrase pair once per source phrase occurrence, or else
+	      // run the risk of having more joint counts than marginal
+	      // counts.
+
 	      for (size_t s = s1; s <= s2; ++s)
 		{
 		  sptr<iter> b = (j->fwd ? ag.bt.I2 : ag.bt.I1)->find(o+s,e1-s);
@@ -507,7 +517,26 @@ namespace Moses {
 		  // assert(b);
 		  for (size_t i = e1; i <= e2; ++i)
 		    {
-		      if (! j->stats->add(b->getPid(),sample_weight,aln,
+		      uint64_t tpid = b->getPid();
+		      size_t s = 0;
+		      while (s < seen.size() && seen[s] != tpid) ++s;
+		      if (s < seen.size())
+			{
+#if 0
+			  size_t sid, off, len;
+			  parse_pid(tpid,sid,off,len);
+			  cerr << "HA, gotcha! " << sid << ":" << off << " at " << HERE << endl;
+			  for (size_t z = 0; z < len; ++z)
+			    {
+			      id_type tid = ag.bt.T2->sntStart(sid)[off+z].id();
+			      cerr << (*ag.bt.V2)[tid] << " "; 
+			    }
+			  cerr << endl;
+#endif
+			  continue;
+			}
+		      seen.push_back(tpid);
+		      if (! j->stats->add(tpid,sample_weight,aln,
 					  b->approxOccurrenceCount(),
 					  po_fwd,po_bwd))
 			{

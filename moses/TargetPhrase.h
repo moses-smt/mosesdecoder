@@ -71,14 +71,14 @@ public:
   ~TargetPhrase();
 
   // 1st evaluate method. Called during loading of phrase table.
-  void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
+  void EvaluateInIsolation(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
 
   // as above, score with ALL FFs
   // Used only for OOV processing. Doesn't have a phrase table connect with it
-  void Evaluate(const Phrase &source);
+  void EvaluateInIsolation(const Phrase &source);
 
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
-  void Evaluate(const InputType &input, const InputPath &inputPath);
+  void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 

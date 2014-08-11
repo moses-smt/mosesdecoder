@@ -132,7 +132,7 @@ std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(
 	  tp->GetScoreBreakdown().PlusEquals(this, score);
 
 	  // score of all other ff when this rule is being loaded
-	  tp->Evaluate(sourcePhrase, GetFeaturesToApply());
+	  tp->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
 	  ret.push_back(tp);
 	}

@@ -84,7 +84,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
       }
 
       outPhrase.Merge(targetPhrase, m_newOutputFactors);
-      outPhrase.Evaluate(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
+      outPhrase.EvaluateInIsolation(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
 
       TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
       assert(newTransOpt != NULL);
@@ -258,7 +258,7 @@ void DecodeStepTranslation::ProcessLEGACY(const TranslationOption &inputPartialT
       }
 
       outPhrase.Merge(targetPhrase, m_newOutputFactors);
-      outPhrase.Evaluate(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
+      outPhrase.EvaluateInIsolation(inputPath.GetPhrase(), m_featuresToApply); // need to do this as all non-transcores would be screwed up
 
 
       TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);

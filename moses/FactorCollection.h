@@ -114,6 +114,8 @@ public:
     return m_factorIdNonTerminal;
   }
 
+  const Factor *GetFactor(const StringPiece &factorString, bool isNonTerminal = false);
+
   // TODO: remove calls to this function, replacing them with the simpler AddFactor(factorString)
   const Factor *AddFactor(FactorDirection /*direction*/, FactorType /*factorType*/, const StringPiece &factorString, bool isNonTerminal = false) {
     return AddFactor(factorString, isNonTerminal);

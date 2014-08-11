@@ -71,10 +71,10 @@ void TranslationOption::CacheLexReorderingScores(const LexicalReordering &produc
   m_lexReorderingScores[&producer] = score;
 }
 
-void TranslationOption::Evaluate(const InputType &input)
+void TranslationOption::EvaluateWithSourceContext(const InputType &input)
 {
   const InputPath &inputPath = GetInputPath();
-  m_targetPhrase.Evaluate(input, inputPath);
+  m_targetPhrase.EvaluateWithSourceContext(input, inputPath);
 }
 
 const InputPath &TranslationOption::GetInputPath() const

@@ -147,7 +147,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           vector<FeatureFunction*> pd_feature;
           pd_feature.push_back(m_pd[i]);
           const vector<FeatureFunction*> pd_feature_const(pd_feature);
-          statistics->targetPhrase->Evaluate(src, pd_feature_const);
+          statistics->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
           // zero out scores from original phrase table
           statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
 
@@ -186,7 +186,7 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
     vector<FeatureFunction*> pd_feature;
     pd_feature.push_back(const_cast<PhraseDictionaryMultiModel*>(this));
     const vector<FeatureFunction*> pd_feature_const(pd_feature);
-    statistics->targetPhrase->Evaluate(src, pd_feature_const);
+    statistics->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
 
     ret->Add(new TargetPhrase(*statistics->targetPhrase));
   }

@@ -67,6 +67,23 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString, bool 
   return &ret.first->in;
 }
 
+const Factor *FactorCollection::GetFactor(const StringPiece &factorString, bool isNonTerminal)
+{
+  FactorFriend to_find;
+  to_find.in.m_string = factorString;
+  to_find.in.m_id = (isNonTerminal) ? m_factorIdNonTerminal : m_factorId;
+  Set & set = (isNonTerminal) ? m_set : m_setNonTerminal;
+  { // read=lock scope
+#ifdef WITH_THREADS
+    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+#endif // WITH_THREADS
+    Set::const_iterator i = set.find(to_find);
+    if (i != set.end()) return &i->in;
+  }
+  return NULL;
+}
+
+
 FactorCollection::~FactorCollection() {}
 
 TO_STRING_BODY(FactorCollection);
