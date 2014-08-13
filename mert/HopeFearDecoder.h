@@ -140,8 +140,7 @@ private:
   //maps sentence Id to graph ptr
   typedef std::map<size_t, boost::shared_ptr<Graph> > GraphColl;
   GraphColl graphs_;
-  std::vector<size_t> sentenceIds_;
-  std::vector<size_t>::const_iterator sentenceIdIter_;
+  GraphColl::const_iterator graphIter_;
   ReferenceSet references_;
   Vocab vocab_;
 };

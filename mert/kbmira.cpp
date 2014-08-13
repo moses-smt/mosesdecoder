@@ -39,10 +39,9 @@ de recherches du Canada
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "M2Scorer.h"
-#include "HypPackEnumerator.h"
 #include "util/exception.hh"
 
+#include "BleuScorer.h"
 #include "HopeFearDecoder.h"
 #include "MiraFeatureVector.h"
 #include "MiraWeightVector.h"
@@ -51,31 +50,6 @@ using namespace std;
 using namespace MosesTuning;
 
 namespace po = boost::program_options;
-
-ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv)
-{
-  vector<ValType> stats(7, 0);
-  for(train->reset(); !train->finished(); train->next()) {
-    // Find max model
-    size_t max_index=0;
-    ValType max_score=0;
-    for(size_t i=0; i<train->cur_size(); i++) {
-      MiraFeatureVector vec(train->featuresAt(i));
-      ValType score = wv.score(vec);
-      if(i==0 || score > max_score) {
-        max_index = i;
-        max_score = score;
-      }
-    }
-    // Update stats
-    const vector<float>& sent = train->scoresAt(max_index);
-    for(size_t i=0; i<sent.size(); i++) {
-      stats[i]+=sent[i];
-    }
-  }
-  return sentenceM2(stats);
-}
-
 
 int main(int argc, char** argv)
 {
@@ -236,7 +210,12 @@ int main(int argc, char** argv)
   MiraWeightVector wv(initParams);
 
   // Initialize background corpus
-  vector<ValType> bg(7, 1);
+  vector<ValType> bg;
+  for(int j=0; j<kBleuNgramOrder; j++) {
+    bg.push_back(kBleuNgramOrder-j);
+    bg.push_back(kBleuNgramOrder-j);
+  }
+  bg.push_back(kBleuNgramOrder);
 
   boost::scoped_ptr<HopeFearDecoder> decoder;
   if (type == "nbest") {
@@ -248,78 +227,35 @@ int main(int argc, char** argv)
   }
 
   // Training loop
-  boost::scoped_ptr<HypPackEnumerator> train;
-  if(streaming)
-    train.reset(new StreamingHypPackEnumerator(featureFiles, scoreFiles));
-  else
-    train.reset(new RandomAccessHypPackEnumerator(featureFiles, scoreFiles, no_shuffle));
-  cerr << "Initial M2 = " << evaluate(train.get(), wv.avg()) << endl;
+  cerr << "Initial BLEU = " << decoder->Evaluate(wv.avg()) << endl;
   ValType bestBleu = 0;
   for(int j=0; j<n_iters; j++) {
     // MIRA train for one epoch
     int iNumExamples = 0;
     int iNumUpdates = 0;
     ValType totalLoss = 0.0;
-    for(train->reset(); !train->finished(); train->next()) {
-      // Hope / fear decode
-      ValType hope_scale = 1.0;
-      size_t hope_index=0, fear_index=0, model_index=0;
-      ValType hope_score=0, fear_score=0, model_score=0;
-      int iNumHypsBackup = iNumHyps;
-      for(size_t safe_loop=0; safe_loop<2; safe_loop++) {
-        iNumHyps = iNumHypsBackup;
-        ValType hope_bleu, hope_model;
-        for(size_t i=0; i< train->cur_size(); i++) {
-          const MiraFeatureVector& vec=train->featuresAt(i);
-          ValType score = wv.score(vec);
-          ValType bleu = sentenceBackgroundM2(train->scoresAt(i), bg);
-          // Hope
-          if(i==0 || (hope_scale*score + bleu) > hope_score) {
-            hope_score = hope_scale*score + bleu;
-            hope_index = i;
-            hope_bleu = bleu;
-            hope_model = score;
-          }
-          // Fear
-          if(i==0 || (score - bleu) > fear_score) {
-            fear_score = score - bleu;
-            fear_index = i;
-          }
-          // Model
-          if(i==0 || score > model_score) {
-            model_score = score;
-            model_index = i;
-          }
-          iNumHyps++;
-        }
-        // Outer loop rescales the contribution of model score to 'hope' in antagonistic cases
-        // where model score is having far more influence than BLEU
-        hope_bleu *= BLEU_RATIO; // We only care about cases where model has MUCH more influence than BLEU
-        if(safe_hope && safe_loop==0 && abs(hope_model)>1e-8 && abs(hope_bleu)/abs(hope_model)<hope_scale)
-          hope_scale = abs(hope_bleu) / abs(hope_model);
-        else break;
-      }
+    size_t sentenceIndex = 0;
+    for(decoder->reset();!decoder->finished(); decoder->next()) {
+      HopeFearData hfd;
+      decoder->HopeFear(bg,wv,&hfd);
+    
       // Update weights
       if (!hfd.hopeFearEqual && hfd.hopeBleu  > hfd.fearBleu) { 
         // Vector difference
         MiraFeatureVector diff = hfd.hopeFeatures - hfd.fearFeatures;
         // Bleu difference
-        const vector<float>& hope_stats = train->scoresAt(hope_index);
-        ValType hopeBleu = sentenceBackgroundM2(hope_stats, bg);
-        const vector<float>& fear_stats = train->scoresAt(fear_index);
-        ValType fearBleu = sentenceBackgroundM2(fear_stats, bg);
-        assert(hopeBleu + 1e-8 >= fearBleu);
-        ValType delta = hopeBleu - fearBleu;
+        //assert(hfd.hopeBleu + 1e-8 >= hfd.fearBleu);
+        ValType delta = hfd.hopeBleu - hfd.fearBleu;
         // Loss and update
         ValType diff_score = wv.score(diff);
         ValType loss = delta - diff_score;
         if(verbose) {
           cerr << "Updating sent " << sentenceIndex << endl;
           cerr << "Wght: " << wv << endl;
-          cerr << "Hope: " << hope << " M2:" << hopeBleu << " Score:" << wv.score(hope) << endl;
-          cerr << "Fear: " << fear << " M2:" << fearBleu << " Score:" << wv.score(fear) << endl;
-          cerr << "Diff: " << diff << " M2:" << delta << " Score:" << diff_score << endl;
-          cerr << "Loss: " << loss << " Scale: " << hope_scale << endl;
+          cerr << "Hope: " << hfd.hopeFeatures << " BLEU:" << hfd.hopeBleu << " Score:" << wv.score(hfd.hopeFeatures) << endl;
+          cerr << "Fear: " << hfd.fearFeatures << " BLEU:" << hfd.fearBleu << " Score:" << wv.score(hfd.fearFeatures) << endl;
+          cerr << "Diff: " << diff << " BLEU:" << delta << " Score:" << diff_score << endl;
+          cerr << "Loss: " << loss <<  " Scale: " << 1 << endl;
           cerr << endl;
         }
         if(loss > 0) {
@@ -347,8 +283,8 @@ int main(int argc, char** argv)
 
     // Evaluate current average weights
     AvgWeightVector avg = wv.avg();
-    ValType bleu = evaluate(train.get(), avg);
-    cerr << ", M2 = " << bleu << endl;
+    ValType bleu = decoder->Evaluate(avg);
+    cerr << ", BLEU = " << bleu << endl;
     if(bleu > bestBleu) {
       /*
       size_t num_dense = train->num_dense();
@@ -382,7 +318,7 @@ int main(int argc, char** argv)
       bestBleu = bleu;
     }
   }
-  cerr << "Best M2 = " << bestBleu << endl;
+  cerr << "Best BLEU = " << bestBleu << endl;
 }
 // --Emacs trickery--
 // Local Variables:

@@ -241,6 +241,10 @@ const char* M2Scorer::code() {
     "    candidate_tok = candidate.split()\n"
     "    source_tok = source.split()\n"
     "\n"
+    // Prevent losing time on stupid candidates that have more than 10 spurious tokens
+    "    if len(candidate_tok) > len(source_tok) + 10:\n"
+    "        return (0,0,1);\n"
+    "\n"
     "    lmatrix1, backpointers1 = levenshtein_matrix(source_tok, candidate_tok, 1, 1, 1)\n"
     "    lmatrix2, backpointers2 = levenshtein_matrix(source_tok, candidate_tok, 1, 1, 2)\n"
     "\n"
