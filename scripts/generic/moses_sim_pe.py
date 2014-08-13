@@ -227,6 +227,7 @@ def main(argv):
     
     # Setup
     work_dir = tempfile.mkdtemp(prefix='moses.', dir=os.path.abspath(tmp_dir))
+    threads = min(threads, text_len)
     batch_size = int(math.ceil(float(text_len) / threads))
 
     # Report settings
