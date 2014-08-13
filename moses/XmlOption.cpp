@@ -31,6 +31,9 @@
 #include "ReorderingConstraint.h"
 #include "FactorCollection.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#if PT_UG
+#include "TranslationModel/UG/mmsapt.h"
+#endif
 
 namespace Moses
 {
@@ -311,6 +314,38 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
           }
           string entity = ParseXmlTagAttribute(tagContent,"entity");
           placeholders.push_back(std::pair<size_t, std::string>(startPos, entity));
+        }
+
+        // update: add new aligned sentence pair to Mmsapt identified by name
+        else if (tagName == "update") {
+#if PT_UG
+            // get model name and aligned sentence pair
+            string pdName = ParseXmlTagAttribute(tagContent,"name");
+            string source = ParseXmlTagAttribute(tagContent,"source");
+            string target = ParseXmlTagAttribute(tagContent,"target");
+            string alignment = ParseXmlTagAttribute(tagContent,"alignment");
+            // find PhraseDictionary by name
+            const vector<PhraseDictionary*> &pds = PhraseDictionary::GetColl();
+            PhraseDictionary* pd = NULL;
+            for (vector<PhraseDictionary*>::const_iterator i = pds.begin(); i != pds.end(); ++i) {
+                PhraseDictionary* curPd = *i;
+                if (curPd->GetScoreProducerDescription() == pdName) {
+                    pd = curPd;
+                    break;
+                }
+            }
+            if (pd == NULL) {
+                TRACE_ERR("ERROR: No PhraseDictionary with name " << pdName << ", no update" << endl);
+                return false;
+            }
+            // update model
+            VERBOSE(3,"Updating " << pdName << " ||| " << source << " ||| " << target << " ||| " << alignment << endl);
+            Mmsapt* pdsa = reinterpret_cast<Mmsapt*>(pd);
+            pdsa->add(source, target, alignment);
+#else
+            TRACE_ERR("ERROR: recompile with --with-mm to update PhraseDictionary at runtime" << endl);
+            return false;
+#endif
         }
 
         // default: opening tag that specifies translation options

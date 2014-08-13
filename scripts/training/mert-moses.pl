@@ -160,6 +160,12 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # and so on
 my $maximum_iterations = 25;
 
+# Simulated post-editing
+my $___MOSES_SIM_PE = "$SCRIPTS_ROOTDIR/generic/moses_sim_pe.py";
+my $___DEV_SYMAL = undef;
+my $dev_symal_abs = undef;
+my $working_dir_abs = undef;
+
 use Getopt::Long;
 GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
@@ -213,7 +219,8 @@ GetOptions(
   "batch-mira-args=s" => \$batch_mira_args,
   "promix-training=s" => \$__PROMIX_TRAINING,
   "promix-table=s" => \@__PROMIX_TABLES,
-  "threads=i" => \$__THREADS
+  "threads=i" => \$__THREADS,
+  "spe-symal=s" => \$___DEV_SYMAL
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -308,6 +315,8 @@ Options:
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
+  --spe-symal=SYMAL      ... Use simulated post-editing when decoding.
+                             (SYMAL aligns input to refs)
 ";
   exit 1;
 }
@@ -465,6 +474,12 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
     || $___DECODER_FLAGS =~ /(^|\s)-(global-lexical-file) /
   ) {
   die "It is forbidden to supply any of -config, -ttable-file, -distortion-file, -generation-file or -lmodel-file in the --decoder-flags.\nPlease use only the --config option to give the config file that lists all the supplementary files.";
+}
+
+# Paths needed for simulated post-editing
+if ($___DEV_SYMAL) {
+   $dev_symal_abs = ensure_full_path($___DEV_SYMAL);
+   $working_dir_abs = ensure_full_path($___WORKING_DIR);
 }
 
 # as weights are normalized in the next steps (by cmert)
@@ -1240,6 +1255,15 @@ sub run_decoder {
       $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG";
       $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
       $decoder_cmd .= " $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
+
+      # If simulating post-editing, route command through moses_sim_pe.py
+      if (defined $___DEV_SYMAL) {
+        # Always use single (first) reference.  Simulated post-editing undefined for multiple references.
+        $decoder_cmd = "$___MOSES_SIM_PE $___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F -ref $references[0] -symal $dev_symal_abs -tmp $working_dir_abs > run$run.out";
+      } else {
+        # Default: call decoder directly
+        $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
+      }
     }
 
     print STDERR "Executing: $decoder_cmd \n";
