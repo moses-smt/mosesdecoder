@@ -58,9 +58,9 @@ GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 
   TargetPhraseCollection *ret = new TargetPhraseCollection();
   BOOST_FOREACH(pstat_entry & e, pstats) {
-    TargetPhrase* tp = m_biSA->GetMosesFactorIDs(e.first, src);
+    TargetPhrase* tp = m_biSA->GetMosesFactorIDs(e.first, src, this);
     tp->GetScoreBreakdown().Assign(this,e.second);
-    tp->Evaluate(src);
+    tp->EvaluateInIsolation(src);
     ret->Add(tp);
   }
   // return ret;

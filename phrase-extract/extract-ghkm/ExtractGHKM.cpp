@@ -248,7 +248,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
       const std::vector<const Subgraph *> &rules = (*p)->GetRules();
 
-      REO_POS l2rOrientation, r2lOrientation;
+      REO_POS l2rOrientation=UNKNOWN, r2lOrientation=UNKNOWN;
       if (options.phraseOrientation && !rules.empty()) {
         int sourceSpanBegin = *((*p)->GetSpan().begin());
         int sourceSpanEnd   = *((*p)->GetSpan().rbegin());
@@ -617,9 +617,8 @@ void ExtractGHKM::WriteGlueGrammar(
     }
   }
 
-  std::string sourceTopLabel = "TOPLABEL";
-  std::string sourceSLabel = "S";
-  std::string sourceSomeLabel = "SOMELABEL";
+  size_t sourceLabelGlueTop = 0;
+  size_t sourceLabelGlueX = 1;
 
   // basic rules
   out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| ||| ||| |||";
@@ -627,7 +626,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " <s>]}}";
   }
   if (options.sourceLabels) {
-    out << " {{SourceLabels 1 1 " << sourceTopLabel << " 1}}";
+    out << " {{SourceLabels 1 1 " << sourceLabelGlueTop << " 1}}";
   }
   out << std::endl;
 
@@ -636,7 +635,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " [" << topLabel << "] </s>]}}";
   }
   if (options.sourceLabels) {
-    out << " {{SourceLabels 2 1 " << sourceTopLabel << " 1 1 " << sourceTopLabel << " 1}}";
+    out << " {{SourceLabels 2 1 " << sourceLabelGlueTop << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
   out << std::endl;
 
@@ -648,7 +647,7 @@ void ExtractGHKM::WriteGlueGrammar(
       out << " {{Tree [" << topLabel << " <s> [" << i->first << "] </s>]}}";
     }
     if (options.sourceLabels) {
-      out << " {{SourceLabels 2 1 " << sourceSLabel << " 1 1 " << sourceTopLabel << " 1}}";
+      out << " {{SourceLabels 2 1 " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
     }
     out << std::endl;
   }
@@ -661,7 +660,7 @@ void ExtractGHKM::WriteGlueGrammar(
       out << " {{Tree [" << topLabel << " ["<< topLabel << "] [" << *i << "]]}}";
     }
     if (options.sourceLabels) {
-      out << " {{SourceLabels 3 2.718 " << sourceTopLabel << " " << sourceSomeLabel << " 2.718 1 " << sourceTopLabel << " 2.718}}"; // TODO: there should be better options than using "SOMELABEL" 
+      out << " {{SourceLabels 3 2.718 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 2.718 1 " << sourceLabelGlueTop << " 2.718}}"; // TODO: there should be better options than using "SOMELABEL" 
     }
     out << std::endl;
   }
@@ -672,7 +671,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [X]]}}";
   }
   if (options.sourceLabels) {
-    out << " {{SourceLabels 3 1 " << sourceTopLabel << " " << sourceSomeLabel << " 1 1 " << sourceTopLabel << " 1}}"; // TODO: there should be better options than using "SOMELABEL"
+    out << " {{SourceLabels 3 1 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}"; // TODO: there should be better options than using "SOMELABEL"
   }
   out << std::endl;
 }

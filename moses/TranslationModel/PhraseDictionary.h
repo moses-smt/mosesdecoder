@@ -87,6 +87,10 @@ public:
     return m_tableLimit;
   }
 
+  //! continguous id for each pt, starting from 0
+  size_t GetId() const
+  { return m_id; }
+
   virtual
   void
   Release(TargetPhraseCollection const* tpc) const;
@@ -152,8 +156,6 @@ protected:
 
   bool SatisfyBackoff(const InputPath &inputPath) const;
 
-  virtual size_t GetDecodeGraphId() const;
-
   // cache
   size_t m_maxCacheSize; // 0 = no caching
 
@@ -169,6 +171,7 @@ protected:
 
 protected:
   CacheColl &GetCache() const;
+  size_t m_id;
 
 };
 

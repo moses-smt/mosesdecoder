@@ -110,15 +110,22 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
 
   //For debug
   
+  
   /*
   map<const Edge*, string> edgeIds;
   for (size_t i = 0; i < edges_.Size(); ++i) {
     stringstream str;
+    size_t childId = 0;
     for (size_t j = 0; j < edges_[i].Words().size(); ++j) {
-      if (edges_[i].Words()[j]) str << edges_[i].Words()[j]->first;
+      if (edges_[i].Words()[j]) {
+        str << edges_[i].Words()[j]->first << " ";
+      } else {
+        str << "[" << edges_[i].Children()[childId++] << "] ";
+      }
     }
     edgeIds[&(edges_[i])] = str.str();
-  }*/
+  }
+  */
 
   //end For debug
 
@@ -129,7 +136,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
 
   //Compute backward scores
   for (size_t vi = 0; vi < vertices_.Size(); ++vi) {
-    //cerr << "Vertex " << vi << endl;
+   // cerr << "Vertex " << vi << endl;
     const Vertex& vertex = vertices_[vi];
     const vector<const Edge*>& incoming = vertex.GetIncoming();
     if (!incoming.size()) {
@@ -140,7 +147,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
         edgeHeads[incoming[ei]]= vi;
         FeatureStatsType incomingScore = incoming[ei]->GetScore(weights);
         for (size_t i = 0; i < incoming[ei]->Children().size(); ++i) {
-       //   cerr << "\tChild " << incoming[ei]->Children()[i] << endl;
+          //cerr << "\tChild " << incoming[ei]->Children()[i] << endl;
           size_t childId = incoming[ei]->Children()[i];
           UTIL_THROW_IF(vertexBackwardScores[childId] == kMinScore,
             HypergraphException, "Graph was not topologically sorted. curr=" << vi << " prev=" << childId);
@@ -148,7 +155,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
           incomingScore += vertexBackwardScores[childId];
         }
         edgeBackwardScores[incoming[ei]]= incomingScore;
-     //   cerr << "Backward score: " << incomingScore << endl;
+        //cerr << "Backward score: " << incomingScore << endl;
         if (incomingScore > vertexBackwardScores[vi]) vertexBackwardScores[vi] = incomingScore;
       }
     }
@@ -166,20 +173,21 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
       for (size_t ei = 0; ei < outgoing[vi].size(); ++ei) {
         //cerr << "Edge " << edgeIds[outgoing[vi][ei]] << endl;
         FeatureStatsType outgoingScore = 0; 
-        //sum scores of siblings
-        for (size_t i = 0; i < outgoing[vi][ei]->Children().size(); ++i) {
-          size_t siblingId = outgoing[vi][ei]->Children()[i];
-          if (siblingId != vi) {
-         //   cerr << "\tSibling " << siblingId << endl;
-            outgoingScore += vertexBackwardScores[siblingId];
-          }
-        }
         //add score of head
         outgoingScore += vertexForwardScores[edgeHeads[outgoing[vi][ei]]];
         //cerr << "Forward score " << outgoingScore << endl;
         edgeForwardScores[outgoing[vi][ei]] = outgoingScore;
+        //sum scores of siblings
+        for (size_t i = 0; i < outgoing[vi][ei]->Children().size(); ++i) {
+          size_t siblingId = outgoing[vi][ei]->Children()[i];
+          if (siblingId != vi) {
+            //cerr << "\tSibling " << siblingId << endl;
+            outgoingScore += vertexBackwardScores[siblingId];
+          }
+        }
         outgoingScore += outgoing[vi][ei]->GetScore(weights);
         if (outgoingScore > vertexForwardScores[vi]) vertexForwardScores[vi] = outgoingScore;
+        //cerr << "Vertex " << vi << " forward score " << outgoingScore << endl;
       }
     }
   }
@@ -227,7 +235,7 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
   map<size_t,size_t> oldIdToNew;
   size_t vi = 0;
   for (set<size_t>::const_iterator i = retainedVertices.begin(); i != retainedVertices.end(); ++i, ++vi) {
-    //cerr << *i << endl;
+    //cerr << *i << " New: " << vi << endl;
     oldIdToNew[*i] = vi;
     Vertex* vertex = newGraph.NewVertex();
     vertex->SetSourceCovered(vertices_[*i].SourceCovered()); 
@@ -247,7 +255,26 @@ void Graph::Prune(Graph* pNewGraph, const SparseVector& weights, size_t minEdgeC
     newHead.AddEdge(newEdge);
   }
 
-  
+  /*
+  cerr << "New graph" << endl;
+  for (size_t vi = 0; vi < newGraph.VertexSize(); ++vi) {
+    cerr << "Vertex " << vi << endl;
+    const vector<const Edge*> incoming = newGraph.GetVertex(vi).GetIncoming();
+    for (size_t ei = 0; ei < incoming.size(); ++ei) {
+      size_t childId = 0;
+      for (size_t wi = 0; wi < incoming[ei]->Words().size(); ++wi) {
+        const Vocab::Entry* word = incoming[ei]->Words()[wi];
+        if (word) {
+          cerr << word->first << " ";
+        } else {
+          cerr << "[" << incoming[ei]->Children()[childId++] << "] ";
+        }
+      }
+      cerr << " Score: " << incoming[ei]->GetScore(weights) <<  endl;
+    }
+    cerr << endl;
+  }
+  */
 
 
 }

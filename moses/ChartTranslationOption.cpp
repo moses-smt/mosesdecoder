@@ -10,7 +10,7 @@ ChartTranslationOption::ChartTranslationOption(const TargetPhrase &targetPhrase)
 {
 }
 
-void ChartTranslationOption::Evaluate(const InputType &input,
+void ChartTranslationOption::EvaluateWithSourceContext(const InputType &input,
 		const InputPath &inputPath,
 		const StackVec &stackVec)
 {

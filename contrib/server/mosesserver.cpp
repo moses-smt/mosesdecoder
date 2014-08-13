@@ -276,14 +276,14 @@ public:
 	  inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
-        ChartManager manager(tinput);
+        ChartManager manager(0,tinput);
         manager.ProcessSentence();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
         if (addGraphInfo) {
           const size_t translationId = tinput.GetTranslationId();
           std::ostringstream sgstream;
-          manager.GetSearchGraph(translationId,sgstream);
+          manager.OutputSearchGraphMoses(sgstream);
           retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
         }
     } else {

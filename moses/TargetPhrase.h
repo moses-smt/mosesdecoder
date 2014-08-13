@@ -41,6 +41,8 @@ namespace Moses
 {
 class FeatureFunction;
 class InputPath;
+class InputPath;
+class PhraseDictionary;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
@@ -60,24 +62,23 @@ private:
   typedef std::map<std::string, boost::shared_ptr<PhraseProperty> > Properties;
   Properties m_properties;
 
-  size_t m_decodeGraphId;
+  const PhraseDictionary *m_container;
 
 public:
-  TargetPhrase();
+  TargetPhrase(const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
-  explicit TargetPhrase(std::string out_string);
-  explicit TargetPhrase(const Phrase &targetPhrase);
+  explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
   ~TargetPhrase();
 
   // 1st evaluate method. Called during loading of phrase table.
-  void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
+  void EvaluateInIsolation(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
 
   // as above, score with ALL FFs
   // Used only for OOV processing. Doesn't have a phrase table connect with it
-  void Evaluate(const Phrase &source);
+  void EvaluateInIsolation(const Phrase &source);
 
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
-  void Evaluate(const InputType &input, const InputPath &inputPath);
+  void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
@@ -133,6 +134,9 @@ public:
   const Phrase *GetRuleSource() const {
     return m_ruleSource;
   }
+
+  const PhraseDictionary *GetContainer() const
+  { return m_container; }
 
   // To be set by the FF that needs it, by default the rule source = NULL
   // make a copy of the source side of the rule

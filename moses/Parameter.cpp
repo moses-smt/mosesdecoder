@@ -50,7 +50,7 @@ Parameter::Parameter()
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("input-factors", "list of factors in the input");
   AddParam("input-file", "i", "location of the input file to be translated");
-  AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
+  AddParam("inputtype", "text (0), confusion network (1), word lattice (2), tree (3) (default = 0)");
   AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
   AddParam("mark-unknown", "mu", "mark unknown words in output");
   AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");

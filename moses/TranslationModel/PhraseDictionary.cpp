@@ -49,6 +49,7 @@ PhraseDictionary::PhraseDictionary(const std::string &line)
   ,m_tableLimit(20) // default
   ,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
+	m_id = s_staticColl.size();
 	s_staticColl.push_back(this);
 }
 
@@ -274,14 +275,6 @@ bool PhraseDictionary::SatisfyBackoff(const InputPath &inputPath) const
   }
 
   return true;
-}
-
-size_t PhraseDictionary::GetDecodeGraphId() const
-{
-	assert(m_container);
-	const DecodeGraph *graph = m_container->GetContainer();
-	assert(graph);
-	return graph->GetId();
 }
 
 } // namespace

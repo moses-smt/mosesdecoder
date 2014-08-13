@@ -124,7 +124,7 @@ std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(
 		Tokenize(toks, line, "\t");
 		UTIL_THROW_IF2(toks.size() != 2, "Error in transliteration output file. Expecting word\tscore");
 
-	  TargetPhrase *tp = new TargetPhrase();
+	  TargetPhrase *tp = new TargetPhrase(this);
 	  Word &word = tp->AddWord();
 	  word.CreateFromString(Output, m_output, toks[0], false);
 
@@ -132,7 +132,7 @@ std::vector<TargetPhrase*> PhraseDictionaryTransliteration::CreateTargetPhrases(
 	  tp->GetScoreBreakdown().PlusEquals(this, score);
 
 	  // score of all other ff when this rule is being loaded
-	  tp->Evaluate(sourcePhrase, GetFeaturesToApply());
+	  tp->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
 	  ret.push_back(tp);
 	}

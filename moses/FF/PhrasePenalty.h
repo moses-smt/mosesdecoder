@@ -34,6 +34,10 @@ public:
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
   {}
 
+  void SetParameter(const std::string& key, const std::string& value);
+
+protected:
+  bool m_perPhraseTable;
 };
 
 } //namespace

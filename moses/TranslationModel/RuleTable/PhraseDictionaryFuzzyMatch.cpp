@@ -270,7 +270,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, &sourceLHS);
 
     // create target phrase obj
-    TargetPhrase *targetPhrase = new TargetPhrase();
+    TargetPhrase *targetPhrase = new TargetPhrase(this);
     // targetPhrase->CreateFromString(Output, m_output, targetPhraseString, factorDelimiter, &targetLHS);
     targetPhrase->CreateFromString(Output, m_output, targetPhraseString, &targetLHS);
 
@@ -284,7 +284,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSenten
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 
     targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
-    targetPhrase->Evaluate(sourcePhrase, GetFeaturesToApply());
+    targetPhrase->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

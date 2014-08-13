@@ -35,7 +35,7 @@ if $(build-moses-server) = true
   xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --libs" ] ;
   xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --cflags" ] ;
 
-  exe mosesserver : mosesserver.cpp ../../moses//moses ../../OnDiskPt//OnDiskPt ../../moses-cmd/IOWrapper.cpp : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
+  exe mosesserver : mosesserver.cpp ../../moses//moses ../../OnDiskPt//OnDiskPt ../../moses-cmd/IOWrapper.cpp ../..//boost_filesystem  : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
 } else {
   alias mosesserver ;
 }

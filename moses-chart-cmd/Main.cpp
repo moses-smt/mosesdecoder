@@ -45,6 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "IOWrapper.h"
 
 #include "moses/FactorCollection.h"
+#include "moses/HypergraphOutput.h"
 #include "moses/Manager.h"
 #include "moses/Phrase.h"
 #include "moses/Util.h"
@@ -80,9 +81,11 @@ void fix(std::ostream& stream, size_t size)
 class TranslationTask : public Task
 {
 public:
-  TranslationTask(InputType *source, IOWrapper &ioWrapper)
+  TranslationTask(InputType *source, IOWrapper &ioWrapper, 
+    boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutput)
     : m_source(source)
-    , m_ioWrapper(ioWrapper) {
+    , m_ioWrapper(ioWrapper)
+    , m_hypergraphOutput(hypergraphOutput) {
   }
 
   ~TranslationTask() {
@@ -116,10 +119,16 @@ public:
       return;
     }
 
-    ChartManager manager(*m_source);
+    ChartManager manager(translationId,*m_source);
     manager.ProcessSentence();
 
     UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
+
+    // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
+    if (m_hypergraphOutput.get()) {
+      m_hypergraphOutput->Write(manager);
+    }
+
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
@@ -168,7 +177,7 @@ public:
 
     if (staticData.GetOutputSearchGraph()) {
       std::ostringstream out;
-      manager.GetSearchGraph(translationId, out);
+      manager.OutputSearchGraphMoses( out);
       OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
       UTIL_THROW_IF2(oc == NULL, "File for search graph output not specified");
       oc->Write(translationId, out.str());
@@ -187,6 +196,7 @@ private:
 
   InputType *m_source;
   IOWrapper &m_ioWrapper;
+  boost::shared_ptr<HypergraphOutput<ChartManager> > m_hypergraphOutput;
 };
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
@@ -289,6 +299,11 @@ int main(int argc, char* argv[])
       TRACE_ERR("\n");
     }
 
+    boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutput; 
+    if (staticData.GetOutputSearchGraphHypergraph()) {
+      hypergraphOutput.reset(new HypergraphOutput<ChartManager>(3));
+    }
+
     if (ioWrapper == NULL)
       return EXIT_FAILURE;
 
@@ -304,7 +319,7 @@ int main(int argc, char* argv[])
 
       FeatureFunction::CallChangeSource(source);
 
-      TranslationTask *task = new TranslationTask(source, *ioWrapper);
+      TranslationTask *task = new TranslationTask(source, *ioWrapper, hypergraphOutput);
       source = NULL;  // task will delete source
 #ifdef WITH_THREADS
       pool.Submit(task);  // pool will delete task

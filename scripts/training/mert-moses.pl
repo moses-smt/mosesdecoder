@@ -127,8 +127,8 @@ my $___NOCASE = 0;
 # Use "--nonorm" to non normalize translation before computing scores
 my $___NONORM = 0;
 
-# set 0 if input type is text, set 1 if input type is confusion network
-my $___INPUTTYPE = 0;
+# set 0 if input type is text, set 1 if input type is confusion network, set 3 if input type is parse tree
+my $___INPUTTYPE;
 
 
 my $mertdir = undef; # path to new mert directory
@@ -159,6 +159,12 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
                                   # and so on
 my $maximum_iterations = 25;
+
+# Simulated post-editing
+my $___MOSES_SIM_PE = "$SCRIPTS_ROOTDIR/generic/moses_sim_pe.py";
+my $___DEV_SYMAL = undef;
+my $dev_symal_abs = undef;
+my $working_dir_abs = undef;
 
 use Getopt::Long;
 GetOptions(
@@ -213,7 +219,8 @@ GetOptions(
   "batch-mira-args=s" => \$batch_mira_args,
   "promix-training=s" => \$__PROMIX_TRAINING,
   "promix-table=s" => \@__PROMIX_TABLES,
-  "threads=i" => \$__THREADS
+  "threads=i" => \$__THREADS,
+  "spe-symal=s" => \$___DEV_SYMAL
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -308,6 +315,8 @@ Options:
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
+  --spe-symal=SYMAL      ... Use simulated post-editing when decoding.
+                             (SYMAL aligns input to refs)
 ";
   exit 1;
 }
@@ -465,6 +474,12 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
     || $___DECODER_FLAGS =~ /(^|\s)-(global-lexical-file) /
   ) {
   die "It is forbidden to supply any of -config, -ttable-file, -distortion-file, -generation-file or -lmodel-file in the --decoder-flags.\nPlease use only the --config option to give the config file that lists all the supplementary files.";
+}
+
+# Paths needed for simulated post-editing
+if ($___DEV_SYMAL) {
+   $dev_symal_abs = ensure_full_path($___DEV_SYMAL);
+   $working_dir_abs = ensure_full_path($___WORKING_DIR);
 }
 
 # as weights are normalized in the next steps (by cmert)
@@ -1228,14 +1243,27 @@ sub run_decoder {
 
     if (defined $___JOBS && $___JOBS > 0) {
       die "Hypergraph mira not supported by moses-parallel" if $___HG_MIRA;
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG";
+      $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE); 
+      $decoder_cmd .= " -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE distinct\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      my $nbest_list_cmd = "-n-best-list $filename $___N_BEST_LIST_SIZE";
+      my $nbest_list_cmd = "-n-best-list $filename $___N_BEST_LIST_SIZE distinct";
       if ($___HG_MIRA) {
         safesystem("rm -rf $hypergraph_dir");
         $nbest_list_cmd = "-output-search-graph-hypergraph true gz";
       }
-      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG";
+      $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
+      $decoder_cmd .= " $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
+
+      # If simulating post-editing, route command through moses_sim_pe.py
+      if (defined $___DEV_SYMAL) {
+        # Always use single (first) reference.  Simulated post-editing undefined for multiple references.
+        $decoder_cmd = "$___MOSES_SIM_PE $___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F -ref $references[0] -symal $dev_symal_abs -tmp $working_dir_abs > run$run.out";
+      } else {
+        # Default: call decoder directly
+        $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
+      }
     }
 
     print STDERR "Executing: $decoder_cmd \n";
@@ -1309,7 +1337,9 @@ sub get_featlist_from_moses {
     print STDERR "Using cached features list: $featlistfn\n";
   } else {
     print STDERR "Asking moses for feature names and values from $___CONFIG\n";
-    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
+    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn";
+    $cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
+    $cmd .= " -show-weights > $featlistfn";
     print STDERR "Executing: $cmd\n";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }
