@@ -46,7 +46,9 @@ namespace ugdiss
   char const *binread(char const* p, uint32_t& buf);
   char const *binread(char const* p, filepos_type& buf);
   char const *binread(char const* p, float& buf);
+#ifdef __clang__
   char const *binread(char const* p, size_t& buf);
+#endif
 
   std::ostream& write(std::ostream& out, char x);
   std::ostream& write(std::ostream& out, unsigned char x);

@@ -284,10 +284,12 @@ namespace ugdiss
     return p;
   }
 
+#ifdef __clang__
   char const *binread(char const* p, size_t& buf)
   {
 	  return binread(p, (uint32_t&) buf);
   }
+#endif
 
   char const *binread(char const* p, uint32_t& buf)
   {
