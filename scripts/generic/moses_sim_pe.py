@@ -32,7 +32,7 @@ Usage: {} moses-cmd -config moses.ini -input-file text.src -ref text.tgt -symal 
 
 Options:
     -threads N: number of decoders to run in parallel (default read from moses.ini, 1 if not present)
-    -n-best-list nbest.out N: location and size of N-best list
+    -n-best-list nbest.out N [distinct]: location and size of N-best list
     -show-weights: for mert-moses.pl, just call moses and exit
     -tmp: location of temp directory (default /tmp)
 
@@ -110,6 +110,7 @@ def main(argv):
     threads = 1
     n_best_out = None
     n_best_size = None
+    n_best_distinct = False
     tmp_dir = '/tmp'
     xml_found = False
     xml_input = 'exclusive'
@@ -143,7 +144,12 @@ def main(argv):
         elif cmd[i] == '-n-best-list':
             n_best_out = cmd[i + 1]
             n_best_size = cmd[i + 2]
-            cmd = cmd[:i] + cmd[i + 3:]
+            # Optional "distinct"
+            if i + 3 < len(cmd) and cmd[i + 3] == 'distinct':
+                n_best_distinct = True
+                cmd = cmd[:i] + cmd[i + 4:]
+            else:
+                cmd = cmd[:i] + cmd[i + 3:]
         elif cmd[i] == '-tmp':
             tmp_dir = cmd[i + 1]
             cmd = cmd[:i] + cmd[i + 2:]
@@ -221,6 +227,7 @@ def main(argv):
     
     # Setup
     work_dir = tempfile.mkdtemp(prefix='moses.', dir=os.path.abspath(tmp_dir))
+    threads = min(threads, text_len)
     batch_size = int(math.ceil(float(text_len) / threads))
 
     # Report settings
@@ -231,7 +238,7 @@ def main(argv):
     sys.stderr.write('Jobs: {}\n'.format(threads))
     sys.stderr.write('Batch size: {}\n'.format(batch_size))
     if n_best_out:
-        sys.stderr.write('N-best list: {} ({})\n'.format(n_best_out, n_best_size))
+        sys.stderr.write('N-best list: {} ({}{})\n'.format(n_best_out, n_best_size, ', distinct' if n_best_distinct else ''))
     sys.stderr.write('Temp dir: {}\n'.format(work_dir))
 
     # Accumulate seen lines
@@ -289,6 +296,8 @@ def main(argv):
             work_cmd.append('-n-best-list')
             work_cmd.append(os.path.join(work_dir, 'nbest.{}'.format(i)))
             work_cmd.append(str(n_best_size))
+            if n_best_distinct:
+                work_cmd.append('distinct')
         in_file = os.path.join(work_dir, 'input.{}.xml'.format(i))
         out_file = os.path.join(work_dir, 'out.{}'.format(i))
         err_file = os.path.join(work_dir, 'err.{}'.format(i))

@@ -280,7 +280,7 @@ public:
 
         if (file->is_complete() && file->good()) {
           fix(*file,PRECISION);
-          manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
+          manager.OutputSearchGraphAsHypergraph(*file);
           file -> flush();
         } else {
           TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber 

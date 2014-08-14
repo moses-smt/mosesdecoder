@@ -477,9 +477,9 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
 }
 
 # Paths needed for simulated post-editing
-if ($___DEV_SYMAL) {
+$working_dir_abs = ensure_full_path($___WORKING_DIR);
+if (defined $___DEV_SYMAL) {
    $dev_symal_abs = ensure_full_path($___DEV_SYMAL);
-   $working_dir_abs = ensure_full_path($___WORKING_DIR);
 }
 
 # as weights are normalized in the next steps (by cmert)
@@ -1254,16 +1254,13 @@ sub run_decoder {
       }
       $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG";
       $decoder_cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
-      $decoder_cmd .= " $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
-
-      # If simulating post-editing, route command through moses_sim_pe.py
+      $decoder_cmd .= " $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F";
       if (defined $___DEV_SYMAL) {
+        # If simulating post-editing, route command through moses_sim_pe.py
         # Always use single (first) reference.  Simulated post-editing undefined for multiple references.
-        $decoder_cmd = "$___MOSES_SIM_PE $___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F -ref $references[0] -symal $dev_symal_abs -tmp $working_dir_abs > run$run.out";
-      } else {
-        # Default: call decoder directly
-        $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd $nbest_list_cmd  -input-file $___DEV_F > run$run.out";
+        $decoder_cmd = "$___MOSES_SIM_PE $decoder_cmd -ref $references[0] -symal $dev_symal_abs -tmp $working_dir_abs > run$run.out";
       }
+      $decoder_cmd .= " > run$run.out";
     }
 
     print STDERR "Executing: $decoder_cmd \n";
