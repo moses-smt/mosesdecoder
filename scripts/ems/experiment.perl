@@ -716,9 +716,11 @@ sub delete_crashed {
   for(my $i=0;$i<=$#DO_STEP;$i++) {
     my $step_file = &versionize(&step_file($i),$DELETE_CRASHED);
     next unless -e $step_file;
-    next unless &check_if_crashed($i,$DELETE_CRASHED,"no wait");
-    &delete_step($DO_STEP[$i],$DELETE_CRASHED);
-    $crashed++;
+    if (! -e $step_file.".DONE" ||     # interrupted (machine went down)
+        &check_if_crashed($i,$DELETE_CRASHED,"no wait")) { # noted crash
+      &delete_step($DO_STEP[$i],$DELETE_CRASHED);
+      $crashed++;
+    }
   }
   print "run with -exec to delete steps\n" if $crashed && !$EXECUTE;
   print "nothing to do\n" unless $crashed;
