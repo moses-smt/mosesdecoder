@@ -815,7 +815,6 @@ sub delete_output {
   if (-d $file) {
     print "\tdelete directory $file\n";
     `rm -r $file` if $EXECUTE;
-    return;
   }
   # delete regular file that matches exactly
   if (-e $file) {
@@ -823,11 +822,20 @@ sub delete_output {
     `rm $file` if $EXECUTE;
   } 
   # delete files that have additional extension
+  $file =~ /^(.+)\/([^\/]+)$/;
+  my ($dir,$f) = ($1,$2);
   my @FILES = `ls $file.* 2>/dev/null`;
-  foreach (@FILES) {
+  foreach (`ls $dir`) {
     chop;
-    print "\tdelete file $_\n";
-    `rm $_` if $EXECUTE;
+    next unless substr($_,0,length($f)) eq $f;
+    if (-e $_) {
+      print "\tdelete file $dir/$_\n";
+      `rm $dir/$_` if $EXECUTE;
+    }
+    else {
+      print "\tdelete directory $dir/$_\n";
+      `rm -r $dir/$_` if $EXECUTE;
+    }
   }
 }
 
