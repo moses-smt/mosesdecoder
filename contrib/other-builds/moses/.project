@@ -2937,6 +2937,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/mtt.count.cc</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/UG/mm/num_read_write.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/num_read_write.cc</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/UG/mm/num_read_write.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/num_read_write.h</locationURI>
