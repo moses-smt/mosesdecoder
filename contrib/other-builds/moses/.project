@@ -377,6 +377,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/GenerationDictionary.h</locationURI>
 		</link>
 		<link>
+			<name>HypergraphOutput.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/HypergraphOutput.cpp</locationURI>
+		</link>
+		<link>
+			<name>HypergraphOutput.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/HypergraphOutput.h</locationURI>
+		</link>
+		<link>
 			<name>HypoList.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/HypoList.h</locationURI>
