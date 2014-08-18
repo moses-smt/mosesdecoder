@@ -217,6 +217,9 @@ namespace Moses
     if ((m = param.find("extra")) != param.end()) 
       extra_data = m->second;
 
+    dflt = pair<string,string>("tuneable","true");
+    m_tuneable = Scan<bool>(param.insert(dflt).first->second.c_str());
+
     // check for unknown parameters
     vector<string> known_parameters; known_parameters.reserve(50);
     known_parameters.push_back("L1");
