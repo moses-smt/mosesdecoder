@@ -243,6 +243,7 @@ namespace Moses
     known_parameters.push_back("sample");
     known_parameters.push_back("smooth");
     known_parameters.push_back("table-limit");
+    known_parameters.push_back("tuneable");
     known_parameters.push_back("unal");
     known_parameters.push_back("workers");
     for (map<string,string>::iterator m = param.begin(); m != param.end(); ++m)
