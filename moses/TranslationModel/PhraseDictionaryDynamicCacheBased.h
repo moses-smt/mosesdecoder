@@ -107,6 +107,7 @@ public:
   void Load(const std::string files);
 
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &src) const;
+  const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(Phrase const &src) const;
   const TargetPhraseCollection* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   // for phrase-based model

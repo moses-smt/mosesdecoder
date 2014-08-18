@@ -53,10 +53,6 @@ PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::
   UTIL_THROW_IF2(s_instance_map.find(m_name) != s_instance_map.end(), "Only 1 PhraseDictionaryDynamicCacheBased feature named " + m_name + " is allowed");
   s_instance_map[m_name] = this;
   s_instance = this; //for back compatibility
-
-  SetFeaturesToApply();
-  vector<float> weight = StaticData::Instance().GetWeights(this);
-  SetPreComputedScores(weight.size());
 }
 
 PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()
@@ -67,9 +63,11 @@ PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()
 void PhraseDictionaryDynamicCacheBased::Load()
 {
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load()" << std::endl);
-//  SetFeaturesToApply();
-//  vector<float> weight = StaticData::Instance().GetWeights(this);
-//  SetPreComputedScores(weight.size());
+  SetFeaturesToApply();
+	
+  vector<float> weight = StaticData::Instance().GetWeights(this);
+  SetPreComputedScores(weight.size());
+
   Load(m_initfiles);
 }
 
@@ -175,18 +173,24 @@ const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhrase
 
   return tpc;
 }
-
+	
+const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionLEGACY(Phrase const &src) const
+{
+	const TargetPhraseCollection *ret = GetTargetPhraseCollection(src);
+	return ret;
+}		
+		
 const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  const TargetPhraseCollection *ret = GetTargetPhraseCollection(src);
-  return ret;
+	const TargetPhraseCollection *ret = GetTargetPhraseCollection(src);
+	return ret;
 }
-
+	
 ChartRuleLookupManager* PhraseDictionaryDynamicCacheBased::CreateRuleLookupManager(const ChartParser &parser, const ChartCellCollectionBase &cellCollection, std::size_t /*maxChartSpan*/)
 {
-  UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
+	UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
-
+	
 void PhraseDictionaryDynamicCacheBased::SetScoreType(size_t type)
 {
 #ifdef WITH_THREADS

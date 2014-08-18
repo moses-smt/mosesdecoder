@@ -118,7 +118,7 @@ float DynamicCacheBasedLanguageModel::Evaluate_Whole_String(const TargetPhrase& 
   size_t endpos = tp.GetSize();
   for (size_t pos = 0 ; pos < endpos ; ++pos) {
     w += tp.GetWord(pos).GetFactor(0)->GetString().as_string();
-    if ((pos == 0) && (endpos > 1)) {
+    if (pos < endpos - 1) {
       w += " ";
     }
   }
