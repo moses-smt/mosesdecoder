@@ -115,7 +115,7 @@ def main(argv):
     xml_found = False
     xml_input = 'exclusive'
     show_weights = False
-    mmsapt_name = None
+    mmsapt_name = []
     mmsapt_l1 = None
     mmsapt_l2 = None
 
@@ -175,10 +175,16 @@ def main(argv):
             if moses_ini_lines[i].startswith('PhraseDictionaryBitextSampling'):
                 for (k, v) in (pair.split('=') for pair in moses_ini_lines[i].split()[1:]):
                     if k == 'name':
-                        mmsapt_name = v
+                        mmsapt_name.append(v)
                     elif k == 'L1':
+                        if mmsapt_l1 and v != mmsapt_l1:
+                            sys.stderr.write('Error: All PhraseDictionaryBitextSampling entries should have same L1: {} != {}\n'.format(v, mmsapt_l1))
+                            sys.exit(1)
                         mmsapt_l1 = v
                     elif k == 'L2':
+                        if mmsapt_l2 and v != mmsapt_l2:
+                            sys.stderr.write('Error: All PhraseDictionaryBitextSampling entries should have same L2: {} != {}\n'.format(v, mmsapt_l2))
+                            sys.exit(1)
                         mmsapt_l2 = v
                 moses_ini_lines[i] += '{mmsapt_extra}'
             # [threads]
@@ -232,7 +238,8 @@ def main(argv):
 
     # Report settings
     sys.stderr.write('Moses flags: {}\n'.format(' '.join('\'{}\''.format(s) if ' ' in s else s for s in cmd[1:])))
-    sys.stderr.write('Mmsapt: {} {} {}\n'.format(mmsapt_name, mmsapt_l1, mmsapt_l2))
+    for (i, n) in enumerate(mmsapt_name):
+        sys.stderr.write('Mmsapt {}: {} {} {}\n'.format(i, n, mmsapt_l1, mmsapt_l2))
     sys.stderr.write('XML mode: {}\n'.format(xml_input))
     sys.stderr.write('Inputs: {} {} {} ({})\n'.format(text_src, text_tgt, text_symal, text_len))
     sys.stderr.write('Jobs: {}\n'.format(threads))
@@ -276,7 +283,12 @@ def main(argv):
         symal_lines.append(symal)
         # Lines after first start with update tag including previous translation.
         # Translation of last line of each batch is included in extra for next batch.
-        xml_out.write('{}{}\n'.format('' if lc % batch_size == 0 else '<update name="{}" source="{}" target="{}" alignment="{}" /> '.format(mmsapt_name, src_lines[-2], tgt_lines[-2], symal_lines[-2]), src))
+        xml_tags = []
+        if lc % batch_size != 0:
+            for n in mmsapt_name:
+                # note: space after tag
+                xml_tags.append('<update name="{}" source="{}" target="{}" alignment="{}" /> '.format(n, src_lines[-2], tgt_lines[-2], symal_lines[-2]))
+        xml_out.write('{}{}\n'.format(''.join(xml_tags), src))
     xml_out.close()
 
     # Run decoders in parallel
