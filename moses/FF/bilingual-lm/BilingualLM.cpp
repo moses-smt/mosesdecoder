@@ -32,11 +32,6 @@ void BilingualLM::Load(){
                  "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
 }
 
-void BilingualLM::EvaluateInIsolation(const Phrase &source
-                                  , const TargetPhrase &targetPhrase
-                                  , ScoreComponentCollection &scoreBreakdown
-                                  , ScoreComponentCollection &estimatedFutureScore) const
-{}
 
 void BilingualLM::EvaluateWithSourceContext(const InputType &input
                                   , const InputPath &inputPath
@@ -44,7 +39,9 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
                                   , const StackVec *stackVec
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection *estimatedFutureScore) const
-{}
+{
+  
+}
 
 FFState* BilingualLM::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
