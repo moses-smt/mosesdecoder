@@ -3,6 +3,8 @@
 #include <string>
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/FFState.h"
+#include "/home/dheart/work/nplm/pure_nplm/nplm-0.1/src/neuralLM.h"
+
 
 namespace Moses
 {
@@ -20,6 +22,14 @@ public:
 
 class BilingualLM : public StatefulFeatureFunction
 {
+
+protected:
+  // big data (vocab, weights, cache) shared among threads
+  std::string m_filePath;
+  nplm::neuralLM *m_neuralLM_shared;
+  // thread-specific nplm for thread-safety
+  mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
+
 public:
   BilingualLM(const std::string &line);
 
@@ -29,6 +39,8 @@ public:
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
     return new BilingualLMState(0);
   }
+
+  void Load();
 
   void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
