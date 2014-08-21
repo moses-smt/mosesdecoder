@@ -1467,6 +1467,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/WordTranslationFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/bilingual-lm</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>LM/Backward.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Backward.cpp</locationURI>
@@ -2025,6 +2030,16 @@
 			<name>FF/OSM-Feature/osmHyp.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/osmHyp.h</locationURI>
+		</link>
+		<link>
+			<name>FF/bilingual-lm/BilingualLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/bilingual-lm/BilingualLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/bilingual-lm/BilingualLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/bilingual-lm/BilingualLM.h</locationURI>
 		</link>
 		<link>
 			<name>LM/oxlm/LBLLM.cpp</name>
