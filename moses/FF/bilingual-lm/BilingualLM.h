@@ -3,7 +3,8 @@
 #include <string>
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/FFState.h"
-#include "/home/dheart/work/nplm/pure_nplm/nplm-0.1/src/neuralLM.h"
+#include "/home/dheart/work/nplm/pure_nplm/nplm/src/neuralLM.h"
+#include <boost/thread/tss.hpp>
 
 
 namespace Moses
@@ -27,6 +28,7 @@ protected:
   // big data (vocab, weights, cache) shared among threads
   std::string m_filePath;
   nplm::neuralLM *m_neuralLM_shared;
+  int m_nGramOrder;
   // thread-specific nplm for thread-safety
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 

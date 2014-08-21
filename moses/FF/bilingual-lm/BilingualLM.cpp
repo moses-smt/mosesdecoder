@@ -72,8 +72,10 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
 void BilingualLM::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "arg") {
-    // set value here
+  if (key == "filepath") {
+    m_filePath = value;
+  } else if (key == "ngrams") {
+    m_nGramOrder = atoi(value.c_str());
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
