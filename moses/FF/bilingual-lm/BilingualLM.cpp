@@ -23,6 +23,15 @@ BilingualLM::BilingualLM(const std::string &line)
   ReadParameters();
 }
 
+void BilingualLM::Load(){
+  m_neuralLM_shared = new nplm::neuralLM(m_filePath, true);
+  //TODO: config option?
+  m_neuralLM_shared->set_cache(1000000);
+
+  UTIL_THROW_IF2(m_nGramOrder != m_neuralLM_shared->get_order(),
+                 "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
+}
+
 void BilingualLM::EvaluateInIsolation(const Phrase &source
                                   , const TargetPhrase &targetPhrase
                                   , ScoreComponentCollection &scoreBreakdown
