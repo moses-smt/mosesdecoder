@@ -3,6 +3,7 @@
 #include "moses/ScoreComponentCollection.h"
 #include "moses/Hypothesis.h"
 #include "moses/InputPath.h"
+#include "moses/Manager.h"
 
 using namespace std;
 
@@ -45,6 +46,7 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {
+  /*
   double value = 0;
   if (target_ngrams > targetPhrase.GetSize()) {
       //We have too small of a phrase.
@@ -143,7 +145,7 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
     value += m_neuralLM->lookup_ngram(words);
   }
   scoreBreakdown.PlusEquals(FloorScore(value)); //If the ngrams are > than the target phrase the value added will be zero.
-
+*/
 }
 
 FFState* BilingualLM::EvaluateWhenApplied(
@@ -151,6 +153,24 @@ FFState* BilingualLM::EvaluateWhenApplied(
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
+  double totalScore = 0;
+  Manager& manager = cur_hypo.GetManager();
+  const Sentence& source_sent = static_cast<const Sentence&>(manager.GetSource());
+
+  const Hypothesis * current = &cur_hypo;
+
+  while (current){
+    double value = 0;
+    Phrase whole_phrase;
+    current->GetOutputPhrase(whole_phrase);
+    const TargetPhrase& currTargetPhrase = current->GetCurrTargetPhrase();
+    const WordsRange& targetWordRange = current->GetCurrTargetWordsRange(); //This should be which words of whole_phrase the current hypothesis represents.
+
+
+    totalScore += value;
+    current = current->GetPrevHypo();
+  }
+
   // dense scores
   vector<float> newScores(m_numScoreComponents);
   newScores[0] = 1.5;
