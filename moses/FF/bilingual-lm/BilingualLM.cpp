@@ -46,6 +46,10 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {
   double value = 0;
+  if (target_ngrams > targetPhrase.GetSize()) {
+      //We have too small of a phrase.
+      return;
+  }
   for (size_t i = 0; i < targetPhrase.GetSize() - target_ngrams; ++i) {
     //Get source word indexes
 
