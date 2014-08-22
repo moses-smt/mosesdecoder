@@ -29,6 +29,8 @@ protected:
   std::string m_filePath;
   nplm::neuralLM *m_neuralLM_shared;
   int m_nGramOrder;
+  int target_ngrams;
+  int source_ngrams;
   // thread-specific nplm for thread-safety
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 

@@ -32,6 +32,10 @@ void BilingualLM::Load(){
                  "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
 }
 
+void BilingualLM::EvaluateInIsolation(const Phrase &source
+                , const TargetPhrase &targetPhrase
+                , ScoreComponentCollection &scoreBreakdown
+                , ScoreComponentCollection &estimatedFutureScore) const {}
 
 void BilingualLM::EvaluateWithSourceContext(const InputType &input
                                   , const InputPath &inputPath
@@ -40,7 +44,28 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {
-  
+  for (int i = 0; i < targetPhrase.GetSize() - target_ngrams; ++i) {
+    //Get source word indexes
+    /*
+    const AlignmentInfo& alignments = targetPhrase.GetAlignTerm();
+    for (int j = 0; j< source_ngrams; j++){
+
+    }*/
+
+    //Insert n target phrase words.
+    std::vector<int> words(target_ngrams);
+    for (int j = 0; j < target_ngrams; j++){
+      const Word& word = targetPhrase.GetWord(i + j);
+      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+      const std::string string = factor->GetString().as_string();
+      int neuralLM_wordID = m_neuralLM->lookup_word(string);
+      words[i] = neuralLM_wordID;
+    }
+    double value = m_neuralLM->lookup_ngram(words);
+
+
+  }
+
 }
 
 FFState* BilingualLM::EvaluateWhenApplied(
