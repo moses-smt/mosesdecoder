@@ -44,6 +44,7 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
                                   , ScoreComponentCollection &scoreBreakdown
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {
+  double value = 0;
   for (int i = 0; i < targetPhrase.GetSize() - target_ngrams; ++i) {
     //Get source word indexes
     /*
@@ -54,6 +55,8 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
 
     //Insert n target phrase words.
     std::vector<int> words(target_ngrams);
+
+    //Taken from NeuralLM wrapper more or less
     for (int j = 0; j < target_ngrams; j++){
       const Word& word = targetPhrase.GetWord(i + j);
       const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
@@ -61,10 +64,9 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
       int neuralLM_wordID = m_neuralLM->lookup_word(string);
       words[i] = neuralLM_wordID;
     }
-    double value = m_neuralLM->lookup_ngram(words);
-
-
+    value += m_neuralLM->lookup_ngram(words);
   }
+  scoreBreakdown.PlusEquals(FloorScore(value)); //If the ngrams are > than the target phrase the value added will be zero.
 
 }
 
