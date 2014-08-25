@@ -24,6 +24,15 @@ public:
 class BilingualLM : public StatefulFeatureFunction
 {
 
+private:
+  std::vector<int> getSourceWords(const TargetPhrase &targetPhrase
+                , int targetWordIdx
+                , const InputType &input
+                , const InputPath &inputPath) const;
+
+  std::vector<int> getTargetWords(Phrase &whole_phrase
+                , int current_word_index) const;
+
 protected:
   // big data (vocab, weights, cache) shared among threads
   std::string m_filePath;
@@ -56,6 +65,7 @@ public:
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
