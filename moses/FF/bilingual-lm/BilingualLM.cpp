@@ -34,6 +34,121 @@ void BilingualLM::Load(){
                  "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
 }
 
+//Returns target_ngrams sized word vector that contains the current word we are looking at. (in effect target_ngrams + 1)
+std::vector<int> BilingualLM::getTargetWords(Phrase &whole_phrase
+                , int current_word_index) const {
+  std::vector<int> target_words(target_ngrams + 1);
+
+  for (int i = target_ngrams; i > -1; i--){
+
+    int neuralLM_wordID;
+    int indexToRead = current_word_index - target_ngrams;
+
+    if (indexToRead < 0) {
+      neuralLM_wordID = m_neuralLM->lookup_word(BOS_);
+    } else {
+      const Word& word = whole_phrase.GetWord(indexToRead);
+      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+      const std::string string = factor->GetString().as_string();
+      neuralLM_wordID = m_neuralLM->lookup_word(string);
+    }
+    target_words.push_back(neuralLM_wordID);
+  }
+  return target_words;
+}
+
+//Returns source words in the way NeuralLM expects them.
+
+std::vector<int> BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
+                , int targetWordIdx
+                , const InputType &input
+                , const InputPath &inputPath) const {
+  std::vector<int> source_words;
+
+  //Get source context
+
+  //Get alignment for the word we require
+  const AlignmentInfo& alignments = targetPhrase.GetAlignTerm();
+
+  //We are getting word alignment for targetPhrase.GetWord(i + target_ngrams -1) according to the paper.
+  //Try to get some alignment, because the word we desire might be unaligned.
+  std::set<size_t> last_word_al;
+  for (int j = 0; j < targetPhrase.GetSize(); j++){
+    //Sometimes our word will not be aligned, so find the nearest aligned word right
+    if ((targetWordIdx + j) < targetPhrase.GetSize()){
+      last_word_al = alignments.GetAlignmentsForTarget(targetWordIdx + j);
+      if (!last_word_al.empty()){
+        break;
+      }
+    } else if ((targetWordIdx + j) > 0) {
+      //We couldn't find word on the right, try the left.
+      last_word_al = alignments.GetAlignmentsForTarget(targetWordIdx - j);
+      if (!last_word_al.empty()){
+        break;
+      }
+
+    }
+    
+  }
+
+  //Assume we have gotten some alignment here. If we couldn't get an alignment from the above routine it means
+  //that none of the words in the target phrase aligned to any word in the source phrase
+
+  //Now we get the source words.
+  size_t source_center_index;
+  if (last_word_al.size() == 1) {
+    //We have only one word aligned
+    source_center_index = *last_word_al.begin();
+  } else { //We have more than one alignments, take the middle one
+    int tempidx = 0; //Temporary index to track where the iterator is.
+    for (std::set<size_t>::iterator it = last_word_al.begin(); it != last_word_al.end(); it++){
+      if (tempidx == last_word_al.size()/2){
+        source_center_index = *(it);
+        break;
+      }
+    }
+  }
+
+  //We have found the alignment. Now determine how much to shift by to get the actual source word index.
+  const WordsRange& wordsRange = inputPath.GetWordsRange();
+  size_t phrase_start_pos = wordsRange.GetStartPos();
+  size_t source_word_mid_idx = phrase_start_pos + targetWordIdx; //Account for how far the current word is from the start of the phrase.
+
+  const Sentence& source_sent = static_cast<const Sentence&>(input);
+  
+  //Define begin and end indexes of the lookup. Cases for even and odd ngrams
+  //This can result in indexes which span larger than the length of the source phrase.
+  //In this case we just
+  int begin_idx;
+  int end_idx;
+  if (source_ngrams%2 == 0){
+    int begin_idx = source_word_mid_idx - source_ngrams/2 - 1;
+    int end_idx = source_word_mid_idx + source_ngrams/2;
+  } else {
+    int begin_idx = source_word_mid_idx - (source_ngrams - 1)/2;
+    int end_idx = source_word_mid_idx + (source_ngrams - 1)/2;
+  }
+
+  //Add words to vector
+  for (int j = begin_idx; j < end_idx; j++) {
+    int neuralLM_wordID;
+    if (j < 0) {
+      neuralLM_wordID = m_neuralLM->lookup_word(BOS_);
+    } else if (j > source_sent.GetSize() - 1) {
+      neuralLM_wordID = m_neuralLM->lookup_word(EOS_);
+    } else {
+      const Word& word = source_sent.GetWord(j);
+      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+      const std::string string = factor->GetString().as_string();
+      neuralLM_wordID = m_neuralLM->lookup_word(string);
+    }
+    source_words.push_back(neuralLM_wordID);
+  }
+
+
+  return source_words;
+}
+
 void BilingualLM::EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
@@ -165,6 +280,15 @@ FFState* BilingualLM::EvaluateWhenApplied(
     current->GetOutputPhrase(whole_phrase);
     const TargetPhrase& currTargetPhrase = current->GetCurrTargetPhrase();
     const WordsRange& targetWordRange = current->GetCurrTargetWordsRange(); //This should be which words of whole_phrase the current hypothesis represents.
+    int phrase_start_pos = targetWordRange.GetStartPos(); //Start position of the current target phrase
+
+    //For each word in the current target phrase get its LM score
+    for (int i = 0; i < currTargetPhrase.GetSize(); i++){
+      std::vector<int> target_words = getTargetWords(whole_phrase, (i + phrase_start_pos));
+      //Get the position of the target phrase compared to the whole phrase
+      //Get source words here. Evaluate with neuralLM.
+
+    }
 
 
     totalScore += value;
