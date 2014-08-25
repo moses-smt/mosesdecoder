@@ -110,8 +110,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       OnDiskPt::Word *sourceWordBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceWordLabel.GetLabel());
 
       if (sourceWordBerkeleyDb != NULL) {
-		std::cerr << *sourceWordBerkeleyDb << std::endl;
-		
         const OnDiskPt::PhraseNode *node = prevNode.GetChild(*sourceWordBerkeleyDb, m_dbWrapper);
         if (node != NULL) {
           // TODO figure out why source word is needed from node, not from sentence
@@ -156,8 +154,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       const Word &sourceLHS = *iterSourceLHS;
 
       OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceLHS);
-	  std::cerr << *sourceLHSBerkeleyDb << std::endl;
-	  
+
       if (sourceLHSBerkeleyDb == NULL) {
         delete sourceLHSBerkeleyDb;
         continue; // vocab not in pt. node definately won't be in there
@@ -196,11 +193,10 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         if (doSearch) {
 
           OnDiskPt::Word *chartNonTermBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_outputFactorsVec, cellLabel.GetLabel());
-		  
+
           if (chartNonTermBerkeleyDb == NULL)
             continue;
-		  std::cerr << *chartNonTermBerkeleyDb << std::endl;
-		  
+
           const OnDiskPt::PhraseNode *node = sourceNode->GetChild(*chartNonTermBerkeleyDb, m_dbWrapper);
           delete chartNonTermBerkeleyDb;
 
@@ -243,8 +239,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceLHS);
         if (sourceLHSBerkeleyDb == NULL)
           continue;
-		std::cerr << *sourceLHSBerkeleyDb << std::endl;
-		  
+
         const TargetPhraseCollection *targetPhraseCollection = NULL;
         const OnDiskPt::PhraseNode *node = prevNode.GetChild(*sourceLHSBerkeleyDb, m_dbWrapper);
         if (node) {

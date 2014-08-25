@@ -56,7 +56,6 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const ChartCellCollectionBase &cellCollection,
   std::size_t /*maxChartSpan*/)
 {
-        std::cerr << "BEEP1" << std::endl;
   return new ChartRuleLookupManagerOnDisk(parser, cellCollection, *this,
                                           GetImplementation(),
                                           m_input,
@@ -65,7 +64,6 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
 
 OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation()
 {
-          std::cerr << "BEEP2" << std::endl;
   OnDiskPt::OnDiskWrapper* dict;
   dict = m_implementation.get();
   UTIL_THROW_IF2(dict == NULL, "Dictionary object not yet created for this thread");
@@ -110,7 +108,6 @@ void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
 
 void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
-          std::cerr << "BEEP3" << std::endl;
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
@@ -128,13 +125,12 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(const InputPathList 
 
 void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath) const
 {
-          std::cerr << "BEEP4" << std::endl;
   OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
   const Phrase &phrase = inputPath.GetPhrase();
   const InputPath *prevInputPath = inputPath.GetPrevPath();
 
   const OnDiskPt::PhraseNode *prevPtNode = NULL;
-  
+
   if (prevInputPath) {
     prevPtNode = static_cast<const OnDiskPt::PhraseNode*>(prevInputPath->GetPtNode(*this));
   } else {
@@ -172,9 +168,8 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
 
 const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
 {
-          std::cerr << "BEEP5" << std::endl;
   const TargetPhraseCollection *ret;
-  
+
   CacheColl &cache = GetCache();
   size_t hash = (size_t) ptNode->GetFilePos();
 
@@ -201,7 +196,6 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
 
 const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const
 {
-          std::cerr << "BEEP6" << std::endl;
   OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
 
   vector<float> weightT = StaticData::Instance().GetWeights(this);

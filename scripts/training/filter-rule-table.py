@@ -45,13 +45,14 @@ def main():
                       help="prune non-initial rules where count is below N",
                       metavar="N")
     (options, args) = parser.parse_args()
-    if len(args) != 1:
+    if len(args) < 1:
         printUsage()
         sys.exit(1)
     N = 7
     inputSentences = []
-    for line in open(args[0]):
-        inputSentences.append(line.split())
+    for argfile in args:
+        for line in open(argfile):
+            inputSentences.append(line.split())
     filterRuleTable(sys.stdin, inputSentences, N, options)
 
 def filterRuleTable(ruleTable, inputSentences, N, options):

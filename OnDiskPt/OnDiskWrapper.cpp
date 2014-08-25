@@ -243,7 +243,7 @@ Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &fact
   } // for (size_t factorType
 
   bool found;
-  std::cerr << strme.str() << std::endl; 
+  //std::cerr << strme.str() << std::endl; 
   
   UINT64 vocabId = m_vocab.GetVocabId(strme.str(), found);
   if (!found) {

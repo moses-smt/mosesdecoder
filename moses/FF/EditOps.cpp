@@ -88,12 +88,22 @@ void EditOps::ComputeFeatures(
   }
   else {
     std::vector<std::string> sourceTokens;
-    for(size_t i = 0; i < source.GetSize(); ++i)
-      sourceTokens.push_back(source.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
+    //std::cerr << "Ed src: ";
+    for(size_t i = 0; i < source.GetSize(); ++i) {
+      if(!source.GetWord(i).IsNonTerminal())
+        sourceTokens.push_back(source.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
+      //std::cerr << sourceTokens.back() << " ";
+    }
+    //std::cerr << std::endl;
     
     std::vector<std::string> targetTokens;
-    for(size_t i = 0; i < target.GetSize(); ++i) 
-      targetTokens.push_back(target.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
+    //std::cerr << "Ed trg: ";
+    for(size_t i = 0; i < target.GetSize(); ++i) {
+      if(!target.GetWord(i).IsNonTerminal())
+        targetTokens.push_back(target.GetWord(i).GetFactor(m_factorType)->GetString().as_string());
+      //std::cerr << targetTokens.back() << " ";
+    }
+    //std::cerr << std::endl;
     
     AddStats(sourceTokens, targetTokens, m_scores, ops);
   }
