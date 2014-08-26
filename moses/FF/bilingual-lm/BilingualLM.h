@@ -5,6 +5,9 @@
 #include "moses/FF/FFState.h"
 #include "/home/dheart/work/nplm/pure_nplm/nplm/src/neuralLM.h"
 #include <boost/thread/tss.hpp>
+#include "moses/Hypothesis.h"
+#include "moses/InputPath.h"
+#include "moses/Manager.h"
 
 
 namespace Moses
@@ -25,13 +28,15 @@ class BilingualLM : public StatefulFeatureFunction
 {
 
 private:
-  std::vector<int> getSourceWords(const TargetPhrase &targetPhrase
+  void getSourceWords(const TargetPhrase &targetPhrase
                 , int targetWordIdx
-                , const InputType &input
-                , const InputPath &inputPath) const;
+                , const Sentence &source_sent
+                , const WordsRange &sourceWordRange
+                , std::vector<int> &words) const;
 
-  std::vector<int> getTargetWords(Phrase &whole_phrase
-                , int current_word_index) const;
+  void getTargetWords(Phrase &whole_phrase
+                , int current_word_index
+                , std::vector<int> &words) const;
 
 protected:
   // big data (vocab, weights, cache) shared among threads

@@ -1,9 +1,7 @@
 #include <vector>
 #include "BilingualLM.h"
 #include "moses/ScoreComponentCollection.h"
-#include "moses/Hypothesis.h"
-#include "moses/InputPath.h"
-#include "moses/Manager.h"
+
 
 using namespace std;
 
@@ -35,9 +33,10 @@ void BilingualLM::Load(){
 }
 
 //Returns target_ngrams sized word vector that contains the current word we are looking at. (in effect target_ngrams + 1)
-std::vector<int> BilingualLM::getTargetWords(Phrase &whole_phrase
-                , int current_word_index) const {
-  std::vector<int> target_words(target_ngrams + 1);
+void BilingualLM::getTargetWords(Phrase &whole_phrase
+                , int current_word_index
+                , std::vector<int> &words) const {
+
 
   for (int i = target_ngrams; i > -1; i--){
 
@@ -52,18 +51,18 @@ std::vector<int> BilingualLM::getTargetWords(Phrase &whole_phrase
       const std::string string = factor->GetString().as_string();
       neuralLM_wordID = m_neuralLM->lookup_word(string);
     }
-    target_words.push_back(neuralLM_wordID);
+    words.push_back(neuralLM_wordID);
   }
-  return target_words;
+
 }
 
 //Returns source words in the way NeuralLM expects them.
 
-std::vector<int> BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
+void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
                 , int targetWordIdx
-                , const InputType &input
-                , const InputPath &inputPath) const {
-  std::vector<int> source_words;
+                , const Sentence &source_sent
+                , const WordsRange &sourceWordRange
+                , std::vector<int> &words) const {
 
   //Get source context
 
@@ -110,11 +109,9 @@ std::vector<int> BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
   }
 
   //We have found the alignment. Now determine how much to shift by to get the actual source word index.
-  const WordsRange& wordsRange = inputPath.GetWordsRange();
-  size_t phrase_start_pos = wordsRange.GetStartPos();
+  size_t phrase_start_pos = sourceWordRange.GetStartPos();
   size_t source_word_mid_idx = phrase_start_pos + targetWordIdx; //Account for how far the current word is from the start of the phrase.
 
-  const Sentence& source_sent = static_cast<const Sentence&>(input);
   
   //Define begin and end indexes of the lookup. Cases for even and odd ngrams
   //This can result in indexes which span larger than the length of the source phrase.
@@ -142,11 +139,9 @@ std::vector<int> BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
       const std::string string = factor->GetString().as_string();
       neuralLM_wordID = m_neuralLM->lookup_word(string);
     }
-    source_words.push_back(neuralLM_wordID);
+    words.push_back(neuralLM_wordID);
   }
 
-
-  return source_words;
 }
 
 void BilingualLM::EvaluateInIsolation(const Phrase &source
@@ -275,6 +270,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
   const Hypothesis * current = &cur_hypo;
 
   while (current){
+    std::vector<int> all_words(source_ngrams + target_ngrams + 1);
     double value = 0;
     Phrase whole_phrase;
     current->GetOutputPhrase(whole_phrase);
@@ -282,14 +278,19 @@ FFState* BilingualLM::EvaluateWhenApplied(
     const WordsRange& targetWordRange = current->GetCurrTargetWordsRange(); //This should be which words of whole_phrase the current hypothesis represents.
     int phrase_start_pos = targetWordRange.GetStartPos(); //Start position of the current target phrase
 
+    const WordsRange& sourceWordRange = current->GetCurrSourceWordsRange(); //Source words range to calculate offsets
+
     //For each word in the current target phrase get its LM score
     for (int i = 0; i < currTargetPhrase.GetSize(); i++){
-      std::vector<int> target_words = getTargetWords(whole_phrase, (i + phrase_start_pos));
-      //Get the position of the target phrase compared to the whole phrase
-      //Get source words here. Evaluate with neuralLM.
+      getSourceWords(currTargetPhrase
+                , i //The current target phrase
+                , source_sent
+                , sourceWordRange
+                , all_words);
+      getTargetWords(whole_phrase, (i + phrase_start_pos), all_words);
+      value += m_neuralLM->lookup_ngram(all_words);
 
     }
-
 
     totalScore += value;
     current = current->GetPrevHypo();
