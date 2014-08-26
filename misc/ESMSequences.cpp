@@ -18,16 +18,19 @@ int main(int argc, char * argv[]) {
     std::vector<std::string> parts;
     boost::split(parts, line, boost::is_any_of("\t"));
     
+    boost::trim(parts[0]);
+    boost::trim(parts[1]);
+    
     std::vector<std::string> source;
-    boost::split(source, parts[0], boost::is_any_of(" "));
+    boost::split(source, parts[0], boost::is_any_of(" "), boost::token_compress_on);
     
     std::vector<std::string> target;    
-    boost::split(target, parts[1], boost::is_any_of(" "));
+    boost::split(target, parts[1], boost::is_any_of(" "), boost::token_compress_on);
     
     std::vector<std::string> edits;
     if(parts.size() == 2) {
         // Use diff-based operations
-        //edits = Moses::calculateEdits(source, target);
+        edits = Moses::calculateEdits(source, target);
     }
     else if(parts.size() == 3) {
         // Use alignment-based operations

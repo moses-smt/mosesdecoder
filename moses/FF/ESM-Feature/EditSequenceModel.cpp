@@ -122,14 +122,14 @@ FFState* EditSequenceModel::EvaluateWhenApplied(
   for (size_t i = 0; i < target.GetSize(); i++)
     myTargetPhrase.push_back(target.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
 
-  const AlignmentInfo &align = target.GetAlignTerm();
-  AlignmentInfo::const_iterator iter;
-  for (iter = align.begin(); iter != align.end(); ++iter) {
-    alignments.push_back(iter->first);
-    alignments.push_back(iter->second);
-  }
+  //const AlignmentInfo &align = target.GetAlignTerm();
+  //AlignmentInfo::const_iterator iter;
+  //for (iter = align.begin(); iter != align.end(); ++iter) {
+  //  alignments.push_back(iter->first);
+  //  alignments.push_back(iter->second);
+  //}
 
-  std::vector<std::string> edits = calculateEdits(mySourcePhrase, myTargetPhrase, alignments);
+  std::vector<std::string> edits = calculateEdits(mySourcePhrase, myTargetPhrase /*, alignments*/);
 
   FFState* curr_state = new esmState(ESM->NullContextState());
   float opProb = calculateScore(edits, prev_state, curr_state, cur_hypo.IsSourceCompleted());

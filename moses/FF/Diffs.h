@@ -1,6 +1,8 @@
 #ifndef moses_Diffs_h
 #define moses_Diffs_h
 
+#include <cmath>
+
 namespace Moses
 {
 
