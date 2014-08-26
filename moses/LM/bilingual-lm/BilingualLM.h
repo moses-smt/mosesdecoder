@@ -3,11 +3,14 @@
 #include <string>
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/FFState.h"
-#include "/home/dheart/work/nplm/pure_nplm/nplm/src/neuralLM.h"
 #include <boost/thread/tss.hpp>
 #include "moses/Hypothesis.h"
 #include "moses/InputPath.h"
 #include "moses/Manager.h"
+
+namespace nplm {
+  class neuralLM;
+}
 
 
 namespace Moses
