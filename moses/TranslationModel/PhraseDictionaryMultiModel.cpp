@@ -35,7 +35,7 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
     UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
 	    m_pdStr.size()*numWeights != m_multimodelweights.size(),
         "Number of scores and weights are not equal");
-  } else if (m_mode == "all") {
+  } else if (m_mode == "all" || m_mode == "all-restrict") {
     size_t componentWeights = 0;
     for(size_t i = 0; i < m_numModels; ++i) {
       const string &ptName = m_pdStr[i];
@@ -115,7 +115,9 @@ const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollect
     RemoveAllInMap(*allStats);
     delete allStats;
   } else if (m_mode == "all") {
-    ret = CreateTargetPhraseCollectionAll(src);
+    ret = CreateTargetPhraseCollectionAll(src, false);
+  } else if (m_mode == "all-restrict") {
+    ret = CreateTargetPhraseCollectionAll(src, true);
   }
 
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
@@ -204,7 +206,7 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
   return ret;
 }
 
-TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollectionAll(const Phrase& src) const
+TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollectionAll(const Phrase& src, const bool restricted) const
 {
   // Collect phrases from all models
   std::map<std::string, multiModelPhrase*> allPhrases;
@@ -227,7 +229,12 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
         std::vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
         std::string targetString = targetPhrase->GetStringRep(m_output);
+        // Phrase not in collection -> add if unrestricted (all) or first model (all-restrict)
         if (allPhrases.find(targetString) == allPhrases.end()) {
+          // all-restrict and not first model: skip adding unseen phrase
+          if (restricted && i > 0) {
+            continue;
+          }
 
           multiModelPhrase* phrase = new multiModelPhrase;
           phrase->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
