@@ -144,6 +144,20 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
 
 }
 
+size_t BilingualLM::getState(Phrase &whole_phrase) const {
+  //Get last n-1 target
+  size_t hashCode = 0;
+  for (int i = whole_phrase.GetSize() - target_ngrams; i < whole_phrase.GetSize(); i++) {
+    int neuralLM_wordID;
+    const Word& word = whole_phrase.GetWord(i);
+    const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+    const std::string string = factor->GetString().as_string();
+    neuralLM_wordID = m_neuralLM->lookup_word(string);
+    boost::hash_combine(hashCode, neuralLM_wordID);
+  }
+  return hashCode;
+}
+
 void BilingualLM::EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
@@ -157,7 +171,7 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
                                   , ScoreComponentCollection *estimatedFutureScore) const
 {
   /*
-  double value = 0;
+  float value = 0;
   if (target_ngrams > targetPhrase.GetSize()) {
       //We have too small of a phrase.
       return;
@@ -263,7 +277,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
-  double totalScore = 0;
+  float totalScore = 0;
   Manager& manager = cur_hypo.GetManager();
   const Sentence& source_sent = static_cast<const Sentence&>(manager.GetSource());
 
@@ -271,7 +285,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   while (current){
     std::vector<int> all_words(source_ngrams + target_ngrams + 1);
-    double value = 0;
+    float value = 0;
     Phrase whole_phrase;
     current->GetOutputPhrase(whole_phrase);
     const TargetPhrase& currTargetPhrase = current->GetCurrTargetPhrase();
@@ -296,15 +310,16 @@ FFState* BilingualLM::EvaluateWhenApplied(
     current = current->GetPrevHypo();
   }
 
-  // dense scores
-  vector<float> newScores(m_numScoreComponents);
-  newScores[0] = 1.5;
-  newScores[1] = 0.3;
-  newScores[2] = 0.4;
-  accumulator->PlusEquals(this, newScores);
+  //Get state:
+  Phrase whole_phrase;
+  cur_hypo.GetOutputPhrase(whole_phrase);
+  size_t new_state = getState(whole_phrase);
+
+
+  accumulator->Assign(this, totalScore);
 
   // int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize(); // ??? [UG]
-  return new BilingualLMState(0);
+  return new BilingualLMState(new_state);
 }
 
 FFState* BilingualLM::EvaluateWhenApplied(
@@ -321,6 +336,10 @@ void BilingualLM::SetParameter(const std::string& key, const std::string& value)
     m_filePath = value;
   } else if (key == "ngrams") {
     m_nGramOrder = atoi(value.c_str());
+  } else if (key == "target_ngrams") {
+    target_ngrams = atoi(value.c_str());
+  } else if (key == "source_ngrams") {
+    source_ngrams = atoi(value.c_str());
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }

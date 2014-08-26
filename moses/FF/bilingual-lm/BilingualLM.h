@@ -38,6 +38,8 @@ private:
                 , int current_word_index
                 , std::vector<int> &words) const;
 
+  size_t getState(Phrase &whole_phrase) const;
+
 protected:
   // big data (vocab, weights, cache) shared among threads
   std::string m_filePath;
