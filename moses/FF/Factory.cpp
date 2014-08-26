@@ -43,6 +43,7 @@
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/CorrectionPattern.h"
 #include "moses/FF/EditOps.h"
+#include "moses/FF/ESM-Feature/EditSequenceModel.h"
 #include "moses/FF/SetSourcePhrase.h"
 #include "CountNonTerms.h"
 #include "ReferenceComparison.h"
@@ -222,6 +223,7 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME(CorrectionPattern);
   MOSES_FNAME(EditOps);
+  MOSES_FNAME(EditSequenceModel);
   
 #ifdef HAVE_CMPH
   MOSES_FNAME(PhraseDictionaryCompact);

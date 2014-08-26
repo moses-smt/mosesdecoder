@@ -71,6 +71,7 @@ lib moses :
   TranslationModel/CYKPlusParser/*.cpp
   FF/*.cpp
   FF/OSM-Feature/*.cpp
+  FF/ESM-Feature/*.cpp
   FF/LexicalReordering/*.cpp
   PP/*.cpp
 : #exceptions
