@@ -49,8 +49,11 @@
 #include "NieceTerminal.h"
 #include "SpanLength.h"
 #include "SyntaxRHS.h"
+<<<<<<< HEAD
 #include "moses/FF/PhraseOrientationFeature.h"
 #include "bilingual-lm/BilingualLM.h"
+=======
+>>>>>>> fix Jamfile
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -92,6 +95,7 @@
 
 #ifdef LM_NEURAL
 #include "moses/LM/NeuralLMWrapper.h"
+#include "moses/LM/bilingual-lm/BilingualLM.h"
 #endif
 
 #ifdef LM_DALM
@@ -252,6 +256,7 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_NEURAL
   MOSES_FNAME2("NeuralLM", NeuralLMWrapper);
+  MOSES_FNAME(BilingualLM);
 #endif
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);

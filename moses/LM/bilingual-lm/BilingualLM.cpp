@@ -1,6 +1,7 @@
 #include <vector>
 #include "BilingualLM.h"
 #include "moses/ScoreComponentCollection.h"
+#include "neuralLM.h"
 
 
 using namespace std;
