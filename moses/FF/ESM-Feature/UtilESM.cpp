@@ -26,27 +26,43 @@ MinPhrase combine(const MinPhrase& p1, const MinPhrase& p2) {
 
 typedef std::vector<std::string> Tokens;
 
-std::string CreateSinglePattern(const Tokens &s1, const Tokens &s2) {
-  typedef typename Tokens::value_type Item;
+std::vector<std::string> CreateSinglePattern(const Tokens &s1, const Tokens &s2) {
+  std::vector<std::string> pattern;
   
-  std::stringstream out;
   if(s1.empty()) {
-    out << "+_" << boost::join(s2, "^");
-    return out.str();
+    BOOST_FOREACH(std::string w, s2) {
+     std::stringstream out;
+     out << "+_" << w;
+     pattern.push_back(out.str());
+    }
   }
   else if(s2.empty()) {
-    out << "-_" << boost::join(s1, "^");
-    return out.str();
+    BOOST_FOREACH(std::string w, s2) {
+     std::stringstream out;
+     out << "-_" << w;
+     pattern.push_back(out.str());
+    }
   }
   else {
-    typename Tokens::value_type v1 = boost::join(s1, "^");
-    typename Tokens::value_type v2 = boost::join(s2, "^");
-    if(v1 == v2)
-      out << "=_" << v1;
-    else
-      out << "~_" << v1 << "_" << v2;
-    return out.str();
+    for(size_t i = 0; i < std::max(s1.size(), s2.size()); i++) {
+      std::stringstream out;
+      if(i < s1.size() && i < s2.size()) {
+        if(s1[i] == s2[i])
+          out << "=_" << s1[i];
+        else
+          out << "~_" << s1[i] << "_" << s2[i];
+      }
+      else if(i < s1.size()) {
+        out << "-_" << s1[i];   
+      }
+      else if(i < s2.size()) {
+        out << "+_" << s2[i];   
+      }
+      pattern.push_back(out.str());
+    }
   }
+  
+  return pattern;
 }
 
 std::vector<std::string> calculateEdits(
@@ -61,10 +77,8 @@ std::vector<std::string> calculateEdits(
   BOOST_FOREACH(Diff type, diffs) {
     if(type == 'm') {
       if(lastType != 'm') {
-        if(!source.empty() || !target.empty()) {
-          std::string pattern = CreateSinglePattern(source, target);
-          patternList.push_back(pattern);
-        }
+        std::vector<std::string> patterns = CreateSinglePattern(source, target);
+        patternList.insert(patternList.end(), patterns.begin(), patterns.end());
       }
       source.clear();
       target.clear();
@@ -76,8 +90,8 @@ std::vector<std::string> calculateEdits(
       else {
         source.push_back(s1[i]);
         target.push_back(s2[j]);
-        std::string pattern = CreateSinglePattern(source, target);
-        patternList.push_back(pattern);
+        std::vector<std::string> patterns = CreateSinglePattern(source, target);
+        patternList.insert(patternList.end(), patterns.begin(), patterns.end());
         source.clear();
         target.clear();
       }
@@ -97,8 +111,8 @@ std::vector<std::string> calculateEdits(
   }
   if(lastType != 'm') {    
     if(!source.empty() || !target.empty()) {
-      std::string pattern = CreateSinglePattern(source, target);
-      patternList.push_back(pattern);
+      std::vector<std::string> patterns = CreateSinglePattern(source, target);
+      patternList.insert(patternList.end(), patterns.begin(), patterns.end());
     }
   }  
   
