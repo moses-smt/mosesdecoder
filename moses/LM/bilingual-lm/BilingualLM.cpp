@@ -35,30 +35,33 @@ void BilingualLM::Load(){
 //Returns target_ngrams sized word vector that contains the current word we are looking at. (in effect target_ngrams + 1)
 void BilingualLM::getTargetWords(Phrase &whole_phrase
                 , int current_word_index
-                , std::vector<int> &words) const {
+                , std::vector<int> &words
+                , std::vector<std::string> &strings) const {
 
   if (!m_neuralLM.get()) {
     m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
   }
-
+  int j = source_ngrams; //Initial index for appending to the vector
   for (int i = target_ngrams; i > -1; i--){
 
     int neuralLM_wordID;
     int indexToRead = current_word_index - i;
-    //std::cout << "Index to read is: " << indexToRead << std::endl;
     //std::cout << "Whole phrase size: " << whole_phrase.GetSize() << std::endl;
 
     if (indexToRead < 0) {
       //std::cout << "Index < 0 before NPLM " << indexToRead << std::endl;
       neuralLM_wordID = m_neuralLM->lookup_word(BOS_);
+      strings[j] = BOS_; //For debugging purposes
       //std::cout << "Index < 0, After NPLM " << indexToRead << std::endl;
     } else {
       const Word& word = whole_phrase.GetWord(indexToRead);
       const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
       const std::string string = factor->GetString().as_string();
+      strings[j] = string; //For debugging purposes
       neuralLM_wordID = m_neuralLM->lookup_word(string);
     }
-    words[i+source_ngrams] = neuralLM_wordID;
+    words[j] = neuralLM_wordID;
+    j++;
   }
 
 }
@@ -69,7 +72,8 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
                 , int targetWordIdx
                 , const Sentence &source_sent
                 , const WordsRange &sourceWordRange
-                , std::vector<int> &words) const {
+                , std::vector<int> &words
+                , std::vector<std::string> &strings) const {
 
   if (!m_neuralLM.get()) {
     m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
@@ -148,12 +152,15 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
     int neuralLM_wordID;
     if (j < 0) {
       neuralLM_wordID = m_neuralLM->lookup_word(BOS_);
+      strings[i] = BOS_;
     } else if (j > source_sent.GetSize() - 1) {
       neuralLM_wordID = m_neuralLM->lookup_word(EOS_);
+      strings[i] = EOS_;
     } else {
       const Word& word = source_sent.GetWord(j);
       const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
       const std::string string = factor->GetString().as_string();
+      strings[i] = string;
       //std:cout << "Source word j: " << j << " is: " << string << std::endl;
       neuralLM_wordID = m_neuralLM->lookup_word(string);
       //std::cout << "NPLM_WORDID: " << neuralLM_wordID << std::endl;
@@ -318,6 +325,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   //std::cout << "Started iterating!" << std::endl;
   std::vector<int> all_words(source_ngrams + target_ngrams + 1);
+  std::vector<std::string> all_strings(source_ngrams + target_ngrams + 1);
   float value = 0;
   Phrase whole_phrase;
   cur_hypo.GetOutputPhrase(whole_phrase);
@@ -334,19 +342,28 @@ FFState* BilingualLM::EvaluateWhenApplied(
               , i //The current target phrase
               , source_sent
               , sourceWordRange
-              , all_words);
+              , all_words
+              , all_strings);
     //std::cout << "Got a source Phrase" << std::endl;
     //for (int j = 0; j< all_words.size(); j++){
     //  std::cout<< "All words " << j << " value " << all_words[j] << std::endl;
     //}
     //std::cout << "Phrase start pos " << phrase_start_pos << std::endl;
-    getTargetWords(whole_phrase, (i + phrase_start_pos), all_words);
-    //for (int j = 0; j< all_words.size(); j++){
-    //  std::cout<< "All words " << j << " value " << all_words[j] << std::endl;
-    //}
+    getTargetWords(whole_phrase, (i + phrase_start_pos), all_words, all_strings);
+    /*
+    for (int j = 0; j< all_words.size(); j++){
+      std::cout<< all_words[j] << " ";
+    }
+    std::cout << std::endl;
+    for (int j = 0; j< all_strings.size(); j++){
+      std::cout<< all_strings[j] << " ";
+    }
+    std::cout << std::endl;
+    */
     //std::cout << "Size of After Words " << all_words.size() << std::endl;
     //std::cout << "Got a target Phrase" << std::endl;
     value += m_neuralLM->lookup_ngram(all_words);
+
   }
 
   size_t new_state = getState(whole_phrase); 
@@ -376,6 +393,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
   while (current){
     //std::cout << "Started iterating!" << std::endl;
     std::vector<int> all_words(source_ngrams + target_ngrams + 1);
+    std::vector<std::string> all_strings(source_ngrams + target_ngrams + 1);
     float value = 0;
     Phrase whole_phrase;
     current->GetOutputPhrase(whole_phrase);
@@ -391,13 +409,24 @@ FFState* BilingualLM::EvaluateWhenApplied(
                 , i //The current target phrase
                 , source_sent
                 , sourceWordRange
-                , all_words);
+                , all_words
+                , all_strings);
       //std::cout << "Got a source Phrase" << std::endl;
       //for (int j = 0; j< all_words.size(); j++){
         //std::cout<< "All words source number " << j << " value " << all_words[j] << std::endl;
       //}
       //std::cout << "Phrase start pos " << phrase_start_pos << std::endl;
-      getTargetWords(whole_phrase, (i + phrase_start_pos), all_words);
+      getTargetWords(whole_phrase, (i + phrase_start_pos), all_words, all_strings);
+      
+      for (int j = 0; j< all_words.size(); j++){
+        std::cout<< all_words[j] << " ";
+      }
+      std::cout << std::endl;
+      for (int j = 0; j< all_strings.size(); j++){
+        std::cout<< all_strings[j] << " ";
+      }
+      std::cout << std::endl;
+
       //std::cout << "Got a target Phrase" << std::endl;
       value += m_neuralLM->lookup_ngram(all_words);
 
@@ -417,7 +446,8 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   // int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize(); // ??? [UG]
   return new BilingualLMState(new_state);
-}*/
+}
+*/
 
 FFState* BilingualLM::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
