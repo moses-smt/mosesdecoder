@@ -119,6 +119,7 @@ std::vector<std::string> calculateEdits(
   return patternList;
 }
 
+/*
 std::vector<std::string> calculateEdits(
                       const std::vector<std::string>& source,
                       const std::vector<std::string>& target,
@@ -166,8 +167,8 @@ std::vector<std::string> calculateEdits(
   
   return edits;
 }
+*/
 
-/*
 std::vector<std::string> calculateEdits(
                       const std::vector<std::string>& source,
                       const std::vector<std::string>& target,
@@ -193,10 +194,13 @@ std::vector<std::string> calculateEdits(
     BOOST_FOREACH(MinPhrase p2, minPhrases) {
       if(p1 != p2) {
         if(overlap(p1, p2)) {
-          minPhrases.erase(p1);
-          minPhrases.erase(p2);   
-          minPhrases.insert(combine(p1, p2));
-          goto repeat;
+          MinPhrase combined = combine(p1, p2);
+          if(combined[2] < 3 && combined[3] < 3) {
+             minPhrases.erase(p1);
+             minPhrases.erase(p2);   
+             minPhrases.insert(combine(p1, p2));
+             goto repeat;
+          }
         }
       }
     }
@@ -204,31 +208,19 @@ std::vector<std::string> calculateEdits(
   
   for(size_t i = 0; i < sourceAligned.size(); i++) {
     if(!sourceAligned[i]) {
-      int start = i;
-      int end = i;
-      while(!sourceAligned[end] && end < (int)sourceAligned.size()) end++;
-      
       MinPhrase sourcePhrase(4, -1);
-      sourcePhrase[0] = start;
-      sourcePhrase[2] = end - start - 1;
-      
+      sourcePhrase[0] = i;
+      sourcePhrase[2] = 0;
       minPhrases.insert(sourcePhrase);
-      i = end - 1;
     }
   }
   
   for(size_t i = 0; i < targetAligned.size(); i++) {
     if(!targetAligned[i]) {
-      int start = i;
-      int end = i;
-      while(!targetAligned[end] && end < (int)targetAligned.size()) end++;
-      
       MinPhrase targetPhrase(4, -1);
-      targetPhrase[1] = start;
-      targetPhrase[3] = end - start - 1;
-      
+      targetPhrase[1] = i;
+      targetPhrase[3] = 0;
       minPhrases.insert(targetPhrase);
-      i = end - 1;
     }
   }
   
@@ -265,5 +257,5 @@ std::vector<std::string> calculateEdits(
   
   return edits;
 }
-*/
+
 }
