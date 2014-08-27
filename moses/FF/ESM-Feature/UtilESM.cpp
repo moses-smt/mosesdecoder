@@ -123,6 +123,55 @@ std::vector<std::string> calculateEdits(
                       const std::vector<std::string>& source,
                       const std::vector<std::string>& target,
                       const std::vector<size_t>& alignment) {
+
+  std::vector<bool> sourceAligned(source.size(), false);
+  std::vector<std::vector<size_t> > targetAligned(target.size());
+  
+  for(size_t i = 0; i < alignment.size(); i += 2) {    
+    sourceAligned[alignment[i]] = true;
+    targetAligned[alignment[i + 1]].push_back(alignment[i]);
+  }
+  
+  std::vector<std::string> edits;
+  for(size_t i = 0; i < targetAligned.size(); i++) {
+    std::stringstream pattern;
+    
+    if(targetAligned[i].empty()) {
+      pattern << "+_" << target[i];
+      edits.push_back(pattern.str());
+    }
+    else {
+      std::stringstream sourceStream;
+      sourceStream << source[targetAligned[i][0]];
+      for(size_t j = 1; j < targetAligned[i].size(); j++)
+        sourceStream << "^" << source[targetAligned[i][j]];
+      std::string sourceString = sourceStream.str();
+      if(sourceString == target[i])
+        pattern << "=_" << sourceString;
+      else
+        pattern << "~_" << sourceString << "_" << target[i];
+      edits.push_back(pattern.str());
+        
+      for(size_t j = 0; j < targetAligned[i].size(); j++) {
+        size_t k = targetAligned[i][j] + 1;
+        while(!sourceAligned[k] && k < source.size()) {
+          std::stringstream dropStream;
+          dropStream << "-_" << source[k];
+          edits.push_back(dropStream.str());
+          k++;
+        }
+      } 
+    }
+  }
+  
+  return edits;
+}
+
+/*
+std::vector<std::string> calculateEdits(
+                      const std::vector<std::string>& source,
+                      const std::vector<std::string>& target,
+                      const std::vector<size_t>& alignment) {
   
   std::vector<bool> sourceAligned(source.size(), false);
   std::vector<bool> targetAligned(target.size(), false);
@@ -216,5 +265,5 @@ std::vector<std::string> calculateEdits(
   
   return edits;
 }
-
+*/
 }
