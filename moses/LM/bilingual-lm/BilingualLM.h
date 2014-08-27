@@ -35,11 +35,13 @@ private:
                 , int targetWordIdx
                 , const Sentence &source_sent
                 , const WordsRange &sourceWordRange
-                , std::vector<int> &words) const;
+                , std::vector<int> &words
+                , std::vector<std::string> &strings) const;
 
   void getTargetWords(Phrase &whole_phrase
                 , int current_word_index
-                , std::vector<int> &words) const;
+                , std::vector<int> &words
+                , std::vector<std::string> &strings) const;
 
   size_t getState(Phrase &whole_phrase) const;
 
