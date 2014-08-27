@@ -58,8 +58,7 @@ void BilingualLM::getTargetWords(Phrase &whole_phrase
       const std::string string = factor->GetString().as_string();
       neuralLM_wordID = m_neuralLM->lookup_word(string);
     }
-    //std::cout << "Pushed to vector" << std::endl;
-    words.push_back(neuralLM_wordID);
+    words[i+source_ngrams] = neuralLM_wordID;
   }
 
 }
@@ -142,8 +141,10 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
 
   //std::cout << "Begin idx:" << begin_idx << std::endl;
   //std::cout << "End idx:" << end_idx << std::endl;
+  //std::cout << "Words size before source " << words.size() << std::endl;
   //Add words to vector
-  for (int j = begin_idx; j < end_idx; j++) {
+  int i = 0; //Counter for the offset of the words vector.
+  for (int j = begin_idx; j < end_idx + 1; j++) {
     int neuralLM_wordID;
     if (j < 0) {
       neuralLM_wordID = m_neuralLM->lookup_word(BOS_);
@@ -157,8 +158,11 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
       neuralLM_wordID = m_neuralLM->lookup_word(string);
       //std::cout << "NPLM_WORDID: " << neuralLM_wordID << std::endl;
     }
-    words.push_back(neuralLM_wordID);
+    words[i] = (neuralLM_wordID);
+    i++;
   }
+  //std::cout << "I max is " << i << std::endl;
+  //std::cout << "Words size after source " << words.size() << std::endl;
 
 }
 
@@ -306,6 +310,62 @@ FFState* BilingualLM::EvaluateWhenApplied(
   }
 
 
+
+  Manager& manager = cur_hypo.GetManager();
+  const Sentence& source_sent = static_cast<const Sentence&>(manager.GetSource());
+
+
+
+  //std::cout << "Started iterating!" << std::endl;
+  std::vector<int> all_words(source_ngrams + target_ngrams + 1);
+  float value = 0;
+  Phrase whole_phrase;
+  cur_hypo.GetOutputPhrase(whole_phrase);
+  const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
+  const WordsRange& targetWordRange = cur_hypo.GetCurrTargetWordsRange(); //This should be which words of whole_phrase the current hypothesis represents.
+  int phrase_start_pos = targetWordRange.GetStartPos(); //Start position of the current target phrase
+
+  const WordsRange& sourceWordRange = cur_hypo.GetCurrSourceWordsRange(); //Source words range to calculate offsets
+
+  //For each word in the current target phrase get its LM score
+  for (int i = 0; i < currTargetPhrase.GetSize(); i++){
+    //std::cout << "Size of Before Words " << all_words.size() << std::endl;
+    getSourceWords(currTargetPhrase
+              , i //The current target phrase
+              , source_sent
+              , sourceWordRange
+              , all_words);
+    //std::cout << "Got a source Phrase" << std::endl;
+    //for (int j = 0; j< all_words.size(); j++){
+    //  std::cout<< "All words " << j << " value " << all_words[j] << std::endl;
+    //}
+    //std::cout << "Phrase start pos " << phrase_start_pos << std::endl;
+    getTargetWords(whole_phrase, (i + phrase_start_pos), all_words);
+    //for (int j = 0; j< all_words.size(); j++){
+    //  std::cout<< "All words " << j << " value " << all_words[j] << std::endl;
+    //}
+    //std::cout << "Size of After Words " << all_words.size() << std::endl;
+    //std::cout << "Got a target Phrase" << std::endl;
+    value += m_neuralLM->lookup_ngram(all_words);
+  }
+
+  size_t new_state = getState(whole_phrase); 
+  accumulator->PlusEquals(this, value);
+
+  return new BilingualLMState(new_state);
+}
+/*
+FFState* BilingualLM::EvaluateWhenApplied(
+  const Hypothesis& cur_hypo,
+  const FFState* prev_state,
+  ScoreComponentCollection* accumulator) const
+{
+
+  if (!m_neuralLM.get()) {
+    m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
+  }
+
+
   float totalScore = 0;
   Manager& manager = cur_hypo.GetManager();
   const Sentence& source_sent = static_cast<const Sentence&>(manager.GetSource());
@@ -357,7 +417,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   // int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize(); // ??? [UG]
   return new BilingualLMState(new_state);
-}
+}*/
 
 FFState* BilingualLM::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
