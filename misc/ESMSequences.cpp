@@ -16,11 +16,12 @@ int main(int argc, char * argv[]) {
   std::string line;
   while(std::getline(std::cin, line)) {
     std::vector<std::string> parts;
-    boost::split(parts, line, boost::is_any_of("\t"));
+    boost::split(parts, line, boost::is_any_of("\t"), boost::token_compress_on);
     
     boost::trim(parts[0]);
     boost::trim(parts[1]);
-    
+    boost::trim(parts[2]);
+
     std::vector<std::string> source;
     boost::split(source, parts[0], boost::is_any_of(" "), boost::token_compress_on);
     
@@ -35,7 +36,7 @@ int main(int argc, char * argv[]) {
     else if(parts.size() == 3) {
         // Use alignment-based operations
         std::vector<std::string> alignmentStr;
-        boost::split(alignmentStr, parts[2], boost::is_any_of(" -"));
+        boost::split(alignmentStr, parts[2], boost::is_any_of(" -"), boost::token_compress_on);
         std::vector<size_t> alignment;
         BOOST_FOREACH(std::string a, alignmentStr)
             alignment.push_back(boost::lexical_cast<size_t>(a));

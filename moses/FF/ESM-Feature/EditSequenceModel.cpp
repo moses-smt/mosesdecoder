@@ -51,7 +51,7 @@ EditSequenceModel::~EditSequenceModel() {
 
 void EditSequenceModel :: readLanguageModel(const char *lmFile)
 {
-  string unkOp = "_TRANS_SLF_";
+  string unkOp = "<unk>";
   ESM = ConstructESMLM(m_lmPath);
 
   State startState = ESM->NullContextState();
@@ -91,12 +91,13 @@ void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
 
   std::vector<std::string> edits = calculateEdits(mySourcePhrase, myTargetPhrase, alignments);
 
-  FFState* start_state = new esmState(ESM->NullContextState());
-  FFState* curr_state = new esmState(ESM->NullContextState());
-  float opProb = calculateScore(edits, start_state, curr_state, false);
-
+  esmState start_state(ESM->NullContextState());
+  esmState curr_state(ESM->NullContextState());
+  float opProb = calculateScore(edits, &start_state, &curr_state, false);
+    
   std::vector<float> scores;
-  scores.push_back(TransformLMScore(opProb));
+  //scores.push_back(TransformLMScore(opProb));
+  scores.push_back(opProb);
   estimatedFutureScore.PlusEquals(this, scores);
 }
 
@@ -122,20 +123,21 @@ FFState* EditSequenceModel::EvaluateWhenApplied(
   for (size_t i = 0; i < target.GetSize(); i++)
     myTargetPhrase.push_back(target.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
 
-  //const AlignmentInfo &align = target.GetAlignTerm();
-  //AlignmentInfo::const_iterator iter;
-  //for (iter = align.begin(); iter != align.end(); ++iter) {
-  //  alignments.push_back(iter->first);
-  //  alignments.push_back(iter->second);
-  //}
+  const AlignmentInfo &align = target.GetAlignTerm();
+  AlignmentInfo::const_iterator iter;
+  for (iter = align.begin(); iter != align.end(); ++iter) {
+    alignments.push_back(iter->first);
+    alignments.push_back(iter->second);
+  }
 
-  std::vector<std::string> edits = calculateEdits(mySourcePhrase, myTargetPhrase /*, alignments*/);
+  std::vector<std::string> edits = calculateEdits(mySourcePhrase, myTargetPhrase, alignments);
 
   FFState* curr_state = new esmState(ESM->NullContextState());
   float opProb = calculateScore(edits, prev_state, curr_state, cur_hypo.IsSourceCompleted());
 
   std::vector<float> scores;
-  scores.push_back(TransformLMScore(opProb));
+  //scores.push_back(TransformLMScore(opProb));
+  scores.push_back(opProb);
   accumulator->PlusEquals(this, scores);
 
   return curr_state;

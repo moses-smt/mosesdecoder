@@ -4,25 +4,12 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <sstream>
+#include <queue>
 
 #include "moses/FF/Diffs.h"
 
 namespace Moses
 {
-
-bool overlap(const MinPhrase& p1, const MinPhrase& p2) {
-  return ((p1[0] <= p2[0] && p2[0] <= p1[0] + p1[2]) || (p2[0] <= p1[0] && p1[0] <= p2[0] + p2[2]) ||
-    (p1[1] <= p2[1] && p2[1] <= p1[1] + p1[3]) || (p2[1] <= p1[1] && p1[1] <= p2[1] + p2[3]));
-}
-
-MinPhrase combine(const MinPhrase& p1, const MinPhrase& p2) {
-  MinPhrase c(4, 0);
-  c[0] = std::min(p1[0], p2[0]);
-  c[1] = std::min(p1[1], p2[1]);
-  c[2] = std::max(p1[0] + p1[2] - c[0], p2[0] + p2[2] - c[0]);
-  c[3] = std::max(p1[1] + p1[3] - c[1], p2[1] + p2[3] - c[1]);
-  return c;
-}
 
 typedef std::vector<std::string> Tokens;
 
@@ -119,140 +106,133 @@ std::vector<std::string> calculateEdits(
   return patternList;
 }
 
-/*
-std::vector<std::string> calculateEdits(
-                      const std::vector<std::string>& source,
-                      const std::vector<std::string>& target,
-                      const std::vector<size_t>& alignment) {
+typedef std::set<size_t> Cept;
+typedef std::pair<Cept, Cept> CeptPair;
 
-  std::vector<bool> sourceAligned(source.size(), false);
-  std::vector<std::vector<size_t> > targetAligned(target.size());
+struct CeptSorter {
+  bool operator()(const CeptPair& c1, const CeptPair& c2) {
+    if(!c1.second.empty() && !c2.second.empty())
+      return c1.second < c2.second;
+
+    if(!c1.first.empty() && !c2.first.empty())
+      return c1.first < c2.first;
+
+    if(!c1.second.empty() && c2.second.empty())
+      return c1.first < c2.second;
+
+    if(c1.second.empty() && !c2.second.empty())
+      return c1.second < c2.first;
+    
+    return false;
+  }
+};
+
+typedef std::set<CeptPair, CeptSorter> CeptSequence;
+
+CeptSequence calculateCepts(const std::vector<size_t>& alignment, size_t slen, size_t tlen) {
   
-  for(size_t i = 0; i < alignment.size(); i += 2) {    
-    sourceAligned[alignment[i]] = true;
+  std::vector<std::vector<size_t> > sourceAligned(slen);
+  std::vector<std::vector<size_t> > targetAligned(tlen);
+  
+  for(size_t i = 0; i < alignment.size() - 1; i += 2) {
+    sourceAligned[alignment[i]].push_back(alignment[i + 1]);
     targetAligned[alignment[i + 1]].push_back(alignment[i]);
   }
   
-  std::vector<std::string> edits;
-  for(size_t i = 0; i < targetAligned.size(); i++) {
-    std::stringstream pattern;
-    
-    if(targetAligned[i].empty()) {
-      pattern << "+_" << target[i];
-      edits.push_back(pattern.str());
-    }
-    else {
-      std::stringstream sourceStream;
-      sourceStream << source[targetAligned[i][0]];
-      for(size_t j = 1; j < targetAligned[i].size(); j++)
-        sourceStream << "^" << source[targetAligned[i][j]];
-      std::string sourceString = sourceStream.str();
-      if(sourceString == target[i])
-        pattern << "=_" << sourceString;
-      else
-        pattern << "~_" << sourceString << "_" << target[i];
-      edits.push_back(pattern.str());
-        
-      for(size_t j = 0; j < targetAligned[i].size(); j++) {
-        size_t k = targetAligned[i][j] + 1;
-        while(!sourceAligned[k] && k < source.size()) {
-          std::stringstream dropStream;
-          dropStream << "-_" << source[k];
-          edits.push_back(dropStream.str());
-          k++;
+  std::vector<bool> sourceVisited(slen, false);
+  std::vector<bool> targetVisited(tlen, false);
+  
+  CeptSequence cepts;
+  for(size_t i = 0; i < tlen; ++i) {
+    if(!targetVisited[i]) {
+      typedef std::pair<size_t, bool> QueueItem;
+      std::queue<QueueItem> myQueue;
+      myQueue.push(std::make_pair(i, true));
+      
+      CeptPair cp;
+      
+      while(!myQueue.empty()) {
+        QueueItem item = myQueue.front();
+        myQueue.pop();
+              
+        if(item.second) {
+          if(!targetVisited[item.first]) {
+            targetVisited[item.first] = true;
+            cp.second.insert(item.first);
+            BOOST_FOREACH(size_t j, targetAligned[item.first])
+              myQueue.push(std::make_pair(j, false));
+          }
         }
-      } 
+        else {
+          if(!sourceVisited[item.first]) {
+            sourceVisited[item.first] = true;
+            cp.first.insert(item.first);
+            BOOST_FOREACH(size_t j, sourceAligned[item.first])
+              myQueue.push(std::make_pair(j, true));
+          }
+        }
+      }
+      cepts.insert(cp);
     }
   }
-  
-  return edits;
+  for(size_t i = 0; i < slen; ++i) {
+    if(!sourceVisited[i]) {
+      CeptPair cp;
+      cp.first.insert(i);
+      cepts.insert(cp);
+    }
+  }
+  return cepts;
 }
-*/
 
 std::vector<std::string> calculateEdits(
                       const std::vector<std::string>& source,
                       const std::vector<std::string>& target,
                       const std::vector<size_t>& alignment) {
-  
-  std::vector<bool> sourceAligned(source.size(), false);
-  std::vector<bool> targetAligned(target.size(), false);
-  
-  MinPhrases minPhrases;
-  for(size_t i = 0; i < alignment.size(); i += 2) {
-    MinPhrase phrase(4, 0);
-    phrase[0] = alignment[i];
-    phrase[1] = alignment[i + 1];
-    minPhrases.insert(phrase);
-    
-    sourceAligned[alignment[i]] = true;
-    targetAligned[alignment[i + 1]] = true;
-  }
-  
-  // @TODO: optimize this speed-wise
-  repeat:
-  BOOST_FOREACH(MinPhrase p1, minPhrases) {
-    BOOST_FOREACH(MinPhrase p2, minPhrases) {
-      if(p1 != p2) {
-        if(overlap(p1, p2)) {
-          MinPhrase combined = combine(p1, p2);
-          if(combined[2] < 3 && combined[3] < 3) {
-             minPhrases.erase(p1);
-             minPhrases.erase(p2);   
-             minPhrases.insert(combine(p1, p2));
-             goto repeat;
-          }
-        }
-      }
-    }
-  }
-  
-  for(size_t i = 0; i < sourceAligned.size(); i++) {
-    if(!sourceAligned[i]) {
-      MinPhrase sourcePhrase(4, -1);
-      sourcePhrase[0] = i;
-      sourcePhrase[2] = 0;
-      minPhrases.insert(sourcePhrase);
-    }
-  }
-  
-  for(size_t i = 0; i < targetAligned.size(); i++) {
-    if(!targetAligned[i]) {
-      MinPhrase targetPhrase(4, -1);
-      targetPhrase[1] = i;
-      targetPhrase[3] = 0;
-      minPhrases.insert(targetPhrase);
-    }
-  }
-  
+
   std::vector<std::string> edits;
-  BOOST_FOREACH(MinPhrase p, minPhrases) {
-    std::vector<std::string> sourceVec;
-    if(p[0] != -1)
-      for(int i = p[0]; i <= p[0] + p[2]; i++)
-        sourceVec.push_back(source[i]);
+  
+  CeptSequence cs = calculateCepts(alignment, source.size(), target.size());
+  BOOST_FOREACH(CeptPair cp, cs) {
+    Cept& sourceCept = cp.first;
+    Cept& targetCept = cp.second;
     
-    std::vector<std::string> targetVec;
-    if(p[1] != -1)
-      for(int i = p[1]; i <= p[1] + p[3]; i++)
-        targetVec.push_back(target[i]);
+    std::stringstream sourceStream;
+    if(!sourceCept.empty()) {
+      Cept::iterator iter = sourceCept.begin();
+      sourceStream << source[*iter++];    
+      while(iter != sourceCept.end())
+        sourceStream << "^" << source[*iter++];
+    }
     
-    std::string source = boost::join(sourceVec, "^");
-    std::string target = boost::join(targetVec, "^");
+    std::stringstream targetStream;
+    if(!targetCept.empty()) {
+      Cept::iterator iter = targetCept.begin();
+      targetStream << target[*iter++];    
+      while(iter != targetCept.end())
+        targetStream << "^" << target[*iter++];
+    }
     
-    std::stringstream ss;
-    if(source.size() == 0) {
-      ss << "+_" << target;
+    std::string sourceStr = sourceStream.str();
+    std::string targetStr = targetStream.str();
+    if(!sourceStr.empty() && !targetStr.empty()) {
+      std::stringstream op;
+      if(sourceStr == targetStr)
+        op << "=_" << sourceStr;
+      else
+        op << "~_" << sourceStr << "_" << targetStr;
+      edits.push_back(op.str());
     }
-    else if(target.size() == 0) {
-      ss << "-_" << source;     
+    else if(!sourceStr.empty() && targetStr.empty()) {
+      std::stringstream op;
+      op << "-_" << sourceStr;
+      edits.push_back(op.str());
     }
-    else if(source == target) {
-      ss << "=_" << source;
+    else if(sourceStr.empty() && !targetStr.empty()) {
+      std::stringstream op;
+      op << "+_" << targetStr;
+      edits.push_back(op.str());
     }
-    else {
-      ss << "~_" << source << "_" << target;
-    }
-    edits.push_back(ss.str());
   }
   
   return edits;
