@@ -94,7 +94,7 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
       if (!last_word_al.empty()){
         break;
       }
-    } else if ((targetWordIdx + j) > 0) {
+    } else if ((targetWordIdx - j) > 0) {
       //We couldn't find word on the right, try the left.
       last_word_al = alignments.GetAlignmentsForTarget(targetWordIdx - j);
       if (!last_word_al.empty()){
@@ -306,6 +306,7 @@ void BilingualLM::EvaluateWithSourceContext(const InputType &input
 */
 }
 
+
 FFState* BilingualLM::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
@@ -350,16 +351,16 @@ FFState* BilingualLM::EvaluateWhenApplied(
     //}
     //std::cout << "Phrase start pos " << phrase_start_pos << std::endl;
     getTargetWords(whole_phrase, (i + phrase_start_pos), all_words, all_strings);
-    /*
-    for (int j = 0; j< all_words.size(); j++){
-      std::cout<< all_words[j] << " ";
-    }
-    std::cout << std::endl;
-    for (int j = 0; j< all_strings.size(); j++){
-      std::cout<< all_strings[j] << " ";
-    }
-    std::cout << std::endl;
-    */
+    //
+    //for (int j = 0; j< all_words.size(); j++){
+    //  std::cout<< all_words[j] << " ";
+    //}
+    //std::cout << std::endl;
+    //for (int j = 0; j< all_strings.size(); j++){
+    //  std::cout<< all_strings[j] << " ";
+    //}
+    //std::cout << std::endl;
+    //
     //std::cout << "Size of After Words " << all_words.size() << std::endl;
     //std::cout << "Got a target Phrase" << std::endl;
     value += m_neuralLM->lookup_ngram(all_words);
@@ -367,7 +368,9 @@ FFState* BilingualLM::EvaluateWhenApplied(
   }
 
   size_t new_state = getState(whole_phrase); 
+  //const Hypothesis *
   accumulator->PlusEquals(this, value);
+  //accumulator->Assign(this, value);
 
   return new BilingualLMState(new_state);
 }
@@ -406,7 +409,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
     //For each word in the current target phrase get its LM score
     for (int i = 0; i < currTargetPhrase.GetSize(); i++){
       getSourceWords(currTargetPhrase
-                , i //The current target phrase
+                , i //The current target word
                 , source_sent
                 , sourceWordRange
                 , all_words
@@ -418,17 +421,18 @@ FFState* BilingualLM::EvaluateWhenApplied(
       //std::cout << "Phrase start pos " << phrase_start_pos << std::endl;
       getTargetWords(whole_phrase, (i + phrase_start_pos), all_words, all_strings);
       
-      for (int j = 0; j< all_words.size(); j++){
-        std::cout<< all_words[j] << " ";
-      }
-      std::cout << std::endl;
-      for (int j = 0; j< all_strings.size(); j++){
-        std::cout<< all_strings[j] << " ";
-      }
-      std::cout << std::endl;
+      //for (int j = 0; j< all_words.size(); j++){
+      //  std::cout<< all_words[j] << " ";
+      //}
+      //std::cout << std::endl;
+      //for (int j = 0; j< all_strings.size(); j++){
+      //  std::cout<< all_strings[j] << " ";
+      //}
+      //std::cout << std::endl;
 
       //std::cout << "Got a target Phrase" << std::endl;
       value += m_neuralLM->lookup_ngram(all_words);
+      //value += 10;
 
     }
 
@@ -439,10 +443,20 @@ FFState* BilingualLM::EvaluateWhenApplied(
   //Get state:
   Phrase whole_phrase;
   cur_hypo.GetOutputPhrase(whole_phrase);
-  size_t new_state = getState(whole_phrase);
+  size_t new_state = getState(whole_phrase); 
 
+  float old_score = 0;
+  if (cur_hypo.GetPrevHypo()){
+    const ScoreComponentCollection& scoreBreakdown = cur_hypo.GetPrevHypo()->GetScoreBreakdown();
+    old_score = scoreBreakdown.GetScoreForProducer(this);
+  }
+  
+  std::cout << "Old score: " << old_score << " Total score: " << totalScore << " ";
+  accumulator->Assign(this, totalScore - old_score);
 
-  accumulator->Assign(this, totalScore);
+  //old_score = accumulator->GetScoreForProducer(this);
+  //std::cout << "Old score: " << old_score << " Total score: " << totalScore << " ";
+  std::cout << whole_phrase << std::endl;
 
   // int targetLen = cur_hypo.GetCurrTargetPhrase().GetSize(); // ??? [UG]
   return new BilingualLMState(new_state);
