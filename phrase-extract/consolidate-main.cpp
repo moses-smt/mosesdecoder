@@ -351,10 +351,10 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     }
 
     // arbitrary key-value pairs
-    fileConsolidated << " ||| ";
+    fileConsolidated << " |||";
     if (itemDirect.size() >= 6) {
       //if (sourceLabelsFlag) {
-        fileConsolidated << propertiesConsolidator.ProcessPropertiesString(itemDirect[5]);
+        fileConsolidated << " " << propertiesConsolidator.ProcessPropertiesString(itemDirect[5]);
       //} else {
       //  fileConsolidated << itemDirect[5];
       //}
