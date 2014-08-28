@@ -4,6 +4,8 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/FFState.h"
 #include <boost/thread/tss.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include "moses/Hypothesis.h"
 #include "moses/InputPath.h"
 #include "moses/Manager.h"
@@ -35,15 +37,20 @@ private:
                 , int targetWordIdx
                 , const Sentence &source_sent
                 , const WordsRange &sourceWordRange
-                , std::vector<int> &words
-                , std::vector<std::string> &strings) const;
+                , std::vector<int> &words) const;
 
   void getTargetWords(Phrase &whole_phrase
                 , int current_word_index
-                , std::vector<int> &words
-                , std::vector<std::string> &strings) const;
+                , std::vector<int> &words) const;
 
   size_t getState(Phrase &whole_phrase) const;
+
+  void getPrevTargetNgrams(const Hypothesis &cur_hypo, std::vector<int> &words) const;
+
+  int getNeuralLMId(const Factor * factor) const;
+
+  mutable std::map<const Factor*, int> neuralLMids;
+  mutable boost::shared_mutex neuralLMids_lock;
 
 protected:
   // big data (vocab, weights, cache) shared among threads
