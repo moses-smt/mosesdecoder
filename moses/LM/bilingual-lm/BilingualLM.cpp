@@ -89,7 +89,55 @@ void BilingualLM::requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount
 
 }
 
+//Populates the words vector with target_ngrams sized that also contains the current word we are looking at. 
+//(in effect target_ngrams + 1)
+void BilingualLM::getTargetWords(const Hypothesis &cur_hypo
+                , const TargetPhrase &targetPhrase
+                , int current_word_index
+                , std::vector<int> &words) const {
+
+  if (!m_neuralLM.get()) {
+    m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
+  }
+
+  int j = source_ngrams; //Initial index for appending to the vector
+
+  //Check if we need to look at previous target phrases
+  int additional_needed = current_word_index - target_ngrams;
+  if (additional_needed < 0) {
+    additional_needed = -additional_needed;
+    std::vector<int> prev_words(additional_needed);
+    requestPrevTargetNgrams(cur_hypo, additional_needed, prev_words);
+    for (int i=0; i<additional_needed; i++){
+      words[j] = prev_words[i];
+      j++;
+    }
+  }
+
+  if (j!=source_ngrams){
+    //We have added some words from previous phrases
+    //Just add until we reach current_word_index
+    for (int i = 0; i<current_word_index + 1; i++){
+      const Word& word = targetPhrase.GetWord(i);
+      const Factor* factor = word.GetFactor(0);
+      words[j] = getNeuralLMId(factor);
+      j++;
+    }
+
+  } else {
+    //We haven't added any words, proceed as before
+    for (int i = current_word_index - target_ngrams; i < current_word_index + 1; i++){
+      const Word& word = targetPhrase.GetWord(i);
+      const Factor* factor = word.GetFactor(0);
+      words[j] = getNeuralLMId(factor);
+      j++;
+    }
+  }
+
+}
+
 //Returns target_ngrams sized word vector that contains the current word we are looking at. (in effect target_ngrams + 1)
+/*
 void BilingualLM::getTargetWords(Phrase &whole_phrase
                 , int current_word_index
                 , std::vector<int> &words) const {
@@ -116,7 +164,7 @@ void BilingualLM::getTargetWords(Phrase &whole_phrase
   }
 
 }
-
+*/
 //Returns source words in the way NeuralLM expects them.
 
 void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
@@ -417,12 +465,8 @@ FFState* BilingualLM::EvaluateWhenApplied(
   //std::cout << "Started iterating!" << std::endl;
   std::vector<int> all_words(source_ngrams + target_ngrams + 1);
   float value = 0;
-  Phrase whole_phrase;
-  cur_hypo.GetOutputPhrase(whole_phrase);
-  const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
-  const WordsRange& targetWordRange = cur_hypo.GetCurrTargetWordsRange(); //This should be which words of whole_phrase the current hypothesis represents.
-  int phrase_start_pos = targetWordRange.GetStartPos(); //Start position of the current target phrase
 
+  const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
   const WordsRange& sourceWordRange = cur_hypo.GetCurrSourceWordsRange(); //Source words range to calculate offsets
 
   //For each word in the current target phrase get its LM score
@@ -434,7 +478,10 @@ FFState* BilingualLM::EvaluateWhenApplied(
               , sourceWordRange
               , all_words);
 
-    getTargetWords(whole_phrase, (i + phrase_start_pos), all_words);
+    getTargetWords(cur_hypo
+              , currTargetPhrase
+              , i
+              , all_words);
 
     value += m_neuralLM->lookup_ngram(all_words);
 
