@@ -59,36 +59,36 @@ int BilingualLM::getNeuralLMId(const Factor * factor) const{
 
 }
 
-/*
-void getPrevTargetNgrams(const Hypothesis &cur_hypo, std::vector<int> &words){
-  //Get previous target phrase
-  int found = 0;
-  std::vector<Word> prev_words(target_ngrams);
-
+void BilingualLM::requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount, std::vector<int> &words) const {
   const Hypothesis * prev_hyp = cur_hypo.GetPrevHypo();
-  while (found != target_ngrams){
-    if (prev_hyp) { //Previous hypothesis might be null
+  int found = 0;
+
+  while (found != amount){
+    if (prev_hyp){
       const TargetPhrase& currTargetPhrase = prev_hyp->GetCurrTargetPhrase();
-      for (int i = currTargetPhrase.GetSize() -1; i> -1; i--){
-        if (found != target_ngrams){
-          prev_words[found] = currTargetPhrase.GetWord(i);
+      for (int i = currTargetPhrase.GetSize() - 1; i> -1; i--){
+        if (found != amount){
+          const Word& word = currTargetPhrase.GetWord(i);
+          const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+          words[found] = getNeuralLMId(factor);
           found++;
-        }else{
-          break;
+        } else {
+          return; //We have gotten everything needed
         }
       }
-      //We might need the prev target_phrase
-      prev_hyp = prev_hyp->GetPrevHypo();
+    } else {
+      break; //We have reached the beginning of the hypothesis
     }
+    prev_hyp = prev_hyp->GetPrevHypo();
   }
 
-  //We have gotten the necessary words, now return them as NeuralLM ids in reverse order.
-  for (int i = prev_words.size() -1; i > -1; i--){
-    w
+  int neuralLM_wordID = getNeuralLMId(BOS_factor);
+  for (int i = found; i < amount; i++){
+    words[i] = neuralLM_wordID;
   }
-  
+
 }
-*/
+
 //Returns target_ngrams sized word vector that contains the current word we are looking at. (in effect target_ngrams + 1)
 void BilingualLM::getTargetWords(Phrase &whole_phrase
                 , int current_word_index
@@ -217,6 +217,49 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
 
 }
 
+size_t BilingualLM::getState(const Hypothesis& cur_hypo) const {
+  
+  if (!m_neuralLM.get()) {
+    m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
+  }
+
+  const TargetPhrase &targetPhrase = cur_hypo.GetCurrTargetPhrase();
+
+  //Check if we need to look at previous target phrases
+  bool previous_phrase_required;
+  int additional_needed = targetPhrase.GetSize() - target_ngrams;
+  if (additional_needed < 0) {
+    previous_phrase_required = true;
+    additional_needed = -additional_needed;
+  }
+
+  //Get last n-1 target phrases
+  size_t hashCode = 0;
+  for (int i = targetPhrase.GetSize() - target_ngrams; i < targetPhrase.GetSize(); i++) {
+    int neuralLM_wordID;
+    if (i < 0) {
+      break;
+    } else {
+      const Word& word = targetPhrase.GetWord(i);
+      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+      neuralLM_wordID = getNeuralLMId(factor);
+    }
+    boost::hash_combine(hashCode, neuralLM_wordID);
+  }
+
+  //In case we need to look at previous target phrases, request them here.
+  if (previous_phrase_required) {
+    std::vector<int> prev_words(additional_needed);
+    requestPrevTargetNgrams(cur_hypo, additional_needed, prev_words);
+    for (int i=0; i<additional_needed; i++){
+      boost::hash_combine(hashCode, prev_words[i]);
+    }
+
+  }
+
+  return hashCode;
+}
+/*
 size_t BilingualLM::getState(Phrase &whole_phrase) const {
   
   if (!m_neuralLM.get()) {
@@ -238,7 +281,7 @@ size_t BilingualLM::getState(Phrase &whole_phrase) const {
   }
   return hashCode;
 }
-
+*/
 void BilingualLM::EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
@@ -397,7 +440,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   }
 
-  size_t new_state = getState(whole_phrase); 
+  size_t new_state = getState(cur_hypo); 
   accumulator->PlusEquals(this, value);
 
   return new BilingualLMState(new_state);
