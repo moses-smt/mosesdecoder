@@ -10,6 +10,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
+#include "moses/AlignmentInfoCollection.h"
 #include "moses/FF/ESM-Feature/UtilESM.h"
 
 int main(int argc, char * argv[]) {
@@ -31,17 +32,21 @@ int main(int argc, char * argv[]) {
     std::vector<std::string> edits;
     if(parts.size() == 2) {
         // Use diff-based operations
-        edits = Moses::calculateEdits(source, target);
+        Moses::calculateEdits(edits, source, target);
     }
     else if(parts.size() == 3) {
         // Use alignment-based operations
         std::vector<std::string> alignmentStr;
         boost::split(alignmentStr, parts[2], boost::is_any_of(" -"), boost::token_compress_on);
-        std::vector<size_t> alignment;
-        BOOST_FOREACH(std::string a, alignmentStr)
-            alignment.push_back(boost::lexical_cast<size_t>(a));
+        std::set<std::pair<size_t, size_t> > container;
+        Moses::AlignmentInfo* alignmentPtr = const_cast<Moses::AlignmentInfo*>(Moses::AlignmentInfoCollection::Instance().Add(container));
+        for(size_t i = 0; i < alignmentStr.size()-1; i += 2) {
+            size_t a = boost::lexical_cast<size_t>(i);
+            size_t b = boost::lexical_cast<size_t>(i + 1);
+            alignmentPtr->Add(a, b);
+        }
         
-        edits = Moses::calculateEdits(source, target, alignment);
+        Moses::calculateEdits(edits, source, target, *alignmentPtr);
     }
     
     BOOST_FOREACH(std::string edit, edits)

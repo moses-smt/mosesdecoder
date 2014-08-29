@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <queue>
+#include <algorithm> 
 
 #include "moses/FF/Diffs.h"
 
@@ -52,14 +53,14 @@ std::vector<std::string> CreateSinglePattern(const Tokens &s1, const Tokens &s2)
   return pattern;
 }
 
-std::vector<std::string> calculateEdits(
-                      const std::vector<std::string>& s1,
-                      const std::vector<std::string>& s2) {
+void calculateEdits(
+    std::vector<std::string>& patternList,
+    const std::vector<std::string>& s1,
+    const std::vector<std::string>& s2) {
       
   Diffs diffs = CreateDiff(s1, s2);
   size_t i = 0, j = 0;
   char lastType = 'm';
-  std::vector<std::string> patternList;
   Tokens source, target;
   BOOST_FOREACH(Diff type, diffs) {
     if(type == 'm') {
@@ -102,15 +103,13 @@ std::vector<std::string> calculateEdits(
       patternList.insert(patternList.end(), patterns.begin(), patterns.end());
     }
   }  
-  
-  return patternList;
 }
 
-typedef std::set<size_t> Cept;
+typedef std::vector<size_t> Cept;
 typedef std::pair<Cept, Cept> CeptPair;
 
 struct CeptSorter {
-  bool operator()(const CeptPair& c1, const CeptPair& c2) {
+  bool operator()(const CeptPair& c1, const CeptPair& c2) const {
     if(!c1.second.empty() && !c2.second.empty())
       return c1.second < c2.second;
 
@@ -127,22 +126,22 @@ struct CeptSorter {
   }
 };
 
-typedef std::set<CeptPair, CeptSorter> CeptSequence;
+typedef std::vector<CeptPair> CeptSequence;
 
-CeptSequence calculateCepts(const std::vector<size_t>& alignment, size_t slen, size_t tlen) {
+void calculateCepts(CeptSequence &cepts, const Moses::AlignmentInfo& alignment, size_t slen, size_t tlen) {
   
   std::vector<std::vector<size_t> > sourceAligned(slen);
   std::vector<std::vector<size_t> > targetAligned(tlen);
   
-  for(size_t i = 0; i < alignment.size() - 1; i += 2) {
-    sourceAligned[alignment[i]].push_back(alignment[i + 1]);
-    targetAligned[alignment[i + 1]].push_back(alignment[i]);
+  AlignmentInfo::const_iterator iter;
+  for (iter = alignment.begin(); iter != alignment.end(); ++iter) {
+    sourceAligned[iter->first].push_back(iter->second);
+    targetAligned[iter->second].push_back(iter->first);
   }
-  
+
   std::vector<bool> sourceVisited(slen, false);
   std::vector<bool> targetVisited(tlen, false);
   
-  CeptSequence cepts;
   for(size_t i = 0; i < tlen; ++i) {
     if(!targetVisited[i]) {
       typedef std::pair<size_t, bool> QueueItem;
@@ -158,7 +157,7 @@ CeptSequence calculateCepts(const std::vector<size_t>& alignment, size_t slen, s
         if(item.second) {
           if(!targetVisited[item.first]) {
             targetVisited[item.first] = true;
-            cp.second.insert(item.first);
+            cp.second.push_back(item.first);
             BOOST_FOREACH(size_t j, targetAligned[item.first])
               myQueue.push(std::make_pair(j, false));
           }
@@ -166,34 +165,41 @@ CeptSequence calculateCepts(const std::vector<size_t>& alignment, size_t slen, s
         else {
           if(!sourceVisited[item.first]) {
             sourceVisited[item.first] = true;
-            cp.first.insert(item.first);
+            cp.first.push_back(item.first);
             BOOST_FOREACH(size_t j, sourceAligned[item.first])
               myQueue.push(std::make_pair(j, true));
           }
         }
       }
-      cepts.insert(cp);
+      std::sort(cp.first.begin(), cp.first.end());
+      std::sort(cp.second.begin(), cp.second.end());
+      cepts.push_back(cp);
     }
   }
   for(size_t i = 0; i < slen; ++i) {
     if(!sourceVisited[i]) {
       CeptPair cp;
-      cp.first.insert(i);
-      cepts.insert(cp);
+      cp.first.push_back(i);
+      cepts.push_back(cp);
     }
   }
-  return cepts;
+  
+  CeptSorter ceptSorter;
+  std::sort(cepts.begin(), cepts.end(), ceptSorter);
 }
 
-std::vector<std::string> calculateEdits(
-                      const std::vector<std::string>& source,
-                      const std::vector<std::string>& target,
-                      const std::vector<size_t>& alignment) {
-
-  std::vector<std::string> edits;
+void calculateEdits(
+    std::vector<std::string>& edits,
+    const std::vector<std::string>& source,
+    const std::vector<std::string>& target,
+    const Moses::AlignmentInfo& alignment) {
   
-  CeptSequence cs = calculateCepts(alignment, source.size(), target.size());
-  BOOST_FOREACH(CeptPair cp, cs) {
+  CeptSequence ceptSequence;
+  calculateCepts(ceptSequence, alignment, source.size(), target.size());
+  
+  edits.reserve(ceptSequence.size());
+  
+  BOOST_FOREACH(CeptPair cp, ceptSequence) {
     Cept& sourceCept = cp.first;
     Cept& targetCept = cp.second;
     
@@ -234,8 +240,6 @@ std::vector<std::string> calculateEdits(
       edits.push_back(op.str());
     }
   }
-  
-  return edits;
 }
 
 }

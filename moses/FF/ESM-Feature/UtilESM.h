@@ -3,16 +3,19 @@
 #include <string>
 #include <set>
 #include <vector>
+#include "moses/AlignmentInfo.h"
 
 namespace Moses
 {
 
-std::vector<std::string> calculateEdits(
-                      const std::vector<std::string>&,
-                      const std::vector<std::string>&); 
+void calculateEdits(
+    std::vector<std::string>&,
+    const std::vector<std::string>&,
+    const std::vector<std::string>&); 
 
-std::vector<std::string> calculateEdits(
-                      const std::vector<std::string>&,
-                      const std::vector<std::string>&,
-                      const std::vector<size_t>&); 
+void calculateEdits(
+    std::vector<std::string>&,
+    const std::vector<std::string>&,
+    const std::vector<std::string>&,
+    const Moses::AlignmentInfo&); 
 }

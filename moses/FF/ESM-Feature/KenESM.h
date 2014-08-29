@@ -8,7 +8,10 @@ namespace Moses
 {
 
 class KenESMBase {
-  public:  
+  public:
+    
+    virtual ~KenESMBase() {}
+    
     virtual float Score(const lm::ngram::State&, const std::string&,
                         lm::ngram::State&) const = 0;
     

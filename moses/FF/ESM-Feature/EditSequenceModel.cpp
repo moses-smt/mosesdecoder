@@ -59,13 +59,10 @@ void EditSequenceModel :: readLanguageModel(const char *lmFile)
   unkOpProb = ESM->Score(startState, unkOp, endState);
 }
 
-
 void EditSequenceModel::Load()
 {
   readLanguageModel(m_lmPath.c_str());
 }
-
-
 
 void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
                                 , const TargetPhrase &targetPhrase
@@ -82,21 +79,15 @@ void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
   for (size_t i = 0; i < targetPhrase.GetSize(); i++)
     myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
 
-  const AlignmentInfo &align = targetPhrase.GetAlignTerm();
-  AlignmentInfo::const_iterator iter;
-  for (iter = align.begin(); iter != align.end(); ++iter) {
-    alignments.push_back(iter->first);
-    alignments.push_back(iter->second);
-  }
-
-  std::vector<std::string> edits = calculateEdits(mySourcePhrase, myTargetPhrase, alignments);
+  const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
+  std::vector<std::string> edits;
+  calculateEdits(edits, mySourcePhrase, myTargetPhrase, alignment);   
 
   esmState start_state(ESM->NullContextState());
   esmState curr_state(ESM->NullContextState());
   float opProb = calculateScore(edits, &start_state, &curr_state, false);
     
   std::vector<float> scores;
-  //scores.push_back(TransformLMScore(opProb));
   scores.push_back(opProb);
   estimatedFutureScore.PlusEquals(this, scores);
 }
@@ -123,20 +114,14 @@ FFState* EditSequenceModel::EvaluateWhenApplied(
   for (size_t i = 0; i < target.GetSize(); i++)
     myTargetPhrase.push_back(target.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
 
-  const AlignmentInfo &align = target.GetAlignTerm();
-  AlignmentInfo::const_iterator iter;
-  for (iter = align.begin(); iter != align.end(); ++iter) {
-    alignments.push_back(iter->first);
-    alignments.push_back(iter->second);
-  }
-
-  std::vector<std::string> edits = calculateEdits(mySourcePhrase, myTargetPhrase, alignments);
+  const AlignmentInfo &alignment = target.GetAlignTerm();
+  std::vector<std::string> edits;
+  calculateEdits(edits, mySourcePhrase, myTargetPhrase, alignment);
 
   FFState* curr_state = new esmState(ESM->NullContextState());
   float opProb = calculateScore(edits, prev_state, curr_state, cur_hypo.IsSourceCompleted());
 
   std::vector<float> scores;
-  //scores.push_back(TransformLMScore(opProb));
   scores.push_back(opProb);
   accumulator->PlusEquals(this, scores);
 
