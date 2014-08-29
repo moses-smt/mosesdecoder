@@ -108,7 +108,7 @@ void BilingualLM::getTargetWords(const Hypothesis &cur_hypo
     additional_needed = -additional_needed;
     std::vector<int> prev_words(additional_needed);
     requestPrevTargetNgrams(cur_hypo, additional_needed, prev_words);
-    for (int i=0; i<additional_needed; i++){
+    for (int i=additional_needed -1 ; i>-1; i--){
       words[j] = prev_words[i];
       j++;
     }
