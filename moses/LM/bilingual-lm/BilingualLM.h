@@ -44,9 +44,11 @@ private:
                 , int current_word_index
                 , std::vector<int> &words) const;
 
-  size_t getState(Phrase &whole_phrase) const;
+  //size_t getState(const TargetPhrase &targetPhrase, std::vector<int> &prev_words) const;
 
-  void getPrevTargetNgrams(const Hypothesis &cur_hypo, std::vector<int> &words) const;
+  size_t getState(const Hypothesis &cur_hypo) const;
+
+  void requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount, std::vector<int> &words) const;
 
   int getNeuralLMId(const Factor * factor) const;
 
