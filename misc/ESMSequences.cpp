@@ -39,13 +39,12 @@ int main(int argc, char * argv[]) {
         std::vector<std::string> alignmentStr;
         boost::split(alignmentStr, parts[2], boost::is_any_of(" -"), boost::token_compress_on);
         std::set<std::pair<size_t, size_t> > container;
-        Moses::AlignmentInfo* alignmentPtr = const_cast<Moses::AlignmentInfo*>(Moses::AlignmentInfoCollection::Instance().Add(container));
-        for(size_t i = 0; i < alignmentStr.size()-1; i += 2) {
-            size_t a = boost::lexical_cast<size_t>(i);
-            size_t b = boost::lexical_cast<size_t>(i + 1);
-            alignmentPtr->Add(a, b);
+        for(size_t i = 0; i < alignmentStr.size() - 1; i += 2) {
+            size_t a = boost::lexical_cast<size_t>(alignmentStr[i]);
+            size_t b = boost::lexical_cast<size_t>(alignmentStr[i + 1]);
+            container.insert(std::make_pair(a, b));
         }
-        
+        const Moses::AlignmentInfo* alignmentPtr = Moses::AlignmentInfoCollection::Instance().Add(container);
         Moses::calculateEdits(edits, source, target, *alignmentPtr);
     }
     
