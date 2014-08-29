@@ -59,6 +59,8 @@ int BilingualLM::getNeuralLMId(const Factor * factor) const{
 
 }
 
+//Populates words with amount words from the targetPhrase from the previous hypothesis where
+//words[0] is the last word of the previous hypothesis, words[1] is the second last etc...
 void BilingualLM::requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount, std::vector<int> &words) const {
   const Hypothesis * prev_hyp = cur_hypo.GetPrevHypo();
   int found = 0;
@@ -273,36 +275,38 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const {
 
   const TargetPhrase &targetPhrase = cur_hypo.GetCurrTargetPhrase();
 
+  size_t hashCode = 0;
+
   //Check if we need to look at previous target phrases
-  bool previous_phrase_required;
   int additional_needed = targetPhrase.GetSize() - target_ngrams;
   if (additional_needed < 0) {
-    previous_phrase_required = true;
     additional_needed = -additional_needed;
-  }
+    std::vector<int> prev_words(additional_needed);
+    requestPrevTargetNgrams(cur_hypo, additional_needed, prev_words);
+    for (int i=0; i<additional_needed; i++){ //This needs to be reverted.
+      boost::hash_combine(hashCode, prev_words[i]);
+    }
+    //Get the rest of the phrases needed
+    for (int i = 0; i < targetPhrase.GetSize(); i++) {
+      int neuralLM_wordID;
 
-  //Get last n-1 target phrases
-  size_t hashCode = 0;
-  for (int i = targetPhrase.GetSize() - target_ngrams; i < targetPhrase.GetSize(); i++) {
-    int neuralLM_wordID;
-    if (i < 0) {
-      break;
-    } else {
       const Word& word = targetPhrase.GetWord(i);
       const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
       neuralLM_wordID = getNeuralLMId(factor);
-    }
-    boost::hash_combine(hashCode, neuralLM_wordID);
-  }
 
-  //In case we need to look at previous target phrases, request them here.
-  if (previous_phrase_required) {
-    std::vector<int> prev_words(additional_needed);
-    requestPrevTargetNgrams(cur_hypo, additional_needed, prev_words);
-    for (int i=0; i<additional_needed; i++){
-      boost::hash_combine(hashCode, prev_words[i]);
+      boost::hash_combine(hashCode, neuralLM_wordID);
     }
 
+  } else {
+    for (int i = targetPhrase.GetSize() - target_ngrams; i < targetPhrase.GetSize(); i++) {
+      int neuralLM_wordID;
+
+      const Word& word = targetPhrase.GetWord(i);
+      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+      neuralLM_wordID = getNeuralLMId(factor);
+
+      boost::hash_combine(hashCode, neuralLM_wordID);
+    }
   }
 
   return hashCode;
