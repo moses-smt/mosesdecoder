@@ -155,20 +155,18 @@ void calculateCepts(CeptSequence &cepts, const Moses::AlignmentInfo& alignment, 
         myQueue.pop();
               
         if(item.second) {
-          if(!targetVisited[item.first]) {
-            targetVisited[item.first] = true;
-            cp.second.push_back(item.first);
-            BOOST_FOREACH(size_t j, targetAligned[item.first])
-              myQueue.push(std::make_pair(j, false));
-          }
+          targetVisited[item.first] = true;
+          cp.second.push_back(item.first);
+          for(size_t j = 0; j < targetAligned[item.first].size(); j++)
+            if(!sourceVisited[targetAligned[item.first][j]])
+              myQueue.push(std::make_pair(targetAligned[item.first][j], false));
         }
         else {
-          if(!sourceVisited[item.first]) {
-            sourceVisited[item.first] = true;
-            cp.first.push_back(item.first);
-            BOOST_FOREACH(size_t j, sourceAligned[item.first])
-              myQueue.push(std::make_pair(j, true));
-          }
+          sourceVisited[item.first] = true;
+          cp.first.push_back(item.first);
+          for(size_t j = 0; j < sourceAligned[item.first].size(); j++)
+            if(!targetVisited[sourceAligned[item.first][j]])
+              myQueue.push(std::make_pair(sourceAligned[item.first][j], true));
         }
       }
       std::sort(cp.first.begin(), cp.first.end());
@@ -202,42 +200,36 @@ void calculateEdits(
   BOOST_FOREACH(CeptPair cp, ceptSequence) {
     Cept& sourceCept = cp.first;
     Cept& targetCept = cp.second;
-    
-    std::stringstream sourceStream;
+
+    std::string sourceStr;
     if(!sourceCept.empty()) {
       Cept::iterator iter = sourceCept.begin();
-      sourceStream << source[*iter++];    
+      sourceStr = source[*iter++];
       while(iter != sourceCept.end())
-        sourceStream << "^" << source[*iter++];
+        sourceStr += "^" + source[*iter++];
     }
-    
-    std::stringstream targetStream;
+
+    std::string targetStr;
     if(!targetCept.empty()) {
       Cept::iterator iter = targetCept.begin();
-      targetStream << target[*iter++];    
+      targetStr = target[*iter++];
       while(iter != targetCept.end())
-        targetStream << "^" << target[*iter++];
+        targetStr += "^" + target[*iter++];
     }
-    
-    std::string sourceStr = sourceStream.str();
-    std::string targetStr = targetStream.str();
+
     if(!sourceStr.empty() && !targetStr.empty()) {
-      std::stringstream op;
+      std::string edit;
       if(sourceStr == targetStr)
-        op << "=_" << sourceStr;
+        edit = "=_" + sourceStr;
       else
-        op << "~_" << sourceStr << "_" << targetStr;
-      edits.push_back(op.str());
+        edit = "~_" + sourceStr + "_" + targetStr;
+      edits.push_back(edit);
     }
     else if(!sourceStr.empty() && targetStr.empty()) {
-      std::stringstream op;
-      op << "-_" << sourceStr;
-      edits.push_back(op.str());
+      edits.push_back("-_" + sourceStr);
     }
     else if(sourceStr.empty() && !targetStr.empty()) {
-      std::stringstream op;
-      op << "+_" << targetStr;
-      edits.push_back(op.str());
+      edits.push_back("+_" + targetStr);
     }
   }
 }
