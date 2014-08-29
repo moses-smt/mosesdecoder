@@ -22,6 +22,9 @@ BilingualLM::BilingualLM(const std::string &line)
   :StatefulFeatureFunction(1, line)
 {
   ReadParameters();
+  FactorCollection& factorFactory = FactorCollection::Instance(); //Factor Factory to use for BOS_ and EOS_
+  BOS_factor = factorFactory.AddFactor(BOS_);
+  EOS_factor = factorFactory.AddFactor(EOS_);
 }
 
 void BilingualLM::Load(){
@@ -102,9 +105,7 @@ void BilingualLM::getTargetWords(Phrase &whole_phrase
     //std::cout << "Whole phrase size: " << whole_phrase.GetSize() << std::endl;
 
     if (indexToRead < 0) {
-      //const Factor* factor = //Well Fuck...
-      neuralLM_wordID = m_neuralLM->lookup_word(BOS_);
-
+      neuralLM_wordID = getNeuralLMId(BOS_factor);
     } else {
       const Word& word = whole_phrase.GetWord(indexToRead);
       const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
@@ -200,9 +201,9 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
   for (int j = begin_idx; j < end_idx + 1; j++) {
     int neuralLM_wordID;
     if (j < 0) {
-      neuralLM_wordID = m_neuralLM->lookup_word(BOS_);
+      neuralLM_wordID = getNeuralLMId(BOS_factor);
     } else if (j > source_sent.GetSize() - 1) {
-      neuralLM_wordID = m_neuralLM->lookup_word(EOS_);
+      neuralLM_wordID = getNeuralLMId(EOS_factor);
     } else {
       const Word& word = source_sent.GetWord(j);
       const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
@@ -226,9 +227,13 @@ size_t BilingualLM::getState(Phrase &whole_phrase) const {
   size_t hashCode = 0;
   for (int i = whole_phrase.GetSize() - target_ngrams; i < whole_phrase.GetSize(); i++) {
     int neuralLM_wordID;
-    const Word& word = whole_phrase.GetWord(i);
-    const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
-    neuralLM_wordID = getNeuralLMId(factor);
+    if (i < 0) {
+      neuralLM_wordID = getNeuralLMId(BOS_factor);
+    } else {
+      const Word& word = whole_phrase.GetWord(i);
+      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+      neuralLM_wordID = getNeuralLMId(factor);
+    }
     boost::hash_combine(hashCode, neuralLM_wordID);
   }
   return hashCode;
