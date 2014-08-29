@@ -4,7 +4,7 @@ clean:
 	rm -f *.o extract-mixed-syntax
 
 .cpp.o:
-	g++ -O4 -g -c -I../../../boost/include -I../../../ $<
+	g++ -O4 -g -c -I../../boost/include -I../../ $<
 
 OBJECTS = AlignedSentence.o ConsistentPhrase.o ConsistentPhrases.o InputFileStream.o \
 	Main.o OutputFileStream.o Parameter.o Phrase.o Rule.o Rules.o RuleSymbol.o \
@@ -12,6 +12,6 @@ OBJECTS = AlignedSentence.o ConsistentPhrase.o ConsistentPhrases.o InputFileStre
 
 extract-mixed-syntax: $(OBJECTS) 
 
-	g++ $(OBJECTS)   -L../../../boost/lib64 -L../../../lib -lz -lboost_iostreams-mt -lboost_program_options-mt -lmoses -o extract-mixed-syntax
+	g++ $(OBJECTS)   -L../../boost/lib64 -L../../lib -lz -lboost_iostreams-mt -lboost_program_options-mt -lmoses -o extract-mixed-syntax
 
 
