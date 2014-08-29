@@ -9,6 +9,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/InputPath.h"
 #include "moses/Manager.h"
+#include "moses/FactorCollection.h"
 
 namespace nplm {
   class neuralLM;
@@ -59,6 +60,8 @@ protected:
   int m_nGramOrder;
   int target_ngrams;
   int source_ngrams;
+  const Factor* BOS_factor;
+  const Factor* EOS_factor;
   // thread-specific nplm for thread-safety
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 
