@@ -283,7 +283,7 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const {
     additional_needed = -additional_needed;
     std::vector<int> prev_words(additional_needed);
     requestPrevTargetNgrams(cur_hypo, additional_needed, prev_words);
-    for (int i=0; i<additional_needed; i++){ //This needs to be reverted.
+    for (int i=additional_needed - 1; i>-1; i--) {
       boost::hash_combine(hashCode, prev_words[i]);
     }
     //Get the rest of the phrases needed
