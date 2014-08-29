@@ -40,7 +40,8 @@ private:
                 , const WordsRange &sourceWordRange
                 , std::vector<int> &words) const;
 
-  void getTargetWords(Phrase &whole_phrase
+  void getTargetWords(const Hypothesis &cur_hypo
+                , const TargetPhrase &targetPhrase
                 , int current_word_index
                 , std::vector<int> &words) const;
 
