@@ -25,6 +25,7 @@ public:
   int maxSymbolsTarget;
   int maxSymbolsSource;
   int minHoleSource;
+  int minHoleSourceSyntax;
 
   long sentenceOffset;
 

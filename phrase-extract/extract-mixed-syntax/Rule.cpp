@@ -277,12 +277,20 @@ void Rule::Prevalidate(const Parameter &params)
 	  const NonTerm &lastNonTerm = *m_nonterms.back();
 	  const ConsistentPhrase &cp = lastNonTerm.GetConsistentPhrase();
 
-	  int sourceWidth = cp.corners[1]  - cp.corners[0] + 1;
-	  if (sourceWidth < params.minHoleSource) {
+	  int sourceWidth = cp.GetWidth(Moses::Input);
+	  if (lastNonTerm.IsHiero(params)) {
+		  if (sourceWidth < params.minHoleSource) {
+			  m_isValid = false;
+			  m_canRecurse = false;
+			  return;
+		  }
+	  }
+	  else if (sourceWidth < params.minHoleSourceSyntax) {
 		  m_isValid = false;
 		  m_canRecurse = false;
 		  return;
 	  }
+
   }
 
   // check number of non-terms
