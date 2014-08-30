@@ -30,7 +30,8 @@ namespace Moses
     pstats::
     ~pstats()
     {
-      --active;
+      try { --active; } catch (...) {} 
+      // counter may not exist any more at destruction time
     }
 
     void
