@@ -12,28 +12,35 @@ TokenIndex V1,V2;
 boost::shared_ptr<ttrack_t> T1,T2;
 tsa_t I1,I2;
 
+float lbop_level = .05;
+#define smooth 1
 namespace stats
 {
   using namespace Moses::bitext;
   float 
   pmi(size_t j,size_t m1, size_t m2, size_t N)
   {
-    float p1 = lbop(N,m1,.1);
-    float p2 = lbop(N,m2,.1);
-    float p12 = lbop(N,j,.1);
+#if smooth
+    float p1 = lbop(N,m1,lbop_level);
+    float p2 = lbop(N,m2,lbop_level);
+    float p12 = lbop(N,j,lbop_level);
     return log(p12) - log(p1) - log(p2);
-    // return log(j) + log(N) - log(m1) - log(m2);
+#else
+    return log(j) + log(N) - log(m1) - log(m2);
+#endif
   }
   
   float 
   npmi(size_t j,size_t m1, size_t m2, size_t N)
   {
-    
-    float p1 = lbop(N,m1,.1);
-    float p2 = lbop(N,m2,.1);
-    float p12 = lbop(N,j,.1);
+#if smooth
+    float p1 = lbop(N,m1,lbop_level);
+    float p2 = lbop(N,m2,lbop_level);
+    float p12 = lbop(N,j,lbop_level);
     return (log(p12) - log(p1) - log(p2)) / -log(p12);
-    // return pmi(j,m1,m2,N) / (log(N) - log(j)); 
+#else
+    return pmi(j,m1,m2,N) / (log(N) - log(j)); 
+#endif
   }
 
   float 
@@ -103,8 +110,8 @@ struct PhrasePair
       this->pmi = stats::pmi(j,m1,m2,N);
       this->npmi = stats::npmi(j,m1,m2,N);
       // float z = float(m1)/N * float(m2)/N;
-      float hmean = 2.*j/(m1+m2);
-      this->score = npmi; // hmean; // /sqrt(z);
+      // float hmean = 2.*j/(m1+m2);
+      this->score = npmi; // npmi; // hmean; // /sqrt(z);
     }
   } stats;
   
@@ -120,6 +127,13 @@ struct PhrasePair
 	    : (this->stats.score > other.stats.score)); 
   }
   
+  size_t len1() const { return e1 - s1; }
+  size_t len2() const { return e2 - s2; }
+  bool includes(PhrasePair const& o) const
+  {
+    return s1 <= o.s1 && e1 >= o.e1 && s2 <= o.s2 && e2 >= o.e2;
+  }
+
 };
 
 SinglePhrase::cache_t cache1,cache2;
@@ -165,6 +179,8 @@ lookup_phrases(vector<id_type> const& snt,
       dest[i].clear();
       for (size_t k = i; k < snt.size() && m.extend(snt[k]); ++k)
 	{
+	  if (m.approxOccurrenceCount() < 3) break;
+	  // if (k - i > 0) break;
 	  sptr<SinglePhrase>& o = cache[m.getPid()];
 	  if (!o) 
 	    {
@@ -232,7 +248,7 @@ int main(int argc, char* argv[])
   string line1, line2;
   while (getline(cin,line1) and getline(cin,line2))
     {
-      cout << line1 << "\n" << line2 << endl;
+      cout << "\n" << line1 << "\n" << line2 << endl;
       vector<vector<sptr<SinglePhrase> > > M1,M2;
       vector<id_type> snt1,snt2;
       V1.fillIdSeq(line1,snt1);
@@ -277,13 +293,17 @@ int main(int argc, char* argv[])
 		      if (pp.stats.j == 0) break;
 		      // ppm1[i1][k1].push_back(pp);
 		      // ppm2[i2][k2].push_back(pp);
-		      if (pp.stats.score > 0) 
-			pp_all.push_back(pp);
+		      size_t J = pp.stats.j * 100;
+		      if (pp.stats.score > 0 
+			  && J >= pp.stats.m1 
+			  && J > pp.stats.m2)
+			{ pp_all.push_back(pp); }
 		    }
 		}
 	    }
 	}
       sort(pp_all.begin(),pp_all.end());
+#if 0
       BOOST_FOREACH(PhrasePair const& pp,pp_all)
 	{
 	  if (pp.stats.npmi < 0) continue;
@@ -322,7 +342,7 @@ int main(int argc, char* argv[])
 	    }
 	  cout << endl;
 	}
-      
+#endif 
 #if 0
       for (size_t k = 1; k < pp_all.size(); ++k)
 	for (size_t i = k; i--;)
@@ -335,15 +355,39 @@ int main(int argc, char* argv[])
 #endif
 
 #if 1
+      vector<int> assoc1(snt1.size(),-1), assoc2(snt2.size(),-1);
       for (size_t p = 0; p < pp_all.size(); ++p)
 	{
 	  PhrasePair const& x = pp_all[p];
 	  // if (x.stats.npmi < .7) break;
 	  // if (z1[x.s1][x.e1-1] >= 0 || z2[x.s2][x.e2-1] >=0) 
 	  // continue;
+	  for (size_t i = x.s1; i < x.e1; ++i) 
+	    {
+	      if (assoc1[i] < 0) 
+		assoc1[i] = p;
+	      else
+		{
+		  // PhrasePair& y = pp_all[assoc1[i]];
+		  // if (y.includes(x)) 
+		  // assoc1[i] = p;
+		}
+	    }
+	  for (size_t i = x.s2; i < x.e2; ++i) 
+	    {
+	      if (assoc2[i] < 0) 
+		assoc2[i] = p;
+	      else
+		{
+		  // PhrasePair& y = pp_all[assoc2[i]];
+		  // if (y.includes(x)) 
+		    // assoc2[i] = p;
+		}
+	    }
 	  z1[x.s1][x.e1-1] = p;
 	  z2[x.s2][x.e2-1] = p;
-	  cout << (boost::format("%.4f %.4f %.4f") 
+	  continue;
+	  cout << (boost::format("%.4f %.8f %.4f") 
 		   % x.stats.score 
 		   % x.stats.mi
 		   % x.stats.npmi);
@@ -355,6 +399,43 @@ int main(int argc, char* argv[])
 	  cout << " [" 
 	       << x.stats.m1 << "/" << x.stats.j << "/" << x.stats.m2 
 	       << "]" << endl;
+	}
+      vector<bool> done(pp_all.size(),false);
+      for (size_t i = 0; i < snt1.size(); ++i)
+	{
+	  if (assoc1[i] < 0 || done[assoc1[i]])
+	    continue;
+	  // for (size_t k = 0; k < snt2.size(); ++k)
+	    // if (assoc1[i] == assoc2[k])
+	      {
+		done[assoc1[i]] = true;
+		PhrasePair& p = pp_all[assoc1[i]];
+		for (size_t j = p.s1; j < p.e1; ++j)
+		  cout << j << ":" << V1[snt1[j]] << " ";
+		cout << " ::: ";
+		for (size_t j = p.s2; j < p.e2; ++j)
+		  cout << j << ":" << V2[snt2[j]] << " ";
+		cout << "[" 
+		     << p.stats.m1 << "/" << p.stats.j << "/" << p.stats.m2 
+		     << "] "<< p.stats.score << endl;
+		// break;
+	      }
+	}
+      cout << endl;
+      for (size_t i = 0; i < snt2.size(); ++i)
+	{
+	  if (assoc2[i] < 0 || done[assoc2[i]])
+	    continue;
+	  done[assoc2[i]] = true;
+	  PhrasePair& p = pp_all[assoc2[i]];
+	  for (size_t j = p.s1; j < p.e1; ++j)
+	    cout << j << ":" << V1[snt1[j]] << " ";
+	  cout << " ::: ";
+	  for (size_t j = p.s2; j < p.e2; ++j)
+	    cout << j << ":" << V2[snt2[j]] << " ";
+	  cout << "[" 
+	       << p.stats.m1 << "/" << p.stats.j << "/" << p.stats.m2 
+	       << "] "<< p.stats.score << endl;
 	}
 #endif      
       // sort(pp_all.begin(),pp_all.end());
