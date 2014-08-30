@@ -796,34 +796,6 @@ namespace Moses
     assert(this->refCount == 0);
   }
   
-  template<typename Token>
-  void 
-  expand(typename Bitext<Token>::iter const& m, 
-	 Bitext<Token> const& bt, 
-	 pstats const& ps, vector<PhrasePair<Token> >& dest)
-  {
-    dest.reserve(ps.trg.size());
-    PhrasePair<Token> pp;
-    pp.init(m.getToken(0), m.size(), &ps, 0);
-    // cout << HERE << " " << toString(*(bt.V1),pp.start1,pp.len1) << endl;
-    pstats::trg_map_t::const_iterator a;
-    for (a = ps.trg.begin(); a != ps.trg.end(); ++a)
-      {
-	uint32_t sid,off,len;
-	parse_pid(a->first, sid, off, len);
-	pp.update(bt.T2->sntStart(sid)+off, len, a->second);
-	dest.push_back(pp);
-      }
-    typename PhrasePair<Token>::SortByTargetIdSeq sorter;
-    sort(dest.begin(), dest.end(),sorter);
-#if 0
-    BOOST_FOREACH(PhrasePair<Token> const& p, dest)
-      cout << toString (*bt.V1,p.start1,p.len1) << " ::: " 
-	   << toString (*bt.V2,p.start2,p.len2) << " " 
-	   << p.joint << endl;
-#endif
-  }
-
   // This is not the most efficient way of phrase lookup! 
   TargetPhraseCollection const* 
   Mmsapt::
@@ -889,9 +861,18 @@ namespace Moses
     if (mdyn.size() == sphrase.size()) sdyn = dyn->lookup(mdyn);
 
     vector<PhrasePair<Token> > ppfix,ppdyn;
-    if (sfix) expand(mfix, btfix, *sfix, ppfix);
-    if (sdyn) expand(mdyn, *dyn, *sdyn, ppdyn);
-    
+    PhrasePair<Token>::SortByTargetIdSeq sort_by_tgt_id;
+    if (sfix) 
+      {
+	expand(mfix, btfix, *sfix, ppfix);
+	sort(ppfix.begin(), ppfix.end(),sort_by_tgt_id);
+      }
+    if (sdyn)
+      {
+	expand(mdyn, *dyn, *sdyn, ppdyn);
+	sort(ppdyn.begin(), ppdyn.end(),sort_by_tgt_id);
+      }
+
     // now we have two lists of Phrase Pairs, let's merge them
     TargetPhraseCollectionWrapper* ret;
     ret = new TargetPhraseCollectionWrapper(revision,phrasekey);
