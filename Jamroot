@@ -125,6 +125,19 @@ if [ option.get "with-cmph" : : "yes" ] {
   requirements += <define>HAVE_CMPH ;
 }
 
+if [ option.get "with-icu" : : "yes" ]
+{
+  external-lib icuuc ;
+  external-lib icuio ;
+  external-lib icui18n ;
+  requirements += <library>icuuc/<link>shared ;
+  requirements += <library>icuio/<link>shared ;
+  requirements += <library>icui18n/<link>shared ;
+  requirements += <cxxflags>-fPIC ;
+  requirements += <address-model>64 ;
+  requirements += <runtime-link>shared ;
+}
+
 if [ option.get "with-probing-pt" : : "yes" ]
 {
   external-lib boost_serialization ;
@@ -173,6 +186,7 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG/mm//mtt-count-words 
   moses/TranslationModel/UG/mm//calc-coverage 
   moses/TranslationModel/UG//try-align 
+  moses/TranslationModel/UG//try-align2 
   ;
 }
 else
