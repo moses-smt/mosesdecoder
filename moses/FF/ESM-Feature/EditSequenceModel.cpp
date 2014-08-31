@@ -69,19 +69,15 @@ void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
                                 , ScoreComponentCollection &scoreBreakdown
                                 , ScoreComponentCollection &estimatedFutureScore) const
 {
-  std::vector<std::string> mySourcePhrase;
-  std::vector<std::string> myTargetPhrase;
+  std::vector<StringPiece> mySourcePhrase;
+  std::vector<StringPiece> myTargetPhrase;
   std::vector<size_t> alignments;
 
   for (size_t i = 0; i < source.GetSize(); i++)
-    mySourcePhrase.push_back(source.GetWord(i).GetFactor(m_sFactor)->GetString().as_string());
+    mySourcePhrase.push_back(source.GetWord(i).GetFactor(m_sFactor)->GetString());
 
-  for (size_t i = 0; i < targetPhrase.GetSize(); i++) {
-    if(targetPhrase.GetWord(i).IsOOV() && m_sFactor == 0 && m_tFactor == 0)
-      myTargetPhrase.push_back("1_");
-    else
-      myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
-  }
+  for (size_t i = 0; i < targetPhrase.GetSize(); i++)
+    myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(m_tFactor)->GetString());
   
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
   std::vector<std::string> edits;
@@ -96,14 +92,13 @@ void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
   estimatedFutureScore.PlusEquals(this, scores);
 }
 
-
 FFState* EditSequenceModel::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
-  std::vector<std::string> mySourcePhrase;
-  std::vector<std::string> myTargetPhrase;
+  std::vector<StringPiece> mySourcePhrase;
+  std::vector<StringPiece> myTargetPhrase;
   std::vector<size_t> alignments;
 
   const Manager &manager = cur_hypo.GetManager();
@@ -112,15 +107,12 @@ FFState* EditSequenceModel::EvaluateWhenApplied(
   size_t startIndex  = sourceRange.GetStartPos();
   size_t endIndex = sourceRange.GetEndPos();
   for (size_t i = startIndex; i <= endIndex; i++)
-    mySourcePhrase.push_back(source.GetWord(i).GetFactor(m_sFactor)->GetString().as_string());
+    mySourcePhrase.push_back(source.GetWord(i).GetFactor(m_sFactor)->GetString());
 
   const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
-  for (size_t i = 0; i < target.GetSize(); i++) {
-    if(target.GetWord(i).IsOOV() && m_sFactor == 0 && m_tFactor == 0)
-      myTargetPhrase.push_back("1_");
-    else
-      myTargetPhrase.push_back(target.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
-  }
+  for (size_t i = 0; i < target.GetSize(); i++) 
+      myTargetPhrase.push_back(target.GetWord(i).GetFactor(m_tFactor)->GetString());
+  
   const AlignmentInfo &alignment = target.GetAlignTerm();
   std::vector<std::string> edits;
   calculateEdits(edits, mySourcePhrase, myTargetPhrase, alignment);

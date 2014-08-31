@@ -7,103 +7,8 @@
 #include <queue>
 #include <algorithm> 
 
-#include "moses/FF/Diffs.h"
-
 namespace Moses
 {
-
-typedef std::vector<std::string> Tokens;
-
-std::vector<std::string> CreateSinglePattern(const Tokens &s1, const Tokens &s2) {
-  std::vector<std::string> pattern;
-  
-  if(s1.empty()) {
-    BOOST_FOREACH(std::string w, s2) {
-     std::stringstream out;
-     out << "+_" << w;
-     pattern.push_back(out.str());
-    }
-  }
-  else if(s2.empty()) {
-    BOOST_FOREACH(std::string w, s2) {
-     std::stringstream out;
-     out << "-_" << w;
-     pattern.push_back(out.str());
-    }
-  }
-  else {
-    for(size_t i = 0; i < std::max(s1.size(), s2.size()); i++) {
-      std::stringstream out;
-      if(i < s1.size() && i < s2.size()) {
-        if(s1[i] == s2[i])
-          out << "=_" << s1[i];
-        else
-          out << "~_" << s1[i] << "_" << s2[i];
-      }
-      else if(i < s1.size()) {
-        out << "-_" << s1[i];   
-      }
-      else if(i < s2.size()) {
-        out << "+_" << s2[i];   
-      }
-      pattern.push_back(out.str());
-    }
-  }
-  
-  return pattern;
-}
-
-void calculateEdits(
-    std::vector<std::string>& patternList,
-    const std::vector<std::string>& s1,
-    const std::vector<std::string>& s2) {
-      
-  Diffs diffs = CreateDiff(s1, s2);
-  size_t i = 0, j = 0;
-  char lastType = 'm';
-  Tokens source, target;
-  BOOST_FOREACH(Diff type, diffs) {
-    if(type == 'm') {
-      if(lastType != 'm') {
-        std::vector<std::string> patterns = CreateSinglePattern(source, target);
-        patternList.insert(patternList.end(), patterns.begin(), patterns.end());
-      }
-      source.clear();
-      target.clear();
-      
-      if(s1[i] != s2[j]) {
-        source.push_back(s1[i]);
-        target.push_back(s2[j]);
-      }
-      else {
-        source.push_back(s1[i]);
-        target.push_back(s2[j]);
-        std::vector<std::string> patterns = CreateSinglePattern(source, target);
-        patternList.insert(patternList.end(), patterns.begin(), patterns.end());
-        source.clear();
-        target.clear();
-      }
-      
-      i++;
-      j++;
-    }
-    else if(type == 'd') {
-      source.push_back(s1[i]);
-      i++;
-    }
-    else if(type == 'i') {
-      target.push_back(s2[j]);
-      j++;
-    }
-    lastType = type;
-  }
-  if(lastType != 'm') {    
-    if(!source.empty() || !target.empty()) {
-      std::vector<std::string> patterns = CreateSinglePattern(source, target);
-      patternList.insert(patternList.end(), patterns.begin(), patterns.end());
-    }
-  }  
-}
 
 typedef std::vector<size_t> Cept;
 typedef std::pair<Cept, Cept> CeptPair;
@@ -188,8 +93,8 @@ void calculateCepts(CeptSequence &cepts, const Moses::AlignmentInfo& alignment, 
 
 void calculateEdits(
     std::vector<std::string>& edits,
-    const std::vector<std::string>& source,
-    const std::vector<std::string>& target,
+    const std::vector<StringPiece>& source,
+    const std::vector<StringPiece>& target,
     const Moses::AlignmentInfo& alignment) {
   
   CeptSequence ceptSequence;
@@ -204,17 +109,17 @@ void calculateEdits(
     std::string sourceStr;
     if(!sourceCept.empty()) {
       Cept::iterator iter = sourceCept.begin();
-      sourceStr = source[*iter++];
+      sourceStr = source[*iter++].as_string();
       while(iter != sourceCept.end())
-        sourceStr += "^" + source[*iter++];
+        sourceStr += "^" + source[*iter++].as_string();
     }
 
     std::string targetStr;
     if(!targetCept.empty()) {
       Cept::iterator iter = targetCept.begin();
-      targetStr = target[*iter++];
+      targetStr = target[*iter++].as_string();
       while(iter != targetCept.end())
-        targetStr += "^" + target[*iter++];
+        targetStr += "^" + target[*iter++].as_string();
     }
 
     if(!sourceStr.empty() && !targetStr.empty()) {

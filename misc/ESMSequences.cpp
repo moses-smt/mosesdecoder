@@ -88,13 +88,13 @@ int main(int argc, char * argv[]) {
       StringPiece targetStr(targetFP.ReadLine());
       StringPiece alignmentStr(alignmentFP.ReadLine());
             
-      std::vector<std::string> source;
+      std::vector<StringPiece> source;
       for(util::TokenIter<util::BoolCharacter, true> w(sourceStr, delimiters); w; ++w)
-        source.push_back(w->as_string());
+        source.push_back(*w);
       
-      std::vector<std::string> target;
+      std::vector<StringPiece> target;
       for(util::TokenIter<util::BoolCharacter, true> w(targetStr, delimiters); w; ++w)
-        target.push_back(w->as_string());
+        target.push_back(*w);
 
       std::set<std::pair<size_t, size_t> > container;
       for(util::TokenIter<util::BoolCharacter, true> w(alignmentStr, aDelimiters); w; ++w) {
