@@ -93,6 +93,7 @@ void calculateCepts(CeptSequence &cepts, const Moses::AlignmentInfo& alignment, 
 
 void calculateEdits(
     std::vector<std::string>& edits,
+    Stats& stats,
     const std::vector<StringPiece>& source,
     const std::vector<StringPiece>& target,
     const Moses::AlignmentInfo& alignment) {
@@ -124,17 +125,23 @@ void calculateEdits(
 
     if(!sourceStr.empty() && !targetStr.empty()) {
       std::string edit;
-      if(sourceStr == targetStr)
+      if(sourceStr == targetStr) {
         edit = "=_" + sourceStr;
-      else
+        stats.matches++;
+      }
+      else {
         edit = "~_" + sourceStr + "_" + targetStr;
+        stats.substitutions++;
+      }
       edits.push_back(edit);
     }
     else if(!sourceStr.empty() && targetStr.empty()) {
       edits.push_back("-_" + sourceStr);
+      stats.deletes++;
     }
     else if(sourceStr.empty() && !targetStr.empty()) {
       edits.push_back("+_" + targetStr);
+      stats.inserts++;
     }
   }
 }

@@ -106,7 +106,8 @@ int main(int argc, char * argv[]) {
         = Moses::AlignmentInfoCollection::Instance().Add(container);
       
       std::vector<std::string> edits;
-      Moses::calculateEdits(edits, source, target, *alignmentPtr);
+      Moses::Stats stats;
+      Moses::calculateEdits(edits, stats, source, target, *alignmentPtr);
   
       BOOST_FOREACH(std::string edit, edits)
           std::cout << edit << " ";

@@ -37,11 +37,11 @@ std::string esmState :: getName() const
 }                 
 
 EditSequenceModel::EditSequenceModel(const std::string &line)
-  :StatefulFeatureFunction(1, line )
+  :StatefulFeatureFunction(5, line)
 {
   m_sFactor = 0;
   m_tFactor = 0;
-  numFeatures = 1;
+  m_numScoreComponents = 5;
   ReadParameters();
 }
 
@@ -51,7 +51,7 @@ EditSequenceModel::~EditSequenceModel() {
 
 void EditSequenceModel :: readLanguageModel(const char *lmFile)
 {
-  string unkOp = "1_";
+  std::string unkOp = "<unk>";
   ESM = ConstructESMLM(m_lmPath);
 
   State startState = ESM->NullContextState();
@@ -81,7 +81,9 @@ void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
   
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
   std::vector<std::string> edits;
-  calculateEdits(edits, mySourcePhrase, myTargetPhrase, alignment);   
+  
+  Stats stats;
+  calculateEdits(edits, stats, mySourcePhrase, myTargetPhrase, alignment);   
 
   esmState start_state(ESM->NullContextState());
   esmState curr_state(ESM->NullContextState());
@@ -89,6 +91,12 @@ void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
     
   std::vector<float> scores;
   scores.push_back(opProb);
+  
+  scores.push_back(stats.deletes);
+  scores.push_back(stats.inserts);
+  scores.push_back(stats.matches);
+  scores.push_back(stats.substitutions);
+  
   estimatedFutureScore.PlusEquals(this, scores);
 }
 
@@ -115,13 +123,21 @@ FFState* EditSequenceModel::EvaluateWhenApplied(
   
   const AlignmentInfo &alignment = target.GetAlignTerm();
   std::vector<std::string> edits;
-  calculateEdits(edits, mySourcePhrase, myTargetPhrase, alignment);
+  
+  Stats stats;
+  calculateEdits(edits, stats, mySourcePhrase, myTargetPhrase, alignment);
 
   FFState* curr_state = new esmState(ESM->NullContextState());
   float opProb = calculateScore(edits, prev_state, curr_state, cur_hypo.IsSourceCompleted());
 
   std::vector<float> scores;
   scores.push_back(opProb);
+  
+  scores.push_back(stats.deletes);
+  scores.push_back(stats.inserts);
+  scores.push_back(stats.matches);
+  scores.push_back(stats.substitutions);
+  
   accumulator->PlusEquals(this, scores);
 
   return curr_state;
@@ -176,14 +192,6 @@ void EditSequenceModel::SetParameter(const std::string& key, const std::string& 
 {
   if (key == "path") {
     m_lmPath = value;
-  } else if (key == "support-features") {
-    if(value == "no") {
-      numFeatures = 1;
-      m_numScoreComponents = 1;
-    }
-    else {
-      numFeatures = 1;
-    }
   } else if (key == "input-factor") {
     m_sFactor = Scan<int>(value);
   } else if (key == "output-factor") {
