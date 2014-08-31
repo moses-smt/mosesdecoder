@@ -8,7 +8,7 @@ exe queryLexicalTable : queryLexicalTable.cpp ../moses//moses ;
 
 exe generateSequences : GenerateSequences.cpp ../moses//moses ; 
 
-exe ESMSequences : ESMSequences.cpp ../moses//moses ; 
+exe ESMSequences : ESMSequences.cpp ../moses//moses $(TOP)//boost_program_options ; 
 
 exe TMining : TransliterationMining.cpp ../moses//moses ;
 

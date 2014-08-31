@@ -51,7 +51,7 @@ EditSequenceModel::~EditSequenceModel() {
 
 void EditSequenceModel :: readLanguageModel(const char *lmFile)
 {
-  string unkOp = "<unk>";
+  string unkOp = "1_";
   ESM = ConstructESMLM(m_lmPath);
 
   State startState = ESM->NullContextState();
@@ -76,9 +76,13 @@ void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
   for (size_t i = 0; i < source.GetSize(); i++)
     mySourcePhrase.push_back(source.GetWord(i).GetFactor(m_sFactor)->GetString().as_string());
 
-  for (size_t i = 0; i < targetPhrase.GetSize(); i++)
-    myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
-
+  for (size_t i = 0; i < targetPhrase.GetSize(); i++) {
+    if(targetPhrase.GetWord(i).IsOOV() && m_sFactor == 0 && m_tFactor == 0)
+      myTargetPhrase.push_back("1_");
+    else
+      myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
+  }
+  
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
   std::vector<std::string> edits;
   calculateEdits(edits, mySourcePhrase, myTargetPhrase, alignment);   
@@ -111,9 +115,12 @@ FFState* EditSequenceModel::EvaluateWhenApplied(
     mySourcePhrase.push_back(source.GetWord(i).GetFactor(m_sFactor)->GetString().as_string());
 
   const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
-  for (size_t i = 0; i < target.GetSize(); i++)
-    myTargetPhrase.push_back(target.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
-
+  for (size_t i = 0; i < target.GetSize(); i++) {
+    if(target.GetWord(i).IsOOV() && m_sFactor == 0 && m_tFactor == 0)
+      myTargetPhrase.push_back("1_");
+    else
+      myTargetPhrase.push_back(target.GetWord(i).GetFactor(m_tFactor)->GetString().as_string());
+  }
   const AlignmentInfo &alignment = target.GetAlignTerm();
   std::vector<std::string> edits;
   calculateEdits(edits, mySourcePhrase, myTargetPhrase, alignment);
@@ -152,14 +159,12 @@ float EditSequenceModel::calculateScore(
   return opProb;
 }
 
-
 FFState* EditSequenceModel::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
     UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
-
 }
 
 const FFState* EditSequenceModel::EmptyHypothesisState(const InputType &input) const
@@ -177,7 +182,6 @@ std::string EditSequenceModel::GetScoreProducerWeightShortName(unsigned idx) con
 
 void EditSequenceModel::SetParameter(const std::string& key, const std::string& value)
 {
-
   if (key == "path") {
     m_lmPath = value;
   } else if (key == "support-features") {
