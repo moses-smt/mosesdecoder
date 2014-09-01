@@ -47,7 +47,7 @@ void BilingualLM::Load(){
 
 //Cache for NeuralLMids
 int BilingualLM::getNeuralLMId(const Word& word) const{
-  const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+  const Factor* factor = word.GetFactor(word_factortype);
 
   std::map<const Factor *, int>::iterator it;
 
@@ -55,7 +55,32 @@ int BilingualLM::getNeuralLMId(const Word& word) const{
   it = neuralLMids.find(factor);
 
   if (it != neuralLMids.end()) {
-    return it->second; //Lock is released here automatically
+    if (!factored){
+      return it->second; //Lock is released here automatically
+    } else {
+      //See if word is unknown
+      if (it->second == unknown_word_id){
+        const Factor* pos_factor = word.GetFactor(pos_factortype); //Get POS tag
+        //Look up the POS tag in the cache
+        it = neuralLMids.find(pos_factor);
+        if (it != neuralLMids.end()){
+          return it->second; //We have our pos tag in the cache.
+        } else {
+          //We have to lookup the word
+          const std::string string = pos_factor->GetString().as_string();
+          int neuralLM_wordID = m_neuralLM->lookup_word(string);
+
+          boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(read_lock);
+          neuralLMids.insert(std::pair<const Factor *, int>(pos_factor, neuralLM_wordID));
+
+          return neuralLM_wordID; //We return the ID of the pos TAG
+        }
+      } else {
+        return it->second; //We return the neuralLMid of the word
+      }
+      
+    }
+    
   } else {
     //We have to lookup the word
     const std::string string = factor->GetString().as_string();
@@ -64,7 +89,18 @@ int BilingualLM::getNeuralLMId(const Word& word) const{
     boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(read_lock);
     neuralLMids.insert(std::pair<const Factor *, int>(factor, neuralLM_wordID));
 
-    return neuralLM_wordID; //Lock is released here
+    if (!factored) {
+      return neuralLM_wordID; //Lock is released here
+    } else {
+      if (neuralLM_wordID == unknown_word_id){
+        const Factor* pos_factor = word.GetFactor(pos_factortype);
+        const std::string factorstring = pos_factor->GetString().as_string();
+        neuralLM_wordID = m_neuralLM->lookup_word(factorstring);
+        neuralLMids.insert(std::pair<const Factor *, int>(pos_factor, neuralLM_wordID));
+      }
+      return neuralLM_wordID; //If a POS tag is needed, neuralLM_wordID is going to be updated.
+    }
+    
   }
 
 
@@ -621,6 +657,19 @@ void BilingualLM::SetParameter(const std::string& key, const std::string& value)
       std::cerr << "UNRECOGNIZED OPTION FOR PARAMETER premultiply. Got " << value << " , expected true or false!" << std::endl;
       exit(1);
     }
+  } else if (key == "factored") {
+    std::string truestr = "true";
+    std::string falsestr = "false";
+    if (value == truestr) {
+      factored = true;
+    } else if (value == falsestr) {
+        factored = false;
+    } else {
+      std::cerr << "UNRECOGNIZED OPTION FOR PARAMETER factored. Got " << value << " , expected true or false!" << std::endl;
+      exit(1);
+    }
+  } else if (key == "pos_factor") {
+    pos_factortype = (size_t)atoi(value.c_str());
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
