@@ -64,14 +64,20 @@ protected:
   int target_ngrams;
   int source_ngrams;
   bool premultiply = true;
+  bool factored = false;
   int neuralLM_cache = 1000000;
   int unknown_word_id;
+
+  //NeuralLM lookup
+  FactorType word_factortype = 0;
+  FactorType pos_factortype;
   const Factor* BOS_factor;
   const Factor* EOS_factor;
   mutable Word BOS_word_actual;
   mutable Word EOS_word_actual;
   const Word& BOS_word = BOS_word_actual;
   const Word& EOS_word = EOS_word_actual;
+
   // thread-specific nplm for thread-safety
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 
