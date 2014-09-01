@@ -42,6 +42,7 @@
 #include "moses/FF/SourceGHKMTreeInputMatchFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/SetSourcePhrase.h"
+#include "moses/FF/CheckTargetNgrams.h"
 #include "CountNonTerms.h"
 #include "ReferenceComparison.h"
 #include "RuleScope.h"
@@ -203,6 +204,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(HyperParameterAsWeight);
   MOSES_FNAME(SetSourcePhrase);
+  MOSES_FNAME(CheckTargetNgrams);
   MOSES_FNAME(CountNonTerms);
   MOSES_FNAME(ReferenceComparison);
   MOSES_FNAME(RuleScope);
