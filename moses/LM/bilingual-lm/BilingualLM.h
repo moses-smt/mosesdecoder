@@ -51,7 +51,7 @@ private:
 
   void requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount, std::vector<int> &words) const;
 
-  int getNeuralLMId(const Factor * factor) const;
+  int getNeuralLMId(const Word& word) const;
 
   mutable std::map<const Factor*, int> neuralLMids;
   mutable boost::shared_mutex neuralLMids_lock;
@@ -65,8 +65,13 @@ protected:
   int source_ngrams;
   bool premultiply = true;
   int neuralLM_cache = 1000000;
+  int unknown_word_id;
   const Factor* BOS_factor;
   const Factor* EOS_factor;
+  mutable Word BOS_word_actual;
+  mutable Word EOS_word_actual;
+  const Word& BOS_word = BOS_word_actual;
+  const Word& EOS_word = EOS_word_actual;
   // thread-specific nplm for thread-safety
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 
