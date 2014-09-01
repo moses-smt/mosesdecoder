@@ -3,9 +3,9 @@
 #include "InputTreeRep.h"
 #include "moses/Util.h"
 #include "phrase-extract/XmlTree.h"
-#include "phrase-extract/SyntaxTree.h"
 
 using namespace std;
+using namespace MosesTraining;
 
 namespace Moses
 {
@@ -34,6 +34,7 @@ InputTreeRep::InputTreeRep(size_t sourceSize)
 :m_noTag("NOTAG")
 {
   SyntaxLabel syntNoLabel(m_noTag,true);
+  //std::cerr << "Constructing chart for source size : " << sourceSize << std::endl;
   for (size_t startPos = 0; startPos < sourceSize; startPos++) {
       //cerr << "startPos" << startPos << endl;
       vector<SyntLabels> internal;
@@ -112,7 +113,7 @@ size_t InputTreeRep::ProcessXMLTags(string &line, std::vector<XMLParseOutputForT
 
   // break up input into a vector of xml tags and text
   // example: (this), (<b>), (is a), (</b>), (test .)
-  vector<string> xmlTokens = MosesTraining::TokenizeXml(line);
+  vector<string> xmlTokens = TokenizeXml(line);
 
   // we need to store opened tags, until they are closed
   // tags are stored as tripled (tagname, startpos, contents)
@@ -125,7 +126,7 @@ size_t InputTreeRep::ProcessXMLTags(string &line, std::vector<XMLParseOutputForT
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
     // not a xml tag, but regular text (may contain many words)
-    if(!MosesTraining::isXmlTag(xmlTokens[xmlTokenPos])) {
+    if(!isXmlTag(xmlTokens[xmlTokenPos])) {
       // add a space at boundary, if necessary
       if (cleanLine.size()>0 &&
           cleanLine[cleanLine.size() - 1] != ' ' &&
@@ -141,7 +142,7 @@ size_t InputTreeRep::ProcessXMLTags(string &line, std::vector<XMLParseOutputForT
       // *** get essential information about tag ***
 
       // strip extra boundary spaces and "<" and ">"
-      string tag =  MosesTraining::Trim(MosesTraining::TrimXml(xmlTokens[xmlTokenPos]));
+      string tag =  Trim(MosesTraining::TrimXml(xmlTokens[xmlTokenPos]));
       //VERBOSE(3,"XML TAG IS: " << tag << std::endl);
 
       if (tag.size() == 0) {
@@ -207,7 +208,7 @@ size_t InputTreeRep::ProcessXMLTags(string &line, std::vector<XMLParseOutputForT
         size_t endPos = wordPos;
 
         // span attribute overwrites position
-        string span = MosesTraining::ParseXmlTagAttribute(tagContent,"span");
+        string span = ParseXmlTagAttribute(tagContent,"span");
         if (! span.empty()) {
           vector<string> ij = Tokenize(span, "-");
           if (ij.size() != 1 && ij.size() != 2) {
@@ -226,7 +227,7 @@ size_t InputTreeRep::ProcessXMLTags(string &line, std::vector<XMLParseOutputForT
           return false;
         }
         // may be either a input span label ("label"), or a specified output translation "translation"
-        string label = MosesTraining::ParseXmlTagAttribute(tagContent,"label");
+        string label = ParseXmlTagAttribute(tagContent,"label");
         //std::cerr << "Obtained Label : " << label << std::endl;
 
         //no need to do something with translation here
@@ -254,7 +255,6 @@ size_t InputTreeRep::ProcessXMLTags(string &line, std::vector<XMLParseOutputForT
 
 int InputTreeRep::Read(std::string &line)
 {
-  //std::cerr << "Reading in parse tree..." << line << std::endl;
 
   std::vector<XMLParseOutputForTrain> sourceLabels;
   ProcessXMLTags(line, sourceLabels);

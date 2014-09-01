@@ -31,6 +31,11 @@ const TargetIndexType &RuleTable::GetTargetIndex()
   return m_targetIndex;
 }
 
+TargetIndexType* RuleTable::GetTargetIndexPtr()
+{
+  return &m_targetIndex;
+}
+
 bool RuleTable::SrcExists(const string &phrase)
 {
   return m_ttable.find(phrase) != m_ttable.end();
@@ -60,7 +65,6 @@ const vector<ChartTranslation> &RuleTable::GetTranslations(const string &srcPhra
 //
 // private methods
 //
-
 void RuleTable::AddRulePair(const std::string &src, const std::string &tgt,
     const std::vector<long double> &scores, const PSD::AlignmentType &termAlign, const PSD::AlignmentType &nonTermAlign)
 {

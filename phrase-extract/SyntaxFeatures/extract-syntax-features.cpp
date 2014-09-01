@@ -91,7 +91,7 @@ int main(int argc, char**argv)
     exit(1);
   }
   InputFileStream parse(argv[3]);
-  if (! corpus.good()) {
+  if (! parse.good()) {
     cerr << "error: Failed to open " << argv[3] << endl;
     exit(1);
   }
@@ -99,7 +99,7 @@ int main(int argc, char**argv)
   RuleTable rtable(argv[4]);
   ExtractorConfig config;
   config.Load(argv[5]);
-  FeatureExtractor extractor(rtable.GetTargetIndex(), config, true);
+  FeatureExtractor extractor(rtable.GetTargetIndexPtr(), &config, true);
   VWFileTrainConsumer consumer(argv[6]);
   WritePhraseIndex(rtable.GetTargetIndex(), argv[7]);
 
@@ -191,7 +191,7 @@ int main(int argc, char**argv)
       //get span corresponding to lhs of rule
       int spanInt = (spanEnd - spanStart) + 1;
 
-      CHECK( spanInt > 0);
+      CHECK(spanInt > 0);
       stringstream s;
       s << spanInt;
       span = s.str();
@@ -199,7 +199,6 @@ int main(int argc, char**argv)
         // set new syntax features
         size_t sentSize = GetSizeOfSentence(corpusLine);
 
-        //cerr << "Extracting syntactic features..." << parseLineString << endl;
         Moses::InputTreeRep myInputChart = Moses::InputTreeRep(sentSize);
         myInputChart.Read(parseLine);
         //cerr << "PRINTING CHART ..." << endl;
@@ -224,8 +223,6 @@ int main(int argc, char**argv)
             else
             {spanEnd++;}
         }
-
-        //cerr << "FOUND PARENT LABEL : " << parentLabel.GetString() << endl;
 
         //iterate over labels and get strings
         //MAYBE INEFFICIENT

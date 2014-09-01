@@ -25,6 +25,7 @@ class ExtractorConfig
   public:
     ExtractorConfig();
     void Load(const std::string &configFile);
+    void LoadLocal(const std::string &configFile); //FB : load configuration for local model
     inline bool GetSourceExternal() const { return m_sourceExternal; }
     inline bool GetSourceInternal() const { return m_sourceInternal; }
     inline bool GetTargetInternal() const { return m_targetInternal; }
@@ -41,13 +42,24 @@ class ExtractorConfig
     inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
     inline const std::vector<long double> &GetScoreBins() const { return m_scoreBins; }
     inline bool IsLoaded() const { return m_isLoaded; }
+    //FB : configuration for simulating local models
+    inline bool GetSourceTargetIndicatorSyntax() const { return m_sourceTargetIndicatorSyntax; }
+    inline bool GetSourceTargetIndicatorInternal() const { return m_sourceTargetIndicatorInternal; }
+    inline bool GetSourceTargetIndicatorBoW() const { return m_sourceTargetIndicatorBoW; }
+    inline bool GetSourceTargetIndicatorPaired() const { return m_sourceTargetIndicatorPaired; }
+    inline bool GetSourceTargetIndicatorContext() const { return m_sourceTargetIndicatorContext; }
+    inline bool GetSourceTargetIndicatorMostFrequent() const { return m_sourceTargetIndicatorMostFrequent;}
+    inline bool GetSourceTargetIndicatorScore() const { return m_sourceTargetIndicatorScore; }
 
   private:
     // read from configuration
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal,
          m_syntaxParent, m_mostFrequent,
-         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic;
+         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic,
+         m_sourceTargetIndicatorSyntax, m_sourceTargetIndicatorInternal, m_sourceTargetIndicatorBoW,
+         m_sourceTargetIndicatorPaired, m_sourceTargetIndicatorContext, m_sourceTargetIndicatorMostFrequent,
+         m_sourceTargetIndicatorScore;
 
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
@@ -86,7 +98,10 @@ typedef boost::bimaps::bimap<std::string, size_t> TargetIndexType;
 class FeatureExtractor
 {
 public:
-  FeatureExtractor(const TargetIndexType &targetIndex, const ExtractorConfig &config, bool train);
+  FeatureExtractor(TargetIndexType* index, ExtractorConfig* config, bool train);
+
+  //copy constructor
+  //FeatureExtractor(const FeatureExtractor &extractor);
 
   void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
@@ -118,8 +133,8 @@ public:
      std::vector<float> &losses);
 
 private:
-  const TargetIndexType &m_targetIndex;
-  const ExtractorConfig &m_config;
+  TargetIndexType* m_targetIndex; //all feature extractor objects refer to the same instance of target index
+  ExtractorConfig* m_config;
   bool m_train;
 
   long double GetMaxProb(const std::vector<Translation> &translations);
@@ -147,6 +162,17 @@ private:
       FeatureConsumer *fc);
   void GenerateScoreFeatures(const std::vector<long double> scores, FeatureConsumer *fc);
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
+
+  //FB : set of functions to simulate a local model (prefix all features with the source side of the rule)
+  void GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
+  		  const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, FeatureConsumer *fc,AlignmentType nonTermAlign,
+  		  		const std::vector<std::string> &syntaxLabel, const std::string parent, const std::string span);
+  void GenerateSourceTargetIndicatorFeatureWithInternalFeaturesChart(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, FeatureConsumer *fc, AlignmentType nonTermAlign);
+  void GenerateSourceTargetIndicatorFeatureWithBagOfWords(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc, AlignmentType nonTermAlign);
+  void GenerateSourceTargetIndicatorFeatureWithPairedFeatures(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const AlignmentType &alignTerm, const AlignmentType nonTermAlign, FeatureConsumer *fc);
+  void GenerateSourceTargetIndicatorFeatureWithContext(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc, AlignmentType nonTermAlign);
+  void GenerateSourceTargetIndicatorMostFrequent(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, FeatureConsumer *fc,AlignmentType nonTermAlign);
+  void GenerateSourceTargetIndicatorFeatureWithScoreFeatures(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const AlignmentType &alignNonTerm, const std::vector<long double> scores, FeatureConsumer *fc);
 };
 
 } // namespace PSD

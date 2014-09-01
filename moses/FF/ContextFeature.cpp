@@ -234,8 +234,8 @@ bool ContextFeature::Initialize(const string &modelFile, const string &indexFile
   }
 
   m_extractorConfig.Load(configFile);
-  m_extractor = new FeatureExtractor(m_ruleIndex,m_extractorConfig, false);
-  m_debugExtractor = new FeatureExtractor(m_ruleIndex,m_extractorConfig, true);
+  m_extractor = new FeatureExtractor(&m_ruleIndex, &m_extractorConfig, false);
+  m_debugExtractor = new FeatureExtractor(&m_ruleIndex, &m_extractorConfig, true);
   m_debugConsumer = new VWFileTrainConsumer("/projekte/morphosynt/braune/MyPerlScripts/softSyntax/hiero-feature-debug");
   isGood = true;
   VERBOSE(4, "Constructing score producers : " << isGood << endl);
@@ -409,10 +409,10 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
         vector<float>::iterator lossIt;
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
            VERBOSE(1, *lossIt << " ");}
-        //Interpolate(losses,pEgivenF,0.1);
+        //Interpolate(losses,pEgivenF,0.1); Uncomment if need interpolation
         //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         //Normalize(losses);
-        VERBOSE(1, "VW losses after interpolation : " << std::endl);
+        //VERBOSE(1, "VW losses after interpolation : " << std::endl);
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
         VERBOSE(1, *lossIt << " ");
         float logScore = PreciseEquals( (long double) *lossIt, 0.0) ? LOWEST_SCORE : log(*lossIt);
@@ -434,7 +434,7 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
 void ContextFeature::NormalizeSquaredLoss(vector<float> &losses) const
 {
 
-	// This is (?) a good choice for sqrt loss (default loss function in VW)
+	// This is (?) a good choice for squared loss (default loss function in VW)
 
   float sum = 0;
 

@@ -34,6 +34,7 @@ InputTreeRep::InputTreeRep(size_t sourceSize)
 :m_noTag("NOTAG")
 {
   SyntaxLabel syntNoLabel(m_noTag,true);
+  //std::cerr << "Constructing chart for source size : " << sourceSize << std::endl;
   for (size_t startPos = 0; startPos < sourceSize; startPos++) {
       //cerr << "startPos" << startPos << endl;
       vector<SyntLabels> internal;
@@ -254,10 +255,11 @@ size_t InputTreeRep::ProcessXMLTags(string &line, std::vector<XMLParseOutputForT
 
 int InputTreeRep::Read(std::string &line)
 {
-  //std::cerr << "Reading in parse tree..." << line << std::endl;
 
   std::vector<XMLParseOutputForTrain> sourceLabels;
   ProcessXMLTags(line, sourceLabels);
+
+  //std::cerr << "Reading line : " << line << std::endl;
 
   // size input chart
   size_t sourceSize = Tokenize(" ",line).size();

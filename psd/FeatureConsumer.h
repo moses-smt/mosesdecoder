@@ -15,6 +15,8 @@
 #include <boost/iostreams/filtering_stream.hpp> 
 #include <boost/iostreams/filter/gzip.hpp> 
 
+#include "../phrase-extract/SyntaxFeatures/SynchronizedInput.h"
+
 
 // #ifdef HAVE_VW
   // forward declarations to avoid dependency on VW
@@ -55,6 +57,29 @@ public:
 
 private:
   boost::iostreams::filtering_ostream m_bfos;
+  std::deque<std::string> m_outputBuffer;
+
+  void WriteBuffer();
+  std::string EscapeSpecialChars(const std::string &str);
+};
+
+class VWBufferTrainConsumer : public FeatureConsumer
+{
+public:
+  VWBufferTrainConsumer(SynchronizedInput<std::string>* queue);
+
+  // FeatureConsumer interface implementation
+  virtual void SetNamespace(char ns, bool shared);
+  virtual void AddFeature(const std::string &name);
+  virtual void AddFeature(const std::string &name, float value);
+  virtual void FinishExample();
+  virtual void Finish();
+  virtual void Train(const std::string &label, float loss);
+  virtual float Predict(const std::string &label);
+
+private:
+  SynchronizedInput<std::string>* m_queue;
+  std::deque<std::string> m_tempBuffer;
   std::deque<std::string> m_outputBuffer;
 
   void WriteBuffer();

@@ -40,10 +40,11 @@ void VWFileTrainConsumer::AddFeature(const std::string &name, float value)
   m_outputBuffer.push_back(EscapeSpecialChars(name) + ":" + SPrint(value));
 }
 
+//Thread-safe writing of example
 void VWFileTrainConsumer::FinishExample()
 {
-  WriteBuffer();
-  m_bfos << endl;
+	WriteBuffer();
+	m_bfos << endl;
 }
 
 void VWFileTrainConsumer::Finish()

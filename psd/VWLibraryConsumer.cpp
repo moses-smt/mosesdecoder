@@ -11,7 +11,9 @@ using namespace std;
 namespace PSD
 {
 
+//Options when using single-threaded
 const char * VW_INIT_OPTIONS = "-t --hash all --noconstant -b 26 -q st --csoaa_ldf sc --loss_function=logistic";
+//const char * VW_INIT_OPTIONS = "-t --hash all --noconstant -b 26 -q st --csoaa_ldf s";
 
 //
 // VWLibraryPredictConsumerFactory

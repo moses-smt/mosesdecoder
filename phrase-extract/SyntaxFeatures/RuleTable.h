@@ -15,6 +15,7 @@ class RuleTable
 public:
   RuleTable(const std::string &fileName);
   const PSD::TargetIndexType &GetTargetIndex();
+  PSD::TargetIndexType* GetTargetIndexPtr();
   bool SrcExists(const std::string &phrase);
 
   // get ID of target phrase, set found to true if found, false otherwise
@@ -31,9 +32,9 @@ private:
 void AddRulePair(const std::string &src, const std::string &tgt,
     const std::vector<long double> &scores, const PSD::AlignmentType &termAlign,
     const PSD::AlignmentType &nonTermAlign);
-  std::vector<long double> GetScores(const std::string &scoreStr);
-  PSD::AlignmentType GetTermAlignment(const std::string &alignStr, const std::string &targetStr);
-  PSD::AlignmentType GetNonTermAlignment(const std::string &alignStr, const std::string &targetStr, const std::string &sourceStr);
+  	std::vector<long double> GetScores(const std::string &scoreStr);
+  	PSD::AlignmentType GetTermAlignment(const std::string &alignStr, const std::string &targetStr);
+  	PSD::AlignmentType GetNonTermAlignment(const std::string &alignStr, const std::string &targetStr, const std::string &sourceStr);
 
   // add phrase to index (if it does not exist yet), return its ID
   size_t AddTargetPhrase(const std::string &phrase);

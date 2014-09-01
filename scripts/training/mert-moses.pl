@@ -107,6 +107,11 @@ my $__REMOVE_SEGMENTATION = "$SCRIPTS_ROOTDIR/ems/support/remove-segmentation-ma
 
 my $__THREADS = 0;
 
+#syntax context : chop dev set for faster tuning
+my $__CHOP = 1;
+my $__PSD = "";
+my $__PARSE = "";
+
 # Parameter for effective reference length when computing BLEU score
 # Default is to use shortest reference
 # Use "--shortest" to use shortest reference length
@@ -209,7 +214,10 @@ GetOptions(
   "batch-mira-args=s" => \$batch_mira_args,
   "promix-training=s" => \$__PROMIX_TRAINING,
   "promix-table=s" => \@__PROMIX_TABLES,
-  "threads=i" => \$__THREADS
+  "threads=i" => \$__THREADS,
+  "chop-into=i" => \$__CHOP,
+  "chop-psd=s" => \$__PSD,
+  "chop-parse=s" => \$__PARSE
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -535,6 +543,7 @@ if ($___FILTER_PHRASE_TABLE) {
   # use the original configuration file
   $___CONFIG_ORIG = $___CONFIG;
 }
+
 
 # we run moses to check validity of moses.ini and to obtain all the feature
 # names
@@ -1195,13 +1204,209 @@ sub run_decoder {
       $lsamp_cmd = " -lattice-samples $lsamp_filename $___LATTICE_SAMPLES ";
     }
 
-    if (defined $___JOBS && $___JOBS > 0) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
-    } else {
-      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
-    }
+    # syntax context : chop tuning set into smaller parts and call decoder for each part
+    if (defined $__CHOP && $__CHOP > 1) {
 
-    safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
+	print "CHOPPING DEVSET FOR BROKEN MULTI-THREADING : CHOP INTO = $__CHOP\n";
+
+	#make temp to put chopped dev set
+	my $TMPDIR="tmp";
+	mkdir $TMPDIR;
+
+	my $fileCount = 0;
+
+	# count the number of lines of the dev set
+  	my $totalLines;
+    	$totalLines = `wc -l < $___DEV_F`;
+
+  	my $linesPerFile = int($totalLines / $__CHOP);
+
+  	# cut up dev set into smaller files
+	open(IN, $___DEV_F) || die "can't open $___DEV_F";
+	
+	my $filePath  = "$TMPDIR/dev.$fileCount";
+	open (OUT, ">", $filePath) or die "error writing output $!";
+	
+	my $lineCount = 0;
+	my $line;
+	while ($line=<IN>) 
+	{
+		chomp($line);
+  		print OUT "$line\n";
+		++$lineCount;
+	
+    		if ($lineCount > $linesPerFile) {
+      		close OUT;
+      		$lineCount = 0;
+      		++$fileCount;
+      		$filePath = "$TMPDIR/dev.$fileCount";
+      		open (OUT, ">", $filePath) or die "error writing output $!";
+    		}
+  	}
+	close OUT;
+	++$fileCount;
+
+	if ($fileCount != $__CHOP) {
+  	die "error: Number of dev files $fileCount different from number of processes $__CHOP";
+	}
+
+	# cut up psd file into smaller files
+	open(IN1, $__PSD) || die "can't open  $__PSD";
+
+	$fileCount = 0;	
+
+	my $filePath  = "$TMPDIR/psd.$fileCount";
+	open (OUT1, ">", $filePath) or die "error writing output $!";
+	
+	my $lineCount1 = 0;
+	my $line1;
+
+	while ($line1=<IN1>) 
+	{
+		chomp($line1);
+  		print OUT1 "$line1\n";
+		++$lineCount1;
+	
+    		if ($lineCount1 > $linesPerFile) {
+      		close OUT1;
+      		$lineCount1 = 0;
+      		++$fileCount;
+      		$filePath = "$TMPDIR/psd.$fileCount";
+      		open (OUT1, ">", $filePath) or die "error writing output $!";
+    		}
+  	}
+	close OUT1;
+	++$fileCount;
+
+	if ($fileCount != $__CHOP) {
+  	die "error: Number of psd files $fileCount different from number of processes $__CHOP";
+	}
+
+	# cut up parse file into smaller files
+	open(IN2, $__PARSE) || die "can't open  $__PARSE";
+
+	$fileCount = 0;
+
+	my $filePath  = "$TMPDIR/parse.$fileCount";
+	open (OUT2, ">", $filePath) or die "error writing output $!";
+	
+	my $lineCount2 = 0;
+	my $line2;
+
+	while ($line2=<IN2>) 
+	{
+		chomp($line2);
+  		print OUT2 "$line2\n";
+		++$lineCount2;
+	
+    		if ($lineCount2 > $linesPerFile) {
+      		close OUT2;
+      		$lineCount2 = 0;
+      		++$fileCount;
+      		$filePath = "$TMPDIR/parse.$fileCount";
+      		open (OUT2, ">", $filePath) or die "error writing output $!";
+    		}
+  	}
+	close OUT2;
+	++$fileCount;
+
+	if ($fileCount != $__CHOP) {
+  	die "error: Number of parse files $fileCount different from number of processes $__CHOP";
+	}
+
+	# create run scripts
+	my @runFiles = (0..($__CHOP-1));
+	for (my $i = 0; $i < $__CHOP; ++$i)
+	{
+	  my $path = "$TMPDIR/run.$i.sh";
+	  open(my $fh, ">", $path) or die "cannot open $path: $!";
+	  $runFiles[$i] = $fh;
+	}
+
+	# write decoder command to run scripts
+	for (my $i = 0; $i < $__CHOP; ++$i)
+	{
+
+	  my $fh = $runFiles[$i];
+
+          #put split psd and parse files into decoder flags
+	  my $newDecoderFlags = $___DECODER_FLAGS;
+	  $newDecoderFlags =~ s/-psd-context \/\S+ /-psd-context $TMPDIR\/psd.$i /g;
+	  $newDecoderFlags =~ s/-syntax-context \/\S+ /-syntax-context $TMPDIR\/parse.$i /g;
+
+	  my $cmd ="$___DECODER $newDecoderFlags  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $TMPDIR/$filename.$i $___N_BEST_LIST_SIZE -input-file $TMPDIR/dev.$i > $TMPDIR/run$run.$i.out"; # write output and n-best list into different files
+	  print $fh $cmd;
+	}
+
+	# close run script files
+	for (my $i = 0; $i < $__CHOP; ++$i)
+	{
+	  close($runFiles[$i]);
+	  my $path = "$TMPDIR/run.$i.sh";
+	  systemCheck("chmod +x $path");
+	}
+
+	# run each score script in parallel
+	my @children;
+	for (my $i = 0; $i < $__CHOP; ++$i)
+	{
+	  my $cmd = "$TMPDIR/run.$i.sh\n";
+		my $pid = RunFork($cmd);
+		push(@children, $pid);
+	}
+
+	# wait for children to finish
+	foreach (@children) {
+		waitpid($_, 0);
+	}
+
+	#merge outputs
+	my $catargs = join(" ", map { "$TMPDIR/run$run.$_.out" } (0 .. $__CHOP - 1));
+	systemCheck("cat $catargs > run$run.out");
+
+	#number n-best lists correctly
+	for(my $i = 0; $i < $__CHOP; ++$i)
+	{
+		my $file = "$TMPDIR/$filename.$i";
+		open(IN3, $file) || die "can't open  $file";
+		my $newFile = "$TMPDIR/$filename.$i.fixed";
+		open (OUT3, ">", $newFile) or die "error writing output $!";
+		my $nbline;
+		while ($nbline=<IN3>)
+		{
+			chomp($nbline);
+			my $increase = $i * ($linesPerFile + 1);
+			if($nbline =~m/^([0-9]+)/g)
+			{
+				my $newnb = $1 + $increase;
+				$nbline =~s/^[0-9]+/$newnb/g;
+				print OUT3 "$nbline\n";	
+			}
+			else
+			{die "error : line in n-best list not numbered !!!";}
+		}
+		close OUT3; 
+	}
+
+	#merge n-best lists
+	my $catargs = join(" ", map { "$TMPDIR/$filename.$_.fixed" } (0 .. $__CHOP - 1));
+	systemCheck("cat $catargs > $filename");
+
+	my $cmd = "rm -rf $TMPDIR";
+	print STDERR "WARNING: skipping $cmd\n";
+	#print STDERR $cmd, "\n";
+	#systemCheck($cmd);
+	}	
+	
+    else{	
+
+    	if (defined $___JOBS && $___JOBS > 0) {
+      	$decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters 	\"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+    	} else {
+     	 $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
+ 	   }
+	safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
+	}
 
     sanity_check_order_of_lambdas($featlist, $filename);
     return ($filename, $lsamp_filename);
@@ -1590,4 +1795,30 @@ sub setup_case_config {
 
 sub is_mac_osx {
   return ($^O eq "darwin") ? 1 : 0;
+}
+
+#syntax context : run chopped files in parallel
+sub RunFork($)
+{
+  my $cmd = shift;
+
+  my $pid = fork();
+  
+  if ($pid == 0)
+  { # child
+    print STDERR $cmd;
+    systemCheck($cmd);
+    exit();
+  }
+  return $pid;
+}
+
+sub systemCheck($)
+{
+  my $cmd = shift;
+  my $retVal = system($cmd);
+  if ($retVal != 0)
+  {
+    exit(1);
+  }
 }
