@@ -63,6 +63,8 @@ protected:
   int m_nGramOrder;
   int target_ngrams;
   int source_ngrams;
+  bool premultiply = true;
+  int neuralLM_cache = 1000000;
   const Factor* BOS_factor;
   const Factor* EOS_factor;
   // thread-specific nplm for thread-safety

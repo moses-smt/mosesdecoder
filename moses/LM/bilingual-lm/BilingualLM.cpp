@@ -28,9 +28,9 @@ BilingualLM::BilingualLM(const std::string &line)
 }
 
 void BilingualLM::Load(){
-  m_neuralLM_shared = new nplm::neuralLM(m_filePath, true);
-  //TODO: config option?
-  m_neuralLM_shared->set_cache(1000000);
+  m_neuralLM_shared = new nplm::neuralLM(m_filePath, premultiply); //Default premultiply= true
+
+  m_neuralLM_shared->set_cache(neuralLM_cache); //Default 1000000
   UTIL_THROW_IF2(m_nGramOrder != m_neuralLM_shared->get_order(),
                  "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
 }
@@ -603,6 +603,19 @@ void BilingualLM::SetParameter(const std::string& key, const std::string& value)
     target_ngrams = atoi(value.c_str());
   } else if (key == "source_ngrams") {
     source_ngrams = atoi(value.c_str());
+  } else if (key == "cache_size") {
+    neuralLM_cache = atoi(value.c_str());
+  } else if (key == "premultiply") {
+    std::string truestr = "true";
+    std::string falsestr = "false";
+    if (value == truestr) {
+      premultiply = true;
+    } else if (value == falsestr) {
+        premultiply = false;
+    } else {
+      std::cerr << "UNRECOGNIZED OPTION FOR PARAMETER premultiply. Got " << value << " , expected true or false!" << std::endl;
+      exit(1);
+    }
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
