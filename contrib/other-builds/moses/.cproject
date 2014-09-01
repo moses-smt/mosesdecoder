@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.config.gnu.exe.debug.656913512">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.debug.656913512" moduleId="org.eclipse.cdt.core.settings" name="Debug">
@@ -13,12 +11,12 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -77,9 +75,8 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.511477442" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1956517467" name="SRI.h" rcbsApplicability="disable" resourcePath="LM/SRI.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1917714409" name="/" resourcePath="TranslationModel">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1874031326" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
@@ -131,15 +128,16 @@
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1540835364" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1671760867"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1897459756" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2072639167">
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.971854509" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+						<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1615949072" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1178947383" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.241920461">
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.577484439" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2013283881" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1997457966" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.505647623"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.886709003" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1809234420"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.325064995" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.2136353299">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.972166009" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1281335737" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
@@ -154,13 +152,13 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.release.401150096" moduleId="org.eclipse.cdt.core.settings" name="Release">
 				<externalSettings/>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -206,12 +204,12 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -276,8 +274,8 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/Rand.h" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/DALMWrapper.h" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/IRST.h" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/DALMWrapper.h" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry excluding="LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
