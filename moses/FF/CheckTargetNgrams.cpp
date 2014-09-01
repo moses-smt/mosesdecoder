@@ -1,8 +1,8 @@
 #include <vector>
+#include "BloomFilter.h"
 #include "CheckTargetNgrams.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/Hypothesis.h"
-#include "BloomFilter.h"
 
 using namespace std;
 
@@ -72,11 +72,11 @@ FFState* CheckTargetNgrams::EvaluateWhenApplied(
 void CheckTargetNgrams::SetParameter(const std::string& key, const std::string& value)
 {
  if (key == "path") {
-    m_filePath = value;
+    m_filePath = Scan<std::string>(value);
   } else if (key == "factor") {
     m_FactorsVec = Tokenize<FactorType>(value,",");
   } else if (key == "max-order") {
-    m_maxorder = Tokenize<int>(value,",");
+    m_maxorder = Scan<unsigned int>(value);
    //m_numScoreComponents is read and set in the super-class
    //if >1 then it will check n-grams from max-order to max-order - numScoreComponents +1
   } else {
@@ -87,13 +87,13 @@ void CheckTargetNgrams::SetParameter(const std::string& key, const std::string& 
 
 void CheckTargetNgrams::Load()
 {
-  if (m_filePath == "") 
-    UTIL_THROW("Filename must be specified");
+  UTIL_THROW_IF2(m_filePath == "", "Filename must be specified");
+
   ifstream inFile(m_filePath.c_str());
   UTIL_THROW_IF2(!inFile, "Can't open file " << m_filePath);
     
   //load bloom filter file
-  m_bloom_filter.load(inFile);
+  m_bloomfilter.load(inFile);
   inFile.close();
 }
 

@@ -13,9 +13,6 @@ namespace Moses
 class CheckTargetNgramsState : public FFState
 {
   unsigned int m_history;
-  int m_maxorder;
-  int m_minorder;
-  bloom_filter m_bloomfilter;
 
 public:
   CheckTargetNgramsState(unsigned int history)
@@ -27,6 +24,13 @@ public:
 
 class CheckTargetNgrams : public StatefulFeatureFunction
 {
+  std::string m_filePath;
+  int m_maxorder;
+  int m_minorder;
+  std::vector<FactorType> m_FactorsVec;
+
+  bloom_filter m_bloomfilter;
+
 public:
   CheckTargetNgrams(const std::string &line);
 
@@ -57,6 +61,8 @@ public:
     ScoreComponentCollection* accumulator) const;
 
   void SetParameter(const std::string& key, const std::string& value);
+
+  void Load();
 
 };
 
