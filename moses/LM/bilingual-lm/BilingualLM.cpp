@@ -24,7 +24,9 @@ BilingualLM::BilingualLM(const std::string &line)
   ReadParameters();
   FactorCollection& factorFactory = FactorCollection::Instance(); //Factor Factory to use for BOS_ and EOS_
   BOS_factor = factorFactory.AddFactor(BOS_);
+  BOS_word_actual.SetFactor(0, BOS_factor);
   EOS_factor = factorFactory.AddFactor(EOS_);
+  EOS_word_actual.SetFactor(0, EOS_factor);
 }
 
 void BilingualLM::Load(){
@@ -33,11 +35,20 @@ void BilingualLM::Load(){
   m_neuralLM_shared->set_cache(neuralLM_cache); //Default 1000000
   UTIL_THROW_IF2(m_nGramOrder != m_neuralLM_shared->get_order(),
                  "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
+
+  if (!m_neuralLM.get()) {
+    m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
+  }
+  //Get unknown word ID
+  unknown_word_id = m_neuralLM->lookup_word("<unk>");
+
 }
 
 
 //Cache for NeuralLMids
-int BilingualLM::getNeuralLMId(const Factor * factor) const{
+int BilingualLM::getNeuralLMId(const Word& word) const{
+  const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
+
   std::map<const Factor *, int>::iterator it;
 
   boost::upgrade_lock< boost::shared_mutex > read_lock(neuralLMids_lock);
@@ -71,8 +82,7 @@ void BilingualLM::requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount
       for (int i = currTargetPhrase.GetSize() - 1; i> -1; i--){
         if (found != amount){
           const Word& word = currTargetPhrase.GetWord(i);
-          const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
-          words[found] = getNeuralLMId(factor);
+          words[found] = getNeuralLMId(word);
           found++;
         } else {
           return; //We have gotten everything needed
@@ -84,7 +94,7 @@ void BilingualLM::requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount
     prev_hyp = prev_hyp->GetPrevHypo();
   }
 
-  int neuralLM_wordID = getNeuralLMId(BOS_factor);
+  int neuralLM_wordID = getNeuralLMId(BOS_word);
   for (int i = found; i < amount; i++){
     words[i] = neuralLM_wordID;
   }
@@ -121,8 +131,7 @@ void BilingualLM::getTargetWords(const Hypothesis &cur_hypo
     //Just add until we reach current_word_index
     for (int i = 0; i<current_word_index + 1; i++){
       const Word& word = targetPhrase.GetWord(i);
-      const Factor* factor = word.GetFactor(0);
-      words[j] = getNeuralLMId(factor);
+      words[j] = getNeuralLMId(word);
       j++;
     }
 
@@ -130,8 +139,7 @@ void BilingualLM::getTargetWords(const Hypothesis &cur_hypo
     //We haven't added any words, proceed as before
     for (int i = current_word_index - target_ngrams; i < current_word_index + 1; i++){
       const Word& word = targetPhrase.GetWord(i);
-      const Factor* factor = word.GetFactor(0);
-      words[j] = getNeuralLMId(factor);
+      words[j] = getNeuralLMId(word);
       j++;
     }
   }
@@ -251,13 +259,12 @@ void BilingualLM::getSourceWords(const TargetPhrase &targetPhrase
   for (int j = begin_idx; j < end_idx + 1; j++) {
     int neuralLM_wordID;
     if (j < 0) {
-      neuralLM_wordID = getNeuralLMId(BOS_factor);
+      neuralLM_wordID = getNeuralLMId(BOS_word);
     } else if (j > source_sent.GetSize() - 1) {
-      neuralLM_wordID = getNeuralLMId(EOS_factor);
+      neuralLM_wordID = getNeuralLMId(EOS_word);
     } else {
       const Word& word = source_sent.GetWord(j);
-      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
-      neuralLM_wordID = getNeuralLMId(factor);
+      neuralLM_wordID = getNeuralLMId(word);
     }
     words[i] = (neuralLM_wordID);
     i++;
@@ -291,8 +298,7 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const {
       int neuralLM_wordID;
 
       const Word& word = targetPhrase.GetWord(i);
-      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
-      neuralLM_wordID = getNeuralLMId(factor);
+      neuralLM_wordID = getNeuralLMId(word);
 
       boost::hash_combine(hashCode, neuralLM_wordID);
     }
@@ -302,8 +308,7 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const {
       int neuralLM_wordID;
 
       const Word& word = targetPhrase.GetWord(i);
-      const Factor* factor = word.GetFactor(0); //Parameter here is m_factorType, hard coded to 0
-      neuralLM_wordID = getNeuralLMId(factor);
+      neuralLM_wordID = getNeuralLMId(word);
 
       boost::hash_combine(hashCode, neuralLM_wordID);
     }
