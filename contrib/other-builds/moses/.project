@@ -1142,6 +1142,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/GlobalLexicalModelUnlimited.h</locationURI>
 		</link>
 		<link>
+			<name>FF/HeadFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/HeadFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/HeadFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/HeadFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/HyperParameterAsWeight.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/HyperParameterAsWeight.cpp</locationURI>

@@ -224,6 +224,9 @@ protected:
 
   const StatefulFeatureFunction* m_treeStructure;
 
+  //MARIA
+  const StatefulFeatureFunction* m_headFeature;
+
   // number of nonterminal labels
 //   size_t m_nonTerminalSize;
 
@@ -762,6 +765,16 @@ public:
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
       m_treeStructure = treeStructure;
   }
+
+  //MARIA
+  const StatefulFeatureFunction* GetHeadFeature() const {
+        return m_headFeature;
+  }
+
+  void SetHeadFeature(const StatefulFeatureFunction* headFeature) {
+        m_headFeature = headFeature;
+  }
+  //MARIA
 
   bool GetDefaultNonTermOnlyForEmptyRange() const
   { return m_defaultNonTermOnlyForEmptyRange; }

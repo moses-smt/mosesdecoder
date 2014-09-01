@@ -48,6 +48,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/FF/TreeStructureFeature.h"
+#include "moses/FF/HeadFeature.h"
 #include "moses/PP/TreeStructurePhraseProperty.h"
 #include "util/exception.hh"
 
@@ -507,13 +508,23 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
 
   //Tree of full sentence
   const StatefulFeatureFunction* treeStructure = StaticData::Instance().GetTreeStructure();
+
+  //MARIA
+  const StatefulFeatureFunction* headStructure = StaticData::Instance().GetHeadFeature();
+
   if (treeStructure != NULL) {
     const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
     for( size_t i=0; i<sff.size(); i++ ) {
         if (sff[i] == treeStructure) {
         const TreeState* tree = dynamic_cast<const TreeState*>(hypo->GetFFState(i));
         out << "Full Tree " << translationId << ": " << tree->GetTree()->GetString() << "\n";
-        break;
+        //break;
+        }
+
+        //MARIA
+        if (sff[i] == headStructure) {
+        	const SyntaxTreeState* tree = dynamic_cast<const SyntaxTreeState*>(hypo->GetFFState(i));
+            out<< "Head Tree "<< translationId << ": " << tree->GetTree()->ToStringHead() << "\n";
         }
     }
   }
