@@ -22,9 +22,9 @@ namespace Moses
 
 class BilingualLMState : public FFState
 {
-  int m_hash;
+  size_t m_hash;
 public:
-  BilingualLMState(int hash)
+  BilingualLMState(size_t hash)
     :m_hash(hash)
   {}
 
