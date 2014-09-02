@@ -12,9 +12,9 @@ int BilingualLMState::Compare(const FFState& other) const
 {
   const BilingualLMState &otherState = static_cast<const BilingualLMState&>(other);
 
-  if (m_targetLen == otherState.m_targetLen)
+  if (m_hash == otherState.m_hash)
     return 0;
-  return (m_targetLen < otherState.m_targetLen) ? -1 : +1;
+  return (m_hash < otherState.m_hash) ? -1 : +1;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -626,11 +626,31 @@ FFState* BilingualLM::EvaluateWhenApplied(
 }
 */
 
+void BilingualLM::getTargetWordsChart(Phrase& whole_phrase
+                , int current_word_index
+                , std::vector<int> &words) const {
+
+  int j = source_ngrams; //Index for appending to the words vector
+  for (int i = current_word_index - target_ngrams; i < current_word_index + 1; i++){
+    if (i < 0) {
+      words[j] = getNeuralLMId(BOS_word);
+    }
+    const Word& word = whole_phrase.GetWord(i);
+    words[j] = getNeuralLMId(word);
+  }
+
+}
+
 FFState* BilingualLM::EvaluateWhenApplied(
-  const ChartHypothesis& /* cur_hypo */,
-  int /* featureID - used to index the state in the previous hypotheses */,
+  const ChartHypothesis& cur_hypo,
+  int featureID, /* - used to index the state in the previous hypotheses */
   ScoreComponentCollection* accumulator) const
 {
+  Phrase whole_phrase;
+  cur_hypo.GetOutputPhrase(whole_phrase);
+
+  const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
+
   return new BilingualLMState(0);
 }
 
