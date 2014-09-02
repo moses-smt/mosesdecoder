@@ -7,6 +7,7 @@
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include "moses/Hypothesis.h"
+#include "moses/ChartHypothesis.h"
 #include "moses/InputPath.h"
 #include "moses/Manager.h"
 #include "moses/FactorCollection.h"
@@ -21,10 +22,10 @@ namespace Moses
 
 class BilingualLMState : public FFState
 {
-  int m_targetLen;
+  int m_hash;
 public:
-  BilingualLMState(int targetLen)
-    :m_targetLen(targetLen)
+  BilingualLMState(int hash)
+    :m_hash(hash)
   {}
 
   int Compare(const FFState& other) const;
@@ -50,6 +51,11 @@ private:
   size_t getState(const Hypothesis &cur_hypo) const;
 
   void requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount, std::vector<int> &words) const;
+
+  //Chart decoder
+  void getTargetWordsChart(Phrase& whole_phrase
+                , int current_word_index
+                , std::vector<int> &words) const;
 
   int getNeuralLMId(const Word& word) const;
 
@@ -109,8 +115,8 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
   FFState* EvaluateWhenApplied(
-    const ChartHypothesis& /* cur_hypo */,
-    int /* featureID - used to index the state in the previous hypotheses */,
+    const ChartHypothesis& cur_hypo ,
+    int featureID, /* - used to index the state in the previous hypotheses */
     ScoreComponentCollection* accumulator) const;
 
   void SetParameter(const std::string& key, const std::string& value);
