@@ -23,10 +23,11 @@ namespace Moses
 class BilingualLMState : public FFState
 {
   size_t m_hash;
-  int first_word_index = 0; //Doesn't matter for phrase based.
+  int first_word_index; //Doesn't matter for phrase based.
 public:
   BilingualLMState(size_t hash)
     :m_hash(hash)
+    ,first_word_index(0)
   {}
   BilingualLMState(size_t hash, int word_index)
     :m_hash(hash), first_word_index(word_index)
@@ -79,20 +80,20 @@ protected:
   int m_nGramOrder;
   int target_ngrams;
   int source_ngrams;
-  bool premultiply = true;
-  bool factored = false;
-  int neuralLM_cache = 1000000;
+  bool premultiply;
+  bool factored;
+  int neuralLM_cache;
   int unknown_word_id;
 
   //NeuralLM lookup
-  FactorType word_factortype = 0;
+  FactorType word_factortype;
   FactorType pos_factortype;
   const Factor* BOS_factor;
   const Factor* EOS_factor;
   mutable Word BOS_word_actual;
   mutable Word EOS_word_actual;
-  const Word& BOS_word = BOS_word_actual;
-  const Word& EOS_word = EOS_word_actual;
+  const Word& BOS_word;
+  const Word& EOS_word;
 
   // thread-specific nplm for thread-safety
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;

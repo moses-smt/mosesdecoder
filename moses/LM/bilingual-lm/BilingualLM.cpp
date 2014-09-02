@@ -20,6 +20,12 @@ int BilingualLMState::Compare(const FFState& other) const
 ////////////////////////////////////////////////////////////////
 BilingualLM::BilingualLM(const std::string &line)
   :StatefulFeatureFunction(1, line)
+  ,premultiply(true)
+  ,factored(false)
+  ,neuralLM_cache(1000000)
+  ,word_factortype(0)
+  ,BOS_word(BOS_word_actual)
+  ,EOS_word(EOS_word_actual)
 {
   ReadParameters();
   FactorCollection& factorFactory = FactorCollection::Instance(); //Factor Factory to use for BOS_ and EOS_
