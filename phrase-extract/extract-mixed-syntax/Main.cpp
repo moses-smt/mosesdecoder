@@ -32,6 +32,7 @@ int main(int argc, char** argv)
     ("MaxNonTerm", po::value<int>()->default_value(params.maxNonTerm), "Maximum number of non-terms allowed per rule")
     ("MaxHieroNonTerm", po::value<int>()->default_value(params.maxHieroNonTerm), "Maximum number of Hiero non-term. Usually, --MaxNonTerm is the normal constraint")
     ("MinHoleSource", po::value<int>()->default_value(params.minHoleSource), "Minimum source span for a non-term.")
+    ("MinHoleSourceSyntax", po::value<int>()->default_value(params.minHoleSourceSyntax), "Minimum source span for a syntactic non-term (source or target).")
 
     ("SourceSyntax", "Source sentence is a parse tree")
     ("TargetSyntax", "Target sentence is a parse tree")
@@ -91,6 +92,7 @@ int main(int argc, char** argv)
   if (vm.count("MaxNonTerm")) params.maxNonTerm = vm["MaxNonTerm"].as<int>();
   if (vm.count("MaxHieroNonTerm")) params.maxHieroNonTerm = vm["MaxHieroNonTerm"].as<int>();
   if (vm.count("MinHoleSource")) params.minHoleSource = vm["MinHoleSource"].as<int>();
+  if (vm.count("MinHoleSourceSyntax")) params.minHoleSourceSyntax = vm["MinHoleSourceSyntax"].as<int>();
 
   if (vm.count("SourceSyntax")) params.sourceSyntax = true;
   if (vm.count("TargetSyntax")) params.targetSyntax = true;
