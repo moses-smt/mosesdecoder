@@ -23,10 +23,18 @@ namespace Moses
 class BilingualLMState : public FFState
 {
   size_t m_hash;
+  int first_word_index = 0; //Doesn't matter for phrase based.
 public:
   BilingualLMState(size_t hash)
     :m_hash(hash)
   {}
+  BilingualLMState(size_t hash, int word_index)
+    :m_hash(hash), first_word_index(word_index)
+  {}
+
+  int GetFirstWordIdx() const {
+    return first_word_index;
+  }
 
   int Compare(const FFState& other) const;
 };
@@ -56,6 +64,8 @@ private:
   void getTargetWordsChart(Phrase& whole_phrase
                 , int current_word_index
                 , std::vector<int> &words) const;
+
+  size_t getStateChart(Phrase& whole_phrase) const;
 
   int getNeuralLMId(const Word& word) const;
 

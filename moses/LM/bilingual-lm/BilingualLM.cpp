@@ -626,6 +626,20 @@ FFState* BilingualLM::EvaluateWhenApplied(
 }
 */
 
+size_t BilingualLM::getStateChart(Phrase& whole_phrase) const {
+  size_t hashCode = 0;
+  for (int i = whole_phrase.GetSize() - target_ngrams; i < target_ngrams; i++){
+    int neuralLM_wordID;
+    if (i < 0) {
+      neuralLM_wordID = getNeuralLMId(BOS_word);
+    } else {
+      neuralLM_wordID = getNeuralLMId(whole_phrase.GetWord(i));
+    }
+    boost::hash_combine(hashCode, neuralLM_wordID);
+  }
+  return hashCode;
+}
+
 void BilingualLM::getTargetWordsChart(Phrase& whole_phrase
                 , int current_word_index
                 , std::vector<int> &words) const {
@@ -646,12 +660,26 @@ FFState* BilingualLM::EvaluateWhenApplied(
   int featureID, /* - used to index the state in the previous hypotheses */
   ScoreComponentCollection* accumulator) const
 {
+  std::vector<int> all_words; //Container for the ngrams
   Phrase whole_phrase;
   cur_hypo.GetOutputPhrase(whole_phrase);
+  int next_phrase_start_idx = whole_phrase.GetSize(); //The start of the next hypothesis is 1+last idx of the current hypothesis
+
+  const BilingualLMState * prev_state = static_cast<const BilingualLMState *>(cur_hypo.GetFFState(featureID));
+  int curr_phrase_start_idx = prev_state->GetFirstWordIdx(); //The start of this hypothesis
 
   const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
 
-  return new BilingualLMState(0);
+  for (int i = 0; i<currTargetPhrase.GetSize(); i++) {
+    //Get Source phrases first
+
+    getTargetWordsChart(whole_phrase, (i+curr_phrase_start_idx), all_words);
+
+  }
+
+  size_t new_state = getStateChart(whole_phrase);
+
+  return new BilingualLMState(new_state, next_phrase_start_idx);
 }
 
 void BilingualLM::SetParameter(const std::string& key, const std::string& value)
