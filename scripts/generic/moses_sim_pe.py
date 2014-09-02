@@ -79,9 +79,7 @@ def atomic_io(cmd, in_file, out_file, err_file, prog=None):
 
 # Open plain or gzipped text
 def gzopen(f):
-    if f.endswith('.gz'):
-        return gzip.open(f, 'rb')
-    return open(f, 'r')
+    return gzip.open(f, 'rb') if f.endswith('.gz') else open(f, 'r')
 
 # Word count
 def wc(f):
@@ -115,7 +113,8 @@ def main(argv):
     xml_found = False
     xml_input = 'exclusive'
     show_weights = False
-    mmsapt_name = []
+    mmsapt_dynamic = []
+    mmsapt_static = []
     mmsapt_l1 = None
     mmsapt_l2 = None
 
@@ -175,7 +174,11 @@ def main(argv):
             if moses_ini_lines[i].startswith('PhraseDictionaryBitextSampling'):
                 for (k, v) in (pair.split('=') for pair in moses_ini_lines[i].split()[1:]):
                     if k == 'name':
-                        mmsapt_name.append(v)
+                        # Dynamic means update this model
+                        if v.startswith('Dynamic'):
+                            mmsapt_dynamic.append(v)
+                        else:
+                            mmsapt_static.append(v)
                     elif k == 'L1':
                         if mmsapt_l1 and v != mmsapt_l1:
                             sys.stderr.write('Error: All PhraseDictionaryBitextSampling entries should have same L1: {} != {}\n'.format(v, mmsapt_l1))
@@ -224,8 +227,8 @@ def main(argv):
     if not (os.path.isfile(cmd[0]) and os.access(cmd[0], os.X_OK)):
         sys.stderr.write('Error: moses-cmd "{}" is not executable\n'.format(cmd[0]))
         sys.exit(1)
-    if not mmsapt_name:
-        sys.stderr.write('Error: no PhraseDictionaryBitextSampling found in {}.  See http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc40\n'.format(moses_ini))
+    if not mmsapt_dynamic:
+        sys.stderr.write('Error: no PhraseDictionaryBitextSampling entries named "Dynamic..." found in {}.  See http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc40\n'.format(moses_ini))
         sys.exit(1)
     if wc(text_tgt) != text_len or wc(text_symal) != text_len:
         sys.stderr.write('Error: length mismatch between "{}", "{}", and "{}"\n'.format(text_src, text_tgt, text_symal))
@@ -238,8 +241,10 @@ def main(argv):
 
     # Report settings
     sys.stderr.write('Moses flags: {}\n'.format(' '.join('\'{}\''.format(s) if ' ' in s else s for s in cmd[1:])))
-    for (i, n) in enumerate(mmsapt_name):
-        sys.stderr.write('Mmsapt {}: {} {} {}\n'.format(i, n, mmsapt_l1, mmsapt_l2))
+    for (i, n) in enumerate(mmsapt_dynamic):
+        sys.stderr.write('Dynamic mmsapt {}: {} {} {}\n'.format(i, n, mmsapt_l1, mmsapt_l2))
+    for (i, n) in enumerate(mmsapt_static):
+        sys.stderr.write('Static mmsapt {}: {} {} {}\n'.format(i, n, mmsapt_l1, mmsapt_l2))
     sys.stderr.write('XML mode: {}\n'.format(xml_input))
     sys.stderr.write('Inputs: {} {} {} ({})\n'.format(text_src, text_tgt, text_symal, text_len))
     sys.stderr.write('Jobs: {}\n'.format(threads))
@@ -285,7 +290,7 @@ def main(argv):
         # Translation of last line of each batch is included in extra for next batch.
         xml_tags = []
         if lc % batch_size != 0:
-            for n in mmsapt_name:
+            for n in mmsapt_dynamic:
                 # note: space after tag
                 xml_tags.append('<update name="{}" source="{}" target="{}" alignment="{}" /> '.format(n, src_lines[-2], tgt_lines[-2], symal_lines[-2]))
         xml_out.write('{}{}\n'.format(''.join(xml_tags), src))
