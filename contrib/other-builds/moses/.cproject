@@ -44,7 +44,6 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.752586397" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="IS_ECLIPSE"/>
-									<listOptionValue builtIn="false" value="PT_UG"/>
 									<listOptionValue builtIn="false" value="HAVE_PROBINGPT"/>
 									<listOptionValue builtIn="false" value="HAVE_BOOST"/>
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
@@ -52,12 +51,10 @@
 									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 									<listOptionValue builtIn="false" value="LM_IRST"/>
-									<listOptionValue builtIn="false" value="LM_DALM"/>
-									<listOptionValue builtIn="false" value="LM_NPLM"/>
 									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
 									<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.dialect.std.1734198568" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.1734198568" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++98" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1905116220" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.2126314903" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -78,6 +75,7 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.511477442" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
+<<<<<<< HEAD
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1176518033" name="/" resourcePath="LM/bilingual-lm">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.2110557759" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.2066996463" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1976472988"/>
@@ -92,6 +90,76 @@
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry excluding="LM/bilingual-lm|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/symal2mam.cc|TranslationModel/UG/mm/mtt-dump.cc|TranslationModel/UG/mm/mtt-count-words.cc|TranslationModel/UG/mm/mtt-build.cc|TranslationModel/UG/mm/mmlex-lookup.cc|TranslationModel/UG/mm/mmlex-build.cc|TranslationModel/UG/mm/mam_verify.cc|TranslationModel/UG/mm/mam2symal.cc|TranslationModel/UG/mm/custom-pt.cc|TranslationModel/UG/mm/calc-coverage.cc|TranslationModel/UG/mm/mtt.count.cc|TranslationModel/UG/util|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+=======
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1845526535" name="SRI.h" rcbsApplicability="disable" resourcePath="LM/SRI.h" toolsToInvoke=""/>
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1917714409" name="/" resourcePath="TranslationModel">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1874031326" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1671760867" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1976472988"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2072639167" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1387618215" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="IS_ECLIPSE"/>
+									<listOptionValue builtIn="false" value="HAVE_PROBINGPT"/>
+									<listOptionValue builtIn="false" value="HAVE_BOOST"/>
+									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
+									<listOptionValue builtIn="false" value="WITH_THREADS"/>
+									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
+									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+									<listOptionValue builtIn="false" value="LM_IRST"/>
+									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
+									<listOptionValue builtIn="false" value="_LARGE_FILES"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1138059468" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.241920461" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.2126314903">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1408639346" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.505647623" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1168585173"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1809234420" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.2074660557"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.2136353299" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.933467113">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.190676079" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1401518461" name="/" resourcePath="TranslationModel/fuzzy-match">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.472269246" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.84234118" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1671760867"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.299872725" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2072639167">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.664273995" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.2044654215" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.241920461">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1537423216" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1174866714" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.505647623"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.239716723" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1809234420"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.2078651360" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.2136353299">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.214869589" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.103170143" name="/" resourcePath="TranslationModel/ProbingPT">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.2026082807" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
+							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1540835364" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1671760867"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1897459756" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.2072639167">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1615949072" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1178947383" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.241920461">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2013283881" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1997457966" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.505647623"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.886709003" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1809234420"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.325064995" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.2136353299">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1281335737" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="LM/SRI.h|LM/SRI.cpp|TranslationModel/UG|LM/DALMWrapper.h|LM/DALMWrapper.cpp|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/symal2mam.cc|TranslationModel/UG/mm/mtt-dump.cc|TranslationModel/UG/mm/mtt-count-words.cc|TranslationModel/UG/mm/mtt-build.cc|TranslationModel/UG/mm/mmlex-lookup.cc|TranslationModel/UG/mm/mmlex-build.cc|TranslationModel/UG/mm/mam_verify.cc|TranslationModel/UG/mm/mam2symal.cc|TranslationModel/UG/mm/custom-pt.cc|TranslationModel/UG/mm/calc-coverage.cc|TranslationModel/UG/mm/mtt.count.cc|TranslationModel/UG/util|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+>>>>>>> master
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -223,8 +291,8 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/Rand.h" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
-					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/DALMWrapper.h" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/IRST.h" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.916939380.LM/DALMWrapper.h" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry excluding="LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>

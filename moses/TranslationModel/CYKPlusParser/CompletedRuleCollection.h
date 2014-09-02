@@ -22,6 +22,7 @@
 #define moses_CompletedRuleCollectionS_h
 
 #include <vector>
+#include <numeric>
 
 #include "moses/StackVec.h"
 #include "moses/TargetPhraseCollection.h"
@@ -103,6 +104,11 @@ public:
 
   void Add(const TargetPhraseCollection &tpc,
            const StackVec &stackVec,
+           const ChartParserCallback &outColl);
+
+  void Add(const TargetPhraseCollection &tpc,
+           const StackVec &stackVec,
+           const std::vector<float> &stackScores,
            const ChartParserCallback &outColl);
 
 private:

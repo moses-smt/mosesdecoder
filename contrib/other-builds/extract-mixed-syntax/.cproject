@@ -30,6 +30,7 @@
 								<option id="gnu.cpp.compiler.option.include.paths.821075319" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../..&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../phrase-extract&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1392992841" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
