@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     ("ScopeSpan", po::value<string>()->default_value(params.scopeSpanStr), "Min and max span for rules of each scope. Format is min,max:min,max...")
 
     ("NonTermConsecSource", "Allow consecutive non-terms on the source side")
-    ("NonTermConsecSourceMixedSyntax", po::value<int>()->default_value(params.nonTermConsecSourceMixedSyntax), "In mixed syntax mode, what nt can be consecutive. 0=don't allow consec nt. 1(default)=hiero+syntax.");
+    ("NonTermConsecSourceMixedSyntax", po::value<int>()->default_value(params.nonTermConsecSourceMixedSyntax), "In mixed syntax mode, what nt can be consecutive. 0=don't allow consec nt. 1(default)=hiero+syntax. 2=syntax+syntax. 3=always allow");
 
 
   po::variables_map vm;

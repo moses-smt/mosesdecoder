@@ -351,7 +351,17 @@ void Rule::Prevalidate(const Parameter &params)
 					  return;
 				  }
 				  break;
-			  }
+			  case 2:
+				  if (lastNonTerm.IsHiero(Moses::Input, params)
+					  || secondLastNonTerm.IsHiero(Moses::Input, params)) {
+					  m_isValid = false;
+					  m_canRecurse = false;
+					  return;
+				  }
+				  break;
+			  case 3:
+				  break;
+			  } // switch
 		  }
 	  }
   }
