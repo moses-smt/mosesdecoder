@@ -56,7 +56,8 @@ int main(int argc, char** argv)
     ("HieroNonTerm", po::value<string>()->default_value(params.hieroNonTerm), "Hiero non-terminal label, including bracket")
     ("ScopeSpan", po::value<string>()->default_value(params.scopeSpanStr), "Min and max span for rules of each scope. Format is min,max:min,max...")
 
-    ("NonTermConsecSource", "Allow consecutive non-terms on the source side");
+    ("NonTermConsecSource", "Allow consecutive non-terms on the source side")
+    ("NonTermConsecSourceMixedSyntax", po::value<int>()->default_value(params.nonTermConsecSourceMixedSyntax), "In mixed syntax mode, what nt can be consecutive. 0=don't allow consec nt. 1(default)=hiero+syntax.");
 
 
   po::variables_map vm;
@@ -119,6 +120,8 @@ int main(int argc, char** argv)
   }
 
   if (vm.count("NonTermConsecSource")) params.nonTermConsecSource = true;
+  if (vm.count("NonTermConsecSourceMixedSyntax")) params.nonTermConsecSourceMixedSyntax = vm["NonTermConsecSourceMixedSyntax"].as<int>();
+
 
   // input files;
   string pathTarget = argv[1];
