@@ -181,7 +181,7 @@ public:
   void FindHeads(SyntaxNode *newNode,std::map<std::string, std::vector <std::string> > &headRules) const;
 
   //find the arguments
-  void FindObj() const;
+  std::string* FindObj() const;
 
   void Clear();
 };

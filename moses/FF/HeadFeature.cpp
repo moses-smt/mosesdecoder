@@ -13,7 +13,7 @@
 
 #include <iostream>
 #include <fstream>
-
+#include <math.h>
 
 using namespace std;
 
@@ -211,7 +211,7 @@ void SyntaxTree::FindHeads(SyntaxNode *node, std::map<std::string, std::vector <
 		FindHeads(node->GetNChild(i),headRules);
 	}
 	if( it!= headRules.end()){
-		std::cout<<"rule: "<<it->first<<std::endl;
+		//std::cout<<"rule: "<<it->first<<std::endl;
 		///!!!!//
 		//[VP [VBP] [NP]]  -> why is the head taken from NP and not from VP ??
 		child=node->FindHeadChild(it->second);
@@ -220,16 +220,16 @@ void SyntaxTree::FindHeads(SyntaxNode *node, std::map<std::string, std::vector <
 
 		///!!! I get VB a lot -> should it be VBD??
 		if(child!=-1){
-			std::cout<<"Head: "<<node->GetNChild(child)->GetHead()<<std::endl;
+			//std::cout<<"Head: "<<node->GetNChild(child)->GetHead()<<std::endl;
 			node->SetHead(node->GetNChild(child)->GetHead());
 		}
 		else{
 			if(node->GetSize()>0){
-				std::cout<<"Head: "<<node->GetNChild(0)->GetHead()<<std::endl;
+				//std::cout<<"Head: "<<node->GetNChild(0)->GetHead()<<std::endl;
 				node->SetHead(node->GetNChild(0)->GetHead());
 			}
-			else
-				std::cout<<"Head: no children: "<<node->GetHead()<<std::endl;
+			//else
+			//	std::cout<<"Head: no children: "<<node->GetHead()<<std::endl;
 		}
 		//!!!! if I find the rule but not any child I should still select the first child!
 	}
@@ -249,15 +249,15 @@ void SyntaxTree::FindHeads(SyntaxNode *node, std::map<std::string, std::vector <
 			}
 			if(child==-1)
 				child=0;
-			else{
-					std::cout<<"rule': "<<it->first<<std::endl;
-			}
+			//else
+					//std::cout<<"rule': "<<it->first<<std::endl;
+
 			if(node->GetSize()>child){
-				std::cout<<"Head': "<<node->GetNChild(child)->GetHead()<<std::endl;
+				//std::cout<<"Head': "<<node->GetNChild(child)->GetHead()<<std::endl;
 				node->SetHead(node->GetNChild(child)->GetHead());
 			}
-			else
-				std::cout<<"Head': no children "<<node->GetHead()<<std::endl;
+			//else
+			//	std::cout<<"Head': no children "<<node->GetHead()<<std::endl;
 		}
 	}
 }
@@ -285,16 +285,20 @@ void SyntaxTree::SetHeadOpenNodes(std::vector<SyntaxTree*> previousTrees){
 	}
 }
 
-void SyntaxTree::FindObj() const{
+string* SyntaxTree::FindObj() const{
 	//we might need to search for the entire subtree for the VP -> it may not be the first node
 	//I should have a flag for when I reach the leaf of the rule so I don't recures to previous hypothesis -> something like HasHead
 	// -> update the Node property with is leaf
+	string *predArgPair = new string("");
 	if(m_top->GetLabel().compare("VP")==0){
-		cout<<"VP: "<<m_top->GetHead()<<" NP: ";
+		//cout<<"VP: "<<m_top->GetHead()<<" NP: ";
 		SyntaxNode *obj = m_top->FindFirstChild("NP");
-		if(obj)
-			cout<<obj->GetHead()<<endl;
+		if(obj){
+			//cout<<obj->GetHead()<<endl;
+			*predArgPair+=m_top->GetHead()+" "+obj->GetHead();
+		}
 	}
+	return predArgPair;
 }
 
 // END MARIA //
@@ -309,7 +313,7 @@ int SyntaxTreeState::Compare(const FFState& other) const
 
 ////////////////////////////////////////////////////////////////
 HeadFeature::HeadFeature(const std::string &line)
-  :StatefulFeatureFunction(0, line) //should modify 0 to the number of scores my feature generates
+  :StatefulFeatureFunction(1, line) //should modify 0 to the number of scores my feature generates
 {
   ReadParameters();
   m_headRules = new std::map<std::string, std::vector <std::string> > ();
@@ -382,8 +386,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	    SyntaxTree *syntaxTree = new SyntaxTree();
 	    //should have new SyntaxTree(pointer to headRules)
 	    syntaxTree->FromString(*tree);
-	    std::cout<<*tree<<std::endl;
-	    std::cout<< syntaxTree->ToString()<<std::endl;//" size "<<syntaxTree->GetSize()<< " open "<<syntaxTree->GetOpenNodes().size()<<std::endl<<std::endl;
+	    //std::cout<<*tree<<std::endl;
+	    //std::cout<< syntaxTree->ToString()<<std::endl;//" size "<<syntaxTree->GetSize()<< " open "<<syntaxTree->GetOpenNodes().size()<<std::endl<<std::endl;
 
 
 
@@ -404,15 +408,26 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	        int index = 0;
 	        syntaxTree->FindHeads(syntaxTree->GetTop(), *m_headRules);
-	        syntaxTree->FindObj();
+	        string *predArgPair = syntaxTree->FindObj();
+	        //cout<<"Found pair: "<<*predArgPair<<endl;
+	        std::map<string,float>::iterator it;
+	        it = m_probArg->find(*predArgPair);
+	        if(it!=m_probArg->end()){
+	        	//cout<<"Have value: "<<it->second<<endl;
+	        	accumulator->PlusEquals(this,log(it->second+0.01));
+	        }
+	        else
+	        	accumulator->PlusEquals(this,0);
 
 
-	        std::cout<< syntaxTree->ToStringHead()<<std::endl;
+	        //std::cout<< syntaxTree->ToStringHead()<<std::endl;
 
 	        return new SyntaxTreeState(syntaxTree);
 
 
 	}
+
+	accumulator->PlusEquals(this,1000);
 }
 
 
