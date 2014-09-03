@@ -3,9 +3,8 @@
 #include <string>
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
-#include "BloomFilter.h"
-
-class bloom_filter;
+#include "BloomFilter.hpp"
+#include "moses/FactorCollection.h"
 
 namespace Moses
 {
@@ -27,7 +26,8 @@ class CheckTargetNgrams : public StatefulFeatureFunction
   std::string m_filePath;
   int m_maxorder;
   int m_minorder;
-  std::vector<FactorType> m_FactorsVec;
+  FactorType m_factorType;
+  std::string m_bos; //! Contains factors which represents the begin word for this feature.  //! Usually <s> 
 
   bloom_filter m_bloomfilter;
 
