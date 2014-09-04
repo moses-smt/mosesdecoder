@@ -71,7 +71,6 @@ namespace Moses
     size_t m_default_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
     vector<string> m_feature_set_names; // one or more of: standard, datasource
-    // or full (default + indicator)
  
     // // deprecated!
     // char m_pfwd_denom; // denominator for computation of fwd phrase score:
