@@ -7,8 +7,6 @@
 
 
 #any single upper case letter  followed by a period is not a sentence ender
-#(excluding I occasionally, but we leave it in usually upper case letters are
-#initials in a name
 A
 B
 C
