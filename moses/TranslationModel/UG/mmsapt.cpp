@@ -220,6 +220,9 @@ namespace Moses
     dflt = pair<string,string>("tuneable","true");
     m_tuneable = Scan<bool>(param.insert(dflt).first->second.c_str());
 
+    dflt = pair<string,string>("feature-sets","standard");
+    m_feature_set_names = Tokenize(param.insert(dflt).first->second.c_str(), ",");
+
     // check for unknown parameters
     vector<string> known_parameters; known_parameters.reserve(50);
     known_parameters.push_back("L1");
@@ -231,6 +234,7 @@ namespace Moses
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
     known_parameters.push_back("extra");
+    known_parameters.push_back("feature-sets");
     known_parameters.push_back("input-factor");
     known_parameters.push_back("lexalpha");
     // known_parameters.push_back("limit"); // replaced by "table-limit"
@@ -354,6 +358,12 @@ namespace Moses
     // can load only once
     // UTIL_THROW_IF2(shards.size(),"Mmsapt is already loaded at " << HERE);
 
+    // load feature sets
+    BOOST_FOREACH(string const& fsname, m_feature_set_names)
+      {
+    // standard (default) feature set
+    if (fsname == "standard")
+      {
     // lexical scores 
     string lexfile = bname + L1 + "-" + L2 + ".lex";
     sptr<PScoreLex1<Token> > ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
@@ -373,6 +383,19 @@ namespace Moses
     // These are always corpus-specific
     check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_fix);
     check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_dyn);
+      }
+
+    // data source features (copies of phrase and word count specific to
+    // this translation model)
+    else if (fsname == "datasource")
+      {
+    sptr<PScorePC<Token> > ffpcnt(new PScorePC<Token>("pcnt"));
+    register_ff(ffpcnt,m_active_ff_common);
+    sptr<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
+    register_ff(ffwcnt,m_active_ff_common);
+      }
+      }
+    // cerr << "Features: " << Join("|",m_feature_names) << endl;
 
     UTIL_THROW_IF2(this->m_feature_names.size() != this->m_numScoreComponents,
 		   "At " << HERE << ": number of feature values provided by "
