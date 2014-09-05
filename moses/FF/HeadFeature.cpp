@@ -23,6 +23,7 @@ namespace Moses
 // MARIA //
 
 void split(std::string &s, std::string delim, std::vector<std::string> &tokens) {
+	//boost::trim(s);
 	boost::trim_fill(s," ");//trim_all(s," "); //trim_if(s, boost::is_any_of(" \t\0\n"));
     boost::split(tokens, s, boost::is_any_of(delim));
 }
