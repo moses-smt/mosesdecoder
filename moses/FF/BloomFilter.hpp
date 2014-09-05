@@ -15,9 +15,13 @@
  *                                                                   *
  *********************************************************************
 */
-//This library was extended with load and save operations
-//to allow storage of bloom filters into binary files, and other minor
-//improvements.
+
+//This library was extended with:
+// - load and save operations to allow storage of bloom filters into binary files
+// - 64-bit MurmurHash hash functions (only for 64-bit architectures)
+//   from https://sites.google.com/site/murmurhash/
+
+
 //Marcello Federico, August  2014
 
 
@@ -162,7 +166,7 @@ public:
 
       std::cout << "number of entries: " << projected_element_count << "\n";
       std::cout << "number of hashes: " << optp.number_of_hashes << "\n";
-      std::cout << "memory size (Mb): " << (double)(optp.table_size)/(double)(8*1024*1024) << "\n";
+      std::cout << "memory size (Mb): " << (int)((double)(optp.table_size)/(double)(8*1024*1024)) << "\n";
       std::cout << "bit per entry: " << optp.table_size/(double)projected_element_count << "\n";
       return true;
 	
@@ -174,6 +178,7 @@ class bloom_filter
 {
 protected:
 
+   typedef unsigned long long int uint64_t;
    typedef unsigned int bloom_type;
    typedef unsigned char cell_type;
 
@@ -181,6 +186,7 @@ public:
    
    bloom_filter()
    : bit_table_(0),
+    
      salt_count_(0),
      table_size_(0),
      raw_table_size_(0),
@@ -321,7 +327,7 @@ public:
       bit_table_=NULL;
       inserted_element_count_ = 0;
    }
- 
+  
    //added by MF: comptutes a single hash key over the unsigned int space
    template<typename T>
    inline unsigned int simple_hash_key(const T& t) const
@@ -330,10 +336,11 @@ public:
       return simple_hash_key(reinterpret_cast<const unsigned char*>(&t),sizeof(T));
    }
 
-   inline unsigned int simple_hash_key(const unsigned char* key,const size_t& length) const {
+   inline unsigned int simple_hash_key(const unsigned char* key,const size_t& length) const
+   {
         //returns hash value over the unsigned int range: very little chance of collision
         //hash function behavior depends on the bloom filter setting
-	return hash_ap(key,length,salt_[0]);
+	return MurmurHash64A(key,length,salt_[0]);
    }
 
    //modified by MF to avoid counting duplicates/clashes   
@@ -345,7 +352,9 @@ public:
 
       for (std::size_t i = 0; i < salt_.size(); ++i)
       {
-         compute_indices(hash_ap(key_begin,length,salt_[i]),bit_index,bit);
+       
+          
+          compute_indices(MurmurHash64A(key_begin,length,salt_[i]),bit_index,bit);
          if (!new_entry && ((bit_table_[bit_index / bits_per_char] & bit_mask[bit]) != bit_mask[bit]))
 	    new_entry=true; 
 
@@ -389,7 +398,7 @@ public:
       std::size_t bit = 0;
       for (std::size_t i = 0; i < salt_.size(); ++i)
       {
-         compute_indices(hash_ap(key_begin,length,salt_[i]),bit_index,bit);
+         compute_indices(MurmurHash64A(key_begin,length,salt_[i]),bit_index,bit);
          if ((bit_table_[bit_index / bits_per_char] & bit_mask[bit]) != bit_mask[bit])
          {
             return false;
@@ -536,7 +545,7 @@ public:
 
 protected:
 
-   inline virtual void compute_indices(const bloom_type& hash, std::size_t& bit_index, std::size_t& bit) const
+   inline virtual void compute_indices(const uint64_t& hash, std::size_t& bit_index, std::size_t& bit) const
    {
       bit_index = hash % table_size_;
       bit = bit_index % bits_per_char;
@@ -618,6 +627,55 @@ protected:
          }
       }
    }
+
+
+
+    // 64-bit hash for 64-bit platforms
+    
+    inline uint64_t MurmurHash64A ( const void * key, int len, bloom_type seed ) const
+    {
+        const uint64_t m = 0xc6a4a7935bd1e995;
+        const int r = 47;
+        
+        uint64_t h = seed ^ (len * m);
+        
+        const uint64_t * data = (const uint64_t *)key;
+        const uint64_t * end = data + (len/8);
+        
+        while(data != end)
+        {
+            uint64_t k = *data++;
+            
+            k *= m;
+            k ^= k >> r;
+            k *= m;
+            
+            h ^= k;
+            h *= m;
+        }
+        
+        const unsigned char * data2 = (const unsigned char*)data;
+        
+        switch(len & 7)
+        {
+            case 7: h ^= uint64_t(data2[6]) << 48;
+            case 6: h ^= uint64_t(data2[5]) << 40;
+            case 5: h ^= uint64_t(data2[4]) << 32;
+            case 4: h ^= uint64_t(data2[3]) << 24;
+            case 3: h ^= uint64_t(data2[2]) << 16;
+            case 2: h ^= uint64_t(data2[1]) << 8;
+            case 1: h ^= uint64_t(data2[0]);
+                h *= m;
+        };
+        
+        h ^= h >> r;
+        h *= m;
+        h ^= h >> r;
+        
+        return h;
+    }
+    
+
 
    inline bloom_type hash_ap(const unsigned char* begin, std::size_t remaining_length, bloom_type hash) const
    {
@@ -747,7 +805,7 @@ public:
 
 private:
 
-   inline void compute_indices(const bloom_type& hash, std::size_t& bit_index, std::size_t& bit) const
+   inline void compute_indices(const uint64_t& hash, std::size_t& bit_index, std::size_t& bit) const
    {
       bit_index = hash;
       for (std::size_t i = 0; i < size_list.size(); ++i)
