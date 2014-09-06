@@ -15,6 +15,10 @@
 //
 // - use multiple agendas for better load balancing and to avoid 
 //   competition for locks
+// 
+
+
+#define UG_BITEXT_TRACK_ACTIVE_THREADS 0
 
 #include <string>
 #include <vector>
@@ -133,7 +137,10 @@ namespace Moses {
     struct 
     pstats
     {
+
+#if UG_BITEXT_TRACK_ACTIVE_THREADS
       static ThreadSafeCounter active;
+#endif
       boost::mutex lock;               // for parallel gathering of stats
       boost::condition_variable ready; // consumers can wait for this data structure to be ready.
       
@@ -463,7 +470,8 @@ namespace Moses {
       mutable pplist_cache_t m_pplist_cache1, m_pplist_cache2;
     private:
       sptr<pstats> 
-	prep2(iter const& phrase, size_t const max_sample) const;
+      prep2(iter const& phrase, size_t const max_sample,
+	    vector<float> const* const bias) const;
     public:
       Bitext(size_t const max_sample =1000, 
 	     size_t const xnum_workers =16);
@@ -481,17 +489,19 @@ namespace Moses {
       virtual void open(string const base, string const L1, string const L2) = 0;
       
       // sptr<pstats> lookup(Phrase const& phrase, size_t factor) const;
-      sptr<pstats> lookup(iter const& phrase) const;
-      sptr<pstats> lookup(iter const& phrase, size_t const max_sample) const;
+      sptr<pstats> lookup(iter const& phrase,vector<float> const* const bias=NULL) const;
+      sptr<pstats> lookup(iter const& phrase, size_t const max_sample,
+			  vector<float> const* const bias) const;
 
       void
       lookup(vector<Token> const& snt, TSA<Token>& idx, 
 	     vector<vector<sptr<vector<PhrasePair<Token> > > > >& dest,
 	     vector<vector<uint64_t> >* pidmap = NULL,
 	     typename PhrasePair<Token>::Scorer* scorer=NULL, 
+	     vector<float> const* const bias=NULL,
 	     bool multithread=true) const;
 
-      void prep(iter const& phrase) const;
+      void prep(iter const& phrase, vector<float> const* const bias) const;
 
       void   setDefaultSampleSize(size_t const max_samples);
       size_t getDefaultSampleSize() const;
@@ -576,7 +586,9 @@ namespace Moses {
       boost::mutex lock; 
       class job 
       {
+#if UG_BITEXT_TRACK_ACTIVE_THREADS
 	static ThreadSafeCounter active;
+#endif
 	boost::mutex lock; 
 	friend class agenda;
 	boost::taus88 rnd;  // every job has its own pseudo random generator 
@@ -594,10 +606,13 @@ namespace Moses {
 	size_t             len; // phrase length
 	bool               fwd; // if true, source phrase is L1 
 	sptr<pstats>     stats; // stores statistics collected during sampling
+	vector<float> const* bias; // sentence-level bias for sampling
+
 	bool step(uint64_t & sid, uint64_t & offset); // select another occurrence
 	bool done() const;
 	job(typename TSA<Token>::tree_iterator const& m, 
-	    sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd);
+	    sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd, 
+	    vector<float> const* const bias);
 	~job();
       };
     public:      
@@ -622,7 +637,9 @@ namespace Moses {
 
       sptr<pstats> 
       add_job(typename TSA<Token>::tree_iterator const& phrase, 
-	      size_t const max_samples);
+	      size_t const max_samples, 
+	      vector<float> const* const bias);
+
       sptr<job> get_job();
     };
     
@@ -641,6 +658,8 @@ namespace Moses {
 	  next = root->readOffset(next,stop,offset);
 	  boost::lock_guard<boost::mutex> sguard(stats->lock);
 	  if (stats->raw_cnt == ctr) ++stats->raw_cnt;
+	  if (bias && bias->at(sid) == 0)
+	    return false;
 	  stats->sample_cnt++;
 	}
       else 
@@ -654,14 +673,21 @@ namespace Moses {
 		boost::lock_guard<boost::mutex> sguard(stats->lock); 
 		if (stats->raw_cnt == ctr) ++stats->raw_cnt;
 		size_t scalefac = (stats->raw_cnt - ctr++);
-		size_t rnum = scalefac*(rnd()/(rnd.max()+1.));
+		size_t rnum = scalefac * (rnd()/(rnd.max()+1.));
+		size_t th = (bias == NULL ? max_samples
+			     : bias->at(sid) * bias->size() * max_samples);
 #if 0
 		cerr << rnum << "/" << scalefac << " vs. " 
 		     << max_samples - stats->good << " ("
 		     << max_samples << " - " << stats->good << ")" 
-		     << endl;
+		     << " th=" << th;
+		if (bias) 
+		  cerr << " with bias " << bias->at(sid) 
+		       << " => " << bias->at(sid) * bias->size();
+		else cerr << " without bias";
+		cerr << endl;
 #endif
-		if (rnum < max_samples - stats->good)
+		if (rnum + stats->good < th)
 		  {
 		    stats->sample_cnt++;
 		    ret = true;
@@ -743,8 +769,7 @@ namespace Moses {
 		}
 	      else if (!ag.bt.find_trg_phr_bounds
 		       (sid,offset,offset+j->len,s1,s2,e1,e2,po_fwd,po_bwd,
-			// NULL,NULL,true))
-			&aln,NULL,true))
+			&aln,NULL,true)) // NULL,NULL,true))
 		continue;
 	      j->stats->lock.lock(); 
 	      j->stats->good += 1; 
@@ -844,7 +869,9 @@ namespace Moses {
     ~job()
     {
       if (stats) stats.reset();
+#if UG_BITEXT_TRACK_ACTIVE_THREADS
       try { --active; } catch (...) {} 
+#endif
       // counter may not exist any more at destruction time
     }
 
@@ -853,7 +880,8 @@ namespace Moses {
     agenda::
     job::
     job(typename TSA<Token>::tree_iterator const& m, 
-	sptr<TSA<Token> > const& r, size_t maxsmpl, bool isfwd)
+	sptr<TSA<Token> > const& r, size_t maxsmpl, 
+	bool isfwd, vector<float> const* const sntbias)
       : rnd(0)
       , rnddenom(rnd.max() + 1.)
       , min_diverse(10)
@@ -865,12 +893,15 @@ namespace Moses {
       , ctr(0)
       , len(m.size())
       , fwd(isfwd)
+      , bias(sntbias)
     {
       stats.reset(new pstats());
       stats->raw_cnt = m.approxOccurrenceCount();
+#if UG_BITEXT_TRACK_ACTIVE_THREADS
       // if (++active%5 == 0) 
       ++active;
       // cerr << size_t(active) << " active jobs at " << __FILE__ << ":" << __LINE__ << endl;
+#endif
     }
 
     template<typename Token>
@@ -878,12 +909,12 @@ namespace Moses {
     Bitext<Token>::
     agenda::
     add_job(typename TSA<Token>::tree_iterator const& phrase, 
-	    size_t const max_samples)
+	    size_t const max_samples, vector<float> const* const bias)
     {
       boost::unique_lock<boost::mutex> lk(this->lock);
       static boost::posix_time::time_duration nodelay(0,0,0,0); 
       bool fwd = phrase.root == bt.I1.get();
-      sptr<job> j(new job(phrase, fwd ? bt.I1 : bt.I2, max_samples, fwd));
+      sptr<job> j(new job(phrase, fwd ? bt.I1 : bt.I2, max_samples, fwd, bias));
       j->stats->register_worker();
       
       joblist.push_back(j);
@@ -1322,15 +1353,16 @@ namespace Moses {
     template<typename Token>
     void
     Bitext<Token>::
-    prep(iter const& phrase) const
+    prep(iter const& phrase, vector<float> const* const bias) const
     {
-      prep2(phrase, this->default_sample_size);
+      prep2(phrase, this->default_sample_size,bias);
     }
 
     template<typename Token>
     sptr<pstats> 
     Bitext<Token>::
-    prep2(iter const& phrase, size_t const max_sample) const
+    prep2(iter const& phrase, size_t const max_sample, 
+	  vector<float> const* const bias) const
     {
       boost::lock_guard<boost::mutex> guard(this->lock);
       if (!ag) 
@@ -1343,7 +1375,7 @@ namespace Moses {
 #if 1
       // use pcache only for plain sentence input
       if (StaticData::Instance().GetInputType() == SentenceInput && 
-	  max_sample == this->default_sample_size && 
+	  max_sample == this->default_sample_size && bias == NULL && 
 	  phrase.approxOccurrenceCount() > m_pstats_cache_threshold)
       	{
 	  // still need to test what a good caching threshold is
@@ -1360,7 +1392,7 @@ namespace Moses {
 	      // cerr << "NEW FREQUENT PHRASE: "
 	      // << phrase.str(V1.get()) << " " << phrase.approxOccurrenceCount()  
 	      // << " at " << __FILE__ << ":" << __LINE__ << endl;
-	      foo.first->second = ag->add_job(phrase, max_sample);
+	      foo.first->second = ag->add_job(phrase, max_sample,NULL);
 	      assert(foo.first->second);
 	    }
 	  assert(foo.first->second);
@@ -1369,7 +1401,7 @@ namespace Moses {
 	}
       else 
 #endif
-	ret = ag->add_job(phrase, max_sample);
+	ret = ag->add_job(phrase, max_sample,bias);
       assert(ret);
       return ret;
     }
@@ -1443,8 +1475,8 @@ namespace Moses {
     lookup(vector<Token> const& snt, TSA<Token>& idx, 
 	   vector<vector<sptr<vector<PhrasePair<Token> > > > >& dest,
 	   vector<vector<uint64_t> >* pidmap,
-	   typename PhrasePair<Token>::Scorer* scorer, 
-	   bool multithread) const
+	   typename PhrasePair<Token>::Scorer* scorer,
+	   vector<float> const* const bias, bool multithread) const
     {
       typedef vector<vector<sptr<vector<PhrasePair<Token> > > > > ret_t;
       
@@ -1474,7 +1506,7 @@ namespace Moses {
 		  pp.reset(new vector<PhrasePair<Token> >());
 		  C.set(key,pp);
 		  dest[i].push_back(pp);
-		  sptr<pstats> x = prep2(m, this->default_sample_size);
+		  sptr<pstats> x = prep2(m, this->default_sample_size,bias);
 		  pstats2pplist<Token> w(m,*(fwd?T2:T1),x,*pp,scorer);
 		  if (multithread) 
 		    {
@@ -1495,9 +1527,9 @@ namespace Moses {
     template<typename Token>
     sptr<pstats> 
     Bitext<Token>::
-    lookup(iter const& phrase) const
+    lookup(iter const& phrase, vector<float> const* const bias) const
     {
-      sptr<pstats> ret = prep2(phrase, this->default_sample_size);
+      sptr<pstats> ret = prep2(phrase, this->default_sample_size, bias);
       assert(ret);
       boost::lock_guard<boost::mutex> guard(this->lock);
       if (this->num_workers <= 1)
@@ -1514,7 +1546,8 @@ namespace Moses {
     template<typename Token>
     sptr<pstats> 
     Bitext<Token>::
-    lookup(iter const& phrase, size_t const max_sample) const
+    lookup(iter const& phrase, size_t const max_sample,
+	   vector<float> const* const bias) const
     {
       sptr<pstats> ret = prep2(phrase, max_sample);
       boost::lock_guard<boost::mutex> guard(this->lock);
@@ -1558,12 +1591,13 @@ namespace Moses {
       return (max_samples && stats->good >= max_samples) || next == stop; 
     }
 
+#if UG_BITEXT_TRACK_ACTIVE_THREADS
     template<typename TKN>
     ThreadSafeCounter 
     Bitext<TKN>::
     agenda::
     job::active;
-
+#endif
 
     template<typename Token>
     void 

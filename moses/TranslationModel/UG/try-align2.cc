@@ -729,7 +729,7 @@ int main(int argc, char* argv[])
 
       for (size_t i = 0; i < A.size(); ++i)
 	{
-	  cout << (*BT.V2)[snt1[i].id()] << ": ";
+	  cout << (*BT.V1)[snt1[i].id()] << ": ";
 	  for (size_t k=A[i].find_first(); k < A[i].size(); k=A[i].find_next(k))
 	    cout << boost::format(" %d:%s") % k % (*BT.V2)[snt2[k].id()];
 	  cout << endl;

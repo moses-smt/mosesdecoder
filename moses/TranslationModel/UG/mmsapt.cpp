@@ -1073,6 +1073,13 @@ namespace Moses
   Mmsapt::
   PrefixExists(Moses::Phrase const& phrase) const
   {
+    return PrefixExists(phrase,NULL); 
+  }
+
+  bool
+  Mmsapt::
+  PrefixExists(Moses::Phrase const& phrase, vector<float> const* const bias) const
+  {
     if (phrase.GetSize() == 0) return false;
     vector<id_type> myphrase; 
     fillIdSeq(phrase,input_factor,*btfix.V1,myphrase);
@@ -1080,7 +1087,7 @@ namespace Moses
     TSA<Token>::tree_iterator mfix(btfix.I1.get(),&myphrase[0],myphrase.size());
     if (mfix.size() == myphrase.size()) 
       {
-	btfix.prep(mfix);
+	btfix.prep(mfix,bias);
 	// cerr << phrase << " " << mfix.approxOccurrenceCount() << endl;
 	return true;
       }
@@ -1096,7 +1103,8 @@ namespace Moses
       {
 	for (size_t i = 0; mdyn.size() == i && i < myphrase.size(); ++i)
 	  mdyn.extend(myphrase[i]);
-	if (mdyn.size() == myphrase.size()) dyn->prep(mdyn);
+	// let's assume a uniform bias over the foreground corpus
+	if (mdyn.size() == myphrase.size()) dyn->prep(mdyn,NULL);
       }
     return mdyn.size() == myphrase.size();
   }
