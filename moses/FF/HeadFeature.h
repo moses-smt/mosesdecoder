@@ -6,7 +6,7 @@
 #include "FFState.h"
 #include <boost/algorithm/string.hpp>
 //#include <boost/algorithm/string/trim_all.hpp>
-#include <moses/trim_all.hpp>
+//#include <moses/trim_all.hpp>
 #include "util/exception.hh"
 
 namespace Moses

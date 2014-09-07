@@ -14,6 +14,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+#include <locale>
 
 using namespace std;
 
@@ -24,8 +25,14 @@ namespace Moses
 
 void split(std::string &s, std::string delim, std::vector<std::string> &tokens) {
 	//boost::trim(s);
-	boost::trim_fill(s," ");//trim_all(s," "); //trim_if(s, boost::is_any_of(" \t\0\n"));
+	const std::locale& Loc =std::locale();
+	boost::trim_if(s,::boost::is_space(Loc));
+	boost::find_format_all(s,
+			boost::token_finder(::boost::is_space(Loc), boost::token_compress_on),
+			 boost::const_formatter(boost::as_literal(" ")));
+	//boost::trim_fill(s," ");//trim_all(s," "); //trim_if(s, boost::is_any_of(" \t\0\n"));
     boost::split(tokens, s, boost::is_any_of(delim));
+    cout<<s<<" "<<tokens.size()<<endl;
 }
 
 SyntaxNode* SyntaxNode::FindFirstChild(std::string label) const{
