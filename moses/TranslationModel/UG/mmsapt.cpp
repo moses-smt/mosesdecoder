@@ -217,16 +217,24 @@ namespace Moses
     if ((m = param.find("extra")) != param.end()) 
       extra_data = m->second;
 
+    dflt = pair<string,string>("tuneable","true");
+    m_tuneable = Scan<bool>(param.insert(dflt).first->second.c_str());
+
+    dflt = pair<string,string>("feature-sets","standard");
+    m_feature_set_names = Tokenize(param.insert(dflt).first->second.c_str(), ",");
+
     // check for unknown parameters
     vector<string> known_parameters; known_parameters.reserve(50);
     known_parameters.push_back("L1");
     known_parameters.push_back("L2");
     known_parameters.push_back("Mmsapt");
+    known_parameters.push_back("PhraseDictionaryBitextSampling"); // alias for Mmsapt
     known_parameters.push_back("base"); // alias for path
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
     known_parameters.push_back("extra");
+    known_parameters.push_back("feature-sets");
     known_parameters.push_back("input-factor");
     known_parameters.push_back("lexalpha");
     // known_parameters.push_back("limit"); // replaced by "table-limit"
@@ -242,6 +250,7 @@ namespace Moses
     known_parameters.push_back("sample");
     known_parameters.push_back("smooth");
     known_parameters.push_back("table-limit");
+    known_parameters.push_back("tuneable");
     known_parameters.push_back("unal");
     known_parameters.push_back("workers");
     for (map<string,string>::iterator m = param.begin(); m != param.end(); ++m)
@@ -273,8 +282,8 @@ namespace Moses
     while(getline(in2,line)) text2.push_back(line);
     while(getline(ina,line)) symal.push_back(line);
 
-    boost::scoped_ptr<lock_guard<mutex> > guard;
-    if (locking) guard.reset(new lock_guard<mutex>(this->lock));
+    boost::scoped_ptr<boost::lock_guard<boost::mutex> > guard;
+    if (locking) guard.reset(new boost::lock_guard<boost::mutex>(this->lock));
     btdyn = btdyn->add(text1,text2,symal);
     assert(btdyn);
     // cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
@@ -344,11 +353,17 @@ namespace Moses
   Mmsapt::
   Load()
   {
-    lock_guard<mutex> guard(this->lock);
+    boost::lock_guard<boost::mutex> guard(this->lock);
 
     // can load only once
     // UTIL_THROW_IF2(shards.size(),"Mmsapt is already loaded at " << HERE);
 
+    // load feature sets
+    BOOST_FOREACH(string const& fsname, m_feature_set_names)
+      {
+    // standard (default) feature set
+    if (fsname == "standard")
+      {
     // lexical scores 
     string lexfile = bname + L1 + "-" + L2 + ".lex";
     sptr<PScoreLex1<Token> > ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
@@ -368,6 +383,19 @@ namespace Moses
     // These are always corpus-specific
     check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_fix);
     check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_dyn);
+      }
+
+    // data source features (copies of phrase and word count specific to
+    // this translation model)
+    else if (fsname == "datasource")
+      {
+    sptr<PScorePC<Token> > ffpcnt(new PScorePC<Token>("pcnt"));
+    register_ff(ffpcnt,m_active_ff_common);
+    sptr<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
+    register_ff(ffwcnt,m_active_ff_common);
+      }
+      }
+    // cerr << "Features: " << Join("|",m_feature_names) << endl;
 
     UTIL_THROW_IF2(this->m_feature_names.size() != this->m_numScoreComponents,
 		   "At " << HERE << ": number of feature values provided by "
@@ -944,6 +972,7 @@ namespace Moses
     // assert(0);
   }
 
+#if defined(timespec)
   bool operator<(timespec const& a, timespec const& b)
   {
     if (a.tv_sec != b.tv_sec) return a.tv_sec < b.tv_sec;
@@ -954,6 +983,19 @@ namespace Moses
   {
     if (a.tv_sec != b.tv_sec) return a.tv_sec > b.tv_sec;
     return (a.tv_nsec >= b.tv_nsec);
+  }
+#endif 
+
+  bool operator<(timeval const& a, timeval const& b)
+  {
+    if (a.tv_sec != b.tv_sec) return a.tv_sec < b.tv_sec;
+    return (a.tv_usec < b.tv_usec);
+  }
+
+  bool operator>=(timeval const& a, timeval const& b)
+  {
+    if (a.tv_sec != b.tv_sec) return a.tv_sec > b.tv_sec;
+    return (a.tv_usec >= b.tv_usec);
   }
 
   void 
@@ -985,12 +1027,10 @@ namespace Moses
   decache(TargetPhraseCollectionWrapper* ptr) const
   {
     if (ptr->refCount || ptr->idx >= 0) return;
-    
-    timespec t; clock_gettime(CLOCK_MONOTONIC,&t);
-    timespec r; clock_getres(CLOCK_MONOTONIC,&r);
-
     // if (t.tv_nsec < v[0]->tstamp.tv_nsec)
 #if 0
+    timespec t; clock_gettime(CLOCK_MONOTONIC,&t);
+    timespec r; clock_getres(CLOCK_MONOTONIC,&r);
     float delta = t.tv_sec - ptr->tstamp.tv_sec;
     cerr << "deleting old cache entry after "
 	 << delta << " seconds."
@@ -1015,8 +1055,11 @@ namespace Moses
     if (!ptr) return NULL;
     ++ptr->refCount;
     ++m_tpc_ctr;
+#if defined(timespec)
     clock_gettime(CLOCK_MONOTONIC, &ptr->tstamp);
-    
+#else
+    gettimeofday(&ptr->tstamp, NULL);
+#endif
     // update history
     if (m_history.capacity() > 1)
       {

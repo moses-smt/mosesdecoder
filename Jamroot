@@ -121,7 +121,7 @@ if [ option.get "with-lbllm" ] {
   requirements += <library>gomp ;
 }
 
-if [ option.get "with-cmph" ] {
+if [ option.get "with-cmph" : : "yes" ] {
   requirements += <define>HAVE_CMPH ;
 }
 
@@ -194,6 +194,7 @@ phrase-extract//lexical-reordering
 phrase-extract//extract-ghkm 
 phrase-extract//pcfg-extract 
 phrase-extract//pcfg-score 
+phrase-extract//extract-mixed-syntax 
 biconcor 
 mira//mira 
 contrib/server//mosesserver 

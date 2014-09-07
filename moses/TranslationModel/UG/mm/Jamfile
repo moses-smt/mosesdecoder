@@ -104,5 +104,5 @@ mam_verify
 calc-coverage
 ; 
 
-fakelib mm : [ glob ug_*.cc tpt_*.cc ] ;
+fakelib mm : [ glob ug_*.cc tpt_*.cc num_read_write.cc ] ;
 

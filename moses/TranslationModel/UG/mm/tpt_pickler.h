@@ -42,6 +42,14 @@ namespace ugdiss
   void binread(std::istream& in, std::string        &data);
   void binread(std::istream& in, float              &data); 
 
+  char const *binread(char const* p, uint16_t& buf);
+  char const *binread(char const* p, uint32_t& buf);
+  char const *binread(char const* p, filepos_type& buf);
+  char const *binread(char const* p, float& buf);
+#ifdef __clang__
+  char const *binread(char const* p, size_t& buf);
+#endif
+
   std::ostream& write(std::ostream& out, char x);
   std::ostream& write(std::ostream& out, unsigned char x);
   std::ostream& write(std::ostream& out, short x);
@@ -58,6 +66,7 @@ namespace ugdiss
   std::istream& read(std::istream& in, size_t& x);
   std::istream& read(std::istream& in, float& x);
 
+  /*
   template<typename WHATEVER>
   char const* 
   binread(char const* p, WHATEVER* buf);
@@ -65,6 +74,7 @@ namespace ugdiss
   template<typename numtype>
   char const* 
   binread(char const* p, numtype& buf);
+  */
 
   template<typename K, typename V>
   void binwrite(std::ostream& out, std::pair<K,V> const& data);
@@ -93,11 +103,11 @@ namespace ugdiss
   template<typename V>
   char const* binread(char const* p, std::vector<V>& v)
   {
-    size_t vsize;
+	size_t vsize;
 #ifdef VERIFY_TIGHT_PACKING
     assert(p);
 #endif
-    p = binread(p,vsize);
+    p = binread(p, vsize);
     v.resize(vsize);
     for (size_t i = 0; i < vsize; ++i)
       p = binread(p,v[i]);
@@ -199,9 +209,6 @@ namespace ugdiss
     return binread(p,*buf);
   }
 
-  template<typename numtype>
-  char const* 
-  binread(char const* p, numtype& buf);
   
 } // end namespace ugdiss
 #endif
