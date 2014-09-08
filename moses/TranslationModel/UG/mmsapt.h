@@ -31,7 +31,6 @@
 #include <map>
 
 #include "moses/TranslationModel/PhraseDictionary.h"
-#include "mmsapt_phrase_scorers.h" // deprecated
 #include "sapt_phrase_scorers.h"
 
 // TO DO:
@@ -71,7 +70,8 @@ namespace Moses
     // must be > 0 if dynamic 
     size_t m_default_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
-
+    vector<string> m_feature_set_names; // one or more of: standard, datasource
+ 
     // // deprecated!
     // char m_pfwd_denom; // denominator for computation of fwd phrase score:
     // // 'r' - divide by raw count
@@ -116,7 +116,7 @@ namespace Moses
     // PScorePfwd<Token> calc_pfwd_fix, calc_pfwd_dyn;
     // PScorePbwd<Token> calc_pbwd_fix, calc_pbwd_dyn;
     // PScoreLex<Token>  calc_lex; // this one I'd like to see as an external ff eventually
-    // PScorePP<Token>   apply_pp; // apply phrase penalty 
+    // PScorePC<Token>   apply_pp; // apply phrase penalty 
     // PScoreLogCounts<Token>   add_logcounts_fix;
     // PScoreLogCounts<Token>   add_logcounts_dyn;
     void init(string const& line);
