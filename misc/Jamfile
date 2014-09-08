@@ -46,4 +46,4 @@ $(TOP)//boost_iostreams
 $(TOP)//boost_program_options 
 ; 
 
-alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin programsProbing merge-sortedprune PhraseTable  ;
+alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin programsProbing merge-sorted prunePhraseTable  ;
