@@ -281,7 +281,7 @@ public:
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
         if (addGraphInfo) {
-          const size_t translationId = tinput.GetTranslationId();
+          // const size_t translationId = tinput.GetTranslationId();
           std::ostringstream sgstream;
           manager.OutputSearchGraphMoses(sgstream);
           retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
