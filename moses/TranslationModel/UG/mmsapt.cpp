@@ -323,58 +323,60 @@ namespace Moses
 
   void
   Mmsapt::
-  Load()
+  Load(bool with_checks)
   {
     boost::lock_guard<boost::mutex> guard(this->lock);
 
     // can load only once
     // UTIL_THROW_IF2(shards.size(),"Mmsapt is already loaded at " << HERE);
-
+    
     // load feature sets
     BOOST_FOREACH(string const& fsname, m_feature_set_names)
       {
-    // standard (default) feature set
-    if (fsname == "standard")
-      {
-    // lexical scores 
-    string lexfile = bname + L1 + "-" + L2 + ".lex";
-    sptr<PScoreLex1<Token> > ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
-    register_ff(ff,m_active_ff_common);
-
-    // these are always computed on pooled data
-    check_ff<PScoreRareness<Token> > ("rare", &m_active_ff_common);
-    check_ff<PScoreUnaligned<Token> >("unal", &m_active_ff_common);
-    check_ff<PScoreCoherence<Token> >("coh",  &m_active_ff_common);
-    
-    // for these ones either way is possible (specification ends with '+' 
-    // if corpus-specific 
-    check_ff<PScorePfwd<Token> >("pfwd", m_lbop_conf);
-    check_ff<PScorePbwd<Token> >("pbwd", m_lbop_conf);
-    check_ff<PScoreLogCnt<Token> >("logcnt");
-
-    // These are always corpus-specific
-    check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_fix);
-    check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_dyn);
-      }
-
-    // data source features (copies of phrase and word count specific to
-    // this translation model)
-    else if (fsname == "datasource")
-      {
-    sptr<PScorePC<Token> > ffpcnt(new PScorePC<Token>("pcnt"));
-    register_ff(ffpcnt,m_active_ff_common);
-    sptr<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
-    register_ff(ffwcnt,m_active_ff_common);
-      }
+	// standard (default) feature set
+	if (fsname == "standard")
+	  {
+	    // lexical scores 
+	    string lexfile = bname + L1 + "-" + L2 + ".lex";
+	    sptr<PScoreLex1<Token> > ff(new PScoreLex1<Token>(param["lex_alpha"],lexfile));
+	    register_ff(ff,m_active_ff_common);
+	    
+	    // these are always computed on pooled data
+	    check_ff<PScoreRareness<Token> > ("rare", &m_active_ff_common);
+	    check_ff<PScoreUnaligned<Token> >("unal", &m_active_ff_common);
+	    check_ff<PScoreCoherence<Token> >("coh",  &m_active_ff_common);
+	    
+	    // for these ones either way is possible (specification ends with '+' 
+	    // if corpus-specific 
+	    check_ff<PScorePfwd<Token> >("pfwd", m_lbop_conf);
+	    check_ff<PScorePbwd<Token> >("pbwd", m_lbop_conf);
+	    check_ff<PScoreLogCnt<Token> >("logcnt");
+	    
+	    // These are always corpus-specific
+	    check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_fix);
+	    check_ff<PScoreProvenance<Token> >("prov", &m_active_ff_dyn);
+	  }
+	
+	// data source features (copies of phrase and word count specific to
+	// this translation model)
+	else if (fsname == "datasource")
+	  {
+	    sptr<PScorePC<Token> > ffpcnt(new PScorePC<Token>("pcnt"));
+	    register_ff(ffpcnt,m_active_ff_common);
+	    sptr<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
+	    register_ff(ffwcnt,m_active_ff_common);
+	  }
       }
     // cerr << "Features: " << Join("|",m_feature_names) << endl;
-
-    UTIL_THROW_IF2(this->m_feature_names.size() != this->m_numScoreComponents,
-		   "At " << HERE << ": number of feature values provided by "
-		   << "Phrase table (" << this->m_feature_names.size()
-		   << ") does not match number specified in Moses config file ("
-		   << this->m_numScoreComponents << ")!\n";);
-
+    
+    if (with_checks)
+      {
+	UTIL_THROW_IF2(this->m_feature_names.size() != this->m_numScoreComponents,
+		       "At " << HERE << ": number of feature values provided by "
+		       << "Phrase table (" << this->m_feature_names.size()
+		       << ") does not match number specified in Moses config file ("
+		       << this->m_numScoreComponents << ")!\n";);
+      }
     // Load corpora. For the time being, we can have one memory-mapped static
     // corpus and one in-memory dynamic corpus
     // sptr<mmbitext> btfix(new mmbitext());
@@ -398,7 +400,6 @@ namespace Moses
 	wlex21[c->id].push_back(r);
     COOCraw.open(bname + L1 + "-" + L2 + ".coc");
 #endif
-    
   }
 
   void
