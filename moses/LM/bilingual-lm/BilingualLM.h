@@ -10,6 +10,7 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/InputPath.h"
 #include "moses/Manager.h"
+#include "moses/ChartManager.h"
 #include "moses/FactorCollection.h"
 
 namespace nplm {
@@ -23,18 +24,25 @@ namespace Moses
 class BilingualLMState : public FFState
 {
   size_t m_hash;
-  int first_word_index; //Doesn't matter for phrase based.
+  int source_last_word_index; //Doesn't matter for phrase based. The last word source word of the previous hypothesis
+  std::vector<int> word_alignments; //Carry the word alignments. For hierarchical
 public:
   BilingualLMState(size_t hash)
     :m_hash(hash)
-    ,first_word_index(0)
+    , source_last_word_index(0)
   {}
-  BilingualLMState(size_t hash, int word_index)
-    :m_hash(hash), first_word_index(word_index)
+  BilingualLMState(size_t hash, int source_word_index, std::vector<int>& word_alignments_vec)
+    :m_hash(hash)
+    , source_last_word_index(source_word_index)
+    , word_alignments(word_alignments_vec)
   {}
 
-  int GetFirstWordIdx() const {
-    return first_word_index;
+  int GetLastSourceWordIdx() const {
+    return source_last_word_index;
+  }
+
+  const std::vector<int>& GetWordAlignmentVector() const {
+    return word_alignments;
   }
 
   int Compare(const FFState& other) const;
@@ -50,6 +58,8 @@ private:
                 , const WordsRange &sourceWordRange
                 , std::vector<int> &words) const;
 
+  void appendSourceWordsToVector(const Sentence &source_sent, std::vector<int> &words, int source_word_mid_idx) const;
+
   void getTargetWords(const Hypothesis &cur_hypo
                 , const TargetPhrase &targetPhrase
                 , int current_word_index
@@ -62,8 +72,19 @@ private:
   void requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount, std::vector<int> &words) const;
 
   //Chart decoder
+
   void getTargetWordsChart(Phrase& whole_phrase
                 , int current_word_index
+                , std::vector<int> &words) const;
+
+  //Returns the index of the source_word that the current target word uses
+  int getSourceWordsChart(const TargetPhrase &targetPhrase
+                , const ChartHypothesis& curr_hypothesis
+                , int targetWordIdx
+                , const Sentence &source_sent
+                , size_t souce_phrase_start_pos
+                , int next_nonterminal_index
+                , int featureID
                 , std::vector<int> &words) const;
 
   size_t getStateChart(Phrase& whole_phrase) const;
