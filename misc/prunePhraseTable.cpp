@@ -65,18 +65,15 @@ static void outputTopN(const StringPiece& sourcePhraseString, PhraseDictionary* 
   InputPathList inputPaths;
   inputPaths.push_back(&inputPath);
   phraseTable->GetTargetPhraseCollectionBatch(inputPaths);
-  
-
-  //EvaluateInIsolation ??
   const TargetPhraseCollection* targetPhrases = inputPath.GetTargetPhrases(*phraseTable);
 
-  //sort by total score and prune
-  // - Already done?
+
 
 
   //print phrases
   const std::vector<FactorType>& output = StaticData::Instance().GetOutputFactorOrder();
   if (targetPhrases) {
+    //if (targetPhrases->GetSize() > 10) cerr << "src " << sourcePhrase << " tgt count " << targetPhrases->GetSize() << endl;
     for (TargetPhraseCollection::const_iterator i = targetPhrases->begin(); i != targetPhrases->end(); ++i) {
       const TargetPhrase* targetPhrase = *i;
       out << sourcePhrase.GetStringRep(input);
