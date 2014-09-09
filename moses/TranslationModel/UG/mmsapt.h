@@ -222,6 +222,9 @@ namespace Moses
     void
     load_extra_data(string bname, bool locking);
 
+    void
+    load_bias(string bname);
+
     mutable size_t m_tpc_ctr;
   public:
     // Mmsapt(string const& description, string const& line);

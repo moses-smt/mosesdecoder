@@ -240,10 +240,15 @@ namespace Moses
 
   void 
   Mmsapt::
-  load_bias()
+  load_bias(string const fname)
   {
-    ifstream in(bias_file);
+    ifstream in(fname.c_str());
     bias.reserve(btfix.T1->size());
+    float v;
+    while (in>>v) bias.push_back(v);
+    UTIL_THROW_IF2(bias.size() != btfix.T1->size(),
+		   "Mismatch between bias vector size and corpus size at "
+		   << HERE);
   }
 
   void
@@ -399,6 +404,9 @@ namespace Moses
     
     btdyn.reset(new imbitext(btfix.V1, btfix.V2, m_default_sample_size));
     btdyn->num_workers = this->m_workers;
+    if (bias_file.size())
+      load_bias(bias_file);
+
     if (extra_data.size()) 
       load_extra_data(extra_data,false);
     
