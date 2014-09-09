@@ -186,6 +186,9 @@ namespace Moses
     
     poolCounts = true;
     
+    if ((m = param.find("bias")) != param.end()) 
+	bias_file = m->second;
+
     if ((m = param.find("extra")) != param.end()) 
       extra_data = m->second;
 
@@ -197,6 +200,7 @@ namespace Moses
 
     // check for unknown parameters
     vector<string> known_parameters; known_parameters.reserve(50);
+    known_parameters.push_back("bias");
     known_parameters.push_back("L1");
     known_parameters.push_back("L2");
     known_parameters.push_back("Mmsapt");
@@ -232,6 +236,14 @@ namespace Moses
 		       HERE << ": Unknown parameter specification for Mmsapt: " 
 		       << m->first);
       }
+  }
+
+  void 
+  Mmsapt::
+  load_bias()
+  {
+    ifstream in(bias_file);
+    bias.reserve(btfix.T1->size());
   }
 
   void

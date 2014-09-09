@@ -50,6 +50,7 @@ namespace Moses
   {
     friend class Alignment;
     map<string,string> param;
+    vector<float> bias;
   public:    
     typedef L2R_Token<SimpleWordId> Token;
     typedef mmBitext<Token> mmbitext;
@@ -61,7 +62,7 @@ namespace Moses
     // vector<sptr<bitext> > shards;
     mmbitext btfix; 
     sptr<imbitext> btdyn; 
-    string bname,extra_data;
+    string bname,extra_data,bias_file;
     string L1;
     string L2;
     float  m_lbop_conf; // confidence level for lbop smoothing

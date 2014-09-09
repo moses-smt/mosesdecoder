@@ -607,7 +607,7 @@ namespace Moses {
 	bool               fwd; // if true, source phrase is L1 
 	sptr<pstats>     stats; // stores statistics collected during sampling
 	vector<float> const* bias; // sentence-level bias for sampling
-
+	float bias_total;
 	bool step(uint64_t & sid, uint64_t & offset); // select another occurrence
 	bool done() const;
 	job(typename TSA<Token>::tree_iterator const& m, 
@@ -674,8 +674,9 @@ namespace Moses {
 		if (stats->raw_cnt == ctr) ++stats->raw_cnt;
 		size_t scalefac = (stats->raw_cnt - ctr++);
 		size_t rnum = scalefac * (rnd()/(rnd.max()+1.));
-		size_t th = (bias == NULL ? max_samples
-			     : bias->at(sid) * bias->size() * max_samples);
+		size_t th = (bias_total 
+			     ? bias->at(sid)/bias_total * bias->size() * max_samples
+			     : max_samples);
 #if 0
 		cerr << rnum << "/" << scalefac << " vs. " 
 		     << max_samples - stats->good << " ("
@@ -897,6 +898,17 @@ namespace Moses {
     {
       stats.reset(new pstats());
       stats->raw_cnt = m.approxOccurrenceCount();
+      bias_total = 0; // needed for renormalization
+      if (bias)
+	{
+	  for (char const* x = m.lower_bound(-1); x < stop;)
+	    {
+	      uint32_t sid; ushort offset;
+	      next = root->readSid(next,stop,sid);
+	      next = root->readOffset(next,stop,offset);
+	      bias_total += bias->at(sid);
+	    }
+	}
 #if UG_BITEXT_TRACK_ACTIVE_THREADS
       // if (++active%5 == 0) 
       ++active;
