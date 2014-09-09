@@ -210,7 +210,6 @@ phrase-extract//pcfg-score
 phrase-extract//extract-mixed-syntax 
 biconcor 
 mira//mira 
-contrib/server//mosesserver 
 mm
 ;
 
