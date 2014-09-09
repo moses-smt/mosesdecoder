@@ -138,6 +138,7 @@ int main(int argc, char** argv)
   mosesargs.push_back(config_file);
   for (size_t i = 0; i < parsed.options.size(); ++i) {
     if (parsed.options[i].position_key == -1 && !parsed.options[i].unregistered) continue;
+    /*
     const string& key = parsed.options[i].string_key;
     if (!key.empty()) {
       mosesargs.push_back(key);
@@ -147,6 +148,10 @@ int main(int argc, char** argv)
       if (!value.empty()) {
         mosesargs.push_back(value);
       }
+    }*/
+
+    for (size_t j = 0; j < parsed.options[i].original_tokens.size(); ++j) {
+      mosesargs.push_back(parsed.options[i].original_tokens[j]);
     }
   }
 
