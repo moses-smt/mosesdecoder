@@ -41,27 +41,22 @@ class PositiveProbWarn {
     WarningAction action_;
 };
 
-template <class Weights> StringPiece Read1Gram(util::FilePiece &f, Weights &weights, PositiveProbWarn &warn) {
+template <class Voc, class Weights> void Read1Gram(util::FilePiece &f, Voc &vocab, Weights *unigrams, PositiveProbWarn &warn) {
   try {
-    weights.prob = f.ReadFloat();
-    if (weights.prob > 0.0) {
-      warn.Warn(weights.prob);
-      weights.prob = 0.0;
+    float prob = f.ReadFloat();
+    if (prob > 0.0) {
+      warn.Warn(prob);
+      prob = 0.0;
     }
     UTIL_THROW_IF(f.get() != '\t', FormatLoadException, "Expected tab after probability");
-    StringPiece ret(f.ReadDelimited(kARPASpaces));
-    ReadBackoff(f, weights);
-    return ret;
+    WordIndex word = vocab.Insert(f.ReadDelimited(kARPASpaces));
+    Weights &w = unigrams[word];
+    w.prob = prob;
+    ReadBackoff(f, w);
   } catch(util::Exception &e) {
     e << " in the 1-gram at byte " << f.Offset();
     throw;
   }
-}
-
-template <class Voc, class Weights> void Read1Gram(util::FilePiece &f, Voc &vocab, Weights *unigrams, PositiveProbWarn &warn) {
-  Weights temp;
-  WordIndex word = vocab.Insert(Read1Gram(f, temp, warn));
-  unigrams[word] = temp;
 }
 
 template <class Voc, class Weights> void Read1Grams(util::FilePiece &f, std::size_t count, Voc &vocab, Weights *unigrams, PositiveProbWarn &warn) {
@@ -81,7 +76,12 @@ template <class Voc, class Weights, class Iterator> void ReadNGram(util::FilePie
       weights.prob = 0.0;
     }
     for (unsigned char i = 0; i < n; ++i, ++indices_out) {
-      *indices_out = vocab.Index(f.ReadDelimited(kARPASpaces));
+      StringPiece word(f.ReadDelimited(kARPASpaces));
+      WordIndex index = vocab.Index(word);
+      *indices_out = index;
+      // Check for words mapped to <unk> that are not the string <unk>.
+      UTIL_THROW_IF(index == 0 /* mapped to <unk> */ && (word != StringPiece("<unk>", 5)) && (word != StringPiece("<UNK>", 5)),
+          FormatLoadException, "Word " << word << " was not seen in the unigrams (which are supposed to list the entire vocabulary) but appears");
     }
     ReadBackoff(f, weights);
   } catch(util::Exception &e) {

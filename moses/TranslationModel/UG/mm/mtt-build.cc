@@ -361,7 +361,7 @@ build_mmTSA(string infile, string outfile)
 {
   size_t mypid = fork();
   if(mypid) return mypid;
-  shared_ptr<mmTtrack<Token> > T(new mmTtrack<Token>(infile));
+  boost::shared_ptr<mmTtrack<Token> > T(new mmTtrack<Token>(infile));
   bdBitset filter;
   filter.resize(T->size(),true);
   imTSA<Token> S(T,&filter,(quiet?NULL:&cerr));

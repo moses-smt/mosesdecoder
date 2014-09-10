@@ -35,6 +35,7 @@
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
+#include "moses/FF/SoftSourceSyntacticConstraintsFeature.h"
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
@@ -48,11 +49,11 @@
 #include "NieceTerminal.h"
 #include "SpanLength.h"
 #include "SyntaxRHS.h"
-#include "SkeletonChangeInput.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
+#include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
 
 #ifdef HAVE_CMPH
@@ -197,6 +198,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
   MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
+  MOSES_FNAME(SoftSourceSyntacticConstraintsFeature);
   MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(HyperParameterAsWeight);
@@ -209,11 +211,11 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SparseHieroReorderingFeature);
   MOSES_FNAME(SpanLength);
   MOSES_FNAME(SyntaxRHS);
-  MOSES_FNAME(SkeletonChangeInput);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonLM);
+  MOSES_FNAME(SkeletonChangeInput);
   MOSES_FNAME(SkeletonPT);
 
 #ifdef HAVE_CMPH

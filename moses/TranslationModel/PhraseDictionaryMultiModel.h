@@ -51,6 +51,14 @@ struct multiModelStatisticsOptimization: multiModelStatistics {
 
 class OptimizationObjective;
 
+struct multiModelPhrase {
+  TargetPhrase *targetPhrase;
+  std::vector<float> p;
+  ~multiModelPhrase() {
+    delete targetPhrase;
+  };
+};
+
 /** Implementation of a virtual phrase table constructed from multiple component phrase tables.
  */
 class PhraseDictionaryMultiModel: public PhraseDictionary
@@ -66,6 +74,7 @@ public:
   void Load();
   virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;
   virtual TargetPhraseCollection* CreateTargetPhraseCollectionLinearInterpolation(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
+  virtual TargetPhraseCollection* CreateTargetPhraseCollectionAll(const Phrase& src, const bool restricted = false) const;
   std::vector<std::vector<float> > getWeights(size_t numWeights, bool normalize) const;
   std::vector<float> normalizeWeights(std::vector<float> &weights) const;
   void CacheForCleanup(TargetPhraseCollection* tpc);

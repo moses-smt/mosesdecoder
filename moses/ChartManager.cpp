@@ -25,6 +25,7 @@
 #include "ChartHypothesis.h"
 #include "ChartKBestExtractor.h"
 #include "ChartTranslationOptions.h"
+#include "HypergraphOutput.h"
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "TreeInput.h"
@@ -41,11 +42,12 @@ extern bool g_mosesDebug;
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.
  */
-ChartManager::ChartManager(InputType const& source)
+ChartManager::ChartManager(size_t lineNumber,InputType const& source)
   :m_source(source)
   ,m_hypoStackColl(source, *this)
   ,m_start(clock())
   ,m_hypothesisId(0)
+  ,m_lineNumber(lineNumber)
   ,m_parser(source, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit(), source)
 {
@@ -85,7 +87,7 @@ void ChartManager::ProcessSentence()
       m_translationOptionList.ApplyThreshold();
 
       const InputPath &inputPath = m_parser.GetInputPath(range);
-      m_translationOptionList.Evaluate(m_source, inputPath);
+      m_translationOptionList.EvaluateWithSourceContext(m_source, inputPath);
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
@@ -141,7 +143,7 @@ void ChartManager::AddXmlChartOptions()
 
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
     ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
-    hypo->Evaluate();
+    hypo->EvaluateWhenApplied();
 
 
     ChartCell &cell = m_hypoStackColl.Get(range);
@@ -222,8 +224,9 @@ void ChartManager::CalcNBest(
   }
 }
 
-void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+void ChartManager::WriteSearchGraph(const ChartSearchGraphWriter& writer) const
 {
+
   size_t size = m_source.GetSize();
 
   // which hypotheses are reachable?
@@ -236,7 +239,11 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
     // no hypothesis
     return;
   }
-  FindReachableHypotheses( hypo, reachable);
+  size_t winners = 0;
+  size_t losers = 0;
+
+  FindReachableHypotheses( hypo, reachable, &winners, &losers);
+  writer.WriteHeader(winners, losers);
 
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
@@ -245,12 +252,13 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
       TRACE_ERR(" " << range << "=");
 
       const ChartCell &cell = m_hypoStackColl.Get(range);
-      cell.GetSearchGraph(translationId, outputSearchGraphStream, reachable);
+      cell.WriteSearchGraph(writer, reachable);
     }
   }
 }
 
-void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const
+void ChartManager::FindReachableHypotheses(
+  const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable, size_t* winners, size_t* losers) const
 {
   // do not recurse, if already visited
   if (reachable.find(hypo->GetId()) != reachable.end()) {
@@ -259,9 +267,14 @@ void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::ma
 
   // recurse
   reachable[ hypo->GetId() ] = true;
+  if (hypo->GetWinningHypothesis() == hypo) {
+    (*winners)++;
+  } else {
+    (*losers)++;
+  }
   const std::vector<const ChartHypothesis*> &previous = hypo->GetPrevHypos();
   for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i) {
-    FindReachableHypotheses( *i, reachable );
+    FindReachableHypotheses( *i, reachable, winners, losers );
   }
 
   // also loop over recombined hypotheses (arcs)
@@ -270,9 +283,19 @@ void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::ma
     ChartArcList::const_iterator iterArc;
     for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
       const ChartHypothesis &arc = **iterArc;
-      FindReachableHypotheses( &arc, reachable );
+      FindReachableHypotheses( &arc, reachable, winners, losers );
     }
   }
+}
+
+void ChartManager::OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const {
+  ChartSearchGraphWriterHypergraph writer(&outputSearchGraphStream);
+  WriteSearchGraph(writer);
+}
+
+void ChartManager::OutputSearchGraphMoses(std::ostream &outputSearchGraphStream) const {
+  ChartSearchGraphWriterMoses writer(&outputSearchGraphStream, m_lineNumber);
+  WriteSearchGraph(writer);
 }
 
 } // namespace Moses

@@ -179,25 +179,31 @@ void ScoreComponentCollection::SparseL2Regularize(float lambda)
   m_scores.sparseL2regularize(lambda);
 }
 
-void ScoreComponentCollection::Save(ostream& out) const
+void ScoreComponentCollection::Save(ostream& out, bool multiline) const
 {
+  string sep = " ";
+  string linesep = "\n";
+  if (!multiline) {
+     sep = "=";
+     linesep = " ";
+  }
   ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
   for (; iter != s_scoreIndexes.end(); ++iter ) {
     string name = iter->first->GetScoreProducerDescription();
     IndexPair ip = iter->second; // feature indices
     if (ip.second-ip.first == 1) {
-      out << name << " " << m_scores[ip.first] << endl;
+      out << name << sep << m_scores[ip.first] << linesep;
     } else {
       for (size_t i=ip.first; i < ip.second; ++i) {
         ostringstream fullname;
         fullname << name << "_" << (i + 1 - ip.first);
-        out << fullname.str() << " " << m_scores[i] << endl;
+        out << fullname.str() << sep << m_scores[i] << linesep;
       }
     }
   }
 
   // write sparse features
-  m_scores.write(out);
+  m_scores.write(out,sep,linesep);
 }
 
 void ScoreComponentCollection::Save(const string& filename) const

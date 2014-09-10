@@ -219,14 +219,14 @@ foreach (@children) {
 	waitpid($_, 0);
 }
 
-# glue rules
+# merge glue rules
 if (defined($glueFile)) {
   my $cmd = "cat $TMPDIR/glue.* | LC_ALL=C sort | uniq > $glueFile";
   print STDERR "Merging glue rules: $cmd \n";
   print STDERR `$cmd`;
 }
 
-# phrase orientation priors (GHKM extraction)
+# merge phrase orientation priors (GHKM extraction)
 if ($phraseOrientation && defined($phraseOrientationPriorsFile)) {
   print STDERR "Merging phrase orientation priors\n";
 

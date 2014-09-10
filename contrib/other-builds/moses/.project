@@ -377,6 +377,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/GenerationDictionary.h</locationURI>
 		</link>
 		<link>
+			<name>HypergraphOutput.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/HypergraphOutput.cpp</locationURI>
+		</link>
+		<link>
+			<name>HypergraphOutput.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/HypergraphOutput.h</locationURI>
+		</link>
+		<link>
 			<name>HypoList.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/HypoList.h</locationURI>
@@ -1152,16 +1162,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InputFeature.h</locationURI>
 		</link>
 		<link>
-			<name>FF/InternalStructStatelessFF.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/InternalStructStatelessFF.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/InternalStructStatelessFF.h</locationURI>
-		</link>
-		<link>
 			<name>FF/LexicalReordering</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1305,6 +1305,16 @@
 			<name>FF/SoftMatchingFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftMatchingFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/SoftSourceSyntacticConstraintsFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftSourceSyntacticConstraintsFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SoftSourceSyntacticConstraintsFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SoftSourceSyntacticConstraintsFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SourceGHKMTreeInputMatchFeature.cpp</name>
@@ -1685,6 +1695,16 @@
 			<name>PP/NonTermContextProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/NonTermContextProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/OrientationPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/OrientationPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/OrientationPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/OrientationPhraseProperty.h</locationURI>
 		</link>
 		<link>
 			<name>PP/PhraseProperty.cpp</name>
@@ -2905,6 +2925,11 @@
 			<name>TranslationModel/UG/mm/mtt.count.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/mtt.count.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/mm/num_read_write.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/mm/num_read_write.cc</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/mm/num_read_write.h</name>

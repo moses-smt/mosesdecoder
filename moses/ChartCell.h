@@ -40,6 +40,7 @@
 
 namespace Moses
 {
+class ChartSearchGraphWriter;
 class ChartTranslationOptionList;
 class ChartCellCollection;
 class ChartManager;
@@ -124,7 +125,7 @@ public:
     return m_coverage < compare.m_coverage;
   }
 
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned,bool> &reachable) const;
+  void WriteSearchGraph(const ChartSearchGraphWriter& writer, const std::map<unsigned,bool> &reachable) const;
 
 };
 

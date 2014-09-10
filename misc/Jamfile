@@ -12,6 +12,8 @@ exe TMining : TransliterationMining.cpp ../moses//moses ;
 
 exe 1-1-Extraction : 1-1-Extraction.cpp ../moses//moses ;
 
+exe prunePhraseTable : prunePhraseTable.cpp ../moses//moses ..//boost_program_options  ;
+
 local with-cmph = [ option.get "with-cmph" ] ;
 if $(with-cmph) {
     exe processPhraseTableMin : processPhraseTableMin.cpp ../moses//moses ;
@@ -44,4 +46,4 @@ $(TOP)//boost_iostreams
 $(TOP)//boost_program_options 
 ; 
 
-alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin programsProbing merge-sorted ;
+alias programs : 1-1-Extraction TMining generateSequences processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin programsProbing merge-sorted prunePhraseTable  ;

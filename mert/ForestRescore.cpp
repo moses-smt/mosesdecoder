@@ -315,7 +315,7 @@ typedef pair<const Edge*,FeatureStatsType> BackPointer;
  **/
 static void GetBestHypothesis(size_t vertexId, const Graph& graph, const vector<BackPointer>& bps,
      HgHypothesis* bestHypo) {
-  //cerr << "Expanding " << vertexId << endl;
+  //cerr << "Expanding " << vertexId << " Score: " << bps[vertexId].second << endl;
   //UTIL_THROW_IF(bps[vertexId].second == kMinScore+1, HypergraphException, "Landed at vertex " << vertexId << " which is a dead end");
   if (!bps[vertexId].first) return;
   const Edge* prevEdge = bps[vertexId].first;

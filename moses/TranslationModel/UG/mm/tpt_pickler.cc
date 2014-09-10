@@ -268,9 +268,7 @@ namespace ugdiss
   }
   
 
-  template<>
-  char const* 
-  binread<uint16_t>(char const* p, uint16_t& buf)
+  char const *binread(char const* p, uint16_t& buf)
   {
     static char mask = 127;
     buf = (*p)&mask; 
@@ -286,9 +284,14 @@ namespace ugdiss
     return p;
   }
 
-  template<>
-  char const* 
-  binread<uint32_t>(char const* p, uint32_t& buf)
+#ifdef __clang__
+  char const *binread(char const* p, size_t& buf)
+  {
+	  return binread(p, (uint32_t&) buf);
+  }
+#endif
+
+  char const *binread(char const* p, uint32_t& buf)
   {
     static char mask = 127;
     
@@ -325,9 +328,7 @@ namespace ugdiss
     return ++p;
   }
 
-  template<>
-  char const* 
-  binread<filepos_type>(char const* p, filepos_type& buf)
+  char const *binread(char const* p, filepos_type& buf)
   {
     static char mask = 127;
     
@@ -394,9 +395,7 @@ namespace ugdiss
     return ++p;
   }
 
-  template<>
-  char const* 
-  binread<float>(char const* p, float& buf)
+  char const *binread(char const* p, float& buf)
   {
     buf = *reinterpret_cast<float const*>(p);
     return p+sizeof(float);

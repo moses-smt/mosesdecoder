@@ -32,7 +32,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT, $_TRANSLITERATION_PHRASE_TABLE,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_GHKM_SOURCE_LABELS,$_GHKM_SOURCE_LABELS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2, $_UNKNOWN_WORD_SOFT_MATCHES_FILE,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
@@ -112,6 +112,8 @@ $_HELP = 1
 		       'ghkm-tree-fragments' => \$_GHKM_TREE_FRAGMENTS,
 		       'ghkm-phrase-orientation' => \$_GHKM_PHRASE_ORIENTATION,
 		       'phrase-orientation-priors-file=s' => \$_PHRASE_ORIENTATION_PRIORS_FILE, # currently relevant for GHKM extraction only; phrase orientation for PBT has different implementation
+               'ghkm-source-labels' => \$_GHKM_SOURCE_LABELS,
+               'ghkm-source-labels-file=s' => \$_GHKM_SOURCE_LABELS_FILE,
 		       'pcfg' => \$_PCFG,
 		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
 		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
@@ -1427,10 +1429,15 @@ sub extract_phrase {
         $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
-        $cmd .= " --TreeFragments" if $_GHKM_TREE_FRAGMENTS;
-        $cmd .= " --PhraseOrientation" if $_GHKM_PHRASE_ORIENTATION;
-        $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if defined($_PHRASE_ORIENTATION_PRIORS_FILE);
-        if (!defined($_GHKM)) {
+        if (defined($_GHKM)) 
+        {
+          $cmd .= " --TreeFragments" if $_GHKM_TREE_FRAGMENTS;
+          $cmd .= " --PhraseOrientation" if $_GHKM_PHRASE_ORIENTATION;
+          $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if defined($_PHRASE_ORIENTATION_PRIORS_FILE);
+          $cmd .= " --SourceLabels" if $_GHKM_SOURCE_LABELS;
+        }
+        else
+        {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
           $cmd .= " --MaxSpan $max_length";
@@ -1609,6 +1616,7 @@ sub score_phrase_phrase_extract {
         $cmd .= " --TreeFragments" if $_GHKM_TREE_FRAGMENTS;
         $cmd .= " --PhraseOrientation" if $_GHKM_PHRASE_ORIENTATION;
         $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if $_GHKM_PHRASE_ORIENTATION && defined($_PHRASE_ORIENTATION_PRIORS_FILE);
+        $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
         $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
         $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
@@ -1659,6 +1667,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --SparseCountBinFeature $SPARSE_COUNT_BIN" if $SPARSE_COUNT_BIN;
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
+    $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
     
     $cmd .= " | gzip -c > $ttable_file.gz";
     
@@ -2164,6 +2173,7 @@ sub create_ini {
   print INI "WordPenalty\n";
   print INI "PhrasePenalty\n";
   print INI "SoftMatchingFeature name=SM0 path=$_UNKNOWN_WORD_SOFT_MATCHES_FILE\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_SOFT_MATCHES_FILE);
+  print INI "SoftSourceSyntacticConstraintsFeature sourceLabelSetFile=$_GHKM_SOURCE_LABELS_FILE\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
   print INI $feature_spec;
 
   print INI "\n# dense weights for feature functions\n";
@@ -2171,6 +2181,7 @@ sub create_ini {
   print INI "UnknownWordPenalty0= 1\n";
   print INI "WordPenalty0= -1\n";
   print INI "PhrasePenalty0= 0.2\n";
+  print INI "SoftSourceSyntacticConstraintsFeature0= 0.3 -0.3 -0.3\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
   print INI $weight_spec;
   close(INI);
 }

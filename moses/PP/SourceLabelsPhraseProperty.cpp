@@ -16,12 +16,12 @@ void SourceLabelsPhraseProperty::ProcessValue(const std::string &value)
   std::istringstream tokenizer(value);
 
   if (! (tokenizer >> m_nNTs)) { // first token: number of non-terminals (incl. left-hand side)
-    UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read number of non-terminals. Flawed property?");
+    UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read number of non-terminals. Flawed property? " << value);
   }
   assert( m_nNTs > 0 );
 
   if (! (tokenizer >> m_totalCount)) { // second token: overall rule count
-    UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read overall rule count. Flawed property?");
+    UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read overall rule count. Flawed property? " << value);
   }
   assert( m_totalCount > 0.0 );
 
@@ -32,7 +32,7 @@ void SourceLabelsPhraseProperty::ProcessValue(const std::string &value)
   std::priority_queue<float> ruleLabelledCountsPQ;
 
   while (tokenizer.peek() != EOF) {
-    try {
+//    try {
 
       SourceLabelsPhrasePropertyItem item;
       size_t numberOfLHSsGivenRHS = std::numeric_limits<std::size_t>::max();
@@ -46,28 +46,28 @@ void SourceLabelsPhraseProperty::ProcessValue(const std::string &value)
         for (size_t i=0; i<m_nNTs-1; ++i) { // RHS source non-terminal labels
           size_t sourceLabelRHS;
           if (! (tokenizer >> sourceLabelRHS) ) { // RHS source non-terminal label
-            UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read right-hand side label index. Flawed property?");
+            UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read right-hand side label index. Flawed property? " << value);
           }
           item.m_sourceLabelsRHS.push_back(sourceLabelRHS);
         }
 
         if (! (tokenizer >> item.m_sourceLabelsRHSCount)) {
-          UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read right-hand side count. Flawed property?");
+          UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read right-hand side count. Flawed property? " << value);
         }
 
         if (! (tokenizer >> numberOfLHSsGivenRHS)) {
-          UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read number of left-hand sides. Flawed property?");
+          UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read number of left-hand sides. Flawed property? " << value);
         }
       }
 
       for (size_t i=0; i<numberOfLHSsGivenRHS && tokenizer.peek()!=EOF; ++i) { // LHS source non-terminal labels seen with this RHS
         size_t sourceLabelLHS;
         if (! (tokenizer >> sourceLabelLHS)) { // LHS source non-terminal label
-          UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read left-hand side label index. Flawed property?");
+          UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read left-hand side label index. Flawed property? " << value);
         }
         float ruleSourceLabelledCount;
         if (! (tokenizer >> ruleSourceLabelledCount)) {
-          UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read count. Flawed property?");
+          UTIL_THROW2("SourceLabelsPhraseProperty: Not able to read count. Flawed property? " << value);
         }
         item.m_sourceLabelsLHSList.push_back( std::make_pair(sourceLabelLHS,ruleSourceLabelledCount) );
         ruleLabelledCountsPQ.push(ruleSourceLabelledCount);
@@ -75,9 +75,9 @@ void SourceLabelsPhraseProperty::ProcessValue(const std::string &value)
 
       m_sourceLabelItems.push_back(item);
 
-    } catch (const std::exception &e) {
-      UTIL_THROW2("SourceLabelsPhraseProperty: Read error. Flawed property?");
-    }
+//    } catch (const std::exception &e) {
+//      UTIL_THROW2("SourceLabelsPhraseProperty: Read error. Flawed property?");
+//    }
   }
 
   // keep only top N label vectors

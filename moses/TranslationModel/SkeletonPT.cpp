@@ -62,7 +62,7 @@ TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
   tp->GetScoreBreakdown().PlusEquals(this, scores);
 
   // score of all other ff when this rule is being loaded
-  tp->Evaluate(sourcePhrase, GetFeaturesToApply());
+  tp->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
   return tp;
 }

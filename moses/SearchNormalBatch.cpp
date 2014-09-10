@@ -159,13 +159,13 @@ void SearchNormalBatch::EvalAndMergePartialHypos()
          ++sfff_iter) {
       const StatefulFeatureFunction &ff = *(sfff_iter->second);
       int state_idx = sfff_iter->first;
-      hypo->EvaluateWith(ff, state_idx);
+      hypo->EvaluateWhenApplied(ff, state_idx);
     }
     std::vector<const StatelessFeatureFunction*>::iterator slff_iter;
     for (slff_iter = m_stateless_ffs.begin();
          slff_iter != m_stateless_ffs.end();
          ++slff_iter) {
-      hypo->EvaluateWith(**slff_iter);
+      hypo->EvaluateWhenApplied(**slff_iter);
     }
   }
 
@@ -190,7 +190,7 @@ void SearchNormalBatch::EvalAndMergePartialHypos()
          dlm_iter != m_dlm_ffs.end();
          ++dlm_iter) {
       LanguageModel &lm = *(dlm_iter->second);
-      hypo->EvaluateWith(lm, (*dlm_iter).first);
+      hypo->EvaluateWhenApplied(lm, (*dlm_iter).first);
     }
 
     // Put completed hypothesis onto its stack.

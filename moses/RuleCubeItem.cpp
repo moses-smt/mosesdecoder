@@ -79,7 +79,7 @@ void RuleCubeItem::CreateHypothesis(const ChartTranslationOptions &transOpt,
                                     ChartManager &manager)
 {
   m_hypothesis = new ChartHypothesis(transOpt, *this, manager);
-  m_hypothesis->Evaluate();
+  m_hypothesis->EvaluateWhenApplied();
   m_score = m_hypothesis->GetTotalScore();
 }
 
