@@ -1347,6 +1347,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanLength.h</locationURI>
 		</link>
 		<link>
+			<name>FF/SpanSparseFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanSparseFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/SpanSparseFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SpanSparseFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/SparseHieroReorderingFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SparseHieroReorderingFeature.cpp</locationURI>
