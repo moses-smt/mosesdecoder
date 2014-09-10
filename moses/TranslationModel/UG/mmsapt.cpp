@@ -200,12 +200,12 @@ namespace Moses
 
     // check for unknown parameters
     vector<string> known_parameters; known_parameters.reserve(50);
-    known_parameters.push_back("bias");
     known_parameters.push_back("L1");
     known_parameters.push_back("L2");
     known_parameters.push_back("Mmsapt");
     known_parameters.push_back("PhraseDictionaryBitextSampling"); // alias for Mmsapt
     known_parameters.push_back("base"); // alias for path
+    known_parameters.push_back("bias");
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
@@ -229,6 +229,7 @@ namespace Moses
     known_parameters.push_back("tuneable");
     known_parameters.push_back("unal");
     known_parameters.push_back("workers");
+    sort(known_parameters.begin(),known_parameters.end());
     for (map<string,string>::iterator m = param.begin(); m != param.end(); ++m)
       {
 	UTIL_THROW_IF2(!binary_search(known_parameters.begin(),
@@ -275,7 +276,7 @@ namespace Moses
     if (locking) guard.reset(new boost::lock_guard<boost::mutex>(this->lock));
     btdyn = btdyn->add(text1,text2,symal);
     assert(btdyn);
-    // cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
+    cerr << "Loaded " << btdyn->T1->size() << " sentence pairs" << endl;
   }
 
   template<typename fftype>
@@ -337,6 +338,13 @@ namespace Moses
   //   check_ff<PScorePbwd<Token> >("pbwd",m_lbop_conf,registry);
   //   check_ff<PScoreLogCnt<Token> >("logcnt",registry);
   // }
+
+  void
+  Mmsapt::
+  Load()
+  {
+    Load(true);
+  }
 
   void
   Mmsapt::
@@ -406,7 +414,7 @@ namespace Moses
     btdyn->num_workers = this->m_workers;
     if (bias_file.size())
       load_bias(bias_file);
-
+    
     if (extra_data.size()) 
       load_extra_data(extra_data,false);
     
@@ -420,6 +428,8 @@ namespace Moses
 	wlex21[c->id].push_back(r);
     COOCraw.open(bname + L1 + "-" + L2 + ".coc");
 #endif
+    assert(btdyn);
+    // cerr << "LOADED " << HERE << endl;
   }
 
   void
@@ -530,6 +540,7 @@ namespace Moses
     sptr<imBitext<Token> > dyn;
     { // braces are needed for scoping mutex lock guard!
       boost::lock_guard<boost::mutex> guard(this->lock);
+      assert(btdyn);
       dyn = btdyn;
     }
     assert(dyn);
@@ -575,7 +586,8 @@ namespace Moses
     // no need to expand pstats at every single lookup again, especially 
     // for btfix.
     sptr<pstats> sfix,sdyn;
-    if (mfix.size() == sphrase.size()) sfix = btfix.lookup(mfix);
+    if (mfix.size() == sphrase.size()) 
+      sfix = btfix.lookup(mfix);
     if (mdyn.size() == sphrase.size()) sdyn = dyn->lookup(mdyn);
 
     vector<PhrasePair<Token> > ppfix,ppdyn;

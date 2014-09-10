@@ -229,8 +229,12 @@ namespace Moses
   public:
     // Mmsapt(string const& description, string const& line);
     Mmsapt(string const& line);
+
     void
-    Load(bool with_checks=true);
+    Load();
+
+    void
+    Load(bool with_checks);
     
     // returns the prior table limit
     size_t SetTableLimit(size_t limit);
