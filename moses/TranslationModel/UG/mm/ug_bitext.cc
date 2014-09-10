@@ -57,7 +57,7 @@ namespace Moses
 
     bool
     pstats::
-    add(uint64_t pid, float const w, 
+    add(::uint64_t pid, float const w, 
 	vector<uchar> const& a, 
 	uint32_t const cnt2, 
 	uint32_t fwd_o, 

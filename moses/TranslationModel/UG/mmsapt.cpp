@@ -503,7 +503,7 @@ namespace Moses
 
   Mmsapt::
   TargetPhraseCollectionWrapper::
-  TargetPhraseCollectionWrapper(size_t r, uint64_t k)
+  TargetPhraseCollectionWrapper(size_t r, ::uint64_t k)
     : revision(r), key(k), refCount(0), idx(-1)
   { }
 
@@ -551,7 +551,7 @@ namespace Moses
       return NULL; // phrase not found in either bitext
 
     // cache lookup:
-    uint64_t phrasekey = (mfix.size() == sphrase.size() ? (mfix.getPid()<<1) 
+    ::uint64_t phrasekey = (mfix.size() == sphrase.size() ? (mfix.getPid()<<1) 
 			  : (mdyn.getPid()<<1)+1);
     size_t revision = dyn->revision();
     {

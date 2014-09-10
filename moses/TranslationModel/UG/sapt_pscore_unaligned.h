@@ -12,7 +12,7 @@ namespace Moses {
     class
     PScoreUnaligned : public PhraseScorer<Token>
     {
-      typedef boost::dynamic_bitset<uint64_t> bitvector;
+      typedef boost::dynamic_bitset<typename ::uint64_t> bitvector;
     public:
       PScoreUnaligned(string const spec) 
       {

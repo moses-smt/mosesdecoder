@@ -134,7 +134,7 @@ namespace Moses
     {
     public:
       size_t   const revision; // time stamp from dynamic bitext
-      uint64_t const      key; // phrase key
+      ::uint64_t const      key; // phrase key
       uint32_t       refCount; // reference count
 #if defined(timespec)
       timespec         tstamp; // last use
@@ -142,7 +142,7 @@ namespace Moses
       timeval          tstamp; // last use
 #endif
       int                 idx; // position in history heap
-      TargetPhraseCollectionWrapper(size_t r, uint64_t const k);
+      TargetPhraseCollectionWrapper(size_t r, ::uint64_t const k);
       ~TargetPhraseCollectionWrapper();
     };
 
@@ -156,7 +156,7 @@ namespace Moses
     void
     decache(TargetPhraseCollectionWrapper* ptr) const;
 
-    typedef map<uint64_t, TargetPhraseCollectionWrapper*> tpc_cache_t;
+    typedef map<typename ::uint64_t, TargetPhraseCollectionWrapper*> tpc_cache_t;
     mutable tpc_cache_t m_cache;
     mutable vector<TargetPhraseCollectionWrapper*> m_history;
     // phrase table feature weights for alignment:
@@ -189,7 +189,7 @@ namespace Moses
     void
     process_pstats
     (Phrase   const& src,
-     uint64_t const  pid1, 
+     ::uint64_t const  pid1, 
      pstats   const& stats, 
      Bitext<Token> const & bt, 
      TargetPhraseCollection* tpcoll
@@ -198,10 +198,10 @@ namespace Moses
     bool
     pool_pstats
     (Phrase   const& src,
-     uint64_t const  pid1a, 
+     ::uint64_t const  pid1a, 
      pstats        * statsa, 
      Bitext<Token> const & bta,
-     uint64_t const  pid1b, 
+     ::uint64_t const  pid1b, 
      pstats   const* statsb, 
      Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll
@@ -210,10 +210,10 @@ namespace Moses
     bool
     combine_pstats
     (Phrase   const& src,
-     uint64_t const  pid1a, 
+     ::uint64_t const  pid1a, 
      pstats   * statsa, 
      Bitext<Token> const & bta,
-     uint64_t const  pid1b, 
+     ::uint64_t const  pid1b, 
      pstats   const* statsb, 
      Bitext<Token> const & btb,
      TargetPhraseCollection* tpcoll
