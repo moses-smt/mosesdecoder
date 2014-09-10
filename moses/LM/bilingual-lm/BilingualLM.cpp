@@ -620,9 +620,11 @@ void BilingualLM::getTargetWordsChart(Phrase& whole_phrase
   for (int i = current_word_index - target_ngrams; i < current_word_index + 1; i++){
     if (i < 0) {
       words[j] = getNeuralLMId(BOS_word);
+    } else {
+      const Word& word = whole_phrase.GetWord(i);
+      words[j] = getNeuralLMId(word);
     }
-    const Word& word = whole_phrase.GetWord(i);
-    words[j] = getNeuralLMId(word);
+    j++;
   }
 
 }
