@@ -23,7 +23,6 @@
 #include "ug_typedefs.h"
 #include "tpt_pickler.h"
 #include "ug_bitext.h"
-#include "../mmsapt_phrase_scorers.h"
 #include "ug_lexical_phrase_scorer2.h"
 #include "../sapt_phrase_scorers.h"
 using namespace std;
@@ -46,7 +45,7 @@ float lbsmooth = .005;
 PScorePfwd<Token> calc_pfwd;
 PScorePbwd<Token> calc_pbwd;
 PScoreLex<Token>  calc_lex(1.0);
-PScoreWP<Token>   apply_wp;
+PScoreWC<Token>   apply_wp;
 vector<float> fweights;
 
 void
