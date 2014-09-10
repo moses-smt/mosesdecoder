@@ -600,7 +600,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
 size_t BilingualLM::getStateChart(Phrase& whole_phrase) const {
   size_t hashCode = 0;
-  for (int i = whole_phrase.GetSize() - target_ngrams; i < target_ngrams; i++){
+  for (int i = whole_phrase.GetSize() - target_ngrams; i < whole_phrase.GetSize(); i++){
     int neuralLM_wordID;
     if (i < 0) {
       neuralLM_wordID = getNeuralLMId(BOS_word);
