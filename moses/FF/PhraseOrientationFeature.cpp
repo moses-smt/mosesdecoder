@@ -53,8 +53,6 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
   const Phrase *currSrcPhr = currTarPhr.GetRuleSource();
 //  const Factor* targetLHS = currTarPhr.GetTargetLHS()[0];
 //  bool isGlueGrammarRule = false;
-  bool isUnkRule = false;
-
 
   std::map<size_t,size_t> alignMap;
   alignMap.insert(
@@ -188,13 +186,7 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
               UTIL_THROW_IF2(!currTarPhr.GetWord(0).IsOOV(), GetScoreProducerDescription()
                              << ": Missing Orientation property. "
                              << "Please check phrase table and glue rules.");
-              // unknown word
-              isUnkRule = true;
           }
-
-          const WordsRange& prevWordsRange = prevHypo->GetCurrSourceRange();
-          size_t prevStartPos = prevWordsRange.GetStartPos();
-          size_t prevEndPos = prevWordsRange.GetEndPos();
 
           ++nonTerminalNumber;
       }
