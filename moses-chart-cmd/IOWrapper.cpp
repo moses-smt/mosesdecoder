@@ -712,6 +712,8 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
   bool includeWordAlignment =
       StaticData::Instance().PrintAlignmentInfoInNbest();
 
+  bool PrintNBestTrees = StaticData::Instance().PrintNBestTrees();
+
   for (ChartKBestExtractor::KBestVec::const_iterator p = nBestList.begin();
        p != nBestList.end(); ++p) {
     const ChartKBestExtractor::Derivation &derivation = **p;
@@ -741,6 +743,12 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
            ++q) {
         out << q->first << "-" << q->second << " ";
       }
+    }
+
+    // optionally, print tree
+    if (PrintNBestTrees) {
+      TreePointer tree = ChartKBestExtractor::GetOutputTree(derivation);
+      out << " ||| " << tree->GetString();
     }
 
     out << std::endl;
