@@ -692,7 +692,7 @@ int BilingualLM::getSourceWordsChart(const TargetPhrase &targetPhrase
     if ((targetWordIdx + j) < targetPhrase.GetSize()){
       last_word_al = alignments.GetAlignmentsForTarget(targetWordIdx + j);
       //If the current word is non terminal we get the alignment from the previous state.
-      if (targetPhrase.GetWord(targetWordIdx - j).IsNonTerminal()) {
+      if (targetPhrase.GetWord(targetWordIdx + j).IsNonTerminal()) {
         const ChartHypothesis * prev_hypo = curr_hypothesis.GetPrevHypo(next_nonterminal_index);
         const BilingualLMState * prev_state = static_cast<const BilingualLMState *>(prev_hypo->GetFFState(featureID));
         const std::vector<int>& word_alignments = prev_state->GetWordAlignmentVector();
@@ -706,7 +706,7 @@ int BilingualLM::getSourceWordsChart(const TargetPhrase &targetPhrase
     } else if ((targetWordIdx - j) > 0) {
       //If the current word is non terminal we get the alignment from a different place
       if (targetPhrase.GetWord(targetWordIdx - j).IsNonTerminal()) {
-        const ChartHypothesis * prev_hypo = curr_hypothesis.GetPrevHypo(next_nonterminal_index);
+        const ChartHypothesis * prev_hypo = curr_hypothesis.GetPrevHypo(next_nonterminal_index -1); //We need to look at the nonterm on the left.
         const BilingualLMState * prev_state = static_cast<const BilingualLMState *>(prev_hypo->GetFFState(featureID));
         const std::vector<int>& word_alignments = prev_state->GetWordAlignmentVector();
         source_word_mid_idx = word_alignments[0]; //The first word on the right or left of our word
@@ -811,7 +811,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
         getTargetWordsChart(whole_phrase, i + additional_shift + j, all_words);
         value += m_neuralLM->lookup_ngram(all_words); //Get the score
       }
-      additional_shift += prev_whole_phrase.GetSize(); //Take into account the size of this non Terminal
+      additional_shift += prev_whole_phrase.GetSize() - 1; //Take into account the size of this non Terminal
 
     }
 
