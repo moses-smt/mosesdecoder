@@ -45,10 +45,10 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
   const ChartHypothesis& hypo,
   ScoreComponentCollection* accumulator) const
 {
-  // dense scores
+  // Dense scores
   std::vector<float> newScores(m_numScoreComponents,0); // m_numScoreComponents == 8
 
-  // read Orientation property
+  // Read Orientation property
   const TargetPhrase &currTarPhr = hypo.GetCurrTargetPhrase();
   const Phrase *currSrcPhr = currTarPhr.GetRuleSource();
 //  const Factor* targetLHS = currTarPhr.GetTargetLHS()[0];
@@ -82,14 +82,17 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
 
   // Initialize phrase orientation scoring object
   Moses::GHKM::PhraseOrientation phraseOrientation(currSrcPhr->GetSize(), currTarPhr.GetSize(), alignment);
+  // TODO: Efficiency! This should be precomputed.
 
 //  std::cerr << *currSrcPhr << std::endl;
 //  std::cerr << currTarPhr << std::endl;
 //  std::cerr << currSrcPhr->GetSize() << std::endl;
  
-  // get index map for underlying hypotheses
+  // Get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
       currTarPhr.GetAlignNonTerm().GetNonTermIndexMap();
+
+  // Determine & score orientations
 
   size_t nonTerminalNumber = 0;
 
@@ -177,6 +180,8 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
                                   << ": Unsupported orientation type.");
                       break;
               }
+
+              // TODO: Handle degenerate cases with boundary non-terminals
 
           } else {
               // abort with error message if the phrase does not translate an unknown word
