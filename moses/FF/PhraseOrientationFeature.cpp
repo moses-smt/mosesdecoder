@@ -1,10 +1,8 @@
 #include <vector>
-#include <limits>
-#include <assert.h>
 #include "PhraseOrientationFeature.h"
-#include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
 #include "moses/ScoreComponentCollection.h"
+#include "moses/StaticData.h"
 #include "moses/Hypothesis.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
@@ -50,8 +48,6 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
   // dense scores
   std::vector<float> newScores(m_numScoreComponents,0); // m_numScoreComponents == 8
 
-//  const InputType& input = hypo.GetManager().GetSource();
-
   // read Orientation property
   const TargetPhrase &currTarPhr = hypo.GetCurrTargetPhrase();
   const Phrase *currSrcPhr = currTarPhr.GetRuleSource();
@@ -74,22 +70,22 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
   for (AlignmentInfo::const_iterator it=currTarPhr.GetAlignTerm().begin();
        it!=currTarPhr.GetAlignTerm().end(); ++it) {
     alignment.push_back(std::make_pair(it->first, it->second));
-    std::cerr << "alignTerm " << it->first << " " << it->second << std::endl;
+//    std::cerr << "alignTerm " << it->first << " " << it->second << std::endl;
   }
 
   for (AlignmentInfo::const_iterator it=currTarPhr.GetAlignNonTerm().begin();
        it!=currTarPhr.GetAlignNonTerm().end(); ++it) {
     alignment.push_back(std::make_pair(it->first, it->second));
     alignmentNTs[it->second] = it->first;
-    std::cerr << "alignNonTerm " << it->first << " " << it->second << std::endl;
+//    std::cerr << "alignNonTerm " << it->first << " " << it->second << std::endl;
   }
 
   // Initialize phrase orientation scoring object
   Moses::GHKM::PhraseOrientation phraseOrientation(currSrcPhr->GetSize(), currTarPhr.GetSize(), alignment);
 
-  std::cerr << *currSrcPhr << std::endl;
-  std::cerr << currTarPhr << std::endl;
-  std::cerr << currSrcPhr->GetSize() << std::endl;
+//  std::cerr << *currSrcPhr << std::endl;
+//  std::cerr << currTarPhr << std::endl;
+//  std::cerr << currSrcPhr->GetSize() << std::endl;
  
   // get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
@@ -108,44 +104,44 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
           if (const PhraseProperty *property = prevTarPhr.GetProperty("Orientation")) {
               const OrientationPhraseProperty *orientationPhraseProperty = static_cast<const OrientationPhraseProperty*>(property); 
 
-              std::cerr << "L2R_Mono "    << orientationPhraseProperty->GetLeftToRightProbabilityMono();
-              std::cerr << " L2R_Swap "   << orientationPhraseProperty->GetLeftToRightProbabilitySwap();
-              std::cerr << " L2R_Dright " << orientationPhraseProperty->GetLeftToRightProbabilityDright();
-              std::cerr << " L2R_Dleft "  << orientationPhraseProperty->GetLeftToRightProbabilityDleft();
-              std::cerr << " R2L_Mono "   << orientationPhraseProperty->GetRightToLeftProbabilityMono();
-              std::cerr << " R2L_Swap "   << orientationPhraseProperty->GetRightToLeftProbabilitySwap();
-              std::cerr << " R2L_Dright " << orientationPhraseProperty->GetRightToLeftProbabilityDright();
-              std::cerr << " R2L_Dleft "  << orientationPhraseProperty->GetRightToLeftProbabilityDleft();
-              std::cerr << std::endl;
+//              std::cerr << "L2R_Mono "    << orientationPhraseProperty->GetLeftToRightProbabilityMono();
+//              std::cerr << " L2R_Swap "   << orientationPhraseProperty->GetLeftToRightProbabilitySwap();
+//              std::cerr << " L2R_Dright " << orientationPhraseProperty->GetLeftToRightProbabilityDright();
+//              std::cerr << " L2R_Dleft "  << orientationPhraseProperty->GetLeftToRightProbabilityDleft();
+//              std::cerr << " R2L_Mono "   << orientationPhraseProperty->GetRightToLeftProbabilityMono();
+//              std::cerr << " R2L_Swap "   << orientationPhraseProperty->GetRightToLeftProbabilitySwap();
+//              std::cerr << " R2L_Dright " << orientationPhraseProperty->GetRightToLeftProbabilityDright();
+//              std::cerr << " R2L_Dleft "  << orientationPhraseProperty->GetRightToLeftProbabilityDleft();
+//              std::cerr << std::endl;
 
               Moses::GHKM::REO_POS l2rOrientation=Moses::GHKM::UNKNOWN, r2lOrientation=Moses::GHKM::UNKNOWN;
               int sourceIndex = alignmentNTs[phrasePos];
-              std::cerr << "targetIndex " << phrasePos << " sourceIndex " << sourceIndex << std::endl;
+//              std::cerr << "targetIndex " << phrasePos << " sourceIndex " << sourceIndex << std::endl;
               l2rOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,Moses::GHKM::L2R);
               r2lOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,Moses::GHKM::R2L);
 
-              std::cerr << "l2rOrientation ";
+//              std::cerr << "l2rOrientation ";
               switch(l2rOrientation) {
                   case Moses::GHKM::LEFT:
                       newScores[0] += std::log(orientationPhraseProperty->GetLeftToRightProbabilityMono());
-                      std::cerr << "mono" << std::endl;
+//                      std::cerr << "mono" << std::endl;
                       break;
                   case Moses::GHKM::RIGHT:
                       newScores[1] += std::log(orientationPhraseProperty->GetLeftToRightProbabilitySwap());
-                      std::cerr << "swap" << std::endl;
+//                      std::cerr << "swap" << std::endl;
                       break;
                   case Moses::GHKM::DRIGHT:
                       newScores[2] += std::log(orientationPhraseProperty->GetLeftToRightProbabilityDright());
-                      std::cerr << "dright" << std::endl;
+//                      std::cerr << "dright" << std::endl;
                       break;
                   case Moses::GHKM::DLEFT:
                       newScores[3] += std::log(orientationPhraseProperty->GetLeftToRightProbabilityDleft());
-                      std::cerr << "dleft" << std::endl;
+//                      std::cerr << "dleft" << std::endl;
                       break;
                   case Moses::GHKM::UNKNOWN:
                       // modelType == Moses::GHKM::REO_MSLR
                       newScores[2] += std::log(orientationPhraseProperty->GetLeftToRightProbabilityDright());
-                      std::cerr << "unknown->dright" << std::endl;
+//                      std::cerr << "unknown->dright" << std::endl;
                       break;
                   default:
                       UTIL_THROW2(GetScoreProducerDescription()
@@ -153,28 +149,28 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
                       break;
               }
 
-              std::cerr << "r2lOrientation ";
+//              std::cerr << "r2lOrientation ";
               switch(r2lOrientation) {
                   case Moses::GHKM::LEFT:
                       newScores[4] += std::log(orientationPhraseProperty->GetRightToLeftProbabilityMono());
-                      std::cerr << "mono" << std::endl;
+//                      std::cerr << "mono" << std::endl;
                       break;
                   case Moses::GHKM::RIGHT:
                       newScores[5] += std::log(orientationPhraseProperty->GetRightToLeftProbabilitySwap());
-                      std::cerr << "swap" << std::endl;
+//                      std::cerr << "swap" << std::endl;
                       break;
                   case Moses::GHKM::DRIGHT:
                       newScores[6] += std::log(orientationPhraseProperty->GetRightToLeftProbabilityDright());
-                      std::cerr << "dright" << std::endl;
+//                      std::cerr << "dright" << std::endl;
                       break;
                   case Moses::GHKM::DLEFT:
                       newScores[7] += std::log(orientationPhraseProperty->GetRightToLeftProbabilityDleft());
-                      std::cerr << "dleft" << std::endl;
+//                      std::cerr << "dleft" << std::endl;
                       break;
                   case Moses::GHKM::UNKNOWN:
                       // modelType == Moses::GHKM::REO_MSLR
                       newScores[6] += std::log(orientationPhraseProperty->GetRightToLeftProbabilityDright());
-                      std::cerr << "unknown->dright" << std::endl;
+//                      std::cerr << "unknown->dright" << std::endl;
                       break;
                   default:
                       UTIL_THROW2(GetScoreProducerDescription()
@@ -198,17 +194,6 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
           ++nonTerminalNumber;
       }
   }
-      
-
-  // add scores
-//  newScores[0] = orientationPhraseProperty.GetLeftToRightProbabilityMono();
-//  newScores[1] = orientationPhraseProperty.GetLeftToRightProbabilitySwap();
-//  newScores[2] = orientationPhraseProperty.GetLeftToRightProbabilityDright();
-//  newScores[3] = orientationPhraseProperty.GetLeftToRightProbabilityDleft();
-//  newScores[4] = orientationPhraseProperty.GetRightToLeftProbabilityMono();
-//  newScores[5] = orientationPhraseProperty.GetRightToLeftProbabilitySwap();
-//  newScores[6] = orientationPhraseProperty.GetRightToLeftProbabilityDright();
-//  newScores[7] = orientationPhraseProperty.GetRightToLeftProbabilityDleft();
 
   accumulator->PlusEquals(this, newScores);
 }
