@@ -80,8 +80,8 @@ private:
   static bool le(int first, int second) { return first <= second; };
   static bool lt(int first, int second) { return first < second; };
 
-  const int &m_countF;
-  const int &m_countE;
+  const int m_countF;
+  const int m_countE;
   const Alignment &m_alignment;
 
   std::vector<std::vector<int> > m_alignedToT;

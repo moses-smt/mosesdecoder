@@ -63,7 +63,7 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
                   currTarPhr.GetAlignNonTerm().end());
 
   Moses::GHKM::Alignment alignment;
-  std::vector<int> alignmentNTs(currTarPhr.GetSize(),-1);
+  std::vector<int> alignmentNTs(currTarPhr.GetSize(),-1); // TODO: can be smaller (number of right-hand side non-terminals)
 
   for (AlignmentInfo::const_iterator it=currTarPhr.GetAlignTerm().begin();
        it!=currTarPhr.GetAlignTerm().end(); ++it) {
@@ -85,6 +85,7 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
 //  std::cerr << *currSrcPhr << std::endl;
 //  std::cerr << currTarPhr << std::endl;
 //  std::cerr << currSrcPhr->GetSize() << std::endl;
+//  std::cerr << currTarPhr.GetSize() << std::endl;
  
   // Get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
@@ -179,11 +180,11 @@ void PhraseOrientationFeature::EvaluateWhenApplied(
                       break;
               }
 
-              // TODO: Handle degenerate cases with boundary non-terminals
+              // TODO: Handle degenerate cases (boundary non-terminals)
 
           } else {
               // abort with error message if the phrase does not translate an unknown word
-              UTIL_THROW_IF2(!currTarPhr.GetWord(0).IsOOV(), GetScoreProducerDescription()
+              UTIL_THROW_IF2(!prevTarPhr.GetWord(0).IsOOV(), GetScoreProducerDescription()
                              << ": Missing Orientation property. "
                              << "Please check phrase table and glue rules.");
           }
