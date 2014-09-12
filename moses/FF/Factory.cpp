@@ -89,7 +89,7 @@
 
 #ifdef LM_NEURAL
 #include "moses/LM/NeuralLMWrapper.h"
-#include "moses/LM/bilingual-lm/BilingualLM.h"
+#include "moses/LM/bilingual-lm/Binlm_nplm.h"
 #endif
 
 #ifdef LM_DALM
@@ -247,7 +247,7 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_NEURAL
   MOSES_FNAME2("NeuralLM", NeuralLMWrapper);
-  MOSES_FNAME(BilingualLM);
+  MOSES_FNAME(BilingualLM_NPLM);
 #endif
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
