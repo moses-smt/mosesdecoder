@@ -4,6 +4,7 @@
 #include "StatelessFeatureFunction.h"
 #include "FFState.h"
 #include "moses/Factor.h"
+#include "phrase-extract/extract-ghkm/PhraseOrientation.h"
 
 namespace Moses
 {
@@ -26,8 +27,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {};
+                , ScoreComponentCollection &estimatedFutureScore) const;
 
   void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
@@ -45,8 +45,6 @@ public:
   void EvaluateWhenApplied(
     const ChartHypothesis& cur_hypo,
     ScoreComponentCollection* accumulator) const;
-
-private:
 
 };
 

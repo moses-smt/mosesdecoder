@@ -239,7 +239,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     }
 
     // Initialize phrase orientation scoring object
-    PhraseOrientation phraseOrientation( sourceTokens, targetXmlTreeParser.GetWords(), alignment);
+    PhraseOrientation phraseOrientation( sourceTokens.size(), targetXmlTreeParser.GetWords().size(), alignment);
 
     // Write the rules, subject to scope pruning.
     const std::vector<Node *> &targetNodes = graph.GetTargetNodes();
