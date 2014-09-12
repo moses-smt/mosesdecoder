@@ -52,6 +52,11 @@ class BilingualLM : public StatefulFeatureFunction
 {
 
 private:
+
+  float Score(std::vector<int>& source_words, std::vector<int>& target_words) const;
+
+  int LookUpNeuralLMWord(const std::string str) const;
+
   void getSourceWords(const TargetPhrase &targetPhrase
                 , int targetWordIdx
                 , const Sentence &source_sent
