@@ -1,8 +1,6 @@
 #include <vector>
 #include "BilingualLM.h"
 #include "moses/ScoreComponentCollection.h"
-#include "neuralLM.h"
-
 
 using namespace std;
 
@@ -36,37 +34,19 @@ BilingualLM::BilingualLM(const std::string &line)
 }
 
 void BilingualLM::Load(){
-  m_neuralLM_shared = new nplm::neuralLM(m_filePath, premultiply); //Default premultiply= true
+  loadModel();
+  initSharedPointer();
 
-  m_neuralLM_shared->set_cache(neuralLM_cache); //Default 1000000
-  UTIL_THROW_IF2(m_nGramOrder != m_neuralLM_shared->get_order(),
-                 "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
-
-  if (!m_neuralLM.get()) {
-    m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
-  }
   //Get unknown word ID
-  unknown_word_id = m_neuralLM->lookup_word("<unk>");
+  unknown_word_id = LookUpNeuralLMWord("<unk>");
 
-}
-
-float BilingualLM::Score(std::vector<int>& source_words, std::vector<int>& target_words) const {
-  source_words.reserve(source_ngrams+target_ngrams+1);
-  source_words.insert( source_words.end(), target_words.begin(), target_words.end() );
-  return m_neuralLM->lookup_ngram(source_words);
-}
-
-int BilingualLM::LookUpNeuralLMWord(const std::string str) const {
-  return m_neuralLM->lookup_word(str);
 }
 
 //Cache for NeuralLMids
 int BilingualLM::getNeuralLMId(const Word& word) const{
 
-  if (!m_neuralLM.get()) {
-    m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
-  }
-
+  initSharedPointer();
+  
   const Factor* factor = word.GetFactor(word_factortype);
 
   std::map<const Factor *, int>::iterator it;
