@@ -89,7 +89,7 @@
 
 #ifdef LM_NEURAL
 #include "moses/LM/NeuralLMWrapper.h"
-#include "moses/LM/bilingual-lm/Binlm_nplm.h"
+#include "moses/LM/bilingual-lm/BiLM_NPLM.h"
 #endif
 
 #ifdef LM_DALM

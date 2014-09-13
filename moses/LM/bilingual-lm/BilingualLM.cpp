@@ -790,6 +790,10 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
     }
 
+    //Clear the vectors before the next iteration
+    source_words.clear();
+    target_words.clear();
+
   }
   size_t new_state = getStateChart(whole_phrase);
   int source_phrase_end_idx = word_alignments[word_alignments_curr_idx]; //Figure it out later
