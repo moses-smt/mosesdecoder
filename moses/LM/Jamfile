@@ -90,8 +90,8 @@ if $(with-nplm) {
   lib neuralLM : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
   obj NeuralLMWrapper.o : NeuralLMWrapper.cpp neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
   obj BilingualLM.o : bilingual-lm/BilingualLM.cpp neuralLM ;
-  obj Binlm_nplm.o : bilingual-lm/Binlm_nplm.cpp BilingualLM.o neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
-  alias nplm : NeuralLMWrapper.o BilingualLM.o Binlm_nplm.o neuralLM : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
+  obj BiLM_NPLM.o : bilingual-lm/BiLM_NPLM.cpp BilingualLM.o neuralLM ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen ;
+  alias nplm : NeuralLMWrapper.o BilingualLM.o BiLM_NPLM.o neuralLM : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
   dependencies += nplm ;
   lmmacros += LM_NEURAL ;
 }
