@@ -52,6 +52,7 @@ private:
   virtual int LookUpNeuralLMWord(const std::string str) const = 0;
   virtual void initSharedPointer() const = 0;
   virtual void loadModel() const = 0;
+  virtual bool parseAdditionalSettings(const std::string& key, const std::string& value) = 0;
 
   void getSourceWords(const TargetPhrase &targetPhrase
                 , int targetWordIdx
@@ -101,10 +102,8 @@ protected:
   int m_nGramOrder;
   int target_ngrams;
   int source_ngrams;
-  bool premultiply;
-  bool factored;
-  int neuralLM_cache;
   int unknown_word_id;
+  bool factored;
 
   //NeuralLM lookup
   FactorType word_factortype;
