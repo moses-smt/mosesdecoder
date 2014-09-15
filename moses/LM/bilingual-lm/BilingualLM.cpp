@@ -18,14 +18,11 @@ int BilingualLMState::Compare(const FFState& other) const
 ////////////////////////////////////////////////////////////////
 BilingualLM::BilingualLM(const std::string &line)
   :StatefulFeatureFunction(1, line)
-  ,premultiply(true)
   ,factored(false)
-  ,neuralLM_cache(1000000)
   ,word_factortype(0)
   ,BOS_word(BOS_word_actual)
   ,EOS_word(EOS_word_actual)
 {
-  ReadParameters();
   FactorCollection& factorFactory = FactorCollection::Instance(); //Factor Factory to use for BOS_ and EOS_
   BOS_factor = factorFactory.AddFactor(BOS_);
   BOS_word_actual.SetFactor(0, BOS_factor);
@@ -34,6 +31,7 @@ BilingualLM::BilingualLM(const std::string &line)
 }
 
 void BilingualLM::Load(){
+  ReadParameters();
   loadModel();
   initSharedPointer();
 
@@ -811,21 +809,10 @@ void BilingualLM::SetParameter(const std::string& key, const std::string& value)
     m_nGramOrder = atoi(value.c_str());
   } else if (key == "target_ngrams") {
     target_ngrams = atoi(value.c_str());
+  } else if (parseAdditionalSettings(key, value)) { //Give key and value to specific implementation
+    //Do nothing here, we assign the variables in the implementation of bilingualLM
   } else if (key == "source_ngrams") {
     source_ngrams = atoi(value.c_str());
-  } else if (key == "cache_size") {
-    neuralLM_cache = atoi(value.c_str());
-  } else if (key == "premultiply") {
-    std::string truestr = "true";
-    std::string falsestr = "false";
-    if (value == truestr) {
-      premultiply = true;
-    } else if (value == falsestr) {
-        premultiply = false;
-    } else {
-      std::cerr << "UNRECOGNIZED OPTION FOR PARAMETER premultiply. Got " << value << " , expected true or false!" << std::endl;
-      exit(1);
-    }
   } else if (key == "factored") {
     std::string truestr = "true";
     std::string falsestr = "false";
