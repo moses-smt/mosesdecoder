@@ -13,11 +13,6 @@
 #include "moses/ChartManager.h"
 #include "moses/FactorCollection.h"
 
-namespace nplm {
-  class neuralLM;
-}
-
-
 namespace Moses
 {
 
@@ -48,10 +43,17 @@ public:
   int Compare(const FFState& other) const;
 };
 
-class BilingualLM : public StatefulFeatureFunction
+class BilingualLM : public StatefulFeatureFunction 
 {
 
 private:
+
+  virtual float Score(std::vector<int>& source_words, std::vector<int>& target_words) const = 0;
+  virtual int LookUpNeuralLMWord(const std::string str) const = 0;
+  virtual void initSharedPointer() const = 0;
+  virtual void loadModel() const = 0;
+  virtual bool parseAdditionalSettings(const std::string& key, const std::string& value) = 0;
+
   void getSourceWords(const TargetPhrase &targetPhrase
                 , int targetWordIdx
                 , const Sentence &source_sent
@@ -97,14 +99,11 @@ private:
 protected:
   // big data (vocab, weights, cache) shared among threads
   std::string m_filePath;
-  nplm::neuralLM *m_neuralLM_shared;
   int m_nGramOrder;
   int target_ngrams;
   int source_ngrams;
-  bool premultiply;
-  bool factored;
-  int neuralLM_cache;
   int unknown_word_id;
+  bool factored;
 
   //NeuralLM lookup
   FactorType word_factortype;
@@ -115,9 +114,6 @@ protected:
   mutable Word EOS_word_actual;
   const Word& BOS_word;
   const Word& EOS_word;
-
-  // thread-specific nplm for thread-safety
-  mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 
 public:
   BilingualLM(const std::string &line);
