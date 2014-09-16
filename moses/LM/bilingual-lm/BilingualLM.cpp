@@ -783,6 +783,8 @@ FFState* BilingualLM::EvaluateWhenApplied(
         appendSourceWordsToVector(source_sent, source_words, prev_word_alignments[j]); //Get Source words
         getTargetWordsChart(whole_phrase, i + additional_shift + j, target_words);
         value += Score(source_words, target_words); //Get the score
+        source_words.clear();
+        target_words.clear();
       }
       additional_shift += prev_whole_phrase.GetSize() - 1; //Take into account the size of this non Terminal
 
