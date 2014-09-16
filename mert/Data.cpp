@@ -164,10 +164,9 @@ void Data::loadNBest(const string &file)
         ++it;                             // skip model score.
 
         if (it) {
-          ++it;
           alignment = it->as_string(); //fifth field (if present) is either phrase or word alignment
+          ++it;
           if (it) {
-            ++it;
             alignment = it->as_string(); //sixth field (if present) is word alignment
           }
         }
