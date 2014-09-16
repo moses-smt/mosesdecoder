@@ -33,7 +33,7 @@ public:
     return kHwcmOrder*3;
   }
 
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
   //TODO: actually, we use trees which we store in place of alignment. Maybe use something analogous to Phrase Properties to cleanly store trees?
   bool useAlignment() const {

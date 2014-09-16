@@ -141,7 +141,7 @@ void HwcmScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   entry.set(stats_str);
 }
 
-float HwcmScorer::calculateScore(const vector<int>& comps) const
+float HwcmScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   float precision = 0;
   float recall = 0;

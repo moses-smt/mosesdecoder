@@ -38,7 +38,7 @@ protected:
   /**
    * Calculate the actual score.
    */
-  virtual statscore_t calculateScore(const std::vector<int>& totals) const = 0;
+  virtual statscore_t calculateScore(const std::vector<ScoreStatsType>& totals) const = 0;
 
   // regularisation
   RegularisationType m_regularization_type;

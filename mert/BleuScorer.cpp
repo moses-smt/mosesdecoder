@@ -186,7 +186,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   entry.set(stats);
 }
 
-statscore_t BleuScorer::calculateScore(const vector<int>& comps) const
+statscore_t BleuScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   UTIL_THROW_IF(comps.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
