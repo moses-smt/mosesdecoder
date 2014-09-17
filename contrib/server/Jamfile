@@ -5,6 +5,10 @@ import path ;
 
 with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
 if $(with-xmlrpc-c) {
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking the XMLRPC-C library; Do NOT use v.1.25.29 !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+
   build-moses-server = true ;
   xmlrpc-command = $(with-xmlrpc-c)/bin/xmlrpc-c-config ;
   if ! [ path.exists $(xmlrpc-command) ] {
