@@ -32,7 +32,7 @@ def main():
     ,hidden=750
     ,input_embedding=150
     ,output_embedding=150
-    ,threads=8
+    ,threads=1
     ,output_model = "train.10k"
   )
 
