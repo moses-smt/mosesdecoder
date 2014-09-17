@@ -67,7 +67,7 @@ public:
     m_feature_data->Features(f);
   }
 
-  void loadNBest(const std::string &file);
+  void loadNBest(const std::string &file, bool oneBest=false);
 
   void load(const std::string &featfile, const std::string &scorefile);
 

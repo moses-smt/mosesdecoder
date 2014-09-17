@@ -14,6 +14,7 @@
 #include "ScorerFactory.h"
 #include "Timer.h"
 #include "Util.h"
+#include "Data.h"
 
 using namespace std;
 using namespace MosesTuning;
@@ -30,17 +31,20 @@ const float g_alpha = 0.05;
 class EvaluatorUtil
 {
 public:
-  static void evaluate(const string& candFile, int bootstrap);
+  static void evaluate(const string& candFile, int bootstrap, bool nbest_mode);
   static float average(const vector<float>& list);
   static string int2string(int n);
+  static vector<ScoreStats> loadNBest(const string& nBestFile);
+  static vector<ScoreStats> loadCand(const string& candFile);
 
 private:
   EvaluatorUtil() {}
   ~EvaluatorUtil() {}
 };
 
-void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
-{
+// load hypothesis from candidate output
+vector<ScoreStats> EvaluatorUtil::loadCand(const string& candFile) {
+
   ifstream cand(candFile.c_str());
   if (!cand.good()) throw runtime_error("Error opening candidate file");
 
@@ -52,6 +56,34 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
   while (getline(cand, line)) {
     g_scorer->prepareStats(entries.size(), line, scoreentry);
     entries.push_back(scoreentry);
+  }
+  return entries;
+}
+
+// load 1-best hypothesis from n-best file (useful if relying on alignment/tree information)
+vector<ScoreStats> EvaluatorUtil::loadNBest(const string& nBestFile) {
+  vector<ScoreStats> entries;
+
+  Data data(g_scorer);
+  data.loadNBest(nBestFile, true);
+  const ScoreDataHandle & score_data = data.getScoreData();
+  for (size_t i = 0; i != score_data->size(); i++) {
+    entries.push_back(score_data->get(i, 0));
+  }
+  return entries;
+}
+
+
+void EvaluatorUtil::evaluate(const string& candFile, int bootstrap, bool nbest_input)
+{
+
+  vector<ScoreStats> entries;
+
+  if (nbest_input) {
+    entries = loadNBest(candFile);
+  }
+  else {
+    entries = loadCand(candFile);
   }
 
   int n = entries.size();
@@ -131,6 +163,7 @@ void usage()
   cerr << "\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc " << endl;
   cerr << "[--reference|-R] comma separated list of reference files" << endl;
   cerr << "[--candidate|-C] comma separated list of candidate files" << endl;
+  cerr << "[--nbest|-n] comma separated list of nbest files (only 1-best is evaluated)" << endl;
   cerr << "[--factors|-f] list of factors passed to the scorer (e.g. 0|2)" << endl;
   cerr << "[--filter|-l] filter command which will be used to preprocess the sentences" << endl;
   cerr << "[--bootstrap|-b] number of booststraped samples (default 0 - no bootstraping)" << endl;
@@ -162,6 +195,7 @@ static struct option long_options[] = {
   {"scconfig", required_argument, 0, 'c'},
   {"reference", required_argument, 0, 'R'},
   {"candidate", required_argument, 0, 'C'},
+  {"nbest", required_argument, 0, 'n'},
   {"bootstrap", required_argument, 0, 'b'},
   {"rseed", required_argument, 0, 'r'},
   {"factors", required_argument, 0, 'f'},
@@ -176,6 +210,7 @@ struct ProgramOption {
   vector<string> scorer_configs;
   string reference;
   string candidate;
+  string nbest;
   vector<string> scorer_factors;
   vector<string> scorer_filter;
   int bootstrap;
@@ -185,6 +220,7 @@ struct ProgramOption {
   ProgramOption()
     : reference(""),
       candidate(""),
+      nbest(""),
       bootstrap(0),
       seed(0),
       has_seed(false) { }
@@ -195,7 +231,7 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt)
   int c;
   int option_index;
   int last_scorer_index = -1;
-  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:f:l:h", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "s:c:R:C:n:b:r:f:l:h", long_options, &option_index)) != -1) {
     switch(c) {
     case 's':
       opt->scorer_types.push_back(string(optarg));
@@ -212,6 +248,9 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt)
       break;
     case 'C':
       opt->candidate = string(optarg);
+      break;
+    case 'n':
+      opt->nbest = string(optarg);
       break;
     case 'b':
       opt->bootstrap = atoi(optarg);
@@ -271,8 +310,13 @@ int main(int argc, char** argv)
     if (option.reference.length() == 0) throw runtime_error("You have to specify at least one reference file.");
     split(option.reference, ',', refFiles);
 
-    if (option.candidate.length() == 0) throw runtime_error("You have to specify at least one candidate file.");
-    split(option.candidate, ',', candFiles);
+    if (option.candidate.length() == 0 && option.nbest.length() == 0) throw runtime_error("You have to specify at least one candidate (or n-best) file.");
+    if (option.candidate.length() > 0 && option.nbest.length() > 0) throw runtime_error("You can either specify candidate files or n-best files, but not both.");
+    bool nbest_input = option.nbest.length() > 0;
+    if (nbest_input)
+      split(option.nbest, ',', candFiles);
+    else
+      split(option.candidate, ',', candFiles);
 
     if (candFiles.size() > 1) g_has_more_files = true;
     if (option.scorer_types.size() > 1) g_has_more_scorers = true;
@@ -283,7 +327,7 @@ int main(int argc, char** argv)
         g_scorer->setFactors(option.scorer_factors[i]);
         g_scorer->setFilter(option.scorer_filter[i]);
         g_scorer->setReferenceFiles(refFiles);
-        EvaluatorUtil::evaluate(*fileIt, option.bootstrap);
+        EvaluatorUtil::evaluate(*fileIt, option.bootstrap, nbest_input);
         delete g_scorer;
       }
     }

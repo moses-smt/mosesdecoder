@@ -135,7 +135,7 @@ void Data::load(const std::string &featfile, const std::string &scorefile)
   m_score_data->load(scorefile);
 }
 
-void Data::loadNBest(const string &file)
+void Data::loadNBest(const string &file, bool oneBest)
 {
   TRACE_ERR("loading nbest from " << file << endl);
   util::FilePiece in(file.c_str());
@@ -154,6 +154,7 @@ void Data::loadNBest(const string &file)
       util::TokenIter<util::MultiCharacter> it(line, util::MultiCharacter("|||"));
 
       sentence_index = ParseInt(*it);
+      if (oneBest && m_score_data->exists(sentence_index)) continue;
       ++it;
       sentence = it->as_string();
       ++it;

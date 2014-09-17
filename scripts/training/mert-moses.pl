@@ -1120,7 +1120,7 @@ if($___RETURN_BEST_DEV) {
   my $bestbleu=0;
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
-    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " $mert_extract_args --candidate run$i.out";
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " $mert_extract_args --nbest run$i.best$___N_BEST_LIST_SIZE.out.gz";
     $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
     safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
