@@ -35,6 +35,10 @@ public:
 
   virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const {
+    return totals[2];
+  }
+
   //TODO: actually, we use trees which we store in place of alignment. Maybe use something analogous to Phrase Properties to cleanly store trees?
   bool useAlignment() const {
     return true;

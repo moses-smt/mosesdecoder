@@ -289,23 +289,6 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
   return exp(logbleu) * stats[kBleuNgramOrder*2];
 }
 
-float unsmoothedBleu(const std::vector<float>& stats)
-{
-  UTIL_THROW_IF(stats.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
-
-  float logbleu = 0.0;
-  for (int j = 0; j < kBleuNgramOrder; j++) {
-    logbleu += log(stats[2 * j]) - log(stats[2 * j + 1]);
-  }
-  logbleu /= kBleuNgramOrder;
-  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
-
-  if (brevity < 0.0) {
-    logbleu += brevity;
-  }
-  return exp(logbleu);
-}
-
 vector<float> BleuScorer::ScoreNbestList(const string& scoreFile, const string& featureFile)
 {
   vector<string> scoreFiles;

@@ -386,7 +386,14 @@ if ($__PROMIX_TRAINING) {
   die "To use promix training, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
 }
 
-$mertargs = "" if !defined $mertargs;
+if (!defined $mertargs) {
+  if (defined $batch_mira_args) {
+    $mertargs = $batch_mira_args;
+  }
+  else {
+    $mertargs = "";
+  }
+}
 
 my $scconfig = undef;
 if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {

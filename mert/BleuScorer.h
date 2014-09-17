@@ -55,6 +55,10 @@ public:
     return m_references.get();
   }
 
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const {
+    return totals[kBleuNgramOrder*2];
+  }
+
   /**
    * Count the ngrams of each type, up to the given length in the input line.
    */
@@ -92,11 +96,6 @@ float smoothedSentenceBleu
  * This function is used in batch MIRA.
  */
 float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg);
-
-/**
- * Computes plain old BLEU from a vector of stats
- */
-float unsmoothedBleu(const std::vector<float>& stats);
 
 }
 
