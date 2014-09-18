@@ -717,7 +717,7 @@ std::string PhraseTableCreator::EncodeLine(std::vector<std::string>& tokens, siz
 	std::stringstream strme;
 	strme << "Error: Wrong number of scores detected ("
               << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
-	strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[3] << " ..." << std::endl;
+	strme << "Line: " << tokens[0] << " ||| " << tokens[1] << " ||| " << tokens[2] << " ..." << std::endl;
     UTIL_THROW2(strme.str());
   }
 
@@ -1146,7 +1146,7 @@ void EncodingTask::operator()()
         UTIL_THROW2(strme.str());
       }
 
-      if(tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
+      if(tokens.size() > 3 && tokens[3].size() <= 1 && m_creator.m_coding != PhraseTableCreator::None) {
     	std::stringstream strme;
       	strme << "Error: It seems the following line contains no alignment information, " << std::endl;
       	strme << "but you are using ";
