@@ -402,6 +402,13 @@ if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {
   $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
 }
 
+my $sctype = undef;
+if ($mertargs =~ /(\-\-sctype\s+.+?)(\s|$)/) {
+  $sctype = $1;
+  $mertargs =~ s/(\-\-sctype\s+.+?)(\s|$)//;
+}
+
+
 # handling reference lengh strategy
 $scconfig .= &setup_reference_length_type();
 
@@ -414,8 +421,7 @@ $scconfig =~ s/\s+/,/g;
 
 $scconfig = "--scconfig $scconfig" if ($scconfig);
 
-my $mert_extract_args = $mertargs;
-$mert_extract_args .= " $scconfig";
+my $mert_extract_args = "$sctype $scconfig";
 
 $extractorargs = "" unless $extractorargs;
 $mert_extract_args .= " $extractorargs";
