@@ -425,7 +425,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        	accumulator->PlusEquals(this,log(it->second+0.01));
 	        }
 	        else
-	        	accumulator->PlusEquals(this,0);
+	        	accumulator->PlusEquals(this,-1);
 
 
 	        //std::cout<< syntaxTree->ToStringHead()<<std::endl;
