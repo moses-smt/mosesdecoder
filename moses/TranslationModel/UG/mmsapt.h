@@ -265,6 +265,9 @@ namespace Moses
     
     /// return true if prefix /phrase/ exists
     bool
+    PrefixExists(Phrase const& phrase, vector<float> const* const bias) const;
+
+    bool
     PrefixExists(Phrase const& phrase) const;
 
     vector<string> const&

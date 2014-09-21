@@ -5,6 +5,8 @@
 use strict;
 use warnings;
 
+use Digest::MD5 qw(md5);
+use Encode qw(encode_utf8);
 use Getopt::Long;
 
 binmode(STDIN, ":utf8");
@@ -14,9 +16,11 @@ binmode(STDERR, ":utf8");
 my $verbose = 0;
 my $n = 1;
 my $srcfile = undef;
+my $md5 = 0;
 GetOptions(
   "n=i" => \$n,  # the n-grams to search for (default: unigrams)
-  "verbose" => \$verbose, # emit the list of oov words
+  "verbose!" => \$verbose, # emit the list of oov words
+  "md5!" => \$md5, # emit the list of oov words
   "src=s" => \$srcfile, # use this source file
 ) or exit 1;
 
@@ -25,6 +29,8 @@ if (!defined $testf) {
   print STDERR "usage: $0 test-corpus < training-corpus
 Options:
   --n=1  ... use phrases of n words as the unit
+             set --n=0 to compare *whole sentences* (forces md5 hashing on)
+  --md5  ... hash each ngram using md5, saves memory for longer n-grams
   --verbose  ... emit OOV phrases at the end
   --src=test-src ... a word in the test-corpus not deemed OOV if present in the
                      corresponding source sentence in test-src.
@@ -39,6 +45,8 @@ Synopsis:
   exit 1;
 }
 
+my $ngr_or_sent = $n > 0 ? "$n-grams" : "sentences";
+
 # load source file to accept ngrams from source
 my $source_confirms = undef;
 my $srcfilelen = undef;
@@ -51,7 +59,7 @@ if (defined $srcfile) {
     chomp;
     s/^\s+//;
     s/\s+$//;
-    my $ngrams = ngrams($n, [ split /\s+/, $_ ]);
+    my $ngrams = ngrams($n, $_);
     foreach my $ngr (keys %$ngrams) {
       $source_confirms->[$nr]->{$ngr} += $ngrams->{$ngr};
       $srctokens += $ngrams->{$ngr};
@@ -59,7 +67,7 @@ if (defined $srcfile) {
   }
   close $fh;
   print "Source set sents\t$nr\n";
-  print "Source set running $n-grams\t$srctokens\n";
+  print "Source set running $ngr_or_sent\t$srctokens\n" if $n>0;
   $srcfilelen = $nr;
 }
 
@@ -73,7 +81,7 @@ while (<$fh>) {
   chomp;
   s/^\s+//;
   s/\s+$//;
-  my $ngrams = ngrams($n, [ split /\s+/, $_ ]);
+  my $ngrams = ngrams($n, $_);
   foreach my $ngr (keys %$ngrams) {
     $needed{$ngr} += $ngrams->{$ngr}
       unless $source_confirms->[$nr]->{$ngr};
@@ -85,9 +93,9 @@ close $fh;
 my $testtypesneeded = scalar(keys(%needed));
 my $testtypes = scalar(keys(%testtypes));
 print "Test set sents\t$nr\n";
-print "Test set running $n-grams\t$testtokens\n";
-print "Test set unique $n-grams needed\t$testtypesneeded\n";
-print "Test set unique $n-grams\t$testtypes\n";
+print "Test set running $n-grams\t$testtokens\n" if $n>0;
+print "Test set unique $ngr_or_sent needed\t$testtypesneeded\n";
+print "Test set unique $ngr_or_sent\t$testtypes\n";
 
 die "Mismatching sent count: $srcfile and $testf ($srcfilelen vs. $nr)"
   if defined $srcfile && $srcfilelen != $nr;
@@ -102,7 +110,7 @@ while (<>) {
   chomp;
   s/^\s+//;
   s/\s+$//;
-  my $ngrams = ngrams($n, [ split /\s+/, $_ ]);
+  my $ngrams = ngrams($n, $_); # [ split /\s+/, $_ ]);
   foreach my $ngr (keys %$ngrams) {
     $seen{$ngr} = 1 if $ngrams->{$ngr};
     $traintokens += $ngrams->{$ngr};
@@ -114,8 +122,8 @@ foreach my $ngr (keys %needed) {
 print STDERR "Done.\n";
 my $traintypes = scalar(keys(%seen));
 print "Training set sents\t$nr\n";
-print "Training set running $n-grams\t$traintokens\n";
-print "Training set unique $n-grams\t$traintypes\n";
+print "Training set running $n-grams\t$traintokens\n" if $n>0;
+print "Training set unique $ngr_or_sent\t$traintypes\n";
 
 
 my $oovtypes = scalar(keys(%needed));
@@ -123,8 +131,8 @@ my $oovtokens = 0;
 foreach my $v (values %needed) {
   $oovtokens += $v;
 }
-printf "OOV $n-gram types\t%i\t%.1f %%\n", $oovtypes, $oovtypes/$testtypes*100;
-printf "OOV $n-gram tokens\t%i\t%.1f %%\n", $oovtokens, $oovtokens/$testtokens*100;
+printf "OOV $ngr_or_sent types\t%i\t%.1f %%\n", $oovtypes, $oovtypes/$testtypes*100;
+printf "OOV $ngr_or_sent tokens\t%i\t%.1f %%\n", $oovtokens, $oovtokens/$testtokens*100;
 
 if ($verbose) {
   foreach my $ngr (sort {$needed{$b} <=> $needed{$a}} keys %needed) {
@@ -159,17 +167,26 @@ sub my_open {
 
 sub ngrams {
   my $n = shift;
-  my @words = @{shift()};
-  my $out;
-  if ($n == 1) {
-    foreach my $w (@words) {
-      $out->{$w}++;
-    }
+  my $sent = shift;
+
+  if ($n == 0) {
+    return { md5(encode_utf8($sent)) => 1  };
   } else {
-    while ($#words >= $n-1) {
-      $out->{join(" ", @words[0..$n-1])}++;
-      shift @words;
+    my @words = split /\s+/, $sent;
+    my $out;
+    if ($n == 1) {
+      foreach my $w (@words) {
+        my $usew = $md5 ? md5(encode_utf8($$w)) : $w;
+        $out->{$w}++;
+      }
+    } else {
+      while ($#words >= $n-1) {
+        my $ngr = join(" ", @words[0..$n-1]);
+        my $usengr = $md5 ? md5(encode_utf8($ngr)) : $ngr;
+        $out->{$ngr}++;
+        shift @words;
+      }
     }
+    return $out;
   }
-  return $out;
 }

@@ -13,27 +13,6 @@ namespace Moses
   using namespace std;
   using namespace boost;
 
-
-  // uint64_t 
-  // pack_phrasekey(uint64_t const shard_id, uint64_t const snt_id, 
-  // 		 uint64_t const offset, uint64_t const len)
-  // {
-  //   uint64_t one = 1;
-  //   //  8 bits - 256 shards
-  //   // 13 bits - max offset
-  //   // 11 bits - max len
-  //   // 32 bits - max sentence id
-  //   UTIL_TRHOW_IF2(shard_id >= 256, "[" << HERE << "] " 
-  // 		   << "Sentence ID exceeds limit.");
-  //   UTIL_THROW_IF2(snt_id >= 4294967296, "[" << HERE << "] " 
-  // 		   << "Sentence ID exceeds limit.");
-  //   UTIL_TRHOW_IF2(offset >= 8192, "[" << HERE << "]" 
-  // 		   << "Phrase offset exceeds limit.");
-  //   UTIL_TRHOW_IF2(offset >= 2048, "[" << HERE << "]" 
-  // 		   << "Phrase length exceeds limit.");
-  //   return ((shard_id<<56)+(snt_id<<24)+(offset<<11)+len);
-  // }
-  
   void 
   fillIdSeq(Phrase const& mophrase, size_t const ifactor,
 	    TokenIndex const& V, vector<id_type>& dest)
@@ -87,13 +66,6 @@ namespace Moses
   Mmsapt::
   Mmsapt(string const& line)
     : PhraseDictionary(line)
-      // , m_lex_alpha(1.0)
-      // , withLogCountFeatures(false)
-      // , withCoherence(true)
-      // , m_pfwd_features("g")
-      // , m_pbwd_features("g")
-      // , withPbwd(true)
-      // , poolCounts(true)
     , ofactor(1,0)
     , m_tpc_ctr(0)
   {
@@ -508,281 +480,6 @@ namespace Moses
     return tp;
   }
 
-  // TargetPhrase* 
-  // Mmsapt::
-  // mkTPhrase(Phrase        const& src, 
-  // 		     Bitext<Token> const& bt, 
-  // 		     PhrasePair    const& pp) const
-  // {
-  //   Word w; uint32_t sid,off,len;    
-  //   TargetPhrase* tp = new TargetPhrase();
-  //   parse_pid(pp.p2, sid, off, len);
-  //   Token const* x = bt.T2->sntStart(sid) + off;
-  //   for (uint32_t k = 0; k < len; ++k)
-  //     {
-  // 	// cerr << (*bt.V2)[x[k].id()] << " at " << __FILE__ << ":" << __LINE__ << endl;
-  // 	StringPiece wrd = (*bt.V2)[x[k].id()];
-  // 	// if ((off+len) > bt.T2->sntLen(sid))
-  // 	// cerr << off << ";" << len << " " << bt.T2->sntLen(sid) << endl;
-  // 	assert(off+len <= bt.T2->sntLen(sid));
-  // 	w.CreateFromString(Output,ofactor,wrd,false);
-  // 	tp->AddWord(w);
-  //     }
-  //   tp->GetScoreBreakdown().Assign(this, pp.fvals);
-  //   tp->Evaluate(src);
-  //   return tp;
-  // }
-
-  // // process phrase stats from a single parallel corpus
-  // void
-  // Mmsapt::
-  // process_pstats
-  // (Phrase   const& src,
-  //  uint64_t const  pid1, 
-  //  pstats   const& stats, 
-  //  Bitext<Token> const & bt, 
-  //  TargetPhraseCollection* tpcoll
-  //  ) const
-  // {
-  //   PhrasePair pp;   
-  //   pp.init(pid1, stats, this->m_numScoreComponents);
-  //   pstats::trg_map_t::const_iterator t;
-  //   for (t = stats.trg.begin(); t != stats.trg.end(); ++t)
-  //     {
-  //  	pp.update(t->first,t->second);
-  // 	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
-  // 	  (*ff)(bt,pp);
-  // 	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
-  // 	  (*ff)(bt,pp);
-  // 	tpcoll->Add(mkTPhrase(src,bt,pp));
-  //     }
-  // }
-
-  // void
-  // Mmsapt::
-  // ScorePPfix(PhrasePair& pp) const
-  // {
-  //   BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
-  //     (*ff)(btfix,pp);
-  //   BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
-  //     (*ff)(btfix,pp);
-  // }
-
-//   // process phrase stats from a single parallel corpus
-//   bool
-//   Mmsapt::
-//   pool_pstats(Phrase   const& src,
-// 	      uint64_t const  pid1a, 
-// 	      pstats        * statsa, 
-// 	      Bitext<Token> const & bta,
-// 	      uint64_t const  pid1b, 
-// 	      pstats   const* statsb, 
-// 	      Bitext<Token> const & btb,
-// 	      TargetPhraseCollection* tpcoll) const
-//   {
-//     PhrasePair pp;
-//     if (statsa && statsb)
-//       pp.init(pid1b, *statsa, *statsb, this->m_numScoreComponents);
-//     else if (statsa)
-//       pp.init(pid1a, *statsa, this->m_numScoreComponents);
-//     else if (statsb)
-//       pp.init(pid1b, *statsb, this->m_numScoreComponents);
-//     else return false; // throw "no stats for pooling available!";
-
-//     pstats::trg_map_t::const_iterator b;
-//     pstats::trg_map_t::iterator a;
-//     if (statsb)
-//       {
-// 	for (b = statsb->trg.begin(); b != statsb->trg.end(); ++b)
-// 	  {
-// 	    uint32_t sid,off,len;    
-// 	    parse_pid(b->first, sid, off, len);
-// 	    Token const* x = btb.T2->sntStart(sid) + off;
-// 	    TSA<Token>::tree_iterator m(bta.I2.get(),x,x+len);
-// 	    if (m.size() == len) 
-// 	      {
-// 		;
-// 		if (statsa && ((a = statsa->trg.find(m.getPid())) 
-// 			       != statsa->trg.end()))
-// 		  {
-// 		    pp.update(b->first,a->second,b->second);
-// 		    a->second.invalidate();
-// 		  }
-// 		else 
-// 		  pp.update(b->first,m.approxOccurrenceCount(),
-// 			    b->second);
-// 	      }
-// 	    else pp.update(b->first,b->second);
-// 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
-// 	      (*ff)(btb,pp);
-// 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
-// 	      (*ff)(btb,pp);
-// 	    tpcoll->Add(mkTPhrase(src,btb,pp));
-// 	  }
-//       }
-//     if (!statsa) return statsb != NULL;
-//     for (a = statsa->trg.begin(); a != statsa->trg.end(); ++a)
-//       {
-// 	uint32_t sid,off,len;
-// 	if (!a->second.valid()) continue;
-// 	parse_pid(a->first, sid, off, len);
-// 	if (btb.T2)
-// 	  {
-// 	    Token const* x = bta.T2->sntStart(sid) + off;
-// 	    TSA<Token>::tree_iterator m(btb.I2.get(), x, len);
-// 	    if (m.size() == len) 
-// 	      pp.update(a->first,m.approxOccurrenceCount(),a->second);
-// 	    else 
-// 	      pp.update(a->first,a->second);
-// 	  }
-// 	else pp.update(a->first,a->second);
-// #if 0
-// 	// jstats const& j = a->second;
-// 	cerr << bta.T1->pid2str(bta.V1.get(),pp.p1) << " ::: " 
-// 	     << bta.T2->pid2str(bta.V2.get(),pp.p2) << endl;
-// 	cerr << pp.raw1 << " " << pp.sample1 << " " << pp.good1 << " " 
-// 	     << pp.joint << " " << pp.raw2 << endl;
-// #endif
-
-// 	UTIL_THROW_IF2(pp.raw2 == 0, 
-// 		       "OOPS" << bta.T1->pid2str(bta.V1.get(),pp.p1) << " ::: " 
-// 		       << bta.T2->pid2str(bta.V2.get(),pp.p2) << ": "
-// 		       << pp.raw1 << " " << pp.sample1 << " " 
-// 		       << pp.good1 << " " << pp.joint << " " 
-// 		       << pp.raw2);
-// 	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
-// 	  (*ff)(bta,pp);
-// 	BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
-// 	  (*ff)(bta,pp);
-// 	tpcoll->Add(mkTPhrase(src,bta,pp));
-//       }
-//     return true;
-//   }
-
-
-
-  
-  // // process phrase stats from a single parallel corpus
-  // bool
-  // Mmsapt::
-  // combine_pstats
-  // (Phrase   const& src,
-  //  uint64_t const  pid1a, pstats      * statsa, Bitext<Token> const & bta,
-  //  uint64_t const  pid1b, pstats const* statsb, Bitext<Token> const & btb,
-  //  TargetPhraseCollection* tpcoll) const
-  // {
-  //   if (!statsa && !statsb) return false; 
-
-  //   PhrasePair ppfix,ppdyn,pool; Word w;
-  //   // ppfix: counts from btfix
-  //   // ppdyn: counts from btdyn
-  //   // pool: pooled counts from both
-
-  //   pstats::trg_map_t::const_iterator b;
-  //   pstats::trg_map_t::iterator a;
-
-    
-  //   set<uint64_t> check;
-  //   if (statsb)
-  //     {
-  // 	ppdyn.init(pid1b,*statsb,this->m_numScoreComponents);
-  // 	if (statsa)
-  // 	  {
-  // 	    pool.init(pid1b, *statsa, *statsb, 0);
-  // 	    ppfix.init(pid1a,*statsa, 0);
-  // 	  }
-  // 	else 
-  // 	  {
-  // 	    pool.init(pid1b, *statsb,0);
-  // 	    ppfix.init();
-  // 	  }
-	
-  // 	for (b = statsb->trg.begin(); b != statsb->trg.end(); ++b)
-  // 	  {
-  // 	    ppdyn.update(b->first,b->second);
-  // 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_dyn)
-  // 	      (*ff)(btb,ppdyn);
-	    
-  // 	    uint32_t sid,off,len;    
-  // 	    parse_pid(b->first, sid, off, len);
-  // 	    Token const* x = btb.T2->sntStart(sid) + off;
-  // 	    TSA<Token>::tree_iterator m(bta.I2.get(),x,len);
-	    
-  // 	    Token const* y = m.getToken(0);
-  // 	    for (size_t i = 0; i < len; ++i)
-  // 	      cout << x[i].id() << " " << endl;
-  // 	    for (size_t i = 0; i < m.size(); ++i)
-  // 	      cout << y[i].id() << " " << endl;
-	    
-  // 	    if (statsa && m.size() &&  
-  // 		((a = statsa->trg.find(m.getPid())) != statsa->trg.end()))
-  // 	      { // i.e., phrase pair found also in btfix
-  // 		ppfix.update(a->first,a->second);
-  // 		pool.update(b->first, b->second, a->second);
-  // 		BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
-  // 		  (*ff)(bta, ppfix, &ppdyn.fvals);
-  // 		check.insert(a->first); 
-  // 	      }
-  // 	    else // phrase pair was not found in btfix
-  // 	      {
-  // 		if (m.size()) // ... but the source phrase was  
-  // 		  {
-  // 		    pool.update(b->first, m.approxOccurrenceCount(), b->second);
-  // 		    ppfix.update(b->first,m.approxOccurrenceCount());
-  // 		  }
-  // 		else // ... and not even the source phrase 
-  // 		  {
-  // 		    pool.update(b->first, b->second);
-  // 		    ppfix.update(b->first,0);
-  // 		  }		    
-  // 		BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
-  // 		  (*ff)(btb, ff->allowPooling() ? pool : ppfix, &ppdyn.fvals);
-  // 	      }
-  // 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
-  // 	      (*ff)(btb, pool, &ppdyn.fvals);
-  // 	    tpcoll->Add(mkTPhrase(src,btb,ppdyn));
-  // 	  }
-  //     }
-
-  //   // now deal with all phraise pairs that are ONLY in btfix
-  //   // (the ones that are in both were dealt with above)
-  //   if (statsa)
-  //     {
-  // 	ppfix.init(pid1a, *statsa, this->m_numScoreComponents);
-  // 	pool.init(pid1a,  *statsa, 0);
-  // 	ppdyn.init();
-  // 	for (a = statsa->trg.begin(); a != statsa->trg.end(); ++a)
-  // 	  {
-  // 	    if (check.find(a->first) != check.end()) 
-  // 	      continue;
-
-  // 	    ppfix.update(a->first, a->second);
-  // 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_fix)
-  // 	      (*ff)(bta, ppfix);
-	    
-  // 	    if (btb.I2)
-  // 	      {
-  // 		uint32_t sid,off,len;    
-  // 		parse_pid(a->first, sid, off, len);
-  // 		Token const* x = bta.T2->sntStart(sid) + off;
-  // 		TSA<Token>::tree_iterator m(btb.I2.get(), x, len);
-  // 		if (m.size())
-  // 		  pool.update(a->first, m.approxOccurrenceCount(), a->second);
-  // 		else
-  // 		  pool.update(a->first, a->second);
-  // 	      }
-  // 	    else pool.update(a->first, a->second);
-  // 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_dyn)
-  // 	      (*ff)(btb, ff->allowPooling() ? pool : ppdyn, &ppfix.fvals);
-  // 	    BOOST_FOREACH(sptr<pscorer> const& ff, m_active_ff_common)
-  // 	      (*ff)(bta, pool, &ppfix.fvals);
-  // 	    if (ppfix.p2)
-  // 	      tpcoll->Add(mkTPhrase(src, bta, ppfix));
-  // 	  }
-  //     }
-  //   return true;
-  // }
-  
   Mmsapt::
   TargetPhraseCollectionWrapper::
   TargetPhraseCollectionWrapper(size_t r, uint64_t k)
@@ -796,34 +493,6 @@ namespace Moses
     assert(this->refCount == 0);
   }
   
-  template<typename Token>
-  void 
-  expand(typename Bitext<Token>::iter const& m, 
-	 Bitext<Token> const& bt, 
-	 pstats const& ps, vector<PhrasePair<Token> >& dest)
-  {
-    dest.reserve(ps.trg.size());
-    PhrasePair<Token> pp;
-    pp.init(m.getToken(0), m.size(), &ps, 0);
-    // cout << HERE << " " << toString(*(bt.V1),pp.start1,pp.len1) << endl;
-    pstats::trg_map_t::const_iterator a;
-    for (a = ps.trg.begin(); a != ps.trg.end(); ++a)
-      {
-	uint32_t sid,off,len;
-	parse_pid(a->first, sid, off, len);
-	pp.update(bt.T2->sntStart(sid)+off, len, a->second);
-	dest.push_back(pp);
-      }
-    typename PhrasePair<Token>::SortByTargetIdSeq sorter;
-    sort(dest.begin(), dest.end(),sorter);
-#if 0
-    BOOST_FOREACH(PhrasePair<Token> const& p, dest)
-      cout << toString (*bt.V1,p.start1,p.len1) << " ::: " 
-	   << toString (*bt.V2,p.start2,p.len2) << " " 
-	   << p.joint << endl;
-#endif
-  }
-
   // This is not the most efficient way of phrase lookup! 
   TargetPhraseCollection const* 
   Mmsapt::
@@ -889,9 +558,18 @@ namespace Moses
     if (mdyn.size() == sphrase.size()) sdyn = dyn->lookup(mdyn);
 
     vector<PhrasePair<Token> > ppfix,ppdyn;
-    if (sfix) expand(mfix, btfix, *sfix, ppfix);
-    if (sdyn) expand(mdyn, *dyn, *sdyn, ppdyn);
-    
+    PhrasePair<Token>::SortByTargetIdSeq sort_by_tgt_id;
+    if (sfix) 
+      {
+	expand(mfix, btfix, *sfix, ppfix);
+	sort(ppfix.begin(), ppfix.end(),sort_by_tgt_id);
+      }
+    if (sdyn)
+      {
+	expand(mdyn, *dyn, *sdyn, ppdyn);
+	sort(ppdyn.begin(), ppdyn.end(),sort_by_tgt_id);
+      }
+
     // now we have two lists of Phrase Pairs, let's merge them
     TargetPhraseCollectionWrapper* ret;
     ret = new TargetPhraseCollectionWrapper(revision,phrasekey);
@@ -1092,6 +770,13 @@ namespace Moses
   Mmsapt::
   PrefixExists(Moses::Phrase const& phrase) const
   {
+    return PrefixExists(phrase,NULL); 
+  }
+
+  bool
+  Mmsapt::
+  PrefixExists(Moses::Phrase const& phrase, vector<float> const* const bias) const
+  {
     if (phrase.GetSize() == 0) return false;
     vector<id_type> myphrase; 
     fillIdSeq(phrase,input_factor,*btfix.V1,myphrase);
@@ -1099,7 +784,7 @@ namespace Moses
     TSA<Token>::tree_iterator mfix(btfix.I1.get(),&myphrase[0],myphrase.size());
     if (mfix.size() == myphrase.size()) 
       {
-	btfix.prep(mfix);
+	btfix.prep(mfix,bias);
 	// cerr << phrase << " " << mfix.approxOccurrenceCount() << endl;
 	return true;
       }
@@ -1115,7 +800,8 @@ namespace Moses
       {
 	for (size_t i = 0; mdyn.size() == i && i < myphrase.size(); ++i)
 	  mdyn.extend(myphrase[i]);
-	if (mdyn.size() == myphrase.size()) dyn->prep(mdyn);
+	// let's assume a uniform bias over the foreground corpus
+	if (mdyn.size() == myphrase.size()) dyn->prep(mdyn,NULL);
       }
     return mdyn.size() == myphrase.size();
   }

@@ -50,7 +50,6 @@
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
 									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
-									<listOptionValue builtIn="false" value="LM_IRST"/>
 									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
 									<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 								</option>
@@ -142,7 +141,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="LM/SRI.h|LM/SRI.cpp|TranslationModel/UG|LM/DALMWrapper.h|LM/DALMWrapper.cpp|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/symal2mam.cc|TranslationModel/UG/mm/mtt-dump.cc|TranslationModel/UG/mm/mtt-count-words.cc|TranslationModel/UG/mm/mtt-build.cc|TranslationModel/UG/mm/mmlex-lookup.cc|TranslationModel/UG/mm/mmlex-build.cc|TranslationModel/UG/mm/mam_verify.cc|TranslationModel/UG/mm/mam2symal.cc|TranslationModel/UG/mm/custom-pt.cc|TranslationModel/UG/mm/calc-coverage.cc|TranslationModel/UG/mm/mtt.count.cc|TranslationModel/UG/util|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="LM/IRST.h|LM/IRST.cpp|LM/SRI.h|LM/SRI.cpp|TranslationModel/UG|LM/DALMWrapper.h|LM/DALMWrapper.cpp|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/symal2mam.cc|TranslationModel/UG/mm/mtt-dump.cc|TranslationModel/UG/mm/mtt-count-words.cc|TranslationModel/UG/mm/mtt-build.cc|TranslationModel/UG/mm/mmlex-lookup.cc|TranslationModel/UG/mm/mmlex-build.cc|TranslationModel/UG/mm/mam_verify.cc|TranslationModel/UG/mm/mam2symal.cc|TranslationModel/UG/mm/custom-pt.cc|TranslationModel/UG/mm/calc-coverage.cc|TranslationModel/UG/mm/mtt.count.cc|TranslationModel/UG/util|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

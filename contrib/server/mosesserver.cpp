@@ -9,6 +9,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/StaticData.h"
+#include "moses/ThreadPool.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #if PT_UG
@@ -199,24 +200,29 @@ public:
   }
 };
 
-
-class Translator : public xmlrpc_c::method
-{
+/**
+  * Required so that translations can be sent to a thread pool.
+**/
+class TranslationTask : public virtual Moses::Task {
 public:
-  Translator() {
-    // signature and help strings are documentation -- the client
-    // can query this information with a system.methodSignature and
-    // system.methodHelp RPC.
-    this->_signature = "S:S";
-    this->_help = "Does translation";
-  }
+  TranslationTask(xmlrpc_c::paramList const& paramList,
+    boost::condition_variable& cond, boost::mutex& mut) 
+   : m_paramList(paramList),
+     m_cond(cond),
+     m_mut(mut),
+     m_done(false)
+     {}
 
-  void
-  execute(xmlrpc_c::paramList const& paramList,
-          xmlrpc_c::value *   const  retvalP) {
+  virtual bool DeleteAfterExecution() {return false;}
 
-    const params_t params = paramList.getStruct(0);
-    paramList.verifyEnd(1);
+  bool IsDone() const {return m_done;}
+
+  const map<string, xmlrpc_c::value>& GetRetData() { return m_retData;}
+
+  virtual void Run() {
+
+    const params_t params = m_paramList.getStruct(0);
+    m_paramList.verifyEnd(1);
     params_t::const_iterator si = params.find("text");
     if (si == params.end()) {
       throw xmlrpc_c::fault(
@@ -268,12 +274,11 @@ public:
     }
 
     stringstream out, graphInfo, transCollOpts;
-    map<string, xmlrpc_c::value> retData;
 
     if (staticData.IsChart()) {
        TreeInput tinput;
         const vector<FactorType>& 
-	  inputFactorOrder = staticData.GetInputFactorOrder();
+	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
         ChartManager manager(0,tinput);
@@ -281,26 +286,26 @@ public:
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
         if (addGraphInfo) {
-          const size_t translationId = tinput.GetTranslationId();
+          // const size_t translationId = tinput.GetTranslationId();
           std::ostringstream sgstream;
           manager.OutputSearchGraphMoses(sgstream);
-          retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
+          m_retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
         }
     } else {
         Sentence sentence;
         const vector<FactorType> &
-	  inputFactorOrder = staticData.GetInputFactorOrder();
+	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-	size_t lineNumber = 0; // TODO: Include sentence request number here?
+	      size_t lineNumber = 0; // TODO: Include sentence request number here?
         Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm());
-	manager.ProcessSentence();
+	      manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
         vector<xmlrpc_c::value> alignInfo;
         outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
         if (addAlignInfo) {
-          retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
+          m_retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
         }
         if (addWordAlignInfo) {
           stringstream wordAlignment;
@@ -314,26 +319,31 @@ public:
           	wordAlignInfo["target-word"] = xmlrpc_c::value_int(atoi(alignmentPair.substr(pos + 1).c_str()));
           	alignments.push_back(xmlrpc_c::value_struct(wordAlignInfo));
           }
-          retData.insert(pair<string, xmlrpc_c::value_array>("word-align", alignments));
+          m_retData.insert(pair<string, xmlrpc_c::value_array>("word-align", alignments));
         }
 
         if (addGraphInfo) {
-          insertGraphInfo(manager,retData);
+          insertGraphInfo(manager,m_retData);
             (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
         }
         if (addTopts) {
-          insertTranslationOptions(manager,retData);
+          insertTranslationOptions(manager,m_retData);
         }
         if (nbest_size>0) {
-          outputNBest(manager, retData, nbest_size, nbest_distinct, 
+          outputNBest(manager, m_retData, nbest_size, nbest_distinct, 
 		      reportAllFactors, addAlignInfo, addScoreBreakdown);
         }
     }
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
-    retData.insert(text);
+    m_retData.insert(text);
     XVERBOSE(1,"Output: " << out.str() << endl);
-    *retvalP = xmlrpc_c::value_struct(retData);
+    {
+      boost::lock_guard<boost::mutex> lock(m_mut);
+      m_done = true;
+    }
+    m_cond.notify_one();
+
   }
 
   void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, bool reportAllFactors = false) {
@@ -520,7 +530,43 @@ public:
       }
     }
     retData.insert(pair<string, xmlrpc_c::value>("topt", xmlrpc_c::value_array(toptsXml)));
+
   }
+
+private:
+  xmlrpc_c::paramList const& m_paramList;
+  map<string, xmlrpc_c::value> m_retData;
+  boost::condition_variable& m_cond;
+  boost::mutex& m_mut;
+  bool m_done;
+};
+
+class Translator : public xmlrpc_c::method
+{
+public:
+  Translator(size_t numThreads = 10) : m_threadPool(numThreads) {
+    // signature and help strings are documentation -- the client
+    // can query this information with a system.methodSignature and
+    // system.methodHelp RPC.
+    this->_signature = "S:S";
+    this->_help = "Does translation";
+  }
+
+  void
+  execute(xmlrpc_c::paramList const& paramList,
+          xmlrpc_c::value *   const  retvalP) {
+    boost::condition_variable cond;
+    boost::mutex mut;
+    TranslationTask task(paramList,cond,mut);
+    m_threadPool.Submit(&task);
+    boost::unique_lock<boost::mutex> lock(mut);
+    while (!task.IsDone()) {
+      cond.wait(lock);
+    }
+    *retvalP = xmlrpc_c::value_struct(task.GetRetData());
+  }
+private:
+  Moses::ThreadPool m_threadPool;
 };
 
 static 
@@ -580,6 +626,7 @@ int main(int argc, char** argv)
   int port = 8080;
   const char* logfile = "/dev/null";
   bool isSerial = false;
+  size_t numThreads = 10; //for translation tasks
 
   for (int i = 0; i < argc; ++i) {
     if (!strcmp(argv[i],"--server-port")) {
@@ -597,6 +644,14 @@ int main(int argc, char** argv)
         exit(1);
       } else {
         logfile = argv[i];
+      }
+    } else if (!strcmp(argv[i], "--threads")) {
+      ++i;
+      if (i>=argc) {
+        cerr << "Error: Missing argument to --threads" << endl;
+        exit(1);
+      } else {
+        numThreads = atoi(argv[i]);
       }
     } else if (!strcmp(argv[i], "--serial")) {
       cerr << "Running single-threaded server" << endl;
@@ -627,7 +682,7 @@ int main(int argc, char** argv)
 
   xmlrpc_c::registry myRegistry;
 
-  xmlrpc_c::methodPtr const translator(new Translator);
+  xmlrpc_c::methodPtr const translator(new Translator(numThreads));
   xmlrpc_c::methodPtr const updater(new Updater);
   xmlrpc_c::methodPtr const optimizer(new Optimizer);
 
