@@ -450,7 +450,9 @@ sub find_steps {
     }
 
     # go through each module
-    for(my $m=$#MODULE; $m>=0; $m--) {
+    while(1) {
+      my $step_count_before = scalar(@DO_STEP);
+      for(my $m=$#MODULE; $m>=0; $m--) {
 	my $module = $MODULE[$m];
 
 	# if module is "multiple" go through each set
@@ -475,6 +477,8 @@ sub find_steps {
 	    &find_steps_for_module($module,"");
 	}
     }
+    last if $step_count_before == scalar(@DO_STEP);
+  }
 }
 
 sub find_steps_for_module {
@@ -487,6 +491,7 @@ sub find_steps_for_module {
 
 	my $step = &construct_name($module,$set,$stepname);
 	my $defined_step = &defined_step($step); # without set
+	next if defined($STEP_LOOKUP{$step});
 
 	# FIRST, some checking...
 	print "\tchecking step: $step\n" if $VERBOSE;
