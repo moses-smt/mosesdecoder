@@ -796,11 +796,10 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   }
   size_t new_state = getStateChart(whole_phrase);
-  int source_phrase_end_idx = word_alignments[word_alignments_curr_idx]; //Figure it out later
 
   accumulator->Assign(this, value);
 
-  return new BilingualLMState(new_state, source_phrase_end_idx, word_alignments);
+  return new BilingualLMState(new_state, word_alignments);
 }
 
 void BilingualLM::SetParameter(const std::string& key, const std::string& value)

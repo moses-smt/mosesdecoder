@@ -19,22 +19,15 @@ namespace Moses
 class BilingualLMState : public FFState
 {
   size_t m_hash;
-  int source_last_word_index; //Doesn't matter for phrase based. The last word source word of the previous hypothesis
   std::vector<int> word_alignments; //Carry the word alignments. For hierarchical
 public:
   BilingualLMState(size_t hash)
     :m_hash(hash)
-    , source_last_word_index(0)
   {}
-  BilingualLMState(size_t hash, int source_word_index, std::vector<int>& word_alignments_vec)
+  BilingualLMState(size_t hash, std::vector<int>& word_alignments_vec)
     :m_hash(hash)
-    , source_last_word_index(source_word_index)
     , word_alignments(word_alignments_vec)
   {}
-
-  int GetLastSourceWordIdx() const {
-    return source_last_word_index;
-  }
 
   const std::vector<int>& GetWordAlignmentVector() const {
     return word_alignments;
