@@ -44,8 +44,8 @@
 								<option id="gnu.cpp.link.option.libs.585257079" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="mert_lib"/>
 									<listOptionValue builtIn="false" value="util"/>
-									<listOptionValue builtIn="false" value="boost_system-mt"/>
-									<listOptionValue builtIn="false" value="boost_thread-mt"/>
+									<listOptionValue builtIn="false" value="boost_system"/>
+									<listOptionValue builtIn="false" value="boost_thread"/>
 									<listOptionValue builtIn="false" value="z"/>
 									<listOptionValue builtIn="false" value="pthread"/>
 								</option>
