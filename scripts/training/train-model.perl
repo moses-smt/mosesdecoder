@@ -344,8 +344,16 @@ $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EX
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
 my $FLEX_SCORER = "$SCRIPTS_ROOTDIR/training/flexibility_score.py";
 
+# gzip binary;
+my $GZIP = "gzip";
+
+# use pigz --- parallel gzip
+if (`which pigz` =~ /pigz/) {
+    $GZIP = "pigz";
+}
+
 # utilities
-my $ZCAT = "gzip -cd";
+my $ZCAT = "$GZIP -cd";
 my $BZCAT = "bzcat";
 
 # do a sanity check to make sure we can find the necessary binaries since
@@ -1198,7 +1206,7 @@ sub run_single_giza {
     die "ERROR: Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
       if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
     safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
-    safesystem("gzip $dir/$f-$e.$___GIZA_EXTENSION") or die;
+    safesystem("$GZIP $dir/$f-$e.$___GIZA_EXTENSION") or die;
 }
 
 sub run_single_snt2cooc {
@@ -1470,9 +1478,9 @@ sub extract_phrase {
 
     if (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) {
       print STDERR "merging with baseline extract from $_BASELINE_EXTRACT\n";
-      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | gzip > $extract_file.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | gzip > $extract_file.inv.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | gzip > $extract_file.o.gz")
+      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | $GZIP > $extract_file.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | $GZIP > $extract_file.inv.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | $GZIP > $extract_file.o.gz")
 	if -e "$extract_file$suffix.o.gz";
       safesystem("rm $extract_file$suffix.gz");
       safesystem("rm $extract_file$suffix.inv.gz");
@@ -1539,6 +1547,9 @@ sub score_phrase_phrase_extract {
 	$DOMAIN = $main_spec if $specified_table_id == $table_id;
       }
     }
+
+    my $TIME = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(\-+Time +\S+)/;
+
     my $SINGLETON = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /Singleton/);
     my $CROSSEDNONTERM = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CrossedNonTerm/);
 
@@ -1611,6 +1622,7 @@ sub score_phrase_phrase_extract {
         $cmd .= " --PhraseOrientation" if $_GHKM_PHRASE_ORIENTATION;
         $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if $_GHKM_PHRASE_ORIENTATION && defined($_PHRASE_ORIENTATION_PRIORS_FILE);
         $cmd .= " $DOMAIN" if $DOMAIN;
+        $cmd .= " $TIME" if $TIME;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
         $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
 
@@ -1661,7 +1673,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     
-    $cmd .= " | gzip -c > $ttable_file.gz";
+    $cmd .= " | $GZIP -c > $ttable_file.gz";
     
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
@@ -1678,7 +1690,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | $GZIP >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1843,7 +1855,7 @@ sub get_generation {
     }
     close(GEN);
     safesystem("rm -f $file.gz") or die("ERROR");
-    safesystem("gzip $file") or die("ERROR");
+    safesystem("$GZIP $file") or die("ERROR");
 }
 
 ### (9) CREATE CONFIGURATION FILE

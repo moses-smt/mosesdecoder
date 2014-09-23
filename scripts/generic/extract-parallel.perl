@@ -71,28 +71,28 @@ my $pid;
 
 if ($numParallel > 1)
 {
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $target $TMPDIR/target.";
-	$pid = RunFork($cmd);
-	push(@children, $pid);
-	
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $source $TMPDIR/source.";
-	$pid = RunFork($cmd);
-	push(@children, $pid);
+    $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $target $TMPDIR/target.";
+    $pid = RunFork($cmd);
+    push(@children, $pid);
+    
+    $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $source $TMPDIR/source.";
+    $pid = RunFork($cmd);
+    push(@children, $pid);
 
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 7 $align $TMPDIR/align.";
-	$pid = RunFork($cmd);
-	push(@children, $pid);
+    $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $align $TMPDIR/align.";
+    $pid = RunFork($cmd);
+    push(@children, $pid);
 
   if ($weights) {
     $cmd = "$splitCmd -d -l $linesPerSplit -a 7 $weights $TMPDIR/weights.";
     $pid = RunFork($cmd);
     push(@children, $pid);
   }
-	
-	# wait for everything is finished
-	foreach (@children) {
-		waitpid($_, 0);
-	}
+    
+    # wait for everything is finished
+    foreach (@children) {
+        waitpid($_, 0);
+    }
 
 }
 else
@@ -100,16 +100,16 @@ else
   my $numStr = NumStr(0);
 
   $cmd = "ln -s $target $TMPDIR/target.$numStr";
-	print STDERR "Executing: $cmd \n";
-	`$cmd`;
+    print STDERR "Executing: $cmd \n";
+    `$cmd`;
 
   $cmd = "ln -s $source $TMPDIR/source.$numStr";
-	print STDERR "Executing: $cmd \n";
-	`$cmd`;
+    print STDERR "Executing: $cmd \n";
+    `$cmd`;
 
   $cmd = "ln -s $align $TMPDIR/align.$numStr";
-	print STDERR "Executing: $cmd \n";
-	`$cmd`;
+    print STDERR "Executing: $cmd \n";
+    `$cmd`;
 
   if ($weights) {
     $cmd = "ln -s $weights $TMPDIR/weights.$numStr";
@@ -146,17 +146,26 @@ for (my $i = 0; $i < $numParallel; ++$i)
   }
   else
   { # parent
-  	push(@children, $pid);
+    push(@children, $pid);
   }
 }
 
 # wait for everything is finished
 foreach (@children) {
-	waitpid($_, 0);
+    waitpid($_, 0);
+}
+
+# gzip binary;
+my $GZIP = "gzip";
+my $catCmd = "gunzip -c ";
+
+# use pigz --- parallel gzip
+if (`which pigz` =~ /pigz/) {
+    $GZIP = "pigz";
+    $catCmd = "pigz -dc ";
 }
 
 # merge
-my $catCmd = "gunzip -c ";
 my $catInvCmd = $catCmd;
 my $catOCmd = $catCmd;
 my $catContextCmd = $catCmd;
@@ -164,25 +173,25 @@ my $catContextInvCmd = $catCmd;
 
 for (my $i = 0; $i < $numParallel; ++$i)
 {
-		my $numStr = NumStr($i);
-		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
-		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
-		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
-		$catContextCmd .= "$TMPDIR/extract.$numStr.context ";
-		$catContextInvCmd .= "$TMPDIR/extract.$numStr.context.inv ";
+        my $numStr = NumStr($i);
+        $catCmd .= "$TMPDIR/extract.$numStr.gz ";
+        $catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
+        $catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
+        $catContextCmd .= "$TMPDIR/extract.$numStr.context ";
+        $catContextInvCmd .= "$TMPDIR/extract.$numStr.context.inv ";
 }
 if (defined($baselineExtract)) {
-		my $sorted = -e "$baselineExtract.sorted.gz" ? ".sorted" : "";
-		$catCmd .= "$baselineExtract$sorted.gz ";
-		$catInvCmd .= "$baselineExtract.inv$sorted.gz ";
-		$catOCmd .= "$baselineExtract.o$sorted.gz ";
+        my $sorted = -e "$baselineExtract.sorted.gz" ? ".sorted" : "";
+        $catCmd .= "$baselineExtract$sorted.gz ";
+        $catInvCmd .= "$baselineExtract.inv$sorted.gz ";
+        $catOCmd .= "$baselineExtract.o$sorted.gz ";
 }
 
-$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.sorted.gz 2>> /dev/stderr \n";
-$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
-$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | gzip -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
-$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
-$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | gzip -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
+$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP -c > $extract.sorted.gz 2>> /dev/stderr \n";
+$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP -c > $extract.inv.sorted.gz 2>> /dev/stderr \n";
+$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | $GZIP -c > $extract.o.sorted.gz 2>> /dev/stderr \n";
+$catContextCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | $GZIP -c > $extract.context.sorted.gz 2>> /dev/stderr \n";
+$catContextInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR 2>> /dev/stderr | uniq | $GZIP -c > $extract.context.inv.sorted.gz 2>> /dev/stderr \n";
 
 
 @children = ();
@@ -210,13 +219,13 @@ if ($otherExtractArgs =~ /--FlexibilityScore/) {
 my $numStr = NumStr(0);
 if (-e "$TMPDIR/extract.$numStr.o.gz")
 {
-	$pid = RunFork($catOCmd);
-	push(@children, $pid);
+    $pid = RunFork($catOCmd);
+    push(@children, $pid);
 }
 
 # wait for all sorting to finish
 foreach (@children) {
-	waitpid($_, 0);
+    waitpid($_, 0);
 }
 
 # glue rules
@@ -292,25 +301,25 @@ sub NumStr($)
     my $i = shift;
     my $numStr;
     if ($i < 10) {
-	$numStr = "000000$i";
+    $numStr = "000000$i";
     }
     elsif ($i < 100) {
-	$numStr = "00000$i";
+    $numStr = "00000$i";
     }
     elsif ($i < 1000) {
-	$numStr = "0000$i";
+    $numStr = "0000$i";
     }
     elsif ($i < 10000) {
-	$numStr = "000$i";
+    $numStr = "000$i";
     }
     elsif ($i < 100000) {
-	$numStr = "00$i";
+    $numStr = "00$i";
     }
     elsif ($i < 1000000) {
-	$numStr = "0$i";
+    $numStr = "0$i";
     }
     else {
-	$numStr = $i;
+    $numStr = $i;
     }
     return $numStr;
 }

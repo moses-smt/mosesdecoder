@@ -20,6 +20,7 @@
 #include "ScoreFeature.h"
 #include "DomainFeature.h"
 #include "InternalStructFeature.h"
+#include "TimeFeature.h"
 
 using namespace std;
 
@@ -29,7 +30,7 @@ namespace MosesTraining
 
 const string& ScoreFeatureManager::usage() const
 {
-  const static string& usage = "[--[Sparse]Domain[Indicator|Ratio|Subset|Bin] domain-file [bins]]"  ;
+  const static string& usage = "[--IgnoreSentenceId] [--[Sparse]Domain[Indicator|Ratio|Subset|Bin] domain-file [bins]] [--Time time-file]"  ;
   return usage;
 }
 
@@ -39,7 +40,7 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
   bool sparseDomainAdded = false;
 
   for (size_t i = 0; i < args.size(); ++i) {
-  	if (args[i] == "--IgnoreSentenceId") {
+    if (args[i] == "--IgnoreSentenceId") {
       m_includeSentenceId = true;
     } else if (args[i].substr(0,8) == "--Domain") {
       string type = args[i].substr(8);
@@ -83,6 +84,13 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
     } else if(args[i] == "--TreeFeatureDense"){
     	//MARIA
     	m_features.push_back(ScoreFeaturePtr(new InternalStructFeatureDense()));
+    } else if(args[i] == "--Time") {
+	// MJD
+	++i;
+	UTIL_THROW_IF(i == args.size(), ScoreFeatureArgumentException, "Missing time file");
+	string timeFile = args[i];
+	m_features.push_back(ScoreFeaturePtr(new TimeFeature(timeFile)));
+	m_includeSentenceId = true;
     } else {
       UTIL_THROW(ScoreFeatureArgumentException,"Unknown score argument " << args[i]);
     	}

@@ -13,6 +13,18 @@ sub GetSourcePhrase($);
 sub NumStr($);
 sub CutContextFile($$$);
 
+# gzip binary;
+my $GZIP = "gzip";
+my $catCmd = "gunzip";
+
+# use pigz --- parallel gzip
+if (`which pigz` =~ /pigz/) {
+    $GZIP = "pigz";
+    $catCmd = "pigz -dc ";
+}
+
+
+
 #my $EXTRACT_SPLIT_LINES = 5000000;
 my $EXTRACT_SPLIT_LINES = 50000000;
 
@@ -70,7 +82,7 @@ if ($numParallel <= 1)
 else
 {	# cut up extract file into smaller mini-extract files.
 	if ($extractFile =~ /\.gz$/) {
-		open(IN, "gunzip -c $extractFile |") || die "can't open pipe to $extractFile";
+		open(IN, "$catCmd -c $extractFile |") || die "can't open pipe to $extractFile";
 	}
 	else {
 		open(IN, $extractFile) || die "can't open $extractFile";
@@ -80,7 +92,7 @@ else
 	if ($FlexibilityScore) {
 		$lastlineContext = "";
 		if ($extractFileContext =~ /\.gz$/) {
-			open(IN_CONTEXT, "gunzip -c $extractFileContext |") || die "can't open pipe to $extractFileContext";
+			open(IN_CONTEXT, "$catCmd -c $extractFileContext |") || die "can't open pipe to $extractFileContext";
 		}
 		else {
 			open(IN_CONTEXT, $extractFileContext) || die "can't open $extractFileContext";
@@ -88,7 +100,7 @@ else
 	}
 
 	my $filePath  = "$TMPDIR/extract.$fileCount.gz";
-	open (OUT, "| gzip -c > $filePath") or die "error starting gzip $!";
+	open (OUT, "| $GZIP -c > $filePath") or die "error starting $GZIP $!";
 	
 	my $lineCount = 0;
 	my $line;
@@ -121,7 +133,7 @@ else
 				++$fileCount;
 				my $filePath  = $fileCount;
 				$filePath     = "$TMPDIR/extract.$filePath.gz";
-				open (OUT, "| gzip -c > $filePath") or die "error starting gzip $!";
+				open (OUT, "| $GZIP -c > $filePath") or die "error starting $GZIP $!";
 			}
 		}
 		else
@@ -163,7 +175,7 @@ for (my $i = 0; $i < $fileCount; ++$i)
     $cmd .= "zcat $TMPDIR/phrase-table.half.$numStr.gz | $FlexibilityCmd $TMPDIR/extract.context.$i.gz";
     $cmd .= " --Inverse" if ($otherExtractArgs =~ /--Inverse/);
     $cmd .= " --Hierarchical" if ($otherExtractArgs =~ /--Hierarchical/);
-    $cmd .= " | gzip -c > $TMPDIR/phrase-table.half.$numStr.flex.gz\n";
+    $cmd .= " | $GZIP -c > $TMPDIR/phrase-table.half.$numStr.flex.gz\n";
     $cmd .= "mv $TMPDIR/phrase-table.half.$numStr.flex.gz $TMPDIR/phrase-table.half.$numStr.gz\n";
   }
 
@@ -201,13 +213,13 @@ if ($fileCount == 1 && !$doSort && !$FlexibilityScore)
 }
 else
 {
-  $cmd = "gunzip -c $TMPDIR/phrase-table.half.*.gz 2>> /dev/stderr";
+  $cmd = "$catCmd -c $TMPDIR/phrase-table.half.*.gz 2>> /dev/stderr";
 
   if ($doSort) {
     $cmd .= "| LC_ALL=C $sortCmd -T $TMPDIR ";
   }
 
-  $cmd .= " | gzip -c > $ptHalf  2>> /dev/stderr ";
+  $cmd .= " | $GZIP -c > $ptHalf  2>> /dev/stderr ";
 }
 print STDERR $cmd;
 systemCheck($cmd);
@@ -336,7 +348,7 @@ sub CutContextFile($$$)
     my $sourcePhrase;
 
     my $filePath  = "$TMPDIR/extract.context.$fileCount.gz";
-    open (OUT_CONTEXT, "| gzip -c > $filePath") or die "error starting gzip $!";
+    open (OUT_CONTEXT, "| $GZIP -c > $filePath") or die "error starting $GZIP $!";
 
     if ($lastline ne "") {
         print OUT_CONTEXT "$lastline\n";
