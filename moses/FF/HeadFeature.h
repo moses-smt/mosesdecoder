@@ -5,8 +5,7 @@
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 #include <boost/algorithm/string.hpp>
-//#include <boost/algorithm/string/trim_all.hpp>
-//#include <moses/trim_all.hpp>
+#include <boost/shared_ptr.hpp>
 #include "util/exception.hh"
 
 namespace Moses
@@ -16,15 +15,18 @@ namespace Moses
 class SyntaxNode;
 class SyntaxTree;
 
+typedef boost::shared_ptr<SyntaxTree> SyntaxTreePtr;
+typedef boost::shared_ptr<SyntaxNode> SyntaxNodePtr;
+
 class SyntaxTreeState : public FFState
 {
-	SyntaxTree* m_tree;
+	SyntaxTreePtr m_tree;
 public:
-  SyntaxTreeState(SyntaxTree* tree)
+  SyntaxTreeState(SyntaxTreePtr tree)
     :m_tree(tree)
   {}
 
-  SyntaxTree* GetTree() const {
+  SyntaxTreePtr GetTree() const {
       return m_tree;
   }
 
@@ -38,8 +40,8 @@ class SyntaxNode
 protected:
   int m_start, m_end;
   std::string m_label;
-  std::vector< SyntaxNode* > m_children;
-  SyntaxNode* m_parent;
+  std::vector< SyntaxNodePtr > m_children;
+  boost::weak_ptr<SyntaxNode> m_parent;
   std::string m_head;
   bool m_isTerminal; //if is terminal than read the child value and put in as m_head
   bool m_isOpen;
@@ -49,12 +51,15 @@ public:
     :m_start(startPos) //maybe set start and end based on children and alignemnt -> might want to know the source words it covers
     ,m_end(endPos)
     ,m_label(label)
-    ,m_parent(0)
+    ,m_parent(SyntaxNodePtr()) //,m_parent(0)
     ,m_head("")
 	,m_isTerminal(false)
 	,m_isOpen(false)
 	,m_hasHead(false){
   }
+
+  ~SyntaxNode();
+
   int GetStart() const {
     return m_start;
   }
@@ -65,7 +70,7 @@ public:
   int GetSize(){
 	  return m_children.size();
   }
-  SyntaxNode* GetNChild(int n){
+  SyntaxNodePtr GetNChild(int n){
 	  return m_children[n];
   }
   std::string GetLabel() const {
@@ -101,33 +106,34 @@ public:
   	  m_isOpen = isOpen;
     }
 
-  SyntaxNode *GetParent() {
+   boost::weak_ptr<SyntaxNode> GetParent() {
     return m_parent;
   }
-  void SetParent(SyntaxNode *parent) {
+  void SetParent(SyntaxNodePtr parent) {
     m_parent = parent;
   }
-  void AddChild(SyntaxNode* child) {
+  void AddChild(SyntaxNodePtr child) {
     m_children.push_back(child);
   }
-  const std::vector< SyntaxNode* > &GetChildren() const {
+  const std::vector< SyntaxNodePtr > &GetChildren() const {
     return m_children;
   }
 
   int FindHeadChild(std::vector<std::string> headRule);
   //do I want to return the object or the index like above?
-  SyntaxNode* FindFirstChild(std::string label) const;
+  SyntaxNodePtr FindFirstChild(std::string label) const;
 };
 
 class SyntaxTree
 {
 
 protected:
-  std::vector< SyntaxNode* > m_nodes;
-  SyntaxNode* m_top; //root of tree fragment
+  std::vector<SyntaxNodePtr > m_nodes;
+  //SyntaxNode* m_top; //root of tree fragment
+  SyntaxNodePtr m_top;
   int m_size;
-  SyntaxNode* m_attachTo; //where the next node should be attached -> index in m_nodes
-  std::vector< SyntaxNode* > m_openNodes; //nodes that will be connected with previous hypothesis
+  SyntaxNodePtr m_attachTo; //where the next node should be attached -> index in m_nodes
+  std::vector< SyntaxNodePtr > m_openNodes; //nodes that will be connected with previous hypothesis
 
 
   friend std::ostream& operator<<(std::ostream&, const SyntaxTree&);
@@ -135,7 +141,7 @@ protected:
 public:
 
   SyntaxTree() {
-    m_top = 0;  // m_top doesn't get set unless ConnectNodes is called.
+    //m_top = 0;  // m_top doesn't get set unless ConnectNodes is called.
     m_size = 0;
   }
 
@@ -144,13 +150,13 @@ public:
   ~SyntaxTree();
 
 
-  SyntaxNode *AddNode( int startPos, int endPos, std::string label );
-  void AddNode( SyntaxNode *newNode);
-  void AddOpenNode(SyntaxNode *newNode){
+  SyntaxNodePtr AddNode( int startPos, int endPos, std::string label );
+  void AddNode(SyntaxNodePtr newNode);
+  void AddOpenNode(SyntaxNodePtr newNode){
 	  m_openNodes.push_back(newNode);
   }
 
-  SyntaxNode *GetTop() {
+  SyntaxNodePtr GetTop() {
     return m_top;
   }
 
@@ -158,7 +164,7 @@ public:
 	  return m_size;
   }
 
-  std::vector<SyntaxNode*> GetOpenNodes(){
+  std::vector<SyntaxNodePtr > GetOpenNodes(){
 	  return m_openNodes;
   }
 
@@ -171,14 +177,14 @@ public:
    * -> this structure should be build for each rule before decoding as Matthias suggested
    * -> or build for each hypothesis only once (no need to build for unused rules) -> mark hypothesis with a pointer to the structure if it exists
   */
-  SyntaxNode *FromString(std::string internalTree);
+  SyntaxNodePtr FromString(std::string internalTree);
 
   std::string ToString();
   std::string ToStringHead();
-  void ToString(SyntaxNode *newNode, std::stringstream &tree);
-  void ToStringHead(SyntaxNode *newNode, std::stringstream &tree);
-  void SetHeadOpenNodes(std::vector<SyntaxTree*> previousTrees);
-  void FindHeads(SyntaxNode *newNode,std::map<std::string, std::vector <std::string> > &headRules) const;
+  void ToString(SyntaxNodePtr newNode, std::stringstream &tree);
+  void ToStringHead(SyntaxNodePtr newNode, std::stringstream &tree);
+  void SetHeadOpenNodes(std::vector< SyntaxTreePtr > previousTrees);
+  void FindHeads(SyntaxNodePtr newNode,std::map<std::string, std::vector <std::string> > &headRules) const;
 
   //find the arguments
   std::string* FindObj() const;
@@ -201,7 +207,8 @@ public:
   }
   //I don't understand this
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
-	  return new SyntaxTreeState(new SyntaxTree()); //&SyntaxTree());
+	  SyntaxTreePtr startTree(new SyntaxTree());
+	  return new SyntaxTreeState(startTree); //&SyntaxTree());
   }
 
 
@@ -233,8 +240,8 @@ public:
   void ReadProbArg();
 
 protected:
-	std::map<std::string, std::vector <std::string> > *m_headRules;
-	std::map<std::string, float> *m_probArg;
+  boost::shared_ptr< std::map<std::string, std::vector <std::string> > > m_headRules;
+  boost::shared_ptr< std::map<std::string, float> > m_probArg;
 	std::string m_headFile;
 	std::string m_probArgFile;
 

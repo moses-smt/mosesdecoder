@@ -32,12 +32,20 @@ void split(std::string &s, std::string delim, std::vector<std::string> &tokens) 
     boost::split(tokens, s, boost::is_any_of(delim));
 }
 
-SyntaxNode* SyntaxNode::FindFirstChild(std::string label) const{
+SyntaxNode::~SyntaxNode(){
+	m_label.clear();
+	m_head.clear();
+	//delete children ? how without delteing it twice
+	//delete parent
+
+}
+
+SyntaxNodePtr SyntaxNode::FindFirstChild(std::string label) const{
 	for(int i=0; i<m_children.size();i++){
 		if(m_children[i]->m_label.compare(label)==0)
 				return m_children[i];
 	}
-	return NULL;
+	return SyntaxNodePtr();
 }
 
 int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
@@ -54,11 +62,12 @@ int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 				return -1; //no children for this node -> should be treated elsewhere
 		}
 		for(i=0; i<m_children.size();i++){
-			for(j=1; j<headRule.size();j++) //first item is direction
+			for(j=1; j<headRule.size();j++){ //first item is direction
 				if(m_children[i]->m_label.compare(headRule[j])==0){
 					found=i;
 					break;
 				}
+			}
 		}
 	}
 	//have to figure out what this 0 means -> VP 0 .. looks wrong
@@ -80,15 +89,16 @@ int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 
 SyntaxTree::~SyntaxTree()
 {
-  Clear();
+//with shared_ptr I shouldn't need this
+  //Clear();
 }
 
 void SyntaxTree::Clear()
 {
-  m_top = 0;
+  //m_top = 0;
   // loop through all m_nodes, delete them
   for(size_t i=0; i<m_nodes.size(); i++) {
-    delete m_nodes[i];
+    m_nodes[i].reset();//delete m_nodes[i];
   }
   m_nodes.clear();
 
@@ -96,15 +106,15 @@ void SyntaxTree::Clear()
 
 
 
-SyntaxNode* SyntaxTree::AddNode( int startPos, int endPos, std::string label )
+SyntaxNodePtr SyntaxTree::AddNode( int startPos, int endPos, std::string label )
 {
-  SyntaxNode* newNode = new SyntaxNode( startPos, endPos, label );
+	SyntaxNodePtr newNode (new SyntaxNode( startPos, endPos, label ));
   m_nodes.push_back( newNode );
   m_size ++;// std::max(endPos+1, m_size);
   return newNode;
 }
 
-void SyntaxTree::AddNode( SyntaxNode *newNode)
+void SyntaxTree::AddNode( SyntaxNodePtr newNode)
 {
 	if(m_size==0)
 		m_top = newNode;
@@ -118,7 +128,7 @@ void SyntaxTree::AddNode( SyntaxNode *newNode)
 
 
 
-SyntaxNode* SyntaxTree::FromString(std::string internalTree)
+SyntaxNodePtr SyntaxTree::FromString(std::string internalTree)
 {
 	size_t pos = 0;
 	size_t nextpos = 0;
@@ -130,7 +140,7 @@ SyntaxNode* SyntaxTree::FromString(std::string internalTree)
 		token = internalTree[pos];
 		pos++;
 		if(token == '['){
-			SyntaxNode* newNode;
+			SyntaxNodePtr newNode;
 			nextpos = internalTree.find_first_of("][",pos);
 			nodes.clear();
 			std::string temp = internalTree.substr(pos,nextpos-pos);
@@ -138,7 +148,7 @@ SyntaxNode* SyntaxTree::FromString(std::string internalTree)
 			if(nodes.size()==0)
 				std::cerr<<" syntax string is not well formed: empty node"<<std::endl;
 			if(internalTree[nextpos]==']'){
-				newNode = new SyntaxNode( 0, 0, nodes[0]);
+				SyntaxNodePtr(new SyntaxNode( 0, 0, nodes[0])).swap(newNode);
 				//can have [TOP [S] ] pr [NP [PRP I]]
 				if(nodes.size()==2){
 					newNode->SetHead(nodes[1]);
@@ -152,20 +162,23 @@ SyntaxNode* SyntaxTree::FromString(std::string internalTree)
 			}
 			// there is a case due to faulty internal structure -> [Q <s> [S] </s>] so nodes.size() might be 2
 			if(internalTree[nextpos]=='['){ // && nodes.size()==1){
-				newNode = new SyntaxNode( 0, 0, nodes[0]);
+				SyntaxNodePtr (new SyntaxNode( 0, 0, nodes[0])).swap(newNode);
 				AddNode(newNode);
 			}
 			m_attachTo = newNode;
 			pos = nextpos;
 		}
-		if(token == ']')
-			m_attachTo = m_attachTo->GetParent();
+		if(token == ']'){
+			SyntaxNodePtr parent = m_attachTo->GetParent().lock();
+			if(parent)
+				m_attachTo = parent;
+		}
 	}
 
 	return m_top;
 }
 
-void SyntaxTree::ToString(SyntaxNode *node, std::stringstream &tree){
+void SyntaxTree::ToString(SyntaxNodePtr node, std::stringstream &tree){
 	tree <<"["<< node->GetLabel()<< " ";
 	if(node->IsTerminal())
 		tree << node->GetHead() << "]";
@@ -177,7 +190,7 @@ void SyntaxTree::ToString(SyntaxNode *node, std::stringstream &tree){
 
 }
 
-void SyntaxTree::ToStringHead(SyntaxNode *node, std::stringstream &tree){
+void SyntaxTree::ToStringHead(SyntaxNodePtr node, std::stringstream &tree){
 	tree <<"["<< node->GetLabel()<<"-"<<node->GetHead()<< " ";
 	if(node->IsTerminal())
 		tree << node->GetHead() << "]";
@@ -203,7 +216,7 @@ std::string SyntaxTree::ToStringHead(){
 
 //!!! still problems with finding the head
 // I had NP in the VP rule and it would always get that one first -> the 0/1 reversing might not be working or some if/else
-void SyntaxTree::FindHeads(SyntaxNode *node, std::map<std::string, std::vector <std::string> > &headRules) const {
+void SyntaxTree::FindHeads(SyntaxNodePtr node, std::map<std::string, std::vector <std::string> > &headRules) const {
 	std::map<std::string,std::vector<std::string> >::iterator it;
 	//so I don't recurse through the children subtrees that have already been updated with the head
 	if(node->HasHead())
@@ -267,7 +280,7 @@ void SyntaxTree::FindHeads(SyntaxNode *node, std::map<std::string, std::vector <
 	}
 }
 
-void SyntaxTree::SetHeadOpenNodes(std::vector<SyntaxTree*> previousTrees){
+void SyntaxTree::SetHeadOpenNodes(std::vector<SyntaxTreePtr > previousTrees){
 	if(previousTrees.size()!=m_openNodes.size())
 		std::cout<<"SetHeadOpenNodes: sizes don't match\n";
 	else{
@@ -297,7 +310,7 @@ string* SyntaxTree::FindObj() const{
 	string *predArgPair = new string("");
 	if(m_top->GetLabel().compare("VP")==0){
 		//cout<<"VP: "<<m_top->GetHead()<<" NP: ";
-		SyntaxNode *obj = m_top->FindFirstChild("NP");
+		SyntaxNodePtr obj = m_top->FindFirstChild("NP");
 		if(obj){
 			//cout<<obj->GetHead()<<endl;
 			*predArgPair+=m_top->GetHead()+" "+obj->GetHead();
@@ -319,10 +332,12 @@ int SyntaxTreeState::Compare(const FFState& other) const
 ////////////////////////////////////////////////////////////////
 HeadFeature::HeadFeature(const std::string &line)
   :StatefulFeatureFunction(1, line) //should modify 0 to the number of scores my feature generates
+	,m_headRules(new std::map<std::string, std::vector <std::string> > ())
+	, m_probArg (new std::map<std::string, float> ())
 {
   ReadParameters();
-  m_headRules = new std::map<std::string, std::vector <std::string> > ();
-  m_probArg = new std::map<std::string, float> ();
+  //m_headRules = new std::map<std::string, std::vector <std::string> > ();
+  //m_probArg = new std::map<std::string, float> ();
 }
 
 void HeadFeature::ReadHeadRules(){
@@ -388,24 +403,24 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 
 
-	    SyntaxTree *syntaxTree = new SyntaxTree();
+	    SyntaxTreePtr syntaxTree (new SyntaxTree());
 	    //should have new SyntaxTree(pointer to headRules)
 	    syntaxTree->FromString(*tree);
-	    //std::cout<<*tree<<std::endl;
-	    //std::cout<< syntaxTree->ToString()<<std::endl;//" size "<<syntaxTree->GetSize()<< " open "<<syntaxTree->GetOpenNodes().size()<<std::endl<<std::endl;
+	   // std::cout<<*tree<<std::endl;
+	   //std::cout<< syntaxTree->ToString()<<std::endl;
 
 
 
 	    //get subtrees (in target order)
-	        std::vector<SyntaxTree*> previousTrees;
+	        std::vector< SyntaxTreePtr > previousTrees;
 	        for (size_t pos = 0; pos < cur_hypo.GetCurrTargetPhrase().GetSize(); ++pos) {
 	          const Word &word = cur_hypo.GetCurrTargetPhrase().GetWord(pos);
 	          if (word.IsNonTerminal()) {
 	            size_t nonTermInd = cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
 	            const ChartHypothesis *prevHypo = cur_hypo.GetPrevHypo(nonTermInd);
 	            const SyntaxTreeState* prev = dynamic_cast<const SyntaxTreeState*>(prevHypo->GetFFState(featureID));
-	            SyntaxTree* prev_tree = prev->GetTree();
-	            previousTrees.push_back(prev_tree);
+	            //SyntaxTree* prev_tree = prev->GetTree();
+	            previousTrees.push_back(prev->GetTree());
 	          }
 	        }
 
@@ -423,7 +438,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        }
 	        else
 	        	accumulator->PlusEquals(this,-1);
-
+	        delete predArgPair;
+	        predArgPair = 0;
 
 	        //std::cout<< syntaxTree->ToStringHead()<<std::endl;
 
