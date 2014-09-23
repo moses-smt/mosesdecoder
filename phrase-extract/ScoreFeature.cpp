@@ -93,7 +93,7 @@ void ScoreFeatureManager::configure(const std::vector<std::string> args)
 	m_includeSentenceId = true;
     } else {
       UTIL_THROW(ScoreFeatureArgumentException,"Unknown score argument " << args[i]);
-    	}
+    }
 
   }
 
