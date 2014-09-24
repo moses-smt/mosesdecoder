@@ -241,6 +241,7 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt)
       last_scorer_index++;
       break;
     case 'c':
+      if (last_scorer_index == -1) throw runtime_error("You need to specify a scorer before its config string.");
       opt->scorer_configs[last_scorer_index] = string(optarg);
       break;
     case 'R':
@@ -260,9 +261,11 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt)
       opt->has_seed = true;
       break;
     case 'f':
+      if (last_scorer_index == -1) throw runtime_error("You need to specify a scorer before its list of factors.");
       opt->scorer_factors[last_scorer_index] = string(optarg);
       break;
     case 'l':
+      if (last_scorer_index == -1) throw runtime_error("You need to specify a scorer before its filter.");
       opt->scorer_filter[last_scorer_index] = string(optarg);
       break;
     default:

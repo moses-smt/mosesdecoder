@@ -402,7 +402,7 @@ if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {
   $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
 }
 
-my $sctype = undef;
+my $sctype = "--sctype BLEU";
 if ($mertargs =~ /(\-\-sctype\s+.+?)(\s|$)/) {
   $sctype = $1;
   $mertargs =~ s/(\-\-sctype\s+.+?)(\s|$)//;
