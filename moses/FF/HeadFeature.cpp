@@ -434,10 +434,10 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        it = m_probArg->find(*predArgPair);
 	        if(it!=m_probArg->end()){
 	        	//cout<<"Have value: "<<it->second<<endl;
-	        	accumulator->PlusEquals(this,log(it->second+0.01));
+	        	accumulator->PlusEquals(this,log(it->second+0.001));
 	        }
-	        else
-	        	accumulator->PlusEquals(this,-1);
+	        //else
+	        //	accumulator->PlusEquals(this,-1);
 	        delete predArgPair;
 	        predArgPair = 0;
 
