@@ -21,7 +21,7 @@ def main():
   parser.add_option("-o", "--output-embedding", dest="output_embedding", type="int")
   parser.add_option("-t", "--threads", dest="threads", type="int")
   parser.add_option("-m", "--output-model", dest="output_model")
-  parser.add_option("-o", "--output-dir", dest="output_dir")
+  parser.add_option("-r", "--output-dir", dest="output_dir")
   parser.add_option("-p", "--skip-preparation", action="store_true", dest="skip_preparation")
   parser.add_option("-f", "--config-options-file", dest="config_options_file")
   parser.add_option("-g", "--log-file", dest="log_file")
@@ -59,7 +59,7 @@ def main():
       os.makedirs(options.output_dir)
 
   config_file = options.output_dir + "/" + options.config_options_file + '-' + options.output_model
-  log_file = options.output_dir + "/" + options.log + '-' + options.output_model
+  log_file = options.output_dir + "/" + options.log_file + '-' + options.output_model
   log_file_write = open(log_file, 'w')
   config_file_write = open(config_file, 'w')
 
