@@ -4,6 +4,7 @@ import logging
 import optparse
 import subprocess
 import sys
+import os
 
 def main():
   logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
@@ -20,6 +21,10 @@ def main():
   parser.add_option("-o", "--output-embedding", dest="output_embedding", type="int")
   parser.add_option("-t", "--threads", dest="threads", type="int")
   parser.add_option("-m", "--output-model", dest="output_model")
+  parser.add_option("-o", "--output-dir", dest="output_dir")
+  parser.add_option("-p", "--skip-preparation", action="store_true", dest="skip_preparation")
+  parser.add_option("-f", "--config-options-file", dest="config_options_file")
+  parser.add_option("-g", "--log-file", dest="log_file")
 
   parser.set_defaults(
     working_dir = "working"
@@ -34,23 +39,50 @@ def main():
     ,output_embedding=150
     ,threads=1
     ,output_model = "train.10k"
+    ,output_dir = None
+    ,skip_preparation = False
+    ,config_options_file = "config"
+    ,log_file = "log"
   )
 
   options,args = parser.parse_args(sys.argv)
+
+  # In order to allow for different models to be trained after the same
+  # preparation step, we should provide an option for multiple output directories
+  # If we have not set output_dir, set it to the same thing as the working dir
+
+  if options.output_dir is None:
+    options.output_dir = options.working_dir
+  else:
+    # Create output dir if necessary
+    if not os.path.exists(options.output_dir):
+      os.makedirs(options.output_dir)
+
+  config_file = options.output_dir + "/" + options.config_options_file + '-' + options.output_model
+  log_file = options.output_dir + "/" + options.log + '-' + options.output_model
+  log_file_write = open(log_file, 'w')
+  config_file_write = open(config_file, 'w')
+
+  config_file_write.write("Called: " + ' '.join(sys.argv) + '\n\n')
+
 
   in_file = options.working_dir + "/" + options.corpus_stem + ".ngrams"
   vocab_file = options.working_dir + "/vocab"
   prep_file = options.working_dir + "/" + options.output_model + ".prepared"
 
-  prep_args = [options.nplm_home + "/src/prepareNeuralLM", "--train_text", in_file, "--ngram_size", \
-                str(options.ngram_size), "--ngramize", "0", "--words_file", vocab_file, "--train_file", prep_file ]
-  print "Prepare model command: "
-  print ', '.join(prep_args)
+  if (not options.skip_preparation):
+    prep_args = [options.nplm_home + "/src/prepareNeuralLM", "--train_text", in_file, "--ngram_size", \
+                  str(options.ngram_size), "--ngramize", "0", "--words_file", vocab_file, "--train_file", prep_file ]
+    print "Prepare model command: "
+    print ', '.join(prep_args)
+    config_file_write.write("Preparation step:\n" + ' '.join(prep_args) + '\n\n')
 
-  ret = subprocess.call(prep_args)
-  if ret: raise Exception("Prepare failed")
+    log_file_write.write("Preparation output:\n")
+    ret = subprocess.call(prep_args, stdout=log_file_write, stderr=log_file_write)
+    log_file_write.write("\n")
+    if ret: raise Exception("Prepare failed")
 
-  model_prefix = options.working_dir + "/" + options.output_model + ".model.nplm"
+  model_prefix = options.output_dir + "/" + options.output_model + ".model.nplm"
   train_args = [options.nplm_home + "/src/trainNeuralNetwork", "--train_file", prep_file, "--num_epochs", str(options.epochs),
                 "--input_words_file", vocab_file, "--output_words_file", vocab_file, "--model_prefix",
                 model_prefix, "--learning_rate", "1", "--minibatch_size", str(options.minibatch_size),
@@ -60,7 +92,11 @@ def main():
   print "Train model command: "
   print ', '.join(train_args)
 
-  ret = subprocess.call(train_args)
+  config_file_write.write("Training step:\n" + ' '.join(train_args) + '\n')
+  config_file_write.close()
+
+  log_file_write.write("Training output:\n")
+  ret = subprocess.call(train_args, stdout=log_file_write, stderr=log_file_write)
   if ret: raise Exception("Training failed")
 
 if __name__ == "__main__":
