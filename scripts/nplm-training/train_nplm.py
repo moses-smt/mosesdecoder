@@ -99,6 +99,8 @@ def main():
   ret = subprocess.call(train_args, stdout=log_file_write, stderr=log_file_write)
   if ret: raise Exception("Training failed")
 
+  log_file_write.close()
+
 if __name__ == "__main__":
   main()
 
