@@ -69,18 +69,18 @@ void SpanSparseFeature::EvaluateWhenApplied(const ChartHypothesis &cur_hypo,
 
 	//Compose the sparse feature name
 	stringstream nameTS,nameSTS,nameSS,nameSSb,nameTSb,nameSTSdiff;
-	nameSS <<LHS_string<<"_S_"<<spanSource;
+	//nameSS <<LHS_string<<"_S_"<<spanSource;
 	nameSSb <<LHS_string<<"_Sb_"<<spanSource/3;
-	nameTS <<LHS_string<<"_T_"<<spanTarget;
+	//nameTS <<LHS_string<<"_T_"<<spanTarget;
 	nameTSb <<LHS_string<<"_Tb_"<<spanTarget/3;
-	nameSTS <<LHS_string<<"_"<<spanSource<<"_"<<spanTarget;
+	//nameSTS <<LHS_string<<"_"<<spanSource<<"_"<<spanTarget;
 	nameSTSdiff <<LHS_string<<"_d_"<<int(spanSource-spanTarget);
 
 
 	//Add sparse features
-	accumulator->PlusEquals(this,nameSS.str(),1); //LHS with the source span length
-	accumulator->PlusEquals(this,nameTS.str(),1); //LHS with the target span length
-	accumulator->PlusEquals(this,nameSTS.str(),1); //LHS with the source and target span length
+	//accumulator->PlusEquals(this,nameSS.str(),1); //LHS with the source span length
+	//accumulator->PlusEquals(this,nameTS.str(),1); //LHS with the target span length
+	//accumulator->PlusEquals(this,nameSTS.str(),1); //LHS with the source and target span length
 	accumulator->PlusEquals(this,nameSSb.str(),1); //LHS with the source span length bined
 	accumulator->PlusEquals(this,nameTSb.str(),1); //LHS with the target span length bined
 	accumulator->PlusEquals(this,nameSTSdiff.str(),1); //LHS with difference of the source and target span length
