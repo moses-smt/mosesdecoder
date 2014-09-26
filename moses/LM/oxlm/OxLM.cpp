@@ -90,13 +90,11 @@ LMResult OxLM<Model>::GetValue(
   mapper->convert(contextFactor, context, word);
 
   size_t context_width = m_nGramOrder - 1;
-
   if (!context.empty() && context.back() == kSTART) {
     context.resize(context_width, kSTART);
   } else {
     context.resize(context_width, kUNKNOWN);
   }
-
 
   double score;
   if (persistentCache) {
