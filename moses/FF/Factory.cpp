@@ -49,11 +49,8 @@
 #include "NieceTerminal.h"
 #include "SpanLength.h"
 #include "SyntaxRHS.h"
-<<<<<<< HEAD
 #include "moses/FF/PhraseOrientationFeature.h"
 #include "bilingual-lm/BilingualLM.h"
-=======
->>>>>>> fix Jamfile
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
@@ -104,6 +101,7 @@
 
 #ifdef LM_OXLM
 #include "moses/LM/oxlm/OxLM.h"
+#include "moses/LM/oxlm/SourceOxLM.h"
 #endif
 
 #include "util/exception.hh"

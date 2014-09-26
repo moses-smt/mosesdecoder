@@ -14,7 +14,7 @@ namespace Moses {
     return m_neuralLM->lookup_ngram(source_words);
   }
 
-  int BilingualLM_NPLM::LookUpNeuralLMWord(const std::string str) const {
+  int BilingualLM_NPLM::LookUpNeuralLMWord(const std::string& str) const {
     return m_neuralLM->lookup_word(str);
   }
     
@@ -45,7 +45,7 @@ namespace Moses {
 
   }
 
-  void BilingualLM_NPLM::loadModel() const {
+  void BilingualLM_NPLM::loadModel() {
     m_neuralLM_shared = new nplm::neuralLM(m_filePath, premultiply); //Default premultiply= true
 
     m_neuralLM_shared->set_cache(neuralLM_cache); //Default 1000000
