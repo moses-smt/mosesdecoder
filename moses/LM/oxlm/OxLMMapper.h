@@ -19,10 +19,10 @@ class OxLMMapper {
       const std::vector<const Word*> &contextFactor,
       std::vector<int> &ids, int &word) const;
 
- private:
+ protected:
   typedef std::map<const Moses::Factor*, int> Coll;
   Coll moses2Oxlm;
   int kUNKNOWN;
 };
 
-}
+} // namespace Moses

@@ -21,10 +21,10 @@ float SourceOxLM::Score(
   return model.predict(word, context);
 }
 
-int SourceOxLM::LookUpNeuralLMWord(const string& str) const {
-}
-
-void SourceOxLM::initSharedPointer() const {
+int SourceOxLM::getNeuralLMId(const Word& word, bool is_source_word) const {
+  const Moses::Factor* factor = word.GetFactor(0);
+  return is_source_word ?
+      mapper->convertSource(factor) : mapper->convert(factor);
 }
 
 void SourceOxLM::loadModel() {
@@ -33,6 +33,9 @@ void SourceOxLM::loadModel() {
   boost::shared_ptr<ModelData> config = model.getConfig();
   source_ngrams = 2 * config->source_order - 1;
   target_ngrams = config->ngram_order - 1;
+
+  boost::shared_ptr<Vocabulary> vocab = model.getVocab();
+  mapper = boost::make_shared<OxLMParallelMapper>(vocab);
 }
 
 void SourceOxLM::SetParameter(const string& key, const string& value) {

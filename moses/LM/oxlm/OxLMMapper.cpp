@@ -1,4 +1,5 @@
-#include "OxLMMapper.h"
+#include "moses/LM/oxlm/OxLMMapper.h"
+
 #include "moses/FactorCollection.h"
 
 using namespace std;
@@ -22,7 +23,7 @@ int OxLMMapper::convert(const Moses::Factor *factor) const {
 }
 
 void OxLMMapper::convert(
-    const vector<const Word*> &contextFactor,
+    const vector<const Word*>& contextFactor,
     vector<int> &ids, int &word) const {
   ids.clear();
 	for (size_t i = 0; i < contextFactor.size() - 1; ++i) {
