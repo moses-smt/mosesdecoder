@@ -114,7 +114,7 @@ requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
 requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
-if [ option.get "with-lbllm" ] {
+if [ option.get "with-oxlm" ] {
   external-lib boost_serialization ;
   external-lib gomp ;
   requirements += <library>boost_serialization ;

@@ -1,4 +1,4 @@
-#include "Mapper.h"
+#include "moses/LM/oxlm/OxLMMapper.h"
 #include "moses/FactorCollection.h"
 
 using namespace std;

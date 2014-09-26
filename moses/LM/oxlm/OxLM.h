@@ -9,16 +9,16 @@
 #include "lbl/model.h"
 #include "lbl/query_cache.h"
 
-#include "Mapper.h"
+#include "OxLMMapper.h"
 
 namespace Moses {
 
 template<class Model>
-class LBLLM : public LanguageModelSingleFactor {
+class OxLM : public LanguageModelSingleFactor {
  public:
-	LBLLM(const std::string &line);
+	OxLM(const std::string &line);
 
-  ~LBLLM();
+  ~OxLM();
 
   void SetParameter(const std::string& key, const std::string& value);
 

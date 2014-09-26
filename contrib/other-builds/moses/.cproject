@@ -266,7 +266,7 @@
 									<listOptionValue builtIn="false" value="LM_IRST"/>
 									<listOptionValue builtIn="false" value="LM_DALM"/>
 									<listOptionValue builtIn="false" value="LM_NPLM"/>
-									<listOptionValue builtIn="false" value="LM_LBL"/>
+									<listOptionValue builtIn="false" value="LM_OXLM"/>
 									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
 									<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 								</option>
