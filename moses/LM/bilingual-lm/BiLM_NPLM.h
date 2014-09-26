@@ -1,4 +1,4 @@
-#include "BilingualLM.h"
+#include "moses/LM/BilingualLM.h"
 
 namespace nplm {
   class neuralLM;
