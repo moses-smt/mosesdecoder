@@ -42,9 +42,9 @@ class BilingualLM : public StatefulFeatureFunction
 private:
 
   virtual float Score(std::vector<int>& source_words, std::vector<int>& target_words) const = 0;
-  virtual int LookUpNeuralLMWord(const std::string str) const = 0;
+  virtual int LookUpNeuralLMWord(const std::string& str) const = 0;
   virtual void initSharedPointer() const = 0;
-  virtual void loadModel() const = 0;
+  virtual void loadModel() = 0;
   virtual bool parseAdditionalSettings(const std::string& key, const std::string& value) = 0;
 
   size_t selectMiddleAlignment(const std::set<size_t>& alignment_links) const;

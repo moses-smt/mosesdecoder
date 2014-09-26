@@ -98,6 +98,7 @@
 
 #ifdef LM_OXLM
 #include "moses/LM/oxlm/OxLM.h"
+#include "moses/LM/oxlm/SourceOxLM.h"
 #endif
 
 #include "util/exception.hh"
@@ -256,6 +257,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("OxLM-LM", OxLM<oxlm::LM>);
   MOSES_FNAME2("OxLM-FactoredLM", OxLM<oxlm::FactoredLM>);
   MOSES_FNAME2("OxLM-FactoredMaxentLM", OxLM<oxlm::FactoredMaxentLM>);
+  MOSES_FNAME2("OxLM-SourceFactoredLM", SourceOxLM);
 #endif
 
   Add("KENLM", new KenFactory());
