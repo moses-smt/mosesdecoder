@@ -53,12 +53,12 @@ template<class Model>
 void LBLLM<Model>::Load() {
   model.load(m_filePath);
 
-  Dict dict = model.getDict();
-  mapper = boost::make_shared<OXLMMapper>(dict);
+  boost::shared_ptr<Vocabulary> vocab = model.getVocab();
+  mapper = boost::make_shared<OXLMMapper>(vocab);
 
-  kSTART = dict.Convert("<s>");
-  kSTOP = dict.Convert("</s>");
-  kUNKNOWN = dict.Convert("<unk>");
+  kSTART = vocab->convert("<s>");
+  kSTOP = vocab->convert("</s>");
+  kUNKNOWN = vocab->convert("<unk>");
 
   size_t ngram_order = model.getConfig()->ngram_order;
   UTIL_THROW_IF2(

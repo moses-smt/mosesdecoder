@@ -1,29 +1,34 @@
 #pragma once
 
 #include <map>
-#include "corpus/corpus.h"
+
+#include "lbl/vocabulary.h"
+
 #include "moses/Factor.h"
 #include "moses/Phrase.h"
 
-namespace Moses
-{
-class OXLMMapper
-{
-public:
- OXLMMapper(const oxlm::Dict& dict);
+namespace Moses {
 
- int convert(const Moses::Factor *factor) const;
- std::vector<int> convert(const Phrase &phrase) const;
- void convert(const std::vector<const Word*> &contextFactor, std::vector<int> &ids, int &word) const;
+class OXLMMapper {
+ public:
+  OXLMMapper(const boost::shared_ptr<oxlm::Vocabulary>& vocab);
 
-private:
- void add(int lbl_id, int cdec_id);
+  int convert(const Moses::Factor *factor) const;
 
- oxlm::Dict dict;
- typedef std::map<const Moses::Factor*, int> Coll;
- Coll moses2lbl;
- int kUNKNOWN;
+  std::vector<int> convert(const Phrase &phrase) const;
 
+  void convert(
+      const std::vector<const Word*> &contextFactor,
+      std::vector<int> &ids,
+      int &word) const;
+
+ private:
+  void add(int lbl_id, int cdec_id);
+
+  boost::shared_ptr<oxlm::Vocabulary> vocab;
+  typedef std::map<const Moses::Factor*, int> Coll;
+  Coll moses2lbl;
+  int kUNKNOWN;
 };
 
 /**
@@ -43,4 +48,4 @@ struct LBLFeatures {
   double OOVScore;
 };
 
-}
+} // namespace Moses

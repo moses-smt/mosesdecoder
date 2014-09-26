@@ -6,20 +6,16 @@
 #include "moses/LM/SingleFactor.h"
 
 // lbl stuff
-#include "corpus/corpus.h"
 #include "lbl/model.h"
 #include "lbl/query_cache.h"
 
 #include "Mapper.h"
 
-namespace Moses
-{
-
+namespace Moses {
 
 template<class Model>
-class LBLLM : public LanguageModelSingleFactor
-{
-public:
+class LBLLM : public LanguageModelSingleFactor {
+ public:
 	LBLLM(const std::string &line);
 
   ~LBLLM();
@@ -36,7 +32,7 @@ public:
 
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 
-protected:
+ protected:
   Model model;
   boost::shared_ptr<OXLMMapper> mapper;
 
@@ -49,5 +45,4 @@ protected:
   mutable int cacheHits, totalHits;
 };
 
-
-}
+} // namespace Moses
