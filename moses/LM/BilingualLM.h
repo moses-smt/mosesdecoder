@@ -36,14 +36,12 @@ public:
   int Compare(const FFState& other) const;
 };
 
-class BilingualLM : public StatefulFeatureFunction 
-{
-
-private:
-
+class BilingualLM : public StatefulFeatureFunction {
+ private:
   virtual float Score(std::vector<int>& source_words, std::vector<int>& target_words) const = 0;
-  virtual int LookUpNeuralLMWord(const std::string& str) const = 0;
-  virtual void initSharedPointer() const = 0;
+
+  virtual int getNeuralLMId(const Word& word, bool is_source_word) const = 0;
+
   virtual void loadModel() = 0;
 
   size_t selectMiddleAlignment(const std::set<size_t>& alignment_links) const;
@@ -89,19 +87,11 @@ private:
 
   size_t getStateChart(Phrase& whole_phrase) const;
 
-  int getNeuralLMId(const Word& word) const;
-
-  mutable std::map<const Factor*, int> neuralLMids;
-  mutable boost::shared_mutex neuralLMids_lock;
-
 protected:
   // big data (vocab, weights, cache) shared among threads
   std::string m_filePath;
-  int m_nGramOrder;
   int target_ngrams;
   int source_ngrams;
-  int unknown_word_id;
-  bool factored;
 
   //NeuralLM lookup
   FactorType word_factortype;

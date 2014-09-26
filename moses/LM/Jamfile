@@ -99,7 +99,8 @@ if $(with-oxlm) {
   obj OxLM.o : oxlm/OxLM.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
   obj SourceOxLM.o : oxlm/SourceOxLM.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
   obj OxLMMapper.o : oxlm/OxLMMapper.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
-  alias oxlm : OxLM.o SourceOxLM.o OxLMMapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_OXLM ;
+  obj OxLMParallelMapper.o : oxlm/OxLMParallelMapper.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  alias oxlm : OxLM.o SourceOxLM.o OxLMMapper.o OxLMParallelMapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_OXLM ;
   dependencies += oxlm ;
   lmmacros += LM_OXLM ;
 }

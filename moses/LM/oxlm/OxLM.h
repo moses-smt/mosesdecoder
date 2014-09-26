@@ -34,7 +34,7 @@ class OxLM : public LanguageModelSingleFactor {
 
  protected:
   Model model;
-  boost::shared_ptr<OXLMMapper> mapper;
+  boost::shared_ptr<OxLMMapper> mapper;
 
   int kSTART;
   int kSTOP;

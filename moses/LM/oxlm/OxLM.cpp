@@ -54,7 +54,7 @@ void OxLM<Model>::Load() {
   model.load(m_filePath);
 
   boost::shared_ptr<Vocabulary> vocab = model.getVocab();
-  mapper = boost::make_shared<OXLMMapper>(vocab);
+  mapper = boost::make_shared<OxLMMapper>(vocab);
 
   kSTART = vocab->convert("<s>");
   kSTOP = vocab->convert("</s>");

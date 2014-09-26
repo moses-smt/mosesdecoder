@@ -17,12 +17,10 @@ int BilingualLMState::Compare(const FFState& other) const
 
 ////////////////////////////////////////////////////////////////
 BilingualLM::BilingualLM(const std::string &line)
-  :StatefulFeatureFunction(1, line)
-  ,factored(false)
-  ,word_factortype(0)
-  ,BOS_word(BOS_word_actual)
-  ,EOS_word(EOS_word_actual)
-{
+    : StatefulFeatureFunction(1, line),
+      word_factortype(0),
+      BOS_word(BOS_word_actual),
+      EOS_word(EOS_word_actual) {
   FactorCollection& factorFactory = FactorCollection::Instance(); //Factor Factory to use for BOS_ and EOS_
   BOS_factor = factorFactory.AddFactor(BOS_);
   BOS_word_actual.SetFactor(0, BOS_factor);
@@ -33,75 +31,6 @@ BilingualLM::BilingualLM(const std::string &line)
 void BilingualLM::Load(){
   ReadParameters();
   loadModel();
-  initSharedPointer();
-
-  //Get unknown word ID
-  unknown_word_id = LookUpNeuralLMWord("<unk>");
-
-}
-
-//Cache for NeuralLMids
-int BilingualLM::getNeuralLMId(const Word& word) const{
-
-  initSharedPointer();
-  
-  const Factor* factor = word.GetFactor(word_factortype);
-
-  std::map<const Factor *, int>::iterator it;
-
-  boost::upgrade_lock< boost::shared_mutex > read_lock(neuralLMids_lock);
-  it = neuralLMids.find(factor);
-
-  if (it != neuralLMids.end()) {
-    if (!factored){
-      return it->second; //Lock is released here automatically
-    } else {
-      //See if word is unknown
-      if (it->second == unknown_word_id){
-        const Factor* pos_factor = word.GetFactor(pos_factortype); //Get POS tag
-        //Look up the POS tag in the cache
-        it = neuralLMids.find(pos_factor);
-        if (it != neuralLMids.end()){
-          return it->second; //We have our pos tag in the cache.
-        } else {
-          //We have to lookup the pos_tag
-          const std::string posstring = pos_factor->GetString().as_string();
-          int neuralLM_wordID = LookUpNeuralLMWord(posstring);
-
-          boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(read_lock);
-          neuralLMids.insert(std::pair<const Factor *, int>(pos_factor, neuralLM_wordID));
-
-          return neuralLM_wordID; //We return the ID of the pos TAG
-        }
-      } else {
-        return it->second; //We return the neuralLMid of the word
-      }
-      
-    }
-    
-  } else {
-    //We have to lookup the word
-    const std::string string = factor->GetString().as_string();
-    int neuralLM_wordID = LookUpNeuralLMWord(string);
-
-    boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(read_lock);
-    neuralLMids.insert(std::pair<const Factor *, int>(factor, neuralLM_wordID));
-
-    if (!factored) {
-      return neuralLM_wordID; //Lock is released here
-    } else {
-      if (neuralLM_wordID == unknown_word_id){
-        const Factor* pos_factor = word.GetFactor(pos_factortype);
-        const std::string factorstring = pos_factor->GetString().as_string();
-        neuralLM_wordID = LookUpNeuralLMWord(string);
-        neuralLMids.insert(std::pair<const Factor *, int>(pos_factor, neuralLM_wordID));
-      }
-      return neuralLM_wordID; //If a POS tag is needed, neuralLM_wordID is going to be updated.
-    }
-    
-  }
-
-
 }
 
 //Populates words with amount words from the targetPhrase from the previous hypothesis where
@@ -116,7 +45,7 @@ void BilingualLM::requestPrevTargetNgrams(
     for (int i = currTargetPhrase.GetSize() - 1; i> -1; i--){
       if (found != amount){
         const Word& word = currTargetPhrase.GetWord(i);
-        words[found] = getNeuralLMId(word);
+        words[found] = getNeuralLMId(word, false);
         found++;
       } else {
         return; //We have gotten everything needed
@@ -126,7 +55,7 @@ void BilingualLM::requestPrevTargetNgrams(
     prev_hyp = prev_hyp->GetPrevHypo();
   }
 
-  int neuralLM_wordID = getNeuralLMId(BOS_word);
+  int neuralLM_wordID = getNeuralLMId(BOS_word, false);
   for (int i = found; i < amount; i++){
     words[i] = neuralLM_wordID;
   }
@@ -155,13 +84,13 @@ void BilingualLM::getTargetWords(
     //Just add until we reach current_word_index
     for (int i = 0; i <= current_word_index; i++) {
       const Word& word = targetPhrase.GetWord(i);
-      words.push_back(getNeuralLMId(word));
+      words.push_back(getNeuralLMId(word, false));
     }
   } else {
     //We haven't added any words, proceed as before
     for (int i = current_word_index - target_ngrams; i <= current_word_index; i++){
       const Word& word = targetPhrase.GetWord(i);
-      words.push_back(getNeuralLMId(word));
+      words.push_back(getNeuralLMId(word, false));
     }
   }
 }
@@ -271,14 +200,14 @@ size_t BilingualLM::getState(const Hypothesis& cur_hypo) const {
     // Get the rest of the phrases needed
     for (int i = 0; i < targetPhrase.GetSize(); i++) {
       const Word& word = targetPhrase.GetWord(i);
-      int neuralLM_wordID = getNeuralLMId(word);
+      int neuralLM_wordID = getNeuralLMId(word, false);
       boost::hash_combine(hashCode, neuralLM_wordID);
     }
   } else {
     // We just need the last target_ngrams from the current target phrase.
     for (int i = targetPhrase.GetSize() - target_ngrams; i < targetPhrase.GetSize(); i++) {
       const Word& word = targetPhrase.GetWord(i);
-      int neuralLM_wordID = getNeuralLMId(word);
+      int neuralLM_wordID = getNeuralLMId(word, false);
 
       boost::hash_combine(hashCode, neuralLM_wordID);
     }
@@ -552,9 +481,9 @@ size_t BilingualLM::getStateChart(Phrase& whole_phrase) const {
   for (int i = whole_phrase.GetSize() - target_ngrams; i < whole_phrase.GetSize(); i++){
     int neuralLM_wordID;
     if (i < 0) {
-      neuralLM_wordID = getNeuralLMId(BOS_word);
+      neuralLM_wordID = getNeuralLMId(BOS_word, false);
     } else {
-      neuralLM_wordID = getNeuralLMId(whole_phrase.GetWord(i));
+      neuralLM_wordID = getNeuralLMId(whole_phrase.GetWord(i), false);
     }
     boost::hash_combine(hashCode, neuralLM_wordID);
   }
@@ -567,10 +496,10 @@ void BilingualLM::getTargetWordsChart(
     std::vector<int>& words) const {
   for (int i = current_word_index - target_ngrams; i <= current_word_index; i++) {
     if (i < 0) {
-      words.push_back(getNeuralLMId(BOS_word));
+      words.push_back(getNeuralLMId(BOS_word, false));
     } else {
       const Word& word = whole_phrase.GetWord(i);
-      words.push_back(getNeuralLMId(word));
+      words.push_back(getNeuralLMId(word, false));
     }
   }
 }
@@ -594,12 +523,12 @@ void BilingualLM::appendSourceWordsToVector(const Sentence &source_sent, std::ve
   for (int j = begin_idx; j <= end_idx; j++) {
     int neuralLM_wordID;
     if (j < 0) {
-      neuralLM_wordID = getNeuralLMId(BOS_word);
+      neuralLM_wordID = getNeuralLMId(BOS_word, true);
     } else if (j >= source_sent.GetSize()) {
-      neuralLM_wordID = getNeuralLMId(EOS_word);
+      neuralLM_wordID = getNeuralLMId(EOS_word, true);
     } else {
       const Word& word = source_sent.GetWord(j);
-      neuralLM_wordID = getNeuralLMId(word);
+      neuralLM_wordID = getNeuralLMId(word, true);
     }
     words.push_back(neuralLM_wordID);
   }
