@@ -47,18 +47,22 @@ private:
   virtual void loadModel() const = 0;
   virtual bool parseAdditionalSettings(const std::string& key, const std::string& value) = 0;
 
-  void getSourceWords(const TargetPhrase &targetPhrase
-                , int targetWordIdx
-                , const Sentence &source_sent
-                , const WordsRange &sourceWordRange
-                , std::vector<int> &words) const;
+  size_t selectMiddleAlignment(const std::set<size_t>& alignment_links) const;
+
+  void getSourceWords(
+      const TargetPhrase &targetPhrase,
+      int targetWordIdx,
+      const Sentence &source_sent,
+      const WordsRange &sourceWordRange,
+      std::vector<int> &words) const;
 
   void appendSourceWordsToVector(const Sentence &source_sent, std::vector<int> &words, int source_word_mid_idx) const;
 
-  void getTargetWords(const Hypothesis &cur_hypo
-                , const TargetPhrase &targetPhrase
-                , int current_word_index
-                , std::vector<int> &words) const;
+  void getTargetWords(
+      const Hypothesis &cur_hypo,
+      const TargetPhrase &targetPhrase,
+      int current_word_index,
+      std::vector<int> &words) const;
 
   //size_t getState(const TargetPhrase &targetPhrase, std::vector<int> &prev_words) const;
 
