@@ -109,7 +109,11 @@ def main():
   save_vocab(options.working_dir, "vocab.target", tvocab)
   vocab = svocab.union(tvocab)
   vocab.update(tags)
-  save_vocab(options.working_dir, "vocab", vocab)
+  # UNK is always the first vocabulary element. Make sure
+  # it appears in position 0
+  vocab_list = list(vocab)
+  vocab_list.insert(0, "<unk>")
+  save_vocab(options.working_dir, "vocab", vocab_list)
  
 if __name__ == "__main__":
   main()
