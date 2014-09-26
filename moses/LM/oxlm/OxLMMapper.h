@@ -15,8 +15,6 @@ class OXLMMapper {
 
   int convert(const Moses::Factor *factor) const;
 
-  std::vector<int> convert(const Phrase &phrase) const;
-
   void convert(
       const std::vector<const Word*> &contextFactor,
       std::vector<int> &ids,
