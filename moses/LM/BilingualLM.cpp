@@ -4,8 +4,8 @@
 
 using namespace std;
 
-namespace Moses
-{
+namespace Moses {
+
 int BilingualLMState::Compare(const FFState& other) const
 {
   const BilingualLMState &otherState = static_cast<const BilingualLMState&>(other);
@@ -754,35 +754,13 @@ FFState* BilingualLM::EvaluateWhenApplied(
   return new BilingualLMState(new_state, word_alignments);
 }
 
-void BilingualLM::SetParameter(const std::string& key, const std::string& value)
-{
+void BilingualLM::SetParameter(const std::string& key, const std::string& value) {
   if (key == "filepath") {
     m_filePath = value;
-  } else if (key == "ngrams") {
-    m_nGramOrder = atoi(value.c_str());
-  } else if (key == "target_ngrams") {
-    target_ngrams = atoi(value.c_str());
-  } else if (parseAdditionalSettings(key, value)) { //Give key and value to specific implementation
-    //Do nothing here, we assign the variables in the implementation of bilingualLM
-  } else if (key == "source_ngrams") {
-    source_ngrams = atoi(value.c_str());
-  } else if (key == "factored") {
-    std::string truestr = "true";
-    std::string falsestr = "false";
-    if (value == truestr) {
-      factored = true;
-    } else if (value == falsestr) {
-        factored = false;
-    } else {
-      std::cerr << "UNRECOGNIZED OPTION FOR PARAMETER factored. Got " << value << " , expected true or false!" << std::endl;
-      exit(1);
-    }
-  } else if (key == "pos_factor") {
-    pos_factortype = (size_t)atoi(value.c_str());
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
 
-}
+} // namespace Moses
 

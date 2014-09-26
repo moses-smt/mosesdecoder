@@ -45,7 +45,6 @@ private:
   virtual int LookUpNeuralLMWord(const std::string& str) const = 0;
   virtual void initSharedPointer() const = 0;
   virtual void loadModel() = 0;
-  virtual bool parseAdditionalSettings(const std::string& key, const std::string& value) = 0;
 
   size_t selectMiddleAlignment(const std::set<size_t>& alignment_links) const;
 
@@ -126,30 +125,32 @@ public:
 
   void Load();
 
-  void EvaluateInIsolation(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const;
-  void EvaluateWithSourceContext(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , const StackVec *stackVec
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+  void EvaluateInIsolation(
+      const Phrase &source,
+      const TargetPhrase &targetPhrase,
+      ScoreComponentCollection &scoreBreakdown,
+      ScoreComponentCollection &estimatedFutureScore) const;
+
+  void EvaluateWithSourceContext(
+      const InputType &input,
+      const InputPath &inputPath,
+      const TargetPhrase &targetPhrase,
+      const StackVec *stackVec,
+      ScoreComponentCollection &scoreBreakdown,
+      ScoreComponentCollection *estimatedFutureScore = NULL) const;
 
   FFState* EvaluateWhenApplied(
-    const Hypothesis& cur_hypo,
-    const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const;
+      const Hypothesis& cur_hypo,
+      const FFState* prev_state,
+      ScoreComponentCollection* accumulator) const;
+
   FFState* EvaluateWhenApplied(
-    const ChartHypothesis& cur_hypo ,
-    int featureID, /* - used to index the state in the previous hypotheses */
-    ScoreComponentCollection* accumulator) const;
+      const ChartHypothesis& cur_hypo ,
+      int featureID, /* - used to index the state in the previous hypotheses */
+      ScoreComponentCollection* accumulator) const;
 
   void SetParameter(const std::string& key, const std::string& value);
-
 };
-
 
 }
 

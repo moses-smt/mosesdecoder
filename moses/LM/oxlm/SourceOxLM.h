@@ -26,12 +26,12 @@ class SourceOxLM : public BilingualLM {
 
   virtual void loadModel();
 
-  virtual bool parseAdditionalSettings(
-      const std::string& key,
-      const std::string& value);
+  void SetParameter(const std::string& key, const std::string& value);
 
  protected:
   oxlm::SourceFactoredLM model;
+
+  bool persistentCache;
 };
 
 } // namespace Moses
