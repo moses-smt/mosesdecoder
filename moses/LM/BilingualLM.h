@@ -72,19 +72,21 @@ private:
 
   //Chart decoder
 
-  void getTargetWordsChart(Phrase& whole_phrase
-                , int current_word_index
-                , std::vector<int> &words) const;
+  void getTargetWordsChart(
+      Phrase& whole_phrase,
+      int current_word_index,
+      std::vector<int> &words) const;
 
   //Returns the index of the source_word that the current target word uses
-  int getSourceWordsChart(const TargetPhrase &targetPhrase
-                , const ChartHypothesis& curr_hypothesis
-                , int targetWordIdx
-                , const Sentence &source_sent
-                , size_t souce_phrase_start_pos
-                , int next_nonterminal_index
-                , int featureID
-                , std::vector<int> &words) const;
+  int getSourceWordsChart(
+      const TargetPhrase &targetPhrase,
+      const ChartHypothesis& curr_hypothesis,
+      int targetWordIdx,
+      const Sentence &source_sent,
+      size_t souce_phrase_start_pos,
+      int next_nonterminal_index,
+      int featureID,
+      std::vector<int> &words) const;
 
   size_t getStateChart(Phrase& whole_phrase) const;
 
