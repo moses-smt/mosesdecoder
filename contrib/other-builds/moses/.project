@@ -2249,6 +2249,7 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/github/mosesdecoder/moses/LM/bilingual-lm/BilingualLM.h</locationURI>
 		</link>
 		<link>
+<<<<<<< HEAD
 			<name>LM/oxlm/LBLLM.cpp</name>
 >>>>>>> add Bilingual LM class
 			<type>1</type>
@@ -2353,6 +2354,16 @@
 			<name>Syntax/S2T/RuleTrieLoader.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrieLoader.cpp</locationURI>
+=======
+			<name>LM/oxlm/OxLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/OxLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/oxlm/OxLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/OxLM.h</locationURI>
+>>>>>>> Rename LBLLM -> OxLM.
 		</link>
 		<link>
 			<name>Syntax/S2T/RuleTrieLoader.h</name>
