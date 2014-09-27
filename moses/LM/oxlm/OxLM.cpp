@@ -135,13 +135,14 @@ void OxLM<Model>::InitializeForInput(const InputType& source) {
       cerr << "Done loading " << cache->size()
            << " n-gram probabilities..." << endl;
     } else {
-      cerr << "Cache file not found" << endl;
+      cerr << "Cache file not found!" << endl;
     }
   }
 }
 
 template<class Model>
 void OxLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
+  // Thread safe: the model cache is thread specific.
   model.clearCache();
 
   if (persistentCache) {
