@@ -27,11 +27,17 @@ class SourceOxLM : public BilingualLM {
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  void InitializeForInput(const InputType& source);
+
+  void CleanUpAfterSentenceProcessing(const InputType& source);
+
  protected:
   oxlm::SourceFactoredLM model;
   boost::shared_ptr<OxLMParallelMapper> mapper;
 
   bool persistentCache;
+  mutable boost::thread_specific_ptr<oxlm::QueryCache> cache;
+  mutable int cacheHits, totalHits;
 };
 
 } // namespace Moses
