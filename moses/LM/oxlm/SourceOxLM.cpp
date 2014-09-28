@@ -22,10 +22,31 @@ SourceOxLM::~SourceOxLM() {
 float SourceOxLM::Score(
     vector<int>& source_words,
     vector<int>& target_words) const {
+  // OxLM expects the context in the following format:
+  // [t_{n-1}, t_{n-2}, ..., t_{n-m}, s_{a_n-sm}, s_{a_n-sm+1}, ..., s_{a_n+sm}]
+  // where n is the index for the current target word, m is the target order,
+  // a_n is t_n's affiliation and sm is the source order.
   vector<int> context = target_words;
-  int word = context.front();
-  context.erase(context.begin());
+  int word = context.back();
+  context.pop_back();
+  reverse(context.begin(), context.end());
   context.insert(context.end(), source_words.begin(), source_words.end());
+
+  /*
+  boost::shared_ptr<oxlm::Vocabulary> vocab = model.getVocab();
+  boost::shared_ptr<oxlm::ParallelVocabulary> parallel_vocab =
+      dynamic_pointer_cast<oxlm::ParallelVocabulary>(vocab);
+  assert(parallel_vocab != nullptr);
+
+  cerr << parallel_vocab->convert(word) << " ||| ";
+  for (int i = 0; i < target_ngrams; ++i) {
+    cerr << parallel_vocab->convert(context[i]) << " ";
+  }
+  cerr << "||| ";
+  for (int i = 0; i < source_ngrams; ++i) {
+    cerr << parallel_vocab->convertSource(context[target_ngrams + i]) << " ";
+  }
+  */
 
   float score;
   if (persistentCache) {
@@ -46,6 +67,8 @@ float SourceOxLM::Score(
   } else {
     score = model.predict(word, context);
   }
+
+  // cerr << "||| " << exp(score) << endl;
 
   // TODO(pauldb): Return OOV count too.
   return score;
