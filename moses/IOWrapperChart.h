@@ -57,7 +57,7 @@ namespace MosesChartCmd
 
 /** Helper class that holds misc variables to write data out to command line.
  */
-class IOWrapper
+class IOWrapperChart
 {
 protected:
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
@@ -113,13 +113,13 @@ protected:
                             , std::string &lastName );
 
 public:
-  IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
+  IOWrapperChart(const std::vector<Moses::FactorType>	&inputFactorOrder
             , const std::vector<Moses::FactorType>	&outputFactorOrder
             , const Moses::FactorMask							&inputFactorUsed
             , size_t												nBestSize
             , const std::string							&nBestFilePath
             , const std::string							&inputFilePath="");
-  ~IOWrapper();
+  ~IOWrapperChart();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);

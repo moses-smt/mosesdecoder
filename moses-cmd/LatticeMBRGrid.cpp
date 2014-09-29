@@ -46,7 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 #include <set>
 
-#include "IOWrapper.h"
+#include "moses/IOWrapper.h"
 #include "moses/LatticeMBR.h"
 #include "moses/Manager.h"
 #include "moses/StaticData.h"

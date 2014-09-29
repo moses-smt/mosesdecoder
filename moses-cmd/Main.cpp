@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "moses/TranslationAnalysis.h"
-#include "IOWrapper.h"
+#include "moses/IOWrapper.h"
 #include "mbr.h"
 
 #include "moses/Hypothesis.h"

@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Main.h"
 #include "moses/TranslationAnalysis.h"
 #include "mbr.h"
-#include "IOWrapper.h"
+#include "IOWrapperChart.h"
 
 #include "moses/FactorCollection.h"
 #include "moses/HypergraphOutput.h"
@@ -81,7 +81,7 @@ void fix(std::ostream& stream, size_t size)
 class TranslationTask : public Task
 {
 public:
-  TranslationTask(InputType *source, IOWrapper &ioWrapper, 
+  TranslationTask(InputType *source, IOWrapperChart &ioWrapper,
     boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutput)
     : m_source(source)
     , m_ioWrapper(ioWrapper)
@@ -195,11 +195,11 @@ private:
   TranslationTask &operator=(const TranslationTask &);
 
   InputType *m_source;
-  IOWrapper &m_ioWrapper;
+  IOWrapperChart &m_ioWrapper;
   boost::shared_ptr<HypergraphOutput<ChartManager> > m_hypergraphOutput;
 };
 
-bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
+bool ReadInput(IOWrapperChart &ioWrapper, InputTypeEnum inputType, InputType*& source)
 {
   delete source;
   switch(inputType) {
@@ -268,8 +268,8 @@ int main(int argc, char* argv[])
       TRACE_ERR(endl);
     }
 
-    IOWrapper::FixPrecision(cout);
-    IOWrapper::FixPrecision(cerr);
+    IOWrapperChart::FixPrecision(cout);
+    IOWrapperChart::FixPrecision(cerr);
 
     // load data structures
     Parameter parameter;
@@ -289,7 +289,7 @@ int main(int argc, char* argv[])
     UTIL_THROW_IF2(!staticData.IsChart(), "Must be SCFG model");
 
     // set up read/writing class
-    IOWrapper *ioWrapper = GetIOWrapper(staticData);
+    IOWrapperChart *ioWrapper = GetIOWrapper(staticData);
 
     // check on weights
     const ScoreComponentCollection& weights = staticData.GetAllWeights();
@@ -354,9 +354,9 @@ int main(int argc, char* argv[])
 #endif
 }
 
-IOWrapper *GetIOWrapper(const StaticData &staticData)
+IOWrapperChart *GetIOWrapper(const StaticData &staticData)
 {
-  IOWrapper *ioWrapper;
+  IOWrapperChart *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
       ,&outputFactorOrder = staticData.GetOutputFactorOrder();
   FactorMask inputFactorUsed(inputFactorOrder);
@@ -366,13 +366,13 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
     VERBOSE(2,"IO from File" << endl);
     string filePath = staticData.GetParam("input-file")[0];
 
-    ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+    ioWrapper = new IOWrapperChart(inputFactorOrder, outputFactorOrder, inputFactorUsed
                               , staticData.GetNBestSize()
                               , staticData.GetNBestFilePath()
                               , filePath);
   } else {
     VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-    ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+    ioWrapper = new IOWrapperChart(inputFactorOrder, outputFactorOrder, inputFactorUsed
                               , staticData.GetNBestSize()
                               , staticData.GetNBestFilePath());
   }

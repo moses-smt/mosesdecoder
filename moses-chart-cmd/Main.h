@@ -38,8 +38,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 namespace MosesChartCmd
 {
-class IOWrapper;
+class IOWrapperChart;
 }
 
 int main(int argc, char* argv[]);
-MosesChartCmd::IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
+MosesChartCmd::IOWrapperChart *GetIOWrapper(const Moses::StaticData &staticData);

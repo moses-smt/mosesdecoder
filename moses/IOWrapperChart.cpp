@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include <boost/algorithm/string.hpp>
-#include "IOWrapper.h"
+#include "IOWrapperChart.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/WordsRange.h"
@@ -57,7 +57,7 @@ using namespace Moses;
 namespace MosesChartCmd
 {
 
-IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
+IOWrapperChart::IOWrapperChart(const std::vector<FactorType>	&inputFactorOrder
                      , const std::vector<FactorType>	&outputFactorOrder
                      , const FactorMask							&inputFactorUsed
                      , size_t												nBestSize
@@ -142,7 +142,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   }
 }
 
-IOWrapper::~IOWrapper()
+IOWrapperChart::~IOWrapperChart()
 {
   if (!m_inputFilePath.empty()) {
     delete m_inputStream;
@@ -161,12 +161,12 @@ IOWrapper::~IOWrapper()
   delete m_unknownsCollector;
 }
 
-void IOWrapper::ResetTranslationId()
+void IOWrapperChart::ResetTranslationId()
 {
   m_translationId = StaticData::Instance().GetStartTranslationId();
 }
 
-InputType*IOWrapper::GetInput(InputType* inputType)
+InputType*IOWrapperChart::GetInput(InputType* inputType)
 {
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
     if (long x = inputType->GetTranslationId()) {
@@ -227,7 +227,7 @@ void OutputSurface(std::ostream &out, const ChartHypothesis *hypo, const std::ve
   }
 }
 
-void IOWrapper::Backtrack(const ChartHypothesis *hypo)
+void IOWrapperChart::Backtrack(const ChartHypothesis *hypo)
 {
   const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
 
@@ -240,7 +240,7 @@ void IOWrapper::Backtrack(const ChartHypothesis *hypo)
   }
 }
 
-void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/)
+void IOWrapperChart::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/)
 {
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i];
@@ -272,7 +272,7 @@ void OutputInput(std::ostream& os, const ChartHypothesis* hypo)
 
 // Given a hypothesis and sentence, reconstructs the 'application context' --
 // the source RHS symbols of the SCFG rule that was applied, plus their spans.
-void IOWrapper::ReconstructApplicationContext(const ChartHypothesis &hypo,
+void IOWrapperChart::ReconstructApplicationContext(const ChartHypothesis &hypo,
     const Sentence &sentence,
     ApplicationContext &context)
 {
@@ -302,7 +302,7 @@ void IOWrapper::ReconstructApplicationContext(const ChartHypothesis &hypo,
 
 // Given a hypothesis and sentence, reconstructs the 'application context' --
 // the source RHS symbols of the SCFG rule that was applied, plus their spans.
-void IOWrapper::ReconstructApplicationContext(const search::Applied *applied,
+void IOWrapperChart::ReconstructApplicationContext(const search::Applied *applied,
     const Sentence &sentence,
     ApplicationContext &context)
 {
@@ -335,7 +335,7 @@ void IOWrapper::ReconstructApplicationContext(const search::Applied *applied,
 // output format is a bit odd (reverse order and double spacing between symbols)
 // but there are scripts and tools that expect the output of -T to look like
 // that.
-void IOWrapper::WriteApplicationContext(std::ostream &out,
+void IOWrapperChart::WriteApplicationContext(std::ostream &out,
                                         const ApplicationContext &context)
 {
   assert(!context.empty());
@@ -349,7 +349,7 @@ void IOWrapper::WriteApplicationContext(std::ostream &out,
   }
 }
 
-void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+void IOWrapperChart::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
   ReconstructApplicationContext(*hypo, sentence, applicationContext);
   out << "Trans Opt " << translationId
@@ -361,7 +361,7 @@ void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &a
       << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
 }
 
-void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
+void IOWrapperChart::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
 {
   ReconstructApplicationContext(applied, sentence, applicationContext);
   const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
@@ -375,7 +375,7 @@ void IOWrapper::OutputTranslationOption(std::ostream &out, ApplicationContext &a
 }
 
 
-void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+void IOWrapperChart::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
   if (hypo != NULL) {
     OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
@@ -392,7 +392,7 @@ void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &
 }
 
 
-void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
+void IOWrapperChart::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
 {
   if (applied != NULL) {
     OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
@@ -406,7 +406,7 @@ void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &
   }
 }
 
-void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+void IOWrapperChart::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
 
   if (hypo != NULL) {
@@ -432,7 +432,7 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
   }
 }
 
-void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
+void IOWrapperChart::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
 {
 
   if (applied != NULL) {
@@ -456,7 +456,7 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
   }
 }
 
-void IOWrapper::OutputDetailedTranslationReport(
+void IOWrapperChart::OutputDetailedTranslationReport(
   const ChartHypothesis *hypo,
   const Sentence &sentence,
   long translationId)
@@ -473,7 +473,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputDetailedTranslationReport(
+void IOWrapperChart::OutputDetailedTranslationReport(
   const search::Applied *applied,
   const Sentence &sentence,
   long translationId)
@@ -490,7 +490,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
+void IOWrapperChart::OutputDetailedTreeFragmentsTranslationReport(
   const ChartHypothesis *hypo,
   const Sentence &sentence,
   long translationId)
@@ -522,7 +522,7 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
 
 }
 
-void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
+void IOWrapperChart::OutputDetailedTreeFragmentsTranslationReport(
   const search::Applied *applied,
   const Sentence &sentence,
   long translationId)
@@ -545,7 +545,7 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
 }
 
 //DIMw
-void IOWrapper::OutputDetailedAllTranslationReport(
+void IOWrapperChart::OutputDetailedAllTranslationReport(
   const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList,
   const ChartManager &manager,
   const Sentence &sentence,
@@ -578,12 +578,12 @@ void IOWrapper::OutputDetailedAllTranslationReport(
   m_detailAllOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
+void IOWrapperChart::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {
   if (!m_singleBestOutputCollector)
     return;
   std::ostringstream out;
-  IOWrapper::FixPrecision(out);
+  IOWrapperChart::FixPrecision(out);
   if (hypo != NULL) {
     VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
     VERBOSE(3,"Best path: ");
@@ -622,11 +622,11 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
   m_singleBestOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
+void IOWrapperChart::OutputBestHypo(search::Applied applied, long translationId)
 {
   if (!m_singleBestOutputCollector) return;
   std::ostringstream out;
-  IOWrapper::FixPrecision(out);
+  IOWrapperChart::FixPrecision(out);
   if (StaticData::Instance().GetOutputHypoScore()) {
     out << applied.GetScore() << ' ';
   }
@@ -644,7 +644,7 @@ void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
   VERBOSE(1,"BEST TRANSLATION: " << outPhrase << "[total=" << applied.GetScore() << "]" << endl);
 }
 
-void IOWrapper::OutputBestNone(long translationId)
+void IOWrapperChart::OutputBestNone(long translationId)
 {
   if (!m_singleBestOutputCollector) return;
   if (StaticData::Instance().GetOutputHypoScore()) {
@@ -654,7 +654,7 @@ void IOWrapper::OutputBestNone(long translationId)
   }
 }
 
-void IOWrapper::OutputAllFeatureScores(const ScoreComponentCollection &features, std::ostream &out)
+void IOWrapperChart::OutputAllFeatureScores(const ScoreComponentCollection &features, std::ostream &out)
 {
   std::string lastName = "";
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
@@ -674,7 +674,7 @@ void IOWrapper::OutputAllFeatureScores(const ScoreComponentCollection &features,
   }
 } // namespace
 
-void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentCollection &features, const FeatureFunction *ff, std::string &lastName )
+void IOWrapperChart::OutputFeatureScores( std::ostream& out, const ScoreComponentCollection &features, const FeatureFunction *ff, std::string &lastName )
 {
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();
@@ -698,7 +698,7 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   }
 }
 
-void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
+void IOWrapperChart::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
                                 long translationId)
 {
   std::ostringstream out;
@@ -706,7 +706,7 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
   if (m_nBestOutputCollector->OutputIsCout()) {
     // Set precision only if we're writing the n-best list to cout.  This is to
     // preserve existing behaviour, but should probably be done either way.
-    IOWrapper::FixPrecision(out);
+    IOWrapperChart::FixPrecision(out);
   }
 
   bool includeWordAlignment =
@@ -758,12 +758,12 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
   m_nBestOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId)
+void IOWrapperChart::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId)
 {
   std::ostringstream out;
   // wtf? copied from the original OutputNBestList
   if (m_nBestOutputCollector->OutputIsCout()) {
-    IOWrapper::FixPrecision(out);
+    IOWrapperChart::FixPrecision(out);
   }
   Phrase outputPhrase;
   ScoreComponentCollection features;
@@ -786,7 +786,7 @@ void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long 
   m_nBestOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
+void IOWrapperChart::FixPrecision(std::ostream &stream, size_t size)
 {
   stream.setf(std::ios::fixed);
   stream.precision(size);
@@ -817,7 +817,7 @@ size_t CalcSourceSize(const Moses::ChartHypothesis *hypo)
   return ret;
 }
 
-size_t IOWrapper::OutputAlignmentNBest(
+size_t IOWrapperChart::OutputAlignmentNBest(
     Alignments &retAlign,
     const Moses::ChartKBestExtractor::Derivation &derivation,
     size_t startTarget)
@@ -896,7 +896,7 @@ size_t IOWrapper::OutputAlignmentNBest(
   return totalTargetSize;
 }
 
-void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo)
+void IOWrapperChart::OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo)
 {
   ostringstream out;
 
@@ -916,7 +916,7 @@ void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothe
   m_alignmentInfoCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputUnknowns(const std::vector<Moses::Phrase*> &unknowns,
+void IOWrapperChart::OutputUnknowns(const std::vector<Moses::Phrase*> &unknowns,
                                long translationId)
 {
   std::ostringstream out;
@@ -927,7 +927,7 @@ void IOWrapper::OutputUnknowns(const std::vector<Moses::Phrase*> &unknowns,
   m_unknownsCollector->Write(translationId, out.str());
 }
 
-size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget)
+size_t IOWrapperChart::OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget)
 {
   size_t totalTargetSize = 0;
   size_t startSource = hypo->GetCurrSourceRange().GetStartPos();
@@ -1001,7 +1001,7 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
   return totalTargetSize;
 }
 
-void IOWrapper::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const AlignmentInfo &ai)
+void IOWrapperChart::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const AlignmentInfo &ai)
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
   AlignVec alignments = ai.GetSortedAlignments();
