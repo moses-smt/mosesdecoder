@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Main.h"
 #include "moses/TranslationAnalysis.h"
 #include "mbr.h"
-#include "IOWrapperChart.h"
+#include "moses/IOWrapperChart.h"
 
 #include "moses/FactorCollection.h"
 #include "moses/HypergraphOutput.h"
