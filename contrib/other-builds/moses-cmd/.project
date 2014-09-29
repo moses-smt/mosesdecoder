@@ -102,16 +102,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Jamfile</locationURI>
 		</link>
 		<link>
-			<name>LatticeMBR.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/LatticeMBR.cpp</locationURI>
-		</link>
-		<link>
-			<name>LatticeMBR.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/LatticeMBR.h</locationURI>
-		</link>
-		<link>
 			<name>LatticeMBRGrid.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/LatticeMBRGrid.cpp</locationURI>

@@ -492,6 +492,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LVoc.h</locationURI>
 		</link>
 		<link>
+			<name>LatticeMBR.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LatticeMBR.cpp</locationURI>
+		</link>
+		<link>
+			<name>LatticeMBR.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LatticeMBR.h</locationURI>
+		</link>
+		<link>
 			<name>Manager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Manager.cpp</locationURI>
