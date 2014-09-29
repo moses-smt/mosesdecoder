@@ -812,6 +812,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Timer.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationAnalysis.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationAnalysis.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationAnalysis.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationAnalysis.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
