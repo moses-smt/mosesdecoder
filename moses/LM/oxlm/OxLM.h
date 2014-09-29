@@ -43,6 +43,8 @@ class OxLM : public LanguageModelSingleFactor {
   int kUNKNOWN;
 
   bool normalized;
+  bool posBackOff;
+  FactorType posFactorType;
 
   bool persistentCache;
   mutable boost::thread_specific_ptr<oxlm::QueryCache> cache;

@@ -16,7 +16,8 @@ namespace Moses
 
 template<class Model>
 OxLM<Model>::OxLM(const string &line)
-    : LanguageModelSingleFactor(line), normalized(true) {
+    : LanguageModelSingleFactor(line), posBackOff(false), posFactorType(1),
+      persistentCache(false) {
   ReadParameters();
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -47,6 +48,10 @@ void OxLM<Model>::SetParameter(const string& key, const string& value) {
     persistentCache = Scan<bool>(value);
   } else if (key == "normalized") {
     normalized = Scan<bool>(value);
+  } else if (key == "pos-back-off") {
+    posBackOff = Scan<bool>(value);
+  } else if (key == "pos-factor-type") {
+    posFactorType = Scan<FactorType>(value);
   } else {
     LanguageModelSingleFactor::SetParameter(key, value);
   }
@@ -56,8 +61,8 @@ template<class Model>
 void OxLM<Model>::Load() {
   model.load(m_filePath);
 
-  boost::shared_ptr<oxlm::Vocabulary> vocab = model.getVocab();
-  mapper = boost::make_shared<OxLMMapper>(vocab);
+  boost::shared_ptr<Vocabulary> vocab = model.getVocab();
+  mapper = boost::make_shared<OxLMMapper>(vocab, posBackOff, posFactorType);
 
   kSTART = vocab->convert("<s>");
   kSTOP = vocab->convert("</s>");
