@@ -35,6 +35,9 @@ class SourceOxLM : public BilingualLM {
   oxlm::SourceFactoredLM model;
   boost::shared_ptr<OxLMParallelMapper> mapper;
 
+  bool posBackOff;
+  FactorType posFactorType;
+
   bool persistentCache;
   mutable boost::thread_specific_ptr<oxlm::QueryCache> cache;
   mutable int cacheHits, totalHits;

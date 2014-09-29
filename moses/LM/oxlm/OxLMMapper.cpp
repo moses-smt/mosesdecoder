@@ -6,7 +6,11 @@ using namespace std;
 
 namespace Moses {
 
-OxLMMapper::OxLMMapper(const boost::shared_ptr<oxlm::Vocabulary>& vocab) {
+OxLMMapper::OxLMMapper(
+    const boost::shared_ptr<oxlm::Vocabulary>& vocab,
+    bool pos_back_off,
+    const FactorType& pos_factor_type)
+    : posBackOff(pos_back_off), posFactorType(pos_factor_type) {
   for (int i = 0; i < vocab->size(); ++i) {
     const string &str = vocab->convert(i);
     FactorCollection &fc = FactorCollection::Instance();
@@ -17,8 +21,13 @@ OxLMMapper::OxLMMapper(const boost::shared_ptr<oxlm::Vocabulary>& vocab) {
   kUNKNOWN = vocab->convert("<unk>");
 }
 
-int OxLMMapper::convert(const Moses::Factor* factor) const {
-	Coll::const_iterator iter = moses2Oxlm.find(factor);
+int OxLMMapper::convert(const Word& word) const {
+  const Moses::Factor* word_factor = word.GetFactor(0);
+	Coll::const_iterator iter = moses2Oxlm.find(word_factor);
+  if (posBackOff && iter == moses2Oxlm.end()) {
+    const Moses::Factor* pos_factor = word.GetFactor(posFactorType);
+    iter = moses2Oxlm.find(pos_factor);
+  }
   return iter == moses2Oxlm.end() ? kUNKNOWN : iter->second;
 }
 
@@ -27,13 +36,11 @@ void OxLMMapper::convert(
     std::vector<int>& ids,
     int& word) const {
 	for (size_t i = 0; i < contextFactor.size() - 1; ++i) {
-		const Moses::Factor *factor = contextFactor[i]->GetFactor(0);
-    ids.push_back(convert(factor));
+    ids.push_back(convert(*contextFactor[i]));
 	}
 	std::reverse(ids.begin(), ids.end());
 
-	const Moses::Factor *factor = contextFactor.back()->GetFactor(0);
-	word = convert(factor);
+	word = convert(*contextFactor.back());
 }
 
 } // namespace Moses

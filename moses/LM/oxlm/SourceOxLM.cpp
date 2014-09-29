@@ -10,7 +10,8 @@ using namespace oxlm;
 namespace Moses {
 
 SourceOxLM::SourceOxLM(const string &line)
-    : BilingualLM(line), cacheHits(0), totalHits(0) {}
+    : BilingualLM(line), posBackOff(false), posFactorType(1),
+      persistentCache(false), cacheHits(0), totalHits(0) {}
 
 SourceOxLM::~SourceOxLM() {
   if (persistentCache) {
@@ -57,9 +58,7 @@ float SourceOxLM::Score(
 }
 
 int SourceOxLM::getNeuralLMId(const Word& word, bool is_source_word) const {
-  const Moses::Factor* factor = word.GetFactor(0);
-  return is_source_word ?
-      mapper->convertSource(factor) : mapper->convert(factor);
+  return is_source_word ? mapper->convertSource(word) : mapper->convert(word);
 }
 
 void SourceOxLM::loadModel() {
@@ -70,12 +69,17 @@ void SourceOxLM::loadModel() {
   target_ngrams = config->ngram_order - 1;
 
   boost::shared_ptr<Vocabulary> vocab = model.getVocab();
-  mapper = boost::make_shared<OxLMParallelMapper>(vocab);
+  mapper = boost::make_shared<OxLMParallelMapper>(
+      vocab, posBackOff, posFactorType);
 }
 
 void SourceOxLM::SetParameter(const string& key, const string& value) {
   if (key == "persistent-cache") {
     persistentCache = Scan<bool>(value);
+  } else if (key == "pos-back-off") {
+    posBackOff = Scan<bool>(value);
+  } else if (key == "pos-factor-type") {
+    posFactorType = Scan<FactorType>(value);
   } else {
     BilingualLM::SetParameter(key, value);
   }
