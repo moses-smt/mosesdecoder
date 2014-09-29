@@ -32,22 +32,6 @@ float SourceOxLM::Score(
   reverse(context.begin(), context.end());
   context.insert(context.end(), source_words.begin(), source_words.end());
 
-  /*
-  boost::shared_ptr<oxlm::Vocabulary> vocab = model.getVocab();
-  boost::shared_ptr<oxlm::ParallelVocabulary> parallel_vocab =
-      dynamic_pointer_cast<oxlm::ParallelVocabulary>(vocab);
-  assert(parallel_vocab != nullptr);
-
-  cerr << parallel_vocab->convert(word) << " ||| ";
-  for (int i = 0; i < target_ngrams; ++i) {
-    cerr << parallel_vocab->convert(context[i]) << " ";
-  }
-  cerr << "||| ";
-  for (int i = 0; i < source_ngrams; ++i) {
-    cerr << parallel_vocab->convertSource(context[target_ngrams + i]) << " ";
-  }
-  */
-
   float score;
   if (persistentCache) {
     if (!cache.get()) {
@@ -67,8 +51,6 @@ float SourceOxLM::Score(
   } else {
     score = model.predict(word, context);
   }
-
-  // cerr << "||| " << exp(score) << endl;
 
   // TODO(pauldb): Return OOV count too.
   return score;

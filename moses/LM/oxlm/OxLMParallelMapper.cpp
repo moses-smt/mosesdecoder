@@ -21,11 +21,13 @@ OxLMParallelMapper::OxLMParallelMapper(
     const Moses::Factor* factor = fc.AddFactor(word, false);
     moses2SourceOxlm[factor] = i;
   }
+
+  kSOURCE_UNKNOWN = parallel_vocab->convertSource("<unk>");
 }
 
 int OxLMParallelMapper::convertSource(const Moses::Factor* factor) const {
   Coll::const_iterator iter = moses2SourceOxlm.find(factor);
-  return iter == moses2SourceOxlm.end() ? kUNKNOWN : iter->second;
+  return iter == moses2SourceOxlm.end() ? kSOURCE_UNKNOWN : iter->second;
 }
 
 } // namespace Moses

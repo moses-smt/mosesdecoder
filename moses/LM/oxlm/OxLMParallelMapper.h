@@ -12,6 +12,7 @@ class OxLMParallelMapper : public OxLMMapper {
 
  private:
   Coll moses2SourceOxlm;
+  int kSOURCE_UNKNOWN;
 };
 
 } // namespace Moses
