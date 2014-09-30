@@ -1,0 +1,296 @@
+#include "TranslationTask.h"
+#include "moses/StaticData.h"
+#include "moses/Sentence.h"
+#include "moses/IOWrapper.h"
+#include "moses/TranslationAnalysis.h"
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
+#include "moses/InputType.h"
+#include "moses/OutputCollector.h"
+#include "mbr.h"
+
+using namespace std;
+using namespace Moses;
+
+namespace MosesCmd
+{
+
+TranslationTask::TranslationTask(size_t lineNumber,
+                InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector,
+                OutputCollector* latticeSamplesCollector,
+                OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
+                OutputCollector* detailedTranslationCollector,
+                OutputCollector* alignmentInfoCollector,
+                OutputCollector* unknownsCollector,
+                bool outputSearchGraphSLF,
+                boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
+  m_source(source), m_lineNumber(lineNumber),
+  m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
+  m_latticeSamplesCollector(latticeSamplesCollector),
+  m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
+  m_detailedTranslationCollector(detailedTranslationCollector),
+  m_alignmentInfoCollector(alignmentInfoCollector),
+  m_unknownsCollector(unknownsCollector),
+  m_outputSearchGraphSLF(outputSearchGraphSLF),
+  m_hypergraphOutput(hypergraphOutput)
+{}
+
+void TranslationTask::Run() {
+  // shorthand for "global data"
+  const StaticData &staticData = StaticData::Instance();
+
+  // input sentence
+  Sentence sentence;
+
+  // report wall time spent on translation
+  Timer translationTime;
+  translationTime.start();
+
+  // report thread number
+#if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
+  TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << endl);
+#endif
+
+
+  // execute the translation
+  // note: this executes the search, resulting in a search graph
+  //       we still need to apply the decision rule (MAP, MBR, ...)
+  Timer initTime;
+  initTime.start();
+  Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm());
+  VERBOSE(1, "Line " << m_lineNumber << ": Initialize search took " << initTime << " seconds total" << endl);
+  manager.ProcessSentence();
+
+  // we are done with search, let's look what we got
+  Timer additionalReportingTime;
+  additionalReportingTime.start();
+
+  // output word graph
+  if (m_wordGraphCollector) {
+    ostringstream out;
+    fix(out,PRECISION);
+    manager.GetWordGraph(m_lineNumber, out);
+    m_wordGraphCollector->Write(m_lineNumber, out.str());
+  }
+
+  // output search graph
+  if (m_searchGraphCollector) {
+    ostringstream out;
+    fix(out,PRECISION);
+    manager.OutputSearchGraph(m_lineNumber, out);
+    m_searchGraphCollector->Write(m_lineNumber, out.str());
+
+#ifdef HAVE_PROTOBUF
+    if (staticData.GetOutputSearchGraphPB()) {
+      ostringstream sfn;
+      sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << m_lineNumber << ".pb" << ends;
+      string fn = sfn.str();
+      VERBOSE(2, "Writing search graph to " << fn << endl);
+      fstream output(fn.c_str(), ios::trunc | ios::binary | ios::out);
+      manager.SerializeSearchGraphPB(m_lineNumber, output);
+    }
+#endif
+  }
+
+  // Output search graph in HTK standard lattice format (SLF)
+  if (m_outputSearchGraphSLF) {
+    stringstream fileName;
+    fileName << staticData.GetParam("output-search-graph-slf")[0] << "/" << m_lineNumber << ".slf";
+    ofstream *file = new ofstream;
+    file->open(fileName.str().c_str());
+    if (file->is_open() && file->good()) {
+      ostringstream out;
+      fix(out,PRECISION);
+      manager.OutputSearchGraphAsSLF(m_lineNumber, out);
+      *file << out.str();
+      file -> flush();
+    } else {
+      TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << endl);
+    }
+    delete file;
+  }
+
+  // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
+  if (m_hypergraphOutput.get()) {
+    m_hypergraphOutput->Write(manager);
+  }
+
+  additionalReportingTime.stop();
+
+  // apply decision rule and output best translation(s)
+  if (m_outputCollector) {
+    ostringstream out;
+    ostringstream debug;
+    fix(debug,PRECISION);
+
+    // all derivations - send them to debug stream
+    if (staticData.PrintAllDerivations()) {
+      additionalReportingTime.start();
+      manager.PrintAllDerivations(m_lineNumber, debug);
+      additionalReportingTime.stop();
+    }
+
+    Timer decisionRuleTime;
+    decisionRuleTime.start();
+
+    // MAP decoding: best hypothesis
+    const Hypothesis* bestHypo = NULL;
+    if (!staticData.UseMBR()) {
+      bestHypo = manager.GetBestHypothesis();
+      if (bestHypo) {
+        if (StaticData::Instance().GetOutputHypoScore()) {
+          out << bestHypo->GetTotalScore() << ' ';
+        }
+        if (staticData.IsPathRecoveryEnabled()) {
+          OutputInput(out, bestHypo);
+          out << "||| ";
+        }
+        if (staticData.GetParam("print-id").size() && Scan<bool>(staticData.GetParam("print-id")[0]) ) {
+          out << m_source->GetTranslationId() << " ";
+        }
+
+	  if (staticData.GetReportSegmentation() == 2) {
+	    manager.GetOutputLanguageModelOrder(out, bestHypo);
+	  }
+        OutputBestSurface(
+          out,
+          bestHypo,
+          staticData.GetOutputFactorOrder(),
+          staticData.GetReportSegmentation(),
+          staticData.GetReportAllFactors());
+        if (staticData.PrintAlignmentInfo()) {
+          out << "||| ";
+          OutputAlignment(out, bestHypo);
+        }
+
+        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, bestHypo);
+        IFVERBOSE(1) {
+          debug << "BEST TRANSLATION: " << *bestHypo << endl;
+        }
+      } else {
+        VERBOSE(1, "NO BEST TRANSLATION" << endl);
+      }
+
+      out << endl;
+    }
+
+    // MBR decoding (n-best MBR, lattice MBR, consensus)
+    else {
+      // we first need the n-best translations
+      size_t nBestSize = staticData.GetMBRSize();
+      if (nBestSize <= 0) {
+        cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
+        exit(1);
+      }
+      TrellisPathList nBestList;
+      manager.CalcNBest(nBestSize, nBestList,true);
+      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+      IFVERBOSE(2) {
+        PrintUserTime("calculated n-best list for (L)MBR decoding");
+      }
+
+      // lattice MBR
+      if (staticData.UseLatticeMBR()) {
+        if (m_nbestCollector) {
+          //lattice mbr nbest
+          vector<LatticeMBRSolution> solutions;
+          size_t n  = min(nBestSize, staticData.GetNBestSize());
+          getLatticeMBRNBest(manager,nBestList,solutions,n);
+          ostringstream out;
+          OutputLatticeMBRNBest(out, solutions,m_lineNumber);
+          m_nbestCollector->Write(m_lineNumber, out.str());
+        } else {
+          //Lattice MBR decoding
+          vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
+          OutputBestHypo(mbrBestHypo, m_lineNumber, staticData.GetReportSegmentation(),
+                         staticData.GetReportAllFactors(),out);
+          IFVERBOSE(2) {
+            PrintUserTime("finished Lattice MBR decoding");
+          }
+        }
+      }
+
+      // consensus decoding
+      else if (staticData.UseConsensusDecoding()) {
+        const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
+        OutputBestHypo(conBestHypo, m_lineNumber,
+                       staticData.GetReportSegmentation(),
+                       staticData.GetReportAllFactors(),out);
+        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, conBestHypo);
+        IFVERBOSE(2) {
+          PrintUserTime("finished Consensus decoding");
+        }
+      }
+
+      // n-best MBR decoding
+      else {
+        const TrellisPath &mbrBestHypo = doMBR(nBestList);
+        OutputBestHypo(mbrBestHypo, m_lineNumber,
+                       staticData.GetReportSegmentation(),
+                       staticData.GetReportAllFactors(),out);
+        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, mbrBestHypo);
+        IFVERBOSE(2) {
+          PrintUserTime("finished MBR decoding");
+        }
+      }
+    }
+
+    // report best translation to output collector
+    m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
+
+    decisionRuleTime.stop();
+    VERBOSE(1, "Line " << m_lineNumber << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
+  }
+
+  additionalReportingTime.start();
+
+  // output n-best list
+  if (m_nbestCollector && !staticData.UseLatticeMBR()) {
+    TrellisPathList nBestList;
+    ostringstream out;
+    manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
+    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_lineNumber,
+                staticData.GetReportSegmentation());
+    m_nbestCollector->Write(m_lineNumber, out.str());
+  }
+
+  //lattice samples
+  if (m_latticeSamplesCollector) {
+    TrellisPathList latticeSamples;
+    ostringstream out;
+    manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
+    OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_lineNumber,
+                staticData.GetReportSegmentation());
+    m_latticeSamplesCollector->Write(m_lineNumber, out.str());
+  }
+
+  // detailed translation reporting
+  if (m_detailedTranslationCollector) {
+    ostringstream out;
+    fix(out,PRECISION);
+    TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
+    m_detailedTranslationCollector->Write(m_lineNumber,out.str());
+  }
+
+  //list of unknown words
+  if (m_unknownsCollector) {
+    const vector<const Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
+    ostringstream out;
+    for (size_t i = 0; i < unknowns.size(); ++i) {
+      out << *(unknowns[i]);
+    }
+    out << endl;
+    m_unknownsCollector->Write(m_lineNumber, out.str());
+  }
+
+  // report additional statistics
+  manager.CalcDecoderStatistics();
+  VERBOSE(1, "Line " << m_lineNumber << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
+  VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
+  IFVERBOSE(2) {
+    PrintUserTime("Sentence Decoding Time:");
+  }
+}
+
+
+}

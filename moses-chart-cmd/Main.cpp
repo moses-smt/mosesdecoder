@@ -68,13 +68,6 @@ using namespace std;
 using namespace Moses;
 using namespace MosesChartCmd;
 
-/** Enforce rounding */
-void fix(std::ostream& stream, size_t size)
-{
-  stream.setf(std::ios::fixed);
-  stream.precision(size);
-}
-
 /**
   * Translates a sentence.
  **/
