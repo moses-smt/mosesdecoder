@@ -19,20 +19,20 @@ namespace MosesChartCmd
 /**
   * Translates a sentence.
  **/
-class TranslationTask : public Moses::Task
+class TranslationTaskChart : public Moses::Task
 {
 public:
-  TranslationTask(Moses::InputType *source, MosesChartCmd::IOWrapperChart &ioWrapper,
+  TranslationTaskChart(Moses::InputType *source, MosesChartCmd::IOWrapperChart &ioWrapper,
     boost::shared_ptr<Moses::HypergraphOutput<Moses::ChartManager> > hypergraphOutput);
 
-  ~TranslationTask();
+  ~TranslationTaskChart();
 
   void Run();
 
 private:
   // Non-copyable: copy constructor and assignment operator not implemented.
-  TranslationTask(const TranslationTask &);
-  TranslationTask &operator=(const TranslationTask &);
+  TranslationTaskChart(const TranslationTaskChart &);
+  TranslationTaskChart &operator=(const TranslationTaskChart &);
 
   Moses::InputType *m_source;
   MosesChartCmd::IOWrapperChart &m_ioWrapper;

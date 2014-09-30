@@ -102,16 +102,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses-chart-cmd/Main.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationTask.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-chart-cmd/TranslationTask.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationTask.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-chart-cmd/TranslationTask.h</locationURI>
-		</link>
-		<link>
 			<name>mbr.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-chart-cmd/mbr.cpp</locationURI>

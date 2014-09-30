@@ -1,4 +1,4 @@
-#include "TranslationTask.h"
+#include "TranslationTaskChart.h"
 #include "moses/Sentence.h"
 #include "moses/StaticData.h"
 #include "moses/Incremental.h"
@@ -9,18 +9,18 @@ using namespace std;
 using namespace Moses;
 using namespace MosesChartCmd;
 
-TranslationTask::TranslationTask(InputType *source, IOWrapperChart &ioWrapper,
+TranslationTaskChart::TranslationTaskChart(InputType *source, IOWrapperChart &ioWrapper,
 boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutput)
 : m_source(source)
 , m_ioWrapper(ioWrapper)
 , m_hypergraphOutput(hypergraphOutput)
 {}
 
-TranslationTask::~TranslationTask() {
+TranslationTaskChart::~TranslationTaskChart() {
   delete m_source;
 }
 
-void TranslationTask::Run() {
+void TranslationTaskChart::Run() {
 const StaticData &staticData = StaticData::Instance();
 const size_t translationId = m_source->GetTranslationId();
 
