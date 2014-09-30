@@ -17,7 +17,7 @@
 #endif
 #include "moses/TreeInput.h"
 #include "moses/LM/ORLM.h"
-#include "moses-cmd/IOWrapper.h"
+#include "moses/IOWrapper.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
