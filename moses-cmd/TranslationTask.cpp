@@ -35,6 +35,10 @@ TranslationTask::TranslationTask(size_t lineNumber,
   m_hypergraphOutput(hypergraphOutput)
 {}
 
+TranslationTask::~TranslationTask() {
+  delete m_source;
+}
+
 void TranslationTask::Run() {
   // shorthand for "global data"
   const StaticData &staticData = StaticData::Instance();

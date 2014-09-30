@@ -34,9 +34,7 @@ public:
                   bool outputSearchGraphSLF,
                   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > hypergraphOutput);
 
-  ~TranslationTask() {
-    delete m_source;
-  }
+  ~TranslationTask();
 
   /** Translate one sentence
    * gets called by main function implemented at end of this source file */
