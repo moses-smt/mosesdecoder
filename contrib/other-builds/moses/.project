@@ -1067,6 +1067,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/hypergraph.proto</locationURI>
 		</link>
 		<link>
+			<name>mbr.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/mbr.cpp</locationURI>
+		</link>
+		<link>
+			<name>mbr.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/mbr.h</locationURI>
+		</link>
+		<link>
 			<name>rule.proto</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/rule.proto</locationURI>

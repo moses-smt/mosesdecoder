@@ -106,15 +106,5 @@
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Main.h</locationURI>
 		</link>
-		<link>
-			<name>mbr.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/mbr.cpp</locationURI>
-		</link>
-		<link>
-			<name>mbr.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/mbr.h</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>

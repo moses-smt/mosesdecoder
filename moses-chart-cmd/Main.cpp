@@ -92,44 +92,6 @@ bool ReadInput(IOWrapperChart &ioWrapper, InputTypeEnum inputType, InputType*& s
   }
   return (source ? true : false);
 }
-static void PrintFeatureWeight(const FeatureFunction* ff)
-{
-  cout << ff->GetScoreProducerDescription() << "=";
-  size_t numScoreComps = ff->GetNumScoreComponents();
-  vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
-  for (size_t i = 0; i < numScoreComps; ++i) {
-    cout << " " << values[i];
-  }
-  cout << endl;
-
-}
-
-static void ShowWeights()
-{
-  fix(cout,6);
-  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
-
-  for (size_t i = 0; i < sff.size(); ++i) {
-    const StatefulFeatureFunction *ff = sff[i];
-    if (ff->IsTuneable()) {
-      PrintFeatureWeight(ff);
-    }
-    else {
-      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
-    }
-  }
-  for (size_t i = 0; i < slf.size(); ++i) {
-    const StatelessFeatureFunction *ff = slf[i];
-    if (ff->IsTuneable()) {
-      PrintFeatureWeight(ff);
-    }
-    else {
-      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
-    }
-  }
-}
-
 
 int main(int argc, char* argv[])
 {

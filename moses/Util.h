@@ -438,6 +438,10 @@ inline void fix(std::ostream& stream, size_t size)
   stream.precision(size);
 }
 
+class FeatureFunction;
+
+void PrintFeatureWeight(const FeatureFunction* ff);
+void ShowWeights();
 
 
 } // namespace

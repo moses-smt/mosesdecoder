@@ -31,7 +31,7 @@ void OutputVec(const vector<T> &vec)
 }
 
 // from phrase-extract/tables-core.cpp
-vector<string> tokenize( const char* input )
+inline vector<string> tokenize( const char* input )
 {
   vector< string > token;
   bool betweenWords = true;
