@@ -254,10 +254,10 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("DALM", LanguageModelDALM);
 #endif
 #ifdef LM_OXLM
-  MOSES_FNAME2("OxLM-LM", OxLM<oxlm::LM>);
-  MOSES_FNAME2("OxLM-FactoredLM", OxLM<oxlm::FactoredLM>);
-  MOSES_FNAME2("OxLM-FactoredMaxentLM", OxLM<oxlm::FactoredMaxentLM>);
-  MOSES_FNAME2("OxLM-SourceFactoredLM", SourceOxLM);
+  MOSES_FNAME2("OxLM", OxLM<oxlm::LM>);
+  MOSES_FNAME2("OxFactoredLM", OxLM<oxlm::FactoredLM>);
+  MOSES_FNAME2("OxFactoredMaxentLM", OxLM<oxlm::FactoredMaxentLM>);
+  MOSES_FNAME2("OxSourceFactoredLM", SourceOxLM);
 #endif
 
   Add("KENLM", new KenFactory());
