@@ -33,28 +33,25 @@ namespace GHKM
 std::vector<float> PhraseOrientation::m_l2rOrientationPriorCounts = boost::assign::list_of(0)(0)(0)(0)(0);
 std::vector<float> PhraseOrientation::m_r2lOrientationPriorCounts = boost::assign::list_of(0)(0)(0)(0)(0);
 
-PhraseOrientation::PhraseOrientation(const std::vector<std::string> &source,
-                                     const std::vector<std::string> &target,
+PhraseOrientation::PhraseOrientation(int sourceSize,
+                                     int targetSize,
                                      const Alignment &alignment)
-  : m_source(source)
-  , m_target(target)
+  : m_countF(sourceSize)
+  , m_countE(targetSize)
   , m_alignment(alignment)
 {
 
-  int countF = m_source.size();
-  int countE = m_target.size();
-
   // prepare data structures for alignments
   std::vector<std::vector<int> > alignedToS;
-  for(int i=0; i<countF; ++i) {
+  for(int i=0; i<m_countF; ++i) {
     std::vector< int > dummy;
     alignedToS.push_back(dummy);
   }
-  for(int i=0; i<countE; ++i) {
+  for(int i=0; i<m_countE; ++i) {
     std::vector< int > dummy;
     m_alignedToT.push_back(dummy);
   }
-  std::vector<int> alignedCountS(countF,0);
+  std::vector<int> alignedCountS(m_countF,0);
 
   for (Alignment::const_iterator a=alignment.begin(); a!=alignment.end(); ++a) {
     m_alignedToT[a->second].push_back(a->first);
@@ -62,8 +59,8 @@ PhraseOrientation::PhraseOrientation(const std::vector<std::string> &source,
     alignedToS[a->first].push_back(a->second);
   }
 
-  for (int startF=0; startF<countF; ++startF) {
-    for (int endF=startF; endF<countF; ++endF) {
+  for (int startF=0; startF<m_countF; ++startF) {
+    for (int endF=startF; endF<m_countF; ++endF) {
 
       int minE = std::numeric_limits<int>::max();
       int maxE = -1;
@@ -85,8 +82,8 @@ PhraseOrientation::PhraseOrientation(const std::vector<std::string> &source,
 
   // check alignments for target phrase startE...endE
   // loop over continuous phrases which are compatible with the word alignments
-  for (int startE=0; startE<countE; ++startE) {
-    for (int endE=startE; endE<countE; ++endE) {
+  for (int startE=0; startE<m_countE; ++startE) {
+    for (int endE=startE; endE<m_countE; ++endE) {
 
       int minF = std::numeric_limits<int>::max();
       int maxF = -1;
@@ -123,7 +120,7 @@ PhraseOrientation::PhraseOrientation(const std::vector<std::string> &source,
                startF--) {
             // end point of source phrase may advance over unaligned
             for (int endF=maxF;
-                 (endF<countF &&
+                 (endF<m_countF &&
                   (endF==maxF || alignedCountS[endF]==0)); // unaligned
                  endF++) { // at this point we have extracted a phrase
 
@@ -197,14 +194,14 @@ const std::string PhraseOrientation::GetOrientationInfoString(int startF, int st
   if ( direction == L2R || direction == BIDIR )
     hierPrevOrient = GetOrientHierModel(REO_MSLR,
                                         connectedLeftTopP, connectedRightTopP,
-                                        startF, endF, startE, endE, m_source.size()-1, 0, 1, 
+                                        startF, endF, startE, endE, m_countF-1, 0, 1, 
                                         &ge, &lt, 
                                         m_bottomRight, m_bottomLeft);
 
   if ( direction == R2L || direction == BIDIR )
     hierNextOrient = GetOrientHierModel(REO_MSLR,
                                         connectedLeftTopN, connectedRightTopN,
-                                        endF, startF, endE, startE, 0, m_source.size()-1, -1, 
+                                        endF, startF, endE, startE, 0, m_countF-1, -1, 
                                         &lt, &ge, 
                                         m_bottomLeft, m_bottomRight); 
 
@@ -263,14 +260,14 @@ REO_POS PhraseOrientation::GetOrientationInfo(int startF, int startE, int endF, 
   if ( direction == L2R )
     return GetOrientHierModel(REO_MSLR,
                               connectedLeftTopP, connectedRightTopP,
-                              startF, endF, startE, endE, m_source.size()-1, 0, 1, 
+                              startF, endF, startE, endE, m_countF-1, 0, 1, 
                               &ge, &lt, 
                               m_bottomRight, m_bottomLeft);
 
   if ( direction == R2L )
     return GetOrientHierModel(REO_MSLR,
                               connectedLeftTopN, connectedRightTopN,
-                              endF, startF, endE, startE, 0, m_source.size()-1, -1, 
+                              endF, startF, endE, startE, 0, m_countF-1, -1, 
                               &lt, &ge, 
                               m_bottomLeft, m_bottomRight);
 
@@ -369,10 +366,10 @@ bool PhraseOrientation::IsAligned(int fi, int ei) const
   if (ei <= -1 || fi <= -1)
     return false;
 
-  if (ei == (int)m_target.size() && fi == (int)m_source.size())
+  if (ei == m_countE && fi == m_countF)
     return true;
 
-  if (ei >= (int)m_target.size() || fi >= (int)m_source.size())
+  if (ei >= m_countE || fi >= m_countF)
     return false;
 
   for (size_t i=0; i<m_alignedToT[ei].size(); ++i)

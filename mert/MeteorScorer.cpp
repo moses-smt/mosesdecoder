@@ -144,7 +144,7 @@ void MeteorScorer::prepareStats(size_t sid, const string& text, ScoreStats& entr
   entry.set(stats_str);
 }
 
-float MeteorScorer::calculateScore(const vector<int>& comps) const
+float MeteorScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   string score;
   stringstream input;

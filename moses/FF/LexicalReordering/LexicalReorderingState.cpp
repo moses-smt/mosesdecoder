@@ -139,18 +139,32 @@ void LexicalReorderingState::CopyScores(ScoreComponentCollection*  accum, const 
   if (m_direction != LexicalReorderingConfiguration::Backward) relevantOpt = m_prevOption;
   const Scores *cachedScores = relevantOpt->GetLexReorderingScores(m_configuration.GetScoreProducer());
 
+  // look up applicable score from vectore of scores
   if(cachedScores) {
     Scores scores(m_configuration.GetScoreProducer()->GetNumScoreComponents(),0);
 
     const Scores &scoreSet = *cachedScores;
-    if(m_configuration.CollapseScores())
+    if(m_configuration.CollapseScores()) {
       scores[m_offset] = scoreSet[m_offset + reoType];
+    }
     else {
       std::fill(scores.begin() + m_offset, scores.begin() + m_offset + m_configuration.GetNumberOfTypes(), 0);
       scores[m_offset + reoType] = scoreSet[m_offset + reoType];
     }
     accum->PlusEquals(m_configuration.GetScoreProducer(), scores);
   }
+  // else: use default scores (if specified)
+  else if (m_configuration.GetScoreProducer()->GetHaveDefaultScores()) {
+    Scores scores(m_configuration.GetScoreProducer()->GetNumScoreComponents(),0);
+    if(m_configuration.CollapseScores()) {
+      scores[m_offset] = m_configuration.GetScoreProducer()->GetDefaultScore(m_offset + reoType);
+    }
+    else {
+      scores[m_offset + reoType] = m_configuration.GetScoreProducer()->GetDefaultScore(m_offset + reoType);
+    }
+    accum->PlusEquals(m_configuration.GetScoreProducer(), scores);
+  }
+  // note: if no default score, no cost
 
   const SparseReordering* sparse = m_configuration.GetSparseReordering();
   if (sparse) sparse->CopyScores(*relevantOpt, m_prevOption, input, reoType, m_direction, accum);

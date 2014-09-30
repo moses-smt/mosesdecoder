@@ -46,6 +46,9 @@ de recherches du Canada
 #include "MiraFeatureVector.h"
 #include "MiraWeightVector.h"
 
+#include "Scorer.h"
+#include "ScorerFactory.h"
+
 using namespace std;
 using namespace MosesTuning;
 
@@ -57,6 +60,8 @@ int main(int argc, char** argv)
   string denseInitFile;
   string sparseInitFile;
   string type = "nbest";
+  string sctype = "BLEU";
+  string scconfig = "";
   vector<string> scoreFiles;
   vector<string> featureFiles;
   vector<string> referenceFiles; //for hg mira
@@ -78,6 +83,8 @@ int main(int argc, char** argv)
   desc.add_options()
   ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
   ("type,t", po::value<string>(&type), "Either nbest or hypergraph")
+  ("sctype", po::value<string>(&sctype), "the scorer type (default BLEU)")
+  ("scconfig,c", po::value<string>(&scconfig), "configuration string passed to scorer")
   ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
   ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
   ("hgdir,H", po::value<string> (&hgDir), "Directory containing hypergraphs")
@@ -209,19 +216,20 @@ int main(int argc, char** argv)
 
   MiraWeightVector wv(initParams);
 
-  // Initialize background corpus
-  vector<ValType> bg;
-  for(int j=0; j<kBleuNgramOrder; j++) {
-    bg.push_back(kBleuNgramOrder-j);
-    bg.push_back(kBleuNgramOrder-j);
+  // Initialize scorer
+  if(sctype != "BLEU" && type == "hypergraph") {
+    UTIL_THROW(util::Exception, "hypergraph mira only supports BLEU");
   }
-  bg.push_back(kBleuNgramOrder);
+  boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer(sctype, scconfig));
+
+  // Initialize background corpus
+  vector<ValType> bg(scorer->NumberOfScores(), 1);
 
   boost::scoped_ptr<HopeFearDecoder> decoder;
   if (type == "nbest") {
-    decoder.reset(new NbestHopeFearDecoder(featureFiles, scoreFiles, streaming, no_shuffle, safe_hope));
+    decoder.reset(new NbestHopeFearDecoder(featureFiles, scoreFiles, streaming, no_shuffle, safe_hope, scorer.get()));
   } else if (type == "hypergraph") {
-    decoder.reset(new HypergraphHopeFearDecoder(hgDir, referenceFiles, initDenseSize, streaming, no_shuffle, safe_hope, hgPruning, wv));
+    decoder.reset(new HypergraphHopeFearDecoder(hgDir, referenceFiles, initDenseSize, streaming, no_shuffle, safe_hope, hgPruning, wv, scorer.get()));
   } else {
     UTIL_THROW(util::Exception, "Unknown batch mira type: '" << type << "'");
   }

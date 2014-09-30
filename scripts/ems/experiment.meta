@@ -116,12 +116,14 @@ consolidate
 	in: CORPUS:clean-parsed-stem
 	out: tokenized-stem
 	default-name: truecaser/corpus
+  pass-unless: trainer
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 	error: number of lines don't match
 train
 	in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
+  pass-unless: trainer
 	default-name: truecaser/truecase-model
 	template: $trainer -model OUT.$input-extension -corpus IN.$input-extension ; $trainer -model OUT.$output-extension -corpus IN.$output-extension
 

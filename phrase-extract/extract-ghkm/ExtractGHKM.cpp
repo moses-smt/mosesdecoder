@@ -95,7 +95,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     if (!options.sourceLabels) {
       Error("SourceLabels should be active if SourceLabelSet is supposed to be written to a file");
     }
-    OpenOutputFileOrDie(options.sourceLabelSetFile, sourceLabelSetStream); // TODO: global sourceLabelSet cannot be determined during parallelized extraction
+    OpenOutputFileOrDie(options.sourceLabelSetFile, sourceLabelSetStream); // note that this is not a global source label set if extraction is parallelized
   }
   if (!options.unknownWordSoftMatchesFile.empty()) {
     OpenOutputFileOrDie(options.unknownWordSoftMatchesFile, unknownWordSoftMatchesStream);
@@ -239,7 +239,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
     }
 
     // Initialize phrase orientation scoring object
-    PhraseOrientation phraseOrientation( sourceTokens, targetXmlTreeParser.GetWords(), alignment);
+    PhraseOrientation phraseOrientation( sourceTokens.size(), targetXmlTreeParser.GetWords().size(), alignment);
 
     // Write the rules, subject to scope pruning.
     const std::vector<Node *> &targetNodes = graph.GetTargetNodes();
@@ -621,33 +621,42 @@ void ExtractGHKM::WriteGlueGrammar(
   size_t sourceLabelGlueX = 1;
 
   // basic rules
-  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| ||| ||| |||";
+  out << "<s> [X] ||| <s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
   if (options.treeFragments) {
-    out << " {{Tree [" << topLabel << " <s>]}}";
+    out << " {{Tree [" << topLabel << " [SSTART <s>]]}}";
   }
   if (options.sourceLabels) {
     out << " {{SourceLabels 1 1 " << sourceLabelGlueTop << " 1}}";
   }
+  if (options.phraseOrientation) {
+    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+  }
   out << std::endl;
 
-  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 ||| ||| |||";
+  out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 ||| ||| |||";
   if (options.treeFragments) {
-    out << " {{Tree [" << topLabel << " [" << topLabel << "] </s>]}}";
+    out << " {{Tree [" << topLabel << " [" << topLabel << "] [SEND </s>]]}}";
   }
   if (options.sourceLabels) {
     out << " {{SourceLabels 2 1 " << sourceLabelGlueTop << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
+    if (options.phraseOrientation) {
+      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+    }
   out << std::endl;
 
   // top rules
   for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1 ||| ||| |||";
+    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2 ||| ||| |||";
     if (options.treeFragments) { 
-      out << " {{Tree [" << topLabel << " <s> [" << i->first << "] </s>]}}";
+      out << " {{Tree [" << topLabel << " [SSTART <s>] [" << i->first << "] [SEND </s>]]}}";
     }
     if (options.sourceLabels) {
       out << " {{SourceLabels 2 1 " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
+    }
+    if (options.phraseOrientation) {
+      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
     }
     out << std::endl;
   }
@@ -660,7 +669,10 @@ void ExtractGHKM::WriteGlueGrammar(
       out << " {{Tree [" << topLabel << " ["<< topLabel << "] [" << *i << "]]}}";
     }
     if (options.sourceLabels) {
-      out << " {{SourceLabels 3 2.718 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 2.718 1 " << sourceLabelGlueTop << " 2.718}}"; // TODO: there should be better options than using "SOMELABEL" 
+      out << " {{SourceLabels 3 2.718 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 2.718 1 " << sourceLabelGlueTop << " 2.718}}"; 
+    }
+    if (options.phraseOrientation) {
+      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
     }
     out << std::endl;
   }
@@ -671,7 +683,10 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{Tree [" << topLabel << " [" << topLabel << "] [X]]}}";
   }
   if (options.sourceLabels) {
-    out << " {{SourceLabels 3 1 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}"; // TODO: there should be better options than using "SOMELABEL"
+    out << " {{SourceLabels 3 1 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
+  }
+  if (options.phraseOrientation) {
+    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
   }
   out << std::endl;
 }
