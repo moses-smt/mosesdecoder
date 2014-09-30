@@ -396,16 +396,16 @@ if (!defined $mertargs) {
 }
 
 my $scconfig = undef;
-if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {
+if ($mertargs =~ /\-\-scconfig(?:\s+|=)(.+?)(\s|$)/) {
   $scconfig = $1;
   $scconfig =~ s/\,/ /g;
-  $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
+  $mertargs =~ s/\-\-scconfig(?:\s+|=)(.+?)(\s|$)//;
 }
 
 my $sctype = "--sctype BLEU";
-if ($mertargs =~ /(\-\-sctype\s+.+?)(\s|$)/) {
+if ($mertargs =~ /(\-\-sctype(?:\s+|=).+?)(\s|$)/) {
   $sctype = $1;
-  $mertargs =~ s/(\-\-sctype\s+.+?)(\s|$)//;
+  $mertargs =~ s/(\-\-sctype(?:\s+|=)+.+?)(\s|$)//;
 }
 
 
