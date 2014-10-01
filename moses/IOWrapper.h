@@ -79,10 +79,13 @@ protected:
   ,*m_outputWordGraphStream,*m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::ofstream *m_alignmentOutputStream;
+  std::ostream                          *m_unknownsStream;
+
   bool													m_surpressSingleBestOutput;
 
   Moses::OutputCollector                *m_singleBestOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
+  Moses::OutputCollector                *m_unknownsCollector;
 
   void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
                       , const std::vector<Moses::FactorType>			&outputFactorOrder
@@ -140,6 +143,9 @@ public:
     return m_nBestOutputCollector;
   }
 
+  Moses::OutputCollector *GetUnknownsCollector() {
+    return m_unknownsCollector;
+  }
 };
 
 IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);

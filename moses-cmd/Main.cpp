@@ -198,18 +198,6 @@ int main(int argc, char** argv)
       alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
     }
 
-    //initialise stream for unknown (oov) words
-    auto_ptr<OutputCollector> unknownsCollector;
-    auto_ptr<ofstream> unknownsStream;
-    if (!staticData.GetOutputUnknownsFile().empty()) {
-      unknownsStream.reset(new ofstream(staticData.GetOutputUnknownsFile().c_str()));
-      if (!unknownsStream->good()) {
-        TRACE_ERR("Unable to open " << staticData.GetOutputUnknownsFile() << " for unknowns");
-        exit(1);
-      }
-      unknownsCollector.reset(new OutputCollector(unknownsStream.get()));
-    }
-
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
@@ -232,7 +220,6 @@ int main(int argc, char** argv)
                             searchGraphCollector.get(),
                             detailedTranslationCollector.get(),
                             alignmentInfoCollector.get(),
-                            unknownsCollector.get(),
                             staticData.GetOutputSearchGraphSLF(),
                             hypergraphOutput);
       // execute task

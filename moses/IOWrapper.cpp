@@ -94,9 +94,13 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
   ,m_alignmentOutputStream(NULL)
+  ,m_unknownsStream(NULL)
   ,m_singleBestOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
+  ,m_unknownsCollector(NULL)
 {
+  const StaticData &staticData = StaticData::Instance();
+
   Initialization(inputFactorOrder, outputFactorOrder
                  , inputFactorUsed
                  , nBestSize, nBestFilePath);
@@ -117,6 +121,14 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 
   if (!suppressSingleBestOutput) {
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
+  }
+
+  if (!staticData.GetOutputUnknownsFile().empty()) {
+    m_unknownsStream = new std::ofstream(staticData.GetOutputUnknownsFile().c_str());
+    m_unknownsCollector = new Moses::OutputCollector(m_unknownsStream);
+    UTIL_THROW_IF2(!m_unknownsStream->good(),
+                   "File for unknowns words could not be opened: " <<
+                     staticData.GetOutputUnknownsFile());
   }
 
 }

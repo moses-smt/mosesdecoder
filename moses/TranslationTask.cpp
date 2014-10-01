@@ -20,7 +20,6 @@ TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd:
                 OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                 OutputCollector* detailedTranslationCollector,
                 OutputCollector* alignmentInfoCollector,
-                OutputCollector* unknownsCollector,
                 bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source), m_lineNumber(lineNumber),
@@ -29,7 +28,6 @@ TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd:
   m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
   m_detailedTranslationCollector(detailedTranslationCollector),
   m_alignmentInfoCollector(alignmentInfoCollector),
-  m_unknownsCollector(unknownsCollector),
   m_outputSearchGraphSLF(outputSearchGraphSLF),
   m_hypergraphOutput(hypergraphOutput)
 {}
@@ -276,14 +274,14 @@ void TranslationTask::Run() {
   }
 
   //list of unknown words
-  if (m_unknownsCollector) {
+  if (m_ioWrapper.GetUnknownsCollector()) {
     const vector<const Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
     ostringstream out;
     for (size_t i = 0; i < unknowns.size(); ++i) {
       out << *(unknowns[i]);
     }
     out << endl;
-    m_unknownsCollector->Write(m_lineNumber, out.str());
+    m_ioWrapper.GetUnknownsCollector()->Write(m_lineNumber, out.str());
   }
 
   // report additional statistics

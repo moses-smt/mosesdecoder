@@ -31,7 +31,6 @@ public:
                   Moses::OutputCollector* wordGraphCollector, Moses::OutputCollector* searchGraphCollector,
                   Moses::OutputCollector* detailedTranslationCollector,
                   Moses::OutputCollector* alignmentInfoCollector,
-                  Moses::OutputCollector* unknownsCollector,
                   bool outputSearchGraphSLF,
                   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > hypergraphOutput);
 
@@ -52,7 +51,6 @@ private:
   Moses::OutputCollector* m_searchGraphCollector;
   Moses::OutputCollector* m_detailedTranslationCollector;
   Moses::OutputCollector* m_alignmentInfoCollector;
-  Moses::OutputCollector* m_unknownsCollector;
   bool m_outputSearchGraphSLF;
   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > m_hypergraphOutput;
   std::ofstream *m_alignmentStream;
