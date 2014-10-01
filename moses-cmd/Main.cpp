@@ -138,7 +138,6 @@ int main(int argc, char** argv)
     // initialize output streams
     // note: we can't just write to STDOUT or files
     // because multithreading may return sentences in shuffled order
-    auto_ptr<OutputCollector> nbestCollector;  // for n-best lists
     auto_ptr<OutputCollector> latticeSamplesCollector; //for lattice samples
     auto_ptr<ofstream> nbestOut;
     auto_ptr<ofstream> latticeSamplesOut;
@@ -148,7 +147,6 @@ int main(int argc, char** argv)
     if (nbestSize) {
       if (nbestFile == "-" || nbestFile == "/dev/stdout") {
         // nbest to stdout, no 1-best
-        nbestCollector.reset(new OutputCollector());
         output1best = false;
       } else {
         // nbest to file, 1-best to stdout
@@ -157,7 +155,6 @@ int main(int argc, char** argv)
           TRACE_ERR("ERROR: Failed to open " << nbestFile << " for nbest lists" << endl);
           exit(1);
         }
-        nbestCollector.reset(new OutputCollector(nbestOut.get()));
       }
     }
     size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
@@ -230,7 +227,6 @@ int main(int argc, char** argv)
       // set up task of translating one sentence
       TranslationTask* task =
         new TranslationTask(lineCount,source, *ioWrapper,
-                            nbestCollector.get(),
                             latticeSamplesCollector.get(),
                             wordGraphCollector.get(),
                             searchGraphCollector.get(),

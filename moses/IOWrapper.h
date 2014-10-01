@@ -135,6 +135,11 @@ public:
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector;
   }
+
+  Moses::OutputCollector *GetNBestOutputCollector() {
+    return m_nBestOutputCollector;
+  }
+
 };
 
 IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);

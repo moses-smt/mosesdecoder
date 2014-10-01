@@ -27,7 +27,6 @@ class TranslationTask : public Moses::Task
 public:
 
   TranslationTask(size_t lineNumber, Moses::InputType* source, MosesCmd::IOWrapper &ioWrapper,
-		  	  	  Moses::OutputCollector* nbestCollector,
                   Moses::OutputCollector* latticeSamplesCollector,
                   Moses::OutputCollector* wordGraphCollector, Moses::OutputCollector* searchGraphCollector,
                   Moses::OutputCollector* detailedTranslationCollector,
@@ -48,7 +47,6 @@ private:
   size_t m_lineNumber;
   MosesCmd::IOWrapper &m_ioWrapper;
 
-  Moses::OutputCollector* m_nbestCollector;
   Moses::OutputCollector* m_latticeSamplesCollector;
   Moses::OutputCollector* m_wordGraphCollector;
   Moses::OutputCollector* m_searchGraphCollector;

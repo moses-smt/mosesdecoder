@@ -16,7 +16,6 @@ namespace MosesCmd
 {
 
 TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd::IOWrapper &ioWrapper,
-				OutputCollector* nbestCollector,
                 OutputCollector* latticeSamplesCollector,
                 OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                 OutputCollector* detailedTranslationCollector,
@@ -26,7 +25,6 @@ TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd:
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source), m_lineNumber(lineNumber),
   m_ioWrapper(ioWrapper),
-  m_nbestCollector(nbestCollector),
   m_latticeSamplesCollector(latticeSamplesCollector),
   m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
   m_detailedTranslationCollector(detailedTranslationCollector),
@@ -196,14 +194,14 @@ void TranslationTask::Run() {
 
       // lattice MBR
       if (staticData.UseLatticeMBR()) {
-        if (m_nbestCollector) {
+        if (m_ioWrapper.GetNBestOutputCollector()) {
           //lattice mbr nbest
           vector<LatticeMBRSolution> solutions;
           size_t n  = min(nBestSize, staticData.GetNBestSize());
           getLatticeMBRNBest(manager,nBestList,solutions,n);
           ostringstream out;
           OutputLatticeMBRNBest(out, solutions,m_lineNumber);
-          m_nbestCollector->Write(m_lineNumber, out.str());
+          m_ioWrapper.GetNBestOutputCollector()->Write(m_lineNumber, out.str());
         } else {
           //Lattice MBR decoding
           vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
@@ -250,13 +248,13 @@ void TranslationTask::Run() {
   additionalReportingTime.start();
 
   // output n-best list
-  if (m_nbestCollector && !staticData.UseLatticeMBR()) {
+  if (m_ioWrapper.GetNBestOutputCollector() && !staticData.UseLatticeMBR()) {
     TrellisPathList nBestList;
     ostringstream out;
     manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
     OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_lineNumber,
                 staticData.GetReportSegmentation());
-    m_nbestCollector->Write(m_lineNumber, out.str());
+    m_ioWrapper.GetNBestOutputCollector()->Write(m_lineNumber, out.str());
   }
 
   //lattice samples
