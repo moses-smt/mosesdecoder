@@ -81,6 +81,9 @@ protected:
   std::ofstream *m_alignmentOutputStream;
   bool													m_surpressSingleBestOutput;
 
+  Moses::OutputCollector                *m_singleBestOutputCollector;
+  Moses::OutputCollector                *m_nBestOutputCollector;
+
   void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
                       , const std::vector<Moses::FactorType>			&outputFactorOrder
                       , const Moses::FactorMask							&inputFactorUsed
@@ -127,6 +130,10 @@ public:
   std::ostream &GetDetailedTranslationReportingStream() {
     assert (m_detailedTranslationReportingStream);
     return *m_detailedTranslationReportingStream;
+  }
+
+  Moses::OutputCollector *GetSingleBestOutputCollector() {
+    return m_singleBestOutputCollector;
   }
 };
 

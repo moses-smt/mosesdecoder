@@ -15,8 +15,8 @@ using namespace Moses;
 namespace MosesCmd
 {
 
-TranslationTask::TranslationTask(size_t lineNumber,
-                InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector,
+TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd::IOWrapper &ioWrapper,
+				OutputCollector* nbestCollector,
                 OutputCollector* latticeSamplesCollector,
                 OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                 OutputCollector* detailedTranslationCollector,
@@ -25,7 +25,8 @@ TranslationTask::TranslationTask(size_t lineNumber,
                 bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source), m_lineNumber(lineNumber),
-  m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
+  m_ioWrapper(ioWrapper),
+  m_nbestCollector(nbestCollector),
   m_latticeSamplesCollector(latticeSamplesCollector),
   m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
   m_detailedTranslationCollector(detailedTranslationCollector),
@@ -122,7 +123,7 @@ void TranslationTask::Run() {
   additionalReportingTime.stop();
 
   // apply decision rule and output best translation(s)
-  if (m_outputCollector) {
+  if (m_ioWrapper.GetSingleBestOutputCollector()) {
     ostringstream out;
     ostringstream debug;
     fix(debug,PRECISION);
@@ -240,7 +241,7 @@ void TranslationTask::Run() {
     }
 
     // report best translation to output collector
-    m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
+    m_ioWrapper.GetSingleBestOutputCollector()->Write(m_lineNumber,out.str(),debug.str());
 
     decisionRuleTime.stop();
     VERBOSE(1, "Line " << m_lineNumber << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);

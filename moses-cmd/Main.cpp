@@ -138,7 +138,6 @@ int main(int argc, char** argv)
     // initialize output streams
     // note: we can't just write to STDOUT or files
     // because multithreading may return sentences in shuffled order
-    auto_ptr<OutputCollector> outputCollector; // for translations
     auto_ptr<OutputCollector> nbestCollector;  // for n-best lists
     auto_ptr<OutputCollector> latticeSamplesCollector; //for lattice samples
     auto_ptr<ofstream> nbestOut;
@@ -175,9 +174,6 @@ int main(int argc, char** argv)
         }
         latticeSamplesCollector.reset(new OutputCollector(latticeSamplesOut.get()));
       }
-    }
-    if (output1best) {
-      outputCollector.reset(new OutputCollector());
     }
 
     // initialize stream for word graph (aka: output lattice)
@@ -233,7 +229,7 @@ int main(int argc, char** argv)
 
       // set up task of translating one sentence
       TranslationTask* task =
-        new TranslationTask(lineCount,source, outputCollector.get(),
+        new TranslationTask(lineCount,source, *ioWrapper,
                             nbestCollector.get(),
                             latticeSamplesCollector.get(),
                             wordGraphCollector.get(),

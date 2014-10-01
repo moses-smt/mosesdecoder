@@ -14,6 +14,8 @@ namespace Moses
 namespace MosesCmd
 {
 
+class IOWrapper;
+
 /** Translates a sentence.
   * - calls the search (Manager)
   * - applies the decision rule
@@ -24,8 +26,8 @@ class TranslationTask : public Moses::Task
 
 public:
 
-  TranslationTask(size_t lineNumber,
-                  Moses::InputType* source, Moses::OutputCollector* outputCollector, Moses::OutputCollector* nbestCollector,
+  TranslationTask(size_t lineNumber, Moses::InputType* source, MosesCmd::IOWrapper &ioWrapper,
+		  	  	  Moses::OutputCollector* nbestCollector,
                   Moses::OutputCollector* latticeSamplesCollector,
                   Moses::OutputCollector* wordGraphCollector, Moses::OutputCollector* searchGraphCollector,
                   Moses::OutputCollector* detailedTranslationCollector,
@@ -44,7 +46,8 @@ public:
 private:
   Moses::InputType* m_source;
   size_t m_lineNumber;
-  Moses::OutputCollector* m_outputCollector;
+  MosesCmd::IOWrapper &m_ioWrapper;
+
   Moses::OutputCollector* m_nbestCollector;
   Moses::OutputCollector* m_latticeSamplesCollector;
   Moses::OutputCollector* m_wordGraphCollector;

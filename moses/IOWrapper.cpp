@@ -94,12 +94,31 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
   ,m_alignmentOutputStream(NULL)
+  ,m_singleBestOutputCollector(NULL)
+  ,m_nBestOutputCollector(NULL)
 {
   Initialization(inputFactorOrder, outputFactorOrder
                  , inputFactorUsed
                  , nBestSize, nBestFilePath);
 
   m_inputStream = m_inputFile;
+
+  bool suppressSingleBestOutput = false;
+
+  if (nBestSize > 0) {
+    if (nBestFilePath == "-") {
+      m_nBestOutputCollector = new Moses::OutputCollector(&std::cout);
+      suppressSingleBestOutput = true;
+    } else {
+      m_nBestOutputCollector = new Moses::OutputCollector(new std::ofstream(nBestFilePath.c_str()));
+      m_nBestOutputCollector->HoldOutputStream();
+    }
+  }
+
+  if (!suppressSingleBestOutput) {
+    m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
+  }
+
 }
 
 IOWrapper::~IOWrapper()
@@ -118,6 +137,10 @@ IOWrapper::~IOWrapper()
   }
   delete m_detailedTranslationReportingStream;
   delete m_alignmentOutputStream;
+
+  delete m_singleBestOutputCollector;
+  delete m_nBestOutputCollector;
+
 }
 
 void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
