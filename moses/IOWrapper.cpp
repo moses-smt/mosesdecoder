@@ -97,11 +97,15 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   if (nBestSize > 0) {
     if (nBestFilePath == "-" || nBestFilePath == "/dev/stdout") {
       m_nBestStream = &std::cout;
+      m_nBestOutputCollector = new Moses::OutputCollector(&std::cout);
       m_surpressSingleBestOutput = true;
     } else {
       std::ofstream *file = new std::ofstream;
-      m_nBestStream = file;
       file->open(nBestFilePath.c_str());
+      m_nBestStream = file;
+
+      m_nBestOutputCollector = new Moses::OutputCollector(file);
+      //m_nBestOutputCollector->HoldOutputStream();
     }
   }
 
@@ -115,16 +119,6 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     std::ofstream *file = new std::ofstream;
     m_outputSearchGraphStream = file;
     file->open(fileName.c_str());
-  }
-
-  if (nBestSize > 0) {
-    if (nBestFilePath == "-") {
-      m_nBestOutputCollector = new Moses::OutputCollector(&std::cout);
-      m_surpressSingleBestOutput = true;
-    } else {
-      m_nBestOutputCollector = new Moses::OutputCollector(new std::ofstream(nBestFilePath.c_str()));
-      m_nBestOutputCollector->HoldOutputStream();
-    }
   }
 
   if (!m_surpressSingleBestOutput) {
