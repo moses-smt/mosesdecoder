@@ -72,6 +72,7 @@ int main(int argc, char** argv)
   float decay = 0.999; // Pseudo-corpus decay \gamma
   int n_iters = 60;    // Max epochs J
   bool streaming = false; // Stream all k-best lists?
+  bool streaming_out = false; // Stream output after each sentence?
   bool no_shuffle = false; // Don't shuffle, even for in memory version
   bool model_bg = false; // Use model for background corpus
   bool verbose = false; // Verbose updates
@@ -97,6 +98,7 @@ int main(int argc, char** argv)
   ("dense-init,d", po::value<string>(&denseInitFile), "Weight file for dense features. This should have 'name= value' on each line, or (legacy) should be the Moses mert 'init.opt' format.")
   ("sparse-init,s", po::value<string>(&sparseInitFile), "Weight file for sparse features")
   ("streaming", po::value(&streaming)->zero_tokens()->default_value(false), "Stream n-best lists to save memory, implies --no-shuffle")
+  ("streaming-out", po::value(&streaming_out)->zero_tokens()->default_value(false), "Stream weights to stdout after each sentence")
   ("no-shuffle", po::value(&no_shuffle)->zero_tokens()->default_value(false), "Don't shuffle hypotheses before each epoch")
   ("model-bg", po::value(&model_bg)->zero_tokens()->default_value(false), "Use model instead of hope for BLEU background")
   ("verbose", po::value(&verbose)->zero_tokens()->default_value(false), "Verbose updates")
@@ -235,7 +237,8 @@ int main(int argc, char** argv)
   }
 
   // Training loop
-  cerr << "Initial BLEU = " << decoder->Evaluate(wv.avg()) << endl;
+  if (!streaming_out)
+    cerr << "Initial BLEU = " << decoder->Evaluate(wv.avg()) << endl;
   ValType bestBleu = 0;
   for(int j=0; j<n_iters; j++) {
     // MIRA train for one epoch
@@ -283,6 +286,8 @@ int main(int argc, char** argv)
       }
       iNumExamples++;
       ++sentenceIndex;
+      if (streaming_out)
+        cout << wv << endl;
     }
     // Training Epoch summary
     cerr << iNumUpdates << "/" << iNumExamples << " updates"
