@@ -89,6 +89,7 @@ protected:
   Moses::OutputCollector                *m_unknownsCollector;
   Moses::OutputCollector                *m_alignmentInfoCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
+  Moses::OutputCollector                *m_detailedTranslationCollector;
 
   void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
                       , const std::vector<Moses::FactorType>			&outputFactorOrder
@@ -125,14 +126,6 @@ public:
   std::ostream &GetOutputWordGraphStream() {
     return *m_outputWordGraphStream;
   }
-  std::ostream &GetOutputSearchGraphStream() {
-    return *m_outputSearchGraphStream;
-  }
-
-  std::ostream &GetDetailedTranslationReportingStream() {
-    assert (m_detailedTranslationReportingStream);
-    return *m_detailedTranslationReportingStream;
-  }
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector;
@@ -152,6 +145,10 @@ public:
 
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
     return m_searchGraphOutputCollector;
+  }
+
+  Moses::OutputCollector *GetDetailedTranslationCollector() {
+    return m_detailedTranslationCollector;
   }
 
 };

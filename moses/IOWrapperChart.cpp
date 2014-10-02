@@ -72,7 +72,7 @@ IOWrapperChart::IOWrapperChart(const std::vector<FactorType>	&inputFactorOrder
   ,m_alignmentInfoStream(NULL)
   ,m_unknownsStream(NULL)
   ,m_inputFilePath(inputFilePath)
-  ,m_detailOutputCollector(NULL)
+  ,m_detailedTranslationCollector(NULL)
   ,m_detailTreeFragmentsOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
@@ -117,7 +117,7 @@ IOWrapperChart::IOWrapperChart(const std::vector<FactorType>	&inputFactorOrder
   if (staticData.IsDetailedTranslationReportingEnabled()) {
     const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
-    m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
+    m_detailedTranslationCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
 
   if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
@@ -153,7 +153,7 @@ IOWrapperChart::~IOWrapperChart()
   delete m_detailTreeFragmentsOutputCollector;
   delete m_alignmentInfoStream;
   delete m_unknownsStream;
-  delete m_detailOutputCollector;
+  delete m_detailedTranslationCollector;
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
@@ -468,9 +468,9 @@ void IOWrapperChart::OutputDetailedTranslationReport(
   ApplicationContext applicationContext;
 
   OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
-  UTIL_THROW_IF2(m_detailOutputCollector == NULL,
+  UTIL_THROW_IF2(m_detailedTranslationCollector == NULL,
 		  "No ouput file for detailed reports specified");
-  m_detailOutputCollector->Write(translationId, out.str());
+  m_detailedTranslationCollector->Write(translationId, out.str());
 }
 
 void IOWrapperChart::OutputDetailedTranslationReport(
@@ -485,9 +485,9 @@ void IOWrapperChart::OutputDetailedTranslationReport(
   ApplicationContext applicationContext;
 
   OutputTranslationOptions(out, applicationContext, applied, sentence, translationId);
-  UTIL_THROW_IF2(m_detailOutputCollector == NULL,
+  UTIL_THROW_IF2(m_detailedTranslationCollector == NULL,
                   "No ouput file for detailed reports specified");
-  m_detailOutputCollector->Write(translationId, out.str());
+  m_detailedTranslationCollector->Write(translationId, out.str());
 }
 
 void IOWrapperChart::OutputDetailedTreeFragmentsTranslationReport(

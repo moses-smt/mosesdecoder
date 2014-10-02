@@ -76,7 +76,7 @@ protected:
   std::ostream                          *m_unknownsStream;
   std::string		        								m_inputFilePath;
   std::istream					        				*m_inputStream;
-  Moses::OutputCollector                *m_detailOutputCollector;
+  Moses::OutputCollector                *m_detailedTranslationCollector;
   Moses::OutputCollector                *m_detailTreeFragmentsOutputCollector;
   //DIMw
   Moses::OutputCollector                *m_detailAllOutputCollector;

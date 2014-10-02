@@ -101,6 +101,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_unknownsCollector(NULL)
   ,m_alignmentInfoCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
+  ,m_detailedTranslationCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -149,6 +150,13 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_searchGraphOutputCollector = new Moses::OutputCollector(m_outputSearchGraphStream);
   }
 
+  // detailed translation reporting
+  if (staticData.IsDetailedTranslationReportingEnabled()) {
+    const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
+    m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
+    m_detailedTranslationCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
+  }
+
 }
 
 IOWrapper::~IOWrapper()
@@ -170,6 +178,7 @@ IOWrapper::~IOWrapper()
   delete m_nBestOutputCollector;
   delete m_alignmentInfoCollector;
   delete m_searchGraphOutputCollector;
+  delete m_detailedTranslationCollector;
 
 }
 
@@ -214,15 +223,6 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
     std::ofstream *file = new std::ofstream;
     m_outputSearchGraphStream = file;
     file->open(fileName.c_str());
-  }
-
-  // detailed translation reporting
-  if (staticData.IsDetailedTranslationReportingEnabled()) {
-    const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
-    m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
-    UTIL_THROW_IF(!m_detailedTranslationReportingStream->good(),
-    		util::FileOpenException,
-    		"File for output of detailed translation report could not be open");
   }
 
 }

@@ -29,7 +29,6 @@ public:
   TranslationTask(size_t lineNumber, Moses::InputType* source, MosesCmd::IOWrapper &ioWrapper,
                   Moses::OutputCollector* latticeSamplesCollector,
                   Moses::OutputCollector* wordGraphCollector,
-                  Moses::OutputCollector* detailedTranslationCollector,
                   bool outputSearchGraphSLF,
                   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > hypergraphOutput);
 
@@ -47,10 +46,8 @@ private:
 
   Moses::OutputCollector* m_latticeSamplesCollector;
   Moses::OutputCollector* m_wordGraphCollector;
-  Moses::OutputCollector* m_detailedTranslationCollector;
   bool m_outputSearchGraphSLF;
   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > m_hypergraphOutput;
-  std::ofstream *m_alignmentStream;
 
 
 };

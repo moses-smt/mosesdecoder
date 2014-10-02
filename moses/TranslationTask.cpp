@@ -18,14 +18,12 @@ namespace MosesCmd
 TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd::IOWrapper &ioWrapper,
                 OutputCollector* latticeSamplesCollector,
                 OutputCollector* wordGraphCollector,
-                OutputCollector* detailedTranslationCollector,
                 bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source), m_lineNumber(lineNumber),
   m_ioWrapper(ioWrapper),
   m_latticeSamplesCollector(latticeSamplesCollector),
   m_wordGraphCollector(wordGraphCollector),
-  m_detailedTranslationCollector(detailedTranslationCollector),
   m_outputSearchGraphSLF(outputSearchGraphSLF),
   m_hypergraphOutput(hypergraphOutput)
 {}
@@ -264,11 +262,11 @@ void TranslationTask::Run() {
   }
 
   // detailed translation reporting
-  if (m_detailedTranslationCollector) {
+  if (m_ioWrapper.GetDetailedTranslationCollector()) {
     ostringstream out;
     fix(out,PRECISION);
     TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
-    m_detailedTranslationCollector->Write(m_lineNumber,out.str());
+    m_ioWrapper.GetDetailedTranslationCollector()->Write(m_lineNumber,out.str());
   }
 
   //list of unknown words

@@ -179,12 +179,6 @@ int main(int argc, char** argv)
       wordGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputWordGraphStream())));
     }
 
-    // initialize stram for details about the decoder run
-    auto_ptr<OutputCollector> detailedTranslationCollector;
-    if (staticData.IsDetailedTranslationReportingEnabled()) {
-      detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
-    }
-
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
@@ -204,7 +198,6 @@ int main(int argc, char** argv)
         new TranslationTask(lineCount,source, *ioWrapper,
                             latticeSamplesCollector.get(),
                             wordGraphCollector.get(),
-                            detailedTranslationCollector.get(),
                             staticData.GetOutputSearchGraphSLF(),
                             hypergraphOutput);
       // execute task
