@@ -84,34 +84,21 @@ protected:
 
   bool													m_surpressSingleBestOutput;
 
-  Moses::OutputCollector                *m_singleBestOutputCollector;
-  Moses::OutputCollector                *m_nBestOutputCollector;
-  Moses::OutputCollector                *m_unknownsCollector;
-  Moses::OutputCollector                *m_alignmentInfoCollector;
-  Moses::OutputCollector                *m_searchGraphOutputCollector;
+  Moses::OutputCollector *m_singleBestOutputCollector;
+  Moses::OutputCollector *m_nBestOutputCollector;
+  Moses::OutputCollector *m_unknownsCollector;
+  Moses::OutputCollector *m_alignmentInfoCollector;
+  Moses::OutputCollector *m_searchGraphOutputCollector;
   Moses::OutputCollector *m_detailedTranslationCollector;
   Moses::OutputCollector *m_wordGraphCollector;
 
-  void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
-                      , const std::vector<Moses::FactorType>			&outputFactorOrder
-                      , const Moses::FactorMask							&inputFactorUsed
-                      , size_t												nBestSize
-                      , const std::string							&nBestFilePath);
-
-
 public:
-  IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
-            , const std::vector<Moses::FactorType>			&outputFactorOrder
-            , const Moses::FactorMask							&inputFactorUsed
-            , size_t												nBestSize
-            , const std::string							&nBestFilePath);
-
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
             , const std::vector<Moses::FactorType>	&outputFactorOrder
             , const Moses::FactorMask							&inputFactorUsed
             , size_t												nBestSize
             , const std::string							&nBestFilePath
-            , const std::string                                                     &infilePath);
+            , const std::string                                                     &inputFilePath = "");
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);

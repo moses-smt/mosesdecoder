@@ -56,28 +56,6 @@ using namespace Moses;
 namespace MosesCmd
 {
 
-IOWrapper::IOWrapper(
-  const vector<FactorType>				&inputFactorOrder
-  , const vector<FactorType>			&outputFactorOrder
-  , const FactorMask							&inputFactorUsed
-  , size_t												nBestSize
-  , const string									&nBestFilePath)
-  :m_inputFactorOrder(inputFactorOrder)
-  ,m_outputFactorOrder(outputFactorOrder)
-  ,m_inputFactorUsed(inputFactorUsed)
-  ,m_inputFile(NULL)
-  ,m_inputStream(&std::cin)
-  ,m_nBestStream(NULL)
-  ,m_outputWordGraphStream(NULL)
-  ,m_outputSearchGraphStream(NULL)
-  ,m_detailedTranslationReportingStream(NULL)
-  ,m_wordGraphCollector(NULL)
-{
-  Initialization(inputFactorOrder, outputFactorOrder
-                 , inputFactorUsed
-                 , nBestSize, nBestFilePath);
-}
-
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const std::vector<FactorType>	&outputFactorOrder
                      , const FactorMask							&inputFactorUsed
@@ -88,7 +66,6 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_outputFactorOrder(outputFactorOrder)
   ,m_inputFactorUsed(inputFactorUsed)
   ,m_inputFilePath(inputFilePath)
-  ,m_inputFile(new InputFileStream(inputFilePath))
   ,m_nBestStream(NULL)
 
   ,m_outputWordGraphStream(NULL)
@@ -107,13 +84,39 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 {
   const StaticData &staticData = StaticData::Instance();
 
-  Initialization(inputFactorOrder, outputFactorOrder
-                 , inputFactorUsed
-                 , nBestSize, nBestFilePath);
-
-  m_inputStream = m_inputFile;
-
   bool suppressSingleBestOutput = false;
+
+  if (inputFilePath.empty()) {
+	m_inputFile = NULL;
+	m_inputStream = &cin;
+  }
+  else {
+    m_inputFile = new InputFileStream(inputFilePath);
+    m_inputStream = m_inputFile;
+  }
+
+  if (nBestSize > 0) {
+    if (nBestFilePath == "-" || nBestFilePath == "/dev/stdout") {
+      m_nBestStream = &std::cout;
+      m_surpressSingleBestOutput = true;
+    } else {
+      std::ofstream *file = new std::ofstream;
+      m_nBestStream = file;
+      file->open(nBestFilePath.c_str());
+    }
+  }
+
+  // search graph output
+  if (staticData.GetOutputSearchGraph()) {
+    string fileName;
+    if (staticData.GetOutputSearchGraphExtended())
+      fileName = staticData.GetParam("output-search-graph-extended")[0];
+    else
+      fileName = staticData.GetParam("output-search-graph")[0];
+    std::ofstream *file = new std::ofstream;
+    m_outputSearchGraphStream = file;
+    file->open(fileName.c_str());
+  }
 
   if (nBestSize > 0) {
     if (nBestFilePath == "-") {
@@ -191,42 +194,6 @@ IOWrapper::~IOWrapper()
   delete m_searchGraphOutputCollector;
   delete m_detailedTranslationCollector;
   delete m_wordGraphCollector;
-}
-
-void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
-                               , const std::vector<FactorType>			&/*outputFactorOrder*/
-                               , const FactorMask							&/*inputFactorUsed*/
-                               , size_t												nBestSize
-                               , const std::string							&nBestFilePath)
-{
-  const StaticData &staticData = StaticData::Instance();
-
-  // n-best
-  m_surpressSingleBestOutput = false;
-
-  if (nBestSize > 0) {
-    if (nBestFilePath == "-" || nBestFilePath == "/dev/stdout") {
-      m_nBestStream = &std::cout;
-      m_surpressSingleBestOutput = true;
-    } else {
-      std::ofstream *file = new std::ofstream;
-      m_nBestStream = file;
-      file->open(nBestFilePath.c_str());
-    }
-  }
-
-  // search graph output
-  if (staticData.GetOutputSearchGraph()) {
-    string fileName;
-    if (staticData.GetOutputSearchGraphExtended())
-      fileName = staticData.GetParam("output-search-graph-extended")[0];
-    else
-      fileName = staticData.GetParam("output-search-graph")[0];
-    std::ofstream *file = new std::ofstream;
-    m_outputSearchGraphStream = file;
-    file->open(fileName.c_str());
-  }
-
 }
 
 InputType*
@@ -682,20 +649,15 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
   FactorMask inputFactorUsed(inputFactorOrder);
 
   // io
+  string inputPath;
   if (staticData.GetParam("input-file").size() == 1) {
     VERBOSE(2,"IO from File" << endl);
-    string filePath = staticData.GetParam("input-file")[0];
-
-    ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                              , staticData.GetNBestSize()
-                              , staticData.GetNBestFilePath()
-                              , filePath);
-  } else {
-    VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-    ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                              , staticData.GetNBestSize()
-                              , staticData.GetNBestFilePath());
+    inputPath = staticData.GetParam("input-file")[0];
   }
+  ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+                            , staticData.GetNBestSize()
+                            , staticData.GetNBestFilePath()
+                            , inputPath);
   ioWrapper->ResetTranslationId();
 
   IFVERBOSE(1)
