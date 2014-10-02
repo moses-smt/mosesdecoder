@@ -81,10 +81,9 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_searchGraphOutputCollector(NULL)
   ,m_detailedTranslationCollector(NULL)
   ,m_wordGraphCollector(NULL)
+  ,m_surpressSingleBestOutput(false)
 {
   const StaticData &staticData = StaticData::Instance();
-
-  bool suppressSingleBestOutput = false;
 
   if (inputFilePath.empty()) {
 	m_inputFile = NULL;
@@ -121,14 +120,14 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   if (nBestSize > 0) {
     if (nBestFilePath == "-") {
       m_nBestOutputCollector = new Moses::OutputCollector(&std::cout);
-      suppressSingleBestOutput = true;
+      m_surpressSingleBestOutput = true;
     } else {
       m_nBestOutputCollector = new Moses::OutputCollector(new std::ofstream(nBestFilePath.c_str()));
       m_nBestOutputCollector->HoldOutputStream();
     }
   }
 
-  if (!suppressSingleBestOutput) {
+  if (!m_surpressSingleBestOutput) {
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 

@@ -82,7 +82,7 @@ protected:
   std::ostream  *m_unknownsStream;
   std::ostream  *m_outputSearchGraphStream;
 
-  bool													m_surpressSingleBestOutput;
+  bool m_surpressSingleBestOutput;
 
   Moses::OutputCollector *m_singleBestOutputCollector;
   Moses::OutputCollector *m_nBestOutputCollector;
