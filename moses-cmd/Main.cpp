@@ -192,12 +192,6 @@ int main(int argc, char** argv)
       detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
     }
 
-    // initialize stram for word alignment between input and output
-    auto_ptr<OutputCollector> alignmentInfoCollector;
-    if (!staticData.GetAlignmentOutputFile().empty()) {
-      alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
-    }
-
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
@@ -219,7 +213,6 @@ int main(int argc, char** argv)
                             wordGraphCollector.get(),
                             searchGraphCollector.get(),
                             detailedTranslationCollector.get(),
-                            alignmentInfoCollector.get(),
                             staticData.GetOutputSearchGraphSLF(),
                             hypergraphOutput);
       // execute task

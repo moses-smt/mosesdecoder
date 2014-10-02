@@ -71,7 +71,6 @@ IOWrapper::IOWrapper(
   ,m_outputWordGraphStream(NULL)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
-  ,m_alignmentOutputStream(NULL)
 {
   Initialization(inputFactorOrder, outputFactorOrder
                  , inputFactorUsed
@@ -93,11 +92,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_outputWordGraphStream(NULL)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
-  ,m_alignmentOutputStream(NULL)
   ,m_unknownsStream(NULL)
+  ,m_alignmentInfoStream(NULL)
   ,m_singleBestOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_unknownsCollector(NULL)
+  ,m_alignmentInfoCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -131,6 +131,13 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      staticData.GetOutputUnknownsFile());
   }
 
+  if (!staticData.GetAlignmentOutputFile().empty()) {
+    m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
+    m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
+    UTIL_THROW_IF2(!m_alignmentInfoStream->good(),
+    		"File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
+  }
+
 }
 
 IOWrapper::~IOWrapper()
@@ -148,10 +155,12 @@ IOWrapper::~IOWrapper()
     delete m_outputSearchGraphStream;
   }
   delete m_detailedTranslationReportingStream;
-  delete m_alignmentOutputStream;
+  delete m_alignmentInfoStream;
+  delete m_unknownsStream;
 
   delete m_singleBestOutputCollector;
   delete m_nBestOutputCollector;
+  delete m_alignmentInfoCollector;
 
 }
 
@@ -205,14 +214,6 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
     UTIL_THROW_IF(!m_detailedTranslationReportingStream->good(),
     		util::FileOpenException,
     		"File for output of detailed translation report could not be open");
-  }
-
-  // sentence alignment output
-  if (! staticData.GetAlignmentOutputFile().empty()) {
-    m_alignmentOutputStream = new ofstream(staticData.GetAlignmentOutputFile().c_str());
-    UTIL_THROW_IF(!m_alignmentOutputStream->good(),
-    		util::FileOpenException,
-    		"File for output of word alignment could not be open");
   }
 
 }

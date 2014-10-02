@@ -19,7 +19,6 @@ TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd:
                 OutputCollector* latticeSamplesCollector,
                 OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                 OutputCollector* detailedTranslationCollector,
-                OutputCollector* alignmentInfoCollector,
                 bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source), m_lineNumber(lineNumber),
@@ -27,7 +26,6 @@ TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd:
   m_latticeSamplesCollector(latticeSamplesCollector),
   m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
   m_detailedTranslationCollector(detailedTranslationCollector),
-  m_alignmentInfoCollector(alignmentInfoCollector),
   m_outputSearchGraphSLF(outputSearchGraphSLF),
   m_hypergraphOutput(hypergraphOutput)
 {}
@@ -164,7 +162,7 @@ void TranslationTask::Run() {
           OutputAlignment(out, bestHypo);
         }
 
-        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, bestHypo);
+        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_lineNumber, bestHypo);
         IFVERBOSE(1) {
           debug << "BEST TRANSLATION: " << *bestHypo << endl;
         }
@@ -217,7 +215,7 @@ void TranslationTask::Run() {
         OutputBestHypo(conBestHypo, m_lineNumber,
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
-        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, conBestHypo);
+        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_lineNumber, conBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished Consensus decoding");
         }
@@ -229,7 +227,7 @@ void TranslationTask::Run() {
         OutputBestHypo(mbrBestHypo, m_lineNumber,
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
-        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, mbrBestHypo);
+        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_lineNumber, mbrBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished MBR decoding");
         }
