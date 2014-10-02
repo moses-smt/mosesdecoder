@@ -28,7 +28,6 @@ public:
 
   TranslationTask(size_t lineNumber, Moses::InputType* source, MosesCmd::IOWrapper &ioWrapper,
                   Moses::OutputCollector* latticeSamplesCollector,
-                  Moses::OutputCollector* wordGraphCollector,
                   bool outputSearchGraphSLF,
                   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > hypergraphOutput);
 
@@ -45,7 +44,6 @@ private:
   MosesCmd::IOWrapper &m_ioWrapper;
 
   Moses::OutputCollector* m_latticeSamplesCollector;
-  Moses::OutputCollector* m_wordGraphCollector;
   bool m_outputSearchGraphSLF;
   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > m_hypergraphOutput;
 

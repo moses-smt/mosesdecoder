@@ -71,6 +71,7 @@ IOWrapper::IOWrapper(
   ,m_outputWordGraphStream(NULL)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
+  ,m_wordGraphCollector(NULL)
 {
   Initialization(inputFactorOrder, outputFactorOrder
                  , inputFactorUsed
@@ -102,6 +103,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_alignmentInfoCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_detailedTranslationCollector(NULL)
+  ,m_wordGraphCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -157,6 +159,15 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailedTranslationCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
 
+  // wordgraph output
+  if (staticData.GetOutputWordGraph()) {
+    string fileName = staticData.GetParam("output-word-graph")[0];
+    std::ofstream *file = new std::ofstream;
+    m_outputWordGraphStream  = file;
+    file->open(fileName.c_str());
+    m_wordGraphCollector = new OutputCollector(m_outputWordGraphStream);
+  }
+
 }
 
 IOWrapper::~IOWrapper()
@@ -179,7 +190,7 @@ IOWrapper::~IOWrapper()
   delete m_alignmentInfoCollector;
   delete m_searchGraphOutputCollector;
   delete m_detailedTranslationCollector;
-
+  delete m_wordGraphCollector;
 }
 
 void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
@@ -203,15 +214,6 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
       file->open(nBestFilePath.c_str());
     }
   }
-
-  // wordgraph output
-  if (staticData.GetOutputWordGraph()) {
-    string fileName = staticData.GetParam("output-word-graph")[0];
-    std::ofstream *file = new std::ofstream;
-    m_outputWordGraphStream  = file;
-    file->open(fileName.c_str());
-  }
-
 
   // search graph output
   if (staticData.GetOutputSearchGraph()) {

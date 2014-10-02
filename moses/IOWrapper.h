@@ -75,9 +75,9 @@ protected:
   std::string										m_inputFilePath;
   Moses::InputFileStream				*m_inputFile;
   std::istream									*m_inputStream;
-  std::ostream 									*m_nBestStream
-  ,*m_outputWordGraphStream;
-  std::ostream                  *m_detailedTranslationReportingStream;
+  std::ostream *m_nBestStream;
+  std::ostream *m_outputWordGraphStream;
+  std::ostream *m_detailedTranslationReportingStream;
   std::ofstream *m_alignmentInfoStream;
   std::ostream  *m_unknownsStream;
   std::ostream  *m_outputSearchGraphStream;
@@ -89,7 +89,8 @@ protected:
   Moses::OutputCollector                *m_unknownsCollector;
   Moses::OutputCollector                *m_alignmentInfoCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
-  Moses::OutputCollector                *m_detailedTranslationCollector;
+  Moses::OutputCollector *m_detailedTranslationCollector;
+  Moses::OutputCollector *m_wordGraphCollector;
 
   void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
                       , const std::vector<Moses::FactorType>			&outputFactorOrder
@@ -123,10 +124,6 @@ public:
     m_translationId = 0;
   }
 
-  std::ostream &GetOutputWordGraphStream() {
-    return *m_outputWordGraphStream;
-  }
-
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector;
   }
@@ -149,6 +146,10 @@ public:
 
   Moses::OutputCollector *GetDetailedTranslationCollector() {
     return m_detailedTranslationCollector;
+  }
+
+  Moses::OutputCollector *GetWordGraphCollector() {
+    return m_wordGraphCollector;
   }
 
 };

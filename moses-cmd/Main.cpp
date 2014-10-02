@@ -173,12 +173,6 @@ int main(int argc, char** argv)
       }
     }
 
-    // initialize stream for word graph (aka: output lattice)
-    auto_ptr<OutputCollector> wordGraphCollector;
-    if (staticData.GetOutputWordGraph()) {
-      wordGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputWordGraphStream())));
-    }
-
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
@@ -197,7 +191,6 @@ int main(int argc, char** argv)
       TranslationTask* task =
         new TranslationTask(lineCount,source, *ioWrapper,
                             latticeSamplesCollector.get(),
-                            wordGraphCollector.get(),
                             staticData.GetOutputSearchGraphSLF(),
                             hypergraphOutput);
       // execute task
