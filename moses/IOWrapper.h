@@ -76,10 +76,11 @@ protected:
   Moses::InputFileStream				*m_inputFile;
   std::istream									*m_inputStream;
   std::ostream 									*m_nBestStream
-  ,*m_outputWordGraphStream,*m_outputSearchGraphStream;
+  ,*m_outputWordGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::ofstream *m_alignmentInfoStream;
-  std::ostream                          *m_unknownsStream;
+  std::ostream  *m_unknownsStream;
+  std::ostream  *m_outputSearchGraphStream;
 
   bool													m_surpressSingleBestOutput;
 
@@ -87,6 +88,7 @@ protected:
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_unknownsCollector;
   Moses::OutputCollector                *m_alignmentInfoCollector;
+  Moses::OutputCollector                *m_searchGraphOutputCollector;
 
   void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
                       , const std::vector<Moses::FactorType>			&outputFactorOrder
@@ -148,6 +150,9 @@ public:
     return m_alignmentInfoCollector;
   }
 
+  Moses::OutputCollector *GetSearchGraphOutputCollector() {
+    return m_searchGraphOutputCollector;
+  }
 
 };
 

@@ -179,13 +179,6 @@ int main(int argc, char** argv)
       wordGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputWordGraphStream())));
     }
 
-    // initialize stream for search graph
-    // note: this is essentially the same as above, but in a different format
-    auto_ptr<OutputCollector> searchGraphCollector;
-    if (staticData.GetOutputSearchGraph()) {
-      searchGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputSearchGraphStream())));
-    }
-
     // initialize stram for details about the decoder run
     auto_ptr<OutputCollector> detailedTranslationCollector;
     if (staticData.IsDetailedTranslationReportingEnabled()) {
@@ -211,7 +204,6 @@ int main(int argc, char** argv)
         new TranslationTask(lineCount,source, *ioWrapper,
                             latticeSamplesCollector.get(),
                             wordGraphCollector.get(),
-                            searchGraphCollector.get(),
                             detailedTranslationCollector.get(),
                             staticData.GetOutputSearchGraphSLF(),
                             hypergraphOutput);

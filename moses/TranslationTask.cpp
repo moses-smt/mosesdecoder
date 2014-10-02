@@ -17,14 +17,14 @@ namespace MosesCmd
 
 TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd::IOWrapper &ioWrapper,
                 OutputCollector* latticeSamplesCollector,
-                OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
+                OutputCollector* wordGraphCollector,
                 OutputCollector* detailedTranslationCollector,
                 bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source), m_lineNumber(lineNumber),
   m_ioWrapper(ioWrapper),
   m_latticeSamplesCollector(latticeSamplesCollector),
-  m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
+  m_wordGraphCollector(wordGraphCollector),
   m_detailedTranslationCollector(detailedTranslationCollector),
   m_outputSearchGraphSLF(outputSearchGraphSLF),
   m_hypergraphOutput(hypergraphOutput)
@@ -73,11 +73,11 @@ void TranslationTask::Run() {
   }
 
   // output search graph
-  if (m_searchGraphCollector) {
+  if (m_ioWrapper.GetSearchGraphOutputCollector()) {
     ostringstream out;
     fix(out,PRECISION);
     manager.OutputSearchGraph(m_lineNumber, out);
-    m_searchGraphCollector->Write(m_lineNumber, out.str());
+    m_ioWrapper.GetSearchGraphOutputCollector()->Write(m_lineNumber, out.str());
 
 #ifdef HAVE_PROTOBUF
     if (staticData.GetOutputSearchGraphPB()) {

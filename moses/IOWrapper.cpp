@@ -89,15 +89,18 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_inputFilePath(inputFilePath)
   ,m_inputFile(new InputFileStream(inputFilePath))
   ,m_nBestStream(NULL)
+
   ,m_outputWordGraphStream(NULL)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
   ,m_unknownsStream(NULL)
   ,m_alignmentInfoStream(NULL)
+
   ,m_singleBestOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_unknownsCollector(NULL)
   ,m_alignmentInfoCollector(NULL)
+  ,m_searchGraphOutputCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -138,6 +141,14 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     		"File for alignment output could not be opened: " << staticData.GetAlignmentOutputFile());
   }
 
+  if (staticData.GetOutputSearchGraph()) {
+    string fileName = staticData.GetParam("output-search-graph")[0];
+    std::ofstream *file = new std::ofstream;
+    m_outputSearchGraphStream = file;
+    file->open(fileName.c_str());
+    m_searchGraphOutputCollector = new Moses::OutputCollector(m_outputSearchGraphStream);
+  }
+
 }
 
 IOWrapper::~IOWrapper()
@@ -148,19 +159,17 @@ IOWrapper::~IOWrapper()
     // outputting n-best to file, rather than stdout. need to close file and delete obj
     delete m_nBestStream;
   }
-  if (m_outputWordGraphStream != NULL) {
-    delete m_outputWordGraphStream;
-  }
-  if (m_outputSearchGraphStream != NULL) {
-    delete m_outputSearchGraphStream;
-  }
+
   delete m_detailedTranslationReportingStream;
   delete m_alignmentInfoStream;
   delete m_unknownsStream;
+  delete m_outputSearchGraphStream;
+  delete m_outputWordGraphStream;
 
   delete m_singleBestOutputCollector;
   delete m_nBestOutputCollector;
   delete m_alignmentInfoCollector;
+  delete m_searchGraphOutputCollector;
 
 }
 
