@@ -50,7 +50,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/InputFileStream.h"
 #include "moses/InputType.h"
 #include "moses/WordLattice.h"
-#include "LatticeMBR.h"
+#include "moses/LatticeMBR.h"
 
 namespace Moses
 {
