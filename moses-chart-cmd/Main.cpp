@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
     UTIL_THROW_IF2(!staticData.IsChart(), "Must be SCFG model");
 
     // set up read/writing class
-    IOWrapperChart *ioWrapper = GetIOWrapper(staticData);
+    IOWrapperChart *ioWrapper = IOWrapperChart::GetIOWrapper(staticData);
 
     // check on weights
     const ScoreComponentCollection& weights = staticData.GetAllWeights();
@@ -188,32 +188,3 @@ int main(int argc, char* argv[])
 #endif
 }
 
-IOWrapperChart *GetIOWrapper(const StaticData &staticData)
-{
-  IOWrapperChart *ioWrapper;
-  const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
-      ,&outputFactorOrder = staticData.GetOutputFactorOrder();
-  FactorMask inputFactorUsed(inputFactorOrder);
-
-  // io
-  if (staticData.GetParam("input-file").size() == 1) {
-    VERBOSE(2,"IO from File" << endl);
-    string filePath = staticData.GetParam("input-file")[0];
-
-    ioWrapper = new IOWrapperChart(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                              , staticData.GetNBestSize()
-                              , staticData.GetNBestFilePath()
-                              , filePath);
-  } else {
-    VERBOSE(1,"IO from STDOUT/STDIN" << endl);
-    ioWrapper = new IOWrapperChart(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                              , staticData.GetNBestSize()
-                              , staticData.GetNBestFilePath());
-  }
-  ioWrapper->ResetTranslationId();
-
-  IFVERBOSE(1)
-  PrintUserTime("Created input-output object");
-
-  return ioWrapper;
-}

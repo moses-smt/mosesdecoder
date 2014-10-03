@@ -113,6 +113,8 @@ protected:
                             , std::string &lastName );
 
 public:
+  static IOWrapperChart *GetIOWrapper(const Moses::StaticData &staticData);
+
   IOWrapperChart(const std::vector<Moses::FactorType>	&inputFactorOrder
             , const std::vector<Moses::FactorType>	&outputFactorOrder
             , const Moses::FactorMask							&inputFactorUsed

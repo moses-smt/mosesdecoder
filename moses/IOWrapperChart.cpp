@@ -1016,5 +1016,35 @@ void IOWrapperChart::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, co
   }
 }
 
+IOWrapperChart *IOWrapperChart::GetIOWrapper(const StaticData &staticData)
+{
+  IOWrapperChart *ioWrapper;
+  const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
+      ,&outputFactorOrder = staticData.GetOutputFactorOrder();
+  FactorMask inputFactorUsed(inputFactorOrder);
+
+  // io
+  if (staticData.GetParam("input-file").size() == 1) {
+    VERBOSE(2,"IO from File" << endl);
+    string filePath = staticData.GetParam("input-file")[0];
+
+    ioWrapper = new IOWrapperChart(inputFactorOrder, outputFactorOrder, inputFactorUsed
+                              , staticData.GetNBestSize()
+                              , staticData.GetNBestFilePath()
+                              , filePath);
+  } else {
+    VERBOSE(1,"IO from STDOUT/STDIN" << endl);
+    ioWrapper = new IOWrapperChart(inputFactorOrder, outputFactorOrder, inputFactorUsed
+                              , staticData.GetNBestSize()
+                              , staticData.GetNBestFilePath());
+  }
+  ioWrapper->ResetTranslationId();
+
+  IFVERBOSE(1)
+  PrintUserTime("Created input-output object");
+
+  return ioWrapper;
+}
+
 }
 

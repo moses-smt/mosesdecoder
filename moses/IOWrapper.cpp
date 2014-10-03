@@ -633,29 +633,7 @@ void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solu
   OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
 }
 
-bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
-{
-  if (source) delete source;
-  switch(inputType) {
-  case SentenceInput:
-    source = ioWrapper.GetInput(new Sentence);
-    break;
-  case ConfusionNetworkInput:
-    source = ioWrapper.GetInput(new ConfusionNet);
-    break;
-  case WordLatticeInput:
-    source = ioWrapper.GetInput(new WordLattice);
-    break;
-  default:
-    TRACE_ERR("Unknown input type: " << inputType << "\n");
-    source = NULL;
-  }
-  return (source ? true : false);
-}
-
-
-
-IOWrapper *GetIOWrapper(const StaticData &staticData)
+IOWrapper *IOWrapper::GetIOWrapper(const StaticData &staticData)
 {
   IOWrapper *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
@@ -678,6 +656,27 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
   PrintUserTime("Created input-output object");
 
   return ioWrapper;
+}
+
+
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
+{
+  if (source) delete source;
+  switch(inputType) {
+  case SentenceInput:
+    source = ioWrapper.GetInput(new Sentence);
+    break;
+  case ConfusionNetworkInput:
+    source = ioWrapper.GetInput(new ConfusionNet);
+    break;
+  case WordLatticeInput:
+    source = ioWrapper.GetInput(new WordLattice);
+    break;
+  default:
+    TRACE_ERR("Unknown input type: " << inputType << "\n");
+    source = NULL;
+  }
+  return (source ? true : false);
 }
 
 }

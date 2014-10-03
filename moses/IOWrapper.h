@@ -95,6 +95,8 @@ protected:
   Moses::OutputCollector *m_latticeSamplesCollector;
 
 public:
+  static IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
+
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
             , const std::vector<Moses::FactorType>	&outputFactorOrder
             , const Moses::FactorMask							&inputFactorUsed
@@ -147,7 +149,6 @@ public:
 
 };
 
-IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 void OutputLanguageModelOrder(std::ostream &out, const Moses::Hypothesis *hypo, Moses::Manager &manager);
 void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors);
