@@ -81,6 +81,7 @@ protected:
   std::ofstream *m_alignmentInfoStream;
   std::ostream  *m_unknownsStream;
   std::ostream  *m_outputSearchGraphStream;
+  std::ofstream *m_latticeSamplesStream;
 
   bool m_surpressSingleBestOutput;
 

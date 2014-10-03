@@ -134,30 +134,6 @@ int main(int argc, char** argv)
       hypergraphOutput.reset(new HypergraphOutput<Manager>(PRECISION));
     }
 
-
-    // initialize output streams
-    // note: we can't just write to STDOUT or files
-    // because multithreading may return sentences in shuffled order
-    auto_ptr<OutputCollector> latticeSamplesCollector; //for lattice samples
-    auto_ptr<ofstream> latticeSamplesOut;
-    bool output1best = true;
-
-    size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
-    string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
-    if (latticeSamplesSize) {
-      if (latticeSamplesFile == "-" || latticeSamplesFile == "/dev/stdout") {
-        latticeSamplesCollector.reset(new OutputCollector());
-        output1best = false;
-      } else {
-        latticeSamplesOut.reset(new ofstream(latticeSamplesFile.c_str()));
-        if (!latticeSamplesOut->good()) {
-          TRACE_ERR("ERROR: Failed to open " << latticeSamplesFile << " for lattice samples" << endl);
-          exit(1);
-        }
-        latticeSamplesCollector.reset(new OutputCollector(latticeSamplesOut.get()));
-      }
-    }
-
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif

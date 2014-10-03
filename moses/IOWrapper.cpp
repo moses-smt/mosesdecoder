@@ -73,6 +73,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_detailedTranslationReportingStream(NULL)
   ,m_unknownsStream(NULL)
   ,m_alignmentInfoStream(NULL)
+  ,m_latticeSamplesStream(NULL)
 
   ,m_singleBestOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
@@ -162,6 +163,22 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_wordGraphCollector = new OutputCollector(m_outputWordGraphStream);
   }
 
+  size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
+  string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
+  if (latticeSamplesSize) {
+    if (latticeSamplesFile == "-" || latticeSamplesFile == "/dev/stdout") {
+      m_latticeSamplesCollector = new OutputCollector();
+      m_surpressSingleBestOutput = true;
+    } else {
+      m_latticeSamplesStream = new ofstream(latticeSamplesFile.c_str());
+      if (!m_latticeSamplesStream->good()) {
+        TRACE_ERR("ERROR: Failed to open " << latticeSamplesFile << " for lattice samples" << endl);
+        exit(1);
+      }
+      m_latticeSamplesCollector = new OutputCollector(m_latticeSamplesStream);
+    }
+  }
+
   if (!m_surpressSingleBestOutput) {
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
@@ -182,6 +199,7 @@ IOWrapper::~IOWrapper()
   delete m_unknownsStream;
   delete m_outputSearchGraphStream;
   delete m_outputWordGraphStream;
+  delete m_latticeSamplesStream;
 
   delete m_singleBestOutputCollector;
   delete m_nBestOutputCollector;
