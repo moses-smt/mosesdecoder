@@ -331,7 +331,7 @@ int SyntaxTreeState::Compare(const FFState& other) const
 
 ////////////////////////////////////////////////////////////////
 HeadFeature::HeadFeature(const std::string &line)
-  :StatefulFeatureFunction(1, line) //should modify 0 to the number of scores my feature generates
+  :StatefulFeatureFunction(2, line) //should modify 0 to the number of scores my feature generates
 	,m_headRules(new std::map<std::string, std::vector <std::string> > ())
 	, m_probArg (new std::map<std::string, float> ())
 {
@@ -434,7 +434,11 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        it = m_probArg->find(*predArgPair);
 	        if(it!=m_probArg->end()){
 	        	//cout<<"Have value: "<<it->second<<endl;
-	        	accumulator->PlusEquals(this,log(it->second+0.001));
+	        	vector<float> scores;
+	        	scores.push_back(log(it->second+0.001));
+	        	scores.push_back(1.0);
+	        	//accumulator->PlusEquals(this,log(it->second+0.001));
+	        	accumulator->PlusEquals(this,scores);
 	        }
 	        //else
 	        //	accumulator->PlusEquals(this,-1);
@@ -447,8 +451,10 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 
 	}
-
-	accumulator->PlusEquals(this,1000);
+	vector<float> scores;
+	scores.push_back(1000.0);
+	scores.push_back(0.0);
+	accumulator->PlusEquals(this,scores);
 }
 
 
