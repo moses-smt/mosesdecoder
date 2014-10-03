@@ -139,24 +139,9 @@ int main(int argc, char** argv)
     // note: we can't just write to STDOUT or files
     // because multithreading may return sentences in shuffled order
     auto_ptr<OutputCollector> latticeSamplesCollector; //for lattice samples
-    auto_ptr<ofstream> nbestOut;
     auto_ptr<ofstream> latticeSamplesOut;
-    size_t nbestSize = staticData.GetNBestSize();
-    string nbestFile = staticData.GetNBestFilePath();
     bool output1best = true;
-    if (nbestSize) {
-      if (nbestFile == "-" || nbestFile == "/dev/stdout") {
-        // nbest to stdout, no 1-best
-        output1best = false;
-      } else {
-        // nbest to file, 1-best to stdout
-        nbestOut.reset(new ofstream(nbestFile.c_str()));
-        if (!nbestOut->good()) {
-          TRACE_ERR("ERROR: Failed to open " << nbestFile << " for nbest lists" << endl);
-          exit(1);
-        }
-      }
-    }
+
     size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
     string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
     if (latticeSamplesSize) {

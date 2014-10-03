@@ -91,6 +91,7 @@ protected:
   Moses::OutputCollector *m_searchGraphOutputCollector;
   Moses::OutputCollector *m_detailedTranslationCollector;
   Moses::OutputCollector *m_wordGraphCollector;
+  Moses::OutputCollector *m_latticeSamplesCollector;
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -137,6 +138,10 @@ public:
 
   Moses::OutputCollector *GetWordGraphCollector() {
     return m_wordGraphCollector;
+  }
+
+  Moses::OutputCollector *GetLatticeSamplesCollector() {
+    return m_latticeSamplesCollector;
   }
 
 };
