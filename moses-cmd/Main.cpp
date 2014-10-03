@@ -175,7 +175,6 @@ int main(int argc, char** argv)
       // set up task of translating one sentence
       TranslationTask* task =
         new TranslationTask(lineCount,source, *ioWrapper,
-                            latticeSamplesCollector.get(),
                             staticData.GetOutputSearchGraphSLF(),
                             hypergraphOutput);
       // execute task

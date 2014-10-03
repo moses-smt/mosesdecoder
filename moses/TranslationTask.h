@@ -27,7 +27,6 @@ class TranslationTask : public Moses::Task
 public:
 
   TranslationTask(size_t lineNumber, Moses::InputType* source, MosesCmd::IOWrapper &ioWrapper,
-                  Moses::OutputCollector* latticeSamplesCollector,
                   bool outputSearchGraphSLF,
                   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > hypergraphOutput);
 

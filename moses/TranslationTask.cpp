@@ -16,7 +16,6 @@ namespace MosesCmd
 {
 
 TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd::IOWrapper &ioWrapper,
-                OutputCollector* latticeSamplesCollector,
                 bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source), m_lineNumber(lineNumber),

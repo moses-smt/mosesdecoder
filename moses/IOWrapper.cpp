@@ -123,10 +123,6 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     file->open(fileName.c_str());
   }
 
-  if (!m_surpressSingleBestOutput) {
-    m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
-  }
-
   if (!staticData.GetOutputUnknownsFile().empty()) {
     m_unknownsStream = new std::ofstream(staticData.GetOutputUnknownsFile().c_str());
     m_unknownsCollector = new Moses::OutputCollector(m_unknownsStream);
@@ -164,6 +160,10 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_outputWordGraphStream  = file;
     file->open(fileName.c_str());
     m_wordGraphCollector = new OutputCollector(m_outputWordGraphStream);
+  }
+
+  if (!m_surpressSingleBestOutput) {
+    m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 
 }
