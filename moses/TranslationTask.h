@@ -43,7 +43,6 @@ private:
   size_t m_lineNumber;
   MosesCmd::IOWrapper &m_ioWrapper;
 
-  Moses::OutputCollector* m_latticeSamplesCollector;
   bool m_outputSearchGraphSLF;
   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > m_hypergraphOutput;
 

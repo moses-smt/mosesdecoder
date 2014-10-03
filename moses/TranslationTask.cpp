@@ -21,7 +21,6 @@ TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd:
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source), m_lineNumber(lineNumber),
   m_ioWrapper(ioWrapper),
-  m_latticeSamplesCollector(latticeSamplesCollector),
   m_outputSearchGraphSLF(outputSearchGraphSLF),
   m_hypergraphOutput(hypergraphOutput)
 {}
@@ -250,13 +249,13 @@ void TranslationTask::Run() {
   }
 
   //lattice samples
-  if (m_latticeSamplesCollector) {
+  if (m_ioWrapper.GetLatticeSamplesCollector()) {
     TrellisPathList latticeSamples;
     ostringstream out;
     manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
     OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_lineNumber,
                 staticData.GetReportSegmentation());
-    m_latticeSamplesCollector->Write(m_lineNumber, out.str());
+    m_ioWrapper.GetLatticeSamplesCollector()->Write(m_lineNumber, out.str());
   }
 
   // detailed translation reporting

@@ -81,6 +81,8 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_searchGraphOutputCollector(NULL)
   ,m_detailedTranslationCollector(NULL)
   ,m_wordGraphCollector(NULL)
+  ,m_latticeSamplesCollector(NULL)
+
   ,m_surpressSingleBestOutput(false)
 {
   const StaticData &staticData = StaticData::Instance();
@@ -187,6 +189,7 @@ IOWrapper::~IOWrapper()
   delete m_searchGraphOutputCollector;
   delete m_detailedTranslationCollector;
   delete m_wordGraphCollector;
+  delete m_latticeSamplesCollector;
 }
 
 InputType*
