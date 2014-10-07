@@ -142,6 +142,7 @@ int main(int argc, char** argv)
     InputType* source = NULL;
     size_t lineCount = staticData.GetStartTranslationId();
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+      source->SetTranslationId(lineCount);
       IFVERBOSE(1) {
         ResetUserTime();
       }
@@ -150,7 +151,7 @@ int main(int argc, char** argv)
 
       // set up task of translating one sentence
       TranslationTask* task =
-        new TranslationTask(lineCount,source, *ioWrapper,
+        new TranslationTask(source, *ioWrapper,
                             staticData.GetOutputSearchGraphSLF(),
                             hypergraphOutput);
       // execute task

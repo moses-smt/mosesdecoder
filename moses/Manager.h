@@ -118,7 +118,6 @@ protected:
   size_t interrupted_flag;
   std::auto_ptr<SentenceStats> m_sentenceStats;
   int m_hypoId; //used to number the hypos as they are created.
-  size_t m_lineNumber;
 
   void GetConnectedGraph(
     std::map< int, bool >* pConnected,
@@ -130,7 +129,7 @@ protected:
 
 public:
   InputType const& m_source; /**< source sentence to be translated */
-  Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm);
+  Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
   ~Manager();
   const  TranslationOptionCollection* getSntTranslationOptions();
 
@@ -145,7 +144,7 @@ public:
   void GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo );
   void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
   int GetNextHypoId();
-  size_t GetLineNumber() const {return m_lineNumber;}
+
 #ifdef HAVE_PROTOBUF
   void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
 #endif

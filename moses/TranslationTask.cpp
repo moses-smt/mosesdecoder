@@ -15,10 +15,10 @@ using namespace Moses;
 namespace MosesCmd
 {
 
-TranslationTask::TranslationTask(size_t lineNumber, InputType* source, MosesCmd::IOWrapper &ioWrapper,
+TranslationTask::TranslationTask(InputType* source, MosesCmd::IOWrapper &ioWrapper,
                 bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
-  m_source(source), m_lineNumber(lineNumber),
+  m_source(source),
   m_ioWrapper(ioWrapper),
   m_outputSearchGraphSLF(outputSearchGraphSLF),
   m_hypergraphOutput(hypergraphOutput)
@@ -41,7 +41,7 @@ void TranslationTask::Run() {
 
   // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
-  TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << endl);
+  TRACE_ERR("Translating line " << m_source->GetTranslationId() << "  in thread id " << pthread_self() << endl);
 #endif
 
 
@@ -50,8 +50,8 @@ void TranslationTask::Run() {
   //       we still need to apply the decision rule (MAP, MBR, ...)
   Timer initTime;
   initTime.start();
-  Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm());
-  VERBOSE(1, "Line " << m_lineNumber << ": Initialize search took " << initTime << " seconds total" << endl);
+  Manager manager(*m_source,staticData.GetSearchAlgorithm());
+  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Initialize search took " << initTime << " seconds total" << endl);
   manager.ProcessSentence();
 
   // we are done with search, let's look what we got
@@ -62,25 +62,25 @@ void TranslationTask::Run() {
   if (m_ioWrapper.GetWordGraphCollector()) {
     ostringstream out;
     fix(out,PRECISION);
-    manager.GetWordGraph(m_lineNumber, out);
-    m_ioWrapper.GetWordGraphCollector()->Write(m_lineNumber, out.str());
+    manager.GetWordGraph(m_source->GetTranslationId(), out);
+    m_ioWrapper.GetWordGraphCollector()->Write(m_source->GetTranslationId(), out.str());
   }
 
   // output search graph
   if (m_ioWrapper.GetSearchGraphOutputCollector()) {
     ostringstream out;
     fix(out,PRECISION);
-    manager.OutputSearchGraph(m_lineNumber, out);
-    m_ioWrapper.GetSearchGraphOutputCollector()->Write(m_lineNumber, out.str());
+    manager.OutputSearchGraph(m_source->GetTranslationId(), out);
+    m_ioWrapper.GetSearchGraphOutputCollector()->Write(m_source->GetTranslationId(), out.str());
 
 #ifdef HAVE_PROTOBUF
     if (staticData.GetOutputSearchGraphPB()) {
       ostringstream sfn;
-      sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << m_lineNumber << ".pb" << ends;
+      sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << m_source->GetTranslationId() << ".pb" << ends;
       string fn = sfn.str();
       VERBOSE(2, "Writing search graph to " << fn << endl);
       fstream output(fn.c_str(), ios::trunc | ios::binary | ios::out);
-      manager.SerializeSearchGraphPB(m_lineNumber, output);
+      manager.SerializeSearchGraphPB(m_source->GetTranslationId(), output);
     }
 #endif
   }
@@ -88,17 +88,17 @@ void TranslationTask::Run() {
   // Output search graph in HTK standard lattice format (SLF)
   if (m_outputSearchGraphSLF) {
     stringstream fileName;
-    fileName << staticData.GetParam("output-search-graph-slf")[0] << "/" << m_lineNumber << ".slf";
+    fileName << staticData.GetParam("output-search-graph-slf")[0] << "/" << m_source->GetTranslationId() << ".slf";
     ofstream *file = new ofstream;
     file->open(fileName.str().c_str());
     if (file->is_open() && file->good()) {
       ostringstream out;
       fix(out,PRECISION);
-      manager.OutputSearchGraphAsSLF(m_lineNumber, out);
+      manager.OutputSearchGraphAsSLF(m_source->GetTranslationId(), out);
       *file << out.str();
       file -> flush();
     } else {
-      TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << endl);
+      TRACE_ERR("Cannot output HTK standard lattice for line " << m_source->GetTranslationId() << " because the output file is not open or not ready for writing" << endl);
     }
     delete file;
   }
@@ -119,7 +119,7 @@ void TranslationTask::Run() {
     // all derivations - send them to debug stream
     if (staticData.PrintAllDerivations()) {
       additionalReportingTime.start();
-      manager.PrintAllDerivations(m_lineNumber, debug);
+      manager.PrintAllDerivations(m_source->GetTranslationId(), debug);
       additionalReportingTime.stop();
     }
 
@@ -156,7 +156,7 @@ void TranslationTask::Run() {
           OutputAlignment(out, bestHypo);
         }
 
-        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_lineNumber, bestHypo);
+        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), bestHypo);
         IFVERBOSE(1) {
           debug << "BEST TRANSLATION: " << *bestHypo << endl;
         }
@@ -190,12 +190,12 @@ void TranslationTask::Run() {
           size_t n  = min(nBestSize, staticData.GetNBestSize());
           getLatticeMBRNBest(manager,nBestList,solutions,n);
           ostringstream out;
-          OutputLatticeMBRNBest(out, solutions,m_lineNumber);
-          m_ioWrapper.GetNBestOutputCollector()->Write(m_lineNumber, out.str());
+          OutputLatticeMBRNBest(out, solutions,m_source->GetTranslationId());
+          m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
         } else {
           //Lattice MBR decoding
           vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-          OutputBestHypo(mbrBestHypo, m_lineNumber, staticData.GetReportSegmentation(),
+          OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
                          staticData.GetReportAllFactors(),out);
           IFVERBOSE(2) {
             PrintUserTime("finished Lattice MBR decoding");
@@ -206,10 +206,10 @@ void TranslationTask::Run() {
       // consensus decoding
       else if (staticData.UseConsensusDecoding()) {
         const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
-        OutputBestHypo(conBestHypo, m_lineNumber,
+        OutputBestHypo(conBestHypo, m_source->GetTranslationId(),
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
-        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_lineNumber, conBestHypo);
+        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), conBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished Consensus decoding");
         }
@@ -218,10 +218,10 @@ void TranslationTask::Run() {
       // n-best MBR decoding
       else {
         const TrellisPath &mbrBestHypo = doMBR(nBestList);
-        OutputBestHypo(mbrBestHypo, m_lineNumber,
+        OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(),
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
-        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_lineNumber, mbrBestHypo);
+        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), mbrBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished MBR decoding");
         }
@@ -229,10 +229,10 @@ void TranslationTask::Run() {
     }
 
     // report best translation to output collector
-    m_ioWrapper.GetSingleBestOutputCollector()->Write(m_lineNumber,out.str(),debug.str());
+    m_ioWrapper.GetSingleBestOutputCollector()->Write(m_source->GetTranslationId(),out.str(),debug.str());
 
     decisionRuleTime.stop();
-    VERBOSE(1, "Line " << m_lineNumber << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
+    VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Decision rule took " << decisionRuleTime << " seconds total" << endl);
   }
 
   additionalReportingTime.start();
@@ -242,9 +242,9 @@ void TranslationTask::Run() {
     TrellisPathList nBestList;
     ostringstream out;
     manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_lineNumber,
+    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
                 staticData.GetReportSegmentation());
-    m_ioWrapper.GetNBestOutputCollector()->Write(m_lineNumber, out.str());
+    m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
   }
 
   //lattice samples
@@ -252,9 +252,9 @@ void TranslationTask::Run() {
     TrellisPathList latticeSamples;
     ostringstream out;
     manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-    OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_lineNumber,
+    OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
                 staticData.GetReportSegmentation());
-    m_ioWrapper.GetLatticeSamplesCollector()->Write(m_lineNumber, out.str());
+    m_ioWrapper.GetLatticeSamplesCollector()->Write(m_source->GetTranslationId(), out.str());
   }
 
   // detailed translation reporting
@@ -262,7 +262,7 @@ void TranslationTask::Run() {
     ostringstream out;
     fix(out,PRECISION);
     TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
-    m_ioWrapper.GetDetailedTranslationCollector()->Write(m_lineNumber,out.str());
+    m_ioWrapper.GetDetailedTranslationCollector()->Write(m_source->GetTranslationId(),out.str());
   }
 
   //list of unknown words
@@ -273,13 +273,13 @@ void TranslationTask::Run() {
       out << *(unknowns[i]);
     }
     out << endl;
-    m_ioWrapper.GetUnknownsCollector()->Write(m_lineNumber, out.str());
+    m_ioWrapper.GetUnknownsCollector()->Write(m_source->GetTranslationId(), out.str());
   }
 
   // report additional statistics
   manager.CalcDecoderStatistics();
-  VERBOSE(1, "Line " << m_lineNumber << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
-  VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
+  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Additional reporting took " << additionalReportingTime << " seconds total" << endl);
+  VERBOSE(1, "Line " << m_source->GetTranslationId() << ": Translation took " << translationTime << " seconds total" << endl);
   IFVERBOSE(2) {
     PrintUserTime("Sentence Decoding Time:");
   }

@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 
   StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
   staticData.SetUseLatticeMBR(true);
-  IOWrapper* ioWrapper = GetIOWrapper(staticData);
+  IOWrapper* ioWrapper = IOWrapper::GetIOWrapper(staticData);
 
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
@@ -180,8 +180,9 @@ int main(int argc, char* argv[])
 
   while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
     ++lineCount;
-    Sentence sentence;
-    Manager manager(lineCount, *source, staticData.GetSearchAlgorithm());
+    source->SetTranslationId(lineCount);
+
+    Manager manager(*source, staticData.GetSearchAlgorithm());
     manager.ProcessSentence();
     TrellisPathList nBestList;
     manager.CalcNBest(nBestSize, nBestList,true);

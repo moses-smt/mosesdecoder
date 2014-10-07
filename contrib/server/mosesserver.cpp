@@ -292,13 +292,15 @@ public:
           m_retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
         }
     } else {
+        size_t lineNumber = 0; // TODO: Include sentence request number here?
         Sentence sentence;
+        sentence.SetTranslationId(lineNumber);
+
         const vector<FactorType> &
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-	      size_t lineNumber = 0; // TODO: Include sentence request number here?
-        Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm());
+        Manager manager(sentence, staticData.GetSearchAlgorithm());
 	      manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
