@@ -475,6 +475,18 @@ namespace Moses
 	Word w; w.CreateFromString(Output,ofactor,wrd,false);
 	tp->AddWord(w);
       }
+
+    std::set<std::pair<size_t, size_t> > alignment;
+    for (int i = 1; i < pool.aln.size(); i += 2)
+      {
+        int t = pool.aln[i];
+        int s = pool.aln[i - 1];
+        assert (s >= 0 && s < pool.len1);
+        assert (t >= 0 && t < pool.len2);
+        alignment.insert(pair<size_t, size_t>(s, t));
+      }
+    tp->SetAlignTerm(alignment);
+
     tp->GetScoreBreakdown().Assign(this, fvals);
     tp->EvaluateInIsolation(src);
     return tp;
