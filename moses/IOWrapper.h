@@ -111,9 +111,7 @@ public:
   void OutputLatticeMBRNBestList(const std::vector<LatticeMBRSolution>& solutions,long translationId);
   void Backtrack(const Moses::Hypothesis *hypo);
 
-  void ResetTranslationId() {
-    m_translationId = 0;
-  }
+  void ResetTranslationId();
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector;
