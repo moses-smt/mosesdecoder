@@ -475,6 +475,7 @@ namespace Moses
 	Word w; w.CreateFromString(Output,ofactor,wrd,false);
 	tp->AddWord(w);
       }
+    tp->SetAlignTerm(pool.aln);
     tp->GetScoreBreakdown().Assign(this, fvals);
     tp->EvaluateInIsolation(src);
     return tp;
