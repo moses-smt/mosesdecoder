@@ -3,6 +3,7 @@
 	<name>extract-mixed-syntax</name>
 	<comment></comment>
 	<projects>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
