@@ -248,7 +248,7 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_NEURAL
   MOSES_FNAME2("NeuralLM", NeuralLMWrapper);
-  MOSES_FNAME(BilingualLM_NPLM);
+  MOSES_FNAME2("BilingualNPLM", BilingualLM_NPLM);
 #endif
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
