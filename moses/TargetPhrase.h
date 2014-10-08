@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
+#include "AlignmentInfoCollection.h"
 #include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
 
@@ -121,8 +122,24 @@ public:
     m_alignNonTerm = alignNonTerm;
   }
 
-  void SetAlignTerm(const AlignmentInfo::CollType &coll);
-  void SetAlignNonTerm(const AlignmentInfo::CollType &coll);
+  // ALNREP = alignment representation, 
+  // see AlignmentInfo constructors for supported representations
+  template<typename ALNREP>
+  void 
+  SetAlignTerm(const ALNREP &coll)
+  {
+    m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
+  }
+
+  // ALNREP = alignment representation, 
+  // see AlignmentInfo constructors for supported representations
+  template<typename ALNREP> 
+  void 
+  SetAlignNonTerm(const ALNREP &coll)
+  {
+    m_alignNonTerm = AlignmentInfoCollection::Instance().Add(coll);
+  }
+
 
   const AlignmentInfo &GetAlignTerm() const {
     return *m_alignTerm;
