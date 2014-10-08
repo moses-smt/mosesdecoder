@@ -306,14 +306,14 @@ public:
       if (!staticData.UseMBR()) {
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
-          if (staticData..GetOutputHypoScore()) {
+          if (staticData.GetOutputHypoScore()) {
             out << bestHypo->GetTotalScore() << ' ';
           }
           if (staticData.IsPathRecoveryEnabled()) {
             OutputInput(out, bestHypo);
             out << "||| ";
           }
-          if (staticData.GetParam("print-id").size() && Scan<bool>(staticData.GetParam("print-id")[0]) ) {
+          if (staticData.IsIDEnabled()) {
             out << m_source->GetTranslationId() << " ";
           }
           if (staticData.IsPassthroughEnabled()) {
