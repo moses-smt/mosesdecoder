@@ -1,4 +1,4 @@
-#include "LBLLM.h"
+#include "OxLM.h"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -15,7 +15,7 @@ namespace Moses
 {
 
 template<class Model>
-LBLLM<Model>::LBLLM(const string &line) : LanguageModelSingleFactor(line) {
+OxLM<Model>::OxLM(const string &line) : LanguageModelSingleFactor(line) {
   ReadParameters();
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -32,7 +32,7 @@ LBLLM<Model>::LBLLM(const string &line) : LanguageModelSingleFactor(line) {
 
 
 template<class Model>
-LBLLM<Model>::~LBLLM() {
+OxLM<Model>::~OxLM() {
   if (persistentCache) {
     double cache_hit_ratio = 100.0 * cacheHits / totalHits;
     cerr << "Cache hit ratio: " << cache_hit_ratio << endl;
@@ -41,7 +41,7 @@ LBLLM<Model>::~LBLLM() {
 
 
 template<class Model>
-void LBLLM<Model>::SetParameter(const string& key, const string& value) {
+void OxLM<Model>::SetParameter(const string& key, const string& value) {
   if (key == "persistent-cache") {
     persistentCache = Scan<bool>(value);
   } else {
@@ -50,24 +50,24 @@ void LBLLM<Model>::SetParameter(const string& key, const string& value) {
 }
 
 template<class Model>
-void LBLLM<Model>::Load() {
+void OxLM<Model>::Load() {
   model.load(m_filePath);
 
-  Dict dict = model.getDict();
-  mapper = boost::make_shared<OXLMMapper>(dict);
+  boost::shared_ptr<oxlm::Vocabulary> vocab = model.getVocab();
+  mapper = boost::make_shared<OxLMMapper>(vocab);
 
-  kSTART = dict.Convert("<s>");
-  kSTOP = dict.Convert("</s>");
-  kUNKNOWN = dict.Convert("<unk>");
+  kSTART = vocab->convert("<s>");
+  kSTOP = vocab->convert("</s>");
+  kUNKNOWN = vocab->convert("<unk>");
 
   size_t ngram_order = model.getConfig()->ngram_order;
   UTIL_THROW_IF2(
       m_nGramOrder != ngram_order,
-      "Wrong order for LBLLM: LM has " << ngram_order << ", but Moses expects " << m_nGramOrder);
+      "Wrong order for OxLM: LM has " << ngram_order << ", but Moses expects " << m_nGramOrder);
 }
 
 template<class Model>
-LMResult LBLLM<Model>::GetValue(
+LMResult OxLM<Model>::GetValue(
     const vector<const Word*> &contextFactor, State* finalState) const {
   if (!cache.get()) {
     cache.reset(new QueryCache());
@@ -95,11 +95,11 @@ LMResult LBLLM<Model>::GetValue(
       score = ret.first;
       ++cacheHits;
     } else {
-      score = model.predict(word, context);
+      score = model.getLogProb(word, context);
       cache->put(query, score);
     }
   } else {
-    score = model.predict(word, context);
+    score = model.getLogProb(word, context);
   }
 
   LMResult ret;
@@ -119,7 +119,7 @@ LMResult LBLLM<Model>::GetValue(
 }
 
 template<class Model>
-void LBLLM<Model>::InitializeForInput(const InputType& source) {
+void OxLM<Model>::InitializeForInput(const InputType& source) {
   LanguageModelSingleFactor::InitializeForInput(source);
 
   if (persistentCache) {
@@ -143,7 +143,7 @@ void LBLLM<Model>::InitializeForInput(const InputType& source) {
 }
 
 template<class Model>
-void LBLLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
+void OxLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
   model.clearCache();
 
   if (persistentCache) {
@@ -162,9 +162,9 @@ void LBLLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
   LanguageModelSingleFactor::CleanUpAfterSentenceProcessing(source);
 }
 
-template class LBLLM<LM>;
-template class LBLLM<FactoredLM>;
-template class LBLLM<FactoredMaxentLM>;
+template class OxLM<LM>;
+template class OxLM<FactoredLM>;
+template class OxLM<FactoredMaxentLM>;
 
 }
 

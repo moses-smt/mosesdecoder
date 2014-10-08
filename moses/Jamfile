@@ -10,14 +10,14 @@ if $(with-dlib) {
   dlib = ;
 }
 
-with-lbllm = [ option.get "with-lbllm" ] ;
-if $(with-lbllm) {
-  lbllm2 = <cxxflags>-std=c++0x <define>LM_LBL <include>$(with-lbllm)/src <include>$(with-lbllm)/third_party/eigen ;
+with-oxlm = [ option.get "with-oxlm" ] ;
+if $(with-oxlm) {
+  oxlm2 = <cxxflags>-std=c++0x <define>LM_OXLM <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
 } else {
-  lbllm2 = ;
+  oxlm2 = ;
 }
 
-alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(lbllm2) ; 
+alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(oxlm2) ; 
 alias ThreadPool : ThreadPool.cpp ;
 alias Util : Util.cpp Timer.cpp ;
 
