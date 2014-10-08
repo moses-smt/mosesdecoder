@@ -46,11 +46,11 @@ float SourceOxLM::Score(
       score = ret.first;
       ++cacheHits;
     } else {
-      score = model.predict(word, context);
+      score = model.getLogProb(word, context);
       cache->put(query, score);
     }
   } else {
-    score = model.predict(word, context);
+    score = model.getLogProb(word, context);
   }
 
   // TODO(pauldb): Return OOV count too.
