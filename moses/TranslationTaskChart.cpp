@@ -47,7 +47,7 @@ if (staticData.GetSearchAlgorithm() == ChartIncremental) {
   return;
 }
 
-ChartManager manager(translationId,*m_source);
+ChartManager manager(*m_source);
 manager.ProcessSentence();
 
 UTIL_THROW_IF2(staticData.UseMBR(), "Cannot use MBR");
