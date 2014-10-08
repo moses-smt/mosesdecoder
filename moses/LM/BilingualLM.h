@@ -20,17 +20,23 @@ class BilingualLMState : public FFState
 {
   size_t m_hash;
   std::vector<int> word_alignments; //Carry the word alignments. For hierarchical
+  std::vector<int> neuralLM_ids; //Carry the neuralLMids of the previous target phrase to avoid calling GetWholePhrase. Hiero only.
 public:
   BilingualLMState(size_t hash)
     :m_hash(hash)
   {}
-  BilingualLMState(size_t hash, std::vector<int>& word_alignments_vec)
+  BilingualLMState(size_t hash, std::vector<int>& word_alignments_vec, std::vector<int>& neural_ids)
     :m_hash(hash)
     , word_alignments(word_alignments_vec)
+    , neuralLM_ids(neural_ids)
   {}
 
   const std::vector<int>& GetWordAlignmentVector() const {
     return word_alignments;
+  }
+
+  const std::vector<int>& GetWordIdsVector() const {
+    return neuralLM_ids;
   }
 
   int Compare(const FFState& other) const;
@@ -70,9 +76,9 @@ class BilingualLM : public StatefulFeatureFunction {
   //Chart decoder
 
   void getTargetWordsChart(
-      Phrase& whole_phrase,
-      int current_word_index,
-      std::vector<int> &words) const;
+    std::vector<int>& neuralLMids,
+    int current_word_index,
+    std::vector<int>& words) const;
 
   //Returns the index of the source_word that the current target word uses
   int getSourceWordsChart(
@@ -85,7 +91,12 @@ class BilingualLM : public StatefulFeatureFunction {
       int featureID,
       std::vector<int> &words) const;
 
-  size_t getStateChart(Phrase& whole_phrase) const;
+  size_t getStateChart(std::vector<int>& neuralLMids) const;
+
+  //Get a vector of all target words IDs in the beginning of calculating NeuralLMids for the current phrase.
+  void getAllTargetIdsChart(const ChartHypothesis& cur_hypo, size_t featureID, std::vector<int>& wordIds) const;
+  //Get a vector of all alignments (mid_idx word)
+  void getAllAlignments(const ChartHypothesis& cur_hypo, size_t featureID, std::vector<int>& alignemnts) const;
 
 protected:
   // big data (vocab, weights, cache) shared among threads
