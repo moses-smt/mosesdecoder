@@ -120,11 +120,9 @@ public:
   Moses::InputType* GetInput(Moses::InputType *inputType);
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
   void OutputBestHypo(search::Applied applied, long translationId);
-  void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId);
   void OutputBestNone(long translationId);
   void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
   void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
-  void OutputNBestTrees(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);

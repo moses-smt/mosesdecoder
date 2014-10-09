@@ -230,8 +230,8 @@ void IOWrapperChart::Backtrack(const ChartHypothesis *hypo)
     Backtrack(prevHypo);
   }
 }
-
-void IOWrapperChart::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/)
+/*
+void IOWrapperChart::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long )
 {
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i];
@@ -241,6 +241,7 @@ void IOWrapperChart::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHy
     cout << *factor << " ";
   }
 }
+*/
 /*
 void OutputInput(std::vector<const Phrase*>& map, const ChartHypothesis* hypo)
 {
