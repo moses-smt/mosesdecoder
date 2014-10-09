@@ -94,16 +94,16 @@ if $(with-nplm) {
   lmmacros += LM_NEURAL ;
 }
 
-#LBLLM
-local with-lbllm = [ option.get "with-lbllm" ] ;
-if $(with-lbllm) {
-  lib lbl : : <search>$(with-lbllm)/lib <search>$(with-lbllm)/lib64 ;
-  lib murmurhash : : <search>$(with-lbllm)/lib <search>$(with-lbllm)/lib64 ;
-  obj LBLLM.o : oxlm/LBLLM.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/third_party/eigen ;
-  obj Mapper.o : oxlm/Mapper.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/third_party/eigen ;
-  alias lbllm : LBLLM.o Mapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_LBL ;
-  dependencies += lbllm ;
-  lmmacros += LM_LBL ;
+#OxLM
+local with-oxlm = [ option.get "with-oxlm" ] ;
+if $(with-oxlm) {
+  lib lbl : : <search>$(with-oxlm)/lib <search>$(with-oxlm)/lib64 ;
+  lib murmurhash : : <search>$(with-oxlm)/lib <search>$(with-oxlm)/lib64 ;
+  obj OxLM.o : oxlm/OxLM.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  obj OxLMMapper.o : oxlm/OxLMMapper.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  alias oxlm : OxLM.o OxLMMapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_OXLM ;
+  dependencies += oxlm ;
+  lmmacros += LM_OXLM ;
 }
 
 

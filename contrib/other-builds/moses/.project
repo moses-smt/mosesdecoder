@@ -2122,24 +2122,24 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
 		</link>
 		<link>
-			<name>LM/oxlm/LBLLM.cpp</name>
+			<name>LM/oxlm/OxLM.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/LBLLM.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/OxLM.cpp</locationURI>
 		</link>
 		<link>
-			<name>LM/oxlm/LBLLM.h</name>
+			<name>LM/oxlm/OxLM.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/LBLLM.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/OxLM.h</locationURI>
 		</link>
 		<link>
-			<name>LM/oxlm/Mapper.cpp</name>
+			<name>LM/oxlm/OxLMMapper.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/Mapper.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/OxLMMapper.cpp</locationURI>
 		</link>
 		<link>
-			<name>LM/oxlm/Mapper.h</name>
+			<name>LM/oxlm/OxLMMapper.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/Mapper.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/OxLMMapper.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>
