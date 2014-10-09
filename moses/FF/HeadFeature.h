@@ -177,7 +177,7 @@ public:
    * -> this structure should be build for each rule before decoding as Matthias suggested
    * -> or build for each hypothesis only once (no need to build for unused rules) -> mark hypothesis with a pointer to the structure if it exists
   */
-  SyntaxNodePtr FromString(std::string internalTree);
+  SyntaxNodePtr FromString(std::string internalTree, boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap);
 
   std::string ToString();
   std::string ToStringHead();
@@ -238,12 +238,14 @@ public:
 
   void ReadHeadRules();
   void ReadProbArg();
-
+  void ReadLemmaMap();
 protected:
   boost::shared_ptr< std::map<std::string, std::vector <std::string> > > m_headRules;
   boost::shared_ptr< std::map<std::string, float> > m_probArg;
+  boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap;
 	std::string m_headFile;
 	std::string m_probArgFile;
+	std::string m_lemmaFile;
 
 };
 

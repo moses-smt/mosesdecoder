@@ -15,8 +15,11 @@
 #include <fstream>
 #include <math.h>
 #include <locale>
+#include <boost/regex.hpp>
+
 
 using namespace std;
+
 
 namespace Moses
 {
@@ -126,9 +129,32 @@ void SyntaxTree::AddNode( SyntaxNodePtr newNode)
 	m_size ++;
 }
 
+std::string FilterArg(std::string arg, boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap){
+	boost::regex web("^bhttp|^bhttps|^bwww");
+	boost::regex date("([0-9]+[.|-|/]?)+"); //some sort of date or other garbage
+	boost::regex nr("[0-9]+");
+	boost::regex prn("i|he|she|we|you|they|it|me|them");
+	//lowercase in place
+	boost::algorithm::to_lower(arg);
+	if(boost::regex_match(arg,web))
+		return "WWW";
+	if(boost::regex_match(arg,date))
+			return "DDAATTEE";
+	if(boost::regex_match(arg,nr))
+			return "NNRR";
+	if(boost::regex_match(arg,prn))
+			return "PRN";
+	std::map<string,string>::iterator it;
+	it = m_lemmaMap->find(arg);
+	if(it!=m_lemmaMap->end()){
+		return it->second;
+	}
+	else
+		return ""; //no filter needed, use the original arg
 
+}
 
-SyntaxNodePtr SyntaxTree::FromString(std::string internalTree)
+SyntaxNodePtr SyntaxTree::FromString(std::string internalTree, boost::shared_ptr< std::map<std::string, std::string> > lemmaMap)
 {
 	size_t pos = 0;
 	size_t nextpos = 0;
@@ -151,7 +177,13 @@ SyntaxNodePtr SyntaxTree::FromString(std::string internalTree)
 				SyntaxNodePtr(new SyntaxNode( 0, 0, nodes[0])).swap(newNode);
 				//can have [TOP [S] ] pr [NP [PRP I]]
 				if(nodes.size()==2){
-					newNode->SetHead(nodes[1]);
+					//try to lemmatize and filter
+					std::string head = FilterArg(nodes[1],lemmaMap);
+					if(head!=""){
+						newNode->SetHead(head);
+					}
+					else
+						newNode->SetHead(nodes[1]);
 					newNode->SetIsTerminal(true);
 				}
 				else{
@@ -321,7 +353,7 @@ string* SyntaxTree::FindObj() const{
 
 // END MARIA //
 
-
+//!!!!! WHAT IS THIS ? - HOW DO I SPLIT THE STATES BASED ON THE INTERNAL STRUCTURE?? //
 int SyntaxTreeState::Compare(const FFState& other) const
 {
   const SyntaxTreeState &otherState = static_cast<const SyntaxTreeState&>(other);
@@ -334,6 +366,7 @@ HeadFeature::HeadFeature(const std::string &line)
   :StatefulFeatureFunction(2, line) //should modify 0 to the number of scores my feature generates
 	,m_headRules(new std::map<std::string, std::vector <std::string> > ())
 	, m_probArg (new std::map<std::string, float> ())
+	, m_lemmaMap (new std::map<std::string, std::string>)
 {
   ReadParameters();
   //m_headRules = new std::map<std::string, std::vector <std::string> > ();
@@ -370,17 +403,38 @@ void HeadFeature::ReadProbArg(){
 	}
 }
 
+void HeadFeature::ReadLemmaMap(){
+	std::ifstream file(m_lemmaFile.c_str()); // (fileName);
+	string line,word,lemma;
+	std::vector<std::string> tokens;
+	if(file.is_open()){
+		while(getline(file,line)){
+			// !!!! SPLIT doesn't work as it should -> problem with delimitors
+			split(line," \t",tokens);
+			if(tokens.size()>1){
+				m_lemmaMap->insert(std::pair<std::string, std::string > (tokens[0],tokens[1]));
+			}
+			tokens.clear();
+		}
+	}
+}
+
 void HeadFeature::SetParameter(const std::string& key, const std::string& value){
 	  if(key=="rulesFile"){
 		  m_headFile=value;
 	  }
 	  else {
 	  	if(key=="probArgFile"){
-	  	m_probArgFile=value;
+	  		m_probArgFile=value;
 	  	}
-	  	else
-	      StatefulFeatureFunction::SetParameter(key, value);
-	    }
+	  	else{
+	  		if(key=="lemmaFile"){
+	  			m_lemmaFile=value;
+	  		}
+	  		else
+	  			StatefulFeatureFunction::SetParameter(key, value);
+	  	}
+	  }
   }
 
 //NOT LOADED??
@@ -390,6 +444,7 @@ void HeadFeature::Load() {
   staticData.SetHeadFeature(this);
   ReadHeadRules();
   ReadProbArg();
+  ReadLemmaMap();
 }
 
 
@@ -405,7 +460,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	    SyntaxTreePtr syntaxTree (new SyntaxTree());
 	    //should have new SyntaxTree(pointer to headRules)
-	    syntaxTree->FromString(*tree);
+	    syntaxTree->FromString(*tree,m_lemmaMap);
 	   // std::cout<<*tree<<std::endl;
 	   //std::cout<< syntaxTree->ToString()<<std::endl;
 
@@ -431,17 +486,25 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        string *predArgPair = syntaxTree->FindObj();
 	        //cout<<"Found pair: "<<*predArgPair<<endl;
 	        std::map<string,float>::iterator it;
-	        it = m_probArg->find(*predArgPair);
-	        if(it!=m_probArg->end()){
-	        	//cout<<"Have value: "<<it->second<<endl;
-	        	vector<float> scores;
-	        	scores.push_back(log(it->second+0.001));
-	        	scores.push_back(1.0);
-	        	//accumulator->PlusEquals(this,log(it->second+0.001));
-	        	accumulator->PlusEquals(this,scores);
+	        //!!! SOULD TRY TO CACHE IT -> THEN I NEED SYNC FOR MULTITHREAD !!!
+	        //I should only search if predArgPair is not empty
+	        if(*predArgPair!=""){
+	        	it = m_probArg->find(*predArgPair);
+						if(it!=m_probArg->end()){
+							//cout<<"Have value: "<<it->second<<endl;
+							vector<float> scores;
+							scores.push_back(log(it->second+0.001));
+							scores.push_back(1.0);
+							//accumulator->PlusEquals(this,log(it->second+0.001));
+							accumulator->PlusEquals(this,scores);
+						}
+						//else !! I should do smoothing based on the verb
+					 //	accumulator->PlusEquals(this,-1);
+					//maybe I should just train a bigram lm over pred-arg pairs and query it here that takes care of smoothing -> dep lm for obj
+						//probability of vb having n arguments and which types -> when I reach the VP I should already have all the arguments covered
+						//prob of vb with argument X given X is aligned to source word attached to verb Y
 	        }
-	        //else
-	        //	accumulator->PlusEquals(this,-1);
+
 	        delete predArgPair;
 	        predArgPair = 0;
 
