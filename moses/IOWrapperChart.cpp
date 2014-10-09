@@ -54,7 +54,7 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
-namespace MosesChartCmd
+namespace Moses
 {
 
 IOWrapperChart::IOWrapperChart(const std::vector<FactorType>	&inputFactorOrder

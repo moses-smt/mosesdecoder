@@ -68,7 +68,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
-using namespace MosesChartCmd;
 
 
 bool ReadInput(IOWrapperChart &ioWrapper, InputTypeEnum inputType, InputType*& source)

@@ -9,12 +9,7 @@ namespace Moses
 {
 	class InputType;
 	class OutputCollector;
-}
-
-namespace MosesChartCmd
-{
 	class IOWrapperChart;
-}
 
 /**
   * Translates a sentence.
@@ -22,7 +17,7 @@ namespace MosesChartCmd
 class TranslationTaskChart : public Moses::Task
 {
 public:
-  TranslationTaskChart(Moses::InputType *source, MosesChartCmd::IOWrapperChart &ioWrapper,
+  TranslationTaskChart(Moses::InputType *source, IOWrapperChart &ioWrapper,
     boost::shared_ptr<Moses::HypergraphOutput<Moses::ChartManager> > hypergraphOutput);
 
   ~TranslationTaskChart();
@@ -35,7 +30,9 @@ private:
   TranslationTaskChart &operator=(const TranslationTaskChart &);
 
   Moses::InputType *m_source;
-  MosesChartCmd::IOWrapperChart &m_ioWrapper;
+  IOWrapperChart &m_ioWrapper;
   boost::shared_ptr<Moses::HypergraphOutput<Moses::ChartManager> > m_hypergraphOutput;
 };
+
+} // namespace
 

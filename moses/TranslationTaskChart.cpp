@@ -7,7 +7,9 @@
 
 using namespace std;
 using namespace Moses;
-using namespace MosesChartCmd;
+
+namespace Moses
+{
 
 TranslationTaskChart::TranslationTaskChart(InputType *source, IOWrapperChart &ioWrapper,
 boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutput)
@@ -116,3 +118,7 @@ IFVERBOSE(2) {
 }
 manager.CalcDecoderStatistics();
 }
+
+} // namespace
+
+

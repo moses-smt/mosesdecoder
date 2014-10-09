@@ -50,10 +50,6 @@ namespace Moses
 {
 class FactorCollection;
 class ScoreComponentCollection;
-}
-
-namespace MosesChartCmd
-{
 
 /** Helper class that holds misc variables to write data out to command line.
  */
