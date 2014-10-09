@@ -222,11 +222,6 @@ GetInput(InputType* inputType)
   }
 }
 
-void IOWrapper::ResetTranslationId()
-{
-  m_translationId = StaticData::Instance().GetStartTranslationId();
-}
-
 std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
 {
   const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
@@ -650,7 +645,6 @@ IOWrapper *IOWrapper::GetIOWrapper(const StaticData &staticData)
                             , staticData.GetNBestSize()
                             , staticData.GetNBestFilePath()
                             , inputPath);
-  ioWrapper->ResetTranslationId();
 
   IFVERBOSE(1)
   PrintUserTime("Created input-output object");

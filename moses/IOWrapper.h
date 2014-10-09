@@ -67,7 +67,6 @@ namespace MosesCmd
 class IOWrapper
 {
 protected:
-  long m_translationId;
 
   const std::vector<Moses::FactorType>	&m_inputFactorOrder;
   const std::vector<Moses::FactorType>	&m_outputFactorOrder;
@@ -110,8 +109,6 @@ public:
   void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, char reportSegmentation, bool reportAllFactors);
   void OutputLatticeMBRNBestList(const std::vector<LatticeMBRSolution>& solutions,long translationId);
   void Backtrack(const Moses::Hypothesis *hypo);
-
-  void ResetTranslationId();
 
   Moses::OutputCollector *GetSingleBestOutputCollector() {
     return m_singleBestOutputCollector;

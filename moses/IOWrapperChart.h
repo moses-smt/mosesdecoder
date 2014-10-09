@@ -62,8 +62,6 @@ class IOWrapperChart
 protected:
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
 
-  long m_translationId;
-
   const std::vector<Moses::FactorType>	&m_inputFactorOrder;
   const std::vector<Moses::FactorType>	&m_outputFactorOrder;
   const Moses::FactorMask								&m_inputFactorUsed;
@@ -137,8 +135,6 @@ public:
   void OutputDetailedTreeFragmentsTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedAllTranslationReport(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
-
-  void ResetTranslationId();
 
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
     return m_searchGraphOutputCollector;

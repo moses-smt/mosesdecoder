@@ -161,11 +161,6 @@ IOWrapperChart::~IOWrapperChart()
   delete m_unknownsCollector;
 }
 
-void IOWrapperChart::ResetTranslationId()
-{
-  m_translationId = StaticData::Instance().GetStartTranslationId();
-}
-
 InputType*IOWrapperChart::GetInput(InputType* inputType)
 {
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
@@ -1034,7 +1029,6 @@ IOWrapperChart *IOWrapperChart::GetIOWrapper(const StaticData &staticData)
                               , staticData.GetNBestSize()
                               , staticData.GetNBestFilePath());
   }
-  ioWrapper->ResetTranslationId();
 
   IFVERBOSE(1)
   PrintUserTime("Created input-output object");
