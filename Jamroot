@@ -79,6 +79,9 @@ include $(TOP)/jam-files/sanity.jam ;
 
 boost 104400 ;
 external-lib z ;
+#maria
+external-lib boost_regex-mt ;
+requirements += <library>boost_regex-mt ;
 
 lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
 requirements += <library>dl ;
