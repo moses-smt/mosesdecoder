@@ -57,10 +57,6 @@ namespace Moses
 class ScoreComponentCollection;
 class Hypothesis;
 class Factor;
-}
-
-namespace MosesCmd
-{
 
 /** Helper class that holds misc variables to write data out to command line.
  */

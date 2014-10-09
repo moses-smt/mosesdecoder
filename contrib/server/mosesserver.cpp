@@ -28,7 +28,6 @@
 #include <xmlrpc-c/server_abyss.hpp>
 
 using namespace Moses;
-using namespace MosesCmd;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
@@ -491,7 +490,7 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  MosesCmd::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
+	  Moses::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 

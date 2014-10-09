@@ -19,7 +19,7 @@
 
 
 
-namespace MosesCmd
+namespace Moses
 {
 
 class Edge;

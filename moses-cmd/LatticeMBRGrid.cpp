@@ -55,12 +55,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
-using namespace MosesCmd;
 
 //keys
 enum gridkey {lmbr_p,lmbr_r,lmbr_prune,lmbr_scale};
 
-namespace MosesCmd
+namespace Moses
 {
 
 class Grid

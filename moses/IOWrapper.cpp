@@ -51,9 +51,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "IOWrapper.h"
 
 using namespace std;
-using namespace Moses;
 
-namespace MosesCmd
+namespace Moses
 {
 
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder

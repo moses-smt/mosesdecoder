@@ -7,12 +7,8 @@
 
 namespace Moses
 {
-	class InputType;
-	class OutputCollector;
-}
-
-namespace MosesCmd
-{
+class InputType;
+class OutputCollector;
 
 class IOWrapper;
 
@@ -26,7 +22,7 @@ class TranslationTask : public Moses::Task
 
 public:
 
-  TranslationTask(Moses::InputType* source, MosesCmd::IOWrapper &ioWrapper,
+  TranslationTask(Moses::InputType* source, Moses::IOWrapper &ioWrapper,
                   bool outputSearchGraphSLF,
                   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > hypergraphOutput);
 
@@ -39,7 +35,7 @@ public:
 
 private:
   Moses::InputType* m_source;
-  MosesCmd::IOWrapper &m_ioWrapper;
+  Moses::IOWrapper &m_ioWrapper;
 
   bool m_outputSearchGraphSLF;
   boost::shared_ptr<Moses::HypergraphOutput<Moses::Manager> > m_hypergraphOutput;

@@ -53,9 +53,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 using namespace Moses;
-using namespace MosesCmd;
 
-namespace MosesCmd
+namespace Moses
 {
 
 void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)

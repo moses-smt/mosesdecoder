@@ -10,12 +10,11 @@
 #include "mbr.h"
 
 using namespace std;
-using namespace Moses;
 
-namespace MosesCmd
+namespace Moses
 {
 
-TranslationTask::TranslationTask(InputType* source, MosesCmd::IOWrapper &ioWrapper,
+TranslationTask::TranslationTask(InputType* source, Moses::IOWrapper &ioWrapper,
                 bool outputSearchGraphSLF,
                 boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput) :
   m_source(source),
