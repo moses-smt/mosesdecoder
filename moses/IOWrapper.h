@@ -105,6 +105,7 @@ public:
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
+  bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 
   void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, char reportSegmentation, bool reportAllFactors);
   void OutputLatticeMBRNBestList(const std::vector<LatticeMBRSolution>& solutions,long translationId);
@@ -144,7 +145,6 @@ public:
 
 };
 
-bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors);
 void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,

@@ -49,6 +49,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/PP/TreeStructurePhraseProperty.h"
+#include "moses/TreeInput.h"
+#include "moses/ConfusionNet.h"
+#include "moses/WordLattice.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -171,6 +174,27 @@ InputType*IOWrapperChart::GetInput(InputType* inputType)
   }
 }
 
+bool IOWrapperChart::ReadInput(IOWrapperChart &ioWrapper, InputTypeEnum inputType, InputType*& source)
+{
+  delete source;
+  switch(inputType) {
+  case SentenceInput:
+    source = ioWrapper.GetInput(new Sentence);
+    break;
+  case ConfusionNetworkInput:
+    source = ioWrapper.GetInput(new ConfusionNet);
+    break;
+  case WordLatticeInput:
+    source = ioWrapper.GetInput(new WordLattice);
+    break;
+  case TreeInputType:
+    source = ioWrapper.GetInput(new TreeInput);
+    break;
+  default:
+    TRACE_ERR("Unknown input type: " << inputType << "\n");
+  }
+  return (source ? true : false);
+}
 
 /***
  * print surface factor only for the given phrase

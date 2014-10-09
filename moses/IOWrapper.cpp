@@ -46,6 +46,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/InputFileStream.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/TreeInput.h"
+#include "moses/ConfusionNet.h"
+#include "moses/WordLattice.h"
 #include "util/exception.hh"
 
 #include "IOWrapper.h"
@@ -475,6 +478,28 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
   }
 }
 
+bool IOWrapper::ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
+{
+  delete source;
+  switch(inputType) {
+  case SentenceInput:
+    source = ioWrapper.GetInput(new Sentence);
+    break;
+  case ConfusionNetworkInput:
+    source = ioWrapper.GetInput(new ConfusionNet);
+    break;
+  case WordLatticeInput:
+    source = ioWrapper.GetInput(new WordLattice);
+    break;
+  case TreeInputType:
+    source = ioWrapper.GetInput(new TreeInput);
+    break;
+  default:
+    TRACE_ERR("Unknown input type: " << inputType << "\n");
+  }
+  return (source ? true : false);
+}
+
 void OutputNBest(std::ostream& out
                  , const Moses::TrellisPathList &nBestList
                  , const std::vector<Moses::FactorType>& outputFactorOrder
@@ -652,25 +677,6 @@ IOWrapper *IOWrapper::GetIOWrapper(const StaticData &staticData)
 }
 
 
-bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
-{
-  if (source) delete source;
-  switch(inputType) {
-  case SentenceInput:
-    source = ioWrapper.GetInput(new Sentence);
-    break;
-  case ConfusionNetworkInput:
-    source = ioWrapper.GetInput(new ConfusionNet);
-    break;
-  case WordLatticeInput:
-    source = ioWrapper.GetInput(new WordLattice);
-    break;
-  default:
-    TRACE_ERR("Unknown input type: " << inputType << "\n");
-    source = NULL;
-  }
-  return (source ? true : false);
-}
 
 }
 

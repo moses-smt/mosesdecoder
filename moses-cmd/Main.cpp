@@ -140,7 +140,7 @@ int main(int argc, char** argv)
     // main loop over set of input sentences
     InputType* source = NULL;
     size_t lineCount = staticData.GetStartTranslationId();
-    while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+    while(ioWrapper->ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
       source->SetTranslationId(lineCount);
       IFVERBOSE(1) {
         ResetUserTime();

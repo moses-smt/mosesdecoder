@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
   const vector<float>& prune_grid = grid.getGrid(lmbr_prune);
   const vector<float>& scale_grid = grid.getGrid(lmbr_scale);
 
-  while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+  while(ioWrapper->ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
     ++lineCount;
     source->SetTranslationId(lineCount);
 

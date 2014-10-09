@@ -118,6 +118,8 @@ public:
   ~IOWrapperChart();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
+  bool ReadInput(IOWrapperChart &ioWrapper, InputTypeEnum inputType, InputType*& source);
+
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
   void OutputBestHypo(search::Applied applied, long translationId);
   void OutputBestNone(long translationId);

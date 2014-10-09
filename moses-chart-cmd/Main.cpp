@@ -69,29 +69,6 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
-
-bool ReadInput(IOWrapperChart &ioWrapper, InputTypeEnum inputType, InputType*& source)
-{
-  delete source;
-  switch(inputType) {
-  case SentenceInput:
-    source = ioWrapper.GetInput(new Sentence);
-    break;
-  case ConfusionNetworkInput:
-    source = ioWrapper.GetInput(new ConfusionNet);
-    break;
-  case WordLatticeInput:
-    source = ioWrapper.GetInput(new WordLattice);
-    break;
-  case TreeInputType:
-    source = ioWrapper.GetInput(new TreeInput);
-    break;
-  default:
-    TRACE_ERR("Unknown input type: " << inputType << "\n");
-  }
-  return (source ? true : false);
-}
-
 int main(int argc, char* argv[])
 {
   try {
@@ -147,7 +124,7 @@ int main(int argc, char* argv[])
     // read each sentence & decode
     InputType *source=NULL;
     size_t lineCount = staticData.GetStartTranslationId();
-    while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+    while(ioWrapper->ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
       source->SetTranslationId(lineCount);
       IFVERBOSE(1)
       ResetUserTime();
