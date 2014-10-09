@@ -559,7 +559,7 @@ void BilingualLM::getAllAlignments(const ChartHypothesis& cur_hypo, size_t featu
       if (!resolvedIndexis){
         size_t source_center_index = selectMiddleAlignment(word_al);
         // We have found the alignment. Now determine how much to shift by to get the actual source word index.
-        int nonterm_length = 0; //Sometimes we have an alignment like a X b -> alpha beta X. In this case
+        int nonterm_length = 0; //@TODO Sometimes we have an alignment like a X b -> alpha beta X. In this case
         //The length of the source phrase that the nonterminal covers doesn't influence the offset of b.
         //However in cases such as a X b -> alpha X beta, it does. We have to determine how many nonterminals
         //are before b and add their source span to the source_word_mid_idx.
@@ -714,14 +714,25 @@ FFState* BilingualLM::EvaluateWhenApplied(
   target_words.reserve(target_ngrams);
 
   float value = 0; //NeuralLM score
+  const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
 
   std::vector<int> neuralLMids; //Equivalent more or less to whole_phrase. Contains all word ids but not as expensive
   std::vector<int> alignments;
-  //@TODO estimate size and reserve vectors to avoid realocation
+  //Estimate size and reserve vectors to avoid realocation
+  int future_size = currTargetPhrase.GetNumTerminals();
+  for (int i =0; i<currTargetPhrase.GetNumNonTerminals(); i++){
+    const ChartHypothesis * prev_hypo = cur_hypo.GetPrevHypo(i); //We need to look at the nonterm on the left.
+    const BilingualLMState * prev_state = static_cast<const BilingualLMState *>(prev_hypo->GetFFState(featureID));
+    const std::vector<int>& wordIds = prev_state->GetWordIdsVector();
+    future_size += wordIds.size();
+  }
+  neuralLMids.reserve(future_size);
+  neuralLMids.reserve(future_size);
+
   getAllTargetIdsChart(cur_hypo, featureID, neuralLMids);
   getAllAlignments(cur_hypo, featureID, alignments);
 
-  const TargetPhrase& currTargetPhrase = cur_hypo.GetCurrTargetPhrase();
+  
   //Get source sentence
   const ChartManager& manager = cur_hypo.GetManager();
   const Sentence& source_sent = static_cast<const Sentence&>(manager.GetSource());
