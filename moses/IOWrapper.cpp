@@ -215,10 +215,6 @@ IOWrapper::
 GetInput(InputType* inputType)
 {
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
-    if (long x = inputType->GetTranslationId()) {
-      if (x>=m_translationId) m_translationId = x+1;
-    } else inputType->SetTranslationId(m_translationId++);
-
     return inputType;
   } else {
     delete inputType;

@@ -146,8 +146,10 @@ int main(int argc, char* argv[])
 #endif
 
     // read each sentence & decode
-    InputType *source=0;
+    InputType *source=NULL;
+    size_t lineCount = staticData.GetStartTranslationId();
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+      source->SetTranslationId(lineCount);
       IFVERBOSE(1)
       ResetUserTime();
 
@@ -161,6 +163,7 @@ int main(int argc, char* argv[])
       task->Run();
       delete task;
 #endif
+      ++lineCount;
     }
 
 #ifdef WITH_THREADS
