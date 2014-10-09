@@ -111,7 +111,11 @@ def main():
   vocab.update(tags)
   # UNK is always the first vocabulary element. Make sure
   # it appears in position 0
+  # We need to use <null> token in the chart decoder in order
+  # to correctly estimate the probabilities of incomplete subphrases
+  # that are not sentence initial.
   vocab_list = list(vocab)
+  vocab_list.insert(0, "<null>")
   vocab_list.insert(0, "<unk>")
   save_vocab(options.working_dir, "vocab", vocab_list)
  
