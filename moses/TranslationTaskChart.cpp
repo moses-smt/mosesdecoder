@@ -2,7 +2,7 @@
 #include "moses/Sentence.h"
 #include "moses/StaticData.h"
 #include "moses/Incremental.h"
-#include "moses/IOWrapperChart.h"
+#include "moses/IOWrapper.h"
 #include "moses/OutputCollector.h"
 
 using namespace std;
@@ -11,7 +11,7 @@ using namespace Moses;
 namespace Moses
 {
 
-TranslationTaskChart::TranslationTaskChart(InputType *source, IOWrapperChart &ioWrapper,
+TranslationTaskChart::TranslationTaskChart(InputType *source, IOWrapper &ioWrapper,
 boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutput)
 : m_source(source)
 , m_ioWrapper(ioWrapper)

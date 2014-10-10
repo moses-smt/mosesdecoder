@@ -286,84 +286,9 @@ void OutputInput(std::ostream& os, const ChartHypothesis* hypo)
 }
 */
 
-// Given a hypothesis and sentence, reconstructs the 'application context' --
-// the source RHS symbols of the SCFG rule that was applied, plus their spans.
-void IOWrapperChart::ReconstructApplicationContext(const ChartHypothesis &hypo,
-    const Sentence &sentence,
-    ApplicationContext &context)
-{
-  context.clear();
-  const std::vector<const ChartHypothesis*> &prevHypos = hypo.GetPrevHypos();
-  std::vector<const ChartHypothesis*>::const_iterator p = prevHypos.begin();
-  std::vector<const ChartHypothesis*>::const_iterator end = prevHypos.end();
-  const WordsRange &span = hypo.GetCurrSourceRange();
-  size_t i = span.GetStartPos();
-  while (i <= span.GetEndPos()) {
-    if (p == end || i < (*p)->GetCurrSourceRange().GetStartPos()) {
-      // Symbol is a terminal.
-      const Word &symbol = sentence.GetWord(i);
-      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
-      ++i;
-    } else {
-      // Symbol is a non-terminal.
-      const Word &symbol = (*p)->GetTargetLHS();
-      const WordsRange &range = (*p)->GetCurrSourceRange();
-      context.push_back(std::make_pair(symbol, range));
-      i = range.GetEndPos()+1;
-      ++p;
-    }
-  }
-}
 
 
-// Given a hypothesis and sentence, reconstructs the 'application context' --
-// the source RHS symbols of the SCFG rule that was applied, plus their spans.
-void IOWrapperChart::ReconstructApplicationContext(const search::Applied *applied,
-    const Sentence &sentence,
-    ApplicationContext &context)
-{
-  context.clear();
-  const WordsRange &span = applied->GetRange();
-  const search::Applied *child = applied->Children();
-  size_t i = span.GetStartPos();
-  size_t j = 0;
 
-  while (i <= span.GetEndPos()) {
-    if (j == applied->GetArity() || i < child->GetRange().GetStartPos()) {
-      // Symbol is a terminal.
-      const Word &symbol = sentence.GetWord(i);
-      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
-      ++i;
-    } else {
-      // Symbol is a non-terminal.
-      const Word &symbol = static_cast<const TargetPhrase*>(child->GetNote().vp)->GetTargetLHS();
-      const WordsRange &range = child->GetRange();
-      context.push_back(std::make_pair(symbol, range));
-      i = range.GetEndPos()+1;
-      ++child;
-      ++j;
-    }
-  }
-}
-
-
-// Emulates the old operator<<(ostream &, const DottedRule &) function.  The
-// output format is a bit odd (reverse order and double spacing between symbols)
-// but there are scripts and tools that expect the output of -T to look like
-// that.
-void IOWrapperChart::WriteApplicationContext(std::ostream &out,
-                                        const ApplicationContext &context)
-{
-  assert(!context.empty());
-  ApplicationContext::const_reverse_iterator p = context.rbegin();
-  while (true) {
-    out << p->second << "=" << p->first << " ";
-    if (++p == context.rend()) {
-      break;
-    }
-    out << " ";
-  }
-}
 
 void IOWrapperChart::OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
@@ -448,29 +373,6 @@ void IOWrapperChart::OutputTreeFragmentsTranslationOptions(std::ostream &out, Ap
   }
 }
 
-void IOWrapperChart::OutputTreeFragmentsTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const search::Applied *applied, const Sentence &sentence, long translationId)
-{
-
-  if (applied != NULL) {
-    OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
-
-    const TargetPhrase &currTarPhr = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
-
-    out << " ||| ";
-    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
-      out << " " << property->GetValueString();
-    } else {
-      out << " " << "noTreeInfo";
-    }
-    out << std::endl;
-  }
-
-  // recursive
-  const search::Applied *child = applied->Children();
-  for (size_t i = 0; i < applied->GetArity(); i++) {
-      OutputTreeFragmentsTranslationOptions(out, applicationContext, child++, sentence, translationId);
-  }
-}
 
 void IOWrapperChart::OutputDetailedTranslationReport(
   const ChartHypothesis *hypo,
@@ -489,22 +391,6 @@ void IOWrapperChart::OutputDetailedTranslationReport(
   m_detailedTranslationCollector->Write(translationId, out.str());
 }
 
-void IOWrapperChart::OutputDetailedTranslationReport(
-  const search::Applied *applied,
-  const Sentence &sentence,
-  long translationId)
-{
-  if (applied == NULL) {
-    return;
-  }
-  std::ostringstream out;
-  ApplicationContext applicationContext;
-
-  OutputTranslationOptions(out, applicationContext, applied, sentence, translationId);
-  UTIL_THROW_IF2(m_detailedTranslationCollector == NULL,
-                  "No ouput file for detailed reports specified");
-  m_detailedTranslationCollector->Write(translationId, out.str());
-}
 
 void IOWrapperChart::OutputDetailedTreeFragmentsTranslationReport(
   const ChartHypothesis *hypo,
@@ -594,81 +480,6 @@ void IOWrapperChart::OutputDetailedAllTranslationReport(
   m_detailAllOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapperChart::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
-{
-  if (!m_singleBestOutputCollector)
-    return;
-  std::ostringstream out;
-  IOWrapperChart::FixPrecision(out);
-  if (hypo != NULL) {
-    VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
-    VERBOSE(3,"Best path: ");
-    Backtrack(hypo);
-    VERBOSE(3,"0" << std::endl);
-
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << hypo->GetTotalScore() << " ";
-    }
-
-    if (StaticData::Instance().IsPathRecoveryEnabled()) {
-      out << "||| ";
-    }
-    Phrase outPhrase(ARRAY_SIZE_INCR);
-    hypo->GetOutputPhrase(outPhrase);
-
-    // delete 1st & last
-    UTIL_THROW_IF2(outPhrase.GetSize() < 2,
-  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-
-    outPhrase.RemoveWord(0);
-    outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-
-    const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-    string output = outPhrase.GetStringRep(outputFactorOrder);
-    out << output << endl;
-  } else {
-    VERBOSE(1, "NO BEST TRANSLATION" << endl);
-
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << "0 ";
-    }
-
-    out << endl;
-  }
-  m_singleBestOutputCollector->Write(translationId, out.str());
-}
-
-void IOWrapperChart::OutputBestHypo(search::Applied applied, long translationId)
-{
-  if (!m_singleBestOutputCollector) return;
-  std::ostringstream out;
-  IOWrapperChart::FixPrecision(out);
-  if (StaticData::Instance().GetOutputHypoScore()) {
-    out << applied.GetScore() << ' ';
-  }
-  Phrase outPhrase;
-  Incremental::ToPhrase(applied, outPhrase);
-  // delete 1st & last
-  UTIL_THROW_IF2(outPhrase.GetSize() < 2,
-		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-  outPhrase.RemoveWord(0);
-  outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-  out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
-  out << '\n';
-  m_singleBestOutputCollector->Write(translationId, out.str());
-
-  VERBOSE(1,"BEST TRANSLATION: " << outPhrase << "[total=" << applied.GetScore() << "]" << endl);
-}
-
-void IOWrapperChart::OutputBestNone(long translationId)
-{
-  if (!m_singleBestOutputCollector) return;
-  if (StaticData::Instance().GetOutputHypoScore()) {
-    m_singleBestOutputCollector->Write(translationId, "0 \n");
-  } else {
-    m_singleBestOutputCollector->Write(translationId, "\n");
-  }
-}
 
 void IOWrapperChart::OutputAllFeatureScores(const ScoreComponentCollection &features, std::ostream &out)
 {
@@ -774,33 +585,6 @@ void IOWrapperChart::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestL
   m_nBestOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapperChart::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId)
-{
-  std::ostringstream out;
-  // wtf? copied from the original OutputNBestList
-  if (m_nBestOutputCollector->OutputIsCout()) {
-    IOWrapperChart::FixPrecision(out);
-  }
-  Phrase outputPhrase;
-  ScoreComponentCollection features;
-  for (std::vector<search::Applied>::const_iterator i = nbest.begin(); i != nbest.end(); ++i) {
-    Incremental::PhraseAndFeatures(*i, outputPhrase, features);
-    // <s> and </s>
-    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
-  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-
-    outputPhrase.RemoveWord(0);
-    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
-    out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
-    out << " ||| ";
-    OutputAllFeatureScores(features, out);
-    out << " ||| " << i->GetScore() << '\n';
-  }
-  out << std::flush;
-  assert(m_nBestOutputCollector);
-  m_nBestOutputCollector->Write(translationId, out.str());
-}
 
 void IOWrapperChart::FixPrecision(std::ostream &stream, size_t size)
 {
@@ -943,79 +727,6 @@ void IOWrapperChart::OutputUnknowns(const std::vector<Moses::Phrase*> &unknowns,
   m_unknownsCollector->Write(translationId, out.str());
 }
 
-size_t IOWrapperChart::OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget)
-{
-  size_t totalTargetSize = 0;
-  size_t startSource = hypo->GetCurrSourceRange().GetStartPos();
-
-  const TargetPhrase &tp = hypo->GetCurrTargetPhrase();
-
-  size_t thisSourceSize = CalcSourceSize(hypo);
-
-  // position of each terminal word in translation rule, irrespective of alignment
-  // if non-term, number is undefined
-  vector<size_t> sourceOffsets(thisSourceSize, 0);
-  vector<size_t> targetOffsets(tp.GetSize(), 0);
-
-  const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
-
-  const AlignmentInfo &aiNonTerm = hypo->GetCurrTargetPhrase().GetAlignNonTerm();
-  vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
-  const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
-
-  UTIL_THROW_IF2(sourceInd2pos.size() != prevHypos.size(), "Error");
-
-  size_t targetInd = 0;
-  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
-    if (tp.GetWord(targetPos).IsNonTerminal()) {
-  	  UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
-      size_t sourceInd = targetPos2SourceInd[targetPos];
-      size_t sourcePos = sourceInd2pos[sourceInd];
-
-      const ChartHypothesis *prevHypo = prevHypos[sourceInd];
-
-      // calc source size
-      size_t sourceSize = prevHypo->GetCurrSourceRange().GetNumWordsCovered();
-      sourceOffsets[sourcePos] = sourceSize;
-
-      // calc target size.
-      // Recursively look thru child hypos
-      size_t currStartTarget = startTarget + totalTargetSize;
-      size_t targetSize = OutputAlignment(retAlign, prevHypo, currStartTarget);
-      targetOffsets[targetPos] = targetSize;
-
-      totalTargetSize += targetSize;
-      ++targetInd;
-    } else {
-      ++totalTargetSize;
-    }
-  }
-
-  // convert position within translation rule to absolute position within
-  // source sentence / output sentence
-  ShiftOffsets(sourceOffsets, startSource);
-  ShiftOffsets(targetOffsets, startTarget);
-
-  // get alignments from this hypo
-  const AlignmentInfo &aiTerm = hypo->GetCurrTargetPhrase().GetAlignTerm();
-
-  // add to output arg, offsetting by source & target
-  AlignmentInfo::const_iterator iter;
-  for (iter = aiTerm.begin(); iter != aiTerm.end(); ++iter) {
-    const std::pair<size_t,size_t> &align = *iter;
-    size_t relSource = align.first;
-    size_t relTarget = align.second;
-    size_t absSource = sourceOffsets[relSource];
-    size_t absTarget = targetOffsets[relTarget];
-
-    pair<size_t, size_t> alignPoint(absSource, absTarget);
-    pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-    UTIL_THROW_IF2(!ret.second, "Error");
-
-  }
-
-  return totalTargetSize;
-}
 
 void IOWrapperChart::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const AlignmentInfo &ai)
 {

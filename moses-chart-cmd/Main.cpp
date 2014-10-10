@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Main.h"
 #include "moses/TranslationAnalysis.h"
 #include "mbr.h"
-#include "moses/IOWrapperChart.h"
+#include "moses/IOWrapper.h"
 
 #include "moses/FactorCollection.h"
 #include "moses/HypergraphOutput.h"
@@ -78,8 +78,8 @@ int main(int argc, char* argv[])
       TRACE_ERR(endl);
     }
 
-    IOWrapperChart::FixPrecision(cout);
-    IOWrapperChart::FixPrecision(cerr);
+    IOWrapper::FixPrecision(cout);
+    IOWrapper::FixPrecision(cerr);
 
     // load data structures
     Parameter parameter;
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     UTIL_THROW_IF2(!staticData.IsChart(), "Must be SCFG model");
 
     // set up read/writing class
-    IOWrapperChart *ioWrapper = IOWrapperChart::GetIOWrapper(staticData);
+    IOWrapper *ioWrapper = IOWrapper::GetIOWrapper(staticData);
 
     // check on weights
     const ScoreComponentCollection& weights = staticData.GetAllWeights();
