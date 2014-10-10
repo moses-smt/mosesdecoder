@@ -87,6 +87,7 @@ protected:
 class CdecFF
 {
 public:
+  virtual ~CdecFF() {}
   virtual int StateSize() const = 0;
 };
 
