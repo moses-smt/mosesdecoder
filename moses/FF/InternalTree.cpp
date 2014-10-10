@@ -45,7 +45,7 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos) {
             }
         }
         else if (token == ' ' || token == ']') {
-            if (value.size() > 0 && ! m_value.size() > 0) {
+            if (value.size() > 0 && !(m_value.size() > 0)) {
                 m_value = value;
             }
             else if (value.size() > 0) {

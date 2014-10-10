@@ -39,14 +39,12 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
   const std::vector<FactorType> &inputFactorsVec,
-  const std::vector<FactorType> &outputFactorsVec,
-  const std::string &filePath)
+  const std::vector<FactorType> &outputFactorsVec)
   : ChartRuleLookupManagerCYKPlus(parser, cellColl)
   , m_dictionary(dictionary)
   , m_dbWrapper(dbWrapper)
   , m_inputFactorsVec(inputFactorsVec)
   , m_outputFactorsVec(outputFactorsVec)
-  , m_filePath(filePath)
 {
   UTIL_THROW_IF2(m_expandableDottedRuleListVec.size() != 0,
 		  "Dotted rule collection not correctly initialized");

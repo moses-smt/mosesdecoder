@@ -38,7 +38,6 @@ PhraseOrientation::PhraseOrientation(int sourceSize,
                                      const Alignment &alignment)
   : m_countF(sourceSize)
   , m_countE(targetSize)
-  , m_alignment(alignment)
 {
 
   // prepare data structures for alignments
