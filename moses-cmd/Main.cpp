@@ -84,8 +84,8 @@ int main(int argc, char** argv)
     }
 
     // set number of significant decimals in output
-    fix(cout,PRECISION);
-    fix(cerr,PRECISION);
+    IOWrapper::FixPrecision(cout);
+    IOWrapper::FixPrecision(cerr);
 
     // load all the settings into the Parameter class
     // (stores them as strings, or array of strings)
@@ -128,9 +128,17 @@ int main(int argc, char** argv)
       TRACE_ERR(weights);
       TRACE_ERR("\n");
     }
+
     boost::shared_ptr<HypergraphOutput<Manager> > hypergraphOutput; 
+    boost::shared_ptr<HypergraphOutput<ChartManager> > hypergraphOutputChart;
+
     if (staticData.GetOutputSearchGraphHypergraph()) {
-      hypergraphOutput.reset(new HypergraphOutput<Manager>(PRECISION));
+    	if (staticData.IsChart()) {
+    		hypergraphOutputChart.reset(new HypergraphOutput<ChartManager>(PRECISION));
+    	}
+    	else {
+    		hypergraphOutput.reset(new HypergraphOutput<Manager>(PRECISION));
+    	}
     }
 
 #ifdef WITH_THREADS
@@ -149,10 +157,18 @@ int main(int argc, char** argv)
       FeatureFunction::CallChangeSource(source);
 
       // set up task of translating one sentence
-      TranslationTask* task =
-        new TranslationTask(source, *ioWrapper,
-                            staticData.GetOutputSearchGraphSLF(),
-                            hypergraphOutput);
+      TranslationTask* task;
+      if (staticData.IsChart()) {
+    	  // scfg
+          task = new TranslationTask(source, *ioWrapper, hypergraphOutputChart);
+      }
+      else {
+    	  // pb
+		  task = new TranslationTask(source, *ioWrapper,
+								staticData.GetOutputSearchGraphSLF(),
+								hypergraphOutput);
+      }
+
       // execute task
 #ifdef WITH_THREADS
       pool.Submit(task);
