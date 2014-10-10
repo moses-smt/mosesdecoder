@@ -442,16 +442,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/IOWrapper.h</locationURI>
 		</link>
 		<link>
-			<name>IOWrapperChart.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/IOWrapperChart.cpp</locationURI>
-		</link>
-		<link>
-			<name>IOWrapperChart.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/IOWrapperChart.h</locationURI>
-		</link>
-		<link>
 			<name>Incremental.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Incremental.cpp</locationURI>
