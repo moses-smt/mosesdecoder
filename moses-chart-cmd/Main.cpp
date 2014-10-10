@@ -59,7 +59,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartHypothesis.h"
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/StatelessFeatureFunction.h"
-#include "moses/TranslationTaskChart.h"
+#include "moses/TranslationTask.h"
 
 #include "util/usage.hh"
 #include "util/exception.hh"
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 
       FeatureFunction::CallChangeSource(source);
 
-      TranslationTaskChart *task = new TranslationTaskChart(source, *ioWrapper, hypergraphOutput);
+      TranslationTask *task = new TranslationTask(source, *ioWrapper, hypergraphOutput);
       source = NULL;  // task will delete source
 #ifdef WITH_THREADS
       pool.Submit(task);  // pool will delete task

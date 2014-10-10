@@ -917,16 +917,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationTask.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationTaskChart.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationTaskChart.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationTaskChart.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationTaskChart.h</locationURI>
-		</link>
-		<link>
 			<name>TreeInput.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TreeInput.cpp</locationURI>
