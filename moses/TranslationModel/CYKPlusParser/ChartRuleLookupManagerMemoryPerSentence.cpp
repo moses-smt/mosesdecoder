@@ -154,7 +154,6 @@ void ChartRuleLookupManagerMemoryPerSentence::UpdateCompressedMatrix(size_t star
 #if !defined(UNLABELLED_SOURCE)
         // source non-terminal labels for the span
         const InputPath &inputPath = GetParser().GetInputPath(startPos, endPos);
-        const std::vector<bool> &sourceNonTermArray = inputPath.GetNonTerminalArray();
 
         // can this ever be true? Moses seems to pad the non-terminal set of the input with [X]
         if (inputPath.GetNonTerminalSet().size() == 0) {

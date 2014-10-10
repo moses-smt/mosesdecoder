@@ -10,7 +10,6 @@ PDTAimp::PDTAimp(PhraseDictionaryTreeAdaptor *p)
     totalE(0),
     distinctE(0) {
   m_numInputScores = 0;
-  const StaticData &staticData = StaticData::Instance();
   m_inputFeature = &InputFeature::Instance();
 
   if (m_inputFeature) {

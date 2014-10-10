@@ -177,7 +177,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         bool doSearch = true;
         if (m_dictionary.m_maxSpanDefault != NOT_FOUND) {
             // for Hieu's source syntax
-			const Word &targetLHS = cellLabel.GetLabel();
 
 			bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
 		    size_t nonTermNumWordsCovered = endPos - startPos + 1;
@@ -186,8 +185,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 					nonTermNumWordsCovered <=  m_dictionary.m_maxSpanLabelled :
 					nonTermNumWordsCovered <= m_dictionary.m_maxSpanDefault;
 
-			//cerr << "sourceLHS=" << sourceLHS << " targetLHS=" << targetLHS
-			//		<< "doSearch=" << doSearch << endl;
         }
 
         if (doSearch) {
