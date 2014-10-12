@@ -1176,6 +1176,9 @@ def compute_lexicalweight(weights,alignment,word_pairs,marginal,mode='counts',ca
         mycache[1] = defaultdict(dict)
     
     for x,translations in alignment:
+        # skip nonterminals
+        if x.startswith(b'['):
+          continue
         
         if cache and translations in mycache[1][x]:
             lex_step = mycache[1][x][translations]
@@ -1870,7 +1873,12 @@ def test():
     sys.stderr.write('Regression test 10\n')
     Combiner = Combine_TMs([[os.path.join('test','model3'),'primary'],[os.path.join('test','model4'),'primary']],output_file=os.path.join('test','phrase-table_test10'),mode='counts',number_of_features=8,i_e2f=4,i_e2f_lex=5,i_f2e=6,i_f2e_lex=7,reference_file='test/extract')
     Combiner.combine_given_tuning_set()
-    
+
+    # count-based combination of two hierarchical models, with fixed weights. Same as test 3, but with hierarchical models
+    # command line: python tmcombine.py combine_given_weights test/model5 test/model6 -w "0.1,0.9;0.1,1;0.2,0.8;0.5,0.5" -o test/phrase-table_test11 -m counts
+    sys.stderr.write('Regression test 11\n')
+    Combiner = Combine_TMs([[os.path.join('test','model5'),'primary'],[os.path.join('test','model6'),'primary']],[[0.1,0.9],[0.1,1],[0.2,0.8],[0.5,0.5]],os.path.join('test','phrase-table_test11'),mode='counts')
+    Combiner.combine_given_weights()
 
 #convert weight vector passed as a command line argument
 class to_list(argparse.Action):
