@@ -163,7 +163,7 @@ void TranslationTask::RunPb()
           out << bestHypo->GetTotalScore() << ' ';
         }
         if (staticData.IsPathRecoveryEnabled()) {
-          OutputInput(out, bestHypo);
+          m_ioWrapper.OutputInput(out, bestHypo);
           out << "||| ";
         }
         if (staticData.GetParam("print-id").size() && Scan<bool>(staticData.GetParam("print-id")[0]) ) {
@@ -173,7 +173,7 @@ void TranslationTask::RunPb()
 	  if (staticData.GetReportSegmentation() == 2) {
 	    manager.GetOutputLanguageModelOrder(out, bestHypo);
 	  }
-        OutputBestSurface(
+        m_ioWrapper.OutputBestSurface(
           out,
           bestHypo,
           staticData.GetOutputFactorOrder(),
@@ -181,10 +181,10 @@ void TranslationTask::RunPb()
           staticData.GetReportAllFactors());
         if (staticData.PrintAlignmentInfo()) {
           out << "||| ";
-          OutputAlignment(out, bestHypo);
+          m_ioWrapper.OutputAlignment(out, bestHypo);
         }
 
-        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), bestHypo);
+        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), bestHypo);
         IFVERBOSE(1) {
           debug << "BEST TRANSLATION: " << *bestHypo << endl;
         }
@@ -218,12 +218,12 @@ void TranslationTask::RunPb()
           size_t n  = min(nBestSize, staticData.GetNBestSize());
           getLatticeMBRNBest(manager,nBestList,solutions,n);
           ostringstream out;
-          OutputLatticeMBRNBest(out, solutions,m_source->GetTranslationId());
+          m_ioWrapper.OutputLatticeMBRNBest(out, solutions,m_source->GetTranslationId());
           m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
         } else {
           //Lattice MBR decoding
           vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-          OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
+          m_ioWrapper.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(), staticData.GetReportSegmentation(),
                          staticData.GetReportAllFactors(),out);
           IFVERBOSE(2) {
             PrintUserTime("finished Lattice MBR decoding");
@@ -234,10 +234,10 @@ void TranslationTask::RunPb()
       // consensus decoding
       else if (staticData.UseConsensusDecoding()) {
         const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
-        OutputBestHypo(conBestHypo, m_source->GetTranslationId(),
+        m_ioWrapper.OutputBestHypo(conBestHypo, m_source->GetTranslationId(),
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
-        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), conBestHypo);
+        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), conBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished Consensus decoding");
         }
@@ -246,10 +246,10 @@ void TranslationTask::RunPb()
       // n-best MBR decoding
       else {
         const TrellisPath &mbrBestHypo = doMBR(nBestList);
-        OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(),
+        m_ioWrapper.OutputBestHypo(mbrBestHypo, m_source->GetTranslationId(),
                        staticData.GetReportSegmentation(),
                        staticData.GetReportAllFactors(),out);
-        OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), mbrBestHypo);
+        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), mbrBestHypo);
         IFVERBOSE(2) {
           PrintUserTime("finished MBR decoding");
         }
@@ -270,7 +270,7 @@ void TranslationTask::RunPb()
     TrellisPathList nBestList;
     ostringstream out;
     manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-    OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
+    m_ioWrapper.OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
                 staticData.GetReportSegmentation());
     m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
   }
@@ -280,7 +280,7 @@ void TranslationTask::RunPb()
     TrellisPathList latticeSamples;
     ostringstream out;
     manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-    OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
+    m_ioWrapper.OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
                 staticData.GetReportSegmentation());
     m_ioWrapper.GetLatticeSamplesCollector()->Write(m_source->GetTranslationId(), out.str());
   }

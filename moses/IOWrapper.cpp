@@ -242,7 +242,7 @@ void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
   stream.precision(size);
 }
 
-std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
+std::map<size_t, const Factor*> IOWrapper::GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
 {
   const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
   const Phrase &inputPhrase = inputPath.GetPhrase();
@@ -973,7 +973,7 @@ size_t IOWrapper::OutputAlignmentNBest(
 /***
  * print surface factor only for the given phrase
  */
-void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
+void IOWrapper::OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
                    char reportSegmentation, bool reportAllFactors)
 {
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
@@ -1046,7 +1046,7 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
   }
 }
 
-void OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
+void IOWrapper::OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
                        char reportSegmentation, bool reportAllFactors)
 {
   if (hypo != NULL) {
@@ -1056,7 +1056,7 @@ void OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vec
   }
 }
 
-void OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
+void IOWrapper::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
   AlignVec alignments = ai.GetSortedAlignments();
@@ -1069,7 +1069,7 @@ void OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset,
 
 }
 
-void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
+void IOWrapper::OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
 {
   size_t targetOffset = 0;
 
@@ -1084,7 +1084,7 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
   }
 }
 
-void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)
+void IOWrapper::OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)
 {
   std::vector<const Hypothesis *> edges;
   const Hypothesis *currentHypo = hypo;
@@ -1097,7 +1097,7 @@ void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)
 
 }
 
-void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
+void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
 {
   ostringstream out;
   OutputAlignment(out, edges);
@@ -1105,7 +1105,7 @@ void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<co
   collector->Write(lineNo,out.str());
 }
 
-void OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo)
+void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo)
 {
   if (collector) {
     std::vector<const Hypothesis *> edges;
@@ -1119,14 +1119,14 @@ void OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesi
   }
 }
 
-void OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPath &path)
+void IOWrapper::OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPath &path)
 {
   if (collector) {
     OutputAlignment(collector,lineNo, path.GetEdges());
   }
 }
 
-void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/, char reportSegmentation, bool reportAllFactors, std::ostream &out)
+void IOWrapper::OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/, char reportSegmentation, bool reportAllFactors, std::ostream &out)
 {
   const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
@@ -1146,7 +1146,7 @@ void IOWrapper::Backtrack(const Hypothesis *hypo)
   }
 }
 
-void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, char /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out)
+void IOWrapper::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, char /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out)
 {
 
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
@@ -1160,7 +1160,7 @@ void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*
 }
 
 
-void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
+void IOWrapper::OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 {
   if (hypo->GetPrevHypo()) {
     OutputInput(map, hypo->GetPrevHypo());
@@ -1168,7 +1168,7 @@ void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
   }
 }
 
-void OutputInput(std::ostream& os, const Hypothesis* hypo)
+void IOWrapper::OutputInput(std::ostream& os, const Hypothesis* hypo)
 {
   size_t len = hypo->GetInput().GetSize();
   std::vector<const Phrase*> inp_phrases(len, 0);
@@ -1204,21 +1204,21 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
   }
 }
 
-bool IOWrapper::ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
+bool IOWrapper::ReadInput(InputTypeEnum inputType, InputType*& source)
 {
   delete source;
   switch(inputType) {
   case SentenceInput:
-    source = ioWrapper.GetInput(new Sentence);
+    source = GetInput(new Sentence);
     break;
   case ConfusionNetworkInput:
-    source = ioWrapper.GetInput(new ConfusionNet);
+    source = GetInput(new ConfusionNet);
     break;
   case WordLatticeInput:
-    source = ioWrapper.GetInput(new WordLattice);
+    source = GetInput(new WordLattice);
     break;
   case TreeInputType:
-    source = ioWrapper.GetInput(new TreeInput);
+    source = GetInput(new TreeInput);
     break;
   default:
     TRACE_ERR("Unknown input type: " << inputType << "\n");
@@ -1226,7 +1226,7 @@ bool IOWrapper::ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputTy
   return (source ? true : false);
 }
 
-void OutputNBest(std::ostream& out
+void IOWrapper::OutputNBest(std::ostream& out
                  , const Moses::TrellisPathList &nBestList
                  , const std::vector<Moses::FactorType>& outputFactorOrder
                  , long translationId
@@ -1300,7 +1300,7 @@ void OutputNBest(std::ostream& out
   out << std::flush;
 }
 
-void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
+void IOWrapper::OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
                             , std::ostream &out)
 {
   std::string lastName = "";
@@ -1321,7 +1321,7 @@ void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
   }
 }
 
-void OutputFeatureScores( std::ostream& out
+void IOWrapper::OutputFeatureScores( std::ostream& out
                           , const ScoreComponentCollection &features
                           , const FeatureFunction *ff
                           , std::string &lastName )
@@ -1348,7 +1348,7 @@ void OutputFeatureScores( std::ostream& out
   }
 }
 
-void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId)
+void IOWrapper::OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId)
 {
   for (vector<LatticeMBRSolution>::const_iterator si = solutions.begin(); si != solutions.end(); ++si) {
     out << translationId;

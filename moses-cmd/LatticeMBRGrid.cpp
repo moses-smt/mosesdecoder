@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
   const vector<float>& prune_grid = grid.getGrid(lmbr_prune);
   const vector<float>& scale_grid = grid.getGrid(lmbr_scale);
 
-  while(ioWrapper->ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+  while(ioWrapper->ReadInput(staticData.GetInputType(),source)) {
     ++lineCount;
     source->SetTranslationId(lineCount);
 
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
             staticData.SetMBRScale(scale);
             cout << lineCount << " ||| " << p << " " << r << " " << prune << " " << scale << " ||| ";
             vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-            OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
+            ioWrapper->OutputBestHypo(mbrBestHypo, lineCount, staticData.GetReportSegmentation(),
                            staticData.GetReportAllFactors(),cout);
           }
         }

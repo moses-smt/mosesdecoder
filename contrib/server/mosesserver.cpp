@@ -310,7 +310,7 @@ public:
         }
         if (addWordAlignInfo) {
           stringstream wordAlignment;
-          OutputAlignment(wordAlignment, hypo);
+          IOWrapper::OutputAlignment(wordAlignment, hypo);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -472,7 +472,7 @@ public:
 
         if ((int)edges.size() > 0) {
           stringstream wordAlignment;
-          OutputAlignment(wordAlignment, edges[0]);
+          IOWrapper::OutputAlignment(wordAlignment, edges[0]);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -490,7 +490,7 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  Moses::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
+	  IOWrapper::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 
