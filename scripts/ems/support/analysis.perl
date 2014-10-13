@@ -746,7 +746,7 @@ sub hierarchical_segmentation {
     open(NODE,">$dir/node") or die "Cannot open: $!";
     while(<TRACE>) {
 	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): pC=[\d\.\-e]+, c=/ ||
-	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): c=/ || die("cannot scan line $_");
+	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>\S+  \-\> (.+) :([\(\),\d\- ]*): c=/ || die("cannot scan line $_");
 	my ($sentence,$start,$end,$spans,$rule_lhs,$rule_rhs,$alignment) = ($1,$2,$3,$4,$5,$6,$7);
 	if ($last_sentence >= 0 && $sentence != $last_sentence) {
 	    &hs_process($last_sentence,\@DERIVATION,\%STATS);
