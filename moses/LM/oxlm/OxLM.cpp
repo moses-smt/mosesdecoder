@@ -16,7 +16,8 @@ namespace Moses
 
 template<class Model>
 OxLM<Model>::OxLM(const string &line)
-    : LanguageModelSingleFactor(line), posBackOff(false), posFactorType(1),
+    : LanguageModelSingleFactor(line), normalized(true),
+      posBackOff(false), posFactorType(1),
       persistentCache(false) {
   ReadParameters();
 
@@ -44,7 +45,9 @@ OxLM<Model>::~OxLM() {
 
 template<class Model>
 void OxLM<Model>::SetParameter(const string& key, const string& value) {
-  if (key == "persistent-cache") {
+  if (key == "normalized") {
+    normalized = Scan<bool>(value);
+  } else if (key == "persistent-cache") {
     persistentCache = Scan<bool>(value);
   } else if (key == "normalized") {
     normalized = Scan<bool>(value);
