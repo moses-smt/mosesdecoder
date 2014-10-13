@@ -32,6 +32,9 @@ class OxLM : public LanguageModelSingleFactor {
 
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 
+ private:
+  double GetScore(int word, const vector<int>& context) const;
+
  protected:
   Model model;
   boost::shared_ptr<OxLMMapper> mapper;
@@ -39,6 +42,8 @@ class OxLM : public LanguageModelSingleFactor {
   int kSTART;
   int kSTOP;
   int kUNKNOWN;
+
+  bool normalized;
 
   bool posBackOff;
   FactorType posFactorType;
