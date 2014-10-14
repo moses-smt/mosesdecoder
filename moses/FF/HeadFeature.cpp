@@ -53,7 +53,6 @@ SyntaxNodePtr SyntaxNode::FindFirstChild(std::string label) const{
 
 int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 	int i,j;
-	int found=-1;
 	//should not look at terminals -> eg [NP Ich]
 	// There is a problem [VP [VBP] [NP]] takes head from NP -> why?? check comparison and Head_rules
 	//even with VP 1 VB VBP... NP I still get the head from the NP -> why?
@@ -67,8 +66,7 @@ int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 		for(i=0; i<m_children.size();i++){
 			for(j=1; j<headRule.size();j++){ //first item is direction
 				if(m_children[i]->m_label.compare(headRule[j])==0){
-					found=i;
-					break;
+					return i;
 				}
 			}
 		}
@@ -82,12 +80,11 @@ int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 		for(i=m_children.size()-1; i>=1;i--){
 			for(j=1; j<headRule.size();j++)
 				if(m_children[i]->m_label.compare(headRule[j])==0){
-					found=i;
-					break;
+					return i;
 				}
 		}
 	}
-	return found;
+	return -1;
 }
 
 SyntaxTree::~SyntaxTree()
