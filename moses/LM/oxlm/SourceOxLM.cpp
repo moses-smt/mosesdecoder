@@ -13,7 +13,7 @@ SourceOxLM::SourceOxLM(const string &line)
     : BilingualLM(line), posBackOff(false), posFactorType(1),
       persistentCache(false), cacheHits(0), totalHits(0) {
         FactorCollection& factorFactory = FactorCollection::Instance(); // To add null word.
-        const Factor* NULL_factor = factorFactory.AddFactor(NULL_string);
+        const Factor* NULL_factor = factorFactory.AddFactor("<unk>");
         NULL_word.SetFactor(0, NULL_factor);
       }
 
