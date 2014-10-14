@@ -116,14 +116,14 @@ consolidate
 	in: CORPUS:clean-parsed-stem
 	out: tokenized-stem
 	default-name: truecaser/corpus
-  pass-unless: trainer
+	pass-unless: trainer
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 	error: number of lines don't match
 train
 	in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
-  pass-unless: trainer
+	pass-unless: trainer
 	default-name: truecaser/truecase-model
 	template: $trainer -model OUT.$input-extension -corpus IN.$input-extension ; $trainer -model OUT.$output-extension -corpus IN.$output-extension
 
@@ -643,7 +643,7 @@ build-sparse
 create-config
 	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm 
 	out: config
-	ignore-if: use-hiero
+	ignore-if: use-hiero thot
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt
 	default-name: model/moses.ini
 	error: Unknown option
@@ -700,6 +700,18 @@ hiero-create-config
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors
 	default-name: hiero-model/hiero.ini
 	template: $hiero-util-dir/generate-ini.pl IN IN1 IN2 IN3 IN4 IN5 $hiero-max-phrase-length $hiero-max-nonterminals $hiero-max-phrase-span $hiero-min-gap-length $hiero-freq-rank1 $hiero-freq-rank2 < $GENERAL:hiero-template-ini > OUT
+thot-build-ttable
+	in: corpus
+	out: thot-ttable
+	default-name: model/phrase-table-thot
+	rerun-on-change: input-extension output-extension
+	template: $thot/thot_tm_train -sdir $working-dir -s IN.$input-extension -t IN.$output-extension -o OUT
+thot-create-config
+	in: thot-ttable LM:lm
+	out: config
+	ignore-unless: thot
+	default-name: model/thot.ini
+	template: $thot/thot_gen_server_cfg_file IN1/lm_desc IN/tm_desc > OUT
 
 [TUNING] single
 input-from-sgm
@@ -968,10 +980,17 @@ tune
 	final-model: yes
 	rerun-on-change: decoder-settings tuning-settings nbest lambda async
 	not-error: trans: No such file or directory
+thot-tune
+	in: TRAINING:config input reference
+	out: config-with-reused-weights
+	ignore-unless: thot
+	tmp-name: tuning/thot.tmp
+	default-name: tuning/thot.tuned.ini
+	template: mkdir -p TMP/home ; mkdir -p TMP/tdir ; mkdir -p TMP/sdir ; HOME=TMP/home $thot/thot_smt_tune -tdir TMP/tdir -sdir TMP/sdir -c IN -s IN1 -t IN2 -o OUT
 apply-weights
 	in: TRAINING:bin-config weight-config
 	out: config-with-reused-weights
-	ignore-if: use-hiero
+	ignore-if: use-hiero thot
 	default-name: tuning/moses.tuned.ini
 	template: $moses-script-dir/ems/support/substitute-weights.perl IN IN1 OUT
 	error: cannot open
@@ -1078,14 +1097,14 @@ apply-filter
 	in: filtered-dir TRAINING:config TUNING:config-with-reused-weights
 	out: filtered-config
 	default-name: evaluation/filtered.ini
-	ignore-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all thot
 	template: $moses-script-dir/ems/support/substitute-filtered-tables-and-weights.perl IN/moses.ini IN1 IN2 OUT
 decode
 	in: TUNING:config-with-reused-weights input filtered-config
 	out: system-output
 	default-name: evaluation/output
 	qsub-script: yes
-	ignore-if: use-hiero
+	ignore-if: use-hiero thot
 	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph wade TRAINING:post-decoding-transliteration
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
@@ -1098,6 +1117,20 @@ hiero-decode
 	ignore-unless: use-hiero
 	template: $hiero-parallelizer -e OUT.edir -r -- $hiero-decoder -c IN < IN1 > OUT
 	rerun-on-change: hiero-decoder
+thot-filter
+	in: TUNING:config-with-reused-weights input
+	out: filtered-config
+	ignore-unless: thot
+	default-name: evaluation/filtered
+	tmp-name: evaluation/filtered-tmp 
+	template: mkdir -p TMP/home ; mkdir -p TMP/tdir ; mkdir -p TMP/sdir ; HOME=TMP/home $thot/thot_prepare_sys_for_test -sdir TMP/sdir -tdir TMP/tdir -t IN1 -c IN/tuned_for_dev.cfg -o OUT ; cp OUT/lm/main/* OUT/lm
+thot-decode
+	in: input filtered-config
+	out: system-output
+	ignore-unless: thot
+	default-name: evaluation/output
+	template: $thot/thot_decoder -sdir $working-dir -c IN1/test_specific.cfg -t IN > OUT
+	not-error: Error in word penalty model file
 remove-markup
 	in: system-output
 	out: cleaned-output
