@@ -50,6 +50,8 @@ class BilingualLM : public StatefulFeatureFunction {
 
   virtual void loadModel() = 0;
 
+  virtual const Word& getNullWord() const = 0;
+
   size_t selectMiddleAlignment(const std::set<size_t>& alignment_links) const;
 
   void getSourceWords(

@@ -24,6 +24,8 @@ class SourceOxLM : public BilingualLM {
   virtual int getNeuralLMId(const Word& word, bool is_source_word) const;
 
   virtual void loadModel();
+  
+  const Word& getNullWord() const;
 
   void SetParameter(const std::string& key, const std::string& value);
 
@@ -41,6 +43,7 @@ class SourceOxLM : public BilingualLM {
   bool persistentCache;
   mutable boost::thread_specific_ptr<oxlm::QueryCache> cache;
   mutable int cacheHits, totalHits;
+  Word NULL_word; //Null symbol for hiero
 };
 
 } // namespace Moses

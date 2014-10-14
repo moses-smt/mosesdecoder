@@ -26,6 +26,7 @@ BilingualLM::BilingualLM(const std::string &line)
   BOS_word_actual.SetFactor(0, BOS_factor);
   EOS_factor = factorFactory.AddFactor(EOS_);
   EOS_word_actual.SetFactor(0, EOS_factor);
+  
 }
 
 void BilingualLM::Load(){
