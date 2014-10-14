@@ -23,11 +23,18 @@ class BilingualLM_NPLM : public BilingualLM {
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  const Word& getNullWord() const;
+
   nplm::neuralLM *m_neuralLM_shared;
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 
   mutable std::map<const Factor*, int> neuralLMids;
   mutable boost::shared_mutex neuralLMids_lock;
+
+  //const Factor* NULL_factor_overwrite;
+  std::string NULL_string;
+  bool NULL_overwrite;
+  Word NULL_word;
 
   bool premultiply;
   bool factored;

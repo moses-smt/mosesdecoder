@@ -11,7 +11,11 @@ namespace Moses {
 
 SourceOxLM::SourceOxLM(const string &line)
     : BilingualLM(line), posBackOff(false), posFactorType(1),
-      persistentCache(false), cacheHits(0), totalHits(0) {}
+      persistentCache(false), cacheHits(0), totalHits(0) {
+        FactorCollection& factorFactory = FactorCollection::Instance(); // To add null word.
+        const Factor* NULL_factor = factorFactory.AddFactor(NULL_string);
+        NULL_word.SetFactor(0, NULL_factor);
+      }
 
 SourceOxLM::~SourceOxLM() {
   if (persistentCache) {
@@ -59,6 +63,10 @@ float SourceOxLM::Score(
 
 int SourceOxLM::getNeuralLMId(const Word& word, bool is_source_word) const {
   return is_source_word ? mapper->convertSource(word) : mapper->convert(word);
+}
+
+const Word& SourceOxLM::getNullWord() const {
+  return NULL_word;
 }
 
 void SourceOxLM::loadModel() {

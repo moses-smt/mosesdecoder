@@ -7,7 +7,15 @@ BilingualLM_NPLM::BilingualLM_NPLM(const std::string &line)
       : BilingualLM(line),
         premultiply(true),
         factored(false),
-        neuralLM_cache(1000000) {}
+        neuralLM_cache(1000000) {
+          
+          if (!NULL_overwrite) {
+            NULL_string = "<null>"; //Default null value for nplm
+          }
+          FactorCollection& factorFactory = FactorCollection::Instance(); // To add null word.
+          const Factor* NULL_factor = factorFactory.AddFactor(NULL_string);
+          NULL_word.SetFactor(0, NULL_factor);
+        }
 
 float BilingualLM_NPLM::Score(std::vector<int>& source_words, std::vector<int>& target_words) const {
   source_words.reserve(source_ngrams+target_ngrams+1);
@@ -17,6 +25,10 @@ float BilingualLM_NPLM::Score(std::vector<int>& source_words, std::vector<int>& 
 
 int BilingualLM_NPLM::LookUpNeuralLMWord(const std::string& str) const {
   return m_neuralLM->lookup_word(str);
+}
+
+const Word& BilingualLM_NPLM::getNullWord() const {
+  return NULL_word;
 }
 
 //Cache for NeuralLMids
@@ -97,6 +109,9 @@ void BilingualLM_NPLM::SetParameter(const std::string& key, const std::string& v
     neuralLM_cache = atoi(value.c_str());
   } else if (key == "premultiply") {
     premultiply = Scan<bool>(value);
+  } else if (key == "null_word") {
+    NULL_string = value;
+    NULL_overwrite = true;
   } else {
     BilingualLM::SetParameter(key, value);
   }
