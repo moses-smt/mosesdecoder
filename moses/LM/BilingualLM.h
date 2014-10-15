@@ -69,29 +69,15 @@ class BilingualLM : public StatefulFeatureFunction {
       int current_word_index,
       std::vector<int> &words) const;
 
-  //size_t getState(const TargetPhrase &targetPhrase, std::vector<int> &prev_words) const;
-
   size_t getState(const Hypothesis &cur_hypo) const;
 
   void requestPrevTargetNgrams(const Hypothesis &cur_hypo, int amount, std::vector<int> &words) const;
 
   //Chart decoder
-
   void getTargetWordsChart(
     std::vector<int>& neuralLMids,
     int current_word_index,
     std::vector<int>& words) const;
-
-  //Returns the index of the source_word that the current target word uses
-  int getSourceWordsChart(
-      const TargetPhrase &targetPhrase,
-      const ChartHypothesis& curr_hypothesis,
-      int targetWordIdx,
-      const Sentence &source_sent,
-      size_t souce_phrase_start_pos,
-      int next_nonterminal_index,
-      int featureID,
-      std::vector<int> &words) const;
 
   size_t getStateChart(std::vector<int>& neuralLMids) const;
 
