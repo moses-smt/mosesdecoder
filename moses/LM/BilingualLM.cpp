@@ -351,10 +351,16 @@ size_t BilingualLM::getStateChart(std::vector<int>& neuralLMids) const {
 void BilingualLM::getTargetWordsChart(
     std::vector<int>& neuralLMids,
     int current_word_index,
-    std::vector<int>& words) const {
+    std::vector<int>& words,
+    bool sentence_begin) const {
+
   for (int i = current_word_index - target_ngrams; i <= current_word_index; i++) {
     if (i < 0) {
-      words.push_back(getNeuralLMId(BOS_word, false));
+      if (sentence_begin) {
+        words.push_back(getNeuralLMId(BOS_word, false));
+      } else {
+        words.push_back(getNeuralLMId(getNullWord(), false));
+      }
     } else {
       words.push_back(neuralLMids[i]);
     }
@@ -420,6 +426,10 @@ FFState* BilingualLM::EvaluateWhenApplied(
   getAllTargetIdsChart(cur_hypo, featureID, neuralLMids);
   getAllAlignments(cur_hypo, featureID, alignments);
 
+  bool sentence_begin = false; //Check if this hypothesis' target words are located in the beginning of the sentence
+  if (neuralLMids[0] == getNeuralLMId(BOS_word, true)){
+    sentence_begin = true;
+  }
   
   //Get source sentence
   const ChartManager& manager = cur_hypo.GetManager();
@@ -429,7 +439,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
     //We already have resolved the nonterminals, we are left with a simple loop.
     appendSourceWordsToVector(source_sent, source_words, alignments[i]);
-    getTargetWordsChart(neuralLMids, i, target_words);
+    getTargetWordsChart(neuralLMids, i, target_words, sentence_begin);
 
     value += Score(source_words, target_words); // Get the score
 

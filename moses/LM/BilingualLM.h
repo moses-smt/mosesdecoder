@@ -77,7 +77,8 @@ class BilingualLM : public StatefulFeatureFunction {
   void getTargetWordsChart(
     std::vector<int>& neuralLMids,
     int current_word_index,
-    std::vector<int>& words) const;
+    std::vector<int>& words,
+    bool sentence_begin) const;
 
   size_t getStateChart(std::vector<int>& neuralLMids) const;
 
