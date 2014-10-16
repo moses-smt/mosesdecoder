@@ -4,8 +4,6 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/FFState.h"
 #include <boost/thread/tss.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #include "moses/Hypothesis.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/InputPath.h"
