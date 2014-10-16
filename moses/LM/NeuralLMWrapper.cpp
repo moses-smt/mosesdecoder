@@ -47,6 +47,8 @@ LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, Sta
 
   if (!m_neuralLM.get()) {
     m_neuralLM.reset(new nplm::neuralLM(*m_neuralLM_shared));
+    //TODO: config option?
+    m_neuralLM->set_cache(1000000);
   }
   size_t hashCode = 0;
 
