@@ -96,10 +96,8 @@ protected:
   FactorType pos_factortype;
   const Factor* BOS_factor;
   const Factor* EOS_factor;
-  mutable Word BOS_word_actual;
-  mutable Word EOS_word_actual;
-  const Word& BOS_word;
-  const Word& EOS_word;
+  mutable Word BOS_word;
+  mutable Word EOS_word;
 
 public:
   BilingualLM(const std::string &line);

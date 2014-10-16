@@ -18,14 +18,12 @@ int BilingualLMState::Compare(const FFState& other) const
 ////////////////////////////////////////////////////////////////
 BilingualLM::BilingualLM(const std::string &line)
     : StatefulFeatureFunction(1, line),
-      word_factortype(0),
-      BOS_word(BOS_word_actual),
-      EOS_word(EOS_word_actual) {
+      word_factortype(0) {
   FactorCollection& factorFactory = FactorCollection::Instance(); //Factor Factory to use for BOS_ and EOS_
   BOS_factor = factorFactory.AddFactor(BOS_);
-  BOS_word_actual.SetFactor(0, BOS_factor);
+  BOS_word.SetFactor(0, BOS_factor);
   EOS_factor = factorFactory.AddFactor(EOS_);
-  EOS_word_actual.SetFactor(0, EOS_factor);
+  EOS_word.SetFactor(0, EOS_factor);
   
 }
 
