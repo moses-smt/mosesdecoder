@@ -1,4 +1,6 @@
 #include "moses/LM/BilingualLM.h"
+#include <boost/unordered_map.hpp>
+#include <utility> //make_pair
 
 namespace nplm {
   class neuralLM;
@@ -15,8 +17,6 @@ class BilingualLM_NPLM : public BilingualLM {
 
   int getNeuralLMId(const Word& word, bool is_source_word) const;
 
-  int LookUpNeuralLMWord(const std::string& str) const;
-
   void initSharedPointer() const;
 
   void loadModel();
@@ -28,8 +28,7 @@ class BilingualLM_NPLM : public BilingualLM {
   nplm::neuralLM *m_neuralLM_shared;
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 
-  mutable std::map<const Factor*, int> neuralLMids;
-  mutable boost::shared_mutex neuralLMids_lock;
+  mutable boost::unordered_map<const Factor*, int> neuralLMids;
 
   //const Factor* NULL_factor_overwrite;
   std::string NULL_string;

@@ -1,5 +1,6 @@
 #include "BiLM_NPLM.h"
 #include "neuralLM.h"
+#include "vocabulary.h"
 
 namespace Moses {
 
@@ -23,70 +24,32 @@ float BilingualLM_NPLM::Score(std::vector<int>& source_words, std::vector<int>& 
   return m_neuralLM->lookup_ngram(source_words);
 }
 
-int BilingualLM_NPLM::LookUpNeuralLMWord(const std::string& str) const {
-  return m_neuralLM->lookup_word(str);
-}
-
 const Word& BilingualLM_NPLM::getNullWord() const {
   return NULL_word;
 }
 
-//Cache for NeuralLMids
-int BilingualLM_NPLM::getNeuralLMId(
-    const Word& word, bool is_source_word) const{
+int BilingualLM_NPLM::getNeuralLMId(const Word& word, bool is_source_word) const {
   initSharedPointer();
 
+  boost::unordered_map<const Factor*, int>::iterator it;
   const Factor* factor = word.GetFactor(word_factortype);
 
-  std::map<const Factor *, int>::iterator it;
-
-  boost::upgrade_lock< boost::shared_mutex > read_lock(neuralLMids_lock);
   it = neuralLMids.find(factor);
-
-  if (it != neuralLMids.end()) {
-    if (!factored){
-      return it->second; //Lock is released here automatically
-    } else {
-      //See if word is unknown
-      if (it->second == unknown_word_id){
-        const Factor* pos_factor = word.GetFactor(pos_factortype); //Get POS tag
-        //Look up the POS tag in the cache
-        it = neuralLMids.find(pos_factor);
-        if (it != neuralLMids.end()){
-          return it->second; //We have our pos tag in the cache.
-        } else {
-          //We have to lookup the pos_tag
-          const std::string posstring = pos_factor->GetString().as_string();
-          int neuralLM_wordID = LookUpNeuralLMWord(posstring);
-
-          boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(read_lock);
-          neuralLMids.insert(std::pair<const Factor *, int>(pos_factor, neuralLM_wordID));
-
-          return neuralLM_wordID; //We return the ID of the pos TAG
-        }
-      } else {
-        return it->second; //We return the neuralLMid of the word
-      }
-    }
+  //If we know the word return immediately
+  if (it != neuralLMids.end()){
+    return it->second;
+  }
+  //If we don't know the word and we aren't factored, return the word.
+  if (!factored) {
+      return unknown_word_id;
+  } 
+  //Else try to get a pos_factor
+  const Factor* pos_factor = word.GetFactor(pos_factortype);
+  it = neuralLMids.find(pos_factor);
+  if (it != neuralLMids.end()){
+    return it->second;
   } else {
-    //We have to lookup the word
-    const std::string string = factor->GetString().as_string();
-    int neuralLM_wordID = LookUpNeuralLMWord(string);
-
-    boost::upgrade_to_unique_lock< boost::shared_mutex > uniqueLock(read_lock);
-    neuralLMids.insert(std::pair<const Factor *, int>(factor, neuralLM_wordID));
-
-    if (!factored) {
-      return neuralLM_wordID; //Lock is released here
-    } else {
-      if (neuralLM_wordID == unknown_word_id){
-        const Factor* pos_factor = word.GetFactor(pos_factortype);
-        const std::string factorstring = pos_factor->GetString().as_string();
-        neuralLM_wordID = LookUpNeuralLMWord(string);
-        neuralLMids.insert(std::pair<const Factor *, int>(pos_factor, neuralLM_wordID));
-      }
-      return neuralLM_wordID; //If a POS tag is needed, neuralLM_wordID is going to be updated.
-    }
+    return unknown_word_id;
   }
 }
 
@@ -128,6 +91,23 @@ void BilingualLM_NPLM::loadModel() {
 
   m_neuralLM_shared->set_cache(neuralLM_cache); //Default 1000000
   unknown_word_id = m_neuralLM_shared->lookup_word("<unk>");
+
+  //Setup factor -> NeuralLMId cache
+  FactorCollection& factorFactory = FactorCollection::Instance(); //To do the conversion from string to vocabID
+
+  const nplm::vocabulary& vocab = m_neuralLM_shared->get_vocabulary();
+  const boost::unordered_map<std::string, int>& neuraLMvocabmap = vocab.get_idmap();
+
+  boost::unordered_map<std::string, int>::const_iterator it;
+
+  for (it = neuraLMvocabmap.cbegin(); it != neuraLMvocabmap.cend(); it++) {
+    std::string raw_word = it->first;
+    int neuralLMid = it->second;
+    const Factor * factor = factorFactory.AddFactor(raw_word);
+
+    neuralLMids.insert(std::make_pair(factor, neuralLMid));
+  }
+
 }
 
 } // namespace Moses
