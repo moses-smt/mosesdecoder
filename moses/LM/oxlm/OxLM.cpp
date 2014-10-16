@@ -39,6 +39,16 @@ OxLM<Model>::~OxLM() {
   if (persistentCache) {
     double cache_hit_ratio = 100.0 * cacheHits / totalHits;
     cerr << "Cache hit ratio: " << cache_hit_ratio << endl;
+
+    string cache_file = m_filePath + ".phrases.cache.bin";
+    ofstream f(cache_file);
+    boost::archive::binary_oarchive oar(f);
+    cerr << "Saving persistent cache to " << cache_file << endl;
+    oar << *cache;
+    cerr << "Done saving " << cache->size()
+         << " n-gram probabilities..." << endl;
+
+    cache->clear();
   }
 }
 
@@ -89,6 +99,20 @@ LMResult OxLM<Model>::GetValue(
     const vector<const Word*> &contextFactor, State* finalState) const {
   if (!cache.get()) {
     cache.reset(new QueryCache());
+
+    if (persistentCache) {
+      string cache_file = m_filePath + ".phrases.cache.bin";
+      if (boost::filesystem::exists(cache_file)) {
+        ifstream f(cache_file);
+        boost::archive::binary_iarchive iar(f);
+        cerr << "Loading n-gram probability cache from " << cache_file << endl;
+        iar >> *cache;
+        cerr << "Done loading " << cache->size()
+             << " n-gram probabilities..." << endl;
+      } else {
+        cerr << "Cache file not found!" << endl;
+      }
+    }
   }
 
   vector<int> context;
@@ -144,11 +168,11 @@ void OxLM<Model>::InitializeForInput(const InputType& source) {
     }
 
     int sentence_id = source.GetTranslationId();
-    string cacheFile = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
-    if (boost::filesystem::exists(cacheFile)) {
-      ifstream f(cacheFile);
+    string cache_file = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
+    if (boost::filesystem::exists(cache_file)) {
+      ifstream f(cache_file);
       boost::archive::binary_iarchive iar(f);
-      cerr << "Loading n-gram probability cache from " << cacheFile << endl;
+      cerr << "Loading n-gram probability cache from " << cache_file << endl;
       iar >> *cache;
       cerr << "Done loading " << cache->size()
            << " n-gram probabilities..." << endl;
@@ -165,10 +189,10 @@ void OxLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
 
   if (persistentCache) {
     int sentence_id = source.GetTranslationId();
-    string cacheFile = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
-    ofstream f(cacheFile);
+    string cache_file = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
+    ofstream f(cache_file);
     boost::archive::binary_oarchive oar(f);
-    cerr << "Saving persistent cache to " << cacheFile << endl;
+    cerr << "Saving persistent cache to " << cache_file << endl;
     oar << *cache;
     cerr << "Done saving " << cache->size()
          << " n-gram probabilities..." << endl;
