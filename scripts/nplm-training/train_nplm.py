@@ -25,6 +25,7 @@ def main():
   parser.add_option("-p", "--skip-preparation", action="store_true", dest="skip_preparation")
   parser.add_option("-f", "--config-options-file", dest="config_options_file")
   parser.add_option("-g", "--log-file", dest="log_file")
+  parser.add_option("-v", "--validation-ngrams", dest="validation_file")
 
   parser.set_defaults(
     working_dir = "working"
@@ -43,9 +44,16 @@ def main():
     ,skip_preparation = False
     ,config_options_file = "config"
     ,log_file = "log"
+    ,validation_file = None
   )
 
   options,args = parser.parse_args(sys.argv)
+  
+  # Set up validation command variable to use with validation set.
+  validations_command = []
+  if options.validation_file is not None:
+    validations_command =["--validation_file", (options.validation_file + ".numberize")]
+    
 
   # In order to allow for different models to be trained after the same
   # preparation step, we should provide an option for multiple output directories
@@ -81,6 +89,15 @@ def main():
     ret = subprocess.call(prep_args, stdout=log_file_write, stderr=log_file_write)
     log_file_write.write("\n")
     if ret: raise Exception("Prepare failed")
+  
+    # Prepare the validation file in the same way
+    if options.validation_file is not None:
+      valid_prep_args = [options.nplm_home + "/src/prepareNeuralLM", "--train_text", options.validation_file, "--ngram_size", \
+                  str(options.ngram_size), "--ngramize", "0", "--words_file", vocab_file, "--train_file", (options.validation_file + ".numberize") ]
+      config_file_write.write("Prepare validation set:\n" + ' '.join(valid_prep_args) + '\n\n')
+      ret = subprocess.call(valid_prep_args, stdout=log_file_write, stderr=log_file_write)
+      if ret: raise Exception("Prepare failed")
+      
 
   model_prefix = options.output_dir + "/" + options.output_model + ".model.nplm"
   train_args = [options.nplm_home + "/src/trainNeuralNetwork", "--train_file", prep_file, "--num_epochs", str(options.epochs),
@@ -88,7 +105,7 @@ def main():
                 model_prefix, "--learning_rate", "1", "--minibatch_size", str(options.minibatch_size),
                 "--num_noise_samples", str(options.noise), "--num_hidden", str(options.hidden), "--input_embedding_dimension",
                 str(options.input_embedding), "--output_embedding_dimension", str(options.output_embedding), "--num_threads",
-                str(options.threads)]
+                str(options.threads)] + validations_command
   print "Train model command: "
   print ', '.join(train_args)
 
