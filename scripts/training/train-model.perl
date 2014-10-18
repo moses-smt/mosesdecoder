@@ -826,6 +826,10 @@ sub reduce_factors {
 sub make_classes {
     my ($corpus,$classes) = @_;
     my $cmd = "$MKCLS -c50 -n2 -p$corpus -V$classes opt";
+    if($_HMM_ALIGN) {
+         # HMM model does not use classes
+         safesystem("touch $classes");
+    }
     print STDERR "(1.1) running mkcls  @ ".`date`."$cmd\n";
     if (-e $classes) {
         print STDERR "  $classes already in place, reusing\n";
@@ -1549,7 +1553,9 @@ sub score_phrase_phrase_extract {
     }
 
     my $TIME = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(\-+Time +\S+)/;
-
+	$DOMAIN = "--IgnoreSentenceId" if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /IgnoreSentenceId/;
+      
+	
     my $SINGLETON = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /Singleton/);
     my $CROSSEDNONTERM = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CrossedNonTerm/);
 
