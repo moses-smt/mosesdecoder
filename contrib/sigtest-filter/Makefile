@@ -11,4 +11,4 @@ filter-pt: filter-pt.cpp
 
 filter-pt-mt: filter-pt-mt.cpp
 	./check-install $(SALMDIR)
-	$(CXX) -O6 $(INC) $(OBJS) -o filter-pt-mt filter-pt-mt.cpp -lboost_thread
+	$(CXX) -O6 $(INC) $(OBJS) -o filter-pt-mt filter-pt-mt.cpp -lboost_thread -lboost_iostreams -lboost_system

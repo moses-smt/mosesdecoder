@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
+#include <fstream>
 
 #include "_SuffixArraySearchApplicationBase.h"
 
@@ -12,7 +13,12 @@
 #include <set>
 
 #include <boost/thread/tss.hpp>
-
+#include <boost/iostreams/filtering_stream.hpp>                                            
+#include <boost/iostreams/filter/gzip.hpp>                                                 
+#include <boost/iostreams/stream.hpp>  
+#include <boost/asio/io_service.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread/thread.hpp>
 
 #ifdef WIN32
 #include "WIN32_functions.h"
@@ -27,7 +33,7 @@ typedef std::map<std::string, ClockedSentIdSet> PhraseSetMap;
 #undef min
 
 // constants
-const size_t MINIMUM_SIZE_TO_KEEP = 10000;     // increase this to improve memory usage,
+const size_t MINIMUM_SIZE_TO_KEEP = 1000;     // increase this to improve memory usage,
 // reduce for speed
 const std::string SEPARATOR       = " ||| ";
 
@@ -42,7 +48,7 @@ double sig_filter_limit = 0;            // keep phrase pairs with -log(sig) > si
 //    higher = filter-more
 bool pef_filter_only = false;           // only filter based on pef
 bool hierarchical = false;
-int max_cache = 0;
+int max_cache = 1000;
 
 // globals
 static boost::thread_specific_ptr<PhraseSetMap> esets;
@@ -62,14 +68,18 @@ void usage()
             << "in H. Johnson, et al. (2007) Improving Translation Quality\n"
             << "by Discarding Most of the Phrasetable. EMNLP 2007.\n"
             << "\nUsage:\n"
-            << "\n  filter-pt -e english.suf-arr -f french.suf-arr\n"
-            << "      [-c] [-p] [-l threshold] [-n num] PHRASE-TABLE-SPLITS\n\n"
+            << "\n  filter-pt-mt -t 16 -e english.suf-arr -f french.suf-arr\n"
+            << "      [-c] [-p] [-l threshold] [-n num] phrase-table.*.gz\n"
+            << "   Writes output parts to phrase-table.000.filtered.gz phrase-table.001.filtered.gz ...\n\n"
             << "   [-l threshold] >0.0, a+e, or a-e: keep values that have a -log significance > this\n"
             << "   [-n num      ] 0, 1...: 0=no filtering, >0 sort by P(e|f) and keep the top num elements\n"
             << "   [-c          ] add the cooccurence counts to the phrase table\n"
             << "   [-p          ] add -log(significance) to the phrasetable\n"
             << "   [-h          ] filter hierarchical rule table\n"
-            << "   [-m num      ] limit cache to num most recent phrases\n";
+            << "   [-m num      ] limit cache to num most recent phrases\n"
+            << "   [-t num      ] use num threads\n\n"
+            << "Create splits with:\n"
+            << "  zcat phrase-table.gz | split -d -a 3 -l 5000000 --filter \"gzip > $FILE.gz\" - phrase-table.\n";
   exit(1);
 }
 
@@ -319,7 +329,7 @@ SentIdSet find_occurrences(const std::string& rule, C_SuffixArraySearchApplicati
 
 
 // input: unordered list of translation options for a single source phrase
-void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
+void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options, PhraseSetMap& esets, PhraseSetMap& fsets)
 {
   if (pfe_filter_limit>0 && options.size() > pfe_filter_limit) {
     nremoved_pfefilter += (options.size() - pfe_filter_limit);
@@ -331,19 +341,19 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
   if (pef_filter_only) return;
 //   std::cerr << "f phrase: " << options.front()->f_phrase << "\n";
   SentIdSet fset;
-  fset = find_occurrences(options.front()->f_phrase, f_sa, *fsets);
+  fset = find_occurrences(options.front()->f_phrase, f_sa, fsets);
   size_t cf = fset.size();
   for (std::vector<PTEntry*>::iterator i=options.begin(); i != options.end(); ++i) {
     const std::string& e_phrase = (*i)->e_phrase;
     size_t cef=0;
-    ClockedSentIdSet& clocked_eset = (*esets)[e_phrase];
+    ClockedSentIdSet& clocked_eset = esets[e_phrase];
     SentIdSet & eset = clocked_eset.first;
     clocked_eset.second = clock();
     if (eset.empty()) {
-        eset = find_occurrences(e_phrase, e_sa, *esets);
+        eset = find_occurrences(e_phrase, e_sa, esets);
         //std::cerr << "Looking up e-phrase: " << e_phrase << "\n";
     }
-    size_t ce=eset.size();
+    size_t ce = eset.size();
     if (ce < cf) {
       for (SentIdSet::iterator i=eset.begin(); i != eset.end(); ++i) {
         if (std::binary_search(fset.begin(), fset.end(), *i)) cef++;
@@ -356,7 +366,7 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
     double nlp = -log(fisher_exact(cef, cf, ce));
     (*i)->set_cooc_stats(cef, cf, ce, nlp);
     if (ce < MINIMUM_SIZE_TO_KEEP) {
-      esets->erase(e_phrase);
+      esets.erase(e_phrase);
     }
 
   }
@@ -381,13 +391,25 @@ void prune_cache(PhraseSetMap & psm) {
   }
 }
 
-template <class IStream, class OStream>
-void filter(IStream &in, OStream& out, int pfe_index) {
+void filter(std::string inPath, std::string outPath, int pfe_index) {
   if(!esets.get())
       esets.reset(new PhraseSetMap());
   if(!fsets.get())
       fsets.reset(new PhraseSetMap());
 
+  PhraseSetMap& esets_ref = *esets;
+  PhraseSetMap& fsets_ref = *fsets;
+      
+  std::ifstream inStream(inPath.c_str(), std::ios_base::in|std::ios_base::binary);
+  boost::iostreams::filtering_istream in;
+  in.push(boost::iostreams::gzip_decompressor());
+  in.push(inStream);
+  
+  std::ofstream outStream(outPath.c_str(), std::ios_base::out|std::ios_base::binary);    
+  boost::iostreams::filtering_ostream out;
+  out.push(boost::iostreams::gzip_compressor());
+  out.push(outStream);
+      
   char tmpString[10000];
   std::string prev = "";
   std::vector<PTEntry*> options;
@@ -397,8 +419,8 @@ void filter(IStream &in, OStream& out, int pfe_index) {
     if(++pt_lines % 10000==0) { 
       std::cerr << ".";
       
-      prune_cache(*esets);
-      prune_cache(*fsets);
+      prune_cache(esets_ref);
+      prune_cache(esets_ref);
       
       if(pt_lines%500000==0) 
         std::cerr << "[n:"<<pt_lines<<"]\n";
@@ -410,7 +432,7 @@ void filter(IStream &in, OStream& out, int pfe_index) {
         prev = pp->f_phrase;
 
         if (!options.empty()) {  // always true after first line
-          compute_cooc_stats_and_filter(options);
+          compute_cooc_stats_and_filter(options, esets_ref, fsets_ref);
         }
         for (std::vector<PTEntry*>::iterator i = options.begin(); i != options.end(); ++i) {
           out << **i << std::endl;
@@ -424,7 +446,7 @@ void filter(IStream &in, OStream& out, int pfe_index) {
       }
     }
   }
-  compute_cooc_stats_and_filter(options);
+  compute_cooc_stats_and_filter(options, esets_ref, fsets_ref);
   for (std::vector<PTEntry*>::iterator i = options.begin(); i != options.end(); ++i) {
     out << **i << std::endl;
     delete *i;
@@ -448,7 +470,8 @@ int main(int argc, char * argv[])
   const char* efile=0;
   const char* ffile=0;
   int pfe_index = 2;
-  while ((c = getopt(argc, argv, "cpf:e:i:n:l:m:h")) != -1) {
+  int threads = 1;
+  while ((c = getopt(argc, argv, "cpf:e:i:n:t:l:m:h")) != -1) {
     switch (c) {
     case 'e':
       efile = optarg;
@@ -462,6 +485,10 @@ int main(int argc, char * argv[])
     case 'n':  // keep only the top n entries in phrase table sorted by p(f|e) (0=all)
       pfe_filter_limit = atoi(optarg);
       std::cerr << "P(f|e) filter limit: " << pfe_filter_limit << std::endl;
+      break;
+    case 't':  // keep only the top n entries in phrase table sorted by p(f|e) (0=all)
+      threads = atoi(optarg);
+      std::cerr << "Using threads: " << threads << std::endl;
       break;
     case 'c':
       print_cooc_counts = true;
@@ -497,7 +524,7 @@ int main(int argc, char * argv[])
     
   if (sig_filter_limit == 0.0) pef_filter_only = true;
   //-----------------------------------------------------------------------------
-  if (optind != argc || ((!efile || !ffile) && !pef_filter_only)) {
+  if (optind == argc || ((!efile || !ffile) && !pef_filter_only)) {
     usage();
   }
   
@@ -531,10 +558,23 @@ int main(int argc, char * argv[])
   std::vector<std::string> splitOutPaths;
   for(int i = optind; i < argc; ++i) {
     splitInPaths.push_back(argv[i]);
-    splitOutPaths.push_back(std::string(argv[i]) + std::string(".filtered.gz"));
     
-    std::cerr << splitInPaths.back() << " " << splitOutPaths.back() << std::endl;
+    std::string base = std::string(argv[i]);
+    base = base.substr(0, base.size() - 3);
+    
+    splitOutPaths.push_back(base + ".filtered.gz");  
   }
   
-  filter(std::cin, std::cout, pfe_index);
+  boost::asio::io_service ioService;
+  boost::thread_group threadpool;
+  boost::asio::io_service::work work(ioService);
+  
+  for(int i = 0; i < threads; i++)
+    threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &ioService));
+    
+  for(int i = 0; i < splitInPaths.size(); ++i)
+    ioService.post(boost::bind(filter, splitInPaths[i], splitOutPaths[i], pfe_index));
+  
+  ioService.stop();
+  threadpool.join_all();
 }
