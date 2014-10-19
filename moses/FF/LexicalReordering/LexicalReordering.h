@@ -66,6 +66,8 @@ public:
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
   {}
+  bool GetHaveDefaultScores() { return m_haveDefaultScores; }
+  float GetDefaultScore( size_t i ) { return m_defaultScores[i]; }
 
 private:
   bool DecodeCondition(std::string s);
@@ -82,6 +84,8 @@ private:
   //bool m_oneScorePerDirection;
   std::vector<FactorType> m_factorsE, m_factorsF;
   std::string m_filePath;
+  bool m_haveDefaultScores;
+  Scores m_defaultScores;
 };
 
 }

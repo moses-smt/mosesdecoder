@@ -9,6 +9,29 @@ $(TOP)/moses/TranslationModel/UG//mmsapt
 $(TOP)/util//kenutil 
 ; 
 
+exe try-align2 : 
+try-align2.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)/moses/TranslationModel/UG/generic//stringdist 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe count-ptable-features : 
+count-ptable-features.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
 exe ptable-lookup : 
 ptable-lookup.cc 
 $(TOP)/moses//moses
@@ -53,6 +76,16 @@ $(TOP)/moses/TranslationModel/UG//mmsapt
 $(TOP)/util//kenutil 
 ; 
 
-install $(PREFIX)/bin : try-align ; 
+exe spe-check-coverage3 : 
+spe-check-coverage3.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+install $(PREFIX)/bin : try-align try-align2 ; 
 
 fakelib mmsapt : [ glob *.cpp mmsapt*.cc sapt*.cc ] ;

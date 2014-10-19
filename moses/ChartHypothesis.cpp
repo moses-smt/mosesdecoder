@@ -212,7 +212,7 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 /** calculate total score
   * @todo this should be in ScoreBreakdown
  */
-void ChartHypothesis::Evaluate()
+void ChartHypothesis::EvaluateWhenApplied()
 {
   const StaticData &staticData = StaticData::Instance();
   // total scores from prev hypos
@@ -293,7 +293,7 @@ void ChartHypothesis::CleanupArcList()
    */
   const StaticData &staticData = StaticData::Instance();
   size_t nBestSize = staticData.GetNBestSize();
-  bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph();
+  bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph() || staticData.GetOutputSearchGraphHypergraph();
 
   if (!distinctNBest && m_arcList->size() > nBestSize) {
     // prune arc list only if there too many arcs

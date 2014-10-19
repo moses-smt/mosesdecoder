@@ -106,12 +106,14 @@ void PhrasePairFeature::Load()
   }
 }
 
-void PhrasePairFeature::EvaluateWhenApplied(
-  const Hypothesis& hypo,
-  ScoreComponentCollection* accumulator) const
+void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
+              , const InputPath &inputPath
+              , const TargetPhrase &targetPhrase
+              , const StackVec *stackVec
+              , ScoreComponentCollection &scoreBreakdown
+              , ScoreComponentCollection *estimatedFutureScore) const
 {
-  const TargetPhrase& target = hypo.GetCurrTargetPhrase();
-  const Phrase& source = hypo.GetTranslationOption().GetInputPath().GetPhrase();
+  const Phrase& source = inputPath.GetPhrase();
   if (m_simple) {
     ostringstream namestr;
     namestr << "pp_";
@@ -122,17 +124,17 @@ void PhrasePairFeature::EvaluateWhenApplied(
       namestr << sourceFactor->GetString();
     }
     namestr << "~";
-    namestr << target.GetWord(0).GetFactor(m_targetFactorId)->GetString();
-    for (size_t i = 1; i < target.GetSize(); ++i) {
-      const Factor* targetFactor = target.GetWord(i).GetFactor(m_targetFactorId);
+    namestr << targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString();
+    for (size_t i = 1; i < targetPhrase.GetSize(); ++i) {
+      const Factor* targetFactor = targetPhrase.GetWord(i).GetFactor(m_targetFactorId);
       namestr << ",";
       namestr << targetFactor->GetString();
     }
 
-    accumulator->SparsePlusEquals(namestr.str(),1);
+    scoreBreakdown.SparsePlusEquals(namestr.str(),1);
   }
   if (m_domainTrigger) {
-    const Sentence& input = static_cast<const Sentence&>(hypo.GetInput());
+    const Sentence& input = static_cast<const Sentence&>(input);
     const bool use_topicid = input.GetUseTopicId();
     const bool use_topicid_prob = input.GetUseTopicIdAndProb();
 
@@ -145,9 +147,9 @@ void PhrasePairFeature::EvaluateWhenApplied(
       pair << sourceFactor->GetString();
     }
     pair << "~";
-    pair << target.GetWord(0).GetFactor(m_targetFactorId)->GetString();
-    for (size_t i = 1; i < target.GetSize(); ++i) {
-      const Factor* targetFactor = target.GetWord(i).GetFactor(m_targetFactorId);
+    pair << targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString();
+    for (size_t i = 1; i < targetPhrase.GetSize(); ++i) {
+      const Factor* targetFactor = targetPhrase.GetWord(i).GetFactor(m_targetFactorId);
       pair << ",";
       pair << targetFactor->GetString();
     }
@@ -165,7 +167,7 @@ void PhrasePairFeature::EvaluateWhenApplied(
 
         feature << "_";
         feature << pair.str();
-        accumulator->SparsePlusEquals(feature.str(), 1);
+        scoreBreakdown.SparsePlusEquals(feature.str(), 1);
       } else {
         // use topic probabilities
         const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
@@ -173,7 +175,7 @@ void PhrasePairFeature::EvaluateWhenApplied(
           stringstream feature;
           feature << "pp_unk_";
           feature << pair.str();
-          accumulator->SparsePlusEquals(feature.str(), 1);
+          scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         } else {
           for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
             stringstream feature;
@@ -181,7 +183,7 @@ void PhrasePairFeature::EvaluateWhenApplied(
             feature << topicid_prob[i];
             feature << "_";
             feature << pair.str();
-            accumulator->SparsePlusEquals(feature.str(), atof((topicid_prob[i+1]).c_str()));
+            scoreBreakdown.SparsePlusEquals(feature.str(), atof((topicid_prob[i+1]).c_str()));
           }
         }
       }
@@ -195,12 +197,12 @@ void PhrasePairFeature::EvaluateWhenApplied(
         namestr << sourceTrigger;
         namestr << "_";
         namestr << pair.str();
-        accumulator->SparsePlusEquals(namestr.str(),1);
+        scoreBreakdown.SparsePlusEquals(namestr.str(),1);
       }
     }
   }
   if (m_sourceContext) {
-    const Sentence& input = static_cast<const Sentence&>(hypo.GetInput());
+    const Sentence& input = static_cast<const Sentence&>(input);
 
     // range over source words to get context
     for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
@@ -229,14 +231,14 @@ void PhrasePairFeature::EvaluateWhenApplied(
           namestr << sourceFactor->GetString();
         }
         namestr << "~";
-        namestr << target.GetWord(0).GetFactor(m_targetFactorId)->GetString();
-        for (size_t i = 1; i < target.GetSize(); ++i) {
-          const Factor* targetFactor = target.GetWord(i).GetFactor(m_targetFactorId);
+        namestr << targetPhrase.GetWord(0).GetFactor(m_targetFactorId)->GetString();
+        for (size_t i = 1; i < targetPhrase.GetSize(); ++i) {
+          const Factor* targetFactor = targetPhrase.GetWord(i).GetFactor(m_targetFactorId);
           namestr << ",";
           namestr << targetFactor->GetString();
         }
 
-        accumulator->SparsePlusEquals(namestr.str(),1);
+        scoreBreakdown.SparsePlusEquals(namestr.str(),1);
       }
     }
   }

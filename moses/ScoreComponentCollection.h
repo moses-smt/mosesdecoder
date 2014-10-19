@@ -261,6 +261,11 @@ public:
 
   void PlusEquals(const FeatureFunction* sp, const ScorePair &scorePair);
 
+  // Add score by index
+  void PlusEquals(size_t index, float score) {
+    m_scores[index] += score;
+  }
+
   //For features which have an unbounded number of components
   void SparsePlusEquals(const std::string& full_name, float score) {
     FName fname(full_name);
@@ -283,7 +288,7 @@ public:
     m_scores[indexes.first] = score;
   }
 
-  // Assign core weight by index
+  // Assign score by index
   void Assign(size_t index, float score) {
     m_scores[index] = score;
   }
@@ -354,6 +359,11 @@ public:
     m_scores.capMin(minValue);
   }
 
+  std::pair<size_t,size_t> GetIndexesForProducer(const FeatureFunction* sp) const {
+    IndexPair indexPair = GetIndexes(sp);
+    return indexPair;
+  }
+
   //! if a FeatureFunction produces a single score (for example, a language model score)
   //! this will return it.  If not, this method will throw
   float GetScoreForProducer(const FeatureFunction* sp) const {
@@ -383,7 +393,7 @@ public:
   size_t SparseL1Regularize(float lambda);
   void SparseL2Regularize(float lambda);
   void Save(const std::string& filename) const;
-  void Save(std::ostream&) const;
+  void Save(std::ostream&, bool multiline=true) const;
 
   void IncrementSparseHopeFeatures() {
     m_scores.incrementSparseHopeFeatures();

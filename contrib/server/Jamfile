@@ -5,6 +5,10 @@ import path ;
 
 with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
 if $(with-xmlrpc-c) {
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking the XMLRPC-C library; Do NOT use v.1.25.29 !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+
   build-moses-server = true ;
   xmlrpc-command = $(with-xmlrpc-c)/bin/xmlrpc-c-config ;
   if ! [ path.exists $(xmlrpc-command) ] {
@@ -35,7 +39,7 @@ if $(build-moses-server) = true
   xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --libs" ] ;
   xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --cflags" ] ;
 
-  exe mosesserver : mosesserver.cpp ../../moses//moses ../../OnDiskPt//OnDiskPt ../../moses-cmd/IOWrapper.cpp : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
+  exe mosesserver : mosesserver.cpp ../../moses//moses ../../OnDiskPt//OnDiskPt ../../moses-cmd/IOWrapper.cpp ../..//boost_filesystem  : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
 } else {
   alias mosesserver ;
 }

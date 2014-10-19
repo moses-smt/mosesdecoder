@@ -60,12 +60,12 @@ const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 5000;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
-#ifdef PT_UG
+//#ifdef PT_UG
 // setting to std::numeric_limits<size_t>::max() makes the regression test for (deprecated) PhraseDictionaryDynamicSuffixArray fail. 
- const size_t DEFAULT_MAX_PHRASE_LENGTH = 100000;
-#else
- const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
-#endif
+// const size_t DEFAULT_MAX_PHRASE_LENGTH = 100000;
+//#else
+const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
+//#endif
 const size_t DEFAULT_MAX_CHART_SPAN			= 10;
 const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;

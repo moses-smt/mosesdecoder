@@ -25,9 +25,18 @@
 
 namespace Moses
 {
+
 AlignmentInfo::AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs)
   : m_collection(pairs)
 {
+  BuildNonTermIndexMap();
+}
+
+AlignmentInfo::AlignmentInfo(const std::vector<unsigned char> &aln)
+{
+  assert(aln.size()%2==0);
+  for (size_t i = 0; i < aln.size(); i+= 2)
+    m_collection.insert(std::make_pair(size_t(aln[i]),size_t(aln[i+1])));
   BuildNonTermIndexMap();
 }
 

@@ -1,0 +1,2 @@
+exe extract-mixed-syntax : Main.cpp AlignedSentence.cpp AlignedSentenceSyntax.cpp ConsistentPhrase.cpp ConsistentPhrases.cpp NonTerm.cpp Parameter.cpp Phrase.cpp pugixml.cpp Rule.cpp RulePhrase.cpp Rules.cpp RuleSymbol.cpp SyntaxTree.cpp Word.cpp ..//deps ../..//z ../..//boost_iostreams ../..//boost_program_options ../../moses//moses : <include>..  ;
+

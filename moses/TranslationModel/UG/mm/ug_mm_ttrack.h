@@ -93,7 +93,7 @@ namespace ugdiss
     assert(myfile.is_open());
     Moses::prime(myfile);
     filepos_type idxOffset;
-    char* p = myfile.data();
+    const char* p = myfile.data();
     id_type numSent,numWords;
     p = numread(p,idxOffset);
     p = numread(p,numSent);

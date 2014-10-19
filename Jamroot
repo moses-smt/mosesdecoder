@@ -114,15 +114,28 @@ requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
 requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
-if [ option.get "with-lbllm" ] {
+if [ option.get "with-oxlm" ] {
   external-lib boost_serialization ;
   external-lib gomp ;
   requirements += <library>boost_serialization ;
   requirements += <library>gomp ;
 }
 
-if [ option.get "with-cmph" ] {
+if [ option.get "with-cmph" : : "yes" ] {
   requirements += <define>HAVE_CMPH ;
+}
+
+if [ option.get "with-icu" : : "yes" ]
+{
+  external-lib icuuc ;
+  external-lib icuio ;
+  external-lib icui18n ;
+  requirements += <library>icuuc/<link>shared ;
+  requirements += <library>icuio/<link>shared ;
+  requirements += <library>icui18n/<link>shared ;
+  requirements += <cxxflags>-fPIC ;
+  requirements += <address-model>64 ;
+  requirements += <runtime-link>shared ;
 }
 
 if [ option.get "with-probing-pt" : : "yes" ]
@@ -159,7 +172,7 @@ build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses
 if [ option.get "with-mm" : : "yes" ]
 {
  alias mm :  
-  moses/TranslationModel/UG//spe-check-coverage2
+  moses/TranslationModel/UG//count-ptable-features 
   moses/TranslationModel/UG//ptable-lookup 
   moses/TranslationModel/UG//sim-pe 
   moses/TranslationModel/UG//spe-check-coverage 
@@ -194,6 +207,7 @@ phrase-extract//lexical-reordering
 phrase-extract//extract-ghkm 
 phrase-extract//pcfg-extract 
 phrase-extract//pcfg-score 
+phrase-extract//extract-mixed-syntax 
 biconcor 
 mira//mira 
 contrib/server//mosesserver 

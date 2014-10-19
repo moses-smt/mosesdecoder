@@ -38,6 +38,7 @@ namespace Moses
 {
 
 class ChartHypothesis;
+class ChartSearchGraphWriter;
 
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
  */
@@ -49,21 +50,31 @@ private:
   std::auto_ptr<SentenceStats> m_sentenceStats;
   clock_t m_start; /**< starting time, used for logging */
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
+  size_t m_lineNumber;
 
   ChartParser m_parser;
 
   ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
 
+  /* auxilliary functions for SearchGraphs */
+  void FindReachableHypotheses( 
+    const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable , size_t* winners, size_t* losers) const; 
+  void WriteSearchGraph(const ChartSearchGraphWriter& writer) const;
+
 public:
-  ChartManager(InputType const& source);
+  ChartManager(size_t lineNumber, InputType const& source);
   ~ChartManager();
   void ProcessSentence();
   void AddXmlChartOptions();
   const ChartHypothesis *GetBestHypothesis() const;
   void CalcNBest(size_t n, std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > &nBestList, bool onlyDistinct=false) const;
 
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
-  void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
+  /** "Moses" (osg)  type format */
+  void OutputSearchGraphMoses(std::ostream &outputSearchGraphStream) const;
+
+  /** Output in (modified) Kenneth hypergraph format */
+  void OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const;
+
 
   //! the input sentence being decoded
   const InputType& GetSource() const {
@@ -97,6 +108,10 @@ public:
   }
 
   const ChartParser &GetParser() const { return m_parser; }
+
+  size_t GetLineNumber() const {
+    return m_lineNumber;
+  }
 };
 
 }

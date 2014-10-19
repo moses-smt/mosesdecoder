@@ -257,7 +257,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
     , const std::vector<float> &weightT
     , bool isSyntax) const
 {
-  Moses::TargetPhrase *ret = new Moses::TargetPhrase();
+  Moses::TargetPhrase *ret = new Moses::TargetPhrase(&phraseDict);
 
   // words
   size_t phraseSize = GetSize();
@@ -312,7 +312,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   // property
   ret->SetProperties(m_property);
 
-  ret->Evaluate(mosesSP, phraseDict.GetFeaturesToApply());
+  ret->EvaluateInIsolation(mosesSP, phraseDict.GetFeaturesToApply());
 
   return ret;
 }

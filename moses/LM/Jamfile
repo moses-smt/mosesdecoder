@@ -19,7 +19,7 @@ if $(with-irstlm) {
   dependencies += irst ;
   lmmacros += LM_IRST ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking the IRSTLM library; be sure the release is >= 5.70.02 !!!" ;
+  echo "!!! You are linking with the IRSTLM library; be sure the release is >= 5.70.02 !!!" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
 }
 
@@ -27,6 +27,10 @@ if $(with-irstlm) {
 local with-srilm = [ option.get "with-srilm" ] ;
 local with-maxent-srilm = [ option.get "with-maxent-srilm" ] ;
 if $(with-srilm) {
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking with the SRILM library; Do NOT use version >= 1.7.1 !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+
   if [ option.get "with-srilm-dynamic" : no : yes ] = yes {
     lib srilm ;
     alias sri-libs : srilm ;
@@ -90,15 +94,16 @@ if $(with-nplm) {
   lmmacros += LM_NEURAL ;
 }
 
-#LBLLM
-local with-lbllm = [ option.get "with-lbllm" ] ;
-if $(with-lbllm) {
-  lib lbl : : <search>$(with-lbllm)/lib <search>$(with-lbllm)/lib64 ;
-  obj LBLLM.o : oxlm/LBLLM.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
-  obj Mapper.o : oxlm/Mapper.cpp lbl ..//headers : <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
-  alias lbllm : LBLLM.o Mapper.o lbl : : : <cxxflags>-std=c++0x <define>LM_LBL ;
-  dependencies += lbllm ;
-  lmmacros += LM_LBL ;
+#OxLM
+local with-oxlm = [ option.get "with-oxlm" ] ;
+if $(with-oxlm) {
+  lib lbl : : <search>$(with-oxlm)/lib <search>$(with-oxlm)/lib64 ;
+  lib murmurhash : : <search>$(with-oxlm)/lib <search>$(with-oxlm)/lib64 ;
+  obj OxLM.o : oxlm/OxLM.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  obj OxLMMapper.o : oxlm/OxLMMapper.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  alias oxlm : OxLM.o OxLMMapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_OXLM ;
+  dependencies += oxlm ;
+  lmmacros += LM_OXLM ;
 }
 
 

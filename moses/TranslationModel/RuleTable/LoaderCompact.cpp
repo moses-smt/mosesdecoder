@@ -222,11 +222,11 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     // The remaining columns are currently ignored.
 
     // Create and score target phrase.
-    TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase);
+    TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase, &ruleTable);
     targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
 
-    targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
+    targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(

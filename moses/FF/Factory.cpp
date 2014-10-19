@@ -35,6 +35,7 @@
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ExternalFeature.h"
 #include "moses/FF/ConstrainedDecoding.h"
+#include "moses/FF/SoftSourceSyntacticConstraintsFeature.h"
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
@@ -48,11 +49,12 @@
 #include "NieceTerminal.h"
 #include "SpanLength.h"
 #include "SyntaxRHS.h"
-#include "SkeletonChangeInput.h"
+#include "moses/FF/PhraseOrientationFeature.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
+#include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
 
 #ifdef HAVE_CMPH
@@ -94,8 +96,8 @@
 #include "moses/LM/DALMWrapper.h"
 #endif
 
-#ifdef LM_LBL
-#include "moses/LM/oxlm/LBLLM.h"
+#ifdef LM_OXLM
+#include "moses/LM/oxlm/OxLM.h"
 #endif
 
 #include "util/exception.hh"
@@ -197,6 +199,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(ExternalFeature);
   MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
+  MOSES_FNAME(SoftSourceSyntacticConstraintsFeature);
   MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(HyperParameterAsWeight);
@@ -209,11 +212,12 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SparseHieroReorderingFeature);
   MOSES_FNAME(SpanLength);
   MOSES_FNAME(SyntaxRHS);
-  MOSES_FNAME(SkeletonChangeInput);
+  MOSES_FNAME(PhraseOrientationFeature);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonLM);
+  MOSES_FNAME(SkeletonChangeInput);
   MOSES_FNAME(SkeletonPT);
 
 #ifdef HAVE_CMPH
@@ -248,10 +252,10 @@ FeatureRegistry::FeatureRegistry()
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
 #endif
-#ifdef LM_LBL
-  MOSES_FNAME2("LBLLM-LM", LBLLM<oxlm::LM>);
-  MOSES_FNAME2("LBLLM-FactoredLM", LBLLM<oxlm::FactoredLM>);
-  MOSES_FNAME2("LBLLM-FactoredMaxentLM", LBLLM<oxlm::FactoredMaxentLM>);
+#ifdef LM_OXLM
+  MOSES_FNAME2("OxLM", OxLM<oxlm::LM>);
+  MOSES_FNAME2("OxFactoredLM", OxLM<oxlm::FactoredLM>);
+  MOSES_FNAME2("OxFactoredMaxentLM", OxLM<oxlm::FactoredMaxentLM>);
 #endif
 
   Add("KENLM", new KenFactory());

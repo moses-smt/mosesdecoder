@@ -11,6 +11,7 @@
 #include "SemposScorer.h"
 #include "PermutationScorer.h"
 #include "MeteorScorer.h"
+#include "HwcmScorer.h"
 #include "Reference.h"
 #include "WipoBleuScorer.h"
 
@@ -34,6 +35,8 @@ vector<string> ScorerFactory::getTypes()
   types.push_back(string("LRSCORE"));
   types.push_back(string("METEOR"));
   types.push_back(string("WIPOBLEU"));
+  types.push_back(string("HWCM"));
+  
   return types;
 }
 
@@ -60,6 +63,8 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config)
     return new MeteorScorer(config);
   } else if (type == "WIPOBLEU") {
     return new WipoBleuScorer(config);
+  } else if (type == "HWCM") {
+    return new HwcmScorer(config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);

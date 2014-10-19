@@ -48,22 +48,25 @@ public:
     return new DummyState();
   }
 
-  void EvaluateWhenApplied(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const;
-
-  void EvaluateWhenApplied(const ChartHypothesis &hypo,
-                     ScoreComponentCollection* accumulator) const;
   void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath
                 , const TargetPhrase &targetPhrase
                 , const StackVec *stackVec
                 , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
+                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+
   void EvaluateInIsolation(const Phrase &source
                 , const TargetPhrase &targetPhrase
                 , ScoreComponentCollection &scoreBreakdown
                 , ScoreComponentCollection &estimatedFutureScore) const
+  {}
+
+  void EvaluateWhenApplied(const Hypothesis& hypo,
+                ScoreComponentCollection* accumulator) const
+  {}
+
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
+                     ScoreComponentCollection* accumulator) const
   {}
 
 };

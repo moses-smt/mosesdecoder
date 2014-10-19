@@ -85,7 +85,7 @@ public:
     return m_estimateOfBestScore;
   }
 
-  void Evaluate(const InputType &input, const InputPath &inputPath);
+  void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
 
   void SetInputPath(const InputPath *inputPath);
 

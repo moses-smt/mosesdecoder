@@ -96,7 +96,7 @@ protected:
   //! implemented by inherited class, called by this class
   virtual void ProcessUnknownWord(size_t sourcePos)=0;
 
-  void EvaluateWithSource();
+  void EvaluateWithSourceContext();
 
   void CacheLexReordering();
 

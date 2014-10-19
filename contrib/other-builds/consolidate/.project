@@ -3,6 +3,8 @@
 	<name>consolidate</name>
 	<comment></comment>
 	<projects>
+		<project>moses</project>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -44,6 +46,16 @@
 			<name>OutputFileStream.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/OutputFileStream.h</locationURI>
+		</link>
+		<link>
+			<name>PropertiesConsolidator.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PropertiesConsolidator.cpp</locationURI>
+		</link>
+		<link>
+			<name>PropertiesConsolidator.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PropertiesConsolidator.h</locationURI>
 		</link>
 		<link>
 			<name>consolidate-main.cpp</name>

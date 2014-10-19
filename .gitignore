@@ -61,6 +61,7 @@ scripts/training/symal/symal
 dist
 bin
 previous.sh
+contrib/sigtest-filter/filter-pt
 contrib/other-builds/*.xcodeproj/project.xcworkspace/
 contrib/other-builds/*.xcodeproj/xcuserdata/
 */*.xcodeproj/project.xcworkspace

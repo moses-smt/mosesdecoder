@@ -280,7 +280,7 @@ void InterpolateProbabilities(const std::vector<uint64_t> &counts, Master &maste
     gamma_chains.push_back(read_backoffs);
     gamma_chains.back() >> gammas[i].Source();
   }
-  master >> Interpolate(std::max(master.Config().vocab_size_for_unk, counts[0] - 1 /* <s> is not included */), util::stream::ChainPositions(gamma_chains), config.prune_thresholds);
+  master >> Interpolate(std::max(master.Config().vocab_size_for_unk, counts[0] - 1 /* <s> is not included */), util::stream::ChainPositions(gamma_chains), config.prune_thresholds, config.output_q);
   gamma_chains >> util::stream::kRecycle;
   master.BufferFinal(counts);
 }
@@ -317,7 +317,7 @@ void Pipeline(PipelineConfig config, int text_file, int out_arpa) {
     std::vector<uint64_t> counts;
     std::vector<uint64_t> counts_pruned;
     std::vector<Discount> discounts;
-    master >> AdjustCounts(counts, counts_pruned, discounts, config.prune_thresholds);
+    master >> AdjustCounts(config.prune_thresholds, counts, counts_pruned, config.discount, discounts);
 
     {
       util::FixedArray<util::stream::FileBuffer> gammas;

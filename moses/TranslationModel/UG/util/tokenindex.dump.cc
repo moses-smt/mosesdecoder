@@ -7,7 +7,7 @@
  * @brief Dumps a TokenIndex (vocab file for TPPT and TPLM) to stdout.
  */
 
-#include "tpt_tokenindex.h"
+#include "../mm/tpt_tokenindex.h"
 #include <iostream>
 #include <iomanip>
 

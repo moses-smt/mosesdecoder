@@ -37,6 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace MosesTuning {
 
+class Scorer;
+
 /** To be filled in by the decoder */
 struct HopeFearData {
   MiraFeatureVector modelFeatures;
@@ -60,6 +62,8 @@ public:
   virtual void next() = 0;
   virtual bool finished() = 0;
 
+  virtual ~HopeFearDecoder() {};
+
   /**
     * Calculate hope, fear and model hypotheses
     **/
@@ -76,6 +80,8 @@ public:
   /** Calculate bleu on training set */
   ValType Evaluate(const AvgWeightVector& wv);
 
+protected:
+  Scorer* scorer_;
 };
 
 
@@ -86,7 +92,8 @@ public:
                          const std::vector<std::string>&  scoreFiles,
                          bool streaming,
                          bool  no_shuffle,
-                         bool safe_hope
+                         bool safe_hope,
+                         Scorer* scorer
                          );
 
   virtual void reset();
@@ -120,7 +127,8 @@ public:
                             bool no_shuffle,
                             bool safe_hope,
                             size_t hg_pruning,
-                            const MiraWeightVector& wv
+                            const MiraWeightVector& wv,
+                            Scorer* scorer_
                             );
 
   virtual void reset();
@@ -140,7 +148,8 @@ private:
   //maps sentence Id to graph ptr
   typedef std::map<size_t, boost::shared_ptr<Graph> > GraphColl;
   GraphColl graphs_;
-  GraphColl::const_iterator graphIter_;
+  std::vector<size_t> sentenceIds_;
+  std::vector<size_t>::const_iterator sentenceIdIter_;
   ReferenceSet references_;
   Vocab vocab_;
 };

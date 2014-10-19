@@ -118,7 +118,7 @@ sub train_lm {
     }
     else {
         $LM = "KENLM";
-        $cmd = "$BUILD_KENLM --prune 0 0 1 -S 50% -T $DIR/lmtmp --order 3 --text $CORPUS --arpa $DIR/cased.kenlm.gz";
+        $cmd = "$BUILD_KENLM --prune 0 0 1 -S 5% -T $DIR/lmtmp --order 3 --text $CORPUS --arpa $DIR/cased.kenlm.gz";
     }
     print STDERR "** Using $LM **" . "\n";
     print STDERR $cmd."\n";

@@ -45,9 +45,9 @@ class PhraseOrientation
 {
 public:
 
-  PhraseOrientation(const std::vector<std::string> &source,
-                    const std::vector<std::string> &target,
-                    const Alignment &alignment);
+    PhraseOrientation(int sourceSize,
+                      int targetSize,
+                      const Alignment &alignment);
 
   REO_POS GetOrientationInfo(int startF, int endF, REO_DIR direction) const;
   REO_POS GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const;
@@ -80,9 +80,8 @@ private:
   static bool le(int first, int second) { return first <= second; };
   static bool lt(int first, int second) { return first < second; };
 
-  const std::vector<std::string> &m_source;
-  const std::vector<std::string> &m_target;
-  const Alignment &m_alignment;
+  const int m_countF;
+  const int m_countE;
 
   std::vector<std::vector<int> > m_alignedToT;
 

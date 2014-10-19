@@ -152,7 +152,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
   PrintUserTime(string("Start loading text phrase table. ") + (format==MosesFormat?"Moses ":"Hiero ") + " format");
 
   const StaticData &staticData = StaticData::Instance();
-  const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 
   string lineOrig;
   size_t count = 0;
@@ -222,12 +221,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Word *targetLHS;
 
     // create target phrase obj
-    TargetPhrase *targetPhrase = new TargetPhrase();
-    // targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
+    TargetPhrase *targetPhrase = new TargetPhrase(&ruleTable);
     targetPhrase->CreateFromString(Output, output, targetPhraseString, &targetLHS);
     // source
     Phrase sourcePhrase;
-    // sourcePhrase.CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
     sourcePhrase.CreateFromString(Input, input, sourcePhraseString, &sourceLHS);
 
     // rest of target phrase
@@ -247,7 +244,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     }
 
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
-    targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
+    targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

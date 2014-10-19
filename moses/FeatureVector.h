@@ -167,7 +167,7 @@ public:
   /** Load from file - each line should be 'root[_name] value' */
   bool load(const std::string& filename);
   void save(const std::string& filename) const;
-  void write(std::ostream& out) const ;
+  void write(std::ostream& out, const std::string& sep=" ", const std::string& linesep="\n") const ;
 
   /** Element access */
   ProxyFVector operator[](const FName& name);

@@ -17,6 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <algorithm>
 #include <cmath>
 #include <iterator>
 
@@ -27,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/exception.hh"
 #include "util/file_piece.hh"
 
-#include "BleuScorer.h"
+#include "Scorer.h"
 #include "HopeFearDecoder.h"
 
 using namespace std;
@@ -38,7 +39,7 @@ namespace MosesTuning {
 static const ValType BLEU_RATIO = 5;
 
 ValType HopeFearDecoder::Evaluate(const AvgWeightVector& wv) {
-  vector<ValType> stats(kBleuNgramOrder*2+1,0);
+  vector<ValType> stats(scorer_->NumberOfScores(),0);
   for(reset(); !finished(); next()) {
     vector<ValType> sent;
     MaxModel(wv,&sent);
@@ -46,7 +47,7 @@ ValType HopeFearDecoder::Evaluate(const AvgWeightVector& wv) {
       stats[i]+=sent[i];
     }
   }
-  return unsmoothedBleu(stats);
+  return scorer_->calculateScore(stats);
 }
 
 NbestHopeFearDecoder::NbestHopeFearDecoder(
@@ -54,8 +55,10 @@ NbestHopeFearDecoder::NbestHopeFearDecoder(
       const vector<string>&  scoreFiles,
       bool streaming,
       bool  no_shuffle,
-      bool safe_hope
+      bool safe_hope,
+      Scorer* scorer
       ) : safe_hope_(safe_hope) {
+  scorer_ = scorer;
   if (streaming) {
     train_.reset(new StreamingHypPackEnumerator(featureFiles, scoreFiles));
   } else {
@@ -92,7 +95,7 @@ void NbestHopeFearDecoder::HopeFear(
     for(size_t i=0; i< train_->cur_size(); i++) {
       const MiraFeatureVector& vec=train_->featuresAt(i);
       ValType score = wv.score(vec);
-      ValType bleu = sentenceLevelBackgroundBleu(train_->scoresAt(i),backgroundBleu);
+      ValType bleu = scorer_->calculateSentenceLevelBackgroundScore(train_->scoresAt(i),backgroundBleu);
       // Hope
       if(i==0 || (hope_scale*score + bleu) > hope_score) {
         hope_score = hope_scale*score + bleu;
@@ -123,9 +126,9 @@ void NbestHopeFearDecoder::HopeFear(
   hopeFear->fearFeatures = train_->featuresAt(fear_index);
 
   hopeFear->hopeStats = train_->scoresAt(hope_index);
-  hopeFear->hopeBleu = sentenceLevelBackgroundBleu(hopeFear->hopeStats, backgroundBleu);
+  hopeFear->hopeBleu = scorer_->calculateSentenceLevelBackgroundScore(hopeFear->hopeStats, backgroundBleu);
   const vector<float>& fear_stats = train_->scoresAt(fear_index);
-  hopeFear->fearBleu = sentenceLevelBackgroundBleu(fear_stats, backgroundBleu);
+  hopeFear->fearBleu = scorer_->calculateSentenceLevelBackgroundScore(fear_stats, backgroundBleu);
 
   hopeFear->modelStats = train_->scoresAt(model_index);
   hopeFear->hopeFearEqual = (hope_index == fear_index);
@@ -157,7 +160,8 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
                             bool no_shuffle,
                             bool safe_hope,
                             size_t hg_pruning,
-                            const MiraWeightVector& wv
+                            const MiraWeightVector& wv,
+                            Scorer* scorer
                           ) :
                           num_dense_(num_dense) {
 
@@ -168,16 +172,19 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
 
   SparseVector weights;
   wv.ToSparse(&weights);
+  scorer_ = scorer;
 
   static const string kWeights = "weights";
   fs::directory_iterator dend;
   size_t fileCount = 0;
-  cerr << "Reading hypergraphs" << endl;
+  
+  cerr << "Reading  hypergraphs" << endl;
   for (fs::directory_iterator di(hypergraphDir); di != dend; ++di) {
-    if (di->path().filename() == kWeights) continue;
+    const fs::path& hgpath = di->path();
+    if (hgpath.filename() == kWeights) continue;
     Graph graph(vocab_);
-    size_t id = boost::lexical_cast<size_t>(di->path().stem().string());
-    util::scoped_fd fd(util::OpenReadOrThrow(di->path().string().c_str()));
+    size_t id = boost::lexical_cast<size_t>(hgpath.stem().string());
+    util::scoped_fd fd(util::OpenReadOrThrow(hgpath.string().c_str()));
     //util::FilePiece file(di->path().string().c_str());
     util::FilePiece file(fd.release()); 
     ReadGraph(file,graph);
@@ -195,19 +202,24 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
   }
   cerr << endl << "Done" << endl;
 
+  sentenceIds_.resize(graphs_.size());
+  for (size_t i = 0; i < graphs_.size(); ++i) sentenceIds_[i] = i;
+  if (!no_shuffle) {
+    random_shuffle(sentenceIds_.begin(), sentenceIds_.end());
+  }
 
 }
 
 void HypergraphHopeFearDecoder::reset() {
-  graphIter_ = graphs_.begin();
+  sentenceIdIter_ = sentenceIds_.begin();
 }
 
 void HypergraphHopeFearDecoder::next() {
-  ++graphIter_;
+  sentenceIdIter_++;
 }
 
 bool HypergraphHopeFearDecoder::finished() {
-  return graphIter_ == graphs_.end();
+  return sentenceIdIter_ == sentenceIds_.end();
 }
 
 void HypergraphHopeFearDecoder::HopeFear(
@@ -215,10 +227,10 @@ void HypergraphHopeFearDecoder::HopeFear(
             const MiraWeightVector& wv,
             HopeFearData* hopeFear
             ) {
-  size_t sentenceId = graphIter_->first;
+  size_t sentenceId = *sentenceIdIter_;
   SparseVector weights;
   wv.ToSparse(&weights);
-  const Graph& graph = *(graphIter_->second);
+  const Graph& graph = *(graphs_[sentenceId]);
 
   ValType hope_scale = 1.0;
   HgHypothesis hopeHypo, fearHypo, modelHypo;
@@ -252,9 +264,9 @@ void HypergraphHopeFearDecoder::HopeFear(
 
   //Only C++11
   //hopeFear->modelStats.assign(std::begin(modelHypo.bleuStats), std::end(modelHypo.bleuStats));
-  vector<ValType> fearStats(kBleuNgramOrder*2+1);
-  hopeFear->hopeStats.reserve(kBleuNgramOrder*2+1);
-  hopeFear->modelStats.reserve(kBleuNgramOrder*2+1);
+  vector<ValType> fearStats(scorer_->NumberOfScores());
+  hopeFear->hopeStats.reserve(scorer_->NumberOfScores());
+  hopeFear->modelStats.reserve(scorer_->NumberOfScores());
   for (size_t i = 0; i < fearStats.size(); ++i) {
     hopeFear->modelStats.push_back(modelHypo.bleuStats[i]);
     hopeFear->hopeStats.push_back(hopeHypo.bleuStats[i]);
@@ -309,11 +321,11 @@ void HypergraphHopeFearDecoder::HopeFear(
 void HypergraphHopeFearDecoder::MaxModel(const AvgWeightVector& wv, vector<ValType>* stats) {
   assert(!finished());
   HgHypothesis bestHypo;
-  size_t sentenceId = graphIter_->first;
+  size_t sentenceId = *sentenceIdIter_;
   SparseVector weights;
   wv.ToSparse(&weights);
-  vector<ValType> bg(kBleuNgramOrder*2+1);
-  Viterbi(*(graphIter_->second), weights, 0, references_, sentenceId, bg, &bestHypo);
+  vector<ValType> bg(scorer_->NumberOfScores());
+  Viterbi(*(graphs_[sentenceId]), weights, 0, references_, sentenceId, bg, &bestHypo);
   stats->resize(bestHypo.bleuStats.size());
   /*
   for (size_t i = 0; i < bestHypo.text.size(); ++i) {

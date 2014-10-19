@@ -124,6 +124,15 @@ public:
     }
   }
 
+  const ChartCellLabel *Find(size_t idx) const {
+    try {
+      return m_map.at(idx);
+    }
+    catch (const std::out_of_range& oor) {
+      return NULL;
+    }
+  }
+
   ChartCellLabel::Stack &FindOrInsert(const Word &w) {
     size_t idx = w[0]->GetId();
     if (! ChartCellExists(idx)) {

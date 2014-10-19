@@ -10,14 +10,14 @@ if $(with-dlib) {
   dlib = ;
 }
 
-with-lbllm = [ option.get "with-lbllm" ] ;
-if $(with-lbllm) {
-  lbllm2 = <cxxflags>-std=c++0x <define>LM_LBL <include>$(with-lbllm)/src <include>$(with-lbllm)/3rdparty/eigen-3 ;
+with-oxlm = [ option.get "with-oxlm" ] ;
+if $(with-oxlm) {
+  oxlm2 = <cxxflags>-std=c++0x <define>LM_OXLM <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
 } else {
-  lbllm2 = ;
+  oxlm2 = ;
 }
 
-alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(lbllm2) ; 
+alias headers : ../util//kenutil : : : $(max-factors) $(dlib) $(oxlm2) ; 
 alias ThreadPool : ThreadPool.cpp ;
 alias Util : Util.cpp Timer.cpp ;
 
@@ -69,6 +69,7 @@ lib moses :
   TranslationModel/RuleTable/*.cpp
   TranslationModel/Scope3Parser/*.cpp
   TranslationModel/CYKPlusParser/*.cpp
+  ../phrase-extract/extract-ghkm/PhraseOrientation.cpp
   FF/*.cpp
   FF/OSM-Feature/*.cpp
   FF/LexicalReordering/*.cpp

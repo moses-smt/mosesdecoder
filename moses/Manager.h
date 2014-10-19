@@ -106,7 +106,6 @@ private:
 
   // Helper functions to output search graph in the hypergraph format of Kenneth Heafield's lazy hypergraph decoder
   void OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostream &outputSearchGraphStream) const;
-  size_t OutputFeatureValuesForHypergraph(size_t index, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const;
 
 
 protected:
@@ -146,13 +145,14 @@ public:
   void GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *hypo );
   void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
   int GetNextHypoId();
+  size_t GetLineNumber() const {return m_lineNumber;}
 #ifdef HAVE_PROTOBUF
   void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
 #endif
 
   void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
   void OutputSearchGraphAsSLF(long translationId, std::ostream &outputSearchGraphStream) const;
-  void OutputSearchGraphAsHypergraph(long translationId, std::ostream &outputSearchGraphStream) const;
+  void OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const;
   void GetSearchGraph(std::vector<SearchGraphNode>& searchGraph) const;
   const InputType& GetSource() const {
     return m_source;
