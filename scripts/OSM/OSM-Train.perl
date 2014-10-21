@@ -43,7 +43,7 @@ die("ERROR: could not find OSM scripts in '$MOSES_SRC_DIR/scripts/OSM")
     unless -e "$MOSES_SRC_DIR/scripts/OSM/flipAlignment.perl";
 
 # create factors
-`mkdir $OUT_DIR`;
+`mkdir -p $OUT_DIR`;
 `$MOSES_SRC_DIR/scripts/OSM/flipAlignment.perl $ALIGNMENT > $OUT_DIR/align`;
 
 if (defined($FACTOR)) {

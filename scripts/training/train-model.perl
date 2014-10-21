@@ -2093,11 +2093,11 @@ sub create_ini {
 		my ($factor_f,$factor_e) = split(/\-/,$factor_val);
 
 		if($count == 0){
-		$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=yes \n";
+		$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=5 path=". $_OSM . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=yes \n";
 	       $weight_spec  .= "OpSequenceModel$count= 0.08 -0.02 0.02 -0.001 0.03\n";		
 		}
 		else{
-			$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=no \n";
+			$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=1 path=". $_OSM . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=no \n";
 	       	$weight_spec  .= "OpSequenceModel$count= 0.08 \n";	
 
 		}
