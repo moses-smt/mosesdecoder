@@ -120,7 +120,6 @@ void usage()
             << "\nUsage:\n"
             << "\n  filter-pt -e english.suf-arr -f french.suf-arr\n"
             << "      [-c] [-p] [-l threshold] [-n num] [-t num] < PHRASE-TABLE > FILTERED-PHRASE-TABLE\n\n"
-            << "   Writes output parts to phrase-table.000.filtered.gz phrase-table.001.filtered.gz ...\n\n"
             << "   [-l threshold] >0.0, a+e, or a-e: keep values that have a -log significance > this\n"
             << "   [-n num      ] 0, 1...: 0=no filtering, >0 sort by P(e|f) and keep the top num elements\n"
             << "   [-c          ] add the cooccurence counts to the phrase table\n"
@@ -364,7 +363,7 @@ void find_occurrences(SentIdSet& ids, const std::string& rule,
 void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options,
                                    Cache& f_cache, Cache& e_cache)
 {
-  if (pfe_filter_limit>0 && options.size() > pfe_filter_limit) {
+  if (pfe_filter_limit > 0 && options.size() > pfe_filter_limit) {
     nremoved_pfefilter += (options.size() - pfe_filter_limit);
     std::nth_element(options.begin(), options.begin() + pfe_filter_limit,
                      options.end(), PfeComparer());
@@ -375,6 +374,9 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options,
   }
   
   if (pef_filter_only)
+    return;
+  
+  if (options.empty())
     return;
   
   SentIdSet fset( new SentIdSet::element_type() );
