@@ -7,4 +7,4 @@ all: filter-pt
 
 filter-pt: filter-pt.cpp
 	./check-install $(SALMDIR)
-	$(CXX) -O6 $(INC) $(OBJS) -o filter-pt filter-pt.cpp
+	$(CXX) -O6 $(INC) $(OBJS) -o filter-pt filter-pt.cpp -lboost_thread -lboost_system
