@@ -516,10 +516,10 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        //!!! SOULD TRY TO CACHE IT -> THEN I NEED SYNC FOR MULTITHREAD !!!
 	        //I should only search if predArgPair is not empty
 	        if(*predArgPair!=""){
-	        	cout<<"Found pair: "<<*predArgPair<<endl;
+	        	//cout<<"Found pair: "<<*predArgPair<<endl;
 	        	it = m_probArg->find(*predArgPair);
 						if(it!=m_probArg->end()){
-							cout<<"Have value: "<<it->second<<endl;
+							//cout<<"Have value: "<<it->second<<endl;
 							vector<float> scores;
 							scores.push_back(log(it->second+0.001));
 							scores.push_back(1.0);

@@ -199,6 +199,7 @@ protected:
   FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
   bool m_defaultNonTermOnlyForEmptyRange;
+  bool m_printNBestTrees;
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
@@ -778,6 +779,11 @@ public:
 
   bool GetDefaultNonTermOnlyForEmptyRange() const
   { return m_defaultNonTermOnlyForEmptyRange; }
+
+  bool PrintNBestTrees() const {
+      return m_printNBestTrees;
+    }
+
 
 };
 
