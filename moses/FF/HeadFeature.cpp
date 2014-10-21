@@ -51,6 +51,24 @@ SyntaxNodePtr SyntaxNode::FindFirstChild(std::string label) const{
 	return SyntaxNodePtr();
 }
 
+
+SyntaxNodePtr SyntaxNode::FindChildRecursively(std::string label) const{
+	SyntaxNodePtr child = this->FindFirstChild(label);
+	//we want to avoid the case [Q [Q] [VP]] -> the VP gets extended with the previous hypothesis and the pair is scored then
+	if(child && child->IsInternal())
+		return child;
+	else{
+		for(int i=0; i<m_children.size();i++){
+			if(m_children[i]->m_isInternal){ //so it doesn't recurse past the leaves of the current hypothesis tree
+				child = m_children[i]->FindChildRecursively(label);
+				if(child)
+					return child; //!!! check this  recursivity
+			}
+		}
+	}
+	return SyntaxNodePtr();
+}
+
 int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 	int i,j;
 	//should not look at terminals -> eg [NP Ich]
@@ -192,6 +210,8 @@ SyntaxNodePtr SyntaxTree::FromString(std::string internalTree, boost::shared_ptr
 			// there is a case due to faulty internal structure -> [Q <s> [S] </s>] so nodes.size() might be 2
 			if(internalTree[nextpos]=='['){ // && nodes.size()==1){
 				SyntaxNodePtr (new SyntaxNode( 0, 0, nodes[0])).swap(newNode);
+				//internal tree -> expecting a child
+				newNode->SetIsInternal(true);
 				AddNode(newNode);
 			}
 			m_attachTo = newNode;
@@ -337,12 +357,23 @@ string* SyntaxTree::FindObj() const{
 	//I should have a flag for when I reach the leaf of the rule so I don't recures to previous hypothesis -> something like HasHead
 	// -> update the Node property with is leaf
 	string *predArgPair = new string("");
-	if(m_top->GetLabel().compare("VP")==0){
+	SyntaxNodePtr head;
+	if(m_top->GetLabel().compare("VP")==0)
+		head = m_top;
+	else//!!!this is not OK -> we might have visited the VP in the previous hypothesis -> only need to serach in the current subtree
+		//do the fake grammar and test
+		head = m_top->FindChildRecursively("VP"); //!!!! This should be done recursively because the internal struct may have several layers
+
+	if(head){
 		//cout<<"VP: "<<m_top->GetHead()<<" NP: ";
-		SyntaxNodePtr obj = m_top->FindFirstChild("NP");
-		if(obj){
+		SyntaxNodePtr obj = head->FindFirstChild("NP");
+		//uncomment to look for PPs
+/*		if(!obj){
+			obj = head->FindFirstChild("PP");
+		}
+*/		if(obj){
 			//cout<<obj->GetHead()<<endl;
-			*predArgPair+=m_top->GetHead()+" "+obj->GetHead();
+			*predArgPair+=head->GetHead()+" "+obj->GetHead();
 		}
 	}
 	return predArgPair;
@@ -458,7 +489,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	    SyntaxTreePtr syntaxTree (new SyntaxTree());
 	    //should have new SyntaxTree(pointer to headRules)
 	    syntaxTree->FromString(*tree,m_lemmaMap);
-	   // std::cout<<*tree<<std::endl;
+	    //std::cout<<*tree<<std::endl;
 	   //std::cout<< syntaxTree->ToString()<<std::endl;
 
 
@@ -481,14 +512,14 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        int index = 0;
 	        syntaxTree->FindHeads(syntaxTree->GetTop(), *m_headRules);
 	        string *predArgPair = syntaxTree->FindObj();
-	        //cout<<"Found pair: "<<*predArgPair<<endl;
 	        std::map<string,float>::iterator it;
 	        //!!! SOULD TRY TO CACHE IT -> THEN I NEED SYNC FOR MULTITHREAD !!!
 	        //I should only search if predArgPair is not empty
 	        if(*predArgPair!=""){
+	        	cout<<"Found pair: "<<*predArgPair<<endl;
 	        	it = m_probArg->find(*predArgPair);
 						if(it!=m_probArg->end()){
-							//cout<<"Have value: "<<it->second<<endl;
+							cout<<"Have value: "<<it->second<<endl;
 							vector<float> scores;
 							scores.push_back(log(it->second+0.001));
 							scores.push_back(1.0);

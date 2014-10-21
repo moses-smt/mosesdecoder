@@ -46,6 +46,7 @@ protected:
   bool m_isTerminal; //if is terminal than read the child value and put in as m_head
   bool m_isOpen;
   bool m_hasHead;
+  bool m_isInternal;
 public:
   SyntaxNode( int startPos, int endPos, std::string label )
     :m_start(startPos) //maybe set start and end based on children and alignemnt -> might want to know the source words it covers
@@ -55,6 +56,7 @@ public:
     ,m_head("")
 	,m_isTerminal(false)
 	,m_isOpen(false)
+	,m_isInternal(false)
 	,m_hasHead(false){
   }
 
@@ -106,6 +108,14 @@ public:
   	  m_isOpen = isOpen;
     }
 
+   bool IsInternal(){
+   	  return m_isInternal;
+     }
+
+   void SetIsInternal(bool isInternal){
+   	  m_isInternal = isInternal;
+     }
+
    boost::weak_ptr<SyntaxNode> GetParent() {
     return m_parent;
   }
@@ -122,6 +132,7 @@ public:
   int FindHeadChild(std::vector<std::string> headRule);
   //do I want to return the object or the index like above?
   SyntaxNodePtr FindFirstChild(std::string label) const;
+  SyntaxNodePtr FindChildRecursively(std::string label) const;
 };
 
 class SyntaxTree
