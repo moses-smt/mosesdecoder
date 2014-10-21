@@ -223,7 +223,7 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 bool
 BackwardsEdge::SeenPosition(const size_t x, const size_t y)
 {
-  std::set< int >::iterator iter = m_seenPosition.find((x<<16) + y);
+  boost::unordered_set< int >::iterator iter = m_seenPosition.find((x<<16) + y);
   return (iter != m_seenPosition.end());
 }
 
