@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -50,6 +51,7 @@ using namespace Moses;
 using namespace std;
 
 namespace po = boost::program_options;
+typedef multimap<float,string> Lines;
 
 static void usage(const po::options_description& desc, char** argv) {
     cerr << "Usage: " + string(argv[0]) +  " [options] input-file output-file" << endl;
@@ -57,25 +59,22 @@ static void usage(const po::options_description& desc, char** argv) {
 }
 
 //Find top n translations of source, and send them to output
-static void outputTopN(const StringPiece& sourcePhraseString, PhraseDictionary* phraseTable, const std::vector<FactorType> &input,  ostream& out) {
-  //get list of target phrases
-  Phrase sourcePhrase;
-  sourcePhrase.CreateFromString(Input,input,sourcePhraseString,NULL);
-  InputPath inputPath(sourcePhrase, NonTerminalSet(), WordsRange(0,sourcePhrase.GetSize()-1),NULL,NULL);
-  InputPathList inputPaths;
-  inputPaths.push_back(&inputPath);
-  phraseTable->GetTargetPhraseCollectionBatch(inputPaths);
-  const TargetPhraseCollection* targetPhrases = inputPath.GetTargetPhrases(*phraseTable);
-
-
-
-
-  //print phrases
-  const std::vector<FactorType>& output = StaticData::Instance().GetOutputFactorOrder();
-  if (targetPhrases) {
-    //if (targetPhrases->GetSize() > 10) cerr << "src " << sourcePhrase << " tgt count " << targetPhrases->GetSize() << endl;
-    for (TargetPhraseCollection::const_iterator i = targetPhrases->begin(); i != targetPhrases->end(); ++i) {
-      const TargetPhrase* targetPhrase = *i;
+static void outputTopN(Lines lines, size_t maxPhrases, ostream& out) {
+  size_t count = 0;
+  for (Lines::const_reverse_iterator i = lines.rbegin(); i != lines.rend(); ++i) {
+    out << i->second << endl;
+    ++count;
+    if (count >= maxPhrases) break;
+  }
+}
+/*
+static void outputTopN(const Phrase& sourcePhrase, const multimap<float,const TargetPhrase*>& targetPhrases,
+                size_t maxPhrases, const PhraseDictionary* phraseTable,
+                   const vector<FactorType> & input, const vector<FactorType> & output, ostream& out) {
+    size_t count = 0;
+    for (multimap<float,const TargetPhrase*>::const_reverse_iterator i
+         = targetPhrases.rbegin(); i != targetPhrases.rend() && count < maxPhrases; ++i, ++count) {
+      const TargetPhrase* targetPhrase = i->second;
       out << sourcePhrase.GetStringRep(input);
       out << " ||| ";
       out << targetPhrase->GetStringRep(output);
@@ -92,15 +91,13 @@ static void outputTopN(const StringPiece& sourcePhraseString, PhraseDictionary* 
       }
       out << endl;
     }
-  }
-
-}
-
+}*/
 int main(int argc, char** argv) 
 {
   bool help;
   string input_file;
   string config_file;
+  size_t maxPhrases = 100;
 
 
   po::options_description desc("Allowed options");
@@ -108,13 +105,14 @@ int main(int argc, char** argv)
   ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
   ("input-file,i", po::value<string>(&input_file), "Input file")
   ("config-file,f", po::value<string>(&config_file), "Config file")
+  ("max-phrases,n", po::value<size_t>(&maxPhrases), "Maximum target phrases per source phrase")
   ;
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
   po::variables_map vm;
   po::parsed_options parsed = po::command_line_parser(argc,argv).
-            options(cmdline_options).allow_unregistered().run();
+            options(cmdline_options).run();
   po::store(parsed, vm);
   po::notify(vm);
   if (help) {
@@ -136,24 +134,6 @@ int main(int argc, char** argv)
   mosesargs.push_back(argv[0]);
   mosesargs.push_back("-f");
   mosesargs.push_back(config_file);
-  for (size_t i = 0; i < parsed.options.size(); ++i) {
-    if (parsed.options[i].position_key == -1 && !parsed.options[i].unregistered) continue;
-    /*
-    const string& key = parsed.options[i].string_key;
-    if (!key.empty()) {
-      mosesargs.push_back(key);
-    }
-    for (size_t j = 0; j < parsed.options[i].value.size(); ++j) {
-      const string& value = parsed.options[i].value[j];
-      if (!value.empty()) {
-        mosesargs.push_back(value);
-      }
-    }*/
-
-    for (size_t j = 0; j < parsed.options[i].original_tokens.size(); ++j) {
-      mosesargs.push_back(parsed.options[i].original_tokens[j]);
-    }
-  }
 
   boost::scoped_ptr<Parameter> params(new Parameter());  
   char** mosesargv = new char*[mosesargs.size()];
@@ -172,9 +152,8 @@ int main(int argc, char** argv)
   }
 
   const StaticData &staticData = StaticData::Instance();
-  const std::vector<FactorType> & input = staticData.GetInputFactorOrder();
 
-  //Find the phrase table to evaluate with
+  //Find the phrase table to manage the target phrases
   PhraseDictionary* phraseTable = NULL;
   const vector<FeatureFunction*>& ffs = FeatureFunction::GetFeatureFunctions();
   for (size_t i = 0; i < ffs.size(); ++i) {
@@ -186,14 +165,10 @@ int main(int argc, char** argv)
   }
   UTIL_THROW_IF(!phraseTable,util::Exception,"Unable to find scoring phrase table");
 
-  Sentence sentence;
-  phraseTable->InitializeForInput(sentence);
 
   //
   //Load and prune the phrase table. This is taken (with mods) from moses/TranslationModel/RuleTable/LoaderStandard.cpp
   //
-
-  string lineOrig;
 
   std::ostream *progress = NULL;
   IFVERBOSE(1) progress = &std::cerr;
@@ -205,7 +180,9 @@ int main(int argc, char** argv)
 
   double_conversion::StringToDoubleConverter converter(double_conversion::StringToDoubleConverter::NO_FLAGS, NAN, NAN, "inf", "nan");
 
-  StringPiece previous;
+  string previous;
+  Lines lines;
+
 
   while(true) {
     try {
@@ -216,12 +193,31 @@ int main(int argc, char** argv)
 
     util::TokenIter<util::MultiCharacter> pipes(line, "|||");
     StringPiece sourcePhraseString(*pipes);
-    if (sourcePhraseString != previous) {
-      outputTopN(previous, phraseTable, input, cout);
-      previous = sourcePhraseString;
+    StringPiece targetPhraseString(*++pipes);
+    StringPiece scoreString(*++pipes);
+    scoreVector.clear();
+    for (util::TokenIter<util::AnyCharacter, true> s(scoreString, " \t"); s; ++s) {
+      int processed;
+      float score = converter.StringToFloat(s->data(), s->length(), &processed);
+      UTIL_THROW_IF2(isnan(score), "Bad score " << *s);
+      scoreVector.push_back(FloorScore(TransformScore(score)));
     }
+
+    if (sourcePhraseString != previous) {
+      outputTopN(lines, maxPhrases, cout);
+      previous = sourcePhraseString.as_string();
+      lines.clear();
+    }
+
+    ScoreComponentCollection scores;
+    scores.Assign(phraseTable,scoreVector);
+    float score = scores.InnerProduct(staticData.GetAllWeights());
+    lines.insert(pair<float,string>(score,line.as_string()));
+
   }
-  outputTopN(previous, phraseTable, input, cout);
+  if (!lines.empty()) {
+    outputTopN(lines, maxPhrases, cout);
+  }
 
 
 
