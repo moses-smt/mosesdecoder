@@ -833,10 +833,6 @@ sub reduce_factors {
 sub make_classes {
     my ($corpus,$classes) = @_;
     my $cmd = "$MKCLS -c50 -n2 -p$corpus -V$classes opt";
-    if($_HMM_ALIGN) {
-         # HMM model does not use classes
-         safesystem("touch $classes");
-    }
     print STDERR "(1.1) running mkcls  @ ".`date`."$cmd\n";
     if (-e $classes) {
         print STDERR "  $classes already in place, reusing\n";

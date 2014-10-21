@@ -126,10 +126,8 @@ void usage()
             << "   [-c          ] add the cooccurence counts to the phrase table\n"
             << "   [-p          ] add -log(significance) to the phrasetable\n"
             << "   [-h          ] filter hierarchical rule table\n"
-            << "   [-t num      ] use num threads\n\n"
-            << "   [-m num      ] limit cache to num most recent phrases\n"
-            << "Create splits with:\n"
-            << "  zcat phrase-table.gz | split -d -a 3 -l 5000000 --filter \"gzip > $FILE.gz\" - phrase-table.\n";
+            << "   [-t num      ] use num threads\n"
+            << "   [-m num      ] limit cache to num most recent phrases\n";
   exit(1);
 }
 
