@@ -330,7 +330,6 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
 
     targetOffset += tp.GetSize();
   }
-  out << std::endl;
 }
 
 void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)

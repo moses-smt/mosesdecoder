@@ -177,6 +177,7 @@ def main(argv):
                         # Dynamic means update this model
                         if v.startswith('Dynamic'):
                             mmsapt_dynamic.append(v)
+                            moses_ini_lines[i] += '{mmsapt_extra}'
                         else:
                             mmsapt_static.append(v)
                     elif k == 'L1':
@@ -189,7 +190,6 @@ def main(argv):
                             sys.stderr.write('Error: All PhraseDictionaryBitextSampling entries should have same L2: {} != {}\n'.format(v, mmsapt_l2))
                             sys.exit(1)
                         mmsapt_l2 = v
-                moses_ini_lines[i] += '{mmsapt_extra}'
             # [threads]
             # 8
             elif moses_ini_lines[i] == '[threads]':

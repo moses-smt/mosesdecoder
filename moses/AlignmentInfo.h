@@ -88,7 +88,7 @@ public:
 private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection
   explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs);
-
+  explicit AlignmentInfo(const std::vector<unsigned char> &aln);
   void BuildNonTermIndexMap();
 
   CollType m_collection;

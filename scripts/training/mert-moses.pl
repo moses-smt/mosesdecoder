@@ -386,14 +386,28 @@ if ($__PROMIX_TRAINING) {
   die "To use promix training, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
 }
 
-$mertargs = "" if !defined $mertargs;
+if (!defined $mertargs) {
+  if (defined $batch_mira_args) {
+    $mertargs = $batch_mira_args;
+  }
+  else {
+    $mertargs = "";
+  }
+}
 
 my $scconfig = undef;
-if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {
+if ($mertargs =~ /\-\-scconfig(?:\s+|=)(.+?)(\s|$)/) {
   $scconfig = $1;
   $scconfig =~ s/\,/ /g;
-  $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
+  $mertargs =~ s/\-\-scconfig(?:\s+|=)(.+?)(\s|$)//;
 }
+
+my $sctype = "--sctype BLEU";
+if ($mertargs =~ /(\-\-sctype(?:\s+|=).+?)(\s|$)/) {
+  $sctype = $1;
+  $mertargs =~ s/(\-\-sctype(?:\s+|=)+.+?)(\s|$)//;
+}
+
 
 # handling reference lengh strategy
 $scconfig .= &setup_reference_length_type();
@@ -407,8 +421,7 @@ $scconfig =~ s/\s+/,/g;
 
 $scconfig = "--scconfig $scconfig" if ($scconfig);
 
-my $mert_extract_args = $mertargs;
-$mert_extract_args .= " $scconfig";
+my $mert_extract_args = "$sctype $scconfig";
 
 $extractorargs = "" unless $extractorargs;
 $mert_extract_args .= " $extractorargs";
@@ -1113,7 +1126,7 @@ if($___RETURN_BEST_DEV) {
   my $bestbleu=0;
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
-    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " $mert_extract_args --candidate run$i.out";
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " $mert_extract_args --nbest run$i.best$___N_BEST_LIST_SIZE.out.gz";
     $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
     safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
@@ -1634,7 +1647,7 @@ sub create_extractor_script() {
 
   open my $out, '>', $script_path
       or die "Couldn't open $script_path for writing: $!\n";
-  print $out "#!/bin/bash\n";
+  print $out "#!/usr/bin/env bash\n";
   print $out "cd $outdir\n";
   print $out "$cmd\n";
   close $out;

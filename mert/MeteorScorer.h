@@ -54,7 +54,7 @@ public:
     return 23;
   }
 
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
 private:
   // Meteor and process IO

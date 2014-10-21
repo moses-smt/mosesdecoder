@@ -49,7 +49,7 @@ public:
 
 
 protected:
-  statscore_t calculateScore(const std::vector<int>& scores) const;
+  statscore_t calculateScore(const std::vector<ScoreStatsType>& scores) const;
   PermutationScorer(const PermutationScorer&);
   ~PermutationScorer() {};
   PermutationScorer& operator=(const PermutationScorer&);

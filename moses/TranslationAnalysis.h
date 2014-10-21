@@ -1,14 +1,16 @@
+#pragma once
 // $Id$
 
 /*
  * also see moses/SentenceStats
  */
 
-#ifndef moses_cmd_TranslationAnalysis_h
-#define moses_cmd_TranslationAnalysis_h
-
 #include <iostream>
-#include "moses/Hypothesis.h"
+
+namespace Moses {
+	class Hypothesis;
+	class ChartHypothesis;
+}
 
 namespace TranslationAnalysis
 {
@@ -18,7 +20,7 @@ namespace TranslationAnalysis
  * os.  Included information: phrase alignment, words dropped, scores
  */
 void PrintTranslationAnalysis(std::ostream &os, const Moses::Hypothesis* hypo);
+void PrintTranslationAnalysis(std::ostream &os, const Moses::ChartHypothesis* hypo);
 
 }
 
-#endif

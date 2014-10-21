@@ -137,18 +137,19 @@ void WordTranslationFeature::Load()
   }
 }
 
-void WordTranslationFeature::EvaluateWhenApplied
-(const Hypothesis& hypo,
- ScoreComponentCollection* accumulator) const
+void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
+              , const InputPath &inputPath
+              , const TargetPhrase &targetPhrase
+              , const StackVec *stackVec
+              , ScoreComponentCollection &scoreBreakdown
+              , ScoreComponentCollection *estimatedFutureScore) const
 {
-  const Sentence& input = static_cast<const Sentence&>(hypo.GetInput());
-  const TranslationOption& transOpt = hypo.GetTranslationOption();
-  const TargetPhrase& targetPhrase = hypo.GetCurrTargetPhrase();
+  const Sentence& sentence = static_cast<const Sentence&>(input);
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
-    const Phrase& sourcePhrase = transOpt.GetInputPath().GetPhrase();
+    const Phrase& sourcePhrase = inputPath.GetPhrase();
     int sourceIndex = alignmentPoint->first;
     int targetIndex = alignmentPoint->second;
     Word ws = sourcePhrase.GetWord(sourceIndex);
@@ -183,15 +184,15 @@ void WordTranslationFeature::EvaluateWhenApplied
       featureName << sourceWord;
       featureName << "~";
       featureName << targetWord;
-      accumulator->SparsePlusEquals(featureName.str(), 1);
+      scoreBreakdown.SparsePlusEquals(featureName.str(), 1);
     }
     if (m_domainTrigger && !m_sourceContext) {
-      const bool use_topicid = input.GetUseTopicId();
-      const bool use_topicid_prob = input.GetUseTopicIdAndProb();
+      const bool use_topicid = sentence.GetUseTopicId();
+      const bool use_topicid_prob = sentence.GetUseTopicIdAndProb();
       if (use_topicid || use_topicid_prob) {
         if(use_topicid) {
           // use topicid as trigger
-          const long topicid = input.GetTopicId();
+          const long topicid = sentence.GetTopicId();
           stringstream feature;
           feature << m_description << "_";
           if (topicid == -1)
@@ -203,7 +204,7 @@ void WordTranslationFeature::EvaluateWhenApplied
           feature << sourceWord;
           feature << "~";
           feature << targetWord;
-          accumulator->SparsePlusEquals(feature.str(), 1);
+          scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         } else {
           // use topic probabilities
           const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
@@ -213,7 +214,7 @@ void WordTranslationFeature::EvaluateWhenApplied
             feature << sourceWord;
             feature << "~";
             feature << targetWord;
-            accumulator->SparsePlusEquals(feature.str(), 1);
+            scoreBreakdown.SparsePlusEquals(feature.str(), 1);
           } else {
             for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
               stringstream feature;
@@ -223,7 +224,7 @@ void WordTranslationFeature::EvaluateWhenApplied
               feature << sourceWord;
               feature << "~";
               feature << targetWord;
-              accumulator->SparsePlusEquals(feature.str(), atof((topicid_prob[i+1]).c_str()));
+              scoreBreakdown.SparsePlusEquals(feature.str(), atof((topicid_prob[i+1]).c_str()));
             }
           }
         }
@@ -239,12 +240,12 @@ void WordTranslationFeature::EvaluateWhenApplied
           feature << sourceWord;
           feature << "~";
           feature << targetWord;
-          accumulator->SparsePlusEquals(feature.str(), 1);
+          scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         }
       }
     }
     if (m_sourceContext) {
-      size_t globalSourceIndex = hypo.GetTranslationOption().GetStartPos() + sourceIndex;
+      size_t globalSourceIndex = inputPath.GetWordsRange().GetStartPos() + sourceIndex;
       if (!m_domainTrigger && globalSourceIndex == 0) {
         // add <s> trigger feature for source
         stringstream feature;
@@ -253,7 +254,7 @@ void WordTranslationFeature::EvaluateWhenApplied
         feature << sourceWord;
         feature << "~";
         feature << targetWord;
-        accumulator->SparsePlusEquals(feature.str(), 1);
+        scoreBreakdown.SparsePlusEquals(feature.str(), 1);
       }
 
       // range over source words to get context
@@ -284,7 +285,7 @@ void WordTranslationFeature::EvaluateWhenApplied
             feature << sourceWord;
             feature << "~";
             feature << targetWord;
-            accumulator->SparsePlusEquals(feature.str(), 1);
+            scoreBreakdown.SparsePlusEquals(feature.str(), 1);
           }
         } else if (m_unrestricted || sourceTriggerExists) {
           stringstream feature;
@@ -300,7 +301,7 @@ void WordTranslationFeature::EvaluateWhenApplied
           }
           feature << "~";
           feature << targetWord;
-          accumulator->SparsePlusEquals(feature.str(), 1);
+          scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         }
       }
     }
@@ -347,13 +348,6 @@ void WordTranslationFeature::EvaluateWhenApplied
       }*/
     }
   }
-}
-
-void WordTranslationFeature::EvaluateWhenApplied(
-  const ChartHypothesis &hypo,
-  ScoreComponentCollection* accumulator) const
-{
-  UTIL_THROW(util::Exception, "Need source phrase. Can't be arsed at the moment");
 }
 
 bool WordTranslationFeature::IsUseable(const FactorMask &mask) const

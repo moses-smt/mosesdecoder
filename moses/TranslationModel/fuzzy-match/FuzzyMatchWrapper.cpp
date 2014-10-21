@@ -323,17 +323,10 @@ string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, co
 
   // do not try to find the best ... report multiple matches
   if (multiple_flag) {
-    int input_letter_length = compute_length( input[sentenceInd] );
     for(int si=0; si<best_tm.size(); si++) {
       int s = best_tm[si];
       string path;
-      unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );
-      // do not report multiple identical sentences, but just their count
-      //cout << sentenceInd << " "; // sentence number
-      //cout << letter_cost << "/" << input_letter_length << " ";
-      //cout << "(" << best_cost <<"/" << input_length <<") ";
-      //cout << "||| " << s << " ||| " << path << endl;
-
+      sed( input[sentenceInd], source[s], path, true );
       const vector<WORD_ID> &sourceSentence = source[s];
       vector<SentenceAlignment> &targets = targetAndAlignment[s];
       create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, path, fuzzyMatchStream);
@@ -707,7 +700,7 @@ unsigned int FuzzyMatchWrapper::compute_length( const vector< WORD_ID > &sentenc
 
 /* brute force method: compare input to all corpus sentences */
 
-int FuzzyMatchWrapper::basic_fuzzy_match( vector< vector< WORD_ID > > source,
+void FuzzyMatchWrapper::basic_fuzzy_match( vector< vector< WORD_ID > > source,
     vector< vector< WORD_ID > > input )
 {
   // go through input set...
