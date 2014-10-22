@@ -81,7 +81,7 @@ def main():
   prep_file = options.working_dir + "/" + options.output_model + ".prepared"
 
   # Prepare the validation file if we have to
-  if (options.validation_file is not None) and skip_preparation_validation:
+  if (options.validation_file is not None) and not skip_preparation_validation:
     valid_prep_args = [options.nplm_home + "/src/prepareNeuralLM", "--train_text", options.validation_file, "--ngram_size", \
                 str(options.ngram_size), "--ngramize", "0", "--words_file", vocab_file, "--train_file", (options.validation_file + ".numberize") ]
     config_file_write.write("Prepare validation set:\n" + ' '.join(valid_prep_args) + '\n\n')
