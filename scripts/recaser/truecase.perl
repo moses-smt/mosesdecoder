@@ -7,6 +7,8 @@ use Getopt::Long "GetOptions";
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
+$| = 1;
+
 # apply switches
 my ($MODEL, $UNBUFFERED);
 die("truecase.perl --model MODEL [-b] < in > out")

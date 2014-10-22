@@ -37,11 +37,11 @@ std::string esmState :: getName() const
 }                 
 
 EditSequenceModel::EditSequenceModel(const std::string &line)
-  :StatefulFeatureFunction(5, line)
+  :StatefulFeatureFunction(1, line)
 {
   m_sFactor = 0;
   m_tFactor = 0;
-  m_numScoreComponents = 5;
+  m_numScoreComponents = 1;
   ReadParameters();
 }
 
@@ -92,10 +92,10 @@ void EditSequenceModel:: EvaluateInIsolation(const Phrase &source
   std::vector<float> scores;
   scores.push_back(opProb);
   
-  scores.push_back(stats.deletes);
-  scores.push_back(stats.inserts);
-  scores.push_back(stats.matches);
-  scores.push_back(stats.substitutions);
+  //scores.push_back(stats.deletes);
+  //scores.push_back(stats.inserts);
+  //scores.push_back(stats.matches);
+  //scores.push_back(stats.substitutions);
   
   estimatedFutureScore.PlusEquals(this, scores);
 }
@@ -133,10 +133,10 @@ FFState* EditSequenceModel::EvaluateWhenApplied(
   std::vector<float> scores;
   scores.push_back(opProb);
   
-  scores.push_back(stats.deletes);
-  scores.push_back(stats.inserts);
-  scores.push_back(stats.matches);
-  scores.push_back(stats.substitutions);
+  //scores.push_back(stats.deletes);
+  //scores.push_back(stats.inserts);
+  //scores.push_back(stats.matches);
+  //scores.push_back(stats.substitutions);
   
   accumulator->PlusEquals(this, scores);
 
