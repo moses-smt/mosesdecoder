@@ -368,10 +368,11 @@ string* SyntaxTree::FindObj() const{
 		//cout<<"VP: "<<m_top->GetHead()<<" NP: ";
 		SyntaxNodePtr obj = head->FindFirstChild("NP");
 		//uncomment to look for PPs
-/*		if(!obj){
+		if(!obj){
 			obj = head->FindFirstChild("PP");
+			//cout<<"PP: "<<obj->GetHead()<<endl;
 		}
-*/		if(obj){
+		if(obj){
 			//cout<<obj->GetHead()<<endl;
 			*predArgPair+=head->GetHead()+" "+obj->GetHead();
 		}
