@@ -26,7 +26,7 @@ def main():
   parser.add_option("-f", "--config-options-file", dest="config_options_file")
   parser.add_option("-g", "--log-file", dest="log_file")
   parser.add_option("-v", "--validation-ngrams", dest="validation_file")
-  parser.add_option("-sv", "--skip-validation-preparation", action="store_true", dest="skip_preparation_validation")
+  parser.add_option("-k", "--skip-validation-preparation", action="store_true", dest="skip_preparation_validation")
 
   parser.set_defaults(
     working_dir = "working"
