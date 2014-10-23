@@ -18,6 +18,15 @@ $(TOP)/moses/TranslationModel/UG/mm//mm
 $(TOP)/util//kenutil 
 ; 
 
+exe mtt-demo1 : 
+mtt-demo1.cc 
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
 exe mtt-count-words : 
 mtt-count-words.cc 
 $(TOP)/moses/TranslationModel/UG/generic//generic 

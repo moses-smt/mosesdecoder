@@ -176,6 +176,7 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG//ptable-lookup 
   moses/TranslationModel/UG//sim-pe 
   moses/TranslationModel/UG//spe-check-coverage 
+  moses/TranslationModel/UG/mm//mtt-demo1 
   moses/TranslationModel/UG/mm//mtt-build 
   moses/TranslationModel/UG/mm//mtt-dump 
   moses/TranslationModel/UG/mm//symal2mam 
