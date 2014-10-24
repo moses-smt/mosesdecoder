@@ -284,7 +284,7 @@ void lookup_phrase(SentIdSet& ids, const std::string& phrase,
       }
       
       std::sort(ids->begin(), ids->end());
-      typename SentIdSet::element_type::iterator it =
+      SentIdSet::element_type::iterator it =
         std::unique(ids->begin(), ids->end());
       ids->resize(it - ids->begin());
       
