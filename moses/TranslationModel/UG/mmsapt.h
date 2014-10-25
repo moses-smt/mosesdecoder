@@ -51,6 +51,7 @@ namespace Moses
     friend class Alignment;
     map<string,string> param;
     vector<float> bias;
+    string m_name;
   public:    
     typedef L2R_Token<SimpleWordId> Token;
     typedef mmBitext<Token> mmbitext;
@@ -238,6 +239,9 @@ namespace Moses
     
     // returns the prior table limit
     size_t SetTableLimit(size_t limit);
+
+    string const&
+    GetName() const;
 
 #ifndef NO_MOSES
     TargetPhraseCollection const* 

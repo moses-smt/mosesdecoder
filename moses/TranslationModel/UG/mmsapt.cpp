@@ -197,6 +197,8 @@ namespace Moses
 
     dflt = pair<string,string>("feature-sets","standard");
     m_feature_set_names = Tokenize(param.insert(dflt).first->second.c_str(), ",");
+    m = param.find("name");
+    if (m != param.end()) m_name = m->second;
 
     // check for unknown parameters
     vector<string> known_parameters; known_parameters.reserve(50);
@@ -864,6 +866,13 @@ namespace Moses
   ProvidesPrefixCheck() const
   {
     return true;
+  }
+
+  string const&
+  Mmsapt::
+  GetName() const 
+  { 
+    return m_name; 
   }
 
 }

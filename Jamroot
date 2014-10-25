@@ -172,6 +172,7 @@ build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses
 if [ option.get "with-mm" : : "yes" ]
 {
  alias mm :  
+  moses/TranslationModel/UG//ptable-describe-features 
   moses/TranslationModel/UG//count-ptable-features 
   moses/TranslationModel/UG//ptable-lookup 
   moses/TranslationModel/UG//sim-pe 
