@@ -123,11 +123,12 @@ bool Parameters::setParamValue(const std::string& name, const std::string& val)
 std::string Parameters::getParamValue(const std::string& name)
 {
   std::string value = Parameters::kNotSetValue;
-  if(isValidParamName(name))
+  if(isValidParamName(name)) {
     if(params_.find(name) != params_.end())
       value = params_[name].value;
     else if(getValueType(name) == kBoolValue)
       value = kFalseValue;
+  }
   return value;
 }
 std::string Parameters::getParam(const std::string& name)

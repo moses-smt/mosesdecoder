@@ -55,6 +55,8 @@ def escape_special_chars(line):
 
     line = line.replace('\'','&apos;') # xml
     line = line.replace('"','&quot;') # xml
+    line = line.replace('[','&#91;') # syntax non-terminal
+    line = line.replace(']','&#93;') # syntax non-terminal
 
     return line
 
@@ -91,11 +93,11 @@ def write(sentence, output_format='xml'):
         out = create_brackets(0,sentence)
 
     out = out.replace('|','&#124;') # factor separator
-    out = out.replace('[','&#91;') # syntax non-terminal
-    out = out.replace(']','&#93;') # syntax non-terminal
 
     out = out.replace('&amp;apos;','&apos;') # lxml is buggy if input is escaped
     out = out.replace('&amp;quot;','&quot;') # lxml is buggy if input is escaped
+    out = out.replace('&amp;#91;','&#91;') # lxml is buggy if input is escaped
+    out = out.replace('&amp;#93;','&#93;') # lxml is buggy if input is escaped
 
     print(out)
 
@@ -138,9 +140,9 @@ def create_subtree(position, sentence):
 def create_brackets(position, sentence):
 
     if position:
-        element = "( " + sentence[position].proj_func + ' '
+        element = "[ " + sentence[position].proj_func + ' '
     else:
-        element = "( sent "
+        element = "[ sent "
 
     for i in range(1,position):
         if sentence[i].proj_head == position:
@@ -148,26 +150,19 @@ def create_brackets(position, sentence):
 
     if position:
         word = sentence[position].word
-        if word == ')':
-            word = 'RBR'
-        elif word == '(':
-            word = 'LBR'
-
         tag = sentence[position].tag
-        if tag == '$(':
-            tag = '$BR'
 
         if preterminals:
-            element += '( ' + tag + ' ' + word + ' ) '
+            element += '[ ' + tag + ' ' + word + ' ] '
         else:
-            element += word + ' ) '
+            element += word + ' ] '
 
     for i in range(position, len(sentence)):
         if i and sentence[i].proj_head == position:
             element += create_brackets(i, sentence)
 
     if preterminals or not position:
-        element += ') '
+        element += '] '
 
     return element
 

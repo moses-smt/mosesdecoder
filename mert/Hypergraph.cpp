@@ -64,7 +64,7 @@ double_conversion::StringToDoubleConverter converter(double_conversion::StringTo
 **/
 static pair<Edge*,size_t> ReadEdge(util::FilePiece &from, Graph &graph) {
   Edge* edge = graph.NewEdge();
-  StringPiece line = NextLine(from);
+  StringPiece line = from.ReadLine(); //Don't allow comments within edge lists
   util::TokenIter<util::MultiCharacter> pipes(line, util::MultiCharacter(" ||| "));
   //Target
   for (util::TokenIter<util::SingleCharacter, true> i(*pipes, util::SingleCharacter(' ')); i; ++i) {

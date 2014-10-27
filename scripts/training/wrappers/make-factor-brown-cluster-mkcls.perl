@@ -34,6 +34,7 @@ sub read_cluster_from_mkcls {
   my ($file) = @_;
   my %CLUSTER;
   open(CLUSTER_FILE,$file) || die("ERROR: could not open cluster file '$file'");
+  binmode(CLUSTER_FILE, ":utf8");
   while(<CLUSTER_FILE>) {
     chop;
     my ($word,$cluster) = split;
@@ -45,3 +46,5 @@ sub read_cluster_from_mkcls {
 
 sub add_cluster_to_string {
 }
+
+

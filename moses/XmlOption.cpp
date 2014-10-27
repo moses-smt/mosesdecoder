@@ -24,6 +24,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <boost/foreach.hpp>
+#include <boost/unordered_map.hpp>
 #include "Util.h"
 #include "StaticData.h"
 #include "WordsRange.h"
@@ -346,6 +348,52 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
             TRACE_ERR("ERROR: recompile with --with-mm to update PhraseDictionary at runtime" << endl);
             return false;
 #endif
+        }
+
+        // weight-overwrite: update feature weights, unspecified weights remain unchanged
+        // IMPORTANT: translation models that cache phrases or apply table-limit during load
+        // based on initial weights need to be reset.  Sending an empty update will do this
+        // for PhraseDictionaryBitextSampling (Mmsapt) models:
+        // <update name="TranslationModelName" source=" " target=" " alignment=" " />
+        else if (tagName == "weight-overwrite") {
+            
+            // is a name->ff map stored anywhere so we don't have to build it every time?
+            const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+            boost::unordered_map<string, FeatureFunction*> map;
+            BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
+                map[ff->GetScoreProducerDescription()] = ff;
+            }
+
+            // update each weight listed
+            ScoreComponentCollection allWeights = StaticData::Instance().GetAllWeights();
+            boost::unordered_map<string, FeatureFunction*>::iterator ffi;
+            string ffName("");
+            vector<float> ffWeights;
+            vector<string> toks = Tokenize(ParseXmlTagAttribute(tagContent,"weights"));
+            BOOST_FOREACH(string const& tok, toks) {
+                if (tok.substr(tok.size() - 1, 1) == "=") {
+                    // start new feature
+                    if (ffName != "") {
+                        // set previous feature weights
+                        if (ffi != map.end()) {
+                            allWeights.Assign(ffi->second, ffWeights);
+                        }
+                        ffWeights.clear();
+                    }
+                    ffName = tok.substr(0, tok.size() - 1);
+                    ffi = map.find(ffName);
+                    if (ffi == map.end()) {
+                        TRACE_ERR("ERROR: No FeatureFunction with name " << ffName << ", no weight update" << endl);
+                    }
+                } else {
+                    // weight for current feature
+                    ffWeights.push_back(Scan<float>(tok));
+                }
+            }
+            if (ffi != map.end()) {
+                allWeights.Assign(ffi->second, ffWeights);
+            }
+            StaticData::InstanceNonConst().SetAllWeights(allWeights);
         }
 
         // default: opening tag that specifies translation options

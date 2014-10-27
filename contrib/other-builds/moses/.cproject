@@ -50,7 +50,6 @@
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
 									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
-									<listOptionValue builtIn="false" value="LM_IRST"/>
 									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
 									<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 								</option>

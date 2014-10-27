@@ -40,7 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <exception>
 #include <fstream>
 #include "Main.h"
-#include "TranslationAnalysis.h"
+#include "moses/TranslationAnalysis.h"
 #include "mbr.h"
 #include "IOWrapper.h"
 
