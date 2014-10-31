@@ -58,7 +58,7 @@ if $(FORCE-STATIC) {
 
 rule test_library ( name ) {
   if $(FORCE-STATIC) {
-    return [ test_flags "-l$(name) -static" ] ;
+    return [ test_flags "-Wl,-Bstatic -l$(name) -Wl,-Bdynamic" ] ;
   } else {
     return [ test_flags "-l$(name)" ] ;
   }
@@ -88,7 +88,7 @@ rule auto-shared ( name : additional * ) {
   if $(shared-command-line) = "<link>shared" {
     return "<link>shared" ;
   } else {
-    if [ test_flags $(additional)" -static -l"$(name) ] {
+    if [ test_flags $(additional)" -Wl,-Bstatic -l"$(name)" -Wl,-Bdynamic" ] {
       return ;
     } else {
       if $(FORCE-STATIC) {
@@ -140,7 +140,7 @@ rule boost-lib ( name macro : deps * ) {
   if $(boost-auto-shared) = "<link>shared" {
     flags += " -DBOOST_$(macro)" ;
   } else {
-    flags += " -static" ;
+    flags = " -Wl,-Bstatic $(flags) -Wl,-Bdynamic " ;
   }
   if [ test_flags $(flags) : $(main) ] {
     lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name)$(boost-lib-version) : <link>static : <library>$(deps) ;
