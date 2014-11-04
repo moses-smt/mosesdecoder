@@ -777,6 +777,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SyntacticLanguageModelState.h</locationURI>
 		</link>
 		<link>
+			<name>Syntax</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>TargetPhrase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetPhrase.cpp</locationURI>
@@ -1787,6 +1792,126 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/TreeStructurePhraseProperty.h</locationURI>
 		</link>
 		<link>
+			<name>Syntax/BoundedPriorityContainer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/BoundedPriorityContainer.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/Cube.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/Cube.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/Cube.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/Cube.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/CubeQueue.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/CubeQueue.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/CubeQueue.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/CubeQueue.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/KBestExtractor.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/KBestExtractor.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/KBestExtractor.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/KBestExtractor.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/NonTerminalMap.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/NonTerminalMap.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/PHyperedge.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/PHyperedge.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/PVertex.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/PVertex.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/RuleTable.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/RuleTable.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/RuleTableFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/RuleTableFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/RuleTableFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/RuleTableFF.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SHyperedge.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SHyperedge.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SHyperedge.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SHyperedge.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SHyperedgeBundle.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SHyperedgeBundle.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SHyperedgeBundleScorer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SHyperedgeBundleScorer.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SVertex.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SVertex.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SVertex.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SVertex.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SVertexBeam.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SVertexBeam.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SVertexRecombinationOrderer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SVertexRecombinationOrderer.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SymbolEqualityPred.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SymbolEqualityPred.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/SymbolHasher.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/SymbolHasher.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/BilingualDynSuffixArray.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.cpp</locationURI>
@@ -2090,6 +2215,111 @@
 			<name>LM/oxlm/OxLMMapper.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/oxlm/OxLMMapper.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/DerivationWriter.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/DerivationWriter.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/DerivationWriter.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/DerivationWriter.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Manager-inl.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Manager-inl.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Manager.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Manager.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/OovHandler-inl.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/OovHandler-inl.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/OovHandler.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/OovHandler.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/PChart.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/PChart.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/PChart.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/PChart.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/PHyperedgeToSHyperedgeBundle.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/PHyperedgeToSHyperedgeBundle.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/ParserCallback.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/ParserCallback.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/RuleTrie.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrie.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/RuleTrieCYKPlus.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrieCYKPlus.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/RuleTrieCYKPlus.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrieCYKPlus.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/RuleTrieCreator.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrieCreator.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/RuleTrieLoader.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrieLoader.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/RuleTrieLoader.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrieLoader.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/RuleTrieScope3.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrieScope3.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/RuleTrieScope3.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/RuleTrieScope3.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/SChart.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/SChart.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/SChart.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/SChart.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>
@@ -2867,6 +3097,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/OSM-Feature/KenOSM.h</locationURI>
 		</link>
 		<link>
+			<name>Syntax/S2T/Parsers/Parser.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Parser.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/RecursiveCYKPlusParser</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -3235,6 +3480,76 @@
 			<name>bin/gcc-4.7/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser-inl.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser-inl.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/Parser-inl.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/Parser-inl.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/Parser.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/Parser.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/PatternApplicationTrie.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/PatternApplicationTrie.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/PatternApplicationTrie.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/PatternApplicationTrie.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/SentenceMap.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/SentenceMap.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/SymbolRange.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/SymbolRange.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/SymbolRangeCalculator.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/SymbolRangeCalculator.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/SymbolRangeCalculator.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/SymbolRangeCalculator.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/TailLattice.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/TailLattice.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/TailLatticeBuilder.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/TailLatticeBuilder.cpp</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/TailLatticeBuilder.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/TailLatticeBuilder.h</locationURI>
+		</link>
+		<link>
+			<name>Syntax/S2T/Parsers/Scope3Parser/TailLatticeSearcher.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Syntax/S2T/Parsers/Scope3Parser/TailLatticeSearcher.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CompactPT/bin/gcc-4.7/release</name>
