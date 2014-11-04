@@ -49,6 +49,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/PP/TreeStructurePhraseProperty.h"
+#include "moses/Syntax/PVertex.h"
+#include "moses/Syntax/S2T/DerivationWriter.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -490,6 +492,19 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
+void IOWrapper::OutputDetailedTranslationReport(const Syntax::SHyperedge *best,
+                                                long translationId)
+{
+  if (best == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  Syntax::S2T::DerivationWriter::Write(*best, translationId, out);
+  UTIL_THROW_IF2(m_detailOutputCollector == NULL,
+		  "No ouput file for detailed reports specified");
+  m_detailOutputCollector->Write(translationId, out.str());
+}
+
 void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
   const ChartHypothesis *hypo,
   const Sentence &sentence,
@@ -644,6 +659,35 @@ void IOWrapper::OutputBestHypo(search::Applied applied, long translationId)
   VERBOSE(1,"BEST TRANSLATION: " << outPhrase << "[total=" << applied.GetScore() << "]" << endl);
 }
 
+void IOWrapper::OutputBestHypo(const Syntax::SHyperedge *best,
+                               long translationId)
+{
+  if (!m_singleBestOutputCollector) {
+    return;
+  }
+  std::ostringstream out;
+  IOWrapper::FixPrecision(out);
+  if (best == NULL) {
+    VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      out << "0 ";
+    }
+  } else {
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      out << best->score << " ";
+    }
+    Phrase yield = Syntax::GetOneBestTargetYield(*best);
+    // delete 1st & last
+    UTIL_THROW_IF2(yield.GetSize() < 2,
+        "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+    yield.RemoveWord(0);
+    yield.RemoveWord(yield.GetSize()-1);
+    out << yield.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
+    out << '\n';
+  }
+  m_singleBestOutputCollector->Write(translationId, out.str());
+}
+
 void IOWrapper::OutputBestNone(long translationId)
 {
   if (!m_singleBestOutputCollector) return;
@@ -758,6 +802,66 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
   m_nBestOutputCollector->Write(translationId, out.str());
 }
 
+void IOWrapper::OutputNBestList(
+    const Syntax::KBestExtractor::KBestVec &nBestList, long translationId)
+{
+  std::ostringstream out;
+
+  if (m_nBestOutputCollector->OutputIsCout()) {
+    // Set precision only if we're writing the n-best list to cout.  This is to
+    // preserve existing behaviour, but should probably be done either way.
+    IOWrapper::FixPrecision(out);
+  }
+
+  bool includeWordAlignment =
+      StaticData::Instance().PrintAlignmentInfoInNbest();
+
+  bool PrintNBestTrees = StaticData::Instance().PrintNBestTrees();
+
+  for (Syntax::KBestExtractor::KBestVec::const_iterator p = nBestList.begin();
+       p != nBestList.end(); ++p) {
+    const Syntax::KBestExtractor::Derivation &derivation = **p;
+
+    // get the derivation's target-side yield
+    Phrase outputPhrase = Syntax::KBestExtractor::GetOutputPhrase(derivation);
+
+    // delete <s> and </s>
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
+        "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+    outputPhrase.RemoveWord(0);
+    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
+
+    // print the translation ID, surface factors, and scores
+    out << translationId << " ||| ";
+    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
+    out << " ||| ";
+    OutputAllFeatureScores(derivation.scoreBreakdown, out);
+    out << " ||| " << derivation.score;
+
+    // optionally, print word alignments
+    if (includeWordAlignment) {
+      out << " ||| ";
+      Alignments align;
+      OutputAlignmentNBest(align, derivation, 0);
+      for (Alignments::const_iterator q = align.begin(); q != align.end();
+           ++q) {
+        out << q->first << "-" << q->second << " ";
+      }
+    }
+
+    // optionally, print tree
+    if (PrintNBestTrees) {
+      TreePointer tree = Syntax::KBestExtractor::GetOutputTree(derivation);
+      out << " ||| " << tree->GetString();
+    }
+
+    out << std::endl;
+  }
+
+  assert(m_nBestOutputCollector);
+  m_nBestOutputCollector->Write(translationId, out.str());
+}
+
 void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId)
 {
   std::ostringstream out;
@@ -812,6 +916,19 @@ size_t CalcSourceSize(const Moses::ChartHypothesis *hypo)
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
   for (size_t i = 0; i < prevHypos.size(); ++i) {
     size_t childSize = prevHypos[i]->GetCurrSourceRange().GetNumWordsCovered();
+    ret -= (childSize - 1);
+  }
+  return ret;
+}
+
+size_t CalcSourceSize(const Moses::Syntax::KBestExtractor::Derivation &d)
+{
+  using namespace Moses::Syntax;
+
+  const SHyperedge &shyperedge = d.edge->shyperedge;
+  size_t ret = shyperedge.head->pvertex->span.GetNumWordsCovered();
+  for (size_t i = 0; i < shyperedge.tail.size(); ++i) {
+    size_t childSize = shyperedge.tail[i]->pvertex->span.GetNumWordsCovered();
     ret -= (childSize - 1);
   }
   return ret;
@@ -896,6 +1013,86 @@ size_t IOWrapper::OutputAlignmentNBest(
   return totalTargetSize;
 }
 
+size_t IOWrapper::OutputAlignmentNBest(
+    Alignments &retAlign,
+    const Moses::Syntax::KBestExtractor::Derivation &derivation,
+    size_t startTarget)
+{
+  const Syntax::SHyperedge &shyperedge = derivation.edge->shyperedge;
+
+  size_t totalTargetSize = 0;
+  size_t startSource = shyperedge.head->pvertex->span.GetStartPos();
+
+  const TargetPhrase &tp = *(shyperedge.translation);
+
+  size_t thisSourceSize = CalcSourceSize(derivation);
+
+  // position of each terminal word in translation rule, irrespective of alignment
+  // if non-term, number is undefined
+  vector<size_t> sourceOffsets(thisSourceSize, 0);
+  vector<size_t> targetOffsets(tp.GetSize(), 0);
+
+  const AlignmentInfo &aiNonTerm = shyperedge.translation->GetAlignNonTerm();
+  vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
+  const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
+
+  UTIL_THROW_IF2(sourceInd2pos.size() != derivation.subderivations.size(),
+                 "Error");
+
+  size_t targetInd = 0;
+  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
+    if (tp.GetWord(targetPos).IsNonTerminal()) {
+      UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
+      size_t sourceInd = targetPos2SourceInd[targetPos];
+      size_t sourcePos = sourceInd2pos[sourceInd];
+
+      const Moses::Syntax::KBestExtractor::Derivation &subderivation =
+        *derivation.subderivations[sourceInd];
+
+      // calc source size
+      size_t sourceSize =
+          subderivation.edge->head->svertex.pvertex->span.GetNumWordsCovered();
+      sourceOffsets[sourcePos] = sourceSize;
+
+      // calc target size.
+      // Recursively look thru child hypos
+      size_t currStartTarget = startTarget + totalTargetSize;
+      size_t targetSize = OutputAlignmentNBest(retAlign, subderivation,
+                                               currStartTarget);
+      targetOffsets[targetPos] = targetSize;
+
+      totalTargetSize += targetSize;
+      ++targetInd;
+    } else {
+      ++totalTargetSize;
+    }
+  }
+
+  // convert position within translation rule to absolute position within
+  // source sentence / output sentence
+  ShiftOffsets(sourceOffsets, startSource);
+  ShiftOffsets(targetOffsets, startTarget);
+
+  // get alignments from this hypo
+  const AlignmentInfo &aiTerm = shyperedge.translation->GetAlignTerm();
+
+  // add to output arg, offsetting by source & target
+  AlignmentInfo::const_iterator iter;
+  for (iter = aiTerm.begin(); iter != aiTerm.end(); ++iter) {
+    const std::pair<size_t,size_t> &align = *iter;
+    size_t relSource = align.first;
+    size_t relTarget = align.second;
+    size_t absSource = sourceOffsets[relSource];
+    size_t absTarget = targetOffsets[relTarget];
+
+    pair<size_t, size_t> alignPoint(absSource, absTarget);
+    pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
+    UTIL_THROW_IF2(!ret.second, "Error");
+  }
+
+  return totalTargetSize;
+}
+
 void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo)
 {
   ostringstream out;
@@ -922,6 +1119,18 @@ void IOWrapper::OutputUnknowns(const std::vector<Moses::Phrase*> &unknowns,
   std::ostringstream out;
   for (std::size_t i = 0; i < unknowns.size(); ++i) {
     out << *(unknowns[i]);
+  }
+  out << std::endl;
+  m_unknownsCollector->Write(translationId, out.str());
+}
+
+void IOWrapper::OutputUnknowns(const std::set<Moses::Word> &unknowns,
+                               long translationId)
+{
+  std::ostringstream out;
+  for (std::set<Moses::Word>::const_iterator p = unknowns.begin();
+       p != unknowns.end(); ++p) {
+    out << *p;
   }
   out << std::endl;
   m_unknownsCollector->Write(translationId, out.str());

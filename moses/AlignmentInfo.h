@@ -65,6 +65,12 @@ public:
     return m_nonTermIndexMap;
   }
 
+  /** Like GetNonTermIndexMap but the return value is the symbol index (i.e.
+    * the index counting both terminals and non-terminals) */
+  const NonTermIndexMap &GetNonTermIndexMap2() const {
+    return m_nonTermIndexMap2;
+  }
+
   const CollType &GetAlignments() const {
     return m_collection;
   }
@@ -89,10 +95,11 @@ private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection
   explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs);
   explicit AlignmentInfo(const std::vector<unsigned char> &aln);
-  void BuildNonTermIndexMap();
+  void BuildNonTermIndexMaps();
 
   CollType m_collection;
   NonTermIndexMap m_nonTermIndexMap;
+  NonTermIndexMap m_nonTermIndexMap2;
 };
 
 /** Define an arbitrary strict weak ordering between AlignmentInfo objects

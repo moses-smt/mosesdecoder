@@ -160,6 +160,11 @@ enum FormatType {
   ,HieroFormat
 };
 
+enum S2TParsingAlgorithm {
+  RecursiveCYKPlus,
+  Scope3
+};
+
 // typedef
 typedef size_t FactorType;
 

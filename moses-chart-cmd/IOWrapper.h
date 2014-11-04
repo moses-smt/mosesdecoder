@@ -45,6 +45,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartHypothesis.h"
 #include "search/applied.hh"
 #include "moses/ChartManager.h"
+#include "moses/Syntax/KBestExtractor.h"
+#include "moses/Syntax/SHyperedge.h"
 
 namespace Moses
 {
@@ -88,6 +90,7 @@ protected:
 
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
   std::size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartKBestExtractor::Derivation &derivation, std::size_t startTarget);
+  std::size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::Syntax::KBestExtractor::Derivation &derivation, std::size_t startTarget);
   size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
   void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
   void OutputTranslationOption(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
@@ -124,13 +127,16 @@ public:
   Moses::InputType* GetInput(Moses::InputType *inputType);
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
   void OutputBestHypo(search::Applied applied, long translationId);
+  void OutputBestHypo(const Moses::Syntax::SHyperedge *, long translationId);
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId);
   void OutputBestNone(long translationId);
   void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
+  void OutputNBestList(const Moses::Syntax::KBestExtractor::KBestVec &nBestList, long translationId);
   void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
   void OutputNBestTrees(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
+  void OutputDetailedTranslationReport(const Moses::Syntax::SHyperedge *, long translationId);
   void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTreeFragmentsTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedAllTranslationReport(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
@@ -144,6 +150,7 @@ public:
 
   void OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo);
   void OutputUnknowns(const std::vector<Moses::Phrase*> &, long);
+  void OutputUnknowns(const std::set<Moses::Word> &, long);
 
   static void FixPrecision(std::ostream &, size_t size=3);
 };

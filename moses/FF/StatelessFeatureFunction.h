@@ -2,6 +2,8 @@
 
 #include "FeatureFunction.h"
 
+#include "moses/Syntax/SHyperedge.h"
+
 namespace Moses
 {
 
@@ -31,6 +33,9 @@ public:
     **/
   virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
                              ScoreComponentCollection* accumulator) const = 0;
+
+  virtual void EvaluateWhenApplied(const Syntax::SHyperedge &,
+                             ScoreComponentCollection*) const { assert(false); }
 
   virtual bool IsStateless() const {
     return true;

@@ -29,7 +29,7 @@ namespace Moses
 AlignmentInfo::AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs)
   : m_collection(pairs)
 {
-  BuildNonTermIndexMap();
+  BuildNonTermIndexMaps();
 }
 
 AlignmentInfo::AlignmentInfo(const std::vector<unsigned char> &aln)
@@ -37,10 +37,10 @@ AlignmentInfo::AlignmentInfo(const std::vector<unsigned char> &aln)
   assert(aln.size()%2==0);
   for (size_t i = 0; i < aln.size(); i+= 2)
     m_collection.insert(std::make_pair(size_t(aln[i]),size_t(aln[i+1])));
-  BuildNonTermIndexMap();
+  BuildNonTermIndexMaps();
 }
 
-void AlignmentInfo::BuildNonTermIndexMap()
+void AlignmentInfo::BuildNonTermIndexMaps()
 {
   if (m_collection.empty()) {
     return;
@@ -53,14 +53,17 @@ void AlignmentInfo::BuildNonTermIndexMap()
     }
   }
   m_nonTermIndexMap.resize(maxIndex+1, NOT_FOUND);
+  m_nonTermIndexMap2.resize(maxIndex+1, NOT_FOUND);
   size_t i = 0;
   for (p = begin(); p != end(); ++p) {
     if (m_nonTermIndexMap[p->second] != NOT_FOUND) {
       // 1-to-many. Definitely a set of terminals. Don't bother storing 1-to-1 index map
       m_nonTermIndexMap.clear();
+      m_nonTermIndexMap2.clear();
       return;
     }
     m_nonTermIndexMap[p->second] = i++;
+    m_nonTermIndexMap2[p->second] = p->first;
   }
 }
 

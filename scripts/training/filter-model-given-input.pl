@@ -113,6 +113,7 @@ while(my $line = <INI>) {
      || $line =~ /PhraseDictionaryBinary /
      || $line =~ /PhraseDictionaryOnDisk /
      || $line =~ /PhraseDictionarySCFG /
+     || $line =~ /RuleTable /
      ) {
     print STDERR "pt:$line\n";
 
@@ -143,7 +144,7 @@ while(my $line = <INI>) {
 			}
     } #for (my $i = 1; $i < scalar(@toks); ++$i) {
     
-		if (($phrase_table_impl ne "PhraseDictionaryMemory" && $phrase_table_impl ne "PhraseDictionarySCFG") || $file =~ /glue-grammar/ || $skip) {
+		if (($phrase_table_impl ne "PhraseDictionaryMemory" && $phrase_table_impl ne "PhraseDictionarySCFG" && $phrase_table_impl ne "RuleTable") || $file =~ /glue-grammar/ || $skip) {
 				# Only Memory ("0") and NewFormat ("6") can be filtered.
 				print INI_OUT "$line\n";
 				next;
