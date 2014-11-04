@@ -416,7 +416,7 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
 
     out << " ||| ";
     if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
-      out << " " << property->GetValueString();
+      out << " " << *property->GetValueString();
     } else {
       out << " " << "noTreeInfo";
     }
@@ -442,7 +442,7 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
 
     out << " ||| ";
     if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
-      out << " " << property->GetValueString();
+      out << " " << *property->GetValueString();
     } else {
       out << " " << "noTreeInfo";
     }
