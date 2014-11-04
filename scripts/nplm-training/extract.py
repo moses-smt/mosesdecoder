@@ -36,7 +36,7 @@ def get_ngrams(corpus_stem, align_file, tagged_stem, svocab, tvocab, slang,tlang
 
       returns set of tags used
     """
-    tags = set()
+    tags = Counter()
     sfh = open(corpus_stem + "." + slang)
     tfh = open(corpus_stem + "." + tlang)
     afh = open(align_file)
