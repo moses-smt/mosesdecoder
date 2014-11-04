@@ -22,11 +22,13 @@ def get_pruned_vocab(corpus,prune):
     if lines % 1000 == 0: sys.stderr.write(".")
     if lines % 50000 == 0:  sys.stderr.write(" [%d]\n" % lines)
   sys.stderr.write("\n")
+  counts[extract.BOS] += lines
+  counts[extract.EOS] += lines
   LOG.info("Vocabulary size: %d" % len(counts))
   if prune:
-    return set([c[0] for c in counts.most_common(prune)])
+    return Counter(dict(counts.most_common(prune)))
   else:
-    return set(counts.keys())
+    return counts
 
 def save_vocab(directory, filename, vocab):
   fh = open(directory + "/" + filename, "w")
@@ -103,18 +105,18 @@ def main():
                      ofh)
 
   # Save vocabularies
-  svocab.add(extract.BOS)
-  tvocab.add(extract.EOS)
-  save_vocab(options.working_dir, "vocab.source", svocab)
-  save_vocab(options.working_dir, "vocab.target", tvocab)
-  vocab = svocab.union(tvocab)
+  save_vocab(options.working_dir, "vocab.source", [item[0] for item in svocab.most_common()])
+  save_vocab(options.working_dir, "vocab.target", [item[0] for item in tvocab.most_common()])
+  vocab = svocab + tvocab
   vocab.update(tags)
   # UNK is always the first vocabulary element. Make sure
   # it appears in position 0
   # We need to use <null> token in the chart decoder in order
   # to correctly estimate the probabilities of incomplete subphrases
   # that are not sentence initial.
-  vocab_list = list(vocab)
+  del vocab["<null>"]
+  del vocab["<unk>"]
+  vocab_list = [item[0] for item in vocab.most_common()]
   vocab_list.insert(0, "<null>")
   vocab_list.insert(0, "<unk>")
   save_vocab(options.working_dir, "vocab", vocab_list)
