@@ -51,9 +51,13 @@ def get_ngrams(corpus_stem, align_file, tagged_stem, svocab, tvocab, slang,tlang
     for lines  in zip(*fhs):
       stokens = lines[0][:-1].split()
       ttokens = lines[1][:-1].split()
+      stokens.append(EOS)
+      ttokens.append(EOS)
       if tagged_stem:
         stags = lines[3][:-1].split()
         ttags = lines[4][:-1].split()
+        stags.append(EOS)
+        ttags.append(EOS)
         tags.update(stags)
         tags.update(ttags)
         replace_tags(stokens,stags,svocab)
@@ -68,7 +72,8 @@ def get_ngrams(corpus_stem, align_file, tagged_stem, svocab, tvocab, slang,tlang
         spos,tpos = atoken.split("-")
         spos,tpos = int(spos), int(tpos)
         target_aligns[tpos].append(spos)
-    
+      #EOS alignment
+      target_aligns[-1] = [len(stokens)-1]
 
       for tpos,spos_list in enumerate(target_aligns):
         # Affiliation heuristics - see Devlin t al. p1371
