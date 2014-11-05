@@ -17,6 +17,9 @@
 #include <locale>
 #include <boost/regex.hpp>
 
+//#include </System/Library/Frameworks/JavaVM.framework/Headers/jni.h>
+#include "CreateJavaVM.h"
+
 
 using namespace std;
 
@@ -40,7 +43,6 @@ SyntaxNode::~SyntaxNode(){
 	m_head.clear();
 	//delete children ? how without delteing it twice
 	//delete parent
-
 }
 
 SyntaxNodePtr SyntaxNode::FindFirstChild(std::string label) const{
@@ -81,6 +83,22 @@ int SyntaxNode::FindHeadChild(std::vector<std::string> headRule){
 			else
 				return -1; //no children for this node -> should be treated elsewhere
 		}
+		//!!! PROBLEM !!!
+		// PP    1       NP NN NNP NNPS NNS IN TO VBG VBN RP FW
+		// the first child will be TO or IN so it will always find that first in the list
+		//instead I should loop outside on the rule and inside on the children
+		// that way I find first NP
+		// or change directation to 0 and look for the last children first -> this way the head is the NP not the function word
+		// originally Collins rule: PP	1	IN TO VBG VBN RP FW	 -> so maybe I should leave this as head and just look again for first NP, NN recursively
+
+		// From standford parser class for finding heads:
+		//"left" means search left-to-right by category and then by position
+		//"leftdis" means search left-to-right by position and then by category
+		//"right" means search right-to-left by category and then by position
+		//"rightdis" means search right-to-left by position and then by category
+		//"leftexcept" means to take the first thing from the left that isn't in the list
+		//"rightexcept" means to take the first thing from the right that isn't on the list
+
 		for(i=0; i<m_children.size();i++){
 			for(j=1; j<headRule.size();j++){ //first item is direction
 				if(m_children[i]->m_label.compare(headRule[j])==0){
@@ -474,6 +492,9 @@ void HeadFeature::Load() {
   ReadHeadRules();
   ReadProbArg();
   ReadLemmaMap();
+
+  CreateJavaVM *javaVM = new CreateJavaVM();
+
 }
 
 

@@ -83,6 +83,19 @@ external-lib z ;
 external-lib boost_regex-mt ;
 requirements += <library>boost_regex-mt ;
 
+#local with-jvm = [ option.get "with-jvm" ] ;
+#if $(with-jvm) {
+#  lib jvm : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared <name>jvm <search>$(with-jvm)/Libraries : :  <include>$(with-jvm)/Headers <include>$(with-jvm)/Headers ;
+#  requirements += <library>jvm ;
+#}
+
+local with-jvm = [ option.get "with-jvm" ] ;
+if $(with-jvm) {
+  lib JavaVM : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared <name>JavaVM <search>$(with-jvm) : :  <include>$(with-jvm)/Versions/Current/Headers/ <include>$(with-jvm)/Versions/Current/Headers/ ;
+  requirements += <library>JavaVM ;
+}
+
+
 lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
 requirements += <library>dl ;
 

@@ -1062,6 +1062,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CoveredReferenceFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/CreateJavaVM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CreateJavaVM.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CreateJavaVM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CreateJavaVM.h</locationURI>
+		</link>
+		<link>
 			<name>FF/DecodeFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DecodeFeature.cpp</locationURI>
