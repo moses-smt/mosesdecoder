@@ -326,8 +326,8 @@ void BilingualLM::getAllAlignments(const ChartHypothesis& cur_hypo, size_t featu
         //are before b and add their source span to the source_word_mid_idx.
         source_word_mid_idx = source_phrase_start_pos + (int)source_center_index + nonterm_length;
       }
+      word_alignemnts.push_back(source_word_mid_idx);
     }
-    word_alignemnts.push_back(source_word_mid_idx);
   }
 
 }
