@@ -46,7 +46,8 @@ def main():
   parser.add_option("-w", "--working-dir", type="string", dest="working_dir")
   parser.add_option("-n", "--target-context", type="int", dest="n")
   parser.add_option("-m", "--source-context", type="int", dest="m")
-  parser.add_option("-p", "--prune-vocab", type="int", dest="prune")
+  parser.add_option("-s", "--prune-source-vocab", type="int", dest="sprune")
+  parser.add_option("-p", "--prune-target-vocab", type="int", dest="tprune")
 
 
   parser.set_defaults(
@@ -57,7 +58,8 @@ def main():
     n = 5,
     m = 4,
     working_dir = "working",
-    prune=16000
+    sprune=16000,
+    tprune=16000
   )
   options,args = parser.parse_args(sys.argv)
 
@@ -85,8 +87,8 @@ def main():
 
   tvocab,svocab = None,None
   # Extract vocabulary, and prune, if required
-  svocab = get_pruned_vocab(scorpus,options.prune)
-  tvocab = get_pruned_vocab(tcorpus,options.prune)
+  svocab = get_pruned_vocab(scorpus,options.sprune)
+  tvocab = get_pruned_vocab(tcorpus,options.tprune)
 
 
   file_stem = os.path.basename(options.corpus_stem)
@@ -105,21 +107,61 @@ def main():
                      ofh)
 
   # Save vocabularies
-  save_vocab(options.working_dir, "vocab.source", [item[0] for item in svocab.most_common()])
-  save_vocab(options.working_dir, "vocab.target", [item[0] for item in tvocab.most_common()])
-  vocab = svocab + tvocab
-  vocab.update(tags)
+  del svocab["<null>"]
+  del tvocab["<null>"]
+  del svocab["<unk>"]
+  del tvocab["<unk>"]
+  svocab_list = [item[0] for item in svocab.most_common()]
+  tvocab_list = [item[0] for item in tvocab.most_common()]
+
   # UNK is always the first vocabulary element. Make sure
   # it appears in position 0
   # We need to use <null> token in the chart decoder in order
   # to correctly estimate the probabilities of incomplete subphrases
   # that are not sentence initial.
-  del vocab["<null>"]
-  del vocab["<unk>"]
-  vocab_list = [item[0] for item in vocab.most_common()]
-  vocab_list.insert(0, "<null>")
-  vocab_list.insert(0, "<unk>")
-  save_vocab(options.working_dir, "vocab", vocab_list)
- 
+
+  tvocab_list.insert(0, "<null>")
+  tvocab_list.insert(0, "<unk>")
+  svocab_list.insert(0, "<unk>")
+
+  #Get tags:
+  tag_list = [item[0] for item in tags.most_common()]
+  svocab_list = svocab_list + tag_list
+  tvocab_list = tvocab_list + tag_list
+
+  save_vocab(options.working_dir, "vocab.source", svocab_list)
+  save_vocab(options.working_dir, "vocab.target", tvocab_list)
+
+  #Create vocab dictionaries that map word to ID
+  tvocab_idmap = {}
+  for i in range(len(tvocab_list)):
+    tvocab_idmap[tvocab_list[i]] = i
+
+  svocab_idmap = {}
+  for i in range(len(svocab_list)):
+    svocab_idmap[svocab_list[i]] = i + len(tvocab_idmap)
+
+  numberized_file = options.working_dir + "/" + file_stem + ".numberized"
+  ngrams_file_handle = open(ngram_file, 'r')
+  numberized_file_handle = open(numberized_file, 'w')
+
+  #Numberize the file
+  for line in ngrams_file_handle:
+    line = line.split()
+    source_words = line[:(2*options.m + 1)]
+    target_words = line[-options.n:]
+
+    numberized_line = ""
+    for item in source_words:
+      numberized_line = numberized_line + str(svocab_idmap[item]) + " "
+
+    for item in target_words:
+      numberized_line = numberized_line + str(tvocab_idmap[item]) + " "  
+
+    #Write to file replacing the last space with new line
+    numberized_file_handle.write(numberized_line[:-1] + "\n")
+  numberized_file_handle.close()
+  ngrams_file_handle.close()
+
 if __name__ == "__main__":
   main()
