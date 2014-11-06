@@ -22,11 +22,9 @@ def main():
   parser.add_option("-t", "--threads", dest="threads", type="int")
   parser.add_option("-m", "--output-model", dest="output_model")
   parser.add_option("-r", "--output-dir", dest="output_dir")
-  parser.add_option("-p", "--skip-preparation", action="store_true", dest="skip_preparation")
   parser.add_option("-f", "--config-options-file", dest="config_options_file")
   parser.add_option("-g", "--log-file", dest="log_file")
   parser.add_option("-v", "--validation-ngrams", dest="validation_file")
-  parser.add_option("-k", "--skip-validation-preparation", action="store_true", dest="skip_preparation_validation")
 
   parser.set_defaults(
     working_dir = "working"
@@ -42,11 +40,9 @@ def main():
     ,threads=1
     ,output_model = "train.10k"
     ,output_dir = None
-    ,skip_preparation = False
     ,config_options_file = "config"
     ,log_file = "log"
     ,validation_file = None
-    ,skip_preparation_validation = False
   )
 
   options,args = parser.parse_args(sys.argv)
@@ -54,7 +50,7 @@ def main():
   # Set up validation command variable to use with validation set.
   validations_command = []
   if options.validation_file is not None:
-    validations_command =["--validation_file", (options.validation_file + ".numberize")]
+    validations_command =["--validation_file", (options.validation_file + ".numberized")]
     
 
   # In order to allow for different models to be trained after the same
@@ -75,37 +71,12 @@ def main():
 
   config_file_write.write("Called: " + ' '.join(sys.argv) + '\n\n')
 
-
-  in_file = options.working_dir + "/" + options.corpus_stem + ".ngrams"
-  vocab_file = options.working_dir + "/vocab"
-  prep_file = options.working_dir + "/" + options.output_model + ".prepared"
-
-  # Prepare the validation file if we have to
-  if (options.validation_file is not None) and not options.skip_preparation_validation:
-    valid_prep_args = [options.nplm_home + "/src/prepareNeuralLM", "--train_text", options.validation_file, "--ngram_size", \
-                str(options.ngram_size), "--ngramize", "0", "--words_file", vocab_file, "--train_file", (options.validation_file + ".numberize") ]
-    config_file_write.write("Prepare validation set:\n" + ' '.join(valid_prep_args) + '\n\n')
-    ret = subprocess.call(valid_prep_args, stdout=log_file_write, stderr=log_file_write)
-    log_file_write.write("\n")
-    if ret: raise Exception("Prepare failed")
-
-  # Prepare the input if we have to
-  if (not options.skip_preparation):
-    prep_args = [options.nplm_home + "/src/prepareNeuralLM", "--train_text", in_file, "--ngram_size", \
-                  str(options.ngram_size), "--ngramize", "0", "--words_file", vocab_file, "--train_file", prep_file ]
-    print "Prepare model command: "
-    print ', '.join(prep_args)
-    config_file_write.write("Preparation step:\n" + ' '.join(prep_args) + '\n\n')
-
-    log_file_write.write("Preparation output:\n")
-    ret = subprocess.call(prep_args, stdout=log_file_write, stderr=log_file_write)
-    log_file_write.write("\n")
-    if ret: raise Exception("Prepare failed")
+  in_file = options.working_dir + "/" + options.corpus_stem + ".numberized"
       
 
   model_prefix = options.output_dir + "/" + options.output_model + ".model.nplm"
-  train_args = [options.nplm_home + "/src/trainNeuralNetwork", "--train_file", prep_file, "--num_epochs", str(options.epochs),
-                "--input_words_file", vocab_file, "--output_words_file", vocab_file, "--model_prefix",
+  train_args = [options.nplm_home + "/src/trainNeuralNetwork", "--train_file", in_file, "--num_epochs", str(options.epochs),
+                "--model_prefix",
                 model_prefix, "--learning_rate", "1", "--minibatch_size", str(options.minibatch_size),
                 "--num_noise_samples", str(options.noise), "--num_hidden", str(options.hidden), "--input_embedding_dimension",
                 str(options.input_embedding), "--output_embedding_dimension", str(options.output_embedding), "--num_threads",
