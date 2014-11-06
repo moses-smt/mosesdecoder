@@ -21,7 +21,7 @@ BilingualLM_NPLM::BilingualLM_NPLM(const std::string &line)
 float BilingualLM_NPLM::Score(std::vector<int>& source_words, std::vector<int>& target_words) const {
   source_words.reserve(source_ngrams+target_ngrams+1);
   source_words.insert( source_words.end(), target_words.begin(), target_words.end() );
-  return m_neuralLM->lookup_ngram(source_words);
+  return FloorScore(m_neuralLM->lookup_ngram(source_words));
 }
 
 const Word& BilingualLM_NPLM::getNullWord() const {
