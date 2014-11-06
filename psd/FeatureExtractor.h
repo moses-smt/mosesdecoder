@@ -82,8 +82,24 @@ struct Translation
   std::vector<long double> m_scores;
 };
 
-struct ChartTranslation
+class ChartTranslation
 {
+
+friend std::ostream& operator<<(std::ostream& out, const ChartTranslation& possibleTransaltion)
+{
+
+	//convert to string
+	std::stringstream ss;
+	ss << possibleTransaltion.m_index;
+	std::string stringIndex= ss.str();
+
+	out << "Translation with : " << std::endl
+		<< "Index : " << stringIndex << std::endl
+		<< "Target Representation : " << possibleTransaltion.m_targetRep << std::endl;
+		return out;
+}
+
+public:
   size_t m_index;
   std::string m_targetRep;
   AlignmentType m_termAlignment;

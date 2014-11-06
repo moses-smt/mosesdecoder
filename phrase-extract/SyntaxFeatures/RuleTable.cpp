@@ -225,3 +225,5 @@ size_t RuleTable::AddTargetPhrase(const string &phrase)
   }
   return id;
 }
+
+

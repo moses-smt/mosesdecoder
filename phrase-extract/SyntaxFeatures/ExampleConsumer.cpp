@@ -57,27 +57,51 @@ void ExampleConsumer::operator () ()
 		string span;
 		size_t spanStart = 0;
 		size_t spanEnd = 0;
+		size_t sentID = 0;
+		string sourceSide = "initial";
+		vector<string> rightTargets;
 		size_t srcTotal = 0;
 		size_t tgtTotal = 0;
 		size_t srcSurvived = 0;
 		size_t tgtSurvived = 0;
 
-		deque<PSDLine> trainingExamples = m_queue->Dequeue();
+		//One deque is one training example with multiple correct answers
+		deque<PSDLine> trainingExample = m_queue->Dequeue();
 		//std::cerr << "Got example from queue : " << trainingExamples.size() << std::endl;
 
 		//iterate over the training examples and process each one
-		deque<PSDLine> ::const_iterator itr_examples;
-		for(itr_examples = trainingExamples.begin(); itr_examples != trainingExamples.end(); itr_examples++)
+		deque<PSDLine> ::const_iterator itr_example;
+
+		for(itr_example = trainingExample.begin(); itr_example != trainingExample.end(); itr_example++)
 		{
-			PSDLine current = *itr_examples;
-			//std::cerr << "CONSUMED PSD LINE : " << current.GetSentID() << " " << current.GetSrcPhrase() << " " << current.GetTgtPhrase() << std::endl;
+			PSDLine current = *itr_example;
 
-			//Get current sentence from corpus and parse
-			corpusLine = m_corpus_input->GetLine(current.GetSentID());
-			parseLine = m_parse_input->GetLine(current.GetSentID());
+			//Process first training example
+			if(sentID == 0 && sourceSide == "initial")
+			{
+				sentID = current.GetSentID();
+				sourceSide = current.GetSrcPhrase();
+				spanStart = current.GetSrcStart();
+				spanEnd = current.GetSrcEnd();
+				rightTargets.push_back(current.GetTgtPhrase());
+			}
+			else{
+				//If other examples don't have the same source side, span or sentence ID something went wrong
+				if(current.GetSentID() != sentID || current.GetSrcPhrase() != sourceSide || current.GetSrcStart() != spanStart || current.GetSrcEnd() != spanEnd)
+				{
+					std::cerr << "ERROR : Instances in same training example should have same source side information" << std::endl;
+					abort();
+				}
+				rightTargets.push_back(current.GetTgtPhrase());
+			}
+		}
 
-			//check if example is in rule table, if not we are done with this example
-			if (! m_ruleTable->SrcExists(current.GetSrcPhrase())) {
+		//Get current sentence from corpus and parse
+		corpusLine = m_corpus_input->GetLine(sentID);
+		parseLine = m_parse_input->GetLine(sentID);
+
+		//check if example is in rule table, if not we are done with this example
+		if (! m_ruleTable->SrcExists(sourceSide)) {
 					  //std::cout << "Source not found, continue" << std::endl;
 					  continue;
 					}
@@ -85,14 +109,12 @@ void ExampleConsumer::operator () ()
 			if (hasTranslation) { //ignore first round
 				//std::cerr << "EXTRACTING FEATURES (1) FOR : " << current.GetSentID() << " " << current.GetSrcPhrase() << " " << current.GetTgtPhrase() << std::endl;
 				 srcSurvived++;
-				 m_extractor.GenerateFeaturesChart(&m_consumer, context, current.GetSrcPhrase(), syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);}
+				 m_extractor.GenerateFeaturesChart(&m_consumer, context, sourceSide, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);}
 				 //Fabienne Braune: Uncomment for debugging : pEgivenF is passed with losses to check numbers
 				 //extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses, pEgivenF);}
 				 // set new source phrase, context, translations and losses
-				  spanStart = current.GetSrcStart();
-				  spanEnd = current.GetSrcEnd();
 				  context = ReadFactoredLine(corpusLine, m_config->GetFactors().size());
-				  translations = m_ruleTable->GetTranslations(current.GetSrcPhrase());
+				  translations = m_ruleTable->GetTranslations(sourceSide);
 				  losses.clear();
 				  syntFeats.clear();
 				  parentLabel.clear();
@@ -104,6 +126,8 @@ void ExampleConsumer::operator () ()
 
 				  //get span corresponding to lhs of rule
 				  int spanInt = (spanEnd - spanStart) + 1;
+				  int chartSpanStart = spanStart;
+				  int chartSpanEnd = spanEnd;
 
 				  CHECK(spanInt > 0);
 				  stringstream s;
@@ -115,20 +139,20 @@ void ExampleConsumer::operator () ()
 
 				  Moses::InputTreeRep myInputChart = Moses::InputTreeRep(sentSize);
 				  myInputChart.Read(parseLine);
-				  vector<SyntaxLabel> lhsSyntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
+				  vector<SyntaxLabel> lhsSyntaxLabels = myInputChart.GetLabels(chartSpanStart, chartSpanEnd);
 				  //std::cerr << "Getting parent label : " << spanStart << " : " << spanEnd << std::endl;
 
 				  bool IsBegin = false;
 				  string noTag = "NOTAG";
-				  parentLabel = myInputChart.GetParent(spanStart,spanEnd,IsBegin);
+				  parentLabel = myInputChart.GetParent(chartSpanStart,chartSpanEnd,IsBegin);
 				  IsBegin = false;
 				  while(!parentLabel.GetString().compare("NOTAG"))
 				  {
-					  parentLabel = myInputChart.GetParent(spanStart,spanEnd,IsBegin);
+					  parentLabel = myInputChart.GetParent(chartSpanStart,chartSpanEnd,IsBegin);
 					  if( !(IsBegin ) )
-					  {spanStart--;}
+					  {chartSpanStart--;}
 					  else
-					  {spanEnd++;}
+					  {chartSpanEnd++;}
 				   }
 
 				   vector<SyntaxLabel>::iterator itr_syn_lab;
@@ -148,28 +172,30 @@ void ExampleConsumer::operator () ()
 						}
 				   }
 
-					//restore span start and span end for extraction of context and bow features
-					spanStart = current.GetSrcStart();
-					spanEnd = current.GetSrcEnd();
-
 					bool foundTgt = false;
 
-					//TODO : FIX considering all target phrases
-					size_t tgtPhraseID = m_ruleTable->GetTgtPhraseID(current.GetTgtPhrase(), &foundTgt);
+					//CONSIDER ALL TARGET PHRASES
+					vector<size_t> targetPhraseIDs;
+					vector<string> :: iterator itr_rightTargets;
+					for(itr_rightTargets = rightTargets.begin();itr_rightTargets != rightTargets.end(); itr_rightTargets++)
+					{
+						size_t tgtPhraseID = m_ruleTable->GetTgtPhraseID(*itr_rightTargets, &foundTgt);
+						targetPhraseIDs.push_back(tgtPhraseID);
+					}
 
 					//if it is not found, no example should be generated
 					if (foundTgt) {
 						// addadd correct translation (i.e., set its loss to 0)
 						for (size_t i = 0; i < translations.size(); i++) {
-							if (translations[i].m_index == tgtPhraseID) {
-								//std::cerr << "ID for target found : " << tgtPhraseID << " : " << translations[i].m_index << std::endl;
-								losses[i] = 0;
-								hasTranslation = true;
-								tgtSurvived++;
-								break;}
-							else
+							//loop through correct targetIDs
+							vector<size_t> :: iterator itr_targetsIds;
+							for(itr_targetsIds = targetPhraseIDs.begin(); itr_targetsIds != targetPhraseIDs.end(); itr_targetsIds++)
 							{
-								//std::cerr << "ID for target not found : " << tgtPhraseID << " : " << translations[i].m_index << std::endl;
+								if (translations[i].m_index == *itr_targetsIds) {
+									//std::cerr << "TRANSLATION FOUND : " << translations[i] << std::endl;
+									losses[i] = 0;
+									hasTranslation = true;
+									tgtSurvived++;}
 							}
 						}
 					}
@@ -179,9 +205,8 @@ void ExampleConsumer::operator () ()
 					//Fabienne Braune: Uncomment for debugging : pEgivenF is passed with losses to check numbers
 					//extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses, pEgivenF);
 					//std::cerr << "EXTRACTING FEATURES (2) FOR : " << current.GetSentID() << " " << current.GetSrcPhrase() << " " << current.GetTgtPhrase() << std::endl;
-					m_extractor.GenerateFeaturesChart(&m_consumer, context, current.GetSrcPhrase(), syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);}
+					m_extractor.GenerateFeaturesChart(&m_consumer, context, sourceSide, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);}
 				  }
-	}
 // Make sure we can be interrupted
 boost::this_thread::interruption_point();
 }
