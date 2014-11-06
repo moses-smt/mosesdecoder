@@ -45,13 +45,13 @@ void ExampleProducer::operator () ()
 	    if (psdLine.GetSrcPhrase() != srcPhrase || currentSpan != span || psdLine.GetSentID() != sentId) {
 	    	//put a COPY of the queue into shared queue
 	    	m_queue->Enqueue(sourcePhrases);
-	    	std::cerr << "LINES : " << sourcePhrases.size() << "FLUSHED" << std::endl;
+	    	//std::cerr << "LINES : " << sourcePhrases.size() << "FLUSHED" << std::endl;
 	    	sourcePhrases.clear();
 	    }
 	    //enque next line and set new source phrase
 	    sourcePhrases.push_back(psdLine);
 	    //std::cerr << "LINE IN sourcePhrases" << std::endl;
-	    std::cerr << "PRODUCED PSD LINE : " << psdLine.GetSentID() << " " << psdLine.GetSrcPhrase() << " " << psdLine.GetTgtPhrase() << std::endl;
+	    //std::cerr << "PRODUCED PSD LINE : " << psdLine.GetSentID() << " " << psdLine.GetSrcPhrase() << " " << psdLine.GetTgtPhrase() << std::endl;
 
 	    //restore source phrase, span and sentenceId
 	    srcPhrase = psdLine.GetSrcPhrase();
@@ -60,7 +60,7 @@ void ExampleProducer::operator () ()
 	}
 	//enqueue last lines
 	m_queue->Enqueue(sourcePhrases);
-	std::cerr << "LINES : " << sourcePhrases.size() << "FLUSHED BEFORE EXIT" << std::endl;
+	//std::cerr << "LINES : " << sourcePhrases.size() << "FLUSHED BEFORE EXIT" << std::endl;
 	sourcePhrases.clear();
 }
 
