@@ -51,6 +51,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/WordLattice.h"
 #include "moses/LatticeMBR.h"
 #include "moses/ChartKBestExtractor.h"
+#include "moses/Syntax/KBestExtractor.h"
 
 #include "search/applied.hh"
 
@@ -60,6 +61,11 @@ class ScoreComponentCollection;
 class Hypothesis;
 class ChartHypothesis;
 class Factor;
+
+namespace Syntax
+{
+struct SHyperedge;
+}
 
 /** Helper class that holds misc variables to write data out to command line.
  */
@@ -131,8 +137,10 @@ protected:
   size_t OutputAlignmentNBest(Alignments &retAlign,
 		  	  	  	  	  	  const Moses::ChartKBestExtractor::Derivation &derivation,
 		  	  	  	  	  	  size_t startTarget);
+  std::size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::Syntax::KBestExtractor::Derivation &derivation, std::size_t startTarget);
 
   size_t CalcSourceSize(const Moses::ChartHypothesis *hypo);
+  size_t CalcSourceSize(const Syntax::KBestExtractor::Derivation &d) const;
 
   template <class T>
   void ShiftOffsets(std::vector<T> &offsets, T shift)
@@ -202,15 +210,23 @@ public:
   // CHART
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
   void OutputBestHypo(search::Applied applied, long translationId);
+  void OutputBestHypo(const Moses::Syntax::SHyperedge *, long translationId);
+
   void OutputBestNone(long translationId);
+
   void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
   void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
+  void OutputNBestList(const Moses::Syntax::KBestExtractor::KBestVec &nBestList, long translationId);
+
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
+  void OutputDetailedTranslationReport(const Moses::Syntax::SHyperedge *, long translationId);
+
   void OutputDetailedAllTranslationReport(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
 
   void OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo);
   void OutputUnknowns(const std::vector<Moses::Phrase*> &, long);
+  void OutputUnknowns(const std::set<Moses::Word> &, long);
 
   void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo,
 		  	  	  	  	  	  const Moses::Sentence &sentence,

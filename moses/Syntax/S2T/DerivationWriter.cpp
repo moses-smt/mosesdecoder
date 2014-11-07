@@ -2,6 +2,7 @@
 
 #include "moses/Factor.h"
 #include "moses/Syntax/PVertex.h"
+#include "moses/Syntax/SHyperedge.h"
 
 namespace Moses
 {

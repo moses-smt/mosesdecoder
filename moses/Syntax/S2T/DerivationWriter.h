@@ -3,13 +3,14 @@
 #include <ostream>
 
 #include "moses/Syntax/KBestExtractor.h"
-#include "moses/Syntax/SHyperedge.h"
 #include "moses/Word.h"
 
 namespace Moses
 {
 namespace Syntax
 {
+struct SHyperedge;
+
 namespace S2T
 {
 
