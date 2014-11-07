@@ -1647,7 +1647,7 @@ sub create_extractor_script() {
 
   open my $out, '>', $script_path
       or die "Couldn't open $script_path for writing: $!\n";
-  print $out "#!/bin/bash\n";
+  print $out "#!/usr/bin/env bash\n";
   print $out "cd $outdir\n";
   print $out "$cmd\n";
   close $out;

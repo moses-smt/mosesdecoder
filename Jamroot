@@ -193,6 +193,17 @@ else
  alias mm ; 
 }
 
+if [ option.get "with-rephraser" : : "yes" ]
+{
+  alias rephraser :
+  contrib/rephraser//paraphrase
+  ;
+}
+else
+{
+  alias rephraser ;
+}
+
 alias programs : 
 lm//programs 
 moses-cmd//programs 
@@ -211,6 +222,7 @@ biconcor
 mira//mira 
 contrib/server//mosesserver 
 mm
+rephraser
 ;
 
 

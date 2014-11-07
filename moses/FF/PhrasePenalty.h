@@ -25,6 +25,9 @@ public:
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
                      ScoreComponentCollection* accumulator) const
   {}
+  void EvaluateWhenApplied(const Syntax::SHyperedge &hyperedge,
+                     ScoreComponentCollection* accumulator) const
+  {}
 
   void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath

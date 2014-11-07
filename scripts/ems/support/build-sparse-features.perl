@@ -19,7 +19,7 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
   $factor = $1 if $feature_spec =~ / factor ([\d\-]+)/; 
 
   if ($SPEC[0] eq 'target-word-insertion') {
-    $ini .= "TargetWordInsertionFeature factor=$factor";
+    $ini .= "TargetWordInsertionFeature name=TWI factor=$factor";
 
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/) {
       my $file = &create_top_words($output_extension, $SPEC[2]);
@@ -33,7 +33,7 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
     $ini .= "\n";
   }
   elsif ($SPEC[0] eq 'source-word-deletion') {
-    $ini .= "SourceWordDeletionFeature factor=$factor";
+    $ini .= "SourceWordDeletionFeature name=SWD factor=$factor";
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/) {
       my $file = &create_top_words($input_extension, $SPEC[2]);
       $ini .= " path=$file";
@@ -59,10 +59,10 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
       die("ERROR: Unknown parameter specification in '$SPEC[1]'\n");
     }
     my ($input_factor,$output_factor) = split(/\-/,$factor);
-    $ini .= "WordTranslationFeature input-factor=$input_factor output-factor=$output_factor simple=1 source-context=0 target-context=0$extra_ini\n";
+    $ini .= "WordTranslationFeature name=WT input-factor=$input_factor output-factor=$output_factor simple=1 source-context=0 target-context=0$extra_ini\n";
   }
   elsif ($SPEC[0] eq 'phrase-length') {
-    $ini .= "PhraseLengthFeature\n";
+    $ini .= "PhraseLengthFeature name=PL\n";
   }
   else {
     die("ERROR: Unknown feature type '$SPEC[0]' in specification '$feature_spec'\nfull spec: '$specification'\n");

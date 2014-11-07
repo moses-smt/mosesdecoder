@@ -32,7 +32,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT, $_TRANSLITERATION_PHRASE_TABLE,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_GHKM_SOURCE_LABELS,$_GHKM_SOURCE_LABELS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_GHKM_SOURCE_LABELS,$_GHKM_SOURCE_LABELS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,$_S2T,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2, $_UNKNOWN_WORD_SOFT_MATCHES_FILE,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
@@ -105,6 +105,7 @@ $_HELP = 1
 		       'generation-type=s' => \@_GENERATION_TYPE,
 		       'continue' => \$_CONTINUE,
 		       'hierarchical' => \$_HIERARCHICAL,
+		       's2t' => \$_S2T,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
@@ -1980,6 +1981,10 @@ sub create_ini {
      $phrase_table_impl_name = "PhraseDictionaryBitextSampling" if $phrase_table_impl==11;
      $file .= "/" if $phrase_table_impl==11 && $file !~ /\/$/;
 
+     if ($_S2T) {
+       $phrase_table_impl_name = "RuleTable";
+     }
+
      # table limit (maximum number of translation options per input phrase)
      my $table_limit = 0;
      if ($i == 0) {
@@ -2011,7 +2016,11 @@ sub create_ini {
    # glue grammar
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
-     $feature_spec .= "PhraseDictionaryMemory name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
+     my $feature_name = "PhraseDictionaryMemory";
+     if ($_S2T) {
+       $feature_name = "RuleTable";
+     }
+     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
      $weight_spec .= "TranslationModel$i= 1.0\n";
    }
 

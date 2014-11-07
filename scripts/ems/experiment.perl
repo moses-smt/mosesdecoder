@@ -281,6 +281,7 @@ sub read_meta {
 		$escaped_template =~ s/^IN/EMS_IN_EMS/;
 		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
 		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
+		$escaped_template =~ s/TMP/EMS_TMP_EMS/g;
 		$TEMPLATE{"$module:$step"} = $escaped_template;
 	    }
 	    elsif ($1 eq "template-if") {
@@ -288,6 +289,7 @@ sub read_meta {
 		$escaped_template =~ s/^IN/EMS_IN_EMS/;
 		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
 		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
+		$escaped_template =~ s/TMP/EMS_TMP_EMS/g;
 		my @IF = split(/\s+/,$escaped_template);
 		push @{$TEMPLATE_IF{"$module:$step"}}, \@IF;
 	    }
@@ -3295,6 +3297,7 @@ sub define_template {
 		#  replace IN and OUT with %s
 		$single_cmd =~ s/EMS_IN_EMS\S*/\%s/;
 		$single_cmd =~ s/EMS_OUT_EMS\S*/\%s/;
+		$single_cmd =~ s/EMS_SLASH_OUT_EMS\S*/\%s/;
 		# build tmp
 		my $tmp_dir = $module;
 		$tmp_dir =~ tr/A-Z/a-z/;
@@ -3335,6 +3338,10 @@ sub define_template {
 	$cmd =~ s/EMS_IN_EMS/$INPUT[0]/g;
     }
     $cmd =~ s/EMS_OUT_EMS/$output/g;
+    if (defined($STEP_TMPNAME{"$module:$stepname"})) {
+      my $tmp = $dir."/".$STEP_TMPNAME{"$module:$stepname"}.".$VERSION";
+      $cmd =~ s/EMS_TMP_EMS/$tmp/g;
+    }
     $cmd =~ s/VERSION/$VERSION/g;
     print "\tcmd is $cmd\n" if $VERBOSE;
     while ($cmd =~ /^([\S\s]*)\$\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
