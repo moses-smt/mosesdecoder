@@ -1,6 +1,7 @@
 #include "moses/LM/BilingualLM.h"
 #include <boost/unordered_map.hpp>
 #include <utility> //make_pair
+#include <fstream> //Read vocabulary files
 
 namespace nplm {
   class neuralLM;
@@ -28,17 +29,21 @@ class BilingualLM_NPLM : public BilingualLM {
   nplm::neuralLM *m_neuralLM_shared;
   mutable boost::thread_specific_ptr<nplm::neuralLM> m_neuralLM;
 
-  mutable boost::unordered_map<const Factor*, int> neuralLMids;
+  mutable boost::unordered_map<const Factor*, int> target_neuralLMids;
+  mutable boost::unordered_map<const Factor*, int> source_neuralLMids;
 
   //const Factor* NULL_factor_overwrite;
   std::string NULL_string;
   bool NULL_overwrite;
   Word NULL_word;
 
+  std::string source_vocab_path;
+  std::string target_vocab_path;
   bool premultiply;
   bool factored;
   int neuralLM_cache;
-  int unknown_word_id;
+  int source_unknown_word_id;
+  int target_unknown_word_id;
 };
 
 } // namespace Moses

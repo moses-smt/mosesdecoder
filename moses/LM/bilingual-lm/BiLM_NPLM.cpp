@@ -31,12 +31,23 @@ const Word& BilingualLM_NPLM::getNullWord() const {
 int BilingualLM_NPLM::getNeuralLMId(const Word& word, bool is_source_word) const {
   initSharedPointer();
 
+  //Decide if we are doing source or target side first.
+  boost::unordered_map<const Factor*, int> * neuralLMids;
+  int unknown_word_id;
+  if (is_source_word) {
+    neuralLMids = &source_neuralLMids;
+    unknown_word_id = source_unknown_word_id;
+  } else {
+    neuralLMids = &target_neuralLMids;
+    unknown_word_id = target_unknown_word_id;
+  }
+
   boost::unordered_map<const Factor*, int>::iterator it;
   const Factor* factor = word.GetFactor(word_factortype);
 
-  it = neuralLMids.find(factor);
+  it = neuralLMids->find(factor);
   //If we know the word return immediately
-  if (it != neuralLMids.end()){
+  if (it != neuralLMids->end()){
     return it->second;
   }
   //If we don't know the word and we aren't factored, return the word.
@@ -45,8 +56,8 @@ int BilingualLM_NPLM::getNeuralLMId(const Word& word, bool is_source_word) const
   } 
   //Else try to get a pos_factor
   const Factor* pos_factor = word.GetFactor(pos_factortype);
-  it = neuralLMids.find(pos_factor);
-  if (it != neuralLMids.end()){
+  it = neuralLMids->find(pos_factor);
+  if (it != neuralLMids->end()){
     return it->second;
   } else {
     return unknown_word_id;
@@ -68,6 +79,10 @@ void BilingualLM_NPLM::SetParameter(const std::string& key, const std::string& v
     factored = Scan<bool>(value);
   } else if (key == "pos_factor") {
     pos_factortype = Scan<FactorType>(value);
+  } else if (key == "source_vocab") {
+    source_vocab_path = value;
+  } else if (key == "target_vocab") {
+    target_vocab_path = value;
   } else if (key == "cache_size") {
     neuralLM_cache = atoi(value.c_str());
   } else if (key == "premultiply") {
@@ -90,23 +105,29 @@ void BilingualLM_NPLM::loadModel() {
       ", but Moses expects " << ngram_order);
 
   m_neuralLM_shared->set_cache(neuralLM_cache); //Default 1000000
-  unknown_word_id = m_neuralLM_shared->lookup_word("<unk>");
 
-  //Setup factor -> NeuralLMId cache
+  //Setup factor -> NeuralLMId cache. First target words
   FactorCollection& factorFactory = FactorCollection::Instance(); //To do the conversion from string to vocabID
-
-  const nplm::vocabulary& vocab = m_neuralLM_shared->get_vocabulary();
-  const boost::unordered_map<std::string, int>& neuraLMvocabmap = vocab.get_idmap();
-
-  boost::unordered_map<std::string, int>::const_iterator it;
-
-  for (it = neuraLMvocabmap.cbegin(); it != neuraLMvocabmap.cend(); it++) {
-    std::string raw_word = it->first;
-    int neuralLMid = it->second;
+  int wordid_counter = 0;
+  target_unknown_word_id = wordid_counter; //The first word is <unk>
+  std::string raw_word;
+  std::ifstream infile_target(target_vocab_path.c_str());
+  while (infile_target >> raw_word) {
     const Factor * factor = factorFactory.AddFactor(raw_word);
-
-    neuralLMids.insert(std::make_pair(factor, neuralLMid));
+    target_neuralLMids.insert(std::make_pair(factor, wordid_counter));
+    wordid_counter++;
   }
+  infile_target.close();
+  source_unknown_word_id = wordid_counter; //The first word is <unk> from the next file
+
+  //Source words now:
+  std::ifstream infile_source(source_vocab_path.c_str());
+  while (infile_source >> raw_word) {
+    const Factor * factor = factorFactory.AddFactor(raw_word);
+    source_neuralLMids.insert(std::make_pair(factor, wordid_counter));
+    wordid_counter++;
+  }
+  infile_source.close();
 
 }
 
