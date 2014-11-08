@@ -14,7 +14,7 @@ namespace S2T
 {
 
 // Given a PHyperedge object and SChart produces a SHyperedgeBundle object.
-void PHyperedgeToSHyperedgeBundle(const PHyperedge &hyperedge,
+inline void PHyperedgeToSHyperedgeBundle(const PHyperedge &hyperedge,
                                   const SChart &schart,
                                   SHyperedgeBundle &bundle) {
   bundle.translations = hyperedge.translations;

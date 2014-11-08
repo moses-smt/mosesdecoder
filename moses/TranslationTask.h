@@ -4,15 +4,17 @@
 #include "moses/ThreadPool.h"
 #include "moses/Manager.h"
 #include "moses/HypergraphOutput.h"
+#include "moses/IOWrapper.h"
 #include "moses/Manager.h"
 #include "moses/ChartManager.h"
+
+#include "moses/Syntax/S2T/Manager.h"
 
 namespace Moses
 {
 class InputType;
 class OutputCollector;
 
-class IOWrapper;
 
 /** Translates a sentence.
   * - calls the search (Manager)
@@ -49,6 +51,33 @@ private:
 
   void RunPb();
   void RunChart();
+
+
+  template<typename Parser>
+  void DecodeS2T() {
+    const StaticData &staticData = StaticData::Instance();
+    const std::size_t translationId = m_source->GetTranslationId();
+    Syntax::S2T::Manager<Parser> manager(*m_source);
+    manager.Decode();
+    // 1-best
+    const Syntax::SHyperedge *best = manager.GetBestSHyperedge();
+    m_ioWrapper.OutputBestHypo(best, translationId);
+    // n-best
+    if (staticData.GetNBestSize() > 0) {
+      Syntax::KBestExtractor::KBestVec nBestList;
+      manager.ExtractKBest(staticData.GetNBestSize(), nBestList,
+                           staticData.GetDistinctNBest());
+      m_ioWrapper.OutputNBestList(nBestList, translationId);
+    }
+    // Write 1-best derivation (-translation-details / -T option).
+    if (staticData.IsDetailedTranslationReportingEnabled()) {
+      m_ioWrapper.OutputDetailedTranslationReport(best, translationId);
+    }
+    // Write unknown words file (-output-unknowns option)
+    if (!staticData.GetOutputUnknownsFile().empty()) {
+      m_ioWrapper.OutputUnknowns(manager.GetUnknownWords(), translationId);
+    }
+  }
 
 };
 

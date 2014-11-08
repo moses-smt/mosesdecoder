@@ -10,6 +10,9 @@
 #include "moses/Incremental.h"
 #include "mbr.h"
 
+#include "moses/Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser.h"
+#include "moses/Syntax/S2T/Parsers/Scope3Parser/Parser.h"
+
 #include "util/exception.hh"
 
 using namespace std;
@@ -320,6 +323,22 @@ void TranslationTask::RunChart()
 	const size_t translationId = m_source->GetTranslationId();
 
 	VERBOSE(2,"\nTRANSLATING(" << translationId << "): " << *m_source);
+
+    if (staticData.UseS2TDecoder()) {
+      S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+      if (algorithm == RecursiveCYKPlus) {
+        typedef Syntax::S2T::EagerParserCallback Callback;
+        typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
+        DecodeS2T<Parser>();
+      } else if (algorithm == Scope3) {
+        typedef Syntax::S2T::StandardParserCallback Callback;
+        typedef Syntax::S2T::Scope3Parser<Callback> Parser;
+        DecodeS2T<Parser>();
+      } else {
+        UTIL_THROW2("ERROR: unhandled S2T parsing algorithm");
+      }
+      return;
+    }
 
 	if (staticData.GetSearchAlgorithm() == ChartIncremental) {
 	  Incremental::Manager manager(*m_source);
