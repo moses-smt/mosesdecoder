@@ -241,3 +241,8 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
   echo "To disable this message, delete $(TOP)/dist ." ;
   echo ;
 }
+
+local temp = [ _shell "cd bin && rm moses_chart && ln -s moses moses_chart" ] ;
+
+
+
