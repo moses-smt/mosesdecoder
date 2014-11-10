@@ -6,8 +6,7 @@
 
 #include "moses/InputType.h"
 #include "moses/Syntax/KBestExtractor.h"
-#include "moses/Syntax/SVertexBeam.h"
-#include "moses/WordsRange.h"
+#include "moses/Syntax/SVertexStack.h"
 
 #include "OovHandler.h"
 #include "ParserCallback.h"
@@ -50,7 +49,7 @@ class Manager
 
   void InitializeParsers(PChart &, std::size_t);
 
-  void RecombineAndSort(const std::vector<SHyperedge*> &, SVertexBeam &);
+  void RecombineAndSort(const std::vector<SHyperedge*> &, SVertexStack &);
 
   void PrunePChart(const SChart::Cell &, PChart::Cell &);
 

@@ -5,7 +5,7 @@
 #include <boost/unordered_map.hpp>
 
 #include "moses/Syntax/NonTerminalMap.h"
-#include "moses/Syntax/SVertexBeam.h"
+#include "moses/Syntax/SVertexStack.h"
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
 #include "moses/Word.h"
@@ -22,11 +22,11 @@ class SChart
  public:
   struct Cell
   {
-    typedef boost::unordered_map<Word, SVertexBeam, SymbolHasher,
+    typedef boost::unordered_map<Word, SVertexStack, SymbolHasher,
                                  SymbolEqualityPred> TMap;
-    typedef NonTerminalMap<SVertexBeam> NMap;
-    TMap terminalBeams;
-    NMap nonTerminalBeams;
+    typedef NonTerminalMap<SVertexStack> NMap;
+    TMap terminalStacks;
+    NMap nonTerminalStacks;
   };
 
   SChart(std::size_t width);

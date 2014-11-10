@@ -26,7 +26,8 @@ Scope3Parser<Callback>::Scope3Parser(PChart &chart, const RuleTrie &trie,
     : Parser<Callback>(chart)
     , m_ruleTable(trie)
     , m_maxChartSpan(maxChartSpan)
-    , m_latticeBuilder(chart) {
+    , m_latticeBuilder(chart)
+{
   Init();
 }
 

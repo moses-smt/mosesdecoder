@@ -36,7 +36,7 @@ void RuleTrieCYKPlus::Node::Prune(std::size_t tableLimit)
   m_targetPhraseCollection.Prune(true, tableLimit);
 }
 
-void RuleTrieCYKPlus::Node::Sort(size_t tableLimit)
+void RuleTrieCYKPlus::Node::Sort(std::size_t tableLimit)
 {
   // recusively sort
   for (SymbolMap::iterator p = m_sourceTermMap.begin();
@@ -86,13 +86,6 @@ const RuleTrieCYKPlus::Node *RuleTrieCYKPlus::Node::GetNonTerminalChild(
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
-void RuleTrieCYKPlus::Node::Remove()
-{
-  m_sourceTermMap.clear();
-  m_nonTermMap.clear();
-  m_targetPhraseCollection.Remove();
-}
-
 TargetPhraseCollection &RuleTrieCYKPlus::GetOrCreateTargetPhraseCollection(
     const Phrase &source, const TargetPhrase &target, const Word *sourceLHS)
 {
@@ -109,7 +102,7 @@ RuleTrieCYKPlus::Node &RuleTrieCYKPlus::GetOrCreateNode(
   AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
 
   Node *currNode = &m_root;
-  for (size_t pos = 0 ; pos < size ; ++pos) {
+  for (std::size_t pos = 0 ; pos < size ; ++pos) {
     const Word& word = source.GetWord(pos);
 
     if (word.IsNonTerminal()) {
@@ -121,7 +114,7 @@ RuleTrieCYKPlus::Node &RuleTrieCYKPlus::GetOrCreateNode(
       UTIL_THROW_IF2(iterAlign->first != pos,
     		  "Alignment info incorrect at position " << pos);
 
-      size_t targetNonTermInd = iterAlign->second;
+      std::size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
       currNode = currNode->GetOrCreateNonTerminalChild(targetNonTerm);

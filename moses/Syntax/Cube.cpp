@@ -17,7 +17,7 @@ Cube::Cube(const SHyperedgeBundle &bundle)
     : m_bundle(bundle)
 {
   // Create the SHyperedge for the 'corner' of the cube.
-  std::vector<int> coordinates(bundle.beams.size()+1, 0);
+  std::vector<int> coordinates(bundle.stacks.size()+1, 0);
   SHyperedge *hyperedge = CreateHyperedge(coordinates);
   // Add its coordinates to the set of visited coordinates.
   std::pair<CoordinateSet::iterator, bool> p = m_visited.insert(coordinates);
@@ -54,10 +54,10 @@ void Cube::CreateNeighbours(const std::vector<int> &coordinates)
   // each neighbour.
   std::vector<int> tmpCoordinates(coordinates);
 
-  // Create each neighbour along the vertex beam dimensions.
+  // Create each neighbour along the vertex stack dimensions.
   for (std::size_t i = 0; i < coordinates.size()-1; ++i) {
     int x = coordinates[i];
-    if (m_bundle.beams[i]->size() > x+1) {
+    if (m_bundle.stacks[i]->size() > x+1) {
       ++tmpCoordinates[i];
       CreateNeighbour(tmpCoordinates);
       --tmpCoordinates[i];
@@ -99,7 +99,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
 
   hyperedge->tail.resize(coordinates.size()-1);
   for (std::size_t i = 0; i < coordinates.size()-1; ++i) {
-    boost::shared_ptr<SVertex> pred = (*m_bundle.beams[i])[coordinates[i]];
+    boost::shared_ptr<SVertex> pred = (*m_bundle.stacks[i])[coordinates[i]];
     hyperedge->tail[i] = pred.get();
     if (pred->best) {
       hyperedge->scoreBreakdown.PlusEquals(pred->best->scoreBreakdown);

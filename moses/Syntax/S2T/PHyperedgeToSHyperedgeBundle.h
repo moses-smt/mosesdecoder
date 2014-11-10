@@ -18,7 +18,7 @@ inline void PHyperedgeToSHyperedgeBundle(const PHyperedge &hyperedge,
                                   const SChart &schart,
                                   SHyperedgeBundle &bundle) {
   bundle.translations = hyperedge.translations;
-  bundle.beams.clear();
+  bundle.stacks.clear();
   for (std::vector<PVertex*>::const_iterator p = hyperedge.tail.begin();
        p != hyperedge.tail.end(); ++p) {
     const PVertex *v = *p;
@@ -26,16 +26,16 @@ inline void PHyperedgeToSHyperedgeBundle(const PHyperedge &hyperedge,
     std::size_t spanEnd = v->span.GetEndPos();
     const Word &symbol = v->symbol;
     const SChart::Cell &cell = schart.GetCell(spanStart, spanEnd);
-    const SVertexBeam *beam = 0;
+    const SVertexStack *stack = 0;
     if (symbol.IsNonTerminal()) {
-      beam = cell.nonTerminalBeams.Find(symbol);
+      stack = cell.nonTerminalStacks.Find(symbol);
     } else {
       const SChart::Cell::TMap::const_iterator q =
-          cell.terminalBeams.find(symbol);
-      assert(q != cell.terminalBeams.end());
-      beam = &(q->second);
+          cell.terminalStacks.find(symbol);
+      assert(q != cell.terminalStacks.end());
+      stack = &(q->second);
     }
-    bundle.beams.push_back(beam);
+    bundle.stacks.push_back(stack);
   }
 }
 

@@ -49,9 +49,9 @@ void Manager<Parser>::InitializeCharts()
     v->best = 0;
     v->pvertex = &pvertex;
     SChart::Cell &scell = m_schart.GetCell(i,i);
-    SVertexBeam beam(1, v);
-    SChart::Cell::TMap::value_type x(terminal, beam);
-    scell.terminalBeams.insert(x);
+    SVertexStack stack(1, v);
+    SChart::Cell::TMap::value_type x(terminal, stack);
+    scell.terminalStacks.insert(x);
   }
 }
 
@@ -160,7 +160,7 @@ void Manager<Parser>::Decode()
   // Get various pruning-related constants.
   const std::size_t popLimit = staticData.GetCubePruningPopLimit();
   const std::size_t ruleLimit = staticData.GetRuleLimit();
-  const std::size_t beamLimit = staticData.GetMaxHypoStackSize();
+  const std::size_t stackLimit = staticData.GetMaxHypoStackSize();
 
   // Initialise the PChart and SChart.
   InitializeCharts();
@@ -218,25 +218,25 @@ void Manager<Parser>::Decode()
         ++count;
       }
 
-      // Recombine SVertices and sort into beams.
+      // Recombine SVertices and sort into stacks.
       for (BufferMap::const_iterator p = buffers.begin(); p != buffers.end();
            ++p) {
         const Word &category = p->first;
         const std::vector<SHyperedge*> &buffer = p->second;
         std::pair<SChart::Cell::NMap::Iterator, bool> ret =
-            scell.nonTerminalBeams.Insert(category, SVertexBeam());
+            scell.nonTerminalStacks.Insert(category, SVertexStack());
         assert(ret.second);
-        SVertexBeam &beam = ret.first->second;
-        RecombineAndSort(buffer, beam);
+        SVertexStack &stack = ret.first->second;
+        RecombineAndSort(buffer, stack);
       }
 
-      // Prune beams.
-      if (beamLimit > 0) {
-        for (SChart::Cell::NMap::Iterator p = scell.nonTerminalBeams.Begin();
-             p != scell.nonTerminalBeams.End(); ++p) {
-          SVertexBeam &beam = p->second;
-          if (beam.size() > beamLimit) {
-            beam.resize(beamLimit);
+      // Prune stacks.
+      if (stackLimit > 0) {
+        for (SChart::Cell::NMap::Iterator p = scell.nonTerminalStacks.Begin();
+             p != scell.nonTerminalStacks.End(); ++p) {
+          SVertexStack &stack = p->second;
+          if (stack.size() > stackLimit) {
+            stack.resize(stackLimit);
           }
         }
       }
@@ -253,13 +253,13 @@ template<typename Parser>
 const SHyperedge *Manager<Parser>::GetBestSHyperedge() const
 {
   const SChart::Cell &cell = m_schart.GetCell(0, m_source.GetSize()-1);
-  const SChart::Cell::NMap &beams = cell.nonTerminalBeams;
-  if (beams.Size() == 0) {
+  const SChart::Cell::NMap &stacks = cell.nonTerminalStacks;
+  if (stacks.Size() == 0) {
     return 0;
   }
-  assert(beams.Size() == 1);
-  const std::vector<boost::shared_ptr<SVertex> > &beam = beams.Begin()->second;
-  return beam[0]->best;
+  assert(stacks.Size() == 1);
+  const std::vector<boost::shared_ptr<SVertex> > &stack = stacks.Begin()->second;
+  return stack[0]->best;
 }
 
 template<typename Parser>
@@ -273,20 +273,20 @@ void Manager<Parser>::ExtractKBest(
     return;
   }
 
-  // Get the top-level SVertex beam.
+  // Get the top-level SVertex stack.
   const SChart::Cell &cell = m_schart.GetCell(0, m_source.GetSize()-1);
-  const SChart::Cell::NMap &beams = cell.nonTerminalBeams;
-  if (beams.Size() == 0) {
+  const SChart::Cell::NMap &stacks = cell.nonTerminalStacks;
+  if (stacks.Size() == 0) {
     return;
   }
-  assert(beams.Size() == 1);
-  const std::vector<boost::shared_ptr<SVertex> > &beam = beams.Begin()->second;
+  assert(stacks.Size() == 1);
+  const std::vector<boost::shared_ptr<SVertex> > &stack = stacks.Begin()->second;
 
   KBestExtractor extractor;
 
   if (!onlyDistinct) {
     // Return the k-best list as is, including duplicate translations.
-    extractor.Extract(beam, k, kBestList);
+    extractor.Extract(stack, k, kBestList);
     return;
   }
 
@@ -302,7 +302,7 @@ void Manager<Parser>::ExtractKBest(
   // Extract the derivations.
   KBestExtractor::KBestVec bigList;
   bigList.reserve(numDerivations);
-  extractor.Extract(beam, numDerivations, bigList);
+  extractor.Extract(stack, numDerivations, bigList);
 
   // Copy derivations into kBestList, skipping ones with repeated translations.
   std::set<Phrase> distinct;
@@ -324,7 +324,7 @@ void Manager<Parser>::PrunePChart(const SChart::Cell &scell,
   PChart::Cell::VertexMap::iterator p = pcell.vertices.begin();
   while (p != pcell.vertices.end()) {
     const Word &category = p->first;
-    if (scell.beams.find(category) == scell.beams.end()) {
+    if (scell.stacks.find(category) == scell.stacks.end()) {
       PChart::Cell::VertexMap::iterator q = p++;
       pcell.vertices.erase(q);
     } else {
@@ -336,7 +336,7 @@ void Manager<Parser>::PrunePChart(const SChart::Cell &scell,
 
 template<typename Parser>
 void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
-                                       SVertexBeam &beam)
+                                       SVertexStack &stack)
 {
   // Step 1: Create a map containing a single instance of each distinct vertex
   // (where distinctness is defined by the state value).  The hyperedges'
@@ -371,15 +371,15 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
     h->head = storedVertex;
   }
 
-  // Step 2: Copy the vertices from the map to the beam.
-  beam.clear();
-  beam.reserve(map.size());
+  // Step 2: Copy the vertices from the map to the stack.
+  stack.clear();
+  stack.reserve(map.size());
   for (Map::const_iterator p = map.begin(); p != map.end(); ++p) {
-    beam.push_back(boost::shared_ptr<SVertex>(p->first));
+    stack.push_back(boost::shared_ptr<SVertex>(p->first));
   }
 
-  // Step 3: Sort the vertices in the beam.
-  std::sort(beam.begin(), beam.end(), SVertexBeamContentOrderer());
+  // Step 3: Sort the vertices in the stack.
+  std::sort(stack.begin(), stack.end(), SVertexStackContentOrderer());
 }
 
 }  // S2T

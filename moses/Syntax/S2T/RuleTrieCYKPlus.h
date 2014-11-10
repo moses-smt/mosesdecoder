@@ -39,11 +39,13 @@ class RuleTrieCYKPlus : public RuleTrie
 
     bool HasRules() const { return !m_targetPhraseCollection.IsEmpty(); }
 
-    void Prune(size_t tableLimit);
-    void Sort(size_t tableLimit);
+    void Prune(std::size_t tableLimit);
+    void Sort(std::size_t tableLimit);
+
     Node *GetOrCreateChild(const Word &sourceTerm);
-    const Node *GetChild(const Word &sourceTerm) const;
     Node *GetOrCreateNonTerminalChild(const Word &targetNonTerm);
+
+    const Node *GetChild(const Word &sourceTerm) const;
     const Node *GetNonTerminalChild(const Word &targetNonTerm) const;
 
     const TargetPhraseCollection &GetTargetPhraseCollection() const {
@@ -57,8 +59,6 @@ class RuleTrieCYKPlus : public RuleTrie
     const SymbolMap &GetTerminalMap() const { return m_sourceTermMap; }
 
     const SymbolMap &GetNonTerminalMap() const { return m_nonTermMap; }
-
-    void Remove();
 
    private:
     SymbolMap m_sourceTermMap;

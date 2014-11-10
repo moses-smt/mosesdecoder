@@ -12,9 +12,9 @@ namespace Moses
 namespace Syntax
 {
 
-typedef std::vector<boost::shared_ptr<SVertex> > SVertexBeam;
+typedef std::vector<boost::shared_ptr<SVertex> > SVertexStack;
 
-struct SVertexBeamContentOrderer
+struct SVertexStackContentOrderer
 {
  public:
   bool operator()(const boost::shared_ptr<SVertex> &x,
