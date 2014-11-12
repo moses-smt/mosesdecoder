@@ -78,6 +78,8 @@ void ScfgRuleWriter::Write(const ScfgRule &rule, bool printEndl)
     m_fwd << " ||| " << std::exp(rule.GetPcfgScore());
   }
 
+  m_fwd << " |||";
+
   if (m_options.sourceLabels && rule.HasSourceLabels()) {
     m_fwd << " {{SourceLabels";
     rule.PrintSourceLabels(m_fwd);
