@@ -24,6 +24,8 @@ class OxLM : public LanguageModelSingleFactor {
 
   void Load();
 
+  double GetScore(int word, const std::vector<int>& context) const;
+
   virtual LMResult GetValue(
       const std::vector<const Word*> &contextFactor,
       State* finalState = 0) const;
@@ -39,6 +41,8 @@ class OxLM : public LanguageModelSingleFactor {
   int kSTART;
   int kSTOP;
   int kUNKNOWN;
+
+  bool normalized;
 
   bool persistentCache;
   mutable boost::thread_specific_ptr<oxlm::QueryCache> cache;

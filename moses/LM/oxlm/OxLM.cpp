@@ -15,7 +15,8 @@ namespace Moses
 {
 
 template<class Model>
-OxLM<Model>::OxLM(const string &line) : LanguageModelSingleFactor(line) {
+OxLM<Model>::OxLM(const string &line)
+    : LanguageModelSingleFactor(line), normalized(true) {
   ReadParameters();
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -44,6 +45,8 @@ template<class Model>
 void OxLM<Model>::SetParameter(const string& key, const string& value) {
   if (key == "persistent-cache") {
     persistentCache = Scan<bool>(value);
+  } else if (key == "normalized") {
+    normalized = Scan<bool>(value);
   } else {
     LanguageModelSingleFactor::SetParameter(key, value);
   }
@@ -64,6 +67,15 @@ void OxLM<Model>::Load() {
   UTIL_THROW_IF2(
       m_nGramOrder != ngram_order,
       "Wrong order for OxLM: LM has " << ngram_order << ", but Moses expects " << m_nGramOrder);
+}
+
+template<class Model>
+double OxLM<Model>::GetScore(int word, const vector<int>& context) const {
+  if (normalized) {
+    return model.getLogProb(word, context);
+  } else {
+    return model.getUnnormalizedScore(word, context);
+  }
 }
 
 template<class Model>
@@ -95,11 +107,11 @@ LMResult OxLM<Model>::GetValue(
       score = ret.first;
       ++cacheHits;
     } else {
-      score = model.getLogProb(word, context);
+      score = GetScore(word, context);
       cache->put(query, score);
     }
   } else {
-    score = model.getLogProb(word, context);
+    score = GetScore(word, context);
   }
 
   LMResult ret;
