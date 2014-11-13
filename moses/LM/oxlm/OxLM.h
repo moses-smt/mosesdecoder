@@ -24,8 +24,6 @@ class OxLM : public LanguageModelSingleFactor {
 
   void Load();
 
-  double GetScore(int word, const std::vector<int>& context) const;
-
   virtual LMResult GetValue(
       const std::vector<const Word*> &contextFactor,
       State* finalState = 0) const;
