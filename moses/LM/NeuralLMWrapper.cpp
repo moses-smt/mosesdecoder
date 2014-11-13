@@ -36,6 +36,8 @@ void NeuralLMWrapper::Load()
   //TODO: config option?
   m_neuralLM_shared->set_cache(1000000);
 
+  m_unk = m_neuralLM_shared->lookup_word("<unk>");
+
   UTIL_THROW_IF2(m_nGramOrder != m_neuralLM_shared->get_order(),
                  "Wrong order of neuralLM: LM has " << m_neuralLM_shared->get_order() << ", but Moses expects " << m_nGramOrder);
 
@@ -67,7 +69,7 @@ LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, Sta
   // Create a new struct to hold the result
   LMResult ret;
   ret.score = FloorScore(value);
-  ret.unknown = false;
+  ret.unknown = (words.back() == m_unk);
 
   (*finalState) = (State*) hashCode;
 

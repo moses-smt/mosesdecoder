@@ -349,7 +349,15 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(con
 
   float score = ruleScore.Finish();
   score = TransformLMScore(score);
-  accumulator->Assign(this, score);
+  if (OOVFeatureEnabled()) {
+    std::vector<float> scores(2);
+    scores[0] = score;
+    scores[1] = 0.0;
+    accumulator->Assign(this, scores);
+  }
+  else {
+    accumulator->Assign(this, score);
+  }
   return newState;
 }
 
