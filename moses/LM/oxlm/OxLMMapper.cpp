@@ -39,7 +39,7 @@ void OxLMMapper::convert(
 	for (size_t i = 0; i < contextFactor.size() - 1; ++i) {
     ids.push_back(convert(*contextFactor[i]));
 	}
-	reverse(ids.begin(), ids.end());
+	std::reverse(ids.begin(), ids.end());
 
 	word = convert(*contextFactor.back());
 }

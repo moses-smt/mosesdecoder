@@ -20,7 +20,8 @@ class OxLMMapper {
 
   void convert(
       const std::vector<const Word*> &contextFactor,
-      std::vector<int> &ids, int &word) const;
+      std::vector<int> &ids,
+      int &word) const;
 
  protected:
   bool posBackOff;
