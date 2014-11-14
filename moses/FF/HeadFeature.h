@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_ptr.hpp>
 #include "util/exception.hh"
+#include "CreateJavaVM.h"
 
 namespace Moses
 {
@@ -18,9 +19,14 @@ class SyntaxTree;
 typedef boost::shared_ptr<SyntaxTree> SyntaxTreePtr;
 typedef boost::shared_ptr<SyntaxNode> SyntaxNodePtr;
 
+
+//have to extend the state to keep track of dep rel pairs that have already been scored
+//the pairs should be head-source_word_id dep_source_word_id
 class SyntaxTreeState : public FFState
 {
 	SyntaxTreePtr m_tree;
+	//hash scored pairs make it static -> one per class but updated with each hypothesis
+	//could make the key a string -> will slow things down head-id-dep-id
 public:
   SyntaxTreeState(SyntaxTreePtr tree)
     :m_tree(tree)
@@ -42,6 +48,7 @@ protected:
   std::string m_label;
   std::vector< SyntaxNodePtr > m_children;
   boost::weak_ptr<SyntaxNode> m_parent;
+  //maybe this should have been a pointer to a Word object
   std::string m_head;
   bool m_isTerminal; //if is terminal than read the child value and put in as m_head
   bool m_isOpen;
@@ -210,6 +217,8 @@ public:
 
   HeadFeature(const std::string &line);
 
+  void GetNewStanfordDepObj();
+
   void SetParameter(const std::string& key, const std::string& value);
 
 
@@ -250,13 +259,26 @@ public:
   void ReadHeadRules();
   void ReadProbArg();
   void ReadLemmaMap();
+
+  std::string CallStanfordDep(std::string parsedSentence) const;
+
+
+
 protected:
   boost::shared_ptr< std::map<std::string, std::vector <std::string> > > m_headRules;
   boost::shared_ptr< std::map<std::string, float> > m_probArg;
   boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap;
+  boost::shared_ptr< std::map<std::string, bool> > m_allowedNT;
+
 	std::string m_headFile;
 	std::string m_probArgFile;
 	std::string m_lemmaFile;
+	std::string m_jarPath;
+	//should do the initialization only once when the wrapper is loaded
+	//could make it a singleton class
+	mutable CreateJavaVM *javaWrapper;
+	//have to take care with this -> one Feature instance per decoder which works multithreaded
+	jobject workingStanforDepObj;
 
 };
 

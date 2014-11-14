@@ -89,10 +89,16 @@ requirements += <library>boost_regex-mt ;
 #  requirements += <library>jvm ;
 #}
 
-local with-jvm = [ option.get "with-jvm" ] ;
+local with-jvm-mac = [ option.get "with-jvm-mac" ] ;
 if $(with-jvm) {
   lib JavaVM : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared <name>JavaVM <search>$(with-jvm) : :  <include>$(with-jvm)/Versions/Current/Headers/ <include>$(with-jvm)/Versions/Current/Headers/ ;
   requirements += <library>JavaVM ;
+}
+
+local with-jvm = [ option.get "with-jvm" ] ;
+if $(with-jvm) {
+  lib jvm : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared <name>jvm <search>$(with-jvm)/jre/lib/amd64/server : :  <include>$(with-jvm)/include <include>$(with-jvm)/include/linux ;
+  requirements += <library>jvm ;
 }
 
 

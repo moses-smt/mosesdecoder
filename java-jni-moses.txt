@@ -1,0 +1,42 @@
+1. Add this to Jamroot ## just before: "project : requirements "
+
+#Add JVM libraries if specified
+local with-jvm = [ option.get "with-jvm" ] ;
+if $(with-jvm) {
+  lib jvm : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared <name>jvm <search>$(with-jvm)/jre/lib/amd64/server : :  <include>$(with-jvm)/include <include>$(with-jvm)/include/linux ;
+  requirements += <library>jvm ;
+}
+
+
+2. Add a parameter "my-jars" to "moses/Parameters.cpp"
+
+
+3. This command prints the method signatures for in a specific class that is required when calling a Java method from C++
+
+cd /home/dwetzel/eclipse/eclipse-4.3-kepler/workspace-default/phd-programs/bin/uk/ac/ed/inf/discsmt/jni
+javap -p -s JniStanfordLemmatizerWrapper.class
+
+
+4. Compiling with JNI:
+
+# on archlinux:
+./bjam  -j6 --with-jvm=/usr/lib/jvm/java-7-openjdk
+
+# on ubuntu (e.g. gna):
+./bjam  -j6 --with-jvm=/usr/lib/jvm/java-7-openjdk-amd64
+
+
+5. Running with JNI:
+
+set your $LD_LIBRARY_PATH to 
+<prefix-as-in-point-4.>/jre/lib/amd64/server
+e.g. in your .bash_alias
+
+
+6. Example moses command:
+
+moses -threads 1 -n-best-list nbest.out 100 -f phrase-model/moses.ini -my-jars "/home/dwetzel/opt/javacode/wordnetrelations.jar:/home/dwetzel/opt/wordnet-api-jwi/edu.mit.jwi_2.3.1_jdk.jar:/home/dwetzel/opt/stanford-corenlp-full-2013-06-20/stanford-corenlp-3.2.0.jar:/home/dwetzel/opt/stanford-corenlp-full-2013-06-20/stanford-corenlp-3.2.0-models.jar" < phrase-model/in.xml > out 2> err
+
+
+
+JAVA_HOME /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home

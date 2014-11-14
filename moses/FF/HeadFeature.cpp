@@ -18,7 +18,7 @@
 #include <boost/regex.hpp>
 
 //#include </System/Library/Frameworks/JavaVM.framework/Headers/jni.h>
-#include "CreateJavaVM.h"
+
 
 
 using namespace std;
@@ -141,7 +141,8 @@ void SyntaxTree::Clear()
 }
 
 
-
+// I have no idea what this is supposed to do -> track source words covered? or target words
+// would be useful to know the index in the target sentence for when scoring dependency pairs (avoid duplicates)
 SyntaxNodePtr SyntaxTree::AddNode( int startPos, int endPos, std::string label )
 {
 	SyntaxNodePtr newNode (new SyntaxNode( startPos, endPos, label ));
@@ -246,40 +247,45 @@ SyntaxNodePtr SyntaxTree::FromString(std::string internalTree, boost::shared_ptr
 }
 
 void SyntaxTree::ToString(SyntaxNodePtr node, std::stringstream &tree){
-	tree <<"["<< node->GetLabel()<< " ";
+	tree <<"("<< node->GetLabel()<< " ";
+	//keep counter and for each index save the pointer to the node
+	//-> this way I can keep track of seen dependency pairs (i get head-index dep-index pairs from StanfordDep, where index is relative to the subtree)
+	//index seen pairs by head pointer and then have a list of dependent pointers ? or a hash somewhow?
 	if(node->IsTerminal())
-		tree << node->GetHead() << "]";
+		tree << node->GetHead() << ")";
 	else{
 		for(int i=0;i<node->GetSize();i++)
 			ToString(node->GetNChild(i),tree);
-		tree << "]";
+		tree << ")";
 	}
 
 }
 
 void SyntaxTree::ToStringHead(SyntaxNodePtr node, std::stringstream &tree){
-	tree <<"["<< node->GetLabel()<<"-"<<node->GetHead()<< " ";
+	tree <<"("<< node->GetLabel()<<"-"<<node->GetHead()<< " ";
 	if(node->IsTerminal())
-		tree << node->GetHead() << "]";
+		tree << node->GetHead() << ")";
 	else{
 		for(int i=0;i<node->GetSize();i++)
 			ToStringHead(node->GetNChild(i),tree);
-		tree << "]";
+		tree << ")";
 	}
 
 }
 
 std::string SyntaxTree::ToString(){
-	std::stringstream tree("[");
+	std::stringstream tree("(");
 	ToString(m_top,tree);
 	return tree.str();
 }
 
 std::string SyntaxTree::ToStringHead(){
-	std::stringstream tree("[");
+	std::stringstream tree("(");
 	ToStringHead(m_top,tree);
 	return tree.str();
 }
+
+
 
 //!!! still problems with finding the head
 // I had NP in the VP rule and it would always get that one first -> the 0/1 reversing might not be working or some if/else
@@ -413,9 +419,16 @@ HeadFeature::HeadFeature(const std::string &line)
   :StatefulFeatureFunction(2, line) //should modify 0 to the number of scores my feature generates
 	,m_headRules(new std::map<std::string, std::vector <std::string> > ())
 	, m_probArg (new std::map<std::string, float> ())
-	, m_lemmaMap (new std::map<std::string, std::string>)
+	, m_lemmaMap (new std::map<std::string, std::string>())
+	, m_allowedNT (new std::map<std::string, bool>())
 {
   ReadParameters();
+  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","PP","WHPP","PRT","ADVP","WHADVP","XS"};
+
+
+	for(int i=0;i<sizeof(vinit)/sizeof(vinit[0]);i++){
+		(*m_allowedNT)[vinit[i]]=true;
+	}
   //m_headRules = new std::map<std::string, std::vector <std::string> > ();
   //m_probArg = new std::map<std::string, float> ();
 }
@@ -478,8 +491,13 @@ void HeadFeature::SetParameter(const std::string& key, const std::string& value)
 	  		if(key=="lemmaFile"){
 	  			m_lemmaFile=value;
 	  		}
-	  		else
-	  			StatefulFeatureFunction::SetParameter(key, value);
+	  		else{
+	  			if(key=="jarPath"){
+	  				m_jarPath=value;
+	  			}
+	  			else
+	  				StatefulFeatureFunction::SetParameter(key, value);
+	  		}
 	  	}
 	  }
   }
@@ -493,10 +511,108 @@ void HeadFeature::Load() {
   ReadProbArg();
   ReadLemmaMap();
 
-  CreateJavaVM *javaVM = new CreateJavaVM();
+  //made CreateJavaVM a singleton class
+  javaWrapper = CreateJavaVM::Instance(m_jarPath);
+  //javaWrapper = new CreateJavaVM();
+  //works when i first run this. must be a problem of loosing references to objects??
+
+
+  //this should be done per sentence
+  //-> and if all sentences have access to the same object I need the called method to be synchronized in java
+  GetNewStanfordDepObj();
+  //javaWrapper->GetDep("bllaa");
+  // !!!! I NEED TO MAKE THIS CALL SO THE CALL IN EvaluateWhenApplied DOESN"T CRASH !!!!
+
+  cout<<"TEST CallStanfordDep:"<<endl;
+  string temp = CallStanfordDep("(VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))");
+  cout<<"TEMP DEP: "<<temp<<endl;
+
+  //javaWrapper->TestRuntime();
 
 }
 
+std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
+
+	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
+	env->ExceptionDescribe();
+
+	/**
+	 * arguments to be passed to ProcessParsedSentenceJId:
+	 * string: parsed sentence
+	 * boolean: TRUE for selecting certain relations (list them with GetRelationListJId method)
+	*/
+	jstring jSentence = env->NewStringUTF(parsedSentence.c_str());
+	jboolean jSpecified = JNI_TRUE;
+	env->ExceptionDescribe();
+
+	/**
+	 * Call this method to get a string with the selected dependency relations
+	 * Issues: method should be synchronize since sentences are decoded in parallel and there is only one object per feature
+	 * Alternative should be to have one object per sentence and free it when decoding finished
+	 */
+	if (!env->ExceptionCheck()){
+		//it's the same method id
+		//VERBOSE(1, "CALLING JMETHOD ProcessParsedSentenceJId: " << env->GetMethodID(javaWrapper->GetRelationsJClass(), "ProcessParsedSentence","(Ljava/lang/String;Z)Ljava/lang/String;") << std::endl);
+		jstring jStanfordDep = reinterpret_cast <jstring> (env ->CallObjectMethod(workingStanforDepObj,javaWrapper->GetProcessParsedSentenceJId(),jSentence,jSpecified));
+
+		env->ExceptionDescribe();
+
+		//Returns a pointer to a UTF-8 string
+		if(jStanfordDep != NULL){
+		const char* stanfordDep = env->GetStringUTFChars(jStanfordDep, 0);
+		std::string dependencies(stanfordDep);
+
+		//how to make sure the memory gets released on the Java side?
+		env->ReleaseStringUTFChars(jStanfordDep, stanfordDep);
+		javaWrapper->GetVM()->DetachCurrentThread();
+		return dependencies;
+		}
+		//Something goes wrong in ProcessParsedSentence when trying to extract the relations and everythig crashes
+		//returning a bogus string from ProcessParsedSentence works
+		VERBOSE(1, "jStanfordDep is NULL" << std::endl);
+
+		//env->DeleteLocalRef(jStanfordDep);
+
+		//for some reson jStanfordDep is NULL -> maybe that the java thing crashses then DetachCurrentThread fails?
+		javaWrapper->GetVM()->DetachCurrentThread(); //-> when jStanfordDep in null it already crashed?
+
+		return "null";
+	}
+	javaWrapper->GetVM()->DetachCurrentThread();
+
+
+	return "exception";
+}
+
+//this should be called in the Manager or somewhere -> how?
+//have to figure out how to manage this object
+void HeadFeature::GetNewStanfordDepObj(){
+
+		JNIEnv *env = javaWrapper->GetAttachedJniEnvPointer();
+
+		//if an object was already initialized (for previous sentence) free the reference
+		if(workingStanforDepObj)
+			env->DeleteGlobalRef(workingStanforDepObj);
+
+		//get the StanfordDep object to query
+		jobject rel = env->NewObject(javaWrapper->GetRelationsJClass(), javaWrapper->GetDepParsingInitJId());
+		env->ExceptionDescribe();
+		//this reference remains valid until it is explicity freed -> prevents class from being unloaded
+		//use this object and just call ProcessParsedSentence() with new arguments for each hypothesis
+		workingStanforDepObj = env->NewGlobalRef(rel);
+		env->DeleteLocalRef(rel);
+
+
+		/**
+		 * /Get list of selected dep relations -> Maybe print this at some point or just access the static object
+		jobject relationsArray = env ->CallObjectMethod(relGlobal,javaWrapper->GetRelationListJId);
+		env->ExceptionDescribe();
+		cout<<"got relationsArray"<<endl;
+		*/
+
+		javaWrapper->GetVM()->DetachCurrentThread();
+
+}
 
 FFState* HeadFeature::EvaluateWhenApplied(
   const ChartHypothesis&  cur_hypo,
@@ -504,15 +620,14 @@ FFState* HeadFeature::EvaluateWhenApplied(
   ScoreComponentCollection* accumulator) const
 {
 	if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
+
 	    const std::string *tree = property->GetValueString();
-
-
 
 	    SyntaxTreePtr syntaxTree (new SyntaxTree());
 	    //should have new SyntaxTree(pointer to headRules)
 	    syntaxTree->FromString(*tree,m_lemmaMap);
 	    //std::cout<<*tree<<std::endl;
-	   //std::cout<< syntaxTree->ToString()<<std::endl;
+	   //std::cout<< "rule: "<< syntaxTree->ToString()<<std::endl;
 
 
 
@@ -522,14 +637,39 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	          const Word &word = cur_hypo.GetCurrTargetPhrase().GetWord(pos);
 	          if (word.IsNonTerminal()) {
 	            size_t nonTermInd = cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
+	            /*
+	              * Notes: When evaluating the value of this feature function, you should avoid
+	              * calling hypo.GetPrevHypo().  If you need something from the "previous"
+	              * hypothesis, you should store it in an FFState object which will be passed
+	              * in as prev_state.  If you don't do this, you will get in trouble.
+	             */
 	            const ChartHypothesis *prevHypo = cur_hypo.GetPrevHypo(nonTermInd);
+	            //trebuie cumva pt prev hypothesis sa am si un container the <node*,node*> pt dep pairs already scored/seen
 	            const SyntaxTreeState* prev = dynamic_cast<const SyntaxTreeState*>(prevHypo->GetFFState(featureID));
 	            //SyntaxTree* prev_tree = prev->GetTree();
 	            previousTrees.push_back(prev->GetTree());
+	            //here add previousScoredPairs -> the FFstate should have a pointer to the container
 	          }
 	        }
 
 	        syntaxTree->SetHeadOpenNodes(previousTrees);
+	        std::string parsedSentence  = syntaxTree->ToString();
+	        //std::cout<< "extended rule: "<< parsedSentence<<std::endl;
+	        std::string depRel ="";
+	        char *stanfordDep;
+	        if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
+	        	if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
+							depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+							std::cout<< "dep rel: "<<depRel<<endl;
+							//problem when there is no dep rel ? returns '\0' or NULL
+							// FUCK THIS FUCKING ERRORS IT FAILS EVEN WITH: extended rule: (VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))
+							//javaWrapper->GetDep(parsedSentence);
+							//this fails here but not in Load()!!!
+							//javaWrapper = new CreateJavaVM();
+							//javaWrapper->TestRuntime();
+	        	}
+	        }
+	        //std::cout<< "dep rel: "<< stanfordDep<<std::endl;
 
 	        int index = 0;
 	        syntaxTree->FindHeads(syntaxTree->GetTop(), *m_headRules);
@@ -561,6 +701,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        //std::cout<< syntaxTree->ToStringHead()<<std::endl;
 
 	        return new SyntaxTreeState(syntaxTree);
+
 
 
 	}
