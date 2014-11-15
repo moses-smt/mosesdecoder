@@ -1,0 +1,9 @@
+FOR OSX ONLY
+------------
+
+This creates an empty library file
+   librt.a
+It should be used when you are compile with Eclipse on OSX.
+
+The Eclipse projects are set up to link to librt but OSX doesn't have it so this just creates a dummy library.
+

@@ -22,7 +22,7 @@ $SCRIPTS_ROOTDIR =~ s/\/training$//;
 #$SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
 my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_SORT_BATCH_SIZE,  $_SORT_COMPRESS, $_SORT_PARALLEL, $_CORPUS,
-   $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
+   $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH, $_DISTORTION_LIMIT,
    $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_LEXICAL_COUNTS, $_VERBOSE, $_ALIGNMENT,
    $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
    $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
@@ -32,11 +32,11 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT, $_TRANSLITERATION_PHRASE_TABLE,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_GHKM_SOURCE_LABELS,$_GHKM_SOURCE_LABELS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_GHKM_PHRASE_ORIENTATION,$_PHRASE_ORIENTATION_PRIORS_FILE,$_GHKM_SOURCE_LABELS,$_GHKM_SOURCE_LABELS_FILE,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,$_S2T,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2, $_UNKNOWN_WORD_SOFT_MATCHES_FILE,
    $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
+   $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_LEXICAL_REORDERING_DEFAULT_SCORES,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,$_MMSAPT,
    @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
    $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE, $_EXTRACT_COMMAND);
@@ -54,6 +54,7 @@ $_HELP = 1
 		       'giza-e2f=s' => \$_GIZA_E2F,
 		       'giza-f2e=s' => \$_GIZA_F2E,
 		       'max-phrase-length=s' => \$_MAX_PHRASE_LENGTH,
+		       'distortion-limit=s' => \$_DISTORTION_LIMIT,
 		       'lexical-file=s' => \$_LEXICAL_FILE,
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
 		       'write-lexical-counts' => \$_LEXICAL_COUNTS,
@@ -104,6 +105,7 @@ $_HELP = 1
 		       'generation-type=s' => \@_GENERATION_TYPE,
 		       'continue' => \$_CONTINUE,
 		       'hierarchical' => \$_HIERARCHICAL,
+		       's2t' => \$_S2T,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
@@ -130,6 +132,7 @@ $_HELP = 1
 		       'transliteration-phrase-table=s' => \$_TRANSLITERATION_PHRASE_TABLE,		
 		       'mmsapt=s' => \$_MMSAPT,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
+		       'lexical-reordering-default-scores=s' => \$_LEXICAL_REORDERING_DEFAULT_SCORES,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
@@ -440,11 +443,14 @@ $___CONTINUE = $_CONTINUE if $_CONTINUE;
 
 my $___MAX_PHRASE_LENGTH = "7";
 $___MAX_PHRASE_LENGTH = "10" if $_HIERARCHICAL;
+$___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
+
+my $___DISTORTION_LIMIT = 6;
+$___DISTORTION_LIMIT = $_DISTORTION_LIMIT if $_DISTORTION_LIMIT;
 
 my $___LEXICAL_WEIGHTING = 1;
 my $___LEXICAL_COUNTS = 0;
 my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
-$___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
 $___LEXICAL_WEIGHTING = 0 if $_NO_LEXICAL_WEIGHTING;
 $___LEXICAL_COUNTS = 1 if $_LEXICAL_COUNTS;
 $___LEXICAL_FILE = $_LEXICAL_FILE if $_LEXICAL_FILE;
@@ -1970,8 +1976,12 @@ sub create_ini {
      $phrase_table_impl_name = "PhraseDictionaryOnDisk" if $phrase_table_impl==2;
      $phrase_table_impl_name = "PhraseDictionaryMemory" if $phrase_table_impl==6;
      $phrase_table_impl_name = "PhraseDictionaryALSuffixArray" if $phrase_table_impl==10;
-     $phrase_table_impl_name = "Mmsapt" if $phrase_table_impl==11;
+     $phrase_table_impl_name = "PhraseDictionaryBitextSampling" if $phrase_table_impl==11;
      $file .= "/" if $phrase_table_impl==11 && $file !~ /\/$/;
+
+     if ($_S2T) {
+       $phrase_table_impl_name = "RuleTable";
+     }
 
      # table limit (maximum number of translation options per input phrase)
      my $table_limit = 0;
@@ -1980,9 +1990,8 @@ sub create_ini {
      }
 
      # sum up...
-     $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i num-features=$basic_weight_count ".($phrase_table_impl==11?"base":"path")."=$file input-factor=$input_factor output-factor=$output_factor";
+     $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor";
      $feature_spec .= " L1=$___F L2=$___E ".$_MMSAPT if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
-     $feature_spec .= " table-limit=$table_limit" unless defined($_MMSAPT);
      $feature_spec .= "\n";
      $weight_spec .= "TranslationModel$i=";
      for(my $j=0;$j<$basic_weight_count;$j++) { $weight_spec .= " 0.2"; }
@@ -2005,7 +2014,11 @@ sub create_ini {
    # glue grammar
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
-     $feature_spec .= "PhraseDictionaryMemory name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
+     my $feature_name = "PhraseDictionaryMemory";
+     if ($_S2T) {
+       $feature_name = "RuleTable";
+     }
+     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
      $weight_spec .= "TranslationModel$i= 1.0\n";
    }
 
@@ -2045,7 +2058,7 @@ sub create_ini {
 	    $table_file .= ".";
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
-            $feature_spec .= "LexicalReordering name=LexicalReordering$i num-features=".$model->{"numfeatures"}." type=".$model->{"config"}." input-factor=$input_factor output-factor=$output_factor path=$table_file\n"; 
+            $feature_spec .= "LexicalReordering name=LexicalReordering$i num-features=".$model->{"numfeatures"}." type=".$model->{"config"}." input-factor=$input_factor output-factor=$output_factor path=$table_file".(defined($_LEXICAL_REORDERING_DEFAULT_SCORES)?" default-scores=$_LEXICAL_REORDERING_DEFAULT_SCORES":"")."\n"; 
             $weight_spec .= "LexicalReordering$i=";
             for(my $j=0;$j<$model->{"numfeatures"};$j++) { $weight_spec .= " 0.3"; }
             $weight_spec .= "\n";
@@ -2136,7 +2149,7 @@ sub create_ini {
   }
   # phrase-based model settings
   else {
-    print INI "[distortion-limit]\n6\n";
+    print INI "[distortion-limit]\n$___DISTORTION_LIMIT\n";
   }
 
   # only set the factor delimiter if it is non-standard

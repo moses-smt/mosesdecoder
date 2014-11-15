@@ -38,6 +38,7 @@ namespace Moses
 {
 
 class ChartHypothesis;
+class ChartSearchGraphWriter;
 
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
  */
@@ -54,6 +55,11 @@ private:
 
   ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
 
+  /* auxilliary functions for SearchGraphs */
+  void FindReachableHypotheses( 
+    const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable , size_t* winners, size_t* losers) const; 
+  void WriteSearchGraph(const ChartSearchGraphWriter& writer) const;
+
 public:
   ChartManager(InputType const& source);
   ~ChartManager();
@@ -62,8 +68,12 @@ public:
   const ChartHypothesis *GetBestHypothesis() const;
   void CalcNBest(size_t n, std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > &nBestList, bool onlyDistinct=false) const;
 
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
-  void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
+  /** "Moses" (osg)  type format */
+  void OutputSearchGraphMoses(std::ostream &outputSearchGraphStream) const;
+
+  /** Output in (modified) Kenneth hypergraph format */
+  void OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraphStream) const;
+
 
   //! the input sentence being decoded
   const InputType& GetSource() const {
@@ -97,6 +107,7 @@ public:
   }
 
   const ChartParser &GetParser() const { return m_parser; }
+
 };
 
 }

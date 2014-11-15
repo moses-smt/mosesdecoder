@@ -338,7 +338,15 @@ FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis&
   }
 
   // assign combined score to score breakdown
-  out->Assign(this, prefixScore + finalizedScore);
+  if (OOVFeatureEnabled()) {
+    vector<float> scores(2);
+    scores[0] = prefixScore + finalizedScore;
+    scores[1] = out->GetScoresForProducer(this)[1];
+    out->Assign(this, scores);
+  }
+  else {
+    out->Assign(this, prefixScore + finalizedScore);
+  }
 
   ret->Set(prefixScore, lmState);
   return ret;

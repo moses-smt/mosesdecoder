@@ -28,6 +28,8 @@
 namespace Moses
 {
 
+class ChartSearchGraphWriter;
+
 //! functor to compare (chart) hypotheses by (descending) score
 class ChartHypothesisScoreOrderer
 {
@@ -117,7 +119,7 @@ public:
     return m_bestScore;
   }
 
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned,bool> &reachable) const;
+  void WriteSearchGraph(const ChartSearchGraphWriter& writer, const std::map<unsigned,bool> &reachable) const;
 
 };
 

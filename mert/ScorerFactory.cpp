@@ -13,6 +13,7 @@
 #include "M2Scorer.h"
 #include "M2ScorerMER.h"
 #include "MeteorScorer.h"
+#include "HwcmScorer.h"
 #include "Reference.h"
 
 using namespace std;
@@ -36,6 +37,7 @@ vector<string> ScorerFactory::getTypes()
   types.push_back(string("M2SCORER"));
   types.push_back(string("M2MERSCORER"));
   types.push_back(string("METEOR"));
+  types.push_back(string("HWCM"));
   return types;
 }
 
@@ -64,6 +66,8 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config)
     return (PermutationScorer*) new PermutationScorer(type, config);
   } else if (type == "METEOR") {
     return new MeteorScorer(config);
+  } else if (type == "HWCM") {
+    return new HwcmScorer(config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);

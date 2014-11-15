@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //#include <vld.h>
 #endif
 
-#include "TranslationAnalysis.h"
+#include "moses/TranslationAnalysis.h"
 #include "IOWrapper.h"
 #include "mbr.h"
 
@@ -280,7 +280,7 @@ public:
 
         if (file->is_complete() && file->good()) {
           fix(*file,PRECISION);
-          manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
+          manager.OutputSearchGraphAsHypergraph(*file);
           file -> flush();
         } else {
           TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber 

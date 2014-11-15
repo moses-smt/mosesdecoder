@@ -46,6 +46,9 @@ de recherches du Canada
 #include "MiraFeatureVector.h"
 #include "MiraWeightVector.h"
 
+#include "Scorer.h"
+#include "ScorerFactory.h"
+
 using namespace std;
 using namespace MosesTuning;
 
@@ -57,6 +60,8 @@ int main(int argc, char** argv)
   string denseInitFile;
   string sparseInitFile;
   string type = "nbest";
+  string sctype = "BLEU";
+  string scconfig = "";
   vector<string> scoreFiles;
   vector<string> featureFiles;
   vector<string> referenceFiles; //for hg mira
@@ -67,6 +72,7 @@ int main(int argc, char** argv)
   float decay = 0.999; // Pseudo-corpus decay \gamma
   int n_iters = 60;    // Max epochs J
   bool streaming = false; // Stream all k-best lists?
+  bool streaming_out = false; // Stream output after each sentence?
   bool no_shuffle = false; // Don't shuffle, even for in memory version
   bool model_bg = false; // Use model for background corpus
   bool verbose = false; // Verbose updates
@@ -78,6 +84,8 @@ int main(int argc, char** argv)
   desc.add_options()
   ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
   ("type,t", po::value<string>(&type), "Either nbest or hypergraph")
+  ("sctype", po::value<string>(&sctype), "the scorer type (default BLEU)")
+  ("scconfig,c", po::value<string>(&scconfig), "configuration string passed to scorer")
   ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
   ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
   ("hgdir,H", po::value<string> (&hgDir), "Directory containing hypergraphs")
@@ -90,6 +98,7 @@ int main(int argc, char** argv)
   ("dense-init,d", po::value<string>(&denseInitFile), "Weight file for dense features. This should have 'name= value' on each line, or (legacy) should be the Moses mert 'init.opt' format.")
   ("sparse-init,s", po::value<string>(&sparseInitFile), "Weight file for sparse features")
   ("streaming", po::value(&streaming)->zero_tokens()->default_value(false), "Stream n-best lists to save memory, implies --no-shuffle")
+  ("streaming-out", po::value(&streaming_out)->zero_tokens()->default_value(false), "Stream weights to stdout after each sentence")
   ("no-shuffle", po::value(&no_shuffle)->zero_tokens()->default_value(false), "Don't shuffle hypotheses before each epoch")
   ("model-bg", po::value(&model_bg)->zero_tokens()->default_value(false), "Use model instead of hope for BLEU background")
   ("verbose", po::value(&verbose)->zero_tokens()->default_value(false), "Verbose updates")
@@ -144,7 +153,7 @@ int main(int argc, char** argv)
     } else {
       vector<string> names;
       string last_name = "";
-      size_t feature_ctr = 0;
+      size_t feature_ctr = 1;
       do {
         size_t equals = buffer.find_last_of("=");
         UTIL_THROW_IF(equals == buffer.npos, util::Exception, "Incorrect format in dense feature file: '"
@@ -154,15 +163,15 @@ int main(int argc, char** argv)
         initParams.push_back(boost::lexical_cast<ValType>(buffer.substr(equals+2)));
 
         //Names for features with several values need to have their id added
-        if (name != last_name) feature_ctr = 0;
+        if (name != last_name) feature_ctr = 1;
         last_name = name;
-        if (feature_ctr) {
+        if (feature_ctr>1) {
           stringstream namestr;
-          namestr << names.back() << feature_ctr;
+          namestr << names.back() << "_" << feature_ctr;
           names[names.size()-1] = namestr.str();
-          if (feature_ctr == 1) {
+          if (feature_ctr == 2) {
             stringstream namestr;
-            namestr << names[names.size()-2] << (feature_ctr-1);
+            namestr << names[names.size()-2] << "_" << (feature_ctr-1);
             names[names.size()-2] = namestr.str();
           }
         }
@@ -209,25 +218,27 @@ int main(int argc, char** argv)
 
   MiraWeightVector wv(initParams);
 
-  // Initialize background corpus
-  vector<ValType> bg;
-  for(int j=0; j<kBleuNgramOrder; j++) {
-    bg.push_back(kBleuNgramOrder-j);
-    bg.push_back(kBleuNgramOrder-j);
+  // Initialize scorer
+  if(sctype != "BLEU" && type == "hypergraph") {
+    UTIL_THROW(util::Exception, "hypergraph mira only supports BLEU");
   }
-  bg.push_back(kBleuNgramOrder);
+  boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer(sctype, scconfig));
+
+  // Initialize background corpus
+  vector<ValType> bg(scorer->NumberOfScores(), 1);
 
   boost::scoped_ptr<HopeFearDecoder> decoder;
   if (type == "nbest") {
-    decoder.reset(new NbestHopeFearDecoder(featureFiles, scoreFiles, streaming, no_shuffle, safe_hope));
+    decoder.reset(new NbestHopeFearDecoder(featureFiles, scoreFiles, streaming, no_shuffle, safe_hope, scorer.get()));
   } else if (type == "hypergraph") {
-    decoder.reset(new HypergraphHopeFearDecoder(hgDir, referenceFiles, initDenseSize, streaming, no_shuffle, safe_hope, hgPruning, wv));
+    decoder.reset(new HypergraphHopeFearDecoder(hgDir, referenceFiles, initDenseSize, streaming, no_shuffle, safe_hope, hgPruning, wv, scorer.get()));
   } else {
     UTIL_THROW(util::Exception, "Unknown batch mira type: '" << type << "'");
   }
 
   // Training loop
-  cerr << "Initial BLEU = " << decoder->Evaluate(wv.avg()) << endl;
+  if (!streaming_out)
+    cerr << "Initial BLEU = " << decoder->Evaluate(wv.avg()) << endl;
   ValType bestBleu = 0;
   for(int j=0; j<n_iters; j++) {
     // MIRA train for one epoch
@@ -275,6 +286,8 @@ int main(int argc, char** argv)
       }
       iNumExamples++;
       ++sentenceIndex;
+      if (streaming_out)
+        cout << wv << endl;
     }
     // Training Epoch summary
     cerr << iNumUpdates << "/" << iNumExamples << " updates"

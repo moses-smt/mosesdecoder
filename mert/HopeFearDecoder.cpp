@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/exception.hh"
 #include "util/file_piece.hh"
 
-#include "BleuScorer.h"
+#include "Scorer.h"
 #include "HopeFearDecoder.h"
 
 using namespace std;
@@ -38,7 +38,7 @@ namespace MosesTuning {
 static const ValType BLEU_RATIO = 5;
 
 ValType HopeFearDecoder::Evaluate(const AvgWeightVector& wv) {
-  vector<ValType> stats(kBleuNgramOrder*2+1,0);
+  vector<ValType> stats(scorer_->NumberOfScores(),0);
   for(reset(); !finished(); next()) {
     vector<ValType> sent;
     MaxModel(wv,&sent);
@@ -46,7 +46,7 @@ ValType HopeFearDecoder::Evaluate(const AvgWeightVector& wv) {
       stats[i]+=sent[i];
     }
   }
-  return unsmoothedBleu(stats);
+  return scorer_->calculateScore(stats);
 }
 
 NbestHopeFearDecoder::NbestHopeFearDecoder(
@@ -54,8 +54,10 @@ NbestHopeFearDecoder::NbestHopeFearDecoder(
       const vector<string>&  scoreFiles,
       bool streaming,
       bool  no_shuffle,
-      bool safe_hope
+      bool safe_hope,
+      Scorer* scorer
       ) : safe_hope_(safe_hope) {
+  scorer_ = scorer;
   if (streaming) {
     train_.reset(new StreamingHypPackEnumerator(featureFiles, scoreFiles));
   } else {
@@ -92,7 +94,7 @@ void NbestHopeFearDecoder::HopeFear(
     for(size_t i=0; i< train_->cur_size(); i++) {
       const MiraFeatureVector& vec=train_->featuresAt(i);
       ValType score = wv.score(vec);
-      ValType bleu = sentenceLevelBackgroundBleu(train_->scoresAt(i),backgroundBleu);
+      ValType bleu = scorer_->calculateSentenceLevelBackgroundScore(train_->scoresAt(i),backgroundBleu);
       // Hope
       if(i==0 || (hope_scale*score + bleu) > hope_score) {
         hope_score = hope_scale*score + bleu;
@@ -123,9 +125,9 @@ void NbestHopeFearDecoder::HopeFear(
   hopeFear->fearFeatures = train_->featuresAt(fear_index);
 
   hopeFear->hopeStats = train_->scoresAt(hope_index);
-  hopeFear->hopeBleu = sentenceLevelBackgroundBleu(hopeFear->hopeStats, backgroundBleu);
+  hopeFear->hopeBleu = scorer_->calculateSentenceLevelBackgroundScore(hopeFear->hopeStats, backgroundBleu);
   const vector<float>& fear_stats = train_->scoresAt(fear_index);
-  hopeFear->fearBleu = sentenceLevelBackgroundBleu(fear_stats, backgroundBleu);
+  hopeFear->fearBleu = scorer_->calculateSentenceLevelBackgroundScore(fear_stats, backgroundBleu);
 
   hopeFear->modelStats = train_->scoresAt(model_index);
   hopeFear->hopeFearEqual = (hope_index == fear_index);
@@ -157,7 +159,8 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
                             bool no_shuffle,
                             bool safe_hope,
                             size_t hg_pruning,
-                            const MiraWeightVector& wv
+                            const MiraWeightVector& wv,
+                            Scorer* scorer
                           ) :
                           num_dense_(num_dense) {
 
@@ -168,6 +171,7 @@ HypergraphHopeFearDecoder::HypergraphHopeFearDecoder
 
   SparseVector weights;
   wv.ToSparse(&weights);
+  scorer_ = scorer;
 
   static const string kWeights = "weights";
   fs::directory_iterator dend;
@@ -252,9 +256,9 @@ void HypergraphHopeFearDecoder::HopeFear(
 
   //Only C++11
   //hopeFear->modelStats.assign(std::begin(modelHypo.bleuStats), std::end(modelHypo.bleuStats));
-  vector<ValType> fearStats(kBleuNgramOrder*2+1);
-  hopeFear->hopeStats.reserve(kBleuNgramOrder*2+1);
-  hopeFear->modelStats.reserve(kBleuNgramOrder*2+1);
+  vector<ValType> fearStats(scorer_->NumberOfScores());
+  hopeFear->hopeStats.reserve(scorer_->NumberOfScores());
+  hopeFear->modelStats.reserve(scorer_->NumberOfScores());
   for (size_t i = 0; i < fearStats.size(); ++i) {
     hopeFear->modelStats.push_back(modelHypo.bleuStats[i]);
     hopeFear->hopeStats.push_back(hopeHypo.bleuStats[i]);
@@ -312,8 +316,8 @@ void HypergraphHopeFearDecoder::MaxModel(const AvgWeightVector& wv, vector<ValTy
   size_t sentenceId = graphIter_->first;
   SparseVector weights;
   wv.ToSparse(&weights);
-  vector<ValType> bg(kBleuNgramOrder*2+1);
-  Viterbi(*(graphIter_->second), weights, 0, references_, sentenceId, bg, &bestHypo);
+  vector<ValType> bg(scorer_->NumberOfScores());
+  Viterbi(*(graphs_[sentenceId]), weights, 0, references_, sentenceId, bg, &bestHypo);
   stats->resize(bestHypo.bleuStats.size());
   /*
   for (size_t i = 0; i < bestHypo.text.size(); ++i) {

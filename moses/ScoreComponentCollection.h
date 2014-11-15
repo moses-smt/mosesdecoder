@@ -393,7 +393,7 @@ public:
   size_t SparseL1Regularize(float lambda);
   void SparseL2Regularize(float lambda);
   void Save(const std::string& filename) const;
-  void Save(std::ostream&) const;
+  void Save(std::ostream&, bool multiline=true) const;
 
   void IncrementSparseHopeFeatures() {
     m_scores.incrementSparseHopeFeatures();

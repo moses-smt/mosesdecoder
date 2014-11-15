@@ -214,10 +214,10 @@ void FVector::save(const string& filename) const
   out.close();
 }
 
-void FVector::write(ostream& out) const
+void FVector::write(ostream& out,const string& sep, const string& linesep) const
 {
   for (const_iterator i = cbegin(); i != cend(); ++i) {
-    out << i->first << " " << i->second << endl;
+    out << i->first << sep << i->second << linesep;
   }
 }
 

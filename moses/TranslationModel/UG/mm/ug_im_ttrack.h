@@ -57,7 +57,7 @@ namespace ugdiss
   public:
 
     imTtrack(boost::shared_ptr<vector<vector<Token> > > const& d);
-    imTtrack(istream& in, TokenIndex const& V, ostream* log);
+    imTtrack(istream& in, TokenIndex const& V, ostream* log = NULL);
     imTtrack(size_t reserve = 0);
     // imTtrack(istream& in, Vocab& V);
     
@@ -131,7 +131,7 @@ namespace ugdiss
   
   template<typename Token>
   imTtrack<Token>::
-  imTtrack(istream& in, TokenIndex const& V, ostream* log = NULL)
+  imTtrack(istream& in, TokenIndex const& V, ostream* log)
     : numToks(0)
   {
     myData.reset(new vector<vector<Token> >());

@@ -5,6 +5,7 @@ use IPC::Open3;
 use File::Temp qw/tempdir/;
 use File::Path qw/rmtree/;
 use Getopt::Long "GetOptions";
+use Symbol;
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
@@ -128,7 +129,6 @@ sub interpolate {
   }
   # no specified weights -> compute them
   else {
-
     # compute perplexity
     my $i = 0;
     foreach my $lm (@LM) {
@@ -193,10 +193,11 @@ sub safesystem {
 
 sub saferun3 {
   print STDERR "Executing: @_\n";
-  my($wtr, $rdr, $err);
+  my $wtr = gensym();
+  my $rdr = gensym();
+  my $err = gensym(); 
   my $pid = open3($wtr, $rdr, $err, @_);
   close($wtr);
-  waitpid($pid, 0);
   my $gotout = "";
   $gotout .= $_ while (<$rdr>);
   close $rdr;
@@ -205,6 +206,7 @@ sub saferun3 {
     $goterr .= $_ while (<$err>);
     close $err;
   }
+  waitpid($pid, 0);
   if ($? == -1) {
       print STDERR "Failed to execute: @_\n  $!\n";
       exit(1);
