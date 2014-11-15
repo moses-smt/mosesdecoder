@@ -50,13 +50,13 @@ void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     return;
   }
   
-  std::vector<int> stats;
+  std::vector<ScoreStatsType> stats;
   
   boost::python::object list = m2_.attr("sufstats")(sentence, sid);
   
-  int correct = extract<int>(list[0]);
-  int proposed = extract<int>(list[1]);
-  int gold = extract<int>(list[2]);
+  ScoreStatsType correct = extract<int>(list[0]);
+  ScoreStatsType proposed = extract<int>(list[1]);
+  ScoreStatsType gold = extract<int>(list[2]);
   
   stats.push_back(correct);
   stats.push_back(proposed);
@@ -66,7 +66,7 @@ void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   entry.set(stats);
 }
 
-float M2Scorer::calculateScore(const vector<int>& comps) const
+float M2Scorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   if (comps.size() != NumberOfScores()) {
     throw runtime_error("Size of stat vector for M2Scorer is not " + NumberOfScores());
@@ -97,7 +97,7 @@ float M2Scorer::calculateScore(const vector<int>& comps) const
   return f;
 }
 
-float sentenceBackgroundM2(const std::vector<float>& stats, const std::vector<float>& bg)
+float sentenceBackgroundM2(const std::vector<ScoreStatsType>& stats, const std::vector<ScoreStatsType>& bg)
 {
   float beta = 0.5;
   
@@ -124,7 +124,7 @@ float sentenceBackgroundM2(const std::vector<float>& stats, const std::vector<fl
   return f;
 }
 
-float sentenceScaledM2(const std::vector<float>& stats)
+float sentenceScaledM2(const std::vector<ScoreStatsType>& stats)
 {
   float beta = 0.5;
   
@@ -153,7 +153,7 @@ float sentenceScaledM2(const std::vector<float>& stats)
   return f;
 }
 
-float sentenceM2(const std::vector<float>& stats)
+float sentenceM2(const std::vector<ScoreStatsType>& stats)
 {
   float beta = 0.5;
   

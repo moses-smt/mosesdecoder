@@ -51,12 +51,12 @@ void M2ScorerMER::setReferenceFiles(const vector<string>& referenceFiles)
   }
 }
 
-void M2ScorerMER::addMERStats(std::string sentence, size_t sid, std::vector<int>& stats) {
+void M2ScorerMER::addMERStats(std::string sentence, size_t sid, std::vector<ScoreStatsType>& stats) {
   
   std::vector<std::string> source_tokens;
   Tokenize(sentence.c_str(), ' ', &source_tokens);
   
-  std::vector<size_t> merScores(4, 0);
+  std::vector<ScoreStatsType> merScores(4, 0);
   std::string scoreDesc("mdis");
   for(size_t k = 0; k < references_.size(); ++k) {
     std::vector<std::string> reference_tokens;
@@ -76,13 +76,13 @@ void M2ScorerMER::prepareStats(size_t sid, const string& text, ScoreStats& entry
     return;
   }
   
-  std::vector<int> stats;
+  std::vector<ScoreStatsType> stats;
   
   boost::python::object list = m2_.attr("sufstats")(sentence, sid);
   
-  int correct = extract<int>(list[0]);
-  int proposed = extract<int>(list[1]);
-  int gold = extract<int>(list[2]);
+  ScoreStatsType correct = extract<int>(list[0]);
+  ScoreStatsType proposed = extract<int>(list[1]);
+  ScoreStatsType gold = extract<int>(list[2]);
   
   stats.push_back(correct);
   stats.push_back(proposed);
@@ -94,7 +94,7 @@ void M2ScorerMER::prepareStats(size_t sid, const string& text, ScoreStats& entry
   entry.set(stats);
 }
 
-float M2ScorerMER::calculateScore(const vector<int>& comps) const
+float M2ScorerMER::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   if (comps.size() != NumberOfScores()) {
     throw runtime_error("Size of stat vector for M2ScorerMER is not " + NumberOfScores());
@@ -135,7 +135,7 @@ float M2ScorerMER::calculateScore(const vector<int>& comps) const
   return score;
 }
 
-float sentenceBackgroundM2MER(const std::vector<float>& stats, const std::vector<float>& bg)
+float sentenceBackgroundM2MER(const std::vector<ScoreStatsType>& stats, const std::vector<ScoreStatsType>& bg)
 {
   float alpha = 0.99;
   float beta = 0.5;
@@ -210,7 +210,7 @@ float sentenceScaledM2MER(const std::vector<float>& stats)
   return score;
 }
 
-float sentenceM2MER(const std::vector<float>& stats)
+float sentenceM2MER(const std::vector<ScoreStatsType>& stats)
 {
   float alpha = 0.99;
   float beta = 0.5;

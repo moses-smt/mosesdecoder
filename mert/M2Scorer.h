@@ -30,7 +30,7 @@ public:
     return 3;
   }
 
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
 private:  
   boost::python::object main_namespace_;
@@ -39,7 +39,7 @@ private:
   int max_unchanged_words_;
   bool ignore_whitespace_casing_;
 
-  std::map<std::string, std::vector<int> > seen_;
+  std::map<std::string, std::vector<ScoreStatsType> > seen_;
   
   const char* code();
   
@@ -48,10 +48,10 @@ private:
   M2Scorer& operator=(const M2Scorer&);
 };
 
-float sentenceM2 (const std::vector<float>& stats);
-float sentenceScaledM2(const std::vector<float>& stats);
-float sentenceBackgroundM2(const std::vector<float>& stats, const std::vector<float>& bg);
+float sentenceM2 (const std::vector<ScoreStatsType>& stats);
+float sentenceScaledM2(const std::vector<ScoreStatsType>& stats);
+float sentenceBackgroundM2(const std::vector<ScoreStatsType>& stats, const std::vector<ScoreStatsType>& bg);
 
 }
 
-#endif  // MERT_CDER_SCORER_H_
+#endif  // MERT_M2_SCORER_H_
