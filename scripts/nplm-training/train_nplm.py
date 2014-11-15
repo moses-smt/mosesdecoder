@@ -25,6 +25,7 @@ def main():
   parser.add_option("-f", "--config-options-file", dest="config_options_file")
   parser.add_option("-g", "--log-file", dest="log_file")
   parser.add_option("-v", "--validation-ngrams", dest="validation_file")
+  parser.add_option("-a", "--activation-function", dest="activation_fn")
 
   parser.set_defaults(
     working_dir = "working"
@@ -43,6 +44,7 @@ def main():
     ,config_options_file = "config"
     ,log_file = "log"
     ,validation_file = None
+    ,activation_fn = "rectifier"
   )
 
   options,args = parser.parse_args(sys.argv)
@@ -80,7 +82,7 @@ def main():
                 model_prefix, "--learning_rate", "1", "--minibatch_size", str(options.minibatch_size),
                 "--num_noise_samples", str(options.noise), "--num_hidden", str(options.hidden), "--input_embedding_dimension",
                 str(options.input_embedding), "--output_embedding_dimension", str(options.output_embedding), "--num_threads",
-                str(options.threads)] + validations_command
+                str(options.threads), "--activation_function", options.activation_fn] + validations_command
   print "Train model command: "
   print ', '.join(train_args)
 
