@@ -1,7 +1,8 @@
 
 //this doesn't have version 1.8 -> have to reinstall jdk 1.6
-//#include </System/Library/Frameworks/JavaVM.framework/Headers/jni.h>
-#include </System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers/jni.h>
+#include </System/Library/Frameworks/JavaVM.framework/Headers/jni.h>
+//#include </System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers/jni.h>
+//#include <jni.h>
 //this doesn't compile
 //#include </Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home/include/jni.h>
 

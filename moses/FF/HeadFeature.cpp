@@ -517,9 +517,11 @@ void HeadFeature::Load() {
   //works when i first run this. must be a problem of loosing references to objects??
 
 
+  //!!! running on the server: FATAL ERROR in native method: Bad global or local ref passed to JNI
+
   //this should be done per sentence
   //-> and if all sentences have access to the same object I need the called method to be synchronized in java
-  GetNewStanfordDepObj();
+  //GetNewStanfordDepObj();
   //javaWrapper->GetDep("bllaa");
   // !!!! I NEED TO MAKE THIS CALL SO THE CALL IN EvaluateWhenApplied DOESN"T CRASH !!!!
 
@@ -535,6 +537,12 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 
 	JNIEnv *env =  javaWrapper->GetAttachedJniEnvPointer();
 	env->ExceptionDescribe();
+
+	jobject rel = env->NewObject(javaWrapper->GetRelationsJClass(), javaWrapper->GetDepParsingInitJId());
+			env->ExceptionDescribe();
+
+	jobject workingStanforDepObj = env->NewGlobalRef(rel);
+	env->DeleteLocalRef(rel);
 
 	/**
 	 * arguments to be passed to ProcessParsedSentenceJId:
