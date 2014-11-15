@@ -185,8 +185,9 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
   string cleanLine; // return string (text without xml)
   size_t wordPos = 0; // position in sentence (in terms of number of words)
 
-  const vector<FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
-  // const string &factorDelimiter = staticData.GetFactorDelimiter();
+  vector<FactorType> outputFactorOrder = staticData.GetOutputFactorOrder();
+  //outputFactorOrder.push_back(1);
+  //const string &factorDelimiter = staticData.GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -358,7 +359,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
           // store translation options into members
           if (staticData.GetXmlInputType() != XmlIgnore) {
             // only store options if we aren't ignoring them
-            for (size_t i=0; i<altTexts.size(); ++i) {
+            for (size_t i = 0; i < altTexts.size(); ++i) {
               Phrase sourcePhrase; // TODO don't know what the source phrase is
 
               // set default probability
@@ -367,10 +368,13 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               // convert from prob to log-prob
               float scoreValue = FloorScore(TransformScore(probValue));
 
-              WordsRange range(startPos + offset,endPos-1 + offset); // span covered by phrase
+              WordsRange range(startPos + offset, endPos-1 + offset); // span covered by phrase
               TargetPhrase targetPhrase(firstPt);
               // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
-              targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
+              //std::cerr << altTexts[i] << std::endl;
+              //std::cerr << outputFactorOrder.size() << std::endl;
+              targetPhrase.CreateFromString(Output, outputFactorOrder, altTexts[i], NULL);
+              //std::cerr << targetPhrase << std::endl;
 
               // lhs
               const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
