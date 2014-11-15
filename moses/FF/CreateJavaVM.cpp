@@ -43,7 +43,7 @@ CreateJavaVM::CreateJavaVM(std::string jarPath){
   VERBOSE(1, "JNI_CreateJavaVM result: jint=" << res << std::endl);
   jclass Relations = env->FindClass("Relations");
   if(Relations==NULL)
-  	cout<<"Relations class NULL"<<endl;
+  	cerr<<"Relations class NULL"<<endl;
   env->ExceptionDescribe();
 	//keep this pointer throughout decoding
   this->relationsJClass = reinterpret_cast <jclass> (env->NewGlobalRef(Relations));
@@ -57,21 +57,21 @@ CreateJavaVM::CreateJavaVM(std::string jarPath){
   		//Get method ID for: object initializer
   		this->DepParsingInitJId = env->GetMethodID(this->relationsJClass, "<init>","()V");
       if(this->DepParsingInitJId==NULL)
-      	cout<<"constructor MethodID NULL"<<endl;
+      	cerr<<"constructor MethodID NULL"<<endl;
       env->ExceptionDescribe();
 
       //Get method ID for: list of selected dep rel types method
       this->GetRelationListJId = env->GetMethodID(this->relationsJClass, "GetRelationList",
                                   "()[Ljava/lang/String;");
       if(this->GetRelationListJId==NULL)
-      	cout<<"GetRelationList MethodID NULL"<<endl;
+      	cerr<<"GetRelationList MethodID NULL"<<endl;
       env->ExceptionDescribe();
 
       //Get method ID for: process the sentence and return dependencies method
       this->ProcessParsedSentenceJId = env->GetMethodID(this->relationsJClass, "ProcessParsedSentence",
                             "(Ljava/lang/String;Z)Ljava/lang/String;");
       if(this->ProcessParsedSentenceJId==NULL)
-        cout<<"ProcessParsedSentence MethodID NULL"<<endl;
+        cerr<<"ProcessParsedSentence MethodID NULL"<<endl;
       env->ExceptionDescribe();
 
       VERBOSE(1, "JNI finished getting method IDs. ProcessParsedSentenceJId: " << this->ProcessParsedSentenceJId << std::endl);
@@ -130,19 +130,19 @@ void CreateJavaVM::GetDep(std::string parsedSentence){
 		      this->ProcessParsedSentenceJId = env->GetMethodID(this->relationsJClass, "ProcessParsedSentence",
 		                            "(Ljava/lang/String;Z)Ljava/lang/String;");
 		      if(this->ProcessParsedSentenceJId==NULL)
-		        cout<<"ProcessParsedSentence MethodID NULL"<<endl;
+		        cerr<<"ProcessParsedSentence MethodID NULL"<<endl;
 		      env->ExceptionDescribe();
 
 		//Get list of selected dep relations
 		/**
 		jobject relationsArray = env ->CallObjectMethod(relGlobal,this->GetRelationListJId);
 		env->ExceptionDescribe();
-		cout<<"got relationsArray"<<endl;
+		cerr<<"got relationsArray"<<endl;
 		**/
 
 		//string sentence = "(S (NP (NNP Sam)) (VP (VBD died) (NP-TMP (NN today))))";
 		string sentence ="(VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))";
-		cout<<"IN TEST: "<<sentence<<endl;
+		cerr<<"IN TEST: "<<sentence<<endl;
 		jstring jSentence = env->NewStringUTF(sentence.c_str());
 		//jstring jSentence = env->NewStringUTF(parsedSentence.c_str());
 		jboolean jSpecified = JNI_TRUE;
@@ -162,7 +162,7 @@ void CreateJavaVM::GetDep(std::string parsedSentence){
 		env->ExceptionDescribe();
 		jstring jStanfordDep = reinterpret_cast <jstring>(jStanfordDepObj);
 		const char* stanfordDep = env->GetStringUTFChars(jStanfordDep, 0);
-		cout << "TEST DEP: "<< stanfordDep <<endl;
+		cerr << "TEST DEP: "<< stanfordDep <<endl;
 		env->ReleaseStringUTFChars(jStanfordDep, stanfordDep);
 
 		//how to make sure the memory gets released on the Java side?
@@ -196,7 +196,7 @@ void CreateJavaVM::TestRuntime(){
 	/**
 	jobject relationsArray = env ->CallObjectMethod(relGlobal,this->GetRelationListJId);
 	env->ExceptionDescribe();
-	cout<<"got relationsArray"<<endl;
+	cerr<<"got relationsArray"<<endl;
 	**/
 
 	//!!! Gives error if string is empty
@@ -218,7 +218,7 @@ void CreateJavaVM::TestRuntime(){
 	env->ExceptionDescribe();
 	jstring jStanfordDep = reinterpret_cast <jstring>(jStanfordDepObj);
 	const char* stanfordDep = env->GetStringUTFChars(jStanfordDep, 0);
-	//cout << stanfordDep;
+	//cerr << stanfordDep;
 	env->ReleaseStringUTFChars(jStanfordDep, stanfordDep);
 
 	//how to make sure the memory gets released on the Java side?

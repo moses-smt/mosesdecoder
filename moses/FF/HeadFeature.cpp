@@ -525,9 +525,9 @@ void HeadFeature::Load() {
   //javaWrapper->GetDep("bllaa");
   // !!!! I NEED TO MAKE THIS CALL SO THE CALL IN EvaluateWhenApplied DOESN"T CRASH !!!!
 
-  cout<<"TEST CallStanfordDep:"<<endl;
+  cerr<<"TEST CallStanfordDep:"<<endl;
   string temp = CallStanfordDep("(VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))");
-  cout<<"TEMP DEP: "<<temp<<endl;
+  cerr<<"TEMP DEP: "<<temp<<endl;
 
   //javaWrapper->TestRuntime();
 
@@ -668,7 +668,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
 	        	if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 							depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
-							std::cout<< "dep rel: "<<depRel<<endl;
+							if(depRel!=" ")
+								std::cerr<< "dep rel: "<<depRel<<endl;
 							//problem when there is no dep rel ? returns '\0' or NULL
 							// FUCK THIS FUCKING ERRORS IT FAILS EVEN WITH: extended rule: (VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))
 							//javaWrapper->GetDep(parsedSentence);
