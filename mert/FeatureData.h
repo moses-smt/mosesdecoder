@@ -12,6 +12,7 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#include <boost/lexical_cast.hpp>
 #include "FeatureArray.h"
 
 namespace MosesTuning
@@ -103,7 +104,7 @@ public:
   inline int getName(std::size_t idx) const {
     idx2name::const_iterator i = m_index_to_array_name.find(idx);
     if (i != m_index_to_array_name.end())
-      throw std::runtime_error("there is no entry at index " + idx);
+      throw std::runtime_error("there is no entry at index " + boost::lexical_cast<std::string>(idx));
     return i->second;
   }
 
@@ -116,7 +117,7 @@ public:
       throw std::runtime_error("Error: you required an too big index");
     std::map<std::size_t, std::string>::const_iterator it = m_index_to_feature_name.find(idx);
     if (it == m_index_to_feature_name.end()) {
-      throw std::runtime_error("Error: specified id is unknown: " + idx);
+      throw std::runtime_error("Error: specified id is unknown: " + boost::lexical_cast<std::string>(idx));
     } else {
       return it->second;
     }
