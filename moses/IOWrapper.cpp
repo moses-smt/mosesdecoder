@@ -1089,6 +1089,7 @@ void IOWrapper::OutputAlignment(ostream &out, const vector<const Hypothesis *> &
 
     targetOffset += tp.GetSize();
   }
+  out << std::endl;
 }
 
 void IOWrapper::OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)

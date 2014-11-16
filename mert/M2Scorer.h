@@ -30,7 +30,7 @@ public:
   }
 
   virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
-  virtual float getReferenceLength(const vector<ScoreStatsType>& comps) const;
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& comps) const;
 
 private:  
   boost::python::object main_namespace_;
