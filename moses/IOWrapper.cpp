@@ -1089,6 +1089,9 @@ void IOWrapper::OutputAlignment(ostream &out, const vector<const Hypothesis *> &
 
     targetOffset += tp.GetSize();
   }
+  // Removing std::endl here breaks -alignment-output-file, so stop doing that, please :)
+  // Or fix it somewhere else.
+  out << std::endl;
 }
 
 void IOWrapper::OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)
