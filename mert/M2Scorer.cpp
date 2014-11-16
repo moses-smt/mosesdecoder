@@ -824,7 +824,7 @@ const char* M2Scorer::code() {
     "                                                self.beta,\n"
     "                                                self.ignore_whitespace_casing)\n"
     "\n"
-    "        return [int(stat_correct), int(stat_proposed), int(stat_gold), int(len(cand_str.split()))]\n"
+    "        return [int(stat_correct), int(stat_proposed), int(stat_gold), int(len(self.source_sentences[i].split()))]\n"
   ;
 }
 
