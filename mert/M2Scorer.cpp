@@ -57,10 +57,12 @@ void M2Scorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   ScoreStatsType correct = extract<int>(list[0]);
   ScoreStatsType proposed = extract<int>(list[1]);
   ScoreStatsType gold = extract<int>(list[2]);
+  ScoreStatsType input_length = extract<int>(list[3]);
   
   stats.push_back(correct);
   stats.push_back(proposed);
   stats.push_back(gold);
+  stats.push_back(input_length);
   
   seen_[sentence] = stats;
   entry.set(stats);
@@ -97,60 +99,8 @@ float M2Scorer::calculateScore(const vector<ScoreStatsType>& comps) const
   return f;
 }
 
-float sentenceBackgroundM2(const std::vector<ScoreStatsType>& stats, const std::vector<ScoreStatsType>& bg)
-{
-  float beta = 0.5;
-  
-  float p = 0.0;
-  float r = 0.0;
-  float f = 0.0;
-    
-  if(stats[1] + bg[1] != 0)
-    p = (stats[0] + bg[0]) / (stats[1] + bg[1]);
-  else
-    p = 1.0;
-    
-  if(stats[2] + bg[2] != 0)
-    r = (stats[0] + bg[0]) / (stats[2] + bg[2]);
-  else
-    r = 1.0;
-  
-  float denom = beta * beta * p + r;
-  if(denom != 0)
-    f = (1.0 + beta * beta) * p * r / denom;
-  else
-    f = 0.0;
-  
-  return f;
-}
-
-float sentenceScaledM2(const std::vector<ScoreStatsType>& stats)
-{
-  float beta = 0.5;
-  
-  float p = 0.0;
-  float r = 0.0;
-  float f = 0.0;
-    
-  float smoothing = 0.0;  
-  
-  if(stats[1] + smoothing != 0)
-    p = (stats[0] + smoothing) / (stats[1] + smoothing);
-  else
-    p = 1.0;
-    
-  if(stats[2] + smoothing != 0)
-    r = (stats[0] + smoothing) / (stats[2] + smoothing);
-  else
-    r = 1.0;
-  
-  float denom = beta * beta * p + r;
-  if(denom != 0)
-    f = (1.0 + beta * beta) * p * r / denom;
-  else
-    f = 0.0;
-  
-  return f;
+float M2Scorer::getReferenceLength(const vector<ScoreStatsType>& comps) const {
+  return comps[3];
 }
 
 float sentenceM2(const std::vector<ScoreStatsType>& stats)
@@ -874,7 +824,7 @@ const char* M2Scorer::code() {
     "                                                self.beta,\n"
     "                                                self.ignore_whitespace_casing)\n"
     "\n"
-    "        return [int(stat_correct), int(stat_proposed), int(stat_gold)]\n"
+    "        return [int(stat_correct), int(stat_proposed), int(stat_gold), int(len(cand_str.split()))]\n"
   ;
 }
 

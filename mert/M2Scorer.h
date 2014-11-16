@@ -26,11 +26,11 @@ public:
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
 
   virtual std::size_t NumberOfScores() const {
-    //return 9;
-    return 3;
+    return 4;
   }
 
   virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
+  virtual float getReferenceLength(const vector<ScoreStatsType>& comps) const;
 
 private:  
   boost::python::object main_namespace_;
@@ -49,8 +49,6 @@ private:
 };
 
 float sentenceM2 (const std::vector<ScoreStatsType>& stats);
-float sentenceScaledM2(const std::vector<ScoreStatsType>& stats);
-float sentenceBackgroundM2(const std::vector<ScoreStatsType>& stats, const std::vector<ScoreStatsType>& bg);
 
 }
 
