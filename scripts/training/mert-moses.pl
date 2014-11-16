@@ -1264,7 +1264,7 @@ sub get_weights_from_mert {
       open my $fh2, '<', $logfile or die "Can't open $logfile: $!";
       while(<$fh2>) {
         if(/Best (BLEU|M2) = ([\-\d\.]+)/) {
-          $devbleu = $1;
+          $devbleu = $2;
         }
       }
       close $fh2;
