@@ -168,7 +168,7 @@ std::string FilterArg(std::string arg, boost::shared_ptr< std::map<std::string, 
 	boost::regex date("([0-9]+[.|-|/]?)+"); //some sort of date or other garbage
 	boost::regex nr("[0-9]+");
 	boost::regex prn("i|he|she|we|you|they|it|me|them");
-	boost::regex par("(|)");
+	boost::regex par("\\(|\\)");
 	//lowercase in place
 	boost::algorithm::to_lower(arg);
 	if(boost::regex_match(arg,web))
