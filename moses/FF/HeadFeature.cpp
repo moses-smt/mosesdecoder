@@ -168,6 +168,7 @@ std::string FilterArg(std::string arg, boost::shared_ptr< std::map<std::string, 
 	boost::regex date("([0-9]+[.|-|/]?)+"); //some sort of date or other garbage
 	boost::regex nr("[0-9]+");
 	boost::regex prn("i|he|she|we|you|they|it|me|them");
+	boost::regex par("(|)");
 	//lowercase in place
 	boost::algorithm::to_lower(arg);
 	if(boost::regex_match(arg,web))
@@ -178,6 +179,8 @@ std::string FilterArg(std::string arg, boost::shared_ptr< std::map<std::string, 
 			return "NNRR";
 	if(boost::regex_match(arg,prn))
 			return "PRN";
+	if(boost::regex_match(arg,par))
+			return "-LRB-";
 	std::map<string,string>::iterator it;
 	it = m_lemmaMap->find(arg);
 	if(it!=m_lemmaMap->end()){
@@ -669,7 +672,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        	if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 							depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
 							if(depRel!=" ")
-								std::cerr<< "dep rel: "<<depRel<<endl;
+								std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
 							//problem when there is no dep rel ? returns '\0' or NULL
 							// FUCK THIS FUCKING ERRORS IT FAILS EVEN WITH: extended rule: (VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))
 							//javaWrapper->GetDep(parsedSentence);
