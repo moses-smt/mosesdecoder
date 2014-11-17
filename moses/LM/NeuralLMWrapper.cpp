@@ -32,7 +32,9 @@ void NeuralLMWrapper::Load()
   m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
-  m_neuralLM_shared = new nplm::neuralLM(m_filePath, true);
+  m_neuralLM_shared = new nplm::neuralLM();
+  m_neuralLM_shared->read(m_filePath);
+  m_neuralLM_shared->premultiply();
   //TODO: config option?
   m_neuralLM_shared->set_cache(1000000);
 

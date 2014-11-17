@@ -15,7 +15,7 @@ max-order += <dependency>$(ORDER-LOG) ;
 
 wrappers = ;
 local with-nplm = [ option.get "with-nplm" ] ;
-if $(with-nplm) {
+if $(with-nplm-0.1) {
   lib neuralLM : : <search>$(with-nplm)/src ;
   obj nplm.o : wrappers/nplm.cc : <include>.. <include>$(with-nplm)/src <cxxflags>-fopenmp ;
   alias nplm : nplm.o neuralLM ..//boost_thread : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>WITH_NPLM <library>..//boost_thread ;

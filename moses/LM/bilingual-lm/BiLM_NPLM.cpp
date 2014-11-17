@@ -96,7 +96,11 @@ void BilingualLM_NPLM::SetParameter(const std::string& key, const std::string& v
 }
 
 void BilingualLM_NPLM::loadModel() {
-  m_neuralLM_shared = new nplm::neuralLM(m_filePath, premultiply); //Default premultiply= true
+  m_neuralLM_shared = new nplm::neuralLM();
+  m_neuralLM_shared->read(m_filePath);
+  if (premultiply) {
+    m_neuralLM_shared->premultiply();
+  }
 
   int ngram_order = target_ngrams + source_ngrams + 1;
   UTIL_THROW_IF2(
