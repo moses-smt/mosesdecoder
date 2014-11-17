@@ -152,13 +152,13 @@ protected:
   int m_size;
   SyntaxNodePtr m_attachTo; //where the next node should be attached -> index in m_nodes
   std::vector< SyntaxNodePtr > m_openNodes; //nodes that will be connected with previous hypothesis
-
+  std::string m_rootedTree; //the entire subtree covered from the current LHS
 
   friend std::ostream& operator<<(std::ostream&, const SyntaxTree&);
 
 public:
 
-  SyntaxTree() {
+  SyntaxTree():m_seenDepRel(),m_rootedTree(""){
     //m_top = 0;  // m_top doesn't get set unless ConnectNodes is called.
     m_size = 0;
   }
@@ -182,6 +182,14 @@ public:
 	  return m_size;
   }
 
+  std::string GetRootedTree(){
+  	return m_rootedTree;
+  }
+
+  void SetRootedTree(std::string subtree){
+  	m_rootedTree = subtree;
+  }
+
   std::vector<SyntaxNodePtr > GetOpenNodes(){
 	  return m_openNodes;
   }
@@ -200,12 +208,16 @@ public:
   std::string ToString();
   std::string ToStringHead();
   void ToString(SyntaxNodePtr newNode, std::stringstream &tree);
+  void ToStringDynamic(SyntaxNodePtr newNode,std::vector< SyntaxTreePtr > *previousTrees, std::stringstream &tree);
   void ToStringHead(SyntaxNodePtr newNode, std::stringstream &tree);
   void SetHeadOpenNodes(std::vector< SyntaxTreePtr > previousTrees);
   void FindHeads(SyntaxNodePtr newNode,std::map<std::string, std::vector <std::string> > &headRules) const;
 
   //find the arguments
   std::string* FindObj() const;
+  std::string* FindSubj() const;
+  std::map<std::string, bool> m_seenDepRel; //all dep rel scored up to the current hypothesis -> should be used in Compare of FFState
+
 
   void Clear();
 };
@@ -261,6 +273,7 @@ public:
   void ReadLemmaMap();
 
   std::string CallStanfordDep(std::string parsedSentence) const;
+  void ProcessDepString(std::string depRelString, std::vector< SyntaxTreePtr > previousTrees,ScoreComponentCollection* accumulator) const;
 
 
 

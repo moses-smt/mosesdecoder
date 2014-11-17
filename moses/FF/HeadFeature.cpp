@@ -264,6 +264,29 @@ void SyntaxTree::ToString(SyntaxNodePtr node, std::stringstream &tree){
 
 }
 
+void SyntaxTree::ToStringDynamic(SyntaxNodePtr node, std::vector< SyntaxTreePtr > *previousTrees, std::stringstream &tree){
+	//tree <<"("<< node->GetLabel()<< " ";
+	//keep counter and for each index save the pointer to the node
+	//-> this way I can keep track of seen dependency pairs (i get head-index dep-index pairs from StanfordDep, where index is relative to the subtree)
+	//index seen pairs by head pointer and then have a list of dependent pointers ? or a hash somewhow?
+	if(node->IsTerminal())
+		tree <<"("<< node->GetLabel()<< " " << node->GetHead() << ")";
+	else{
+		if(node->IsOpen() && !previousTrees->empty()){
+					tree << previousTrees->front()->GetRootedTree();
+					previousTrees->erase(previousTrees->begin()); //
+				}
+		else{ //if(node->IsInternal()){
+			tree <<"("<< node->GetLabel()<< " ";
+			//this is totally wrong -> it inverses the order of the children
+			for(int i=0 ; i<node->GetSize();i++){
+				ToStringDynamic(node->GetNChild(i),previousTrees,tree);
+			}
+			tree << ")";
+		}
+	}
+}
+
 void SyntaxTree::ToStringHead(SyntaxNodePtr node, std::stringstream &tree){
 	tree <<"("<< node->GetLabel()<<"-"<<node->GetHead()<< " ";
 	if(node->IsTerminal())
@@ -281,6 +304,7 @@ std::string SyntaxTree::ToString(){
 	ToString(m_top,tree);
 	return tree.str();
 }
+
 
 std::string SyntaxTree::ToStringHead(){
 	std::stringstream tree("(");
@@ -393,12 +417,35 @@ string* SyntaxTree::FindObj() const{
 
 	if(head){
 		//cout<<"VP: "<<m_top->GetHead()<<" NP: ";
-		SyntaxNodePtr obj = head->FindFirstChild("NP");
+		SyntaxNodePtr obj = head->FindFirstChild("NP"); //here I can add rules for finding to NPs (to deal with iobj)
 		//uncomment to look for PPs
 		if(!obj){
 			obj = head->FindFirstChild("PP");
 			//cout<<"PP: "<<obj->GetHead()<<endl;
 		}
+		if(obj){
+			//cout<<obj->GetHead()<<endl;
+			*predArgPair+=head->GetHead()+" "+obj->GetHead();
+		}
+	}
+	return predArgPair;
+}
+
+string* SyntaxTree::FindSubj() const{
+	//we might need to search for the entire subtree for the VP -> it may not be the first node
+	//I should have a flag for when I reach the leaf of the rule so I don't recures to previous hypothesis -> something like HasHead
+	// -> update the Node property with is leaf
+	string *predArgPair = new string("");
+	SyntaxNodePtr head;
+	if(m_top->GetLabel().compare("S")==0)
+		head = m_top;
+	else//!!!this is not OK -> we might have visited the VP in the previous hypothesis -> only need to serach in the current subtree
+		//do the fake grammar and test
+		head = m_top->FindChildRecursively("S"); //!!!! This should be done recursively because the internal struct may have several layers
+
+	if(head){
+		//cout<<"VP: "<<m_top->GetHead()<<" NP: ";
+		SyntaxNodePtr obj = head->FindFirstChild("NP");
 		if(obj){
 			//cout<<obj->GetHead()<<endl;
 			*predArgPair+=head->GetHead()+" "+obj->GetHead();
@@ -426,7 +473,7 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_allowedNT (new std::map<std::string, bool>())
 {
   ReadParameters();
-  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","PP","WHPP","PRT","ADVP","WHADVP","XS"};
+  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
 
 
 	for(int i=0;i<sizeof(vinit)/sizeof(vinit[0]);i++){
@@ -625,6 +672,35 @@ void HeadFeature::GetNewStanfordDepObj(){
 
 }
 
+void HeadFeature::ProcessDepString(std::string depRelString, std::vector< SyntaxTreePtr > previousTrees,ScoreComponentCollection* accumulator) const{
+	vector<string> tokens;
+	split(depRelString,"\t",tokens);
+	std::map<std::string, bool> seenDepRel;
+	if(tokens.size()>1){
+		cerr<<tokens.size()<<endl;
+		for(vector<SyntaxTreePtr>::iterator itTrees=previousTrees.begin();itTrees!=previousTrees.end();itTrees++)
+			seenDepRel.insert((*itTrees)->m_seenDepRel.begin(),(*itTrees)->m_seenDepRel.end());
+		for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
+				if(seenDepRel.find(*it)==seenDepRel.end()){
+					//score
+					std::map<string,float>::iterator itScore;
+					itScore = m_probArg->find(*it);
+					if(itScore!=m_probArg->end()){
+						//cout<<"Have value: "<<it->second<<endl;
+						vector<float> scores;
+						scores.push_back(log(itScore->second+0.001));
+						scores.push_back(1.0);
+						//accumulator->PlusEquals(this,log(it->second+0.001));
+						accumulator->PlusEquals(this,scores);
+					}
+				//add to hashmap
+				seenDepRel[*it]=true;
+				}
+		}
+		//m_lemmaMap->insert(std::pair<std::string, std::string > (tokens[0],tokens[1]));
+	}
+}
+
 FFState* HeadFeature::EvaluateWhenApplied(
   const ChartHypothesis&  cur_hypo,
   int  featureID /*- used to index the state in the previous hypotheses */,
@@ -664,15 +740,28 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        }
 
 	        syntaxTree->SetHeadOpenNodes(previousTrees);
+
+	        /*
 	        std::string parsedSentence  = syntaxTree->ToString();
-	        //std::cout<< "extended rule: "<< parsedSentence<<std::endl;
+	        std::cout<< "extended rule: "<< parsedSentence<<std::endl;
+	        std::stringstream subtree("");
+	        syntaxTree->ToStringDynamic(syntaxTree->GetTop(),&previousTrees,subtree);
+	        std::cout<< "ruleDynamic: "<< subtree.str() <<std::endl;
+	        syntaxTree->SetRootedTree(subtree.str());
+					*/
+
 	        std::string depRel ="";
 	        char *stanfordDep;
-	        if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
-	        	if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
+	        //should only call toString if the LHS passes these criteria
+	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
+	        	std::string parsedSentence  = syntaxTree->ToString();
+	        	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
+
 							depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
-							if(depRel!=" ")
+							if(depRel!=" "){
 								std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
+								//ProcessDepString(depRel,previousTrees,accumulator);
+							}
 							//problem when there is no dep rel ? returns '\0' or NULL
 							// FUCK THIS FUCKING ERRORS IT FAILS EVEN WITH: extended rule: (VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))
 							//javaWrapper->GetDep(parsedSentence);
@@ -700,6 +789,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 							//accumulator->PlusEquals(this,log(it->second+0.001));
 							accumulator->PlusEquals(this,scores);
 						}
+
 						//else !! I should do smoothing based on the verb
 					 //	accumulator->PlusEquals(this,-1);
 					//maybe I should just train a bigram lm over pred-arg pairs and query it here that takes care of smoothing -> dep lm for obj
@@ -709,7 +799,12 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	        delete predArgPair;
 	        predArgPair = 0;
-
+/*
+	        string *predSubjPair = syntaxTree->FindSubj();
+	        	        if(*predSubjPair!=""){
+	        	        		cout<<"Found pair: "<<*predSubjPair<<endl;
+	        	        }
+*/
 	        //std::cout<< syntaxTree->ToStringHead()<<std::endl;
 
 	        return new SyntaxTreeState(syntaxTree);
