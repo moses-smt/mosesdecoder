@@ -22,6 +22,7 @@
 #include <cassert>
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
+#include "FF/InternalTree.h"
 
 #include <boost/unordered_set.hpp>
 #include <boost/weak_ptr.hpp>
@@ -89,6 +90,7 @@ public:
                std::size_t k, KBestVec &);
 
   static Phrase GetOutputPhrase(const Derivation &);
+  static TreePointer GetOutputTree(const Derivation &);
 
 private:
   typedef boost::unordered_map<const ChartHypothesis *,

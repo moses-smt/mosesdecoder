@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(bleu_clipped_counts)
 BOOST_AUTO_TEST_CASE(calculate_actual_score)
 {
   BOOST_REQUIRE(4 == kBleuNgramOrder);
-  std::vector<int> stats(2 * kBleuNgramOrder + 1);
+  std::vector<ScoreStatsType> stats(2 * kBleuNgramOrder + 1);
   BleuScorer scorer;
 
   // unigram

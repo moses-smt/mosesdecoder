@@ -139,7 +139,7 @@ ostream& operator<<(ostream& o, const MiraWeightVector& e)
   for(size_t i=0; i<e.m_weights.size(); i++) {
     if(abs(e.m_weights[i])>1e-8) {
       if(i>0) o << " ";
-      cerr << i << ":" << e.m_weights[i];
+      o << i << ":" << e.m_weights[i];
     }
   }
   return o;

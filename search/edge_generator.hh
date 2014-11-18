@@ -8,7 +8,7 @@
 
 namespace lm {
 namespace ngram {
-class ChartState;
+struct ChartState;
 } // namespace ngram
 } // namespace lm
 

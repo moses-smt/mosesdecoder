@@ -3,7 +3,10 @@
 	<name>consolidate</name>
 	<comment></comment>
 	<projects>
+		<project>lm</project>
 		<project>moses</project>
+		<project>OnDiskPt</project>
+		<project>search</project>
 		<project>util</project>
 	</projects>
 	<buildSpec>

@@ -30,7 +30,7 @@ public:
   virtual std::size_t NumberOfScores() const {
     return 3;
   }
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
 private:
   // no copying allowed

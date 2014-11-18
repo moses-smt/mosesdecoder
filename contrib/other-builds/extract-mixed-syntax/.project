@@ -3,6 +3,7 @@
 	<name>extract-mixed-syntax</name>
 	<comment></comment>
 	<projects>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -108,12 +109,12 @@
 		<link>
 			<name>OutputFileStream.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-mixed-syntax/OutputFileStream.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/OutputFileStream.cpp</locationURI>
 		</link>
 		<link>
 			<name>OutputFileStream.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-mixed-syntax/OutputFileStream.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/OutputFileStream.h</locationURI>
 		</link>
 		<link>
 			<name>Parameter.cpp</name>

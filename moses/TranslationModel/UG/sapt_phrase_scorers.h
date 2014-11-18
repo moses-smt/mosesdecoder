@@ -10,3 +10,5 @@
 #include "sapt_pscore_pfwd.h"        // fwd phrase prob
 #include "sapt_pscore_pbwd.h"        // bwd phrase prob
 #include "sapt_pscore_coherence.h"   // coherence feature: good/sample-size
+#include "sapt_pscore_phrasecount.h" // phrase count
+#include "sapt_pscore_wordcount.h"   // word count

@@ -100,10 +100,9 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
 
       targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
       targetPhrase->EvaluateInIsolation(*unksrc);
-
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
-      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.GetTreeStructure() != NULL) {
+      if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() || staticData.PrintNBestTrees() || staticData.GetTreeStructure() != NULL) {
         targetPhrase->SetProperty("Tree","[ " + (*targetLHS)[0]->GetString().as_string() + " "+sourceWord[0]->GetString().as_string()+" ]");
       }
 

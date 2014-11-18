@@ -49,12 +49,14 @@
 #include "NieceTerminal.h"
 #include "SpanLength.h"
 #include "SyntaxRHS.h"
+#include "moses/FF/PhraseOrientationFeature.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
 #include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
+#include "moses/Syntax/RuleTableFF.h"
 
 #ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
@@ -95,8 +97,8 @@
 #include "moses/LM/DALMWrapper.h"
 #endif
 
-#ifdef LM_LBL
-#include "moses/LM/oxlm/LBLLM.h"
+#ifdef LM_OXLM
+#include "moses/LM/oxlm/OxLM.h"
 #endif
 
 #include "util/exception.hh"
@@ -173,6 +175,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryDynSuffixArray);
   MOSES_FNAME(PhraseDictionaryTransliteration);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
+  MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
 
   MOSES_FNAME(GlobalLexicalModel);
   //MOSES_FNAME(GlobalLexicalModelUnlimited); This was commented out in the original
@@ -211,6 +214,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SparseHieroReorderingFeature);
   MOSES_FNAME(SpanLength);
   MOSES_FNAME(SyntaxRHS);
+  MOSES_FNAME(PhraseOrientationFeature);
 
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
@@ -250,10 +254,10 @@ FeatureRegistry::FeatureRegistry()
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
 #endif
-#ifdef LM_LBL
-  MOSES_FNAME2("LBLLM-LM", LBLLM<oxlm::LM>);
-  MOSES_FNAME2("LBLLM-FactoredLM", LBLLM<oxlm::FactoredLM>);
-  MOSES_FNAME2("LBLLM-FactoredMaxentLM", LBLLM<oxlm::FactoredMaxentLM>);
+#ifdef LM_OXLM
+  MOSES_FNAME2("OxLM", OxLM<oxlm::LM>);
+  MOSES_FNAME2("OxFactoredLM", OxLM<oxlm::FactoredLM>);
+  MOSES_FNAME2("OxFactoredMaxentLM", OxLM<oxlm::FactoredMaxentLM>);
 #endif
 
   Add("KENLM", new KenFactory());

@@ -32,7 +32,7 @@ namespace GHKM
 
 struct Options;
 class ScfgRule;
-struct Symbol;
+class Symbol;
 
 class ScfgRuleWriter
 {

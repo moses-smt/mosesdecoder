@@ -11,7 +11,9 @@ namespace Moses
   namespace bitext 
   {
 
+#if UG_BITEXT_TRACK_ACTIVE_THREADS
     ThreadSafeCounter pstats::active;
+#endif
     
     pstats::
     pstats()
@@ -23,14 +25,15 @@ namespace Moses
     {
       ofwd[0] = ofwd[1] = ofwd[2] = ofwd[3] = ofwd[4] = ofwd[5] = ofwd[6] = 0;
       obwd[0] = obwd[1] = obwd[2] = obwd[3] = obwd[4] = obwd[5] = obwd[6] = 0;
-      // if (++active%5 == 0) 
-      // cerr << size_t(active) << " active pstats at " << __FILE__ << ":" << __LINE__ << endl;
     }
 
     pstats::
     ~pstats()
     {
-      --active;
+#if UG_BITEXT_TRACK_ACTIVE_THREADS
+      // counter may not exist any more at destruction time, so try ... catch
+      try { --active; } catch (...) {} 
+#endif
     }
 
     void

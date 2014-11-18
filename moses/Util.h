@@ -431,7 +431,19 @@ T log_sum (T log_a, T log_b)
   return ( v );
 }
 
-
+/** Enforce rounding */
+inline void fix(std::ostream& stream, size_t size)
+{
+  stream.setf(std::ios::fixed);
+  stream.precision(size);
 }
+
+class FeatureFunction;
+
+void PrintFeatureWeight(const FeatureFunction* ff);
+void ShowWeights();
+
+
+} // namespace
 
 #endif

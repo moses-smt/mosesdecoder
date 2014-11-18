@@ -52,12 +52,13 @@ namespace ugdiss
       VAL operator[](ID key) const;
     };
 
-    Cell* data;
-    VAL   *M1, *M2;
-    OFFSET * index;
+    Cell const* data;
+    VAL  const* M1;
+    VAL const* M2;
+    OFFSET const* index;
     ID numRows;
     ID numCols;
-    boost::shared_ptr<bio::mapped_file> file;
+    boost::shared_ptr<bio::mapped_file_source> file;
 
     VAL m1(ID key) const 
     { 
@@ -120,8 +121,8 @@ namespace ugdiss
 	string foo = msg.str();
 	UTIL_THROW(util::Exception,foo.c_str());
       }
-    file.reset(new bio::mapped_file());
-    file->open(fname,ios::in|ios::out);
+    file.reset(new bio::mapped_file_source());
+    file->open(fname);
     if (!file->is_open())
       {
 	ostringstream msg;
@@ -130,14 +131,14 @@ namespace ugdiss
 	string foo = msg.str();
 	UTIL_THROW(util::Exception,foo.c_str());
       }
-    char* p = file->data();
-    filepos_type offset = *reinterpret_cast<filepos_type*>(p);
-    index = reinterpret_cast<OFFSET*>(p+offset); p += sizeof(offset);
+    char const* p = file->data();
+    filepos_type offset = *reinterpret_cast<filepos_type const*>(p);
+    index = reinterpret_cast<OFFSET const*>(p+offset); p += sizeof(offset);
     numRows = *reinterpret_cast<ID const*>(p);   p += sizeof(id_type);
     numCols = *reinterpret_cast<ID const*>(p);   p += sizeof(id_type);
-    data = reinterpret_cast<Cell*>(p);
+    data = reinterpret_cast<Cell const*>(p);
     // cout << numRows << " rows; " << numCols << " columns " << endl;
-    M1 = reinterpret_cast<VAL*>(index+numRows+1);
+    M1 = reinterpret_cast<VAL const*>(index+numRows+1);
     M2 = M1+numRows;
     //    cout << "Table " << fname << " has " << numRows << " rows and " 
     //         << numCols << " columns." << endl;

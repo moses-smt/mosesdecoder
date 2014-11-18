@@ -87,29 +87,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>IOWrapper.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/IOWrapper.cpp</locationURI>
-		</link>
-		<link>
-			<name>IOWrapper.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/IOWrapper.h</locationURI>
-		</link>
-		<link>
 			<name>Jamfile</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Jamfile</locationURI>
-		</link>
-		<link>
-			<name>LatticeMBR.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/LatticeMBR.cpp</locationURI>
-		</link>
-		<link>
-			<name>LatticeMBR.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/LatticeMBR.h</locationURI>
 		</link>
 		<link>
 			<name>LatticeMBRGrid.cpp</name>
@@ -125,26 +105,6 @@
 			<name>Main.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Main.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationAnalysis.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/TranslationAnalysis.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationAnalysis.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/TranslationAnalysis.h</locationURI>
-		</link>
-		<link>
-			<name>mbr.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/mbr.cpp</locationURI>
-		</link>
-		<link>
-			<name>mbr.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/mbr.h</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

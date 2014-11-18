@@ -206,12 +206,9 @@ LoadCorpus(FactorDirection direction,
   int sntIdx(0);
   // corpus.seekg(0); Seems needless -> commented out to allow
   // loading of gzipped corpora (gzfilebuf doesn't support seeking).
-  const string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   while(getline(corpus, line)) {
     sntArray.push_back(sntIdx);
     Phrase phrase(ARRAY_SIZE_INCR);
-    // parse phrase
-    // phrase.CreateFromString( direction, factors, line, factorDelimiter, NULL);
     phrase.CreateFromString( direction, factors, line, NULL);
     // store words in vocabulary and corpus
     for( size_t i = 0; i < phrase.GetSize(); ++i) {
@@ -499,11 +496,9 @@ addSntPair(string& source, string& target, string& alignment)
   vuint_t srcFactor, trgFactor;
   cerr << "source, target, alignment = " << source << ", "
        << target << ", " << alignment << endl;
-  const string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   const unsigned oldSrcCrpSize = m_srcCorpus->size(), oldTrgCrpSize = m_trgCorpus->size();
   cerr << "old source corpus size = " << oldSrcCrpSize << "\told target size = " << oldTrgCrpSize << endl;
   Phrase sphrase(ARRAY_SIZE_INCR);
-  // sphrase.CreateFromString(Input, m_inputFactors, source, factorDelimiter, NULL);
   sphrase.CreateFromString(Input, m_inputFactors, source, NULL);
   m_srcVocab->MakeOpen();
   vector<wordID_t> sIDs(sphrase.GetSize());
@@ -519,7 +514,6 @@ addSntPair(string& source, string& target, string& alignment)
   m_srcSntBreaks.push_back(oldSrcCrpSize); // former end of corpus is index of new sentence
   m_srcVocab->MakeClosed();
   Phrase tphrase(ARRAY_SIZE_INCR);
-  // tphrase.CreateFromString(Output, m_outputFactors, target, factorDelimiter, NULL);
   tphrase.CreateFromString(Output, m_outputFactors, target, NULL);
   m_trgVocab->MakeOpen();
   vector<wordID_t> tIDs(tphrase.GetSize());
