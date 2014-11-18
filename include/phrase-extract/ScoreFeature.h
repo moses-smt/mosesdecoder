@@ -35,7 +35,7 @@
 
 #include "util/exception.hh"
 
-#include "PhraseAlignment.h"
+#include "ExtractionPhrasePair.h"
 
 namespace MosesTraining
 {
@@ -64,17 +64,14 @@ public:
 /** Passed to each feature to be used to calculate its values */
 struct ScoreFeatureContext {
   ScoreFeatureContext(
-    const PhraseAlignmentCollection &thePhrasePair,
-    float theCount, /* Total counts of all phrase pairs*/
+    const ExtractionPhrasePair &thePhrasePair,
     const MaybeLog& theMaybeLog
   ) :
     phrasePair(thePhrasePair),
-    count(theCount),
     maybeLog(theMaybeLog) {
   }
 
-  const PhraseAlignmentCollection& phrasePair;
-  float count;
+  const ExtractionPhrasePair &phrasePair;
   MaybeLog maybeLog;
 };
 
@@ -85,15 +82,18 @@ struct ScoreFeatureContext {
 class ScoreFeature
 {
 public:
+
+  /** Some features might need to store properties in ExtractionPhrasePair,
+   *  e.g. to pass along external information loaded by a feature
+   *  which may distinguish several phrase occurrences based on sentence ID */
+  virtual void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+                                         float count,
+                                         int sentenceId) const {};
+
   /** Add the values for this feature function. */
   virtual void add(const ScoreFeatureContext& context,
                    std::vector<float>& denseValues,
                    std::map<std::string,float>& sparseValues) const = 0;
-
-  /** Return true if the two phrase pairs are equal from the point of this feature. Assume
-      that they already compare true according to PhraseAlignment.equals()
-   **/
-  virtual bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const = 0;
 
   virtual ~ScoreFeature() {}
 
@@ -112,16 +112,17 @@ public:
   /** Pass the unused command-line arguments to configure the extra features */
   void configure(const std::vector<std::string> args);
 
+  /** Some features might need to store properties in ExtractionPhrasePair,
+   *  e.g. to pass along external information loaded by a feature
+   *  which may distinguish several phrase occurrences based on sentence ID */
+  void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+                                 float count,
+                                 int sentenceId) const;
+
   /** Add all the features */
   void addFeatures(const ScoreFeatureContext& context,
                    std::vector<float>& denseValues,
                    std::map<std::string,float>& sparseValues) const;
-
-  /**
-    * Used to tell if the PhraseAlignment should be considered the same by all
-    * extended features.
-   **/
-  bool equals(const PhraseAlignment& lhs, const PhraseAlignment& rhs) const;
 
   const std::vector<ScoreFeaturePtr>& getFeatures() const {
     return m_features;

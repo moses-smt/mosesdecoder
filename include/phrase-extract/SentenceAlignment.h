@@ -33,7 +33,7 @@ public:
   std::vector<std::string> target;
   std::vector<std::string> source;
   std::vector<int> alignedCountS;
-  std::vector<std::vector<int> > alignedToT;
+  std::vector<std::vector<int> > alignedToT, alignedToS;
   int sentenceID;
   std::string weightString;
 
@@ -45,6 +45,8 @@ public:
 
   bool create(char targetString[], char sourceString[],
               char alignmentString[], char weightString[], int sentenceID, bool boundaryRules);
+
+  void invertAlignment();
 
 };
 
