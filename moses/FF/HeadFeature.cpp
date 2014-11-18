@@ -471,6 +471,8 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_probArg (new std::map<std::string, float> ())
 	, m_lemmaMap (new std::map<std::string, std::string>())
 	, m_allowedNT (new std::map<std::string, bool>())
+	, m_counter(0)
+	, m_counterDepRel(0)
 {
   ReadParameters();
   const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
@@ -708,6 +710,16 @@ FFState* HeadFeature::EvaluateWhenApplied(
 {
 	if (const PhraseProperty *property = cur_hypo.GetCurrTargetPhrase().GetProperty("Tree")) {
 
+			//basically at the start of a new sentence reset counter
+		//use this just for testing with one thread
+			if(cur_hypo.GetId()==0){
+				std::cerr<<"Current counter: "<<m_counter<<endl;
+				std::cerr<<"Current counterDepRel: "<<m_counterDepRel<<endl;
+				m_counter=0;
+				m_counterDepRel=0;
+			}
+
+
 	    const std::string *tree = property->GetValueString();
 
 	    SyntaxTreePtr syntaxTree (new SyntaxTree());
@@ -759,7 +771,11 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 							depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
 							if(depRel!=" "){
-								std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
+								m_counter++;
+								vector<string> tokens;
+								split(depRel,"\t",tokens);
+								m_counterDepRel+=tokens.size();
+								//std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
 								//ProcessDepString(depRel,previousTrees,accumulator);
 							}
 							//problem when there is no dep rel ? returns '\0' or NULL

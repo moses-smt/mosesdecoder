@@ -290,6 +290,8 @@ protected:
 	//should do the initialization only once when the wrapper is loaded
 	//could make it a singleton class
 	mutable CreateJavaVM *javaWrapper;
+	mutable unsigned long long m_counter;
+	mutable unsigned long long m_counterDepRel;
 	//have to take care with this -> one Feature instance per decoder which works multithreaded
 	jobject workingStanforDepObj;
 
