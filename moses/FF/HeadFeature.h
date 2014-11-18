@@ -8,6 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include "util/exception.hh"
 #include "CreateJavaVM.h"
+#include "moses/Util.h"
 
 namespace Moses
 {
@@ -208,7 +209,7 @@ public:
   std::string ToString();
   std::string ToStringHead();
   void ToString(SyntaxNodePtr newNode, std::stringstream &tree);
-  void ToStringDynamic(SyntaxNodePtr newNode,std::vector< SyntaxTreePtr > *previousTrees, std::stringstream &tree);
+  void ToStringDynamic(SyntaxNodePtr newNode,std::vector< SyntaxTreePtr > *previousTrees, std::stringstream *tree);
   void ToStringHead(SyntaxNodePtr newNode, std::stringstream &tree);
   void SetHeadOpenNodes(std::vector< SyntaxTreePtr > previousTrees);
   void FindHeads(SyntaxNodePtr newNode,std::map<std::string, std::vector <std::string> > &headRules) const;

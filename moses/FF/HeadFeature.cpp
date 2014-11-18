@@ -264,25 +264,28 @@ void SyntaxTree::ToString(SyntaxNodePtr node, std::stringstream &tree){
 
 }
 
-void SyntaxTree::ToStringDynamic(SyntaxNodePtr node, std::vector< SyntaxTreePtr > *previousTrees, std::stringstream &tree){
+void SyntaxTree::ToStringDynamic(SyntaxNodePtr node, std::vector< SyntaxTreePtr > *previousTrees, std::stringstream *tree){
 	//tree <<"("<< node->GetLabel()<< " ";
 	//keep counter and for each index save the pointer to the node
 	//-> this way I can keep track of seen dependency pairs (i get head-index dep-index pairs from StanfordDep, where index is relative to the subtree)
 	//index seen pairs by head pointer and then have a list of dependent pointers ? or a hash somewhow?
-	if(node->IsTerminal())
-		tree <<"("<< node->GetLabel()<< " " << node->GetHead() << ")";
+	if(node->IsTerminal()){
+		*tree <<"("<< node->GetLabel()<< " " << node->GetHead() << ")";
+		if(node->IsOpen()) //the open node was extended with a leaf and set as IsTerminal. Still we have to pop the prev tree (we don't have anything to process since it was a leaf)
+			previousTrees->erase(previousTrees->begin());
+	}
 	else{
 		if(node->IsOpen() && !previousTrees->empty()){
-					tree << previousTrees->front()->GetRootedTree();
+					*tree << previousTrees->front()->GetRootedTree();
 					previousTrees->erase(previousTrees->begin()); //
-				}
+					}
 		else{ //if(node->IsInternal()){
-			tree <<"("<< node->GetLabel()<< " ";
+			*tree <<"("<< node->GetLabel()<< " ";
 			//this is totally wrong -> it inverses the order of the children
 			for(int i=0 ; i<node->GetSize();i++){
 				ToStringDynamic(node->GetNChild(i),previousTrees,tree);
 			}
-			tree << ")";
+			*tree << ")";
 		}
 	}
 }
@@ -625,6 +628,7 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 		//how to make sure the memory gets released on the Java side?
 		env->ReleaseStringUTFChars(jStanfordDep, stanfordDep);
 		env->DeleteGlobalRef(workingStanforDepObj);
+		env->ExceptionDescribe();
 		javaWrapper->GetVM()->DetachCurrentThread();
 		return dependencies;
 		}
@@ -635,8 +639,10 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 		//env->DeleteLocalRef(jStanfordDep);
 
 		//for some reson jStanfordDep is NULL -> maybe that the java thing crashses then DetachCurrentThread fails?
-		if(workingStanforDepObj!=NULL)
+		if(workingStanforDepObj!=NULL){
 			env->DeleteGlobalRef(workingStanforDepObj);
+			env->ExceptionDescribe();
+		}
 		javaWrapper->GetVM()->DetachCurrentThread(); //-> when jStanfordDep in null it already crashed?
 
 		return "null";
@@ -756,29 +762,32 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	        syntaxTree->SetHeadOpenNodes(previousTrees);
 
-	        /*
-	        std::string parsedSentence  = syntaxTree->ToString();
-	        std::cout<< "extended rule: "<< parsedSentence<<std::endl;
-	        std::stringstream subtree("");
+
+	        //std::string parsedSentence  = syntaxTree->ToString();
+	        //std::cout<< "extended rule: "<< parsedSentence<<std::endl;
+	        std::stringstream *subtree = new stringstream("");
 	        syntaxTree->ToStringDynamic(syntaxTree->GetTop(),&previousTrees,subtree);
-	        std::cout<< "ruleDynamic: "<< subtree.str() <<std::endl;
-	        syntaxTree->SetRootedTree(subtree.str());
-					*/
+	        std::string parsedSentence = subtree->str();
+	        syntaxTree->SetRootedTree(parsedSentence);
+	        delete subtree;
+
 
 	        std::string depRel ="";
 	        char *stanfordDep;
 	        //should only call toString if the LHS passes these criteria
 	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
-	        	std::string parsedSentence  = syntaxTree->ToString();
+	        	//std::string parsedSentence  = syntaxTree->ToString();
 	        	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
 
 							depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
 							if(depRel!=" "){
 								m_counter++;
 								vector<string> tokens;
-								split(depRel,"\t",tokens);
+								Tokenize(tokens,depRel,"\t");
+								//split(depRel,"\t",tokens);
 								m_counterDepRel+=tokens.size();
 								//std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
+								//std::cerr<< "token size: "<<tokens.size()<<endl;
 								//ProcessDepString(depRel,previousTrees,accumulator);
 							}
 							//problem when there is no dep rel ? returns '\0' or NULL
