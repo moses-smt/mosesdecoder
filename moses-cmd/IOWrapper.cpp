@@ -294,9 +294,15 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
   }
 }
 
+void OutputPassthroughInformation(std::string& passthrough, const Hypothesis *hypo)
+{
+  passthrough = hypo->GetManager().GetSource().GetPassthroughInformation();
+}
+
 void OutputPassthroughInformation(std::ostream &out, const Hypothesis *hypo)
 {
-  std::string passthrough = hypo->GetManager().GetSource().GetPassthroughInformation();
+  std::string passthrough;
+  passthrough = hypo->GetManager().GetSource().GetPassthroughInformation();
   out << passthrough;
 }
 

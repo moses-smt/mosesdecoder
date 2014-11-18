@@ -169,6 +169,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
+  SetBooleanParameter( &m_PrintID, "print-id", false );
   SetBooleanParameter( &m_PrintPassthroughInformation, "print-passthrough", false );
   SetBooleanParameter( &m_PrintPassthroughInformationInNBest, "print-passthrough-in-n-best", false );
 

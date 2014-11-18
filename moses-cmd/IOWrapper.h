@@ -139,6 +139,7 @@ void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*transla
                     char reportSegmentation, bool reportAllFactors, std::ostream& out);
 void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,char reportSegmentation, bool reportAllFactors, std::ostream &out);
 void OutputInput(std::ostream& os, const Moses::Hypothesis* hypo);
+void OutputPassthroughInformation(std::string& passthrough, const Moses::Hypothesis* hypo);
 void OutputPassthroughInformation(std::ostream& os, const Moses::Hypothesis* hypo);
 void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo, const Moses::Hypothesis *hypo);
 void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
