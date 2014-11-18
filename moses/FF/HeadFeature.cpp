@@ -478,7 +478,8 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_counterDepRel(0)
 {
   ReadParameters();
-  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
+  //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
+  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR"};//"PP", ??
 
 
 	for(int i=0;i<sizeof(vinit)/sizeof(vinit[0]);i++){
@@ -762,21 +763,18 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	        syntaxTree->SetHeadOpenNodes(previousTrees);
 
-
-	        //std::string parsedSentence  = syntaxTree->ToString();
-	        //std::cout<< "extended rule: "<< parsedSentence<<std::endl;
+	        /*
 	        std::stringstream *subtree = new stringstream("");
 	        syntaxTree->ToStringDynamic(syntaxTree->GetTop(),&previousTrees,subtree);
 	        std::string parsedSentence = subtree->str();
 	        syntaxTree->SetRootedTree(parsedSentence);
 	        delete subtree;
-
+					*/
 
 	        std::string depRel ="";
-	        char *stanfordDep;
 	        //should only call toString if the LHS passes these criteria
 	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
-	        	//std::string parsedSentence  = syntaxTree->ToString();
+	        	std::string parsedSentence  = syntaxTree->ToString();
 	        	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
 
 							depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
@@ -786,7 +784,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 								Tokenize(tokens,depRel,"\t");
 								//split(depRel,"\t",tokens);
 								m_counterDepRel+=tokens.size();
-								//std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
+								std::cerr<<parsedSentence<<endl;
+								std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
 								//std::cerr<< "token size: "<<tokens.size()<<endl;
 								//ProcessDepString(depRel,previousTrees,accumulator);
 							}
