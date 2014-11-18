@@ -624,6 +624,7 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 
 		//how to make sure the memory gets released on the Java side?
 		env->ReleaseStringUTFChars(jStanfordDep, stanfordDep);
+		env->DeleteGlobalRef(workingStanforDepObj);
 		javaWrapper->GetVM()->DetachCurrentThread();
 		return dependencies;
 		}
@@ -634,6 +635,8 @@ std::string HeadFeature::CallStanfordDep(std::string parsedSentence) const{
 		//env->DeleteLocalRef(jStanfordDep);
 
 		//for some reson jStanfordDep is NULL -> maybe that the java thing crashses then DetachCurrentThread fails?
+		if(workingStanforDepObj!=NULL)
+			env->DeleteGlobalRef(workingStanforDepObj);
 		javaWrapper->GetVM()->DetachCurrentThread(); //-> when jStanfordDep in null it already crashed?
 
 		return "null";
