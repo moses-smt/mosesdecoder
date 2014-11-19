@@ -784,8 +784,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 								Tokenize(tokens,depRel,"\t");
 								//split(depRel,"\t",tokens);
 								m_counterDepRel+=tokens.size();
-								std::cerr<<parsedSentence<<endl;
-								std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
+								//std::cerr<<parsedSentence<<endl;
+								//std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
 								//std::cerr<< "token size: "<<tokens.size()<<endl;
 								//ProcessDepString(depRel,previousTrees,accumulator);
 							}
