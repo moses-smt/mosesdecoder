@@ -48,6 +48,8 @@ void Time::load( const std::string &timeFileName )
     if(m_epochs.count(date) == 0) {
       long epoch = str2days(date);
       m_epochs[date] = epoch;
+       
+      //std::cerr << date << " " << epoch << std::endl;
       
       if(epoch < m_oldest) m_oldest = epoch;
       if(epoch > m_newest) m_newest = epoch;
@@ -100,40 +102,40 @@ void TimeFeature::add(const ScoreFeatureContext& context,
 }
 
 float TimeFeature::calculate(const map<string, float>& timeCount,
-			     TimeFeature::Mapper mapper,
-			     TimeFeature::Reducer reducer) const {
+                 TimeFeature::Mapper mapper,
+                 TimeFeature::Reducer reducer) const {
   return (this->*reducer)(timeCount, mapper);
 }
 
 void TimeFeature::add(const map<string, float>& timeCount,
-		      float count,
+              float count,
                       const MaybeLog& maybeLog,
                       std::vector<float>& denseValues,
                       std::map<std::string, float>& sparseValues) const
 {  
-  denseValues.push_back(maybeLog(calculate(timeCount,
-					   &TimeFeature::hyperbola,
-					   &TimeFeature::max)));
-  
   /*denseValues.push_back(maybeLog(calculate(timeCount,
-					   &TimeFeature::hyperbola,
-					   &TimeFeature::avg)));
+                       &TimeFeature::hyperbola,
+                       &TimeFeature::max)));
   
   denseValues.push_back(maybeLog(calculate(timeCount,
-					   &TimeFeature::hyperbola,
-					   &TimeFeature::min)));
+                       &TimeFeature::hyperbola,
+                       &TimeFeature::avg)));
+  
+  denseValues.push_back(maybeLog(calculate(timeCount,
+                       &TimeFeature::hyperbola,
+                       &TimeFeature::min)));
   */
   denseValues.push_back(maybeLog(calculate(timeCount,
-					   &TimeFeature::linear,
-					   &TimeFeature::max)));
+                       &TimeFeature::linear,
+                       &TimeFeature::max)));
   /*
   denseValues.push_back(maybeLog(calculate(timeCount,
-					   &TimeFeature::linear,
-					   &TimeFeature::avg)));
+                       &TimeFeature::linear,
+                       &TimeFeature::avg)));
   
   denseValues.push_back(maybeLog(calculate(timeCount,
-					   &TimeFeature::linear,
-					   &TimeFeature::min)));
+                       &TimeFeature::linear,
+                       &TimeFeature::min)));
   */
 }
 
@@ -157,7 +159,7 @@ float TimeFeature::linear(const std::string& date) const {
 /* Reducers */
 
 float TimeFeature::max(const map<string, float>& timeCount,
-		       TimeFeature::Mapper mapper) const {
+               TimeFeature::Mapper mapper) const {
   float newest = 0;
   for(map<string, float>::const_iterator i = timeCount.begin();
       i != timeCount.end(); ++i) {
@@ -170,7 +172,7 @@ float TimeFeature::max(const map<string, float>& timeCount,
 }
 
 float TimeFeature::min(const map<string, float>& timeCount,
-		       TimeFeature::Mapper mapper) const {
+               TimeFeature::Mapper mapper) const {
   float oldest = 1;
   for(map<string, float>::const_iterator i = timeCount.begin();
       i != timeCount.end(); ++i) {
@@ -183,7 +185,7 @@ float TimeFeature::min(const map<string, float>& timeCount,
 }
 
 float TimeFeature::avg(const map<string, float>& timeCount,
-		       TimeFeature::Mapper mapper) const {
+               TimeFeature::Mapper mapper) const {
   float sum = 0;
   long n = 0;
   for(map<string, float>::const_iterator i = timeCount.begin();
