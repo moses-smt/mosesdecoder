@@ -268,6 +268,9 @@ public:
   // creates a map of TARGET positions which should be replaced by word using placeholder
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor);
 
+  // post editing
+  std::ifstream *spe_src, *spe_trg, *spe_aln;
+
 };
 
 

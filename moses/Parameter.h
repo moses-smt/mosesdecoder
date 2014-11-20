@@ -94,7 +94,7 @@ public:
     return m_setting[paramName];
   }
   /** check if parameter is defined (either in moses.ini or as switch) */
-  bool isParamSpecified(const std::string &paramName) {
+  bool isParamSpecified(const std::string &paramName) const {
     return  m_setting.find( paramName ) != m_setting.end();
   }
 

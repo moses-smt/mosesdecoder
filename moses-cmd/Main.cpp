@@ -171,6 +171,32 @@ int main(int argc, char** argv)
 
       // execute task
 #ifdef WITH_THREADS
+#ifdef PT_UG
+      /*
+      bool spe = params.isParamSpecified("spe-src");
+      if (spe) {
+    	// simulated post-editing: always run single-threaded!
+        task->Run();
+        delete task;
+        string src,trg,aln;
+        UTIL_THROW_IF2(!getline(ioWrapper->spe_src,src), "[" << HERE << "] "
+                       << "missing update data for simulated post-editing.");
+        UTIL_THROW_IF2(!getline(ioWrapper->spe_trg,trg), "[" << HERE << "] "
+		       << "missing update data for simulated post-editing.");
+        UTIL_THROW_IF2(!getline(ioWrapper->spe_aln,aln), "[" << HERE << "] "
+		       << "missing update data for simulated post-editing.");
+		BOOST_FOREACH (PhraseDictionary* pd, PhraseDictionary::GetColl())
+		  {
+			Mmsapt* sapt = dynamic_cast<Mmsapt*>(pd);
+			if (sapt) sapt->add(src,trg,aln);
+			VERBOSE(1,"[" << HERE << " added src] " << src << endl);
+			VERBOSE(1,"[" << HERE << " added trg] " << trg << endl);
+			VERBOSE(1,"[" << HERE << " added aln] " << aln << endl);
+		  }
+      }
+      else
+      */
+#endif
       pool.Submit(task);
 #else
       task->Run();
