@@ -172,7 +172,6 @@ int main(int argc, char** argv)
       // execute task
 #ifdef WITH_THREADS
 #ifdef PT_UG
-      /*
       bool spe = params.isParamSpecified("spe-src");
       if (spe) {
     	// simulated post-editing: always run single-threaded!
@@ -195,7 +194,6 @@ int main(int argc, char** argv)
 		  }
       }
       else
-      */
 #endif
       pool.Submit(task);
 #else
