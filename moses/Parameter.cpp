@@ -217,6 +217,11 @@ Parameter::~Parameter()
 {
 }
 
+const PARAM_VEC &Parameter::GetParam(const std::string &paramName) const
+{
+  return m_setting[paramName];
+}
+
 /** initialize a parameter, sub of constructor */
 void Parameter::AddParam(const string &paramName, const string &description)
 {
