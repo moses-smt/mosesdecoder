@@ -216,11 +216,15 @@ SyntaxNodePtr SyntaxTree::FromString(std::string internalTree, boost::shared_ptr
 				if(nodes.size()==2){
 					//try to lemmatize and filter
 					std::string head = FilterArg(nodes[1],lemmaMap);
+					std::string headPOS = nodes[0]; //we are in the preterminat case here so the label of the node will be the same as the POS of the head
 					if(head!=""){
 						newNode->SetHead(head);
+						newNode->SetHeadPOS(headPOS);
 					}
-					else
+					else{
 						newNode->SetHead(nodes[1]);
+						newNode->SetHeadPOS(headPOS);
+					}
 					newNode->SetIsTerminal(true);
 				}
 				else{
@@ -260,6 +264,52 @@ void SyntaxTree::ToString(SyntaxNodePtr node, std::stringstream &tree){
 		for(int i=0;i<node->GetSize();i++)
 			ToString(node->GetNChild(i),tree);
 		tree << ")";
+	}
+
+}
+
+void SyntaxTree::ToStringLevel(SyntaxNodePtr node, std::stringstream &tree, int level, int maxLevel){
+	tree <<"("<< node->GetLabel()<< " ";
+	//keep counter and for each index save the pointer to the node
+	//-> this way I can keep track of seen dependency pairs (i get head-index dep-index pairs from StanfordDep, where index is relative to the subtree)
+	//index seen pairs by head pointer and then have a list of dependent pointers ? or a hash somewhow?
+	if(node->IsTerminal())
+		tree << node->GetHead() << ")";
+	else{
+		if(level==maxLevel){
+			tree << "("<<node->GetHeadPOS()<<" "<< node->GetHead() <<")" << ")";
+		}
+		else{
+			level++;
+			for(int i=0;i<node->GetSize();i++)
+				ToStringLevel(node->GetNChild(i),tree,level,maxLevel);
+			tree << ")";
+		}
+	}
+
+}
+
+void SyntaxTree::ToStringNodeCount(SyntaxNodePtr node, std::stringstream &tree, int *nodeCount, int maxNodes){
+	tree <<"("<< node->GetLabel()<< " ";
+	//keep counter and for each index save the pointer to the node
+	//-> this way I can keep track of seen dependency pairs (i get head-index dep-index pairs from StanfordDep, where index is relative to the subtree)
+	//index seen pairs by head pointer and then have a list of dependent pointers ? or a hash somewhow?
+	if(node->IsTerminal() ) //will add all the children even if the nodeCount is over maxNodes -> maxnNodes+nr of remaining children
+		tree << node->GetHead() << ")";
+	else{
+		if(*nodeCount >= maxNodes){
+			tree << "("<<node->GetHeadPOS()<<" "<< node->GetHead() <<")" << ")";
+		}
+		else{
+			for(int i=0;i<node->GetSize();i++){
+				(*nodeCount)++;
+				//this way the tree will end up having more children (grandchildren) on the left side -> it's DFS
+				//tree will grow as much in depth for the first child and the rest will stop imediatly because nodeCount will have been consumed
+				//have to change to BFS
+				ToStringNodeCount(node->GetNChild(i),tree,nodeCount,maxNodes);
+			}
+			tree << ")";
+		}
 	}
 
 }
@@ -308,6 +358,23 @@ std::string SyntaxTree::ToString(){
 	return tree.str();
 }
 
+//using this might also solve the problem of scoring dep rel twice
+//ex: VP1 -VP NP -> rel_obj  ; S -> NP VP1 -> rel_subj rel_obj
+//if instead of the VP1 subtree we put only the head there should be no rel_obj extracted at the S node
+std::string SyntaxTree::ToStringLevel(int maxLevel){
+	std::stringstream tree("(");
+	ToStringLevel(m_top,tree,1,maxLevel);
+	return tree.str();
+}
+
+std::string SyntaxTree::ToStringNodeCount(int maxNodes){
+	std::stringstream tree("(");
+	int nodeCount =1;
+	ToStringNodeCount(m_top,tree,&nodeCount,maxNodes);
+	return tree.str();
+}
+
+
 
 std::string SyntaxTree::ToStringHead(){
 	std::stringstream tree("(");
@@ -343,11 +410,13 @@ void SyntaxTree::FindHeads(SyntaxNodePtr node, std::map<std::string, std::vector
 		if(child!=-1){
 			//std::cout<<"Head: "<<node->GetNChild(child)->GetHead()<<std::endl;
 			node->SetHead(node->GetNChild(child)->GetHead());
+			node->SetHeadPOS(node->GetNChild(child)->GetHeadPOS());
 		}
 		else{
 			if(node->GetSize()>0){
 				//std::cout<<"Head: "<<node->GetNChild(0)->GetHead()<<std::endl;
 				node->SetHead(node->GetNChild(0)->GetHead());
+				node->SetHeadPOS(node->GetNChild(0)->GetHeadPOS());
 			}
 			//else
 			//	std::cout<<"Head: no children: "<<node->GetHead()<<std::endl;
@@ -376,6 +445,7 @@ void SyntaxTree::FindHeads(SyntaxNodePtr node, std::map<std::string, std::vector
 			if(node->GetSize()>child){
 				//std::cout<<"Head': "<<node->GetNChild(child)->GetHead()<<std::endl;
 				node->SetHead(node->GetNChild(child)->GetHead());
+				node->SetHeadPOS(node->GetNChild(child)->GetHeadPOS());
 			}
 			//else
 			//	std::cout<<"Head': no children "<<node->GetHead()<<std::endl;
@@ -391,6 +461,7 @@ void SyntaxTree::SetHeadOpenNodes(std::vector<SyntaxTreePtr > previousTrees){
 			if(m_openNodes[i]->GetLabel().compare(previousTrees[i]->GetTop()->GetLabel())==0){
 				//std::cout<<"Update head1: "<<m_openNodes[i]->GetHead();
 				m_openNodes[i]->SetHead(previousTrees[i]->GetTop()->GetHead());
+				m_openNodes[i]->SetHeadPOS(previousTrees[i]->GetTop()->GetHeadPOS());
 				for(int j=0; j<previousTrees[i]->GetTop()->GetSize();j++){
 					m_openNodes[i]->AddChild(previousTrees[i]->GetTop()->GetNChild(j));
 				}
@@ -477,6 +548,7 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_counter(0)
 	, m_counterDepRel(0)
 	, m_cacheHits(0)
+	, m_cacheDepRelHits(0)
 {
   ReadParameters();
   //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
@@ -731,14 +803,21 @@ FFState* HeadFeature::EvaluateWhenApplied(
 				std::cerr<<"Current counter: "<<m_counter<<endl;
 				std::cerr<<"Current counterDepRel: "<<m_counterDepRel<<endl;
 				std::cerr<<"Current cacheHits: "<<m_cacheHits<<endl;
+				std::cerr<<"Current cacheDepRelHits: "<<m_cacheDepRelHits<<endl;
 				StringHashMap &localCache = GetCache();
+				DepRelMap &localCacheDepRel = GetCacheDepRel();
+				//nr of S or VP trees = cache.size + cache.hits
 				std::cerr<<"Current cache size: "<<localCache.size()<<endl;
+				// Counter = cacheDepRel.size + cacheDepRel.hits
+				std::cerr<<"Current cacheDepRel size: "<<localCacheDepRel.size()<<endl;
 				localCache = ResetCache();
+				localCacheDepRel = ResetCacheDepRel();
 				std::cerr<<"Reset cache: "<<localCache.size()<<endl;
+				std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
 				m_counter=0;
 				m_counterDepRel=0;
 				m_cacheHits=0;
-
+				m_cacheDepRelHits =0;
 
 			}
 
@@ -749,9 +828,6 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	    //should have new SyntaxTree(pointer to headRules)
 	    syntaxTree->FromString(*tree,m_lemmaMap);
 	    //std::cout<<*tree<<std::endl;
-	   //std::cout<< "rule: "<< syntaxTree->ToString()<<std::endl;
-
-
 
 	    //get subtrees (in target order)
 	        std::vector< SyntaxTreePtr > previousTrees;
@@ -775,6 +851,14 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        }
 
 	        syntaxTree->SetHeadOpenNodes(previousTrees);
+	        syntaxTree->FindHeads(syntaxTree->GetTop(), *m_headRules);
+
+	        /*
+	        std::cout<<*tree<<std::endl;
+	        std::cout<< "rule: "<< syntaxTree->ToString()<<std::endl;
+	   	    std::cout<< "rule maxLevel: "<< syntaxTree->ToStringLevel(2)<<std::endl;
+     	    std::cout<< "rule maxNodes: "<< syntaxTree->ToStringNodeCount(3)<<std::endl;
+					*/
 
 	        /*
 	        std::stringstream *subtree = new stringstream("");
@@ -787,18 +871,27 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        std::string depRel ="";
 	        //should only call toString if the LHS passes these criteria
 	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
-	        	std::string parsedSentence  = syntaxTree->ToString();
+	        	//std::string parsedSentence  = syntaxTree->ToString();
+	        	std::string parsedSentence  = syntaxTree->ToStringLevel(4);
 	        	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
 	        		//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 	        		StringHashMap &localCache = GetCache();
 	        		if(localCache.find(parsedSentence)!=localCache.end()){
-	        			depRel=localCache[parsedSentence];
+	        			depRel=localCache[parsedSentence]->first;
 	        			m_cacheHits++;
 	        			//cerr<<"cache Hit: "<<parsedSentence <<endl;
 	        			//cerr<<"dep rel: "<<depRel<<endl;
 	        		}
 	        		else{
 	        			depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+	        			float score = 1.0;
+	        			DepRelMap &localCacheDepRel = GetCacheDepRel();
+	        			//if key already returns return iterator to key position
+	        			pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, float> (depRel,score));
+	        			if(it.second==false) //no insert took place
+	        				m_cacheDepRelHits++;
+	        			if(it.first!=localCacheDepRel.end())
+	        				(*m_cache)[parsedSentence]=it.first;
 	        			//save in TreeString - DepRel cache
 	        			//parsedSentence should be produced with generic words since the rel doesn't depend on the words
 	        			//therefore we can cache only repeating trees ignoring the words and avoid more computation
@@ -809,7 +902,8 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        			//!!! might want to hald the size of the cache from time to time
 	        			//-> do like the phrasse chache: memorize the time and delete older ones (lower in the chart)
 	        			//instead of time I could also just save the span length -> if the number of leavs are different so will the tree
-	        			(*m_cache)[parsedSentence]=depRel;
+	        			//(*m_cache)[parsedSentence]=depRel;
+
 	        			//std::cerr<<"Cache Miss: "<<parsedSentence<<endl;
 	        			//std::cerr<< "dep rel: "<<depRel<<endl;
 	        		}
@@ -835,7 +929,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        //std::cout<< "dep rel: "<< stanfordDep<<std::endl;
 
 	        int index = 0;
-	        syntaxTree->FindHeads(syntaxTree->GetTop(), *m_headRules);
+
 	        string *predArgPair = syntaxTree->FindObj();
 	        std::map<string,float>::iterator it;
 	        //!!! SOULD TRY TO CACHE IT -> THEN I NEED SYNC FOR MULTITHREAD !!!

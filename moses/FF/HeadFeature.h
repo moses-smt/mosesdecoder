@@ -20,10 +20,18 @@ class SyntaxTree;
 
 typedef boost::shared_ptr<SyntaxTree> SyntaxTreePtr;
 typedef boost::shared_ptr<SyntaxNode> SyntaxNodePtr;
-class StringHashMap : public  boost::unordered_map<std::string,std::string>{
+
+//map the dep rel string to it's score or to some other structure holding the information
+class DepRelMap : public  boost::unordered_map<std::string,float>{
+public:
+	virtual ~DepRelMap() {}
+};
+
+class StringHashMap : public  boost::unordered_map<std::string,DepRelMap::iterator>{
 public:
 	virtual ~StringHashMap() {}
 };
+
 //typedef boost::unordered_map<std::string,std::string> StringHashMap;
 
 
@@ -57,6 +65,7 @@ protected:
   boost::weak_ptr<SyntaxNode> m_parent;
   //maybe this should have been a pointer to a Word object
   std::string m_head;
+  std::string m_headPOS;
   bool m_isTerminal; //if is terminal than read the child value and put in as m_head
   bool m_isOpen;
   bool m_hasHead;
@@ -68,6 +77,7 @@ public:
     ,m_label(label)
     ,m_parent(SyntaxNodePtr()) //,m_parent(0)
     ,m_head("")
+		,m_headPOS("")
 	,m_isTerminal(false)
 	,m_isOpen(false)
 	,m_isInternal(false)
@@ -100,6 +110,14 @@ public:
   void SetHead(std::string head){
     m_head = head;
     m_hasHead = true;
+  }
+
+  std::string GetHeadPOS(){
+    return m_headPOS;
+  }
+
+  void SetHeadPOS(std::string headPOS){
+    m_headPOS = headPOS;
   }
 
   bool HasHead(){
@@ -213,8 +231,12 @@ public:
   SyntaxNodePtr FromString(std::string internalTree, boost::shared_ptr< std::map<std::string, std::string> > m_lemmaMap);
 
   std::string ToString();
+  std::string ToStringLevel(int maxLevel);
+  std::string ToStringNodeCount(int maxNodes);
   std::string ToStringHead();
   void ToString(SyntaxNodePtr newNode, std::stringstream &tree);
+  void ToStringLevel(SyntaxNodePtr node, std::stringstream &tree, int level, int maxLevel);
+  void ToStringNodeCount(SyntaxNodePtr node, std::stringstream &tree, int *nodeCount, int maxNodes);
   void ToStringDynamic(SyntaxNodePtr newNode,std::vector< SyntaxTreePtr > *previousTrees, std::stringstream *tree);
   void ToStringHead(SyntaxNodePtr newNode, std::stringstream &tree);
   void SetHeadOpenNodes(std::vector< SyntaxTreePtr > previousTrees);
@@ -303,6 +325,27 @@ public:
    	return *cache;
    }
 
+ DepRelMap &GetCacheDepRel() const {
+
+	 DepRelMap *cache;
+  	  cache = m_cacheDepRel.get();
+  	  if (cache == NULL) {
+  	    cache = new DepRelMap;
+  	    m_cacheDepRel.reset(cache);
+  	  }
+  	  assert(cache);
+  	  return *cache;
+  }
+
+ DepRelMap &ResetCacheDepRel() const {
+
+	 DepRelMap *cache;
+   	cache = new DepRelMap;
+   	m_cacheDepRel.reset(cache);
+   	assert(cache);
+   	return *cache;
+   }
+
 
 protected:
   boost::shared_ptr< std::map<std::string, std::vector <std::string> > > m_headRules;
@@ -320,7 +363,9 @@ protected:
 	mutable unsigned long long m_counter;
 	mutable unsigned long long m_counterDepRel;
 	mutable unsigned long long m_cacheHits;
+	mutable unsigned long long m_cacheDepRelHits;
 	mutable boost::thread_specific_ptr<StringHashMap> m_cache;
+	mutable boost::thread_specific_ptr<DepRelMap> m_cacheDepRel;
 	//have to take care with this -> one Feature instance per decoder which works multithreaded
 	jobject workingStanforDepObj;
 
