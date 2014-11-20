@@ -217,7 +217,7 @@ Parameter::~Parameter()
 {
 }
 
-const PARAM_VEC &Parameter::GetParam(const std::string &paramName) const
+const PARAM_VEC &Parameter::GetParam(const std::string &paramName)
 {
   return m_setting[paramName];
 }

@@ -90,7 +90,7 @@ public:
   void Explain();
 
   /** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */
-  const PARAM_VEC &GetParam(const std::string &paramName) const;
+  const PARAM_VEC &GetParam(const std::string &paramName);
 
   /** check if parameter is defined (either in moses.ini or as switch) */
   bool isParamSpecified(const std::string &paramName) const {
