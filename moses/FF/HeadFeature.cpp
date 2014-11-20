@@ -479,8 +479,8 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_cacheHits(0)
 {
   ReadParameters();
-  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
-  //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR"};//"PP", ??
+  //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
+  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR"};//"PP", ??
 
 
 	for(int i=0;i<sizeof(vinit)/sizeof(vinit[0]);i++){
