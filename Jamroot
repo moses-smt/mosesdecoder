@@ -70,6 +70,7 @@
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
 #--clean to clean
+#--debug-build to build with Og. Only available with gcc 4.8+
 
 import option ;
 import modules ;
@@ -95,6 +96,11 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
   }
 } else {
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
+}
+
+if [ option.get "debug-build" : : "yes" ] {
+   requirements += <cxxflags>-Og ;
+   echo "Building with -Og to enable easier profiling and debugging. Only available on gcc 4.8+." ;
 }
 
 if [ option.get "enable-mpi" : : "yes" ] {

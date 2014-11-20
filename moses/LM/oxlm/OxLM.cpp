@@ -16,7 +16,9 @@ namespace Moses
 
 template<class Model>
 OxLM<Model>::OxLM(const string &line)
-    : LanguageModelSingleFactor(line), normalized(true) {
+    : LanguageModelSingleFactor(line), normalized(true),
+      posBackOff(false), posFactorType(1),
+      persistentCache(false) {
   ReadParameters();
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -43,10 +45,16 @@ OxLM<Model>::~OxLM() {
 
 template<class Model>
 void OxLM<Model>::SetParameter(const string& key, const string& value) {
-  if (key == "persistent-cache") {
+  if (key == "normalized") {
+    normalized = Scan<bool>(value);
+  } else if (key == "persistent-cache") {
     persistentCache = Scan<bool>(value);
   } else if (key == "normalized") {
     normalized = Scan<bool>(value);
+  } else if (key == "pos-back-off") {
+    posBackOff = Scan<bool>(value);
+  } else if (key == "pos-factor-type") {
+    posFactorType = Scan<FactorType>(value);
   } else {
     LanguageModelSingleFactor::SetParameter(key, value);
   }
@@ -56,8 +64,8 @@ template<class Model>
 void OxLM<Model>::Load() {
   model.load(m_filePath);
 
-  boost::shared_ptr<oxlm::Vocabulary> vocab = model.getVocab();
-  mapper = boost::make_shared<OxLMMapper>(vocab);
+  boost::shared_ptr<Vocabulary> vocab = model.getVocab();
+  mapper = boost::make_shared<OxLMMapper>(vocab, posBackOff, posFactorType);
 
   kSTART = vocab->convert("<s>");
   kSTOP = vocab->convert("</s>");
@@ -90,13 +98,11 @@ LMResult OxLM<Model>::GetValue(
   mapper->convert(contextFactor, context, word);
 
   size_t context_width = m_nGramOrder - 1;
-
   if (!context.empty() && context.back() == kSTART) {
     context.resize(context_width, kSTART);
   } else {
     context.resize(context_width, kUNKNOWN);
   }
-
 
   double score;
   if (persistentCache) {
@@ -149,13 +155,14 @@ void OxLM<Model>::InitializeForInput(const InputType& source) {
       cerr << "Done loading " << cache->size()
            << " n-gram probabilities..." << endl;
     } else {
-      cerr << "Cache file not found" << endl;
+      cerr << "Cache file not found!" << endl;
     }
   }
 }
 
 template<class Model>
 void OxLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
+  // Thread safe: the model cache is thread specific.
   model.clearCache();
 
   if (persistentCache) {
