@@ -42,6 +42,7 @@
 #include "moses/FF/SourceGHKMTreeInputMatchFeature.h"
 #include "moses/FF/HyperParameterAsWeight.h"
 #include "moses/FF/SetSourcePhrase.h"
+#include "moses/FF/PhraseOrientationFeature.h"
 #include "CountNonTerms.h"
 #include "ReferenceComparison.h"
 #include "RuleScope.h"
@@ -49,11 +50,11 @@
 #include "NieceTerminal.h"
 #include "SpanLength.h"
 #include "SyntaxRHS.h"
-#include "moses/FF/PhraseOrientationFeature.h"
 
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
+#include "moses/LM/BilingualLM.h"
 #include "SkeletonChangeInput.h"
 #include "moses/TranslationModel/SkeletonPT.h"
 #include "moses/Syntax/RuleTableFF.h"
@@ -91,6 +92,7 @@
 
 #ifdef LM_NEURAL
 #include "moses/LM/NeuralLMWrapper.h"
+#include "moses/LM/bilingual-lm/BiLM_NPLM.h"
 #endif
 
 #ifdef LM_DALM
@@ -99,6 +101,7 @@
 
 #ifdef LM_OXLM
 #include "moses/LM/oxlm/OxLM.h"
+#include "moses/LM/oxlm/SourceOxLM.h"
 #endif
 
 #include "util/exception.hh"
@@ -250,6 +253,7 @@ FeatureRegistry::FeatureRegistry()
 #endif
 #ifdef LM_NEURAL
   MOSES_FNAME2("NeuralLM", NeuralLMWrapper);
+  MOSES_FNAME2("BilingualNPLM", BilingualLM_NPLM);
 #endif
 #ifdef LM_DALM
   MOSES_FNAME2("DALM", LanguageModelDALM);
@@ -258,6 +262,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("OxLM", OxLM<oxlm::LM>);
   MOSES_FNAME2("OxFactoredLM", OxLM<oxlm::FactoredLM>);
   MOSES_FNAME2("OxFactoredMaxentLM", OxLM<oxlm::FactoredMaxentLM>);
+  MOSES_FNAME2("OxSourceFactoredLM", SourceOxLM);
 #endif
 
   Add("KENLM", new KenFactory());
