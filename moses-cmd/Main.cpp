@@ -51,6 +51,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "hypergraph.pb.h"
 #endif
 
+#ifdef PT_UG
+#include <boost/foreach.hpp>
+#include "moses/TranslationModel/UG/mmsapt.h"
+#include "moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.h"
+#endif
+
 using namespace std;
 using namespace Moses;
 
@@ -178,11 +184,11 @@ int main(int argc, char** argv)
         task->Run();
         delete task;
         string src,trg,aln;
-        UTIL_THROW_IF2(!getline(ioWrapper->spe_src,src), "[" << HERE << "] "
+        UTIL_THROW_IF2(!getline(*ioWrapper->spe_src,src), "[" << HERE << "] "
                        << "missing update data for simulated post-editing.");
-        UTIL_THROW_IF2(!getline(ioWrapper->spe_trg,trg), "[" << HERE << "] "
+        UTIL_THROW_IF2(!getline(*ioWrapper->spe_trg,trg), "[" << HERE << "] "
 		       << "missing update data for simulated post-editing.");
-        UTIL_THROW_IF2(!getline(ioWrapper->spe_aln,aln), "[" << HERE << "] "
+        UTIL_THROW_IF2(!getline(*ioWrapper->spe_aln,aln), "[" << HERE << "] "
 		       << "missing update data for simulated post-editing.");
 		BOOST_FOREACH (PhraseDictionary* pd, PhraseDictionary::GetColl())
 		  {
