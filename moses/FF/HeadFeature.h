@@ -9,6 +9,7 @@
 #include "util/exception.hh"
 #include "CreateJavaVM.h"
 #include "moses/Util.h"
+#include <boost/thread/tss.hpp>
 
 namespace Moses
 {
@@ -19,6 +20,11 @@ class SyntaxTree;
 
 typedef boost::shared_ptr<SyntaxTree> SyntaxTreePtr;
 typedef boost::shared_ptr<SyntaxNode> SyntaxNodePtr;
+class StringHashMap : public  boost::unordered_map<std::string,std::string>{
+public:
+	virtual ~StringHashMap() {}
+};
+//typedef boost::unordered_map<std::string,std::string> StringHashMap;
 
 
 //have to extend the state to keep track of dep rel pairs that have already been scored
@@ -276,6 +282,26 @@ public:
   std::string CallStanfordDep(std::string parsedSentence) const;
   void ProcessDepString(std::string depRelString, std::vector< SyntaxTreePtr > previousTrees,ScoreComponentCollection* accumulator) const;
 
+ StringHashMap &GetCache() const {
+
+  	StringHashMap *cache;
+  	  cache = m_cache.get();
+  	  if (cache == NULL) {
+  	    cache = new StringHashMap;
+  	    m_cache.reset(cache);
+  	  }
+  	  assert(cache);
+  	  return *cache;
+  }
+
+ StringHashMap &ResetCache() const {
+
+   	StringHashMap *cache;
+   	cache = new StringHashMap;
+   	m_cache.reset(cache);
+   	assert(cache);
+   	return *cache;
+   }
 
 
 protected:
@@ -293,6 +319,8 @@ protected:
 	mutable CreateJavaVM *javaWrapper;
 	mutable unsigned long long m_counter;
 	mutable unsigned long long m_counterDepRel;
+	mutable unsigned long long m_cacheHits;
+	mutable boost::thread_specific_ptr<StringHashMap> m_cache;
 	//have to take care with this -> one Feature instance per decoder which works multithreaded
 	jobject workingStanforDepObj;
 

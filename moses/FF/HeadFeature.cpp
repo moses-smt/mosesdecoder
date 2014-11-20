@@ -476,10 +476,11 @@ HeadFeature::HeadFeature(const std::string &line)
 	, m_allowedNT (new std::map<std::string, bool>())
 	, m_counter(0)
 	, m_counterDepRel(0)
+	, m_cacheHits(0)
 {
   ReadParameters();
-  //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
-  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR"};//"PP", ??
+  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
+  //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR"};//"PP", ??
 
 
 	for(int i=0;i<sizeof(vinit)/sizeof(vinit[0]);i++){
@@ -584,6 +585,10 @@ void HeadFeature::Load() {
   cerr<<"TEST CallStanfordDep:"<<endl;
   string temp = CallStanfordDep("(VP (VB give)(PP (DT a)(JJ separate)(NNP GC)(NN exam)))");
   cerr<<"TEMP DEP: "<<temp<<endl;
+
+  //this should be done in InitializeForInput (for everysentence ->new thread)
+  //the treadspecific pointer gets NULL when the thread exists
+
 
   //javaWrapper->TestRuntime();
 
@@ -725,8 +730,16 @@ FFState* HeadFeature::EvaluateWhenApplied(
 			if(cur_hypo.GetId()==0){
 				std::cerr<<"Current counter: "<<m_counter<<endl;
 				std::cerr<<"Current counterDepRel: "<<m_counterDepRel<<endl;
+				std::cerr<<"Current cacheHits: "<<m_cacheHits<<endl;
+				StringHashMap &localCache = GetCache();
+				std::cerr<<"Current cache size: "<<localCache.size()<<endl;
+				localCache = ResetCache();
+				std::cerr<<"Reset cache: "<<localCache.size()<<endl;
 				m_counter=0;
 				m_counterDepRel=0;
+				m_cacheHits=0;
+
+
 			}
 
 
@@ -776,16 +789,38 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 	        	std::string parsedSentence  = syntaxTree->ToString();
 	        	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
-
-							depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+	        		//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
+	        		StringHashMap &localCache = GetCache();
+	        		if(localCache.find(parsedSentence)!=localCache.end()){
+	        			depRel=localCache[parsedSentence];
+	        			m_cacheHits++;
+	        			//cerr<<"cache Hit: "<<parsedSentence <<endl;
+	        			//cerr<<"dep rel: "<<depRel<<endl;
+	        		}
+	        		else{
+	        			depRel = CallStanfordDep(parsedSentence); //(parsedSentence);
+	        			//save in TreeString - DepRel cache
+	        			//parsedSentence should be produced with generic words since the rel doesn't depend on the words
+	        			//therefore we can cache only repeating trees ignoring the words and avoid more computation
+	        			//FALSE some words matter -> copula verb, timeregex etc. Nouns probably don't matter, finite verbs, adj etc
+	        			//we need the preposition to make prep_to rep rels or substitute in post_processing
+	        			//I could also precompute the relations for the most common trees of up to some size that I've seen in the corpus
+	        			//especially if I put a treshold level on the hight
+	        			//!!! might want to hald the size of the cache from time to time
+	        			//-> do like the phrasse chache: memorize the time and delete older ones (lower in the chart)
+	        			//instead of time I could also just save the span length -> if the number of leavs are different so will the tree
+	        			(*m_cache)[parsedSentence]=depRel;
+	        			//std::cerr<<"Cache Miss: "<<parsedSentence<<endl;
+	        			//std::cerr<< "dep rel: "<<depRel<<endl;
+	        		}
 							if(depRel!=" "){
 								m_counter++;
 								vector<string> tokens;
 								Tokenize(tokens,depRel,"\t");
 								//split(depRel,"\t",tokens);
 								m_counterDepRel+=tokens.size();
-								//std::cerr<<parsedSentence<<endl;
-								//std::cerr<< "dep rel: "<<depRel<<endl; //FOR TESTING I SHOULD PRINT OUT THE FRAGMENT
+
+
 								//std::cerr<< "token size: "<<tokens.size()<<endl;
 								//ProcessDepString(depRel,previousTrees,accumulator);
 							}
