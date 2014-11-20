@@ -67,6 +67,7 @@ StaticData::StaticData()
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
   ,m_treeStructure(NULL)
+  ,m_useS2TDecoder(false)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -433,6 +434,10 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_defaultNonTermOnlyForEmptyRange, "default-non-term-for-empty-range-only", false );
   SetBooleanParameter( &m_printNBestTrees, "n-best-trees", false );
 
+  // S2T decoder
+  SetBooleanParameter( &m_useS2TDecoder, "s2t", false );
+  m_s2tParsingAlgorithm = (m_parameter->GetParam("s2t-parsing-algorithm").size() > 0) ?
+                      (S2TParsingAlgorithm) Scan<size_t>(m_parameter->GetParam("s2t-parsing-algorithm")[0]) : RecursiveCYKPlus;
 
   // Compact phrase table and reordering model
   SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );
@@ -1154,6 +1159,15 @@ std::map<std::string, std::string> StaticData::OverrideFeatureNames()
 			ret[oldName] = newName;
 		}
 	}
+
+  if (m_useS2TDecoder) {
+    // Automatically override PhraseDictionary{Memory,Scope3}.  This will
+    // have to change if the FF parameters diverge too much in the future,
+    // but for now it makes switching between the old and new decoders much
+    // more convenient.
+    ret["PhraseDictionaryMemory"] = "RuleTable";
+    ret["PhraseDictionaryScope3"] = "RuleTable";
+  }
 
 	return ret;
 }

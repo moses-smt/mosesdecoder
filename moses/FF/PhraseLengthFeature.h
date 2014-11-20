@@ -29,9 +29,8 @@ public:
   {}
 
   void EvaluateWhenApplied(const ChartHypothesis& hypo,
-                     ScoreComponentCollection*) const {
-    throw std::logic_error("PhraseLengthFeature not valid in chart decoder");
-  }
+                     ScoreComponentCollection*) const
+  {}
 
   void EvaluateWithSourceContext(const InputType &input
                 , const InputPath &inputPath

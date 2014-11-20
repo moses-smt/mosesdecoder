@@ -50,7 +50,6 @@ private:
   std::auto_ptr<SentenceStats> m_sentenceStats;
   clock_t m_start; /**< starting time, used for logging */
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
-  size_t m_lineNumber;
 
   ChartParser m_parser;
 
@@ -62,7 +61,7 @@ private:
   void WriteSearchGraph(const ChartSearchGraphWriter& writer) const;
 
 public:
-  ChartManager(size_t lineNumber, InputType const& source);
+  ChartManager(InputType const& source);
   ~ChartManager();
   void ProcessSentence();
   void AddXmlChartOptions();
@@ -109,9 +108,6 @@ public:
 
   const ChartParser &GetParser() const { return m_parser; }
 
-  size_t GetLineNumber() const {
-    return m_lineNumber;
-  }
 };
 
 }

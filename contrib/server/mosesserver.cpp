@@ -17,7 +17,7 @@
 #endif
 #include "moses/TreeInput.h"
 #include "moses/LM/ORLM.h"
-#include "moses-cmd/IOWrapper.h"
+#include "moses/IOWrapper.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
@@ -28,7 +28,6 @@
 #include <xmlrpc-c/server_abyss.hpp>
 
 using namespace Moses;
-using namespace MosesCmd;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
@@ -281,7 +280,7 @@ public:
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
-        ChartManager manager(0,tinput);
+        ChartManager manager(tinput);
         manager.ProcessSentence();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
@@ -292,13 +291,15 @@ public:
           m_retData.insert(pair<string, xmlrpc_c::value>("sg", xmlrpc_c::value_string(sgstream.str())));
         }
     } else {
+        size_t lineNumber = 0; // TODO: Include sentence request number here?
         Sentence sentence;
+        sentence.SetTranslationId(lineNumber);
+
         const vector<FactorType> &
 	      inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-	      size_t lineNumber = 0; // TODO: Include sentence request number here?
-        Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm());
+        Manager manager(sentence, staticData.GetSearchAlgorithm());
 	      manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
@@ -309,7 +310,7 @@ public:
         }
         if (addWordAlignInfo) {
           stringstream wordAlignment;
-          OutputAlignment(wordAlignment, hypo);
+          IOWrapper::OutputAlignment(wordAlignment, hypo);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -471,7 +472,7 @@ public:
 
         if ((int)edges.size() > 0) {
           stringstream wordAlignment;
-          OutputAlignment(wordAlignment, edges[0]);
+          IOWrapper::OutputAlignment(wordAlignment, edges[0]);
           vector<xmlrpc_c::value> alignments;
           string alignmentPair;
           while (wordAlignment >> alignmentPair) {
@@ -489,7 +490,7 @@ public:
 	{
 	  // should the score breakdown be reported in a more structured manner?
 	  ostringstream buf;
-	  MosesCmd::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
+	  IOWrapper::OutputAllFeatureScores(path.GetScoreBreakdown(),buf);
 	  nBestXMLItem["fvals"] = xmlrpc_c::value_string(buf.str());
 	}
 

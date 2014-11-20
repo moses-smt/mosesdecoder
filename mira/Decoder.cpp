@@ -143,7 +143,7 @@ vector< vector<const Word*> > MosesDecoder::runDecoder(const std::string& source
     string filename)
 {
   // run the decoder
-  m_manager = new Moses::Manager(0,*m_sentence, search);
+  m_manager = new Moses::Manager(*m_sentence, search);
   m_manager->ProcessSentence();
   TrellisPathList nBestList;
   m_manager->CalcNBest(nBestSize, nBestList, distinct);
@@ -220,7 +220,7 @@ vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& s
     size_t epoch)
 {
   // run the decoder
-  m_chartManager = new ChartManager(0,*m_sentence);
+  m_chartManager = new ChartManager(*m_sentence);
   m_chartManager->ProcessSentence();
   ChartKBestExtractor::KBestVec nBestList;
   m_chartManager->CalcNBest(nBestSize, nBestList, distinct);

@@ -42,12 +42,11 @@ extern bool g_mosesDebug;
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.
  */
-ChartManager::ChartManager(size_t lineNumber,InputType const& source)
+ChartManager::ChartManager(InputType const& source)
   :m_source(source)
   ,m_hypoStackColl(source, *this)
   ,m_start(clock())
   ,m_hypothesisId(0)
-  ,m_lineNumber(lineNumber)
   ,m_parser(source, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit(), source)
 {
@@ -294,7 +293,7 @@ void ChartManager::OutputSearchGraphAsHypergraph(std::ostream &outputSearchGraph
 }
 
 void ChartManager::OutputSearchGraphMoses(std::ostream &outputSearchGraphStream) const {
-  ChartSearchGraphWriterMoses writer(&outputSearchGraphStream, m_lineNumber);
+  ChartSearchGraphWriterMoses writer(&outputSearchGraphStream, m_source.GetTranslationId());
   WriteSearchGraph(writer);
 }
 

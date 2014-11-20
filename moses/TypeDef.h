@@ -74,6 +74,9 @@ const float DEFAULT_EARLY_DISCARDING_THRESHOLD		= 0.0f;
 const float DEFAULT_TRANSLATION_OPTION_THRESHOLD	= 0.0f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
+// output floats with five significant digits
+static const size_t PRECISION = 3;
+
 // enums.
 // must be 0, 1, 2, ..., unless otherwise stated
 
@@ -158,6 +161,11 @@ enum WordAlignmentSort {
 enum FormatType {
   MosesFormat
   ,HieroFormat
+};
+
+enum S2TParsingAlgorithm {
+  RecursiveCYKPlus,
+  Scope3
 };
 
 // typedef

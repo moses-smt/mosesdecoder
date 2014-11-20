@@ -59,6 +59,14 @@ This corresponds to the option:
    `--newSourceMaxLength=4`
 
 
+BACKOFF
+-------
+
+This combination technique is a simplified version of the fill-up technique.
+With respect to fill-up technique, the backoff technique does not add the 
+binary additional feature denoting the provenance of an entry.
+
+
 LINEAR INTERPOLATION
 --------------------
 

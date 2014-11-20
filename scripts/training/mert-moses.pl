@@ -396,16 +396,16 @@ if (!defined $mertargs) {
 }
 
 my $scconfig = undef;
-if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {
+if ($mertargs =~ /\-\-scconfig(?:\s+|=)(.+?)(\s|$)/) {
   $scconfig = $1;
   $scconfig =~ s/\,/ /g;
-  $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
+  $mertargs =~ s/\-\-scconfig(?:\s+|=)(.+?)(\s|$)//;
 }
 
 my $sctype = "--sctype BLEU";
-if ($mertargs =~ /(\-\-sctype\s+.+?)(\s|$)/) {
+if ($mertargs =~ /(\-\-sctype(?:\s+|=).+?)(\s|$)/) {
   $sctype = $1;
-  $mertargs =~ s/(\-\-sctype\s+.+?)(\s|$)//;
+  $mertargs =~ s/(\-\-sctype(?:\s+|=)+.+?)(\s|$)//;
 }
 
 
@@ -432,7 +432,7 @@ $proargs = "" unless $proargs;
 
 my $mert_mert_args = "$mertargs $mertmertargs";
 $mert_mert_args =~ s/\-+(binary|b)\b//;
-$mert_mert_args .= " $scconfig";
+$mert_mert_args .= "$sctype $scconfig";
 if ($___ACTIVATE_FEATURES) {
   $mert_mert_args .= " -o \"$___ACTIVATE_FEATURES\"";
 }
@@ -1647,7 +1647,7 @@ sub create_extractor_script() {
 
   open my $out, '>', $script_path
       or die "Couldn't open $script_path for writing: $!\n";
-  print $out "#!/bin/bash\n";
+  print $out "#!/usr/bin/env bash\n";
   print $out "cd $outdir\n";
   print $out "$cmd\n";
   close $out;

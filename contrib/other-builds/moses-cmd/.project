@@ -87,16 +87,6 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>IOWrapper.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/IOWrapper.cpp</locationURI>
-		</link>
-		<link>
-			<name>IOWrapper.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/IOWrapper.h</locationURI>
-		</link>
-		<link>
 			<name>Jamfile</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Jamfile</locationURI>
@@ -115,16 +105,6 @@
 			<name>Main.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Main.h</locationURI>
-		</link>
-		<link>
-			<name>mbr.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/mbr.cpp</locationURI>
-		</link>
-		<link>
-			<name>mbr.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/mbr.h</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

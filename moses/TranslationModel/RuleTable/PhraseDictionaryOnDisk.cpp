@@ -59,7 +59,7 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   return new ChartRuleLookupManagerOnDisk(parser, cellCollection, *this,
                                           GetImplementation(),
                                           m_input,
-                                          m_output, m_filePath);
+                                          m_output);
 }
 
 OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation()

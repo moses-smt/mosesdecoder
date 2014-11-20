@@ -1,0 +1,9 @@
+Example usage:
+#create training and test corpus
+/home/abmayne/code/deepathon/nnjm/extract_training.py --working-dir  /home/abmayne/experiments/2014-iwslt/nplm/en-cs10k --corpus corpus/europarl.clean.10k --target-language cs --source-language en --align corpus/europarl.clean.10k.align
+/home/abmayne/code/deepathon/nnjm/extract_test.py --working-dir  /home/abmayne/experiments/2014-iwslt/nplm/en-cs10k --corpus corpus/europarl.test.10k --target-language cs --source-language en --align corpus/europarl.test.10k.align
+
+#Train and test different language models with basic nplm training
+/home/abmayne/code/deepathon/nnjm/train_nplm.py --working-dir /home/abmayne/experiments/2014-iwslt/nplm/en-cs10k --corpus europarl.clean.10k --minibatch-size 128 --epochs 40 --output-model europarl.10k.bbn  --nplm-home  /home/abmayne/code/deepathon/nplm_one_layer --hidden 0 --threads 1 --output-model europarl.10k.1layer
+/home/abmayne/code/deepathon/nnjm/test_nplm.py --working-dir /home/abmayne/experiments/2014-iwslt/nplm/en-cs10k --corpus europarl.test.10k --train-corpus europarl.10k.1layer --nplm-home  /home/abmayne/code/deepathon/nplm_one_layer --threads 1
+

@@ -60,8 +60,18 @@ int ExtractGHKM::Main(int argc, char *argv[])
   ProcessOptions(argc, argv, options);
 
   // Open input files.
-  InputFileStream targetStream(options.targetFile);
-  InputFileStream sourceStream(options.sourceFile);
+  //
+  // The GHKM algorithm is neutral about whether the model is string-to-tree or
+  // tree-to-string.  This implementation assumes the model to be
+  // string-to-tree, but if the -t2s option is given then the source and target
+  // input files are switched prior to extraction and then the source and
+  // target of the extracted rules are switched on output.
+  std::string effectiveTargetFile = options.t2s ? options.sourceFile
+                                                : options.targetFile;
+  std::string effectiveSourceFile = options.t2s ? options.targetFile
+                                                : options.sourceFile;
+  InputFileStream targetStream(effectiveTargetFile);
+  InputFileStream sourceStream(effectiveSourceFile);
   InputFileStream alignmentStream(options.alignmentFile);
 
   // Open output files.
@@ -214,6 +224,9 @@ int ExtractGHKM::Main(int argc, char *argv[])
     if (alignment.size() == 0) {
       std::cerr << "skipping line " << lineNum << " without alignment points\n";
       continue;
+    }
+    if (options.t2s) {
+      FlipAlignment(alignment);
     }
 
     // Record word counts.
@@ -436,6 +449,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
    "include score based on PCFG scores in target corpus")
   ("PhraseOrientation",
    "output phrase orientation information")
+  ("T2S",
+   "enable tree-to-string rule extraction (string-to-tree is assumed by default)")
   ("TreeFragments",
    "output parse tree information")
   ("SourceLabels",
@@ -542,6 +557,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   }
   if (vm.count("PhraseOrientation")) {
     options.phraseOrientation = true;
+  }
+  if (vm.count("T2S")) {
+    options.t2s = true;
   }
   if (vm.count("TreeFragments")) {
     options.treeFragments = true;

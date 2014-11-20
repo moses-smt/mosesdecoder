@@ -11,12 +11,12 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -74,6 +74,22 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.511477442" name="Rand.h" rcbsApplicability="disable" resourcePath="LM/Rand.h" toolsToInvoke=""/>
+<<<<<<< HEAD
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1176518033" name="/" resourcePath="LM/bilingual-lm">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.2110557759" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.2066996463" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1976472988"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.293388458" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1851071294" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.2126314903"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.569336804" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1168585173"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.690097122" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.2074660557"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.435042440" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.933467113"/>
+						</toolChain>
+					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
+					<sourceEntries>
+						<entry excluding="LM/bilingual-lm|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/symal2mam.cc|TranslationModel/UG/mm/mtt-dump.cc|TranslationModel/UG/mm/mtt-count-words.cc|TranslationModel/UG/mm/mtt-build.cc|TranslationModel/UG/mm/mmlex-lookup.cc|TranslationModel/UG/mm/mmlex-build.cc|TranslationModel/UG/mm/mam_verify.cc|TranslationModel/UG/mm/mam2symal.cc|TranslationModel/UG/mm/custom-pt.cc|TranslationModel/UG/mm/calc-coverage.cc|TranslationModel/UG/mm/mtt.count.cc|TranslationModel/UG/util|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+=======
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1845526535" name="SRI.h" rcbsApplicability="disable" resourcePath="LM/SRI.h" toolsToInvoke=""/>
@@ -141,7 +157,23 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="LM/IRST.h|LM/IRST.cpp|LM/SRI.h|LM/SRI.cpp|TranslationModel/UG|LM/DALMWrapper.h|LM/DALMWrapper.cpp|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/symal2mam.cc|TranslationModel/UG/mm/mtt-dump.cc|TranslationModel/UG/mm/mtt-count-words.cc|TranslationModel/UG/mm/mtt-build.cc|TranslationModel/UG/mm/mmlex-lookup.cc|TranslationModel/UG/mm/mmlex-build.cc|TranslationModel/UG/mm/mam_verify.cc|TranslationModel/UG/mm/mam2symal.cc|TranslationModel/UG/mm/custom-pt.cc|TranslationModel/UG/mm/calc-coverage.cc|TranslationModel/UG/mm/mtt.count.cc|TranslationModel/UG/util|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="LM/SRI.h|LM/SRI.cpp|TranslationModel/UG|LM/DALMWrapper.h|LM/DALMWrapper.cpp|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/symal2mam.cc|TranslationModel/UG/mm/mtt-dump.cc|TranslationModel/UG/mm/mtt-count-words.cc|TranslationModel/UG/mm/mtt-build.cc|TranslationModel/UG/mm/mmlex-lookup.cc|TranslationModel/UG/mm/mmlex-build.cc|TranslationModel/UG/mm/mam_verify.cc|TranslationModel/UG/mm/mam2symal.cc|TranslationModel/UG/mm/custom-pt.cc|TranslationModel/UG/mm/calc-coverage.cc|TranslationModel/UG/mm/mtt.count.cc|TranslationModel/UG/util|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+>>>>>>> master
+					</sourceEntries>
+					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1176518033" name="/" resourcePath="LM/bilingual-lm">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.2110557759" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.2066996463" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1976472988"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.293388458" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1774992327"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1851071294" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.2126314903"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.569336804" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1168585173"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.690097122" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.2074660557"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.435042440" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.933467113"/>
+						</toolChain>
+					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.790052015" name="IRST.h" rcbsApplicability="disable" resourcePath="LM/IRST.h" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.656913512.1211280539" name="DALMWrapper.h" rcbsApplicability="disable" resourcePath="LM/DALMWrapper.h" toolsToInvoke=""/>
+					<sourceEntries>
+						<entry excluding="LM/bilingual-lm|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/symal2mam.cc|TranslationModel/UG/mm/mtt-dump.cc|TranslationModel/UG/mm/mtt-count-words.cc|TranslationModel/UG/mm/mtt-build.cc|TranslationModel/UG/mm/mmlex-lookup.cc|TranslationModel/UG/mm/mmlex-build.cc|TranslationModel/UG/mm/mam_verify.cc|TranslationModel/UG/mm/mam2symal.cc|TranslationModel/UG/mm/custom-pt.cc|TranslationModel/UG/mm/calc-coverage.cc|TranslationModel/UG/mm/mtt.count.cc|TranslationModel/UG/util|LM/oxlm|LM/Rand.h|LM/Rand.cpp|TranslationModel/CompactPT|LM/NeuralLMWrapper.cpp|FF/PhraseLengthFeatureTest.cpp|PhraseLengthFeatureTest.cpp|LM/BackwardTest.cpp|LM/BackwardLMState.h|LM/BackwardLMState.cpp|LM/Backward.h|LM/Backward.cpp|FeatureVectorTest.cpp|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|src/SyntacticLanguageModelState.h|src/SyntacticLanguageModelFiles.h|src/SyntacticLanguageModel.h|src/SyntacticLanguageModel.cpp|src/LM/SRI.h|src/LM/SRI.cpp|src/LM/Rand.h|src/LM/Rand.cpp|src/LM/LDHT.h|src/LM/LDHT.cpp|SyntacticLanguageModelState.h|SyntacticLanguageModelFiles.h|SyntacticLanguageModel.h|SyntacticLanguageModel.cpp|LM/LDHT.h|LM/LDHT.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -151,13 +183,13 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.release.401150096" moduleId="org.eclipse.cdt.core.settings" name="Release">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -203,12 +235,12 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -248,7 +280,7 @@
 									<listOptionValue builtIn="false" value="LM_IRST"/>
 									<listOptionValue builtIn="false" value="LM_DALM"/>
 									<listOptionValue builtIn="false" value="LM_NPLM"/>
-									<listOptionValue builtIn="false" value="LM_LBL"/>
+									<listOptionValue builtIn="false" value="LM_OXLM"/>
 									<listOptionValue builtIn="false" value="_FILE_OFFSET_BIT=64"/>
 									<listOptionValue builtIn="false" value="_LARGE_FILES"/>
 								</option>

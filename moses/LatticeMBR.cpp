@@ -13,9 +13,8 @@
 #include <set>
 
 using namespace std;
-using namespace Moses;
 
-namespace MosesCmd
+namespace Moses
 {
 
 size_t bleu_order = 4;

@@ -70,6 +70,7 @@
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
 #--clean to clean
+#--debug-build to build with Og. Only available with gcc 4.8+
 
 import option ;
 import modules ;
@@ -97,6 +98,11 @@ if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_min
   echo "Tip: install tcmalloc for faster threading.  See BUILD-INSTRUCTIONS.txt for more information." ;
 }
 
+if [ option.get "debug-build" : : "yes" ] {
+   requirements += <cxxflags>-Og ;
+   echo "Building with -Og to enable easier profiling and debugging. Only available on gcc 4.8+." ;
+}
+
 if [ option.get "enable-mpi" : : "yes" ] {
   import mpi ;
   using mpi ;
@@ -114,7 +120,7 @@ requirements += [ option.get "with-mm" : : <define>PT_UG ] ;
 requirements += [ option.get "with-mm" : : <define>MAX_NUM_FACTORS=4 ] ;
 requirements += [ option.get "unlabelled-source" : : <define>UNLABELLED_SOURCE ] ;
 
-if [ option.get "with-lbllm" ] {
+if [ option.get "with-oxlm" ] {
   external-lib boost_serialization ;
   external-lib gomp ;
   requirements += <library>boost_serialization ;
@@ -167,7 +173,7 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-projects lm util phrase-extract search moses moses/LM mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;
+build-projects lm util phrase-extract search moses moses/LM mert moses-cmd mira scripts regression-testing  ;
 
 if [ option.get "with-mm" : : "yes" ]
 {
@@ -175,7 +181,6 @@ if [ option.get "with-mm" : : "yes" ]
   moses/TranslationModel/UG//ptable-describe-features 
   moses/TranslationModel/UG//count-ptable-features 
   moses/TranslationModel/UG//ptable-lookup 
-  moses/TranslationModel/UG//sim-pe 
   moses/TranslationModel/UG//spe-check-coverage 
   moses/TranslationModel/UG/mm//mtt-demo1 
   moses/TranslationModel/UG/mm//mtt-build 
@@ -195,9 +200,19 @@ else
  alias mm ; 
 }
 
+if [ option.get "with-rephraser" : : "yes" ]
+{
+  alias rephraser :
+  contrib/rephraser//paraphrase
+  ;
+}
+else
+{
+  alias rephraser ;
+}
+
 alias programs : 
 lm//programs 
-moses-chart-cmd//moses_chart 
 moses-cmd//programs 
 OnDiskPt//CreateOnDiskPt 
 OnDiskPt//queryOnDiskPt 
@@ -214,11 +229,12 @@ biconcor
 mira//mira 
 contrib/server//mosesserver 
 mm
+rephraser
 ;
 
 
 install-bin-libs programs ;
-install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
+install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
 install-headers headers-moses : moses//headers-to-install : moses ;
 
 alias install : prefix-bin prefix-lib headers-base headers-moses ;
@@ -232,3 +248,10 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
   echo "To disable this message, delete $(TOP)/dist ." ;
   echo ;
 }
+
+local temp = [ _shell "mkdir bin" ] ;
+local temp = [ _shell "rm bin/moses_chart" ] ;
+local temp = [ _shell "cd bin && ln -s moses moses_chart" ] ;
+
+
+

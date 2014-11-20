@@ -40,7 +40,7 @@ class Subgraph;
 
 enum SymbolType { Terminal, NonTerminal };
 
-struct Symbol {
+class Symbol {
 public:
   Symbol(const std::string &v, SymbolType t) : m_value(v) , m_type(t) {}
 

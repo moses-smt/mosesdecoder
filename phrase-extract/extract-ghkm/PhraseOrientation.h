@@ -82,7 +82,6 @@ private:
 
   const int m_countF;
   const int m_countE;
-  const Alignment &m_alignment;
 
   std::vector<std::vector<int> > m_alignedToT;
 

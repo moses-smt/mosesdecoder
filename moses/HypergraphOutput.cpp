@@ -124,7 +124,7 @@ template<class M>
 void HypergraphOutput<M>::Write(const M& manager) const {
 
   stringstream fileName;
-  fileName << m_hypergraphDir << "/" << manager.GetLineNumber();
+  fileName << m_hypergraphDir << "/" << manager.GetSource().GetTranslationId();
   if ( m_appendSuffix ) {
     fileName << "." << m_compression;
   }
@@ -144,7 +144,7 @@ void HypergraphOutput<M>::Write(const M& manager) const {
     manager.OutputSearchGraphAsHypergraph(file);
     file.flush();
   } else {
-    TRACE_ERR("Cannot output hypergraph for line " << manager.GetLineNumber() 
+    TRACE_ERR("Cannot output hypergraph for line " << manager.GetSource().GetTranslationId()
   << " because the output file " << fileName.str() 
   << " is not open or not ready for writing" 
   << std::endl);
