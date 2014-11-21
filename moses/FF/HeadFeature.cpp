@@ -277,7 +277,8 @@ void SyntaxTree::ToStringLevel(SyntaxNodePtr node, std::stringstream &tree, int 
 		tree << node->GetHead() << ")";
 	else{
 		if(level==maxLevel){
-			tree << "("<<node->GetHeadPOS()<<" "<< node->GetHead() <<")" << ")";
+			//tree << "("<<node->GetHeadPOS()<<" "<< node->GetHead() <<")" << ")";
+			tree << node->GetHead() << ")";
 		}
 		else{
 			level++;
