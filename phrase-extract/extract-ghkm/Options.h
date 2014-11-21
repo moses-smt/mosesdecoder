@@ -43,6 +43,7 @@ public:
     , phraseOrientation(false)
     , sentenceOffset(0)
     , sourceLabels(false)
+    , stsg(false)
     , t2s(false)
     , treeFragments(false)
     , unknownWordMinRelFreq(0.03f)
@@ -71,6 +72,7 @@ public:
   bool sourceLabels;
   std::string sourceLabelSetFile;
   std::string sourceUnknownWordFile;
+  bool stsg;
   bool t2s;
   std::string targetUnknownWordFile;
   bool treeFragments;

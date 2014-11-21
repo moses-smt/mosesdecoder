@@ -56,6 +56,42 @@ public:
     m_pcfgScore = CalcPcfgScore();
   }
 
+  Subgraph(const Subgraph &other, bool targetOnly=false)
+      : m_root(other.m_root)
+      , m_leaves(other.m_leaves)
+      , m_depth(other.m_depth)
+      , m_size(other.m_size)
+      , m_nodeCount(other.m_nodeCount)
+      , m_pcfgScore(other.m_pcfgScore) {
+    if (targetOnly && m_root->GetType() != SOURCE) {
+      // Replace any source-word sink nodes with their parents (except for
+      // the special case where the parent is a non-word tree node -- see
+      // below).
+      std::set<const Node *> targetLeaves;
+      for (std::set<const Node *>::const_iterator p = m_leaves.begin();
+           p != m_leaves.end(); ++p) {
+        const Node *leaf = *p;
+        if (leaf->GetType() != SOURCE) {
+          targetLeaves.insert(leaf);
+        } else {
+          const std::vector<Node*> &parents = leaf->GetParents();
+          for (std::vector<Node*>::const_iterator q = parents.begin();
+               q != parents.end(); ++q) {
+            const Node *parent = *q;
+            // Only add parents that are words, not tree nodes since those
+            // are never sink nodes.  (A source word can have a tree node as
+            // its parent due to the heuristic for handling unaligned source
+            // words).
+            if (parent->GetType() == TARGET) {
+              targetLeaves.insert(*q);
+            }
+          }
+        }
+      }
+      m_leaves.swap(targetLeaves);
+    }
+  }
+
   const Node *GetRoot() const {
     return m_root;
   }
