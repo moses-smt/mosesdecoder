@@ -873,7 +873,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        //should only call toString if the LHS passes these criteria
 	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 	        	//std::string parsedSentence  = syntaxTree->ToString();
-	        	std::string parsedSentence  = syntaxTree->ToStringLevel(4);
+	        	std::string parsedSentence  = syntaxTree->ToStringLevel(3);
 	        	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
 	        		//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 	        		StringHashMap &localCache = GetCache();
