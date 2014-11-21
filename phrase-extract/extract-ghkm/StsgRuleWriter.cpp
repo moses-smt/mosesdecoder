@@ -23,15 +23,13 @@ void StsgRuleWriter::Write(const StsgRule &rule)
 
   // Write the source side of the rule to sourceSS.
   const std::vector<Symbol> &sourceSide = rule.GetSourceSide();
-  int sourceNonTermIndex = 0;
   for (std::size_t i = 0; i < sourceSide.size(); ++i) {
     const Symbol &symbol = sourceSide[i];
     if (i > 0) {
       sourceSS << " ";
     }
     if (symbol.GetType() == NonTerminal) {
-      int targetNonTermIndex = rule.GetNonTermAlignment()[sourceNonTermIndex++];
-      sourceSS << "[" << targetNonTermIndex << "]";
+      sourceSS << "[X]";
     } else {
       sourceSS << symbol.GetValue();
     }
@@ -50,6 +48,23 @@ void StsgRuleWriter::Write(const StsgRule &rule)
     m_inv << targetSS.str() << " ||| " << sourceSS.str() << " |||";
   }
 
+  // Write the non-terminal alignments.
+  const std::vector<int> &nonTermAlignment = rule.GetNonTermAlignment();
+  for (int srcIndex = 0; srcIndex <  nonTermAlignment.size(); ++srcIndex) {
+    int tgtIndex = nonTermAlignment[srcIndex];
+    if (m_options.t2s) {
+      // If model is tree-to-string then flip the source and target.
+      m_fwd << " " << tgtIndex << "-" << srcIndex;
+      m_inv << " " << srcIndex << "-" << tgtIndex;
+    } else {
+      m_fwd << " " << srcIndex << "-" << tgtIndex;
+      m_inv << " " << tgtIndex << "-" << srcIndex;
+    }
+  }
+  m_fwd << " |||";
+  m_inv << " |||";
+
+  // Write the symbol alignments.
   const Alignment &alignment = rule.GetAlignment();
   for (Alignment::const_iterator p = alignment.begin();
        p != alignment.end(); ++p) {
