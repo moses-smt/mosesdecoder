@@ -206,7 +206,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 
-  if (staticData.GetParam("spe-src").size()) {
+  if (staticData.GetParameter().isParamSpecified("spe-src")) {
 	spe_src = new ifstream(staticData.GetParam("spe-src")[0].c_str());
     spe_trg = new ifstream(staticData.GetParam("spe-trg")[0].c_str());
     spe_aln = new ifstream(staticData.GetParam("spe-aln")[0].c_str());
