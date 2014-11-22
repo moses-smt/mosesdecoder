@@ -37,6 +37,11 @@ OxLM<Model>::OxLM(const string &line)
 template<class Model>
 OxLM<Model>::~OxLM() {
   if (persistentCache) {
+    if (cache.get()) {
+      string cache_file = m_filePath + ".phrases.cache.bin";
+      savePersistentCache(cache_file);
+    }
+
     double cache_hit_ratio = 100.0 * cacheHits / totalHits;
     cerr << "Cache hit ratio: " << cache_hit_ratio << endl;
   }
@@ -91,6 +96,8 @@ LMResult OxLM<Model>::GetValue(
     const vector<const Word*> &contextFactor, State* finalState) const {
   if (!cache.get()) {
     cache.reset(new QueryCache());
+    string cache_file = m_filePath + ".phrases.cache.bin";
+    loadPersistentCache(cache_file);
   }
 
   vector<int> context;
@@ -137,6 +144,30 @@ LMResult OxLM<Model>::GetValue(
 }
 
 template<class Model>
+void OxLM<Model>::loadPersistentCache(const string& cache_file) const {
+  if (boost::filesystem::exists(cache_file)) {
+    ifstream f(cache_file);
+    boost::archive::binary_iarchive iar(f);
+    cerr << "Loading n-gram probability cache from " << cache_file << endl;
+    iar >> *cache;
+    cerr << "Done loading " << cache->size()
+         << " n-gram probabilities..." << endl;
+  } else {
+    cerr << "Cache file not found" << endl;
+  }
+}
+
+template<class Model>
+void OxLM<Model>::savePersistentCache(const string& cache_file) const {
+  ofstream f(cache_file);
+  boost::archive::binary_oarchive oar(f);
+  cerr << "Saving persistent cache to " << cache_file << endl;
+  oar << *cache;
+  cerr << "Done saving " << cache->size()
+       << " n-gram probabilities..." << endl;
+}
+
+template<class Model>
 void OxLM<Model>::InitializeForInput(const InputType& source) {
   LanguageModelSingleFactor::InitializeForInput(source);
 
@@ -146,17 +177,8 @@ void OxLM<Model>::InitializeForInput(const InputType& source) {
     }
 
     int sentence_id = source.GetTranslationId();
-    string cacheFile = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
-    if (boost::filesystem::exists(cacheFile)) {
-      ifstream f(cacheFile);
-      boost::archive::binary_iarchive iar(f);
-      cerr << "Loading n-gram probability cache from " << cacheFile << endl;
-      iar >> *cache;
-      cerr << "Done loading " << cache->size()
-           << " n-gram probabilities..." << endl;
-    } else {
-      cerr << "Cache file not found!" << endl;
-    }
+    string cache_file = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
+    loadPersistentCache(cache_file);
   }
 }
 
@@ -167,13 +189,8 @@ void OxLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
 
   if (persistentCache) {
     int sentence_id = source.GetTranslationId();
-    string cacheFile = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
-    ofstream f(cacheFile);
-    boost::archive::binary_oarchive oar(f);
-    cerr << "Saving persistent cache to " << cacheFile << endl;
-    oar << *cache;
-    cerr << "Done saving " << cache->size()
-         << " n-gram probabilities..." << endl;
+    string cache_file = m_filePath + "." + to_string(sentence_id) + ".cache.bin";
+    savePersistentCache(cache_file);
 
     cache->clear();
   }
