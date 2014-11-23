@@ -873,7 +873,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        //should only call toString if the LHS passes these criteria
 	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 	        	//std::string parsedSentence  = syntaxTree->ToString();
-	        	std::string parsedSentence  = syntaxTree->ToStringLevel(3);
+	        	std::string parsedSentence  = syntaxTree->ToStringLevel(4);
 	        	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
 	        		//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 	        		StringHashMap &localCache = GetCache();
@@ -909,11 +909,29 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        			//std::cerr<< "dep rel: "<<depRel<<endl;
 	        		}
 							if(depRel!=" "){
+								//std::cerr<<parsedSentence<< " dep rel: "<<depRel<<endl;
 								m_counter++;
 								vector<string> tokens;
 								Tokenize(tokens,depRel,"\t");
 								//split(depRel,"\t",tokens);
 								m_counterDepRel+=tokens.size();
+								for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
+									vector<string> rel;
+									Tokenize(rel,*it);
+									//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
+									if(rel.size()==3 && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0)){
+										std::map<string,float>::iterator itModel;
+										itModel = m_probArg->find(rel[1]+" "+rel[2]);
+										if(itModel!=m_probArg->end()){
+											//cout<<"Have value: "<<itModel->first <<" "<<itModel->second<<endl;
+											vector<float> scores;
+											scores.push_back(log(itModel->second+0.001));
+											scores.push_back(1.0);
+											//accumulator->PlusEquals(this,log(it->second+0.001));
+											accumulator->PlusEquals(this,scores);
+										}
+									}
+								}
 
 
 								//std::cerr<< "token size: "<<tokens.size()<<endl;
@@ -929,7 +947,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        }
 	        //std::cout<< "dep rel: "<< stanfordDep<<std::endl;
 
-	        int index = 0;
+	     /*
 
 	        string *predArgPair = syntaxTree->FindObj();
 	        std::map<string,float>::iterator it;
@@ -956,6 +974,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	        delete predArgPair;
 	        predArgPair = 0;
+	     */
 /*
 	        string *predSubjPair = syntaxTree->FindSubj();
 	        	        if(*predSubjPair!=""){
