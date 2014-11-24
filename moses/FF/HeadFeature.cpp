@@ -269,22 +269,25 @@ void SyntaxTree::ToString(SyntaxNodePtr node, std::stringstream &tree){
 }
 
 void SyntaxTree::ToStringLevel(SyntaxNodePtr node, std::string &tree, int level, int maxLevel){
-	tree <<"("<< node->GetLabel()<< " ";
+	string label = node->GetLabel();
+	if(label.compare("Q")==0)
+			label = "S"; //substitute all Q nodes to send to DepRel extraction -> what better approach?
+	tree+="("+label+ " ";
 	//keep counter and for each index save the pointer to the node
 	//-> this way I can keep track of seen dependency pairs (i get head-index dep-index pairs from StanfordDep, where index is relative to the subtree)
 	//index seen pairs by head pointer and then have a list of dependent pointers ? or a hash somewhow?
 	if(node->IsTerminal())
-		tree << node->GetHead() << ")";
+		tree += node->GetHead() + ")";
 	else{
 		if(level==maxLevel){
-			tree << "("<<node->GetHeadPOS()<<" "<< node->GetHead() <<")" << ")";
+			tree += "("+node->GetHeadPOS()+" "+ node->GetHead() +")" + ")";
 			//tree << node->GetHead() << ")";
 		}
 		else{
 			level++;
 			for(int i=0;i<node->GetSize();i++)
 				ToStringLevel(node->GetNChild(i),tree,level,maxLevel);
-			tree << ")";
+			tree+= ")";
 		}
 	}
 
@@ -363,7 +366,7 @@ std::string SyntaxTree::ToString(){
 //ex: VP1 -VP NP -> rel_obj  ; S -> NP VP1 -> rel_subj rel_obj
 //if instead of the VP1 subtree we put only the head there should be no rel_obj extracted at the S node
 std::string SyntaxTree::ToStringLevel(int maxLevel){
-	std::string tree("(");
+	std::string tree("");
 	ToStringLevel(m_top,tree,1,maxLevel);
 	return tree;
 }
@@ -801,10 +804,11 @@ FFState* HeadFeature::EvaluateWhenApplied(
 			//basically at the start of a new sentence reset counter
 		//use this just for testing with one thread
 			if(cur_hypo.GetId()==0){
-				std::cerr<<"Current counter: "<<m_counter<<endl;
+	/*			std::cerr<<"Current counter: "<<m_counter<<endl;
 				std::cerr<<"Current counterDepRel: "<<m_counterDepRel<<endl;
 				std::cerr<<"Current cacheHits: "<<m_cacheHits<<endl;
 				std::cerr<<"Current cacheDepRelHits: "<<m_cacheDepRelHits<<endl;
+	*/
 				StringHashMap &localCache = GetCache();
 				DepRelMap &localCacheDepRel = GetCacheDepRel();
 				//nr of S or VP trees = cache.size + cache.hits
@@ -857,7 +861,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        /*
 	        std::cout<<*tree<<std::endl;
 	        std::cout<< "rule: "<< syntaxTree->ToString()<<std::endl;
-	   	    std::cout<< "rule maxLevel: "<< syntaxTree->ToStringLevel(2)<<std::endl;
+	        std::cout<< "rule maxLevel: "<< syntaxTree->ToStringLevel(4)<<std::endl;
      	    std::cout<< "rule maxNodes: "<< syntaxTree->ToStringNodeCount(3)<<std::endl;
 					*/
 
@@ -871,11 +875,15 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	        std::string depRel ="";
 	        //should only call toString if the LHS passes these criteria
+	        //might consider adding Q in allowedNT -> we transform it to S in ToStringLevel
 	        if(m_allowedNT->find(syntaxTree->GetTop()->GetLabel())!=m_allowedNT->end()){
 	        	//std::string parsedSentence  = syntaxTree->ToString();
 	        	std::string parsedSentence  = syntaxTree->ToStringLevel(4);
-	        	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
-	        		//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
+
+	        	//!!!!!! do this if not replacing Q nodes in ToStringLevel
+	  //      	if(parsedSentence.find_first_of("Q")==string::npos){// && parsedSentence.find("VP")==1){ //if there is no Q in the subtree (no glue rule applied)
+
+	        	//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 	        		StringHashMap &localCache = GetCache();
 	        		if(localCache.find(parsedSentence)!=localCache.end()){
 	        			depRel=localCache[parsedSentence]->first;
@@ -943,7 +951,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 							//this fails here but not in Load()!!!
 							//javaWrapper = new CreateJavaVM();
 							//javaWrapper->TestRuntime();
-	        	}
+	//        	}
 	        }
 	        //std::cout<< "dep rel: "<< stanfordDep<<std::endl;
 
