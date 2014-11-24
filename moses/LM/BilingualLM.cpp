@@ -98,7 +98,6 @@ void BilingualLM::getTargetWords(
 
 size_t BilingualLM::selectMiddleAlignment(
     const set<size_t>& alignment_links) const {
-  assert(alignment_links.size() > 0);
 
   set<size_t>::iterator it = alignment_links.begin();
   for (int i = 0; i < (alignment_links.size() - 1) / 2; ++i) {
@@ -144,6 +143,10 @@ void BilingualLM::getSourceWords(
   //that none of the words in the target phrase aligned to any word in the source phrase
 
   // Now we get the source words. First select middle alignment.
+  //It should never be the case the the word_al size would be zero, but several times this has happened because
+  //of a corrupt phrase table. It is best to have this check here, as it makes debugging the problem a lot easier.
+  UTIL_THROW_IF2(last_word_al.size() == 0,
+  "A target phrase with no alignments detected! " << targetPhrase << "Check if there is something wrong with your phrase table.");
   size_t source_center_index = selectMiddleAlignment(last_word_al);
   // We have found the alignment. Now determine how much to shift by to get the actual source word index.
   size_t phrase_start_pos = sourceWordRange.GetStartPos();
@@ -318,6 +321,10 @@ void BilingualLM::getAllAlignments(const ChartHypothesis& cur_hypo, size_t featu
       }
 
       if (!resolvedIndexis){
+        //It should never be the case the the word_al size would be zero, but several times this has happened because
+        //of a corrupt phrase table. It is best to have this check here, as it makes debugging the problem a lot easier.
+        UTIL_THROW_IF2(word_al.size() == 0,
+        "A target phrase with no alignments detected! " << targetPhrase << "Check if there is something wrong with your phrase table.");
         size_t source_center_index = selectMiddleAlignment(word_al);
         // We have found the alignment. Now determine how much to shift by to get the actual source word index.
         int nonterm_length = 0; //@TODO Sometimes we have an alignment like a X b -> alpha beta X. In this case
@@ -410,7 +417,7 @@ FFState* BilingualLM::EvaluateWhenApplied(
 
   std::vector<int> neuralLMids; //Equivalent more or less to whole_phrase. Contains all word ids but not as expensive
   std::vector<int> alignments;
-  //Estimate size and reserve vectors to avoid realocation
+  //Estimate size and reserve vectors to avoid reallocation
   int future_size = currTargetPhrase.GetNumTerminals();
   for (int i =0; i<currTargetPhrase.GetNumNonTerminals(); i++){
     const ChartHypothesis * prev_hypo = cur_hypo.GetPrevHypo(i); //We need to look at the nonterm on the left.
