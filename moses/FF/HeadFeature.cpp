@@ -268,7 +268,7 @@ void SyntaxTree::ToString(SyntaxNodePtr node, std::stringstream &tree){
 
 }
 
-void SyntaxTree::ToStringLevel(SyntaxNodePtr node, std::stringstream &tree, int level, int maxLevel){
+void SyntaxTree::ToStringLevel(SyntaxNodePtr node, std::string &tree, int level, int maxLevel){
 	tree <<"("<< node->GetLabel()<< " ";
 	//keep counter and for each index save the pointer to the node
 	//-> this way I can keep track of seen dependency pairs (i get head-index dep-index pairs from StanfordDep, where index is relative to the subtree)
@@ -277,8 +277,8 @@ void SyntaxTree::ToStringLevel(SyntaxNodePtr node, std::stringstream &tree, int 
 		tree << node->GetHead() << ")";
 	else{
 		if(level==maxLevel){
-			//tree << "("<<node->GetHeadPOS()<<" "<< node->GetHead() <<")" << ")";
-			tree << node->GetHead() << ")";
+			tree << "("<<node->GetHeadPOS()<<" "<< node->GetHead() <<")" << ")";
+			//tree << node->GetHead() << ")";
 		}
 		else{
 			level++;
@@ -363,9 +363,9 @@ std::string SyntaxTree::ToString(){
 //ex: VP1 -VP NP -> rel_obj  ; S -> NP VP1 -> rel_subj rel_obj
 //if instead of the VP1 subtree we put only the head there should be no rel_obj extracted at the S node
 std::string SyntaxTree::ToStringLevel(int maxLevel){
-	std::stringstream tree("(");
+	std::string tree("(");
 	ToStringLevel(m_top,tree,1,maxLevel);
-	return tree.str();
+	return tree;
 }
 
 std::string SyntaxTree::ToStringNodeCount(int maxNodes){
@@ -553,7 +553,7 @@ HeadFeature::HeadFeature(const std::string &line)
 {
   ReadParameters();
   //const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","PRN","VP","WHPP","PRT","ADVP","WHADVP","XS"};//"PP", ??
-  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR"};//"PP", ??
+  const char *vinit[] = {"S", "SQ", "SBARQ","SINV","SBAR","VP"};//"PP", ??
 
 
 	for(int i=0;i<sizeof(vinit)/sizeof(vinit[0]);i++){

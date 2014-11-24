@@ -235,7 +235,7 @@ public:
   std::string ToStringNodeCount(int maxNodes);
   std::string ToStringHead();
   void ToString(SyntaxNodePtr newNode, std::stringstream &tree);
-  void ToStringLevel(SyntaxNodePtr node, std::stringstream &tree, int level, int maxLevel);
+  void ToStringLevel(SyntaxNodePtr node, std::string &tree, int level, int maxLevel);
   void ToStringNodeCount(SyntaxNodePtr node, std::stringstream &tree, int *nodeCount, int maxNodes);
   void ToStringDynamic(SyntaxNodePtr newNode,std::vector< SyntaxTreePtr > *previousTrees, std::stringstream *tree);
   void ToStringHead(SyntaxNodePtr newNode, std::stringstream &tree);
