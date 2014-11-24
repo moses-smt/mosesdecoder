@@ -35,6 +35,10 @@ class OxLM : public LanguageModelSingleFactor {
  private:
   double GetScore(int word, const vector<int>& context) const;
 
+  void loadPersistentCache(const string& cache_file) const;
+
+  void savePersistentCache(const string& cache_file) const;
+
  protected:
   Model model;
   boost::shared_ptr<OxLMMapper> mapper;

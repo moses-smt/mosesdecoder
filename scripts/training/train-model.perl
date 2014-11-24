@@ -2115,12 +2115,16 @@ sub create_ini {
       my $path = `pwd`; chop($path);
       $fn = $path."/".$fn;
     }
-    $type = 0 unless $type;
-    my $type_name = "UnknownLM";
-    $type_name = "SRILM" if $type == 0;
-    $type_name = "IRSTLM" if $type == 1;
-    $type_name = "KENLM lazyken=0" if $type == 8;
-    $type_name = "KENLM lazyken=1" if $type == 9;
+    $type = "SRILM" unless defined $type; # default to SRILM if no type given
+
+    if ($type =~ /^\d+$/) {
+      # backwards compatibility if the type is given not as string but as a number
+      $type = "SRILM" if $type == 0;
+      $type = "IRSTLM" if $type == 1;
+      $type = "KENLM lazyken=0" if $type == 8;
+      $type = "KENLM lazyken=1" if $type == 9;
+      die "Unknown numeric LM type given: $type" if $type =~ /^\d+$/;
+    }
 	
     my $lm_oov_prob = 0.1;
 	
@@ -2129,7 +2133,7 @@ sub create_ini {
 	$_LMODEL_OOV_FEATURE = "yes";
     } 	   
  
-    $feature_spec .= "$type_name name=LM$i factor=$f path=$fn order=$o\n";
+    $feature_spec .= "$type name=LM$i factor=$f path=$fn order=$o\n";
     $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
   }
