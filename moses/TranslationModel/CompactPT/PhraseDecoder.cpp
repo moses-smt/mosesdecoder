@@ -403,10 +403,17 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
           state = Add;
       }
     } else if(state == Alignment) {
-      AlignPoint alignPoint = m_alignTree->Read(encodedBitStream);
+      AlignPoint alignPoint = m_alignTree->Read(encodedBitStream);      
       if(alignPoint == alignStopSymbol) {
         state = Add;
       } else {
+        if(alignPoint.first >= sourcePhrase.GetSize() || alignPoint.second >= targetPhrase->GetSize()) {
+          std::cerr << "Alignment error: " << static_cast<unsigned int>(alignPoint.first) << "-"
+            << static_cast<unsigned int>(alignPoint.second) << " " << sourcePhrase.GetSize() << " "
+            << targetPhrase->GetSize() << std::endl;
+          return TargetPhraseVectorPtr();
+        }
+
         if(m_phraseDictionary.m_useAlignmentInfo)
           alignment.insert(AlignPointSizeT(alignPoint));
       }
@@ -417,6 +424,10 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
         targetPhrase->SetAlignTerm(alignment);
       }
 
+      //std::cerr << sourcePhrase << std::endl;
+      //std::cerr << *targetPhrase << std::endl;
+      //std::cerr << targetPhrase->GetAlignTerm() << std::endl;
+      
       if(eval) {
         targetPhrase->EvaluateInIsolation(sourcePhrase, m_phraseDictionary.GetFeaturesToApply());
       }

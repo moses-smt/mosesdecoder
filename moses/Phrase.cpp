@@ -180,7 +180,10 @@ void Phrase::CreateFromString(FactorDirection direction
 
   size_t numWords;
   const StringPiece &annotatedWord = annotatedWordVector.back();
-  if (annotatedWord.size() >= 2
+  
+
+  if (StaticData::Instance().IsChart() 
+      && annotatedWord.size() >= 2
       && *annotatedWord.data() == '['
       && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
     // hiero/syntax rule
@@ -197,30 +200,31 @@ void Phrase::CreateFromString(FactorDirection direction
       (*lhs) = NULL;
     }
   }
-
+ 
   // parse each word
   m_words.reserve(numWords);
 
   for (size_t phrasePos = 0 ; phrasePos < numWords; phrasePos++) {
     StringPiece &annotatedWord = annotatedWordVector[phrasePos];
-    bool isNonTerminal;
-    if (annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
-      // non-term
-      isNonTerminal = true;
+    bool isNonTerminal = false;
+    if(StaticData::Instance().IsChart()) {
+      if (annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
+        // non-term
+        isNonTerminal = true;
 
-      size_t nextPos = annotatedWord.find('[', 1);
-      UTIL_THROW_IF2(nextPos == string::npos,
+        size_t nextPos = annotatedWord.find('[', 1);
+        UTIL_THROW_IF2(nextPos == string::npos,
     		  "Incorrect formatting of non-terminal. Should have 2 non-terms, eg. [X][X]. "
     		  << "Current string: " << annotatedWord);
 
-      if (direction == Input)
-        annotatedWord = annotatedWord.substr(1, nextPos - 2);
-      else
-        annotatedWord = annotatedWord.substr(nextPos + 1, annotatedWord.size() - nextPos - 2);
-    } else {
-      isNonTerminal = false;
+        if (direction == Input)
+          annotatedWord = annotatedWord.substr(1, nextPos - 2);
+        else
+          annotatedWord = annotatedWord.substr(nextPos + 1, annotatedWord.size() - nextPos - 2);
+      } else {
+        isNonTerminal = false;
+      }
     }
-
     Word &word = AddWord();
     word.CreateFromString(direction, factorOrder, annotatedWord, isNonTerminal);
 
