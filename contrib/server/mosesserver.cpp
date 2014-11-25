@@ -268,9 +268,11 @@ public:
 
     const StaticData &staticData = StaticData::Instance();
 
-    if (addGraphInfo) {
+    //Make sure alternative paths are retained, if necessary
+    if (addGraphInfo || nbest_size>0) {
       (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
     }
+
 
     stringstream out, graphInfo, transCollOpts;
 
@@ -325,7 +327,6 @@ public:
 
         if (addGraphInfo) {
           insertGraphInfo(manager,m_retData);
-            (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
         }
         if (addTopts) {
           insertTranslationOptions(manager,m_retData);
@@ -334,6 +335,8 @@ public:
           outputNBest(manager, m_retData, nbest_size, nbest_distinct, 
 		      reportAllFactors, addAlignInfo, addScoreBreakdown);
         }
+        (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
+
     }
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
