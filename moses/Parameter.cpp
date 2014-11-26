@@ -647,37 +647,36 @@ void Parameter::ConvertWeightArgsDistortion()
   const string oldLexReordingName = "distortion-file";
 
   // distortion / lex distortion
-  const PARAM_VEC &oldWeights = GetParam(oldWeightName);
+  const PARAM_VEC *oldWeights = GetParam2(oldWeightName);
 
-  if (oldWeights.size() > 0) {
-    if (!isParamSpecified("search-algorithm") ||
-        (GetParam("search-algorithm").size() > 0
-         && (Trim(GetParam("search-algorithm")[0]) == "0"
-             ||Trim(GetParam("search-algorithm")[0]) == "1"
-            )
+  if (oldWeights) {
+	const PARAM_VEC *searchAlgo = GetParam2("search-algorithm");
+    if (searchAlgo == NULL ||
+        (searchAlgo->size() > 0
+         && (Trim(searchAlgo->at(0)) == "0" || Trim(searchAlgo->at(0)) == "1")
         )
        ) {
       // phrase-based. Add distance distortion to list of features
       AddFeature("Distortion");
-      SetWeight("Distortion", 0, Scan<float>(oldWeights[0]));
+      SetWeight("Distortion", 0, Scan<float>(oldWeights->at(0)));
     }
 
     // everything but the last is lex reordering model
 
     size_t currOldInd = 1;
-    const PARAM_VEC &lextable = GetParam(oldLexReordingName);
+    const PARAM_VEC *lextable = GetParam2(oldLexReordingName);
 
-    for (size_t indTable = 0; indTable < lextable.size(); ++indTable) {
-      const string &line = lextable[indTable];
+    for (size_t indTable = 0; lextable && indTable < lextable->size(); ++indTable) {
+      const string &line = lextable->at(indTable);
       vector<string> toks = Tokenize(line);
 
       size_t numFF = Scan<size_t>(toks[2]);
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
-    	UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
+    	UTIL_THROW_IF2(oldWeights && currOldInd >= oldWeights->size(),
     			  "Errors converting old distortion weights to new weights");
-        float weight = Scan<float>(oldWeights[currOldInd]);
+        float weight = Scan<float>(oldWeights->at(currOldInd));
         weights[currFF] = weight;
 
         ++currOldInd;
@@ -713,11 +712,11 @@ void Parameter::ConvertWeightArgsLM()
   const string oldFeatureName = "lmodel-file";
 
   bool isChartDecoding = true;
-  if (!isParamSpecified("search-algorithm") ||
-      (GetParam("search-algorithm").size() > 0
-       && (Trim(GetParam("search-algorithm")[0]) == "0"
-           ||Trim(GetParam("search-algorithm")[0]) == "1"
-          )
+
+  const PARAM_VEC *searchAlgo = GetParam2("search-algorithm");
+  if (searchAlgo == NULL ||
+      (searchAlgo->size() > 0
+       && (Trim(searchAlgo->at(0)) == "0" || Trim(searchAlgo->at(0)) == "1")
       )
      ) {
     isChartDecoding = false;
@@ -845,11 +844,10 @@ void Parameter::ConvertWeightArgsWordPenalty()
   const std::string newWeightName = "WordPenalty";
 
   bool isChartDecoding = true;
-  if (!isParamSpecified("search-algorithm") ||
-      (GetParam("search-algorithm").size() > 0
-       && (Trim(GetParam("search-algorithm")[0]) == "0"
-           ||Trim(GetParam("search-algorithm")[0]) == "1"
-          )
+  const PARAM_VEC *searchAlgo = GetParam2("search-algorithm");
+  if (searchAlgo == NULL ||
+      (searchAlgo->size() > 0
+       && (Trim(searchAlgo->at(0)) == "0" || Trim(searchAlgo->at(0)) == "1")
       )
      ) {
     isChartDecoding = false;
