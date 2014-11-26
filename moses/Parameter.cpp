@@ -342,27 +342,28 @@ bool Parameter::LoadParam(int argc, char* argv[])
   }
 
   // don't mix old and new format
-  if ((isParamSpecified("feature") || isParamSpecified("weight"))
-      && (isParamSpecified("weight-slm") || isParamSpecified("weight-bl") || isParamSpecified("weight-d") ||
-          isParamSpecified("weight-dlm") || isParamSpecified("weight-lrl") || isParamSpecified("weight-generation") ||
-          isParamSpecified("weight-i") || isParamSpecified("weight-l") || isParamSpecified("weight-lex") ||
-          isParamSpecified("weight-glm") || isParamSpecified("weight-wt") || isParamSpecified("weight-pp") ||
-          isParamSpecified("weight-pb") || isParamSpecified("weight-t") || isParamSpecified("weight-w") ||
-          isParamSpecified("weight-u") || isParamSpecified("weight-e") ||
-          isParamSpecified("dlm-mode") || isParamSpecified("generation-file") || isParamSpecified("global-lexical-file") ||
-          isParamSpecified("glm-feature") || isParamSpecified("lmodel-file") || isParamSpecified("lmodel-dub") ||
-          isParamSpecified("slmodel-file") || isParamSpecified("slmodel-factor") ||
-          isParamSpecified("slmodel-beam") || isParamSpecified("ttable-file") || isParamSpecified("phrase-pair-feature") ||
-          isParamSpecified("phrase-boundary-source-feature") || isParamSpecified("phrase-boundary-target-feature") || isParamSpecified("phrase-length-feature") ||
-          isParamSpecified("target-word-insertion-feature") || isParamSpecified("source-word-deletion-feature") || isParamSpecified("word-translation-feature")
+  if ((GetParam2("feature") || GetParam2("weight"))
+      && (GetParam2("weight-slm") || GetParam2("weight-bl") || GetParam2("weight-d") ||
+    	  GetParam2("weight-dlm") || GetParam2("weight-lrl") || GetParam2("weight-generation") ||
+    	  GetParam2("weight-i") || GetParam2("weight-l") || GetParam2("weight-lex") ||
+          GetParam2("weight-glm") || GetParam2("weight-wt") || GetParam2("weight-pp") ||
+          GetParam2("weight-pb") || GetParam2("weight-t") || GetParam2("weight-w") ||
+          GetParam2("weight-u") || GetParam2("weight-e") ||
+          GetParam2("dlm-mode") || GetParam2("generation-file") || GetParam2("global-lexical-file") ||
+          GetParam2("glm-feature") || GetParam2("lmodel-file") || GetParam2("lmodel-dub") ||
+          GetParam2("slmodel-file") || GetParam2("slmodel-factor") ||
+          GetParam2("slmodel-beam") || GetParam2("ttable-file") || GetParam2("phrase-pair-feature") ||
+          GetParam2("phrase-boundary-source-feature") || GetParam2("phrase-boundary-target-feature") || GetParam2("phrase-length-feature") ||
+          GetParam2("target-word-insertion-feature") || GetParam2("source-word-deletion-feature") || GetParam2("word-translation-feature")
          )
      ) {
     UTIL_THROW(util::Exception, "Don't mix old and new ini file format");
   }
 
   // convert old weights args to new format
-  if (!isParamSpecified("feature"))
+  if (GetParam2("feature") == NULL) {
     ConvertWeightArgs();
+  }
   CreateWeightsMap();
   WeightOverwrite();
 
@@ -470,9 +471,12 @@ void Parameter::ConvertWeightArgsSingleWeight(const string &oldWeightName, const
 
 void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 {
+  const PARAM_VEC *params;
+
   // process input weights 1st
-  if (isParamSpecified("weight-i")) {
-    vector<float> inputWeights = Scan<float>(m_setting["weight-i"]);
+  params = GetParam2("weight-i");
+  if (params) {
+    vector<float> inputWeights = Scan<float>(*params);
     PARAM_VEC &numInputScores = m_setting["input-scores"];
     if (inputWeights.size() == 1) {
       UTIL_THROW_IF2(numInputScores.size() != 0, "No [input-scores] section allowed");
@@ -494,7 +498,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
   size_t numRealWordsInInput = 0;
   map<string, size_t> ptIndices;
 
-  const PARAM_VEC *params = GetParam2("input-scores");
+  params = GetParam2("input-scores");
   if (params) {
     numInputScores = Scan<size_t>(params->at(0));
 
@@ -710,21 +714,23 @@ void Parameter::ConvertWeightArgsLM()
 {
   const string oldWeightName = "weight-l";
   const string oldFeatureName = "lmodel-file";
+  const PARAM_VEC *params;
 
   bool isChartDecoding = true;
 
-  const PARAM_VEC *searchAlgo = GetParam2("search-algorithm");
-  if (searchAlgo == NULL ||
-      (searchAlgo->size() > 0
-       && (Trim(searchAlgo->at(0)) == "0" || Trim(searchAlgo->at(0)) == "1")
+  params = GetParam2("search-algorithm");
+  if (params == NULL ||
+      (params->size() > 0
+       && (Trim(params->at(0)) == "0" || Trim(params->at(0)) == "1")
       )
      ) {
     isChartDecoding = false;
   }
 
   vector<int> oovWeights;
-  if (isParamSpecified("lmodel-oov-feature")) {
-    oovWeights = Scan<int>(m_setting["lmodel-oov-feature"]);
+  params = GetParam2("lmodel-oov-feature");
+  if (params) {
+    oovWeights = Scan<int>(*params);
   }
 
   PARAM_MAP::iterator iterMap;
@@ -874,10 +880,11 @@ void Parameter::ConvertWeightArgsWordPenalty()
 void Parameter::ConvertPhrasePenalty()
 {
   string oldWeightName = "weight-p";
-  if (isParamSpecified(oldWeightName)) {
-	UTIL_THROW_IF2(m_setting[oldWeightName].size() != 1,
+  const PARAM_VEC *params = GetParam2(oldWeightName);
+  if (params) {
+	UTIL_THROW_IF2(params->size() != 1,
 			"There should be only 1 phrase-penalty weight");
-    float weight = Scan<float>(m_setting[oldWeightName][0]);
+    float weight = Scan<float>(params->at(0));
     AddFeature("PhrasePenalty");
     SetWeight("PhrasePenalty", 0, weight);
 
