@@ -93,7 +93,8 @@ def get_ngrams(corpus_stem, align_file, tagged_stem, svocab, tvocab, slang,tlang
 
         if not spos_list:
           raise Exception("No alignments in sentence \nSRC: " +  lines[0][:-1] + "\nTGT: " +  lines[1][:-1])
-        spos = (max(spos_list) + min(spos_list)) / 2
+        midpos = (len(spos_list)-1) / 2
+        spos = sorted(spos_list)[midpos]
 
 
         # source-context, target-context, predicted word
