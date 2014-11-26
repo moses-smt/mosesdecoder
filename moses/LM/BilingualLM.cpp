@@ -262,6 +262,7 @@ void BilingualLM::getAllTargetIdsChart(const ChartHypothesis& cur_hypo, size_t f
 void BilingualLM::getAllAlignments(const ChartHypothesis& cur_hypo, size_t featureID, std::vector<int>& word_alignemnts) const {
   const TargetPhrase targetPhrase = cur_hypo.GetCurrTargetPhrase();
   int next_nonterminal_index = 0;
+  int nonterm_length = 0; //Account for the size of nonterminals when calculating the alignment.
   int source_phrase_start_pos = cur_hypo.GetCurrSourceRange().GetStartPos();
   int source_word_mid_idx; //The word alignment
 
@@ -278,6 +279,7 @@ void BilingualLM::getAllAlignments(const ChartHypothesis& cur_hypo, size_t featu
       const ChartHypothesis * prev_hypo = cur_hypo.GetPrevHypo(next_nonterminal_index);
       const BilingualLMState * prev_state = static_cast<const BilingualLMState *>(prev_hypo->GetFFState(featureID));
       const std::vector<int> prevWordAls = prev_state->GetWordAlignmentVector();
+      nonterm_length += prevWordAls.size();
       for (std::vector<int>::const_iterator it = prevWordAls.begin(); it!= prevWordAls.end(); it++){
         word_alignemnts.push_back(*it);
       }
@@ -327,10 +329,6 @@ void BilingualLM::getAllAlignments(const ChartHypothesis& cur_hypo, size_t featu
         "A target phrase with no alignments detected! " << targetPhrase << "Check if there is something wrong with your phrase table.");
         size_t source_center_index = selectMiddleAlignment(word_al);
         // We have found the alignment. Now determine how much to shift by to get the actual source word index.
-        int nonterm_length = 0; //@TODO Sometimes we have an alignment like a X b -> alpha beta X. In this case
-        //The length of the source phrase that the nonterminal covers doesn't influence the offset of b.
-        //However in cases such as a X b -> alpha X beta, it does. We have to determine how many nonterminals
-        //are before b and add their source span to the source_word_mid_idx.
         source_word_mid_idx = source_phrase_start_pos + (int)source_center_index + nonterm_length;
       }
       word_alignemnts.push_back(source_word_mid_idx);
