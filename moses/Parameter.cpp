@@ -222,6 +222,18 @@ const PARAM_VEC &Parameter::GetParam(const std::string &paramName)
   return m_setting[paramName];
 }
 
+const PARAM_VEC *Parameter::GetParam2(const std::string &paramName) const
+{
+	PARAM_MAP::const_iterator iter = m_setting.find( paramName );
+	if (iter == m_setting.end()) {
+		return NULL;
+	}
+	else {
+		return &iter->second;
+	}
+
+}
+
 /** initialize a parameter, sub of constructor */
 void Parameter::AddParam(const string &paramName, const string &description)
 {
@@ -375,19 +387,16 @@ bool Parameter::LoadParam(int argc, char* argv[])
 
 void Parameter::AddFeaturesCmd()
 {
-  if (!isParamSpecified("feature-add")) {
-    return;
+  const PARAM_VEC *params = GetParam2("feature-add");
+  if (params) {
+	  PARAM_VEC::const_iterator iter;
+	  for (iter = params->begin(); iter != params->end(); ++iter) {
+		const string &line = *iter;
+		AddFeature(line);
+	  }
+
+	  m_setting.erase("feature-add");
   }
-
-  const PARAM_VEC &params = GetParam("feature-add");
-
-  PARAM_VEC::const_iterator iter;
-  for (iter = params.begin(); iter != params.end(); ++iter) {
-    const string &line = *iter;
-    AddFeature(line);
-  }
-
-  m_setting.erase("feature-add");
 }
 
 std::vector<float> Parameter::GetWeights(const std::string &name)
@@ -485,19 +494,26 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
   size_t numRealWordsInInput = 0;
   map<string, size_t> ptIndices;
 
-  if (GetParam("input-scores").size()) {
-    numInputScores = Scan<size_t>(GetParam("input-scores")[0]);
-  }
+  const PARAM_VEC *params = GetParam2("input-scores");
+  if (params) {
+    numInputScores = Scan<size_t>(params->at(0));
 
-  if (GetParam("input-scores").size() > 1) {
-    numRealWordsInInput = Scan<size_t>(GetParam("input-scores")[1]);
+    if (params->size() > 1) {
+      numRealWordsInInput = Scan<size_t>(params->at(1));
+    }
   }
 
   // load phrase translation tables
-  if (GetParam("ttable-file").size() > 0) {
+  params = GetParam2("ttable-file");
+  if (params) {
     // weights
-    const vector<string> &translationVector = GetParam("ttable-file");
-    vector<size_t>  maxTargetPhrase         = Scan<size_t>(GetParam("ttable-limit"));
+    const vector<string> translationVector = *params;
+
+    vector<size_t>  maxTargetPhrase;
+    params = GetParam2("ttable-limit");
+    if (params) {
+    	maxTargetPhrase = Scan<size_t>(*params);
+    }
 
     if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
       VERBOSE(1, "Using uniform ttable-limit of " << maxTargetPhrase[0] << " for all translation tables." << endl);
