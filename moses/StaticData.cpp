@@ -310,12 +310,12 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
       return false;
     }
-    m_minHypoStackDiversity = Scan<size_t>(m_parameter->GetParam("stack-diversity")[0]);
+    m_parameter->SetParameter<size_t>(m_minHypoStackDiversity, "stack-diversity", 0);
   }
 
-  m_beamWidth = (m_parameter->GetParam("beam-threshold").size() > 0) ?
-                TransformScore(Scan<float>(m_parameter->GetParam("beam-threshold")[0]))
-                : TransformScore(DEFAULT_BEAM_WIDTH);
+  m_parameter->SetParameter(m_beamWidth, "beam-threshold", DEFAULT_BEAM_WIDTH);
+  m_beamWidth = TransformScore(m_beamWidth);
+
   m_earlyDiscardingThreshold = (m_parameter->GetParam("early-discarding-threshold").size() > 0) ?
                                TransformScore(Scan<float>(m_parameter->GetParam("early-discarding-threshold")[0]))
                                : TransformScore(DEFAULT_EARLY_DISCARDING_THRESHOLD);
@@ -437,20 +437,10 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-  m_startTranslationId = (m_parameter->GetParam("start-translation-id").size() > 0) ?
-                         Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
+  m_parameter->SetParameter<long>(m_startTranslationId, "start-translation-id", 0);
 
   // use of xml in input
-  if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
-  else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
-  else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
-  else if (m_parameter->GetParam("xml-input")[0]=="constraint") m_xmlInputType = XmlConstraint;
-  else if (m_parameter->GetParam("xml-input")[0]=="ignore") m_xmlInputType = XmlIgnore;
-  else if (m_parameter->GetParam("xml-input")[0]=="pass-through") m_xmlInputType = XmlPassThrough;
-  else {
-    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, constraint, or ignore");
-    return false;
-  }
+  m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
 
   // specify XML tags opening and closing brackets for XML option
   if (m_parameter->GetParam("xml-brackets").size() > 0) {
@@ -465,20 +455,16 @@ bool StaticData::LoadData(Parameter *parameter)
 	    << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
   }
 
-  if (m_parameter->GetParam("placeholder-factor").size() > 0) {
-    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
-  } else {
-    m_placeHolderFactor = NOT_FOUND;
-  }
+  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor", NOT_FOUND);
 
   std::map<std::string, std::string> featureNameOverride = OverrideFeatureNames();
 
   // all features
   map<string, int> featureIndexMap;
 
-  const vector<string> &features = m_parameter->GetParam("feature");
-  for (size_t i = 0; i < features.size(); ++i) {
-    const string &line = Trim(features[i]);
+  const vector<string> *features = m_parameter->GetParam2("feature");
+  for (size_t i = 0; features && i < features->size(); ++i) {
+    const string &line = Trim(features->at(i));
     VERBOSE(1,"line=" << line << endl);
     if (line.empty())
       continue;
@@ -503,7 +489,7 @@ bool StaticData::LoadData(Parameter *parameter)
   NoCache();
   OverrideFeatures();
 
-  if (!m_parameter->isParamSpecified("show-weights")) {
+  if (m_parameter->GetParam2("show-weights") == NULL) {
     LoadFeatureFunctions();
   }
 
@@ -517,15 +503,12 @@ bool StaticData::LoadData(Parameter *parameter)
   //Add any other features here.
 
   //Load extra feature weights
-  vector<string> extraWeightConfig = m_parameter->GetParam("weight-file");
-  if (extraWeightConfig.size()) {
-    if (extraWeightConfig.size() != 1) {
-      UserMessage::Add("One argument should be supplied for weight-file");
-      return false;
-    }
+  string weightFile;
+  m_parameter->SetParameter<string>(weightFile, "weight-file", "");
+  if (!weightFile.empty()) {
     ScoreComponentCollection extraWeights;
-    if (!extraWeights.Load(extraWeightConfig[0])) {
-      UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
+    if (!extraWeights.Load(weightFile)) {
+      UserMessage::Add("Unable to load weights from " + weightFile);
       return false;
     }
     m_allWeights.PlusEquals(extraWeights);

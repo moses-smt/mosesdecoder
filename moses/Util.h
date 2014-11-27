@@ -120,6 +120,22 @@ inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
   return (SearchAlgorithm) Scan<size_t>(input);
 }
 
+template<>
+inline XmlInputType Scan<XmlInputType>(const std::string &input)
+{
+  XmlInputType ret;
+  if (input=="exclusive") ret = XmlExclusive;
+  else if (input=="inclusive") ret = XmlInclusive;
+  else if (input=="constraint") ret = XmlConstraint;
+  else if (input=="ignore") ret = XmlIgnore;
+  else if (input=="pass-through") ret = XmlPassThrough;
+  else {
+	  UTIL_THROW2("Unknown XML input type");
+  }
+
+  return ret;
+}
+
 //! Specialisation to understand yes/no y/n true/false 0/1
 template<>
 bool Scan<bool>(const std::string &input);
