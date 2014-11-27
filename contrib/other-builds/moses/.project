@@ -571,16 +571,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Phrase.h</locationURI>
 		</link>
 		<link>
-			<name>PhraseOrientation.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseOrientation.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
-		</link>
-		<link>
 			<name>PrefixTree.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PrefixTree.h</locationURI>
@@ -1007,6 +997,11 @@
 		</link>
 		<link>
 			<name>bin</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>extract-ghkm</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2134,6 +2129,16 @@
 			<name>bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/lm.log</locationURI>
+		</link>
+		<link>
+			<name>extract-ghkm/PhraseOrientation.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.cpp</locationURI>
+		</link>
+		<link>
+			<name>extract-ghkm/PhraseOrientation.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/LexicalReordering.cpp</name>
