@@ -58,17 +58,13 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_detailedTranslationReportingFilePath()
-  ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_needAlignmentInfo(false)
-  ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
   ,m_treeStructure(NULL)
   ,m_useS2TDecoder(false)
-  ,m_nBestFactor(20)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -107,25 +103,17 @@ bool StaticData::LoadData(Parameter *parameter)
   const PARAM_VEC *params;
 
   // verbose level
-  m_verboseLevel = 1;
-  params = m_parameter->GetParam2("verbose");
-  if (params && params->size()) {
-    m_verboseLevel = Scan<size_t>(params->at(0));
-  }
+  m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
 
   // to cube or not to cube
-  params = m_parameter->GetParam2("search-algorithm");
-  m_searchAlgorithm = (params && params->size()) ?
-                      (SearchAlgorithm) Scan<size_t>(params->at(0)) : Normal;
+  m_parameter->SetParameter(m_searchAlgorithm, "search-algorithm", Normal);
 
   if (IsChart())
     LoadChartDecodingParameters();
 
   // input type has to be specified BEFORE loading the phrase tables!
-  params = m_parameter->GetParam2("inputtype");
-  if(params && params->size()) {
-    m_inputType= (InputTypeEnum) Scan<int>(params->at(0));
-  }
+  m_parameter->SetParameter(m_inputType, "inputtype", SentenceInput);
+
   std::string s_it = "text input";
   if (m_inputType == 1) {
     s_it = "confusion net";
@@ -138,20 +126,15 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   VERBOSE(2,"input type is: "<<s_it<<"\n");
 
-  params = m_parameter->GetParam2("recover-input-path");
-  if(params && params->size()) {
-    m_recoverPath = Scan<bool>(params->at(0));
-    if (m_recoverPath && m_inputType == SentenceInput) {
+  m_parameter->SetParameter(m_recoverPath, "recover-input-path", false);
+  if (m_recoverPath && m_inputType == SentenceInput) {
       TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
       m_recoverPath = false;
     }
-  }
 
   // factor delimiter
-  params = m_parameter->GetParam2("factor-delimiter");
-  if (params && params->size()) {
-    m_factorDelimiter = params->at(0);
-    if (m_factorDelimiter == "none")
+  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
+  if (m_factorDelimiter == "none") {
       m_factorDelimiter = "";
   }
 
@@ -165,10 +148,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
-  params = m_parameter->GetParam2("sort-word-alignment");
-  if(params && params->size()) {
-    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(params->at(0));
-  }
+  m_parameter->SetParameter(m_wordAlignmentSort, "sort-word-alignment", NoSort);
 
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
   if (m_PrintAlignmentInfoNbest) {
@@ -197,9 +177,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestSize = 0;
   }
 
-  if (m_parameter->GetParam("n-best-factor").size() > 0) {
-    m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
-  }
+  m_parameter->SetParameter<size_t>(m_nBestFactor, "n-best-factor", 20);
 
   //lattice samples
   if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
@@ -260,15 +238,7 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", false );
   SetBooleanParameter( &m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
 
-  if (m_parameter->isParamSpecified("output-unknowns")) {
-
-    if (m_parameter->GetParam("output-unknowns").size() == 1) {
-      m_outputUnknownsFile =Scan<string>(m_parameter->GetParam("output-unknowns")[0]);
-    } else {
-      UserMessage::Add(string("need to specify exactly one file name for unknowns"));
-      return false;
-    }
-  }
+  m_parameter->SetParameter<string>(m_outputUnknownsFile, "output-unknowns", "");
 
   // include feature names in the n-best list
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
@@ -316,45 +286,19 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
 
   // additional output
-  if (m_parameter->isParamSpecified("translation-details")) {
-    const vector<string> &args = m_parameter->GetParam("translation-details");
-    if (args.size() == 1) {
-      m_detailedTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the translation-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
-  if (m_parameter->isParamSpecified("tree-translation-details")) {
-    const vector<string> &args = m_parameter->GetParam("tree-translation-details");
-    if (args.size() == 1) {
-      m_detailedTreeFragmentsTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the tree-translation-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
+  m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath, "translation-details", "");
+  m_parameter->SetParameter<string>(m_detailedTreeFragmentsTranslationReportingFilePath, "tree-translation-details", "");
 
   //DIMw
-  if (m_parameter->isParamSpecified("translation-all-details")) {
-    const vector<string> &args = m_parameter->GetParam("translation-all-details");
-    if (args.size() == 1) {
-      m_detailedAllTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the translation-all-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
+  m_parameter->SetParameter<string>(m_detailedAllTranslationReportingFilePath, "translation-all-details", "");
 
   // reordering constraints
-  m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
-                    Scan<int>(m_parameter->GetParam("distortion-limit")[0])
-                    : -1;
+  m_parameter->SetParameter(m_maxDistortion, "distortion-limit", -1);
+
   SetBooleanParameter( &m_reorderingConstraint, "monotone-at-punctuation", false );
 
   // settings for pruning
-  m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
-                       ? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
+  m_parameter->SetParameter(m_maxHypoStackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
 
   m_minHypoStackDiversity = 0;
   if (m_parameter->GetParam("stack-diversity").size() > 0) {
