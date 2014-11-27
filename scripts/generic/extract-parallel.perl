@@ -125,15 +125,16 @@ $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
 $catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
 $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
 
-
+#BP Try not to run in parallel, always wait for child before going to next
 @children = ();
 if ($makeTTable)
 {
   $pid = RunFork($catCmd);
   push(@children, $pid);
-
+  waitpid($pid,0); #BP
   $pid = RunFork($catInvCmd);
   push(@children, $pid);
+  waitpid($pid,0);#BP
 }
 
 my $numStr = NumStr(0);
@@ -141,6 +142,7 @@ if (-e "$TMPDIR/extract.$numStr.o.gz")
 {
 	$pid = RunFork($catOCmd);
 	push(@children, $pid);
+	waitpid($pid,0);#BP
 }
 
 # wait for all sorting to finish
@@ -151,7 +153,7 @@ foreach (@children) {
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;
-`$cmd`;
+`$cmd`; #BP: we could comment it but it would create huge temp files...
 
 print STDERR "Finished ".localtime() ."\n";
 
