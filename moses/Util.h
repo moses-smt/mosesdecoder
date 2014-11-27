@@ -102,6 +102,24 @@ inline std::string Scan<std::string>(const std::string &input)
   return input;
 }
 
+template<>
+inline WordAlignmentSort Scan<WordAlignmentSort>(const std::string &input)
+{
+  return (WordAlignmentSort) Scan<size_t>(input);
+}
+
+template<>
+inline InputTypeEnum Scan<InputTypeEnum>(const std::string &input)
+{
+  return (InputTypeEnum) Scan<size_t>(input);
+}
+
+template<>
+inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
+{
+  return (SearchAlgorithm) Scan<size_t>(input);
+}
+
 //! Specialisation to understand yes/no y/n true/false 0/1
 template<>
 bool Scan<bool>(const std::string &input);

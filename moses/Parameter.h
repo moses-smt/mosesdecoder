@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include "TypeDef.h"
+#include "Util.h"
 
 namespace Moses
 {
@@ -111,7 +112,21 @@ public:
   }
 
   void Save(const std::string path);
+
+  template<typename T>
+  void SetParameter(T &var, const std::string &name, const T &defaultValue)
+  {
+	const PARAM_VEC *params = GetParam2(name);
+	if (params && params->size()) {
+		var = Scan<T>( params->at(0));
+	}
+	else {
+		var = defaultValue;
+	}
+  }
+
 };
+
 
 }
 
