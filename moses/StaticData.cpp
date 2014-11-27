@@ -68,6 +68,7 @@ StaticData::StaticData()
   ,m_currentWeightSetting("default")
   ,m_treeStructure(NULL)
   ,m_useS2TDecoder(false)
+  ,m_nBestFactor(20)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -103,22 +104,28 @@ bool StaticData::LoadData(Parameter *parameter)
   ResetUserTime();
   m_parameter = parameter;
 
+  const PARAM_VEC *params;
+
   // verbose level
   m_verboseLevel = 1;
-  if (m_parameter->GetParam("verbose").size() == 1) {
-    m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
+  params = m_parameter->GetParam2("verbose");
+  if (params && params->size()) {
+    m_verboseLevel = Scan<size_t>(params->at(0));
   }
 
   // to cube or not to cube
-  m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
-                      (SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
+  params = m_parameter->GetParam2("search-algorithm");
+  m_searchAlgorithm = (params && params->size()) ?
+                      (SearchAlgorithm) Scan<size_t>(params->at(0)) : Normal;
 
   if (IsChart())
     LoadChartDecodingParameters();
 
   // input type has to be specified BEFORE loading the phrase tables!
-  if(m_parameter->GetParam("inputtype").size())
-    m_inputType= (InputTypeEnum) Scan<int>(m_parameter->GetParam("inputtype")[0]);
+  params = m_parameter->GetParam2("inputtype");
+  if(params && params->size()) {
+    m_inputType= (InputTypeEnum) Scan<int>(params->at(0));
+  }
   std::string s_it = "text input";
   if (m_inputType == 1) {
     s_it = "confusion net";
@@ -131,8 +138,9 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   VERBOSE(2,"input type is: "<<s_it<<"\n");
 
-  if(m_parameter->GetParam("recover-input-path").size()) {
-    m_recoverPath = Scan<bool>(m_parameter->GetParam("recover-input-path")[0]);
+  params = m_parameter->GetParam2("recover-input-path");
+  if(params && params->size()) {
+    m_recoverPath = Scan<bool>(params->at(0));
     if (m_recoverPath && m_inputType == SentenceInput) {
       TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
       m_recoverPath = false;
@@ -140,8 +148,9 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   // factor delimiter
-  if (m_parameter->GetParam("factor-delimiter").size() > 0) {
-    m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
+  params = m_parameter->GetParam2("factor-delimiter");
+  if (params && params->size()) {
+    m_factorDelimiter = params->at(0);
     if (m_factorDelimiter == "none")
       m_factorDelimiter = "";
   }
@@ -156,8 +165,9 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
-  if(m_parameter->GetParam("sort-word-alignment").size()) {
-    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
+  params = m_parameter->GetParam2("sort-word-alignment");
+  if(params && params->size()) {
+    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(params->at(0));
   }
 
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
@@ -165,27 +175,30 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
-  if (m_parameter->GetParam("alignment-output-file").size() > 0) {
-    m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
+  params = m_parameter->GetParam2("alignment-output-file");
+  if (params && params->size()) {
+    m_alignmentOutputFile = Scan<std::string>(params->at(0));
     m_needAlignmentInfo = true;
   }
 
   // n-best
-  if (m_parameter->GetParam("n-best-list").size() >= 2) {
-    m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
-    m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
-    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2
-                         && m_parameter->GetParam("n-best-list")[2]=="distinct");
-  } else if (m_parameter->GetParam("n-best-list").size() == 1) {
-    UserMessage::Add(string("wrong format for switch -n-best-list file size"));
-    return false;
+  params = m_parameter->GetParam2("n-best-list");
+  if (params) {
+	  if (params->size() >= 2) {
+		m_nBestFilePath = params->at(0);
+		m_nBestSize = Scan<size_t>( params->at(1) );
+		m_onlyDistinctNBest=(params->size()>2 && params->at(2)=="distinct");
+	  }
+	  else {
+		  UserMessage::Add(string("wrong format for switch -n-best-list file size [disinct]"));
+		  return false;
+	  }
   } else {
     m_nBestSize = 0;
   }
+
   if (m_parameter->GetParam("n-best-factor").size() > 0) {
     m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
-  } else {
-    m_nBestFactor = 20;
   }
 
   //lattice samples
