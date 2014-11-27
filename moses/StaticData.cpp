@@ -58,8 +58,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_detailedTranslationReportingFilePath()
-  ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_needAlignmentInfo(false)
   ,m_lmEnableOOVFeature(false)
@@ -240,15 +238,7 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", false );
   SetBooleanParameter( &m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
 
-  if (m_parameter->isParamSpecified("output-unknowns")) {
-
-    if (m_parameter->GetParam("output-unknowns").size() == 1) {
-      m_outputUnknownsFile =Scan<string>(m_parameter->GetParam("output-unknowns")[0]);
-    } else {
-      UserMessage::Add(string("need to specify exactly one file name for unknowns"));
-      return false;
-    }
-  }
+  m_parameter->SetParameter<string>(m_outputUnknownsFile, "output-unknowns", "");
 
   // include feature names in the n-best list
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
@@ -296,45 +286,19 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
 
   // additional output
-  if (m_parameter->isParamSpecified("translation-details")) {
-    const vector<string> &args = m_parameter->GetParam("translation-details");
-    if (args.size() == 1) {
-      m_detailedTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the translation-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
-  if (m_parameter->isParamSpecified("tree-translation-details")) {
-    const vector<string> &args = m_parameter->GetParam("tree-translation-details");
-    if (args.size() == 1) {
-      m_detailedTreeFragmentsTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the tree-translation-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
+  m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath, "translation-details", "");
+  m_parameter->SetParameter<string>(m_detailedTreeFragmentsTranslationReportingFilePath, "tree-translation-details", "");
 
   //DIMw
-  if (m_parameter->isParamSpecified("translation-all-details")) {
-    const vector<string> &args = m_parameter->GetParam("translation-all-details");
-    if (args.size() == 1) {
-      m_detailedAllTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the translation-all-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
+  m_parameter->SetParameter<string>(m_detailedAllTranslationReportingFilePath, "translation-all-details", "");
 
   // reordering constraints
-  m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
-                    Scan<int>(m_parameter->GetParam("distortion-limit")[0])
-                    : -1;
+  m_parameter->SetParameter(m_maxDistortion, "distortion-limit", -1);
+
   SetBooleanParameter( &m_reorderingConstraint, "monotone-at-punctuation", false );
 
   // settings for pruning
-  m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
-                       ? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
+  m_parameter->SetParameter(m_maxHypoStackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
 
   m_minHypoStackDiversity = 0;
   if (m_parameter->GetParam("stack-diversity").size() > 0) {
