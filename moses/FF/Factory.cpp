@@ -263,6 +263,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("OxFactoredLM", OxLM<oxlm::FactoredLM>);
   MOSES_FNAME2("OxFactoredMaxentLM", OxLM<oxlm::FactoredMaxentLM>);
   MOSES_FNAME2("OxSourceFactoredLM", SourceOxLM);
+  MOSES_FNAME2("OxTreeLM", OxLM<oxlm::FactoredTreeLM>);
 #endif
 
   Add("KENLM", new KenFactory());

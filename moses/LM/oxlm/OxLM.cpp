@@ -201,6 +201,7 @@ void OxLM<Model>::CleanUpAfterSentenceProcessing(const InputType& source) {
 template class OxLM<LM>;
 template class OxLM<FactoredLM>;
 template class OxLM<FactoredMaxentLM>;
+template class OxLM<FactoredTreeLM>;
 
 }
 
