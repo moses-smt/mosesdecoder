@@ -62,13 +62,11 @@ StaticData::StaticData()
   ,m_detailedTreeFragmentsTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_needAlignmentInfo(false)
-  ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
   ,m_treeStructure(NULL)
   ,m_useS2TDecoder(false)
-  ,m_nBestFactor(20)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -107,25 +105,17 @@ bool StaticData::LoadData(Parameter *parameter)
   const PARAM_VEC *params;
 
   // verbose level
-  m_verboseLevel = 1;
-  params = m_parameter->GetParam2("verbose");
-  if (params && params->size()) {
-    m_verboseLevel = Scan<size_t>(params->at(0));
-  }
+  m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
 
   // to cube or not to cube
-  params = m_parameter->GetParam2("search-algorithm");
-  m_searchAlgorithm = (params && params->size()) ?
-                      (SearchAlgorithm) Scan<size_t>(params->at(0)) : Normal;
+  m_parameter->SetParameter(m_searchAlgorithm, "search-algorithm", Normal);
 
   if (IsChart())
     LoadChartDecodingParameters();
 
   // input type has to be specified BEFORE loading the phrase tables!
-  params = m_parameter->GetParam2("inputtype");
-  if(params && params->size()) {
-    m_inputType= (InputTypeEnum) Scan<int>(params->at(0));
-  }
+  m_parameter->SetParameter(m_inputType, "inputtype", SentenceInput);
+
   std::string s_it = "text input";
   if (m_inputType == 1) {
     s_it = "confusion net";
@@ -138,20 +128,15 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   VERBOSE(2,"input type is: "<<s_it<<"\n");
 
-  params = m_parameter->GetParam2("recover-input-path");
-  if(params && params->size()) {
-    m_recoverPath = Scan<bool>(params->at(0));
-    if (m_recoverPath && m_inputType == SentenceInput) {
+  m_parameter->SetParameter(m_recoverPath, "recover-input-path", false);
+  if (m_recoverPath && m_inputType == SentenceInput) {
       TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
       m_recoverPath = false;
     }
-  }
 
   // factor delimiter
-  params = m_parameter->GetParam2("factor-delimiter");
-  if (params && params->size()) {
-    m_factorDelimiter = params->at(0);
-    if (m_factorDelimiter == "none")
+  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
+  if (m_factorDelimiter == "none") {
       m_factorDelimiter = "";
   }
 
@@ -165,10 +150,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
-  params = m_parameter->GetParam2("sort-word-alignment");
-  if(params && params->size()) {
-    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(params->at(0));
-  }
+  m_parameter->SetParameter(m_wordAlignmentSort, "sort-word-alignment", NoSort);
 
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
   if (m_PrintAlignmentInfoNbest) {
@@ -197,9 +179,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestSize = 0;
   }
 
-  if (m_parameter->GetParam("n-best-factor").size() > 0) {
-    m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
-  }
+  m_parameter->SetParameter<size_t>(m_nBestFactor, "n-best-factor", 20);
 
   //lattice samples
   if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
