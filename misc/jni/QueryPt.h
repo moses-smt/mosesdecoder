@@ -31,7 +31,7 @@ class QueryPt {
     boost::shared_ptr<Moses::LMList> m_lmList;
   
   public:
-    QueryPt(const std::string& ttable);
+    QueryPt(const std::string& ttable, int scores = 5);
     std::string query(std::string phrase);
     void usage();
 };

@@ -13,37 +13,11 @@
 
 using namespace Moses;
 
-QueryPt::QueryPt(const std::string& ttable)
+QueryPt::QueryPt(const std::string& ttable, int scores)
+: m_nscores(scores)
 {
-  m_nscores = 5;
   m_useAlignments = true;
   m_reportCounts = false;
-
-  //for(int i = 1; i < argc; i++) {
-  //  if(!strcmp(argv[i], "-n")) {
-  //    if(i + 1 == argc)
-  //      usage();
-  //    nscores = atoi(argv[++i]);
-  //  } else if(!strcmp(argv[i], "-s")) {
-  //    if(i + 1 == argc)
-  //      usage();
-  //    paramSource = argv[++i];
-  //    single = true;
-  //  } else if(!strcmp(argv[i], "-t")) {
-  //    if(i + 1 == argc)
-  //      usage();
-  //    ttable = argv[++i];
-  //  } else if(!strcmp(argv[i], "-a")) {
-  //    useAlignments = true;
-  //  } else if (!strcmp(argv[i], "-c")) {
-  //    reportCounts = true;
-  //  }
-  //  else
-  //    usage();
-  //}
-  //
-  //if(ttable == "")
-  //  usage();
 
   m_input = std::vector<FactorType>(1, 0);
   m_output = std::vector<FactorType>(1, 0);

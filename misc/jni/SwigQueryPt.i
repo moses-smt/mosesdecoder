@@ -7,6 +7,6 @@
 
 class QueryPt {
   public:
-    QueryPt(std::string path);
+    QueryPt(std::string path, int scores);
     std::string query(std::string phrase);
 };

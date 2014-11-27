@@ -1344,6 +1344,7 @@ sub extract_phrase {
         $cmd .= " --NoTTable" if !$ttable_flag;
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
+      $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     
     $cmd .= " --GZOutput ";

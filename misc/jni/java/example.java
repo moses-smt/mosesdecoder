@@ -10,8 +10,11 @@ public class example {
 
     public static void main(String argv[]) {
         String mosesModelPath = argv[0];
-            
-        QueryPt pt = new QueryPt(mosesModelPath);
+       int scores = 5;    
+       if(argv.length > 1)
+          scores = Integer.parseInt(argv[1]);
+    
+        QueryPt pt = new QueryPt(mosesModelPath, scores);
         if(pt != null) {
             try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
