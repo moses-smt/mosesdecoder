@@ -264,10 +264,6 @@ public:
   bool LoadData(Parameter *parameter);
   void ClearData();
 
-  const PARAM_VEC &GetParam(const std::string &paramName) const {
-    return m_parameter->GetParam(paramName);
-  }
-
   const Parameter &GetParameter() const {
     return *m_parameter;
   }
@@ -387,10 +383,6 @@ public:
 
   bool UseMinlexrInMemory() const {
     return m_minlexrMemory;
-  }
-
-  const std::vector<std::string> &GetDescription() const {
-    return m_parameter->GetParam("description");
   }
 
   // for mert

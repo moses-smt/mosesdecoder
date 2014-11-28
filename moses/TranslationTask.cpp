@@ -119,7 +119,11 @@ void TranslationTask::RunPb()
   // Output search graph in HTK standard lattice format (SLF)
   if (m_outputSearchGraphSLF) {
     stringstream fileName;
-    fileName << staticData.GetParam("output-search-graph-slf")[0] << "/" << m_source->GetTranslationId() << ".slf";
+
+    string dir;
+    staticData.GetParameter().SetParameter<string>(dir, "output-search-graph-slf", "");
+
+    fileName << dir << "/" << m_source->GetTranslationId() << ".slf";
     ofstream *file = new ofstream;
     file->open(fileName.str().c_str());
     if (file->is_open() && file->good()) {
@@ -169,7 +173,9 @@ void TranslationTask::RunPb()
           m_ioWrapper.OutputInput(out, bestHypo);
           out << "||| ";
         }
-        if (staticData.GetParam("print-id").size() && Scan<bool>(staticData.GetParam("print-id")[0]) ) {
+
+        const PARAM_VEC *params = staticData.GetParameter().GetParam2("print-id");
+        if (params && params->size() && Scan<bool>(params->at(0)) ) {
           out << m_source->GetTranslationId() << " ";
         }
 

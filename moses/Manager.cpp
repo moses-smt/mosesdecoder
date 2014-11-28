@@ -565,8 +565,19 @@ void Manager::GetOutputLanguageModelOrder( std::ostream &out, const Hypothesis *
 void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const
 {
   const StaticData &staticData = StaticData::Instance();
-  string fileName = staticData.GetParam("output-word-graph")[0];
-  bool outputNBest = Scan<bool>(staticData.GetParam("output-word-graph")[1]);
+  const PARAM_VEC *params;
+
+  string fileName;
+  bool outputNBest = false;
+  params = staticData.GetParameter().GetParam2("output-word-graph");
+  if (params && params->size()) {
+	  fileName = params->at(0);
+
+	  if (params->size() == 2) {
+		  outputNBest = Scan<bool>(params->at(1));
+	  }
+  }
+
   const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
 
   outputWordGraphStream << "VERSION=1.0" << endl

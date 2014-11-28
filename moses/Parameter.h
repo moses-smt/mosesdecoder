@@ -91,7 +91,6 @@ public:
   void Explain();
 
   /** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */
-  const PARAM_VEC &GetParam(const std::string &paramName);
   const PARAM_VEC *GetParam2(const std::string &paramName) const;
 
   /** check if parameter is defined (either in moses.ini or as switch) */
@@ -114,7 +113,7 @@ public:
   void Save(const std::string path);
 
   template<typename T>
-  void SetParameter(T &var, const std::string &name, const T &defaultValue)
+  void SetParameter(T &var, const std::string &name, const T &defaultValue) const
   {
 	const PARAM_VEC *params = GetParam2(name);
 	if (params && params->size()) {

@@ -217,11 +217,6 @@ Parameter::~Parameter()
 {
 }
 
-const PARAM_VEC &Parameter::GetParam(const std::string &paramName)
-{
-  return m_setting[paramName];
-}
-
 const PARAM_VEC *Parameter::GetParam2(const std::string &paramName) const
 {
 	PARAM_MAP::const_iterator iter = m_setting.find( paramName );

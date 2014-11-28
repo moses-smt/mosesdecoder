@@ -132,10 +132,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   // search graph output
   if (staticData.GetOutputSearchGraph()) {
     string fileName;
-    if (staticData.GetOutputSearchGraphExtended())
-      fileName = staticData.GetParam("output-search-graph-extended")[0];
-    else
-      fileName = staticData.GetParam("output-search-graph")[0];
+    if (staticData.GetOutputSearchGraphExtended()) {
+    	staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph-extended", "");
+    }
+    else {
+    	staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph", "");
+    }
     std::ofstream *file = new std::ofstream;
     m_outputSearchGraphStream = file;
     file->open(fileName.c_str());
@@ -157,7 +159,9 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   }
 
   if (staticData.GetOutputSearchGraph()) {
-    string fileName = staticData.GetParam("output-search-graph")[0];
+    string fileName;
+	staticData.GetParameter().SetParameter<string>(fileName, "output-search-graph", "");
+
     std::ofstream *file = new std::ofstream;
     m_outputSearchGraphStream = file;
     file->open(fileName.c_str());
@@ -179,7 +183,9 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 
   // wordgraph output
   if (staticData.GetOutputWordGraph()) {
-    string fileName = staticData.GetParam("output-word-graph")[0];
+    string fileName;
+	staticData.GetParameter().SetParameter<string>(fileName, "output-word-graph", "");
+
     std::ofstream *file = new std::ofstream;
     m_outputWordGraphStream  = file;
     file->open(fileName.c_str());
@@ -206,10 +212,10 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 
-  if (staticData.GetParameter().isParamSpecified("spe-src")) {
-	spe_src = new ifstream(staticData.GetParam("spe-src")[0].c_str());
-    spe_trg = new ifstream(staticData.GetParam("spe-trg")[0].c_str());
-    spe_aln = new ifstream(staticData.GetParam("spe-aln")[0].c_str());
+  if (staticData.GetParameter().GetParam2("spe-src")) {
+	spe_src = new ifstream(staticData.GetParameter().GetParam2("spe-src")->at(0).c_str());
+    spe_trg = new ifstream(staticData.GetParameter().GetParam2("spe-trg")->at(0).c_str());
+    spe_aln = new ifstream(staticData.GetParameter().GetParam2("spe-aln")->at(0).c_str());
   }
 }
 
@@ -1406,10 +1412,11 @@ IOWrapper *IOWrapper::GetIOWrapper(const StaticData &staticData)
 
   // io
   string inputPath;
-  if (staticData.GetParam("input-file").size() == 1) {
+  staticData.GetParameter().SetParameter<string>(inputPath, "input-file", "");
+  if (!inputPath.empty()) {
     VERBOSE(2,"IO from File" << endl);
-    inputPath = staticData.GetParam("input-file")[0];
   }
+
   ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
                             , staticData.GetNBestSize()
                             , staticData.GetNBestFilePath()
