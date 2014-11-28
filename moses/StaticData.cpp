@@ -180,33 +180,41 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter<size_t>(m_nBestFactor, "n-best-factor", 20);
 
   //lattice samples
-  if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
-    m_latticeSamplesFilePath = m_parameter->GetParam("lattice-samples")[0];
-    m_latticeSamplesSize = Scan<size_t>(m_parameter->GetParam("lattice-samples")[1]);
-  } else if (m_parameter->GetParam("lattice-samples").size() != 0 ) {
-    UserMessage::Add(string("wrong format for switch -lattice-samples file size"));
-    return false;
-  } else {
+  params = m_parameter->GetParam2("lattice-samples");
+  if (params) {
+	  if (params->size() ==2 ) {
+		m_latticeSamplesFilePath = params->at(0);
+		m_latticeSamplesSize = Scan<size_t>(params->at(1));
+	  }
+	  else {
+		UserMessage::Add(string("wrong format for switch -lattice-samples file size"));
+		return false;
+	  }
+  }
+  else {
     m_latticeSamplesSize = 0;
   }
 
   // word graph
-  if (m_parameter->GetParam("output-word-graph").size() == 2)
-    m_outputWordGraph = true;
+  params = m_parameter->GetParam2("output-word-graph");
+  if (params && params->size() == 2)
+	m_outputWordGraph = true;
   else
-    m_outputWordGraph = false;
+	m_outputWordGraph = false;
 
   // search graph
-  if (m_parameter->GetParam("output-search-graph").size() > 0) {
-    if (m_parameter->GetParam("output-search-graph").size() != 1) {
+  params = m_parameter->GetParam2("output-search-graph");
+  if (params && params->size()) {
+    if (params->size() != 1) {
       UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph file"));
       return false;
     }
     m_outputSearchGraph = true;
   }
   // ... in extended format
-  else if (m_parameter->GetParam("output-search-graph-extended").size() > 0) {
-    if (m_parameter->GetParam("output-search-graph-extended").size() != 1) {
+  else if (m_parameter->GetParam2("output-search-graph-extended") &&
+		  m_parameter->GetParam2("output-search-graph-extended")->size()) {
+    if (m_parameter->GetParam2("output-search-graph-extended")->size() != 1) {
       UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-extended file"));
       return false;
     }
@@ -215,19 +223,25 @@ bool StaticData::LoadData(Parameter *parameter)
   } else {
     m_outputSearchGraph = false;
   }
-  if (m_parameter->GetParam("output-search-graph-slf").size() > 0) {
+
+  params = m_parameter->GetParam2("output-search-graph-slf");
+  if (params && params->size()) {
     m_outputSearchGraphSLF = true;
   } else {
     m_outputSearchGraphSLF = false;
   }
-  if (m_parameter->GetParam("output-search-graph-hypergraph").size() > 0) {
+
+  params = m_parameter->GetParam2("output-search-graph-hypergraph");
+  if (params && params->size()) {
     m_outputSearchGraphHypergraph = true;
   } else {
     m_outputSearchGraphHypergraph = false;
   }
+
 #ifdef HAVE_PROTOBUF
-  if (m_parameter->GetParam("output-search-graph-pb").size() > 0) {
-    if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {
+  params = m_parameter->GetParam2("output-search-graph-pb");
+  if (params && params->size()) {
+    if (params->size() != 1) {
       UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-pb path"));
       return false;
     }
@@ -235,6 +249,7 @@ bool StaticData::LoadData(Parameter *parameter)
   } else
     m_outputSearchGraphPB = false;
 #endif
+
   SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", false );
   SetBooleanParameter( &m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
 
@@ -257,19 +272,18 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
 
   //input factors
-  const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
-  for(size_t i=0; i<inputFactorVector.size(); i++) {
-    m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
+  params = m_parameter->GetParam2("input-factors");
+  if (params) {
+	m_inputFactorOrder = Scan<FactorType>(*params);
   }
   if(m_inputFactorOrder.empty()) {
-    UserMessage::Add(string("no input factor specified in config file"));
-    return false;
+	m_inputFactorOrder.push_back(0);
   }
 
   //output factors
-  const vector<string> &outputFactorVector = m_parameter->GetParam("output-factors");
-  for(size_t i=0; i<outputFactorVector.size(); i++) {
-    m_outputFactorOrder.push_back(Scan<FactorType>(outputFactorVector[i]));
+  params = m_parameter->GetParam2("output-factors");
+  if (params) {
+	  m_outputFactorOrder = Scan<FactorType>(*params);
   }
   if(m_outputFactorOrder.empty()) {
     // default. output factor 0
@@ -316,9 +330,9 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter(m_beamWidth, "beam-threshold", DEFAULT_BEAM_WIDTH);
   m_beamWidth = TransformScore(m_beamWidth);
 
-  m_earlyDiscardingThreshold = (m_parameter->GetParam("early-discarding-threshold").size() > 0) ?
-                               TransformScore(Scan<float>(m_parameter->GetParam("early-discarding-threshold")[0]))
-                               : TransformScore(DEFAULT_EARLY_DISCARDING_THRESHOLD);
+  m_parameter->SetParameter(m_earlyDiscardingThreshold, "early-discarding-threshold", DEFAULT_EARLY_DISCARDING_THRESHOLD);
+  m_earlyDiscardingThreshold = TransformScore(m_earlyDiscardingThreshold);
+
   m_translationOptionThreshold = (m_parameter->GetParam("translation-option-threshold").size() > 0) ?
                                  TransformScore(Scan<float>(m_parameter->GetParam("translation-option-threshold")[0]))
                                  : TransformScore(DEFAULT_TRANSLATION_OPTION_THRESHOLD);
