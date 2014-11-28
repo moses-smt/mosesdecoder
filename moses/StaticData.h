@@ -212,7 +212,7 @@ protected:
   void LoadNonTerminals();
 
   //! helper fn to set bool param from ini file/command line
-  void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
+  void SetBooleanParameter(bool &paramter, std::string parameterName, bool defaultValue);
 
   //! load decoding steps
   bool LoadDecodeGraphs();

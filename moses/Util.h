@@ -121,6 +121,18 @@ inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
 }
 
 template<>
+inline S2TParsingAlgorithm Scan<S2TParsingAlgorithm>(const std::string &input)
+{
+  return (S2TParsingAlgorithm) Scan<size_t>(input);
+}
+
+template<>
+inline SourceLabelOverlap Scan<SourceLabelOverlap>(const std::string &input)
+{
+  return (SourceLabelOverlap) Scan<size_t>(input);
+}
+
+template<>
 inline XmlInputType Scan<XmlInputType>(const std::string &input)
 {
   XmlInputType ret;
