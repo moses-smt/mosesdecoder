@@ -48,7 +48,7 @@ HypergraphOutput<M>::HypergraphOutput(size_t precision) :
   m_precision(precision) {
   const StaticData& staticData = StaticData::Instance();
   vector<string> hypergraphParameters;
-  const PARAM_VEC *params = staticData.GetParameter().GetParam2("output-search-graph-hypergraph");
+  const PARAM_VEC *params = staticData.GetParameter().GetParam("output-search-graph-hypergraph");
   if (params) {
 	  hypergraphParameters = *params;
   }

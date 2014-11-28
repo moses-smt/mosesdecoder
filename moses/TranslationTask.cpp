@@ -174,7 +174,7 @@ void TranslationTask::RunPb()
           out << "||| ";
         }
 
-        const PARAM_VEC *params = staticData.GetParameter().GetParam2("print-id");
+        const PARAM_VEC *params = staticData.GetParameter().GetParam("print-id");
         if (params && params->size() && Scan<bool>(params->at(0)) ) {
           out << m_source->GetTranslationId() << " ";
         }

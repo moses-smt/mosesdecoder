@@ -155,14 +155,14 @@ bool StaticData::LoadData(Parameter *parameter)
     m_needAlignmentInfo = true;
   }
 
-  params = m_parameter->GetParam2("alignment-output-file");
+  params = m_parameter->GetParam("alignment-output-file");
   if (params && params->size()) {
     m_alignmentOutputFile = Scan<std::string>(params->at(0));
     m_needAlignmentInfo = true;
   }
 
   // n-best
-  params = m_parameter->GetParam2("n-best-list");
+  params = m_parameter->GetParam("n-best-list");
   if (params) {
 	  if (params->size() >= 2) {
 		m_nBestFilePath = params->at(0);
@@ -180,7 +180,7 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter<size_t>(m_nBestFactor, "n-best-factor", 20);
 
   //lattice samples
-  params = m_parameter->GetParam2("lattice-samples");
+  params = m_parameter->GetParam("lattice-samples");
   if (params) {
 	  if (params->size() ==2 ) {
 		m_latticeSamplesFilePath = params->at(0);
@@ -196,14 +196,14 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   // word graph
-  params = m_parameter->GetParam2("output-word-graph");
+  params = m_parameter->GetParam("output-word-graph");
   if (params && params->size() == 2)
 	m_outputWordGraph = true;
   else
 	m_outputWordGraph = false;
 
   // search graph
-  params = m_parameter->GetParam2("output-search-graph");
+  params = m_parameter->GetParam("output-search-graph");
   if (params && params->size()) {
     if (params->size() != 1) {
       UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph file"));
@@ -212,9 +212,9 @@ bool StaticData::LoadData(Parameter *parameter)
     m_outputSearchGraph = true;
   }
   // ... in extended format
-  else if (m_parameter->GetParam2("output-search-graph-extended") &&
-		  m_parameter->GetParam2("output-search-graph-extended")->size()) {
-    if (m_parameter->GetParam2("output-search-graph-extended")->size() != 1) {
+  else if (m_parameter->GetParam("output-search-graph-extended") &&
+		  m_parameter->GetParam("output-search-graph-extended")->size()) {
+    if (m_parameter->GetParam("output-search-graph-extended")->size() != 1) {
       UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-extended file"));
       return false;
     }
@@ -224,14 +224,14 @@ bool StaticData::LoadData(Parameter *parameter)
     m_outputSearchGraph = false;
   }
 
-  params = m_parameter->GetParam2("output-search-graph-slf");
+  params = m_parameter->GetParam("output-search-graph-slf");
   if (params && params->size()) {
     m_outputSearchGraphSLF = true;
   } else {
     m_outputSearchGraphSLF = false;
   }
 
-  params = m_parameter->GetParam2("output-search-graph-hypergraph");
+  params = m_parameter->GetParam("output-search-graph-hypergraph");
   if (params && params->size()) {
     m_outputSearchGraphHypergraph = true;
   } else {
@@ -239,7 +239,7 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
 #ifdef HAVE_PROTOBUF
-  params = m_parameter->GetParam2("output-search-graph-pb");
+  params = m_parameter->GetParam("output-search-graph-pb");
   if (params && params->size()) {
     if (params->size() != 1) {
       UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-pb path"));
@@ -272,7 +272,7 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
 
   //input factors
-  params = m_parameter->GetParam2("input-factors");
+  params = m_parameter->GetParam("input-factors");
   if (params) {
 	m_inputFactorOrder = Scan<FactorType>(*params);
   }
@@ -281,7 +281,7 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   //output factors
-  params = m_parameter->GetParam2("output-factors");
+  params = m_parameter->GetParam("output-factors");
   if (params) {
 	  m_outputFactorOrder = Scan<FactorType>(*params);
   }
@@ -315,7 +315,7 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter(m_maxHypoStackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
 
   m_minHypoStackDiversity = 0;
-  params = m_parameter->GetParam2("stack-diversity");
+  params = m_parameter->GetParam("stack-diversity");
   if (params && params->size()) {
     if (m_maxDistortion > 15) {
       UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
@@ -378,7 +378,7 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter(m_lmbrMapWeight, "lmbr-map-weight", 0.0f);
   SetBooleanParameter(m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
 
-  params = m_parameter->GetParam2("lmbr-thetas");
+  params = m_parameter->GetParam("lmbr-thetas");
   if (params) {
 	  m_lmbrThetas = Scan<float>(*params);
   }
@@ -408,7 +408,7 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
 
   m_threadCount = 1;
-  params = m_parameter->GetParam2("threads");
+  params = m_parameter->GetParam("threads");
   if (params && params->size()) {
     if (params->at(0) == "all") {
 #ifdef WITH_THREADS
@@ -442,7 +442,7 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
 
   // specify XML tags opening and closing brackets for XML option
-  params = m_parameter->GetParam2("xml-brackets");
+  params = m_parameter->GetParam("xml-brackets");
   if (params && params->size()) {
     std::vector<std::string> brackets = Tokenize(params->at(0));
     if(brackets.size()!=2) {
@@ -462,7 +462,7 @@ bool StaticData::LoadData(Parameter *parameter)
   // all features
   map<string, int> featureIndexMap;
 
-  params = m_parameter->GetParam2("feature");
+  params = m_parameter->GetParam("feature");
   for (size_t i = 0; params && i < params->size(); ++i) {
     const string &line = Trim(params->at(i));
     VERBOSE(1,"line=" << line << endl);
@@ -489,7 +489,7 @@ bool StaticData::LoadData(Parameter *parameter)
   NoCache();
   OverrideFeatures();
 
-  if (m_parameter->GetParam2("show-weights") == NULL) {
+  if (m_parameter->GetParam("show-weights") == NULL) {
     LoadFeatureFunctions();
   }
 
@@ -518,7 +518,7 @@ bool StaticData::LoadData(Parameter *parameter)
   LoadSparseWeightsFromConfig();
 
   // alternate weight settings
-  params = m_parameter->GetParam2("alternate-weight-setting");
+  params = m_parameter->GetParam("alternate-weight-setting");
   if (params && params->size()) {
     if (!LoadAlternateWeightSettings()) {
       return false;
@@ -529,7 +529,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
 void StaticData::SetBooleanParameter( bool &parameter, string parameterName, bool defaultValue )
 {
-  const PARAM_VEC *params = m_parameter->GetParam2(parameterName);
+  const PARAM_VEC *params = m_parameter->GetParam(parameterName);
 
   // default value if nothing is specified
   parameter = defaultValue;
@@ -575,7 +575,7 @@ void StaticData::LoadNonTerminals()
   m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
 
   // for unknown words
-  const PARAM_VEC *params = m_parameter->GetParam2("unknown-lhs");
+  const PARAM_VEC *params = m_parameter->GetParam("unknown-lhs");
   if (params == NULL || params->size() == 0) {
     UnknownLHSEntry entry(defaultNonTerminals, 0.0f);
     m_unknownLHS.push_back(entry);
@@ -615,12 +615,12 @@ bool StaticData::LoadDecodeGraphs()
 
   const PARAM_VEC *params;
 
-  params = m_parameter->GetParam2("mapping");
+  params = m_parameter->GetParam("mapping");
   if (params && params->size()) {
 	  mappingVector = *params;
   }
 
-  params = m_parameter->GetParam2("max-chart-span");
+  params = m_parameter->GetParam("max-chart-span");
   if (params && params->size()) {
 	  maxChartSpans = Scan<size_t>(*params);
   }
@@ -710,7 +710,7 @@ bool StaticData::LoadDecodeGraphs()
   // set maximum n-gram size for backoff approach to decoding paths
   // default is always use subsequent paths (value = 0)
   // if specified, record maxmimum unseen n-gram size
-  const vector<string> *backoffVector = m_parameter->GetParam2("decoding-graph-backoff");
+  const vector<string> *backoffVector = m_parameter->GetParam("decoding-graph-backoff");
   for(size_t i=0; i<m_decodeGraphs.size() && backoffVector && i<backoffVector->size(); i++) {
 	DecodeGraph &decodeGraph = *m_decodeGraphs[i];
 
@@ -978,7 +978,7 @@ bool StaticData::LoadAlternateWeightSettings()
   }
 
   vector<string> weightSpecification;
-  const PARAM_VEC *params = m_parameter->GetParam2("alternate-weight-setting");
+  const PARAM_VEC *params = m_parameter->GetParam("alternate-weight-setting");
   if (params && params->size()) {
 	  weightSpecification = *params;
   }
@@ -1096,7 +1096,7 @@ std::map<std::string, std::string> StaticData::OverrideFeatureNames()
 {
 	std::map<std::string, std::string> ret;
 
-	const PARAM_VEC *params = m_parameter->GetParam2("feature-name-overwrite");
+	const PARAM_VEC *params = m_parameter->GetParam("feature-name-overwrite");
 	if (params && params->size()) {
 		UTIL_THROW_IF2(params->size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
 		vector<string> toks = Tokenize(params->at(0));
@@ -1123,7 +1123,7 @@ std::map<std::string, std::string> StaticData::OverrideFeatureNames()
 
 void StaticData::OverrideFeatures()
 {
-  const PARAM_VEC *params = m_parameter->GetParam2("feature-overwrite");
+  const PARAM_VEC *params = m_parameter->GetParam("feature-overwrite");
   for (size_t i = 0; params && i < params->size(); ++i) {
     const string &str = params->at(i);
     vector<string> toks = Tokenize(str);

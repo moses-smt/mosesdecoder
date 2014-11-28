@@ -569,7 +569,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 
   string fileName;
   bool outputNBest = false;
-  params = staticData.GetParameter().GetParam2("output-word-graph");
+  params = staticData.GetParameter().GetParam("output-word-graph");
   if (params && params->size()) {
 	  fileName = params->at(0);
 
