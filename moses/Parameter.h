@@ -126,6 +126,8 @@ public:
 
 };
 
+template<>
+void Parameter::SetParameter<bool>(bool &var, const std::string &name, const bool &defaultValue) const;
 
 }
 

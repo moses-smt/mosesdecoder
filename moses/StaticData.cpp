@@ -138,19 +138,19 @@ bool StaticData::LoadData(Parameter *parameter)
       m_factorDelimiter = "";
   }
 
-  SetBooleanParameter( m_continuePartialTranslation, "continue-partial-translation", false );
-  SetBooleanParameter( m_outputHypoScore, "output-hypo-score", false );
+  m_parameter->SetParameter( m_continuePartialTranslation, "continue-partial-translation", false );
+  m_parameter->SetParameter( m_outputHypoScore, "output-hypo-score", false );
 
   //word-to-word alignment
   // alignments
-  SetBooleanParameter( m_PrintAlignmentInfo, "print-alignment-info", false );
+  m_parameter->SetParameter( m_PrintAlignmentInfo, "print-alignment-info", false );
   if (m_PrintAlignmentInfo) {
     m_needAlignmentInfo = true;
   }
 
   m_parameter->SetParameter(m_wordAlignmentSort, "sort-word-alignment", NoSort);
 
-  SetBooleanParameter( m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
+  m_parameter->SetParameter( m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
   if (m_PrintAlignmentInfoNbest) {
     m_needAlignmentInfo = true;
   }
@@ -250,26 +250,26 @@ bool StaticData::LoadData(Parameter *parameter)
     m_outputSearchGraphPB = false;
 #endif
 
-  SetBooleanParameter( m_unprunedSearchGraph, "unpruned-search-graph", false );
-  SetBooleanParameter( m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
+  m_parameter->SetParameter( m_unprunedSearchGraph, "unpruned-search-graph", false );
+  m_parameter->SetParameter( m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
 
   m_parameter->SetParameter<string>(m_outputUnknownsFile, "output-unknowns", "");
 
   // include feature names in the n-best list
-  SetBooleanParameter( m_labeledNBestList, "labeled-n-best-list", true );
+  m_parameter->SetParameter( m_labeledNBestList, "labeled-n-best-list", true );
 
   // include word alignment in the n-best list
-  SetBooleanParameter( m_nBestIncludesSegmentation, "include-segmentation-in-n-best", false );
+  m_parameter->SetParameter( m_nBestIncludesSegmentation, "include-segmentation-in-n-best", false );
 
   // printing source phrase spans
-  SetBooleanParameter( m_reportSegmentation, "report-segmentation", false );
-  SetBooleanParameter( m_reportSegmentationEnriched, "report-segmentation-enriched", false );
+  m_parameter->SetParameter( m_reportSegmentation, "report-segmentation", false );
+  m_parameter->SetParameter( m_reportSegmentationEnriched, "report-segmentation-enriched", false );
 
   // print all factors of output translations
-  SetBooleanParameter( m_reportAllFactors, "report-all-factors", false );
+  m_parameter->SetParameter( m_reportAllFactors, "report-all-factors", false );
 
   // print all factors of output translations
-  SetBooleanParameter( m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
+  m_parameter->SetParameter( m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
 
   //input factors
   params = m_parameter->GetParam("input-factors");
@@ -291,13 +291,13 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   //source word deletion
-  SetBooleanParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
+  m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
 
   //Disable discarding
-  SetBooleanParameter(m_disableDiscarding, "disable-discarding", false);
+  m_parameter->SetParameter(m_disableDiscarding, "disable-discarding", false);
 
   //Print All Derivations
-  SetBooleanParameter(m_printAllDerivations , "print-all-derivations", false );
+  m_parameter->SetParameter(m_printAllDerivations , "print-all-derivations", false );
 
   // additional output
   m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath, "translation-details", "");
@@ -309,7 +309,7 @@ bool StaticData::LoadData(Parameter *parameter)
   // reordering constraints
   m_parameter->SetParameter(m_maxDistortion, "distortion-limit", -1);
 
-  SetBooleanParameter(m_reorderingConstraint, "monotone-at-punctuation", false );
+  m_parameter->SetParameter(m_reorderingConstraint, "monotone-at-punctuation", false );
 
   // settings for pruning
   m_parameter->SetParameter(m_maxHypoStackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
@@ -343,31 +343,31 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter(m_cubePruningPopLimit, "cube-pruning-pop-limit", DEFAULT_CUBE_PRUNING_POP_LIMIT);
   m_parameter->SetParameter(m_cubePruningDiversity, "cube-pruning-diversity", DEFAULT_CUBE_PRUNING_DIVERSITY);
 
-  SetBooleanParameter(m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
+  m_parameter->SetParameter(m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
 
   // early distortion cost
-  SetBooleanParameter(m_useEarlyDistortionCost, "early-distortion-cost", false );
+  m_parameter->SetParameter(m_useEarlyDistortionCost, "early-distortion-cost", false );
 
   // unknown word processing
-  SetBooleanParameter(m_dropUnknown, "drop-unknown", false );
-  SetBooleanParameter(m_markUnknown, "mark-unknown", false );
+  m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
+  m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
 
-  SetBooleanParameter(m_lmEnableOOVFeature, "lmodel-oov-feature", false);
+  m_parameter->SetParameter(m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
   // minimum Bayes risk decoding
-  SetBooleanParameter(m_mbr, "minimum-bayes-risk", false );
+  m_parameter->SetParameter(m_mbr, "minimum-bayes-risk", false );
   m_parameter->SetParameter<size_t>(m_mbrSize, "mbr-size", 200);
   m_parameter->SetParameter(m_mbrScale, "mbr-scale", 1.0f);
 
   //lattice mbr
-  SetBooleanParameter(m_useLatticeMBR, "lminimum-bayes-risk", false );
+  m_parameter->SetParameter(m_useLatticeMBR, "lminimum-bayes-risk", false );
   if (m_useLatticeMBR && m_mbr) {
     cerr << "Errror: Cannot use both n-best mbr and lattice mbr together" << endl;
     return false;
   }
 
   //mira training
-  SetBooleanParameter(m_mira, "mira", false );
+  m_parameter->SetParameter(m_mira, "mira", false );
 
   // lattice MBR
   if (m_useLatticeMBR) m_mbr = true;
@@ -376,7 +376,7 @@ bool StaticData::LoadData(Parameter *parameter)
   m_parameter->SetParameter(m_lmbrPrecision, "lmbr-p", 0.8f);
   m_parameter->SetParameter(m_lmbrPRatio, "lmbr-r", 0.6f);
   m_parameter->SetParameter(m_lmbrMapWeight, "lmbr-map-weight", 0.0f);
-  SetBooleanParameter(m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
+  m_parameter->SetParameter(m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
 
   params = m_parameter->GetParam("lmbr-thetas");
   if (params) {
@@ -384,23 +384,23 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   //consensus decoding
-  SetBooleanParameter(m_useConsensusDecoding, "consensus-decoding", false );
+  m_parameter->SetParameter(m_useConsensusDecoding, "consensus-decoding", false );
   if (m_useConsensusDecoding && m_mbr) {
     cerr<< "Error: Cannot use consensus decoding together with mbr" << endl;
     exit(1);
   }
   if (m_useConsensusDecoding) m_mbr=true;
 
-  SetBooleanParameter(m_defaultNonTermOnlyForEmptyRange, "default-non-term-for-empty-range-only", false );
-  SetBooleanParameter(m_printNBestTrees, "n-best-trees", false );
+  m_parameter->SetParameter(m_defaultNonTermOnlyForEmptyRange, "default-non-term-for-empty-range-only", false );
+  m_parameter->SetParameter(m_printNBestTrees, "n-best-trees", false );
 
   // S2T decoder
-  SetBooleanParameter(m_useS2TDecoder, "s2t", false );
+  m_parameter->SetParameter(m_useS2TDecoder, "s2t", false );
   m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm", RecursiveCYKPlus);
 
   // Compact phrase table and reordering model
-  SetBooleanParameter(m_minphrMemory, "minphr-memory", false );
-  SetBooleanParameter(m_minlexrMemory, "minlexr-memory", false );
+  m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
+  m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
 
   m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
   m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
@@ -525,26 +525,6 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
   return true;
-}
-
-void StaticData::SetBooleanParameter( bool &parameter, string parameterName, bool defaultValue )
-{
-  const PARAM_VEC *params = m_parameter->GetParam(parameterName);
-
-  // default value if nothing is specified
-  parameter = defaultValue;
-  if (params == NULL) {
-    return;
-  }
-
-  // if parameter is just specified as, e.g. "-parameter" set it true
-  if (params->size() == 0) {
-    parameter = true;
-  }
-  // if paramter is specified "-parameter true" or "-parameter false"
-  else if (params->size() == 1) {
-    parameter = Scan<bool>( params->at(0));
-  }
 }
 
 void StaticData::SetWeight(const FeatureFunction* sp, float weight)
@@ -1081,7 +1061,7 @@ bool StaticData::LoadAlternateWeightSettings()
 void StaticData::NoCache()
 {
 	bool noCache;
-	SetBooleanParameter(noCache, "no-cache", false );
+	m_parameter->SetParameter(noCache, "no-cache", false );
 
 	if (noCache) {
 		const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();

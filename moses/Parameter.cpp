@@ -1389,6 +1389,27 @@ void Parameter::Save(const std::string path)
   file.close();
 }
 
+template<>
+void Parameter::SetParameter<bool>(bool &parameter, const std::string &parameterName, const bool &defaultValue) const
+{
+  const PARAM_VEC *params = GetParam(parameterName);
+
+  // default value if nothing is specified
+  parameter = defaultValue;
+  if (params == NULL) {
+    return;
+  }
+
+  // if parameter is just specified as, e.g. "-parameter" set it true
+  if (params->size() == 0) {
+    parameter = true;
+  }
+  // if paramter is specified "-parameter true" or "-parameter false"
+  else if (params->size() == 1) {
+    parameter = Scan<bool>( params->at(0));
+  }
 }
+
+} // namespace
 
 
