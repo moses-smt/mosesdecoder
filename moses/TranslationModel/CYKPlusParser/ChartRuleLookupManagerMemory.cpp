@@ -70,24 +70,13 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
   const PhraseDictionaryNodeMemory &rootNode = m_ruleTable.GetRootNode();
 
-  // size-1 terminal rules
+  // all rules starting with terminal
   if (startPos == absEndPos) {
-    const Word &sourceWord = GetSourceAt(absEndPos).GetLabel();
-    const PhraseDictionaryNodeMemory *child = rootNode.GetChild(sourceWord);
-
-    // if we found a new rule -> directly add it to the out collection
-    if (child != NULL) {
-        const TargetPhraseCollection &tpc = child->GetTargetPhraseCollection();
-        outColl.Add(tpc, m_stackVec, range);
-    }
+    GetTerminalExtension(&rootNode, startPos);
   }
   // all rules starting with nonterminal
   else if (absEndPos > startPos) {
     GetNonTerminalExtension(&rootNode, startPos);
-    // all (non-unary) rules starting with terminal
-    if (absEndPos == startPos+1) {
-      GetTerminalExtension(&rootNode, absEndPos-1);
-    }
   }
 
   // copy temporarily stored rules to out collection
@@ -177,8 +166,8 @@ void ChartRuleLookupManagerMemory::AddAndExtend(
     size_t endPos) {
 
     const TargetPhraseCollection &tpc = node->GetTargetPhraseCollection();
-    // add target phrase collection (except if rule is empty or unary)
-    if (!tpc.IsEmpty() && endPos != m_unaryPos) {
+    // add target phrase collection (except if rule is empty or a unary non-terminal rule)
+    if (!tpc.IsEmpty() && (m_stackVec.empty() || endPos != m_unaryPos)) {
       m_completedRules[endPos].Add(tpc, m_stackVec, m_stackScores, *m_outColl);
     }
 
