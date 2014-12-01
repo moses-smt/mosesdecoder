@@ -158,8 +158,8 @@ int main(int argc, char* argv[])
 
   StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
   staticData.SetUseLatticeMBR(true);
-  IOWrapper* ioWrapper = IOWrapper::GetIOWrapper(staticData);
 
+  IOWrapper* ioWrapper = new IOWrapper();
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }

@@ -121,8 +121,12 @@ int main(int argc, char** argv)
     srand(time(NULL));
 
     // set up read/writing class
-    IOWrapper* ioWrapper = IOWrapper::GetIOWrapper(staticData);
-    if (!ioWrapper) {
+    IFVERBOSE(1) {
+    	PrintUserTime("Created input-output object");
+    }
+
+    IOWrapper* ioWrapper = new IOWrapper();
+    if (ioWrapper == NULL) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);
     }

@@ -68,17 +68,8 @@ using namespace std;
 namespace Moses
 {
 
-IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
-                     , const std::vector<FactorType>	&outputFactorOrder
-                     , const FactorMask							&inputFactorUsed
-                     , size_t												nBestSize
-                     , const std::string							&nBestFilePath
-                     , const std::string							&inputFilePath)
-  :m_inputFactorOrder(inputFactorOrder)
-  ,m_outputFactorOrder(outputFactorOrder)
-  ,m_inputFactorUsed(inputFactorUsed)
-  ,m_inputFilePath(inputFilePath)
-  ,m_nBestStream(NULL)
+IOWrapper::IOWrapper()
+  :m_nBestStream(NULL)
 
   ,m_outputWordGraphStream(NULL)
   ,m_outputSearchGraphStream(NULL)
@@ -105,12 +96,21 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 {
   const StaticData &staticData = StaticData::Instance();
 
-  if (inputFilePath.empty()) {
+  m_inputFactorOrder = &staticData.GetInputFactorOrder();
+  m_outputFactorOrder = &staticData.GetOutputFactorOrder();
+  m_inputFactorUsed = FactorMask(*m_inputFactorOrder);
+
+  size_t nBestSize = staticData.GetNBestSize();
+  string nBestFilePath = staticData.GetNBestFilePath();
+
+  staticData.GetParameter().SetParameter<string>(m_inputFilePath, "input-file", "");
+  if (m_inputFilePath.empty()) {
 	m_inputFile = NULL;
 	m_inputStream = &cin;
   }
   else {
-    m_inputFile = new InputFileStream(inputFilePath);
+    VERBOSE(2,"IO from File" << endl);
+    m_inputFile = new InputFileStream(m_inputFilePath);
     m_inputStream = m_inputFile;
   }
 
@@ -250,7 +250,7 @@ InputType*
 IOWrapper::
 GetInput(InputType* inputType)
 {
-  if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
+  if(inputType->Read(*m_inputStream, *m_inputFactorOrder)) {
     return inputType;
   } else {
     delete inputType;
@@ -646,7 +646,7 @@ void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long 
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
+    OutputSurface(out, outputPhrase, *m_outputFactorOrder, false);
     out << " ||| ";
     OutputAllFeatureScores(features, out);
     out << " ||| " << i->GetScore() << '\n';
@@ -883,7 +883,7 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
 
     // print the translation ID, surface factors, and scores
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
+    OutputSurface(out, outputPhrase, *m_outputFactorOrder, false);
     out << " ||| ";
     OutputAllFeatureScores(derivation.scoreBreakdown, out);
     out << " ||| " << derivation.score;
@@ -1218,7 +1218,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
         OutputInput(cout, hypo);
         cout << "||| ";
       }
-      OutputBestSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
+      OutputBestSurface(cout, hypo, *m_outputFactorOrder, reportSegmentation, reportAllFactors);
       cout << endl;
     }
   } else {
@@ -1403,32 +1403,6 @@ void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solu
   OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
 }
 
-IOWrapper *IOWrapper::GetIOWrapper(const StaticData &staticData)
-{
-  IOWrapper *ioWrapper;
-  const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
-      ,&outputFactorOrder = staticData.GetOutputFactorOrder();
-  FactorMask inputFactorUsed(inputFactorOrder);
-
-  // io
-  string inputPath;
-  staticData.GetParameter().SetParameter<string>(inputPath, "input-file", "");
-  if (!inputPath.empty()) {
-    VERBOSE(2,"IO from File" << endl);
-  }
-
-  ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                            , staticData.GetNBestSize()
-                            , staticData.GetNBestFilePath()
-                            , inputPath);
-
-  IFVERBOSE(1)
-  PrintUserTime("Created input-output object");
-
-  return ioWrapper;
-}
-
-
 ////////////////////////////
 #include "moses/Syntax/PVertex.h"
 #include "moses/Syntax/S2T/DerivationWriter.h"
@@ -1506,7 +1480,7 @@ void IOWrapper::OutputNBestList(
 
     // print the translation ID, surface factors, and scores
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
+    OutputSurface(out, outputPhrase, *m_outputFactorOrder, false);
     out << " ||| ";
     OutputAllFeatureScores(derivation.scoreBreakdown, out);
     out << " ||| " << derivation.score;
