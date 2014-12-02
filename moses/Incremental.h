@@ -7,6 +7,8 @@
 #include "moses/ChartCellCollection.h"
 #include "moses/ChartParser.h"
 
+#include "BaseManager.h"
+
 #include <vector>
 #include <string>
 
@@ -19,7 +21,7 @@ class LanguageModel;
 namespace Incremental
 {
 
-class Manager
+class Manager : public BaseManager
 {
 public:
   Manager(const InputType &source);
@@ -34,6 +36,10 @@ public:
   const std::vector<search::Applied> &Completed() const {
     return *completed_nbest_;
   }
+
+  // output
+  void OutputNBest(OutputCollector *collector) const;
+
 
 private:
   template <class Model, class Best> search::History PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out);
@@ -51,6 +57,9 @@ private:
   search::NBest n_best_;
 
   const std::vector<search::Applied> *completed_nbest_;
+
+  // outputs
+  void OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const;
 };
 
 // Just get the phrase.

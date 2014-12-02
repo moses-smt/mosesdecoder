@@ -8,6 +8,7 @@
 #include "moses/StaticData.h"
 #include "moses/Util.h"
 #include "moses/LM/Base.h"
+#include "moses/OutputCollector.h"
 
 #include "lm/model.hh"
 #include "search/applied.hh"
@@ -277,6 +278,47 @@ const std::vector<search::Applied> &Manager::ProcessSentence()
   LanguageModel::GetFirstLM().IncrementalCallback(*this);
   return *completed_nbest_;
 }
+
+void Manager::OutputNBest(OutputCollector *collector)  const
+{
+  if (collector == NULL) {
+	  return;
+  }
+
+  OutputNBestList(collector, *completed_nbest_, source_.GetTranslationId());
+}
+
+void Manager::OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const
+{
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<Moses::FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
+
+  std::ostringstream out;
+  // wtf? copied from the original OutputNBestList
+  if (collector->OutputIsCout()) {
+    FixPrecision(out);
+  }
+  Phrase outputPhrase;
+  ScoreComponentCollection features;
+  for (std::vector<search::Applied>::const_iterator i = nbest.begin(); i != nbest.end(); ++i) {
+    Incremental::PhraseAndFeatures(*i, outputPhrase, features);
+    // <s> and </s>
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
+  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+
+    outputPhrase.RemoveWord(0);
+    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
+    out << translationId << " ||| ";
+    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    out << " ||| ";
+    OutputAllFeatureScores(features, out);
+    out << " ||| " << i->GetScore() << '\n';
+  }
+  out << std::flush;
+  assert(collector);
+  collector->Write(translationId, out.str());
+}
+
 
 namespace
 {

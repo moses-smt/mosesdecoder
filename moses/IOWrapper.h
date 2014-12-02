@@ -73,9 +73,9 @@ class IOWrapper
 {
 protected:
 
-  const std::vector<Moses::FactorType>	&m_inputFactorOrder;
-  const std::vector<Moses::FactorType>	&m_outputFactorOrder;
-  const Moses::FactorMask							&m_inputFactorUsed;
+  const std::vector<Moses::FactorType>	*m_inputFactorOrder;
+  const std::vector<Moses::FactorType>	*m_outputFactorOrder;
+  Moses::FactorMask				m_inputFactorUsed;
   std::string										m_inputFilePath;
   Moses::InputFileStream				*m_inputFile;
   std::istream									*m_inputStream;
@@ -157,15 +157,7 @@ protected:
   }
 
 public:
-  static IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
-  static void FixPrecision(std::ostream &, size_t size=3);
-
-  IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
-            , const std::vector<Moses::FactorType>	&outputFactorOrder
-            , const Moses::FactorMask							&inputFactorUsed
-            , size_t												nBestSize
-            , const std::string							&nBestFilePath
-            , const std::string                                                     &inputFilePath = "");
+  IOWrapper();
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
@@ -215,7 +207,6 @@ public:
   void OutputBestNone(long translationId);
 
   void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
-  void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
   void OutputNBestList(const Moses::Syntax::KBestExtractor::KBestVec &nBestList, long translationId);
 
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
@@ -251,12 +242,6 @@ public:
   static void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo);
   static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
   static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
-
-  void OutputNBest(std::ostream& out
-                   , const Moses::TrellisPathList &nBestList
-                   , const std::vector<Moses::FactorType>& outputFactorOrder
-                   , long translationId
-                   , char reportSegmentation);
 
   static void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
                               , std::ostream &out);

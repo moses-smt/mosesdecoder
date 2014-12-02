@@ -31,6 +31,8 @@
 #include "ChartTranslationOptionList.h"
 #include "ChartParser.h"
 #include "ChartKBestExtractor.h"
+#include "BaseManager.h"
+#include "moses/Syntax/KBestExtractor.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -42,7 +44,7 @@ class ChartSearchGraphWriter;
 
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
  */
-class ChartManager
+class ChartManager : public BaseManager
 {
 private:
   InputType const& m_source; /**< source sentence to be translated */
@@ -59,6 +61,31 @@ private:
   void FindReachableHypotheses( 
     const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable , size_t* winners, size_t* losers) const; 
   void WriteSearchGraph(const ChartSearchGraphWriter& writer) const;
+
+  // output
+  typedef std::set< std::pair<size_t, size_t>  > Alignments;
+
+  void OutputNBestList(OutputCollector *collector,
+		  	  	  	  const ChartKBestExtractor::KBestVec &nBestList,
+                      long translationId) const;
+  size_t CalcSourceSize(const Moses::ChartHypothesis *hypo) const;
+  size_t OutputAlignmentNBest(Alignments &retAlign,
+		  	  	  	  	  	  const Moses::ChartKBestExtractor::Derivation &derivation,
+		  	  	  	  	  	  size_t startTarget) const;
+
+  template <class T>
+  void ShiftOffsets(std::vector<T> &offsets, T shift) const
+  {
+    T currPos = shift;
+    for (size_t i = 0; i < offsets.size(); ++i) {
+      if (offsets[i] == 0) {
+        offsets[i] = currPos;
+        ++currPos;
+      } else {
+        currPos += offsets[i];
+      }
+    }
+  }
 
 public:
   ChartManager(InputType const& source);
@@ -108,6 +135,8 @@ public:
 
   const ChartParser &GetParser() const { return m_parser; }
 
+  // outputs
+  void OutputNBest(OutputCollector *collector) const;
 };
 
 }

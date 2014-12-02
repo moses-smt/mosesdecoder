@@ -18,8 +18,6 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_ALIGNMENT_H_
-#define EXTRACT_GHKM_ALIGNMENT_H_
 
 #include <string>
 #include <utility>
@@ -39,4 +37,3 @@ void FlipAlignment(Alignment &);
 }  // namespace GHKM
 }  // namespace Moses
 
-#endif

@@ -478,7 +478,7 @@ T log_sum (T log_a, T log_b)
 }
 
 /** Enforce rounding */
-inline void fix(std::ostream& stream, size_t size)
+inline void FixPrecision(std::ostream& stream, size_t size = 3)
 {
   stream.setf(std::ios::fixed);
   stream.precision(size);

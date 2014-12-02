@@ -90,8 +90,8 @@ int main(int argc, char** argv)
     }
 
     // set number of significant decimals in output
-    IOWrapper::FixPrecision(cout);
-    IOWrapper::FixPrecision(cerr);
+    FixPrecision(cout);
+    FixPrecision(cerr);
 
     // load all the settings into the Parameter class
     // (stores them as strings, or array of strings)
@@ -121,8 +121,12 @@ int main(int argc, char** argv)
     srand(time(NULL));
 
     // set up read/writing class
-    IOWrapper* ioWrapper = IOWrapper::GetIOWrapper(staticData);
-    if (!ioWrapper) {
+    IFVERBOSE(1) {
+    	PrintUserTime("Created input-output object");
+    }
+
+    IOWrapper* ioWrapper = new IOWrapper();
+    if (ioWrapper == NULL) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);
     }

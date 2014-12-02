@@ -68,17 +68,8 @@ using namespace std;
 namespace Moses
 {
 
-IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
-                     , const std::vector<FactorType>	&outputFactorOrder
-                     , const FactorMask							&inputFactorUsed
-                     , size_t												nBestSize
-                     , const std::string							&nBestFilePath
-                     , const std::string							&inputFilePath)
-  :m_inputFactorOrder(inputFactorOrder)
-  ,m_outputFactorOrder(outputFactorOrder)
-  ,m_inputFactorUsed(inputFactorUsed)
-  ,m_inputFilePath(inputFilePath)
-  ,m_nBestStream(NULL)
+IOWrapper::IOWrapper()
+  :m_nBestStream(NULL)
 
   ,m_outputWordGraphStream(NULL)
   ,m_outputSearchGraphStream(NULL)
@@ -105,12 +96,21 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 {
   const StaticData &staticData = StaticData::Instance();
 
-  if (inputFilePath.empty()) {
+  m_inputFactorOrder = &staticData.GetInputFactorOrder();
+  m_outputFactorOrder = &staticData.GetOutputFactorOrder();
+  m_inputFactorUsed = FactorMask(*m_inputFactorOrder);
+
+  size_t nBestSize = staticData.GetNBestSize();
+  string nBestFilePath = staticData.GetNBestFilePath();
+
+  staticData.GetParameter().SetParameter<string>(m_inputFilePath, "input-file", "");
+  if (m_inputFilePath.empty()) {
 	m_inputFile = NULL;
 	m_inputStream = &cin;
   }
   else {
-    m_inputFile = new InputFileStream(inputFilePath);
+    VERBOSE(2,"IO from File" << endl);
+    m_inputFile = new InputFileStream(m_inputFilePath);
     m_inputStream = m_inputFile;
   }
 
@@ -250,18 +250,12 @@ InputType*
 IOWrapper::
 GetInput(InputType* inputType)
 {
-  if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
+  if(inputType->Read(*m_inputStream, *m_inputFactorOrder)) {
     return inputType;
   } else {
     delete inputType;
     return NULL;
   }
-}
-
-void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
-{
-  stream.setf(std::ios::fixed);
-  stream.precision(size);
 }
 
 std::map<size_t, const Factor*> IOWrapper::GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
@@ -628,34 +622,6 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
   }
 }
 
-void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId)
-{
-  std::ostringstream out;
-  // wtf? copied from the original OutputNBestList
-  if (m_nBestOutputCollector->OutputIsCout()) {
-    FixPrecision(out);
-  }
-  Phrase outputPhrase;
-  ScoreComponentCollection features;
-  for (std::vector<search::Applied>::const_iterator i = nbest.begin(); i != nbest.end(); ++i) {
-    Incremental::PhraseAndFeatures(*i, outputPhrase, features);
-    // <s> and </s>
-    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
-  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-
-    outputPhrase.RemoveWord(0);
-    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
-    out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
-    out << " ||| ";
-    OutputAllFeatureScores(features, out);
-    out << " ||| " << i->GetScore() << '\n';
-  }
-  out << std::flush;
-  assert(m_nBestOutputCollector);
-  m_nBestOutputCollector->Write(translationId, out.str());
-}
-
 /***
  * print surface factor only for the given phrase
  */
@@ -883,7 +849,7 @@ void IOWrapper::OutputNBestList(const ChartKBestExtractor::KBestVec &nBestList,
 
     // print the translation ID, surface factors, and scores
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
+    OutputSurface(out, outputPhrase, *m_outputFactorOrder, false);
     out << " ||| ";
     OutputAllFeatureScores(derivation.scoreBreakdown, out);
     out << " ||| " << derivation.score;
@@ -1218,7 +1184,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, c
         OutputInput(cout, hypo);
         cout << "||| ";
       }
-      OutputBestSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
+      OutputBestSurface(cout, hypo, *m_outputFactorOrder, reportSegmentation, reportAllFactors);
       cout << endl;
     }
   } else {
@@ -1249,80 +1215,6 @@ bool IOWrapper::ReadInput(InputTypeEnum inputType, InputType*& source)
     TRACE_ERR("Unknown input type: " << inputType << "\n");
   }
   return (source ? true : false);
-}
-
-void IOWrapper::OutputNBest(std::ostream& out
-                 , const Moses::TrellisPathList &nBestList
-                 , const std::vector<Moses::FactorType>& outputFactorOrder
-                 , long translationId
-                 , char reportSegmentation)
-{
-  const StaticData &staticData = StaticData::Instance();
-  bool reportAllFactors = staticData.GetReportAllFactorsNBest();
-  bool includeSegmentation = staticData.NBestIncludesSegmentation();
-  bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
-
-  TrellisPathList::const_iterator iter;
-  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
-    const TrellisPath &path = **iter;
-    const std::vector<const Hypothesis *> &edges = path.GetEdges();
-
-    // print the surface factor of the translation
-    out << translationId << " ||| ";
-    for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
-      const Hypothesis &edge = *edges[currEdge];
-      OutputSurface(out, edge, outputFactorOrder, reportSegmentation, reportAllFactors);
-    }
-    out << " |||";
-
-    // print scores with feature names
-    OutputAllFeatureScores(path.GetScoreBreakdown(), out );
-
-    // total
-    out << " ||| " << path.GetTotalScore();
-
-    //phrase-to-phrase segmentation
-    if (includeSegmentation) {
-      out << " |||";
-      for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
-        const Hypothesis &edge = *edges[currEdge];
-        const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
-        WordsRange targetRange = path.GetTargetWordsRange(edge);
-        out << " " << sourceRange.GetStartPos();
-        if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
-          out << "-" << sourceRange.GetEndPos();
-        }
-        out<< "=" << targetRange.GetStartPos();
-        if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
-          out<< "-" << targetRange.GetEndPos();
-        }
-      }
-    }
-
-    if (includeWordAlignment) {
-      out << " ||| ";
-      for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
-        const Hypothesis &edge = *edges[currEdge];
-        const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
-        WordsRange targetRange = path.GetTargetWordsRange(edge);
-        const int sourceOffset = sourceRange.GetStartPos();
-        const int targetOffset = targetRange.GetStartPos();
-        const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-
-        OutputAlignment(out, ai, sourceOffset, targetOffset);
-
-      }
-    }
-
-    if (StaticData::Instance().IsPathRecoveryEnabled()) {
-      out << " ||| ";
-      OutputInput(out, edges[0]);
-    }
-
-    out << endl;
-  }
-
-  out << std::flush;
 }
 
 void IOWrapper::OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
@@ -1403,32 +1295,6 @@ void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solu
   OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
 }
 
-IOWrapper *IOWrapper::GetIOWrapper(const StaticData &staticData)
-{
-  IOWrapper *ioWrapper;
-  const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
-      ,&outputFactorOrder = staticData.GetOutputFactorOrder();
-  FactorMask inputFactorUsed(inputFactorOrder);
-
-  // io
-  string inputPath;
-  staticData.GetParameter().SetParameter<string>(inputPath, "input-file", "");
-  if (!inputPath.empty()) {
-    VERBOSE(2,"IO from File" << endl);
-  }
-
-  ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                            , staticData.GetNBestSize()
-                            , staticData.GetNBestFilePath()
-                            , inputPath);
-
-  IFVERBOSE(1)
-  PrintUserTime("Created input-output object");
-
-  return ioWrapper;
-}
-
-
 ////////////////////////////
 #include "moses/Syntax/PVertex.h"
 #include "moses/Syntax/S2T/DerivationWriter.h"
@@ -1453,7 +1319,7 @@ void IOWrapper::OutputBestHypo(const Syntax::SHyperedge *best,
     return;
   }
   std::ostringstream out;
-  IOWrapper::FixPrecision(out);
+  FixPrecision(out);
   if (best == NULL) {
     VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
     if (StaticData::Instance().GetOutputHypoScore()) {
@@ -1483,7 +1349,7 @@ void IOWrapper::OutputNBestList(
   if (m_nBestOutputCollector->OutputIsCout()) {
     // Set precision only if we're writing the n-best list to cout.  This is to
     // preserve existing behaviour, but should probably be done either way.
-    IOWrapper::FixPrecision(out);
+    FixPrecision(out);
   }
 
   bool includeWordAlignment =
@@ -1506,7 +1372,7 @@ void IOWrapper::OutputNBestList(
 
     // print the translation ID, surface factors, and scores
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
+    OutputSurface(out, outputPhrase, *m_outputFactorOrder, false);
     out << " ||| ";
     OutputAllFeatureScores(derivation.scoreBreakdown, out);
     out << " ||| " << derivation.score;
