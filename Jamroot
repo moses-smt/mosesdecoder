@@ -225,6 +225,7 @@ phrase-extract//extract-ghkm
 phrase-extract//pcfg-extract 
 phrase-extract//pcfg-score 
 phrase-extract//extract-mixed-syntax 
+phrase-extract//score-stsg
 biconcor 
 mira//mira 
 contrib/server//mosesserver 
