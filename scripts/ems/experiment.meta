@@ -711,7 +711,7 @@ thot-create-config
 	out: config
 	ignore-unless: thot
 	default-name: model/thot.ini
-	template: $thot/thot_gen_server_cfg_file IN1/lm_desc IN/tm_desc > OUT
+	template: $thot/thot_gen_cfg_file IN1/lm_desc IN/tm_desc > OUT
 
 [TUNING] single
 input-from-sgm
