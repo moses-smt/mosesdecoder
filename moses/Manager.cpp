@@ -1712,4 +1712,18 @@ std::map<size_t, const Factor*> Manager::GetPlaceholders(const Hypothesis &hypo,
   return ret;
 }
 
+void Manager::OutputLatticeSamples(OutputCollector *collector)
+{
+  const StaticData &staticData = StaticData::Instance();
+  if (collector) {
+	TrellisPathList latticeSamples;
+	ostringstream out;
+	CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
+	OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_source.GetTranslationId(),
+				staticData.GetReportSegmentation());
+	collector->Write(m_source.GetTranslationId(), out.str());
+  }
+
+}
+
 }

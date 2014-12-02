@@ -193,6 +193,7 @@ public:
 
   // outputs
   void OutputNBest(OutputCollector *collector);
+  void OutputLatticeSamples(OutputCollector *collector);
 };
 
 }

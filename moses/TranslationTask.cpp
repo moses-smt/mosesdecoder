@@ -278,14 +278,7 @@ void TranslationTask::RunPb()
   manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
 
   //lattice samples
-  if (m_ioWrapper.GetLatticeSamplesCollector()) {
-    TrellisPathList latticeSamples;
-    ostringstream out;
-    manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-    m_ioWrapper.OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
-                staticData.GetReportSegmentation());
-    m_ioWrapper.GetLatticeSamplesCollector()->Write(m_source->GetTranslationId(), out.str());
-  }
+  manager.OutputLatticeSamples(m_ioWrapper.GetLatticeSamplesCollector());
 
   // detailed translation reporting
   if (m_ioWrapper.GetDetailedTranslationCollector()) {
