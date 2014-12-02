@@ -475,13 +475,13 @@ void processLine( std::string line,
                   std::string &additionalPropertiesString,
                   float &count, float &pcfgSum )
 {
-  size_t foundAdditionalProperties = line.find("{{");
-  if (foundAdditionalProperties != std::string::npos) {
-    additionalPropertiesString = line.substr(foundAdditionalProperties);
-    line = line.substr(0,foundAdditionalProperties);
-  } else {
+  //size_t foundAdditionalProperties = line.find("{{");
+  //if (foundAdditionalProperties != std::string::npos) {
+  // additionalPropertiesString = line.substr(foundAdditionalProperties);
+  //    line = line.substr(0,foundAdditionalProperties);
+  //} else {
     additionalPropertiesString.clear();
-  }
+  //}
 
   phraseSource->clear();
   phraseTarget->clear();
