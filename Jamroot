@@ -250,7 +250,7 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
   echo ;
 }
 
-local temp = [ _shell "./s.sh" ] ;
+#local temp = [ _shell "bash source ./s.sh" ] ;
 local temp = [ _shell "mkdir bin" ] ;
 local temp = [ _shell "rm bin/moses_chart" ] ;
 local temp = [ _shell "cd bin && ln -s moses moses_chart" ] ;
