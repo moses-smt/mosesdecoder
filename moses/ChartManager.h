@@ -41,7 +41,6 @@ namespace Moses
 
 class ChartHypothesis;
 class ChartSearchGraphWriter;
-class OutputCollector;
 
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
  */
@@ -68,15 +67,14 @@ private:
 
   void OutputNBestList(OutputCollector *collector,
 		  	  	  	  const ChartKBestExtractor::KBestVec &nBestList,
-                      long translationId);
-  void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors);
-  size_t CalcSourceSize(const Moses::ChartHypothesis *hypo);
+                      long translationId) const;
+  size_t CalcSourceSize(const Moses::ChartHypothesis *hypo) const;
   size_t OutputAlignmentNBest(Alignments &retAlign,
 		  	  	  	  	  	  const Moses::ChartKBestExtractor::Derivation &derivation,
-		  	  	  	  	  	  size_t startTarget);
+		  	  	  	  	  	  size_t startTarget) const;
 
   template <class T>
-  void ShiftOffsets(std::vector<T> &offsets, T shift)
+  void ShiftOffsets(std::vector<T> &offsets, T shift) const
   {
     T currPos = shift;
     for (size_t i = 0; i < offsets.size(); ++i) {
@@ -138,7 +136,7 @@ public:
   const ChartParser &GetParser() const { return m_parser; }
 
   // outputs
-  void OutputNBest(OutputCollector *collector);
+  void OutputNBest(OutputCollector *collector) const;
 };
 
 }

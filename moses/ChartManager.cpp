@@ -298,7 +298,7 @@ void ChartManager::OutputSearchGraphMoses(std::ostream &outputSearchGraphStream)
   WriteSearchGraph(writer);
 }
 
-void ChartManager::OutputNBest(OutputCollector *collector)
+void ChartManager::OutputNBest(OutputCollector *collector) const
 {
 	const StaticData &staticData = StaticData::Instance();
 	size_t nBestSize = staticData.GetNBestSize();
@@ -316,15 +316,9 @@ void ChartManager::OutputNBest(OutputCollector *collector)
 
 }
 
-void FixPrecision(std::ostream &stream, size_t size = 3)
-{
-  stream.setf(std::ios::fixed);
-  stream.precision(size);
-}
-
 void ChartManager::OutputNBestList(OutputCollector *collector,
 								const ChartKBestExtractor::KBestVec &nBestList,
-                                long translationId)
+                                long translationId) const
 {
   const StaticData &staticData = StaticData::Instance();
   const std::vector<Moses::FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
@@ -386,36 +380,7 @@ void ChartManager::OutputNBestList(OutputCollector *collector,
   collector->Write(translationId, out.str());
 }
 
-/***
- * print surface factor only for the given phrase
- */
-void ChartManager::OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
-{
-  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
-		  "Cannot be empty phrase");
-  if (reportAllFactors == true) {
-    out << phrase;
-  } else {
-    size_t size = phrase.GetSize();
-    for (size_t pos = 0 ; pos < size ; pos++) {
-      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-      out << *factor;
-      UTIL_THROW_IF2(factor == NULL,
-    		  "Empty factor 0 at position " << pos);
-
-      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
-        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        UTIL_THROW_IF2(factor == NULL,
-      		  "Empty factor " << i << " at position " << pos);
-
-        out << "|" << *factor;
-      }
-      out << " ";
-    }
-  }
-}
-
-size_t ChartManager::CalcSourceSize(const Moses::ChartHypothesis *hypo)
+size_t ChartManager::CalcSourceSize(const Moses::ChartHypothesis *hypo) const
 {
   size_t ret = hypo->GetCurrSourceRange().GetNumWordsCovered();
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
@@ -429,7 +394,7 @@ size_t ChartManager::CalcSourceSize(const Moses::ChartHypothesis *hypo)
 size_t ChartManager::OutputAlignmentNBest(
     Alignments &retAlign,
     const Moses::ChartKBestExtractor::Derivation &derivation,
-    size_t startTarget)
+    size_t startTarget) const
 {
   const ChartHypothesis &hypo = derivation.edge.head->hypothesis;
 

@@ -42,7 +42,6 @@ namespace Moses
 class SentenceStats;
 class TrellisPath;
 class TranslationOptionCollection;
-class OutputCollector;
 
 /** Used to output the search graph */
 struct SearchGraphNode {
@@ -134,13 +133,13 @@ protected:
                    , const Moses::TrellisPathList &nBestList
                    , const std::vector<Moses::FactorType>& outputFactorOrder
                    , long translationId
-                   , char reportSegmentation);
+                   , char reportSegmentation) const;
   void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                     char reportSegmentation, bool reportAllFactors);
-  void OutputAlignment(std::ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
-  void OutputInput(std::ostream& os, const Hypothesis* hypo);
-  void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
-  std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor);
+                     char reportSegmentation, bool reportAllFactors) const;
+  void OutputAlignment(std::ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset) const;
+  void OutputInput(std::ostream& os, const Hypothesis* hypo) const;
+  void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo) const;
+  std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const;
 
 public:
   InputType const& m_source; /**< source sentence to be translated */
@@ -186,8 +185,8 @@ public:
                                      std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps, std::vector< float>* pFwdBwdScores) const;
 
   // outputs
-  void OutputNBest(OutputCollector *collector);
-  void OutputLatticeSamples(OutputCollector *collector);
+  void OutputNBest(OutputCollector *collector)  const;
+  void OutputLatticeSamples(OutputCollector *collector) const;
 };
 
 }

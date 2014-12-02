@@ -92,7 +92,7 @@ void TranslationTask::RunPb()
   // output word graph
   if (m_ioWrapper.GetWordGraphCollector()) {
     ostringstream out;
-    fix(out,PRECISION);
+    FixPrecision(out,PRECISION);
     manager.GetWordGraph(m_source->GetTranslationId(), out);
     m_ioWrapper.GetWordGraphCollector()->Write(m_source->GetTranslationId(), out.str());
   }
@@ -100,7 +100,7 @@ void TranslationTask::RunPb()
   // output search graph
   if (m_ioWrapper.GetSearchGraphOutputCollector()) {
     ostringstream out;
-    fix(out,PRECISION);
+    FixPrecision(out,PRECISION);
     manager.OutputSearchGraph(m_source->GetTranslationId(), out);
     m_ioWrapper.GetSearchGraphOutputCollector()->Write(m_source->GetTranslationId(), out.str());
 
@@ -128,7 +128,7 @@ void TranslationTask::RunPb()
     file->open(fileName.str().c_str());
     if (file->is_open() && file->good()) {
       ostringstream out;
-      fix(out,PRECISION);
+      FixPrecision(out,PRECISION);
       manager.OutputSearchGraphAsSLF(m_source->GetTranslationId(), out);
       *file << out.str();
       file -> flush();
@@ -149,7 +149,7 @@ void TranslationTask::RunPb()
   if (m_ioWrapper.GetSingleBestOutputCollector()) {
     ostringstream out;
     ostringstream debug;
-    fix(debug,PRECISION);
+    FixPrecision(debug,PRECISION);
 
     // all derivations - send them to debug stream
     if (staticData.PrintAllDerivations()) {
@@ -283,7 +283,7 @@ void TranslationTask::RunPb()
   // detailed translation reporting
   if (m_ioWrapper.GetDetailedTranslationCollector()) {
     ostringstream out;
-    fix(out,PRECISION);
+    FixPrecision(out,PRECISION);
     TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
     m_ioWrapper.GetDetailedTranslationCollector()->Write(m_source->GetTranslationId(),out.str());
   }
@@ -348,8 +348,9 @@ void TranslationTask::RunChart()
 	  } else {
 		m_ioWrapper.OutputBestNone(translationId);
 	  }
-	  if (staticData.GetNBestSize() > 0)
-		m_ioWrapper.OutputNBestList(nbest, translationId);
+
+	  manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
+
 	  return;
 	}
 

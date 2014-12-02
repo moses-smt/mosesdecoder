@@ -90,8 +90,8 @@ int main(int argc, char** argv)
     }
 
     // set number of significant decimals in output
-    IOWrapper::FixPrecision(cout);
-    IOWrapper::FixPrecision(cerr);
+    FixPrecision(cout);
+    FixPrecision(cerr);
 
     // load all the settings into the Parameter class
     // (stores them as strings, or array of strings)

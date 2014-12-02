@@ -157,8 +157,6 @@ protected:
   }
 
 public:
-  static void FixPrecision(std::ostream &, size_t size=3);
-
   IOWrapper();
   ~IOWrapper();
 
@@ -209,7 +207,6 @@ public:
   void OutputBestNone(long translationId);
 
   void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
-  void OutputNBestList(const std::vector<search::Applied> &nbest, long translationId);
   void OutputNBestList(const Moses::Syntax::KBestExtractor::KBestVec &nBestList, long translationId);
 
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);

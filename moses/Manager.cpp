@@ -1448,7 +1448,7 @@ SentenceStats& Manager::GetSentenceStats() const
 
 }
 
-void Manager::OutputNBest(OutputCollector *collector)
+void Manager::OutputNBest(OutputCollector *collector) const
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -1467,7 +1467,7 @@ void Manager::OutputNBest(std::ostream& out
                  , const Moses::TrellisPathList &nBestList
                  , const std::vector<Moses::FactorType>& outputFactorOrder
                  , long translationId
-                 , char reportSegmentation)
+                 , char reportSegmentation) const
 {
   const StaticData &staticData = StaticData::Instance();
   bool reportAllFactors = staticData.GetReportAllFactorsNBest();
@@ -1542,7 +1542,7 @@ void Manager::OutputNBest(std::ostream& out
  * print surface factor only for the given phrase
  */
 void Manager::OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                   char reportSegmentation, bool reportAllFactors)
+                   char reportSegmentation, bool reportAllFactors) const
 {
   UTIL_THROW_IF2(outputFactorOrder.size() == 0,
 		  "Must specific at least 1 output factor");
@@ -1614,7 +1614,7 @@ void Manager::OutputSurface(std::ostream &out, const Hypothesis &edge, const std
   }
 }
 
-void Manager::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
+void Manager::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset) const
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
   AlignVec alignments = ai.GetSortedAlignments();
@@ -1627,7 +1627,7 @@ void Manager::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sour
 
 }
 
-void Manager::OutputInput(std::ostream& os, const Hypothesis* hypo)
+void Manager::OutputInput(std::ostream& os, const Hypothesis* hypo) const
 {
   size_t len = hypo->GetInput().GetSize();
   std::vector<const Phrase*> inp_phrases(len, 0);
@@ -1636,7 +1636,7 @@ void Manager::OutputInput(std::ostream& os, const Hypothesis* hypo)
     if (inp_phrases[i]) os << *inp_phrases[i];
 }
 
-void Manager::OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
+void Manager::OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo) const
 {
   if (hypo->GetPrevHypo()) {
     OutputInput(map, hypo->GetPrevHypo());
@@ -1644,7 +1644,7 @@ void Manager::OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hyp
   }
 }
 
-std::map<size_t, const Factor*> Manager::GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
+std::map<size_t, const Factor*> Manager::GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const
 {
   const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
   const Phrase &inputPhrase = inputPath.GetPhrase();
@@ -1664,7 +1664,7 @@ std::map<size_t, const Factor*> Manager::GetPlaceholders(const Hypothesis &hypo,
   return ret;
 }
 
-void Manager::OutputLatticeSamples(OutputCollector *collector)
+void Manager::OutputLatticeSamples(OutputCollector *collector) const
 {
   const StaticData &staticData = StaticData::Instance();
   if (collector) {

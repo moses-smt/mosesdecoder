@@ -258,12 +258,6 @@ GetInput(InputType* inputType)
   }
 }
 
-void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
-{
-  stream.setf(std::ios::fixed);
-  stream.precision(size);
-}
-
 std::map<size_t, const Factor*> IOWrapper::GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
 {
   const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
@@ -626,34 +620,6 @@ void IOWrapper::OutputTreeFragmentsTranslationOptions(std::ostream &out, Applica
   for (size_t i = 0; i < applied->GetArity(); i++) {
       OutputTreeFragmentsTranslationOptions(out, applicationContext, child++, sentence, translationId);
   }
-}
-
-void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, long translationId)
-{
-  std::ostringstream out;
-  // wtf? copied from the original OutputNBestList
-  if (m_nBestOutputCollector->OutputIsCout()) {
-    FixPrecision(out);
-  }
-  Phrase outputPhrase;
-  ScoreComponentCollection features;
-  for (std::vector<search::Applied>::const_iterator i = nbest.begin(); i != nbest.end(); ++i) {
-    Incremental::PhraseAndFeatures(*i, outputPhrase, features);
-    // <s> and </s>
-    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
-  		  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
-
-    outputPhrase.RemoveWord(0);
-    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
-    out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, *m_outputFactorOrder, false);
-    out << " ||| ";
-    OutputAllFeatureScores(features, out);
-    out << " ||| " << i->GetScore() << '\n';
-  }
-  out << std::flush;
-  assert(m_nBestOutputCollector);
-  m_nBestOutputCollector->Write(translationId, out.str());
 }
 
 /***
@@ -1353,7 +1319,7 @@ void IOWrapper::OutputBestHypo(const Syntax::SHyperedge *best,
     return;
   }
   std::ostringstream out;
-  IOWrapper::FixPrecision(out);
+  FixPrecision(out);
   if (best == NULL) {
     VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
     if (StaticData::Instance().GetOutputHypoScore()) {
@@ -1383,7 +1349,7 @@ void IOWrapper::OutputNBestList(
   if (m_nBestOutputCollector->OutputIsCout()) {
     // Set precision only if we're writing the n-best list to cout.  This is to
     // preserve existing behaviour, but should probably be done either way.
-    IOWrapper::FixPrecision(out);
+    FixPrecision(out);
   }
 
   bool includeWordAlignment =
