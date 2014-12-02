@@ -61,6 +61,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/AlignmentInfoTest.cpp</locationURI>
 		</link>
 		<link>
+			<name>BaseManager.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.cpp</locationURI>
+		</link>
+		<link>
+			<name>BaseManager.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.h</locationURI>
+		</link>
+		<link>
 			<name>BitmapContainer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.cpp</locationURI>

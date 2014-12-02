@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "Search.h"
 #include "SearchCubePruning.h"
+#include "BaseManager.h"
 
 namespace Moses
 {
@@ -41,6 +42,7 @@ namespace Moses
 class SentenceStats;
 class TrellisPath;
 class TranslationOptionCollection;
+class OutputCollector;
 
 /** Used to output the search graph */
 struct SearchGraphNode {
@@ -91,7 +93,7 @@ struct SearchGraphNode {
  *       the appropriate stack, or re-combined with existing hypotheses
  **/
 
-class Manager
+class Manager : public BaseManager
 {
   Manager();
   Manager(Manager const&);
@@ -126,6 +128,25 @@ protected:
     std::map< int, bool >* pConnected,
     std::vector< const Hypothesis* >* pConnectedList) const;
 
+  // output
+  // nbest
+  void OutputNBest(std::ostream& out
+                   , const Moses::TrellisPathList &nBestList
+                   , const std::vector<Moses::FactorType>& outputFactorOrder
+                   , long translationId
+                   , char reportSegmentation);
+  void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
+                     char reportSegmentation, bool reportAllFactors);
+  void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
+                              , std::ostream &out);
+  void OutputFeatureScores( std::ostream& out
+                            , const ScoreComponentCollection &features
+                            , const FeatureFunction *ff
+                            , std::string &lastName );
+  void OutputAlignment(std::ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
+  void OutputInput(std::ostream& os, const Hypothesis* hypo);
+  void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
+  std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor);
 
 public:
   InputType const& m_source; /**< source sentence to be translated */
@@ -170,6 +191,8 @@ public:
   void GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
                                      std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps, std::vector< float>* pFwdBwdScores) const;
 
+  // outputs
+  void OutputNBest(OutputCollector *collector);
 };
 
 }

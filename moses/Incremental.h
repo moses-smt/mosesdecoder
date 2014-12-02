@@ -7,6 +7,8 @@
 #include "moses/ChartCellCollection.h"
 #include "moses/ChartParser.h"
 
+#include "BaseManager.h"
+
 #include <vector>
 #include <string>
 
@@ -19,7 +21,7 @@ class LanguageModel;
 namespace Incremental
 {
 
-class Manager
+class Manager : public BaseManager
 {
 public:
   Manager(const InputType &source);

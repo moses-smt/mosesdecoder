@@ -31,6 +31,7 @@
 #include "ChartTranslationOptionList.h"
 #include "ChartParser.h"
 #include "ChartKBestExtractor.h"
+#include "BaseManager.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -42,7 +43,7 @@ class ChartSearchGraphWriter;
 
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
  */
-class ChartManager
+class ChartManager : public BaseManager
 {
 private:
   InputType const& m_source; /**< source sentence to be translated */

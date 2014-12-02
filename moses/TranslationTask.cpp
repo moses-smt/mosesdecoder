@@ -275,14 +275,7 @@ void TranslationTask::RunPb()
   additionalReportingTime.start();
 
   // output n-best list
-  if (m_ioWrapper.GetNBestOutputCollector() && !staticData.UseLatticeMBR()) {
-    TrellisPathList nBestList;
-    ostringstream out;
-    manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-    m_ioWrapper.OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_source->GetTranslationId(),
-                staticData.GetReportSegmentation());
-    m_ioWrapper.GetNBestOutputCollector()->Write(m_source->GetTranslationId(), out.str());
-  }
+  manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
 
   //lattice samples
   if (m_ioWrapper.GetLatticeSamplesCollector()) {

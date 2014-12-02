@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "Timer.h"
+#include "moses/OutputCollector.h"
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/LM/Base.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
@@ -1445,6 +1446,270 @@ SentenceStats& Manager::GetSentenceStats() const
 {
   return *m_sentenceStats;
 
+}
+
+void Manager::OutputNBest(OutputCollector *collector)
+{
+  const StaticData &staticData = StaticData::Instance();
+
+  if (collector && !staticData.UseLatticeMBR()) {
+	TrellisPathList nBestList;
+	ostringstream out;
+	CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
+	OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), m_source.GetTranslationId(),
+				staticData.GetReportSegmentation());
+	collector->Write(m_source.GetTranslationId(), out.str());
+  }
+
+}
+
+void Manager::OutputNBest(std::ostream& out
+                 , const Moses::TrellisPathList &nBestList
+                 , const std::vector<Moses::FactorType>& outputFactorOrder
+                 , long translationId
+                 , char reportSegmentation)
+{
+  const StaticData &staticData = StaticData::Instance();
+  bool reportAllFactors = staticData.GetReportAllFactorsNBest();
+  bool includeSegmentation = staticData.NBestIncludesSegmentation();
+  bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
+
+  TrellisPathList::const_iterator iter;
+  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
+    const TrellisPath &path = **iter;
+    const std::vector<const Hypothesis *> &edges = path.GetEdges();
+
+    // print the surface factor of the translation
+    out << translationId << " ||| ";
+    for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+      const Hypothesis &edge = *edges[currEdge];
+      OutputSurface(out, edge, outputFactorOrder, reportSegmentation, reportAllFactors);
+    }
+    out << " |||";
+
+    // print scores with feature names
+    OutputAllFeatureScores(path.GetScoreBreakdown(), out );
+
+    // total
+    out << " ||| " << path.GetTotalScore();
+
+    //phrase-to-phrase segmentation
+    if (includeSegmentation) {
+      out << " |||";
+      for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
+        const Hypothesis &edge = *edges[currEdge];
+        const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+        WordsRange targetRange = path.GetTargetWordsRange(edge);
+        out << " " << sourceRange.GetStartPos();
+        if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
+          out << "-" << sourceRange.GetEndPos();
+        }
+        out<< "=" << targetRange.GetStartPos();
+        if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
+          out<< "-" << targetRange.GetEndPos();
+        }
+      }
+    }
+
+    if (includeWordAlignment) {
+      out << " ||| ";
+      for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
+        const Hypothesis &edge = *edges[currEdge];
+        const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+        WordsRange targetRange = path.GetTargetWordsRange(edge);
+        const int sourceOffset = sourceRange.GetStartPos();
+        const int targetOffset = targetRange.GetStartPos();
+        const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
+
+        OutputAlignment(out, ai, sourceOffset, targetOffset);
+
+      }
+    }
+
+    if (StaticData::Instance().IsPathRecoveryEnabled()) {
+      out << " ||| ";
+      OutputInput(out, edges[0]);
+    }
+
+    out << endl;
+  }
+
+  out << std::flush;
+}
+
+//////////////////////////////////////////////////////////////////////////
+/***
+ * print surface factor only for the given phrase
+ */
+void Manager::OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
+                   char reportSegmentation, bool reportAllFactors)
+{
+  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
+		  "Must specific at least 1 output factor");
+  const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
+  bool markUnknown = StaticData::Instance().GetMarkUnknown();
+  if (reportAllFactors == true) {
+    out << phrase;
+  } else {
+    FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+
+    std::map<size_t, const Factor*> placeholders;
+    if (placeholderFactor != NOT_FOUND) {
+      // creates map of target position -> factor for placeholders
+      placeholders = GetPlaceholders(edge, placeholderFactor);
+    }
+
+    size_t size = phrase.GetSize();
+    for (size_t pos = 0 ; pos < size ; pos++) {
+      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+
+      if (placeholders.size()) {
+        // do placeholders
+        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
+        if (iter != placeholders.end()) {
+          factor = iter->second;
+        }
+      }
+
+      UTIL_THROW_IF2(factor == NULL,
+    		  "No factor 0 at position " << pos);
+
+      //preface surface form with UNK if marking unknowns
+      const Word &word = phrase.GetWord(pos);
+      if(markUnknown && word.IsOOV()) {
+        out << "UNK" << *factor;
+      } else {
+        out << *factor;
+      }
+
+      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
+        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+        UTIL_THROW_IF2(factor == NULL,
+      		  "No factor " << i << " at position " << pos);
+
+        out << "|" << *factor;
+      }
+      out << " ";
+    }
+  }
+
+  // trace ("report segmentation") option "-t" / "-tt"
+  if (reportSegmentation > 0 && phrase.GetSize() > 0) {
+    const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+    const int sourceStart = sourceRange.GetStartPos();
+    const int sourceEnd = sourceRange.GetEndPos();
+    out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
+    if (reportSegmentation == 2) {
+      out << ",wa=";
+      const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
+      OutputAlignment(out, ai, 0, 0);
+      out << ",total=";
+      out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
+      out << ",";
+      ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
+      scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
+      OutputAllFeatureScores(scoreBreakdown, out);
+    }
+    out << "| ";
+  }
+}
+
+void Manager::OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
+                            , std::ostream &out)
+{
+  std::string lastName = "";
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for( size_t i=0; i<sff.size(); i++ ) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->GetScoreProducerDescription() != "BleuScoreFeature"
+        && ff->IsTuneable()) {
+      OutputFeatureScores( out, features, ff, lastName );
+    }
+  }
+  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  for( size_t i=0; i<slf.size(); i++ ) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      OutputFeatureScores( out, features, ff, lastName );
+    }
+  }
+}
+
+void Manager::OutputFeatureScores( std::ostream& out
+                          , const ScoreComponentCollection &features
+                          , const FeatureFunction *ff
+                          , std::string &lastName )
+{
+  const StaticData &staticData = StaticData::Instance();
+  bool labeledOutput = staticData.IsLabeledNBestList();
+
+  // regular features (not sparse)
+  if (ff->GetNumScoreComponents() != 0) {
+    if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
+      lastName = ff->GetScoreProducerDescription();
+      out << " " << lastName << "=";
+    }
+    vector<float> scores = features.GetScoresForProducer( ff );
+    for (size_t j = 0; j<scores.size(); ++j) {
+      out << " " << scores[j];
+    }
+  }
+
+  // sparse features
+  const FVector scores = features.GetVectorForProducer( ff );
+  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+    out << " " << i->first << "= " << i->second;
+  }
+}
+
+void Manager::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
+{
+  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
+  AlignVec alignments = ai.GetSortedAlignments();
+
+  AlignVec::const_iterator it;
+  for (it = alignments.begin(); it != alignments.end(); ++it) {
+    const std::pair<size_t,size_t> &alignment = **it;
+    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+  }
+
+}
+
+void Manager::OutputInput(std::ostream& os, const Hypothesis* hypo)
+{
+  size_t len = hypo->GetInput().GetSize();
+  std::vector<const Phrase*> inp_phrases(len, 0);
+  OutputInput(inp_phrases, hypo);
+  for (size_t i=0; i<len; ++i)
+    if (inp_phrases[i]) os << *inp_phrases[i];
+}
+
+void Manager::OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
+{
+  if (hypo->GetPrevHypo()) {
+    OutputInput(map, hypo->GetPrevHypo());
+    map[hypo->GetCurrSourceWordsRange().GetStartPos()] = &hypo->GetTranslationOption().GetInputPath().GetPhrase();
+  }
+}
+
+std::map<size_t, const Factor*> Manager::GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor)
+{
+  const InputPath &inputPath = hypo.GetTranslationOption().GetInputPath();
+  const Phrase &inputPhrase = inputPath.GetPhrase();
+
+  std::map<size_t, const Factor*> ret;
+
+  for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
+    const Factor *factor = inputPhrase.GetFactor(sourcePos, placeholderFactor);
+    if (factor) {
+      std::set<size_t> targetPos = hypo.GetTranslationOption().GetTargetPhrase().GetAlignTerm().GetAlignmentsForSource(sourcePos);
+      UTIL_THROW_IF2(targetPos.size() != 1,
+    		  "Placeholder should be aligned to 1, and only 1, word");
+      ret[*targetPos.begin()] = factor;
+    }
+  }
+
+  return ret;
 }
 
 }
