@@ -246,12 +246,6 @@ public:
   static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
   static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
 
-  void OutputNBest(std::ostream& out
-                   , const Moses::TrellisPathList &nBestList
-                   , const std::vector<Moses::FactorType>& outputFactorOrder
-                   , long translationId
-                   , char reportSegmentation);
-
   static void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
                               , std::ostream &out);
   static void OutputFeatureScores( std::ostream& out
