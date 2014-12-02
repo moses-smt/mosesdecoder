@@ -398,16 +398,7 @@ void TranslationTask::RunChart()
 	}
 
 	// n-best
-	size_t nBestSize = staticData.GetNBestSize();
-	if (nBestSize > 0) {
-	  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-	  std::vector<boost::shared_ptr<ChartKBestExtractor::Derivation> > nBestList;
-	  manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-	  m_ioWrapper.OutputNBestList(nBestList, translationId);
-	  IFVERBOSE(2) {
-		PrintUserTime("N-Best Hypotheses Generation Time:");
-	  }
-	}
+	manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
 
 	if (staticData.GetOutputSearchGraph()) {
 	  std::ostringstream out;

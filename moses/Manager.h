@@ -137,12 +137,6 @@ protected:
                    , char reportSegmentation);
   void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
                      char reportSegmentation, bool reportAllFactors);
-  void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
-                              , std::ostream &out);
-  void OutputFeatureScores( std::ostream& out
-                            , const ScoreComponentCollection &features
-                            , const FeatureFunction *ff
-                            , std::string &lastName );
   void OutputAlignment(std::ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
   void OutputInput(std::ostream& os, const Hypothesis* hypo);
   void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
