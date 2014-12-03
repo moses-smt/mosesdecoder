@@ -72,6 +72,9 @@ private:
   size_t OutputAlignmentNBest(Alignments &retAlign,
 		  	  	  	  	  	  const Moses::ChartKBestExtractor::Derivation &derivation,
 		  	  	  	  	  	  size_t startTarget) const;
+  size_t OutputAlignment(Alignments &retAlign,
+		  	  	  	  	  const Moses::ChartHypothesis *hypo,
+		  	  	  	  	  size_t startTarget) const;
 
   template <class T>
   void ShiftOffsets(std::vector<T> &offsets, T shift) const
@@ -137,6 +140,10 @@ public:
 
   // outputs
   void OutputNBest(OutputCollector *collector) const;
+  void OutputLatticeSamples(OutputCollector *collector) const
+  {}
+
+  void OutputAlignment(OutputCollector *collector) const;
 };
 
 }

@@ -194,6 +194,8 @@ void TranslationTask::RunPb()
         }
 
         m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), bestHypo);
+        manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
+
         IFVERBOSE(1) {
           debug << "BEST TRANSLATION: " << *bestHypo << endl;
         }
@@ -372,9 +374,7 @@ void TranslationTask::RunChart()
 	  PrintUserTime("Best Hypothesis Generation Time:");
 	}
 
-	if (!staticData.GetAlignmentOutputFile().empty()) {
-	  m_ioWrapper.OutputAlignment(translationId, bestHypo);
-	}
+    manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
 
 	if (staticData.IsDetailedTranslationReportingEnabled()) {
 	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);

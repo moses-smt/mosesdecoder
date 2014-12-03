@@ -140,6 +140,7 @@ protected:
   void OutputInput(std::ostream& os, const Hypothesis* hypo) const;
   void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo) const;
   std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const;
+  void OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo) const;
 
 public:
   InputType const& m_source; /**< source sentence to be translated */
@@ -186,7 +187,9 @@ public:
 
   // outputs
   void OutputNBest(OutputCollector *collector)  const;
+  void OutputAlignment(OutputCollector *collector) const;
   void OutputLatticeSamples(OutputCollector *collector) const;
+
 };
 
 }

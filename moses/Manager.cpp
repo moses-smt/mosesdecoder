@@ -1678,4 +1678,12 @@ void Manager::OutputLatticeSamples(OutputCollector *collector) const
 
 }
 
+void Manager::OutputAlignment(OutputCollector *collector) const
+{
+}
+
+void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo) const
+{
+}
+
 }

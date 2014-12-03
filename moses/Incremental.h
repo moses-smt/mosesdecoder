@@ -60,6 +60,9 @@ private:
 
   // outputs
   void OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const;
+  void OutputLatticeSamples(OutputCollector *collector) const
+  {}
+
 };
 
 // Just get the phrase.

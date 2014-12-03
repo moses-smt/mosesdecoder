@@ -27,6 +27,8 @@ protected:
 public:
   // outputs
   virtual void OutputNBest(OutputCollector *collector) const = 0;
+  virtual void OutputLatticeSamples(OutputCollector *collector) const = 0;
+
 
 };
 
