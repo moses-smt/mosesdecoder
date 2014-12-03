@@ -533,10 +533,13 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
 
           StringHashMap  &subtreeCache = tree->GetSubtreeCache();
           DepRelMap &depRelCache = tree->GetDepRelCache();
+          Counters &counters = tree->GetCounters();
           outDepRel<<"id:\t"<<translationId<<"\n";
           outDepRel<<"sourceLength:\t"<<hypo->GetCurrSourceRange().GetNumWordsCovered()<<"\n";
           outDepRel<<"SubtreeCacheSize:\t"<<subtreeCache.size()<<"\n";
+          outDepRel<<"SubtreeCacheHits:\t"<<counters.subtreeCacheHits<<"\n";
           outDepRel<<"DepRelCacheSize:\t"<<depRelCache.size()<<"\n";
+          outDepRel<<"DepRelCacheHits:\t"<<counters.depRelCacheHits<<"\n";
           for(DepRelMap::iterator it=depRelCache.begin(); it!=depRelCache.end();it++){
           	outDepRel<<it->first<<"\n";
           }

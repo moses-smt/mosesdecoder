@@ -797,11 +797,14 @@ void HeadFeature::ProcessDepString(std::string depRelString, std::vector< Syntax
 void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
 	StringHashMap &localCache = GetCache();
 	DepRelMap &localCacheDepRel = GetCacheDepRel();
+	Counters &localCounters = GetCounters();
 	localCache = ResetCache();
 	localCacheDepRel = ResetCacheDepRel();
+	localCounters = ResetCounters();
 
 	std::cerr<<"Reset cache: "<<localCache.size()<<endl;
 	std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
+	std::cerr<<"Reset counters: "<<localCounters.depRelCacheHits <<" "<<localCounters.subtreeCacheHits<<endl;
 
 	m_counter=0;
 	m_counterDepRel=0;
@@ -900,8 +903,10 @@ FFState* HeadFeature::EvaluateWhenApplied(
 
 	        	//I should populate this cache with all trees constructed? and just set to "" if I haven't extracted the depRel?
 	        		StringHashMap &localCache = GetCache();
+	        		Counters &localCounters = GetCounters();
 	        		if(localCache.find(parsedSentence)!=localCache.end()){
 	        			depRel=localCache[parsedSentence]->first;
+	        			localCounters.subtreeCacheHits++;
 	        			m_cacheHits++;
 	        			//cerr<<"cache Hit: "<<parsedSentence <<endl;
 	        			//cerr<<"dep rel: "<<depRel<<endl;
@@ -914,8 +919,10 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        			pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, float> (depRel,score));
 
 	        			//!!!!! only score dep rel pairs that haven't been seen before in this path -> use ProcessDepString and use state to keep track of the map of seen depRel
-	        			if(it.second==false) //no insert took place
+	        			if(it.second==false){ //no insert took place
 	        				m_cacheDepRelHits++;
+	        				localCounters.depRelCacheHits++;
+	        			}
 	        			else{//unseen depRel pair ->score
 	        				; //TODO
 	        			}
@@ -1007,7 +1014,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 */
 	        //std::cout<< syntaxTree->ToStringHead()<<std::endl;
 
-	        return new SyntaxTreeState(syntaxTree,GetCache(),GetCacheDepRel());
+	        return new SyntaxTreeState(syntaxTree,GetCache(),GetCacheDepRel(),GetCounters());
 
 
 

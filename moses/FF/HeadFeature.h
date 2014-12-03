@@ -32,6 +32,14 @@ public:
 	virtual ~StringHashMap() {}
 };
 
+class Counters {
+
+public:
+	int subtreeCacheHits;
+	int depRelCacheHits;
+	Counters():subtreeCacheHits(0),depRelCacheHits(0){}
+	virtual ~Counters() {}
+};
 //typedef boost::unordered_map<std::string,std::string> StringHashMap;
 
 
@@ -45,12 +53,14 @@ class SyntaxTreeState : public FFState
 
 	StringHashMap  &m_subtreeCache;
 	DepRelMap &m_depRelCache;
+	Counters &m_counters;
 
 public:
-  SyntaxTreeState(SyntaxTreePtr tree, StringHashMap &subtreeCache, DepRelMap &depRelCache)
+  SyntaxTreeState(SyntaxTreePtr tree, StringHashMap &subtreeCache, DepRelMap &depRelCache, Counters &counters)
     :m_tree(tree)
 		,m_subtreeCache(subtreeCache)
 		,m_depRelCache(depRelCache)
+		,m_counters(counters)
   {}
 
   SyntaxTreePtr GetTree() const {
@@ -64,6 +74,10 @@ public:
   DepRelMap& GetDepRelCache() const {
         return m_depRelCache;
     }
+
+  Counters& GetCounters() const {
+          return m_counters;
+      }
 
   int Compare(const FFState& other) const;
 };
@@ -283,7 +297,7 @@ public:
   //I don't understand this
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
 	  SyntaxTreePtr startTree(new SyntaxTree());
-	  return new SyntaxTreeState(startTree,GetCache(),GetCacheDepRel()); //&SyntaxTree());
+	  return new SyntaxTreeState(startTree,GetCache(),GetCacheDepRel(),GetCounters()); //&SyntaxTree());
   }
 
 
@@ -361,6 +375,27 @@ public:
    	return *cache;
    }
 
+ Counters &GetCounters() const {
+
+ 	 Counters *counters;
+ 	 counters = m_counters.get();
+   	  if (counters == NULL) {
+   	  	counters = new Counters;
+   	    m_counters.reset(counters);
+   	  }
+   	  assert(counters);
+   	  return *counters;
+   }
+
+ 	Counters &ResetCounters() const {
+
+	 Counters *counters;
+	 	 counters = new Counters;
+    	m_counters.reset(counters);
+    	assert(counters);
+    	return *counters;
+    }
+
 
 protected:
   boost::shared_ptr< std::map<std::string, std::vector <std::string> > > m_headRules;
@@ -381,6 +416,7 @@ protected:
 	mutable unsigned long long m_cacheDepRelHits;
 	mutable boost::thread_specific_ptr<StringHashMap> m_cache;
 	mutable boost::thread_specific_ptr<DepRelMap> m_cacheDepRel;
+	mutable boost::thread_specific_ptr<Counters> m_counters;
 	//have to take care with this -> one Feature instance per decoder which works multithreaded
 	jobject workingStanforDepObj;
 
