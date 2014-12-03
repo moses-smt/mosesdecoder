@@ -42,14 +42,28 @@ class SyntaxTreeState : public FFState
 	SyntaxTreePtr m_tree;
 	//hash scored pairs make it static -> one per class but updated with each hypothesis
 	//could make the key a string -> will slow things down head-id-dep-id
+
+	StringHashMap  &m_subtreeCache;
+	DepRelMap &m_depRelCache;
+
 public:
-  SyntaxTreeState(SyntaxTreePtr tree)
+  SyntaxTreeState(SyntaxTreePtr tree, StringHashMap &subtreeCache, DepRelMap &depRelCache)
     :m_tree(tree)
+		,m_subtreeCache(subtreeCache)
+		,m_depRelCache(depRelCache)
   {}
 
   SyntaxTreePtr GetTree() const {
       return m_tree;
   }
+
+  StringHashMap& GetSubtreeCache() const {
+        return m_subtreeCache;
+    }
+
+  DepRelMap& GetDepRelCache() const {
+        return m_depRelCache;
+    }
 
   int Compare(const FFState& other) const;
 };
@@ -269,7 +283,7 @@ public:
   //I don't understand this
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
 	  SyntaxTreePtr startTree(new SyntaxTree());
-	  return new SyntaxTreeState(startTree); //&SyntaxTree());
+	  return new SyntaxTreeState(startTree,GetCache(),GetCacheDepRel()); //&SyntaxTree());
   }
 
 
@@ -303,6 +317,7 @@ public:
 
   std::string CallStanfordDep(std::string parsedSentence) const;
   void ProcessDepString(std::string depRelString, std::vector< SyntaxTreePtr > previousTrees,ScoreComponentCollection* accumulator) const;
+  void CleanUpAfterSentenceProcessing(const InputType& source);
 
  StringHashMap &GetCache() const {
 

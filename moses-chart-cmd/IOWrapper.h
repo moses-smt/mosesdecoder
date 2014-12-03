@@ -85,6 +85,7 @@ protected:
   Moses::OutputCollector                *m_singleBestOutputCollector;
   Moses::OutputCollector                *m_alignmentInfoCollector;
   Moses::OutputCollector                *m_unknownsCollector;
+  Moses::OutputCollector								*m_depRelOutputCollector;
 
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
   std::size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartKBestExtractor::Derivation &derivation, std::size_t startTarget);

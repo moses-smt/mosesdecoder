@@ -794,6 +794,21 @@ void HeadFeature::ProcessDepString(std::string depRelString, std::vector< Syntax
 	}
 }
 
+void HeadFeature::CleanUpAfterSentenceProcessing(const InputType& source){
+	StringHashMap &localCache = GetCache();
+	DepRelMap &localCacheDepRel = GetCacheDepRel();
+	localCache = ResetCache();
+	localCacheDepRel = ResetCacheDepRel();
+
+	std::cerr<<"Reset cache: "<<localCache.size()<<endl;
+	std::cerr<<"Reset cacheDepRel: "<<localCacheDepRel.size()<<endl;
+
+	m_counter=0;
+	m_counterDepRel=0;
+	m_cacheHits=0;
+	m_cacheDepRelHits =0;
+}
+
 FFState* HeadFeature::EvaluateWhenApplied(
   const ChartHypothesis&  cur_hypo,
   int  featureID /*- used to index the state in the previous hypotheses */,
@@ -808,7 +823,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 				std::cerr<<"Current counterDepRel: "<<m_counterDepRel<<endl;
 				std::cerr<<"Current cacheHits: "<<m_cacheHits<<endl;
 				std::cerr<<"Current cacheDepRelHits: "<<m_cacheDepRelHits<<endl;
-	*/
+
 				StringHashMap &localCache = GetCache();
 				DepRelMap &localCacheDepRel = GetCacheDepRel();
 				//nr of S or VP trees = cache.size + cache.hits
@@ -823,7 +838,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 				m_counterDepRel=0;
 				m_cacheHits=0;
 				m_cacheDepRelHits =0;
-
+*/
 			}
 
 
@@ -897,8 +912,13 @@ FFState* HeadFeature::EvaluateWhenApplied(
 	        			DepRelMap &localCacheDepRel = GetCacheDepRel();
 	        			//if key already returns return iterator to key position
 	        			pair<DepRelMap::iterator,bool> it = localCacheDepRel.insert(pair<string, float> (depRel,score));
+
+	        			//!!!!! only score dep rel pairs that haven't been seen before in this path -> use ProcessDepString and use state to keep track of the map of seen depRel
 	        			if(it.second==false) //no insert took place
 	        				m_cacheDepRelHits++;
+	        			else{//unseen depRel pair ->score
+	        				; //TODO
+	        			}
 	        			if(it.first!=localCacheDepRel.end())
 	        				(*m_cache)[parsedSentence]=it.first;
 	        			//save in TreeString - DepRel cache
@@ -921,13 +941,12 @@ FFState* HeadFeature::EvaluateWhenApplied(
 								m_counter++;
 								vector<string> tokens;
 								Tokenize(tokens,depRel,"\t");
-								//split(depRel,"\t",tokens);
 								m_counterDepRel+=tokens.size();
 								for(vector<string>::iterator it=tokens.begin();it!=tokens.end();it++){
 									vector<string> rel;
 									Tokenize(rel,*it);
 									//std::cerr<<rel[0]<<" "<<rel[1]<<" "<<rel[2]<<endl;
-									if(rel.size()==3 && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0)){
+									if(rel.size()==3 && (rel[0].compare("dobj")==0 || rel[0].compare("pobj")==0 || rel[0].compare("iobj")==0 || rel[0].compare("nsubj")==0 || rel[0].compare("nsubjpass")==0)){
 										std::map<string,float>::iterator itModel;
 										itModel = m_probArg->find(rel[1]+" "+rel[2]);
 										if(itModel!=m_probArg->end()){
@@ -940,9 +959,6 @@ FFState* HeadFeature::EvaluateWhenApplied(
 										}
 									}
 								}
-
-
-								//std::cerr<< "token size: "<<tokens.size()<<endl;
 								//ProcessDepString(depRel,previousTrees,accumulator);
 							}
 							//problem when there is no dep rel ? returns '\0' or NULL
@@ -991,7 +1007,7 @@ FFState* HeadFeature::EvaluateWhenApplied(
 */
 	        //std::cout<< syntaxTree->ToStringHead()<<std::endl;
 
-	        return new SyntaxTreeState(syntaxTree);
+	        return new SyntaxTreeState(syntaxTree,GetCache(),GetCacheDepRel());
 
 
 

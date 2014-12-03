@@ -80,6 +80,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_singleBestOutputCollector(NULL)
   ,m_alignmentInfoCollector(NULL)
   ,m_unknownsCollector(NULL)
+	,m_depRelOutputCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -119,6 +120,9 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
+
+    //MARIA
+    m_depRelOutputCollector = new Moses::OutputCollector(new std::ofstream((path+".DepRel").c_str()));
   }
 
   if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
@@ -510,6 +514,7 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
   const StatefulFeatureFunction* treeStructure = StaticData::Instance().GetTreeStructure();
 
   //MARIA
+  std::ostringstream outDepRel;
   const StatefulFeatureFunction* headStructure = StaticData::Instance().GetHeadFeature();
 
   if (treeStructure != NULL) {
@@ -525,11 +530,23 @@ void IOWrapper::OutputDetailedTreeFragmentsTranslationReport(
         if (sff[i] == headStructure) {
         	const SyntaxTreeState* tree = dynamic_cast<const SyntaxTreeState*>(hypo->GetFFState(i));
             out<< "Head Tree "<< translationId << ": " << tree->GetTree()->ToStringHead() << "\n";
+
+          StringHashMap  &subtreeCache = tree->GetSubtreeCache();
+          DepRelMap &depRelCache = tree->GetDepRelCache();
+          outDepRel<<"id:\t"<<translationId<<"\n";
+          outDepRel<<"sourceLength:\t"<<hypo->GetCurrSourceRange().GetNumWordsCovered()<<"\n";
+          outDepRel<<"SubtreeCacheSize:\t"<<subtreeCache.size()<<"\n";
+          outDepRel<<"DepRelCacheSize:\t"<<depRelCache.size()<<"\n";
+          for(DepRelMap::iterator it=depRelCache.begin(); it!=depRelCache.end();it++){
+          	outDepRel<<it->first<<"\n";
+          }
+          outDepRel<<"\n";
         }
     }
   }
 
   m_detailTreeFragmentsOutputCollector->Write(translationId, out.str());
+  m_depRelOutputCollector->Write(translationId,outDepRel.str());
 
 }
 
