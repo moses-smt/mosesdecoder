@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "moses/InputType.h"
+#include "moses/BaseManager.h"
 #include "moses/Syntax/KBestExtractor.h"
 #include "moses/Syntax/SVertexStack.h"
 
@@ -25,7 +26,7 @@ namespace S2T
 {
 
 template<typename Parser>
-class Manager
+class Manager : public BaseManager
 {
  public:
   Manager(const InputType &);
@@ -41,6 +42,11 @@ class Manager
       bool onlyDistinct=false) const;
 
   const std::set<Word> &GetUnknownWords() const { return m_oovs; }
+
+  void OutputNBest(OutputCollector *collector) const;
+  void OutputLatticeSamples(OutputCollector *collector) const;
+  void OutputAlignment(OutputCollector *collector) const;
+  void OutputDetailedTranslationReport(OutputCollector *collector) const;
 
  private:
   void FindOovs(const PChart &, std::set<Word> &, std::size_t);
