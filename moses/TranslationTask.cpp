@@ -193,7 +193,6 @@ void TranslationTask::RunPb()
           m_ioWrapper.OutputAlignment(out, bestHypo);
         }
 
-        m_ioWrapper.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector(), m_source->GetTranslationId(), bestHypo);
         manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
 
         IFVERBOSE(1) {

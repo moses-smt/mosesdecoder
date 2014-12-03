@@ -1680,10 +1680,42 @@ void Manager::OutputLatticeSamples(OutputCollector *collector) const
 
 void Manager::OutputAlignment(OutputCollector *collector) const
 {
+  if (collector) {
+	std::vector<const Hypothesis *> edges;
+	const Hypothesis *currentHypo = GetBestHypothesis();
+	while (currentHypo) {
+	  edges.push_back(currentHypo);
+	  currentHypo = currentHypo->GetPrevHypo();
+	}
+
+	OutputAlignment(collector,m_source.GetTranslationId(), edges);
+  }
 }
 
-void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo) const
+void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges) const
 {
+  ostringstream out;
+  OutputAlignment(out, edges);
+
+  collector->Write(lineNo,out.str());
+}
+
+void Manager::OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges) const
+{
+  size_t targetOffset = 0;
+
+  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+    const Hypothesis &edge = *edges[currEdge];
+    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
+    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
+
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
+
+    targetOffset += tp.GetSize();
+  }
+  // Removing std::endl here breaks -alignment-output-file, so stop doing that, please :)
+  // Or fix it somewhere else.
+  out << std::endl;
 }
 
 }
