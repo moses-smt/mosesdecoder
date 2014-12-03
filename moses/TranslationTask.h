@@ -70,9 +70,12 @@ private:
       m_ioWrapper.OutputNBestList(nBestList, translationId);
     }
     // Write 1-best derivation (-translation-details / -T option).
+
+    /*
     if (staticData.IsDetailedTranslationReportingEnabled()) {
       m_ioWrapper.OutputDetailedTranslationReport(best, translationId);
     }
+    */
     // Write unknown words file (-output-unknowns option)
     if (!staticData.GetOutputUnknownsFile().empty()) {
       m_ioWrapper.OutputUnknowns(manager.GetUnknownWords(), translationId);

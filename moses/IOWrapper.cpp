@@ -368,22 +368,6 @@ void IOWrapper::Backtrack(const ChartHypothesis *hypo)
   }
 }
 
-void IOWrapper::OutputDetailedTranslationReport(
-  const search::Applied *applied,
-  const Sentence &sentence,
-  long translationId)
-{
-  if (applied == NULL) {
-    return;
-  }
-  std::ostringstream out;
-  ApplicationContext applicationContext;
-
-  OutputTranslationOptions(out, applicationContext, applied, sentence, translationId);
-  UTIL_THROW_IF2(m_detailedTranslationCollector == NULL,
-                  "No ouput file for detailed reports specified");
-  m_detailedTranslationCollector->Write(translationId, out.str());
-}
 
 void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
@@ -1281,19 +1265,6 @@ void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solu
 ////////////////////////////
 #include "moses/Syntax/PVertex.h"
 #include "moses/Syntax/S2T/DerivationWriter.h"
-
-void IOWrapper::OutputDetailedTranslationReport(const Syntax::SHyperedge *best,
-                                                long translationId)
-{
-  if (best == NULL) {
-    return;
-  }
-  std::ostringstream out;
-  Syntax::S2T::DerivationWriter::Write(*best, translationId, out);
-  UTIL_THROW_IF2(m_detailedTranslationCollector == NULL,
-		  "No ouput file for detailed reports specified");
-  m_detailedTranslationCollector->Write(translationId, out.str());
-}
 
 void IOWrapper::OutputBestHypo(const Syntax::SHyperedge *best,
                                long translationId)
