@@ -469,7 +469,7 @@ void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
                                                         double smoothingFactor, 
                                                         std::ostream &out) const
 {
-  assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dright dleft
+  assert(orientationClassPriorsL2R.size()==4 && orientationClassPriorsR2L.size()==4); // mono swap dleft dright
 
   const PROPERTY_VALUES *allPropertyValues = GetProperty( key );
 
@@ -507,10 +507,10 @@ void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
     if (!l2rOrientationClass.compare("swap")) {
       l2rOrientationClassId = 1;
     }
-    if (!l2rOrientationClass.compare("dright")) {
+    if (!l2rOrientationClass.compare("dleft")) {
       l2rOrientationClassId = 2;
     }
-    if (!l2rOrientationClass.compare("dleft")) {
+    if (!l2rOrientationClass.compare("dright")) {
       l2rOrientationClassId = 3;
     }
     if (l2rOrientationClassId == -1) {
@@ -525,10 +525,10 @@ void ExtractionPhrasePair::CollectAllPhraseOrientations(const std::string &key,
     if (!r2lOrientationClass.compare("swap")) {
       r2lOrientationClassId = 1;
     }
-    if (!r2lOrientationClass.compare("dright")) {
+    if (!r2lOrientationClass.compare("dleft")) {
       r2lOrientationClassId = 2;
     }
-    if (!r2lOrientationClass.compare("dleft")) {
+    if (!r2lOrientationClass.compare("dright")) {
       r2lOrientationClassId = 3;
     }
     if (r2lOrientationClassId == -1) {

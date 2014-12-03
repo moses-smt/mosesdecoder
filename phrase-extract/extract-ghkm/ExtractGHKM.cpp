@@ -264,12 +264,12 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
       const std::vector<const Subgraph *> &rules = (*p)->GetRules();
 
-      REO_POS l2rOrientation=UNKNOWN, r2lOrientation=UNKNOWN;
+      Moses::GHKM::PhraseOrientation::REO_CLASS l2rOrientation=Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN, r2lOrientation=Moses::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN;
       if (options.phraseOrientation && !rules.empty()) {
         int sourceSpanBegin = *((*p)->GetSpan().begin());
         int sourceSpanEnd   = *((*p)->GetSpan().rbegin());
-        l2rOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,L2R);
-        r2lOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,R2L);
+        l2rOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,Moses::GHKM::PhraseOrientation::REO_DIR_L2R);
+        r2lOrientation = phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd,Moses::GHKM::PhraseOrientation::REO_DIR_R2L);
         // std::cerr << "span " << sourceSpanBegin << " " << sourceSpanEnd << std::endl;
         // std::cerr << "phraseOrientation " << phraseOrientation.GetOrientationInfo(sourceSpanBegin,sourceSpanEnd) << std::endl;
       }
@@ -304,8 +304,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
             fwdExtractStream << " ";
             phraseOrientation.WriteOrientation(fwdExtractStream,r2lOrientation);
             fwdExtractStream << "}}";
-            phraseOrientation.IncrementPriorCount(L2R,l2rOrientation,1);
-            phraseOrientation.IncrementPriorCount(R2L,r2lOrientation,1);
+            phraseOrientation.IncrementPriorCount(Moses::GHKM::PhraseOrientation::REO_DIR_L2R,l2rOrientation,1);
+            phraseOrientation.IncrementPriorCount(Moses::GHKM::PhraseOrientation::REO_DIR_R2L,r2lOrientation,1);
           }
           fwdExtractStream << std::endl;
           invExtractStream << std::endl;

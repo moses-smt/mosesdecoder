@@ -45,6 +45,7 @@ void FeatureFunction::CallChangeSource(InputType *&input)
 FeatureFunction::
 FeatureFunction(const std::string& line)
   : m_tuneable(true)
+  , m_verbosity(1)
   , m_numScoreComponents(1)
 {
   Initialize(line);
@@ -54,6 +55,7 @@ FeatureFunction::
 FeatureFunction(size_t numScoreComponents,
                 const std::string& line)
   : m_tuneable(true)
+  , m_verbosity(0)
   , m_numScoreComponents(numScoreComponents)
 {
   Initialize(line);
@@ -115,6 +117,8 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
 {
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
+  } else if (key == "verbosity") {
+    m_verbosity = Scan<size_t>(value);
   } else if (key == "filterable") { //ignore
   } else {
     UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);

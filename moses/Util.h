@@ -59,8 +59,11 @@ namespace Moses
 
 #define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
-#define XVERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR("[" << __FILE__ << ":" << __LINE__ << "] ");TRACE_ERR(str); } }
+#define XVERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR("[" << __FILE__ << ":" << __LINE__ << "] "); TRACE_ERR(str); } }
 #define HERE __FILE__ << ":" << __LINE__
+#define FEATUREVERBOSE(level,str) { if (m_verbosity >= level) { TRACE_ERR("[" << GetScoreProducerDescription() << "] "); FEATUREVERBOSE2(level,str); } }
+#define FEATUREVERBOSE2(level,str) { if (m_verbosity >= level) { TRACE_ERR(str); } }
+#define IFFEATUREVERBOSE(level) if (m_verbosity >= level)
 
 
 #if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)
