@@ -22,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
+#include <cassert>
 
 #include <boost/assign/list_of.hpp>
 
@@ -100,13 +101,15 @@ PhraseOrientation::PhraseOrientation(int sourceSize,
         }
       }
 
+      m_minAndMaxAlignedToTargetSpan[ std::pair<int,int>(startE,endE) ] = std::pair<int,int>(minF,maxF); 
+
       if (maxF >= 0) { // aligned to any source words at all
 
-        // check if source words are aligned to out of bound target words
+        // check if source words are aligned to out of bounds target words
         bool out_of_bounds = false;
         for (int fi=minF; fi<=maxF && !out_of_bounds; ++fi)
           if (usedF[fi]>0) {
-            // cout << "ouf of bounds: " << fi << "\n";
+            // cout << "out of bounds: " << fi << "\n";
             out_of_bounds = true;
           }
 
@@ -175,7 +178,7 @@ const std::string PhraseOrientation::GetOrientationInfoString(int startF, int en
 //      << std::endl;
     return GetOrientationInfoString(startF, startE, endF, endE, direction);
   } else {
-    std::cerr << "Error: not able to determine phrase orientation" << std::endl;
+    std::cerr << "PhraseOrientation::GetOrientationInfoString(): Error: not able to determine phrase orientation" << std::endl;
     std::exit(1);
   }
 }
@@ -183,46 +186,33 @@ const std::string PhraseOrientation::GetOrientationInfoString(int startF, int en
 
 const std::string PhraseOrientation::GetOrientationInfoString(int startF, int startE, int endF, int endE, REO_DIR direction) const
 {
-  REO_POS hierPrevOrient=UNKNOWN, hierNextOrient=UNKNOWN;
+  REO_CLASS hierPrevOrient=REO_CLASS_UNKNOWN, hierNextOrient=REO_CLASS_UNKNOWN;
 
-  bool connectedLeftTopP  = IsAligned( startF-1, startE-1 );
-  bool connectedRightTopP = IsAligned( endF+1,   startE-1 );
-  bool connectedLeftTopN  = IsAligned( endF+1,   endE+1   );
-  bool connectedRightTopN = IsAligned( startF-1, endE+1   );
+  if ( direction == REO_DIR_L2R || direction == REO_DIR_BIDIR )
+    hierPrevOrient = GetOrientationInfo(startF, startE, endF, endE, REO_DIR_L2R);
 
-  if ( direction == L2R || direction == BIDIR )
-    hierPrevOrient = GetOrientHierModel(REO_MSLR,
-                                        connectedLeftTopP, connectedRightTopP,
-                                        startF, endF, startE, endE, m_countF-1, 0, 1, 
-                                        &ge, &lt, 
-                                        m_bottomRight, m_bottomLeft);
-
-  if ( direction == R2L || direction == BIDIR )
-    hierNextOrient = GetOrientHierModel(REO_MSLR,
-                                        connectedLeftTopN, connectedRightTopN,
-                                        endF, startF, endE, startE, 0, m_countF-1, -1, 
-                                        &lt, &ge, 
-                                        m_bottomLeft, m_bottomRight); 
+  if ( direction == REO_DIR_R2L || direction == REO_DIR_BIDIR )
+    hierNextOrient = GetOrientationInfo(startF, startE, endF, endE, REO_DIR_R2L);
 
   switch (direction) {
-    case L2R:
-      return GetOrientationString(hierPrevOrient, REO_MSLR);
+    case REO_DIR_L2R:
+      return GetOrientationString(hierPrevOrient, REO_MODEL_TYPE_MSLR);
       break;
-    case R2L:
-      return GetOrientationString(hierNextOrient, REO_MSLR);
+    case REO_DIR_R2L:
+      return GetOrientationString(hierNextOrient, REO_MODEL_TYPE_MSLR);
       break;
-    case BIDIR:
-      return GetOrientationString(hierPrevOrient, REO_MSLR) + " " + GetOrientationString(hierNextOrient, REO_MSLR);
+    case REO_DIR_BIDIR:
+      return GetOrientationString(hierPrevOrient, REO_MODEL_TYPE_MSLR) + " " + GetOrientationString(hierNextOrient, REO_MODEL_TYPE_MSLR);
       break;
     default:
-      return GetOrientationString(hierPrevOrient, REO_MSLR) + " " + GetOrientationString(hierNextOrient, REO_MSLR);
+      return GetOrientationString(hierPrevOrient, REO_MODEL_TYPE_MSLR) + " " + GetOrientationString(hierNextOrient, REO_MODEL_TYPE_MSLR);
       break;
   }
   return "PhraseOrientationERROR";
 }
 
 
-REO_POS PhraseOrientation::GetOrientationInfo(int startF, int endF, REO_DIR direction) const
+PhraseOrientation::REO_CLASS PhraseOrientation::GetOrientationInfo(int startF, int endF, REO_DIR direction) const
 {
   boost::unordered_map< std::pair<int,int> , std::pair<int,int> >::const_iterator foundMinMax 
     = m_minAndMaxAlignedToSourceSpan.find( std::pair<int,int>(startF,endF) );
@@ -238,86 +228,114 @@ REO_POS PhraseOrientation::GetOrientationInfo(int startF, int endF, REO_DIR dire
 //      << std::endl;
     return GetOrientationInfo(startF, startE, endF, endE, direction);
   } else {
-    std::cerr << "Error: not able to determine phrase orientation" << std::endl;
+    std::cerr << "PhraseOrientation::GetOrientationInfo(): Error: not able to determine phrase orientation" << std::endl;
     std::exit(1);
   }
 }
 
 
-REO_POS PhraseOrientation::GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const
+PhraseOrientation::REO_CLASS PhraseOrientation::GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const
 {
-  if ( direction != L2R && direction != R2L ) {
-    std::cerr << "PhraseOrientation::GetOrientationInfo(): direction should be either L2R or R2L" << std::endl;
+  if ( direction != REO_DIR_L2R && direction != REO_DIR_R2L ) {
+    std::cerr << "PhraseOrientation::GetOrientationInfo(): Error: direction should be either L2R or R2L" << std::endl;
     std::exit(1);
   }
 
-  bool connectedLeftTopP  = IsAligned( startF-1, startE-1 );
-  bool connectedRightTopP = IsAligned( endF+1,   startE-1 );
-  bool connectedLeftTopN  = IsAligned( endF+1,   endE+1   );
-  bool connectedRightTopN = IsAligned( startF-1, endE+1   );
-
-  if ( direction == L2R )
-    return GetOrientHierModel(REO_MSLR,
-                              connectedLeftTopP, connectedRightTopP,
-                              startF, endF, startE, endE, m_countF-1, 0, 1, 
-                              &ge, &lt, 
+  if ( direction == REO_DIR_L2R )
+    return GetOrientHierModel(REO_MODEL_TYPE_MSLR,
+                              startF, endF, startE, endE, m_countF-1, 0, 0, 1, 
+                              &ge, &le, 
                               m_bottomRight, m_bottomLeft);
 
-  if ( direction == R2L )
-    return GetOrientHierModel(REO_MSLR,
-                              connectedLeftTopN, connectedRightTopN,
-                              endF, startF, endE, startE, 0, m_countF-1, -1, 
-                              &lt, &ge, 
-                              m_bottomLeft, m_bottomRight);
+  if ( direction == REO_DIR_R2L )
+    return GetOrientHierModel(REO_MODEL_TYPE_MSLR,
+                              endF, startF, endE, startE, 0, m_countF-1, m_countE-1, -1, 
+                              &le, &ge, 
+                              m_topLeft, m_topRight);
 
-  return UNKNOWN; 
+  return REO_CLASS_UNKNOWN; 
 }
 
 
 // to be called with countF-1 instead of countF
-REO_POS PhraseOrientation::GetOrientHierModel(REO_MODEL_TYPE modelType,
-                                              bool connectedLeftTop, bool connectedRightTop,
-                                              int startF, int endF, int startE, int endE, int countF, int zero, int unit,
-                                              bool (*ge)(int, int), bool (*lt)(int, int),
+PhraseOrientation::REO_CLASS PhraseOrientation::GetOrientHierModel(REO_MODEL_TYPE modelType,
+                                              int startF, int endF, int startE, int endE, int countF, int zeroF, int zeroE, int unit,
+                                              bool (*ge)(int, int), bool (*le)(int, int),
                                               const HSentenceVertices & bottomRight, const HSentenceVertices & bottomLeft) const
 {
+  bool leftSourceSpanIsAligned = ( (startF != zeroF) && SourceSpanIsAligned(zeroF,startF-unit) );
+  bool topTargetSpanIsAligned  = ( (startE != zeroE) && TargetSpanIsAligned(zeroE,startE-unit) );
+
+  if (!topTargetSpanIsAligned && !leftSourceSpanIsAligned)
+    return REO_CLASS_LEFT;
+
   HSentenceVertices::const_iterator it;
 
-  if ((connectedLeftTop && !connectedRightTop) ||
+  if (//(connectedLeftTop && !connectedRightTop) ||
       ((it = bottomRight.find(startE - unit)) != bottomRight.end() &&
        it->second.find(startF-unit) != it->second.end()))
-    return LEFT;
+    return REO_CLASS_LEFT;
 
-  if (modelType == REO_MONO)
-    return UNKNOWN;
+  if (modelType == REO_MODEL_TYPE_MONO)
+    return REO_CLASS_UNKNOWN;
 
-  if ((!connectedLeftTop &&  connectedRightTop) ||
+  if (//(!connectedLeftTop &&  connectedRightTop) ||
       ((it = bottomLeft.find(startE - unit)) != bottomLeft.end() &&
        it->second.find(endF + unit) != it->second.end()))
-    return RIGHT;
+    return REO_CLASS_RIGHT;
 
-  if (modelType == REO_MSD)
-    return UNKNOWN;
+  if (modelType == REO_MODEL_TYPE_MSD)
+    return REO_CLASS_UNKNOWN;
 
-  connectedLeftTop = false;
-  for (int indexF=startF-2*unit; (*ge)(indexF, zero) && !connectedLeftTop; indexF=indexF-unit) {
-    if ((connectedLeftTop = ((it = bottomRight.find(startE - unit)) != bottomRight.end() &&
-                             it->second.find(indexF) != it->second.end())))
-      return DRIGHT;
+  for (int indexF=startF-2*unit; (*ge)(indexF, zeroF); indexF=indexF-unit) 
+  {
+    if ((it = bottomRight.find(startE - unit)) != bottomRight.end() &&
+         it->second.find(indexF) != it->second.end())
+      return REO_CLASS_DLEFT;
   }
 
-  connectedRightTop = false;
-  for (int indexF=endF+2*unit; (*lt)(indexF, countF) && !connectedRightTop; indexF=indexF+unit) {
-    if ((connectedRightTop = ((it = bottomLeft.find(startE - unit)) != bottomLeft.end() &&
-                              it->second.find(indexF) != it->second.end())))
-      return DLEFT;
+  for (int indexF=endF+2*unit; (*le)(indexF, countF); indexF=indexF+unit) 
+  {
+    if ((it = bottomLeft.find(startE - unit)) != bottomLeft.end() &&
+        it->second.find(indexF) != it->second.end())
+      return REO_CLASS_DRIGHT;
   }
 
-  return UNKNOWN;
+  return REO_CLASS_UNKNOWN;
+}
+  
+bool PhraseOrientation::SourceSpanIsAligned(int index1, int index2) const
+{
+  return SpanIsAligned(index1, index2, m_minAndMaxAlignedToSourceSpan);
+}
+
+bool PhraseOrientation::TargetSpanIsAligned(int index1, int index2) const
+{
+  return SpanIsAligned(index1, index2, m_minAndMaxAlignedToTargetSpan);
+}
+
+bool PhraseOrientation::SpanIsAligned(int index1, int index2, const boost::unordered_map< std::pair<int,int> , std::pair<int,int> > &minAndMaxAligned) const
+{
+  boost::unordered_map< std::pair<int,int> , std::pair<int,int> >::const_iterator itMinAndMaxAligned = 
+    minAndMaxAligned.find(std::pair<int,int>(std::min(index1,index2),std::max(index1,index2)));
+
+  if (itMinAndMaxAligned == minAndMaxAligned.end())
+  {
+    std::cerr << "PhraseOrientation::SourceSpanIsAligned(): Error" << std::endl;
+    std::exit(1);
+  }
+  else
+  {
+    if (itMinAndMaxAligned->second.first == std::numeric_limits<int>::max()) 
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 
-const std::string PhraseOrientation::GetOrientationString(const REO_POS orient, const REO_MODEL_TYPE modelType)
+const std::string PhraseOrientation::GetOrientationString(const REO_CLASS orient, const REO_MODEL_TYPE modelType)
 {
   std::ostringstream oss;
   WriteOrientation(oss, orient, modelType);
@@ -325,31 +343,31 @@ const std::string PhraseOrientation::GetOrientationString(const REO_POS orient, 
 }
 
 
-void PhraseOrientation::WriteOrientation(std::ostream& out, const REO_POS orient, const REO_MODEL_TYPE modelType)
+void PhraseOrientation::WriteOrientation(std::ostream& out, const REO_CLASS orient, const REO_MODEL_TYPE modelType)
 {
   switch(orient) {
-  case LEFT:
+  case REO_CLASS_LEFT:
     out << "mono";
     break;
-  case RIGHT:
+  case REO_CLASS_RIGHT:
     out << "swap";
     break;
-  case DRIGHT:
-    out << "dright";
-    break;
-  case DLEFT:
+  case REO_CLASS_DLEFT:
     out << "dleft";
     break;
-  case UNKNOWN:
+  case REO_CLASS_DRIGHT:
+    out << "dright";
+    break;
+  case REO_CLASS_UNKNOWN:
     switch(modelType) {
-    case REO_MONO:
+    case REO_MODEL_TYPE_MONO:
       out << "nomono";
       break;
-    case REO_MSD:
+    case REO_MODEL_TYPE_MSD:
       out << "other";
       break;
-    case REO_MSLR:
-      out << "dright";
+    case REO_MODEL_TYPE_MSLR:
+      out << "dleft";
       break;
     }
     break;
@@ -379,12 +397,12 @@ bool PhraseOrientation::IsAligned(int fi, int ei) const
 }
 
 
-void PhraseOrientation::IncrementPriorCount(REO_DIR direction, REO_POS orient, float increment)
+void PhraseOrientation::IncrementPriorCount(REO_DIR direction, REO_CLASS orient, float increment)
 {
-  assert(direction==L2R || direction==R2L);
-  if (direction == L2R) {
+  assert(direction==REO_DIR_L2R || direction==REO_DIR_R2L);
+  if (direction == REO_DIR_L2R) {
     m_l2rOrientationPriorCounts[orient] += increment;
-  } else if (direction == R2L) {
+  } else if (direction == REO_DIR_R2L) {
     m_r2lOrientationPriorCounts[orient] += increment;
   }
 }
@@ -394,11 +412,11 @@ void PhraseOrientation::WritePriorCounts(std::ostream& out, const REO_MODEL_TYPE
 {
   std::map<std::string,float> l2rOrientationPriorCountsMap;
   std::map<std::string,float> r2lOrientationPriorCountsMap;
-  for (int orient=0; orient<=UNKNOWN; ++orient) {
-    l2rOrientationPriorCountsMap[GetOrientationString((REO_POS)orient, modelType)] += m_l2rOrientationPriorCounts[orient];
+  for (int orient=0; orient<=REO_CLASS_UNKNOWN; ++orient) {
+    l2rOrientationPriorCountsMap[GetOrientationString((REO_CLASS)orient, modelType)] += m_l2rOrientationPriorCounts[orient];
   } 
-  for (int orient=0; orient<=UNKNOWN; ++orient) {
-    r2lOrientationPriorCountsMap[GetOrientationString((REO_POS)orient, modelType)] += m_r2lOrientationPriorCounts[orient];
+  for (int orient=0; orient<=REO_CLASS_UNKNOWN; ++orient) {
+    r2lOrientationPriorCountsMap[GetOrientationString((REO_CLASS)orient, modelType)] += m_r2lOrientationPriorCounts[orient];
   }
   for (std::map<std::string,float>::const_iterator l2rOrientationPriorCountsMapIt = l2rOrientationPriorCountsMap.begin();
        l2rOrientationPriorCountsMapIt != l2rOrientationPriorCountsMap.end(); ++l2rOrientationPriorCountsMapIt) {

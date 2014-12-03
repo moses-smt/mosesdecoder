@@ -33,10 +33,6 @@ namespace Moses
 namespace GHKM
 {
 
-enum REO_MODEL_TYPE {REO_MSD, REO_MSLR, REO_MONO};
-enum REO_POS {LEFT, RIGHT, DLEFT, DRIGHT, UNKNOWN};
-enum REO_DIR {L2R, R2L, BIDIR};
-
 // The key of the map is the English index and the value is a set of the source ones
 typedef std::map <int, std::set<int> > HSentenceVertices;
 
@@ -45,18 +41,25 @@ class PhraseOrientation
 {
 public:
 
-    PhraseOrientation(int sourceSize,
-                      int targetSize,
-                      const Alignment &alignment);
+  enum REO_MODEL_TYPE {REO_MODEL_TYPE_MSD, REO_MODEL_TYPE_MSLR, REO_MODEL_TYPE_MONO};
+  enum REO_CLASS {REO_CLASS_LEFT, REO_CLASS_RIGHT, REO_CLASS_DLEFT, REO_CLASS_DRIGHT, REO_CLASS_UNKNOWN};
+  enum REO_DIR {REO_DIR_L2R, REO_DIR_R2L, REO_DIR_BIDIR};
 
-  REO_POS GetOrientationInfo(int startF, int endF, REO_DIR direction) const;
-  REO_POS GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const;
-  const std::string GetOrientationInfoString(int startF, int endF, REO_DIR direction=BIDIR) const;
-  const std::string GetOrientationInfoString(int startF, int startE, int endF, int endE, REO_DIR direction=BIDIR) const;
-  static const std::string GetOrientationString(const REO_POS orient, const REO_MODEL_TYPE modelType=REO_MSLR);
-  static void WriteOrientation(std::ostream& out, const REO_POS orient, const REO_MODEL_TYPE modelType=REO_MSLR);
-  void IncrementPriorCount(REO_DIR direction, REO_POS orient, float increment);
-  static void WritePriorCounts(std::ostream& out, const REO_MODEL_TYPE modelType=REO_MSLR);
+
+  PhraseOrientation(int sourceSize,
+                    int targetSize,
+                    const Alignment &alignment);
+
+  REO_CLASS GetOrientationInfo(int startF, int endF, REO_DIR direction) const;
+  REO_CLASS GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const;
+  const std::string GetOrientationInfoString(int startF, int endF, REO_DIR direction=REO_DIR_BIDIR) const;
+  const std::string GetOrientationInfoString(int startF, int startE, int endF, int endE, REO_DIR direction=REO_DIR_BIDIR) const;
+  static const std::string GetOrientationString(const REO_CLASS orient, const REO_MODEL_TYPE modelType=REO_MODEL_TYPE_MSLR);
+  static void WriteOrientation(std::ostream& out, const REO_CLASS orient, const REO_MODEL_TYPE modelType=REO_MODEL_TYPE_MSLR);
+  void IncrementPriorCount(REO_DIR direction, REO_CLASS orient, float increment);
+  static void WritePriorCounts(std::ostream& out, const REO_MODEL_TYPE modelType=REO_MODEL_TYPE_MSLR);
+  bool SourceSpanIsAligned(int index1, int index2) const;
+  bool TargetSpanIsAligned(int index1, int index2) const;
 
 private:
 
@@ -68,11 +71,12 @@ private:
                             HSentenceVertices & bottomRight,
                             int startF, int startE, int endF, int endE);
 
-  REO_POS GetOrientHierModel(REO_MODEL_TYPE modelType,
-                             bool connectedLeftTop, bool connectedRightTop,
-                             int startF, int endF, int startE, int endE, int countF, int zero, int unit,
+  REO_CLASS GetOrientHierModel(REO_MODEL_TYPE modelType,
+                             int startF, int endF, int startE, int endE, int countF, int zeroF, int zeroE, int unit,
                              bool (*ge)(int, int), bool (*lt)(int, int),
                              const HSentenceVertices & bottomRight, const HSentenceVertices & bottomLeft) const;
+
+  bool SpanIsAligned(int index1, int index2, const boost::unordered_map< std::pair<int,int> , std::pair<int,int> > &minAndMaxAligned) const;
 
   bool IsAligned(int fi, int ei) const;
 
@@ -91,6 +95,7 @@ private:
   HSentenceVertices m_bottomRight;
 
   boost::unordered_map< std::pair<int,int> , std::pair<int,int> > m_minAndMaxAlignedToSourceSpan;
+  boost::unordered_map< std::pair<int,int> , std::pair<int,int> > m_minAndMaxAlignedToTargetSpan;
 
   static std::vector<float> m_l2rOrientationPriorCounts;
   static std::vector<float> m_r2lOrientationPriorCounts;

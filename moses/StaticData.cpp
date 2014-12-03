@@ -63,8 +63,8 @@ StaticData::StaticData()
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_currentWeightSetting("default")
-  ,m_treeStructure(NULL)
   ,m_useS2TDecoder(false)
+  ,m_treeStructure(NULL)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
