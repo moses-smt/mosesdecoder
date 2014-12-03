@@ -190,6 +190,7 @@ public:
   void OutputNBest(OutputCollector *collector)  const;
   void OutputAlignment(OutputCollector *collector) const;
   void OutputLatticeSamples(OutputCollector *collector) const;
+  void OutputDetailedTranslationReport(OutputCollector *collector) const;
 
 };
 

@@ -756,23 +756,6 @@ size_t IOWrapper::CalcSourceSize(const Moses::ChartHypothesis *hypo)
   return ret;
 }
 
-void IOWrapper::OutputDetailedTranslationReport(
-  const ChartHypothesis *hypo,
-  const Sentence &sentence,
-  long translationId)
-{
-  if (hypo == NULL) {
-    return;
-  }
-  std::ostringstream out;
-  ApplicationContext applicationContext;
-
-  OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
-  UTIL_THROW_IF2(m_detailedTranslationCollector == NULL,
-		  "No ouput file for detailed reports specified");
-  m_detailedTranslationCollector->Write(translationId, out.str());
-}
-
 //DIMw
 void IOWrapper::OutputDetailedAllTranslationReport(
   const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList,

@@ -209,7 +209,6 @@ public:
   void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
   void OutputNBestList(const Moses::Syntax::KBestExtractor::KBestVec &nBestList, long translationId);
 
-  void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
   void OutputDetailedTranslationReport(const Moses::Syntax::SHyperedge *, long translationId);
 

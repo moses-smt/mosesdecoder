@@ -338,10 +338,9 @@ void TranslationTask::RunChart()
 	  const std::vector<search::Applied> &nbest = manager.ProcessSentence();
 	  if (!nbest.empty()) {
 		m_ioWrapper.OutputBestHypo(nbest[0], translationId);
-		if (staticData.IsDetailedTranslationReportingEnabled()) {
-		  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-		  m_ioWrapper.OutputDetailedTranslationReport(&nbest[0], sentence, translationId);
-		}
+
+		manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
+
 		if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
 		  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
 		  m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(&nbest[0], sentence, translationId);
@@ -374,11 +373,9 @@ void TranslationTask::RunChart()
 	}
 
     manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
+    manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
 
-	if (staticData.IsDetailedTranslationReportingEnabled()) {
-	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-	  m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
-	}
+
 	if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
 	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
 	  m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);

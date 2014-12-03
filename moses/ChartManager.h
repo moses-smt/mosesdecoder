@@ -75,6 +75,24 @@ private:
   size_t OutputAlignment(Alignments &retAlign,
 		  	  	  	  	  const Moses::ChartHypothesis *hypo,
 		  	  	  	  	  size_t startTarget) const;
+  void OutputDetailedTranslationReport(
+		  	  	  	  	  	OutputCollector *collector,
+							const ChartHypothesis *hypo,
+							const Sentence &sentence,
+							long translationId) const;
+  void OutputTranslationOptions(std::ostream &out,
+		  	  	  	  	  ApplicationContext &applicationContext,
+		  	  	  	  	  const ChartHypothesis *hypo,
+		  	  	  	  	  const Sentence &sentence,
+		  	  	  	  	  long translationId) const;
+  void OutputTranslationOption(std::ostream &out,
+  			ApplicationContext &applicationContext,
+  			const ChartHypothesis *hypo,
+  			const Sentence &sentence,
+  			long translationId) const;
+  void ReconstructApplicationContext(const ChartHypothesis &hypo,
+      const Sentence &sentence,
+      ApplicationContext &context) const;
 
   template <class T>
   void ShiftOffsets(std::vector<T> &offsets, T shift) const
@@ -142,8 +160,9 @@ public:
   void OutputNBest(OutputCollector *collector) const;
   void OutputLatticeSamples(OutputCollector *collector) const
   {}
-
   void OutputAlignment(OutputCollector *collector) const;
+  void OutputDetailedTranslationReport(OutputCollector *collector) const;
+
 };
 
 }

@@ -572,4 +572,96 @@ size_t ChartManager::OutputAlignment(Alignments &retAlign,
   return totalTargetSize;
 }
 
+void ChartManager::OutputDetailedTranslationReport(OutputCollector *collector) const
+{
+	if (collector) {
+		OutputDetailedTranslationReport(collector,
+										GetBestHypothesis(),
+										static_cast<const Sentence&>(m_source),
+										m_source.GetTranslationId());
+	}
+}
+
+void ChartManager::OutputDetailedTranslationReport(
+		  OutputCollector *collector,
+		  const ChartHypothesis *hypo,
+		  const Sentence &sentence,
+		  long translationId) const
+{
+  if (hypo == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+  collector->Write(translationId, out.str());
+}
+
+void ChartManager::OutputTranslationOptions(std::ostream &out,
+					ApplicationContext &applicationContext,
+					const ChartHypothesis *hypo,
+					const Sentence &sentence,
+					long translationId) const
+{
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
+void ChartManager::OutputTranslationOption(std::ostream &out,
+			ApplicationContext &applicationContext,
+			const ChartHypothesis *hypo,
+			const Sentence &sentence,
+			long translationId) const
+{
+  ReconstructApplicationContext(*hypo, sentence, applicationContext);
+  out << "Trans Opt " << translationId
+      << " " << hypo->GetCurrSourceRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+      << "->" << hypo->GetCurrTargetPhrase()
+      << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+}
+
+// Given a hypothesis and sentence, reconstructs the 'application context' --
+// the source RHS symbols of the SCFG rule that was applied, plus their spans.
+void ChartManager::ReconstructApplicationContext(const ChartHypothesis &hypo,
+    const Sentence &sentence,
+    ApplicationContext &context) const
+{
+  context.clear();
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo.GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator p = prevHypos.begin();
+  std::vector<const ChartHypothesis*>::const_iterator end = prevHypos.end();
+  const WordsRange &span = hypo.GetCurrSourceRange();
+  size_t i = span.GetStartPos();
+  while (i <= span.GetEndPos()) {
+    if (p == end || i < (*p)->GetCurrSourceRange().GetStartPos()) {
+      // Symbol is a terminal.
+      const Word &symbol = sentence.GetWord(i);
+      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
+      ++i;
+    } else {
+      // Symbol is a non-terminal.
+      const Word &symbol = (*p)->GetTargetLHS();
+      const WordsRange &range = (*p)->GetCurrSourceRange();
+      context.push_back(std::make_pair(symbol, range));
+      i = range.GetEndPos()+1;
+      ++p;
+    }
+  }
+}
+
+
 } // namespace Moses

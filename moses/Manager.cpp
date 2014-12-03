@@ -1718,4 +1718,8 @@ void Manager::OutputAlignment(ostream &out, const vector<const Hypothesis *> &ed
   out << std::endl;
 }
 
+void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
+{
+
+}
 }

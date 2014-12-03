@@ -39,6 +39,13 @@ public:
 
   // output
   void OutputNBest(OutputCollector *collector) const;
+  void OutputDetailedTranslationReport(OutputCollector *collector) const;
+  void OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const;
+  void OutputLatticeSamples(OutputCollector *collector) const
+  {}
+  void OutputAlignment(OutputCollector *collector) const
+  {}
+
 
 
 private:
@@ -59,11 +66,24 @@ private:
   const std::vector<search::Applied> *completed_nbest_;
 
   // outputs
-  void OutputNBestList(OutputCollector *collector, const std::vector<search::Applied> &nbest, long translationId) const;
-  void OutputLatticeSamples(OutputCollector *collector) const
-  {}
-  void OutputAlignment(OutputCollector *collector) const
-  {}
+  void OutputDetailedTranslationReport(
+      OutputCollector *collector,
+      const search::Applied *applied,
+      const Sentence &sentence,
+      long translationId) const;
+    void OutputTranslationOptions(std::ostream &out,
+  		  ApplicationContext &applicationContext,
+  		  const search::Applied *applied,
+  		  const Sentence &sentence,
+  		  long translationId) const;
+    void OutputTranslationOption(std::ostream &out,
+    		ApplicationContext &applicationContext,
+    		const search::Applied *applied,
+    		const Sentence &sentence,
+    		long translationId) const;
+    void ReconstructApplicationContext(const search::Applied *applied,
+        const Sentence &sentence,
+        ApplicationContext &context) const;
 
 };
 
