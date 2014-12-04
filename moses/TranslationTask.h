@@ -63,12 +63,8 @@ private:
     const Syntax::SHyperedge *best = manager.GetBestSHyperedge();
     m_ioWrapper.OutputBestHypo(best, translationId);
     // n-best
-    if (staticData.GetNBestSize() > 0) {
-      Syntax::KBestExtractor::KBestVec nBestList;
-      manager.ExtractKBest(staticData.GetNBestSize(), nBestList,
-                           staticData.GetDistinctNBest());
-      m_ioWrapper.OutputNBestList(nBestList, translationId);
-    }
+    manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
+
     // Write 1-best derivation (-translation-details / -T option).
 
     /*

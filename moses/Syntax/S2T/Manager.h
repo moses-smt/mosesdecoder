@@ -65,6 +65,16 @@ class Manager : public BaseManager
   std::set<Word> m_oovs;
   boost::shared_ptr<typename Parser::RuleTrie> m_oovRuleTrie;
   std::vector<boost::shared_ptr<Parser> > m_parsers;
+
+  // output
+  void OutputNBestList(OutputCollector *collector,
+		  const Moses::Syntax::KBestExtractor::KBestVec &nBestList,
+		  long translationId) const;
+  std::size_t OutputAlignmentNBest(Alignments &retAlign,
+		  const Moses::Syntax::KBestExtractor::Derivation &derivation,
+		  std::size_t startTarget) const;
+  size_t CalcSourceSize(const Syntax::KBestExtractor::Derivation &d) const;
+
 };
 
 }  // S2T
