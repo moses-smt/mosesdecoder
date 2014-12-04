@@ -411,6 +411,56 @@ void Manager::ReconstructApplicationContext(const search::Applied *applied,
   }
 }
 
+void Manager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
+{
+  if (collector == NULL || Completed().empty()) {
+	  return;
+  }
+
+  const search::Applied *applied = &Completed()[0];
+  const Sentence &sentence = dynamic_cast<const Sentence &>(source_);
+  const size_t translationId = source_.GetTranslationId();
+
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, applied, sentence, translationId);
+
+  //Tree of full sentence
+  //TODO: incremental search doesn't support stateful features
+
+  collector->Write(translationId, out.str());
+
+}
+
+void Manager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
+		ApplicationContext &applicationContext,
+		const search::Applied *applied,
+		const Sentence &sentence,
+		long translationId) const
+{
+
+  if (applied != NULL) {
+    OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
+
+    const TargetPhrase &currTarPhr = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
+
+    out << " ||| ";
+    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
+      out << " " << *property->GetValueString();
+    } else {
+      out << " " << "noTreeInfo";
+    }
+    out << std::endl;
+  }
+
+  // recursive
+  const search::Applied *child = applied->Children();
+  for (size_t i = 0; i < applied->GetArity(); i++) {
+      OutputTreeFragmentsTranslationOptions(out, applicationContext, child++, sentence, translationId);
+  }
+}
+
 namespace
 {
 

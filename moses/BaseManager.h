@@ -51,6 +51,7 @@ public:
   virtual void OutputLatticeSamples(OutputCollector *collector) const = 0;
   virtual void OutputAlignment(OutputCollector *collector) const = 0;
   virtual void OutputDetailedTranslationReport(OutputCollector *collector) const = 0;
+  virtual void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const = 0;
 
 
 };

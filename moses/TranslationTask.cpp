@@ -327,11 +327,8 @@ void TranslationTask::RunChart()
 		m_ioWrapper.OutputBestHypo(nbest[0], translationId);
 
 		manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
+	    manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
 
-		if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
-		  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-		  m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(&nbest[0], sentence, translationId);
-		}
 	  } else {
 		m_ioWrapper.OutputBestNone(translationId);
 	  }
@@ -361,13 +358,7 @@ void TranslationTask::RunChart()
 
     manager.OutputAlignment(m_ioWrapper.GetAlignmentInfoCollector());
     manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
-
-
-	if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled()) {
-	  const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-	  m_ioWrapper.OutputDetailedTreeFragmentsTranslationReport(bestHypo, sentence, translationId);
-	}
-
+    manager.OutputDetailedTreeFragmentsTranslationReport(m_ioWrapper.GetDetailTreeFragmentsOutputCollector());
 	manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
 
 	//DIMw

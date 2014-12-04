@@ -29,6 +29,7 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "TreeInput.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/OutputCollector.h"
 #include "moses/ChartKBestExtractor.h"
@@ -679,5 +680,68 @@ void ChartManager::OutputUnknowns(OutputCollector *collector) const
   }
 
 }
+
+void ChartManager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
+{
+  const ChartHypothesis *hypo = GetBestHypothesis();
+  if (collector == NULL || hypo == NULL) {
+	return;
+  }
+
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+  const size_t translationId = m_source.GetTranslationId();
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+
+  //Tree of full sentence
+  const StatefulFeatureFunction* treeStructure = StaticData::Instance().GetTreeStructure();
+  if (treeStructure != NULL) {
+	const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+	for( size_t i=0; i<sff.size(); i++ ) {
+		if (sff[i] == treeStructure) {
+		const TreeState* tree = dynamic_cast<const TreeState*>(hypo->GetFFState(i));
+		out << "Full Tree " << translationId << ": " << tree->GetTree()->GetString() << "\n";
+		break;
+		}
+	}
+  }
+
+  collector->Write(translationId, out.str());
+
+}
+
+void ChartManager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
+		ApplicationContext &applicationContext,
+		const ChartHypothesis *hypo,
+		const Sentence &sentence,
+		long translationId) const
+{
+
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+
+    const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
+
+    out << " ||| ";
+    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
+      out << " " << *property->GetValueString();
+    } else {
+      out << " " << "noTreeInfo";
+    }
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
 
 } // namespace Moses

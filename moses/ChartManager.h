@@ -91,6 +91,11 @@ private:
   void ReconstructApplicationContext(const ChartHypothesis &hypo,
       const Sentence &sentence,
       ApplicationContext &context) const;
+  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
+		  ApplicationContext &applicationContext,
+		  const ChartHypothesis *hypo,
+		  const Sentence &sentence,
+		  long translationId) const;
 
 public:
   ChartManager(InputType const& source);
@@ -147,6 +152,7 @@ public:
   void OutputAlignment(OutputCollector *collector) const;
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
   void OutputUnknowns(OutputCollector *collector) const;
+  void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const;
 
 };
 

@@ -117,16 +117,6 @@ protected:
                                      ApplicationContext &context);
   void WriteApplicationContext(std::ostream &out,
                                const ApplicationContext &context);
-  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
-		  	  	  	  	  	  ApplicationContext &applicationContext,
-		  	  	  	  	  	  const Moses::ChartHypothesis *hypo,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
-  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
-		  	  	  	  	  	  ApplicationContext &applicationContext,
-		  	  	  	  	  	  const search::Applied *applied,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
 
   void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors);
   void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
@@ -175,6 +165,11 @@ public:
     return m_latticeSamplesCollector;
   }
 
+  Moses::OutputCollector *GetDetailTreeFragmentsOutputCollector() {
+    return m_detailTreeFragmentsOutputCollector;
+  }
+
+
   // CHART
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
   void OutputBestHypo(search::Applied applied, long translationId);
@@ -183,13 +178,6 @@ public:
   void OutputBestNone(long translationId);
 
   void OutputDetailedAllTranslationReport(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
-
-  void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
-  void OutputDetailedTreeFragmentsTranslationReport(const search::Applied *applied,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
 
   // phrase-based
   void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors);

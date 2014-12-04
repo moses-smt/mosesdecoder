@@ -400,13 +400,6 @@ void Manager<Parser>::OutputNBest(OutputCollector *collector) const
 
 }
 
-template<typename Parser>
-void Manager<Parser>::OutputLatticeSamples(OutputCollector *collector) const
-{}
-
-template<typename Parser>
-void Manager<Parser>::OutputAlignment(OutputCollector *collector) const
-{}
 
 template<typename Parser>
 void Manager<Parser>::OutputDetailedTranslationReport(OutputCollector *collector) const

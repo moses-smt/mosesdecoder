@@ -45,6 +45,7 @@ public:
   {}
   void OutputAlignment(OutputCollector *collector) const
   {}
+  void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const;
 
 
 
@@ -84,6 +85,11 @@ private:
     void ReconstructApplicationContext(const search::Applied *applied,
         const Sentence &sentence,
         ApplicationContext &context) const;
+    void OutputTreeFragmentsTranslationOptions(std::ostream &out,
+    		ApplicationContext &applicationContext,
+    		const search::Applied *applied,
+    		const Sentence &sentence,
+    		long translationId) const;
 
 };
 

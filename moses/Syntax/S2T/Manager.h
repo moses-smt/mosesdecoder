@@ -44,10 +44,14 @@ class Manager : public BaseManager
   const std::set<Word> &GetUnknownWords() const { return m_oovs; }
 
   void OutputNBest(OutputCollector *collector) const;
-  void OutputLatticeSamples(OutputCollector *collector) const;
-  void OutputAlignment(OutputCollector *collector) const;
+  void OutputLatticeSamples(OutputCollector *collector) const
+  {}
+  void OutputAlignment(OutputCollector *collector) const
+  {}
   void OutputDetailedTranslationReport(OutputCollector *collector) const;
   void OutputUnknowns(OutputCollector *collector) const;
+  void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
+  {}
 
  private:
   void FindOovs(const PChart &, std::set<Word> &, std::size_t);
