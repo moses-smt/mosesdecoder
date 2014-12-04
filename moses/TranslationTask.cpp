@@ -282,12 +282,7 @@ void TranslationTask::RunPb()
   manager.OutputLatticeSamples(m_ioWrapper.GetLatticeSamplesCollector());
 
   // detailed translation reporting
-  if (m_ioWrapper.GetDetailedTranslationCollector()) {
-    ostringstream out;
-    FixPrecision(out,PRECISION);
-    TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
-    m_ioWrapper.GetDetailedTranslationCollector()->Write(m_source->GetTranslationId(),out.str());
-  }
+  manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
 
   //list of unknown words
   manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());

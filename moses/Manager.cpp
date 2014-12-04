@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/LM/Base.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/TranslationAnalysis.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -1720,6 +1721,12 @@ void Manager::OutputAlignment(ostream &out, const vector<const Hypothesis *> &ed
 
 void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
 {
+  if (collector) {
+	ostringstream out;
+	FixPrecision(out,PRECISION);
+	TranslationAnalysis::PrintTranslationAnalysis(out, GetBestHypothesis());
+	collector->Write(m_source.GetTranslationId(),out.str());
+  }
 
 }
 
