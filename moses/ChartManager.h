@@ -63,8 +63,6 @@ private:
   void WriteSearchGraph(const ChartSearchGraphWriter& writer) const;
 
   // output
-  typedef std::set< std::pair<size_t, size_t>  > Alignments;
-
   void OutputNBestList(OutputCollector *collector,
 		  	  	  	  const ChartKBestExtractor::KBestVec &nBestList,
                       long translationId) const;
@@ -75,20 +73,29 @@ private:
   size_t OutputAlignment(Alignments &retAlign,
 		  	  	  	  	  const Moses::ChartHypothesis *hypo,
 		  	  	  	  	  size_t startTarget) const;
-
-  template <class T>
-  void ShiftOffsets(std::vector<T> &offsets, T shift) const
-  {
-    T currPos = shift;
-    for (size_t i = 0; i < offsets.size(); ++i) {
-      if (offsets[i] == 0) {
-        offsets[i] = currPos;
-        ++currPos;
-      } else {
-        currPos += offsets[i];
-      }
-    }
-  }
+  void OutputDetailedTranslationReport(
+		  	  	  	  	  	OutputCollector *collector,
+							const ChartHypothesis *hypo,
+							const Sentence &sentence,
+							long translationId) const;
+  void OutputTranslationOptions(std::ostream &out,
+		  	  	  	  	  ApplicationContext &applicationContext,
+		  	  	  	  	  const ChartHypothesis *hypo,
+		  	  	  	  	  const Sentence &sentence,
+		  	  	  	  	  long translationId) const;
+  void OutputTranslationOption(std::ostream &out,
+  			ApplicationContext &applicationContext,
+  			const ChartHypothesis *hypo,
+  			const Sentence &sentence,
+  			long translationId) const;
+  void ReconstructApplicationContext(const ChartHypothesis &hypo,
+      const Sentence &sentence,
+      ApplicationContext &context) const;
+  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
+		  ApplicationContext &applicationContext,
+		  const ChartHypothesis *hypo,
+		  const Sentence &sentence,
+		  long translationId) const;
 
 public:
   ChartManager(InputType const& source);
@@ -142,8 +149,11 @@ public:
   void OutputNBest(OutputCollector *collector) const;
   void OutputLatticeSamples(OutputCollector *collector) const
   {}
-
   void OutputAlignment(OutputCollector *collector) const;
+  void OutputDetailedTranslationReport(OutputCollector *collector) const;
+  void OutputUnknowns(OutputCollector *collector) const;
+  void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const;
+
 };
 
 }

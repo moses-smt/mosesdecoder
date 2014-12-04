@@ -319,6 +319,147 @@ void Manager::OutputNBestList(OutputCollector *collector, const std::vector<sear
   collector->Write(translationId, out.str());
 }
 
+void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
+{
+	if (collector && !completed_nbest_->empty()) {
+		const search::Applied &applied = completed_nbest_->at(0);
+		OutputDetailedTranslationReport(collector,
+										&applied,
+										static_cast<const Sentence&>(source_),
+										source_.GetTranslationId());
+	}
+
+}
+
+void Manager::OutputDetailedTranslationReport(
+  OutputCollector *collector,
+  const search::Applied *applied,
+  const Sentence &sentence,
+  long translationId) const
+{
+  if (applied == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTranslationOptions(out, applicationContext, applied, sentence, translationId);
+  collector->Write(translationId, out.str());
+}
+
+void Manager::OutputTranslationOptions(std::ostream &out,
+		ApplicationContext &applicationContext,
+		const search::Applied *applied,
+		const Sentence &sentence, long translationId) const
+{
+  if (applied != NULL) {
+    OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
+    out << std::endl;
+  }
+
+  // recursive
+  const search::Applied *child = applied->Children();
+  for (size_t i = 0; i < applied->GetArity(); i++) {
+      OutputTranslationOptions(out, applicationContext, child++, sentence, translationId);
+  }
+}
+
+void Manager::OutputTranslationOption(std::ostream &out,
+		ApplicationContext &applicationContext,
+		const search::Applied *applied,
+		const Sentence &sentence,
+		long translationId) const
+{
+  ReconstructApplicationContext(applied, sentence, applicationContext);
+  const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
+  out << "Trans Opt " << translationId
+      << " " << applied->GetRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << phrase.GetTargetLHS()
+      << "->" << phrase
+      << " " << applied->GetScore(); // << hypo->GetScoreBreakdown() TODO: missing in incremental search hypothesis
+}
+
+// Given a hypothesis and sentence, reconstructs the 'application context' --
+// the source RHS symbols of the SCFG rule that was applied, plus their spans.
+void Manager::ReconstructApplicationContext(const search::Applied *applied,
+    const Sentence &sentence,
+    ApplicationContext &context) const
+{
+  context.clear();
+  const WordsRange &span = applied->GetRange();
+  const search::Applied *child = applied->Children();
+  size_t i = span.GetStartPos();
+  size_t j = 0;
+
+  while (i <= span.GetEndPos()) {
+    if (j == applied->GetArity() || i < child->GetRange().GetStartPos()) {
+      // Symbol is a terminal.
+      const Word &symbol = sentence.GetWord(i);
+      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
+      ++i;
+    } else {
+      // Symbol is a non-terminal.
+      const Word &symbol = static_cast<const TargetPhrase*>(child->GetNote().vp)->GetTargetLHS();
+      const WordsRange &range = child->GetRange();
+      context.push_back(std::make_pair(symbol, range));
+      i = range.GetEndPos()+1;
+      ++child;
+      ++j;
+    }
+  }
+}
+
+void Manager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
+{
+  if (collector == NULL || Completed().empty()) {
+	  return;
+  }
+
+  const search::Applied *applied = &Completed()[0];
+  const Sentence &sentence = dynamic_cast<const Sentence &>(source_);
+  const size_t translationId = source_.GetTranslationId();
+
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, applied, sentence, translationId);
+
+  //Tree of full sentence
+  //TODO: incremental search doesn't support stateful features
+
+  collector->Write(translationId, out.str());
+
+}
+
+void Manager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
+		ApplicationContext &applicationContext,
+		const search::Applied *applied,
+		const Sentence &sentence,
+		long translationId) const
+{
+
+  if (applied != NULL) {
+    OutputTranslationOption(out, applicationContext, applied, sentence, translationId);
+
+    const TargetPhrase &currTarPhr = *static_cast<const TargetPhrase*>(applied->GetNote().vp);
+
+    out << " ||| ";
+    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
+      out << " " << *property->GetValueString();
+    } else {
+      out << " " << "noTreeInfo";
+    }
+    out << std::endl;
+  }
+
+  // recursive
+  const search::Applied *child = applied->Children();
+  for (size_t i = 0; i < applied->GetArity(); i++) {
+      OutputTreeFragmentsTranslationOptions(out, applicationContext, child++, sentence, translationId);
+  }
+}
 
 namespace
 {

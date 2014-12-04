@@ -140,7 +140,8 @@ protected:
   void OutputInput(std::ostream& os, const Hypothesis* hypo) const;
   void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo) const;
   std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const;
-  void OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo) const;
+  void OutputAlignment(OutputCollector* collector, size_t lineNo , const std::vector<const Hypothesis *> &edges) const;
+  void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges) const;
 
 public:
   InputType const& m_source; /**< source sentence to be translated */
@@ -189,6 +190,10 @@ public:
   void OutputNBest(OutputCollector *collector)  const;
   void OutputAlignment(OutputCollector *collector) const;
   void OutputLatticeSamples(OutputCollector *collector) const;
+  void OutputDetailedTranslationReport(OutputCollector *collector) const;
+  void OutputUnknowns(OutputCollector *collector) const;
+  void OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
+  {}
 
 };
 

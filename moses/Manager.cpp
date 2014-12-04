@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/FF/DistortionScoreProducer.h"
 #include "moses/LM/Base.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/TranslationAnalysis.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -1680,10 +1681,68 @@ void Manager::OutputLatticeSamples(OutputCollector *collector) const
 
 void Manager::OutputAlignment(OutputCollector *collector) const
 {
+  if (collector) {
+	std::vector<const Hypothesis *> edges;
+	const Hypothesis *currentHypo = GetBestHypothesis();
+	while (currentHypo) {
+	  edges.push_back(currentHypo);
+	  currentHypo = currentHypo->GetPrevHypo();
+	}
+
+	OutputAlignment(collector,m_source.GetTranslationId(), edges);
+  }
 }
 
-void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo) const
+void Manager::OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges) const
 {
+  ostringstream out;
+  OutputAlignment(out, edges);
+
+  collector->Write(lineNo,out.str());
+}
+
+void Manager::OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges) const
+{
+  size_t targetOffset = 0;
+
+  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+    const Hypothesis &edge = *edges[currEdge];
+    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
+    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
+
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
+
+    targetOffset += tp.GetSize();
+  }
+  // Removing std::endl here breaks -alignment-output-file, so stop doing that, please :)
+  // Or fix it somewhere else.
+  out << std::endl;
+}
+
+void Manager::OutputDetailedTranslationReport(OutputCollector *collector) const
+{
+  if (collector) {
+	ostringstream out;
+	FixPrecision(out,PRECISION);
+	TranslationAnalysis::PrintTranslationAnalysis(out, GetBestHypothesis());
+	collector->Write(m_source.GetTranslationId(),out.str());
+  }
+
+}
+
+void Manager::OutputUnknowns(OutputCollector *collector) const
+{
+  if (collector) {
+	long translationId = m_source.GetTranslationId();
+	const vector<const Phrase*>& unknowns = m_transOptColl->GetUnknownSources();
+	ostringstream out;
+	for (size_t i = 0; i < unknowns.size(); ++i) {
+	  out << *(unknowns[i]);
+	}
+	out << endl;
+	collector->Write(translationId, out.str());
+  }
+
 }
 
 }

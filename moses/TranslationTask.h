@@ -63,20 +63,13 @@ private:
     const Syntax::SHyperedge *best = manager.GetBestSHyperedge();
     m_ioWrapper.OutputBestHypo(best, translationId);
     // n-best
-    if (staticData.GetNBestSize() > 0) {
-      Syntax::KBestExtractor::KBestVec nBestList;
-      manager.ExtractKBest(staticData.GetNBestSize(), nBestList,
-                           staticData.GetDistinctNBest());
-      m_ioWrapper.OutputNBestList(nBestList, translationId);
-    }
+    manager.OutputNBest(m_ioWrapper.GetNBestOutputCollector());
+
     // Write 1-best derivation (-translation-details / -T option).
-    if (staticData.IsDetailedTranslationReportingEnabled()) {
-      m_ioWrapper.OutputDetailedTranslationReport(best, translationId);
-    }
-    // Write unknown words file (-output-unknowns option)
-    if (!staticData.GetOutputUnknownsFile().empty()) {
-      m_ioWrapper.OutputUnknowns(manager.GetUnknownWords(), translationId);
-    }
+
+    manager.OutputDetailedTranslationReport(m_ioWrapper.GetDetailedTranslationCollector());
+
+    manager.OutputUnknowns(m_ioWrapper.GetUnknownsCollector());
   }
 
 };

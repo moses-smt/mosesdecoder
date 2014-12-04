@@ -29,6 +29,7 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "TreeInput.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/OutputCollector.h"
 #include "moses/ChartKBestExtractor.h"
@@ -571,5 +572,176 @@ size_t ChartManager::OutputAlignment(Alignments &retAlign,
 
   return totalTargetSize;
 }
+
+void ChartManager::OutputDetailedTranslationReport(OutputCollector *collector) const
+{
+	if (collector) {
+		OutputDetailedTranslationReport(collector,
+										GetBestHypothesis(),
+										static_cast<const Sentence&>(m_source),
+										m_source.GetTranslationId());
+	}
+}
+
+void ChartManager::OutputDetailedTranslationReport(
+		  OutputCollector *collector,
+		  const ChartHypothesis *hypo,
+		  const Sentence &sentence,
+		  long translationId) const
+{
+  if (hypo == NULL) {
+    return;
+  }
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+  collector->Write(translationId, out.str());
+}
+
+void ChartManager::OutputTranslationOptions(std::ostream &out,
+					ApplicationContext &applicationContext,
+					const ChartHypothesis *hypo,
+					const Sentence &sentence,
+					long translationId) const
+{
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
+void ChartManager::OutputTranslationOption(std::ostream &out,
+			ApplicationContext &applicationContext,
+			const ChartHypothesis *hypo,
+			const Sentence &sentence,
+			long translationId) const
+{
+  ReconstructApplicationContext(*hypo, sentence, applicationContext);
+  out << "Trans Opt " << translationId
+      << " " << hypo->GetCurrSourceRange()
+      << ": ";
+  WriteApplicationContext(out, applicationContext);
+  out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+      << "->" << hypo->GetCurrTargetPhrase()
+      << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown();
+}
+
+// Given a hypothesis and sentence, reconstructs the 'application context' --
+// the source RHS symbols of the SCFG rule that was applied, plus their spans.
+void ChartManager::ReconstructApplicationContext(const ChartHypothesis &hypo,
+    const Sentence &sentence,
+    ApplicationContext &context) const
+{
+  context.clear();
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo.GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator p = prevHypos.begin();
+  std::vector<const ChartHypothesis*>::const_iterator end = prevHypos.end();
+  const WordsRange &span = hypo.GetCurrSourceRange();
+  size_t i = span.GetStartPos();
+  while (i <= span.GetEndPos()) {
+    if (p == end || i < (*p)->GetCurrSourceRange().GetStartPos()) {
+      // Symbol is a terminal.
+      const Word &symbol = sentence.GetWord(i);
+      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
+      ++i;
+    } else {
+      // Symbol is a non-terminal.
+      const Word &symbol = (*p)->GetTargetLHS();
+      const WordsRange &range = (*p)->GetCurrSourceRange();
+      context.push_back(std::make_pair(symbol, range));
+      i = range.GetEndPos()+1;
+      ++p;
+    }
+  }
+}
+
+void ChartManager::OutputUnknowns(OutputCollector *collector) const
+{
+  if (collector) {
+	  long translationId = m_source.GetTranslationId();
+	  const std::vector<Phrase*> &oovs = GetParser().GetUnknownSources();
+
+	  std::ostringstream out;
+	  for (std::vector<Phrase*>::const_iterator p = oovs.begin();
+		   p != oovs.end(); ++p) {
+		out << *p;
+	  }
+	  out << std::endl;
+	  collector->Write(translationId, out.str());
+  }
+
+}
+
+void ChartManager::OutputDetailedTreeFragmentsTranslationReport(OutputCollector *collector) const
+{
+  const ChartHypothesis *hypo = GetBestHypothesis();
+  if (collector == NULL || hypo == NULL) {
+	return;
+  }
+
+  std::ostringstream out;
+  ApplicationContext applicationContext;
+
+  const Sentence &sentence = dynamic_cast<const Sentence &>(m_source);
+  const size_t translationId = m_source.GetTranslationId();
+
+  OutputTreeFragmentsTranslationOptions(out, applicationContext, hypo, sentence, translationId);
+
+  //Tree of full sentence
+  const StatefulFeatureFunction* treeStructure = StaticData::Instance().GetTreeStructure();
+  if (treeStructure != NULL) {
+	const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+	for( size_t i=0; i<sff.size(); i++ ) {
+		if (sff[i] == treeStructure) {
+		const TreeState* tree = dynamic_cast<const TreeState*>(hypo->GetFFState(i));
+		out << "Full Tree " << translationId << ": " << tree->GetTree()->GetString() << "\n";
+		break;
+		}
+	}
+  }
+
+  collector->Write(translationId, out.str());
+
+}
+
+void ChartManager::OutputTreeFragmentsTranslationOptions(std::ostream &out,
+		ApplicationContext &applicationContext,
+		const ChartHypothesis *hypo,
+		const Sentence &sentence,
+		long translationId) const
+{
+
+  if (hypo != NULL) {
+    OutputTranslationOption(out, applicationContext, hypo, sentence, translationId);
+
+    const TargetPhrase &currTarPhr = hypo->GetCurrTargetPhrase();
+
+    out << " ||| ";
+    if (const PhraseProperty *property = currTarPhr.GetProperty("Tree")) {
+      out << " " << *property->GetValueString();
+    } else {
+      out << " " << "noTreeInfo";
+    }
+    out << std::endl;
+  }
+
+  // recursive
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const ChartHypothesis *prevHypo = *iter;
+    OutputTreeFragmentsTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
+  }
+}
+
 
 } // namespace Moses

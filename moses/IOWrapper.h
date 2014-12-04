@@ -102,7 +102,6 @@ protected:
 
   // CHART
   typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
-  typedef std::set< std::pair<size_t, size_t>  > Alignments;
 
   void Backtrack(const ChartHypothesis *hypo);
   void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
@@ -118,43 +117,10 @@ protected:
                                      ApplicationContext &context);
   void WriteApplicationContext(std::ostream &out,
                                const ApplicationContext &context);
-  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
-		  	  	  	  	  	  ApplicationContext &applicationContext,
-		  	  	  	  	  	  const Moses::ChartHypothesis *hypo,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
-  void OutputTreeFragmentsTranslationOptions(std::ostream &out,
-		  	  	  	  	  	  ApplicationContext &applicationContext,
-		  	  	  	  	  	  const search::Applied *applied,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
 
   void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors);
   void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
                      char reportSegmentation, bool reportAllFactors);
-
-  size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
-  size_t OutputAlignmentNBest(Alignments &retAlign,
-		  	  	  	  	  	  const Moses::ChartKBestExtractor::Derivation &derivation,
-		  	  	  	  	  	  size_t startTarget);
-  std::size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::Syntax::KBestExtractor::Derivation &derivation, std::size_t startTarget);
-
-  size_t CalcSourceSize(const Moses::ChartHypothesis *hypo);
-  size_t CalcSourceSize(const Syntax::KBestExtractor::Derivation &d) const;
-
-  template <class T>
-  void ShiftOffsets(std::vector<T> &offsets, T shift)
-  {
-    T currPos = shift;
-    for (size_t i = 0; i < offsets.size(); ++i) {
-      if (offsets[i] == 0) {
-        offsets[i] = currPos;
-        ++currPos;
-      } else {
-        currPos += offsets[i];
-      }
-    }
-  }
 
 public:
   IOWrapper();
@@ -199,6 +165,11 @@ public:
     return m_latticeSamplesCollector;
   }
 
+  Moses::OutputCollector *GetDetailTreeFragmentsOutputCollector() {
+    return m_detailTreeFragmentsOutputCollector;
+  }
+
+
   // CHART
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
   void OutputBestHypo(search::Applied applied, long translationId);
@@ -206,25 +177,7 @@ public:
 
   void OutputBestNone(long translationId);
 
-  void OutputNBestList(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, long translationId);
-  void OutputNBestList(const Moses::Syntax::KBestExtractor::KBestVec &nBestList, long translationId);
-
-  void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
-  void OutputDetailedTranslationReport(const search::Applied *applied, const Moses::Sentence &sentence, long translationId);
-  void OutputDetailedTranslationReport(const Moses::Syntax::SHyperedge *, long translationId);
-
   void OutputDetailedAllTranslationReport(const std::vector<boost::shared_ptr<Moses::ChartKBestExtractor::Derivation> > &nBestList, const Moses::ChartManager &manager, const Moses::Sentence &sentence, long translationId);
-
-  void OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo);
-  void OutputUnknowns(const std::vector<Moses::Phrase*> &, long);
-  void OutputUnknowns(const std::set<Moses::Word> &, long);
-
-  void OutputDetailedTreeFragmentsTranslationReport(const Moses::ChartHypothesis *hypo,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
-  void OutputDetailedTreeFragmentsTranslationReport(const search::Applied *applied,
-		  	  	  	  	  	  const Moses::Sentence &sentence,
-		  	  	  	  	  	  long translationId);
 
   // phrase-based
   void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors);

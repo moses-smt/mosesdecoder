@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+#include <sstream>
 #include "moses/DecodeGraph.h"
 #include "moses/StaticData.h"
 #include "moses/Syntax/BoundedPriorityContainer.h"
@@ -12,6 +14,7 @@
 #include "moses/Syntax/SVertexRecombinationOrderer.h"
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
+#include "DerivationWriter.h"
 
 #include "OovHandler.h"
 #include "PChart.h"
@@ -380,6 +383,215 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
 
   // Step 3: Sort the vertices in the stack.
   std::sort(stack.begin(), stack.end(), SVertexStackContentOrderer());
+}
+
+template<typename Parser>
+void Manager<Parser>::OutputNBest(OutputCollector *collector) const
+{
+    if (collector) {
+   	  const StaticData &staticData = StaticData::Instance();
+   	  long translationId = m_source.GetTranslationId();
+
+      Syntax::KBestExtractor::KBestVec nBestList;
+      ExtractKBest(staticData.GetNBestSize(), nBestList,
+                           staticData.GetDistinctNBest());
+      OutputNBestList(collector, nBestList, translationId);
+    }
+
+}
+
+
+template<typename Parser>
+void Manager<Parser>::OutputDetailedTranslationReport(OutputCollector *collector) const
+{
+  const SHyperedge *best = GetBestSHyperedge();
+  if (best == NULL || collector == NULL) {
+	return;
+  }
+
+  long translationId = m_source.GetTranslationId();
+  std::ostringstream out;
+  Syntax::S2T::DerivationWriter::Write(*best, translationId, out);
+  collector->Write(translationId, out.str());
+
+}
+
+template<typename Parser>
+void Manager<Parser>::OutputUnknowns(OutputCollector *collector) const
+{
+  if (collector) {
+	  long translationId = m_source.GetTranslationId();
+
+	  std::ostringstream out;
+	  for (std::set<Moses::Word>::const_iterator p = m_oovs.begin();
+	       p != m_oovs.end(); ++p) {
+	    out << *p;
+	  }
+	  out << std::endl;
+	  collector->Write(translationId, out.str());
+  }
+
+}
+
+template<typename Parser>
+void Manager<Parser>::OutputNBestList(OutputCollector *collector,
+		const Syntax::KBestExtractor::KBestVec &nBestList,
+		long translationId) const
+{
+  const StaticData &staticData = StaticData::Instance();
+
+  const std::vector<Moses::FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
+
+  std::ostringstream out;
+
+  if (collector->OutputIsCout()) {
+    // Set precision only if we're writing the n-best list to cout.  This is to
+    // preserve existing behaviour, but should probably be done either way.
+    FixPrecision(out);
+  }
+
+  bool includeWordAlignment =
+		  staticData.PrintAlignmentInfoInNbest();
+
+  bool PrintNBestTrees = StaticData::Instance().PrintNBestTrees();
+
+  for (Syntax::KBestExtractor::KBestVec::const_iterator p = nBestList.begin();
+       p != nBestList.end(); ++p) {
+    const Syntax::KBestExtractor::Derivation &derivation = **p;
+
+    // get the derivation's target-side yield
+    Phrase outputPhrase = Syntax::KBestExtractor::GetOutputPhrase(derivation);
+
+    // delete <s> and </s>
+    UTIL_THROW_IF2(outputPhrase.GetSize() < 2,
+        "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
+    outputPhrase.RemoveWord(0);
+    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
+
+    // print the translation ID, surface factors, and scores
+    out << translationId << " ||| ";
+    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    out << " ||| ";
+    OutputAllFeatureScores(derivation.scoreBreakdown, out);
+    out << " ||| " << derivation.score;
+
+    // optionally, print word alignments
+    if (includeWordAlignment) {
+      out << " ||| ";
+      Alignments align;
+      OutputAlignmentNBest(align, derivation, 0);
+      for (Alignments::const_iterator q = align.begin(); q != align.end();
+           ++q) {
+        out << q->first << "-" << q->second << " ";
+      }
+    }
+
+    // optionally, print tree
+    if (PrintNBestTrees) {
+      TreePointer tree = Syntax::KBestExtractor::GetOutputTree(derivation);
+      out << " ||| " << tree->GetString();
+    }
+
+    out << std::endl;
+  }
+
+  assert(collector);
+  collector->Write(translationId, out.str());
+}
+
+template<typename Parser>
+size_t Manager<Parser>::OutputAlignmentNBest(
+    Alignments &retAlign,
+    const Syntax::KBestExtractor::Derivation &derivation,
+    size_t startTarget) const
+{
+  const Syntax::SHyperedge &shyperedge = derivation.edge->shyperedge;
+
+  size_t totalTargetSize = 0;
+  size_t startSource = shyperedge.head->pvertex->span.GetStartPos();
+
+  const TargetPhrase &tp = *(shyperedge.translation);
+
+  size_t thisSourceSize = CalcSourceSize(derivation);
+
+  // position of each terminal word in translation rule, irrespective of alignment
+  // if non-term, number is undefined
+  std::vector<size_t> sourceOffsets(thisSourceSize, 0);
+  std::vector<size_t> targetOffsets(tp.GetSize(), 0);
+
+  const AlignmentInfo &aiNonTerm = shyperedge.translation->GetAlignNonTerm();
+  std::vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
+  const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
+
+  UTIL_THROW_IF2(sourceInd2pos.size() != derivation.subderivations.size(),
+                 "Error");
+
+  size_t targetInd = 0;
+  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
+    if (tp.GetWord(targetPos).IsNonTerminal()) {
+      UTIL_THROW_IF2(targetPos >= targetPos2SourceInd.size(), "Error");
+      size_t sourceInd = targetPos2SourceInd[targetPos];
+      size_t sourcePos = sourceInd2pos[sourceInd];
+
+      const Moses::Syntax::KBestExtractor::Derivation &subderivation =
+        *derivation.subderivations[sourceInd];
+
+      // calc source size
+      size_t sourceSize =
+          subderivation.edge->head->svertex.pvertex->span.GetNumWordsCovered();
+      sourceOffsets[sourcePos] = sourceSize;
+
+      // calc target size.
+      // Recursively look thru child hypos
+      size_t currStartTarget = startTarget + totalTargetSize;
+      size_t targetSize = OutputAlignmentNBest(retAlign, subderivation,
+                                               currStartTarget);
+      targetOffsets[targetPos] = targetSize;
+
+      totalTargetSize += targetSize;
+      ++targetInd;
+    } else {
+      ++totalTargetSize;
+    }
+  }
+
+  // convert position within translation rule to absolute position within
+  // source sentence / output sentence
+  ShiftOffsets(sourceOffsets, startSource);
+  ShiftOffsets(targetOffsets, startTarget);
+
+  // get alignments from this hypo
+  const AlignmentInfo &aiTerm = shyperedge.translation->GetAlignTerm();
+
+  // add to output arg, offsetting by source & target
+  AlignmentInfo::const_iterator iter;
+  for (iter = aiTerm.begin(); iter != aiTerm.end(); ++iter) {
+    const std::pair<size_t,size_t> &align = *iter;
+    size_t relSource = align.first;
+    size_t relTarget = align.second;
+    size_t absSource = sourceOffsets[relSource];
+    size_t absTarget = targetOffsets[relTarget];
+
+    std::pair<size_t, size_t> alignPoint(absSource, absTarget);
+    std::pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
+    UTIL_THROW_IF2(!ret.second, "Error");
+  }
+
+  return totalTargetSize;
+}
+
+template<typename Parser>
+size_t Manager<Parser>::CalcSourceSize(const Syntax::KBestExtractor::Derivation &d) const
+{
+  using namespace Moses::Syntax;
+
+  const Syntax::SHyperedge &shyperedge = d.edge->shyperedge;
+  size_t ret = shyperedge.head->pvertex->span.GetNumWordsCovered();
+  for (size_t i = 0; i < shyperedge.tail.size(); ++i) {
+    size_t childSize = shyperedge.tail[i]->pvertex->span.GetNumWordsCovered();
+    ret -= (childSize - 1);
+  }
+  return ret;
 }
 
 }  // S2T

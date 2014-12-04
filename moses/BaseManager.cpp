@@ -88,6 +88,24 @@ void BaseManager::OutputSurface(std::ostream &out, const Phrase &phrase,
   }
 }
 
+// Emulates the old operator<<(ostream &, const DottedRule &) function.  The
+// output format is a bit odd (reverse order and double spacing between symbols)
+// but there are scripts and tools that expect the output of -T to look like
+// that.
+void BaseManager::WriteApplicationContext(std::ostream &out,
+                                        const ApplicationContext &context) const
+{
+  assert(!context.empty());
+  ApplicationContext::const_reverse_iterator p = context.rbegin();
+  while (true) {
+    out << p->second << "=" << p->first << " ";
+    if (++p == context.rend()) {
+      break;
+    }
+    out << " ";
+  }
+}
+
 } // namespace
 
 
